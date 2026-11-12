@@ -90,7 +90,7 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM matches')
   await database.pool.query('DELETE FROM players')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'sanne@example.org', 'beheerder')
+  await createAccount(database.db, 'sanne@example.org', 'editor', '')
   userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
   jar.set(sessionCookieName, await startSession(database.db, userId))
 
@@ -263,17 +263,17 @@ describe('submitReport', () => {
     expect(await reports()).toHaveLength(0)
   })
 
-  it('refuses a call without a session, or from a moderator', async () => {
+  it('refuses a call without a session, or from an author', async () => {
     jar.clear()
     await expect(submitReport(matchId, undefined, initial, formDataOf(report()))).rejects.toMatchObject({
       url: '/beheer/inloggen',
     })
 
-    await createAccount(database.db, 'jelle@example.org', 'moderator')
+    await createAccount(database.db, 'jelle@example.org', 'author', '')
 
-    const [moderator] = await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'jelle@example.org'))
+    const [author] = await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'jelle@example.org'))
 
-    jar.set(sessionCookieName, await startSession(database.db, moderator?.id ?? 0))
+    jar.set(sessionCookieName, await startSession(database.db, author?.id ?? 0))
     await expect(submitReport(matchId, undefined, initial, formDataOf(report()))).rejects.toThrow('not found')
     expect(await reports()).toHaveLength(0)
   })

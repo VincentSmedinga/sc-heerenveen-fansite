@@ -71,7 +71,7 @@ const notices: Record<string, { text: string; title: string }> = {
 // report that was klaar and no longer fits the result says so. The page tells what the last
 // action did from the word in the address.
 export default async function ReportPage({ params, searchParams }: Props) {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const id = parseItemId((await params).id)
   const screen = id === undefined ? undefined : await findReportScreen(getDatabase().db, id)

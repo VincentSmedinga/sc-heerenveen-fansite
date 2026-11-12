@@ -32,7 +32,7 @@ export const sessionCookieOptions = {
 } as const
 
 /** The account that is logged in. */
-export type AdminContext = { email: string; role: AdminRole; userId: number }
+export type AdminContext = { email: string; firstName: string; role: AdminRole; userId: number }
 
 /**
  * The one check of the admin: who is logged in, and may this role do this? Every page, route

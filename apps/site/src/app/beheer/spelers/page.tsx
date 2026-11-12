@@ -52,13 +52,13 @@ const errors: Record<string, string> = {
   weg: 'Deze speler bestaat niet. Er is niets veranderd. Kies hieronder een speler.',
 }
 
-// The players of a season for a beheerder, to add one or to change one (issue 1020). The list
+// The players of a season for an editor, to add one or to change one (issue 1020). The list
 // opens on the current season, and the season picker is a form with method GET, so the page
 // works without JavaScript. A player who left the squad says so in words. Every column but the
 // name folds under the name where the table has no room, as on a phone, and its header is gone
 // then: so a cell says in words what it holds, such as "Rugnummer 7".
 export default async function PlayersPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const { db } = getDatabase()
   const { fout, gedaan, seizoen } = await searchParams

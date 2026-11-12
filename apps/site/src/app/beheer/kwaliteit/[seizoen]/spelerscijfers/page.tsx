@@ -50,11 +50,11 @@ const notices: Record<string, { text: string; title: string }> = {
 }
 
 // The players of one season whose goals in the squad table differ from the goals of the
-// matches or of the match reports (issue 974), for a beheerder. Each difference has both
+// matches or of the match reports (issue 974), for an editor. Each difference has both
 // numbers and one form: take the other number over, or keep the table. An address that names
 // no season since 1990/91 says "niet gevonden".
 export default async function StatDifferencesPage({ params, searchParams }: Props) {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const { seizoen } = await params
   const season = seasonFromSlug(seizoen)

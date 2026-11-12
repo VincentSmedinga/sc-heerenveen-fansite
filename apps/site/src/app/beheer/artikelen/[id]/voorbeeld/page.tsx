@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 
+import { adminRoles } from '@fansite/db/schema'
 import { Article, Card, Heading, Link, Page, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
 import { articlePath } from '#src/app/beheer/artikelen/paths'
 import { ArticleText } from '#src/ArticleText'
-import { findArticle } from '#src/beheer/articles'
+import { findArticleFor } from '#src/beheer/articles'
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
 import { requireRole } from '#src/beheer/require-role'
@@ -20,14 +21,14 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Voorbeeld van een artikel' }
 
 // The article as visitors see it, made by the same `Article` and `ArticleText` as the page
-// `/redactie/<adres>`, so a draft looks the way it will. Only a beheerder gets it: the draft is
-// in the admin, behind the session, and the public page says "niet gevonden" for it. A draft
-// has no date yet, so the preview shows today's.
+// `/redactie/<adres>`, so a draft looks the way it will. An owner or an editor gets every one,
+// an author only his own: the draft is in the admin, behind the session, and the public page
+// says "niet gevonden" for it. A draft has no date yet, so the preview shows today's.
 export default async function ArticlePreviewPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireRole('beheerder')
+  const reader = await requireRole(...adminRoles)
 
   const id = parseItemId((await params).id)
-  const article = id === undefined ? undefined : await findArticle(getDatabase().db, id)
+  const article = id === undefined ? undefined : await findArticleFor(getDatabase().db, id, reader)
 
   if (id === undefined || article === undefined) {
     notFound()
@@ -46,7 +47,7 @@ export default async function ArticlePreviewPage({ params }: { params: Promise<{
         <Text>
           {live
             ? `Zo ziet een bezoeker dit artikel op /redactie/${article.slug}.`
-            : 'Dit artikel is een concept. Zo ziet een bezoeker het zodra je het publiceert, met de datum van die dag.'}{' '}
+            : 'Dit artikel is een concept. Zo ziet een bezoeker het zodra het op de site staat, met de datum van die dag.'}{' '}
           <Link href={articlePath(article.id)}>Terug naar het formulier</Link>
         </Text>
       </Card>

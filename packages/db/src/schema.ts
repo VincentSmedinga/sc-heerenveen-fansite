@@ -223,13 +223,13 @@ export const items = mysqlTable(
     lastSeenAt: datetime('last_seen_at')
       .notNull()
       .default(sql`(UTC_TIMESTAMP())`),
-    // Set when a moderator hides the item: when, by whom and why. All three are empty for an
+    // Set when an editor hides the item: when, by whom and why. All three are empty for an
     // item that is shown. A hidden item is on no page of the site, and the importer leaves it
     // as it is (see `audit_log` for the history).
     hiddenAt: datetime('hidden_at'),
     hiddenBy: int('hidden_by', { unsigned: true }).references(() => adminUsers.id),
     hiddenReason: varchar('hidden_reason', { length: hiddenReasonMaxLength }),
-    // Set when a moderator puts an item on the site that the importer judged `doubtful` or
+    // Set when an editor puts an item on the site that the importer judged `doubtful` or
     // `irrelevant`: when and by whom. Both are empty for an item nobody approved. The importer
     // never touches them, so an approval survives every later run, whatever the filter says.
     // Hiding wins over approving.
@@ -326,9 +326,9 @@ export const importResults = mysqlTable('import_results', {
 export type ImportResult = typeof importResults.$inferSelect
 
 /**
- * The rules of robots.txt that apply to us, per origin (`https://www.lc.nl`), as JSON. The fetcher keeps them for at
- * most 24 hours (RFC 9309), so the next runs need not ask the host again. A robots.txt it could
- * not read is not kept.
+ * The rules of robots.txt that apply to us, per origin (`https://www.lc.nl`), as JSON. The
+ * fetcher keeps them for at most 24 hours (RFC 9309), so the next runs need not ask the host
+ * again. A robots.txt it could not read is not kept.
  */
 export const robotsTxt = mysqlTable('robots_txt', {
   origin: varchar('origin', { length: 300 }).primaryKey(),
@@ -336,19 +336,36 @@ export const robotsTxt = mysqlTable('robots_txt', {
   fetchedAt: datetime('fetched_at').notNull(),
 })
 
-export const adminRoles = ['beheerder', 'moderator'] as const
+/**
+ * The roles of the admin (issue 1156). The owner may do everything and is the only one who
+ * manages the accounts; an editor may do everything else; an author writes his own articles
+ * and publishes nothing. The admin shows them as eigenaar, redacteur and auteur.
+ */
+export const adminRoles = ['owner', 'editor', 'author'] as const
 
 export type AdminRole = (typeof adminRoles)[number]
 
+/** The owner and an editor: the roles that may do everything but what only the owner does. */
+export const editorRoles = ['owner', 'editor'] as const satisfies readonly AdminRole[]
+
+/** The most characters of the first name of an account. */
+export const firstNameMaxLength = 50
+
 /**
- * The accounts that may log in to the admin. There is no sign-up: the command `admin:create`
- * makes one, and `admin:revoke` turns it off (`disabled_at`) and removes its sessions. `email`
- * is lowercase. Times are UTC.
+ * The accounts that may log in to the admin. There is no sign-up: the owner adds one on
+ * /beheer/accounts, and the command `admin:create` makes one on the host, which is the only way
+ * to make an owner. Turning one off (`disabled_at`) removes its sessions; an account is never
+ * deleted, because the log refers to it. `email` is lowercase. `first_name` is shown in the
+ * admin only, never on the public site, and is empty for an account of before issue 1156 until
+ * the owner fills it in. `conflict_mail` is whether an owner or an editor gets the mail about
+ * a difference with Wikipedia; an author never does. Times are UTC.
  */
 export const adminUsers = mysqlTable('admin_users', {
   id: int('id', { unsigned: true }).autoincrement().primaryKey(),
   email: varchar('email', { length: 254 }).notNull().unique(),
   role: mysqlEnum('role', adminRoles).notNull(),
+  firstName: varchar('first_name', { length: firstNameMaxLength }).notNull().default(''),
+  conflictMail: boolean('conflict_mail').notNull().default(true),
   createdAt: datetime('created_at')
     .notNull()
     .default(sql`(UTC_TIMESTAMP())`),
@@ -445,6 +462,10 @@ export const auditActions = [
   'player.field-keep',
   'person.edit',
   'person.merge',
+  'account.create',
+  'account.edit',
+  'account.disable',
+  'account.enable',
 ] as const
 
 export type AuditAction = (typeof auditActions)[number]
@@ -1572,7 +1593,7 @@ export type MatchChangeResolution = (typeof matchChangeResolutions)[number]
  * A change with a `part` is a difference between Wikipedia and an entry of the editors
  * (`match_edits`): the entry stays, `old_value` is the entry for that part, `new_value` what
  * Wikipedia says, and `proposal` that part as Wikipedia has it (see `match-conflicts.ts`).
- * `mailed_at` is when the beheerders were mailed about the difference, and
+ * `mailed_at` is when the editors were mailed about the difference, and
  * `taken_over_mailed_at` when they were mailed that the importer took Wikipedia over; both stay
  * empty until a mail went out.
  *

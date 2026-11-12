@@ -1,13 +1,14 @@
 import { expect, type Page, test } from '@playwright/test'
 
 import { adminCookie } from './admin'
+import { articleIdOf, testArticles } from './articles'
 import { checkPage } from './check-page'
 import { earlierSeasonSlug } from './earlier-season'
 import { liveReportMatchId } from './live-report'
 import { matchId, playedMatchId } from './matches'
 import { addPreviousLineUp, lineUpNames, previousLabel } from './previous-lineup'
 
-// Writes an article in the admin from start to end, with the editor, as the beheerder of the
+// Writes an article in the admin from start to end, with the text editor, as the editor of the
 // global setup: a draft that errors can't lose, the preview, publishing, saving a change, and
 // withdrawing. Writing needs JavaScript; reading does not, so the published article is read
 // once without. This check publishes an article, so playwright.config.ts runs it after all the
@@ -17,7 +18,7 @@ import { addPreviousLineUp, lineUpNames, previousLabel } from './previous-lineup
 test.describe.configure({ mode: 'serial' })
 
 test.beforeEach(async ({ baseURL, context }) => {
-  await context.addCookies([adminCookie(new URL(baseURL ?? '').hostname, 'beheerder')])
+  await context.addCookies([adminCookie(new URL(baseURL ?? '').hostname, 'editor')])
 })
 
 /** The editor for the text, which is a textbox with the label Tekst. */
@@ -299,17 +300,19 @@ test('refuses an address that another article has, with the error at the field a
   await expect(page.getByLabel('Titel', { exact: true })).toHaveValue('Een ander artikel met hetzelfde adres')
 })
 
-test('is for a beheerder: a moderator gets "niet gevonden", and a visitor goes to the login page', async ({
+test('gives an author "niet gevonden" for an article of someone else, and a visitor the login page', async ({
   baseURL,
   context,
   page,
 }) => {
   await context.clearCookies()
-  await context.addCookies([adminCookie(new URL(baseURL ?? '').hostname, 'moderator')])
+  await context.addCookies([adminCookie(new URL(baseURL ?? '').hostname, 'author')])
 
-  const response = await page.goto('/beheer/artikelen')
+  const response = await page.goto(`/beheer/artikelen/${await articleIdOf(testArticles.published.slug)}`)
 
   expect(response?.status()).toBe(404)
+  await page.goto('/beheer/artikelen')
+  await expect(page.getByRole('link', { name: testArticles.published.title })).toHaveCount(0)
   await context.clearCookies()
   await page.goto('/beheer/artikelen')
   await expect(page).toHaveURL(/\/beheer\/inloggen$/u)

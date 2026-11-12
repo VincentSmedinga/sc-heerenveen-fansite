@@ -50,12 +50,12 @@ const run = (...args: string[]) =>
   )
 
 it('makes an account and turns it off again, on its own, with DATABASE_URL from a file', async () => {
-  expect(await run('create', 'Jelle@Example.org', 'moderator')).toEqual({
+  expect(await run('create', 'Jelle@Example.org', 'author', 'Jelle')).toEqual({
     code: 0,
-    output: 'Made the account for jelle@example.org, as moderator.\n',
+    output: 'Made the account for jelle@example.org, as author, with the first name Jelle.\n',
   })
   expect(await database.db.select({ email: adminUsers.email, role: adminUsers.role }).from(adminUsers)).toEqual([
-    { email: 'jelle@example.org', role: 'moderator' },
+    { email: 'jelle@example.org', role: 'author' },
   ])
 
   const [account] = await database.db.select().from(adminUsers)
@@ -74,8 +74,10 @@ it('makes an account and turns it off again, on its own, with DATABASE_URL from 
 }, 30_000)
 
 it('stops with the exit code of the case, and says what is wrong', async () => {
-  expect((await run('create', 'jelle@example.org', 'beheerder')).code).toBe(0)
-  expect(await run('create', 'jelle@example.org', 'beheerder')).toMatchObject({ code: 1 })
+  expect((await run('create', 'jelle@example.org', 'editor', 'Jelle')).code).toBe(0)
+  expect(await run('create', 'jelle@example.org', 'editor')).toMatchObject({ code: 1 })
+  expect(await run('create', 'jelle@example.org', 'owner')).toMatchObject({ code: 0 })
+  expect(await run('create', 'nieuw@example.test', 'editor')).toMatchObject({ code: 2 })
   expect(await run('revoke', 'niemand@example.org')).toEqual({
     code: 1,
     output: 'There is no account for niemand@example.org.\n',
@@ -85,7 +87,7 @@ it('stops with the exit code of the case, and says what is wrong', async () => {
 }, 30_000)
 
 it('stops with the name of the variable when the file has no DATABASE_URL', async () => {
-  const { code, output } = await promisify(execFile)(process.execPath, [file, 'create', 'a@example.org', 'beheerder'], {
+  const { code, output } = await promisify(execFile)(process.execPath, [file, 'create', 'a@example.org', 'editor'], {
     cwd: folder,
     env: { PATH: process.env['PATH'] },
   }).then(

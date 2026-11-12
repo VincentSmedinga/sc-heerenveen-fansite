@@ -73,7 +73,7 @@ export async function findSession(db: Database, token: string, now = new Date())
 
   await db.update(adminSessions).set({ lastSeenAt: now }).where(eq(adminSessions.id, row.id))
 
-  return { email: row.user.email, role: row.user.role, userId: row.user.id }
+  return { email: row.user.email, firstName: row.user.firstName, role: row.user.role, userId: row.user.id }
 }
 
 /** What the database keeps of a token. */

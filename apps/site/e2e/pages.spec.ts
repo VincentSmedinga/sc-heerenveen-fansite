@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-import { adminCookie, type E2eRole } from './admin'
+import { adminAccountId, adminCookie, type E2eRole } from './admin'
 import { articleIdOf, testArticles } from './articles'
 import { checkPage } from './check-page'
 import { earlierSeasonSlug } from './earlier-season'
@@ -14,8 +14,8 @@ import { squadPlayerId } from './players'
 // Every page of the site, one line each, and the status code it must answer. A new page is one
 // line here. An address that doesn't exist is the page "niet gevonden"; the status code also
 // keeps a typo in a path from testing that page by mistake. A page with `admin` is a page of
-// the admin, checked as the moderator or the beheerder that the global setup logs in (see
-// admin.ts).
+// the admin, checked as the owner, the editor or the author that the global setup logs in (see
+// admin.ts). `{account}` stands for the number of the account of the editor.
 // `{draft}` and `{published}` in a path stand for the number of the made-up draft and the
 // made-up published article, and `{match}` for the first made-up match of this season that
 // is still to be played, which the database gives, and `{held}` for the match of the season
@@ -216,163 +216,185 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/beheer/inloggen?fout=link', status: 200 },
   { path: '/beheer/inloggen/verstuurd', status: 200 },
   { path: '/beheer/inloggen/bevestigen?token=onbekend', status: 200 },
-  // The admin, as a moderator who is logged in: the start page, the list of items in both
+  // The admin, as an editor who is logged in: the start page, the list of items in both
   // groups (the group that is not on the site with and without the box for what editors hid),
-  // a search with a result and without one.
-  { admin: 'moderator', path: '/beheer', status: 200 },
-  { admin: 'moderator', path: '/beheer/berichten', status: 200 },
-  { admin: 'moderator', path: '/beheer/berichten?q=Verzonnen', status: 200 },
-  { admin: 'moderator', path: '/beheer/berichten?q=bestaat+niet', status: 200 },
-  { admin: 'moderator', path: '/beheer/berichten?toon=niet-op-de-site', status: 200 },
-  { admin: 'moderator', path: '/beheer/berichten?toon=niet-op-de-site&redactie=1', status: 200 },
-  { admin: 'moderator', path: '/beheer/berichten?toon=niet-op-de-site&q=Verzonnen', status: 200 },
-  { admin: 'moderator', path: '/beheer/berichten?fout=weg', status: 200 },
-  { admin: 'moderator', path: '/beheer/berichten?pagina=2', status: 200 },
-  { admin: 'moderator', path: '/beheer/berichten?pagina=abc', status: 200 },
-  { admin: 'moderator', path: '/beheer/berichten?fout=reden-anders&keuze=anders', status: 200 },
-  { admin: 'beheerder', path: '/beheer', status: 200 },
-  // The articles are for a beheerder: the list, the form for a new one, the form of a draft and
-  // of an article that is published (with its versions), the notice after an action, and the
-  // preview of both. A moderator and a number that is no article get "niet gevonden".
-  { admin: 'beheerder', path: '/beheer/artikelen', status: 200 },
-  { admin: 'beheerder', path: '/beheer/artikelen?fout=weg', status: 200 },
-  { admin: 'beheerder', path: '/beheer/artikelen/nieuw', status: 200 },
-  { admin: 'beheerder', path: '/beheer/artikelen/{draft}', status: 200 },
-  { admin: 'beheerder', path: '/beheer/artikelen/{draft}?gedaan=ongewijzigd', status: 200 },
-  { admin: 'beheerder', path: '/beheer/artikelen/{published}', status: 200 },
-  { admin: 'beheerder', path: '/beheer/artikelen/{draft}/voorbeeld', status: 200 },
-  { admin: 'beheerder', path: '/beheer/artikelen/{published}/voorbeeld', status: 200 },
+  // a search with a result and without one. An author has the start page, and gets "niet
+  // gevonden" for the items.
+  { admin: 'author', path: '/beheer', status: 200 },
+  { admin: 'author', path: '/beheer/berichten', status: 404 },
+  { admin: 'editor', path: '/beheer/berichten', status: 200 },
+  { admin: 'editor', path: '/beheer/berichten?q=Verzonnen', status: 200 },
+  { admin: 'editor', path: '/beheer/berichten?q=bestaat+niet', status: 200 },
+  { admin: 'editor', path: '/beheer/berichten?toon=niet-op-de-site', status: 200 },
+  { admin: 'editor', path: '/beheer/berichten?toon=niet-op-de-site&redactie=1', status: 200 },
+  { admin: 'editor', path: '/beheer/berichten?toon=niet-op-de-site&q=Verzonnen', status: 200 },
+  { admin: 'editor', path: '/beheer/berichten?fout=weg', status: 200 },
+  { admin: 'editor', path: '/beheer/berichten?pagina=2', status: 200 },
+  { admin: 'editor', path: '/beheer/berichten?pagina=abc', status: 200 },
+  { admin: 'editor', path: '/beheer/berichten?fout=reden-anders&keuze=anders', status: 200 },
+  { admin: 'editor', path: '/beheer', status: 200 },
+  // The articles: the list, the form for a new one, the form of a draft and of an article that
+  // is published (with its versions), the notice after an action, and the preview of both. A
+  // number that is no article gets "niet gevonden", and so does an author for an article that
+  // is not his.
+  { admin: 'editor', path: '/beheer/artikelen', status: 200 },
+  { admin: 'editor', path: '/beheer/artikelen?fout=weg', status: 200 },
+  { admin: 'editor', path: '/beheer/artikelen/nieuw', status: 200 },
+  { admin: 'editor', path: '/beheer/artikelen/{draft}', status: 200 },
+  { admin: 'editor', path: '/beheer/artikelen/{draft}?gedaan=ongewijzigd', status: 200 },
+  { admin: 'editor', path: '/beheer/artikelen/{published}', status: 200 },
+  { admin: 'editor', path: '/beheer/artikelen/{draft}/voorbeeld', status: 200 },
+  { admin: 'editor', path: '/beheer/artikelen/{published}/voorbeeld', status: 200 },
   // The versions: the published article has three, the newest equal to the article. A draft
   // made without the admin has none, and a number the article never had is "niet gevonden".
-  { admin: 'beheerder', path: '/beheer/artikelen/{published}/versies/1', status: 200 },
-  { admin: 'beheerder', path: '/beheer/artikelen/{published}/versies/2', status: 200 },
-  { admin: 'beheerder', path: '/beheer/artikelen/{published}/versies/3', status: 200 },
-  { admin: 'beheerder', path: '/beheer/artikelen/{published}/versies/4', status: 404 },
-  { admin: 'beheerder', path: '/beheer/artikelen/{draft}/versies/1', status: 404 },
-  { admin: 'beheerder', path: '/beheer/artikelen/999999', status: 404 },
-  { admin: 'moderator', path: '/beheer/artikelen', status: 404 },
-  { admin: 'moderator', path: '/beheer/artikelen/nieuw', status: 404 },
-  { admin: 'moderator', path: '/beheer/artikelen/{published}/versies/1', status: 404 },
-  // The numbers of the visit are for a beheerder. A moderator gets "niet gevonden".
-  // The matches are for a beheerder: the list, the notice for a match that is gone, the form of
+  { admin: 'editor', path: '/beheer/artikelen/{published}/versies/1', status: 200 },
+  { admin: 'editor', path: '/beheer/artikelen/{published}/versies/2', status: 200 },
+  { admin: 'editor', path: '/beheer/artikelen/{published}/versies/3', status: 200 },
+  { admin: 'editor', path: '/beheer/artikelen/{published}/versies/4', status: 404 },
+  { admin: 'editor', path: '/beheer/artikelen/{draft}/versies/1', status: 404 },
+  { admin: 'editor', path: '/beheer/artikelen/999999', status: 404 },
+  { admin: 'author', path: '/beheer/artikelen', status: 200 },
+  { admin: 'author', path: '/beheer/artikelen/nieuw', status: 200 },
+  { admin: 'author', path: '/beheer/artikelen/{published}', status: 404 },
+  { admin: 'author', path: '/beheer/artikelen/{published}/voorbeeld', status: 404 },
+  { admin: 'author', path: '/beheer/artikelen/{published}/versies/1', status: 404 },
+  // The accounts are for the owner (issue 1156): the list, the form for a new one and the form
+  // of an account. An editor and an author get "niet gevonden". Mijn account is for every role.
+  { admin: 'owner', path: '/beheer/accounts', status: 200 },
+  { admin: 'owner', path: '/beheer/accounts?fout=weg', status: 200 },
+  { admin: 'owner', path: '/beheer/accounts/nieuw', status: 200 },
+  { admin: 'owner', path: '/beheer/accounts/{account}', status: 200 },
+  { admin: 'owner', path: '/beheer/accounts/{account}?gedaan=opgeslagen', status: 200 },
+  { admin: 'owner', path: '/beheer/accounts/999999', status: 404 },
+  { admin: 'editor', path: '/beheer/accounts', status: 404 },
+  { admin: 'editor', path: '/beheer/accounts/{account}', status: 404 },
+  { admin: 'author', path: '/beheer/accounts', status: 404 },
+  { admin: 'author', path: '/beheer/accounts/nieuw', status: 404 },
+  { admin: 'owner', path: '/beheer/mijn-account', status: 200 },
+  { admin: 'owner', path: '/beheer/mijn-account?gedaan=opgeslagen', status: 200 },
+  { admin: 'editor', path: '/beheer/mijn-account', status: 200 },
+  { admin: 'author', path: '/beheer/mijn-account', status: 200 },
+  { admin: 'owner', path: '/beheer', status: 200 },
+  // The numbers of the visit are for an editor. An author gets "niet gevonden".
+  // The matches are for an editor: the list, the notice for a match that is gone, the form of
   // a match with and without a notice, and the addresses that say "niet gevonden".
-  { admin: 'beheerder', path: '/beheer/wedstrijden/nieuw', status: 200 },
-  { admin: 'beheerder', path: '/beheer/wedstrijden', status: 200 },
-  { admin: 'beheerder', path: '/beheer/wedstrijden?tonen=alles', status: 200 },
-  { admin: 'beheerder', path: '/beheer/wedstrijden?tonen=aangepast', status: 200 },
-  { admin: 'beheerder', path: `/beheer/wedstrijden?seizoen=${earlierSeasonSlug()}&tonen=alles`, status: 200 },
-  { admin: 'beheerder', path: '/beheer/wedstrijden?fout=weg', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden/nieuw', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden?tonen=alles', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden?tonen=aangepast', status: 200 },
+  { admin: 'editor', path: `/beheer/wedstrijden?seizoen=${earlierSeasonSlug()}&tonen=alles`, status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden?fout=weg', status: 200 },
   // A change of Wikipedia that is held back: its choice in the list, in an earlier season, and
   // the card on the match, with the form that decides it.
-  { admin: 'beheerder', path: `/beheer/wedstrijden?seizoen=${earlierSeasonSlug()}&tonen=wikipedia-wacht`, status: 200 },
-  { admin: 'beheerder', path: '/beheer/wedstrijden?gedaan=verwijderd', status: 200 },
-  { admin: 'beheerder', path: '/beheer/wedstrijden/{held}', status: 200 },
-  { admin: 'beheerder', path: '/beheer/wedstrijden/{held}?gedaan=wijziging-afgewezen', status: 200 },
-  { admin: 'beheerder', path: '/beheer/wedstrijden/{match}', status: 200 },
-  { admin: 'beheerder', path: '/beheer/wedstrijden/{match}?gedaan=ongewijzigd', status: 200 },
-  { admin: 'beheerder', path: '/beheer/wedstrijden/999999', status: 404 },
+  { admin: 'editor', path: `/beheer/wedstrijden?seizoen=${earlierSeasonSlug()}&tonen=wikipedia-wacht`, status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden?gedaan=verwijderd', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{held}', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{held}?gedaan=wijziging-afgewezen', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{match}', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{match}?gedaan=ongewijzigd', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden/999999', status: 404 },
   // The report of a match: a played match has one, and the notice after an action. A match that
   // was not played or does not exist says "niet gevonden".
-  { admin: 'beheerder', path: '/beheer/wedstrijden/{played}', status: 200 },
-  { admin: 'beheerder', path: '/beheer/wedstrijden/{played}/verslag', status: 200 },
-  { admin: 'beheerder', path: '/beheer/wedstrijden/{played}/verslag?gedaan=opgeslagen', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{played}', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{played}/verslag', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{played}/verslag?gedaan=opgeslagen', status: 200 },
   // The cup tie with a shoot-out has the lists of the kicks, and the series in the preview.
-  { admin: 'beheerder', path: '/beheer/wedstrijden/{cupMatch}/verslag', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{cupMatch}/verslag', status: 200 },
   // The match that is being played: its report with the button "Wedstrijd afgelopen", and the
   // confirmation with the stand.
-  { admin: 'beheerder', path: '/beheer/wedstrijden/{liveMatch}/verslag', status: 200 },
-  { admin: 'beheerder', path: '/beheer/wedstrijden/{liveMatch}/verslag/afgelopen', status: 200 },
-  { admin: 'moderator', path: '/beheer/wedstrijden/{liveMatch}/verslag/afgelopen', status: 404 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{liveMatch}/verslag', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{liveMatch}/verslag/afgelopen', status: 200 },
+  { admin: 'author', path: '/beheer/wedstrijden/{liveMatch}/verslag/afgelopen', status: 404 },
   // The quick screen that keeps a report up to date during the match (#907).
-  { admin: 'beheerder', path: '/beheer/wedstrijden/{liveMatch}/verslag/live', status: 200 },
-  { admin: 'beheerder', path: '/beheer/wedstrijden/{played}/verslag/live', status: 200 },
-  { admin: 'moderator', path: '/beheer/wedstrijden/{liveMatch}/verslag/live', status: 404 },
-  { admin: 'beheerder', path: '/beheer/wedstrijden/{match}/verslag/live', status: 404 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{liveMatch}/verslag/live', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{played}/verslag/live', status: 200 },
+  { admin: 'author', path: '/beheer/wedstrijden/{liveMatch}/verslag/live', status: 404 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{match}/verslag/live', status: 404 },
   // The screen that reads a pasted text into the form of the report.
-  { admin: 'beheerder', path: '/beheer/wedstrijden/{played}/verslag/plakken', status: 200 },
-  { admin: 'beheerder', path: '/beheer/wedstrijden/{match}/verslag/plakken', status: 404 },
-  { admin: 'moderator', path: '/beheer/wedstrijden/{played}/verslag/plakken', status: 404 },
-  { admin: 'beheerder', path: '/beheer/wedstrijden/{match}/verslag', status: 404 },
-  { admin: 'beheerder', path: '/beheer/wedstrijden/999999/verslag', status: 404 },
-  { admin: 'moderator', path: '/beheer/wedstrijden/{played}/verslag', status: 404 },
-  { admin: 'moderator', path: '/beheer/wedstrijden', status: 404 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{played}/verslag/plakken', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{match}/verslag/plakken', status: 404 },
+  { admin: 'author', path: '/beheer/wedstrijden/{played}/verslag/plakken', status: 404 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{match}/verslag', status: 404 },
+  { admin: 'editor', path: '/beheer/wedstrijden/999999/verslag', status: 404 },
+  { admin: 'author', path: '/beheer/wedstrijden/{played}/verslag', status: 404 },
+  { admin: 'author', path: '/beheer/wedstrijden', status: 404 },
   // The players of a season (#1020): the list with its notices, the form that adds one with the
   // search for a person we know, and the form of a player of the made-up squad (`{player}`).
-  { admin: 'beheerder', path: '/beheer/spelers', status: 200 },
-  { admin: 'beheerder', path: `/beheer/spelers?seizoen=${earlierSeasonSlug()}`, status: 200 },
-  { admin: 'beheerder', path: '/beheer/spelers?gedaan=toegevoegd', status: 200 },
-  { admin: 'beheerder', path: '/beheer/spelers?fout=weg', status: 200 },
-  { admin: 'beheerder', path: `/beheer/spelers/nieuw?seizoen=${statSeasonSlug()}`, status: 200 },
-  { admin: 'beheerder', path: `/beheer/spelers/nieuw?seizoen=${statSeasonSlug()}&q=e`, status: 200 },
-  { admin: 'beheerder', path: `/beheer/spelers/nieuw?seizoen=${statSeasonSlug()}&q=bestaat+niet`, status: 200 },
-  { admin: 'beheerder', path: '/beheer/spelers/{player}', status: 200 },
-  { admin: 'beheerder', path: '/beheer/spelers/{player}?gedaan=opgeslagen', status: 200 },
-  { admin: 'beheerder', path: '/beheer/spelers/999999', status: 404 },
+  { admin: 'editor', path: '/beheer/spelers', status: 200 },
+  { admin: 'editor', path: `/beheer/spelers?seizoen=${earlierSeasonSlug()}`, status: 200 },
+  { admin: 'editor', path: '/beheer/spelers?gedaan=toegevoegd', status: 200 },
+  { admin: 'editor', path: '/beheer/spelers?fout=weg', status: 200 },
+  { admin: 'editor', path: `/beheer/spelers/nieuw?seizoen=${statSeasonSlug()}`, status: 200 },
+  { admin: 'editor', path: `/beheer/spelers/nieuw?seizoen=${statSeasonSlug()}&q=e`, status: 200 },
+  { admin: 'editor', path: `/beheer/spelers/nieuw?seizoen=${statSeasonSlug()}&q=bestaat+niet`, status: 200 },
+  { admin: 'editor', path: '/beheer/spelers/{player}', status: 200 },
+  { admin: 'editor', path: '/beheer/spelers/{player}?gedaan=opgeslagen', status: 200 },
+  { admin: 'editor', path: '/beheer/spelers/999999', status: 404 },
   // "Dezelfde persoon als" on the form of a player, and the page that merges two persons
   // (issue 977): two made-up persons, one person twice, and an address without persons.
-  { admin: 'beheerder', path: '/beheer/spelers/{player}?zoek=verzonnen', status: 200 },
-  { admin: 'beheerder', path: '/beheer/spelers/samenvoegen?persoon={person}&met={otherPerson}', status: 200 },
-  { admin: 'beheerder', path: '/beheer/spelers/samenvoegen?persoon={person}&met={person}', status: 200 },
-  { admin: 'beheerder', path: '/beheer/spelers/samenvoegen', status: 200 },
-  { admin: 'moderator', path: '/beheer/spelers/samenvoegen', status: 404 },
-  { admin: 'moderator', path: '/beheer/spelers', status: 404 },
-  { admin: 'moderator', path: `/beheer/spelers/nieuw?seizoen=${statSeasonSlug()}`, status: 404 },
-  { admin: 'moderator', path: '/beheer/spelers/{player}', status: 404 },
+  { admin: 'editor', path: '/beheer/spelers/{player}?zoek=verzonnen', status: 200 },
+  { admin: 'editor', path: '/beheer/spelers/samenvoegen?persoon={person}&met={otherPerson}', status: 200 },
+  { admin: 'editor', path: '/beheer/spelers/samenvoegen?persoon={person}&met={person}', status: 200 },
+  { admin: 'editor', path: '/beheer/spelers/samenvoegen', status: 200 },
+  { admin: 'author', path: '/beheer/spelers/samenvoegen', status: 404 },
+  { admin: 'author', path: '/beheer/spelers', status: 404 },
+  { admin: 'author', path: `/beheer/spelers/nieuw?seizoen=${statSeasonSlug()}`, status: 404 },
+  { admin: 'author', path: '/beheer/spelers/{player}', status: 404 },
   // The stadiums: the list of the clubs with its filter and search, a club with a list of its
   // own and a note (made up, see stadiums.ts), a club without one, and a club that is no club.
-  { admin: 'beheerder', path: '/beheer/stadions', status: 200 },
-  { admin: 'beheerder', path: '/beheer/stadions?tonen=eigen-lijst', status: 200 },
-  { admin: 'beheerder', path: '/beheer/stadions?q=proef', status: 200 },
-  { admin: 'beheerder', path: '/beheer/stadions?fout=weg', status: 200 },
-  { admin: 'beheerder', path: '/beheer/stadions/sv-proefdorp', status: 200 },
-  { admin: 'beheerder', path: '/beheer/stadions/sv-proefdorp?gedaan=opgeslagen', status: 200 },
-  { admin: 'beheerder', path: '/beheer/stadions/voorbeeld-united', status: 200 },
-  { admin: 'beheerder', path: '/beheer/stadions/bestaat-niet', status: 404 },
-  { admin: 'moderator', path: '/beheer/stadions', status: 404 },
-  { admin: 'moderator', path: '/beheer/stadions/sv-proefdorp', status: 404 },
+  { admin: 'editor', path: '/beheer/stadions', status: 200 },
+  { admin: 'editor', path: '/beheer/stadions?tonen=eigen-lijst', status: 200 },
+  { admin: 'editor', path: '/beheer/stadions?q=proef', status: 200 },
+  { admin: 'editor', path: '/beheer/stadions?fout=weg', status: 200 },
+  { admin: 'editor', path: '/beheer/stadions/sv-proefdorp', status: 200 },
+  { admin: 'editor', path: '/beheer/stadions/sv-proefdorp?gedaan=opgeslagen', status: 200 },
+  { admin: 'editor', path: '/beheer/stadions/voorbeeld-united', status: 200 },
+  { admin: 'editor', path: '/beheer/stadions/bestaat-niet', status: 404 },
+  { admin: 'author', path: '/beheer/stadions', status: 404 },
+  { admin: 'author', path: '/beheer/stadions/sv-proefdorp', status: 404 },
   // The names of the clubs: the same pages as the stadiums, with a club that has a list of
   // names of its own and a note (made up, see club-names.ts).
-  { admin: 'beheerder', path: '/beheer/clubnamen', status: 200 },
-  { admin: 'beheerder', path: '/beheer/clubnamen?tonen=eigen-lijst', status: 200 },
-  { admin: 'beheerder', path: '/beheer/clubnamen?q=proef', status: 200 },
-  { admin: 'beheerder', path: '/beheer/clubnamen?fout=weg', status: 200 },
-  { admin: 'beheerder', path: '/beheer/clubnamen/sv-proefdorp', status: 200 },
-  { admin: 'beheerder', path: '/beheer/clubnamen/sv-proefdorp?gedaan=opgeslagen', status: 200 },
-  { admin: 'beheerder', path: '/beheer/clubnamen/voorbeeld-united', status: 200 },
-  { admin: 'beheerder', path: '/beheer/clubnamen/bestaat-niet', status: 404 },
-  { admin: 'moderator', path: '/beheer/clubnamen', status: 404 },
-  { admin: 'moderator', path: '/beheer/clubnamen/sv-proefdorp', status: 404 },
-  { admin: 'moderator', path: '/beheer/wedstrijden/{match}', status: 404 },
-  { admin: 'moderator', path: '/beheer/wedstrijden/{held}', status: 404 },
+  { admin: 'editor', path: '/beheer/clubnamen', status: 200 },
+  { admin: 'editor', path: '/beheer/clubnamen?tonen=eigen-lijst', status: 200 },
+  { admin: 'editor', path: '/beheer/clubnamen?q=proef', status: 200 },
+  { admin: 'editor', path: '/beheer/clubnamen?fout=weg', status: 200 },
+  { admin: 'editor', path: '/beheer/clubnamen/sv-proefdorp', status: 200 },
+  { admin: 'editor', path: '/beheer/clubnamen/sv-proefdorp?gedaan=opgeslagen', status: 200 },
+  { admin: 'editor', path: '/beheer/clubnamen/voorbeeld-united', status: 200 },
+  { admin: 'editor', path: '/beheer/clubnamen/bestaat-niet', status: 404 },
+  { admin: 'author', path: '/beheer/clubnamen', status: 404 },
+  { admin: 'author', path: '/beheer/clubnamen/sv-proefdorp', status: 404 },
+  { admin: 'author', path: '/beheer/wedstrijden/{match}', status: 404 },
+  { admin: 'author', path: '/beheer/wedstrijden/{held}', status: 404 },
   // The quality of the data: the table of the seasons, a work list with a row (the made-up
   // change that waits, see held-changes.ts), an empty one, and addresses that are no list.
-  { admin: 'beheerder', path: '/beheer/kwaliteit', status: 200 },
-  { admin: 'beheerder', path: `/beheer/kwaliteit/${earlierSeasonSlug()}/wachtende-wijzigingen`, status: 200 },
-  { admin: 'beheerder', path: '/beheer/kwaliteit/1990-91/zonder-doelpunten', status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit', status: 200 },
+  { admin: 'editor', path: `/beheer/kwaliteit/${earlierSeasonSlug()}/wachtende-wijzigingen`, status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/1990-91/zonder-doelpunten', status: 200 },
   // The persons without a line or a country (made up, see persons.ts): both lists, a part
   // that does not exist, which shows the last one, and a list that is no list, which is the
   // first.
-  { admin: 'beheerder', path: '/beheer/kwaliteit/personen', status: 200 },
-  { admin: 'beheerder', path: '/beheer/kwaliteit/personen?lijst=land', status: 200 },
-  { admin: 'beheerder', path: '/beheer/kwaliteit/personen?lijst=land&deel=9', status: 200 },
-  { admin: 'beheerder', path: '/beheer/kwaliteit/personen?lijst=onbekend', status: 200 },
-  { admin: 'moderator', path: '/beheer/kwaliteit/personen', status: 404 },
+  { admin: 'editor', path: '/beheer/kwaliteit/personen', status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/personen?lijst=land', status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/personen?lijst=land&deel=9', status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/personen?lijst=onbekend', status: 200 },
+  { admin: 'author', path: '/beheer/kwaliteit/personen', status: 404 },
   // The players whose numbers differ: a season with the made-up difference, and an empty one.
-  { admin: 'beheerder', path: `/beheer/kwaliteit/${statSeasonSlug()}/spelerscijfers`, status: 200 },
-  { admin: 'beheerder', path: '/beheer/kwaliteit/1990-91/spelerscijfers', status: 200 },
-  { admin: 'beheerder', path: '/beheer/kwaliteit/1989-90/spelerscijfers', status: 404 },
-  { admin: 'moderator', path: '/beheer/kwaliteit/1990-91/spelerscijfers', status: 404 },
+  { admin: 'editor', path: `/beheer/kwaliteit/${statSeasonSlug()}/spelerscijfers`, status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/1990-91/spelerscijfers', status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/1989-90/spelerscijfers', status: 404 },
+  { admin: 'author', path: '/beheer/kwaliteit/1990-91/spelerscijfers', status: 404 },
   // The players of whom the import says something else than the editors: the same seasons.
-  { admin: 'beheerder', path: `/beheer/kwaliteit/${statSeasonSlug()}/spelersgegevens`, status: 200 },
-  { admin: 'beheerder', path: '/beheer/kwaliteit/1990-91/spelersgegevens', status: 200 },
-  { admin: 'beheerder', path: '/beheer/kwaliteit/1989-90/spelersgegevens', status: 404 },
-  { admin: 'moderator', path: '/beheer/kwaliteit/1990-91/spelersgegevens', status: 404 },
-  { admin: 'beheerder', path: '/beheer/kwaliteit/1989-90/zonder-doelpunten', status: 404 },
-  { admin: 'beheerder', path: '/beheer/kwaliteit/1990-91/bestaat-niet', status: 404 },
-  { admin: 'moderator', path: '/beheer/kwaliteit', status: 404 },
-  { admin: 'moderator', path: '/beheer/kwaliteit/1990-91/zonder-doelpunten', status: 404 },
-  { admin: 'beheerder', path: '/beheer/bezoek', status: 200 },
-  { admin: 'moderator', path: '/beheer/bezoek', status: 404 },
+  { admin: 'editor', path: `/beheer/kwaliteit/${statSeasonSlug()}/spelersgegevens`, status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/1990-91/spelersgegevens', status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/1989-90/spelersgegevens', status: 404 },
+  { admin: 'author', path: '/beheer/kwaliteit/1990-91/spelersgegevens', status: 404 },
+  { admin: 'editor', path: '/beheer/kwaliteit/1989-90/zonder-doelpunten', status: 404 },
+  { admin: 'editor', path: '/beheer/kwaliteit/1990-91/bestaat-niet', status: 404 },
+  { admin: 'author', path: '/beheer/kwaliteit', status: 404 },
+  { admin: 'author', path: '/beheer/kwaliteit/1990-91/zonder-doelpunten', status: 404 },
+  { admin: 'editor', path: '/beheer/bezoek', status: 200 },
+  { admin: 'author', path: '/beheer/bezoek', status: 404 },
   // The overview of the articles of the editors: the first page, and the addresses that say
   // "niet gevonden": a page after the last one (the made-up articles fit on one page) and a
   // page that is not a number.
@@ -394,6 +416,7 @@ async function withNumbers(path: string) {
   return path.includes('{')
     ? path
         .replace('{draft}', String(await articleIdOf(testArticles.draft.slug)))
+        .replace('{account}', path.includes('{account}') ? String(await adminAccountId('editor')) : '{account}')
         .replace('{published}', String(await articleIdOf(testArticles.published.slug)))
         .replace('{match}', path.includes('{match}') ? String(await matchId()) : '{match}')
         .replace('{held}', path.includes('{held}') ? String(await heldMatchId()) : '{held}')

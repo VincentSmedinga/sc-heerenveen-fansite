@@ -40,7 +40,7 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM audit_log')
   await database.pool.query('DELETE FROM sources')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'jelle@example.org', 'moderator')
+  await createAccount(database.db, 'jelle@example.org', 'author', '')
   userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
   ids = await addSource(database)
 })
@@ -122,16 +122,16 @@ describe('listItems', () => {
     })
     await addItem(database, ids, 'gewoon', { publishedAt: new Date('2026-10-21T08:00:00Z') })
 
-    expect((await listItems(database.db, '', { ...offSite(), now })).map((item) => item.hiddenByEmail)).toEqual([
+    expect((await listItems(database.db, '', { ...offSite(), now })).map((item) => item.hiddenByName)).toEqual([
       'jelle@example.org',
     ])
-    expect((await listItems(database.db, '', { now })).map((item) => item.hiddenByEmail)).toEqual([null])
+    expect((await listItems(database.db, '', { now })).map((item) => item.hiddenByName)).toEqual([null])
   })
 
   it('still gives a hidden item whose account has no row, without an address', async () => {
     await addItem(database, ids, 'verborgen', { hiddenAt: new Date('2026-10-22T08:00:00Z'), hiddenReason: 'Fout' })
 
-    expect((await listItems(database.db, '', { ...offSite(), now })).map((item) => item.hiddenByEmail)).toEqual([null])
+    expect((await listItems(database.db, '', { ...offSite(), now })).map((item) => item.hiddenByName)).toEqual([null])
   })
 
   it('gives the newest 50 of each group and no more', async () => {
@@ -175,9 +175,9 @@ describe('listItems', () => {
 
     expect(Object.keys(item ?? {}).toSorted()).toEqual([
       'approvedAt',
-      'approvedByEmail',
+      'approvedByName',
       'hiddenAt',
-      'hiddenByEmail',
+      'hiddenByName',
       'hiddenReason',
       'id',
       'paywalled',

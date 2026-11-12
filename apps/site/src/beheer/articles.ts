@@ -1,6 +1,6 @@
 import type { Database } from '@fansite/db/client'
 
-import { articles } from '@fansite/db/schema'
+import { type AdminRole, articles } from '@fansite/db/schema'
 import { desc, eq } from 'drizzle-orm'
 
 import type { ArticleErrors, ArticleValues } from './article-fields'
@@ -26,6 +26,12 @@ export type AdminArticle = NonNullable<Awaited<ReturnType<typeof findArticle>>>
 /** One article as the list shows it. */
 export type AdminArticleRow = Awaited<ReturnType<typeof listArticles>>[number]
 
+/**
+ * Who asks for an article: an author sees and writes only the articles he made (`created_by`);
+ * an owner or an editor sees them all (issue 1156).
+ */
+export type ArticleReader = { role: AdminRole; userId: number }
+
 /** What a save did to the article. */
 export type SaveOutcome =
   | { errors: ArticleErrors; status: 'invalid' }
@@ -40,6 +46,7 @@ export async function findArticle(db: Pick<Database, 'select'>, id: number) {
       author: articles.author,
       body: articles.body,
       createdAt: articles.createdAt,
+      createdBy: articles.createdBy,
       id: articles.id,
       intro: articles.intro,
       publishedAt: articles.publishedAt,
@@ -55,10 +62,22 @@ export async function findArticle(db: Pick<Database, 'select'>, id: number) {
 }
 
 /**
- * Every article, drafts and published ones, the one written last first. The list does not
- * need the text.
+ * The article with this number for `reader`, or `undefined` when there is none or it is not
+ * his: an author gets "niet gevonden" for the article of someone else, as for one that isn't
+ * there.
  */
-export function listArticles(db: Pick<Database, 'select'>) {
+export async function findArticleFor(db: Pick<Database, 'select'>, id: number, reader: ArticleReader) {
+  const article = await findArticle(db, id)
+  const own = ownArticlesOf(reader)
+
+  return article === undefined || (own !== undefined && article.createdBy !== own) ? undefined : article
+}
+
+/**
+ * Every article, drafts and published ones, the one written last first, or for `createdBy`
+ * only the articles that account made. The list does not need the text.
+ */
+export function listArticles(db: Pick<Database, 'select'>, createdBy?: number) {
   return db
     .select({
       author: articles.author,
@@ -69,8 +88,14 @@ export function listArticles(db: Pick<Database, 'select'>) {
       updatedAt: articles.updatedAt,
     })
     .from(articles)
+    .where(createdBy === undefined ? undefined : eq(articles.createdBy, createdBy))
     .orderBy(desc(articles.id))
     .limit(listLength)
+}
+
+/** The number of the account whose articles only `reader` may see, or `undefined` for all. */
+export function ownArticlesOf(reader: ArticleReader) {
+  return reader.role === 'author' ? reader.userId : undefined
 }
 
 /** The fields of a form that a version keeps. */
@@ -143,7 +168,8 @@ export async function createArticle(
  * saves nothing again and publishes nothing again, and the log says what happened. The address
  * of an article that has a time of publication is not changed (a link that was shared must not
  * break); the answer is an error at the field. An article for later, which only SQL can make,
- * is left as it is: withdraw it first to publish it now.
+ * is left as it is: withdraw it first to publish it now. With `createdBy` only an article that
+ * account made is saved: one of someone else is `missing`, as for an author (issue 1156).
  */
 export async function saveArticle(
   db: Database,
@@ -152,13 +178,14 @@ export async function saveArticle(
   values: ArticleValues,
   publish: boolean,
   now = new Date(),
+  createdBy?: number,
 ): Promise<SaveOutcome> {
   try {
     return await retryOnDeadlock(() =>
       db.transaction(async (transaction) => {
         const [row] = await transaction.select().from(articles).where(eq(articles.id, id)).for('update')
 
-        if (row === undefined) {
+        if (row === undefined || (createdBy !== undefined && row.createdBy !== createdBy)) {
           return { status: 'missing' } as const
         }
 

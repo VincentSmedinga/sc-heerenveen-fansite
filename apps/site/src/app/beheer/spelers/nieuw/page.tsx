@@ -32,7 +32,7 @@ type SearchParams = Record<string, string | string[] | undefined>
 // comes from the form of a match (`wedstrijd` in the address, issue 1021) goes back to it after
 // the save, and with "Annuleren".
 export default async function AddPlayerPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const { db } = getDatabase()
   const { q, seizoen, wedstrijd } = await searchParams

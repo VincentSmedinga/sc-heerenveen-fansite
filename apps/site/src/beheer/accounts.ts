@@ -1,6 +1,13 @@
 import type { Database } from '@fansite/db/client'
 
-import { adminLoginLinks, type AdminRole, adminRoles, adminSessions, adminUsers } from '@fansite/db/schema'
+import {
+  adminLoginLinks,
+  type AdminRole,
+  adminRoles,
+  adminSessions,
+  adminUsers,
+  firstNameMaxLength,
+} from '@fansite/db/schema'
 import { eq } from 'drizzle-orm'
 
 // The accounts of the admin, and the two commands that manage them on the host (see
@@ -12,27 +19,43 @@ const maxAddressLength = 254
 
 const address = /^[^\s@<>,;:"\\]+@[^\s@<>,;:"\\]+\.[^\s@<>,;:"\\]+$/
 
+/** What `createAccount` did. */
+export type CreateResult = 'changed' | 'created' | 'enabled' | 'exists' | 'needs-name'
+
 /**
- * Makes the account for an address, or turns a disabled one on again with the role given. An
- * account that is on already is not changed: the result says so. The sessions of an account
- * that was turned off are gone, so it logs in again.
+ * Makes the account for an address, or gives an account that exists the role, and the first
+ * name when one is given. An account that was turned off is turned on again; its sessions are
+ * gone, so it logs in again. A new account needs a first name. It is the only way to make an
+ * owner: the admin can't give or take that role (issue 1156).
  */
-export async function createAccount(db: Database, email: string, role: AdminRole, now = new Date()) {
+export async function createAccount(
+  db: Database,
+  email: string,
+  role: AdminRole,
+  firstName: string | undefined,
+  now = new Date(),
+): Promise<CreateResult> {
   const [existing] = await db.select().from(adminUsers).where(eq(adminUsers.email, email))
 
   if (existing === undefined) {
-    await db.insert(adminUsers).values({ createdAt: now, email, role })
+    if (firstName === undefined) {
+      return 'needs-name'
+    }
 
-    return 'created' as const
+    await db.insert(adminUsers).values({ createdAt: now, email, firstName, role })
+
+    return 'created'
   }
 
-  if (existing.disabledAt === null) {
-    return 'exists' as const
+  const name = firstName ?? existing.firstName
+
+  if (existing.disabledAt === null && existing.role === role && existing.firstName === name) {
+    return 'exists'
   }
 
-  await db.update(adminUsers).set({ disabledAt: null, role }).where(eq(adminUsers.id, existing.id))
+  await db.update(adminUsers).set({ disabledAt: null, firstName: name, role }).where(eq(adminUsers.id, existing.id))
 
-  return 'enabled' as const
+  return existing.disabledAt === null ? 'changed' : 'enabled'
 }
 
 /** Whether a string is one of the roles of the admin. */
@@ -49,6 +72,17 @@ export function normaliseEmail(value: string) {
   const email = value.trim().toLowerCase()
 
   return email.length <= maxAddressLength && address.test(email) ? email : undefined
+}
+
+/**
+ * The first name as the accounts keep it: without spaces around it and with one space between
+ * words, or `undefined` when it is empty, too long or has a character that is no text, such as
+ * a new line.
+ */
+export function normaliseFirstName(value: string) {
+  const name = value.trim().replaceAll(/\s+/gu, ' ')
+
+  return name === '' || name.length > firstNameMaxLength || /\p{C}/u.test(name) ? undefined : name
 }
 
 /**

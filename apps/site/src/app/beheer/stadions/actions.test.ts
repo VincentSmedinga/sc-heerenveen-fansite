@@ -41,7 +41,7 @@ vi.mock('#src/database', () => ({ getDatabase: () => database }))
 
 let database: TestDatabase
 let userId: number
-let moderatorId: number
+let authorId: number
 let clubId: number
 
 beforeAll(async () => {
@@ -72,11 +72,10 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM audit_log')
   await database.pool.query('DELETE FROM matches')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'sanne@example.org', 'beheerder')
-  await createAccount(database.db, 'jelle@example.org', 'moderator')
+  await createAccount(database.db, 'sanne@example.org', 'editor', '')
+  await createAccount(database.db, 'jelle@example.org', 'author', '')
   userId = (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'sanne@example.org')))[0]?.id ?? 0
-  moderatorId =
-    (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'jelle@example.org')))[0]?.id ?? 0
+  authorId = (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'jelle@example.org')))[0]?.id ?? 0
   jar.set(sessionCookieName, await startSession(database.db, userId))
 
   const values = await withClubs(database.db, [
@@ -156,7 +155,7 @@ describe('submitStadiums', () => {
   })
 
   it('takes the account from the session and never from the form', async () => {
-    await submit(form(azList, 'opslaan', { userId: String(moderatorId) }))
+    await submit(form(azList, 'opslaan', { userId: String(authorId) }))
 
     expect((await log())[0]?.userId).toBe(userId)
   })
@@ -262,8 +261,8 @@ describe('submitStadiums', () => {
     expect(await log()).toEqual([])
   })
 
-  it('is for the beheerder: a moderator is told the page does not exist, and nothing is stored', async () => {
-    jar.set(sessionCookieName, await startSession(database.db, moderatorId))
+  it('is for the editor: an author is told the page does not exist, and nothing is stored', async () => {
+    jar.set(sessionCookieName, await startSession(database.db, authorId))
 
     await expect(submit(form(azList))).rejects.toThrow('not found')
     expect(await stored()).toEqual([])
@@ -298,9 +297,9 @@ describe('submitReset', () => {
     expect(await reset('bestaat-niet')).toEqual({ redirect: '/beheer/stadions?fout=weg' })
   })
 
-  it('is for the beheerder, and sends somebody without a session to the login page', async () => {
+  it('is for the editor, and sends somebody without a session to the login page', async () => {
     await submit(form(azList))
-    jar.set(sessionCookieName, await startSession(database.db, moderatorId))
+    jar.set(sessionCookieName, await startSession(database.db, authorId))
     await expect(reset()).rejects.toThrow('not found')
 
     jar.clear()

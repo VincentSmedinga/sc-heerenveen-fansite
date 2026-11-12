@@ -4,7 +4,7 @@ import { partLabels, secondSourceOf, sourceLabels, takenOverAt } from '@fansite/
 
 import { formatVersionTime } from '../news'
 
-// What a beheerder reads of a difference that waits for a part of a match: whose values the
+// What an editor reads of a difference that waits for a part of a match: whose values the
 // two are, what happens when nobody decides, and what the two buttons do. A difference between
 // Wikipedia and an entry of the editors is taken over by the import after seven days, in the
 // season that is on only (issue 1025); a difference between two sources (issue 974) waits

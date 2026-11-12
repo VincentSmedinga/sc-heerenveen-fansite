@@ -26,7 +26,7 @@ type Props = { params: Promise<{ id: string }> }
 // result. A match that is not being played any more, or has no report, goes back to the
 // screen of the report.
 export default async function FinishMatchPage({ params }: Props) {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const id = parseItemId((await params).id)
   const screen = id === undefined ? undefined : await findReportScreen(getDatabase().db, id)

@@ -24,7 +24,7 @@ import { checkReportForm } from '#src/beheer/report-form'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
-// The actions of the screen of a match report. Only a beheerder fills in a report, as with the
+// The actions of the screen of a match report. Only an editor fills in a report, as with the
 // matches. The number of the match is bound to the action and is input from outside all the
 // same, so each action checks it again. A form that is wrong returns to the form with the
 // values kept, and one that works ends on the screen with a notice: both work without
@@ -50,7 +50,7 @@ export async function submitRemoveReport(
   _previous: RemoveReportFormState,
   formData: FormData,
 ): Promise<RemoveReportFormState> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const id = parseItemId(matchId)
 
   if (id === undefined) {
@@ -89,7 +89,7 @@ export async function submitReport(
   previous: ReportFormState,
   formData: FormData,
 ): Promise<ReportFormState> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const id = parseItemId(matchId)
   const { db } = getDatabase()
   const screen = id === undefined ? undefined : await findReportScreen(db, id)
@@ -195,7 +195,7 @@ export async function submitFinish(
   _previous: FinishFormState,
   formData: FormData,
 ): Promise<FinishFormState> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const id = parseItemId(matchId)
 
   if (id === undefined) {

@@ -52,9 +52,9 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM audit_log')
   await database.pool.query('DELETE FROM matches')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'sanne@example.org', 'beheerder')
+  await createAccount(database.db, 'sanne@example.org', 'editor', '')
   userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
-  requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'beheerder', userId })
+  requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'editor', userId })
 
   const [values] = await withClubs(database.db, [live])
   const [inserted] = await database.db.insert(matches).values(values!).$returningId()
@@ -73,7 +73,7 @@ const page = async (id: number | string) =>
   renderToStaticMarkup(await FinishMatchPage({ params: Promise.resolve({ id: String(id) }) }))
 
 describe('the screen "Wedstrijd afgelopen"', () => {
-  it('is for the beheerder, and is not indexed', async () => {
+  it('is for the editor, and is not indexed', async () => {
     requireRole.mockRejectedValue(new Error('not found'))
 
     await expect(page(matchId)).rejects.toThrow('not found')

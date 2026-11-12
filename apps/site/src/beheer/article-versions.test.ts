@@ -25,7 +25,7 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM article_versions')
   await database.pool.query('DELETE FROM articles')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'sanne@example.org', 'beheerder')
+  await createAccount(database.db, 'sanne@example.org', 'editor', '')
   userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
 
   const [row] = await database.db

@@ -50,7 +50,7 @@ type Props = {
 // page that merges the two persons. Both are forms of their own, and work without JavaScript.
 // After a search the focus is on the list, or on the search field when nobody was found.
 export default async function PlayerPage({ params, searchParams }: Props) {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const id = parseItemId((await params).id)
   const found = id === undefined ? undefined : await findAdminPlayer(getDatabase().db, id)

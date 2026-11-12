@@ -64,7 +64,7 @@ vi.mock('#src/database', () => ({ getDatabase: () => database }))
 
 let database: TestDatabase
 let userId: number
-let moderatorId: number
+let authorId: number
 let matchId: number
 
 beforeAll(async () => {
@@ -93,11 +93,10 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM matches')
   await database.pool.query('DELETE FROM players')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'sanne@example.org', 'beheerder')
-  await createAccount(database.db, 'jelle@example.org', 'moderator')
+  await createAccount(database.db, 'sanne@example.org', 'editor', '')
+  await createAccount(database.db, 'jelle@example.org', 'author', '')
   userId = (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'sanne@example.org')))[0]?.id ?? 0
-  moderatorId =
-    (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'jelle@example.org')))[0]?.id ?? 0
+  authorId = (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'jelle@example.org')))[0]?.id ?? 0
   jar.set(sessionCookieName, await startSession(database.db, userId))
 
   const [values] = await withClubs(database.db, [scheduled])
@@ -204,7 +203,7 @@ describe('submitMatch', () => {
   })
 
   it('takes the account from the session and never from the form', async () => {
-    await submit(matchId, form({ editedBy: String(moderatorId), userId: String(moderatorId) }))
+    await submit(matchId, form({ editedBy: String(authorId), userId: String(authorId) }))
 
     expect((await edits())[0]?.editedBy).toBe(userId)
     expect((await log())[0]?.userId).toBe(userId)
@@ -344,8 +343,8 @@ describe('submitMatch', () => {
     expect(await submit(-1, form())).toEqual({ redirect: '/beheer/wedstrijden?fout=weg' })
   })
 
-  it('is for the beheerder: a moderator is told the page does not exist, and nothing is stored', async () => {
-    jar.set(sessionCookieName, await startSession(database.db, moderatorId))
+  it('is for the editor: an author is told the page does not exist, and nothing is stored', async () => {
+    jar.set(sessionCookieName, await startSession(database.db, authorId))
 
     await expect(submit(matchId, form())).rejects.toThrow('not found')
     expect(await edits()).toEqual([])
@@ -390,9 +389,9 @@ describe('submitRemoveEntry', () => {
     expect(await remove('abc', 'Waarom')).toEqual({ redirect: '/beheer/wedstrijden?fout=weg' })
   })
 
-  it('is for the beheerder', async () => {
+  it('is for the editor', async () => {
     await submit(matchId, form())
-    jar.set(sessionCookieName, await startSession(database.db, moderatorId))
+    jar.set(sessionCookieName, await startSession(database.db, authorId))
 
     await expect(remove(matchId, 'Waarom')).rejects.toThrow('not found')
     expect(await edits()).toHaveLength(1)
@@ -536,10 +535,10 @@ describe('submitConflict', () => {
     expect((await log()).map((line) => line.action)).toEqual(['match.edit', 'match.keep'])
   })
 
-  it('is for the beheerder, and sends somebody without a session to the login page', async () => {
+  it('is for the editor, and sends somebody without a session to the login page', async () => {
     const id = await waiting()
 
-    jar.set(sessionCookieName, await startSession(database.db, moderatorId))
+    jar.set(sessionCookieName, await startSession(database.db, authorId))
     await expect(decide(id, { besluit: 'overnemen', reden: 'Waarom' })).rejects.toThrow('not found')
 
     jar.clear()
@@ -714,10 +713,10 @@ describe('submitHeldChange', () => {
     expect(await log()).toEqual([])
   })
 
-  it('is for the beheerder, and sends somebody without a session to the login page', async () => {
+  it('is for the editor, and sends somebody without a session to the login page', async () => {
     const id = await held()
 
-    jar.set(sessionCookieName, await startSession(database.db, moderatorId))
+    jar.set(sessionCookieName, await startSession(database.db, authorId))
     await expect(decide(id, { besluit: 'overnemen', reden: 'Waarom' })).rejects.toThrow('not found')
 
     jar.clear()
@@ -865,8 +864,8 @@ describe('submitAddMatch and submitDeleteMatch (issue 970)', () => {
     expect(await added()).toHaveLength(1)
   })
 
-  it('is for a beheerder: a moderator adds nothing', async () => {
-    jar.set(sessionCookieName, await startSession(database.db, moderatorId))
+  it('is for an editor: an author adds nothing', async () => {
+    jar.set(sessionCookieName, await startSession(database.db, authorId))
 
     await expect(add(addForm())).rejects.toThrow()
     expect(await added()).toEqual([])

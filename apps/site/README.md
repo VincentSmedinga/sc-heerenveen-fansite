@@ -962,14 +962,24 @@ Zonder ze, alleen lokaal, schrijft `sendMail` de mail in het logboek van `pnpm d
 ## Het beheer
 
 Wie het beheer in mag, logt in met een link die de site per e-mail stuurt, zonder wachtwoord (zie `src/beheer` en `src/app/beheer`).
-Een account maak je met een opdracht, want er is geen aanmeldpagina:
+Er is geen aanmeldpagina.
+Het beheer kent drie rollen (#1156):
+
+- De eigenaar (`owner`) mag alles, ook de accounts beheren op `/beheer/accounts`.
+- Een redacteur (`editor`) mag alles behalve de accounts beheren.
+- Een auteur (`author`) schrijft alleen zijn eigen artikelen en ziet zijn eigen account; hij publiceert niet en haalt niets offline.
+
+De eigenaar voegt redacteuren en auteurs toe in het beheer.
+Een eigenaar maak je alleen met een opdracht:
 
 ```sh
-pnpm admin:create <e-mailadres> <rol>
+pnpm admin:create <e-mailadres> <rol> [voornaam]
 pnpm admin:revoke <e-mailadres>
 ```
 
-De rol is `beheerder` of `moderator`.
+De rol is `owner`, `editor` of `author`.
+Een nieuw account heeft een voornaam nodig.
+Heeft het adres al een account, dan zet `admin:create` de rol, en de voornaam als je die noemt; zo maak je je eigen account eigenaar.
 `admin:revoke` zet het account uit en beëindigt zijn sessies meteen.
 Beide lezen `DATABASE_URL` uit de `.env` in de root.
 Op de host is er geen pnpm: daar draait `apps/site/admin.mjs`, dat `assemble` maakt (zie `docs/acceptatieomgeving.md`, stap 12).
@@ -1016,21 +1026,26 @@ Een sessie die verloopt haalt hem niet weg: daar is hij voor.
   `src/beheer/routes.test.ts` zoekt ze zelf op in de mappen (en elk bestand met `'use server'`, waar ook), en laat zien dat een aanroep zonder sessie naar de inlogpagina gaat.
   Een nieuwe pagina of actie die `requireRole` niet aanroept, laat die test falen.
   Staat een nieuwe pagina bedoeld open, dan noem je haar in `open` in die test.
-- `/beheer` is de startpagina: wie is ingelogd (het adres en de rol), een tegel (`Tile` van het designsysteem) voor elk scherm van die rol in de hoofdkolom.
+- `/beheer` is de startpagina: wie is ingelogd (de voornaam, of het adres zonder voornaam, en de rol), een tegel (`Tile` van het designsysteem) voor elk scherm van die rol in de hoofdkolom.
+  `src/beheer/screens.ts` zegt welke rol welk scherm ziet; `src/beheer/routes.test.ts` controleert dat elke pagina en actie de rol vraagt die erbij hoort.
+  In de balk heet de link naar Mijn account "Mijn account (Eva)", met de voornaam van het account.
   Onder het hoofdmenu staat op elke pagina onder `/beheer` (behalve de inlogpagina's) de balk met de schermen van de rol: `NavigationBar` van het designsysteem, met een `label`, getekend door `AdminBar` in het slot `@shortcuts` (`app/@shortcuts/beheer`).
   De knop Uitloggen is het laatste item van die balk (de prop `end`): een knop in een formulier met de serveractie `logOut`, dus een POST die ook zonder JavaScript werkt.
   Op een bureaublad staat hij rechts in de balk; op een telefoon schuift hij mee met de schermen.
   De kaart "Te doen" staat in de zijbalk (`Page.Sidebar`) en er alleen als er iets wacht: afwijkingen van Wikipedia op een besluit, vastgehouden wijzigingen van Wikipedia op een besluit (`countHeldChanges`), wedstrijden zonder uitslag in het lopende seizoen (`countMatchesWithoutResult`) en verslagen die klaar waren en niet meer kloppen (`countReportsToCheck`, alleen verslagen die een redacteur opsloeg), elk een koppeling naar de lijst.
   Een volgend scherm voegt een regel toe door een item aan `todo` in `src/app/beheer/page.tsx` toe te voegen.
   Op een telefoon staat de kaart onder de tegels, want `Page` zet de zijbalk in de volgorde van de bron na de hoofdkolom.
-- `/beheer/berichten` is de eerste beheerpagina: de 50 nieuwste berichten van alle bronnen die op de site staan of die er niet op staan, met bron, kop als link, tijd en wie een bericht verborg (zie _Berichten verbergen_).
-- `/beheer/artikelen` is voor beheerders alleen: de artikelen van de redactie schrijven, bekijken, publiceren en intrekken (zie _Artikelen schrijven_).
-- `/beheer/wedstrijden` is voor beheerders alleen: een wedstrijd van het lopende seizoen invullen of verbeteren (zie _Wedstrijden invullen_).
-- `/beheer/spelers` is voor beheerders alleen: een speler toevoegen aan de selectie van een seizoen, of er een aanpassen (zie _De spelers van een seizoen_).
-- `/beheer/stadions` is voor beheerders alleen: een club een eigen lijst van stadions geven, met een toelichting voor de kaart op zijn pagina (zie _De stadions van een club_).
-- `/beheer/clubnamen` is voor beheerders alleen: bijhouden welke namen een club droeg en sinds wanneer, met een toelichting (zie _De namen van een club_).
-- `/beheer/kwaliteit` is voor beheerders alleen: wat we van elk seizoen weten en wat ontbreekt, met werklijsten (zie _De kwaliteit van de gegevens_).
-- `/beheer/bezoek` is voor beheerders alleen: de cijfers over het bezoek van de laatste dagen (zie _Het bezoek bekijken_).
+- `/beheer/berichten` is alleen voor de eigenaar en de redacteuren: de 50 nieuwste berichten van alle bronnen die op de site staan of die er niet op staan, met bron, kop als link, tijd en wie een bericht verborg (zie _Berichten verbergen_).
+- `/beheer/artikelen` is voor elke rol: de artikelen van de redactie schrijven, bekijken, publiceren en intrekken (zie _Artikelen schrijven_).
+  Een auteur ziet alleen de artikelen die hij maakte (`created_by`), en heeft geen knop om te publiceren of in te trekken; de serveracties weigeren het ook.
+- `/beheer/wedstrijden` is alleen voor de eigenaar en de redacteuren: een wedstrijd van het lopende seizoen invullen of verbeteren (zie _Wedstrijden invullen_).
+- `/beheer/spelers` is alleen voor de eigenaar en de redacteuren: een speler toevoegen aan de selectie van een seizoen, of er een aanpassen (zie _De spelers van een seizoen_).
+- `/beheer/stadions` is alleen voor de eigenaar en de redacteuren: een club een eigen lijst van stadions geven, met een toelichting voor de kaart op zijn pagina (zie _De stadions van een club_).
+- `/beheer/clubnamen` is alleen voor de eigenaar en de redacteuren: bijhouden welke namen een club droeg en sinds wanneer, met een toelichting (zie _De namen van een club_).
+- `/beheer/kwaliteit` is alleen voor de eigenaar en de redacteuren: wat we van elk seizoen weten en wat ontbreekt, met werklijsten (zie _De kwaliteit van de gegevens_).
+- `/beheer/bezoek` is alleen voor de eigenaar en de redacteuren: de cijfers over het bezoek van de laatste dagen (zie _Het bezoek bekijken_).
+- `/beheer/accounts` is alleen voor de eigenaar: de accounts met voornaam, adres, rol en aan of uit (zie _De accounts beheren_).
+- `/beheer/mijn-account` is voor elke rol: de eigen voornaam, het adres en de rol, en voor de eigenaar en een redacteur de keuze voor de mail over afwijkingen van Wikipedia.
 - Het beheer is compact: kleinere letters en kortere afstanden dan de publieke pagina's.
   Elke pagina onder `/beheer` zet de klasse `compact` uit `src/beheer/density.ts` op zijn `Page.Main`, en `src/beheer/density.test.ts` zoekt de pagina's zelf op en faalt voor een pagina die haar vergeet (zie _Dichtheid_ in Storybook).
 - De proxy (`src/proxy.ts`) geeft elk antwoord onder `/beheer` de headers `X-Robots-Tag: noindex, nofollow`, `Cache-Control: no-store` en `Referrer-Policy: same-origin`, op elke omgeving.
@@ -1044,14 +1059,35 @@ Een sessie die verloopt haalt hem niet weg: daar is hij voor.
   Van een link en een sessie bewaart de tabel alleen de SHA-256 van de token.
   De teller bewaart de SHA-256 van het adres en de tijd, en geen IP-adres.
 
+### De accounts beheren
+
+`/beheer/accounts` (`src/app/beheer/accounts`) is alleen voor de eigenaar: een redacteur en een auteur krijgen "niet gevonden", ook voor elke actie (#1156).
+De lijst toont elk account met voornaam, adres, rol en aan of uit, de eigenaar bovenaan.
+De link van een account is zijn voornaam, of zijn adres zolang het geen voornaam heeft.
+
+- **Nieuw account:** voornaam, adres en rol (redacteur of auteur).
+  Er gaat geen mail uit: de persoon vraagt een inloglink op `/beheer/inloggen`.
+- **Wijzigen:** voornaam, adres, rol, en aan of uit.
+  Een nieuw adres en uitzetten beëindigen meteen alle sessies en inloglinks van dat account.
+  Een adres dat al bij een ander account hoort, krijgt een fout bij het veld.
+- **De eigenaar:** zijn account staat in de lijst, maar het formulier heeft geen rol en geen status.
+  Een verzoek dat ze toch stuurt, krijgt een fout zonder veld en verandert niets.
+  Alleen `admin create` maakt of verandert een eigenaar.
+- **Verwijderen** kan niet: het logboek verwijst naar het account.
+
+Elke wijziging schrijft in dezelfde transactie een regel in `audit_log`: `account.create`, `account.edit`, `account.disable` of `account.enable`, met het nummer van het account.
+`detail` zegt wat er veranderde (voornaam gewijzigd, adres gewijzigd, de rol van en naar, of de keuze voor de mail), nooit een e-mailadres.
+De voornaam staat alleen in het beheer: in de lijst, bij wie iets deed (`accountName` in `src/beheer/account-name.ts`) en in de balk.
+Op de publieke site staat hij nergens.
+
 ### Berichten verbergen
 
-`/beheer/berichten` (`src/app/beheer/berichten`) is voor beheerders en moderators.
+`/beheer/berichten` (`src/app/beheer/berichten`) is voor de eigenaar en de redacteuren: een auteur krijgt "niet gevonden".
 Boven de lijst staat een schakelaar met twee keuzes: "Op de site" en "Niet op de site" (`SwitchLinks`, zoals `CompetitionSwitch`).
 Het zijn gewone links, dus hij werkt zonder JavaScript, en de huidige keuze heeft `aria-current="page"`.
 Met JavaScript wisselt een gewone klik de pagina zonder haar opnieuw te laden (zie _Schakelaars die in de pagina wisselen_).
 "Op de site" is de standaard en heeft niets in het adres, "Niet op de site" is `?toon=niet-op-de-site`, en een andere waarde valt terug op de standaard.
-Wat "op de site" is, zegt `isOnSite` in `src/beheer/items.ts`: niet verborgen, door de import `relevant` gevonden of door een moderator op de site gezet (zie _Een bericht op de site zetten_), en al gepubliceerd.
+Wat "op de site" is, zegt `isOnSite` in `src/beheer/items.ts`: niet verborgen, door de import `relevant` gevonden of door de redactie op de site gezet (zie _Een bericht op de site zetten_), en al gepubliceerd.
 `isShown` in `@fansite/db/queries` is strenger voor de bezoeker (een bron die uitstaat, en een verhaal dat de site samenvouwt), dus een bericht dat hier "op de site" staat, kan voor een bezoeker ontbreken.
 De lijst toont per groep de berichten van de nieuwste eerst, 50 op een pagina, met `Pagination` en `?pagina=<nummer>` in het adres (`listItems` en `countItems`).
 Groep, zoekopdracht en het vakje blijven bij het bladeren staan, een pagina ver voorbij de laatste toont de laatste, en de tekst erboven zegt hoeveel berichten het er zijn en welke pagina je ziet.
@@ -1076,13 +1112,13 @@ Alle formulieren zijn gewone posts van een serveractie (`actions.ts`), dus ze we
 
 #### Een bericht op de site zetten
 
-Een bericht dat de import een twijfelgeval of "niet over de club" noemde, kan een moderator op de site zetten.
+Een bericht dat de import een twijfelgeval of "niet over de club" noemde, kan een redacteur op de site zetten.
 Dat staat in de kolommen `approved_at` en `approved_by` van `items`, niet in `relevance`: de import beoordeelt elk bericht bij elke run opnieuw, en een goedkeuring in `relevance` zou verdwijnen.
 De import raakt die twee kolommen nooit aan, en een test in `apps/importer/src/import-feeds.test.ts` houdt dat vast.
 Een bericht staat op de site als het niet verborgen is en `relevant` of goedgekeurd: verbergen wint van goedkeuren (`isShown` en `isOnSite`).
 
 - Een bericht met `doubtful` of `irrelevant` en zonder goedkeuring heeft de knop "Op de site zetten" ("Op de site zetten: <kop>" voor een schermlezer), zonder reden.
-- Een goedgekeurd bericht staat in de groep "Op de site", zegt "door een moderator op de site gezet" met het adres van wie en wanneer, en heeft de knop "Terug naar het oordeel van het filter".
+- Een goedgekeurd bericht staat in de groep "Op de site", zegt "door de redactie op de site gezet" met de voornaam van wie (of het adres zolang die er niet is) en wanneer, en heeft de knop "Terug naar het oordeel van het filter".
   Die maakt `approved_at` en `approved_by` leeg, en het bericht is weer wat het filter zei.
 - De acties zijn `approveItem` en `unapproveItem` in `src/beheer/items.ts`, met dezelfde uitkomsten als verbergen: `done`, `unchanged` (al zo, of door de import `relevant` gevonden) en `missing`.
   Elke actie schrijft in één transactie met de wijziging een regel in het logboek: `item.approve` of `item.unapprove`.
@@ -1093,8 +1129,9 @@ Lokaal zie je de pagina na `pnpm run import` (of met `pnpm --filter site test-da
 
 ### Artikelen schrijven
 
-`/beheer/artikelen` (`src/app/beheer/artikelen`) is alleen voor beheerders: een moderator krijgt "niet gevonden".
-De lijst toont alle artikelen, het laatst geschreven bovenaan, met "Nieuw artikel" als formulier met `method="get"`.
+`/beheer/artikelen` (`src/app/beheer/artikelen`) is voor elke rol.
+Een auteur ziet alleen de artikelen die hij maakte, krijgt "niet gevonden" voor een artikel van een ander, en publiceert en trekt niets in.
+De lijst toont voor de eigenaar en een redacteur alle artikelen, het laatst geschreven bovenaan, met "Nieuw artikel" als formulier met `method="get"`.
 Het formulier (`ArticleForm.tsx`) is een client-component met `useActionState` die een fout met de ingevulde waarden terugstuurt.
 De tekst schrijf je met `RichTextEditor` uit het designsysteem (`@fansite/design-system/rich-text-editor`), die JavaScript vraagt; alleen de pagina's met het formulier laden Tiptap.
 De editor zet de tekst als Tiptap's JSON in een verborgen veld.
@@ -1116,7 +1153,7 @@ De fouten staan in een `ErrorSummary` en bij het veld, en met JavaScript krijgt 
 
 ### Wedstrijden invullen
 
-`/beheer/wedstrijden` (`src/app/beheer/wedstrijden`) is alleen voor beheerders: een moderator krijgt "niet gevonden".
+`/beheer/wedstrijden` (`src/app/beheer/wedstrijden`) is alleen voor de eigenaar en de redacteuren: een auteur krijgt "niet gevonden".
 De lijst is één tabel van de wedstrijden van een seizoen, met de wedstrijd als enige koppeling in een rij, de uitslag en de status in woorden, en een label voor wat de redactie moet zien: "Uitslag ontbreekt", "Aangepast" en "Wikipedia wijkt af".
 Een filter met de aantallen kiest wat de lijst toont: `?tonen=alles`, `?tonen=aangepast` en, zonder zoekopdracht, de wedstrijden zonder uitslag (twee uur na de aftrap, zoals `lacksResult`), met de wedstrijden zonder uitslag eerst bij "Alles".
 Het zijn gewone koppelingen, dus het werkt zonder JavaScript.
@@ -1188,7 +1225,7 @@ Het volledige formulier draagt `reportBasis` mee en weigert te bewaren als het v
 
 ### De stadions van een club
 
-`/beheer/stadions` (`src/app/beheer/stadions`) is alleen voor beheerders: een moderator krijgt "niet gevonden".
+`/beheer/stadions` (`src/app/beheer/stadions`) is alleen voor de eigenaar en de redacteuren: een auteur krijgt "niet gevonden".
 De kaart op de pagina van een club toont wat de wedstrijden zeggen over zijn stadion (zie _De tegenstanders_).
 Hier geeft de redactie een club een eigen lijst van namen, met een start en een toelichting, voor een stadion dat de wedstrijden niet goed vertellen, zoals AZ dat in 2019 een half jaar in Den Haag speelde.
 
@@ -1211,7 +1248,7 @@ Hier geeft de redactie een club een eigen lijst van namen, met een start en een 
 
 ### De namen van een club
 
-`/beheer/clubnamen` (`src/app/beheer/clubnamen`) is alleen voor beheerders, zoals de stadions.
+`/beheer/clubnamen` (`src/app/beheer/clubnamen`) is alleen voor de eigenaar en de redacteuren, zoals de stadions.
 De data van Wikipedia kent alleen schrijfwijzen, geen jaren: hier houdt de redactie bij welke namen een club droeg, vanaf wanneer, en waarom.
 De lijst is alleen voor de weergave: de import bepaalt de naam in de kop en het adres van de pagina (de slug), ook voor een club met een lijst.
 
@@ -1230,7 +1267,7 @@ De lijst is alleen voor de weergave: de import bepaalt de naam in de kop en het 
 
 ### De spelers van een seizoen
 
-`/beheer/spelers` (`src/app/beheer/spelers`) is alleen voor beheerders: een moderator krijgt "niet gevonden" (#1020).
+`/beheer/spelers` (`src/app/beheer/spelers`) is alleen voor de eigenaar en de redacteuren: een auteur krijgt "niet gevonden" (#1020).
 Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hier voegt ze een speler toe die daar ontbreekt, of verbetert ze er een.
 
 - De lijst toont de spelers van een seizoen met rugnummer, positie, bron en of ze in de selectie staan, in woorden.
@@ -1291,7 +1328,7 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
 
 ### De kwaliteit van de gegevens
 
-`/beheer/kwaliteit` (`src/app/beheer/kwaliteit`) is alleen voor beheerders: een moderator krijgt "niet gevonden".
+`/beheer/kwaliteit` (`src/app/beheer/kwaliteit`) is alleen voor de eigenaar en de redacteuren: een auteur krijgt "niet gevonden".
 De pagina toont een tabel met een rij per seizoen sinds 1990/91, het nieuwste bovenaan.
 De cijfers komen uit `readSeasonCoverage` in `@fansite/db/season-coverage`, dezelfde functie als `import:status` gebruikt.
 De wachtende wijzigingen telt `waitingChangesBySeason` in `src/beheer/quality.ts` erbij.
@@ -1342,7 +1379,7 @@ Een groep uit de lijst `personsWhoDiffer` staat er niet: dat zijn twee mensen, z
 
 ### Het bezoek bekijken
 
-`/beheer/bezoek` (`src/app/beheer/bezoek`) is alleen voor beheerders: een moderator krijgt "niet gevonden".
+`/beheer/bezoek` (`src/app/beheer/bezoek`) is alleen voor de eigenaar en de redacteuren: een auteur krijgt "niet gevonden".
 De pagina leest de tellers die de site per dag bewaart (zie _Bezoekers tellen_ in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md)) en laat zien:
 
 - de totalen van de laatste 7 en 30 dagen;
@@ -1361,7 +1398,7 @@ De klikken op berichten (#292) staan er nog niet op: die komen als dat issue kla
 ### De beheertests in de browser
 
 De inloglink is een mail, en een browsertest heeft geen mailbox.
-`e2e/admin.ts` zet daarom vóór de eerste test een moderator en een beheerder met elk een sessie in de database van de controle, zoals `startSession` dat doet, en geeft de browser het cookie (`adminCookie(host, rol)`); `e2e/pages.spec.ts`, `e2e/admin.spec.ts` en `e2e/writing.spec.ts` loggen zo in.
+`e2e/admin.ts` zet daarom vóór de eerste test een eigenaar, een redacteur en een auteur met elk een sessie in de database van de controle, zoals `startSession` dat doet, en geeft de browser het cookie (`adminCookie(host, rol)`); `e2e/pages.spec.ts`, `e2e/admin.spec.ts` en `e2e/writing.spec.ts` loggen zo in.
 De tokens zijn voor elke run nieuw, staan alleen in het geheugen van de controle en in de omgeving van haar processen, en de accounts, de sessies, de logregels, de artikelen die een test schreef en de verzonnen berichten gaan er na afloop weer uit.
 De opzet weigert elke database die niet op deze computer staat (`127.0.0.1`, `::1` of `localhost`), dus ze kan nooit schrijven in de database van acceptatie of productie.
 De site zelf kent geen route, omgevingsvariabele of token om zo in te loggen, en `e2e/` zit niet in de build.

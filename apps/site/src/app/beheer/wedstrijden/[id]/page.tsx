@@ -100,7 +100,7 @@ const notices: Record<string, { text: string; title: string }> = {
 // holds the cards of the form, the sidebar the save panel and what belongs to the entry. The
 // page tells what the last action did from the word in the address.
 export default async function MatchPage({ params, searchParams }: Props) {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const id = parseItemId((await params).id)
   const found = id === undefined ? undefined : await findMatch(getDatabase().db, id)
@@ -298,7 +298,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
                   <Text>Onderdelen: {parts}</Text>
                 </List.Item>
                 <List.Item>
-                  <Text>Door: {edit.editedByEmail}</Text>
+                  <Text>Door: {edit.editedByName}</Text>
                 </List.Item>
                 <List.Item>
                   <Text>Op: {formatVersionTime(edit.editedAt)}</Text>

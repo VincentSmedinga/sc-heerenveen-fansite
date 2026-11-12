@@ -55,11 +55,11 @@ const notices: Record<string, { text: string; title: string }> = {
 }
 
 // The players of one season of whom the import read another value than the editors set (issue
-// 1022), for a beheerder. Each difference has the field, both values and one form: take the
+// 1022), for an editor. Each difference has the field, both values and one form: take the
 // value of the import over, or keep that of the editors. An address that names no season since
 // 1990/91 says "niet gevonden".
 export default async function FieldDifferencesPage({ params, searchParams }: Props) {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const { seizoen } = await params
   const season = seasonFromSlug(seizoen)

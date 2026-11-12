@@ -40,7 +40,7 @@ vi.mock('#src/database', () => ({ getDatabase: () => database }))
 
 let database: TestDatabase
 let userId: number
-let moderatorId: number
+let authorId: number
 
 beforeAll(async () => {
   database = await createTestDatabase()
@@ -56,11 +56,10 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM article_versions')
   await database.pool.query('DELETE FROM articles')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'sanne@example.org', 'beheerder')
-  await createAccount(database.db, 'jelle@example.org', 'moderator')
+  await createAccount(database.db, 'sanne@example.org', 'editor', '')
+  await createAccount(database.db, 'jelle@example.org', 'author', '')
   userId = (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'sanne@example.org')))[0]?.id ?? 0
-  moderatorId =
-    (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'jelle@example.org')))[0]?.id ?? 0
+  authorId = (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'jelle@example.org')))[0]?.id ?? 0
   jar.set(sessionCookieName, await startSession(database.db, userId))
 })
 
@@ -129,10 +128,10 @@ describe('submitNewArticle', () => {
 
   it('takes the account from the session and never from the form', async () => {
     await create({
-      createdBy: String(moderatorId),
-      savedBy: String(moderatorId),
-      updatedBy: String(moderatorId),
-      userId: String(moderatorId),
+      createdBy: String(authorId),
+      savedBy: String(authorId),
+      updatedBy: String(authorId),
+      userId: String(authorId),
     })
 
     expect((await stored())[0]).toMatchObject({ createdBy: userId, updatedBy: userId })
@@ -345,17 +344,41 @@ describe('submitWithdraw', () => {
 })
 
 describe('who may call the actions', () => {
-  it('refuses a moderator, who may not write articles, before it reads the form, and changes nothing', async () => {
+  it('lets an author change nothing in an article of someone else, and withdraw nothing', async () => {
     const id = await draft()
 
-    jar.set(sessionCookieName, await startSession(database.db, moderatorId))
+    jar.set(sessionCookieName, await startSession(database.db, authorId))
 
-    await expect(create({ adres: 'ander' })).rejects.toThrow('not found')
-    await expect(save(id, { tekst: json('Gekraakt') })).rejects.toThrow('not found')
+    expect(await save(id, { tekst: json('Gekraakt') })).toEqual({ redirect: '/beheer/artikelen?fout=weg' })
     await expect(withdraw(id)).rejects.toThrow('not found')
     expect(await stored()).toMatchObject([{ body: json('Een alinea.') }])
     expect(await log()).toHaveLength(1)
     expect(await versions()).toHaveLength(1)
+  })
+
+  it('lets an author write and save his own draft, but refuses to publish it, also with a request he made', async () => {
+    jar.set(sessionCookieName, await startSession(database.db, authorId))
+
+    const id = await draft()
+
+    expect(await stored()).toMatchObject([{ createdBy: authorId, publishedAt: null }])
+    expect(await save(id, { tekst: json('Beter') })).toEqual({ redirect: `/beheer/artikelen/${id}?gedaan=opgeslagen` })
+    await expect(save(id, { knop: 'publiceren', tekst: json('Live') })).rejects.toThrow('not found')
+    expect(await stored()).toMatchObject([{ body: json('Beter'), publishedAt: null }])
+    expect((await log()).map((row) => row.action)).toEqual(['article.create', 'article.update'])
+  })
+
+  it('refuses an author who withdraws his own article that an editor published', async () => {
+    jar.set(sessionCookieName, await startSession(database.db, authorId))
+
+    const id = await draft()
+
+    jar.set(sessionCookieName, await startSession(database.db, userId))
+    await save(id, { knop: 'publiceren' })
+    jar.set(sessionCookieName, await startSession(database.db, authorId))
+
+    await expect(withdraw(id)).rejects.toThrow('not found')
+    expect((await stored())[0]?.publishedAt).not.toBeNull()
   })
 
   it('sends a call without a session, and one with a session that ended, to the login page', async () => {

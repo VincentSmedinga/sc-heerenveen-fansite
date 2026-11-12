@@ -136,7 +136,7 @@ describe('migrateArticleBodies', () => {
 
   beforeAll(async () => {
     database = await createTestDatabase()
-    await database.pool.query("INSERT INTO admin_users (email, role) VALUES ('een@example.test', 'beheerder')")
+    await database.pool.query("INSERT INTO admin_users (email, role) VALUES ('een@example.test', 'editor')")
     await database.pool.query(
       `INSERT INTO articles (slug, title, intro, body, author, published_at, created_at, updated_at, created_by, updated_by)
        SELECT 'eerste', 'Eerste', 'Intro', ?, 'de redactie', '2026-10-20 10:00:00', '2026-10-20 09:00:00', '2026-10-21 12:30:00', id, id

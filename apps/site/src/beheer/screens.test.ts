@@ -1,24 +1,36 @@
+import { adminRoles, editorRoles } from '@fansite/db/schema'
 import { describe, expect, it } from 'vitest'
 
-import { currentScreen, isLoginPage, screens, screensFor } from './screens'
+import { allRoles, currentScreen, isLoginPage, screens, screensFor, workRoles } from './screens'
 
 describe('the screens of the admin', () => {
-  it('shows a moderator Berichten only', () => {
-    expect(screensFor('moderator').map(({ label }) => label)).toEqual(['Berichten'])
+  it('knows the roles of the schema', () => {
+    expect(allRoles).toEqual(adminRoles)
+    expect(workRoles).toEqual(editorRoles)
   })
 
-  it('shows a beheerder every screen, with Beheer as the start', () => {
-    expect(screensFor('beheerder').map(({ label }) => label)).toEqual([
-      'Beheer',
-      'Berichten',
-      'Artikelen',
-      'Wedstrijden',
-      'Spelers',
-      'Stadions',
-      'Clubnamen',
-      'Kwaliteit',
-      'Bezoek',
-    ])
+  it('shows an author the start, the articles and his own account', () => {
+    expect(screensFor('author').map(({ label }) => label)).toEqual(['Beheer', 'Artikelen', 'Mijn account'])
+  })
+
+  const work = [
+    'Beheer',
+    'Berichten',
+    'Artikelen',
+    'Wedstrijden',
+    'Spelers',
+    'Stadions',
+    'Clubnamen',
+    'Kwaliteit',
+    'Bezoek',
+  ]
+
+  it('shows an editor every screen but the accounts', () => {
+    expect(screensFor('editor').map(({ label }) => label)).toEqual([...work, 'Mijn account'])
+  })
+
+  it('shows the owner every screen, the accounts too', () => {
+    expect(screensFor('owner').map(({ label }) => label)).toEqual([...work, 'Accounts', 'Mijn account'])
   })
 
   it('has every address once, below /beheer', () => {
@@ -34,6 +46,8 @@ describe('the screens of the admin', () => {
     ['/beheer/wedstrijden/2025-26', '/beheer/wedstrijden'],
     ['/beheer/kwaliteit/2005-06/zonder-doelpunten', '/beheer/kwaliteit'],
     ['/beheer/bezoek', '/beheer/bezoek'],
+    ['/beheer/accounts/4', '/beheer/accounts'],
+    ['/beheer/mijn-account', '/beheer/mijn-account'],
   ])('puts %s under %s', (pathname, href) => {
     expect(currentScreen(pathname)).toBe(href)
   })

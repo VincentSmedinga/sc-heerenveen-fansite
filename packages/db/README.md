@@ -158,12 +158,12 @@ Een kolom daarvoor komt met de eerste bron die het wel mag; een test houdt de li
 | `season_number`                 | Het seizoen van een aflevering; leeg als de feed het niet geeft                                    |
 | `episode_number`                | Het nummer van een aflevering; leeg als de feed het niet geeft                                     |
 | `first_seen_at`, `last_seen_at` | Wanneer we het bericht voor het eerst en het laatst zagen, in UTC                                  |
-| `hidden_at`                     | Wanneer een moderator het bericht verborg, in UTC; leeg voor een bericht dat te zien is            |
+| `hidden_at`                     | Wanneer een redacteur het bericht verborg, in UTC; leeg voor een bericht dat te zien is            |
 | `hidden_by`                     | Het account dat het verborg (`admin_users`); leeg als het bericht niet verborgen is                |
 | `hidden_reason`                 | Waarom, hoogstens 300 tekens; leeg als het bericht niet verborgen is                               |
 | `relevance`                     | Wat de importer van de kop vond: `relevant` (de beginwaarde), `doubtful` of `irrelevant`           |
 | `thread_key`                    | De sleutel van het verhaal waar het bericht een versie van is (hoogstens 100 tekens); meestal leeg |
-| `approved_at`                   | Wanneer een moderator het bericht op de site zette, in UTC; leeg als niemand dat deed              |
+| `approved_at`                   | Wanneer een redacteur het bericht op de site zette, in UTC; leeg als niemand dat deed              |
 | `approved_by`                   | Het account dat het op de site zette (`admin_users`); leeg als niemand dat deed                    |
 
 `item_key` is uniek per bron (`source_id` en `item_key` samen) en hoofdlettergevoelig: de kolom heeft de collatie `utf8mb4_bin`, want een `guid` en het pad van een URL kennen hoofdletters.
@@ -210,7 +210,7 @@ Bij een bron met een `publisher` toont de lijst van berichten van alle bronnen, 
 - het bericht van de bron met `local` gaat voor; zijn er twee lokale bronnen of geen, dan het bericht met de vroegste `published_at`, en bij dezelfde tijd het laagste `id`;
 - de naam, de link, de tijd en de betaalmuur zijn die van het bericht dat wint;
 - het verhaal is te zien als een van zijn berichten `relevant` is, bij welke bron ook, en niet verborgen;
-- verbergt een moderator het bericht dat wint, of heeft zijn bron het nooit in de feed gehad, dan staat het bericht van de andere bron er;
+- verbergt een redacteur het bericht dat wint, of heeft zijn bron het nooit in de feed gehad, dan staat het bericht van de andere bron er;
 - bronnen van verschillende uitgevers, en bronnen zonder `publisher`, worden nooit samengevoegd, ook niet bij dezelfde kop of dezelfde sleutel.
 
 Kiest de bezoeker één of meer bronnen (`/nieuws?bron=…`), dan toont de lijst alles wat die bronnen zelf hebben, ook wat een lokale krant zou vervangen.
@@ -219,16 +219,16 @@ De filterlijst van bronnen (`listArchiveSources`) kijkt naar de berichten van de
 
 ### Een bericht verbergen
 
-Een moderator verbergt een bericht in het beheer (`/beheer/berichten`); dat zet `hidden_at`, `hidden_by` en `hidden_reason`.
+Een redacteur verbergt een bericht in het beheer (`/beheer/berichten`); dat zet `hidden_at`, `hidden_by` en `hidden_reason`.
 Een bericht dat verborgen is, staat op geen enkele pagina van de site: elke query in `queries.ts` die berichten toont, sluit het uit met `hidden_at IS NULL`.
 Een nieuwe query op `items` voor een pagina doet dat ook, en een test per query houdt het vast.
 Het bericht blijft in de tabel, zodat de importer het niet opnieuw als nieuw ziet.
-De importer overschrijft het niet: de voorwaarde staat in het `INSERT … ON DUPLICATE KEY UPDATE` zelf, dus een bericht dat een moderator verbergt terwijl een run bezig is, blijft ook ongemoeid.
+De importer overschrijft het niet: de voorwaarde staat in het `INSERT … ON DUPLICATE KEY UPDATE` zelf, dus een bericht dat een redacteur verbergt terwijl een run bezig is, blijft ook ongemoeid.
 "Toon weer" maakt de drie kolommen leeg.
 
 ### Een bericht op de site zetten
 
-Een moderator zet een twijfelgeval of een bericht dat het filter weghoudt op de site met "Op de site zetten"; dat zet `approved_at` en `approved_by`.
+Een redacteur zet een twijfelgeval of een bericht dat het filter weghoudt op de site met "Op de site zetten"; dat zet `approved_at` en `approved_by`.
 De importer beoordeelt elk bericht bij elke run opnieuw en overschrijft `relevance`, maar raakt deze twee kolommen nooit aan.
 `isShown` laat een bericht door als het niet verborgen is en `relevant` of goedgekeurd; verbergen wint.
 "Terug naar het oordeel van het filter" maakt de twee kolommen leeg.
@@ -565,7 +565,7 @@ De module bewaart ook de typen en de code van een voorstel (`Proposal`, `updateM
 | `status`                            | `pending` (wacht), `accepted` of `rejected`                                                                                                                                                                                                     |
 | `resolution`                        | Hoe het besluit viel: `applied`, `stood` (zeven dagen), `person`, `reverted` of `replaced`; leeg zolang het wacht                                                                                                                               |
 | `part`                              | Bij een afwijking met de invoer van de redactie: `kickoff`, `result` of `goals`; ook `goals` bij bewaarde doelpunten van de oude fansite, die geen afwijking zijn; anders leeg                                                                  |
-| `mailed_at`, `taken_over_mailed_at` | Wanneer de beheerders een mail kregen over de afwijking, en over de overname na zeven dagen; leeg tot een mail uit is                                                                                                                           |
+| `mailed_at`, `taken_over_mailed_at` | Wanneer de eigenaar en de redacteuren een mail kregen over de afwijking, en over de overname na zeven dagen; leeg tot een mail uit is                                                                                                           |
 | `first_seen_at`, `last_seen_at`     | De eerste en de laatste run die deze nieuwe waarde zag, in UTC                                                                                                                                                                                  |
 | `times_seen`                        | Het aantal runs dat deze nieuwe waarde zag                                                                                                                                                                                                      |
 | `decided_at`                        | Wanneer de wijziging werd overgenomen of afgewezen, in UTC                                                                                                                                                                                      |

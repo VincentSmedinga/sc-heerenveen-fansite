@@ -26,11 +26,11 @@ beforeEach(() => {
   vi.mocked(sessionToken).mockReset()
   vi.mocked(sessionToken).mockResolvedValue('token')
   vi.mocked(findSession).mockReset()
-  vi.mocked(findSession).mockResolvedValue({ email: 'sanne@example.org', role: 'beheerder', userId: 1 })
+  vi.mocked(findSession).mockResolvedValue({ email: 'sanne@example.org', firstName: 'Sanne', role: 'owner', userId: 1 })
 })
 
 describe('the bar of the admin', () => {
-  it('is a navigation named Beheer, with the screens of a beheerder and the current one marked', async () => {
+  it('is a navigation named Beheer, with the screens of the owner and the current one marked', async () => {
     const html = await render('/beheer/artikelen/nieuw')
 
     expect(html).toContain('aria-label="Beheer"')
@@ -44,6 +44,8 @@ describe('the bar of the admin', () => {
       ['/beheer/clubnamen', 'Clubnamen'],
       ['/beheer/kwaliteit', 'Kwaliteit'],
       ['/beheer/bezoek', 'Bezoek'],
+      ['/beheer/accounts', 'Accounts'],
+      ['/beheer/mijn-account', 'Mijn account (Sanne)'],
     ])
     expect(html.match(/aria-current="page"/g)).toHaveLength(1)
     expect(html).toMatch(
@@ -51,9 +53,9 @@ describe('the bar of the admin', () => {
     )
   })
 
-  it('ends with a button Uitloggen in a form, in the same navigation, for a beheerder and a moderator', async () => {
-    for (const role of ['beheerder', 'moderator'] as const) {
-      vi.mocked(findSession).mockResolvedValue({ email: 'sanne@example.org', role, userId: 1 })
+  it('ends with a button Uitloggen in a form, in the same navigation, for every role', async () => {
+    for (const role of ['owner', 'editor', 'author'] as const) {
+      vi.mocked(findSession).mockResolvedValue({ email: 'sanne@example.org', firstName: 'Sanne', role, userId: 1 })
 
       const html = await render('/beheer/berichten')
 
@@ -65,10 +67,14 @@ describe('the bar of the admin', () => {
     }
   })
 
-  it('shows a moderator Berichten only', async () => {
-    vi.mocked(findSession).mockResolvedValue({ email: 'jan@example.org', role: 'moderator', userId: 2 })
+  it('shows an author the start, the articles and his account, which says Mijn account without a first name', async () => {
+    vi.mocked(findSession).mockResolvedValue({ email: 'jan@example.org', firstName: '', role: 'author', userId: 2 })
 
-    expect(links(await render('/beheer/berichten'))).toEqual([['/beheer/berichten', 'Berichten']])
+    expect(links(await render('/beheer/artikelen'))).toEqual([
+      ['/beheer', 'Beheer'],
+      ['/beheer/artikelen', 'Artikelen'],
+      ['/beheer/mijn-account', 'Mijn account'],
+    ])
   })
 
   it('draws no bar on the login pages, whatever the session', async () => {

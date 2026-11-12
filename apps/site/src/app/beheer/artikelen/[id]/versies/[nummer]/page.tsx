@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
 
+import { adminRoles } from '@fansite/db/schema'
 import { Article, Card, Heading, Link, Page, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
 import { articlePath } from '#src/app/beheer/artikelen/paths'
 import { ArticleText } from '#src/ArticleText'
 import { findVersion } from '#src/beheer/article-versions'
-import { findArticle } from '#src/beheer/articles'
+import { findArticleFor } from '#src/beheer/articles'
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
 import { requireRole } from '#src/beheer/require-role'
@@ -22,17 +23,17 @@ export const metadata: Metadata = { robots: { follow: false, index: false }, tit
 
 // One saved version of an article as visitors would see it, made by the same `Article` and
 // `ArticleText` as the preview and the page `/redactie/<adres>`, with the facts of the version
-// above it. Only a beheerder gets it. There is no button to put the version back: whoever wants
-// an old text copies it from here. The date is the one of the article, or today's for a draft,
-// like the preview.
+// above it. An owner or an editor gets every one, an author only his own. There is no button to
+// put the version back: whoever wants an old text copies it from here. The date is the one of
+// the article, or today's for a draft, like the preview.
 export default async function ArticleVersionPage({ params }: { params: Promise<{ id: string; nummer: string }> }) {
-  await requireRole('beheerder')
+  const reader = await requireRole(...adminRoles)
 
   const { id: idText, nummer } = await params
   const id = parseItemId(idText)
   const number = parseItemId(nummer)
   const database = getDatabase().db
-  const article = id === undefined ? undefined : await findArticle(database, id)
+  const article = id === undefined ? undefined : await findArticleFor(database, id, reader)
   const version = id === undefined || number === undefined ? undefined : await findVersion(database, id, number)
 
   if (article === undefined || version === undefined) {

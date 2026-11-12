@@ -23,7 +23,7 @@ afterAll(async () => {
 beforeEach(async () => {
   await database.pool.query('DELETE FROM audit_log')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'jelle@example.org', 'moderator')
+  await createAccount(database.db, 'jelle@example.org', 'author', '')
   userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
 })
 
@@ -145,6 +145,10 @@ describe('recordAction', () => {
       'player.field-keep',
       'person.edit',
       'person.merge',
+      'account.create',
+      'account.edit',
+      'account.disable',
+      'account.enable',
     ])
   })
 

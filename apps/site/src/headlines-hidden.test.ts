@@ -8,7 +8,7 @@ import { createAccount } from './beheer/accounts'
 import { hideItem, showItem } from './beheer/items'
 import { addItem, addSource } from './beheer/test-items'
 
-// The page of the admin tells the moderator that a hidden item "staat binnen vijf minuten niet
+// The page of the admin tells the author that a hidden item "staat binnen vijf minuten niet
 // meer op de site". This test reads the headlines of the homepage the way the homepage does,
 // from a real database and its cache, and shows that it is true: the headlines are kept for
 // five minutes, so the item is gone when the five minutes are over, and not a moment later.
@@ -38,7 +38,7 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM audit_log')
   await database.pool.query('DELETE FROM sources')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'jelle@example.org', 'moderator')
+  await createAccount(database.db, 'jelle@example.org', 'author', '')
   userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
 
   const ids = await addSource(database)

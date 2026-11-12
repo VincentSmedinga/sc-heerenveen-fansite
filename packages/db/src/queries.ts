@@ -833,7 +833,7 @@ export function listPublishedArticles(db: Database, until: Date, limit = 5000) {
  * internal, and so does every other column, so none of them can reach a page.
  *
  * The episodes of a podcast are items too, but they are not news, so a source of kind podcast
- * gives none. An item that a moderator hid (`hidden_at`) or that the importer did not find
+ * gives none. An item that an editor hid (`hidden_at`) or that the importer did not find
  * `relevant` is never given, by this query or by any other that shows items: a new query on
  * `items` for a page must use `isShown` too.
  *
@@ -1347,17 +1347,17 @@ function hasWords(words: string[], ...columns: [AnyMySqlColumn, ...AnyMySqlColum
 }
 
 /**
- * The condition that makes an item one to show to a visitor: no moderator hid it, and the
- * importer found it `relevant` (see `items.relevance`) or a moderator put it on the site
+ * The condition that makes an item one to show to a visitor: no editor hid it, and the
+ * importer found it `relevant` (see `items.relevance`) or an editor put it on the site
  * (`approved_at`, which the importer never changes). Hiding wins over approving. Every query
- * that puts items on a page includes it. The admin's list is the one that doesn't, so a
- * moderator finds every item.
+ * that puts items on a page includes it. The admin's list is the one that doesn't, so an
+ * editor finds every item.
  *
  * An item with a `thread_key` is a version of a story that its source put in the feed again
  * under a new headline, such as a live blog. Only the newest version of the story is shown (the
  * newest `published_at`, and the highest `id` among versions of the same time), and the story
  * counts as relevant when any of its versions is: the headline of the last version may say
- * "the final whistle" and nothing about the club. A version a moderator hid is not a version:
+ * "the final whistle" and nothing about the club. A version an editor hid is not a version:
  * the one before it is shown, and no version is left when all are hidden. Versions of one key
  * at two sources are two stories. Pass `until` to leave out the versions that are later than
  * that, as the query itself does for the item.
@@ -1393,10 +1393,10 @@ function isShown(until?: Date, { merge = false }: { merge?: boolean } = {}) {
  * Whether an item of a source with a `publisher` and a `thread_key` is the one to show of its
  * story, when the lists show a story of one publisher once. The story is every item of the
  * sources that are switched on, no podcast and have this publisher, under this key. It is
- * relevant when one of the items that no moderator hid is, whatever the source. Each source
- * puts forward its newest item that no moderator hid. Of those, the one of a `local` source
+ * relevant when one of the items that no editor hid is, whatever the source. Each source
+ * puts forward its newest item that no editor hid. Of those, the one of a `local` source
  * goes first, and then the one that was published first, and then the lowest `id`. The others
- * are not shown. A moderator who hid the item of the winner, or a winner that was never in the
+ * are not shown. An editor who hid the item of the winner, or a winner that was never in the
  * feed, leaves the item of another source to be shown.
  */
 function isShownOnce(until?: Date) {
@@ -1405,7 +1405,7 @@ function isShownOnce(until?: Date) {
   const later = alias(items, 'later')
   const dated = (item: { publishedAt: AnyMySqlColumn }) =>
     until === undefined ? sql`` : sql` and ${lte(item.publishedAt, until)}`
-  // The newest item of its source that no moderator hid: no item of the same key that is not
+  // The newest item of its source that no editor hid: no item of the same key that is not
   // hidden is later (or of the same time and a higher id).
   const newestOf = (item: Record<'id' | 'publishedAt' | 'sourceId' | 'threadKey', AnyMySqlColumn>) =>
     sql`not exists (select 1 from items later where ${later.sourceId} = ${item.sourceId} and ${later.threadKey} = ${item.threadKey} and ${later.hiddenAt} is null${dated(later)} and (${later.publishedAt} > ${item.publishedAt} or (${later.publishedAt} = ${item.publishedAt} and ${later.id} > ${item.id})))`

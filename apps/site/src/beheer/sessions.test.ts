@@ -39,7 +39,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'jelle@example.org', 'beheerder', start)
+  await createAccount(database.db, 'jelle@example.org', 'editor', '', start)
   userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
 })
 
@@ -149,7 +149,8 @@ describe('a session', () => {
 
     expect(await findSession(database.db, token, start)).toEqual({
       email: 'jelle@example.org',
-      role: 'beheerder',
+      firstName: '',
+      role: 'editor',
       userId,
     })
   })

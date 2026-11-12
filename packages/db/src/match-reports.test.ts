@@ -356,7 +356,7 @@ describe('what goes with what', () => {
     const matchId = await playedMatch()
     const [user] = await database.db
       .insert(adminUsers)
-      .values({ email: 'beheer@example.test', role: 'beheerder' })
+      .values({ email: 'beheer@example.test', role: 'editor' })
       .$returningId()
 
     await database.db.insert(matchReports).values({ matchId, savedBy: user!.id, status: 'bezig' })

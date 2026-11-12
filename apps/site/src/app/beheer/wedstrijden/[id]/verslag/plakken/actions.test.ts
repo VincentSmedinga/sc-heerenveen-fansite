@@ -83,7 +83,7 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM matches')
   await database.pool.query('DELETE FROM players')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'sanne@example.org', 'beheerder')
+  await createAccount(database.db, 'sanne@example.org', 'editor', '')
   userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
   jar.set(sessionCookieName, await startSession(database.db, userId))
 
@@ -297,7 +297,7 @@ describe('submitPaste', () => {
     expect(await paste({ tekst: text }, 0)).toEqual({ redirect: '/beheer/wedstrijden?fout=weg' })
   })
 
-  it('is for the beheerder: a visitor without a session gets nothing', async () => {
+  it('is for the editor: a visitor without a session gets nothing', async () => {
     jar.clear()
 
     expect(await paste({ tekst: text })).toEqual({ redirect: '/beheer/inloggen' })

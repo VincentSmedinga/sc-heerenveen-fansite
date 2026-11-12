@@ -9,7 +9,7 @@
 //   caught up. The part follows Wikipedia from then on.
 // - Wikipedia has something else: the entry stays, and the difference goes in the log and in
 //   the warning of the import, once, with both values. The difference is also kept as a change
-//   that waits in `match_changes` (once, per part), and the beheerders are mailed about it
+//   that waits in `match_changes` (once, per part), and the editors are mailed about it
 //   (`mailConflicts`). A person decides in the admin or with `pnpm run import:changes`; when
 //   nobody does and Wikipedia says the same for seven days, the importer takes Wikipedia over
 //   and mails again, in the season that is on only (`hasStood`). When Wikipedia puts the value
@@ -427,7 +427,7 @@ async function hasDecided(db: Pick<Database, 'select'>, matchId: number, part: M
   return found.length > 0
 }
 
-/** Keeps a difference as a change that waits, for the beheerders to decide. */
+/** Keeps a difference as a change that waits, for the editors to decide. */
 async function keepDifference(
   db: Pick<Database, 'insert'>,
   match: Match,

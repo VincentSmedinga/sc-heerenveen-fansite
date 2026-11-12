@@ -45,11 +45,11 @@ const notices: Record<string, string> = {
   weg: 'Deze wedstrijd bestaat niet. Er is niets veranderd. Kies hieronder een wedstrijd.',
 }
 
-// The matches of a season for a beheerder, to fill in or to correct. The list opens on the
+// The matches of a season for an editor, to fill in or to correct. The list opens on the
 // matches without a result, because Wikipedia is behind there; "Alles" keeps them on top.
 // What an editor entered is told in words, never in colour alone.
 export default async function MatchesPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const { fout, gedaan, seizoen, tonen } = await searchParams
   const now = new Date()

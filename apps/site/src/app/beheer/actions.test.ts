@@ -76,7 +76,7 @@ beforeEach(async () => {
   set.mockClear()
   await database.db.delete(adminLoginAttempts)
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'jelle@example.org', 'beheerder')
+  await createAccount(database.db, 'jelle@example.org', 'editor', '')
 })
 
 /** Calls an action with a form and returns where it redirected to. */

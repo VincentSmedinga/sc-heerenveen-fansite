@@ -4,7 +4,7 @@ import { adminUsers } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import { createAccount, isAdminRole, normaliseEmail, revokeAccount } from './accounts'
+import { createAccount, isAdminRole, normaliseEmail, normaliseFirstName, revokeAccount } from './accounts'
 import { findSession, startSession } from './sessions'
 
 const start = new Date('2026-10-26T10:00:00Z')
@@ -48,10 +48,12 @@ describe('normaliseEmail', () => {
 })
 
 describe('isAdminRole', () => {
-  it('knows beheerder and moderator, and nothing else', () => {
-    expect(['beheerder', 'moderator', 'admin', 'Beheerder', ''].map(isAdminRole)).toEqual([
+  it('knows owner, editor and author, and nothing else', () => {
+    expect(['owner', 'editor', 'author', 'beheerder', 'moderator', 'Owner', ''].map(isAdminRole)).toEqual([
       true,
       true,
+      true,
+      false,
       false,
       false,
       false,
@@ -60,26 +62,60 @@ describe('isAdminRole', () => {
 })
 
 describe('createAccount', () => {
-  it('makes an account with the role', async () => {
-    expect(await createAccount(database.db, 'jelle@example.org', 'moderator', start)).toBe('created')
+  it('makes an account with the role and the first name, with the mail on', async () => {
+    expect(await createAccount(database.db, 'jelle@example.org', 'author', 'Jelle', start)).toBe('created')
     expect(await database.db.select().from(adminUsers)).toEqual([
-      { createdAt: start, disabledAt: null, email: 'jelle@example.org', id: expect.any(Number), role: 'moderator' },
+      {
+        conflictMail: true,
+        createdAt: start,
+        disabledAt: null,
+        email: 'jelle@example.org',
+        firstName: 'Jelle',
+        id: expect.any(Number),
+        role: 'author',
+      },
     ])
   })
 
-  it('leaves an account that is on as it is', async () => {
-    await createAccount(database.db, 'jelle@example.org', 'moderator', start)
+  it('makes no account without a first name', async () => {
+    expect(await createAccount(database.db, 'jelle@example.org', 'owner', undefined, start)).toBe('needs-name')
+    expect(await database.db.select().from(adminUsers)).toEqual([])
+  })
 
-    expect(await createAccount(database.db, 'jelle@example.org', 'beheerder', start)).toBe('exists')
-    expect((await database.db.select().from(adminUsers))[0]?.role).toBe('moderator')
+  it('gives an account that is on the role, and keeps its first name when none is given', async () => {
+    await createAccount(database.db, 'jelle@example.org', 'editor', 'Jelle', start)
+
+    expect(await createAccount(database.db, 'jelle@example.org', 'owner', undefined, start)).toBe('changed')
+    expect(await database.db.select().from(adminUsers)).toMatchObject([{ firstName: 'Jelle', role: 'owner' }])
+  })
+
+  it('leaves an account as it is when it has the role and the first name already', async () => {
+    await createAccount(database.db, 'jelle@example.org', 'author', 'Jelle', start)
+
+    expect(await createAccount(database.db, 'jelle@example.org', 'author', undefined, start)).toBe('exists')
+    expect(await createAccount(database.db, 'jelle@example.org', 'author', 'Jelle', start)).toBe('exists')
   })
 
   it('turns an account that was revoked on again, with the new role', async () => {
-    await createAccount(database.db, 'jelle@example.org', 'moderator', start)
+    await createAccount(database.db, 'jelle@example.org', 'author', '', start)
     await revokeAccount(database.db, 'jelle@example.org', start)
 
-    expect(await createAccount(database.db, 'jelle@example.org', 'beheerder', start)).toBe('enabled')
-    expect(await database.db.select().from(adminUsers)).toMatchObject([{ disabledAt: null, role: 'beheerder' }])
+    expect(await createAccount(database.db, 'jelle@example.org', 'editor', undefined, start)).toBe('enabled')
+    expect(await database.db.select().from(adminUsers)).toMatchObject([{ disabledAt: null, role: 'editor' }])
+  })
+})
+
+describe('normaliseFirstName', () => {
+  it.each([
+    ['Jelle', 'Jelle'],
+    ['  Jan   Willem ', 'Jan Willem'],
+    ['Sjoukje-Fenna', 'Sjoukje-Fenna'],
+  ])('takes %j as %j', (value, name) => {
+    expect(normaliseFirstName(value)).toBe(name)
+  })
+
+  it.each(['', '   ', 'a'.repeat(51), 'Jelle\u0000', 'Je\u200Blle'])('refuses %j', (value) => {
+    expect(normaliseFirstName(value)).toBeUndefined()
   })
 })
 
@@ -89,8 +125,8 @@ describe('revokeAccount', () => {
   })
 
   it('turns the account off, keeps the row and ends the sessions of that account only', async () => {
-    await createAccount(database.db, 'jelle@example.org', 'beheerder', start)
-    await createAccount(database.db, 'marijke@example.org', 'moderator', start)
+    await createAccount(database.db, 'jelle@example.org', 'editor', '', start)
+    await createAccount(database.db, 'marijke@example.org', 'author', '', start)
 
     const [jelle, marijke] = await database.db.select().from(adminUsers).orderBy(adminUsers.id)
     const jellesSession = await startSession(database.db, jelle?.id ?? 0, start)
@@ -105,7 +141,7 @@ describe('revokeAccount', () => {
   })
 
   it('says so when the account was off already, and keeps the first time', async () => {
-    await createAccount(database.db, 'jelle@example.org', 'beheerder', start)
+    await createAccount(database.db, 'jelle@example.org', 'editor', '', start)
     await revokeAccount(database.db, 'jelle@example.org', start)
 
     expect(await revokeAccount(database.db, 'jelle@example.org', new Date(start.getTime() + 1000))).toEqual({

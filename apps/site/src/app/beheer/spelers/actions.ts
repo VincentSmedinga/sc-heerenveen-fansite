@@ -24,7 +24,7 @@ import { getDatabase } from '#src/database'
 
 import { listPath, mergePath, playerPath, playersPath } from './paths'
 
-// The actions of the players. Only a beheerder keeps them, as with the matches. The season and
+// The actions of the players. Only an editor keeps them, as with the matches. The season and
 // the number of the player are bound to the action (`submitPlayer.bind(null, id)`) and are
 // input from outside all the same, so each action checks them again. A form that is wrong
 // returns to the form with the values kept, and one that works ends on a page with a notice:
@@ -46,7 +46,7 @@ export async function submitAddPlayer(
   _previous: PlayerFormState,
   formData: FormData,
 ): Promise<PlayerFormState> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const { db } = getDatabase()
 
   if (!(await listPlayerSeasons(db)).includes(season)) {
@@ -92,7 +92,7 @@ export async function submitMergePersons(
   keptId: number,
   playerId: number | undefined,
 ): Promise<MergeFormState> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const { db } = getDatabase()
   const other = parseItemId(otherId)
   const kept = parseItemId(keptId)
@@ -139,7 +139,7 @@ export async function submitPlayer(
   _previous: PlayerFormState,
   formData: FormData,
 ): Promise<PlayerFormState> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const id = parseItemId(playerId)
 
   if (id === undefined) {
@@ -186,7 +186,7 @@ export async function submitPlayer(
  * an appearance stays, and the page says why.
  */
 export async function submitRemovePlayer(playerId: number): Promise<void> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const { db } = getDatabase()
   const id = parseItemId(playerId)
   const found = id === undefined ? undefined : await findAdminPlayer(db, id)

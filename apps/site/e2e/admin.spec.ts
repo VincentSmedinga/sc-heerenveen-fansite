@@ -5,7 +5,7 @@ import { expect, test } from '@playwright/test'
 import { adminCookie, adminItems } from './admin'
 import { checkPage } from './check-page'
 
-// Hides and shows a made-up item in the admin, as the moderator of the global setup, once with
+// Hides and shows a made-up item in the admin, as the editor of the global setup, once with
 // JavaScript and once without. The forms are plain posts, so both have to work. The items sit
 // on the source that is switched off (see admin.ts), so no other check reads them, and the
 // checks here run one after the other because they change what they read.
@@ -82,7 +82,7 @@ for (const [name, javaScriptEnabled, title] of [
       )
       await expect(page.getByLabel('Zoeken')).toHaveValue(title)
       await expect(itemOf(page, title).getByText('Reden: Fout in het bericht')).toBeVisible()
-      await expect(itemOf(page, title).getByText(/door .+@.+\. Reden/)).toBeVisible()
+      await expect(itemOf(page, title).getByText(/door Redacteur\. Reden/)).toBeVisible()
       if (javaScriptEnabled) {
         expect(await checkPage(page)).toEqual([])
       }

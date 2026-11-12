@@ -34,7 +34,7 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM matches')
   await database.pool.query('DELETE FROM players')
   await database.pool.query('DELETE FROM admin_users')
-  await database.pool.query("INSERT INTO admin_users (email, role) VALUES ('redactie@example.org', 'beheerder')")
+  await database.pool.query("INSERT INTO admin_users (email, role) VALUES ('redactie@example.org', 'editor')")
   adminId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
 })
 

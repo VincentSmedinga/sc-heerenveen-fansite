@@ -28,7 +28,7 @@ type Props = { params: Promise<{ id: string }> }
 // score from the goals, a form for a goal, a card and a substitution that each save at once,
 // and the events from the last to the first. The line-up stays in the full form.
 export default async function LiveReportPage({ params }: Props) {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const id = parseItemId((await params).id)
   const screen = id === undefined ? undefined : await findReportScreen(getDatabase().db, id)

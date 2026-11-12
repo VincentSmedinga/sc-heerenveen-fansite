@@ -6,7 +6,7 @@ import { describeEntryGoals, describeEntryKickoff, describeEntryResult } from '@
 
 import type { HeldChange } from './match-entries'
 
-// What a beheerder reads of a change of Wikipedia that the importer holds back: what the site
+// What an editor reads of a change of Wikipedia that the importer holds back: what the site
 // shows and what Wikipedia says now, in words, why the change waits and what happens when
 // nobody decides. The importer keeps its reason and its values in English, as one line for the
 // machine; this file builds the Dutch from the match itself and from the proposal.

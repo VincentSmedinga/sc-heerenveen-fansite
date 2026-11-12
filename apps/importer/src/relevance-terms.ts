@@ -13,7 +13,7 @@
  * words split at anything that isn't a letter or a digit. A test checks it. A term of more than
  * one word matches only those words next to each other, in that order.
  *
- * The filter is not strict on purpose: a headline that slips through is hidden by a moderator
+ * The filter is not strict on purpose: a headline that slips through is hidden by an editor
  * in a moment, and one that is held back is not seen by anyone. So:
  * - A person is on the lists with the full name and with the surname, also a common one such
  *   as Kersten or Veldman. A full name makes a headline `relevant` on its own. A surname makes
@@ -44,7 +44,7 @@ export const clubNames = ['heerenveen', 'hearrenfean'] as const
  * Someone so much part of the club that a headline about them belongs on the site without the
  * name of the club: Abe Lenstra, our greatest player of all time (the project owner decided
  * this on 25 October 2026). It matches "Abe Lenstra Stadion" too. A headline about the Abe
- * Lenstra Boulevard gets in as well; a moderator can hide it.
+ * Lenstra Boulevard gets in as well; an editor can hide it.
  */
 export const clubLegends = ['abe lenstra'] as const
 
@@ -401,12 +401,12 @@ export const footballWords = [
  * "wint"): "ploech" (a team, but also any crew or group), "spiler" (a player of anything),
  * "útslach" (a result, but also a rash), "kampioenskip" (fierljeppen and skûtsjesilen have
  * one too), "ferlies" (a loss in money too), "promoasje", "beker" (a mug) and "oanhing" (any
- * followers). A headline with one of them and "Hearrenfean" is `doubtful`, which a moderator
+ * followers). A headline with one of them and "Hearrenfean" is `doubtful`, which an editor
  * can look at. Add one when a missed headline shows that we need it.
  *
  * The words of winning and losing are on the list, like "wint" and "verliest" for Dutch: "wûn"
  * (won) and "ferlear" (lost). A headline such as "Frou wûn lotterij yn Hearrenfean" becomes
- * `relevant`, which a moderator hides. A club headline we miss is worse (see
+ * `relevant`, which an editor hides. A club headline we miss is worse (see
  * `docs/beslissingen/importer.md`, _Een volledige naam is genoeg, en "wint" en "verliest" zijn
  * voetbalwoorden_).
  */

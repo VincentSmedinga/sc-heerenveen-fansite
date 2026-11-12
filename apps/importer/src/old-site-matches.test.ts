@@ -410,7 +410,7 @@ describe('the step matches', () => {
     for (const table of ['match_changes', 'match_edits', 'match_statistics', 'matches', 'clubs', 'admin_users']) {
       await database.pool.query(`DELETE FROM ${table}`)
     }
-    await database.pool.query("INSERT INTO admin_users (email, role) VALUES ('redactie@example.org', 'beheerder')")
+    await database.pool.query("INSERT INTO admin_users (email, role) VALUES ('redactie@example.org', 'editor')")
     adminId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
   })
 

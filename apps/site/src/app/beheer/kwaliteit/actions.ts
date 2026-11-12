@@ -15,7 +15,7 @@ import { seasonFromSlug } from '#src/seasons'
 /**
  * Decides a difference between what the editors set of a player and what the import read (issue
  * 1022): "overnemen" gives the player the value of the import, "houden" keeps that of the
- * editors. It asks for a reason, as every change does. Only a beheerder decides. The number of
+ * editors. It asks for a reason, as every change does. Only an editor decides. The number of
  * the difference and the season of the page are bound to the action and checked again, and a
  * difference that is decided already or gone ends on the page with a notice.
  */
@@ -25,7 +25,7 @@ export async function submitFieldDifference(
   _previous: ConflictFormState,
   formData: FormData,
 ): Promise<ConflictFormState> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const id = parseItemId(differenceId)
   const season = seasonFromSlug(seasonSlug)
 
@@ -72,7 +72,7 @@ export async function submitFieldDifference(
 /**
  * Decides a difference in the goals of a player between the squad table and the matches or the
  * match reports (issue 974): "overnemen" puts the other number in the squad table, "houden"
- * keeps the table. It asks for a reason, as every change does. Only a beheerder decides. The
+ * keeps the table. It asks for a reason, as every change does. Only an editor decides. The
  * number of the difference and the season of the page are bound to the action and checked
  * again, and a difference that is decided already or gone ends on the page with a notice.
  */
@@ -82,7 +82,7 @@ export async function submitStatDifference(
   _previous: ConflictFormState,
   formData: FormData,
 ): Promise<ConflictFormState> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const id = parseItemId(differenceId)
   const season = seasonFromSlug(seasonSlug)
 

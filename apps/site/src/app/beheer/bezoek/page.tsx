@@ -23,12 +23,12 @@ const dayFormat = new Intl.DateTimeFormat('nl-NL', {
 /** A day as `2026-10-26`, written for a reader: `ma 26 okt`. */
 const formatDay = (day: string) => dayFormat.format(new Date(`${day}T12:00:00Z`))
 
-// The numbers of the visit of the last 30 days, for a beheerder: the totals of the last 7 and
+// The numbers of the visit of the last 30 days, for an editor: the totals of the last 7 and
 // 30 days, every day on its own line and the most viewed pages, with in plain words what the
 // numbers are and are not. The tables have a caption that only a screen reader gets, because
 // the heading above each one says what it is.
 export default async function VisitPage() {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const { perDay, topPages, total, totalShort } = await visitNumbers(getDatabase().db)
   const counted = total.views > 0 || total.visitors > 0

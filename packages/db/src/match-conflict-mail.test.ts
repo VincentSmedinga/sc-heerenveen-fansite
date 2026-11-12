@@ -43,10 +43,13 @@ beforeEach(async () => {
   }
 
   await database.pool.query(
-    "INSERT INTO admin_users (email, role) VALUES ('beheer1@example.org', 'beheerder'), ('beheer2@example.org', 'beheerder'), ('mod@example.org', 'moderator')",
+    "INSERT INTO admin_users (email, role) VALUES ('beheer1@example.org', 'owner'), ('beheer2@example.org', 'editor'), ('auteur@example.test', 'author')",
   )
   await database.pool.query(
-    "INSERT INTO admin_users (email, role, disabled_at) VALUES ('weg@example.org', 'beheerder', '2026-10-01 10:00:00')",
+    "INSERT INTO admin_users (email, role, conflict_mail) VALUES ('stil@example.test', 'editor', false), ('stil-eigenaar@example.test', 'owner', false)",
+  )
+  await database.pool.query(
+    "INSERT INTO admin_users (email, role, disabled_at) VALUES ('weg@example.org', 'editor', '2026-10-01 10:00:00')",
   )
 
   const scheduled: Omit<NewMatch, 'clubId'> = {
@@ -102,7 +105,7 @@ const run = (options: { env?: Record<string, string>; send?: (mail: Mail) => Pro
 const changes = () => database.db.select().from(matchChanges)
 
 describe('the mail about a difference', () => {
-  it('goes to each beheerder who is not turned off, once, with both values and the link', async () => {
+  it('goes to the owner and each editor who is not turned off and wants it, never to an author, once, with both values and the link', async () => {
     await waits()
     await run()
 
@@ -175,7 +178,7 @@ describe('the mail about a difference', () => {
     expect(await changes()).not.toMatchObject([{ mailedAt: null }])
   })
 
-  it('counts a difference as mailed when one of the beheerders got the mail', async () => {
+  it('counts a difference as mailed when one of the editors got the mail', async () => {
     await waits()
     await run({
       send: (mail) => (mail.to === 'beheer1@example.org' ? Promise.reject(new Error('nee')) : collect(mail)),
@@ -190,7 +193,7 @@ describe('the mail about a difference', () => {
     await database.pool.query('DELETE FROM admin_users')
     await run()
 
-    expect(lines).toEqual([expect.stringContaining('no beheerder')])
+    expect(lines).toEqual([expect.stringContaining('no owner or editor')])
     expect(await changes()).toMatchObject([{ mailedAt: null }])
   })
 

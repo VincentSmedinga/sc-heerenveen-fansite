@@ -38,7 +38,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await database.pool.query('DELETE FROM sources')
-  // After the sources: an item that is hidden refers to the account of the moderator.
+  // After the sources: an item that is hidden refers to the account of the editor.
   await database.pool.query('DELETE FROM admin_users')
   await database.pool.query('DELETE FROM matches')
   await database.pool.query('DELETE FROM league_results')
@@ -337,7 +337,7 @@ describe('an item that is already known', () => {
   })
 })
 
-describe('an item that a moderator hid', () => {
+describe('an item that an editor hid', () => {
   const hiddenAt = new Date('2026-10-22T10:30:00Z')
 
   /**
@@ -352,7 +352,7 @@ describe('an item that a moderator hid', () => {
 
     const [user] = await database.db
       .insert(adminUsers)
-      .values({ email: 'jelle@example.org', role: 'moderator' })
+      .values({ email: 'jelle@example.org', role: 'editor' })
       .$returningId()
 
     await database.db
@@ -425,7 +425,7 @@ describe('an item that a moderator hid', () => {
     ])
   })
 
-  it('is updated again once a moderator shows it', async () => {
+  it('is updated again once an editor shows it', async () => {
     await hideThenImport(feedWith(entry('g1')), feedWith(entry('g1', { title: 'Nieuwe kop' })))
     await database.db.update(items).set({ hiddenAt: null, hiddenBy: null, hiddenReason: null })
 
@@ -579,7 +579,7 @@ describe('the relevance filter', () => {
     expect((await relevanceByKey())['elders']).toBe('relevant')
   })
 
-  it('does not change the value of an item that a moderator hid', async () => {
+  it('does not change the value of an item that an editor hid', async () => {
     const server = await serve(mixed())
     const feed = await addFeed(`${server.origin}/rss/`, { filter: 'club' })
 
@@ -587,7 +587,7 @@ describe('the relevance filter', () => {
 
     const [user] = await database.db
       .insert(adminUsers)
-      .values({ email: 'jelle@example.org', role: 'moderator' })
+      .values({ email: 'jelle@example.org', role: 'editor' })
       .$returningId()
 
     await database.db
@@ -602,7 +602,7 @@ describe('the relevance filter', () => {
     expect((await relevanceByKey())['elders']).toBe('relevant')
   })
 
-  it('leaves the approval of a moderator as it is when a new run judges the item differently', async () => {
+  it('leaves the approval of an editor as it is when a new run judges the item differently', async () => {
     const server = await serve(mixed())
     const feed = await addFeed(`${server.origin}/rss/`, { filter: 'club' })
 
@@ -610,7 +610,7 @@ describe('the relevance filter', () => {
 
     const [user] = await database.db
       .insert(adminUsers)
-      .values({ email: 'jelle@example.org', role: 'moderator' })
+      .values({ email: 'jelle@example.org', role: 'editor' })
       .$returningId()
     const approvedAt = new Date('2026-10-22T10:30:00Z')
 
@@ -805,7 +805,7 @@ describe('the relevance filter and the matches of the season', () => {
 
     const [user] = await database.db
       .insert(adminUsers)
-      .values({ email: 'jelle@example.org', role: 'moderator' })
+      .values({ email: 'jelle@example.org', role: 'editor' })
       .$returningId()
 
     await database.db
@@ -1071,7 +1071,7 @@ describe('importing the football feed of the Algemeen Dagblad, the way the regis
     expect(byLink['https://ad.test/voetbal/jongste-speler-ooit~a1000008/']).toEqual(new Date('2026-10-25T10:15:00Z'))
   })
 
-  it('keeps nothing of the description, the author or the images', async () => {
+  it('keeps nothing of the description, the editor or the images', async () => {
     const server = await serve(sample)
 
     await importFeed(database.db, fetcherFor(servers), await adFeed(server.origin), adRun)
@@ -1231,7 +1231,7 @@ describe('importing the sport feed of De Gelderlander, the way the register has 
     expect(byLink['https://gld.test/sport/schaatsers-in-thialf~ag2000006/']).toEqual(new Date('2026-11-01T09:51:00Z'))
   })
 
-  it('keeps nothing of the description, the author, the images or the logo of the channel', async () => {
+  it('keeps nothing of the description, the editor, the images or the logo of the channel', async () => {
     const server = await serve(sample)
 
     await importFeed(database.db, fetcherFor(servers), await gelderlanderFeed(server.origin), gelderlanderRun)
@@ -1376,7 +1376,7 @@ describe('importing the football feed of ESPN NL, the way the register has it', 
     expect(at(9000007)).toEqual(espnRun)
   })
 
-  it('keeps nothing of the description, the author or the logo', async () => {
+  it('keeps nothing of the description, the editor or the logo', async () => {
     const server = await serve(sample)
 
     await importFeed(database.db, fetcherFor(servers), await espnFeed(server.origin), espnRun)
@@ -1490,7 +1490,7 @@ describe('importing the sports feed of Rijnmond, the way the register has it', (
     expect(rows.find((row) => row.key === '9100008')?.publishedAt).toEqual(new Date('2026-12-11T13:40:00Z'))
   })
 
-  it('keeps nothing of the description, the author, the image or the logo', async () => {
+  it('keeps nothing of the description, the editor, the image or the logo', async () => {
     const server = await serve(sample)
 
     await importFeed(database.db, fetcherFor(servers), await rijnmondFeed(server.origin), rijnmondRun, opponents)
@@ -1634,7 +1634,7 @@ describe('importing RTV Noord and OOG Groningen, the way the register has them',
     expect(shown.every((item) => item.sourceName === 'OOG Groningen')).toBe(true)
   })
 
-  it('keeps nothing of the description, the author, the text, the image or the logo', async () => {
+  it('keeps nothing of the description, the editor, the text, the image or the logo', async () => {
     const rtv = await serve(rtvSample)
     const oog = await serve(oogSample)
 

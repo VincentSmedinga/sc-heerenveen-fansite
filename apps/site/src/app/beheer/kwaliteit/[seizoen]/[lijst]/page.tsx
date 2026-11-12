@@ -68,14 +68,14 @@ const dayFormat = new Intl.DateTimeFormat('nl-NL', {
 /** The day of a match with its year, without points: `za 27 aug 2005`. */
 const dayOf = (matchDate: string) => dayFormat.format(new Date(`${matchDate}T12:00:00Z`)).replaceAll('.', '')
 
-// A work list of the page Kwaliteit, for a beheerder: the matches of one season that miss
+// A work list of the page Kwaliteit, for an editor: the matches of one season that miss
 // something, the oldest first. Each row leads to the match in the admin, a report that is not
 // finished to its report. The list of the goals without a player leads to the goals of the
 // match and has the name each goal came with, and says so above the rows when the season has no
 // player to choose from (issue 1021). An address that names no season since 1990/91 or no list
 // says "niet gevonden".
 export default async function WorkListPage({ params }: Props) {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const { lijst, seizoen } = await params
   const season = seasonFromSlug(seizoen)

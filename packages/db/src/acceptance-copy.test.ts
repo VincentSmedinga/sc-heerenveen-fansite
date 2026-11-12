@@ -19,8 +19,8 @@ const now = new Date('2026-11-10T09:31:15.500Z')
 const serverUrl = readDatabaseEnv().DATABASE_URL
 const madeUpDump = [
   '-- A made-up dump, as `backup.mjs export` prints one.',
-  "CREATE TABLE admin_users (id int unsigned AUTO_INCREMENT PRIMARY KEY, email varchar(254) NOT NULL UNIQUE, role enum('beheerder','moderator') NOT NULL, created_at datetime NOT NULL DEFAULT (UTC_TIMESTAMP()), disabled_at datetime);",
-  "INSERT INTO admin_users (id, email, role, created_at) VALUES (3, 'beheerder-3@example.invalid', 'moderator', '2026-10-01 08:00:00');",
+  "CREATE TABLE admin_users (id int unsigned AUTO_INCREMENT PRIMARY KEY, email varchar(254) NOT NULL UNIQUE, first_name varchar(50) NOT NULL DEFAULT '', role enum('owner','editor','author') NOT NULL, created_at datetime NOT NULL DEFAULT (UTC_TIMESTAMP()), disabled_at datetime);",
+  "INSERT INTO admin_users (id, email, role, created_at) VALUES (3, 'beheerder-3@example.invalid', 'author', '2026-10-01 08:00:00');",
   'CREATE TABLE items (id int unsigned PRIMARY KEY, title varchar(100));',
   "INSERT INTO items VALUES (1, 'Een verzonnen kop');",
   'CREATE TABLE `acceptance_copy` (`dumped_at` datetime NOT NULL, `loaded_at` datetime DEFAULT NULL);',
@@ -159,12 +159,12 @@ describe('pullAcceptanceCopy', () => {
     await pullAcceptanceCopy(env(), now, { database, ssh: fakeSsh() })
 
     const [users] = await server.query(
-      `SELECT id, email, role, disabled_at FROM \`${database}\`.admin_users ORDER BY id`,
+      `SELECT id, email, first_name, role, disabled_at FROM \`${database}\`.admin_users ORDER BY id`,
     )
 
     expect(users).toEqual([
-      { disabled_at: null, email: 'beheerder-3@example.invalid', id: 3, role: 'moderator' },
-      { disabled_at: null, email: 'beheer@example.test', id: 4, role: 'beheerder' },
+      { disabled_at: null, email: 'beheerder-3@example.invalid', first_name: '', id: 3, role: 'author' },
+      { disabled_at: null, email: 'beheer@example.test', first_name: 'Lokaal', id: 4, role: 'owner' },
     ])
   })
 

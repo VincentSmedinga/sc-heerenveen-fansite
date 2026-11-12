@@ -2,7 +2,7 @@
 
 Dit document is voor wie een artikel voor de sc Heerenveen Fansite schrijft.
 Een artikel van onze eigen redactie staat op `/redactie/<adres>`, en het nieuwste staat als kaart "Van de redactie" bovenaan de homepage.
-Een beheerder schrijft, bekijkt, publiceert en trekt een artikel in op `/beheer/artikelen` (zie _Een artikel schrijven en publiceren in het beheer_).
+Een redacteur schrijft, bekijkt, publiceert en trekt een artikel in op `/beheer/artikelen` (zie _Een artikel schrijven en publiceren in het beheer_).
 Zonder het beheer kan de projecteigenaar een artikel met een SQL-opdracht in de database zetten (zie _Een artikel in de database zetten_).
 
 ## Een artikel schrijven
@@ -77,8 +77,9 @@ Wie het artikel schrijft, leest het ook na: een tweede lezer is er nog niet (die
 
 ## Een artikel schrijven en publiceren in het beheer
 
-Alleen een beheerder schrijft artikelen.
-Een moderator ziet deze pagina's niet: voor een moderator zijn ze "niet gevonden".
+De eigenaar, een redacteur en een auteur schrijven artikelen (#1156).
+Een auteur ziet alleen de artikelen die hij zelf maakte: een artikel van een ander is voor hem "niet gevonden".
+Hij heeft geen knop om te publiceren of in te trekken; dat doen de eigenaar en een redacteur, en de site weigert het ook als een auteur het verzoek zelf maakt.
 Log in zoals bij elke beheerpagina en kies op `/beheer` de tegel "Artikelen".
 
 1. Kies "Nieuw artikel" en vul de velden in.
@@ -90,7 +91,7 @@ Log in zoals bij elke beheerpagina en kies op `/beheer` de tegel "Artikelen".
    Is een veld fout, dan blijft alles staan wat je typte, en staat de fout bovenaan en bij het veld.
 3. Kies "Voorbeeld" om het artikel te zien zoals een bezoeker het ziet, op `/beheer/artikelen/<nummer>/voorbeeld`.
    Een concept heeft nog geen datum: het voorbeeld toont de dag van vandaag.
-   Alleen een ingelogde beheerder opent het voorbeeld.
+   Alleen wie is ingelogd opent het voorbeeld, en een auteur alleen dat van zijn eigen artikel.
    Browsers bewaren het niet en zoekmachines nemen het niet op.
 4. Kies "Publiceren".
    Dat slaat op wat op het scherm staat en zet het artikel meteen op de site, met de tijd van dat moment.
@@ -136,9 +137,9 @@ Het beheer bewaart elke versie van de tekst van een artikel, en wie het artikel 
   Dat staat in het logboek, bij `article.publish` en `article.unpublish`.
 - **Wie wat deed:** `updated_by` in `articles` is het account dat het artikel het laatst veranderde, ook bij publiceren en intrekken.
   `saved_by` in `article_versions` is het account dat die versie opsloeg.
-- **Lezen:** onder het formulier staat de lijst "Eerdere versies", de nieuwste bovenaan, met het nummer, de tijd en het e-mailadres van het account.
+- **Lezen:** onder het formulier staat de lijst "Eerdere versies", de nieuwste bovenaan, met het nummer, de tijd en de voornaam van het account, of het e-mailadres zolang het geen voornaam heeft.
   Een versie opent op `/beheer/artikelen/<nummer>/versies/<versienummer>`, zoals een bezoeker de tekst zou zien.
-  Alleen een beheerder opent de lijst en die pagina's.
+  Alleen wie is ingelogd opent de lijst en die pagina's, en een auteur alleen die van zijn eigen artikel.
 - **Terugzetten:** daar is geen knop voor.
   Wil je een oude tekst terug, kopieer hem dan uit de pagina van de versie en plak hem in het formulier.
 - **Weghalen:** niets in de site wijzigt of verwijdert een versie.
@@ -280,7 +281,7 @@ Artikelen en versies die er nog mee zijn opgeslagen, zijn bij het starten van de
 - `migrateArticleBodies` in `packages/db/src/article-body-migration.ts` heeft de artikelen en versies in de oude opmaak omgezet naar JSON (zie _Artikelen schrijven vraagt JavaScript, lezen niet_ en de beslissing erboven in `beslissingen/redactie.md`).
 - Het beheer staat in `apps/site/src/app/beheer/artikelen` (de lijst, het formulier, de serveracties en het voorbeeld).
   De queries en de wijzigingen staan in `apps/site/src/beheer/articles.ts`, de controle van het formulier in `article-form.ts`.
-  Elke serveractie begint met `requireRole('beheerder')`, en elke wijziging schrijft met `recordAction` in dezelfde transactie een regel in het logboek.
+  Elke serveractie begint met `requireRole`, voor elke rol bij schrijven en opslaan en alleen voor de eigenaar en een redacteur bij intrekken, en elke wijziging schrijft met `recordAction` in dezelfde transactie een regel in het logboek.
   Een wijziging van de tekst voegt in diezelfde transactie met `recordVersion` (`apps/site/src/beheer/article-versions.ts`) een versie toe, en elke wijziging zet `updated_by`.
   Alleen `article-versions.ts` raakt `article_versions`, alleen met `INSERT`, en `article-versions.test.ts` houdt dat zo.
 - De pagina is `apps/site/src/app/redactie/[slug]/page.tsx`, de kaart staat in `apps/site/src/app/page.tsx`, en beide gebruiken de componenten `Article` en `ArticleCard` van het designsysteem.

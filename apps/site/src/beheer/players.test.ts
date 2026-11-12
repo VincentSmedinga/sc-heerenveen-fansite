@@ -67,7 +67,7 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM players')
   await database.pool.query('DELETE FROM persons')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'sanne@example.org', 'beheerder')
+  await createAccount(database.db, 'sanne@example.org', 'editor', '')
   userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
   await database.db.insert(matches).values(
     await withClubs(database.db, [

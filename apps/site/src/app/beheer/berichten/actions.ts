@@ -1,6 +1,6 @@
 'use server'
 
-import { adminRoles } from '@fansite/db/schema'
+import { editorRoles } from '@fansite/db/schema'
 import { redirect } from 'next/navigation'
 
 import { otherReasonKey, parseHideReason } from '#src/beheer/hide-reasons'
@@ -18,10 +18,10 @@ import { itemsPath, type ListView } from './paths'
 
 /**
  * Puts an item on the site that the importer judged `doubtful` or `irrelevant`, without a
- * reason. It is on the site within five minutes, unless a moderator hid it.
+ * reason. It is on the site within five minutes, unless an editor hid it.
  */
 export async function submitApprove(itemId: number, view: ListView) {
-  const { userId } = await requireRole(...adminRoles)
+  const { userId } = await requireRole(...editorRoles)
   const id = parseItemId(itemId)
   const list = cleanView(view)
 
@@ -42,7 +42,7 @@ export async function submitApprove(itemId: number, view: ListView) {
  * within five minutes (see `src/headlines.ts` and `src/podcasts.ts`).
  */
 export async function submitHide(itemId: number, view: ListView, formData: FormData) {
-  const { userId } = await requireRole(...adminRoles)
+  const { userId } = await requireRole(...editorRoles)
   const id = parseItemId(itemId)
   const list = cleanView(view)
 
@@ -70,7 +70,7 @@ export async function submitHide(itemId: number, view: ListView, formData: FormD
 
 /** Shows a hidden item again. It is back on the site within five minutes. */
 export async function submitShow(itemId: number, view: ListView) {
-  const { userId } = await requireRole(...adminRoles)
+  const { userId } = await requireRole(...editorRoles)
   const id = parseItemId(itemId)
   const list = cleanView(view)
 
@@ -85,7 +85,7 @@ export async function submitShow(itemId: number, view: ListView) {
 
 /** Takes an approval back: the item is what the filter said again. */
 export async function submitUnapprove(itemId: number, view: ListView) {
-  const { userId } = await requireRole(...adminRoles)
+  const { userId } = await requireRole(...editorRoles)
   const id = parseItemId(itemId)
   const list = cleanView(view)
 

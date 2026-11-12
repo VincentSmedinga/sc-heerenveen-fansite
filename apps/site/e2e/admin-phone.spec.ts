@@ -46,6 +46,9 @@ const screens = [
   '/beheer/kwaliteit/personen',
   '/beheer/kwaliteit/personen?lijst=land',
   '/beheer/bezoek',
+  '/beheer/accounts',
+  '/beheer/accounts/nieuw',
+  '/beheer/mijn-account',
 ]
 
 async function withNumbers(path: string) {
@@ -67,7 +70,7 @@ for (const path of screens) {
   for (const colorScheme of ['light', 'dark'] as const) {
     test(`${path} fits a phone in ${colorScheme}`, async ({ baseURL, context, page }) => {
       await page.emulateMedia({ colorScheme })
-      await context.addCookies([adminCookie(new URL(baseURL ?? '').hostname, 'beheerder')])
+      await context.addCookies([adminCookie(new URL(baseURL ?? '').hostname, 'owner')])
       await page.goto(await withNumbers(path))
       await page.evaluate(() => {
         for (const details of document.querySelectorAll('details')) {

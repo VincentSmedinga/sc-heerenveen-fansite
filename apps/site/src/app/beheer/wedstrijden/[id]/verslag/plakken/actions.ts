@@ -40,7 +40,7 @@ export async function submitPaste(
   previous: PasteState,
   formData: FormData,
 ): Promise<PasteState> {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   if (!formData.has('tekst')) {
     // The form of the report: a row added or taken away, or a save, as on the screen of the

@@ -270,7 +270,7 @@ Zo komt een bericht in de database ([`src/read-feed.ts`](src/read-feed.ts)):
 - **Bijwerken:** een nieuw bericht komt erbij.
   Een bekend bericht krijgt de nieuwe kop, link, tijd en betaalmuur als de bron die veranderde, en de relevantie die het filter nu vindt (zie _Het relevantiefilter_).
   We bewaren geen eerdere koppen.
-  Een bericht dat een moderator in het beheer verborg (`items.hidden_at`), blijft zoals het is: de kop, de link, de tijd, de betaalmuur en `last_seen_at` veranderen niet, ook niet als de bron het bericht opnieuw aanbiedt of verandert, en het telt als ongewijzigd.
+  Een bericht dat een redacteur in het beheer verborg (`items.hidden_at`), blijft zoals het is: de kop, de link, de tijd, de betaalmuur en `last_seen_at` veranderen niet, ook niet als de bron het bericht opnieuw aanbiedt of verandert, en het telt als ongewijzigd.
   De voorwaarde staat in de query zelf (`unlessHidden` in [`src/import-feeds.ts`](src/import-feeds.ts)), dus ook een bericht dat tijdens een run wordt verborgen, blijft ongemoeid.
 - **ETag en Last-Modified:** de adapter bewaart ze in dezelfde transactie als de berichten.
   Lukt het bewaren of lezen niet, dan blijven de oude waarden staan en vraagt de volgende run de hele feed opnieuw.
@@ -298,7 +298,7 @@ Hoofdletters en accenten tellen niet, en alleen hele woorden: "Heerenveenseweg" 
 Het filter kent ook de Friese schrijfwijze (zie _Friese woorden_).
 De keuzes staan in `docs/beslissingen/importer.md`, onder _De regels van het filter_.
 De importer bewaart elk bericht, ook `doubtful` en `irrelevant`.
-Het beheer (`/beheer/berichten`) toont ze wel, met een woord erbij, zodat een moderator ze kan vinden en verbergen.
+Het beheer (`/beheer/berichten`) toont ze wel, met een woord erbij, zodat een redacteur ze kan vinden en verbergen.
 Een scherm om twijfelgevallen te beoordelen, en het met de hand corrigeren van een uitkomst (#76), komen later.
 
 ### Welke clubs een kop noemt
@@ -390,7 +390,7 @@ UPDATE feeds SET filter = 'club' WHERE url = 'https://www.voorbeeld.nl/sport/rss
 
 De volgende run beoordeelt alle berichten van de feed, ook die we al hadden, en schrijft de aantallen in het logboek.
 Zet je hem terug op `none`, dan worden ze weer allemaal `relevant`.
-Een bericht dat een moderator verborg, houdt zijn waarde (zie _Wat de adapter bewaart_).
+Een bericht dat een redacteur verborg, houdt zijn waarde (zie _Wat de adapter bewaart_).
 De seed laat `filter` met rust, dus een nieuwe seed zet de waarde niet terug.
 Een feed in `realSources` die over meer gaat dan de club, begint op `club`: de seed zet de waarde alleen als hij de feed in het register zet.
 Dat zijn nu de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_), die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_), die van De Gelderlander (zie _De sportfeed van De Gelderlander_), die van ESPN (zie _De voetbalfeed van ESPN NL_), de sportfeed van Rijnmond (zie _De sportfeed van Rijnmond_), de sportfeed van RTV Noord en de FC Groningen-feed van OOG Groningen (zie _De feeds van RTV Noord en OOG Groningen_).
@@ -440,7 +440,7 @@ Zo voeg je een Fries woord toe:
 2. Schrijf het in kleine letters zonder accenten, in de Friese spelling: `'kompetysje'`, `'thuswedstriden'` voor "thúswedstriden", `'wun'` voor "wûn".
    Het filter zet "y" en "ij" niet om, en een test controleert de vorm.
 3. Is het woord ook buiten het voetbal gewoon, zoals "ploech" of "útslach", zet het er dan niet op.
-   Een kop met zo'n woord en "Hearrenfean" is `doubtful`, en een moderator kan hem vinden.
+   Een kop met zo'n woord en "Hearrenfean" is `doubtful`, en een redacteur kan hem vinden.
 4. Zet in [`src/relevance.test.ts`](src/relevance.test.ts) een kop in `frisianClub`, en pas de datum van de controle aan in het commentaar bij `frisianFootballWords`.
 
 ### De profclubs bijhouden
@@ -1451,7 +1451,7 @@ pnpm run import:changes reject 12 13
 pnpm run import:changes accept all
 ```
 
-- De beheerders kunnen een vastgehouden wijziging ook beslissen in het beheer, op de pagina van de wedstrijd (zie [`docs/wedstrijden-invullen.md`](../../docs/wedstrijden-invullen.md)).
+- De eigenaar en de redacteuren kunnen een vastgehouden wijziging ook beslissen in het beheer, op de pagina van de wedstrijd (zie [`docs/wedstrijden-invullen.md`](../../docs/wedstrijden-invullen.md)).
   Het scherm en de opdracht gebruiken dezelfde code, `decideChange` in `packages/db/src/match-changes.ts`, die ook het voorstel naar de wedstrijd schrijft (`updateMatch`).
   Het scherm schrijft `match.take-over` of `match.keep` met de reden en het account in het logboek van het beheer; de opdracht doet dat zonder account, met de reden `Besloten met het commando import:changes`.
   Is de wedstrijd van een wijziging er niet meer, dan verandert zowel `accept` als `reject` niets en blijft de wijziging wachten; de opdracht zegt dat.
@@ -1529,7 +1529,7 @@ De tabel `match_changes` verzamelt dat vanaf nu zelf: na een paar maanden telt d
 
 ### Een wedstrijd die de redactie invulde
 
-Een beheerder kan een wedstrijd invullen of verbeteren (`/beheer/wedstrijden`, zie [`docs/wedstrijden-invullen.md`](../../docs/wedstrijden-invullen.md)).
+Een redacteur kan een wedstrijd invullen of verbeteren (`/beheer/wedstrijden`, zie [`docs/wedstrijden-invullen.md`](../../docs/wedstrijden-invullen.md)).
 De invoer staat in `matches` en `match_goals`, en de tabel `match_edits` markeert welke onderdelen van de wedstrijd van de redactie zijn: de aftrap, de uitslag (met de status), de doelpunten en de gegevens (de toeschouwers, de scheidsrechter, het stadion en de opmerking).
 Voor de import is zo'n wedstrijd eigen invoer, ook voor `pnpm run import:season`.
 `src/edited-matches.ts` beoordeelt elk onderdeel met een markering apart, want Wikipedia zet meestal eerst de uitslag en pas later de doelpuntenmakers:
@@ -1558,7 +1558,7 @@ Voor de import is zo'n wedstrijd eigen invoer, ook voor `pnpm run import:season`
   Heeft Wikipedia hetzelfde, dan gebeurt er niets: de markering blijft staan en er komt geen `match.caught-up`.
   Heeft Wikipedia iets anders, dan wacht de afwijking zoals hieronder, maar de import neemt haar nooit over, ook niet na zeven dagen.
   `decideConflict` weigert "Wikipedia overnemen" voor die doelpunten: `pnpm run import:changes accept` meldt `the match has a report` en eindigt met code 1.
-  Een beheerder houdt de invoer (`reject`) of past het verslag aan.
+  Een redacteur houdt de invoer (`reject`) of past het verslag aan.
   De wedstrijd blijft ook staan als hij van de pagina verdwijnt.
 
 #### Een afwijking met de invoer van de redactie
@@ -1567,14 +1567,14 @@ Zegt Wikipedia iets anders dan de invoer, dan komt er een rij in `match_changes`
 De rij komt één keer, en bij elke run die dezelfde waarde ziet telt `times_seen` op.
 Wat daarna gebeurt:
 
-- **De beheerders krijgen een mail.**
-  Na elke run mailt `mailConflicts` (`packages/db/src/match-conflict-mail.ts`) elk account met de rol `beheerder` dat niet is uitgezet, een eigen mail per afwijking.
+- **De eigenaar en de redacteuren krijgen een mail.**
+  Na elke run mailt `mailConflicts` (`packages/db/src/match-conflict-mail.ts`) elk account met de rol `owner` of `editor` dat niet is uitgezet en de mail niet zelf uitzette (`conflict_mail`, op `/beheer/mijn-account`), een eigen mail per afwijking; een auteur krijgt hem nooit.
   Er staan de wedstrijd, beide waarden, de koppeling naar het beheer en de dag van overname in, en geen naam of adres van een redacteur.
   Een mail die niet uit kan, is een regel `Conflict mail: …` in het logboek van de import; de import slaagt, en de volgende run probeert het opnieuw.
 - **Een redacteur beslist** op de pagina van de wedstrijd (zie [`docs/wedstrijden-invullen.md`](../../docs/wedstrijden-invullen.md)), of de eigenaar met `pnpm run import:changes`.
   `accept` neemt Wikipedia over voor dat onderdeel, `reject` houdt de invoer.
   Beide gebruiken `decideConflict` uit `packages/db/src/match-conflicts.ts`, en schrijven `match.take-over` of `match.keep` in het logboek, het commando zonder account.
-- **Beslist niemand** en staat dezelfde waarde zeven dagen op Wikipedia (de regel van _Een verdachte wijziging wacht_), dan neemt de import het onderdeel over (`resolution` is `stood`, `match.take-over` zonder account) en mailen de beheerders daarover.
+- **Beslist niemand** en staat dezelfde waarde zeven dagen op Wikipedia (de regel van _Een verdachte wijziging wacht_), dan neemt de import het onderdeel over (`resolution` is `stood`, `match.take-over` zonder account) en mailen de eigenaar en de redacteuren daarover.
   Dat doet hij alleen in het lopende seizoen.
   In een seizoen dat voorbij is blijft de invoer staan tot iemand beslist, en de mail en het beheer zeggen dat.
 - **Zet Wikipedia de waarde van de redactie terug**, dan vervalt de afwijking (`reverted`) en staat dat in het logboek (`match.caught-up`).
