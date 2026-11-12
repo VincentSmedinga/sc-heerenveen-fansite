@@ -66,10 +66,10 @@ const render = (aside: PlayerAsideData, hrefs = true) =>
   )
 
 describe('the side column of a player', () => {
-  it('is an aside with every card, and the credit last', () => {
+  it('is a named section with every card, and the credit last', () => {
     const html = render(full)
 
-    expect(html).toMatch(/^<aside[^>]*aria-label="Meer cijfers over deze speler"/)
+    expect(html).toMatch(/^<section[^>]*aria-label="Meer cijfers over deze speler"/)
     const order = [
       '>Doelpunten per competitie<',
       '>Vaakst raak tegen<',

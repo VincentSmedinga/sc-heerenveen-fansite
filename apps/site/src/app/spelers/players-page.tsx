@@ -12,6 +12,7 @@ import { seasonSourceOf, sourceName, sourceOf } from '#src/match-sources'
 import { choiceFor, getAllTimeMatches } from '#src/matches'
 import { AllTimeScorersCard, SourceCredit, TopScorersCard } from '#src/MatchViews'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
+import { pageAreas } from '#src/page-areas'
 import { AllPlayersCard, RankingCard } from '#src/ReportFiguresCards'
 import { loadSeasonPage, pickerPathOf, playersPath, type SearchParams } from '#src/season-page'
 import { getSeasonPlayerStats } from '#src/season-player-stats'
@@ -98,76 +99,77 @@ export async function PlayersPage({ searchParams, season }: { searchParams: Prom
 
   return (
     <>
-      <Page.Main
-        intro={
-          <Page.Title>
-            <Heading level={1}>Spelers</Heading>
-            <SeasonPicker
-              action={pickerPath}
-              fields={competitionFields(competition)}
-              options={seasonChoices(seasons)}
-              value={seasonSlug(season)}
-            />
-          </Page.Title>
-        }
-      >
-        <CompetitionSwitch
-          address={seasonAddress(playersPath, season, seasonOf(new Date()))}
-          competition={competition}
-          matches={data.matches}
-        />
-        <SeasonSquadCard squad={squad} />
-        {figures?.seasonHasReports === true && (
-          <AllPlayersCard
+      <Page.Main areas={pageAreas({ after: ['side'], toolbar: true })}>
+        <Page.Cell area="head">
+          <Heading level={1}>Spelers</Heading>
+        </Page.Cell>
+        <Page.Toolbar>
+          <SeasonPicker
+            action={pickerPath}
+            fields={competitionFields(competition)}
+            options={seasonChoices(seasons)}
+            value={seasonSlug(season)}
+          />
+          <CompetitionSwitch
+            address={seasonAddress(playersPath, season, seasonOf(new Date()))}
             competition={competition}
-            figures={unlinked(figures)}
-            season={season}
+            matches={data.matches}
+          />
+        </Page.Toolbar>
+        <Page.Section area="main" aria-label="De selectie en de spelers van het seizoen">
+          <SeasonSquadCard squad={squad} />
+          {figures?.seasonHasReports === true && (
+            <AllPlayersCard
+              competition={competition}
+              figures={unlinked(figures)}
+              season={season}
+              seasonOnImage={current ? undefined : season}
+            />
+          )}
+        </Page.Section>
+        <Page.Section area="side" aria-label="Meer cijfers over de spelers">
+          <TopScorersCard
+            competition={competition}
+            matches={data.matches}
+            season={data.season}
+            seasonOnImage={current ? undefined : season}
+            stats={stats}
+          />
+          {allTime !== undefined && <AllTimeScorersCard competition={competition} matches={allTime} />}
+          <SpecialGoalsCard
+            competition={competition}
+            matches={data.matches}
             seasonOnImage={current ? undefined : season}
           />
-        )}
+          {figures?.seasonHasReports === true && (
+            <>
+              <RankingCard
+                competition={competition}
+                figure="assists"
+                figures={unlinked(figures)}
+                season={season}
+                seasonOnImage={current ? undefined : season}
+              />
+              <RankingCard
+                competition={competition}
+                figure="minutes"
+                figures={unlinked(figures)}
+                season={season}
+                seasonOnImage={current ? undefined : season}
+              />
+            </>
+          )}
+          {(data.matches.length > 0 || data.standings.length > 0 || squad.pages.length > 0) && (
+            <SourceCredit
+              edited={data.edited}
+              pages={data.pages}
+              season={data.season}
+              source={sourceOf([...data.matches, ...(allTime ?? [])])}
+              squad={squadSource}
+            />
+          )}
+        </Page.Section>
       </Page.Main>
-      <Page.Sidebar aria-label="Meer cijfers over de spelers">
-        <TopScorersCard
-          competition={competition}
-          matches={data.matches}
-          season={data.season}
-          seasonOnImage={current ? undefined : season}
-          stats={stats}
-        />
-        {allTime !== undefined && <AllTimeScorersCard competition={competition} matches={allTime} />}
-        <SpecialGoalsCard
-          competition={competition}
-          matches={data.matches}
-          seasonOnImage={current ? undefined : season}
-        />
-        {figures?.seasonHasReports === true && (
-          <>
-            <RankingCard
-              competition={competition}
-              figure="assists"
-              figures={unlinked(figures)}
-              season={season}
-              seasonOnImage={current ? undefined : season}
-            />
-            <RankingCard
-              competition={competition}
-              figure="minutes"
-              figures={unlinked(figures)}
-              season={season}
-              seasonOnImage={current ? undefined : season}
-            />
-          </>
-        )}
-        {(data.matches.length > 0 || data.standings.length > 0 || squad.pages.length > 0) && (
-          <SourceCredit
-            edited={data.edited}
-            pages={data.pages}
-            season={data.season}
-            source={sourceOf([...data.matches, ...(allTime ?? [])])}
-            squad={squadSource}
-          />
-        )}
-      </Page.Sidebar>
     </>
   )
 }

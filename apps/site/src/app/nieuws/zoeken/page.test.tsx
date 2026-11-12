@@ -81,8 +81,10 @@ async function render(query: Query = {}) {
   return withoutIcons(renderToStaticMarkup(await SearchPage(props(query))))
 }
 
-/** The sidebar alone, or an empty text when the page has none. */
-const sidebarOf = (html: string) => (html.includes('<aside') ? html.slice(html.indexOf('<aside')) : '')
+const section = '<section class="hf-page-section"'
+
+/** The section with the players alone, or an empty text when the page has none. */
+const sidebarOf = (html: string) => (html.includes(section) ? html.slice(html.indexOf(section)) : '')
 
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] })
@@ -122,15 +124,15 @@ describe('the page Zoeken without a search', () => {
     expect(html).toMatch(/<form[^>]*role="search"/u)
   })
 
-  it('has the h1 and the sentence in the introduction, and the form in a blue card, so the players start level with it', async () => {
+  it('has the h1 and the sentence in the cell of the heading, and the form in a blue card, so the players start level with it', async () => {
     const html = await render()
 
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html).toMatch(
-      /<div class="hf-page-intro"><h1 class="hf-heading-1">Zoeken<\/h1><p class="hf-intro">.*?<\/p><\/div>/u,
+      /<div class="hf-page-cell" style="grid-area:head"><h1 class="hf-heading-1">Zoeken<\/h1><p class="hf-intro">.*?<\/p><\/div>/u,
     )
-    expect(html).toMatch(/<div class="hf-page-cells"><div class="hf-card hf-card-soft"><form/u)
-    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
+    expect(html).toMatch(/<div class="hf-page-cell" style="grid-area:main"><div class="hf-card hf-card-soft"><form/u)
+    expect(html.indexOf('grid-area:main')).toBeLessThan(html.indexOf(section))
   })
 })
 
@@ -146,7 +148,9 @@ describe('the page Zoeken with a search', () => {
   it('has the form and the results in one white card', async () => {
     const html = await render({ q: 'klaverboer' })
 
-    expect(html).toMatch(/<div class="hf-page-cells"><div class="hf-card"><form.*<\/form><h2[^>]*id="resultaten"/u)
+    expect(html).toMatch(
+      /<div class="hf-page-cell" style="grid-area:main"><div class="hf-card"><form.*<\/form><h2[^>]*id="resultaten"/u,
+    )
     expect(html).not.toContain('hf-card-soft')
     expect(html.match(/<div class="hf-card">/g)).toHaveLength(1)
   })
@@ -275,7 +279,7 @@ describe('the page Zoeken without results', () => {
     const html = await render({ q: 'bestaatniet' })
 
     expect(html).toContain('<p>Daar hebben we niets over gevonden. Probeer een ander woord.</p>')
-    expect(html).not.toContain('<aside')
+    expect(html).not.toContain(section)
   })
 })
 
@@ -304,17 +308,20 @@ describe('the page Zoeken with a search that does not meet the limits', () => {
   })
 
   it('still shows the players', async () => {
-    expect(await render({ q: 'a' })).toContain('<aside')
+    expect(await render({ q: 'a' })).toContain(section)
   })
 })
 
 describe('the list of players', () => {
-  it('is in the sidebar with a name of its own, after the main', async () => {
+  it('is in a section with a name of its own, after the main cell', async () => {
     const html = await render({ q: 'klaverboer' })
 
-    expect(html.match(/<aside/g)).toHaveLength(1)
-    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
-    expect(sidebarOf(html)).toMatch(/^<aside class="hf-page-sidebar" aria-label="De spelers van sc Heerenveen">/u)
+    expect(html).not.toContain('<aside')
+    expect(html.match(/<section class="hf-page-section"/g)).toHaveLength(1)
+    expect(html.indexOf('grid-area:main')).toBeLessThan(html.indexOf(section))
+    expect(sidebarOf(html)).toMatch(
+      /^<section class="hf-page-section" style="grid-area:side" aria-label="De spelers van sc Heerenveen">/u,
+    )
   })
 
   it('has the players under a heading for each position, with an h2 above them', async () => {
@@ -374,7 +381,7 @@ describe('the list of players', () => {
 
     const html = await render({ q: 'klaverboer' })
 
-    expect(html).not.toContain('<aside')
+    expect(html).not.toContain(section)
     expect(html).not.toContain('Bron: Wikipedia')
     expect(html).toContain('>3 resultaten voor klaverboer</h2>')
   })
@@ -386,7 +393,7 @@ describe('the list of players', () => {
 
     const html = await render({ q: 'klaverboer' })
 
-    expect(html).not.toContain('<aside')
+    expect(html).not.toContain(section)
     expect(html).toContain('>3 resultaten voor klaverboer</h2>')
     expect(error).toHaveBeenCalledWith(
       'Could not read the squad for /nieuws/zoeken: connect ECONNREFUSED 127.0.0.1:3306',

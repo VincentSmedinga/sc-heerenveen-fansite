@@ -51,6 +51,7 @@ import {
   StadiumsCard,
   TopPointsCard,
 } from '#src/OpponentViews'
+import { pageAreas } from '#src/page-areas'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { withBranch } from '#src/title'
 
@@ -157,40 +158,50 @@ export async function ClubListPage({ searchParams }: { searchParams: Promise<Sea
 
   return (
     <>
-      <Page.Main
-        intro={
+      <Page.Main areas={pageAreas({ after: ['side'], toolbar: hasCup })} columns="equal">
+        <Page.Cell area="head">
           <Page.Title>
             <Heading level={1}>Tegenstanders</Heading>
           </Page.Title>
-        }
-      >
-        {hasCup && <CompetitionLinks address={opponentsPath} competition={competition} />}
-        <ClubsCard
-          address={opponentsPath}
-          choice={competition}
-          query={competitionQuery(competition)}
-          records={records}
-          since={since}
-        />
+        </Page.Cell>
+        {hasCup && (
+          <Page.Toolbar>
+            <CompetitionLinks address={opponentsPath} competition={competition} />
+          </Page.Toolbar>
+        )}
+        <Page.Cell area="main">
+          <ClubsCard
+            address={opponentsPath}
+            choice={competition}
+            query={competitionQuery(competition)}
+            records={records}
+            since={since}
+          />
+        </Page.Cell>
+        <Page.Section area="side" aria-label="Het gemiddelde resultaat en de bron">
+          <TopPointsCard
+            address={opponentsPath}
+            choice={competition}
+            query={competitionQuery(competition)}
+            records={records}
+            since={since}
+          />
+          <HardestCard
+            address={opponentsPath}
+            choice={competition}
+            query={competitionQuery(competition)}
+            records={records}
+            since={since}
+          />
+          <LastWinCard address={opponentsPath} places={loaded.lastWins} query={competitionQuery(competition)} />
+          <OpponentsCredit
+            edited={loaded.edited}
+            pages={loaded.pages}
+            seasons={loaded.seasons}
+            source={loaded.source}
+          />
+        </Page.Section>
       </Page.Main>
-      <Page.Sidebar aria-label="Het gemiddelde resultaat en de bron">
-        <TopPointsCard
-          address={opponentsPath}
-          choice={competition}
-          query={competitionQuery(competition)}
-          records={records}
-          since={since}
-        />
-        <HardestCard
-          address={opponentsPath}
-          choice={competition}
-          query={competitionQuery(competition)}
-          records={records}
-          since={since}
-        />
-        <LastWinCard address={opponentsPath} places={loaded.lastWins} query={competitionQuery(competition)} />
-        <OpponentsCredit edited={loaded.edited} pages={loaded.pages} seasons={loaded.seasons} source={loaded.source} />
-      </Page.Sidebar>
     </>
   )
 }
@@ -268,82 +279,99 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
   const earlier = earlierNames(loaded.page.names, club.name)
   const stadiums = stadiumViewsOf(loaded.page.stadiums, matches)
   const hasNews = loaded.news.length > 0
+  const hasSide = meetings.length > 0 || upcoming.length > 0 || stadiums.length > 0 || hasNews
 
   return (
     <>
       <Page.Main
-        intro={
-          <Page.Cell>
-            <Heading level={1}>{club.name}</Heading>
-            {earlier !== undefined && <Text appearance="meta">{`Eerder: ${earlier}`}</Text>}
-            <ClubNamesNotes names={clubNameViewsOf(loaded.page.names)} />
-          </Page.Cell>
-        }
+        areas={pageAreas({
+          after: hasSide ? ['side'] : [],
+          before: meetings.length > 0 ? ['summary'] : [],
+          toolbar: hasCup,
+        })}
+        columns="equal"
       >
-        {hasCup && <CompetitionLinks address={`${opponentsPath}/${slug}`} competition={competition} />}
-        {meetings.length === 0 && upcoming.length === 0 ? (
-          <Text>{noneYet}</Text>
-        ) : (
-          <ClubMeetingsCard meetings={meetings} now={now} page={query.page} pageHref={pageHref} upcoming={upcoming} />
+        <Page.Cell area="head">
+          <Heading level={1}>{club.name}</Heading>
+          {earlier !== undefined && <Text appearance="meta">{`Eerder: ${earlier}`}</Text>}
+          <ClubNamesNotes names={clubNameViewsOf(loaded.page.names)} />
+        </Page.Cell>
+        {hasCup && (
+          <Page.Toolbar>
+            <CompetitionLinks address={`${opponentsPath}/${slug}`} competition={competition} />
+          </Page.Toolbar>
         )}
-      </Page.Main>
-      {/* The sidebar is as wide as the main column, as on Cijfers. On a phone it follows the
-          matches: our record against the club, the names of its stadium and the credit. */}
-      {meetings.length > 0 ? (
-        <Page.Sidebar
-          aria-label={sidebarLabel([
-            'onze uitslagen',
-            hasNews && 'het nieuws',
-            stadiums.length > 0 && 'het stadion',
-            'de bron',
-          ])}
-          wide
-        >
-          <ClubSummaryCard
-            choice={competition}
-            name={club.name}
-            now={now}
-            since={sinceOf(loaded.seasons)}
-            source={sourceOf(meetings)}
-            summary={summaryOf(meetings)}
-          />
-          <ClubTimelineCard matches={matches} now={now} since={sinceOf(loaded.seasons)} />
-          <ClubScoreCountsCard meetings={meetings} />
-          <ClubPlacesCard name={club.name} places={loaded.places} />
-          <ClubAttendanceCard
-            attendance={clubAttendanceOf(matches, competition)}
-            choice={competition}
-            name={club.name}
-            source={sourceOf(matches)}
-          />
-          {hasClubScorers(matches) && <ClubTopScorersCard choice={competition} matches={matches} name={club.name} />}
-          <ClubNewsCard headlines={loaded.news} name={club.name} now={now} />
-          <StadiumsCard stadiums={stadiums} />
-          <OpponentsCredit
-            edited={loaded.edited}
-            pages={loaded.pages}
-            seasons={seasonsOf([...meetings, ...upcoming])}
-            source={sourceOf([...meetings, ...upcoming])}
-          />
-        </Page.Sidebar>
-      ) : (
-        (upcoming.length > 0 || stadiums.length > 0 || hasNews) && (
-          <Page.Sidebar
+        {/* The summary stands before the matches in the source, so on a phone it is the first
+            card, and on a wide screen it is the second column. */}
+        {meetings.length > 0 && (
+          <Page.Section area="summary" aria-label="Onze uitslagen">
+            <ClubSummaryCard
+              choice={competition}
+              name={club.name}
+              now={now}
+              since={sinceOf(loaded.seasons)}
+              source={sourceOf(meetings)}
+              summary={summaryOf(meetings)}
+            />
+          </Page.Section>
+        )}
+        <Page.Cell area="main">
+          {meetings.length === 0 && upcoming.length === 0 ? (
+            <Text>{noneYet}</Text>
+          ) : (
+            <ClubMeetingsCard meetings={meetings} now={now} page={query.page} pageHref={pageHref} upcoming={upcoming} />
+          )}
+        </Page.Cell>
+        {/* On a phone the cards beside the matches follow them: the timeline, the names of the
+            stadium and the credit. */}
+        {meetings.length > 0 ? (
+          <Page.Section
+            area="side"
             aria-label={sidebarLabel([
+              'meer cijfers',
               hasNews && 'het nieuws',
               stadiums.length > 0 && 'het stadion',
-              upcoming.length > 0 && 'de bron',
+              'de bron',
             ])}
-            wide
           >
+            <ClubTimelineCard matches={matches} now={now} since={sinceOf(loaded.seasons)} />
+            <ClubScoreCountsCard meetings={meetings} />
+            <ClubPlacesCard name={club.name} places={loaded.places} />
+            <ClubAttendanceCard
+              attendance={clubAttendanceOf(matches, competition)}
+              choice={competition}
+              name={club.name}
+              source={sourceOf(matches)}
+            />
+            {hasClubScorers(matches) && <ClubTopScorersCard choice={competition} matches={matches} name={club.name} />}
             <ClubNewsCard headlines={loaded.news} name={club.name} now={now} />
             <StadiumsCard stadiums={stadiums} />
-            {upcoming.length > 0 && (
-              <OpponentsCredit edited={loaded.edited} pages={loaded.pages} seasons={seasonsOf(upcoming)} />
-            )}
-          </Page.Sidebar>
-        )
-      )}
+            <OpponentsCredit
+              edited={loaded.edited}
+              pages={loaded.pages}
+              seasons={seasonsOf([...meetings, ...upcoming])}
+              source={sourceOf([...meetings, ...upcoming])}
+            />
+          </Page.Section>
+        ) : (
+          hasSide && (
+            <Page.Section
+              area="side"
+              aria-label={sidebarLabel([
+                hasNews && 'het nieuws',
+                stadiums.length > 0 && 'het stadion',
+                upcoming.length > 0 && 'de bron',
+              ])}
+            >
+              <ClubNewsCard headlines={loaded.news} name={club.name} now={now} />
+              <StadiumsCard stadiums={stadiums} />
+              {upcoming.length > 0 && (
+                <OpponentsCredit edited={loaded.edited} pages={loaded.pages} seasons={seasonsOf(upcoming)} />
+              )}
+            </Page.Section>
+          )
+        )}
+      </Page.Main>
     </>
   )
 }

@@ -5,6 +5,7 @@ import { cache } from 'react'
 
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
+import { pageAreas } from '#src/page-areas'
 import { factsOf, findPlayers, nameOf, playerSearchPath, shownPlayers } from '#src/player-search'
 import { parseSearch } from '#src/search'
 import { SearchForm } from '#src/SearchViews'
@@ -74,60 +75,59 @@ export default async function PlayerSearchPage({ searchParams }: { searchParams:
   const { found } = content
 
   return (
-    <Page.Main
-      intro={
-        <Page.Cell>
-          <Page.Title>
-            <Heading level={1}>Zoeken naar een speler</Heading>
-          </Page.Title>
-          <Text appearance="intro">Zoek een speler van sc Heerenveen op zijn naam.</Text>
-        </Page.Cell>
-      }
-    >
-      <Card as="div" surface={found === undefined ? 'soft' : 'default'}>
-        <SearchForm
-          action={playerSearchPath}
-          ariaLabel="Zoeken naar een speler"
-          error={search.kind === 'invalid' ? search.message : undefined}
-          label="Naam van de speler"
-          text={search.kind === 'none' ? '' : search.text}
-        />
-        {found !== undefined && search.kind === 'valid' && (
-          <>
-            <Heading id="resultaten" level={2}>
-              {found.total === 0 ? 'Geen spelers' : `${found.total} ${found.total === 1 ? 'speler' : 'spelers'}`} voor ‘
-              {search.text}’
-            </Heading>
-            {found.total === 0 ? (
-              <Text>
-                Daar hebben we geen speler onder gevonden. Probeer een ander deel van de naam, of kijk bij de{' '}
-                <Link href={playersPath}>spelers van dit seizoen</Link>.
-              </Text>
-            ) : (
-              <PlayerList
-                aria-labelledby="resultaten"
-                order="given-first"
-                players={found.players.map((player) => {
-                  const { givenName, surname } = nameOf(player)
+    <Page.Main areas={pageAreas({})}>
+      <Page.Cell area="head">
+        <Page.Title>
+          <Heading level={1}>Zoeken naar een speler</Heading>
+        </Page.Title>
+        <Text appearance="intro">Zoek een speler van sc Heerenveen op zijn naam.</Text>
+      </Page.Cell>
+      <Page.Cell area="main">
+        <Card as="div" surface={found === undefined ? 'soft' : 'default'}>
+          <SearchForm
+            action={playerSearchPath}
+            ariaLabel="Zoeken naar een speler"
+            error={search.kind === 'invalid' ? search.message : undefined}
+            label="Naam van de speler"
+            text={search.kind === 'none' ? '' : search.text}
+          />
+          {found !== undefined && search.kind === 'valid' && (
+            <>
+              <Heading id="resultaten" level={2}>
+                {found.total === 0 ? 'Geen spelers' : `${found.total} ${found.total === 1 ? 'speler' : 'spelers'}`} voor
+                ‘{search.text}’
+              </Heading>
+              {found.total === 0 ? (
+                <Text>
+                  Daar hebben we geen speler onder gevonden. Probeer een ander deel van de naam, of kijk bij de{' '}
+                  <Link href={playersPath}>spelers van dit seizoen</Link>.
+                </Text>
+              ) : (
+                <PlayerList
+                  aria-labelledby="resultaten"
+                  order="given-first"
+                  players={found.players.map((player) => {
+                    const { givenName, surname } = nameOf(player)
 
-                  return {
-                    facts: factsOf(player),
-                    href: `${playersPath}/${player.slug}`,
-                    key: String(player.id),
-                    rest: givenName,
-                    surname,
-                  }
-                })}
-              />
-            )}
-            {found.total > shownPlayers && (
-              <Text appearance="meta">
-                {`Dit zijn ${shownPlayers} van de ${found.total} spelers. Zoek op meer van de naam om er minder te krijgen.`}
-              </Text>
-            )}
-          </>
-        )}
-      </Card>
+                    return {
+                      facts: factsOf(player),
+                      href: `${playersPath}/${player.slug}`,
+                      key: String(player.id),
+                      rest: givenName,
+                      surname,
+                    }
+                  })}
+                />
+              )}
+              {found.total > shownPlayers && (
+                <Text appearance="meta">
+                  {`Dit zijn ${shownPlayers} van de ${found.total} spelers. Zoek op meer van de naam om er minder te krijgen.`}
+                </Text>
+              )}
+            </>
+          )}
+        </Card>
+      </Page.Cell>
     </Page.Main>
   )
 }

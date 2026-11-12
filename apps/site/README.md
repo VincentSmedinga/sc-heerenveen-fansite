@@ -281,7 +281,8 @@ Lokaal staan er berichten en discussies na `pnpm run import` (zie de [README van
 
 `/wedstrijden` toont het programma, de uitslagen en de stand van sc Heerenveen 1 (mannen) in het lopende seizoen, en daarnaast de hoofdtrainers.
 De kaarten met cijfers staan op `/cijfers` (zie _De cijfers_).
-Het programma met daaronder de uitslagen staat in de hoofdkolom en de stand met daaronder de hoofdtrainers in een brede zijbalk (`wide` op `Page.Sidebar`); op een telefoon staan ze onder elkaar in die volgorde.
+De stand met daaronder de hoofdtrainers staat in een sectie met een naam die in de bron vóór de wedstrijden staat, in de tweede kolom van twee gelijke kolommen (`columns="equal"` op `Page.Main`); de wedstrijden staan in de eerste.
+Op een telefoon staat de stand dus bovenaan, en daarna het programma en de uitslagen.
 Onder de stand en onder de uitslagen staat een link naar de kaart op de pagina Cijfers waar ze bij hoort, voor hetzelfde seizoen: de stand naar "Onze plek in de competitie" en de uitslagen naar "Het verloop van het seizoen".
 Op een telefoon staat onder de kop een balk "Op deze pagina:" met een link naar elke kaart (Laatste wedstrijd, Programma, een link per kaart met uitslagen, Stand, Verloop op de ranglijst als het seizoen die heeft, en Hoofdtrainer, behalve in een seizoen met Verloop op de ranglijst; een eerder seizoen heeft geen Programma en noemt de stand Eindstand) (`Page.Shortcuts`, via het slot `@shortcuts` van de layout, in `app/@shortcuts/wedstrijden`); op een breed scherm is hij er niet.
 De balk volgt de pagina: de link naar de kaart waar je bent, heeft een rode streep en staat vooraan in de rij.
@@ -304,12 +305,12 @@ De regel met `role="status"` zegt alleen een nieuw doelpunt en het einde van de 
 `MatchPageView` (`src/MatchPageView.tsx`) zet die onderdelen op de pagina, uit die gegevens en uit niets anders.
 Het voorbeeld naast het formulier van het verslag (`ReportPreview`, `src/beheer/report-preview.ts`) maakt die gegevens uit de waarden van het formulier en gebruikt datzelfde onderdeel, met `preview` aan.
 De regel van zo'n wedstrijd in de lijst eindigt met "Het verslag" (`Match` met `reportHref`), en die van een wedstrijd die live is met "Live" (`Match` met `live`, de sleutels uit `getLiveReports`).
-Rechts naast de kop staat de seizoenskiezer (`SeasonPicker` met `Page.Title`), zolang er meer dan één seizoen is: een formulier dat zonder JavaScript met de knop "Toon" werkt, via `app/wedstrijden/kies`, die doorverwijst (303).
+In de werkbalk onder de kop staat de seizoenskiezer (`SeasonPicker` in `Page.Toolbar`), zolang er meer dan één seizoen is: een formulier dat zonder JavaScript met de knop "Toon" werkt, via `app/wedstrijden/kies`, die doorverwijst (303).
 Met JavaScript verdwijnen de knop en het zichtbare label en wisselt de pagina bij een keuze, en met het toetsenbord bevestig je een keuze met Enter; een verborgen regel legt dat aan een schermlezer uit.
 Het lopende seizoen en een eerder seizoen tonen hun uitslagen allebei in een kaart per competitie met wedstrijden (Eredivisie met het anker `uitslagen`, KNVB Beker, Johan Cruijff Schaal, Play-offs Champions League, Play-offs Conference League, Play-offs Europa League en Europa League, zonder het woord Uitslagen in de kop; `resultsPerCompetition` en `resultsCardOf`).
 Het lopende seizoen heeft de nieuwste uitslag bovenaan, een kaart Laatste wedstrijd (de nieuwste begonnen wedstrijd, ook die staat in Uitslagen) en een kaart Programma met alle competities op datum.
 Een eerder seizoen heeft geen kaart Programma en geen kaart Laatste wedstrijd, toont elke kaart van de eerste naar de laatste wedstrijd (`resultsOfSeason`), noemt zijn tabel Eindstand (`standingsCardOf`, met het anker `eindstand`), zet het seizoen op de afbeelding van een kaart en staat niet in de sitemap.
-Een pagina met een ander basisadres (zoals `/cijfers`) gebruikt dezelfde onderdelen: `loadSeasonPage`, `seasonOfAddress` en `pickedSeasonResponse` in `src/season-page.ts`, `seasonFromSlug`, `seasonAddress`, `seasonChoices` en `pickedAddress` in `src/seasons.ts`, `getMatchSeasons` en `getMatchData` in `src/matches.ts`, `SeasonPicker` en `Page.Title` uit het designsysteem, en een route naast de pagina die `pickedSeasonResponse` aanroept, zoals `app/wedstrijden/kies/route.ts`.
+Een pagina met een ander basisadres (zoals `/cijfers`) gebruikt dezelfde onderdelen: `loadSeasonPage`, `seasonOfAddress` en `pickedSeasonResponse` in `src/season-page.ts`, `seasonFromSlug`, `seasonAddress`, `seasonChoices` en `pickedAddress` in `src/seasons.ts`, `getMatchSeasons` en `getMatchData` in `src/matches.ts`, `SeasonPicker` en `Page.Toolbar` uit het designsysteem, en een route naast de pagina die `pickedSeasonResponse` aanroept, zoals `app/wedstrijden/kies/route.ts`.
 Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
 
 - **Programma:** alle wedstrijden die nog niet zijn begonnen, op volgorde van de dag, ook een uitgestelde wedstrijd (die zegt "Uitgesteld").
@@ -402,12 +403,12 @@ De andere clubs hebben er minder en hebben geen rij.
 
 `/cijfers` toont onder twaalf kopjes de kaarten met cijfers over sc Heerenveen 1 (mannen) in het lopende seizoen: onze plek in de competitie, onze plek door de jaren, het verloop van het seizoen, hoe de wedstrijden verlopen, de reeksen, thuis en uit, de toeschouwers, hoe vaak welke uitslag, de wedstrijden waarin we de nul hielden, de doelpunten per kwartier en de uitersten, en daarnaast de resultaten per hoofdtrainer over alle seizoenen.
 Wedstrijden is wat je opzoekt, een lijst van wedstrijden en de stand; Cijfers is wat uit veel wedstrijden volgt, een telling, een rangorde of een verloop (de beslissing staat in `docs/beslissingen/site.md`, _De site heeft vier onderdelen_).
-De kaarten staan in twee gelijke kolommen: de eerste zes in de hoofdkolom, onder de kop met de seizoenskiezer, en de andere zes in een brede zijbalk (`wide` op `Page.Sidebar`), die even breed is als de hoofdkolom.
+De kaarten staan in twee gelijke kolommen (`columns="equal"`), elk een `Page.Section` met een naam: de eerste zes onder de werkbalk met de seizoenskiezer en de schakelaar, en de andere zes ernaast.
 Cijfers is de uitzondering op de regel voor de kolommen (zie _Een kaart staat op de pagina van de zaak die hij beschrijft, en de hoofd- en zijkolom hebben vaste rollen_ in `docs/beslissingen/site.md`): hier hebben beide kolommen cijfers, omdat er geen lijst of tabel is waar de pagina voor bestaat.
 Links staan onze plek, onze plek door de jaren, het verloop, hoe de wedstrijden verlopen, de schakelaar, de reeksen en thuis en uit, en Opmerkelijk.
 Rechts staan de toeschouwers, hoe vaak welke uitslag, de nul gehouden, de doelpunten per kwartier, de uitersten, de resultaten per hoofdtrainer en de bronvermelding.
 De kaart Resultaten per hoofdtrainer (`src/CoachResultsCard.tsx`, de telling in `src/coachResults.ts`) is een tabel met een rij per trainer met wedstrijden, de nieuwste eerst, met achter de naam de regel "34 wedstrijden, 1,85 punten per wedstrijd" (`matchesLineOf`, als `children` van `PlayerName`), volgt de schakelaar, telt alle seizoenen en heeft geen knop voor een afbeelding.
-De drie kaarten die de schakelaar negeren (onze plek, het verloop en hoe de wedstrijden verlopen) staan bij elkaar bovenaan de hoofdkolom, boven de schakelaar, en elk eindigt met de regel "Alleen de Eredivisie" (`EredivisieOnly` in `src/MatchViews.tsx`).
+De drie kaarten die de schakelaar negeren (onze plek, het verloop en hoe de wedstrijden verlopen) staan bij elkaar bovenaan de hoofdkolom, onder de schakelaar in de werkbalk, en elk eindigt met de regel "Alleen de Eredivisie" (`EredivisieOnly` in `src/MatchViews.tsx`).
 De schakelaar staat daarmee direct boven de eerste kaart die hem volgt.
 De volgorde in de broncode is de volgorde van de balk en van een telefoon: eerst de hoofdkolom, dan de zijbalk.
 Op een telefoon staan alle kaarten onder elkaar in die volgorde.
@@ -666,7 +667,7 @@ De komende wedstrijden en de rij "Laatste wedstrijden" staan alleen op de eerste
 Op een telefoon staat onder de kop de balk "Op deze pagina:" met een link naar elke kaart die er is (`clubShortcutsOf` in `src/opponents.ts`, `app/@shortcuts/tegenstanders/[club]`).
 Direct onder de kop staat de rij "Laatste wedstrijden" (een `MarkRow`) met de laatste vijf uitslagen als W, G en V, de oudste links en de nieuwste achteraan.
 De rij gebruikt dezelfde wedstrijden als de lijst, dus de keuze Eredivisie verandert hem mee, en bij minder dan vijf gespeelde wedstrijden is er geen rij.
-De zijkolom (`Page.Sidebar`, breed, zo breed als de hoofdkolom, zoals op Cijfers) volgt op een telefoon op de hoofdkolom.
+De zijkolom (een `Page.Section`, zo breed als de hoofdkolom, zoals op Cijfers) volgt op een telefoon op de hoofdkolom, behalve de samenvatting, die ervoor staat.
 Ze heeft acht delen:
 
 - De kaart "Onze uitslagen tegen …" op het zachte vlak met de samenvatting (een `RecordTable` met de rijen Thuis en Uit en eronder Totaal, met het gewicht van het kerngetal, en de kolommen G, W, G, V, P (alleen bij de keuze Eredivisie) en D (het doelsaldo); W, G (gelijk) en V hebben de kleuren van de uitslag, en de woorden van de afkortingen staan onder de tabel), de grootste overwinning en de grootste nederlaag (die twee blijven `ShortMatch`: ze zijn een selectie), de afbeeldingsknop en de zin "Alle 12 gespeelde wedstrijden sinds 2010/11".
@@ -751,7 +752,7 @@ Een eerder seizoen werkt hetzelfde; is zijn beker niet geïmporteerd, dan telt A
 
 De kaarten die de keuze volgen, zijn Reeksen, Thuis en uit, Toeschouwers, Hoe vaak welke uitslag, Doelpuntenmakers (op Spelers), Sinds 1990/91 (op Spelers), Bijzondere doelpunten (op Spelers), De nul gehouden, Doelpunten per kwartier, Uitersten en Opmerkelijk.
 De kaarten Onze plek in de competitie, Verloop van het seizoen en Hoe de wedstrijden verlopen blijven de Eredivisie, omdat ze op de stand, de 34 speelrondes en de stand na 90 minuten rusten.
-Op Cijfers staan ze bij elkaar boven de schakelaar, en elk heeft als laatste regel "Alleen de Eredivisie" (`EredivisieOnly`), zodat de schakelaar direct boven de eerste kaart staat die hem volgt.
+Op Cijfers staan ze bij elkaar bovenaan, onder de schakelaar in de werkbalk, en elk heeft als laatste regel "Alleen de Eredivisie" (`EredivisieOnly`).
 Op de pagina van een club volgt de kaart Resultaten sinds de schakelaar ook niet: hij telt de Eredivisie, omdat de grafiek twee wedstrijden per seizoen kan tonen en een bekerwedstrijd of play-offwedstrijd geen vaste plek in een seizoen heeft.
 Een bekerwedstrijd en een play-offwedstrijd tellen met de score na de verlenging.
 Een strafschoppenserie telt niet mee in de doelpunten, maar wel in de uitkomst: een wedstrijd die gelijk eindigt en op strafschoppen wordt beslist, is een winst of een verlies.
@@ -792,7 +793,7 @@ Met precies één vinkje staat de naam van de bron niet bij elke kop (`showSourc
 De functies die het adres lezen en maken staan in `src/archive-query.ts`.
 Op een smal scherm staat de zijbalk onder de lijst en de paginering, want de zijbalk komt na de hoofdkolom in de bron en het designsysteem laat de volgorde van de bron en van het scherm gelijk.
 Zonder bronnen is er geen filter, en zonder artikel en afleveringen geen zijbalk.
-De pagina heeft een hoofdkolom van 46 rem, 2 rem ruimte en een zijbalk van 16 rem (`narrow` op `Page.Sidebar`), samen de 64 rem van de pagina.
+De pagina heeft een hoofdkolom van 46 rem, 2 rem ruimte en een kolom van 16 rem voor het filter (`columns="narrow-side"` op `Page.Main`), samen de 64 rem van de pagina.
 Zonder zijbalk heeft de hoofdkolom de gewone breedte van 38 rem.
 De slug komt uit de kolom `slug` van `sources`, die de seed voor elke bron met koppen vastlegt (`packages/db/src/seed.ts`), dus een andere naam verandert het adres niet.
 Een bron zonder slug staat niet in het filter, maar haar koppen staan wel bij alle bronnen.

@@ -99,18 +99,21 @@ async function renderDiscussions() {
   return html.slice(start, html.indexOf('<section class="hf-card" aria-labelledby="episodes-heading">'))
 }
 
-/** The main column alone: the news, without the sidebar. */
+/** The start of the section with the cards beside the news, which has the name of its cards. */
+const sidebarStart = '<section class="hf-page-section"'
+
+/** The main column alone: the news, without the section beside it, closed with the main. */
 async function renderMain() {
   const html = await render()
 
-  return html.slice(0, html.indexOf('</main>') + '</main>'.length)
+  return `${html.slice(0, html.indexOf(sidebarStart))}</main>`
 }
 
-/** The sidebar alone: the matches, the table, the forum and the podcast episodes. */
+/** The section beside the news alone: the matches, the table, the forum and the podcasts. */
 async function renderSidebar() {
   const html = await render()
 
-  return html.slice(html.indexOf('<aside'))
+  return html.slice(html.indexOf(sidebarStart))
 }
 
 beforeEach(() => {
@@ -160,7 +163,7 @@ describe('the homepage', () => {
 
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html).toMatch(
-      /^<main class="hf-page-main"><h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite<\/h1><section class="hf-card" aria-labelledby="media-heading">.*<\/section><\/main><aside/,
+      /^<main class="hf-page-main hf-page-main-grid"[^>]*><div class="hf-page-cell" style="grid-area:news"><h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite<\/h1><section class="hf-card" aria-labelledby="media-heading">.*<\/section><\/div><section class="hf-page-section" style="grid-area:side"/,
     )
   })
 
@@ -295,7 +298,7 @@ describe('the homepage', () => {
 
     const html = await renderMain()
 
-    expect(withoutIcons(html)).toMatch(/<\/ul><p><a href="\/nieuws">Al het nieuws<\/a><\/p><\/section><\/main>$/)
+    expect(withoutIcons(html)).toMatch(/<\/ul><p><a href="\/nieuws">Al het nieuws<\/a><\/p><\/section><\/div><\/main>$/)
     expect(html.match(/href="\/nieuws"/g)).toHaveLength(1)
   })
 
@@ -433,7 +436,7 @@ async function renderEpisodes() {
 
   return html.slice(
     html.indexOf('<section class="hf-card" aria-labelledby="episodes-heading">'),
-    html.indexOf('</aside>'),
+    html.indexOf('</section></main>'),
   )
 }
 
@@ -579,10 +582,11 @@ describe('the discussions in the sidebar of the homepage', () => {
   it('puts the block in the sidebar beside the news, named by its h2', async () => {
     const html = await render()
 
-    expect(html.match(/<aside/g)).toHaveLength(1)
-    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
+    expect(html).not.toContain('<aside')
+    expect(html.match(/<section class="hf-page-section"/g)).toHaveLength(1)
+    expect(html.indexOf('media-heading')).toBeLessThan(html.indexOf(sidebarStart))
     expect(withoutIcons(await renderSidebar())).toMatch(
-      /^<aside class="hf-page-sidebar" aria-label="De wedstrijden, de stand, het forum en de podcasts"><section class="hf-card hf-card-soft" aria-labelledby="matches-heading">.*<\/section><section class="hf-card hf-card-soft" aria-labelledby="standings-heading">.*<\/section><section class="hf-card" aria-labelledby="discussions-heading"><h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies<\/h2><ul role="list">.*<\/ul><p><a href="https:\/\/forum.heerenveen.org">Naar het forum<\/a><\/p><\/section><section class="hf-card" aria-labelledby="episodes-heading">.*<\/section><\/aside>$/,
+      /^<section class="hf-page-section" style="grid-area:side" aria-label="De wedstrijden, de stand, het forum en de podcasts"><section class="hf-card hf-card-soft" aria-labelledby="matches-heading">.*<\/section><section class="hf-card hf-card-soft" aria-labelledby="standings-heading">.*<\/section><section class="hf-card" aria-labelledby="discussions-heading"><h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies<\/h2><ul role="list">.*<\/ul><p><a href="https:\/\/forum.heerenveen.org">Naar het forum<\/a><\/p><\/section><section class="hf-card" aria-labelledby="episodes-heading">.*<\/section><\/section><\/main>$/,
     )
   })
 
@@ -695,7 +699,7 @@ describe('the card with the newest article of the editors', () => {
     const html = await renderMain()
 
     expect(html).toMatch(
-      /^<main class="hf-page-main"><h1 [^>]*>sc Heerenveen Fansite<\/h1><section class="hf-card hf-card-warm hf-article-card" aria-labelledby="[^"]+">.*?<\/section><section class="hf-card" aria-labelledby="media-heading">/,
+      /^<main class="hf-page-main hf-page-main-grid"[^>]*><div class="hf-page-cell" style="grid-area:article"><h1 [^>]*>sc Heerenveen Fansite<\/h1><section class="hf-card hf-card-warm hf-article-card" aria-labelledby="[^"]+">.*?<\/section><\/div><div class="hf-page-cell" style="grid-area:news"><section class="hf-card" aria-labelledby="media-heading">/,
     )
     expect(html.indexOf('Van de redactie')).toBeLessThan(html.indexOf('Laatste nieuws'))
   })
@@ -838,11 +842,12 @@ describe('the matches and the table in the sidebar of the homepage', () => {
   it('puts the two cards at the top of the sidebar, above the discussions, and after the news', async () => {
     const html = await render()
 
-    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('matches-heading'))
+    expect(html.indexOf('media-heading')).toBeLessThan(html.indexOf('matches-heading'))
     expect(html.indexOf('matches-heading')).toBeLessThan(html.indexOf('standings-heading'))
     expect(html.indexOf('standings-heading')).toBeLessThan(html.indexOf('discussions-heading'))
     expect(html.indexOf('discussions-heading')).toBeLessThan(html.indexOf('episodes-heading'))
-    expect(html.match(/<aside/g)).toHaveLength(1)
+    expect(html).not.toContain('<aside')
+    expect(html.match(/<section class="hf-page-section"/g)).toHaveLength(1)
     expect(html.lastIndexOf('<section')).toBe(
       html.indexOf('<section class="hf-card" aria-labelledby="episodes-heading">'),
     )

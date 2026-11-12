@@ -347,8 +347,8 @@ describe('the page of a player', () => {
 
   it('has the side column beside the main column, with the credit at the bottom of it and not in the main column', async () => {
     const html = await render()
-    const main = html.slice(html.indexOf('<main'), html.indexOf('</main>'))
-    const aside = html.slice(html.indexOf('<aside'))
+    const main = html.slice(html.indexOf('<main'), html.indexOf('style="grid-area:side"'))
+    const aside = html.slice(html.indexOf('style="grid-area:side"'), html.indexOf('</main>'))
 
     expect(aside).toContain('aria-label="Meer cijfers over deze speler"')
     expect(main).not.toContain('Bron: Wikipedia')
@@ -358,8 +358,8 @@ describe('the page of a player', () => {
 
   it('has the charts in the side column as soft cards, after the competitions and before the credit, and not in the main column', async () => {
     const html = await render()
-    const main = html.slice(html.indexOf('<main'), html.indexOf('</main>'))
-    const aside = html.slice(html.indexOf('<aside'))
+    const main = html.slice(html.indexOf('<main'), html.indexOf('style="grid-area:side"'))
+    const aside = html.slice(html.indexOf('style="grid-area:side"'), html.indexOf('</main>'))
     const soft = (id: string) => `hf-card-soft" aria-labelledby="${id}"`
     const places = ['per-competitie', 'grafiek-per-seizoen'].map((id) => {
       expect(aside).toContain(soft(id))

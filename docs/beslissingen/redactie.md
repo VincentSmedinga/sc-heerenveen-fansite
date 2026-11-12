@@ -2263,6 +2263,7 @@
   De titelrij is een indeling van de pagina en geen eigenschap van de kiezer, dus een andere bediening kan er ook staan.
 - **Alternatieven:** de kiezer in de site laten, naast de kop (dan bouwt elke pagina hem opnieuw).
   Een eigenschap `actions` op `Page.Main` (de kop staat in `intro`, en een eigenschap erbij maakt twee manieren om dezelfde plek te vullen).
+- **Later:** zie _De openbare pagina's gebruiken het raster met benoemde gebieden_ in `site.md` (12 november 2026): de kiezer staat niet meer in de titelrij maar in de werkbalk, `Page.Toolbar`, onder de kop.
 
 ## Een eerder seizoen toont zijn uitslagen van oud naar nieuw, en zijn tabel heet Eindstand
 

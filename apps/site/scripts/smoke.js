@@ -936,7 +936,7 @@ await withEmptyDatabase((database) =>
     assert.equal(podcastPage.status, 200)
     assert.match(podcastHtml, /<h1[^>]*>Podcasts<\/h1>/)
     assert.match(podcastHtml, /We hebben nog geen podcastafleveringen gevonden\./)
-    assert.doesNotMatch(podcastHtml, /<aside|<fieldset|type="checkbox"/)
+    assert.doesNotMatch(podcastHtml, /<fieldset|type="checkbox"/)
     assert.equal((await fetch(`${origin}/nieuws/podcasts?podcast=bestaat-niet`)).status, 404)
     assert.equal((await fetch(`${origin}/nieuws/podcasts?podcast=bestaat-niet&podcast=omroep-abe`)).status, 404)
     assert.equal((await fetch(`${origin}/nieuws/podcasts?podcast=omroep-abe&podcast=omroep-abe`)).status, 404)
@@ -961,7 +961,7 @@ await withEmptyDatabase((database) =>
     assert.match(archiveHtml, /<h1[^>]*>Nieuws<\/h1>/)
     assert.match(archiveHtml, /We hebben nog geen nieuws gevonden\./)
     assert.doesNotMatch(archiveHtml, /<fieldset|type="checkbox"/)
-    assert.match(archiveHtml, /<aside.*<h2[^>]*>Podcasts<\/h2>.*<\/aside>/s)
+    assert.match(archiveHtml, /<section class="hf-page-section"[^>]*>.*<h2[^>]*>Podcasts<\/h2>.*<\/section>/s)
     assert.doesNotMatch(archiveHtml, /Wedstrijden<\/h2>|Stand<\/h2>|Nieuwste discussies/)
     assert.match(html, /<a href="\/nieuws">Al het <span class="hf-icon-tail">nieuws</)
     assert.equal((await fetch(`${origin}/nieuws?bron=leeuwarder-courant`)).status, 404)
@@ -1003,13 +1003,13 @@ await withEmptyDatabase((database) =>
     assert.deepEqual(
       [...matchesHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
       [
+        '#stand',
+        '#hoofdtrainer',
         '#laatste-wedstrijd',
         '#programma',
         '#uitslagen',
         '#uitslagen-knvb-beker',
         '#uitslagen-play-offs',
-        '#stand',
-        '#hoofdtrainer',
       ],
     )
     // The made-up results of the current season are of six clubs, so the card with our place
@@ -1107,10 +1107,7 @@ await withEmptyDatabase((database) =>
       statisticsHtml,
       /<a aria-current="true" class="hf-navigation-link" href="\/wedstrijden">Wedstrijden<\/a><div class="hf-navigation-bar">.*?<a aria-current="page" class="hf-navigation-sublink" href="\/cijfers">Cijfers<\/a>.*?<a class="hf-navigation-sublink" href="\/tegenstanders">Tegenstanders<\/a>/s,
     )
-    assert.match(
-      statisticsHtml,
-      /<aside class="hf-page-sidebar hf-page-sidebar-wide" aria-label="Meer cijfers over het seizoen">/,
-    )
+    assert.match(statisticsHtml, /<section class="hf-page-section"[^>]*aria-label="Meer cijfers over het seizoen">/)
     assert.match(
       statisticsHtml,
       /<\/header><nav aria-label="Hoofdmenu".*?<\/nav><nav aria-labelledby="([^"]+)" class="hf-page-shortcuts"><span class="hf-page-shortcuts-label" id="\1">Op deze pagina:<\/span>.*<\/nav><div class="hf-page-body"><main/s,
@@ -1250,11 +1247,16 @@ await withEmptyDatabase((database) =>
       statisticsHtml,
       /id="(?:doelpuntenmakers|topscorers)"|Alle <span class="hf-icon-tail">doelpuntenmakers/,
     )
-    // The three cards that stay the Eredivisie come first, then the switch, then the cards that
-    // follow it, and each of the three ends with the line that says so.
+    // The switch is in the toolbar under the heading, above the cards. The three cards that
+    // stay the Eredivisie come first, then the cards that follow the switch, and each of the
+    // three ends with the line that says so.
     assert.match(
       statisticsHtml,
-      /id="onze-plek-in-de-competitie".*?Alleen de Eredivisie<\/p><\/section>.*?id="verloop-van-het-seizoen".*?Alleen de Eredivisie<\/p><\/section>.*?id="hoe-de-wedstrijden-verlopen".*?Alleen de Eredivisie<\/p><\/section><div aria-label="Welke wedstrijden".*?<\/div><p class="hf-visually-hidden" role="status"><\/p><section[^>]*aria-labelledby="reeksen"/s,
+      /<\/h1>.*?class="hf-page-toolbar".*?aria-label="Welke wedstrijden".*?id="onze-plek-in-de-competitie"/s,
+    )
+    assert.match(
+      statisticsHtml,
+      /id="onze-plek-in-de-competitie".*?Alleen de Eredivisie<\/p><\/section>.*?id="verloop-van-het-seizoen".*?Alleen de Eredivisie<\/p><\/section>.*?id="hoe-de-wedstrijden-verlopen".*?Alleen de Eredivisie<\/p><\/section><section[^>]*aria-labelledby="reeksen"/s,
     )
     // Spelers is an item of the menu of its own after Wedstrijden, and Cijfers is not one.
     assert.match(
@@ -1441,7 +1443,7 @@ await withEmptyDatabase((database) =>
     )
     // A player without a country, among others who have one, has an empty place for the flag.
     assert.match(squadCard, /<span class="hf-player-name-flag"><\/span><span class="hf-player-name-text">/)
-    assert.ok(playersHtml.indexOf('id="selectie"') < playersHtml.indexOf('<aside'))
+    assert.ok(playersHtml.indexOf('id="selectie"') < playersHtml.indexOf('aria-label="Meer cijfers over de spelers"'))
     assert.match(
       playersHtml,
       /<h2[^>]*id="doelpuntenmakers">(?:<span class="hf-heading-target">.*?<\/span>)?(?:<span class="hf-heading-alias" id="topscorers"><\/span>)<a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmaker/,
@@ -1487,7 +1489,7 @@ await withEmptyDatabase((database) =>
     assert.match(specialCard, /^<section class="hf-card hf-card-soft hf-card-shareable"/)
     assert.match(
       playersHtml,
-      /<aside class="hf-page-sidebar" aria-label="Meer cijfers over de spelers">.*?id="bijzondere-doelpunten"/s,
+      /<section class="hf-page-section"[^>]*aria-label="Meer cijfers over de spelers">.*?id="bijzondere-doelpunten"/s,
     )
     assert.match(
       playersHtml,
@@ -1637,9 +1639,9 @@ await withEmptyDatabase((database) =>
       /<th scope="row">Thuis<\/th>.*<th scope="row">Uit<\/th>.*<tfoot><tr><th scope="row">Totaal<\/th>/,
     )
     assert.match(clubHtml, /<h2[^>]*id="wedstrijden">/)
-    // The matches are in the main column, the results in the sidebar after it. Testdorp FC was
+    // The summary stands before the matches, so on a phone it is first. Testdorp FC was
     // only met in the league at home, so the stadium is ours and there is no card Stadion.
-    assert.match(clubHtml, /<main[^>]*>.*id="wedstrijden".*<\/main>.*<aside[^>]*>.*id="onze-uitslagen"/s)
+    assert.match(clubHtml, /<main[^>]*>.*id="onze-uitslagen".*id="wedstrijden".*<\/main>/s)
     assert.doesNotMatch(clubHtml, /id="stadion"/)
     // Testdorp FC has five played matches, so the sidebar has the card Doelpuntenmakers tegen
     // the club after Hoe vaak welke uitslag: the table with a caption for a screen reader, and
@@ -1714,12 +1716,12 @@ await withEmptyDatabase((database) =>
     )
     assert.doesNotMatch(comingClub, /<h3|nog niet tegen deze club gespeeld/)
     assert.doesNotMatch(comingClub, /id="onze-uitslagen"|id="hoe-vaak-welke-uitslag"|Thuis|>Uit</)
-    assert.match(comingClub, /<aside[^>]*aria-label="De bron"/)
+    assert.match(comingClub, /<section class="hf-page-section"[^>]*aria-label="De bron"/)
     // A club with a list of its own has the card Stadions with it, whatever the matches say:
     // the periods follow from the starts, the note is under the name of its line, and the
     // credit follows the card. This club has a cup tie to come and none played.
     const ownListClub = await (await fetch(`${origin}/tegenstanders/sv-proefdorp`)).text()
-    assert.match(ownListClub, /<aside[^>]*aria-label="Het stadion en de bron"/)
+    assert.match(ownListClub, /<section class="hf-page-section"[^>]*aria-label="Het stadion en de bron"/)
     assert.match(
       ownListClub,
       /<h2[^>]*id="stadion">.*href="#stadion">Stadion<span class="hf-icon-tail">s<.*tot 10 aug 2019<.*Sportpark Proefdorp.*10 aug 2019 t\/m 2019\/20<.*Stadion Tijdelijk.*Proefdorp speelde tijdelijk elders\..*vanaf 2020\/21<.*Sportpark Proefdorp.*Bron: /s,

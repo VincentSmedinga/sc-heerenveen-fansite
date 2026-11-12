@@ -6,6 +6,7 @@ import { cache } from 'react'
 import { email } from '#src/contact'
 import { reasonOf } from '#src/errors'
 import { pageMetadata } from '#src/metadata'
+import { pageAreas } from '#src/page-areas'
 import { groupByKind, kindAnchors, websiteOf } from '#src/register'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { getSources } from '#src/sources'
@@ -45,102 +46,104 @@ export default async function SourcesPage() {
   }
 
   const groups = groupByKind(sources)
+  const areas = pageAreas({ after: ['side'], main: [...groups.map(({ kind }) => kind), 'data'] })
 
   return (
     <>
-      <Page.Main
-        intro={
-          <>
-            <Heading level={1}>Onze bronnen</Heading>
-            {groups.length === 0 && (
-              <Text appearance="intro">
-                We hebben nog geen bronnen. Binnenkort lees je hier waar we het nieuws vandaan halen.
-              </Text>
-            )}
-          </>
-        }
-      >
+      <Page.Main areas={areas}>
+        <Page.Cell area="head">
+          <Heading level={1}>Onze bronnen</Heading>
+          {groups.length === 0 && (
+            <Text appearance="intro">
+              We hebben nog geen bronnen. Binnenkort lees je hier waar we het nieuws vandaan halen.
+            </Text>
+          )}
+        </Page.Cell>
         {groups.map(({ heading, kind, sources }) => (
-          <Card aria-labelledby={kindAnchors[kind]} key={kind}>
-            <Heading anchor id={kindAnchors[kind]} level={2}>
-              {heading}
-            </Heading>
-            <List loose>
-              {sources.map((source) => (
-                <List.Item key={source.domain}>
-                  <Link href={websiteOf(source)} icon="external-link">
-                    {source.name}
-                  </Link>
-                  {source.description && <Text>{source.description}</Text>}
-                </List.Item>
-              ))}
-            </List>
-          </Card>
+          <Page.Cell area={kind} key={kind}>
+            <Card aria-labelledby={kindAnchors[kind]}>
+              <Heading anchor id={kindAnchors[kind]} level={2}>
+                {heading}
+              </Heading>
+              <List loose>
+                {sources.map((source) => (
+                  <List.Item key={source.domain}>
+                    <Link href={websiteOf(source)} icon="external-link">
+                      {source.name}
+                    </Link>
+                    {source.description && <Text>{source.description}</Text>}
+                  </List.Item>
+                ))}
+              </List>
+            </Card>
+          </Page.Cell>
         ))}
-        <Card aria-labelledby="wedstrijden-en-spelers">
-          <Heading anchor id="wedstrijden-en-spelers" level={2}>
-            Wedstrijden, standen en spelers
-          </Heading>
-          <Text>
-            Uitslagen, doelpunten, standen en gegevens van spelers komen van Wikipedia, vooral de Nederlandse en soms de
-            Engelse. Enkele gegevens van spelers komen van Wikidata (CC0).
-          </Text>
-          <Text>
-            Wikipedia is geschreven door vrijwilligers. Hun namen staan in de geschiedenis van elk artikel. We lezen de
-            artikelen hoogstens één keer per uur.
-          </Text>
-          <Text>
-            We namen de gegevens over, ordenden ze en vulden ze aan: met de opstellingen, wissels, kaarten en assists
-            van wedstrijden van 1990 tot 2007, en met wat onze redactie zelf invulde of verbeterde.
-          </Text>
-          <Text>
-            Onze gegevens hebben dezelfde licentie als die van Wikipedia:{' '}
-            <Link href="https://creativecommons.org/licenses/by-sa/4.0/deed.nl" icon="external-link">
-              CC BY-SA 4.0
-            </Link>
-            . Je mag ze delen en bewerken als je Wikipedia en ons noemt, zegt dat je ze bewerkte en dezelfde licentie
-            houdt.
-          </Text>
-        </Card>
+        <Page.Cell area="data">
+          <Card aria-labelledby="wedstrijden-en-spelers">
+            <Heading anchor id="wedstrijden-en-spelers" level={2}>
+              Wedstrijden, standen en spelers
+            </Heading>
+            <Text>
+              Uitslagen, doelpunten, standen en gegevens van spelers komen van Wikipedia, vooral de Nederlandse en soms
+              de Engelse. Enkele gegevens van spelers komen van Wikidata (CC0).
+            </Text>
+            <Text>
+              Wikipedia is geschreven door vrijwilligers. Hun namen staan in de geschiedenis van elk artikel. We lezen
+              de artikelen hoogstens één keer per uur.
+            </Text>
+            <Text>
+              We namen de gegevens over, ordenden ze en vulden ze aan: met de opstellingen, wissels, kaarten en assists
+              van wedstrijden van 1990 tot 2007, en met wat onze redactie zelf invulde of verbeterde.
+            </Text>
+            <Text>
+              Onze gegevens hebben dezelfde licentie als die van Wikipedia:{' '}
+              <Link href="https://creativecommons.org/licenses/by-sa/4.0/deed.nl" icon="external-link">
+                CC BY-SA 4.0
+              </Link>
+              . Je mag ze delen en bewerken als je Wikipedia en ons noemt, zegt dat je ze bewerkte en dezelfde licentie
+              houdt.
+            </Text>
+          </Card>
+        </Page.Cell>
+        <Page.Section area="side" aria-label="Meer over bronnen">
+          <Card aria-labelledby="voorstellen" surface="soft">
+            <Heading anchor id="voorstellen" level={2}>
+              Mis je een bron?
+            </Heading>
+            <Text>
+              Schrijft een medium over sc Heerenveen en staat het hier nog niet? Stuur ons de naam en de website via{' '}
+              <Link href={`mailto:${email}`} icon="envelope">
+                {email}
+              </Link>
+              .
+            </Text>
+          </Card>
+          <Card aria-labelledby="uitgever" surface="strong">
+            <Heading anchor id="uitgever" level={2}>
+              Ben je zelf een bron?
+            </Heading>
+            <Text>
+              Heb je een vraag of een verzoek over hoe we jouw medium tonen? Mail ons via{' '}
+              <Link href={`mailto:${email}`} icon="envelope">
+                {email}
+              </Link>
+              .
+            </Text>
+          </Card>
+          <Card aria-labelledby="nieuwsbrief-lc" surface="warm">
+            <Heading anchor id="nieuwsbrief-lc" level={2}>
+              Abonneer je op de nieuwsbrief van de LC!
+            </Heading>
+            <Text>
+              Misschien vergat Sander de Vries het in Omroep Abe te noemen – dan helpen we graag een handje:{' '}
+              <Link href="https://www.lc.nl/sport/nieuwsbrief-sc-heerenveen/157167352.html" icon="external-link">
+                schrijf je snel in
+              </Link>
+              .
+            </Text>
+          </Card>
+        </Page.Section>
       </Page.Main>
-      <Page.Sidebar aria-label="Meer over bronnen" split>
-        <Card aria-labelledby="voorstellen" surface="soft">
-          <Heading anchor id="voorstellen" level={2}>
-            Mis je een bron?
-          </Heading>
-          <Text>
-            Schrijft een medium over sc Heerenveen en staat het hier nog niet? Stuur ons de naam en de website via{' '}
-            <Link href={`mailto:${email}`} icon="envelope">
-              {email}
-            </Link>
-            .
-          </Text>
-        </Card>
-        <Card aria-labelledby="uitgever" surface="strong">
-          <Heading anchor id="uitgever" level={2}>
-            Ben je zelf een bron?
-          </Heading>
-          <Text>
-            Heb je een vraag of een verzoek over hoe we jouw medium tonen? Mail ons via{' '}
-            <Link href={`mailto:${email}`} icon="envelope">
-              {email}
-            </Link>
-            .
-          </Text>
-        </Card>
-        <Card aria-labelledby="nieuwsbrief-lc" surface="warm">
-          <Heading anchor id="nieuwsbrief-lc" level={2}>
-            Abonneer je op de nieuwsbrief van de LC!
-          </Heading>
-          <Text>
-            Misschien vergat Sander de Vries het in Omroep Abe te noemen – dan helpen we graag een handje:{' '}
-            <Link href="https://www.lc.nl/sport/nieuwsbrief-sc-heerenveen/157167352.html" icon="external-link">
-              schrijf je snel in
-            </Link>
-            .
-          </Text>
-        </Card>
-      </Page.Sidebar>
     </>
   )
 }

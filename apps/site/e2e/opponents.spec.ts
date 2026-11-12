@@ -296,18 +296,20 @@ test.describe('the card Nieuws over <club>', () => {
 })
 
 test.describe('the page of a club', () => {
-  test('has the matches in the main column and the results, the scores and the stadiums in the sidebar', async ({
+  test('has the matches in the main column, the summary before it and the scores and the stadiums in the sidebar', async ({
     page,
   }) => {
     await page.goto('/tegenstanders/voorbeeld-united')
 
     await expect(page.getByRole('main').getByRole('heading', { level: 2, name: 'Wedstrijden' })).toBeVisible()
-    await expect(page.getByRole('main').getByRole('heading', { level: 2, name: /^Onze uitslagen/ })).toHaveCount(0)
 
-    const sidebar = page.getByRole('complementary', { name: 'Onze uitslagen, het stadion en de bron' })
+    const summary = page.getByRole('region', { name: 'Onze uitslagen' })
+
+    await expect(summary.getByRole('heading', { level: 2 })).toHaveText(['Onze uitslagen tegen Voorbeeld United'])
+
+    const sidebar = page.getByRole('region', { name: 'Meer cijfers, het stadion en de bron' })
 
     await expect(sidebar.getByRole('heading', { level: 2 })).toHaveText([
-      'Onze uitslagen tegen Voorbeeld United',
       /^Resultaten sinds \d{4}$/,
       'Hoe vaak welke uitslag',
       'De plek van Voorbeeld United en de onze',
@@ -381,8 +383,10 @@ test.describe('the page of a club', () => {
     }
 
     await page.goto('/tegenstanders/testdorp-fc')
-    await expect(page.getByRole('complementary').getByRole('heading', { level: 2 })).toContainText([
-      'Onze uitslagen tegen Testdorp FC',
+    await expect(page.getByRole('region', { name: 'Onze uitslagen' }).getByRole('heading', { level: 2 })).toContainText(
+      ['Onze uitslagen tegen Testdorp FC'],
+    )
+    await expect(page.getByRole('main').getByRole('region').getByRole('heading', { level: 2 })).toContainText([
       'Hoe vaak welke uitslag',
       'Doelpuntenmakers tegen Testdorp FC',
     ])
@@ -445,7 +449,7 @@ test.describe('the matches to come on the page of a club', () => {
     await expect(page.getByText('We hebben nog niet tegen deze club gespeeld.')).toHaveCount(0)
     await expect(page.getByRole('heading', { level: 2, name: /^Onze uitslagen/ })).toHaveCount(0)
     // Without a played match there is no summary, but the credit is still there.
-    await expect(page.getByRole('complementary', { name: 'De bron' }).getByText(/^Bron: /)).toBeVisible()
+    await expect(page.getByRole('region', { name: 'De bron' }).getByText(/^Bron: /)).toBeVisible()
   })
 
   test('shows a match that is called off with "Uitgesteld"', async ({ page }) => {

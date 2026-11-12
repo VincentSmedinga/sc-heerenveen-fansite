@@ -97,7 +97,7 @@ test.describe('the card on the news page', () => {
     await page.goto('/nieuws')
 
     const card = page.getByRole('region', { name: 'Van de redactie' })
-    const sidebar = page.getByRole('complementary')
+    const sidebar = page.getByRole('region', { name: 'De redactie en de podcasts' })
 
     await expect(sidebar.getByRole('region', { name: 'Van de redactie' })).toBeVisible()
     await expect(card.getByRole('link', { name: published.title })).toHaveAttribute('href', address)
@@ -105,7 +105,10 @@ test.describe('the card on the news page', () => {
     await expect(card.getByRole('link', { name: /Lees verder/ })).toHaveCount(0)
     await expect(card.locator('time')).toHaveCount(1)
 
-    const filterBox = await sidebar.getByRole('group', { name: 'Bronnen' }).boundingBox()
+    const filterBox = await page
+      .getByRole('region', { name: 'Filter' })
+      .getByRole('group', { name: 'Bronnen' })
+      .boundingBox()
     const cardBox = await card.boundingBox()
     const podcastsBox = await sidebar.getByRole('region', { name: 'Podcasts' }).boundingBox()
 

@@ -90,7 +90,9 @@ describe('the page /cijfers', () => {
     const html = await render()
 
     expect(html).not.toContain('hf-intro')
-    expect(html).toMatch(/<div class="hf-page-intro"><div class="hf-page-title"><h1 class="hf-heading-1">Cijfers<\/h1>/)
+    expect(html).toMatch(
+      /<div class="hf-page-cell" style="grid-area:head"><h1 class="hf-heading-1">Cijfers<\/h1><\/div><div class="hf-page-toolbar"/,
+    )
   })
 
   describe('the order of the parts of a card', () => {
@@ -165,10 +167,12 @@ describe('the page /cijfers', () => {
     expect(statisticsShortcuts.map((item) => item.href)).toEqual(ids)
   })
 
-  it('has the first six cards in the main with the h1 and the other six in a named, wide sidebar after it, so the two columns are equal', async () => {
+  it('has the first six cards in a named section of the first column and the other six in one of the second, so the two columns are equal', async () => {
     const html = await render()
     const main = html.match(/<main[^>]*>.*<\/main>/s)?.[0] ?? ''
-    const sidebar = html.match(/<aside[^>]*>.*<\/aside>/s)?.[0] ?? ''
+    const start = (area: string) => main.indexOf(`<section class="hf-page-section" style="grid-area:${area}"`)
+    const first = main.slice(start('first'), start('second'))
+    const sidebar = main.slice(start('second'))
     const left = [
       'onze-plek-in-de-competitie',
       'onze-plek-door-de-jaren',
@@ -187,14 +191,21 @@ describe('the page /cijfers', () => {
     ]
 
     expect(html.match(/<main/g)).toHaveLength(1)
-    expect(html.match(/<aside/g)).toHaveLength(1)
-    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
+    expect(html).not.toContain('<aside')
+    expect(main).toMatch(
+      /^<main class="hf-page-main hf-page-main-grid" style="[^"]*--hf-page-columns:var\(--hf-page-columns-equal\)/,
+    )
+    expect(start('first')).toBeGreaterThan(-1)
+    expect(start('first')).toBeLessThan(start('second'))
+    expect(first).toMatch(
+      /^<section class="hf-page-section" style="grid-area:first" aria-label="Het seizoen in cijfers">/,
+    )
     expect(sidebar).toMatch(
-      /^<aside class="hf-page-sidebar hf-page-sidebar-wide" aria-label="Meer cijfers over het seizoen">/,
+      /^<section class="hf-page-section" style="grid-area:second" aria-label="Meer cijfers over het seizoen">/,
     )
     expect(main.match(/<h1/g)).toHaveLength(1)
     expect(sidebar).not.toContain('<h1')
-    expect([...main.matchAll(/<h2[^>]*\sid="([^"]+)"/g)].map(([, id]) => id)).toEqual(left)
+    expect([...first.matchAll(/<h2[^>]*\sid="([^"]+)"/g)].map(([, id]) => id)).toEqual(left)
     expect([...sidebar.matchAll(/<h2[^>]*\sid="([^"]+)"/g)].map(([, id]) => id)).toEqual(right)
   })
 
@@ -208,7 +219,7 @@ describe('the page /cijfers', () => {
 
   it('has no order or style attribute but the length of a bar and the place of a label or a bar of a chart, so the order on a phone is the order in the source', async () => {
     expect(await render()).not.toMatch(
-      / style="(?!--hf-bar-share:[\d.]+"|--hf-segmented-count:\d+;--hf-segmented-index:\d+"|--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"|--hf-donut-cos:|--hf-bar-chart-(?:slots|at|share|across):[\d.]+(?:;--hf-bar-chart-at:[\d.]+)?")|order:/,
+      / style="(?!grid-area:[a-z-]+"|--hf-page-areas-narrow:[^"]*"|--hf-bar-share:[\d.]+"|--hf-segmented-count:\d+;--hf-segmented-index:\d+"|--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"|--hf-donut-cos:|--hf-bar-chart-(?:slots|at|share|across):[\d.]+(?:;--hf-bar-chart-at:[\d.]+)?")|order:/,
     )
   })
 
@@ -1431,9 +1442,9 @@ describe('the page /cijfers', () => {
   describe('the card Hoe vaak welke uitslag', () => {
     const card = async () => section(await render(), 'hoe-vaak-welke-uitslag')
 
-    it('is a card of the sidebar right after the table, with the heading at level 2 and an anchor', async () => {
+    it('is a card of the second column right after the table, with the heading at level 2 and an anchor', async () => {
       const html = await render()
-      const sidebar = html.match(/<aside[^>]*>.*<\/aside>/s)?.[0] ?? ''
+      const sidebar = html.slice(html.indexOf('style="grid-area:second"'), html.indexOf('</main>'))
 
       expect(sidebar).toContain(
         '<section class="hf-card hf-card-warm hf-card-shareable" aria-labelledby="hoe-vaak-welke-uitslag">',
@@ -1540,9 +1551,9 @@ describe('the page /cijfers', () => {
     expect(html).toContain('href="https://nl.wikipedia.org/wiki/KNVB_Beker_2026/27_(mannen)"')
     expect(html).toContain('<time dateTime="2026-10-23T12:05:00.000Z">23 oktober 2026 om 14:05</time>')
     expect(html.lastIndexOf('hf-wikipedia-credit')).toBeGreaterThan(html.lastIndexOf('</table>'))
-    // Last in the sidebar, so on a phone it follows the results and not the programme.
+    // Last in the second column, so on a phone it follows the results and not the programme.
     expect(html.lastIndexOf('hf-wikipedia-credit')).toBeGreaterThan(html.indexOf('id="uitslagen"'))
-    expect(html.match(/<aside.*<\/aside>/s)?.[0]).toContain('hf-wikipedia-credit')
+    expect(html.slice(html.indexOf('style="grid-area:second"'))).toContain('hf-wikipedia-credit')
   })
 
   it('puts the credit in a card without a border or background to see, and links to no history', async () => {
@@ -1617,11 +1628,11 @@ describe('the season picker on /cijfers', () => {
     expect(getMatchData).toHaveBeenCalledExactlyOnceWith('2026/27')
   })
 
-  it('has the picker next to the heading, with the current season chosen and the earlier seasons after it', async () => {
+  it('has the picker in the toolbar under the heading, with the current season chosen and the earlier seasons after it', async () => {
     const html = await render()
 
     expect(html).toMatch(
-      /<div class="hf-page-title"><h1 class="hf-heading-1">Cijfers<\/h1><form [^>]*aria-label="Seizoen kiezen"/,
+      /<h1 class="hf-heading-1">Cijfers<\/h1><\/div><div class="hf-page-toolbar"[^>]*><form [^>]*aria-label="Seizoen kiezen"/,
     )
     expect(html).toContain(
       '<option value="2026-27" selected="">2026/27</option><option value="2025-26">2025/26</option>',
@@ -1667,7 +1678,7 @@ describe('the choice between all the matches and the Eredivisie on /cijfers', ()
       (error: unknown) => (error as { digest?: string }).digest,
     )
 
-  it('has a switch of two links in the title row, with the choice that the address asks for marked', async () => {
+  it('has a switch of two links in the toolbar, with the choice that the address asks for marked', async () => {
     const all = await render()
     const league = await render(eredivisie)
 
@@ -1680,29 +1691,23 @@ describe('the choice between all the matches and the Eredivisie on /cijfers', ()
     expect(all.match(/aria-current/g)).toHaveLength(1)
   })
 
-  it('puts the switch in a plain cell of the main column, after the three cards that ignore it and before the first one that follows it', async () => {
-    const html = await render()
-    const main = /<main class="hf-page-main">(.*?)<\/main>/s.exec(html)?.[1] ?? ''
-    const cells = /<div class="hf-page-cells">(.*)/s.exec(main)?.[1] ?? ''
-    const place = main.indexOf('Welke wedstrijden')
+  it('puts the switch in the toolbar under the heading, after the season picker and before every card', async () => {
+    vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26'])
 
-    // The title row is the introduction, and the cells under it start with the three cards.
-    expect(main).toMatch(
-      /^<div class="hf-page-intro"><div class="hf-page-title">.*?<\/div><\/div><div class="hf-page-cells"><section/s,
+    const html = await render()
+    const toolbar = html.slice(
+      html.indexOf('<div class="hf-page-toolbar"'),
+      html.indexOf('<section class="hf-page-section"'),
     )
-    expect(cells.startsWith('<section')).toBe(true)
-    expect(main.indexOf('id="onze-plek-in-de-competitie"')).toBeLessThan(main.indexOf('id="verloop-van-het-seizoen"'))
-    expect(main.indexOf('id="verloop-van-het-seizoen"')).toBeLessThan(main.indexOf('id="hoe-de-wedstrijden-verlopen"'))
-    expect(main.indexOf('id="hoe-de-wedstrijden-verlopen"')).toBeLessThan(place)
-    // Directly above the first card that follows the switch, with nothing between them.
-    expect(place).toBeLessThan(main.indexOf('id="reeksen"'))
-    expect(main.slice(main.indexOf('</section>', main.indexOf('id="hoe-de-wedstrijden-verlopen"')))).toMatch(
-      /^<\/section><div aria-label="Welke wedstrijden"/,
-    )
+
+    expect(html).toMatch(/<h1 class="hf-heading-1">Cijfers<\/h1><\/div><div class="hf-page-toolbar"/)
+    expect(toolbar).toContain('aria-label="Seizoen kiezen"')
+    expect(toolbar).toContain('aria-label="Welke wedstrijden"')
+    expect(toolbar.indexOf('Seizoen kiezen')).toBeLessThan(toolbar.indexOf('Welke wedstrijden'))
     // It is no card and has no card around it, and it comes before every card it controls.
-    expect(html.indexOf('Welke wedstrijden')).toBeLessThan(html.indexOf('id="toeschouwers"'))
+    expect(html.indexOf('Welke wedstrijden')).toBeLessThan(html.indexOf('id="onze-plek-in-de-competitie"'))
     expect(html).not.toMatch(/<section[^>]*>(?:(?!<\/section>).)*Welke wedstrijden/s)
-    expect(html.match(/hf-page-title">.*?<\/div><\/div>/s)?.[0]).not.toContain('hf-segmented-control')
+    expect(html.match(/Welke wedstrijden/g)).toHaveLength(1)
   })
 
   it('has no switch in a season without a played cup tie, nor for one that is still to come', async () => {
@@ -1769,15 +1774,15 @@ describe('the choice between all the matches and the Eredivisie on /cijfers', ()
       expect(card(all, id), id).toBe(card(league, id))
       expect(card(all, id), id).not.toContain('SV Proefdorp')
       expect(card(all, id), id).toMatch(/<p class="hf-meta">Alleen de Eredivisie<\/p>$/)
+      expect(card(all, id), id).toContain('>Eredivisie</span>')
     }
   })
 
-  it('puts the cards that ignore the switch above it, and the cards that follow it under it', async () => {
+  it('says Alleen de Eredivisie on the cards that ignore the switch, and not on the cards that follow it', async () => {
     const html = await render()
-    const place = html.indexOf('Welke wedstrijden')
 
     for (const id of ['onze-plek-in-de-competitie', 'verloop-van-het-seizoen', 'hoe-de-wedstrijden-verlopen']) {
-      expect(html.indexOf(`id="${id}"`), id).toBeLessThan(place)
+      expect(html.indexOf(`id="${id}"`), id).toBeGreaterThan(html.indexOf('Welke wedstrijden'))
     }
 
     for (const id of [
@@ -1789,8 +1794,9 @@ describe('the choice between all the matches and the Eredivisie on /cijfers', ()
       'doelpunten-per-kwartier',
       'uitersten',
     ]) {
-      expect(html.indexOf(`id="${id}"`), id).toBeGreaterThan(place)
+      expect(html.indexOf(`id="${id}"`), id).toBeGreaterThan(html.indexOf('Welke wedstrijden'))
       expect(section(html, id), id).not.toContain('Alleen de Eredivisie')
+      expect(section(html, id), id).not.toContain('>Eredivisie</span>')
     }
   })
 

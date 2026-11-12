@@ -117,14 +117,15 @@ describe('the page Onze bronnen', () => {
     ).toHaveLength(2)
   })
 
-  it('is the one main of the page, with the h1 alone as its intro and a card for each kind under it, and a sidebar with three coloured cards', async () => {
+  it('is the one main of the page, with the h1 alone in its cell and a card in a cell for each kind under it, and a section with three coloured cards', async () => {
     vi.mocked(getSources).mockResolvedValue(sources)
 
     const html = await render()
 
     expect(html.match(/<main/g)).toHaveLength(1)
+    expect(html).not.toContain('<aside')
     expect(html).toMatch(
-      /^<main class="hf-page-main"><div class="hf-page-intro"><h1 class="hf-heading-1">Onze bronnen<\/h1><\/div><div class="hf-page-cells"><section class="hf-card" aria-labelledby="nieuws">.*<\/section><section class="hf-card" aria-labelledby="podcasts">.*<\/section><section class="hf-card" aria-labelledby="wedstrijden-en-spelers">.*<\/section><\/div><\/main><aside class="hf-page-sidebar hf-page-sidebar-split" aria-label="Meer over bronnen"><section class="hf-card hf-card-soft" aria-labelledby="voorstellen">.*<\/section><section class="hf-card hf-card-strong" aria-labelledby="uitgever">.*<\/section><section class="hf-card hf-card-warm" aria-labelledby="nieuwsbrief-lc">.*<\/section><\/aside>$/,
+      /^<main class="hf-page-main hf-page-main-grid"[^>]*><div class="hf-page-cell" style="grid-area:head"><h1 class="hf-heading-1">Onze bronnen<\/h1><\/div><div class="hf-page-cell" style="grid-area:news"><section class="hf-card" aria-labelledby="nieuws">.*<\/section><\/div><div class="hf-page-cell" style="grid-area:podcast"><section class="hf-card" aria-labelledby="podcasts">.*<\/section><\/div><div class="hf-page-cell" style="grid-area:data"><section class="hf-card" aria-labelledby="wedstrijden-en-spelers">.*<\/section><\/div><section class="hf-page-section" style="grid-area:side" aria-label="Meer over bronnen"><section class="hf-card hf-card-soft" aria-labelledby="voorstellen">.*<\/section><section class="hf-card hf-card-strong" aria-labelledby="uitgever">.*<\/section><section class="hf-card hf-card-warm" aria-labelledby="nieuwsbrief-lc">.*<\/section><\/section><\/main>$/,
     )
   })
 
@@ -139,7 +140,7 @@ describe('the page Onze bronnen', () => {
     expect(cards[0]?.match(/<li>/g)).toHaveLength(2)
     expect(cards[1]).toContain('<h2 class="hf-heading-2 hf-heading-anchored" id="podcasts">Podcasts</h2>')
     expect(cards[1]?.match(/<li>/g)).toHaveLength(1)
-    // The h1 is in the intro above the cards.
+    // The h1 is in the cell of the heading, above the cards.
     expect(cards.join('')).not.toContain('<h1')
     expect(cards.join('')).not.toContain('Dit zijn de bronnen')
   })
@@ -235,7 +236,7 @@ describe('the page Onze bronnen', () => {
     expect(html).toContain('<p class="hf-intro"><b>We hebben nog geen bronnen.')
     // The card for matches and players has nothing to do with the register, so it stays.
     expect(html).toContain(
-      '<div class="hf-page-cells"><section class="hf-card" aria-labelledby="wedstrijden-en-spelers">',
+      '<div class="hf-page-cell" style="grid-area:data"><section class="hf-card" aria-labelledby="wedstrijden-en-spelers">',
     )
     expect(html).not.toContain('Dit zijn de bronnen')
     expect(html).not.toContain('id="nieuws"')

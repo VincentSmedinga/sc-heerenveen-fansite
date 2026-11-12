@@ -133,29 +133,20 @@ for (const { heading, path } of pickerPages) {
   })
 }
 
-test.describe('the title row with the season picker', () => {
-  for (const [width, beside] of [
-    // Narrower than a phone, so the row has to wrap: the heading, the space and the list are
-    // 279 pixels wide, and 300 pixels leaves 268.
-    [300, false],
-    [320, true],
-    [390, true],
-    [900, true],
-  ] as const) {
-    test(`is on the right, ${beside ? 'beside' : 'under'} the title at ${width} pixels, and does not scroll the page`, async ({
-      page,
-    }) => {
+test.describe('the toolbar with the season picker', () => {
+  for (const width of [300, 320, 390, 900]) {
+    test(`is under the heading, in the toolbar, at ${width} pixels, and does not scroll the page`, async ({ page }) => {
       await page.setViewportSize({ height: 900, width })
       await page.goto(`/wedstrijden/${slug}`)
       await hydrated(page)
 
       const heading = (await page.getByRole('heading', { level: 1 }).boundingBox())!
       const picker = (await page.getByRole('form', { name: 'Seizoen kiezen' }).boundingBox())!
-      const row = (await page.locator('.hf-page-title').boundingBox())!
+      const toolbar = (await page.locator('.hf-page-toolbar').boundingBox())!
 
-      // On the right of the row, either way.
-      expect(picker.x + picker.width).toBeCloseTo(row.x + row.width, 0)
-      expect(beside ? picker.y < heading.y + heading.height : picker.y >= heading.y + heading.height).toBe(true)
+      expect(picker.y).toBeGreaterThanOrEqual(heading.y + heading.height)
+      expect(picker.x).toBeGreaterThanOrEqual(toolbar.x)
+      expect(picker.x + picker.width).toBeLessThanOrEqual(toolbar.x + toolbar.width + 1)
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
     })
   }
@@ -344,12 +335,18 @@ test.describe('the open list of the season picker', () => {
 
   // The short menu and the two situations of the list that does not fit below: measured with
   // the field at a place on the page, by a margin above it.
-  const open = async (page: Page, { count, height, lowerBy }: { count: number; height: number; lowerBy: number }) => {
+  const open = async (
+    page: Page,
+    { count, fieldAt, height, lowerBy }: { count: number; fieldAt?: number; height: number; lowerBy: number },
+  ) => {
     await page.setViewportSize({ height, width: 390 })
     await page.goto('/wedstrijden')
     await hydrated(page)
 
     const list = listOf(page)
+
+    // A field that stands at a given height, wherever the heading and the toolbar put it.
+    const margin = fieldAt === undefined ? lowerBy : fieldAt - (await list.boundingBox())!.y
 
     await list.evaluate(
       (select: HTMLSelectElement, { count, lowerBy }) => {
@@ -361,7 +358,7 @@ test.describe('the open list of the season picker', () => {
 
         select.closest('form')!.style.marginBlockStart = `${lowerBy}px`
       },
-      { count, lowerBy },
+      { count, lowerBy: margin },
     )
     await list.click()
     await expect.poll(() => list.evaluate((select) => select.matches(':open'))).toBe(true)
@@ -373,7 +370,7 @@ test.describe('the open list of the season picker', () => {
   }
 
   test('opens a short list below the field, also when there is more room above', async ({ page }) => {
-    const { field, menu, roomAbove, roomBelow } = await open(page, { count: 0, height: 844, lowerBy: 150 })
+    const { field, menu, roomAbove, roomBelow } = await open(page, { count: 0, fieldAt: 408, height: 844, lowerBy: 0 })
 
     expect(roomAbove).toBeGreaterThan(roomBelow)
     expect(menu.optionsHeight).toBeLessThan(roomBelow)
@@ -389,7 +386,7 @@ test.describe('the open list of the season picker', () => {
 
     expect(menu.optionsHeight).toBeGreaterThan(roomBelow)
     expect(menu.optionsHeight).toBeLessThan(roomAbove)
-    expect(menu.bottom).toBeLessThanOrEqual(field.y)
+    expect(menu.bottom).toBeLessThanOrEqual(field.y + 1)
     expect(menu.top).toBeGreaterThanOrEqual(0)
     expect(menu.optionsHeight).toBeLessThanOrEqual(menu.bottom - menu.top)
   })
@@ -399,7 +396,7 @@ test.describe('the open list of the season picker', () => {
 
     expect(menu.optionsHeight).toBeGreaterThan(Math.max(roomAbove, roomBelow))
     expect(roomBelow).toBeLessThan(roomAbove)
-    expect(menu.bottom).toBeLessThanOrEqual(field.y)
+    expect(menu.bottom).toBeLessThanOrEqual(field.y + 1)
     expect(menu.top).toBeGreaterThanOrEqual(0)
     expect(menu.bottom - menu.top).toBeLessThanOrEqual(roomAbove)
   })

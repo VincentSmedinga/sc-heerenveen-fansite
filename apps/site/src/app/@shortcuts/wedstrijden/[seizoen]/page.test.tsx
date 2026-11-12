@@ -39,14 +39,14 @@ describe('the bar of the page of an earlier season', () => {
 
     // The made-up matches have the league and the cup.
     expect(hrefs(html)).toEqual(matchShortcutsOf(false, 0, ['Eredivisie', 'KNVB Beker']).map(({ href }) => href))
-    expect(hrefs(html)).toEqual(['#uitslagen', '#uitslagen-knvb-beker', '#eindstand'])
+    expect(hrefs(html)).toEqual(['#eindstand', '#uitslagen', '#uitslagen-knvb-beker'])
     expect(hrefs(html)).not.toContain('#programma')
     expect(html).toContain('Op deze pagina:')
     expect(html).toContain('>Eredivisie</a>')
     expect(html).toContain('>KNVB Beker</a>')
   })
 
-  it('has a link for the play-offs too, after the one for the cup', async () => {
+  it('has a link for the play-offs too, after the one for the cup, and Eindstand first', async () => {
     const [first] = matchData.matches
     const playOffs = {
       ...first!,
@@ -62,7 +62,7 @@ describe('the bar of the page of an earlier season', () => {
     })
     const html = await render('2025-26')
 
-    expect(hrefs(html)).toEqual(['#uitslagen', '#uitslagen-knvb-beker', '#uitslagen-play-offs', '#eindstand'])
+    expect(hrefs(html)).toEqual(['#eindstand', '#uitslagen', '#uitslagen-knvb-beker', '#uitslagen-play-offs'])
     expect(html).toContain('>Play-offs Conference League</a>')
   })
 
@@ -70,7 +70,7 @@ describe('the bar of the page of an earlier season', () => {
     vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [], season: '2025/26' })
     const html = await render('2025-26')
 
-    expect(hrefs(html)).toEqual(['#uitslagen', '#eindstand'])
+    expect(hrefs(html)).toEqual(['#eindstand', '#uitslagen'])
     expect(html).toContain('>Uitslagen</a>')
   })
 

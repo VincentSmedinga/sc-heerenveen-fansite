@@ -32,6 +32,7 @@ import {
   StandingsTable,
   tableColumns,
   tableLegend,
+  Tag,
   Text,
   TopScorersTable,
   WikipediaCredit,
@@ -419,6 +420,7 @@ export function LeaguePlaceCard({
       <Heading anchor id="onze-plek-in-de-competitie" level={2}>
         Onze plek in de competitie
       </Heading>
+      <Tag>Eredivisie</Tag>
       {place === undefined ? (
         <Text>
           {standings.length === 0
@@ -668,6 +670,7 @@ export function MatchFlowCard({ matches, season }: { matches: PublicMatch[]; sea
       <Heading anchor id="hoe-de-wedstrijden-verlopen" level={2}>
         Hoe de wedstrijden verlopen
       </Heading>
+      <Tag>Eredivisie</Tag>
       {known === 0 ? (
         <Text>We hebben nog geen doelpunten met een minuut van dit seizoen. Kijk straks nog eens.</Text>
       ) : (
@@ -857,6 +860,7 @@ export function SeasonCard({ matches, season }: { matches: PublicMatch[]; season
       <Heading anchor id="verloop-van-het-seizoen" level={2}>
         Verloop van het seizoen
       </Heading>
+      <Tag>Eredivisie</Tag>
       {results.length === 0 ? (
         <Text>We hebben nog geen uitslagen van dit seizoen.</Text>
       ) : (

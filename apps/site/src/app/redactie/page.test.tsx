@@ -62,9 +62,12 @@ describe('the page Redactie', () => {
     const html = await render()
 
     expect(html.match(/<main/g)).toHaveLength(1)
-    expect(html).toMatch(/<main class="hf-page-main"><div class="hf-page-intro"><h1[^>]*>Redactie<\/h1><\/div>/)
-    expect(html).toMatch(/<div class="hf-card"><ul role="list">/)
+    expect(html).toMatch(
+      /<main class="hf-page-main hf-page-main-grid"[^>]*><div class="hf-page-cell" style="grid-area:head"><h1[^>]*>Redactie<\/h1><\/div>/,
+    )
+    expect(html).toMatch(/<div class="hf-page-cell" style="grid-area:main"><div class="hf-card"><ul role="list">/)
     expect(html).not.toContain('<aside')
+    expect(html).not.toContain('hf-page-section')
     expect(html).not.toContain('/contact')
   })
 

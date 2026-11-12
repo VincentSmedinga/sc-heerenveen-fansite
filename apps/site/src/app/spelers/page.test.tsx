@@ -117,7 +117,7 @@ describe('the page /spelers', () => {
       '<h2 class="hf-heading-2 hf-heading-anchored" id="sinds-1990-91"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#sinds-1990-91">Sinds 1990/91</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="bijzondere-doelpunten"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#bijzondere-doelpunten">Bijzondere doelpunten</a></h2>',
     ])
-    expect(html).toMatch(/<div class="hf-page-title"><h1 class="hf-heading-1">Spelers<\/h1>/)
+    expect(html).toMatch(/<h1 class="hf-heading-1">Spelers<\/h1>/)
   })
 
   it('has a heading for the link of the bar under the header, with the id the link goes to', async () => {
@@ -128,7 +128,7 @@ describe('the page /spelers', () => {
     expect(html).toMatch(/<section class="hf-card[ a-z-]*" aria-labelledby="doelpuntenmakers">/)
   })
 
-  it('has the card Doelpuntenmakers soft in the sidebar, with a button for an image, and the card Selectie without one', async () => {
+  it('has the card Doelpuntenmakers soft in the side section, with a button for an image, and the card Selectie without one', async () => {
     const html = await render()
 
     expect(html).toContain(
@@ -138,14 +138,14 @@ describe('the page /spelers', () => {
     expect(html.match(/data-hf-card-share/g)).toHaveLength(2)
   })
 
-  it('has the main column with the white card Selectie and a named sidebar with the soft cards Doelpuntenmakers and Bijzondere doelpunten', async () => {
+  it('has the main column with the white card Selectie and a named side section with the soft cards Doelpuntenmakers and Bijzondere doelpunten', async () => {
     const html = await render()
-    const main = html.match(/<main.*<\/main>/s)?.[0] ?? ''
-    const sidebar = html.match(/<aside.*<\/aside>/s)?.[0] ?? ''
+    const main = html.slice(html.indexOf('style="grid-area:main"'), html.indexOf('style="grid-area:side"'))
+    const sidebar = html.slice(html.indexOf('style="grid-area:side"'), html.indexOf('</main>'))
 
-    expect(html.match(/<aside/g)).toHaveLength(1)
-    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
-    expect(sidebar).toMatch(/^<aside class="hf-page-sidebar" aria-label="Meer cijfers over de spelers">/)
+    expect(html.match(/style="grid-area:side"/g)).toHaveLength(1)
+    expect(html.indexOf('style="grid-area:main"')).toBeLessThan(html.indexOf('style="grid-area:side"'))
+    expect(sidebar).toMatch(/^style="grid-area:side" aria-label="Meer cijfers over de spelers">/)
     expect(main).toContain('id="selectie"')
     expect(main).not.toContain('id="doelpuntenmakers"')
     expect(main).not.toContain('id="bijzondere-doelpunten"')
@@ -168,7 +168,7 @@ describe('the page /spelers', () => {
       expect(html).not.toContain(`id="${id}"`)
     }
     expect(html.match(/<main/g)).toHaveLength(1)
-    expect(html.match(/<aside/g)).toHaveLength(1)
+    expect(html.match(/style="grid-area:side"/g)).toHaveLength(1)
   })
 
   it('is a table with a caption for a screen reader, in the card under the table', async () => {
@@ -248,14 +248,14 @@ describe('the page /spelers', () => {
     expect(html).not.toContain('hf-card-shareable')
   })
 
-  it('has one credit at the end of the sidebar, with the time of the last reading, and loads nothing from another domain', async () => {
+  it('has one credit at the end of the side section, with the time of the last reading, and loads nothing from another domain', async () => {
     const html = await render()
 
     expect(html.match(/class="hf-meta hf-wikipedia-credit"/g)).toHaveLength(1)
     expect(html).toContain('href="https://nl.wikipedia.org/wiki/Eredivisie_2026/27_(mannenvoetbal)"')
     expect(html).toContain('<time dateTime="2026-10-23T12:05:00.000Z">23 oktober 2026 om 14:05</time>')
     expect(html.lastIndexOf('hf-wikipedia-credit')).toBeGreaterThan(html.lastIndexOf('</table>'))
-    expect(html.match(/<aside.*<\/aside>/s)?.[0]).toContain('hf-wikipedia-credit')
+    expect(html.slice(html.indexOf('style="grid-area:side"'), html.indexOf('</main>'))).toContain('hf-wikipedia-credit')
     expect(withoutFlags(html)).not.toMatch(/<(?:img|script|iframe|link)\b/u)
   })
 
@@ -320,7 +320,7 @@ describe('the card Bijzondere doelpunten on /spelers', () => {
       ],
     })
 
-  it('comes after the card Doelpuntenmakers, in the sidebar and before the credit, and is soft with a button for an image', async () => {
+  it('comes after the card Doelpuntenmakers, in the side section and before the credit, and is soft with a button for an image', async () => {
     const html = await render()
 
     expect(html.indexOf('id="doelpuntenmakers"')).toBeLessThan(html.indexOf('id="bijzondere-doelpunten"'))
@@ -473,11 +473,11 @@ describe('the season picker on /spelers', () => {
     expect(getMatchData).toHaveBeenCalledExactlyOnceWith('2026/27')
   })
 
-  it('has the picker next to the heading, with the current season chosen and the earlier seasons after it, and the route of its own', async () => {
+  it('has the picker in the toolbar after the heading, with the current season chosen and the earlier seasons after it, and the route of its own', async () => {
     const html = await render()
 
     expect(html).toMatch(
-      /<div class="hf-page-title"><h1 class="hf-heading-1">Spelers<\/h1><form [^>]*aria-label="Seizoen kiezen"/,
+      /<h1 class="hf-heading-1">Spelers<\/h1><\/div><div class="hf-page-toolbar"[^>]*><form [^>]*aria-label="Seizoen kiezen"/,
     )
     expect(html).toContain(
       '<option value="2026-27" selected="">2026/27</option><option value="2025-26">2025/26</option>',
@@ -544,16 +544,19 @@ describe('the choice between all the matches and the Eredivisie on /spelers', ()
     )
   })
 
-  it('puts the switch first in the main column, before the card Selectie, and not in a card or in the sidebar', async () => {
+  it('puts the switch in the toolbar, before the card Selectie, and not in a card or in the side section', async () => {
     const html = await render()
-    const main = html.match(/<main.*<\/main>/s)?.[0] ?? ''
-    const cells = /<div class="hf-page-cells">(.*)/s.exec(main)?.[1] ?? ''
+    const toolbar = html.slice(html.indexOf('<div class="hf-page-toolbar"'), html.indexOf('style="grid-area:main"'))
 
     expect(
-      cells.startsWith('<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group"'),
+      /^<div class="hf-page-toolbar"[^>]*><div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group"/.test(
+        toolbar,
+      ),
     ).toBe(true)
     expect(html.indexOf('Welke wedstrijden')).toBeLessThan(html.indexOf('id="selectie"'))
-    expect(html.match(/<aside.*<\/aside>/s)?.[0]).not.toContain('Welke wedstrijden')
+    expect(html.slice(html.indexOf('style="grid-area:side"'), html.indexOf('</main>'))).not.toContain(
+      'Welke wedstrijden',
+    )
     expect(html).not.toMatch(/<section[^>]*>(?:(?!<\/section>).)*Welke wedstrijden/s)
   })
 
@@ -617,10 +620,10 @@ describe('the card Selectie on /spelers', () => {
 
   const sentenceOf = (html: string) => plain(card(html).match(/<\/h2><p>(.*?)<\/p>/s)?.[1])
 
-  it('is the first card, before the sidebar, with the sentence under the heading and above the parts', async () => {
+  it('is the first card, before the side section, with the sentence under the heading and above the parts', async () => {
     const html = await render()
 
-    expect(html.indexOf('id="selectie"')).toBeLessThan(html.indexOf('<aside'))
+    expect(html.indexOf('id="selectie"')).toBeLessThan(html.indexOf('style="grid-area:side"'))
     expect(card(html).indexOf('<p>')).toBeLessThan(card(html).indexOf('<h3'))
     expect(sentenceOf(html)).toBe(
       'We kennen 5 spelers van dit seizoen. Waarschijnlijk staat iedereen uit de selectie erbij.',
@@ -837,7 +840,7 @@ describe('the card Selectie on /spelers', () => {
     expect(card(await render())).not.toMatch(/<h3|<ul|<li/)
   })
 
-  it('credits the pages of the squad in the credit that ends the sidebar, with the English one named as such', async () => {
+  it('credits the pages of the squad in the credit that ends the side section, with the English one named as such', async () => {
     withSquad({
       pages: [
         { readAt: new Date('2026-10-23T11:30:00Z'), title: '2018–19 SC Heerenveen season' },
@@ -903,11 +906,11 @@ describe('the card Sinds 1990/91 on /spelers', () => {
     { ...scorers(counts)[0]!, competition, season: '2010/11' },
   ]
 
-  it('is soft in the sidebar under Doelpuntenmakers, with a button for an image', async () => {
+  it('is soft in the side section under Doelpuntenmakers, with a button for an image', async () => {
     vi.mocked(getAllTimeMatches).mockResolvedValue(history([3, 2]))
 
     const html = await render()
-    const sidebar = html.match(/<aside.*<\/aside>/s)?.[0] ?? ''
+    const sidebar = html.slice(html.indexOf('style="grid-area:side"'), html.indexOf('</main>'))
 
     expect(sidebar).toContain(
       '<section class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="sinds-1990-91">',

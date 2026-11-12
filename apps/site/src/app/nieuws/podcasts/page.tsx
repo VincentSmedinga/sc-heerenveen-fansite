@@ -22,6 +22,7 @@ import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { pageMetadata } from '#src/metadata'
 import { dateTimeOf, episodeDetails, formatEpisodeTime } from '#src/news'
+import { pageAreas } from '#src/page-areas'
 import { getPodcastPage } from '#src/podcasts'
 import { parsePodcastsQuery, podcastsHeading, podcastsHref, podcastsQuery, podcastsTitle } from '#src/podcasts-query'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
@@ -92,85 +93,93 @@ export default async function PodcastsPage({ searchParams }: { searchParams: Pro
           { href: about.spotifyUrl, name: 'Spotify' },
         ].filter((platform): platform is { href: string; name: string } => platform.href !== null)
 
+  const areas = pageAreas({ before: podcasts.length > 0 ? ['filter'] : [] })
+
   return (
     <>
-      <Page.Main intro={<Heading level={1}>{podcastsHeading(selected.map((item) => item.name))}</Heading>}>
-        <Card as="div">
-          {episodes.length === 0 ? (
-            <Text>We hebben nog geen podcastafleveringen gevonden.</Text>
-          ) : (
-            <List role="list">
-              {episodes.map((episode, index) => (
-                <List.Item key={index}>
-                  <NewsItem
-                    dateTime={dateTimeOf(episode.publishedAt)}
-                    details={episodeDetails(episode)}
-                    headline={episode.title}
-                    href={episode.url}
-                    showSource={showSource}
-                    source={episode.sourceName}
-                    time={formatEpisodeTime(episode.publishedAt, now)}
-                  />
-                </List.Item>
-              ))}
-            </List>
-          )}
-          {pageCount > 1 && (
-            <Pagination
-              current={page}
-              label="Paginering"
-              nextHref={page < pageCount ? podcastsHref(slugs, page + 1) : undefined}
-              previousHref={page > 1 ? podcastsHref(slugs, page - 1) : undefined}
-              total={pageCount}
-            />
-          )}
-        </Card>
-      </Page.Main>
-      {podcasts.length > 0 && (
-        // The sidebar is second in the source, so on a narrow screen the filter sits under the
-        // list and the pagination. The form is a GET to this page, so it works without
-        // JavaScript and a choice is an address that can be shared. The button stays with
-        // JavaScript too: a page that reloads at each tick takes the focus with it.
-        <Page.Sidebar aria-label="Podcasts">
-          <Card as="div" surface="soft">
-            <Form action="/nieuws/podcasts" autoComplete="off" method="get">
-              <CheckboxGroup
-                className="hf-space-end-s"
-                legend="Podcasts"
-                name="podcast"
-                options={podcasts.map((item) => ({ label: item.name, value: item.slug }))}
-                value={chosen}
-              />
-              <Button type="submit">Toon</Button>
-            </Form>
-          </Card>
-          {about !== undefined && (
-            <Card aria-labelledby="about-heading" surface="warm">
-              <Heading id="about-heading" level={2}>
-                Over {about.name}
-              </Heading>
-              {about.description !== null && about.description !== '' && <Text>{about.description}</Text>}
-              {platforms.length > 0 && (
-                <>
-                  <Text>Luister ook op</Text>
-                  <List role="list">
-                    {platforms.map((platform) => (
-                      <List.Item key={platform.name}>
-                        <Link href={platform.href} icon="external-link">
-                          <Text as="span" className="hf-visually-hidden">
-                            {about.name} op{' '}
-                          </Text>
-                          {platform.name}
-                        </Link>
-                      </List.Item>
-                    ))}
-                  </List>
-                </>
-              )}
+      <Page.Main areas={areas} columns="narrow-side">
+        <Page.Cell area="head">
+          <Heading level={1}>{podcastsHeading(selected.map((item) => item.name))}</Heading>
+        </Page.Cell>
+        {podcasts.length > 0 && (
+          // The filter and the card about a podcast come before the list in the source, so on a
+          // narrow screen they sit above it, and on a wide screen in the second column. The
+          // form is a GET to this page, so it works without JavaScript and a choice is an
+          // address that can be shared. The button stays with JavaScript too: a page that
+          // reloads at each tick takes the focus with it.
+          <Page.Section area="filter" aria-label="Podcasts">
+            <Card as="div" surface="soft">
+              <Form action="/nieuws/podcasts" autoComplete="off" method="get">
+                <CheckboxGroup
+                  className="hf-space-end-s"
+                  legend="Podcasts"
+                  name="podcast"
+                  options={podcasts.map((item) => ({ label: item.name, value: item.slug }))}
+                  value={chosen}
+                />
+                <Button type="submit">Toon</Button>
+              </Form>
             </Card>
-          )}
-        </Page.Sidebar>
-      )}
+            {about !== undefined && (
+              <Card aria-labelledby="about-heading" surface="warm">
+                <Heading id="about-heading" level={2}>
+                  Over {about.name}
+                </Heading>
+                {about.description !== null && about.description !== '' && <Text>{about.description}</Text>}
+                {platforms.length > 0 && (
+                  <>
+                    <Text>Luister ook op</Text>
+                    <List role="list">
+                      {platforms.map((platform) => (
+                        <List.Item key={platform.name}>
+                          <Link href={platform.href} icon="external-link">
+                            <Text as="span" className="hf-visually-hidden">
+                              {about.name} op{' '}
+                            </Text>
+                            {platform.name}
+                          </Link>
+                        </List.Item>
+                      ))}
+                    </List>
+                  </>
+                )}
+              </Card>
+            )}
+          </Page.Section>
+        )}
+        <Page.Cell area="main">
+          <Card as="div">
+            {episodes.length === 0 ? (
+              <Text>We hebben nog geen podcastafleveringen gevonden.</Text>
+            ) : (
+              <List role="list">
+                {episodes.map((episode, index) => (
+                  <List.Item key={index}>
+                    <NewsItem
+                      dateTime={dateTimeOf(episode.publishedAt)}
+                      details={episodeDetails(episode)}
+                      headline={episode.title}
+                      href={episode.url}
+                      showSource={showSource}
+                      source={episode.sourceName}
+                      time={formatEpisodeTime(episode.publishedAt, now)}
+                    />
+                  </List.Item>
+                ))}
+              </List>
+            )}
+            {pageCount > 1 && (
+              <Pagination
+                current={page}
+                label="Paginering"
+                nextHref={page < pageCount ? podcastsHref(slugs, page + 1) : undefined}
+                previousHref={page > 1 ? podcastsHref(slugs, page - 1) : undefined}
+                total={pageCount}
+              />
+            )}
+          </Card>
+        </Page.Cell>
+      </Page.Main>
     </>
   )
 }

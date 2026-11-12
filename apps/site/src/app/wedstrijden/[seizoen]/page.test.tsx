@@ -177,12 +177,12 @@ describe('the cards with results of an earlier season, one for each competition'
     withMatches(all)
     const html = await render()
 
-    expect(ids(html)).toEqual(['uitslagen', 'uitslagen-knvb-beker', 'uitslagen-play-offs', 'eindstand'])
+    expect(ids(html)).toEqual(['eindstand', 'uitslagen', 'uitslagen-knvb-beker', 'uitslagen-play-offs'])
     expect(html.match(/<h2[^>]*>.*?<\/h2>/g)?.map((heading) => heading.replace(/<[^>]+>/g, ''))).toEqual([
+      'Eindstand',
       'Eredivisie',
       'KNVB Beker',
       'Play-offs Conference League',
-      'Eindstand',
     ])
   })
 
@@ -195,13 +195,16 @@ describe('the cards with results of an earlier season, one for each competition'
     }
   })
 
-  it('has the headings in the source in the order of the screen: the main before the sidebar, the cards in order', async () => {
+  it('has the headings in the source in the order of a phone: the table first, then the cards with results in order', async () => {
     withMatches(all)
     const html = await render()
-    const main = html.match(/<main[^>]*>.*<\/main>/s)?.[0] ?? ''
+    const table = html.slice(html.indexOf('style="grid-area:stand"'), html.indexOf('aria-labelledby="uitslagen"'))
+    const results = html.slice(html.indexOf('aria-labelledby="uitslagen"'))
 
-    expect(ids(main)).toEqual(['uitslagen', 'uitslagen-knvb-beker', 'uitslagen-play-offs'])
-    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('id="eindstand"'))
+    expect(html).toContain('<section class="hf-page-section" style="grid-area:stand"')
+    expect(ids(table)).toEqual(['eindstand'])
+    expect(ids(results)).toEqual(['uitslagen', 'uitslagen-knvb-beker', 'uitslagen-play-offs'])
+    expect(html.indexOf('id="eindstand"')).toBeLessThan(html.indexOf('id="uitslagen"'))
   })
 
   it('has each match in the card of its competition, the oldest first', async () => {
@@ -256,7 +259,7 @@ describe('the cards with results of an earlier season, one for each competition'
     withMatches([all[0]!, all[3]!])
     const html = await render()
 
-    expect(ids(html)).toEqual(['uitslagen', 'uitslagen-play-offs', 'eindstand'])
+    expect(ids(html)).toEqual(['eindstand', 'uitslagen', 'uitslagen-play-offs'])
     expect(html).not.toContain('uitslagen-knvb-beker')
   })
 
@@ -264,7 +267,7 @@ describe('the cards with results of an earlier season, one for each competition'
     withMatches([])
     const html = await render()
 
-    expect(ids(html)).toEqual(['uitslagen', 'eindstand'])
+    expect(ids(html)).toEqual(['eindstand', 'uitslagen'])
     expect(section(html, 'uitslagen')).toContain('We hebben nog geen uitslagen van dit seizoen.')
     expect(html).toContain('>Uitslagen</a>')
     expect(html).not.toContain('Het verloop van het seizoen')
@@ -414,8 +417,8 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
     const html = await render()
 
     expect(html.match(/<h2[^>]*id="([^"]+)"/g)?.map((heading) => /id="([^"]+)"/.exec(heading)?.[1])).toEqual([
-      'uitslagen',
       'eindstand',
+      'uitslagen',
     ])
   })
 
@@ -456,11 +459,11 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
   })
 
   describe('the season picker', () => {
-    it('is a form named Seizoen kiezen in the title row, next to the heading, that gets /wedstrijden/kies', async () => {
+    it('is a form named Seizoen kiezen in the toolbar under the heading, that gets /wedstrijden/kies', async () => {
       const html = await render()
 
       expect(html).toMatch(
-        /<div class="hf-page-title"><h1 class="hf-heading-1">Wedstrijden<\/h1><form [^>]*aria-label="Seizoen kiezen"/,
+        /<h1 class="hf-heading-1">Wedstrijden<\/h1><\/div><div class="hf-page-toolbar"[^>]*><form [^>]*aria-label="Seizoen kiezen"/,
       )
       expect(html).toContain('action="/wedstrijden/kies"')
       expect(html).toContain('method="get"')

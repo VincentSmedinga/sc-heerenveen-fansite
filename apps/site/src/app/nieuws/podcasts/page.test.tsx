@@ -80,6 +80,9 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
+/** The cell of the list, without the section with the filter before it. */
+const listOf = (html: string) => html.slice(html.indexOf('style="grid-area:main"'))
+
 describe('the page Podcasts', () => {
   it('has one h1, Podcasts, and no other heading', async () => {
     const html = await render()
@@ -87,19 +90,21 @@ describe('the page Podcasts', () => {
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual(['<h1 class="hf-heading-1">Podcasts</h1>'])
   })
 
-  it('is the one main of the page, with the h1 as its introduction and the list in a card', async () => {
+  it('is the one main of the page, with the h1 in a cell of its own and the list in a card', async () => {
     const html = await render()
 
     expect(html.match(/<main/g)).toHaveLength(1)
-    expect(html).toMatch(/<main class="hf-page-main"><div class="hf-page-intro"><h1[^>]*>Podcasts<\/h1><\/div>/)
+    expect(html).toMatch(
+      /<main class="hf-page-main hf-page-main-grid"[^>]*><div class="hf-page-cell" style="grid-area:head"><h1[^>]*>Podcasts<\/h1><\/div>/,
+    )
     expect(html).toMatch(/<div class="hf-card"><ul role="list">/)
-    expect(html.slice(0, html.indexOf('</main>'))).not.toContain('<form')
+    expect(listOf(html)).not.toContain('<form')
   })
 
   it('shows each episode as a link to its page at the maker, with the name of the podcast and the time', async () => {
     const html = await render()
 
-    expect(html.slice(0, html.indexOf('</main>')).match(/<li>/g)).toHaveLength(2)
+    expect(listOf(html).match(/<li>/g)).toHaveLength(2)
     expect(html).toContain('href="https://omny.test/shows/abe/12"')
     expect(html).toContain('href="https://camataru.test/e/1/"')
     expect(html).toContain('Radio Camataru')
@@ -124,17 +129,18 @@ describe('the page Podcasts', () => {
     expect(html).not.toMatch(/<img|<audio|<iframe|<script|\.mp3/)
   })
 
-  it('puts the filter in a card on a soft surface in the sidebar, after the main, with a name for the sidebar', async () => {
+  it('puts the filter in a card on a soft surface in a section before the list, with a name for the section', async () => {
     const html = await render()
 
-    expect(html.match(/<aside/g)).toHaveLength(1)
-    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
-    expect(html.slice(html.indexOf('<aside'))).toMatch(
-      /^<aside class="hf-page-sidebar" aria-label="Podcasts"><div class="hf-card hf-card-soft"><form class="hf-form" noValidate="" autoComplete="off" action="\/nieuws\/podcasts" method="get"><fieldset class="hf-checkbox-group hf-space-end-s"><legend class="hf-heading-2">Podcasts<\/legend>/,
+    expect(html).not.toContain('<aside')
+    expect(html.match(/<section class="hf-page-section"/g)).toHaveLength(1)
+    expect(html.indexOf('grid-area:filter"')).toBeLessThan(html.indexOf('grid-area:main"'))
+    expect(html.slice(html.indexOf('<section class="hf-page-section"'))).toMatch(
+      /^<section class="hf-page-section" style="grid-area:filter" aria-label="Podcasts"><div class="hf-card hf-card-soft"><form class="hf-form" noValidate="" autoComplete="off" action="\/nieuws\/podcasts" method="get"><fieldset class="hf-checkbox-group hf-space-end-s"><legend class="hf-heading-2">Podcasts<\/legend>/,
     )
   })
 
-  it('has no sidebar and no filter when there are no podcasts', async () => {
+  it('has no section for the filter when there are no podcasts', async () => {
     vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, episodes: [], podcasts: [] })
 
     const html = await render()
@@ -145,7 +151,7 @@ describe('the page Podcasts', () => {
 
   it('has a form that gets to /nieuws/podcasts, with a group named Podcasts and a button Toon, so it works without JavaScript', async () => {
     const html = await render()
-    const form = html.slice(html.indexOf('<aside')).match(/<form.*?<\/form>/)?.[0] ?? ''
+    const form = html.slice(html.indexOf('grid-area:filter')).match(/<form.*?<\/form>/)?.[0] ?? ''
 
     expect(form).toMatch(/^<form [^>]*action="\/nieuws\/podcasts"[^>]*method="get"/)
     expect(form).toContain('<fieldset')
@@ -227,7 +233,7 @@ describe('the podcasts that are chosen', () => {
 
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Podcasts van Omroep Abe</h1>'])
     // The name stays in each line for a screen reader, but nobody sees it.
-    const list = html.slice(0, html.indexOf('</main>'))
+    const list = listOf(html)
 
     expect(list.match(/<span>Omroep Abe<\/span>/g)).toBeNull()
     expect(list.match(/class="hf-visually-hidden">[^<]* <\/span>/g)).toHaveLength(2)
@@ -236,7 +242,7 @@ describe('the podcasts that are chosen', () => {
   it('shows the name of the podcast on each line when none is chosen', async () => {
     const html = await render()
 
-    expect(html.slice(0, html.indexOf('</main>')).match(/<span>Omroep Abe<\/span>/g)).toHaveLength(1)
+    expect(listOf(html).match(/<span>Omroep Abe<\/span>/g)).toHaveLength(1)
     expect(html).not.toContain('hf-visually-hidden')
   })
 
@@ -250,7 +256,7 @@ describe('the podcasts that are chosen', () => {
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual([
       '<h1 class="hf-heading-1">Podcasts van Omroep Abe en Radio Camataru</h1>',
     ])
-    expect(html.slice(0, html.indexOf('</main>')).match(/<span>Omroep Abe<\/span>/g)).toHaveLength(1)
+    expect(listOf(html).match(/<span>Omroep Abe<\/span>/g)).toHaveLength(1)
     expect(html).not.toContain('Over Omroep Abe')
   })
 
@@ -287,18 +293,24 @@ describe('the podcasts that are chosen', () => {
   })
 })
 
-describe('the card about the podcast in the sidebar', () => {
-  /** The card alone, or an empty text when the page has none. */
-  const sidebarOf = (html: string) => (html.includes('<section') ? html.slice(html.indexOf('<section')) : '')
+describe('the card about the podcast in the section with the filter', () => {
+  /** The card alone, without the list after it, or an empty text when the page has none. */
+  const sidebarOf = (html: string) =>
+    html.includes('<section class="hf-card')
+      ? html.slice(
+          html.indexOf('<section class="hf-card'),
+          html.indexOf('<div class="hf-page-cell" style="grid-area:main"'),
+        )
+      : ''
 
-  it('is a card on a warm surface in the sidebar under the card with the filter, named by its h2 "Over" and the name of the podcast', async () => {
+  it('is a card on a warm surface in the section under the card with the filter, named by its h2 "Over" and the name of the podcast', async () => {
     vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, about: bothAddresses, selected: [abe] })
 
     const html = await render({ podcast: 'omroep-abe' })
 
-    expect(html.match(/<aside/g)).toHaveLength(1)
-    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
-    expect(html.indexOf('<fieldset')).toBeLessThan(html.indexOf('<section'))
+    expect(html.match(/<section class="hf-page-section"/g)).toHaveLength(1)
+    expect(html.indexOf('grid-area:main"')).toBeGreaterThan(html.indexOf('about-heading'))
+    expect(html.indexOf('<fieldset')).toBeLessThan(html.indexOf('<section class="hf-card'))
     expect(html).toContain('</form></div><section class="hf-card hf-card-warm" aria-labelledby="about-heading">')
     expect(sidebarOf(html)).toMatch(
       /^<section class="hf-card hf-card-warm" aria-labelledby="about-heading"><h2 class="hf-heading-2" id="about-heading">Over Omroep Abe<\/h2>/,
@@ -410,7 +422,7 @@ describe('the card about the podcast in the sidebar', () => {
   it('is not there for all podcasts or for more than one, and the line "Luister ook op" is no longer under the h1', async () => {
     const html = await render()
 
-    expect(html).not.toContain('<section')
+    expect(html).not.toContain('<section class="hf-card')
     expect(html).not.toContain('Luister ook')
 
     vi.mocked(getPodcastPage).mockResolvedValue({
@@ -426,7 +438,7 @@ describe('the card about the podcast in the sidebar', () => {
     vi.mocked(getPodcastPage).mockResolvedValue({ ...everything, about: bothAddresses, selected: [abe] })
 
     const html = await render({ podcast: 'omroep-abe' })
-    const main = html.slice(0, html.indexOf('</main>'))
+    const main = listOf(html)
 
     expect(main).not.toContain('Luister ook')
   })

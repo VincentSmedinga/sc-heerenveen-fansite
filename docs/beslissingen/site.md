@@ -1492,6 +1492,8 @@
 - **Later:** zie _Op `/nieuws` kies je bronnen met selectievakjes in een fieldset_: de kaart blijft, maar bevat een formulier met een `fieldset` en een `legend` "Bronnen" in plaats van de kop en de navigatie "Bronnen filteren".
 - **Later:** zie _/nieuws heeft een hoofdkolom van 46 rem en een zijbalk van 16 rem_.
   De zijbalk met het filter is 16 rem breed en de lijst 46 rem.
+- **Later:** zie _De openbare pagina's gebruiken het raster met benoemde gebieden_ (12 november 2026): het filter staat niet meer in een zijbalk naast de lijst maar in een sectie met een naam die in de bron vóór de lijst staat, zodat het op een telefoon boven de lijst staat en op een breed scherm in de tweede kolom.
+  Het nadeel van deze beslissing (scrollen voorbij de lijst) vervalt.
 
 ## /nieuws heeft een hoofdkolom van 46 rem en een zijbalk van 16 rem
 
@@ -2748,6 +2750,8 @@
 - **Waarom:** Nieuws, Tegenstanders en de homepage hebben geen seizoen.
   Een globale keuze in de kop zou daar niets doen.
 - **Alternatieven:** een seizoenskiezer in de kop van elke pagina.
+- **Later:** zie _De openbare pagina's gebruiken het raster met benoemde gebieden_ (12 november 2026): de seizoenskiezer staat niet meer in de titel maar in de werkbalk onder de kop (`Page.Toolbar`), met de schakelaar voor de competitie ernaast.
+  Het seizoen blijft een instelling van de pagina, in het adres.
 
 ## Tegenstanders hoort bij Wedstrijden
 
@@ -2852,6 +2856,8 @@
 - **Later:** vervangt _De kaart met de uitslagen staat op Wedstrijden en telt dezelfde wedstrijden als Uitslagen_ (2 november 2026).
   Het vult _Doelpuntenmakers staan op één plek: Spelers_ (6 november 2026) aan: de code toont op Cijfers nu ook geen anker `#doelpuntenmakers` meer.
   Het vult _Een kaart staat op de pagina van de zaak die hij beschrijft, en de hoofd- en zijkolom hebben vaste rollen_ (6 november 2026) aan: de schakelaar is een cel van de hoofdkolom.
+- **Later:** zie _De openbare pagina's gebruiken het raster met benoemde gebieden_ (12 november 2026): de schakelaar is geen cel van de hoofdkolom meer maar staat in de werkbalk onder de kop, op Cijfers, Spelers, Tegenstanders en de pagina van een speler.
+  De kolommen van Cijfers zijn twee secties (`first` en `second`) in plaats van een hoofdkolom en een zijbalk.
 
 ## Onze eindplek per seizoen staat als lijn op Wedstrijden
 
@@ -5314,6 +5320,22 @@
 - **Waarom:** Drizzle zet de query met alle waarden in de melding, en MariaDB citeert soms een waarde.
   Zo kwam een geboortedatum in het serverlog, en dat is een persoonsgegeven.
 - **Alternatieven:** de eerste regel van de melding met `reasonOf` (de melding van MariaDB kan nog een waarde citeren); de waarden uit de melding wissen (een nieuwe vorm van de melding glipt erdoor).
+
+## De openbare pagina's gebruiken het raster met benoemde gebieden
+
+- **Datum:** 12 november 2026
+- **Besluit:** alle openbare pagina's met een zijkolom, een filter of een kiezer gebruiken `Page.Main` met `areas` uit #1179 (#206, #1180).
+  - **De gebieden:** `pageAreas` in `apps/site/src/page-areas.ts` maakt ze: de kop, de werkbalk, de cellen van de hoofdinhoud en de cellen ernaast, die vóór of na de hoofdinhoud staan in de bron.
+    Wat vóór staat, staat op een telefoon boven de hoofdinhoud: het filter op `/nieuws` en `/nieuws/podcasts`, de stand op `/wedstrijden` en de samenvatting op `/tegenstanders/[club]`.
+  - **Kaarten onder elkaar:** de kaarten van de zijkolom staan samen in één `Page.Section` met een naam.
+    De kaarten van de hoofdinhoud krijgen elk een eigen gebied (`Page.Cell` met `area`), of staan samen in een `Page.Section` als een component zelf meerdere cellen maakt of het aantal kaarten wisselt.
+  - **De werkbalk:** de seizoenskiezer en de schakelaar staan in `Page.Toolbar`, op Wedstrijden, Cijfers, Spelers, Tegenstanders en de pagina van een speler.
+    Op de pagina van een speler is dat alleen de schakelaar, en de tabel Per seizoen heeft hem niet meer in de kaart.
+  - **De balk "Op deze pagina:" volgt de bron:** op `/wedstrijden` staat de stand dus eerst (`matchShortcutsOf`).
+  - **Geen `aside`:** de pagina's hebben geen landmark `complementary` meer; elke sectie heeft een naam die een schermlezer voorleest.
+- **Waarom:** zie #206.
+  Een cel uit de zijkolom kon op een telefoon niet vóór de hoofdinhoud staan zonder `order`, en de seizoenskiezer in de titel nam de plek van de kop in.
+- **Alternatieven:** per pagina eigen rijen voor de hoofdinhoud (een hoge kaart naast de zijkolom rekt dan de rij op); een `Page.Section` voor elke hoofdkolom (te veel landmarks).
 
 ## De pagina's van het beheer gebruiken het raster, met de knoppen om op te slaan in de werkbalk
 

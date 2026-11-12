@@ -152,7 +152,6 @@ describe('the table Per seizoen', () => {
           competition="league"
           goalkeeper={false}
           name="Test Speler"
-          playerAddress="/spelers/test-speler"
           seasons={[
             season('2004/05', { assists: undefined, played: undefined, source: 'wikipedia', started: undefined }),
             season('2003/04'),
@@ -161,7 +160,6 @@ describe('the table Per seizoen', () => {
       ),
     )
 
-    expect(html).toContain('Welke wedstrijden')
     expect(html).toContain('alleen de Eredivisie, ')
     expect(html).toContain('Voor 2004/05 kennen we de cijfers niet per competitie.')
     expect(html).not.toContain('geen opstellingen')
