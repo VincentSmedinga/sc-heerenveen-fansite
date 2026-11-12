@@ -235,7 +235,7 @@ Het scherm laat zien wat niet meer klopt.
 De doelpunten van een wedstrijd met een verslag pas je alleen in het verslag aan.
 Het formulier van de wedstrijd laat ze dan zien, met een link naar het verslag.
 
-"Verslag weghalen" (in de zijbalk, met een reden) haalt het verslag weg en zet de doelpunten terug op wat Wikipedia zei.
+"Verslag weghalen" (in de rij onder het formulier, met een reden) haalt het verslag weg en zet de doelpunten terug op wat Wikipedia zei.
 
 ### Een verslag tijdens de wedstrijd
 
@@ -244,7 +244,7 @@ De wedstrijd blijft dan gepland, zonder uitslag, en op de pagina van de wedstrij
 Voor de aftrap staan de aftrap en de opstelling erop.
 De doelpunten van zo'n wedstrijd tellen nergens mee, tot hij is afgelopen.
 
-Wil je het verslag bijhouden vanaf je telefoon, kies dan "Verslag bijhouden" in de zijbalk van het verslag, of de naam van de wedstrijd in de lijst, zolang de wedstrijd bezig is.
+Wil je het verslag bijhouden vanaf je telefoon, kies dan "Verslag bijhouden" in de rij onder het formulier van het verslag, of de naam van de wedstrijd in de lijst, zolang de wedstrijd bezig is.
 De opstelling maak je eerst in het volledige formulier.
 Op het snelle scherm voeg je een doelpunt, een kaart of een wissel toe: kies bij "Voor wie" sc Heerenveen of de tegenstander, vul de minuut in en kies de speler.
 Bij minuut 45, 90, 105 en 120 verschijnt het veld Blessuretijd naast de minuut.
@@ -256,7 +256,7 @@ Slaat een collega tegelijk iets op, dan blijven allebei de gebeurtenissen staan.
 Heb je het volledige formulier open terwijl iemand anders iets bewaart, dan weigert het formulier te bewaren en zegt het dat iemand anders het verslag heeft bewaard.
 Wat je typte blijft staan.
 
-Is de wedstrijd afgelopen, kies dan in de zijbalk van het verslag "Wedstrijd afgelopen".
+Is de wedstrijd afgelopen, kies dan in de rij onder het formulier van het verslag "Wedstrijd afgelopen".
 Je ziet de stand uit de doelpunten van het bewaarde verslag, die je kunt aanpassen, en kiest dan nog eens "Wedstrijd afgelopen".
 De wedstrijd heeft dan zijn uitslag en "Live" is weg.
 Het verslag blijft bezig: maak het af (de bank, de minuten) en zet het dan op klaar.
@@ -265,7 +265,7 @@ Verlenging en strafschoppen vul je in met het formulier van de wedstrijd.
 ## Een verslag plakken
 
 Typ je het verslag liever als tekst uit een bron die je naast je hebt?
-Kies dan in de zijbalk van het verslag "Tekst plakken", of ga naar `/beheer/wedstrijden/<nummer>/verslag/plakken`.
+Kies dan in de rij onder het formulier van het verslag "Tekst plakken", of ga naar `/beheer/wedstrijden/<nummer>/verslag/plakken`.
 Je plakt de tekst in een eenvoudig formaat en krijgt het formulier van het verslag terug, met alles ingevuld.
 Plakken bewaart niets: pas "Opslaan" in het formulier doet dat, met dezelfde controle als bij een verslag dat je met de hand invulde.
 

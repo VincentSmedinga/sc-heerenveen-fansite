@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 
 import { Card, DataTable, Heading, Link, Notice, Page, SeasonPicker, Tag, Text } from '@fansite/design-system'
 
+import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { positionChoices } from '#src/beheer/player-fields'
 import { type AdminPlayerRow, doubleShirtNumbers, listAdminPlayers, listPlayerSeasons } from '#src/beheer/players'
@@ -81,63 +82,60 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
   const notice = known(errors, fout) ?? known(notices, gedaan)
 
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Page.Title>
-            <Heading level={1}>Spelers</Heading>
-            <SeasonPicker action={playersPath} options={seasonChoices(seasons)} value={seasonSlug(season)} />
-          </Page.Title>
-          <Text appearance="intro">
-            De spelers van een seizoen, uit Wikipedia en van de redactie. Voeg een speler toe die ontbreekt, zodat je
-            hem bij een doelpunt kunt kiezen, of verbeter er een.
-          </Text>
-          <Text>
-            <Link href={addPlayerPath(season)}>Speler toevoegen aan {season}</Link>
-          </Text>
-        </>
-      }
-      wide
-    >
-      {notice === undefined ? null : <Notice>{notice}</Notice>}
-      {doubles.length === 0 ? null : (
-        <Notice>
-          Dubbel rugnummer in de selectie van {season}:{' '}
-          {doubles.map((double) => `${double.number} (${double.names.join(', ')})`).join('; ')}. Controleer of een van
-          hen een ander nummer heeft gekregen.
-        </Notice>
-      )}
-      {rows.length === 0 ? (
-        <Text>Er zijn nog geen spelers in het seizoen {season}.</Text>
-      ) : (
-        <Card aria-labelledby="spelers-kop">
-          <Heading className="hf-visually-hidden" id="spelers-kop" level={2}>
-            Spelers in het seizoen {season}
-          </Heading>
-          <DataTable
-            appearance="text"
-            caption={`Spelers in het seizoen ${season}`}
-            columns={[
-              'Speler',
-              { fold: true, name: 'Rugnummer' },
-              { fold: true, name: 'Positie' },
-              { fold: true, name: 'Bron' },
-              { fold: true, name: 'Selectie' },
-            ]}
-            rows={rows.map((player) => ({
-              cells: [
-                player.shirtNumber === null ? 'Geen rugnummer' : `Rugnummer ${player.shirtNumber}`,
-                positionText(player),
-                player.source === 'redactie' ? <Tag tone="highlight">Redactie</Tag> : sourceLabels[player.source],
-                player.inSquad ? 'In de selectie' : 'Uit de selectie',
-              ],
-              header: player.name,
-              href: playerPath(player.id),
-            }))}
-          />
-        </Card>
-      )}
+    <Page.Main areas={adminAreas} className={compact}>
+      <Page.Cell area="head">
+        <Page.Title>
+          <Heading level={1}>Spelers</Heading>
+          <SeasonPicker action={playersPath} options={seasonChoices(seasons)} value={seasonSlug(season)} />
+        </Page.Title>
+        <Text appearance="intro">
+          De spelers van een seizoen, uit Wikipedia en van de redactie. Voeg een speler toe die ontbreekt, zodat je hem
+          bij een doelpunt kunt kiezen, of verbeter er een.
+        </Text>
+        <Text>
+          <Link href={addPlayerPath(season)}>Speler toevoegen aan {season}</Link>
+        </Text>
+      </Page.Cell>
+      <Page.Cell area="main">
+        {notice === undefined ? null : <Notice>{notice}</Notice>}
+        {doubles.length === 0 ? null : (
+          <Notice>
+            Dubbel rugnummer in de selectie van {season}:{' '}
+            {doubles.map((double) => `${double.number} (${double.names.join(', ')})`).join('; ')}. Controleer of een van
+            hen een ander nummer heeft gekregen.
+          </Notice>
+        )}
+        {rows.length === 0 ? (
+          <Text>Er zijn nog geen spelers in het seizoen {season}.</Text>
+        ) : (
+          <Card aria-labelledby="spelers-kop">
+            <Heading className="hf-visually-hidden" id="spelers-kop" level={2}>
+              Spelers in het seizoen {season}
+            </Heading>
+            <DataTable
+              appearance="text"
+              caption={`Spelers in het seizoen ${season}`}
+              columns={[
+                'Speler',
+                { fold: true, name: 'Rugnummer' },
+                { fold: true, name: 'Positie' },
+                { fold: true, name: 'Bron' },
+                { fold: true, name: 'Selectie' },
+              ]}
+              rows={rows.map((player) => ({
+                cells: [
+                  player.shirtNumber === null ? 'Geen rugnummer' : `Rugnummer ${player.shirtNumber}`,
+                  positionText(player),
+                  player.source === 'redactie' ? <Tag tone="highlight">Redactie</Tag> : sourceLabels[player.source],
+                  player.inSquad ? 'In de selectie' : 'Uit de selectie',
+                ],
+                header: player.name,
+                href: playerPath(player.id),
+              }))}
+            />
+          </Card>
+        )}
+      </Page.Cell>
     </Page.Main>
   )
 }

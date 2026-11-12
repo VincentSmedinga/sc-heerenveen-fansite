@@ -5,9 +5,12 @@ import { notFound } from 'next/navigation'
 
 import { nameOf, roleLabels } from '#src/beheer/account-fields'
 import { findAccount } from '#src/beheer/account-management'
+import { toolbarAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
+import { accountFormId } from '#src/beheer/form-ids'
 import { parseItemId } from '#src/beheer/items'
 import { requireRole } from '#src/beheer/require-role'
+import { SaveButtons } from '#src/beheer/SaveButtons'
 import { getDatabase } from '#src/database'
 
 import { AccountForm } from '../AccountForm'
@@ -47,46 +50,47 @@ export default async function AccountPage({ params, searchParams }: Props) {
   const isOwner = account.role === 'owner'
 
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Heading level={1}>Account wijzigen</Heading>
-          <Text appearance="intro">
-            {nameOf(account.firstName)}, {roleLabels[account.role]}, {account.disabled ? 'uit' : 'aan'}.
+    <Page.Main areas={toolbarAreas} className={compact}>
+      <Page.Cell area="head">
+        <Heading level={1}>Account wijzigen</Heading>
+        <Text appearance="intro">
+          {nameOf(account.firstName)}, {roleLabels[account.role]}, {account.disabled ? 'uit' : 'aan'}.
+        </Text>
+        {isOwner ? (
+          <Text>
+            Dit is het account van de eigenaar. Het houdt zijn rol en blijft aan: dat verandert alleen de opdracht op de
+            server.
           </Text>
-          {isOwner ? (
-            <Text>
-              Dit is het account van de eigenaar. Het houdt zijn rol en blijft aan: dat verandert alleen de opdracht op
-              de server.
-            </Text>
-          ) : null}
-        </>
-      }
-    >
-      {notice === undefined ? null : (
-        <Card aria-labelledby="gedaan-kop" surface="soft">
-          <Heading id="gedaan-kop" level={2}>
-            {notice.title}
-          </Heading>
-          <Text>{notice.text}</Text>
-        </Card>
-      )}
-      <AccountForm
-        action={submitAccount.bind(null, account.id)}
-        initial={{
-          adres: account.email,
-          rol: isOwner ? '' : account.role,
-          status: isOwner ? '' : account.disabled ? 'uit' : 'aan',
-          voornaam: account.firstName,
-        }}
-        key={`${account.id}-${account.email}-${account.firstName}-${account.role}-${String(account.disabled)}`}
-        kind={isOwner ? 'owner' : 'edit'}
-        submitLabel="Opslaan"
-      />
-      <Text>
-        <Link href={accountsPath}>Terug naar de accounts</Link>
-      </Text>
+        ) : null}
+      </Page.Cell>
+      <Page.Toolbar>
+        <SaveButtons buttons={[{ label: 'Opslaan' }]} cancelHref={accountsPath} formId={accountFormId} />
+      </Page.Toolbar>
+      <Page.Cell area="main">
+        {notice === undefined ? null : (
+          <Card aria-labelledby="gedaan-kop" surface="soft">
+            <Heading id="gedaan-kop" level={2}>
+              {notice.title}
+            </Heading>
+            <Text>{notice.text}</Text>
+          </Card>
+        )}
+        <AccountForm
+          action={submitAccount.bind(null, account.id)}
+          initial={{
+            adres: account.email,
+            rol: isOwner ? '' : account.role,
+            status: isOwner ? '' : account.disabled ? 'uit' : 'aan',
+            voornaam: account.firstName,
+          }}
+          key={`${account.id}-${account.email}-${account.firstName}-${account.role}-${String(account.disabled)}`}
+          kind={isOwner ? 'owner' : 'edit'}
+          submitLabel="Opslaan"
+        />
+        <Text>
+          <Link href={accountsPath}>Terug naar de accounts</Link>
+        </Text>
+      </Page.Cell>
     </Page.Main>
   )
 }

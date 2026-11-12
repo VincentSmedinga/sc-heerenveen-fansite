@@ -4,6 +4,7 @@ import { Button, ErrorSummary, Field, Form, Heading, Input, Page, Text } from '@
 import { redirect } from 'next/navigation'
 
 import { AdminMarker } from '#src/AdminMarker'
+import { singleAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { sessionToken } from '#src/beheer/require-role'
 import { findSession } from '#src/beheer/sessions'
@@ -50,8 +51,8 @@ export default async function LoginPage({
       {/* Somebody without a session gets here. The layout may still hold the answer of an earlier
           page, after a soft navigation, so this page takes the mark away itself. */}
       <AdminMarker loggedIn={false} loggedOut={uitgelogd === '1'} />
-      <Page.Main className={compact}>
-        <Page.Cell>
+      <Page.Main areas={singleAreas} className={compact}>
+        <Page.Cell area="main">
           <Heading level={1}>Inloggen voor beheer</Heading>
           <Text appearance="intro">
             Vul het e-mailadres van je account in. We mailen je een link om in te loggen. Je hebt geen wachtwoord nodig.

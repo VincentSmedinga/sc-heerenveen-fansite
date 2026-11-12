@@ -6,6 +6,7 @@ import { Card, DataTable, Filter, Heading, Link, Notice, Page, SeasonPicker, Tag
 
 import type { AdminMatchRow } from '#src/beheer/match-entries'
 
+import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { listAdminMatches } from '#src/beheer/match-entries'
 import { requireRole } from '#src/beheer/require-role'
@@ -71,67 +72,64 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   const notice = typeof fout === 'string' ? notices[fout] : typeof gedaan === 'string' ? done[gedaan] : undefined
 
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Page.Title>
-            <Heading level={1}>Wedstrijden</Heading>
-            <SeasonPicker
-              action={matchesPath}
-              fields={show === defaultShow ? {} : { tonen: show }}
-              options={seasonChoices(seasons)}
-              value={seasonSlug(season)}
-            />
-          </Page.Title>
-          <Text appearance="intro">
-            Vul een wedstrijd in of verbeter hem, als Wikipedia achterloopt of een fout heeft. Wat je opslaat, staat{' '}
-            {describeShowDelay(season, now)} op de site.
-          </Text>
-          <Text>
-            <Link href={addPath}>Wedstrijd toevoegen</Link>
-          </Text>
-        </>
-      }
-      wide
-    >
-      {notice === undefined ? null : <Notice>{notice}</Notice>}
-      {rows.length === 0 ? (
-        <Text>Er zijn nog geen wedstrijden in het seizoen {season}.</Text>
-      ) : (
-        <Card aria-labelledby="wedstrijden-kop">
-          <Heading className="hf-visually-hidden" id="wedstrijden-kop" level={2}>
-            Wedstrijden in het seizoen {season}
-          </Heading>
-          <Filter
-            items={[
-              { current: show === 'alles', href: address('alles'), label: `Alles (${rows.length})` },
-              {
-                current: show === 'zonder-uitslag',
-                href: address('zonder-uitslag'),
-                label: `Zonder uitslag (${lacking.length})`,
-              },
-              { current: show === 'aangepast', href: address('aangepast'), label: `Aangepast (${edited.length})` },
-              {
-                current: show === 'wikipedia-wacht',
-                href: address('wikipedia-wacht'),
-                label: `Wikipedia wacht (${holding.length})`,
-              },
-            ]}
-            label="Wedstrijden filteren"
+    <Page.Main areas={adminAreas} className={compact}>
+      <Page.Cell area="head">
+        <Page.Title>
+          <Heading level={1}>Wedstrijden</Heading>
+          <SeasonPicker
+            action={matchesPath}
+            fields={show === defaultShow ? {} : { tonen: show }}
+            options={seasonChoices(seasons)}
+            value={seasonSlug(season)}
           />
-          {shown.length === 0 ? (
-            <Text>{emptyTexts[show]}</Text>
-          ) : (
-            <DataTable
-              appearance="text"
-              caption={`Wedstrijden in het seizoen ${season}`}
-              columns={['Wedstrijd', 'Uitslag', 'Verslag']}
-              rows={tableRows(shown)}
+        </Page.Title>
+        <Text appearance="intro">
+          Vul een wedstrijd in of verbeter hem, als Wikipedia achterloopt of een fout heeft. Wat je opslaat, staat{' '}
+          {describeShowDelay(season, now)} op de site.
+        </Text>
+        <Text>
+          <Link href={addPath}>Wedstrijd toevoegen</Link>
+        </Text>
+      </Page.Cell>
+      <Page.Cell area="main">
+        {notice === undefined ? null : <Notice>{notice}</Notice>}
+        {rows.length === 0 ? (
+          <Text>Er zijn nog geen wedstrijden in het seizoen {season}.</Text>
+        ) : (
+          <Card aria-labelledby="wedstrijden-kop">
+            <Heading className="hf-visually-hidden" id="wedstrijden-kop" level={2}>
+              Wedstrijden in het seizoen {season}
+            </Heading>
+            <Filter
+              items={[
+                { current: show === 'alles', href: address('alles'), label: `Alles (${rows.length})` },
+                {
+                  current: show === 'zonder-uitslag',
+                  href: address('zonder-uitslag'),
+                  label: `Zonder uitslag (${lacking.length})`,
+                },
+                { current: show === 'aangepast', href: address('aangepast'), label: `Aangepast (${edited.length})` },
+                {
+                  current: show === 'wikipedia-wacht',
+                  href: address('wikipedia-wacht'),
+                  label: `Wikipedia wacht (${holding.length})`,
+                },
+              ]}
+              label="Wedstrijden filteren"
             />
-          )}
-        </Card>
-      )}
+            {shown.length === 0 ? (
+              <Text>{emptyTexts[show]}</Text>
+            ) : (
+              <DataTable
+                appearance="text"
+                caption={`Wedstrijden in het seizoen ${season}`}
+                columns={['Wedstrijd', 'Uitslag', 'Verslag']}
+                rows={tableRows(shown)}
+              />
+            )}
+          </Card>
+        )}
+      </Page.Cell>
     </Page.Main>
   )
 }

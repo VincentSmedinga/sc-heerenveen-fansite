@@ -29,6 +29,7 @@ import {
   useState,
 } from 'react'
 
+import { matchFormId } from '#src/beheer/form-ids'
 import {
   addGoalId,
   emptyGoal,
@@ -51,7 +52,7 @@ import {
 const summaryId = 'fouten'
 
 /** The `id` of the form, which the field and button of the save panel name in their `form`. */
-const formId = 'wedstrijd'
+const formId = matchFormId
 
 const ours = 'sc Heerenveen'
 

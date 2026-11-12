@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 
 import { articlePath } from '#src/app/beheer/artikelen/paths'
 import { ArticleText } from '#src/ArticleText'
+import { singleAreas } from '#src/beheer/areas'
 import { findVersion } from '#src/beheer/article-versions'
 import { findArticleFor } from '#src/beheer/articles'
 import { compact } from '#src/beheer/density'
@@ -43,31 +44,33 @@ export default async function ArticleVersionPage({ params }: { params: Promise<{
   const moment = article.publishedAt ?? new Date()
 
   return (
-    <Page.Main className={compact}>
-      <Card aria-labelledby="versie-kop" surface="soft">
-        <Heading id="versie-kop" level={2}>
-          Versie {version.version}
-        </Heading>
-        <Text>
-          Bewaard op {formatVersionTime(version.savedAt)} door {version.savedBy}.{' '}
-          {version.newest
-            ? 'Dit is de huidige versie: het artikel zoals het nu is.'
-            : 'Dit is een eerdere versie. Het artikel is daarna veranderd.'}
-        </Text>
-        <Text>
-          {version.newest ? 'Het adres van deze versie is' : 'Het adres van deze versie was'} /redactie/{version.slug}.
-          Zo ziet een bezoeker deze tekst. <Link href={articlePath(article.id)}>Terug naar het formulier</Link>
-        </Text>
-      </Card>
-      <Article
-        author={version.author}
-        date={formatArticleDate(moment)}
-        dateTime={dayOf(moment)}
-        intro={version.intro}
-        title={version.title}
-      >
-        <ArticleText body={version.body} />
-      </Article>
+    <Page.Main areas={singleAreas} className={compact}>
+      <Page.Cell area="main">
+        <Card aria-labelledby="versie-kop" surface="soft">
+          <Heading id="versie-kop" level={2}>
+            Versie {version.version}
+          </Heading>
+          <Text>
+            Bewaard op {formatVersionTime(version.savedAt)} door {version.savedBy}.{' '}
+            {version.newest
+              ? 'Dit is de huidige versie: het artikel zoals het nu is.'
+              : 'Dit is een eerdere versie. Het artikel is daarna veranderd.'}
+          </Text>
+          <Text>
+            {version.newest ? 'Het adres van deze versie is' : 'Het adres van deze versie was'} /redactie/{version.slug}
+            . Zo ziet een bezoeker deze tekst. <Link href={articlePath(article.id)}>Terug naar het formulier</Link>
+          </Text>
+        </Card>
+        <Article
+          author={version.author}
+          date={formatArticleDate(moment)}
+          dateTime={dayOf(moment)}
+          intro={version.intro}
+          title={version.title}
+        >
+          <ArticleText body={version.body} />
+        </Article>
+      </Page.Cell>
     </Page.Main>
   )
 }

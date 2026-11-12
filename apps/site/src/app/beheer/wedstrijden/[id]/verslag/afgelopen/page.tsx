@@ -5,6 +5,7 @@ import { Heading, Link, Page, Text } from '@fansite/design-system'
 import { notFound, redirect } from 'next/navigation'
 
 import { reportPath } from '#src/app/beheer/wedstrijden/paths'
+import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
 import { findReportScreen } from '#src/beheer/match-reports'
@@ -45,29 +46,27 @@ export default async function FinishMatchPage({ params }: Props) {
   const ours = goals.filter((goal) => goal.ours).length
 
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Text>
-            <Link href={reportPath(id)} icon="arrow-left">
-              Terug naar het verslag
-            </Link>
-          </Text>
-          <Heading level={1}>Wedstrijd afgelopen: {clubs}</Heading>
-          <Text appearance="meta">
-            {match.competition}, {match.round} · {describeEntryKickoff(match)}
-          </Text>
-        </>
-      }
-    >
-      <FinishForm
-        action={submitFinish.bind(null, id)}
-        cancelHref={reportPath(id)}
-        counted={{ against: goals.length - ours, for: ours }}
-        home={match.home}
-        opponent={match.opponent}
-      />
+    <Page.Main areas={adminAreas} className={compact}>
+      <Page.Cell area="head">
+        <Text>
+          <Link href={reportPath(id)} icon="arrow-left">
+            Terug naar het verslag
+          </Link>
+        </Text>
+        <Heading level={1}>Wedstrijd afgelopen: {clubs}</Heading>
+        <Text appearance="meta">
+          {match.competition}, {match.round} · {describeEntryKickoff(match)}
+        </Text>
+      </Page.Cell>
+      <Page.Cell area="main">
+        <FinishForm
+          action={submitFinish.bind(null, id)}
+          cancelHref={reportPath(id)}
+          counted={{ against: goals.length - ours, for: ours }}
+          home={match.home}
+          opponent={match.opponent}
+        />
+      </Page.Cell>
     </Page.Main>
   )
 }

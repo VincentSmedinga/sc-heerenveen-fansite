@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { Fragment } from 'react'
 
 import { personGapLegend, personGapRow, personGapTableColumns } from '#src/app/beheer/kwaliteit/gap-table'
+import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { personFactsPath } from '#src/beheer/person-facts'
 import {
@@ -64,75 +65,72 @@ export default async function LetterQualityPage({ params, searchParams }: Props)
   const back = letterTablePath(letter, column)
 
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Text>
-            <Link href={personQualityPath} icon="arrow-left">
-              Personen
-            </Link>
-          </Text>
-          <Heading level={1}>{shown}</Heading>
-          <Text appearance="intro">
-            {withGaps.length === 0
-              ? `Alles compleet${columnName === undefined ? '' : ` in de kolom ${columnName}`}.`
-              : `${plural(withGaps.length, 'persoon', 'personen')} van de ${inLetter.length} ${withGaps.length === 1 ? 'heeft' : 'hebben'} een gat${columnName === undefined ? '' : ` in de kolom ${columnName}`}.`}
-          </Text>
-          <Text>
-            {letters.map((candidate, index) => {
-              const label = candidate === '#' ? 'Overig' : candidate
+    <Page.Main areas={adminAreas} className={compact}>
+      <Page.Cell area="head">
+        <Text>
+          <Link href={personQualityPath} icon="arrow-left">
+            Personen
+          </Link>
+        </Text>
+        <Heading level={1}>{shown}</Heading>
+        <Text appearance="intro">
+          {withGaps.length === 0
+            ? `Alles compleet${columnName === undefined ? '' : ` in de kolom ${columnName}`}.`
+            : `${plural(withGaps.length, 'persoon', 'personen')} van de ${inLetter.length} ${withGaps.length === 1 ? 'heeft' : 'hebben'} een gat${columnName === undefined ? '' : ` in de kolom ${columnName}`}.`}
+        </Text>
+        <Text>
+          {letters.map((candidate, index) => {
+            const label = candidate === '#' ? 'Overig' : candidate
 
-              return (
-                <Fragment key={candidate}>
-                  {index === 0 ? null : ' '}
-                  {candidate === letter ? (
-                    <Link aria-current="page" href={letterTablePath(candidate, column)}>
-                      <Strong>{label}</Strong>
-                    </Link>
-                  ) : used.has(candidate) ? (
-                    <Link href={letterTablePath(candidate, column)}>{label}</Link>
-                  ) : (
-                    label
-                  )}
-                </Fragment>
-              )
-            })}
+            return (
+              <Fragment key={candidate}>
+                {index === 0 ? null : ' '}
+                {candidate === letter ? (
+                  <Link aria-current="page" href={letterTablePath(candidate, column)}>
+                    <Strong>{label}</Strong>
+                  </Link>
+                ) : used.has(candidate) ? (
+                  <Link href={letterTablePath(candidate, column)}>{label}</Link>
+                ) : (
+                  label
+                )}
+              </Fragment>
+            )
+          })}
+        </Text>
+        {column === undefined ? null : (
+          <Text>
+            <Link href={letterTablePath(letter)}>Alle kolommen</Link>
           </Text>
-          {column === undefined ? null : (
-            <Text>
-              <Link href={letterTablePath(letter)}>Alle kolommen</Link>
-            </Text>
-          )}
-        </>
-      }
-      wide
-    >
-      {gedaan === 'kolom-compleet' ? (
-        <Notice>
-          <Strong>Opgeslagen.</Strong> Er is geen andere persoon bij {shown} met een gat in deze kolom.
-        </Notice>
-      ) : null}
-      <Text>
-        <Link href={personFactsPath}>Linie en land snel aanvullen</Link>
-      </Text>
-      {withGaps.length === 0 ? null : (
-        <Card aria-labelledby="personen-kop">
-          <Heading id="personen-kop" level={2}>
-            {plural(withGaps.length, 'persoon', 'personen')} met een gat
-          </Heading>
-          <Text appearance="meta">{personGapLegend}</Text>
-          <DataTable
-            appearance="text"
-            caption={`Personen bij ${shown} met een gat${columnName === undefined ? '' : ` in de kolom ${columnName}`}, op achternaam`}
-            columns={personGapTableColumns('Persoon')}
-            rows={withGaps.map((person) => personGapRow(person, back))}
-          />
-        </Card>
-      )}
-      <Text>
-        <Link href={namesQualityPath}>Namen die op elkaar lijken en de lijst van Wikipedia</Link>
-      </Text>
+        )}
+      </Page.Cell>
+      <Page.Cell area="main">
+        {gedaan === 'kolom-compleet' ? (
+          <Notice>
+            <Strong>Opgeslagen.</Strong> Er is geen andere persoon bij {shown} met een gat in deze kolom.
+          </Notice>
+        ) : null}
+        <Text>
+          <Link href={personFactsPath}>Linie en land snel aanvullen</Link>
+        </Text>
+        {withGaps.length === 0 ? null : (
+          <Card aria-labelledby="personen-kop">
+            <Heading id="personen-kop" level={2}>
+              {plural(withGaps.length, 'persoon', 'personen')} met een gat
+            </Heading>
+            <Text appearance="meta">{personGapLegend}</Text>
+            <DataTable
+              appearance="text"
+              caption={`Personen bij ${shown} met een gat${columnName === undefined ? '' : ` in de kolom ${columnName}`}, op achternaam`}
+              columns={personGapTableColumns('Persoon')}
+              rows={withGaps.map((person) => personGapRow(person, back))}
+            />
+          </Card>
+        )}
+        <Text>
+          <Link href={namesQualityPath}>Namen die op elkaar lijken en de lijst van Wikipedia</Link>
+        </Text>
+      </Page.Cell>
     </Page.Main>
   )
 }

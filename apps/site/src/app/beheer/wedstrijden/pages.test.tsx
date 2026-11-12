@@ -193,7 +193,8 @@ describe('the list', () => {
     expect(html).not.toContain('hf-data-table-fold')
     expect(html).toContain('<span class="hf-data-table-secondary">')
     expect(html).toContain('Eredivisie, Speelronde 11')
-    expect(html).toContain('hf-page-main hf-page-main-wide hf-density-compact')
+    expect(html).toContain('hf-page-main hf-page-main-grid hf-density-compact')
+    expect(html).not.toContain('hf-page-main-wide')
   })
 
   it('shows the filter with the numbers, as links with the choice in the address', async () => {
@@ -418,7 +419,8 @@ describe('the match', () => {
     expect(html).toContain('<span class="hf-tag hf-tag-attention">Uitslag ontbreekt</span>')
     expect(html).not.toContain('Terug naar de wedstrijden')
     expect(html).not.toContain('hf-page-sidebar')
-    expect(html).toContain('hf-page-main hf-page-main-wide hf-density-compact')
+    expect(html).toContain('hf-page-main hf-page-main-grid hf-density-compact')
+    expect(html).not.toContain('hf-page-main-wide')
     expect(html).not.toContain('Laatste invoer')
   })
 

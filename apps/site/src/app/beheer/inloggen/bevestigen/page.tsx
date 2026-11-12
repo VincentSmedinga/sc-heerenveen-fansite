@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { Button, Form, Heading, Link, Page, Text } from '@fansite/design-system'
 
+import { singleAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { loginLinkWorks } from '#src/beheer/sessions'
 import { getDatabase } from '#src/database'
@@ -23,8 +24,8 @@ export default async function ConfirmPage({
   const works = typeof token === 'string' && (await loginLinkWorks(getDatabase().db, token))
 
   return (
-    <Page.Main className={compact}>
-      <Page.Cell>
+    <Page.Main areas={singleAreas} className={compact}>
+      <Page.Cell area="main">
         {works ? (
           <>
             <Heading level={1}>Inloggen</Heading>

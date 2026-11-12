@@ -5,6 +5,7 @@ import { playerListReport, similarPersons } from '@fansite/db/persons'
 import { Card, Heading, Link, List, Page, Text } from '@fansite/design-system'
 import { Fragment } from 'react'
 
+import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { personQualityPath } from '#src/beheer/person-table'
 import { requireRole } from '#src/beheer/require-role'
@@ -31,41 +32,38 @@ export default async function NamesQualityPage() {
   const list = await playerListReport(db)
 
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Text>
-            <Link href={personQualityPath} icon="arrow-left">
-              Personen
-            </Link>
-          </Text>
-          <Heading level={1}>{title}</Heading>
-        </>
-      }
-      wide
-    >
-      <Card aria-labelledby="personen-kop">
-        <Heading id="personen-kop" level={2}>
-          Personen die op elkaar lijken
-        </Heading>
-        {alike.length === 0 ? (
-          <Text>Er zijn geen personen die op elkaar lijken.</Text>
-        ) : (
-          <>
-            <Text>
-              Deze personen hebben bijna dezelfde naam op Wikipedia, op accenten, hoofdletters en streepjes na. We
-              voegen ze niet vanzelf samen, want twee spelers kunnen dezelfde naam hebben.
-            </Text>
-            <List role="list">
-              {alike.map((titles) => (
-                <List.Item key={titles.join('|')}>{sentenceList(titles)}</List.Item>
-              ))}
-            </List>
-          </>
-        )}
-      </Card>
-      <PlayerListCard report={list} />
+    <Page.Main areas={adminAreas} className={compact}>
+      <Page.Cell area="head">
+        <Text>
+          <Link href={personQualityPath} icon="arrow-left">
+            Personen
+          </Link>
+        </Text>
+        <Heading level={1}>{title}</Heading>
+      </Page.Cell>
+      <Page.Cell area="main">
+        <Card aria-labelledby="personen-kop">
+          <Heading id="personen-kop" level={2}>
+            Personen die op elkaar lijken
+          </Heading>
+          {alike.length === 0 ? (
+            <Text>Er zijn geen personen die op elkaar lijken.</Text>
+          ) : (
+            <>
+              <Text>
+                Deze personen hebben bijna dezelfde naam op Wikipedia, op accenten, hoofdletters en streepjes na. We
+                voegen ze niet vanzelf samen, want twee spelers kunnen dezelfde naam hebben.
+              </Text>
+              <List role="list">
+                {alike.map((titles) => (
+                  <List.Item key={titles.join('|')}>{sentenceList(titles)}</List.Item>
+                ))}
+              </List>
+            </>
+          )}
+        </Card>
+        <PlayerListCard report={list} />
+      </Page.Cell>
     </Page.Main>
   )
 }

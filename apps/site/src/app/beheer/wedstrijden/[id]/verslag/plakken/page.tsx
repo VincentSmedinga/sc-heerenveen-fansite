@@ -5,6 +5,7 @@ import { Heading, Link, Page, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
 import { matchPath, reportPath } from '#src/app/beheer/wedstrijden/paths'
+import { toolbarAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
 import { findReportScreen, reportBasis, seriesOf } from '#src/beheer/match-reports'
@@ -14,7 +15,7 @@ import { getDatabase } from '#src/database'
 import { describeShowDelay } from '#src/matches'
 
 import { submitPaste } from './actions'
-import { PasteBody, PasteProvider, PasteSidebar } from './PasteScreen'
+import { PasteBody, PasteProvider, PasteToolbar } from './PasteScreen'
 
 // Render on each request: the report changes with every entry and every import.
 export const dynamic = 'force-dynamic'
@@ -53,27 +54,24 @@ export default async function PasteReportPage({ params }: Props) {
       }}
       existing={report === undefined ? undefined : describeStored(report)}
     >
-      <Page.Main
-        className={compact}
-        intro={
-          <>
-            <Text>
-              <Link href={reportPath(match.id)} icon="arrow-left">
-                Terug naar het verslag
-              </Link>
-            </Text>
-            <Heading level={1}>Verslag plakken: {clubs}</Heading>
-            <Text appearance="meta">
-              {match.competition}, {match.round} · {describeEntryKickoff(match)} ·{' '}
-              {match.status === 'played' ? `Uitslag ${match.goalsFor}–${match.goalsAgainst}` : 'Nog geen uitslag'}
-            </Text>
-          </>
-        }
-        wide
-      >
-        <PasteBody />
+      <Page.Main areas={toolbarAreas} className={compact}>
+        <Page.Cell area="head">
+          <Text>
+            <Link href={reportPath(match.id)} icon="arrow-left">
+              Terug naar het verslag
+            </Link>
+          </Text>
+          <Heading level={1}>Verslag plakken: {clubs}</Heading>
+          <Text appearance="meta">
+            {match.competition}, {match.round} · {describeEntryKickoff(match)} ·{' '}
+            {match.status === 'played' ? `Uitslag ${match.goalsFor}–${match.goalsAgainst}` : 'Nog geen uitslag'}
+          </Text>
+        </Page.Cell>
+        <PasteToolbar />
+        <Page.Cell area="main">
+          <PasteBody />
+        </Page.Cell>
       </Page.Main>
-      <PasteSidebar />
     </PasteProvider>
   )
 }

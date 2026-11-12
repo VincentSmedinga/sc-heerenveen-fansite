@@ -3,10 +3,13 @@ import type { Metadata } from 'next'
 import { competitions } from '@fansite/db/schema'
 import { Heading, Link, Page, Text } from '@fansite/design-system'
 
+import { toolbarAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
+import { addMatchFormId } from '#src/beheer/form-ids'
 import { listClubChoices } from '#src/beheer/match-additions'
 import { statusChoices } from '#src/beheer/match-form'
 import { requireRole } from '#src/beheer/require-role'
+import { SaveButtons } from '#src/beheer/SaveButtons'
 import { getDatabase } from '#src/database'
 
 import { submitAddMatch } from '../actions'
@@ -27,25 +30,25 @@ export default async function AddMatchPage() {
   const clubs = await listClubChoices(getDatabase().db)
 
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Text>
-            <Link href={matchesPath} icon="arrow-left">
-              Terug naar Wedstrijden
-            </Link>
-          </Text>
-          <Heading level={1}>Wedstrijd toevoegen</Heading>
-          <Text appearance="intro">
-            Voeg een wedstrijd toe die geen bron heeft die de import kan lezen, zoals een wedstrijd uit een
-            krantenarchief. Geen enkele import wijzigt of verwijdert hem. Doelpunten en een verslag vul je daarna in.
-          </Text>
-        </>
-      }
-      wide
-    >
-      <AddMatchForm action={submitAddMatch} choices={{ clubs, competitions, statuses: statusChoices }} />
+    <Page.Main areas={toolbarAreas} className={compact}>
+      <Page.Cell area="head">
+        <Text>
+          <Link href={matchesPath} icon="arrow-left">
+            Terug naar Wedstrijden
+          </Link>
+        </Text>
+        <Heading level={1}>Wedstrijd toevoegen</Heading>
+        <Text appearance="intro">
+          Voeg een wedstrijd toe die geen bron heeft die de import kan lezen, zoals een wedstrijd uit een
+          krantenarchief. Geen enkele import wijzigt of verwijdert hem. Doelpunten en een verslag vul je daarna in.
+        </Text>
+      </Page.Cell>
+      <Page.Toolbar>
+        <SaveButtons buttons={[{ label: 'Wedstrijd toevoegen' }]} cancelHref={matchesPath} formId={addMatchFormId} />
+      </Page.Toolbar>
+      <Page.Cell area="main">
+        <AddMatchForm action={submitAddMatch} choices={{ clubs, competitions, statuses: statusChoices }} />
+      </Page.Cell>
     </Page.Main>
   )
 }

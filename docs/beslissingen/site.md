@@ -2139,6 +2139,7 @@
   Een tegel Wedstrijden die niet meer naar `?tonen=aangepast` wijst, is een klik meer voor wie alleen de afwijkingen wil zien, maar de kaart heeft die link.
 - **Alternatieven:** een doorverwijzing naar het vaakst gebruikte scherm (werkt niet voor twee rollen met andere schermen); alleen de lijst houden (blijft onduidelijk wat wacht); de kaart boven de tegels op een telefoon met `order` (breekt de leesvolgorde en vraagt een aanpassing aan `Page`); het aantal als label op de tegel (een tegel is één link, en een label zegt niet waar het naartoe gaat); een lege kaart "Niets te doen" (een kaart die niets zegt, naast de lege hoofdkolom).
 - **Later:** zie _Uitloggen is de laatste knop van de balk van het beheer_ (2 november 2026): de knop Uitloggen staat niet meer onder de tegels maar in de balk van het beheer.
+- **Later:** zie _De pagina's van het beheer gebruiken het raster, met de knoppen om op te slaan in de werkbalk_ (12 november 2026): de kaart Te doen is geen zijbalk (`aside`) meer maar een sectie in `main`, en staat op een telefoon vóór de tegels.
 
 ## Uitloggen is de laatste knop van de balk van het beheer
 
@@ -2360,6 +2361,7 @@
   - **Het scherm:** `/beheer/stadions` toont de clubs waarvan we wedstrijden hebben, met het label "Eigen lijst", het filter Alles of Eigen lijst en zoeken op de naam.
     `/beheer/stadions/<club>` is de brede pagina met een zijbalk, zoals een wedstrijd: het formulier met de regels in de hoofdkolom, en in de zijbalk "Opslaan", wat de wedstrijden zeggen met de knop "Overnemen", en het uitklapblok "Terug naar Wikipedia".
     **Later:** sinds 12 november 2026 heeft het formulier van een wedstrijd geen zijbalk meer (#1162); het stadion houdt de zijne.
+    **Later:** zie _De pagina's van het beheer gebruiken het raster, met de knoppen om op te slaan in de werkbalk_: ook het stadion heeft geen zijbalk meer, en "Opslaan" staat in de werkbalk en aan het einde van het formulier.
     "Overnemen" vult het formulier en slaat niets op; "Terug naar Wikipedia" haalt de hele lijst weg, ook de toelichtingen, na een bevestiging.
     Voor dezelfde rollen als de wedstrijden: alleen een beheerder.
   - **Geen reden:** een opslag of een "Terug naar Wikipedia" vraagt geen reden, anders dan een wedstrijd.
@@ -5334,3 +5336,26 @@
 - **Waarom:** zie #206.
   Een cel uit de zijkolom kon op een telefoon niet vóór de hoofdinhoud staan zonder `order`, en de seizoenskiezer in de titel nam de plek van de kop in.
 - **Alternatieven:** per pagina eigen rijen voor de hoofdinhoud (een hoge kaart naast de zijkolom rekt dan de rij op); een `Page.Section` voor elke hoofdkolom (te veel landmarks).
+
+## De pagina's van het beheer gebruiken het raster, met de knoppen om op te slaan in de werkbalk
+
+- **Datum:** 12 november 2026
+- **Besluit:** alle pagina's van het beheer zijn een `Page.Main` met `areas`, zonder `Page.Sidebar`, `intro`, `sticky` en `wide` (#1181, deel van #206).
+  - **De kop** is een `Page.Cell` met het gebied `head`, de inhoud een cel `main`.
+    De gebieden staan in `apps/site/src/beheer/areas.ts`, zodat een pagina ze noemt in plaats van ze te schrijven.
+    Elke pagina is 64 rem breed, ook die met een tabel.
+  - **De werkbalk** (`Page.Toolbar`) heeft het `Filter` van de delen van een wedstrijd en een persoon, `SegmentedLinks` op Kwaliteit, en het zoekveld en de schakelaar op Berichten, Stadions en Clubnamen.
+  - **Opslaan en annuleren** staan in de werkbalk en nog een keer aan het einde van het formulier, op de formulieren van een account, artikel, speler, persoon, wedstrijd, verslag, stadion, clubnamen, nieuwe wedstrijd en het verslag plakken.
+    De knoppen in de werkbalk horen bij het formulier met het attribuut `form`, dus ze werken zonder JavaScript.
+    Het onderdeel `SaveButtons` en de `id`'s van de formulieren (`form-ids.ts`) delen ze.
+    Twee knoppen met dezelfde naam doen hetzelfde, dus dat is geen probleem voor een schermlezer.
+    De knop in de werkbalk is niet uitgeschakeld terwijl het formulier opslaat, want de pagina is een servercomponent die dat niet weet.
+  - **Het verslag van een wedstrijd** heeft het voorbeeld naast het formulier (`ReportWorkspace`, nu in 64 rem), en "Tijdens de wedstrijd", "Tekst plakken", "Wedstrijd afgelopen" en "Verslag weghalen" in een rij over de hele breedte eronder, als een sectie met een naam (`rowStyle`).
+  - **Stadions en clubnamen van een club** hebben een tweede kolom met een sectie voor wat Wikipedia zegt.
+  - **`/beheer`** zet de kaart Te doen in de tweede kolom en op een telefoon vóór de tegels.
+  - **Geen knop in de werkbalk** voor "Bijhouden" (de losse formulieren voor een doelpunt, kaart en wissel slaan elk meteen op), "Wedstrijd afgelopen" (een bevestiging, geen opslag) en "Samenvoegen" (een gevaarlijke actie).
+- **Waarom:** een plakkende zijbalk met knoppen bestaat dan niet meer, en aan het einde van een lang formulier wil je opslaan zonder terug te scrollen.
+  De Enter-toets in een veld slaat nog op, want de knop in de werkbalk heeft dezelfde waarde als de verborgen eerste knop van het formulier.
+- **Nadeel:** de tabellen hebben 64 rem in plaats van 84 rem; de pagina's met `wide` mogen nog opzij scrollen tot #1182 het meet.
+  Op de pagina's van een wedstrijd en een persoon die van Kwaliteit komen, is de eerste knop in het document nu "Opslaan en volgende", dus de Enter-toets in een veld doet dat.
+- **Alternatieven:** een plakkende rij onderaan het scherm; de knoppen alleen in de werkbalk (dan is het einde van een lang formulier leeg); "Live" en "Plakken" als links in de werkbalk.

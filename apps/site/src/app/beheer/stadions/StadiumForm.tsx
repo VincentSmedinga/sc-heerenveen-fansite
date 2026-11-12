@@ -9,6 +9,7 @@ import {
   Input,
   InputTable,
   type InputTableRow,
+  Link,
   Strong,
   Text,
 } from '@fansite/design-system'
@@ -28,9 +29,9 @@ import {
 /**
  * The form of the stadiums of a club: the list of the errors and a card with the lines. The
  * first button in the form is a hidden "Opslaan", so the Enter key in a field saves, and never
- * removes the first line. The save button and "Overnemen" are in the sidebar of the page and
- * belong to this form by its `id` (the `form` attribute). Every field and button of a line
- * names the line it belongs to, with the name of its stadium.
+ * removes the first line. The save button is at its end. "Overnemen" and a second save button
+ * are in the page and belong to this form by its `id` (the `form` attribute). Every field and
+ * button of a line names the line it belongs to, with the name of its stadium.
  *
  * It is a plain POST that works without JavaScript: the component is a client component only to
  * show what the server says. Adding and removing a line, and taking Wikipedia over, are buttons
@@ -38,12 +39,15 @@ import {
  */
 export function StadiumForm({
   action,
+  cancelHref,
   initial,
 }: {
   action: (previous: StadiumFormState, formData: FormData) => Promise<StadiumFormState>
+  /** Where "Annuleren" goes. */
+  cancelHref: string
   initial: StadiumRowValues[]
 }) {
-  const [state, formAction] = useActionState(action, { errors: {}, values: initial })
+  const [state, formAction, pending] = useActionState(action, { errors: {}, values: initial })
   const { errors, values } = state
 
   // After a button the editor must land somewhere sensible. A save with errors goes to the list
@@ -168,6 +172,12 @@ export function StadiumForm({
             rows={rows}
           />
         </Card>
+        <Button disabled={pending} icon="save" name="knop" type="submit" value="opslaan">
+          Opslaan
+        </Button>
+        <Text>
+          <Link href={cancelHref}>Annuleren</Link>
+        </Text>
       </Form>
     </>
   )

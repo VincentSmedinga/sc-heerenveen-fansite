@@ -19,6 +19,7 @@ import {
 } from '@fansite/design-system'
 import { createContext, type ReactNode, use, useActionState, useEffect } from 'react'
 
+import { pasteFormId, reportFormId } from '#src/beheer/form-ids'
 import {
   firstPasteState,
   type PasteAsk,
@@ -27,6 +28,7 @@ import {
   type PasteRead_,
   type PasteState,
 } from '#src/beheer/report-paste-state'
+import { SaveButtons } from '#src/beheer/SaveButtons'
 
 import { type ReportChoices, ReportErrorSummary, ReportFields, ReportFormShell, ReportSavePanel } from '../ReportForm'
 
@@ -150,6 +152,7 @@ export function PasteBody() {
         <PasteOutcome state={state} />
         <ReportErrorSummary />
         <ReportFields />
+        <ReportSavePanel cancelHref={cancelHref} />
       </>
     )
   }
@@ -161,7 +164,7 @@ export function PasteBody() {
           Tekst plakken
         </Heading>
         <PasteError state={state} />
-        <Form action={formAction} key={state.version}>
+        <Form action={formAction} id={pasteFormId} key={state.version}>
           <Field
             error={state.field === 'vervangen' ? undefined : state.error}
             hint={`Plak de tekst in het formaat hieronder. Hoogstens ${pasteMaxLength.toLocaleString('nl-NL')} tekens. Er wordt niets bewaard voordat je in het formulier Opslaan kiest.`}
@@ -223,9 +226,9 @@ export function PasteBody() {
 }
 
 /**
- * The state of the screen "Tekst plakken", shared by its body and its sidebar: the answer of
+ * The state of the screen "Tekst plakken", shared by its body and its toolbar: the answer of
  * the server to the text, and, once the text is read, the form of the report with the values
- * filled in. The page puts the two in the columns of the page, as the screen of the report
+ * filled in. The page puts the two in the areas of the page, as the screen of the report
  * does, so they sit in this provider. Nothing is stored until the form is saved. Without
  * JavaScript it is two plain posts: the text, then the form.
  */
@@ -265,15 +268,22 @@ export function PasteProvider({
   return <PasteContext value={context}>{children}</PasteContext>
 }
 
-/** The sidebar: "Opslaan" for the form, which is only there once the text is read. */
-export function PasteSidebar() {
+/**
+ * The toolbar: "Opslaan" for the form once the text is read, and before that "Tekst lezen" for
+ * the form with the text. The buttons at the end of the forms do the same.
+ */
+export function PasteToolbar() {
   const { cancelHref, state } = usePaste()
 
-  return state.kind === 'read' ? (
-    <Page.Sidebar aria-label="Opslaan" sticky>
-      <ReportSavePanel cancelHref={cancelHref} />
-    </Page.Sidebar>
-  ) : null
+  return (
+    <Page.Toolbar>
+      {state.kind === 'read' ? (
+        <SaveButtons buttons={[{ label: 'Opslaan', value: 'opslaan' }]} cancelHref={cancelHref} formId={reportFormId} />
+      ) : (
+        <SaveButtons buttons={[{ label: 'Tekst lezen', noIcon: true }]} cancelHref={cancelHref} formId={pasteFormId} />
+      )}
+    </Page.Toolbar>
+  )
 }
 
 /**
@@ -303,7 +313,7 @@ function usePaste() {
   const context = use(PasteContext)
 
   if (context === undefined) {
-    throw new Error('PasteBody and PasteSidebar belong in a PasteProvider.')
+    throw new Error('PasteBody and PasteToolbar belong in a PasteProvider.')
   }
 
   return context

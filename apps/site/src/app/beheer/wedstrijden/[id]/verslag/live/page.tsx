@@ -6,6 +6,7 @@ import { Button, Card, Form, Heading, Link, Notice, Page, Strong, Text } from '@
 import { notFound } from 'next/navigation'
 
 import { finishPath, reportPath } from '#src/app/beheer/wedstrijden/paths'
+import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
 import { liveViewOf } from '#src/beheer/live-report'
@@ -56,85 +57,84 @@ export default async function LiveReportPage({ params }: Props) {
         : `${view.score.opponent}–${view.score.ours}`
 
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Heading level={1}>Bijhouden: {clubs}</Heading>
-          <Text appearance="meta">
-            {match.competition}, {match.round} · {describeEntryKickoff(match)}
-          </Text>
-        </>
-      }
-    >
-      {view === undefined ? (
-        <Card aria-labelledby="geen-verslag-kop">
-          <Heading id="geen-verslag-kop" level={2}>
-            Eerst de opstelling
-          </Heading>
-          <Text>
-            Dit verslag heeft nog geen spelers. Vul eerst de opstelling in met het volledige formulier of door tekst te
-            plakken. Daarna houd je hier de wedstrijd bij.
-          </Text>
-          <Link href={reportPath(id)} icon="arrow-right">
-            Naar het verslag
-          </Link>
-        </Card>
-      ) : (
-        <LiveStatusProvider eventCount={view.events.length}>
-          <Card aria-labelledby="stand-kop">
-            <Heading id="stand-kop" level={2}>
-              Stand {score}
+    <Page.Main areas={adminAreas} className={compact}>
+      <Page.Cell area="head">
+        <Heading level={1}>Bijhouden: {clubs}</Heading>
+        <Text appearance="meta">
+          {match.competition}, {match.round} · {describeEntryKickoff(match)}
+        </Text>
+      </Page.Cell>
+      <Page.Cell area="main">
+        {view === undefined ? (
+          <Card aria-labelledby="geen-verslag-kop">
+            <Heading id="geen-verslag-kop" level={2}>
+              Eerst de opstelling
             </Heading>
-            {phase === undefined ? null : (
-              <Form action={finishPath(id)} method="get">
-                <Button type="submit">Wedstrijd afgelopen</Button>
-              </Form>
+            <Text>
+              Dit verslag heeft nog geen spelers. Vul eerst de opstelling in met het volledige formulier of door tekst
+              te plakken. Daarna houd je hier de wedstrijd bij.
+            </Text>
+            <Link href={reportPath(id)} icon="arrow-right">
+              Naar het verslag
+            </Link>
+          </Card>
+        ) : (
+          <LiveStatusProvider eventCount={view.events.length}>
+            <Card aria-labelledby="stand-kop">
+              <Heading id="stand-kop" level={2}>
+                Stand {score}
+              </Heading>
+              {phase === undefined ? null : (
+                <Form action={finishPath(id)} method="get">
+                  <Button type="submit">Wedstrijd afgelopen</Button>
+                </Form>
+              )}
+            </Card>
+            {toCheck.length === 0 ? null : (
+              <Notice>
+                <Strong>Controleer het verslag.</Strong> Wat je invoert, wordt opgeslagen, ook als de regels iets
+                vinden. Los het op in het <Link href={reportPath(id)}>volledige formulier</Link>:{' '}
+                {toCheck.slice(0, 3).join(' ')}
+              </Notice>
             )}
-          </Card>
-          {toCheck.length === 0 ? null : (
-            <Notice>
-              <Strong>Controleer het verslag.</Strong> Wat je invoert, wordt opgeslagen, ook als de regels iets vinden.
-              Los het op in het <Link href={reportPath(id)}>volledige formulier</Link>: {toCheck.slice(0, 3).join(' ')}
-            </Notice>
-          )}
-          <LiveEventForm
-            action={submitLiveEvent.bind(null, id, 'doelpunt')}
-            kind="doelpunt"
-            opponent={match.opponent}
-            players={view.players}
-            title="Doelpunt"
-          />
-          <LiveEventForm
-            action={submitLiveEvent.bind(null, id, 'kaart')}
-            kind="kaart"
-            opponent={match.opponent}
-            players={view.players}
-            title="Kaart"
-          />
-          <LiveEventForm
-            action={submitLiveEvent.bind(null, id, 'wissel')}
-            kind="wissel"
-            opponent={match.opponent}
-            players={view.players}
-            title="Wissel"
-          />
-          <Card aria-labelledby="gebeurtenissen-kop">
-            <Heading id="gebeurtenissen-kop" level={2} tabIndex={-1}>
-              Gebeurtenissen
-            </Heading>
-            <LiveEvents
-              events={view.events.map((event) => ({
-                ...event,
-                action: submitRemoveLiveEvent.bind(null, id, event.kind, event.id),
-              }))}
+            <LiveEventForm
+              action={submitLiveEvent.bind(null, id, 'doelpunt')}
+              kind="doelpunt"
+              opponent={match.opponent}
+              players={view.players}
+              title="Doelpunt"
             />
-          </Card>
-          <Text>
-            <Link href={reportPath(id)}>Naar het volledige verslag</Link>
-          </Text>
-        </LiveStatusProvider>
-      )}
+            <LiveEventForm
+              action={submitLiveEvent.bind(null, id, 'kaart')}
+              kind="kaart"
+              opponent={match.opponent}
+              players={view.players}
+              title="Kaart"
+            />
+            <LiveEventForm
+              action={submitLiveEvent.bind(null, id, 'wissel')}
+              kind="wissel"
+              opponent={match.opponent}
+              players={view.players}
+              title="Wissel"
+            />
+            <Card aria-labelledby="gebeurtenissen-kop">
+              <Heading id="gebeurtenissen-kop" level={2} tabIndex={-1}>
+                Gebeurtenissen
+              </Heading>
+              <LiveEvents
+                events={view.events.map((event) => ({
+                  ...event,
+                  action: submitRemoveLiveEvent.bind(null, id, event.kind, event.id),
+                }))}
+              />
+            </Card>
+            <Text>
+              <Link href={reportPath(id)}>Naar het volledige verslag</Link>
+            </Text>
+          </LiveStatusProvider>
+        )}
+      </Page.Cell>
     </Page.Main>
   )
 }

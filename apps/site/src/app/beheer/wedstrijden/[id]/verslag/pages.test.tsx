@@ -212,7 +212,8 @@ describe('the report screen', () => {
     await store()
 
     const html = await page(matchId)
-    const first = html.match(/<button[^>]*>/u)?.[0] ?? ''
+    // The first button of the form itself. The toolbar has a copy before it.
+    const first = html.match(/<form[^>]*id="verslag"[^>]*>.*?(<button[^>]*>)/su)?.[1] ?? ''
 
     expect(first).toContain('value="opslaan"')
     expect(first).toContain('hf-visually-hidden')
@@ -283,12 +284,19 @@ describe('the report screen', () => {
     expect(html).toMatch(/<p[^>]*id="bewaarde-invoer"[^>]*><\/p>/u)
   })
 
-  it('has a sidebar with the save panel and a link back to the match', async () => {
+  it('has the buttons to save in the toolbar and at the end of the form, and a row of actions under the form', async () => {
     const html = await page(matchId)
+    const toolbar = html.match(/<div class="hf-page-toolbar".*?<\/div>/su)?.[0] ?? ''
 
-    expect(html).toContain('aria-label="Opslaan en verslag"')
-    expect(html).toContain(`href="/beheer/wedstrijden/${matchId}"`)
-    expect(html).toContain('form="verslag"')
+    expect(html).not.toContain('<aside')
+    expect(toolbar).toContain('form="verslag"')
+    expect(toolbar).toContain('value="opslaan"')
+    expect(toolbar).toContain(`href="/beheer/wedstrijden/${matchId}"`)
+    expect(html.match(/<button[^>]*form="verslag"[^>]*value="opslaan"/gu)).toHaveLength(2)
+    expect(html).toMatch(/<section[^>]*aria-label="Meer voor dit verslag"/u)
+    expect(html).toMatch(/<section[^>]*style="grid-area:row;/u)
+    expect(html.indexOf('Meer voor dit verslag')).toBeGreaterThan(html.indexOf('hf-page-toolbar'))
+    expect(html).toContain('Tekst plakken')
     // The row of a new empty speler is the default.
     expect(emptyRow('speler').rol).toBe('basis')
     expect(await database.db.select().from(matchGoals).where(eq(matchGoals.matchId, matchId))).toHaveLength(3)

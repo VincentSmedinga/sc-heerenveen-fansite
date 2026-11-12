@@ -215,9 +215,14 @@ describe('the new article', () => {
       expect(html, name).toMatch(new RegExp(`<(?:input|textarea)[^>]*name="${name}"`, 'u'))
     }
 
-    expect(html.match(/<button[^>]*>(.*?)<\/button>/g)).toEqual([
+    expect(html.match(/<button(?![^>]*\bform=)[^>]*>(.*?)<\/button>/g)).toEqual([
       '<button class="hf-space-end-0" type="submit">Opslaan als concept</button>',
     ])
+    // The toolbar has a second button that belongs to the form by its id, and a link to cancel.
+    expect(html).toMatch(
+      /<div class="hf-page-toolbar"[^>]*><button[^>]*form="artikel-formulier"[^>]*>.*Opslaan als concept<\/button>/u,
+    )
+    expect(html).toContain('<a href="/beheer/artikelen">Annuleren</a>')
     expect(html).toContain('de redactie')
     expect(html).toContain('Hoogstens 20.000 tekens')
     expect(html).not.toContain('Er is iets mis')
@@ -247,10 +252,11 @@ describe('the article', () => {
     expect(html).toContain(`<a href="/beheer/artikelen/${id}/voorbeeld">Voorbeeld</a>`)
     expect(html).toMatch(/<input[^>]*name="titel"[^>]*value="Welkom"|<input[^>]*value="Welkom"[^>]*name="titel"/u)
     expect(html).toMatch(/<input[^>]*name="tekst"[^>]*value="\{&quot;type&quot;:&quot;doc&quot;/u)
-    expect(html.match(/<button[^>]*>(.*?)<\/button>/g)).toEqual([
+    expect(html.match(/<button(?![^>]*\bform=)[^>]*>(.*?)<\/button>/g)).toEqual([
       '<button class="hf-space-end-0" type="submit">Opslaan</button>',
       '<button class="hf-button-soft" type="submit" value="publiceren" name="knop">Publiceren</button>',
     ])
+    expect(html).toMatch(/<div class="hf-page-toolbar"[^>]*>.*form="artikel-formulier"[^>]*value="publiceren"/u)
     expect(html).not.toContain('readonly')
   })
 
@@ -266,7 +272,7 @@ describe('the article', () => {
     ])
     expect(html).toContain('staat sinds 21 oktober 2026 op de site')
     expect(html).toMatch(/<input[^>]*name="adres"[^>]*readOnly=""|<input[^>]*readOnly=""[^>]*name="adres"/u)
-    expect(html.match(/<button[^>]*>(.*?)<\/button>/g)).toEqual([
+    expect(html.match(/<button(?![^>]*\bform=)[^>]*>(.*?)<\/button>/g)).toEqual([
       '<button class="hf-space-end-0" type="submit">Opslaan</button>',
       '<button class="hf-button-soft" type="submit">Intrekken</button>',
     ])
@@ -445,7 +451,7 @@ describe('the earlier versions on the page of the article', () => {
   it('shows no button to put a version back or to delete one', async () => {
     const html = await edit(await editedArticle())
 
-    expect(html.match(/<button[^>]*>(.*?)<\/button>/g)).toEqual([
+    expect(html.match(/<button(?![^>]*\bform=)[^>]*>(.*?)<\/button>/g)).toEqual([
       '<button class="hf-space-end-0" type="submit">Opslaan</button>',
       '<button class="hf-button-soft" type="submit" value="publiceren" name="knop">Publiceren</button>',
     ])

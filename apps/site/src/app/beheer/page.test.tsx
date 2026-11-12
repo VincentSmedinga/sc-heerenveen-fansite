@@ -134,20 +134,22 @@ describe('the admin', () => {
     const html = renderToStaticMarkup(await AdminPage())
 
     expect(html).not.toContain('Te doen')
-    expect(html).not.toContain('<aside')
+    expect(html).not.toContain('te-doen-kop')
   })
 
-  it('puts the card Te doen in the sidebar, after the main column, when something waits', async () => {
+  it('puts the card Te doen in the area todo before the tiles, so it comes first on a phone', async () => {
     requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'editor', userId: 1 })
     countMatchesWithoutResult.mockResolvedValue(1)
 
     const html = renderToStaticMarkup(await AdminPage())
-    const aside = (html.match(/<aside[\s\S]*<\/aside>/) ?? [])[0] ?? ''
+    const section = (html.match(/<section[\s\S]*?<\/section>/) ?? [])[0] ?? ''
 
-    expect(aside).toContain('aria-label="Te doen"')
-    expect(headings(aside)).toEqual(['h2 Te doen'])
-    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
-    expect(html.slice(0, html.indexOf('<aside'))).not.toContain('Te doen')
+    expect(section).toContain('aria-labelledby="te-doen-kop"')
+    expect(section).toContain('style="grid-area:todo"')
+    expect(headings(section)).toEqual(['h2 Te doen'])
+    expect(html).not.toContain('<aside')
+    expect(html.indexOf('Te doen')).toBeLessThan(html.indexOf('Schermen van het beheer'))
+    expect(html).toContain('&quot;main todo&quot;')
   })
 
   it('tells an editor how many differences with Wikipedia wait for a decision, and nobody else', async () => {
@@ -166,7 +168,7 @@ describe('the admin', () => {
     const html = renderToStaticMarkup(await AdminPage())
 
     expect(html).not.toContain('afwijking')
-    expect(html).not.toContain('<aside')
+    expect(html).not.toContain('te-doen-kop')
     expect(countWaitingDifferences).toHaveBeenCalledTimes(3)
   })
 
@@ -190,7 +192,7 @@ describe('the admin', () => {
     const html = renderToStaticMarkup(await AdminPage())
 
     expect(html).not.toContain('wijziging')
-    expect(html).not.toContain('<aside')
+    expect(html).not.toContain('te-doen-kop')
     expect(countHeldChanges).not.toHaveBeenCalled()
   })
 
@@ -257,9 +259,9 @@ describe('the admin', () => {
     countMatchesWithoutResult.mockResolvedValue(3)
 
     const html = renderToStaticMarkup(await AdminPage())
-    const aside = (html.match(/<aside[\s\S]*<\/aside>/) ?? [])[0] ?? ''
+    const section = (html.match(/<section[\s\S]*?<\/section>/) ?? [])[0] ?? ''
 
-    expect([...aside.matchAll(/<li>(.*?)<\/li>/g)].map(([, line]) => line?.replace(/<[^>]*>/g, ''))).toEqual([
+    expect([...section.matchAll(/<li>(.*?)<\/li>/g)].map(([, line]) => line?.replace(/<[^>]*>/g, ''))).toEqual([
       '2 afwijkingen van Wikipedia wachten op een besluit',
       '1 wijziging van Wikipedia wacht op een besluit',
       '3 wedstrijden zonder uitslag',
