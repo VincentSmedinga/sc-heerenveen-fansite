@@ -215,7 +215,7 @@ describe('LastWinCard', () => {
     { days: null, lastWin: null, name: 'Zonder Pagina', slug: null },
   ]
 
-  it('shows the clubs in the order given, with the day, the days and the links keeping the choice', () => {
+  it('shows the clubs in the order given, with the days and the links keeping the choice', () => {
     const { container } = render(
       <LastWinCard address="/tegenstanders" places={places} query="?competitie=eredivisie" />,
     )
@@ -227,11 +227,7 @@ describe('LastWinCard', () => {
         name: 'De clubs in de Eredivisie, van de langste tijd sinds onze laatste overwinning tegen hen tot de kortste',
       }),
     ).toBeTruthy()
-    expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
-      'Club',
-      'Laatste overwinning',
-      'Dagen geleden',
-    ])
+    expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual(['Club', 'Dagen geleden'])
     expect(names()).toEqual(['FC Twente', 'Ajax', 'Nooit FC', 'Zonder Pagina'])
     expect(screen.getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
       '/tegenstanders/fc-twente?competitie=eredivisie',
@@ -240,8 +236,16 @@ describe('LastWinCard', () => {
     ])
     // A club without a page is a row header that is no link.
     expect(screen.getByRole('rowheader', { name: 'Zonder Pagina' }).querySelector('a')).toBeNull()
-    expect(screen.getByText('21 april 2019').getAttribute('datetime')).toBe('2019-04-21')
-    expect(screen.getByText('2.762')).toBeTruthy()
+    // The date of the last win is not on the card.
+    expect(container.querySelector('time')).toBeNull()
+    expect(screen.queryByText('21 april 2019')).toBeNull()
+    // The days are aligned to the end, with the bar after them, in the same cell.
+    const cell = screen.getByText('2.762', { exact: false }).closest('td')
+
+    expect(cell?.className).toBe('hf-numeric')
+    expect(cell?.textContent).toBe('2.762')
+    expect(cell?.lastElementChild?.className).toBe('hf-bar')
+    expect(screen.getByRole('columnheader', { name: 'Dagen geleden' }).className).toBe('hf-numeric')
     expect(screen.getAllByText('Nog nooit gewonnen')).toHaveLength(2)
     // The bar is as long as the days are of the longest wait, and a club never beaten has none.
     const bars = [...container.querySelectorAll('.hf-bar')]
