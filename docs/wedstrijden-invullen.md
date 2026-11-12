@@ -36,7 +36,7 @@ Bij een wedstrijd uit een eerder seizoen duurt dat hoogstens een uur, want de si
      Zonder JavaScript past het formulier zich pas aan als je een knop kiest.
 4. Schrijf bij "Reden" waarom je dit invult, als dat iets toevoegt.
    Het veld mag leeg.
-   Dat is verplicht, en het komt in het logboek.
+   Wat je schrijft, komt in het logboek.
    Het veld staat in het blok "Opslaan" onder het formulier.
 5. Kies "Opslaan", in hetzelfde blok.
 

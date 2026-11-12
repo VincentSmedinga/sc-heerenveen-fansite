@@ -7,8 +7,8 @@ import type { RemoveFormState } from './actions'
 
 /**
  * The block that deletes a match the editors added: a Disclosure, so the red button is not one
- * press away, with what goes with the match and a reason, as every change asks for one. A
- * missing reason comes back as an error with the focus, and the block is open then, also
+ * press away, with what goes with the match and an optional reason. A reason that is
+ * too long comes back as an error with the focus, and the block is open then, also
  * without JavaScript.
  */
 export function RemoveMatchForm({
