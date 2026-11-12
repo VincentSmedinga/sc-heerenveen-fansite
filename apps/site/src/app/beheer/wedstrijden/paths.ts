@@ -5,6 +5,14 @@ export const matchesPath = '/beheer/wedstrijden'
 /** The address of the form that adds a match no import reads. */
 export const addPath = `${matchesPath}/nieuw`
 
+/**
+ * Where "Annuleren" goes back to: the address in `terug` when it is a page of the admin, and
+ * otherwise the list of the matches. Anything else, such as another site, is ignored.
+ */
+export function backPathOf(back: unknown): string | undefined {
+  return typeof back === 'string' && /^\/beheer(?:[/?#]|$)/u.test(back) && !back.includes('\\') ? back : undefined
+}
+
 /** The address of the screen that ends a match that is still being played. */
 export function finishPath(id: number) {
   return `${matchesPath}/${id}/verslag/afgelopen`
@@ -30,6 +38,27 @@ export function listPath(season?: string, show?: string) {
 /** The address of the quick screen that keeps a report up to date during the match. */
 export function livePath(id: number) {
   return `${matchesPath}/${id}/verslag/live`
+}
+
+/**
+ * The address of a part of the form of a match (issue 1162), with what the last action left to
+ * say and where the editor came from (`terug`): `/beheer/wedstrijden/412/doelpunten`.
+ */
+export function matchPartPath(
+  id: number,
+  part: string,
+  query: { back?: string | undefined; done?: string | undefined } = {},
+) {
+  const search = new URLSearchParams()
+
+  if (query.done !== undefined) {
+    search.set('gedaan', query.done)
+  }
+  if (query.back !== undefined) {
+    search.set('terug', query.back)
+  }
+
+  return search.size === 0 ? `${matchesPath}/${id}/${part}` : `${matchesPath}/${id}/${part}?${search}`
 }
 
 /** The address of the form of a match, with what the last action left to say (`gedaan`). */

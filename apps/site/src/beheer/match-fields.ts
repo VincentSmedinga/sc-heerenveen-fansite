@@ -86,6 +86,47 @@ export const emptyFields: Record<MatchFieldName, string> = Object.fromEntries(
   matchFieldNames.map((name) => [name, '']),
 ) as Record<MatchFieldName, string>
 
+/**
+ * The parts of the form of a match that have a form of their own (issue 1162), as the address
+ * names them: `/beheer/wedstrijden/412/doelpunten`.
+ */
+export const formParts = ['uitslag', 'gegevens', 'doelpunten'] as const
+
+export type FormPart = (typeof formParts)[number]
+
+/** The fields of a part that are not goals. The part `doelpunten` has the goals only. */
+const partFields: Record<FormPart, readonly MatchFieldName[]> = {
+  doelpunten: [],
+  gegevens: ['toeschouwers', 'scheidsrechter', 'stadion', 'opmerking'],
+  uitslag: matchFieldNames.filter((name) => !['opmerking', 'scheidsrechter', 'stadion', 'toeschouwers'].includes(name)),
+}
+
+/** Whether the field with this `id` is on the page of a part: `reden` is on every one. */
+export function isPartField(part: FormPart, id: string): boolean {
+  return (
+    id === 'reden' ||
+    (partFields[part] as readonly string[]).includes(id) ||
+    (part === 'doelpunten' && (id === 'doelpunten' || id.startsWith('doelpunt-')))
+  )
+}
+
+/**
+ * What a part saves: its own fields from what the editor sent, and every other field as the
+ * database holds it now, so a part never undoes what someone changed in another part since the
+ * page opened.
+ */
+export function mergePart(part: FormPart, sent: MatchValues, stored: MatchValues): MatchValues {
+  const own = new Set<MatchFieldName>(partFields[part])
+
+  return {
+    doelpunten: part === 'doelpunten' ? sent.doelpunten : stored.doelpunten,
+    reden: sent.reden,
+    velden: Object.fromEntries(
+      matchFieldNames.map((name) => [name, own.has(name) ? sent.velden[name] : stored.velden[name]]),
+    ) as Record<MatchFieldName, string>,
+  }
+}
+
 /** The id of the button that adds a goal, which gets the focus after the last goal goes. */
 export const addGoalId = 'doelpunt-toevoegen'
 

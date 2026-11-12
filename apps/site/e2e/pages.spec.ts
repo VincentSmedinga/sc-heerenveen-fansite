@@ -293,6 +293,12 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'editor', path: '/beheer/wedstrijden/{match}', status: 200 },
   { admin: 'editor', path: '/beheer/wedstrijden/{match}?gedaan=ongewijzigd', status: 200 },
   { admin: 'editor', path: '/beheer/wedstrijden/999999', status: 404 },
+  // A part of the form of a match on its own (#1162), and the changes that wait on their own.
+  { admin: 'editor', path: '/beheer/wedstrijden/{played}/uitslag', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{played}/gegevens', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{played}/doelpunten?gedaan=opgeslagen', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{held}/wijzigingen', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden/{played}/iets', status: 404 },
   // The report of a match: a played match has one, and the notice after an action. A match that
   // was not played or does not exist says "niet gevonden".
   { admin: 'editor', path: '/beheer/wedstrijden/{played}', status: 200 },

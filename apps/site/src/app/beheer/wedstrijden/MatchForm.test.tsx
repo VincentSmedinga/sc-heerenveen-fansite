@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { emptyFields, emptyGoal, type MatchFormState, type MatchValues, padGoals } from '#src/beheer/match-fields'
 
-import { MatchFields, type MatchFormChoices, MatchFormProvider } from './MatchForm'
+import { MatchFields, type MatchFormChoices, MatchFormProvider, summaryOf } from './MatchForm'
 
 const { refresh } = vi.hoisted(() => ({ refresh: vi.fn() }))
 
@@ -80,6 +80,50 @@ describe('the facts in the form of a match', () => {
     }
     expect((screen.getByLabelText(/^Toeschouwers/u) as HTMLInputElement).value).toBe('21022')
     expect((screen.getByLabelText(/^Opmerking/u) as HTMLInputElement).value).toBe('Begon later')
+  })
+})
+
+describe('the parts of the form of a match (#1162)', () => {
+  it('shows only the cards of the part it is given', () => {
+    const values = initial('1', '0')
+
+    render(
+      <MatchFormProvider action={() => Promise.resolve({ errors: {}, values })} choices={choices} initial={values}>
+        <MatchFields part="gegevens" />
+      </MatchFormProvider>,
+    )
+
+    expect([...document.querySelectorAll('h2')].map((heading) => heading.textContent)).toEqual(['Gegevens'])
+  })
+
+  it('says which goals came in without a player, and with which name', () => {
+    const values = initial('1', '0')
+
+    render(
+      <MatchFormProvider
+        action={() => Promise.resolve({ errors: {}, values })}
+        choices={{ ...choices, incoming: [{ name: 'Hansen', number: 1 }] }}
+        initial={values}
+      >
+        <MatchFields part="doelpunten" />
+      </MatchFormProvider>,
+    )
+
+    expect(document.body.textContent).toContain('Zonder speler binnengekomen: doelpunt 1 als "Hansen".')
+  })
+
+  it('links an error of another part to the whole form, and the errors of the part to their field', () => {
+    const state: MatchFormState = {
+      errors: { doelpunten: 'De doelpunten geven 2–1.', reden: 'Schrijf waarom.', 'uitslag-wij': 'Vul een getal in.' },
+      values: initial('3', '1'),
+    }
+
+    expect(summaryOf(state, 'uitslag')).toEqual([
+      { id: 'uitslag-wij', message: 'Vul een getal in.' },
+      { id: 'hele-wedstrijd', message: 'In een ander deel van de wedstrijd: De doelpunten geven 2–1.' },
+      { id: 'reden', message: 'Schrijf waarom.' },
+    ])
+    expect(summaryOf(state).map(({ id }) => id)).toEqual(['uitslag-wij', 'doelpunten', 'reden'])
   })
 })
 

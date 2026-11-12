@@ -36,8 +36,14 @@ Bij een wedstrijd uit een eerder seizoen duurt dat hoogstens een uur, want de si
      Zonder JavaScript past het formulier zich pas aan als je een knop kiest.
 4. Schrijf bij "Reden" waarom je dit invult.
    Dat is verplicht, en het komt in het logboek.
-   Het veld staat in het blok "Opslaan" naast het formulier, en op een telefoon onder het formulier.
+   Het veld staat in het blok "Opslaan" onder het formulier.
 5. Kies "Opslaan", in hetzelfde blok.
+
+Wil je maar één deel invullen, kies het dan bovenaan in "Delen van de wedstrijd": Uitslag (met de aftrap), Gegevens of Doelpunten.
+Je ziet dan alleen dat deel, met de reden en "Opslaan", en je slaat alleen dat deel op.
+Wat iemand intussen in een ander deel opsloeg, blijft staan.
+Zonder speler binnengekomen doelpunten staan in een zin boven de tabel, met de naam waarmee ze binnenkwamen.
+"Alles" toont het hele formulier, en "Wijzigingen" staat er als er wijzigingen van Wikipedia of verschillen wachten.
 
 De doelpunten moeten samen de uitslag geven.
 Een uitslag zonder doelpunten mag: voeg ze toe als je ze weet.
@@ -184,7 +190,7 @@ Wie op de server werkt, kan hetzelfde met `pnpm run import:changes`: `accept` ne
 
 Van een gespeelde wedstrijd kun je ook het verslag invullen: wie speelde, wie er inviel, de doelpunten met wie de assist gaf, de kaarten, de gemiste strafschoppen en, bij een beslissing op strafschoppen, de schoten van de serie.
 Kies de wedstrijd in de lijst: de koppeling opent het verslag.
-Of open de wedstrijd en kies "Het verslag invullen".
+Of open de wedstrijd en kies "Verslag" bij "Delen van de wedstrijd".
 De kolom Verslag zegt in één woord hoe het ervoor staat: "Geen", "Niet af", "Klaar" of "Live".
 Het verslag heeft een eigen scherm, `/beheer/wedstrijden/<nummer>/verslag`.
 

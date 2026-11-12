@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation'
 
 import type { PlayerFormState } from '#src/beheer/player-fields'
 
-import { matchPath } from '#src/app/beheer/wedstrijden/paths'
+import { matchPartPath, matchPath } from '#src/app/beheer/wedstrijden/paths'
 import { parseItemId } from '#src/beheer/items'
 import { mergePersons } from '#src/beheer/person-merge'
 import { findReturnMatch } from '#src/beheer/player-return'
@@ -43,6 +43,7 @@ export type MergeFormState = { error?: string }
 export async function submitAddPlayer(
   season: string,
   matchId: number | undefined,
+  toGoals: boolean,
   _previous: PlayerFormState,
   formData: FormData,
 ): Promise<PlayerFormState> {
@@ -77,7 +78,13 @@ export async function submitAddPlayer(
   // The number of the match is input from outside: only a match of this season counts.
   const back = await findReturnMatch(db, matchId, season)
 
-  redirect(back === undefined ? listPath(season, 'toegevoegd') : matchPath(back.id, 'speler-toegevoegd'))
+  redirect(
+    back === undefined
+      ? listPath(season, 'toegevoegd')
+      : toGoals
+        ? matchPartPath(back.id, 'doelpunten', { done: 'speler-toegevoegd' })
+        : matchPath(back.id, 'speler-toegevoegd'),
+  )
 }
 
 /**

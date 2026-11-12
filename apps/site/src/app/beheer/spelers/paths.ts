@@ -10,7 +10,7 @@ export const mergePagePath = `${playersPath}/samenvoegen`
  * know (`q`) and the match the editor comes from and goes back to after the save
  * (`wedstrijd`).
  */
-export function addPlayerPath(season: string, search?: string, matchId?: number) {
+export function addPlayerPath(season: string, search?: string, matchId?: number, toGoals = false) {
   const query = new URLSearchParams({ seizoen: seasonSlug(season) })
 
   if (search !== undefined && search !== '') {
@@ -18,6 +18,10 @@ export function addPlayerPath(season: string, search?: string, matchId?: number)
   }
   if (matchId !== undefined) {
     query.set('wedstrijd', String(matchId))
+  }
+  // From the part Doelpunten of a match (issue 1162), the way back goes to that part.
+  if (matchId !== undefined && toGoals) {
+    query.set('deel', 'doelpunten')
   }
 
   return `${playersPath}/nieuw?${query}`

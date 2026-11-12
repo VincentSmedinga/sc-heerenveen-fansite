@@ -34,6 +34,7 @@ import {
   submitDeleteMatch,
   submitHeldChange,
   submitMatch,
+  submitMatchPart,
   submitRemoveEntry,
 } from './actions'
 
@@ -357,6 +358,99 @@ describe('submitMatch', () => {
     expect(await edits()).toEqual([])
   })
 })
+
+describe('submitMatchPart', () => {
+  const part = (name: 'doelpunten' | 'gegevens' | 'uitslag', formData: FormData, back?: string) =>
+    resultOf(() => submitMatchPart(matchId, name, back, initial, formData))
+
+  /** Only the fields of a part, as the page of that part sends them, and a reason. */
+  const only = (fields: Record<string, string>) => {
+    const formData = new FormData()
+
+    for (const [name, value] of Object.entries({ reden: 'Uit de krant', ...fields })) {
+      formData.set(name, value)
+    }
+
+    return formData
+  }
+
+  it('saves the fields of its part and keeps every other field as the database has it', async () => {
+    await submit(matchId, form({ ...(await threeGoals()), scheidsrechter: 'Kevin Blom' }))
+
+    expect(await part('gegevens', only({ stadion: 'Abe Lenstra Stadion', toeschouwers: '26100' }))).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}/gegevens?gedaan=opgeslagen`,
+    })
+    expect((await database.db.select().from(matches))[0]).toMatchObject({
+      attendance: 26100,
+      goalsAgainst: 1,
+      goalsFor: 2,
+      referee: null,
+      stadium: 'Abe Lenstra Stadion',
+      status: 'played',
+    })
+    expect(await database.db.select().from(matchGoals)).toHaveLength(3)
+    expect((await log()).at(-1)).toMatchObject({ action: 'match.edit', reason: 'Uit de krant' })
+  })
+
+  it('takes what someone saved in another part since the page opened, and never undoes it', async () => {
+    await submit(matchId, form(await threeGoals()))
+    // Someone else fills in the attendance while the page of the result is open.
+    await database.db.update(matches).set({ attendance: 5000 }).where(eq(matches.id, matchId))
+
+    await part('uitslag', only({ ...uitslagOf('2', '1'), 'aftrap-tijd': '20:00', toeschouwers: '' }))
+
+    expect((await database.db.select().from(matches))[0]).toMatchObject({
+      attendance: 5000,
+      kickoffAt: new Date('2026-10-31T19:00:00Z'),
+    })
+  })
+
+  it('saves the goals on the page of the goals, against the result in the database', async () => {
+    await submit(matchId, form())
+
+    expect(await part('doelpunten', only(await threeGoals()))).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}/doelpunten?gedaan=opgeslagen`,
+    })
+    expect(await database.db.select().from(matchGoals)).toHaveLength(3)
+  })
+
+  it('returns an error of another part, so the page can say it is elsewhere', async () => {
+    await submit(matchId, form(await threeGoals()))
+
+    expect(await part('uitslag', only(uitslagOf('4', '1')))).toMatchObject({
+      errors: { doelpunten: expect.stringContaining('De doelpunten geven 2–1') },
+    })
+  })
+
+  it('keeps the address the editor came from, when it is a page of the admin', async () => {
+    await submit(matchId, form())
+
+    expect(await part('gegevens', only({ stadion: 'Abe Lenstra Stadion' }), '/beheer/kwaliteit/2026-27')).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}/gegevens?gedaan=opgeslagen&terug=%2Fbeheer%2Fkwaliteit%2F2026-27`,
+    })
+    expect(await part('gegevens', only({ stadion: 'De Vliert' }), 'https://example.org/beheer')).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}/gegevens?gedaan=opgeslagen`,
+    })
+  })
+
+  it('sends an unknown part to the list', async () => {
+    expect(
+      await resultOf(() => submitMatchPart(matchId, 'verslag' as 'uitslag', undefined, initial, only({}))),
+    ).toEqual({ redirect: '/beheer/wedstrijden?fout=weg' })
+  })
+})
+
+/** The fields of the part `uitslag` for a played match with this result. */
+function uitslagOf(wij: string, zij: string) {
+  return {
+    'aftrap-datum': '2026-10-31',
+    'aftrap-tijd': '18:45',
+    status: 'played',
+    'uitslag-wij': wij,
+    'uitslag-zij': zij,
+    verlenging: 'nee',
+  }
+}
 
 describe('submitRemoveEntry', () => {
   it('takes the entry away, writes match.undo with the reason and leads to the page with a notice', async () => {
