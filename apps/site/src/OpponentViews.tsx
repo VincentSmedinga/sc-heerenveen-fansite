@@ -738,6 +738,7 @@ export function LastWinCard({
       <Heading id="laatste-overwinning" level={2}>
         Laatste overwinning
       </Heading>
+      <Text>Alleen wedstrijden in de Eredivisie tellen.</Text>
       <BarPlace>
         <DataTable
           appearance="text"

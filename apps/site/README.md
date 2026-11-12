@@ -637,7 +637,7 @@ Het is een `DataTable` die niet sorteert: de plaats komt uit `position` van een 
 Daaronder staat de zachte kaart "Het moeilijkst" (`HardestCard`) met de vijf clubs waartegen we gemiddeld de minste punten per wedstrijd haalden (`hardestOf` in `src/opponents.ts`).
 Ze heeft dezelfde tabel, legenda en regel over het aantal wedstrijden als de top 10, van laag naar hoog, en staat er alleen als minstens 10 clubs 5 gespeelde wedstrijden hebben.
 Daaronder staat de zachte kaart "Laatste overwinning" (`LastWinCard`) met de clubs van het nieuwste seizoen in de stand, zonder sc Heerenveen, van de langste tijd sinds onze laatste overwinning in de Eredivisie tot de kortste (`lastWinsOf` in `src/opponents.ts`).
-De kaart volgt de schakelaar niet, maar haar links houden de keuze.
+De kaart volgt de schakelaar niet, maar haar links houden de keuze, en een zin onder de kop zegt dat alleen wedstrijden in de Eredivisie tellen.
 Het is een `DataTable` met tekst: de datum staat in een `<time>`, het aantal dagen volgt het getal, en een `Bar` naast de datum is zo lang als de dagen van de langste wachttijd.
 Een club die we nog nooit versloegen, staat onderaan met "Nog nooit gewonnen" en zonder balk.
 Dat geldt ook voor een club van de stand zonder eigen pagina, die we nooit troffen of die de stand anders schrijft: ze staat er zonder link.

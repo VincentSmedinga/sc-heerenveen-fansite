@@ -221,6 +221,7 @@ describe('LastWinCard', () => {
     )
 
     expect(screen.getByRole('heading', { level: 2, name: 'Laatste overwinning' })).toBeTruthy()
+    expect(screen.getByText('Alleen wedstrijden in de Eredivisie tellen.')).toBeTruthy()
     expect(
       screen.getByRole('table', {
         name: 'De clubs in de Eredivisie, van de langste tijd sinds onze laatste overwinning tegen hen tot de kortste',

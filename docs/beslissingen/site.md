@@ -4999,6 +4999,7 @@
   - **Volgorde:** de oudste datum bovenaan, dezelfde datum op naam (`localeCompare` met `nl`), een club die we nog nooit versloegen onderaan met "Nog nooit gewonnen" en zonder balk.
   - **De dagen:** kalenderdagen tot vandaag naar de datum in Nederland (`lastWinsOf` en `dutchDay`), bij elke vertoning berekend en niet in de cache bewaard. Een uitslag zonder tijd telt als de speeldag, en een wedstrijd van vandaag toont 0 dagen.
   - **De balk:** de bestaande `Bar` naast de datum, als deel van de langste wachttijd. Het designsysteem exporteert daarvoor `Bar`, `sharesOf` en `BarPlace` (de wrapper `hf-bar-place`, waarin de balken de breedte van hun plaats bevragen); de tabel is een `DataTable` met tekst in een `BarPlace`, zonder `hf-bar-table` omdat de kop en de datum op een telefoon moeten kunnen afbreken, en `DataTable` zelf is niet veranderd.
+  - **Een zin onder de kop:** "Alleen wedstrijden in de Eredivisie tellen.", omdat de kaart de schakelaar niet volgt en een recente bekerwinst anders naast een oude datum kan lijken te staan. Het bijschrift van de tabel blijft zoals het was.
   - **Geen kaart:** met minder dan twee clubs naast sc Heerenveen, of zonder stand.
   - **Een club zonder pagina:** een club van de stand die we nooit troffen, of die de stand anders schrijft dan wij, staat onderaan met "Nog nooit gewonnen", zonder link en zonder balk.
   - **Mijlpaal:** E4 – Tegenstanders en clubs.

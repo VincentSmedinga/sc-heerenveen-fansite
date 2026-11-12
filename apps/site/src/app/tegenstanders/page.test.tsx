@@ -107,6 +107,7 @@ describe('the page /tegenstanders', () => {
     expect(html.indexOf('id="laatste-overwinning"')).toBeLessThan(html.indexOf('Wikipedia'))
     expect(html).toContain('href="/tegenstanders/fc-twente?competitie=eredivisie"')
     expect(html).toContain('Nog nooit gewonnen')
+    expect(html).toContain('Alleen wedstrijden in de Eredivisie tellen.')
   })
 
   it('has no card Laatste overwinning without places', async () => {
