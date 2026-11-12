@@ -8,7 +8,7 @@ import path from 'node:path'
 
 /**
  * Made-up persons who miss a line, a country or both, so the work list of the admin
- * (`/beheer/kwaliteit/personen`, issue 1053) is checked with rows in both of its lists: a
+ * (`/beheer/kwaliteit/personen/snel`, issue 1053) is checked with rows in both of its lists: a
  * person with one season, one with several, one with a Wikipedia article and one who is in no
  * squad. The seasons are old ones, where no other check looks. It only writes to a database on
  * this computer. The file imports nothing from this folder, because

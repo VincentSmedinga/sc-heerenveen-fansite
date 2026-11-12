@@ -395,11 +395,23 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   // The persons without a line or a country (made up, see persons.ts): both lists, a part
   // that does not exist, which shows the last one, and a list that is no list, which is the
   // first.
+  // The table of the persons (issue 1165): the overview, a letter, a letter with a column, a
+  // letter without persons and an address that is no letter, the quick list of the line and
+  // the country at `snel`, an old address of it, and the page with the names.
   { admin: 'editor', path: '/beheer/kwaliteit/personen', status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/personen/b', status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/personen/b?kolom=land', status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/personen/q', status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/personen/bb', status: 404 },
+  { admin: 'editor', path: '/beheer/kwaliteit/personen/snel', status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/personen/snel?lijst=land', status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/personen/snel?lijst=land&deel=9', status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/personen/snel?lijst=onbekend', status: 200 },
   { admin: 'editor', path: '/beheer/kwaliteit/personen?lijst=land', status: 200 },
-  { admin: 'editor', path: '/beheer/kwaliteit/personen?lijst=land&deel=9', status: 200 },
-  { admin: 'editor', path: '/beheer/kwaliteit/personen?lijst=onbekend', status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/namen', status: 200 },
   { admin: 'author', path: '/beheer/kwaliteit/personen', status: 404 },
+  { admin: 'author', path: '/beheer/kwaliteit/personen/b', status: 404 },
+  { admin: 'author', path: '/beheer/kwaliteit/namen', status: 404 },
   // The players whose numbers differ: a season with the made-up difference, and an empty one.
   { admin: 'editor', path: `/beheer/kwaliteit/${statSeasonSlug()}/spelerscijfers`, status: 200 },
   { admin: 'editor', path: '/beheer/kwaliteit/1990-91/spelerscijfers', status: 200 },

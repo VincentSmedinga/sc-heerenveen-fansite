@@ -10,6 +10,7 @@ import { addQualitySeason } from '#src/beheer/quality-fixtures'
 import SeasonPage, { metadata as seasonMetadata } from './[seizoen]/page'
 import StatDifferencesPage, { metadata as statMetadata } from './[seizoen]/spelerscijfers/page'
 import FieldDifferencesPage, { metadata as fieldMetadata } from './[seizoen]/spelersgegevens/page'
+import NamesPage, { metadata as namesMetadata } from './namen/page'
 import QualityPage, { metadata } from './page'
 
 const { requireRole } = vi.hoisted(() => ({ requireRole: vi.fn() }))
@@ -73,21 +74,16 @@ describe('the page Kwaliteit', () => {
     await expect(QualityPage()).rejects.toThrow('redirect to /beheer/inloggen')
   })
 
-  it('says how many persons have no line or no country, with a link to their work list', async () => {
-    expect(renderToStaticMarkup(await QualityPage())).toContain('Elke persoon heeft een linie en een land.')
-
-    await database.db
-      .insert(persons)
-      .values([
-        { country: 'NL', name: 'Verzonnen Spits' },
-        { name: 'Bedachte Back' },
-        { country: 'DK', line: 'doelman', name: 'Proef de Keeper' },
-      ])
-
+  it('has the switch to the persons, with the matches as the current choice, and no cards about persons', async () => {
     const html = renderToStaticMarkup(await QualityPage())
 
-    expect(html).toContain('2 personen hebben geen linie en 1 persoon heeft geen land.')
-    expect(html).toContain('<a href="/beheer/kwaliteit/personen">Vul de linie en het land aan</a>')
+    expect(html).toMatch(
+      /<a[^>]*href="\/beheer\/kwaliteit"[^>]*aria-current="page"[^>]*>|<a[^>]*aria-current="page"[^>]*href="\/beheer\/kwaliteit"/u,
+    )
+    expect(html).toContain('href="/beheer/kwaliteit/personen"')
+    expect(html).not.toContain('Personen die op elkaar lijken')
+    expect(html).not.toContain('Namen en de lijst van spelers')
+    expect(html).not.toContain('Personen zonder linie of land')
   })
 
   it('is a table with a caption, a header for each part of a match and a row for each season, the newest first', async () => {
@@ -127,16 +123,25 @@ describe('the page Kwaliteit', () => {
     expect(row).toContain('0 wedstrijden, alles compleet')
     expect(signsOf(row)).toEqual(['', '', '', '', '', '', ''])
   })
+})
+
+describe('the page with the names (#1165)', () => {
+  it('is for an editor only, and stays out of search engines', async () => {
+    renderToStaticMarkup(await NamesPage())
+
+    expect(requireRole).toHaveBeenCalledWith('owner', 'editor')
+    expect(namesMetadata.robots).toEqual({ follow: false, index: false })
+  })
 
   it('says what the list of players says about our names, and that it is not read yet', async () => {
-    expect(renderToStaticMarkup(await QualityPage())).toContain('nog niet gelezen')
+    expect(renderToStaticMarkup(await NamesPage())).toContain('nog niet gelezen')
 
     await database.db.insert(persons).values([{ wikipediaPage: 'Gerrit Abma' }, { wikipediaPage: 'Iemand Anders' }])
     await database.db
       .insert(playerListTitles)
       .values(['Gerrit Abma', 'Luca Oyen'].map((title) => ({ readAt: new Date(), title })))
 
-    const html = renderToStaticMarkup(await QualityPage())
+    const html = renderToStaticMarkup(await NamesPage())
 
     expect(html).toContain('Iemand Anders')
     expect(html).toContain('Luca Oyen')
@@ -144,7 +149,7 @@ describe('the page Kwaliteit', () => {
   })
 
   it('lists the persons that look alike, and says so when there are none', async () => {
-    expect(renderToStaticMarkup(await QualityPage())).toContain('Er zijn geen personen die op elkaar lijken.')
+    expect(renderToStaticMarkup(await NamesPage())).toContain('Er zijn geen personen die op elkaar lijken.')
 
     await database.db
       .insert(persons)
@@ -154,7 +159,7 @@ describe('the page Kwaliteit', () => {
         { wikipediaPage: 'Piet Paal' },
       ])
 
-    const html = renderToStaticMarkup(await QualityPage())
+    const html = renderToStaticMarkup(await NamesPage())
 
     expect(html).toContain('Daniël Jansen en D&#x27;aniel Jan-sen</li>')
     expect(html).not.toContain('Piet Paal')

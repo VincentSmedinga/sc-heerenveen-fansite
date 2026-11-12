@@ -1,118 +1,113 @@
 import type { Metadata } from 'next'
 
-import { Heading, Link, Page, Pagination, Text } from '@fansite/design-system'
+import { Card, DataTable, Heading, Link, Page, SegmentedLinks, Text } from '@fansite/design-system'
+import { redirect } from 'next/navigation'
 
-import { countryChoices } from '#src/beheer/countries'
+import { personGapLegend, personGapTableColumns, qualitySwitch } from '#src/app/beheer/kwaliteit/gap-table'
 import { compact } from '#src/beheer/density'
+import { personFactsPath } from '#src/beheer/person-facts'
 import {
-  countPersonsWithout,
-  listPersonsWithout,
-  ourCountries,
-  type PersonFact,
-  personFacts,
-  personFactsPath,
-  personListLength,
-} from '#src/beheer/person-facts'
-import { qualityPath } from '#src/beheer/quality'
+  countPersonGapsByLetter,
+  letterTablePath,
+  namesQualityPath,
+  personGapColumns,
+  readPersonGaps,
+} from '#src/beheer/person-table'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
-import { wikipediaUrl } from '#src/match-format'
-
-import { submitPersonFact } from './actions'
-import { PersonWorkList } from './PersonWorkList'
 
 // Render on each request: who is logged in and what the database holds are not known when the
 // site is built.
 export const dynamic = 'force-dynamic'
 
-const title = 'Personen zonder linie of land'
-
-export const metadata: Metadata = { robots: { follow: false, index: false }, title }
+export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Kwaliteit van de personen' }
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
-// The persons without a line or without a country (issue 1053), for an editor: two lists,
-// each in parts of fifty, the persons of the newest seasons first. The list itself is a client
-// component, so a choice saves one row and leaves the others as they are. A part that does not
-// exist shows the last one.
-export default async function PersonFactsPage({ searchParams }: Props) {
+const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`
+
+/**
+ * What we miss of the persons in our squads, for an editor (issue 1165): one row for each
+ * letter, with a column for each fact. A number is how many persons of the letter have a gap
+ * in that column, and leads to them. The quick list of the line and the country that stood
+ * here moved to `snel`, and an old address of it goes there.
+ */
+export default async function PersonQualityPage({ searchParams }: Props) {
   await requireRole('owner', 'editor')
 
   const { deel, lijst } = await searchParams
-  const fact = personFacts.find((choice) => choice === lijst) ?? 'linie'
-  const { db } = getDatabase()
-  const totals = await countPersonsWithout(db)
-  const parts = Math.max(1, Math.ceil(totals[fact] / personListLength))
-  const asked = typeof deel === 'string' && /^[1-9]\d{0,3}$/u.test(deel) ? Number(deel) : 1
-  const part = Math.min(asked, parts)
-  const found = await listPersonsWithout(db, fact, { offset: (part - 1) * personListLength })
-  const ours = new Set(fact === 'land' ? await ourCountries(db) : [])
-  const choices = fact === 'land' ? countryChoices() : []
+
+  if (lijst !== undefined || deel !== undefined) {
+    const query = new URLSearchParams({
+      ...(typeof lijst === 'string' ? { lijst } : {}),
+      ...(typeof deel === 'string' ? { deel } : {}),
+    })
+
+    redirect(query.size === 0 ? personFactsPath : `${personFactsPath}?${query}`)
+  }
+
+  const all = await readPersonGaps(getDatabase().db)
+  const counts = countPersonGapsByLetter(all)
+  const withGaps = all.filter((person) => Object.keys(person.gaps).length > 0)
+  const total = withGaps.reduce((sum, person) => sum + Object.keys(person.gaps).length, 0)
 
   return (
     <Page.Main
       className={compact}
       intro={
         <>
-          <Text>
-            <Link href={qualityPath} icon="arrow-left">
-              Terug naar de kwaliteit van de gegevens
-            </Link>
-          </Text>
-          <Heading level={1}>{title}</Heading>
+          <Heading level={1}>Kwaliteit</Heading>
+          <SegmentedLinks {...qualitySwitch('personen')} />
           <Text appearance="intro">
-            Van deze personen weten we de linie of het land niet. Kies het hier: een keuze is meteen opgeslagen, en de
-            import laat haar staan.
+            {withGaps.length === 0
+              ? 'Alle personen zijn compleet.'
+              : `Nog ${plural(total, 'gat', 'gaten')} bij ${plural(withGaps.length, 'persoon', 'personen')} van de ${all.length}. Een getal in de tabel leidt naar de personen van die letter met een gat in die kolom.`}
           </Text>
         </>
       }
       wide
     >
-      <PersonWorkList
-        action={submitPersonFact}
-        countries={{
-          others: choices.filter(({ code }) => !ours.has(code)),
-          ours: choices.filter(({ code }) => ours.has(code)),
-        }}
-        fact={fact}
-        key={`${fact}-${part}`}
-        paths={{ land: address('land'), linie: address('linie') }}
-        rows={found.map((person) => ({
-          id: person.id,
-          name: person.name,
-          ...(person.firstSeason === null || person.lastSeason === null
-            ? {}
-            : {
-                seasons:
-                  person.firstSeason === person.lastSeason
-                    ? person.firstSeason
-                    : `${person.firstSeason} tot en met ${person.lastSeason}`,
+      <Text>
+        <Link href={personFactsPath}>Linie en land snel aanvullen</Link>
+      </Text>
+      <Card aria-labelledby="letters-kop">
+        <Heading id="letters-kop" level={2}>
+          Per letter
+        </Heading>
+        <Text appearance="meta">{personGapLegend}</Text>
+        <DataTable
+          appearance="text"
+          caption="Personen met een gat per letter van de achternaam en per gegeven"
+          columns={personGapTableColumns('Letter')}
+          rows={[...counts].map(([letter, count]) => {
+            const complete = personGapColumns.every(({ key }) => count.columns[key] === 0)
+            const persons = plural(count.persons, 'persoon', 'personen')
+            const shown = letter === '#' ? 'Overig' : letter
+
+            return {
+              cells: personGapColumns.map(({ key, name }) => {
+                const gaps = count.columns[key]
+
+                return gaps === 0 ? null : (
+                  <DataTable.Mark
+                    description={`${gaps === 1 ? 'persoon' : 'personen'} met een gat in ${name} bij de letter ${shown}`}
+                    href={letterTablePath(letter, key)}
+                    key={key}
+                  >
+                    {String(gaps)}
+                  </DataTable.Mark>
+                )
               }),
-          ...(person.wikipediaPage === null
-            ? {}
-            : { wikipedia: wikipediaUrl(person.wikipediaPage, person.englishTitle ? 'en' : 'nl') }),
-        }))}
-        totals={totals}
-      />
-      {parts === 1 ? null : (
-        <Pagination
-          current={part}
-          label="Delen van de lijst"
-          nextHref={part < parts ? address(fact, part + 1) : undefined}
-          previousHref={part > 1 ? address(fact, part - 1) : undefined}
-          total={parts}
+              header: shown,
+              href: letterTablePath(letter),
+              secondary: complete ? `${persons}, alles compleet` : persons,
+            }
+          })}
         />
-      )}
+      </Card>
+      <Text>
+        <Link href={namesQualityPath}>Namen die op elkaar lijken en de lijst van Wikipedia</Link>
+      </Text>
     </Page.Main>
   )
-}
-
-/** The address of a list and a part of it: the first list and the first part are left out. */
-function address(fact: PersonFact, part = 1) {
-  const query = new URLSearchParams({
-    ...(fact === 'linie' ? {} : { lijst: fact }),
-    ...(part === 1 ? {} : { deel: String(part) }),
-  })
-
-  return query.size === 0 ? personFactsPath : `${personFactsPath}?${query.toString()}`
 }

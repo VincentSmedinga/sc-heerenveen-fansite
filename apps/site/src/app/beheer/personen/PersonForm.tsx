@@ -30,6 +30,7 @@ export function PersonForm({
   cancelHref,
   countries,
   initial,
+  next = false,
   part,
 }: {
   action: (previous: PersonFormState, formData: FormData) => Promise<PersonFormState>
@@ -37,6 +38,8 @@ export function PersonForm({
   /** The countries to choose from, by name (`countryChoices`). */
   countries: readonly CountryChoice[]
   initial: PersonValues
+  /** Whether the editor came from the table of Kwaliteit, so "Opslaan en volgende" is there. */
+  next?: boolean
   /** The part on the page; none for the whole form. */
   part?: PersonPart | undefined
 }) {
@@ -138,7 +141,21 @@ export function PersonForm({
         <Field error={errors.reden} hint="Komt in het logboek, hoogstens 300 tekens." id="reden" label="Reden">
           <Input {...field('reden')} autoComplete="off" />
         </Field>
-        <Button disabled={pending} icon="save" type="submit">
+        {next ? (
+          // From the table of Kwaliteit (issue 1165): save, and go on to the next person of the
+          // letter with a gap in the same column.
+          <Button disabled={pending} icon="save" name="knop" type="submit" value="volgende">
+            Opslaan en volgende
+          </Button>
+        ) : null}
+        <Button
+          appearance={next ? 'soft' : 'default'}
+          disabled={pending}
+          icon="save"
+          name="knop"
+          type="submit"
+          value="opslaan"
+        >
           Opslaan
         </Button>
       </Card>

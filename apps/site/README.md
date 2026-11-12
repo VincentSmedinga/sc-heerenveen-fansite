@@ -130,7 +130,7 @@ Kies een andere map met `--out <map>`.
 `--full-page` neemt de hele pagina in plaats van het eerste scherm.
 
 De homepage (met de kaart van het artikel), `/redactie/e2e-artikel`, `/nieuws`, `/nieuws/podcasts` en de pagina van een eerder seizoen, `/wedstrijden/<seizoen>`, hebben de verzonnen gegevens van de toegankelijkheidscontrole nodig (zie _Toegankelijkheid controleren_), en `pnpm test:a11y` haalt ze er na afloop weer uit.
-De werklijst `/beheer/kwaliteit/personen` heeft de verzonnen personen zonder linie of land nodig (`e2e/persons.ts`).
+De werklijst `/beheer/kwaliteit/personen/snel` heeft de verzonnen personen zonder linie of land nodig (`e2e/persons.ts`).
 `pnpm --filter site test-data` zet ze in de database van je `.env`, en `pnpm --filter site test-data --remove` haalt ze er weer uit.
 Gebruik daarvoor de database waarmee je ontwikkelt, niet die van de controle of van de hosting.
 Vanuit de root:
@@ -1365,7 +1365,13 @@ Elke afwijking heeft een formulier met een reden en twee knoppen: de import over
 Het besluit staat in het logboek als `player.field-take-over` of `player.field-keep`.
 Heeft een andere speler van het seizoen de naam of de pagina van de import al, dan verandert er niets en zegt de pagina dat.
 
-Onder de tabel staat een kaart met het aantal personen zonder linie en zonder land, en een link naar `/beheer/kwaliteit/personen` (`src/app/beheer/kwaliteit/personen`, #1053).
+Een schakelaar bovenaan (`SegmentedLinks`) leidt naar de tabel van de personen, `/beheer/kwaliteit/personen` (#1165).
+Die heeft een rij per letter van de achternaam zonder voorvoegsel, zoals de lijst van alle spelers (`letterOf`), en een kolom per gegeven: Naam (geen voornaam), Wikipedia, Geboren, Land en Linie.
+Een getal leidt naar de letter, `/beheer/kwaliteit/personen/<letter>` (`overig` voor een naam zonder letter), met `?kolom=` voor één kolom.
+Daar staat een rij per persoon met een gat; een `?` leidt naar het deel van zijn formulier, met "Opslaan en volgende" binnen de letter en de kolom (`src/beheer/person-table.ts`).
+`/beheer/kwaliteit/namen` toont de personen die op elkaar lijken en wat de lijst van spelers van Wikipedia over onze namen zegt.
+
+Boven de tabel van de personen staat een link naar `/beheer/kwaliteit/personen/snel` (`src/app/beheer/kwaliteit/personen/snel`, #1053); een oud adres met `?lijst=` of `?deel=` gaat daarheen.
 Die pagina heeft twee lijsten, `?lijst=land` voor de tweede, elk in delen van 50 (`?deel=2`), de personen van de nieuwste seizoenen eerst.
 Een rij toont de naam, het eerste en het laatste seizoen en een link naar het artikel op Wikipedia.
 Voor de linie heeft ze vier knoppen, voor het land een keuzelijst met eerst de landen die onze personen al hebben, en een knop.
@@ -1378,7 +1384,7 @@ De knoppen en velden van de lijst zijn 44 pixels hoog, ook al is het beheer comp
 Op de pagina van een wedstrijd staat een verschil tussen twee bronnen als een kaart met beide waarden en de namen van de bronnen (`differenceWords` in `src/beheer/difference-words.ts`).
 De kaart zegt dat de import hier niets vanzelf overneemt, en de knoppen noemen de bron die je overneemt of houdt.
 
-Onder de tabel staan de personen die op elkaar lijken: personen met dezelfde titel op Wikipedia, op accenten, hoofdletters, streepjes, spaties en apostroffen na (`similarPersons` in `@fansite/db/persons`).
+Op `/beheer/kwaliteit/namen` staan de personen die op elkaar lijken: personen met dezelfde titel op Wikipedia, op accenten, hoofdletters, streepjes, spaties en apostroffen na (`similarPersons` in `@fansite/db/persons`).
 De import waarschuwt voor dezelfde groepen en voegt ze niet samen.
 Een groep uit de lijst `personsWhoDiffer` staat er niet: dat zijn twee mensen, zoals Jordy Bruijn en Jordy Buijs.
 

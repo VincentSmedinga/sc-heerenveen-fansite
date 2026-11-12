@@ -122,6 +122,18 @@ describe('the page of a person', () => {
     await expect(render()).rejects.toThrow('not found')
   })
 
+  it('has Opslaan en volgende only for a column of the table that leads to this part', async () => {
+    const from = { kolom: 'wikipedia', terug: '/beheer/kwaliteit/personen/v?kolom=wikipedia' }
+
+    expect(await page(personId, ['naam'], from)).toContain('value="volgende"')
+    expect(await page(personId, ['naam'], { ...from, gedaan: 'volgende-opgeslagen' })).toContain(
+      'De vorige persoon is opgeslagen. Dit is de volgende persoon met een gat in deze kolom.',
+    )
+    expect(await page(personId, ['leven'], from)).not.toContain('value="volgende"')
+    expect(await page(personId, undefined, from)).not.toContain('value="volgende"')
+    expect(await page(personId, ['naam'], { kolom: 'onbekend' })).not.toContain('value="volgende"')
+  })
+
   it('says what the last save did', async () => {
     expect(await page(personId, undefined, { gedaan: 'opgeslagen' })).toContain('Opgeslagen.')
   })
@@ -141,13 +153,13 @@ describe('submitPerson', () => {
 
   it('saves a part and ends on that part, with the way back kept', async () => {
     await expect(
-      submitPerson(personId, 'land', '/beheer/spelers', empty, form({ land: 'BE', reden: 'Clubblad' })),
+      submitPerson(personId, 'land', '/beheer/spelers', undefined, empty, form({ land: 'BE', reden: 'Clubblad' })),
     ).rejects.toThrow(`redirect to /beheer/personen/${personId}/land?gedaan=opgeslagen&terug=%2Fbeheer%2Fspelers`)
     expect((await database.db.select().from(persons).where(eq(persons.id, personId)))[0]?.country).toBe('BE')
   })
 
   it('comes back with the errors and the values', async () => {
-    const state = await submitPerson(personId, 'land', undefined, empty, form({ land: 'XX', reden: '' }))
+    const state = await submitPerson(personId, 'land', undefined, undefined, empty, form({ land: 'XX', reden: '' }))
 
     expect(state.errors).toEqual({
       land: 'Kies een land uit de lijst, of kies Onbekend.',
@@ -158,15 +170,22 @@ describe('submitPerson', () => {
 
   it('drops a way back that leaves the admin', async () => {
     await expect(
-      submitPerson(personId, undefined, 'https://example.org', empty, form({ ...whole(), reden: 'Clubblad' })),
+      submitPerson(
+        personId,
+        undefined,
+        'https://example.org',
+        undefined,
+        empty,
+        form({ ...whole(), reden: 'Clubblad' }),
+      ),
     ).rejects.toThrow(`redirect to /beheer/personen/${personId}?gedaan=ongewijzigd`)
   })
 
   it('sends a person who is gone, or an unknown part, to the list of the players', async () => {
-    await expect(submitPerson(999_999, undefined, undefined, empty, form({}))).rejects.toThrow(
+    await expect(submitPerson(999_999, undefined, undefined, undefined, empty, form({}))).rejects.toThrow(
       'redirect to /beheer/spelers?fout=persoon-weg',
     )
-    await expect(submitPerson(personId, 'constructor', undefined, empty, form({}))).rejects.toThrow(
+    await expect(submitPerson(personId, 'constructor', undefined, undefined, empty, form({}))).rejects.toThrow(
       'redirect to /beheer/spelers?fout=persoon-weg',
     )
   })
