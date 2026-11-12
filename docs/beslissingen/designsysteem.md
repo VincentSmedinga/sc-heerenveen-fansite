@@ -3398,7 +3398,8 @@
     Een schermlezer hoort altijd het hele woord, in een `abbr` met het woord als `title`.
     De tabel staat dan in een container, zoals een tabel met een kolom die opvouwt.
   - **`mark`:** de kop en de cellen staan in het midden.
-  - **`DataTable.Mark`:** een kort teken in een cel dat een link is, zoals `2` of `?`, vet op de sterke vulling, en minstens 1,5rem in beide richtingen.
+  - **`DataTable.Mark`:** een kort teken in een cel dat een link is, zoals `2` of `?`, op de sterke vulling, en minstens 1,5rem in beide richtingen.
+    Het teken is niet vet: vet in een tabel is alleen voor het kerngetal.
     `description` zegt de rest voor een schermlezer: "2 doelpunten zonder speler bij Ajax, 14 augustus".
 - **Waarom:** de tabel van de kwaliteit heeft zeven kolommen met korte tekens, en op een telefoon passen alleen letters.
   Een teken van één teken is te klein als doel zonder vulling en minimale maat (WCAG 2.5.8).

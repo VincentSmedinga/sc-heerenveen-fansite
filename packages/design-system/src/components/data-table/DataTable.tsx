@@ -183,8 +183,8 @@ Group.displayName = 'DataTable.Group'
 DataTable.Group = Group
 
 /**
- * A short sign in a cell that is a link, such as `2` or `?` for what a match still misses: bold
- * on a light fill, and at least as large as a target must be (WCAG 2.5.8). The sign alone says
+ * A short sign in a cell that is a link, such as `2` or `?` for what a match still misses: on a
+ * light fill, and at least as large as a target must be (WCAG 2.5.8). The sign alone says
  * little, so `description` says the rest to a screen reader, after the sign: "2" with
  * "doelpunten zonder speler bij Ajax, 14 augustus" is the name of the link. Put it in a column
  * with `mark`.

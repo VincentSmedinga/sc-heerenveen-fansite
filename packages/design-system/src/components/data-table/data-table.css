@@ -214,8 +214,9 @@
 
   /*
    * A column of short signs (`mark`): the header and the signs are centred over each other.
-   * A sign is a link of at least 1.5rem each way, the smallest target WCAG 2.5.8 allows, bold
-   * on the strong fill, so it stands out from the empty cells of what is complete.
+   * A sign is a link of at least 1.5rem each way, the smallest target WCAG 2.5.8 allows, on the
+   * strong fill, so it stands out from the empty cells of what is complete. It keeps the weight
+   * of the cell: bold in a table is only for the key figure (see weight-css.test.ts).
    */
   .hf-data-table-text .hf-data-table-mark-column {
     text-align: center;
@@ -226,11 +227,10 @@
     border-radius: 0.25rem;
     display: inline-block;
     font-variant-numeric: tabular-nums;
-    font-weight: var(--hf-strong-font-weight);
     line-height: 1.5rem;
     min-block-size: 1.5rem;
     min-inline-size: 1.5rem;
-    padding-inline: 0.25rem;
+    padding-inline: var(--hf-space-xs);
     text-align: center;
     text-decoration: none;
   }
