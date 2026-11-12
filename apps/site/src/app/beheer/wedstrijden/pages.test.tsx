@@ -25,8 +25,7 @@ import { saveReport } from '#src/beheer/match-reports'
 import { report as reportOf, squadOf } from '#src/beheer/report-fixtures'
 import { checkReportForm } from '#src/beheer/report-form'
 
-import MatchPartPage, { generateMetadata as partMetadata } from './[id]/[deel]/page'
-import MatchPage, { metadata as matchMetadata } from './[id]/page'
+import MatchPage, { generateMetadata as matchMetadataOf } from './[id]/[[...deel]]/page'
 import MatchesPage, { metadata as listMetadata } from './page'
 
 const noFacts = { attendance: null, note: null, referee: null, stadium: null }
@@ -99,8 +98,8 @@ const form = async (id: number | string, searchParams: Record<string, string> = 
 
 const partForm = async (id: number, deel: string, searchParams: Record<string, string> = {}) =>
   renderToStaticMarkup(
-    await MatchPartPage({
-      params: Promise.resolve({ deel, id: String(id) }),
+    await MatchPage({
+      params: Promise.resolve({ deel: [deel], id: String(id) }),
       searchParams: Promise.resolve(searchParams),
     }),
   )
@@ -110,10 +109,10 @@ const headings = (html: string) =>
 
 describe('the pages of the matches', () => {
   it.each([
-    ['the list', listMetadata],
-    ['the match', matchMetadata],
-  ])('tell search engines to stay away from %s', (_name, metadata) => {
-    expect(metadata.robots).toEqual({ follow: false, index: false })
+    ['the list', () => Promise.resolve(listMetadata)],
+    ['the match', () => matchMetadataOf({ params: Promise.resolve({ id: '1' }) })],
+  ])('tell search engines to stay away from %s', async (_name, metadata) => {
+    expect((await metadata()).robots).toEqual({ follow: false, index: false })
   })
 
   it.each([
@@ -1084,7 +1083,7 @@ describe('the parts of the form of a match (#1162)', () => {
   })
 
   it('names the part in the title of the tab', async () => {
-    expect((await partMetadata({ params: Promise.resolve({ deel: 'doelpunten', id: '1' }) })).title).toBe(
+    expect((await matchMetadataOf({ params: Promise.resolve({ deel: ['doelpunten'], id: '1' }) })).title).toBe(
       'Wedstrijd invullen: doelpunten',
     )
   })

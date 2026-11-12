@@ -253,6 +253,9 @@ export async function submitMatchPart(
   _previous: MatchFormState,
   formData: FormData,
 ): Promise<MatchFormState> {
+  // The role first, so a call without a session goes to the login page whatever it sends.
+  await requireRole('owner', 'editor')
+
   if (!formParts.includes(part)) {
     redirect(`${matchesPath}?fout=weg`)
   }

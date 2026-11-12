@@ -102,7 +102,7 @@ describe('the admin', () => {
     )
     expect(routes).toEqual(
       expect.arrayContaining([
-        'app/beheer/wedstrijden/[id]/page.tsx',
+        'app/beheer/wedstrijden/[id]/[[...deel]]/page.tsx',
         'app/beheer/wedstrijden/[id]/verslag/page.tsx',
         'app/beheer/wedstrijden/page.tsx',
       ]),

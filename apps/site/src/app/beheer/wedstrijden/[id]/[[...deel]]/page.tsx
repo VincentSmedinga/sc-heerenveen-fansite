@@ -1,3 +1,5 @@
+import type { Metadata } from 'next'
+
 import { partLabels } from '@fansite/db/match-conflicts'
 import { describeEntryGoals, describeEntryKickoff, markedParts } from '@fansite/db/match-edits'
 import { mayHaveReport } from '@fansite/db/match-reports'
@@ -7,6 +9,26 @@ import { notFound } from 'next/navigation'
 import type { FormPart } from '#src/beheer/match-fields'
 
 import { addPlayerPath } from '#src/app/beheer/spelers/paths'
+import {
+  submitConflict,
+  submitDeleteMatch,
+  submitHeldChange,
+  submitMatch,
+  submitMatchPart,
+  submitRemoveEntry,
+} from '#src/app/beheer/wedstrijden/actions'
+import { ConflictForm } from '#src/app/beheer/wedstrijden/ConflictForm'
+import { HeldChangeForm } from '#src/app/beheer/wedstrijden/HeldChangeForm'
+import {
+  MatchErrorSummary,
+  MatchFields,
+  MatchFormProvider,
+  MatchSavePanel,
+  wholeFormId,
+} from '#src/app/beheer/wedstrijden/MatchForm'
+import { backPathOf, matchesPath, matchPartPath, matchPath, reportPath } from '#src/app/beheer/wedstrijden/paths'
+import { RemoveEntryForm } from '#src/app/beheer/wedstrijden/RemoveEntryForm'
+import { RemoveMatchForm } from '#src/app/beheer/wedstrijden/RemoveMatchForm'
 import { compact } from '#src/beheer/density'
 import { differenceWords } from '#src/beheer/difference-words'
 import { describeHeldChange, describeWithoutDecision, explainHold } from '#src/beheer/held-changes'
@@ -19,23 +41,8 @@ import { wikipediaUrl } from '#src/match-format'
 import { describeShowDelay, lacksResult } from '#src/matches'
 import { formatVersionTime } from '#src/news'
 
-import {
-  submitConflict,
-  submitDeleteMatch,
-  submitHeldChange,
-  submitMatch,
-  submitMatchPart,
-  submitRemoveEntry,
-} from './actions'
-import { ConflictForm } from './ConflictForm'
-import { HeldChangeForm } from './HeldChangeForm'
-import { MatchErrorSummary, MatchFields, MatchFormProvider, MatchSavePanel, wholeFormId } from './MatchForm'
-import { backPathOf, matchesPath, matchPartPath, matchPath, reportPath } from './paths'
-import { RemoveEntryForm } from './RemoveEntryForm'
-import { RemoveMatchForm } from './RemoveMatchForm'
-
 /** A part of the page of a match: one of the form, or the changes that wait (issue 1162). */
-export type MatchPagePart = 'wijzigingen' | FormPart
+type MatchPagePart = 'wijzigingen' | FormPart
 
 /** The parts in the navigation, in order, with what they say. */
 const pageLabels: Record<MatchPagePart, string> = {
@@ -45,14 +52,22 @@ const pageLabels: Record<MatchPagePart, string> = {
   wijzigingen: 'Wijzigingen',
 }
 
-/** The parts a page can be, as the address names them. */
-export const matchPageParts = Object.keys(pageLabels) as MatchPagePart[]
-
 type Props = {
-  id: string
-  /** The part the page shows, or the whole form without one. */
-  part?: MatchPagePart | undefined
-  searchParams: Record<string, string | string[] | undefined>
+  params: Promise<{ deel?: string[]; id: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
+
+// Render on each request: the match changes with every entry and every import.
+export const dynamic = 'force-dynamic'
+
+/** What the tab says: "Wedstrijd invullen", or with a part "Wedstrijd invullen: doelpunten". */
+export async function generateMetadata({ params }: Pick<Props, 'params'>): Promise<Metadata> {
+  const part = partOf((await params).deel)
+
+  return {
+    robots: { follow: false, index: false },
+    title: part === undefined || part === null ? 'Wedstrijd invullen' : `Wedstrijd invullen: ${part}`,
+  }
 }
 
 /** What the last action says, by the word in the address. */
@@ -120,8 +135,15 @@ const notices: Record<string, { text: string; title: string }> = {
  * cards with the save panel, and saves only its own fields. The page tells what the last action
  * did from the word in the address.
  */
-export async function MatchEditPage({ id: rawId, part, searchParams }: Props) {
+export default async function MatchPage({ params, searchParams }: Props) {
   await requireRole('owner', 'editor')
+
+  const { deel, id: rawId } = await params
+  const part = partOf(deel)
+
+  if (part === null) {
+    notFound()
+  }
 
   const id = parseItemId(rawId)
   const found = id === undefined ? undefined : await findMatch(getDatabase().db, id)
@@ -137,7 +159,7 @@ export async function MatchEditPage({ id: rawId, part, searchParams }: Props) {
     notFound()
   }
 
-  const { gedaan, terug } = searchParams
+  const { gedaan, terug } = await searchParams
   const back = backPathOf(terug)
   const formPart = part === 'wijzigingen' ? undefined : part
   const shows = (shown: MatchPagePart) => part === undefined || part === shown
@@ -400,4 +422,18 @@ function pageKindOf(competition: string) {
       : competition === 'Europa League'
         ? 'europa-league'
         : 'playoffs'
+}
+
+/**
+ * The part an address names: `undefined` for the whole form, and `null` for an address that is
+ * no part, which is not found.
+ */
+function partOf(deel: string[] | undefined): MatchPagePart | null | undefined {
+  if (deel === undefined || deel.length === 0) {
+    return undefined
+  }
+
+  const [name] = deel
+
+  return deel.length === 1 && name !== undefined && name in pageLabels ? (name as MatchPagePart) : null
 }
