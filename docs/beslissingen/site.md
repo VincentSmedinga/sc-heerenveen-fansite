@@ -4281,6 +4281,7 @@
 
 - **Datum:** 10 november 2026
 - **Besluit:** de redactie vult de gaten in op `/beheer/kwaliteit/personen`, een pagina van het beheer, en niet in een gesprek met een agent (#1053).
+  **Later:** sinds 12 november 2026 staat deze lijst op `/beheer/kwaliteit/personen/snel`, en is `/beheer/kwaliteit/personen` de tabel van personen; zie _De tabel van de personen telt vijf gegevens per persoon_.
   De pagina heeft twee lijsten, de personen zonder linie en de personen zonder land, met bovenaan hoeveel er nog zijn.
   Een rij heeft vier knoppen voor de linie, of een keuzelijst van landen met een knop, en slaat op bij een tik.
   - **Opslaan bij de rij:** de lijst is een onderdeel in de browser, en elke rij heeft een eigen formulier.
@@ -5281,3 +5282,22 @@
 - **Waarom:** een persoon heeft geen seizoen, dus een naam die alleen bij de persoon verandert, laat in elk seizoen de oude naam staan.
   Eén veld voor de datum werkt zonder JavaScript en met elk hulpmiddel; een datumveld van de browser kent geen los jaar.
 - **Alternatieven:** alleen de persoon hernoemen en de seizoenen laten (de lijst van een seizoen toont dan de oude naam); drie velden voor dag, maand en jaar (meer werk voor een veld dat meestal een jaar is); een datumveld van de browser met een apart veld voor een jaar.
+
+## De tabel van de personen telt vijf gegevens per persoon
+
+- **Datum:** 12 november 2026
+- **Besluit:** `/beheer/kwaliteit/personen` en `/beheer/kwaliteit/personen/<letter>` tonen de gaten van de personen in vijf kolommen: Naam, Wikipedia, Geboren, Land en Linie (#1165).
+  - **Wie telt:** een persoon met een rij in `players`, dus die in minstens één seizoen in onze selectie stond.
+    Naam telt een persoon zonder voornaam, ook een speler met één naam: dat blijft een gat tot er een markering "niet te vinden" is.
+  - **De letter** volgt de lijst van alle spelers (`letterOf` en `sortPlayers`): de achternaam zonder voorvoegsel, zonder accent, zodat van den Berg bij B staat.
+    Een naam zonder letter staat onder `overig`.
+  - **De rij van letters** staat boven de tabel als gewone tekst met links, en niet als navigatie: een letter zonder personen is gewone tekst, en een navigatie van het designsysteem kent alleen links.
+    De huidige letter is vet, met `aria-current`.
+  - **Opslaan en volgende** gaat naar de volgende persoon van de letter met een gat in de kolom, en na de laatste terug naar de letter met een melding.
+    De kolommen Naam en Wikipedia leiden allebei naar het deel `naam`.
+  - **De snelle lijst** van de linie en het land staat op `/beheer/kwaliteit/personen/snel`, met een link boven de tabel.
+    Een oud adres met `?lijst=` of `?deel=` gaat daarheen.
+  - **De schakelaar** Wedstrijden en Personen staat boven de tabel van de wedstrijden en die van de personen.
+- **Waarom:** de kolommen volgen de delen van het formulier van een persoon uit #1164, zodat een tik op een `?` het goede deel opent.
+  Dezelfde letter als de lijst van alle spelers maakt een persoon makkelijk te vinden.
+- **Alternatieven:** een kolom Verschil met de import (er is nog geen telling per persoon); de letter van de hele naam (van den Berg zou bij V staan); een navigatie met alleen de letters die personen hebben (de rij springt dan per letter anders).

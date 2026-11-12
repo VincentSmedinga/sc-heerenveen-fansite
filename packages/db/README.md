@@ -895,7 +895,7 @@ Drie tabellen horen erbij:
 
 Functies in `@fansite/db/persons` voor de importer: `personsToRead`, `rememberWikidataId`, `storePersonData`, `storeWikidataLabel`, `knownWikidataLabels`, `personsByWikidataId`, `squadLines`, `applyManualLines`, `refreshPersonLines`, `refreshPersonCountries` en `countPersonData`.
 Voor het beheer is er `setEditorsPersonFacts`, dat de linie en het land van een persoon zet met de bron `manual`, of weghaalt.
-De werklijst van het beheer (`/beheer/kwaliteit/personen`, #1053) gebruikt het ook, en schrijft dan `person.edit` in het logboek.
+De werklijst van het beheer (`/beheer/kwaliteit/personen/snel`, #1053) gebruikt het ook, en schrijft dan `person.edit` in het logboek.
 De migratie `0067_add_person_edit_action` voegt die actie toe aan de lijst van `audit_log.action`.
 
 `@fansite/db/person-merge` voegt twee personen samen, voor de importer en voor het beheer.

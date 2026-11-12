@@ -92,9 +92,14 @@ export function isGapColumn(value: unknown): value is GapColumn {
 /**
  * The next match after `current` in the order of the season with a gap in the column, or the
  * first one before it when none comes after, so "Opslaan en volgende" goes round the season.
- * `undefined` when no other match has a gap there.
+ * `undefined` when no other match has a gap there. The persons of a letter go round the same
+ * way (issue 1165).
  */
-export function nextWithGap(rows: readonly MatchGaps[], current: number, column: GapColumn) {
+export function nextWithGap<Column extends string, Row extends { gaps: Partial<Record<Column, unknown>>; id: number }>(
+  rows: readonly Row[],
+  current: number,
+  column: Column,
+): Row | undefined {
   const index = rows.findIndex((row) => row.id === current)
   const ordered = index === -1 ? rows : [...rows.slice(index + 1), ...rows.slice(0, index)]
 

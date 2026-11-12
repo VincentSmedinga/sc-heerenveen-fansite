@@ -23,7 +23,7 @@ export const personFacts = ['linie', 'land'] as const
 /** How many persons one part of the list shows. */
 export const personListLength = 50
 
-export const personFactsPath = `${qualityPath}/personen`
+export const personFactsPath = `${qualityPath}/personen/snel`
 
 /** The name of a person in the list: the name, the title of the article or a player's name. */
 const listedName = sql<string>`COALESCE(${persons.name}, ${persons.wikipediaPage}, MAX(${players.name}), CONCAT('Persoon ', ${persons.id}))`

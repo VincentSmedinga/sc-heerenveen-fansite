@@ -14,6 +14,7 @@ import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
 import { isPersonPart, type PersonPart, personPartLabels, personParts } from '#src/beheer/person-fields'
 import { findAdminPerson, personNameOf, personValuesOf } from '#src/beheer/person-form'
+import { isPersonGapColumn, personColumnParts } from '#src/beheer/person-table'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
@@ -39,6 +40,14 @@ export async function generateMetadata({ params }: Pick<Props, 'params'>): Promi
 const notices: Record<string, { text: string; title: string }> = {
   ongewijzigd: { text: 'Je had niets veranderd, dus er is niets opgeslagen.', title: 'Niets veranderd' },
   opgeslagen: { text: 'Je invoer is bewaard.', title: 'Opgeslagen' },
+  'volgende-ongewijzigd': {
+    text: 'Bij de vorige persoon had je niets veranderd. Dit is de volgende persoon met een gat in deze kolom.',
+    title: 'Volgende',
+  },
+  'volgende-opgeslagen': {
+    text: 'De vorige persoon is opgeslagen. Dit is de volgende persoon met een gat in deze kolom.',
+    title: 'Volgende',
+  },
 }
 
 /**
@@ -65,8 +74,10 @@ export default async function PersonPage({ params, searchParams }: Props) {
     notFound()
   }
 
-  const { gedaan, terug } = await searchParams
+  const { gedaan, kolom, terug } = await searchParams
   const back = backPathOf(terug)
+  // The column of the table of Kwaliteit the editor works through, when it leads to this part.
+  const column = isPersonGapColumn(kolom) && part === personColumnParts[kolom] ? kolom : undefined
   const initial = personValuesOf(found)
   const notice = typeof gedaan === 'string' && Object.hasOwn(notices, gedaan) ? notices[gedaan] : undefined
   const navigation = [
@@ -120,12 +131,13 @@ export default async function PersonPage({ params, searchParams }: Props) {
         </Notice>
       )}
       <PersonForm
-        action={submitPerson.bind(null, id, part, back)}
+        action={submitPerson.bind(null, id, part, back, column)}
         cancelHref={back ?? playersPath}
         countries={countryChoices()}
         initial={initial}
         // A second save on the same address must open the form anew, with what is stored now.
         key={`${id}-${part ?? ''}-${gedaan ?? ''}-${JSON.stringify(initial)}`}
+        next={column !== undefined}
         part={part}
       />
     </Page.Main>
