@@ -35,7 +35,7 @@ import {
 import { MatchLegend, MatchLine } from './MatchViews'
 import { opponentsPath } from './opponents'
 
-/** The id of the form, which the choice of the order outside it points to. */
+/** The id of the form. */
 const formId = 'wedstrijden-zoeken'
 
 /** The id of the heading with the number of matches, where a search ends up. */
