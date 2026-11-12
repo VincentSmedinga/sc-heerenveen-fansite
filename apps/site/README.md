@@ -1187,7 +1187,7 @@ Wat een redacteur ziet en verwacht, staat in [`docs/wedstrijden-invullen.md`](..
 
 `/beheer/wedstrijden/<nummer>/verslag` (`src/app/beheer/wedstrijden/[id]/verslag`) is het scherm voor het verslag van een gespeelde wedstrijd, of van een wedstrijd die nog wordt gespeeld (`scheduled`, vanaf zijn dag): de bron en de status, en voor sc Heerenveen en de tegenstander de opstelling en de bank, de wissels, de doelpunten, de kaarten en de gemiste strafschoppen, en bij een wedstrijd met een uitslag van de strafschoppenserie ook de schoten van de serie.
 Een wedstrijd die niet bestaat, van een latere dag is, uitgesteld of afgelast is, geeft "niet gevonden".
-Bij een wedstrijd die nog wordt gespeeld staat in de zijbalk de knop "Wedstrijd afgelopen", die naar `/beheer/wedstrijden/<nummer>/verslag/afgelopen` gaat: daar bevestigt de redactie de stand uit de doelpunten van het verslag (`finishMatch`), de wedstrijd krijgt zijn uitslag en wordt `played`, en het verslag blijft `bezig`.
+Bij een wedstrijd die nog wordt gespeeld staat in de rij onder het formulier de knop "Wedstrijd afgelopen", die naar `/beheer/wedstrijden/<nummer>/verslag/afgelopen` gaat: daar bevestigt de redactie de stand uit de doelpunten van het verslag (`finishMatch`), de wedstrijd krijgt zijn uitslag en wordt `played`, en het verslag blijft `bezig`.
 De lijst met wedstrijden heeft een kolom Verslag (Leeg, Bezig, Klaar of Controleer), en de pagina van een wedstrijd linkt naar het scherm.
 `/beheer/wedstrijden/<nummer>/verslag/live` (`src/app/beheer/wedstrijden/[id]/verslag/live`) is het snelle scherm om het verslag bij te houden vanaf een telefoon: een formulier voor een doelpunt, een kaart en een wissel.
 Blessuretijd staat naast Minuut en is er met JavaScript alleen bij 45, 90, 105 en 120 (`MomentFields` in `LiveForms.tsx`); zonder JavaScript is het altijd zichtbaar.
@@ -1235,16 +1235,17 @@ Hier geeft de redactie een club een eigen lijst van namen, met een start en een 
 
 - De lijst heeft alle clubs waartegen we wedstrijden hebben, met het label "Eigen lijst" bij clubs die er een hebben, het filter Alles of Eigen lijst en zoeken op een deel van de naam.
   Het zoeken is een formulier met `GET`, dus het werkt zonder JavaScript (`searchClubs` in `src/beheer/stadiums.ts`).
-- `/beheer/stadions/<club>` is de brede pagina met een zijbalk.
+- `/beheer/stadions/<club>` is een pagina met twee kolommen en een werkbalk (zie _De pagina's van het beheer gebruiken het raster_ in `docs/beslissingen/site.md`).
   De hoofdkolom heeft het formulier (`StadiumForm.tsx`): een regel per naam met de naam, het seizoen of de dag waarmee hij begint, en een toelichting.
   Een naam begint met een seizoen (`2019/20`, telt als 1 juli van dat jaar) of met een dag, niet met allebei, en alleen de eerste naam mag zonder start; de starts lopen op, en de naam ervoor eindigt waar de volgende begint.
   De toelichting is gewone tekst van hoogstens 200 tekens, in eigen woorden, en noemt de bron als die niet Wikipedia is.
-- De zijbalk heeft "Opslaan", wat de wedstrijden zeggen met de knop "Overnemen", en het uitklapblok "Terug naar Wikipedia".
+- De werkbalk heeft "Opslaan" en "Annuleren", en het formulier heeft ze aan het einde.
+  De tweede kolom heeft wat de wedstrijden zeggen met de knop "Overnemen", en het uitklapblok "Terug naar Wikipedia".
   "Overnemen" vult het formulier met die namen en seizoenen, en slaat niets op.
   "Terug naar Wikipedia" haalt de hele lijst van de club weg, ook de toelichtingen, en vraagt eerst een bevestiging zoals "Invoer weghalen" bij een wedstrijd.
 - Het formulier is een client-component met `useActionState`, en een gewone post die zonder JavaScript werkt.
   Een regel toevoegen of weghalen en "Overnemen" zijn knoppen van hetzelfde formulier, die de server beantwoordt met de waarden bewaard en de focus op het goede veld; de eerste knop is een verborgen "Opslaan", zodat Enter opslaat.
-  De knoppen in de zijbalk horen bij het formulier met het attribuut `form`.
+  "Overnemen" en de knoppen in de werkbalk horen bij het formulier met het attribuut `form`.
 - `src/beheer/stadium-form.ts` leest en controleert wat het formulier stuurt, altijd opnieuw op de server, met een zin bij elk veld (lengte, vorm van een seizoen, een dag die bestaat, oplopende starts).
   `replaceClubStadiums` en `removeClubStadiums` uit `@fansite/db/club-stadiums` schrijven de lijst en `stadium.save` of `stadium.reset` in het logboek, in één transactie, met het nummer van de club en de aantallen en zonder de tekst van een toelichting.
 - Een opslag staat binnen vijf minuten op de pagina van de club: dat is de tijd die `getClubPage` zijn gegevens bewaart.
@@ -1261,7 +1262,8 @@ De lijst is alleen voor de weergave: de import bepaalt de naam in de kop en het 
   De regels voor een start zijn die van de stadions, en de periodes komen uit dezelfde functie (`ownListPeriods` in `src/match-format.ts`).
   Boven het formulier staat de naam die de site nu in de kop toont.
   Is de laatste naam van de lijst een andere (`headingNotice`), dan zegt een melding dat in gewone tekst; opslaan kan wel.
-- De zijbalk heeft "Opslaan", de schrijfwijzen die we van Wikipedia kennen (alleen lezen, uit `club_names`) en het uitklapblok "Lijst weghalen", dat eerst een bevestiging vraagt.
+- De werkbalk heeft "Opslaan" en "Annuleren", en het formulier heeft ze aan het einde.
+  De tweede kolom heeft de schrijfwijzen die we van Wikipedia kennen (alleen lezen, uit `club_names`) en het uitklapblok "Lijst weghalen", dat eerst een bevestiging vraagt.
 - Elke naam van de lijst komt bij het opslaan ook in `club_names`, zodat de import de oude naam als dezelfde club vindt en er geen tweede club ontstaat.
   Hoort een naam bij een andere club (op naam, zonder verschil in hoofdletters, accenten en leestekens), dan staat er een fout bij het veld en wordt niets opgeslagen.
   Een naam uit de lijst halen of de lijst weghalen laat `club_names` zoals het is.

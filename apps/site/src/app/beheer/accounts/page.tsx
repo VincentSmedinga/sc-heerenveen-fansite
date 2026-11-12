@@ -4,6 +4,7 @@ import { Button, Card, FigureList, Form, Heading, Link, Page, Text } from '@fans
 
 import { nameOf, roleLabels } from '#src/beheer/account-fields'
 import { listAccounts } from '#src/beheer/account-management'
+import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
@@ -31,59 +32,57 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
   const accounts = await listAccounts(getDatabase().db)
 
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Heading level={1}>Accounts</Heading>
-          <Text appearance="intro">
-            Hier voeg je redacteuren en auteurs toe, en wijzig je hun voornaam, adres en rol. Een account dat je uitzet,
-            kan niet meer inloggen. Verwijderen kan niet, want het logboek verwijst ernaar.
-          </Text>
-        </>
-      }
-    >
-      {fout === 'weg' ? (
-        <Card aria-labelledby="weg-kop" surface="soft">
-          <Heading id="weg-kop" level={2}>
-            Dit account bestaat niet
-          </Heading>
-          <Text>Er is niets veranderd. Kies hieronder een account.</Text>
-        </Card>
-      ) : null}
-      <Card as="div">
-        <Text appearance="meta">
-          {accounts.length} {accounts.length === 1 ? 'account' : 'accounts'}.
+    <Page.Main areas={adminAreas} className={compact}>
+      <Page.Cell area="head">
+        <Heading level={1}>Accounts</Heading>
+        <Text appearance="intro">
+          Hier voeg je redacteuren en auteurs toe, en wijzig je hun voornaam, adres en rol. Een account dat je uitzet,
+          kan niet meer inloggen. Verwijderen kan niet, want het logboek verwijst ernaar.
         </Text>
-        <FigureList>
-          {accounts.map((account) => (
-            <FigureList.Item
-              figure={`${roleLabels[account.role]} · ${account.disabled ? 'uit' : 'aan'}`}
-              key={account.id}
-              note={account.firstName === '' ? nameOf('') : account.email}
-            >
-              <Link href={accountPath(account.id)}>
-                {account.firstName === '' ? (
-                  account.email
-                ) : (
-                  <>
-                    {account.firstName}
-                    {/* Two accounts can share a first name: the address tells them apart. */}
-                    <Text as="span" className="hf-visually-hidden">
-                      {` (${account.email})`}
-                    </Text>
-                  </>
-                )}
-              </Link>
-            </FigureList.Item>
-          ))}
-        </FigureList>
-      </Card>
-      <Form action={newAccountPath} method="get">
-        <Button icon="plus" type="submit">
-          Nieuw account
-        </Button>
-      </Form>
+      </Page.Cell>
+      <Page.Cell area="main">
+        {fout === 'weg' ? (
+          <Card aria-labelledby="weg-kop" surface="soft">
+            <Heading id="weg-kop" level={2}>
+              Dit account bestaat niet
+            </Heading>
+            <Text>Er is niets veranderd. Kies hieronder een account.</Text>
+          </Card>
+        ) : null}
+        <Card as="div">
+          <Text appearance="meta">
+            {accounts.length} {accounts.length === 1 ? 'account' : 'accounts'}.
+          </Text>
+          <FigureList>
+            {accounts.map((account) => (
+              <FigureList.Item
+                figure={`${roleLabels[account.role]} · ${account.disabled ? 'uit' : 'aan'}`}
+                key={account.id}
+                note={account.firstName === '' ? nameOf('') : account.email}
+              >
+                <Link href={accountPath(account.id)}>
+                  {account.firstName === '' ? (
+                    account.email
+                  ) : (
+                    <>
+                      {account.firstName}
+                      {/* Two accounts can share a first name: the address tells them apart. */}
+                      <Text as="span" className="hf-visually-hidden">
+                        {` (${account.email})`}
+                      </Text>
+                    </>
+                  )}
+                </Link>
+              </FigureList.Item>
+            ))}
+          </FigureList>
+        </Card>
+        <Form action={newAccountPath} method="get">
+          <Button icon="plus" type="submit">
+            Nieuw account
+          </Button>
+        </Form>
+      </Page.Cell>
     </Page.Main>
   )
 }

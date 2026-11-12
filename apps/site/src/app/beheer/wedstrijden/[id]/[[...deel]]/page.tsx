@@ -29,14 +29,17 @@ import {
 import { backPathOf, matchesPath, matchPartPath, matchPath, reportPath } from '#src/app/beheer/wedstrijden/paths'
 import { RemoveEntryForm } from '#src/app/beheer/wedstrijden/RemoveEntryForm'
 import { RemoveMatchForm } from '#src/app/beheer/wedstrijden/RemoveMatchForm'
+import { toolbarAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { differenceWords } from '#src/beheer/difference-words'
+import { matchFormId } from '#src/beheer/form-ids'
 import { describeHeldChange, describeWithoutDecision, explainHold } from '#src/beheer/held-changes'
 import { parseItemId } from '#src/beheer/items'
 import { findMatch } from '#src/beheer/match-entries'
 import { goalKinds, isKnockout, statusChoices, valuesOf } from '#src/beheer/match-form'
 import { columnParts, isFormColumn } from '#src/beheer/quality-table'
 import { requireRole } from '#src/beheer/require-role'
+import { SaveButtons } from '#src/beheer/SaveButtons'
 import { getDatabase } from '#src/database'
 import { wikipediaUrl } from '#src/match-format'
 import { describeShowDelay, lacksResult } from '#src/matches'
@@ -244,177 +247,192 @@ export default async function MatchPage({ params, searchParams }: Props) {
       initial={hasReport ? { ...valuesOf(match, []), doelpunten: [] } : valuesOf(match, goals)}
       key={`${match.id}-${edit?.editedAt.getTime() ?? 0}-${gedaan ?? ''}`}
     >
-      <Page.Main
-        className={compact}
-        intro={
-          <>
+      <Page.Main areas={toolbarAreas} className={compact}>
+        <Page.Cell area="head">
+          <Text>
+            <Link href={back ?? matchesPath} icon="arrow-left">
+              {back === undefined ? 'Terug naar Wedstrijden' : 'Terug'}
+            </Link>
+          </Text>
+          <Heading level={1}>{clubs}</Heading>
+          <Text appearance="meta">
+            {match.competition}, {match.round} · {describeEntryKickoff(match)}
+          </Text>
+          {match.dataSource === 'redactie' ? (
+            <Text appearance="meta">Toegevoegd door de redactie. Bron: {match.sourceLine}</Text>
+          ) : null}
+          {edit === undefined && !lacking ? null : (
             <Text>
-              <Link href={back ?? matchesPath} icon="arrow-left">
-                {back === undefined ? 'Terug naar Wedstrijden' : 'Terug'}
+              {edit === undefined ? null : <Tag tone="highlight">{`Aangepast: ${parts}`}</Tag>}{' '}
+              {lacking ? <Tag tone="attention">Uitslag ontbreekt</Tag> : null}
+            </Text>
+          )}
+          {part === undefined ? null : (
+            <Text>
+              <Link href={matchPath(match.id)} id={wholeFormId}>
+                Hele wedstrijd bewerken
               </Link>
             </Text>
-            <Heading level={1}>{clubs}</Heading>
-            <Text appearance="meta">
-              {match.competition}, {match.round} · {describeEntryKickoff(match)}
-            </Text>
-            {match.dataSource === 'redactie' ? (
-              <Text appearance="meta">Toegevoegd door de redactie. Bron: {match.sourceLine}</Text>
-            ) : null}
-            {edit === undefined && !lacking ? null : (
-              <Text>
-                {edit === undefined ? null : <Tag tone="highlight">{`Aangepast: ${parts}`}</Tag>}{' '}
-                {lacking ? <Tag tone="attention">Uitslag ontbreekt</Tag> : null}
-              </Text>
-            )}
-            <Filter items={navigation} label="Delen van de wedstrijd" />
-            {part === undefined ? null : (
-              <Text>
-                <Link href={matchPath(match.id)} id={wholeFormId}>
-                  Hele wedstrijd bewerken
-                </Link>
-              </Text>
-            )}
-          </>
-        }
-        wide
-      >
-        <MatchErrorSummary part={formPart} />
-        {notice === undefined ? null : (
-          <Notice>
-            <Strong>{notice.title}.</Strong> {notice.text}
-          </Notice>
-        )}
-        {!shows('wijzigingen')
-          ? null
-          : differences.map((difference) => {
-              const words = differenceWords(difference, match, now, hasReport)
+          )}
+        </Page.Cell>
+        <Page.Toolbar>
+          <Filter items={navigation} label="Delen van de wedstrijd" />
+          {part === 'wijzigingen' ? null : (
+            <SaveButtons
+              buttons={
+                column === undefined
+                  ? [{ label: 'Opslaan', value: 'opslaan' }]
+                  : [
+                      { label: 'Opslaan en volgende', value: 'volgende' },
+                      { appearance: 'soft', label: 'Opslaan', value: 'opslaan' },
+                    ]
+              }
+              cancelHref={back ?? matchesPath}
+              formId={matchFormId}
+            />
+          )}
+        </Page.Toolbar>
+        <Page.Cell area="main">
+          <MatchErrorSummary part={formPart} />
+          {notice === undefined ? null : (
+            <Notice>
+              <Strong>{notice.title}.</Strong> {notice.text}
+            </Notice>
+          )}
+          {!shows('wijzigingen')
+            ? null
+            : differences.map((difference) => {
+                const words = differenceWords(difference, match, now, hasReport)
 
-              return (
-                <Card aria-labelledby={`afwijking-${difference.id}-kop`} key={difference.id}>
-                  <Heading id={`afwijking-${difference.id}-kop`} level={2}>
-                    {words.heading}
-                  </Heading>
-                  <List role="list">
-                    <List.Item>
-                      <Text>
-                        {words.ours}: {difference.oldValue}
-                      </Text>
-                    </List.Item>
-                    <List.Item>
-                      <Text>
-                        {words.theirs}: {difference.newValue}
-                      </Text>
-                    </List.Item>
-                  </List>
-                  <Text appearance="meta">{words.note}</Text>
-                  <ConflictForm
-                    action={submitConflict.bind(null, difference.id)}
-                    id={difference.id}
-                    labels={{ keep: words.keep, takeOver: words.takeOver }}
-                    part={`de ${partLabels[difference.part]}`}
-                    title={title}
-                  />
-                </Card>
-              )
-            })}
-        {!shows('wijzigingen')
-          ? null
-          : held.map((change) => {
-              const summary = describeHeldChange(change, match, goals)
-              const outcome = describeWithoutDecision(change, now)
-              const page = pages.find((candidate) => candidate.kind === pageKindOf(match.competition))
-              const what = summary.removal
-                ? 'het weghalen van de wedstrijd'
-                : summary.differences.length === 0
-                  ? 'de wijziging'
-                  : listWords(summary.differences.map((difference) => difference.label.toLowerCase()))
-
-              return (
-                <Card aria-labelledby={`wijziging-${change.id}-kop`} key={change.id}>
-                  <Heading id={`wijziging-${change.id}-kop`} level={2}>
-                    Wikipedia wacht: {what}
-                  </Heading>
-                  <Text>{explainHold(change.reason)}</Text>
-                  {summary.removal ? (
+                return (
+                  <Card aria-labelledby={`afwijking-${difference.id}-kop`} key={difference.id}>
+                    <Heading id={`afwijking-${difference.id}-kop`} level={2}>
+                      {words.heading}
+                    </Heading>
                     <List role="list">
                       <List.Item>
-                        <Text>Op de site: de wedstrijd staat er.</Text>
+                        <Text>
+                          {words.ours}: {difference.oldValue}
+                        </Text>
                       </List.Item>
                       <List.Item>
-                        <Text>Wikipedia: de wedstrijd staat niet meer op de pagina.</Text>
+                        <Text>
+                          {words.theirs}: {difference.newValue}
+                        </Text>
                       </List.Item>
                     </List>
-                  ) : summary.differences.length === 0 ? (
-                    <Text>Alleen een verwijzing is anders, zoals de pagina van een speler of van de tegenstander.</Text>
-                  ) : (
-                    <List role="list">
-                      {summary.differences.map((difference) => (
-                        <List.Item key={difference.label}>
-                          <Text>
-                            <Strong>{difference.label}.</Strong> Op de site: {difference.site}. Wikipedia:{' '}
-                            {difference.wikipedia}.
-                          </Text>
+                    <Text appearance="meta">{words.note}</Text>
+                    <ConflictForm
+                      action={submitConflict.bind(null, difference.id)}
+                      id={difference.id}
+                      labels={{ keep: words.keep, takeOver: words.takeOver }}
+                      part={`de ${partLabels[difference.part]}`}
+                      title={title}
+                    />
+                  </Card>
+                )
+              })}
+          {!shows('wijzigingen')
+            ? null
+            : held.map((change) => {
+                const summary = describeHeldChange(change, match, goals)
+                const outcome = describeWithoutDecision(change, now)
+                const page = pages.find((candidate) => candidate.kind === pageKindOf(match.competition))
+                const what = summary.removal
+                  ? 'het weghalen van de wedstrijd'
+                  : summary.differences.length === 0
+                    ? 'de wijziging'
+                    : listWords(summary.differences.map((difference) => difference.label.toLowerCase()))
+
+                return (
+                  <Card aria-labelledby={`wijziging-${change.id}-kop`} key={change.id}>
+                    <Heading id={`wijziging-${change.id}-kop`} level={2}>
+                      Wikipedia wacht: {what}
+                    </Heading>
+                    <Text>{explainHold(change.reason)}</Text>
+                    {summary.removal ? (
+                      <List role="list">
+                        <List.Item>
+                          <Text>Op de site: de wedstrijd staat er.</Text>
                         </List.Item>
-                      ))}
-                    </List>
-                  )}
-                  <Text appearance="meta">
-                    Wikipedia zegt dit sinds {formatVersionTime(change.firstSeenAt)}. De import zag het{' '}
-                    {change.timesSeen === 1 ? 'één keer' : `${change.timesSeen} keer`}, voor het laatst op{' '}
-                    {formatVersionTime(change.lastSeenAt)}.{' '}
-                    {outcome.kind === 'taken-over'
-                      ? `Zonder besluit neemt de import dit over op ${formatVersionTime(outcome.at)}, als Wikipedia dan nog hetzelfde zegt.`
-                      : 'Het seizoen is voorbij of bijna voorbij, dus de import neemt dit niet vanzelf over. Zonder besluit blijft de huidige waarde staan.'}
-                  </Text>
-                  {page === undefined ? null : (
-                    <Text>
-                      <Link href={wikipediaUrl(page.title, page.language)} icon="external-link">
-                        Bekijk {page.title} op Wikipedia
-                      </Link>
+                        <List.Item>
+                          <Text>Wikipedia: de wedstrijd staat niet meer op de pagina.</Text>
+                        </List.Item>
+                      </List>
+                    ) : summary.differences.length === 0 ? (
+                      <Text>
+                        Alleen een verwijzing is anders, zoals de pagina van een speler of van de tegenstander.
+                      </Text>
+                    ) : (
+                      <List role="list">
+                        {summary.differences.map((difference) => (
+                          <List.Item key={difference.label}>
+                            <Text>
+                              <Strong>{difference.label}.</Strong> Op de site: {difference.site}. Wikipedia:{' '}
+                              {difference.wikipedia}.
+                            </Text>
+                          </List.Item>
+                        ))}
+                      </List>
+                    )}
+                    <Text appearance="meta">
+                      Wikipedia zegt dit sinds {formatVersionTime(change.firstSeenAt)}. De import zag het{' '}
+                      {change.timesSeen === 1 ? 'één keer' : `${change.timesSeen} keer`}, voor het laatst op{' '}
+                      {formatVersionTime(change.lastSeenAt)}.{' '}
+                      {outcome.kind === 'taken-over'
+                        ? `Zonder besluit neemt de import dit over op ${formatVersionTime(outcome.at)}, als Wikipedia dan nog hetzelfde zegt.`
+                        : 'Het seizoen is voorbij of bijna voorbij, dus de import neemt dit niet vanzelf over. Zonder besluit blijft de huidige waarde staan.'}
                     </Text>
-                  )}
-                  <HeldChangeForm
-                    action={submitHeldChange.bind(null, change.id)}
-                    id={change.id}
-                    title={title}
-                    what={what}
-                  />
-                </Card>
-              )
-            })}
-        {part === 'wijzigingen' ? null : (
-          <>
-            <MatchFields part={formPart} />
-            <MatchSavePanel cancelHref={back ?? matchesPath} next={column !== undefined} />
-          </>
-        )}
-        {part !== undefined ? null : match.dataSource === 'redactie' ? (
-          <RemoveMatchForm action={submitDeleteMatch.bind(null, match.id)} title={title} />
-        ) : null}
-        {part !== undefined || edit === undefined ? null : (
-          <>
-            <Card aria-labelledby="invoer-kop" surface="soft">
-              <Heading id="invoer-kop" level={2}>
-                Laatste invoer
-              </Heading>
-              <List role="list">
-                <List.Item>
-                  <Text>Onderdelen: {parts}</Text>
-                </List.Item>
-                <List.Item>
-                  <Text>Door: {edit.editedByName}</Text>
-                </List.Item>
-                <List.Item>
-                  <Text>Op: {formatVersionTime(edit.editedAt)}</Text>
-                </List.Item>
-                <List.Item>
-                  <Text>Reden: {edit.reason}</Text>
-                </List.Item>
-              </List>
-            </Card>
-            <RemoveEntryForm action={submitRemoveEntry.bind(null, match.id)} title={title} />
-          </>
-        )}
+                    {page === undefined ? null : (
+                      <Text>
+                        <Link href={wikipediaUrl(page.title, page.language)} icon="external-link">
+                          Bekijk {page.title} op Wikipedia
+                        </Link>
+                      </Text>
+                    )}
+                    <HeldChangeForm
+                      action={submitHeldChange.bind(null, change.id)}
+                      id={change.id}
+                      title={title}
+                      what={what}
+                    />
+                  </Card>
+                )
+              })}
+          {part === 'wijzigingen' ? null : (
+            <>
+              <MatchFields part={formPart} />
+              <MatchSavePanel cancelHref={back ?? matchesPath} next={column !== undefined} />
+            </>
+          )}
+          {part !== undefined ? null : match.dataSource === 'redactie' ? (
+            <RemoveMatchForm action={submitDeleteMatch.bind(null, match.id)} title={title} />
+          ) : null}
+          {part !== undefined || edit === undefined ? null : (
+            <>
+              <Card aria-labelledby="invoer-kop" surface="soft">
+                <Heading id="invoer-kop" level={2}>
+                  Laatste invoer
+                </Heading>
+                <List role="list">
+                  <List.Item>
+                    <Text>Onderdelen: {parts}</Text>
+                  </List.Item>
+                  <List.Item>
+                    <Text>Door: {edit.editedByName}</Text>
+                  </List.Item>
+                  <List.Item>
+                    <Text>Op: {formatVersionTime(edit.editedAt)}</Text>
+                  </List.Item>
+                  <List.Item>
+                    <Text>Reden: {edit.reason}</Text>
+                  </List.Item>
+                </List>
+              </Card>
+              <RemoveEntryForm action={submitRemoveEntry.bind(null, match.id)} title={title} />
+            </>
+          )}
+        </Page.Cell>
       </Page.Main>
     </MatchFormProvider>
   )

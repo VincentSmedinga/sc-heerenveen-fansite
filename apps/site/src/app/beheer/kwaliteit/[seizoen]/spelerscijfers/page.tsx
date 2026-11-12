@@ -8,6 +8,7 @@ import { notFound } from 'next/navigation'
 
 import { submitStatDifference } from '#src/app/beheer/kwaliteit/actions'
 import { ConflictForm } from '#src/app/beheer/wedstrijden/ConflictForm'
+import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { qualityPath } from '#src/beheer/quality'
 import { requireRole } from '#src/beheer/require-role'
@@ -69,66 +70,63 @@ export default async function StatDifferencesPage({ params, searchParams }: Prop
   const title = 'Spelerscijfers die verschillen'
 
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Text>
-            <Link href={qualityPath} icon="arrow-left">
-              Terug naar de kwaliteit van de gegevens
-            </Link>
-          </Text>
-          <Heading level={1}>
-            {title} in {season}
-          </Heading>
-          <Text appearance="intro">
-            Deze spelers hebben in de selectietabel een ander aantal doelpunten dan in de wedstrijden of de verslagen.
-            Neem het andere getal over, of houd de selectietabel.
-          </Text>
-        </>
-      }
-      wide
-    >
-      {notice === undefined ? null : (
-        <Notice>
-          <Strong>{notice.title}.</Strong> {notice.text}
-        </Notice>
-      )}
-      {found.length === 0 ? (
-        <Text>Er zijn geen spelerscijfers die verschillen in het seizoen {season}.</Text>
-      ) : (
-        found.map((difference) => {
-          const other = statSourceLabels[difference.comparedWith]
+    <Page.Main areas={adminAreas} className={compact}>
+      <Page.Cell area="head">
+        <Text>
+          <Link href={qualityPath} icon="arrow-left">
+            Terug naar de kwaliteit van de gegevens
+          </Link>
+        </Text>
+        <Heading level={1}>
+          {title} in {season}
+        </Heading>
+        <Text appearance="intro">
+          Deze spelers hebben in de selectietabel een ander aantal doelpunten dan in de wedstrijden of de verslagen.
+          Neem het andere getal over, of houd de selectietabel.
+        </Text>
+      </Page.Cell>
+      <Page.Cell area="main">
+        {notice === undefined ? null : (
+          <Notice>
+            <Strong>{notice.title}.</Strong> {notice.text}
+          </Notice>
+        )}
+        {found.length === 0 ? (
+          <Text>Er zijn geen spelerscijfers die verschillen in het seizoen {season}.</Text>
+        ) : (
+          found.map((difference) => {
+            const other = statSourceLabels[difference.comparedWith]
 
-          return (
-            <Card aria-labelledby={`verschil-${difference.id}-kop`} key={difference.id}>
-              <Heading id={`verschil-${difference.id}-kop`} level={2}>
-                {difference.name}: {difference.competition}, tegen de {other}
-              </Heading>
-              <List role="list">
-                <List.Item>
-                  <Text>Selectietabel: {goals(difference.tableGoals)}</Text>
-                </List.Item>
-                <List.Item>
-                  <Text>
-                    {capital(other)}: {goals(difference.otherGoals)}
-                  </Text>
-                </List.Item>
-              </List>
-              <Text appearance="meta">
-                De selectietabel blijft staan tot je beslist. Verdwijnt het verschil, dan verdwijnt het ook hier.
-              </Text>
-              <ConflictForm
-                action={submitStatDifference.bind(null, difference.id, seizoen)}
-                id={difference.id}
-                labels={{ keep: 'Houd de selectietabel', takeOver: `Neem de ${other} over` }}
-                part="de doelpunten"
-                title={`${difference.name} in de ${difference.competition}, tegen de ${other}`}
-              />
-            </Card>
-          )
-        })
-      )}
+            return (
+              <Card aria-labelledby={`verschil-${difference.id}-kop`} key={difference.id}>
+                <Heading id={`verschil-${difference.id}-kop`} level={2}>
+                  {difference.name}: {difference.competition}, tegen de {other}
+                </Heading>
+                <List role="list">
+                  <List.Item>
+                    <Text>Selectietabel: {goals(difference.tableGoals)}</Text>
+                  </List.Item>
+                  <List.Item>
+                    <Text>
+                      {capital(other)}: {goals(difference.otherGoals)}
+                    </Text>
+                  </List.Item>
+                </List>
+                <Text appearance="meta">
+                  De selectietabel blijft staan tot je beslist. Verdwijnt het verschil, dan verdwijnt het ook hier.
+                </Text>
+                <ConflictForm
+                  action={submitStatDifference.bind(null, difference.id, seizoen)}
+                  id={difference.id}
+                  labels={{ keep: 'Houd de selectietabel', takeOver: `Neem de ${other} over` }}
+                  part="de doelpunten"
+                  title={`${difference.name} in de ${difference.competition}, tegen de ${other}`}
+                />
+              </Card>
+            )
+          })
+        )}
+      </Page.Cell>
     </Page.Main>
   )
 }

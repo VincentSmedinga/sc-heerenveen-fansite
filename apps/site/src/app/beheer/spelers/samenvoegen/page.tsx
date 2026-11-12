@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 
 import { Card, DataTable, Heading, Link, List, Page, Strong, Text } from '@fansite/design-system'
 
+import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
 import { personLabels } from '#src/beheer/person-labels'
@@ -56,36 +57,33 @@ export default async function MergePersonsPage({ searchParams }: Props) {
   const [keptName, otherName] = plan === undefined ? [] : personLabels(plan.kept, plan.other)
 
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Heading level={1}>Personen samenvoegen</Heading>
-          {plan === undefined ? null : (
-            <Text appearance="intro">
-              Je maakt van twee personen één persoon. {keptName} blijft en {otherName} verdwijnt: alles van {otherName}{' '}
-              gaat naar {keptName}. Dat kun je niet terugdraaien. Lees daarom eerst wat er gebeurt.
+    <Page.Main areas={adminAreas} className={compact}>
+      <Page.Cell area="head">
+        <Heading level={1}>Personen samenvoegen</Heading>
+        {plan === undefined ? null : (
+          <Text appearance="intro">
+            Je maakt van twee personen één persoon. {keptName} blijft en {otherName} verdwijnt: alles van {otherName}{' '}
+            gaat naar {keptName}. Dat kun je niet terugdraaien. Lees daarom eerst wat er gebeurt.
+          </Text>
+        )}
+      </Page.Cell>
+      <Page.Cell area="main">
+        {plan === undefined ? (
+          <>
+            <Text>
+              <Strong>Samenvoegen kan niet.</Strong>{' '}
+              {view === 'same'
+                ? 'Je koos twee keer dezelfde persoon. Kies een andere persoon om mee samen te voegen.'
+                : 'Een van de twee personen bestaat niet meer. Misschien zijn ze al samengevoegd. Zoek de speler opnieuw op en kijk wat er nu staat.'}
             </Text>
-          )}
-        </>
-      }
-      wide
-    >
-      {plan === undefined ? (
-        <>
-          <Text>
-            <Strong>Samenvoegen kan niet.</Strong>{' '}
-            {view === 'same'
-              ? 'Je koos twee keer dezelfde persoon. Kies een andere persoon om mee samen te voegen.'
-              : 'Een van de twee personen bestaat niet meer. Misschien zijn ze al samengevoegd. Zoek de speler opnieuw op en kijk wat er nu staat.'}
-          </Text>
-          <Text>
-            <Link href={back.href}>{back.label}</Link>
-          </Text>
-        </>
-      ) : (
-        <MergePlan back={back} plan={plan} playerId={from?.player.id} />
-      )}
+            <Text>
+              <Link href={back.href}>{back.label}</Link>
+            </Text>
+          </>
+        ) : (
+          <MergePlan back={back} plan={plan} playerId={from?.player.id} />
+        )}
+      </Page.Cell>
     </Page.Main>
   )
 }

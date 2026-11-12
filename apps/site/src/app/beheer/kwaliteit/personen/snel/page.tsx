@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { Heading, Link, Page, Pagination, Text } from '@fansite/design-system'
 
+import { adminAreas } from '#src/beheer/areas'
 import { countryChoices } from '#src/beheer/countries'
 import { compact } from '#src/beheer/density'
 import {
@@ -51,59 +52,56 @@ export default async function PersonFactsPage({ searchParams }: Props) {
   const choices = fact === 'land' ? countryChoices() : []
 
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Text>
-            <Link href={personQualityPath} icon="arrow-left">
-              Personen
-            </Link>
-          </Text>
-          <Heading level={1}>{title}</Heading>
-          <Text appearance="intro">
-            Van deze personen weten we de linie of het land niet. Kies het hier: een keuze is meteen opgeslagen, en de
-            import laat haar staan.
-          </Text>
-        </>
-      }
-      wide
-    >
-      <PersonWorkList
-        action={submitPersonFact}
-        countries={{
-          others: choices.filter(({ code }) => !ours.has(code)),
-          ours: choices.filter(({ code }) => ours.has(code)),
-        }}
-        fact={fact}
-        key={`${fact}-${part}`}
-        paths={{ land: address('land'), linie: address('linie') }}
-        rows={found.map((person) => ({
-          id: person.id,
-          name: person.name,
-          ...(person.firstSeason === null || person.lastSeason === null
-            ? {}
-            : {
-                seasons:
-                  person.firstSeason === person.lastSeason
-                    ? person.firstSeason
-                    : `${person.firstSeason} tot en met ${person.lastSeason}`,
-              }),
-          ...(person.wikipediaPage === null
-            ? {}
-            : { wikipedia: wikipediaUrl(person.wikipediaPage, person.englishTitle ? 'en' : 'nl') }),
-        }))}
-        totals={totals}
-      />
-      {parts === 1 ? null : (
-        <Pagination
-          current={part}
-          label="Delen van de lijst"
-          nextHref={part < parts ? address(fact, part + 1) : undefined}
-          previousHref={part > 1 ? address(fact, part - 1) : undefined}
-          total={parts}
+    <Page.Main areas={adminAreas} className={compact}>
+      <Page.Cell area="head">
+        <Text>
+          <Link href={personQualityPath} icon="arrow-left">
+            Personen
+          </Link>
+        </Text>
+        <Heading level={1}>{title}</Heading>
+        <Text appearance="intro">
+          Van deze personen weten we de linie of het land niet. Kies het hier: een keuze is meteen opgeslagen, en de
+          import laat haar staan.
+        </Text>
+      </Page.Cell>
+      <Page.Cell area="main">
+        <PersonWorkList
+          action={submitPersonFact}
+          countries={{
+            others: choices.filter(({ code }) => !ours.has(code)),
+            ours: choices.filter(({ code }) => ours.has(code)),
+          }}
+          fact={fact}
+          key={`${fact}-${part}`}
+          paths={{ land: address('land'), linie: address('linie') }}
+          rows={found.map((person) => ({
+            id: person.id,
+            name: person.name,
+            ...(person.firstSeason === null || person.lastSeason === null
+              ? {}
+              : {
+                  seasons:
+                    person.firstSeason === person.lastSeason
+                      ? person.firstSeason
+                      : `${person.firstSeason} tot en met ${person.lastSeason}`,
+                }),
+            ...(person.wikipediaPage === null
+              ? {}
+              : { wikipedia: wikipediaUrl(person.wikipediaPage, person.englishTitle ? 'en' : 'nl') }),
+          }))}
+          totals={totals}
         />
-      )}
+        {parts === 1 ? null : (
+          <Pagination
+            current={part}
+            label="Delen van de lijst"
+            nextHref={part < parts ? address(fact, part + 1) : undefined}
+            previousHref={part > 1 ? address(fact, part - 1) : undefined}
+            total={parts}
+          />
+        )}
+      </Page.Cell>
     </Page.Main>
   )
 }

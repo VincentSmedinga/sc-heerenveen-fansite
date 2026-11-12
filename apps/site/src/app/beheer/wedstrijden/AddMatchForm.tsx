@@ -16,6 +16,7 @@ import {
 } from '@fansite/design-system'
 import { useActionState, useEffect } from 'react'
 
+import { addMatchFormId } from '#src/beheer/form-ids'
 import {
   type AddFieldName,
   addFieldNames,
@@ -65,7 +66,7 @@ export function AddMatchForm({
   const field = (name: AddFieldName) => ({ defaultValue: values[name], key: `${name}-${values[name]}`, name })
 
   return (
-    <Form action={formAction}>
+    <Form action={formAction} id={addMatchFormId}>
       <ErrorSummary errors={summary} id={summaryId} level={2} tabIndex={-1} />
       <Card aria-labelledby="wie-kop">
         <Heading id="wie-kop" level={2}>

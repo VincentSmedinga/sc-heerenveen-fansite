@@ -5,6 +5,7 @@ import { useActionState, useEffect } from 'react'
 
 import type { CountryChoice } from '#src/beheer/countries'
 
+import { personFormId } from '#src/beheer/form-ids'
 import {
   type PersonFieldName,
   personFieldNames,
@@ -62,7 +63,7 @@ export function PersonForm({
   const field = (name: PersonFieldName) => ({ defaultValue: values[name], key: `${name}-${values[name]}`, name })
 
   return (
-    <Form action={formAction}>
+    <Form action={formAction} id={personFormId}>
       <ErrorSummary errors={summary} id={summaryId} level={2} tabIndex={-1} />
       {/* An error without a field has a line of its own: its link in the list leads here. */}
       {errors.algemeen === undefined ? null : (

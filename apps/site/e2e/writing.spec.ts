@@ -126,7 +126,7 @@ test.describe('with JavaScript', () => {
     // The address follows the title until the editor writes in it.
     await expect(page.getByLabel(/^Adres/u)).toHaveValue(/^verzonnen-artikel-met-javascript$/u)
     await page.getByLabel(/^Adres/u).fill(slug)
-    await page.getByRole('button', { name: 'Opslaan als concept' }).click()
+    await page.getByRole('button', { name: 'Opslaan als concept' }).first().click()
     await expect(page.getByRole('heading', { name: 'Er is iets mis' })).toBeVisible()
     await expect(page.getByRole('link', { name: /Schrijf een intro/u })).toBeVisible()
     await expect(page.getByRole('link', { name: /De tekst is te lang/u })).toBeVisible()
@@ -149,7 +149,7 @@ test.describe('with JavaScript', () => {
       .getByLabel('Intro', { exact: true })
       .fill('Een verzonnen inleiding van twee zinnen. Zo stellen we ons voor.')
     await writeBody(page)
-    await page.getByRole('button', { name: 'Opslaan als concept' }).click()
+    await page.getByRole('button', { name: 'Opslaan als concept' }).first().click()
     await expect(page.getByRole('heading', { name: 'Concept gemaakt' })).toBeVisible()
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Artikel bewerken')
     await expect(editorOf(page).locator('h2')).toHaveText(['Wie zijn wij?', 'Wat je van ons mag verwachten'])
@@ -200,7 +200,7 @@ test.describe('with JavaScript', () => {
     // Publiceren saves what is on the screen and then publishes it.
     await page.goto(editAddress)
     await page.getByLabel('Intro', { exact: true }).fill('Een verzonnen inleiding, nu aangepast voor het publiceren.')
-    await page.getByRole('button', { name: 'Publiceren' }).click()
+    await page.getByRole('button', { name: 'Publiceren' }).first().click()
     await expect(page.getByRole('heading', { name: 'Gepubliceerd' })).toBeVisible()
     await expect(page.getByLabel(/^Adres/u)).toHaveAttribute('readonly', /.*/u)
     await expect(page.getByRole('button', { name: 'Intrekken' })).toBeVisible()
@@ -232,7 +232,7 @@ test.describe('with JavaScript', () => {
     // A change is saved and is on the site at once.
     await page.goto(editAddress)
     await page.getByLabel('Titel', { exact: true }).fill(`${title}, verbeterd`)
-    await page.getByRole('button', { name: 'Opslaan' }).click()
+    await page.getByRole('button', { name: 'Opslaan' }).first().click()
     await expect(page.getByRole('heading', { name: 'Opgeslagen' })).toBeVisible()
     await page.goto(`/redactie/${slug}`)
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(`${title}, verbeterd`)
@@ -269,7 +269,7 @@ test.describe('with JavaScript', () => {
     await page.getByRole('button', { name: 'Intrekken' }).click()
     await expect(page.getByRole('heading', { name: 'Ingetrokken' })).toBeVisible()
     await expect(page.getByRole('region', { name: 'Eerdere versies' }).getByRole('listitem')).toHaveCount(3)
-    await expect(page.getByRole('button', { name: 'Publiceren' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Publiceren' }).first()).toBeVisible()
     expect((await request.get(`/redactie/${slug}`)).status()).toBe(404)
     expect(await (await request.get('/sitemap.xml')).text()).not.toContain(slug)
     await page.goto('/')
@@ -293,7 +293,7 @@ test('refuses an address that another article has, with the error at the field a
   await page.getByLabel(/^Adres/u).fill('e2e-schrijven-met-js')
   await page.getByLabel('Intro', { exact: true }).fill('Een intro.')
   await editorOf(page).fill('Een tekst.')
-  await page.getByRole('button', { name: 'Opslaan als concept' }).click()
+  await page.getByRole('button', { name: 'Opslaan als concept' }).first().click()
 
   await expect(page.getByRole('link', { name: /Een ander artikel heeft dit adres al/u })).toBeVisible()
   await expect(page.getByLabel(/^Adres/u)).toHaveAttribute('aria-invalid', 'true')
@@ -358,7 +358,7 @@ for (const [name, javaScriptEnabled] of [
       // A goal with only the added time filled in: the errors are in the summary and at the
       // goal, the summary has the focus, and what was typed is still there.
       await page.getByLabel('Blessuretijd, doelpunt 1', { exact: true }).fill('1')
-      await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
+      await page.getByRole('button', { exact: true, name: 'Opslaan' }).first().click()
       await expect(page.locator('#fouten')).toBeVisible()
       await expect(page.locator('#doelpunt-1-kant-error')).toBeVisible()
       // The minute may be empty, but not with added time: the error is at the added time.
@@ -377,7 +377,7 @@ for (const [name, javaScriptEnabled] of [
 
       if (!javaScriptEnabled) {
         // Without JavaScript the field for the name shows when the form comes back.
-        await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
+        await page.getByRole('button', { exact: true, name: 'Opslaan' }).first().click()
         await expect(page.locator('#doelpunt-1-naam-error')).toBeVisible()
       }
 
@@ -387,7 +387,7 @@ for (const [name, javaScriptEnabled] of [
         // The form with a goal in it, which the checks of all the pages never open.
         expect(await checkPage(page)).toEqual([])
       }
-      await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
+      await page.getByRole('button', { exact: true, name: 'Opslaan' }).first().click()
       await expect(page).toHaveURL(/\?gedaan=opgeslagen$/u)
       await expect(page.getByRole('status').filter({ hasText: 'Opgeslagen.' })).toBeVisible()
       await expect(page.getByRole('heading', { level: 2, name: 'Laatste invoer' })).toBeVisible()
@@ -449,7 +449,7 @@ for (const [name, javaScriptEnabled] of [
       // A number without a name: the error is in the summary and at the field, the summary has
       // the focus, and what was typed is still there.
       await page.getByLabel('Rugnummer, speler 1', { exact: true }).last().fill('5')
-      await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
+      await page.getByRole('button', { exact: true, name: 'Opslaan' }).first().click()
       await expect(page.locator('#fouten')).toBeVisible()
       await expect(page.locator('#speler-zij-1-naam-error')).toBeVisible()
       await expect(page.getByLabel('Naam, speler 1', { exact: true })).toHaveAttribute('aria-invalid', 'true')
@@ -466,7 +466,7 @@ for (const [name, javaScriptEnabled] of [
         // The form with a row in it, which the checks of all the pages never open.
         expect(await checkPage(page)).toEqual([])
       }
-      await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
+      await page.getByRole('button', { exact: true, name: 'Opslaan' }).first().click()
       await expect(page).toHaveURL(/\/verslag\?gedaan=opgeslagen$/u)
       await expect(page.getByRole('status').filter({ hasText: 'Opgeslagen.' })).toBeVisible()
       await expect(page.getByLabel('Naam, speler 1', { exact: true })).toHaveValue('Verzonnen Tegenstander')
@@ -475,7 +475,7 @@ for (const [name, javaScriptEnabled] of [
 
       // "Klaar" does not work yet: the report stays bezig, and says why.
       await page.getByLabel('Status', { exact: true }).selectOption('klaar')
-      await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
+      await page.getByRole('button', { exact: true, name: 'Opslaan' }).first().click()
       await expect(page).toHaveURL(/\/verslag\?gedaan=nog-niet-klaar$/u)
       await expect(page.getByRole('status').filter({ hasText: 'Bewaard als bezig.' })).toBeVisible()
 
@@ -607,7 +607,7 @@ for (const [name, javaScriptEnabled] of [
       await expect(page.getByLabel('Voorbeeld', { exact: true })).toHaveValue(/^Formatie: 4-3-3\nOpstelling\n/u)
 
       // An empty text is asked for again, with the error at the field.
-      await page.getByRole('button', { name: 'Tekst lezen' }).click()
+      await page.getByRole('button', { name: 'Tekst lezen' }).first().click()
       await expect(page.getByText('Plak eerst de tekst van het verslag.').first()).toBeVisible()
 
       if (javaScriptEnabled) {
@@ -624,7 +624,7 @@ for (const [name, javaScriptEnabled] of [
             '\n',
           ),
         )
-      await page.getByRole('button', { name: 'Tekst lezen' }).click()
+      await page.getByRole('button', { name: 'Tekst lezen' }).first().click()
       await expect(page.getByRole('heading', { level: 2, name: 'Gelezen' })).toBeVisible()
       await expect(page.getByRole('heading', { level: 3, name: 'Niet gelezen' })).toBeVisible()
       await expect(page.getByText('Regel 4:', { exact: false })).toBeVisible()
@@ -643,7 +643,7 @@ for (const [name, javaScriptEnabled] of [
       await page.locator('button[value="speler-zij-toevoegen"]').click()
       await expect(page.locator('#speler-zij-1-rugnummer')).toHaveCount(1)
       await expect(page.getByLabel('Tekst van het verslag', { exact: true })).toHaveCount(0)
-      await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
+      await page.getByRole('button', { exact: true, name: 'Opslaan' }).first().click()
       await expect(page.locator('#fouten')).toBeVisible()
       await expect(page.getByLabel('Tekst van het verslag', { exact: true })).toHaveCount(0)
       await expect(page.getByRole('heading', { level: 2, name: 'Gegevens' })).toBeVisible()
@@ -677,7 +677,7 @@ for (const [name, javaScriptEnabled] of [
       await expect(page.locator('#formatie-wij-eigen'))[javaScriptEnabled ? 'toBeHidden' : 'toBeVisible']()
       await page.locator('#formatie-zij').selectOption('anders')
       await page.locator('#formatie-zij-eigen').fill('4-3-4')
-      await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
+      await page.getByRole('button', { exact: true, name: 'Opslaan' }).first().click()
       await expect(page.locator('#formatie-zij-eigen-error')).toContainText('tellen op tot 11')
       await expect(page.locator('#formatie-zij-eigen')).toHaveAttribute('aria-invalid', 'true')
       await expect(page.locator('#formatie-wij')).toHaveValue('4-3-3')
@@ -689,7 +689,7 @@ for (const [name, javaScriptEnabled] of [
 
       // With a formation that follows the rule the report is stored, and comes back as it was.
       await page.locator('#formatie-zij-eigen').fill('4-1-2-1-2')
-      await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
+      await page.getByRole('button', { exact: true, name: 'Opslaan' }).first().click()
       await expect(page).toHaveURL(/\/verslag\?gedaan=opgeslagen$/u)
       await expect(page.locator('#formatie-wij')).toHaveValue('4-3-3')
       await expect(page.locator('#formatie-zij')).toHaveValue('anders')
@@ -721,7 +721,7 @@ test.describe('the input of a match report that the browser keeps', () => {
     await page.getByRole('button', { name: 'Herstel' }).click()
     await expect(page.getByLabel('Bron', { exact: true })).toHaveValue('bewaard in de browser')
 
-    await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
+    await page.getByRole('button', { exact: true, name: 'Opslaan' }).first().click()
     await expect(page).toHaveURL(/gedaan=/u)
     expect(
       await page.evaluate(() => Object.keys(localStorage).filter((key) => /^fansite-verslag-\d+$/u.test(key))),

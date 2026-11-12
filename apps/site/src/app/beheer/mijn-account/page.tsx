@@ -6,8 +6,11 @@ import { notFound } from 'next/navigation'
 
 import { nameOf, roleLabels } from '#src/beheer/account-fields'
 import { findAccount } from '#src/beheer/account-management'
+import { adminAreas, toolbarAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
+import { myAccountFormId } from '#src/beheer/form-ids'
 import { requireRole } from '#src/beheer/require-role'
+import { SaveButtons } from '#src/beheer/SaveButtons'
 import { getDatabase } from '#src/database'
 
 import { submitConflictMail } from './actions'
@@ -40,58 +43,61 @@ export default async function MyAccountPage({ searchParams }: { searchParams: Pr
   const getsMail = account.role !== 'author'
 
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Heading level={1}>Mijn account</Heading>
-          <Text appearance="intro">
-            {account.role === 'owner'
-              ? 'Je voornaam en adres wijzig je bij Accounts.'
-              : 'Wil je je voornaam, adres of rol anders? Vraag het de eigenaar.'}
-          </Text>
-        </>
-      }
-    >
-      {notice === undefined ? null : (
-        <Card aria-labelledby="gedaan-kop" surface="soft">
-          <Heading id="gedaan-kop" level={2}>
-            {notice.title}
-          </Heading>
-          <Text>{notice.text}</Text>
-        </Card>
-      )}
-      <Card aria-labelledby="gegevens-kop">
-        <Heading id="gegevens-kop" level={2}>
-          Gegevens
-        </Heading>
-        <DescriptionList>
-          <DescriptionList.Item term="Voornaam">{nameOf(account.firstName)}</DescriptionList.Item>
-          <DescriptionList.Item term="E-mailadres">{account.email}</DescriptionList.Item>
-          <DescriptionList.Item term="Rol">{roleLabels[account.role]}</DescriptionList.Item>
-        </DescriptionList>
-      </Card>
+    <Page.Main areas={getsMail ? toolbarAreas : adminAreas} className={compact}>
+      <Page.Cell area="head">
+        <Heading level={1}>Mijn account</Heading>
+        <Text appearance="intro">
+          {account.role === 'owner'
+            ? 'Je voornaam en adres wijzig je bij Accounts.'
+            : 'Wil je je voornaam, adres of rol anders? Vraag het de eigenaar.'}
+        </Text>
+      </Page.Cell>
       {getsMail ? (
-        <Card aria-labelledby="mail-kop">
-          <Heading id="mail-kop" level={2}>
-            Mail over Wikipedia
-          </Heading>
-          <Form action={submitConflictMail}>
-            <RadioGroup
-              hint="Wijkt Wikipedia af van wat de redactie invulde, dan krijg je een mail. Die mail krijgen de eigenaar en de redacteuren."
-              id="mail"
-              legend="Mail over afwijkingen van Wikipedia"
-              name="mail"
-              options={[
-                { label: 'Aan', value: 'aan' },
-                { label: 'Uit', value: 'uit' },
-              ]}
-              value={account.conflictMail ? 'aan' : 'uit'}
-            />
-            <Button type="submit">Opslaan</Button>
-          </Form>
-        </Card>
+        <Page.Toolbar>
+          <SaveButtons buttons={[{ label: 'Opslaan' }]} formId={myAccountFormId} />
+        </Page.Toolbar>
       ) : null}
+      <Page.Cell area="main">
+        {notice === undefined ? null : (
+          <Card aria-labelledby="gedaan-kop" surface="soft">
+            <Heading id="gedaan-kop" level={2}>
+              {notice.title}
+            </Heading>
+            <Text>{notice.text}</Text>
+          </Card>
+        )}
+        <Card aria-labelledby="gegevens-kop">
+          <Heading id="gegevens-kop" level={2}>
+            Gegevens
+          </Heading>
+          <DescriptionList>
+            <DescriptionList.Item term="Voornaam">{nameOf(account.firstName)}</DescriptionList.Item>
+            <DescriptionList.Item term="E-mailadres">{account.email}</DescriptionList.Item>
+            <DescriptionList.Item term="Rol">{roleLabels[account.role]}</DescriptionList.Item>
+          </DescriptionList>
+        </Card>
+        {getsMail ? (
+          <Card aria-labelledby="mail-kop">
+            <Heading id="mail-kop" level={2}>
+              Mail over Wikipedia
+            </Heading>
+            <Form action={submitConflictMail} id={myAccountFormId}>
+              <RadioGroup
+                hint="Wijkt Wikipedia af van wat de redactie invulde, dan krijg je een mail. Die mail krijgen de eigenaar en de redacteuren."
+                id="mail"
+                legend="Mail over afwijkingen van Wikipedia"
+                name="mail"
+                options={[
+                  { label: 'Aan', value: 'aan' },
+                  { label: 'Uit', value: 'uit' },
+                ]}
+                value={account.conflictMail ? 'aan' : 'uit'}
+              />
+              <Button type="submit">Opslaan</Button>
+            </Form>
+          </Card>
+        ) : null}
+      </Page.Cell>
     </Page.Main>
   )
 }

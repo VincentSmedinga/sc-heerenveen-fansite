@@ -6,7 +6,9 @@ import { Button, Card, Form, Heading, Link, Notice, Page, Strong, Tag, Text } fr
 import { notFound } from 'next/navigation'
 
 import { finishPath, livePath, matchPath, pastePath } from '#src/app/beheer/wedstrijden/paths'
+import { rowAreas, rowStyle } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
+import { reportFormId } from '#src/beheer/form-ids'
 import { parseItemId } from '#src/beheer/items'
 import {
   contextOf,
@@ -19,6 +21,7 @@ import {
 import { checkReportForm } from '#src/beheer/report-form'
 import { previewMatchOf } from '#src/beheer/report-preview-match'
 import { requireRole } from '#src/beheer/require-role'
+import { SaveButtons } from '#src/beheer/SaveButtons'
 import { getDatabase } from '#src/database'
 import { describeShowDelay } from '#src/matches'
 
@@ -66,10 +69,11 @@ const notices: Record<string, { text: string; title: string }> = {
 
 // The report of one match: the data, and for both teams the line-up and the bench, the
 // substitutions, the goals, the cards, the missed penalties and the kicks of the shoot-out. The
-// main column holds the cards of the form, the sidebar the save panel and the block that takes
-// the report away. The rules of the report judge what is stored every time the page opens, so a
-// report that was klaar and no longer fits the result says so. The page tells what the last
-// action did from the word in the address.
+// main area holds the cards of the form with the save panel at its end, and the row under it
+// the way to the live screen, the screen to paste text, "Wedstrijd afgelopen" and the block
+// that takes the report away. The toolbar has the buttons to save too. The rules of the report
+// judge what is stored every time the page opens, so a report that was klaar and no longer fits
+// the result says so. The page tells what the last action did from the word in the address.
 export default async function ReportPage({ params, searchParams }: Props) {
   await requireRole('owner', 'editor')
 
@@ -112,94 +116,98 @@ export default async function ReportPage({ params, searchParams }: Props) {
       key={`${match.id}-${report?.report.savedAt.getTime() ?? 0}-${gedaan ?? ''}`}
       title={toCheck ? 'Controleer het verslag' : 'Dit is nog niet af'}
     >
-      <Page.Main
-        className={compact}
-        intro={
-          <>
-            <Text>
-              <Link href={matchPath(match.id)} icon="arrow-left">
-                Terug naar de wedstrijd
+      <Page.Main areas={rowAreas} className={compact}>
+        <Page.Cell area="head">
+          <Text>
+            <Link href={matchPath(match.id)} icon="arrow-left">
+              Terug naar de wedstrijd
+            </Link>
+          </Text>
+          <Heading level={1}>Verslag: {clubs}</Heading>
+          <Text appearance="meta">
+            {match.competition}, {match.round} · {describeEntryKickoff(match)} ·{' '}
+            {phase === undefined
+              ? `Uitslag ${match.goalsFor}–${match.goalsAgainst}`
+              : phase === 'live'
+                ? 'De wedstrijd wordt gespeeld, nog geen uitslag'
+                : 'De wedstrijd is nog niet begonnen'}
+          </Text>
+          <Text>
+            {status === undefined ? (
+              <Tag>Nog geen verslag</Tag>
+            ) : (
+              <Tag tone="highlight">{status === 'klaar' ? 'Klaar' : 'Bezig'}</Tag>
+            )}{' '}
+            {phase === 'live' && status !== undefined ? <Tag tone="highlight">Live</Tag> : null}{' '}
+            {toCheck ? <Tag tone="attention">Controleer</Tag> : null}
+          </Text>
+        </Page.Cell>
+        <Page.Toolbar>
+          <SaveButtons
+            buttons={[{ label: 'Opslaan', value: 'opslaan' }]}
+            cancelHref={matchPath(match.id)}
+            formId={reportFormId}
+          />
+        </Page.Toolbar>
+        <Page.Cell area="main">
+          <ReportErrorSummary />
+          <ReportDraftNotice
+            savedAt={
+              typeof gedaan === 'string' && savedNotices.includes(gedaan)
+                ? (report?.report.savedAt.getTime() ?? 0)
+                : undefined
+            }
+          />
+          {notice === undefined ? null : (
+            <Notice>
+              <Strong>{notice.title}.</Strong> {notice.text}
+            </Notice>
+          )}
+          <ReportWorkspace />
+          <ReportSavePanel cancelHref={matchPath(match.id)} />
+        </Page.Cell>
+        <Page.Section area="row" aria-label="Meer voor dit verslag" style={rowStyle}>
+          {report === undefined ? null : (
+            <Card aria-labelledby="live-kop">
+              <Heading id="live-kop" level={2}>
+                Tijdens de wedstrijd
+              </Heading>
+              <Text>
+                Houd het verslag bij vanaf een telefoon: een doelpunt, een kaart of een wissel is meteen opgeslagen.
+              </Text>
+              <Link href={livePath(match.id)} icon="arrow-right">
+                Verslag bijhouden
               </Link>
-            </Text>
-            <Heading level={1}>Verslag: {clubs}</Heading>
-            <Text appearance="meta">
-              {match.competition}, {match.round} · {describeEntryKickoff(match)} ·{' '}
-              {phase === undefined
-                ? `Uitslag ${match.goalsFor}–${match.goalsAgainst}`
-                : phase === 'live'
-                  ? 'De wedstrijd wordt gespeeld, nog geen uitslag'
-                  : 'De wedstrijd is nog niet begonnen'}
-            </Text>
-            <Text>
-              {status === undefined ? (
-                <Tag>Nog geen verslag</Tag>
-              ) : (
-                <Tag tone="highlight">{status === 'klaar' ? 'Klaar' : 'Bezig'}</Tag>
-              )}{' '}
-              {phase === 'live' && status !== undefined ? <Tag tone="highlight">Live</Tag> : null}{' '}
-              {toCheck ? <Tag tone="attention">Controleer</Tag> : null}
-            </Text>
-          </>
-        }
-        wide
-      >
-        <ReportErrorSummary />
-        <ReportDraftNotice
-          savedAt={
-            typeof gedaan === 'string' && savedNotices.includes(gedaan)
-              ? (report?.report.savedAt.getTime() ?? 0)
-              : undefined
-          }
-        />
-        {notice === undefined ? null : (
-          <Notice>
-            <Strong>{notice.title}.</Strong> {notice.text}
-          </Notice>
-        )}
-        <ReportWorkspace />
-      </Page.Main>
-      <Page.Sidebar aria-label="Opslaan en verslag" sticky>
-        <ReportSavePanel cancelHref={matchPath(match.id)} />
-        {report === undefined ? null : (
-          <Card aria-labelledby="live-kop">
-            <Heading id="live-kop" level={2}>
-              Tijdens de wedstrijd
+            </Card>
+          )}
+          <Card aria-labelledby="plakken-kop">
+            <Heading id="plakken-kop" level={2}>
+              Tekst plakken
             </Heading>
-            <Text>
-              Houd het verslag bij vanaf een telefoon: een doelpunt, een kaart of een wissel is meteen opgeslagen.
-            </Text>
-            <Link href={livePath(match.id)} icon="arrow-right">
-              Verslag bijhouden
+            <Text>Plak het verslag als tekst en vul het formulier er zo mee in. Wat je nu invulde, gaat niet mee.</Text>
+            <Link href={pastePath(match.id)} icon="arrow-right">
+              Tekst plakken
             </Link>
           </Card>
-        )}
-        <Card aria-labelledby="plakken-kop">
-          <Heading id="plakken-kop" level={2}>
-            Tekst plakken
-          </Heading>
-          <Text>Plak het verslag als tekst en vul het formulier er zo mee in. Wat je nu invulde, gaat niet mee.</Text>
-          <Link href={pastePath(match.id)} icon="arrow-right">
-            Tekst plakken
-          </Link>
-        </Card>
-        {phase === undefined || report === undefined ? null : (
-          <Card aria-labelledby="afgelopen-kop">
-            <Heading id="afgelopen-kop" level={2}>
-              Wedstrijd afgelopen
-            </Heading>
-            <Text>
-              Zodra de wedstrijd is afgelopen, krijgt hij zijn uitslag uit de doelpunten van dit verslag. Bewaar eerst
-              je wijzigingen.
-            </Text>
-            <Form action={finishPath(match.id)} method="get">
-              <Button type="submit">Wedstrijd afgelopen</Button>
-            </Form>
-          </Card>
-        )}
-        {report === undefined ? null : (
-          <RemoveReportForm action={submitRemoveReport.bind(null, match.id)} title={title} />
-        )}
-      </Page.Sidebar>
+          {phase === undefined || report === undefined ? null : (
+            <Card aria-labelledby="afgelopen-kop">
+              <Heading id="afgelopen-kop" level={2}>
+                Wedstrijd afgelopen
+              </Heading>
+              <Text>
+                Zodra de wedstrijd is afgelopen, krijgt hij zijn uitslag uit de doelpunten van dit verslag. Bewaar eerst
+                je wijzigingen.
+              </Text>
+              <Form action={finishPath(match.id)} method="get">
+                <Button type="submit">Wedstrijd afgelopen</Button>
+              </Form>
+            </Card>
+          )}
+          {report === undefined ? null : (
+            <RemoveReportForm action={submitRemoveReport.bind(null, match.id)} title={title} />
+          )}
+        </Page.Section>
+      </Page.Main>
     </ReportFormProvider>
   )
 }

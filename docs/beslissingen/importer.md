@@ -1826,6 +1826,7 @@
   Het blok om op te slaan twee keer maken, een in de hoofdkolom en een in de zijbalk; dan zijn er twee velden "Reden" met dezelfde naam.
   Een vaste balk onderaan met JavaScript; dat werkt niet zonder JavaScript en het ontwerp wil geen vaste balk op een telefoon.
   De seizoenen van de lijst uit de cache van de publieke pagina's halen; een wedstrijd die een minuut geleden is toegevoegd, staat er dan niet, en de redactie moet hem zien.
+- **Later:** zie _De pagina's van het beheer gebruiken het raster, met de knoppen om op te slaan in de werkbalk_ (12 november 2026): het blok om op te slaan staat niet meer in een plakkende zijbalk; de knoppen staan in de werkbalk en aan het einde van het formulier, en `Page.Sidebar` met `sticky` is er niet meer.
 
 ## Wie een doelpunt maakte volgt uit het team en de soort, en het formulier vraagt één vorm
 

@@ -4,11 +4,14 @@ import { adminRoles } from '@fansite/db/schema'
 import { Button, Card, Form, Heading, Link, List, Page, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
+import { toolbarAreas } from '#src/beheer/areas'
 import { listVersions } from '#src/beheer/article-versions'
 import { findArticleFor } from '#src/beheer/articles'
 import { compact } from '#src/beheer/density'
+import { articleFormId } from '#src/beheer/form-ids'
 import { parseItemId } from '#src/beheer/items'
 import { requireRole } from '#src/beheer/require-role'
+import { SaveButtons } from '#src/beheer/SaveButtons'
 import { getDatabase } from '#src/database'
 import { formatArticleDate, formatVersionTime } from '#src/news'
 
@@ -50,95 +53,103 @@ export default async function ArticlePage({ params, searchParams }: Props) {
   const status = article.publishedAt === null ? 'draft' : 'published'
 
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Heading level={1}>Artikel bewerken</Heading>
-          <Text appearance="intro">{article.title}</Text>
-          <Text>
-            {article.publishedAt === null
-              ? 'Dit artikel is een concept. Het staat nergens op de site.'
-              : article.publishedAt > now
-                ? `Dit artikel is gepland voor ${formatArticleDate(article.publishedAt)}.`
-                : `Dit artikel staat sinds ${formatArticleDate(article.publishedAt)} op de site. Een wijziging die je opslaat, staat er meteen.`}{' '}
-            <Link href={previewPath(article.id)}>Voorbeeld</Link>
-          </Text>
-        </>
-      }
-    >
-      {notice === undefined ? null : (
-        <Card aria-labelledby="gedaan-kop" surface="soft">
-          <Heading id="gedaan-kop" level={2}>
-            {notice.title}
-          </Heading>
-          <Text>{notice.text}</Text>
-        </Card>
-      )}
-      <ArticleForm
-        action={submitArticle.bind(null, article.id)}
-        initial={{
-          adres: article.slug,
-          auteur: article.author,
-          intro: article.intro,
-          tekst: article.body,
-          titel: article.title,
-        }}
-        key={`${article.id}-${article.updatedAt.getTime()}-${article.publishedAt?.getTime() ?? 0}`}
-        limits={formLimits}
-        status={status}
-      />
-      {article.publishedAt === null ? null : (
-        <Card aria-labelledby="intrekken-kop" surface="soft">
-          <Heading id="intrekken-kop" level={2}>
-            Van de site halen
-          </Heading>
-          <Text>
-            Intrekken haalt het artikel meteen van de site en maakt er weer een concept van. Er wordt niets verwijderd.
-            Publiceer je het later opnieuw, dan krijgt het de datum van dat moment.
-          </Text>
-          <Form action={submitWithdraw.bind(null, article.id)}>
-            <Button appearance="soft" type="submit">
-              Intrekken
-            </Button>
-          </Form>
-        </Card>
-      )}
-      <Card aria-labelledby="versies-kop">
-        <Heading id="versies-kop" level={2}>
-          Eerdere versies
-        </Heading>
-        {versions.length === 0 ? (
-          <Text>
-            Van dit artikel is nog geen versie bewaard. De eerste komt bij de eerstvolgende wijziging in dit scherm.
-          </Text>
-        ) : (
-          <>
-            <Text appearance="meta">
-              Elke keer dat je iets verandert en opslaat, bewaren we de tekst. Publiceren en intrekken bewaren geen
-              versie.
-            </Text>
-            <List role="list">
-              {versions.map((version, index) => (
-                <List.Item key={version.version}>
-                  <Heading appearance={4} level={3}>
-                    <Link href={versionPath(article.id, version.version)}>Versie {version.version}</Link>
-                  </Heading>
-                  <Text appearance="meta">
-                    {index === 0 ? 'Huidige versie · ' : ''}
-                    {formatVersionTime(version.savedAt)}
-                    {' · '}
-                    {version.savedBy}
-                  </Text>
-                </List.Item>
-              ))}
-            </List>
-          </>
+    <Page.Main areas={toolbarAreas} className={compact}>
+      <Page.Cell area="head">
+        <Heading level={1}>Artikel bewerken</Heading>
+        <Text appearance="intro">{article.title}</Text>
+        <Text>
+          {article.publishedAt === null
+            ? 'Dit artikel is een concept. Het staat nergens op de site.'
+            : article.publishedAt > now
+              ? `Dit artikel is gepland voor ${formatArticleDate(article.publishedAt)}.`
+              : `Dit artikel staat sinds ${formatArticleDate(article.publishedAt)} op de site. Een wijziging die je opslaat, staat er meteen.`}{' '}
+          <Link href={previewPath(article.id)}>Voorbeeld</Link>
+        </Text>
+      </Page.Cell>
+      <Page.Toolbar>
+        <SaveButtons
+          buttons={[
+            { label: 'Opslaan' },
+            ...(status === 'draft' ? [{ appearance: 'soft' as const, label: 'Publiceren', value: 'publiceren' }] : []),
+          ]}
+          cancelHref={articlesPath}
+          formId={articleFormId}
+        />
+      </Page.Toolbar>
+      <Page.Cell area="main">
+        {notice === undefined ? null : (
+          <Card aria-labelledby="gedaan-kop" surface="soft">
+            <Heading id="gedaan-kop" level={2}>
+              {notice.title}
+            </Heading>
+            <Text>{notice.text}</Text>
+          </Card>
         )}
-      </Card>
-      <Text>
-        <Link href={articlesPath}>Terug naar de artikelen</Link>
-      </Text>
+        <ArticleForm
+          action={submitArticle.bind(null, article.id)}
+          initial={{
+            adres: article.slug,
+            auteur: article.author,
+            intro: article.intro,
+            tekst: article.body,
+            titel: article.title,
+          }}
+          key={`${article.id}-${article.updatedAt.getTime()}-${article.publishedAt?.getTime() ?? 0}`}
+          limits={formLimits}
+          status={status}
+        />
+        {article.publishedAt === null ? null : (
+          <Card aria-labelledby="intrekken-kop" surface="soft">
+            <Heading id="intrekken-kop" level={2}>
+              Van de site halen
+            </Heading>
+            <Text>
+              Intrekken haalt het artikel meteen van de site en maakt er weer een concept van. Er wordt niets
+              verwijderd. Publiceer je het later opnieuw, dan krijgt het de datum van dat moment.
+            </Text>
+            <Form action={submitWithdraw.bind(null, article.id)}>
+              <Button appearance="soft" type="submit">
+                Intrekken
+              </Button>
+            </Form>
+          </Card>
+        )}
+        <Card aria-labelledby="versies-kop">
+          <Heading id="versies-kop" level={2}>
+            Eerdere versies
+          </Heading>
+          {versions.length === 0 ? (
+            <Text>
+              Van dit artikel is nog geen versie bewaard. De eerste komt bij de eerstvolgende wijziging in dit scherm.
+            </Text>
+          ) : (
+            <>
+              <Text appearance="meta">
+                Elke keer dat je iets verandert en opslaat, bewaren we de tekst. Publiceren en intrekken bewaren geen
+                versie.
+              </Text>
+              <List role="list">
+                {versions.map((version, index) => (
+                  <List.Item key={version.version}>
+                    <Heading appearance={4} level={3}>
+                      <Link href={versionPath(article.id, version.version)}>Versie {version.version}</Link>
+                    </Heading>
+                    <Text appearance="meta">
+                      {index === 0 ? 'Huidige versie · ' : ''}
+                      {formatVersionTime(version.savedAt)}
+                      {' · '}
+                      {version.savedBy}
+                    </Text>
+                  </List.Item>
+                ))}
+              </List>
+            </>
+          )}
+        </Card>
+        <Text>
+          <Link href={articlesPath}>Terug naar de artikelen</Link>
+        </Text>
+      </Page.Cell>
     </Page.Main>
   )
 }

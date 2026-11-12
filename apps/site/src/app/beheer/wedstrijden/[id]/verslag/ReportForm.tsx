@@ -29,6 +29,7 @@ import {
   useSyncExternalStore,
 } from 'react'
 
+import { reportFormId } from '#src/beheer/form-ids'
 import {
   canonicalValues,
   clearDraft,
@@ -82,8 +83,8 @@ const summaryId = 'fouten'
 const roleHintId = (side: Side) => `rol-hint-${side}`
 const outHintId = (side: Side) => `eruit-hint-${side}`
 
-/** The `id` of the form, which the field and button in the sidebar name in their `form`. */
-const formId = 'verslag'
+/** The `id` of the form, which the buttons in the toolbar name in their `form`. */
+const formId = reportFormId
 
 /** What the form needs to know of the match to word its choices. */
 export type ReportChoices = {
@@ -787,11 +788,10 @@ export function ReportFields() {
 
 /**
  * The state of the form of a report, shared by the three parts of the page: the list of errors
- * (`ReportErrorSummary`), the cards with the fields (`ReportFields`) and the save panel in the
- * sidebar (`ReportSavePanel`). They sit in two columns of the page, so the page puts them in
- * this provider, and the field and button of the sidebar belong to the form by its `id` (the
- * `form` attribute). The form is a plain POST that works without JavaScript: the provider is a
- * client component only to show what the server says.
+ * (`ReportErrorSummary`), the cards with the fields (`ReportFields`) and the save panel at its
+ * end (`ReportSavePanel`). The page puts them in this provider, and the buttons in its toolbar
+ * belong to the form by its `id` (the `form` attribute). The form is a plain POST that works
+ * without JavaScript: the provider is a client component only to show what the server says.
  */
 export function ReportFormProvider({
   action,
@@ -946,9 +946,9 @@ export function ReportFormShell({
 }
 
 /**
- * The save panel for the sidebar: "Opslaan" in a card, and "Annuleren" in a cell of its own
- * under it. The button belongs to the form of the cards by its `id`, so it saves, with or
- * without JavaScript.
+ * The save panel at the end of the form: "Opslaan" in a card, and "Annuleren" in a cell of its
+ * own under it. The page has the same buttons in its toolbar. The button belongs to the form of
+ * the cards by its `id`, so it saves, with or without JavaScript.
  */
 export function ReportSavePanel({ cancelHref }: { cancelHref: string }) {
   const { choices, pending } = useReportForm()
