@@ -5,6 +5,7 @@ import { seasonOf } from '@fansite/db/season'
 import { Card, Heading, Link, List, Page, Text, Tile } from '@fansite/design-system'
 
 import { roleLabels } from '#src/beheer/account-fields'
+import { adminAreas, todoAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { countHeldChanges, countMatchesWithoutResult, countWaitingDifferences } from '#src/beheer/match-entries'
 import { countReportsToCheck } from '#src/beheer/match-reports'
@@ -24,9 +25,10 @@ type TodoItem = { href: string; text: string }
 const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`
 
 // The start of the admin: who is logged in, a tile for every screen the role may see, and what
-// is left to do in a card in the sidebar. An author sees his articles and his account only. The
-// button to log out is in the bar (AdminScreens). The card is only there when something waits,
-// and a next screen adds a line to it by adding an item to `todo`.
+// is left to do in a card Te doen, which comes before the tiles on a phone. An author sees his
+// articles and his account only. The button to log out is in the bar (AdminScreens). The card
+// is only there when something waits, and a next screen adds a line to it by adding an item to
+// `todo`.
 export default async function AdminPage() {
   const { email, firstName, role } = await requireRole(...adminRoles)
   const editor = role !== 'author'
@@ -72,18 +74,30 @@ export default async function AdminPage() {
   }
 
   return (
-    <>
-      <Page.Main
-        className={compact}
-        intro={
-          <>
-            <Heading level={1}>Beheer</Heading>
-            <Text>
-              Je bent ingelogd als {firstName === '' ? email : firstName} ({roleLabels[role]}).
-            </Text>
-          </>
-        }
-      >
+    <Page.Main areas={todo.length === 0 ? adminAreas : todoAreas} className={compact}>
+      <Page.Cell area="head">
+        <Heading level={1}>Beheer</Heading>
+        <Text>
+          Je bent ingelogd als {firstName === '' ? email : firstName} ({roleLabels[role]}).
+        </Text>
+      </Page.Cell>
+      {todo.length === 0 ? null : (
+        <Page.Section area="todo" aria-labelledby="te-doen-kop">
+          <Card as="div" surface="soft">
+            <Heading id="te-doen-kop" level={2}>
+              Te doen
+            </Heading>
+            <List role="list">
+              {todo.map((item) => (
+                <List.Item key={item.href + item.text}>
+                  <Link href={item.href}>{item.text}</Link>
+                </List.Item>
+              ))}
+            </List>
+          </Card>
+        </Page.Section>
+      )}
+      <Page.Cell area="main">
         <Tile.Grid aria-label="Schermen van het beheer">
           {editor ? (
             <Tile href="/beheer/berichten" icon="speech" level={2} title="Berichten">
@@ -121,21 +135,7 @@ export default async function AdminPage() {
             {editor ? 'Bekijk je gegevens en kies of je de mail over Wikipedia krijgt.' : 'Bekijk je gegevens.'}
           </Tile>
         </Tile.Grid>
-      </Page.Main>
-      {todo.length === 0 ? null : (
-        <Page.Sidebar aria-label="Te doen">
-          <Card as="div" surface="soft">
-            <Heading level={2}>Te doen</Heading>
-            <List role="list">
-              {todo.map((item) => (
-                <List.Item key={item.href + item.text}>
-                  <Link href={item.href}>{item.text}</Link>
-                </List.Item>
-              ))}
-            </List>
-          </Card>
-        </Page.Sidebar>
-      )}
-    </>
+      </Page.Cell>
+    </Page.Main>
   )
 }

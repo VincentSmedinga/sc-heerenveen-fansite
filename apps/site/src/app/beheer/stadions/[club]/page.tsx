@@ -18,8 +18,10 @@ import {
 } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
+import { sideAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { requireRole } from '#src/beheer/require-role'
+import { SaveButtons } from '#src/beheer/SaveButtons'
 import { emptyRow, stadiumFormId } from '#src/beheer/stadium-fields'
 import { rowOf } from '#src/beheer/stadium-form'
 import { findAdminClub } from '#src/beheer/stadiums'
@@ -40,10 +42,10 @@ type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
-// The form of the stadiums of one club: the lines of its own list in the main column, and in
-// the sidebar the save button, what the matches say with the button that takes it over, and the
-// block that goes back to Wikipedia. The page tells what the last action did from the word in
-// the address.
+// The form of the stadiums of one club: the lines of its own list in the main area, the save
+// buttons in the toolbar and at the end of the form, and beside it what the matches say with
+// the button that takes it over, and the block that goes back to Wikipedia. The page tells what
+// the last action did from the word in the address.
 export default async function ClubStadiumsPage({ params, searchParams }: Props) {
   await requireRole('owner', 'editor')
 
@@ -69,27 +71,29 @@ export default async function ClubStadiumsPage({ params, searchParams }: Props) 
   const notice = typeof gedaan === 'string' ? notices[gedaan] : undefined
 
   return (
-    <>
-      <Page.Main
-        className={compact}
-        intro={
-          <>
-            <Text>
-              <Link href={stadiumsPath} icon="arrow-left">
-                Terug naar Stadions
-              </Link>
-            </Text>
-            <Heading level={1}>{club.name}</Heading>
-            <Text>
-              {own.length > 0 ? <Tag tone="highlight">Eigen lijst</Tag> : <Tag>Wikipedia</Tag>}{' '}
-              {own.length > 0
-                ? 'De kaart op de pagina van de club toont alleen deze lijst.'
-                : 'De kaart toont wat de wedstrijden zeggen. Sla een lijst op om dat te vervangen.'}
-            </Text>
-          </>
-        }
-        wide
-      >
+    <Page.Main areas={sideAreas} className={compact}>
+      <Page.Cell area="head">
+        <Text>
+          <Link href={stadiumsPath} icon="arrow-left">
+            Terug naar Stadions
+          </Link>
+        </Text>
+        <Heading level={1}>{club.name}</Heading>
+        <Text>
+          {own.length > 0 ? <Tag tone="highlight">Eigen lijst</Tag> : <Tag>Wikipedia</Tag>}{' '}
+          {own.length > 0
+            ? 'De kaart op de pagina van de club toont alleen deze lijst.'
+            : 'De kaart toont wat de wedstrijden zeggen. Sla een lijst op om dat te vervangen.'}
+        </Text>
+      </Page.Cell>
+      <Page.Toolbar>
+        <SaveButtons
+          buttons={[{ label: 'Opslaan', value: 'opslaan' }]}
+          cancelHref={stadiumsPath}
+          formId={stadiumFormId}
+        />
+      </Page.Toolbar>
+      <Page.Cell area="main">
         {notice === undefined ? null : (
           <Notice>
             <Strong>{notice.title}.</Strong> {notice.text}
@@ -97,23 +101,12 @@ export default async function ClubStadiumsPage({ params, searchParams }: Props) 
         )}
         <StadiumForm
           action={submitStadiums.bind(null, slug)}
+          cancelHref={stadiumsPath}
           initial={own.length > 0 ? own.map(rowOf) : [{ ...emptyRow }]}
           key={`${club.id}-${gedaan ?? ''}`}
         />
-      </Page.Main>
-      <Page.Sidebar aria-label="Opslaan en wat de wedstrijden zeggen" sticky>
-        <Card aria-labelledby="opslaan-kop">
-          <Heading id="opslaan-kop" level={2}>
-            Opslaan
-          </Heading>
-          <Text appearance="meta">Staat {showDelay} op de pagina van de club.</Text>
-          <Button form={stadiumFormId} icon="save" name="knop" type="submit" value="opslaan">
-            Opslaan
-          </Button>
-        </Card>
-        <Text>
-          <Link href={stadiumsPath}>Annuleren</Link>
-        </Text>
+      </Page.Cell>
+      <Page.Section area="side" aria-label="Wat de wedstrijden zeggen">
         <Card aria-labelledby="wedstrijden-kop" surface="soft">
           <Heading id="wedstrijden-kop" level={2}>
             Wat de wedstrijden zeggen
@@ -152,7 +145,7 @@ export default async function ClubStadiumsPage({ params, searchParams }: Props) 
             </Form>
           </Disclosure>
         )}
-      </Page.Sidebar>
-    </>
+      </Page.Section>
+    </Page.Main>
   )
 }

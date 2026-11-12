@@ -4,6 +4,7 @@ import { readSeasonCoverage } from '@fansite/db/season-coverage'
 import { Card, DataTable, Heading, Page, SegmentedLinks, Text } from '@fansite/design-system'
 
 import { gapLegend, gapTableColumns, qualitySwitch } from '#src/app/beheer/kwaliteit/gap-table'
+import { toolbarAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { countGapsBySeason, gapColumns, readMatchGaps, seasonTablePath } from '#src/beheer/quality-table'
 import { requireRole } from '#src/beheer/require-role'
@@ -35,56 +36,55 @@ export default async function QualityPage() {
   )
 
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Heading level={1}>Kwaliteit</Heading>
-          <SegmentedLinks {...qualitySwitch('wedstrijden')} />
-          <Text appearance="intro">
-            {withGaps.length === 0
-              ? 'Alle wedstrijden zijn compleet.'
-              : `Nog ${plural(total, 'gat', 'gaten')} in ${plural(withGaps.length, 'wedstrijd', 'wedstrijden')} van de ${matchGaps.length}. Een getal in de tabel leidt naar de wedstrijden van dat seizoen met een gat in die kolom.`}
-          </Text>
-        </>
-      }
-      wide
-    >
-      <Card aria-labelledby="seizoenen-kop">
-        <Heading id="seizoenen-kop" level={2}>
-          Per seizoen
-        </Heading>
-        <Text appearance="meta">{gapLegend}</Text>
-        <DataTable
-          appearance="text"
-          caption="Wedstrijden met een gat per seizoen en per deel, het nieuwste seizoen bovenaan"
-          columns={gapTableColumns('Seizoen')}
-          rows={coverage.map((row) => {
-            const counts = gaps.get(row.season)
-            const complete = counts === undefined || gapColumns.every(({ key }) => counts.columns[key] === 0)
-            const matchCount = plural(counts?.matches ?? 0, 'wedstrijd', 'wedstrijden')
+    <Page.Main areas={toolbarAreas} className={compact}>
+      <Page.Cell area="head">
+        <Heading level={1}>Kwaliteit</Heading>
+        <Text appearance="intro">
+          {withGaps.length === 0
+            ? 'Alle wedstrijden zijn compleet.'
+            : `Nog ${plural(total, 'gat', 'gaten')} in ${plural(withGaps.length, 'wedstrijd', 'wedstrijden')} van de ${matchGaps.length}. Een getal in de tabel leidt naar de wedstrijden van dat seizoen met een gat in die kolom.`}
+        </Text>
+      </Page.Cell>
+      <Page.Toolbar>
+        <SegmentedLinks {...qualitySwitch('wedstrijden')} />
+      </Page.Toolbar>
+      <Page.Cell area="main">
+        <Card aria-labelledby="seizoenen-kop">
+          <Heading id="seizoenen-kop" level={2}>
+            Per seizoen
+          </Heading>
+          <Text appearance="meta">{gapLegend}</Text>
+          <DataTable
+            appearance="text"
+            caption="Wedstrijden met een gat per seizoen en per deel, het nieuwste seizoen bovenaan"
+            columns={gapTableColumns('Seizoen')}
+            rows={coverage.map((row) => {
+              const counts = gaps.get(row.season)
+              const complete = counts === undefined || gapColumns.every(({ key }) => counts.columns[key] === 0)
+              const matchCount = plural(counts?.matches ?? 0, 'wedstrijd', 'wedstrijden')
 
-            return {
-              cells: gapColumns.map(({ key, name }) => {
-                const total = counts?.columns[key] ?? 0
+              return {
+                cells: gapColumns.map(({ key, name }) => {
+                  const total = counts?.columns[key] ?? 0
 
-                return total === 0 ? null : (
-                  <DataTable.Mark
-                    description={`${total === 1 ? 'wedstrijd' : 'wedstrijden'} met een gat in ${name} in ${row.season}`}
-                    href={seasonTablePath(row.season, key)}
-                    key={key}
-                  >
-                    {String(total)}
-                  </DataTable.Mark>
-                )
-              }),
-              header: row.season,
-              href: seasonTablePath(row.season),
-              secondary: complete ? `${matchCount}, alles compleet` : matchCount,
-            }
-          })}
-        />
-      </Card>
+                  return total === 0 ? null : (
+                    <DataTable.Mark
+                      description={`${total === 1 ? 'wedstrijd' : 'wedstrijden'} met een gat in ${name} in ${row.season}`}
+                      href={seasonTablePath(row.season, key)}
+                      key={key}
+                    >
+                      {String(total)}
+                    </DataTable.Mark>
+                  )
+                }),
+                header: row.season,
+                href: seasonTablePath(row.season),
+                secondary: complete ? `${matchCount}, alles compleet` : matchCount,
+              }
+            })}
+          />
+        </Card>
+      </Page.Cell>
     </Page.Main>
   )
 }

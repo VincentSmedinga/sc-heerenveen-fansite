@@ -24,7 +24,7 @@ export function nameFieldId(number: number, field: NameFieldName) {
 /** A line without answers. */
 export const emptyNameRow: NameRowValues = { dag: '', naam: '', seizoen: '', toelichting: '' }
 
-/** The id of the list of the errors, and the `id` of the form the sidebar belongs to. */
+/** The id of the list of the errors, and the `id` of the form of the buttons in the toolbar. */
 export const nameSummaryId = 'fouten'
 
 export const nameFormId = 'clubnamen'

@@ -17,11 +17,13 @@ import {
 } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
+import { sideAreas } from '#src/beheer/areas'
 import { emptyNameRow, nameFormId } from '#src/beheer/club-name-fields'
 import { rowOf } from '#src/beheer/club-name-form'
 import { findAdminClub, headingNotice } from '#src/beheer/club-names'
 import { compact } from '#src/beheer/density'
 import { requireRole } from '#src/beheer/require-role'
+import { SaveButtons } from '#src/beheer/SaveButtons'
 import { getDatabase } from '#src/database'
 import { describeShowDelay } from '#src/matches'
 
@@ -40,9 +42,9 @@ type Props = {
 }
 
 // The form of the names of one club: the name the site shows in the heading now, the lines of
-// its own list in the main column, and in the sidebar the save button, the spellings Wikipedia
-// has (read only) and the block that takes the list away. The page tells what the last action
-// did from the word in the address.
+// its own list in the main area, the save buttons in the toolbar and at the end of the form,
+// and beside it the spellings Wikipedia has (read only) and the block that takes the list away.
+// The page tells what the last action did from the word in the address.
 export default async function ClubNamesOfClubPage({ params, searchParams }: Props) {
   await requireRole('owner', 'editor')
 
@@ -69,32 +71,34 @@ export default async function ClubNamesOfClubPage({ params, searchParams }: Prop
   const mismatch = headingNotice(club.name, own)
 
   return (
-    <>
-      <Page.Main
-        className={compact}
-        intro={
-          <>
-            <Text>
-              <Link href={clubNamesPath} icon="arrow-left">
-                Terug naar Clubnamen
-              </Link>
-            </Text>
-            <Heading level={1}>{club.name}</Heading>
-            <Text>
-              {own.length > 0 ? <Tag tone="highlight">Eigen lijst</Tag> : <Tag>Geen lijst</Tag>}{' '}
-              {own.length > 0
-                ? 'De pagina van de club zegt "Eerder" uit deze lijst, en de lijsten met wedstrijden tonen de naam van het seizoen.'
-                : 'De pagina van de club heeft geen regel "Eerder". Sla een lijst op om die te maken.'}
-            </Text>
-            <Text>
-              De site toont nu de naam <Strong>{club.name}</Strong> in de kop. De import bepaalt die naam en het adres
-              van de pagina; de lijst verandert ze niet.
-            </Text>
-            {mismatch === undefined ? null : <Notice>{mismatch}</Notice>}
-          </>
-        }
-        wide
-      >
+    <Page.Main areas={sideAreas} className={compact}>
+      <Page.Cell area="head">
+        <Text>
+          <Link href={clubNamesPath} icon="arrow-left">
+            Terug naar Clubnamen
+          </Link>
+        </Text>
+        <Heading level={1}>{club.name}</Heading>
+        <Text>
+          {own.length > 0 ? <Tag tone="highlight">Eigen lijst</Tag> : <Tag>Geen lijst</Tag>}{' '}
+          {own.length > 0
+            ? 'De pagina van de club zegt "Eerder" uit deze lijst, en de lijsten met wedstrijden tonen de naam van het seizoen.'
+            : 'De pagina van de club heeft geen regel "Eerder". Sla een lijst op om die te maken.'}
+        </Text>
+        <Text>
+          De site toont nu de naam <Strong>{club.name}</Strong> in de kop. De import bepaalt die naam en het adres van
+          de pagina; de lijst verandert ze niet.
+        </Text>
+        {mismatch === undefined ? null : <Notice>{mismatch}</Notice>}
+      </Page.Cell>
+      <Page.Toolbar>
+        <SaveButtons
+          buttons={[{ label: 'Opslaan', value: 'opslaan' }]}
+          cancelHref={clubNamesPath}
+          formId={nameFormId}
+        />
+      </Page.Toolbar>
+      <Page.Cell area="main">
         {notice === undefined ? null : (
           <Notice>
             <Strong>{notice.title}.</Strong> {notice.text}
@@ -102,23 +106,12 @@ export default async function ClubNamesOfClubPage({ params, searchParams }: Prop
         )}
         <ClubNameForm
           action={submitNames.bind(null, slug)}
+          cancelHref={clubNamesPath}
           initial={own.length > 0 ? own.map(rowOf) : [{ ...emptyNameRow }]}
           key={`${club.id}-${gedaan ?? ''}`}
         />
-      </Page.Main>
-      <Page.Sidebar aria-label="Opslaan en de schrijfwijzen van Wikipedia" sticky>
-        <Card aria-labelledby="opslaan-kop">
-          <Heading id="opslaan-kop" level={2}>
-            Opslaan
-          </Heading>
-          <Text appearance="meta">Staat {showDelay} op de pagina van de club.</Text>
-          <Button form={nameFormId} icon="save" name="knop" type="submit" value="opslaan">
-            Opslaan
-          </Button>
-        </Card>
-        <Text>
-          <Link href={clubNamesPath}>Annuleren</Link>
-        </Text>
+      </Page.Cell>
+      <Page.Section area="side" aria-label="Schrijfwijzen van Wikipedia">
         <Card aria-labelledby="schrijfwijzen-kop" surface="soft">
           <Heading id="schrijfwijzen-kop" level={2}>
             Schrijfwijzen van Wikipedia
@@ -152,7 +145,7 @@ export default async function ClubNamesOfClubPage({ params, searchParams }: Prop
             </Form>
           </Disclosure>
         )}
-      </Page.Sidebar>
-    </>
+      </Page.Section>
+    </Page.Main>
   )
 }

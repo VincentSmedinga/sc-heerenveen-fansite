@@ -11,6 +11,7 @@ import {
   slugMaxLength,
   suggestSlug,
 } from '#src/beheer/article-fields'
+import { articleFormId } from '#src/beheer/form-ids'
 
 const summaryId = 'fouten'
 
@@ -68,7 +69,7 @@ export function ArticleForm({
   return (
     <>
       <ErrorSummary errors={summary} id={summaryId} level={2} tabIndex={-1} />
-      <Form action={formAction}>
+      <Form action={formAction} id={articleFormId}>
         <Field error={errors.titel} hint={`Hoogstens ${limits.title} tekens.`} id="titel" label="Titel">
           <Input
             autoComplete="off"

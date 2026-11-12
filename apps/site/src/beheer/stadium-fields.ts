@@ -24,7 +24,7 @@ export function stadiumFieldId(number: number, field: StadiumFieldName) {
 /** A line without answers. */
 export const emptyRow: StadiumRowValues = { dag: '', naam: '', seizoen: '', toelichting: '' }
 
-/** The id of the list of the errors, and the `id` of the form the sidebar belongs to. */
+/** The id of the list of the errors, and the `id` of the form of the buttons in the toolbar. */
 export const stadiumSummaryId = 'fouten'
 
 export const stadiumFormId = 'stadions'

@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 
 import { articlePath } from '#src/app/beheer/artikelen/paths'
 import { ArticleText } from '#src/ArticleText'
+import { singleAreas } from '#src/beheer/areas'
 import { findArticleFor } from '#src/beheer/articles'
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
@@ -39,27 +40,29 @@ export default async function ArticlePreviewPage({ params }: { params: Promise<{
   const live = article.publishedAt !== null && article.publishedAt <= now
 
   return (
-    <Page.Main className={compact}>
-      <Card aria-labelledby="voorbeeld-kop" surface="soft">
-        <Heading id="voorbeeld-kop" level={2}>
-          Voorbeeld
-        </Heading>
-        <Text>
-          {live
-            ? `Zo ziet een bezoeker dit artikel op /redactie/${article.slug}.`
-            : 'Dit artikel is een concept. Zo ziet een bezoeker het zodra het op de site staat, met de datum van die dag.'}{' '}
-          <Link href={articlePath(article.id)}>Terug naar het formulier</Link>
-        </Text>
-      </Card>
-      <Article
-        author={article.author}
-        date={formatArticleDate(moment)}
-        dateTime={dayOf(moment)}
-        intro={article.intro}
-        title={article.title}
-      >
-        <ArticleText body={article.body} />
-      </Article>
+    <Page.Main areas={singleAreas} className={compact}>
+      <Page.Cell area="main">
+        <Card aria-labelledby="voorbeeld-kop" surface="soft">
+          <Heading id="voorbeeld-kop" level={2}>
+            Voorbeeld
+          </Heading>
+          <Text>
+            {live
+              ? `Zo ziet een bezoeker dit artikel op /redactie/${article.slug}.`
+              : 'Dit artikel is een concept. Zo ziet een bezoeker het zodra het op de site staat, met de datum van die dag.'}{' '}
+            <Link href={articlePath(article.id)}>Terug naar het formulier</Link>
+          </Text>
+        </Card>
+        <Article
+          author={article.author}
+          date={formatArticleDate(moment)}
+          dateTime={dayOf(moment)}
+          intro={article.intro}
+          title={article.title}
+        >
+          <ArticleText body={article.body} />
+        </Article>
+      </Page.Cell>
     </Page.Main>
   )
 }

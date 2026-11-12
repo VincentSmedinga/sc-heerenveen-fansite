@@ -19,7 +19,9 @@ describe('the form of the names of a club', () => {
       },
       values: [],
     }
-    const { container } = render(<ClubNameForm action={() => Promise.resolve(answer)} initial={[]} />)
+    const { container } = render(
+      <ClubNameForm action={() => Promise.resolve(answer)} cancelHref="/beheer/clubnamen" initial={[]} />,
+    )
 
     fireEvent.submit(container.querySelector('form') as HTMLFormElement)
 
@@ -37,7 +39,9 @@ describe('the form of the names of a club', () => {
       errors: { 'regel-1-naam': 'Vul de naam van de club in.' },
       values: [{ dag: '', naam: '', seizoen: '', toelichting: 'Alleen een toelichting' }],
     }
-    const { container } = render(<ClubNameForm action={() => Promise.resolve(answer)} initial={[]} />)
+    const { container } = render(
+      <ClubNameForm action={() => Promise.resolve(answer)} cancelHref="/beheer/clubnamen" initial={[]} />,
+    )
 
     fireEvent.submit(container.querySelector('form') as HTMLFormElement)
 

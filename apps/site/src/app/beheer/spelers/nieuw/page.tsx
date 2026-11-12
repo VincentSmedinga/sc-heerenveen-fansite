@@ -4,13 +4,16 @@ import { Button, Card, Field, Form, Heading, Input, Link, Page, Text } from '@fa
 import { redirect } from 'next/navigation'
 
 import { matchPartPath, matchPath } from '#src/app/beheer/wedstrijden/paths'
+import { toolbarAreas } from '#src/beheer/areas'
 import { countryChoices } from '#src/beheer/countries'
 import { compact } from '#src/beheer/density'
+import { playerFormId } from '#src/beheer/form-ids'
 import { parseSearch, searchMaxLength } from '#src/beheer/items'
 import { emptyPlayerValues, newPersonChoice } from '#src/beheer/player-fields'
 import { findReturnMatch } from '#src/beheer/player-return'
 import { listPlayerSeasons, mostPersonChoices, searchPersons } from '#src/beheer/players'
 import { requireRole } from '#src/beheer/require-role'
+import { SaveButtons } from '#src/beheer/SaveButtons'
 import { getDatabase } from '#src/database'
 import { seasonFromSlug, seasonSlug } from '#src/seasons'
 
@@ -49,72 +52,78 @@ export default async function AddPlayerPage({ searchParams }: { searchParams: Pr
   const [first] = people
 
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Text>
-            <Link href={listPath(season)} icon="arrow-left">
-              Terug naar Spelers
-            </Link>
-          </Text>
-          <Heading level={1}>Speler toevoegen aan {season}</Heading>
-          <Text appearance="intro">
-            Voeg een speler toe die in de selectie van {season} ontbreekt. Zoek eerst of we de persoon al kennen uit een
-            ander seizoen. Staat hij er niet bij, dan maak je een nieuwe persoon.
-          </Text>
-          {back === undefined ? null : (
-            <Text>Na het opslaan ga je terug naar het formulier van de wedstrijd {back.clubs}.</Text>
-          )}
-        </>
-      }
-      wide
-    >
-      <Card aria-labelledby="zoek-kop">
-        <Heading id="zoek-kop" level={2}>
-          Kennen we hem al?
-        </Heading>
-        <Form action={`${playersPath}/nieuw`} method="get">
-          <Field
-            hint="Een deel van de naam. Zoek eerst: wat je hieronder al invulde, gaat bij het zoeken verloren."
-            id="zoek"
-            label="Zoek een persoon"
-            required={false}
-          >
-            <Input autoCorrect="off" defaultValue={search} maxLength={searchMaxLength} name="q" type="search" />
-          </Field>
-          {/* The button sends the season, and a hidden field the match to go back to. */}
-          {back === undefined ? null : <Input name="wedstrijd" type="hidden" value={String(back.id)} />}
-          {toGoals ? <Input name="deel" type="hidden" value="doelpunten" /> : null}
-          <Button appearance="soft" name="seizoen" type="submit" value={seasonSlug(season)}>
-            Zoeken
-          </Button>
-        </Form>
-        {search === '' ? null : (
-          <Text>
-            {people.length === 0
-              ? `Geen persoon gevonden met “${search}”. Maak hieronder een nieuwe persoon.`
-              : people.length === mostPersonChoices
-                ? `De eerste ${mostPersonChoices} personen met “${search}” staan in de lijst hieronder. Staat hij er niet bij? Zoek dan preciezer.`
-                : `${people.length === 1 ? '1 persoon' : `${people.length} personen`} met “${search}” in de lijst hieronder.`}
-          </Text>
+    <Page.Main areas={toolbarAreas} className={compact}>
+      <Page.Cell area="head">
+        <Text>
+          <Link href={listPath(season)} icon="arrow-left">
+            Terug naar Spelers
+          </Link>
+        </Text>
+        <Heading level={1}>Speler toevoegen aan {season}</Heading>
+        <Text appearance="intro">
+          Voeg een speler toe die in de selectie van {season} ontbreekt. Zoek eerst of we de persoon al kennen uit een
+          ander seizoen. Staat hij er niet bij, dan maak je een nieuwe persoon.
+        </Text>
+        {back === undefined ? null : (
+          <Text>Na het opslaan ga je terug naar het formulier van de wedstrijd {back.clubs}.</Text>
         )}
-      </Card>
-      <PlayerForm
-        action={submitAddPlayer.bind(null, season, back?.id, toGoals)}
-        cancelHref={
-          back === undefined ? listPath(season) : toGoals ? matchPartPath(back.id, 'doelpunten') : matchPath(back.id)
-        }
-        countries={countryChoices()}
-        initial={{
-          ...emptyPlayerValues,
-          persoon: first === undefined ? newPersonChoice : String(first.id),
-          rugnummer: first?.suggestion === undefined ? '' : String(first.suggestion.number),
-        }}
-        key={addPlayerPath(season, search, back?.id, toGoals)}
-        people={people}
-        submitLabel="Speler toevoegen"
-      />
+      </Page.Cell>
+      <Page.Toolbar>
+        <SaveButtons
+          buttons={[{ label: 'Speler toevoegen' }]}
+          cancelHref={
+            back === undefined ? listPath(season) : toGoals ? matchPartPath(back.id, 'doelpunten') : matchPath(back.id)
+          }
+          formId={playerFormId}
+        />
+      </Page.Toolbar>
+      <Page.Cell area="main">
+        <Card aria-labelledby="zoek-kop">
+          <Heading id="zoek-kop" level={2}>
+            Kennen we hem al?
+          </Heading>
+          <Form action={`${playersPath}/nieuw`} method="get">
+            <Field
+              hint="Een deel van de naam. Zoek eerst: wat je hieronder al invulde, gaat bij het zoeken verloren."
+              id="zoek"
+              label="Zoek een persoon"
+              required={false}
+            >
+              <Input autoCorrect="off" defaultValue={search} maxLength={searchMaxLength} name="q" type="search" />
+            </Field>
+            {/* The button sends the season, and a hidden field the match to go back to. */}
+            {back === undefined ? null : <Input name="wedstrijd" type="hidden" value={String(back.id)} />}
+            {toGoals ? <Input name="deel" type="hidden" value="doelpunten" /> : null}
+            <Button appearance="soft" name="seizoen" type="submit" value={seasonSlug(season)}>
+              Zoeken
+            </Button>
+          </Form>
+          {search === '' ? null : (
+            <Text>
+              {people.length === 0
+                ? `Geen persoon gevonden met “${search}”. Maak hieronder een nieuwe persoon.`
+                : people.length === mostPersonChoices
+                  ? `De eerste ${mostPersonChoices} personen met “${search}” staan in de lijst hieronder. Staat hij er niet bij? Zoek dan preciezer.`
+                  : `${people.length === 1 ? '1 persoon' : `${people.length} personen`} met “${search}” in de lijst hieronder.`}
+            </Text>
+          )}
+        </Card>
+        <PlayerForm
+          action={submitAddPlayer.bind(null, season, back?.id, toGoals)}
+          cancelHref={
+            back === undefined ? listPath(season) : toGoals ? matchPartPath(back.id, 'doelpunten') : matchPath(back.id)
+          }
+          countries={countryChoices()}
+          initial={{
+            ...emptyPlayerValues,
+            persoon: first === undefined ? newPersonChoice : String(first.id),
+            rugnummer: first?.suggestion === undefined ? '' : String(first.suggestion.number),
+          }}
+          key={addPlayerPath(season, search, back?.id, toGoals)}
+          people={people}
+          submitLabel="Speler toevoegen"
+        />
+      </Page.Cell>
     </Page.Main>
   )
 }

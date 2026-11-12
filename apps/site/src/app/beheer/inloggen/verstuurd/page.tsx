@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { Button, ErrorSummary, Field, Form, Heading, Input, Link, Page, Text } from '@fansite/design-system'
 
+import { singleAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 
 import { logInWithCode } from '../actions'
@@ -26,8 +27,8 @@ export default async function SentPage({
   const error = fout === 'code' ? codeError : undefined
 
   return (
-    <Page.Main className={compact}>
-      <Page.Cell>
+    <Page.Main areas={singleAreas} className={compact}>
+      <Page.Cell area="main">
         <Heading level={1}>Kijk in je mail</Heading>
         <Text appearance="intro">Als dit adres een account heeft, hebben we een link en een code gemaild.</Text>
         <Text>De link en de code werken 15 minuten en één keer.</Text>

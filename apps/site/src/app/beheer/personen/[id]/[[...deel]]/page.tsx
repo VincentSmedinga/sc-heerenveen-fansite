@@ -9,13 +9,16 @@ import { personPartPath, personPath } from '#src/app/beheer/personen/paths'
 import { PersonForm } from '#src/app/beheer/personen/PersonForm'
 import { playerPath, playersPath } from '#src/app/beheer/spelers/paths'
 import { backPathOf } from '#src/app/beheer/wedstrijden/paths'
+import { toolbarAreas } from '#src/beheer/areas'
 import { countryChoices } from '#src/beheer/countries'
 import { compact } from '#src/beheer/density'
+import { personFormId } from '#src/beheer/form-ids'
 import { parseItemId } from '#src/beheer/items'
 import { isPersonPart, type PersonPart, personPartLabels, personParts } from '#src/beheer/person-fields'
 import { findAdminPerson, personNameOf, personValuesOf } from '#src/beheer/person-form'
 import { isPersonGapColumn, personColumnParts } from '#src/beheer/person-table'
 import { requireRole } from '#src/beheer/require-role'
+import { SaveButtons } from '#src/beheer/SaveButtons'
 import { getDatabase } from '#src/database'
 
 type Props = {
@@ -90,56 +93,67 @@ export default async function PersonPage({ params, searchParams }: Props) {
   ]
 
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Text>
-            <Link href={back ?? playersPath} icon="arrow-left">
-              {back === undefined ? 'Terug naar Spelers' : 'Terug'}
-            </Link>
-          </Text>
-          <Heading level={1}>{personNameOf(found.person)}</Heading>
-          <Text appearance="meta">
-            {found.seasons.length === 0 ? (
-              'Nog in geen seizoen in onze selectie.'
-            ) : (
-              <>
-                In onze selectie:{' '}
-                {found.seasons.map((player, index) => (
-                  <Fragment key={player.id}>
-                    {index === 0 ? null : ', '}
-                    <Link href={playerPath(player.id)}>{player.season}</Link>
-                  </Fragment>
-                ))}
-              </>
-            )}
-          </Text>
-          <Filter items={navigation} label="Delen van de persoon" />
-          {part === undefined ? null : (
-            <Text>
-              <Link href={personPath(id, { back })}>Hele persoon bewerken</Link>
-            </Text>
+    <Page.Main areas={toolbarAreas} className={compact}>
+      <Page.Cell area="head">
+        <Text>
+          <Link href={back ?? playersPath} icon="arrow-left">
+            {back === undefined ? 'Terug naar Spelers' : 'Terug'}
+          </Link>
+        </Text>
+        <Heading level={1}>{personNameOf(found.person)}</Heading>
+        <Text appearance="meta">
+          {found.seasons.length === 0 ? (
+            'Nog in geen seizoen in onze selectie.'
+          ) : (
+            <>
+              In onze selectie:{' '}
+              {found.seasons.map((player, index) => (
+                <Fragment key={player.id}>
+                  {index === 0 ? null : ', '}
+                  <Link href={playerPath(player.id)}>{player.season}</Link>
+                </Fragment>
+              ))}
+            </>
           )}
-        </>
-      }
-      wide
-    >
-      {notice === undefined ? null : (
-        <Notice>
-          <Strong>{notice.title}.</Strong> {notice.text}
-        </Notice>
-      )}
-      <PersonForm
-        action={submitPerson.bind(null, id, part, back, column)}
-        cancelHref={back ?? playersPath}
-        countries={countryChoices()}
-        initial={initial}
-        // A second save on the same address must open the form anew, with what is stored now.
-        key={`${id}-${part ?? ''}-${gedaan ?? ''}-${JSON.stringify(initial)}`}
-        next={column !== undefined}
-        part={part}
-      />
+        </Text>
+        {part === undefined ? null : (
+          <Text>
+            <Link href={personPath(id, { back })}>Hele persoon bewerken</Link>
+          </Text>
+        )}
+      </Page.Cell>
+      <Page.Toolbar>
+        <Filter items={navigation} label="Delen van de persoon" />
+        <SaveButtons
+          buttons={
+            column === undefined
+              ? [{ label: 'Opslaan', value: 'opslaan' }]
+              : [
+                  { label: 'Opslaan en volgende', value: 'volgende' },
+                  { appearance: 'soft', label: 'Opslaan', value: 'opslaan' },
+                ]
+          }
+          cancelHref={back ?? playersPath}
+          formId={personFormId}
+        />
+      </Page.Toolbar>
+      <Page.Cell area="main">
+        {notice === undefined ? null : (
+          <Notice>
+            <Strong>{notice.title}.</Strong> {notice.text}
+          </Notice>
+        )}
+        <PersonForm
+          action={submitPerson.bind(null, id, part, back, column)}
+          cancelHref={back ?? playersPath}
+          countries={countryChoices()}
+          initial={initial}
+          // A second save on the same address must open the form anew, with what is stored now.
+          key={`${id}-${part ?? ''}-${gedaan ?? ''}-${JSON.stringify(initial)}`}
+          next={column !== undefined}
+          part={part}
+        />
+      </Page.Cell>
     </Page.Main>
   )
 }

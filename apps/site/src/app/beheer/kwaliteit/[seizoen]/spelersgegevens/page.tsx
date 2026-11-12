@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation'
 
 import { submitFieldDifference } from '#src/app/beheer/kwaliteit/actions'
 import { ConflictForm } from '#src/app/beheer/wedstrijden/ConflictForm'
+import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { qualityPath } from '#src/beheer/quality'
 import { requireRole } from '#src/beheer/require-role'
@@ -74,65 +75,62 @@ export default async function FieldDifferencesPage({ params, searchParams }: Pro
   const title = 'Spelersgegevens die verschillen'
 
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Text>
-            <Link href={qualityPath} icon="arrow-left">
-              Terug naar de kwaliteit van de gegevens
-            </Link>
-          </Text>
-          <Heading level={1}>
-            {title} in {season}
-          </Heading>
-          <Text appearance="intro">
-            Van deze spelers leest de import iets anders dan de redactie invulde. Neem de waarde van de import over, of
-            houd die van de redactie.
-          </Text>
-        </>
-      }
-      wide
-    >
-      {notice === undefined ? null : (
-        <Notice>
-          <Strong>{notice.title}.</Strong> {notice.text}
-        </Notice>
-      )}
-      {found.length === 0 ? (
-        <Text>Er zijn geen spelersgegevens die verschillen in het seizoen {season}.</Text>
-      ) : (
-        found.map((difference) => {
-          const field = playerFieldLabels[difference.field]
+    <Page.Main areas={adminAreas} className={compact}>
+      <Page.Cell area="head">
+        <Text>
+          <Link href={qualityPath} icon="arrow-left">
+            Terug naar de kwaliteit van de gegevens
+          </Link>
+        </Text>
+        <Heading level={1}>
+          {title} in {season}
+        </Heading>
+        <Text appearance="intro">
+          Van deze spelers leest de import iets anders dan de redactie invulde. Neem de waarde van de import over, of
+          houd die van de redactie.
+        </Text>
+      </Page.Cell>
+      <Page.Cell area="main">
+        {notice === undefined ? null : (
+          <Notice>
+            <Strong>{notice.title}.</Strong> {notice.text}
+          </Notice>
+        )}
+        {found.length === 0 ? (
+          <Text>Er zijn geen spelersgegevens die verschillen in het seizoen {season}.</Text>
+        ) : (
+          found.map((difference) => {
+            const field = playerFieldLabels[difference.field]
 
-          return (
-            <Card aria-labelledby={`verschil-${difference.id}-kop`} key={difference.id}>
-              <Heading id={`verschil-${difference.id}-kop`} level={2}>
-                {difference.name}: {field}
-              </Heading>
-              <List role="list">
-                <List.Item>
-                  <Text>Redactie: {difference.editorsValue ?? 'leeg'}</Text>
-                </List.Item>
-                <List.Item>
-                  <Text>Import: {difference.importValue}</Text>
-                </List.Item>
-              </List>
-              <Text appearance="meta">
-                De waarde van de redactie blijft staan tot je beslist. Verdwijnt het verschil, dan verdwijnt het ook
-                hier.
-              </Text>
-              <ConflictForm
-                action={submitFieldDifference.bind(null, difference.id, seizoen)}
-                id={difference.id}
-                labels={{ keep: 'Houd de redactie', takeOver: 'Neem de import over' }}
-                part={parts[difference.field]}
-                title={difference.name}
-              />
-            </Card>
-          )
-        })
-      )}
+            return (
+              <Card aria-labelledby={`verschil-${difference.id}-kop`} key={difference.id}>
+                <Heading id={`verschil-${difference.id}-kop`} level={2}>
+                  {difference.name}: {field}
+                </Heading>
+                <List role="list">
+                  <List.Item>
+                    <Text>Redactie: {difference.editorsValue ?? 'leeg'}</Text>
+                  </List.Item>
+                  <List.Item>
+                    <Text>Import: {difference.importValue}</Text>
+                  </List.Item>
+                </List>
+                <Text appearance="meta">
+                  De waarde van de redactie blijft staan tot je beslist. Verdwijnt het verschil, dan verdwijnt het ook
+                  hier.
+                </Text>
+                <ConflictForm
+                  action={submitFieldDifference.bind(null, difference.id, seizoen)}
+                  id={difference.id}
+                  labels={{ keep: 'Houd de redactie', takeOver: 'Neem de import over' }}
+                  part={parts[difference.field]}
+                  title={difference.name}
+                />
+              </Card>
+            )
+          })
+        )}
+      </Page.Cell>
     </Page.Main>
   )
 }

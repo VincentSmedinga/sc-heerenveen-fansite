@@ -5,6 +5,7 @@ import { useActionState, useEffect, useState } from 'react'
 
 import type { CountryChoice } from '#src/beheer/countries'
 
+import { playerFormId } from '#src/beheer/form-ids'
 import {
   newPersonChoice,
   type PlayerFieldName,
@@ -90,7 +91,7 @@ export function PlayerForm({
   const keeps = people === undefined ? '' : ' Kies je een persoon die we al kennen? Onbekend laat staan wat hij heeft.'
 
   return (
-    <Form action={formAction}>
+    <Form action={formAction} id={playerFormId}>
       <ErrorSummary errors={summary} id={summaryId} level={2} tabIndex={-1} />
       {/* An error without a field has a line of its own: its link in the list leads here. */}
       {errors.algemeen === undefined ? null : (

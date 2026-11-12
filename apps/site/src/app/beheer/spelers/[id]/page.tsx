@@ -19,11 +19,14 @@ import {
 import { notFound } from 'next/navigation'
 
 import { personPath } from '#src/app/beheer/personen/paths'
+import { toolbarAreas } from '#src/beheer/areas'
 import { countryChoices } from '#src/beheer/countries'
 import { compact } from '#src/beheer/density'
+import { playerFormId } from '#src/beheer/form-ids'
 import { parseItemId, parseSearch, searchMaxLength } from '#src/beheer/items'
 import { findAdminPlayer, mostPersonChoices, playerValuesOf, searchPersons } from '#src/beheer/players'
 import { requireRole } from '#src/beheer/require-role'
+import { SaveButtons } from '#src/beheer/SaveButtons'
 import { getDatabase } from '#src/database'
 import { describeShowDelay } from '#src/matches'
 
@@ -81,110 +84,113 @@ export default async function PlayerPage({ params, searchParams }: Props) {
   const notice = typeof gedaan === 'string' && Object.hasOwn(notices, gedaan) ? notices[gedaan] : undefined
 
   return (
-    <Page.Main
-      className={compact}
-      intro={
-        <>
-          <Text>
-            <Link href={listPath(player.season)} icon="arrow-left">
-              Terug naar Spelers
-            </Link>
-          </Text>
-          <Heading level={1}>{player.name}</Heading>
-          <Text>
-            {player.source === 'redactie' ? <Tag tone="highlight">Redactie</Tag> : <Tag>Import</Tag>} Speler in het
-            seizoen {player.season}, {player.inSquad ? 'in de selectie' : 'uit de selectie'}.{' '}
-            {person === undefined
-              ? 'Hij heeft nog geen persoon: met een Wikipedia-pagina krijgt hij er een.'
-              : 'Zijn persoon is in elk seizoen dezelfde.'}
-          </Text>
-        </>
-      }
-      wide
-    >
-      {notice === undefined ? null : (
-        <Notice>
-          <Strong>{notice.title}.</Strong> {notice.text}
-        </Notice>
-      )}
-      <PlayerForm
-        action={submitPlayer.bind(null, id)}
-        cancelHref={listPath(player.season)}
-        countries={countryChoices()}
-        initial={playerValuesOf(found)}
-        key={`${id}-${gedaan ?? ''}`}
-        nameHint={person === undefined ? undefined : 'Een andere naam geldt voor deze persoon in elk seizoen.'}
-        personHref={person === undefined ? undefined : personPath(person.id, { back: playerPath(id) })}
-        submitLabel="Opslaan"
-        withoutPerson={person === undefined}
-      />
-      {person === undefined ? null : (
-        <Card aria-labelledby="zelfde-persoon-kop">
-          <Heading id="zelfde-persoon-kop" level={2}>
-            Dezelfde persoon als
-          </Heading>
-          <Text>
-            Staat deze speler er twee keer in, als twee personen? Dat gebeurt bij een speler die van naam veranderde.
-            Zoek de andere persoon en voeg de twee samen. Je leest eerst wat er dan gebeurt.
-          </Text>
-          <Form action={playerPath(id)} method="get">
-            <Field
-              hint="Een deel van de naam of van de titel van de Wikipedia-pagina."
-              id="zoek"
-              label="Zoek de andere persoon"
-              required={false}
-            >
-              <Input autoCorrect="off" defaultValue={search} maxLength={searchMaxLength} name="zoek" type="search" />
-            </Field>
-            <Button appearance="soft" type="submit">
-              Zoeken
-            </Button>
-          </Form>
-          {/* The answer to a search gets the focus: the list, or the field to search again. */}
-          {search === '' ? null : <FocusOnLoad id={others.length === 0 ? 'zoek' : 'met'} />}
-          {search === '' ? null : others.length === 0 ? (
-            <Text>Geen andere persoon gevonden met “{search}”. Zoek op een ander deel van de naam.</Text>
-          ) : (
-            <Form action={mergePagePath} method="get">
-              <Input name="persoon" type="hidden" value={String(person.id)} />
-              <Input name="speler" type="hidden" value={String(id)} />
+    <Page.Main areas={toolbarAreas} className={compact}>
+      <Page.Cell area="head">
+        <Text>
+          <Link href={listPath(player.season)} icon="arrow-left">
+            Terug naar Spelers
+          </Link>
+        </Text>
+        <Heading level={1}>{player.name}</Heading>
+        <Text>
+          {player.source === 'redactie' ? <Tag tone="highlight">Redactie</Tag> : <Tag>Import</Tag>} Speler in het
+          seizoen {player.season}, {player.inSquad ? 'in de selectie' : 'uit de selectie'}.{' '}
+          {person === undefined
+            ? 'Hij heeft nog geen persoon: met een Wikipedia-pagina krijgt hij er een.'
+            : 'Zijn persoon is in elk seizoen dezelfde.'}
+        </Text>
+      </Page.Cell>
+      <Page.Toolbar>
+        <SaveButtons buttons={[{ label: 'Opslaan' }]} cancelHref={listPath(player.season)} formId={playerFormId} />
+      </Page.Toolbar>
+      <Page.Cell area="main">
+        {notice === undefined ? null : (
+          <Notice>
+            <Strong>{notice.title}.</Strong> {notice.text}
+          </Notice>
+        )}
+        <PlayerForm
+          action={submitPlayer.bind(null, id)}
+          cancelHref={listPath(player.season)}
+          countries={countryChoices()}
+          initial={playerValuesOf(found)}
+          key={`${id}-${gedaan ?? ''}`}
+          nameHint={person === undefined ? undefined : 'Een andere naam geldt voor deze persoon in elk seizoen.'}
+          personHref={person === undefined ? undefined : personPath(person.id, { back: playerPath(id) })}
+          submitLabel="Opslaan"
+          withoutPerson={person === undefined}
+        />
+        {person === undefined ? null : (
+          <Card aria-labelledby="zelfde-persoon-kop">
+            <Heading id="zelfde-persoon-kop" level={2}>
+              Dezelfde persoon als
+            </Heading>
+            <Text>
+              Staat deze speler er twee keer in, als twee personen? Dat gebeurt bij een speler die van naam veranderde.
+              Zoek de andere persoon en voeg de twee samen. Je leest eerst wat er dan gebeurt.
+            </Text>
+            <Form action={playerPath(id)} method="get">
               <Field
-                hint={`${others.length >= mostPersonChoices - 1 ? 'De eerste personen die we vonden; zoek preciezer als hij er niet bij staat. ' : ''}Bij elke persoon staan zijn seizoenen en zijn Wikipedia-pagina, zodat je twee personen met dezelfde naam uit elkaar houdt.`}
-                id="met"
-                label="Dezelfde persoon als"
+                hint="Een deel van de naam of van de titel van de Wikipedia-pagina."
+                id="zoek"
+                label="Zoek de andere persoon"
+                required={false}
               >
-                <Select name="met">
-                  {others.map((other) => (
-                    <Select.Option key={other.id} value={String(other.id)}>
-                      {other.label}
-                    </Select.Option>
-                  ))}
-                </Select>
+                <Input autoCorrect="off" defaultValue={search} maxLength={searchMaxLength} name="zoek" type="search" />
               </Field>
               <Button appearance="soft" type="submit">
-                Bekijk wat samenvoegen doet
+                Zoeken
               </Button>
             </Form>
-          )}
-        </Card>
-      )}
-      {!player.inSquad ? null : inUse ? (
-        <Text>
-          <Strong>Uit de selectie halen kan niet.</Strong> {stays}
-        </Text>
-      ) : (
-        <Disclosure summary="Uit de selectie halen">
+            {/*
+             * The answer to a search gets the focus: the list, or the field to search
+             * again.
+             */}
+            {search === '' ? null : <FocusOnLoad id={others.length === 0 ? 'zoek' : 'met'} />}
+            {search === '' ? null : others.length === 0 ? (
+              <Text>Geen andere persoon gevonden met “{search}”. Zoek op een ander deel van de naam.</Text>
+            ) : (
+              <Form action={mergePagePath} method="get">
+                <Input name="persoon" type="hidden" value={String(person.id)} />
+                <Input name="speler" type="hidden" value={String(id)} />
+                <Field
+                  hint={`${others.length >= mostPersonChoices - 1 ? 'De eerste personen die we vonden; zoek preciezer als hij er niet bij staat. ' : ''}Bij elke persoon staan zijn seizoenen en zijn Wikipedia-pagina, zodat je twee personen met dezelfde naam uit elkaar houdt.`}
+                  id="met"
+                  label="Dezelfde persoon als"
+                >
+                  <Select name="met">
+                    {others.map((other) => (
+                      <Select.Option key={other.id} value={String(other.id)}>
+                        {other.label}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Field>
+                <Button appearance="soft" type="submit">
+                  Bekijk wat samenvoegen doet
+                </Button>
+              </Form>
+            )}
+          </Card>
+        )}
+        {!player.inSquad ? null : inUse ? (
           <Text>
-            Dit haalt {player.name} uit de selectie van {player.season}. Hij blijft in de lijst van het seizoen staan,
-            als speler die is vertrokken. Doe dit alleen als hij niet in de selectie hoort.
+            <Strong>Uit de selectie halen kan niet.</Strong> {stays}
           </Text>
-          <Form action={submitRemovePlayer.bind(null, id)}>
-            <Button appearance="danger" aria-label={`${player.name} uit de selectie halen`} type="submit">
-              Uit de selectie halen
-            </Button>
-          </Form>
-        </Disclosure>
-      )}
+        ) : (
+          <Disclosure summary="Uit de selectie halen">
+            <Text>
+              Dit haalt {player.name} uit de selectie van {player.season}. Hij blijft in de lijst van het seizoen staan,
+              als speler die is vertrokken. Doe dit alleen als hij niet in de selectie hoort.
+            </Text>
+            <Form action={submitRemovePlayer.bind(null, id)}>
+              <Button appearance="danger" aria-label={`${player.name} uit de selectie halen`} type="submit">
+                Uit de selectie halen
+              </Button>
+            </Form>
+          </Disclosure>
+        )}
+      </Page.Cell>
     </Page.Main>
   )
 }

@@ -33,8 +33,18 @@ describe('the compact density of the admin', () => {
       const source = read(page)
 
       expect(source.match(/<Page\.Main/g), page).toHaveLength(1)
-      expect(source, page).toMatch(/<Page\.Main\s+className=\{compact\}/)
+      expect(source, page).toMatch(/<Page\.Main\s+areas=\{[^}]+\}\s+className=\{compact\}/)
       expect(source, page).toContain("import { compact } from '")
+    }
+  })
+
+  it('leaves the old layout: no sidebar, no intro, no sticky and no wide page', () => {
+    for (const page of pages) {
+      const source = read(page)
+
+      expect(source, page).not.toContain('Page.Sidebar')
+      expect(source, page).not.toMatch(/<Page\.Main[^>]*\b(?:intro|wide)\b/)
+      expect(source, page).not.toMatch(/\bsticky\b/)
     }
   })
 

@@ -11,6 +11,7 @@ import {
   generalError,
   roleLabels,
 } from '#src/beheer/account-fields'
+import { accountFormId } from '#src/beheer/form-ids'
 
 const summaryId = 'fouten'
 
@@ -52,7 +53,7 @@ export function AccountForm({
   const field = (name: keyof AccountValues) => ({ defaultValue: values[name], key: `${name}-${values[name]}`, name })
 
   return (
-    <Form action={formAction}>
+    <Form action={formAction} id={accountFormId}>
       <ErrorSummary errors={summary} id={summaryId} level={2} tabIndex={-1} />
       {/* An error without a field has a line of its own: its link in the list leads here. */}
       {errors[generalError] === undefined ? null : (
