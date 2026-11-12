@@ -80,7 +80,7 @@ test.describe('an item that an editor approves', () => {
 
     await page.getByRole('link', { exact: true, name: 'Op de site' }).click()
     await expect(itemOf().getByText('door de redactie op de site gezet', { exact: false }).first()).toBeVisible()
-    await expect(itemOf().getByText(/door .+@.+\./)).toBeVisible()
+    await expect(itemOf().getByText(/door Redacteur\./)).toBeVisible()
 
     await itemOf()
       .getByRole('button', { name: `Herstellen, terug naar het oordeel van het filter: ${title}` })

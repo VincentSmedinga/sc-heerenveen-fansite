@@ -82,7 +82,7 @@ for (const [name, javaScriptEnabled, title] of [
       )
       await expect(page.getByLabel('Zoeken')).toHaveValue(title)
       await expect(itemOf(page, title).getByText('Reden: Fout in het bericht')).toBeVisible()
-      await expect(itemOf(page, title).getByText(/door .+@.+\. Reden/)).toBeVisible()
+      await expect(itemOf(page, title).getByText(/door Redacteur\. Reden/)).toBeVisible()
       if (javaScriptEnabled) {
         expect(await checkPage(page)).toEqual([])
       }

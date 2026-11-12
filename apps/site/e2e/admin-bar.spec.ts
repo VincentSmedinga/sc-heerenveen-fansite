@@ -72,7 +72,7 @@ test('has Uitloggen at the right on a desktop, after the screens', async ({ base
   await page.goto('/beheer/bezoek')
 
   const bar = page.getByRole('navigation', { name: 'Beheer' })
-  const last = await bar.getByRole('link', { name: 'Bezoek' }).boundingBox()
+  const last = await bar.getByRole('link', { name: 'Redacteur' }).boundingBox()
   const logOut = await bar.getByRole('button', { name: 'Uitloggen' }).boundingBox()
   const barBox = await bar.boundingBox()
 
@@ -96,7 +96,8 @@ for (const width of [390, 320]) {
 
     const bar = page.getByRole('navigation', { name: 'Beheer' })
 
-    await bar.getByRole('link', { name: 'Bezoek' }).focus()
+    // The last link is Mijn account, by the first name of the account.
+    await bar.getByRole('link', { name: 'Redacteur' }).focus()
     await page.keyboard.press('Tab')
 
     const logOut = bar.getByRole('button', { name: 'Uitloggen' })
