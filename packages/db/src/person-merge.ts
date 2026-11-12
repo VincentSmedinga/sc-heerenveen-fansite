@@ -141,8 +141,8 @@ export async function mergeChosenPersons(
  *
  * - What Wikidata said, the article and its title are those of the person that stays, and what
  *   he lacks comes from the other.
- * - The line and the country too, but one the editors set (`manual`) goes before one from
- *   another source (#1051).
+ * - The line, the country, the birth date and the date of death too, but one the editors set
+ *   (`manual`) goes before one from another source (#1051, #1147, #1164).
  * - The name is that of the person that stays, but a name the editors gave the other person
  *   (`redactie`) stays when the first has none of theirs.
  */
@@ -152,13 +152,16 @@ export function mergedPersonValues(other: Person, kept: Person) {
   const countryFrom = kept.country === null || editorsOnly(kept.countrySource, other.countrySource) ? other : kept
   // A year of death the editors set (#1147) goes before one of Wikidata, like a line does.
   const deathFrom = kept.deathDate === null || editorsOnly(kept.deathDateSource, other.deathDateSource) ? other : kept
+  // A birth date the editors set (#1164) goes before one of Wikidata, as a year of death does.
+  const birthFrom = kept.birthDate === null || editorsOnly(kept.birthDateSource, other.birthDateSource) ? other : kept
   const nameFrom = other.nameSource === 'redactie' && kept.nameSource !== 'redactie' ? other : kept
   // The importer always keeps the person with the title; the editors can keep one without.
   const pageFrom = kept.wikipediaPage === null ? other : kept
 
   return {
-    birthDate: kept.birthDate ?? other.birthDate,
-    birthDatePrecision: kept.birthDate === null ? other.birthDatePrecision : kept.birthDatePrecision,
+    birthDate: birthFrom.birthDate,
+    birthDatePrecision: birthFrom.birthDatePrecision,
+    birthDateSource: birthFrom.birthDateSource,
     birthPlaceId: kept.birthPlaceId ?? other.birthPlaceId,
     country: countryFrom.country,
     countrySource: countryFrom.countrySource,

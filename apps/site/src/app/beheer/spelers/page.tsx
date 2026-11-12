@@ -48,6 +48,7 @@ function positionText({ personLine, position }: Pick<AdminPlayerRow, 'personLine
 }
 
 const errors: Record<string, string> = {
+  'persoon-weg': 'Deze persoon bestaat niet meer. Er is niets veranderd. Kies hieronder een speler.',
   seizoen: 'Dit seizoen kennen we niet: het heeft nog geen wedstrijd. Er is niets veranderd.',
   weg: 'Deze speler bestaat niet. Er is niets veranderd. Kies hieronder een speler.',
 }

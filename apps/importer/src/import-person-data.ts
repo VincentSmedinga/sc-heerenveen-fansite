@@ -465,7 +465,9 @@ async function readUnreadPersons(
    */
   async function finish(
     person: PersonToRead,
-    data: Omit<PersonData, 'deathDate' | 'line'>,
+    data: Omit<PersonData, 'birthDate' | 'deathDate' | 'line'> & {
+      birthDate: Exclude<PersonData['birthDate'], 'keep'>
+    },
     positionLine: null | PlayerPosition = null,
     death: PersonData['deathDate'] = null,
   ): Promise<void> {
@@ -491,7 +493,13 @@ async function readUnreadPersons(
       storePersonData(
         transaction,
         person.id,
-        { ...data, deathDate: person.deathDateSource === 'manual' ? 'keep' : death, line: stored },
+        {
+          ...data,
+          // A date the editors set in the admin stays (#1147, #1164).
+          birthDate: person.birthDateSource === 'manual' ? 'keep' : data.birthDate,
+          deathDate: person.deathDateSource === 'manual' ? 'keep' : death,
+          line: stored,
+        },
         clock(),
       ),
     )

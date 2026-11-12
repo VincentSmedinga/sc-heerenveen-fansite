@@ -71,7 +71,9 @@ export async function addPersons() {
       const [person] = await db
         .insert(persons)
         .values({
-          ...(birthDate === undefined ? {} : { birthDate, birthDatePrecision: 'day' as const }),
+          ...(birthDate === undefined
+            ? {}
+            : { birthDate, birthDatePrecision: 'day' as const, birthDateSource: 'wikidata' as const }),
           country,
           countrySource: country === null ? null : 'manual',
           line,

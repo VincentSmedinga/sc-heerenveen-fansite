@@ -3701,6 +3701,7 @@
     De import geeft dan een waarschuwing met `Persons:` en beide titels, zodat de redactie ernaar kijkt.
     Bij een Q-nummer of een artikel noemt de waarschuwing beide nummers.
     Bij een geboortedatum zegt hij alleen dat de datums verschillen: een geboortedatum is een persoonsgegeven en hoort niet in het logboek.
+    **Later:** sinds 12 november 2026 gaat een geboortedatum van de redactie (`manual`) voor op een van Wikidata, zoals een jaar van overlijden; zie _De geboortedatum heeft een bron, en de importer laat die van de redactie staan_.
   - **Een tabel die de andere schrijfwijze nog schrijft:** de import van de selectie en van een vorige selectie zet de pagina en de naam eerst om in de schrijfwijze die blijft (`chosenSpelling`).
     Zonder dat kreeg `Jan-Harm Schippers` een tweede rij naast `Jan Harm Schippers`, met dezelfde persoon, en kwam de oude schrijfwijze terug.
     Een naam zonder link wordt ook omgezet; een naam met een link naar een ander artikel is een ander mens en blijft zoals hij is.
@@ -4105,3 +4106,17 @@
 - **Waarom:** het onderzoek (#1110) vond bij 417 spelers met een Wikidata-item geen sterfdatum op Wikipedia die Wikidata mist.
   Wikidata is CC0, dus er komt geen bronvermelding bij, en de redactie weet het beter dan een bron voor spelers zonder item.
 - **Alternatieven:** ook Wikipedia lezen (CC BY-SA, veel code, niets extra); Wikidata laten winnen (een fout in Wikidata zou een correctie van de redactie wissen); twee pull requests, eerst de gegevens en dan de pagina.
+
+## De geboortedatum heeft een bron, en de importer laat die van de redactie staan
+
+- **Datum:** 12 november 2026
+- **Besluit:** een migratie geeft `persons` de kolom `birth_date_source`, met `wikidata` of `manual`, zoals `death_date_source` (#1164).
+  - **Wat er al stond:** elke geboortedatum die er was, komt van Wikidata en krijgt de bron `wikidata`.
+  - **De redactie** vult in het formulier van een persoon een heel jaar of een volledige datum in, met de bron `manual`.
+    De importer vervangt die nooit: hij geeft `keep` door aan `storePersonData`, zoals bij een jaar van overlijden.
+  - **Leegmaken** haalt de datum, de precisie en de bron weg, en zet `wikidata_read_at` leeg, zodat de importer de persoon bij de volgende run opnieuw leest en de datum van Wikidata weer invult.
+  - **Samenvoegen:** een datum van de redactie gaat voor op een van Wikidata, ook als hij van de persoon komt die opgaat.
+  - **De geboorteplaats** blijft bij de import en krijgt geen bron.
+- **Waarom:** de redactie weet soms beter dan Wikidata wanneer een speler geboren is, vooral bij een speler zonder item.
+  Zonder bron zou de volgende lezing die correctie wissen.
+- **Alternatieven:** een eigen kolom voor de datum van de redactie naast die van Wikidata (twee datums om te kiezen op elke pagina); de importer een persoon met een geboortedatum niet meer laten lezen (dan komt een fout van Wikidata ook nooit meer recht).

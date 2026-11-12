@@ -1040,6 +1040,7 @@ Een sessie die verloopt haalt hem niet weg: daar is hij voor.
   Een auteur ziet alleen de artikelen die hij maakte (`created_by`), en publiceert en trekt alleen die in (#1159); de serveracties weigeren een artikel van een ander.
 - `/beheer/wedstrijden` is alleen voor de eigenaar en de redacteuren: een wedstrijd van het lopende seizoen invullen of verbeteren (zie _Wedstrijden invullen_).
 - `/beheer/spelers` is alleen voor de eigenaar en de redacteuren: een speler toevoegen aan de selectie van een seizoen, of er een aanpassen (zie _De spelers van een seizoen_).
+- `/beheer/personen/<nummer>` is alleen voor de eigenaar en de redacteuren: wat voor een persoon in elk seizoen geldt, zoals de naam en de geboortedatum (zie _De spelers van een seizoen_).
 - `/beheer/stadions` is alleen voor de eigenaar en de redacteuren: een club een eigen lijst van stadions geven, met een toelichting voor de kaart op zijn pagina (zie _De stadions van een club_).
 - `/beheer/clubnamen` is alleen voor de eigenaar en de redacteuren: bijhouden welke namen een club droeg en sinds wanneer, met een toelichting (zie _De namen van een club_).
 - `/beheer/kwaliteit` is alleen voor de eigenaar en de redacteuren: wat er van elk seizoen ontbreekt, in een tabel met een kolom per deel van een wedstrijd (zie _De kwaliteit van de gegevens_).
@@ -1295,6 +1296,13 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
   Een andere naam geldt ook voor de persoon, in elk seizoen, met de bron `redactie`.
   Een Wikipedia-pagina geeft een persoon zonder titel zijn titel, en een speler zonder persoon de persoon van die titel; zijn doelpunten krijgen die persoon ook.
   Een pagina die bij een andere persoon hoort, wordt geweigerd, met onder het veld een link naar het samenvoegen van de twee personen.
+  Onder "Wie" staat de link "Persoon bewerken" naar het formulier van zijn persoon.
+- `/beheer/personen/<nummer>` (`src/app/beheer/personen`) is het formulier van een persoon, in de delen Naam, Leven, Land en Linie (#1164).
+  Elk deel heeft een eigen adres, zoals `/beheer/personen/<nummer>/leven`, dat alleen dat deel toont en opslaat; de navigatie "Delen van de persoon" staat erboven.
+  De velden en controles zijn die van het formulier van een speler (`PersonFields.tsx` en `src/beheer/person-checks.ts`).
+  Een nieuwe naam geldt voor de persoon en voor zijn speler in elk seizoen.
+  De geboortedatum is een jaar of een datum, met de bron `manual`, die de importer niet vervangt; leeg haalt hem weg, zodat de importer hem weer invult.
+  Opslaan vraagt een reden, en schrijft `person.edit` met wat er veranderde, zonder de geboortedatum zelf.
 - Een speler kan een **vorig rugnummer** hebben met de dag vanaf wanneer het huidige nummer geldt ("Vorig rugnummer" en "Nieuw nummer vanaf", beide of geen, elk met een eigen fout; #1076).
   Verandert de redactie het nummer van een speler die met zijn oude nummer in een opgeslagen opstelling staat, dan zet het formulier het oude nummer in Vorig rugnummer en vraagt het om de dag.
   `readSquad` (`src/beheer/match-reports.ts`) geeft de selectie met het nummer van de dag van de wedstrijd, voor het formulier van het verslag, het plakken en het live verslag; een opgeslagen verslag houdt zijn nummers.

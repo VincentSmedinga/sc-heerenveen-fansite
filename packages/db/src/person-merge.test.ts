@@ -313,6 +313,41 @@ describe('mergePersons', () => {
     ])
   })
 
+  it('keeps a birth date the editors set, and fills a missing one from the other person (#1164)', async () => {
+    await addPerson({
+      birthDate: '1990-03-04',
+      birthDatePrecision: 'day',
+      birthDateSource: 'wikidata',
+      wikipediaPage: 'Uğur Yıldırım',
+    })
+    await addPerson({
+      birthDate: '1991-01-01',
+      birthDatePrecision: 'year',
+      birthDateSource: 'manual',
+      wikipediaPage: 'Ugur Yıldırım',
+    })
+    await addPerson({ wikipediaPage: 'Radoslav Samardžić' })
+    await addPerson({
+      birthDate: '1979-05-06',
+      birthDatePrecision: 'day',
+      birthDateSource: 'wikidata',
+      wikipediaPage: 'Radoslav Samardzic',
+    })
+
+    await mergePersons(database.db, list)
+
+    expect(
+      (await personRows()).map(({ birthDate, birthDatePrecision, birthDateSource }) => ({
+        birthDate,
+        birthDatePrecision,
+        birthDateSource,
+      })),
+    ).toEqual([
+      { birthDate: '1991-01-01', birthDatePrecision: 'year', birthDateSource: 'manual' },
+      { birthDate: '1979-05-06', birthDatePrecision: 'day', birthDateSource: 'wikidata' },
+    ])
+  })
+
   it('makes one row of the two rows of the person in a season, and loses no goal, line-up or number', async () => {
     const kept = await addPerson({ wikipediaPage: 'Jan Harm Schippers' })
     const other = await addPerson({ wikipediaPage: 'Jan-Harm Schippers' })

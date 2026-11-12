@@ -4166,6 +4166,7 @@
   - **De Wikipedia-pagina** is de titel van het artikel, zoals de redactie hem invult.
     De site vraagt Wikipedia niets, en een adres in plaats van een titel wordt geweigerd.
   - **Aanpassen:** een andere naam geldt ook voor de persoon, in elk seizoen.
+    **Later:** sinds 12 november 2026 geeft het formulier van een persoon zijn nieuwe naam ook aan zijn speler in elk seizoen; zie _Het formulier van een persoon geeft een nieuwe naam aan elk seizoen_.
     Een pagina geeft een persoon zonder titel zijn titel, en een speler zonder persoon de persoon van die titel.
     Een pagina van een andere persoon, en een andere pagina voor een persoon die er al een heeft, weigert het formulier.
     **Later:** sinds 10 november 2026 heeft de weigering van een pagina van een andere persoon een link naar het samenvoegen; zie _De redactie voegt twee personen samen in het beheer_.
@@ -5261,3 +5262,22 @@
   De tabel met tekst van het designsysteem doet de rest zonder een nieuw onderdeel.
 - **Alternatieven:** een cel over de hele breedte en een tussenkop per competitie (een nieuw onderdeel voor één pagina).
   De werklijsten houden naast de tabel (twee wegen naar hetzelfde).
+
+## Het formulier van een persoon geeft een nieuwe naam aan elk seizoen
+
+- **Datum:** 12 november 2026
+- **Besluit:** `/beheer/personen/<id>` is het formulier van een persoon, in de delen Naam, Leven, Land en Linie, elk met een eigen adres zoals bij een wedstrijd (#1164).
+  - **De naam:** een nieuwe naam gaat naar de persoon, met de bron `redactie`, en naar `players.name` van zijn speler in elk seizoen.
+    Daar is de naam vanaf dan van de redactie (`editors_fields`), zodat de importer hem laat staan.
+    Heeft een seizoen al een andere speler met die naam, dan weigert het formulier hem.
+  - **De Wikipedia-pagina** volgt de regels van het formulier van een speler: een persoon zonder pagina krijgt hem, een persoon met een pagina houdt die, en een pagina van een andere persoon geeft een link naar het samenvoegen.
+    Krijgt de persoon een pagina, dan krijgen zijn spelers zonder pagina hem ook.
+  - **De geboortedatum** is één veld: een jaar (`1985`) of een datum (`14-3-1985`).
+    Een maand van Wikidata staat er als `3-1985` en blijft zo zolang de redactie het veld niet aanpast.
+  - **Opslaan** vraagt een reden, die met wat er veranderde in `person.edit` komt.
+    Van de geboortedatum zegt het logboek alleen dat hij is ingevuld, aangepast of weggehaald: een geboortedatum is een persoonsgegeven en hoort niet in het logboek.
+    Een deel slaat alleen zijn eigen velden op en controleert alleen die.
+  - **De weg terug** gaat met `terug` naar de pagina waar de redactie vandaan kwam, zoals het formulier van een speler; zonder `terug` naar Spelers, want er is geen lijst van personen.
+- **Waarom:** een persoon heeft geen seizoen, dus een naam die alleen bij de persoon verandert, laat in elk seizoen de oude naam staan.
+  Eén veld voor de datum werkt zonder JavaScript en met elk hulpmiddel; een datumveld van de browser kent geen los jaar.
+- **Alternatieven:** alleen de persoon hernoemen en de seizoenen laten (de lijst van een seizoen toont dan de oude naam); drie velden voor dag, maand en jaar (meer werk voor een veld dat meestal een jaar is); een datumveld van de browser met een apart veld voor een jaar.

@@ -14,6 +14,8 @@ import {
   positionChoices,
 } from '#src/beheer/player-fields'
 
+import { CountryField, DeathYearField, LineField, NameFields } from './PersonFields'
+
 const summaryId = 'fouten'
 
 /**
@@ -38,6 +40,7 @@ export function PlayerForm({
   initial,
   nameHint,
   people,
+  personHref,
   submitLabel,
   withoutPerson = false,
 }: {
@@ -50,6 +53,8 @@ export function PlayerForm({
   nameHint?: string | undefined
   /** The persons to choose from. Without it the form has no list: it changes a player. */
   people?: readonly { id: number; label: string; suggestion?: { number: number; season: string } }[]
+  /** The form of the person of the player, for a player who has one (issue 1164). */
+  personHref?: string | undefined
   submitLabel: string
   /** The player has no person yet, so there is nobody to give a line or a country. */
   withoutPerson?: boolean
@@ -100,6 +105,12 @@ export function PlayerForm({
         <Heading id="wie-kop" level={2}>
           Wie
         </Heading>
+        {/* The person has a form of his own, for what holds in every season (issue 1164). */}
+        {personHref === undefined ? null : (
+          <Text>
+            <Link href={personHref}>Persoon bewerken</Link>
+          </Text>
+        )}
         {choosing ? (
           <Field
             error={errors.persoon}
@@ -134,46 +145,15 @@ export function PlayerForm({
             </Select>
           </Field>
         ) : null}
-        <Field
-          error={errors.voornaam}
+        <NameFields
+          errors={errors}
+          familyHint={achternaamHint}
+          familyRequired={!choosing}
           hideOptional={choosing}
-          hint={`${forNewPerson}Laat leeg voor een speler met één naam.`}
-          id="voornaam"
-          label="Voornaam"
-          required={false}
-        >
-          <Input {...field('voornaam')} autoComplete="off" autoCorrect="off" />
-        </Field>
-        <Field
-          error={errors.tussenvoegsel}
-          hideOptional={choosing}
-          hint={`${forNewPerson}Zoals van, de of van der.`}
-          id="tussenvoegsel"
-          label="Tussenvoegsel"
-          required={false}
-        >
-          <Input {...field('tussenvoegsel')} autoCapitalize="off" autoComplete="off" autoCorrect="off" width="narrow" />
-        </Field>
-        <Field
-          error={errors.achternaam}
-          hideOptional
-          {...(achternaamHint === undefined ? {} : { hint: achternaamHint })}
-          id="achternaam"
-          label="Achternaam"
-          required={!choosing}
-        >
-          <Input {...field('achternaam')} autoComplete="off" autoCorrect="off" />
-        </Field>
-        <Field
-          error={errors.wikipedia}
-          hideOptional={choosing}
-          hint={`${forNewPerson}De titel van het artikel op de Nederlandse Wikipedia, precies zoals hij daar staat, zoals Pim Verbeek (voetballer, 1999). Geen adres. ${pageHint}`}
-          id="wikipedia"
-          label="Wikipedia-pagina"
-          required={false}
-        >
-          <Input {...field('wikipedia')} autoComplete="off" autoCorrect="off" />
-        </Field>
+          input={field}
+          pageHint={pageHint}
+          prefix={forNewPerson}
+        />
         {/* The way on from a page of another person: the page that merges the two. */}
         {merge === undefined ? null : (
           <Text>
@@ -182,47 +162,22 @@ export function PlayerForm({
         )}
         {withoutPerson ? null : (
           <>
-            <Field
+            <LineField
               error={errors.linie}
               hint={`De linie van deze persoon, in elk seizoen.${keeps}`}
-              id="linie"
-              label="Linie"
-              required={false}
-            >
-              <Select {...field('linie')} width="natural">
-                <Select.Option value="">Onbekend</Select.Option>
-                {positionChoices.map((position) => (
-                  <Select.Option key={position.value} value={position.value}>
-                    {position.label}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Field>
-            <Field
+              input={field('linie')}
+            />
+            <CountryField
+              countries={countries}
               error={errors.land}
               hint={`Het land van deze persoon, in elk seizoen. De lijst staat op naam, met de landcode erachter.${keeps}`}
-              id="land"
-              label="Land"
-              required={false}
-            >
-              <Select {...field('land')} width="natural">
-                <Select.Option value="">Onbekend</Select.Option>
-                {countries.map((country) => (
-                  <Select.Option key={country.code} value={country.code}>
-                    {country.label}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Field>
-            <Field
+              input={field('land')}
+            />
+            <DeathYearField
               error={errors.overleden}
               hint={`Het jaar van overlijden, met vier cijfers. Een jaar dat je hier invult, gaat voor Wikidata. ${people === undefined ? ' Maak je het leeg, dan geldt weer Wikidata.' : ' Kies je een persoon die we al kennen? Leeg laat staan wat hij heeft.'}`}
-              id="overleden"
-              label="Jaar van overlijden"
-              required={false}
-            >
-              <Input {...field('overleden')} autoComplete="off" inputMode="numeric" width="narrow" />
-            </Field>
+              input={field('overleden')}
+            />
           </>
         )}
       </Card>
