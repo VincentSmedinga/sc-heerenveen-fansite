@@ -35,6 +35,8 @@ const screens = [
   `/beheer/spelers/nieuw?seizoen=${statSeasonSlug()}&q=e`,
   '/beheer/spelers/{player}',
   '/beheer/spelers/samenvoegen?persoon={person}&met={otherPerson}',
+  '/beheer/personen/{person}',
+  '/beheer/personen/{person}/leven',
   '/beheer/stadions',
   '/beheer/stadions/sv-proefdorp',
   '/beheer/clubnamen',
