@@ -81,7 +81,7 @@
    * The header of the number is above the numbers, not above the bars: it has the space of the
    * bar at its end, like the cells have. Without bars there is no space to keep.
    */
-  .hf-bar-table th.hf-bar-head {
+  .hf-bar-place th.hf-bar-head {
     padding-inline-end: calc(var(--hf-space-s) + var(--hf-bar-gap) + var(--hf-bar-size));
   }
 
@@ -102,7 +102,7 @@
       display: none;
     }
 
-    .hf-bar-table th.hf-bar-head {
+    .hf-bar-place th.hf-bar-head {
       padding-inline-end: var(--hf-space-s);
     }
   }

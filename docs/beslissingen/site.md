@@ -5010,3 +5010,8 @@
 - **Waarom:** er is geen nieuwe gegevensbron nodig, de kaart volgt het seizoen vanzelf en geen club valt zomaar weg.
   De dagen in de cache zouden na middernacht niet kloppen.
 - **Alternatieven:** clubs met een wedstrijd dit seizoen; alle competities of de schakelaar volgen; een nieuwe optie op `DataTable` voor een balk.
+- **Later:** 12 november 2026 (#1152): de kaart toont de datum van de laatste overwinning niet meer.
+  De tabel heeft twee kolommen, de club en "Dagen geleden", en de balk staat achter de dagen in dezelfde cel in plaats van achter de datum.
+  De dagen staan rechts uitgelijnd, met de kop erboven.
+  Daarvoor kreeg een kolom van een `DataTable` met tekst de optie `bar: true`, die de kop en de cellen naar het einde uitlijnt en de kop de ruimte van de balk geeft; `DataTable` is dus wel veranderd.
+  Een club die we nooit versloegen, houdt "Nog nooit gewonnen" in die kolom, zonder balk.

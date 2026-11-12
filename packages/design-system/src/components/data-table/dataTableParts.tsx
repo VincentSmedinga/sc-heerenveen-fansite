@@ -10,6 +10,7 @@ import type {
   DataTableTextRow,
 } from './dataTableTypes'
 
+import { classNames } from '../classNames'
 import { Link } from '../link/Link'
 import { PlaceCell, sharedPlaces } from '../place-cell/PlaceCell'
 
@@ -172,7 +173,13 @@ export const TextTableRows = ({
           </th>
           {row.cells.map((cell, index) => (
             // The cells have no names, so the position is the only key; rows do not reorder.
-            <td className={columns[index + 1]?.fold === true ? 'hf-data-table-fold-column' : undefined} key={index}>
+            <td
+              className={classNames(
+                columns[index + 1]?.fold === true && 'hf-data-table-fold-column',
+                columns[index + 1]?.bar === true && 'hf-numeric',
+              )}
+              key={index}
+            >
               {textOfNode(cell)}
             </td>
           ))}

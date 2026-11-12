@@ -215,6 +215,21 @@ describe('DataTable with text', () => {
     ],
   } as const
 
+  it('aligns a column with a bar to the end and gives its header the room of the bar', () => {
+    render(
+      <DataTable
+        appearance="text"
+        caption="Wachttijden"
+        columns={['Club', { bar: true, name: 'Dagen' }]}
+        rows={[{ cells: [12], header: 'FC Voorbeeld' }]}
+      />,
+    )
+
+    expect(screen.getByRole('columnheader', { name: 'Dagen' }).className).toBe('hf-numeric hf-bar-head')
+    expect(screen.getByRole('cell', { name: '12' }).className).toBe('hf-numeric')
+    expect(screen.getByRole('columnheader', { name: 'Club' }).className).toBe('')
+  })
+
   it('is a table with the same caption, headers with scope and row headers as the one with numbers', () => {
     render(<DataTable {...textProps} />)
 

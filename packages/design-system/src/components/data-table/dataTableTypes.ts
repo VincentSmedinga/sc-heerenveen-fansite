@@ -109,6 +109,12 @@ export type DataTableRow = {
 /** A column of a table with text, given as an object when it can fold. */
 export type DataTableTextColumn = {
   /**
+   * Makes the column one of numbers with a `Bar` after each number: the header and the cells
+   * are aligned to the end, and the header keeps the room of the bar, so it stands above the
+   * numbers.
+   */
+  bar?: boolean
+  /**
    * Lets the column fold where the table has no room: its header and cells are gone then, and
    * the text of its cells stands under the name of the row, in secondary text, on one line in
    * the order of the columns. Where the table has room, the column is a column and the line is
