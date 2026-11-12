@@ -7,6 +7,7 @@ import {
   choicesOf,
   competitionGroups,
   days,
+  facetValuesOf,
   type Filters,
   findMatches,
   hasChoice,
@@ -564,5 +565,39 @@ describe('the parameters of the questions (#1151)', () => {
   it('writes a list of names for a sentence', () => {
     expect(listOf(['Ajax'])).toBe('Ajax')
     expect(listOf(['Ajax', 'PSV', 'Feyenoord'])).toBe('Ajax, PSV en Feyenoord')
+  })
+})
+
+describe('what a closed row says (#1157)', () => {
+  const seasons = ['2001/02', '2002/03', '2003/04']
+  const values = (filters: Partial<Filters>) => {
+    const all = { ...none, ...filters }
+
+    return facetValuesOf(all, viewOf(matches, all, undefined, world), seasons)
+  }
+
+  it('says nothing without a choice', () => {
+    expect(Object.values(values({})).every((value) => value === '')).toBe(true)
+  })
+
+  it('names the club, one value, or the number of values of a group', () => {
+    expect(values({ club: 'testdorp-fc' }).club).toBe('Testdorp FC')
+    expect(values({ venues: ['uit'] }).venues).toBe('Uit')
+    expect(values({ outcomes: ['gewonnen', 'gelijk'] }).outcomes).toBe('2 gekozen')
+    expect(values({ days: ['zaterdag'] }).days).toBe('zaterdag')
+  })
+
+  it('names the seasons only when they are not all of them', () => {
+    expect(values({ from: '2001/02', to: '2003/04' }).seasons).toBe('')
+    expect(values({ from: '2002/03' }).seasons).toBe('2002/03–2003/04')
+    expect(values({ to: '2002/03' }).seasons).toBe('2001/02–2002/03')
+  })
+
+  it('gives the goalscorer as written and the exact score with the side that is empty', () => {
+    expect(values({ scorer: { text: 'Van Aken', words: ['van', 'aken'] } }).scorer).toBe('Van Aken')
+    expect(values({ scorerError: { message: 'Te kort.', text: 'a' } }).scorer).toBe('a')
+    expect(values({ ours: 2, theirs: 1 }).score).toBe('2–1')
+    expect(values({ ours: 2 }).score).toBe('2–')
+    expect(values({ theirs: 1 }).score).toBe('–1')
   })
 })

@@ -3389,3 +3389,16 @@
 - **Waarom:** de zoekpagina voor wedstrijden begint met negen vragen en een kaart met de wedstrijden van vandaag in eerdere jaren, en beide komen op meer pagina's voor als de site groeit.
   `Tile` past niet voor de vraagkaart: die heeft een kop en een beschrijving, en geen groot getal.
 - **Alternatieven:** de kaarten in `apps/site` houden; `Tile` met een getal in de beschrijving; `KeyFigures` (dat is geen link).
+
+## De filters zijn een lijst van rijen, en een `Disclosure` zegt wat erin gekozen is
+
+- **Datum:** 12 november 2026
+- **Besluit:** `FilterCard` is vervangen door `FilterList` (#1157): een lijst van rijen, elk een `Disclosure`.
+  `Disclosure` krijgt de optie `value`: wat er binnen gekozen is, rechts naast de samenvatting, in vet in de linkkleur.
+  Een schermlezer hoort het na de samenvatting, met een verborgen komma ertussen: "Tegenstander, Ajax".
+  In een `FilterList` staat de naam van de rij in de tekstkleur, zodat de keuze opvalt.
+  Zonder `value` ziet een `Disclosure` er uit zoals hij was.
+- **Waarom:** twee lagen (een kaart en daarin "Meer filters") zijn lastig te overzien.
+  Eén lijst met de keuze in de dichte rij laat zien wat er gekozen is zonder alles te openen.
+- **Alternatieven:** `FilterCard` houden en alleen de keuze toevoegen; een eigen component voor de rij; de keuze in de naam van de samenvatting.
+- **Later:** vervangt `FilterCard` uit de beslissing "Een zoekpagina krijgt een filterkaart, een chip en een regel met de uitslagen": de filters zijn geen kaart meer die op een breed scherm altijd open staat.

@@ -1,0 +1,50 @@
+/*
+ * The filters as a list of rows, one level deep. A row is a disclosure: the name of the filter
+ * on the left in the colour of text, and on the right the choice in bold in the colour of a
+ * link, then the arrow. A filter without a choice shows nothing on the right.
+ *
+ * The headings in a row are the size of a label: the legend of a group of checkboxes is not a
+ * heading of the page, and the label of a box is plain text, not a name. The two seasons stay
+ * in a row, whatever the width.
+ */
+
+@layer hf.components {
+  .hf-filter-list {
+    display: grid;
+    gap: var(--hf-space-s);
+
+    > .hf-disclosure > summary {
+      color: var(--hf-colour-text-default);
+      font-weight: var(--hf-body-font-weight);
+
+      @media (hover: hover) {
+        &:hover {
+          color: var(--hf-colour-text-default);
+        }
+      }
+    }
+
+    .hf-disclosure-value {
+      color: var(--hf-colour-text-link);
+      font-weight: var(--hf-strong-font-weight);
+    }
+
+    .hf-checkbox-group > legend {
+      font-family: inherit;
+      font-size: inherit;
+      font-stretch: normal;
+      font-weight: var(--hf-name-font-weight);
+      letter-spacing: normal;
+      line-height: inherit;
+      text-transform: none;
+    }
+
+    .hf-checkbox-group-label {
+      font-weight: var(--hf-body-font-weight);
+    }
+
+    .hf-field-group-separated {
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    }
+  }
+}
