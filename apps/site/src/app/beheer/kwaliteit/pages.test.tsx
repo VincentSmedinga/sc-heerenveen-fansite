@@ -1,21 +1,13 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import {
-  matchGoals,
-  persons,
-  playerFieldDifferences,
-  playerListTitles,
-  players,
-  playerStatDifferences,
-} from '@fansite/db/schema'
+import { persons, playerFieldDifferences, playerListTitles, players, playerStatDifferences } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
-import { and, eq } from 'drizzle-orm'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { addQualitySeason } from '#src/beheer/quality-fixtures'
 
-import WorkListPage, { metadata as listMetadata } from './[seizoen]/[lijst]/page'
+import SeasonPage, { metadata as seasonMetadata } from './[seizoen]/page'
 import StatDifferencesPage, { metadata as statMetadata } from './[seizoen]/spelerscijfers/page'
 import FieldDifferencesPage, { metadata as fieldMetadata } from './[seizoen]/spelersgegevens/page'
 import QualityPage, { metadata } from './page'
@@ -51,12 +43,20 @@ beforeEach(async () => {
   await database.db.delete(playerFieldDifferences)
 })
 
-const workList = async (seizoen: string, lijst: string) =>
-  renderToStaticMarkup(await WorkListPage({ params: Promise.resolve({ lijst, seizoen }) }))
+const seasonPage = async (seizoen: string, searchParams: Record<string, string> = {}) =>
+  renderToStaticMarkup(
+    await SeasonPage({ params: Promise.resolve({ seizoen }), searchParams: Promise.resolve(searchParams) }),
+  )
 
-/** The row of a season in the table, from its row header to the end of the row. */
-const rowOf = (html: string, season: string) =>
-  new RegExp(`<tr><th scope="row">${season}.*?</tr>`).exec(html)?.[0] ?? ''
+/** The row of a season or a match in a table, from its row header to the end of the row. */
+const rowOf = (html: string, header: string) =>
+  new RegExp(`<tr><th scope="row">(?:<a [^>]*>)?${header}.*?</tr>`).exec(html)?.[0] ?? ''
+
+/** The signs of a row, in the order of the columns, with an empty string for a full cell. */
+const signsOf = (row: string) =>
+  [...row.matchAll(/<td[^>]*>(.*?)<\/td>/g)].map(
+    ([, cell]) => /class="hf-data-table-mark">([^<]*?) ?</.exec(cell ?? '')?.[1] ?? '',
+  )
 
 describe('the page Kwaliteit', () => {
   it('is for an editor only, and stays out of search engines', async () => {
@@ -90,54 +90,42 @@ describe('the page Kwaliteit', () => {
     expect(html).toContain('<a href="/beheer/kwaliteit/personen">Vul de linie en het land aan</a>')
   })
 
-  it('is a table with a caption, a header for each column and a row for each season, the newest first', async () => {
+  it('is a table with a caption, a header for each part of a match and a row for each season, the newest first', async () => {
     const html = renderToStaticMarkup(await QualityPage())
-    const seasons = [...html.matchAll(/<tr><th scope="row">(\d{4}\/\d{2})/g)].map(([, season]) => season)
+    const seasons = [...html.matchAll(/<tr><th scope="row"><a [^>]*>(\d{4}\/\d{2})/g)].map(([, season]) => season)
 
-    expect(html).toContain('<caption class="hf-visually-hidden">Wat we van elk seizoen weten')
-    expect([...html.matchAll(/<th[^>]*scope="col">(.*?)<\/th>/g)].map(([, name]) => name)).toEqual([
-      'Seizoen',
-      'Wedstrijden',
-      'Details',
-      'Selectie',
-      'Verslagen',
-      'Te doen',
+    expect(html).toContain('<caption class="hf-visually-hidden">Wedstrijden met een gat per seizoen')
+    expect([...html.matchAll(/<abbr title="([^"]+)">/g)].map(([, name]) => name)).toEqual([
+      'Uitslag',
+      'Aftrap',
+      'Doelpunten',
+      'Opstelling',
+      'Verslag',
+      'Gegevens',
+      'Wacht',
     ])
+    expect(html).toContain('U Uitslag, A Aftrap, D Doelpunten, O Opstelling, V Verslag, G Gegevens, W Wacht.')
     expect(seasons.at(-1)).toBe('1990/91')
     expect(seasons).toEqual(seasons.toSorted().reverse())
-    expect(seasons).toContain('2005/06')
   })
 
-  it('says in words what a season has, with a link to each work list that has work', async () => {
-    const row = rowOf(renderToStaticMarkup(await QualityPage()), '2005/06')
+  it('counts the matches of a season with a gap in each part, each a link to the season with that column', async () => {
+    const html = renderToStaticMarkup(await QualityPage())
+    const row = rowOf(html, '2005/06')
 
-    expect(row).toContain('6 wedstrijden, 6 gespeeld (6 van de sc Heerenveen Fansite)')
+    expect(row).toContain('<span class="hf-data-table-secondary">6 wedstrijden</span>')
+    expect(signsOf(row)).toEqual(['', '6', '2', '6', '5', '6', '1'])
     expect(row).toContain(
-      'href="/beheer/kwaliteit/2005-06/zonder-doelpunten">1 wedstrijd zonder doelpunten<span class="hf-visually-hidden"> in 2005/06</span></a>',
+      '<a href="/beheer/kwaliteit/2005-06?kolom=doelpunten" class="hf-data-table-mark">2 <span class="hf-visually-hidden">wedstrijden met een gat in Doelpunten in 2005/06</span></a>',
     )
-    expect(row).toContain(
-      'href="/beheer/kwaliteit/2005-06/doelpunten-zonder-speler">2 doelpunten zonder speler<span class="hf-visually-hidden"> in 2005/06</span></a>',
-    )
-    expect(row).toContain('1 verslag klaar')
-    expect(row).toContain(
-      'href="/beheer/kwaliteit/2005-06/verslagen-bezig">1 verslag niet af<span class="hf-visually-hidden"> in 2005/06</span></a>',
-    )
-    expect(row).toContain('Toeschouwers bij 0, scheidsrechter bij 0, geen stand')
-    expect(row).toContain('1 speler, onbekend hoe compleet')
-    expect(row).toContain(
-      'href="/beheer/kwaliteit/2005-06/wachtende-wijzigingen">2 wijzigingen wachten<span class="hf-visually-hidden"> in 2005/06</span></a>',
-    )
+    expect(html).toMatch(/Nog \d+ gaten in 7 wedstrijden van de 7\./)
   })
 
-  it('has words and no link in a season without matches', async () => {
+  it('says a season without gaps is complete, with no sign', async () => {
     const row = rowOf(renderToStaticMarkup(await QualityPage()), '1990/91')
 
-    expect(row).toContain('Geen wedstrijden')
-    expect(row).toContain('Geen stand')
-    expect(row).toContain('Geen spelers')
-    expect(row).toContain('Geen verslagen')
-    expect(row).toContain('Niets te doen')
-    expect(row).not.toContain('<a ')
+    expect(row).toContain('0 wedstrijden, alles compleet')
+    expect(signsOf(row)).toEqual(['', '', '', '', '', '', ''])
   })
 
   it('says what the list of players says about our names, and that it is not read yet', async () => {
@@ -173,88 +161,53 @@ describe('the page Kwaliteit', () => {
   })
 })
 
-describe('a work list', () => {
-  it('is for an editor only, and stays out of search engines', async () => {
-    await workList('2005-06', 'zonder-doelpunten')
+describe('the table of a season (#1163)', () => {
+  it('is for an editor only, stays out of search engines, and is not there for a season it does not know', async () => {
+    await seasonPage('2005-06')
 
     expect(requireRole).toHaveBeenCalledWith('owner', 'editor')
-    expect(listMetadata.robots).toEqual({ follow: false, index: false })
+    expect(seasonMetadata.robots).toEqual({ follow: false, index: false })
+    await expect(seasonPage('1980-81')).rejects.toThrow('not found')
+    await expect(seasonPage('iets')).rejects.toThrow('not found')
   })
 
-  it('names the list and the season, and leads each row to the match in the admin', async () => {
-    const html = await workList('2005-06', 'zonder-doelpunten')
+  it('has a row for each match with a gap, with a sign that leads to the part of the match', async () => {
+    const html = await seasonPage('2005-06')
+    const row = rowOf(html, '17 sep')
 
-    expect(html).toContain('Wedstrijden zonder doelpunten in 2005/06</h1>')
-    expect(html).toContain(`<a href="/beheer/wedstrijden/${ids.withoutGoals}"`)
-    expect(html).toContain('Voorbeeld United - sc Heerenveen')
-    expect(html).toContain('za 27 aug 2005 · Eredivisie, 3')
-    expect(html).toContain('<td>1 - 2</td><td>Doelpunten invullen</td>')
-    expect(html.match(/<tr>/g)).toHaveLength(2)
-  })
-
-  it('leads a report that is not finished to the report', async () => {
-    expect(await workList('2005-06', 'verslagen-bezig')).toContain(
-      `<a href="/beheer/wedstrijden/${ids.unfinished}/verslag"`,
+    expect(html).toContain('<h2 class="hf-heading-2" id="competitie-eredivisie">Eredivisie</h2>')
+    expect(row).toContain('<span class="hf-data-table-secondary">Nepstad Rangers (t)</span>')
+    expect(signsOf(row)).toEqual(['', '?', '2', '?', '?', '3', ''])
+    expect(row).toContain(
+      `href="/beheer/wedstrijden/${ids.unlinked}/doelpunten?terug=%2Fbeheer%2Fkwaliteit%2F2005-06&amp;kolom=doelpunten" class="hf-data-table-mark">2 <span class="hf-visually-hidden">doelpunten zonder speler bij Nepstad Rangers (t), 17 september 2005</span>`,
+    )
+    expect(row).toContain(`href="/beheer/wedstrijden/${ids.unlinked}/verslag"`)
+    expect(row).toContain(
+      `href="/beheer/wedstrijden/${ids.unlinked}/uitslag?terug=%2Fbeheer%2Fkwaliteit%2F2005-06&amp;kolom=aftrap#aftrap-kop"`,
     )
   })
 
-  it('says how many goals have no player and how many changes wait', async () => {
-    expect(await workList('2005-06', 'doelpunten-zonder-speler')).toContain('<td>2 doelpunten zonder speler</td>')
-    expect(await workList('2005-06', 'wachtende-wijzigingen')).toContain('<td>2 wijzigingen wachten</td>')
+  it('keeps only the matches with a gap in one column, and links to all columns', async () => {
+    const html = await seasonPage('2005-06', { kolom: 'wacht' })
+
+    expect([...html.matchAll(/<tr><th scope="row">/g)]).toHaveLength(1)
+    expect(signsOf(rowOf(html, '24 sep')).at(-1)).toBe('2')
+    expect(html).toContain('<a href="/beheer/kwaliteit/2005-06">Alle kolommen</a>')
+    expect(html).toContain('1 wedstrijd van de 6 heeft een gat in de kolom Wacht.')
   })
 
-  it('leads a goal without a player to the goals of its match, with the name the goal came with', async () => {
-    const html = await workList('2005-06', 'doelpunten-zonder-speler')
+  it('says when a column is complete, and after the last save in it', async () => {
+    const html = await seasonPage('2005-06', { gedaan: 'kolom-compleet', kolom: 'uitslag' })
 
-    expect(html).toMatch(
-      new RegExp(
-        `<a[^>]*href="/beheer/wedstrijden/${ids.unlinked}#doelpunten"[^>]*>sc Heerenveen - Nepstad Rangers`,
-        'u',
-      ),
-    )
-    expect([...html.matchAll(/<th[^>]*scope="col">(.*?)<\/th>/g)].map(([, name]) => name)).toEqual([
-      'Wedstrijd',
-      'Uitslag',
-      'Naam bij het doelpunt',
-      'Te doen',
-    ])
-    expect(html).toContain('<td>Onbekende Een, Onbekende Twee</td><td>2 doelpunten zonder speler</td>')
-    // The season has a player to choose, so the list does not send the editor to the players.
-    expect(html).not.toContain('nog geen enkele speler')
+    expect(html).toContain('Alles compleet in de kolom Uitslag.')
+    expect(html).toContain('Er is geen andere wedstrijd van 2005/06 met een gat in deze kolom.')
   })
 
-  it('says above the rows that a season has no player, with a link to its players, and counts a goal without a name', async () => {
-    await database.db.insert(matchGoals).values({ matchId: ids.later, ours: true, player: '' })
+  it('links to the seasons before and after', async () => {
+    const html = await seasonPage('2005-06')
 
-    try {
-      const html = await workList('2006-07', 'doelpunten-zonder-speler')
-
-      expect(html).toContain('Het seizoen 2006/07 heeft nog geen enkele speler')
-      expect(html).toContain('<a href="/beheer/spelers?seizoen=2006-07"')
-      expect(html).toContain('>naar de spelers van 2006/07</a>')
-      expect(html.indexOf('nog geen enkele speler')).toBeLessThan(html.indexOf('<table'))
-      expect(html).toContain('<td>1 zonder naam</td><td>1 doelpunt zonder speler</td>')
-      // The other lists of the season say nothing about players.
-      expect(await workList('2006-07', 'zonder-doelpunten')).not.toContain('nog geen enkele speler')
-    } finally {
-      await database.db.delete(matchGoals).where(and(eq(matchGoals.matchId, ids.later), eq(matchGoals.ours, true)))
-    }
-  })
-
-  it('says so when a list is empty', async () => {
-    const html = await workList('1990-91', 'verslagen-bezig')
-
-    expect(html).toContain('Deze lijst is leeg')
-    expect(html).not.toContain('<table')
-  })
-
-  it.each([
-    ['1989-90', 'zonder-doelpunten'],
-    ['2999-00', 'zonder-doelpunten'],
-    ['geen-seizoen', 'zonder-doelpunten'],
-    ['2005-06', 'bestaat-niet'],
-  ])('says "niet gevonden" for %s/%s', async (seizoen, lijst) => {
-    await expect(workList(seizoen, lijst)).rejects.toThrow('not found')
+    expect(html).toContain('<a href="/beheer/kwaliteit/2004-05">Vorig seizoen</a>')
+    expect(html).toContain('<a href="/beheer/kwaliteit/2006-07">Volgend seizoen</a>')
   })
 })
 
@@ -288,13 +241,13 @@ describe('the players whose numbers differ', () => {
     expect(statMetadata.robots).toEqual({ follow: false, index: false })
   })
 
-  it('has a link on the page Kwaliteit in a season with a difference, and none without', async () => {
-    expect(rowOf(renderToStaticMarkup(await QualityPage()), '2005/06')).not.toContain('spelerscijfer')
+  it('has a link on the page of the season with a difference, and none without', async () => {
+    expect(await seasonPage('2005-06')).not.toContain('spelerscijfer')
 
     await addDifference()
 
-    expect(rowOf(renderToStaticMarkup(await QualityPage()), '2005/06')).toContain(
-      'href="/beheer/kwaliteit/2005-06/spelerscijfers">1 spelerscijfer verschilt<span class="hf-visually-hidden"> in 2005/06</span></a>',
+    expect(await seasonPage('2005-06')).toContain(
+      '<a href="/beheer/kwaliteit/2005-06/spelerscijfers">1 spelerscijfer verschilt</a>',
     )
   })
 
@@ -366,13 +319,13 @@ describe('the page with the fields of players where the import says something el
     expect(fieldMetadata.robots).toEqual({ follow: false, index: false })
   })
 
-  it('has a link on the page Kwaliteit in a season with a difference, and none without', async () => {
-    expect(rowOf(renderToStaticMarkup(await QualityPage()), '2005/06')).not.toContain('spelersgegeven')
+  it('has a link on the page of the season with a difference, and none without', async () => {
+    expect(await seasonPage('2005-06')).not.toContain('spelersgegeven')
 
     await addDifference()
 
-    expect(rowOf(renderToStaticMarkup(await QualityPage()), '2005/06')).toContain(
-      'href="/beheer/kwaliteit/2005-06/spelersgegevens">1 spelersgegeven verschilt<span class="hf-visually-hidden"> in 2005/06</span></a>',
+    expect(await seasonPage('2005-06')).toContain(
+      '<a href="/beheer/kwaliteit/2005-06/spelersgegevens">1 spelersgegeven verschilt</a>',
     )
   })
 

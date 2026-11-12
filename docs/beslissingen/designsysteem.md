@@ -3402,3 +3402,20 @@
   Eén lijst met de keuze in de dichte rij laat zien wat er gekozen is zonder alles te openen.
 - **Alternatieven:** `FilterCard` houden en alleen de keuze toevoegen; een eigen component voor de rij; de keuze in de naam van de samenvatting.
 - **Later:** vervangt `FilterCard` uit de beslissing "Een zoekpagina krijgt een filterkaart, een chip en een regel met de uitslagen": de filters zijn geen kaart meer die op een breed scherm altijd open staat.
+
+## Een tabel met tekst kan korte koppen en korte tekens hebben
+
+- **Datum:** 12 november 2026
+- **Besluit:** een kolom van `DataTable` met `appearance="text"` kan een `abbreviation` hebben en `mark` zijn (#1163).
+  - **`abbreviation`:** waar de tabel smaller is dan 44rem, toont de kop de letter, en anders het hele woord.
+    Een schermlezer hoort altijd het hele woord, in een `abbr` met het woord als `title`.
+    De tabel staat dan in een container, zoals een tabel met een kolom die opvouwt.
+  - **`mark`:** de kop en de cellen staan in het midden.
+  - **`DataTable.Mark`:** een kort teken in een cel dat een link is, zoals `2` of `?`, op de sterke vulling, en minstens 1,5rem in beide richtingen.
+    Het teken is niet vet: vet in een tabel is alleen voor het kerngetal.
+    `description` zegt de rest voor een schermlezer: "2 doelpunten zonder speler bij Ajax, 14 augustus".
+- **Waarom:** de tabel van de kwaliteit heeft zeven kolommen met korte tekens, en op een telefoon passen alleen letters.
+  Een teken van één teken is te klein als doel zonder vulling en minimale maat (WCAG 2.5.8).
+- **Alternatieven:** de tabel met getallen, die alleen letters kent en geen links in een cel heeft.
+  Altijd letters, ook op een breed scherm.
+  Een eigen tabel in de site, die geen eigen CSS heeft.

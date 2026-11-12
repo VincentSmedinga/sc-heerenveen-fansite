@@ -583,7 +583,7 @@ export function MatchFormProvider({
  * size of the compact admin (WCAG 2.5.8). Its field and button belong to the form of the cards
  * by its `id`, so they save it, with or without JavaScript.
  */
-export function MatchSavePanel({ cancelHref }: { cancelHref: string }) {
+export function MatchSavePanel({ cancelHref, next = false }: { cancelHref: string; next?: boolean }) {
   const { choices, pending, state } = useMatchForm()
 
   return (
@@ -596,7 +596,22 @@ export function MatchSavePanel({ cancelHref }: { cancelHref: string }) {
         <Field error={state.errors.reden} hint="Komt in het logboek, hoogstens 300 tekens." id="reden" label="Reden">
           <Input autoComplete="off" defaultValue={state.values.reden} form={formId} name="reden" />
         </Field>
-        <Button disabled={pending} form={formId} icon="save" name="knop" type="submit" value="opslaan">
+        {next ? (
+          // From the table of Kwaliteit (issue 1163): save, and go on to the next match with a
+          // gap in the same column.
+          <Button disabled={pending} form={formId} icon="save" name="knop" type="submit" value="volgende">
+            Opslaan en volgende
+          </Button>
+        ) : null}
+        <Button
+          appearance={next ? 'soft' : 'default'}
+          disabled={pending}
+          form={formId}
+          icon="save"
+          name="knop"
+          type="submit"
+          value="opslaan"
+        >
           Opslaan
         </Button>
       </Card>

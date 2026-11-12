@@ -28,6 +28,14 @@ import {
   padGoals,
 } from '#src/beheer/match-fields'
 import { newGoal, readButton, readValues, validate, valuesOf } from '#src/beheer/match-form'
+import {
+  columnParts,
+  type FormColumn,
+  isFormColumn,
+  nextWithGap,
+  readMatchGaps,
+  seasonTablePath,
+} from '#src/beheer/quality-table'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
@@ -250,6 +258,7 @@ export async function submitMatchPart(
   matchId: number,
   part: FormPart,
   back: string | undefined,
+  column: string | undefined,
   _previous: MatchFormState,
   formData: FormData,
 ): Promise<MatchFormState> {
@@ -260,7 +269,7 @@ export async function submitMatchPart(
     redirect(`${matchesPath}?fout=weg`)
   }
 
-  return submitForm(matchId, part, backPathOf(back), formData)
+  return submitForm(matchId, part, backPathOf(back), formData, isFormColumn(column) ? column : undefined)
 }
 
 /**
@@ -301,6 +310,7 @@ async function submitForm(
   part: FormPart | undefined,
   back: string | undefined,
   formData: FormData,
+  column?: FormColumn,
 ): Promise<MatchFormState> {
   const { userId } = await requireRole('owner', 'editor')
   const id = parseItemId(matchId)
@@ -368,6 +378,18 @@ async function submitForm(
   const outcome = await saveEntry(getDatabase().db, userId, id, entry, checked.reason)
 
   const done = outcome.status === 'saved' ? 'opgeslagen' : 'ongewijzigd'
+
+  // "Opslaan en volgende" (issue 1163) goes on to the next match of the season with a gap in
+  // the column of the table, or back to the table when the column is complete.
+  if (outcome.status !== 'missing' && column !== undefined && formData.get('knop') === 'volgende') {
+    const next = nextWithGap(await readMatchGaps(getDatabase().db, found.match.season), id, column)
+
+    redirect(
+      next === undefined
+        ? seasonTablePath(found.match.season, undefined, 'kolom-compleet')
+        : matchPartPath(next.id, columnParts[column], { back, column, done: `volgende-${done}` }),
+    )
+  }
 
   redirect(
     outcome.status === 'missing'

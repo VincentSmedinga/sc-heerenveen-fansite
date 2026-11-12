@@ -372,11 +372,14 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'author', path: '/beheer/clubnamen/sv-proefdorp', status: 404 },
   { admin: 'author', path: '/beheer/wedstrijden/{match}', status: 404 },
   { admin: 'author', path: '/beheer/wedstrijden/{held}', status: 404 },
-  // The quality of the data: the table of the seasons, a work list with a row (the made-up
-  // change that waits, see held-changes.ts), an empty one, and addresses that are no list.
+  // The quality of the data (#1163): the table of the seasons, the table of a season with a gap
+  // (the made-up change that waits, see held-changes.ts), one column of it, an old work list
+  // that forwards to its column, a season without matches, and seasons it does not know.
   { admin: 'editor', path: '/beheer/kwaliteit', status: 200 },
+  { admin: 'editor', path: `/beheer/kwaliteit/${earlierSeasonSlug()}`, status: 200 },
+  { admin: 'editor', path: `/beheer/kwaliteit/${earlierSeasonSlug()}?kolom=wacht`, status: 200 },
   { admin: 'editor', path: `/beheer/kwaliteit/${earlierSeasonSlug()}/wachtende-wijzigingen`, status: 200 },
-  { admin: 'editor', path: '/beheer/kwaliteit/1990-91/zonder-doelpunten', status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/1990-91', status: 200 },
   // The persons without a line or a country (made up, see persons.ts): both lists, a part
   // that does not exist, which shows the last one, and a list that is no list, which is the
   // first.
@@ -395,10 +398,10 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'editor', path: '/beheer/kwaliteit/1990-91/spelersgegevens', status: 200 },
   { admin: 'editor', path: '/beheer/kwaliteit/1989-90/spelersgegevens', status: 404 },
   { admin: 'author', path: '/beheer/kwaliteit/1990-91/spelersgegevens', status: 404 },
-  { admin: 'editor', path: '/beheer/kwaliteit/1989-90/zonder-doelpunten', status: 404 },
+  { admin: 'editor', path: '/beheer/kwaliteit/1989-90', status: 404 },
   { admin: 'editor', path: '/beheer/kwaliteit/1990-91/bestaat-niet', status: 404 },
   { admin: 'author', path: '/beheer/kwaliteit', status: 404 },
-  { admin: 'author', path: '/beheer/kwaliteit/1990-91/zonder-doelpunten', status: 404 },
+  { admin: 'author', path: '/beheer/kwaliteit/1990-91', status: 404 },
   { admin: 'editor', path: '/beheer/bezoek', status: 200 },
   { admin: 'author', path: '/beheer/bezoek', status: 404 },
   // The overview of the articles of the editors: the first page, and the addresses that say

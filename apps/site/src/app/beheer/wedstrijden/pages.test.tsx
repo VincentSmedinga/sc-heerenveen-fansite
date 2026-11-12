@@ -1110,6 +1110,15 @@ describe('the parts of the form of a match (#1162)', () => {
     await expect(partForm(id, 'wijzigingen')).rejects.toThrow('not found')
   })
 
+  it('has "Opslaan en volgende" when the editor comes from a column of the table that leads to the part (#1163)', async () => {
+    const id = await addMatch({ goalsAgainst: 0, goalsFor: 1, status: 'played' })
+
+    expect(await partForm(id, 'gegevens', { kolom: 'gegevens' })).toContain('value="volgende"')
+    expect(await partForm(id, 'uitslag', { kolom: 'aftrap' })).toContain('value="volgende"')
+    expect(await partForm(id, 'gegevens', { kolom: 'doelpunten' })).not.toContain('value="volgende"')
+    expect(await partForm(id, 'gegevens')).not.toContain('value="volgende"')
+  })
+
   it('goes back to where the editor came from, only for a page of the admin', async () => {
     const id = await addMatch({ goalsAgainst: 0, goalsFor: 1, status: 'played' })
 

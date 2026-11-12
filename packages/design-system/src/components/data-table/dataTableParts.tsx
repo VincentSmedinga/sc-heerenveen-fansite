@@ -177,6 +177,7 @@ export const TextTableRows = ({
               className={classNames(
                 columns[index + 1]?.fold === true && 'hf-data-table-fold-column',
                 columns[index + 1]?.bar === true && 'hf-numeric',
+                columns[index + 1]?.mark === true && 'hf-data-table-mark-column',
               )}
               key={index}
             >

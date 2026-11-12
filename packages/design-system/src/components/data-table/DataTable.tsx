@@ -94,11 +94,21 @@ export const DataTable = ({ appearance = 'numbers', caption, className, columns,
                 className={classNames(
                   column.fold === true && 'hf-data-table-fold-column',
                   column.bar === true && 'hf-numeric',
+                  column.mark === true && 'hf-data-table-mark-column',
                 )}
                 key={column.name}
                 scope="col"
               >
-                {column.name}
+                {column.abbreviation === undefined ? (
+                  column.name
+                ) : (
+                  <abbr title={column.name}>
+                    <span aria-hidden="true" className="hf-data-table-short">
+                      {column.abbreviation}
+                    </span>
+                    <span className="hf-data-table-long">{column.name}</span>
+                  </abbr>
+                )}
               </th>
             ))}
           </tr>
@@ -107,8 +117,9 @@ export const DataTable = ({ appearance = 'numbers', caption, className, columns,
       </table>
     )
 
-    // The room of the table itself decides when a column folds, so it needs a container.
-    return textColumns.some((column) => column.fold === true) ? (
+    // The room of the table itself decides when a column folds, or a header is short, so it
+    // needs a container.
+    return textColumns.some((column) => column.fold === true || column.abbreviation !== undefined) ? (
       <div className="hf-data-table-fold">{table}</div>
     ) : (
       table
@@ -170,3 +181,25 @@ const Group = ({ className, ...props }: ComponentPropsWithoutRef<'div'>) => (
 Group.displayName = 'DataTable.Group'
 
 DataTable.Group = Group
+
+/**
+ * A short sign in a cell that is a link, such as `2` or `?` for what a match still misses: on a
+ * light fill, and at least as large as a target must be (WCAG 2.5.8). The sign alone says
+ * little, so `description` says the rest to a screen reader, after the sign: "2" with
+ * "doelpunten zonder speler bij Ajax, 14 augustus" is the name of the link. Put it in a column
+ * with `mark`.
+ */
+const Mark = ({
+  children,
+  className,
+  description,
+  ...props
+}: ComponentPropsWithoutRef<'a'> & { children: string; description: string; href: string }) => (
+  <a {...props} className={classNames('hf-data-table-mark', className)}>
+    {children} <span className="hf-visually-hidden">{description}</span>
+  </a>
+)
+
+Mark.displayName = 'DataTable.Mark'
+
+DataTable.Mark = Mark

@@ -614,3 +614,71 @@ export const FoldedColumns = meta.story({
     </Card>
   ),
 })
+
+// Made-up matches with what they still miss, for the columns of short signs.
+const markColumns = [
+  'Wedstrijd',
+  { abbreviation: 'U', mark: true, name: 'Uitslag' },
+  { abbreviation: 'D', mark: true, name: 'Doelpunten' },
+  { abbreviation: 'O', mark: true, name: 'Opstelling' },
+  { abbreviation: 'G', mark: true, name: 'Gegevens' },
+] as const
+
+const mark = (sign: string, description: string) => (
+  <DataTable.Mark description={description} href="#gat">
+    {sign}
+  </DataTable.Mark>
+)
+
+const markRows: DataTableTextRow[] = [
+  {
+    cells: [null, mark('2', 'doelpunten zonder speler bij Testclub'), mark('?', 'opstelling ontbreekt'), null],
+    header: '14 aug',
+    secondary: 'Testclub (u)',
+  },
+  {
+    cells: [
+      mark('?', 'uitslag ontbreekt bij Proefstad'),
+      null,
+      mark('?', 'opstelling ontbreekt'),
+      mark('1', 'gegeven ontbreekt'),
+    ],
+    header: '21 aug',
+    secondary: 'Proefstad (t)',
+  },
+]
+
+const renderMarks = (width: string) => () => (
+  <Card aria-labelledby="tekens-kop" style={{ maxInlineSize: width }}>
+    <Heading id="tekens-kop" level={2}>
+      Wedstrijden met een gat
+    </Heading>
+    <DataTable appearance="text" caption="Wedstrijden met een gat" columns={markColumns} rows={markRows} />
+  </Card>
+)
+
+export const Marks = meta.story({
+  name: 'Kolommen met tekens',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Een kolom met `mark` heeft korte tekens, elk een `DataTable.Mark`, en een lege cel voor wat compleet is. Met ruimte staat het hele woord boven de kolom.',
+      },
+    },
+  },
+  render: renderMarks('48rem'),
+})
+
+export const MarksNarrow = meta.story({
+  name: 'Kolommen met tekens, smal',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Dezelfde tabel in een smalle ruimte: de kop is de letter uit `abbreviation`, en een schermlezer hoort het hele woord.',
+      },
+    },
+  },
+  render: renderMarks('22rem'),
+})

@@ -1042,7 +1042,7 @@ Een sessie die verloopt haalt hem niet weg: daar is hij voor.
 - `/beheer/spelers` is alleen voor de eigenaar en de redacteuren: een speler toevoegen aan de selectie van een seizoen, of er een aanpassen (zie _De spelers van een seizoen_).
 - `/beheer/stadions` is alleen voor de eigenaar en de redacteuren: een club een eigen lijst van stadions geven, met een toelichting voor de kaart op zijn pagina (zie _De stadions van een club_).
 - `/beheer/clubnamen` is alleen voor de eigenaar en de redacteuren: bijhouden welke namen een club droeg en sinds wanneer, met een toelichting (zie _De namen van een club_).
-- `/beheer/kwaliteit` is alleen voor de eigenaar en de redacteuren: wat we van elk seizoen weten en wat ontbreekt, met werklijsten (zie _De kwaliteit van de gegevens_).
+- `/beheer/kwaliteit` is alleen voor de eigenaar en de redacteuren: wat er van elk seizoen ontbreekt, in een tabel met een kolom per deel van een wedstrijd (zie _De kwaliteit van de gegevens_).
 - `/beheer/bezoek` is alleen voor de eigenaar en de redacteuren: de cijfers over het bezoek van de laatste dagen (zie _Het bezoek bekijken_).
 - `/beheer/accounts` is alleen voor de eigenaar: de accounts met voornaam, adres, rol en aan of uit (zie _De accounts beheren_).
 - `/beheer/mijn-account` is voor elke rol: de eigen voornaam, het adres en de rol, en voor de eigenaar en een redacteur de keuze voor de mail over afwijkingen van Wikipedia.
@@ -1332,32 +1332,26 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
 ### De kwaliteit van de gegevens
 
 `/beheer/kwaliteit` (`src/app/beheer/kwaliteit`) is alleen voor de eigenaar en de redacteuren: een auteur krijgt "niet gevonden".
-De pagina toont een tabel met een rij per seizoen sinds 1990/91, het nieuwste bovenaan.
-De cijfers komen uit `readSeasonCoverage` in `@fansite/db/season-coverage`, dezelfde functie als `import:status` gebruikt.
-De wachtende wijzigingen telt `waitingChangesBySeason` in `src/beheer/quality.ts` erbij.
-Elke cel zegt in woorden wat ze telt, zoals "12 wedstrijden, 10 gespeeld (12 van Wikipedia)" en "Geen spelers".
-Zo leest de cel ook op een telefoon, waar de kolommen onder het seizoen staan en hun kop weg is, en zegt geen kleur iets.
+De pagina toont een tabel met een rij per seizoen sinds 1990/91, het nieuwste bovenaan, en een kolom voor elk deel van een wedstrijd (#1163): Uitslag, Aftrap, Doelpunten, Opstelling, Verslag, Gegevens en Wacht.
+`readMatchGaps` in `src/beheer/quality-table.ts` bepaalt per wedstrijd wat er ontbreekt, en `countGapsBySeason` telt per seizoen de wedstrijden met een gat in elke kolom.
+Een getal in de tabel is een link naar het seizoen met die kolom gekozen; een leeg vak is compleet.
+Op een telefoon is de kop van een kolom een letter (`abbreviation` van `DataTable`), en een regel boven de tabel zegt wat de letters en de tekens betekenen.
 
-De laatste kolom, Te doen, heeft een koppeling voor elke werklijst van het seizoen waar werk in zit, `/beheer/kwaliteit/<seizoen>/<lijst>`:
+`/beheer/kwaliteit/<seizoen>` (`src/app/beheer/kwaliteit/[seizoen]/page.tsx`) toont de wedstrijden van het seizoen met een gat, de oudste eerst, in een kaart per competitie.
+Een vak toont een getal (zoveel ontbreekt), `?` (het hele deel ontbreekt) of `…` (het verslag is niet af), als `DataTable.Mark`, een link naar het deel van de wedstrijd of naar het verslag.
+`?kolom=<kolom>` houdt alleen de wedstrijden met een gat in die kolom over.
+De link naar een deel heeft `terug` en `kolom`, zodat het deel de knop "Opslaan en volgende" heeft: die slaat op en opent het volgende gat in die kolom (`nextWithGap`), of keert terug naar de tabel als de kolom compleet is.
+Heeft het seizoen geen enkele speler (`seasonHasPlayers`), dan staat dat in een zin boven de tabel, met een link naar `/beheer/spelers?seizoen=<seizoen>`.
+De oude werklijsten, zoals `/beheer/kwaliteit/<seizoen>/zonder-doelpunten`, sturen door naar het seizoen met de passende kolom (`next.config.ts`).
+De tellingen van de doelpunten en de verslagen zijn die van `readSeasonCoverage`; `src/beheer/quality.test.ts` houdt ze daaraan.
+Een adres zonder seizoen sinds 1990/91 geeft "niet gevonden".
 
-- `zonder-doelpunten`: gespeelde wedstrijden met doelpunten in de uitslag en geen doelpunt in `match_goals`;
-- `verslagen-bezig`: wedstrijden met een verslag dat `bezig` is;
-- `doelpunten-zonder-speler`: wedstrijden met een doelpunt van ons zonder speler uit de selectie;
-- `wachtende-wijzigingen`: wedstrijden met een wijziging van Wikipedia, een afwijking van de invoer of een verschil tussen twee bronnen dat op een besluit wacht.
-
-`listWork` in `src/beheer/quality.ts` leest een lijst, de oudste wedstrijd eerst.
-Elke rij leidt naar de wedstrijd in het beheer, en een verslag dat niet af is naar het verslag.
-De lijst `doelpunten-zonder-speler` leidt naar de kaart Doelpunten van de wedstrijd (`#doelpunten`) en heeft een kolom "Naam bij het doelpunt", met de naam waarmee elk doelpunt binnenkwam (#1021).
-Heeft het seizoen geen enkele speler (`seasonHasPlayers`), dan staat dat in een zin boven de rijen, met een link naar `/beheer/spelers?seizoen=<seizoen>`.
-Een lijst telt wat de tabel telt; `src/beheer/quality.test.ts` houdt ze daaraan.
-Een adres zonder seizoen sinds 1990/91 of zonder bestaande lijst geeft "niet gevonden".
-
-Verschillen de doelpunten van een speler in de selectietabel van die in de wedstrijden of de verslagen, dan heeft de kolom ook een koppeling "spelerscijfers verschillen" (#974).
+Verschillen de doelpunten van een speler in de selectietabel van die in de wedstrijden of de verslagen, dan heeft de pagina van het seizoen een koppeling "spelerscijfers verschillen" (#974).
 Ze leidt naar `/beheer/kwaliteit/<seizoen>/spelerscijfers` (`src/app/beheer/kwaliteit/[seizoen]/spelerscijfers`), met per verschil de speler, de competitie en de twee aantallen.
 Elk verschil heeft een formulier met een reden en twee knoppen: het andere aantal overnemen, of de selectietabel houden (`submitStatDifference` in `src/app/beheer/kwaliteit/actions.ts`).
 Het besluit staat in het logboek als `player.stats-take-over` of `player.stats-keep`.
 
-Leest de import voor een speler iets anders dan de redactie invulde, dan heeft de kolom een koppeling "spelersgegevens verschillen" (#1022).
+Leest de import voor een speler iets anders dan de redactie invulde, dan heeft de pagina van het seizoen een koppeling "spelersgegevens verschillen" (#1022).
 Ze leidt naar `/beheer/kwaliteit/<seizoen>/spelersgegevens` (`src/app/beheer/kwaliteit/[seizoen]/spelersgegevens`), met per afwijking de speler, het veld, de waarde van de redactie en die van de import.
 Elke afwijking heeft een formulier met een reden en twee knoppen: de import overnemen, of de redactie houden (`submitFieldDifference` in `src/app/beheer/kwaliteit/actions.ts`).
 Het besluit staat in het logboek als `player.field-take-over` of `player.field-keep`.

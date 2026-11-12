@@ -183,6 +183,64 @@
       display: block;
     }
   }
+
+  /*
+   * A short header (`abbreviation`) shows the whole word where the table has room, and the
+   * letter where it has not, at the same 44rem. The word stays for a screen reader at every
+   * width: it is hidden from the eye only, and the letter is hidden from a screen reader.
+   */
+  .hf-data-table-text .hf-data-table-short {
+    display: none;
+  }
+
+  .hf-data-table-text abbr:has(.hf-data-table-short) {
+    text-decoration: none;
+  }
+
+  @container (inline-size < 44rem) {
+    .hf-data-table-text .hf-data-table-short {
+      display: inline;
+    }
+
+    .hf-data-table-text .hf-data-table-long {
+      block-size: 1px;
+      clip-path: inset(50%);
+      inline-size: 1px;
+      overflow: hidden;
+      position: absolute;
+      white-space: nowrap;
+    }
+  }
+
+  /*
+   * A column of short signs (`mark`): the header and the signs are centred over each other.
+   * A sign is a link of at least 1.5rem each way, the smallest target WCAG 2.5.8 allows, on the
+   * strong fill, so it stands out from the empty cells of what is complete. It keeps the weight
+   * of the cell: bold in a table is only for the key figure (see weight-css.test.ts). The cells
+   * of such a column have no padding at the sides: seven columns and a row header then fit a
+   * phone of 320 pixels, and the sign itself keeps its size as a target.
+   */
+  .hf-data-table-text .hf-data-table-mark-column {
+    padding-inline: 0;
+    text-align: center;
+  }
+
+  .hf-data-table-mark {
+    background-color: var(--hf-colour-background-surface-strong);
+    border-radius: 0.25rem;
+    display: inline-block;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.5rem;
+    min-block-size: 1.5rem;
+    min-inline-size: 1.5rem;
+    padding-inline: var(--hf-space-xs);
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .hf-data-table-mark:hover {
+    text-decoration: underline;
+  }
 }
 
 @layer hf.components {
