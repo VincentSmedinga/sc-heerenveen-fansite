@@ -14,13 +14,17 @@ import {
   Input,
   Link,
   List,
+  OnThisDay,
   OutcomeLine,
   Page,
   Pagination,
+  QuestionCard,
   Select,
   Strong,
   Text,
 } from '@fansite/design-system'
+
+import type { OnThisDay as OnThisDayCard, Question } from './match-search-start'
 
 import {
   clubsOf,
@@ -61,7 +65,7 @@ export function MatchSearchFilters({
   seasons: readonly string[]
   view: SearchView
 }) {
-  const chosenCount = view.chips.length
+  const chosenCount = view.chips.filter((chip) => chip.sorting !== true).length
   const moreOpen =
     filters.scorer !== undefined ||
     filters.scorerError !== undefined ||
@@ -157,7 +161,15 @@ export function MatchSearchFilters({
             </Field>
           </FieldGroup>
         </Disclosure>
-        {filters.order === 'oudste' && <Input name="volgorde" type="hidden" value="oudste" />}
+        {/* What the form has no field for stays in the address on a new search. */}
+        {filters.order !== 'nieuwste' && <Input name="volgorde" type="hidden" value={filters.order} />}
+        {filters.clubs.map((slug) => (
+          <Input key={slug} name="clubs" type="hidden" value={slug} />
+        ))}
+        {filters.minGoals !== undefined && <Input name="doelpunten" type="hidden" value={filters.minGoals} />}
+        {filters.penalties && <Input name="strafschoppen" type="hidden" value="ja" />}
+        {filters.date !== undefined && <Input name="maand" type="hidden" value={filters.date.month} />}
+        {filters.date?.day !== undefined && <Input name="op" type="hidden" value={filters.date.day} />}
         <Form.Buttons>
           <Button type="submit">Toon wedstrijden</Button>
           <Link href={matchSearchPath}>Wis alles</Link>
@@ -234,8 +246,8 @@ export function MatchSearchResults({
             </Text>
           )}
           {result.seasons.map((group) => (
-            <Page.Cell key={group.season}>
-              <Heading level={3}>{group.season}</Heading>
+            <Page.Cell key={group.season ?? 'alle'}>
+              {group.season !== undefined && <Heading level={3}>{group.season}</Heading>}
               <List role="list">
                 {group.matches.map((match) => (
                   <List.Item key={match.id}>
@@ -263,6 +275,46 @@ export function MatchSearchResults({
         </>
       )}
     </Page.Cell>
+  )
+}
+
+/** The questions a visitor can start with, and the matches of this day in earlier years. */
+export function MatchSearchStart({
+  onThisDay,
+  questions,
+}: {
+  onThisDay: OnThisDayCard | undefined
+  questions: Question[]
+}) {
+  if (questions.length === 0 && onThisDay === undefined) {
+    return <Text>Kies wat je zoekt in de filters.</Text>
+  }
+
+  return (
+    <>
+      {questions.length > 0 && (
+        <Page.Cell>
+          <Heading level={2}>Begin met een vraag</Heading>
+          <QuestionCard.Grid aria-label="Begin met een vraag">
+            {questions.map((question) => (
+              <QuestionCard
+                figure={question.figure}
+                href={question.href}
+                key={question.href}
+                question={question.question}
+              >
+                {question.note}
+              </QuestionCard>
+            ))}
+          </QuestionCard.Grid>
+        </Page.Cell>
+      )}
+      {onThisDay !== undefined && (
+        <OnThisDay intro={onThisDay.intro} matches={onThisDay.matches} title={onThisDay.title}>
+          <Link href={onThisDay.monthHref}>{onThisDay.monthLabel}</Link>
+        </OnThisDay>
+      )}
+    </>
   )
 }
 

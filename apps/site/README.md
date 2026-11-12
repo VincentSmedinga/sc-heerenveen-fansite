@@ -884,28 +884,41 @@ De teller van het bezoek telt `/spelers/zoeken` zonder de vraag; de pagina is `n
 Het is één `GET`-formulier, dus elke keuze staat in het adres en de pagina werkt zonder JavaScript.
 De parameters zijn:
 
-| Parameter         | Waarden                                                                        | Betekenis                                         |
-| ----------------- | ------------------------------------------------------------------------------ | ------------------------------------------------- |
-| `tegen`           | de adresnaam van een club, zoals `ajax`                                        | de tegenstander                                   |
-| `van`, `tot`      | een seizoen, zoals `2019/20`                                                   | het eerste en het laatste seizoen                 |
-| `waar`            | `thuis`, `uit`                                                                 | thuis of uit; allebei (of geen) telt allebei      |
-| `competitie`      | `eredivisie`, `eerste-divisie`, `knvb-beker`, `europa`, `johan-cruijff-schaal` | de competitie; `europa` is elke Europese beker    |
-| `uitslag`         | `gewonnen`, `gelijk`, `verloren`                                               | de afloop; een strafschoppenreeks telt als gelijk |
-| `dag`             | `maandag` tot en met `zondag`                                                  | de dag van de week                                |
-| `doelpuntenmaker` | tekst, de grenzen van `/spelers/zoeken`                                        | een speler die een doelpunt maakte                |
-| `wij`, `zij`      | een getal van 0 tot en met 99                                                  | de exacte uitslag, onze doelpunten en die van hen |
-| `volgorde`        | `nieuwste` (standaard), `oudste`                                               | de volgorde van de lijst                          |
-| `pagina`          | een getal vanaf 1                                                              | de pagina van 25 wedstrijden                      |
+| Parameter         | Waarden                                                                        | Betekenis                                              |
+| ----------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------ |
+| `tegen`           | de adresnaam van een club, zoals `ajax`                                        | de tegenstander                                        |
+| `van`, `tot`      | een seizoen, zoals `2019/20`                                                   | het eerste en het laatste seizoen                      |
+| `waar`            | `thuis`, `uit`                                                                 | thuis of uit; allebei (of geen) telt allebei           |
+| `competitie`      | `eredivisie`, `eerste-divisie`, `knvb-beker`, `europa`, `johan-cruijff-schaal` | de competitie; `europa` is elke Europese beker         |
+| `uitslag`         | `gewonnen`, `gelijk`, `verloren`                                               | de afloop; een strafschoppenreeks telt als gelijk      |
+| `dag`             | `maandag` tot en met `zondag`                                                  | de dag van de week                                     |
+| `doelpuntenmaker` | tekst, de grenzen van `/spelers/zoeken`                                        | een speler die een doelpunt maakte                     |
+| `wij`, `zij`      | een getal van 0 tot en met 99                                                  | de exacte uitslag, onze doelpunten en die van hen      |
+| `clubs`           | de adresnaam van een club, zoals `ajax`, meer keer                             | meer clubs tegelijk (#1151)                            |
+| `doelpunten`      | een getal van 1 tot en met 99                                                  | ten minste zoveel doelpunten van beide clubs           |
+| `strafschoppen`   | `ja`                                                                           | alleen wedstrijden die een strafschoppenreeks besliste |
+| `maand`, `op`     | `maand` een getal van 1 tot en met 12, `op` een dag van die maand              | de maand, of de dag en de maand, in elk jaar           |
+| `volgorde`        | `nieuwste` (standaard), `oudste`, `doelsaldo`                                  | de volgorde van de lijst                               |
+| `pagina`          | een getal vanaf 1                                                              | de pagina van 25 wedstrijden                           |
 
 Een waarde die niet bestaat wordt genegeerd en geeft geen foutpagina; een seizoen `van` na `tot` wisselt de twee om; een doelpuntenmaker buiten de grenzen krijgt een melding bij het veld en vraagt de database niets.
 Waarden binnen een groep tellen als "of", groepen onderling als "en".
-Zonder keuze in het adres toont de pagina alleen de filters; met minstens één keuze ook de resultaten.
+`clubs`, `doelpunten`, `strafschoppen`, `maand`, `op` en `doelsaldo` hebben geen veld in het formulier; ze komen van de kaarten onder "Begin met een vraag".
+Ze werken als de andere keuzes: ze tellen mee in de aantallen, staan als chip boven de resultaten (met een × die ze weghaalt) en in de zin.
+Het formulier bewaart ze in verborgen velden, zodat een bezoeker die ze via een kaart krijgt ze bij een nieuwe zoekopdracht niet kwijtraakt.
+Een `op` zonder `maand` geldt niet, en een dag die de maand niet heeft (31 april) laat alleen de maand staan; 29 februari bestaat, en telt dus niet mee op 28 februari.
+Zonder keuze in het adres toont de pagina de filters, onder de kop "Begin met een vraag" negen kaarten en de kaart "Op deze dag"; met minstens één keuze de filters en de resultaten.
+De volgorde alleen is geen keuze.
+`match-search-start.ts` kent de negen vragen (een vaste lijst) en telt bij elk verzoek uit dezelfde lijst wedstrijden het getal en de regel van elke kaart; een kaart zonder wedstrijd valt weg.
+"Op deze dag" zijn de wedstrijden van de datum van vandaag in eerdere jaren, de nieuwste eerst, met de datum in Nederland (`Europe/Amsterdam`, niet die van de server); op een datum zonder wedstrijden valt de kaart weg.
+De kaarten zijn `QuestionCard` en de kaart `OnThisDay` van het designsysteem.
+De volgorde `doelsaldo` zet de grootste winst bovenaan (doelsaldo, dan doelpunten, dan de nieuwste) in één lijst zonder seizoenskoppen.
 `match-search.ts` doet het werk op de lijst van alle gespeelde wedstrijden (`listSearchableMatches` in `@fansite/db/match-search`, vijf minuten vastgehouden door `match-search-data.ts`): het leest het adres, filtert, telt de aantallen achter elke waarde, schrijft de zin en de chips en groepeert de resultaten per seizoen.
 Alleen de doelpuntenmaker vraagt de database per zoekopdracht (`listScorerMatchIds`).
 `MatchSearchViews.tsx` tekent het formulier en de resultaten; elke wedstrijd is `MatchLine`, zoals op de seizoenspagina's.
 De pagina leest op elk verzoek, toont de foutpagina in de HTML zonder database en logt de reden en niet de vraag.
 De teller van het bezoek telt `/wedstrijden/zoeken` zonder de vraag; de pagina is `noindex` en staat niet in de sitemap.
-`pnpm test:a11y` toetst hem zonder keuzes, met keuzes, zonder resultaat en met een doelpuntenmaker die niet mag.
+`pnpm test:a11y` toetst hem zonder keuzes, met keuzes (ook de extra parameters), zonder resultaat en met een doelpuntenmaker die niet mag.
 
 ## De bronnen
 

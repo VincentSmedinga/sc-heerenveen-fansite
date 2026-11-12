@@ -101,7 +101,7 @@ describe('the page Zoeken in wedstrijden', () => {
     }
     expect(html).toContain('2 clubs, op naam. Typ de eerste letters om te springen.')
     expect(html).toContain('href="/wedstrijden/zoeken">Wis alles</a>')
-    expect(html).toContain('Kies wat je zoekt in de filters.')
+    expect(html).toContain('>Begin met een vraag</h2>')
     expect(html).toContain('Bron: Wikipedia en het archief van de oude sc Heerenveen Fansite.')
     expect(html).not.toContain('id="resultaten"')
     expect(html).toContain('<summary>Filters<')
@@ -180,7 +180,7 @@ describe('the page Zoeken in wedstrijden', () => {
       wij: '1000',
     })
 
-    expect(html).toContain('Kies wat je zoekt in de filters.')
+    expect(html).toContain('>Begin met een vraag</h2>')
     expect(html).not.toContain('id="resultaten"')
   })
 
@@ -216,5 +216,74 @@ describe('the page Zoeken in wedstrijden', () => {
     expect(log).toHaveBeenCalledWith(expect.stringContaining('Could not search for /wedstrijden/zoeken'))
     expect(JSON.stringify(log.mock.calls)).not.toContain('geheim')
     expect((await generateMetadata({ searchParams: Promise.resolve({}) })).title).toContain('Er ging iets mis')
+  })
+
+  describe('without a choice (#1151)', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('shows the questions with their numbers, each a link to a search, and not the results', async () => {
+      const html = await render()
+
+      expect(html).toContain('<h2 class="hf-heading-2">Begin met een vraag</h2>')
+      expect(html).toMatch(/<ul class="hf-question-grid" role="list" aria-label="Begin met een vraag">/u)
+      expect(html).toContain('href="/wedstrijden/zoeken?uitslag=gewonnen&amp;volgorde=doelsaldo"')
+      expect(html).toContain('>2–1</span>')
+      expect(html).not.toContain('id="resultaten"')
+    })
+
+    it('shows the matches of the date of today in earlier years, in the date of the Netherlands', async () => {
+      vi.useFakeTimers({ toFake: ['Date'] })
+      // 23:30 UTC on 31 August is already 1 September in Amsterdam.
+      vi.setSystemTime(new Date('2027-08-31T23:30:00Z'))
+      const html = await render()
+
+      expect(html).toContain('>Op deze dag: 1 september</h2>')
+      expect(html).toContain('sc Heerenveen – Testdorp FC')
+      expect(html).toContain('href="/wedstrijden/zoeken?maand=9"')
+      expect(html).toContain('>Alle wedstrijden in september</a>')
+    })
+
+    it('leaves the card out on a date without matches', async () => {
+      vi.useFakeTimers({ toFake: ['Date'] })
+      vi.setSystemTime(new Date('2027-12-25T10:00:00Z'))
+
+      expect(await render()).not.toContain('Op deze dag')
+    })
+
+    it('shows neither the questions nor the card with a choice, but the results', async () => {
+      vi.useFakeTimers({ toFake: ['Date'] })
+      vi.setSystemTime(new Date('2027-09-01T10:00:00Z'))
+      const html = await render({ waar: 'thuis' })
+
+      expect(html).not.toContain('Begin met een vraag')
+      expect(html).not.toContain('Op deze dag')
+      expect(html).toContain('id="resultaten"')
+    })
+
+    it('shows a month without error, and a date that does not exist as no choice', async () => {
+      expect(await render({ maand: '9' })).toContain('>2 wedstrijden</h2>')
+      expect(await render({ maand: '13', op: '40' })).toContain('Begin met een vraag')
+    })
+  })
+
+  it('keeps what the form has no field for in the form, and has a chip for it', async () => {
+    const html = await render({ clubs: ['testdorp-fc', 'voorbeeld-united'], doelpunten: '3', volgorde: 'doelsaldo' })
+
+    for (const [name, value] of [
+      ['clubs', 'testdorp-fc'],
+      ['clubs', 'voorbeeld-united'],
+      ['doelpunten', '3'],
+      ['volgorde', 'doelsaldo'],
+    ]) {
+      expect(html).toMatch(new RegExp(`<input[^>]*type="hidden"[^>]*name="${name}"[^>]*value="${value}"`, 'u'))
+    }
+    expect(html).toContain('Testdorp FC en Voorbeeld United')
+    expect(html).toContain('Ten minste 3 doelpunten')
+    expect(html).toContain('Op doelsaldo')
+    // The order has no season headings.
+    expect(html).not.toContain('<h3')
+    expect(html).toContain('<summary>Filters · 2 gekozen<')
   })
 })

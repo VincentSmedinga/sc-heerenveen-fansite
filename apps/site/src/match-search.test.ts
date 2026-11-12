@@ -3,11 +3,14 @@ import type { SearchableMatch } from '@fansite/db/match-search'
 import { describe, expect, it } from 'vitest'
 
 import {
+  byGoalDifference,
   choicesOf,
   competitionGroups,
   days,
   type Filters,
+  findMatches,
   hasChoice,
+  listOf,
   matchCount,
   matchesPerSearchPage,
   outcomeOf,
@@ -407,5 +410,159 @@ describe('the pages of the results', () => {
 
   it('has no range for nothing', () => {
     expect(viewOf([], none, undefined, world).result).toMatchObject({ pageCount: 1, range: [0, 0], total: 0 })
+  })
+})
+
+/** The query of an address as `parseFilters` gets it: each name with all its values. */
+const rawOf = (href: string) => {
+  const query = new URL(href, 'https://example.test').searchParams
+
+  return Object.fromEntries([...new Set(query.keys())].map((name) => [name, query.getAll(name)]))
+}
+
+describe('the parameters of the questions (#1151)', () => {
+  it('reads more clubs, the least goals, penalties and the order of the goal difference', () => {
+    const filters = parse({
+      clubs: ['voorbeeld-united', 'onzin', 'testdorp-fc', 'voorbeeld-united'],
+      doelpunten: '7',
+      strafschoppen: 'ja',
+      volgorde: 'doelsaldo',
+    })
+
+    expect(filters).toMatchObject({
+      clubs: ['voorbeeld-united', 'testdorp-fc'],
+      minGoals: 7,
+      order: 'doelsaldo',
+      penalties: true,
+    })
+    expect(hasChoice(parse({ clubs: 'testdorp-fc' }))).toBe(true)
+    expect(hasChoice(parse({ doelpunten: '3' }))).toBe(true)
+    expect(hasChoice(parse({ strafschoppen: 'ja' }))).toBe(true)
+    // The order alone is not a choice.
+    expect(hasChoice(parse({ volgorde: 'doelsaldo' }))).toBe(false)
+  })
+
+  it('drops what is not a number or not known, and gives no error', () => {
+    expect(parse({ doelpunten: 'veel', maand: '13', op: '5', strafschoppen: 'nee' })).toMatchObject({
+      date: undefined,
+      minGoals: undefined,
+      penalties: false,
+    })
+    expect(parse({ doelpunten: '0' }).minGoals).toBeUndefined()
+  })
+
+  it('reads a day and a month, or a month alone, and ignores a date that does not exist', () => {
+    expect(parse({ maand: '11', op: '11' }).date).toEqual({ day: 11, month: 11 })
+    expect(parse({ maand: '11' }).date).toEqual({ day: undefined, month: 11 })
+    // A day without a month asks for nothing.
+    expect(parse({ op: '11' }).date).toBeUndefined()
+    // 31 April doesn't exist: the month stays, the day goes.
+    expect(parse({ maand: '4', op: '31' }).date).toEqual({ day: undefined, month: 4 })
+    // 29 February does exist, in a leap year.
+    expect(parse({ maand: '2', op: '29' }).date).toEqual({ day: 29, month: 2 })
+    expect(parse({ maand: '2', op: '30' }).date).toEqual({ day: undefined, month: 2 })
+  })
+
+  it('writes them in the address and reads them back', () => {
+    const filters = parse({
+      clubs: ['testdorp-fc', 'voorbeeld-united'],
+      doelpunten: '7',
+      maand: '11',
+      op: '11',
+      strafschoppen: 'ja',
+      volgorde: 'doelsaldo',
+    })
+    const href = searchHref(filters)
+
+    expect(href).toBe(
+      '/wedstrijden/zoeken?clubs=testdorp-fc&clubs=voorbeeld-united&doelpunten=7&strafschoppen=ja&maand=11&op=11&volgorde=doelsaldo',
+    )
+    expect(parse(rawOf(href))).toEqual(filters)
+  })
+
+  it('finds the matches of more clubs at once', () => {
+    expect(count({ clubs: ['voorbeeld-united'] })).toBe(2)
+    expect(count({ clubs: ['voorbeeld-united', 'testdorp-fc'] })).toBe(5)
+  })
+
+  it('finds the matches with at least that many goals of both clubs together', () => {
+    expect(count({ minGoals: 5 })).toBe(1)
+    expect(count({ minGoals: 4 })).toBe(2)
+    expect(count({ minGoals: 99 })).toBe(0)
+  })
+
+  it('finds the matches a shoot-out decided', () => {
+    expect(count({ penalties: true })).toBe(1)
+  })
+
+  it('finds the matches of a day and month, and of a month, in any year', () => {
+    expect(count({ date: { day: 7, month: 9 } })).toBe(2)
+    expect(count({ date: { day: undefined, month: 9 } })).toBe(4)
+    expect(count({ date: { day: 8, month: 9 } })).toBe(0)
+  })
+
+  it('does not count a leap day on 28 February', () => {
+    const leap = [made({ matchDate: '2008-02-29', season: '2007/08' }), made({ matchDate: '2009-02-28' })]
+
+    expect(findMatches(leap, { ...none, date: { day: 28, month: 2 } }, undefined)).toEqual([leap[1]])
+    expect(findMatches(leap, { ...none, date: { day: 29, month: 2 } }, undefined)).toEqual([leap[0]])
+    expect(findMatches(leap, { ...none, date: { day: undefined, month: 2 } }, undefined)).toHaveLength(2)
+  })
+
+  it('orders on goal difference, then goals, then the newest, in one group without a season', () => {
+    const ordered = byGoalDifference(matches)
+
+    expect(ordered.map((match) => [match.goalsFor, match.goalsAgainst])).toEqual([
+      [5, 0],
+      [2, 1],
+      [2, 2],
+      [1, 1],
+      [0, 3],
+    ])
+
+    const result = viewOf(matches, { ...none, order: 'doelsaldo' }, undefined, world).result
+
+    expect(result.seasons).toHaveLength(1)
+    expect(result.seasons[0]?.season).toBeUndefined()
+    expect(result.seasons[0]?.matches).toHaveLength(5)
+  })
+
+  it('has a chip each, and a sentence that names them', () => {
+    const filters = parse({
+      clubs: ['testdorp-fc', 'voorbeeld-united'],
+      doelpunten: '7',
+      maand: '11',
+      op: '11',
+      strafschoppen: 'ja',
+      volgorde: 'doelsaldo',
+    })
+    const labels = choicesOf(filters, world).map((choice) => choice.label)
+
+    expect(labels).toEqual([
+      'Testdorp FC en Voorbeeld United',
+      'Ten minste 7 doelpunten',
+      'Beslist met strafschoppen',
+      '11 november',
+      'Op doelsaldo',
+    ])
+    expect(sentenceOf(parse({ doelpunten: '7' }), world)).toBe(
+      'Alle wedstrijden met 7 doelpunten of meer, sinds 2001/02.',
+    )
+    expect(sentenceOf(filters, world)).toBe(
+      'Alle wedstrijden tegen Testdorp FC en Voorbeeld United met 7 doelpunten of meer die met strafschoppen werden beslist, gespeeld op 11 november, sinds 2001/02, de grootste uitslag eerst.',
+    )
+    expect(sentenceOf(parse({ maand: '11' }), world)).toContain(', gespeeld in november,')
+  })
+
+  it('does not offer the order to leave out when nothing is found, and the chip of the order is no filter', () => {
+    const filters = parse({ doelpunten: '99', volgorde: 'doelsaldo' })
+    const view = viewOf(matches, filters, undefined, world)
+
+    expect(view.relaxed.map((choice) => choice.label)).toEqual(['Ten minste 99 doelpunten'])
+  })
+
+  it('writes a list of names for a sentence', () => {
+    expect(listOf(['Ajax'])).toBe('Ajax')
+    expect(listOf(['Ajax', 'PSV', 'Feyenoord'])).toBe('Ajax, PSV en Feyenoord')
   })
 })

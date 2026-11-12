@@ -35,11 +35,13 @@
 @import url('./components/page/top-link.css');
 @import url('./components/card/card.css');
 @import url('./components/tag/tag.css');
+@import url('./components/question-card/question-card.css');
 @import url('./components/tile/tile.css');
 @import url('./components/notice/notice.css');
 @import url('./components/disclosure/disclosure.css');
 @import url('./components/filter-card/filter-card.css');
 @import url('./components/chip/chip.css');
+@import url('./components/on-this-day/on-this-day.css');
 @import url('./components/outcome-line/outcome-line.css');
 @import url('./components/card/card-share.css');
 @import url('./components/navigation/navigation.css');

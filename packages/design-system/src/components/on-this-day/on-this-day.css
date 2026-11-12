@@ -1,0 +1,34 @@
+/* The card with the matches of today's date in earlier years. */
+
+@layer hf.components {
+  .hf-on-this-day-intro {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+  }
+
+  /* A line between the matches, in the colour of the border of the card. */
+  .hf-on-this-day-match {
+    align-items: baseline;
+    border-block-start: 1px solid var(--hf-card-line);
+    display: flex;
+    gap: var(--hf-space-s);
+    padding-block: var(--hf-space-xs);
+  }
+
+  .hf-on-this-day-year {
+    color: var(--hf-colour-text-secondary);
+    flex: none;
+    font-variant-numeric: tabular-nums;
+    inline-size: 3em;
+  }
+
+  .hf-on-this-day-clubs {
+    flex: 1;
+    min-inline-size: 0;
+  }
+
+  .hf-on-this-day-score {
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-name-font-weight);
+  }
+}

@@ -1,0 +1,66 @@
+/* A question card: one link with a question, a large number and a short line. */
+
+@layer hf.components {
+  /*
+   * Three columns on a wide screen and one on a phone. The cells of a row are as high as the
+   * highest one, so the row has an even edge.
+   */
+  .hf-question-grid {
+    display: grid;
+    gap: var(--hf-space-m);
+    grid-template-columns: minmax(0, 1fr);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    @media (width >= 40rem) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .hf-question-item {
+    display: grid;
+  }
+
+  /*
+   * The link is the card. It has no underline, and under the mouse the border takes the colour
+   * of a highlight, so the card shows it is a link, without moving. The card has a touch target
+   * of its own that is far above 44 pixels.
+   */
+  .hf-question-card {
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: var(--hf-space-xs);
+    padding: var(--hf-space-m);
+    text-decoration: none;
+
+    &:hover {
+      border-color: var(--hf-colour-border-highlight);
+    }
+  }
+
+  .hf-question-text {
+    color: var(--hf-colour-link);
+    font-weight: var(--hf-name-font-weight);
+
+    .hf-question-card:hover & {
+      text-decoration: underline;
+    }
+  }
+
+  .hf-question-figure {
+    color: var(--hf-colour-text-heading);
+    font-family: var(--hf-font-family-display);
+    font-size: var(--hf-figure-large-font-size);
+    font-stretch: 125%;
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-key-figure-font-weight);
+    line-height: 1.1;
+  }
+
+  .hf-question-note {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+  }
+}

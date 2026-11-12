@@ -63,7 +63,8 @@
       .hf-donut-chart-group,
       .hf-form-chart,
       .hf-input-table,
-      .hf-tile-grid
+      .hf-tile-grid,
+      .hf-question-grid
     ),
     > :has(+ :is(h1, h2, h3, h4, h5, h6, hr)),
     > hr {
