@@ -5358,4 +5358,5 @@
   De Enter-toets in een veld slaat nog op, want de knop in de werkbalk heeft dezelfde waarde als de verborgen eerste knop van het formulier.
 - **Nadeel:** de tabellen hebben 64 rem in plaats van 84 rem; de pagina's met `wide` mogen nog opzij scrollen tot #1182 het meet.
   Op de pagina's van een wedstrijd en een persoon die van Kwaliteit komen, is de eerste knop in het document nu "Opslaan en volgende", dus de Enter-toets in een veld doet dat.
+- **Later:** de pagina's met `wide` zijn gemeten in #1182: geen enkele scrolt opzij, bij 320 pixels en bij 400% zoom ook niet (zie _De oude opbouw van een pagina is weg_ in `designsysteem.md`).
 - **Alternatieven:** een plakkende rij onderaan het scherm; de knoppen alleen in de werkbalk (dan is het einde van een lang formulier leeg); "Live" en "Plakken" als links in de werkbalk.

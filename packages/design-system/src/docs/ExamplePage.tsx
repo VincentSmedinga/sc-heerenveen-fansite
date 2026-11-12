@@ -188,27 +188,23 @@ export const ExampleMain = () => (
 )
 
 /**
- * The main column with an introduction: the heading with its text is the `intro`, and a text
- * and a list under a heading are the cells under it. On a wide screen a sidebar starts under
- * the intro, level with the first cell.
+ * A page with a main column and a sidebar, in areas: the heading on top, then the main content
+ * with a section beside it that holds two cells of different heights. They stack on their own,
+ * not on the rows of the main content.
  */
-export const ExampleMainWithIntro = () => (
-  <Page.Main
-    intro={
-      <>
-        <Heading level={1}>Nieuws over sc Heerenveen</Heading>
-        <Text>
-          Hier komen de koppen van de media die over de club schrijven. Elke kop is een link naar de journalist zelf,
-          met de naam van de bron erbij.
-        </Text>
-      </>
-    }
-  >
-    <Text>
-      Op een breed scherm begint de zijbalk onder de inleiding, op dezelfde hoogte als deze tekst. Op een smaller scherm
-      staan de inleiding, deze cellen en de zijbalk onder elkaar.
-    </Text>
-    <Page.Cell>
+export const ExampleMainWithSide = () => (
+  <Page.Main areas={{ narrow: ['head', 'main', 'side'], wide: ['head head', 'main side'] }}>
+    <Page.Cell area="head">
+      <Heading level={1}>Nieuws over sc Heerenveen</Heading>
+      <Text>
+        Hier komen de koppen van de media die over de club schrijven. Elke kop is een link naar de journalist zelf, met
+        de naam van de bron erbij.
+      </Text>
+    </Page.Cell>
+    <Page.Cell area="main">
+      <Text>
+        Op een breed scherm staat deze kolom naast de zijkolom. Op een smaller scherm staat de zijkolom eronder.
+      </Text>
       <Heading appearance={3} level={2}>
         Zo lees je de site
       </Heading>
@@ -219,44 +215,25 @@ export const ExampleMainWithIntro = () => (
         </List.Item>
       </List>
     </Page.Cell>
+    <Page.Section area="side" aria-label="Naast het nieuws">
+      <div>
+        <Heading appearance={3} level={2}>
+          Volgende wedstrijd
+        </Heading>
+        <Text appearance="meta">Hier komt een blok met de volgende wedstrijd.</Text>
+      </div>
+      <div>
+        <Heading appearance={3} level={2}>
+          Nieuwste discussies
+        </Heading>
+        <List>
+          <List.Item>Hier komt een lijst uit het forum.</List.Item>
+          <List.Item>Met een paar onderwerpen onder elkaar.</List.Item>
+          <List.Item>Zodat deze cel hoger is dan de cel erboven.</List.Item>
+        </List>
+      </div>
+    </Page.Section>
   </Page.Main>
-)
-
-/**
- * The sidebar with two cells of different heights. They stack on their own, not on the rows of
- * the main column. With `wide` it is the wide sidebar, and with `split` the cells sit side by
- * side where two fit.
- */
-export const ExampleSidebar = ({
-  narrow = false,
-  split = false,
-  sticky = false,
-  wide = false,
-}: {
-  narrow?: boolean
-  split?: boolean
-  sticky?: boolean
-  wide?: boolean
-}) => (
-  <Page.Sidebar aria-label="Naast het nieuws" narrow={narrow} split={split} sticky={sticky} wide={wide}>
-    <Page.Cell>
-      <Heading appearance={3} level={2}>
-        Volgende wedstrijd
-      </Heading>
-      <Text appearance="meta">Hier komt een blok met de volgende wedstrijd.</Text>
-    </Page.Cell>
-    <Page.Cell>
-      <Heading appearance={3} level={2}>
-        Nieuwste discussies
-      </Heading>
-      <List>
-        <List.Item>Hier komt een lijst uit het forum.</List.Item>
-        <List.Item>Met een paar onderwerpen onder elkaar.</List.Item>
-        <List.Item>Zodat deze cel hoger is dan de cel erboven.</List.Item>
-        <List.Item>En hoger of lager dan de cellen in de hoofdkolom.</List.Item>
-      </List>
-    </Page.Cell>
-  </Page.Sidebar>
 )
 
 /** A whole page, built from the components. */
@@ -279,8 +256,7 @@ export const ExamplePageWithSidebar = () => (
   <Page>
     <ExampleHeader />
     <Page.Body>
-      <ExampleMain />
-      <ExampleSidebar />
+      <ExampleMainWithSide />
     </Page.Body>
     <ExampleFooter />
   </Page>

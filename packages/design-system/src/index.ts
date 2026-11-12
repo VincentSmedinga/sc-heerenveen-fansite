@@ -183,7 +183,6 @@ export type {
   PageProps,
   PageShortcutsItem,
   PageShortcutsProps,
-  PageSidebarProps,
   PageTitleProps,
   PageTopLinkProps,
 } from './components/page/Page'

@@ -27,24 +27,6 @@
     --hf-content-max-width: 38rem;
 
     /*
-     * The widest the main column gets on a page with a narrow sidebar (Page.Sidebar with
-     * `narrow`), and the width of that sidebar. With the space between them (2rem) they fill
-     * the column of the page, 64rem, like the sizes above. The page that has them is /nieuws,
-     * where the list is the point and the sidebar holds a filter.
-     */
-    --hf-content-max-width-broad: 46rem;
-    --hf-sidebar-width-narrow: 16rem;
-
-    /*
-     * The widest the main column gets on a wide page (Page.Main with `wide`), for a page whose
-     * main column holds a table with fields in it. With the space between the columns (2rem)
-     * and the usual sidebar (24rem) the page is 84rem wide, wider than the 64rem of other
-     * pages.
-     */
-    --hf-content-max-width-wide: 58rem;
-    --hf-page-max-width-wide: 84rem;
-
-    /*
      * How a page with areas (Page.Main with `areas`) divides its 64rem from 52rem, as the tracks of the
      * columns, in four sets: a main with a sidebar of 24rem, two equal columns, a main with a narrow sidebar of
      * 16rem, and a sidebar of 17.5rem on the start side, for the filters of a search. With the space between the

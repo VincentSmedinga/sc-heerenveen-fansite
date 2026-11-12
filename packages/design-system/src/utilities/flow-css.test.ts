@@ -61,7 +61,7 @@ const rules = (css: string) =>
 const headings = ':is(h1, h2, h3, h4, h5, h6)'
 const containers = block(
   flow.replaceAll(/\s+/gu, ' '),
-  ':where( .hf-card, .hf-page-cell, .hf-page-intro, .hf-article, .hf-disclosure-content, .hf-flow, .hf-form:not(:has(> .hf-card), .hf-form-inline) )',
+  ':where( .hf-card, .hf-page-cell, .hf-article, .hf-disclosure-content, .hf-flow, .hf-form:not(:has(> .hf-card), .hf-form-inline) )',
 )
 const containerRules = rules(containers)
 const everyChild = containerRules.find((rule) => rule.selectors.includes('> *'))

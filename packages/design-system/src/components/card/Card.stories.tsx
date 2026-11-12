@@ -333,35 +333,39 @@ export const ShareableDark = meta.story({
 
 const renderPage = () => (
   <Page.Body>
-    <Page.Main>
-      <Heading level={1}>Nieuws over sc Heerenveen</Heading>
-      <Card aria-labelledby="page-media">
-        <Heading id="page-media" level={2}>
-          Laatste nieuws
-        </Heading>
-        {newsItems}
-      </Card>
-      <Text>
-        Welke media we volgen, lees je bij <Link href="#bronnen">Onze bronnen</Link>.
-      </Text>
+    <Page.Main areas={{ narrow: ['head', 'main', 'side'], wide: ['head head', 'main side'] }}>
+      <Page.Cell area="head">
+        <Heading level={1}>Nieuws over sc Heerenveen</Heading>
+      </Page.Cell>
+      <Page.Cell area="main">
+        <Card aria-labelledby="page-media">
+          <Heading id="page-media" level={2}>
+            Laatste nieuws
+          </Heading>
+          {newsItems}
+        </Card>
+        <Text>
+          Welke media we volgen, lees je bij <Link href="#bronnen">Onze bronnen</Link>.
+        </Text>
+      </Page.Cell>
+      <Page.Section area="side" aria-label="Naast het nieuws">
+        <Card aria-labelledby="page-match" surface="soft">
+          <Heading appearance={3} id="page-match" level={2}>
+            Volgende wedstrijd
+          </Heading>
+          <Text appearance="meta">Hier komt een blok met de volgende wedstrijd.</Text>
+        </Card>
+        <Card aria-labelledby="page-forum">
+          <Heading appearance={3} id="page-forum" level={2}>
+            Nieuwste discussies
+          </Heading>
+          <List>
+            <List.Item>Hier komt een lijst uit het forum.</List.Item>
+            <List.Item>Met een paar onderwerpen onder elkaar.</List.Item>
+          </List>
+        </Card>
+      </Page.Section>
     </Page.Main>
-    <Page.Sidebar aria-label="Naast het nieuws">
-      <Card aria-labelledby="page-match" surface="soft">
-        <Heading appearance={3} id="page-match" level={2}>
-          Volgende wedstrijd
-        </Heading>
-        <Text appearance="meta">Hier komt een blok met de volgende wedstrijd.</Text>
-      </Card>
-      <Card aria-labelledby="page-forum">
-        <Heading appearance={3} id="page-forum" level={2}>
-          Nieuwste discussies
-        </Heading>
-        <List>
-          <List.Item>Hier komt een lijst uit het forum.</List.Item>
-          <List.Item>Met een paar onderwerpen onder elkaar.</List.Item>
-        </List>
-      </Card>
-    </Page.Sidebar>
   </Page.Body>
 )
 

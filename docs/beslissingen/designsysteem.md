@@ -446,6 +446,7 @@
   Het token `--hf-content-max-width` zet nu de breedte van het eerste spoor in het raster van `Page.Body`, en niet meer een `max-inline-size` op de `main`; de zijbalk is er, 24 rem breed.
 - **Later:** zie _Een pagina van 64 rem, met kolommen van 36, 4 en 24 rem_.
   De hoofdkolom is weer 36 rem, en de kolom van de pagina 64 rem.
+- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `Page.Sidebar`, het raster met kolommen in `Page.Body` en de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky` bestaan niet meer. De kolommen zijn de verdelingen uit `layout.css`, en 52 rem blijft de grens.
 
 ## Page.Body is het raster, met een hoofdkolom en een zijbalk
 
@@ -495,6 +496,7 @@
 - **Later:** zie _De kaart of de cel bepaalt de verticale witruimte tussen wat erin staat_ (2 november 2026).
   De ruimte in een `Page.Cell` komt nu van de stroom in `utilities/flow.css`, die elk kind ruimte onder zich geeft en het laatste geen; de regel voor het eerste en het laatste kind in `page.css` is weg.
   De ruimte tussen de cellen blijft de `gap` van `Page.Body`.
+- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `Page.Sidebar`, het raster met kolommen in `Page.Body` en de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky` bestaan niet meer. De kolommen zijn de verdelingen uit `layout.css`, en 52 rem blijft de grens.
 
 ## Een regel met padding of een rand zet zelf `box-sizing: border-box`
 
@@ -647,6 +649,7 @@
   De kolommen staan naast elkaar vanaf 52 rem en niet meer vanaf 56 rem.
 - **Later:** zie _Ruimte komt uit vijf stappen, met gemiddeld als vaste keuze_ (31 oktober 2026): de ruimte naast het woordmerk is 0,5 rem, dus de hang van het schild is 3,9875 rem en het logo hangt vanaf 74 rem buiten de kolom (was 4,2375 rem en 74,5 rem).
   De ruimten van 2 rem en 4 rem zijn nu `--hf-space-xl` en tweemaal die stap: de "eerste aanzet voor de tokens voor ruimte" is de reeks geworden.
+- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `Page.Sidebar`, het raster met kolommen in `Page.Body` en de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky` bestaan niet meer. De kolommen zijn de verdelingen uit `layout.css`, en 52 rem blijft de grens.
 
 ## De hoofdkolom is 38 rem, met 2 rem ruimte naast de zijbalk
 
@@ -679,6 +682,7 @@
   Een pagina kan met `narrow` op de `Page.Sidebar` een hoofdkolom van 46 rem en een zijbalk van 16 rem kiezen.
 - **Later:** zie _De tweede kolom begint bij 52 rem, voor alle pagina's met een zijbalk_.
   De kolommen staan naast elkaar vanaf 52 rem en niet meer vanaf 56 rem; bij 52 rem is er dus 48 rem voor de sporen, en niet meer 52 rem.
+- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `Page.Sidebar`, het raster met kolommen in `Page.Body` en de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky` bestaan niet meer. De kolommen zijn de verdelingen uit `layout.css`, en 52 rem blijft de grens.
 
 ## Een smalle nieuwsregel zet de dag en de tijd boven de kop, met een container query
 
@@ -1022,6 +1026,7 @@
   De regel `.hf-page-sidebar-wide` voor de kolommen van de cellen is vervallen, want dat is nu de standaard; `wide` maakt de zijbalk alleen nog breder, met dezelfde sporen als eerst: 38, 2 en 24 rem voor een gewone zijbalk en 31, 2 en 31 rem voor een brede.
   De zijbalk staat nog na de hoofdkolom in de bron, zonder `order`, en de benoemde gebieden voor een pagina met een inleiding blijven gelden.
 - **Alternatieven:** de verdeling in twee kolommen helemaal weghalen (`/bronnen` verliest iets wat goed werkte); de verdeling als standaard laten en per pagina afzetten, zoals met `wide` (elke nieuwe pagina met lijsten moet eraan denken).
+- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `Page.Sidebar`, het raster met kolommen in `Page.Body` en de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky` bestaan niet meer. De kolommen zijn de verdelingen uit `layout.css`, en 52 rem blijft de grens.
 
 ## Een donutdiagram is een eigen onderdeel in SVG, met een positieve en een negatieve kleur
 
@@ -1529,6 +1534,7 @@
   Een lagere grens met smallere kolommen van 18 tot 20 rem (knijpt tabellen en kaarten).
   Voor de brede zijbalk een hogere grens dan 52 rem (laat precies de telefoons in één kolom waarvoor het issue is, en de balk en de kolommen wisselen dan op twee plaatsen).
   Een grens op oriëntatie of hoogte (laat zoom en tekstvergroting op een liggend scherm twee kolommen houden, en breekt het herschikken).
+- **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `Page.Sidebar`, het raster met kolommen in `Page.Body` en de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky` bestaan niet meer. De kolommen zijn de verdelingen uit `layout.css`, en 52 rem blijft de grens.
 
 ## Een keuzelijst krijgt de opmaak van de site met `appearance: base-select`, binnen `@supports`, te beginnen bij de seizoenskiezer
 
@@ -1921,6 +1927,7 @@
   Een eigen tweede `Page.Body` voor het beheer; dat zet de indeling twee keer in de code, en de pagina's van het beheer gebruiken de indeling van de site.
   De kop, het menu en de voet ook breder maken; dat raakt de hang van het schild en het menu, en de projecteigenaar vroeg er niet om.
   `wide` op `Page.Sidebar` hergebruiken; dat betekent al "een zijbalk even breed als de hoofdkolom".
+- **Later:** zie _De oude opbouw van een pagina is weg_ (#1182): de brede variant is weg en elke pagina is 64 rem breed.
 
 ## Een tabel om in te vullen wordt een blok per rij waar hij niet past, naar de breedte van de tabel zelf
 
@@ -3428,6 +3435,7 @@
 - **Waarom:** de body hield ook zonder zijbalk een tweede spoor vrij, en de tabel van de kwaliteit gebruikte bij 900 px maar de helft van de breedte.
 - **Alternatieven:** een eigen klasse op de pagina in de site, die elke brede pagina zonder zijbalk opnieuw zou moeten kiezen.
   Elke brede pagina volle breedte geven, ook met een zijbalk: dan past de zijbalk er niet naast.
+- **Later:** zie _De oude opbouw van een pagina is weg_ (#1182): de brede variant is weg en elke pagina is 64 rem breed.
 
 ## Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop
 
@@ -3448,3 +3456,22 @@
     `page-css.test.ts` controleert dat.
 - **Waarom:** de zes vaste verdelingen en de regels met `:has()` groeiden per pagina, en een cel uit de zijkolom kon op een telefoon nooit vóór de hoofdinhoud staan zonder `order`, dat de volgorde van het toetsenbord breekt (2.4.3).
 - **Alternatieven:** een algemeen rastercomponent met kolommen en `span` (meer API voor weinig winst); de huidige varianten uitbreiden met een eigenschap per cel; `order`; een stap die de CSS uit de tokens maakt (een extra gereedschap dat geen issue vraagt).
+- **Later:** #1182 haalt de oude opbouw weg, zie _De oude opbouw van een pagina is weg_.
+
+## De oude opbouw van een pagina is weg
+
+- **Datum:** 12 november 2026
+- **Besluit:** er is één opbouw van een pagina: `Page.Main` met of zonder `areas` (#206, #1182).
+  - **Weg:** `Page.Sidebar`, `Page.Body` als raster met kolommen, de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky`, de tokens `--hf-content-max-width-wide`, `--hf-page-max-width-wide`, `--hf-content-max-width-broad` en `--hf-sidebar-width-narrow`, en de regels met `:has()` en de subgrid in `page.css`.
+  - **`Page.Body`** is een ruimte van één spoor: 38 rem breed en gecentreerd onder 52 rem, 64 rem breed vanaf 52 rem.
+    Een `Page.Main` zonder `areas` is één kolom van 38 rem, aan het begin; met `areas` is hij zo breed als de pagina.
+  - **Elke pagina is 64 rem breed**, ook die van het beheer met een tabel.
+- **Gemeten:** op de gebouwde site met de verzonnen gegevens van de toegankelijkheidscontrole, ingelogd als eigenaar, op alle 40 pagina's van het beheer, bij 1440, 1280, 1100, 1024, 900, 400 en 320 pixels.
+  Geen pagina scrolt opzij, en geen tabel heeft een eigen scrollgebied nodig.
+  De breedste tabel van Kwaliteit is `/beheer/kwaliteit` met 611 pixels van de 978 die de pagina heeft; de andere tabellen van Kwaliteit zijn 565 pixels of smaller.
+  De breedste tabel van het beheer is het verslag van een bekerwedstrijd met 914 pixels, daarna Bezoek met 836.
+  Met de echte gegevens zijn de namen langer dan de verzonnen, dus kijk bij een tabel die breder wordt opnieuw (een tabel mag in zijn eigen scrollgebied scrollen, 1.4.10).
+- **Waarom:** de oude opbouw had zes verdelingen met regels met `:has()` die elkaar raakten, en niemand gebruikte ze meer sinds #1180 en #1181.
+  Een pagina van 84 rem was breder dan de kop, het menu en de voet.
+- **Alternatieven:** de oude opbouw laten staan voor een volgende pagina (dode CSS die elke wijziging moet meedragen); `Page.Main` zonder `areas` ook 64 rem breed maken (dan worden de tekstpagina's te breed om te lezen).
+- **Later:** de beslissingen _De inhoud staat in een smallere kolom, met plaats voor een zijbalk_, _Page.Body is het raster, met een hoofdkolom en een zijbalk_, _Een pagina van 64 rem, met kolommen van 36, 4 en 24 rem_, _De hoofdkolom is 38 rem, met 2 rem ruimte naast de zijbalk_, _De kaarten van een zijbalk staan standaard onder elkaar, naast elkaar is een optie_, _De tweede kolom begint bij 52 rem, voor alle pagina's met een zijbalk_, _Een pagina kan breed zijn, met een hoofdkolom van 58 rem en de zijbalk van 24 rem_ en _Een brede pagina zonder zijbalk vult de hele breedte_ gelden niet meer.

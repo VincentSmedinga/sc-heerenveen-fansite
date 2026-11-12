@@ -92,7 +92,6 @@ describe('the JavaScript entry of the package', () => {
     expect(typeof designSystem.Page.Header).toBe('function')
     expect(typeof designSystem.Page.Body).toBe('function')
     expect(typeof designSystem.Page.Main).toBe('function')
-    expect(typeof designSystem.Page.Sidebar).toBe('function')
     expect(typeof designSystem.Page.Cell).toBe('function')
     expect(typeof designSystem.Page.Footer).toBe('function')
     expect(typeof designSystem.Page.TopLink).toBe('function')
