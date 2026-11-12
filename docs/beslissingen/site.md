@@ -5032,8 +5032,8 @@
   - **De doelpuntenmaker:** een speler van ons die een doelpunt maakte, geen eigen doelpunt, gezocht met de letterregels van `/spelers/zoeken` en dus ook onder zijn oude naam.
     Een doelpunt zonder koppeling aan een speler, zoals veel van de oude wedstrijden, vindt niemand.
   - **Het formulier:** op een telefoon een uitklapper boven de resultaten, dicht bij een zoekopdracht en open zonder; op een breed scherm een kolom links (`Page.Sidebar` met `start`).
-    De keuzelijst "Volgorde" boven de lijst hoort bij hetzelfde formulier (`form="wedstrijden-zoeken"`).
-    Met JavaScript verstuurt het formulier bij elke keuze zelf, behalve in een tekstveld; de knop "Toon wedstrijden" blijft.
+    Het formulier verstuurt alleen met de knop "Toon wedstrijden": een keuze die de pagina direct ververst, breekt de toegankelijkheidsregels.
+    De aanvankelijk geplande keuzelijst "Volgorde" en het aantal "1–25 van 76" boven de lijst zijn voor nu weggelaten; het adres kent `volgorde=oudste` nog.
   - **Zonder resultaat:** de kop "Geen wedstrijden", de zin en de chips blijven, en "Laat één keuze weg:" noemt elke keuze met het aantal dat je dan krijgt; een keuze met nog steeds 0 staat er niet bij.
   - **Het submenu:** Wedstrijden heeft de items Cijfers, Tegenstanders en Zoeken; Zoeken houdt de keuze van competitie niet vast, omdat de pagina eigen filters heeft (`app/@subnav/wedstrijden/zoeken`).
 - **Waarom:** een supporter zoekt in wedstrijden op wat hij zich herinnert (een club, een dag, een uitslag), niet op een naam.

@@ -22,7 +22,6 @@ import {
   Text,
 } from '@fansite/design-system'
 
-import { FormAutoSubmit } from './FormAutoSubmit'
 import {
   clubsOf,
   type Filters,
@@ -164,7 +163,6 @@ export function MatchSearchFilters({
           <Link href={matchSearchPath}>Wis alles</Link>
         </Form.Buttons>
       </Form>
-      <FormAutoSubmit formId={formId} />
     </FilterCard>
   )
 }
