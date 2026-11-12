@@ -194,7 +194,6 @@ describe('the list', () => {
     expect(html).toContain('<span class="hf-data-table-secondary">')
     expect(html).toContain('Eredivisie, Speelronde 11')
     expect(html).toContain('hf-page-main hf-page-main-grid hf-density-compact')
-    expect(html).not.toContain('hf-page-main-wide')
   })
 
   it('shows the filter with the numbers, as links with the choice in the address', async () => {
@@ -418,9 +417,7 @@ describe('the match', () => {
     expect(html.replaceAll(/<[^>]+>/gu, '')).toContain('Terug naar Wedstrijden')
     expect(html).toContain('<span class="hf-tag hf-tag-attention">Uitslag ontbreekt</span>')
     expect(html).not.toContain('Terug naar de wedstrijden')
-    expect(html).not.toContain('hf-page-sidebar')
     expect(html).toContain('hf-page-main hf-page-main-grid hf-density-compact')
-    expect(html).not.toContain('hf-page-main-wide')
     expect(html).not.toContain('Laatste invoer')
   })
 
@@ -1068,7 +1065,6 @@ describe('the parts of the form of a match (#1162)', () => {
     expect(html).not.toContain('id="doelpunten"')
     expect(html).toContain('id="opslaan-kop"')
     expect(html).toContain(`<a href="/beheer/wedstrijden/${id}" id="hele-wedstrijd">Hele wedstrijd bewerken</a>`)
-    expect(html).not.toContain('hf-page-sidebar')
     expect(headings(html).filter((heading) => heading.startsWith('h1'))).toHaveLength(1)
   })
 

@@ -113,49 +113,21 @@
   }
 
   /*
-   * The grid of the page between the header and the footer. It takes the space the page has left, so the footer sits at
-   * the bottom of a short page, and keeps its rows at the top instead of stretching them. The columns start in line with
-   * the logo. On a screen narrower than a column the column is as wide as the screen: the margin on the end side gives
-   * way.
-   *
-   * There is one track, as wide as the main (--hf-content-max-width, 38rem), so the
-   * sidebar sits under the main, both over the whole track. From 52rem there are two
-   * tracks: the main, 38rem, and the sidebar, 24rem, with 2rem of space between them,
-   * which is the whole column of the page (--hf-page-max-width, 64rem), and 1rem of margin
-   * on either side. A media query can't use a custom property, so the number is written
-   * out here. Between 52rem and the full width of the column plus the margins (66rem) the
-   * tracks shrink, the main to 24rem at the least and the sidebar to 16rem; at 52rem there
-   * is 48rem for them (50rem less the space between them), so they never get there on their
-   * own. The margin is as wide as the inset of the device, though, and a media query can't
-   * read that. A phone on its side has up to 62px (3.875rem) on both sides, which leaves
-   * 52 - 2 * 3.875 - 2 = 42.25rem for the tracks at 52rem; the minimums must fit in that,
-   * so nothing scrolls sideways.
-   * The track of a column is a minmax() of fixed sizes, not fr: the space left over is shared out equally until a column is
-   * as wide as its maximum.
-   * A page with a wide sidebar (Page.Sidebar with `wide`) divides the same 64rem differently: a
-   * main of 31rem, 2rem of space and a sidebar of 31rem, two columns of equal width, for a
-   * sidebar that holds a table. It follows the same rules: one track under 52rem, tracks that
-   * shrink up to 66rem, and the sidebar second in the grid. The tracks may shrink to 20rem
-   * each, so they stay equally wide, and with the space between them (2rem) and the insets
-   * of a phone on its side (7.75rem) they fit in the 52rem.
-   * A page with a narrow sidebar (Page.Sidebar with `narrow`) divides it into a main of
-   * 46rem, 2rem and a sidebar of 16rem (--hf-content-max-width-broad and
-   * --hf-sidebar-width-narrow). It follows the same rules: one track under 52rem, and a main
-   * that shrinks up to 66rem, to 24rem at the least, so the minimums (24rem and 16rem) fit in
-   * the 42.25rem of a phone on its side.
+   * The body of the page, between the header and the footer. It takes the space the page has left, so the footer sits at
+   * the bottom of a short page, and keeps its rows at the top instead of stretching them. It has one track, and the
+   * Page.Main in it is as wide as the page (64rem) from 52rem, in line with the logo. Under 52rem the track is as wide as
+   * the content (--hf-content-max-width, 38rem) and centred, and on a screen narrower than that it is as wide as the
+   * screen: the margin on the end side gives way.
+   * A media query can't use a custom property, so 52rem is written out here and below. The Page.Main divides the 64rem
+   * itself (see .hf-page-main-grid), with tracks that shrink to a width that fits in 52rem with the insets of a phone on
+   * its side. The margin is as wide as the inset of the device, and a media query can't read that. A phone on its side
+   * has up to 62px (3.875rem) on both sides, which leaves 52 - 2 * 3.875 - 2 = 42.25rem for the tracks at 52rem, with the space
+   * between them (2rem) taken off.
    * The text in the main lines up with the wordmark of the logo on a wide screen, where the shield hangs in the margin
    * (see .hf-page-header).
-   * The sidebar is second in the source and so in the grid. There is no `order`, which would split the reading order from
-   * what is on the screen.
    *
-   * The tracks are centred in the body. Only the stacked layout, under 52rem, leaves room to
-   * the sides of the track, so the columns are centred when they are under each other, and fill
-   * the column of the page when they are side by side.
-   *
-   * There are two sizes of space: 2rem and 4rem. The space between cells is 2rem: in a
-   * column, between columns side by side, between columns under each other, and above the
-   * columns. The padding under the columns is 4rem. A column gets the space between its
-   * cells through a custom property.
+   * There are two sizes of space: 2rem and 4rem. The space between cells is 2rem: in a column, between columns side by
+   * side, between columns under each other, and above the columns. The padding under the columns is 4rem.
    */
   .hf-page-body {
     --hf-page-body-cell-gap: var(--hf-space-xl);
@@ -173,98 +145,26 @@
     padding-block: var(--hf-page-body-cell-gap) var(--hf-page-body-end-space);
 
     @media (width >= 52rem) {
-      grid-template-columns: minmax(24rem, var(--hf-content-max-width)) minmax(16rem, 24rem);
-    }
-  }
-
-  @media (width >= 52rem) {
-    .hf-page-body:has(> .hf-page-sidebar-wide) {
-      grid-template-columns: minmax(20rem, 31rem) minmax(20rem, 31rem);
-    }
-  }
-
-  @media (width >= 52rem) {
-    .hf-page-body:has(> .hf-page-sidebar-narrow) {
-      grid-template-columns: minmax(24rem, var(--hf-content-max-width-broad)) var(--hf-sidebar-width-narrow);
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 
   /*
-   * A page with a sidebar that stands first (Page.Sidebar with `start`, before the Page.Main in the source), such as
-   * the filters of a search: from 52rem it is a column of 17.5rem on the start side and the main takes the rest of the
-   * column of the page. Under 52rem it is the first cell, above the main.
+   * The main is a grid of one track, so its cells stack under each other, each as tall as its content. The track can
+   * shrink to 0, so a long word or address can't make the column wider than the screen.
+   * A child of the main is a cell and has no margin to the outside: the gap is all the space between cells.
+   * A main without areas is one column of the width of the content (38rem), at the start of the page.
+   * The column takes the gap again from the space token: a custom property is resolved where it is declared, so a
+   * column with another density than the Page.Body would otherwise keep the gap of the Page.Body.
    */
-  @media (width >= 52rem) {
-    .hf-page-body:has(> .hf-page-sidebar-start) {
-      grid-template-columns: 17.5rem minmax(0, 1fr);
-    }
-
-    /* With an introduction the areas are named, and the sidebar takes the first track beside the main. */
-    .hf-page-body:has(> .hf-page-sidebar-start):has(> .hf-page-main > .hf-page-intro) {
-      /* The sidebar is taller than the introduction, and the second row takes what is left over. */
-      grid-template-areas:
-        'sidebar main'
-        'sidebar main';
-      grid-template-rows: auto 1fr;
-    }
-  }
-
-  /*
-   * A wide page (Page.Main with `wide`) is a page of 84rem: a main of 58rem, 2rem of space and
-   * the usual sidebar of 24rem (--hf-content-max-width-wide and --hf-page-max-width-wide). It
-   * follows the same rules as the page above: one track under 52rem, so a phone sees no
-   * difference, and tracks that shrink up to the full width of the columns plus the margins
-   * (86rem), the main to 24rem at the least and the sidebar to 16rem, so the minimums fit in
-   * the 42.25rem of a phone on its side.
-   * The body is the only part that gets wider: the inset on its sides is worked out from the
-   * wider column, as --hf-page-inset is from the usual one, so the tracks are centred and
-   * don't run out of the body. The header, the menu and the footer stay in the column of 64rem.
-   */
-  .hf-page-body:has(> .hf-page-main-wide) {
-    --hf-page-inset: max(var(--hf-page-margin), calc((100% - var(--hf-page-max-width-wide)) / 2));
-  }
-
-  @media (width >= 52rem) {
-    .hf-page-body:has(> .hf-page-main-wide) {
-      grid-template-columns: minmax(24rem, var(--hf-content-max-width-wide)) minmax(16rem, 24rem);
-    }
-  }
-
-  /*
-   * A wide page without a sidebar, such as a table in the admin, has nothing for the second track, so the main takes
-   * the whole width of the body, up to the width of a wide page, and not only the 58rem of the main beside a sidebar.
-   */
-  @media (width >= 52rem) {
-    .hf-page-body:has(> .hf-page-main-wide):not(:has(> .hf-page-sidebar)) {
-      grid-template-columns: minmax(24rem, 1fr);
-    }
-  }
-
-  /*
-   * A column is a grid of one track, its own, so its cells stack under each other, each as tall as its content, and not
-   * on the rows of the other column. That is why a plain grid is enough here: a subgrid would put the cells of both
-   * columns on the same rows. Only a main with an introduction is a subgrid, and then in two rows only (see below).
-   * The track can shrink to 0, so a long word or address can't make the column wider than the screen.
-   * A child of a column is a cell and has no margin to the outside: the gap is all the space between cells.
-   * The cells of the sidebar sit under each other, at every width. A sidebar with `split` puts
-   * them side by side as long as two of them fit, at 16rem each and 2rem apart (34rem), and
-   * otherwise under each other. That is the case under the main, in a track of up to 38rem, on
-   * a screen from 36rem wide.
-   * From 52rem the sidebar is a column of 24rem at most, in which two cells never fit, so no
-   * media query is needed.
-   * The column takes the gap again from the space token: a custom property is resolved where
-   * it is declared, so a column with another density than the Page.Body would otherwise keep
-   * the gap of the Page.Body.
-   */
-  .hf-page-main,
-  .hf-page-cells,
-  .hf-page-sidebar {
+  .hf-page-main {
     --hf-page-body-cell-gap: var(--hf-space-xl);
 
     align-content: start;
     display: grid;
     gap: var(--hf-page-body-cell-gap);
     grid-template-columns: minmax(0, 1fr);
+    max-inline-size: var(--hf-content-max-width);
 
     > * {
       margin: 0;
@@ -272,8 +172,8 @@
   }
 
   /*
-   * A page with areas (Page.Main with `areas`) is the grid itself. The main spans all the tracks of the body, so it is
-   * as wide as the page (64rem), and divides that width itself: one track under 52rem, and from there the columns of
+   * A page with areas (Page.Main with `areas`) is the grid itself. The main is as wide as the page (64rem), and divides
+   * that width itself: one track under 52rem, and from there the columns of
    * a set from layout.css (--hf-page-columns). The page names its areas as custom properties in `style`, and each cell
    * names its area (grid-area), so a cell can stand first on a phone and beside the main content on a wide screen
    * without `order`: the source is the order on a phone, and so the order of the keyboard.
@@ -282,9 +182,9 @@
    * tall as their cells. The space between the cells is the gap of the main, 2rem, across and down.
    */
   .hf-page-main-grid {
-    grid-column: 1 / -1;
     grid-template-areas: var(--hf-page-areas-narrow);
     grid-template-columns: minmax(0, 1fr);
+    max-inline-size: none;
 
     > * {
       align-self: start;
@@ -338,83 +238,7 @@
   }
 
   /*
-   * A sticky sidebar (Page.Sidebar with `sticky`) stays in view while the main column scrolls.
-   * A grid item sticks within its grid area, which is as tall as the main column, so the
-   * sidebar can follow the reader from the top to the bottom of it. Under 52rem the sidebar is
-   * under the main column and scrolls with the page.
-   * A sidebar that is taller than the window scrolls on its own, so every part of it can be
-   * reached, with the keyboard too (WCAG 2.4.11). The little padding, which the negative margin
-   * takes back, leaves room for the focus ring of a link at the edge, which a scrolling box
-   * would cut off.
-   */
-  @media (width >= 52rem) {
-    .hf-page-sidebar-sticky {
-      inset-block-start: var(--hf-space-m);
-      /* stylelint-disable-next-line declaration-property-value-allowed-list -- The negative margin takes back the padding that makes room for the focus ring, so the sidebar stays in its column; this margin stays. */
-      margin: calc(-1 * var(--hf-space-xs));
-      max-block-size: calc(100dvh - 2 * var(--hf-space-m));
-      overflow-y: auto;
-      padding: var(--hf-space-xs);
-      position: sticky;
-    }
-  }
-
-  .hf-page-sidebar-split {
-    grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
-  }
-
-  /*
-   * A main with an introduction (Page.Main with `intro`) holds two things: the introduction, a cell, and a `div` around the
-   * cells under it, which stacks them like the main does without an introduction. They are two rows, and the main is a
-   * subgrid in the rows of the body: it sits on two of them, so the body knows how tall the introduction is. That is how
-   * the sidebar starts under it. The gap between the rows is the gap between cells, so the introduction is a cell like the
-   * others. :has() tells the body about it, so a page without an introduction keeps the layout above.
-   *
-   * Under 52rem the columns are under each other, so the sidebar, which comes after the main in
-   * the body, is on the third row. A narrow screen needs nothing more.
-   *
-   * From 52rem the main takes the first track on both rows and the sidebar the second track
-   * on the second row. The areas are named, not numbered: an item with a row number of its
-   * own is placed before the others, and the sidebar then ended up in the first track. Only
-   * a body with an introduction has areas, because an empty area keeps its row and its gap.
-   * Here the main spans both rows, so a page without a sidebar has nothing empty: the cells
-   * sit under the introduction as before.
-   * The introduction is as wide as the main, so its lines are as long as those of the other cells, and the track of the
-   * sidebar beside it is empty.
-   *
-   * A main without cells under its introduction, such as a page with nothing to list yet, has no second row of its own on a
-   * narrow screen, and the empty `div` is left out, so the sidebar sits one gap under the introduction, not two.
-   */
-  .hf-page-main:has(> .hf-page-intro) {
-    grid-template-rows: subgrid;
-  }
-
-  .hf-page-main:has(> .hf-page-cells:not(:empty)) {
-    grid-row: span 2;
-  }
-
-  .hf-page-cells:empty {
-    display: none;
-  }
-
-  @media (width >= 52rem) {
-    .hf-page-body:has(> .hf-page-main > .hf-page-intro) {
-      grid-template-areas:
-        'main .'
-        'main sidebar';
-
-      > .hf-page-main {
-        grid-area: main;
-      }
-
-      > .hf-page-sidebar {
-        grid-area: sidebar;
-      }
-    }
-  }
-
-  /*
-   * A cell and an introduction are flow containers: the flow (utilities/flow.css) sets the
+   * A cell is a flow container: the flow (utilities/flow.css) sets the
    * space between what is in them, and gives the last child none to the outside. A cell is a
    * grid item, so margins of what is in it don't collapse out of it and would add to the gap.
    */

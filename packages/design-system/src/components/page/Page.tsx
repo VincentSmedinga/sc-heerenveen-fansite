@@ -1,4 +1,4 @@
-import { type ComponentPropsWithoutRef, type CSSProperties, type ReactNode, useId } from 'react'
+import { type ComponentPropsWithoutRef, type CSSProperties, useId } from 'react'
 
 import { classNames } from '../classNames'
 import { Icon } from '../icon/Icon'
@@ -40,28 +40,12 @@ export type PageHeaderProps = ComponentPropsWithoutRef<'header'>
 export type PageMainProps = ComponentPropsWithoutRef<'main'> & {
   /**
    * The areas of the page. With them the Page.Main is a grid of its own, as wide as the page,
-   * and each cell names its area (see `area` of the Page.Cell). Don't combine it with `intro`,
-   * `wide` or a Page.Sidebar, which are the old way.
+   * and each cell names its area (see `area` of the Page.Cell). Without them the Page.Main is
+   * one column, as wide as the content, and each child is a cell.
    */
   areas?: PageAreas
   /** How the width is divided from 52rem, with `areas`. Defaults to `side`. */
   columns?: PageColumns
-  /**
-   * The introduction of the page, such as its heading with a text: one cell at the top of the
-   * main column, which the children follow. On a wide screen the Page.Sidebar starts under it,
-   * level with the first child. Without an `intro` the children are the cells of the column and
-   * the sidebar starts at the top.
-   */
-  intro?: ReactNode
-  /**
-   * A wide page, for a page whose main column holds a table with fields in it. The page is
-   * wider than other pages, and the main column broader, while the sidebar keeps its width. On
-   * a screen narrower than the columns side by side it makes no difference. It is the
-   * Page.Main that tells the Page.Body, so a page can choose it without owning the Page.Body,
-   * which the layout of the site renders. The header, the menu and the footer keep the width
-   * of the other pages. Don't combine it with `wide` or `narrow` on the Page.Sidebar.
-   */
-  wide?: boolean
 }
 
 export type PageProps = ComponentPropsWithoutRef<'div'>
@@ -90,42 +74,6 @@ export type PageShortcutsProps = Omit<
    * so it says what the links are: "Op deze pagina:" for links to the cards of the page.
    */
   label: string
-}
-
-export type PageSidebarProps = ComponentPropsWithoutRef<'aside'> & {
-  /**
-   * A sidebar that is narrower than on other pages, with a broader main column, for a page
-   * whose main column holds a long list and whose sidebar holds a short one, such as a filter.
-   * The columns stay as wide together as without it. Like `wide`, it is the Page.Sidebar that
-   * tells the Page.Body. Don't combine it with `wide`.
-   */
-  narrow?: boolean
-  /**
-   * Puts the cells next to each other, in two columns, where two of them fit, which is under
-   * the main column on a middle screen. For a sidebar of small cells. Without it the cells sit
-   * under each other at every width, which suits cells with a list.
-   */
-  split?: boolean
-  /**
-   * A sidebar that stands first: put it before the Page.Main in the source. It is the column
-   * on the start side of a wide screen, a narrow one, and above the main on a narrow screen,
-   * for the filters of a search. Don't combine it with `wide`, `narrow` or `sticky`.
-   */
-  start?: boolean
-  /**
-   * Keeps the sidebar in view while the main column scrolls, from the width where it stands
-   * beside it. For a sidebar with something the reader needs while filling in a long main
-   * column, such as the save panel of a form. A sidebar that is taller than the window scrolls
-   * on its own. Under the main column it scrolls with the page.
-   */
-  sticky?: boolean
-  /**
-   * A sidebar as wide as the main column, which is narrower than on other pages, for a page
-   * whose sidebar holds a table or another cell that needs the width. The columns stay as wide
-   * together as without it. It is the Page.Sidebar that tells the Page.Body, so a page can
-   * choose it without owning the Page.Body, which the layout of the site renders.
-   */
-  wide?: boolean
 }
 
 export type PageTitleProps = ComponentPropsWithoutRef<'div'> & {
@@ -216,83 +164,21 @@ const areaProperties = ({ narrow, wide }: PageAreas, columns: PageColumns) =>
   }) as CSSProperties
 
 /**
- * The grid of the page between the header and the footer: a `div` with a Page.Main and, if the
- * page has one, a Page.Sidebar. It sets the space between the columns and between the cells. If
- * the Page.Main has an `intro`, the Page.Sidebar starts under it on a wide screen.
+ * The space of the page between the header and the footer: a `div` with the Page.Main in it. It
+ * sets the space around the main and between the cells.
  */
 const Body = ({ className, ...props }: PageBodyProps) => (
   <div className={classNames('hf-page-body', className)} {...props} />
 )
 
 /**
- * The main column and the `main` of the page, so every page has exactly one. Each of its
- * children is a cell. With an `intro` the column holds the introduction in a `div` of its own,
- * and the children in a second `div`, which stacks them like the column does without an
- * introduction. The Page.Body needs the two to start the Page.Sidebar under the introduction.
- * The `intro` prop adds them, so a page can't leave one out. With `wide` the page is wider than
- * other pages, to make room for a table with fields in it.
+ * The `main` of the page, so every page has exactly one. Each of its children is a cell. With
+ * `areas` it is the grid of the page, as wide as the page; without them it is one column.
  */
-const Main = ({
-  areas,
-  children,
-  className,
-  columns = 'side',
-  intro,
-  style,
-  wide = false,
-  ...props
-}: PageMainProps) => {
-  if (areas !== undefined) {
-    return (
-      <main
-        className={classNames('hf-page-main', 'hf-page-main-grid', className)}
-        style={{ ...areaProperties(areas, columns), ...style }}
-        {...props}
-      >
-        {children}
-      </main>
-    )
-  }
-
-  return (
-    <main className={classNames('hf-page-main', wide && 'hf-page-main-wide', className)} style={style} {...props}>
-      {intro === undefined || intro === null || intro === false ? (
-        children
-      ) : (
-        <>
-          <div className="hf-page-intro">{intro}</div>
-          <div className="hf-page-cells">{children}</div>
-        </>
-      )}
-    </main>
-  )
-}
-
-/**
- * The sidebar, an `aside`: beside the Page.Main, or under it on a narrow screen. Each of its
- * children is a cell, and the cells sit under each other. With `split` they sit side by side
- * where two fit, with `wide` the sidebar is as wide as the main column, with `narrow` it is
- * narrower than usual and the main column broader, and with `sticky` it stays in view.
- */
-const Sidebar = ({
-  className,
-  narrow = false,
-  split = false,
-  start = false,
-  sticky = false,
-  wide = false,
-  ...props
-}: PageSidebarProps) => (
-  <aside
-    className={classNames(
-      'hf-page-sidebar',
-      split && 'hf-page-sidebar-split',
-      start && 'hf-page-sidebar-start',
-      sticky && 'hf-page-sidebar-sticky',
-      wide && 'hf-page-sidebar-wide',
-      narrow && 'hf-page-sidebar-narrow',
-      className,
-    )}
+const Main = ({ areas, className, columns = 'side', style, ...props }: PageMainProps) => (
+  <main
+    className={classNames('hf-page-main', areas !== undefined && 'hf-page-main-grid', className)}
+    style={areas === undefined ? style : { ...areaProperties(areas, columns), ...style }}
     {...props}
   />
 )
@@ -333,11 +219,11 @@ const Toolbar = ({ className, style, ...props }: PageToolbarProps) => (
 )
 
 /**
- * The title row of a page, for the `intro` of a Page.Main: the heading of the page and, beside
- * it, one control that belongs to the whole page, such as the SeasonPicker. The control sits at
- * the end of the row, on the right. Where the two do not fit side by side the control goes
- * under the heading and stays on the right, or, with `wrapped="start"`, on the left. A row with
- * the heading alone is the heading.
+ * The title row of a page, for the heading cell of a Page.Main: the heading of the page and,
+ * beside it, one control that belongs to the whole page, such as the SeasonPicker. The control
+ * sits at the end of the row, on the right. Where the two do not fit side by side the control
+ * goes under the heading and stays on the right, or, with `wrapped="start"`, on the left. A row
+ * with the heading alone is the heading.
  */
 const Title = ({ className, wrapped = 'end', ...props }: PageTitleProps) => (
   <div className={classNames('hf-page-title', wrapped === 'start' && 'hf-page-title-start', className)} {...props} />
@@ -382,7 +268,6 @@ Header.displayName = 'Page.Header'
 Shortcuts.displayName = 'Page.Shortcuts'
 Body.displayName = 'Page.Body'
 Main.displayName = 'Page.Main'
-Sidebar.displayName = 'Page.Sidebar'
 Title.displayName = 'Page.Title'
 Cell.displayName = 'Page.Cell'
 Section.displayName = 'Page.Section'
@@ -396,11 +281,10 @@ TopLink.displayName = 'Page.TopLink'
  * width, with a margin on either side on a narrow screen. It holds a Page.Header, a Page.Body
  * and a Page.Footer, in that order, and between the first two the main menu, a Navigation with
  * `appearance="header"`, and a Page.Shortcuts, in that order, if the page has one. The
- * Page.Body holds a Page.Main and, if the page has one, a Page.Sidebar, and in them the cells,
- * some of them a Page.Cell. They only work inside a Page, so they are written as properties of
- * it. Before them the page has an empty `div` that is
- * fixed to the top of the screen in the colour of the header, for the status bar of a phone
- * (see page.css).
+ * Page.Body holds a Page.Main, and in it the cells, some of them a Page.Cell or a Page.Section.
+ * They only work inside a Page, so they are written as properties of it. Before them the page
+ * has an empty `div` that is fixed to the top of the screen in the colour of the header, for
+ * the status bar of a phone (see page.css).
  */
 export const Page = ({ children, className, ...props }: PageProps) => (
   <div className={classNames('hf-page', className)} {...props}>
@@ -413,7 +297,6 @@ Page.Header = Header
 Page.Shortcuts = Shortcuts
 Page.Body = Body
 Page.Main = Main
-Page.Sidebar = Sidebar
 Page.Title = Title
 Page.Cell = Cell
 Page.Section = Section

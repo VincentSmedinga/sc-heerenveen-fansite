@@ -13,9 +13,9 @@ const meta = preview.meta({
           'Zet wat bij elkaar hoort in één cel van een kolom, zoals een kop met een inleiding.',
           'Het is een `div` zonder rol.',
           '',
-          '- Elk kind van een `Page.Main` of een `Page.Sidebar` is al een cel. Een `Page.Cell` maakt van meer dingen één cel.',
+          '- Elk kind van een `Page.Main` is al een cel. Een `Page.Cell` maakt van meer dingen één cel.',
           '- De cel bepaalt de ruimte tussen wat erin staat, zoals tussen een kop en de tekst eronder (zie _Ruimte tussen onderdelen_ in het hoofdstuk Ruimte), en niets erin heeft een marge naar buiten.',
-          '- De ruimte tussen de cellen komt van de `Page.Body`.',
+          '- De ruimte tussen de cellen komt van de `Page.Main`.',
         ].join('\n'),
       },
       source: {
@@ -35,7 +35,7 @@ const meta = preview.meta({
 })
 
 // The dashed lines show the cells. They are only in these stories.
-const outline = '.hf-page-main > *, .hf-page-sidebar > * { outline: 1px dashed var(--hf-colour-border-input); }'
+const outline = '.hf-page-main > * { outline: 1px dashed var(--hf-colour-border-input); }'
 
 const render = () => (
   <Page.Body>

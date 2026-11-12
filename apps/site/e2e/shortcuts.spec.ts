@@ -47,9 +47,9 @@ for (const { links, path } of withBar) {
       await expect(page.getByRole('navigation', { name: 'Op deze pagina:' })).toBeVisible()
     })
 
-    test('is there exactly when the body has one column, at 51.9rem and at 52rem', async ({ page }) => {
+    test('is there exactly when the main has one column, at 51.9rem and at 52rem', async ({ page }) => {
       const columns = () =>
-        page.locator('.hf-page-body').evaluate((body) => getComputedStyle(body).gridTemplateColumns.split(' ').length)
+        page.locator('.hf-page-main').evaluate((main) => getComputedStyle(main).gridTemplateColumns.split(' ').length)
 
       for (const [width, count, bar] of [
         [831, 1, 1],

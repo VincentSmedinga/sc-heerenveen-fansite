@@ -53,7 +53,7 @@ Daarvoor is de checklist hieronder.
 - [ ] Je ziet steeds waar de focus is: de focusrand van het designsysteem, niet weggehaald met `outline: none` (2.4.7).
       Hij haalt 3:1 tegen de achtergrond (1.4.11).
 - [ ] Een vaste header of een melding bedekt het element met focus niet helemaal (2.4.11).
-- [ ] Je kunt herhaalde blokken zoals het menu overslaan, met een link naar de inhoud of met landmarks: `header`, `nav`, `main` en `footer` (2.4.1).
+- [ ] Je kunt herhaalde blokken zoals het menu overslaan, met een link naar de inhoud of met landmarks: `header`, `nav`, `main` en `footer`, en voor wat naast de hoofdinhoud staat een `section` met een naam (een `region`, geen `aside`) (2.4.1).
 
 Zo test je het: leg de muis weg en loop de pagina door met Tab.
 
@@ -201,7 +201,7 @@ Gebruik wat er is, in plaats van het opnieuw te bouwen (#19):
 - [HTML-elementen/Koppen](https://ds.heerenveen.org/?path=/docs/html-elementen-koppen--documentatie): de stijl van een kop staat los van het niveau.
 - [HTML-elementen/Links](https://ds.heerenveen.org/?path=/docs/html-elementen-links--documentatie): onderstreepte links, met hover, focus en bezocht.
 - [HTML-elementen/Formulier](https://ds.heerenveen.org/?path=/docs/html-elementen-formulier--documentatie): labels, velden en knoppen van 44 pixels hoog (en 36 pixels in de kleine maat), en randen van 3:1.
-- [Componenten/Pagina/Page](https://ds.heerenveen.org/?path=/docs/componenten-pagina-page--documentatie): de componenten voor de paginaopbouw, met de landmarks `header`, `nav`, `main` en `footer`, een navigatie met een naam en een kop met een niveau los van zijn stijl.
+- [Componenten/Pagina/Page](https://ds.heerenveen.org/?path=/docs/componenten-pagina-page--documentatie): de componenten voor de paginaopbouw, met de landmarks `header`, `nav`, `main` en `footer`, secties met een naam (`Page.Section`) voor wat naast de hoofdinhoud staat, een navigatie met een naam en een kop met een niveau los van zijn stijl.
 - [Hulpklassen/Alleen voor schermlezers](https://ds.heerenveen.org/?path=/docs/hulpklassen-alleen-voor-schermlezers--documentatie): de klasse `hf-visually-hidden`, voor tekst die je niet ziet maar die een schermlezer wel voorleest.
 
 De patronen volgen met de pagina's die ze nodig hebben.
