@@ -4138,6 +4138,7 @@
 - **Gevolg:** de rijkop van een tabel met tekst houdt in het designsysteem ruimte voor zeven tekens (`data-table.css`).
   Zonder die regel brak de tabel een seizoen als `2025/26` in tweeën, naast kolommen vol tekst.
 - **Alternatieven:** vier filters erbij in `/beheer/wedstrijden`; een tabel met getallen en afkortingen die opzij schuift; `similarPersons` in de site nog een keer schrijven.
+- **Later:** zie _De pagina Kwaliteit is een werktabel met een kolom per deel van de gegevens_ (12 november 2026): de zinnen per seizoen en de werklijsten maken plaats voor een tabel met een teken per gat (#1163).
 
 ## Spelers voegt de redactie toe door een persoon te kiezen of te maken
 
@@ -5144,3 +5145,81 @@
   Het logboek schrijft `article.publish` en `article.unpublish` met zijn account, zoals bij een redacteur.
 - **Waarom:** de redactie is klein en overlegt zelf; een verplichte tweede persoon vertraagt zonder dat het iets oplevert.
 - **Alternatieven:** alleen een redacteur publiceert (zoals #1156 deed); een gepubliceerd artikel op slot voor zijn auteur.
+
+## De pagina Kwaliteit is een werktabel met een kolom per deel van de gegevens
+
+- **Datum:** 12 november 2026
+- **Besluit:** de kolommen zijn de delen van een wedstrijd of een persoon, zoals Doelpunten, Opstelling en Land: geen losse velden en geen grote groepen (#1161).
+  Een lege cel is compleet.
+  Een cel met een gat toont een kort teken (een getal, `?` of `…`) en is een link naar het deel van het formulier waar je het aanvult.
+  Er zijn twee niveaus met dezelfde kolommen: een overzicht met een rij per seizoen of per letter, en een detail met een rij per wedstrijd of per persoon met een gat.
+- **Waarom:** de redactie ziet in één blik waar de gaten zitten en dicht ze met één tik.
+  Dezelfde kolommen op beide niveaus maken de tabel snel te leren.
+- **Alternatieven:** de zinnen per seizoen houden, met een werklijst per soort gat (veel klikken en geen overzicht per wedstrijd).
+  Een kolom per veld (te breed voor een telefoon).
+
+## Een detailtabel van de kwaliteit toont alleen rijen met een gat
+
+- **Datum:** 12 november 2026
+- **Besluit:** een seizoen of een letter toont alleen de wedstrijden of personen waar iets ontbreekt (#1161).
+  Zonder gaten zegt de pagina "Alles compleet".
+- **Waarom:** zo is de tabel een werklijst die korter wordt.
+- **Alternatieven:** alle rijen, met lege rijen voor wat compleet is.
+
+## Wat niet te vinden is, telt voorlopig mee als gat
+
+- **Datum:** 12 november 2026
+- **Besluit:** een gegeven dat niet te vinden is, zoals het aantal toeschouwers bij een oude bekerwedstrijd, blijft als gat in de tabel staan (#1161).
+  Een markering "niet te vinden" komt later, in een eigen issue.
+- **Waarom:** eerst zien hoeveel er echt ontbreekt, dan beslissen wat we als onvindbaar markeren.
+- **Alternatieven:** nu al een markering per deel (meer werk en een kolom erbij in de database).
+
+## Op een telefoon is een kolomkop van de kwaliteit één letter, met een legenda
+
+- **Datum:** 12 november 2026
+- **Besluit:** op een telefoon heeft elke kolom een kop van één letter, met de volledige naam als `abbr`, en een legenda boven de tabel (#1161).
+  Op een breed scherm staat het hele woord.
+  Elke link zegt voor een schermlezer voluit wat er ontbreekt en waar, zoals "2 doelpunten zonder speler bij Ajax, 14 augustus".
+  De tabel schuift niet opzij.
+- **Waarom:** zeven kolommen met hele woorden passen niet op 390 pixels.
+- **Alternatieven:** schuine koppen (slecht leesbaar); een tabel die opzij schuift (het beheer schuift nergens opzij).
+
+## Een formulier in het beheer bestaat uit delen, die elk een eigen adres hebben
+
+- **Datum:** 12 november 2026
+- **Besluit:** het formulier van een wedstrijd en dat van een persoon bestaan uit delen (#1161).
+  Het hele formulier toont alle delen onder elkaar, met bovenaan een navigatie naar de delen.
+  Elk deel heeft ook een eigen adres dat alleen dat deel toont, met de reden en Opslaan, en alleen dat deel opslaat.
+  Het deel gebruikt dezelfde velden, controles en actie als het hele formulier.
+  Het formulier van een wedstrijd heeft geen rechterkolom meer.
+- **Waarom:** op een telefoon is het formulier van een wedstrijd lang, en een fout in een ander deel houdt de opslag tegen.
+  Een los deel is rustig en snel.
+  De rechterkolom kostte ruimte en hielp weinig.
+- **Alternatieven:** een link naar een anker in het hele formulier (de rest van het formulier blijft in de weg).
+  Tabbladen met JavaScript (een deel heeft dan geen eigen adres).
+
+## Namen die op elkaar lijken en de lijst van Wikipedia krijgen een eigen pagina
+
+- **Datum:** 12 november 2026
+- **Besluit:** de kaarten "Personen die op elkaar lijken" en "Namen en de lijst van spelers" gaan naar `/beheer/kwaliteit/namen`, met een link boven de tabel van personen (#1161, gebouwd in #1165).
+- **Waarom:** het zijn lijsten om te lezen, geen gaten om in te vullen.
+- **Alternatieven:** ze onder de tabel laten staan.
+
+## De delen van het formulier van een wedstrijd
+
+- **Datum:** 12 november 2026
+- **Besluit:** `/beheer/wedstrijden/<id>/<deel>` heeft de delen `uitslag` (Aftrap, Uitslag en Verlenging), `gegevens`, `doelpunten` en `wijzigingen` (#1162).
+  - **De navigatie** "Delen van de wedstrijd" is een `Filter` uit het designsysteem: Alles, Uitslag, Gegevens, Doelpunten, Verslag, en Wijzigingen als er iets wacht.
+    Verslag gaat naar de pagina van het verslag, die er al was; de oude link "Naar het verslag" boven het formulier is daarmee weg.
+  - **Opslaan van een deel** neemt alleen de velden van dat deel uit het formulier, en elk ander veld zoals de database het nu heeft (`mergePart`).
+    Zo maakt een deel nooit ongedaan wat iemand intussen in een ander deel opsloeg.
+    Het logboek schrijft dezelfde regel `match.edit` als het hele formulier.
+  - **Een fout in een ander deel**, zoals doelpunten die niet meer bij een nieuwe uitslag passen, staat in de foutsamenvatting als "In een ander deel van de wedstrijd: …" en linkt naar "Hele wedstrijd bewerken".
+  - **Binnengekomen namen:** het deel Doelpunten zegt in één zin boven de tabel met welke naam een doelpunt van ons zonder speler binnenkwam: Zonder speler binnengekomen: doelpunt 1 als "Hansen".
+  - **Terug:** een adres met `terug` binnen `/beheer` bepaalt waar Annuleren en de link bovenaan heen gaan; een ander adres wordt genegeerd.
+- **Waarom:** `Filter` is al de rij links met `aria-current` in het beheer, en breekt af op een telefoon.
+  `SegmentedLinks` breekt zes woorden midden in een woord af.
+  Eén zin boven de tabel past in de tabel van velden, die geen hint per veld heeft.
+- **Alternatieven:** de waarden van de andere delen als verborgen velden meesturen (overschrijft wat iemand intussen opsloeg).
+  Een nieuw onderdeel voor tabbladen in het designsysteem.
+  De binnengekomen naam bij elk doelpunt in de tabel (vraagt een hint per veld in `InputTable`).

@@ -25,6 +25,7 @@ import { saveReport } from '#src/beheer/match-reports'
 import { report as reportOf, squadOf } from '#src/beheer/report-fixtures'
 import { checkReportForm } from '#src/beheer/report-form'
 
+import MatchPartPage, { generateMetadata as partMetadata } from './[id]/[deel]/page'
 import MatchPage, { metadata as matchMetadata } from './[id]/page'
 import MatchesPage, { metadata as listMetadata } from './page'
 
@@ -94,6 +95,14 @@ const list = async (searchParams: Record<string, string> = {}) =>
 const form = async (id: number | string, searchParams: Record<string, string> = {}) =>
   renderToStaticMarkup(
     await MatchPage({ params: Promise.resolve({ id: String(id) }), searchParams: Promise.resolve(searchParams) }),
+  )
+
+const partForm = async (id: number, deel: string, searchParams: Record<string, string> = {}) =>
+  renderToStaticMarkup(
+    await MatchPartPage({
+      params: Promise.resolve({ deel, id: String(id) }),
+      searchParams: Promise.resolve(searchParams),
+    }),
   )
 
 const headings = (html: string) =>
@@ -386,7 +395,7 @@ describe('the match', () => {
     expect(html).not.toContain('Weghalen')
     // The hidden first button makes Enter save.
     expect(html.indexOf('value="opslaan"')).toBeLessThan(html.indexOf('value="doelpunt-toevoegen"'))
-    // The reason and the button in the sidebar belong to the form of the cards.
+    // The reason and the button of the save panel belong to the form of the cards.
     expect(html).toMatch(/<form [^>]*id="wedstrijd"/u)
     expect(html).toMatch(/<input [^>]*form="wedstrijd"[^>]*name="reden"/u)
     expect(html).toMatch(/<button [^>]*form="wedstrijd"[^>]*value="opslaan"/u)
@@ -401,7 +410,7 @@ describe('the match', () => {
     expect(headings(away)).toContain('h1 N.E.C. - sc Heerenveen')
   })
 
-  it('has a link back to Wedstrijden, tags for what the editors changed and what is missing, and a sticky sidebar', async () => {
+  it('has a link back to Wedstrijden, tags for what the editors changed and what is missing, and one column', async () => {
     const id = await addMatch()
     const html = await form(id)
 
@@ -409,7 +418,7 @@ describe('the match', () => {
     expect(html.replaceAll(/<[^>]+>/gu, '')).toContain('Terug naar Wedstrijden')
     expect(html).toContain('<span class="hf-tag hf-tag-attention">Uitslag ontbreekt</span>')
     expect(html).not.toContain('Terug naar de wedstrijden')
-    expect(html).toContain('hf-page-sidebar hf-page-sidebar-sticky')
+    expect(html).not.toContain('hf-page-sidebar')
     expect(html).toContain('hf-page-main hf-page-main-wide hf-density-compact')
     expect(html).not.toContain('Laatste invoer')
   })
@@ -1032,6 +1041,87 @@ describe('the match', () => {
   })
 })
 
+describe('the parts of the form of a match (#1162)', () => {
+  /** The links of the navigation of the parts, with the one that is current. */
+  const parts = (html: string) => {
+    const nav = /<nav[^>]*aria-label="Delen van de wedstrijd"[^>]*>(.*?)<\/nav>/su.exec(html)?.[1] ?? ''
+
+    return [...nav.matchAll(/<a ([^>]*)>(.*?)<\/a>/gu)].map(
+      ([, attributes, text]) => `${text}${attributes?.includes('aria-current="page"') ? ' (hier)' : ''}`,
+    )
+  }
+
+  it('has a navigation to the parts on the whole form, with Alles as the current one', async () => {
+    const id = await addMatch({ goalsAgainst: 0, goalsFor: 1, status: 'played' })
+
+    expect(parts(await form(id))).toEqual(['Alles (hier)', 'Uitslag', 'Gegevens', 'Doelpunten', 'Verslag'])
+  })
+
+  it('shows only the cards of a part, with the save panel and a link to the whole form', async () => {
+    const id = await addMatch({ goalsAgainst: 0, goalsFor: 1, status: 'played' })
+    const html = await partForm(id, 'gegevens')
+
+    expect(parts(html)).toEqual(['Alles', 'Uitslag', 'Gegevens (hier)', 'Doelpunten', 'Verslag'])
+    expect(html).toContain('id="gegevens-kop"')
+    expect(html).not.toContain('id="aftrap-kop"')
+    expect(html).not.toContain('id="doelpunten"')
+    expect(html).toContain('id="opslaan-kop"')
+    expect(html).toContain(`<a href="/beheer/wedstrijden/${id}" id="hele-wedstrijd">Hele wedstrijd bewerken</a>`)
+    expect(html).not.toContain('hf-page-sidebar')
+    expect(headings(html).filter((heading) => heading.startsWith('h1'))).toHaveLength(1)
+  })
+
+  it('has the kick-off and the result together, and the goals on their own', async () => {
+    const id = await addMatch({ goalsAgainst: 0, goalsFor: 1, status: 'played' })
+    const result = await partForm(id, 'uitslag')
+    const goals = await partForm(id, 'doelpunten')
+
+    expect(result).toContain('id="aftrap-kop"')
+    expect(result).toContain('id="uitslag-kop"')
+    expect(result).not.toContain('id="gegevens-kop"')
+    expect(goals).toContain('id="doelpunten"')
+    expect(goals).not.toContain('id="uitslag-kop"')
+  })
+
+  it('names the part in the title of the tab', async () => {
+    expect((await partMetadata({ params: Promise.resolve({ deel: 'doelpunten', id: '1' }) })).title).toBe(
+      'Wedstrijd invullen: doelpunten',
+    )
+  })
+
+  it('says with which name a goal of ours without a player came in', async () => {
+    const id = await addMatch({ goalsAgainst: 0, goalsFor: 2, status: 'played' })
+
+    await database.db.insert(matchGoals).values([
+      { matchId: id, minute: 12, ours: true, player: 'Hansen' },
+      { matchId: id, minute: 40, ours: true, player: '' },
+    ])
+
+    expect(await partForm(id, 'doelpunten')).toContain(
+      'Zonder speler binnengekomen: doelpunt 1 als &quot;Hansen&quot;.',
+    )
+  })
+
+  it('is not found for an unknown part, or for the changes when none wait', async () => {
+    const id = await addMatch({ goalsAgainst: 0, goalsFor: 1, status: 'played' })
+
+    await expect(partForm(id, 'verslag')).rejects.toThrow('not found')
+    await expect(partForm(id, 'iets')).rejects.toThrow('not found')
+    await expect(partForm(id, 'wijzigingen')).rejects.toThrow('not found')
+  })
+
+  it('goes back to where the editor came from, only for a page of the admin', async () => {
+    const id = await addMatch({ goalsAgainst: 0, goalsFor: 1, status: 'played' })
+
+    expect(await partForm(id, 'gegevens', { terug: '/beheer/kwaliteit' })).toContain(
+      'href="/beheer/kwaliteit">Annuleren</a>',
+    )
+    expect(await partForm(id, 'gegevens', { terug: 'https://example.org' })).toContain(
+      'href="/beheer/wedstrijden">Annuleren</a>',
+    )
+  })
+})
+
 describe('the report in the list and on the match', () => {
   /** A match that was played 2-1, with a squad and a report of this status. */
   async function withReport(status: 'bezig' | 'klaar') {
@@ -1117,7 +1207,7 @@ describe('the report in the list and on the match', () => {
     const id = await withReport('klaar')
     const html = await form(id)
 
-    expect(html).toContain(`href="/beheer/wedstrijden/${id}/verslag">Naar het verslag</a>`)
+    expect(html).toMatch(new RegExp(`href="/beheer/wedstrijden/${id}/verslag"[^>]*>Verslag</a>`, 'u'))
     expect(html).toContain('De doelpunten van deze wedstrijd staan in het verslag.')
     expect(html).toContain('12&#x27; Speler 9')
     expect(html).not.toContain('doelpunt-1-minuut')
@@ -1132,11 +1222,11 @@ describe('the report in the list and on the match', () => {
     const planned = await addMatch({ matchDate: '2099-01-01', round: 'Speelronde 12' })
     const today = await addMatch({ round: 'Speelronde 13' })
 
-    expect(await form(played)).toContain(`href="/beheer/wedstrijden/${played}/verslag">Het verslag invullen</a>`)
+    expect(await form(played)).toMatch(new RegExp(`href="/beheer/wedstrijden/${played}/verslag"[^>]*>Verslag</a>`, 'u'))
     expect(await form(played)).toContain('value="doelpunt-toevoegen"')
     expect(await form(planned)).not.toContain('/verslag')
     // A match that is still being played, from its day on, can have a report too.
-    expect(await form(today)).toContain(`href="/beheer/wedstrijden/${today}/verslag">Het verslag invullen</a>`)
+    expect(await form(today)).toMatch(new RegExp(`href="/beheer/wedstrijden/${today}/verslag"[^>]*>Verslag</a>`, 'u'))
   })
 })
 

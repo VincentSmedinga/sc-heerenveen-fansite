@@ -1165,8 +1165,10 @@ De actie `submitHeldChange` roept `decideChange` van `@fansite/db/match-changes`
 De controles zetten er een verzonnen wijziging voor in `e2e/held-changes.ts`.
 De tegel Wedstrijden wijst altijd naar de lijst zoals die opent.
 `?seizoen=2025-26` kiest een ouder seizoen, en een seizoen zonder wedstrijden valt terug op het huidige.
-De pagina van een wedstrijd (`/beheer/wedstrijden/<nummer>`) is de brede pagina met een zijbalk: de kaarten van het formulier staan in de hoofdkolom (`MatchFields` in `MatchForm.tsx`) en het blok om op te slaan, de laatste invoer en het uitklapblok "Invoer weghalen" in de zijbalk, die op een brede pagina in beeld blijft.
-De velden van het blok om op te slaan horen bij het formulier met het attribuut `form`, en `MatchFormProvider` deelt de toestand van het formulier met de drie delen.
+De pagina van een wedstrijd (`/beheer/wedstrijden/<nummer>`, `MatchEditPage.tsx`) is één brede kolom: de navigatie "Delen van de wedstrijd", de wachtende wijzigingen, de kaarten van het formulier (`MatchFields` in `MatchForm.tsx`), het blok om op te slaan, en daaronder de laatste invoer en het uitklapblok "Invoer weghalen".
+Een deel heeft een eigen adres, `/beheer/wedstrijden/<nummer>/<deel>` met `uitslag`, `gegevens`, `doelpunten` of `wijzigingen`, en toont alleen zijn kaarten met het blok om op te slaan.
+`submitMatchPart` neemt dan alleen de velden van dat deel uit het formulier, en de andere zoals de database ze nu heeft (`mergePart` in `src/beheer/match-fields.ts`).
+De velden van het blok om op te slaan horen bij het formulier met het attribuut `form`, en `MatchFormProvider` deelt de toestand van het formulier met de foutsamenvatting, de kaarten en dat blok.
 Wat een redacteur ziet en verwacht, staat in [`docs/wedstrijden-invullen.md`](../../docs/wedstrijden-invullen.md); de import is beschreven in de [README van de importer](../importer/README.md).
 
 - Het formulier is een client-component met `useActionState`, en een gewone post die zonder JavaScript werkt.

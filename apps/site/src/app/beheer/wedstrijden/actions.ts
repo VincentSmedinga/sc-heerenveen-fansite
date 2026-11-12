@@ -17,12 +17,21 @@ import {
   storedEntryGoals,
   undoEntry,
 } from '#src/beheer/match-entries'
-import { addGoalId, goalFieldId, isUntouchedGoal, type MatchFormState, padGoals } from '#src/beheer/match-fields'
-import { newGoal, readButton, readValues, validate } from '#src/beheer/match-form'
+import {
+  addGoalId,
+  type FormPart,
+  formParts,
+  goalFieldId,
+  isUntouchedGoal,
+  type MatchFormState,
+  mergePart,
+  padGoals,
+} from '#src/beheer/match-fields'
+import { newGoal, readButton, readValues, validate, valuesOf } from '#src/beheer/match-form'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
-import { matchesPath, matchPath } from './paths'
+import { backPathOf, matchesPath, matchPartPath, matchPath } from './paths'
 
 // The actions of the matches. Only an editor fills in a match, as with the articles. The
 // number of the match is bound to the action (`submitMatch.bind(null, id)`) and is input from
@@ -229,6 +238,67 @@ export async function submitMatch(
   _previous: MatchFormState,
   formData: FormData,
 ): Promise<MatchFormState> {
+  return submitForm(matchId, undefined, undefined, formData)
+}
+
+/**
+ * The same for one part of the form (issue 1162): only the fields of that part come from the
+ * form, and the others are what the database holds now. A save ends on the page of the part,
+ * with the address the editor came from (`back`) kept for "Annuleren".
+ */
+export async function submitMatchPart(
+  matchId: number,
+  part: FormPart,
+  back: string | undefined,
+  _previous: MatchFormState,
+  formData: FormData,
+): Promise<MatchFormState> {
+  if (!formParts.includes(part)) {
+    redirect(`${matchesPath}?fout=weg`)
+  }
+
+  return submitForm(matchId, part, backPathOf(back), formData)
+}
+
+/**
+ * Takes the entry of a match away: the match goes back to what it was before the first entry,
+ * and the import reads what Wikipedia says again. It asks for a reason, as every change does.
+ */
+export async function submitRemoveEntry(
+  matchId: number,
+  _previous: RemoveFormState,
+  formData: FormData,
+): Promise<RemoveFormState> {
+  const { userId } = await requireRole('owner', 'editor')
+  const id = parseItemId(matchId)
+
+  if (id === undefined) {
+    redirect(`${matchesPath}?fout=weg`)
+  }
+
+  const reason = parseReason(formData.get('reden'))
+
+  if ('error' in reason) {
+    return {
+      error: reason.error === 'leeg' ? 'Schrijf waarom je de invoer weghaalt.' : 'Schrijf hoogstens 300 tekens.',
+    }
+  }
+
+  const outcome = await undoEntry(getDatabase().db, userId, id, reason.reason)
+
+  redirect(
+    outcome === 'missing'
+      ? `${matchesPath}?fout=weg`
+      : matchPath(id, outcome === 'done' ? 'weggehaald' : 'geen-invoer'),
+  )
+}
+
+async function submitForm(
+  matchId: number,
+  part: FormPart | undefined,
+  back: string | undefined,
+  formData: FormData,
+): Promise<MatchFormState> {
   const { userId } = await requireRole('owner', 'editor')
   const id = parseItemId(matchId)
   const found = id === undefined ? undefined : await findMatch(getDatabase().db, id)
@@ -237,8 +307,10 @@ export async function submitMatch(
     redirect(`${matchesPath}?fout=weg`)
   }
 
+  const read = readValues(formData)
+  const sent = part === undefined ? read : mergePart(part, read, valuesOf(found.match, found.goals))
   // The goals of a match with a report are the report's: the form shows them, and sends none.
-  const values = found.hasReport ? { ...readValues(formData), doelpunten: [] } : readValues(formData)
+  const values = found.hasReport ? { ...sent, doelpunten: [] } : sent
   const button = readButton(formData)
 
   if (button.kind === 'add') {
@@ -292,42 +364,13 @@ export async function submitMatch(
   const entry = found.hasReport ? { ...checked.entry, goals: storedEntryGoals(found.goals) } : checked.entry
   const outcome = await saveEntry(getDatabase().db, userId, id, entry, checked.reason)
 
+  const done = outcome.status === 'saved' ? 'opgeslagen' : 'ongewijzigd'
+
   redirect(
     outcome.status === 'missing'
       ? `${matchesPath}?fout=weg`
-      : matchPath(id, outcome.status === 'saved' ? 'opgeslagen' : 'ongewijzigd'),
-  )
-}
-
-/**
- * Takes the entry of a match away: the match goes back to what it was before the first entry,
- * and the import reads what Wikipedia says again. It asks for a reason, as every change does.
- */
-export async function submitRemoveEntry(
-  matchId: number,
-  _previous: RemoveFormState,
-  formData: FormData,
-): Promise<RemoveFormState> {
-  const { userId } = await requireRole('owner', 'editor')
-  const id = parseItemId(matchId)
-
-  if (id === undefined) {
-    redirect(`${matchesPath}?fout=weg`)
-  }
-
-  const reason = parseReason(formData.get('reden'))
-
-  if ('error' in reason) {
-    return {
-      error: reason.error === 'leeg' ? 'Schrijf waarom je de invoer weghaalt.' : 'Schrijf hoogstens 300 tekens.',
-    }
-  }
-
-  const outcome = await undoEntry(getDatabase().db, userId, id, reason.reason)
-
-  redirect(
-    outcome === 'missing'
-      ? `${matchesPath}?fout=weg`
-      : matchPath(id, outcome === 'done' ? 'weggehaald' : 'geen-invoer'),
+      : part === undefined
+        ? matchPath(id, done)
+        : matchPartPath(id, part, { back, done }),
   )
 }

@@ -32,11 +32,13 @@ import {
 import {
   addGoalId,
   emptyGoal,
+  type FormPart,
   goalFieldId,
   type GoalFieldName,
   goalFieldNames,
   goalTotalOf,
   type GoalValues,
+  isPartField,
   isUntouchedGoal,
   type MatchFieldName,
   matchFieldNames,
@@ -48,7 +50,7 @@ import {
 
 const summaryId = 'fouten'
 
-/** The `id` of the form, which the fields and buttons in the sidebar name in their `form`. */
+/** The `id` of the form, which the field and button of the save panel name in their `form`. */
 const formId = 'wedstrijd'
 
 const ours = 'sc Heerenveen'
@@ -63,6 +65,11 @@ export type MatchFormChoices = {
   goalKinds: readonly { label: string; value: string }[]
   /** Whether sc Heerenveen plays at home: clubs and scores follow the order of the match. */
   home: boolean
+  /**
+   * The goals of ours that came in without a player, by their number in the form, with the
+   * name they came in with: the editor chooses the player from it (issue 1162).
+   */
+  incoming?: readonly { name: string; number: number }[]
   /** Whether the competition has extra time: the cup and the play-offs. */
   knockout: boolean
   opponent: string
@@ -91,30 +98,27 @@ const MatchFormContext = createContext<MatchFormContext | undefined>(undefined)
 /** What the form knows before the server answers: how many goals it has and who scored. */
 type LiveGoals = { count: number; for: MatchFormState; scorers: ScorerForm[] }
 
-/** The list of the errors of the last save, which gets the focus when there are any. */
-export function MatchErrorSummary() {
+/**
+ * The `id` of the link to the whole form on the page of a part: an error in a field of another
+ * part links to it, as that field is not on the page.
+ */
+export const wholeFormId = 'hele-wedstrijd'
+
+/**
+ * The list of the errors of the last save, which gets the focus when there are any. On the page
+ * of a part, an error of a field that is not on the page says so and links to the whole form.
+ */
+export function MatchErrorSummary({ part }: { part?: FormPart | undefined }) {
   const { state } = useMatchForm()
-  const { errors, values } = state
-  const order = [
-    ...matchFieldNames,
-    'doelpunten',
-    ...values.doelpunten.flatMap((_goal, index) => goalFieldNames.map((field) => goalFieldId(index + 1, field))),
-    'reden',
-  ]
-  const summary = order.flatMap((id) => {
-    const message = errors[id]
 
-    return message === undefined ? [] : [{ id, message }]
-  })
-
-  return <ErrorSummary errors={summary} id={summaryId} level={2} tabIndex={-1} />
+  return <ErrorSummary errors={summaryOf(state, part)} id={summaryId} level={2} tabIndex={-1} />
 }
 
 /**
- * The cards of the form: the kick-off, the result and the goals, each with its own heading. The
- * first button in the form is a hidden "Opslaan", so the Enter key in a field saves, and never
- * removes the first goal. The goals are a table of fields, and every field and button of it
- * names the goal it belongs to.
+ * The cards of the form: the kick-off, the result and the goals, each with its own heading, or
+ * only the cards of one `part` (issue 1162). The first button in the form is a hidden
+ * "Opslaan", so the Enter key in a field saves, and never removes the first goal. The goals are
+ * a table of fields, and every field and button of it names the goal it belongs to.
  *
  * With JavaScript the goals follow the form while it is filled in: a new end result gives as
  * many goals as it adds up to, and the team and the kind of a goal decide which field asks for
@@ -126,8 +130,9 @@ export function MatchErrorSummary() {
  * 1021). Each time the editor comes back to this tab, the page asks the server for the squad
  * again: the new player is in the list of every goal, and the fields keep what was typed.
  */
-export function MatchFields() {
+export function MatchFields({ part }: { part?: FormPart | undefined }) {
   const { choices, formAction, state } = useMatchForm()
+  const shows = (card: FormPart) => part === undefined || part === card
   const [live, setLive] = useState<LiveGoals>()
   const router = useRouter()
   const addingPlayer = useRef(false)
@@ -313,131 +318,137 @@ export function MatchFields() {
       <Button aria-hidden="true" className="hf-visually-hidden" name="knop" tabIndex={-1} type="submit" value="opslaan">
         Opslaan
       </Button>
-      <Card aria-labelledby="aftrap-kop">
-        <Heading id="aftrap-kop" level={2}>
-          Aftrap
-        </Heading>
-        <FieldGroup
-          legend={
-            <Text as="span" className="hf-visually-hidden">
-              Datum en tijd
-            </Text>
-          }
-        >
-          <Field
-            error={errors['aftrap-datum']}
-            hint="Is alleen het weekend bekend? Vul de eerste dag in."
-            id="aftrap-datum"
-            label="Datum"
-          >
-            <Input {...field('aftrap-datum')} type="date" width="natural" />
-          </Field>
-          <Field
-            error={errors['aftrap-tijd']}
-            hideOptional
-            {...(choices.timeOptional
-              ? { hint: 'Staat de tijd niet bij de sc Heerenveen Fansite? Laat hem dan leeg.' }
-              : {})}
-            id="aftrap-tijd"
-            label="Tijd"
-            required={false}
-          >
-            <Input {...field('aftrap-tijd')} type="time" width="natural" />
-          </Field>
-          <Field
-            error={errors['aftrap-tekst']}
-            hideOptional
-            hint="Alleen als de tijd niet bekend is, zoals 12-14 februari 2027."
-            id="aftrap-tekst"
-            label="Weekend of dag zonder tijd"
-            required={false}
-          >
-            <Input {...field('aftrap-tekst')} autoComplete="off" />
-          </Field>
-        </FieldGroup>
-      </Card>
-      <Card aria-labelledby="uitslag-kop">
-        <Heading id="uitslag-kop" level={2}>
-          Uitslag
-        </Heading>
-        <Field error={errors.status} id="status" label="Status">
-          <Select {...field('status')} key={velden.status} width="natural">
-            {choices.statuses.map((status) => (
-              <Select.Option key={status.value} value={status.value}>
-                {status.label}
-              </Select.Option>
-            ))}
-          </Select>
-        </Field>
-        <FieldGroup hint="Met verlenging, zonder strafschoppen." legend="Eindstand" separator="-">
-          {score('uitslag')}
-        </FieldGroup>
-      </Card>
-      {choices.knockout ? (
-        <Card aria-labelledby="verlenging-kop">
-          <Heading id="verlenging-kop" level={2}>
-            Verlenging en strafschoppen
+      {shows('uitslag') ? (
+        <>
+          <Card aria-labelledby="aftrap-kop">
+            <Heading id="aftrap-kop" level={2}>
+              Aftrap
+            </Heading>
+            <FieldGroup
+              legend={
+                <Text as="span" className="hf-visually-hidden">
+                  Datum en tijd
+                </Text>
+              }
+            >
+              <Field
+                error={errors['aftrap-datum']}
+                hint="Is alleen het weekend bekend? Vul de eerste dag in."
+                id="aftrap-datum"
+                label="Datum"
+              >
+                <Input {...field('aftrap-datum')} type="date" width="natural" />
+              </Field>
+              <Field
+                error={errors['aftrap-tijd']}
+                hideOptional
+                {...(choices.timeOptional
+                  ? { hint: 'Staat de tijd niet bij de sc Heerenveen Fansite? Laat hem dan leeg.' }
+                  : {})}
+                id="aftrap-tijd"
+                label="Tijd"
+                required={false}
+              >
+                <Input {...field('aftrap-tijd')} type="time" width="natural" />
+              </Field>
+              <Field
+                error={errors['aftrap-tekst']}
+                hideOptional
+                hint="Alleen als de tijd niet bekend is, zoals 12-14 februari 2027."
+                id="aftrap-tekst"
+                label="Weekend of dag zonder tijd"
+                required={false}
+              >
+                <Input {...field('aftrap-tekst')} autoComplete="off" />
+              </Field>
+            </FieldGroup>
+          </Card>
+          <Card aria-labelledby="uitslag-kop">
+            <Heading id="uitslag-kop" level={2}>
+              Uitslag
+            </Heading>
+            <Field error={errors.status} id="status" label="Status">
+              <Select {...field('status')} key={velden.status} width="natural">
+                {choices.statuses.map((status) => (
+                  <Select.Option key={status.value} value={status.value}>
+                    {status.label}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Field>
+            <FieldGroup hint="Met verlenging, zonder strafschoppen." legend="Eindstand" separator="-">
+              {score('uitslag')}
+            </FieldGroup>
+          </Card>
+          {choices.knockout ? (
+            <Card aria-labelledby="verlenging-kop">
+              <Heading id="verlenging-kop" level={2}>
+                Verlenging en strafschoppen
+              </Heading>
+              <RadioGroup
+                error={errors.verlenging}
+                id="verlenging"
+                key={velden.verlenging}
+                legend="Was er verlenging?"
+                name="verlenging"
+                options={[
+                  { label: 'Nee', value: 'nee' },
+                  { label: 'Ja', value: 'ja' },
+                ]}
+                value={velden.verlenging}
+              />
+              <FieldGroup
+                hint="Alleen bij verlenging, voor allebei de teams of voor geen van beide."
+                legend="Stand na 90 minuten"
+                separator="-"
+              >
+                {score('na90')}
+              </FieldGroup>
+              <FieldGroup
+                hint="Alleen bij een gelijke stand na verlenging, voor allebei de teams of voor geen van beide."
+                legend="Strafschoppen"
+                separator="-"
+              >
+                {score('strafschoppen')}
+              </FieldGroup>
+            </Card>
+          ) : null}
+        </>
+      ) : null}
+      {shows('gegevens') ? (
+        <Card aria-labelledby="gegevens-kop">
+          <Heading id="gegevens-kop" level={2}>
+            Gegevens
           </Heading>
-          <RadioGroup
-            error={errors.verlenging}
-            id="verlenging"
-            key={velden.verlenging}
-            legend="Was er verlenging?"
-            name="verlenging"
-            options={[
-              { label: 'Nee', value: 'nee' },
-              { label: 'Ja', value: 'ja' },
-            ]}
-            value={velden.verlenging}
-          />
-          <FieldGroup
-            hint="Alleen bij verlenging, voor allebei de teams of voor geen van beide."
-            legend="Stand na 90 minuten"
-            separator="-"
+          <Field
+            error={errors.toeschouwers}
+            hideOptional
+            hint="Alleen bij een gespeelde wedstrijd. Een wedstrijd zonder publiek heeft 0."
+            id="toeschouwers"
+            label="Toeschouwers"
+            required={false}
           >
-            {score('na90')}
-          </FieldGroup>
-          <FieldGroup
-            hint="Alleen bij een gelijke stand na verlenging, voor allebei de teams of voor geen van beide."
-            legend="Strafschoppen"
-            separator="-"
+            <Input {...field('toeschouwers')} autoComplete="off" inputMode="numeric" width="narrow" />
+          </Field>
+          <Field error={errors.scheidsrechter} hideOptional id="scheidsrechter" label="Scheidsrechter" required={false}>
+            <Input {...field('scheidsrechter')} autoComplete="off" />
+          </Field>
+          <Field error={errors.stadion} hideOptional id="stadion" label="Stadion" required={false}>
+            <Input {...field('stadion')} autoComplete="off" autoCorrect="off" />
+          </Field>
+          <Field
+            error={errors.opmerking}
+            hideOptional
+            hint="Een feit voor de bezoeker, zoals Begon later door file."
+            id="opmerking"
+            label="Opmerking"
+            required={false}
           >
-            {score('strafschoppen')}
-          </FieldGroup>
+            <Input {...field('opmerking')} autoComplete="off" />
+          </Field>
         </Card>
       ) : null}
-      <Card aria-labelledby="gegevens-kop">
-        <Heading id="gegevens-kop" level={2}>
-          Gegevens
-        </Heading>
-        <Field
-          error={errors.toeschouwers}
-          hideOptional
-          hint="Alleen bij een gespeelde wedstrijd. Een wedstrijd zonder publiek heeft 0."
-          id="toeschouwers"
-          label="Toeschouwers"
-          required={false}
-        >
-          <Input {...field('toeschouwers')} autoComplete="off" inputMode="numeric" width="narrow" />
-        </Field>
-        <Field error={errors.scheidsrechter} hideOptional id="scheidsrechter" label="Scheidsrechter" required={false}>
-          <Input {...field('scheidsrechter')} autoComplete="off" />
-        </Field>
-        <Field error={errors.stadion} hideOptional id="stadion" label="Stadion" required={false}>
-          <Input {...field('stadion')} autoComplete="off" autoCorrect="off" />
-        </Field>
-        <Field
-          error={errors.opmerking}
-          hideOptional
-          hint="Een feit voor de bezoeker, zoals Begon later door file."
-          id="opmerking"
-          label="Opmerking"
-          required={false}
-        >
-          <Input {...field('opmerking')} autoComplete="off" />
-        </Field>
-      </Card>
-      {choices.report === undefined ? null : (
+      {!shows('doelpunten') || choices.report === undefined ? null : (
         <Card aria-labelledby="doelpunten">
           <Heading id="doelpunten" level={2} tabIndex={-1}>
             Doelpunten
@@ -459,7 +470,7 @@ export function MatchFields() {
           )}
         </Card>
       )}
-      {choices.report !== undefined ? null : (
+      {!shows('doelpunten') || choices.report !== undefined ? null : (
         <Card aria-labelledby="doelpunten">
           <Heading id="doelpunten" level={2} tabIndex={-1}>
             Doelpunten
@@ -481,6 +492,12 @@ export function MatchFields() {
                 De speler staat er niet in? Voeg hem toe aan de selectie van {choices.addPlayer.season} (opent in een
                 nieuw tabblad)
               </Link>
+            </Text>
+          )}
+          {choices.incoming === undefined || choices.incoming.length === 0 ? null : (
+            <Text>
+              Zonder speler binnengekomen:{' '}
+              {choices.incoming.map(({ name, number }) => `doelpunt ${number} als "${name}"`).join(', ')}.
             </Text>
           )}
           {/* The end result changes the goals by itself, so a screen reader is told. */}
@@ -517,13 +534,14 @@ export function MatchFields() {
 }
 
 /**
- * The state of the form of a match, shared by the three parts of the page: the list of errors
- * (`MatchErrorSummary`), the cards with the fields (`MatchFields`) and the save panel in the
- * sidebar (`MatchSavePanel`). They sit in two columns of the page, so the page puts them in
- * this provider, and the field and button of the sidebar belong to the form by its `id` (the
- * `form` attribute). The form is a plain POST that works without JavaScript: the provider is a
- * client component only to show what the server says. Adding or removing a goal is a button
- * that sends the form to the server, which answers with the form again.
+ * The state of the form of a match, shared by the three pieces of the page: the list of
+ * errors (`MatchErrorSummary`), the cards with the fields (`MatchFields`) and the save panel
+ * under them (`MatchSavePanel`). Other cards with forms of their own come between them, so the
+ * page puts them in this provider, and the field and button of the save panel belong to the
+ * form by its `id` (the `form` attribute). The form is a plain POST that works without
+ * JavaScript: the provider is a client component only to show what the server says. Adding or
+ * removing a goal is a button that sends the form to the server, which answers with the form
+ * again.
  */
 export function MatchFormProvider({
   action,
@@ -560,7 +578,7 @@ export function MatchFormProvider({
 }
 
 /**
- * The save panel for the sidebar: the reason and "Opslaan" in a card, and "Annuleren" in a cell
+ * The save panel under the cards: the reason and "Opslaan" in a card, and "Annuleren" in a cell
  * of its own under it. Under the button it would be too close to be a target of its own at the
  * size of the compact admin (WCAG 2.5.8). Its field and button belong to the form of the cards
  * by its `id`, so they save it, with or without JavaScript.
@@ -587,6 +605,31 @@ export function MatchSavePanel({ cancelHref }: { cancelHref: string }) {
       </Text>
     </>
   )
+}
+
+/**
+ * The errors of the form in the order of its fields. On the page of a part, an error of a field
+ * that is not on the page links to the whole form and says it is in another part.
+ */
+export function summaryOf({ errors, values }: MatchFormState, part?: FormPart): { id: string; message: string }[] {
+  const order = [
+    ...matchFieldNames,
+    'doelpunten',
+    ...values.doelpunten.flatMap((_goal, index) => goalFieldNames.map((field) => goalFieldId(index + 1, field))),
+    'reden',
+  ]
+
+  return order.flatMap((id) => {
+    const message = errors[id]
+
+    if (message === undefined) {
+      return []
+    }
+
+    return part === undefined || isPartField(part, id)
+      ? [{ id, message }]
+      : [{ id: wholeFormId, message: `In een ander deel van de wedstrijd: ${message}` }]
+  })
 }
 
 /** What a screen reader hears when the form changes the number of goals by itself. */
