@@ -524,10 +524,7 @@ describe('the address of the page of a player (#1079)', () => {
 
     expect(await addPlayer(database.db, userId, season, entry(), t0)).toMatchObject({ status: 'added' })
     expect(await allPlayers()).toHaveLength(1)
-    expect(warn).toHaveBeenCalledWith(
-      'Could not update the addresses of the players after a change of a player',
-      expect.any(Error),
-    )
+    expect(warn).toHaveBeenCalledWith('Could not update the addresses of the players after a change of a player: Error')
     warn.mockRestore()
   })
 })
