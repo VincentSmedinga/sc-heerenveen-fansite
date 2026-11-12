@@ -405,12 +405,10 @@ for (const [name, javaScriptEnabled] of [
       await page.goto('/beheer/wedstrijden?tonen=aangepast')
       await expect(page.locator(`a[href^="${address}"]`).first()).toBeVisible()
 
-      // Taking the entry away asks for a reason, and brings the match back.
+      // Taking the entry away needs no reason, and brings the match back.
       await page.goto(address)
       await page.locator('summary', { hasText: 'Invoer weghalen' }).click()
-      await page.getByRole('button', { name: /^Invoer weghalen voor/u }).click()
-      await expect(page.locator('#weghalen-reden')).toHaveAttribute('aria-invalid', 'true')
-      await page.getByLabel('Reden om de invoer weg te halen').fill('Het was een test')
+      await expect(page.locator('#weghalen-reden')).not.toHaveAttribute('required')
       await page.getByRole('button', { name: /^Invoer weghalen voor/u }).click()
       await expect(page.getByRole('status').filter({ hasText: 'Invoer weggehaald.' })).toBeVisible()
       await expect(page.getByRole('heading', { level: 2, name: 'Laatste invoer' })).toHaveCount(0)
@@ -489,11 +487,10 @@ for (const [name, javaScriptEnabled] of [
       await page.getByRole('button', { name: 'Speler 1 weghalen' }).last().click()
       await expect(page.locator('#speler-zij-1-naam')).toHaveCount(0)
 
-      // Taking the report away asks for a reason, and brings the goals back.
+      // Taking the report away takes a reason, and brings the goals back.
       await page.goto(address)
       await page.locator('summary', { hasText: 'Verslag weghalen' }).click()
-      await page.getByRole('button', { name: /^Verslag weghalen voor/u }).click()
-      await expect(page.locator('#verslag-weghalen-reden')).toHaveAttribute('aria-invalid', 'true')
+      await expect(page.locator('#verslag-weghalen-reden')).not.toHaveAttribute('required')
       await page.getByLabel('Reden om het verslag weg te halen').fill('Het was een test')
       await page.getByRole('button', { name: /^Verslag weghalen voor/u }).click()
       await expect(page.getByRole('status').filter({ hasText: 'Verslag weggehaald.' })).toBeVisible()

@@ -38,11 +38,12 @@ export function parseHideReason(choice: unknown, note: unknown): { error: HideRe
 
   const parsed = parseReason(note)
 
-  if ('reason' in parsed) {
-    return parsed
+  if ('error' in parsed) {
+    return { error: 'lang' }
   }
 
-  return { error: parsed.error === 'leeg' ? 'anders' : 'lang' }
+  // Hiding an item keeps its reason required, also for "Anders".
+  return parsed.reason === undefined ? { error: 'anders' } : { reason: parsed.reason }
 }
 
 /** The error texts, by what went wrong; `lang` says how long a text may be. */

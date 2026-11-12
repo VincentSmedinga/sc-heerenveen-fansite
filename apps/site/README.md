@@ -1178,7 +1178,7 @@ Wat een redacteur ziet en verwacht, staat in [`docs/wedstrijden-invullen.md`](..
   De eerste knop is een verborgen "Opslaan", zodat Enter opslaat.
 - `src/beheer/match-form.ts` leest en controleert wat het formulier stuurt, altijd opnieuw op de server, met dezelfde regels als de checks van `matches` en `match_goals` en de eis dat de doelpunten samen de uitslag geven (een uitslag zonder doelpunten mag).
   `src/beheer/match-entries.ts` schrijft de invoer in `matches` en `match_goals`, zet de markering in `match_edits` met de wedstrijd van vóór de eerste invoer, en schrijft `match.edit` of `match.undo` in het logboek, alles in één transactie.
-- Elke invoer en elk weghalen vraagt een reden.
+- Een reden bij een invoer of een weghaalactie mag leeg (#1186): dan staat er geen reden in het logboek, en de pagina toont geen regel "Reden".
   Een invoer zonder verschil, en "weghalen" zonder invoer, schrijven niets.
 - Een wijziging van Wikipedia die voor de wedstrijd wachtte in `match_changes`, vervalt bij een invoer.
 - Zolang minstens één wedstrijd een markering heeft, zetten de pagina's met de volledige bronvermelding (`SourceCredit`, `OpponentsCredit`) in de uitklap van die bronvermelding de zin "Enkele gegevens heeft onze redactie zelf ingevuld of aangepast." (`edited` van `WikipediaCredit`).
@@ -1305,7 +1305,7 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
   De velden en controles zijn die van het formulier van een speler (`PersonFields.tsx` en `src/beheer/person-checks.ts`).
   Een nieuwe naam geldt voor de persoon en voor zijn speler in elk seizoen.
   De geboortedatum is een jaar of een datum, met de bron `manual`, die de importer niet vervangt; leeg haalt hem weg, zodat de importer hem weer invult.
-  Opslaan vraagt een reden, en schrijft `person.edit` met wat er veranderde, zonder de geboortedatum zelf.
+  Opslaan vraagt geen reden (die mag leeg), en schrijft `person.edit` met wat er veranderde, zonder de geboortedatum zelf.
 - Een speler kan een **vorig rugnummer** hebben met de dag vanaf wanneer het huidige nummer geldt ("Vorig rugnummer" en "Nieuw nummer vanaf", beide of geen, elk met een eigen fout; #1076).
   Verandert de redactie het nummer van een speler die met zijn oude nummer in een opgeslagen opstelling staat, dan zet het formulier het oude nummer in Vorig rugnummer en vraagt het om de dag.
   `readSquad` (`src/beheer/match-reports.ts`) geeft de selectie met het nummer van de dag van de wedstrijd, voor het formulier van het verslag, het plakken en het live verslag; een opgeslagen verslag houdt zijn nummers.
@@ -1359,12 +1359,12 @@ Een adres zonder seizoen sinds 1990/91 geeft "niet gevonden".
 
 Verschillen de doelpunten van een speler in de selectietabel van die in de wedstrijden of de verslagen, dan heeft de pagina van het seizoen een koppeling "spelerscijfers verschillen" (#974).
 Ze leidt naar `/beheer/kwaliteit/<seizoen>/spelerscijfers` (`src/app/beheer/kwaliteit/[seizoen]/spelerscijfers`), met per verschil de speler, de competitie en de twee aantallen.
-Elk verschil heeft een formulier met een reden en twee knoppen: het andere aantal overnemen, of de selectietabel houden (`submitStatDifference` in `src/app/beheer/kwaliteit/actions.ts`).
+Elk verschil heeft een formulier met een reden (die mag leeg) en twee knoppen: het andere aantal overnemen, of de selectietabel houden (`submitStatDifference` in `src/app/beheer/kwaliteit/actions.ts`).
 Het besluit staat in het logboek als `player.stats-take-over` of `player.stats-keep`.
 
 Leest de import voor een speler iets anders dan de redactie invulde, dan heeft de pagina van het seizoen een koppeling "spelersgegevens verschillen" (#1022).
 Ze leidt naar `/beheer/kwaliteit/<seizoen>/spelersgegevens` (`src/app/beheer/kwaliteit/[seizoen]/spelersgegevens`), met per afwijking de speler, het veld, de waarde van de redactie en die van de import.
-Elke afwijking heeft een formulier met een reden en twee knoppen: de import overnemen, of de redactie houden (`submitFieldDifference` in `src/app/beheer/kwaliteit/actions.ts`).
+Elke afwijking heeft een formulier met een reden (die mag leeg) en twee knoppen: de import overnemen, of de redactie houden (`submitFieldDifference` in `src/app/beheer/kwaliteit/actions.ts`).
 Het besluit staat in het logboek als `player.field-take-over` of `player.field-keep`.
 Heeft een andere speler van het seizoen de naam of de pagina van de import al, dan verandert er niets en zegt de pagina dat.
 

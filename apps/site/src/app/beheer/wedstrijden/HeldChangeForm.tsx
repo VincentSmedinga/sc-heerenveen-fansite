@@ -8,9 +8,9 @@ import type { HeldChangeFormState } from './actions'
 /**
  * The form that decides one change that Wikipedia holds back: one reason, and two buttons, one
  * that takes Wikipedia over and one that rejects the change. Every button names the match and
- * what changes, so a page with several changes still tells them apart. A missing reason comes
- * back as an error with the focus on the list of errors. The form is a plain POST that works
- * without JavaScript.
+ * what changes, so a page with several changes still tells them apart. A reason that is
+ * too long comes back as an error with the focus on the list of errors. The form is a plain
+ * POST that works without JavaScript.
  */
 export function HeldChangeForm({
   action,
@@ -47,9 +47,11 @@ export function HeldChangeForm({
       <Form action={formAction}>
         <Field
           error={state.error}
-          hint="Waarom beslis je dit? Komt in het logboek, hoogstens 300 tekens."
+          hideOptional
+          hint="Mag leeg. Komt in het logboek, hoogstens 300 tekens."
           id={reasonId}
           label={`Reden voor je besluit over ${what}`}
+          required={false}
         >
           <Input autoComplete="off" name="reden" />
         </Field>

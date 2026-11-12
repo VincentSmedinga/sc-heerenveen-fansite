@@ -594,7 +594,14 @@ export function MatchSavePanel({ cancelHref, next = false }: { cancelHref: strin
           Opslaan
         </Heading>
         <Text appearance="meta">Staat {choices.showDelay} op de site.</Text>
-        <Field error={state.errors.reden} hint="Komt in het logboek, hoogstens 300 tekens." id="reden" label="Reden">
+        <Field
+          error={state.errors.reden}
+          hideOptional
+          hint="Mag leeg. Komt in het logboek, hoogstens 300 tekens."
+          id="reden"
+          label="Reden"
+          required={false}
+        >
           <Input autoComplete="off" defaultValue={state.values.reden} form={formId} name="reden" />
         </Field>
         {next ? (

@@ -83,7 +83,7 @@ export async function deleteAddedMatch(
   db: Database,
   userId: number,
   id: number,
-  reason: string,
+  reason: string | undefined,
   now = new Date(),
 ): Promise<DeleteOutcome> {
   return db.transaction(async (transaction) => {

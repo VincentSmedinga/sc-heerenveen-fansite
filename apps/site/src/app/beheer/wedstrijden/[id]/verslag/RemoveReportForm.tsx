@@ -7,8 +7,8 @@ import type { RemoveReportFormState } from './actions'
 
 /**
  * The block that takes the report of a match away: a Disclosure, so the red button is not one
- * press away, with a reason, as every change asks for one. The button names the match. A
- * missing reason comes back as an error, and the block is open then, also without JavaScript,
+ * press away, with an optional reason. The button names the match. A reason that is
+ * too long comes back as an error, and the block is open then, also without JavaScript,
  * where the server makes the page again and a closed block would hide the error.
  */
 export function RemoveReportForm({
@@ -35,9 +35,11 @@ export function RemoveReportForm({
       <Form action={formAction}>
         <Field
           error={state.error}
-          hint="Waarom haal je het verslag weg? Komt in het logboek, hoogstens 300 tekens."
+          hideOptional
+          hint="Mag leeg. Komt in het logboek, hoogstens 300 tekens."
           id="verslag-weghalen-reden"
           label="Reden om het verslag weg te halen"
+          required={false}
         >
           <Input autoComplete="off" name="reden" />
         </Field>

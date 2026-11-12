@@ -159,11 +159,18 @@ describe('submitPerson', () => {
   })
 
   it('comes back with the errors and the values', async () => {
-    const state = await submitPerson(personId, 'land', undefined, undefined, empty, form({ land: 'XX', reden: '' }))
+    const state = await submitPerson(
+      personId,
+      'land',
+      undefined,
+      undefined,
+      empty,
+      form({ land: 'XX', reden: 'x'.repeat(301) }),
+    )
 
     expect(state.errors).toEqual({
       land: 'Kies een land uit de lijst, of kies Onbekend.',
-      reden: 'Schrijf waarom je dit invult of aanpast.',
+      reden: 'Schrijf hoogstens 300 tekens.',
     })
     expect(state.values.land).toBe('XX')
   })

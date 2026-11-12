@@ -374,10 +374,17 @@ describe('submitRemoveReport', () => {
       return submitRemoveReport(id as number, {}, formData)
     })
 
-  it('asks for a reason, and leaves the report as it is without one', async () => {
+  it('takes the report away without a reason, and writes none in the log', async () => {
     await submit(matchId, report())
 
-    expect(await remove(matchId, '  ')).toEqual({ error: 'Schrijf waarom je het verslag weghaalt.' })
+    expect(await remove(matchId, '  ')).toMatchObject({ redirect: expect.any(String) })
+    expect(await reports()).toEqual([])
+    expect((await database.db.select().from(auditLog)).at(-1)).toMatchObject({ action: 'match.undo', reason: null })
+  })
+
+  it('leaves the report as it is for a reason of more than 300 characters', async () => {
+    await submit(matchId, report())
+
     expect(await remove(matchId, 'x'.repeat(301))).toEqual({ error: 'Schrijf hoogstens 300 tekens.' })
     expect(await reports()).toHaveLength(1)
   })

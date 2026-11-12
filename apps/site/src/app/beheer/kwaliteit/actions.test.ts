@@ -139,10 +139,14 @@ describe('deciding a difference in the numbers of a player', () => {
     expect(await differences()).toMatchObject([{ resolution: 'person', status: 'rejected' }])
   })
 
-  it('asks for a reason and a choice, and changes nothing without them', async () => {
-    expect(await decide(differenceId, { besluit: 'overnemen', reden: ' ' })).toEqual({
-      error: 'Schrijf waarom je dit beslist.',
+  it('decides without a reason, and writes none in the log', async () => {
+    expect(await decide(differenceId, { besluit: 'houden', reden: ' ' })).toEqual({
+      redirect: `${page}?gedaan=gehouden`,
     })
+    expect(await database.db.select().from(auditLog)).toMatchObject([{ reason: null }])
+  })
+
+  it('asks for a choice and a reason of at most 300 characters, and changes nothing without them', async () => {
     expect(await decide(differenceId, { besluit: 'overnemen', reden: 'x'.repeat(301) })).toEqual({
       error: 'Schrijf hoogstens 300 tekens.',
     })
@@ -252,10 +256,14 @@ describe('deciding a difference between the editors and the import about a playe
     expect(await database.db.select().from(auditLog)).toMatchObject([{ action: 'player.field-keep' }])
   })
 
-  it('asks for a reason and a choice, and changes nothing without them', async () => {
-    expect(await decideField(fieldDifferenceId, { besluit: 'overnemen', reden: ' ' })).toEqual({
-      error: 'Schrijf waarom je dit beslist.',
+  it('decides without a reason, and writes none in the log', async () => {
+    expect(await decideField(fieldDifferenceId, { besluit: 'houden', reden: ' ' })).toEqual({
+      redirect: `${fieldPage}?gedaan=gehouden`,
     })
+    expect(await database.db.select().from(auditLog)).toMatchObject([{ reason: null }])
+  })
+
+  it('asks for a choice and a reason of at most 300 characters, and changes nothing without them', async () => {
     expect(await decideField(fieldDifferenceId, { besluit: 'iets', reden: 'Daarom' })).toEqual({
       error: 'Kies of je de import overneemt of de redactie houdt.',
     })

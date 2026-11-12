@@ -13,7 +13,7 @@ export type AuditEntry = {
   detail?: string
   itemId: number
   /** Why, for an action that has a reason, such as hiding an item. */
-  reason?: string
+  reason?: string | undefined
   /**
    * The account that did it: its id, not its address. `null` is the importer, which has no
    * account: the log then says "de import".

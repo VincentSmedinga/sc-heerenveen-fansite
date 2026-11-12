@@ -86,7 +86,7 @@ export async function countWaitingFieldDifferences(db: Reader): Promise<Map<stri
 export async function decidePlayerFieldDifference(
   db: Writer,
   id: number,
-  decision: { kind: 'keep' | 'take-over'; reason: string; userId: number },
+  decision: { kind: 'keep' | 'take-over'; reason?: string | undefined; userId: number },
   now: Date,
 ): Promise<FieldDecisionOutcome> {
   const [difference] = await db
