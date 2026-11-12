@@ -35,7 +35,7 @@ export function RemoveMatchForm({
       <Form action={formAction}>
         <Field
           error={state.error}
-          hint="Waarom verwijder je de wedstrijd? Komt in het logboek, hoogstens 300 tekens."
+          hint="Mag leeg. Komt in het logboek, hoogstens 300 tekens."
           id="verwijderen-reden"
           label="Reden om de wedstrijd te verwijderen"
         >

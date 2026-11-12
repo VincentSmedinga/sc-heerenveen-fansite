@@ -461,7 +461,7 @@ export async function removeReport(
   db: Database,
   userId: number,
   id: number,
-  reason: string,
+  reason: string | undefined,
   now = new Date(),
 ): Promise<RemoveReportOutcome> {
   return db.transaction(async (transaction) => {

@@ -93,7 +93,7 @@ export async function submitAddMatch(_previous: AddFormState, formData: FormData
 /**
  * Decides a difference between Wikipedia and the entry of the editors, or between two sources
  * of a match: "overnemen" takes the other value over for that part, "houden" keeps the match.
- * It asks for a reason, as every change does. The number of the difference is bound to the
+ * The reason is optional. The number of the difference is bound to the
  * action and checked again, and one that is decided already (by someone else, or by the import
  * after seven days) ends on the list with a notice.
  */
@@ -120,7 +120,7 @@ export async function submitConflict(
 
   if ('error' in reason) {
     return {
-      error: reason.error === 'leeg' ? 'Schrijf waarom je dit beslist.' : 'Schrijf hoogstens 300 tekens.',
+      error: 'Schrijf hoogstens 300 tekens.',
     }
   }
 
@@ -167,7 +167,7 @@ export async function submitDeleteMatch(
 
   if ('error' in reason) {
     return {
-      error: reason.error === 'leeg' ? 'Schrijf waarom je de wedstrijd verwijdert.' : 'Schrijf hoogstens 300 tekens.',
+      error: 'Schrijf hoogstens 300 tekens.',
     }
   }
 
@@ -185,7 +185,7 @@ export async function submitDeleteMatch(
 /**
  * Decides a change that Wikipedia holds back: "overnemen" makes the match what Wikipedia says
  * now (or removes it, when the page does not name it any more), "afwijzen" leaves the match as
- * it is. It asks for a reason, as every change does. The number of the change is bound to the
+ * it is. The reason is optional. The number of the change is bound to the
  * action and checked again, and one that is decided already (by someone else, by the command or
  * by the import after seven days) or whose match is gone ends on the list with a notice.
  */
@@ -212,7 +212,7 @@ export async function submitHeldChange(
 
   if ('error' in reason) {
     return {
-      error: reason.error === 'leeg' ? 'Schrijf waarom je dit beslist.' : 'Schrijf hoogstens 300 tekens.',
+      error: 'Schrijf hoogstens 300 tekens.',
     }
   }
 
@@ -275,7 +275,7 @@ export async function submitMatchPart(
 
 /**
  * Takes the entry of a match away: the match goes back to what it was before the first entry,
- * and the import reads what Wikipedia says again. It asks for a reason, as every change does.
+ * and the import reads what Wikipedia says again. The reason is optional.
  */
 export async function submitRemoveEntry(
   matchId: number,
@@ -293,7 +293,7 @@ export async function submitRemoveEntry(
 
   if ('error' in reason) {
     return {
-      error: reason.error === 'leeg' ? 'Schrijf waarom je de invoer weghaalt.' : 'Schrijf hoogstens 300 tekens.',
+      error: 'Schrijf hoogstens 300 tekens.',
     }
   }
 

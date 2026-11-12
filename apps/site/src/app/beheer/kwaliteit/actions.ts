@@ -15,7 +15,7 @@ import { seasonFromSlug } from '#src/seasons'
 /**
  * Decides a difference between what the editors set of a player and what the import read (issue
  * 1022): "overnemen" gives the player the value of the import, "houden" keeps that of the
- * editors. It asks for a reason, as every change does. Only an editor decides. The number of
+ * editors. The reason is optional. Only an editor decides. The number of
  * the difference and the season of the page are bound to the action and checked again, and a
  * difference that is decided already or gone ends on the page with a notice.
  */
@@ -49,7 +49,7 @@ export async function submitFieldDifference(
 
   if ('error' in reason) {
     return {
-      error: reason.error === 'leeg' ? 'Schrijf waarom je dit beslist.' : 'Schrijf hoogstens 300 tekens.',
+      error: 'Schrijf hoogstens 300 tekens.',
     }
   }
 
@@ -72,7 +72,7 @@ export async function submitFieldDifference(
 /**
  * Decides a difference in the goals of a player between the squad table and the matches or the
  * match reports (issue 974): "overnemen" puts the other number in the squad table, "houden"
- * keeps the table. It asks for a reason, as every change does. Only an editor decides. The
+ * keeps the table. The reason is optional. Only an editor decides. The
  * number of the difference and the season of the page are bound to the action and checked
  * again, and a difference that is decided already or gone ends on the page with a notice.
  */
@@ -106,7 +106,7 @@ export async function submitStatDifference(
 
   if ('error' in reason) {
     return {
-      error: reason.error === 'leeg' ? 'Schrijf waarom je dit beslist.' : 'Schrijf hoogstens 300 tekens.',
+      error: 'Schrijf hoogstens 300 tekens.',
     }
   }
 

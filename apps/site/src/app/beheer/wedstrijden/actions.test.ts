@@ -211,11 +211,11 @@ describe('submitMatch', () => {
   })
 
   it('returns the form with the errors and the values, and stores nothing, for fields that are wrong', async () => {
-    const result = await submit(matchId, form({ reden: '', 'uitslag-zij': '' }))
+    const result = await submit(matchId, form({ reden: 'x'.repeat(301), 'uitslag-zij': '' }))
 
     expect(result).toMatchObject({
-      errors: { reden: 'Schrijf waarom je dit invult of aanpast.', 'uitslag-zij': expect.any(String) },
-      values: { reden: '', velden: { 'uitslag-wij': '2' } },
+      errors: { reden: 'Schrijf hoogstens 300 tekens.', 'uitslag-zij': expect.any(String) },
+      values: { reden: 'x'.repeat(301), velden: { 'uitslag-wij': '2' } },
     })
     expect(await edits()).toEqual([])
     expect(await log()).toEqual([])
@@ -251,7 +251,7 @@ describe('submitMatch', () => {
         'doelpunt-1-speler': await oyenId(),
         'doelpunt-2-kant': '',
         'doelpunt-2-soort': 'gewoon',
-        reden: '',
+        reden: 'x'.repeat(301),
       }),
     )
 
@@ -502,10 +502,17 @@ describe('submitRemoveEntry', () => {
     ])
   })
 
-  it('asks for a reason, and takes nothing away without one', async () => {
+  it('takes the entry away without a reason, and writes no reason in the log', async () => {
     await submit(matchId, form())
 
-    expect(await remove(matchId, '  ')).toEqual({ error: 'Schrijf waarom je de invoer weghaalt.' })
+    expect(await remove(matchId, '  ')).toEqual({ redirect: `/beheer/wedstrijden/${matchId}?gedaan=weggehaald` })
+    expect(await edits()).toEqual([])
+    expect((await log()).at(-1)).toMatchObject({ action: 'match.undo', reason: null })
+  })
+
+  it('takes nothing away with a reason of more than 300 characters', async () => {
+    await submit(matchId, form())
+
     expect(await remove(matchId, 'x'.repeat(301))).toEqual({ error: 'Schrijf hoogstens 300 tekens.' })
     expect(await edits()).toHaveLength(1)
     expect(await log()).toHaveLength(1)
@@ -632,10 +639,18 @@ describe('submitConflict', () => {
     })
   })
 
-  it('asks for a reason and for a choice, and decides nothing without them', async () => {
+  it('decides without a reason, and writes none in the log', async () => {
     const id = await waiting()
 
-    expect(await decide(id, { besluit: 'overnemen', reden: '  ' })).toEqual({ error: 'Schrijf waarom je dit beslist.' })
+    expect(await decide(id, { besluit: 'houden', reden: '  ' })).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}?gedaan=gehouden`,
+    })
+    expect((await log()).at(-1)).toMatchObject({ action: 'match.keep', reason: null, userId })
+  })
+
+  it('asks for a choice and a reason of at most 300 characters, and decides nothing without them', async () => {
+    const id = await waiting()
+
     expect(await decide(id, { besluit: 'houden', reden: 'x'.repeat(301) })).toEqual({
       error: 'Schrijf hoogstens 300 tekens.',
     })
@@ -773,10 +788,16 @@ describe('submitHeldChange', () => {
     expect(await log()).toMatchObject([{ action: 'match.take-over', itemId: matchId }])
   })
 
-  it('asks for a reason and for a choice, and decides nothing without them', async () => {
+  it('decides without a reason, and writes none in the log', async () => {
     const id = await held()
 
-    expect(await decide(id, { besluit: 'overnemen', reden: '  ' })).toEqual({ error: 'Schrijf waarom je dit beslist.' })
+    expect(await decide(id, { besluit: 'afwijzen', reden: '  ' })).toMatchObject({ redirect: expect.any(String) })
+    expect((await log()).at(-1)).toMatchObject({ reason: null, userId })
+  })
+
+  it('asks for a choice and a reason of at most 300 characters, and decides nothing without them', async () => {
+    const id = await held()
+
     expect(await decide(id, { besluit: 'afwijzen', reden: 'x'.repeat(301) })).toEqual({
       error: 'Schrijf hoogstens 300 tekens.',
     })
@@ -1009,8 +1030,14 @@ describe('submitAddMatch and submitDeleteMatch (issue 970)', () => {
     expect((await log()).at(-1)).toMatchObject({ action: 'match.delete', reason: 'Dubbel', userId })
   })
 
-  it('asks for a reason, and never deletes a match of an import', async () => {
-    expect(await deleteMatch(matchId, '')).toMatchObject({ error: expect.any(String) })
+  it('deletes a match the editors added without a reason, and never deletes a match of an import', async () => {
+    await add(addForm())
+
+    const [row] = await added()
+
+    expect(await deleteMatch(row!.id, '')).toEqual({ redirect: '/beheer/wedstrijden?gedaan=wedstrijd-weg' })
+    expect((await log()).at(-1)).toMatchObject({ action: 'match.delete', reason: null })
+    expect(await deleteMatch(matchId, 'x'.repeat(301))).toEqual({ error: 'Schrijf hoogstens 300 tekens.' })
     expect(await deleteMatch(matchId, 'Waarom')).toEqual({
       redirect: `/beheer/wedstrijden/${matchId}?gedaan=niet-van-ons`,
     })

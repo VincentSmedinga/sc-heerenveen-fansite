@@ -47,7 +47,7 @@ export function HeldChangeForm({
       <Form action={formAction}>
         <Field
           error={state.error}
-          hint="Waarom beslis je dit? Komt in het logboek, hoogstens 300 tekens."
+          hint="Mag leeg. Komt in het logboek, hoogstens 300 tekens."
           id={reasonId}
           label={`Reden voor je besluit over ${what}`}
         >

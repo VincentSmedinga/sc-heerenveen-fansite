@@ -211,15 +211,15 @@ export function parsePage(value: string | string[] | undefined) {
 
 /**
  * The reason from the form, as one line: control characters and runs of spaces become one
- * space, and the ends are trimmed. It is empty for no reason (`error: 'leeg'`) and too long
- * above `hiddenReasonMaxLength` characters (`error: 'lang'`), counted as the column does, in
- * characters and not in UTF-16 units.
+ * space, and the ends are trimmed. A reason is optional: no reason is `reason: undefined`, and
+ * nothing is stored. It is too long above `hiddenReasonMaxLength` characters (`error: 'lang'`),
+ * counted as the column does, in characters and not in UTF-16 units.
  */
-export function parseReason(value: unknown): { error: 'lang' | 'leeg' } | { reason: string } {
+export function parseReason(value: unknown): { error: 'lang' } | { reason: string | undefined } {
   const reason = typeof value === 'string' ? value.replaceAll(/[\p{Cc}\s]+/gu, ' ').trim() : ''
 
   if (reason === '') {
-    return { error: 'leeg' }
+    return { reason: undefined }
   }
 
   return [...reason].length > hiddenReasonMaxLength ? { error: 'lang' } : { reason }

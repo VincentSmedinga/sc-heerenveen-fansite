@@ -134,7 +134,7 @@ export async function decideDifference(
   userId: number,
   id: number,
   kind: 'keep' | 'take-over',
-  reason: string,
+  reason: string | undefined,
   now = new Date(),
 ): Promise<ConflictOutcome> {
   return db.transaction((transaction) =>
@@ -153,7 +153,7 @@ export async function decideHeldChange(
   userId: number,
   id: number,
   kind: 'keep' | 'take-over',
-  reason: string,
+  reason: string | undefined,
   now = new Date(),
 ): Promise<ConflictOutcome> {
   return db.transaction((transaction) => decideChange(transaction, id, { kind, reason, userId }, now))
@@ -300,7 +300,7 @@ export async function saveEntry(
   userId: number,
   id: number,
   entry: MatchEntry,
-  reason: string,
+  reason: string | undefined,
   now = new Date(),
 ): Promise<SaveOutcome> {
   return db.transaction(async (transaction) => {
@@ -376,7 +376,7 @@ export async function saveEntry(
         editedAt: now,
         editedBy: userId,
         matchId: id,
-        reason,
+        reason: reason ?? null,
       })
     } else {
       // A part that comes back after Wikipedia took it over is kept as Wikipedia has it now.
@@ -390,7 +390,7 @@ export async function saveEntry(
           ...(newly.length === 0 ? {} : refreshSnapshot(edit, match, goals, newly)),
           editedAt: now,
           editedBy: userId,
-          reason,
+          reason: reason ?? null,
         })
         .where(eq(matchEdits.matchId, id))
     }
@@ -448,7 +448,7 @@ export async function undoEntry(
   db: Database,
   userId: number,
   id: number,
-  reason: string,
+  reason: string | undefined,
   now = new Date(),
 ): Promise<RemoveOutcome> {
   return db.transaction(async (transaction) => {

@@ -412,9 +412,9 @@ describe('parseReason', () => {
   })
 
   it.each([undefined, null, '', '   ', '\n\t', '\u0000', 42, {}, new File([], 'x')])(
-    'says %j is no reason',
+    'says %j is no reason, and that is allowed',
     (value) => {
-      expect(parseReason(value)).toEqual({ error: 'leeg' })
+      expect(parseReason(value)).toEqual({ reason: undefined })
     },
   )
 

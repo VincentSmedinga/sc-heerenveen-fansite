@@ -626,6 +626,37 @@ describe('the match', () => {
     expect(html).toContain('Reden om de invoer weg te halen')
   })
 
+  it('shows the last entry without a line for the reason when there is none', async () => {
+    const id = await addMatch()
+
+    await saveEntry(
+      database.db,
+      userId,
+      id,
+      {
+        facts: noFacts,
+        goals: [],
+        kickoff: { dateText: null, kickoffAt: base.kickoffAt ?? null, matchDate: '2026-10-31' },
+        result: {
+          afterNinetyAgainst: null,
+          afterNinetyFor: null,
+          extraTime: false,
+          goalsAgainst: 0,
+          goalsFor: 0,
+          penaltiesAgainst: null,
+          penaltiesFor: null,
+          status: 'played',
+        },
+      },
+      undefined,
+    )
+
+    const html = await form(id)
+
+    expect(html).toContain('Door: sanne@example.org')
+    expect(html).not.toContain('Reden:')
+  })
+
   describe('a difference with Wikipedia that waits', () => {
     /** A match with an entry of the result, and a waiting difference about it. */
     async function withDifference() {
@@ -977,7 +1008,7 @@ describe('the match', () => {
         ]),
       )
       expect(html).toContain('Reden voor je besluit over doelpunten')
-      expect(html).toContain('Waarom beslis je dit? Komt in het logboek, hoogstens 300 tekens.')
+      expect(html).toContain('Mag leeg. Komt in het logboek, hoogstens 300 tekens.')
       expect(html).toContain(`id="wijziging-${changeId}-reden"`)
     })
 

@@ -139,7 +139,12 @@ export function PersonForm({
         <Heading id="opslaan-kop" level={2}>
           Opslaan
         </Heading>
-        <Field error={errors.reden} hint="Komt in het logboek, hoogstens 300 tekens." id="reden" label="Reden">
+        <Field
+          error={errors.reden}
+          hint="Mag leeg. Komt in het logboek, hoogstens 300 tekens."
+          id="reden"
+          label="Reden"
+        >
           <Input {...field('reden')} autoComplete="off" />
         </Field>
         {next ? (

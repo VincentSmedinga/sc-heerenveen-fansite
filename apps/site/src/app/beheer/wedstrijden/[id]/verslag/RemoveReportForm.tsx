@@ -35,7 +35,7 @@ export function RemoveReportForm({
       <Form action={formAction}>
         <Field
           error={state.error}
-          hint="Waarom haal je het verslag weg? Komt in het logboek, hoogstens 300 tekens."
+          hint="Mag leeg. Komt in het logboek, hoogstens 300 tekens."
           id="verslag-weghalen-reden"
           label="Reden om het verslag weg te halen"
         >

@@ -18,7 +18,7 @@ import { matchChanges, matches, matchGoals } from './schema.ts'
  * `userId` is the account that decided, or `null` for the command. A held change is only ever
  * decided by a person here, so the `resolution` is `person`.
  */
-export type ChangeDecision = { kind: 'keep' | 'take-over'; reason: string; userId: null | number }
+export type ChangeDecision = { kind: 'keep' | 'take-over'; reason?: string | undefined; userId: null | number }
 
 /** A goal as it is kept: what the page says, and the player of ours it is linked to or null. */
 export type LinkedGoal = ReadGoal & {

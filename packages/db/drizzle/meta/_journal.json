@@ -519,6 +519,13 @@
       "when": 1794491099089,
       "tag": "0073_add_birth_date_source",
       "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "5",
+      "when": 1794521464008,
+      "tag": "0074_make_edit_reason_optional",
+      "breakpoints": true
     }
   ]
 }

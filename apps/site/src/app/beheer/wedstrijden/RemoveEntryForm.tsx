@@ -35,7 +35,7 @@ export function RemoveEntryForm({
       <Form action={formAction}>
         <Field
           error={state.error}
-          hint="Waarom haal je de invoer weg? Komt in het logboek, hoogstens 300 tekens."
+          hint="Mag leeg. Komt in het logboek, hoogstens 300 tekens."
           id="weghalen-reden"
           label="Reden om de invoer weg te halen"
         >

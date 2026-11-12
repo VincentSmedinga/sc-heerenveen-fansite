@@ -47,7 +47,7 @@ export type PersonEntry = {
   line?: null | PlayerPosition
   name?: Parameters<typeof joinNameParts>[0]
   page?: null | string
-  reason: string
+  reason: string | undefined
 }
 
 type Transaction = Parameters<Parameters<Database['transaction']>[0]>[0]
@@ -179,10 +179,7 @@ export function validatePerson(
     entry.line = checkLine(values.linie, errors)
   }
   if ('error' in reason) {
-    errors.reden =
-      reason.error === 'leeg'
-        ? 'Schrijf waarom je dit invult of aanpast.'
-        : `Schrijf hoogstens ${hiddenReasonMaxLength} tekens.`
+    errors.reden = `Schrijf hoogstens ${hiddenReasonMaxLength} tekens.`
   }
 
   return Object.keys(errors).length > 0 || 'error' in reason
@@ -383,7 +380,7 @@ async function storePersonEdit(
         transaction,
         {
           action: 'person.edit',
-          detail: `Aangepast: ${shown}. ${changes.join('; ')}. Reden: ${entry.reason}`,
+          detail: `Aangepast: ${shown}. ${changes.join('; ')}.${entry.reason === undefined ? '' : ` Reden: ${entry.reason}`}`,
           itemId: person.id,
           userId,
         },

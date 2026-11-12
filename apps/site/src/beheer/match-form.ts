@@ -164,7 +164,7 @@ export function validate(
   values: MatchValues,
   context: MatchContext,
 ):
-  | { entry: MatchEntry; errors?: undefined; reason: string }
+  | { entry: MatchEntry; errors?: undefined; reason: string | undefined }
   | { entry?: undefined; errors: MatchErrors; reason?: undefined } {
   const errors: MatchErrors = {}
   const { velden: fields } = values
@@ -391,10 +391,7 @@ export function validate(
   const reason = parseReason(values.reden)
 
   if ('error' in reason) {
-    errors.reden =
-      reason.error === 'leeg'
-        ? 'Schrijf waarom je dit invult of aanpast.'
-        : `Schrijf hoogstens ${hiddenReasonMaxLength} tekens.`
+    errors.reden = `Schrijf hoogstens ${hiddenReasonMaxLength} tekens.`
   }
 
   if (Object.keys(errors).length > 0 || status === undefined || 'error' in reason) {

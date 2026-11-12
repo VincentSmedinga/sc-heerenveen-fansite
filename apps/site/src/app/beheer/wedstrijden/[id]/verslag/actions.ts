@@ -43,7 +43,7 @@ export type RemoveReportFormState = { error?: string }
 
 /**
  * Takes the report of a match away: its rows go and the goals go back to what Wikipedia said.
- * It asks for a reason, as every change does.
+ * The reason is optional.
  */
 export async function submitRemoveReport(
   matchId: number,
@@ -61,7 +61,7 @@ export async function submitRemoveReport(
 
   if ('error' in reason) {
     return {
-      error: reason.error === 'leeg' ? 'Schrijf waarom je het verslag weghaalt.' : 'Schrijf hoogstens 300 tekens.',
+      error: 'Schrijf hoogstens 300 tekens.',
     }
   }
 
