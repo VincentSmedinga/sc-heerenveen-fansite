@@ -338,8 +338,9 @@ export const robotsTxt = mysqlTable('robots_txt', {
 
 /**
  * The roles of the admin (issue 1156). The owner may do everything and is the only one who
- * manages the accounts; an editor may do everything else; an author writes his own articles
- * and publishes nothing. The admin shows them as eigenaar, redacteur and auteur.
+ * manages the accounts; an editor may do everything else; an author writes, publishes and
+ * withdraws his own articles only (issue 1159). The admin shows them as eigenaar, redacteur and
+ * auteur.
  */
 export const adminRoles = ['owner', 'editor', 'author'] as const
 

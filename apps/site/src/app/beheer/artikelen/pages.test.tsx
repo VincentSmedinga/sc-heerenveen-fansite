@@ -598,23 +598,13 @@ describe('an author', () => {
     await expect(version(other, 1)).rejects.toThrow('not found')
   })
 
-  it('has no button to publish his draft, and no button to withdraw his published article', async () => {
+  it('has the button to publish his draft, and the button to withdraw his published article', async () => {
     const own = await addOwn()
 
-    expect(await edit(own)).not.toMatch(publishButton)
+    expect(await edit(own)).toMatch(publishButton)
 
-    await saveArticle(database.db, userId, own, values(), true, new Date('2026-10-21T09:00:00Z'))
+    await saveArticle(database.db, authorId, own, values(), true, new Date('2026-10-21T09:00:00Z'), authorId)
 
-    const html = await edit(own)
-
-    expect(html).not.toMatch(/<button[^>]*>Intrekken<\/button>/u)
-    expect(html).not.toMatch(publishButton)
-  })
-
-  it('has no button to publish on the form for a new article, and the intro says who publishes', async () => {
-    const html = renderToStaticMarkup(await NewArticlePage())
-
-    expect(html).not.toMatch(publishButton)
-    expect(html).toContain('Een redacteur of de eigenaar publiceert het.')
+    expect(await edit(own)).toMatch(/<button[^>]*>Intrekken<\/button>/u)
   })
 })

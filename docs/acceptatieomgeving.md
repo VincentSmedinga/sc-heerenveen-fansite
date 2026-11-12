@@ -500,7 +500,7 @@ Zo kan niemand nagaan wie een account heeft.
 - De eigenaar mag alles in het beheer, een redacteur alles behalve de accounts, en een auteur alleen zijn eigen artikelen en zijn eigen account.
   `/beheer/accounts` is voor de eigenaar: daar voegt hij redacteuren en auteurs toe en wijzigt hij ze.
   `/beheer/mijn-account` is voor iedereen: de eigen gegevens, en voor de eigenaar en een redacteur de keuze voor de mail over afwijkingen van Wikipedia.
-  `/beheer/artikelen` is voor elke rol: daar schrijft, bekijkt, publiceert en trekt een redacteur een artikel van de redactie in (zie [`artikelen.md`](artikelen.md)); een auteur schrijft er alleen zijn eigen artikelen, en publiceert niet.
+  `/beheer/artikelen` is voor elke rol: daar schrijft, bekijkt, publiceert en trekt een redacteur een artikel van de redactie in (zie [`artikelen.md`](artikelen.md)); een auteur schrijft, publiceert en trekt er alleen zijn eigen artikelen in.
   `/beheer/bezoek` is voor een redacteur: de bezoekers en paginaweergaven van de laatste dagen en de meest bekeken pagina's (zie _Bezoekers tellen_ hieronder).
   `/beheer/berichten` is voor een redacteur, die er een bericht verbergt, met een reden, en het weer toont, en een twijfelgeval of een bericht dat het filter weghoudt op de site zet.
   Een verborgen bericht staat binnen vijf minuten niet meer op de homepage, op `/nieuws` en op `/nieuws/podcasts`, en de import zet het niet terug.

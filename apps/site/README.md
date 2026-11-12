@@ -967,7 +967,7 @@ Het beheer kent drie rollen (#1156):
 
 - De eigenaar (`owner`) mag alles, ook de accounts beheren op `/beheer/accounts`.
 - Een redacteur (`editor`) mag alles behalve de accounts beheren.
-- Een auteur (`author`) schrijft alleen zijn eigen artikelen en ziet zijn eigen account; hij publiceert niet en haalt niets offline.
+- Een auteur (`author`) schrijft, publiceert en trekt alleen zijn eigen artikelen in, en ziet zijn eigen account.
 
 De eigenaar voegt redacteuren en auteurs toe in het beheer.
 Een eigenaar maak je alleen met een opdracht:
@@ -1037,7 +1037,7 @@ Een sessie die verloopt haalt hem niet weg: daar is hij voor.
   Op een telefoon staat de kaart onder de tegels, want `Page` zet de zijbalk in de volgorde van de bron na de hoofdkolom.
 - `/beheer/berichten` is alleen voor de eigenaar en de redacteuren: de 50 nieuwste berichten van alle bronnen die op de site staan of die er niet op staan, met bron, kop als link, tijd en wie een bericht verborg (zie _Berichten verbergen_).
 - `/beheer/artikelen` is voor elke rol: de artikelen van de redactie schrijven, bekijken, publiceren en intrekken (zie _Artikelen schrijven_).
-  Een auteur ziet alleen de artikelen die hij maakte (`created_by`), en heeft geen knop om te publiceren of in te trekken; de serveracties weigeren het ook.
+  Een auteur ziet alleen de artikelen die hij maakte (`created_by`), en publiceert en trekt alleen die in (#1159); de serveracties weigeren een artikel van een ander.
 - `/beheer/wedstrijden` is alleen voor de eigenaar en de redacteuren: een wedstrijd van het lopende seizoen invullen of verbeteren (zie _Wedstrijden invullen_).
 - `/beheer/spelers` is alleen voor de eigenaar en de redacteuren: een speler toevoegen aan de selectie van een seizoen, of er een aanpassen (zie _De spelers van een seizoen_).
 - `/beheer/stadions` is alleen voor de eigenaar en de redacteuren: een club een eigen lijst van stadions geven, met een toelichting voor de kaart op zijn pagina (zie _De stadions van een club_).
@@ -1130,7 +1130,8 @@ Lokaal zie je de pagina na `pnpm run import` (of met `pnpm --filter site test-da
 ### Artikelen schrijven
 
 `/beheer/artikelen` (`src/app/beheer/artikelen`) is voor elke rol.
-Een auteur ziet alleen de artikelen die hij maakte, krijgt "niet gevonden" voor een artikel van een ander, en publiceert en trekt niets in.
+Een auteur ziet alleen de artikelen die hij maakte, en publiceert en trekt die zelf in (#1159).
+Voor een artikel van een ander krijgt hij "niet gevonden", en publiceren of intrekken ervan weigert de site.
 De lijst toont voor de eigenaar en een redacteur alle artikelen, het laatst geschreven bovenaan, met "Nieuw artikel" als formulier met `method="get"`.
 Het formulier (`ArticleForm.tsx`) is een client-component met `useActionState` die een fout met de ingevulde waarden terugstuurt.
 De tekst schrijf je met `RichTextEditor` uit het designsysteem (`@fansite/design-system/rich-text-editor`), die JavaScript vraagt; alleen de pagina's met het formulier laden Tiptap.

@@ -29,21 +29,17 @@ export type ArticleStatus = 'draft' | 'new' | 'published'
  *
  * "Opslaan" is the first button, so the Enter key in a field saves and does not publish.
  * "Publiceren" saves what is on the screen and then publishes it. The address of a published
- * article is shown but can't be changed. An author has no "Publiceren" (`publishes` is false):
- * an editor or the owner publishes his article.
+ * article is shown but can't be changed.
  */
 export function ArticleForm({
   action,
   initial,
   limits,
-  publishes = true,
   status,
 }: {
   action: (previous: ArticleFormState, formData: FormData) => Promise<ArticleFormState>
   initial: ArticleValues
   limits: ArticleFormLimits
-  /** Whether the form has the button to publish: not for an author. */
-  publishes?: boolean
   status: ArticleStatus
 }) {
   // The editor starts with the text that was loaded, and keeps its own text after that.
@@ -137,7 +133,7 @@ export function ArticleForm({
         <Button className="hf-space-end-0" disabled={pending} type="submit">
           {status === 'new' ? 'Opslaan als concept' : 'Opslaan'}
         </Button>
-        {status === 'draft' && publishes ? (
+        {status === 'draft' ? (
           <Button appearance="soft" disabled={pending} name="knop" type="submit" value="publiceren">
             Publiceren
           </Button>

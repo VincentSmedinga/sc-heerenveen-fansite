@@ -344,41 +344,38 @@ describe('submitWithdraw', () => {
 })
 
 describe('who may call the actions', () => {
-  it('lets an author change nothing in an article of someone else, and withdraw nothing', async () => {
-    const id = await draft()
-
-    jar.set(sessionCookieName, await startSession(database.db, authorId))
-
-    expect(await save(id, { tekst: json('Gekraakt') })).toEqual({ redirect: '/beheer/artikelen?fout=weg' })
-    await expect(withdraw(id)).rejects.toThrow('not found')
-    expect(await stored()).toMatchObject([{ body: json('Een alinea.') }])
-    expect(await log()).toHaveLength(1)
-    expect(await versions()).toHaveLength(1)
-  })
-
-  it('lets an author write and save his own draft, but refuses to publish it, also with a request he made', async () => {
-    jar.set(sessionCookieName, await startSession(database.db, authorId))
-
-    const id = await draft()
-
-    expect(await stored()).toMatchObject([{ createdBy: authorId, publishedAt: null }])
-    expect(await save(id, { tekst: json('Beter') })).toEqual({ redirect: `/beheer/artikelen/${id}?gedaan=opgeslagen` })
-    await expect(save(id, { knop: 'publiceren', tekst: json('Live') })).rejects.toThrow('not found')
-    expect(await stored()).toMatchObject([{ body: json('Beter'), publishedAt: null }])
-    expect((await log()).map((row) => row.action)).toEqual(['article.create', 'article.update'])
-  })
-
-  it('refuses an author who withdraws his own article that an editor published', async () => {
-    jar.set(sessionCookieName, await startSession(database.db, authorId))
-
+  it('lets an author change, publish and withdraw nothing of someone else, also with a request he made', async () => {
     const id = await draft()
 
     jar.set(sessionCookieName, await startSession(database.db, userId))
     await save(id, { knop: 'publiceren' })
+    const other = await draft({ adres: 'concept-van-een-ander' })
+
     jar.set(sessionCookieName, await startSession(database.db, authorId))
 
-    await expect(withdraw(id)).rejects.toThrow('not found')
+    const before = { log: await log(), stored: await stored(), versions: await versions() }
+
+    expect(await save(other, { knop: 'publiceren', tekst: json('Gekraakt') })).toEqual({
+      redirect: '/beheer/artikelen?fout=weg',
+    })
+    expect(await withdraw(id)).toEqual({ redirect: '/beheer/artikelen?fout=weg' })
+    expect({ log: await log(), stored: await stored(), versions: await versions() }).toEqual(before)
+  })
+
+  it('lets an author write, publish and withdraw his own article, under his own account in the log', async () => {
+    jar.set(sessionCookieName, await startSession(database.db, authorId))
+
+    const id = await draft()
+
+    expect(await save(id, { knop: 'publiceren' })).toEqual({ redirect: `/beheer/artikelen/${id}?gedaan=gepubliceerd` })
     expect((await stored())[0]?.publishedAt).not.toBeNull()
+    expect(await withdraw(id)).toEqual({ redirect: `/beheer/artikelen/${id}?gedaan=ingetrokken` })
+    expect((await stored())[0]?.publishedAt).toBeNull()
+    expect((await log()).map((row) => [row.action, row.userId])).toEqual([
+      ['article.create', authorId],
+      ['article.publish', authorId],
+      ['article.unpublish', authorId],
+    ])
   })
 
   it('sends a call without a session, and one with a session that ended, to the login page', async () => {

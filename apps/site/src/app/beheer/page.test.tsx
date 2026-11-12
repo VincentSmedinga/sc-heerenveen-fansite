@@ -94,7 +94,7 @@ describe('the admin', () => {
       '<a class="hf-tile-link" href="/beheer/artikelen">Artikelen</a>',
       '<a class="hf-tile-link" href="/beheer/mijn-account">Mijn account</a>',
     ])
-    expect(html).toContain('Schrijf je eigen artikelen. Een redacteur publiceert ze.')
+    expect(html).toContain('Schrijf je eigen artikelen en publiceer ze.')
     expect(countMatchesWithoutResult).not.toHaveBeenCalled()
   })
 

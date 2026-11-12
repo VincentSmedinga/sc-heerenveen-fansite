@@ -79,7 +79,8 @@ Wie het artikel schrijft, leest het ook na: een tweede lezer is er nog niet (die
 
 De eigenaar, een redacteur en een auteur schrijven artikelen (#1156).
 Een auteur ziet alleen de artikelen die hij zelf maakte: een artikel van een ander is voor hem "niet gevonden".
-Hij heeft geen knop om te publiceren of in te trekken; dat doen de eigenaar en een redacteur, en de site weigert het ook als een auteur het verzoek zelf maakt.
+Zijn eigen artikelen publiceert en trekt hij zelf in, met dezelfde knoppen als een redacteur (#1159).
+Een artikel van een ander publiceren of intrekken weigert de site, ook als een auteur het verzoek zelf maakt.
 Log in zoals bij elke beheerpagina en kies op `/beheer` de tegel "Artikelen".
 
 1. Kies "Nieuw artikel" en vul de velden in.

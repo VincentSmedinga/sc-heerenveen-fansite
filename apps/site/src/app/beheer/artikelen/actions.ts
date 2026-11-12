@@ -1,7 +1,7 @@
 'use server'
 
-import { adminRoles, editorRoles } from '@fansite/db/schema'
-import { notFound, redirect } from 'next/navigation'
+import { adminRoles } from '@fansite/db/schema'
+import { redirect } from 'next/navigation'
 
 import { type ArticleFormState } from '#src/beheer/article-fields'
 import { readValues, validate } from '#src/beheer/article-form'
@@ -12,9 +12,10 @@ import { getDatabase } from '#src/database'
 
 import { articlePath, articlesPath } from './paths'
 
-// The actions of the articles. The owner and an editor write every article and publish and
-// withdraw them. An author writes only the articles he made and never publishes or withdraws
-// (issue 1156): the actions check that on the server, whatever the form sends. The number of
+// The actions of the articles. The owner and an editor write, publish and withdraw every
+// article. An author does the same with the articles he made, and nothing with those of
+// someone else (issues 1156 and 1159): the actions check that on the server, whatever the
+// form sends. The number of
 // the article is bound to the action (`submitArticle.bind(null, id)`), which Next.js keeps
 // encrypted in the form. It is input from outside all the same, so each action checks it again.
 // A form that sends nothing wrong ends on the page of the article with a notice, and one with
@@ -34,11 +35,6 @@ export async function submitArticle(
   const { userId } = reader
   const id = parseItemId(articleId)
   const publish = formData.get('knop') === 'publiceren'
-
-  // An author has no button to publish; a request that presses it anyway is refused.
-  if (publish && reader.role === 'author') {
-    notFound()
-  }
 
   if (id === undefined) {
     redirect(`${articlesPath}?fout=weg`)
@@ -95,16 +91,20 @@ export async function submitNewArticle(_previous: ArticleFormState, formData: Fo
   redirect(articlePath(outcome.id, 'gemaakt'))
 }
 
-/** Makes a published article a draft again. It is off the site at once. An author may not. */
+/**
+ * Makes a published article a draft again. It is off the site at once. An author withdraws
+ * only an article he made: one of someone else is "weg" for him.
+ */
 export async function submitWithdraw(articleId: number) {
-  const { userId } = await requireRole(...editorRoles)
+  const reader = await requireRole(...adminRoles)
+  const { userId } = reader
   const id = parseItemId(articleId)
 
   if (id === undefined) {
     redirect(`${articlesPath}?fout=weg`)
   }
 
-  const outcome = await withdrawArticle(getDatabase().db, userId, id)
+  const outcome = await withdrawArticle(getDatabase().db, userId, id, new Date(), ownArticlesOf(reader))
 
   redirect(
     outcome === 'missing'

@@ -5091,6 +5091,7 @@
 - **Waarom:** het beheer heeft een handvol mensen, en een aparte rol voor moderatie levert weinig op.
   Een auteur voor nieuws en columns is wat #40 vraagt, en publiceren door een tweede persoon past bij de controlestap daar.
 - **Alternatieven:** de twee bestaande rollen houden en er eigenaar boven zetten; een auteur zelf laten publiceren; een auteur zijn gepubliceerde artikel niet meer laten bewerken.
+- **Later:** zie _Een auteur publiceert en trekt zijn eigen artikelen in_ (12 november 2026): een auteur publiceert en trekt nu zijn eigen artikelen in; een artikel van een ander blijft voor hem "niet gevonden".
 
 ## De eigenaar beheert accounts in het beheer, en alleen de opdracht maakt een eigenaar
 
@@ -5134,3 +5135,12 @@
 - **Besluit:** rollen, accounts beheren en Mijn account komen in één pull request.
 - **Waarom:** de eigenaar wil het zo; de delen hangen aan dezelfde tabel en dezelfde rolcontrole.
 - **Alternatieven:** drie pull requests na elkaar.
+
+## Een auteur publiceert en trekt zijn eigen artikelen in
+
+- **Datum:** 12 november 2026
+- **Besluit:** een auteur publiceert zijn eigen artikelen en trekt ze in, met dezelfde knoppen als een redacteur (#1159).
+  Artikelen van een ander blijven voor hem "niet gevonden": `saveArticle` en `withdrawArticle` krijgen het account van de auteur mee en geven `missing` voor een artikel dat hij niet maakte.
+  Het logboek schrijft `article.publish` en `article.unpublish` met zijn account, zoals bij een redacteur.
+- **Waarom:** de redactie is klein en overlegt zelf; een verplichte tweede persoon vertraagt zonder dat het iets oplevert.
+- **Alternatieven:** alleen een redacteur publiceert (zoals #1156 deed); een gepubliceerd artikel op slot voor zijn auteur.
