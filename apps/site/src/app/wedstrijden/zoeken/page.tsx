@@ -5,9 +5,10 @@ import { cache } from 'react'
 
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
-import { hasChoice, matchSearchPath, parseFilters, viewOf } from '#src/match-search'
+import { matchSearchPath, parseFilters, viewOf } from '#src/match-search'
 import { findScorerMatches, getSearchWorld } from '#src/match-search-data'
-import { formatCount, MatchSearchFilters, MatchSearchResults } from '#src/MatchSearchViews'
+import { onThisDayOf, questionsOf } from '#src/match-search-start'
+import { formatCount, MatchSearchFilters, MatchSearchResults, MatchSearchStart } from '#src/MatchSearchViews'
 import { getReportAddresses } from '#src/report-data'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { withBranch } from '#src/title'
@@ -53,12 +54,20 @@ const loadSearch = cache(async (query: string) => {
     const filters = parseFilters(rawOf(query), world)
     const scorer = filters.scorer === undefined ? undefined : await findScorerMatches(filters.scorer.words)
     const view = viewOf(matches, filters, scorer, world)
-    const shownSeasons = [...new Set(view.result.seasons.map((group) => group.season))]
+    const shownSeasons = [
+      ...new Set(view.result.seasons.flatMap((group) => group.matches.map((match) => match.season))),
+    ]
     const reportAddresses = new Map(
       (await Promise.all(shownSeasons.map((season) => getReportAddresses(season)))).flatMap((map) => [...map]),
     )
 
-    return { allClubs: clubs.length, filters, matches: matches.length, reportAddresses, seasons, view }
+    // The start page has no results; it shows the questions and the day instead, counted from
+    // same list, with the date of now in the Netherlands.
+    const start = view.chosen
+      ? undefined
+      : { onThisDay: onThisDayOf(matches, new Date()), questions: questionsOf(matches, seasons[0] ?? '') }
+
+    return { allClubs: clubs.length, filters, matches: matches.length, reportAddresses, seasons, start, view }
   } catch (error) {
     console.error(`Could not search for ${matchSearchPath}: ${reasonOf(error)}`)
 
@@ -84,7 +93,7 @@ export default async function MatchSearchPage({ searchParams }: { searchParams: 
     return <ServerError retryHref={query === '' ? matchSearchPath : `${matchSearchPath}?${query}`} />
   }
 
-  const { allClubs, filters, matches, reportAddresses, seasons, view } = loaded
+  const { allClubs, filters, matches, reportAddresses, seasons, start, view } = loaded
   const first = seasons[0]?.slice(0, 4)
 
   return (
@@ -102,10 +111,10 @@ export default async function MatchSearchPage({ searchParams }: { searchParams: 
           </Page.Cell>
         }
       >
-        {hasChoice(filters) ? (
+        {start === undefined ? (
           <MatchSearchResults filters={filters} now={new Date()} reportAddresses={reportAddresses} view={view} />
         ) : (
-          <Text>Kies wat je zoekt in de filters.</Text>
+          <MatchSearchStart onThisDay={start.onThisDay} questions={start.questions} />
         )}
         <Text appearance="meta">
           Bron: Wikipedia en het archief van de oude sc Heerenveen Fansite. Van 1990 tot 2006 missen we bij een deel van

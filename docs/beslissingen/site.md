@@ -5027,6 +5027,7 @@
   Scheidsrechter, publiek, land, stadion, opstelling, ronde en aftrap zijn geen filter.
   - **De naam van het adres:** `tegen` (de adresnaam van de club), `van` en `tot` (een seizoen als `2019/20`), `waar` (`thuis`, `uit`), `competitie` (`eredivisie`, `eerste-divisie`, `knvb-beker`, `europa`, `johan-cruijff-schaal`), `uitslag` (`gewonnen`, `gelijk`, `verloren`), `dag` (`maandag` tot en met `zondag`), `doelpuntenmaker`, `wij` en `zij`, `volgorde` (`nieuwste`, `oudste`) en `pagina`.
     Een waarde die niet bestaat wordt genegeerd en geeft geen foutpagina.
+    **Later:** #1151 voegt `clubs`, `doelpunten`, `strafschoppen`, `maand`, `op` en de volgorde `doelsaldo` toe (zie _De zoekpagina begint met vragen en met Op deze dag_).
   - **Europa:** elke Europese beker en zijn play-offs: Champions League, Europa League, Europacup II, Intertoto Cup, UEFA Cup en de play-offs voor Europees voetbal.
     Elke competitie van de database hoort bij precies één groep, zodat de aantallen bij elkaar de hele lijst zijn.
   - **Het aantal achter een waarde:** het aantal wedstrijden dat je krijgt als je de waarde toevoegt, met de andere keuzes zoals ze zijn.
@@ -5048,3 +5049,27 @@
 - **Alternatieven:** het formulier als zin met keuzelijsten; een groot overzicht met een strip per seizoen en feiten bovenaan; één zoekpagina voor de hele site; een eigen kaart per wedstrijd met een W/G/V-vak (de kleuren van `Match` volstaan); een telling per aantal in de database.
 - **Nadeel:** het aantal achter elke waarde kost per verzoek een telling per waarde, in het geheugen.
   De lijst is klein, dus dat is genoeg; een zoekindex is niet nodig.
+
+## De zoekpagina begint met vragen en met Op deze dag
+
+- **Datum:** 12 november 2026
+- **Besluit:** zonder keuze in het adres toont `/wedstrijden/zoeken` onder de filters negen kaarten met vragen en de kaart "Op deze dag" (#1151).
+  De kaarten en de kaart gebruiken extra parameters in het adres, die het formulier niet als veld toont, in plaats van nieuwe velden.
+  De lijst met kaarten staat vast in de code (`match-search-start.ts`); de getallen worden bij elk verzoek geteld uit dezelfde lijst wedstrijden als de resultaten.
+  "Vandaag" is de datum in Europe/Amsterdam.
+  - **De namen van het adres:** `clubs` (meer keer, de adresnaam van een club), `doelpunten` (ten minste zoveel doelpunten van beide clubs), `strafschoppen` (`ja`), `maand` en `op` (een maand, of een dag en een maand), en `volgorde=doelsaldo`.
+    Elke parameter telt mee in de aantallen, staat als chip boven de resultaten en in de zin, en het formulier bewaart ze in verborgen velden.
+  - **De negen vragen:** elke uitzege in Europa zonder tegendoelpunt (`competitie=europa`, `waar=uit`, `uitslag=gewonnen`, `zij=0`); de derby tegen sc Cambuur; Ajax, PSV en Feyenoord; vrijdagavond thuis; zeven doelpunten of meer, met de grootste uitslag als regel; alle 0–0's; beslist met strafschoppen; op een maandag; onze grootste zeges, op doelsaldo.
+    Een kaart zonder wedstrijd valt weg.
+    De regel "de zeldzaamste dag" staat er alleen als geen andere dag van de week minder wedstrijden heeft.
+  - **De volgorde `doelsaldo`:** het hoogste doelsaldo eerst, dan de meeste doelpunten, dan de nieuwste.
+    De lijst loopt door de seizoenen heen, dus er zijn geen seizoenskoppen.
+    De volgorde alleen is geen keuze, en geeft dus geen resultaten.
+  - **Op deze dag:** de wedstrijden van dezelfde dag en maand in eerdere jaren, de nieuwste eerst.
+    Een 29 februari telt op 28 februari niet mee, en een datum die niet bestaat (31 april) laat alleen de maand staan.
+    De "alle wedstrijden in november" is een zoekopdracht met alleen de maand.
+  - **Niet gedaan:** een keuzelijst "Volgorde" met "Op doelsaldo" en het aantal "1–25 van 76" ontbreken nog, zoals de beslissing over #1150 zei; de keuze "alleen een Europese competitie" is `competitie=europa`.
+- **Waarom:** een supporter weet niet altijd wat hij zoekt, en een vraag met een getal nodigt uit.
+  Een veld voor "meer clubs tegelijk" of "ten minste zeven doelpunten" maakt het formulier zwaarder voor een zeldzame vraag, terwijl een adres met een parameter elke vraag deelbaar en te bewaren houdt.
+- **Alternatieven:** alleen de kaarten die het formulier al kent (vijf van de negen blijven dan niet over); een veld voor elke vraag; een eigen pagina per vraag.
+- **Nadeel:** een parameter die geen veld heeft, is alleen te veranderen via de chip of het adres.

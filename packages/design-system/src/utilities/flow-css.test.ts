@@ -92,7 +92,7 @@ describe('the flow', () => {
     const list = large?.selectors.find((selector) => selector.startsWith('> :where('))
 
     expect(list).toBe(
-      '> :where( table, .hf-data-table-group, .hf-bar-place, .hf-bar-chart, .hf-donut-chart, .hf-donut-chart-group, .hf-form-chart, .hf-input-table, .hf-tile-grid )',
+      '> :where( table, .hf-data-table-group, .hf-bar-place, .hf-bar-chart, .hf-donut-chart, .hf-donut-chart-group, .hf-form-chart, .hf-input-table, .hf-tile-grid, .hf-question-grid )',
     )
   })
 

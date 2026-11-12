@@ -3377,3 +3377,15 @@
 - **Waarom:** de filters horen bij een telefoon boven de resultaten en bij een breed scherm ernaast, en alleen zo blijft de volgorde in de bron gelijk aan die op het scherm.
   De aantallen achter de vakjes en de chips hebben anders geen eigen plek.
 - **Alternatieven:** de filters in de zijbalk rechts, onder de resultaten op een telefoon; twee keer dezelfde filters (een uitklapper en een kaart) met CSS verborgen; een component in `apps/site`.
+
+## Een vraagkaart en de kaart Op deze dag zijn eigen componenten
+
+- **Datum:** 12 november 2026
+- **Besluit:** het designsysteem heeft `QuestionCard` met `QuestionCard.Grid`, en `OnThisDay` (#1151).
+  - **QuestionCard:** een kaart die één link is, met een vraag, een groot getal en een korte regel.
+    De link heeft de vraag, het getal en de regel samen als naam.
+    De kaarten staan in een lijst met drie kolommen op een breed scherm en één op een telefoon.
+  - **OnThisDay:** een warme kaart met een kop, één regel inleiding, de wedstrijden (het jaar, de clubs en de uitslag) en een link naar meer.
+- **Waarom:** de zoekpagina voor wedstrijden begint met negen vragen en een kaart met de wedstrijden van vandaag in eerdere jaren, en beide komen op meer pagina's voor als de site groeit.
+  `Tile` past niet voor de vraagkaart: die heeft een kop en een beschrijving, en geen groot getal.
+- **Alternatieven:** de kaarten in `apps/site` houden; `Tile` met een getal in de beschrijving; `KeyFigures` (dat is geen link).

@@ -113,6 +113,13 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
     status: 200,
   },
   { path: '/wedstrijden/zoeken?doelpuntenmaker=a&tegen=onzin&van=1850/51&wij=1000', status: 200 },
+  // The questions of the start page (#1151), a day and a month, and a date that doesn't exist.
+  { path: '/wedstrijden/zoeken?clubs=ajax&clubs=psv&clubs=feyenoord', status: 200 },
+  { path: '/wedstrijden/zoeken?doelpunten=7&volgorde=doelsaldo', status: 200 },
+  { path: '/wedstrijden/zoeken?strafschoppen=ja', status: 200 },
+  { path: '/wedstrijden/zoeken?maand=11&op=11', status: 200 },
+  { path: '/wedstrijden/zoeken?maand=2&op=29', status: 200 },
+  { path: '/wedstrijden/zoeken?maand=4&op=31&clubs=onzin&doelpunten=veel', status: 200 },
   { path: '/spelers/2099-00', status: 404 },
   { path: '/spelers/onzin', status: 404 },
   // The page of a made-up player and a person in no squad of ours (see persons.ts). An old

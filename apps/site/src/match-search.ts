@@ -67,6 +67,25 @@ export const days = [
   { index: 0, label: 'zondag', value: 'zondag' },
 ] as const
 
+/** The months, as a visitor says them. */
+export const months = [
+  'januari',
+  'februari',
+  'maart',
+  'april',
+  'mei',
+  'juni',
+  'juli',
+  'augustus',
+  'september',
+  'oktober',
+  'november',
+  'december',
+] as const
+
+/** The most days each month has, with 29 for February so a leap day can be asked for. */
+const daysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] as const
+
 export type CompetitionValue = (typeof competitionGroups)[number]['value']
 
 export type DayValue = (typeof days)[number]['value']
@@ -75,16 +94,24 @@ export type DayValue = (typeof days)[number]['value']
 export type Filters = {
   /** The slug of the club, as in `/tegenstanders/<slug>`. */
   club?: string | undefined
+  /** More clubs at once, as slugs. A card uses them; no field. */
+  clubs: string[]
   competitions: CompetitionValue[]
+  /** The day of the month and the month a match was played on, or the month alone. */
+  date?: undefined | { day?: number | undefined; month: number }
   days: DayValue[]
   /** The first season, such as `2019/20`, or none for the first we have. */
   from?: string | undefined
+  /** The least number of goals of both clubs together. */
+  minGoals?: number | undefined
   order: Order
   /** Our goals in the exact score. */
   ours?: number | undefined
   outcomes: OutcomeValue[]
   /** The page of the results, counting from 1. */
   page: number
+  /** Only the matches that a shoot-out decided. */
+  penalties: boolean
   /** What was written for a goalscorer, when it meets the limits. */
   scorer?: undefined | { text: string; words: string[] }
   /** The message of a goalscorer that doesn't meet the limits, which the field shows. */
@@ -96,7 +123,7 @@ export type Filters = {
   venues: VenueValue[]
 }
 
-export type Order = 'nieuwste' | 'oudste'
+export type Order = 'doelsaldo' | 'nieuwste' | 'oudste'
 
 export type OutcomeValue = (typeof outcomes)[number]['value']
 
@@ -137,17 +164,30 @@ export function parseFilters(raw: Raw, world: SearchWorld): Filters {
 
   const scorerText = firstOf(raw['doelpuntenmaker'])
   const scorer = scorerText === undefined || scorerText.trim() === '' ? undefined : parseSearch(scorerText)
+  const month = /^(?:[1-9]|1[0-2])$/u.test(firstOf(raw['maand']) ?? '') ? Number(firstOf(raw['maand'])) : undefined
+  const dayOfMonth = /^(?:[1-9]|[12]\d|3[01])$/u.test(firstOf(raw['op']) ?? '') ? Number(firstOf(raw['op'])) : undefined
+  // A day that its month doesn't have, such as 31 April, is dropped; the month stays.
+  const dayAsked =
+    month !== undefined && dayOfMonth !== undefined && dayOfMonth <= daysInMonth[month - 1]! ? dayOfMonth : undefined
+  const minGoals = goalsOf(raw['doelpunten'])
+  const orderAsked = firstOf(raw['volgorde'])
   const page = /^[1-9]\d{0,3}$/u.test(firstOf(raw['pagina']) ?? '') ? Number(firstOf(raw['pagina'])) : 1
 
   return {
     club: club !== undefined && world.clubs.some((candidate) => candidate.slug === club) ? club : undefined,
+    clubs: valuesOf(raw['clubs']).filter(
+      (slug, index, all) => all.indexOf(slug) === index && world.clubs.some((candidate) => candidate.slug === slug),
+    ),
     competitions: pick(raw['competitie'], competitionGroups),
+    date: month === undefined ? undefined : { day: dayAsked, month },
     days: pick(raw['dag'], days),
     from: from === world.seasons[0] ? undefined : from,
-    order: firstOf(raw['volgorde']) === 'oudste' ? 'oudste' : 'nieuwste',
+    minGoals: minGoals === 0 ? undefined : minGoals,
+    order: orderAsked === 'oudste' || orderAsked === 'doelsaldo' ? orderAsked : 'nieuwste',
     ours: goalsOf(raw['wij']),
     outcomes: pick(raw['uitslag'], outcomes),
     page,
+    penalties: firstOf(raw['strafschoppen']) === 'ja',
     scorer: scorer?.kind === 'valid' ? { text: scorer.text, words: scorer.words } : undefined,
     scorerError: scorer?.kind === 'invalid' ? { message: scorer.message, text: scorer.text } : undefined,
     theirs: goalsOf(raw['zij']),
@@ -179,11 +219,15 @@ function pick<T extends string>(raw: string | string[] | undefined, known: reado
 /** Whether the address has at least one choice, which is what shows the results. */
 export const hasChoice = (filters: Filters) =>
   filters.club !== undefined ||
+  filters.clubs.length > 0 ||
   filters.competitions.length > 0 ||
+  filters.date !== undefined ||
   filters.days.length > 0 ||
   filters.from !== undefined ||
+  filters.minGoals !== undefined ||
   filters.ours !== undefined ||
   filters.outcomes.length > 0 ||
+  filters.penalties ||
   filters.scorer !== undefined ||
   filters.theirs !== undefined ||
   filters.to !== undefined ||
@@ -199,6 +243,9 @@ export function searchHref(filters: Filters, { page = filters.page }: { page?: n
 
   if (filters.club !== undefined) {
     query.set('tegen', filters.club)
+  }
+  for (const slug of filters.clubs) {
+    query.append('clubs', slug)
   }
   if (filters.from !== undefined) {
     query.set('van', filters.from)
@@ -221,14 +268,26 @@ export function searchHref(filters: Filters, { page = filters.page }: { page?: n
   if (filters.scorer !== undefined) {
     query.set('doelpuntenmaker', filters.scorer.text)
   }
+  if (filters.minGoals !== undefined) {
+    query.set('doelpunten', String(filters.minGoals))
+  }
+  if (filters.penalties) {
+    query.set('strafschoppen', 'ja')
+  }
+  if (filters.date !== undefined) {
+    query.set('maand', String(filters.date.month))
+    if (filters.date.day !== undefined) {
+      query.set('op', String(filters.date.day))
+    }
+  }
   if (filters.ours !== undefined) {
     query.set('wij', String(filters.ours))
   }
   if (filters.theirs !== undefined) {
     query.set('zij', String(filters.theirs))
   }
-  if (filters.order === 'oudste') {
-    query.set('volgorde', 'oudste')
+  if (filters.order !== 'nieuwste') {
+    query.set('volgorde', filters.order)
   }
   if (page > 1) {
     query.set('pagina', String(page))
@@ -260,10 +319,19 @@ const competitionOf = (match: SearchableMatch): CompetitionValue =>
 /** The groups of values that have a count behind each value. */
 export type CountedGroup = 'competitions' | 'days' | 'outcomes' | 'venues'
 
-/** Whether a match meets every choice, except those of the groups in `skip`. */
+/** Whether a match was played on the day and month, or in the month. */
+const meetsDate = ({ matchDate }: Pick<SearchableMatch, 'matchDate'>, date: NonNullable<Filters['date']>) =>
+  Number(matchDate.slice(5, 7)) === date.month &&
+  (date.day === undefined || Number(matchDate.slice(8, 10)) === date.day)
+
+/** Whether a match meets every choice. */
 function passes(match: SearchableMatch, filters: Filters, scorer: ScorerMatches): boolean {
   return (
     (filters.club === undefined || match.clubSlug === filters.club) &&
+    (filters.clubs.length === 0 || filters.clubs.includes(match.clubSlug)) &&
+    (filters.date === undefined || meetsDate(match, filters.date)) &&
+    (filters.minGoals === undefined || match.goalsFor + match.goalsAgainst >= filters.minGoals) &&
+    (!filters.penalties || match.penaltiesFor !== null) &&
     (filters.from === undefined || match.season >= filters.from) &&
     (filters.to === undefined || match.season <= filters.to) &&
     (filters.venues.length === 0 || filters.venues.includes(match.home ? 'thuis' : 'uit')) &&
@@ -357,7 +425,13 @@ export const tallyLine = (tally: Tally) =>
 export const matchCount = (count: number) => `${count} ${count === 1 ? 'wedstrijd' : 'wedstrijden'}`
 
 /** One choice of the search, as a chip: its words, and the filters without it. */
-export type Choice = { label: string; lower?: true; without: Filters }
+export type Choice = {
+  label: string
+  lower?: true
+  /** The order, which is not a filter. */
+  sorting?: true
+  without: Filters
+}
 
 const seasonLabel = (filters: Filters, first: string) =>
   filters.from !== undefined && filters.to !== undefined
@@ -373,7 +447,8 @@ export type SearchResult = {
   pageCount: number
   /** The first and last number of the matches shown, as `1–25`. */
   range: [number, number]
-  seasons: { matches: SearchableMatch[]; season: string }[]
+  /** The matches by season; the order of the goal difference has one group without a season. */
+  seasons: { matches: SearchableMatch[]; season: string | undefined }[]
   tally: Tally
   total: number
 }
@@ -404,6 +479,14 @@ export function choicesOf(filters: Filters, world: SearchWorld): Choice[] {
 
   if (club !== undefined) {
     choices.push({ label: club.name, without: without({ club: undefined }) })
+  }
+  if (filters.clubs.length > 0) {
+    choices.push({
+      label: listOf(
+        filters.clubs.map((slug) => world.clubs.find((candidate) => candidate.slug === slug)?.name ?? slug),
+      ),
+      without: without({ clubs: [] }),
+    })
   }
   if (filters.from !== undefined || filters.to !== undefined) {
     choices.push({
@@ -437,6 +520,15 @@ export function choicesOf(filters: Filters, world: SearchWorld): Choice[] {
       without: without({ days: filters.days.filter((item) => item !== value) }),
     })
   }
+  if (filters.minGoals !== undefined) {
+    choices.push({ label: `Ten minste ${filters.minGoals} doelpunten`, without: without({ minGoals: undefined }) })
+  }
+  if (filters.penalties) {
+    choices.push({ label: 'Beslist met strafschoppen', without: without({ penalties: false }) })
+  }
+  if (filters.date !== undefined) {
+    choices.push({ label: dateLabel(filters.date), without: without({ date: undefined }) })
+  }
   if (filters.scorer !== undefined) {
     choices.push({ label: `Doelpunt van ${filters.scorer.text}`, without: without({ scorer: undefined }) })
   }
@@ -446,9 +538,20 @@ export function choicesOf(filters: Filters, world: SearchWorld): Choice[] {
       without: without({ ours: undefined, theirs: undefined }),
     })
   }
+  if (filters.order === 'doelsaldo') {
+    choices.push({ label: 'Op doelsaldo', sorting: true, without: without({ order: 'nieuwste' }) })
+  }
 
   return choices
 }
+
+/** A list of names for a sentence: `Ajax, PSV en Feyenoord`. */
+export const listOf = (names: readonly string[]) =>
+  names.length < 2 ? names.join('') : `${names.slice(0, -1).join(', ')} en ${names.at(-1)}`
+
+/** The day and month as a visitor says them, `11 november`, or the month alone, `november`. */
+export const dateLabel = ({ day, month }: NonNullable<Filters['date']>) =>
+  `${day === undefined ? '' : `${day} `}${months[month - 1]}`
 
 /**
  * What you get when you leave one choice out, for the page that found nothing: the choices
@@ -460,18 +563,30 @@ export function relaxedChoices(
   scorer: ScorerMatches,
   world: SearchWorld,
 ) {
-  return choicesOf(filters, world).flatMap((choice) => {
-    const count = findMatches(all, choice.without, scorer).length
+  return choicesOf(filters, world)
+    .filter((choice) => choice.sorting !== true)
+    .flatMap((choice) => {
+      const count = findMatches(all, choice.without, scorer).length
 
-    const label = choice.lower === true ? choice.label.toLowerCase() : choice.label
+      const label = choice.lower === true ? choice.label.toLowerCase() : choice.label
 
-    return count === 0 ? [] : [{ count, href: searchHref(choice.without), label }]
-  })
+      return count === 0 ? [] : [{ count, href: searchHref(choice.without), label }]
+    })
 }
+
+/** The best result first: the highest goal difference, then the most goals, then the newest. */
+export const byGoalDifference = (found: readonly SearchableMatch[]) =>
+  found.toSorted(
+    (first, second) =>
+      second.goalsFor - second.goalsAgainst - (first.goalsFor - first.goalsAgainst) ||
+      second.goalsFor - first.goalsFor ||
+      second.matchDate.localeCompare(first.matchDate),
+  )
 
 /** The matches of the page in the order asked for, grouped by season in that order. */
 export function resultOf(found: readonly SearchableMatch[], filters: Filters): SearchResult {
-  const ordered = filters.order === 'oudste' ? found : found.toReversed()
+  const ordered =
+    filters.order === 'oudste' ? found : filters.order === 'doelsaldo' ? byGoalDifference(found) : found.toReversed()
   const pageCount = Math.max(1, Math.ceil(ordered.length / matchesPerSearchPage))
   const page = Math.min(filters.page, pageCount)
   const start = (page - 1) * matchesPerSearchPage
@@ -481,7 +596,14 @@ export function resultOf(found: readonly SearchableMatch[], filters: Filters): S
   for (const match of shown) {
     const last = seasons.at(-1)
 
-    if (last?.season === match.season) {
+    // The order of the goal difference runs through the seasons, so it has no headings.
+    if (filters.order === 'doelsaldo') {
+      if (last === undefined) {
+        seasons.push({ matches: [match], season: undefined })
+      } else {
+        last.matches.push(match)
+      }
+    } else if (last?.season === match.season) {
       last.matches.push(match)
     } else {
       seasons.push({ matches: [match], season: match.season })
@@ -512,12 +634,22 @@ export function sentenceOf(filters: Filters, world: SearchWorld): string {
   const outcomeWords = { gelijk: 'gelijkspeelden', gewonnen: 'wonnen', verloren: 'verloren' } as const
   const parts = [
     `Alle ${kind}`,
-    club === undefined ? '' : ` tegen ${club.name}`,
+    club === undefined && filters.clubs.length === 0
+      ? ''
+      : ` tegen ${listOf([
+          ...(club === undefined ? [] : [club.name]),
+          ...filters.clubs.flatMap((slug) => world.clubs.find((candidate) => candidate.slug === slug)?.name ?? []),
+        ])}`,
+    filters.minGoals === undefined ? '' : ` met ${filters.minGoals} doelpunten of meer`,
+    filters.penalties ? ' die met strafschoppen werden beslist' : '',
     filters.competitions.length === 0
       ? ''
       : ` in ${or(filters.competitions.map((value) => competitionGroups.find((item) => item.value === value)?.label ?? value))}`,
     filters.outcomes.length === 0 ? '' : ` die we ${or(filters.outcomes.map((value) => outcomeWords[value]))}`,
     filters.days.length === 0 ? '' : `, op een ${or(filters.days)}`,
+    filters.date === undefined
+      ? ''
+      : `, gespeeld ${filters.date.day === undefined ? 'in' : 'op'} ${dateLabel(filters.date)}`,
     filters.scorer === undefined ? '' : `, met een doelpunt van ${filters.scorer.text}`,
     filters.ours === undefined && filters.theirs === undefined
       ? ''
@@ -527,6 +659,7 @@ export function sentenceOf(filters: Filters, world: SearchWorld): string {
       : filters.to !== undefined
         ? `, van ${first} tot en met ${filters.to}`
         : `, sinds ${filters.from ?? first}`,
+    filters.order === 'doelsaldo' ? ', de grootste uitslag eerst' : '',
   ]
 
   return `${parts.join('')}.`
