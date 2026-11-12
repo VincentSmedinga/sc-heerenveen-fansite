@@ -170,56 +170,197 @@ const page = ({ areas, columns, render }: Layout) => (
   </Page>
 )
 
-const story = (name: keyof typeof layouts, title: string, viewport?: string) =>
-  meta.story({
-    globals: viewport === undefined ? {} : { viewport: { value: viewport } },
-    name: title,
-    render: () => page(layouts[name]),
-    ...(viewport === undefined ? {} : { tags: ['!autodocs'] }),
-  })
+export const MainOnly = meta.story({ name: 'Alleen een hoofdkolom', render: () => page(layouts.main) })
+export const Main320 = meta.story({
+  globals: { viewport: { value: 'w320' } },
+  name: 'Alleen een hoofdkolom, 320 pixels',
+  render: () => page(layouts.main),
+  tags: ['!autodocs'],
+})
+export const Main400 = meta.story({
+  globals: { viewport: { value: 'w400' } },
+  name: 'Alleen een hoofdkolom, 400 pixels',
+  render: () => page(layouts.main),
+  tags: ['!autodocs'],
+})
+export const Main560 = meta.story({
+  globals: { viewport: { value: 'w560' } },
+  name: 'Alleen een hoofdkolom, 560 pixels',
+  render: () => page(layouts.main),
+  tags: ['!autodocs'],
+})
+export const Main900 = meta.story({
+  globals: { viewport: { value: 'w900' } },
+  name: 'Alleen een hoofdkolom, 900 pixels',
+  render: () => page(layouts.main),
+  tags: ['!autodocs'],
+})
+export const Main1280 = meta.story({
+  globals: { viewport: { value: 'w1280' } },
+  name: 'Alleen een hoofdkolom, 1280 pixels',
+  render: () => page(layouts.main),
+  tags: ['!autodocs'],
+})
 
-export const Main = story('main', 'Alleen een hoofdkolom')
-export const Main320 = story('main', 'Alleen een hoofdkolom, 320 pixels', 'w320')
-export const Main400 = story('main', 'Alleen een hoofdkolom, 400 pixels', 'w400')
-export const Main560 = story('main', 'Alleen een hoofdkolom, 560 pixels', 'w560')
-export const Main900 = story('main', 'Alleen een hoofdkolom, 900 pixels', 'w900')
-export const Main1280 = story('main', 'Alleen een hoofdkolom, 1280 pixels', 'w1280')
+export const SideOnly = meta.story({ name: 'Met een zijkolom', render: () => page(layouts.side) })
+export const Side320 = meta.story({
+  globals: { viewport: { value: 'w320' } },
+  name: 'Met een zijkolom, 320 pixels',
+  render: () => page(layouts.side),
+  tags: ['!autodocs'],
+})
+export const Side400 = meta.story({
+  globals: { viewport: { value: 'w400' } },
+  name: 'Met een zijkolom, 400 pixels',
+  render: () => page(layouts.side),
+  tags: ['!autodocs'],
+})
+export const Side560 = meta.story({
+  globals: { viewport: { value: 'w560' } },
+  name: 'Met een zijkolom, 560 pixels',
+  render: () => page(layouts.side),
+  tags: ['!autodocs'],
+})
+export const Side900 = meta.story({
+  globals: { viewport: { value: 'w900' } },
+  name: 'Met een zijkolom, 900 pixels',
+  render: () => page(layouts.side),
+  tags: ['!autodocs'],
+})
+export const Side1280 = meta.story({
+  globals: { viewport: { value: 'w1280' } },
+  name: 'Met een zijkolom, 1280 pixels',
+  render: () => page(layouts.side),
+  tags: ['!autodocs'],
+})
 
-export const Side = story('side', 'Met een zijkolom')
-export const Side320 = story('side', 'Met een zijkolom, 320 pixels', 'w320')
-export const Side400 = story('side', 'Met een zijkolom, 400 pixels', 'w400')
-export const Side560 = story('side', 'Met een zijkolom, 560 pixels', 'w560')
-export const Side900 = story('side', 'Met een zijkolom, 900 pixels', 'w900')
-export const Side1280 = story('side', 'Met een zijkolom, 1280 pixels', 'w1280')
+export const FirstOnly = meta.story({
+  name: 'Met een cel die op een telefoon voor de hoofdinhoud staat',
+  render: () => page(layouts.first),
+})
+export const First320 = meta.story({
+  globals: { viewport: { value: 'w320' } },
+  name: 'Met een cel die op een telefoon voor de hoofdinhoud staat, 320 pixels',
+  render: () => page(layouts.first),
+  tags: ['!autodocs'],
+})
+export const First400 = meta.story({
+  globals: { viewport: { value: 'w400' } },
+  name: 'Met een cel die op een telefoon voor de hoofdinhoud staat, 400 pixels',
+  render: () => page(layouts.first),
+  tags: ['!autodocs'],
+})
+export const First560 = meta.story({
+  globals: { viewport: { value: 'w560' } },
+  name: 'Met een cel die op een telefoon voor de hoofdinhoud staat, 560 pixels',
+  render: () => page(layouts.first),
+  tags: ['!autodocs'],
+})
+export const First900 = meta.story({
+  globals: { viewport: { value: 'w900' } },
+  name: 'Met een cel die op een telefoon voor de hoofdinhoud staat, 900 pixels',
+  render: () => page(layouts.first),
+  tags: ['!autodocs'],
+})
+export const First1280 = meta.story({
+  globals: { viewport: { value: 'w1280' } },
+  name: 'Met een cel die op een telefoon voor de hoofdinhoud staat, 1280 pixels',
+  render: () => page(layouts.first),
+  tags: ['!autodocs'],
+})
 
-export const First = story('first', 'Met een cel die op een telefoon voor de hoofdinhoud staat')
-export const First320 = story('first', 'Met een cel die op een telefoon voor de hoofdinhoud staat, 320 pixels', 'w320')
-export const First400 = story('first', 'Met een cel die op een telefoon voor de hoofdinhoud staat, 400 pixels', 'w400')
-export const First560 = story('first', 'Met een cel die op een telefoon voor de hoofdinhoud staat, 560 pixels', 'w560')
-export const First900 = story('first', 'Met een cel die op een telefoon voor de hoofdinhoud staat, 900 pixels', 'w900')
-export const First1280 = story(
-  'first',
-  'Met een cel die op een telefoon voor de hoofdinhoud staat, 1280 pixels',
-  'w1280',
-)
+export const EqualOnly = meta.story({ name: 'Met twee gelijke kolommen', render: () => page(layouts.equal) })
+export const Equal320 = meta.story({
+  globals: { viewport: { value: 'w320' } },
+  name: 'Met twee gelijke kolommen, 320 pixels',
+  render: () => page(layouts.equal),
+  tags: ['!autodocs'],
+})
+export const Equal400 = meta.story({
+  globals: { viewport: { value: 'w400' } },
+  name: 'Met twee gelijke kolommen, 400 pixels',
+  render: () => page(layouts.equal),
+  tags: ['!autodocs'],
+})
+export const Equal560 = meta.story({
+  globals: { viewport: { value: 'w560' } },
+  name: 'Met twee gelijke kolommen, 560 pixels',
+  render: () => page(layouts.equal),
+  tags: ['!autodocs'],
+})
+export const Equal900 = meta.story({
+  globals: { viewport: { value: 'w900' } },
+  name: 'Met twee gelijke kolommen, 900 pixels',
+  render: () => page(layouts.equal),
+  tags: ['!autodocs'],
+})
+export const Equal1280 = meta.story({
+  globals: { viewport: { value: 'w1280' } },
+  name: 'Met twee gelijke kolommen, 1280 pixels',
+  render: () => page(layouts.equal),
+  tags: ['!autodocs'],
+})
 
-export const Equal = story('equal', 'Met twee gelijke kolommen')
-export const Equal320 = story('equal', 'Met twee gelijke kolommen, 320 pixels', 'w320')
-export const Equal400 = story('equal', 'Met twee gelijke kolommen, 400 pixels', 'w400')
-export const Equal560 = story('equal', 'Met twee gelijke kolommen, 560 pixels', 'w560')
-export const Equal900 = story('equal', 'Met twee gelijke kolommen, 900 pixels', 'w900')
-export const Equal1280 = story('equal', 'Met twee gelijke kolommen, 1280 pixels', 'w1280')
+export const StartOnly = meta.story({ name: 'Met een zijkolom links', render: () => page(layouts.start) })
+export const Start320 = meta.story({
+  globals: { viewport: { value: 'w320' } },
+  name: 'Met een zijkolom links, 320 pixels',
+  render: () => page(layouts.start),
+  tags: ['!autodocs'],
+})
+export const Start400 = meta.story({
+  globals: { viewport: { value: 'w400' } },
+  name: 'Met een zijkolom links, 400 pixels',
+  render: () => page(layouts.start),
+  tags: ['!autodocs'],
+})
+export const Start560 = meta.story({
+  globals: { viewport: { value: 'w560' } },
+  name: 'Met een zijkolom links, 560 pixels',
+  render: () => page(layouts.start),
+  tags: ['!autodocs'],
+})
+export const Start900 = meta.story({
+  globals: { viewport: { value: 'w900' } },
+  name: 'Met een zijkolom links, 900 pixels',
+  render: () => page(layouts.start),
+  tags: ['!autodocs'],
+})
+export const Start1280 = meta.story({
+  globals: { viewport: { value: 'w1280' } },
+  name: 'Met een zijkolom links, 1280 pixels',
+  render: () => page(layouts.start),
+  tags: ['!autodocs'],
+})
 
-export const Start = story('start', 'Met een zijkolom links')
-export const Start320 = story('start', 'Met een zijkolom links, 320 pixels', 'w320')
-export const Start400 = story('start', 'Met een zijkolom links, 400 pixels', 'w400')
-export const Start560 = story('start', 'Met een zijkolom links, 560 pixels', 'w560')
-export const Start900 = story('start', 'Met een zijkolom links, 900 pixels', 'w900')
-export const Start1280 = story('start', 'Met een zijkolom links, 1280 pixels', 'w1280')
-
-export const Toolbar = story('toolbar', 'Met een werkbalk')
-export const Toolbar320 = story('toolbar', 'Met een werkbalk, 320 pixels', 'w320')
-export const Toolbar400 = story('toolbar', 'Met een werkbalk, 400 pixels', 'w400')
-export const Toolbar560 = story('toolbar', 'Met een werkbalk, 560 pixels', 'w560')
-export const Toolbar900 = story('toolbar', 'Met een werkbalk, 900 pixels', 'w900')
-export const Toolbar1280 = story('toolbar', 'Met een werkbalk, 1280 pixels', 'w1280')
+export const ToolbarOnly = meta.story({ name: 'Met een werkbalk', render: () => page(layouts.toolbar) })
+export const Toolbar320 = meta.story({
+  globals: { viewport: { value: 'w320' } },
+  name: 'Met een werkbalk, 320 pixels',
+  render: () => page(layouts.toolbar),
+  tags: ['!autodocs'],
+})
+export const Toolbar400 = meta.story({
+  globals: { viewport: { value: 'w400' } },
+  name: 'Met een werkbalk, 400 pixels',
+  render: () => page(layouts.toolbar),
+  tags: ['!autodocs'],
+})
+export const Toolbar560 = meta.story({
+  globals: { viewport: { value: 'w560' } },
+  name: 'Met een werkbalk, 560 pixels',
+  render: () => page(layouts.toolbar),
+  tags: ['!autodocs'],
+})
+export const Toolbar900 = meta.story({
+  globals: { viewport: { value: 'w900' } },
+  name: 'Met een werkbalk, 900 pixels',
+  render: () => page(layouts.toolbar),
+  tags: ['!autodocs'],
+})
+export const Toolbar1280 = meta.story({
+  globals: { viewport: { value: 'w1280' } },
+  name: 'Met een werkbalk, 1280 pixels',
+  render: () => page(layouts.toolbar),
+  tags: ['!autodocs'],
+})
