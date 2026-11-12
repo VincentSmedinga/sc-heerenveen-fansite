@@ -122,9 +122,9 @@ const layouts = {
       <>
         <Head />
         <MainCell />
-        <Page.Section area="side" aria-labelledby="side-title">
-          <Card id="side-title" title="Zijkolom" />
-          <Card id="side-more" title="Nog een kaart" />
+        <Page.Section area="side" aria-labelledby="first-side-title">
+          <Card id="first-side-title" title="Zijkolom" />
+          <Card id="first-side-more" title="Nog een kaart" />
         </Page.Section>
       </>
     ),
@@ -152,8 +152,8 @@ const layouts = {
         <Head />
         <ToolbarRow />
         <MainCell />
-        <Page.Section area="side" aria-labelledby="side-title">
-          <Card id="side-title" title="Zijkolom" />
+        <Page.Section area="side" aria-labelledby="toolbar-side-title">
+          <Card id="toolbar-side-title" title="Zijkolom" />
         </Page.Section>
       </>
     ),
