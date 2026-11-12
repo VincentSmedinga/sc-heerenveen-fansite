@@ -91,7 +91,7 @@ export default async function AdminPage() {
             </Tile>
           ) : null}
           <Tile href="/beheer/artikelen" icon="document" level={2} title="Artikelen">
-            {editor ? 'Schrijf artikelen en publiceer ze.' : 'Schrijf je eigen artikelen. Een redacteur publiceert ze.'}
+            {editor ? 'Schrijf artikelen en publiceer ze.' : 'Schrijf je eigen artikelen en publiceer ze.'}
           </Tile>
           {editor ? (
             <>

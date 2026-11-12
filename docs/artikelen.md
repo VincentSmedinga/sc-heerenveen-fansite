@@ -79,7 +79,8 @@ Wie het artikel schrijft, leest het ook na: een tweede lezer is er nog niet (die
 
 De eigenaar, een redacteur en een auteur schrijven artikelen (#1156).
 Een auteur ziet alleen de artikelen die hij zelf maakte: een artikel van een ander is voor hem "niet gevonden".
-Hij heeft geen knop om te publiceren of in te trekken; dat doen de eigenaar en een redacteur, en de site weigert het ook als een auteur het verzoek zelf maakt.
+Zijn eigen artikelen publiceert en trekt hij zelf in, met dezelfde knoppen als een redacteur (#1159).
+Een artikel van een ander publiceren of intrekken weigert de site, ook als een auteur het verzoek zelf maakt.
 Log in zoals bij elke beheerpagina en kies op `/beheer` de tegel "Artikelen".
 
 1. Kies "Nieuw artikel" en vul de velden in.
@@ -281,7 +282,7 @@ Artikelen en versies die er nog mee zijn opgeslagen, zijn bij het starten van de
 - `migrateArticleBodies` in `packages/db/src/article-body-migration.ts` heeft de artikelen en versies in de oude opmaak omgezet naar JSON (zie _Artikelen schrijven vraagt JavaScript, lezen niet_ en de beslissing erboven in `beslissingen/redactie.md`).
 - Het beheer staat in `apps/site/src/app/beheer/artikelen` (de lijst, het formulier, de serveracties en het voorbeeld).
   De queries en de wijzigingen staan in `apps/site/src/beheer/articles.ts`, de controle van het formulier in `article-form.ts`.
-  Elke serveractie begint met `requireRole`, voor elke rol bij schrijven en opslaan en alleen voor de eigenaar en een redacteur bij intrekken, en elke wijziging schrijft met `recordAction` in dezelfde transactie een regel in het logboek.
+  Elke serveractie begint met `requireRole` voor elke rol; een auteur slaat alleen zijn eigen artikel op, publiceert het en trekt het in, en elke wijziging schrijft met `recordAction` in dezelfde transactie een regel in het logboek.
   Een wijziging van de tekst voegt in diezelfde transactie met `recordVersion` (`apps/site/src/beheer/article-versions.ts`) een versie toe, en elke wijziging zet `updated_by`.
   Alleen `article-versions.ts` raakt `article_versions`, alleen met `INSERT`, en `article-versions.test.ts` houdt dat zo.
 - De pagina is `apps/site/src/app/redactie/[slug]/page.tsx`, de kaart staat in `apps/site/src/app/page.tsx`, en beide gebruiken de componenten `Article` en `ArticleCard` van het designsysteem.

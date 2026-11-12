@@ -245,22 +245,24 @@ export async function saveArticle(
 /**
  * Makes a published article a draft again, and writes `article.unpublish` in the log. A draft
  * is left as it is and writes nothing. The time of publication is gone; publishing again sets
- * a new one.
+ * a new one. With `createdBy` only an article that account made is withdrawn: one of someone
+ * else is `missing`, as for an author (issue 1159).
  */
 export async function withdrawArticle(
   db: Database,
   userId: number,
   id: number,
   now = new Date(),
+  createdBy?: number,
 ): Promise<WithdrawOutcome> {
   return db.transaction(async (transaction) => {
     const [row] = await transaction
-      .select({ publishedAt: articles.publishedAt })
+      .select({ createdBy: articles.createdBy, publishedAt: articles.publishedAt })
       .from(articles)
       .where(eq(articles.id, id))
       .for('update')
 
-    if (row === undefined) {
+    if (row === undefined || (createdBy !== undefined && row.createdBy !== createdBy)) {
       return 'missing'
     }
 

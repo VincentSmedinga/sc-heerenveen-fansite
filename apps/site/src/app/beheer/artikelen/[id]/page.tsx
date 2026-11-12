@@ -34,9 +34,8 @@ const freshFor = 5 * 60 * 1000
 // article, the button to withdraw it, and under them the earlier versions of the text. The page
 // tells the editor what the last action did from what the database says now.
 export default async function ArticlePage({ params, searchParams }: Props) {
+  // An author gets only the articles he made, and publishes and withdraws them himself.
   const reader = await requireRole(...adminRoles)
-  // An author may not publish or withdraw: he has neither button (issue 1156).
-  const publishes = reader.role !== 'author'
   const id = parseItemId((await params).id)
   const article = id === undefined ? undefined : await findArticleFor(getDatabase().db, id, reader)
 
@@ -87,10 +86,9 @@ export default async function ArticlePage({ params, searchParams }: Props) {
         }}
         key={`${article.id}-${article.updatedAt.getTime()}-${article.publishedAt?.getTime() ?? 0}`}
         limits={formLimits}
-        publishes={publishes}
         status={status}
       />
-      {article.publishedAt === null || !publishes ? null : (
+      {article.publishedAt === null ? null : (
         <Card aria-labelledby="intrekken-kop" surface="soft">
           <Heading id="intrekken-kop" level={2}>
             Van de site halen

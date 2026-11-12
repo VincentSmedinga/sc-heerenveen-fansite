@@ -37,7 +37,7 @@ export default async function ArticlesPage({ searchParams }: { searchParams: Pro
           <Heading level={1}>Artikelen</Heading>
           <Text appearance="intro">
             {reader.role === 'author'
-              ? 'Hier schrijf je je eigen artikelen. Een concept staat nergens op de site. Een redacteur of de eigenaar publiceert het.'
+              ? 'Hier schrijf en publiceer je je eigen artikelen. Een concept staat nergens op de site.'
               : 'Hier schrijf je de artikelen van de redactie. Een concept staat nergens op de site. Een gepubliceerd artikel staat op een eigen pagina en, als het het nieuwste is, op home.'}
           </Text>
           <Form action="/beheer/artikelen/nieuw" method="get">

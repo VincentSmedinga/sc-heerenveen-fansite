@@ -86,7 +86,7 @@ export function AccountForm({
       {kind === 'owner' ? null : (
         <RadioGroup
           error={errors.rol}
-          hint="Een redacteur mag alles behalve accounts beheren. Een auteur schrijft alleen zijn eigen artikelen en publiceert niet."
+          hint="Een redacteur mag alles behalve accounts beheren. Een auteur schrijft en publiceert alleen zijn eigen artikelen."
           id="rol"
           key={`rol-${values.rol}`}
           legend="Rol"

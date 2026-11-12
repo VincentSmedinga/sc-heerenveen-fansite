@@ -311,6 +311,22 @@ describe('saveArticle', () => {
     expect(await log()).toEqual([])
   })
 
+  it('saves, publishes and withdraws for createdBy only an article that account made', async () => {
+    const id = await draft()
+
+    await saveArticle(database.db, userId, id, values(), true, t1)
+
+    const before = await log()
+
+    expect(await saveArticle(database.db, userId, id, values({ titel: 'Ander' }), true, t2, userId + 1)).toEqual({
+      status: 'missing',
+    })
+    expect(await withdrawArticle(database.db, userId, id, t2, userId + 1)).toBe('missing')
+    expect((await stored(id))?.publishedAt).toEqual(t1)
+    expect(await log()).toEqual(before)
+    expect(await withdrawArticle(database.db, userId, id, t2, userId)).toBe('done')
+  })
+
   it('writes the log and the change in one transaction: a failing log leaves the article as it was', async () => {
     const id = await draft()
 
