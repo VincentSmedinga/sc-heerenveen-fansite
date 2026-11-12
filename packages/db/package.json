@@ -20,6 +20,7 @@
     "./match-conflicts": "./src/match-conflicts.ts",
     "./match-edits": "./src/match-edits.ts",
     "./match-lookup": "./src/match-lookup.ts",
+    "./match-search": "./src/match-search.ts",
     "./match-reports": "./src/match-reports.ts",
     "./migration-check": "./src/migration-check.ts",
     "./player-field-differences": "./src/player-field-differences.ts",

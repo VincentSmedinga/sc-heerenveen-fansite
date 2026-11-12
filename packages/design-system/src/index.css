@@ -38,6 +38,9 @@
 @import url('./components/tile/tile.css');
 @import url('./components/notice/notice.css');
 @import url('./components/disclosure/disclosure.css');
+@import url('./components/filter-card/filter-card.css');
+@import url('./components/chip/chip.css');
+@import url('./components/outcome-line/outcome-line.css');
 @import url('./components/card/card-share.css');
 @import url('./components/navigation/navigation.css');
 @import url('./components/checkbox-group/checkbox-group.css');

@@ -22,12 +22,15 @@ const opponentsPath = '/tegenstanders'
 
 const statisticsPath = '/cijfers'
 
+const matchesPath = '/wedstrijden'
+
+const matchesSearchPath = `${matchesPath}/zoeken`
+
 const matchesSubitems = [
   { href: statisticsPath, label: 'Cijfers' },
   { href: opponentsPath, label: 'Tegenstanders' },
+  { href: matchesSearchPath, label: 'Zoeken' },
 ]
-
-const matchesPath = '/wedstrijden'
 
 const playersPath = '/spelers'
 
@@ -97,6 +100,10 @@ export function currentOf(pathname: string): { item?: string; subitem?: string }
 
   if (pathname === adminPath || pathname.startsWith(`${adminPath}/`)) {
     return { item: adminPath }
+  }
+
+  if (pathname === matchesSearchPath) {
+    return { item: matchesPath, subitem: matchesSearchPath }
   }
 
   if (pathname === '/wedstrijden' || pathname.startsWith('/wedstrijden/')) {

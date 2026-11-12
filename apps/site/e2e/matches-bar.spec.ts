@@ -14,7 +14,9 @@ const bar = (page: Page, name: string) => menu(page).getByRole('link', { exact: 
 test.describe('the menu and the bar of Wedstrijden without JavaScript', () => {
   test.use({ javaScriptEnabled: false })
 
-  test('has the bar of Cijfers and Tegenstanders on Wedstrijden and on the page of a season', async ({ page }) => {
+  test('has the bar of Cijfers, Tegenstanders and Zoeken on Wedstrijden and on the page of a season', async ({
+    page,
+  }) => {
     for (const [path, figures] of [
       ['/wedstrijden', '/cijfers'],
       [`/wedstrijden/${slug}`, `/cijfers/${slug}`],
@@ -23,8 +25,17 @@ test.describe('the menu and the bar of Wedstrijden without JavaScript', () => {
 
       await expect(bar(page, 'Cijfers')).toHaveAttribute('href', figures)
       await expect(bar(page, 'Tegenstanders')).toHaveAttribute('href', '/tegenstanders')
+      await expect(bar(page, 'Zoeken')).toHaveAttribute('href', '/wedstrijden/zoeken')
       await expect(bar(page, 'Wedstrijden')).toHaveAttribute('aria-current', 'page')
     }
+  })
+
+  test('marks Zoeken as the current sub-page on the search for a match', async ({ page }) => {
+    await page.goto('/wedstrijden/zoeken')
+
+    await expect(bar(page, 'Zoeken')).toHaveAttribute('aria-current', 'page')
+    await expect(bar(page, 'Wedstrijden')).toHaveAttribute('aria-current', 'true')
+    await expect(menu(page).locator('[aria-current="page"]')).toHaveCount(1)
   })
 
   test('marks Cijfers as the current sub-page, and keeps the choice and the season', async ({ page }) => {

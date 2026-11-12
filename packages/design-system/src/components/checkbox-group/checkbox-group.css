@@ -27,10 +27,23 @@
     overflow-wrap: anywhere;
     padding-block: var(--hf-space-xs);
 
+    > span:first-of-type {
+      flex: 1;
+    }
+
     > input {
       flex: none;
       inset-block-start: 0.125rem;
       position: relative;
     }
+  }
+
+  /* The number behind a label: secondary text, in digits of one width so a column lines up. */
+  .hf-checkbox-group-count {
+    color: var(--hf-colour-text-secondary);
+    flex: none;
+    font-size: var(--hf-meta-font-size);
+    font-variant-numeric: tabular-nums;
+    margin-inline-start: var(--hf-space-m);
   }
 }

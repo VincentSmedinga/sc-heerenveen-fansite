@@ -124,6 +124,7 @@ describe('SiteNavigation', () => {
       expect(barLinks(html)).toEqual([
         ['/cijfers', 'Cijfers'],
         ['/tegenstanders', 'Tegenstanders'],
+        ['/wedstrijden/zoeken', 'Zoeken'],
       ])
       expect(linksWith(html, 'true')).toEqual([])
     },
@@ -139,6 +140,7 @@ describe('SiteNavigation', () => {
       expect(barLinks(html)).toEqual([
         ['/cijfers', 'Cijfers'],
         ['/tegenstanders', 'Tegenstanders'],
+        ['/wedstrijden/zoeken', 'Zoeken'],
       ])
     },
   )
@@ -168,8 +170,23 @@ describe('SiteNavigation', () => {
     expect(linksWith(html, 'true')).toEqual(['Spelers'])
   })
 
+  it('marks Zoeken as the current sub-page on /wedstrijden/zoeken, and Wedstrijden as the item that holds it', () => {
+    const html = render('/wedstrijden/zoeken')
+
+    expect(currentLinks(html)).toEqual(['Zoeken'])
+    expect(linksWith(html, 'true')).toEqual(['Wedstrijden'])
+  })
+
   it('has exactly one item with aria-current on every page of the menu', () => {
-    for (const path of ['/nieuws', '/wedstrijden', '/cijfers', '/tegenstanders', '/spelers', '/spelers/2025-26']) {
+    for (const path of [
+      '/nieuws',
+      '/wedstrijden',
+      '/wedstrijden/zoeken',
+      '/cijfers',
+      '/tegenstanders',
+      '/spelers',
+      '/spelers/2025-26',
+    ]) {
       expect(render(path).match(/aria-current="page"/g)).toHaveLength(1)
     }
   })
@@ -184,6 +201,7 @@ describe('SiteNavigation', () => {
       expect(barLinks(html)).toEqual([
         ['/cijfers', 'Cijfers'],
         ['/tegenstanders', 'Tegenstanders'],
+        ['/wedstrijden/zoeken', 'Zoeken'],
       ])
     },
   )
@@ -194,6 +212,7 @@ describe('SiteNavigation', () => {
       <div className="hf-navigation-bar">
         <a href="/cijfers?competitie=eredivisie">Cijfers</a>
         <a href="/tegenstanders?competitie=eredivisie">Tegenstanders</a>
+        <a href="/wedstrijden/zoeken">Zoeken</a>
       </div>
     )
 
@@ -210,6 +229,7 @@ describe('SiteNavigation', () => {
       expect(barLinks(html)).toEqual([
         ['/cijfers?competitie=eredivisie', 'Cijfers'],
         ['/tegenstanders?competitie=eredivisie', 'Tegenstanders'],
+        ['/wedstrijden/zoeken', 'Zoeken'],
       ])
       expect(html.match(/hf-navigation-bar/g)).toHaveLength(1)
       expect(html).toMatch(/<a [^>]*href="\/wedstrijden[^"]*"[^>]*>Wedstrijden<\/a><div class="hf-navigation-bar">/)

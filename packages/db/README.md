@@ -910,6 +910,13 @@ De migratie `0071_add_death_date_to_persons` doet dat ook; terugdraaien kan met 
 Terugdraaien op de host: haal de foreign key `persons_birth_place_id_wikidata_items_id_fk`, de index `persons_wikidata_id_unique` en de acht kolommen weg, dan `person_nationalities`, `person_positions` en `wikidata_items`.
 De importer leest de personen dan opnieuw.
 
+### Zoeken in wedstrijden
+
+`match-search.ts` (`@fansite/db/match-search`) heeft de twee vragen van `/wedstrijden/zoeken` (#1150).
+`listSearchableMatches` geeft elke gespeelde wedstrijd met de naam en de adresnaam van zijn club, van oud naar nieuw; de pagina filtert en telt ze in het geheugen.
+`listScorerMatchIds` geeft de wedstrijden waarin een speler van ons scoorde, met de woorden gezocht zoals `searchPlayers` doet (dus ook onder een oude naam).
+Een eigen doelpunt telt niet voor de speler, en een doelpunt dat niet aan een speler is gekoppeld vindt niemand.
+
 ### De tabel `club_stadiums`
 
 De eigen lijst van namen van het stadion van een club, die de redactie bijhoudt in het beheer (zie _De stadions van een club_ in de [README van de site](../../apps/site/README.md)).

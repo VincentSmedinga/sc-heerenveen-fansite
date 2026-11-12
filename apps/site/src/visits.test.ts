@@ -310,7 +310,13 @@ describe('visitOf', () => {
       .filter((path) => !path.startsWith('/beheer') && !path.startsWith('/@') && !withoutCount.includes(path))
 
     expect(paths.toSorted()).toEqual(
-      [...pages.map(({ path }) => path), '/contact/verstuurd', '/nieuws/zoeken', '/spelers/zoeken'].toSorted(),
+      [
+        ...pages.map(({ path }) => path),
+        '/contact/verstuurd',
+        '/nieuws/zoeken',
+        '/spelers/zoeken',
+        '/wedstrijden/zoeken',
+      ].toSorted(),
     )
   })
 })

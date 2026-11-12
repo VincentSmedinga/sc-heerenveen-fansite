@@ -34,6 +34,7 @@ const countedPaths: ReadonlySet<string> = new Set([
   '/contact/verstuurd',
   '/nieuws/zoeken',
   '/spelers/zoeken',
+  '/wedstrijden/zoeken',
 ])
 
 const articlePath = /^\/redactie\/([^/]+)$/u

@@ -103,6 +103,16 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/spelers/zoeken?q=proefman', status: 200 },
   { path: '/spelers/zoeken?q=bestaat+echt+niet', status: 200 },
   { path: '/spelers/zoeken?q=a', status: 200 },
+  // The search for a match (#1150): the start, results, a page past the last, nothing found,
+  // and values that do not exist.
+  { path: '/wedstrijden/zoeken', status: 200 },
+  { path: '/wedstrijden/zoeken?waar=uit&uitslag=gewonnen', status: 200 },
+  { path: '/wedstrijden/zoeken?competitie=europa&volgorde=oudste&pagina=9', status: 200 },
+  {
+    path: '/wedstrijden/zoeken?waar=thuis&uitslag=verloren&dag=vrijdag&doelpuntenmaker=bestaat+echt+niet',
+    status: 200,
+  },
+  { path: '/wedstrijden/zoeken?doelpuntenmaker=a&tegen=onzin&van=1850/51&wij=1000', status: 200 },
   { path: '/spelers/2099-00', status: 404 },
   { path: '/spelers/onzin', status: 404 },
   // The page of a made-up player and a person in no squad of ours (see persons.ts). An old

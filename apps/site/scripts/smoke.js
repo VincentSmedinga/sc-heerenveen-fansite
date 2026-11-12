@@ -1361,6 +1361,33 @@ await withEmptyDatabase((database) =>
     assert.match(nobody.replaceAll('<!-- -->', ''), />Geen spelers voor ‘bestaat echt niet’</)
     assert.match(await (await fetch(`${searchBase}?q=a`)).text(), /Schrijf woorden van minstens 2 tekens\./)
 
+    // The search for a match (#1150): the form without a choice, the made-up matches for a
+    // choice, nothing for a choice that fits no match, and values that do not exist. The page
+    // keeps search engines away.
+    const matchSearchBase = `${origin}/wedstrijden/zoeken`
+    const matchSearchHtml = await (await fetch(matchSearchBase)).text()
+    assert.match(matchSearchHtml, /<h1[^>]*>Zoeken in wedstrijden<\/h1>/)
+    assert.match(matchSearchHtml, /noindex/)
+    assert.match(matchSearchHtml, /<a aria-current="page"[^>]*href="\/wedstrijden\/zoeken"[^>]*>Zoeken</)
+    assert.doesNotMatch(matchSearchHtml, /id="resultaten"/)
+
+    const awayWins = await fetch(`${matchSearchBase}?waar=uit&uitslag=gewonnen`)
+    const awayWinsHtml = await awayWins.text()
+    assert.equal(awayWins.status, 200)
+    assert.match(awayWinsHtml.replaceAll('<!-- -->', ''), /id="resultaten">\d+ wedstrijd(en)?<\/h2>/)
+    assert.match(awayWinsHtml, /Alle uitwedstrijden die we wonnen/)
+    assert.match(awayWinsHtml, /class="hf-chip"/)
+
+    const nothing = await fetch(
+      `${matchSearchBase}?waar=thuis&uitslag=verloren&dag=vrijdag&doelpuntenmaker=bestaat+echt+niet`,
+    )
+    assert.equal(nothing.status, 200)
+    assert.match(await nothing.text(), />Geen wedstrijden</)
+
+    const nonsense = await fetch(`${matchSearchBase}?tegen=onzin&van=1850/51&competitie=onzin&wij=1000`)
+    assert.equal(nonsense.status, 200)
+    assert.doesNotMatch(await nonsense.text(), /id="resultaten"/)
+
     const playersPage = await fetch(`${origin}/spelers`)
     const playersHtml = await playersPage.text()
     assert.equal(playersPage.status, 200)
