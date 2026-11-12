@@ -1035,7 +1035,7 @@ Een sessie die verloopt haalt hem niet weg: daar is hij voor.
   Op een bureaublad staat hij rechts in de balk; op een telefoon schuift hij mee met de schermen.
   De kaart "Te doen" staat in een sectie met een naam naast de tegels (`Page.Section`) en er alleen als er iets wacht: afwijkingen van Wikipedia op een besluit, vastgehouden wijzigingen van Wikipedia op een besluit (`countHeldChanges`), wedstrijden zonder uitslag in het lopende seizoen (`countMatchesWithoutResult`) en verslagen die klaar waren en niet meer kloppen (`countReportsToCheck`, alleen verslagen die een redacteur opsloeg), elk een koppeling naar de lijst.
   Een volgend scherm voegt een regel toe door een item aan `todo` in `src/app/beheer/page.tsx` toe te voegen.
-  Op een telefoon staat de kaart onder de tegels, want de gebieden van de pagina zetten de sectie op een smal scherm vóór de tegels, in de volgorde van de bron.
+  Op een telefoon staat de kaart boven de tegels, want de gebieden van de pagina zetten de sectie op een smal scherm vóór de tegels.
 - `/beheer/berichten` is alleen voor de eigenaar en de redacteuren: de 50 nieuwste berichten van alle bronnen die op de site staan of die er niet op staan, met bron, kop als link, tijd en wie een bericht verborg (zie _Berichten verbergen_).
 - `/beheer/artikelen` is voor elke rol: de artikelen van de redactie schrijven, bekijken, publiceren en intrekken (zie _Artikelen schrijven_).
   Een auteur ziet alleen de artikelen die hij maakte (`created_by`), en publiceert en trekt alleen die in (#1159); de serveracties weigeren een artikel van een ander.
