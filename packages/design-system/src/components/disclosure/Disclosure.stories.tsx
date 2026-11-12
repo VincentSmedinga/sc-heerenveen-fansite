@@ -12,6 +12,7 @@ const meta = preview.meta({
       control: 'text',
       description: 'De regel die het blok opent en sluit. Hij zegt wat erachter zit.',
     },
+    value: { control: 'text', description: 'Wat er binnen gekozen is, rechts naast de samenvatting.' },
   },
   component: Disclosure,
   parameters: {
@@ -49,4 +50,9 @@ export const Default = meta.story({
 export const Open = meta.story({
   args: { children: content, open: true, summary: 'Invoer weghalen' },
   name: 'Open',
+})
+
+export const WithValue = meta.story({
+  args: { children: content, summary: 'Tegenstander', value: 'Ajax' },
+  name: 'Met een keuze',
 })

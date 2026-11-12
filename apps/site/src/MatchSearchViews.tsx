@@ -8,7 +8,7 @@ import {
   Disclosure,
   Field,
   FieldGroup,
-  FilterCard,
+  FilterList,
   Form,
   Heading,
   Input,
@@ -28,6 +28,7 @@ import type { OnThisDay as OnThisDayCard, Question } from './match-search-start'
 
 import {
   clubsOf,
+  facetValuesOf,
   type Filters,
   matchCount,
   matchSearchPath,
@@ -50,9 +51,10 @@ export const formatCount = (count: number) => new Intl.NumberFormat('nl-NL').for
 
 /**
  * The filters of the search as a form: one plain `GET` form, so every choice is in the address
- * and the page works without JavaScript. On a narrow screen the card is a disclosure that is
- * open without a search and closed with one. A value that gives no match is not in the list,
- * unless it is chosen; every value has the number of matches you get by adding it.
+ * and the page works without JavaScript. The filters are one list of rows that open and close.
+ * A closed row says what is chosen. Tegenstander and Seizoenen are open when the page loads,
+ * with or without a search, and so is a row with an error. A value that gives no match is not
+ * in the list, unless it is chosen; every value has the number of matches you get by adding it.
  */
 export function MatchSearchFilters({
   allClubs,
@@ -65,60 +67,69 @@ export function MatchSearchFilters({
   seasons: readonly string[]
   view: SearchView
 }) {
-  const chosenCount = view.chips.filter((chip) => chip.sorting !== true).length
-  const moreOpen =
-    filters.scorer !== undefined ||
-    filters.scorerError !== undefined ||
-    filters.ours !== undefined ||
-    filters.theirs !== undefined
+  const values = facetValuesOf(filters, view, seasons)
 
   return (
-    <FilterCard collapsed={view.chosen} summary={chosenCount === 0 ? 'Filters' : `Filters · ${chosenCount} gekozen`}>
-      <Form action={`${matchSearchPath}#${searchResultsId}`} aria-label="Wedstrijden zoeken" id={formId} method="get">
-        <Field
-          hideOptional
-          hint={`${formatCount(allClubs)} clubs, op naam. Typ de eerste letters om te springen.`}
-          id="tegenstander"
-          label="Tegenstander"
-          required={false}
-        >
-          <Select defaultValue={filters.club ?? ''} name="tegen">
-            <Select.Option value="">Elke club</Select.Option>
-            {view.clubs.map((club) => (
-              <Select.Option key={club.slug} value={club.slug}>{`${club.name} (${club.count})`}</Select.Option>
-            ))}
-          </Select>
-        </Field>
-        <FieldGroup legend="Seizoenen" separator="–">
-          <Field hideOptional id="van" label="Van" required={false}>
-            <Select defaultValue={filters.from ?? seasons[0] ?? ''} name="van">
-              {seasons.map((season) => (
-                <Select.Option key={season} value={season}>
-                  {season}
-                </Select.Option>
+    <Form action={`${matchSearchPath}#${searchResultsId}`} aria-label="Wedstrijden zoeken" id={formId} method="get">
+      <FilterList>
+        <Disclosure open summary="Tegenstander" value={values.club}>
+          <Field
+            hideOptional
+            hint={`${formatCount(allClubs)} clubs, op naam. Typ de eerste letters om te springen.`}
+            id="tegenstander"
+            label="Tegenstander"
+            required={false}
+          >
+            <Select defaultValue={filters.club ?? ''} name="tegen">
+              <Select.Option value="">Elke club</Select.Option>
+              {view.clubs.map((club) => (
+                <Select.Option key={club.slug} value={club.slug}>{`${club.name} (${club.count})`}</Select.Option>
               ))}
             </Select>
           </Field>
-          <Field hideOptional id="tot" label="Tot" required={false}>
-            <Select defaultValue={filters.to ?? seasons.at(-1) ?? ''} name="tot">
-              {seasons.map((season) => (
-                <Select.Option key={season} value={season}>
-                  {season}
-                </Select.Option>
-              ))}
-            </Select>
-          </Field>
-        </FieldGroup>
-        <CheckboxGroup legend="Thuis of uit" name="waar" options={view.venues.map(optionOf)} value={filters.venues} />
-        <CheckboxGroup
-          legend="Competitie"
-          name="competitie"
-          options={view.competitions.map(optionOf)}
-          value={filters.competitions}
-        />
-        <CheckboxGroup legend="Uitslag" name="uitslag" options={view.outcomes.map(optionOf)} value={filters.outcomes} />
-        <CheckboxGroup legend="Dag" name="dag" options={view.days.map(optionOf)} value={filters.days} />
-        <Disclosure open={moreOpen} summary="Meer filters">
+        </Disclosure>
+        <Disclosure open summary="Seizoenen" value={values.seasons}>
+          <FieldGroup legend="Seizoenen" separator="–">
+            <Field hideOptional id="van" label="Van" required={false}>
+              <Select defaultValue={filters.from ?? seasons[0] ?? ''} name="van">
+                {seasons.map((season) => (
+                  <Select.Option key={season} value={season}>
+                    {season}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Field>
+            <Field hideOptional id="tot" label="Tot" required={false}>
+              <Select defaultValue={filters.to ?? seasons.at(-1) ?? ''} name="tot">
+                {seasons.map((season) => (
+                  <Select.Option key={season} value={season}>
+                    {season}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Field>
+          </FieldGroup>
+        </Disclosure>
+        <Disclosure summary="Competitie" value={values.competitions}>
+          <CheckboxGroup
+            legend="Competitie"
+            name="competitie"
+            options={view.competitions.map(optionOf)}
+            value={filters.competitions}
+          />
+        </Disclosure>
+        <Disclosure summary="Thuis of uit" value={values.venues}>
+          <CheckboxGroup legend="Thuis of uit" name="waar" options={view.venues.map(optionOf)} value={filters.venues} />
+        </Disclosure>
+        <Disclosure summary="Uitslag" value={values.outcomes}>
+          <CheckboxGroup
+            legend="Uitslag"
+            name="uitslag"
+            options={view.outcomes.map(optionOf)}
+            value={filters.outcomes}
+          />
+        </Disclosure>
+        <Disclosure open={filters.scorerError !== undefined} summary="Doelpuntenmaker" value={values.scorer}>
           <Field
             error={filters.scorerError?.message}
             hideOptional
@@ -136,6 +147,11 @@ export function MatchSearchFilters({
               type="search"
             />
           </Field>
+        </Disclosure>
+        <Disclosure summary="Dag" value={values.days}>
+          <CheckboxGroup legend="Dag" name="dag" options={view.days.map(optionOf)} value={filters.days} />
+        </Disclosure>
+        <Disclosure summary="Exacte uitslag" value={values.score}>
           <FieldGroup legend="Exacte uitslag" separator="–">
             <Field hideOptional id="wij" label="Wij" required={false}>
               <Input
@@ -161,21 +177,21 @@ export function MatchSearchFilters({
             </Field>
           </FieldGroup>
         </Disclosure>
-        {/* What the form has no field for stays in the address on a new search. */}
-        {filters.order !== 'nieuwste' && <Input name="volgorde" type="hidden" value={filters.order} />}
-        {filters.clubs.map((slug) => (
-          <Input key={slug} name="clubs" type="hidden" value={slug} />
-        ))}
-        {filters.minGoals !== undefined && <Input name="doelpunten" type="hidden" value={filters.minGoals} />}
-        {filters.penalties && <Input name="strafschoppen" type="hidden" value="ja" />}
-        {filters.date !== undefined && <Input name="maand" type="hidden" value={filters.date.month} />}
-        {filters.date?.day !== undefined && <Input name="op" type="hidden" value={filters.date.day} />}
-        <Form.Buttons>
-          <Button type="submit">Toon wedstrijden</Button>
-          <Link href={matchSearchPath}>Wis alles</Link>
-        </Form.Buttons>
-      </Form>
-    </FilterCard>
+      </FilterList>
+      {/* What the form has no field for stays in the address on a new search. */}
+      {filters.order !== 'nieuwste' && <Input name="volgorde" type="hidden" value={filters.order} />}
+      {filters.clubs.map((slug) => (
+        <Input key={slug} name="clubs" type="hidden" value={slug} />
+      ))}
+      {filters.minGoals !== undefined && <Input name="doelpunten" type="hidden" value={filters.minGoals} />}
+      {filters.penalties && <Input name="strafschoppen" type="hidden" value="ja" />}
+      {filters.date !== undefined && <Input name="maand" type="hidden" value={filters.date.month} />}
+      {filters.date?.day !== undefined && <Input name="op" type="hidden" value={filters.date.day} />}
+      <Form.Buttons>
+        <Button type="submit">Toon wedstrijden</Button>
+        <Link href={matchSearchPath}>Wis alles</Link>
+      </Form.Buttons>
+    </Form>
   )
 }
 

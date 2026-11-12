@@ -75,6 +75,12 @@ async function render(query: Query = {}) {
   return withoutIcons(renderToStaticMarkup(await MatchSearchPage({ searchParams: Promise.resolve(query) })))
 }
 
+/** The name of each row of the filters and whether it is open, in the order of the page. */
+const rowsOf = (html: string) =>
+  [...html.matchAll(/<details class="hf-disclosure"( open="")?><summary>([^<]*)/gu)].map(
+    (row) => [row[2], row[1] !== undefined] as const,
+  )
+
 beforeEach(() => {
   nextId = 1
   vi.mocked(getSearchWorld).mockResolvedValue(world(few))
@@ -104,8 +110,19 @@ describe('the page Zoeken in wedstrijden', () => {
     expect(html).toContain('>Begin met een vraag</h2>')
     expect(html).toContain('Bron: Wikipedia en het archief van de oude sc Heerenveen Fansite.')
     expect(html).not.toContain('id="resultaten"')
-    expect(html).toContain('<summary>Filters<')
-    expect(html).toMatch(/<details class="hf-disclosure hf-filter-card" open/u)
+    // One level: eight rows, and only Tegenstander and Seizoenen are open.
+    expect(html).not.toContain('Meer filters')
+    expect(html).not.toContain('<summary>Filters')
+    expect(rowsOf(html)).toEqual([
+      ['Tegenstander', true],
+      ['Seizoenen', true],
+      ['Competitie', false],
+      ['Thuis of uit', false],
+      ['Uitslag', false],
+      ['Doelpuntenmaker', false],
+      ['Dag', false],
+      ['Exacte uitslag', false],
+    ])
   })
 
   it('has a count behind each value, and Wis alles', async () => {
@@ -131,9 +148,16 @@ describe('the page Zoeken in wedstrijden', () => {
     expect(html).not.toContain('Volgorde')
     expect(html).toContain('>2001/02</h3>')
     expect(html).toContain('href="/tegenstanders/testdorp-fc">Alles over Testdorp FC bij Tegenstanders</a>')
-    // With a choice the filters are closed on a phone.
-    expect(html).toContain('<summary>Filters · 1 gekozen<')
-    expect(html).not.toMatch(/<details class="hf-disclosure hf-filter-card" open/u)
+    // A search leaves the rows as they are, and the closed row says what is chosen.
+    expect(
+      rowsOf(html)
+        .filter(([, open]) => open)
+        .map(([name]) => name),
+    ).toEqual(['Tegenstander', 'Seizoenen'])
+    expect(html).toMatch(
+      /<summary>Tegenstander<span class="hf-disclosure-value"><span class="hf-visually-hidden">, <\/span>Testdorp FC</u,
+    )
+    expect(html).not.toContain('<summary>Filters')
   })
 
   it('links a match that has a report to its page', async () => {
@@ -189,6 +213,12 @@ describe('the page Zoeken in wedstrijden', () => {
 
     expect(html).toContain('Schrijf woorden van minstens 2 tekens.')
     expect(findScorerMatches).not.toHaveBeenCalled()
+    // The row with the error opens on its own.
+    expect(
+      rowsOf(html)
+        .filter(([, open]) => open)
+        .map(([name]) => name),
+    ).toEqual(['Tegenstander', 'Seizoenen', 'Doelpuntenmaker'])
   })
 
   it('asks the database for the matches of a goalscorer', async () => {
@@ -284,6 +314,6 @@ describe('the page Zoeken in wedstrijden', () => {
     expect(html).toContain('Op doelsaldo')
     // The order has no season headings.
     expect(html).not.toContain('<h3')
-    expect(html).toContain('<summary>Filters · 2 gekozen<')
+    expect(html).not.toContain('<summary>Filters')
   })
 })

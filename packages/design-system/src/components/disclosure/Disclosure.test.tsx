@@ -57,4 +57,25 @@ describe('Disclosure', () => {
     expect(details?.className).toBe('hf-disclosure extra')
     expect(details?.id).toBe('weghalen')
   })
+
+  it('shows the value after the summary, with a comma for a screen reader', () => {
+    const { container } = render(
+      <Disclosure summary="Tegenstander" value="Ajax">
+        Een lijst
+      </Disclosure>,
+    )
+
+    expect(container.querySelector('summary')?.textContent).toBe('Tegenstander, Ajax')
+    expect(container.querySelector('.hf-disclosure-value')?.textContent).toBe(', Ajax')
+  })
+
+  it('shows no value when there is none', () => {
+    const { container } = render(
+      <Disclosure summary="Tegenstander" value="">
+        Een lijst
+      </Disclosure>,
+    )
+
+    expect(container.querySelector('.hf-disclosure-value')).toBeNull()
+  })
 })
