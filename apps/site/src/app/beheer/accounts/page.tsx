@@ -20,9 +20,9 @@ type SearchParams = Record<string, string | string[] | undefined>
 
 // The accounts of the admin, for the owner only (issue 1156): the owner first, then the others
 // in the order they were made, each with its first name, address, role and whether it is on.
-// The link of each account is its first name, or its address when it has none yet, so the name
-// of the link says which account it opens. There is no button to delete one: the log refers to
-// it.
+// The link of each account is its first name with its address for screen readers, or its
+// address when it has none yet, so the name of the link says which account it opens. There is
+// no button to delete one: the log refers to it.
 export default async function AccountsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   await requireRole('owner')
 
@@ -64,7 +64,17 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
             <List.Item className="hf-flow" key={account.id}>
               <Heading appearance={4} level={2}>
                 <Link href={accountPath(account.id)}>
-                  {account.firstName === '' ? account.email : account.firstName}
+                  {account.firstName === '' ? (
+                    account.email
+                  ) : (
+                    <>
+                      {account.firstName}
+                      {/* Two accounts can share a first name: the address tells them apart. */}
+                      <Text as="span" className="hf-visually-hidden">
+                        {` (${account.email})`}
+                      </Text>
+                    </>
+                  )}
                 </Link>
               </Heading>
               <Text appearance="meta">

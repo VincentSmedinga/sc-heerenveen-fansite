@@ -120,7 +120,7 @@ describe('the admin', () => {
   })
 
   it('shows the owner the accounts as well', async () => {
-    requireRole.mockResolvedValue({ email: 'eigenaar@example.org', firstName: 'Eva', role: 'owner', userId: 1 })
+    requireRole.mockResolvedValue({ email: 'eigenaar@example.test', firstName: 'Eva', role: 'owner', userId: 1 })
 
     const html = renderToStaticMarkup(await AdminPage())
 

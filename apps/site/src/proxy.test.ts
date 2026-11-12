@@ -104,7 +104,7 @@ describe('proxy', () => {
   it('leaves the rest of the site on production without those headers', () => {
     vi.stubEnv('SITE_ENV', 'production')
 
-    for (const path of ['/', '/editor', '/bronnen', '/over-ons/beheer']) {
+    for (const path of ['/', '/beheerder', '/bronnen', '/over-ons/beheer']) {
       const { headers } = proxy(path)
 
       expect(headers.get('X-Robots-Tag'), path).toBeNull()
@@ -113,8 +113,8 @@ describe('proxy', () => {
     }
   })
 
-  it('knows the admin by its path, and /editor is not under it', () => {
-    expect(['/beheer', '/beheer/', '/beheer/x', '/editor', '/', '/x/beheer'].map(isAdminPath)).toEqual([
+  it('knows the admin by its path, and /beheerder is not under it', () => {
+    expect(['/beheer', '/beheer/', '/beheer/x', '/beheerder', '/', '/x/beheer'].map(isAdminPath)).toEqual([
       true,
       true,
       true,

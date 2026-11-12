@@ -1,6 +1,6 @@
 // What the forms of the accounts are made of, with nothing the browser should not load: the
-// forms are client components, and they import this file. The checks that need the database
-// package are in `account-form.ts`, the changes in `account-management.ts`.
+// forms are client components, and they import this file. The checks and the changes, which
+// need the database package, are in `account-management.ts`.
 
 import type { AdminRole } from '@fansite/db/schema'
 

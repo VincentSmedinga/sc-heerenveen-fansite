@@ -57,12 +57,12 @@ function item(key: string, overrides: Partial<typeof items.$inferInsert> = {}): 
 }
 
 describe('the table items', () => {
-  it('has columns for the headline, the link, the key, the time, the paywall, three facts about an episode, the key of the story, the hiding and the approving by a moderator, and for nothing else of the source', async () => {
+  it('has columns for the headline, the link, the key, the time, the paywall, three facts about an episode, the key of the story, the hiding and the approving by an editor, and for nothing else of the source', async () => {
     // An intro, an image, an author or a category has no column: no source has given permission
     // for it (principle 2). Adding a column here is a decision for the issue that brings the
     // first source that allows it. The duration, the season and the number of an episode are
     // facts and no content, which the owner allowed (see docs/beslissingen/importer.md). When,
-    // by whom and why a moderator hid an item is our own record and no content of the source
+    // by whom and why an editor hid an item is our own record and no content of the source
     // either, and so is when and by whom one approved it, and the key of the story, which comes
     // from the link.
     expect(await columnsOf('items')).toEqual([
@@ -129,7 +129,7 @@ describe('the table items', () => {
     expect(hiddenReasonMaxLength).toBe(300)
   })
 
-  it('refuses a moderator that does not exist', async () => {
+  it('refuses an account that does not exist', async () => {
     await expect(
       database.db.insert(items).values(item('een', { hiddenAt: new Date(), hiddenBy: 99_999 })),
     ).rejects.toMatchObject({ cause: { code: 'ER_NO_REFERENCED_ROW_2' } })

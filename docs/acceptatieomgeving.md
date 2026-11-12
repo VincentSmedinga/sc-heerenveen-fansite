@@ -586,7 +586,7 @@ Zo kan niemand nagaan wie een account heeft.
 - Een bericht op de site zetten werkt op dezelfde pagina onder "Niet op de site".
   Een bericht met "twijfelgeval, niet op de site" of "niet over de club, niet op de site" heeft de knop "Op de site zetten", zonder reden.
   De pagina zegt "Op de site gezet", en na hoogstens vijf minuten staat het bericht op de homepage en op `/nieuws`, ook na de volgende import.
-  Het staat dan onder "Op de site", met "door de redactie op de site gezet" en jouw adres.
+  Het staat dan onder "Op de site", met "door de redactie op de site gezet" en jouw voornaam, of je adres zolang je geen voornaam hebt.
   "Terug naar het oordeel van het filter" haalt het weer van de site, tenzij het filter het bericht goed vindt.
   Een bericht dat je ook verbergt, staat nergens.
   Het logboek toont `item.approve` en `item.unapprove`, met het nummer van het bericht en zonder reden.

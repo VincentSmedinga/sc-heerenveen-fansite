@@ -135,8 +135,9 @@ export function isOnSite(now: Date) {
  * first. Under `on-site`
  * (the default) these are the items of `isOnSite`. Under `not-on-site` they are all the others,
  * of which `editorsOnly` keeps the ones an editor hid (the importer keeps `doubtful` and
- * `irrelevant` items too, and an item can have a time to come). Each has the email address of
- * the account that hid it, if it is hidden and the account still exists. With a search,
+ * `irrelevant` items too, and an item can have a time to come). Each has the name of the
+ * account that hid it (`accountName`: its first name, or its address while it has none), if it
+ * is hidden and the account still exists. With a search,
  * only the items whose headline or link contains the text, in any case. The text is a plain
  * text and no pattern: `%` and `_` stand for themselves.
  */

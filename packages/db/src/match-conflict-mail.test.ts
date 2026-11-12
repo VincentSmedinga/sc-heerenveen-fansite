@@ -43,10 +43,10 @@ beforeEach(async () => {
   }
 
   await database.pool.query(
-    "INSERT INTO admin_users (email, role) VALUES ('beheer1@example.org', 'owner'), ('beheer2@example.org', 'editor'), ('auteur@example.org', 'author')",
+    "INSERT INTO admin_users (email, role) VALUES ('beheer1@example.org', 'owner'), ('beheer2@example.org', 'editor'), ('auteur@example.test', 'author')",
   )
   await database.pool.query(
-    "INSERT INTO admin_users (email, role, conflict_mail) VALUES ('stil@example.org', 'editor', false), ('stil-eigenaar@example.org', 'owner', false)",
+    "INSERT INTO admin_users (email, role, conflict_mail) VALUES ('stil@example.test', 'editor', false), ('stil-eigenaar@example.test', 'owner', false)",
   )
   await database.pool.query(
     "INSERT INTO admin_users (email, role, disabled_at) VALUES ('weg@example.org', 'editor', '2026-10-01 10:00:00')",

@@ -49,7 +49,7 @@ vi.mock('#src/database', () => ({ getDatabase: () => database }))
 
 let database: TestDatabase
 let userId: number
-let moderatorId: number
+let authorId: number
 let matchId: number
 
 beforeAll(async () => {
@@ -72,8 +72,7 @@ beforeEach(async () => {
   await createAccount(database.db, 'sanne@example.org', 'editor', '')
   await createAccount(database.db, 'jelle@example.org', 'author', '')
   userId = (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'sanne@example.org')))[0]?.id ?? 0
-  moderatorId =
-    (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'jelle@example.org')))[0]?.id ?? 0
+  authorId = (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'jelle@example.org')))[0]?.id ?? 0
   jar.set(sessionCookieName, await startSession(database.db, userId))
   await database.db.insert(matches).values(
     await withClubs(database.db, [
@@ -191,7 +190,7 @@ describe('submitAddPlayer', () => {
   })
 
   it('takes the account from the session and never from the form', async () => {
-    await add(form({}, { userId: String(moderatorId) }))
+    await add(form({}, { userId: String(authorId) }))
 
     expect(await log()).toMatchObject([{ userId }])
   })
@@ -234,7 +233,7 @@ describe('submitAddPlayer', () => {
   })
 
   it('is for the editor: an author is told the page does not exist, and nothing is stored', async () => {
-    jar.set(sessionCookieName, await startSession(database.db, moderatorId))
+    jar.set(sessionCookieName, await startSession(database.db, authorId))
 
     await expect(add(form())).rejects.toThrow('not found')
     expect(await stored()).toEqual([])
@@ -307,7 +306,7 @@ describe('submitPlayer', () => {
   it('is for the editor, and sends somebody without a session to the login page', async () => {
     const id = await firstId()
 
-    jar.set(sessionCookieName, await startSession(database.db, moderatorId))
+    jar.set(sessionCookieName, await startSession(database.db, authorId))
     await expect(edit(id, form({ rugnummer: '9' }))).rejects.toThrow('not found')
 
     jar.clear()
@@ -351,7 +350,7 @@ describe('submitRemovePlayer', () => {
   it('is for the editor, and sends somebody without a session to the login page', async () => {
     const id = await firstId()
 
-    jar.set(sessionCookieName, await startSession(database.db, moderatorId))
+    jar.set(sessionCookieName, await startSession(database.db, authorId))
     await expect(remove(id)).rejects.toThrow('not found')
 
     jar.clear()
@@ -427,7 +426,7 @@ describe('submitMergePersons', () => {
   it('is not for an author', async () => {
     const { old, renamed } = await twoPersons()
 
-    jar.set(sessionCookieName, await startSession(database.db, moderatorId))
+    jar.set(sessionCookieName, await startSession(database.db, authorId))
 
     await expect(merge(old, renamed)).rejects.toThrow('not found')
     expect(await database.db.select().from(persons)).toHaveLength(2)

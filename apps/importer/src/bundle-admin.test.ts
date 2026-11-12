@@ -77,7 +77,7 @@ it('stops with the exit code of the case, and says what is wrong', async () => {
   expect((await run('create', 'jelle@example.org', 'editor', 'Jelle')).code).toBe(0)
   expect(await run('create', 'jelle@example.org', 'editor')).toMatchObject({ code: 1 })
   expect(await run('create', 'jelle@example.org', 'owner')).toMatchObject({ code: 0 })
-  expect(await run('create', 'nieuw@example.org', 'editor')).toMatchObject({ code: 2 })
+  expect(await run('create', 'nieuw@example.test', 'editor')).toMatchObject({ code: 2 })
   expect(await run('revoke', 'niemand@example.org')).toEqual({
     code: 1,
     output: 'There is no account for niemand@example.org.\n',

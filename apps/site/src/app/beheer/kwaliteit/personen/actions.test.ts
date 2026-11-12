@@ -30,7 +30,7 @@ vi.mock('#src/database', () => ({ getDatabase: () => database }))
 
 let database: TestDatabase
 let userId: number
-let moderatorId: number
+let authorId: number
 let personId: number
 
 beforeAll(async () => {
@@ -50,8 +50,7 @@ beforeEach(async () => {
   await createAccount(database.db, 'sanne@example.org', 'editor', '')
   await createAccount(database.db, 'jelle@example.org', 'author', '')
   userId = (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'sanne@example.org')))[0]?.id ?? 0
-  moderatorId =
-    (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'jelle@example.org')))[0]?.id ?? 0
+  authorId = (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'jelle@example.org')))[0]?.id ?? 0
   jar.set(sessionCookieName, await startSession(database.db, userId))
   personId = await addPerson({ name: 'Verzonnen Spits' }, ['2003/04'])
 })
@@ -160,7 +159,7 @@ describe('choosing the line or the country of a person on the work list', () => 
   })
 
   it('is for an editor only', async () => {
-    jar.set(sessionCookieName, await startSession(database.db, moderatorId))
+    jar.set(sessionCookieName, await startSession(database.db, authorId))
 
     await expect(choose(personId, 'linie', 'doelman')).rejects.toThrow()
     expect(await person()).toMatchObject({ line: null })

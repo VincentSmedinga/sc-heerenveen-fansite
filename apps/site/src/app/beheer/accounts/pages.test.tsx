@@ -108,8 +108,8 @@ describe('the list', () => {
 
     expect(headings(html)).toEqual([
       'h1 Accounts',
-      `h2 <a href="/beheer/accounts/${ids.owner}">Eva</a>`,
-      `h2 <a href="/beheer/accounts/${ids.editor}">Ruben</a>`,
+      `h2 <a href="/beheer/accounts/${ids.owner}">Eva<span class="hf-visually-hidden"> (eigenaar@example.test)</span></a>`,
+      `h2 <a href="/beheer/accounts/${ids.editor}">Ruben<span class="hf-visually-hidden"> (redacteur@example.test)</span></a>`,
       `h2 <a href="/beheer/accounts/${ids.author}">auteur@example.test</a>`,
     ])
     expect(html).toContain('eigenaar@example.test · eigenaar · aan')

@@ -264,7 +264,7 @@ describe('listRecentItems', () => {
     },
   )
 
-  it('gives a doubtful item that a moderator approved, and not one that is hidden too', async () => {
+  it('gives a doubtful item that an editor approved, and not one that is hidden too', async () => {
     const ids = await addSource()
     const approvedAt = new Date('2026-10-22T09:00:00Z')
 
@@ -539,7 +539,7 @@ describe('the news archive', () => {
       },
     )
 
-    it('gives an irrelevant headline that a moderator approved, and not one that is hidden too', async () => {
+    it('gives an irrelevant headline that an editor approved, and not one that is hidden too', async () => {
       const ids = await addSource()
       const approvedAt = new Date('2026-10-22T09:00:00Z')
 
@@ -850,7 +850,7 @@ describe('the versions of a story', () => {
     expect(await countArchiveItems(database.db, { until: now })).toBe(0)
   })
 
-  it('shows the newest version of a story when a moderator approved one version', async () => {
+  it('shows the newest version of a story when an editor approved one version', async () => {
     const ids = await addSource()
 
     await addItem(ids, 'blog-1', '2026-10-22T08:00:00Z', {
@@ -863,7 +863,7 @@ describe('the versions of a story', () => {
     expect(await archive()).toEqual(['Kop blog-2'])
   })
 
-  it('shows the version before the newest when a moderator hid the newest, and nothing when all are hidden', async () => {
+  it('shows the version before the newest when an editor hid the newest, and nothing when all are hidden', async () => {
     const ids = await addSource()
     const hiddenAt = new Date('2026-10-22T09:30:00Z')
 
