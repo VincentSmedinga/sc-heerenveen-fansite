@@ -3361,3 +3361,19 @@
   - **Een lijst in twee kolommen:** `List` heeft `columns`, met CSS multi-column, voor korte regels zoals een werelddeel en zijn aantal; de volgorde in de code blijft de leesvolgorde.
 - **Waarom:** grid lanes haalt de gaten weg waar de browser het kent, en wie het niet kent ziet nog altijd een goede pagina.
 - **Alternatieven:** twee losse kolommen (een andere volgorde in de code, en de rechterkolom wordt zo'n 45 procent langer); één kolom; een script dat de kolommen vult.
+
+## Een zoekpagina krijgt een filterkaart, een chip en een regel met de uitslagen
+
+- **Datum:** 12 november 2026
+- **Besluit:** het designsysteem krijgt drie componenten voor een pagina die zoekt (#1150): `FilterCard`, `Chip` met `ChipList`, en `OutcomeLine`.
+  `Page.Sidebar` krijgt de optie `start` en `CheckboxGroup` een aantal achter elk vakje (`count`).
+  - **FilterCard:** een `Disclosure` met de filters.
+    Op een telefoon is het een uitklapper boven de resultaten, dicht als er al gekozen is.
+    Vanaf 52rem staan de filters altijd in beeld en is de samenvatting weg.
+    Dat laatste doet `::details-content`, dat nog niet overal werkt: zonder blijft het een uitklapper, die werkt ook.
+  - **Chip:** een keuze die geldt, als link die de keuze weghaalt, met een kruis dat versiering is en de tekst "weghalen" voor een schermlezer.
+  - **OutcomeLine:** de `OutcomeBar` smal naast een tekst met de aantallen; de tekst draagt de betekenis.
+  - **Page.Sidebar `start`:** de zijbalk staat vóór de hoofdkolom in de bron, op een breed scherm als kolom links van 17,5rem, en op een telefoon boven de hoofdkolom.
+- **Waarom:** de filters horen bij een telefoon boven de resultaten en bij een breed scherm ernaast, en alleen zo blijft de volgorde in de bron gelijk aan die op het scherm.
+  De aantallen achter de vakjes en de chips hebben anders geen eigen plek.
+- **Alternatieven:** de filters in de zijbalk rechts, onder de resultaten op een telefoon; twee keer dezelfde filters (een uitklapper en een kaart) met CSS verborgen; een component in `apps/site`.

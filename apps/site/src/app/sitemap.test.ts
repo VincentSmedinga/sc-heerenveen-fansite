@@ -56,6 +56,8 @@ const notInSitemap: string[] = [
   '/nieuws/zoeken',
   // The same for the search for a player.
   '/spelers/zoeken',
+  // And for the search for a match.
+  '/wedstrijden/zoeken',
   // One page for every published article: the sitemap lists them from the database.
   '/redactie/[slug]',
   // One page for every club we played: the sitemap lists them from the database.

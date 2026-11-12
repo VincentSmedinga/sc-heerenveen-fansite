@@ -69,6 +69,12 @@ export type PageSidebarProps = ComponentPropsWithoutRef<'aside'> & {
    */
   split?: boolean
   /**
+   * A sidebar that stands first: put it before the Page.Main in the source. It is the column
+   * on the start side of a wide screen, a narrow one, and above the main on a narrow screen,
+   * for the filters of a search. Don't combine it with `wide`, `narrow` or `sticky`.
+   */
+  start?: boolean
+  /**
    * Keeps the sidebar in view while the main column scrolls, from the width where it stands
    * beside it. For a sidebar with something the reader needs while filling in a long main
    * column, such as the save panel of a form. A sidebar that is taller than the window scrolls
@@ -197,6 +203,7 @@ const Sidebar = ({
   className,
   narrow = false,
   split = false,
+  start = false,
   sticky = false,
   wide = false,
   ...props
@@ -205,6 +212,7 @@ const Sidebar = ({
     className={classNames(
       'hf-page-sidebar',
       split && 'hf-page-sidebar-split',
+      start && 'hf-page-sidebar-start',
       sticky && 'hf-page-sidebar-sticky',
       wide && 'hf-page-sidebar-wide',
       narrow && 'hf-page-sidebar-narrow',

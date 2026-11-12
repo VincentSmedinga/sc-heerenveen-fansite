@@ -82,4 +82,22 @@ describe('CheckboxGroup', () => {
     expect(screen.getByRole('group', { name: 'Bronnen' }).className).toBe('hf-checkbox-group extra')
     expect(screen.getByRole('group', { name: 'Bronnen' }).getAttribute('aria-describedby')).toBe('uitleg')
   })
+
+  it('shows a count behind the label of an option that has one, and nothing for the others', () => {
+    render(
+      <CheckboxGroup
+        legend="Uitslag"
+        name="uitslag"
+        options={[
+          { count: 552, label: 'Gewonnen', value: 'gewonnen' },
+          { label: 'Gelijk', value: 'gelijk' },
+        ]}
+      />,
+    )
+    const group = screen.getByRole('group', { name: 'Uitslag' })
+
+    expect(group.querySelectorAll('.hf-checkbox-group-count')).toHaveLength(1)
+    expect(screen.getByRole('checkbox', { name: /Gewonnen/ }).closest('label')?.textContent).toBe('Gewonnen552')
+    expect(screen.getByRole('checkbox', { name: /Gelijk/ }).closest('label')?.textContent).toBe('Gelijk')
+  })
 })

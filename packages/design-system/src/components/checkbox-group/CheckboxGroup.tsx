@@ -3,6 +3,11 @@ import type { ComponentPropsWithoutRef } from 'react'
 import { classNames } from '../classNames'
 
 export type CheckboxGroupOption = {
+  /**
+   * A number behind the label, such as how many results the box gives. It is part of what a
+   * screen reader reads after the label.
+   */
+  count?: number
   /** What the checkbox says, such as the name of a source. */
   label: string
   /** What the form sends for it when it is checked, such as `leeuwarder-courant`. */
@@ -34,6 +39,7 @@ export const CheckboxGroup = ({ className, legend, name, options, value = [], ..
       <label className="hf-checkbox-group-label" key={option.value}>
         <input defaultChecked={value.includes(option.value)} name={name} type="checkbox" value={option.value} />
         <span>{option.label}</span>
+        {option.count === undefined ? null : <span className="hf-checkbox-group-count">{option.count}</span>}
       </label>
     ))}
   </fieldset>

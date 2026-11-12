@@ -322,6 +322,17 @@ describe('Page.Sidebar', () => {
     expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar')
   })
 
+  it('adds a class for a sidebar that stands first only with `start`, and passes no `start` on to the element', () => {
+    const { rerender } = render(<Page.Sidebar aria-label="Filters" className="extra" start />)
+
+    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar hf-page-sidebar-start extra')
+    expect(screen.getByRole('complementary').hasAttribute('start')).toBe(false)
+
+    rerender(<Page.Sidebar aria-label="Filters" start={false} />)
+
+    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar')
+  })
+
   it('adds a class for splitting the cells only with `split`, and passes no `split` on to the element', () => {
     const { rerender } = render(<Page.Sidebar aria-label="Zijbalk" className="extra" split />)
 

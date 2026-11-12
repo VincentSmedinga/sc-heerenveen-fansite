@@ -190,6 +190,26 @@
   }
 
   /*
+   * A page with a sidebar that stands first (Page.Sidebar with `start`, before the Page.Main in the source), such as
+   * the filters of a search: from 52rem it is a column of 17.5rem on the start side and the main takes the rest of the
+   * column of the page. Under 52rem it is the first cell, above the main.
+   */
+  @media (width >= 52rem) {
+    .hf-page-body:has(> .hf-page-sidebar-start) {
+      grid-template-columns: 17.5rem minmax(0, 1fr);
+    }
+
+    /* With an introduction the areas are named, and the sidebar takes the first track beside the main. */
+    .hf-page-body:has(> .hf-page-sidebar-start):has(> .hf-page-main > .hf-page-intro) {
+      /* The sidebar is taller than the introduction, and the second row takes what is left over. */
+      grid-template-areas:
+        'sidebar main'
+        'sidebar main';
+      grid-template-rows: auto 1fr;
+    }
+  }
+
+  /*
    * A wide page (Page.Main with `wide`) is a page of 84rem: a main of 58rem, 2rem of space and
    * the usual sidebar of 24rem (--hf-content-max-width-wide and --hf-page-max-width-wide). It
    * follows the same rules as the page above: one track under 52rem, so a phone sees no

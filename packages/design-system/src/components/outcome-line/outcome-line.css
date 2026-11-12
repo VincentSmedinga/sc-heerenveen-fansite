@@ -1,0 +1,24 @@
+/*
+ * The line of the results: a thin bar next to the text: the whole width on a narrow screen,
+ * with the text under it, and a fixed width on a wide one. The bar is the `OutcomeBar` with a lower height.
+ */
+
+@layer hf.components {
+  .hf-outcome-line {
+    align-items: center;
+    gap: var(--hf-space-s) var(--hf-space-m);
+    display: flex;
+    flex-wrap: wrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hf-outcome-line-bar {
+    block-size: 0.625rem;
+    flex: none;
+    inline-size: 100%;
+
+    @media (width >= 40rem) {
+      inline-size: 10rem;
+    }
+  }
+}

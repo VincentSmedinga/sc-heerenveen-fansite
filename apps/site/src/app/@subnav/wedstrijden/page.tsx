@@ -5,7 +5,7 @@ import { MatchesBar } from '#src/matchesBar'
 // Render on each request, like the page it belongs to: the bar reads `?competitie=`.
 export const dynamic = 'force-dynamic'
 
-/** The bar of /wedstrijden: Cijfers and Tegenstanders, with the choice of the page. */
+/** The bar of /wedstrijden: Cijfers, Tegenstanders and Zoeken, with the choice of the page. */
 export default function MatchesSubnav({ searchParams }: { searchParams: Promise<SearchParams> }) {
   return MatchesBar({ current: undefined, searchParams })
 }

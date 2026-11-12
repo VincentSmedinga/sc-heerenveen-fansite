@@ -22,7 +22,7 @@ const meta = preview.meta({
     name: { description: 'De naam waaronder het formulier elke aangevinkte waarde verstuurt.' },
     options: {
       description:
-        'De vakjes, in de volgorde waarin ze staan: een `label` voor de bezoeker en een `value` voor het formulier.',
+        'De vakjes, in de volgorde waarin ze staan: een `label` voor de bezoeker, een `value` voor het formulier en eventueel een `count`, een aantal dat achter het label staat.',
     },
     value: {
       description: 'De waarden die aangevinkt zijn als de pagina opent. Zonder `value` staat er niets aan.',
@@ -64,6 +64,21 @@ export const Default = meta.story({
 export const Checked = meta.story({
   args: { value: ['omrop-fryslan', 'testkrant'] },
   name: 'Twee aangevinkt',
+  render: inCard,
+})
+
+export const WithCounts = meta.story({
+  args: {
+    legend: 'Uitslag',
+    name: 'uitslag',
+    options: [
+      { count: 552, label: 'Gewonnen', value: 'gewonnen' },
+      { count: 358, label: 'Gelijk', value: 'gelijk' },
+      { count: 475, label: 'Verloren', value: 'verloren' },
+    ],
+    value: ['gewonnen'],
+  },
+  name: 'Met een aantal achter elk vakje',
   render: inCard,
 })
 

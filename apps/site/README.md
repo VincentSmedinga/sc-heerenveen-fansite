@@ -413,15 +413,16 @@ De volgorde in de broncode is de volgorde van de balk en van een telefoon: eerst
 Op een telefoon staan alle kaarten onder elkaar in die volgorde.
 Onder de kop staat dan een balk "Op deze pagina:" met een link naar elke kaart (`app/@shortcuts/cijfers`, de links in `src/statisticsShortcuts.ts`).
 De kaarten tellen standaard alle wedstrijden, de Eredivisie, de KNVB Beker en de play-offs voor de Conference League of de Europa League; met `?competitie=eredivisie` tellen ze alleen de Eredivisie (zie _De keuze tussen alle wedstrijden en de Eredivisie_ hieronder).
-Onder het hoofdmenu staat op de pagina's van Wedstrijden een balk met de subpagina's van Wedstrijden: Cijfers en Tegenstanders (Spelers is een onderdeel van het hoofdmenu, zie _De spelers_, en heeft geen balk).
+Onder het hoofdmenu staat op de pagina's van Wedstrijden een balk met de subpagina's van Wedstrijden: Cijfers, Tegenstanders en Zoeken (Spelers is een onderdeel van het hoofdmenu, zie _De spelers_, en heeft geen balk).
 De links van die balk houden de keuze tussen alle wedstrijden en de Eredivisie vast: met `?competitie=eredivisie` in het adres blijft de link naar Tegenstanders `/tegenstanders?competitie=eredivisie`, en die naar Cijfers `/cijfers?competitie=eredivisie`.
 De link naar Cijfers houdt ook het seizoen van de pagina vast, zoals het menu: op `/wedstrijden/2025-26` gaat hij naar `/cijfers/2025-26`.
 Tegenstanders telt alle seizoenen, dus het seizoen reist niet mee.
+Zoeken houdt de keuze niet vast: de pagina heeft eigen filters (zie _Zoeken in wedstrijden_).
 De items van het menu zelf houden de keuze niet vast, en het seizoen alleen op de pagina van een seizoen: op `/cijfers/2025-26` gaan Wedstrijden en Spelers naar `/wedstrijden/2025-26` en `/spelers/2025-26` (`hrefOf` in `src/SiteNavigation.tsx`).
 De keuze staat in de query string, en die kan een clientcomponent in de layout alleen lezen met `useSearchParams` en een Suspense-grens, en dat raakt elke pagina.
-Daarom tekent het slot `@subnav` van de layout de balk op de server (`app/@subnav/wedstrijden`, `app/@subnav/cijfers` en `app/@subnav/tegenstanders`, `src/matchesBar.tsx`), en geeft de layout hem aan `SiteNavigation` (`matchesBar`), dat hem aan het item Wedstrijden geeft (`bar` van `Navigation`).
+Daarom tekent het slot `@subnav` van de layout de balk op de server (`app/@subnav/wedstrijden` met `zoeken` en het seizoen, `app/@subnav/cijfers` en `app/@subnav/tegenstanders`, `src/matchesBar.tsx`), en geeft de layout hem aan `SiteNavigation` (`matchesBar`), dat hem aan het item Wedstrijden geeft (`bar` van `Navigation`).
 `matchesSubitems` in `src/SiteNavigation.tsx` zegt alleen welke subpagina de huidige is.
-Alleen de pagina's van Wedstrijden, Cijfers en Tegenstanders hebben een route in het slot, en zij worden al per verzoek gemaakt; elke andere pagina, ook Spelers, krijgt een leeg slot.
+Alleen de pagina's van Wedstrijden (ook Zoeken), Cijfers en Tegenstanders hebben een route in het slot, en zij worden al per verzoek gemaakt; elke andere pagina, ook Spelers, krijgt een leeg slot.
 Op `/wedstrijden` en zijn seizoenen is geen subpagina de huidige; op `/cijfers` en zijn seizoenen is Cijfers het wel, en op `/tegenstanders` en de pagina's van de clubs is het Tegenstanders.
 Wedstrijden is dan het huidige onderdeel van het menu (`aria-current="true"`).
 Op `/spelers` en zijn seizoenen is Spelers het huidige onderdeel van het menu (`aria-current="page"`), zonder balk en zonder dat Wedstrijden meetelt.
@@ -876,6 +877,35 @@ De pagina toont hoogstens tien spelers op achternaam, met de zin dat het er tien
 De pagina leest op elk verzoek, toont de foutpagina in de HTML zonder database en logt de reden en niet de vraag.
 De teller van het bezoek telt `/spelers/zoeken` zonder de vraag; de pagina is `noindex` en staat niet in de sitemap.
 `pnpm test:a11y` toetst hem zonder vraag, met een vraag, zonder resultaat en met een vraag die niet mag.
+
+### Zoeken in wedstrijden
+
+`/wedstrijden/zoeken` zoekt in de gespeelde wedstrijden van 1990/91 tot nu (#1150); het submenu van Wedstrijden heeft er het item "Zoeken" naartoe.
+Het is één `GET`-formulier, dus elke keuze staat in het adres en de pagina werkt zonder JavaScript.
+De parameters zijn:
+
+| Parameter         | Waarden                                                                        | Betekenis                                         |
+| ----------------- | ------------------------------------------------------------------------------ | ------------------------------------------------- |
+| `tegen`           | de adresnaam van een club, zoals `ajax`                                        | de tegenstander                                   |
+| `van`, `tot`      | een seizoen, zoals `2019/20`                                                   | het eerste en het laatste seizoen                 |
+| `waar`            | `thuis`, `uit`                                                                 | thuis of uit; allebei (of geen) telt allebei      |
+| `competitie`      | `eredivisie`, `eerste-divisie`, `knvb-beker`, `europa`, `johan-cruijff-schaal` | de competitie; `europa` is elke Europese beker    |
+| `uitslag`         | `gewonnen`, `gelijk`, `verloren`                                               | de afloop; een strafschoppenreeks telt als gelijk |
+| `dag`             | `maandag` tot en met `zondag`                                                  | de dag van de week                                |
+| `doelpuntenmaker` | tekst, de grenzen van `/spelers/zoeken`                                        | een speler die een doelpunt maakte                |
+| `wij`, `zij`      | een getal van 0 tot en met 99                                                  | de exacte uitslag, onze doelpunten en die van hen |
+| `volgorde`        | `nieuwste` (standaard), `oudste`                                               | de volgorde van de lijst                          |
+| `pagina`          | een getal vanaf 1                                                              | de pagina van 25 wedstrijden                      |
+
+Een waarde die niet bestaat wordt genegeerd en geeft geen foutpagina; een seizoen `van` na `tot` wisselt de twee om; een doelpuntenmaker buiten de grenzen krijgt een melding bij het veld en vraagt de database niets.
+Waarden binnen een groep tellen als "of", groepen onderling als "en".
+Zonder keuze in het adres toont de pagina alleen de filters; met minstens één keuze ook de resultaten.
+`match-search.ts` doet het werk op de lijst van alle gespeelde wedstrijden (`listSearchableMatches` in `@fansite/db/match-search`, vijf minuten vastgehouden door `match-search-data.ts`): het leest het adres, filtert, telt de aantallen achter elke waarde, schrijft de zin en de chips en groepeert de resultaten per seizoen.
+Alleen de doelpuntenmaker vraagt de database per zoekopdracht (`listScorerMatchIds`).
+`MatchSearchViews.tsx` tekent het formulier en de resultaten; elke wedstrijd is `MatchLine`, zoals op de seizoenspagina's.
+De pagina leest op elk verzoek, toont de foutpagina in de HTML zonder database en logt de reden en niet de vraag.
+De teller van het bezoek telt `/wedstrijden/zoeken` zonder de vraag; de pagina is `noindex` en staat niet in de sitemap.
+`pnpm test:a11y` toetst hem zonder keuzes, met keuzes, zonder resultaat en met een doelpuntenmaker die niet mag.
 
 ## De bronnen
 

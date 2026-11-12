@@ -5015,3 +5015,36 @@
   De dagen staan rechts uitgelijnd, met de kop over het getal en de balk samen.
   Daarvoor kreeg een kolom van een `DataTable` met tekst de optie `bar: true`, die de kop en de cellen naar het einde uitlijnt; `DataTable` is dus wel veranderd.
   Een club die we nooit versloegen, houdt "Nog nooit gewonnen" in die kolom, zonder balk.
+
+## Wedstrijden hebben een eigen zoekpagina, `/wedstrijden/zoeken`
+
+- **Datum:** 12 november 2026
+- **Besluit:** wedstrijden hebben een eigen zoekpagina, `/wedstrijden/zoeken`, met één `GET`-formulier (#1150).
+  Elke keuze staat in het adres.
+  De resultaten zijn het bestaande component `Match`, gegroepeerd per seizoen, 25 per pagina.
+  Elke waarde heeft een aantal ("en" tussen groepen, "of" binnen een groep), en een waarde met 0 valt weg, tenzij ze gekozen is.
+  De uitslag "gelijk" omvat een wedstrijd die met strafschoppen is beslist.
+  Scheidsrechter, publiek, land, stadion, opstelling, ronde en aftrap zijn geen filter.
+  - **De naam van het adres:** `tegen` (de adresnaam van de club), `van` en `tot` (een seizoen als `2019/20`), `waar` (`thuis`, `uit`), `competitie` (`eredivisie`, `eerste-divisie`, `knvb-beker`, `europa`, `johan-cruijff-schaal`), `uitslag` (`gewonnen`, `gelijk`, `verloren`), `dag` (`maandag` tot en met `zondag`), `doelpuntenmaker`, `wij` en `zij`, `volgorde` (`nieuwste`, `oudste`) en `pagina`.
+    Een waarde die niet bestaat wordt genegeerd en geeft geen foutpagina.
+  - **Europa:** elke Europese beker en zijn play-offs: Champions League, Europa League, Europacup II, Intertoto Cup, UEFA Cup en de play-offs voor Europees voetbal.
+    Elke competitie van de database hoort bij precies één groep, zodat de aantallen bij elkaar de hele lijst zijn.
+  - **Het aantal achter een waarde:** het aantal wedstrijden dat je krijgt als je de waarde toevoegt, met de andere keuzes zoals ze zijn.
+    Staat er al een waarde van de groep aan, dan telt de nieuwe erbij: "Thuis" toont dan de wedstrijden thuis of uit.
+    Een groep zonder keuze telt wat elke waarde alleen oplevert.
+  - **Hoe het telt:** de pagina leest de gespeelde wedstrijden (circa 1.400) in één keer, houdt ze vijf minuten vast en filtert en telt in het geheugen (`match-search.ts`).
+    Alleen de doelpuntenmaker vraagt de database per zoekopdracht.
+  - **De doelpuntenmaker:** een speler van ons die een doelpunt maakte, geen eigen doelpunt, gezocht met de letterregels van `/spelers/zoeken` en dus ook onder zijn oude naam.
+    Een doelpunt zonder koppeling aan een speler, zoals veel van de oude wedstrijden, vindt niemand.
+  - **Het formulier:** op een telefoon een uitklapper boven de resultaten, dicht bij een zoekopdracht en open zonder; op een breed scherm een kolom links (`Page.Sidebar` met `start`).
+    Het formulier verstuurt alleen met de knop "Toon wedstrijden": een keuze die de pagina direct ververst, breekt de toegankelijkheidsregels.
+    De aanvankelijk geplande keuzelijst "Volgorde" en het aantal "1–25 van 76" boven de lijst zijn voor nu weggelaten; het adres kent `volgorde=oudste` nog.
+  - **Zonder resultaat:** de kop "Geen wedstrijden", de zin en de chips blijven, en "Laat één keuze weg:" noemt elke keuze met het aantal dat je dan krijgt; een keuze met nog steeds 0 staat er niet bij.
+  - **Het submenu:** Wedstrijden heeft de items Cijfers, Tegenstanders en Zoeken; Zoeken houdt de keuze van competitie niet vast, omdat de pagina eigen filters heeft (`app/@subnav/wedstrijden/zoeken`).
+- **Waarom:** een supporter zoekt in wedstrijden op wat hij zich herinnert (een club, een dag, een uitslag), niet op een naam.
+  De aantallen laten zien wat de keuze oplevert voordat hij zoekt.
+  Hetzelfde component als de seizoenspagina's houdt het uiterlijk gelijk, en een gewoon formulier werkt zonder JavaScript en is te delen.
+  De gegevens over scheidsrechter, publiek, stadion en opstellingen zijn te dun, en een land van een club hebben we niet.
+- **Alternatieven:** het formulier als zin met keuzelijsten; een groot overzicht met een strip per seizoen en feiten bovenaan; één zoekpagina voor de hele site; een eigen kaart per wedstrijd met een W/G/V-vak (de kleuren van `Match` volstaan); een telling per aantal in de database.
+- **Nadeel:** het aantal achter elke waarde kost per verzoek een telling per waarde, in het geheugen.
+  De lijst is klein, dus dat is genoeg; een zoekindex is niet nodig.

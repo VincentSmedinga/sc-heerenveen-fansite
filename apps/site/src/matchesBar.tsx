@@ -3,12 +3,13 @@ import type { NavigationSubitem } from '@fansite/design-system'
 import { NavigationBar } from '@fansite/design-system'
 
 import { type CompetitionChoice, competitionQuery, parseCompetition } from './competition'
+import { matchSearchPath } from './match-search'
 import { opponentsPath } from './opponents'
 import { type SearchParams, statisticsPath } from './season-page'
 import { seasonFromSlug, seasonSlug } from './seasons'
 
 /** The sub-page of Wedstrijden that the visitor is on, or none (the page of a season). */
-export type MatchesSubpage = 'figures' | 'opponents' | undefined
+export type MatchesSubpage = 'figures' | 'opponents' | 'search' | undefined
 
 /**
  * The bar of Wedstrijden for the page the visitor is on, built on the server from the address:
@@ -34,9 +35,10 @@ export async function MatchesBar({
 }
 
 /**
- * The links in the bar under the main menu while the visitor is on Wedstrijden: Cijfers and
- * Tegenstanders. Both keep the choice between all matches and the Eredivisie, which is in the
- * address of the page (`?competitie=eredivisie`). Cijfers also keeps the season of the page, as
+ * The links in the bar under the main menu while the visitor is on Wedstrijden: Cijfers,
+ * Tegenstanders and Zoeken. Cijfers and Tegenstanders keep the choice between all matches and
+ * the Eredivisie, which is in the address of the page (`?competitie=eredivisie`); Zoeken has
+ * its own filters and keeps nothing. Cijfers also keeps the season of the page, as
  * the main menu does for Wedstrijden, Cijfers and Spelers (see SiteNavigation); Tegenstanders
  * counts every season, so it has none.
  */
@@ -55,5 +57,7 @@ export function matchesBarItems({
   return [
     { current: current === 'figures', href: `${figures}${query}`, label: 'Cijfers' },
     { current: current === 'opponents', href: `${opponentsPath}${query}`, label: 'Tegenstanders' },
+    // The search keeps no choice of competition: it has filters of its own.
+    { current: current === 'search', href: matchSearchPath, label: 'Zoeken' },
   ]
 }

@@ -1,0 +1,44 @@
+/*
+ * A chip: a choice as a link that takes the choice away. It is as high as a small control and
+ * rounded like a pill. The text is the colour of a heading on the soft surface, and the rim
+ * reaches 3:1 for the shape of a control.
+ */
+
+@layer hf.components {
+  .hf-chip {
+    align-items: center;
+    background-color: var(--hf-colour-background-surface-soft);
+    border: 1px solid var(--hf-colour-line-graphic-surface);
+    border-radius: 62.4375rem;
+    box-sizing: border-box;
+    color: var(--hf-colour-text-heading);
+    display: inline-flex;
+    gap: var(--hf-space-s);
+    min-block-size: var(--hf-size-control-small);
+    padding-inline: var(--hf-space-m) var(--hf-space-s);
+    text-decoration: none;
+
+    /* Only with a mouse, so nothing stays lit after a tap. */
+    @media (hover: hover) {
+      &:hover {
+        border-color: var(--hf-colour-text-link-hover);
+        color: var(--hf-colour-text-link-hover);
+      }
+    }
+  }
+
+  .hf-chip-cross {
+    block-size: 0.75rem;
+    flex: none;
+    inline-size: 0.75rem;
+  }
+
+  /* A list without bullets, which wraps. The list style is the bullet of the base styles. */
+  .hf-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--hf-space-s);
+    list-style: none;
+    padding-inline-start: 0;
+  }
+}

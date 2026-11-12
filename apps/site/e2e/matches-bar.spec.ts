@@ -14,7 +14,9 @@ const bar = (page: Page, name: string) => menu(page).getByRole('link', { exact: 
 test.describe('the menu and the bar of Wedstrijden without JavaScript', () => {
   test.use({ javaScriptEnabled: false })
 
-  test('has the bar of Cijfers and Tegenstanders on Wedstrijden and on the page of a season', async ({ page }) => {
+  test('has the bar of Cijfers, Tegenstanders and Zoeken on Wedstrijden and on the page of a season', async ({
+    page,
+  }) => {
     for (const [path, figures] of [
       ['/wedstrijden', '/cijfers'],
       [`/wedstrijden/${slug}`, `/cijfers/${slug}`],
@@ -23,8 +25,17 @@ test.describe('the menu and the bar of Wedstrijden without JavaScript', () => {
 
       await expect(bar(page, 'Cijfers')).toHaveAttribute('href', figures)
       await expect(bar(page, 'Tegenstanders')).toHaveAttribute('href', '/tegenstanders')
+      await expect(bar(page, 'Zoeken')).toHaveAttribute('href', '/wedstrijden/zoeken')
       await expect(bar(page, 'Wedstrijden')).toHaveAttribute('aria-current', 'page')
     }
+  })
+
+  test('marks Zoeken as the current sub-page on the search for a match', async ({ page }) => {
+    await page.goto('/wedstrijden/zoeken')
+
+    await expect(bar(page, 'Zoeken')).toHaveAttribute('aria-current', 'page')
+    await expect(bar(page, 'Wedstrijden')).toHaveAttribute('aria-current', 'true')
+    await expect(menu(page).locator('[aria-current="page"]')).toHaveCount(1)
   })
 
   test('marks Cijfers as the current sub-page, and keeps the choice and the season', async ({ page }) => {
@@ -91,15 +102,17 @@ test.describe('the menu and the bar of Wedstrijden with JavaScript', () => {
 
     const names = () => menu(page).getByRole('link').allTextContents()
 
-    expect(await names()).toEqual(['Nieuws', 'Wedstrijden', 'Cijfers', 'Tegenstanders', 'Spelers', 'Forum'])
+    expect(await names()).toEqual(['Nieuws', 'Wedstrijden', 'Cijfers', 'Tegenstanders', 'Zoeken', 'Spelers', 'Forum'])
 
     // The bar sits under Wedstrijden, so the keyboard goes from Wedstrijden to Cijfers and on
-    // to Tegenstanders.
+    // to Tegenstanders and Zoeken.
     await bar(page, 'Wedstrijden').focus()
     await page.keyboard.press('Tab')
     await expect(bar(page, 'Cijfers')).toBeFocused()
     await page.keyboard.press('Tab')
     await expect(bar(page, 'Tegenstanders')).toBeFocused()
+    await page.keyboard.press('Tab')
+    await expect(bar(page, 'Zoeken')).toBeFocused()
 
     // A link of the menu loads a whole page (there is no next/link), so the focus starts at the
     // top, as it does after any link on the site.
@@ -108,7 +121,7 @@ test.describe('the menu and the bar of Wedstrijden with JavaScript', () => {
     await expect(page).toHaveURL(/\/tegenstanders$/)
     await expect(bar(page, 'Tegenstanders')).toHaveAttribute('aria-current', 'page')
 
-    expect(await names()).toEqual(['Nieuws', 'Wedstrijden', 'Cijfers', 'Tegenstanders', 'Spelers', 'Forum'])
+    expect(await names()).toEqual(['Nieuws', 'Wedstrijden', 'Cijfers', 'Tegenstanders', 'Zoeken', 'Spelers', 'Forum'])
 
     await page.keyboard.press('Tab')
     await expect(page.getByRole('link', { name: /^sc Heerenveen Fansite/ })).toBeFocused()
