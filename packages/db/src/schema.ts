@@ -1360,12 +1360,13 @@ export type NewMatchGoal = typeof matchGoals.$inferInsert
  * a marked part as it is until Wikipedia has the same, and then clears the marker; the row is
  * gone when no marker is left.
  *
- * `edited_by`, `edited_at` and `reason` are who made the last entry, when (UTC) and why;
- * `audit_log` has every entry. `before_match` and `before_goals` are the match and its goals
- * as JSON, as they were before the first entry (see `match-edits.ts`), so removing the entry
- * can put them back. `reported_kickoff`, `reported_result`, `reported_goals` and
- * `reported_facts` are what Wikipedia said the last time it differed from the entry of that
- * part, so the importer reports a difference once and not on every run.
+ * `edited_by`, `edited_at` and `reason` are who made the last entry, when (UTC) and why, if
+ * the editor said. `audit_log` has every entry. `before_match` and `before_goals` are the
+ * match and its goals as JSON, as they were before the first entry (see `match-edits.ts`),
+ * so removing the entry can put them back. `reported_kickoff`, `reported_result`,
+ * `reported_goals` and `reported_facts` are what Wikipedia said the last time it differed
+ * from the entry of that part, so the importer reports a difference once and not on every
+ * run.
  */
 export const matchEdits = mysqlTable(
   'match_edits',
@@ -1381,7 +1382,7 @@ export const matchEdits = mysqlTable(
       .notNull()
       .references(() => adminUsers.id),
     editedAt: datetime('edited_at').notNull(),
-    reason: varchar('reason', { length: hiddenReasonMaxLength }).notNull(),
+    reason: varchar('reason', { length: hiddenReasonMaxLength }),
     beforeMatch: text('before_match').notNull(),
     beforeGoals: text('before_goals').notNull(),
     reportedKickoff: text('reported_kickoff'),

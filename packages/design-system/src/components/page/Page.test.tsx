@@ -108,18 +108,16 @@ describe('Page.Body', () => {
     expect(screen.queryByRole('main')).toBeNull()
   })
 
-  it('holds the main and the sidebar in the order of the source, with no other order', () => {
+  it('holds the main, with no other order or style', () => {
     const { container } = render(
       <Page.Body>
         <Page.Main>Inhoud</Page.Main>
-        <Page.Sidebar>Zijbalk</Page.Sidebar>
       </Page.Body>,
     )
     const body = container.querySelector<HTMLElement>('.hf-page-body')!
 
-    expect(Array.from(body.children).map((child) => child.tagName.toLowerCase())).toEqual(['main', 'aside'])
+    expect(Array.from(body.children).map((child) => child.tagName.toLowerCase())).toEqual(['main'])
     expect(screen.getAllByRole('main')).toHaveLength(1)
-    expect(screen.getAllByRole('complementary')).toHaveLength(1)
     expect(body.querySelector('[style]')).toBeNull()
   })
 
@@ -161,17 +159,6 @@ describe('Page.Main', () => {
     expect(screen.getByRole('main').id).toBe('inhoud')
   })
 
-  it('adds a class for the wide page only with `wide`, and passes no `wide` on to the element', () => {
-    const { rerender } = render(<Page.Main className="extra" wide />)
-
-    expect(screen.getByRole('main').className).toBe('hf-page-main hf-page-main-wide extra')
-    expect(screen.getByRole('main').hasAttribute('wide')).toBe(false)
-
-    rerender(<Page.Main wide={false} />)
-
-    expect(screen.getByRole('main').className).toBe('hf-page-main')
-  })
-
   it('has every child as a cell of its own, in the order of the source', () => {
     render(
       <Page.Main>
@@ -191,7 +178,7 @@ describe('Page.Main', () => {
     ])
   })
 
-  it('has no extra elements without an intro: the children are the direct children of the main', () => {
+  it('has no extra elements: the children are the direct children of the main', () => {
     render(
       <Page.Main>
         <p>Een</p>
@@ -202,183 +189,8 @@ describe('Page.Main', () => {
     expect(screen.getByRole('main').innerHTML).toBe('<p>Een</p><p>Twee</p>')
   })
 
-  it('puts an intro in a div of its own, and the children in a second div, in that order', () => {
-    render(
-      <Page.Main intro={<h1>Bronnen</h1>}>
-        <p>Een</p>
-        <p>Twee</p>
-      </Page.Main>,
-    )
-
-    expect(screen.getByRole('main').innerHTML).toBe(
-      '<div class="hf-page-intro"><h1>Bronnen</h1></div><div class="hf-page-cells"><p>Een</p><p>Twee</p></div>',
-    )
-  })
-
-  it('leaves the div for the cells empty when an intro has no children, so page.css can leave it out', () => {
-    render(<Page.Main intro={<h1>Bronnen</h1>}>{[]}</Page.Main>)
-
-    expect(screen.getByRole('main').innerHTML).toBe(
-      '<div class="hf-page-intro"><h1>Bronnen</h1></div><div class="hf-page-cells"></div>',
-    )
-  })
-
-  it('keeps the heading in the intro inside the main, as the one level one heading of the page', () => {
-    render(
-      <Page.Main intro={<h1>Bronnen</h1>}>
-        <p>Een</p>
-      </Page.Main>,
-    )
-
-    expect(within(screen.getByRole('main')).getByRole('heading', { level: 1 })).toBeTruthy()
-  })
-
-  it('treats an empty intro as no intro', () => {
-    const { rerender } = render(<Page.Main intro={undefined}>Inhoud</Page.Main>)
-
-    expect(screen.getByRole('main').innerHTML).toBe('Inhoud')
-
-    rerender(<Page.Main intro={null}>Inhoud</Page.Main>)
-    expect(screen.getByRole('main').innerHTML).toBe('Inhoud')
-
-    rerender(<Page.Main intro={false}>Inhoud</Page.Main>)
-    expect(screen.getByRole('main').innerHTML).toBe('Inhoud')
-  })
-
-  it('does not pass the intro on to the main as an attribute', () => {
-    render(<Page.Main intro="Inleiding">Inhoud</Page.Main>)
-
-    expect(screen.getByRole('main').hasAttribute('intro')).toBe(false)
-  })
-
-  it('keeps the sidebar outside the main when the main has an intro, in the order of the source', () => {
-    render(
-      <Page.Body>
-        <Page.Main intro={<h1>Bronnen</h1>}>
-          <p>Een</p>
-        </Page.Main>
-        <Page.Sidebar aria-label="Zijbalk">Zijbalk</Page.Sidebar>
-      </Page.Body>,
-    )
-
-    expect(screen.getByRole('main').contains(screen.getByRole('complementary'))).toBe(false)
-    expect(
-      Array.from(screen.getByRole('main').parentElement?.children ?? []).map((child) => child.tagName.toLowerCase()),
-    ).toEqual(['main', 'aside'])
-  })
-
   it('is called Page.Main in the developer tools and the code examples', () => {
     expect(Page.Main.displayName).toBe('Page.Main')
-  })
-})
-
-describe('Page.Sidebar', () => {
-  it('is a complementary landmark', () => {
-    render(<Page.Sidebar>Zijbalk</Page.Sidebar>)
-    const sidebar = screen.getByRole('complementary')
-
-    expect(sidebar.tagName).toBe('ASIDE')
-    expect(sidebar.className).toBe('hf-page-sidebar')
-    expect(sidebar.textContent).toBe('Zijbalk')
-  })
-
-  it('keeps the other attributes, such as a name, and adds a class to its own', () => {
-    render(<Page.Sidebar aria-label="Wedstrijden" className="extra" id="zijbalk" />)
-
-    expect(screen.getByRole('complementary', { name: 'Wedstrijden' }).className).toBe('hf-page-sidebar extra')
-    expect(screen.getByRole('complementary').id).toBe('zijbalk')
-  })
-
-  it('adds a class for the wide sidebar only with `wide`, and passes no `wide` on to the element', () => {
-    const { rerender } = render(<Page.Sidebar aria-label="Zijbalk" className="extra" wide />)
-
-    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar hf-page-sidebar-wide extra')
-    expect(screen.getByRole('complementary').hasAttribute('wide')).toBe(false)
-
-    rerender(<Page.Sidebar aria-label="Zijbalk" wide={false} />)
-
-    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar')
-  })
-
-  it('adds a class for the sticky sidebar only with `sticky`, and passes no `sticky` on to the element', () => {
-    const { rerender } = render(<Page.Sidebar aria-label="Zijbalk" className="extra" sticky />)
-
-    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar hf-page-sidebar-sticky extra')
-    expect(screen.getByRole('complementary').hasAttribute('sticky')).toBe(false)
-
-    rerender(<Page.Sidebar aria-label="Zijbalk" sticky={false} />)
-
-    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar')
-  })
-
-  it('adds a class for the narrow sidebar only with `narrow`, and passes no `narrow` on to the element', () => {
-    const { rerender } = render(<Page.Sidebar aria-label="Zijbalk" className="extra" narrow />)
-
-    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar hf-page-sidebar-narrow extra')
-    expect(screen.getByRole('complementary').hasAttribute('narrow')).toBe(false)
-
-    rerender(<Page.Sidebar aria-label="Zijbalk" narrow={false} />)
-
-    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar')
-  })
-
-  it('adds a class for a sidebar that stands first only with `start`, and passes no `start` on to the element', () => {
-    const { rerender } = render(<Page.Sidebar aria-label="Filters" className="extra" start />)
-
-    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar hf-page-sidebar-start extra')
-    expect(screen.getByRole('complementary').hasAttribute('start')).toBe(false)
-
-    rerender(<Page.Sidebar aria-label="Filters" start={false} />)
-
-    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar')
-  })
-
-  it('adds a class for splitting the cells only with `split`, and passes no `split` on to the element', () => {
-    const { rerender } = render(<Page.Sidebar aria-label="Zijbalk" className="extra" split />)
-
-    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar hf-page-sidebar-split extra')
-    expect(screen.getByRole('complementary').hasAttribute('split')).toBe(false)
-
-    rerender(<Page.Sidebar aria-label="Zijbalk" split wide />)
-
-    expect(screen.getByRole('complementary').className).toBe(
-      'hf-page-sidebar hf-page-sidebar-split hf-page-sidebar-wide',
-    )
-
-    rerender(<Page.Sidebar aria-label="Zijbalk" split={false} />)
-
-    expect(screen.getByRole('complementary').className).toBe('hf-page-sidebar')
-  })
-
-  it('is called Page.Sidebar in the developer tools and the code examples', () => {
-    expect(Page.Sidebar.displayName).toBe('Page.Sidebar')
-  })
-})
-
-describe('Page.Cell', () => {
-  it('puts what belongs together in one div, without a role of its own', () => {
-    const { container } = render(
-      <Page.Cell>
-        <h2>Kop</h2>
-        <p>Inleiding</p>
-      </Page.Cell>,
-    )
-
-    expect(container.firstElementChild?.tagName).toBe('DIV')
-    expect(container.firstElementChild?.className).toBe('hf-page-cell')
-    expect(container.firstElementChild?.children).toHaveLength(2)
-    expect(screen.queryByRole('region')).toBeNull()
-  })
-
-  it('keeps the other attributes and adds a class to its own', () => {
-    const { container } = render(<Page.Cell className="extra" id="blok" />)
-
-    expect(container.firstElementChild?.className).toBe('hf-page-cell extra')
-    expect(container.firstElementChild?.id).toBe('blok')
-  })
-
-  it('is called Page.Cell in the developer tools and the code examples', () => {
-    expect(Page.Cell.displayName).toBe('Page.Cell')
   })
 })
 
@@ -408,16 +220,14 @@ describe('Page.Title', () => {
     expect(screen.getByTestId('end').className).toBe('hf-page-title')
   })
 
-  it('is in the introduction of the Page.Main like any other content', () => {
+  it('is a cell of the Page.Main like any other content', () => {
     render(
-      <Page.Body>
-        <Page.Main intro={<Page.Title>Titel</Page.Title>}>
-          <p>Een cel</p>
-        </Page.Main>
-      </Page.Body>,
+      <Page.Main>
+        <Page.Title>Titel</Page.Title>
+      </Page.Main>,
     )
 
-    expect(document.querySelector('.hf-page-intro > .hf-page-title')?.textContent).toBe('Titel')
+    expect(document.querySelector('.hf-page-main > .hf-page-title')?.textContent).toBe('Titel')
   })
 })
 

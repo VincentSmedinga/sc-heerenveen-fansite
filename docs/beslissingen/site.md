@@ -2590,6 +2590,7 @@
 - **Alternatieven:** ook redacteuren laten beslissen (verworpen: zij komen niet op de schermen van de wedstrijden en het zou de groep vergroten die wedstrijdgegevens raakt).
   Eén nieuwe pagina met alle wijzigingen van alle seizoenen (verworpen: een nieuw scherm naast drie die het al kunnen, en de wedstrijd zelf staat er niet bij).
   Nieuwe soorten in het logboek (verworpen: het vraagt een migratie van de enum, en de twee soorten zeggen al wat er gebeurt).
+- **Later:** zie _De reden bij een opslag of een besluit in het beheer is optioneel_ (12 november 2026): de reden bij het besluit mag leeg.
 
 ## Een vastgehouden wijziging in een afgelopen seizoen neemt alleen een mens over
 
@@ -3306,6 +3307,7 @@
   - **Een afwijking van Wikipedia over de doelpunten** die nog wachtte, vervalt, omdat de doelpunten weer volgen wat Wikipedia zegt.
 - **Waarom:** een verslag dat je weghaalt moet geen stukken van zichzelf achterlaten die de pagina's als doelpunt blijven tonen.
 - **Alternatieven:** de doelpunten van het verslag laten staan met de markering (de import blijft ze dan afhouden van Wikipedia, terwijl het verslag weg is).
+- **Later:** zie _De reden bij een opslag of een besluit in het beheer is optioneel_ (12 november 2026): de reden bij het weghalen mag leeg.
 
 ## Plakken vult het formulier in, het bewaart niets
 
@@ -5237,6 +5239,7 @@
 - **Alternatieven:** de waarden van de andere delen als verborgen velden meesturen (overschrijft wat iemand intussen opsloeg).
   Een nieuw onderdeel voor tabbladen in het designsysteem.
   De binnengekomen naam bij elk doelpunt in de tabel (vraagt een hint per veld in `InputTable`).
+- **Later:** zie _De reden bij een opslag of een besluit in het beheer is optioneel_ (12 november 2026): de reden bij Opslaan mag leeg.
 
 ## De filters van de wedstrijdzoeker klappen open en dicht, op één niveau
 
@@ -5290,6 +5293,7 @@
 - **Waarom:** een persoon heeft geen seizoen, dus een naam die alleen bij de persoon verandert, laat in elk seizoen de oude naam staan.
   Eén veld voor de datum werkt zonder JavaScript en met elk hulpmiddel; een datumveld van de browser kent geen los jaar.
 - **Alternatieven:** alleen de persoon hernoemen en de seizoenen laten (de lijst van een seizoen toont dan de oude naam); drie velden voor dag, maand en jaar (meer werk voor een veld dat meestal een jaar is); een datumveld van de browser met een apart veld voor een jaar.
+- **Later:** zie _De reden bij een opslag of een besluit in het beheer is optioneel_ (12 november 2026): de reden bij Opslaan mag leeg.
 
 ## De tabel van de personen telt vijf gegevens per persoon
 
@@ -5358,6 +5362,7 @@
   De Enter-toets in een veld slaat nog op, want de knop in de werkbalk heeft dezelfde waarde als de verborgen eerste knop van het formulier.
 - **Nadeel:** de tabellen hebben 64 rem in plaats van 84 rem; de pagina's met `wide` mogen nog opzij scrollen tot #1182 het meet.
   Op de pagina's van een wedstrijd en een persoon die van Kwaliteit komen, is de eerste knop in het document nu "Opslaan en volgende", dus de Enter-toets in een veld doet dat.
+- **Later:** de pagina's met `wide` zijn gemeten in #1182: geen enkele scrolt opzij, bij 320 pixels en bij 400% zoom ook niet (zie _De oude opbouw van een pagina is weg_ in `designsysteem.md`).
 - **Alternatieven:** een plakkende rij onderaan het scherm; de knoppen alleen in de werkbalk (dan is het einde van een lang formulier leeg); "Live" en "Plakken" als links in de werkbalk.
 
 ## De melding bij een andere Wikipedia-pagina van een persoon zegt wat je dan doet
@@ -5368,3 +5373,26 @@
   Het veld blijft bewerkbaar.
 - **Waarom:** de oude melding zei wat niet mag en niet wat je dan doet, en een redacteur die alleen de naam wilde wijzigen, zat vast.
 - **Alternatieven:** een kortere melding zonder uitleg; het veld alleen-lezen maken zodat de fout niet kan ontstaan (meer werk in het formulier en de werktabel van Kwaliteit).
+
+## De reden bij een opslag of een besluit in het beheer is optioneel
+
+- **Datum:** 12 november 2026
+- **Besluit:** de reden is optioneel in elk formulier van Beheer dat er een vroeg, behalve het verbergen van een bericht (#1186).
+  - **Veld:** een tekstveld met vrije tekst, hoogstens 300 tekens; de hint zegt:
+    "Mag leeg. Komt in het logboek, hoogstens 300 tekens."
+    Het geldt voor een wedstrijd invullen of aanpassen, een persoon per deel, overnemen of houden in Kwaliteit en op de wedstrijdpagina, een vastgehouden wijziging beslissen, een wedstrijd verwijderen, en een invoer of een verslag weghalen.
+  - **Leeg:** `parseReason` geeft voor leeg geen fout meer, maar `undefined`, en de opslag bewaart dan geen reden: `audit_log.reason` is leeg, en bij `person.edit` ontbreekt het deel ". Reden: …" in `detail`.
+    Alleen een tekst van meer dan 300 tekens geeft nog een fout.
+  - **Opslag:** `match_edits.reason` is nullable (migratie 0074).
+    Het logboek was dat al.
+  - **Weergave:** de wedstrijdpagina in Beheer toont "Reden: …" bij de laatste invoer alleen als er een reden is.
+  - **Werktabel:** de links in Kwaliteit vullen geen bron in.
+  - **Verbergen blijft:** een bericht verbergen vraagt nog een reden uit de lijst, ook bij "Anders" (`parseHideReason`).
+  - **Opruimen:** dezelfde migratie maakt elke reden leeg waarin "Wikipedia" of "Transfermarkt" voorkomt, in elke hoofdletter, in `match_edits.reason` en in `audit_log.reason`.
+    Bij `person.edit` haalt ze het deel ". Reden: …" uit `detail` als die reden een van die woorden bevat.
+    Een regel van de import in het logboek (zonder account), zoals "Niemand besliste in zeven dagen, dus de import nam Wikipedia over", blijft staan: die reden schreef geen redacteur.
+    De migratie kan niet terug: de gewiste redenen staan alleen nog in een back-up.
+- **Waarom:** de redactie vult veel gegevens in vanuit dezelfde bron; een verplicht woord kost tijd en geeft het logboek niets nieuws, want wie, wat en wanneer staan er al.
+  Een reden die er wel toe doet, kan de redacteur nog steeds schrijven.
+- **Alternatieven:** een lijst met bronnen met de laatste keuze in de sessie (sneller dan typen, maar de redacteur wil geen keuze); de bron uit de link van de werktabel invullen (de tabel weet niet waar de waarde vandaan komt); alleen optioneel bij invullen en verplicht bij aanpassen of weghalen (twee regels om te onthouden).
+- **Later:** vervangt de regel "elke wijziging vraagt een reden" uit de beslissingen over het formulier van een wedstrijd en van een persoon, en de regel dat een weghaalactie een reden vraagt; de rest blijft.

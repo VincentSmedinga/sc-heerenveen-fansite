@@ -232,128 +232,49 @@ describe('the footer with a link to the top in page.css', () => {
   })
 })
 
-describe('the columns of the body in page.css', () => {
+describe('the body in page.css', () => {
   const layout = readFileSync(join(import.meta.dirname, '../../tokens/layout.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
   const token = (name: string) => Number(layout.match(new RegExp(String.raw`${name}: (\d+(?:\.\d+)?)rem;`))?.[1])
   const body = css.match(/\.hf-page-body \{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/)?.[1] ?? ''
-  const tracks = body.match(
-    /grid-template-columns: minmax\((\d+)rem, var\(--hf-content-max-width\)\) minmax\((\d+)rem, (\d+)rem\);/,
-  )
 
-  it('has a main of 38rem, a sidebar of 24rem and 2rem between them, which fill the page of 64rem', () => {
-    const [, , , sidebar] = tracks ?? []
-
+  it('is one track of the width of the content under 52rem, and one track as wide as the page from there', () => {
     expect(token('--hf-content-max-width')).toBe(38)
-    expect(Number(sidebar)).toBe(24)
     expect(token('--hf-page-max-width')).toBe(64)
-    expect(body).toContain('--hf-page-body-cell-gap: var(--hf-space-xl);')
-    expect(token('--hf-content-max-width') + Number(sidebar) + 2).toBe(token('--hf-page-max-width'))
+    expect(body).toContain('grid-template-columns: minmax(0, var(--hf-content-max-width));')
+    expect(body).toMatch(/@media \(width >= 52rem\) \{\s*grid-template-columns: minmax\(0, 1fr\);/)
+    expect(body.match(/grid-template-columns:/g)).toHaveLength(2)
   })
 
-  it('puts the same space between the columns as between the cells, with no gap of its own', () => {
+  it('puts the same space around the main as between the cells, with no gap of its own', () => {
+    expect(body).toContain('--hf-page-body-cell-gap: var(--hf-space-xl);')
     expect(body).toContain('gap: var(--hf-page-body-cell-gap);')
     expect(body).not.toMatch(/(^|\s)column-gap:/)
     expect(css).not.toContain('--hf-page-body-column-gap')
   })
 
-  it('keeps twice the largest space under the columns, and the main as wide with a sidebar as without', () => {
+  it('keeps twice the largest space under the main', () => {
     expect(body).toContain('--hf-page-body-end-space: calc(2 * var(--hf-space-xl));')
     expect(body).toContain('padding-block: var(--hf-page-body-cell-gap) var(--hf-page-body-end-space);')
-    expect(body.match(/grid-template-columns:/g)).toHaveLength(2)
   })
 
-  it('lets the tracks shrink only to a width that fits in 52rem, where the columns start side by side', () => {
-    const [, mainMinimum, sidebarMinimum] = tracks ?? []
+  it('leaves no trace of the old layout: no sidebar, introduction, wide page or subgrid', () => {
+    const layoutCss = readFileSync(join(import.meta.dirname, '../../tokens/layout.css'), 'utf8')
 
-    expect(Number(mainMinimum) + Number(sidebarMinimum)).toBeLessThanOrEqual(roomAtTheBoundary)
-    expect(body).toContain('@media (width >= 52rem)')
-  })
-})
-
-describe('the wide sidebar in page.css', () => {
-  const layout = readFileSync(join(import.meta.dirname, '../../tokens/layout.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
-  const pageWidth = Number(layout.match(/--hf-page-max-width: (\d+)rem;/)?.[1])
-  const wide = css.match(
-    /@media \(width >= 52rem\) \{\s*\.hf-page-body:has\(> \.hf-page-sidebar-wide\) \{\s*grid-template-columns: minmax\((\d+)rem, (\d+)rem\) minmax\((\d+)rem, (\d+)rem\);/,
-  )
-
-  it('has a main and a sidebar of 31rem each and 2rem between them, which fill the page of 64rem', () => {
-    const [, , main, , sidebar] = wide ?? []
-
-    expect(Number(main)).toBe(31)
-    expect(Number(sidebar)).toBe(31)
-    expect(Number(main) + Number(sidebar) + 2).toBe(pageWidth)
-  })
-
-  it('lets the tracks shrink only to a width that fits in 52rem, where the columns start side by side', () => {
-    const [, mainMinimum, , sidebarMinimum] = wide ?? []
-
-    expect(Number(mainMinimum) + Number(sidebarMinimum)).toBeLessThanOrEqual(roomAtTheBoundary)
-  })
-
-  it('shrinks both tracks to the same minimum, so they are equally wide at every width', () => {
-    const [, mainMinimum, , sidebarMinimum] = wide ?? []
-
-    expect(mainMinimum).toBe(sidebarMinimum)
-  })
-
-  it('is chosen by the sidebar, which the page renders, and leaves the other pages with 38, 2 and 24rem', () => {
-    expect(css.match(/\.hf-page-body:has\(> \.hf-page-sidebar-wide\)/g)).toHaveLength(1)
-    expect(css).toContain('grid-template-columns: minmax(24rem, var(--hf-content-max-width)) minmax(16rem, 24rem);')
-  })
-
-  it('needs no rule of its own to keep the cells under each other, because every sidebar does', () => {
-    expect(css).not.toMatch(/\.hf-page-sidebar-wide \{/)
+    expect(css).not.toMatch(/hf-page-(sidebar|intro|cells|main-wide)|subgrid/)
+    expect(layoutCss).not.toMatch(/max-width-(wide|broad)|sidebar-width/)
   })
 })
 
-describe('the narrow sidebar in page.css', () => {
-  const layout = readFileSync(join(import.meta.dirname, '../../tokens/layout.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
-  const token = (name: string) => Number(layout.match(new RegExp(String.raw`${name}: (\d+(?:\.\d+)?)rem;`))?.[1])
-  const narrow = css.match(
-    /@media \(width >= 52rem\) \{\s*\.hf-page-body:has\(> \.hf-page-sidebar-narrow\) \{\s*grid-template-columns: minmax\((\d+)rem, var\(--hf-content-max-width-broad\)\) var\(--hf-sidebar-width-narrow\);/,
-  )
+describe('the cells of the main in page.css', () => {
+  const rule = css.match(/\.hf-page-main \{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/)?.[1] ?? ''
 
-  it('has a main of 46rem and a sidebar of 16rem with 2rem between them, which fill the page of 64rem', () => {
-    expect(token('--hf-content-max-width-broad')).toBe(46)
-    expect(token('--hf-sidebar-width-narrow')).toBe(16)
-    expect(token('--hf-content-max-width-broad') + token('--hf-sidebar-width-narrow') + 2).toBe(
-      token('--hf-page-max-width'),
-    )
+  it('puts them under each other in one track that can shrink to 0, as wide as the content', () => {
+    expect(rule).toContain('grid-template-columns: minmax(0, 1fr);')
+    expect(rule).toContain('max-inline-size: var(--hf-content-max-width);')
   })
 
-  it('lets the main shrink only to a width that fits in 52rem, where the columns start side by side', () => {
-    const [, mainMinimum] = narrow ?? []
-
-    expect(Number(mainMinimum) + token('--hf-sidebar-width-narrow')).toBeLessThanOrEqual(roomAtTheBoundary)
-  })
-
-  it('is chosen by the sidebar, which the page renders, and comes after the wide one', () => {
-    expect(css.match(/\.hf-page-body:has\(> \.hf-page-sidebar-narrow\)/g)).toHaveLength(1)
-    expect(css.indexOf('.hf-page-sidebar-narrow')).toBeGreaterThan(css.indexOf('.hf-page-sidebar-wide'))
-  })
-})
-
-describe('the cells of the sidebar in page.css', () => {
-  const rule = (selector: string) => css.match(new RegExp(String.raw`${selector} \{([^{}]*)\}`))?.[1] ?? ''
-  const columns = css.match(
-    /\.hf-page-main,\s*\.hf-page-cells,\s*\.hf-page-sidebar \{[^{}]*?grid-template-columns: ([^;]*);/,
-  )?.[1]
-
-  it('puts them under each other by default, at every width, also under the main where two of 16rem fit', () => {
-    expect(columns).toBe('minmax(0, 1fr)')
-    expect(rule(String.raw`\.hf-page-sidebar`)).not.toContain('grid-template-columns')
-  })
-
-  it('puts them side by side with `split`, as long as two of 16rem and 2rem between them fit', () => {
-    expect(rule(String.raw`\.hf-page-sidebar-split`)).toContain(
-      'grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));',
-    )
-    expect(css.indexOf('.hf-page-sidebar-split {')).toBeGreaterThan(css.indexOf('.hf-page-sidebar {'))
-  })
-
-  it('has one rule with auto-fit, so only `split` can put the cells side by side', () => {
-    expect(css.match(/auto-fit/g)).toHaveLength(1)
+  it('has no auto-fit: a column never puts its cells side by side by itself', () => {
+    expect(css).not.toContain('auto-fit')
   })
 })
 
@@ -374,61 +295,6 @@ describe('the title row in page.css', () => {
   })
 })
 
-describe('the wide page in page.css', () => {
-  const rule = (selector: string) => css.match(new RegExp(String.raw`${selector}\s*\{(.*?)\n {2,4}\}`, 's'))?.[1] ?? ''
-
-  it('has a main of 58rem and the usual sidebar of 24rem side by side from 52rem, like other pages', () => {
-    const start = css.indexOf('.hf-page-body:has(> .hf-page-main-wide) {\n      grid-template-columns')
-
-    expect(start).not.toBe(-1)
-    expect(css.slice(css.lastIndexOf('@media', start), start)).toContain('@media (width >= 52rem)')
-    expect(css.slice(start, css.indexOf('}', start))).toContain(
-      'grid-template-columns: minmax(24rem, var(--hf-content-max-width-wide)) minmax(16rem, 24rem);',
-    )
-  })
-
-  it('sets the columns of the wide page once, inside the media query, so a phone sees no difference', () => {
-    expect(css.match(/\.hf-page-body:has\(> \.hf-page-main-wide\)(?!:not)/g)).toHaveLength(2)
-    expect(rule(String.raw`\.hf-page-body:has\(> \.hf-page-main-wide\)`)).not.toContain('grid-template-columns')
-  })
-
-  it('works out the inset on the sides from the wider column, so the tracks are centred in the body', () => {
-    expect(rule(String.raw`\.hf-page-body:has\(> \.hf-page-main-wide\)`)).toContain(
-      '--hf-page-inset: max(var(--hf-page-margin), calc((100% - var(--hf-page-max-width-wide)) / 2));',
-    )
-  })
-
-  it('is the width of its parts: 58rem, 2rem of space and 24rem', () => {
-    const tokens = readFileSync(join(import.meta.dirname, '../../tokens/layout.css'), 'utf8')
-
-    expect(tokens).toContain('--hf-content-max-width-wide: 58rem;')
-    expect(tokens).toContain('--hf-page-max-width-wide: 84rem;')
-    expect(58 + 2 + 24).toBe(84)
-  })
-})
-
-describe('the sticky sidebar in page.css', () => {
-  const rule = css.match(/\.hf-page-sidebar-sticky \{([^}]*)\}/)?.[1] ?? ''
-
-  it('sticks to the top, from the width where the sidebar stands beside the main column', () => {
-    expect(rule).toContain('position: sticky;')
-    expect(css).toMatch(/@media \(width >= 52rem\) \{\s*\.hf-page-sidebar-sticky/)
-  })
-
-  it('scrolls on its own when it is taller than the window, so every part of it can be reached', () => {
-    expect(rule).toContain('overflow-y: auto;')
-    expect(rule).toMatch(/max-block-size: calc\(100dvh - 2 \* var\(--hf-space-m\)\);/)
-  })
-})
-
-describe('a wide page without a sidebar in page.css', () => {
-  it('lets the main fill the body in one track, so no track is kept for a sidebar that is not there', () => {
-    expect(css).toMatch(
-      /\.hf-page-body:has\(> \.hf-page-main-wide\):not\(:has\(> \.hf-page-sidebar\)\)\s*\{\s*grid-template-columns: minmax\(24rem, 1fr\);/,
-    )
-  })
-})
-
 describe('the grid of a page with areas in page.css', () => {
   const layout = readFileSync(join(import.meta.dirname, '../../tokens/layout.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
   const grid = css.match(/\.hf-page-main-grid \{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/)?.[1] ?? ''
@@ -441,12 +307,13 @@ describe('the grid of a page with areas in page.css', () => {
     expect(grid.match(/52rem/g)).toHaveLength(1)
   })
 
-  it('spans the whole body, so the main is as wide as the page', () => {
-    expect(grid).toContain('grid-column: 1 / -1;')
+  it('is as wide as the page, not as wide as the content of a main without areas', () => {
+    expect(grid).toContain('max-inline-size: none;')
+    expect(css.indexOf('.hf-page-main-grid {')).toBeGreaterThan(css.indexOf('.hf-page-main {'))
   })
 
   it('has no order and no new rule with :has() for the grid, the toolbar or the section', () => {
-    const after = css.slice(css.indexOf('.hf-page-main-grid {'), css.indexOf('.hf-page-sidebar-sticky'))
+    const after = css.slice(css.indexOf('.hf-page-main-grid {'), css.indexOf('.hf-page-title'))
 
     expect(after).not.toMatch(/(^|[\s;{])order:/)
     expect(after).not.toContain(':has(')
@@ -454,9 +321,9 @@ describe('the grid of a page with areas in page.css', () => {
   })
 
   it('has the same space between the cells as elsewhere, 2rem, across and down', () => {
-    expect(
-      css.match(/\.hf-page-main,\s*\.hf-page-cells,\s*\.hf-page-sidebar \{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/)?.[1],
-    ).toContain('gap: var(--hf-page-body-cell-gap);')
+    expect(css.match(/\.hf-page-main \{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/)?.[1]).toContain(
+      'gap: var(--hf-page-body-cell-gap);',
+    )
     expect(css.match(/\.hf-page-section \{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/)?.[1]).toContain(
       'gap: var(--hf-page-body-cell-gap);',
     )

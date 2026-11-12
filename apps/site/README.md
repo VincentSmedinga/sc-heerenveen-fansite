@@ -1033,9 +1033,9 @@ Een sessie die verloopt haalt hem niet weg: daar is hij voor.
   Onder het hoofdmenu staat op elke pagina onder `/beheer` (behalve de inlogpagina's) de balk met de schermen van de rol: `NavigationBar` van het designsysteem, met een `label`, getekend door `AdminBar` in het slot `@shortcuts` (`app/@shortcuts/beheer`).
   De knop Uitloggen is het laatste item van die balk (de prop `end`): een knop in een formulier met de serveractie `logOut`, dus een POST die ook zonder JavaScript werkt.
   Op een bureaublad staat hij rechts in de balk; op een telefoon schuift hij mee met de schermen.
-  De kaart "Te doen" staat in de zijbalk (`Page.Sidebar`) en er alleen als er iets wacht: afwijkingen van Wikipedia op een besluit, vastgehouden wijzigingen van Wikipedia op een besluit (`countHeldChanges`), wedstrijden zonder uitslag in het lopende seizoen (`countMatchesWithoutResult`) en verslagen die klaar waren en niet meer kloppen (`countReportsToCheck`, alleen verslagen die een redacteur opsloeg), elk een koppeling naar de lijst.
+  De kaart "Te doen" staat in een sectie met een naam naast de tegels (`Page.Section`) en er alleen als er iets wacht: afwijkingen van Wikipedia op een besluit, vastgehouden wijzigingen van Wikipedia op een besluit (`countHeldChanges`), wedstrijden zonder uitslag in het lopende seizoen (`countMatchesWithoutResult`) en verslagen die klaar waren en niet meer kloppen (`countReportsToCheck`, alleen verslagen die een redacteur opsloeg), elk een koppeling naar de lijst.
   Een volgend scherm voegt een regel toe door een item aan `todo` in `src/app/beheer/page.tsx` toe te voegen.
-  Op een telefoon staat de kaart onder de tegels, want `Page` zet de zijbalk in de volgorde van de bron na de hoofdkolom.
+  Op een telefoon staat de kaart boven de tegels, want de gebieden van de pagina zetten de sectie op een smal scherm vóór de tegels.
 - `/beheer/berichten` is alleen voor de eigenaar en de redacteuren: de 50 nieuwste berichten van alle bronnen die op de site staan of die er niet op staan, met bron, kop als link, tijd en wie een bericht verborg (zie _Berichten verbergen_).
 - `/beheer/artikelen` is voor elke rol: de artikelen van de redactie schrijven, bekijken, publiceren en intrekken (zie _Artikelen schrijven_).
   Een auteur ziet alleen de artikelen die hij maakte (`created_by`), en publiceert en trekt alleen die in (#1159); de serveracties weigeren een artikel van een ander.
@@ -1178,7 +1178,7 @@ Wat een redacteur ziet en verwacht, staat in [`docs/wedstrijden-invullen.md`](..
   De eerste knop is een verborgen "Opslaan", zodat Enter opslaat.
 - `src/beheer/match-form.ts` leest en controleert wat het formulier stuurt, altijd opnieuw op de server, met dezelfde regels als de checks van `matches` en `match_goals` en de eis dat de doelpunten samen de uitslag geven (een uitslag zonder doelpunten mag).
   `src/beheer/match-entries.ts` schrijft de invoer in `matches` en `match_goals`, zet de markering in `match_edits` met de wedstrijd van vóór de eerste invoer, en schrijft `match.edit` of `match.undo` in het logboek, alles in één transactie.
-- Elke invoer en elk weghalen vraagt een reden.
+- Een reden bij een invoer of een weghaalactie mag leeg (#1186): dan staat er geen reden in het logboek, en de pagina toont geen regel "Reden".
   Een invoer zonder verschil, en "weghalen" zonder invoer, schrijven niets.
 - Een wijziging van Wikipedia die voor de wedstrijd wachtte in `match_changes`, vervalt bij een invoer.
 - Zolang minstens één wedstrijd een markering heeft, zetten de pagina's met de volledige bronvermelding (`SourceCredit`, `OpponentsCredit`) in de uitklap van die bronvermelding de zin "Enkele gegevens heeft onze redactie zelf ingevuld of aangepast." (`edited` van `WikipediaCredit`).
@@ -1305,7 +1305,7 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
   De velden en controles zijn die van het formulier van een speler (`PersonFields.tsx` en `src/beheer/person-checks.ts`).
   Een nieuwe naam geldt voor de persoon en voor zijn speler in elk seizoen.
   De geboortedatum is een jaar of een datum, met de bron `manual`, die de importer niet vervangt; leeg haalt hem weg, zodat de importer hem weer invult.
-  Opslaan vraagt een reden, en schrijft `person.edit` met wat er veranderde, zonder de geboortedatum zelf.
+  Opslaan vraagt geen reden (die mag leeg), en schrijft `person.edit` met wat er veranderde, zonder de geboortedatum zelf.
 - Een speler kan een **vorig rugnummer** hebben met de dag vanaf wanneer het huidige nummer geldt ("Vorig rugnummer" en "Nieuw nummer vanaf", beide of geen, elk met een eigen fout; #1076).
   Verandert de redactie het nummer van een speler die met zijn oude nummer in een opgeslagen opstelling staat, dan zet het formulier het oude nummer in Vorig rugnummer en vraagt het om de dag.
   `readSquad` (`src/beheer/match-reports.ts`) geeft de selectie met het nummer van de dag van de wedstrijd, voor het formulier van het verslag, het plakken en het live verslag; een opgeslagen verslag houdt zijn nummers.
@@ -1359,12 +1359,12 @@ Een adres zonder seizoen sinds 1990/91 geeft "niet gevonden".
 
 Verschillen de doelpunten van een speler in de selectietabel van die in de wedstrijden of de verslagen, dan heeft de pagina van het seizoen een koppeling "spelerscijfers verschillen" (#974).
 Ze leidt naar `/beheer/kwaliteit/<seizoen>/spelerscijfers` (`src/app/beheer/kwaliteit/[seizoen]/spelerscijfers`), met per verschil de speler, de competitie en de twee aantallen.
-Elk verschil heeft een formulier met een reden en twee knoppen: het andere aantal overnemen, of de selectietabel houden (`submitStatDifference` in `src/app/beheer/kwaliteit/actions.ts`).
+Elk verschil heeft een formulier met een reden (die mag leeg) en twee knoppen: het andere aantal overnemen, of de selectietabel houden (`submitStatDifference` in `src/app/beheer/kwaliteit/actions.ts`).
 Het besluit staat in het logboek als `player.stats-take-over` of `player.stats-keep`.
 
 Leest de import voor een speler iets anders dan de redactie invulde, dan heeft de pagina van het seizoen een koppeling "spelersgegevens verschillen" (#1022).
 Ze leidt naar `/beheer/kwaliteit/<seizoen>/spelersgegevens` (`src/app/beheer/kwaliteit/[seizoen]/spelersgegevens`), met per afwijking de speler, het veld, de waarde van de redactie en die van de import.
-Elke afwijking heeft een formulier met een reden en twee knoppen: de import overnemen, of de redactie houden (`submitFieldDifference` in `src/app/beheer/kwaliteit/actions.ts`).
+Elke afwijking heeft een formulier met een reden (die mag leeg) en twee knoppen: de import overnemen, of de redactie houden (`submitFieldDifference` in `src/app/beheer/kwaliteit/actions.ts`).
 Het besluit staat in het logboek als `player.field-take-over` of `player.field-keep`.
 Heeft een andere speler van het seizoen de naam of de pagina van de import al, dan verandert er niets en zegt de pagina dat.
 

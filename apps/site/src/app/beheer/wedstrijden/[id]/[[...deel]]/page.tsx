@@ -424,9 +424,11 @@ export default async function MatchPage({ params, searchParams }: Props) {
                   <List.Item>
                     <Text>Op: {formatVersionTime(edit.editedAt)}</Text>
                   </List.Item>
-                  <List.Item>
-                    <Text>Reden: {edit.reason}</Text>
-                  </List.Item>
+                  {edit.reason === null ? null : (
+                    <List.Item>
+                      <Text>Reden: {edit.reason}</Text>
+                    </List.Item>
+                  )}
                 </List>
               </Card>
               <RemoveEntryForm action={submitRemoveEntry.bind(null, match.id)} title={title} />

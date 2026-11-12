@@ -38,16 +38,6 @@ describe('the compact density of the admin', () => {
     }
   })
 
-  it('leaves the old layout: no sidebar, no intro, no sticky and no wide page', () => {
-    for (const page of pages) {
-      const source = read(page)
-
-      expect(source, page).not.toContain('Page.Sidebar')
-      expect(source, page).not.toMatch(/<Page\.Main[^>]*\b(?:intro|wide)\b/)
-      expect(source, page).not.toMatch(/\bsticky\b/)
-    }
-  })
-
   it('is used nowhere outside the admin', () => {
     const others = files(src).filter(
       (file) =>

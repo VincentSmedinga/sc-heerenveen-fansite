@@ -34,8 +34,9 @@ Bij een wedstrijd uit een eerder seizoen duurt dat hoogstens een uur, want de si
      Maakte een speler van de tegenstander het doelpunt, dan schrijf je zijn naam zoals Wikipedia hem schrijft.
      Dat geldt ook bij een eigen doelpunt: dat maakte een speler van het andere team.
      Zonder JavaScript past het formulier zich pas aan als je een knop kiest.
-4. Schrijf bij "Reden" waarom je dit invult.
-   Dat is verplicht, en het komt in het logboek.
+4. Schrijf bij "Reden" waarom je dit invult, als dat iets toevoegt.
+   Het veld mag leeg.
+   Wat je schrijft, komt in het logboek.
    Het veld staat in het blok "Opslaan" onder het formulier.
 5. Kies "Opslaan", in hetzelfde blok.
 
@@ -70,7 +71,8 @@ De site toont de bron bij de wedstrijd.
 Het logboek heeft een regel `match.add` met de bron als reden.
 
 Een wedstrijd die je toevoegde, kun je verwijderen met "Wedstrijd verwijderen" op de pagina van de wedstrijd.
-Dat vraagt een reden, haalt de doelpunten en het verslag mee weg en kan niet terug.
+Je mag een reden schrijven.
+Dat haalt de doelpunten en het verslag mee weg en kan niet terug.
 Een wedstrijd uit een import kun je niet verwijderen.
 
 ## Wat de bezoeker ziet
@@ -100,7 +102,7 @@ Wikipedia zet meestal eerst de uitslag, en pas later de doelpuntenmakers.
 
 Open de wedstrijd met het label "Wikipedia wijkt af".
 Per onderdeel dat afwijkt, staan onze invoer en wat Wikipedia zegt naast elkaar.
-Schrijf bij "Reden" waarom je beslist, en kies:
+Schrijf bij "Reden" waarom je beslist, als dat iets toevoegt, en kies:
 
 - **Neem Wikipedia over:** het onderdeel wordt wat Wikipedia zegt en volgt Wikipedia weer.
   Het label "Aangepast" verdwijnt als er geen onderdeel van jullie meer over is.
@@ -126,7 +128,7 @@ De wedstrijd houdt dan de waarde van de bron waar hij van komt, en het verschil 
 Je vindt zo'n wedstrijd op `/beheer/kwaliteit`, onder "wijzigingen wachten" bij het seizoen.
 
 Op de pagina van de wedstrijd staat een kaart met de twee waarden en de namen van de bronnen.
-Schrijf bij "Reden" waarom je beslist, en kies welke bron je overneemt of houdt.
+Schrijf bij "Reden" waarom je beslist, als dat iets toevoegt, en kies welke bron je overneemt of houdt.
 De import neemt hier niets vanzelf over, en er gaat geen mail uit.
 Een verschil dat je afwijst, komt niet terug zolang beide bronnen hetzelfde blijven zeggen.
 
@@ -135,7 +137,7 @@ Een verschil dat je afwijst, komt niet terug zolang beide bronnen hetzelfde blij
 De selectietabel van Wikipedia heeft per speler het aantal doelpunten in een competitie.
 Is dat een ander aantal dan in de wedstrijden of de verslagen, dan staat op `/beheer/kwaliteit` bij het seizoen "spelerscijfers verschillen".
 De pagina erachter noemt de speler, de competitie en de twee aantallen.
-Schrijf een reden, en kies:
+Schrijf een reden als dat iets toevoegt, en kies:
 
 - **Neem de wedstrijden over** of **Neem de verslagen over:** het andere aantal komt in de selectietabel.
   De import laat het staan zolang de tabel van Wikipedia hetzelfde zegt als nu.
@@ -235,7 +237,7 @@ Het scherm laat zien wat niet meer klopt.
 De doelpunten van een wedstrijd met een verslag pas je alleen in het verslag aan.
 Het formulier van de wedstrijd laat ze dan zien, met een link naar het verslag.
 
-"Verslag weghalen" (in de rij onder het formulier, met een reden) haalt het verslag weg en zet de doelpunten terug op wat Wikipedia zei.
+"Verslag weghalen" (in de rij onder het formulier, met een reden als je die wilt geven) haalt het verslag weg en zet de doelpunten terug op wat Wikipedia zei.
 
 ### Een verslag tijdens de wedstrijd
 
@@ -304,7 +306,7 @@ De tekst komt niet in het logboek en is hoogstens 20.000 tekens.
 ## Invoer weghalen
 
 Op de pagina van een wedstrijd met een invoer staat naast het formulier, onder "Laatste invoer", een blok "Invoer weghalen".
-Klap het open, schrijf een reden en kies de rode knop.
+Klap het open, schrijf een reden als je die wilt geven, en kies de rode knop.
 Dat zet wat jij invulde terug naar wat er stond voor de eerste invoer.
 Daarna leest de import weer wat Wikipedia zegt, zoals bij elke andere wedstrijd.
 Een afwijking die nog wachtte, vervalt.

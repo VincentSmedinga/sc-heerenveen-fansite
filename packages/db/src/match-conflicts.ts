@@ -23,7 +23,7 @@ import { seasonOf } from './season.ts'
  */
 export type ConflictDecision = {
   kind: 'keep' | 'take-over'
-  reason: string
+  reason?: string | undefined
   resolution: 'person' | 'stood'
   userId: null | number
 }

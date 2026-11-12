@@ -67,7 +67,7 @@ export const viewport: Viewport = {
 }
 
 // Every page has the same header and footer, and puts its content in a Page.Main in the
-// Page.Body, so a page with a sidebar can add a Page.Sidebar beside it. Without data-theme on
+// Page.Body, so a page with a sidebar names its areas on the Page.Main. Without data-theme on
 // Root, light and dark follow the system setting. A visitor who pressed the theme button in the
 // header gets data-theme on it from public/theme.js, which runs before the first paint, so
 // React must not mind the attribute it did not render (suppressHydrationWarning). The header

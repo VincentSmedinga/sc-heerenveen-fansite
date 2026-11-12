@@ -3,9 +3,9 @@ import preview from '#.storybook/preview'
 import {
   ExampleFooter,
   ExampleMain,
+  ExampleMainWithSide,
   exampleMenu,
   exampleMenuWithSubpages,
-  ExampleSidebar,
 } from '../../docs/ExamplePage'
 import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
@@ -27,8 +27,8 @@ const meta = preview.meta({
           'De onderdelen zelf staan bij Componenten › Pagina en Componenten › Navigatie.',
           '',
           '- **Gewone pagina:** header, hoofdmenu, een hoofdkolom en de footer.',
-          '- **Met zijbalk:** een `Page.Sidebar` naast de hoofdkolom in de `Page.Body`.',
-          '- **Met twee gelijke kolommen:** een `Page.Main` met een `intro` en de eerste kaarten, en een `Page.Sidebar` met `wide` met de rest. Op een breed scherm staan ze naast elkaar, even breed. Op een smal scherm staan alle kaarten onder elkaar, eerst die van de `Page.Main`. Verdeel de kaarten dus in de volgorde waarin ze onder elkaar moeten staan, en zo dat de kolommen ongeveer even hoog worden.',
+          '- **Met zijkolom:** een `Page.Main` met `areas`, en een `Page.Section` naast de hoofdinhoud.',
+          '- **Met twee gelijke kolommen:** een `Page.Main` met `areas` en `columns="equal"`. Op een breed scherm staan de twee kolommen naast elkaar, even breed. Op een smal scherm staan alle kaarten onder elkaar, in de volgorde van de code.',
           '- **Met subpagina’s:** een onderdeel van het hoofdmenu met `subitems`. De balk met subpagina’s hoort bij het menu en staat in dezelfde `nav`.',
           '- **Met subpagina’s en ankers:** daaronder een `Page.Shortcuts` met links naar de kaarten van de pagina, voor een smal scherm. Alleen die balk plakt.',
           '',
@@ -73,8 +73,7 @@ const renderWithSidebar = (_args: unknown, context: Globals) => (
     </Page.Header>
     <Navigation appearance="header" items={exampleMenu} label="Hoofdmenu" />
     <Page.Body>
-      <ExampleMain />
-      <ExampleSidebar />
+      <ExampleMainWithSide />
     </Page.Body>
     <ExampleFooter />
   </Page>
@@ -172,16 +171,21 @@ const renderWithEqualColumns = (_args: unknown, context: Globals) => (
       label="Op deze pagina:"
     />
     <Page.Body>
-      <Page.Main intro={<Heading level={1}>Cijfers</Heading>}>
-        {equalColumns.main.map((title) => (
-          <EqualColumnsCard key={title} title={title} />
-        ))}
+      <Page.Main areas={{ narrow: ['head', 'first', 'second'], wide: ['head head', 'first second'] }} columns="equal">
+        <Page.Cell area="head">
+          <Heading level={1}>Cijfers</Heading>
+        </Page.Cell>
+        <Page.Section area="first" aria-label="Onze plek en het verloop">
+          {equalColumns.main.map((title) => (
+            <EqualColumnsCard key={title} title={title} />
+          ))}
+        </Page.Section>
+        <Page.Section area="second" aria-label="Meer cijfers">
+          {equalColumns.sidebar.map((title) => (
+            <EqualColumnsCard key={title} title={title} />
+          ))}
+        </Page.Section>
       </Page.Main>
-      <Page.Sidebar aria-label="Meer cijfers" wide>
-        {equalColumns.sidebar.map((title) => (
-          <EqualColumnsCard key={title} title={title} />
-        ))}
-      </Page.Sidebar>
     </Page.Body>
     <ExampleFooter />
   </Page>
@@ -221,7 +225,7 @@ export const WithEqualColumnsLight = meta.story({
     docs: {
       description: {
         story:
-          'Op een breed scherm staan de kaarten van de `Page.Main` links en die van de `Page.Sidebar` met `wide` rechts, even breed. De kop staat boven de linker kolom. De balk met ankers verdwijnt waar de kolommen naast elkaar staan.',
+          'Op een breed scherm staan de kaarten van de `Page.Main` links en die van de tweede sectie rechts, even breed. De kop staat boven beide kolommen. De balk met ankers verdwijnt waar de kolommen naast elkaar staan.',
       },
     },
   },
@@ -242,7 +246,7 @@ export const WithEqualColumnsPhone = meta.story({
     docs: {
       description: {
         story:
-          'Op een smal scherm staan alle kaarten onder elkaar, eerst die van de `Page.Main`, dan die van de zijbalk.',
+          'Op een smal scherm staan alle kaarten onder elkaar, eerst die van de eerste sectie, dan die van de tweede.',
       },
     },
   },

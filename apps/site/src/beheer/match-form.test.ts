@@ -362,8 +362,9 @@ describe('validate', () => {
     ])
   })
 
-  it('asks for a reason, and takes it as one line', () => {
-    expect(validate({ ...filled(), reden: '' }, league).errors).toHaveProperty('reden')
+  it('takes a reason as one line, allows none, and refuses one that is too long', () => {
+    expect(validate({ ...filled(), reden: '' }, league)).toMatchObject({ reason: undefined })
+    expect(validate({ ...filled(), reden: '  ' }, league).errors).toBeUndefined()
     expect(validate({ ...filled(), reden: 'x'.repeat(301) }, league).errors).toHaveProperty('reden')
     expect(validate({ ...filled(), reden: 'Eerst   dit\n en dan dat' }, league).reason).toBe('Eerst dit en dan dat')
   })

@@ -132,6 +132,16 @@ describe('the form of a person', () => {
     ])
   })
 
+  it('writes no reason in the log when there is none', async () => {
+    const entry = await entryOf({ achternaam: 'Bedenksel' }, 'naam')
+
+    await editPerson(database.db, userId, personId, { ...entry, reason: undefined }, now)
+
+    expect((await log()).map(({ detail }) => detail)).toEqual([
+      'Aangepast: Jan Verzonnen. naam: Jan Verzonnen → Jan Bedenksel.',
+    ])
+  })
+
   it('refuses a name that another player of one of his seasons has, and changes nothing', async () => {
     const outcome = await editPerson(
       database.db,
@@ -245,18 +255,24 @@ describe('the form of a person', () => {
 })
 
 describe('validatePerson', () => {
-  it('asks for a reason, and checks the fields of the part only', async () => {
-    const values = await valuesOf({ achternaam: '', land: 'XX', reden: '' })
+  it('checks the fields of the part only, and a reason of more than 300 characters', async () => {
+    const values = await valuesOf({ achternaam: '', land: 'XX', reden: 'x'.repeat(301) })
 
     expect(validatePerson(values, 'land', '3-1990', now).errors).toEqual({
       land: 'Kies een land uit de lijst, of kies Onbekend.',
-      reden: 'Schrijf waarom je dit invult of aanpast.',
+      reden: 'Schrijf hoogstens 300 tekens.',
     })
     expect(Object.keys(validatePerson(values, undefined, '3-1990', now).errors ?? {})).toEqual([
       'achternaam',
       'land',
       'reden',
     ])
+  })
+
+  it('takes no reason, and then the entry has none', async () => {
+    expect(validatePerson(await valuesOf({ land: 'NL', reden: '' }), 'land', '3-1990', now)).toMatchObject({
+      entry: { reason: undefined },
+    })
   })
 
   it('refuses a birth date after the year of death', async () => {

@@ -194,7 +194,6 @@ describe('the list', () => {
     expect(html).toContain('<span class="hf-data-table-secondary">')
     expect(html).toContain('Eredivisie, Speelronde 11')
     expect(html).toContain('hf-page-main hf-page-main-grid hf-density-compact')
-    expect(html).not.toContain('hf-page-main-wide')
   })
 
   it('shows the filter with the numbers, as links with the choice in the address', async () => {
@@ -418,9 +417,7 @@ describe('the match', () => {
     expect(html.replaceAll(/<[^>]+>/gu, '')).toContain('Terug naar Wedstrijden')
     expect(html).toContain('<span class="hf-tag hf-tag-attention">Uitslag ontbreekt</span>')
     expect(html).not.toContain('Terug naar de wedstrijden')
-    expect(html).not.toContain('hf-page-sidebar')
     expect(html).toContain('hf-page-main hf-page-main-grid hf-density-compact')
-    expect(html).not.toContain('hf-page-main-wide')
     expect(html).not.toContain('Laatste invoer')
   })
 
@@ -624,6 +621,37 @@ describe('the match', () => {
     expect(html).toContain('aria-label="Invoer weghalen voor Speelronde 11 (Eredivisie): sc Heerenveen - N.E.C."')
     expect(html).toContain('hf-button-danger')
     expect(html).toContain('Reden om de invoer weg te halen')
+  })
+
+  it('shows the last entry without a line for the reason when there is none', async () => {
+    const id = await addMatch()
+
+    await saveEntry(
+      database.db,
+      userId,
+      id,
+      {
+        facts: noFacts,
+        goals: [],
+        kickoff: { dateText: null, kickoffAt: base.kickoffAt ?? null, matchDate: '2026-10-31' },
+        result: {
+          afterNinetyAgainst: null,
+          afterNinetyFor: null,
+          extraTime: false,
+          goalsAgainst: 0,
+          goalsFor: 0,
+          penaltiesAgainst: null,
+          penaltiesFor: null,
+          status: 'played',
+        },
+      },
+      undefined,
+    )
+
+    const html = await form(id)
+
+    expect(html).toContain('Door: sanne@example.org')
+    expect(html).not.toContain('Reden:')
   })
 
   describe('a difference with Wikipedia that waits', () => {
@@ -977,7 +1005,7 @@ describe('the match', () => {
         ]),
       )
       expect(html).toContain('Reden voor je besluit over doelpunten')
-      expect(html).toContain('Waarom beslis je dit? Komt in het logboek, hoogstens 300 tekens.')
+      expect(html).toContain('Mag leeg. Komt in het logboek, hoogstens 300 tekens.')
       expect(html).toContain(`id="wijziging-${changeId}-reden"`)
     })
 
@@ -1068,7 +1096,6 @@ describe('the parts of the form of a match (#1162)', () => {
     expect(html).not.toContain('id="doelpunten"')
     expect(html).toContain('id="opslaan-kop"')
     expect(html).toContain(`<a href="/beheer/wedstrijden/${id}" id="hele-wedstrijd">Hele wedstrijd bewerken</a>`)
-    expect(html).not.toContain('hf-page-sidebar')
     expect(headings(html).filter((heading) => heading.startsWith('h1'))).toHaveLength(1)
   })
 

@@ -82,7 +82,7 @@ export async function countWaitingStatDifferences(db: Reader): Promise<Map<strin
 export async function decidePlayerStatDifference(
   db: Writer,
   id: number,
-  decision: { kind: 'keep' | 'take-over'; reason: string; userId: number },
+  decision: { kind: 'keep' | 'take-over'; reason?: string | undefined; userId: number },
   now: Date,
 ): Promise<StatDecisionOutcome> {
   const [difference] = await db

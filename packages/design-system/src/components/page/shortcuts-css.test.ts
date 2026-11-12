@@ -26,7 +26,7 @@ describe('the bar in shortcuts.css', () => {
   })
 
   it('is gone from the width where the body has two columns, with display: none, so a screen reader skips it', () => {
-    const wide = page.match(/@media \(width >= ([\d.]+rem)\) \{\s*grid-template-columns: minmax\(24rem/)?.[1]
+    const wide = page.match(/@media \(width >= ([\d.]+rem)\) \{\s*grid-template-columns: minmax\(0, 1fr\)/)?.[1]
 
     expect(wide).toBe('52rem')
     expect(bar).toContain(`@media (width >= ${wide}) {\n      display: none;`)

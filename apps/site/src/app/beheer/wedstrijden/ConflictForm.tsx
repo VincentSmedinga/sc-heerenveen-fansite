@@ -10,8 +10,8 @@ import type { ConflictFormState } from './actions'
  * reason, and two buttons, one that takes Wikipedia over and one that keeps the entry. A
  * difference between two other values gives its own words for the buttons (`labels`). Every
  * button names the match and the part, so a page with several differences still tells them
- * apart. A missing reason comes back as an error with the focus on the list of errors. The
- * form is a plain POST that works without JavaScript.
+ * apart. A reason that is too long comes back as an error with the focus on the list of errors.
+ * The form is a plain POST that works without JavaScript.
  */
 export function ConflictForm({
   action,
@@ -51,9 +51,11 @@ export function ConflictForm({
       <Form action={formAction}>
         <Field
           error={state.error}
-          hint="Waarom beslis je dit? Komt in het logboek, hoogstens 300 tekens."
+          hideOptional
+          hint="Mag leeg. Komt in het logboek, hoogstens 300 tekens."
           id={reasonId}
           label={`Reden voor je besluit over ${part}`}
+          required={false}
         >
           <Input autoComplete="off" name="reden" />
         </Field>
