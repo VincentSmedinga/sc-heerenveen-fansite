@@ -173,6 +173,24 @@ describe('the form of a person', () => {
     expect((await person())?.wikipediaPage).toBeNull()
   })
 
+  it('tells the editor what to do when a person that has a page gets another page or none', async () => {
+    await editPerson(database.db, userId, personId, await entryOf({ wikipedia: 'Jan Verzonnen' }, 'naam'), now)
+
+    const tail =
+      'De import herkent een persoon aan die pagina, daarom blijft ze zoals ze is. Zet de pagina terug zoals ze was om de rest te bewaren.'
+
+    expect(
+      await editPerson(database.db, userId, personId, await entryOf({ wikipedia: 'Jan (1990)' }, 'naam'), now),
+    ).toEqual({
+      errors: { wikipedia: `Deze persoon heeft al een Wikipedia-pagina: Jan Verzonnen. ${tail}` },
+      status: 'refused',
+    })
+    expect(await editPerson(database.db, userId, personId, await entryOf({ wikipedia: '' }, 'naam'), now)).toEqual({
+      errors: { wikipedia: `Deze persoon heeft een Wikipedia-pagina: Jan Verzonnen. ${tail}` },
+      status: 'refused',
+    })
+  })
+
   it('saves a birth date as the editors give it, and an empty one gives Wikidata back, without dates in the log', async () => {
     await editPerson(database.db, userId, personId, await entryOf({ geboren: '14-3-1990' }, 'leven'), now)
     expect(await person()).toMatchObject({

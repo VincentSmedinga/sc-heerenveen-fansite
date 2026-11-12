@@ -549,7 +549,7 @@ async function personOfNewPage(
   }
   if (person.wikipediaPage !== null) {
     throw new Refusal({
-      wikipedia: `Deze persoon heeft al een Wikipedia-pagina: ${person.wikipediaPage}. Een andere pagina geven kan hier niet.`,
+      wikipedia: `Deze persoon heeft al een Wikipedia-pagina: ${person.wikipediaPage}. De import herkent een persoon aan die pagina, daarom blijft ze zoals ze is. Zet de pagina terug zoals ze was om de rest te bewaren.`,
     })
   }
 

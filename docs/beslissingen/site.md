@@ -5359,3 +5359,12 @@
 - **Nadeel:** de tabellen hebben 64 rem in plaats van 84 rem; de pagina's met `wide` mogen nog opzij scrollen tot #1182 het meet.
   Op de pagina's van een wedstrijd en een persoon die van Kwaliteit komen, is de eerste knop in het document nu "Opslaan en volgende", dus de Enter-toets in een veld doet dat.
 - **Alternatieven:** een plakkende rij onderaan het scherm; de knoppen alleen in de werkbalk (dan is het einde van een lang formulier leeg); "Live" en "Plakken" als links in de werkbalk.
+
+## De melding bij een andere Wikipedia-pagina van een persoon zegt wat je dan doet
+
+- **Datum:** 12 november 2026
+- **Besluit:** een persoon die al een Wikipedia-pagina heeft, krijgt geen andere pagina en kan haar niet kwijtraken, en de twee meldingen zeggen nu waarom en wat je doet: "De import herkent een persoon aan die pagina, daarom blijft ze zoals ze is. Zet de pagina terug zoals ze was om de rest te bewaren." (#1188).
+  De tekst staat op het formulier van een persoon en op dat van een speler.
+  Het veld blijft bewerkbaar.
+- **Waarom:** de oude melding zei wat niet mag en niet wat je dan doet, en een redacteur die alleen de naam wilde wijzigen, zat vast.
+- **Alternatieven:** een kortere melding zonder uitleg; het veld alleen-lezen maken zodat de fout niet kan ontstaan (meer werk in het formulier en de werktabel van Kwaliteit).
