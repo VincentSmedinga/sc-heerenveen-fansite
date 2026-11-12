@@ -1028,7 +1028,7 @@ Een sessie die verloopt haalt hem niet weg: daar is hij voor.
   Staat een nieuwe pagina bedoeld open, dan noem je haar in `open` in die test.
 - `/beheer` is de startpagina: wie is ingelogd (de voornaam, of het adres zonder voornaam, en de rol), een tegel (`Tile` van het designsysteem) voor elk scherm van die rol in de hoofdkolom.
   `src/beheer/screens.ts` zegt welke rol welk scherm ziet; `src/beheer/routes.test.ts` controleert dat elke pagina en actie de rol vraagt die erbij hoort.
-  In de balk staat de link naar Mijn account met de voornaam van het account.
+  In de balk heet de link naar Mijn account "Mijn account (Eva)", met de voornaam van het account.
   Onder het hoofdmenu staat op elke pagina onder `/beheer` (behalve de inlogpagina's) de balk met de schermen van de rol: `NavigationBar` van het designsysteem, met een `label`, getekend door `AdminBar` in het slot `@shortcuts` (`app/@shortcuts/beheer`).
   De knop Uitloggen is het laatste item van die balk (de prop `end`): een knop in een formulier met de serveractie `logOut`, dus een POST die ook zonder JavaScript werkt.
   Op een bureaublad staat hij rechts in de balk; op een telefoon schuift hij mee met de schermen.
@@ -1118,7 +1118,7 @@ De import raakt die twee kolommen nooit aan, en een test in `apps/importer/src/i
 Een bericht staat op de site als het niet verborgen is en `relevant` of goedgekeurd: verbergen wint van goedkeuren (`isShown` en `isOnSite`).
 
 - Een bericht met `doubtful` of `irrelevant` en zonder goedkeuring heeft de knop "Op de site zetten" ("Op de site zetten: <kop>" voor een schermlezer), zonder reden.
-- Een goedgekeurd bericht staat in de groep "Op de site", zegt "door de redactie op de site gezet" met het adres van wie en wanneer, en heeft de knop "Terug naar het oordeel van het filter".
+- Een goedgekeurd bericht staat in de groep "Op de site", zegt "door de redactie op de site gezet" met de voornaam van wie (of het adres zolang die er niet is) en wanneer, en heeft de knop "Terug naar het oordeel van het filter".
   Die maakt `approved_at` en `approved_by` leeg, en het bericht is weer wat het filter zei.
 - De acties zijn `approveItem` en `unapproveItem` in `src/beheer/items.ts`, met dezelfde uitkomsten als verbergen: `done`, `unchanged` (al zo, of door de import `relevant` gevonden) en `missing`.
   Elke actie schrijft in één transactie met de wijziging een regel in het logboek: `item.approve` of `item.unapprove`.
@@ -1129,8 +1129,9 @@ Lokaal zie je de pagina na `pnpm run import` (of met `pnpm --filter site test-da
 
 ### Artikelen schrijven
 
-`/beheer/artikelen` (`src/app/beheer/artikelen`) is alleen voor de eigenaar en de redacteuren: een auteur krijgt "niet gevonden".
-De lijst toont alle artikelen, het laatst geschreven bovenaan, met "Nieuw artikel" als formulier met `method="get"`.
+`/beheer/artikelen` (`src/app/beheer/artikelen`) is voor elke rol.
+Een auteur ziet alleen de artikelen die hij maakte, krijgt "niet gevonden" voor een artikel van een ander, en publiceert en trekt niets in.
+De lijst toont voor de eigenaar en een redacteur alle artikelen, het laatst geschreven bovenaan, met "Nieuw artikel" als formulier met `method="get"`.
 Het formulier (`ArticleForm.tsx`) is een client-component met `useActionState` die een fout met de ingevulde waarden terugstuurt.
 De tekst schrijf je met `RichTextEditor` uit het designsysteem (`@fansite/design-system/rich-text-editor`), die JavaScript vraagt; alleen de pagina's met het formulier laden Tiptap.
 De editor zet de tekst als Tiptap's JSON in een verborgen veld.
@@ -1397,7 +1398,7 @@ De klikken op berichten (#292) staan er nog niet op: die komen als dat issue kla
 ### De beheertests in de browser
 
 De inloglink is een mail, en een browsertest heeft geen mailbox.
-`e2e/admin.ts` zet daarom vóór de eerste test een redacteur en een redacteur met elk een sessie in de database van de controle, zoals `startSession` dat doet, en geeft de browser het cookie (`adminCookie(host, rol)`); `e2e/pages.spec.ts`, `e2e/admin.spec.ts` en `e2e/writing.spec.ts` loggen zo in.
+`e2e/admin.ts` zet daarom vóór de eerste test een eigenaar, een redacteur en een auteur met elk een sessie in de database van de controle, zoals `startSession` dat doet, en geeft de browser het cookie (`adminCookie(host, rol)`); `e2e/pages.spec.ts`, `e2e/admin.spec.ts` en `e2e/writing.spec.ts` loggen zo in.
 De tokens zijn voor elke run nieuw, staan alleen in het geheugen van de controle en in de omgeving van haar processen, en de accounts, de sessies, de logregels, de artikelen die een test schreef en de verzonnen berichten gaan er na afloop weer uit.
 De opzet weigert elke database die niet op deze computer staat (`127.0.0.1`, `::1` of `localhost`), dus ze kan nooit schrijven in de database van acceptatie of productie.
 De site zelf kent geen route, omgevingsvariabele of token om zo in te loggen, en `e2e/` zit niet in de build.

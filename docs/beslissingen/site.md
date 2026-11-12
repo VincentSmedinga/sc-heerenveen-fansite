@@ -5121,7 +5121,7 @@
 - **Besluit:** op `/beheer/mijn-account` zet een eigenaar of redacteur de mail over afwijkingen van Wikipedia uit, in de kolom `conflict_mail`.
   Hij staat standaard aan; een auteur krijgt hem nooit en ziet de keuze niet.
   De keuze schrijft `account.edit` in het logboek.
-  De voornaam (`first_name`, hoogstens 50 tekens) staat alleen in het beheer: in de lijst van accounts, in de balk als link naar Mijn account, en bij wie iets deed (wie een bericht verborg, een versie opsloeg of een wedstrijd invulde), met het adres zolang er geen voornaam is.
+  De voornaam (`first_name`, hoogstens 50 tekens) staat alleen in het beheer: in de lijst van accounts, in de balk in de link "Mijn account (Eva)", en bij wie iets deed (wie een bericht verborg, een versie opsloeg of een wedstrijd invulde), met het adres zolang er geen voornaam is.
   Het beheer heeft geen eigen pagina voor het logboek, dus "in het logboek" is daar waar het beheer zegt wie iets deed.
   De kopie van acceptatie krijgt de voornaam `Account <id>`.
 - **Waarom:** het is de eigen inbox van iemand, en een auteur beslist niet over wedstrijden.

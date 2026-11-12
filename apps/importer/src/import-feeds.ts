@@ -827,7 +827,7 @@ async function storeItems(
 }
 
 /**
- * What an item column becomes when the source offers the item again: the new value, unless a
+ * What an item column becomes when the source offers the item again: the new value, unless an
  * editor hid the item, then it stays as it is.
  */
 function unlessHidden(column: AnyMySqlColumn) {

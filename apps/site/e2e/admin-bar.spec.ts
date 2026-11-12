@@ -19,7 +19,7 @@ test('gives an author the start, the articles and his account, by his first name
 
   const bar = page.getByRole('navigation', { name: 'Beheer' })
 
-  await expect(bar.getByRole('link')).toHaveText(['Beheer', 'Artikelen', 'Auteur'])
+  await expect(bar.getByRole('link')).toHaveText(['Beheer', 'Artikelen', 'Mijn account (Auteur)'])
   await expect(bar.getByRole('button')).toHaveText(['Uitloggen'])
   await expect(bar.getByRole('link', { name: 'Artikelen' })).toHaveAttribute('aria-current', 'page')
   expect(await checkPage(page)).toEqual([])
@@ -42,7 +42,7 @@ test('gives the owner every screen and marks the one below which the page is', a
     'Kwaliteit',
     'Bezoek',
     'Accounts',
-    'Eigenaar',
+    'Mijn account (Eigenaar)',
   ])
   await expect(bar.locator('[aria-current="page"]')).toHaveText('Artikelen')
   await expect(bar.getByRole('button')).toHaveText(['Uitloggen'])
@@ -72,7 +72,7 @@ test('has Uitloggen at the right on a desktop, after the screens', async ({ base
   await page.goto('/beheer/bezoek')
 
   const bar = page.getByRole('navigation', { name: 'Beheer' })
-  const last = await bar.getByRole('link', { name: 'Redacteur' }).boundingBox()
+  const last = await bar.getByRole('link', { name: 'Mijn account (Redacteur)' }).boundingBox()
   const logOut = await bar.getByRole('button', { name: 'Uitloggen' }).boundingBox()
   const barBox = await bar.boundingBox()
 
@@ -97,7 +97,7 @@ for (const width of [390, 320]) {
     const bar = page.getByRole('navigation', { name: 'Beheer' })
 
     // The last link is Mijn account, by the first name of the account.
-    await bar.getByRole('link', { name: 'Redacteur' }).focus()
+    await bar.getByRole('link', { name: 'Mijn account (Redacteur)' }).focus()
     await page.keyboard.press('Tab')
 
     const logOut = bar.getByRole('button', { name: 'Uitloggen' })

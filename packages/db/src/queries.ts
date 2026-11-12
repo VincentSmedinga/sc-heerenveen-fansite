@@ -1350,7 +1350,7 @@ function hasWords(words: string[], ...columns: [AnyMySqlColumn, ...AnyMySqlColum
  * The condition that makes an item one to show to a visitor: no editor hid it, and the
  * importer found it `relevant` (see `items.relevance`) or an editor put it on the site
  * (`approved_at`, which the importer never changes). Hiding wins over approving. Every query
- * that puts items on a page includes it. The admin's list is the one that doesn't, so a
+ * that puts items on a page includes it. The admin's list is the one that doesn't, so an
  * editor finds every item.
  *
  * An item with a `thread_key` is a version of a story that its source put in the feed again

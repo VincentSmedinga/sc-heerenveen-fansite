@@ -45,7 +45,7 @@ describe('the bar of the admin', () => {
       ['/beheer/kwaliteit', 'Kwaliteit'],
       ['/beheer/bezoek', 'Bezoek'],
       ['/beheer/accounts', 'Accounts'],
-      ['/beheer/mijn-account', 'Sanne'],
+      ['/beheer/mijn-account', 'Mijn account (Sanne)'],
     ])
     expect(html.match(/aria-current="page"/g)).toHaveLength(1)
     expect(html).toMatch(
