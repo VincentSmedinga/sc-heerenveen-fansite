@@ -4990,3 +4990,23 @@
   - **Het logboek** schrijft "jaar van overlijden van de persoon: geen → 2018".
 - **Waarom:** de redactie weet het beter dan een bron voor een speler zonder artikel, en een fout in Wikidata mag een correctie van de redactie niet wissen.
 - **Alternatieven:** Wikidata laten winnen (een fout in Wikidata wist een correctie); een volledige datum laten invullen (we tonen alleen het jaar).
+
+## De kaart "Laatste overwinning" telt alleen de Eredivisie en de dagen bij het tonen
+
+- **Datum:** 9 november 2026
+- **Besluit:** de zijkolom van Tegenstanders heeft onder "Het moeilijkst" de zachte kaart "Laatste overwinning" (`LastWinCard`) met de clubs van het nieuwste seizoen in de stand, zonder sc Heerenveen, van de langste tijd sinds onze laatste overwinning tot de kortste (#989).
+  - **Welke winst:** de laatste wedstrijd in de Eredivisie met meer doelpunten voor dan tegen (`listClubLastWins` in `packages/db`), los van de schakelaar.
+    Beker en strafschoppen tellen niet.
+  - **Volgorde:** de oudste datum bovenaan, dezelfde datum op naam (`localeCompare` met `nl`), een club die we nog nooit versloegen onderaan met "Nog nooit gewonnen" en zonder balk.
+  - **De dagen:** kalenderdagen tot vandaag naar de datum in Nederland (`lastWinsOf` en `dutchDay`), bij elke vertoning berekend en niet in de cache bewaard.
+    Een uitslag zonder tijd telt als de speeldag, en een wedstrijd van vandaag toont 0 dagen.
+  - **De balk:** de bestaande `Bar` naast de datum, als deel van de langste wachttijd.
+    Het designsysteem exporteert daarvoor `Bar`, `sharesOf` en `BarPlace` (aangevuld, 12 november 2026; de wrapper `hf-bar-place`, waarin de balken de breedte van hun plaats bevragen); de tabel is een `DataTable` met tekst in een `BarPlace`, zonder `hf-bar-table` omdat de kop en de datum op een telefoon moeten kunnen afbreken, en `DataTable` zelf is niet veranderd.
+  - **Een zin onder de kop** (aangevuld, 12 november 2026): "Alleen wedstrijden in de Eredivisie tellen.", omdat de kaart de schakelaar niet volgt en een recente bekerwinst anders naast een oude datum kan lijken te staan.
+    Het bijschrift van de tabel blijft zoals het was.
+  - **Geen kaart:** met minder dan twee clubs naast sc Heerenveen, of zonder stand.
+  - **Een club zonder pagina** (aangevuld, 12 november 2026): een club van de stand die we nooit troffen, of die de stand anders schrijft dan wij, staat onderaan met "Nog nooit gewonnen", zonder link en zonder balk.
+  - **Mijlpaal:** E4 – Tegenstanders en clubs.
+- **Waarom:** er is geen nieuwe gegevensbron nodig, de kaart volgt het seizoen vanzelf en geen club valt zomaar weg.
+  De dagen in de cache zouden na middernacht niet kloppen.
+- **Alternatieven:** clubs met een wedstrijd dit seizoen; alle competities of de schakelaar volgen; een nieuwe optie op `DataTable` voor een balk.

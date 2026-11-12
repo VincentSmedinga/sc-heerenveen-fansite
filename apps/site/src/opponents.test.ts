@@ -15,11 +15,13 @@ import {
   clubNameViewsOf,
   clubPlacesOf,
   clubScorersMinimum,
+  daysBetween,
   earlierNames,
   hardestOf,
   hasClubScorers,
   hasTimeline,
   lastResultsOf,
+  lastWinsOf,
   meetingsOf,
   pointsOf,
   seasonsOf,
@@ -1063,5 +1065,111 @@ describe('clubAttendanceOf', () => {
       { at: 1, text: '2020' },
       { at: 11, text: '2025' },
     ])
+  })
+})
+
+describe('lastWinsOf', () => {
+  const table = [
+    { club: 'sc Heerenveen', season: '2026/27' },
+    { club: 'Ajax', season: '2026/27' },
+    { club: 'FC Twente', season: '2026/27' },
+    { club: 'N.E.C.', season: '2026/27' },
+    { club: 'Oude Club', season: '2025/26' },
+  ]
+  const club = (name: string, lastWin: null | string, otherNames: string[] = []) => ({
+    lastWin,
+    name,
+    otherNames,
+    slug: name.toLowerCase().replaceAll(' ', '-'),
+  })
+  const clubs = [
+    club('Ajax', '2024-03-02'),
+    club('FC Twente', '2019-04-21'),
+    club('NEC', '2024-03-02', ['N.E.C.']),
+    club('Oude Club', '2010-01-01'),
+  ]
+
+  it('puts the longest wait first and counts the calendar days to today', () => {
+    expect(lastWinsOf(table, clubs, '2026-11-12')).toEqual([
+      { days: 2762, lastWin: '2019-04-21', name: 'FC Twente', slug: 'fc-twente' },
+      { days: 985, lastWin: '2024-03-02', name: 'Ajax', slug: 'ajax' },
+      { days: 985, lastWin: '2024-03-02', name: 'NEC', slug: 'nec' },
+    ])
+  })
+
+  it('leaves out sc Heerenveen and the clubs of other seasons, and finds a club under another spelling', () => {
+    expect(lastWinsOf(table, clubs, '2026-11-12')?.map((place) => place.name)).toEqual(['FC Twente', 'Ajax', 'NEC'])
+  })
+
+  it('orders the same day by name, with the Dutch collation', () => {
+    const same = [club('Éerste Club', '2020-01-01'), club('Zesde Club', '2020-01-01'), club('Derde Club', '2020-01-01')]
+    const rows = same.map((one) => ({ club: one.name, season: '2026/27' }))
+
+    expect(lastWinsOf(rows, same, '2026-11-12')?.map((place) => place.name)).toEqual([
+      'Derde Club',
+      'Éerste Club',
+      'Zesde Club',
+    ])
+  })
+
+  it('puts a club we never beat last, with no day and no days, also when we never met it', () => {
+    const never = [club('Ajax', '2024-03-02'), club('FC Twente', null), club('Nooit Gewonnen', null)]
+    const rows = ['Ajax', 'FC Twente', 'Nooit Gewonnen'].map((name) => ({ club: name, season: '2026/27' }))
+
+    expect(lastWinsOf(rows, never, '2026-11-12')).toEqual([
+      { days: 985, lastWin: '2024-03-02', name: 'Ajax', slug: 'ajax' },
+      { days: null, lastWin: null, name: 'FC Twente', slug: 'fc-twente' },
+      { days: null, lastWin: null, name: 'Nooit Gewonnen', slug: 'nooit-gewonnen' },
+    ])
+  })
+
+  it('counts a win of today as 0 days', () => {
+    const rows = [
+      { club: 'Ajax', season: '2026/27' },
+      { club: 'FC Twente', season: '2026/27' },
+    ]
+
+    expect(lastWinsOf(rows, [club('Ajax', '2026-11-12'), club('FC Twente', '2026-11-11')], '2026-11-12')).toMatchObject(
+      [
+        { days: 1, name: 'FC Twente' },
+        { days: 0, name: 'Ajax' },
+      ],
+    )
+  })
+
+  it('has no card with fewer than two clubs besides sc Heerenveen, or without a table', () => {
+    expect(
+      lastWinsOf(
+        [
+          { club: 'sc Heerenveen', season: '2026/27' },
+          { club: 'Ajax', season: '2026/27' },
+        ],
+        clubs,
+        '2026-11-12',
+      ),
+    ).toBeUndefined()
+    expect(lastWinsOf([], clubs, '2026-11-12')).toBeUndefined()
+  })
+
+  it('keeps a club of the table that has no page, last and without a slug', () => {
+    const rows = [
+      { club: 'Ajax', season: '2026/27' },
+      { club: 'FC Twente', season: '2026/27' },
+      { club: 'Onbekend', season: '2026/27' },
+    ]
+
+    expect(lastWinsOf(rows, clubs, '2026-11-12')).toEqual([
+      { days: 2762, lastWin: '2019-04-21', name: 'FC Twente', slug: 'fc-twente' },
+      { days: 985, lastWin: '2024-03-02', name: 'Ajax', slug: 'ajax' },
+      { days: null, lastWin: null, name: 'Onbekend', slug: null },
+    ])
+  })
+})
+
+describe('daysBetween', () => {
+  it('counts calendar days, also over a change of the clock', () => {
+    expect(daysBetween('2026-03-28', '2026-03-30')).toBe(2)
+    expect(daysBetween('2026-10-24', '2026-10-26')).toBe(2)
+    expect(daysBetween('2026-11-12', '2026-11-12')).toBe(0)
   })
 })

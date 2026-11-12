@@ -14,6 +14,7 @@ import { filterHref, filterQuery, parseFilterQuery } from '#src/filter-query'
 import { sourceName, sourceOf } from '#src/match-sources'
 import { getEditedMatches, getMatchSeasons, getMatchSource } from '#src/matches'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
+import { dutchDay } from '#src/noteworthy'
 import {
   clubAttendanceOf,
   clubNameViewsOf,
@@ -22,6 +23,7 @@ import {
   getClubPage,
   getClubPlaces,
   getClubRecords,
+  getLastWinPlaces,
   getSourcePages,
   hasClubScorers,
   meetingPageCount,
@@ -44,6 +46,7 @@ import {
   ClubTimelineCard,
   ClubTopScorersCard,
   HardestCard,
+  LastWinCard,
   OpponentsCredit,
   StadiumsCard,
   TopPointsCard,
@@ -59,16 +62,18 @@ import { withBranch } from '#src/title'
  */
 const loadClubList = cache(async () => {
   try {
-    const [all, league, seasons, pages, edited, source] = await Promise.all([
+    const [all, league, seasons, pages, edited, source, lastWins] = await Promise.all([
       getClubRecords('all'),
       getClubRecords('league'),
       getMatchSeasons(),
       getSourcePages(),
       getEditedMatches(),
       getMatchSource(),
+      // The days are counted from the day in the Netherlands now, and this is never kept.
+      getLastWinPlaces(dutchDay(new Date())),
     ])
 
-    return { all, edited, kind: 'found', league, pages, seasons, source } as const
+    return { all, edited, kind: 'found', lastWins, league, pages, seasons, source } as const
   } catch (error) {
     console.error(`Could not read the opponents for ${opponentsPath}: ${reasonOf(error)}`)
 
@@ -125,7 +130,8 @@ export async function clubListMetadata(): Promise<Metadata> {
  * the choice that is not known is the page "niet gevonden". The list is the main column, on the
  * white surface. The sidebar has the top 10 of the average points per match (`TopPointsCard`),
  * which counts the same matches as the list, the card Het moeilijkst (`HardestCard`) when at
- * least ten clubs count, and the credit under it. On a phone it follows the
+ * least ten clubs count, the card Laatste overwinning (`LastWinCard`) with the clubs of the
+ * Eredivisie, and the credit under it. On a phone it follows the
  * list.
  */
 export async function ClubListPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
@@ -182,6 +188,7 @@ export async function ClubListPage({ searchParams }: { searchParams: Promise<Sea
           records={records}
           since={since}
         />
+        <LastWinCard address={opponentsPath} places={loaded.lastWins} query={competitionQuery(competition)} />
         <OpponentsCredit edited={loaded.edited} pages={loaded.pages} seasons={loaded.seasons} source={loaded.source} />
       </Page.Sidebar>
     </>

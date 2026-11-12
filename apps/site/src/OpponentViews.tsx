@@ -2,7 +2,9 @@ import type { PublicClubMatch, PublicClubRecord, PublicSeasonWikipediaPage } fro
 
 import { competitions } from '@fansite/db/schema'
 import {
+  Bar,
   BarChart,
+  BarPlace,
   Card,
   DataTable,
   Disclosure,
@@ -13,12 +15,14 @@ import {
   NewsItem,
   Pagination,
   RecordTable,
+  sharesOf,
   ShortMatch,
   ShortStaff,
   signedNumber,
   tableColumns,
   tableLegend,
   Text,
+  Time,
   WikipediaCredit,
 } from '@fansite/design-system'
 
@@ -39,6 +43,7 @@ import {
   hardestOf,
   hasTimeline,
   lastResultsOf,
+  type LastWinPlace,
   type Meeting,
   meetingPageCount,
   meetingsOf,
@@ -699,6 +704,62 @@ export function HardestCard({
         played={played}
         since={since}
       />
+    </Card>
+  )
+}
+
+/**
+ * The card Laatste overwinning under Het moeilijkst: the clubs of the Eredivisie now, the one
+ * we have not beaten for the longest time first (see `lastWinsOf`), on the soft surface. The
+ * table has the club as a link, the day of our last win in the Eredivisie and the calendar days
+ * since, and a `Bar` next to the day, as long as the days are of the longest wait. The bar is
+ * decoration: a screen reader reads the day and the days. A club we never beat says so in place
+ * of the day and the days, and has no bar. The card does not follow the switch of the page,
+ * which is why the caption says the Eredivisie, but its links keep the choice (`address` and
+ * `query`). Without `places` there is no card.
+ */
+export function LastWinCard({
+  address,
+  places,
+  query,
+}: {
+  address: string
+  places: LastWinPlace[] | undefined
+  query: string
+}) {
+  if (places === undefined) {
+    return null
+  }
+
+  const shares = sharesOf(places.map((place) => place.days ?? 0))
+
+  return (
+    <Card aria-labelledby="laatste-overwinning" surface="soft">
+      <Heading id="laatste-overwinning" level={2}>
+        Laatste overwinning
+      </Heading>
+      <Text>Alleen wedstrijden in de Eredivisie tellen.</Text>
+      <BarPlace>
+        <DataTable
+          appearance="text"
+          caption="De clubs in de Eredivisie, van de langste tijd sinds onze laatste overwinning tegen hen tot de kortste"
+          columns={['Club', 'Laatste overwinning', 'Dagen geleden']}
+          rows={places.map((place, index) => ({
+            cells:
+              place.lastWin === null
+                ? ['Nog nooit gewonnen', '']
+                : [
+                    <>
+                      <Time dateTime={place.lastWin}>{formatTableDay(place.lastWin)}</Time>
+                      {shares === null ? null : <Bar share={shares[index] ?? 0} />}
+                    </>,
+                    place.days,
+                  ],
+            header: place.name,
+            ...(place.slug === null ? {} : { href: `${address}/${place.slug}${query}` }),
+          }))}
+        />
+      </BarPlace>
     </Card>
   )
 }

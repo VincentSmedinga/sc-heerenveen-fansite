@@ -49,6 +49,8 @@ export type PublicArticleLink = Awaited<ReturnType<typeof listPublishedArticles>
 
 export type PublicClub = NonNullable<Awaited<ReturnType<typeof findClubBySlug>>>
 
+export type PublicClubLastWin = Awaited<ReturnType<typeof listClubLastWins>>[number]
+
 export type PublicClubMatch = Awaited<ReturnType<typeof listClubMatches>>[number]
 
 export type PublicClubRecord = Awaited<ReturnType<typeof listClubRecords>>[number]
@@ -436,6 +438,35 @@ export async function listArticleLines(db: Database, until: Date, limit: number,
     .offset(offset)
 
   return rows.flatMap((row) => (row.publishedAt === null ? [] : [{ ...row, publishedAt: row.publishedAt }]))
+}
+
+/**
+ * Every club with the day of the last match of the Eredivisie that sc Heerenveen won against
+ * it, as `2019-04-21`, or `null` when we never did. A win is a played match with more goals
+ * for than against. The Eredivisie has no shoot-outs, but a level score never counts as a win.
+ * The names are the other spellings of the club, so the table of a season is found under the
+ * name it was written with. A club without a match is not in it.
+ */
+export async function listClubLastWins(db: Database) {
+  const rows = await db
+    .select({
+      id: clubs.id,
+      lastWin: sql<
+        null | string
+      >`max(case when ${matches.status} = 'played' and ${matches.competition} = 'Eredivisie' and ${matches.goalsFor} > ${matches.goalsAgainst} then ${matches.matchDate} end)`,
+      name: clubs.name,
+      slug: clubs.slug,
+    })
+    .from(clubs)
+    .innerJoin(matches, eq(matches.clubId, clubs.id))
+    .groupBy(clubs.id)
+    .orderBy(asc(clubs.name), asc(clubs.id))
+  const others = await db.select({ clubId: clubNames.clubId, name: clubNames.name }).from(clubNames)
+
+  return rows.map((row) => ({
+    ...row,
+    otherNames: others.filter((other) => other.clubId === row.id).map((other) => other.name),
+  }))
 }
 
 /**

@@ -1538,6 +1538,14 @@ await withEmptyDatabase((database) =>
       assert.match(opponentsHtml, /<h2[^>]*id="het-moeilijkst">Het moeilijkst<\/h2>/)
       assert.match(opponentsHtml, /van laag naar hoog/)
     }
+    // The card Laatste overwinning needs the table of the newest season, so the made-up data
+    // may or may not have it; if so, it has its own heading and caption, before the credit.
+    if (opponentsHtml.includes('id="laatste-overwinning"')) {
+      assert.match(opponentsHtml, /<h2[^>]*id="laatste-overwinning">Laatste overwinning<\/h2>/)
+      assert.match(opponentsHtml, /Alleen wedstrijden in de Eredivisie tellen\./)
+      assert.match(opponentsHtml, /van de langste tijd sinds onze laatste overwinning tegen hen tot de kortste/)
+      assert.ok(opponentsHtml.indexOf('id="laatste-overwinning"') < opponentsHtml.search(closedWikipediaCredit))
+    }
     assert.match(opponentsHtml, closedWikipediaCredit)
     // The Eredivisie leaves out FC Maquette, whom the made-up matches meet only in the cup, and
     // the links keep the choice.

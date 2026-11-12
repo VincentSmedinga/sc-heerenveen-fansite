@@ -3077,3 +3077,10 @@
 - **Alternatieven:** één korte regel zonder uitklap (korter, maar de projecteigenaar koos de uitklap); alleen een link naar Onze bronnen in de voet (te mager als zichtbare vermelding).
 - **Later:** vervangt in _Onze eigen gegevens heten overal sc Heerenveen Fansite_ (11 november 2026) de bronvermelding "Bron: sc Heerenveen Fansite" voor pagina's met alleen eigen gegevens: die is weg, de naam blijft in de regel "Wikipedia en sc Heerenveen Fansite" en in de uitklap.
   De zin die de redactie zelf invulde, staat in de uitklap in plaats van eronder (zie _Onder de bronvermelding staat een zin zolang de redactie gegevens zelf invulde_ in `importer.md`).
+
+## De kaart "Laatste overwinning" heeft geen bronvermelding van zichzelf
+
+- **Datum:** 9 november 2026
+- **Besluit:** de kaart "Laatste overwinning" op Tegenstanders toont alleen een clubnaam, een datum en een aantal dagen uit onze eigen wedstrijdlijst, en heeft geen vermelding van een bron: de uitklap van `WikipediaCredit` onderaan de zijkolom dekt haar, en er komt geen verzoek naar een derde bij (#989).
+- **Waarom:** de gegevens komen uit de wedstrijden die we van Wikipedia lezen, en een pagina heeft één bronvermelding (zie _Een pagina met gegevens van Wikipedia heeft één bronvermelding_).
+- **Alternatieven:** een regel onder de kaart zoals "Het moeilijkst" die had.

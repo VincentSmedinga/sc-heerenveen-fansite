@@ -1,4 +1,6 @@
-import type { CSSProperties } from 'react'
+import type { ComponentPropsWithoutRef, CSSProperties } from 'react'
+
+import { classNames } from '../classNames'
 
 /**
  * The values as a share of the largest, in percent from 0 to 100, so a bar from zero shows the
@@ -19,4 +21,13 @@ export function sharesOf(values: number[]): null | number[] {
  */
 export const Bar = ({ share }: { share: number }) => (
   <span aria-hidden="true" className="hf-bar" style={{ '--hf-bar-share': share } as CSSProperties} />
+)
+
+/**
+ * The place of a table with bars that is not one of the tables of the design system, such as
+ * a `DataTable` with text whose cells hold a `Bar`. The bars query the width of this place,
+ * so they go where the place is too narrow for them.
+ */
+export const BarPlace = ({ className, ...props }: ComponentPropsWithoutRef<'div'>) => (
+  <div {...props} className={classNames('hf-bar-place', className)} />
 )

@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { Bar, sharesOf } from './Bar'
+import { Bar, BarPlace, sharesOf } from './Bar'
 
 describe('sharesOf', () => {
   it('gives the largest number the whole bar and half of it half', () => {
@@ -33,5 +33,13 @@ describe('Bar', () => {
     expect(bar.getAttribute('role')).toBeNull()
     expect(bar.textContent).toBe('')
     expect(bar.style.getPropertyValue('--hf-bar-share')).toBe('40')
+  })
+})
+
+describe('BarPlace', () => {
+  it('is the container the bars query, and keeps the class it is given', () => {
+    const { container } = render(<BarPlace className="extra">tabel</BarPlace>)
+
+    expect(container.firstElementChild?.className).toBe('hf-bar-place extra')
   })
 })

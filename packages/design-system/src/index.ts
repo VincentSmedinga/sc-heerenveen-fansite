@@ -17,6 +17,7 @@ export type {
 } from './components/bar-chart/BarChart'
 export { BarList } from './components/bar-list/BarList'
 export type { BarListProps, BarListRow } from './components/bar-list/BarList'
+export { Bar, BarPlace, sharesOf } from './components/bar/Bar'
 export { Body } from './components/body/Body'
 export type { BodyProps } from './components/body/Body'
 export { Button, buttonAppearances, buttonIcons, buttonTypes } from './components/button/Button'

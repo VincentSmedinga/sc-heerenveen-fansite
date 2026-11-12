@@ -4,7 +4,7 @@ import type { NewMatchWithoutClub } from './clubs.ts'
 import type { TestDatabase } from './test-database.ts'
 
 import { withClubs } from './clubs.ts'
-import { findClubBySlug, findPreviousMeeting, listClubMatches, listClubRecords } from './queries.ts'
+import { findClubBySlug, findPreviousMeeting, listClubLastWins, listClubMatches, listClubRecords } from './queries.ts'
 import { clubNames, clubs, matches, matchGoals } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
@@ -53,6 +53,24 @@ function played(
 async function store(...rows: NewMatchWithoutClub[]) {
   await database.db.insert(matches).values(await withClubs(database.db, rows))
 }
+
+describe('listClubLastWins', () => {
+  it('gives the day of the last win in the Eredivisie, and null for a club we never beat there', async () => {
+    await store(
+      played('FC Twente', 2, 0, { matchDate: '2025-03-01', season: '2024/25' }),
+      played('FC Twente', 3, 1, { matchDate: '2026-02-01' }),
+      played('FC Twente', 0, 1, { matchDate: '2026-10-01' }),
+      played('Ajax', 1, 1, { matchDate: '2026-03-01' }),
+      played('Quick Boys', 4, 0, { competition: 'KNVB Beker' }),
+    )
+
+    expect(await listClubLastWins(database.db)).toMatchObject([
+      { lastWin: null, name: 'Ajax' },
+      { lastWin: '2026-02-01', name: 'FC Twente', slug: 'fc-twente' },
+      { lastWin: null, name: 'Quick Boys' },
+    ])
+  })
+})
 
 describe('listClubRecords', () => {
   it('gives nothing while there are no matches', async () => {
