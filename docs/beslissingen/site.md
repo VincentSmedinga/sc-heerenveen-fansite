@@ -5042,6 +5042,7 @@
   - **De doelpuntenmaker:** een speler van ons die een doelpunt maakte, geen eigen doelpunt, gezocht met de letterregels van `/spelers/zoeken` en dus ook onder zijn oude naam.
     Een doelpunt zonder koppeling aan een speler, zoals veel van de oude wedstrijden, vindt niemand.
   - **Het formulier:** op een telefoon een uitklapper boven de resultaten, dicht bij een zoekopdracht en open zonder; op een breed scherm een kolom links (`Page.Sidebar` met `start`).
+    **Later:** #1157 maakt er één lijst van acht rijen van, zonder de uitklapper boven de resultaten (zie _De filters van de wedstrijdzoeker klappen open en dicht, op één niveau_).
     Het formulier verstuurt alleen met de knop "Toon wedstrijden": een keuze die de pagina direct ververst, breekt de toegankelijkheidsregels.
     De aanvankelijk geplande keuzelijst "Volgorde" en het aantal "1–25 van 76" boven de lijst zijn voor nu weggelaten; het adres kent `volgorde=oudste` nog.
   - **Zonder resultaat:** de kop "Geen wedstrijden", de zin en de chips blijven, en "Laat één keuze weg:" noemt elke keuze met het aantal dat je dan krijgt; een keuze met nog steeds 0 staat er niet bij.
@@ -5226,3 +5227,17 @@
 - **Alternatieven:** de waarden van de andere delen als verborgen velden meesturen (overschrijft wat iemand intussen opsloeg).
   Een nieuw onderdeel voor tabbladen in het designsysteem.
   De binnengekomen naam bij elk doelpunt in de tabel (vraagt een hint per veld in `InputTable`).
+
+## De filters van de wedstrijdzoeker klappen open en dicht, op één niveau
+
+- **Datum:** 12 november 2026
+- **Besluit:** de filters van `/wedstrijden/zoeken` staan op één niveau: acht rijen die elk openklappen, zonder buitenste kaart en zonder "Meer filters" (#1157).
+  De volgorde is Tegenstander, Seizoenen, Competitie, Thuis of uit, Uitslag, Doelpuntenmaker, Dag, Exacte uitslag.
+  Alleen Tegenstander en Seizoenen zijn bij het laden open, met en zonder zoekopdracht en op elke breedte; een rij met een foutmelding is ook open.
+  De dichte rij toont de keuze: één waarde is die waarde, twee of meer is "2 gekozen", de seizoenen alleen als het bereik niet het volledige is.
+- **Waarom:** twee lagen maken het formulier moeilijk te overzien en te bedienen op een telefoon.
+  Tegenstander en Seizoenen worden het meest gebruikt en hebben elk één of twee keuzelijsten, dus ze nemen weinig plek in; de groepen vakjes zijn hoog en beginnen dicht.
+  Eén regel voor elke breedte en voor of na een zoekopdracht houdt het zonder JavaScript werkend.
+  Na een zoekopdracht nemen de filters op een telefoon ongeveer 500 pixels in, en het formulier stuurt de bezoeker al naar `#resultaten`, dus een buitenste inklapper is niet nodig.
+- **Alternatieven:** de buitenste kaart houden en alleen "Meer filters" weghalen; alle rijen standaard dicht of open; open of dicht laten afhangen van de breedte of van de keuzes (kan niet zonder JavaScript).
+- **Later:** vervangt de uitklapper "Filters" met "Filters · n gekozen" en de uitklapper "Meer filters" uit de beslissing over `/wedstrijden/zoeken` (#1150).
