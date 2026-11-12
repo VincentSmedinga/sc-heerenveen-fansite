@@ -5301,3 +5301,14 @@
 - **Waarom:** de kolommen volgen de delen van het formulier van een persoon uit #1164, zodat een tik op een `?` het goede deel opent.
   Dezelfde letter als de lijst van alle spelers maakt een persoon makkelijk te vinden.
 - **Alternatieven:** een kolom Verschil met de import (er is nog geen telling per persoon); de letter van de hele naam (van den Berg zou bij V staan); een navigatie met alleen de letters die personen hebben (de rij springt dan per letter anders).
+
+## Een fout in het beheer logt geen waarden
+
+- **Datum:** 12 november 2026
+- **Besluit:** mislukt een actie in het beheer, dan schrijft het serverlog alleen wat er misging, met het id als dat er is, en de soort fout (#1176).
+  De soort fout is de code van MariaDB, zoals `ER_DUP_ENTRY`, of anders de naam van de fout.
+  De functie `adminFailure` in `apps/site/src/beheer/failure.ts` maakt die regel voor alle acties.
+  De melding van de fout gaat nooit mee.
+- **Waarom:** Drizzle zet de query met alle waarden in de melding, en MariaDB citeert soms een waarde.
+  Zo kwam een geboortedatum in het serverlog, en dat is een persoonsgegeven.
+- **Alternatieven:** de eerste regel van de melding met `reasonOf` (de melding van MariaDB kan nog een waarde citeren); de waarden uit de melding wissen (een nieuwe vorm van de melding glipt erdoor).

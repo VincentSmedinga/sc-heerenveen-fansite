@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 
 import type { AddFormState } from '#src/beheer/match-add-fields'
 
+import { adminFailure } from '#src/beheer/failure'
 import { parseItemId, parseReason } from '#src/beheer/items'
 import { addMatch, deleteAddedMatch, listClubChoices, readAddValues, validateAdd } from '#src/beheer/match-additions'
 import {
@@ -77,7 +78,7 @@ export async function submitAddMatch(_previous: AddFormState, formData: FormData
   try {
     outcome = await addMatch(db, userId, checked.entry)
   } catch (error) {
-    console.error(`Could not add a match: ${error instanceof Error ? error.message : String(error)}`)
+    console.error(adminFailure('add a match', error))
 
     return { errors: { algemeen: 'De wedstrijd is niet opgeslagen. Probeer het nog eens.' }, values }
   }

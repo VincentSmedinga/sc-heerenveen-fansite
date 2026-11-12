@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation'
 import type { PlayerFormState } from '#src/beheer/player-fields'
 
 import { matchPartPath, matchPath } from '#src/app/beheer/wedstrijden/paths'
+import { adminFailure } from '#src/beheer/failure'
 import { parseItemId } from '#src/beheer/items'
 import { mergePersons } from '#src/beheer/person-merge'
 import { findReturnMatch } from '#src/beheer/player-return'
@@ -66,7 +67,7 @@ export async function submitAddPlayer(
   try {
     outcome = await addPlayer(db, userId, season, checked.entry)
   } catch (error) {
-    console.error(`Could not add a player: ${error instanceof Error ? error.message : String(error)}`)
+    console.error(adminFailure('add a player', error))
 
     return { errors: { algemeen: 'De speler is niet opgeslagen. Probeer het nog eens.' }, values }
   }
@@ -115,7 +116,7 @@ export async function submitMergePersons(
   try {
     outcome = await mergePersons(db, userId, { keptId: kept, otherId: other })
   } catch (error) {
-    console.error(`Could not merge two persons: ${error instanceof Error ? error.message : String(error)}`)
+    console.error(adminFailure(`merge person ${other} into person ${kept}`, error))
 
     return { error: 'De personen zijn niet samengevoegd. Er is niets veranderd. Probeer het nog eens.' }
   }
@@ -165,7 +166,7 @@ export async function submitPlayer(
   try {
     outcome = await editPlayer(getDatabase().db, userId, id, checked.entry)
   } catch (error) {
-    console.error(`Could not change a player: ${error instanceof Error ? error.message : String(error)}`)
+    console.error(adminFailure(`change player ${id}`, error))
 
     return { errors: { algemeen: 'De speler is niet opgeslagen. Probeer het nog eens.' }, values }
   }
