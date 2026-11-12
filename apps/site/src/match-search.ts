@@ -583,6 +583,34 @@ export const byGoalDifference = (found: readonly SearchableMatch[]) =>
       second.matchDate.localeCompare(first.matchDate),
   )
 
+/**
+ * What a closed row of the filters says about its choice: the club, the seasons when they are
+ * not all of them, `2 gekozen` for two or more values of a group, the goalscorer as it was
+ * written, and the exact score. A filter without a choice says nothing (an empty text).
+ */
+export function facetValuesOf(filters: Filters, view: SearchView, seasons: readonly string[]) {
+  const ofGroup = (group: readonly { label: string; selected: boolean }[]) => {
+    const chosen = group.filter((item) => item.selected)
+
+    return chosen.length > 1 ? `${chosen.length} gekozen` : (chosen[0]?.label ?? '')
+  }
+  const first = filters.from ?? seasons[0]
+  const last = filters.to ?? seasons.at(-1)
+  const everySeason = (first === undefined || first === seasons[0]) && (last === undefined || last === seasons.at(-1))
+
+  return {
+    club: view.clubs.find((club) => club.slug === filters.club)?.name ?? '',
+    competitions: ofGroup(view.competitions),
+    days: ofGroup(view.days),
+    outcomes: ofGroup(view.outcomes),
+    score:
+      filters.ours === undefined && filters.theirs === undefined ? '' : `${filters.ours ?? ''}–${filters.theirs ?? ''}`,
+    scorer: filters.scorer?.text ?? filters.scorerError?.text ?? '',
+    seasons: everySeason ? '' : `${first}–${last}`,
+    venues: ofGroup(view.venues),
+  }
+}
+
 /** The matches of the page in the order asked for, grouped by season in that order. */
 export function resultOf(found: readonly SearchableMatch[], filters: Filters): SearchResult {
   const ordered =

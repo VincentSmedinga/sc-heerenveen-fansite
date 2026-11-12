@@ -41,6 +41,12 @@
       }
     }
 
+    /* What is chosen inside stands on the right, against the arrow. */
+    .hf-disclosure-value {
+      margin-inline-start: auto;
+      text-align: end;
+    }
+
     &[open] > summary .hf-icon {
       transform: rotate(180deg);
     }
