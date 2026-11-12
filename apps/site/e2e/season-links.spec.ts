@@ -27,9 +27,12 @@ test.describe('the links between the pages of a season', () => {
         .filter((href): href is string => href !== null && href.startsWith('/'))
         .map((href) => new URL(href, 'http://example.test').pathname)
         .filter((target) => seasonPages.some((base) => target === base || target.startsWith(`${base}/`)))
-        // The addresses of the picker and of Tegenstanders start with the same words, but are
-        // not pages of a season.
-        .filter((target) => !target.endsWith('/kies') && !target.startsWith('/tegenstanders'))
+        // The addresses of the picker, the search for a match and Tegenstanders start with the
+        // same words, but are not pages of a season.
+        .filter(
+          (target) =>
+            !target.endsWith('/kies') && target !== '/wedstrijden/zoeken' && !target.startsWith('/tegenstanders'),
+        )
         // The page of a player is `/spelers/<name>`: a name, not a season (#1087).
         .filter((target) => !/^\/spelers\/(?!\d{4}-\d{2}$)/u.test(target))
 

@@ -86,7 +86,7 @@ export function MatchSearchFilters({
             ))}
           </Select>
         </Field>
-        <FieldGroup legend="Seizoenen">
+        <FieldGroup legend="Seizoenen" separator="–">
           <Field hideOptional id="van" label="Van" required={false}>
             <Select defaultValue={filters.from ?? seasons[0] ?? ''} name="van">
               {seasons.map((season) => (
@@ -235,15 +235,6 @@ export function MatchSearchResults({
               <Link href={`${opponentsPath}/${club}`}>{`Alles over ${clubName} bij Tegenstanders`}</Link>
             </Text>
           )}
-          <Page.Cell>
-            <Text appearance="meta">{`${result.range[0]}–${result.range[1]} van ${result.total}`}</Text>
-            <Field hideOptional id="volgorde" label="Volgorde" required={false}>
-              <Select defaultValue={filters.order} form={formId} name="volgorde" width="natural">
-                <Select.Option value="nieuwste">Nieuwste eerst</Select.Option>
-                <Select.Option value="oudste">Oudste eerst</Select.Option>
-              </Select>
-            </Field>
-          </Page.Cell>
           {result.seasons.map((group) => (
             <Page.Cell key={group.season}>
               <Heading level={3}>{group.season}</Heading>

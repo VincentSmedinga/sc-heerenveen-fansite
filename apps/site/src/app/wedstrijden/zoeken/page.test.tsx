@@ -126,7 +126,9 @@ describe('the page Zoeken in wedstrijden', () => {
     )
     expect(html).not.toContain('required')
     expect(html).toContain('1 gewonnen · 0 gelijk · 0 verloren · doelpunten 2–1')
-    expect(html).toContain('1–1 van 1')
+    // The range and the order are left out for now.
+    expect(html).not.toContain('1–1 van 1')
+    expect(html).not.toContain('Volgorde')
     expect(html).toContain('>2001/02</h3>')
     expect(html).toContain('href="/tegenstanders/testdorp-fc">Alles over Testdorp FC bij Tegenstanders</a>')
     // With a choice the filters are closed on a phone.
@@ -151,11 +153,10 @@ describe('the page Zoeken in wedstrijden', () => {
     const html = await render({ uitslag: 'gewonnen' })
 
     expect(html).toContain('>30 wedstrijden</h2>')
-    expect(html).toContain('1–25 van 30')
     expect(html).toContain('Pagina 1 van 2')
     expect(html).toContain('href="/wedstrijden/zoeken?uitslag=gewonnen&amp;pagina=2"')
     expect((html.match(/class="hf-match/gu) ?? []).length).toBeGreaterThanOrEqual(25)
-    expect(await render({ pagina: '2', uitslag: 'gewonnen' })).toContain('26–30 van 30')
+    expect(await render({ pagina: '2', uitslag: 'gewonnen' })).toContain('Pagina 2 van 2')
   })
 
   it('says "Geen wedstrijden" when nothing fits, and offers each choice to leave out with its count', async () => {

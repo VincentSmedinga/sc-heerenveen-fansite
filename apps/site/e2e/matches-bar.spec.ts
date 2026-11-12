@@ -102,15 +102,17 @@ test.describe('the menu and the bar of Wedstrijden with JavaScript', () => {
 
     const names = () => menu(page).getByRole('link').allTextContents()
 
-    expect(await names()).toEqual(['Nieuws', 'Wedstrijden', 'Cijfers', 'Tegenstanders', 'Spelers', 'Forum'])
+    expect(await names()).toEqual(['Nieuws', 'Wedstrijden', 'Cijfers', 'Tegenstanders', 'Zoeken', 'Spelers', 'Forum'])
 
     // The bar sits under Wedstrijden, so the keyboard goes from Wedstrijden to Cijfers and on
-    // to Tegenstanders.
+    // to Tegenstanders and Zoeken.
     await bar(page, 'Wedstrijden').focus()
     await page.keyboard.press('Tab')
     await expect(bar(page, 'Cijfers')).toBeFocused()
     await page.keyboard.press('Tab')
     await expect(bar(page, 'Tegenstanders')).toBeFocused()
+    await page.keyboard.press('Tab')
+    await expect(bar(page, 'Zoeken')).toBeFocused()
 
     // A link of the menu loads a whole page (there is no next/link), so the focus starts at the
     // top, as it does after any link on the site.
@@ -119,7 +121,7 @@ test.describe('the menu and the bar of Wedstrijden with JavaScript', () => {
     await expect(page).toHaveURL(/\/tegenstanders$/)
     await expect(bar(page, 'Tegenstanders')).toHaveAttribute('aria-current', 'page')
 
-    expect(await names()).toEqual(['Nieuws', 'Wedstrijden', 'Cijfers', 'Tegenstanders', 'Spelers', 'Forum'])
+    expect(await names()).toEqual(['Nieuws', 'Wedstrijden', 'Cijfers', 'Tegenstanders', 'Zoeken', 'Spelers', 'Forum'])
 
     await page.keyboard.press('Tab')
     await expect(page.getByRole('link', { name: /^sc Heerenveen Fansite/ })).toBeFocused()
