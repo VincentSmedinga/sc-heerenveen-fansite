@@ -15,11 +15,11 @@ import { articlePath, articlesPath } from './paths'
 // The actions of the articles. The owner and an editor write, publish and withdraw every
 // article. An author does the same with the articles he made, and nothing with those of
 // someone else (issues 1156 and 1159): the actions check that on the server, whatever the
-// form sends. The number of
-// the article is bound to the action (`submitArticle.bind(null, id)`), which Next.js keeps
-// encrypted in the form. It is input from outside all the same, so each action checks it again.
-// A form that sends nothing wrong ends on the page of the article with a notice, and one with
-// an error returns to the form with the values kept: both work without JavaScript.
+// form sends. The number of the article is bound to the action
+// (`submitArticle.bind(null, id)`), which Next.js keeps encrypted in the form. It is input from
+// outside all the same, so each action checks it again. A form that sends nothing wrong ends on
+// the page of the article with a notice, and one with an error returns to the form with the
+// values kept: both work without JavaScript.
 
 /**
  * Saves the form of an article, and publishes it when the button that was pressed says so

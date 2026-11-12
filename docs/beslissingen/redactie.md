@@ -935,6 +935,7 @@
   Een aparte rol voor vrijwilligers die schrijven, met een controlestap erbij, komt met #40.
 - **Alternatieven:** ook moderators laten schrijven (een grotere groep zonder controlestap); een nieuwe rol `redacteur` nu al (meer werk dan de lancering vraagt).
 - **Later:** zie _Het beheer kent drie rollen: eigenaar, redacteur en auteur_ in `site.md` (12 november 2026): de eigenaar en een redacteur schrijven en publiceren elk artikel; een auteur schrijft alleen zijn eigen artikelen en publiceert niet.
+- **Later:** zie _Een auteur publiceert en trekt zijn eigen artikelen in_ in `site.md` (12 november 2026): een auteur publiceert en trekt zijn eigen artikelen nu zelf in.
 
 ## Een artikel wordt ingetrokken en niet verwijderd, en het adres van een gepubliceerd artikel staat vast
 
