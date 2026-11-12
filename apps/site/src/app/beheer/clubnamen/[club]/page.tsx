@@ -111,7 +111,7 @@ export default async function ClubNamesOfClubPage({ params, searchParams }: Prop
           key={`${club.id}-${gedaan ?? ''}`}
         />
       </Page.Cell>
-      <Page.Section area="side" aria-label="Schrijfwijzen van Wikipedia">
+      <Page.Section area="side" aria-label="Naast de lijst met namen">
         <Card aria-labelledby="schrijfwijzen-kop" surface="soft">
           <Heading id="schrijfwijzen-kop" level={2}>
             Schrijfwijzen van Wikipedia

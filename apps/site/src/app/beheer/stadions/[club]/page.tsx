@@ -106,7 +106,7 @@ export default async function ClubStadiumsPage({ params, searchParams }: Props) 
           key={`${club.id}-${gedaan ?? ''}`}
         />
       </Page.Cell>
-      <Page.Section area="side" aria-label="Wat de wedstrijden zeggen">
+      <Page.Section area="side" aria-label="Naast de lijst met stadions">
         <Card aria-labelledby="wedstrijden-kop" surface="soft">
           <Heading id="wedstrijden-kop" level={2}>
             Wat de wedstrijden zeggen
