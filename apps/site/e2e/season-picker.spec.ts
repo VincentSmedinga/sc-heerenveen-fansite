@@ -335,12 +335,18 @@ test.describe('the open list of the season picker', () => {
 
   // The short menu and the two situations of the list that does not fit below: measured with
   // the field at a place on the page, by a margin above it.
-  const open = async (page: Page, { count, height, lowerBy }: { count: number; height: number; lowerBy: number }) => {
+  const open = async (
+    page: Page,
+    { count, fieldAt, height, lowerBy }: { count: number; fieldAt?: number; height: number; lowerBy: number },
+  ) => {
     await page.setViewportSize({ height, width: 390 })
     await page.goto('/wedstrijden')
     await hydrated(page)
 
     const list = listOf(page)
+
+    // A field that stands at a given height, wherever the heading and the toolbar put it.
+    const margin = fieldAt === undefined ? lowerBy : fieldAt - (await list.boundingBox())!.y
 
     await list.evaluate(
       (select: HTMLSelectElement, { count, lowerBy }) => {
@@ -352,7 +358,7 @@ test.describe('the open list of the season picker', () => {
 
         select.closest('form')!.style.marginBlockStart = `${lowerBy}px`
       },
-      { count, lowerBy },
+      { count, lowerBy: margin },
     )
     await list.click()
     await expect.poll(() => list.evaluate((select) => select.matches(':open'))).toBe(true)
@@ -364,7 +370,7 @@ test.describe('the open list of the season picker', () => {
   }
 
   test('opens a short list below the field, also when there is more room above', async ({ page }) => {
-    const { field, menu, roomAbove, roomBelow } = await open(page, { count: 0, height: 844, lowerBy: 110 })
+    const { field, menu, roomAbove, roomBelow } = await open(page, { count: 0, fieldAt: 408, height: 844, lowerBy: 0 })
 
     expect(roomAbove).toBeGreaterThan(roomBelow)
     expect(menu.optionsHeight).toBeLessThan(roomBelow)
