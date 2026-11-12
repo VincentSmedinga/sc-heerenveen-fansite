@@ -1,19 +1,51 @@
-import { type ComponentPropsWithoutRef, type ReactNode, useId } from 'react'
+import { type ComponentPropsWithoutRef, type CSSProperties, type ReactNode, useId } from 'react'
 
 import { classNames } from '../classNames'
 import { Icon } from '../icon/Icon'
 import { Link } from '../link/Link'
 import { ShortcutsRow } from './ShortcutsRow'
 
+/**
+ * The areas of a page, as the rows of the grid, one string per row with a name for each column,
+ * such as `'main side'`: the same name in two columns, or in two rows, is one area. `narrow` is
+ * for a screen under 52rem, with one column, and `wide` for the screen from there on, with two
+ * columns. The rows come in a fixed order: the heading (`head`), the toolbar (`toolbar`), the
+ * content and last the credit (`source`). A row of a page without a toolbar is left out.
+ */
+export type PageAreas = {
+  /** The rows under 52rem, with one column, in the order of the source. */
+  narrow: readonly string[]
+  /** The rows from 52rem, with two columns. Use `.` for an empty place. */
+  wide: readonly string[]
+}
+
 export type PageBodyProps = ComponentPropsWithoutRef<'div'>
 
-export type PageCellProps = ComponentPropsWithoutRef<'div'>
+export type PageCellProps = ComponentPropsWithoutRef<'div'> & {
+  /**
+   * The area of the grid of the Page.Main that the cell sits in, as it is named in its `areas`.
+   * Without it the cell takes the next free place, which is only right in a Page.Main without
+   * `areas`.
+   */
+  area?: string
+}
+
+/** How the page divides its width from 52rem, a set of tokens in layout.css. */
+export type PageColumns = 'equal' | 'narrow-side' | 'side' | 'start-side'
 
 export type PageFooterProps = ComponentPropsWithoutRef<'footer'>
 
 export type PageHeaderProps = ComponentPropsWithoutRef<'header'>
 
 export type PageMainProps = ComponentPropsWithoutRef<'main'> & {
+  /**
+   * The areas of the page. With them the Page.Main is a grid of its own, as wide as the page,
+   * and each cell names its area (see `area` of the Page.Cell). Don't combine it with `intro`,
+   * `wide` or a Page.Sidebar, which are the old way.
+   */
+  areas?: PageAreas
+  /** How the width is divided from 52rem, with `areas`. Defaults to `side`. */
+  columns?: PageColumns
   /**
    * The introduction of the page, such as its heading with a text: one cell at the top of the
    * main column, which the children follow. On a wide screen the Page.Sidebar starts under it,
@@ -33,6 +65,12 @@ export type PageMainProps = ComponentPropsWithoutRef<'main'> & {
 }
 
 export type PageProps = ComponentPropsWithoutRef<'div'>
+
+export type PageSectionProps = Omit<ComponentPropsWithoutRef<'section'>, 'aria-label' | 'aria-labelledby'> &
+  ({ 'aria-label': string; 'aria-labelledby'?: never } | { 'aria-label'?: never; 'aria-labelledby': string }) & {
+    /** The area of the grid of the Page.Main that the section sits in. */
+    area: string
+  }
 
 export type PageShortcutsItem = {
   /** Where the link goes, such as `#stand` for a card on the page. */
@@ -99,6 +137,8 @@ export type PageTitleProps = ComponentPropsWithoutRef<'div'> & {
   wrapped?: 'end' | 'start'
 }
 
+export type PageToolbarProps = ComponentPropsWithoutRef<'div'>
+
 export type PageTopLinkProps = Omit<ComponentPropsWithoutRef<'a'>, 'aria-label' | 'children' | 'href'> & {
   /**
    * The name of the link for a screen reader, such as "Naar boven". There is no visible text,
@@ -163,6 +203,18 @@ const Shortcuts = ({ className, items, label, ...props }: PageShortcutsProps) =>
   )
 }
 
+const rowsToAreas = (rows: readonly string[]) => rows.map((row) => `"${row.trim()}"`).join(' ')
+
+// The custom properties that page.css reads. The last row of the wide grid takes the height
+// that a tall main needs, so the rows above it stay as tall as their cells.
+const areaProperties = ({ narrow, wide }: PageAreas, columns: PageColumns) =>
+  ({
+    '--hf-page-areas-narrow': rowsToAreas(narrow),
+    '--hf-page-areas-wide': rowsToAreas(wide),
+    '--hf-page-columns': `var(--hf-page-columns-${columns})`,
+    '--hf-page-rows-wide': `${'auto '.repeat(Math.max(wide.length - 1, 0))}1fr`,
+  }) as CSSProperties
+
 /**
  * The grid of the page between the header and the footer: a `div` with a Page.Main and, if the
  * page has one, a Page.Sidebar. It sets the space between the columns and between the cells. If
@@ -180,18 +232,41 @@ const Body = ({ className, ...props }: PageBodyProps) => (
  * The `intro` prop adds them, so a page can't leave one out. With `wide` the page is wider than
  * other pages, to make room for a table with fields in it.
  */
-const Main = ({ children, className, intro, wide = false, ...props }: PageMainProps) => (
-  <main className={classNames('hf-page-main', wide && 'hf-page-main-wide', className)} {...props}>
-    {intro === undefined || intro === null || intro === false ? (
-      children
-    ) : (
-      <>
-        <div className="hf-page-intro">{intro}</div>
-        <div className="hf-page-cells">{children}</div>
-      </>
-    )}
-  </main>
-)
+const Main = ({
+  areas,
+  children,
+  className,
+  columns = 'side',
+  intro,
+  style,
+  wide = false,
+  ...props
+}: PageMainProps) => {
+  if (areas !== undefined) {
+    return (
+      <main
+        className={classNames('hf-page-main', 'hf-page-main-grid', className)}
+        style={{ ...areaProperties(areas, columns), ...style }}
+        {...props}
+      >
+        {children}
+      </main>
+    )
+  }
+
+  return (
+    <main className={classNames('hf-page-main', wide && 'hf-page-main-wide', className)} style={style} {...props}>
+      {intro === undefined || intro === null || intro === false ? (
+        children
+      ) : (
+        <>
+          <div className="hf-page-intro">{intro}</div>
+          <div className="hf-page-cells">{children}</div>
+        </>
+      )}
+    </main>
+  )
+}
 
 /**
  * The sidebar, an `aside`: beside the Page.Main, or under it on a narrow screen. Each of its
@@ -226,8 +301,35 @@ const Sidebar = ({
  * Puts what belongs together in one cell of a column, such as a heading with its introduction.
  * It has no margin to the outside, and nor does what is in it.
  */
-const Cell = ({ className, ...props }: PageCellProps) => (
-  <div className={classNames('hf-page-cell', className)} {...props} />
+const Cell = ({ area, className, style, ...props }: PageCellProps) => (
+  <div
+    className={classNames('hf-page-cell', className)}
+    style={area === undefined ? style : { gridArea: area, ...style }}
+    {...props}
+  />
+)
+
+/**
+ * A cell of a Page.Main with `areas` that is a section with a name, a landmark `region`: for
+ * what stands beside the main content, such as a filter or the cards of a sidebar. It has a
+ * name, which is `aria-labelledby` pointing to its heading, or `aria-label`. Cards that only
+ * stand under each other go in one section, which is a grid with rows of its own, so a tall
+ * card does not stretch the row of the main content beside it.
+ */
+const Section = ({ area, className, style, ...props }: PageSectionProps) => (
+  <section className={classNames('hf-page-section', className)} style={{ gridArea: area, ...style }} {...props} />
+)
+
+/**
+ * The row under the heading, as wide as the page, for what steers the whole page: the choice of
+ * a season, a switch, and in the admin the filter and the buttons to save. It wraps on a phone
+ * and does not stick. It is no landmark and has no role `toolbar`, which promises arrow keys
+ * between its controls: each control in it has a name of its own. It sits in the area `toolbar`
+ * of a Page.Main with `areas`, and comes after the heading in the source. A page without one
+ * has no row for it, so there is no empty space.
+ */
+const Toolbar = ({ className, style, ...props }: PageToolbarProps) => (
+  <div className={classNames('hf-page-toolbar', className)} style={{ gridArea: 'toolbar', ...style }} {...props} />
 )
 
 /**
@@ -283,6 +385,8 @@ Main.displayName = 'Page.Main'
 Sidebar.displayName = 'Page.Sidebar'
 Title.displayName = 'Page.Title'
 Cell.displayName = 'Page.Cell'
+Section.displayName = 'Page.Section'
+Toolbar.displayName = 'Page.Toolbar'
 Footer.displayName = 'Page.Footer'
 TopLink.displayName = 'Page.TopLink'
 
@@ -312,5 +416,7 @@ Page.Main = Main
 Page.Sidebar = Sidebar
 Page.Title = Title
 Page.Cell = Cell
+Page.Section = Section
+Page.Toolbar = Toolbar
 Page.Footer = Footer
 Page.TopLink = TopLink

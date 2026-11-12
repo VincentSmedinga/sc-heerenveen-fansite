@@ -272,6 +272,72 @@
   }
 
   /*
+   * A page with areas (Page.Main with `areas`) is the grid itself. The main spans all the tracks of the body, so it is
+   * as wide as the page (64rem), and divides that width itself: one track under 52rem, and from there the columns of
+   * a set from layout.css (--hf-page-columns). The page names its areas as custom properties in `style`, and each cell
+   * names its area (grid-area), so a cell can stand first on a phone and beside the main content on a wide screen
+   * without `order`: the source is the order on a phone, and so the order of the keyboard.
+   * 52rem is written out here, as in the rules above: a media query can't read a custom property.
+   * The last row of the wide grid takes the height of a tall main (--hf-page-rows-wide), so the rows beside it stay as
+   * tall as their cells. The space between the cells is the gap of the main, 2rem, across and down.
+   */
+  .hf-page-main-grid {
+    grid-column: 1 / -1;
+    grid-template-areas: var(--hf-page-areas-narrow);
+    grid-template-columns: minmax(0, 1fr);
+
+    > * {
+      align-self: start;
+      min-inline-size: 0;
+    }
+
+    @media (width >= 52rem) {
+      /* stylelint-disable declaration-block-no-redundant-longhand-properties -- The areas and the rows come from separate custom properties, so the shorthand can't hold them. */
+      grid-template-areas: var(--hf-page-areas-wide);
+      grid-template-columns: var(--hf-page-columns);
+      grid-template-rows: var(--hf-page-rows-wide);
+      /* stylelint-enable declaration-block-no-redundant-longhand-properties */
+    }
+  }
+
+  /* The main content stretches over the rows of the sidebar, and the cells beside it do not. */
+  .hf-page-main-grid > .hf-page-cell {
+    align-self: stretch;
+  }
+
+  /*
+   * A section of the sidebar is a grid with rows of its own, so the cards in it stack by their own height and a tall
+   * card does not stretch the row of the main content beside it.
+   */
+  .hf-page-section {
+    --hf-page-body-cell-gap: var(--hf-space-xl);
+
+    align-content: start;
+    display: grid;
+    gap: var(--hf-page-body-cell-gap);
+    grid-template-columns: minmax(0, 1fr);
+
+    > * {
+      margin: 0;
+    }
+  }
+
+  /*
+   * The toolbar: one row as wide as the page, which wraps on a phone. It does not stick, and it has no space of its own
+   * above or below, which the gap of the main sets.
+   */
+  .hf-page-toolbar {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--hf-space-s) var(--hf-space-l);
+
+    > * {
+      margin: 0;
+    }
+  }
+
+  /*
    * A sticky sidebar (Page.Sidebar with `sticky`) stays in view while the main column scrolls.
    * A grid item sticks within its grid area, which is as tall as the main column, so the
    * sidebar can follow the reader from the top to the bottom of it. Under 52rem the sidebar is

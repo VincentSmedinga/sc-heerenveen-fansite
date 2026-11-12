@@ -21,6 +21,7 @@ const meta = preview.meta({
           '- De ruimte tussen de cellen komt van de `Page.Body`.',
           '- Met `wide` is de pagina breder dan andere pagina’s, en de hoofdkolom breder, voor een pagina met een tabel met velden erin, zoals de beheerschermen voor een wedstrijd. De zijbalk houdt zijn breedte. Op een smal scherm is er geen verschil. De `Page.Body` hoef je er niets voor te geven: de hoofdkolom zegt het zelf. De kop, het menu en de voet houden de breedte van andere pagina’s. Kies er niet `wide` of `narrow` van de zijbalk bij.',
           '- Met de eigenschap `intro` zet je de inleiding van de pagina, zoals de kop met een tekst, bovenaan. De kinderen zijn dan de cellen eronder, en op een breed scherm begint de zijbalk onder de inleiding. Zie `Page.Body`.',
+          '- Met `areas` is de hoofdkolom een raster met benoemde gebieden: de pagina zegt welke gebieden ze heeft op een smal en op een breed scherm, en elke cel noemt zijn gebied. Een cel kan zo op een telefoon vóór de hoofdinhoud staan zonder dat de volgorde van de code verandert. De kop staat bovenaan over de hele breedte, daaronder de `Page.Toolbar`, dan de inhoud. Zie Page.Main met gebieden.',
         ].join('\n'),
       },
       source: {

@@ -428,3 +428,64 @@ describe('a wide page without a sidebar in page.css', () => {
     )
   })
 })
+
+describe('the grid of a page with areas in page.css', () => {
+  const layout = readFileSync(join(import.meta.dirname, '../../tokens/layout.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
+  const grid = css.match(/\.hf-page-main-grid \{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/)?.[1] ?? ''
+
+  it('has one rule for a narrow screen and one from 52rem, and 52rem is written out once for the grid', () => {
+    expect(grid).toContain('grid-template-areas: var(--hf-page-areas-narrow);')
+    expect(grid).toContain('@media (width >= 52rem)')
+    expect(grid).toContain('grid-template-areas: var(--hf-page-areas-wide);')
+    expect(grid).toContain('grid-template-columns: var(--hf-page-columns);')
+    expect(grid.match(/52rem/g)).toHaveLength(1)
+  })
+
+  it('spans the whole body, so the main is as wide as the page', () => {
+    expect(grid).toContain('grid-column: 1 / -1;')
+  })
+
+  it('has no order and no new rule with :has() for the grid, the toolbar or the section', () => {
+    const after = css.slice(css.indexOf('.hf-page-main-grid {'), css.indexOf('.hf-page-sidebar-sticky'))
+
+    expect(after).not.toMatch(/(^|[\s;{])order:/)
+    expect(after).not.toContain(':has(')
+    expect(css.slice(css.indexOf('.hf-page-toolbar'))).not.toMatch(/(^|[\s;{])order:/)
+  })
+
+  it('has the same space between the cells as elsewhere, 2rem, across and down', () => {
+    expect(
+      css.match(/\.hf-page-main,\s*\.hf-page-cells,\s*\.hf-page-sidebar \{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/)?.[1],
+    ).toContain('gap: var(--hf-page-body-cell-gap);')
+    expect(css.match(/\.hf-page-section \{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/)?.[1]).toContain(
+      'gap: var(--hf-page-body-cell-gap);',
+    )
+  })
+
+  it('does not stick, and makes the toolbar a wrapping row', () => {
+    const toolbar = css.match(/\.hf-page-toolbar \{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/)?.[1] ?? ''
+
+    expect(toolbar).toContain('flex-wrap: wrap;')
+    expect(toolbar).not.toContain('sticky')
+  })
+
+  describe.each(['side', 'equal', 'narrow-side', 'start-side'])('the columns %s', (name) => {
+    const value = layout.match(new RegExp(String.raw`--hf-page-columns-${name}: ([^;]*);`))?.[1] ?? ''
+    const tracks = value.match(/minmax\([^)]*\)/g) ?? []
+    const rem = (track: string, index: number) => Number(track.match(/([\d.]+)rem/g)?.[index]?.replace('rem', '') ?? 0)
+
+    it('has two tracks that fill the page of 64rem with 2rem between them', () => {
+      expect(tracks).toHaveLength(2)
+
+      if (name === 'start-side') {
+        expect(rem(tracks[0] ?? '', 0)).toBe(17.5)
+      } else {
+        expect(rem(tracks[0] ?? '', 1) + rem(tracks[1] ?? '', 1) + 2).toBe(64)
+      }
+    })
+
+    it('lets the tracks shrink only to a width that fits in 52rem, where the columns start side by side', () => {
+      expect(rem(tracks[0] ?? '', 0) + rem(tracks[1] ?? '', 0)).toBeLessThanOrEqual(roomAtTheBoundary)
+    })
+  })
+})
