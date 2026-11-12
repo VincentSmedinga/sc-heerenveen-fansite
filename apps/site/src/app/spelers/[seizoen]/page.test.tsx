@@ -103,13 +103,15 @@ describe('the page of an earlier season, /spelers/2025-26', () => {
   })
 
   describe('the picker', () => {
-    it('is next to the heading, with the route of Spelers, and has the season of the page chosen', async () => {
+    it('is in the toolbar after the heading, with the route of Spelers, and has the season of the page chosen', async () => {
       const html = await render()
       const options = [...html.matchAll(/<option value="([^"]+)"( selected="")?>([^<]+)<\/option>/g)].map(
         ([, value, selected, label]) => [value, label, selected !== undefined],
       )
 
-      expect(html).toMatch(/<h1 class="hf-heading-1">Spelers<\/h1><form [^>]*aria-label="Seizoen kiezen"/)
+      expect(html).toMatch(
+        /<h1 class="hf-heading-1">Spelers<\/h1><\/div><div class="hf-page-toolbar"[^>]*><form [^>]*aria-label="Seizoen kiezen"/,
+      )
       expect(html).toContain('action="/spelers/kies"')
       expect(options).toEqual([
         ['2026-27', '2026/27', false],

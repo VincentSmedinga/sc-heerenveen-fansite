@@ -57,13 +57,13 @@ describe('the overview by name', () => {
     expect(html).toContain('1 speler')
   })
 
-  it('puts the letters in one grid in the order A, B, D, and the credit in the sidebar beside it', async () => {
+  it('puts the letters in one grid in the order A, B, D, and the credit in the side section beside it', async () => {
     const html = await render('naam')
     const columns = html.slice(html.indexOf('hf-card-columns-grid'), html.indexOf('</main>'))
 
     expect([...columns.matchAll(/<h2[^>]*id="letter-(\w)"/g)].map(([, letter]) => letter)).toEqual(['a', 'b', 'd'])
-    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('Bron: Wikipedia'))
-    expect(html.slice(html.indexOf('<aside'))).toContain('Bron: Wikipedia')
+    expect(html.indexOf('hf-card-columns-grid')).toBeLessThan(html.indexOf('Bron: Wikipedia'))
+    expect(html.slice(html.indexOf('style="grid-area:side"'))).toContain('Bron: Wikipedia')
   })
 
   it('links a player who has a page and shows the surname bold, then the given name with the prefix', async () => {

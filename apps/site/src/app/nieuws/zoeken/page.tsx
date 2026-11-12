@@ -5,6 +5,7 @@ import { cache } from 'react'
 
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
+import { pageAreas } from '#src/page-areas'
 import { getSquad, parseResultCount, parseSearch, searchHref, searchSite, type Squad } from '#src/search'
 import { SearchCard, SquadCard } from '#src/SearchViews'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
@@ -89,31 +90,30 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <Page.Main
-        intro={
-          <>
-            <Heading level={1}>Zoeken</Heading>
-            <Text appearance="intro">Zoek in de koppen van nieuws, podcasts en artikelen.</Text>
-          </>
-        }
-      >
-        <SearchCard
-          error={search.kind === 'invalid' ? search.message : undefined}
-          formText={search.kind === 'none' ? '' : search.text}
-          results={
-            results !== undefined && search.kind === 'valid'
-              ? { count, hasSquad, hits: results.hits, now, text: search.text, total: results.total }
-              : undefined
-          }
-        />
+      <Page.Main areas={pageAreas({ after: hasSquad ? ['side'] : [] })}>
+        <Page.Cell area="head">
+          <Heading level={1}>Zoeken</Heading>
+          <Text appearance="intro">Zoek in de koppen van nieuws, podcasts en artikelen.</Text>
+        </Page.Cell>
+        <Page.Cell area="main">
+          <SearchCard
+            error={search.kind === 'invalid' ? search.message : undefined}
+            formText={search.kind === 'none' ? '' : search.text}
+            results={
+              results !== undefined && search.kind === 'valid'
+                ? { count, hasSquad, hits: results.hits, now, text: search.text, total: results.total }
+                : undefined
+            }
+          />
+        </Page.Cell>
+        {/* After the results in the source, so on a phone the players are under the results, and
+            under the form on a first visit. */}
+        {hasSquad && (
+          <Page.Section area="side" aria-label="De spelers van sc Heerenveen">
+            <SquadCard squad={squad} />
+          </Page.Section>
+        )}
       </Page.Main>
-      {/* After the results in the source, so on a phone the players are under the results, and
-          under the form on a first visit. */}
-      {hasSquad && (
-        <Page.Sidebar aria-label="De spelers van sc Heerenveen">
-          <SquadCard squad={squad} />
-        </Page.Sidebar>
-      )}
     </>
   )
 }

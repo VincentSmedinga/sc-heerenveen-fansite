@@ -200,11 +200,11 @@ describe('the page of an earlier season, /cijfers/2025-26', () => {
   })
 
   describe('the season picker', () => {
-    it('is a form named Seizoen kiezen in the title row, next to the heading, that gets /cijfers/kies', async () => {
+    it('is a form named Seizoen kiezen in the toolbar under the heading, that gets /cijfers/kies', async () => {
       const html = await render()
 
       expect(html).toMatch(
-        /<div class="hf-page-title"><h1 class="hf-heading-1">Cijfers<\/h1><form [^>]*aria-label="Seizoen kiezen"/,
+        /<h1 class="hf-heading-1">Cijfers<\/h1><\/div><div class="hf-page-toolbar"[^>]*><form [^>]*aria-label="Seizoen kiezen"/,
       )
       expect(html).toContain('action="/cijfers/kies"')
       expect(html).toContain('method="get"')

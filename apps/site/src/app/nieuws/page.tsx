@@ -29,6 +29,7 @@ import { reasonOf } from '#src/errors'
 import { pageMetadata } from '#src/metadata'
 import { dateTimeOf, formatNewsTime } from '#src/news'
 import { EditorsCard, EpisodesCard, loadArticle, loadEpisodes } from '#src/NewsCards'
+import { pageAreas } from '#src/page-areas'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { withBranch } from '#src/title'
 
@@ -95,48 +96,23 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
   // With one source the name is the same on every line, and the heading says it.
   const showSource = selected.length !== 1
 
+  const hasFilter = sources.length > 0
+  const hasSide = article !== undefined || episodes !== undefined
+  // The filter stands before the list in the source, so on a narrow screen it sits above it.
+  // The article and the podcasts come after the list.
+  const areas = pageAreas({ after: hasSide ? ['side'] : [], before: hasFilter ? ['filter'] : [] })
+
   return (
     <>
-      <Page.Main intro={<Heading level={1}>{archiveHeading(selected.map((item) => item.name))}</Heading>}>
-        <Card as="div">
-          {headlines.length === 0 ? (
-            <Text>We hebben nog geen nieuws gevonden.</Text>
-          ) : (
-            <List role="list">
-              {headlines.map((item, index) => (
-                <List.Item key={index}>
-                  <NewsItem
-                    dateTime={dateTimeOf(item.publishedAt)}
-                    headline={item.title}
-                    href={item.url}
-                    paywalled={item.paywalled}
-                    showSource={showSource}
-                    source={item.sourceName}
-                    time={formatNewsTime(item.publishedAt, now)}
-                  />
-                </List.Item>
-              ))}
-            </List>
-          )}
-          {pageCount > 1 && (
-            <Pagination
-              current={page}
-              label="Paginering"
-              nextHref={page < pageCount ? archiveHref(slugs, page + 1) : undefined}
-              previousHref={page > 1 ? archiveHref(slugs, page - 1) : undefined}
-              total={pageCount}
-            />
-          )}
-        </Card>
-      </Page.Main>
-      {/* The sidebar is second in the source, so on a narrow screen the filter, the article and
-          the podcasts sit under the list and the pagination, in the order of the keyboard. The
-          form is a GET to this page, so it works without JavaScript and a choice is an address
-          that can be shared. The button stays with JavaScript too: a page that reloads at each
-          tick takes the focus with it. */}
-      {(sources.length > 0 || article !== undefined || episodes !== undefined) && (
-        <Page.Sidebar aria-label="Het filter, de redactie en de podcasts" narrow>
-          {sources.length > 0 && (
+      <Page.Main areas={areas} columns="narrow-side">
+        <Page.Cell area="head">
+          <Heading level={1}>{archiveHeading(selected.map((item) => item.name))}</Heading>
+        </Page.Cell>
+        {hasFilter && (
+          // The form is a GET to this page, so it works without JavaScript and a choice is an
+          // address that can be shared. The button stays with JavaScript too: a page that
+          // reloads at each tick takes the focus with it.
+          <Page.Section area="filter" aria-label="Filter">
             <Card as="div" surface="soft">
               <Form action="/nieuws" autoComplete="off" method="get">
                 <CheckboxGroup
@@ -149,11 +125,47 @@ export default async function NewsPage({ searchParams }: { searchParams: Promise
                 <Button type="submit">Toon</Button>
               </Form>
             </Card>
-          )}
-          {article !== undefined && <EditorsCard article={article} now={now} />}
-          {episodes !== undefined && <EpisodesCard episodes={episodes} heading="Podcasts" now={now} />}
-        </Page.Sidebar>
-      )}
+          </Page.Section>
+        )}
+        <Page.Cell area="main">
+          <Card as="div">
+            {headlines.length === 0 ? (
+              <Text>We hebben nog geen nieuws gevonden.</Text>
+            ) : (
+              <List role="list">
+                {headlines.map((item, index) => (
+                  <List.Item key={index}>
+                    <NewsItem
+                      dateTime={dateTimeOf(item.publishedAt)}
+                      headline={item.title}
+                      href={item.url}
+                      paywalled={item.paywalled}
+                      showSource={showSource}
+                      source={item.sourceName}
+                      time={formatNewsTime(item.publishedAt, now)}
+                    />
+                  </List.Item>
+                ))}
+              </List>
+            )}
+            {pageCount > 1 && (
+              <Pagination
+                current={page}
+                label="Paginering"
+                nextHref={page < pageCount ? archiveHref(slugs, page + 1) : undefined}
+                previousHref={page > 1 ? archiveHref(slugs, page - 1) : undefined}
+                total={pageCount}
+              />
+            )}
+          </Card>
+        </Page.Cell>
+        {hasSide && (
+          <Page.Section area="side" aria-label="De redactie en de podcasts">
+            {article !== undefined && <EditorsCard article={article} now={now} />}
+            {episodes !== undefined && <EpisodesCard episodes={episodes} heading="Podcasts" now={now} />}
+          </Page.Section>
+        )}
+      </Page.Main>
     </>
   )
 }

@@ -3,7 +3,6 @@ import { Card, DataTable, Heading, tableColumns, tableLegend, Text } from '@fans
 import type { CompetitionChoice } from './competition'
 import type { PlayerSeason } from './player-seasons'
 
-import { CompetitionLinks } from './CompetitionSwitch'
 import { nextSeason } from './player-page'
 
 /** The figures a column can show, each a field of `PlayerSeason`. */
@@ -91,7 +90,6 @@ export function PlayerSeasonsCard({
   competition = 'all',
   goalkeeper,
   name,
-  playerAddress,
   seasons,
 }: {
   /** The address of the page Spelers of a season, such as `/spelers/2025-26`. */
@@ -100,8 +98,6 @@ export function PlayerSeasonsCard({
   competition?: CompetitionChoice
   goalkeeper: boolean
   name: string
-  /** The address of his page, for the switch; without it there is nothing to choose. */
-  playerAddress?: string | undefined
   seasons: readonly PlayerSeason[]
 }) {
   const table = playerSeasonsTable(seasons, goalkeeper)
@@ -115,7 +111,6 @@ export function PlayerSeasonsCard({
       <Heading id={playerSeasonsCardId} level={2}>
         Per seizoen
       </Heading>
-      {playerAddress === undefined ? null : <CompetitionLinks address={playerAddress} competition={competition} />}
       <DataTable
         caption={`De cijfers van ${name} per seizoen bij sc Heerenveen, ${competition === 'league' ? 'alleen de Eredivisie, ' : ''}het nieuwste seizoen eerst, met het totaal onderaan`}
         columns={['Seizoen', ...table.columns.map(({ abbreviation, name: word }) => ({ abbreviation, name: word }))]}

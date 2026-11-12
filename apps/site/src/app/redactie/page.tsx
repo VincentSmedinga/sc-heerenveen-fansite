@@ -12,6 +12,7 @@ import { reasonOf } from '#src/errors'
 import { filterHref, filterQuery, parseFilterQuery } from '#src/filter-query'
 import { pageMetadata } from '#src/metadata'
 import { dayOf, formatArticleDate } from '#src/news'
+import { pageAreas } from '#src/page-areas'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { withBranch } from '#src/title'
 
@@ -50,35 +51,40 @@ export default async function EditorsPage({ searchParams }: { searchParams: Prom
   const { articles, pageCount } = content
 
   return (
-    <Page.Main intro={<Heading level={1}>Redactie</Heading>}>
-      <Card as="div">
-        {articles.length === 0 ? (
-          <Text>We hebben nog geen artikelen.</Text>
-        ) : (
-          <List role="list">
-            {articles.map((article) => (
-              <List.Item key={article.slug}>
-                <Heading appearance={3} className="hf-space-end-xs" level={2}>
-                  <Link href={`/redactie/${article.slug}`}>{article.title}</Link>
-                </Heading>
-                <Text appearance="meta">
-                  <Time dateTime={dayOf(article.publishedAt)}>{formatArticleDate(article.publishedAt)}</Time>
-                </Text>
-                <Text>{article.intro}</Text>
-              </List.Item>
-            ))}
-          </List>
-        )}
-        {pageCount > 1 && (
-          <Pagination
-            current={page}
-            label="Paginering"
-            nextHref={page < pageCount ? pageHref(page + 1) : undefined}
-            previousHref={page > 1 ? pageHref(page - 1) : undefined}
-            total={pageCount}
-          />
-        )}
-      </Card>
+    <Page.Main areas={pageAreas({})}>
+      <Page.Cell area="head">
+        <Heading level={1}>Redactie</Heading>
+      </Page.Cell>
+      <Page.Cell area="main">
+        <Card as="div">
+          {articles.length === 0 ? (
+            <Text>We hebben nog geen artikelen.</Text>
+          ) : (
+            <List role="list">
+              {articles.map((article) => (
+                <List.Item key={article.slug}>
+                  <Heading appearance={3} className="hf-space-end-xs" level={2}>
+                    <Link href={`/redactie/${article.slug}`}>{article.title}</Link>
+                  </Heading>
+                  <Text appearance="meta">
+                    <Time dateTime={dayOf(article.publishedAt)}>{formatArticleDate(article.publishedAt)}</Time>
+                  </Text>
+                  <Text>{article.intro}</Text>
+                </List.Item>
+              ))}
+            </List>
+          )}
+          {pageCount > 1 && (
+            <Pagination
+              current={page}
+              label="Paginering"
+              nextHref={page < pageCount ? pageHref(page + 1) : undefined}
+              previousHref={page > 1 ? pageHref(page - 1) : undefined}
+              total={pageCount}
+            />
+          )}
+        </Card>
+      </Page.Cell>
     </Page.Main>
   )
 }

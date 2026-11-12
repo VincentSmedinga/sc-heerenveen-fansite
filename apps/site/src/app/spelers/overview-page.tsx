@@ -22,6 +22,7 @@ import { Fragment } from 'react'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { pageMetadata } from '#src/metadata'
+import { pageAreas } from '#src/page-areas'
 import {
   byCountry,
   byLetter,
@@ -152,58 +153,57 @@ export async function OverviewPage({ view }: { view: OverviewView }) {
 
   return (
     <>
-      <Page.Main
-        intro={
-          <Page.Cell>
-            <Page.Title>
-              <Heading level={1}>Alle spelers</Heading>
-            </Page.Title>
-            <Text>{intro}</Text>
-            <SegmentedLinks
-              label="Hoe de spelers staan"
-              options={[
-                { href: overviewPath, label: 'Op naam', value: 'naam' },
-                { href: overviewCountryPath, label: 'Op land', value: 'land' },
-              ]}
-              value={view}
-            />
-          </Page.Cell>
-        }
-      >
-        {view === 'land' && <CountriesCard groups={countries} />}
-        {view === 'naam' ? (
-          <CardColumns>
-            {byLetter(players).map(({ letter, players: group }) => (
+      <Page.Main areas={pageAreas({ after: ['side'] })}>
+        <Page.Cell area="head">
+          <Page.Title>
+            <Heading level={1}>Alle spelers</Heading>
+          </Page.Title>
+          <Text>{intro}</Text>
+          <SegmentedLinks
+            label="Hoe de spelers staan"
+            options={[
+              { href: overviewPath, label: 'Op naam', value: 'naam' },
+              { href: overviewCountryPath, label: 'Op land', value: 'land' },
+            ]}
+            value={view}
+          />
+        </Page.Cell>
+        <Page.Section area="main" aria-label={view === 'land' ? 'De spelers per land' : 'De spelers per letter'}>
+          {view === 'land' && <CountriesCard groups={countries} />}
+          {view === 'naam' ? (
+            <CardColumns>
+              {byLetter(players).map(({ letter, players: group }) => (
+                <Section
+                  anchor={letterAnchor(letter)}
+                  count={group.length}
+                  key={letter}
+                  title={letter === '#' ? 'Overig' : letter}
+                >
+                  <Rows current={current} players={group} />
+                </Section>
+              ))}
+            </CardColumns>
+          ) : (
+            countries.map((group) => (
               <Section
-                anchor={letterAnchor(letter)}
-                count={group.length}
-                key={letter}
-                title={letter === '#' ? 'Overig' : letter}
+                anchor={countryAnchor(group)}
+                count={group.players.length}
+                key={countryAnchor(group)}
+                title={group.name}
               >
-                <Rows current={current} players={group} />
+                <Rows current={current} players={group.players} />
               </Section>
-            ))}
-          </CardColumns>
-        ) : (
-          countries.map((group) => (
-            <Section
-              anchor={countryAnchor(group)}
-              count={group.players.length}
-              key={countryAnchor(group)}
-              title={group.name}
-            >
-              <Rows current={current} players={group.players} />
-            </Section>
-          ))
-        )}
+            ))
+          )}
+        </Page.Section>
+        <Page.Section area="side" aria-label={view === 'land' ? 'Het noorden, de werelddelen en de bron' : 'De bron'}>
+          {view === 'land' && <NorthCard groups={countries} />}
+          {view === 'land' && <ContinentsCard players={players} />}
+          <Card as="div" surface="transparent">
+            <WikipediaCredit archive compact />
+          </Card>
+        </Page.Section>
       </Page.Main>
-      <Page.Sidebar aria-label={view === 'land' ? 'Het noorden, de werelddelen en de bron' : 'De bron'}>
-        {view === 'land' && <NorthCard groups={countries} />}
-        {view === 'land' && <ContinentsCard players={players} />}
-        <Card as="div" surface="transparent">
-          <WikipediaCredit archive compact />
-        </Card>
-      </Page.Sidebar>
     </>
   )
 }

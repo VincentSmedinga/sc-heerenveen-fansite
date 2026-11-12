@@ -18,6 +18,7 @@ import { getEditorSources, getMatchData, type MatchData } from '#src/matches'
 import { MatchPageCards, MatchPageHeader } from '#src/MatchPageView'
 import { EditorSources, SourceCredit } from '#src/MatchViews'
 import { seasonPageMetadata } from '#src/metadata'
+import { pageAreas } from '#src/page-areas'
 import { getPublicReport, isCompleteReport, reportAddress } from '#src/report-data'
 import { matchPageDataOf, ourClub } from '#src/report-view'
 import { matchesPath } from '#src/season-page'
@@ -154,36 +155,37 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
 
   return (
     <>
-      <Page.Main
-        intro={
-          <Page.Cell>
-            <Text>
-              <Link href={seasonAddress(matchesPath, season, seasonOf(now))} icon="arrow-left">
-                {`Wedstrijden ${season}`}
-              </Link>
-            </Text>
-            <LiveRegion name="header" on={phase === 'live'}>
-              <MatchPageHeader data={page} />
-              <LiveState {...liveStateOf(reported, phase)} />
-            </LiveRegion>
-            {phase === 'live' && (
-              <LiveRefresh
-                href={`${matchesPath}/${seizoen}/${slug}`}
-                renderedAt={now.getTime()}
-                stopAt={liveStopAt(reported.match)}
-              />
-            )}
-          </Page.Cell>
-        }
-      >
-        <LiveRegion name="cards" on={phase === 'live'}>
-          <MatchPageCards data={page} />
-        </LiveRegion>
-        <MatchNeighbours next={neighbours.next} previous={neighbours.previous} />
+      <Page.Main areas={pageAreas({ after: ['source'], main: ['cards', 'neighbours'] })}>
+        <Page.Cell area="head">
+          <Text>
+            <Link href={seasonAddress(matchesPath, season, seasonOf(now))} icon="arrow-left">
+              {`Wedstrijden ${season}`}
+            </Link>
+          </Text>
+          <LiveRegion name="header" on={phase === 'live'}>
+            <MatchPageHeader data={page} />
+            <LiveState {...liveStateOf(reported, phase)} />
+          </LiveRegion>
+          {phase === 'live' && (
+            <LiveRefresh
+              href={`${matchesPath}/${seizoen}/${slug}`}
+              renderedAt={now.getTime()}
+              stopAt={liveStopAt(reported.match)}
+            />
+          )}
+        </Page.Cell>
+        <Page.Cell area="cards">
+          <LiveRegion name="cards" on={phase === 'live'}>
+            <MatchPageCards data={page} />
+          </LiveRegion>
+        </Page.Cell>
+        <Page.Cell area="neighbours">
+          <MatchNeighbours next={neighbours.next} previous={neighbours.previous} />
+        </Page.Cell>
+        <Page.Section area="source" aria-label="De bron">
+          <ReportCredit data={data} editorSources={editorSources} reported={reported} />
+        </Page.Section>
       </Page.Main>
-      <Page.Sidebar aria-label="De bron">
-        <ReportCredit data={data} editorSources={editorSources} reported={reported} />
-      </Page.Sidebar>
     </>
   )
 }

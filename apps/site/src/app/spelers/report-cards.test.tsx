@@ -71,10 +71,10 @@ describe('the cards with the figures of the match reports on /spelers', () => {
     }
   })
 
-  it('puts Alle spelers after the squad in the main column, and Assists and Minuten at the end of the sidebar, before the credit', async () => {
+  it('puts Alle spelers after the squad in the main column, and Assists and Minuten at the end of the side section, before the credit', async () => {
     const html = await render()
-    const main = html.match(/<main.*<\/main>/s)?.[0] ?? ''
-    const sidebar = html.match(/<aside.*<\/aside>/s)?.[0] ?? ''
+    const main = html.slice(html.indexOf('style="grid-area:main"'), html.indexOf('style="grid-area:side"'))
+    const sidebar = html.slice(html.indexOf('style="grid-area:side"'), html.indexOf('</main>'))
 
     expect(main.indexOf('id="selectie"')).toBeLessThan(main.indexOf('id="alle-spelers"'))
     expect(sidebar).not.toContain('id="alle-spelers"')

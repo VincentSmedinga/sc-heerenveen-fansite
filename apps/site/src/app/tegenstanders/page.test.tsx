@@ -61,10 +61,11 @@ afterEach(() => {
 })
 
 /** The main column: the card Alle tegenstanders. */
-const mainOf = (html: string) => html.slice(0, html.indexOf('<aside'))
+const mainOf = (html: string) => html.slice(0, html.indexOf('<section class="hf-page-section"'))
 
-/** The sidebar: the card with the top 10 and the credit. */
-const sidebarOf = (html: string) => html.slice(html.indexOf('<aside'), html.indexOf('</aside>'))
+/** The side section: the card with the top 10 and the credit. */
+const sidebarOf = (html: string) =>
+  html.slice(html.indexOf('<section class="hf-page-section"'), html.indexOf('</main>'))
 
 /** The rows of the top 10: the place, the club and its address, the average and the matches. */
 const placesOf = (html: string) =>
@@ -245,7 +246,7 @@ describe('the page /tegenstanders', () => {
     expect(html).not.toContain('Bron: ')
   })
 
-  it('has Alle tegenstanders on the white surface in the main column, and the top 10 on the soft one in the sidebar', async () => {
+  it('has Alle tegenstanders on the white surface in the main column, and the top 10 on the soft one in the side section', async () => {
     const html = await render()
 
     expect(mainOf(html)).toMatch(
@@ -257,7 +258,7 @@ describe('the page /tegenstanders', () => {
     )
   })
 
-  it('has a sidebar with a name, the top 10 first and the credit after it', async () => {
+  it('has a side section with a name, the top 10 first and the credit after it', async () => {
     const sidebar = sidebarOf(await render())
 
     expect(sidebar).toContain('aria-label="Het gemiddelde resultaat en de bron"')

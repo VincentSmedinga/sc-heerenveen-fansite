@@ -17,10 +17,12 @@ import { notFound, permanentRedirect } from 'next/navigation'
 import { Fragment, type ReactNode } from 'react'
 
 import { competitionParam, parseCompetition } from '#src/competition'
+import { CompetitionLinks } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { formatReadAt, wikipediaUrl } from '#src/match-format'
 import { seasonPageMetadata } from '#src/metadata'
+import { pageAreas } from '#src/page-areas'
 import { type PlayerAside, playerAsideOf } from '#src/player-aside'
 import { type CareerMomentChoice, careerMoments } from '#src/player-career'
 import { goalQuartersOf, playerRecordOf, seasonBarsOf } from '#src/player-charts'
@@ -115,6 +117,9 @@ export async function PlayerPageView({ searchParams, slug }: { searchParams: Pro
   const aside = playerAsideOf(seasons ?? [], facts ?? {}, page.line === 'doelman')
   const asideAddresses = await readMatchAddresses(asideSeasons(aside))
 
+  // The choice between all the matches and the Eredivisie, only where there is one to make.
+  const switchAddress = facts !== undefined && playedBesidesEredivisie(facts) ? playerAddress(page.slug) : undefined
+
   const seasonBars = seasons === undefined ? undefined : seasonBarsOf(seasons, page.line)
   const goalQuarters = seasons === undefined ? undefined : goalQuartersOf(seasons)
   const record = seasons === undefined ? undefined : playerRecordOf(seasons, page.line === 'doelman')
@@ -122,64 +127,73 @@ export async function PlayerPageView({ searchParams, slug }: { searchParams: Pro
   return (
     <>
       <Page.Main
-        intro={
-          <Page.Cell>
-            <Text>
-              <Link href={playersPath} icon="arrow-left">
-                Spelers
-              </Link>
-            </Text>
-            <Page.Title wrapped="start">
-              <Heading level={1}>
-                <PlayerName givenName={page.nameParts.givenName} surname={page.nameParts.surname} />
-              </Heading>
-              <PlayerFacts page={page} />
-            </Page.Title>
-          </Page.Cell>
-        }
+        areas={pageAreas({
+          after: ['side'],
+          main: [
+            ...(keyFigures.length === 0 ? [] : ['figures']),
+            ...(seasons === undefined ? [] : ['seasons']),
+            ...(seasons === undefined || career === undefined ? [] : ['career']),
+          ],
+          toolbar: switchAddress !== undefined,
+        })}
       >
+        <Page.Cell area="head">
+          <Text>
+            <Link href={playersPath} icon="arrow-left">
+              Spelers
+            </Link>
+          </Text>
+          <Page.Title wrapped="start">
+            <Heading level={1}>
+              <PlayerName givenName={page.nameParts.givenName} surname={page.nameParts.surname} />
+            </Heading>
+            <PlayerFacts page={page} />
+          </Page.Title>
+        </Page.Cell>
+        {switchAddress === undefined ? null : (
+          <Page.Toolbar>
+            <CompetitionLinks address={switchAddress} competition={competition} />
+          </Page.Toolbar>
+        )}
         {keyFigures.length === 0 ? null : (
-          <Page.Cell>
+          <Page.Cell area="figures">
             <KeyFigures aria-label="Kerngetallen" figures={keyFigures} />
           </Page.Cell>
         )}
         {seasons === undefined ? null : (
-          <Page.Cell>
+          <Page.Cell area="seasons">
             <PlayerSeasonsCard
               address={(season) => seasonAddress(playersPath, season, current)}
               competition={competition}
               goalkeeper={page.line === 'doelman'}
               name={page.name}
-              playerAddress={
-                facts !== undefined && playedBesidesEredivisie(facts) ? playerAddress(page.slug) : undefined
-              }
               seasons={tableSeasons ?? seasons}
             />
           </Page.Cell>
         )}
         {seasons === undefined || career === undefined ? null : (
-          <Page.Cell>
+          <Page.Cell area="career">
             <PlayerCareerCard options={career} seasons={seasons} />
           </Page.Cell>
         )}
+        <PlayerAsideColumn
+          aside={aside}
+          charts={
+            <>
+              {seasonBars === undefined ? null : (
+                <PlayerSeasonBarsCard
+                  address={(season) => seasonAddress(playersPath, season, current)}
+                  bars={seasonBars}
+                />
+              )}
+              {goalQuarters === undefined ? null : <PlayerQuartersCard quarters={goalQuarters} />}
+              {record === undefined ? null : <PlayerRecordCard record={record} />}
+            </>
+          }
+          credit={<PlayerCredit page={page} />}
+          matchHref={({ competition, round, season }) => asideAddresses.get(season)?.get(`${competition}|${round}`)}
+        />
       </Page.Main>
-      <PlayerAsideColumn
-        aside={aside}
-        charts={
-          <>
-            {seasonBars === undefined ? null : (
-              <PlayerSeasonBarsCard
-                address={(season) => seasonAddress(playersPath, season, current)}
-                bars={seasonBars}
-              />
-            )}
-            {goalQuarters === undefined ? null : <PlayerQuartersCard quarters={goalQuarters} />}
-            {record === undefined ? null : <PlayerRecordCard record={record} />}
-          </>
-        }
-        credit={<PlayerCredit page={page} />}
-        matchHref={({ competition, round, season }) => asideAddresses.get(season)?.get(`${competition}|${round}`)}
-      />
     </>
   )
 }

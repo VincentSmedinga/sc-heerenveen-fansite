@@ -40,7 +40,7 @@ export function PlayerAside({
   const facts = [firstGoal, assistGiver, europe].some((fact) => fact !== undefined)
 
   return (
-    <Page.Sidebar aria-label="Meer cijfers over deze speler">
+    <Page.Section area="side" aria-label="Meer cijfers over deze speler">
       {competitions === undefined ? null : (
         <Card aria-labelledby={playerAsideIds.competitions} surface="soft">
           <Heading id={playerAsideIds.competitions} level={2}>
@@ -131,7 +131,7 @@ export function PlayerAside({
         </Card>
       )}
       {credit}
-    </Page.Sidebar>
+    </Page.Section>
   )
 }
 

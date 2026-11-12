@@ -77,6 +77,14 @@ async function render(query: Query = {}) {
   return renderToStaticMarkup(await NewsPage(props(query)))
 }
 
+/** The cell of the list, without the filter before it and the section after it. */
+const listOf = (html: string) => {
+  const start = html.indexOf('style="grid-area:main"')
+  const end = html.indexOf('<section class="hf-page-section" style="grid-area:side"')
+
+  return html.slice(start, end === -1 ? undefined : end)
+}
+
 /**
  * The page that the visitor sees: Next.js stops at a notFound() with an error that has this
  * digest.
@@ -110,19 +118,21 @@ describe('the page Nieuws', () => {
     ])
   })
 
-  it('is the one main of the page, with the h1 as its introduction and the list in a card', async () => {
+  it('is the one main of the page, with the h1 in a cell of its own and the list in a card', async () => {
     const html = await render()
 
     expect(html.match(/<main/g)).toHaveLength(1)
-    expect(html).toMatch(/<main class="hf-page-main"><div class="hf-page-intro"><h1[^>]*>Nieuws<\/h1><\/div>/)
+    expect(html).toMatch(
+      /<main class="hf-page-main hf-page-main-grid"[^>]*><div class="hf-page-cell" style="grid-area:head"><h1[^>]*>Nieuws<\/h1><\/div>/,
+    )
     expect(html).toMatch(/<div class="hf-card"><ul role="list">/)
-    expect(html.slice(0, html.indexOf('</main>'))).not.toContain('<form')
+    expect(listOf(html)).not.toContain('<form')
   })
 
   it('shows each headline as a link to the source, with the name of the source, and the day and time of its own', async () => {
     const html = await render()
 
-    expect(html.slice(0, html.indexOf('</main>')).match(/<li>/g)).toHaveLength(3)
+    expect(listOf(html).match(/<li>/g)).toHaveLength(3)
     expect(html).toContain('href="https://lc.test/heerenveen-testclub"')
     expect(html).toContain('href="https://voorbeeldkrant.test/jonge-garde"')
     expect(html).toContain('<span>Voorbeeldkrant, met dank aan de redactie</span>')
@@ -164,13 +174,14 @@ describe('the page Nieuws', () => {
     ])
   })
 
-  it('puts the filter in a card on a soft surface in the sidebar, after the main, with a name for the sidebar', async () => {
+  it('puts the filter in a card on a soft surface in a section before the list, with a name for the section', async () => {
     const html = await render()
 
-    expect(html.match(/<aside/g)).toHaveLength(1)
-    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
-    expect(html.slice(html.indexOf('<aside'))).toMatch(
-      /^<aside class="hf-page-sidebar hf-page-sidebar-narrow" aria-label="Het filter, de redactie en de podcasts"><div class="hf-card hf-card-soft"><form class="hf-form" noValidate="" autoComplete="off" action="\/nieuws" method="get"><fieldset class="hf-checkbox-group hf-space-end-s"><legend class="hf-heading-2">Bronnen<\/legend>/,
+    expect(html).not.toContain('<aside')
+    expect(html.match(/<section class="hf-page-section" style="grid-area:filter"/g)).toHaveLength(1)
+    expect(html.indexOf('grid-area:filter"')).toBeLessThan(html.indexOf('grid-area:main"'))
+    expect(html.slice(html.indexOf('<section class="hf-page-section" style="grid-area:filter"'))).toMatch(
+      /^<section class="hf-page-section" style="grid-area:filter" aria-label="Filter"><div class="hf-card hf-card-soft"><form class="hf-form" noValidate="" autoComplete="off" action="\/nieuws" method="get"><fieldset class="hf-checkbox-group hf-space-end-s"><legend class="hf-heading-2">Bronnen<\/legend>/,
     )
   })
 
@@ -180,7 +191,8 @@ describe('the page Nieuws', () => {
 
     const html = await render()
 
-    expect(html).toContain('<aside')
+    expect(html).toContain('grid-area:side')
+    expect(html).not.toContain('grid-area:filter')
     expect(html).not.toContain('Bronnen')
     expect(html).not.toContain('<form')
     expect(html).toContain('Van de redactie')
@@ -188,7 +200,7 @@ describe('the page Nieuws', () => {
 
   it('has a form that gets to /nieuws, with a group named Bronnen and a button Toon, so it works without JavaScript', async () => {
     const html = await render()
-    const form = html.slice(html.indexOf('<aside')).match(/<form.*?<\/form>/)?.[0] ?? ''
+    const form = html.slice(html.indexOf('grid-area:filter')).match(/<form.*?<\/form>/)?.[0] ?? ''
 
     expect(form).toMatch(/^<form [^>]*action="\/nieuws"[^>]*method="get"/)
     expect(form).toContain('<fieldset')
@@ -278,14 +290,14 @@ describe('the sources that are chosen', () => {
 
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Nieuws van Leeuwarder Courant</h1>'])
     // The name stays in each line for a screen reader, but nobody sees it.
-    expect(html.slice(0, html.indexOf('</main>')).match(/<span>Leeuwarder Courant<\/span>/g)).toBeNull()
-    expect(html.slice(0, html.indexOf('</main>')).match(/class="hf-visually-hidden">[^<]* <\/span>/g)).toHaveLength(3)
+    expect(listOf(html).match(/<span>Leeuwarder Courant<\/span>/g)).toBeNull()
+    expect(listOf(html).match(/class="hf-visually-hidden">[^<]* <\/span>/g)).toHaveLength(3)
   })
 
   it('shows the name of the source on each line when none is chosen', async () => {
     const html = await render()
 
-    expect(html.slice(0, html.indexOf('</main>')).match(/<span>Leeuwarder Courant<\/span>/g)).toHaveLength(2)
+    expect(listOf(html).match(/<span>Leeuwarder Courant<\/span>/g)).toHaveLength(2)
     expect(html).not.toContain('hf-visually-hidden')
   })
 
@@ -297,7 +309,7 @@ describe('the sources that are chosen', () => {
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual([
       '<h1 class="hf-heading-1">Nieuws van Leeuwarder Courant en Voorbeeldkrant, met dank aan de redactie</h1>',
     ])
-    expect(html.slice(0, html.indexOf('</main>')).match(/<span>Leeuwarder Courant<\/span>/g)).toHaveLength(2)
+    expect(listOf(html).match(/<span>Leeuwarder Courant<\/span>/g)).toHaveLength(2)
   })
 
   it('names three sources with commas and "en"', async () => {
@@ -429,7 +441,7 @@ describe('an address that is wrong', () => {
   })
 })
 
-describe('the sidebar of the news page', () => {
+describe('the cards beside the list of the news page', () => {
   beforeEach(() => {
     vi.mocked(getNewestArticle).mockResolvedValue(article)
     vi.mocked(getLatestEpisodes).mockResolvedValue(episodes)
@@ -437,11 +449,11 @@ describe('the sidebar of the news page', () => {
 
   it('has the filter, then the article of the editors, then the podcasts, in the order of the keyboard', async () => {
     const html = await render()
-    const sidebar = html.slice(html.indexOf('<aside'))
 
-    expect(sidebar.indexOf('<form')).toBeLessThan(sidebar.indexOf('id="editors-heading"'))
-    expect(sidebar.indexOf('id="editors-heading"')).toBeLessThan(sidebar.indexOf('id="episodes-heading"'))
-    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<form'))
+    // The filter stands before the list, and the article and the podcasts after it.
+    expect(html.indexOf('<form')).toBeLessThan(html.indexOf('grid-area:main'))
+    expect(html.indexOf('grid-area:main')).toBeLessThan(html.indexOf('id="editors-heading"'))
+    expect(html.indexOf('id="editors-heading"')).toBeLessThan(html.indexOf('id="episodes-heading"'))
   })
 
   it('shows the article as one news line: the title as a link, the day, "Van de redactie" as the source and no intro', async () => {

@@ -30,6 +30,7 @@ import {
   standingsCaption,
 } from '#src/MatchViews'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
+import { pageAreas } from '#src/page-areas'
 import { PlacePerRoundCard } from '#src/PlacePerRoundCard'
 import { getLiveReports, getReportAddresses } from '#src/report-data'
 import { loadSeasonPage, matchesPath, pickerPathOf, type SearchParams, statisticsPath } from '#src/season-page'
@@ -125,122 +126,144 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   // The cards with figures are on the statistics page of the same season.
   const statistics = (id: string) => `${seasonAddress(statisticsPath, season, seasonOf(now))}#${id}`
 
+  const areas = pageAreas({
+    before: ['stand'],
+    main: [
+      ...(current && previous !== undefined ? ['last'] : []),
+      ...(current ? ['programme'] : []),
+      ...(resultCards.length === 0 ? ['results-0'] : resultCards.map((_, index) => `results-${index}`)),
+    ],
+    toolbar: true,
+  })
+
   return (
     <>
-      <Page.Main
-        intro={
-          <Page.Title>
-            <Heading level={1}>Wedstrijden</Heading>
-            <SeasonPicker action={pickerPath} options={seasonChoices(seasons)} value={seasonSlug(season)} />
-          </Page.Title>
-        }
-      >
-        {/* The latest match that has begun, current season only. Uitslagen has it too. */}
-        {current && previous !== undefined && (
-          <Card aria-labelledby={lastMatchCard.id}>
-            <Heading anchor id={lastMatchCard.id} level={2}>
-              {lastMatchCard.name}
+      <Page.Main areas={areas} columns="equal">
+        <Page.Cell area="head">
+          <Heading level={1}>Wedstrijden</Heading>
+        </Page.Cell>
+        <Page.Toolbar>
+          <SeasonPicker action={pickerPath} options={seasonChoices(seasons)} value={seasonSlug(season)} />
+        </Page.Toolbar>
+        {/* The table stands before the matches in the source, so on a phone it is the first
+            thing under the season picker, and on a wide screen it is the second column. */}
+        <Page.Section
+          area="stand"
+          aria-label={`${current ? 'De stand' : 'De eindstand'}${data.coaches.length > 0 && placePerRound === undefined ? ` en de ${coachesCard.name.toLowerCase()}` : ''}`}
+        >
+          <Card
+            aria-labelledby={standingsCard.id}
+            shareable={imageCredit(data.standings.length > 0, imageSeason)}
+            surface="soft"
+          >
+            <Heading anchor id={standingsCard.id} level={2}>
+              {standingsCard.name}
             </Heading>
-            <MatchLines liveReports={liveReports} matches={[previous]} now={now} reportAddresses={reportAddresses} />
-          </Card>
-        )}
-        {current && (
-          <Card aria-labelledby="programma">
-            <Heading anchor id="programma" level={2}>
-              Programma
-            </Heading>
-            {programme.length === 0 ? (
-              <Text>
-                {data.matches.length === 0
-                  ? 'We hebben het programma nog niet gevonden. Kijk straks nog eens.'
-                  : 'Er staan dit seizoen geen wedstrijden meer op het programma.'}
-              </Text>
+            {data.standings.length === 0 ? (
+              <Text>{`We hebben ${current ? 'de stand' : 'de eindstand'} nog niet gevonden. Kijk straks nog eens.`}</Text>
             ) : (
-              <MatchLines matches={programme} now={now} />
+              <>
+                {lastFive !== undefined && (
+                  <StandingsSwitch
+                    address={seasonAddress(matchesPath, season, seasonOf(now))}
+                    anchor={standingsCard.id}
+                    view={lastFiveShown ? 'last-five' : 'season'}
+                  />
+                )}
+                <StandingsTable
+                  caption={
+                    lastFiveShown
+                      ? lastFiveCaption(lastFive.lastResultOn)
+                      : standingsCaption(data.standings, standingsCard.name)
+                  }
+                  rows={lastFiveShown ? lastFive.rows : data.standings}
+                />
+                {/* An Eindstand no longer changes, so only this season can be behind. */}
+                {current && <StandingsBehind matches={data.matches} now={now} />}
+                <Text>
+                  <Link href={statistics('onze-plek-in-de-competitie')} icon="arrow-right">
+                    Onze plek in de competitie
+                  </Link>
+                </Text>
+              </>
             )}
           </Card>
+          {placePerRound !== undefined && (
+            <PlacePerRoundCard coaches={data.coaches} matches={data.matches} places={placePerRound} />
+          )}
+          {placePerRound === undefined && <CoachesCard coaches={data.coaches} />}
+          {(data.matches.length > 0 || data.standings.length > 0) && (
+            <SourceCredit
+              edited={data.edited}
+              pages={data.pages}
+              season={data.season}
+              source={sourceOf(data.matches)}
+            />
+          )}
+          <EditorSources sources={editorSources} />
+        </Page.Section>
+        {/* The latest match that has begun, current season only. Uitslagen has it too. */}
+        {current && previous !== undefined && (
+          <Page.Cell area="last">
+            <Card aria-labelledby={lastMatchCard.id}>
+              <Heading anchor id={lastMatchCard.id} level={2}>
+                {lastMatchCard.name}
+              </Heading>
+              <MatchLines liveReports={liveReports} matches={[previous]} now={now} reportAddresses={reportAddresses} />
+            </Card>
+          </Page.Cell>
+        )}
+        {current && (
+          <Page.Cell area="programme">
+            <Card aria-labelledby="programma">
+              <Heading anchor id="programma" level={2}>
+                Programma
+              </Heading>
+              {programme.length === 0 ? (
+                <Text>
+                  {data.matches.length === 0
+                    ? 'We hebben het programma nog niet gevonden. Kijk straks nog eens.'
+                    : 'Er staan dit seizoen geen wedstrijden meer op het programma.'}
+                </Text>
+              ) : (
+                <MatchLines matches={programme} now={now} />
+              )}
+            </Card>
+          </Page.Cell>
         )}
         {resultCards.length === 0 ? (
-          <Card aria-labelledby="uitslagen">
-            <Heading anchor id="uitslagen" level={2}>
-              Uitslagen
-            </Heading>
-            <Text>We hebben nog geen uitslagen van dit seizoen.</Text>
-          </Card>
+          <Page.Cell area="results-0">
+            <Card aria-labelledby="uitslagen">
+              <Heading anchor id="uitslagen" level={2}>
+                Uitslagen
+              </Heading>
+              <Text>We hebben nog geen uitslagen van dit seizoen.</Text>
+            </Card>
+          </Page.Cell>
         ) : (
-          resultCards.map(({ competition, matches }) => {
+          resultCards.map(({ competition, matches }, index) => {
             const { id, name } = resultsCardOf(competition)
 
             return (
-              <Card aria-labelledby={id} key={competition}>
-                <Heading anchor id={id} level={2}>
-                  {name}
-                </Heading>
-                <MatchLines
-                  liveReports={liveReports}
-                  matches={matches}
-                  now={now}
-                  reportAddresses={reportAddresses}
-                  withCompetition={false}
-                />
-                {competition === 'Eredivisie' && <SeasonCourseLink href={statistics('verloop-van-het-seizoen')} />}
-              </Card>
+              <Page.Cell area={`results-${index}`} key={competition}>
+                <Card aria-labelledby={id}>
+                  <Heading anchor id={id} level={2}>
+                    {name}
+                  </Heading>
+                  <MatchLines
+                    liveReports={liveReports}
+                    matches={matches}
+                    now={now}
+                    reportAddresses={reportAddresses}
+                    withCompetition={false}
+                  />
+                  {competition === 'Eredivisie' && <SeasonCourseLink href={statistics('verloop-van-het-seizoen')} />}
+                </Card>
+              </Page.Cell>
             )
           })
         )}
       </Page.Main>
-      {/* The table is wide, so the sidebar is too. On a phone it follows the programme and
-          the results: the table and the head coaches. */}
-      <Page.Sidebar
-        aria-label={`${current ? 'De stand' : 'De eindstand'}${data.coaches.length > 0 && placePerRound === undefined ? ` en de ${coachesCard.name.toLowerCase()}` : ''}`}
-        wide
-      >
-        <Card
-          aria-labelledby={standingsCard.id}
-          shareable={imageCredit(data.standings.length > 0, imageSeason)}
-          surface="soft"
-        >
-          <Heading anchor id={standingsCard.id} level={2}>
-            {standingsCard.name}
-          </Heading>
-          {data.standings.length === 0 ? (
-            <Text>{`We hebben ${current ? 'de stand' : 'de eindstand'} nog niet gevonden. Kijk straks nog eens.`}</Text>
-          ) : (
-            <>
-              {lastFive !== undefined && (
-                <StandingsSwitch
-                  address={seasonAddress(matchesPath, season, seasonOf(now))}
-                  anchor={standingsCard.id}
-                  view={lastFiveShown ? 'last-five' : 'season'}
-                />
-              )}
-              <StandingsTable
-                caption={
-                  lastFiveShown
-                    ? lastFiveCaption(lastFive.lastResultOn)
-                    : standingsCaption(data.standings, standingsCard.name)
-                }
-                rows={lastFiveShown ? lastFive.rows : data.standings}
-              />
-              {/* An Eindstand no longer changes, so only the current season can be behind. */}
-              {current && <StandingsBehind matches={data.matches} now={now} />}
-              <Text>
-                <Link href={statistics('onze-plek-in-de-competitie')} icon="arrow-right">
-                  Onze plek in de competitie
-                </Link>
-              </Text>
-            </>
-          )}
-        </Card>
-        {placePerRound !== undefined && (
-          <PlacePerRoundCard coaches={data.coaches} matches={data.matches} places={placePerRound} />
-        )}
-        {placePerRound === undefined && <CoachesCard coaches={data.coaches} />}
-        {(data.matches.length > 0 || data.standings.length > 0) && (
-          <SourceCredit edited={data.edited} pages={data.pages} season={data.season} source={sourceOf(data.matches)} />
-        )}
-        <EditorSources sources={editorSources} />
-      </Page.Sidebar>
     </>
   )
 }

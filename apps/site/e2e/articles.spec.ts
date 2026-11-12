@@ -97,7 +97,7 @@ test.describe('the card on the news page', () => {
     await page.goto('/nieuws')
 
     const card = page.getByRole('region', { name: 'Van de redactie' })
-    const sidebar = page.getByRole('complementary')
+    const sidebar = page.getByRole('region', { name: 'De redactie en de podcasts' })
 
     await expect(sidebar.getByRole('region', { name: 'Van de redactie' })).toBeVisible()
     await expect(card.getByRole('link', { name: published.title })).toHaveAttribute('href', address)

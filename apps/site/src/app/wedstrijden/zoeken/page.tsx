@@ -9,6 +9,7 @@ import { matchSearchPath, parseFilters, viewOf } from '#src/match-search'
 import { findScorerMatches, getSearchWorld } from '#src/match-search-data'
 import { onThisDayOf, questionsOf } from '#src/match-search-start'
 import { formatCount, MatchSearchFilters, MatchSearchResults, MatchSearchStart } from '#src/MatchSearchViews'
+import { pageAreas } from '#src/page-areas'
 import { getReportAddresses } from '#src/report-data'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { withBranch } from '#src/title'
@@ -98,28 +99,27 @@ export default async function MatchSearchPage({ searchParams }: { searchParams: 
 
   return (
     <>
-      <Page.Sidebar aria-label="Filters" start>
-        <MatchSearchFilters allClubs={allClubs} filters={filters} seasons={seasons} view={view} />
-      </Page.Sidebar>
-      <Page.Main
-        intro={
-          <Page.Cell>
-            <Page.Title>
-              <Heading level={1}>Zoeken in wedstrijden</Heading>
-            </Page.Title>
-            <Text appearance="intro">{`Alle ${formatCount(matches)} gespeelde wedstrijden sinds ${first ?? ''}, van de Eredivisie tot de Intertoto Cup.`}</Text>
-          </Page.Cell>
-        }
-      >
-        {start === undefined ? (
-          <MatchSearchResults filters={filters} now={new Date()} reportAddresses={reportAddresses} view={view} />
-        ) : (
-          <MatchSearchStart onThisDay={start.onThisDay} questions={start.questions} />
-        )}
-        <Text appearance="meta">
-          Bron: Wikipedia en het archief van de oude sc Heerenveen Fansite. Van 1990 tot 2006 missen we bij een deel van
-          de wedstrijden de doelpuntenmakers.
-        </Text>
+      <Page.Main areas={pageAreas({ before: ['filter'], start: true })} columns="start-side">
+        <Page.Cell area="head">
+          <Page.Title>
+            <Heading level={1}>Zoeken in wedstrijden</Heading>
+          </Page.Title>
+          <Text appearance="intro">{`Alle ${formatCount(matches)} gespeelde wedstrijden sinds ${first ?? ''}, van de Eredivisie tot de Intertoto Cup.`}</Text>
+        </Page.Cell>
+        <Page.Section area="filter" aria-label="Filters">
+          <MatchSearchFilters allClubs={allClubs} filters={filters} seasons={seasons} view={view} />
+        </Page.Section>
+        <Page.Section area="main" aria-label={start === undefined ? 'Resultaten' : 'Vragen en deze dag'}>
+          {start === undefined ? (
+            <MatchSearchResults filters={filters} now={new Date()} reportAddresses={reportAddresses} view={view} />
+          ) : (
+            <MatchSearchStart onThisDay={start.onThisDay} questions={start.questions} />
+          )}
+          <Text appearance="meta">
+            Bron: Wikipedia en het archief van de oude sc Heerenveen Fansite. Van 1990 tot 2006 missen we bij een deel
+            van de wedstrijden de doelpuntenmakers.
+          </Text>
+        </Page.Section>
       </Page.Main>
     </>
   )

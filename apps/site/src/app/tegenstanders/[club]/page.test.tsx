@@ -56,6 +56,14 @@ afterEach(() => {
 })
 
 /** The text of some HTML, as a screen reader and a copy have it. */
+/** The markup of one grid area: from its cell to the next cell, or to the end of the main. */
+const areaOf = (html: string, area: string) => {
+  const start = html.indexOf(`style="grid-area:${area}"`)
+  const next = html.indexOf('style="grid-area:', start + 1)
+
+  return start === -1 ? '' : html.slice(start, next === -1 ? html.indexOf('</main>') : next)
+}
+
 const plain = (html: string) =>
   html
     .replaceAll(/<[^>]*>/g, ' ')
@@ -448,9 +456,14 @@ describe('the page of a club', () => {
     expect(list).toContain('<abbr title="Strafschop">str.</abbr>')
     // The result is heard as "3 tegen 0", and the legend under the list gives the full words.
     expect(list).toContain('3 tegen 0')
-    expect(plain(html.slice(html.indexOf('</ul>', html.indexOf('id="wedstrijden"')), html.indexOf('</section>')))).toBe(
-      'n.v. na verlenging, str. strafschop',
-    )
+    expect(
+      plain(
+        html.slice(
+          html.indexOf('</ul>', html.indexOf('id="wedstrijden"')),
+          html.indexOf('</section>', html.indexOf('id="wedstrijden"')),
+        ),
+      ),
+    ).toBe('n.v. na verlenging, str. strafschop')
   })
 
   it('keeps the list a list for a screen reader', async () => {
@@ -507,27 +520,30 @@ describe('the page of a club', () => {
     expect(html).not.toContain('Eredivisie 2023/24')
   })
 
-  it('has Wedstrijden on the white surface in the main column, and the summary and the stadiums in the sidebar', async () => {
+  it('has Wedstrijden on the white surface in the main column, the summary before it and the stadiums beside it', async () => {
     const html = await render()
-    const main = html.slice(html.indexOf('<main'), html.indexOf('</main>'))
-    const sidebar = html.slice(html.indexOf('<aside'), html.indexOf('</aside>'))
+    const main = areaOf(html, 'main')
+    const summary = areaOf(html, 'summary')
+    const sidebar = areaOf(html, 'side')
 
     expect(main).toMatch(
       /<section class="hf-card" aria-labelledby="wedstrijden">|<section aria-labelledby="wedstrijden" class="hf-card">/,
     )
     expect(main).not.toContain('id="onze-uitslagen"')
-    expect(sidebar).toMatch(
+    expect(summary).toMatch(
       /class="hf-card hf-card-soft[^"]*"[^>]*aria-labelledby="onze-uitslagen"|aria-labelledby="onze-uitslagen"[^>]*class="hf-card hf-card-soft/,
     )
-    expect(sidebar.indexOf('id="onze-uitslagen"')).toBeLessThan(sidebar.indexOf('id="hoe-vaak-welke-uitslag"'))
+    // The summary stands before the matches in the source, so it is the first card on a phone.
+    expect(html.indexOf('id="onze-uitslagen"')).toBeLessThan(html.indexOf('id="wedstrijden"'))
+    expect(sidebar).not.toContain('id="onze-uitslagen"')
     expect(sidebar.indexOf('id="hoe-vaak-welke-uitslag"')).toBeLessThan(sidebar.indexOf('id="stadion"'))
     expect(sidebar.indexOf('id="stadion"')).toBeLessThan(sidebar.indexOf('Bron:'))
     expect(main).not.toContain('hf-card-warm')
   })
 
-  it('has the card Hoe vaak welke uitslag on the warm surface in the sidebar, as on Wedstrijden', async () => {
+  it('has the card Hoe vaak welke uitslag on the warm surface in the side section, as on Wedstrijden', async () => {
     const html = await render()
-    const sidebar = html.slice(html.indexOf('<aside'), html.indexOf('</aside>'))
+    const sidebar = areaOf(html, 'side')
 
     expect(html).toMatch(/<h2[^>]*id="hoe-vaak-welke-uitslag"[^>]*>.*Hoe vaak welke uitslag/)
     expect(sidebar).toMatch(
@@ -807,7 +823,7 @@ describe('the page of a club', () => {
       expect(plain(cardOf(await render()).slice(cardOf(await render()).indexOf('<ul')))).toBe('AFAS Stadion')
     })
 
-    it('names the sidebar of a club with matches to come after the stadium and the source', async () => {
+    it('names the side section of a club with matches to come after the stadium and the source', async () => {
       vi.mocked(getClubPage).mockResolvedValue({ ...promovendus, stadiums: [own[0] as (typeof own)[0]] })
 
       const html = await render('nieuw-promovendus')
@@ -835,21 +851,21 @@ describe('the page of a club', () => {
     expect(await render()).not.toContain('id="stadion"')
   })
 
-  it('names the sidebar after what it holds: the stadium only when there is a card for it', async () => {
-    expect(await render()).toContain('aria-label="Onze uitslagen, het stadion en de bron"')
+  it('names the side section after what it holds: the stadium only when there is a card for it', async () => {
+    expect(await render()).toContain('aria-label="Meer cijfers, het stadion en de bron"')
 
     vi.mocked(getClubPage).mockResolvedValue({
       ...testclub,
       matches: testclub.matches.map((item) => ({ ...item, stadium: null })),
     })
 
-    expect(await render()).toContain('aria-label="Onze uitslagen en de bron"')
+    expect(await render()).toContain('aria-label="Meer cijfers en de bron"')
   })
 
-  it('has no cards and no sidebar for a club with the choice Eredivisie when we only met it in the cup', async () => {
+  it('has no cards and no side section for a club with the choice Eredivisie when we only met it in the cup', async () => {
     const html = await render('beker-united', { competitie: 'eredivisie' })
 
-    expect(html).not.toContain('<aside')
+    expect(html).not.toContain('hf-page-section')
     expect(html).not.toContain('hf-card')
   })
 
@@ -931,15 +947,14 @@ describe('the matches that are still to come on the page of a club', () => {
     const headings = [...html.matchAll(/<h([23])[^>]*>(?:<[^>]*>)*([^<]*)/g)].map(([, level, text]) => [level, text])
 
     expect(headings).toEqual([
-      ['2', 'Wedstrijden'],
       ['2', 'Onze uitslagen tegen Komend FC'],
+      ['2', 'Wedstrijden'],
       ['2', 'Hoe vaak welke uitslag'],
     ])
     expect(html).not.toContain('Komende wedstrijden')
     expect(html).not.toContain('Gespeelde wedstrijden')
     expect(listOf(html).match(/<ul/g)).toHaveLength(1)
     expect(itemsOf(html)).toHaveLength(4)
-    expect(html.indexOf('class="hf-match"')).toBeLessThan(html.indexOf('hf-short-match'))
   })
 
   it('shows one match that is to come, for a club with a single one', async () => {
@@ -1081,7 +1096,7 @@ describe('the card Doelpuntenmakers on the page of a club', () => {
     expect(html).not.toContain('<table')
   })
 
-  it('is in the sidebar after Hoe vaak welke uitslag and before the stadium, soft, with the button for an image', async () => {
+  it('is in the side section after Hoe vaak welke uitslag and before the stadium, soft, with the button for an image', async () => {
     withMatches([cup!, scored!, ...others])
 
     const html = await render()
@@ -1135,15 +1150,14 @@ describe('the card Resultaten sinds', () => {
     )
   })
 
-  it('has the first season we have matches of in the heading, as an anchor, in the sidebar between the summary and the card Hoe vaak welke uitslag', async () => {
+  it('has the first season we have matches of in the heading, as an anchor, in the side cards after the summary and before the card Hoe vaak welke uitslag', async () => {
     const html = await render()
-    const sidebar = html.slice(html.indexOf('<aside'), html.indexOf('</aside>'))
 
     // The oldest season of the seasons we have is 2022/23.
     expect(html).toMatch(/<h2[^>]*id="resultaten-sinds"[^>]*>[\s\S]*Resultaten sinds 2022/)
     expect(html).toContain('href="#resultaten-sinds"')
-    expect(sidebar.indexOf('id="onze-uitslagen"')).toBeLessThan(sidebar.indexOf('id="resultaten-sinds"'))
-    expect(sidebar.indexOf('id="resultaten-sinds"')).toBeLessThan(sidebar.indexOf('id="hoe-vaak-welke-uitslag"'))
+    expect(html.indexOf('id="onze-uitslagen"')).toBeLessThan(html.indexOf('id="resultaten-sinds"'))
+    expect(html.indexOf('id="resultaten-sinds"')).toBeLessThan(html.indexOf('id="hoe-vaak-welke-uitslag"'))
   })
 
   it('starts with the first season of all the matches we have, not that of the club', async () => {
@@ -1390,7 +1404,7 @@ describe('the card Nieuws over <club> on the page of a club', () => {
     expect(plain(cardOf(await render()))).toContain('voor abonnees')
   })
 
-  it('is in the sidebar after the cards with figures and before the stadium', async () => {
+  it('is in the side section after the cards with figures and before the stadium', async () => {
     vi.mocked(getClubNews).mockResolvedValue([headline('Een kop')])
     vi.mocked(getClubPage).mockResolvedValue({
       ...testclub,

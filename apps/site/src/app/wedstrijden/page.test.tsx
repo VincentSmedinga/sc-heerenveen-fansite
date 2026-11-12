@@ -113,16 +113,16 @@ describe('the links to the pages of the matches', () => {
 })
 
 describe('the page /wedstrijden', () => {
-  it('has one h1 and five h2 headings in order: the last match, the programme, a card for each competition with results and the table', async () => {
+  it('has one h1 and five h2 headings in order: the table, the last match, the programme and a card for each competition with results', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1">Wedstrijden</h1>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="stand"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#stand">Stand</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="laatste-wedstrijd"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#laatste-wedstrijd">Laatste wedstrijd</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="programma"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#programma">Programma</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="uitslagen"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#uitslagen">Eredivisie</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="uitslagen-knvb-beker"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#uitslagen-knvb-beker">KNVB Beker</a></h2>',
-      '<h2 class="hf-heading-2 hf-heading-anchored" id="stand"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#stand">Stand</a></h2>',
     ])
   })
 
@@ -131,7 +131,7 @@ describe('the page /wedstrijden', () => {
 
     expect(html).not.toContain('hf-intro')
     expect(html).toMatch(
-      /<div class="hf-page-intro"><div class="hf-page-title"><h1 class="hf-heading-1">Wedstrijden<\/h1>/,
+      /<div class="hf-page-cell" style="grid-area:head"><h1 class="hf-heading-1">Wedstrijden<\/h1><\/div>/,
     )
   })
 
@@ -177,23 +177,30 @@ describe('the page /wedstrijden', () => {
     expect(matchShortcutsOf(true, 0, ['Eredivisie', 'KNVB Beker'], false, true).map((item) => item.href)).toEqual(ids)
   })
 
-  it('has the programme and the results in the main with the h1, and the table in a named, wide sidebar after it', async () => {
+  it('has the table in a named section before the matches, and the programme and the results in cells of the same main as the h1', async () => {
     const html = await render()
     const main = html.match(/<main[^>]*>.*<\/main>/s)?.[0] ?? ''
-    const sidebar = html.match(/<aside[^>]*>.*<\/aside>/s)?.[0] ?? ''
+    const start = main.indexOf('<section class="hf-page-section" style="grid-area:stand"')
+    const side = main.slice(start, main.indexOf('</section><div class="hf-page-cell" style="grid-area:last"'))
+    const cells = main.slice(start + side.length)
 
     expect(html.match(/<main/g)).toHaveLength(1)
-    expect(html.match(/<aside/g)).toHaveLength(1)
-    expect(html.indexOf('</main>')).toBeLessThan(html.indexOf('<aside'))
-    expect(sidebar).toMatch(/^<aside class="hf-page-sidebar hf-page-sidebar-wide" aria-label="De stand">/)
+    expect(html).not.toContain('<aside')
+    expect(main).toMatch(
+      /^<main class="hf-page-main hf-page-main-grid" style="[^"]*--hf-page-columns:var\(--hf-page-columns-equal\)/,
+    )
+    expect(side).toMatch(/^<section class="hf-page-section" style="grid-area:stand" aria-label="De stand">/)
+    // The table is first in the source, so on a phone it is the first thing under the picker.
+    expect(start).toBeGreaterThan(main.indexOf('hf-page-toolbar'))
+    expect(start).toBeLessThan(main.indexOf('id="programma"'))
     expect(main.match(/<h1/g)).toHaveLength(1)
-    expect(main).toContain('id="programma"')
-    expect(main.indexOf('id="programma"')).toBeLessThan(main.indexOf('id="uitslagen"'))
-    expect(main).not.toContain('id="stand"')
-    expect(sidebar).toContain('id="stand"')
-    expect(sidebar).not.toContain('id="uitslagen"')
-    expect(sidebar).not.toContain('<h1')
-    expect(sidebar).not.toContain('id="programma"')
+    expect(cells).toContain('id="programma"')
+    expect(cells.indexOf('id="programma"')).toBeLessThan(cells.indexOf('id="uitslagen"'))
+    expect(cells).not.toContain('id="stand"')
+    expect(side).toContain('id="stand"')
+    expect(side).not.toContain('id="uitslagen"')
+    expect(side).not.toContain('<h1')
+    expect(side).not.toContain('id="programma"')
   })
 
   it('has none of the cards with figures: they are on the page Cijfers', async () => {
@@ -236,7 +243,7 @@ describe('the page /wedstrijden', () => {
 
   it('has no order or style attribute but the length of a bar and the place of a label or a bar of a chart, so the order on a phone is the order in the source', async () => {
     expect(await render()).not.toMatch(
-      / style="(?!--hf-bar-share:[\d.]+"|--hf-donut-cos:|--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"|--hf-bar-chart-(?:slots|at|share|across):[\d.]+")|order:/,
+      / style="(?!grid-area:[a-z0-9-]+"|--hf-page-areas-narrow:[^"]*"|--hf-bar-share:[\d.]+"|--hf-donut-cos:|--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"|--hf-bar-chart-(?:slots|at|share|across):[\d.]+")|order:/,
     )
   })
 
@@ -819,9 +826,11 @@ describe('the page /wedstrijden', () => {
     expect(html).toContain('href="https://nl.wikipedia.org/wiki/KNVB_Beker_2026/27_(mannen)"')
     expect(html).toContain('<time dateTime="2026-10-23T12:05:00.000Z">23 oktober 2026 om 14:05</time>')
     expect(html.lastIndexOf('hf-wikipedia-credit')).toBeGreaterThan(html.lastIndexOf('</table>'))
-    // Last in the sidebar, so on a phone it follows the results and not the programme.
-    expect(html.lastIndexOf('hf-wikipedia-credit')).toBeGreaterThan(html.indexOf('id="uitslagen"'))
-    expect(html.match(/<aside.*<\/aside>/s)?.[0]).toContain('hf-wikipedia-credit')
+    // In the section with the table, which comes before the matches in the source.
+    expect(html.lastIndexOf('hf-wikipedia-credit')).toBeLessThan(html.indexOf('id="programma"'))
+    expect(html.slice(html.indexOf('style="grid-area:stand"'), html.indexOf('id="laatste-wedstrijd"'))).toContain(
+      'hf-wikipedia-credit',
+    )
   })
 
   it('puts the credit in a card without a border or background to see, and links to no history', async () => {
@@ -905,11 +914,11 @@ describe('the season picker on /wedstrijden', () => {
     expect(getMatchData).toHaveBeenCalledExactlyOnceWith('2026/27')
   })
 
-  it('has the picker next to the heading, with the current season chosen and the earlier seasons after it', async () => {
+  it('has the picker in the toolbar under the heading, with the current season chosen and the earlier seasons after it', async () => {
     const html = await render()
 
     expect(html).toMatch(
-      /<div class="hf-page-title"><h1 class="hf-heading-1">Wedstrijden<\/h1><form [^>]*aria-label="Seizoen kiezen"/,
+      /<h1 class="hf-heading-1">Wedstrijden<\/h1><\/div><div class="hf-page-toolbar"[^>]*><form [^>]*aria-label="Seizoen kiezen"/,
     )
     expect(html).toContain(
       '<option value="2026-27" selected="">2026/27</option><option value="2025-26">2025/26</option>',
@@ -1033,7 +1042,7 @@ describe('the head coaches of the season', () => {
     expect(card).not.toContain('wikipedia')
   })
 
-  it('is a card with the strong blue surface in the sidebar after the table, named by its heading, without a source of its own', async () => {
+  it('is a card with the strong blue surface in the section with the table, after it, named by its heading, without a source of its own', async () => {
     withCoaches([veldman])
 
     const { card, html } = await coachesCard()

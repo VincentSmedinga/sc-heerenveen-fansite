@@ -116,56 +116,68 @@ export async function StatisticsPage({
   return (
     <>
       <Page.Main
-        intro={
-          <Page.Title>
-            <Heading level={1}>Cijfers</Heading>
-            <SeasonPicker
-              action={pickerPath}
-              fields={competitionFields(competition)}
-              options={seasonChoices(seasons)}
-              value={seasonSlug(season)}
-            />
-          </Page.Title>
-        }
+        areas={{
+          narrow: ['head', 'toolbar', 'first', 'second'],
+          wide: ['head head', 'toolbar toolbar', 'first second'],
+        }}
+        columns="equal"
       >
-        <LeaguePlaceCard season={imageSeason} standings={data.standings} />
-        <FinalPlacesCard current={seasonOf(now)} linkable={seasons} places={finalPlaces} />
-        <SeasonCard matches={data.matches} season={imageSeason} />
-        <MatchFlowCard matches={data.matches} season={imageSeason} />
-        <CompetitionSwitch address={address} competition={competition} matches={data.matches} />
-        <StreaksCard competition={competition} matches={data.matches} now={now} season={imageSeason} />
-        <HomeAwayCard competition={competition} matches={data.matches} season={imageSeason} />
-        <NoteworthyCard
-          coaches={data.coaches}
-          competition={competition}
-          matches={data.matches}
-          now={now}
-          number={parseNoteworthyNumber(factNumber)}
-          path={address}
-        />
+        <Page.Cell area="head">
+          <Heading level={1}>Cijfers</Heading>
+        </Page.Cell>
+        <Page.Toolbar>
+          <SeasonPicker
+            action={pickerPath}
+            fields={competitionFields(competition)}
+            options={seasonChoices(seasons)}
+            value={seasonSlug(season)}
+          />
+          <CompetitionSwitch address={address} competition={competition} matches={data.matches} />
+        </Page.Toolbar>
+        <Page.Section area="first" aria-label="Het seizoen in cijfers">
+          <LeaguePlaceCard season={imageSeason} standings={data.standings} />
+          <FinalPlacesCard current={seasonOf(now)} linkable={seasons} places={finalPlaces} />
+          <SeasonCard matches={data.matches} season={imageSeason} />
+          <MatchFlowCard matches={data.matches} season={imageSeason} />
+          <StreaksCard competition={competition} matches={data.matches} now={now} season={imageSeason} />
+          <HomeAwayCard competition={competition} matches={data.matches} season={imageSeason} />
+          <NoteworthyCard
+            coaches={data.coaches}
+            competition={competition}
+            matches={data.matches}
+            now={now}
+            number={parseNoteworthyNumber(factNumber)}
+            path={address}
+          />
+        </Page.Section>
+        {/* The two columns are equal. On a phone the second follows the first: our place in the
+            league, the season, how the matches go, the streaks, home and away, the attendance,
+            how often each score was played, the clean sheets, the goals per quarter and the
+            extremes. */}
+        <Page.Section area="second" aria-label="Meer cijfers over het seizoen">
+          <AttendanceCard competition={competition} matches={data.matches} season={imageSeason} />
+          <ScoreCountsCard competition={competition} matches={data.matches} season={imageSeason} />
+          <CleanSheetsCard
+            competition={competition}
+            count={parseCleanSheetCount(nul)}
+            matches={data.matches}
+            now={now}
+            path={address}
+            season={imageSeason}
+          />
+          <GoalsPerQuarterCard competition={competition} matches={data.matches} season={imageSeason} />
+          <ExtremesCard competition={competition} matches={data.matches} now={now} season={imageSeason} />
+          {coachResults}
+          {(data.matches.length > 0 || data.standings.length > 0) && (
+            <SourceCredit
+              edited={data.edited}
+              pages={data.pages}
+              season={data.season}
+              source={sourceOf(data.matches)}
+            />
+          )}
+        </Page.Section>
       </Page.Main>
-      {/* The second column is a sidebar as wide as the main column, so the two are equal. On a
-          phone it follows the main: our place in the league, the season, how the matches go,
-          the streaks, home and away, the attendance, how often each score was played, the clean
-          sheets, the goals per quarter and the extremes. */}
-      <Page.Sidebar aria-label="Meer cijfers over het seizoen" wide>
-        <AttendanceCard competition={competition} matches={data.matches} season={imageSeason} />
-        <ScoreCountsCard competition={competition} matches={data.matches} season={imageSeason} />
-        <CleanSheetsCard
-          competition={competition}
-          count={parseCleanSheetCount(nul)}
-          matches={data.matches}
-          now={now}
-          path={address}
-          season={imageSeason}
-        />
-        <GoalsPerQuarterCard competition={competition} matches={data.matches} season={imageSeason} />
-        <ExtremesCard competition={competition} matches={data.matches} now={now} season={imageSeason} />
-        {coachResults}
-        {(data.matches.length > 0 || data.standings.length > 0) && (
-          <SourceCredit edited={data.edited} pages={data.pages} season={data.season} source={sourceOf(data.matches)} />
-        )}
-      </Page.Sidebar>
     </>
   )
 }

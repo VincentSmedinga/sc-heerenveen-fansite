@@ -12,6 +12,7 @@ import { MatchesCard, StandingsCard } from '../MatchViews'
 import { pageMetadata } from '../metadata'
 import { dateTimeOf, dayOf, formatArticleDate, formatNewsTime } from '../news'
 import { DiscussionsCard, EpisodesCard, loadArticle } from '../NewsCards'
+import { pageAreas } from '../page-areas'
 import { getLatestEpisodes } from '../podcasts'
 import { ServerError, serverErrorTitle } from '../ServerError'
 import { withBranch } from '../title'
@@ -104,63 +105,82 @@ export default async function HomePage() {
 
   return (
     <>
-      <Page.Main>
+      <Page.Main
+        areas={pageAreas({
+          after: ['side'],
+          head: false,
+          main: ['article', 'news'].slice(article === undefined ? 1 : 0),
+        })}
+      >
         {/* The logo just above already shows the name, so the h1 is for screen readers only.
             Every page has one h1. */}
-        <Heading className="hf-visually-hidden" level={1}>
-          sc Heerenveen Fansite
-        </Heading>
         {article !== undefined && (
-          <ArticleCard
-            date={formatArticleDate(article.publishedAt)}
-            dateTime={dayOf(article.publishedAt)}
-            href={`/redactie/${article.slug}`}
-            intro={article.intro}
-            title={article.title}
-          />
+          <Page.Cell area="article">
+            <Heading className="hf-visually-hidden" level={1}>
+              sc Heerenveen Fansite
+            </Heading>
+            <ArticleCard
+              date={formatArticleDate(article.publishedAt)}
+              dateTime={dayOf(article.publishedAt)}
+              href={`/redactie/${article.slug}`}
+              intro={article.intro}
+              title={article.title}
+            />
+          </Page.Cell>
         )}
-        <Card aria-labelledby="media-heading">
-          <Heading id="media-heading" level={2}>
-            Laatste nieuws
-          </Heading>
-          {news.items.length === 0 ? (
-            <Text>We hebben nog geen nieuws gevonden. Kijk straks nog eens.</Text>
-          ) : (
+        <Page.Cell area="news">
+          {article === undefined && (
+            <Heading className="hf-visually-hidden" level={1}>
+              sc Heerenveen Fansite
+            </Heading>
+          )}
+          <Card aria-labelledby="media-heading">
+            <Heading id="media-heading" level={2}>
+              Laatste nieuws
+            </Heading>
+            {news.items.length === 0 ? (
+              <Text>We hebben nog geen nieuws gevonden. Kijk straks nog eens.</Text>
+            ) : (
+              <>
+                <Text appearance="meta">{headlineCount(news.items.length, news.days)}</Text>
+                <List role="list">
+                  {news.items.map((item, index) => (
+                    <List.Item key={index}>
+                      <NewsItem
+                        dateTime={dateTimeOf(item.publishedAt)}
+                        headline={item.title}
+                        href={item.url}
+                        paywalled={item.paywalled}
+                        source={item.sourceName}
+                        time={formatNewsTime(item.publishedAt, now)}
+                      />
+                    </List.Item>
+                  ))}
+                </List>
+              </>
+            )}
+            <Text>
+              <Link href="/nieuws" icon="arrow-right">
+                Al het nieuws
+              </Link>
+            </Text>
+          </Card>
+        </Page.Cell>
+        <Page.Section area="side" aria-label="De wedstrijden, de stand, het forum en de podcasts">
+          {matches !== undefined && (
             <>
-              <Text appearance="meta">{headlineCount(news.items.length, news.days)}</Text>
-              <List role="list">
-                {news.items.map((item, index) => (
-                  <List.Item key={index}>
-                    <NewsItem
-                      dateTime={dateTimeOf(item.publishedAt)}
-                      headline={item.title}
-                      href={item.url}
-                      paywalled={item.paywalled}
-                      source={item.sourceName}
-                      time={formatNewsTime(item.publishedAt, now)}
-                    />
-                  </List.Item>
-                ))}
-              </List>
+              <MatchesCard data={matches} details={details} now={now} />
+              <StandingsCard
+                archive={details?.previousMeeting?.dataSource === 'oude-fansite'}
+                data={matches}
+                now={now}
+              />
             </>
           )}
-          <Text>
-            <Link href="/nieuws" icon="arrow-right">
-              Al het nieuws
-            </Link>
-          </Text>
-        </Card>
+          <DiscussionsCard discussions={discussions} now={now} />
+          <EpisodesCard episodes={episodes} heading="Nieuwste podcasts" now={now} />
+        </Page.Section>
       </Page.Main>
-      <Page.Sidebar aria-label="De wedstrijden, de stand, het forum en de podcasts">
-        {matches !== undefined && (
-          <>
-            <MatchesCard data={matches} details={details} now={now} />
-            <StandingsCard archive={details?.previousMeeting?.dataSource === 'oude-fansite'} data={matches} now={now} />
-          </>
-        )}
-        <DiscussionsCard discussions={discussions} now={now} />
-        <EpisodesCard episodes={episodes} heading="Nieuwste podcasts" now={now} />
-      </Page.Sidebar>
     </>
   )
 }

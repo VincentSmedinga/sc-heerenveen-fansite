@@ -133,29 +133,20 @@ for (const { heading, path } of pickerPages) {
   })
 }
 
-test.describe('the title row with the season picker', () => {
-  for (const [width, beside] of [
-    // Narrower than a phone, so the row has to wrap: the heading, the space and the list are
-    // 279 pixels wide, and 300 pixels leaves 268.
-    [300, false],
-    [320, true],
-    [390, true],
-    [900, true],
-  ] as const) {
-    test(`is on the right, ${beside ? 'beside' : 'under'} the title at ${width} pixels, and does not scroll the page`, async ({
-      page,
-    }) => {
+test.describe('the toolbar with the season picker', () => {
+  for (const width of [300, 320, 390, 900]) {
+    test(`is under the heading, in the toolbar, at ${width} pixels, and does not scroll the page`, async ({ page }) => {
       await page.setViewportSize({ height: 900, width })
       await page.goto(`/wedstrijden/${slug}`)
       await hydrated(page)
 
       const heading = (await page.getByRole('heading', { level: 1 }).boundingBox())!
       const picker = (await page.getByRole('form', { name: 'Seizoen kiezen' }).boundingBox())!
-      const row = (await page.locator('.hf-page-title').boundingBox())!
+      const toolbar = (await page.locator('.hf-page-toolbar').boundingBox())!
 
-      // On the right of the row, either way.
-      expect(picker.x + picker.width).toBeCloseTo(row.x + row.width, 0)
-      expect(beside ? picker.y < heading.y + heading.height : picker.y >= heading.y + heading.height).toBe(true)
+      expect(picker.y).toBeGreaterThanOrEqual(heading.y + heading.height)
+      expect(picker.x).toBeGreaterThanOrEqual(toolbar.x)
+      expect(picker.x + picker.width).toBeLessThanOrEqual(toolbar.x + toolbar.width + 1)
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
     })
   }

@@ -4,6 +4,7 @@ import { Card, Heading, Link, Page, Text } from '@fansite/design-system'
 
 import { email } from '#src/contact'
 import { pageMetadata } from '#src/metadata'
+import { pageAreas } from '#src/page-areas'
 
 // Render on each request: the canonical URL and the Open Graph address come from SITE_ENV,
 // which the build doesn't know.
@@ -22,9 +23,11 @@ const EmailLink = () => (
 export default function AboutPage() {
   return (
     <>
-      <Page.Main>
-        <Page.Cell>
+      <Page.Main areas={pageAreas({ after: ['side'] })}>
+        <Page.Cell area="head">
           <Heading level={1}>Over ons</Heading>
+        </Page.Cell>
+        <Page.Cell area="main">
           <Heading anchor id="wie-we-zijn" level={2}>
             Wie we zijn
           </Heading>
@@ -61,41 +64,41 @@ export default function AboutPage() {
             Wat we met je gegevens doen, lees je bij <Link href="/privacy">Privacy</Link>.
           </Text>
         </Page.Cell>
+        <Page.Section area="side" aria-label="Over de gegevens">
+          <Card aria-labelledby="gegevens" surface="soft">
+            <Heading anchor appearance={3} id="gegevens" level={2}>
+              Waar de gegevens vandaan komen
+            </Heading>
+            <Heading appearance={4} level={3}>
+              Nieuws
+            </Heading>
+            <Text>
+              De importer, een programma, haalt regelmatig de feeds op. Bij sommige bronnen kiest een filter de koppen
+              over sc Heerenveen, rond een wedstrijd ook over de tegenstander. Het mist soms een kop of laat er een te
+              veel staan.
+            </Text>
+            <Heading appearance={4} level={3}>
+              Wedstrijden en stand
+            </Heading>
+            <Text>
+              Uitslagen, doelpunten en stand komen van de{' '}
+              <Link href="/bronnen#wedstrijden-en-spelers">Nederlandse Wikipedia</Link> (CC BY-SA 4.0). We lezen haar
+              hoogstens één keer per uur, dus een uitslag kan achterlopen. Namen staan zoals Wikipedia ze schrijft, soms
+              anders dan bij de club.
+            </Text>
+            <Heading appearance={4} level={3}>
+              Forum en podcasts
+            </Heading>
+            <Text>Discussies komen van ons forum, afleveringen uit de podcastfeeds.</Text>
+            <Heading appearance={4} level={3}>
+              Een fout?
+            </Heading>
+            <Text>
+              Meld hem via <Link href="/contact">Contact</Link>. Staat hij ook op Wikipedia, verbeter hem dan daar.
+            </Text>
+          </Card>
+        </Page.Section>
       </Page.Main>
-      <Page.Sidebar aria-label="Over de gegevens">
-        <Card aria-labelledby="gegevens" surface="soft">
-          <Heading anchor appearance={3} id="gegevens" level={2}>
-            Waar de gegevens vandaan komen
-          </Heading>
-          <Heading appearance={4} level={3}>
-            Nieuws
-          </Heading>
-          <Text>
-            De importer, een programma, haalt regelmatig de feeds op. Bij sommige bronnen kiest een filter de koppen
-            over sc Heerenveen, rond een wedstrijd ook over de tegenstander. Het mist soms een kop of laat er een te
-            veel staan.
-          </Text>
-          <Heading appearance={4} level={3}>
-            Wedstrijden en stand
-          </Heading>
-          <Text>
-            Uitslagen, doelpunten en stand komen van de{' '}
-            <Link href="/bronnen#wedstrijden-en-spelers">Nederlandse Wikipedia</Link> (CC BY-SA 4.0). We lezen haar
-            hoogstens één keer per uur, dus een uitslag kan achterlopen. Namen staan zoals Wikipedia ze schrijft, soms
-            anders dan bij de club.
-          </Text>
-          <Heading appearance={4} level={3}>
-            Forum en podcasts
-          </Heading>
-          <Text>Discussies komen van ons forum, afleveringen uit de podcastfeeds.</Text>
-          <Heading appearance={4} level={3}>
-            Een fout?
-          </Heading>
-          <Text>
-            Meld hem via <Link href="/contact">Contact</Link>. Staat hij ook op Wikipedia, verbeter hem dan daar.
-          </Text>
-        </Card>
-      </Page.Sidebar>
     </>
   )
 }

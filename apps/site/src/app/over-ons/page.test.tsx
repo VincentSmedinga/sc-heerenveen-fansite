@@ -11,7 +11,7 @@ const html = renderToStaticMarkup(<AboutPage />)
 const plain = withoutHeadingLinks(html)
 
 /** The sidebar, and the main column without it. */
-const [mainHtml = '', sidebarHtml = ''] = html.split('<aside')
+const [mainHtml = '', sidebarHtml = ''] = html.split('<section class="hf-page-section"')
 
 /** The words of the text in the sidebar, without the heading. */
 const sidebarWords = sidebarHtml
@@ -43,14 +43,17 @@ describe('the page Over ons', () => {
     })
   })
 
-  it('is the one main of the page, with all its content in one cell, and the sidebar after it', () => {
+  it('is the one main of the page, with the h1 and all its content in a cell each, and the section after them', () => {
     expect(html.match(/<main/g)).toHaveLength(1)
-    expect(html.match(/<aside/g)).toHaveLength(1)
-    expect(mainHtml).toMatch(/^<main class="hf-page-main"><div class="hf-page-cell">.*<\/div><\/main>$/)
-    expect(sidebarHtml).toMatch(/^ class="hf-page-sidebar" aria-label="Over de gegevens">.*<\/aside>$/)
+    expect(html).not.toContain('<aside')
+    expect(html.match(/<section class="hf-page-section"/g)).toHaveLength(1)
+    expect(mainHtml).toMatch(
+      /^<main class="hf-page-main hf-page-main-grid"[^>]*><div class="hf-page-cell" style="grid-area:head"><h1[^>]*>Over ons<\/h1><\/div><div class="hf-page-cell" style="grid-area:main">.*<\/div>$/,
+    )
+    expect(sidebarHtml).toMatch(/^ style="grid-area:side" aria-label="Over de gegevens">.*<\/section><\/main>$/)
   })
 
-  it('has a sidebar with one card, named by its h2 Waar de gegevens vandaan komen, with an anchor', () => {
+  it('has a section for the sidebar with one card, named by its h2 Waar de gegevens vandaan komen, with an anchor', () => {
     expect(sidebarHtml.match(/<section/g)).toHaveLength(1)
     expect(sidebarHtml).toContain('<section class="hf-card hf-card-soft" aria-labelledby="gegevens">')
     expect(plain).toContain(
