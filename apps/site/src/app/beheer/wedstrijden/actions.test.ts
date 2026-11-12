@@ -361,7 +361,7 @@ describe('submitMatch', () => {
 
 describe('submitMatchPart', () => {
   const part = (name: 'doelpunten' | 'gegevens' | 'uitslag', formData: FormData, back?: string) =>
-    resultOf(() => submitMatchPart(matchId, name, back, initial, formData))
+    resultOf(() => submitMatchPart(matchId, name, back, undefined, initial, formData))
 
   /** Only the fields of a part, as the page of that part sends them, and a reason. */
   const only = (fields: Record<string, string>) => {
@@ -433,9 +433,43 @@ describe('submitMatchPart', () => {
     })
   })
 
+  it('goes on to the next match of the season with a gap in the column, or back to the table (#1163)', async () => {
+    const [values] = await withClubs(database.db, [
+      {
+        ...scheduled,
+        goalsAgainst: 0,
+        goalsFor: 1,
+        kickoffAt: new Date('2026-11-07T19:00:00Z'),
+        matchDate: '2026-11-07',
+        opponent: 'Testdorp FC',
+        round: 'Speelronde 12',
+        status: 'played',
+      },
+    ])
+    const [next] = await database.db.insert(matches).values(values!).$returningId()
+    const back = '/beheer/kwaliteit/2026-27'
+    const formData = only({ scheidsrechter: 'Kevin Blom' })
+
+    formData.set('knop', 'volgende')
+    await submit(matchId, form())
+
+    expect(await resultOf(() => submitMatchPart(matchId, 'gegevens', back, 'gegevens', initial, formData))).toEqual({
+      redirect: `/beheer/wedstrijden/${next?.id}/gegevens?gedaan=volgende-opgeslagen&terug=%2Fbeheer%2Fkwaliteit%2F2026-27&kolom=gegevens`,
+    })
+
+    await database.db
+      .update(matches)
+      .set({ attendance: 1, referee: 'Iemand', stadium: 'Ergens' })
+      .where(eq(matches.id, next?.id ?? 0))
+
+    expect(await resultOf(() => submitMatchPart(matchId, 'gegevens', back, 'gegevens', initial, formData))).toEqual({
+      redirect: '/beheer/kwaliteit/2026-27?gedaan=kolom-compleet',
+    })
+  })
+
   it('sends an unknown part to the list', async () => {
     expect(
-      await resultOf(() => submitMatchPart(matchId, 'verslag' as 'uitslag', undefined, initial, only({}))),
+      await resultOf(() => submitMatchPart(matchId, 'verslag' as 'uitslag', undefined, undefined, initial, only({}))),
     ).toEqual({ redirect: '/beheer/wedstrijden?fout=weg' })
   })
 })

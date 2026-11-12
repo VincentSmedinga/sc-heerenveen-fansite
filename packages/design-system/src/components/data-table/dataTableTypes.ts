@@ -109,6 +109,12 @@ export type DataTableRow = {
 /** A column of a table with text, given as an object when it can fold. */
 export type DataTableTextColumn = {
   /**
+   * A short header, such as one letter, for a table with many columns: where the table is too
+   * narrow for the whole words the header shows it, and where it has room the whole `name`. A
+   * screen reader always hears the `name`. Explain the letters in a line above the table.
+   */
+  abbreviation?: string
+  /**
    * Makes the column one of numbers with a `Bar` after each number: the header and the cells
    * are aligned to the end, so the header stands over the number and the bar together.
    */
@@ -120,6 +126,11 @@ export type DataTableTextColumn = {
    * gone. Without it, the column is always there.
    */
   fold?: boolean
+  /**
+   * Makes the column one of short signs, each a `DataTable.Mark` or empty, such as the gaps in
+   * the data of a match: the header and the cells are centred.
+   */
+  mark?: boolean
   /** The header of the column, as plain text. It must be unique. */
   name: string
 }

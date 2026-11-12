@@ -1,23 +1,15 @@
 import type { PlayerListReport } from '@fansite/db/persons'
-import type { SeasonCoverage } from '@fansite/db/season-coverage'
 import type { Metadata } from 'next'
 
 import { playerListReport, similarPersons } from '@fansite/db/persons'
-import { countWaitingFieldDifferences } from '@fansite/db/player-field-differences'
-import { countWaitingStatDifferences } from '@fansite/db/player-stat-differences'
 import { readSeasonCoverage } from '@fansite/db/season-coverage'
 import { Card, DataTable, Heading, Link, List, Page, Text } from '@fansite/design-system'
 import { Fragment } from 'react'
 
+import { gapLegend, gapTableColumns } from '#src/app/beheer/kwaliteit/gap-table'
 import { compact } from '#src/beheer/density'
 import { countPersonsWithout, personFactsPath } from '#src/beheer/person-facts'
-import {
-  fieldDifferencesPath,
-  statDifferencesPath,
-  waitingChangesBySeason,
-  type WorkList,
-  workListPath,
-} from '#src/beheer/quality'
+import { countGapsBySeason, gapColumns, readMatchGaps, seasonTablePath } from '#src/beheer/quality-table'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
@@ -29,35 +21,23 @@ export const metadata: Metadata = { robots: { follow: false, index: false }, tit
 
 const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`
 
-/** Where the matches came from, in the words of a sentence: "34 van Wikipedia". */
-const sourceWords: Record<keyof SeasonCoverage['matchesBySource'], string> = {
-  'oude-fansite': 'van de sc Heerenveen Fansite',
-  redactie: 'van de redactie',
-  wikipedia: 'van Wikipedia',
-}
-
-/** How complete the squad of a season is, in the words of a sentence. */
-const levelWords: Record<NonNullable<SeasonCoverage['squad']>['level'], string> = {
-  bijna: 'bijna compleet',
-  compleet: 'compleet',
-  deels: 'deels compleet',
-  onbekend: 'onbekend hoe compleet',
-  weinig: 'lang niet compleet',
-}
-
-// What we have of each season since 1990/91, for an editor: one row for each season, the
-// newest first, and the persons that look alike. A cell says in words what it counts, so it
-// still reads where the column is folded under the season and its header is gone, and nothing
-// is told by colour. What an editor can do something about is a link to its work list, in the
-// last column.
+// What we miss of each season since 1990/91, for an editor (issue 1163): one row for each
+// season, the newest first, with a column for each part of a match. A number is how many
+// matches of the season have a gap in that part, and leads to them. Under it the persons that
+// look alike, the list of players of Wikipedia and the persons without a line or a country,
+// until the table of persons takes their place (issue 1165).
 export default async function QualityPage() {
   await requireRole('owner', 'editor')
 
   const { db } = getDatabase()
   const coverage = (await readSeasonCoverage(db)).reverse()
-  const waiting = await waitingChangesBySeason(db)
-  const differing = await countWaitingStatDifferences(db)
-  const edited = await countWaitingFieldDifferences(db)
+  const matchGaps = await readMatchGaps(db)
+  const gaps = countGapsBySeason(matchGaps)
+  const withGaps = matchGaps.filter((match) => Object.keys(match.gaps).length > 0)
+  const total = withGaps.reduce(
+    (sum, match) => sum + Object.values(match.gaps).reduce((inMatch, gap) => inMatch + gap.total, 0),
+    0,
+  )
   const alike = await similarPersons(db)
   const list = await playerListReport(db)
   const without = await countPersonsWithout(db)
@@ -69,8 +49,9 @@ export default async function QualityPage() {
         <>
           <Heading level={1}>Kwaliteit</Heading>
           <Text appearance="intro">
-            Wat we van elk seizoen sinds 1990/91 weten, en wat er nog ontbreekt. Een koppeling in de tabel leidt naar
-            een werklijst: de wedstrijden waar je iets aan kunt doen.
+            {withGaps.length === 0
+              ? 'Alle wedstrijden zijn compleet.'
+              : `Nog ${plural(total, 'gat', 'gaten')} in ${plural(withGaps.length, 'wedstrijd', 'wedstrijden')} van de ${matchGaps.length}. Een getal in de tabel leidt naar de wedstrijden van dat seizoen met een gat in die kolom.`}
           </Text>
         </>
       }
@@ -80,33 +61,35 @@ export default async function QualityPage() {
         <Heading id="seizoenen-kop" level={2}>
           Per seizoen
         </Heading>
+        <Text appearance="meta">{gapLegend}</Text>
         <DataTable
           appearance="text"
-          caption="Wat we van elk seizoen weten, het nieuwste seizoen bovenaan"
-          columns={[
-            'Seizoen',
-            { fold: true, name: 'Wedstrijden' },
-            { fold: true, name: 'Details' },
-            { fold: true, name: 'Selectie' },
-            { fold: true, name: 'Verslagen' },
-            { fold: true, name: 'Te doen' },
-          ]}
-          rows={coverage.map((row) => ({
-            cells: [
-              matchesText(row),
-              detailsText(row),
-              squadText(row),
-              row.reports === 0 ? 'Geen verslagen' : plural(row.reportsDone, 'verslag klaar', 'verslagen klaar'),
-              <TodoCell
-                differing={differing.get(row.season) ?? 0}
-                edited={edited.get(row.season) ?? 0}
-                key="te-doen"
-                row={row}
-                waiting={waiting.get(row.season) ?? 0}
-              />,
-            ],
-            header: row.season,
-          }))}
+          caption="Wedstrijden met een gat per seizoen en per deel, het nieuwste seizoen bovenaan"
+          columns={gapTableColumns('Seizoen')}
+          rows={coverage.map((row) => {
+            const counts = gaps.get(row.season)
+            const complete = counts === undefined || gapColumns.every(({ key }) => counts.columns[key] === 0)
+            const matchCount = plural(counts?.matches ?? 0, 'wedstrijd', 'wedstrijden')
+
+            return {
+              cells: gapColumns.map(({ key, name }) => {
+                const total = counts?.columns[key] ?? 0
+
+                return total === 0 ? null : (
+                  <DataTable.Mark
+                    description={`${total === 1 ? 'wedstrijd' : 'wedstrijden'} met een gat in ${name} in ${row.season}`}
+                    href={seasonTablePath(row.season, key)}
+                    key={key}
+                  >
+                    {String(total)}
+                  </DataTable.Mark>
+                )
+              }),
+              header: row.season,
+              href: seasonTablePath(row.season),
+              secondary: complete ? `${matchCount}, alles compleet` : matchCount,
+            }
+          })}
         />
       </Card>
       <Card aria-labelledby="personen-kop">
@@ -146,28 +129,6 @@ export default async function QualityPage() {
       </Card>
     </Page.Main>
   )
-}
-
-/** What we know of the matches besides the result, and whether the season has a table. */
-function detailsText(row: SeasonCoverage) {
-  if (row.matchesTotal === 0) {
-    return row.hasStanding ? 'Stand bekend' : 'Geen stand'
-  }
-
-  return `Toeschouwers bij ${row.withAttendance}, scheidsrechter bij ${row.withReferee}, ${row.hasStanding ? 'stand bekend' : 'geen stand'}`
-}
-
-/** The matches of a season, how many were played and where they came from. */
-function matchesText(row: SeasonCoverage) {
-  if (row.matchesTotal === 0) {
-    return 'Geen wedstrijden'
-  }
-
-  const sources = Object.entries(row.matchesBySource)
-    .filter(([, total]) => total > 0)
-    .map(([source, total]) => `${total} ${sourceWords[source as keyof typeof sourceWords]}`)
-
-  return `${plural(row.matchesTotal, 'wedstrijd', 'wedstrijden')}, ${row.played} gespeeld (${sources.join(', ')})`
 }
 
 /**
@@ -226,90 +187,4 @@ function PlayerListCard({ report }: { report: PlayerListReport }) {
 /** Names in a sentence: "A en B", "A, B en C". */
 function sentenceList(names: readonly string[]) {
   return names.length < 2 ? names.join('') : `${names.slice(0, -1).join(', ')} en ${names.at(-1)}`
-}
-
-/** The players of a season, and how complete `squad_completeness` says the squad is. */
-function squadText(row: SeasonCoverage) {
-  if (row.playerCount === 0 && row.squad === null) {
-    return 'Geen spelers'
-  }
-
-  const players = plural(row.playerCount, 'speler', 'spelers')
-
-  return row.squad === null
-    ? `${players}, onbekend hoe compleet`
-    : `${players}, ${levelWords[row.squad.level]} (beste bron: ${row.squad.bestSource})`
-}
-
-/**
- * What an editor can do about a season, each as a link to its work list: the matches without
- * goals, the goals without a player, the reports that are not finished, the changes that wait,
- * the numbers of players that differ and the fields of players where the import says something
- * else than the editors. A season without work says so.
- */
-function TodoCell({
-  differing,
-  edited,
-  row,
-  waiting,
-}: {
-  differing: number
-  edited: number
-  row: SeasonCoverage
-  waiting: number
-}) {
-  const unfinished = row.reports - row.reportsDone
-  const work: { list: 'spelerscijfers' | 'spelersgegevens' | WorkList; text: string; total: number }[] = [
-    {
-      list: 'zonder-doelpunten',
-      text: plural(row.playedWithoutGoalList, 'wedstrijd zonder doelpunten', 'wedstrijden zonder doelpunten'),
-      total: row.playedWithoutGoalList,
-    },
-    {
-      list: 'doelpunten-zonder-speler',
-      text: plural(row.goalsWithoutPlayer, 'doelpunt zonder speler', 'doelpunten zonder speler'),
-      total: row.goalsWithoutPlayer,
-    },
-    { list: 'verslagen-bezig', text: plural(unfinished, 'verslag niet af', 'verslagen niet af'), total: unfinished },
-    {
-      list: 'wachtende-wijzigingen',
-      text: plural(waiting, 'wijziging wacht', 'wijzigingen wachten'),
-      total: waiting,
-    },
-    {
-      list: 'spelerscijfers',
-      text: plural(differing, 'spelerscijfer verschilt', 'spelerscijfers verschillen'),
-      total: differing,
-    },
-    {
-      list: 'spelersgegevens',
-      text: plural(edited, 'spelersgegeven verschilt', 'spelersgegevens verschillen'),
-      total: edited,
-    },
-  ]
-  const links = work.filter(({ total }) => total > 0)
-
-  return links.length === 0
-    ? 'Niets te doen'
-    : links.map(({ list, text }, index) => (
-        <Fragment key={list}>
-          {index === 0 ? null : ', '}
-          <Link
-            href={
-              list === 'spelerscijfers'
-                ? statDifferencesPath(row.season)
-                : list === 'spelersgegevens'
-                  ? fieldDifferencesPath(row.season)
-                  : workListPath(row.season, list)
-            }
-          >
-            {text}
-            {/* The same words are in every row, so the name of the link says which season. */}
-            <Text as="span" className="hf-visually-hidden">
-              {' '}
-              in {row.season}
-            </Text>
-          </Link>
-        </Fragment>
-      ))
 }

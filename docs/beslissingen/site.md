@@ -5226,3 +5226,23 @@
 - **Alternatieven:** de waarden van de andere delen als verborgen velden meesturen (overschrijft wat iemand intussen opsloeg).
   Een nieuw onderdeel voor tabbladen in het designsysteem.
   De binnengekomen naam bij elk doelpunt in de tabel (vraagt een hint per veld in `InputTable`).
+
+## De tabel van de kwaliteit telt per wedstrijd zeven delen
+
+- **Datum:** 12 november 2026
+- **Besluit:** `/beheer/kwaliteit` en `/beheer/kwaliteit/<seizoen>` tonen de gaten van de wedstrijden in zeven kolommen (#1163).
+  - **Wat telt:** een gespeelde wedstrijd zonder tijd van de aftrap, zonder doelpunten bij een uitslag met doelpunten (`?`) of met doelpunten van ons zonder speler (het aantal), zonder opstelling, zonder verslag (`?`) of met een verslag dat niet af is (`…`), en het aantal lege velden van toeschouwers, scheidsrechter en stadion.
+    Uitslag volgt `lacksResult`, zoals de lijst van wedstrijden.
+    Wacht telt de wachtende wijzigingen van elke wedstrijd, ook een die nog niet gespeeld is.
+  - **Het overzicht:** een seizoen zonder gaten zegt "alles compleet" in de tweede regel onder het seizoen, want een tabel met tekst kent geen cel over de hele breedte.
+  - **Een seizoen:** een kaart per competitie met een kop en het aantal wedstrijden met een gat, in plaats van een tussenkop in één tabel.
+    Met `?kolom=` staat de kolom in de zin onder de kop ("in de kolom Doelpunten"), met een link "Alle kolommen", en niet vet in de tabel.
+    De verschillen in spelerscijfers en spelersgegevens staan als links boven de tabel.
+  - **De legenda** staat op elke breedte boven de tabel, met de letters en de tekens.
+  - **Opslaan en volgende** gaat naar de volgende wedstrijd van het seizoen met een gat in de kolom, en na de laatste weer naar de eerste; de wedstrijd die je net opsloeg telt niet mee.
+    De kolommen Opstelling en Verslag leiden naar het verslag, Wacht naar het deel `wijzigingen`: daar is geen "Opslaan en volgende".
+  - **De oude werklijsten** sturen tijdelijk (307) door naar het seizoen met de passende kolom, in `next.config.ts`.
+- **Waarom:** de kolommen volgen de delen van het formulier uit #1162, zodat een tik op een teken het goede deel opent.
+  De tabel met tekst van het designsysteem doet de rest zonder een nieuw onderdeel.
+- **Alternatieven:** een cel over de hele breedte en een tussenkop per competitie (een nieuw onderdeel voor één pagina).
+  De werklijsten houden naast de tabel (twee wegen naar hetzelfde).

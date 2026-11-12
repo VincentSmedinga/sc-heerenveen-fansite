@@ -40,7 +40,7 @@ const screens = [
   '/beheer/clubnamen',
   '/beheer/clubnamen/sv-proefdorp',
   '/beheer/kwaliteit',
-  `/beheer/kwaliteit/${earlierSeasonSlug()}/wachtende-wijzigingen`,
+  `/beheer/kwaliteit/${earlierSeasonSlug()}`,
   `/beheer/kwaliteit/${statSeasonSlug()}/spelerscijfers`,
   `/beheer/kwaliteit/${statSeasonSlug()}/spelersgegevens`,
   '/beheer/kwaliteit/personen',

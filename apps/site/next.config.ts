@@ -38,10 +38,25 @@ const config: NextConfig = {
   //
   // The page Updates used to be called Wat is er nieuw, at /wat-is-er-nieuw. Links and feed
   // readers may still use the old addresses, so they forward to the new ones for good (308).
+  //
+  // The work lists of the page Kwaliteit became columns of the table of a season (issue 1163).
+  // They are pages of the admin, which may change again, so they forward for now (307).
   redirects: () =>
     Promise.resolve([
       { destination: '/updates', permanent: true, source: '/wat-is-er-nieuw' },
       { destination: '/updates/feed.xml', permanent: true, source: '/wat-is-er-nieuw/feed.xml' },
+      ...(
+        [
+          ['zonder-doelpunten', 'doelpunten'],
+          ['doelpunten-zonder-speler', 'doelpunten'],
+          ['verslagen-bezig', 'verslag'],
+          ['wachtende-wijzigingen', 'wacht'],
+        ] as const
+      ).map(([list, column]) => ({
+        destination: `/beheer/kwaliteit/:seizoen?kolom=${column}`,
+        permanent: false,
+        source: `/beheer/kwaliteit/:seizoen/${list}`,
+      })),
     ]),
   // The packages in this workspace are TypeScript source.
   transpilePackages: ['@fansite/db', '@fansite/design-system', '@fansite/shared'],

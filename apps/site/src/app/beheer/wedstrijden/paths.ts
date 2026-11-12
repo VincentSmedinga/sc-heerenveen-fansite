@@ -42,12 +42,14 @@ export function livePath(id: number) {
 
 /**
  * The address of a part of the form of a match (issue 1162), with what the last action left to
- * say and where the editor came from (`terug`): `/beheer/wedstrijden/412/doelpunten`.
+ * say, where the editor came from (`terug`), and the column of the table of Kwaliteit that the
+ * editor works through (`kolom`, issue 1163): `/beheer/wedstrijden/412/doelpunten`. The column
+ * of the kick-off goes to its card in the part `uitslag`.
  */
 export function matchPartPath(
   id: number,
   part: string,
-  query: { back?: string | undefined; done?: string | undefined } = {},
+  query: { back?: string | undefined; column?: string | undefined; done?: string | undefined } = {},
 ) {
   const search = new URLSearchParams()
 
@@ -57,11 +59,15 @@ export function matchPartPath(
   if (query.back !== undefined) {
     search.set('terug', query.back)
   }
+  if (query.column !== undefined) {
+    search.set('kolom', query.column)
+  }
 
-  return search.size === 0 ? `${matchesPath}/${id}/${part}` : `${matchesPath}/${id}/${part}?${search}`
+  const path = search.size === 0 ? `${matchesPath}/${id}/${part}` : `${matchesPath}/${id}/${part}?${search}`
+
+  return query.column === 'aftrap' ? `${path}#aftrap-kop` : path
 }
 
-/** The address of the form of a match, with what the last action left to say (`gedaan`). */
 export function matchPath(id: number, done?: string) {
   return done === undefined ? `${matchesPath}/${id}` : `${matchesPath}/${id}?gedaan=${done}`
 }

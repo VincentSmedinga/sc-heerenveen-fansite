@@ -3389,3 +3389,19 @@
 - **Waarom:** de zoekpagina voor wedstrijden begint met negen vragen en een kaart met de wedstrijden van vandaag in eerdere jaren, en beide komen op meer pagina's voor als de site groeit.
   `Tile` past niet voor de vraagkaart: die heeft een kop en een beschrijving, en geen groot getal.
 - **Alternatieven:** de kaarten in `apps/site` houden; `Tile` met een getal in de beschrijving; `KeyFigures` (dat is geen link).
+
+## Een tabel met tekst kan korte koppen en korte tekens hebben
+
+- **Datum:** 12 november 2026
+- **Besluit:** een kolom van `DataTable` met `appearance="text"` kan een `abbreviation` hebben en `mark` zijn (#1163).
+  - **`abbreviation`:** waar de tabel smaller is dan 44rem, toont de kop de letter, en anders het hele woord.
+    Een schermlezer hoort altijd het hele woord, in een `abbr` met het woord als `title`.
+    De tabel staat dan in een container, zoals een tabel met een kolom die opvouwt.
+  - **`mark`:** de kop en de cellen staan in het midden.
+  - **`DataTable.Mark`:** een kort teken in een cel dat een link is, zoals `2` of `?`, vet op de sterke vulling, en minstens 1,5rem in beide richtingen.
+    `description` zegt de rest voor een schermlezer: "2 doelpunten zonder speler bij Ajax, 14 augustus".
+- **Waarom:** de tabel van de kwaliteit heeft zeven kolommen met korte tekens, en op een telefoon passen alleen letters.
+  Een teken van één teken is te klein als doel zonder vulling en minimale maat (WCAG 2.5.8).
+- **Alternatieven:** de tabel met getallen, die alleen letters kent en geen links in een cel heeft.
+  Altijd letters, ook op een breed scherm.
+  Een eigen tabel in de site, die geen eigen CSS heeft.

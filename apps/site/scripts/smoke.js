@@ -308,7 +308,7 @@ async function checkAdmin() {
     '/beheer/artikelen/1/voorbeeld',
     '/beheer/bezoek',
     '/beheer/kwaliteit',
-    '/beheer/kwaliteit/2005-06/zonder-doelpunten',
+    '/beheer/kwaliteit/2005-06',
     '/beheer/spelers',
     '/beheer/spelers/nieuw?seizoen=2025-26&q=jansen',
     '/beheer/spelers/1',

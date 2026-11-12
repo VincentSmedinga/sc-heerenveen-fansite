@@ -359,6 +359,66 @@ describe('DataTable with text', () => {
   })
 })
 
+describe('DataTable with short signs', () => {
+  const html = () =>
+    renderToStaticMarkup(
+      <DataTable
+        appearance="text"
+        caption="Gaten"
+        columns={['Wedstrijd', { abbreviation: 'D', mark: true, name: 'Doelpunten' }]}
+        rows={[
+          {
+            cells: [
+              <DataTable.Mark description="doelpunten zonder speler bij Ajax" href="/gat" key="d">
+                2
+              </DataTable.Mark>,
+            ],
+            header: '14 aug',
+          },
+          { cells: [null], header: '21 aug' },
+        ]}
+      />,
+    )
+
+  it('shows the letter and the word in the header, with the word in the abbr for a screen reader', () => {
+    expect(html()).toContain(
+      '<th class="hf-data-table-mark-column" scope="col"><abbr title="Doelpunten"><span aria-hidden="true" class="hf-data-table-short">D</span><span class="hf-data-table-long">Doelpunten</span></abbr></th>',
+    )
+  })
+
+  it('puts the table in a container, so the header can follow its width', () => {
+    expect(html()).toMatch(/^<div class="hf-data-table-fold"><table/)
+  })
+
+  it('makes a mark a link named by the sign and its description, and leaves a complete cell empty', () => {
+    render(
+      <DataTable
+        appearance="text"
+        caption="Gaten"
+        columns={['Wedstrijd', { abbreviation: 'D', mark: true, name: 'Doelpunten' }]}
+        rows={[
+          {
+            cells: [
+              <DataTable.Mark description="doelpunten zonder speler bij Ajax" href="/gat" key="d">
+                2
+              </DataTable.Mark>,
+            ],
+            header: '14 aug',
+          },
+          { cells: [null], header: '21 aug' },
+        ]}
+      />,
+    )
+
+    // jsdom drops the space at the start of the hidden words, which a browser keeps.
+    expect(screen.getByRole('link', { name: /^2 ?doelpunten zonder speler bij Ajax$/u }).className).toBe(
+      'hf-data-table-mark',
+    )
+    expect(screen.getByRole('columnheader', { name: 'Doelpunten' })).toBeTruthy()
+    expect(screen.getAllByRole('cell').at(-1)?.textContent).toBe('')
+  })
+})
+
 describe('DataTable.Group', () => {
   it('is a div with the class of the group, and passes other props on', () => {
     const { container } = render(

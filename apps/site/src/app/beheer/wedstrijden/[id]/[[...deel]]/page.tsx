@@ -35,6 +35,7 @@ import { describeHeldChange, describeWithoutDecision, explainHold } from '#src/b
 import { parseItemId } from '#src/beheer/items'
 import { findMatch } from '#src/beheer/match-entries'
 import { goalKinds, isKnockout, statusChoices, valuesOf } from '#src/beheer/match-form'
+import { columnParts, isFormColumn } from '#src/beheer/quality-table'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 import { wikipediaUrl } from '#src/match-format'
@@ -110,6 +111,14 @@ const notices: Record<string, { text: string; title: string }> = {
     text: 'Er is niets veranderd: de doelpunten van deze wedstrijd zijn van het verslag. Heeft Wikipedia gelijk? Pas dan het verslag aan. Anders houd je onze invoer.',
     title: 'Niet overgenomen',
   },
+  'volgende-ongewijzigd': {
+    text: 'Bij de vorige wedstrijd had je niets veranderd. Dit is de volgende wedstrijd met een gat in deze kolom.',
+    title: 'Volgende',
+  },
+  'volgende-opgeslagen': {
+    text: 'De vorige wedstrijd is opgeslagen. Dit is de volgende wedstrijd met een gat in deze kolom.',
+    title: 'Volgende',
+  },
   weggehaald: {
     text: 'De wedstrijd is teruggezet naar wat er stond voor de eerste invoer. De import leest bij de volgende keer weer wat Wikipedia zegt.',
     title: 'Invoer weggehaald',
@@ -159,10 +168,12 @@ export default async function MatchPage({ params, searchParams }: Props) {
     notFound()
   }
 
-  const { gedaan, terug } = await searchParams
+  const { gedaan, kolom, terug } = await searchParams
   const back = backPathOf(terug)
   const formPart = part === 'wijzigingen' ? undefined : part
   const shows = (shown: MatchPagePart) => part === undefined || part === shown
+  // The column of the table of Kwaliteit the editor works through, when it leads to this part.
+  const column = isFormColumn(kolom) && part === columnParts[kolom] ? kolom : undefined
   const showDelay = describeShowDelay(match.season)
   const notice =
     gedaan === 'opgeslagen'
@@ -210,7 +221,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
       action={
         part === undefined || part === 'wijzigingen'
           ? submitMatch.bind(null, match.id)
-          : submitMatchPart.bind(null, match.id, part, back)
+          : submitMatchPart.bind(null, match.id, part, back, column)
       }
       choices={{
         addPlayer: {
@@ -374,7 +385,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
         {part === 'wijzigingen' ? null : (
           <>
             <MatchFields part={formPart} />
-            <MatchSavePanel cancelHref={back ?? matchesPath} />
+            <MatchSavePanel cancelHref={back ?? matchesPath} next={column !== undefined} />
           </>
         )}
         {part !== undefined ? null : match.dataSource === 'redactie' ? (

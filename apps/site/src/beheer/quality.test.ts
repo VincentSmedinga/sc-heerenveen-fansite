@@ -4,8 +4,9 @@ import { readSeasonCoverage } from '@fansite/db/season-coverage'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { listWork, seasonHasPlayers, waitingChangesBySeason, workListPath, workLists } from './quality'
+import { seasonHasPlayers } from './quality'
 import { addQualitySeason, season } from './quality-fixtures'
+import { countGapsBySeason, nextWithGap, readMatchGaps, seasonTablePath } from './quality-table'
 
 let database: TestDatabase
 let ids: Awaited<ReturnType<typeof addQualitySeason>>
@@ -19,86 +20,92 @@ afterAll(async () => {
   await database?.drop()
 })
 
-const idsOf = async (list: (typeof workLists)[number], of = season) =>
-  (await listWork(database.db, of, list)).map((match) => match.id)
+const now = new Date('2006-10-01T12:00:00Z')
+const gapsOf = async (of = season) =>
+  new Map((await readMatchGaps(database.db, of, now)).map((match) => [match.id, match.gaps]))
 
-describe('the work lists of a season', () => {
-  it('lists the played matches with goals in the result and none in the list of goals', async () => {
-    expect(await idsOf('zonder-doelpunten')).toEqual([ids.withoutGoals])
-    expect(await idsOf('zonder-doelpunten', '2006/07')).toEqual([ids.later])
+describe('the gaps of the matches of a season (#1163)', () => {
+  it('has a ? for goals when the result has goals and the list has none, and not for a 0-0', async () => {
+    const gaps = await gapsOf()
+
+    expect(gaps.get(ids.withoutGoals)?.doelpunten).toEqual({ sign: '?', total: 1 })
+    expect(gaps.get(ids.goalless)?.doelpunten).toBeUndefined()
+    expect((await gapsOf('2006/07')).get(ids.later)?.doelpunten).toEqual({ sign: '?', total: 1 })
   })
 
-  it('lists the matches with a report that is not finished', async () => {
-    expect(await idsOf('verslagen-bezig')).toEqual([ids.unfinished])
+  it('counts the goals of ours without a player, and not an own goal of ours or a goal of the opponent', async () => {
+    const gaps = await gapsOf()
+
+    expect(gaps.get(ids.unlinked)?.doelpunten).toEqual({ sign: '2', total: 2 })
+    expect(gaps.get(ids.unfinished)?.doelpunten).toBeUndefined()
+    expect(gaps.get(ids.complete)?.doelpunten).toBeUndefined()
   })
 
-  it('lists the matches with a goal of ours without a player, with how many', async () => {
-    const found = await listWork(database.db, season, 'doelpunten-zonder-speler')
+  it('has … for a report that is not finished, and ? for no report', async () => {
+    const gaps = await gapsOf()
 
-    // An own goal of ours and a goal of the opponent are not ours to link; an own goal of the
-    // opponent is.
-    expect(found.map(({ id, total }) => ({ id, total }))).toEqual([{ id: ids.unlinked, total: 2 }])
-    // The names those two goals came with, and not the one of the opponent's goal.
-    expect(found[0]?.names).toEqual(['Onbekende Een', 'Onbekende Twee'])
-    expect((await listWork(database.db, season, 'wachtende-wijzigingen'))[0]?.names).toEqual([])
+    expect(gaps.get(ids.unfinished)?.verslag).toEqual({ sign: '…', total: 1 })
+    expect(gaps.get(ids.complete)?.verslag).toBeUndefined()
+    expect(gaps.get(ids.withoutGoals)?.verslag).toEqual({ sign: '?', total: 1 })
   })
 
+  it('counts the changes that wait, and the facts that are empty', async () => {
+    const gaps = await gapsOf()
+
+    expect(gaps.get(ids.waiting)?.wacht).toEqual({ sign: '2', total: 2 })
+    expect(gaps.get(ids.complete)?.wacht).toBeUndefined()
+    expect(gaps.get(ids.complete)?.gegevens).toEqual({ sign: '3', total: 3 })
+  })
+
+  it('has a ? for the kick-off and the line-up of a played match without them', async () => {
+    const gaps = await gapsOf()
+
+    expect(gaps.get(ids.complete)?.aftrap).toEqual({ sign: '?', total: 1 })
+    expect(gaps.get(ids.complete)?.opstelling).toEqual({ sign: '?', total: 1 })
+    expect(gaps.get(ids.complete)?.uitslag).toBeUndefined()
+  })
+
+  it('counts as many goals and reports as the coverage of the season', async () => {
+    const coverage = (await readSeasonCoverage(database.db, now)).find((row) => row.season === season)
+    const rows = await readMatchGaps(database.db, season, now)
+
+    expect(rows.filter((row) => row.gaps.doelpunten?.sign === '?')).toHaveLength(coverage?.playedWithoutGoalList ?? -1)
+    expect(rows.filter((row) => row.gaps.verslag?.sign === '…')).toHaveLength(
+      (coverage?.reports ?? 0) - (coverage?.reportsDone ?? 0),
+    )
+    expect(
+      rows.reduce((sum, row) => sum + (row.gaps.doelpunten?.sign === '?' ? 0 : (row.gaps.doelpunten?.total ?? 0)), 0),
+    ).toBe(coverage?.goalsWithoutPlayer)
+  })
+
+  it('counts the matches of each season and the ones with a gap in each column', async () => {
+    const counts = countGapsBySeason(await readMatchGaps(database.db, undefined, now))
+
+    expect(counts.get(season)).toMatchObject({ columns: { doelpunten: 2, verslag: 5, wacht: 1 }, matches: 6 })
+    expect(counts.get('2006/07')?.matches).toBe(1)
+  })
+
+  it('finds the next match with a gap in a column, going round the season', async () => {
+    const rows = await readMatchGaps(database.db, season, now)
+
+    expect(nextWithGap(rows, ids.withoutGoals, 'doelpunten')?.id).toBe(ids.unlinked)
+    expect(nextWithGap(rows, ids.unlinked, 'doelpunten')?.id).toBe(ids.withoutGoals)
+    expect(nextWithGap(rows, ids.waiting, 'wacht')).toBeUndefined()
+  })
+})
+
+describe('the addresses of the table', () => {
+  it('names the season, and the column and the notice when given', () => {
+    expect(seasonTablePath('2005/06')).toBe('/beheer/kwaliteit/2005-06')
+    expect(seasonTablePath('2005/06', 'doelpunten', 'kolom-compleet')).toBe(
+      '/beheer/kwaliteit/2005-06?kolom=doelpunten&gedaan=kolom-compleet',
+    )
+  })
+})
+
+describe('the players of a season', () => {
   it('knows whether a season has a player to choose from', async () => {
     expect(await seasonHasPlayers(database.db, season)).toBe(true)
     expect(await seasonHasPlayers(database.db, '2006/07')).toBe(false)
-  })
-
-  it('lists the matches with a change that waits, with how many, and not a decided one', async () => {
-    const found = await listWork(database.db, season, 'wachtende-wijzigingen')
-
-    expect(found.map(({ id, total }) => ({ id, total }))).toEqual([{ id: ids.waiting, total: 2 }])
-  })
-
-  it('gives what a row shows: the clubs, the day, the round and the result', async () => {
-    expect(await listWork(database.db, season, 'zonder-doelpunten')).toEqual([
-      {
-        competition: 'Eredivisie',
-        goalsAgainst: 1,
-        goalsFor: 2,
-        home: false,
-        id: ids.withoutGoals,
-        kickoffAt: null,
-        matchDate: '2005-08-27',
-        names: [],
-        opponent: 'Voorbeeld United',
-        round: '3',
-        status: 'played',
-        total: 1,
-      },
-    ])
-  })
-
-  it('is empty for a season without work', async () => {
-    for (const list of workLists) {
-      expect(await listWork(database.db, '1990/91', list)).toEqual([])
-    }
-  })
-
-  it('has as many matches and goals as the coverage of the season counts', async () => {
-    const coverage = (await readSeasonCoverage(database.db, new Date('2006-10-01T12:00:00Z'))).find(
-      (row) => row.season === season,
-    )
-    const unlinked = await listWork(database.db, season, 'doelpunten-zonder-speler')
-
-    expect(coverage?.playedWithoutGoalList).toBe((await idsOf('zonder-doelpunten')).length)
-    expect((coverage?.reports ?? 0) - (coverage?.reportsDone ?? 0)).toBe((await idsOf('verslagen-bezig')).length)
-    expect(coverage?.goalsWithoutPlayer).toBe(unlinked.reduce((sum, match) => sum + match.total, 0))
-  })
-})
-
-describe('the changes that wait, by season', () => {
-  it('counts the pending changes of a match that exists', async () => {
-    expect(await waitingChangesBySeason(database.db)).toEqual(new Map([[season, 2]]))
-  })
-})
-
-describe('the address of a work list', () => {
-  it('names the season and the list', () => {
-    expect(workListPath('2005/06', 'zonder-doelpunten')).toBe('/beheer/kwaliteit/2005-06/zonder-doelpunten')
   })
 })
