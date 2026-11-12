@@ -69,7 +69,7 @@ export function AccountForm({
         id="voornaam"
         label="Voornaam"
       >
-        <Input autoComplete="off" {...field('voornaam')} />
+        <Input autoComplete="off" width="natural" {...field('voornaam')} />
       </Field>
       <Field
         error={errors.adres}

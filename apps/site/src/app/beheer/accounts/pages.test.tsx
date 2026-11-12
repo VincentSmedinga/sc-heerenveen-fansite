@@ -101,22 +101,37 @@ describe('the pages of the accounts', () => {
 })
 
 describe('the list', () => {
-  it('shows the owner first, then the others, each with a link by its first name, or its address without one', async () => {
+  it('shows the owner first, then the others, each a row with a link by its first name, or its address without one', async () => {
     await revokeAccount(database.db, 'auteur@example.test')
 
     const html = await list()
+    const rows = [...html.matchAll(/<li class="hf-figure-list-item">(.*?)<\/li>/gu)].map(([, row]) => row)
 
-    expect(headings(html)).toEqual([
-      'h1 Accounts',
-      `h2 <a href="/beheer/accounts/${ids.owner}">Eva<span class="hf-visually-hidden"> (eigenaar@example.test)</span></a>`,
-      `h2 <a href="/beheer/accounts/${ids.editor}">Ruben<span class="hf-visually-hidden"> (redacteur@example.test)</span></a>`,
-      `h2 <a href="/beheer/accounts/${ids.author}">auteur@example.test</a>`,
-    ])
-    expect(html).toContain('eigenaar@example.test · eigenaar · aan')
-    expect(html).toContain('redacteur@example.test · redacteur · aan')
-    expect(html).toContain('zonder voornaam · auteur · uit')
+    expect(headings(html)).toEqual(['h1 Accounts'])
+    expect(rows).toHaveLength(3)
+    expect(rows[0]).toContain(
+      `<a href="/beheer/accounts/${ids.owner}">Eva<span class="hf-visually-hidden"> (eigenaar@example.test)</span></a>`,
+    )
+    expect(rows[0]).toContain('eigenaar@example.test')
+    expect(rows[0]).toContain('eigenaar · aan')
+    expect(rows[1]).toContain(
+      `<a href="/beheer/accounts/${ids.editor}">Ruben<span class="hf-visually-hidden"> (redacteur@example.test)</span></a>`,
+    )
+    expect(rows[1]).toContain('redacteur · aan')
+    expect(rows[2]).toContain(`<a href="/beheer/accounts/${ids.author}">auteur@example.test</a>`)
+    expect(rows[2]).toContain('zonder voornaam')
+    expect(rows[2]).toContain('auteur · uit')
     expect(html).toContain('3 accounts.')
     expect(html).not.toMatch(/<(?:button|a)[^>]*>[^<]*verwijder/iu)
+  })
+
+  it('has the button for a new account under the card, as a form with method get', async () => {
+    const html = await list()
+
+    expect(html.indexOf('Nieuw')).toBeGreaterThan(html.indexOf('hf-figure-list'))
+    expect(html).toMatch(
+      /<form[^>]*action="\/beheer\/accounts\/nieuw"[^>]*method="get"|<form[^>]*method="get"[^>]*action="\/beheer\/accounts\/nieuw"/u,
+    )
   })
 
   it('says an account is gone when the address says so', async () => {
@@ -131,6 +146,9 @@ describe('the form of an account', () => {
     expect(headings(html)[0]).toBe('h1 Account wijzigen')
     expect(html).toContain('zonder voornaam, auteur, aan.')
     expect(html).toMatch(/<label[^>]*for="voornaam"[^>]*>Voornaam/u)
+    expect(html).toMatch(
+      /<input[^>]*class="hf-width-natural"[^>]*name="voornaam"|<input[^>]*name="voornaam"[^>]*class="hf-width-natural"/u,
+    )
     expect(html).toMatch(/<label[^>]*for="adres"[^>]*>E-mailadres/u)
     expect(html).toMatch(/<legend>Rol/u)
     expect(html).toMatch(/<legend>Status/u)
