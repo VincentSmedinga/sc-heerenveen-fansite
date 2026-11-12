@@ -110,8 +110,7 @@ export type DataTableRow = {
 export type DataTableTextColumn = {
   /**
    * Makes the column one of numbers with a `Bar` after each number: the header and the cells
-   * are aligned to the end, and the header keeps the room of the bar, so it stands above the
-   * numbers.
+   * are aligned to the end, so the header stands over the number and the bar together.
    */
   bar?: boolean
   /**

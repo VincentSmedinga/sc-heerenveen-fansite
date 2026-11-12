@@ -525,7 +525,7 @@ export const TextTableWithBars = meta.story({
     docs: {
       description: {
         story:
-          'Een kolom van een tabel met tekst kan getallen met een `Bar` erachter hebben: geef de kolom als `{ bar: true, name }`, dan staan de kop en de getallen rechts uitgelijnd. Zet de tabel in een `BarPlace`: de balk verdwijnt daar waar de plaats te smal voor hem is. De balk is versiering en verborgen voor een schermlezer.',
+          'Een kolom van een tabel met tekst kan getallen met een `Bar` erachter hebben: geef de kolom als `{ bar: true, name }`, dan staan de getallen rechts uitgelijnd en staat de kop over het getal en de balk. Zet de tabel in een `BarPlace`: de balk verdwijnt daar waar de plaats te smal voor hem is. De balk is versiering en verborgen voor een schermlezer.',
       },
     },
   },

@@ -215,7 +215,7 @@ describe('DataTable with text', () => {
     ],
   } as const
 
-  it('aligns a column with a bar to the end and gives its header the room of the bar', () => {
+  it('aligns a column with a bar to the end and puts its header over the number and the bar', () => {
     render(
       <DataTable
         appearance="text"
@@ -225,7 +225,7 @@ describe('DataTable with text', () => {
       />,
     )
 
-    expect(screen.getByRole('columnheader', { name: 'Dagen' }).className).toBe('hf-numeric hf-bar-head')
+    expect(screen.getByRole('columnheader', { name: 'Dagen' }).className).toBe('hf-numeric')
     expect(screen.getByRole('cell', { name: '12' }).className).toBe('hf-numeric')
     expect(screen.getByRole('columnheader', { name: 'Club' }).className).toBe('')
   })

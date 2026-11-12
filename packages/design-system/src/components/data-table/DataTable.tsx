@@ -93,7 +93,7 @@ export const DataTable = ({ appearance = 'numbers', caption, className, columns,
               <th
                 className={classNames(
                   column.fold === true && 'hf-data-table-fold-column',
-                  column.bar === true && 'hf-numeric hf-bar-head',
+                  column.bar === true && 'hf-numeric',
                 )}
                 key={column.name}
                 scope="col"
