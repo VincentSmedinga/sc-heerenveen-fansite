@@ -6,6 +6,7 @@ import type { PersonTitleAlias } from './person-merge.ts'
 
 import {
   type BirthDatePrecision,
+  type BirthDateSource,
   type DeathDateSource,
   type PersonCountrySource,
   type PersonLineSource,
@@ -32,7 +33,8 @@ export type PersonBookCounts = { people: number; titles: number }
 
 /** What the importer reads from Wikidata about one person (#898). Everything may be empty. */
 export type PersonData = {
-  birthDate: null | { date: string; precision: BirthDatePrecision }
+  /** The birth date of Wikidata. `keep` leaves what is there: a date of the editors (#1164). */
+  birthDate: 'keep' | null | { date: string; precision: BirthDatePrecision }
   /** The Q-number of the birth place. Its label is in `wikidata_items`. */
   birthPlaceId: null | string
   /** The date of death of Wikidata. `keep`, or leaving it out, leaves what is there. */
@@ -86,6 +88,8 @@ export type PersonNameCounts = Record<ImportedNameSource, number>
 
 /** A person the importer has not read from Wikidata yet, with what an earlier try left. */
 export type PersonToRead = {
+  /** Where his birth date came from. `manual` is a date the importer leaves alone (#1164). */
+  birthDateSource: BirthDateSource | null
   /** Where his date of death came from. `manual` is a year the importer leaves alone. */
   deathDateSource: DeathDateSource | null
   id: number
@@ -491,6 +495,7 @@ export async function personsToRead(
 ): Promise<PersonToRead[]> {
   const rows = await db
     .select({
+      birthDateSource: persons.birthDateSource,
       deathDateSource: persons.deathDateSource,
       id: persons.id,
       lineSource: persons.lineSource,
@@ -784,19 +789,25 @@ export async function setEditorsName(db: Pick<Database, 'update'>, personId: num
 }
 
 /**
- * Sets the line and the country of a person as the editors chose them in the admin (#1051). A
- * value gets the source `manual`, which the importer never replaces; null takes the value and
- * its source away, so the importer fills it in again at its next run. A field that is left out
- * stays as it is.
+ * Sets the line, the country, the birth date and the year of death of a person as the editors
+ * chose them in the admin (#1051, #1147, #1164). A value gets the source `manual`, which the
+ * importer never replaces; null takes the value and its source away, so the importer fills it
+ * in again at its next run. A field that is left out stays as it is. A birth date is a year or
+ * a day.
  */
 export async function setEditorsPersonFacts(
   db: Pick<Database, 'update'>,
   personId: number,
-  facts: { country?: null | string; deathYear?: null | number; line?: null | PlayerPosition },
+  facts: {
+    birthDate?: null | { date: string; precision: 'day' | 'year' }
+    country?: null | string
+    deathYear?: null | number
+    line?: null | PlayerPosition
+  },
 ): Promise<void> {
-  const { country, deathYear, line } = facts
+  const { birthDate, country, deathYear, line } = facts
 
-  if (country === undefined && line === undefined && deathYear === undefined) {
+  if (country === undefined && line === undefined && deathYear === undefined && birthDate === undefined) {
     return
   }
 
@@ -805,6 +816,12 @@ export async function setEditorsPersonFacts(
     .set({
       ...(country === undefined ? {} : { country, countrySource: country === null ? null : ('manual' as const) }),
       ...(line === undefined ? {} : { line, lineSource: line === null ? null : ('manual' as const) }),
+      // A birth date of the editors (#1164), taken away as the year of death is.
+      ...(birthDate === undefined
+        ? {}
+        : birthDate === null
+          ? { birthDate: null, birthDatePrecision: null, birthDateSource: null, wikidataReadAt: null }
+          : { birthDate: birthDate.date, birthDatePrecision: birthDate.precision, birthDateSource: 'manual' as const }),
       // A year of the editors (#1147). Taking it away leaves nothing of Wikidata to fall back
       // on, so the person is read again at the next run.
       ...(deathYear === undefined
@@ -959,8 +976,13 @@ export async function storePersonData(
   await db
     .update(persons)
     .set({
-      birthDate: data.birthDate?.date ?? null,
-      birthDatePrecision: data.birthDate?.precision ?? null,
+      ...(data.birthDate === 'keep'
+        ? {}
+        : {
+            birthDate: data.birthDate?.date ?? null,
+            birthDatePrecision: data.birthDate?.precision ?? null,
+            birthDateSource: data.birthDate === null ? null : ('wikidata' as const),
+          }),
       birthPlaceId: data.birthPlaceId,
       ...(data.deathDate === 'keep' || data.deathDate === undefined
         ? {}

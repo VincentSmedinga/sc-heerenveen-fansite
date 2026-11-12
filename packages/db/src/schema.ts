@@ -856,6 +856,14 @@ export const deathDateSources = ['wikidata', 'manual'] as const
 
 export type DeathDateSource = (typeof deathDateSources)[number]
 
+/**
+ * Where the birth date of a person came from (#1164): `wikidata` from `P569`, `manual` a year
+ * or a day the editors filled in. The importer never replaces `manual`.
+ */
+export const birthDateSources = ['wikidata', 'manual'] as const
+
+export type BirthDateSource = (typeof birthDateSources)[number]
+
 /** The most characters a Q-number of Wikidata holds (`Q15943430`), and the most of a label. */
 export const wikidataLimits = { id: 20, label: 255 }
 
@@ -914,6 +922,9 @@ export const persons = mysqlTable('persons', {
   wikipediaPageId: int('wikipedia_page_id', { unsigned: true }),
   birthDate: date('birth_date', { mode: 'string' }),
   birthDatePrecision: mysqlEnum('birth_date_precision', birthDatePrecisions),
+  // Where the birth date came from (#1164), as `death_date_source`: the editors fill in a year
+  // or a day with the source `manual`, which the importer never replaces.
+  birthDateSource: mysqlEnum('birth_date_source', birthDateSources),
   birthPlaceId: varchar('birth_place_id', { length: wikidataLimits.id }).references(() => wikidataItems.id),
   // The date of death (#1147), as `birth_date` is kept: a day, or the first of the month or of
   // the year when `death_date_precision` says that is all we know. All three are empty for a

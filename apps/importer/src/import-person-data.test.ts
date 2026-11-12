@@ -219,6 +219,33 @@ describe('readPersonData', () => {
     expect(asked(served.data)).toEqual([itemPath('Q15943430')])
   })
 
+  it('never replaces a birth date of the editors, and gives Wikidata back when they clear it', async () => {
+    await addPersons('Joost van Aken')
+
+    const [person] = await rows('SELECT id FROM persons')
+
+    await setEditorsPersonFacts(connection.db, person?.['id'], { birthDate: { date: '1993-01-01', precision: 'year' } })
+
+    const served = await serve(joost.wikipedia, joost.wikidata)
+
+    expect((await read(served)).read).toBe(1)
+    expect(
+      await rows(
+        "SELECT DATE_FORMAT(birth_date, '%Y-%m-%d') AS birth_date, birth_date_precision, birth_date_source, wikidata_id FROM persons",
+      ),
+    ).toEqual([
+      { birth_date: '1993-01-01', birth_date_precision: 'year', birth_date_source: 'manual', wikidata_id: 'Q15943430' },
+    ])
+
+    await setEditorsPersonFacts(connection.db, person?.['id'], { birthDate: null })
+    await read(served)
+    expect(
+      await rows(
+        "SELECT DATE_FORMAT(birth_date, '%Y-%m-%d') AS birth_date, birth_date_precision, birth_date_source FROM persons",
+      ),
+    ).toEqual([{ birth_date: '1994-05-13', birth_date_precision: 'day', birth_date_source: 'wikidata' }])
+  })
+
   it('stores a birth date with only a year as a first of January, with its precision', async () => {
     await addPersons('Oude Speler')
 
