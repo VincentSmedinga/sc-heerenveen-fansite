@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { Button, Card, Field, Form, Heading, Input, Link, Page, Text } from '@fansite/design-system'
 import { redirect } from 'next/navigation'
 
-import { matchPath } from '#src/app/beheer/wedstrijden/paths'
+import { matchPartPath, matchPath } from '#src/app/beheer/wedstrijden/paths'
 import { countryChoices } from '#src/beheer/countries'
 import { compact } from '#src/beheer/density'
 import { parseSearch, searchMaxLength } from '#src/beheer/items'
@@ -35,7 +35,7 @@ export default async function AddPlayerPage({ searchParams }: { searchParams: Pr
   await requireRole('owner', 'editor')
 
   const { db } = getDatabase()
-  const { q, seizoen, wedstrijd } = await searchParams
+  const { deel, q, seizoen, wedstrijd } = await searchParams
   const season = typeof seizoen === 'string' ? seasonFromSlug(seizoen) : undefined
 
   if (season === undefined || !(await listPlayerSeasons(db)).includes(season)) {
@@ -44,6 +44,7 @@ export default async function AddPlayerPage({ searchParams }: { searchParams: Pr
 
   const search = parseSearch(q)
   const back = await findReturnMatch(db, wedstrijd, season)
+  const toGoals = back !== undefined && deel === 'doelpunten'
   const people = await searchPersons(db, search, season)
   const [first] = people
 
@@ -84,6 +85,7 @@ export default async function AddPlayerPage({ searchParams }: { searchParams: Pr
           </Field>
           {/* The button sends the season, and a hidden field the match to go back to. */}
           {back === undefined ? null : <Input name="wedstrijd" type="hidden" value={String(back.id)} />}
+          {toGoals ? <Input name="deel" type="hidden" value="doelpunten" /> : null}
           <Button appearance="soft" name="seizoen" type="submit" value={seasonSlug(season)}>
             Zoeken
           </Button>
@@ -99,15 +101,17 @@ export default async function AddPlayerPage({ searchParams }: { searchParams: Pr
         )}
       </Card>
       <PlayerForm
-        action={submitAddPlayer.bind(null, season, back?.id)}
-        cancelHref={back === undefined ? listPath(season) : matchPath(back.id)}
+        action={submitAddPlayer.bind(null, season, back?.id, toGoals)}
+        cancelHref={
+          back === undefined ? listPath(season) : toGoals ? matchPartPath(back.id, 'doelpunten') : matchPath(back.id)
+        }
         countries={countryChoices()}
         initial={{
           ...emptyPlayerValues,
           persoon: first === undefined ? newPersonChoice : String(first.id),
           rugnummer: first?.suggestion === undefined ? '' : String(first.suggestion.number),
         }}
-        key={addPlayerPath(season, search, back?.id)}
+        key={addPlayerPath(season, search, back?.id, toGoals)}
         people={people}
         submitLabel="Speler toevoegen"
       />

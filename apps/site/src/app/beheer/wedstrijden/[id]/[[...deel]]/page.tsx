@@ -213,7 +213,10 @@ export default async function MatchPage({ params, searchParams }: Props) {
           : submitMatchPart.bind(null, match.id, part, back)
       }
       choices={{
-        addPlayer: { href: addPlayerPath(match.season, undefined, match.id), season: match.season },
+        addPlayer: {
+          href: addPlayerPath(match.season, undefined, match.id, part === 'doelpunten'),
+          season: match.season,
+        },
         goalKinds,
         home: match.home,
         incoming,

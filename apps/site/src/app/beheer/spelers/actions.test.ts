@@ -128,7 +128,7 @@ async function resultOf(run: () => Promise<unknown>) {
 
 const initial: PlayerFormState = { errors: {}, values: emptyPlayerValues }
 const add = (formData: FormData, ofSeason: unknown = season, from?: unknown) =>
-  resultOf(() => submitAddPlayer(ofSeason as string, from as number | undefined, initial, formData))
+  resultOf(() => submitAddPlayer(ofSeason as string, from as number | undefined, false, initial, formData))
 const edit = (id: unknown, formData: FormData) => resultOf(() => submitPlayer(id as number, initial, formData))
 const remove = (id: unknown) => resultOf(() => submitRemovePlayer(id as number))
 const stored = () => database.db.select().from(players).orderBy(asc(players.id))
@@ -151,6 +151,12 @@ describe('submitAddPlayer', () => {
       redirect: `/beheer/wedstrijden/${matchId}?gedaan=speler-toegevoegd`,
     })
     expect(await stored()).toMatchObject([{ name: 'Pelle van Amersfoort', season }])
+  })
+
+  it('ends on the part Doelpunten of the match when the editor came from there (#1162)', async () => {
+    expect(await resultOf(() => submitAddPlayer(season, matchId, true, initial, form()))).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}/doelpunten?gedaan=speler-toegevoegd`,
+    })
   })
 
   it('ends on the list for a match of another season, a match that is gone and something that is no number', async () => {

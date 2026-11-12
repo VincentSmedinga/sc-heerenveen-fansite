@@ -5217,6 +5217,7 @@
   - **Een fout in een ander deel**, zoals doelpunten die niet meer bij een nieuwe uitslag passen, staat in de foutsamenvatting als "In een ander deel van de wedstrijd: …" en linkt naar "Hele wedstrijd bewerken".
   - **Binnengekomen namen:** het deel Doelpunten zegt in één zin boven de tabel met welke naam een doelpunt van ons zonder speler binnenkwam: Zonder speler binnengekomen: doelpunt 1 als "Hansen".
   - **Terug:** een adres met `terug` binnen `/beheer` bepaalt waar Annuleren en de link bovenaan heen gaan; een ander adres wordt genegeerd.
+  - **Een speler toevoegen** vanaf het deel Doelpunten komt na het opslaan of Annuleren terug op dat deel: het adres van het formulier van een speler krijgt `deel=doelpunten`.
   - **Eén pagina:** het hele formulier en de delen zijn één pagina, `[id]/[[...deel]]/page.tsx`, zodat de controles op de rol en de compacte dichtheid één bestand lezen.
 - **Waarom:** `Filter` is al de rij links met `aria-current` in het beheer, en breekt af op een telefoon.
   `SegmentedLinks` breekt zes woorden midden in een woord af.
