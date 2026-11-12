@@ -1774,6 +1774,7 @@ describe('the choice between all the matches and the Eredivisie on /cijfers', ()
       expect(card(all, id), id).toBe(card(league, id))
       expect(card(all, id), id).not.toContain('SV Proefdorp')
       expect(card(all, id), id).toMatch(/<p class="hf-meta">Alleen de Eredivisie<\/p>$/)
+      expect(card(all, id), id).toContain('>Eredivisie</span>')
     }
   })
 
@@ -1795,6 +1796,7 @@ describe('the choice between all the matches and the Eredivisie on /cijfers', ()
     ]) {
       expect(html.indexOf(`id="${id}"`), id).toBeGreaterThan(html.indexOf('Welke wedstrijden'))
       expect(section(html, id), id).not.toContain('Alleen de Eredivisie')
+      expect(section(html, id), id).not.toContain('>Eredivisie</span>')
     }
   })
 
