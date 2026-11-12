@@ -173,7 +173,7 @@ describe('the form of a person', () => {
     expect((await person())?.wikipediaPage).toBeNull()
   })
 
-  it('saves a birth date as the editors give it, and an empty one gives Wikidata back', async () => {
+  it('saves a birth date as the editors give it, and an empty one gives Wikidata back, without dates in the log', async () => {
     await editPerson(database.db, userId, personId, await entryOf({ geboren: '14-3-1990' }, 'leven'), now)
     expect(await person()).toMatchObject({
       birthDate: '1990-03-14',
@@ -189,8 +189,8 @@ describe('the form of a person', () => {
       wikidataReadAt: null,
     })
     expect((await log()).map((row) => row.detail)).toEqual([
-      'Aangepast: Jan Verzonnen. geboortedatum: 3-1990 → 14-3-1990. Reden: Uit het clubblad',
-      'Aangepast: Jan Verzonnen. geboortedatum: 14-3-1990 → geen. Reden: Uit het clubblad',
+      'Aangepast: Jan Verzonnen. geboortedatum aangepast. Reden: Uit het clubblad',
+      'Aangepast: Jan Verzonnen. geboortedatum weggehaald. Reden: Uit het clubblad',
     ])
   })
 

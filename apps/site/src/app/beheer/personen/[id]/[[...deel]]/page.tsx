@@ -67,6 +67,7 @@ export default async function PersonPage({ params, searchParams }: Props) {
 
   const { gedaan, terug } = await searchParams
   const back = backPathOf(terug)
+  const initial = personValuesOf(found)
   const notice = typeof gedaan === 'string' && Object.hasOwn(notices, gedaan) ? notices[gedaan] : undefined
   const navigation = [
     { current: part === undefined, href: personPath(id, { back }), label: 'Alles' },
@@ -122,8 +123,9 @@ export default async function PersonPage({ params, searchParams }: Props) {
         action={submitPerson.bind(null, id, part, back)}
         cancelHref={back ?? playersPath}
         countries={countryChoices()}
-        initial={personValuesOf(found)}
-        key={`${id}-${part ?? ''}-${gedaan ?? ''}`}
+        initial={initial}
+        // A second save on the same address must open the form anew, with what is stored now.
+        key={`${id}-${part ?? ''}-${gedaan ?? ''}-${JSON.stringify(initial)}`}
         part={part}
       />
     </Page.Main>

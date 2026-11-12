@@ -1302,7 +1302,7 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
   De velden en controles zijn die van het formulier van een speler (`PersonFields.tsx` en `src/beheer/person-checks.ts`).
   Een nieuwe naam geldt voor de persoon en voor zijn speler in elk seizoen.
   De geboortedatum is een jaar of een datum, met de bron `manual`, die de importer niet vervangt; leeg haalt hem weg, zodat de importer hem weer invult.
-  Opslaan vraagt een reden, en schrijft `person.edit` met wat er veranderde.
+  Opslaan vraagt een reden, en schrijft `person.edit` met wat er veranderde, zonder de geboortedatum zelf.
 - Een speler kan een **vorig rugnummer** hebben met de dag vanaf wanneer het huidige nummer geldt ("Vorig rugnummer" en "Nieuw nummer vanaf", beide of geen, elk met een eigen fout; #1076).
   Verandert de redactie het nummer van een speler die met zijn oude nummer in een opgeslagen opstelling staat, dan zet het formulier het oude nummer in Vorig rugnummer en vraagt het om de dag.
   `readSquad` (`src/beheer/match-reports.ts`) geeft de selectie met het nummer van de dag van de wedstrijd, voor het formulier van het verslag, het plakken en het live verslag; een opgeslagen verslag houdt zijn nummers.

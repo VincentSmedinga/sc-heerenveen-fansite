@@ -5275,6 +5275,7 @@
   - **De geboortedatum** is één veld: een jaar (`1985`) of een datum (`14-3-1985`).
     Een maand van Wikidata staat er als `3-1985` en blijft zo zolang de redactie het veld niet aanpast.
   - **Opslaan** vraagt een reden, die met wat er veranderde in `person.edit` komt.
+    Van de geboortedatum zegt het logboek alleen dat hij is ingevuld, aangepast of weggehaald: een geboortedatum is een persoonsgegeven en hoort niet in het logboek.
     Een deel slaat alleen zijn eigen velden op en controleert alleen die.
   - **De weg terug** gaat met `terug` naar de pagina waar de redactie vandaan kwam, zoals het formulier van een speler; zonder `terug` naar Spelers, want er is geen lijst van personen.
 - **Waarom:** een persoon heeft geen seizoen, dus een naam die alleen bij de persoon verandert, laat in elk seizoen de oude naam staan.

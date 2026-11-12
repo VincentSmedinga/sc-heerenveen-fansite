@@ -306,7 +306,8 @@ async function rename(transaction: Transaction, personId: number, name: NonNulla
  * of another person is refused with the two persons to merge, and a person who has a page keeps
  * it. The birth date, the year of death, the country and the line get the source `manual`, and
  * an empty one takes the value and its source away (`setEditorsPersonFacts`). Writes
- * `person.edit` with what changed and the reason, and nothing for a save that changes nothing.
+ * `person.edit` with what changed, without the birth date itself, and the reason, and nothing
+ * for a save that changes nothing.
  */
 async function storePersonEdit(
   db: Database,
@@ -354,11 +355,15 @@ async function storePersonEdit(
         ...(entry.line === undefined || entry.line === person.line ? {} : { line: entry.line }),
       }
 
+      // A birth date is a personal datum, so the log says what happened and not the dates.
       if (facts.birthDate !== undefined) {
-        const was = birthDateText(person.birthDate, person.birthDatePrecision)
-        const is = birthDateText(facts.birthDate?.date, facts.birthDate?.precision)
-
-        changes.push(`geboortedatum: ${was === '' ? 'geen' : was} → ${is === '' ? 'geen' : is}`)
+        changes.push(
+          facts.birthDate === null
+            ? 'geboortedatum weggehaald'
+            : person.birthDate === null
+              ? 'geboortedatum ingevuld'
+              : 'geboortedatum aangepast',
+        )
       }
       if (facts.deathYear !== undefined) {
         changes.push(`jaar van overlijden: ${yearOfDeath ?? 'geen'} → ${facts.deathYear ?? 'geen'}`)
