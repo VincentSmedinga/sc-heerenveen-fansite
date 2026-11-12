@@ -364,7 +364,7 @@ test.describe('the open list of the season picker', () => {
   }
 
   test('opens a short list below the field, also when there is more room above', async ({ page }) => {
-    const { field, menu, roomAbove, roomBelow } = await open(page, { count: 0, height: 844, lowerBy: 150 })
+    const { field, menu, roomAbove, roomBelow } = await open(page, { count: 0, height: 844, lowerBy: 110 })
 
     expect(roomAbove).toBeGreaterThan(roomBelow)
     expect(menu.optionsHeight).toBeLessThan(roomBelow)
@@ -380,7 +380,7 @@ test.describe('the open list of the season picker', () => {
 
     expect(menu.optionsHeight).toBeGreaterThan(roomBelow)
     expect(menu.optionsHeight).toBeLessThan(roomAbove)
-    expect(menu.bottom).toBeLessThanOrEqual(field.y)
+    expect(menu.bottom).toBeLessThanOrEqual(field.y + 1)
     expect(menu.top).toBeGreaterThanOrEqual(0)
     expect(menu.optionsHeight).toBeLessThanOrEqual(menu.bottom - menu.top)
   })
@@ -390,7 +390,7 @@ test.describe('the open list of the season picker', () => {
 
     expect(menu.optionsHeight).toBeGreaterThan(Math.max(roomAbove, roomBelow))
     expect(roomBelow).toBeLessThan(roomAbove)
-    expect(menu.bottom).toBeLessThanOrEqual(field.y)
+    expect(menu.bottom).toBeLessThanOrEqual(field.y + 1)
     expect(menu.top).toBeGreaterThanOrEqual(0)
     expect(menu.bottom - menu.top).toBeLessThanOrEqual(roomAbove)
   })

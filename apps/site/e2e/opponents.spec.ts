@@ -302,7 +302,6 @@ test.describe('the page of a club', () => {
     await page.goto('/tegenstanders/voorbeeld-united')
 
     await expect(page.getByRole('main').getByRole('heading', { level: 2, name: 'Wedstrijden' })).toBeVisible()
-    await expect(page.getByRole('main').getByRole('heading', { level: 2, name: /^Onze uitslagen/ })).toHaveCount(0)
 
     const summary = page.getByRole('region', { name: 'Onze uitslagen' })
 

@@ -1003,13 +1003,13 @@ await withEmptyDatabase((database) =>
     assert.deepEqual(
       [...matchesHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
       [
+        '#stand',
+        '#hoofdtrainer',
         '#laatste-wedstrijd',
         '#programma',
         '#uitslagen',
         '#uitslagen-knvb-beker',
         '#uitslagen-play-offs',
-        '#stand',
-        '#hoofdtrainer',
       ],
     )
     // The made-up results of the current season are of six clubs, so the card with our place
