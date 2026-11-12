@@ -3419,3 +3419,12 @@
 - **Alternatieven:** de tabel met getallen, die alleen letters kent en geen links in een cel heeft.
   Altijd letters, ook op een breed scherm.
   Een eigen tabel in de site, die geen eigen CSS heeft.
+
+### Een brede pagina zonder zijbalk vult de hele breedte
+
+- **Datum:** 12 november 2026
+- **Besluit:** een `Page.Main` met `wide` zonder `Page.Sidebar` krijgt in de `Page.Body` één spoor dat meegroeit, tot de breedte van een brede pagina (#1169).
+  Met een zijbalk, en bij een pagina die niet breed is, blijft de indeling zoals ze was.
+- **Waarom:** de body hield ook zonder zijbalk een tweede spoor vrij, en de tabel van de kwaliteit gebruikte bij 900 px maar de helft van de breedte.
+- **Alternatieven:** een eigen klasse op de pagina in de site, die elke brede pagina zonder zijbalk opnieuw zou moeten kiezen.
+  Elke brede pagina volle breedte geven, ook met een zijbalk: dan past de zijbalk er niet naast.

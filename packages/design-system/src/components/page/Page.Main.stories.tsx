@@ -58,7 +58,7 @@ export const Light = meta.story({
 
 export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render })
 
-const wideRender = () => (
+const wideRender = ({ sidebar = true }: { sidebar?: boolean } = {}) => (
   <Page.Body>
     <Page.Main
       intro={
@@ -77,7 +77,7 @@ const wideRender = () => (
         </Form>
       </Card>
     </Page.Main>
-    <ExampleSidebar />
+    {sidebar ? <ExampleSidebar /> : null}
   </Page.Body>
 )
 
@@ -98,6 +98,21 @@ export const WideLight = meta.story({
     },
   },
   render: wideRender,
+})
+
+export const WideWithoutSidebar = meta.story({
+  ...screen,
+  globals: { theme: 'light', viewport: { value: 'wide' } },
+  name: 'Brede pagina zonder zijbalk, breed scherm, licht',
+  parameters: {
+    ...screen.parameters,
+    docs: {
+      description: {
+        story: 'Zonder zijbalk vult de hoofdkolom de hele breedte van de pagina, tot de breedte van een brede pagina.',
+      },
+    },
+  },
+  render: () => wideRender({ sidebar: false }),
 })
 
 export const WideDark = meta.story({
