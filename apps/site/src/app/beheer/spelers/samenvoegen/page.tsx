@@ -36,7 +36,7 @@ const seasonsText = (seasons: readonly string[]) =>
 // pressed. Everything in the address is input: two numbers that are no two persons get a
 // sentence that says so, and no button.
 export default async function MergePersonsPage({ searchParams }: Props) {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const { db } = getDatabase()
   const { blijft, met, persoon, speler } = await searchParams

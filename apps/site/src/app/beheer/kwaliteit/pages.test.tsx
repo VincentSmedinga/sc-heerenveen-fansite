@@ -44,7 +44,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   requireRole.mockReset()
-  requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'beheerder', userId: 1 })
+  requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'editor', userId: 1 })
   await database.db.delete(persons)
   await database.db.delete(playerListTitles)
   await database.db.delete(playerStatDifferences)
@@ -59,10 +59,10 @@ const rowOf = (html: string, season: string) =>
   new RegExp(`<tr><th scope="row">${season}.*?</tr>`).exec(html)?.[0] ?? ''
 
 describe('the page Kwaliteit', () => {
-  it('is for a beheerder only, and stays out of search engines', async () => {
+  it('is for an editor only, and stays out of search engines', async () => {
     renderToStaticMarkup(await QualityPage())
 
-    expect(requireRole).toHaveBeenCalledWith('beheerder')
+    expect(requireRole).toHaveBeenCalledWith('owner', 'editor')
     expect(metadata.robots).toEqual({ follow: false, index: false })
     expect(metadata.title).toBe('Kwaliteit')
   })
@@ -174,10 +174,10 @@ describe('the page Kwaliteit', () => {
 })
 
 describe('a work list', () => {
-  it('is for a beheerder only, and stays out of search engines', async () => {
+  it('is for an editor only, and stays out of search engines', async () => {
     await workList('2005-06', 'zonder-doelpunten')
 
-    expect(requireRole).toHaveBeenCalledWith('beheerder')
+    expect(requireRole).toHaveBeenCalledWith('owner', 'editor')
     expect(listMetadata.robots).toEqual({ follow: false, index: false })
   })
 
@@ -281,10 +281,10 @@ describe('the players whose numbers differ', () => {
     })
   }
 
-  it('is for a beheerder only, and stays out of search engines', async () => {
+  it('is for an editor only, and stays out of search engines', async () => {
     await statDifferences('2005-06')
 
-    expect(requireRole).toHaveBeenCalledWith('beheerder')
+    expect(requireRole).toHaveBeenCalledWith('owner', 'editor')
     expect(statMetadata.robots).toEqual({ follow: false, index: false })
   })
 
@@ -359,10 +359,10 @@ describe('the page with the fields of players where the import says something el
     })
   }
 
-  it('is for a beheerder only, and stays out of search engines', async () => {
+  it('is for an editor only, and stays out of search engines', async () => {
     await fieldDifferences('2005-06')
 
-    expect(requireRole).toHaveBeenCalledWith('beheerder')
+    expect(requireRole).toHaveBeenCalledWith('owner', 'editor')
     expect(fieldMetadata.robots).toEqual({ follow: false, index: false })
   })
 

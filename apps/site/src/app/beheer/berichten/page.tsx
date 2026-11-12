@@ -2,7 +2,7 @@ import type { Database } from '@fansite/db/client'
 import type { ItemRelevance } from '@fansite/db/schema'
 import type { Metadata } from 'next'
 
-import { adminRoles } from '@fansite/db/schema'
+import { editorRoles } from '@fansite/db/schema'
 import {
   Button,
   Card,
@@ -121,7 +121,7 @@ type NoticeKind = keyof typeof noticeTexts
 
 /**
  * What the list says of an item the importer did not find about the club. A `relevant` item
- * has nothing to say. These are not on the site, whatever the moderator does.
+ * has nothing to say. These are not on the site, whatever the editor does.
  */
 const relevanceDetails = {
   doubtful: ['twijfelgeval, niet op de site'],
@@ -129,12 +129,12 @@ const relevanceDetails = {
   relevant: [],
 } as const satisfies Record<ItemRelevance, readonly string[]>
 
-// The list of the items that a moderator hides and shows. The search is a form with method GET,
+// The list of the items that an editor hides and shows. The search is a form with method GET,
 // and each action a form that posts, so the page works without JavaScript. An action ends on
 // this page again: an error is in the address, and the notice that it worked is written from
 // what the database says now, so a made-up address can't claim an action that never happened.
 export default async function ItemsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
-  await requireRole(...adminRoles)
+  await requireRole(...editorRoles)
 
   const {
     bericht,
@@ -292,7 +292,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
                     dateTime={dateTimeOf(item.publishedAt)}
                     details={[
                       ...(hidden ? ['verborgen'] : []),
-                      ...(approved ? ['door een moderator op de site gezet'] : relevanceDetails[item.relevance]),
+                      ...(approved ? ['door de redactie op de site gezet'] : relevanceDetails[item.relevance]),
                       ...(!hidden && (item.relevance === 'relevant' || approved) && item.publishedAt > now
                         ? ['nog niet gepubliceerd, niet op de site']
                         : []),
@@ -325,8 +325,8 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
                   {item.approvedAt === null ? null : (
                     <>
                       <Text>
-                        Door een moderator op de site gezet op {formatNewsTime(item.approvedAt, now)} door{' '}
-                        {item.approvedByEmail ?? 'een verwijderd account'}.
+                        Door de redactie op de site gezet op {formatNewsTime(item.approvedAt, now)} door{' '}
+                        {item.approvedByName ?? 'een verwijderd account'}.
                       </Text>
                       <Form action={submitUnapprove.bind(null, item.id, view)}>
                         <Button
@@ -343,7 +343,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
                     <>
                       <Text>
                         Verborgen op {formatNewsTime(item.hiddenAt, now)} door{' '}
-                        {item.hiddenByEmail ?? 'een verwijderd account'}. Reden: {item.hiddenReason}
+                        {item.hiddenByName ?? 'een verwijderd account'}. Reden: {item.hiddenReason}
                       </Text>
                       <Form action={submitShow.bind(null, item.id, view)}>
                         <Button appearance="soft" aria-label={`Toon weer: ${item.title}`} type="submit">

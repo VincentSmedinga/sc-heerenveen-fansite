@@ -601,7 +601,7 @@ async function importWikipedia(
     })),
   )
 
-  // The beheerders hear of a difference with an entry of the editors, also one that an earlier
+  // The editors hear of a difference with an entry of the editors, also one that an earlier
   // run could not mail. A mail that fails is a line here, never a failed import.
   await mailConflicts(db, {
     ...alerts,
@@ -695,7 +695,7 @@ async function storeDiscussions(db: Executor, feed: StoredFeed, found: ForumDisc
  * source, so an item that moves to another feed of the same source is the same item.
  *
  * A known item keeps its time of publication when the feed gives none this time. An item
- * without a valid time gets the time we first saw it. An item that a moderator hid is never
+ * without a valid time gets the time we first saw it. An item that an editor hid is never
  * changed, whatever the source offers, and counts as unchanged.
  *
  * Every item gets its relevance: `relevant` for a feed without a filter, and for a feed with
@@ -784,7 +784,7 @@ async function storeItems(
 
     // The key is unique, so an item that another run added in the meantime is updated instead
     // of added twice. A hidden item keeps every column: the condition is in the statement, so
-    // an item that a moderator hides while this run is busy is left alone too, which a check on
+    // an item that an editor hides while this run is busy is left alone too, which a check on
     // the row read above would miss.
     await db
       .insert(items)
@@ -828,7 +828,7 @@ async function storeItems(
 
 /**
  * What an item column becomes when the source offers the item again: the new value, unless a
- * moderator hid the item, then it stays as it is.
+ * editor hid the item, then it stays as it is.
  */
 function unlessHidden(column: AnyMySqlColumn) {
   return sql`if(${items.hiddenAt} is null, values(${column}), ${column})`

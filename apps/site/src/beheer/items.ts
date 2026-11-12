@@ -4,9 +4,10 @@ import { adminUsers, hiddenReasonMaxLength, items, sources } from '@fansite/db/s
 import { and, count, desc, eq, isNotNull, isNull, lte, ne, not, or, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/mysql-core'
 
+import { accountName } from './account-name'
 import { recordAction } from './audit-log'
 
-// Hiding, showing and approving items in the admin: the list a moderator searches, and the
+// Hiding, showing and approving items in the admin: the list an editor searches, and the
 // changes. A change and its row in the log of the admin are one transaction.
 
 /** How many items a page of the list shows. */
@@ -42,7 +43,7 @@ export async function findItem(db: Pick<Database, 'select'>, id: number) {
 
 /**
  * Hides an item, and writes `item.hide` with the reason in the log. An item that is hidden
- * already is left as it is, with its first reason, and writes nothing: two moderators who hide
+ * already is left as it is, with its first reason, and writes nothing: two editors who hide
  * the same item don't make two rows.
  */
 export async function hideItem(
@@ -116,8 +117,8 @@ export async function countItems(
 }
 
 /**
- * The condition that makes an item "on the site" for the list: no moderator hid it, the
- * importer found it `relevant` or a moderator approved it, and it is published already. Every
+ * The condition that makes an item "on the site" for the list: no editor hid it, the
+ * importer found it `relevant` or an editor approved it, and it is published already. Every
  * other item is not on the site: the hidden ones (hiding wins over approving), the `doubtful`
  * and `irrelevant` ones nobody approved, and the ones with a time to come. The pages of
  * visitors add more (see `isShown` in `@fansite/db/queries`): a source that is switched off, a
@@ -133,7 +134,7 @@ export function isOnSite(now: Date) {
  * The items of a page of a group, `listLength` of them from `offset`, from every source, newest
  * first. Under `on-site`
  * (the default) these are the items of `isOnSite`. Under `not-on-site` they are all the others,
- * of which `editorsOnly` keeps the ones a moderator hid (the importer keeps `doubtful` and
+ * of which `editorsOnly` keeps the ones an editor hid (the importer keeps `doubtful` and
  * `irrelevant` items too, and an item can have a time to come). Each has the email address of
  * the account that hid it, if it is hidden and the account still exists. With a search,
  * only the items whose headline or link contains the text, in any case. The text is a plain
@@ -149,9 +150,9 @@ export function listItems(
   return db
     .select({
       approvedAt: items.approvedAt,
-      approvedByEmail: approver.email,
+      approvedByName: accountName(approver),
       hiddenAt: items.hiddenAt,
-      hiddenByEmail: adminUsers.email,
+      hiddenByName: accountName(adminUsers),
       hiddenReason: items.hiddenReason,
       id: items.id,
       paywalled: items.paywalled,

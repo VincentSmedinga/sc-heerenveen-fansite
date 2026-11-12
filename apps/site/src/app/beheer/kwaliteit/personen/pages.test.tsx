@@ -25,7 +25,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   requireRole.mockReset()
-  requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'beheerder', userId: 1 })
+  requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'editor', userId: 1 })
   await database.pool.query('DELETE FROM players')
   await database.db.delete(persons)
 })
@@ -43,10 +43,10 @@ async function addPeople(total: number) {
 }
 
 describe('the page of the persons without a line or a country', () => {
-  it('is for a beheerder and stays out of search engines', async () => {
+  it('is for an editor and stays out of search engines', async () => {
     await page()
 
-    expect(requireRole).toHaveBeenCalledWith('beheerder')
+    expect(requireRole).toHaveBeenCalledWith('owner', 'editor')
     expect(metadata).toMatchObject({ robots: { follow: false, index: false }, title: 'Personen zonder linie of land' })
   })
 

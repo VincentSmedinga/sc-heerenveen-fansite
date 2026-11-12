@@ -215,7 +215,11 @@ export async function pullAcceptanceCopy(
     const dumpedAt = String(info[0]?.['dumped_at'] ?? '')
     const loadedAt = utc(now)
 
-    await server.query('INSERT INTO admin_users (email, role) VALUES (?, ?)', [localLogin.email, localLogin.role])
+    await server.query('INSERT INTO admin_users (email, first_name, role) VALUES (?, ?, ?)', [
+      localLogin.email,
+      localLogin.firstName,
+      localLogin.role,
+    ])
     await server.query('UPDATE ?? SET loaded_at = ?', [copyInfoTable, loadedAt])
 
     const [counted] = await server.query<RowDataPacket[]>(

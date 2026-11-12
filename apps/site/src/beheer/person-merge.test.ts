@@ -34,7 +34,7 @@ beforeEach(async () => {
   }
 
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'sanne@example.org', 'beheerder')
+  await createAccount(database.db, 'sanne@example.org', 'editor', '')
   userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
   ;[{ insertId: old }] = await database.db.insert(persons).values({
     birthDate: '1999-03-01',

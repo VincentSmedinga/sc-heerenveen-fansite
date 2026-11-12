@@ -56,8 +56,9 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM audit_log')
   await database.pool.query('DELETE FROM sources')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'jelle@example.org', 'moderator')
-  await createAccount(database.db, 'sanne@example.org', 'beheerder')
+  await createAccount(database.db, 'jelle@example.org', 'editor', '')
+  await createAccount(database.db, 'sanne@example.org', 'owner', '')
+  await createAccount(database.db, 'auteur@example.org', 'author', '')
   userId = (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'jelle@example.org')))[0]?.id ?? 0
   jar.set(sessionCookieName, await startSession(database.db, userId))
   itemId = await addItem(database, await addSource(database), 'een')
@@ -117,13 +118,23 @@ describe('submitHide', () => {
     ])
   })
 
-  it('works for a moderator and for a beheerder', async () => {
+  it('works for an editor and for the owner', async () => {
     const [sanne] = await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'sanne@example.org'))
 
     jar.set(sessionCookieName, await startSession(database.db, sanne?.id ?? 0))
 
     expect(await hide(itemId, '')).toBe(`/beheer/berichten?verborgen=${itemId}`)
     expect((await database.db.select().from(auditLog))[0]?.userId).toBe(sanne?.id)
+  })
+
+  it('refuses an author, and changes nothing', async () => {
+    const [author] = await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'auteur@example.org'))
+
+    jar.set(sessionCookieName, await startSession(database.db, author?.id ?? 0))
+
+    await expect(hide(itemId, '')).rejects.toThrow('not found')
+    expect((await stored())?.hiddenBy).toBeNull()
+    expect(await database.db.select().from(auditLog)).toEqual([])
   })
 
   it('takes the account from the session and never from the form', async () => {

@@ -18,7 +18,7 @@ export type PersonFactState = { error?: string; land?: string; saved?: string }
 const articles: Record<PersonFact, string> = { land: 'een land', linie: 'een linie' }
 
 /**
- * Gives one person of the work list a line or a country (issue 1053). Only a beheerder does
+ * Gives one person of the work list a line or a country (issue 1053). Only an editor does
  * that. The number of the person and the list are bound to the action and checked again, and
  * the value is checked against the lines and the country codes we know. It answers with a state
  * and sends nobody away, so the other rows of the list stay as the editor left them.
@@ -29,7 +29,7 @@ export async function submitPersonFact(
   _previous: PersonFactState,
   formData: FormData,
 ): Promise<PersonFactState> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const id = parseItemId(personId)
   const value = formData.get(fact)
   const land = fact === 'land' && typeof value === 'string' ? { land: value } : {}

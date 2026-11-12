@@ -19,7 +19,8 @@ import { addVisits } from './visits'
 // Runs after the site has started and before the first test. It puts the test sources in the
 // register (see test-sources.ts), which acceptance no longer has. It also puts a made-up
 // article, a draft and an article for later in the database (see articles.ts), and makes the
-// moderator with a session that the checks of the admin log in as (see admin.ts), and the
+// owner, the editor and the author with a session that the checks of the admin log in as (see
+// admin.ts), and the
 // made-up counters that the page Bezoek shows (see visits.ts), and a made-up league table for
 // /wedstrijden (see standings.ts), and made-up matches for the season before it (see
 // earlier-season.ts), and our row in the table of the two seasons before that (see

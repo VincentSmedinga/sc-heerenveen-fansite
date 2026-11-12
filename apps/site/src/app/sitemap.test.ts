@@ -21,6 +21,10 @@ vi.mock('../player-page', () => ({ getPlayerSlugs, playerAddress: (slug: string)
 // the sitemap.
 const notInSitemap: string[] = [
   '/beheer',
+  '/beheer/accounts',
+  '/beheer/accounts/[id]',
+  '/beheer/accounts/nieuw',
+  '/beheer/mijn-account',
   '/beheer/artikelen',
   '/beheer/artikelen/[id]',
   '/beheer/artikelen/[id]/versies/[nummer]',

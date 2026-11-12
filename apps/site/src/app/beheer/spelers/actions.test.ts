@@ -69,8 +69,8 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM players')
   await database.pool.query('DELETE FROM persons')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'sanne@example.org', 'beheerder')
-  await createAccount(database.db, 'jelle@example.org', 'moderator')
+  await createAccount(database.db, 'sanne@example.org', 'editor', '')
+  await createAccount(database.db, 'jelle@example.org', 'author', '')
   userId = (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'sanne@example.org')))[0]?.id ?? 0
   moderatorId =
     (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'jelle@example.org')))[0]?.id ?? 0
@@ -233,7 +233,7 @@ describe('submitAddPlayer', () => {
     expect(await stored()).toEqual([])
   })
 
-  it('is for the beheerder: a moderator is told the page does not exist, and nothing is stored', async () => {
+  it('is for the editor: an author is told the page does not exist, and nothing is stored', async () => {
     jar.set(sessionCookieName, await startSession(database.db, moderatorId))
 
     await expect(add(form())).rejects.toThrow('not found')
@@ -304,7 +304,7 @@ describe('submitPlayer', () => {
     expect(await edit('abc', form())).toEqual({ redirect: '/beheer/spelers?fout=weg' })
   })
 
-  it('is for the beheerder, and sends somebody without a session to the login page', async () => {
+  it('is for the editor, and sends somebody without a session to the login page', async () => {
     const id = await firstId()
 
     jar.set(sessionCookieName, await startSession(database.db, moderatorId))
@@ -348,7 +348,7 @@ describe('submitRemovePlayer', () => {
     expect(await remove('abc')).toEqual({ redirect: '/beheer/spelers?fout=weg' })
   })
 
-  it('is for the beheerder, and sends somebody without a session to the login page', async () => {
+  it('is for the editor, and sends somebody without a session to the login page', async () => {
     const id = await firstId()
 
     jar.set(sessionCookieName, await startSession(database.db, moderatorId))
@@ -424,7 +424,7 @@ describe('submitMergePersons', () => {
     expect(await database.db.select().from(auditLog)).toEqual([])
   })
 
-  it('is not for a moderator', async () => {
+  it('is not for an author', async () => {
     const { old, renamed } = await twoPersons()
 
     jar.set(sessionCookieName, await startSession(database.db, moderatorId))

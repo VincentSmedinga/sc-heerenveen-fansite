@@ -80,27 +80,30 @@ describe('the admin', () => {
   const tileList = (html: string) =>
     (html.match(/<ul[^>]*aria-label="Schermen van het beheer"[\s\S]*?<\/ul>/) ?? [])[0] ?? ''
 
-  it('says who is logged in with the role and shows a tile for the screen, and has no button to log out', async () => {
-    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'moderator', userId: 1 })
+  it('shows an author the articles and his account, by his first name and role, and no button to log out', async () => {
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', firstName: 'Jelle', role: 'author', userId: 1 })
 
     const html = renderToStaticMarkup(await AdminPage())
 
-    expect(requireRole).toHaveBeenCalledWith('beheerder', 'moderator')
-    expect(headings(html)).toEqual(['h1 Beheer', expect.stringMatching(/^h2 <a[^>]*>Berichten<\/a>$/)])
-    expect(html).toContain('Je bent ingelogd als jelle@example.org (moderator).')
+    expect(requireRole).toHaveBeenCalledWith('owner', 'editor', 'author')
+    expect(html).toContain('Je bent ingelogd als Jelle (auteur).')
     // Logging out is in the bar of the admin (AdminScreens), on every page.
     expect(html).not.toContain('<button')
     expect(html).not.toContain('Uitloggen')
-    expect(links(html)).toEqual(['<a class="hf-tile-link" href="/beheer/berichten">Berichten</a>'])
-    expect(html).toContain('Verberg berichten die niet op de site horen.')
+    expect(links(tileList(html))).toEqual([
+      '<a class="hf-tile-link" href="/beheer/artikelen">Artikelen</a>',
+      '<a class="hf-tile-link" href="/beheer/mijn-account">Mijn account</a>',
+    ])
+    expect(html).toContain('Schrijf je eigen artikelen. Een redacteur publiceert ze.')
+    expect(countMatchesWithoutResult).not.toHaveBeenCalled()
   })
 
-  it('shows a beheerder a tile for the articles, the matches and the visit as well, and says the role', async () => {
-    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
+  it('shows an editor a tile for every screen but the accounts, and says the role', async () => {
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', firstName: '', role: 'editor', userId: 1 })
 
     const html = renderToStaticMarkup(await AdminPage())
 
-    expect(html).toContain('Je bent ingelogd als jelle@example.org (beheerder).')
+    expect(html).toContain('Je bent ingelogd als jelle@example.org (redacteur).')
     expect(links(tileList(html))).toEqual([
       '<a class="hf-tile-link" href="/beheer/berichten">Berichten</a>',
       '<a class="hf-tile-link" href="/beheer/artikelen">Artikelen</a>',
@@ -109,14 +112,24 @@ describe('the admin', () => {
       '<a class="hf-tile-link" href="/beheer/clubnamen">Clubnamen</a>',
       '<a class="hf-tile-link" href="/beheer/kwaliteit">Kwaliteit</a>',
       '<a class="hf-tile-link" href="/beheer/bezoek">Bezoek</a>',
+      '<a class="hf-tile-link" href="/beheer/mijn-account">Mijn account</a>',
     ])
     expect(html).toContain('Vul wedstrijden in of verbeter ze.')
     expect(html).toContain('Geef een club een eigen lijst van stadions, met een toelichting.')
     expect(html).toContain('Houd bij welke namen een club droeg, en sinds wanneer.')
   })
 
+  it('shows the owner the accounts as well', async () => {
+    requireRole.mockResolvedValue({ email: 'eigenaar@example.org', firstName: 'Eva', role: 'owner', userId: 1 })
+
+    const html = renderToStaticMarkup(await AdminPage())
+
+    expect(html).toContain('Je bent ingelogd als Eva (eigenaar).')
+    expect(links(tileList(html))).toContain('<a class="hf-tile-link" href="/beheer/accounts">Accounts</a>')
+  })
+
   it('has no card and no sidebar when nothing waits', async () => {
-    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'editor', userId: 1 })
 
     const html = renderToStaticMarkup(await AdminPage())
 
@@ -125,7 +138,7 @@ describe('the admin', () => {
   })
 
   it('puts the card Te doen in the sidebar, after the main column, when something waits', async () => {
-    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'editor', userId: 1 })
     countMatchesWithoutResult.mockResolvedValue(1)
 
     const html = renderToStaticMarkup(await AdminPage())
@@ -137,8 +150,8 @@ describe('the admin', () => {
     expect(html.slice(0, html.indexOf('<aside'))).not.toContain('Te doen')
   })
 
-  it('tells a beheerder how many differences with Wikipedia wait for a decision, and nobody else', async () => {
-    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
+  it('tells an editor how many differences with Wikipedia wait for a decision, and nobody else', async () => {
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'editor', userId: 1 })
     countWaitingDifferences.mockResolvedValue({ seasons: [currentSeason], total: 1 })
     expect(renderToStaticMarkup(await AdminPage())).toContain('1 afwijking van Wikipedia wacht op een besluit')
 
@@ -149,7 +162,7 @@ describe('the admin', () => {
     expect(renderToStaticMarkup(await AdminPage())).not.toContain('afwijking')
 
     countWaitingDifferences.mockResolvedValue({ seasons: [currentSeason], total: 3 })
-    requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'moderator', userId: 2 })
+    requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'author', userId: 2 })
     const html = renderToStaticMarkup(await AdminPage())
 
     expect(html).not.toContain('afwijking')
@@ -157,8 +170,8 @@ describe('the admin', () => {
     expect(countWaitingDifferences).toHaveBeenCalledTimes(3)
   })
 
-  it('tells a beheerder how many changes of Wikipedia are held back, and nobody else', async () => {
-    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
+  it('tells an editor how many changes of Wikipedia are held back, and nobody else', async () => {
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'editor', userId: 1 })
     countHeldChanges.mockResolvedValue({ seasons: ['2013/14'], total: 1 })
     expect(renderToStaticMarkup(await AdminPage())).toContain('1 wijziging van Wikipedia wacht op een besluit')
 
@@ -172,7 +185,7 @@ describe('the admin', () => {
     expect(renderToStaticMarkup(await AdminPage())).not.toContain('wijziging')
 
     countHeldChanges.mockResolvedValue({ seasons: ['2013/14'], total: 3 })
-    requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'moderator', userId: 2 })
+    requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'author', userId: 2 })
     countHeldChanges.mockClear()
     const html = renderToStaticMarkup(await AdminPage())
 
@@ -182,7 +195,7 @@ describe('the admin', () => {
   })
 
   it('links the line about held changes to the choice Wikipedia wacht of the season that holds them', async () => {
-    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'editor', userId: 1 })
     const link = async () =>
       (renderToStaticMarkup(await AdminPage()).match(
         /<a href="([^"]*)">\d+ wijzigingen? van Wikipedia wachte?n? op een besluit<\/a>/,
@@ -197,8 +210,8 @@ describe('the admin', () => {
     expect(await link()).toBe('/beheer/wedstrijden?seizoen=2024-25&amp;tonen=wikipedia-wacht')
   })
 
-  it('tells a beheerder how many matches of the season have no result, and nobody else', async () => {
-    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
+  it('tells an editor how many matches of the season have no result, and nobody else', async () => {
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'editor', userId: 1 })
     countMatchesWithoutResult.mockResolvedValue(1)
     expect(renderToStaticMarkup(await AdminPage())).toContain('>1 wedstrijd zonder uitslag</a>')
 
@@ -209,14 +222,14 @@ describe('the admin', () => {
     expect(countMatchesWithoutResult).toHaveBeenLastCalledWith({}, currentSeason, expect.any(Date))
     expect(html).toContain('<a href="/beheer/wedstrijden">4 wedstrijden zonder uitslag</a>')
 
-    requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'moderator', userId: 2 })
+    requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'author', userId: 2 })
     countMatchesWithoutResult.mockClear()
     expect(renderToStaticMarkup(await AdminPage())).not.toContain('zonder uitslag')
     expect(countMatchesWithoutResult).not.toHaveBeenCalled()
   })
 
-  it('tells a beheerder how many reports that were klaar are no longer right, with a link to the list (#1077)', async () => {
-    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
+  it('tells an editor how many reports that were klaar are no longer right, with a link to the list (#1077)', async () => {
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'editor', userId: 1 })
     expect(renderToStaticMarkup(await AdminPage())).not.toContain('klop')
 
     const slug = currentSeason.replace('/', '-')
@@ -231,14 +244,14 @@ describe('the admin', () => {
       '<a href="/beheer/wedstrijden?seizoen=2024-25&amp;tonen=alles">2 verslagen kloppen niet</a>',
     )
 
-    requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'moderator', userId: 2 })
+    requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'author', userId: 2 })
     countReportsToCheck.mockClear()
     expect(renderToStaticMarkup(await AdminPage())).not.toContain('klop')
     expect(countReportsToCheck).not.toHaveBeenCalled()
   })
 
   it('lists the lines of the card one under the other, the differences first', async () => {
-    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'editor', userId: 1 })
     countWaitingDifferences.mockResolvedValue({ seasons: [currentSeason], total: 2 })
     countHeldChanges.mockResolvedValue({ seasons: ['2013/14'], total: 1 })
     countMatchesWithoutResult.mockResolvedValue(3)
@@ -254,7 +267,7 @@ describe('the admin', () => {
   })
 
   it('links the line about differences to the list of the changed matches of the season that holds them', async () => {
-    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'editor', userId: 1 })
     const link = async () =>
       (renderToStaticMarkup(await AdminPage()).match(
         /<a href="([^"]*)">\d+ afwijkingen? van Wikipedia wachte?n? op een besluit<\/a>/,
@@ -331,7 +344,7 @@ describe('the login page', () => {
 
   it('goes on to the admin for somebody who is logged in already', async () => {
     sessionToken.mockResolvedValue('token')
-    findSession.mockResolvedValue({ email: 'jelle@example.org', role: 'beheerder', userId: 1 })
+    findSession.mockResolvedValue({ email: 'jelle@example.org', role: 'editor', userId: 1 })
 
     await expect(render()).rejects.toThrow('redirect to /beheer')
   })

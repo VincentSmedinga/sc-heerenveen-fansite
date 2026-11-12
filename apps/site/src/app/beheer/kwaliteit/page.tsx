@@ -45,13 +45,13 @@ const levelWords: Record<NonNullable<SeasonCoverage['squad']>['level'], string> 
   weinig: 'lang niet compleet',
 }
 
-// What we have of each season since 1990/91, for a beheerder: one row for each season, the
+// What we have of each season since 1990/91, for an editor: one row for each season, the
 // newest first, and the persons that look alike. A cell says in words what it counts, so it
 // still reads where the column is folded under the season and its header is gone, and nothing
 // is told by colour. What an editor can do something about is a link to its work list, in the
 // last column.
 export default async function QualityPage() {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const { db } = getDatabase()
   const coverage = (await readSeasonCoverage(db)).reverse()

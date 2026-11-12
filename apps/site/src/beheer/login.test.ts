@@ -24,8 +24,8 @@ afterAll(async () => {
 beforeEach(async () => {
   await database.db.delete(adminLoginAttempts)
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'jelle@example.org', 'beheerder', start)
-  await createAccount(database.db, 'marijke@example.org', 'moderator', start)
+  await createAccount(database.db, 'jelle@example.org', 'editor', '', start)
+  await createAccount(database.db, 'marijke@example.org', 'author', '', start)
   vi.restoreAllMocks()
 })
 

@@ -51,11 +51,11 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM audit_log')
   await database.pool.query('DELETE FROM matches')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'sanne@example.org', 'beheerder')
+  await createAccount(database.db, 'sanne@example.org', 'editor', '')
 
   const userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
 
-  requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'beheerder', userId })
+  requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'editor', userId })
 
   const [values] = await withClubs(database.db, [live])
   const [inserted] = await database.db.insert(matches).values(values!).$returningId()
@@ -81,13 +81,13 @@ const page = async (id: number | string) =>
   renderToStaticMarkup(await LiveReportPage({ params: Promise.resolve({ id: String(id) }) }))
 
 describe('the screen "Verslag bijhouden"', () => {
-  it('is for the beheerder, is not indexed, and is not found for another match', async () => {
+  it('is for the editor, is not indexed, and is not found for another match', async () => {
     await addReport()
     requireRole.mockRejectedValue(new Error('not found'))
     await expect(page(matchId)).rejects.toThrow('not found')
     expect(metadata.robots).toEqual({ follow: false, index: false })
 
-    requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'beheerder', userId: 1 })
+    requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'editor', userId: 1 })
     await expect(page(999_999)).rejects.toThrow('not found')
     await expect(page('x')).rejects.toThrow('not found')
   })

@@ -28,7 +28,7 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM article_versions')
   await database.pool.query('DELETE FROM articles')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'sanne@example.org', 'beheerder')
+  await createAccount(database.db, 'sanne@example.org', 'editor', '')
   userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
 })
 
@@ -398,7 +398,7 @@ describe('the versions and updated_by of an article', () => {
   let otherId: number
 
   beforeEach(async () => {
-    await createAccount(database.db, 'jelle@example.org', 'beheerder')
+    await createAccount(database.db, 'jelle@example.org', 'editor', '')
     otherId = (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'jelle@example.org')))[0]?.id ?? 0
   })
 

@@ -133,6 +133,48 @@ describe('the admin', () => {
     }
   })
 
+  it('lets an author in only where he writes his own articles or sees his account, and only the owner to the accounts', () => {
+    // Issue 1156: every other page, route and action asks for the owner or an editor. The
+    // articles check on top that an author reaches only his own, and never publishes or
+    // withdraws (see artikelen/actions.ts); the tests of those files show it.
+    const forEveryRole = [
+      'app/beheer/actions.ts',
+      'app/beheer/artikelen/[id]/page.tsx',
+      'app/beheer/artikelen/[id]/versies/[nummer]/page.tsx',
+      'app/beheer/artikelen/[id]/voorbeeld/page.tsx',
+      'app/beheer/artikelen/actions.ts',
+      'app/beheer/artikelen/nieuw/page.tsx',
+      'app/beheer/artikelen/page.tsx',
+      'app/beheer/mijn-account/page.tsx',
+      'app/beheer/page.tsx',
+    ]
+    const forTheOwner = [
+      'app/beheer/accounts/[id]/page.tsx',
+      'app/beheer/accounts/actions.ts',
+      'app/beheer/accounts/nieuw/page.tsx',
+      'app/beheer/accounts/page.tsx',
+    ]
+    const roles = (file: string) =>
+      [...text(file).matchAll(/\brequireRole\(([^)]*)\)/g)].map(([, args]) => args?.trim())
+    const guarded = [...routes, ...actionFiles].filter((file) => !open.includes(file))
+
+    for (const file of guarded) {
+      const found = new Set(roles(file))
+      const allowed = forTheOwner.includes(file)
+        ? ["'owner'"]
+        : forEveryRole.includes(file)
+          ? ['...adminRoles', '...editorRoles', "'owner', 'editor'"]
+          : ['...editorRoles', "'owner', 'editor'"]
+
+      expect(
+        [...found].filter((args) => !allowed.includes(args ?? '')),
+        file,
+      ).toEqual([])
+    }
+
+    expect(guarded).toEqual(expect.arrayContaining([...forEveryRole, ...forTheOwner]))
+  })
+
   it.each(routes.filter((file) => !open.includes(file)))('refuses a call without a session to %s', async (file) => {
     const handlers = await exportedFunctions(file)
     const calls = handlers.filter(([name]) => name === 'default' || /^(?:DELETE|GET|PATCH|POST|PUT)$/.test(name))

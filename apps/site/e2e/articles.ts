@@ -123,7 +123,10 @@ export async function addArticles() {
     // A run that was stopped halfway may have left its articles and its account.
     await remove(pool)
 
-    const [user] = await db.insert(adminUsers).values({ email: authorEmail, role: 'beheerder' }).$returningId()
+    const [user] = await db
+      .insert(adminUsers)
+      .values({ email: authorEmail, firstName: 'Schrijver', role: 'editor' })
+      .$returningId()
     const createdBy = user?.id ?? 0
     const updatedBy = createdBy
     const day = 24 * 60 * 60 * 1000

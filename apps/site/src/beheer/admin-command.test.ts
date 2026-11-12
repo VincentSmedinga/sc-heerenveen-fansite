@@ -38,42 +38,67 @@ async function run(...args: string[]) {
 }
 
 describe('admin create', () => {
-  it('makes an account and says so', async () => {
-    expect(await run('create', 'Jelle@Example.org', 'beheerder')).toEqual({
+  it('makes an account with a first name and says so', async () => {
+    expect(await run('create', 'Jelle@Example.org', 'editor', 'Jelle')).toEqual({
       code: 0,
-      said: 'Made the account for jelle@example.org, as beheerder.',
+      said: 'Made the account for jelle@example.org, as editor, with the first name Jelle.',
     })
-    expect(await database.db.select({ email: adminUsers.email, role: adminUsers.role }).from(adminUsers)).toEqual([
-      { email: 'jelle@example.org', role: 'beheerder' },
-    ])
+    expect(
+      await database.db
+        .select({ email: adminUsers.email, firstName: adminUsers.firstName, role: adminUsers.role })
+        .from(adminUsers),
+    ).toEqual([{ email: 'jelle@example.org', firstName: 'Jelle', role: 'editor' }])
   })
 
-  it('stops with 1 for an address that has an account, and changes nothing', async () => {
-    await run('create', 'jelle@example.org', 'moderator')
+  it('takes a first name of more words, with or without quotes', async () => {
+    expect((await run('create', 'jelle@example.org', 'author', 'Jan', 'Willem')).code).toBe(0)
+    expect((await database.db.select().from(adminUsers))[0]?.firstName).toBe('Jan Willem')
+  })
 
-    expect(await run('create', 'jelle@example.org', 'beheerder')).toEqual({
-      code: 1,
-      said: 'jelle@example.org has an account already. Nothing changed.',
+  it('stops with 2 for a new account without a first name, and makes nothing', async () => {
+    const { code, said } = await run('create', 'jelle@example.org', 'owner')
+
+    expect(code).toBe(2)
+    expect(said).toContain('needs a first name')
+    expect(await database.db.select().from(adminUsers)).toEqual([])
+  })
+
+  it('makes an account that exists the owner, which is how the owner gets the role', async () => {
+    await run('create', 'jelle@example.org', 'editor', 'Jelle')
+
+    expect(await run('create', 'jelle@example.org', 'owner')).toEqual({
+      code: 0,
+      said: 'The account for jelle@example.org is owner now.',
     })
-    expect((await database.db.select().from(adminUsers))[0]?.role).toBe('moderator')
+    expect(await database.db.select().from(adminUsers)).toMatchObject([{ firstName: 'Jelle', role: 'owner' }])
+  })
+
+  it('stops with 1 for an account that has the role already, and changes nothing', async () => {
+    await run('create', 'jelle@example.org', 'author', 'Jelle')
+
+    expect(await run('create', 'jelle@example.org', 'author')).toEqual({
+      code: 1,
+      said: 'jelle@example.org has an account as author already. Nothing changed.',
+    })
   })
 
   it('turns an account that was revoked on again', async () => {
-    await run('create', 'jelle@example.org', 'moderator')
+    await run('create', 'jelle@example.org', 'author', 'Jelle')
     await run('revoke', 'jelle@example.org')
 
-    expect((await run('create', 'jelle@example.org', 'beheerder')).code).toBe(0)
-    expect(await database.db.select().from(adminUsers)).toMatchObject([{ disabledAt: null, role: 'beheerder' }])
+    expect((await run('create', 'jelle@example.org', 'editor')).code).toBe(0)
+    expect(await database.db.select().from(adminUsers)).toMatchObject([{ disabledAt: null, role: 'editor' }])
   })
 
   it.each([
     [[]],
     [['create']],
     [['create', 'jelle@example.org']],
-    [['create', 'jelle@example.org', 'admin']],
-    [['create', 'geen-adres', 'beheerder']],
-    [['create', 'jelle@example.org', 'beheerder', 'extra']],
-    [['maak', 'jelle@example.org', 'beheerder']],
+    [['create', 'jelle@example.org', 'admin', 'Jelle']],
+    [['create', 'jelle@example.org', 'beheerder', 'Jelle']],
+    [['create', 'geen-adres', 'editor', 'Jelle']],
+    [['create', 'jelle@example.org', 'editor', 'x'.repeat(51)]],
+    [['maak', 'jelle@example.org', 'editor', 'Jelle']],
   ])('stops with 2 and the usage for %j, and makes nothing', async (args) => {
     const { code, said } = await run(...args)
 
@@ -85,7 +110,7 @@ describe('admin create', () => {
 
 describe('admin revoke', () => {
   it('turns the account off and ends its sessions at once', async () => {
-    await run('create', 'jelle@example.org', 'beheerder')
+    await run('create', 'jelle@example.org', 'editor', 'Jelle')
 
     const [account] = await database.db.select().from(adminUsers)
     const session = await startSession(database.db, account?.id ?? 0, start)
@@ -105,7 +130,7 @@ describe('admin revoke', () => {
     })
   })
 
-  it.each([[['revoke']], [['revoke', 'geen-adres']], [['revoke', 'jelle@example.org', 'beheerder']]])(
+  it.each([[['revoke']], [['revoke', 'geen-adres']], [['revoke', 'jelle@example.org', 'editor']]])(
     'stops with 2 and the usage for %j',
     async (args) => {
       const { code, said } = await run(...args)

@@ -441,23 +441,28 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
     Draai daarna de proefmail onder _Controleren_.
 
 12. **Accounts voor het beheer.**
-    Wie het beheer in mag, heeft een persoonlijk account met een e-mailadres en een rol: `beheerder` of `moderator`.
+    Wie het beheer in mag, heeft een persoonlijk account met een e-mailadres, een voornaam en een rol: `owner` (eigenaar), `editor` (redacteur) of `author` (auteur).
     Er is geen aanmeldpagina en geen wachtwoord.
-    Je maakt een account met een opdracht op de host, en de persoon logt in met een link die de site mailt (zie _Het beheer_ hieronder).
+    De eigenaar voegt redacteuren en auteurs toe op `/beheer/accounts`.
+    Alleen een opdracht op de host maakt een eigenaar.
+    De persoon logt in met een link die de site mailt (zie _Het beheer_ hieronder).
     De tabellen komen vanzelf: de site maakt ze als de host hem start, net als de rest van het schema.
     Het bestand `apps/site/admin.mjs` staat sinds de deploy op de host, naast de importer.
     Het is één bestand, en het leest alleen `DATABASE_URL`, uit hetzelfde bestand als de importer (`~/fansite-acceptatie.env`, stap 8).
-    Log in met SSH (`ssh -p 26 <gebruiker>@<host>`) en draai op één regel, met het adres en de rol erachter:
+    Log in met SSH (`ssh -p 26 <gebruiker>@<host>`) en draai op één regel, met het adres, de rol en de voornaam erachter:
 
     ```sh
-    /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=/home/<gebruiker>/fansite-acceptatie.env /home/<gebruiker>/domains/acc.sc.heerenveen.org/app/apps/site/admin.mjs create <e-mailadres> beheerder
+    /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=/home/<gebruiker>/fansite-acceptatie.env /home/<gebruiker>/domains/acc.sc.heerenveen.org/app/apps/site/admin.mjs create <e-mailadres> owner <voornaam>
     ```
 
     Gebruik dezelfde paden als in de cronjob (stap 9 en 10).
-    Hij zegt `Made the account for <adres>, as beheerder.` en stopt met 0.
+    Hij zegt `Made the account for <adres>, as owner, with the first name <voornaam>.` en stopt met 0.
     Het adres wordt in kleine letters bewaard.
-    Heeft het adres al een account dat aanstaat, dan zegt hij dat en verandert hij niets (stopt met 1).
-    Staat het account uit, dan zet dezelfde opdracht het weer aan, met de rol die je noemt.
+    Een nieuw account zonder voornaam maakt hij niet: hij zegt dat de voornaam ontbreekt en stopt met 2.
+    Heeft het adres al een account, dan zet dezelfde opdracht de rol, en de voornaam als je die noemt.
+    Zo maak je je eigen account eigenaar: `create <je adres> owner`.
+    Staat het account uit, dan zet de opdracht het ook weer aan.
+    Heeft het account die rol al, dan zegt hij dat en verandert hij niets (stopt met 1).
 
     Een account uitzetten, en zijn sessies meteen beëindigen, doe je met `revoke`:
 
@@ -470,7 +475,7 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
     Een adres zonder account geeft `There is no account for <adres>.` en code 1.
     Een fout in de opdracht, zoals een rol die niet bestaat, toont het gebruik en stopt met 2.
 
-    Op je eigen computer, met pnpm, doe je hetzelfde met `pnpm admin:create <e-mailadres> <rol>` en `pnpm admin:revoke <e-mailadres>`.
+    Op je eigen computer, met pnpm, doe je hetzelfde met `pnpm admin:create <e-mailadres> <rol> [voornaam]` en `pnpm admin:revoke <e-mailadres>`.
     Dat leest `DATABASE_URL` uit de `.env` in de root.
 
 ## Het beheer
@@ -492,10 +497,12 @@ Zo kan niemand nagaan wie een account heeft.
   Een sessie eindigt na 9 dagen zonder gebruik, en na 14 dagen hoe dan ook.
   Uitloggen verwijdert de sessie op de server.
 - Alles onder `/beheer` krijgt `X-Robots-Tag: noindex, nofollow` en `Cache-Control: no-store`, ook op productie, en `robots.txt` weigert `/beheer` op elke omgeving.
-- Het beheer heeft drie schermen.
-  `/beheer/artikelen` is voor een beheerder: daar schrijft, bekijkt, publiceert en trekt hij een artikel van de redactie in (zie [`artikelen.md`](artikelen.md)).
-  `/beheer/bezoek` is voor een beheerder: de bezoekers en paginaweergaven van de laatste dagen en de meest bekeken pagina's (zie _Bezoekers tellen_ hieronder).
-  `/beheer/berichten` is voor een beheerder of moderator, die er een bericht verbergt, met een reden, en het weer toont, en een twijfelgeval of een bericht dat het filter weghoudt op de site zet.
+- De eigenaar mag alles in het beheer, een redacteur alles behalve de accounts, en een auteur alleen zijn eigen artikelen en zijn eigen account.
+  `/beheer/accounts` is voor de eigenaar: daar voegt hij redacteuren en auteurs toe en wijzigt hij ze.
+  `/beheer/mijn-account` is voor iedereen: de eigen gegevens, en voor de eigenaar en een redacteur de keuze voor de mail over afwijkingen van Wikipedia.
+  `/beheer/artikelen` is voor elke rol: daar schrijft, bekijkt, publiceert en trekt een redacteur een artikel van de redactie in (zie [`artikelen.md`](artikelen.md)); een auteur schrijft er alleen zijn eigen artikelen, en publiceert niet.
+  `/beheer/bezoek` is voor een redacteur: de bezoekers en paginaweergaven van de laatste dagen en de meest bekeken pagina's (zie _Bezoekers tellen_ hieronder).
+  `/beheer/berichten` is voor een redacteur, die er een bericht verbergt, met een reden, en het weer toont, en een twijfelgeval of een bericht dat het filter weghoudt op de site zet.
   Een verborgen bericht staat binnen vijf minuten niet meer op de homepage, op `/nieuws` en op `/nieuws/podcasts`, en de import zet het niet terug.
   Een schakelaar kiest tussen de berichten die op de site staan en die er niet op staan.
   De tweede groep toont ook de berichten die het relevantiefilter een twijfelgeval vond of niet over de club; die staan niet op de site (zie _Het relevantiefilter_ in de [README van de importer](../apps/importer/README.md)).
@@ -579,7 +586,7 @@ Zo kan niemand nagaan wie een account heeft.
 - Een bericht op de site zetten werkt op dezelfde pagina onder "Niet op de site".
   Een bericht met "twijfelgeval, niet op de site" of "niet over de club, niet op de site" heeft de knop "Op de site zetten", zonder reden.
   De pagina zegt "Op de site gezet", en na hoogstens vijf minuten staat het bericht op de homepage en op `/nieuws`, ook na de volgende import.
-  Het staat dan onder "Op de site", met "door een moderator op de site gezet" en jouw adres.
+  Het staat dan onder "Op de site", met "door de redactie op de site gezet" en jouw adres.
   "Terug naar het oordeel van het filter" haalt het weer van de site, tenzij het filter het bericht goed vindt.
   Een bericht dat je ook verbergt, staat nergens.
   Het logboek toont `item.approve` en `item.unapprove`, met het nummer van het bericht en zonder reden.
@@ -646,7 +653,7 @@ Zo kan niemand nagaan wie een account heeft.
   | `DATABASE_URL is missing` of `DATABASE_URL: Invalid URL`    | Het bestand heeft geen regel `DATABASE_URL=…`, of de waarde klopt niet. Kopieer de waarde van de Node.js-app.                        |
   | `Access denied for user` of `connect ECONNREFUSED`          | De gebruiker, het wachtwoord of de host in het bestand klopt niet. Kopieer de waarde van de Node.js-app.                             |
   | `Table '…admin_users' doesn't exist`                        | De database heeft de tabellen van het beheer nog niet. De site maakt ze als de host haar start: open de site en probeer het opnieuw. |
-  | Het gebruik (`Usage:`)                                      | De opdracht klopt niet: `create <e-mailadres> beheerder` (of `moderator`), of `revoke <e-mailadres>`.                                |
+  | Het gebruik (`Usage:`)                                      | De opdracht klopt niet: `create <e-mailadres> <owner, editor of author> <voornaam>`, of `revoke <e-mailadres>`.                      |
 
 - Iemand krijgt geen mail met een link: de pagina antwoordt voor elk adres hetzelfde, dus kijk eerst of het adres een account heeft dat aanstaat (stap 12, in phpMyAdmin: `SELECT email, role, disabled_at FROM admin_users`).
   Staat het er goed, kijk dan in het logboek van de app naar een regel `Could not mail a login link`.
@@ -680,7 +687,7 @@ We weten nog niet of de host het adres van de bezoeker meestuurt in de header `X
 Controleer dat op acceptatie, in de eerste dagen na de deploy:
 
 1. Open in een gewone browser, zonder blokkeerder en zonder Do Not Track, een paar pagina's van <https://acc.sc.heerenveen.org>.
-2. Kijk op `/beheer/bezoek` (als beheerder), of in phpMyAdmin:
+2. Kijk op `/beheer/bezoek` (als eigenaar of redacteur), of in phpMyAdmin:
 
    ```sql
    SELECT * FROM page_views ORDER BY day DESC, views DESC;

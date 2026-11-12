@@ -1698,6 +1698,7 @@
   Zonder één beheerder met een actief account gaat er niets uit, en de run zegt dat in het logboek.
 - **Alternatieven:** één mail naar `ALERT_MAIL_TO` (de eigenaar is niet altijd de redacteur die de wedstrijd invulde); één mail met alle beheerders in `To` (de adressen staan bij elkaar, en `sendMail` weigert het); de mail in de transactie van de import (een mail die faalt zou de wedstrijden terugdraaien); een mail bij elke run die de afwijking ziet (honderden mails voor één afwijking).
 - **Later:** zie _In een seizoen dat voorbij is wint Wikipedia niet vanzelf van de redactie_ (10 november 2026): de mail over een afwijking in een seizoen dat voorbij is noemt geen dag meer, en zegt dat de import Wikipedia niet vanzelf overneemt.
+- **Later:** zie _Ieder zet zelf de mail van Wikipedia uit_ in `site.md` (12 november 2026): de mail gaat naar elk actief account met de rol `owner` of `editor` dat de keuze `conflict_mail` aan heeft; een auteur krijgt hem nooit.
 
 ## De import bewaart de uitslagen van alle clubs in de Eredivisie, in een tabel naast de stand
 

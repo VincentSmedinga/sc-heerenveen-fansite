@@ -3,26 +3,30 @@ import { expect, test } from '@playwright/test'
 import { addAdminSession, adminCookie } from './admin'
 import { checkPage } from './check-page'
 
-// The bar with the screens of the admin, under the main menu: what a moderator and a beheerder
-// get, which screen is marked, and that the login pages have none. The pages of the admin are
-// checked with axe in pages.spec.ts, so the bar is in those checks too.
+// The bar with the screens of the admin, under the main menu: what an author, an editor and the
+// owner get, which screen is marked, and that the login pages have none. The pages of the admin
+// are checked with axe in pages.spec.ts, so the bar is in those checks too.
 
 const host = (baseURL: string | undefined) => new URL(baseURL ?? '').hostname
 
-test('gives a moderator Berichten only', async ({ baseURL, context, page }) => {
-  await context.addCookies([adminCookie(host(baseURL), 'moderator')])
-  await page.goto('/beheer/berichten')
+test('gives an author the start, the articles and his account, by his first name', async ({
+  baseURL,
+  context,
+  page,
+}) => {
+  await context.addCookies([adminCookie(host(baseURL), 'author')])
+  await page.goto('/beheer/artikelen')
 
   const bar = page.getByRole('navigation', { name: 'Beheer' })
 
-  await expect(bar.getByRole('link')).toHaveText(['Berichten'])
+  await expect(bar.getByRole('link')).toHaveText(['Beheer', 'Artikelen', 'Auteur'])
   await expect(bar.getByRole('button')).toHaveText(['Uitloggen'])
-  await expect(bar.getByRole('link', { name: 'Berichten' })).toHaveAttribute('aria-current', 'page')
+  await expect(bar.getByRole('link', { name: 'Artikelen' })).toHaveAttribute('aria-current', 'page')
   expect(await checkPage(page)).toEqual([])
 })
 
-test('gives a beheerder every screen and marks the one below which the page is', async ({ baseURL, context, page }) => {
-  await context.addCookies([adminCookie(host(baseURL), 'beheerder')])
+test('gives the owner every screen and marks the one below which the page is', async ({ baseURL, context, page }) => {
+  await context.addCookies([adminCookie(host(baseURL), 'owner')])
   await page.goto('/beheer/artikelen/nieuw')
 
   const bar = page.getByRole('navigation', { name: 'Beheer' })
@@ -37,6 +41,8 @@ test('gives a beheerder every screen and marks the one below which the page is',
     'Clubnamen',
     'Kwaliteit',
     'Bezoek',
+    'Accounts',
+    'Eigenaar',
   ])
   await expect(bar.locator('[aria-current="page"]')).toHaveText('Artikelen')
   await expect(bar.getByRole('button')).toHaveText(['Uitloggen'])
@@ -47,21 +53,21 @@ test('gives a beheerder every screen and marks the one below which the page is',
   await expect(bar.locator('[aria-current="page"]')).toHaveText('Bezoek')
 })
 
-test('is no longer on the start page of the admin, which keeps the address and the role', async ({
+test('is no longer on the start page of the admin, which keeps the first name and the role', async ({
   baseURL,
   context,
   page,
 }) => {
-  await context.addCookies([adminCookie(host(baseURL), 'beheerder')])
+  await context.addCookies([adminCookie(host(baseURL), 'editor')])
   await page.goto('/beheer')
 
-  await expect(page.getByText(/^Je bent ingelogd als .* \(beheerder\)\.$/)).toBeVisible()
+  await expect(page.getByText('Je bent ingelogd als Redacteur (redacteur).')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Uitloggen' })).toHaveCount(1)
   await expect(page.getByRole('main').getByRole('button', { name: 'Uitloggen' })).toHaveCount(0)
 })
 
 test('has Uitloggen at the right on a desktop, after the screens', async ({ baseURL, context, page }) => {
-  await context.addCookies([adminCookie(host(baseURL), 'beheerder')])
+  await context.addCookies([adminCookie(host(baseURL), 'editor')])
   await page.setViewportSize({ height: 800, width: 900 })
   await page.goto('/beheer/bezoek')
 
@@ -84,7 +90,7 @@ for (const width of [390, 320]) {
     context,
     page,
   }) => {
-    await context.addCookies([adminCookie(host(baseURL), 'beheerder')])
+    await context.addCookies([adminCookie(host(baseURL), 'editor')])
     await page.setViewportSize({ height: 800, width })
     await page.goto('/beheer/berichten')
 
@@ -108,7 +114,7 @@ for (const width of [390, 320]) {
 // The session is the test's own: logging out ends it, and the shared session of the global
 // setup must stay.
 test('is gone on the login page after logging out', async ({ baseURL, context, page }) => {
-  await context.addCookies([await addAdminSession(host(baseURL), 'beheerder')])
+  await context.addCookies([await addAdminSession(host(baseURL), 'editor')])
   await page.goto('/beheer')
   await page.getByRole('navigation', { name: 'Beheer' }).getByRole('button', { name: 'Uitloggen' }).click()
 

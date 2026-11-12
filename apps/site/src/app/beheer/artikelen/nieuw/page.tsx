@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { adminRoles } from '@fansite/db/schema'
 import { Heading, Link, Page, Text } from '@fansite/design-system'
 
 import { emptyValues } from '#src/beheer/article-fields'
@@ -18,7 +19,7 @@ export const metadata: Metadata = { robots: { follow: false, index: false }, tit
 // The form for a new article. It saves a draft: nothing is on the site until the editor
 // publishes it, from the page of the article.
 export default async function NewArticlePage() {
-  await requireRole('beheerder')
+  const { role } = await requireRole(...adminRoles)
 
   return (
     <Page.Main
@@ -27,8 +28,9 @@ export default async function NewArticlePage() {
         <>
           <Heading level={1}>Nieuw artikel</Heading>
           <Text appearance="intro">
-            Vul de velden in en sla het artikel op als concept. Daarna kijk je met het voorbeeld hoe het eruitziet, en
-            publiceer je het.
+            {role === 'author'
+              ? 'Vul de velden in en sla het artikel op als concept. Daarna kijk je met het voorbeeld hoe het eruitziet. Een redacteur of de eigenaar publiceert het.'
+              : 'Vul de velden in en sla het artikel op als concept. Daarna kijk je met het voorbeeld hoe het eruitziet, en publiceer je het.'}
           </Text>
         </>
       }

@@ -215,21 +215,21 @@ Agents bevragen de kopie alleen (zie _The copy of the acceptance database_ in `A
 
 `packages/db/src/export-plan.ts` zegt van elke tabel van het schema wat de export ermee doet.
 
-| Tabellen                                                                                                          | Wat de kopie krijgt                                                                                    |
-| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `visitor_salts`, `visitor_hashes`, `discussions`, `admin_sessions`, `admin_login_links` en `admin_login_attempts` | Alleen de structuur, zonder rijen                                                                      |
-| `admin_users`                                                                                                     | Elk account met het adres `beheerder-<id>@example.invalid`, en het echte nummer, de rol en de tijden   |
-| Alle andere tabellen, en `__drizzle_migrations`                                                                   | Alle rijen                                                                                             |
-| `acceptance_copy`, een tabel die alleen in de kopie bestaat                                                       | Eén rij met `dumped_at`, de tijd van de dump op de host, en `loaded_at`, de tijd van het laden, in UTC |
+| Tabellen                                                                                                          | Wat de kopie krijgt                                                                                                                                       |
+| ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `visitor_salts`, `visitor_hashes`, `discussions`, `admin_sessions`, `admin_login_links` en `admin_login_attempts` | Alleen de structuur, zonder rijen                                                                                                                         |
+| `admin_users`                                                                                                     | Elk account met het adres `beheerder-<id>@example.invalid` en de voornaam `Account <id>`, en het echte nummer, de rol, de keuze voor de mail en de tijden |
+| Alle andere tabellen, en `__drizzle_migrations`                                                                   | Alle rijen                                                                                                                                                |
+| `acceptance_copy`, een tabel die alleen in de kopie bestaat                                                       | Eén rij met `dumped_at`, de tijd van de dump op de host, en `loaded_at`, de tijd van het laden, in UTC                                                    |
 
-De export leest het echte adres van een account niet: de query vraagt de database om het verzonnen adres.
+De export leest het echte adres en de echte voornaam van een account niet: de query vraagt de database om de verzonnen waarden.
 Wie wat deed, staat in `audit_log`, `articles`, `article_versions`, `match_edits` en `match_reports` als het nummer van een account, en dat nummer blijft kloppen.
 De export vraagt `mysqldump` om elke tabel bij naam.
 Heeft de database een tabel die niet in de lijst staat, of heeft `admin_users` een kolom die de lijst niet kent, dan stopt de export voordat hij iets schrijft.
 Een test vergelijkt de lijst met `packages/db/src/schema.ts`, zodat een nieuwe tabel al in CI opvalt.
 Het wachtwoord van de database staat ook hier in een optiebestand dat de opdracht na afloop weghaalt, en niet in de opdrachtregel of de uitvoer.
 
-Na het laden zet de opdracht één account in de kopie om lokaal mee in te loggen: `beheer@example.test`, met de rol `beheerder`.
+Na het laden zet de opdracht één account in de kopie om lokaal mee in te loggen: `beheer@example.test`, met de rol `owner` en de voornaam Lokaal.
 
 ### Eenmalig instellen
 

@@ -22,7 +22,7 @@ export const metadata: Metadata = { robots: { follow: false, index: false }, tit
 // gets the source `redactie` and the line that says where it comes from; no import changes or
 // removes it. Afterwards the goals and the report are filled in as for any other match.
 export default async function AddMatchPage() {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const clubs = await listClubChoices(getDatabase().db)
 

@@ -16,7 +16,7 @@ export const copyInfoTable = 'acceptance_copy'
 export const madeUpAddress = (id: number | string) => `beheerder-${id}@example.invalid`
 
 /** The one account the copy gets to log in with, on the owner's computer only. */
-export const localLogin = { email: 'beheer@example.test', role: 'beheerder' } as const
+export const localLogin = { email: 'beheer@example.test', firstName: 'Lokaal', role: 'owner' } as const
 
 export type ExportRule =
   /** All rows, as they are. */
@@ -35,8 +35,9 @@ export type ExportRule =
  * `structure`: the five tables the nightly dump leaves empty too (see `structureOnlyTables` in
  * backup.ts) and `admin_login_attempts`, which holds the hash of an address for 15 minutes.
  *
- * `admin_users`: the address is the only thing in the database that says who an account is. The
- * number, the role and the times stay, so "who did what" can still be followed as a number.
+ * `admin_users`: the address and the first name are what in the database says who an account
+ * is. The first name becomes "Account" and the number. The number, the role, the choice for the
+ * mail and the times stay, so "who did what" can still be followed as a number.
  * The real address is never read: the query asks for the made-up one.
  *
  * Everything else is copied. It is what the site shows, what the importer read from public
@@ -47,8 +48,8 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
   admin_login_links: 'structure',
   admin_sessions: 'structure',
   admin_users: {
-    keep: ['id', 'role', 'created_at', 'disabled_at'],
-    replace: { email: "CONCAT('beheerder-', `id`, '@example.invalid')" },
+    keep: ['id', 'role', 'conflict_mail', 'created_at', 'disabled_at'],
+    replace: { email: "CONCAT('beheerder-', `id`, '@example.invalid')", first_name: "CONCAT('Account ', `id`)" },
   },
   article_versions: 'copy',
   articles: 'copy',

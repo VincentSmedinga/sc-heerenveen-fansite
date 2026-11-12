@@ -50,7 +50,7 @@ export async function submitLiveEvent(
   previous: LiveFormState,
   formData: FormData,
 ): Promise<LiveFormState> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const id = parseItemId(matchId)
 
   if (id === undefined || !liveKinds.includes(kind)) {
@@ -92,7 +92,7 @@ export async function submitRemoveLiveEvent(
   kind: LiveKind,
   eventId: number,
 ): Promise<LiveRemoveState> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const id = parseItemId(matchId)
   const event = parseItemId(eventId)
 

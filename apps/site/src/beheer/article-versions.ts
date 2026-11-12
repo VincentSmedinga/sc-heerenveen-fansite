@@ -3,6 +3,8 @@ import type { Database } from '@fansite/db/client'
 import { adminUsers, articleVersions } from '@fansite/db/schema'
 import { and, desc, eq, sql } from 'drizzle-orm'
 
+import { accountName } from './account-name'
+
 // The versions of an article: the text as it was each time an editor saved it. `recordVersion`
 // is the only code that writes the table `article_versions`, and this file is the only code
 // that touches it. It only adds; nothing in the site changes or removes a version, and
@@ -37,7 +39,7 @@ export async function findVersion(db: Pick<Database, 'select'>, articleId: numbe
       body: articleVersions.body,
       intro: articleVersions.intro,
       savedAt: articleVersions.savedAt,
-      savedBy: adminUsers.email,
+      savedBy: accountName(adminUsers),
       slug: articleVersions.slug,
       title: articleVersions.title,
       version: articleVersions.version,
@@ -58,12 +60,12 @@ export async function findVersion(db: Pick<Database, 'select'>, articleId: numbe
   return { ...row, newest: Number(newest?.version) === row.version }
 }
 
-/** The versions of an article, the newest first, with the e-mail address of the account. */
+/** The versions of an article, the newest first, with the name of the account. */
 export function listVersions(db: Pick<Database, 'select'>, articleId: number) {
   return db
     .select({
       savedAt: articleVersions.savedAt,
-      savedBy: adminUsers.email,
+      savedBy: accountName(adminUsers),
       version: articleVersions.version,
     })
     .from(articleVersions)

@@ -992,6 +992,7 @@
 - **Besluit:** de opdracht zet `beheer@example.test` met de rol `beheerder` in de kopie.
 - **Waarom:** dan kun je het beheer op echte gegevens bekijken zonder een echt adres.
 - **Alternatieven:** alleen query's, zonder inloggen; met `admin:create` zelf een account maken.
+- **Later:** zie _Het beheer kent drie rollen: eigenaar, redacteur en auteur_ in `site.md` (12 november 2026): het account heeft nu de rol `owner` en de voornaam Lokaal, en de export geeft elk account de voornaam `Account <id>`.
 
 ## De kopie heet `fansite_acc`, en geen werkmap mag die naam krijgen
 

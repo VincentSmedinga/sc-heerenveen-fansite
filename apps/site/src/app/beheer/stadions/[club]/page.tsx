@@ -45,7 +45,7 @@ type Props = {
 // block that goes back to Wikipedia. The page tells what the last action did from the word in
 // the address.
 export default async function ClubStadiumsPage({ params, searchParams }: Props) {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const { club: slug } = await params
   const found = await findAdminClub(getDatabase().db, slug)

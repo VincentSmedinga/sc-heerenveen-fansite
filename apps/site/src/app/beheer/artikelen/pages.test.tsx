@@ -45,9 +45,9 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM article_versions')
   await database.pool.query('DELETE FROM articles')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'sanne@example.org', 'beheerder')
+  await createAccount(database.db, 'sanne@example.org', 'editor', '')
   userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
-  requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'beheerder', userId })
+  requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'editor', userId })
 })
 
 const text = (value: string, marks?: unknown[]) => ({ text: value, type: 'text', ...(marks ? { marks } : {}) })
@@ -122,17 +122,11 @@ describe('every page of the articles', () => {
     ['the article', () => edit(1)],
     ['the preview', () => preview(1)],
     ['a version', () => version(1, 1)],
-  ])('is for the beheerder and not for the moderator: %s', async (_name, render) => {
-    requireRole.mockImplementation((...roles: string[]) => {
-      if (!roles.includes('moderator')) {
-        return Promise.reject(new Error('not found'))
-      }
-
-      return Promise.resolve({})
-    })
+  ])('is for every role: %s', async (_name, render) => {
+    requireRole.mockRejectedValue(new Error('not found'))
 
     await expect(render()).rejects.toThrow('not found')
-    expect(requireRole).toHaveBeenCalledWith('beheerder')
+    expect(requireRole).toHaveBeenCalledWith('owner', 'editor', 'author')
   })
 
   it.each([
@@ -206,7 +200,7 @@ describe('the new article', () => {
   it('has one h1, the five fields with labels, and one button that saves a draft', async () => {
     const html = renderToStaticMarkup(await NewArticlePage())
 
-    expect(requireRole).toHaveBeenCalledWith('beheerder')
+    expect(requireRole).toHaveBeenCalledWith('owner', 'editor', 'author')
     expect(headings(html)).toEqual(['h1 Nieuw artikel'])
 
     for (const [name, label] of [
@@ -407,7 +401,7 @@ describe('the earlier versions on the page of the article', () => {
   async function editedArticle() {
     const id = await addArticle()
 
-    await createAccount(database.db, 'jelle@example.org', 'beheerder')
+    await createAccount(database.db, 'jelle@example.org', 'editor', '')
 
     const other = (await database.db.select().from(adminUsers)).find((user) => user.email === 'jelle@example.org')
 
@@ -562,5 +556,65 @@ describe('the page of a version', () => {
     await expect(version(id, '1e3')).rejects.toThrow('not found')
     await expect(version('abc', 1)).rejects.toThrow('not found')
     await expect(version(other, 2)).rejects.toThrow('not found')
+  })
+})
+
+describe('an author', () => {
+  const publishButton = /<button[^>]*>Publiceren<\/button>/u
+  let authorId: number
+
+  beforeEach(async () => {
+    await createAccount(database.db, 'auteur@example.test', 'author', 'Anna')
+    authorId = (await database.db.select().from(adminUsers)).find((row) => row.role === 'author')?.id ?? 0
+    requireRole.mockResolvedValue({ email: 'auteur@example.test', firstName: 'Anna', role: 'author', userId: authorId })
+  })
+
+  async function addOwn(overrides: Record<string, string> = {}) {
+    const created = await createArticle(database.db, authorId, values(overrides), new Date('2026-10-20T09:00:00Z'))
+
+    if (created.status !== 'created') {
+      throw new Error('not made')
+    }
+
+    return created.id
+  }
+
+  it('sees only the articles he made in the list', async () => {
+    await addArticle({ adres: 'van-de-redactie', titel: 'Van de redactie' })
+    await addOwn({ adres: 'van-mij', titel: 'Van mij' })
+
+    const html = await list()
+
+    expect(html).toContain('Van mij')
+    expect(html).not.toContain('Van de redactie')
+    expect(html).toContain('1 artikel.')
+  })
+
+  it('gets "niet gevonden" for the form, the preview and a version of an article of someone else', async () => {
+    const other = await addArticle()
+
+    await expect(edit(other)).rejects.toThrow('not found')
+    await expect(preview(other)).rejects.toThrow('not found')
+    await expect(version(other, 1)).rejects.toThrow('not found')
+  })
+
+  it('has no button to publish his draft, and no button to withdraw his published article', async () => {
+    const own = await addOwn()
+
+    expect(await edit(own)).not.toMatch(publishButton)
+
+    await saveArticle(database.db, userId, own, values(), true, new Date('2026-10-21T09:00:00Z'))
+
+    const html = await edit(own)
+
+    expect(html).not.toMatch(/<button[^>]*>Intrekken<\/button>/u)
+    expect(html).not.toMatch(publishButton)
+  })
+
+  it('has no button to publish on the form for a new article, and the intro says who publishes', async () => {
+    const html = renderToStaticMarkup(await NewArticlePage())
+
+    expect(html).not.toMatch(publishButton)
+    expect(html).toContain('Een redacteur of de eigenaar publiceert het.')
   })
 })

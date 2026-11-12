@@ -69,9 +69,9 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM matches')
   await database.pool.query('DELETE FROM players')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'sanne@example.org', 'beheerder')
+  await createAccount(database.db, 'sanne@example.org', 'editor', '')
   userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
-  requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'beheerder', userId })
+  requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'editor', userId })
 
   const [values] = await withClubs(database.db, [played])
   const [inserted] = await database.db.insert(matches).values(values!).$returningId()
@@ -141,15 +141,15 @@ async function store(overrides: Parameters<typeof baseReport>[1] = {}, status = 
 }
 
 describe('the report screen', () => {
-  it('tells search engines to stay away, and is for the beheerder and not for the moderator', async () => {
+  it('tells search engines to stay away, and is for the editor and not for the author', async () => {
     expect(metadata.robots).toEqual({ follow: false, index: false })
 
     requireRole.mockImplementation((...roles: string[]) =>
-      roles.includes('moderator') ? Promise.resolve({}) : Promise.reject(new Error('not found')),
+      roles.includes('author') ? Promise.resolve({}) : Promise.reject(new Error('not found')),
     )
 
     await expect(page(matchId)).rejects.toThrow('not found')
-    expect(requireRole).toHaveBeenCalledWith('beheerder')
+    expect(requireRole).toHaveBeenCalledWith('owner', 'editor')
   })
 
   it('is "not found" for a match that does not exist, was not played, or is no number', async () => {

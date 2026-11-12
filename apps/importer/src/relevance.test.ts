@@ -92,7 +92,7 @@ const fromTheLogs: Case[] = [
 const knownFalsePositives: Case[] = [
   /*
    * Made up (verzonnen). The owner said "not relevant", but "wint" is a football word on
-   * purpose: a club headline we miss is worse than a headline a moderator hides (see the
+   * purpose: a club headline we miss is worse than a headline an author hides (see the
    * decision "Een volledige naam is genoeg, en "wint" en "verliest" zijn voetbalwoorden" in
    * `docs/beslissingen/importer.md`).
    */
@@ -125,7 +125,7 @@ const legends: Case[] = [
   ['Abe Lenstra, onze grootste speler aller tijden', 'relevant'],
   ['Nieuw boek over Abe Lenstra verschijnt in december', 'relevant'],
   ['ABE LENSTRA-stadion krijgt nieuwe tribune', 'relevant'],
-  // A known false positive: the boulevard has his name. A moderator hides such an item.
+  // A known false positive: the boulevard has his name. An author hides such an item.
   ['Wegwerkzaamheden op de Abe Lenstra Boulevard', 'relevant'],
   ['Lenstra opent nieuwe garage in Drachten', 'irrelevant'],
 ]
@@ -189,7 +189,7 @@ const heerenveenWithFootball: Case[] = [
   // A verb of winning or losing is a football word: these are headlines about a match.
   ['Heerenveen wint', 'relevant'],
   ['Heerenveen verliest in Zwolle', 'relevant'],
-  // A known false positive: the word is not about football. A moderator hides such an item.
+  // A known false positive: the word is not about football. An author hides such an item.
   ['Vrachtwagen verliest lading op de A7 bij Heerenveen', 'relevant'],
   ['Man wint loterij in Heerenveen', 'relevant'],
 ]
@@ -389,7 +389,7 @@ const frisianClub: Case[] = [
   ['Kampioenskip fierljeppen yn Hearrenfean', 'doubtful'],
   ['Ferlies foar bedriuw yn Hearrenfean', 'doubtful'],
   // Known false positives, like "Man wint loterij in Heerenveen": the verbs of winning and
-  // losing are football words on purpose. A moderator hides such an item.
+  // losing are football words on purpose. An author hides such an item.
   ['Frou wûn lotterij yn Hearrenfean', 'relevant'],
   ['Frou ferlear har tas yn Hearrenfean', 'relevant'],
 ]

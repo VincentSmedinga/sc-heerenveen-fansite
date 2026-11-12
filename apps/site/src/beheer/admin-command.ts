@@ -2,12 +2,14 @@ import type { Database } from '@fansite/db/client'
 
 import { adminRoles } from '@fansite/db/schema'
 
-import { createAccount, isAdminRole, normaliseEmail, revokeAccount } from './accounts.ts'
+import { createAccount, isAdminRole, normaliseEmail, normaliseFirstName, revokeAccount } from './accounts.ts'
 
 const usage = [
   'Usage:',
-  `  admin create <email address> <role: ${adminRoles.join(' or ')}>`,
+  `  admin create <email address> <role: ${adminRoles.join(', ')}> [first name]`,
   '  admin revoke <email address>',
+  'A new account needs a first name. For an account that exists, create sets the role, and the',
+  'first name when one is given.',
 ].join('\n')
 
 /**
@@ -20,15 +22,25 @@ const usage = [
 export async function runAdminCommand(db: Database, args: readonly string[], now = new Date()) {
   const [command, address, role, ...rest] = args
   const email = address === undefined ? undefined : normaliseEmail(address)
+  // The first name may be in quotes or not: "Jan Willem" and Jan Willem are the same.
+  const firstName = rest.length === 0 ? undefined : normaliseFirstName(rest.join(' '))
+  const nameIsRight = rest.length === 0 || firstName !== undefined
 
-  if (command === 'create' && email !== undefined && role !== undefined && isAdminRole(role) && rest.length === 0) {
-    const result = await createAccount(db, email, role, now)
+  if (command === 'create' && email !== undefined && role !== undefined && isAdminRole(role) && nameIsRight) {
+    const result = await createAccount(db, email, role, firstName, now)
+
+    if (result === 'needs-name') {
+      console.error(`There is no account for ${email} yet, and a new account needs a first name.\n${usage}`)
+
+      return 2
+    }
 
     console.log(
       {
-        created: `Made the account for ${email}, as ${role}.`,
+        changed: `The account for ${email} is ${role} now${firstName === undefined ? '' : `, with the first name ${firstName}`}.`,
+        created: `Made the account for ${email}, as ${role}, with the first name ${firstName ?? ''}.`,
         enabled: `The account for ${email} was turned off. It is on again, as ${role}.`,
-        exists: `${email} has an account already. Nothing changed.`,
+        exists: `${email} has an account as ${role} already. Nothing changed.`,
       }[result],
     )
 

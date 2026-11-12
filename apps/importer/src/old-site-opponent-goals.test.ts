@@ -156,7 +156,7 @@ describe('linking the goals against us to a person', () => {
 
   it('leaves the goals of a match the editors filled in', async () => {
     await person('Piet Pietersen')
-    await database.pool.query("INSERT INTO admin_users (email, role) VALUES ('redactie@example.org', 'beheerder')")
+    await database.pool.query("INSERT INTO admin_users (email, role) VALUES ('redactie@example.org', 'editor')")
 
     const [admin] = await database.db.select().from(adminUsers)
 

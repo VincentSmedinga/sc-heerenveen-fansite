@@ -6,29 +6,27 @@ import path from 'node:path'
 
 import { hashOf, newToken } from '../src/beheer/sessions'
 
-// A moderator and a beheerder with a session for the checks of the admin. The login of the
-// admin is a link in a mail, which a browser test can't follow without a mailbox, so the check
-// puts the account and the session in the database itself, as `startSession` does, and gives
-// the browser the cookie.
-// Nothing in the site can do this: there is no route, no environment variable and no token in
-// the code that logs in, and this file is not part of the build. The tokens are made anew for
-// every run, they are only in the memory of the check (and in the environment of its workers),
-// and the accounts and the sessions are removed afterwards. The moderator hides messages; the
-// beheerder also writes articles, which a moderator may not.
+// An owner, an editor and an author with a session for the checks of the admin (issue 1156).
+// The login of the admin is a link in a mail, which a browser test can't follow without a
+// mailbox, so the check puts the account and the session in the database itself, as
+// `startSession` does, and gives the browser the cookie. Nothing in the site can do this: there
+// is no route, no environment variable and no token in the code that logs in, and this file is
+// not part of the build. The tokens are made anew for every run, they are only in the memory of
+// the check (and in the environment of its workers), and the accounts and the sessions are
+// removed afterwards. The editor hides messages and writes articles; the owner also manages the
+// accounts; the author only writes his own articles.
 
 /**
  * The accounts of the check, by role. `.test` is a domain that can't exist, so a mail to it
  * goes nowhere.
  */
 const accounts = {
-  beheerder: { email: 'e2e-beheerder@example.test', variable: 'E2E_BEHEERDER_TOKEN' },
-  moderator: { email: 'e2e-moderator@example.test', variable: 'E2E_ADMIN_TOKEN' },
+  author: { email: 'e2e-auteur@example.test', firstName: 'Auteur', variable: 'E2E_AUTHOR_TOKEN' },
+  editor: { email: 'e2e-redacteur@example.test', firstName: 'Redacteur', variable: 'E2E_EDITOR_TOKEN' },
+  owner: { email: 'e2e-eigenaar@example.test', firstName: 'Eigenaar', variable: 'E2E_OWNER_TOKEN' },
 } as const
 
 export type E2eRole = keyof typeof accounts
-
-/** The account of the moderator. */
-export const adminEmail = accounts.moderator.email
 
 /**
  * The name of the cookie of the admin (`sessionCookieName` in src/beheer/require-role.ts, which
@@ -60,8 +58,8 @@ const feedPath = '/e2e-admin/rss/'
 const loopback = new Set(['127.0.0.1', '::1', '[::1]', 'localhost'])
 
 /**
- * Puts the moderator, the beheerder, their sessions and the made-up items in the database and
- * returns the function that takes them out again. It only works on a database on this
+ * Puts the owner, the editor, the author, their sessions and the made-up items in the database
+ * and returns the function that takes them out again. It only works on a database on this
  * computer: it refuses any other host, so it can never write to the database of acceptance or
  * production, whatever `DATABASE_URL` says by mistake. The site must have started already: it
  * makes the tables, and global-setup.ts puts the test sources in (see test-sources.ts).
@@ -77,10 +75,10 @@ export async function addAdmin() {
 
     const now = new Date()
 
-    for (const [role, { email, variable }] of Object.entries(accounts)) {
+    for (const [role, { email, firstName, variable }] of Object.entries(accounts)) {
       const [user] = await db
         .insert(adminUsers)
-        .values({ email, role: role as E2eRole })
+        .values({ email, firstName, role: role as E2eRole })
         .$returningId()
       const token = newToken()
 
@@ -135,12 +133,12 @@ export async function addAdmin() {
 }
 
 /**
- * A session of its own for the moderator or the beheerder of the check, as the cookie for the
+ * A session of its own for an account of the check, as the cookie for the
  * browser. The session of the global setup is shared by every test, so a test that logs out or
  * revokes uses this one: it goes with the account when the check is over (the sessions of an
  * account are removed with it).
  */
-export async function addAdminSession(host: string, role: E2eRole = 'moderator') {
+export async function addAdminSession(host: string, role: E2eRole = 'editor') {
   const { close, db } = connect(localDatabaseUrl())
 
   try {
@@ -166,12 +164,32 @@ export async function addAdminSession(host: string, role: E2eRole = 'moderator')
   }
 }
 
+/** The number of the account of the check with this role, for the address of its form. */
+export async function adminAccountId(role: E2eRole) {
+  const { close, db } = connect(localDatabaseUrl())
+
+  try {
+    const [user] = await db
+      .select({ id: adminUsers.id })
+      .from(adminUsers)
+      .where(eq(adminUsers.email, accounts[role].email))
+
+    if (user === undefined) {
+      throw new Error(`The account of the ${role} is not there: the global setup of the checks makes it.`)
+    }
+
+    return user.id
+  } finally {
+    await close()
+  }
+}
+
 /**
- * The cookie that logs the browser in as the moderator of the check, or as the beheerder when
- * the role says so. It has the attributes the site sets, and `Secure` works on 127.0.0.1 in
- * Chromium.
+ * The cookie that logs the browser in as the editor of the check, or as the owner or the author
+ * when the role says so. It has the attributes the site sets, and `Secure` works on 127.0.0.1
+ * in Chromium.
  */
-export function adminCookie(host: string, role: E2eRole = 'moderator') {
+export function adminCookie(host: string, role: E2eRole = 'editor') {
   const value = process.env[accounts[role].variable]
 
   if (value === undefined) {

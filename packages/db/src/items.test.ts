@@ -115,7 +115,7 @@ describe('the table items', () => {
   it('holds a reason of 300 characters and refuses one of 301', async () => {
     const [user] = await database.db
       .insert(adminUsers)
-      .values({ email: 'jelle@example.org', role: 'moderator' })
+      .values({ email: 'jelle@example.org', role: 'author' })
       .$returningId()
     const hidden = { hiddenAt: new Date('2026-10-22T10:00:00Z'), hiddenBy: user?.id ?? 0 }
 

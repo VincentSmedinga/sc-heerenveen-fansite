@@ -24,7 +24,7 @@ import { getDatabase } from '#src/database'
 
 import { matchesPath, matchPath } from './paths'
 
-// The actions of the matches. Only a beheerder fills in a match, as with the articles. The
+// The actions of the matches. Only an editor fills in a match, as with the articles. The
 // number of the match is bound to the action (`submitMatch.bind(null, id)`) and is input from
 // outside all the same, so each action checks it again. A form that is wrong returns to the
 // form with the values kept, and one that works ends on the page of the match with a notice:
@@ -46,7 +46,7 @@ export type RemoveFormState = { error?: string }
  * where the goals and the report are filled in as for any other match.
  */
 export async function submitAddMatch(_previous: AddFormState, formData: FormData): Promise<AddFormState> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const { db } = getDatabase()
   const values = readAddValues(formData)
   const checked = validateAdd(values, await listClubChoices(db))
@@ -84,7 +84,7 @@ export async function submitConflict(
   _previous: ConflictFormState,
   formData: FormData,
 ): Promise<ConflictFormState> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const id = parseItemId(changeId)
   const difference = id === undefined ? undefined : await findDifference(getDatabase().db, id)
 
@@ -138,7 +138,7 @@ export async function submitDeleteMatch(
   _previous: RemoveFormState,
   formData: FormData,
 ): Promise<RemoveFormState> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const id = parseItemId(matchId)
 
   if (id === undefined) {
@@ -176,7 +176,7 @@ export async function submitHeldChange(
   _previous: HeldChangeFormState,
   formData: FormData,
 ): Promise<HeldChangeFormState> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const id = parseItemId(changeId)
   const change = id === undefined ? undefined : await findHeldChange(getDatabase().db, id)
 
@@ -229,7 +229,7 @@ export async function submitMatch(
   _previous: MatchFormState,
   formData: FormData,
 ): Promise<MatchFormState> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const id = parseItemId(matchId)
   const found = id === undefined ? undefined : await findMatch(getDatabase().db, id)
 
@@ -308,7 +308,7 @@ export async function submitRemoveEntry(
   _previous: RemoveFormState,
   formData: FormData,
 ): Promise<RemoveFormState> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const id = parseItemId(matchId)
 
   if (id === undefined) {

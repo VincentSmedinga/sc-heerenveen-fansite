@@ -183,7 +183,7 @@ Al in het register (#258), met het filter `club`.
 - **Meer tonen:** de bron zegt er niets over; we vragen toestemming voor meer dan de standaard.
 - **Besluit: nemen, met het filter `club`.**
   De feed is het regionieuws van Friesland, de provincie van de club, en sc Heerenveen komt er regelmatig in voor.
-  Het filter houdt de rest van de berichten van de site; de twijfelgevallen blijven onzichtbaar en een moderator vindt ze in het beheer.
+  Het filter houdt de rest van de berichten van de site; de twijfelgevallen blijven onzichtbaar en een redacteur vindt ze in het beheer.
   Controle van 25 oktober 2026, met een lokale run van de importer.
 - **Importer:** leest de feed zonder aanpassing.
   Een run bewaarde alle 50 berichten, zonder er een over te slaan, en alle tijden waren geldig.

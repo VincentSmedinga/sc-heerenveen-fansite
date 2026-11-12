@@ -79,7 +79,7 @@ beforeEach(async () => {
     await database.pool.query(`DELETE FROM ${table}`)
   }
 
-  await database.pool.query("INSERT INTO admin_users (email, role) VALUES ('redactie@example.org', 'beheerder')")
+  await database.pool.query("INSERT INTO admin_users (email, role) VALUES ('redactie@example.org', 'editor')")
   adminId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
 })
 
@@ -892,7 +892,7 @@ describe('a difference becomes a change that waits (issue 577)', () => {
     expect((await log()).filter((line) => line.action === 'match.keep')).toHaveLength(2)
   })
 
-  describe('the mail to the beheerders', () => {
+  describe('the mail to the editors', () => {
     const env = {
       MAIL_FROM: 'fansite@example.org',
       SITE_ENV: 'acceptance',

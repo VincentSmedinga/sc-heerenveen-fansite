@@ -62,10 +62,10 @@ describe('exportPlan', () => {
     }
   })
 
-  it('gives every account a made-up address and keeps its number, role and times', () => {
+  it('gives every account a made-up address and first name and keeps its number, role and times', () => {
     expect(exportPlan['admin_users']).toEqual({
-      keep: ['id', 'role', 'created_at', 'disabled_at'],
-      replace: { email: "CONCAT('beheerder-', `id`, '@example.invalid')" },
+      keep: ['id', 'role', 'conflict_mail', 'created_at', 'disabled_at'],
+      replace: { email: "CONCAT('beheerder-', `id`, '@example.invalid')", first_name: "CONCAT('Account ', `id`)" },
     })
     expect(madeUpAddress(7)).toBe('beheerder-7@example.invalid')
   })
@@ -90,7 +90,7 @@ describe('exportDump', () => {
     work = mkdtempSync(path.join(tmpdir(), 'fansite-export-test-'))
     database = await createTestDatabase()
     await database.pool.query(
-      "INSERT INTO admin_users (id, email, role, created_at, disabled_at) VALUES (3, 'sanne@example.org', 'beheerder', '2026-10-01 08:00:00', NULL), (8, 'jelle.o''brien@example.org', 'moderator', '2026-10-02 09:30:00', '2026-11-01 12:00:00')",
+      "INSERT INTO admin_users (id, email, first_name, role, created_at, disabled_at) VALUES (3, 'sanne@example.org', 'Sanne', 'editor', '2026-10-01 08:00:00', NULL), (8, 'jelle.o''brien@example.org', 'Jelle', 'author', '2026-10-02 09:30:00', '2026-11-01 12:00:00')",
     )
   })
 
@@ -177,14 +177,15 @@ describe('exportDump', () => {
     await exportDump(env(), out, now)
 
     expect(text()).toContain(
-      "INSERT INTO `admin_users` (`id`, `email`, `role`, `created_at`, `disabled_at`) VALUES (3, 'beheerder-3@example.invalid', 'beheerder', '2026-10-01 08:00:00', NULL);",
+      "INSERT INTO `admin_users` (`id`, `email`, `role`, `created_at`, `disabled_at`, `first_name`, `conflict_mail`) VALUES (3, 'beheerder-3@example.invalid', 'editor', '2026-10-01 08:00:00', NULL, 'Account 3', 1);",
     )
     expect(text()).toContain(
-      "VALUES (8, 'beheerder-8@example.invalid', 'moderator', '2026-10-02 09:30:00', '2026-11-01 12:00:00');",
+      "VALUES (8, 'beheerder-8@example.invalid', 'author', '2026-10-02 09:30:00', '2026-11-01 12:00:00', 'Account 8', 1);",
     )
     expect(text()).not.toContain('example.org')
-    expect(text()).not.toContain('sanne')
+    expect(text()).not.toMatch(/sanne/i)
     expect(text()).not.toContain('brien')
+    expect(text()).not.toContain('Jelle')
   })
 
   it('ends with the time of the dump in UTC and the line that says it is complete', async () => {

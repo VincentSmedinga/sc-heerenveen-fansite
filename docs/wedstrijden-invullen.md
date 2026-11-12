@@ -1,6 +1,6 @@
 # Een wedstrijd invullen of verbeteren
 
-Voor beheerders.
+Voor de eigenaar en de redacteuren.
 Soms heeft Wikipedia de uitslag nog niet, of staat er een fout in.
 Een dag na een wedstrijd zeggen onze pagina's dan nog "Gegevens nog niet beschikbaar".
 Op `/beheer/wedstrijden` vul je de wedstrijd zelf in, en iedereen ziet het binnen vijf minuten.
@@ -84,7 +84,7 @@ De import leest Wikipedia elk uur, en kijkt voor elk onderdeel dat jij invulde (
   Het logboek zegt dat Wikipedia is bijgekomen.
 - **Wikipedia zegt iets anders:** jouw invoer blijft staan.
   De import schrijft het verschil één keer op, met beide waarden, in het logboek en in de waarschuwing van de import (`pnpm run import:status`).
-  De beheerders krijgen een mail, en op `/beheer/wedstrijden` staat bij de wedstrijd het label "Wikipedia wijkt af".
+  De eigenaar en de redacteuren krijgen een mail, en op `/beheer/wedstrijden` staat bij de wedstrijd het label "Wikipedia wijkt af".
   De kaart "Te doen" op de startpagina van het beheer zegt hoeveel afwijkingen op een besluit wachten, en de koppeling erbij opent de lijst "Aangepast" van het seizoen waar ze staan.
 
 De uitslag en de doelpunten tellen apart.
@@ -103,7 +103,7 @@ Schrijf bij "Reden" waarom je beslist, en kies:
 
 Het besluit komt in het logboek, met wie en waarom.
 Beslist niemand, dan neemt de import het onderdeel over na zeven dagen, als Wikipedia dan nog hetzelfde zegt.
-De beheerders krijgen daarover een mail.
+De eigenaar en de redacteuren krijgen daarover een mail.
 
 De doelpunten van een wedstrijd met een verslag zijn een uitzondering: ze zijn van het verslag.
 "Neem Wikipedia over" verandert daar niets, en de import neemt ze ook na zeven dagen niet over.
@@ -176,7 +176,7 @@ In het lopende seizoen neemt de import de wijziging over na zeven dagen, als Wik
 In een seizoen dat voorbij is neemt de import een wijziging nooit zelf over.
 Daar blijft de huidige waarde staan tot iemand beslist.
 Dat geldt ook voor het seizoen dat net voorbij is, dat de import in juli en augustus nog één keer per week leest.
-Alleen een beheerder ziet deze schermen en kan beslissen.
+Alleen de eigenaar of een redacteur ziet deze schermen en kan beslissen.
 
 Wie op de server werkt, kan hetzelfde met `pnpm run import:changes`: `accept` neemt Wikipedia over, `reject` laat de wedstrijd staan.
 

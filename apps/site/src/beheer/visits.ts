@@ -6,7 +6,7 @@ import { desc, gte, sql } from 'drizzle-orm'
 
 // The numbers of the visit for the admin: the counters that the site keeps per day (see
 // `createVisitCounter` in @fansite/db/visits), read for the last days. The counters hold no
-// person, so there is nothing to hide here: the page that shows them is for beheerders only
+// person, so there is nothing to hide here: the page that shows them is for editors only
 // because the numbers are for the team.
 
 /** How many days the page shows, today included. */

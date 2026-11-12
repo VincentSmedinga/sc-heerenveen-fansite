@@ -28,7 +28,7 @@ type Props = { params: Promise<{ id: string }> }
 // reads and stores nothing by itself; the form saves with the same action as the form typed by
 // hand.
 export default async function PasteReportPage({ params }: Props) {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const id = parseItemId((await params).id)
   const screen = id === undefined ? undefined : await findReportScreen(getDatabase().db, id)

@@ -505,6 +505,13 @@
       "when": 1794435563022,
       "tag": "0071_add_death_date_to_persons",
       "breakpoints": true
+    },
+    {
+      "idx": 72,
+      "version": "5",
+      "when": 1794474000703,
+      "tag": "0072_manage_admin_accounts",
+      "breakpoints": true
     }
   ]
 }

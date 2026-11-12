@@ -5,7 +5,7 @@ import { checkPage } from './check-page'
 import { headlines } from './headlines'
 
 // The importer keeps the items it finds doubtful or not about the club, and the site never
-// shows them to a visitor (#74). Only the admin lists them, so a moderator can find them.
+// shows them to a visitor (#74). Only the admin lists them, so an editor can find them.
 
 const [doubtful, irrelevant] = headlines.notForVisitors
 
@@ -53,10 +53,10 @@ test.describe('the items that are not relevant', () => {
   })
 })
 
-// A moderator puts a doubtful item on the site, and takes it back. The item sits on the source
+// An editor puts a doubtful item on the site, and takes it back. The item sits on the source
 // that is switched off (see admin.ts), so no other check reads it. "On the site" is the group
 // of the admin that is called so: the made-up source is off, so no page of a visitor shows it.
-test.describe('an item that a moderator approves', () => {
+test.describe('an item that an editor approves', () => {
   const title = adminItems.approving
 
   test('is on the site after "Op de site zetten", and off it after "Terug naar het oordeel van het filter"', async ({
@@ -79,7 +79,7 @@ test.describe('an item that a moderator approves', () => {
     expect(await checkPage(page)).toEqual([])
 
     await page.getByRole('link', { exact: true, name: 'Op de site' }).click()
-    await expect(itemOf().getByText('door een moderator op de site gezet', { exact: false }).first()).toBeVisible()
+    await expect(itemOf().getByText('door de redactie op de site gezet', { exact: false }).first()).toBeVisible()
     await expect(itemOf().getByText(/door .+@.+\./)).toBeVisible()
 
     await itemOf()

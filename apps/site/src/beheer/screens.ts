@@ -1,5 +1,18 @@
 import type { AdminRole } from '@fansite/db/schema'
 
+// The roles are written out here instead of imported from the schema, because the bar is a
+// client component and the schema must not go into the browser. `screens.test.ts` keeps them
+// the same.
+
+/** Every role: the owner, an editor and an author. */
+export const allRoles: readonly AdminRole[] = ['owner', 'editor', 'author']
+
+/** The roles that do the work of the editors (`editorRoles` in the schema). */
+export const workRoles: readonly AdminRole[] = ['owner', 'editor']
+
+/** The address of Mijn account, whose link in the bar is the first name of the account. */
+export const myAccountHref = '/beheer/mijn-account'
+
 /** A screen of the admin, as the bar under the main menu lists it. */
 export type Screen = { href: string; label: string; roles: readonly AdminRole[] }
 
@@ -9,15 +22,17 @@ export type Screen = { href: string; label: string; roles: readonly AdminRole[] 
  * calls requireRole() itself.
  */
 export const screens: readonly Screen[] = [
-  { href: '/beheer', label: 'Beheer', roles: ['beheerder'] },
-  { href: '/beheer/berichten', label: 'Berichten', roles: ['beheerder', 'moderator'] },
-  { href: '/beheer/artikelen', label: 'Artikelen', roles: ['beheerder'] },
-  { href: '/beheer/wedstrijden', label: 'Wedstrijden', roles: ['beheerder'] },
-  { href: '/beheer/spelers', label: 'Spelers', roles: ['beheerder'] },
-  { href: '/beheer/stadions', label: 'Stadions', roles: ['beheerder'] },
-  { href: '/beheer/clubnamen', label: 'Clubnamen', roles: ['beheerder'] },
-  { href: '/beheer/kwaliteit', label: 'Kwaliteit', roles: ['beheerder'] },
-  { href: '/beheer/bezoek', label: 'Bezoek', roles: ['beheerder'] },
+  { href: '/beheer', label: 'Beheer', roles: allRoles },
+  { href: '/beheer/berichten', label: 'Berichten', roles: workRoles },
+  { href: '/beheer/artikelen', label: 'Artikelen', roles: allRoles },
+  { href: '/beheer/wedstrijden', label: 'Wedstrijden', roles: workRoles },
+  { href: '/beheer/spelers', label: 'Spelers', roles: workRoles },
+  { href: '/beheer/stadions', label: 'Stadions', roles: workRoles },
+  { href: '/beheer/clubnamen', label: 'Clubnamen', roles: workRoles },
+  { href: '/beheer/kwaliteit', label: 'Kwaliteit', roles: workRoles },
+  { href: '/beheer/bezoek', label: 'Bezoek', roles: workRoles },
+  { href: '/beheer/accounts', label: 'Accounts', roles: ['owner'] },
+  { href: myAccountHref, label: 'Mijn account', roles: allRoles },
 ]
 
 /**

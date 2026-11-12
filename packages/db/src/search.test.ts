@@ -35,7 +35,7 @@ beforeEach(async () => {
 
   const [user] = await database.db
     .insert(adminUsers)
-    .values({ email: 'beheerder@example.test', role: 'beheerder' })
+    .values({ email: 'beheerder@example.test', role: 'editor' })
     .$returningId()
 
   userId = user?.id ?? 0

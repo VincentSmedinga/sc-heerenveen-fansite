@@ -18,5 +18,5 @@ export async function AdminBar() {
     return null
   }
 
-  return <AdminScreens role={session.role} />
+  return <AdminScreens firstName={session.firstName} role={session.role} />
 }

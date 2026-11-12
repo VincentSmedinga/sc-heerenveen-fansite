@@ -10,7 +10,7 @@ import { getDatabase } from '#src/database'
 
 import { clubPath, stadiumsPath } from './paths'
 
-// The actions of the stadiums. Only a beheerder keeps them, as with the matches. The address
+// The actions of the stadiums. Only an editor keeps them, as with the matches. The address
 // part of the club is bound to the action (`submitStadiums.bind(null, slug)`) and is input from
 // outside all the same, so each action looks the club up again. A form that is wrong returns to
 // the form with the values kept, and one that works ends on the page of the club with a notice:
@@ -22,7 +22,7 @@ import { clubPath, stadiumsPath } from './paths'
  * a button, so nothing can be wrong with it.
  */
 export async function submitReset(slug: string): Promise<void> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const { db } = getDatabase()
   const found = await findAdminClub(db, slug)
 
@@ -49,7 +49,7 @@ export async function submitStadiums(
   _previous: StadiumFormState,
   formData: FormData,
 ): Promise<StadiumFormState> {
-  const { userId } = await requireRole('beheerder')
+  const { userId } = await requireRole('owner', 'editor')
   const { db } = getDatabase()
   const found = await findAdminClub(db, slug)
 

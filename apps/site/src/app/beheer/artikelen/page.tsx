@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
 
+import { adminRoles } from '@fansite/db/schema'
 import { Button, Card, Form, Heading, Link, List, Page, Text } from '@fansite/design-system'
 
-import { listArticles, listLength } from '#src/beheer/articles'
+import { listArticles, listLength, ownArticlesOf } from '#src/beheer/articles'
 import { compact } from '#src/beheer/density'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
@@ -18,14 +19,14 @@ export const metadata: Metadata = { robots: { follow: false, index: false }, tit
 
 type SearchParams = Record<string, string | string[] | undefined>
 
-// The list of the articles of the editors, for a beheerder: the one written last first, with
+// The list of the articles of the editors: the one written last first, with
 // where each stands, a link to write on it and a link to preview it. "Nieuw artikel" is a form
 // with method GET, so it is a real button and works without JavaScript.
 export default async function ArticlesPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
-  await requireRole('beheerder')
-
+  const reader = await requireRole(...adminRoles)
   const { fout } = await searchParams
-  const found = await listArticles(getDatabase().db)
+  // An author sees only the articles he made (issue 1156).
+  const found = await listArticles(getDatabase().db, ownArticlesOf(reader))
   const now = new Date()
 
   return (
@@ -35,8 +36,9 @@ export default async function ArticlesPage({ searchParams }: { searchParams: Pro
         <>
           <Heading level={1}>Artikelen</Heading>
           <Text appearance="intro">
-            Hier schrijf je de artikelen van de redactie. Een concept staat nergens op de site. Een gepubliceerd artikel
-            staat op een eigen pagina en, als het het nieuwste is, op home.
+            {reader.role === 'author'
+              ? 'Hier schrijf je je eigen artikelen. Een concept staat nergens op de site. Een redacteur of de eigenaar publiceert het.'
+              : 'Hier schrijf je de artikelen van de redactie. Een concept staat nergens op de site. Een gepubliceerd artikel staat op een eigen pagina en, als het het nieuwste is, op home.'}
           </Text>
           <Form action="/beheer/artikelen/nieuw" method="get">
             <Button icon="plus" type="submit">

@@ -484,6 +484,7 @@
   Hoe die opdracht draait, staat onder _De opdrachten voor accounts zijn één bestand in de build_.
 - **Waarom:** een aanmeldpagina is een aanvalsvlak en nog niet nodig voor een handvol mensen.
 - **Alternatieven:** uitnodigen vanuit het beheer; dat kan later, met #31.
+- **Later:** zie _De eigenaar beheert accounts in het beheer, en alleen de opdracht maakt een eigenaar_ (12 november 2026): de eigenaar voegt redacteuren en auteurs toe op `/beheer/accounts`; de opdracht maakt alleen nog een eigenaar, en zet de rol van een account dat er al is.
 
 ## Het logboek van beheeracties komt met de eerste beheeractie
 
@@ -729,6 +730,7 @@
 - **Beperking:** de teardown verwijdert de logregels van het testaccount met een eigen `DELETE`, anders weigert de foreign key het account te verwijderen.
   Dat mag alleen hier, op de database op deze computer; de site heeft geen manier om een regel te verwijderen.
 - **Alternatieven:** de inloglink uit de nepmailserver van het contactformulier halen en echt inloggen (dichter bij de werkelijkheid, maar elke test mailt dan en wacht, en de limiet van 5 links per kwartier raakt het); een route in de site die in testmodus inlogt (een deur die op acceptatie open kan staan); `SITE_ENV` als sleutel gebruiken (de controle draait met `acceptance`, dus dat zou juist die omgeving openzetten).
+- **Later:** zie _Het beheer kent drie rollen: eigenaar, redacteur en auteur_ (12 november 2026): `e2e/admin.ts` zet nu een eigenaar, een redacteur en een auteur met een sessie in de database, met de tokens in `E2E_OWNER_TOKEN`, `E2E_EDITOR_TOKEN` en `E2E_AUTHOR_TOKEN`.
 
 ## De pagina van de inloglink zegt dat de link klopt
 
@@ -5073,3 +5075,62 @@
   Een veld voor "meer clubs tegelijk" of "ten minste zeven doelpunten" maakt het formulier zwaarder voor een zeldzame vraag, terwijl een adres met een parameter elke vraag deelbaar en te bewaren houdt.
 - **Alternatieven:** alleen de kaarten die het formulier al kent (vijf van de negen blijven dan niet over); een veld voor elke vraag; een eigen pagina per vraag.
 - **Nadeel:** een parameter die geen veld heeft, is alleen te veranderen via de chip of het adres.
+
+## Het beheer kent drie rollen: eigenaar, redacteur en auteur
+
+- **Datum:** 12 november 2026
+- **Besluit:** `owner` (eigenaar), `editor` (redacteur) en `author` (auteur), in `admin_users.role` (#1156).
+  De rollen `beheerder` en `moderator` gaan op in redacteur: migratie `0072_manage_admin_accounts` zet elk bestaand account op `editor`.
+  De eigenaar beheert de accounts; een redacteur mag verder alles; een auteur schrijft alleen zijn eigen artikelen (`created_by`) en publiceert niet en haalt niets offline.
+  - **Waar het staat:** `editorRoles` in het schema is de eigenaar en de redacteur; elke pagina en actie vraagt die, behalve de artikelen, de startpagina, Mijn account en uitloggen, die elke rol toelaten.
+    `src/beheer/routes.test.ts` controleert per bestand welke rollen `requireRole` noemt.
+  - **De artikelen:** een auteur krijgt "niet gevonden" voor een artikel van een ander, ook in het voorbeeld en de versies, en `saveArticle` slaat een artikel van een ander niet op.
+    Een verzoek om te publiceren of in te trekken van een auteur geeft "niet gevonden", ook als hij het zelf maakt.
+    Een auteur mag een artikel van hem dat al op de site staat wel bewerken, zoals het issue zegt; die wijziging staat er meteen.
+  - **Het menu:** `src/beheer/screens.ts` schrijft de rollen uit in plaats van ze uit het schema te halen, omdat de balk in de browser draait; een test houdt ze gelijk.
+- **Waarom:** het beheer heeft een handvol mensen, en een aparte rol voor moderatie levert weinig op.
+  Een auteur voor nieuws en columns is wat #40 vraagt, en publiceren door een tweede persoon past bij de controlestap daar.
+- **Alternatieven:** de twee bestaande rollen houden en er eigenaar boven zetten; een auteur zelf laten publiceren; een auteur zijn gepubliceerde artikel niet meer laten bewerken.
+
+## De eigenaar beheert accounts in het beheer, en alleen de opdracht maakt een eigenaar
+
+- **Datum:** 12 november 2026
+- **Besluit:** de eigenaar voegt accounts toe, wijzigt voornaam, adres en rol en zet ze aan of uit, op `/beheer/accounts`.
+  De rol eigenaar geeft alleen `admin create <adres> owner` op de host; bij een account dat er al is, zet de opdracht de rol, en een nieuw account heeft een voornaam nodig.
+  Het formulier van de eigenaar heeft geen rol en geen status, en een verzoek dat ze toch stuurt, krijgt een fout zonder veld.
+  Een account wordt nooit verwijderd.
+  Elke wijziging schrijft `account.create`, `account.edit`, `account.disable` of `account.enable` in `audit_log`, met het nummer van het account en in `detail` wat er veranderde, nooit een adres.
+  Aan en uit zijn twee eigen acties, omdat ze in het logboek het belangrijkst zijn.
+- **Waarom:** de opdracht op de host was er voor een handvol mensen; met een redactie wil de eigenaar het zelf kunnen.
+  Een migratie met het adres van de eigenaar zou persoonsgegevens in een openbare repository zetten.
+  Het logboek verwijst naar accounts, dus verwijderen breekt het.
+- **Alternatieven:** ook redacteuren laten beheren; de eigenaar met een migratie maken; accounts verwijderen; één actie `account.edit` voor alles.
+
+## Een nieuw adres beëindigt de sessies van het account
+
+- **Datum:** 12 november 2026
+- **Besluit:** verandert de eigenaar het adres van een account, of zet hij het uit, dan verdwijnen in dezelfde transactie alle sessies en inloglinks.
+  Een adres dat al bij een ander account hoort, kan niet: de fout staat bij het veld.
+  Verandert de eigenaar zijn eigen adres, dan is hij ook zelf uitgelogd.
+- **Waarom:** wie het oude postvak nog kan lezen, blijft zo niet ingelogd.
+- **Alternatieven:** de sessies laten lopen tot ze verlopen.
+
+## Ieder zet zelf de mail van Wikipedia uit
+
+- **Datum:** 12 november 2026
+- **Besluit:** op `/beheer/mijn-account` zet een eigenaar of redacteur de mail over afwijkingen van Wikipedia uit, in de kolom `conflict_mail`.
+  Hij staat standaard aan; een auteur krijgt hem nooit en ziet de keuze niet.
+  De keuze schrijft `account.edit` in het logboek.
+  De voornaam (`first_name`, hoogstens 50 tekens) staat alleen in het beheer: in de lijst van accounts, in de balk als link naar Mijn account, en bij wie iets deed (wie een bericht verborg, een versie opsloeg of een wedstrijd invulde), met het adres zolang er geen voornaam is.
+  Het beheer heeft geen eigen pagina voor het logboek, dus "in het logboek" is daar waar het beheer zegt wie iets deed.
+  De kopie van acceptatie krijgt de voornaam `Account <id>`.
+- **Waarom:** het is de eigen inbox van iemand, en een auteur beslist niet over wedstrijden.
+  Een voornaam leest prettiger dan een adres, en op de openbare site heeft hij niets te zoeken.
+- **Alternatieven:** de eigenaar zet het voor iedereen; geen keuze; een eigen pagina voor het logboek.
+
+## Rollen, accounts en Mijn account in één pull request
+
+- **Datum:** 12 november 2026
+- **Besluit:** rollen, accounts beheren en Mijn account komen in één pull request.
+- **Waarom:** de eigenaar wil het zo; de delen hangen aan dezelfde tabel en dezelfde rolcontrole.
+- **Alternatieven:** drie pull requests na elkaar.

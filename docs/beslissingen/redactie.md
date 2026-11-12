@@ -934,6 +934,7 @@
 - **Waarom:** de redactie is nog klein, en een artikel staat onder onze naam.
   Een aparte rol voor vrijwilligers die schrijven, met een controlestap erbij, komt met #40.
 - **Alternatieven:** ook moderators laten schrijven (een grotere groep zonder controlestap); een nieuwe rol `redacteur` nu al (meer werk dan de lancering vraagt).
+- **Later:** zie _Het beheer kent drie rollen: eigenaar, redacteur en auteur_ in `site.md` (12 november 2026): de eigenaar en een redacteur schrijven en publiceren elk artikel; een auteur schrijft alleen zijn eigen artikelen en publiceert niet.
 
 ## Een artikel wordt ingetrokken en niet verwijderd, en het adres van een gepubliceerd artikel staat vast
 
@@ -1499,6 +1500,7 @@
 - **Waarom:** de cijfers zijn voor het team, niet voor het publiek, en een teller per dag bevat geen persoonsgegevens en is klein.
   Er is dus geen reden om ze te wissen, en een lange reeks is juist nuttig.
 - **Alternatieven:** de cijfers openbaar maken (past bij onze openheid, maar meer om te bouwen en onzorgvuldig als ze te ruw zijn); de tellers na een jaar weghalen (bespaart bijna niets).
+- **Later:** zie _Het beheer kent drie rollen: eigenaar, redacteur en auteur_ in `site.md` (12 november 2026): de cijfers zijn voor de eigenaar en de redacteuren.
 
 ## De pagina Bezoek toont de laatste 30 dagen, en de tabel is een component van het designsysteem
 

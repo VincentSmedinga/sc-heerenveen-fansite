@@ -23,6 +23,7 @@ import { and, asc, count, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm
 import type { EntryGoal, MatchEntry, SquadPlayer } from './match-form'
 
 import { lacksResult } from '../matches'
+import { accountName } from './account-name'
 import { recordAction } from './audit-log'
 import { listReportsToCheck } from './match-reports'
 
@@ -142,7 +143,7 @@ export async function decideDifference(
 }
 
 /**
- * A beheerder decides a change that Wikipedia holds back: Wikipedia is taken over (the match
+ * An editor decides a change that Wikipedia holds back: Wikipedia is taken over (the match
  * and its goals change, or the match goes), or the match stays as it is. This is the code the
  * command `import:changes` uses too (`decideChange`), in one transaction with its line in the
  * log.
@@ -190,7 +191,7 @@ export async function findMatch(db: Pick<Database, 'select'>, id: number) {
 
   const goals = await db.select().from(matchGoals).where(eq(matchGoals.matchId, id)).orderBy(asc(matchGoals.id))
   const [edit] = await db
-    .select({ editedByEmail: adminUsers.email, row: matchEdits })
+    .select({ editedByName: accountName(adminUsers), row: matchEdits })
     .from(matchEdits)
     .innerJoin(adminUsers, eq(matchEdits.editedBy, adminUsers.id))
     .where(eq(matchEdits.matchId, id))
@@ -212,7 +213,7 @@ export async function findMatch(db: Pick<Database, 'select'>, id: number) {
 
   return {
     differences: await waitingDifferences(db, id),
-    edit: edit === undefined ? undefined : { ...edit.row, editedByEmail: edit.editedByEmail },
+    edit: edit === undefined ? undefined : { ...edit.row, editedByName: edit.editedByName },
     goals,
     // A match with a report has its goals in the report: the form of the match shows them only.
     hasReport: report !== undefined,

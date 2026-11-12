@@ -41,7 +41,7 @@ const notices: Record<string, string> = {
 // search is a form with method GET, so the page works without JavaScript. A club with a list of
 // its own says so in words, never in colour alone.
 export default async function StadiumsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const { fout, q: rawSearch, tonen } = await searchParams
   const search = parseSearch(rawSearch)

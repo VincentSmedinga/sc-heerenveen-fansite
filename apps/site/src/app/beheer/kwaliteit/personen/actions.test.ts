@@ -47,8 +47,8 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM players')
   await database.db.delete(persons)
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'sanne@example.org', 'beheerder')
-  await createAccount(database.db, 'jelle@example.org', 'moderator')
+  await createAccount(database.db, 'sanne@example.org', 'editor', '')
+  await createAccount(database.db, 'jelle@example.org', 'author', '')
   userId = (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'sanne@example.org')))[0]?.id ?? 0
   moderatorId =
     (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'jelle@example.org')))[0]?.id ?? 0
@@ -159,7 +159,7 @@ describe('choosing the line or the country of a person on the work list', () => 
     expect(await person()).toMatchObject({ line: 'doelman', lineSource: 'wikidata' })
   })
 
-  it('is for a beheerder only', async () => {
+  it('is for an editor only', async () => {
     jar.set(sessionCookieName, await startSession(database.db, moderatorId))
 
     await expect(choose(personId, 'linie', 'doelman')).rejects.toThrow()

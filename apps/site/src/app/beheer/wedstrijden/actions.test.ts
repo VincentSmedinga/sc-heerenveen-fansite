@@ -93,8 +93,8 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM matches')
   await database.pool.query('DELETE FROM players')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'sanne@example.org', 'beheerder')
-  await createAccount(database.db, 'jelle@example.org', 'moderator')
+  await createAccount(database.db, 'sanne@example.org', 'editor', '')
+  await createAccount(database.db, 'jelle@example.org', 'author', '')
   userId = (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'sanne@example.org')))[0]?.id ?? 0
   moderatorId =
     (await database.db.select().from(adminUsers).where(eq(adminUsers.email, 'jelle@example.org')))[0]?.id ?? 0
@@ -344,7 +344,7 @@ describe('submitMatch', () => {
     expect(await submit(-1, form())).toEqual({ redirect: '/beheer/wedstrijden?fout=weg' })
   })
 
-  it('is for the beheerder: a moderator is told the page does not exist, and nothing is stored', async () => {
+  it('is for the editor: an author is told the page does not exist, and nothing is stored', async () => {
     jar.set(sessionCookieName, await startSession(database.db, moderatorId))
 
     await expect(submit(matchId, form())).rejects.toThrow('not found')
@@ -390,7 +390,7 @@ describe('submitRemoveEntry', () => {
     expect(await remove('abc', 'Waarom')).toEqual({ redirect: '/beheer/wedstrijden?fout=weg' })
   })
 
-  it('is for the beheerder', async () => {
+  it('is for the editor', async () => {
     await submit(matchId, form())
     jar.set(sessionCookieName, await startSession(database.db, moderatorId))
 
@@ -536,7 +536,7 @@ describe('submitConflict', () => {
     expect((await log()).map((line) => line.action)).toEqual(['match.edit', 'match.keep'])
   })
 
-  it('is for the beheerder, and sends somebody without a session to the login page', async () => {
+  it('is for the editor, and sends somebody without a session to the login page', async () => {
     const id = await waiting()
 
     jar.set(sessionCookieName, await startSession(database.db, moderatorId))
@@ -714,7 +714,7 @@ describe('submitHeldChange', () => {
     expect(await log()).toEqual([])
   })
 
-  it('is for the beheerder, and sends somebody without a session to the login page', async () => {
+  it('is for the editor, and sends somebody without a session to the login page', async () => {
     const id = await held()
 
     jar.set(sessionCookieName, await startSession(database.db, moderatorId))
@@ -865,7 +865,7 @@ describe('submitAddMatch and submitDeleteMatch (issue 970)', () => {
     expect(await added()).toHaveLength(1)
   })
 
-  it('is for a beheerder: a moderator adds nothing', async () => {
+  it('is for an editor: an author adds nothing', async () => {
     jar.set(sessionCookieName, await startSession(database.db, moderatorId))
 
     await expect(add(addForm())).rejects.toThrow()

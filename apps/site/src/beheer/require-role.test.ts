@@ -47,30 +47,31 @@ afterAll(async () => {
 beforeEach(async () => {
   jar.clear()
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'jelle@example.org', 'moderator')
+  await createAccount(database.db, 'jelle@example.org', 'author', '')
   userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
 })
 
 describe('requireRole', () => {
   it('sends a visitor without a cookie to the login page', async () => {
-    await expect(requireRole('beheerder', 'moderator')).rejects.toMatchObject({ url: loginPath })
+    await expect(requireRole('editor', 'author')).rejects.toMatchObject({ url: loginPath })
     expect(loginPath).toBe('/beheer/inloggen')
   })
 
   it('sends a visitor with an empty cookie or a token that was never made to the login page', async () => {
     jar.set(sessionCookieName, '')
-    await expect(requireRole('moderator')).rejects.toMatchObject({ url: loginPath })
+    await expect(requireRole('author')).rejects.toMatchObject({ url: loginPath })
 
     jar.set(sessionCookieName, 'x'.repeat(43))
-    await expect(requireRole('moderator')).rejects.toMatchObject({ url: loginPath })
+    await expect(requireRole('author')).rejects.toMatchObject({ url: loginPath })
   })
 
   it('lets in an account with an allowed role, and says who it is', async () => {
     jar.set(sessionCookieName, await startSession(database.db, userId))
 
-    await expect(requireRole('beheerder', 'moderator')).resolves.toEqual({
+    await expect(requireRole('editor', 'author')).resolves.toEqual({
       email: 'jelle@example.org',
-      role: 'moderator',
+      firstName: '',
+      role: 'author',
       userId,
     })
   })
@@ -78,37 +79,37 @@ describe('requireRole', () => {
   it('answers as if the page is not there for an account with another role', async () => {
     jar.set(sessionCookieName, await startSession(database.db, userId))
 
-    await expect(requireRole('beheerder')).rejects.toThrow('not found')
+    await expect(requireRole('editor')).rejects.toThrow('not found')
   })
 
   it('refuses a session that was ended by logging out, at once', async () => {
     const token = await startSession(database.db, userId)
 
     jar.set(sessionCookieName, token)
-    await expect(requireRole('moderator')).resolves.toBeDefined()
+    await expect(requireRole('author')).resolves.toBeDefined()
 
     await endSession(database.db, token)
 
-    await expect(requireRole('moderator')).rejects.toMatchObject({ url: loginPath })
+    await expect(requireRole('author')).rejects.toMatchObject({ url: loginPath })
   })
 
   it('refuses a session of an account that was revoked, at once', async () => {
     jar.set(sessionCookieName, await startSession(database.db, userId))
-    await expect(requireRole('moderator')).resolves.toBeDefined()
+    await expect(requireRole('author')).resolves.toBeDefined()
 
     await revokeAccount(database.db, 'jelle@example.org')
 
-    await expect(requireRole('moderator')).rejects.toMatchObject({ url: loginPath })
+    await expect(requireRole('author')).rejects.toMatchObject({ url: loginPath })
   })
 
   it('refuses a session that ended after 9 days without a request or 14 days since it began', async () => {
     const now = Date.now()
 
     jar.set(sessionCookieName, await startSession(database.db, userId, new Date(now - idleLifetime - 1000)))
-    await expect(requireRole('moderator')).rejects.toMatchObject({ url: loginPath })
+    await expect(requireRole('author')).rejects.toMatchObject({ url: loginPath })
 
     jar.set(sessionCookieName, await startSession(database.db, userId, new Date(now - absoluteLifetime - 1000)))
-    await expect(requireRole('moderator')).rejects.toMatchObject({ url: loginPath })
+    await expect(requireRole('author')).rejects.toMatchObject({ url: loginPath })
   })
 })
 

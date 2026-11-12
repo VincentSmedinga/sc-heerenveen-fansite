@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
 
+import { adminRoles } from '@fansite/db/schema'
 import { Button, Card, Form, Heading, Link, List, Page, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
 import { listVersions } from '#src/beheer/article-versions'
-import { findArticle } from '#src/beheer/articles'
+import { findArticleFor } from '#src/beheer/articles'
 import { compact } from '#src/beheer/density'
 import { parseItemId } from '#src/beheer/items'
 import { requireRole } from '#src/beheer/require-role'
@@ -33,10 +34,11 @@ const freshFor = 5 * 60 * 1000
 // article, the button to withdraw it, and under them the earlier versions of the text. The page
 // tells the editor what the last action did from what the database says now.
 export default async function ArticlePage({ params, searchParams }: Props) {
-  await requireRole('beheerder')
-
+  const reader = await requireRole(...adminRoles)
+  // An author may not publish or withdraw: he has neither button (issue 1156).
+  const publishes = reader.role !== 'author'
   const id = parseItemId((await params).id)
-  const article = id === undefined ? undefined : await findArticle(getDatabase().db, id)
+  const article = id === undefined ? undefined : await findArticleFor(getDatabase().db, id, reader)
 
   if (id === undefined || article === undefined) {
     notFound()
@@ -85,9 +87,10 @@ export default async function ArticlePage({ params, searchParams }: Props) {
         }}
         key={`${article.id}-${article.updatedAt.getTime()}-${article.publishedAt?.getTime() ?? 0}`}
         limits={formLimits}
+        publishes={publishes}
         status={status}
       />
-      {article.publishedAt === null ? null : (
+      {article.publishedAt === null || !publishes ? null : (
         <Card aria-labelledby="intrekken-kop" surface="soft">
           <Heading id="intrekken-kop" level={2}>
             Van de site halen

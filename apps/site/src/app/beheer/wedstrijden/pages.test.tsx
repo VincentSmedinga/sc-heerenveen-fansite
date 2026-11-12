@@ -65,9 +65,9 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM matches')
   await database.pool.query('DELETE FROM players')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'sanne@example.org', 'beheerder')
+  await createAccount(database.db, 'sanne@example.org', 'editor', '')
   userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
-  requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'beheerder', userId })
+  requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'editor', userId })
 })
 
 const base: Omit<NewMatch, 'clubId'> = {
@@ -110,13 +110,13 @@ describe('the pages of the matches', () => {
   it.each([
     ['the list', () => list()],
     ['the match', () => form(1)],
-  ])('are for the beheerder and not for the moderator: %s', async (_name, render) => {
+  ])('are for the editor and not for the author: %s', async (_name, render) => {
     requireRole.mockImplementation((...roles: string[]) =>
-      roles.includes('moderator') ? Promise.resolve({}) : Promise.reject(new Error('not found')),
+      roles.includes('author') ? Promise.resolve({}) : Promise.reject(new Error('not found')),
     )
 
     await expect(render()).rejects.toThrow('not found')
-    expect(requireRole).toHaveBeenCalledWith('beheerder')
+    expect(requireRole).toHaveBeenCalledWith('owner', 'editor')
   })
 })
 
@@ -1010,7 +1010,7 @@ describe('the match', () => {
       expect(await list({ gedaan: 'verwijderd' })).toContain('De wedstrijd is weggehaald')
     })
 
-    it('is for the beheerder: a moderator does not get the page', async () => {
+    it('is for the editor: an author does not get the page', async () => {
       const { id } = await withHeldChange()
 
       requireRole.mockRejectedValue(new Error('not found'))

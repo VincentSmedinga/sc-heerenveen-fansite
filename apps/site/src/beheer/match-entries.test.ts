@@ -51,7 +51,7 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM players')
   await database.pool.query('DELETE FROM persons')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'sanne@example.org', 'beheerder')
+  await createAccount(database.db, 'sanne@example.org', 'editor', '')
   userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
 })
 
@@ -649,7 +649,7 @@ describe('listAdminMatches and findMatch', () => {
 
     expect(found?.match).toMatchObject({ id, round: 'Speelronde 11' })
     expect(found?.goals).toHaveLength(3)
-    expect(found?.edit).toMatchObject({ editedByEmail: 'sanne@example.org', resultEdited: true })
+    expect(found?.edit).toMatchObject({ editedByName: 'sanne@example.org', resultEdited: true })
     expect(found?.squad.map((player) => player.name)).toEqual(['Bernt Klaverboer', 'Luca Oyen'])
     expect(await findMatch(database.db, 99_999)).toBeUndefined()
   })

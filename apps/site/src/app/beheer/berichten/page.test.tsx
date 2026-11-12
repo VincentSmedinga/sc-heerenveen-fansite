@@ -39,9 +39,9 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM audit_log')
   await database.pool.query('DELETE FROM sources')
   await database.db.delete(adminUsers)
-  await createAccount(database.db, 'jelle@example.org', 'moderator')
+  await createAccount(database.db, 'jelle@example.org', 'editor', '')
   userId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
-  requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'moderator', userId })
+  requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'editor', userId })
   ids = await addSource(database)
 })
 
@@ -61,10 +61,10 @@ const hasButton = (html: string, name: string, text: string) =>
   new RegExp(`<button[^>]*aria-label="${name}"[^>]*>${text}</button>`).test(html)
 
 describe('the page', () => {
-  it('is for the beheerder and the moderator, and tells search engines to stay away', async () => {
+  it('is for the owner and an editor, and tells search engines to stay away', async () => {
     await render()
 
-    expect(requireRole).toHaveBeenCalledWith('beheerder', 'moderator')
+    expect(requireRole).toHaveBeenCalledWith('owner', 'editor')
     expect(metadata.robots).toEqual({ follow: false, index: false })
   })
 
@@ -170,7 +170,7 @@ describe('the list', () => {
     const html = text(await render())
 
     expect(html).toContain('Kop twijfel')
-    expect(html).toContain('door een moderator op de site gezet')
+    expect(html).toContain('door de redactie op de site gezet')
     expect(html).toContain('door jelle@example.org')
     expect(hasButton(html, 'Herstellen, terug naar het oordeel van het filter: Kop twijfel', 'Herstellen')).toBe(true)
     expect(hasButton(html, 'Verberg: Kop twijfel', 'Verberg')).toBe(true)

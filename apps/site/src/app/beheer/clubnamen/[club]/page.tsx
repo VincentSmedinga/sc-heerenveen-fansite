@@ -44,7 +44,7 @@ type Props = {
 // has (read only) and the block that takes the list away. The page tells what the last action
 // did from the word in the address.
 export default async function ClubNamesOfClubPage({ params, searchParams }: Props) {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const { club: slug } = await params
   const found = await findAdminClub(getDatabase().db, slug)

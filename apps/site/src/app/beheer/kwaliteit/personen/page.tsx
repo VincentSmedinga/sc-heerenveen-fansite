@@ -31,12 +31,12 @@ export const metadata: Metadata = { robots: { follow: false, index: false }, tit
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
-// The persons without a line or without a country (issue 1053), for a beheerder: two lists,
+// The persons without a line or without a country (issue 1053), for an editor: two lists,
 // each in parts of fifty, the persons of the newest seasons first. The list itself is a client
 // component, so a choice saves one row and leaves the others as they are. A part that does not
 // exist shows the last one.
 export default async function PersonFactsPage({ searchParams }: Props) {
-  await requireRole('beheerder')
+  await requireRole('owner', 'editor')
 
   const { deel, lijst } = await searchParams
   const fact = personFacts.find((choice) => choice === lijst) ?? 'linie'

@@ -25,7 +25,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   requireRole.mockReset()
-  requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'beheerder', userId: 1 })
+  requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'editor', userId: 1 })
   await database.pool.query('DELETE FROM page_views')
   await database.pool.query('DELETE FROM daily_visitors')
 })
@@ -35,10 +35,10 @@ const headings = (html: string) =>
   [...html.matchAll(/<h([1-6])[^>]*>(.*?)<\/h\1>/g)].map(([, level, text]) => `h${level} ${text}`)
 
 describe('the page with the numbers of the visit', () => {
-  it('is for a beheerder only, and stays out of search engines', async () => {
+  it('is for an editor only, and stays out of search engines', async () => {
     await renderToStaticMarkup(await VisitPage())
 
-    expect(requireRole).toHaveBeenCalledWith('beheerder')
+    expect(requireRole).toHaveBeenCalledWith('owner', 'editor')
     expect(metadata.robots).toEqual({ follow: false, index: false })
     expect(metadata.title).toBe('Bezoek')
   })

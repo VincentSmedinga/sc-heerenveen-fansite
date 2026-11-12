@@ -38,7 +38,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await database.pool.query('DELETE FROM sources')
-  // After the sources: an item that is hidden refers to the account of the moderator.
+  // After the sources: an item that is hidden refers to the account of the author.
   await database.pool.query('DELETE FROM admin_users')
   await database.pool.query('DELETE FROM matches')
   await database.pool.query('DELETE FROM league_results')
@@ -337,7 +337,7 @@ describe('an item that is already known', () => {
   })
 })
 
-describe('an item that a moderator hid', () => {
+describe('an item that an author hid', () => {
   const hiddenAt = new Date('2026-10-22T10:30:00Z')
 
   /**
@@ -352,7 +352,7 @@ describe('an item that a moderator hid', () => {
 
     const [user] = await database.db
       .insert(adminUsers)
-      .values({ email: 'jelle@example.org', role: 'moderator' })
+      .values({ email: 'jelle@example.org', role: 'author' })
       .$returningId()
 
     await database.db
@@ -425,7 +425,7 @@ describe('an item that a moderator hid', () => {
     ])
   })
 
-  it('is updated again once a moderator shows it', async () => {
+  it('is updated again once an author shows it', async () => {
     await hideThenImport(feedWith(entry('g1')), feedWith(entry('g1', { title: 'Nieuwe kop' })))
     await database.db.update(items).set({ hiddenAt: null, hiddenBy: null, hiddenReason: null })
 
@@ -579,7 +579,7 @@ describe('the relevance filter', () => {
     expect((await relevanceByKey())['elders']).toBe('relevant')
   })
 
-  it('does not change the value of an item that a moderator hid', async () => {
+  it('does not change the value of an item that an author hid', async () => {
     const server = await serve(mixed())
     const feed = await addFeed(`${server.origin}/rss/`, { filter: 'club' })
 
@@ -587,7 +587,7 @@ describe('the relevance filter', () => {
 
     const [user] = await database.db
       .insert(adminUsers)
-      .values({ email: 'jelle@example.org', role: 'moderator' })
+      .values({ email: 'jelle@example.org', role: 'author' })
       .$returningId()
 
     await database.db
@@ -602,7 +602,7 @@ describe('the relevance filter', () => {
     expect((await relevanceByKey())['elders']).toBe('relevant')
   })
 
-  it('leaves the approval of a moderator as it is when a new run judges the item differently', async () => {
+  it('leaves the approval of an author as it is when a new run judges the item differently', async () => {
     const server = await serve(mixed())
     const feed = await addFeed(`${server.origin}/rss/`, { filter: 'club' })
 
@@ -610,7 +610,7 @@ describe('the relevance filter', () => {
 
     const [user] = await database.db
       .insert(adminUsers)
-      .values({ email: 'jelle@example.org', role: 'moderator' })
+      .values({ email: 'jelle@example.org', role: 'author' })
       .$returningId()
     const approvedAt = new Date('2026-10-22T10:30:00Z')
 
@@ -805,7 +805,7 @@ describe('the relevance filter and the matches of the season', () => {
 
     const [user] = await database.db
       .insert(adminUsers)
-      .values({ email: 'jelle@example.org', role: 'moderator' })
+      .values({ email: 'jelle@example.org', role: 'author' })
       .$returningId()
 
     await database.db
