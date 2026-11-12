@@ -428,8 +428,9 @@ export const matchCount = (count: number) => `${count} ${count === 1 ? 'wedstrij
 export type Choice = {
   label: string
   lower?: true
+  /** The order, which is not a filter. */
   sorting?: true
-  /** The order, which is not a filter. */ without: Filters
+  without: Filters
 }
 
 const seasonLabel = (filters: Filters, first: string) =>
