@@ -50,6 +50,7 @@ const screens = [
   '/beheer/kwaliteit/personen/snel',
   '/beheer/kwaliteit/personen/snel?lijst=land',
   '/beheer/kwaliteit/namen',
+  '/beheer/kwaliteit/formaties',
   '/beheer/bezoek',
   '/beheer/accounts',
   '/beheer/accounts/nieuw',

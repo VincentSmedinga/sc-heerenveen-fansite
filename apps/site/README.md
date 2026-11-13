@@ -1373,6 +1373,8 @@ Die heeft een rij per letter van de achternaam zonder voorvoegsel, zoals de lijs
 Een getal leidt naar de letter, `/beheer/kwaliteit/personen/<letter>` (`overig` voor een naam zonder letter), met `?kolom=` voor één kolom.
 Daar staat een rij per persoon met een gat; een `?` leidt naar het deel van zijn formulier, met "Opslaan en volgende" binnen de letter en de kolom (`src/beheer/person-table.ts`).
 `/beheer/kwaliteit/namen` toont de personen die op elkaar lijken en wat de lijst van spelers van Wikipedia over onze namen zegt.
+`/beheer/kwaliteit/formaties` toont per seizoen de wedstrijden waarvan de formatie van ons niet 4-3-3 of 4-2-3-1 is (`usualFormations` in `src/beheer/formations.ts`, #1191), met een link naar het verslag.
+De link naar die pagina staat boven de tabel van de wedstrijden.
 
 Boven de tabel van de personen staat een link naar `/beheer/kwaliteit/personen/snel` (`src/app/beheer/kwaliteit/personen/snel`, #1053); een oud adres met `?lijst=` of `?deel=` gaat daarheen.
 Die pagina heeft twee lijsten, `?lijst=land` voor de tweede, elk in delen van 50 (`?deel=2`), de personen van de nieuwste seizoenen eerst.

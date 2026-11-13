@@ -5396,3 +5396,14 @@
   Een reden die er wel toe doet, kan de redacteur nog steeds schrijven.
 - **Alternatieven:** een lijst met bronnen met de laatste keuze in de sessie (sneller dan typen, maar de redacteur wil geen keuze); de bron uit de link van de werktabel invullen (de tabel weet niet waar de waarde vandaan komt); alleen optioneel bij invullen en verplicht bij aanpassen of weghalen (twee regels om te onthouden).
 - **Later:** vervangt de regel "elke wijziging vraagt een reden" uit de beslissingen over het formulier van een wedstrijd en van een persoon, en de regel dat een weghaalactie een reden vraagt; de rest blijft.
+
+## Een afwijkende formatie is een lijst om te lezen, op een eigen pagina van Kwaliteit
+
+- **Datum:** 13 november 2026
+- **Besluit:** de pagina `/beheer/kwaliteit/formaties` (#1191) toont per seizoen de wedstrijden waarvan de formatie van ons niet 4-3-3 en niet 4-2-3-1 is, het nieuwste seizoen bovenaan, met de formatie, de bron van het verslag en een link naar het verslag.
+  De link naar de pagina staat boven de tabel van de wedstrijden.
+  De twee gewone formaties staan in `usualFormations` (`src/beheer/formations.ts`), zodat een nieuwe gewone formatie één regel is.
+  Alleen de formatie van ons telt, en een verslag zonder formatie staat er niet in: dat is een gat dat de tabel al toont.
+- **Waarom:** een andere formatie is geen gat maar iets om na te kijken, vaak een fout: een formatie die uit de lijnen van de oude fansite is afgeleid, of een tikfout.
+  Dat past bij de lijsten om te lezen, zoals die van de namen, en houdt de tabel met gaten kort.
+- **Alternatieven:** een kolom in de tabel (een formatie is geen gat, en de kolom is bijna overal leeg); een instelling in het beheer voor de gewone formaties (niemand vraagt erom).

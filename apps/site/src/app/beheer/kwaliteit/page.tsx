@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 
 import { readSeasonCoverage } from '@fansite/db/season-coverage'
-import { Card, DataTable, Heading, Page, SegmentedLinks, Text } from '@fansite/design-system'
+import { Card, DataTable, Heading, Link, Page, SegmentedLinks, Text } from '@fansite/design-system'
 
 import { gapLegend, gapTableColumns, qualitySwitch } from '#src/app/beheer/kwaliteit/gap-table'
 import { toolbarAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
+import { unusualFormationsPath } from '#src/beheer/formations'
 import { countGapsBySeason, gapColumns, readMatchGaps, seasonTablePath } from '#src/beheer/quality-table'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
@@ -49,6 +50,10 @@ export default async function QualityPage() {
         <SegmentedLinks {...qualitySwitch('wedstrijden')} />
       </Page.Toolbar>
       <Page.Cell area="main">
+        <Text>
+          <Link href={unusualFormationsPath}>Afwijkende formaties</Link>: de wedstrijden waarvan de formatie niet 4-3-3
+          of 4-2-3-1 is.
+        </Text>
         <Card aria-labelledby="seizoenen-kop">
           <Heading id="seizoenen-kop" level={2}>
             Per seizoen
