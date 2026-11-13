@@ -10,20 +10,8 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De knop "Pagina verversen", voor wie de pagina niet omlaag kan trekken: met het toetsenbord, een schermlezer of een andere bediening dan een vinger.',
-          'Hij doet hetzelfde als het gebaar: de pagina opnieuw laden.',
-          '',
-          'De knop is onzichtbaar totdat hij focus heeft, zoals een link om naar de inhoud te springen, maar een schermlezer vindt hem wel.',
-          'Met Tab komt hij als eerste, vóór de kop van de pagina.',
-          'Met focus staat hij vast in de hoek bovenaan het scherm.',
-          'Er heeft dan niets anders focus, dus hij bedekt geen element met focus.',
-          '',
-          '`PullToRefresh` zet hem in beeld, alleen als de site draait als app op het beginscherm.',
-          'In een browsertabblad staat hij er niet: daar heeft de browser een eigen verversknop.',
-          'Je gebruikt deze knop niet zelf.',
-          '',
-          'Zonder focus is er hier niets te zien.',
-          'Klik in het kader of druk op Tab om de knop te zien.',
+          'De knop "Pagina verversen", voor wie de pagina niet omlaag kan trekken: met het toetsenbord, een schermlezer of een andere bediening dan een vinger. Hij doet hetzelfde als het gebaar: de pagina opnieuw laden.',
+          'Je gebruikt deze knop niet zelf: `PullToRefresh` zet hem in beeld, alleen als de site draait als app op het beginscherm. Hij is onzichtbaar totdat hij focus heeft, dus druk op Tab om hem te zien.',
         ].join('\n'),
       },
     },
@@ -45,19 +33,8 @@ const focus = async () => {
   await userEvent.tab()
 }
 
-export const FocusLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Met focus, licht',
-  play: async ({ canvas }) => {
-    await focus()
-    await expect(canvas.getByRole('button', { name: 'Pagina verversen' })).toHaveFocus()
-  },
-  render: frame,
-})
-
-export const FocusDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Met focus, donker',
+export const Focus = meta.story({
+  name: 'Met focus',
   play: async ({ canvas }) => {
     await focus()
     await expect(canvas.getByRole('button', { name: 'Pagina verversen' })).toHaveFocus()

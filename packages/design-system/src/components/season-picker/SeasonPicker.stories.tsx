@@ -2,6 +2,7 @@ import { expect, fn, userEvent } from 'storybook/test'
 
 import preview from '#.storybook/preview'
 
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { SeasonPicker } from './SeasonPicker'
 
 const options = [
@@ -12,25 +13,22 @@ const options = [
 ]
 
 const meta = preview.meta({
+  argTypes: {
+    options: {
+      description: 'De seizoenen, de nieuwste eerst: een `label` voor de bezoeker en een `value` voor het adres.',
+    },
+    value: { description: 'Het seizoen van de pagina.' },
+  },
   component: SeasonPicker,
   parameters: {
     docs: {
       description: {
         component: [
-          'Een keuzelijst met seizoenen waarmee een bezoeker een ander seizoen van een pagina opent.',
-          'Je kiest hem voor een pagina met een adres per seizoen, zoals `/wedstrijden/2025-26`.',
-          '',
-          'Het is een gewoon formulier (GET) met een knop "Toon", dus het werkt zonder JavaScript: de knop stuurt de keuze naar een route die doorverwijst naar het adres van het seizoen.',
-          'Met JavaScript verdwijnt de knop en wisselt de pagina zodra een seizoen is gekozen.',
-          'Dat is een wisseling van context (WCAG 3.2.2), dus een regel zegt het vooraf, en de lijst verwijst ernaar met `aria-describedby`.',
-          'Met JavaScript zijn het label en die regel niet te zien, maar een schermlezer leest ze voor; zonder JavaScript staat het label er, met de knop.',
-          'Met het toetsenbord kies je met de pijltjes en bevestig je met Enter, zodat de pagina niet bij elke pijl verspringt.',
-          'Een keuze met de muis, een vinger of de open lijst wisselt direct.',
-          '',
-          'De lijst heeft de opmaak van de site (`hf-select-styled` van `Select`), in een browser die dat kan: ruimte tussen het pijltje en de rand, en een lijst met seizoenen in onze kleuren.',
-          'Een andere browser houdt zijn eigen lijst.',
+          'Een keuzelijst met seizoenen waarmee een bezoeker een ander seizoen van een pagina opent. Je kiest hem voor een pagina met een adres per seizoen, zoals `/wedstrijden/2025-26`.',
+          'Het werkt zonder JavaScript met een knop "Toon"; met JavaScript wisselt de pagina zodra een seizoen is gekozen, en een regel zegt dat vooraf.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
     },
   },
   tags: ['autodocs'],
@@ -61,12 +59,6 @@ export const Default = meta.story({
       }}
     />
   ),
-})
-
-export const Dark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Donker',
-  render: () => <Example />,
 })
 
 export const Open = meta.story({
@@ -108,14 +100,4 @@ export const WithTheKeyboard = meta.story({
     await expect(sentWithKeyboard).not.toHaveBeenCalled()
   },
   render: () => <Example onSubmit={sentWithKeyboard} />,
-})
-
-export const Narrow = meta.story({
-  globals: { viewport: { value: 'mobile1' } },
-  name: 'Smal (320 pixels)',
-  render: () => (
-    <div style={{ maxInlineSize: '20rem' }}>
-      <Example />
-    </div>
-  ),
 })

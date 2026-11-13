@@ -1,31 +1,25 @@
 import preview from '#.storybook/preview'
 
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Card } from '../card/Card'
 import { Text } from '../text/Text'
 import { Honeypot } from './Honeypot'
 
 const meta = preview.meta({
+  argTypes: {
+    label: { control: 'text', description: 'De tekst voor een hulpmiddel dat het veld toch laat zien.' },
+    name: { control: 'text', description: 'De naam van het veld. Kies er een die niets verklapt.' },
+  },
   component: Honeypot,
   parameters: {
     docs: {
       description: {
         component: [
-          'Een val tegen spam: een tekstveld dat niemand ziet.',
-          'Een robot die elk veld invult, vult dit veld ook in, en de site weet dan dat het formulier niet van een mens komt.',
-          'De site weigert een formulier waarin het veld niet leeg is.',
-          '',
-          'Een mens komt er niet bij:',
-          '',
-          '- Je ziet het niet, want het is verborgen met de klasse `hf-visually-hidden`.',
-          '  Het staat bewust niet op `display: none`, want dat herkennen robots.',
-          '- Je bereikt het niet met Tab, want het is `inert` en heeft `tabIndex={-1}`.',
-          '- Een schermlezer leest het niet voor, want het is `inert` en `aria-hidden`.',
-          '- De browser en een wachtwoordmanager vullen het niet in, want het heeft `autoComplete="off"`.',
-          '',
-          'Zet het ergens in het formulier en geef het een `name` die geen veld van het formulier verklapt, zoals `website`.',
-          'Het label staat er voor een hulpmiddel dat het veld toch laat zien; met `label` pas je de tekst aan.',
+          'Een val tegen spam: een tekstveld dat niemand ziet. Een robot die elk veld invult, vult dit veld ook in, en de site weigert dan het formulier.',
+          'Een mens komt er niet bij: het is verborgen, niet met Tab te bereiken, wordt niet voorgelezen en de browser vult het niet in. Geef het een `name` die geen veld van het formulier verklapt, zoals `website`.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
     },
   },
   tags: ['autodocs'],
@@ -33,6 +27,7 @@ const meta = preview.meta({
 })
 
 export const Default = meta.story({
+  args: { name: 'website' },
   name: 'Honeypot',
   parameters: {
     docs: {
@@ -41,10 +36,10 @@ export const Default = meta.story({
       },
     },
   },
-  render: () => (
+  render: (args) => (
     <Card aria-label="Voorbeeld" surface="soft">
       <Text>Onder deze tekst staat een veld dat je niet ziet.</Text>
-      <Honeypot name="website" />
+      <Honeypot {...args} />
     </Card>
   ),
 })

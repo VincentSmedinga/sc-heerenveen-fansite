@@ -2,81 +2,52 @@ import { expect, userEvent, waitFor } from 'storybook/test'
 
 import preview from '#.storybook/preview'
 
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import {
   exampleLongMenu,
   type ExampleLongMenuPage,
   exampleMenu,
   exampleMenuAt,
-  type ExampleMenuPage,
   exampleMenuWithSubpages,
 } from '../../docs/ExamplePage'
 import { Navigation } from './Navigation'
 import { NavigationBar } from './NavigationBar'
 
 const meta = preview.meta({
+  args: { items: exampleMenu, label: 'Hoofdmenu' },
+  argTypes: {
+    appearance: {
+      control: 'radio',
+      description:
+        'Een gewone rij links, of het hoofdmenu van de site in de header. Alleen het hoofdmenu toont subpagina’s.',
+      options: ['default', 'header'],
+    },
+    items: {
+      description:
+        'De links. Elk item heeft een `href` en een `label`, en eventueel `current`, `external` en `subitems`.',
+    },
+    label: {
+      control: 'text',
+      description:
+        'De naam voor schermlezers. Heeft een pagina meer dan één navigatie, dan krijgt elke een andere naam.',
+    },
+    moreLabel: {
+      control: 'text',
+      description:
+        'De tekst van de knop die op een smal scherm de middelste onderdelen van een lang hoofdmenu bevat, zoals "Meer".',
+    },
+  },
+  component: Navigation,
   parameters: {
     docs: {
       description: {
         component: [
-          'Een navigatie: een `nav` met een lijst met links.',
-          '',
-          '- `label` is verplicht: de naam voor schermlezers, zoals "Hoofdmenu".',
-          '  Heeft een pagina meer dan één navigatie, dan krijgt elke een andere naam.',
-          '- `items` is de lijst met links.',
-          '  Elk item heeft een `href` en een `label`, de tekst van de link.',
-          '- `current` op een item zet `aria-current="page"` op die link.',
-          '- `external` op een item zegt dat de link naar een andere site gaat.',
-          '  De link krijgt dan achter zijn tekst hetzelfde pictogram als de kop van een nieuwsregel.',
-          '  Het pictogram is voor het oog: een schermlezer hoort alleen de tekst van de link.',
-          '',
-          'Buiten de header is de huidige pagina ook te zien zonder kleur: de link is 200 zwaarder, met een dikkere onderstreping.',
-          'Zo ziet het menu in de footer eruit.',
-          '',
-          'Het hoofdmenu van de site is een `Navigation` met `appearance="header"`.',
-          'Hij staat direct na de `Page.Header`, op hetzelfde blauw, zodat de twee één vlak lijken, in een eigen rij onder het logo met een dunne lijn erboven.',
-          'Alle links hebben de lichtste kleur van de header en zijn niet onderstreept, tot je er met de muis op staat.',
-          'De letters groeien mee met het venster en zijn vet, zodat het menu boven een submenu met lichtere letters uitkomt.',
-          'De huidige pagina is nog vetter en heeft een rode streep eronder.',
-          'Die streep heeft de kleur `--hf-colour-accent-on-header`.',
-          'Zo is de huidige pagina ook zonder kleur te herkennen.',
-          'De laatste link, die naar het forum, staat rechts, ook als hij op een smal scherm op een tweede rij komt.',
-          '',
-          'De links zijn groot genoeg om op een telefoon aan te raken en lopen op een smal scherm door op een tweede regel.',
-          '',
-          'Een item van het hoofdmenu kan `subitems` hebben: de subpagina’s van dat onderdeel, elk met een `href`, een `label` en `current`.',
-          'Ze staan in een geneste lijst in het `li` van hun onderdeel, dus het menu is één `nav` met één naam, en een schermlezer leest de lijst met de lijst erin.',
-          'De lijst is er alleen bij het onderdeel waar de bezoeker is, of waarvan hij een subpagina bekijkt.',
-          'Andere onderdelen, en een pagina zonder subpagina’s, hebben geen geneste lijst.',
-          'Ze staat als een balk over de volle breedte onder de rij van het menu, in een tint van de header, in gewone letters, met de huidige subpagina zwaarder en met de rode streep.',
-          'Een lange rij scrolt zijwaarts, met een vervaging aan de rand, en begint zo gescrold dat de huidige subpagina in beeld is.',
-          'Op een heel smal scherm, of bij sterk inzoomen, loopt de rij om.',
-          '',
-          'Moet de pagina de links van de balk zelf maken, omdat ze iets uit het adres van de pagina meenemen, dan tekent de pagina de balk met `NavigationBar` en geeft hem aan het onderdeel als `bar`.',
-          'De balk staat dan op dezelfde plek en ziet er hetzelfde uit; de `subitems` blijven nodig, want die zeggen welke subpagina de huidige is.',
-          '',
-          'Een onderdeel van de site dat meer dan één scherm heeft, maar niet op elke pagina in het menu staat, zoals het beheer, tekent de balk met een `label`.',
-          'Dan staat de balk op zichzelf: een `nav` met die naam, tussen het hoofdmenu en de `Page.Body`, een band van rand tot rand die direct onder het menu past.',
-          'De naam verschilt van die van het hoofdmenu.',
-          'Hij heeft dezelfde pillen, rij en kleuren als de balk in het menu, en eindigt vanaf een breed scherm aan de rand van de kolom, in lijn met het menu.',
-          'Een knop die geen scherm is, zoals Uitloggen, staat met `end` achteraan in de rij: op een bureaublad aan het rechteruiteinde van de balk, op een telefoon aan het eind van wat zijwaarts scrolt.',
-          '',
-          'Is de huidige pagina een onderdeel van het menu, dan heeft dat onderdeel `aria-current="page"`.',
-          'Is het een subpagina, dan heeft de subpagina `aria-current="page"` en het onderdeel `aria-current="true"`.',
-          'Het onderdeel blijft dan even vet en houdt de rode streep.',
-          '',
-          'De volgorde in de code is de volgorde van de focus: een link, dan zijn subpagina’s, dan de volgende link.',
-          'Een toetsenbordgebruiker komt dus uit de balk terug bij de links die erboven staan.',
-          '',
-          'Heeft het hoofdmenu zes of meer onderdelen, en krijgt `Navigation` een `moreLabel` zoals "Meer", dan passen ze niet op een telefoon.',
-          'Op een smal scherm staan dan het eerste onderdeel, de knop en het laatste onderdeel (het forum) in de rij.',
-          'De onderdelen ertussen staan in een lijst onder de knop, die opengaat in de pagina en de rest naar beneden duwt.',
-          'Op een breed scherm staat alles in de rij, en bij vijf onderdelen of minder verandert er niets.',
-          'De knop opent en sluit zonder JavaScript.',
-          'Met JavaScript sluit de lijst ook met Escape, met een klik op een link of ernaast, en bij een andere pagina.',
-          'Staat de huidige pagina achter de knop, dan komt hij naar voren in de rij, met zijn subpagina’s eronder.',
-          'Past hij daar niet, dan blijft hij in de lijst en krijgt de knop de rode streep.',
+          'Een navigatie: een `nav` met een lijst met links, om van de ene plek van de site naar de andere te gaan. De huidige pagina heeft `aria-current` en is ook zonder kleur te herkennen.',
+          'Het hoofdmenu van de site is een `Navigation` met `appearance="header"`, direct na de `Page.Header`. Een onderdeel kan subpagina’s hebben die als balk onder het menu staan, en een lang menu zet op een smal scherm de middelste onderdelen achter een knop.',
+          'Een onderdeel van de site dat niet in het menu staat, zoals het beheer, tekent zijn eigen balk met `NavigationBar`.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
       source: {
         code: `<Navigation
   items={[
@@ -90,114 +61,45 @@ const meta = preview.meta({
       },
     },
   },
-  tags: ['autodocs'],
-  title: 'Componenten/Navigatie/Navigation',
 })
-
-const render = () => <Navigation items={exampleMenu} label="Hoofdmenu" />
-
-export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', render })
-
-export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render })
 
 // The main menu is the top of a page, so it runs from edge to edge of the window.
 const fullscreen = { layout: 'fullscreen' } as const
 
-const mainMenu = (current: ExampleMenuPage) => () => (
-  <Navigation appearance="header" items={exampleMenuAt(current)} label="Hoofdmenu" />
-)
+const story = (text: string) => ({ ...fullscreen, docs: { description: { story: text } } })
 
-export const NewsMainLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Hoofdmenu: Nieuws, licht',
+export const Default = meta.story({
+  args: { items: exampleMenu, label: 'Menu in de footer' },
+  name: 'Navigatie',
+})
+
+export const Header = meta.story({
+  args: { appearance: 'header', items: exampleMenuAt('Nieuws'), label: 'Hoofdmenu' },
+  name: 'Hoofdmenu',
   parameters: fullscreen,
-  render: mainMenu('Nieuws'),
 })
 
-export const NewsMainDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Hoofdmenu: Nieuws, donker',
-  parameters: fullscreen,
-  render: mainMenu('Nieuws'),
-})
-
-export const ForumMainLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Hoofdmenu: Forum, licht',
-  parameters: fullscreen,
-  render: mainMenu('Forum'),
-})
-
-export const ForumMainDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Hoofdmenu: Forum, donker',
-  parameters: fullscreen,
-  render: mainMenu('Forum'),
-})
-
-const withSubpages = (current: Parameters<typeof exampleMenuWithSubpages>[0], count?: number) => () => (
-  <Navigation appearance="header" items={exampleMenuWithSubpages(current, count)} label="Hoofdmenu" />
-)
-
-const noSubpagesStory = {
-  docs: {
-    description: {
-      story:
-        'Een pagina in het menu zonder subpagina’s, zoals Nieuws: de rij is zoals hij was en er is geen geneste lijst, ook al heeft een ander onderdeel er wel.',
-    },
-  },
-}
-
-export const WithoutSubpagesLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Zonder subpagina’s',
-  parameters: { ...fullscreen, ...noSubpagesStory },
-  render: withSubpages('Nieuws'),
-})
-
-export const WithoutSubpagesDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Zonder subpagina’s, donker',
-  parameters: { ...fullscreen, ...noSubpagesStory },
-  render: withSubpages('Nieuws'),
-})
-
-const onSectionStory = {
-  docs: {
-    description: {
-      story:
-        'De bezoeker is op Wedstrijden zelf. Het onderdeel heeft `aria-current="page"`, de balk met de subpagina’s staat eronder en geen subpagina is de huidige.',
-    },
-  },
-}
-
-export const SectionLight = meta.story({
-  globals: { theme: 'light' },
+export const Section = meta.story({
+  args: { appearance: 'header', items: exampleMenuWithSubpages('Wedstrijden'), label: 'Hoofdmenu' },
   name: 'Onderdeel met subpagina’s',
-  parameters: { ...fullscreen, ...onSectionStory },
-  render: withSubpages('Wedstrijden'),
+  parameters: story(
+    'De bezoeker is op Wedstrijden zelf. Het onderdeel heeft `aria-current="page"` en de balk met de subpagina’s staat eronder.',
+  ),
 })
 
-export const SectionDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Onderdeel met subpagina’s, donker',
-  parameters: { ...fullscreen, ...onSectionStory },
-  render: withSubpages('Wedstrijden'),
+export const Subpage = meta.story({
+  args: { appearance: 'header', items: exampleMenuWithSubpages('Uitslagen'), label: 'Hoofdmenu' },
+  name: 'Subpagina als huidige',
+  parameters: story(
+    'De subpagina heeft `aria-current="page"`, en het onderdeel `aria-current="true"` en houdt zijn gewicht en zijn streep.',
+  ),
 })
-
-const barFromCallerStory = {
-  docs: {
-    description: {
-      story:
-        'De pagina tekent de balk zelf met `NavigationBar` en geeft hem als `bar` aan het onderdeel. Hij ziet er hetzelfde uit als de balk die `Navigation` uit `subitems` tekent.',
-    },
-  },
-}
 
 export const BarFromCaller = meta.story({
-  globals: { theme: 'light' },
   name: 'Balk van de pagina zelf',
-  parameters: { ...fullscreen, ...barFromCallerStory },
+  parameters: story(
+    'De pagina tekent de balk zelf met `NavigationBar` en geeft hem als `bar` aan het onderdeel, voor links die iets uit het adres van de pagina meenemen.',
+  ),
   render: () => {
     const items = exampleMenuWithSubpages('Uitslagen').map((item) =>
       item.subitems === undefined
@@ -216,169 +118,32 @@ export const BarFromCaller = meta.story({
   },
 })
 
-const onSubpageStory = {
-  docs: {
-    description: {
-      story:
-        'De bezoeker is op de subpagina Uitslagen. Die is zwaarder dan de andere subpagina’s, met een rode streep en heeft `aria-current="page"`; Wedstrijden in het menu heeft `aria-current="true"` en houdt zijn gewicht en zijn streep.',
-    },
-  },
-}
-
-export const SubpageLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Subpagina als huidige',
-  parameters: { ...fullscreen, ...onSubpageStory },
-  render: withSubpages('Uitslagen'),
-})
-
-export const SubpageDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Subpagina als huidige, donker',
-  parameters: { ...fullscreen, ...onSubpageStory },
-  render: withSubpages('Uitslagen'),
-})
-
-// Only on the canvas, with Storybook's viewport setting: on the docs page they would show the
-// same as the stories above.
-const phone = { tags: ['!autodocs'] }
-
-export const Scrolls = meta.story({
-  ...phone,
-  globals: { theme: 'light', viewport: { value: 'mobile2' } },
-  name: 'Zes subpagina’s: de rij scrolt',
-  parameters: {
-    ...fullscreen,
-    docs: {
-      description: {
-        story:
-          'Zes subpagina’s passen niet op een telefoon. De rij scrolt zijwaarts, zonder schuifbalk, met een vervaging aan de rand. De huidige subpagina, Doelpuntenmakers, staat in beeld.',
-      },
-    },
-  },
-  render: withSubpages('Doelpuntenmakers', 6),
-})
-
-export const Wrapped = meta.story({
-  ...phone,
-  globals: { theme: 'light', viewport: { value: 'mobile1' } },
-  name: 'Smal scherm: de rij loopt om',
-  parameters: {
-    ...fullscreen,
-    docs: {
-      description: {
-        story:
-          'Op een heel smal scherm, of bij sterk inzoomen, scrolt de rij niet meer maar loopt om. Zo scrolt de pagina niet zijwaarts.',
-      },
-    },
-  },
-  render: withSubpages('Stand', 6),
-})
-
-const statesParameters = {
-  docs: {
-    description: {
-      story:
-        'De toestanden van een link in de balk, nagebootst met de add-on Pseudo States: de eerste onder de muis, de tweede ingedrukt, de derde met de focus. De huidige subpagina behoudt zijn streep onder de muis.',
-    },
-  },
-  pseudo: {
-    active: ['.hf-navigation-bar li:nth-child(2) a'],
-    focusVisible: ['.hf-navigation-bar li:nth-child(3) a'],
-    hover: ['.hf-navigation-bar li:nth-child(1) a'],
-  },
-}
-
-export const StatesLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Toestanden van de balk',
-  parameters: { ...fullscreen, ...statesParameters },
-  render: withSubpages('Programma'),
-})
-
-export const StatesDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Toestanden van de balk, donker',
-  parameters: { ...fullscreen, ...statesParameters },
-  render: withSubpages('Programma'),
-})
-
-const longMenu = (current: ExampleLongMenuPage) => () => (
-  <Navigation appearance="header" items={exampleLongMenu(current)} label="Hoofdmenu" moreLabel="Meer" />
-)
-
-// The menu of eight items needs the button on a phone, so these are on the canvas only, with
-// Storybook's viewport setting; on the docs page they would show the same width as the others.
-const mobile = (viewport: 'mobile1' | 'mobile2') => ({
-  ...phone,
-  globals: { theme: 'light', viewport: { value: viewport } },
-})
-
-const closeStory = (story: string) => ({ ...fullscreen, docs: { description: { story } } })
-
-export const MoreWide = meta.story({
-  globals: { theme: 'light' },
-  name: 'Meer: breed scherm, alles in de rij',
-  parameters: closeStory('Acht onderdelen op een breed scherm staan alle in de rij, en de knop “Meer” is er niet.'),
-  render: longMenu('Nieuws'),
-})
-
-export const MoreClosed = meta.story({
-  ...mobile('mobile2'),
-  name: 'Meer: dicht',
-  parameters: closeStory(
-    'Op een telefoon: het eerste onderdeel, de knop “Meer” met een pijltje omlaag, en het forum rechts.',
+// The menu of eight items needs the button on a phone, so these two use Storybook's viewport
+// setting: on a wide screen the button isn't there.
+const longMenu = (current: ExampleLongMenuPage) => ({
+  args: {
+    appearance: 'header',
+    items: exampleLongMenu(current),
+    label: 'Hoofdmenu',
+    moreLabel: 'Meer',
+  } as const,
+  globals: { viewport: { value: 'mobile2' } },
+  parameters: story(
+    'Op een smal scherm staan het eerste onderdeel, de knop en het forum in de rij, en de rest in een lijst onder de knop die de pagina naar beneden duwt. Staat de huidige pagina achter de knop, dan komt hij naar voren in de rij.',
   ),
-  render: longMenu('Nieuws'),
 })
 
-export const MoreClosedDark = meta.story({
-  ...mobile('mobile2'),
-  globals: { theme: 'dark', viewport: { value: 'mobile2' } },
-  name: 'Meer: dicht, donker',
-  parameters: closeStory('De knop in het donkere thema.'),
-  render: longMenu('Nieuws'),
-})
-
-const opened = async ({ canvas }: { canvas: { getByText: (text: string) => HTMLElement } }) => {
-  await userEvent.click(canvas.getByText('Meer'))
-}
-
-export const MoreOpen = meta.story({
-  ...mobile('mobile2'),
-  name: 'Meer: open',
-  parameters: closeStory(
-    'De lijst staat onder de rij, begint onder de tekst van “Meer” en duwt de pagina naar beneden. Het pijltje wijst omhoog.',
-  ),
-  play: opened,
-  render: longMenu('Nieuws'),
-})
-
-export const MoreOpenDark = meta.story({
-  ...mobile('mobile2'),
-  globals: { theme: 'dark', viewport: { value: 'mobile2' } },
-  name: 'Meer: open, donker',
-  parameters: closeStory('De open lijst in het donkere thema.'),
-  play: opened,
-  render: longMenu('Nieuws'),
-})
-
-export const MoreCurrentInRow = meta.story({
-  ...mobile('mobile2'),
-  name: 'Meer: de huidige pagina staat in de rij',
-  parameters: closeStory(
-    'De bezoeker is op Spelers, dat achter “Meer” staat. Spelers komt naar voren in de rij, met de rode streep, en staat niet meer in de lijst.',
-  ),
-  play: opened,
-  render: longMenu('Spelers'),
+export const More = meta.story({
+  ...longMenu('Nieuws'),
+  name: 'Lang menu met een knop',
+  play: async ({ canvas }) => {
+    await userEvent.click(canvas.getByText('Meer'))
+  },
 })
 
 export const MoreCurrentWithSubpages = meta.story({
-  ...mobile('mobile2'),
-  name: 'Meer: de huidige pagina heeft subpagina’s',
-  parameters: closeStory(
-    'De bezoeker is op de subpagina Uitslagen van Wedstrijden, dat achter “Meer” staat. Wedstrijden komt naar voren in de rij (aria-current="true") met zijn balk eronder, en Uitslagen heeft aria-current="page". Een schermlezer ziet de balk één keer.',
-  ),
+  ...longMenu('Uitslagen'),
+  name: 'Lang menu: de huidige pagina heeft subpagina’s',
   // The stylesheet shows one copy of the page behind the button: a screen reader meets it once.
   play: async ({ canvas }) => {
     await expect(canvas.getAllByRole('link', { name: 'Wedstrijden' })).toHaveLength(1)
@@ -386,38 +151,12 @@ export const MoreCurrentWithSubpages = meta.story({
     await expect(canvas.getAllByRole('link', { current: 'page' })).toHaveLength(1)
     await expect(canvas.getByRole('link', { name: 'Wedstrijden' })).toHaveAttribute('aria-current', 'true')
   },
-  render: longMenu('Uitslagen'),
-})
-
-export const MoreCurrentWithSubpagesDark = meta.story({
-  ...mobile('mobile2'),
-  globals: { theme: 'dark', viewport: { value: 'mobile2' } },
-  name: 'Meer: de huidige pagina heeft subpagina’s, donker',
-  parameters: closeStory('Hetzelfde in het donkere thema.'),
-  play: opened,
-  render: longMenu('Uitslagen'),
-})
-
-export const MoreCurrentInList = meta.story({
-  ...mobile('mobile1'),
-  name: 'Meer: de huidige pagina past niet in de rij',
-  parameters: closeStory(
-    'Op een heel smal scherm past de huidige pagina niet naast “Meer”. Hij blijft in de lijst en “Meer” krijgt de rode streep. De balk met subpagina’s blijft zichtbaar.',
-  ),
-  play: async (context) => {
-    await opened(context)
-    await expect(context.canvas.getAllByRole('link', { name: 'Wedstrijden' })).toHaveLength(1)
-    await expect(context.canvas.getAllByRole('link', { name: 'Uitslagen' })).toHaveLength(1)
-  },
-  render: longMenu('Uitslagen'),
 })
 
 export const MoreEscape = meta.story({
-  ...mobile('mobile2'),
-  name: 'Meer: Escape sluit de lijst',
-  parameters: closeStory(
-    'Escape sluit de open lijst, en de focus staat dan op de knop. Enter of spatie op de knop opent hem zonder JavaScript.',
-  ),
+  ...longMenu('Nieuws'),
+  name: 'Lang menu: Escape sluit de lijst',
+  parameters: story('Escape sluit de open lijst, en de focus staat dan op de knop.'),
   play: async ({ canvas }) => {
     const button = canvas.getByText('Meer').closest('summary')!
 
@@ -427,7 +166,6 @@ export const MoreEscape = meta.story({
     await waitFor(() => expect(button).toHaveAttribute('aria-expanded', 'false'))
     await expect(button).toHaveFocus()
   },
-  render: longMenu('Nieuws'),
 })
 
 const screens = [
@@ -453,53 +191,16 @@ const aloneBar = (subitems: typeof screens, button: boolean) => () => (
   </>
 )
 
-const aloneStory = (story: string) => ({ ...fullscreen, docs: { description: { story } } })
-
-export const AloneFive = meta.story({
-  globals: { theme: 'light' },
-  name: 'Losse balk: vijf schermen',
-  parameters: aloneStory(
-    'De balk van een onderdeel op zichzelf, onder het hoofdmenu: een `nav` met de naam "Beheer" en de huidige pagina met `aria-current="page"`.',
+export const Alone = meta.story({
+  name: 'Losse balk',
+  parameters: story(
+    'De balk van een onderdeel op zichzelf, onder het hoofdmenu: een `nav` met de naam "Beheer". Een knop zoals Uitloggen staat met `end` achteraan in de rij.',
   ),
-  render: aloneBar(screens, false),
+  render: aloneBar(screens, true),
 })
 
 export const AloneOne = meta.story({
-  globals: { theme: 'light' },
   name: 'Losse balk: één scherm',
-  parameters: aloneStory('Heeft het onderdeel één scherm voor deze rol, dan is de balk een rij van één link.'),
+  parameters: story('Heeft het onderdeel één scherm voor deze rol, dan is de balk een rij van één link.'),
   render: aloneBar([screens[1]!], false),
-})
-
-export const AloneWithButton = meta.story({
-  globals: { theme: 'light' },
-  name: 'Losse balk: met een knop aan het eind',
-  parameters: aloneStory(
-    'De knop Uitloggen is een knop in een formulier en staat achteraan in de rij: aan het eind van de balk, in lijn met het menu.',
-  ),
-  render: aloneBar(screens, true),
-})
-
-export const AloneOneWithButton = meta.story({
-  globals: { theme: 'light' },
-  name: 'Losse balk: één scherm met een knop',
-  parameters: aloneStory('Met één scherm staat de knop op het uiteinde en het scherm aan het begin.'),
-  render: aloneBar([screens[1]!], true),
-})
-
-export const AloneDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Losse balk: donker',
-  parameters: aloneStory('De balk op zichzelf in het donker.'),
-  render: aloneBar(screens, true),
-})
-
-export const AloneWrapped = meta.story({
-  ...phone,
-  globals: { theme: 'light', viewport: { value: 'mobile1' } },
-  name: 'Losse balk: smal scherm, de rij loopt om',
-  parameters: aloneStory(
-    'Op een heel smal scherm, of bij sterk inzoomen, scrolt de rij niet meer maar loopt om, met de eerste link in lijn met het menu.',
-  ),
-  render: aloneBar(screens, true),
 })

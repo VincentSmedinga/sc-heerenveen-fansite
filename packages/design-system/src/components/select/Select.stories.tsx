@@ -1,61 +1,54 @@
 import preview from '#.storybook/preview'
 
-import type { Size } from '../size'
-
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Field } from '../field/Field'
-import { Select } from './Select'
+import { sizes } from '../size'
+import { Select, selectWidths } from './Select'
 
 const meta = preview.meta({
+  argTypes: {
+    size: { control: 'radio', description: 'De maat van de lijst.', options: sizes },
+    width: {
+      control: 'radio',
+      description: 'De breedte: de regel, of zo breed als de keuze die de lijst laat zien.',
+      options: selectWidths,
+    },
+  },
   component: Select,
   parameters: {
     docs: {
       description: {
         component: [
           'Een lijst om één antwoord uit te kiezen. Zet het altijd in een `Field`, dat het zijn label geeft.',
-          'Elke keuze is een `Select.Option`: het `option`-element, dat alleen in een `Select` werkt.',
-          'De waarde van de gekozen keuze gaat mee met het formulier.',
-          'Heeft een lange lijst een deel waar mensen het meest uit kiezen, zet dat deel dan bovenaan in een `Select.Group` met een naam, en de rest in een tweede groep.',
-          '',
-          'Met `defaultValue` kies je het antwoord dat in het begin gekozen is.',
-          'Wil je dat de bezoeker zelf kiest, zet dan als eerste een keuze zoals "Kies een onderwerp" met een lege `value`, en maak het veld verplicht.',
-          '',
-          'Het veld is hoog genoeg om met een vinger te raken, en zijn rand is goed te zien tegen de achtergrond.',
-          'Met `size="small"` is het veld lager, voor een kiezer naast de inhoud; in het hoofdstuk Maten van knoppen en velden staat wanneer je welke maat kiest.',
-          'Heeft het veld een fout (`aria-invalid`), dan is de rand dikker en heeft hij de kleur van fouten.',
-          '',
-          'Met `width="natural"` is de lijst zo breed als de keuze die hij laat zien, voor een korte lijst met korte woorden zoals een status.',
-          '',
-          'Met `className="hf-select-styled"` krijgt de lijst de opmaak van de site, gesloten en open: ruimte tussen het pijltje en de rand, en een lijst met keuzes in onze kleuren, waarin de gekozen keuze een vinkje heeft.',
-          'Dat werkt in een browser die dat kan; een andere browser houdt zijn eigen lijst.',
-          'De open lijst blijft binnen het scherm: hij opent onder het veld, boven het veld als hij daar niet past, en anders aan de kant met de meeste ruimte, waar een lange lijst in zichzelf scrolt.',
-          'De cijfers in die lijst zijn even breed, zodat 1996/97 en 2004/05 even breed zijn en de seizoenen onder elkaar recht staan.',
-          'De seizoenskiezer gebruikt het al.',
+          'Kies hem als er te veel antwoorden zijn voor keuzerondjes. Elke keuze is een `Select.Option`; een lange lijst deel je in met `Select.Group`.',
+          'Met `className="hf-select-styled"` krijgt de lijst de opmaak van de site, in een browser die dat kan.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
     },
   },
   tags: ['autodocs'],
   title: 'Componenten/Formulier/Select',
 })
 
-const render = (className?: string, size: Size = 'default') => (
-  <Field id="onderwerp" label="Onderwerp">
-    <Select className={className} defaultValue="verwijderen" name="onderwerp" size={size}>
-      <Select.Option value="verwijderen">Een bericht laten verwijderen</Select.Option>
-      <Select.Option value="fout">Een fout in een bericht</Select.Option>
-      <Select.Option value="bron">Een bron voorstellen</Select.Option>
-      <Select.Option value="anders">Iets anders</Select.Option>
-    </Select>
-  </Field>
-)
-
-export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', render: () => render() })
-
-export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render: () => render() })
+export const Default = meta.story({
+  name: 'Keuzelijst',
+  render: (args) => (
+    <Field id="onderwerp" label="Onderwerp">
+      <Select defaultValue="verwijderen" name="onderwerp" {...args}>
+        <Select.Option value="verwijderen">Een bericht laten verwijderen</Select.Option>
+        <Select.Option value="fout">Een fout in een bericht</Select.Option>
+        <Select.Option value="bron">Een bron voorstellen</Select.Option>
+        <Select.Option value="anders">Iets anders</Select.Option>
+      </Select>
+    </Field>
+  ),
+})
 
 export const Styled = meta.story({
+  args: { className: 'hf-select-styled' },
   name: 'Met de opmaak van de site',
-  render: () => render('hf-select-styled'),
+  render: Default.input.render,
 })
 
 export const Groups = meta.story({
@@ -79,21 +72,10 @@ export const Groups = meta.story({
   ),
 })
 
-export const SmallLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Kleine maat, licht',
-  render: () => render(undefined, 'small'),
-})
-
-export const SmallDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Kleine maat, donker',
-  render: () => render(undefined, 'small'),
-})
-
-export const SmallStyled = meta.story({
-  name: 'Kleine maat met de opmaak van de site',
-  render: () => render('hf-select-styled', 'small'),
+export const Small = meta.story({
+  args: { size: 'small' },
+  name: 'Kleine maat',
+  render: Default.input.render,
 })
 
 export const Natural = meta.story({
