@@ -56,6 +56,7 @@ const notInSitemap: string[] = [
   '/beheer/kwaliteit/namen',
   '/beheer/kwaliteit/formaties',
   '/beheer/kwaliteit/plaatsen',
+  '/beheer/kwaliteit/plaatsen/vragen',
   '/beheer/berichten',
   '/beheer/bezoek',
   '/beheer/inloggen',

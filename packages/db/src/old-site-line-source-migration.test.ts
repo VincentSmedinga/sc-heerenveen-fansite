@@ -65,8 +65,8 @@ describe(`the migration ${migration}`, () => {
     await prepareDatabase({ migrationsFolder, seed: false, url: database.url })
     await prepareDatabase({ migrationsFolder, seed: false, url: database.url })
 
-    // Later migrations add `slug` (#1079), the date of death (#1147) and the source of the
-    // birth date (#1164), which stay empty here: these persons have no birth date.
+    // Later migrations add `slug` (#1079), the date of death (#1147), the source of the birth
+    // date (#1164) and the side (#1194), which stay empty here: these persons have none.
     expect(await rows('SELECT * FROM persons ORDER BY id')).toEqual(
       before.map((row) => ({
         ...row,
@@ -74,6 +74,7 @@ describe(`the migration ${migration}`, () => {
         death_date: null,
         death_date_precision: null,
         death_date_source: null,
+        side: null,
         slug: null,
       })),
     )

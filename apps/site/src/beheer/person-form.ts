@@ -8,7 +8,14 @@ import type { Database } from '@fansite/db/client'
 
 import { recordAction } from '@fansite/db/audit-log'
 import { givePersonPage, joinNameParts, setEditorsName, setEditorsPersonFacts } from '@fansite/db/persons'
-import { hiddenReasonMaxLength, personPages, persons, type PlayerPosition, players } from '@fansite/db/schema'
+import {
+  hiddenReasonMaxLength,
+  personPages,
+  persons,
+  type PlayerPosition,
+  players,
+  type PlayerSide,
+} from '@fansite/db/schema'
 import { and, asc, eq, isNull, ne, or } from 'drizzle-orm'
 
 import { parseReason } from './items'
@@ -20,6 +27,7 @@ import {
   checkLine,
   checkName,
   checkPage,
+  checkSide,
   type EditorsBirthDate,
 } from './person-checks'
 import { type PersonErrors, personFieldNames, type PersonPart, type PersonValues } from './person-fields'
@@ -48,6 +56,7 @@ export type PersonEntry = {
   name?: Parameters<typeof joinNameParts>[0]
   page?: null | string
   reason: string | undefined
+  side?: null | PlayerSide
 }
 
 type Transaction = Parameters<Parameters<Database['transaction']>[0]>[0]
@@ -114,6 +123,7 @@ export function personValuesOf({ person }: Pick<AdminPerson, 'person'>): PersonV
   return {
     ...nameValuesOf({ name: personNameOf(person).replace(/\s*\([^)]*\)$/u, '') }, person),
     geboren: birthDateText(person.birthDate, person.birthDatePrecision),
+    kant: person.side ?? '',
     land: person.country ?? '',
     linie: person.line ?? '',
     overleden: person.deathDate === null ? '' : person.deathDate.slice(0, 4),
@@ -177,6 +187,7 @@ export function validatePerson(
   }
   if (shows('linie')) {
     entry.line = checkLine(values.linie, errors)
+    entry.side = checkSide(values.kant, errors)
   }
   if ('error' in reason) {
     errors.reden = `Schrijf hoogstens ${hiddenReasonMaxLength} tekens.`
@@ -350,6 +361,7 @@ async function storePersonEdit(
         ...(entry.deathYear === undefined || entry.deathYear === yearOfDeath ? {} : { deathYear: entry.deathYear }),
         ...(entry.country === undefined || entry.country === person.country ? {} : { country: entry.country }),
         ...(entry.line === undefined || entry.line === person.line ? {} : { line: entry.line }),
+        ...(entry.side === undefined || entry.side === person.side ? {} : { side: entry.side }),
       }
 
       // A birth date is a personal datum, so the log says what happened and not the dates.
@@ -370,6 +382,9 @@ async function storePersonEdit(
       }
       if (facts.line !== undefined) {
         changes.push(`linie: ${person.line ?? 'geen'} → ${facts.line ?? 'geen'}`)
+      }
+      if (facts.side !== undefined) {
+        changes.push(`kant: ${person.side ?? 'geen'} → ${facts.side ?? 'geen'}`)
       }
       if (changes.length === 0) {
         return { status: 'unchanged' } as const

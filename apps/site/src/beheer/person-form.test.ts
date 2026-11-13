@@ -91,6 +91,7 @@ describe('the form of a person', () => {
     expect(await valuesOf({ reden: '' })).toEqual({
       achternaam: 'Verzonnen',
       geboren: '3-1990',
+      kant: '',
       land: 'NL',
       linie: 'aanvaller',
       overleden: '',
@@ -239,6 +240,35 @@ describe('the form of a person', () => {
       countrySource: 'manual',
       familyName: 'Verzonnen',
       line: 'aanvaller',
+    })
+  })
+
+  it('saves the side with the part Linie, writes it in the log, and takes it away with Onbekend', async () => {
+    const entry = await entryOf({ kant: 'links', linie: 'aanvaller' }, 'linie')
+
+    expect(entry).toEqual({ line: 'aanvaller', reason: 'Uit het clubblad', side: 'links' })
+    expect(await editPerson(database.db, userId, personId, entry, now)).toEqual({ status: 'changed' })
+    expect(await person()).toMatchObject({ line: 'aanvaller', side: 'links' })
+    expect((await log()).at(-1)?.detail).toBe('Aangepast: Jan Verzonnen. kant: geen → links. Reden: Uit het clubblad')
+
+    // The side has no source: the same side again changes nothing, and Onbekend empties it.
+    expect(await editPerson(database.db, userId, personId, entry, now)).toEqual({ status: 'unchanged' })
+    await editPerson(database.db, userId, personId, await entryOf({ kant: '', linie: 'aanvaller' }, 'linie'), now)
+    expect((await person())?.side).toBeNull()
+  })
+
+  it('leaves the side alone in a part that is not Linie', async () => {
+    await editPerson(database.db, userId, personId, await entryOf({ kant: 'rechts' }, 'linie'), now)
+    await editPerson(database.db, userId, personId, await entryOf({ kant: '', land: 'BE' }, 'land'), now)
+
+    expect(await person()).toMatchObject({ country: 'BE', side: 'rechts' })
+  })
+
+  it('refuses a side that is not one of the three', async () => {
+    const values = await valuesOf({ kant: 'boven', reden: '' })
+
+    expect(validatePerson(values, 'linie', '3-1990', now).errors).toEqual({
+      kant: 'Kies links, midden of rechts, of kies Onbekend.',
     })
   })
 

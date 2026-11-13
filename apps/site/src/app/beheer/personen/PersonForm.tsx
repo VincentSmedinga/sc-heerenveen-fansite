@@ -14,7 +14,7 @@ import {
   type PersonValues,
 } from '#src/beheer/person-fields'
 
-import { CountryField, DeathYearField, LineField, NameFields } from '../spelers/PersonFields'
+import { CountryField, DeathYearField, LineField, NameFields, SideField } from '../spelers/PersonFields'
 
 const summaryId = 'fouten'
 
@@ -130,9 +130,14 @@ export function PersonForm({
       {shows('linie') ? (
         <Card aria-labelledby="linie-kop">
           <Heading id="linie-kop" level={2}>
-            Linie
+            Linie en kant
           </Heading>
           <LineField error={errors.linie} hint="De linie van deze persoon, in elk seizoen." input={field('linie')} />
+          <SideField
+            error={errors.kant}
+            hint="De kant waar deze persoon meestal speelde, gezien in de richting van de aanval. Een middenvelder in het midden kiest Midden."
+            input={field('kant')}
+          />
         </Card>
       ) : null}
       <Card aria-labelledby="opslaan-kop">

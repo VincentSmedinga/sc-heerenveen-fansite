@@ -315,6 +315,7 @@ async function checkAdmin() {
     '/beheer/kwaliteit/namen',
     '/beheer/kwaliteit/formaties',
     '/beheer/kwaliteit/plaatsen',
+    '/beheer/kwaliteit/plaatsen/vragen',
     '/beheer/spelers',
     '/beheer/spelers/nieuw?seizoen=2025-26&q=jansen',
     '/beheer/spelers/1',

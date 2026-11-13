@@ -52,6 +52,7 @@ const screens = [
   '/beheer/kwaliteit/namen',
   '/beheer/kwaliteit/formaties',
   '/beheer/kwaliteit/plaatsen',
+  '/beheer/kwaliteit/plaatsen/vragen',
   '/beheer/bezoek',
   '/beheer/accounts',
   '/beheer/accounts/nieuw',

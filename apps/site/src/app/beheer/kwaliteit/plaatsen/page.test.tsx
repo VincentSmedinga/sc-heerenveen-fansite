@@ -112,7 +112,7 @@ describe('the page Vaste plaatsen', () => {
     expect(html).toContain('keeper')
     expect(html).toContain('verdediger, 1 van 4')
     expect(html).toContain('aanvaller, 3 van 3')
-    expect(html).toContain('100%, elke keer')
+    expect(html).toContain('10 wedstrijden, elke keer')
     expect(html).toContain('href="/beheer/kwaliteit"')
   })
 
@@ -136,7 +136,7 @@ describe('the page Vaste plaatsen', () => {
     expect(html).not.toContain('Negen')
     expect(html).not.toContain('Alleen 4-4-2')
     // Player 2 is in the first place of the defence in nine of ten.
-    expect(html).toMatch(/Speler 2.*?verdediger, 1 van 4.*?90%(?!, elke keer)/su)
+    expect(html).toMatch(/Speler 2.*?verdediger, 1 van 4.*?10 wedstrijden, 90%/su)
     expect(html).toContain(`href="/beheer/spelers/${playerId}"`)
     expect(html.match(/href="\/beheer\/spelers\//g)).toHaveLength(1)
   })

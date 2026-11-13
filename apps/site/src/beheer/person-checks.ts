@@ -10,6 +10,8 @@ import {
   playerNameMaxLength,
   type PlayerPosition,
   playerPositions,
+  type PlayerSide,
+  playerSides,
   wikipediaPageMaxLength,
 } from '@fansite/db/schema'
 import { isCountryCode } from '@fansite/shared/countries'
@@ -19,7 +21,10 @@ export type EditorsBirthDate = { date: string; precision: 'day' | 'year' }
 
 /** The errors of the fields of a person, by the `id` of the field. */
 export type PersonCheckErrors = Partial<
-  Record<'achternaam' | 'geboren' | 'land' | 'linie' | 'overleden' | 'tussenvoegsel' | 'voornaam' | 'wikipedia', string>
+  Record<
+    'achternaam' | 'geboren' | 'kant' | 'land' | 'linie' | 'overleden' | 'tussenvoegsel' | 'voornaam' | 'wikipedia',
+    string
+  >
 >
 
 /** The oldest year a birth date or a year of death may have. */
@@ -165,4 +170,15 @@ export function checkPage(value: string, errors: PersonCheckErrors): null | stri
   }
 
   return null
+}
+
+/** The side, or null for Onbekend (#1194). */
+export function checkSide(value: string, errors: PersonCheckErrors): null | PlayerSide {
+  const side = playerSides.find((choice) => choice === value) ?? null
+
+  if (value !== '' && side === null) {
+    errors.kant = 'Kies links, midden of rechts, of kies Onbekend.'
+  }
+
+  return side
 }

@@ -7,6 +7,7 @@ import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { qualityPath } from '#src/beheer/quality'
 import { requireRole } from '#src/beheer/require-role'
+import { sideQuizPath } from '#src/beheer/side-quiz'
 import {
   countedFormation,
   fewestMatches,
@@ -47,6 +48,9 @@ export default async function UsualSlotsPage() {
           In een {countedFormation}, voor spelers met minstens {fewestMatches} wedstrijden. De plaats in de rij komt uit
           de volgorde van de opstelling.
         </Text>
+        <Text>
+          <Link href={sideQuizPath}>Leg de kant van spelers vast</Link>, met een quiz.
+        </Text>
       </Page.Cell>
       <Page.Cell area="main">
         <Card aria-labelledby="plaatsen-kop">
@@ -61,14 +65,12 @@ export default async function UsualSlotsPage() {
             <DataTable
               appearance="text"
               caption={`De vaakste plaats van elke speler in een ${countedFormation}, de spelers met de meeste wedstrijden bovenaan`}
-              columns={['Speler', 'Wedstrijden', 'Plaats', 'Aandeel']}
+              columns={['Speler', 'Plaats']}
               rows={slots.map((slot) => ({
-                cells: [
-                  String(slot.matches),
-                  slotText(slot),
-                  `${slot.percentage}%${slot.percentage === 100 ? ', elke keer' : ''}`,
-                ],
+                cells: [slotText(slot)],
                 header: slot.name,
+                // The count and the share under the name: two columns fit a phone, five do not.
+                secondary: `${slot.matches} wedstrijden, ${slot.percentage === 100 ? 'elke keer' : `${slot.percentage}%`}`,
                 ...(slot.playerId === null ? {} : { href: playerPath(slot.playerId) }),
               }))}
             />
