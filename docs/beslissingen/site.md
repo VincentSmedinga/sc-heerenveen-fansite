@@ -5435,7 +5435,8 @@
   Elke knop is een verzendknop, dus het werkt zonder JavaScript, en zegt voor een schermlezer de naam van de speler: "Speler 4: links".
   Het antwoord is de kant van de persoon, met dezelfde regel in het logboek als het formulier van de persoon ("kant: geen → links").
   Een speler die je overslaat, blijft in het adres (`?over=`) en komt in deze ronde niet terug; open de pagina opnieuw voor de overgeslagen spelers.
-  Na een antwoord staat de focus op de kop van de volgende speler (`autofocus`), en een melding die een status is, zegt wat is opgeslagen.
+  Na een antwoord of een skip staat de focus op de kop van de volgende speler, of op de tekst dat niemand meer over is, met een klein client-component dat de focus zet als de speler wisselt (`QuestionHeading`).
+  Zonder JavaScript verspringt de focus niet, en een melding die een status is, zegt wat is opgeslagen.
 - **Waarom:** de redactie kent veel spelers uit het hoofd, en snel antwoorden is het doel.
   Het formulier van een persoon vraagt dezelfde kant, maar per persoon een pagina.
 - **Alternatieven:** de kant bij elk formulier invullen (veel klikken); de overgeslagen spelers in de database bewaren (een tabel of kolom voor iets dat een sessie duurt).

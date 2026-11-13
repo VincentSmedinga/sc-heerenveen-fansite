@@ -64,12 +64,12 @@ export default async function SideQuizPage({
             : `${answered.name ?? 'De speler'}: ${sideWords[answered.side]} opgeslagen.`}
         </Notice>
         {next === undefined ? (
-          <Card>
-            <Text>
+          <Card aria-labelledby="vraag-kop">
+            <QuestionHeading focus={answeredId !== undefined || skipped.length > 0} personId={0}>
               {skipped.length === 0
                 ? 'Alle spelers hebben een kant.'
                 : 'Je hebt alle spelers gehad die nog een kant nodig hebben.'}
-            </Text>
+            </QuestionHeading>
             <Text>
               <Link href={skipped.length === 0 ? usualSlotsPath : sideQuizPath}>
                 {skipped.length === 0 ? 'Terug naar de vaste plaatsen' : 'Begin opnieuw met de overgeslagen spelers'}

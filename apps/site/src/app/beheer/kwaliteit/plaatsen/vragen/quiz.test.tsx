@@ -239,6 +239,8 @@ describe('the page of the quiz', () => {
     const html = await page()
 
     expect(html).toContain('Alle spelers hebben een kant.')
+    // The text is the heading that gets the focus, as the heading of a question does.
+    expect(html).toMatch(/<h2[^>]*id="vraag-kop"[^>]*>Alle spelers hebben een kant\./u)
     expect(html).toContain('href="/beheer/kwaliteit/plaatsen"')
   })
 })
