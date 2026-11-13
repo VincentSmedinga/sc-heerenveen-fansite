@@ -41,9 +41,7 @@ export default async function UnusualFormationsPage() {
         </Text>
         <Heading level={1}>{title}</Heading>
         <Text appearance="intro">
-          Wedstrijden waarvan de formatie van sc Heerenveen niet {usualFormations.join(' of ')} is. Dat kan kloppen,
-          maar het is ook vaak een fout: een formatie die uit de lijnen van de oude fansite is afgeleid, of een tikfout
-          in een verslag.
+          Wedstrijden waarvan de formatie van sc Heerenveen niet {usualFormations.join(' of ')} is: kijk of die klopt.
         </Text>
       </Page.Cell>
       <Page.Cell area="main">
