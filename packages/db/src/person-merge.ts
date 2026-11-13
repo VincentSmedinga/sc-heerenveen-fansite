@@ -176,6 +176,8 @@ export function mergedPersonValues(other: Person, kept: Person) {
     lineSource: lineFrom.lineSource,
     name: nameFrom.name,
     nameSource: nameFrom.nameSource,
+    // The side the editors gave (#1194): the kept person's goes first, else the other's.
+    side: kept.side ?? other.side,
     wikidataId: kept.wikidataId ?? other.wikidataId,
     wikidataReadAt: kept.wikidataReadAt ?? other.wikidataReadAt,
     wikipediaPage: pageFrom.wikipediaPage,

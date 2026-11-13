@@ -1392,6 +1392,13 @@ function madeUpPersonName(name: string, searchTerm: string) {
  * Gives each made-up player of the season a person, as the import does (one for each page, with
  * the name kept in parts), for the players that have none yet.
  */
+// The made-up players with a side (#1194), so the form of a person and the quiz show one.
+const madeUpSides: Record<string, 'links' | 'midden' | 'rechts'> = {
+  'Floris de Wal': 'links',
+  'Jesse Postma': 'midden',
+  'Sjoerd Altena': 'rechts',
+}
+
 async function personsForMadeUpPlayers(db: Pick<Database, 'insert' | 'select' | 'update'>, season: string) {
   const squad = await db
     .select({ id: players.id, name: players.name, page: players.wikipediaPage, searchTerm: players.searchTerm })
@@ -1409,6 +1416,7 @@ async function personsForMadeUpPlayers(db: Pick<Database, 'insert' | 'select' | 
         ...madeUpPersonName(player.name, player.searchTerm),
         name: player.name,
         nameSource: 'manual',
+        ...(madeUpSides[player.name] === undefined ? {} : { side: madeUpSides[player.name] }),
         wikipediaPage: player.page,
       })
       .onDuplicateKeyUpdate({ set: { wikipediaPage: player.page } })

@@ -5423,3 +5423,18 @@
 - **Waarom:** de volgorde bepaalt waar een speler op het veld staat, en de redactie moest een speler weghalen en opnieuw invullen om hem te verplaatsen.
   Een kolom is een migratie en een tweede waarheid naast `id`.
 - **Alternatieven:** een kolom `position` (nodig als de rijen ooit niet meer opnieuw worden geschreven); slepen; een veld "plaats".
+
+## De quiz vraagt de kant van spelers, een speler tegelijk
+
+- **Datum:** 13 november 2026
+- **Besluit:** de pagina `/beheer/kwaliteit/plaatsen/vragen` (#1194) vraagt de kant van de spelers van de lijst met vaste plaatsen (#1193) die nog geen kant hebben, een speler tegelijk.
+  De spelers die er elke keer op dezelfde plaats stonden, komen eerst.
+  Bij een speler staan zijn linie, zijn jaren in de selectie en de plaats die de oude opstellingen hem geven.
+  Er zijn drie knoppen, Links, Midden en Rechts, en een knop Overslaan.
+  Elke knop is een verzendknop, dus het werkt zonder JavaScript, en zegt voor een schermlezer de naam van de speler: "Speler 4: links".
+  Het antwoord is de kant van de persoon, met dezelfde regel in het logboek als het formulier van de persoon ("kant: geen → links").
+  Een speler die je overslaat, blijft in het adres (`?over=`) en komt in deze ronde niet terug; open de pagina opnieuw voor de overgeslagen spelers.
+  Na een antwoord staat de focus op de kop van de volgende speler (`autofocus`), en een melding die een status is, zegt wat is opgeslagen.
+- **Waarom:** de redactie kent veel spelers uit het hoofd, en snel antwoorden is het doel.
+  Het formulier van een persoon vraagt dezelfde kant, maar per persoon een pagina.
+- **Alternatieven:** de kant bij elk formulier invullen (veel klikken); de overgeslagen spelers in de database bewaren (een tabel of kolom voor iets dat een sessie duurt).

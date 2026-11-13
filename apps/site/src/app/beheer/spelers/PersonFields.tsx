@@ -2,7 +2,7 @@ import { Field, Input, Select } from '@fansite/design-system'
 
 import type { CountryChoice } from '#src/beheer/countries'
 
-import { positionChoices } from '#src/beheer/player-fields'
+import { positionChoices, sideChoices } from '#src/beheer/player-fields'
 
 // The fields of a person: the name in parts with the Wikipedia page, the year of death, the
 // country and the line. The form of a player and the form of a person (issue 1164)
@@ -139,5 +139,21 @@ export function NameFields({
         <Input {...input('wikipedia')} autoComplete="off" autoCorrect="off" />
       </Field>
     </>
+  )
+}
+
+/** The side of a person, seen in the direction of the attack, or Onbekend (#1194). */
+export function SideField({ error, hint, input }: { error: string | undefined; hint: string; input: PersonInput }) {
+  return (
+    <Field error={error} hint={hint} id="kant" label="Kant" required={false}>
+      <Select {...input} width="natural">
+        <Select.Option value="">Onbekend</Select.Option>
+        {sideChoices.map((side) => (
+          <Select.Option key={side.value} value={side.value}>
+            {side.label}
+          </Select.Option>
+        ))}
+      </Select>
+    </Field>
   )
 }

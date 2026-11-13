@@ -1032,3 +1032,17 @@
 - **Waarom:** een nummer zonder dag, of een dag zonder nummer, zegt niets, en de database is de laatste plek waar dat kan worden tegengehouden.
   Een bestaande database met gegevens verandert niet: geen rij krijgt een waarde.
 - **Alternatieven:** de paring alleen in het formulier controleren (de importer en de seed omzeilen het); een eigen tabel met nummers per periode (zie _De selectie onthoudt één vorig rugnummer met de datum van de wissel_ in `site.md`).
+
+## Een persoon heeft een kant, die alleen de redactie zet
+
+- **Datum:** 13 november 2026
+- **Besluit:** `persons.side` (#1194) heeft de waarden `links`, `midden` en `rechts`, en is leeg zolang niemand het zei.
+  Het is de kant waar de persoon meestal speelde, gezien in de richting van de aanval, in elk seizoen.
+  De kolom staat bij de persoon, zoals de linie, en niet bij `players`: een speler heeft in elk seizoen een rij, en zijn kant verandert niet per seizoen.
+  Er is geen bron erbij: alleen de redactie zet hem, in het formulier van de persoon of met de quiz, en geen import leest of vervangt hem.
+  Bij het samenvoegen van twee personen houdt de blijvende persoon zijn kant, en anders krijgt hij die van de andere.
+  De migratie `0075_add_person_side` is herhaalbaar: `ADD COLUMN IF NOT EXISTS`.
+  Terugdraaien op de host: `ALTER TABLE persons DROP COLUMN side`; de kanten die de redactie gaf, zijn dan weg.
+- **Waarom:** met een kant per persoon kunnen we later de opstellingen van de oude fansite verbeteren, waar links en rechts niet te vertrouwen zijn.
+  Een bron is niet nodig, want de importer schrijft de kolom nooit.
+- **Alternatieven:** de kolom bij `players` (zoals het issue zei: een kant per seizoen die niemand nodig heeft, en een quiz die elke speler per seizoen vraagt); een kant per linie (een persoon met twee kanten komt zelden voor); een positie in tekst zoals "linksback" (dubbelt de linie).

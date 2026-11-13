@@ -1375,6 +1375,8 @@ Daar staat een rij per persoon met een gat; een `?` leidt naar het deel van zijn
 `/beheer/kwaliteit/namen` toont de personen die op elkaar lijken en wat de lijst van spelers van Wikipedia over onze namen zegt.
 `/beheer/kwaliteit/plaatsen` toont per speler met minstens 10 wedstrijden in een 4-3-3 op welke plaats van zijn rij hij het vaakst stond en in hoeveel procent van die wedstrijden (`src/beheer/usual-slots.ts`, #1193).
 De plaats komt uit de volgorde van de opstelling; er verandert niets in de gegevens.
+`/beheer/kwaliteit/plaatsen/vragen` is de quiz (#1194): een speler tegelijk zonder kant, met drie knoppen Links, Midden en Rechts en een knop Overslaan.
+Het antwoord is de kant van de persoon (`persons.side`), zoals het formulier van een persoon hem heeft, in het deel Linie en kant; geen import leest of vervangt hem.
 
 Boven de tabel van de personen staat een link naar `/beheer/kwaliteit/personen/snel` (`src/app/beheer/kwaliteit/personen/snel`, #1053); een oud adres met `?lijst=` of `?deel=` gaat daarheen.
 Die pagina heeft twee lijsten, `?lijst=land` voor de tweede, elk in delen van 50 (`?deel=2`), de personen van de nieuwste seizoenen eerst.

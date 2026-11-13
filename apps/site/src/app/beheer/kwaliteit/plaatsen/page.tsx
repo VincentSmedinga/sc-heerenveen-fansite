@@ -7,6 +7,7 @@ import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { qualityPath } from '#src/beheer/quality'
 import { requireRole } from '#src/beheer/require-role'
+import { sideQuizPath } from '#src/beheer/side-quiz'
 import {
   countedFormation,
   fewestMatches,
@@ -46,6 +47,9 @@ export default async function UsualSlotsPage() {
         <Text appearance="intro">
           In een {countedFormation}, voor spelers met minstens {fewestMatches} wedstrijden. De plaats in de rij komt uit
           de volgorde van de opstelling.
+        </Text>
+        <Text>
+          <Link href={sideQuizPath}>Leg de kant van spelers vast</Link>, met een quiz.
         </Text>
       </Page.Cell>
       <Page.Cell area="main">

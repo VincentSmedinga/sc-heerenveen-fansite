@@ -11,6 +11,7 @@ export const personFieldNames = [
   'overleden',
   'land',
   'linie',
+  'kant',
   'reden',
 ] as const
 
@@ -33,7 +34,7 @@ export const personPartLabels: Record<PersonPart, string> = {
 export const personPartFields: Record<PersonPart, readonly PersonFieldName[]> = {
   land: ['land'],
   leven: ['geboren', 'overleden'],
-  linie: ['linie'],
+  linie: ['linie', 'kant'],
   naam: ['voornaam', 'tussenvoegsel', 'achternaam', 'wikipedia'],
 }
 
