@@ -32,7 +32,8 @@ const meta = preview.meta({
           '- **Met subpagina’s:** een onderdeel van het hoofdmenu met `subitems`. De balk met subpagina’s hoort bij het menu en staat in dezelfde `nav`.',
           '- **Met subpagina’s en ankers:** daaronder een `Page.Shortcuts` met links naar de kaarten van de pagina, voor een smal scherm. Alleen die balk plakt.',
           '',
-          'De verhalen voor een smal scherm staan alleen in het canvas, met de instelling Viewport van de werkbalk.',
+          'Het verhaal met ankers is voor een smal scherm en staat alleen in het canvas; de andere breedtes kies je met de instelling Viewport van de werkbalk.',
+          'Een pagina is gebouwd uit `Page`, `Navigation`, `Card`, `Heading` en `Text`.',
         ].join('\n'),
       },
       story: { iframeHeight: '30rem', inline: false },
@@ -194,33 +195,18 @@ const renderWithEqualColumns = (_args: unknown, context: Globals) => (
 const phone = { tags: ['!autodocs'] }
 const mobile = { theme: 'light', viewport: { value: 'mobile2' } }
 
-export const PlainLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Gewone pagina, licht',
+export const Plain = meta.story({
+  name: 'Gewone pagina',
   render: renderPlain,
 })
 
-export const PlainDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Gewone pagina, donker',
-  render: renderPlain,
-})
-
-export const WithSidebarLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Met zijbalk, licht',
+export const WithSidebar = meta.story({
+  name: 'Met zijbalk',
   render: renderWithSidebar,
 })
 
-export const WithSidebarDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Met zijbalk, donker',
-  render: renderWithSidebar,
-})
-
-export const WithEqualColumnsLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Met twee gelijke kolommen, licht',
+export const WithEqualColumns = meta.story({
+  name: 'Met twee gelijke kolommen',
   parameters: {
     docs: {
       description: {
@@ -232,68 +218,14 @@ export const WithEqualColumnsLight = meta.story({
   render: renderWithEqualColumns,
 })
 
-export const WithEqualColumnsDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Met twee gelijke kolommen, donker',
-  render: renderWithEqualColumns,
-})
-
-export const WithEqualColumnsPhone = meta.story({
-  ...phone,
-  globals: mobile,
-  name: 'Met twee gelijke kolommen, telefoon',
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Op een smal scherm staan alle kaarten onder elkaar, eerst die van de eerste sectie, dan die van de tweede.',
-      },
-    },
-  },
-  render: renderWithEqualColumns,
-})
-
-export const WithSubpagesLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Met subpagina’s, licht',
-  render: renderWithSubpages,
-})
-
-export const WithSubpagesDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Met subpagina’s, donker',
+export const WithSubpages = meta.story({
+  name: 'Met subpagina’s',
   render: renderWithSubpages,
 })
 
 export const WithSubpagesAndShortcuts = meta.story({
   ...phone,
   globals: mobile,
-  name: 'Met subpagina’s en ankers, telefoon',
-  render: renderWithSubpagesAndShortcuts,
-})
-
-export const WithSubpagesAndShortcutsDark = meta.story({
-  ...phone,
-  globals: { ...mobile, theme: 'dark' },
-  name: 'Met subpagina’s en ankers, telefoon, donker',
-  render: renderWithSubpagesAndShortcuts,
-})
-
-// The page scrolls to a heading, as after a click on its link: only the anchors are left.
-export const WithSubpagesAndShortcutsScrolled = meta.story({
-  ...phone,
-  globals: mobile,
-  name: 'Met subpagina’s en ankers, gescrold',
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'De pagina is tot de kop van Stand gescrold. Het menu met de subpagina’s is weg, de balk met ankers blijft, en de kop komt er niet onder.',
-      },
-    },
-  },
-  play: () => {
-    document.getElementById('stand')?.scrollIntoView({ behavior: 'instant', block: 'start' })
-  },
+  name: 'Met subpagina’s en ankers',
   render: renderWithSubpagesAndShortcuts,
 })

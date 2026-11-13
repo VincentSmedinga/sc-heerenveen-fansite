@@ -1,31 +1,33 @@
 import preview from '#.storybook/preview'
 
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
 import { List } from '../list/List'
 import { NewsItem } from '../news-item/NewsItem'
 import { Page } from '../page/Page'
-import { ArticleCard } from './ArticleCard'
+import { ArticleCard, type ArticleCardProps } from './ArticleCard'
 
 const meta = preview.meta({
+  argTypes: {
+    date: { description: 'De datum zoals een lezer hem leest.' },
+    dateTime: { description: 'Dezelfde dag voor het `time`-element.' },
+    href: { description: 'Het adres van het artikel op de site.' },
+    intro: { description: 'De inleiding van het artikel.' },
+    title: { description: 'De titel van het artikel, als link.' },
+  },
   component: ArticleCard,
   parameters: {
     docs: {
       description: {
         component: [
           'De kaart op de homepage met het nieuwste artikel van onze eigen redactie.',
-          'Hij staat bovenaan de hoofdkolom, boven het nieuws van de media, op het warme vlak, zodat hij zich van het nieuws onderscheidt.',
-          'Is er geen artikel, dan laat de pagina de kaart weg.',
-          '',
-          'Onder de kop "Van de redactie" staan de titel als link naar het artikel, de datum, de inleiding en de link "Lees verder".',
-          'De titel en "Lees verder" gaan naar dezelfde pagina.',
-          'De naam van "Lees verder" noemt het artikel, zodat de link ook buiten de kaart duidelijk is.',
-          '',
-          '- `title` is de titel van het artikel, `intro` de inleiding.',
-          '- `href` is het adres van het artikel op de site.',
-          '- `date` is de datum zoals een lezer hem leest, en `dateTime` dezelfde dag voor het `time`-element.',
+          'Hij staat bovenaan de hoofdkolom, boven het nieuws van de media, op het warme vlak, zodat hij zich van het nieuws onderscheidt; is er geen artikel, dan laat de pagina de kaart weg.',
+          'De titel en "Lees verder" gaan naar dezelfde pagina, en de naam van "Lees verder" noemt het artikel.',
+          'Hij is gebouwd uit `Card`, `Heading`, `Text`, `Link` en `Time`.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
     },
   },
   tags: ['autodocs'],
@@ -53,47 +55,42 @@ const news = (
 
 // The card at the top of the main column, above the news, as on the homepage. The text is made
 // up.
-const renderOnPage = () => (
+const renderOnPage = (args: ArticleCardProps) => (
   <Page.Body>
     <Page.Main>
-      <ArticleCard
-        date="25 oktober 2026"
-        dateTime="2026-10-25"
-        href="#dit-zijn-wij"
-        intro="Wij zijn de redactie van de Fansite. Hier lees je wie we zijn en wat je van ons mag verwachten."
-        title="Dit zijn wij"
-      />
+      <ArticleCard {...args} />
       {news}
     </Page.Main>
   </Page.Body>
 )
 
-const renderLong = () => (
-  <div style={{ maxInlineSize: '20rem' }}>
-    <ArticleCard
-      date="25 oktober 2026"
-      dateTime="2026-10-25"
-      href="#lang"
-      intro="Een introductie van drie hele regels, met een heel lang woord erin: Heelerglangewoordenzonderspatieswaarnaaralleswordtgezegd. En nog een zin, zodat de tekst doorloopt."
-      title="Een titel die zo lang is dat hij op een smalle kolom over meer dan één regel loopt"
-    />
-  </div>
-)
-
-export const Light = meta.story({ globals: { theme: 'light' }, name: 'Boven het nieuws, licht', render: renderOnPage })
-
-export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Boven het nieuws, donker', render: renderOnPage })
-
-export const LongLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Lange titel en inleiding in een smalle kolom, licht',
-  render: renderLong,
+export const Default = meta.story({
+  args: {
+    date: '25 oktober 2026',
+    dateTime: '2026-10-25',
+    href: '#dit-zijn-wij',
+    intro: 'Wij zijn de redactie van de Fansite. Hier lees je wie we zijn en wat je van ons mag verwachten.',
+    title: 'Dit zijn wij',
+  },
+  name: 'Boven het nieuws',
+  render: renderOnPage,
 })
 
-export const LongDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Lange titel en inleiding in een smalle kolom, donker',
-  render: renderLong,
+export const Long = meta.story({
+  args: {
+    date: '25 oktober 2026',
+    dateTime: '2026-10-25',
+    href: '#lang',
+    intro:
+      'Een introductie van drie hele regels, met een heel lang woord erin: Heelerglangewoordenzonderspatieswaarnaaralleswordtgezegd. En nog een zin, zodat de tekst doorloopt.',
+    title: 'Een titel die zo lang is dat hij op een smalle kolom over meer dan één regel loopt',
+  },
+  name: 'Lange titel en inleiding',
+  render: (args) => (
+    <div style={{ maxInlineSize: '20rem' }}>
+      <ArticleCard {...args} />
+    </div>
+  ),
 })
 
 // The titles are made up. Each one breaks over two or three lines in a narrow column, so the
@@ -133,9 +130,8 @@ const renderBalanced = () => (
   </div>
 )
 
-export const BalancedLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Titels in balans over twee of drie regels, met een lang woord en een Friese titel, licht',
+export const Balanced = meta.story({
+  name: 'Titels in balans over twee of drie regels, met een lang woord en een Friese titel',
   parameters: {
     docs: {
       description: {
@@ -144,11 +140,5 @@ export const BalancedLight = meta.story({
       },
     },
   },
-  render: renderBalanced,
-})
-
-export const BalancedDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Titels in balans over twee of drie regels, met een lang woord en een Friese titel, donker',
   render: renderBalanced,
 })

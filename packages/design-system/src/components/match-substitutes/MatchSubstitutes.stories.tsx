@@ -27,9 +27,8 @@ const meta = preview.meta({
       description: {
         component: [
           'De wissels van één team: wie erin kwam, in welke minuut en voor wie, en een doelpunt als hij scoorde.',
-          'Elke speler heeft een stip met het rugnummer en een boog die begint bij de minuut van invallen, zoals op het veld.',
-          'De spelers op de bank die niet inviellen staan er niet bij: het verslag legt ze niet vast.',
-          'Een schermlezer hoort per wissel één zin, en de tekens zijn verborgen.',
+          'Elke speler heeft een stip met het rugnummer en een boog die begint bij de minuut van invallen, zoals op het veld. De spelers op de bank die niet inviellen staan er niet bij, want het verslag legt ze niet vast.',
+          'Hij is gebouwd uit `PitchPlayer`, `PlayerDisc`, `MatchEventIcon`, `PlayerName` en `Heading`.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

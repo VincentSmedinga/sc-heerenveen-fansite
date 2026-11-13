@@ -1,5 +1,6 @@
 import preview from '#.storybook/preview'
 
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { DataTable } from '../data-table/DataTable'
 import { tableColumns } from '../table-columns'
 import { TopScorersTable } from '../top-scorers-table/TopScorersTable'
@@ -19,6 +20,7 @@ const meta = preview.meta({
           'Het beletselteken van een rij voor een tijd weg (`gap` in een `DataTable`) is een ander teken voor iets anders: het staat in de rijkop, nooit in deze kolom.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
     },
   },
   tags: ['autodocs'],
@@ -50,14 +52,7 @@ const ranking = (offset = 0) => (
 )
 
 export const SharedPlaces = meta.story({
-  globals: { theme: 'light' },
   name: 'Gedeelde plaatsen',
-  render: () => ranking(),
-})
-
-export const SharedPlacesDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Gedeelde plaatsen, donker',
   render: () => ranking(),
 })
 

@@ -16,8 +16,8 @@ const meta = preview.meta({
       description: {
         component: [
           'Een lijst met liggende balken, één regel per naam, zoals de doelpunten van een speler per seizoen.',
-          'De naam en het getal zijn de tekst van de lijst; de balk is versiering die een schermlezer overslaat.',
-          'Zet de lijst in een `Card` onder een kop van niveau 2 die zegt wat de balken tellen.',
+          'De naam en het getal zijn de tekst van de lijst; de balk is versiering die een schermlezer overslaat. Zet de lijst in een `Card` onder een kop van niveau 2 die zegt wat de balken tellen.',
+          'Hij is gebouwd uit `Bar`.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

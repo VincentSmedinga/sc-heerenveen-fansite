@@ -39,7 +39,8 @@ const meta = preview.meta({
       description: {
         component: [
           'Eén speler op het veld: een rond vlak met het rugnummer, een ring met de minuten die hij speelde, merken voor een doelpunt, een kaart, een wissel en de aanvoerder, en de achternaam eronder.',
-          'Het veld (MatchPitch) zet de spelers op hun plek. Een schermlezer hoort één zin per speler en slaat de tekening over.',
+          'Het veld (`MatchPitch`) zet de spelers op hun plek. Een schermlezer hoort één zin per speler en slaat de tekening over.',
+          'Hij is gebouwd uit `PlayerDisc`, `MatchEventIcon` en `PlayerName`.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

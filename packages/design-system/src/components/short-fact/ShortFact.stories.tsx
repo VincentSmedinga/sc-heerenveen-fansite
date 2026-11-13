@@ -22,8 +22,8 @@ const meta = preview.meta({
       description: {
         component: [
           'Een feit als korte regel in een lijst, met de naam erboven, zoals de uitersten van een seizoen hun naam boven de wedstrijd hebben.',
-          'Het is de korte regel van `ShortMatch` voor een waarde die geen wedstrijd is, met hetzelfde uiterlijk en dezelfde dunne lijnen tussen de regels.',
-          'Zet de naam als `Text` met `appearance="meta"` en de regel samen in een `List.Item`, de lijst in een `Card` onder een kop van niveau 2, en geef de `List` `role="list"`.',
+          'Het is de korte regel van `ShortMatch` voor een waarde die geen wedstrijd is, met hetzelfde uiterlijk. Zet de naam als `Text` met `appearance="meta"` en de regel samen in een `List.Item`, de lijst in een `Card` onder een kop van niveau 2, en geef de `List` `role="list"`.',
+          'Hij is gebouwd uit `Text` en `List`, in de vorm van `ShortMatch`.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

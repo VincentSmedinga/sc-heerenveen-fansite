@@ -24,9 +24,8 @@ const meta = preview.meta({
       description: {
         component: [
           'De loopbaan laat zien hoe een speler bij de club was, periode na periode en seizoen na seizoen, met een regel voor elk gat ertussen.',
-          'Periodes en seizoenen zijn lijsten met een kop, zodat een schermlezer de tijdlijn als lijst leest; de lijn en de punten zijn versiering.',
-          'De pagina geeft de koppen, de links en de tekst van een gat mee.',
-          'Een deel dat ontbreekt, laat geen lege regel achter.',
+          'Periodes en seizoenen zijn lijsten met een kop, zodat een schermlezer de tijdlijn als lijst leest; de lijn en de punten zijn versiering. De pagina geeft de koppen, de links en de tekst van een gat mee, en een deel dat ontbreekt laat geen lege regel achter.',
+          'Hij is gebouwd uit `Heading`, `Link` en `Tag`.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

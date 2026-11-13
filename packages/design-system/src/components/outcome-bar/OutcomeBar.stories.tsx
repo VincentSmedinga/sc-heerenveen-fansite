@@ -19,6 +19,7 @@ const meta = preview.meta({
         component: [
           'Een balk in drie delen: winst, gelijkspel en verlies, in de kleuren van een uitslag.',
           'De balk is versiering en een kleur is nooit het enige teken: zet de drie getallen als zin naast of onder de balk.',
+          'Hij is gebouwd uit drie eigen elementen in de kleuren van een uitslag.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

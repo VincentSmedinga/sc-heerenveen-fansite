@@ -19,8 +19,8 @@ const meta = preview.meta({
       description: {
         component: [
           'Een korte balk naast een getal in een tabelcel, zo lang als het aandeel van dat getal in het grootste getal van de tabel (`sharesOf` rekent dat uit).',
-          'De balk is versiering: hij heeft geen rol of tekst en een schermlezer slaat hem over, dus het getal blijft in de cel staan.',
-          'Zet een tabel met balken in een `BarPlace`: de balken verdwijnen daar waar de plaats te smal voor ze is.',
+          'De balk is versiering: hij heeft geen rol of tekst en een schermlezer slaat hem over, dus het getal blijft in de cel staan. Zet een tabel met balken in een `BarPlace`: de balken verdwijnen daar waar de plaats te smal voor ze is.',
+          'Hij is gebouwd uit een eigen element in de kleur van een uitslag, zonder andere onderdelen.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
