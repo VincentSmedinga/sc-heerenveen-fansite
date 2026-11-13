@@ -90,6 +90,11 @@ export type InputTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> 
    */
   empty?: ReactNode
   /**
+   * What the buttons that move a row say, which a screen reader hears after the name of the
+   * row: `Speler 2 omhoog`. Without them, they are `Omhoog` and `Omlaag`.
+   */
+  moveLabels?: { down: string; up: string }
+  /**
    * What the button that removes a row says, which a screen reader hears after the name of the
    * row: `Doelpunt 2 weghalen`. Without it, it is `Weghalen`. The button shows a bin, and the
    * words show when the pointer rests on it.
@@ -109,6 +114,13 @@ export type InputTableRow = {
   header: string
   /** What the eye sees as the row header, such as `2`. Without it, it is the `header`. */
   mark?: string
+  /**
+   * The buttons that move the row up or down, for a list whose order matters. Leave one out
+   * where the row can't go that way, such as `up` for the first row: the button is then not
+   * there, so the keyboard doesn't stop on a button that does nothing. They are submit buttons
+   * too. Each has an `id`, so the server can say which one gets the focus after the move.
+   */
+  move?: { down?: InputTableButton & { id: string }; up?: InputTableButton & { id: string } }
   /** The button that removes the row: a submit button. */
   remove: InputTableButton
 }
@@ -121,8 +133,8 @@ const lowerFirst = (name: string) => name.charAt(0).toLowerCase() + name.slice(1
  * again, such as the goals of a match. Every field has its own visible label, with the name of
  * the row in it for a screen reader: `Minuut, doelpunt 2`. A row can have two lines of fields,
  * and a field that does not apply to a row can be hidden. The header of a row is its number,
- * and every row has a button to remove it, a bin with a name. Under the table a button adds a
- * row.
+ * and every row has a button to remove it, a bin with a name. A row can also have buttons to
+ * move it up or down, with arrows. Under the table a button adds a row.
  * Both are submit buttons, so the table works without JavaScript: the server answers with the
  * form again, with the row added or removed. Put it in a Form.
  *
@@ -136,6 +148,7 @@ export const InputTable = ({
   className,
   columns,
   empty,
+  moveLabels = { down: 'Omlaag', up: 'Omhoog' },
   removeLabel = 'Weghalen',
   rows,
   ...props
@@ -168,6 +181,26 @@ export const InputTable = ({
                   </td>
                 ))}
                 <td className="hf-input-table-action">
+                  {row.move?.up === undefined ? null : (
+                    <IconButton
+                      icon="arrow-up"
+                      id={row.move.up.id}
+                      label={`${row.header} ${lowerFirst(moveLabels.up)}`}
+                      name={row.move.up.name}
+                      type="submit"
+                      value={row.move.up.value}
+                    />
+                  )}
+                  {row.move?.down === undefined ? null : (
+                    <IconButton
+                      icon="arrow-down"
+                      id={row.move.down.id}
+                      label={`${row.header} ${lowerFirst(moveLabels.down)}`}
+                      name={row.move.down.name}
+                      type="submit"
+                      value={row.move.down.value}
+                    />
+                  )}
                   <IconButton
                     icon="trash"
                     label={`${row.header} ${lowerFirst(removeLabel)}`}
