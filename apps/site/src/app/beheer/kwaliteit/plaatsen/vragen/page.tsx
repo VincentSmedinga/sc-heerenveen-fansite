@@ -13,6 +13,7 @@ import { usualSlotsPath } from '#src/beheer/usual-slots'
 import { getDatabase } from '#src/database'
 
 import { submitSide } from './actions'
+import { QuestionHeading } from './QuestionHeading'
 
 // Render on each request: who is logged in and what the database holds are not known when the
 // site is built.
@@ -77,9 +78,9 @@ export default async function SideQuizPage({
           </Card>
         ) : (
           <Card aria-labelledby="vraag-kop">
-            <Heading autoFocus id="vraag-kop" level={2} tabIndex={-1}>
+            <QuestionHeading focus={answeredId !== undefined || skipped.length > 0} personId={next.question.personId}>
               {next.question.name}
-            </Heading>
+            </QuestionHeading>
             <Text appearance="meta">
               {[next.question.line, next.question.years].filter((part) => part !== '').join(', ')}
               {next.question.line === '' && next.question.years === '' ? 'Geen linie bekend.' : ''}
@@ -89,14 +90,16 @@ export default async function SideQuizPage({
               {next.question.slot}. Nog {next.left} {next.left === 1 ? 'speler' : 'spelers'} te gaan.
             </Text>
             <Form action={submitSide.bind(null, next.question.personId, skipped.join(','))}>
-              {(['links', 'midden', 'rechts'] as const).map((side) => (
-                <Button key={side} name="knop" type="submit" value={side}>
-                  {`${next.question.name}: ${side}`}
+              <Form.Buttons>
+                {(['links', 'midden', 'rechts'] as const).map((side) => (
+                  <Button key={side} name="knop" type="submit" value={side}>
+                    {`${next.question.name}: ${side}`}
+                  </Button>
+                ))}
+                <Button appearance="soft" name="knop" type="submit" value="overslaan">
+                  {`${next.question.name}: overslaan`}
                 </Button>
-              ))}
-              <Button appearance="soft" name="knop" type="submit" value="overslaan">
-                {`${next.question.name}: overslaan`}
-              </Button>
+              </Form.Buttons>
             </Form>
           </Card>
         )}

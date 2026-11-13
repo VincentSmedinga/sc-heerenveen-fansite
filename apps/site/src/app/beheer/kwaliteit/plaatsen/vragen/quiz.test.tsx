@@ -133,6 +133,13 @@ describe('the addresses of the quiz', () => {
     expect(parseSkipped(undefined)).toEqual([])
   })
 
+  it('keeps the newest skipped players when there are too many, so the one just skipped is not lost', () => {
+    const many = Array.from({ length: 250 }, (_nothing, index) => index + 1)
+
+    expect(parseSkipped(many.join(','))).toHaveLength(200)
+    expect(parseSkipped(many.join(',')).at(-1)).toBe(250)
+  })
+
   it('keeps the skipped players and the answered one in the address', () => {
     expect(sideQuizAddress([])).toBe('/beheer/kwaliteit/plaatsen/vragen')
     expect(sideQuizAddress([4, 9], 12)).toBe('/beheer/kwaliteit/plaatsen/vragen?over=4%2C9&gedaan=12')
@@ -147,6 +154,23 @@ describe('the next question', () => {
     expect(next?.question).toMatchObject({ matches: 10, percentage: 100, years: '2005/06' })
     expect(next?.question.name).not.toBe('Speler 2')
     expect(next?.question.name).not.toBe('Speler 3')
+  })
+
+  it('gives the years of his seasons from the first start to the end of the last season', async () => {
+    const [{ id: playerId }] = (await database.db.select({ id: players.id }).from(players).limit(1)) as [{ id: number }]
+    const [{ personId }] = (await database.db
+      .select({ personId: players.personId })
+      .from(players)
+      .where(eq(players.id, playerId))) as [{ personId: number }]
+
+    await database.db.insert(players).values([{ name: 'Later', personId, searchTerm: 'Later', season: '2006/07' }])
+
+    const next = await readNextQuestion(
+      database.db,
+      Object.values(personIds).filter((id) => id !== personId),
+    )
+
+    expect(next?.question.years).toBe('2005–2007')
   })
 
   it('leaves out a player who was skipped and a person who has a side already', async () => {
@@ -190,7 +214,6 @@ describe('the page of the quiz', () => {
     const name = (await readNextQuestion(database.db, []))!.question.name
 
     expect(html).toContain(`>${name}</h2>`)
-    expect(html).toContain('autofocus')
     expect(html).toContain('tabindex="-1"')
 
     for (const answer of ['links', 'midden', 'rechts', 'overslaan']) {

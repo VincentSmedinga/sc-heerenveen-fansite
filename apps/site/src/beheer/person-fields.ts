@@ -26,7 +26,7 @@ export type PersonPart = (typeof personParts)[number]
 export const personPartLabels: Record<PersonPart, string> = {
   land: 'Land',
   leven: 'Leven',
-  linie: 'Linie',
+  linie: 'Linie en kant',
   naam: 'Naam',
 }
 

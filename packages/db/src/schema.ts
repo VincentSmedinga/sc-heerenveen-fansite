@@ -856,15 +856,15 @@ export const deathDateSources = ['wikidata', 'manual'] as const
 
 export type DeathDateSource = (typeof deathDateSources)[number]
 
-/**
- * Where the birth date of a person came from (#1164): `wikidata` from `P569`, `manual` a year
- * or a day the editors filled in. The importer never replaces `manual`.
- */
 /** The side of the pitch a person played on, seen in the direction of the attack (#1194). */
 export const playerSides = ['links', 'midden', 'rechts'] as const
 
 export type PlayerSide = (typeof playerSides)[number]
 
+/**
+ * Where the birth date of a person came from (#1164): `wikidata` from `P569`, `manual` a year
+ * or a day the editors filled in. The importer never replaces `manual`.
+ */
 export const birthDateSources = ['wikidata', 'manual'] as const
 
 export type BirthDateSource = (typeof birthDateSources)[number]

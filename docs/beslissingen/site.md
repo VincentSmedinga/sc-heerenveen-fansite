@@ -5294,6 +5294,7 @@
   Eén veld voor de datum werkt zonder JavaScript en met elk hulpmiddel; een datumveld van de browser kent geen los jaar.
 - **Alternatieven:** alleen de persoon hernoemen en de seizoenen laten (de lijst van een seizoen toont dan de oude naam); drie velden voor dag, maand en jaar (meer werk voor een veld dat meestal een jaar is); een datumveld van de browser met een apart veld voor een jaar.
 - **Later:** zie _De reden bij een opslag of een besluit in het beheer is optioneel_ (12 november 2026): de reden bij Opslaan mag leeg.
+- **Later:** zie _De quiz vraagt de kant van spelers, een speler tegelijk_ (13 november 2026): het deel Linie heet nu Linie en kant en heeft ook de keuze Kant.
 
 ## De tabel van de personen telt vijf gegevens per persoon
 

@@ -15,7 +15,7 @@ import { readLineUpsInCountedFormation, slotText, usualSlots, usualSlotsPath } f
 /** The address of the quiz. */
 export const sideQuizPath = `${usualSlotsPath}/vragen`
 
-/** The fewest skipped players the address keeps, so it does not grow without end. */
+/** The most skipped players the address keeps, so it does not grow without end. */
 const mostSkipped = 200
 
 /** One player to ask about. */
@@ -50,7 +50,7 @@ export function parseSkipped(value: string | undefined): number[] {
     .split(',')
     .map(Number)
     .filter((number) => Number.isInteger(number) && number > 0)
-    .slice(0, mostSkipped)
+    .slice(-mostSkipped)
 }
 
 /**
@@ -102,8 +102,6 @@ export async function readNextQuestion(
 
     asked.add(personId)
 
-    const years = seasons.get(personId) ?? []
-
     open.push({
       line: positionChoices.find((choice) => choice.value === one.line)?.label.toLowerCase() ?? '',
       matches: slot.matches,
@@ -111,12 +109,7 @@ export async function readNextQuestion(
       percentage: slot.percentage,
       personId,
       slot: slotText(slot),
-      years:
-        years.length === 0
-          ? ''
-          : years.length === 1
-            ? years[0]!
-            : `${years[0]!.slice(0, 4)}–${years.at(-1)!.slice(0, 4)}`,
+      years: yearsOf(seasons.get(personId) ?? []),
     })
   }
 
@@ -141,4 +134,14 @@ export function sideQuizAddress(skipped: readonly number[], answered?: number) {
   const text = query.toString()
 
   return text === '' ? sideQuizPath : `${sideQuizPath}?${text}`
+}
+
+/** The years of the seasons of a person, such as `2004–2007`, or the one season. */
+function yearsOf(seasons: readonly string[]) {
+  const first = seasons[0]
+  const last = seasons.at(-1)
+
+  return first === undefined || last === undefined || first === last
+    ? (first ?? '')
+    : `${first.slice(0, 4)}–${Number(last.slice(0, 4)) + 1}`
 }
