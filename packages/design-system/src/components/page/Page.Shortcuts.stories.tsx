@@ -63,14 +63,14 @@ const phone = { tags: ['!autodocs'] }
 
 export const Default = meta.story({
   ...phone,
-  globals: { theme: 'light', viewport: { value: 'mobile2' } },
+  globals: { viewport: { value: 'mobile2' } },
   name: 'Snelkoppelingen',
   render,
 })
 
 export const FewLinks = meta.story({
   ...phone,
-  globals: { theme: 'light', viewport: { value: 'mobile2' } },
+  globals: { viewport: { value: 'mobile2' } },
   name: 'Weinig links',
   parameters: {
     docs: { description: { story: 'Met weinig links past de rij en scrolt er niets, dus er is ook geen vervaging.' } },
@@ -80,7 +80,7 @@ export const FewLinks = meta.story({
 
 export const Wrapped = meta.story({
   ...phone,
-  globals: { theme: 'light', viewport: { value: 'mobile1' } },
+  globals: { viewport: { value: 'mobile1' } },
   name: 'Smal scherm: de rij loopt om',
   parameters: {
     docs: {
@@ -148,7 +148,7 @@ const renderLongPage = (_args: unknown, { globals }: { globals: Record<string, u
 
 export const Follows = meta.story({
   ...phone,
-  globals: { theme: 'light', viewport: { value: 'mobile2' } },
+  globals: { viewport: { value: 'mobile2' } },
   name: 'Volgt de pagina',
   parameters: followParameters,
   play: scrollToStand,
