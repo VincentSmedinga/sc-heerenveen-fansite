@@ -5365,6 +5365,15 @@
 - **Later:** de pagina's met `wide` zijn gemeten in #1182: geen enkele scrolt opzij, bij 320 pixels en bij 400% zoom ook niet (zie _De oude opbouw van een pagina is weg_ in `designsysteem.md`).
 - **Alternatieven:** een plakkende rij onderaan het scherm; de knoppen alleen in de werkbalk (dan is het einde van een lang formulier leeg); "Live" en "Plakken" als links in de werkbalk.
 
+## De melding bij een andere Wikipedia-pagina van een persoon zegt wat je dan doet
+
+- **Datum:** 12 november 2026
+- **Besluit:** een persoon die al een Wikipedia-pagina heeft, krijgt geen andere pagina en kan haar niet kwijtraken, en de twee meldingen zeggen nu waarom en wat je doet: "De import herkent een persoon aan die pagina, daarom blijft ze zoals ze is. Zet de pagina terug zoals ze was om de rest te bewaren." (#1188).
+  De tekst staat op het formulier van een persoon en op dat van een speler.
+  Het veld blijft bewerkbaar.
+- **Waarom:** de oude melding zei wat niet mag en niet wat je dan doet, en een redacteur die alleen de naam wilde wijzigen, zat vast.
+- **Alternatieven:** een kortere melding zonder uitleg; het veld alleen-lezen maken zodat de fout niet kan ontstaan (meer werk in het formulier en de werktabel van Kwaliteit).
+
 ## De reden bij een opslag of een besluit in het beheer is optioneel
 
 - **Datum:** 12 november 2026

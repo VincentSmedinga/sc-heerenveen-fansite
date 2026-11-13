@@ -776,7 +776,8 @@ describe('editPlayer', () => {
 
     expect(await editPlayer(database.db, userId, id, entry({ name: jan, page: 'Jan Vos (1990)' }))).toEqual({
       errors: {
-        wikipedia: 'Deze persoon heeft al een Wikipedia-pagina: Jan Vos. Een andere pagina geven kan hier niet.',
+        wikipedia:
+          'Deze persoon heeft al een Wikipedia-pagina: Jan Vos. De import herkent een persoon aan die pagina, daarom blijft ze zoals ze is. Zet de pagina terug zoals ze was om de rest te bewaren.',
       },
       status: 'refused',
     })

@@ -197,8 +197,8 @@ async function givePage(transaction: Transaction, person: AdminPerson['person'],
     throw new Refusal({
       wikipedia:
         page === null
-          ? `Deze persoon heeft een Wikipedia-pagina: ${person.wikipediaPage}. Een pagina weghalen kan hier niet.`
-          : `Deze persoon heeft al een Wikipedia-pagina: ${person.wikipediaPage}. Een andere pagina geven kan hier niet.`,
+          ? `Deze persoon heeft een Wikipedia-pagina: ${person.wikipediaPage}. De import herkent een persoon aan die pagina, daarom blijft ze zoals ze is. Zet de pagina terug zoals ze was om de rest te bewaren.`
+          : `Deze persoon heeft al een Wikipedia-pagina: ${person.wikipediaPage}. De import herkent een persoon aan die pagina, daarom blijft ze zoals ze is. Zet de pagina terug zoals ze was om de rest te bewaren.`,
     })
   }
   if (page === null) {
