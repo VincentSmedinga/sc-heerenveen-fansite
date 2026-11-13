@@ -409,11 +409,13 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'editor', path: '/beheer/kwaliteit/personen/snel?lijst=onbekend', status: 200 },
   { admin: 'editor', path: '/beheer/kwaliteit/personen?lijst=land', status: 200 },
   { admin: 'editor', path: '/beheer/kwaliteit/namen', status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/formaties', status: 200 },
   { admin: 'editor', path: '/beheer/kwaliteit/plaatsen', status: 200 },
   { admin: 'editor', path: '/beheer/kwaliteit/plaatsen/vragen', status: 200 },
   { admin: 'author', path: '/beheer/kwaliteit/personen', status: 404 },
   { admin: 'author', path: '/beheer/kwaliteit/personen/b', status: 404 },
   { admin: 'author', path: '/beheer/kwaliteit/namen', status: 404 },
+  { admin: 'author', path: '/beheer/kwaliteit/formaties', status: 404 },
   { admin: 'author', path: '/beheer/kwaliteit/plaatsen', status: 404 },
   { admin: 'author', path: '/beheer/kwaliteit/plaatsen/vragen', status: 404 },
   // The players whose numbers differ: a season with the made-up difference, and an empty one.

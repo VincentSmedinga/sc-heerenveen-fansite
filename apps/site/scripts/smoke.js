@@ -313,6 +313,7 @@ async function checkAdmin() {
     '/beheer/kwaliteit/personen/b',
     '/beheer/kwaliteit/personen/snel',
     '/beheer/kwaliteit/namen',
+    '/beheer/kwaliteit/formaties',
     '/beheer/kwaliteit/plaatsen',
     '/beheer/kwaliteit/plaatsen/vragen',
     '/beheer/spelers',
