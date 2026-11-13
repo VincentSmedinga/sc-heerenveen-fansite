@@ -61,6 +61,8 @@ const meta = preview.meta({
       },
     },
   },
+  tags: ['autodocs'],
+  title: 'Componenten/Navigatie/Navigation',
 })
 
 // The main menu is the top of a page, so it runs from edge to edge of the window.
