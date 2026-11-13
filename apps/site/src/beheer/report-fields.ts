@@ -161,10 +161,10 @@ export const formationOwnId = (side: Side) => `formatie-${side}-eigen`
 /** A formation that was not filled in. */
 export const noFormation = (): FormationValue => ({ eigen: '', keuze: '' })
 
-/** What a button of the form asks for. */
 /** The way a row of the players moves: `up` to an earlier place, `down` to a later one. */
 export type MoveDirection = 'down' | 'up'
 
+/** What a button of the form asks for. */
 export type ReportButton =
   | { direction: MoveDirection; kind: 'move'; number: number; row: RowKind; side: Side }
   | { kind: 'add'; row: RowKind; side: Side }
