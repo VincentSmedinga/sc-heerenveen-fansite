@@ -69,6 +69,8 @@
   }
 
   .hf-input-table td.hf-input-table-action {
+    display: flex;
+    gap: var(--hf-space-s);
     grid-area: action;
   }
 

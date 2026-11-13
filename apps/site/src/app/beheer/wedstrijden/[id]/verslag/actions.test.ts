@@ -253,6 +253,23 @@ describe('submitReport', () => {
     expect(await reports()).toHaveLength(0)
   })
 
+  it('moves a player with a button, says where he stands now, and does not store anything', async () => {
+    const start = report()
+    const names = start.wij.speler.map((row) => row.keuze)
+    const moved = (await submit(matchId, start, 'speler-wij-omlaag-1')) as ReportFormState
+
+    expect(moved.values.wij.speler.map((row) => row.keuze)).toEqual([names[1], names[0], ...names.slice(2)])
+    expect(moved.moved).toEqual({ side: 'wij', text: 'Speler 1 staat nu op plaats 2.' })
+    expect(moved.focus).toBe('speler-wij-omlaag-2-knop')
+    expect(await reports()).toHaveLength(0)
+
+    // A button for a place that does not exist changes nothing.
+    const none = (await submit(matchId, start, 'speler-wij-omhoog-1')) as ReportFormState
+
+    expect(none.values.wij.speler.map((row) => row.keuze)).toEqual(names)
+    expect(none.moved).toBeUndefined()
+  })
+
   it('ends on the list with a notice for a match that is gone or was not played', async () => {
     expect(await submit(999_999, report())).toEqual({ redirect: '/beheer/wedstrijden?fout=weg' })
     expect(await submit('x', report())).toEqual({ redirect: '/beheer/wedstrijden?fout=weg' })

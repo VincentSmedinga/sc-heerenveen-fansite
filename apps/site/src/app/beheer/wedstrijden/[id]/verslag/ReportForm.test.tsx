@@ -58,6 +58,57 @@ const select = (id: string) => document.getElementById(id) as HTMLSelectElement
 const optionsOf = (id: string) => [...select(id).options].map((option) => option.value)
 const choose = (id: string, value: string) => fireEvent.change(select(id), { target: { value } })
 
+describe('the buttons that move a player in the form of a report', () => {
+  const valueOf = (value: string) => document.querySelector(`button[value="${value}"]`)
+
+  it('gives every player but the first a button up and every player but the last a button down, with his name', () => {
+    show()
+
+    expect(valueOf('speler-wij-omhoog-1')).toBeNull()
+    expect(valueOf('speler-wij-omlaag-4')).toBeNull()
+    expect(valueOf('speler-wij-omhoog-2')?.getAttribute('aria-label')).toBe('Speler 2 omhoog')
+    expect(valueOf('speler-wij-omlaag-1')?.getAttribute('aria-label')).toBe('Speler 1 omlaag')
+    expect(valueOf('speler-wij-omlaag-1')?.getAttribute('type')).toBe('submit')
+    expect(valueOf('speler-wij-omlaag-1')?.getAttribute('id')).toBe('speler-wij-omlaag-1-knop')
+  })
+
+  it('gives no such buttons to the rows of a list where the order does not matter', () => {
+    show()
+
+    expect(document.querySelector('button[value^="wissel-"][value*="omhoog"]')).toBeNull()
+    expect(document.querySelector('button[value*="doelpunt"][value*="omlaag"]')).toBeNull()
+  })
+
+  it('says where a player stands after he moved, in the notice of his team', () => {
+    const moved: ReportFormState = {
+      ...initial,
+      moved: { side: 'wij', text: 'Speler 3 staat nu op plaats 2.' },
+      version: 1,
+    }
+
+    render(
+      <ReportFormProvider
+        action={() => Promise.resolve(initial)}
+        choices={{
+          matchHref: '/beheer/wedstrijden/7',
+          opponent: 'Testclub',
+          series: null,
+          showDelay: 'binnen vijf minuten',
+          squad,
+        }}
+        initial={moved}
+        title="Dit is nog niet af"
+      >
+        <ReportFields />
+      </ReportFormProvider>,
+    )
+
+    const notices = [...document.querySelectorAll('[role="status"]')].map((notice) => notice.textContent)
+
+    expect(notices.filter((text) => text === 'Speler 3 staat nu op plaats 2.')).toHaveLength(1)
+  })
+})
+
 describe('the places of the line-up and the bench in the form of a report', () => {
   it('gives the places of the bench the players who are not in the line-up', () => {
     show()

@@ -55,6 +55,11 @@ export type ReportFormState = {
   /** The `id` of the element that gets the focus, such as the first field of a new row. */
   focus?: string
   /**
+   * What a button that moved a player says, as `Speler 3 staat nu op plaats 2`, so a screen
+   * reader hears it. The next answer of the server has none.
+   */
+  moved?: { side: Side; text: string }
+  /**
    * Which match the line-up of ours was taken from, as `Opponent, 3 november 2025`, after the
    * button that does that. The next answer of the server has none.
    */
@@ -157,7 +162,11 @@ export const formationOwnId = (side: Side) => `formatie-${side}-eigen`
 export const noFormation = (): FormationValue => ({ eigen: '', keuze: '' })
 
 /** What a button of the form asks for. */
+/** The way a row of the players moves: `up` to an earlier place, `down` to a later one. */
+export type MoveDirection = 'down' | 'up'
+
 export type ReportButton =
+  | { direction: MoveDirection; kind: 'move'; number: number; row: RowKind; side: Side }
   | { kind: 'add'; row: RowKind; side: Side }
   | { kind: 'previous' }
   | { kind: 'remove'; number: number; row: RowKind; side: Side }
@@ -245,6 +254,16 @@ export function listId(kind: RowKind, side: Side) {
   return `${kind}-${side}`
 }
 
+/** The `id` of the button that moves a row, which gets the focus after the move. */
+export function moveButtonId(kind: RowKind, side: Side, number: number, direction: MoveDirection) {
+  return `${moveButtonValue(kind, side, number, direction)}-knop`
+}
+
+/** The value of the button that moves a row up or down. */
+export function moveButtonValue(kind: RowKind, side: Side, number: number, direction: MoveDirection) {
+  return `${kind}-${side}-${direction === 'up' ? 'omhoog' : 'omlaag'}-${number}`
+}
+
 /** The value of the button that removes a row. */
 export function removeButtonValue(kind: RowKind, side: Side, number: number) {
   return `${kind}-${side}-weghalen-${number}`
@@ -273,9 +292,13 @@ export const rowNames: Record<RowKind, string> = {
 export function applyReportButton(
   values: ReportValues,
   button: Exclude<ReportButton, { kind: 'previous' } | { kind: 'save' }>,
-): { focus: string; values: ReportValues } {
+): { focus: string; moved?: { side: Side; text: string }; values: ReportValues } {
   const next: ReportValues = { ...values, wij: { ...values.wij }, zij: { ...values.zij } }
   const { row, side } = button
+
+  if (button.kind === 'move') {
+    return moveRow(values, button)
+  }
 
   if (button.kind === 'add') {
     next[side][row] = [...values[side][row], emptyRow(row, values[side][row].length)]
@@ -476,6 +499,18 @@ export function readReportButton(formData: FormData): ReportButton {
     return { kind: 'previous' }
   }
 
+  const moving = /^speler-(wij|zij)-(omhoog|omlaag)-(\d{1,3})$/u.exec(knop)
+
+  if (moving !== null) {
+    return {
+      direction: moving[2] === 'omhoog' ? 'up' : 'down',
+      kind: 'move',
+      number: Number(moving[3]),
+      row: 'speler',
+      side: moving[1] as Side,
+    }
+  }
+
   const found = /^(speler|wissel|doelpunt|kaart|strafschop|serie)-(wij|zij)-(toevoegen|weghalen-(\d{1,3}))$/u.exec(knop)
 
   if (found === null) {
@@ -587,4 +622,81 @@ function clockOfRow(row: Row) {
   const extra = /^\d{1,2}$/u.test(row.extra ?? '') ? Number(row.extra) : 0
 
   return minute + extra / 100
+}
+
+/**
+ * The values after a player moved one place up or down. The two players swap places, and
+ * everything that pointed to one of them points to him at his new place: a substitution, a
+ * card, a goal or a kick. A player nobody touched takes the role of his new place, as it is
+ * after a removal. The focus goes to the button that moved him, so the editor can go on, or to
+ * the other one when he can't go that way any more.
+ */
+function moveRow(
+  values: ReportValues,
+  button: Extract<ReportButton, { kind: 'move' }>,
+): { focus: string; moved?: { side: Side; text: string }; values: ReportValues } {
+  const { direction, number, row, side } = button
+  const to = direction === 'up' ? number - 1 : number + 1
+  const rows = values[side][row]
+
+  // A button that arrives for a row that isn't there, or can't go that way, changes nothing.
+  if (row !== 'speler' || to < 1 || to > rows.length || number < 1 || number > rows.length) {
+    return { focus: listId(row, side), values }
+  }
+
+  const next: ReportValues = { ...values, wij: { ...values.wij }, zij: { ...values.zij } }
+  const swapped = [...rows]
+
+  swapped[number - 1] = rows[to - 1] as Row
+  swapped[to - 1] = rows[number - 1] as Row
+  next[side].speler = swapped.map((other, index) => {
+    const before = index === number - 1 ? to - 1 : index === to - 1 ? number - 1 : index
+
+    return before !== index && isUntouchedRow('speler', other, before) ? { ...other, rol: defaultRole(index) } : other
+  })
+
+  const swap = (value: string) => {
+    const found = Number(value)
+
+    return value === '' || !Number.isInteger(found)
+      ? value
+      : found === number
+        ? String(to)
+        : found === to
+          ? String(number)
+          : value
+  }
+  const swapSide = (value: string) => {
+    const [of = '', place = ''] = value.split('-')
+
+    return of === side ? `${of}-${swap(place)}` : value
+  }
+
+  for (const kind of ['wissel', 'kaart', 'strafschop', 'serie'] as const) {
+    next[side][kind] = next[side][kind].map((other) =>
+      Object.fromEntries(
+        Object.entries(other).map(([field, value]) => [
+          field,
+          field === 'eruit' || field === 'erin' || field === 'speler' ? swap(value) : value,
+        ]),
+      ),
+    )
+  }
+
+  for (const of of sides) {
+    next[of].doelpunt = next[of].doelpunt.map((goal) => ({
+      ...goal,
+      assist: swapSide(goal.assist ?? ''),
+      speler: swapSide(goal.speler ?? ''),
+    }))
+  }
+
+  const stays = direction === 'up' ? to > 1 : to < swapped.length
+  const toward = stays ? direction : direction === 'up' ? 'down' : 'up'
+
+  return {
+    focus: moveButtonId('speler', side, to, toward),
+    moved: { side, text: `${rowNames.speler} ${number} staat nu op plaats ${to}.` },
+    values: next,
+  }
 }
