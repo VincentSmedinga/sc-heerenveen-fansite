@@ -25,6 +25,9 @@ export const metadata: Metadata = { robots: { follow: false, index: false }, tit
 
 const sideWords = { links: 'links', midden: 'midden', rechts: 'rechts' } as const
 
+/** What a button of the quiz says; a screen reader also hears the name of the player. */
+const sideLabels = { links: 'Links', midden: 'Midden', rechts: 'Rechts' } as const
+
 /**
  * The quiz for the side of a player (issue 1194): one player at a time, with his usual slot in
  * a 4-3-3 from the old line-ups, and three buttons. The answer and the skip are submit buttons,
@@ -93,11 +96,17 @@ export default async function SideQuizPage({
               <Form.Buttons>
                 {(['links', 'midden', 'rechts'] as const).map((side) => (
                   <Button key={side} name="knop" type="submit" value={side}>
-                    {`${next.question.name}: ${side}`}
+                    {sideLabels[side]}
+                    <Text as="span" className="hf-visually-hidden">
+                      , {next.question.name}
+                    </Text>
                   </Button>
                 ))}
                 <Button appearance="soft" name="knop" type="submit" value="overslaan">
-                  {`${next.question.name}: overslaan`}
+                  Overslaan
+                  <Text as="span" className="hf-visually-hidden">
+                    , {next.question.name}
+                  </Text>
                 </Button>
               </Form.Buttons>
             </Form>

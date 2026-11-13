@@ -216,9 +216,14 @@ describe('the page of the quiz', () => {
     expect(html).toContain(`>${name}</h2>`)
     expect(html).toContain('tabindex="-1"')
 
-    for (const answer of ['links', 'midden', 'rechts', 'overslaan']) {
-      expect(html).toContain(`${name}: ${answer}`)
-      expect(html).toContain(`value="${answer}"`)
+    // The button says one word, and the name of the player is there for a screen reader.
+    for (const [value, word] of [
+      ['links', 'Links'],
+      ['midden', 'Midden'],
+      ['rechts', 'Rechts'],
+      ['overslaan', 'Overslaan'],
+    ]) {
+      expect(html).toContain(`value="${value}" name="knop">${word}<span class="hf-visually-hidden">, ${name}</span>`)
     }
 
     expect(html).toContain('Nog 11 spelers te gaan.')
