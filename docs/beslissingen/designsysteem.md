@@ -2861,6 +2861,7 @@
 - **Later:** zie _Het veld is zo groot als er teams op staan_ (8 november 2026): een team zonder bruikbare gegevens staat niet meer op een leeg stuk veld.
   Het andere team staat dan op een half veld, en zonder team is er geen veld.
   Een team zonder formatie heeft een eigen zin, apart van "past de formatie niet bij de spelers".
+  Zie ook _Een rij van de opstelling loopt van links naar rechts, in de richting van de aanval_ (13 november 2026): de volgorde binnen een rij is nu vastgelegd.
 
 ## Het veld staat rechtop op een telefoon en ligt vanaf een breedte van 40 rem
 
@@ -3495,3 +3496,16 @@
 - **Waarom:** bij een lijst waarin de volgorde telt, zoals de spelers van een opstelling, moet de redacteur een rij kunnen verplaatsen zonder haar weg te halen en opnieuw in te vullen.
   Een knop die niets doet, is een stop voor het toetsenbord en een zin voor een schermlezer die nergens op slaat.
 - **Alternatieven:** slepen (geen toetsenbord, veel code); een veld "plaats" (de redacteur moet tellen); de knop uitschakelen bij de eerste en de laatste rij (de Tab-volgorde stopt dan op een dode knop).
+
+## Een rij van de opstelling loopt van links naar rechts, in de richting van de aanval
+
+- **Datum:** 13 november 2026
+- **Besluit:** de spelers van een rij staan van links naar rechts, gezien in de richting van de aanval van hun team, voor sc Heerenveen en voor de tegenstander, op het rechtopstaande en op het liggende veld.
+  Rechtop (sc Heerenveen onderaan, de tegenstander bovenaan) staat de eerste speler van onze rij links en die van de tegenstander rechts.
+  Liggend (sc Heerenveen links, de tegenstander rechts) staat de eerste speler van onze rij bovenaan en die van de tegenstander onderaan.
+  Het formulier van een verslag zegt de volgorde bij de lijst met spelers van elk team.
+  Er verandert niets in wat is opgeslagen.
+- **Waarom:** zo is de opstelling bedoeld en zo slaat de redactie hem op: wedstrijd 12 van de kopie van acceptatie begint met een linksback en eindigt met een rechtsback.
+  Het liggende veld tekende de rijen van onze ploeg van onder naar boven en die van de tegenstander van boven naar onder, dus een linksbuiten stond rechts.
+- **Alternatieven:** de volgorde omdraaien, waarmee alle verslagen van de redactie veranderen.
+- **Niet opgelost:** de opstellingen van de oude fansite (bron "Oude fansite") hebben alleen de linie per speler, dus links en rechts zijn daar niet te vertrouwen.

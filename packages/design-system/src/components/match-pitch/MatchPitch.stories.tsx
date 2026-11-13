@@ -28,7 +28,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De opstelling van beide teams op een veld, getekend uit de formatie en de volgorde van de spelers: de keeper staat vooraan, daarna komt de formatie rij voor rij.',
+          'De opstelling van beide teams op een veld, getekend uit de formatie en de volgorde van de spelers: de keeper staat vooraan, daarna komt de formatie rij voor rij, en elke rij loopt van links naar rechts, gezien in de richting van de aanval van het team.',
           'Een ring om elke speler toont de minuten die hij speelde, en merken tonen doelpunten, kaarten, wissels en de aanvoerder.',
           'Een schermlezer hoort per team een lijst met één zin per speler, en onder het veld staat dezelfde opstelling als lijst.',
           'Het veld is zo groot als er teams op staan. Staan beide teams erop, dan is het het hele veld. Is er van één team geen bruikbare formatie, dan staat alleen de helft van het andere team op het veld, op dezelfde schaal. Is er van geen van beide een formatie, dan is er geen veld en staat de lijst open, met een zin over elk team.',
@@ -49,18 +49,20 @@ const player = (
 ): PitchPlayerData => ({ minutesPlayed: 90, name: { givenName, surname }, shirtNumber, ...rest })
 
 // Made-up players and a made-up club, like the data of the seed.
+// The numbers of a 4-2-3-1, from the keeper to the attack, each row from left to right: 1, then
+// 5 4 3 2, then 6 8, then 11 10 7, then 9.
 const ourPlayers = (formationRest: Record<number, Partial<PitchPlayerData>> = {}): PitchPlayerData[] =>
   [
     player(1, 'Demo', 'Rick', { captain: true }),
-    player(2, 'Proefveld', 'Ties'),
-    player(3, 'Maquette', 'Wim'),
-    player(4, 'Nepper', 'Gerrit'),
     player(5, 'Idzenga', 'Thijs', { minutesPlayed: 62, substitutedOffAt: 62 }),
+    player(4, 'Nepper', 'Gerrit'),
+    player(3, 'Maquette', 'Wim'),
+    player(2, 'Proefveld', 'Ties'),
     player(6, 'Boerema', 'Daan', { card: { kind: 'yellow-card', minute: 27 } }),
     player(8, 'Reitsma', 'Milan'),
+    player(11, 'Monster', 'Sven'),
     player(10, 'Voorbeeld', 'Jelle', { goals: [{ minute: 12 }] }),
     player(7, 'Schijn', 'Luuk', { minutesPlayed: 78, substitutedOffAt: 78 }),
-    player(11, 'Monster', 'Sven'),
     player(9, 'Sjabloon', 'Okke', { goals: [{ minute: 58 }, { minute: 90, stoppageMinutes: 2 }] }),
   ].map((one, index) => ({ ...one, ...formationRest[index] }))
 
@@ -111,6 +113,42 @@ export const Default = meta.story({
   },
   decorators: [phone],
   name: 'Een gewone wedstrijd',
+})
+
+// The players are named after the place they have in the formation, so a story shows that the
+// first player of a row stands on the left hand of the team, on both pitches.
+const byPlace = (): PitchPlayerData[] =>
+  [
+    ['Keeper', 'Doel'],
+    ['Linksback', 'Achter'],
+    ['Midvoor links', 'Achter'],
+    ['Midvoor rechts', 'Achter'],
+    ['Rechtsback', 'Achter'],
+    ['Linksmidden', 'Midden'],
+    ['Centraal links', 'Midden'],
+    ['Centraal rechts', 'Midden'],
+    ['Rechtsmidden', 'Midden'],
+    ['Spits links', 'Voor'],
+    ['Spits rechts', 'Voor'],
+  ].map(([surname, givenName], index) => player(index + 1, surname ?? '', givenName ?? ''))
+
+export const LeftToRight = meta.story({
+  args: {
+    headingLevel: 3,
+    opponent: opponent('4-4-2', byPlace()),
+    ours: ours('4-4-2', byPlace()),
+  },
+  decorators: [phone],
+  name: 'Een rij loopt van links naar rechts',
+})
+
+export const LeftToRightLyingDown = meta.story({
+  args: {
+    headingLevel: 3,
+    opponent: opponent('4-4-2', byPlace()),
+    ours: ours('4-4-2', byPlace()),
+  },
+  name: 'Een rij loopt van links naar rechts, liggend',
 })
 
 export const FiveInARow = meta.story({
