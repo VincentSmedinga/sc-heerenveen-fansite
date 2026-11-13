@@ -2105,6 +2105,7 @@
 - **Alternatieven:** de kolomkoppen houden met twee kopregels; de regels hebben dan niets met elkaar te maken.
   Een veld weghalen uit de pagina als het niet past; dan is wat de redacteur typte weg bij een vergissing.
   Een attribuut `disabled` op elk veld apart; dan moet de aanroeper het bij elk soort veld onthouden.
+- **Later:** zie _Een rij van een tabel om in te vullen kan omhoog en omlaag_ (13 november 2026): de knop naast de prullenbak is er niet meer alleen.
 
 ## Alle tabellen gebruiken één stel afkortingen voor hun kolommen
 
@@ -3482,6 +3483,19 @@
   Een pagina van 84 rem was breder dan de kop, het menu en de voet.
 - **Alternatieven:** de oude opbouw laten staan voor een volgende pagina (dode CSS die elke wijziging moet meedragen); `Page.Main` zonder `areas` ook 64 rem breed maken (dan worden de tekstpagina's te breed om te lezen).
 - **Later:** de beslissingen _De inhoud staat in een smallere kolom, met plaats voor een zijbalk_, _Page.Body is het raster, met een hoofdkolom en een zijbalk_, _Een pagina van 64 rem, met kolommen van 36, 4 en 24 rem_, _De hoofdkolom is 38 rem, met 2 rem ruimte naast de zijbalk_, _De kaarten van een zijbalk staan standaard onder elkaar, naast elkaar is een optie_, _De tweede kolom begint bij 52 rem, voor alle pagina's met een zijbalk_, _Een pagina kan breed zijn, met een hoofdkolom van 58 rem en de zijbalk van 24 rem_ en _Een brede pagina zonder zijbalk vult de hele breedte_ gelden niet meer.
+
+## Een rij van een tabel om in te vullen kan omhoog en omlaag
+
+- **Datum:** 13 november 2026
+- **Besluit:** een rij van `InputTable` kan twee knoppen krijgen naast de prullenbak, met een pijl omhoog en een pijl omlaag (`move` in de rij, `moveLabels` in de tabel).
+  Het zijn verzendknoppen, zoals de prullenbak, dus het werkt ook zonder JavaScript.
+  Waar een rij niet verder kan, is de knop er niet: de eerste rij heeft geen knop omhoog en de laatste geen knop omlaag.
+  Elke knop heeft een `id`, zodat de server kan zeggen welke knop na de verplaatsing de focus krijgt.
+  Een schermlezer hoort de naam van de rij en dan "omhoog" of "omlaag", zoals bij de prullenbak.
+  `IconButton` kent daarvoor de pictogrammen `arrow-up` en `arrow-down`.
+- **Waarom:** bij een lijst waarin de volgorde telt, zoals de spelers van een opstelling, moet de redacteur een rij kunnen verplaatsen zonder haar weg te halen en opnieuw in te vullen.
+  Een knop die niets doet, is een stop voor het toetsenbord en een zin voor een schermlezer die nergens op slaat.
+- **Alternatieven:** slepen (geen toetsenbord, veel code); een veld "plaats" (de redacteur moet tellen); de knop uitschakelen bij de eerste en de laatste rij (de Tab-volgorde stopt dan op een dode knop).
 
 ## Een rij van de opstelling loopt van links naar rechts, in de richting van de aanval
 

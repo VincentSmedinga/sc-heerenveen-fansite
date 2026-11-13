@@ -50,6 +50,8 @@ import {
   incidentKindChoices,
   isEmptyLineUp,
   listId,
+  moveButtonId,
+  moveButtonValue,
   otherFormation,
   otherPlayer,
   playerChoices,
@@ -353,6 +355,31 @@ export function ReportFields() {
         fields: fieldsOf(row, number),
         header: `${rowNames[kind]} ${number}`,
         mark: String(number),
+        // Only the players have an order that matters: it is where they stand on the pitch.
+        ...(kind === 'speler'
+          ? {
+              move: {
+                ...(number > 1
+                  ? {
+                      up: {
+                        id: moveButtonId(kind, side, number, 'up'),
+                        name: 'knop',
+                        value: moveButtonValue(kind, side, number, 'up'),
+                      },
+                    }
+                  : {}),
+                ...(number < current[side][kind].length
+                  ? {
+                      down: {
+                        id: moveButtonId(kind, side, number, 'down'),
+                        name: 'knop',
+                        value: moveButtonValue(kind, side, number, 'down'),
+                      },
+                    }
+                  : {}),
+              },
+            }
+          : {}),
         remove: { name: 'knop', value: removeButtonValue(kind, side, number) },
       }
     })
@@ -363,6 +390,7 @@ export function ReportFields() {
         caption={`${listTitles[kind]} van ${club(side)}`}
         columns={columns}
         empty={<Text>{emptyTexts[kind]}</Text>}
+        moveLabels={{ down: 'Omlaag', up: 'Omhoog' }}
         removeLabel="Weghalen"
         rows={rows}
       />
@@ -476,6 +504,8 @@ export function ReportFields() {
               ) : null}
             </>
           ) : null}
+          {/* Empty until a player was moved, then it says where he stands now. */}
+          <Notice>{state.moved?.side === side ? state.moved.text : ''}</Notice>
           <Text appearance="meta" id={roleHintId(side)}>
             Een team heeft één aanvoerder. Zodra een speler Basis en aanvoerder heeft, staat die keuze niet meer bij de
             anderen van {club(side)}.

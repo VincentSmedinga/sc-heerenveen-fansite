@@ -128,7 +128,14 @@ export async function submitReport(
   if (button.kind !== 'save') {
     const moved = applyReportButton(values, button)
 
-    return { errors: {}, focus: moved.focus, values: moved.values, version, warnings: {} }
+    return {
+      errors: {},
+      focus: moved.focus,
+      ...(moved.moved === undefined ? {} : { moved: moved.moved }),
+      values: moved.values,
+      version,
+      warnings: {},
+    }
   }
 
   const checked = checkReportForm(values, contextOf(screen))

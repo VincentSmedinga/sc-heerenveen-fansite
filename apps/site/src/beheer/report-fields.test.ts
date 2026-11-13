@@ -10,6 +10,8 @@ import {
   formationValueOf,
   isEmptyLineUp,
   isUntouchedRow,
+  moveButtonId,
+  moveButtonValue,
   noFormation,
   otherFormation,
   playerChoices,
@@ -199,6 +201,113 @@ describe('applyReportButton', () => {
     expect(next.wij.doelpunt[0]).toMatchObject({ assist: 'wij-2', speler: '' })
     // A player of the other side keeps his number, and a goal of the other side is moved too.
     expect(next.zij.doelpunt[0]).toMatchObject({ assist: 'zij-2', speler: 'wij-2' })
+  })
+})
+
+describe('moving a player', () => {
+  const player = (naam: string, rol = 'basis'): Row => ({ ...emptyRow('speler'), keuze: 'andere', naam, rol })
+  const start = () =>
+    values({
+      wij: {
+        ...emptySide(),
+        doelpunt: [{ ...emptyRow('doelpunt'), assist: 'wij-3', speler: 'wij-2' }],
+        kaart: [{ ...emptyRow('kaart'), speler: '2' }],
+        speler: [player('A'), player('B'), player('C')],
+        wissel: [{ ...emptyRow('wissel'), erin: '3', eruit: '2' }],
+      },
+      zij: { ...emptySide(), doelpunt: [{ ...emptyRow('doelpunt'), assist: 'zij-2', speler: 'wij-3' }] },
+    })
+
+  it('reads the buttons that move a player, and nothing else that looks like them', () => {
+    expect(readReportButton(form({ knop: moveButtonValue('speler', 'wij', 3, 'up') }))).toEqual({
+      direction: 'up',
+      kind: 'move',
+      number: 3,
+      row: 'speler',
+      side: 'wij',
+    })
+    expect(readReportButton(form({ knop: 'speler-zij-omlaag-12' }))).toEqual({
+      direction: 'down',
+      kind: 'move',
+      number: 12,
+      row: 'speler',
+      side: 'zij',
+    })
+    expect(readReportButton(form({ knop: 'wissel-wij-omhoog-2' }))).toEqual({ kind: 'save' })
+    expect(readReportButton(form({ knop: 'speler-wij-omhoog-x' }))).toEqual({ kind: 'save' })
+  })
+
+  it('swaps the two players, and says where the player stands now', () => {
+    const next = applyReportButton(start(), { direction: 'up', kind: 'move', number: 2, row: 'speler', side: 'wij' })
+
+    expect(next.values.wij.speler.map((row) => row.naam)).toEqual(['B', 'A', 'C'])
+    expect(next.moved).toEqual({ side: 'wij', text: 'Speler 2 staat nu op plaats 1.' })
+  })
+
+  it('moves everything that pointed to either player along with him', () => {
+    const next = applyReportButton(start(), {
+      direction: 'down',
+      kind: 'move',
+      number: 2,
+      row: 'speler',
+      side: 'wij',
+    }).values
+
+    // B went from 2 to 3 and C from 3 to 2: the goal of B is still of B, and so on.
+    expect(next.wij.kaart[0]?.speler).toBe('3')
+    expect(next.wij.wissel[0]).toMatchObject({ erin: '2', eruit: '3' })
+    expect(next.wij.doelpunt[0]).toMatchObject({ assist: 'wij-2', speler: 'wij-3' })
+    // A goal of the other side that names a player of ours moves too; their own number stays.
+    expect(next.zij.doelpunt[0]).toMatchObject({ assist: 'zij-2', speler: 'wij-2' })
+  })
+
+  it('leaves a number that points to neither of the two players alone', () => {
+    const rows = start()
+    const next = applyReportButton(
+      { ...rows, wij: { ...rows.wij, kaart: [{ ...emptyRow('kaart'), speler: '3' }] } },
+      { direction: 'up', kind: 'move', number: 2, row: 'speler', side: 'wij' },
+    ).values
+
+    expect(next.wij.kaart[0]?.speler).toBe('3')
+  })
+
+  it('keeps the role of a place that nobody touched, so the line-up stays eleven', () => {
+    const rows: Row[] = Array.from({ length: 12 }, (_nothing, index) => ({ ...emptyRow('speler', index) }))
+    const next = applyReportButton(values({ wij: { ...emptySide(), speler: rows } }), {
+      direction: 'down',
+      kind: 'move',
+      number: 11,
+      row: 'speler',
+      side: 'wij',
+    }).values
+
+    // Nobody touched them, so the line-up stays eleven and the twelfth is on the bench.
+    expect(next.wij.speler[10]?.rol).toBe('basis')
+    expect(next.wij.speler[11]?.rol).toBe('bank')
+  })
+
+  it('keeps the focus on the button that was pressed, or on the other when he can go no further', () => {
+    const move = (number: number, direction: 'down' | 'up') =>
+      applyReportButton(start(), { direction, kind: 'move', number, row: 'speler', side: 'wij' }).focus
+
+    expect(move(3, 'up')).toBe(moveButtonId('speler', 'wij', 2, 'up'))
+    expect(move(2, 'up')).toBe(moveButtonId('speler', 'wij', 1, 'down'))
+    expect(move(1, 'down')).toBe(moveButtonId('speler', 'wij', 2, 'down'))
+    expect(move(2, 'down')).toBe(moveButtonId('speler', 'wij', 3, 'up'))
+  })
+
+  it('changes nothing for a button that cannot be used', () => {
+    const before = start()
+
+    expect(
+      applyReportButton(before, { direction: 'up', kind: 'move', number: 1, row: 'speler', side: 'wij' }).values,
+    ).toBe(before)
+    expect(
+      applyReportButton(before, { direction: 'down', kind: 'move', number: 3, row: 'speler', side: 'wij' }).values,
+    ).toBe(before)
+    expect(
+      applyReportButton(before, { direction: 'down', kind: 'move', number: 9, row: 'speler', side: 'wij' }).values,
+    ).toBe(before)
   })
 })
 

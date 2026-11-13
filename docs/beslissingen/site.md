@@ -5396,3 +5396,15 @@
   Een reden die er wel toe doet, kan de redacteur nog steeds schrijven.
 - **Alternatieven:** een lijst met bronnen met de laatste keuze in de sessie (sneller dan typen, maar de redacteur wil geen keuze); de bron uit de link van de werktabel invullen (de tabel weet niet waar de waarde vandaan komt); alleen optioneel bij invullen en verplicht bij aanpassen of weghalen (twee regels om te onthouden).
 - **Later:** vervangt de regel "elke wijziging vraagt een reden" uit de beslissingen over het formulier van een wedstrijd en van een persoon, en de regel dat een weghaalactie een reden vraagt; de rest blijft.
+
+## De spelers van een opstelling gaan omhoog of omlaag, met de volgorde van de rijen als volgorde
+
+- **Datum:** 13 november 2026
+- **Besluit:** in het formulier van een verslag heeft elke speler een knop omhoog en omlaag (#1171).
+  Een verplaatsing wisselt twee spelers van plaats, en alles wat naar een van de twee wees, gaat met hem mee: een wissel, een kaart, een doelpunt, een assist en een schot van de serie.
+  Een rij die niemand aanraakte, houdt de rol van zijn plaats, dus de basis blijft elf spelers.
+  Na de verplaatsing staat de focus op dezelfde knop, of op de andere als de speler niet verder kan, en een melding zegt "Speler 3 staat nu op plaats 2.".
+  De volgorde blijft de volgorde van de rijen, zonder kolom `position`: bij elke opslag worden de spelers van het verslag opnieuw geschreven, dus `match_appearances.id` volgt altijd de volgorde van het formulier, en het veld leest hem zo.
+- **Waarom:** de volgorde bepaalt waar een speler op het veld staat, en de redactie moest een speler weghalen en opnieuw invullen om hem te verplaatsen.
+  Een kolom is een migratie en een tweede waarheid naast `id`.
+- **Alternatieven:** een kolom `position` (nodig als de rijen ooit niet meer opnieuw worden geschreven); slepen; een veld "plaats".
