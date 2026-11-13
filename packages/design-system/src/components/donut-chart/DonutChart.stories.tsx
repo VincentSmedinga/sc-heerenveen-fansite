@@ -49,44 +49,11 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Een donutdiagram laat zien hoe een totaal over een paar delen is verdeeld, zoals de aanmeldingen over de maanden van een half jaar.',
-          'De ring is getekend als SVG in onze eigen code, zonder grafiekbibliotheek en zonder iets van buiten te laden.',
-          'Elke plak is zo breed als zijn deel van het totaal, en het totaal staat in het gat.',
-          'Bij elke plak staan de naam en de waarde als tekst, dus het diagram is te lezen zonder de kleuren.',
-          'Staan twee plakken zo dicht bij elkaar dat hun tekst over elkaar zou vallen, dan schuiven de teksten op en loopt er een streepje naar hun plak.',
-          'Een deel met waarde nul heeft geen plak en geen tekst, en een diagram zonder waarden toont een lege ring met een nul.',
-          '',
-          'De plakken hebben het groen van iets positiefs of het rood van iets negatiefs, in dezelfde kleuren als de uitkomst van een wedstrijd.',
-          'De pagina bepaalt welke getallen positief zijn en welke negatief: het onderdeel kent de betekenis niet.',
-          'Ze lopen op van een zwakkere tint naar de volle kleur, in de volgorde van het diagram, en een lichte lijn om elke plak houdt hem los van de volgende.',
-          'Die lijn is wit in licht en een lichte kleur in donker, op elk vlak, en is een omlijning van de plakken en geen gat in de kleur van het vlak.',
-          'Ze is wat de plakken uit elkaar houdt, en niet het verschil in kleur.',
-          'In een hoog-contrastweergave (forced colors) krijgen alle plakken dezelfde kleur, en doet de lijn het werk.',
-          'Er is geen beweging.',
-          '',
-          'Het diagram is een plaatje van getallen en daarom verborgen voor een schermlezer.',
-          'Zet dezelfde getallen in een `DataTable` ernaast: dat is het tekstalternatief.',
-          'Het diagram is dus nooit de enige plek voor de getallen.',
-          '',
-          '- `title` is de titel boven de ring, en mag ontbreken.',
-          '- `slices` zijn de plakken met een `label`, een `value` en eventueel een eigen `tone`.',
-          '- `tone` kiest tussen groen (`positive`) en rood (`negative`) voor alle plakken die geen eigen `tone` hebben.',
-          '- `labels={false}` laat de tekst rond de ring weg.',
-          '- `ranked` zegt dat de plakken van goed naar slecht gaan en geeft de uitersten de sterkste kleur.',
-          '',
-          'Een plak kan een kleur van zichzelf hebben: groen (`positive`), grijs (`neutral`) of rood (`negative`), zoals de uitslagen van een seizoen.',
-          'Plakken van dezelfde kleur lopen onderling van zwak naar sterk, zodat ze te onderscheiden blijven.',
-          'Zonder tekst rond de ring is de ring zelf kleiner en past hij zich aan de plek aan, en staat de naam van elke plak in een tabel ernaast.',
-          'Met `ranked` gaan de plakken van goed naar slecht, zoals de uitslagen van een seizoen van de grootste winst tot het grootste verlies.',
-          'De sterkte van de kleur groeit dan naar beide kanten: de eerste plak is het sterkste groen en de laatste het sterkste rood.',
-          'Het bereik is ook groter, want de sterkste plakken gaan voorbij de volle kleur naar de kleur van de tekst, die in licht donker is en in donker licht, zodat het verschil met de zwakste plak goed te zien is.',
-          'Het vlakje voor een rij van een tabel is een `DonutChart.Swatch`, met precies de kleur van de plak, en met dezelfde `ranked`.',
-          'Een rij van een `DataTable` krijgt het vlakje als `marker` en de uitkomst in woorden als `note`, en drie kleine tabellen naast elkaar staan in een `DataTable.Group`.',
-          '',
+          'Een donutdiagram laat zien hoe een totaal over een paar delen is verdeeld, zoals de aanmeldingen over de maanden van een half jaar. Het totaal staat in het gat, en bij elke plak staan de naam en de waarde als tekst.',
+          'De plakken zijn groen voor iets positiefs, rood voor iets negatiefs en grijs voor gelijk, zoals de uitkomst van een wedstrijd. De pagina bepaalt welke getallen positief zijn: het onderdeel kent de betekenis niet.',
+          'Met `ranked` gaan de plakken van goed naar slecht en krijgen de uitersten de sterkste kleur. Een `DonutChart.Swatch` geeft een rij van een tabel precies de kleur van de plak.',
           'Meer diagrammen naast elkaar zet je in een `DonutChart.Group`.',
-          'Is er niet genoeg ruimte voor ze naast elkaar, zoals op een telefoon, dan komen ze onder elkaar.',
-          'Een groep met een klein diagram naast een groter diagram zonder tekst houdt ze naast elkaar, ook op een telefoon.',
-          'Elk diagram staat dan midden in een eigen kolom, en de kolommen verhouden zich als de breedtes van de diagrammen.',
+          'Het diagram is een plaatje van getallen en daarom verborgen voor een schermlezer: zet dezelfde getallen in een `DataTable` ernaast, want het diagram is nooit de enige plek voor de getallen.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -139,15 +106,18 @@ const card = (maxInlineSize: string, negative: number[], positive: number[]) => 
 const positive = [3, 5, 4, 2, 6, 7]
 const negative = [1, 2, 3, 2, 1, 4]
 
-export const Light = meta.story({
-  globals: { theme: 'light' },
-  name: 'Twee diagrammen met een tabel, licht',
-  render: card('31rem', negative, positive),
+export const Default = meta.story({
+  args: { slices: slicesOf(positive), title: 'Aangemeld', tone: 'positive' },
+  name: 'Diagram',
+  render: (args) => (
+    <div style={{ maxInlineSize: '20rem' }}>
+      <DonutChart {...args} />
+    </div>
+  ),
 })
 
-export const Dark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Twee diagrammen met een tabel, donker',
+export const Months = meta.story({
+  name: 'Twee diagrammen met een tabel',
   render: card('31rem', negative, positive),
 })
 
@@ -159,56 +129,19 @@ const surfaces = () => (
   </div>
 )
 
-export const SurfacesLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Op het witte, het zachte en het warme vlak, licht',
+export const Surfaces = meta.story({
+  name: 'Op het witte, het zachte en het warme vlak',
   render: surfaces,
 })
 
-export const SurfacesDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Op het witte, het zachte en het warme vlak, donker',
-  render: surfaces,
-})
-
-export const EmptyLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Zonder waarden, een lege ring met een nul, licht',
+export const Empty = meta.story({
+  name: 'Zonder waarden, een lege ring met een nul',
   render: card('31rem', [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]),
 })
 
-export const EmptyDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Zonder waarden, een lege ring met een nul, donker',
-  render: card('31rem', [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]),
-})
-
-export const OneEmptyLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Eén diagram zonder waarden, het andere heeft plakken, licht',
+export const OneEmpty = meta.story({
+  name: 'Eén diagram zonder waarden, het andere heeft plakken',
   render: card('31rem', [0, 0, 0, 0, 0, 0], positive),
-})
-
-export const NarrowLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Smalle plek, de diagrammen onder elkaar, licht',
-  render: card('20rem', negative, positive),
-})
-
-export const NarrowDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Smalle plek, de diagrammen onder elkaar, donker',
-  render: card('20rem', negative, positive),
-})
-
-export const Single = meta.story({
-  args: { slices: slicesOf(positive), title: 'Aangemeld', tone: 'positive' },
-  name: 'Eén diagram met besturing',
-  render: (args) => (
-    <div style={{ maxInlineSize: '20rem' }}>
-      <DonutChart {...args} />
-    </div>
-  ),
 })
 
 export const OneSlice = meta.story({
@@ -221,21 +154,9 @@ export const OneSlice = meta.story({
   ),
 })
 
-export const CrowdedLight = meta.story({
+export const Crowded = meta.story({
   args: { slices: slicesOf([1, 1, 12, 1, 1, 1]), title: 'Aangemeld', tone: 'positive' },
-  globals: { theme: 'light' },
-  name: 'Kleine plakken naast elkaar, de teksten schuiven op, licht',
-  render: (args) => (
-    <div style={{ maxInlineSize: '20rem' }}>
-      <DonutChart {...args} />
-    </div>
-  ),
-})
-
-export const CrowdedDark = meta.story({
-  args: { slices: slicesOf([1, 1, 12, 1, 1, 1]), title: 'Aangemeld', tone: 'positive' },
-  globals: { theme: 'dark' },
-  name: 'Kleine plakken naast elkaar, de teksten schuiven op, donker',
+  name: 'Kleine plakken naast elkaar, de teksten schuiven op',
   render: (args) => (
     <div style={{ maxInlineSize: '20rem' }}>
       <DonutChart {...args} />
@@ -294,42 +215,12 @@ const ScoresCard = ({
   </div>
 )
 
-export const ScoresLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Een plak per uitslag in groen, grijs en rood, met drie tabellen, licht',
+export const Scores = meta.story({
+  name: 'Een plak per uitslag in groen, grijs en rood, met drie tabellen',
   render: () => <ScoresCard slices={scores} />,
-})
-
-export const ScoresDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Een plak per uitslag in groen, grijs en rood, met drie tabellen, donker',
-  render: () => <ScoresCard slices={scores} />,
-})
-
-export const ScoresOneSlice = meta.story({
-  globals: { theme: 'light' },
-  name: 'Eén uitslag, de ring is één plak met één tabel van één rij',
-  render: () => <ScoresCard slices={[{ label: '2–1', tone: 'positive', value: 1 }]} />,
-})
-
-export const ScoresNoValues = meta.story({
-  globals: { theme: 'light' },
-  name: 'Zonder waarden, een lege ring met een nul en geen tekst rond de ring',
-  render: () => (
-    <div style={{ maxInlineSize: '24rem' }}>
-      <DonutChart
-        labels={false}
-        slices={[
-          { label: '1–0', tone: 'positive', value: 0 },
-          { label: '0–1', tone: 'negative', value: 0 },
-        ]}
-      />
-    </div>
-  ),
 })
 
 export const ScoresTwelve = meta.story({
-  globals: { theme: 'light' },
   name: 'Twaalf uitslagen, de grootste winst en het grootste verlies zijn het donkerst',
   render: () => (
     <ScoresCard
@@ -349,12 +240,6 @@ export const ScoresTwelve = meta.story({
       ]}
     />
   ),
-})
-
-export const ScoresNarrow = meta.story({
-  globals: { theme: 'light' },
-  name: 'Een smalle plek, de drie tabellen onder elkaar waar ze niet naast elkaar passen',
-  render: () => <ScoresCard maxInlineSize="15rem" slices={scores} />,
 })
 
 // Made-up numbers: how often we won, drew and lost, and the goals scored and conceded.
@@ -381,20 +266,7 @@ const pair = (maxInlineSize: string) => () => (
   </Card>
 )
 
-export const PairLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Een klein diagram naast een groter, elk midden in zijn eigen kolom, licht',
+export const SmallNextToLarge = meta.story({
+  name: 'Een klein diagram naast een groter, elk midden in zijn eigen kolom',
   render: pair('24rem'),
-})
-
-export const PairDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Een klein diagram naast een groter, elk midden in zijn eigen kolom, donker',
-  render: pair('24rem'),
-})
-
-export const PairPhone = meta.story({
-  globals: { theme: 'light' },
-  name: 'Op de breedte van een telefoon staan ze naast elkaar, elk midden in zijn kolom',
-  render: pair('20.5rem'),
 })

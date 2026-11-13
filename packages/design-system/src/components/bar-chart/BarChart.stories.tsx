@@ -41,12 +41,7 @@ const meta = preview.meta({
           'Het onderdeel weet niets over wat de staafjes meten: de tonen, de schaal en de nummers zijn van de pagina.',
           'Een `BarChart.Trend` tekent er een vloeiende lijn overheen, op dezelfde schaal.',
           'Met `labels` op de lijn volgt een tooltip de aanwijzer en toont de tekst van het dichtstbijzijnde punt; een tik of sleep met de vinger doet hetzelfde.',
-          '',
-          'De staafjes hebben de kleuren van de uitslag, in dezelfde sterkte als de balk in een tabel en de plakken van het donutdiagram.',
-          'De hoogte is vast; een brede kaart krijgt cijfers aan de zijkant en meer ruimte om de staafjes.',
-          '',
-          'De grafiek is een plaatje van getallen en daarom verborgen voor een schermlezer.',
-          'Zet dezelfde getallen als tekst of in een `DataTable` ernaast.',
+          'De grafiek is een plaatje van getallen en daarom verborgen voor een schermlezer: zet dezelfde getallen als tekst of in een `DataTable` ernaast.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -156,12 +151,6 @@ export const OtherChart = meta.story({
   render: () => <GoalsCard />,
 })
 
-export const OtherChartDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Dezelfde onderdelen, andere grafiek, donker',
-  render: () => <GoalsCard />,
-})
-
 export const NoLine = meta.story({
   name: 'Zonder lijn',
   render: () => <GoalsCard trend={false} />,
@@ -231,13 +220,7 @@ export const PlaceFullSeason = meta.story({
 })
 
 export const PlaceDividers = meta.story({
-  name: 'Lijn met omgekeerde as: gestreepte lijnen bij een nieuwe trainer, na ronde 12 en na ronde 25',
-  render: () => <PlaceLine dividers={[12, 25]} rounds={places} />,
-})
-
-export const PlaceDividersDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Lijn met omgekeerde as: gestreepte lijnen in het donker',
+  name: 'Lijn met omgekeerde as: gestreepte lijnen bij een nieuwe trainer',
   render: () => <PlaceLine dividers={[12, 25]} rounds={places} />,
 })
 

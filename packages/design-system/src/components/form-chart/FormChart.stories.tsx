@@ -20,16 +20,9 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De vormgrafiek laat een seizoen zien als staafjes: één per wedstrijd, drie hoog voor een winst, één voor een gelijkspel en een klein blokje voor een verlies, met een vloeiende lijn erdoorheen die laat zien hoe het gaat.',
-          'Boven de grafiek staat de vorm als letters, het oudste links.',
-          'Wedstrijden die nog gespeeld moeten worden, hebben een lege plek.',
-          'De lijn is het gemiddelde aantal punten per wedstrijd over de laatste wedstrijden, hoogstens vijf, en begint bij de eerste wedstrijd.',
-          '',
-          'De grafiek zelf is verborgen voor een schermlezer.',
-          'De vorm in woorden, de uitleg van de letters en de zin over de lijn zijn tekst, en de pagina zet dezelfde cijfers in een `DataTable` ernaast.',
-          '',
+          'De vormgrafiek laat een seizoen zien als staafjes: één per wedstrijd, hoog voor een winst, middel voor een gelijkspel en een klein blokje voor een verlies, met een vloeiende lijn erdoorheen die laat zien hoe het gaat. Boven de grafiek staat de vorm als letters, het oudste links, en wedstrijden die nog gespeeld moeten worden, hebben een lege plek.',
+          'De grafiek zelf is verborgen voor een schermlezer: de vorm in woorden en de uitleg van de letters zijn tekst, en de pagina zet dezelfde cijfers in een `DataTable` ernaast.',
           'Het onderdeel zet `MarkRow`, `BarChart` en `BarChart.Trend` samen en voegt het voetbal toe: de letters, de punten en het gemiddelde.',
-          'Die drie onderdelen weten niets van voetbal en kunnen een andere grafiek tekenen.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -86,13 +79,6 @@ export const Season = meta.story({
   render: (args) => <SeasonCard results={args.results} />,
 })
 
-export const SeasonDark = meta.story({
-  args: { results: seasonResults },
-  globals: { theme: 'dark' },
-  name: 'Een heel seizoen, donker: de lijn is licht met een rand in de kleur van de kaart',
-  render: (args) => <SeasonCard results={args.results} />,
-})
-
 export const InProgress = meta.story({
   args: { results: seasonResults.slice(0, 12) },
   name: 'Een seizoen onderweg, de rest van de plekken is leeg',
@@ -119,24 +105,7 @@ const surfaces = () => (
   </div>
 )
 
-export const SurfacesLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Op het witte, het zachte en het warme vlak, licht',
+export const Surfaces = meta.story({
+  name: 'Op het witte, het zachte en het warme vlak',
   render: surfaces,
-})
-
-export const SurfacesDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Op het witte, het zachte en het warme vlak, donker',
-  render: surfaces,
-})
-
-export const Narrow = meta.story({
-  args: { results: seasonResults },
-  name: 'Een smalle kaart',
-  render: (args) => (
-    <div style={{ maxInlineSize: '20rem' }}>
-      <SeasonCard results={args.results} />
-    </div>
-  ),
 })

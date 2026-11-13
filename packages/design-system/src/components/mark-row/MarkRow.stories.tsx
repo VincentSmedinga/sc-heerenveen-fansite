@@ -45,12 +45,6 @@ export const Default = meta.story({
   name: 'Vijf tekens, met besturing',
 })
 
-export const DefaultDark = meta.story({
-  args: Default.input.args,
-  globals: { theme: 'dark' },
-  name: 'Vijf tekens, donker',
-})
-
 export const Empty = meta.story({
   args: { empty: 'Nog geen wedstrijden gespeeld.', marks: [], title: 'Vorm' },
   name: 'Nog geen tekens',

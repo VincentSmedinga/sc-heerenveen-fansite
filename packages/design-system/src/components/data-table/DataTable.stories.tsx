@@ -2,6 +2,7 @@ import { expect, userEvent } from 'storybook/test'
 
 import preview from '#.storybook/preview'
 
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Bar, BarPlace } from '../bar/Bar'
 import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
@@ -68,50 +69,15 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Een tabel met getallen, als echte `table`.',
-          'De tabel heeft een bijschrift dat zegt wat erin staat, maar alleen een schermlezer krijgt het: bezienden zien de kop boven de tabel.',
-          'Zet dus een kop boven de tabel, bijvoorbeeld in een kaart.',
-          'Verder heeft de tabel kolomkoppen met `scope` en een rijkop voor elke rij.',
-          '',
-          '- `caption` is de tekst van het bijschrift, dat niet te zien is.',
-          '- `columns` zijn de koppen van de kolommen.',
-          '  De eerste kolom heeft de rijkoppen, zoals een dag of een pad.',
-          '  De andere kolommen hebben getallen, aan het eind uitgelijnd en met tabelcijfers, zodat ze recht onder elkaar staan.',
-          '- `rows` zijn de rijen van boven naar beneden.',
-          '  Een rij heeft een `header` en `cells`, één voor elke kolom na de eerste.',
-          '  Een getal schrijft het component op zijn Nederlands, met een punt tussen de duizendtallen.',
-          '  De `header` moet uniek zijn.',
-          '  Met `href` wordt de rijkop een link naar de pagina over de rij, zoals de pagina van een club in een lijst van clubs.',
-          '  Met `marker` staat er een versiering voor de rijkop, zoals het vlakje van een plak van een donutdiagram, en met `note` hoort een schermlezer woorden achter de rijkop, zoals "winst" achter "4–0".',
-          '  Een `marker` is zelf verborgen voor een schermlezer: de `note` zegt wat hij betekent (zie `DonutChart.Swatch` voor een voorbeeld).',
-          '',
-          'Een lange rijkop, zoals een pad zonder spaties, breekt af waar het moet.',
-          'Een kolomkop breekt alleen bij een spatie af, dus houd hem kort: een lang woord als kop maakt de tabel breder dan een telefoon.',
-          'Past een tabel met veel kolommen niet met hele woorden, geef een kolom dan als `{ abbreviation, name }`.',
-          'De kop toont de afkorting, een schermlezer hoort het hele woord, en de pagina zet een regel onder de tabel die de afkortingen uitlegt, zoals de stand van de competitie doet.',
-          'Is de tekst van een kop geen afkorting maar een andere schrijfwijze van de naam, zoals "Winst 12×" voor "Winst, 12 keer", geef de kolom dan als `{ name, shown }`.',
-          'De tabel is voor een lijst van dingen met elk een paar getallen, niet voor samengevoegde cellen of cellen met meer dan tekst.',
-          'De stand van de competitie heeft een eigen component, `StandingsTable`.',
-          '',
-          'Kies sorteerbare kolommen (`sortable`) voor een tabel met veel rijen, als de bezoeker een uiterste zoekt: de club waartegen we de meeste wedstrijden speelden, of waartegen we het hoogste doelsaldo hebben.',
-          'Bij een tabel van een paar rijen is sorteren overbodig.',
-          'Sorteren werkt met JavaScript: de server stuurt de hele tabel in de volgorde van `rows`, en in de browser worden de koppen van die kolommen knoppen.',
-          'Een getallenkolom begint met het grootste getal bovenaan en de eerste kolom van A tot Z; een tweede klik keert de richting om.',
-          'Een cel als `{ text, sortValue }` toont `text` en sorteert op `sortValue`, bijvoorbeeld “+18”, dat op het getal sorteert.',
-          '',
-          'In een tabel is vet voor één ding: het kerngetal, het getal waarop de tabel is geordend of dat het antwoord van de tabel is.',
-          'Geef die kolom `key`; er kan er hoogstens één zijn, anders geeft de tabel een fout.',
-          'In een tabel die sorteert, volgt het kerngetal de sortering: de kolom waarop de bezoeker sorteerde is vet, en voor de eerste klik is dat de kolom met `key`.',
-          'Vet is nooit het enige teken: de sorteerknop en `aria-sort` zeggen het ook.',
-          '',
-          'Met `appearance="text"` is het een tabel met tekst, zoals een lijst van wedstrijden.',
-          'De kolommen beginnen aan het begin, de rijkop kan een tweede regel met secundaire tekst hebben (`secondary`), en een cel kan elke inhoud hebben, zoals een link.',
-          'Zo’n tabel kan niet sorteren.',
-          'Een kolom die je als `{ fold: true, name }` geeft, vouwt op naar de rijkop waar de tabel te smal voor is, zoals de datum en de competitie van een wedstrijd op een telefoon.',
-          'Waar de tabel ruimte heeft, is het een kolom, en waar niet, staat de tekst van de cellen op één regel onder de naam van de rij.',
-          'De ruimte is die van de tabel zelf, niet die van het venster.',
+          'Een tabel met getallen, als echte `table`: een lijst van dingen met elk een paar getallen. De eerste kolom heeft de rijkoppen, zoals een dag of een club, en de andere kolommen hebben getallen die recht onder elkaar staan.',
+          'Het bijschrift (`caption`) zegt wat erin staat, maar alleen een schermlezer krijgt het: zet dus een kop boven de tabel, bijvoorbeeld in een kaart.',
+          'Past een tabel met veel kolommen niet met hele woorden, geef een kolom dan als `{ abbreviation, name }`: de kop toont de afkorting, een schermlezer hoort het hele woord, en de pagina zet een regel onder de tabel die de afkortingen uitlegt.',
+          'Kies sorteerbare kolommen (`sortable`) voor een tabel met veel rijen, als de bezoeker een uiterste zoekt. Sorteren werkt met JavaScript; zonder blijft de tabel in de volgorde van `rows`.',
+          'In een tabel is vet voor één ding: het kerngetal, de kolom met `key` of, in een tabel die sorteert, de kolom waarop de bezoeker sorteerde. Vet is nooit het enige teken.',
+          'Met `appearance="text"` is het een tabel met tekst, zoals een lijst van wedstrijden; die kan niet sorteren. De stand van de competitie heeft een eigen component, `StandingsTable`.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
     },
   },
   tags: ['autodocs'],
@@ -137,6 +103,23 @@ const clubs: DataTableRow[] = [
   { cells: [3, 0, 1, 2, 1, '−4'], header: 'FC Voorbeeld', href: '#fc-voorbeeld' },
   { cells: [1, 1, 0, 0, 3, '+2'], header: 'Proefstad SV', href: '#proefstad-sv' },
 ]
+
+const renderSortable = (maxInlineSize: string) => (args: DataTableProps) => (
+  <div style={{ maxInlineSize }}>
+    <Card aria-labelledby="sorteerbaar-kop">
+      <Heading id="sorteerbaar-kop" level={2}>
+        Alle tegenstanders
+      </Heading>
+      <DataTable {...args} />
+      <Text appearance="meta">{clubLegend}</Text>
+    </Card>
+  </div>
+)
+
+export const Default = meta.story({
+  name: 'Tabel',
+  render: renderSortable('40rem'),
+})
 
 const renderDays = (maxInlineSize: string) => () => (
   <div style={{ maxInlineSize }}>
@@ -168,22 +151,9 @@ const renderPages = (maxInlineSize: string) => () => (
   </div>
 )
 
-export const Light = meta.story({
-  globals: { theme: 'light' },
-  name: 'Drie kolommen, licht',
+export const Days = meta.story({
+  name: 'Drie kolommen',
   render: renderDays('40rem'),
-})
-
-export const Dark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Drie kolommen, donker',
-  render: renderDays('40rem'),
-})
-
-export const PhoneLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Op een telefoon, licht',
-  render: renderDays('20rem'),
 })
 
 const results: DataTableRow[] = [
@@ -207,32 +177,18 @@ const renderAbbreviations = () => (
   </div>
 )
 
-export const AbbreviationsLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Kolommen met een afkorting op een telefoon, licht',
+export const Abbreviations = meta.story({
+  name: 'Kolommen met een afkorting',
   render: renderAbbreviations,
 })
 
-export const AbbreviationsDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Kolommen met een afkorting op een telefoon, donker',
-  render: renderAbbreviations,
-})
-
-export const LongRowHeaderLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Een lange rijkop breekt af op een telefoon, licht',
-  render: renderPages('20rem'),
-})
-
-export const LongRowHeaderDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Een lange rijkop breekt af op een telefoon, donker',
+export const LongRowHeader = meta.story({
+  name: 'Een lange rijkop breekt af',
   render: renderPages('20rem'),
 })
 
 export const Links = meta.story({
-  name: 'Rijen met een link op een telefoon',
+  name: 'Rijen met een link',
   render: () => (
     <div style={{ maxInlineSize: '20rem' }}>
       <Card aria-labelledby="clubs-kop">
@@ -299,7 +255,7 @@ export const SeasonsWithGap = meta.story({
 })
 
 export const NamesWithPeriods = meta.story({
-  name: 'Namen met een tweede regel op een telefoon',
+  name: 'Namen met een tweede regel',
   render: () => (
     <div style={{ maxInlineSize: '20rem' }}>
       <Card aria-labelledby="trainers-kop">
@@ -335,7 +291,7 @@ export const NamesWithPeriods = meta.story({
 })
 
 export const Ranked = meta.story({
-  name: 'Met de plaats in de ranglijst op een telefoon',
+  name: 'Met de plaats in de ranglijst',
   render: () => (
     <div style={{ maxInlineSize: '20rem' }}>
       <Card aria-labelledby="ranglijst-kop" surface="soft">
@@ -357,33 +313,8 @@ export const Ranked = meta.story({
   ),
 })
 
-const renderSortable = (maxInlineSize: string) => (args: DataTableProps) => (
-  <div style={{ maxInlineSize }}>
-    <Card aria-labelledby="sorteerbaar-kop">
-      <Heading id="sorteerbaar-kop" level={2}>
-        Alle tegenstanders
-      </Heading>
-      <DataTable {...args} />
-      <Text appearance="meta">{clubLegend}</Text>
-    </Card>
-  </div>
-)
-
-export const Sortable = meta.story({
-  globals: { theme: 'light' },
-  name: 'Sorteerbare kolommen, licht',
-  render: renderSortable('40rem'),
-})
-
-export const SortableDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Sorteerbare kolommen, donker',
-  render: renderSortable('40rem'),
-})
-
 export const SortableLast = meta.story({
-  globals: { theme: 'light' },
-  name: 'Sorteerbaar, als laatste in een kaart, licht',
+  name: 'Sorteerbaar, als laatste in een kaart',
   parameters: {
     docs: {
       description: {
@@ -405,9 +336,8 @@ export const SortableLast = meta.story({
   ),
 })
 
-export const SortedPhone = meta.story({
-  globals: { theme: 'light' },
-  name: 'Gesorteerd op een telefoon, licht',
+export const Sorted = meta.story({
+  name: 'Gesorteerd',
   play: async ({ canvas }) => {
     await userEvent.click(canvas.getByRole('button', { name: 'D doelsaldo' }))
     await expect(canvas.getByRole('columnheader', { name: 'D doelsaldo' })).toHaveAttribute('aria-sort', 'descending')
@@ -416,20 +346,8 @@ export const SortedPhone = meta.story({
   render: renderSortable('20rem'),
 })
 
-export const SortedPhoneDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Gesorteerd op een telefoon, donker',
-  play: async ({ canvas }) => {
-    await userEvent.click(canvas.getByRole('button', { name: 'Club' }))
-    await userEvent.click(canvas.getByRole('button', { name: 'Club' }))
-    await expect(canvas.getByRole('columnheader', { name: 'Club' })).toHaveAttribute('aria-sort', 'descending')
-  },
-  render: renderSortable('20rem'),
-})
-
 export const SortedKey = meta.story({
-  globals: { theme: 'light' },
-  name: 'Het kerngetal volgt de sortering, licht',
+  name: 'Het kerngetal volgt de sortering',
   parameters: {
     docs: {
       description: {
@@ -450,8 +368,7 @@ export const SortedKey = meta.story({
 })
 
 export const SortableLongHeaders = meta.story({
-  globals: { theme: 'light' },
-  name: 'Sorteerbare kolommen met een lange kop en een korte, gesorteerd, licht',
+  name: 'Sorteerbare kolommen met een lange kop en een korte, gesorteerd',
   play: async ({ canvas }) => {
     await userEvent.click(canvas.getByRole('button', { name: 'Weergaven' }))
     await expect(canvas.getByRole('columnheader', { name: 'Weergaven' })).toHaveAttribute('aria-sort', 'descending')
@@ -582,26 +499,7 @@ export const FoldingColumns = meta.story({
     docs: {
       description: {
         story:
-          'Hier is de tabel breed genoeg voor vijf kolommen. In een smallere ruimte, zoals op een telefoon, staan de datum en de competitie onder de naam van de wedstrijd.',
-      },
-    },
-  },
-  render: () => (
-    <Card aria-labelledby="vouw-kop">
-      <Heading id="vouw-kop" level={2}>
-        Wedstrijden
-      </Heading>
-      <DataTable appearance="text" caption="Wedstrijden van Testclub" columns={foldColumns} rows={foldMatches} />
-    </Card>
-  ),
-})
-
-export const FoldedColumns = meta.story({
-  name: 'Kolommen opgevouwen',
-  parameters: {
-    docs: {
-      description: {
-        story: 'Dezelfde tabel in een smalle ruimte: drie kolommen, met de datum en de competitie onder de wedstrijd.',
+          'Waar de tabel te smal is voor vijf kolommen, staan de datum en de competitie onder de naam van de wedstrijd. De ruimte is die van de tabel zelf, niet die van het venster.',
       },
     },
   },
@@ -663,22 +561,9 @@ export const Marks = meta.story({
     docs: {
       description: {
         story:
-          'Een kolom met `mark` heeft korte tekens, elk een `DataTable.Mark`, en een lege cel voor wat compleet is. Met ruimte staat het hele woord boven de kolom.',
+          'Een kolom met `mark` heeft korte tekens, elk een `DataTable.Mark`, en een lege cel voor wat compleet is. Met ruimte staat het hele woord boven de kolom; in een smalle ruimte is de kop de letter uit `abbreviation`, en een schermlezer hoort het hele woord.',
       },
     },
   },
   render: renderMarks('48rem'),
-})
-
-export const MarksNarrow = meta.story({
-  name: 'Kolommen met tekens, smal',
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'Dezelfde tabel in een smalle ruimte: de kop is de letter uit `abbreviation`, en een schermlezer hoort het hele woord.',
-      },
-    },
-  },
-  render: renderMarks('22rem'),
 })
