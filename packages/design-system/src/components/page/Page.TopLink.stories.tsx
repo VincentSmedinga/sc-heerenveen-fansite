@@ -1,5 +1,6 @@
 import preview from '#.storybook/preview'
 
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { ExampleFooter, ExampleHeader } from '../../docs/ExamplePage'
 import { Heading } from '../heading/Heading'
 import { Text } from '../text/Text'
@@ -10,29 +11,11 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Een ronde knop in de footer die de bezoeker terugbrengt naar de bovenkant van de pagina.',
-          'Hij ziet eruit als de themaknop in de header, met een pijl omhoog in plaats van de zon of de maan, en heeft geen zichtbare tekst.',
-          'Het `label` is de naam voor schermlezers, zoals "Naar boven".',
-          'Het is een gewone link naar de bovenkant van de pagina, dus hij werkt ook zonder JavaScript.',
-          '',
-          'De knop is er alleen als hij nuttig is: als de pagina meer dan twee keer zo hoog is als het venster.',
-          'Op een korte pagina, zoals een foutpagina, zie je hem nooit.',
-          'Dat regelt CSS, op de scrollpositie van de pagina, zonder script.',
-          'Een verborgen knop is niet bereikbaar met Tab en een schermlezer leest hem niet voor.',
-          'Een browser die dit niet kent, toont de knop altijd.',
-          '',
-          'Zet hem als laatste in de `Page.Footer`, na de links.',
-          'Op het scherm staat hij rechts, op een smal scherm boven de links, maar voor het toetsenbord komt hij na de andere links.',
-          'Wie onderaan een lange pagina naar de footer tabt, komt zo bij de knop zodra hij zichtbaar is.',
-          '',
-          'De kleuren zijn die van de links in de footer.',
-          'De knop ligt over de strepen van de vlag, en in geforceerde kleuren heeft hij een rand in een systeemkleur.',
-          'Bij het afdrukken is hij er niet.',
-          '',
-          'De verhalen hieronder tonen de knop op een korte pagina, met de regel opgeheven, zodat hij te zien is.',
-          'In het verhaal over een lange pagina werkt de regel echt: scrol naar beneden en de knop verschijnt.',
+          'Een ronde knop als laatste in de `Page.Footer` die de bezoeker terugbrengt naar de bovenkant van de pagina.',
+          'Je kiest hem voor een lange pagina; hij is er alleen als hij nuttig is, en werkt ook zonder JavaScript.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
       source: {
         code: `<Page.TopLink label="Naar boven" />`,
         language: 'tsx',
@@ -71,69 +54,9 @@ const shortPageParameters = {
   docs: { story: { iframeHeight: '30rem', inline: false } },
 }
 
-export const Light = meta.story({
-  globals: { theme: 'light' },
-  name: 'Licht',
+export const Default = meta.story({
+  name: 'Op een korte pagina',
   parameters: shortPageParameters,
-  render: renderOnShortPage,
-})
-
-export const Dark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Donker',
-  parameters: shortPageParameters,
-  render: renderOnShortPage,
-})
-
-const hoverParameters = {
-  ...shortPageParameters,
-  docs: {
-    ...shortPageParameters.docs,
-    description: {
-      story:
-        'Onder de muis wordt de pijl donkerder in licht en lichter in donker, met een rand en een vulling. Dat doet hij alleen met een muis, niet na een tik op een telefoon. Ingedrukt ziet de knop er hetzelfde uit.',
-    },
-  },
-  pseudo: { hover: ['.hf-page-top-link'] },
-}
-
-const focusParameters = {
-  ...shortPageParameters,
-  docs: {
-    ...shortPageParameters.docs,
-    description: {
-      story:
-        'Met het toetsenbord heeft de knop dezelfde rand en vulling als onder de muis, en daaromheen de focusrand van de pagina. De focusrand ligt over de strepen.',
-    },
-  },
-  pseudo: { focusVisible: ['.hf-page-top-link'] },
-}
-
-export const HoverLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Onder de muis in licht',
-  parameters: hoverParameters,
-  render: renderOnShortPage,
-})
-
-export const HoverDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Onder de muis in donker',
-  parameters: hoverParameters,
-  render: renderOnShortPage,
-})
-
-export const FocusLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Focus in licht',
-  parameters: focusParameters,
-  render: renderOnShortPage,
-})
-
-export const FocusDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Focus in donker',
-  parameters: focusParameters,
   render: renderOnShortPage,
 })
 

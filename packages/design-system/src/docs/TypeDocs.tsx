@@ -15,7 +15,7 @@ export const typeStyles: TypeStyle[] = [
     colour: 'heading',
     name: 'Woordmerk',
     sample: 'sc Heerenveen Fansite',
-    spec: 'Truculenta 900 · breedte 125 · 36 px (mobiel 28) · regelhoogte 1 · +0,02 em · kapitalen',
+    spec: 'Truculenta 900 · breedte 125 · regelhoogte 1 · +0,02 em · kapitalen',
     use: 'Alleen de sitenaam in header en footer.',
   },
   {
