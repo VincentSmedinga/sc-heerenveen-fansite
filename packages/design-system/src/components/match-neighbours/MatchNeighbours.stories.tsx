@@ -15,6 +15,7 @@ const meta = preview.meta({
         component: [
           'De links naar de vorige en de volgende wedstrijd onderaan de pagina van een wedstrijd, zodat een supporter het seizoen kan doorlezen.',
           'Een wedstrijd met een uitslag toont de stand vanuit onze kant in de kleur van de uitslag; een wedstrijd zonder uitslag toont de datum of een woord, en een wedstrijd zonder pagina is gewone tekst.',
+          'Hij is gebouwd uit `Card`, `Link` en `Time`.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

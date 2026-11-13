@@ -1,5 +1,6 @@
 import preview from '#.storybook/preview'
 
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Emphasis } from '../emphasis/Emphasis'
 import { Heading } from '../heading/Heading'
 import { Link } from '../link/Link'
@@ -7,28 +8,27 @@ import { List } from '../list/List'
 import { Page } from '../page/Page'
 import { Strong } from '../strong/Strong'
 import { Text } from '../text/Text'
-import { Article } from './Article'
+import { Article, type ArticleProps } from './Article'
 
 const meta = preview.meta({
+  argTypes: {
+    author: { description: 'De naam bij het artikel, zoals "de redactie". Het component schrijft er "Door" voor.' },
+    date: { description: 'De datum zoals een lezer hem leest.' },
+    dateTime: { description: 'Dezelfde dag voor het `time`-element, zoals `2026-10-25`.' },
+    intro: { description: 'De inleiding in een of twee zinnen.' },
+    title: { description: 'De titel van het artikel. Hij is de `h1` van de pagina.' },
+  },
   component: Article,
   parameters: {
     docs: {
       description: {
         component: [
-          'Een artikel van onze eigen redactie, op een pagina van zichzelf.',
-          'De titel is de `h1` van de pagina.',
-          'Eronder staan de auteur en de datum, dan de inleiding, en daarna de tekst.',
-          '',
-          '- `title` is de titel van het artikel.',
-          '- `author` is de naam bij het artikel, zoals "de redactie". Het component schrijft er "Door" voor.',
-          '- `date` is de datum zoals een lezer hem leest, en `dateTime` dezelfde dag voor het `time`-element, zoals `2026-10-25`.',
-          '- `intro` is de inleiding in een of twee zinnen.',
-          "- De tekst geef je als kinderen: alinea's met `Text`, koppen van niveau 2 met `Heading`, lijsten met `List`, vet met `Strong`, cursief met `Emphasis` en links met `Link`. Een link naar een andere site krijgt het pictogram voor een externe link.",
-          '',
-          'Zet het artikel in een `Page.Main`, zodat de `article` in de `main` staat.',
-          'De tekst van een artikel komt uit de database en wordt op de site omgezet naar deze onderdelen; er is geen HTML bij.',
+          'Een artikel van onze eigen redactie, op een pagina van zichzelf: de titel, de auteur en de datum, de inleiding en de tekst.',
+          "De tekst geef je als kinderen: alinea's met `Text`, koppen van niveau 2 met `Heading`, lijsten met `List`, vet met `Strong`, cursief met `Emphasis` en links met `Link`.",
+          'Het is gebouwd uit `Heading`, `Text`, `Time` en de onderdelen voor de tekst, en staat in een `Page.Main`.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
     },
   },
   tags: ['autodocs'],
@@ -36,16 +36,10 @@ const meta = preview.meta({
 })
 
 // The text is made up, and so are the names.
-const render = () => (
+const render = (args: ArticleProps) => (
   <Page.Body>
     <Page.Main>
-      <Article
-        author="de redactie"
-        date="25 oktober 2026"
-        dateTime="2026-10-25"
-        intro="Wij zijn de redactie van de Fansite. Hier lees je wie we zijn en wat je van ons mag verwachten."
-        title="Dit zijn wij"
-      >
+      <Article {...args}>
         <Text>
           We zijn supporters, geen journalisten. We schrijven <Strong>niet</Strong> over wat anderen al schreven, maar
           we <Emphasis>wijzen</Emphasis> je de weg naar hun verhaal.
@@ -72,6 +66,14 @@ const render = () => (
   </Page.Body>
 )
 
-export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', render })
-
-export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render })
+export const Default = meta.story({
+  args: {
+    author: 'de redactie',
+    date: '25 oktober 2026',
+    dateTime: '2026-10-25',
+    intro: 'Wij zijn de redactie van de Fansite. Hier lees je wie we zijn en wat je van ons mag verwachten.',
+    title: 'Dit zijn wij',
+  },
+  name: 'Artikel',
+  render,
+})

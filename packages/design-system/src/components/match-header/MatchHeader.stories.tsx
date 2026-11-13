@@ -34,13 +34,9 @@ const meta = preview.meta({
       description: {
         component: [
           'De kop van de pagina van een wedstrijd: de twee clubs met de uitslag, de uitkomst in een pil en onder elke club zijn doelpuntenmakers.',
-          'Op een smal scherm staan de naam en de doelpunten van een club op één regel; op een breed scherm staan de namen links en rechts en de uitslag groot in het midden.',
-          'Kies hem alleen voor de pagina van één wedstrijd; een regel in een lijst is een `Match`.',
-          'De uitslag heeft de kleur van de uitkomst voor sc Heerenveen, en het woord in de pil is het teken: een schermlezer hoort "6 tegen 0".',
-          'Na een verlenging of strafschoppen staat dat in woorden onder de uitslag.',
-          'Wordt de wedstrijd nog gespeeld, zet dan `phase` op `live`: de pil zegt "Live" in plaats van een uitkomst, en de stand is die tot nu toe.',
-          'Is de aftrap er nog niet, dan is het `upcoming`: streepjes in plaats van een stand.',
-          'De `h1` van de pagina hoort er niet bij: de pagina mag hem visueel verbergen, want de namen en de uitslag zijn wat de ogen zien.',
+          'Kies hem alleen voor de pagina van één wedstrijd; een regel in een lijst is een `Match`. Na een verlenging of strafschoppen staat dat in woorden onder de uitslag, een wedstrijd die nog wordt gespeeld zegt "Live" (`phase`), en een wedstrijd die nog niet begon heeft streepjes in plaats van een stand.',
+          'De uitslag heeft de kleur van de uitkomst voor sc Heerenveen, en het woord in de pil is het teken: een schermlezer hoort "6 tegen 0". De `h1` van de pagina hoort er niet bij.',
+          'Hij is gebouwd uit `DescriptionList` voor de feiten en de uitkomst die ook `Match` gebruikt.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -101,12 +97,6 @@ export const ScorersWithPages = meta.story({
       },
     },
   },
-})
-
-export const ScorersWithPagesDark = meta.story({
-  args: scorersWithPages,
-  globals: { theme: 'dark' },
-  name: 'Doelpuntenmakers met een pagina, donker',
 })
 
 export const AfterExtraTime = meta.story({

@@ -1,5 +1,6 @@
 import preview from '#.storybook/preview'
 
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
 import { type PlayerFiguresRow, PlayerFiguresTable } from './PlayerFiguresTable'
@@ -9,21 +10,13 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De cijfers van alle spelers die in de verslagen van de wedstrijden staan, als echte `table`: de wedstrijden, de basisplaatsen, de keren dat hij inviel, de minuten, de doelpunten, de assists en de gele en rode kaarten.',
-          'De tabel heeft een bijschrift dat zegt voor welk seizoen en welke competities hij telt, maar alleen een schermlezer krijgt het: bezienden zien de kop van de kaart.',
-          'Verder heeft de tabel kolomkoppen met `scope` en een rijkop met de naam van elke speler (zie `PlayerName`).',
-          'De koppen zijn de letters uit `tableColumns`: G gespeeld, B basis, I invallers, M minuten, D doelpunten, A assists, Y geel en R rood.',
-          'Een schermlezer hoort het hele woord, en onder de tabel staan de letters met hun woorden.',
-          'Een geel-rode kaart telt als een gele en een rode, en dat staat er ook.',
-          '',
-          'De minuten zijn het kerngetal en dus vet, want de pagina sorteert de lijst op minuten en dan op naam.',
-          'Een speler van de bank die niet inviel, staat er ook, met nullen, zodat hij niet verdwijnt.',
-          'De kolommen staan dicht bij elkaar, zodat de tabel op een telefoon past; een lange naam breekt bij een spatie.',
-          '',
-          '- `caption` is de tekst van het bijschrift, dat niet te zien is.',
-          '- `rows` zijn de spelers van boven naar beneden: het component sorteert niet.',
+          'De cijfers van alle spelers die in de verslagen van de wedstrijden staan, als echte `table`: wedstrijden, basisplaatsen, invallen, minuten, doelpunten, assists en kaarten.',
+          'Kies hem voor een lijst van alle spelers van een seizoen; een speler van de bank die niet inviel, staat er ook, met nullen.',
+          'De pagina geeft het bijschrift en de rijen mee, in de volgorde waarin ze staan: het component sorteert niet.',
+          'Hij is gebouwd uit `DataTable`-kolommen uit `tableColumns` en `PlayerName`, in een `Card` onder een kop van niveau 2.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
     },
   },
   tags: ['autodocs'],
@@ -100,8 +93,8 @@ const rows: PlayerFiguresRow[] = [
 const caption =
   'Alle spelers in de verslagen van sc Heerenveen in het seizoen 2026/27, in de Eredivisie en de KNVB Beker'
 
-const render = (maxInlineSize: string) => () => (
-  <div style={{ maxInlineSize }}>
+const render = () => (
+  <div style={{ maxInlineSize: '40rem' }}>
     <Card aria-labelledby="alle-spelers-kop">
       <Heading id="alle-spelers-kop" level={2}>
         Alle spelers
@@ -111,20 +104,7 @@ const render = (maxInlineSize: string) => () => (
   </div>
 )
 
-export const Light = meta.story({
-  globals: { theme: 'light' },
-  name: 'Alle spelers, licht',
-  render: render('40rem'),
-})
-
-export const Dark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Alle spelers, donker',
-  render: render('40rem'),
-})
-
-export const NarrowLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Op een telefoon, licht',
-  render: render('22rem'),
+export const Default = meta.story({
+  name: 'Alle spelers',
+  render,
 })

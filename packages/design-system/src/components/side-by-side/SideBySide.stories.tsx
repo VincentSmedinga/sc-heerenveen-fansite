@@ -15,8 +15,8 @@ const meta = preview.meta({
       description: {
         component: [
           'Twee delen van één taak naast elkaar, zoals een formulier en het voorbeeld van wat het maakt.',
-          'Het voorbeeld blijft in beeld terwijl het formulier scrolt. Is er te weinig plaats, dan staat één deel tegelijk en kies je met de tabs welk.',
-          'Het deel dat niet getoond wordt, blijft in de pagina, zodat een formulier zijn waarden houdt.',
+          'Het voorbeeld blijft in beeld terwijl het formulier scrolt. Is er te weinig plaats, dan staat één deel tegelijk en kies je met de tabs welk; het deel dat niet getoond wordt, blijft in de pagina, zodat een formulier zijn waarden houdt.',
+          'Hij zet twee delen naast elkaar; op een smal scherm kies je het deel met een `SegmentedControl`.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -64,23 +64,5 @@ export const Default = meta.story({
         {previewCard}
       </SideBySide.Aside>
     </SideBySide>
-  ),
-})
-
-export const OnePartAtATime = meta.story({
-  name: 'Eén deel tegelijk op een smal scherm',
-  parameters: {
-    docs: { description: { story: 'Het voorbeeld heeft `hidden`: het formulier is het deel dat je ziet.' } },
-  },
-  render: () => (
-    <div style={{ inlineSize: '24rem', maxInlineSize: '100%' }}>
-      <SideBySide>
-        {tabs}
-        <SideBySide.Main>{form}</SideBySide.Main>
-        <SideBySide.Aside aria-label="Voorbeeld" hidden tabIndex={0}>
-          {previewCard}
-        </SideBySide.Aside>
-      </SideBySide>
-    </div>
   ),
 })

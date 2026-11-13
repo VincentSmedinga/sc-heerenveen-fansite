@@ -27,9 +27,8 @@ const meta = preview.meta({
       description: {
         component: [
           'Het verloop van een gespeelde wedstrijd in twee helften naast elkaar, en na een verlenging een derde blok eronder.',
-          'Elke gebeurtenis is één regel: de minuut in een pil, gevuld voor sc Heerenveen en open voor de tegenstander, en daarna het pictogram en de naam.',
-          'Een woord naast een pictogram dat hetzelfde zegt, blijft weg; een schermlezer hoort het team, de minuut en de soort gebeurtenis vooraan.',
-          'De blokken zijn genummerde lijsten met een naam, onder een kop van het niveau dat de pagina kiest.',
+          'Elke gebeurtenis is één regel: de minuut in een pil, gevuld voor sc Heerenveen en open voor de tegenstander, en daarna het pictogram en de naam. De blokken zijn genummerde lijsten met een naam, onder een kop van het niveau dat de pagina kiest.',
+          'Hij is gebouwd uit `MatchEventIcon`, `PlayerName` en `Heading`.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -110,12 +109,6 @@ export const WithPages = meta.story({
       },
     },
   },
-})
-
-export const WithPagesDark = meta.story({
-  args: withPages,
-  globals: { theme: 'dark' },
-  name: 'Een speler met een pagina, donker',
 })
 
 export const ExtraTime = meta.story({

@@ -1,5 +1,6 @@
 import preview from '#.storybook/preview'
 
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
 import { List } from '../list/List'
@@ -9,83 +10,18 @@ import { WikipediaCredit } from '../wikipedia-credit/WikipediaCredit'
 import { Match } from './Match'
 
 const meta = preview.meta({
+  component: Match,
   parameters: {
     docs: {
       description: {
         component: [
-          'Een wedstrijd van sc Heerenveen 1, als regel in een lijst.',
-          'Kies hem voor een volledige lijst, zoals een seizoen of alle wedstrijden tegen één club; voor een selectie die op een eigenschap uit de wedstrijden kiest, kies je `ShortMatch`, en een lijst heeft één soort regel.',
-          'Er zijn twee vormen, en `competition` kiest welke.',
-          'Met `competition`, zoals op de homepage en in een lijst met alle competities op datum, staat de dag bovenaan, met het stadion: "zo 8 nov 12:15 · Abe Lenstra Stadion".',
-          'Daaronder staan de twee clubs met de uitslag ertussen, en eventueel de doelpuntenmakers, en onderaan de competitie met de ronde: "Eredivisie · Speelronde 12".',
-          'Zonder `competition`, onder een kop die de competitie al noemt, begint de regel met de ronde, de dag en het stadion: "Speelronde 1 · zo 11 aug 2024 · Johan Cruijff ArenA".',
-          'Daaronder staan de clubs en de doelpuntenmakers.',
-          'Met `referee` eindigt die laatste regel met de naam van de scheidsrechter, zonder label: "Eredivisie · Speelronde 2 · Danny Makkelie".',
-          'Met `extra` zet de pagina kleine regels onder de clubs, zoals de vorige ontmoeting of de vorm van de tegenstander; de wedstrijd zet ze in kleine tekst en bepaalt niet wat erin staat.',
-          'De volgorde in de broncode is de volgorde op het scherm en voor een schermlezer.',
-          '',
-          'De clubs staan in de volgorde van de aankondiging: de thuisclub eerst.',
-          'De regel zegt niet "Thuis" of "Uit": de volgorde van de clubs en het stadion zeggen het al.',
-          'Een gespeelde wedstrijd heeft de uitslag tussen de namen, gezien vanaf de thuisclub: "2–0".',
-          'Een schermlezer hoort "2 tegen 0".',
-          'De uitslag heeft de kleur van de uitkomst voor sc Heerenveen: groen bij winst, rood bij verlies en neutraal bij gelijkspel, ook in de beker zolang er geen strafschoppen zijn.',
-          'Dat volgt uit de doelpunten van sc Heerenveen en niet uit die van de thuisclub: 0–2 uit is een winst en 2–0 uit een verlies.',
-          'Een bekerwedstrijd na verlenging zegt "n.v." en na strafschoppen "n.s." met de score ervan, bijvoorbeeld "3–3 (5–3 n.s.)", direct achter de uitslag en in de volgorde van de clubs.',
-          'Is de stand na 90 minuten bekend, dan staat die tussen haakjes achter "n.v.": "2–1 n.v. (1–1)", en met strafschoppen "3–3 n.v. (2–2), 5–3 n.s.". Is hij niet bekend, dan staat er alleen "n.v.".',
-          'Elke afkorting heeft de volle woorden in een `title`, en een schermlezer hoort de volle woorden na de uitslag: "1 tegen 1, na strafschoppen 4 tegen 3", of "2 tegen 1, na verlenging; na 90 minuten 1 tegen 1".',
-          'Onder een lijst met zulke wedstrijden staat wat de afkortingen betekenen, want een `title` toont alleen onder een muis.',
-          'Bij strafschoppen volgt de kleur de strafschoppen: groen als sc Heerenveen ze won en rood als het ze verloor.',
-          '',
-          'Een gespeelde wedstrijd kan de doelpuntenmakers tonen, in `goals`: één regel onder de clubs, op volgorde van de minuut met de doelpunten van beide clubs, zoals "34’ Trenskow, 45’+1 Vente, 80’ Van Bergen".',
-          'De naam van de club staat er niet.',
-          'De minuut is groen bij een doelpunt van sc Heerenveen en rood bij een doelpunt van de tegenstander, met dezelfde betekenis als de uitslag, en bij sc Heerenveen ook vet.',
-          'Kleur is niet het enige teken: het vet blijft over in forced colours, en een schermlezer hoort per doelpunt de club: "minuut 45 plus 1, Vente, sc Heerenveen".',
-          'Een eigen doelpunt staat bij de club die ervan profiteert, met "e.d." erachter, en een strafschop heeft "str." erachter.',
-          'Beide zijn afkortingen met de volle woorden in een `title` en voor een schermlezer, en onder een lijst staat wat ze betekenen, want een `title` toont alleen onder een muis.',
-          'Zonder doelpunten, of met een lege lijst, komt er geen regel en geen lege ruimte.',
-          '',
-          'De kleur is een aanvulling en nooit het enige teken: wie hem niet ziet, leest de uitkomst in de doelpunten zelf, dus er komt geen letter of woord bij.',
-          'Een wedstrijd die nog moet komen heeft een streepje tussen de namen, dat een schermlezer als "tegen" leest.',
-          'De rij van sc Heerenveen zelf is het zwaarst gedrukt, zodat onze club opvalt zonder dat kleur het enige is.',
-          'Passen de twee clubs niet op één regel, dan breekt de regel in balans: de clubs komen ongeveer even lang over twee regels, en een naam blijft niet met één woord alleen over.',
-          '',
-          'De tijd is een `Time`.',
-          'Je geeft de tekst zoals een bezoeker hem leest, in Nederlandse tijd, en in `dateTime` de waarde voor machines.',
-          'Dat is de aftrap, bijvoorbeeld "zo 1 nov 14:30", of de dag, bijvoorbeeld "zo 25 okt", bij een uitslag.',
-          'Is de aftrap nog niet bekend, dan staat er het weekend, zoals "weekend 12–14 februari", en `dateTime` is de eerste dag.',
-          'Bij een uitgestelde wedstrijd staat er "Uitgesteld" in plaats van een tijd: "Uitgesteld · Abe Lenstra Stadion".',
-          'Een wedstrijd die nooit meer wordt gespeeld, zoals in een seizoen dat is stilgelegd, is `cancelled` en zegt op dezelfde plaats en op dezelfde manier "Geannuleerd".',
-          'Hij heeft geen uitslag en geen regel over gegevens die ontbreken.',
-          '',
-          'Wordt een wedstrijd gespeeld en heeft hij al een pagina met een verslag dat bijgewerkt wordt, dan zet je `live` en geef je `reportHref`: de link zegt "Live" in plaats van "Het verslag", en de regel meldt geen ontbrekende gegevens.',
-          'Is een wedstrijd begonnen en is de uitslag er twee uur later nog niet, dan zet je `resultMissing`.',
-          'Onderaan staat dan "Gegevens nog niet beschikbaar", onder de andere regels, in een gedempt rood, en niet vet.',
-          'De tijd blijft staan.',
-          'Het is een eerlijke melding van wat we niet weten, zonder gok naar de uitslag.',
-          '',
-          'Heeft een wedstrijd iets te melden dat de andere regels niet zeggen, zoals dat hij gestaakt is en later is uitgespeeld, dan zet je dat in `note`.',
-          'Het is gewone tekst in de kleine letter, als laatste regel onder de wedstrijd.',
-          'Staat "Gegevens nog niet beschikbaar" er ook, dan komt de regel daaronder.',
-          'Zonder `note` verandert er niets.',
-          '',
-          'Staat de wedstrijd onder een kop die de competitie al noemt, zoals "KNVB Beker", laat dan `competition` weg: de competitie staat dan niet tientallen keren onder een kop die haar al noemt.',
-          '',
-          '- `competition`, `round` en `opponent` zijn gewone tekst, zoals de bron ze heeft.',
-          '- `home` zegt of sc Heerenveen thuis speelt.',
-          '- `status` is `scheduled`, `played`, `postponed` of `cancelled`.',
-          '  Een gespeelde wedstrijd heeft `goalsFor` en `goalsAgainst`, een andere heeft ze niet.',
-          '- `stadium` is het stadion.',
-          '  Zonder stadion staat er alleen de dag of de tijd.',
-          '',
-          'Een wedstrijd is gewone tekst, zonder clubwapen: alleen de namen.',
-          'Alleen een wedstrijd met een eigen pagina, die van een verslag dat klaar is, krijgt `reportHref`: de regel eindigt dan met de link "Het verslag".',
-          'De andere wedstrijden hebben geen link.',
-          'Het component is een `div`.',
-          'Zet hem in een `List.Item` voor een lijst met wedstrijden, en geef de `List` `role="list"`: Safari noemt een lijst zonder opsommingstekens anders geen lijst meer.',
-          'De lijst krijgt dan geen opsommingstekens en geen inspringing, en tussen de regels staat een dunne lijn.',
-          'Zet de lijst in een `Card`, onder een kop van niveau 2.',
+          'Een wedstrijd van sc Heerenveen 1, als regel in een lijst: de dag en het stadion, de twee clubs met de uitslag ertussen, eventueel de doelpuntenmakers, en de competitie met de ronde.',
+          'Kies hem voor een volledige lijst, zoals een seizoen of alle wedstrijden tegen één club; voor een selectie die op een eigenschap uit de wedstrijden kiest, kies je `ShortMatch`. Laat `competition` weg onder een kop die de competitie al noemt.',
+          'De thuisclub staat eerst en de uitslag heeft de kleur van de uitkomst voor sc Heerenveen, nooit als enig teken. Een wedstrijd kan nog moeten komen, uitgesteld of geannuleerd zijn, live gaan, na verlenging of strafschoppen eindigen, of nog geen uitslag hebben.',
+          'Zet hem in een `List.Item` met `role="list"` op de `List`, in een `Card` onder een kop van niveau 2. Hij is gebouwd uit `Time`, `Link` en `Text`, met de uitkomst die ook `ShortMatch` gebruikt.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
     },
   },
   tags: ['autodocs'],
@@ -94,8 +30,8 @@ const meta = preview.meta({
 
 // The block as the homepage has it, in the width of the sidebar: the previous and the next
 // match. The clubs, the dates and the stadiums are made up, like the data of the seed.
-const renderBlock = (maxInlineSize: string) => () => (
-  <div style={{ maxInlineSize }}>
+const renderSidebar = () => (
+  <div style={{ maxInlineSize: '20rem' }}>
     <Card aria-labelledby="wedstrijden-kop">
       <Heading id="wedstrijden-kop" level={2}>
         Wedstrijden
@@ -132,50 +68,6 @@ const renderBlock = (maxInlineSize: string) => () => (
     </Card>
   </div>
 )
-
-const renderSidebar = renderBlock('20rem')
-
-// The block of the homepage when the previous match is over but has no result yet: a cup tie
-// two hours after the kick-off, with the next match under it.
-const renderSidebarMissing = () => (
-  <div style={{ maxInlineSize: '20rem' }}>
-    <Card aria-labelledby="wedstrijden-zonder-uitslag-kop">
-      <Heading id="wedstrijden-zonder-uitslag-kop" level={2}>
-        Wedstrijden
-      </Heading>
-      <List role="list">
-        <List.Item>
-          <Match
-            competition="KNVB Beker"
-            dateTime="2026-10-28T19:00:00Z"
-            home={false}
-            opponent="Voorbeeld United"
-            resultMissing
-            round="Tweede ronde"
-            stadium="Voorbeeldpark"
-            status="scheduled"
-            time="wo 28 okt 20:00"
-          />
-        </List.Item>
-        <List.Item>
-          <Match
-            competition="Eredivisie"
-            dateTime="2026-11-01T18:45:00Z"
-            home
-            opponent="Proefstad SV"
-            round="Speelronde 3"
-            stadium="Stadion Proeflaan"
-            status="scheduled"
-            time="zo 1 nov 19:45"
-          />
-        </List.Item>
-      </List>
-      <WikipediaCredit compact />
-    </Card>
-  </div>
-)
-
-const renderNarrow = renderBlock('16rem')
 
 // Every state a match can be in: still to be played with a kick-off and with only a weekend,
 // played at home and away, called off, a cup tie, and a match without a stadium.
@@ -625,100 +517,34 @@ const renderNote = () => (
   </div>
 )
 
-export const Light = meta.story({
-  globals: { theme: 'light' },
-  name: 'Zijbalk, met de vorige en de volgende wedstrijd, licht',
+export const Sidebar = meta.story({
+  name: 'Zijbalk, met de vorige en de volgende wedstrijd',
   render: renderSidebar,
 })
 
-export const Dark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Zijbalk, met de vorige en de volgende wedstrijd, donker',
-  render: renderSidebar,
-})
-
-export const NarrowLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Smalle kolom, licht',
-  render: renderNarrow,
-})
-
-export const NarrowDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Smalle kolom, donker',
-  render: renderNarrow,
-})
-
-export const StatesLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Alle toestanden: gepland met en zonder aftrap, beker, uitgesteld, geannuleerd, thuis en uit, gespeeld, licht',
+export const States = meta.story({
+  name: 'Alle toestanden: gepland met en zonder aftrap, beker, uitgesteld, geannuleerd, thuis en uit, gespeeld',
   render: renderStates,
 })
 
-export const StatesDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Alle toestanden: gepland met en zonder aftrap, beker, uitgesteld, geannuleerd, thuis en uit, gespeeld, donker',
-  render: renderStates,
-})
-
-export const ResultsLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Uitslagen: winst, verlies en gelijkspel, thuis en uit, licht',
+export const Results = meta.story({
+  name: 'Uitslagen: winst, verlies en gelijkspel, thuis en uit',
   render: renderResults,
 })
 
-export const ResultsDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Uitslagen: winst, verlies en gelijkspel, thuis en uit, donker',
-  render: renderResults,
-})
-
-export const CupLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Beker: na verlenging en na strafschoppen, licht',
+export const Cup = meta.story({
+  name: 'Beker: na verlenging en na strafschoppen',
   render: renderCup,
 })
 
-export const CupDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Beker: na verlenging en na strafschoppen, donker',
-  render: renderCup,
-})
-
-export const ScorersLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Doelpuntenmakers: een of beide clubs, strafschop, eigen doelpunt, blessuretijd, lange naam, licht',
+export const Scorers = meta.story({
+  name: 'Doelpuntenmakers: een of beide clubs, strafschop, eigen doelpunt, blessuretijd, lange naam',
   render: renderScorers,
 })
 
-export const ScorersDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Doelpuntenmakers: een of beide clubs, strafschop, eigen doelpunt, blessuretijd, lange naam, donker',
-  render: renderScorers,
-})
-
-export const MissingLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Zonder uitslag: gegevens nog niet beschikbaar, licht',
+export const Missing = meta.story({
+  name: 'Zonder uitslag: gegevens nog niet beschikbaar',
   render: renderMissing,
-})
-
-export const MissingDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Zonder uitslag: gegevens nog niet beschikbaar, donker',
-  render: renderMissing,
-})
-
-export const SidebarMissingLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Zijbalk, de vorige wedstrijd zonder uitslag en de volgende, licht',
-  render: renderSidebarMissing,
-})
-
-export const SidebarMissingDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Zijbalk, de vorige wedstrijd zonder uitslag en de volgende, donker',
-  render: renderSidebarMissing,
 })
 
 export const WithNote = meta.story({

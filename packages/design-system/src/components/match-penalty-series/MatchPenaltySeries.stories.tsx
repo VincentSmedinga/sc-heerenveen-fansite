@@ -26,8 +26,8 @@ const meta = preview.meta({
       description: {
         component: [
           'De strafschoppenserie van een wedstrijd, twee keer: als rij schoten per team met het totaal, voor een snelle blik, en als tabel met een regel per ronde, met de nemers van beide teams en de stand na de ronde.',
-          'De tabel is wat een schermlezer leest: elke cel begint met "Raak:", "Naast:" of "Gestopt:", en de totalen noemen hun team.',
-          'Bij een schot dat niet raak was, staat het woord ook naast de speler, dus een doorgekruiste ring is nooit het enige teken.',
+          'De tabel is wat een schermlezer leest: elke cel begint met "Raak:", "Naast:" of "Gestopt:", en bij een schot dat niet raak was staat het woord ook naast de speler, dus een doorgekruiste ring is nooit het enige teken.',
+          'Hij is gebouwd uit `MatchTimeline`-onderdelen, `MatchEventIcon`, `PlayerName` en `Heading`.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

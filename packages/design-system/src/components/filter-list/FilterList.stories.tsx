@@ -17,8 +17,8 @@ const meta = preview.meta({
       description: {
         component: [
           'De filters van een zoekopdracht als één lijst van rijen die open- en dichtklappen.',
-          'Een dichte rij zegt wat er gekozen is, zodat de bezoeker niet alles hoeft te openen.',
-          'Zet de lijst in een formulier, zodat het werkt zonder JavaScript.',
+          'Een dichte rij zegt wat er gekozen is, zodat de bezoeker niet alles hoeft te openen. Zet de lijst in een formulier, zodat het werkt zonder JavaScript.',
+          'Hij is gebouwd uit de rijen van `Filter`.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

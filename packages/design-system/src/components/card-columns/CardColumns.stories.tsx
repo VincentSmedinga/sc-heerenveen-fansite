@@ -15,7 +15,7 @@ const meta = preview.meta({
         component: [
           'Kaarten in twee kolommen als er plaats voor is, en anders onder elkaar.',
           'De volgorde in de code is de leesvolgorde: de eerste kaart links, de tweede rechts, de derde weer links.',
-          'Een browser die grid lanes kent, zet elke kaart in de kortste kolom, zodat er geen gaten onder de kortere kaart van een paar zitten.',
+          'Hij is gebouwd uit `Card`, die hij naast elkaar zet.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

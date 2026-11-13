@@ -1,52 +1,32 @@
 import preview from '#.storybook/preview'
 
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
 import { type TableColumn, tableColumns } from '../table-columns'
-import { Text } from '../text/Text'
 import { TopScorersTable, type TopScorersTableRow } from './TopScorersTable'
 
 const meta = preview.meta({
+  argTypes: {
+    caption: { description: 'De tekst van het bijschrift, dat alleen een schermlezer krijgt.' },
+    figure: { description: 'De kolom die de lijst telt, uit `tableColumns`: doelpunten, assists of minuten.' },
+    rows: { description: 'De plaatsen van boven naar beneden, met de doelpunten en een of meer spelers.' },
+    showGoalsPerMatch: {
+      description: 'Voegt de kolom D/W toe. Elke speler krijgt dan een eigen rij.',
+    },
+  },
+  component: TopScorersTable,
   parameters: {
     docs: {
       description: {
         component: [
-          'De doelpuntenmakers van sc Heerenveen in het seizoen, als echte `table`: iedereen die scoorde, van veel naar weinig doelpunten.',
-          'De tabel heeft een bijschrift dat zegt voor welk seizoen en welke competities hij telt, maar alleen een schermlezer krijgt het: bezienden zien de kop van de kaart.',
-          'Verder heeft de tabel kolomkoppen met `scope` en een rijkop met de naam van elke speler.',
-          'De kolommen zijn de plaats, de speler en de doelpunten.',
-          'De kop van de doelpunten is de afkorting D, en onder de tabel staat het volle woord: "D doelpunten".',
-          'De afkorting zelf heeft ook een `title`, maar die verschijnt alleen onder een muis en een telefoon heeft er niets aan.',
-          '',
-          'Spelers met evenveel doelpunten hebben dezelfde plaats.',
-          "Een korte lijst, zoals de top 5, voegt ze samen: spelers met evenveel doelpunten delen één rij, met de namen achter elkaar gescheiden door komma's, en een lange lijst met alle spelers houdt een rij per speler.",
-          'De doelpunten in een gedeelde rij gelden voor elke speler, en een naam breekt nooit midden in de naam.',
-          'In een lijst met een rij per speler toont alleen de eerste rij van een gedeelde plaats het nummer, en de volgende rijen een verticaal beletselteken (⋮); een schermlezer hoort daar "gedeeld 2" (zie `PlaceCell`).',
-          'Het aantal doelpunten is het kerngetal en dus vet, want daarop is de lijst gesorteerd.',
-          'De getallen staan rechts uitgelijnd en hebben tabelcijfers, zodat ze recht onder elkaar staan.',
-          '',
-          'In de cel van de doelpunten staat, rechts van het getal, dezelfde balk als in de stand.',
-          'De lengte is het aandeel van de doelpunten van de topscorer: de topscorer vult de balk, een speler met de helft van de doelpunten vult de helft.',
-          'De schaal begint bij nul, dus de balk toont de echte verhouding, en spelers met evenveel doelpunten hebben even lange balken.',
-          'De balk is versiering: een schermlezer slaat hem over en leest alleen de getallen.',
-          'Is de plek van de tabel te smal, zoals op een telefoon, dan verdwijnt de balk en blijft de rest van de tabel staan.',
-          'Dat hangt af van de breedte van de plek waar de tabel in staat en niet van het scherm.',
-          '',
-          'De kolom D/W, de doelpunten per wedstrijd, komt er alleen bij als de pagina van elke speler weet hoeveel wedstrijden hij speelde (`showGoalsPerMatch`).',
-          'Elke speler heeft dan een eigen rij, en spelers met evenveel doelpunten houden dezelfde plaats.',
-          'Onder de tabel staat dan ook wat D/W is.',
-          '',
-          'Met `figure` is de lijst van iets anders, zoals de assists of de minuten: de plaatsen en de balk zijn dezelfde, en de kop en de regel onder de tabel hebben zijn letter en woord uit `tableColumns`.',
-          '',
-          'Zonder doelpunten geeft de pagina geen tabel, maar een zin voor de lezer in de kaart.',
-          '',
-          '- `caption` is de tekst van het bijschrift, dat niet te zien is.',
-          '- `rows` zijn de plaatsen van boven naar beneden, met de plaats, de doelpunten en een of meer spelers (voornaam en achternaam, zie `PlayerName`).',
-          '  De pagina telt de doelpunten en kiest de rijen: het component rekent alleen de balken uit.',
-          '',
-          "Er zijn geen links en geen foto's: alleen de namen.",
+          'De doelpuntenmakers van sc Heerenveen in het seizoen, als echte `table`: iedereen die scoorde, van veel naar weinig doelpunten, met de plaats, de speler en een balk bij de doelpunten.',
+          'Spelers met evenveel doelpunten hebben dezelfde plaats; een korte lijst voegt ze samen in één rij, een lange lijst houdt een rij per speler. Met `figure` telt de lijst iets anders, zoals de assists of de minuten.',
+          'De balk is versiering die een schermlezer overslaat, en op een te smalle plek verdwijnt hij. Zonder doelpunten geeft de pagina geen tabel maar een zin in de kaart.',
+          'Hij is gebouwd uit `PlaceCell`, `PlayerName` en `Bar`, met de kolommen uit `tableColumns`, in een `Card` onder een kop van niveau 2.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
     },
   },
   tags: ['autodocs'],
@@ -174,121 +154,47 @@ const render =
     </div>
   )
 
-const renderEmpty = () => (
-  <div style={{ maxInlineSize: '32rem' }}>
-    <Card aria-labelledby="doelpuntenmakers-kop">
-      <Heading id="doelpuntenmakers-kop" level={2}>
-        Doelpuntenmakers
-      </Heading>
-      <Text>We hebben nog geen doelpuntenmakers van dit seizoen. Kijk straks nog eens.</Text>
-    </Card>
-  </div>
-)
-
-export const Light = meta.story({
-  globals: { theme: 'light' },
-  name: 'Doelpuntenmakers met balken, licht',
-  render: render('32rem', rows),
+export const Default = meta.story({
+  args: { caption, rows, showGoalsPerMatch: false },
+  name: 'Doelpuntenmakers met balken',
+  render: (args) => (
+    <div style={{ maxInlineSize: '32rem' }}>
+      <Card aria-labelledby="doelpuntenmakers-kop">
+        <Heading id="doelpuntenmakers-kop" level={2}>
+          Doelpuntenmakers
+        </Heading>
+        <TopScorersTable {...args} />
+      </Card>
+    </div>
+  ),
 })
 
-export const Dark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Doelpuntenmakers met balken, donker',
-  render: render('32rem', rows),
-})
-
-export const MinutesLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Een lijst van de minuten, met de letter M, licht',
+export const Minutes = meta.story({
+  name: 'Een lijst van de minuten, met de letter M',
   render: render('32rem', minutesRows, false, tableColumns.minutes),
 })
 
-export const LongLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Lange lijst, twintig spelers, licht',
+export const Long = meta.story({
+  name: 'Lange lijst, twintig spelers',
   render: render('32rem', longRows),
 })
 
-export const LongDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Lange lijst, twintig spelers, donker',
-  render: render('32rem', longRows),
-})
-
-export const EqualLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Gelijke spelers, even lange balken, licht',
+export const Equal = meta.story({
+  name: 'Gelijke spelers, even lange balken',
   render: render('32rem', equalRows),
 })
 
-export const EqualDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Gelijke spelers, even lange balken, donker',
-  render: render('32rem', equalRows),
-})
-
-export const SharedLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Gelijke spelers delen een rij, licht',
+export const Shared = meta.story({
+  name: 'Gelijke spelers delen een rij',
   render: render('32rem', sharedRows),
 })
 
-export const SharedDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Gelijke spelers delen een rij, donker',
-  render: render('32rem', sharedRows),
-})
-
-export const PerMatchLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Met de kolom D/W, een rij per speler, licht',
+export const PerMatch = meta.story({
+  name: 'Met de kolom D/W, een rij per speler',
   render: render('32rem', perMatchRows, true),
 })
 
-export const PerMatchDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Met de kolom D/W, een rij per speler, donker',
-  render: render('32rem', perMatchRows, true),
-})
-
-export const PerMatchNarrowLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Met de kolom D/W op een smalle plek, licht',
-  render: render('20rem', perMatchRows, true),
-})
-
-export const LongNamesNarrowLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Lange namen breken af op een spatie, smalle plek, licht',
+export const LongNames = meta.story({
+  name: 'Lange namen breken af op een spatie',
   render: render('20rem', longNameRows),
-})
-
-export const SharedNarrowLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Gelijke spelers delen een rij op een smalle plek, licht',
-  render: render('20rem', sharedRows),
-})
-
-export const NarrowLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Smalle plek, de balk verdwijnt, licht',
-  render: render('20rem', rows),
-})
-
-export const NarrowDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Smalle plek, de balk verdwijnt, donker',
-  render: render('20rem', rows),
-})
-
-export const EmptyLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Nog geen doelpunten, een zin in plaats van een tabel, licht',
-  render: renderEmpty,
-})
-
-export const EmptyDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Nog geen doelpunten, een zin in plaats van een tabel, donker',
-  render: renderEmpty,
 })

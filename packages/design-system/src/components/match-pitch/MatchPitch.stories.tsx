@@ -28,10 +28,9 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De opstelling van beide teams op een veld, getekend uit de formatie en de volgorde van de spelers: de keeper staat vooraan, daarna komt de formatie rij voor rij, en elke rij loopt van links naar rechts, gezien in de richting van de aanval van het team.',
-          'Een ring om elke speler toont de minuten die hij speelde, en merken tonen doelpunten, kaarten, wissels en de aanvoerder.',
-          'Een schermlezer hoort per team een lijst met één zin per speler, en onder het veld staat dezelfde opstelling als lijst.',
-          'Het veld is zo groot als er teams op staan. Staan beide teams erop, dan is het het hele veld. Is er van één team geen bruikbare formatie, dan staat alleen de helft van het andere team op het veld, op dezelfde schaal. Is er van geen van beide een formatie, dan is er geen veld en staat de lijst open, met een zin over elk team.',
+          'De opstelling van beide teams op een veld, getekend uit de formatie en de volgorde van de spelers; een ring om elke speler toont de minuten die hij speelde, en merken tonen doelpunten, kaarten, wissels en de aanvoerder.',
+          'Het veld is zo groot als er teams op staan: beide teams, de helft van één team, of geen veld als er van geen van beide een bruikbare formatie is. Een schermlezer hoort per team een lijst met één zin per speler, en onder het veld staat dezelfde opstelling als lijst.',
+          'Hij is gebouwd uit `PitchPlayer`, `PlayerName`, `MatchEventIcon`, `Disclosure`, `Heading` en `Tag`.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

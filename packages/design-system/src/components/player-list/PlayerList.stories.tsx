@@ -14,8 +14,9 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Een lijst met spelers voor een lange pagina: de achternaam vet, dan de voornaam (of met `order` de voornaam eerst, voor zoekresultaten), en eronder in kleine letters wat we van zijn tijd bij ons weten.',
+          'Een lijst met spelers voor een lange pagina: de achternaam vet, dan de voornaam (of met `order` de voornaam eerst, voor zoekresultaten), en eronder wat we van zijn tijd bij ons weten.',
           'Een speler zonder pagina is gewone tekst. Zet de lijst onder een kop van niveau 2 die zegt wat de lijst groepeert.',
+          'Hij is gebouwd uit `PlayerName` en `Link`.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

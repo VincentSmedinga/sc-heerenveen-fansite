@@ -26,9 +26,8 @@ const meta = preview.meta({
       description: {
         component: [
           'Een persoon van de staf als korte regel in een lijst: de naam, en als dat iets zegt ervoor wanneer die de functie had of kreeg.',
-          'Het is de korte regel van `ShortMatch` voor een persoon, met hetzelfde uiterlijk, voor een lijst zoals de hoofdtrainers van een seizoen.',
-          'De naam staat als bij een speler: de voornaam in het normale gewicht en de achternaam in het sterkere. "(interim)" staat erachter in het normale gewicht.',
-          'Zet de regel in een `List.Item`, de lijst in een `Card` met het vlak `strong` onder een kop van niveau 2, en geef de `List` `role="list"`: Safari noemt een lijst zonder opsommingstekens anders geen lijst meer.',
+          'Het is de korte regel van `ShortMatch` voor een persoon, voor een lijst zoals de hoofdtrainers van een seizoen. Zet de regel in een `List.Item`, de lijst in een `Card` onder een kop van niveau 2, en geef de `List` `role="list"`.',
+          'Hij is gebouwd uit `PlayerName` en `Text`.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

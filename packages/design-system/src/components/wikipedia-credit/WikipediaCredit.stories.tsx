@@ -1,42 +1,32 @@
 import preview from '#.storybook/preview'
 
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { WikipediaCredit, type WikipediaCreditPage } from './WikipediaCredit'
 
 const meta = preview.meta({
+  argTypes: {
+    archive: { description: 'Noemt ook de sc Heerenveen Fansite, voor wedstrijden van Wikipedia en van de Fansite.' },
+    compact: { description: 'De korte vorm: alleen "Bron: Wikipedia", zonder uitklap.' },
+    data: { description: 'Het woord voor onze eigen gegevens in de laatste zin, in het meervoud.' },
+    edited: { description: 'Zet de zin dat de redactie gegevens zelf invulde in de uitklap.' },
+    open: { description: 'Laat de uitklap open staan, voor een voorbeeld.' },
+    pages: { description: "De pagina's van Wikipedia waar de gegevens vandaan komen, minstens één." },
+    readAt: { description: 'De tijd van de laatste keer lezen, zoals een bezoeker hem leest.' },
+    readAtDateTime: { description: 'Dezelfde tijd voor machines.' },
+    wikidata: { description: 'Zegt dat enkele spelers van Wikidata komen (CC0).' },
+  },
+  component: WikipediaCredit,
   parameters: {
     docs: {
       description: {
         component: [
           'De bronvermelding voor gegevens van Wikipedia, in de vorm van principe 4 van de Redactie: altijd de bron vermelden.',
-          'De volledige vorm staat dicht en zegt "Bron: Wikipedia".',
-          'Eén klik of toetsdruk laat de licentie (CC BY-SA 4.0), een link naar elke pagina waar de gegevens vandaan komen, de tijd van de laatste keer lezen en de zin zien dat onze wedstrijdgegevens ook CC BY-SA 4.0 zijn.',
-          'De uitklap gaat zacht open en dicht, met dezelfde duur en curve als het pijltje; een browser die dat niet kan, laat hem springen, en wie om minder beweging vraagt, ziet geen overgang.',
-          'Hij is dicht voor elke pagina, ook als er maar één is, zodat een bezoeker één vorm leert kennen en een lange lijst, zoals die van de tegenstanders, de pagina niet vult.',
-          'Wikipedia noemt een link naar het artikel een goede bronvermelding: de auteurs staan in de geschiedenis van het artikel, die vanaf de pagina te bereiken is.',
-          'Daarom linkt de bronvermelding niet zelf naar die geschiedenis.',
-          '',
-          'Een kleine kaart op een pagina die de volledige vorm elders heeft, gebruikt de korte vorm: `compact` zegt alleen "Bron: Wikipedia", zonder uitklap.',
-          '',
-          'Heeft onze redactie een deel van de gegevens zelf ingevuld of aangepast, dan zet `edited` de zin "Enkele gegevens heeft onze redactie zelf ingevuld of aangepast." in de uitklap.',
-          'Een pagina krijgt zo één bronvermelding: wat er verder over onze eigen gegevens te zeggen is, staat in de uitklap en niet eronder.',
-          'Een pagina waarvan alle gegevens van onszelf zijn, heeft geen bronvermelding.',
-          '',
-          'Het is een component, zodat een pagina met gegevens van Wikipedia er niet omheen kan.',
-          'Zet het onder het blok of de pagina met de gegevens.',
-          '',
-          "- `pages` zijn de pagina's van Wikipedia waar de gegevens vandaan komen, minstens één.",
-          '  Elke pagina heeft een `name` voor de link en een `href`.',
-          '  Bij meer dan tien pagina\'s die op een seizoen eindigen, staan de pagina\'s van één seizoen op één regel, zoals "2024/25: Eredivisie, KNVB Beker".',
-          '- `data` is het woord voor onze eigen gegevens uit die pagina\'s in de laatste zin, "Onze wedstrijdgegevens zijn ook CC BY-SA 4.0".',
-          '  Een pagina met andere gegevens, zoals de selectie, geeft het eigen woord in het meervoud: `selectiegegevens`.',
-          '- `archive` noemt ook de sc Heerenveen Fansite, voor een pagina met wedstrijden van Wikipedia en van de sc Heerenveen Fansite.',
-          '- `edited` zet de zin van de redactie in de uitklap; alleen de volledige vorm heeft hem.',
-          '- `wikidata` zegt in de uitklap dat enkele spelers van Wikidata komen (CC0), voor de pagina Spelers.',
-          '- `readAt` is de tijd van de laatste keer lezen zoals een bezoeker hem leest, in Nederlandse tijd.',
-          '  `readAtDateTime` is dezelfde tijd voor machines.',
-          '- `open` laat de uitklap open staan, voor een voorbeeld; op een pagina blijft hij dicht.',
+          'De volledige vorm staat dicht en zegt "Bron: Wikipedia"; één klik laat de licentie, een link naar elke pagina waar de gegevens vandaan komen en de tijd van de laatste keer lezen zien.',
+          'Een kleine kaart op een pagina die de volledige vorm elders heeft, gebruikt de korte vorm (`compact`). Een pagina waarvan alle gegevens van onszelf zijn, heeft geen bronvermelding.',
+          'Het is een component, zodat een pagina met gegevens van Wikipedia er niet omheen kan. Hij is gebouwd uit `Link`, `Time` en `Icon` in een uitklap, en staat onder het blok of de pagina met de gegevens.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
     },
   },
   tags: ['autodocs'],
@@ -67,67 +57,30 @@ const manyPages: [WikipediaCreditPage, ...WikipediaCreditPage[]] = [
 
 const readAt = { readAt: '25 oktober 2026 om 14:05', readAtDateTime: '2026-10-25T12:05:00Z' }
 
-export const Closed = meta.story({
-  name: 'Dicht, met één pagina',
-  render: () => (
-    <div style={{ maxInlineSize: '20rem' }}>
-      <WikipediaCredit {...readAt} pages={[standings]} />
-    </div>
-  ),
+const inColumn = (credit: React.ReactNode) => <div style={{ maxInlineSize: '20rem' }}>{credit}</div>
+
+export const Default = meta.story({
+  args: { ...readAt, open: false, pages: [standings, cup] },
+  name: 'Bronvermelding',
+  render: (args) => inColumn(<WikipediaCredit {...args} />),
 })
 
-export const Open = meta.story({
-  name: 'Open, met één pagina',
-  render: () => (
-    <div style={{ maxInlineSize: '20rem' }}>
-      <WikipediaCredit {...readAt} open pages={[standings]} />
-    </div>
-  ),
-})
-
-export const TwoPagesOpen = meta.story({
-  name: "Open, met twee pagina's",
-  render: () => (
-    <div style={{ maxInlineSize: '36rem' }}>
-      <WikipediaCredit {...readAt} open pages={[standings, cup]} />
-    </div>
-  ),
-})
-
-export const ManyPagesClosed = meta.story({
-  name: "Dicht, met veel pagina's: de lijst van de tegenstanders",
-  render: () => (
-    <div style={{ maxInlineSize: '20rem' }}>
-      <WikipediaCredit {...readAt} pages={manyPages} />
-    </div>
-  ),
-})
-
-export const ManyPagesOpen = meta.story({
-  name: "Open, met veel pagina's: de lijst van de tegenstanders",
-  render: () => (
-    <div style={{ maxInlineSize: '20rem' }}>
-      <WikipediaCredit {...readAt} open pages={manyPages} />
-    </div>
-  ),
+export const ManyPages = meta.story({
+  args: { ...readAt, open: true, pages: manyPages },
+  name: "Veel pagina's: de lijst van de tegenstanders",
+  render: (args) => inColumn(<WikipediaCredit {...args} />),
 })
 
 export const Edited = meta.story({
-  name: 'Met een zin dat de redactie gegevens zelf invulde, open',
-  render: () => (
-    <div style={{ maxInlineSize: '20rem' }}>
-      <WikipediaCredit {...readAt} edited open pages={[standings]} />
-    </div>
-  ),
+  args: { ...readAt, edited: true, open: true, pages: [standings] },
+  name: 'Met een zin dat de redactie gegevens zelf invulde',
+  render: (args) => inColumn(<WikipediaCredit {...args} />),
 })
 
 export const Compact = meta.story({
+  args: { compact: true },
   name: 'Korte vorm',
-  render: () => (
-    <div style={{ maxInlineSize: '20rem' }}>
-      <WikipediaCredit compact />
-    </div>
-  ),
+  render: (args) => inColumn(<WikipediaCredit {...args} />),
 })
 
 const squad = {
@@ -135,38 +88,14 @@ const squad = {
   name: 'Selectie 2026/27',
 }
 
-export const Squad = meta.story({
-  name: 'De selectie, met een eigen woord voor onze gegevens, open',
-  render: () => (
-    <div style={{ maxInlineSize: '20rem' }}>
-      <WikipediaCredit {...readAt} data="selectiegegevens" open pages={[squad]} />
-    </div>
-  ),
-})
-
 export const WithWikidata = meta.story({
-  name: 'Met Wikidata, open',
-  render: () => (
-    <div style={{ maxInlineSize: '20rem' }}>
-      <WikipediaCredit {...readAt} data="selectiegegevens" open pages={[squad]} wikidata />
-    </div>
-  ),
+  args: { ...readAt, data: 'selectiegegevens', open: true, pages: [squad], wikidata: true },
+  name: 'De selectie, met Wikidata en een eigen woord voor onze gegevens',
+  render: (args) => inColumn(<WikipediaCredit {...args} />),
 })
 
 export const WithArchive = meta.story({
-  name: 'Met de sc Heerenveen Fansite, open',
-  render: () => (
-    <div style={{ maxInlineSize: '20rem' }}>
-      <WikipediaCredit {...readAt} archive open pages={[standings]} />
-    </div>
-  ),
-})
-
-export const CompactWithArchive = meta.story({
-  name: 'Korte vorm, met de sc Heerenveen Fansite',
-  render: () => (
-    <div style={{ maxInlineSize: '20rem' }}>
-      <WikipediaCredit archive compact />
-    </div>
-  ),
+  args: { ...readAt, archive: true, open: true, pages: [standings] },
+  name: 'Met de sc Heerenveen Fansite',
+  render: (args) => inColumn(<WikipediaCredit {...args} />),
 })
