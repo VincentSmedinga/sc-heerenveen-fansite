@@ -78,13 +78,3 @@ export const OnePiece = meta.story({
   name: 'Een club die pas laat in de Eredivisie kwam, de eerste jaren zijn leeg',
   render: (args) => <TimelineCard results={args.results} scope={args.scope} />,
 })
-
-export const OnPhone = meta.story({
-  args: { firstYear, results: withGaps, scope, title: 'Seizoen' },
-  name: 'Op een telefoon: 34 plekken in een smalle kaart',
-  render: (args) => (
-    <div style={{ inlineSize: '20rem', maxInlineSize: '100%' }}>
-      <TimelineCard results={args.results} scope={args.scope} />
-    </div>
-  ),
-})

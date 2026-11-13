@@ -1,5 +1,6 @@
 import preview from '#.storybook/preview'
 
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { filledIconNames, Icon, type IconName, iconNames } from './Icon'
 
 const meta = preview.meta({
@@ -8,35 +9,13 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De pictogrammen van het designsysteem: een pijl naar rechts, een pijl naar links, een voetbal, een camera, een staafdiagram, een pagina met tekst, een envelop, het pictogram voor een externe link, een schakel van een ketting, een plus, een diskette om op te slaan, een tekstballon, een zon, een maan en een prullenbak.',
-          'We tekenen ze zelf, als SVG in de code. Er komt niets van buiten bij en er is geen pictogrammenbibliotheek.',
-          'Je zet een pictogram niet zelf op een pagina: een `Link`, een `Button`, een `IconButton`, een `SegmentedControl` en een `Heading` met een anker en een `Tile` tekenen het voor je.',
-          '',
-          '**De stijl.**',
-          'Een pictogram is een lijn met ronde uiteinden en ronde hoeken, zonder vulling, en het blijft binnen zijn vierkant.',
-          'De lijn is even dik als de letters van gewone tekst, ook als het pictogram groter is, dus pictogram en tekst lijken bij elkaar te horen.',
-          'De lijn komt halverwege de kleine letters te staan, zoals de dwarsbalk van de e.',
-          'Een volgend pictogram krijgt dezelfde lijn, hetzelfde vierkant en dezelfde hoeken.',
-          'De zon en de maan hebben twee tekeningen: alleen de lijn, en gevuld.',
-          'De gevulde tekening is dezelfde lijn met de vorm opgevuld in de kleur van de tekst, zodat de twee één stijl houden.',
-          '',
-          '**Kleur en grootte.**',
-          'Een pictogram heeft altijd de kleur van de tekst eromheen, ook onder de muis, met de focus en in geforceerde kleuren, dus het heeft hetzelfde contrast als die tekst.',
-          'Het is iets kleiner dan de tekst en groeit en krimpt met die tekst.',
-          'In een knop is het iets groter, omdat de tekst van een knop vet is.',
-          'Het beweegt niet.',
-          '',
-          '**Voor of achter de tekst.**',
-          'Bij een link staat het pictogram achter de tekst, omdat het vooruit wijst: naar waar de link heen gaat.',
-          'Bij een knop staat het ervoor, omdat het zegt wat de knop doet.',
-          'Er zijn twee uitzonderingen bij een link, en die staan ervoor: "Vorige", omdat zijn pijl naar links wijst, en de envelop bij een e-mailadres, omdat hij zegt wat de link doet: een mail openen.',
-          'Het pictogram blijft aan het eerste of laatste woord vast als de regel afbreekt, zodat het niet alleen op een regel komt.',
-          '',
-          '**Toegankelijkheid.**',
-          'De naam van een link of een knop is zijn tekst alleen: het pictogram is verborgen voor hulpsoftware.',
-          'Het is nooit de enige aanwijzing voor iets. De gevulde zon of maan op een knop in rust is een tweede aanwijzing naast `aria-pressed`.',
+          'De pictogrammen van het designsysteem: lijntekeningen met ronde uiteinden en hoeken, als SVG in de code. Er komt niets van buiten bij en er is geen pictogrammenbibliotheek.',
+          'Je zet een pictogram niet zelf op een pagina: een `Link`, een `Button`, een `IconButton`, een `SegmentedControl`, een `Heading` met een anker en een `Tile` tekenen het voor je.',
+          'Bij een link staat het pictogram achter de tekst, omdat het vooruit wijst, en bij een knop ervoor, omdat het zegt wat de knop doet. De zon en de maan hebben ook een gevulde tekening.',
+          'Het pictogram heeft de kleur van de tekst eromheen en is verborgen voor hulpsoftware: de naam van een link of knop is zijn tekst alleen, en het pictogram is nooit de enige aanwijzing.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
     },
   },
   tags: ['autodocs'],
@@ -88,46 +67,6 @@ const render = () => (
   </ul>
 )
 
-export const Light = meta.story({ globals: { theme: 'light' }, name: 'Alle pictogrammen, licht', render })
+export const Default = meta.story({ args: { name: 'ball' }, name: 'Pictogram' })
 
-export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Alle pictogrammen, donker', render })
-
-const sunAndMoon = () => (
-  <ul
-    style={{
-      alignItems: 'center',
-      display: 'flex',
-      flexWrap: 'wrap',
-      fontSize: '2rem',
-      gap: '1.5rem',
-      listStyle: 'none',
-      margin: 0,
-      padding: 0,
-    }}
-  >
-    <li>
-      <Icon name="sun" />
-    </li>
-    <li>
-      <Icon appearance="filled" name="sun" />
-    </li>
-    <li>
-      <Icon name="moon" />
-    </li>
-    <li>
-      <Icon appearance="filled" name="moon" />
-    </li>
-  </ul>
-)
-
-export const SunAndMoonLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Zon en maan, lijn en gevuld, licht',
-  render: sunAndMoon,
-})
-
-export const SunAndMoonDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Zon en maan, lijn en gevuld, donker',
-  render: sunAndMoon,
-})
+export const AllIcons = meta.story({ name: 'Alle pictogrammen', render })

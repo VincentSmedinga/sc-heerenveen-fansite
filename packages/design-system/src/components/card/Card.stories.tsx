@@ -47,47 +47,10 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Een kaart zet een blok van de pagina op een eigen vlak, met een rand en ronde hoeken.',
-          'Zo staat elk blok los op de pagina, en dat geeft de pagina rust en richting.',
-          'Een kaart met het vlak `transparent` heeft geen rand en achtergrond die je ziet, en geen binnenruimte boven en onder: de tekst erin staat op één lijn met de tekst in de andere kaarten, zonder dat de ruimte tussen de kaarten groter wordt.',
-          'De kaart bepaalt de ruimte tussen wat erin staat: groot onder een kop en onder een tabel of een grafiek, gemiddeld onder de rest, en geen onder het laatste (zie _Ruimte tussen onderdelen_ in het hoofdstuk Ruimte).',
-          'Onder de lijst kan een formulier met een knop staan, zoals "Laad 5 meer" in de kaart met de nul gehouden op Wedstrijden.',
-          'Met `shareable` krijgt de kaart rechtsboven een knop die er een afbeelding van maakt, met het logo, het adres van de site, de datum en de bron eronder.',
-          'De bezoeker deelt die afbeelding of bewaart hem, en er gaat niets naar een server.',
-          'Gebruik hem alleen voor een kaart met cijfers en feiten die we mogen laten rondgaan, nooit voor het werk van journalisten.',
-          '',
-          'De lijnen in een kaart volgen de kaart: de scheidingen tussen rijen, de omlijsting van een uitklapblok of een mededeling en de assen van een grafiek hebben de kleur van het vlak waarop ze staan, en niet meer één kleur voor elk vlak.',
-          'Het vlak zet daarvoor drie eigenschappen, `--hf-card-line` (de rand van het vlak), `--hf-card-line-strong` (een stap donkerder) en `--hf-card-line-graphic` (haalt 3:1, voor assen en pijlen).',
-          'Een onderdeel gebruikt ze met een terugval op zijn eigen kleur, dus buiten een kaart verandert er niets.',
-          'Velden, de focusrand, knoppen en de gegevens van een grafiek houden hun vaste kleur.',
-          '',
-          'De vier vlakken en het doorzichtige vlak hebben elk een betekenis.',
-          'Loop de regels op volgorde door: de eerste die past, wint.',
-          '',
-          '- **Wit** (`default`): de kaart is waar de pagina voor bestaat.',
-          '  Dat zijn de hoofdinhoud van de pagina, zoals de lijsten met nieuws, het programma en de uitslagen, en het overzicht van ons seizoen.',
-          '  Op de homepage zijn het nieuws, de discussies en de podcasts wit, want dat is de redactionele inhoud.',
-          '- **Sterk** (`strong`): de kaart gaat over de mensen of organisaties achter de inhoud, of is aan hen gericht.',
-          '  Denk aan de hoofdtrainer, "Ben je zelf een bron?" en later het officiële clubnieuws.',
-          '- **Warm** (`warm`): iets opmerkelijks.',
-          '  Een kaart die bijzonder of oorspronkelijk is, zoals de grafieken van het seizoen en de ringen van Doelpunten per kwartier, of een uitnodiging, zoals de nieuwsbrief van de LC.',
-          '  Ongeveer één kaart op de zes is warm, zonder vast maximum per pagina, en nooit om buren van elkaar te onderscheiden.',
-          '- **Zacht** (`soft`): ranglijsten, lijsten en records die bij de hoofdinhoud horen, zoals de stand, de doelpuntenmakers en de uitersten, de filters, de kaart van de eerste zoekvraag en al het andere dat de pagina aanvult.',
-          '- **Transparant** (`transparent`): bronvermeldingen.',
-          '  De schakelaar voor de competitie blijft zoals hij is, zonder vlak.',
-          '- **Buurkaarten mogen dezelfde kleur hebben.**',
-          '  Moeten twee kaarten uit elkaar, verander dan de volgorde of de kop, niet de kleur.',
-          '- **Kleur is nooit het enige teken.**',
-          '  In donker zijn zacht en wit gelijk, en warm en sterk ook, dus de betekenis moet ook uit de plaats en de kop komen.',
-          '',
-          '**Welk vlak kies ik?**',
-          'Stel de vragen op volgorde, en neem het vlak van het eerste ja.',
-          '',
-          '1. Is de kaart waar de pagina voor bestaat? Kies wit.',
-          '2. Gaat de kaart over de mensen of organisaties achter de inhoud, of is hij aan hen gericht? Kies sterk.',
-          '3. Is de kaart bijzonder of oorspronkelijk, of is hij een uitnodiging? Kies warm.',
-          '4. Hoort de kaart bij de hoofdinhoud, of vult hij de pagina aan, als ranglijst, lijst, record, filter of eerste zoekvraag? Kies zacht.',
-          '5. Is het een bronvermelding? Kies transparant.',
+          'Een kaart zet een blok van de pagina op een eigen vlak, met een rand en ronde hoeken. Zo staat elk blok los op de pagina.',
+          'Het vlak zegt wat voor blok het is: wit voor de hoofdinhoud, sterk voor de mensen en organisaties achter de inhoud, zacht voor lijsten en records die erbij horen, warm voor iets opmerkelijks of een uitnodiging, en transparant voor een bronvermelding.',
+          'Buurkaarten mogen dezelfde kleur hebben, en kleur is nooit het enige teken: in donker zijn zacht en wit gelijk, en warm en sterk ook.',
+          'Met `shareable` krijgt de kaart een knop die er een afbeelding van maakt, met het logo, het adres van de site, de datum en de bron; gebruik hem alleen voor cijfers en feiten, nooit voor het werk van journalisten.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -167,9 +130,7 @@ const renderSurfaces = () => (
   </Page.Body>
 )
 
-export const Light = meta.story({ globals: { theme: 'light' }, name: 'Vier vlakken, licht', render: renderSurfaces })
-
-export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Vier vlakken, donker', render: renderSurfaces })
+export const Surfaces = meta.story({ name: 'Vier vlakken', render: renderSurfaces })
 
 // The lines in a card follow the card: the rows of the table, the outline of the disclosure and
 // the notice, and the axes of the chart take the colour of the surface they are on.
@@ -211,29 +172,9 @@ const renderLines = (only?: CardSurface) => (
   </Page.Body>
 )
 
-export const LinesLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Lijnen in een kaart, licht',
+export const Lines = meta.story({
+  name: 'Lijnen in een kaart',
   render: () => renderLines(),
-})
-
-export const LinesDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Lijnen in een kaart, donker',
-  render: () => renderLines(),
-})
-
-// The warm surface alone, where the lines used to be blue or hardly there.
-export const LinesWarmLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Lijnen in een warme kaart, licht',
-  render: () => renderLines('warm'),
-})
-
-export const LinesWarmDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Lijnen in een warme kaart, donker',
-  render: () => renderLines('warm'),
 })
 
 const renderWithButton = () => (
@@ -254,15 +195,8 @@ const renderWithButton = () => (
   </Page.Body>
 )
 
-export const WithButtonLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Met een knop onder de lijst, licht',
-  render: renderWithButton,
-})
-
-export const WithButtonDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Met een knop onder de lijst, donker',
+export const WithButton = meta.story({
+  name: 'Met een knop onder de lijst',
   render: renderWithButton,
 })
 
@@ -319,15 +253,8 @@ const renderShareable = () => (
   </Page.Body>
 )
 
-export const ShareableLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Met een knop voor een afbeelding, licht',
-  render: renderShareable,
-})
-
-export const ShareableDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Met een knop voor een afbeelding, donker',
+export const Shareable = meta.story({
+  name: 'Met een knop voor een afbeelding',
   render: renderShareable,
 })
 
@@ -369,9 +296,7 @@ const renderPage = () => (
   </Page.Body>
 )
 
-export const OnPageLight = meta.story({ globals: { theme: 'light' }, name: 'Op een pagina, licht', render: renderPage })
-
-export const OnPageDark = meta.story({ globals: { theme: 'dark' }, name: 'Op een pagina, donker', render: renderPage })
+export const OnPage = meta.story({ name: 'Op een pagina', render: renderPage })
 
 const renderTransparent = () => (
   <Page.Body>
@@ -391,14 +316,7 @@ const renderTransparent = () => (
   </Page.Body>
 )
 
-export const TransparentLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Doorzichtig vlak naast een gewone kaart, licht',
-  render: renderTransparent,
-})
-
-export const TransparentDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Doorzichtig vlak naast een gewone kaart, donker',
+export const Transparent = meta.story({
+  name: 'Doorzichtig vlak naast een gewone kaart',
   render: renderTransparent,
 })

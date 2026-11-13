@@ -12,7 +12,7 @@ const meta = preview.meta({
       { clubs: 'Voorbeeld United – sc Heerenveen', score: '2–0', year: '2018' },
       { clubs: 'sc Heerenveen – Proef Boys', score: '2–1', year: '1990' },
     ],
-    title: 'Op deze dag: 11 november',
+    title: 'Op deze dag',
   },
   argTypes: {
     children: { control: false, description: 'De link onder de wedstrijden, zoals "Alle wedstrijden in november".' },
@@ -33,7 +33,7 @@ const meta = preview.meta({
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/Weergave/OnThisDay',
+  title: 'Patronen/OnThisDay',
 })
 
 export const Default = meta.story({

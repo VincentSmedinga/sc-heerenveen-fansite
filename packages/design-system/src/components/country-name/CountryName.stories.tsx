@@ -1,5 +1,6 @@
 import preview from '#.storybook/preview'
 
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { CountryName } from './CountryName'
 
 const meta = preview.meta({
@@ -15,10 +16,11 @@ const meta = preview.meta({
           'Kies `PlayerName` met `country` voor een speler in een lijst; kies dit voor een land in een zin.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
     },
   },
   tags: ['autodocs'],
-  title: 'Componenten/CountryName',
+  title: 'Componenten/Tekst/CountryName',
 })
 
 export const Default = meta.story({ name: 'Met een vlag' })
