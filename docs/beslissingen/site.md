@@ -5408,6 +5408,20 @@
   Dat past bij de lijsten om te lezen, zoals die van de namen, en houdt de tabel met gaten kort.
 - **Alternatieven:** een kolom in de tabel (een formatie is geen gat, en de kolom is bijna overal leeg); een instelling in het beheer voor de gewone formaties (niemand vraagt erom).
 
+## De vaste plaatsen van spelers in een 4-3-3 staan op een eigen pagina van Kwaliteit
+
+- **Besluit:** de pagina `/beheer/kwaliteit/plaatsen` (#1193) toont per speler met minstens 10 wedstrijden in de basis in een 4-3-3 de plaats in zijn rij waar hij het vaakst stond, zoals "middenvelder, 3 van 3", het aantal wedstrijden en het percentage.
+  Een speler die er elke keer staat, krijgt dat in woorden, "100%, elke keer".
+  De plaats komt uit de volgorde van de opstelling: de keeper, dan vier, drie en drie spelers, elke rij van links naar rechts.
+  Alleen de basisspelers van ons met een 4-3-3 tellen, uit alle bronnen, en alleen een opstelling met elf basisspelers.
+  Een speler telt per naam, en zijn naam is een link naar zijn formulier als zijn verslag een speler uit de selectie heeft.
+  Bij twee plaatsen die even vaak voorkomen, wint de plaats die in de opstelling eerst komt.
+  Er verandert niets in de gegevens.
+- **Waarom:** de aanname dat het een 4-3-3 was maakt de plaatsen vergelijkbaar, en 4-3-3 is de formatie van bijna alle jaren.
+  Onder de tien wedstrijden is een percentage toeval.
+  Eerst zien wat er is, dan beslissen wat we eraan doen.
+- **Alternatieven:** alle formaties meetellen (een plaats in een rij van vier en in een rij van drie is niet te vergelijken); de lijst vanaf één wedstrijd (te veel toeval).
+
 ## De spelers van een opstelling gaan omhoog of omlaag, met de volgorde van de rijen als volgorde
 
 - **Datum:** 13 november 2026

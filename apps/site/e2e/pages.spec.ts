@@ -414,6 +414,8 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'author', path: '/beheer/kwaliteit/personen/b', status: 404 },
   { admin: 'author', path: '/beheer/kwaliteit/namen', status: 404 },
   { admin: 'author', path: '/beheer/kwaliteit/formaties', status: 404 },
+  { admin: 'editor', path: '/beheer/kwaliteit/plaatsen', status: 200 },
+  { admin: 'author', path: '/beheer/kwaliteit/plaatsen', status: 404 },
   // The players whose numbers differ: a season with the made-up difference, and an empty one.
   { admin: 'editor', path: `/beheer/kwaliteit/${statSeasonSlug()}/spelerscijfers`, status: 200 },
   { admin: 'editor', path: '/beheer/kwaliteit/1990-91/spelerscijfers', status: 200 },
