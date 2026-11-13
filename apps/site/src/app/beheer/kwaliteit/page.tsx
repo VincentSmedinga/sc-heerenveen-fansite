@@ -1,13 +1,14 @@
 import type { Metadata } from 'next'
 
 import { readSeasonCoverage } from '@fansite/db/season-coverage'
-import { Card, DataTable, Heading, Page, SegmentedLinks, Text } from '@fansite/design-system'
+import { Card, DataTable, Heading, Link, Page, SegmentedLinks, Text } from '@fansite/design-system'
 
 import { gapLegend, gapTableColumns, qualitySwitch } from '#src/app/beheer/kwaliteit/gap-table'
 import { toolbarAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { countGapsBySeason, gapColumns, readMatchGaps, seasonTablePath } from '#src/beheer/quality-table'
 import { requireRole } from '#src/beheer/require-role'
+import { usualSlotsPath } from '#src/beheer/usual-slots'
 import { getDatabase } from '#src/database'
 
 // Render on each request: who is logged in and what the database holds are not known when the
@@ -43,6 +44,9 @@ export default async function QualityPage() {
           {withGaps.length === 0
             ? 'Alle wedstrijden zijn compleet.'
             : `Nog ${plural(total, 'gat', 'gaten')} in ${plural(withGaps.length, 'wedstrijd', 'wedstrijden')} van de ${matchGaps.length}. Een getal in de tabel leidt naar de wedstrijden van dat seizoen met een gat in die kolom.`}
+        </Text>
+        <Text>
+          <Link href={usualSlotsPath}>Vaste plaatsen in een 4-3-3</Link>: waar spelers meestal stonden in hun rij.
         </Text>
       </Page.Cell>
       <Page.Toolbar>
