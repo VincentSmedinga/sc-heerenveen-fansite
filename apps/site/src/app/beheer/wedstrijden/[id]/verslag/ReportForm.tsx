@@ -462,8 +462,8 @@ export function ReportFields() {
         'speler',
         side,
         own
-          ? 'Kies een speler uit de selectie, of Andere speler als hij er niet in staat. Laat het rugnummer leeg voor het nummer van de selectie, of als de speler geen rugnummer had.'
-          : 'Schrijf de naam van de speler zoals de bron hem schrijft. Het rugnummer mag leeg blijven. Een kant die niet af is, mag leeg blijven.',
+          ? 'Kies een speler uit de selectie, of Andere speler als hij er niet in staat. Laat het rugnummer leeg voor het nummer van de selectie, of als de speler geen rugnummer had. Zet de spelers van de opstelling in deze volgorde: de keeper, dan elke rij van achter naar voren, en elke rij van links naar rechts gezien in de richting van de aanval. Die volgorde bepaalt waar een speler op het veld staat.'
+          : 'Schrijf de naam van de speler zoals de bron hem schrijft. Het rugnummer mag leeg blijven. Een kant die niet af is, mag leeg blijven. Zet de spelers van de opstelling in deze volgorde: de keeper, dan elke rij van achter naar voren, en elke rij van links naar rechts gezien in de richting van de aanval. Die volgorde bepaalt waar een speler op het veld staat.',
         <>
           {own ? (
             <>

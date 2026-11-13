@@ -28,7 +28,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De opstelling van beide teams op een veld, getekend uit de formatie en de volgorde van de spelers: de keeper staat vooraan, daarna komt de formatie rij voor rij.',
+          'De opstelling van beide teams op een veld, getekend uit de formatie en de volgorde van de spelers: de keeper staat vooraan, daarna komt de formatie rij voor rij, en elke rij loopt van links naar rechts, gezien in de richting van de aanval van het team.',
           'Een ring om elke speler toont de minuten die hij speelde, en merken tonen doelpunten, kaarten, wissels en de aanvoerder.',
           'Een schermlezer hoort per team een lijst met één zin per speler, en onder het veld staat dezelfde opstelling als lijst.',
           'Het veld is zo groot als er teams op staan. Staan beide teams erop, dan is het het hele veld. Is er van één team geen bruikbare formatie, dan staat alleen de helft van het andere team op het veld, op dezelfde schaal. Is er van geen van beide een formatie, dan is er geen veld en staat de lijst open, met een zin over elk team.',
@@ -111,6 +111,42 @@ export const Default = meta.story({
   },
   decorators: [phone],
   name: 'Een gewone wedstrijd',
+})
+
+// The players are named after the place they have in the formation, so a story shows that the
+// first player of a row stands on the left hand of the team, on both pitches.
+const byPlace = (): PitchPlayerData[] =>
+  [
+    ['Keeper', 'Doel'],
+    ['Linksback', 'Achter'],
+    ['Midvoor links', 'Achter'],
+    ['Midvoor rechts', 'Achter'],
+    ['Rechtsback', 'Achter'],
+    ['Linksmidden', 'Midden'],
+    ['Centraal links', 'Midden'],
+    ['Centraal rechts', 'Midden'],
+    ['Rechtsmidden', 'Midden'],
+    ['Spits links', 'Voor'],
+    ['Spits rechts', 'Voor'],
+  ].map(([surname, givenName], index) => player(index + 1, surname ?? '', givenName ?? ''))
+
+export const LeftToRight = meta.story({
+  args: {
+    headingLevel: 3,
+    opponent: opponent('4-4-2', byPlace()),
+    ours: ours('4-4-2', byPlace()),
+  },
+  decorators: [phone],
+  name: 'Een rij loopt van links naar rechts',
+})
+
+export const LeftToRightLyingDown = meta.story({
+  args: {
+    headingLevel: 3,
+    opponent: opponent('4-4-2', byPlace()),
+    ours: ours('4-4-2', byPlace()),
+  },
+  name: 'Een rij loopt van links naar rechts, liggend',
 })
 
 export const FiveInARow = meta.story({

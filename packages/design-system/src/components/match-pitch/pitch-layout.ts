@@ -1,9 +1,11 @@
 /**
  * Where the players of a team stand on the pitch, worked out from the formation. The goalkeeper
  * comes first, then the rows of the formation, from the defence to the attack, and the players
- * of a row stand evenly spread. A spot is a place in percent of the pitch, for the upright
- * pitch (a phone) and for the pitch that lies down (from 40 rem). No position of a player is
- * stored: the formation and the order of the players are all there is.
+ * of a row stand evenly spread, from the left of the team to its right, seen in the direction
+ * of its attack: the first player of a row is on the left hand of the team. A spot is a place
+ * in percent of the pitch, for the upright pitch (a phone) and for the pitch that lies down
+ * (from 40 rem). No position of a player is stored: the formation and the order of the players
+ * are all there is.
  */
 
 /** The most numbers a formation has, such as `4-1-2-1-2`, and the players it needs. */
@@ -104,8 +106,8 @@ export function pitchSpots(
 
       spots.push({
         landscape: ours
-          ? { x: percent(toward), y: percent(1 - offset) }
-          : { x: percent(1 - toward), y: percent(offset) },
+          ? { x: percent(toward), y: percent(offset) }
+          : { x: percent(1 - toward), y: percent(1 - offset) },
         landscapeShare: percent(rowGap * 0.95 * length),
         portrait: ours
           ? { x: percent(offset), y: percent(1 - toward) }

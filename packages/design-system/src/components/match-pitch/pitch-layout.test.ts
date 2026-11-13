@@ -83,6 +83,19 @@ describe('pitchSpots', () => {
     expect(theirs[0]?.landscape.x).toBeGreaterThan(50)
   })
 
+  it('puts the first player of a row on the left hand of the team, upright and lying down', () => {
+    // sc Heerenveen attacks up when upright and to the right when lying down; the opponent the
+    // other way, so the left hand of a team is on the left, then at the top for sc Heerenveen.
+    const ours = pitchSpots('4-4-2', lineUpSize, true) ?? []
+    const theirs = pitchSpots('4-4-2', lineUpSize, false) ?? []
+
+    // The first row of the formation is the players 1 to 4.
+    expect(ours[1]?.portrait.x).toBeLessThan(ours[4]?.portrait.x ?? 0)
+    expect(ours[1]?.landscape.y).toBeLessThan(ours[4]?.landscape.y ?? 0)
+    expect(theirs[1]?.portrait.x).toBeGreaterThan(theirs[4]?.portrait.x ?? 0)
+    expect(theirs[1]?.landscape.y).toBeGreaterThan(theirs[4]?.landscape.y ?? 0)
+  })
+
   it.each(formations)('puts the players of a half where they stand on the whole pitch, for %s', (formation) => {
     ;[true, false].forEach((ours) => {
       const whole = pitchSpots(formation, lineUpSize, ours) ?? []
