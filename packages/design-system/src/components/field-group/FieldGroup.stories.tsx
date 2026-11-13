@@ -32,11 +32,8 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Een groep van twee tot vier velden die bij elkaar horen, in een `fieldset` met een legenda.',
-          'De velden staan naast elkaar waar ze passen en onder elkaar waar niet, zoals op een telefoon.',
-          'Een schermlezer leest de legenda voor het label van elk veld, dus de labels kunnen kort zijn: "Datum" en "Tijd" onder "Aftrap".',
-          'Kies hem voor datum en tijd, voor een stand met een streepje tussen twee velden (de teamnamen zijn de labels) en voor een groep zoals "Stand na 90 minuten".',
-          'Een groep met een streepje houdt de twee velden ook op een telefoon naast elkaar.',
+          'Een groep van twee tot vier velden die bij elkaar horen, in een `fieldset` met een legenda. De legenda wordt voor het label van elk veld voorgelezen, dus de labels kunnen kort zijn.',
+          'Kies hem voor datum en tijd, of voor een stand met een streepje tussen twee velden.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

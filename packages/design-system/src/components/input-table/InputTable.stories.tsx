@@ -55,17 +55,8 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Een tabel om in te vullen, voor een lijst waarin de redacteur steeds hetzelfde invult, zoals de doelpunten van een wedstrijd.',
-          'Elk veld heeft zijn eigen label, met de rij erin voor een schermlezer: "Minuut, doelpunt 2".',
-          'Een rij kan twee regels velden hebben, naast het nummer van de rij en de knop om haar weg te halen.',
-          'De knop is een prullenbak met een naam voor een schermlezer en een tekst bij aanwijzen, en onder de tabel staat een knop om een rij toe te voegen.',
-          'Telt de volgorde van de rijen, dan heeft elke rij ook een knop omhoog en omlaag. De eerste rij heeft geen knop omhoog en de laatste geen knop omlaag.',
-          'Beide zijn verzendknoppen, dus het werkt ook zonder JavaScript: de server antwoordt met het formulier, met de rij erbij of eraf.',
-          'Een veld dat niet bij een rij past kan `hidden` zijn: het is dan niet te zien en gaat niet mee met het formulier, maar wat erin stond blijft staan.',
-          'Zet de tabel in een `Form`, onder een kop die zegt wat erin staat. Dat formulier is dan even breed als zijn ouder.',
-          '',
-          'Waar de tabel niet past, zoals op een telefoon, wordt elke rij een blok met het nummer en de knop bovenaan, zodat er niets zijwaarts schuift.',
-          'Op een brede pagina (`Page.Main` met `wide`) blijft de tabel in één stuk.',
+          'Een tabel om in te vullen, voor een lijst waarin de redacteur steeds hetzelfde invult, zoals de doelpunten van een wedstrijd. Elk veld heeft zijn eigen label, met de rij erin voor een schermlezer.',
+          'Het werkt ook zonder JavaScript: de knoppen om een rij toe te voegen, weg te halen of te verplaatsen zijn verzendknoppen. Zet de tabel in een `Form`, onder een kop die zegt wat erin staat.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -128,22 +119,6 @@ export const Empty = meta.story({
   name: 'Zonder rijen',
   parameters: { layout: 'padded' },
   render,
-})
-
-// Only on the canvas, with Storybook's viewport setting: the docs page can't resize the window.
-export const Phone = meta.story({
-  globals: { viewport: { value: 'mobile2' } },
-  name: 'Op een telefoon',
-  parameters: {
-    docs: {
-      description: {
-        story: 'Op een telefoon is elke rij een blok, in plaats van een tabel die zijwaarts schuift.',
-      },
-    },
-    layout: 'fullscreen',
-  },
-  render,
-  tags: ['!autodocs'],
 })
 
 export const WithHiddenField = meta.story({

@@ -66,9 +66,3 @@ const render = () => (
 )
 
 export const SideBySide = meta.story({ name: 'Standaard en klein onder elkaar', render })
-
-export const SideBySideDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Standaard en klein onder elkaar, donker',
-  render,
-})

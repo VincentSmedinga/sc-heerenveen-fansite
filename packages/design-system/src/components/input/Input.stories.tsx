@@ -1,82 +1,85 @@
 import preview from '#.storybook/preview'
 
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Field } from '../field/Field'
-import { Input } from './Input'
+import { sizes } from '../size'
+import { Input, inputTypes, inputWidths } from './Input'
 
 const meta = preview.meta({
+  argTypes: {
+    size: { control: 'radio', description: 'De maat van het veld.', options: sizes },
+    type: {
+      control: 'select',
+      description: 'Het soort veld. Zonder `type` is het een gewoon tekstveld.',
+      options: inputTypes,
+    },
+    width: {
+      control: 'radio',
+      description: 'De breedte: de regel, een paar tekens, of die van een datum of tijd.',
+      options: inputWidths,
+    },
+  },
   component: Input,
   parameters: {
     docs: {
       description: {
         component: [
           'Een veld voor tekst van één regel. Zet het altijd in een `Field`, dat het zijn label geeft.',
-          '',
-          'Met `type` kies je het soort veld, zoals `email`, `url`, `tel` of `password`.',
-          'Zonder `type` is het een gewoon tekstveld.',
-          'Een vinkje, een keuzerondje en een bestandsveld zijn andere onderdelen en komen later.',
-          '',
-          'Een veld met persoonsgegevens krijgt `autoComplete`, zoals `name`, `email` of `current-password`.',
-          'De browser kan het dan invullen, en niemand hoeft iets twee keer te typen.',
-          '',
-          'Het veld is hoog genoeg om met een vinger te raken, en zijn rand is goed te zien tegen de achtergrond.',
-          'Met `size="small"` is het veld lager, voor een veld naast de inhoud; in het hoofdstuk Maten van knoppen en velden staat wanneer je welke maat kiest.',
-          'Heeft het veld een fout (`aria-invalid`), dan is de rand dikker en heeft hij de kleur van fouten.',
-          '`Field` zet dat attribuut; de foutmelding zelf staat in tekst.',
-          '',
-          'Zonder `width` is het veld zo breed als de regel, tot een maximum.',
-          'Met `width="narrow"` is het smal, voor een paar tekens zoals een score of een minuut, en met `width="natural"` heeft het de breedte die de browser aan een datum of een tijd geeft.',
-          'Een naam of een zin houdt de standaardbreedte.',
+          'Met `type` kies je het soort veld, zoals `email`, `url` of `tel`, en een veld met persoonsgegevens krijgt `autoComplete`, zodat de browser het kan invullen. Een antwoord van een paar tekens, zoals een minuut, krijgt een smal veld.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
     },
   },
   tags: ['autodocs'],
   title: 'Componenten/Formulier/Input',
 })
 
-const render = () => (
-  <div className="hf-flow">
+export const Default = meta.story({
+  name: 'Tekstveld',
+  render: (args) => (
     <Field id="naam" label="Naam">
-      <Input autoComplete="name" name="naam" />
+      <Input autoComplete="name" name="naam" {...args} />
     </Field>
+  ),
+})
+
+export const Email = meta.story({
+  args: { type: 'email' },
+  name: 'E-mailadres',
+  render: (args) => (
     <Field id="e-mail" label="E-mailadres">
-      <Input autoComplete="email" name="e-mail" type="email" />
+      <Input autoComplete="email" name="e-mail" {...args} />
     </Field>
-    <Field id="link" label="Link naar het bericht" required={false}>
-      <Input name="link" type="url" />
+  ),
+})
+
+export const Small = meta.story({
+  args: { size: 'small', type: 'search' },
+  name: 'Kleine maat',
+  render: (args) => (
+    <Field id="zoeken" label="Zoeken">
+      <Input name="zoeken" {...args} />
     </Field>
-  </div>
-)
+  ),
+})
 
-export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', render })
-
-export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render })
-
-const small = () => (
-  <Field id="zoeken" label="Zoeken">
-    <Input name="zoeken" size="small" type="search" />
-  </Field>
-)
-
-export const SmallLight = meta.story({ globals: { theme: 'light' }, name: 'Kleine maat, licht', render: small })
-
-export const SmallDark = meta.story({ globals: { theme: 'dark' }, name: 'Kleine maat, donker', render: small })
-
-const widths = () => (
-  <div className="hf-flow">
+export const Narrow = meta.story({
+  args: { inputMode: 'numeric', width: 'narrow' },
+  name: 'Smal, voor een paar tekens',
+  render: (args) => (
     <Field id="minuut" label="Minuut">
-      <Input inputMode="numeric" name="minuut" width="narrow" />
+      <Input name="minuut" {...args} />
     </Field>
-    <Field id="datum" label="Datum">
-      <Input name="datum" type="date" width="natural" />
-    </Field>
-    <Field id="tijd" label="Tijd">
-      <Input name="tijd" type="time" width="natural" />
-    </Field>
-    <Field id="naam-lang" label="Naam">
-      <Input name="naam-lang" />
-    </Field>
-  </div>
-)
+  ),
+})
 
-export const Widths = meta.story({ name: 'Breedtes die bij het antwoord passen', render: widths })
+export const Natural = meta.story({
+  args: { type: 'date', width: 'natural' },
+  name: 'Datum',
+  render: (args) => (
+    <Field id="datum" label="Datum">
+      <Input name="datum" {...args} />
+    </Field>
+  ),
+})

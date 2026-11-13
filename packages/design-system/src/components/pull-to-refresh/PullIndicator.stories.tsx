@@ -1,35 +1,27 @@
 import preview from '#.storybook/preview'
 
-import { PullIndicator } from './PullIndicator'
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
+import { PullIndicator, type PullIndicatorProps } from './PullIndicator'
 
 const meta = preview.meta({
+  args: { progress: 1, refreshing: false },
+  argTypes: {
+    progress: {
+      control: { max: 1, min: 0, step: 0.1, type: 'range' },
+      description: 'Hoe ver de pagina is getrokken, van 0 tot 1. Bij 1 ververst het loslaten de pagina.',
+    },
+    refreshing: { control: 'boolean', description: 'Waar zodra de vinger los is en de pagina opnieuw laadt.' },
+  },
   component: PullIndicator,
   parameters: {
     docs: {
       description: {
         component: [
-          'Wat een bezoeker ziet als hij een pagina omlaag trekt om hem te verversen: een klein label bovenaan het scherm.',
-          'Het komt met de vinger mee omlaag en zegt wat er gebeurt als hij loslaat.',
-          '',
-          '- `progress` loopt van 0 tot 1.',
-          '  Bij 1 ververst het loslaten de pagina.',
-          '- `refreshing` is waar zodra de vinger los is en de pagina opnieuw laadt.',
-          '',
-          'Het label is verborgen voor schermlezers (`aria-hidden`).',
-          'Het is een hint voor een vinger op het scherm, en een schermlezer ziet dat gebaar niet.',
-          'De pagina die daarna laadt, leest de schermlezer zelf voor.',
-          'Met minder beweging komt het label niet omlaag: het blijft staan en verschijnt zodra loslaten ververst.',
-          '',
-          'Je gebruikt dit label niet zelf.',
-          '`PullToRefresh` zet het in beeld, en staat in de layout van de site.',
-          'Die luistert naar het gebaar, alleen als de site draait als app op het beginscherm, en laadt de pagina opnieuw.',
-          'In een browsertabblad, met het toetsenbord en zonder JavaScript verandert er niets.',
-          'In de app zet `PullToRefresh` ook de eigen verversing van de browser uit (Chrome op Android heeft die), zodat niet allebei afgaan.',
-          'De pagina scrolt en veert zoals altijd.',
-          '',
-          'Het label staat vast bovenaan het scherm; hier staat het in een kader.',
+          'Wat een bezoeker ziet als hij een pagina omlaag trekt om hem te verversen: een klein label bovenaan het scherm dat met de vinger meekomt en zegt wat er gebeurt als hij loslaat.',
+          'Je gebruikt dit label niet zelf: `PullToRefresh` zet het in beeld, alleen als de site draait als app op het beginscherm. Hier staat het in een kader.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
     },
   },
   tags: ['autodocs'],
@@ -38,47 +30,24 @@ const meta = preview.meta({
 
 // The label is fixed to the top of the screen. A transform on the frame makes it the box the
 // label is fixed to.
-const frame = (progress: number, refreshing = false) => (
+const frame = (args: PullIndicatorProps) => (
   <div style={{ blockSize: '6rem', transform: 'translateZ(0)' }}>
-    <PullIndicator progress={progress} refreshing={refreshing} />
+    <PullIndicator {...args} />
   </div>
 )
 
 // While the label is pulled down it fades in with the pull, so a snapshot at half way has
 // text at about 2.4:1. That is a moment of the movement, not a colour of the label: at 1 the
-// label has full contrast, as the stories "Klaar om los te laten" show. Only this rule is off.
+// label has full contrast, as the story "Klaar om los te laten" shows. Only this rule is off.
 const halfwayParameters = { a11y: { config: { rules: [{ enabled: false, id: 'color-contrast' }] } } }
 
-const pulling = () => frame(0.5)
-const ready = () => frame(1)
-const refreshing = () => frame(1, true)
-
-export const PullingLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Trekken, licht',
+export const Pulling = meta.story({
+  args: { progress: 0.5 },
+  name: 'Trekken',
   parameters: halfwayParameters,
-  render: pulling,
+  render: frame,
 })
 
-export const PullingDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Trekken, donker',
-  parameters: halfwayParameters,
-  render: pulling,
-})
+export const Ready = meta.story({ name: 'Klaar om los te laten', render: frame })
 
-export const ReadyLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Klaar om los te laten, licht',
-  render: ready,
-})
-
-export const ReadyDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Klaar om los te laten, donker',
-  render: ready,
-})
-
-export const RefreshingLight = meta.story({ globals: { theme: 'light' }, name: 'Verversen, licht', render: refreshing })
-
-export const RefreshingDark = meta.story({ globals: { theme: 'dark' }, name: 'Verversen, donker', render: refreshing })
+export const Refreshing = meta.story({ args: { refreshing: true }, name: 'Verversen', render: frame })

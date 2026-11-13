@@ -12,17 +12,12 @@ const options = [
   { href: '#eredivisie', label: 'Eredivisie', value: 'league' },
 ] as const
 
-// The type of the props as the table of controls shows it: the compiler gives
-// `unknown[number]` for the lists.
-const union = (values: readonly string[]) => ({ type: { summary: values.map((value) => `'${value}'`).join(' | ') } })
-
 const meta = preview.meta({
   argTypes: {
     size: {
       control: 'radio',
       description: 'De maat van de schakelaar.',
       options: sizes,
-      table: union(sizes),
     },
   },
   component: SegmentedLinks,
@@ -30,18 +25,8 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Dezelfde baan met een knop als SegmentedControl, voor een keuze die een adres is, zoals de wedstrijden die een pagina telt.',
-          'Je kiest hem als de keuze in het adres moet staan en ook zonder JavaScript moet werken.',
-          '',
-          'Elke optie is een link, en de optie die de pagina nu toont heeft `aria-current="page"` en dikkere letters.',
-          'Zonder JavaScript laadt een klik de pagina opnieuw, dus de knop schuift alleen als de browser een overgang tussen pagina’s kent; anders springt hij naar de nieuwe keuze.',
-          'Een pagina die de keuze zelf in de browser wil wisselen, vangt de klik op de groep op en geeft de nieuwe waarde, zoals het verhaal "De knop schuift naar een andere keuze" laat zien.',
-          'Geef de schakelaar met `place` een plek, een woord dat bij de plek op de pagina hoort, zoals `stand`.',
-          'Dan schuift de knop als de volgende pagina dezelfde schakelaar met een andere keuze heeft.',
-          'Een schakelaar op een andere plek van een andere pagina heeft een andere plek, zodat de knop niet over de pagina vliegt.',
-          'Twee schakelaars op één pagina hebben twee plekken.',
-          'Zonder plek doet de schakelaar niet mee aan de overgang.',
-          'Het component bewaart niets: de pagina geeft de waarde en de adressen.',
+          'Dezelfde baan met een knop als SegmentedControl, voor een keuze die een adres is, zoals de wedstrijden die een pagina telt. Je kiest hem als de keuze in het adres moet staan en ook zonder JavaScript moet werken.',
+          'Geef de schakelaar met `place` een plek, zoals `stand`, dan schuift de knop als de volgende pagina dezelfde schakelaar met een andere keuze heeft.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -59,20 +44,6 @@ export const Default = meta.story({
 export const TwoOptionsSmall = meta.story({
   args: { label: 'Welke wedstrijden', options, size: 'small', value: 'league' },
   name: 'Twee keuzes in de kleine maat, zoals op Cijfers',
-})
-
-export const LongLabels = meta.story({
-  args: {
-    label: 'Welke wedstrijden',
-    options: [
-      { href: '#alle-wedstrijden', label: 'Alle wedstrijden van het seizoen', value: 'all' },
-      { href: '#eredivisie', label: 'Alleen de competitiewedstrijden', value: 'league' },
-    ],
-    size: 'default',
-    value: 'all',
-  },
-  globals: { viewport: { value: 'mobile1' } },
-  name: 'Lange labels op een smal scherm',
 })
 
 // Pressing a link in the story does not load a page: the story takes over the value, so the
