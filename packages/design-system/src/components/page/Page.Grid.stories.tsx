@@ -2,6 +2,7 @@ import { type ReactNode } from 'react'
 
 import preview from '#.storybook/preview'
 
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Heading } from '../heading/Heading'
 import { SeasonPicker } from '../season-picker/SeasonPicker'
 import { Switch } from '../switch/Switch'
@@ -13,16 +14,11 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Een pagina is een raster met benoemde gebieden: een `Page.Main` met `areas` zegt welke gebieden de pagina heeft op een smal en op een breed scherm, en welke verdeling van de kolommen ze kiest.',
-          'Elke cel noemt zijn gebied met `area`. Zo kan een cel op een telefoon vóór de hoofdinhoud staan en op een breed scherm ernaast, zonder dat de volgorde van de code en van het toetsenbord verandert.',
-          '',
-          '- De kop met de inleiding staat bovenaan over de hele breedte, dan de werkbalk (`Page.Toolbar`), dan de inhoud en als laatste de bronvermelding.',
-          '- Een cel naast de hoofdinhoud is een `Page.Section` met een naam. Kaarten die alleen onder elkaar staan, gaan samen in één sectie, die zelf rijen heeft.',
-          '- De werkbalk hoort bij de hele pagina, zoals de keuze van een seizoen. Een pagina zonder werkbalk heeft op die plek geen lege ruimte.',
-          '',
-          'De verhalen voor een smal of breed scherm staan alleen in het canvas, met de instelling Viewport van de werkbalk.',
+          'Een `Page.Main` met `areas` is een raster met benoemde gebieden: de pagina zegt welke gebieden ze heeft op een smal en op een breed scherm, en elke cel noemt zijn gebied met `area`.',
+          'Je kiest het voor een pagina met meer dan één kolom, zodat een cel op een telefoon vóór de hoofdinhoud kan staan zonder dat de volgorde van de code verandert.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
     },
     layout: 'fullscreen',
   },
@@ -171,196 +167,11 @@ const page = ({ areas, columns, render }: Layout) => (
 )
 
 export const MainOnly = meta.story({ name: 'Alleen een hoofdkolom', render: () => page(layouts.main) })
-export const Main320 = meta.story({
-  globals: { viewport: { value: 'w320' } },
-  name: 'Alleen een hoofdkolom, 320 pixels',
-  render: () => page(layouts.main),
-  tags: ['!autodocs'],
-})
-export const Main400 = meta.story({
-  globals: { viewport: { value: 'w400' } },
-  name: 'Alleen een hoofdkolom, 400 pixels',
-  render: () => page(layouts.main),
-  tags: ['!autodocs'],
-})
-export const Main560 = meta.story({
-  globals: { viewport: { value: 'w560' } },
-  name: 'Alleen een hoofdkolom, 560 pixels',
-  render: () => page(layouts.main),
-  tags: ['!autodocs'],
-})
-export const Main900 = meta.story({
-  globals: { viewport: { value: 'w900' } },
-  name: 'Alleen een hoofdkolom, 900 pixels',
-  render: () => page(layouts.main),
-  tags: ['!autodocs'],
-})
-export const Main1280 = meta.story({
-  globals: { viewport: { value: 'w1280' } },
-  name: 'Alleen een hoofdkolom, 1280 pixels',
-  render: () => page(layouts.main),
-  tags: ['!autodocs'],
-})
-
 export const SideOnly = meta.story({ name: 'Met een zijkolom', render: () => page(layouts.side) })
-export const Side320 = meta.story({
-  globals: { viewport: { value: 'w320' } },
-  name: 'Met een zijkolom, 320 pixels',
-  render: () => page(layouts.side),
-  tags: ['!autodocs'],
-})
-export const Side400 = meta.story({
-  globals: { viewport: { value: 'w400' } },
-  name: 'Met een zijkolom, 400 pixels',
-  render: () => page(layouts.side),
-  tags: ['!autodocs'],
-})
-export const Side560 = meta.story({
-  globals: { viewport: { value: 'w560' } },
-  name: 'Met een zijkolom, 560 pixels',
-  render: () => page(layouts.side),
-  tags: ['!autodocs'],
-})
-export const Side900 = meta.story({
-  globals: { viewport: { value: 'w900' } },
-  name: 'Met een zijkolom, 900 pixels',
-  render: () => page(layouts.side),
-  tags: ['!autodocs'],
-})
-export const Side1280 = meta.story({
-  globals: { viewport: { value: 'w1280' } },
-  name: 'Met een zijkolom, 1280 pixels',
-  render: () => page(layouts.side),
-  tags: ['!autodocs'],
-})
-
 export const FirstOnly = meta.story({
   name: 'Met een cel die op een telefoon voor de hoofdinhoud staat',
   render: () => page(layouts.first),
 })
-export const First320 = meta.story({
-  globals: { viewport: { value: 'w320' } },
-  name: 'Met een cel die op een telefoon voor de hoofdinhoud staat, 320 pixels',
-  render: () => page(layouts.first),
-  tags: ['!autodocs'],
-})
-export const First400 = meta.story({
-  globals: { viewport: { value: 'w400' } },
-  name: 'Met een cel die op een telefoon voor de hoofdinhoud staat, 400 pixels',
-  render: () => page(layouts.first),
-  tags: ['!autodocs'],
-})
-export const First560 = meta.story({
-  globals: { viewport: { value: 'w560' } },
-  name: 'Met een cel die op een telefoon voor de hoofdinhoud staat, 560 pixels',
-  render: () => page(layouts.first),
-  tags: ['!autodocs'],
-})
-export const First900 = meta.story({
-  globals: { viewport: { value: 'w900' } },
-  name: 'Met een cel die op een telefoon voor de hoofdinhoud staat, 900 pixels',
-  render: () => page(layouts.first),
-  tags: ['!autodocs'],
-})
-export const First1280 = meta.story({
-  globals: { viewport: { value: 'w1280' } },
-  name: 'Met een cel die op een telefoon voor de hoofdinhoud staat, 1280 pixels',
-  render: () => page(layouts.first),
-  tags: ['!autodocs'],
-})
-
 export const EqualOnly = meta.story({ name: 'Met twee gelijke kolommen', render: () => page(layouts.equal) })
-export const Equal320 = meta.story({
-  globals: { viewport: { value: 'w320' } },
-  name: 'Met twee gelijke kolommen, 320 pixels',
-  render: () => page(layouts.equal),
-  tags: ['!autodocs'],
-})
-export const Equal400 = meta.story({
-  globals: { viewport: { value: 'w400' } },
-  name: 'Met twee gelijke kolommen, 400 pixels',
-  render: () => page(layouts.equal),
-  tags: ['!autodocs'],
-})
-export const Equal560 = meta.story({
-  globals: { viewport: { value: 'w560' } },
-  name: 'Met twee gelijke kolommen, 560 pixels',
-  render: () => page(layouts.equal),
-  tags: ['!autodocs'],
-})
-export const Equal900 = meta.story({
-  globals: { viewport: { value: 'w900' } },
-  name: 'Met twee gelijke kolommen, 900 pixels',
-  render: () => page(layouts.equal),
-  tags: ['!autodocs'],
-})
-export const Equal1280 = meta.story({
-  globals: { viewport: { value: 'w1280' } },
-  name: 'Met twee gelijke kolommen, 1280 pixels',
-  render: () => page(layouts.equal),
-  tags: ['!autodocs'],
-})
-
 export const StartOnly = meta.story({ name: 'Met een zijkolom links', render: () => page(layouts.start) })
-export const Start320 = meta.story({
-  globals: { viewport: { value: 'w320' } },
-  name: 'Met een zijkolom links, 320 pixels',
-  render: () => page(layouts.start),
-  tags: ['!autodocs'],
-})
-export const Start400 = meta.story({
-  globals: { viewport: { value: 'w400' } },
-  name: 'Met een zijkolom links, 400 pixels',
-  render: () => page(layouts.start),
-  tags: ['!autodocs'],
-})
-export const Start560 = meta.story({
-  globals: { viewport: { value: 'w560' } },
-  name: 'Met een zijkolom links, 560 pixels',
-  render: () => page(layouts.start),
-  tags: ['!autodocs'],
-})
-export const Start900 = meta.story({
-  globals: { viewport: { value: 'w900' } },
-  name: 'Met een zijkolom links, 900 pixels',
-  render: () => page(layouts.start),
-  tags: ['!autodocs'],
-})
-export const Start1280 = meta.story({
-  globals: { viewport: { value: 'w1280' } },
-  name: 'Met een zijkolom links, 1280 pixels',
-  render: () => page(layouts.start),
-  tags: ['!autodocs'],
-})
-
 export const ToolbarOnly = meta.story({ name: 'Met een werkbalk', render: () => page(layouts.toolbar) })
-export const Toolbar320 = meta.story({
-  globals: { viewport: { value: 'w320' } },
-  name: 'Met een werkbalk, 320 pixels',
-  render: () => page(layouts.toolbar),
-  tags: ['!autodocs'],
-})
-export const Toolbar400 = meta.story({
-  globals: { viewport: { value: 'w400' } },
-  name: 'Met een werkbalk, 400 pixels',
-  render: () => page(layouts.toolbar),
-  tags: ['!autodocs'],
-})
-export const Toolbar560 = meta.story({
-  globals: { viewport: { value: 'w560' } },
-  name: 'Met een werkbalk, 560 pixels',
-  render: () => page(layouts.toolbar),
-  tags: ['!autodocs'],
-})
-export const Toolbar900 = meta.story({
-  globals: { viewport: { value: 'w900' } },
-  name: 'Met een werkbalk, 900 pixels',
-  render: () => page(layouts.toolbar),
-  tags: ['!autodocs'],
-})
-export const Toolbar1280 = meta.story({
-  globals: { viewport: { value: 'w1280' } },
-  name: 'Met een werkbalk, 1280 pixels',
-  render: () => page(layouts.toolbar),
-  tags: ['!autodocs'],
-})

@@ -1,5 +1,6 @@
 import preview from '#.storybook/preview'
 
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Heading } from '../heading/Heading'
 import { List } from '../list/List'
 import { Text } from '../text/Text'
@@ -10,14 +11,11 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Zet wat bij elkaar hoort in één cel van een kolom, zoals een kop met een inleiding.',
-          'Het is een `div` zonder rol.',
-          '',
-          '- Elk kind van een `Page.Main` is al een cel. Een `Page.Cell` maakt van meer dingen één cel.',
-          '- De cel bepaalt de ruimte tussen wat erin staat, zoals tussen een kop en de tekst eronder (zie _Ruimte tussen onderdelen_ in het hoofdstuk Ruimte), en niets erin heeft een marge naar buiten.',
-          '- De ruimte tussen de cellen komt van de `Page.Main`.',
+          'Een `Page.Cell` zet wat bij elkaar hoort, zoals een kop met een inleiding, in één cel van de pagina.',
+          'Je kiest hem als meer dan één ding samen één plek op de pagina moet krijgen.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
       source: {
         code: `<Page.Cell>
   <Heading appearance={3} level={2}>
@@ -37,28 +35,27 @@ const meta = preview.meta({
 // The dashed lines show the cells. They are only in these stories.
 const outline = '.hf-page-main > * { outline: 1px dashed var(--hf-colour-border-input); }'
 
-const render = () => (
-  <Page.Body>
-    <style>{outline}</style>
-    <Page.Main>
-      <Page.Cell>
-        <Heading level={1}>Een kop met een inleiding</Heading>
-        <Text>De kop en deze tekst zijn samen één cel, dus de cel bepaalt de ruimte ertussen.</Text>
-      </Page.Cell>
-      <Text>Deze tekst is een cel op zich. De ruimte tussen de cellen is overal even groot.</Text>
-      <Page.Cell>
-        <Heading appearance={3} level={2}>
-          Een lijst onder een kop
-        </Heading>
-        <List>
-          <List.Item>Ook een kop met een lijst is één cel.</List.Item>
-          <List.Item>De lijst heeft geen ruimte onder zich.</List.Item>
-        </List>
-      </Page.Cell>
-    </Page.Main>
-  </Page.Body>
-)
-
-export const Light = meta.story({ globals: { theme: 'light' }, name: 'Licht', render })
-
-export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render })
+export const Default = meta.story({
+  name: 'Cellen',
+  render: () => (
+    <Page.Body>
+      <style>{outline}</style>
+      <Page.Main>
+        <Page.Cell>
+          <Heading level={1}>Een kop met een inleiding</Heading>
+          <Text>De kop en deze tekst zijn samen één cel.</Text>
+        </Page.Cell>
+        <Text>Deze tekst is een cel op zich.</Text>
+        <Page.Cell>
+          <Heading appearance={3} level={2}>
+            Een lijst onder een kop
+          </Heading>
+          <List>
+            <List.Item>Ook een kop met een lijst is één cel.</List.Item>
+            <List.Item>De lijst heeft geen ruimte onder zich.</List.Item>
+          </List>
+        </Page.Cell>
+      </Page.Main>
+    </Page.Body>
+  ),
+})

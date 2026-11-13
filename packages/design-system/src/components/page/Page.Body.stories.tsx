@@ -1,5 +1,6 @@
 import preview from '#.storybook/preview'
 
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { ExampleContent, ExampleMainWithSide } from '../../docs/ExamplePage'
 import { Page } from './Page'
 
@@ -8,13 +9,11 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De ruimte van de pagina, tussen de header en de footer.',
-          'Het is een `div` met de `Page.Main` erin.',
-          '',
-          '- De `Page.Body` regelt de witruimte om de `Page.Main` heen. De verdeling in kolommen en gebieden is die van de `Page.Main` (zie Page.Main met gebieden).',
-          '- Het groeit mee met het scherm, zodat de footer onderaan blijft staan.',
+          'De ruimte van de pagina tussen de header en de footer, met de `Page.Main` erin.',
+          'Je kiest hem voor elke pagina, zodat de footer onderaan blijft staan als er weinig inhoud is.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
       source: {
         code: `<Page.Body>
   <Page.Main>…</Page.Main>
@@ -44,9 +43,8 @@ const withSidebar = () => (
   </Page.Body>
 )
 
-export const Light = meta.story({
-  globals: { theme: 'light' },
-  name: 'Licht',
+export const Default = meta.story({
+  name: 'Alleen een hoofdkolom',
   parameters: {
     docs: {
       description: { story: 'Alleen een hoofdkolom, met de hele inhoud in één cel.' },
@@ -55,95 +53,12 @@ export const Light = meta.story({
   render: onlyMain,
 })
 
-export const Dark = meta.story({ globals: { theme: 'dark' }, name: 'Donker', render: onlyMain })
-
-const sidebarDescription = 'Een pagina met gebieden: de kop bovenaan, en de hoofdinhoud met een zijkolom ernaast.'
-
-export const WithSidebarLight = meta.story({
-  globals: { theme: 'light' },
-  name: 'Met zijbalk, licht',
-  parameters: { docs: { description: { story: sidebarDescription } } },
-  render: withSidebar,
-})
-
-export const WithSidebarDark = meta.story({
-  globals: { theme: 'dark' },
-  name: 'Met zijbalk, donker',
-  render: withSidebar,
-})
-
-// Only on the canvas, with Storybook's viewport setting: on the docs page they would show the
-// same as the stories above, because the docs page can't resize the window. The window is what
-// the breakpoint follows, so the story fills it.
-const screens = { parameters: { layout: 'fullscreen' as const }, tags: ['!autodocs'] }
-
-const narrow = { value: 'mobile1' }
-const wide = { value: 'wide' }
-
-export const OnlyMainNarrowLight = meta.story({
-  ...screens,
-  globals: { theme: 'light', viewport: narrow },
-  name: 'Alleen een hoofdkolom, smal scherm, licht',
-  render: onlyMain,
-})
-
-export const OnlyMainNarrowDark = meta.story({
-  ...screens,
-  globals: { theme: 'dark', viewport: narrow },
-  name: 'Alleen een hoofdkolom, smal scherm, donker',
-  render: onlyMain,
-})
-
-export const OnlyMainWideLight = meta.story({
-  ...screens,
-  globals: { theme: 'light', viewport: wide },
-  name: 'Alleen een hoofdkolom, breed scherm, licht',
-  render: onlyMain,
-})
-
-export const OnlyMainWideDark = meta.story({
-  ...screens,
-  globals: { theme: 'dark', viewport: wide },
-  name: 'Alleen een hoofdkolom, breed scherm, donker',
-  render: onlyMain,
-})
-
-export const WithSidebarNarrowLight = meta.story({
-  ...screens,
-  globals: { theme: 'light', viewport: narrow },
-  name: 'Met zijbalk, smal scherm, licht',
+export const WithSidebar = meta.story({
+  name: 'Met zijbalk',
   parameters: {
-    ...screens.parameters,
-    docs: { description: { story: 'Op een smal scherm staat de zijbalk onder de hoofdkolom.' } },
-  },
-  render: withSidebar,
-})
-
-export const WithSidebarNarrowDark = meta.story({
-  ...screens,
-  globals: { theme: 'dark', viewport: narrow },
-  name: 'Met zijbalk, smal scherm, donker',
-  render: withSidebar,
-})
-
-export const WithSidebarWideLight = meta.story({
-  ...screens,
-  globals: { theme: 'light', viewport: wide },
-  name: 'Met zijbalk, breed scherm, licht',
-  parameters: {
-    ...screens.parameters,
     docs: {
-      description: {
-        story: 'Op een breed scherm staan de hoofdkolom en de zijbalk naast elkaar.',
-      },
+      description: { story: 'Een pagina met gebieden: de kop bovenaan, en de hoofdinhoud met een zijkolom ernaast.' },
     },
   },
-  render: withSidebar,
-})
-
-export const WithSidebarWideDark = meta.story({
-  ...screens,
-  globals: { theme: 'dark', viewport: wide },
-  name: 'Met zijbalk, breed scherm, donker',
   render: withSidebar,
 })

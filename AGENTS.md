@@ -321,7 +321,7 @@ How to make them:
    For a component, build Storybook (`pnpm --filter design-system build-storybook`) and serve the folder `packages/design-system/storybook-static`.
 2. `pnpm screenshots <address of the build> <path or story id>...` writes the PNGs into `screenshots/` (git ignores it), and adds `--dark` when dark is needed.
    It takes only a build on this computer.
-   A path starts with a slash (`/nieuws/podcasts`); anything else is the id of a story (`componenten-pagina-page-footer--light`).
+   A path starts with a slash (`/nieuws/podcasts`); anything else is the id of a story (`componenten-pagina-page-footer--default`).
    Look at the images before you use them.
    Stop a server you started by its process number, never with `pkill -f` or another command that looks for a name or a path (see `pr-screenshots`).
 

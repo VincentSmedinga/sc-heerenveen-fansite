@@ -1,5 +1,6 @@
 import preview from '#.storybook/preview'
 
+import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { ExampleHeader, ExampleMain } from '../../docs/ExamplePage'
 import { Heading } from '../heading/Heading'
 import { Text } from '../text/Text'
@@ -10,25 +11,11 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Een balk direct onder het hoofdmenu, met een label en een rij links die zijwaarts scrolt.',
-          'Hij is er voor een pagina waarvan de cellen op een smal scherm onder elkaar staan: een lange cel verbergt dan de cellen erna, en de balk springt ernaartoe.',
-          'Zet hem tussen het hoofdmenu (de `Navigation` na de `Page.Header`) en de `Page.Body`, buiten de `main`.',
-          'Het label zegt wat de links zijn en is ook de naam van de navigatie.',
-          'Het blijft staan als de rij scrolt.',
-          'De laatste zichtbare link is half afgesneden en de rij vervaagt aan de rand, zodat je ziet dat er meer is.',
-          'De rij snapt op het begin van een link.',
-          'De balk blijft aan de bovenkant van het venster plakken als de pagina scrolt.',
-          'Op een breed scherm, waar de cellen naast elkaar staan, is de balk er niet, ook niet voor een schermlezer.',
-          'Terwijl je scrolt, volgt de balk de pagina: de link naar de kaart waar je bent staat vooraan in de rij, met een rode streep eronder.',
-          'Dat is de kaart waarvan de kop als laatste boven de balk is gekomen.',
-          'Vóór de eerste kop is er geen huidige link, en zonder script ook niet.',
-          'De rij scrolt, nooit de pagina, en niet terwijl je de rij aanraakt of met het toetsenbord in de rij bent.',
-          'De streep betekent: je bent hier, en geldt voor een plek op de pagina, niet voor een pagina.',
-          '',
-          'De balk heeft alleen op een smal scherm iets te laten zien, dus de verhalen staan alleen in het canvas.',
-          'Kies bij Viewport in de werkbalk een smal scherm.',
+          'Een balk direct onder het hoofdmenu met een label en een rij links naar de kaarten van de pagina.',
+          'Je kiest hem voor een pagina waarvan de cellen op een telefoon onder elkaar staan; op een breed scherm is hij er niet, dus de verhalen staan alleen in het canvas, met een smal scherm bij Viewport.',
         ].join('\n'),
       },
+      page: ControlsDocsPage,
       source: {
         code: `<Page.Shortcuts
   items={[
@@ -74,17 +61,10 @@ const render = renderWith(cards)
 // the body has two columns, and the docs page is wider than that.
 const phone = { tags: ['!autodocs'] }
 
-export const Light = meta.story({
+export const Default = meta.story({
   ...phone,
   globals: { theme: 'light', viewport: { value: 'mobile2' } },
-  name: 'Licht',
-  render,
-})
-
-export const Dark = meta.story({
-  ...phone,
-  globals: { theme: 'dark', viewport: { value: 'mobile2' } },
-  name: 'Donker',
+  name: 'Snelkoppelingen',
   render,
 })
 
@@ -110,13 +90,6 @@ export const Wrapped = meta.story({
       },
     },
   },
-  render,
-})
-
-export const WrappedDark = meta.story({
-  ...phone,
-  globals: { theme: 'dark', viewport: { value: 'mobile1' } },
-  name: 'Smal scherm: de rij loopt om, donker',
   render,
 })
 
@@ -180,43 +153,4 @@ export const Follows = meta.story({
   parameters: followParameters,
   play: scrollToStand,
   render: renderLongPage,
-})
-
-export const FollowsDark = meta.story({
-  ...phone,
-  globals: { theme: 'dark', viewport: { value: 'mobile2' } },
-  name: 'Volgt de pagina, donker',
-  parameters: followParameters,
-  play: scrollToStand,
-  render: renderLongPage,
-})
-
-const statesParameters = {
-  docs: {
-    description: {
-      story:
-        'De toestanden van een link, nagebootst met de add-on Pseudo States: de eerste onder de muis, de tweede ingedrukt, de derde met de focus. In rust heeft een link geen onderstreping.',
-    },
-  },
-  pseudo: {
-    active: ['.hf-page-shortcuts li:nth-child(2) a'],
-    focusVisible: ['.hf-page-shortcuts li:nth-child(3) a'],
-    hover: ['.hf-page-shortcuts li:nth-child(1) a'],
-  },
-}
-
-export const StatesLight = meta.story({
-  ...phone,
-  globals: { theme: 'light', viewport: { value: 'mobile2' } },
-  name: 'Toestanden',
-  parameters: statesParameters,
-  render,
-})
-
-export const StatesDark = meta.story({
-  ...phone,
-  globals: { theme: 'dark', viewport: { value: 'mobile2' } },
-  name: 'Toestanden, donker',
-  parameters: statesParameters,
-  render,
 })
