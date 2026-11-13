@@ -49,18 +49,20 @@ const player = (
 ): PitchPlayerData => ({ minutesPlayed: 90, name: { givenName, surname }, shirtNumber, ...rest })
 
 // Made-up players and a made-up club, like the data of the seed.
+// The numbers of a 4-2-3-1, from the keeper to the attack, each row from left to right: 1, then
+// 5 4 3 2, then 6 8, then 11 10 7, then 9.
 const ourPlayers = (formationRest: Record<number, Partial<PitchPlayerData>> = {}): PitchPlayerData[] =>
   [
     player(1, 'Demo', 'Rick', { captain: true }),
-    player(2, 'Proefveld', 'Ties'),
-    player(3, 'Maquette', 'Wim'),
-    player(4, 'Nepper', 'Gerrit'),
     player(5, 'Idzenga', 'Thijs', { minutesPlayed: 62, substitutedOffAt: 62 }),
+    player(4, 'Nepper', 'Gerrit'),
+    player(3, 'Maquette', 'Wim'),
+    player(2, 'Proefveld', 'Ties'),
     player(6, 'Boerema', 'Daan', { card: { kind: 'yellow-card', minute: 27 } }),
     player(8, 'Reitsma', 'Milan'),
+    player(11, 'Monster', 'Sven'),
     player(10, 'Voorbeeld', 'Jelle', { goals: [{ minute: 12 }] }),
     player(7, 'Schijn', 'Luuk', { minutesPlayed: 78, substitutedOffAt: 78 }),
-    player(11, 'Monster', 'Sven'),
     player(9, 'Sjabloon', 'Okke', { goals: [{ minute: 58 }, { minute: 90, stoppageMinutes: 2 }] }),
   ].map((one, index) => ({ ...one, ...formationRest[index] }))
 
