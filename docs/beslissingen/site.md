@@ -5294,6 +5294,7 @@
   Eén veld voor de datum werkt zonder JavaScript en met elk hulpmiddel; een datumveld van de browser kent geen los jaar.
 - **Alternatieven:** alleen de persoon hernoemen en de seizoenen laten (de lijst van een seizoen toont dan de oude naam); drie velden voor dag, maand en jaar (meer werk voor een veld dat meestal een jaar is); een datumveld van de browser met een apart veld voor een jaar.
 - **Later:** zie _De reden bij een opslag of een besluit in het beheer is optioneel_ (12 november 2026): de reden bij Opslaan mag leeg.
+- **Later:** zie _De quiz vraagt de kant van spelers, een speler tegelijk_ (13 november 2026): het deel Linie heet nu Linie en kant en heeft ook de keuze Kant.
 
 ## De tabel van de personen telt vijf gegevens per persoon
 
@@ -5423,3 +5424,19 @@
 - **Waarom:** de volgorde bepaalt waar een speler op het veld staat, en de redactie moest een speler weghalen en opnieuw invullen om hem te verplaatsen.
   Een kolom is een migratie en een tweede waarheid naast `id`.
 - **Alternatieven:** een kolom `position` (nodig als de rijen ooit niet meer opnieuw worden geschreven); slepen; een veld "plaats".
+
+## De quiz vraagt de kant van spelers, een speler tegelijk
+
+- **Datum:** 13 november 2026
+- **Besluit:** de pagina `/beheer/kwaliteit/plaatsen/vragen` (#1194) vraagt de kant van de spelers van de lijst met vaste plaatsen (#1193) die nog geen kant hebben, een speler tegelijk.
+  De spelers die er elke keer op dezelfde plaats stonden, komen eerst.
+  Bij een speler staan zijn linie, zijn jaren in de selectie en de plaats die de oude opstellingen hem geven.
+  Er zijn drie knoppen, Links, Midden en Rechts, en een knop Overslaan.
+  Elke knop is een verzendknop, dus het werkt zonder JavaScript, en zegt voor een schermlezer de naam van de speler: "Speler 4: links".
+  Het antwoord is de kant van de persoon, met dezelfde regel in het logboek als het formulier van de persoon ("kant: geen → links").
+  Een speler die je overslaat, blijft in het adres (`?over=`) en komt in deze ronde niet terug; open de pagina opnieuw voor de overgeslagen spelers.
+  Na een antwoord of een skip staat de focus op de kop van de volgende speler, of op de tekst dat niemand meer over is, met een klein client-component dat de focus zet als de speler wisselt (`QuestionHeading`).
+  Zonder JavaScript verspringt de focus niet, en een melding die een status is, zegt wat is opgeslagen.
+- **Waarom:** de redactie kent veel spelers uit het hoofd, en snel antwoorden is het doel.
+  Het formulier van een persoon vraagt dezelfde kant, maar per persoon een pagina.
+- **Alternatieven:** de kant bij elk formulier invullen (veel klikken); de overgeslagen spelers in de database bewaren (een tabel of kolom voor iets dat een sessie duurt).

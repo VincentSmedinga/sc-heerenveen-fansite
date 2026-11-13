@@ -856,6 +856,11 @@ export const deathDateSources = ['wikidata', 'manual'] as const
 
 export type DeathDateSource = (typeof deathDateSources)[number]
 
+/** The side of the pitch a person played on, seen in the direction of the attack (#1194). */
+export const playerSides = ['links', 'midden', 'rechts'] as const
+
+export type PlayerSide = (typeof playerSides)[number]
+
 /**
  * Where the birth date of a person came from (#1164): `wikidata` from `P569`, `manual` a year
  * or a day the editors filled in. The importer never replaces `manual`.
@@ -935,6 +940,10 @@ export const persons = mysqlTable('persons', {
   deathDateSource: mysqlEnum('death_date_source', deathDateSources),
   line: mysqlEnum('line', playerPositions),
   lineSource: mysqlEnum('line_source', personLineSources),
+  // The side the person usually played on, in every season (#1194): `links`, `midden` or
+  // `rechts`, seen in the direction of the attack. Only the editors set it, in the form of the
+  // person, so there is no source: no import reads or replaces it. Empty until someone says.
+  side: mysqlEnum('side', playerSides),
   // The country of the person (#1051): the code of two letters in capitals (`NL`), and where
   // it came from. Both are empty for a person whose country we do not know. A season can
   // differ: `players.country` goes before it on the page of that season, as `players.position`

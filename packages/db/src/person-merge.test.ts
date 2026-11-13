@@ -721,6 +721,14 @@ describe('mergeEditorsPersonInto', () => {
     ])
   })
 
+  it('keeps the side the editors gave, of the person that stays or else of the other (#1194)', async () => {
+    const untitled = await addPerson({ name: 'Sanne Spits', nameSource: 'redactie', side: 'links' })
+    const titled = await addPerson({ name: 'S. Spits', wikipediaPage: 'Sanne Spits (1999)' })
+
+    expect(await mergeEditorsPersonInto(database.db, untitled, titled)).toBe(true)
+    expect(await personRows()).toMatchObject([{ id: titled, side: 'links' }])
+  })
+
   it('leaves a person with an article of his own alone, and a person who is gone', async () => {
     const one = await addPerson({ wikipediaPage: 'Sanne Spits' })
     const two = await addPerson({ wikipediaPage: 'Sanne Spits (1999)' })

@@ -526,6 +526,13 @@
       "when": 1794521464008,
       "tag": "0074_make_edit_reason_optional",
       "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "5",
+      "when": 1794562710764,
+      "tag": "0075_add_person_side",
+      "breakpoints": true
     }
   ]
 }

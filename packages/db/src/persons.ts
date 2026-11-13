@@ -18,6 +18,7 @@ import {
   playerListTitles,
   type PlayerPosition,
   players,
+  type PlayerSide,
   wikidataItems,
 } from './schema.ts'
 
@@ -803,11 +804,18 @@ export async function setEditorsPersonFacts(
     country?: null | string
     deathYear?: null | number
     line?: null | PlayerPosition
+    side?: null | PlayerSide
   },
 ): Promise<void> {
-  const { birthDate, country, deathYear, line } = facts
+  const { birthDate, country, deathYear, line, side } = facts
 
-  if (country === undefined && line === undefined && deathYear === undefined && birthDate === undefined) {
+  if (
+    country === undefined &&
+    line === undefined &&
+    deathYear === undefined &&
+    birthDate === undefined &&
+    side === undefined
+  ) {
     return
   }
 
@@ -816,6 +824,7 @@ export async function setEditorsPersonFacts(
     .set({
       ...(country === undefined ? {} : { country, countrySource: country === null ? null : ('manual' as const) }),
       ...(line === undefined ? {} : { line, lineSource: line === null ? null : ('manual' as const) }),
+      ...(side === undefined ? {} : { side }),
       // A birth date of the editors (#1164), taken away as the year of death is.
       ...(birthDate === undefined
         ? {}

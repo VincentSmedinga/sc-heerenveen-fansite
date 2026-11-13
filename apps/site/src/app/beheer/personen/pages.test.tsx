@@ -92,7 +92,7 @@ describe('the page of a person', () => {
   it('has one h1 with the name, the seasons as links, the parts and every card', async () => {
     const html = await page(personId)
 
-    expect(headings(html)).toEqual(['1 Jan Verzonnen', '2 Naam', '2 Leven', '2 Land', '2 Linie', '2 Opslaan'])
+    expect(headings(html)).toEqual(['1 Jan Verzonnen', '2 Naam', '2 Leven', '2 Land', '2 Linie en kant', '2 Opslaan'])
     expect(html).toContain(`In onze selectie: <a href="/beheer/spelers/${playerIds[0]}"`)
     expect(html).toMatch(new RegExp(`href="/beheer/spelers/${playerIds[1]}"[^>]*>2005/06</a>`, 'u'))
     expect(html).toMatch(/<nav[^>]*aria-label="Delen van de persoon"/u)

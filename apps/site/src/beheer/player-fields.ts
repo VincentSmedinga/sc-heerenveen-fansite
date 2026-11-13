@@ -44,6 +44,13 @@ export const emptyPlayerValues: PlayerValues = Object.fromEntries(
   playerFieldNames.map((name) => [name, name === 'persoon' ? newPersonChoice : '']),
 ) as PlayerValues
 
+/** The sides to choose from, seen in the direction of the attack, with the word of the form. */
+export const sideChoices = [
+  { label: 'Links', value: 'links' },
+  { label: 'Midden', value: 'midden' },
+  { label: 'Rechts', value: 'rechts' },
+] as const
+
 /** The lines to choose from, in the order of the pitch, with the word the form shows. */
 export const positionChoices = [
   { label: 'Doelman', value: 'doelman' },
