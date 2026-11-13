@@ -65,14 +65,12 @@ export default async function UsualSlotsPage() {
             <DataTable
               appearance="text"
               caption={`De vaakste plaats van elke speler in een ${countedFormation}, de spelers met de meeste wedstrijden bovenaan`}
-              columns={['Speler', 'Wedstrijden', 'Plaats', 'Aandeel']}
+              columns={['Speler', 'Plaats']}
               rows={slots.map((slot) => ({
-                cells: [
-                  String(slot.matches),
-                  slotText(slot),
-                  `${slot.percentage}%${slot.percentage === 100 ? ', elke keer' : ''}`,
-                ],
+                cells: [slotText(slot)],
                 header: slot.name,
+                // The count and the share under the name: two columns fit a phone, five do not.
+                secondary: `${slot.matches} wedstrijden, ${slot.percentage === 100 ? 'elke keer' : `${slot.percentage}%`}`,
                 ...(slot.playerId === null ? {} : { href: playerPath(slot.playerId) }),
               }))}
             />
