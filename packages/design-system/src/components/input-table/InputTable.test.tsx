@@ -175,6 +175,57 @@ describe('InputTable', () => {
     expect(button.textContent).toBe('')
   })
 
+  it('has no buttons to move a row unless the row has them', () => {
+    render(<InputTable {...props} />)
+
+    expect(screen.queryByRole('button', { name: /omhoog|omlaag/u })).toBeNull()
+  })
+
+  it('has buttons that move a row up or down, with the name of the row, and leaves out one that can not be used', () => {
+    const [first, second] = props.rows as [InputTableProps['rows'][number], InputTableProps['rows'][number]]
+
+    render(
+      <InputTable
+        {...props}
+        rows={[
+          { ...first, move: { down: { id: 'omlaag-1', name: 'actie', value: 'omlaag-1' } } },
+          {
+            ...second,
+            move: {
+              up: { id: 'omhoog-2', name: 'actie', value: 'omhoog-2' },
+            },
+          },
+        ]}
+      />,
+    )
+
+    expect(screen.queryByRole('button', { name: 'Doelpunt 1 omhoog' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Doelpunt 2 omlaag' })).toBeNull()
+
+    const down = screen.getByRole('button', { name: 'Doelpunt 1 omlaag' })
+    const up = screen.getByRole('button', { name: 'Doelpunt 2 omhoog' })
+
+    expect(down.getAttribute('type')).toBe('submit')
+    expect(down.getAttribute('id')).toBe('omlaag-1')
+    expect(down.getAttribute('value')).toBe('omlaag-1')
+    expect(up.getAttribute('id')).toBe('omhoog-2')
+    expect(up.textContent).toBe('')
+  })
+
+  it('uses the texts for the move buttons that it is given', () => {
+    const [first] = props.rows as [InputTableProps['rows'][number]]
+
+    render(
+      <InputTable
+        {...props}
+        moveLabels={{ down: 'Een plaats lager', up: 'Een plaats hoger' }}
+        rows={[{ ...first, move: { up: { id: 'u', name: 'actie', value: 'u' } } }]}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Doelpunt 1 een plaats hoger' })).toBeTruthy()
+  })
+
   it('uses the text for the remove button that it is given', () => {
     render(<InputTable {...props} removeLabel="Haal weg" />)
 

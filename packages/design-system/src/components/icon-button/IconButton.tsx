@@ -5,7 +5,7 @@ import { classNames } from '../classNames'
 import { Icon } from '../icon/Icon'
 
 /** The icons an IconButton can have. */
-export const iconButtonIcons = ['trash'] as const
+export const iconButtonIcons = ['arrow-down', 'arrow-up', 'trash'] as const
 
 export type IconButtonIcon = (typeof iconButtonIcons)[number]
 

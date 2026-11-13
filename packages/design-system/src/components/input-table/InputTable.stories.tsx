@@ -34,6 +34,11 @@ const meta = preview.meta({
       description: 'Wat er staat als er nog geen rijen zijn, zoals een regel tekst. De knop om toe te voegen blijft.',
       table: { type: { summary: 'ReactNode' } },
     },
+    moveLabels: {
+      description:
+        'Wat de knoppen zeggen die een rij verplaatsen, voor een schermlezer en als tekst bij aanwijzen: de naam van de rij en dan dit, zoals "Speler 2 omhoog". Zonder zijn ze `Omhoog` en `Omlaag`.',
+      table: { type: { summary: '{ down: string; up: string }' } },
+    },
     removeLabel: {
       description:
         'Wat de knop zegt die een rij weghaalt, voor een schermlezer en als tekst bij aanwijzen: de naam van de rij en dan dit, zoals "Doelpunt 2 weghalen". De knop zelf is een prullenbak.',
@@ -54,6 +59,7 @@ const meta = preview.meta({
           'Elk veld heeft zijn eigen label, met de rij erin voor een schermlezer: "Minuut, doelpunt 2".',
           'Een rij kan twee regels velden hebben, naast het nummer van de rij en de knop om haar weg te halen.',
           'De knop is een prullenbak met een naam voor een schermlezer en een tekst bij aanwijzen, en onder de tabel staat een knop om een rij toe te voegen.',
+          'Telt de volgorde van de rijen, dan heeft elke rij ook een knop omhoog en omlaag. De eerste rij heeft geen knop omhoog en de laatste geen knop omlaag.',
           'Beide zijn verzendknoppen, dus het werkt ook zonder JavaScript: de server antwoordt met het formulier, met de rij erbij of eraf.',
           'Een veld dat niet bij een rij past kan `hidden` zijn: het is dan niet te zien en gaat niet mee met het formulier, maar wat erin stond blijft staan.',
           'Zet de tabel in een `Form`, onder een kop die zegt wat erin staat. Dat formulier is dan even breed als zijn ouder.',
@@ -96,6 +102,24 @@ export const WithErrors = meta.story({
     },
     layout: 'padded',
   },
+  render,
+})
+
+export const Movable = meta.story({
+  args: {
+    moveLabels: { down: 'Omlaag', up: 'Omhoog' },
+    rows: exampleGoals(false).map((row, index, all) => ({
+      ...row,
+      move: {
+        ...(index > 0 ? { up: { id: `omhoog-${index + 1}`, name: 'actie', value: `omhoog-${index + 1}` } } : {}),
+        ...(index < all.length - 1
+          ? { down: { id: `omlaag-${index + 1}`, name: 'actie', value: `omlaag-${index + 1}` } }
+          : {}),
+      },
+    })),
+  },
+  name: 'Met knoppen om een rij te verplaatsen',
+  parameters: { layout: 'padded' },
   render,
 })
 

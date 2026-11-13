@@ -44,6 +44,7 @@ import {
   valuesOfReport,
 } from './match-reports'
 import {
+  applyReportButton,
   emptyRow,
   emptySide,
   noFormation,
@@ -407,6 +408,27 @@ describe('saveReport', () => {
 
     expect(again.zij.speler.slice(-2).map((row) => row.rugnummer)).toEqual(['', ''])
     expect(await save(again, t1)).toEqual({ status: 'unchanged' })
+  })
+
+  it('keeps the order of the players that an editor moved, for the form and for the pitch', async () => {
+    const values = report()
+
+    expect(await save(values)).toEqual({ status: 'saved' })
+
+    const first = valuesOfReport(await readMatchReport(database.db, matchId), await goalsOf(), squad)
+    const before = first.wij.speler.map((row) => row.keuze)
+    const moved = applyReportButton(first, { direction: 'down', kind: 'move', number: 1, row: 'speler', side: 'wij' })
+
+    expect(await save(moved.values, t1)).toEqual({ status: 'saved' })
+
+    const stored = await readMatchReport(database.db, matchId)
+    const again = valuesOfReport(stored, await goalsOf(), squad)
+
+    expect(again.wij.speler.map((row) => row.keuze)).toEqual([before[1], before[0], ...before.slice(2)])
+    // The order of the rows is the order of the players: the pitch reads it as it is.
+    expect(stored!.appearances.filter((one) => one.ours).map((one) => one.name)).toEqual(
+      again.wij.speler.map((row) => squad.find((player) => String(player.id) === row.keuze)?.name),
+    )
   })
 
   it('gives the kicks back to the form as they were saved, so saving it again changes nothing', async () => {
