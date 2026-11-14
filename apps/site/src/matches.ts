@@ -11,6 +11,7 @@ import {
   listLeagueResults,
   listMatchDataSources,
   listMatchSeasons,
+  listPersonBirthDates,
   listPersonSeasons,
   listReportSeasons,
   listSeasonFormations,
@@ -431,6 +432,16 @@ export const getPersonSeasons = cacheFor(pastSeasonPeriod, async () => {
 
   return seasons
 })
+
+/**
+ * The full birth date of each person who has one, by the id of the person, for the ages on the
+ * card Records. One query for all persons, kept for an hour.
+ */
+export const getPersonBirthDates = cacheFor(
+  pastSeasonPeriod,
+  async () =>
+    new Map((await listPersonBirthDates(getDatabase().db)).map(({ birthDate, personId }) => [personId, birthDate])),
+)
 
 /**
  * The seasons whose line-ups we have (they have a finished match report), the oldest first. A

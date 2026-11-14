@@ -21,6 +21,7 @@ import {
   listMatchSeasons,
   listMatchSequence,
   listNewestDiscussions,
+  listPersonBirthDates,
   listPersonSeasons,
   listPodcastEpisodes,
   listPodcasts,
@@ -1861,6 +1862,30 @@ describe('the matches and the table of a season', () => {
         { personId: personId, season: '2010/11' },
         { personId: personId, season: '2011/12' },
       ])
+    })
+
+    it('gives the birth date of each person who has a full one, and none for a month or a year', async () => {
+      const [{ insertId: day }] = await database.db.insert(persons).values({
+        birthDate: '1999-03-04',
+        birthDatePrecision: 'day',
+        familyName: 'Dag',
+        givenName: 'Jan',
+        name: 'Jan Dag',
+      })
+
+      await database.db.insert(persons).values([
+        {
+          birthDate: '1999-03-01',
+          birthDatePrecision: 'month',
+          familyName: 'Maand',
+          givenName: 'Jan',
+          name: 'Jan Maand',
+        },
+        { birthDate: '1999-01-01', birthDatePrecision: 'year', familyName: 'Jaar', givenName: 'Jan', name: 'Jan Jaar' },
+        { familyName: 'Geen', givenName: 'Jan', name: 'Jan Geen' },
+      ])
+
+      expect(await listPersonBirthDates(database.db)).toEqual([{ birthDate: '1999-03-04', personId: day }])
     })
 
     it('gives the seasons that have a finished report of a played match, oldest first', async () => {
