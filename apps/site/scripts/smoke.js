@@ -82,7 +82,7 @@ function dayYearsAgo(years) {
 const seasonsAgo = (years) => seasonOf(dayYearsAgo(years))
 
 /**
- * Gives the card "Onze plek door de jaren" three seasons: the one of the seed and our row in
+ * Gives the card "Seizoen voor seizoen" three seasons: the one of the seed and our row in
  * the table of the two seasons before it, the older one with two points taken off, and the row
  * of Testdorp FC in them, for its card "De plek van <club> en de onze". These seasons have a
  * table and no matches, so their rows are not links.
@@ -1185,6 +1185,15 @@ await withEmptyDatabase((database) =>
       allSeasonsHtml,
       /id="(?:verloop-van-het-seizoen|hoe-de-wedstrijden-verlopen|reeksen|uitersten)"/,
     )
+    // The card Seizoen voor seizoen took in Onze plek door de jaren (#1212): a row for each
+    // season, with a link to it, and the first table of five seasons at most.
+    assert.match(allSeasonsHtml, /<h3[^>]*id="seizoen-voor-seizoen"/)
+    assert.doesNotMatch(allSeasonsHtml, /id="onze-plek-door-de-jaren"/)
+    assert.match(
+      allSeasonsHtml,
+      /<caption class="hf-visually-hidden">De laatste seizoenen van sc Heerenveen: de plek in de Eredivisie/,
+    )
+    assert.match(allSeasonsHtml, /<th scope="row"><a href="\/wedstrijden">[^<]*\(nu\)<\/a><\/th>/)
     assert.match(
       allSeasonsHtml,
       /wedstrijden<\/span><span class="hf-key-figure-stop">, <\/span><span class="hf-key-figure-note">gespeeld in alle competities sinds /,

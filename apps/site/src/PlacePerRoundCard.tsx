@@ -17,11 +17,11 @@ import { Fragment } from 'react'
 
 import type { PlaceInRound } from './matches'
 
-import { lineOfPositions } from './FinalPlacesCard'
 import { placePerRoundShortcut as card } from './matchShortcuts'
 import { EredivisieOnly } from './MatchViews'
 import { axisTicks, coachLines, coachText, placeLines } from './placeHistory'
 import { splitPersonName } from './player-name'
+import { lineOfPositions } from './SeasonBySeasonCard'
 
 /** The tooltip at each round: "Ronde 12: plek 4", the place heavy; `null` for an open round. */
 export const labelsOf = (places: readonly (null | PlaceInRound)[]) =>

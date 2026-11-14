@@ -102,14 +102,16 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'uitersten',
   ],
   // The page with all seasons (#1211). Its four groups, and the cards that are only there:
-  // Onze plek door de jaren and Resultaten per hoofdtrainer, which came back from the page of a
-  // season, and Records. The cards it shares with a season have their anchors on both.
+  // Seizoen voor seizoen, which took in Onze plek door de jaren (#1212; the anchor of that card
+  // is gone on purpose, without a redirect), Resultaten per hoofdtrainer, which came back from
+  // the page of a season, and Records. The cards it shares with a season have their anchors on
+  // both.
   '/wedstrijden/cijfers/alle': [
     'seizoenen',
     'uitslagen',
     'doelpunten',
     'rondom-de-wedstrijd',
-    'onze-plek-door-de-jaren',
+    'seizoen-voor-seizoen',
     'resultaten-per-hoofdtrainer',
     'thuis-en-uit',
     'hoe-vaak-welke-uitslag',
