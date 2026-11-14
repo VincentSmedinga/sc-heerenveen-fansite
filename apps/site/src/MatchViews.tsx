@@ -38,6 +38,7 @@ import {
   WikipediaCredit,
 } from '@fansite/design-system'
 
+import type { CijfersSearch } from './cijfers-search'
 import type { FlowRow, HomeAwayTally, MatchData } from './matches'
 import type { UpcomingDetails } from './upcoming-match'
 
@@ -87,6 +88,7 @@ import {
   topScorersOf,
   topScorersPlaces,
 } from './matches'
+import { MatchSearchLink, rowLinkText } from './MatchSearchLink'
 import { coachesCardOf, scoreCountsCard } from './matchShortcuts'
 import { splitPersonName } from './player-name'
 import { isEnglishPage, squadPageName } from './season-squad'
@@ -171,6 +173,7 @@ export function CleanSheetsCard({
   matches,
   now,
   path = '/wedstrijden/cijfers',
+  search,
   season,
   since,
 }: {
@@ -180,6 +183,8 @@ export function CleanSheetsCard({
   matches: PublicMatch[]
   now: Date
   path?: string
+  /** The links to the matches behind the figure, in the search of matches. */
+  search?: CijfersSearch | undefined
   season?: string | undefined
   /** The first season of a card that counts all seasons: the dates then have their year. */
   since?: string | undefined
@@ -203,6 +208,7 @@ export function CleanSheetsCard({
       ) : (
         <>
           <Text>{`${sheets.length} keer de nul gehouden in ${played} ${played === 1 ? 'wedstrijd' : 'wedstrijden'}`}</Text>
+          <MatchSearchLink link={search?.cleanSheets()} what="waarin we de nul hielden" />
           <List role="list">
             {shown.map((match, index) => (
               <List.Item id={`nul-${index + 1}`} key={`${match.matchDate}-${match.competition}-${match.opponent}`}>
@@ -586,12 +592,15 @@ export function HomeAwayCard({
   competition,
   level = 2,
   matches,
+  search,
   season,
   since,
 }: {
   competition: CompetitionChoice
   level?: 2 | 3
   matches: PublicMatch[]
+  /** The links to the matches behind the figures, in the search of matches. */
+  search?: CijfersSearch | undefined
   season?: string | undefined
   since?: string | undefined
 }) {
@@ -632,6 +641,8 @@ export function HomeAwayCard({
               row('Zonder tegendoelpunt', (side) => side.cleanSheets),
             ]}
           />
+          <MatchSearchLink link={search?.venue('thuis')} what="thuis" />
+          <MatchSearchLink link={search?.venue('uit')} what="uit" />
           <BasedOn known={total.played} played={total.played} />
         </>
       )}
@@ -1026,12 +1037,15 @@ export function ScoreCountsCard({
   competition = 'all',
   level = 2,
   matches,
+  search,
   season,
   since,
 }: {
   competition?: CompetitionChoice
   level?: 2 | 3
   matches: PublicMatch[]
+  /** The links to the matches behind each score, in the search of matches. */
+  search?: CijfersSearch | undefined
   season?: string | undefined
   since?: string | undefined
 }) {
@@ -1043,6 +1057,7 @@ export function ScoreCountsCard({
       counts={counts}
       empty="We hebben nog geen uitslagen van dit seizoen."
       level={level}
+      search={search}
       season={season}
       since={since}
       source={sourceOf(matches)}
@@ -1114,6 +1129,7 @@ export function ScoreCountsView({
   empty,
   goals,
   level = 2,
+  search,
   season,
   since,
   source,
@@ -1124,6 +1140,8 @@ export function ScoreCountsView({
   empty: string
   goals?: undefined | { against: number; for: number }
   level?: 2 | 3
+  /** The links to the matches behind each score: its row header becomes a link. */
+  search?: CijfersSearch | undefined
   season?: string | undefined
   /** The first season of a card that counts all seasons, for the image. */
   since?: string | undefined
@@ -1188,12 +1206,20 @@ export function ScoreCountsView({
                   caption={caption}
                   columns={[outcomeColumn(heading, total), { hidden: true, name: 'Keer' }]}
                   key={outcome}
-                  rows={rows.map(({ count, index }) => ({
-                    cells: [`${count.count}×`],
-                    header: slices[index]!.label,
-                    marker: <DonutChart.Swatch index={index} ranked slices={slices} />,
-                    note: outcomeWords[outcome],
-                  }))}
+                  rows={rows.map(({ count, index }) => {
+                    const label = slices[index]!.label
+                    const link = search?.score(count.goalsFor, count.goalsAgainst)
+
+                    return {
+                      cells: [`${count.count}×`],
+                      header: label,
+                      ...(link === undefined
+                        ? {}
+                        : { display: rowLinkText(label, link, `met ${label}`), href: link.href }),
+                      marker: <DonutChart.Swatch index={index} ranked slices={slices} />,
+                      note: outcomeWords[outcome],
+                    }
+                  })}
                 />
               )
             })}

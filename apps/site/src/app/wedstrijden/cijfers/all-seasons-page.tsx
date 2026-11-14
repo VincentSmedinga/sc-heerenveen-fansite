@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 import { cache } from 'react'
 
 import { AttendanceRecordsCard, RecordsCard } from '#src/AllSeasonsCards'
+import { cijfersSearchOf, matchLink } from '#src/cijfers-search'
 import { coachResultsOf, firstSeasonOf } from '#src/coachResults'
 import { CoachResultsCard } from '#src/CoachResultsCard'
 import { type CompetitionChoice, competitionFields, parseCompetition } from '#src/competition'
@@ -14,6 +15,7 @@ import { competitionTalliesOf } from '#src/competitionTally'
 import { CompetitionTallyCard } from '#src/CompetitionTallyCard'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
+import { getSearchWorld } from '#src/match-search-data'
 import { sourceOf } from '#src/match-sources'
 import {
   choiceFor,
@@ -112,7 +114,12 @@ export async function AllSeasonsPage({ searchParams }: { searchParams: Promise<S
   const since = seasons.at(-1) ?? '1990/91'
   const now = new Date()
   const keyFigures = allSeasonsKeyFigures(homeAwayOf(matches, competition).total, competition, since)
-  const [coachResults, finalPlaces] = await Promise.all([loadCoachResults(competition), loadFinalPlaces()])
+  const [coachResults, finalPlaces, searchable] = await Promise.all([
+    loadCoachResults(competition),
+    loadFinalPlaces(),
+    loadSearchableMatches(),
+  ])
+  const search = cijfersSearchOf(searchable, { competition })
   const tallies = seasonTalliesOf(matches, competition)
   const referees = refereesOf(matches, competition, { top: topRefereeCount })
   const penalties = matchPenaltiesOf(matches, competition)
@@ -162,14 +169,18 @@ export async function AllSeasonsPage({ searchParams }: { searchParams: Promise<S
             seasons={seasons}
             tallies={tallies}
           />
-          <CompetitionTallyCard level={3} tallies={competitionTalliesOf(matches)} />
+          <CompetitionTallyCard
+            level={3}
+            matchLink={(value) => matchLink(searchable, { competition: 'all' }, { competitions: [value] })}
+            tallies={competitionTalliesOf(matches)}
+          />
           {coachResults}
         </CardGroup>
       )}
       <CardGroup area="results" id="uitslagen" title="Uitslagen">
-        <HomeAwayCard competition={competition} level={3} matches={matches} since={since} />
-        <ScoreCountsCard competition={competition} level={3} matches={matches} since={since} />
-        <RecordsCard competition={competition} level={3} matches={matches} now={now} since={since} />
+        <HomeAwayCard competition={competition} level={3} matches={matches} search={search} since={since} />
+        <ScoreCountsCard competition={competition} level={3} matches={matches} search={search} since={since} />
+        <RecordsCard competition={competition} level={3} matches={matches} now={now} search={search} since={since} />
       </CardGroup>
       <CardGroup area="goals" id="doelpunten" title="Doelpunten">
         <GoalsPerQuarterCard competition={competition} level={3} matches={matches} since={since} />
@@ -180,6 +191,7 @@ export async function AllSeasonsPage({ searchParams }: { searchParams: Promise<S
           matches={matches}
           now={now}
           path={allSeasonsPath}
+          search={search}
           since={since}
         />
         <PenaltiesCard level={3} {...penalties} />
@@ -230,6 +242,21 @@ async function loadFinalPlaces() {
     return await getFinalPlaces()
   } catch (error) {
     console.error(`Could not read our place in the seasons for ${allSeasonsPath}: ${reasonOf(error)}`)
+
+    return []
+  }
+}
+
+/**
+ * Every played match as the search of matches has it, for the links under the figures. They are
+ * no more than links: when the matches can't be read, the page is shown without them and the
+ * error is logged.
+ */
+async function loadSearchableMatches() {
+  try {
+    return (await getSearchWorld()).matches
+  } catch (error) {
+    console.error(`Could not read the matches for the links of ${allSeasonsPath}: ${reasonOf(error)}`)
 
     return []
   }

@@ -4,12 +4,14 @@ import { seasonOf } from '@fansite/db/season'
 import { CardGroup, Heading, KeyFigures, Page, SeasonPicker } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
+import { cijfersSearchOf } from '#src/cijfers-search'
 import { competitionFields, parseCompetition } from '#src/competition'
 import { CompetitionSwitch } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { formationsOf } from '#src/formations'
 import { FormationsCard } from '#src/FormationsCard'
+import { getSearchWorld } from '#src/match-search-data'
 import { seasonSourceOf, sourceName, sourceOf } from '#src/match-sources'
 import { choiceFor, getSeasonFormations, homeAwayOf, parseCleanSheetCount } from '#src/matches'
 import {
@@ -107,6 +109,7 @@ export async function StatisticsPage({
   const imageSeason = current ? undefined : season
   const address = seasonAddress(statisticsPath, season, seasonOf(now))
   const formations = formationsOf(data.matches, await readFormations(season), competition)
+  const search = cijfersSearchOf(await readSearchableMatches(), { competition, season })
   const referees = refereesOf(data.matches, competition)
   const penalties = matchPenaltiesOf(data.matches, competition)
   const keyFigures = statisticsKeyFigures(data.standings, homeAwayOf(data.matches, competition).total, competition)
@@ -151,9 +154,15 @@ export async function StatisticsPage({
         <MatchFlowCard level={3} matches={data.matches} season={imageSeason} />
       </CardGroup>
       <CardGroup area="results" id="uitslagen" title="Uitslagen">
-        <HomeAwayCard competition={competition} level={3} matches={data.matches} season={imageSeason} />
+        <HomeAwayCard competition={competition} level={3} matches={data.matches} search={search} season={imageSeason} />
         <StreaksCard competition={competition} level={3} matches={data.matches} now={now} season={imageSeason} />
-        <ScoreCountsCard competition={competition} level={3} matches={data.matches} season={imageSeason} />
+        <ScoreCountsCard
+          competition={competition}
+          level={3}
+          matches={data.matches}
+          search={search}
+          season={imageSeason}
+        />
         <ExtremesCard competition={competition} level={3} matches={data.matches} now={now} season={imageSeason} />
       </CardGroup>
       <CardGroup area="goals" id="doelpunten" title="Doelpunten">
@@ -165,6 +174,7 @@ export async function StatisticsPage({
           matches={data.matches}
           now={now}
           path={address}
+          search={search}
           season={imageSeason}
         />
         <PenaltiesCard level={3} {...penalties} />
@@ -192,6 +202,20 @@ async function readFormations(season: string) {
     return await getSeasonFormations(season)
   } catch (error) {
     console.error(`Could not read the formations for ${statisticsPath}: ${reasonOf(error)}`)
+
+    return []
+  }
+}
+
+/**
+ * Every played match as the search of matches has it, for the links under the figures. They are
+ * no more than links: when the matches can't be read, the page shows without them.
+ */
+async function readSearchableMatches() {
+  try {
+    return (await getSearchWorld()).matches
+  } catch (error) {
+    console.error(`Could not read the matches for the links of ${statisticsPath}: ${reasonOf(error)}`)
 
     return []
   }

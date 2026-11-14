@@ -5819,3 +5819,23 @@
   - **Het ontwerp** laat de kaart in het zachte vlak zien met twee regels; de kaart heeft de regel over de benutte strafschoppen en de regel "Op basis van" erbij, die het ontwerp niet toont.
 - **Waarom:** supporters willen weten hoeveel strafschoppen we kregen en tegen kregen, en uit de doelpunten weten we welke uit een strafschop kwamen.
 - **Alternatieven:** de strafschoppen van een strafschoppenserie meetellen; wachten tot #408 de gemiste strafschoppen heeft; een tabel in plaats van een lijst.
+
+## Wedstrijden · Cijfers linkt de cijfers naar de wedstrijden erachter in Zoeken
+
+- **Datum:** 14 november 2026
+- **Besluit:** Cijfers heeft geen filters naast de werkbalk.
+  Wie verder wil kijken, volgt een link naar Zoeken in wedstrijden, met de filters van het getal ingevuld, het bereik van de pagina (het seizoen, of geen seizoen bij alle seizoenen) en de gekozen competitie.
+  - **Eén hulpfunctie** (`cijfers-search.ts`) bouwt elk adres met `searchHref` en telt de wedstrijden met `findMatches` van Zoeken zelf.
+    Het getal in de link is dus het getal dat Zoeken toont.
+    Een test houdt het gelijk aan de getallen op de kaarten, met verzonnen wedstrijden.
+  - **De tekst** van een link zegt wat je krijgt, met het aantal: "Toon de 111 wedstrijden met 0–0".
+    In een tabel is de link de rijkop, met de rest van de zin voor een schermlezer erachter.
+    Een link die geen wedstrijd zou vinden, blijft weg.
+  - **Deze kaarten** krijgen een link: Hoe vaak welke uitslag (elke uitslag), Thuis en uit (thuis en uit), De nul gehouden (`zij=0`), Records (onze zeges, de grootste eerst) en Per competitie (de rijen, met de competitie erbij).
+    Een getal waarvoor Zoeken geen filter heeft, zoals de scheidsrechter (#1227), krijgt geen link.
+  - **Het verschil met een kaart:** Zoeken telt een gelijkspel dat een strafschoppenserie besliste als gelijkspel, en de kaarten als winst of verlies.
+    De link naar onze zeges telt dus minder wedstrijden dan "gewonnen" op de kaart Thuis en uit.
+  - **De competitie** Competitie op Cijfers is de Eredivisie en de Eerste divisie, en dat zijn bij Zoeken twee waarden.
+  - **Het ontwerp** toont één link onder de kaart Hoe vaak welke uitslag; het issue vraagt een link bij elke uitslag in de lijst, en die is er.
+- **Waarom:** de getallen op Cijfers zijn een ingang: wie "111 keer 0–0" ziet, wil die wedstrijden zien, en snijden doet Zoeken al.
+- **Alternatieven:** filters op Cijfers zelf; een getal in de link dat de kaart telt in plaats van Zoeken; links voor alle kaarten, ook die Zoeken nog niet kan filteren.
