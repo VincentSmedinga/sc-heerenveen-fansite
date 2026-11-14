@@ -216,13 +216,14 @@ describe('the page of an earlier season, /wedstrijden/cijfers/2025-26', () => {
       expect(html).toContain('method="get"')
     })
 
-    it('lists the seasons with matches, the newest first, with the season of the page chosen', async () => {
+    it('lists "Alle seizoenen" first and then the seasons with matches, the newest first, with the season of the page chosen', async () => {
       const html = await render()
       const options = [...html.matchAll(/<option value="([^"]+)"( selected="")?>([^<]+)<\/option>/g)].map(
         ([, value, selected, label]) => [value, label, selected !== undefined],
       )
 
       expect(options).toEqual([
+        ['alle', 'Alle seizoenen', false],
         ['2026-27', '2026/27', false],
         ['2025-26', '2025/26', true],
         ['2024-25', '2024/25', false],

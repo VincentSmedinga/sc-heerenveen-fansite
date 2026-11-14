@@ -32,7 +32,7 @@ import { PenaltiesCard } from '#src/PenaltiesCard'
 import { refereesOf } from '#src/referees'
 import { RefereesCard } from '#src/RefereesCard'
 import { loadSeasonPage, pickerPathOf, type SearchParams, statisticsPath } from '#src/season-page'
-import { seasonAddress, seasonChoices, seasonSlug } from '#src/seasons'
+import { seasonAddress, seasonChoicesWithAll, seasonSlug } from '#src/seasons'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { statisticsKeyFigures } from '#src/statistics-key-figures'
 import { withBranch } from '#src/title'
@@ -138,7 +138,7 @@ export async function StatisticsPage({
         <SeasonPicker
           action={pickerPath}
           fields={competitionFields(competition)}
-          options={seasonChoices(seasons)}
+          options={seasonChoicesWithAll(seasons)}
           value={seasonSlug(season)}
         />
         <CompetitionSwitch address={address} competition={competition} matches={data.matches} />
