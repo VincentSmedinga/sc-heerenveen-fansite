@@ -45,6 +45,7 @@
     "test:a11y": "pnpm --filter site test:a11y",
     "test:stories": "pnpm --filter @fansite/design-system test:stories",
     "typecheck": "tsc -b",
+    "clean-up": "node scripts/clean-up.js",
     "worktree:db:drop": "node scripts/worktree-env.js drop",
     "worktree:env": "node scripts/worktree-env.js"
   },

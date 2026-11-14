@@ -143,17 +143,8 @@ When you patch an issue, read the body just before you write it: Builders tick b
 
 ## Clean up
 
-Remove, without asking, the remote and local branches of merged or closed pull requests, and their worktrees.
-First check that:
-
-- nothing is uncommitted or unpushed;
-- no live session has the folder as its working directory (`get_session`), because the app can reuse an archived session's worktree folder;
-- the HEAD is the merged head of the pull request, not just a folder name that matches.
-
-Leave alone:
-
-- the branch `pr-screenshots`, on the remote and locally;
-- the review folder `../sc-heerenveen-fansite-review`.
+Run the `clean-up` skill, without asking.
+It removes the leftovers of merged or closed pull requests, with the checks that belong to it; the steps are in the skill, not here.
 
 If your next branch builds on the merged one, rebase it onto `main`.
 
