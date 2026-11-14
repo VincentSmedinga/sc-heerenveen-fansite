@@ -758,7 +758,7 @@ export async function getClubNews(page: ClubPage): Promise<ClubHeadline[]> {
 
 /**
  * The places of a club and ours per season (see `clubPlacesOf`). Our places are the ones of the
- * card "Onze plek door de jaren" (`getFinalPlaces`), so there is no second question for them.
+ * card "Seizoen voor seizoen" (`getFinalPlaces`), so there is no second question for them.
  */
 export async function getClubPlaces(page: ClubPage): Promise<ClubPlace[]> {
   const [ours, table] = await Promise.all([getFinalPlaces(), standingsPlaces()])

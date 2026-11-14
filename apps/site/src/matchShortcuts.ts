@@ -31,8 +31,8 @@ export const coachResultsCard = { id: 'resultaten-per-hoofdtrainer', name: 'Resu
 /** The name and the anchor of the card with our place after each round, under the table. */
 export const placePerRoundShortcut = { id: 'verloop-op-de-ranglijst', name: 'Verloop op de ranglijst' } as const
 
-/** The name and the anchor of the card with our place in every season, on Cijfers. */
-export const finalPlacesShortcut = { id: 'onze-plek-door-de-jaren', name: 'Onze plek door de jaren' } as const
+/** The name and the anchor of the card with every season with our place, on Cijfers. */
+export const seasonBySeasonCard = { id: 'seizoen-voor-seizoen', name: 'Seizoen voor seizoen' } as const
 
 type Shortcut = { href: string; label: string }
 
