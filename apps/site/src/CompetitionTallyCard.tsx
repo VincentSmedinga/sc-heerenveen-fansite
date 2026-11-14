@@ -1,9 +1,12 @@
 import { Card, DataTable, Heading, tableColumns, tableLegend, Text } from '@fansite/design-system'
 
+import type { MatchLink } from './cijfers-search'
 import type { CompetitionTally } from './competitionTally'
+import type { CompetitionValue } from './match-search'
 
 import { searchHref } from './match-search'
 import { nothing } from './match-search-start'
+import { rowLinkText } from './MatchSearchLink'
 import { competitionTallyCard } from './matchShortcuts'
 
 const numberFormat = new Intl.NumberFormat('nl-NL')
@@ -26,7 +29,16 @@ const legend = tableLegend(figureColumns)
  * whatever the choice of the page, so it does not say so. A line under the table says that
  * Europa is every European cup and the play-offs for them. Without a match there is no card.
  */
-export function CompetitionTallyCard({ level = 2, tallies }: { level?: 2 | 3; tallies: readonly CompetitionTally[] }) {
+export function CompetitionTallyCard({
+  level = 2,
+  matchLink,
+  tallies,
+}: {
+  level?: 2 | 3
+  /** The link to the matches of a competition, with their number, as the search shows them. */
+  matchLink?: (value: CompetitionValue) => MatchLink | undefined
+  tallies: readonly CompetitionTally[]
+}) {
   if (tallies.length === 0) {
     return null
   }
@@ -39,11 +51,16 @@ export function CompetitionTallyCard({ level = 2, tallies }: { level?: 2 | 3; ta
       <DataTable
         caption="De wedstrijden van sc Heerenveen per soort competitie, met de wedstrijden gewonnen, gelijk en verloren en de doelpunten voor en tegen"
         columns={columns}
-        rows={tallies.map(({ drawn, goalsAgainst, goalsFor, label, lost, played, value, won }) => ({
-          cells: [numberFormat.format(played), won, drawn, lost, `${goalsFor}–${goalsAgainst}`],
-          header: label,
-          href: searchHref({ ...nothing, competitions: [value] }),
-        }))}
+        rows={tallies.map(({ drawn, goalsAgainst, goalsFor, label, lost, played, value, won }) => {
+          const link = matchLink?.(value)
+
+          return {
+            cells: [numberFormat.format(played), won, drawn, lost, `${goalsFor}–${goalsAgainst}`],
+            header: label,
+            href: link?.href ?? searchHref({ ...nothing, competitions: [value] }),
+            ...(link === undefined ? {} : { display: rowLinkText(label, link, `in ${label}`) }),
+          }
+        })}
       />
       <Text appearance="meta">{legend}</Text>
       {tallies.some(({ value }) => value === 'europa') && (

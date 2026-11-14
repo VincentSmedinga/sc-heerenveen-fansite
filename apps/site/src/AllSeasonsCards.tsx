@@ -2,6 +2,8 @@ import type { PublicMatch } from '@fansite/db/queries'
 
 import { Card, Heading, List, ShortMatch, Text } from '@fansite/design-system'
 
+import type { CijfersSearch } from './cijfers-search'
+
 import { type CompetitionChoice } from './competition'
 import { formatTableDay, matchMoment } from './match-format'
 import { shootOutOf } from './match-result'
@@ -13,6 +15,7 @@ import {
   recordsOf,
   type RecordStreak,
 } from './matches'
+import { MatchSearchLink } from './MatchSearchLink'
 import { BasedOn, imageCredit } from './MatchViews'
 
 const numberFormat = new Intl.NumberFormat('nl-NL')
@@ -36,12 +39,15 @@ export function RecordsCard({
   level = 2,
   matches,
   now,
+  search,
   since,
 }: {
   competition: CompetitionChoice
   level?: 2 | 3
   matches: AllMatch[]
   now: Date
+  /** The links to the matches behind a record, in the search of matches. */
+  search?: CijfersSearch | undefined
   since: string
 }) {
   const { biggestLoss, biggestWin, mostGoals, played } = extremesOf(matches, competition)
@@ -94,6 +100,7 @@ export function RecordsCard({
               </List.Item>
             )}
           </List>
+          <MatchSearchLink link={search?.biggestWins()} what="die we wonnen, de grootste zege eerst" />
           <BasedOn known={played} played={played} />
         </>
       )}
