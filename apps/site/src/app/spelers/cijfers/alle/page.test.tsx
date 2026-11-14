@@ -8,6 +8,7 @@ import {
   getEditedMatches,
   getMatchSeasons,
   getMatchSource,
+  getPersonBirthDates,
   getPersonSeasons,
   getReportSeasons,
 } from '#src/matches'
@@ -25,6 +26,7 @@ vi.mock('#src/matches', async (importOriginal) => ({
   getEditedMatches: vi.fn(),
   getMatchSeasons: vi.fn(),
   getMatchSource: vi.fn(),
+  getPersonBirthDates: vi.fn(),
   getPersonSeasons: vi.fn(),
   getReportSeasons: vi.fn(),
 }))
@@ -108,6 +110,7 @@ beforeEach(() => {
   vi.mocked(getEditedMatches).mockResolvedValue(false)
   vi.mocked(getMatchSeasons).mockResolvedValue(matchSeasons)
   vi.mocked(getMatchSource).mockResolvedValue('wikipedia')
+  vi.mocked(getPersonBirthDates).mockResolvedValue(new Map())
   vi.mocked(getPersonSeasons).mockResolvedValue(new Map())
   vi.mocked(getReportSeasons).mockResolvedValue(['2003/04', '2004/05', '2005/06', '2026/27'])
   vi.mocked(getReportAddresses).mockResolvedValue(
@@ -227,6 +230,58 @@ describe('the page with all seasons, /spelers/cijfers/alle', () => {
     expect(side).toContain('aria-labelledby="strafschoppen"')
     expect(html).not.toMatch(/id="(alle-spelers|assists|minuten|doelpuntenmakers|bijzondere-doelpunten)"/)
     expect(side.indexOf('id="hattricks"')).toBeLessThan(side.indexOf('id="strafschoppen"'))
+  })
+
+  it('has the soft card Records on top of the side column, with the player and the match or the season', async () => {
+    const html = await render()
+    const side = html.slice(html.indexOf('style="grid-area:side"'))
+    const card = /<section[^>]*aria-labelledby="records".*?<\/section>/s.exec(side)?.[0] ?? ''
+    const lines = [...card.matchAll(/<p class="hf-meta">([^<]+)<\/p>/g)]
+      .map(([, name]) => name)
+      .filter((name) => !name?.startsWith('De leeftijd'))
+
+    expect(side.indexOf('id="records"')).toBeLessThan(side.indexOf('id="hattricks"'))
+    expect(card).toContain('hf-card-soft')
+    // No birth dates are known, so there is no youngest and no oldest scorer.
+    expect(lines).toEqual([
+      'Meeste doelpunten in één seizoen',
+      'Meeste doelpunten in één wedstrijd',
+      'Snelste doelpunt',
+    ])
+    expect(card).toContain('5 doelpunten')
+    expect(card).toContain('Vijf')
+    expect(card).toContain('minuut 10')
+    expect(card).toContain('Spelers zonder geboortedag tellen niet mee')
+  })
+
+  it('has the youngest and the oldest scorer when birth dates are known, as an age and never a date', async () => {
+    const drie = goal('Drie').personId ?? 0
+
+    vi.mocked(getPersonBirthDates).mockResolvedValue(new Map([[drie, '1986-05-20']]))
+
+    const html = await render()
+
+    expect(html).toContain('Jongste doelpuntenmaker')
+    expect(html).toContain('Oudste doelpuntenmaker')
+    expect(html).toContain('17 jaar en 115 dagen')
+    expect(html).not.toContain('1986')
+  })
+
+  it('links the match of a record when it has a page', async () => {
+    const drie = goal('Drie').personId ?? 0
+
+    vi.mocked(getPersonBirthDates).mockResolvedValue(new Map([[drie, '1986-05-20']]))
+
+    const html = await render()
+    const card = /<section[^>]*aria-labelledby="records".*?<\/section>/s.exec(html)?.[0] ?? ''
+
+    expect(card).toContain('<a href="/wedstrijden/2003-04/2003-09-12-fc-proef">')
+  })
+
+  it('leaves the card Records out when no goal gives a record, as the bar does', async () => {
+    vi.mocked(getAllTimeMatches).mockResolvedValue([match('2001/02', [], { goalsFor: 2 })])
+
+    expect(await render()).not.toContain('id="records"')
   })
 
   it('lists every hattrick behind a closed block, with the match as a link when it has a page', async () => {

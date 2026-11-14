@@ -48,8 +48,8 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   ],
   // All seasons (#1219). The made-up data has no hattrick, so the card Hattricks (anchor
   // `hattricks`) is left out there, as it is for any choice that has none; the smoke test
-  // checks the two cards that the made-up data has.
-  '/spelers/cijfers/alle': ['topscorers-sinds-1990-91', 'clubtopscorer-per-seizoen', 'strafschoppen'],
+  // checks the cards that the made-up data has.
+  '/spelers/cijfers/alle': ['topscorers-sinds-1990-91', 'clubtopscorer-per-seizoen', 'records', 'strafschoppen'],
   // The card Stadion(s) is on the page of every club that has one; the smoke test checks the
   // made-up club with two names of its stadium. The card Nieuws is on the page of a club that
   // headlines name (#777); the smoke test gives Testdorp FC six, so its page is the one that

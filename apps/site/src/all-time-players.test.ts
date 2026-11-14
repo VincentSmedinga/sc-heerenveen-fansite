@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  ageOnDay,
   type AllTimeMatch,
   allTimeScorersOf,
   clubTopScorersOf,
@@ -8,6 +9,7 @@ import {
   hattricksOf,
   lineupSentence,
   penaltiesOf,
+  playerRecordsOf,
   yearsAtClub,
 } from './all-time-players'
 
@@ -328,5 +330,126 @@ describe('clubTopScorersOf', () => {
 
   it('has no rows when no scorer is known', () => {
     expect(clubTopScorersOf([inSeason('2001/02', [], { goalsFor: 2 })], 'all')).toEqual([])
+  })
+})
+
+describe('ageOnDay', () => {
+  it('counts whole years and the days since the last birthday', () => {
+    expect(ageOnDay('2000-03-04', '2017-03-04')).toEqual({ days: 0, years: 17 })
+    expect(ageOnDay('2000-03-04', '2017-03-03')).toEqual({ days: 364, years: 16 })
+    expect(ageOnDay('2000-03-04', '2017-06-12')).toEqual({ days: 100, years: 17 })
+  })
+
+  it('gives a birthday of 29 February its day on 1 March in a year without one', () => {
+    expect(ageOnDay('2000-02-29', '2001-03-01')).toEqual({ days: 0, years: 1 })
+    expect(ageOnDay('2000-02-29', '2001-02-28')).toEqual({ days: 365, years: 0 })
+  })
+
+  it('has no age before the birth', () => {
+    expect(ageOnDay('2000-03-04', '1999-01-01')).toBeUndefined()
+  })
+})
+
+describe('playerRecordsOf', () => {
+  const born = new Map([
+    [1, '1990-06-01'],
+    [2, '1980-01-01'],
+  ])
+
+  it('has nothing without goals', () => {
+    expect(playerRecordsOf([], 'all', born)).toEqual({})
+    expect(playerRecordsOf([inSeason('2001/02', [], { goalsFor: 2 })], 'all', born)).toEqual({})
+  })
+
+  it('takes the most in a season from the same count as Clubtopscorer per seizoen, and shares it', () => {
+    const records = playerRecordsOf(
+      [
+        inSeason('2001/02', [person(1, 'Aap'), person(1, 'Aap'), person(2, 'Beer')]),
+        inSeason('2002/03', [person(2, 'Beer', { minute: 5 }), person(2, 'Beer', { minute: 6 })], {
+          matchDate: '2002-09-12',
+        }),
+        inSeason('2003/04', [person(3, 'Kat', { ours: true, ownGoal: true }), goal('Hond', { ours: false })]),
+      ],
+      'all',
+      born,
+    )
+
+    expect(records.mostInSeason?.value).toBe(2)
+    expect(records.mostInSeason?.entries.map(({ id, season }) => [id, season])).toEqual([
+      ['person:1', '2001/02'],
+      ['person:2', '2002/03'],
+    ])
+  })
+
+  it('finds the most in a match, with everyone who shares it, and skips own goals and goals of the opponent', () => {
+    const records = playerRecordsOf(
+      [
+        inSeason('2001/02', [
+          person(1, 'Aap'),
+          person(1, 'Aap'),
+          person(1, 'Aap'),
+          person(2, 'Beer', { ownGoal: true }),
+        ]),
+        inSeason('2002/03', [person(2, 'Beer'), person(2, 'Beer'), person(2, 'Beer'), goal('Hond', { ours: false })]),
+        inSeason('2003/04', [person(2, 'Beer'), person(2, 'Beer')]),
+      ],
+      'all',
+      born,
+    )
+
+    expect(records.mostInMatch?.value).toBe(3)
+    expect(records.mostInMatch?.entries.map(({ id, match }) => [id, match?.season])).toEqual([
+      ['person:1', '2001/02'],
+      ['person:2', '2002/03'],
+    ])
+  })
+
+  it('finds the youngest and the oldest scorer by the day of the match, and leaves out players without a full birth date', () => {
+    const records = playerRecordsOf(
+      [
+        inSeason('2008/09', [person(1, 'Aap'), person(3, 'Kat')], { matchDate: '2008-09-12' }),
+        inSeason('2010/11', [person(2, 'Beer')], { matchDate: '2010-09-12' }),
+        inSeason('2012/13', [person(1, 'Aap')], { matchDate: '2012-09-12' }),
+      ],
+      'all',
+      born,
+    )
+
+    expect(records.youngest?.entries.map(({ id }) => id)).toEqual(['person:1'])
+    expect(records.youngest?.entries[0]?.age).toEqual({ days: 103, years: 18 })
+    expect(records.oldest?.entries.map(({ id }) => id)).toEqual(['person:2'])
+    expect(records.oldest?.entries[0]?.age).toEqual({ days: 254, years: 30 })
+  })
+
+  it('finds the fastest goal from the goals that have a minute, and shares it', () => {
+    const records = playerRecordsOf(
+      [
+        inSeason('2001/02', [
+          person(1, 'Aap', { minute: 3 }),
+          person(2, 'Beer', { minute: 0 }),
+          person(2, 'Beer', { minute: null }),
+        ]),
+        inSeason('2002/03', [person(2, 'Beer', { minute: 3 }), person(3, 'Kat', { minute: 95 })]),
+      ],
+      'all',
+      born,
+    )
+
+    expect(records.fastest?.value).toBe(3)
+    expect(records.fastest?.entries.map(({ id }) => id)).toEqual(['person:1', 'person:2'])
+  })
+
+  it('follows the choice of competition', () => {
+    const records = playerRecordsOf(
+      [
+        inSeason('2001/02', [person(1, 'Aap'), person(1, 'Aap')], { competition: 'KNVB Beker' }),
+        inSeason('2002/03', [person(2, 'Beer')]),
+      ],
+      'league',
+      born,
+    )
+
+    expect(records.mostInMatch?.value).toBe(1)
+    expect(records.mostInSeason?.entries.map(({ id }) => id)).toEqual(['person:2'])
   })
 })

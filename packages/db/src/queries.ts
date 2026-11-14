@@ -774,6 +774,21 @@ export function listNewestDiscussions(db: Database, limit = 5) {
 }
 
 /**
+ * The full birth date of each person who has one, by the id of the person, for the ages on the
+ * card Records of the players of all seasons. A date that is only known by month or by year is
+ * left out: it gives no age to the day. The dates stay on the server; the page shows an age.
+ */
+export async function listPersonBirthDates(db: Database) {
+  const rows = await db
+    .select({ birthDate: persons.birthDate, personId: persons.id })
+    .from(persons)
+    .where(and(isNotNull(persons.birthDate), eq(persons.birthDatePrecision, 'day')))
+    .orderBy(asc(persons.id))
+
+  return rows.flatMap(({ birthDate, personId }) => (birthDate === null ? [] : [{ birthDate, personId }]))
+}
+
+/**
  * The seasons in which each person was in the squad, for the years a player was with the club:
  * one row per person and season, in the order of the season. A player without a person has no
  * row, and a season in which the person has more than one title is one row.

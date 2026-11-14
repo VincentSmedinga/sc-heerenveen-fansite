@@ -16,7 +16,13 @@ const hrefs = (html: string) => [...html.matchAll(/<a [^>]*href="([^"]*)"/g)].ma
 
 beforeEach(() => {
   cards.allSeasonsCards.mockReset()
-  cards.allSeasonsCards.mockResolvedValue({ clubTopScorers: true, hattricks: true, penalties: true, scorers: true })
+  cards.allSeasonsCards.mockResolvedValue({
+    clubTopScorers: true,
+    hattricks: true,
+    penalties: true,
+    records: true,
+    scorers: true,
+  })
 })
 
 afterEach(() => {
@@ -32,9 +38,20 @@ describe('the bar of /spelers/cijfers/alle', () => {
   })
 
   it('leaves out the link to a card that is not on the page', async () => {
-    cards.allSeasonsCards.mockResolvedValue({ clubTopScorers: true, hattricks: false, penalties: true, scorers: true })
+    cards.allSeasonsCards.mockResolvedValue({
+      clubTopScorers: true,
+      hattricks: false,
+      penalties: true,
+      records: true,
+      scorers: true,
+    })
 
-    expect(hrefs(await render())).toEqual(['#topscorers-sinds-1990-91', '#clubtopscorer-per-seizoen', '#strafschoppen'])
+    expect(hrefs(await render())).toEqual([
+      '#topscorers-sinds-1990-91',
+      '#clubtopscorer-per-seizoen',
+      '#records',
+      '#strafschoppen',
+    ])
   })
 
   it('passes the choice of competition on', async () => {
