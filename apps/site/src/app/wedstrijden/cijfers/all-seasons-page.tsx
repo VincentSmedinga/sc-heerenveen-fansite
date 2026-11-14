@@ -88,7 +88,8 @@ export async function allSeasonsMetadata(): Promise<Metadata> {
  * every card counting every match since the first season we have (1990/91), and four groups:
  * Seizoenen (season by season, with our place, our results per kind of competition, and the
  * results per head coach), Uitslagen (home and away, how often each score, and the records),
- * Doelpunten (per quarter, the clean sheets) and Rondom de wedstrijd (the crowds). The cards
+ * Doelpunten (per quarter, the clean sheets) and Rondom de wedstrijd (the crowds, the referees
+ * and the day). The cards
  * that rest on one season, the course of the season, how the matches go and the streaks, are
  * not here, and the streaks are in the records. Every card follows the choice of competition,
  * except our place in the card Seizoen voor seizoen, which is the Eredivisie, and the card Per
