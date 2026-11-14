@@ -89,7 +89,7 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   // door de jaren and Resultaten per hoofdtrainer left the page of a season for the page of
   // all seasons (#1211): their anchors are gone here on purpose. The card Formaties (#1216) is
   // there for a season with a finished match report that has a formation, which the made-up
-  // season has.
+  // season has. The card Strafschoppen (#1215) is on both pages, in the group Doelpunten.
   '/wedstrijden/cijfers': [
     'competitie',
     'uitslagen',
@@ -97,6 +97,7 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'rondom-de-wedstrijd',
     'doelpunten-per-kwartier',
     'de-nul-gehouden',
+    'strafschoppen',
     'nul-gehouden',
     'verloop-van-het-seizoen',
     'reeksen',
@@ -126,6 +127,7 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'records',
     'doelpunten-per-kwartier',
     'de-nul-gehouden',
+    'strafschoppen',
     'toeschouwers',
     'scheidsrechters',
   ],

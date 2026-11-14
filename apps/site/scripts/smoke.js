@@ -1131,6 +1131,7 @@ await withEmptyDatabase((database) =>
         '2 doelpunten',
         '3 doelpunten-per-kwartier',
         '3 de-nul-gehouden',
+        '3 strafschoppen',
         '2 rondom-de-wedstrijd',
         '3 toeschouwers',
         '3 scheidsrechters',
