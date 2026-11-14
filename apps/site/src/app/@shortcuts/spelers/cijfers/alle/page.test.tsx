@@ -18,6 +18,8 @@ beforeEach(() => {
   cards.allSeasonsCards.mockReset()
   cards.allSeasonsCards.mockResolvedValue({
     clubTopScorers: true,
+    goalsPerCountry: true,
+    goalsPerLine: true,
     hattricks: true,
     penalties: true,
     records: true,
@@ -31,7 +33,7 @@ afterEach(() => {
 })
 
 describe('the bar of /spelers/cijfers/alle', () => {
-  it('links to the six cards in the order of the page', async () => {
+  it('links to the eight cards in the order of the page', async () => {
     const html = await render()
 
     expect(hrefs(html)).toEqual(allSeasonsShortcuts.map(({ href }) => href))
@@ -41,6 +43,8 @@ describe('the bar of /spelers/cijfers/alle', () => {
   it('leaves out the link to a card that is not on the page', async () => {
     cards.allSeasonsCards.mockResolvedValue({
       clubTopScorers: true,
+      goalsPerCountry: true,
+      goalsPerLine: true,
       hattricks: false,
       penalties: true,
       records: true,
@@ -54,6 +58,8 @@ describe('the bar of /spelers/cijfers/alle', () => {
       '#records',
       '#strafschoppen',
       '#meeste-seizoenen-in-de-selectie',
+      '#doelpunten-per-linie',
+      '#doelpunten-per-land',
     ])
   })
 

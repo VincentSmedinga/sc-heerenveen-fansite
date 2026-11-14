@@ -802,6 +802,18 @@ export async function listPersonSeasons(db: Database) {
 }
 
 /**
+ * The line and the country of each person who has one, for the cards Doelpunten per linie and
+ * Doelpunten per land. A person with neither is left out. One row per person.
+ */
+export async function listPersonTraits(db: Database) {
+  return db
+    .select({ country: persons.country, line: persons.line, personId: persons.id })
+    .from(persons)
+    .where(or(isNotNull(persons.line), isNotNull(persons.country)))
+    .orderBy(asc(persons.id))
+}
+
+/**
  * The episodes of the podcasts that are switched on, newest first, from `offset`, at most
  * `limit`, with what the pages show of them: the title, the link to the page of the episode,
  * the time, the name of the podcast, and the duration, the season and the number of the

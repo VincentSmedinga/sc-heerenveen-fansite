@@ -33,6 +33,7 @@ export const allSeasonsStatisticsShortcuts = [
  */
 export const playerFiguresShortcuts = [
   { href: '#doelpuntenmakers', label: 'Doelpuntenmakers' },
+  { href: '#doelpunten-per-linie', label: 'Linies' },
   { href: '#bijzondere-doelpunten', label: 'Bijzondere doelpunten' },
 ] as const
 
@@ -48,11 +49,12 @@ export function playerFiguresShortcutsFor(hasReports: boolean) {
     return playerFiguresShortcuts
   }
 
-  const [scorers, special] = playerFiguresShortcuts
+  const [scorers, lines, special] = playerFiguresShortcuts
 
   return [
     scorers,
     { href: '#alle-spelers', label: 'Alle spelers' },
+    lines,
     { href: '#assists', label: 'Assists' },
     { href: '#minuten', label: 'Minuten' },
     { href: '#invallers-die-scoorden', label: 'Invallers' },
@@ -61,7 +63,7 @@ export function playerFiguresShortcutsFor(hasReports: boolean) {
 }
 
 /**
- * The bar of /spelers/cijfers/alle: the six cards in the order of the page, the main column
+ * The bar of /spelers/cijfers/alle: the eight cards in the order of the page, the main column
  * first. A card that has nothing to say is not on the page, and the bar leaves it out too (see
  * `allSeasonsShortcutsFor`). The ids are those of their headings.
  */
@@ -72,11 +74,15 @@ export const allSeasonsShortcuts = [
   { href: '#hattricks', label: 'Hattricks' },
   { href: '#strafschoppen', label: 'Strafschoppen' },
   { href: '#meeste-seizoenen-in-de-selectie', label: 'Selectie' },
+  { href: '#doelpunten-per-linie', label: 'Linies' },
+  { href: '#doelpunten-per-land', label: 'Landen' },
 ] as const
 
 /** The bar of /spelers/cijfers/alle for the cards that are on the page. */
 export const allSeasonsShortcutsFor = ({
   clubTopScorers,
+  goalsPerCountry,
+  goalsPerLine,
   hattricks,
   penalties,
   records,
@@ -84,6 +90,8 @@ export const allSeasonsShortcutsFor = ({
   squadSeasons,
 }: {
   clubTopScorers: boolean
+  goalsPerCountry: boolean
+  goalsPerLine: boolean
   hattricks: boolean
   penalties: boolean
   records: boolean
@@ -101,5 +109,9 @@ export const allSeasonsShortcutsFor = ({
             ? hattricks
             : href === '#strafschoppen'
               ? penalties
-              : squadSeasons,
+              : href === '#meeste-seizoenen-in-de-selectie'
+                ? squadSeasons
+                : href === '#doelpunten-per-linie'
+                  ? goalsPerLine
+                  : goalsPerCountry,
   )

@@ -13,6 +13,7 @@ import {
   listMatchSeasons,
   listPersonBirthDates,
   listPersonSeasons,
+  listPersonTraits,
   listReportSeasons,
   listSeasonFormations,
   listSeasonMatches,
@@ -441,6 +442,18 @@ export const getPersonSeasons = cacheFor(pastSeasonPeriod, async () => {
 export const getSquadPeople = cacheFor(
   pastSeasonPeriod,
   async () => new Map((await listSquadPeople(getDatabase().db)).map((person) => [person.personId, person])),
+)
+
+/**
+ * The line and the country of each person who has one, by the id of the person, for the cards
+ * Doelpunten per linie and Doelpunten per land. One query for all persons, kept for an hour.
+ */
+export const getPersonTraits = cacheFor(
+  pastSeasonPeriod,
+  async () =>
+    new Map(
+      (await listPersonTraits(getDatabase().db)).map(({ country, line, personId }) => [personId, { country, line }]),
+    ),
 )
 
 /**

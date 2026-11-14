@@ -1486,11 +1486,12 @@ await withEmptyDatabase((database) =>
     assert.deepEqual(
       [...figuresHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
       // The seed makes up one match report that is klaar, so the three cards with its figures
-      // are there (#832): Alle spelers after Doelpuntenmakers, Assists, Minuten and Invallers
-      // die scoorden (#1224) before the special goals.
+      // are there (#832): Alle spelers after Doelpuntenmakers, then Doelpunten per linie
+      // (#1223), Assists, Minuten and Invallers die scoorden (#1224) before the special goals.
       [
         '#doelpuntenmakers',
         '#alle-spelers',
+        '#doelpunten-per-linie',
         '#assists',
         '#minuten',
         '#invallers-die-scoorden',

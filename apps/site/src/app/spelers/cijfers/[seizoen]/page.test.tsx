@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getMatchData, getMatchSeasons } from '#src/matches'
+import { getMatchData, getMatchSeasons, getPersonTraits } from '#src/matches'
 import { getSeasonReportFigures } from '#src/season-report-figures'
 import { playerFiguresShortcuts } from '#src/statisticsShortcuts'
 import { matchData } from '#src/test-matches'
@@ -15,6 +15,7 @@ vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
+  getPersonTraits: vi.fn(),
 }))
 
 // The figures of the match reports are made up too, and by default there are none.
@@ -49,6 +50,7 @@ beforeEach(() => {
   vi.mocked(getSeasonReportFigures).mockReset()
   vi.mocked(getSeasonReportFigures).mockResolvedValue(noReports)
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26', '2024/25'])
+  vi.mocked(getPersonTraits).mockResolvedValue(new Map())
   vi.mocked(getMatchData).mockImplementation((season) =>
     Promise.resolve(season === '2025/26' ? earlier : { ...matchData, season: season ?? '2026/27' }),
   )

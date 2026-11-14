@@ -23,6 +23,7 @@ import {
   listNewestDiscussions,
   listPersonBirthDates,
   listPersonSeasons,
+  listPersonTraits,
   listPodcastEpisodes,
   listPodcasts,
   listRecentItems,
@@ -1865,6 +1866,23 @@ describe('the matches and the table of a season', () => {
       ])
       expect(await listSquadPeople(database.db)).toEqual([
         { familyName: 'Oud', familyNamePrefix: null, givenName: 'Jan', personId: personId, slug: null },
+      ])
+    })
+
+    it('gives the line and the country of each person who has one, and leaves out a person with neither', async () => {
+      await database.db.insert(persons).values([
+        { country: 'DK', familyName: 'Beide', givenName: 'Jan', line: 'aanvaller', name: 'Jan Beide' },
+        { familyName: 'Lijn', givenName: 'Jan', line: 'doelman', name: 'Jan Lijn' },
+        { country: 'SE', familyName: 'Land', givenName: 'Jan', name: 'Jan Land' },
+        { familyName: 'Niets', givenName: 'Jan', name: 'Jan Niets' },
+      ])
+
+      const rows = await listPersonTraits(database.db)
+
+      expect(rows.map(({ country, line }) => ({ country, line }))).toEqual([
+        { country: 'DK', line: 'aanvaller' },
+        { country: null, line: 'doelman' },
+        { country: 'SE', line: null },
       ])
     })
 

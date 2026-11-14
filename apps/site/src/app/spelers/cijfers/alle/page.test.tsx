@@ -10,6 +10,7 @@ import {
   getMatchSource,
   getPersonBirthDates,
   getPersonSeasons,
+  getPersonTraits,
   getReportSeasons,
   getSquadPeople,
 } from '#src/matches'
@@ -29,6 +30,7 @@ vi.mock('#src/matches', async (importOriginal) => ({
   getMatchSource: vi.fn(),
   getPersonBirthDates: vi.fn(),
   getPersonSeasons: vi.fn(),
+  getPersonTraits: vi.fn(),
   getReportSeasons: vi.fn(),
   getSquadPeople: vi.fn(),
 }))
@@ -114,6 +116,7 @@ beforeEach(() => {
   vi.mocked(getMatchSource).mockResolvedValue('wikipedia')
   vi.mocked(getPersonBirthDates).mockResolvedValue(new Map())
   vi.mocked(getPersonSeasons).mockResolvedValue(new Map())
+  vi.mocked(getPersonTraits).mockResolvedValue(new Map())
   vi.mocked(getSquadPeople).mockResolvedValue(new Map())
   vi.mocked(getReportSeasons).mockResolvedValue(['2003/04', '2004/05', '2005/06', '2026/27'])
   vi.mocked(getReportAddresses).mockResolvedValue(
@@ -358,6 +361,42 @@ describe('the page with all seasons, /spelers/cijfers/alle', () => {
     expect(card).toContain('href="/spelers/johan-hansma"')
     expect(card).toContain('1993–1996')
     expect(card).toContain('Het aantal seizoenen waarin de speler in de selectie stond, niet zijn wedstrijden.')
+  })
+
+  it('has the soft cards Doelpunten per linie and Doelpunten per land after the squad card, and follows the choice', async () => {
+    const idOf = (name: string) => [...name].reduce((sum, letter) => sum + letter.charCodeAt(0), 0)
+
+    vi.mocked(getPersonTraits).mockResolvedValue(
+      new Map([
+        [idOf('Drie'), { country: 'NL', line: 'aanvaller' }],
+        [idOf('Vijf'), { country: 'DK', line: 'middenvelder' }],
+      ]),
+    )
+
+    const html = await render()
+    const side = html.slice(html.indexOf('style="grid-area:side"'))
+    const line = /<section[^>]*aria-labelledby="doelpunten-per-linie".*?<\/section>/s.exec(side)?.[0] ?? ''
+    const country = /<section[^>]*aria-labelledby="doelpunten-per-land".*?<\/section>/s.exec(side)?.[0] ?? ''
+
+    expect(side.indexOf('id="strafschoppen"')).toBeLessThan(side.indexOf('id="doelpunten-per-linie"'))
+    expect(side.indexOf('id="doelpunten-per-linie"')).toBeLessThan(side.indexOf('id="doelpunten-per-land"'))
+    expect(line).toContain('hf-card-soft')
+    expect(line).toContain('Middenvelders')
+    expect(line).toMatch(/Aanvallers.*hf-bar-list-value">3</s)
+    expect(country).toContain('Denemarken')
+    expect(country).toContain('Nederland')
+    expect(country).toContain('Het land van de doelpuntenmaker.')
+    // The 79 goals of the other scorers have no person we know.
+    expect(country).toContain('Op basis van 8 van de 87 doelpunten')
+
+    expect(await render({ competitie: 'beker' })).not.toContain('id="doelpunten-per-linie"')
+  })
+
+  it('leaves the cards Doelpunten per linie and Doelpunten per land out when no line or country is known', async () => {
+    const html = await render()
+
+    expect(html).not.toContain('doelpunten-per-linie')
+    expect(html).not.toContain('doelpunten-per-land')
   })
 
   it('does not follow the choice of competition', async () => {

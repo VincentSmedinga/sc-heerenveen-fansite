@@ -5782,6 +5782,28 @@
 - **Waarom:** "onder wie winnen we, en onder wie nooit?" is een vraag die supporters stellen, en de scheidsrechter staat al bij de wedstrijden.
 - **Alternatieven:** één kolom W–G–V; de namen samenvoegen bij twee schrijfwijzen (dat is een keuze van de importer, #417); de top 10 bij alle seizoenen.
 
+## Spelers · Cijfers heeft de kaarten Doelpunten per linie en Doelpunten per land
+
+- **Datum:** 14 november 2026
+- **Besluit:** de zijkolom van `/spelers/cijfers` en `/spelers/cijfers/<seizoen>` heeft vooraan de zachte kaart "Doelpunten per linie" (`#doelpunten-per-linie`), en de zijkolom van `/spelers/cijfers/alle` heeft die kaart na Meeste seizoenen in de selectie, gevolgd door "Doelpunten per land" (`#doelpunten-per-land`) (#1223, onderdeel van #1207).
+  Beide kaarten volgen de werkbalk, met een staaf per rij in een `BarList`, en het getal als tekst ernaast.
+  - **De telling** volgt die van de lijst met doelpuntenmakers (`topScorersOf`): een doelpunt van ons, zonder eigen doelpunten van beide kanten, in de wedstrijden van de gekozen competitie.
+    De totalen kloppen dus met de andere kaarten.
+    De linie en het land zijn die van de persoon achter het doelpunt (`persons.line` en `persons.country`, uit `getPersonTraits`).
+  - **Een doelpunt zonder persoon, of van een persoon zonder linie of zonder land,** telt in het totaal en niet in de staven.
+    Rusten de staven op minder doelpunten, dan zegt de kaart dat: "Op basis van 9 van de 12 doelpunten: van de rest kennen we de linie van de doelpuntenmaker niet."
+  - **Per linie** staan aanvallers, middenvelders, verdedigers en doelmannen in die volgorde, en een linie zonder doelpunten ontbreekt.
+    **Per land** staan de vijf landen met de meeste doelpunten, en bij gelijk aantal op naam, met het land in woorden (`CountryName`).
+    Een regel zegt dat het om het land van de doelpuntenmaker gaat.
+  - **Wanneer de kaart er is:** bij een seizoen staat Doelpunten per linie er altijd, ook zonder bekende linies, met de zin "We kennen nog geen doelpunten per linie van …", zoals Bijzondere doelpunten.
+    Kan de database de lijnen niet geven, dan staat dezelfde zin er en logt de pagina de reden.
+    Op de pagina met alle seizoenen laten we een kaart weg die niets te zeggen heeft, zoals de andere kaarten daar, en de balk "Op deze pagina:" laat de link dan ook weg.
+  - **De balk** heeft de links "Linies" en, bij alle seizoenen, "Landen".
+  - **Het ontwerp** toont Doelpunten per land alleen bij alle seizoenen, en Doelpunten per linie alleen bij een seizoen; het issue zet Doelpunten per linie op beide pagina's, en de kaart staat er dus ook bij alle seizoenen.
+- **Waarom:** wie maakt de doelpunten, de aanvallers of de rest, en uit welke landen komen ze?
+  We kennen van bijna elke speler de linie en het land.
+- **Alternatieven:** de linie van het seizoen (`players.position`) in plaats van die van de persoon, wat een speler die van linie wisselde per seizoen anders telt maar een zoekopdracht per seizoen vraagt; een regel "En verder" onder Doelpunten per land, zoals het overzicht van spelers per land heeft; de doelpunten zonder linie of land als aparte staaf "Onbekend".
+
 ## Wedstrijden · Cijfers heeft de kaart Strafschoppen, met de benutte strafschoppen voor en tegen ons
 
 - **Datum:** 14 november 2026

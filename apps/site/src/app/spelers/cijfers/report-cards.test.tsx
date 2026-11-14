@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getMatchData, getMatchSeasons } from '#src/matches'
+import { getMatchData, getMatchSeasons, getPersonTraits } from '#src/matches'
 import { getSeasonPlayerStats } from '#src/season-player-stats'
 import { getSeasonReportFigures } from '#src/season-report-figures'
 import { playerFiguresShortcutsFor } from '#src/statisticsShortcuts'
@@ -15,6 +15,7 @@ vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
+  getPersonTraits: vi.fn(),
 }))
 vi.mock('#src/season-player-stats', () => ({ getSeasonPlayerStats: vi.fn() }))
 vi.mock('#src/season-report-figures', () => ({ getSeasonReportFigures: vi.fn(), seasonHasReports: vi.fn() }))
@@ -39,6 +40,7 @@ beforeEach(() => {
   vi.mocked(getMatchData).mockResolvedValue(matchData)
   vi.mocked(getMatchSeasons).mockReset()
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27'])
+  vi.mocked(getPersonTraits).mockResolvedValue(new Map())
   vi.mocked(getSeasonPlayerStats).mockReset()
   vi.mocked(getSeasonPlayerStats).mockResolvedValue([])
   vi.mocked(getSeasonReportFigures).mockReset()

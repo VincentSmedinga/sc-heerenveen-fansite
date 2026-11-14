@@ -3,7 +3,7 @@ import type { PublicMatch } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getMatchData, getMatchSeasons } from '#src/matches'
+import { getMatchData, getMatchSeasons, getPersonTraits } from '#src/matches'
 import { getSeasonPlayerStats } from '#src/season-player-stats'
 import { getSeasonReportFigures } from '#src/season-report-figures'
 import { playerFiguresShortcuts } from '#src/statisticsShortcuts'
@@ -19,6 +19,7 @@ vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
+  getPersonTraits: vi.fn(),
 }))
 
 // The figures of the match reports are made up too, and by default there are none.
@@ -84,6 +85,7 @@ beforeEach(() => {
   vi.mocked(getSeasonReportFigures).mockResolvedValue(noReports)
   vi.mocked(getMatchData).mockResolvedValue(matchData)
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27'])
+  vi.mocked(getPersonTraits).mockResolvedValue(new Map())
 })
 
 afterEach(() => {
@@ -93,12 +95,13 @@ afterEach(() => {
 })
 
 describe('the page /spelers/cijfers', () => {
-  it('has one h1, Cijfers van de spelers, the h2 Doelpuntenmakers in the main column and the h2 Bijzondere doelpunten in the side column', async () => {
+  it('has one h1, Cijfers van de spelers, the h2 Doelpuntenmakers in the main column and the h2s Doelpunten per linie and Bijzondere doelpunten in the side column', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1">Cijfers van de spelers</h1>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="doelpuntenmakers"><span class="hf-heading-target"></span><span class="hf-heading-alias" id="topscorers"></span><a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmakers</a></h2>',
+      '<h2 class="hf-heading-2 hf-heading-anchored" id="doelpunten-per-linie"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#doelpunten-per-linie">Doelpunten per linie</a></h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="bijzondere-doelpunten"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#bijzondere-doelpunten">Bijzondere doelpunten</a></h2>',
     ])
   })
@@ -145,6 +148,37 @@ describe('the page /spelers/cijfers', () => {
     )
     expect(card.match(/<table/g)).toHaveLength(1)
     expect(card).toContain('<p class="hf-meta hf-bar-legend"><b>D</b> doelpunten</p>')
+  })
+
+  it('has the soft card Doelpunten per linie first in the side section, with a bar per line', async () => {
+    const goals = scorers([2, 1]).flatMap((item) => item.goals)
+
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: [{ ...played, goals: goals.map((item, index) => ({ ...item, personId: index < 2 ? 1 : 2 })) }],
+    })
+    vi.mocked(getPersonTraits).mockResolvedValue(
+      new Map([
+        [1, { country: 'NL', line: 'aanvaller' }],
+        [2, { country: 'NL', line: 'verdediger' }],
+      ]),
+    )
+
+    const html = await render()
+    const sidebar = html.slice(html.indexOf('style="grid-area:side"'))
+
+    expect(sidebar.indexOf('id="doelpunten-per-linie"')).toBeLessThan(sidebar.indexOf('id="bijzondere-doelpunten"'))
+    expect(sidebar).toMatch(/Aanvallers.*hf-bar-list-value">2<.*Verdedigers.*hf-bar-list-value">1</s)
+    expect(sidebar).not.toContain('Op basis van')
+  })
+
+  it('says that we know no goals per line when the lines can not be read, and logs the reason', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    vi.mocked(getPersonTraits).mockRejectedValue(new Error('no database'))
+
+    expect(await render()).toContain('We kennen nog geen doelpunten per linie van alle competities.')
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('Could not read the lines of the players'))
   })
 
   it('counts the goals of our players over the matches, as the card on Cijfers did', async () => {
