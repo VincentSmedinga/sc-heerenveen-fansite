@@ -1,6 +1,7 @@
 import preview from '#.storybook/preview'
 
 import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
+import { Match } from '../match/Match'
 import { DescriptionList } from './DescriptionList'
 
 const meta = preview.meta({
@@ -50,6 +51,29 @@ export const Stacked = meta.story({
         4 februari 2003, uit bij Stormvogels Telstar (1–3)
       </DescriptionList.Item>
       <DescriptionList.Item term="Vaakst bediend door">Richard Knopper, 3 assists</DescriptionList.Item>
+    </DescriptionList>
+  ),
+})
+
+export const WithMatches = meta.story({
+  name: 'Met een wedstrijd als omschrijving',
+  render: () => (
+    <DescriptionList stacked>
+      <DescriptionList.Item term="Grootste overwinning">
+        <Match
+          dateTime="2026-10-25"
+          goalsAgainst={0}
+          goalsFor={6}
+          home
+          opponent="Voorbeeld United"
+          round="Speelronde 2"
+          status="played"
+          time="zo 25 okt"
+        />
+      </DescriptionList.Item>
+      <DescriptionList.Item term="Langste reeks zonder nederlaag">
+        <p>12 wedstrijden, 2015/16</p>
+      </DescriptionList.Item>
     </DescriptionList>
   ),
 })

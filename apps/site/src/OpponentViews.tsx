@@ -7,6 +7,7 @@ import {
   BarPlace,
   Card,
   DataTable,
+  DescriptionList,
   Disclosure,
   FormTimeline,
   Heading,
@@ -375,14 +376,13 @@ export function ClubSummaryCard({
         total={row('Totaal', summary.total)}
       />
       {lines.length > 0 && (
-        <List role="list">
+        <DescriptionList stacked>
           {lines.map(({ label, match }) => (
-            <List.Item key={label}>
-              <Text appearance="meta">{label}</Text>
+            <DescriptionList.Item key={label} term={label}>
               <MeetingLine choice={choice} match={match} now={now} />
-            </List.Item>
+            </DescriptionList.Item>
           ))}
-        </List>
+        </DescriptionList>
       )}
       <BasedOnSince choice={choice} played={summary.total.played} since={since} />
     </Card>

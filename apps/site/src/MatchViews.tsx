@@ -15,6 +15,7 @@ import {
   Button,
   Card,
   DataTable,
+  DescriptionList,
   Disclosure,
   DonutChart,
   Form,
@@ -288,13 +289,17 @@ export function ExtremesCard({
         <Text>We hebben nog geen uitslagen van dit seizoen.</Text>
       ) : (
         <>
-          <List role="list">
+          <DescriptionList stacked>
             {shown.map(({ goal, match, name }) => (
-              <List.Item key={name}>
-                <Text appearance="meta">
-                  {name}
-                  {goal !== undefined && goalLine(goal)}
-                </Text>
+              <DescriptionList.Item
+                key={name}
+                term={
+                  <>
+                    {name}
+                    {goal !== undefined && goalLine(goal)}
+                  </>
+                }
+              >
                 <Match
                   // Only played matches with both scores count, so these are numbers.
                   competition={competition === 'all' ? match.competition : undefined}
@@ -307,9 +312,9 @@ export function ExtremesCard({
                   round={match.round}
                   status="played"
                 />
-              </List.Item>
+              </DescriptionList.Item>
             ))}
-          </List>
+          </DescriptionList>
           <BasedOn known={played} played={played} />
           {known > 0 && known < played && (
             <Text appearance="meta">{`Vroegste en laatste doelpunt: ${known} van de ${played} gespeelde wedstrijden`}</Text>

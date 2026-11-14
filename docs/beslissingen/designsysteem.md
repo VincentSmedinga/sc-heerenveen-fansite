@@ -2347,6 +2347,7 @@
   Wat dichterbij of verder weg staat dan de stroom zegt, krijgt een hulpklasse: `FormChart` is een `hf-flow` met `hf-space-end-s` op de rij met letters en `hf-space-end-xs` op de toelichting, en een `CheckboxGroup` in een formulier met een knop krijgt `hf-space-end-s`.
   Vier marges blijven, elk met de reden bij de regel: de ruimte onder de `legend` van een fieldset (`FieldGroup`, `RadioGroup` en `CheckboxGroup`), omdat een `gap` de legenda niet bereikt; de marge van de open lijst van `Select`, omdat die lijst een popover buiten de stroom is; de ruimte onder de lijn van de navigatie in de header, omdat een `gap` ook tussen elke andere rij links zou komen; en de ruimte boven de links in de footer van `Page`, omdat een `gap` ook tussen de twee regels tekst zou komen.
   Een lijst met regels die elk een naam boven een `ShortMatch` hebben, is een raster met `gap` gemiddeld, in plaats van een marge boven elke naam.
+  - **Later:** zie _Een naam bij een wedstrijd is een `dt` in een `dl`, met de `Match` in de `dd`_ (#1249): de naam staat sindsdien in een `dt`.
 - **Waarom:** een onderdeel kent zijn omgeving niet.
   Zette het zelf een marge, dan hing de ruimte af van wat er toevallig naast stond, en moest de stroom die marge overschrijven.
   Met de `gap` van het onderdeel is de ruimte tussen zijn delen één plek, en wijst stylelint elke marge af die niet blijft.
@@ -3537,3 +3538,12 @@
 - **Waarom:** Wedstrijden · Cijfers en Spelers · Cijfers (#1218) hebben dezelfde kop met lijn nodig, en één onderdeel houdt ze gelijk.
   Vier getallen naast elkaar lees je in één blik, en dat is wat de rij is voor.
 - **Alternatieven:** de groep in de site bouwen, zodat twee pagina's hem elk bouwen; een eigen component voor de rij kerngetallen van Cijfers.
+
+## Een naam bij een wedstrijd is een `dt` in een `dl`, met de `Match` in de `dd`
+
+- **Datum:** 14 november 2026
+- **Besluit:** waar een kaart een wedstrijd een naam geeft, zoals "Grootste overwinning", is de lijst een `DescriptionList` met `stacked` en een `DescriptionList.Item` per regel: de naam is de `term`, de `Match` of de tekst de beschrijving (#1249).
+  In Records zijn ook de reeksen en "Beslist met strafschoppen" een paar van dezelfde lijst.
+  Een `dd` met een `Match` of een alinea heeft de grootte en het gewicht van gewone tekst, en de `Match` in een `dd` heeft geen ruimte boven en onder zich: de ruimte is die van het paar.
+- **Waarom:** een schermlezer hoort dat de naam bij de wedstrijd hoort, en de naam en de wedstrijd zijn niet meer twee losse stukken tekst.
+- **Alternatieven:** alleen de regels met een `Match` een `dl` en de tekstregels een `List.Item` (een `dl` naast losse lijstitems is onzuiver en de opmaak verschilt); een nieuw onderdeel voor gelabelde regels (er is er al een).

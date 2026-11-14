@@ -356,11 +356,11 @@ describe('the page of a club', () => {
     },
   )
 
-  it('has the biggest win and the biggest loss under the summary, as short lines', async () => {
+  it('has the biggest win and the biggest loss under the summary, as terms with a match', async () => {
     const html = await render()
 
-    expect(html).toContain('Grootste overwinning')
-    expect(html).toContain('Grootste nederlaag')
+    expect(html).toContain('<dt>Grootste overwinning</dt><dd><div class="hf-match"')
+    expect(html).toContain('<dt>Grootste nederlaag</dt><dd><div class="hf-match"')
     expect(plain(html.slice(html.indexOf('Grootste overwinning')))).toMatch(
       /^Grootste overwinning vr 24 okt 2025 sc Heerenveen 3–0 3 tegen 0 Testclub.*Grootste nederlaag/,
     )

@@ -177,7 +177,7 @@ describe('the page /wedstrijden/cijfers', () => {
 
       expectInOrder(section(html, 'thuis-en-uit'), ['</h3>', '<table', 'gespeelde wedstrijd'])
       expectInOrder(section(html, 'doelpunten-per-kwartier'), ['</h3>', '<table', 'gespeelde wedstrijd'])
-      expectInOrder(section(html, 'uitersten'), ['</h3>', '<ul', 'Alle', 'Vroegste en laatste doelpunt: '])
+      expectInOrder(section(html, 'uitersten'), ['</h3>', '<dl', 'Alle', 'Vroegste en laatste doelpunt: '])
     })
 
     it('has the sentence about extra time right after the count', async () => {
@@ -1216,17 +1216,17 @@ describe('the page /wedstrijden/cijfers', () => {
     // round 8 (2–0, at home against Testdorp FC, goals in 34' and 45+1') and round 9 (2–2 away
     // against Voorbeeld United, our goals in 40' and 63'). The cup tie doesn't count.
     const lines = (card: string) =>
-      [...card.matchAll(/<li[^>]*>(.*?)<\/li>/gs)].map(([, line]) =>
+      [...card.matchAll(/<dt>(.*?)<\/dd>/gs)].map(([, line]) =>
         (line ?? '')
           .replaceAll(/<[^>]*>/g, ' ')
           .replaceAll(/\s+/g, ' ')
           .trim(),
       )
 
-    it('is a card with a list of lines, each with a name above a match and, for a goal, the minute and the player in the name', async () => {
+    it('is a card with a description list, each name a term and each match its description and, for a goal, the minute and the player in the name', async () => {
       const card = section(await render(eredivisie), 'uitersten')
 
-      expect(card.match(/<ul[^>]*role="list"/g)).toHaveLength(1)
+      expect(card.match(/<dl /g)).toHaveLength(1)
       expect(card.match(/<div class="hf-match"/g)).toHaveLength(4)
       expect(lines(card)).toEqual([
         expect.stringMatching(/^Grootste overwinning .*sc Heerenveen 2–0 2 tegen 0 Testdorp FC$/),
@@ -1236,14 +1236,14 @@ describe('the page /wedstrijden/cijfers', () => {
       ])
     })
 
-    it('puts the name in the same item right before the match, with a dot a screen reader skips', async () => {
+    it('puts the name in a term right before the match in its description, with a dot a screen reader skips', async () => {
       const card = section(await render(eredivisie), 'uitersten')
 
-      expect(card.match(/<li>(?:<p class="hf-meta">[^]*?<\/p>)<div class="hf-match">/g)).toHaveLength(4)
+      expect(card.match(/<div><dt>[^]*?<\/dt><dd><div class="hf-match">/g)).toHaveLength(4)
       expect(card).toContain(
-        '<p class="hf-meta">Vroegste doelpunt <span aria-hidden="true">·</span> minuut 34 <span aria-hidden="true">·</span> Proefman</p><div class="hf-match">',
+        '<dt>Vroegste doelpunt <span aria-hidden="true">·</span> minuut 34 <span aria-hidden="true">·</span> Proefman</dt><dd><div class="hf-match">',
       )
-      expect(card).toContain('<p class="hf-meta">Grootste overwinning</p><div class="hf-match">')
+      expect(card).toContain('<dt>Grootste overwinning</dt><dd><div class="hf-match">')
     })
 
     it('leaves out a line without a match, such as the biggest loss in a season without a loss, and does not say so', async () => {
