@@ -1,8 +1,7 @@
 import { Card, DataTable, Heading, PlayerName, tableColumns, tableLegend, Text } from '@fansite/design-system'
 
-import type { CompetitionChoice } from './competition'
-
 import { type CoachResult } from './coachResults'
+import { type CompetitionChoice, competitionWords } from './competition'
 import { coachResultsCard } from './matchShortcuts'
 import { BasedOnSince } from './OpponentViews'
 import { splitPersonName } from './player-name'
@@ -62,7 +61,7 @@ export function CoachResultsCard({
         {coachResultsCard.name}
       </Heading>
       <DataTable
-        caption={`De resultaten van sc Heerenveen per hoofdtrainer, de nieuwste eerst${choice === 'league' ? ', in de Eredivisie' : ''}`}
+        caption={`De resultaten van sc Heerenveen per hoofdtrainer, de nieuwste eerst${choice === 'all' ? '' : `, in ${competitionWords(choice)}`}`}
         columns={['Hoofdtrainer', ...figureColumns]}
         rows={results.map((result) => ({
           cells: [result.played, result.won, result.drawn, result.lost, result.pointsPerMatch],

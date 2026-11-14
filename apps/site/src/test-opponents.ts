@@ -42,6 +42,12 @@ export const leagueRecords: PublicClubRecord[] = [
   record('testclub', 'Testclub', 4, 3, 1, 0, [10, 3]),
 ]
 
+/** What the cup counts: the two cup ties of the made-up clubs. */
+export const cupRecords: PublicClubRecord[] = [
+  record('beker-united', 'Beker United', 1, 0, 0, 1, [0, 2]),
+  record('testclub', 'Testclub', 1, 0, 1, 0, [1, 1]),
+]
+
 let id = 0
 
 /** A goal of one of our players, at `minute`, as the query gives it. */

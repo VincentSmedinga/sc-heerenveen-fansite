@@ -219,13 +219,15 @@ test.describe('without JavaScript', () => {
     expect(names).toEqual([...names].toSorted(new Intl.Collator('nl', { sensitivity: 'base' }).compare))
   })
 
-  test('the switch of the list is two links, and a club we only met in the cup leaves the list', async ({ page }) => {
+  test('the switch of the list is a row of links, and a club we only met in the cup leaves the list', async ({
+    page,
+  }) => {
     await page.goto('/tegenstanders')
 
     const choices = page.getByRole('group', { name: 'Welke wedstrijden' })
 
     await expect(list(page).getByRole('rowheader', { name: 'FC Maquette' })).toBeVisible()
-    await choices.getByRole('link', { name: 'Eredivisie' }).click()
+    await choices.getByRole('link', { name: 'Competitie' }).click()
 
     await expect(page).toHaveURL(/\/tegenstanders\?competitie=eredivisie$/)
     await expect(page.getByRole('rowheader', { name: 'FC Maquette' })).toHaveCount(0)
@@ -236,7 +238,7 @@ test.describe('without JavaScript', () => {
     await page.goto('/tegenstanders/fc-maquette?competitie=eredivisie')
 
     await expect(page.getByText('In de Eredivisie hebben we nog niet tegen deze club gespeeld.')).toBeVisible()
-    await page.getByRole('link', { name: 'Alle wedstrijden' }).click()
+    await page.getByRole('link', { name: 'Alles' }).click()
 
     await expect(page).toHaveURL(/\/tegenstanders\/fc-maquette$/)
     await expect(page.getByRole('heading', { level: 2, name: 'Onze uitslagen tegen FC Maquette' })).toBeVisible()
@@ -458,16 +460,14 @@ test.describe('the matches to come on the page of a club', () => {
     await expect(page.getByRole('region', { name: 'Wedstrijden' }).getByText('Uitgesteld').first()).toBeVisible()
   })
 
-  test('leaves out a cup tie with the choice Eredivisie, and brings it back with Alle wedstrijden', async ({
-    page,
-  }) => {
+  test('leaves out a cup tie with the choice Eredivisie, and brings it back with Alles', async ({ page }) => {
     await page.goto('/tegenstanders/sv-proefdorp?competitie=eredivisie')
 
     const card = page.getByRole('region', { name: 'Wedstrijden' })
 
     await expect(page.getByText('In de Eredivisie hebben we nog niet tegen deze club gespeeld.')).toBeVisible()
     await expect(card.getByText('KNVB Beker')).toHaveCount(0)
-    await page.getByRole('link', { name: 'Alle wedstrijden' }).click()
+    await page.getByRole('link', { name: 'Alles' }).click()
 
     await expect(page).toHaveURL(/\/tegenstanders\/sv-proefdorp$/)
     await expect(card.getByText('KNVB Beker · Tweede ronde')).toBeVisible()

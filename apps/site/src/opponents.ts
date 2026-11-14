@@ -19,7 +19,7 @@ import {
 import { seasonOf } from '@fansite/db/season'
 
 import { cacheFor, cacheForKey } from './cache'
-import { type CompetitionChoice } from './competition'
+import { type CompetitionChoice, competitionMembers, countsFor } from './competition'
 import { getDatabase } from './database'
 import { ownListPeriods, stadiumPeriods } from './match-format'
 import { letterOf, resultOf } from './match-result'
@@ -75,7 +75,7 @@ const emptyTally = (): Tally => ({ drawn: 0, goalsAgainst: 0, goalsFor: 0, lost:
 export function meetingsOf(matches: readonly PublicClubMatch[], choice: CompetitionChoice): Meeting[] {
   return matches.filter(
     (match): match is Meeting =>
-      (choice === 'all' || match.competition === 'Eredivisie') &&
+      countsFor(match.competition, choice) &&
       match.status === 'played' &&
       match.goalsFor !== null &&
       match.goalsAgainst !== null,
@@ -236,10 +236,7 @@ export function tallyOf(meetings: readonly Meeting[]): Tally {
  * query has them, so they are turned round.
  */
 export function upcomingOf(matches: readonly PublicClubMatch[], choice: CompetitionChoice, now: Date) {
-  return programmeOf(
-    matches.filter((match) => choice === 'all' || match.competition === 'Eredivisie').toReversed(),
-    now,
-  )
+  return programmeOf(matches.filter((match) => countsFor(match.competition, choice)).toReversed(), now)
 }
 
 /** How many of the latest meetings the row Laatste wedstrijden shows, and needs. */
@@ -541,9 +538,11 @@ export function hardestOf(records: readonly PublicClubRecord[]) {
 export const seasonsOf = (matches: readonly PublicClubMatch[]) =>
   [...new Set(matches.map((match) => match.season))].sort().reverse()
 
-const clubRecords = cacheForKey(period, (choice) =>
-  listClubRecords(getDatabase().db, choice === 'league' ? { competition: 'Eredivisie' } : {}),
-)
+const clubRecords = cacheForKey(period, (choice) => {
+  const only = competitionMembers(choice as CompetitionChoice)
+
+  return listClubRecords(getDatabase().db, only === undefined ? {} : { competition: only })
+})
 
 /** The club and every match against it, whatever the competition. */
 export type ClubPage = {
@@ -558,7 +557,7 @@ export type ClubPage = {
 /**
  * Every club with the record against it, A to Z, for the matches the choice counts. A club
  * without a match of that choice, such as one we only met in the cup with the choice `league`,
- * is not in it. The two choices are the only keys, so the cache never grows.
+ * is not in it. The four choices are the only keys, so the cache never grows.
  */
 export function getClubRecords(choice: CompetitionChoice): Promise<PublicClubRecord[]> {
   return clubRecords(choice)

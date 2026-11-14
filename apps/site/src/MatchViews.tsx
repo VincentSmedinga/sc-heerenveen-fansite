@@ -41,7 +41,7 @@ import {
 import type { FlowRow, HomeAwayTally, MatchData } from './matches'
 import type { UpcomingDetails } from './upcoming-match'
 
-import { type CompetitionChoice, competitionParam, leagueValue } from './competition'
+import { type CompetitionChoice, competitionFields } from './competition'
 import { goalsPerMatchOf } from './goals-per-match'
 import { moreCleanSheets } from './items-per-card'
 import {
@@ -198,7 +198,9 @@ export function CleanSheetsCard({
           {sheets.length > shown.length && (
             <Form action={`${path}#nul-${shown.length + 1}`} method="get">
               {/* The form replaces the query of the address, so it carries the choice. */}
-              {competition === 'league' && <Input name={competitionParam} type="hidden" value={leagueValue} />}
+              {Object.entries(competitionFields(competition)).map(([name, value]) => (
+                <Input key={name} name={name} type="hidden" value={value} />
+              ))}
               <Button appearance="soft" icon="plus" name="nul" type="submit" value={String(count + moreCleanSheets)}>
                 {`Laad ${moreCleanSheets} meer`}
               </Button>

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getEditedMatches, getMatchSeasons, getMatchSource } from '#src/matches'
 import { getClubRecords, getLastWinPlaces, getSourcePages } from '#src/opponents'
-import { allRecords, leagueRecords, matchSeasons, sourcePages } from '#src/test-opponents'
+import { allRecords, cupRecords, leagueRecords, matchSeasons, sourcePages } from '#src/test-opponents'
 import { withoutIcons } from '#src/without-icons'
 
 import OpponentsPage, { generateMetadata } from './page'
@@ -43,7 +43,7 @@ beforeEach(() => {
   vi.stubEnv('SITE_ENV', 'production')
   vi.mocked(getClubRecords).mockReset()
   vi.mocked(getClubRecords).mockImplementation((choice) =>
-    Promise.resolve(choice === 'league' ? leagueRecords : allRecords),
+    Promise.resolve({ all: allRecords, cup: cupRecords, europe: [], league: leagueRecords }[choice]),
   )
   vi.mocked(getLastWinPlaces).mockReset()
   vi.mocked(getLastWinPlaces).mockResolvedValue(undefined)
@@ -184,16 +184,21 @@ describe('the page /tegenstanders', () => {
     expect(await render()).toContain('Alle 9 gespeelde wedstrijden sinds 2022/23')
   })
 
-  it('has the switch, with the choice Alle wedstrijden current, when a cup tie was played', async () => {
+  it('has the switch, with the choice Alles current, when a cup tie was played', async () => {
     const html = await render()
 
     expect(html).toContain('aria-label="Welke wedstrijden"')
-    expect(html).toMatch(/<a aria-current="page"[^>]*href="\/tegenstanders"[^>]*><span[^>]*>Alle wedstrijden/)
+    expect(html).toMatch(/<a aria-current="page"[^>]*href="\/tegenstanders"[^>]*><span[^>]*>Alles/)
     expect(html).toContain('href="/tegenstanders?competitie=eredivisie"')
+    expect(html).toContain('href="/tegenstanders?competitie=beker"')
+    // Nothing was played in Europe, so that choice is not offered.
+    expect(html).not.toContain('competitie=europa')
   })
 
   it('has no switch when no cup tie was played, because there is nothing to choose', async () => {
-    vi.mocked(getClubRecords).mockResolvedValue(allRecords)
+    vi.mocked(getClubRecords).mockImplementation((choice) =>
+      Promise.resolve({ all: leagueRecords, cup: [], europe: [], league: leagueRecords }[choice]),
+    )
 
     expect(await render()).not.toContain('Welke wedstrijden')
   })
@@ -207,7 +212,7 @@ describe('the page /tegenstanders', () => {
       '/tegenstanders/testclub?competitie=eredivisie',
     ])
     expect(html).toContain('Alle 7 gespeelde wedstrijden in de Eredivisie sinds 2022/23')
-    expect(html).toMatch(/<a aria-current="page"[^>]*><span[^>]*>Eredivisie</)
+    expect(html).toMatch(/<a aria-current="page"[^>]*><span[^>]*>Competitie</)
   })
 
   it('says under the credit that the editors entered some of the data, only while that is so', async () => {

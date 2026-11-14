@@ -138,7 +138,7 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   // address of the player has a test of its own, below.
   { path: playerPages.player, status: 200 },
   { path: `${playerPages.player}?competitie=eredivisie`, status: 200 },
-  { path: `${playerPages.player}?competitie=beker`, status: 404 },
+  { path: `${playerPages.player}?competitie=onzin`, status: 404 },
   { path: playerPages.opponent, status: 404 },
   // A made-up goalkeeper and a made-up forward, with the table Per seizoen (#1082).
   { path: playerPages.goalkeeper, status: 200 },

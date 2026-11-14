@@ -15,6 +15,11 @@ export type SegmentedLinksOption = {
 }
 
 export type SegmentedLinksProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
+  /**
+   * Smaller letters and less room round them, at the standard height of the target. For four
+   * options on a phone, where the standard letters do not fit.
+   */
+  compact?: boolean
   /** The name of the group, for a screen reader, such as "Welke wedstrijden". */
   label: string
   /** The links, in order. */
@@ -36,6 +41,7 @@ export type SegmentedLinksProps = Omit<ComponentPropsWithoutRef<'div'>, 'childre
  */
 export const SegmentedLinks = ({
   className,
+  compact = false,
   label,
   options,
   size = 'default',
@@ -59,7 +65,7 @@ export const SegmentedLinks = ({
       {...props}
       {...group}
       aria-label={label}
-      className={classNames('hf-segmented-control', sizeClass, className)}
+      className={classNames('hf-segmented-control', sizeClass, compact && 'hf-segmented-compact', className)}
       role="group"
       style={groupStyle}
     >

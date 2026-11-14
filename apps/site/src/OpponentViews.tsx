@@ -25,7 +25,7 @@ import {
   WikipediaCredit,
 } from '@fansite/design-system'
 
-import { type CompetitionChoice } from './competition'
+import { type CompetitionChoice, competitionWords } from './competition'
 import { creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
 import { type MatchSource, sourceOf } from './match-sources'
 import { competitionNames, countScores, topScorersOf } from './matches'
@@ -78,7 +78,7 @@ export function BasedOnSince({
   const where = condition === undefined ? '' : `, ${condition}`
 
   return (
-    <Text appearance="meta">{`${matches}${choice === 'league' ? ' in de Eredivisie' : ''} sinds ${since}${where}`}</Text>
+    <Text appearance="meta">{`${matches}${choice === 'all' ? '' : ` in ${competitionWords(choice)}`} sinds ${since}${where}`}</Text>
   )
 }
 
@@ -211,7 +211,7 @@ export function ClubsCard({
       ) : (
         <>
           <DataTable
-            caption={`De tegenstanders van sc Heerenveen, van A tot Z, met onze uitslagen tegen elk${choice === 'league' ? ' in de Eredivisie' : ''}`}
+            caption={`De tegenstanders van sc Heerenveen, van A tot Z, met onze uitslagen tegen elk${choice === 'all' ? '' : ` in ${competitionWords(choice)}`}`}
             columns={clubColumns}
             rows={records.map((record) => ({
               cells: [
@@ -369,7 +369,7 @@ export function ClubSummaryCard({
         {`Onze uitslagen tegen ${name}`}
       </Heading>
       <RecordTable
-        caption={`De uitslagen van sc Heerenveen tegen ${name}${choice === 'league' ? ' in de Eredivisie' : ''}, thuis, uit en in totaal`}
+        caption={`De uitslagen van sc Heerenveen tegen ${name}${choice === 'all' ? '' : ` in ${competitionWords(choice)}`}, thuis, uit en in totaal`}
         rows={[row('Thuis', summary.home), row('Uit', summary.away)]}
         total={row('Totaal', summary.total)}
       />
@@ -687,7 +687,7 @@ export function HardestCard({
         Het moeilijkst
       </Heading>
       <DataTable
-        caption={`De vijf clubs waartegen sc Heerenveen gemiddeld de minste punten per wedstrijd haalt, van laag naar hoog${choice === 'league' ? ', in de Eredivisie' : ''}`}
+        caption={`De vijf clubs waartegen sc Heerenveen gemiddeld de minste punten per wedstrijd haalt, van laag naar hoog${choice === 'all' ? '' : `, in ${competitionWords(choice)}`}`}
         columns={['Club', { ...tableColumns.pointsPerMatch, key: true }, tableColumns.played]}
         rows={places.map((place) => ({
           cells: [averageFormat.format(place.points / place.played), place.played],
@@ -829,7 +829,7 @@ export function TopPointsCard({
       ) : (
         <>
           <DataTable
-            caption={`De tien clubs waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt, van hoog naar laag${choice === 'league' ? ', in de Eredivisie' : ''}`}
+            caption={`De tien clubs waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt, van hoog naar laag${choice === 'all' ? '' : `, in ${competitionWords(choice)}`}`}
             columns={['Club', { ...tableColumns.pointsPerMatch, key: true }, tableColumns.played]}
             rows={places.map((place) => ({
               cells: [averageFormat.format(place.points / place.played), place.played],

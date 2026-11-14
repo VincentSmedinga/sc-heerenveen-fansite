@@ -15,6 +15,7 @@ import {
 import { and, count, countDistinct, eq, inArray, or } from 'drizzle-orm'
 import { cache } from 'react'
 
+import { type CompetitionChoice, countsFor, optionsOf } from './competition'
 import { getDatabase } from './database'
 
 /** A goal he scored for us: the match, and the minute when we know it. */
@@ -152,13 +153,20 @@ export type SeasonAppearance = {
 export type SeasonSource = 'lineups' | 'none' | 'some-lineups' | 'wikipedia'
 
 /**
- * Whether he played or scored outside the Eredivisie: only then is there anything to choose
- * (#1103). The line-ups and the goals tell, whatever the source of a season.
+ * The choices of the switch on his page (#1103, #1209): `all` first, then the league, the cup
+ * and Europe, each only when he played or scored in it, and none when there is nothing to
+ * choose. The line-ups and the goals tell, whatever the source of a season.
  */
-export function playedBesidesEredivisie(facts: PlayerSeasonFacts): boolean {
-  return (
-    facts.appearances.some(({ cameOn, match, starter }) => (starter || cameOn) && match.competition !== 'Eredivisie') ||
-    facts.goals.some(({ competition }) => competition !== 'Eredivisie')
+export function playerCompetitionOptions(facts: PlayerSeasonFacts): CompetitionChoice[] {
+  const played = [
+    ...facts.appearances.filter(({ cameOn, starter }) => starter || cameOn).map(({ match }) => match.competition),
+    ...facts.goals.map(({ competition }) => competition),
+  ]
+
+  return optionsOf(
+    (['league', 'cup', 'europe'] as const).filter((choice) =>
+      played.some((competition) => countsFor(competition, choice)),
+    ),
   )
 }
 
@@ -169,7 +177,7 @@ export function playedBesidesEredivisie(facts: PlayerSeasonFacts): boolean {
  * count either. A season with no figure at all (no line-up, no table, no goal) has dashes
  * only: with no source the goals are unknown, not nil.
  */
-export function playerSeasonsOf(allFacts: PlayerSeasonFacts, only?: Competition): PlayerSeason[] {
+export function playerSeasonsOf(allFacts: PlayerSeasonFacts, only?: readonly Competition[]): PlayerSeason[] {
   const facts = only === undefined ? allFacts : inCompetition(allFacts, only)
   const seasons = [...new Set(facts.players.map((row) => row.season))].sort().reverse()
 
@@ -468,12 +476,12 @@ export async function readPlayerSeasonFacts(personId: number): Promise<PlayerSea
  * What was read, kept to the matches of one competition (#1103). The table of Wikipedia has no
  * split by competition: `playerSeasonsOf` leaves what it fills out for a season that has it.
  */
-function inCompetition(facts: PlayerSeasonFacts, only: Competition): PlayerSeasonFacts {
+function inCompetition(facts: PlayerSeasonFacts, only: readonly Competition[]): PlayerSeasonFacts {
   return {
     ...facts,
-    appearances: facts.appearances.filter(({ match }) => match.competition === only),
-    assists: facts.assists.filter((assist) => assist.competition === only),
-    goals: facts.goals.filter((goal) => goal.competition === only),
+    appearances: facts.appearances.filter(({ match }) => only.includes(match.competition)),
+    assists: facts.assists.filter((assist) => assist.competition !== undefined && only.includes(assist.competition)),
+    goals: facts.goals.filter((goal) => goal.competition !== undefined && only.includes(goal.competition)),
   }
 }
 

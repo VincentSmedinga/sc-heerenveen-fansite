@@ -1,18 +1,14 @@
 import { Card, Heading, PlayerFiguresTable, tableColumns, Text, TopScorersTable } from '@fansite/design-system'
 
-import type { CompetitionChoice } from './competition'
 import type { ReportFigures } from './report-figures'
 
+import { type CompetitionChoice, competitionWords } from './competition'
 import { basedOnSentence, figureRows, type RankedFigure, rankedPlaces, reportPlaces } from './report-figures'
 
 // The cards of the page Spelers with the figures of the match reports (#832): the lists of the
 // assists and the minutes, and the table of all the players. They count only the reports that
 // are `klaar`, say how many of the played matches that is, and name no source: they are our
 // own data.
-
-/** The competitions the figures count, for the caption of a table. */
-const competitionWords = (competition: CompetitionChoice) =>
-  competition === 'league' ? 'de Eredivisie' : 'alle competities'
 
 /** What the figures rest on: the line under the content of a card. */
 function Footing({ figures }: { figures: Pick<ReportFigures, 'known' | 'played'> }) {

@@ -16,7 +16,7 @@ import {
 import { notFound, permanentRedirect } from 'next/navigation'
 import { Fragment, type ReactNode } from 'react'
 
-import { competitionParam, parseCompetition } from '#src/competition'
+import { competitionMembers, competitionParam, leagueLabel, parseCompetition } from '#src/competition'
 import { CompetitionLinks } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
@@ -31,7 +31,7 @@ import { lastArchiveSeason, loadPlayerPage, periodsOf, playerAddress, type Playe
 import {
   loadPlayerSeasonFacts,
   loadPlayerSeasons,
-  playedBesidesEredivisie,
+  playerCompetitionOptions,
   type PlayerSeason,
   playerSeasonsOf,
 } from '#src/player-seasons'
@@ -107,10 +107,11 @@ export async function PlayerPageView({ searchParams, slug }: { searchParams: Pro
   // The table Per seizoen alone follows the choice (#1103); a page with nothing to choose
   // counts the same under both.
   const facts = seasons === undefined ? undefined : await readFacts(page)
-  const tableSeasons =
-    competition === 'league' && facts !== undefined && playedBesidesEredivisie(facts)
-      ? playerSeasonsOf(facts, 'Eredivisie')
-      : seasons
+  const options = facts === undefined ? [] : playerCompetitionOptions(facts)
+  // A choice he has nothing in counts as `all`, so the card never shows an empty table.
+  const chosen = options.includes(competition) ? competition : 'all'
+  const only = competitionMembers(chosen)
+  const tableSeasons = only !== undefined && facts !== undefined ? playerSeasonsOf(facts, only) : seasons
   const keyFigures = seasons === undefined ? [] : playerKeyFigures(seasons, page.line)
   const current = seasonOf(new Date())
   const career = seasons === undefined ? undefined : await readCareer(seasons, current)
@@ -118,7 +119,7 @@ export async function PlayerPageView({ searchParams, slug }: { searchParams: Pro
   const asideAddresses = await readMatchAddresses(asideSeasons(aside))
 
   // The choice between all the matches and the Eredivisie, only where there is one to make.
-  const switchAddress = facts !== undefined && playedBesidesEredivisie(facts) ? playerAddress(page.slug) : undefined
+  const switchAddress = options.length > 0 ? playerAddress(page.slug) : undefined
 
   const seasonBars = seasons === undefined ? undefined : seasonBarsOf(seasons, page.line)
   const goalQuarters = seasons === undefined ? undefined : goalQuartersOf(seasons)
@@ -152,7 +153,15 @@ export async function PlayerPageView({ searchParams, slug }: { searchParams: Pro
         </Page.Cell>
         {switchAddress === undefined ? null : (
           <Page.Toolbar>
-            <CompetitionLinks address={switchAddress} competition={competition} />
+            <CompetitionLinks
+              address={switchAddress}
+              competition={chosen}
+              league={leagueLabel([
+                ...(facts?.appearances.map(({ match }) => match.competition) ?? []),
+                ...(facts?.goals.map(({ competition: name }) => name) ?? []),
+              ])}
+              options={options}
+            />
           </Page.Toolbar>
         )}
         {keyFigures.length === 0 ? null : (
@@ -164,7 +173,7 @@ export async function PlayerPageView({ searchParams, slug }: { searchParams: Pro
           <Page.Cell area="seasons">
             <PlayerSeasonsCard
               address={(season) => seasonAddress(playersPath, season, current)}
-              competition={competition}
+              competition={chosen}
               goalkeeper={page.line === 'doelman'}
               name={page.name}
               seasons={tableSeasons ?? seasons}

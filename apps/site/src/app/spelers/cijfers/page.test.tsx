@@ -9,6 +9,7 @@ import { getSeasonReportFigures } from '#src/season-report-figures'
 import { playerFiguresShortcuts } from '#src/statisticsShortcuts'
 import { matchData } from '#src/test-matches'
 import { noReports } from '#src/test-report-figures'
+import { leagueAndCup, switchHtml } from '#src/test-switch'
 import { withoutIcons } from '#src/without-icons'
 
 import PlayersPage, { generateMetadata } from './page'
@@ -501,11 +502,9 @@ describe('the choice between all the matches and the Eredivisie on /spelers/cijf
   const switchOf = (html: string) => /<div [^>]*aria-label="Welke wedstrijden"[^>]*>.*?<\/div>/.exec(html)?.[0]
 
   it('has the switch, with links to this page, and marks the choice of the address', async () => {
-    expect(switchOf(await render())).toBe(
-      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-count:2;--hf-segmented-index:0"><a aria-current="page" href="/spelers/cijfers"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a href="/spelers/cijfers?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
-    )
+    expect(switchOf(await render())).toBe(switchHtml('/spelers/cijfers', 0, leagueAndCup))
     expect(switchOf(await renderWith({ competitie: 'eredivisie' }))).toBe(
-      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-count:2;--hf-segmented-index:1"><a href="/spelers/cijfers"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a aria-current="page" href="/spelers/cijfers?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
+      switchHtml('/spelers/cijfers', 1, leagueAndCup),
     )
   })
 
@@ -514,7 +513,7 @@ describe('the choice between all the matches and the Eredivisie on /spelers/cijf
     const toolbar = html.slice(html.indexOf('<div class="hf-page-toolbar"'), html.indexOf('style="grid-area:main"'))
 
     expect(
-      /^<div class="hf-page-toolbar"[^>]*><div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group"/.test(
+      /^<div class="hf-page-toolbar"[^>]*><div aria-label="Welke wedstrijden" class="hf-segmented-control hf-segmented-compact" role="group"/.test(
         toolbar,
       ),
     ).toBe(true)

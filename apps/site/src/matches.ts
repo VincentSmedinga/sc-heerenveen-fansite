@@ -25,7 +25,7 @@ import { type Competition } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 
 import { cacheFor, cacheForKey } from './cache'
-import { type CompetitionChoice } from './competition'
+import { type CompetitionChoice, competitionWords, countsFor, optionsOf } from './competition'
 import { getDatabase } from './database'
 import { firstCleanSheets, moreCleanSheets } from './items-per-card'
 import { lastDayOf } from './match-format'
@@ -43,55 +43,50 @@ const ourClub = 'sc Heerenveen'
  */
 export type ScoredMatch = Pick<PublicMatch, 'competition' | 'goals' | 'goalsAgainst' | 'goalsFor' | 'status'>
 
-/**
- * Whether a match counts for the choice: the league alone, or every competition: the league,
- * the cup, the play-offs (of the Conference League, the Europa League or the UEFA Cup),
- * Europe and the Eerste divisie. The choice `league` is the Eredivisie only.
- */
-const countsFor = (match: Pick<ScoredMatch, 'competition'>, choice: CompetitionChoice) =>
-  choice === 'all' || match.competition === 'Eredivisie'
+/** Whether a match counts for the choice (see `countsFor` in `competition.ts`). */
+const matchCountsFor = (match: Pick<ScoredMatch, 'competition'>, choice: CompetitionChoice) =>
+  countsFor(match.competition, choice)
+
+/** Whether a match was played and has a score, so one a card can count. */
+const isPlayedWithScore = (match: Omit<ScoredMatch, 'goals'>) =>
+  match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null
 
 /**
- * Whether a match of another competition than the league was played and has a score, so one the
- * choice can add.
+ * The choices a page of these matches can make: `all` first, then each of the league, the cup
+ * and Europe that has a played match with a score in them. A choice without a match is not
+ * offered, and with only one left (just the league, say) the choice would count the same as
+ * `all`, so there is nothing to choose and the list is empty.
  */
-const isPlayedExtraMatch = (match: Omit<ScoredMatch, 'goals'>) =>
-  match.competition !== 'Eredivisie' &&
-  match.status === 'played' &&
-  match.goalsFor !== null &&
-  match.goalsAgainst !== null
+export function competitionOptionsOf(matches: readonly Omit<ScoredMatch, 'goals'>[]): CompetitionChoice[] {
+  const played = matches.filter(isPlayedWithScore)
+
+  return optionsOf(
+    (['league', 'cup', 'europe'] as const).filter((choice) =>
+      played.some((match) => countsFor(match.competition, choice)),
+    ),
+  )
+}
 
 /**
- * Whether there is anything to choose: the season has a match of the Eredivisie and a played
- * match of another competition (a cup tie, the play-offs, Europe). Without the second, the two
- * choices count the same matches. Without the first, as in the seasons in the Eerste divisie,
- * the choice Eredivisie would count nothing, so the page has no switch.
- */
-export const hasPlayedExtraMatch = (matches: PublicMatch[]) =>
-  matches.some(isPlayedExtraMatch) && matches.some((match) => match.competition === 'Eredivisie')
-
-/**
- * The competitions a card counts, as the captions of the cards name them: the league, the cup,
- * the matches in Europe and the play-offs are in only when the choice is `all` and a match of
- * theirs was played, because then it is in the numbers. The Eredivisie is always named, unless
- * the season was played in the Eerste divisie and has no Eredivisie match. The play-offs are
- * one name, whatever they were for.
+ * The competitions a card counts, as the captions of the cards name them: those of the choice
+ * that have a played match, because then it is in the numbers. The Eredivisie is always named
+ * for `all` and `league`, unless the season was played in the Eerste divisie and has no
+ * Eredivisie match. The play-offs are one name, whatever they were for.
  */
 export const competitionNames = (matches: Omit<ScoredMatch, 'goals'>[], choice: CompetitionChoice) => {
-  if (choice === 'league') {
-    return 'de Eredivisie'
-  }
-
   const played = (...among: PublicMatch['competition'][]) =>
     matches.some(
       (match) =>
         among.includes(match.competition) &&
+        countsFor(match.competition, choice) &&
         match.status === 'played' &&
         match.goalsFor !== null &&
         match.goalsAgainst !== null,
     )
   const names = [
-    ...(played('Eredivisie') || !played('Eerste divisie') ? ['de Eredivisie'] : []),
+    ...((played('Eredivisie') || !played('Eerste divisie')) && countsFor('Eredivisie', choice)
+      ? ['de Eredivisie']
+      : []),
     ...(played('Eerste divisie') ? ['de Eerste divisie'] : []),
     ...(played('KNVB Beker') ? ['de KNVB Beker'] : []),
     ...(played('Johan Cruijff Schaal') ? ['de Johan Cruijff Schaal'] : []),
@@ -110,17 +105,24 @@ export const competitionNames = (matches: Omit<ScoredMatch, 'goals'>[], choice: 
       : []),
   ]
 
-  return names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} en ${names.at(-1)}`
+  return names.length === 0
+    ? competitionWords(choice)
+    : names.length === 1
+      ? names[0]
+      : `${names.slice(0, -1).join(', ')} en ${names.at(-1)}`
 }
 
 /**
- * The choice a page of a season counts with: the one asked for, except that `league` becomes
- * `all` in a season without a match of the Eredivisie, such as one in the Eerste divisie.
- * The season picker keeps the choice when it goes to another season, and a season without the
- * switch would otherwise show empty cards with no way back.
+ * The choice a page counts with: the one asked for, except that it becomes `all` when the
+ * matches have none of that competition, played or not (a season without a cup tie, say). The
+ * season picker keeps the choice when it goes to another season, and a season without that
+ * value in the switch would otherwise show empty cards with no way back. A season that has
+ * matches of the competition keeps the choice, also before one is played.
  */
-export const choiceFor = (matches: PublicMatch[], choice: CompetitionChoice): CompetitionChoice =>
-  choice === 'league' && !matches.some((match) => match.competition === 'Eredivisie') ? 'all' : choice
+export const choiceFor = (
+  matches: readonly Omit<ScoredMatch, 'goals'>[],
+  choice: CompetitionChoice,
+): CompetitionChoice => (matches.some((match) => countsFor(match.competition, choice)) ? choice : 'all')
 
 export type MatchData = {
   /** The head coaches of the season, in the order their periods began. */
@@ -486,7 +488,10 @@ export function cleanSheetsOf(matches: PublicMatch[], choice: CompetitionChoice 
   const played = matches
     .filter(
       (match) =>
-        countsFor(match, choice) && match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null,
+        matchCountsFor(match, choice) &&
+        match.status === 'played' &&
+        match.goalsFor !== null &&
+        match.goalsAgainst !== null,
     )
     .reverse()
 
@@ -562,7 +567,10 @@ export function leagueResultsOf(matches: PublicMatch[]): FormResult[] {
 export function playedMatchesOf(matches: PublicMatch[], choice: CompetitionChoice): LeagueMatch[] {
   return matches.filter(
     (match): match is LeagueMatch =>
-      countsFor(match, choice) && match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null,
+      matchCountsFor(match, choice) &&
+      match.status === 'played' &&
+      match.goalsFor !== null &&
+      match.goalsAgainst !== null,
   )
 }
 
@@ -818,7 +826,7 @@ export function extremesOf(matches: PublicMatch[], choice: CompetitionChoice = '
  * too.
  */
 export function goalsPerQuarter(matches: PublicMatch[], choice: CompetitionChoice = 'all'): GoalsPerQuarter {
-  const played = matches.filter((match) => countsFor(match, choice) && match.status === 'played')
+  const played = matches.filter((match) => matchCountsFor(match, choice) && match.status === 'played')
   const known = played.filter(hasKnownGoals)
   const scored = quarterLabels.map(() => 0)
   const conceded = quarterLabels.map(() => 0)
@@ -860,7 +868,9 @@ export function lateGoalsOf(
 ): { late: LateGoals; stoppage: LateGoals } {
   const late: LateGoals = { conceded: 0, scored: 0 }
   const stoppage: LateGoals = { conceded: 0, scored: 0 }
-  const known = matches.filter((match) => countsFor(match, choice) && match.status === 'played').filter(hasKnownGoals)
+  const known = matches
+    .filter((match) => matchCountsFor(match, choice) && match.status === 'played')
+    .filter(hasKnownGoals)
 
   for (const goal of known.flatMap((match) => match.goals)) {
     const side = goal.ours ? 'scored' : 'conceded'
@@ -965,7 +975,7 @@ export function homeAwayOf(matches: PublicMatch[], choice: CompetitionChoice = '
   return {
     away: tally(played.filter((match) => !match.home)),
     home: tally(played.filter((match) => match.home)),
-    leagueOnly: played.every((match) => match.competition === 'Eredivisie'),
+    leagueOnly: played.every((match) => countsFor(match.competition, 'league')),
     total: tally(played),
   }
 }
@@ -1247,7 +1257,7 @@ export function scorersCoverage(
   matches: ScoredMatch[],
   choice: CompetitionChoice = 'all',
 ): { known: number; played: number } {
-  const played = matches.filter((match) => countsFor(match, choice) && match.status === 'played')
+  const played = matches.filter((match) => matchCountsFor(match, choice) && match.status === 'played')
   const missing = played.filter((match) => match.goalsFor !== 0 && match.goals.length === 0)
 
   return { known: played.length - missing.length, played: played.length }
@@ -1298,7 +1308,7 @@ export function standingsLag(matches: PublicMatch[], now: Date) {
 export function topScorersOf(matches: ScoredMatch[], choice: CompetitionChoice = 'all'): TopScorer[] {
   const scorers = new Map<string, { row: Omit<TopScorer, 'position'>; sort: string }>()
   const goals = matches
-    .filter((match) => countsFor(match, choice))
+    .filter((match) => matchCountsFor(match, choice))
     .flatMap((match) => match.goals)
     .filter((goal) => goal.ours && !goal.ownGoal)
 
@@ -1508,7 +1518,7 @@ export function scorersByPlace(scorers: TopScorer[]): ScorerPlace[] {
  * a player of ours did.
  */
 export function specialGoalsOf(matches: PublicMatch[], choice: CompetitionChoice = 'all'): SpecialGoals {
-  const counted = matches.filter((match) => countsFor(match, choice) && match.status === 'played')
+  const counted = matches.filter((match) => matchCountsFor(match, choice) && match.status === 'played')
   const known = counted.filter(hasKnownGoals)
   const goals = known.flatMap((match) => match.goals)
   const hattricks = new Map<string, { row: MultiGoalScorer; sort: string }>()
@@ -1648,7 +1658,7 @@ export function attendanceOf<T extends AttendanceMatch = PublicMatch>(
   choice: CompetitionChoice = 'all',
 ): Attendance<T> {
   const slots = matches
-    .filter((match) => match.home && match.status !== 'cancelled' && countsFor(match, choice))
+    .filter((match) => match.home && match.status !== 'cancelled' && matchCountsFor(match, choice))
     .map((match) => ({ attendance: match.status === 'played' ? match.attendance : null, match }))
   const counted = slots.filter((slot) => (slot.attendance ?? 0) > 0)
   const largest = Math.max(0, ...counted.map((slot) => slot.attendance ?? 0))
