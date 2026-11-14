@@ -104,7 +104,7 @@ describe('the page of an earlier season, /wedstrijden/cijfers/2025-26', () => {
     }
   })
 
-  it('has the same four groups and nine cards as the current season, in the order of the bar', async () => {
+  it('has the same four groups and ten cards as the current season, in the order of the bar', async () => {
     const html = await render()
 
     expect(html.match(/<h[23][^>]*id="([^"]+)"/g)?.map((heading) => /id="([^"]+)"/.exec(heading)?.[1])).toEqual([
@@ -119,6 +119,7 @@ describe('the page of an earlier season, /wedstrijden/cijfers/2025-26', () => {
       'doelpunten',
       'doelpunten-per-kwartier',
       'de-nul-gehouden',
+      'strafschoppen',
       'rondom-de-wedstrijd',
       'toeschouwers',
     ])

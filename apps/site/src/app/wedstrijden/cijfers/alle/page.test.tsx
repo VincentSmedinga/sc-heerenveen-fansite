@@ -91,6 +91,7 @@ describe('the page /wedstrijden/cijfers/alle', () => {
       '2 doelpunten',
       '3 doelpunten-per-kwartier',
       '3 de-nul-gehouden',
+      '3 strafschoppen',
       '2 rondom-de-wedstrijd',
       '3 toeschouwers',
     ])
