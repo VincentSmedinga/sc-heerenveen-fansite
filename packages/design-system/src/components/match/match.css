@@ -1,9 +1,8 @@
 /*
- * A match: the two clubs with the result between them, with small type around them. With a
- * competition the day and the stadium are above the clubs and the competition and the round
- * under them; without one, the round, the day and the stadium are above them. A club is not a
- * link, so the line has no underline and no hover. A List of matches has a thin line between
- * the matches.
+ * A match: the two clubs with the result between them, with small type around them. Above them
+ * are the day, the competition and the round; under them the stadium and the referee. A club is
+ * not a link, so the line has no underline and no hover. A List of matches has a thin line
+ * between the matches.
  */
 
 @layer hf.components {
@@ -43,14 +42,19 @@
     font-weight: var(--hf-figure-font-weight);
   }
 
-  /* The name of the referee stays in one piece, so the line breaks before it and not in it. */
-  .hf-match-referee {
-    white-space: nowrap;
+  /*
+   * A part of a meta line stays in one piece, so the line breaks between two parts and not in
+   * one. A block that sits in the line as a whole; a part wider than the line still breaks.
+   */
+  .hf-match-part {
+    display: inline-block;
+    max-inline-size: 100%;
+    vertical-align: top;
   }
 
-  .hf-match-label,
   .hf-match-note,
-  .hf-match-when {
+  .hf-match-when,
+  .hf-match-where {
     color: var(--hf-colour-text-secondary);
     margin-block: 0;
   }

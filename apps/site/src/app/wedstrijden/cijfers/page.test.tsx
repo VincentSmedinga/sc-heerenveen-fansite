@@ -343,8 +343,12 @@ describe('the page /wedstrijden/cijfers', () => {
     it('names the competition and the round of a match under all competitions, and not under one', async () => {
       const all = section(await render(), 'de-nul-gehouden')
 
-      expect(all).toContain('KNVB Beker <span aria-hidden="true">·</span> Tweede ronde')
-      expect(all).toContain('Eredivisie <span aria-hidden="true">·</span> Speelronde 8')
+      expect(all).toContain(
+        'KNVB Beker</span> <span aria-hidden="true">·</span> <span class="hf-match-part">Tweede ronde',
+      )
+      expect(all).toContain(
+        'Eredivisie</span> <span aria-hidden="true">·</span> <span class="hf-match-part">Speelronde 8',
+      )
       expect(all).not.toContain('Stadion Proeflaan')
       expect(all).not.toContain('Proefman')
       expect(all).toContain('hf-match-win')
@@ -1726,7 +1730,8 @@ describe('the choice between all the matches and the Eredivisie on /wedstrijden/
     ]) {
       expect(html.indexOf(`id="${id}"`), id).toBeGreaterThan(html.indexOf('Welke wedstrijden'))
       expect(section(html, id), id).not.toContain('Alleen de Eredivisie')
-      expect(section(html, id), id).not.toContain('>Eredivisie</span>')
+      // The name in a line of a match is a part of that line, not the mark of the card.
+      expect(section(html, id), id).not.toMatch(/(?<!hf-match-part")>Eredivisie<\/span>/)
     }
   })
 
