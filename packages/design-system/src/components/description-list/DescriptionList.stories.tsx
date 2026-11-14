@@ -55,6 +55,17 @@ export const Stacked = meta.story({
   ),
 })
 
+export const Aligned = meta.story({
+  name: 'Naam links, waarde rechts, voor een zijkolom',
+  render: () => (
+    <DescriptionList aligned stacked>
+      <DescriptionList.Item term="Spelers">28</DescriptionList.Item>
+      <DescriptionList.Item term="Gemiddelde leeftijd">24,3 jaar</DescriptionList.Item>
+      <DescriptionList.Item term="Landen">11</DescriptionList.Item>
+    </DescriptionList>
+  ),
+})
+
 export const WithMatches = meta.story({
   name: 'Met een wedstrijd als omschrijving',
   render: () => (

@@ -11,6 +11,11 @@ export type DescriptionListItemProps = Omit<ComponentPropsWithoutRef<'div'>, 'ch
 
 export type DescriptionListProps = ComponentPropsWithoutRef<'dl'> & {
   /**
+   * With `stacked`: the term on the left and the description on the right of the same row,
+   * for short terms and short values such as a figure.
+   */
+  aligned?: boolean
+  /**
    * Puts the pairs under each other with a line between them, the term above its description,
    * for a narrow column such as a sidebar. Without it the pairs stand next to each other as
    * far as they fit.
@@ -40,8 +45,16 @@ Item.displayName = 'DescriptionList.Item'
  * It does not know where it stands: the head of a match and a card with figures both use it.
  * description-list.css gives it its look.
  */
-export const DescriptionList = ({ className, stacked, ...props }: DescriptionListProps) => (
-  <dl {...props} className={classNames('hf-description-list', stacked && 'hf-description-list-stacked', className)} />
+export const DescriptionList = ({ aligned, className, stacked, ...props }: DescriptionListProps) => (
+  <dl
+    {...props}
+    className={classNames(
+      'hf-description-list',
+      stacked && 'hf-description-list-stacked',
+      stacked && aligned && 'hf-description-list-aligned',
+      className,
+    )}
+  />
 )
 
 DescriptionList.Item = Item

@@ -5,6 +5,7 @@ import type { TestDatabase } from './test-database.ts'
 import {
   findSquadCompleteness,
   findSquadPage,
+  listSeasonPlayerBirths,
   listSeasonPlayers,
   listSquad,
   listSquadPages,
@@ -414,6 +415,29 @@ describe('findSquadPage', () => {
       title: 'Sc Heerenveen in het seizoen 2026/27 (mannen)',
     })
     expect(await findSquadPage(database.db, '2025/26')).toBeUndefined()
+  })
+})
+
+describe('listSeasonPlayerBirths', () => {
+  it('gives the date of birth and its precision of the players of the season, and nulls for a player without a person', async () => {
+    const [{ insertId: person }] = await database.db.insert(persons).values({
+      birthDate: '2001-05-17',
+      birthDatePrecision: 'day',
+      familyName: 'Aken',
+      givenName: 'Joost',
+      wikipediaPage: 'Geboorte Proefspeler',
+    })
+
+    await database.db.insert(players).values([
+      { name: 'Joost van Aken', personId: person, searchTerm: 'Aken', season: '2026/27' },
+      { name: 'Zonder Persoon', searchTerm: 'Persoon', season: '2026/27' },
+      { name: 'Ander Seizoen', searchTerm: 'Seizoen', season: '2025/26' },
+    ])
+
+    expect(await listSeasonPlayerBirths(database.db, '2026/27')).toEqual([
+      { birthDate: '2001-05-17', birthDatePrecision: 'day', name: 'Joost van Aken' },
+      { birthDate: null, birthDatePrecision: null, name: 'Zonder Persoon' },
+    ])
   })
 })
 

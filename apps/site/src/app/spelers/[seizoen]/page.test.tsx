@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getAllTimeMatches, getMatchData, getMatchSeasons } from '#src/matches'
 import { getSeasonReportFigures } from '#src/season-report-figures'
 import { getSeasonSquad } from '#src/season-squad'
+import { getSquadSummary } from '#src/squad-summary'
 import { matchData } from '#src/test-matches'
 import { noReports } from '#src/test-report-figures'
 import { squadData } from '#src/test-squad'
@@ -29,6 +30,9 @@ vi.mock('#src/season-squad', async (importOriginal) => ({
 }))
 
 // A name of nobody: the page of a player (#1079) has tests of its own, in player-page.test.tsx.
+// The figures of the squad are made up too: they come from the dates of birth in the database.
+vi.mock('#src/squad-summary', () => ({ getSquadSummary: vi.fn() }))
+
 vi.mock('#src/player-page', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   loadPlayerPage: vi.fn(async () => ({ kind: 'unknown' })),
@@ -66,6 +70,12 @@ beforeEach(() => {
   vi.mocked(getSeasonReportFigures).mockResolvedValue(noReports)
   vi.mocked(getSeasonSquad).mockReset()
   vi.mocked(getSeasonSquad).mockResolvedValue(squadData)
+  vi.mocked(getSquadSummary).mockReset()
+  vi.mocked(getSquadSummary).mockResolvedValue({
+    ages: { average: 24.3, oldest: 34, youngest: 17 },
+    countries: 3,
+    players: 5,
+  })
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26', '2024/25'])
   vi.mocked(getMatchData).mockImplementation((season) =>
     Promise.resolve(season === '2025/26' ? earlier : { ...matchData, season: season ?? '2026/27' }),
@@ -83,6 +93,12 @@ describe('the page of an earlier season, /spelers/2025-26', () => {
     await render()
 
     expect(getMatchData).toHaveBeenCalledExactlyOnceWith('2025/26')
+  })
+
+  it('asks for the figures of the squad of that season', async () => {
+    await render()
+
+    expect(getSquadSummary).toHaveBeenCalledWith(squadData, '2025/26', expect.any(Date))
   })
 
   it('has the heading Spelers, without the season, the card Selectie, and the link to the figures of that season', async () => {

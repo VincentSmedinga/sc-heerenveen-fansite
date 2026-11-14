@@ -5,6 +5,7 @@ import { getMatchData, getMatchSeasons } from '#src/matches'
 import { getSeasonPlayerStats } from '#src/season-player-stats'
 import { getSeasonReportFigures } from '#src/season-report-figures'
 import { getSeasonSquad } from '#src/season-squad'
+import { getSquadSummary } from '#src/squad-summary'
 import { matchData } from '#src/test-matches'
 import { noReports } from '#src/test-report-figures'
 import { squadData } from '#src/test-squad'
@@ -29,6 +30,9 @@ vi.mock('#src/season-squad', async (importOriginal) => ({
   getSeasonSquad: vi.fn(),
 }))
 
+// The figures of the squad are made up too: they come from the dates of birth in the database.
+vi.mock('#src/squad-summary', () => ({ getSquadSummary: vi.fn() }))
+
 // The appearances are made up too: the page reads them from the database.
 vi.mock('#src/season-player-stats', () => ({ getSeasonPlayerStats: vi.fn() }))
 
@@ -52,6 +56,12 @@ beforeEach(() => {
   vi.mocked(getSeasonReportFigures).mockResolvedValue(noReports)
   vi.mocked(getSeasonSquad).mockReset()
   vi.mocked(getSeasonSquad).mockResolvedValue(squadData)
+  vi.mocked(getSquadSummary).mockReset()
+  vi.mocked(getSquadSummary).mockResolvedValue({
+    ages: { average: 24.3, oldest: 34, youngest: 17 },
+    countries: 3,
+    players: 5,
+  })
   vi.mocked(getMatchData).mockResolvedValue(matchData)
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27'])
 })
@@ -63,7 +73,7 @@ afterEach(() => {
 })
 
 describe('the page /spelers', () => {
-  it('has one h1, Spelers, the h2 Selectie with an h3 for each position, and the h2 of the card with the link to the figures', async () => {
+  it('has one h1, Spelers, the h2 Selectie with an h3 for each position, the h2 of the card with the squad in short and the h2 of the card with the link to the figures', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
@@ -73,6 +83,7 @@ describe('the page /spelers', () => {
       '<h3 class="hf-heading-3">Verdedigers</h3>',
       '<h3 class="hf-heading-3">Middenvelders</h3>',
       '<h3 class="hf-heading-3">Aanvallers</h3>',
+      '<h2 class="hf-heading-2" id="de-selectie-in-het-kort">De selectie in het kort</h2>',
       '<h2 class="hf-heading-2" id="cijfers-van-dit-seizoen">Cijfers van dit seizoen</h2>',
     ])
   })
@@ -95,6 +106,29 @@ describe('the page /spelers', () => {
     expect(sidebar).toContain('href="/spelers/cijfers"')
     expect(sidebar).toContain('Naar de cijfers van de spelers')
     expect(sidebar.indexOf('hf-card-strong')).toBeLessThan(sidebar.indexOf('hf-wikipedia-credit'))
+  })
+
+  it('has the soft card "De selectie in het kort" in the sidebar, above the strong card, with the figures of the summary', async () => {
+    const html = await render()
+    const sidebar = html.slice(html.indexOf('style="grid-area:side"'), html.indexOf('</main>'))
+
+    expect(sidebar).toContain('<section class="hf-card hf-card-soft" aria-labelledby="de-selectie-in-het-kort">')
+    expect(sidebar.indexOf('hf-card-soft')).toBeLessThan(sidebar.indexOf('hf-card-strong'))
+    expect(plain(sidebar)).toContain('Spelers5Gemiddelde leeftijd24,3 jaarJongste17 jaarOudste34 jaarLanden3')
+    expect(getSquadSummary).toHaveBeenCalledWith(squadData, '2026/27', now)
+  })
+
+  it('has no card "De selectie in het kort" when the squad is not known', async () => {
+    vi.mocked(getSquadSummary).mockResolvedValue(undefined)
+
+    const html = await render()
+
+    expect(html).not.toContain('de-selectie-in-het-kort')
+    expect(html).toContain('cijfers-van-dit-seizoen')
+  })
+
+  it('has no date of birth anywhere in the page', async () => {
+    expect(await render()).not.toMatch(/\b(?:19|20)\d{2}-\d{2}-\d{2}\b/)
   })
 
   it('has none of the cards with figures: they are on /spelers/cijfers', async () => {

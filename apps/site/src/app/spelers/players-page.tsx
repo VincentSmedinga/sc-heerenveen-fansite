@@ -11,10 +11,12 @@ import { SourceCredit } from '#src/MatchViews'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
 import { pageAreas } from '#src/page-areas'
 import { loadSeasonPage, pickerPathOf, playerFiguresPath, playersPath } from '#src/season-page'
-import { getSeasonSquad } from '#src/season-squad'
+import { getSeasonSquad, type SeasonSquad } from '#src/season-squad'
 import { seasonAddress, seasonChoices, seasonSlug } from '#src/seasons'
 import { SeasonSquadCard } from '#src/SeasonSquadCard'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
+import { getSquadSummary } from '#src/squad-summary'
+import { SquadSummaryCard } from '#src/SquadSummaryCard'
 import { withBranch } from '#src/title'
 
 /** The route that sends the season picker on to its season (app/spelers/kies). */
@@ -50,10 +52,11 @@ export async function playersMetadata(season: string): Promise<Metadata> {
  * and the season picker, and the card Selectie with every player of the season in parts by
  * position and, under the heading, how complete that list is. That card is white: the squad is
  * what the page is for. The figures of the players are on their own page (Cijfers, see
- * `PlayerFiguresPage`), so the toolbar has no choice of competition, and the sidebar has a
- * strong card that links to the figures of the same season, and ends with the credit. The
+ * `PlayerFiguresPage`), so the toolbar has no choice of competition. The sidebar has the soft
+ * card "De selectie in het kort" (`SquadSummaryCard`, when the squad is known), a strong card
+ * that links to the figures of the same season, and ends with the credit. The
  * sidebar follows the main column on a phone, so the squad comes first there. The page has one
- * card, so it has no bar "Op deze pagina:". A season that has
+ * list, so it has no bar "Op deze pagina:". A season that has
  * no matches in the database is the page "niet gevonden".
  */
 export async function PlayersPage({ season }: { season: string }) {
@@ -74,6 +77,7 @@ export async function PlayersPage({ season }: { season: string }) {
   }
 
   const { data, seasons } = loaded
+  const summary = await loadSummary(squad, season)
   const squadSource = { pages: squad.pages, wikidata: squad.players.some((player) => player.source === 'wikidata') }
 
   return (
@@ -88,6 +92,7 @@ export async function PlayersPage({ season }: { season: string }) {
         <SeasonSquadCard squad={squad} />
       </Page.Section>
       <Page.Section area="side" aria-label="Meer over de spelers">
+        {summary === undefined ? null : <SquadSummaryCard summary={summary} />}
         <Card aria-labelledby="cijfers-van-dit-seizoen" surface="strong">
           <Heading id="cijfers-van-dit-seizoen" level={2}>
             Cijfers van dit seizoen
@@ -117,6 +122,17 @@ async function loadSquad(season: string) {
     return await getSeasonSquad(season)
   } catch (error) {
     console.error(`Could not read the squad for ${playersPath}: ${reasonOf(error)}`)
+
+    return undefined
+  }
+}
+
+/** The figures of the card "De selectie in het kort", or undefined: no card (error logged). */
+async function loadSummary(squad: SeasonSquad, season: string) {
+  try {
+    return await getSquadSummary(squad, season, new Date())
+  } catch (error) {
+    console.error(`Could not read the figures of the squad for ${playersPath}: ${reasonOf(error)}`)
 
     return undefined
   }

@@ -3580,3 +3580,11 @@
 - **Waarom:** de volgorde is op elke kaart dezelfde en leest van groot naar klein; de regel boven de clubs, die de wedstrijd herkenbaar maakt, past bij een gewone wedstrijd op één regel, en een afbreking valt tussen twee onderdelen.
 - **Alternatieven:** alles op één regel boven de clubs (te lang: het stadion is bij ruim de helft van de wedstrijden bekend); het stadion boven en de scheidsrechter onder (de bovenste regel wordt te lang); één eigenschap `context` waarmee `Match` zelf onderdelen weglaat (meer API en een nieuw begrip om te documenteren); een afbreking binnen een onderdeel toestaan (een stadion of een competitie in tweeën op een smalle kaart).
 - **Later:** zie _De volgorde van de regels van een wedstrijd hangt af van de competitie_ in `site.md` (3 november 2026): `competition` kiest de volgorde niet meer, de ronde staat altijd na de dag, en het stadion staat onder de clubs.
+
+## Een beschrijvingslijst kan de naam links en de waarde rechts zetten
+
+- **Datum:** 14 november 2026
+- **Besluit:** `DescriptionList` krijgt de eigenschap `aligned`, die samen met `stacked` de naam links en de waarde rechts op één regel zet, met een lijn tussen de paren (#1261).
+  Zonder `stacked` doet ze niets.
+- **Waarom:** het ontwerp van de kaart "De selectie in het kort" zet de naam links en de waarde rechts, en de kaart moet dan wel een bestaand onderdeel gebruiken; de gestapelde lijst zet de naam boven de waarde, en een kort getal is zo moeilijk te vergelijken.
+- **Alternatieven:** de gestapelde lijst zoals de kaart Records (de naam boven de waarde: het ontwerp wijkt dan af); een nieuw onderdeel voor zulke regels (dubbel werk naast `DescriptionList`).
