@@ -30,6 +30,7 @@ import {
   listSeasonFormations,
   listSeasonMatches,
   listSeasonStandings,
+  listSquadPeople,
   listStandingsPlaces,
   listStandingsSeasons,
   listWikipediaPages,
@@ -1861,6 +1862,9 @@ describe('the matches and the table of a season', () => {
       expect(await listPersonSeasons(database.db)).toEqual([
         { personId: personId, season: '2010/11' },
         { personId: personId, season: '2011/12' },
+      ])
+      expect(await listSquadPeople(database.db)).toEqual([
+        { familyName: 'Oud', familyNamePrefix: null, givenName: 'Jan', personId: personId, slug: null },
       ])
     })
 

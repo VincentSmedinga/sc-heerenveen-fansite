@@ -13,6 +13,7 @@ import {
   matchKey,
   penaltiesOf,
   playerRecordsOf,
+  squadSeasonsOf,
 } from '#src/all-time-players'
 import {
   AllTimeScorersCard,
@@ -20,6 +21,7 @@ import {
   HattricksCard,
   PenaltiesCard,
   PlayerRecordsCard,
+  SquadSeasonsCard,
 } from '#src/AllTimePlayersCards'
 import { competitionFields, leagueLabel, parseCompetition } from '#src/competition'
 import { CompetitionLinks } from '#src/CompetitionSwitch'
@@ -35,6 +37,7 @@ import {
   getPersonBirthDates,
   getPersonSeasons,
   getReportSeasons,
+  getSquadPeople,
 } from '#src/matches'
 import { seasonPageMetadata } from '#src/metadata'
 import { getSourcePages } from '#src/opponents'
@@ -57,18 +60,31 @@ export const allSeasonsPlayersAddress = allSeasonsAddress(playerFiguresPath)
  */
 const loadAllSeasons = cache(async () => {
   try {
-    const [matches, birthDates, personSeasons, reportSeasons, seasons, pages, edited, source] = await Promise.all([
-      getAllTimeMatches(),
-      getPersonBirthDates(),
-      getPersonSeasons(),
-      getReportSeasons(),
-      getMatchSeasons(),
-      getSourcePages(),
-      getEditedMatches(),
-      getMatchSource(),
-    ])
+    const [matches, birthDates, personSeasons, squadPeople, reportSeasons, seasons, pages, edited, source] =
+      await Promise.all([
+        getAllTimeMatches(),
+        getPersonBirthDates(),
+        getPersonSeasons(),
+        getSquadPeople(),
+        getReportSeasons(),
+        getMatchSeasons(),
+        getSourcePages(),
+        getEditedMatches(),
+        getMatchSource(),
+      ])
 
-    return { birthDates, edited, kind: 'found', matches, pages, personSeasons, reportSeasons, seasons, source } as const
+    return {
+      birthDates,
+      edited,
+      kind: 'found',
+      matches,
+      pages,
+      personSeasons,
+      reportSeasons,
+      seasons,
+      source,
+      squadPeople,
+    } as const
   } catch (error) {
     console.error(`Could not read the matches for ${allSeasonsPlayersAddress}: ${reasonOf(error)}`)
 
@@ -97,6 +113,7 @@ export async function allSeasonsCards(competitie: string | string[] | undefined)
     penalties: penaltiesOf(loaded.matches, competition).total > 0,
     records: hasRecords(playerRecordsOf(loaded.matches, competition, loaded.birthDates)),
     scorers: allTimeScorersOf(loaded.matches, competition, loaded.personSeasons).total > 0,
+    squadSeasons: squadSeasonsOf(loaded.personSeasons, loaded.squadPeople).length > 0,
   }
 }
 
@@ -125,9 +142,10 @@ export async function allSeasonsPlayersMetadata(): Promise<Metadata> {
  * the title row and the toolbar with the season picker, which has "Alle seizoenen" first, and
  * the choice of competition. The main column is white and has the cards Topscorers sinds
  * 1990/91 and Clubtopscorer per seizoen.
- * The sidebar has soft cards, Records, Hattricks and Strafschoppen benut, a sentence that says
- * why there is no list of matches, minutes or assists, and the credit. A card with nothing to
- * say is left out. A choice of competition that is not known is the page "niet gevonden".
+ * The sidebar has soft cards, Records, Hattricks, Strafschoppen benut and Meeste seizoenen in
+ * de selectie, a sentence that says why there is no list of matches, minutes or assists, and
+ * the credit. A card with nothing to say is left out. A choice of competition that is not
+ * known is the page "niet gevonden".
  */
 export async function AllSeasonsPlayersPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const { competitie } = await searchParams
@@ -142,7 +160,7 @@ export async function AllSeasonsPlayersPage({ searchParams }: { searchParams: Pr
     return <ServerError retryHref={allSeasonsPlayersAddress} />
   }
 
-  const { birthDates, edited, matches, pages, personSeasons, reportSeasons, seasons, source } = loaded
+  const { birthDates, edited, matches, pages, personSeasons, reportSeasons, seasons, source, squadPeople } = loaded
   const options = competitionOptionsOf(matches)
   const competition = choiceFor(matches, chosen)
 
@@ -151,6 +169,7 @@ export async function AllSeasonsPlayersPage({ searchParams }: { searchParams: Pr
   const hattricks = hattricksOf(matches, competition)
   const penalties = penaltiesOf(matches, competition)
   const records = playerRecordsOf(matches, competition, birthDates)
+  const squadSeasons = squadSeasonsOf(personSeasons, squadPeople)
   const hattrickSeasons = new Set(
     [
       ...hattricks.list.map((hattrick) => hattrick.match.season),
@@ -201,6 +220,7 @@ export async function AllSeasonsPlayersPage({ searchParams }: { searchParams: Pr
         {penalties.total > 0 && (
           <PenaltiesCard competition={competition} matches={matches} penalties={penalties} since={scorers.since} />
         )}
+        {squadSeasons.length > 0 && <SquadSeasonsCard rows={squadSeasons} />}
         <Text appearance="meta">{lineupSentence(reportSeasons, seasonOf(new Date()))}</Text>
         <OpponentsCredit edited={edited} pages={pages} seasons={seasons} source={source} />
       </Page.Section>

@@ -22,6 +22,7 @@ beforeEach(() => {
     penalties: true,
     records: true,
     scorers: true,
+    squadSeasons: true,
   })
 })
 
@@ -30,7 +31,7 @@ afterEach(() => {
 })
 
 describe('the bar of /spelers/cijfers/alle', () => {
-  it('links to the four cards in the order of the page', async () => {
+  it('links to the six cards in the order of the page', async () => {
     const html = await render()
 
     expect(hrefs(html)).toEqual(allSeasonsShortcuts.map(({ href }) => href))
@@ -44,6 +45,7 @@ describe('the bar of /spelers/cijfers/alle', () => {
       penalties: true,
       records: true,
       scorers: true,
+      squadSeasons: true,
     })
 
     expect(hrefs(await render())).toEqual([
@@ -51,6 +53,7 @@ describe('the bar of /spelers/cijfers/alle', () => {
       '#clubtopscorer-per-seizoen',
       '#records',
       '#strafschoppen',
+      '#meeste-seizoenen-in-de-selectie',
     ])
   })
 

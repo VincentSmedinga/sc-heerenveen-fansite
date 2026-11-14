@@ -5750,6 +5750,21 @@
 - **Waarom:** supporters willen weten hoe we het deden in de beker en in Europa, en 107 Europese wedstrijden zitten nu in geen enkel getal.
 - **Alternatieven:** een rij per afzonderlijke Europese beker; één kolom W–G–V; de kaart wel laten volgen op de keuze van competitie.
 
+## Spelers · Cijfers van alle seizoenen heeft de kaart Meeste seizoenen in de selectie
+
+- **Datum:** 14 november 2026
+- **Besluit:** in de zijkolom van `/spelers/cijfers/alle` staat onder Strafschoppen benut de kaart Meeste seizoenen in de selectie (`#meeste-seizoenen-in-de-selectie`), op het zachte vlak en met een link "Selectie" in de balk "Op deze pagina:".
+  De kaart toont de eerste vijf plaatsen, met alle spelers die een plaats delen, in dezelfde tabel als de kaarten ernaast (`TopScorersTable`): de speler als link, de jaren bij de club (`1993–2004`) en het aantal seizoenen in de kolom Z.
+  - **De telling** is het aantal verschillende seizoenen waarin de speler in de selectie stond (`squadSeasonsOf`, uit `getPersonSeasons`), dus een speler die wegging en terugkwam telt elk seizoen één keer, en het getal klopt met dat op de pagina van de speler.
+    De jaren lopen van het eerste tot en met het laatste seizoen, ook als er seizoenen tussen missen.
+  - **De kaart volgt de keuze van competitie niet.**
+    Een regel onder de kaart zegt dat ze de seizoenen telt, niet de wedstrijden.
+  - **De letter Z** is nieuw in `tableColumns` (`seasons`: Z seizoenen), omdat de S al van de strafschoppen is.
+  - **Een gelijke stand** geeft alle spelers dezelfde plaats; de plaatsen volgen de gewone telling (1, 1, 3), en een plaats na de vijfde valt weg.
+  - **De selecties van 2000/01 tot en met 2004/05** komen uit Wikidata (#767): als die veranderen, verandert de kaart mee.
+- **Waarom:** we kennen de selectie van elk seizoen sinds 1990/91, dus deze lijst is compleet, anders dan een lijst van gespeelde wedstrijden.
+- **Alternatieven:** een eigen kolom met de jaren in een lijst met korte feiten (het ontwerp); de kaart op de keuze van competitie laten volgen; een nieuwe tabel in plaats van `TopScorersTable`.
+
 ## Wedstrijden · Cijfers heeft de kaart Scheidsrechters, met onze balans per scheidsrechter
 
 - **Datum:** 14 november 2026

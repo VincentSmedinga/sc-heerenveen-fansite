@@ -24,6 +24,8 @@ export type TableColumn = {
  * The points come before the goals and the goal difference, as in every league table: `P`
  * stands before `D`.
  *
+ * The list of the seasons in the squad has `Z` seizoenen, because `S` is the penalties.
+ *
  * The tables of the players have `G` gespeeld (the matches he was in, also as a substitute),
  * `B` basis (the line-ups), `I` invallers (the times he came on), `M` minuten, `D` doelpunten,
  * `A` assists, `Y` geel and `R` rood. `G` is taken for gelijk and gespeeld, so the yellow
@@ -52,6 +54,7 @@ export const tableColumns = {
   points: { abbreviation: 'P', name: 'punten' },
   pointsPerMatch: { abbreviation: 'P', name: 'punten per wedstrijd' },
   red: { abbreviation: 'R', name: 'rood' },
+  seasons: { abbreviation: 'Z', name: 'seizoenen' },
   started: { abbreviation: 'B', name: 'basis' },
   substituted: { abbreviation: 'I', name: 'invallers' },
   won: { abbreviation: 'W', name: 'winst' },

@@ -17,6 +17,7 @@ import {
   listSeasonFormations,
   listSeasonMatches,
   listSeasonStandings,
+  listSquadPeople,
   listStaffInSeason,
   listStandingsSeasons,
   listWikipediaPages,
@@ -432,6 +433,15 @@ export const getPersonSeasons = cacheFor(pastSeasonPeriod, async () => {
 
   return seasons
 })
+
+/**
+ * The name and the page of each person who was in a squad, by the id of the person, for the
+ * card Meeste seizoenen in de selectie. One query for all persons, kept for an hour.
+ */
+export const getSquadPeople = cacheFor(
+  pastSeasonPeriod,
+  async () => new Map((await listSquadPeople(getDatabase().db)).map((person) => [person.personId, person])),
+)
 
 /**
  * The full birth date of each person who has one, by the id of the person, for the ages on the

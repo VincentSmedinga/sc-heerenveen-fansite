@@ -10,6 +10,7 @@ import {
   lineupSentence,
   penaltiesOf,
   playerRecordsOf,
+  squadSeasonsOf,
   yearsAtClub,
 } from './all-time-players'
 
@@ -451,5 +452,58 @@ describe('playerRecordsOf', () => {
 
     expect(records.mostInMatch?.value).toBe(1)
     expect(records.mostInSeason?.entries.map(({ id }) => id)).toEqual(['person:2'])
+  })
+})
+
+describe('squadSeasonsOf', () => {
+  const person = (givenName: string, familyName: string, slug: null | string = null) => ({
+    familyName,
+    familyNamePrefix: null,
+    givenName,
+    slug,
+  })
+  const people = new Map([
+    [1, person('Johan', 'Hansma', 'johan-hansma')],
+    [2, person('Hans', 'Vonk')],
+    [3, person('Jan', 'Bekkema')],
+    [4, person('Jeffrey', 'Talan')],
+  ])
+
+  it('counts the seasons of a person once, also for a person who left and came back', () => {
+    const rows = squadSeasonsOf(
+      new Map([
+        [1, ['1993/94', '1994/95', '1994/95', '2003/04']],
+        [2, ['2000/01']],
+      ]),
+      people,
+    )
+
+    expect(rows.map(({ goals, players, position }) => [position, goals, players[0].id, players[0].years])).toEqual([
+      [1, 3, 'person:1', '1993–2004'],
+      [2, 1, 'person:2', '2000–2001'],
+    ])
+    expect(rows[0]?.players[0]).toMatchObject({ givenName: 'Johan', href: '/spelers/johan-hansma', surname: 'Hansma' })
+  })
+
+  it('puts players with the same number of seasons in one place, by name, and keeps the first five places', () => {
+    const rows = squadSeasonsOf(
+      new Map([
+        [1, ['2000/01']],
+        [2, ['2000/01']],
+        [3, ['2000/01', '2001/02']],
+        [4, ['2000/01', '2001/02']],
+      ]),
+      people,
+    )
+
+    expect(rows.map(({ players, position }) => [position, players.map((player) => player.surname)])).toEqual([
+      [1, ['Bekkema', 'Talan']],
+      [3, ['Hansma', 'Vonk']],
+    ])
+  })
+
+  it('leaves out a person without a name, and gives nothing when nobody was in a squad', () => {
+    expect(squadSeasonsOf(new Map([[9, ['2000/01']]]), people)).toEqual([])
+    expect(squadSeasonsOf(new Map(), people)).toEqual([])
   })
 })
