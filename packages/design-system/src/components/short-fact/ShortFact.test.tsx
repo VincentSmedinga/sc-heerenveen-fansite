@@ -6,18 +6,18 @@ import { Text } from '../text/Text'
 import { ShortFact } from './ShortFact'
 
 describe('ShortFact', () => {
-  it('writes the fact in the classes of a short match, so a List draws the lines between its lines', () => {
+  it('writes the fact in the classes of a short line, so a List draws the lines between its lines', () => {
     const { container } = render(<ShortFact>1 van de 17 doelpunten</ShortFact>)
 
-    expect(container.querySelector('.hf-short-match.hf-short-fact')).not.toBeNull()
-    expect(container.querySelector('.hf-short-match-opponent')?.textContent).toBe('1 van de 17 doelpunten')
+    expect(container.querySelector('.hf-short-line.hf-short-fact')).not.toBeNull()
+    expect(container.querySelector('.hf-short-line-opponent')?.textContent).toBe('1 van de 17 doelpunten')
   })
 
   it('has the quiet style of "thuis" for a line that says there is nothing', () => {
     const { container } = render(<ShortFact empty>Nog geen</ShortFact>)
 
-    expect(container.querySelector('.hf-short-match-where')?.textContent).toBe('Nog geen')
-    expect(container.querySelector('.hf-short-match-opponent')).toBeNull()
+    expect(container.querySelector('.hf-short-line-where')?.textContent).toBe('Nog geen')
+    expect(container.querySelector('.hf-short-line-opponent')).toBeNull()
   })
 
   it('keeps the name above it in the same item, first, so a screen reader reads it first', () => {

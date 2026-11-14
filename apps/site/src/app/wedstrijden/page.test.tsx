@@ -1005,7 +1005,7 @@ describe('the head coaches of the season', () => {
     expect(card).toContain('<ul role="list">')
     expect(card.match(/<li>/g)).toHaveLength(1)
     expect(card).not.toContain('hele seizoen')
-    expect(card).not.toContain('hf-short-match-when')
+    expect(card).not.toContain('hf-short-line-when')
     expect(textOf(card)).toBe('|Hoofdtrainer|Robin| |Veldman|')
   })
 
@@ -1035,7 +1035,7 @@ describe('the head coaches of the season', () => {
 
     const { card } = await coachesCard()
 
-    expect(card).toContain('<span class="hf-short-match-where">(interim)</span>')
+    expect(card).toContain('<span class="hf-short-line-where">(interim)</span>')
     expect(card).not.toContain('<a href="https://nl.wikipedia.org')
     expect(card).not.toContain('wikipedia')
   })

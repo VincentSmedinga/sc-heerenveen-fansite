@@ -2262,6 +2262,7 @@
 - **Alternatieven:** `ShortMatch` voor alles op de pagina van een club (het onderdeel kent geen wedstrijd die nog komt, en competitie, stadion en tijd zouden verdwijnen); de gemengde lijst laten zoals ze is (de projecteigenaar wil dat niet); alle `ShortMatch`-plekken ook `Match` maken (de kaarten van Statistieken worden lang voor een uitslag die ze al geven).
 - **Nadeel:** de pagina van een club met veel wedstrijden wordt langer, omdat een `Match` meer ruimte neemt dan een `ShortMatch`.
   Een grens aan de lengte of "Laad meer" is een eigen issue als dat nodig blijkt.
+- **Later:** zie _Overal een `Match`, en `ShortMatch` vervalt_ (14 november 2026): de selectie gebruikt sindsdien ook `Match`, en `ShortMatch` bestaat niet meer.
 - **Later:** zie _De wedstrijden van een club staan bladerend, tien per pagina_ (6 november 2026): de lijst is nog steeds volledig, maar verdeeld over pagina's, en de pagina heeft een balk "Op deze pagina:".
 
 ## De kaart "Hoe vaak welke uitslag" toont de aantallen in de tabelkoppen, de competities in een tabel en de doelpunten in een diagram
@@ -5839,3 +5840,15 @@
   - **Het ontwerp** toont één link onder de kaart Hoe vaak welke uitslag; het issue vraagt een link bij elke uitslag in de lijst, en die is er.
 - **Waarom:** de getallen op Cijfers zijn een ingang: wie "111 keer 0–0" ziet, wil die wedstrijden zien, en snijden doet Zoeken al.
 - **Alternatieven:** filters op Cijfers zelf; een getal in de link dat de kaart telt in plaats van Zoeken; links voor alle kaarten, ook die Zoeken nog niet kan filteren.
+
+## Overal een `Match`, en `ShortMatch` vervalt
+
+- **Datum:** 14 november 2026
+- **Besluit:** de site gebruikt overal `Match` voor een wedstrijd, ook voor een selectie, en `ShortMatch` is vervallen (#1248).
+  De kaarten Records, Uitersten, De nul gehouden en Reeksen en de ontmoetingen op de pagina van een club tonen een `Match` met `status="played"`.
+- **Hoe:** een kaart die wedstrijden van meer dan één competitie kan tonen, geeft `competition` alleen door bij de keuze "alle competities"; onder één competitie staat die op elke regel gelijk en blijft weg.
+  `Match` krijgt geen nieuwe eigenschap.
+  De regels tussen de items van een lijst en de naam boven een wedstrijd (de naam heeft de lijn erboven) staan nu in `short-line.css`, voor `Match`, `ShortStaff` en `ShortFact`.
+- **Waarom:** de datum links in `ShortMatch` neemt veel ruimte en laat de regel met de clubs toch vaak afbreken; een `Match` met de clubs en de uitslag op een eigen regel kost weinig extra hoogte, en met één onderdeel hoeft de site niet meer te kiezen tussen twee.
+- **Alternatieven:** een eigenschap `showCompetition` op `Match` (meer API, terwijl weglaten van `competition` hetzelfde doet); de eerste regel van `Match` aanpassen zodat de datum altijd bovenaan staat (de eigenaar wil dat later bekijken).
+- **Later:** zie _`Match` is voor een volledige lijst, `ShortMatch` voor een selectie_ (4 november 2026).

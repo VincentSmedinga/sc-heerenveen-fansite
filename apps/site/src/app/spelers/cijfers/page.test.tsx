@@ -333,7 +333,7 @@ describe('the card Bijzondere doelpunten on /spelers/cijfers', () => {
     const html = cardOf(await render())
 
     expect(html).toMatch(
-      /<ul role="list"><li><p class="hf-meta">Hattricks<\/p><div class="hf-short-match hf-short-fact">/,
+      /<ul role="list"><li><p class="hf-meta">Hattricks<\/p><div class="hf-short-line hf-short-fact">/,
     )
     expect(facts(html).map(([name]) => name)).toEqual([
       'Hattricks',
@@ -354,7 +354,7 @@ describe('the card Bijzondere doelpunten on /spelers/cijfers', () => {
       ['Strafschoppen', '0 van de 4 doelpunten'],
       ['Eigen doelpunten', '0 door de tegenstander · 0 door ons'],
     ])
-    expect(html.match(/<span class="hf-short-match-where">Nog geen<\/span>/g)).toHaveLength(2)
+    expect(html.match(/<span class="hf-short-line-where">Nog geen<\/span>/g)).toHaveLength(2)
   })
 
   it('lists the hattricks and the doubles with the names as one name, and how often for a repeat', async () => {

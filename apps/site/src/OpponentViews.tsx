@@ -12,11 +12,11 @@ import {
   Heading,
   List,
   MarkRow,
+  Match,
   NewsItem,
   Pagination,
   RecordTable,
   sharesOf,
-  ShortMatch,
   ShortStaff,
   signedNumber,
   tableColumns,
@@ -27,6 +27,7 @@ import {
 
 import { type CompetitionChoice, competitionWords } from './competition'
 import { creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
+import { shootOutOf } from './match-result'
 import { type MatchSource, sourceOf } from './match-sources'
 import { competitionNames, countScores, topScorersOf } from './matches'
 import { EredivisieOnly, imageCredit, markOf, MatchLegend, MatchLine, ScoreCountsView, TopScorers } from './MatchViews'
@@ -378,7 +379,7 @@ export function ClubSummaryCard({
           {lines.map(({ label, match }) => (
             <List.Item key={label}>
               <Text appearance="meta">{label}</Text>
-              <MeetingLine match={match} now={now} />
+              <MeetingLine choice={choice} match={match} now={now} />
             </List.Item>
           ))}
         </List>
@@ -851,15 +852,22 @@ export function TopPointsCard({
   )
 }
 
-/** One played match against the club as a short line, for the cards that pick matches out. */
-function MeetingLine({ match, now }: { match: Meeting; now: Date }) {
+/**
+ * One played match against the club, for the cards that pick matches out. The competition is
+ * on the line only when the choice is all competitions: under one competition it repeats.
+ */
+function MeetingLine({ choice, match, now }: { choice: CompetitionChoice; match: Meeting; now: Date }) {
   return (
-    <ShortMatch
+    <Match
+      competition={choice === 'all' ? match.competition : undefined}
       {...matchMoment(match, now)}
       goalsAgainst={match.goalsAgainst}
       goalsFor={match.goalsFor}
+      {...shootOutOf(match)}
       home={match.home}
       opponent={match.opponent}
+      round={match.round}
+      status="played"
     />
   )
 }

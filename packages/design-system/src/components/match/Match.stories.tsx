@@ -16,9 +16,9 @@ const meta = preview.meta({
       description: {
         component: [
           'Een wedstrijd van sc Heerenveen 1, als regel in een lijst: de dag en het stadion, de twee clubs met de uitslag ertussen, eventueel de doelpuntenmakers, en de competitie met de ronde.',
-          'Kies hem voor een volledige lijst, zoals een seizoen of alle wedstrijden tegen één club; voor een selectie die op een eigenschap uit de wedstrijden kiest, kies je `ShortMatch`. Laat `competition` weg onder een kop die de competitie al noemt.',
+          'Kies hem voor een volledige lijst, zoals een seizoen of alle wedstrijden tegen één club; ook voor een selectie, zoals een record. Laat `competition` weg onder een kop die de competitie al noemt.',
           'De thuisclub staat eerst en de uitslag heeft de kleur van de uitkomst voor sc Heerenveen, nooit als enig teken. Een wedstrijd kan nog moeten komen, uitgesteld of geannuleerd zijn, live gaan, na verlenging of strafschoppen eindigen, of nog geen uitslag hebben.',
-          'Zet hem in een `List.Item` met `role="list"` op de `List`, in een `Card` onder een kop van niveau 2. Hij is gebouwd uit `Time`, `Link` en `Text`, met de uitkomst die ook `ShortMatch` gebruikt.',
+          'Zet hem in een `List.Item` met `role="list"` op de `List`, in een `Card` onder een kop van niveau 2. Hij is gebouwd uit `Time`, `Link` en `Text`, met de uitkomst die ook de andere onderdelen met een uitslag gebruiken.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

@@ -1,6 +1,6 @@
 import type { PublicMatch } from '@fansite/db/queries'
 
-import { Card, Heading, List, ShortMatch, Text } from '@fansite/design-system'
+import { Card, Heading, List, Match, Text } from '@fansite/design-system'
 
 import type { CijfersSearch } from './cijfers-search'
 
@@ -28,7 +28,7 @@ const matchesWord = (count: number) => (count === 1 ? 'wedstrijd' : 'wedstrijden
 
 /**
  * The card Records of the page with all seasons (it is the card Uitersten of a season): the
- * biggest win and loss and the match with the most goals, each a short match with its name
+ * biggest win and loss and the match with the most goals, each a `Match` with its name
  * above it and its year, then the longest run without a loss and without a win with the seasons
  * it ran over, and how often a shoot-out decided a match. A line without a match is left out.
  * The two goals of Uitersten, the earliest and the last, are left out: a record of a goal is
@@ -76,14 +76,17 @@ export function RecordsCard({
             {shown.map(({ match, name }) => (
               <List.Item key={name}>
                 <Text appearance="meta">{name}</Text>
-                <ShortMatch
+                <Match
                   // Only played matches with both scores count, so these are numbers.
+                  competition={competition === 'all' ? match.competition : undefined}
                   {...matchMoment(match, now, { withYear: true })}
                   goalsAgainst={match.goalsAgainst ?? 0}
                   goalsFor={match.goalsFor ?? 0}
                   {...shootOutOf(match)}
                   home={match.home}
                   opponent={match.opponent}
+                  round={match.round}
+                  status="played"
                 />
               </List.Item>
             ))}

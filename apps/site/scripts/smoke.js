@@ -993,7 +993,7 @@ await withEmptyDatabase((database) =>
     // name only.
     assert.match(
       matchesHtml,
-      /<h2[^>]*id="hoofdtrainer">.*?href="#hoofdtrainer">Hoofdtraine.*?<\/h2><ul role="list"><li><div class="hf-short-match hf-short-staff"><span class="hf-short-match-opponent"><span class="hf-player-name"><span class="hf-player-name-given">Robin<\/span> <span class="hf-player-name-surname">Veldman<\/span><\/span><\/span><\/div><\/li><\/ul><\/section>/s,
+      /<h2[^>]*id="hoofdtrainer">.*?href="#hoofdtrainer">Hoofdtraine.*?<\/h2><ul role="list"><li><div class="hf-short-line hf-short-staff"><span class="hf-short-line-opponent"><span class="hf-player-name"><span class="hf-player-name-given">Robin<\/span> <span class="hf-player-name-surname">Veldman<\/span><\/span><\/span><\/div><\/li><\/ul><\/section>/s,
     )
     // The main menu is its own nav right after the header, and the bar with a link to each card
     // comes after it, outside the main; none on the home.
