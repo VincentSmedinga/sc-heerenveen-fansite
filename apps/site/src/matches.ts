@@ -13,6 +13,7 @@ import {
   listMatchSeasons,
   listPersonSeasons,
   listReportSeasons,
+  listSeasonFormations,
   listSeasonMatches,
   listSeasonStandings,
   listStaffInSeason,
@@ -225,6 +226,9 @@ export function getEditorSources(season = seasonOf(new Date())) {
 const currentLeagueResults = cacheForKey(currentSeasonPeriod, (season) => listLeagueResults(getDatabase().db, season))
 const pastLeagueResults = cacheForKey(pastSeasonPeriod, (season) => listLeagueResults(getDatabase().db, season))
 
+const currentFormations = cacheForKey(currentSeasonPeriod, (season) => listSeasonFormations(getDatabase().db, season))
+const pastFormations = cacheForKey(pastSeasonPeriod, (season) => listSeasonFormations(getDatabase().db, season))
+
 /** One season of the card "Onze plek door de jaren": our place, or none without a table. */
 export type FinalPlace = {
   /** Whether this is the season that is going on, whose table is not final. */
@@ -288,6 +292,15 @@ export function finalPlacesOf(
  */
 export function getLeagueResults(season: string): Promise<PublicLeagueResult[]> {
   return season === seasonOf(new Date()) ? currentLeagueResults(season) : pastLeagueResults(season)
+}
+
+/**
+ * Our formation in each played match of a season that has a finished report with one, for the
+ * card Formaties. Kept like the data of the season. The caller asks for a season of
+ * `getMatchSeasons` only.
+ */
+export function getSeasonFormations(season: string) {
+  return season === seasonOf(new Date()) ? currentFormations(season) : pastFormations(season)
 }
 
 /** The clubs in the Eredivisie, and so the matches in a round and the rounds in a season. */

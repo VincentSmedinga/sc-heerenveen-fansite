@@ -7,8 +7,11 @@ import { notFound } from 'next/navigation'
 import { competitionFields, parseCompetition } from '#src/competition'
 import { CompetitionSwitch } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
+import { reasonOf } from '#src/errors'
+import { formationsOf } from '#src/formations'
+import { FormationsCard } from '#src/FormationsCard'
 import { seasonSourceOf, sourceName, sourceOf } from '#src/match-sources'
-import { choiceFor, homeAwayOf, parseCleanSheetCount } from '#src/matches'
+import { choiceFor, getSeasonFormations, homeAwayOf, parseCleanSheetCount } from '#src/matches'
 import {
   AttendanceCard,
   CleanSheetsCard,
@@ -99,6 +102,7 @@ export async function StatisticsPage({
   // one the image has always been of.
   const imageSeason = current ? undefined : season
   const address = seasonAddress(statisticsPath, season, seasonOf(now))
+  const formations = formationsOf(data.matches, await readFormations(season), competition)
   const keyFigures = statisticsKeyFigures(data.standings, homeAwayOf(data.matches, competition).total, competition)
 
   return (
@@ -160,6 +164,7 @@ export async function StatisticsPage({
       </CardGroup>
       <CardGroup area="around" id="rondom-de-wedstrijd" title="Rondom de wedstrijd">
         <AttendanceCard competition={competition} level={3} matches={data.matches} season={imageSeason} />
+        <FormationsCard level={3} {...formations} />
       </CardGroup>
       {(data.matches.length > 0 || data.standings.length > 0) && (
         <Page.Cell area="credit">
@@ -168,4 +173,18 @@ export async function StatisticsPage({
       )}
     </Page.Main>
   )
+}
+
+/**
+ * Our formations in the matches of a season. The card Formaties is a bonus: when they can't be
+ * read, the page shows without it.
+ */
+async function readFormations(season: string) {
+  try {
+    return await getSeasonFormations(season)
+  } catch (error) {
+    console.error(`Could not read the formations for ${statisticsPath}: ${reasonOf(error)}`)
+
+    return []
+  }
 }
