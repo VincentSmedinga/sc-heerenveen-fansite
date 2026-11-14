@@ -3544,6 +3544,6 @@
 - **Datum:** 14 november 2026
 - **Besluit:** waar een kaart een wedstrijd een naam geeft, zoals "Grootste overwinning", is de lijst een `DescriptionList` met `stacked` en een `DescriptionList.Item` per regel: de naam is de `term`, de `Match` of de tekst de beschrijving (#1249).
   In Records zijn ook de reeksen en "Beslist met strafschoppen" een paar van dezelfde lijst.
-  Een `dd` met een `Match` of een alinea heeft de grootte en het gewicht van gewone tekst, en de `Match` in een `dd` heeft geen ruimte boven en onder zich: de ruimte is die van het paar.
+  Een `dd` met een `Match` of een alinea heeft de grootte en het gewicht van gewone tekst, en de `Match` in een `dd` heeft alleen een kleine ruimte onder de term, geen eigen ruimte eronder.
 - **Waarom:** een schermlezer hoort dat de naam bij de wedstrijd hoort, en de naam en de wedstrijd zijn niet meer twee losse stukken tekst.
 - **Alternatieven:** alleen de regels met een `Match` een `dl` en de tekstregels een `List.Item` (een `dl` naast losse lijstitems is onzuiver en de opmaak verschilt); een nieuw onderdeel voor gelabelde regels (er is er al een).
