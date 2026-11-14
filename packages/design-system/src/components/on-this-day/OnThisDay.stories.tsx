@@ -17,6 +17,11 @@ const meta = preview.meta({
   argTypes: {
     children: { control: false, description: 'De link onder de wedstrijden, zoals "Alle wedstrijden in november".' },
     intro: { control: 'text', description: 'Eén regel onder de kop met het aantal en waar ze gespeeld zijn.' },
+    level: {
+      control: 'inline-radio',
+      description: 'Het niveau van de kop: 2 op zichzelf, 3 in een groep kaarten.',
+      options: [2, 3],
+    },
     matches: { description: 'De wedstrijden, de nieuwste eerst: het jaar, de clubs en de uitslag.' },
     title: { control: 'text', description: 'De kop, met de datum.' },
   },
