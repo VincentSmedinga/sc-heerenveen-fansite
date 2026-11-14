@@ -1,5 +1,6 @@
 import {
   Card,
+  DataTable,
   Disclosure,
   Heading,
   Link,
@@ -14,6 +15,8 @@ import type { allTimeScorersOf } from './all-time-players'
 
 import {
   type AllTimeMatch,
+  type ClubTopScorerSeason,
+  clubTopScorerSeasonsShown,
   type CountPlace,
   countRows,
   type Hattrick,
@@ -24,9 +27,11 @@ import {
   shortListPlaces,
   type YearsPlace,
 } from './all-time-players'
-import { type CompetitionChoice, competitionWords } from './competition'
+import { type CompetitionChoice, competitionQuery, competitionWords } from './competition'
 import { scorersCoverage } from './matches'
 import { imageCredit } from './MatchViews'
+import { playerFiguresPath } from './season-page'
+import { seasonAddress } from './seasons'
 
 // The cards of the page Spelers · Cijfers with the choice "Alle seizoenen" (#1219). They count
 // every season we have, and a card with nothing to say is left out by the page.
@@ -88,6 +93,87 @@ export function AllTimeScorersCard({
       {known < played && (
         <Text appearance="meta">
           {`Van ${played - known} ${played - known === 1 ? 'wedstrijd' : 'wedstrijden'} kennen we de doelpuntenmakers niet.`}
+        </Text>
+      )}
+    </Card>
+  )
+}
+
+/**
+ * The card Clubtopscorer per seizoen: a row for each season, the newest first, with the
+ * season (a link to its figures), the player or players who shared the first place and their
+ * goals. The last five seasons are in the table and a closed block has the rest. A season
+ * whose scorers we don't all know has a star and, under the tables, a line that says so. The
+ * card is white and stands in the main column, under Topscorers sinds 1990/91.
+ */
+export function ClubTopScorersCard({
+  competition,
+  current,
+  matches,
+  seasons,
+}: {
+  competition: CompetitionChoice
+  /** The current season, whose figures have the address of the page itself. */
+  current: string
+  matches: readonly AllTimeMatch[]
+  seasons: readonly ClubTopScorerSeason[]
+}) {
+  const recent = seasons.slice(0, clubTopScorerSeasonsShown)
+  const earlier = seasons.slice(clubTopScorerSeasonsShown)
+  const caption = (part: string) => `${part} van sc Heerenveen, in ${wordsOf(competition)}, met zijn doelpunten`
+  const table = (rows: readonly ClubTopScorerSeason[], part: string) => (
+    <DataTable
+      appearance="text"
+      caption={caption(part)}
+      columns={['Seizoen', 'Speler', { abbreviation: 'D', name: 'Doelpunten' }]}
+      rows={rows.map(({ goals, incomplete, players, season }) => ({
+        cells: [
+          players.map((player, index) => (
+            <Text as="span" key={player.id}>
+              {index > 0 && ', '}
+              <PlayerName givenName={player.givenName} href={player.href} surname={player.surname} />
+            </Text>
+          )),
+          incomplete ? (
+            <>
+              {goals}
+              <Text aria-hidden="true" as="span">
+                *
+              </Text>
+              <Text as="span" className="hf-visually-hidden">
+                , niet alle doelpuntenmakers bekend
+              </Text>
+            </>
+          ) : (
+            goals
+          ),
+        ],
+        header: season,
+        href: `${seasonAddress(playerFiguresPath, season, current)}${competitionQuery(competition)}`,
+      }))}
+    />
+  )
+
+  return (
+    <Card aria-labelledby="clubtopscorer-per-seizoen" shareable={imageCredit(true, undefined, [...matches])}>
+      <Heading anchor id="clubtopscorer-per-seizoen" level={2}>
+        Clubtopscorer per seizoen
+      </Heading>
+      <Text>
+        {seasons.length === 1 ? 'De clubtopscorer van 1 seizoen' : `De clubtopscorer van ${seasons.length} seizoenen`}
+      </Text>
+      {table(
+        recent,
+        `De laatste ${recent.length === 1 ? 'seizoen' : `${recent.length} seizoenen`} met de clubtopscorer`,
+      )}
+      {earlier.length > 0 && (
+        <Disclosure summary={`Toon alle ${seasons.length} seizoenen`}>
+          {table(earlier, 'De oudere seizoenen met de clubtopscorer')}
+        </Disclosure>
+      )}
+      {seasons.some((season) => season.incomplete) && (
+        <Text appearance="meta">
+          * Van een deel van de wedstrijden van dit seizoen kennen we de doelpuntenmakers niet.
         </Text>
       )}
     </Card>

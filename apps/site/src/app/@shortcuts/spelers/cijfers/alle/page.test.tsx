@@ -16,7 +16,7 @@ const hrefs = (html: string) => [...html.matchAll(/<a [^>]*href="([^"]*)"/g)].ma
 
 beforeEach(() => {
   cards.allSeasonsCards.mockReset()
-  cards.allSeasonsCards.mockResolvedValue({ hattricks: true, penalties: true, scorers: true })
+  cards.allSeasonsCards.mockResolvedValue({ clubTopScorers: true, hattricks: true, penalties: true, scorers: true })
 })
 
 afterEach(() => {
@@ -24,7 +24,7 @@ afterEach(() => {
 })
 
 describe('the bar of /spelers/cijfers/alle', () => {
-  it('links to the three cards in the order of the page', async () => {
+  it('links to the four cards in the order of the page', async () => {
     const html = await render()
 
     expect(hrefs(html)).toEqual(allSeasonsShortcuts.map(({ href }) => href))
@@ -32,9 +32,9 @@ describe('the bar of /spelers/cijfers/alle', () => {
   })
 
   it('leaves out the link to a card that is not on the page', async () => {
-    cards.allSeasonsCards.mockResolvedValue({ hattricks: false, penalties: true, scorers: true })
+    cards.allSeasonsCards.mockResolvedValue({ clubTopScorers: true, hattricks: false, penalties: true, scorers: true })
 
-    expect(hrefs(await render())).toEqual(['#topscorers-sinds-1990-91', '#strafschoppen'])
+    expect(hrefs(await render())).toEqual(['#topscorers-sinds-1990-91', '#clubtopscorer-per-seizoen', '#strafschoppen'])
   })
 
   it('passes the choice of competition on', async () => {

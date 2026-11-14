@@ -5,8 +5,15 @@ import { Heading, Page, SeasonPicker, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
 
-import { allTimeScorersOf, hattricksOf, lineupSentence, matchKey, penaltiesOf } from '#src/all-time-players'
-import { AllTimeScorersCard, HattricksCard, PenaltiesCard } from '#src/AllTimePlayersCards'
+import {
+  allTimeScorersOf,
+  clubTopScorersOf,
+  hattricksOf,
+  lineupSentence,
+  matchKey,
+  penaltiesOf,
+} from '#src/all-time-players'
+import { AllTimeScorersCard, ClubTopScorersCard, HattricksCard, PenaltiesCard } from '#src/AllTimePlayersCards'
 import { competitionFields, leagueLabel, parseCompetition } from '#src/competition'
 import { CompetitionLinks } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
@@ -76,6 +83,7 @@ export async function allSeasonsCards(competitie: string | string[] | undefined)
   const competition = choiceFor(loaded.matches, chosen)
 
   return {
+    clubTopScorers: clubTopScorersOf(loaded.matches, competition).length > 0,
     hattricks: hattricksOf(loaded.matches, competition).total > 0,
     penalties: penaltiesOf(loaded.matches, competition).total > 0,
     scorers: allTimeScorersOf(loaded.matches, competition, loaded.personSeasons).total > 0,
@@ -102,8 +110,8 @@ export async function allSeasonsPlayersMetadata(): Promise<Metadata> {
 /**
  * The figures of the players over all seasons since 1990/91: `/spelers/cijfers/alle`. It has
  * the title row and the toolbar with the season picker, which has "Alle seizoenen" first, and
- * the choice of competition. The main column is white and has the card Topscorers sinds
- * 1990/91.
+ * the choice of competition. The main column is white and has the cards Topscorers sinds
+ * 1990/91 and Clubtopscorer per seizoen.
  * The sidebar has soft cards, Hattricks and Strafschoppen benut, a sentence that says why
  * there is no list of matches, minutes or assists, and the credit. A card with nothing to say
  * is left out. A choice of competition that is not known is the page "niet gevonden".
@@ -126,6 +134,7 @@ export async function AllSeasonsPlayersPage({ searchParams }: { searchParams: Pr
   const competition = choiceFor(matches, chosen)
 
   const scorers = allTimeScorersOf(matches, competition, personSeasons)
+  const clubTopScorers = clubTopScorersOf(matches, competition)
   const hattricks = hattricksOf(matches, competition)
   const penalties = penaltiesOf(matches, competition)
   const hattrickSeasons = new Set(
@@ -157,6 +166,14 @@ export async function AllSeasonsPlayersPage({ searchParams }: { searchParams: Pr
           <AllTimeScorersCard competition={competition} matches={matches} scorers={scorers} />
         ) : (
           <Text>We hebben nog geen doelpuntenmakers. Kijk straks nog eens.</Text>
+        )}
+        {clubTopScorers.length > 0 && (
+          <ClubTopScorersCard
+            competition={competition}
+            current={seasonOf(new Date())}
+            matches={matches}
+            seasons={clubTopScorers}
+          />
         )}
       </Page.Section>
       <Page.Section area="side" aria-label="Meer cijfers over de spelers">

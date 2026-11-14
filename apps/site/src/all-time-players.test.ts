@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   type AllTimeMatch,
   allTimeScorersOf,
+  clubTopScorersOf,
   countRows,
   hattricksOf,
   lineupSentence,
@@ -249,5 +250,83 @@ describe('lineupSentence', () => {
 
   it('says so when no season has line-ups', () => {
     expect(lineupSentence([], '2026/27')).toContain('nog van geen enkel seizoen')
+  })
+})
+
+describe('clubTopScorersOf', () => {
+  it('has the first place of each season, the newest season first', () => {
+    const rows = clubTopScorersOf(
+      [
+        inSeason('2001/02', [person(1, 'Een'), person(1, 'Een'), person(2, 'Twee')]),
+        inSeason('2002/03', [person(2, 'Twee'), person(3, 'Drie'), person(3, 'Drie'), person(3, 'Drie')]),
+      ],
+      'all',
+    )
+
+    expect(rows.map((row) => [row.season, row.goals, row.players.map((player) => player.player)])).toEqual([
+      ['2002/03', 3, ['Pier Drie']],
+      ['2001/02', 2, ['Pier Een']],
+    ])
+  })
+
+  it('counts a person who scored in two competitions as one, like the card of a season', () => {
+    const [row] = clubTopScorersOf(
+      [
+        inSeason('2001/02', [person(1, 'Een')]),
+        inSeason('2001/02', [person(1, 'Een')], { competition: 'KNVB Beker' }),
+        inSeason('2001/02', [person(2, 'Twee')]),
+      ],
+      'all',
+    )
+
+    expect(row?.goals).toBe(2)
+    expect(row?.players).toHaveLength(1)
+  })
+
+  it('puts everybody who shares the first place in the row, from A to Z', () => {
+    const [row] = clubTopScorersOf(
+      [
+        inSeason('2001/02', [
+          person(2, 'Zeta'),
+          person(2, 'Zeta'),
+          person(1, 'Alfa'),
+          person(1, 'Alfa'),
+          person(3, 'Laag'),
+        ]),
+      ],
+      'all',
+    )
+
+    expect(row?.players.map((player) => player.surname)).toEqual(['Alfa', 'Zeta'])
+  })
+
+  it('follows the choice of competition and leaves out a season without a match in it', () => {
+    const matches = [
+      inSeason('2001/02', [person(1, 'Een')]),
+      inSeason('2002/03', [person(2, 'Twee')], { competition: 'KNVB Beker' }),
+    ]
+
+    expect(clubTopScorersOf(matches, 'cup').map((row) => row.season)).toEqual(['2002/03'])
+    expect(clubTopScorersOf(matches, 'league').map((row) => row.season)).toEqual(['2001/02'])
+  })
+
+  it('marks a season with a match without scorers as incomplete', () => {
+    const rows = clubTopScorersOf(
+      [
+        inSeason('2001/02', [person(1, 'Een')]),
+        inSeason('2001/02', [], { goalsFor: 2 }),
+        inSeason('2002/03', [person(1, 'Een')]),
+      ],
+      'all',
+    )
+
+    expect(rows.map((row) => [row.season, row.incomplete])).toEqual([
+      ['2002/03', false],
+      ['2001/02', true],
+    ])
+  })
+
+  it('has no rows when no scorer is known', () => {
+    expect(clubTopScorersOf([inSeason('2001/02', [], { goalsFor: 2 })], 'all')).toEqual([])
   })
 })
