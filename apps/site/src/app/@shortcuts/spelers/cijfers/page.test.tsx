@@ -90,7 +90,7 @@ describe('the bar of /spelers/cijfers and the choice of the matches', () => {
 })
 
 describe('the links to the cards with the figures of the match reports, in the current season', () => {
-  it('has the links to Alle spelers, Assists and Minuten, in the order of the cards, when the season has reports', async () => {
+  it('has the links to Alle spelers, Assists, Minuten and Invallers, in the order of the cards, when the season has reports', async () => {
     vi.mocked(seasonHasReports).mockResolvedValue(true)
 
     const html = await render()
@@ -104,10 +104,11 @@ describe('the links to the cards with the figures of the match reports, in the c
       ['#alle-spelers', 'Alle spelers'],
       ['#assists', 'Assists'],
       ['#minuten', 'Minuten'],
+      ['#invallers-die-scoorden', 'Invallers'],
       ['#bijzondere-doelpunten', 'Bijzondere doelpunten'],
     ])
     expect(seasonHasReports).toHaveBeenCalledWith('2026/27')
-    expect(playerFiguresShortcutsFor(true)).toHaveLength(5)
+    expect(playerFiguresShortcutsFor(true)).toHaveLength(6)
   })
 
   it('has no link to them when the season has no report that is klaar', async () => {

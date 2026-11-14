@@ -344,14 +344,14 @@ test.describe('the bar under the header of /wedstrijden/cijfers', () => {
 // main column and the sidebar side by side.
 test.describe('the bar under the header of /spelers/cijfers', () => {
   for (const colorScheme of ['light', 'dark'] as const) {
-    test(`has five links on a phone, to the cards, and passes axe in ${colorScheme}`, async ({ page }) => {
+    test(`has six links on a phone, to the cards, and passes axe in ${colorScheme}`, async ({ page }) => {
       await page.emulateMedia({ colorScheme })
       await page.setViewportSize({ height: 800, width: 390 })
       await page.goto('/spelers/cijfers')
 
       const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
 
-      await expect(bar.getByRole('link')).toHaveCount(5)
+      await expect(bar.getByRole('link')).toHaveCount(6)
       await bar.getByRole('link', { name: 'Doelpuntenmakers' }).click()
       await expect(page).toHaveURL(/#doelpuntenmakers$/)
       await bar.getByRole('link', { name: 'Alle spelers' }).click()
