@@ -1812,7 +1812,7 @@ await withEmptyDatabase((database) =>
     const comingClub = await (await fetch(`${origin}/tegenstanders/nepstad-rangers`)).text()
     assert.match(
       comingClub,
-      /<h2[^>]*id="wedstrijden">.*<ul role="list"><li><div class="hf-match">.*Nepstad Rangers.*hf-match-when">.*?Eredivisie.*?Speelronde 4<\/span><\/p><\/div><\/li><\/ul>/s,
+      /<h2[^>]*id="wedstrijden">.*<ul role="list"><li><div class="hf-match">.*hf-match-when">.*?Eredivisie.*?Speelronde 4<\/span><\/p><p class="hf-match-clubs">.*?Nepstad Rangers.*?<\/p><\/div><\/li><\/ul>/s,
     )
     assert.doesNotMatch(comingClub, /<h3|nog niet tegen deze club gespeeld/)
     assert.doesNotMatch(comingClub, /id="onze-uitslagen"|id="hoe-vaak-welke-uitslag"|Thuis|>Uit</)
