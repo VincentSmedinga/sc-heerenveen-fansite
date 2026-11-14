@@ -1255,10 +1255,11 @@ await withEmptyDatabase((database) =>
     // On the statistics page it is a card of the sidebar: the chart without text round the ring
     // (hidden from a screen reader), and the tables that are its key, one for each outcome with
     // its count in the header, and the outcome in words for each score. It has no sentence with
-    // the sums, and under the tables only the number of matches.
+    // the sums, and under the tables only the number of matches. A score is a link to the
+    // search of matches when it finds some, with where it goes said after the score.
     assert.match(
       statisticsHtml,
-      /<h3[^>]*id="hoe-vaak-welke-uitslag">.*?Hoe vaak welke uitsla.*?<\/h3>.*?<div aria-hidden="true" class="hf-donut-chart hf-donut-chart-bare">.*?<div class="hf-data-table-group">.*?<th scope="col"><span aria-hidden="true">Winst \d+×<\/span><span class="hf-visually-hidden">Winst, \d+ keer<\/span><\/th>.*?<th scope="row"><span aria-hidden="true" class="hf-donut-chart-swatch [^"]*" style="--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"><\/span>\d+–\d+<span class="hf-visually-hidden">, (?:winst|gelijk|verlies)<\/span><\/th>/s,
+      /<h3[^>]*id="hoe-vaak-welke-uitslag">.*?Hoe vaak welke uitsla.*?<\/h3>.*?<div aria-hidden="true" class="hf-donut-chart hf-donut-chart-bare">.*?<div class="hf-data-table-group">.*?<th scope="col"><span aria-hidden="true">Winst \d+×<\/span><span class="hf-visually-hidden">Winst, \d+ keer<\/span><\/th>.*?<th scope="row"><span aria-hidden="true" class="hf-donut-chart-swatch [^"]*" style="--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"><\/span>(?:<a href="\/wedstrijden\/zoeken\?[^"]*">)?\d+–\d+(?:<span class="hf-visually-hidden">, toon de [^<]*<\/span><\/a>)?<span class="hf-visually-hidden">, (?:winst|gelijk|verlies)<\/span><\/th>/s,
     )
     // The card Doelpuntenmakers is on the page Spelers alone (#774): no heading, no anchor and
     // no link to it on this page.
