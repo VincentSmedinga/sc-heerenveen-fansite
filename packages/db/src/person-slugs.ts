@@ -31,10 +31,10 @@ export async function findPlayerBySlug(db: Pick<Database, 'select'>, slug: strin
 
 /**
  * The addresses below `/spelers` that are pages of their own, so no player has one as slug:
- * the form that chooses a season (`kies`), the overview of all players (`overzicht`, #1138)
- * and the search for a player (`zoeken`, #1130).
+ * the figures of the players (`cijfers`, #1218), the form that chooses a season (`kies`), the
+ * overview of all players (`overzicht`, #1138) and the search for a player (`zoeken`, #1130).
  */
-export const reservedPlayerSlugs: readonly string[] = ['kies', 'overzicht', 'zoeken']
+export const reservedPlayerSlugs: readonly string[] = ['cijfers', 'kies', 'overzicht', 'zoeken']
 
 /**
  * Whether a slug can be the address of a player: `/spelers/kies` is the form that chooses a

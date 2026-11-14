@@ -1,7 +1,7 @@
 # @fansite/site
 
 De site van de sc Heerenveen Fansite.
-Er zijn nu veertien pagina's, en een pagina per tegenstander: de homepage met het nieuwste artikel van de redactie, de nieuwste koppen, de wedstrijden en het forum, `/nieuws` met alle koppen en een filter per bron, `/wedstrijden` met het programma, de uitslagen en de stand, `/wedstrijden/cijfers` met de cijfers over het seizoen, `/spelers` met alle doelpuntenmakers en de bijzondere doelpunten, `/tegenstanders` met de onderlinge resultaten (en een pagina per club), `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/spelers/zoeken` om een speler op zijn naam te zoeken, `/redactie` met alle artikelen van de redactie, tien per pagina, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
+Er zijn nu veertien pagina's, en een pagina per tegenstander: de homepage met het nieuwste artikel van de redactie, de nieuwste koppen, de wedstrijden en het forum, `/nieuws` met alle koppen en een filter per bron, `/wedstrijden` met het programma, de uitslagen en de stand, `/wedstrijden/cijfers` met de cijfers over het seizoen, `/spelers` met de selectie, `/spelers/cijfers` met de cijfers van de spelers, `/tegenstanders` met de onderlinge resultaten (en een pagina per club), `/nieuws/podcasts` met de afleveringen van de podcasts, `/nieuws/zoeken` om te zoeken in onze koppen, `/spelers/zoeken` om een speler op zijn naam te zoeken, `/redactie` met alle artikelen van de redactie, tien per pagina, `/bronnen` met de bronnen uit het register, `/over-ons` over de site, `/privacy` met de privacyverklaring, `/contact` met het contactformulier, en `/updates` met wat er per versie veranderd is, met een RSS-feed.
 De andere pagina's komen met de volgende issues.
 De keuzes over de site staan in [`docs/beslissingen/site.md`](../../docs/beslissingen/site.md).
 
@@ -208,7 +208,7 @@ De balk komt uit `Navigation` van het designsysteem (`subitems`), dus het menu e
   Op `/nieuws` is alleen Nieuws het huidige onderdeel, met `aria-current="page"`, en is er geen huidige subpagina.
 - Een ander pad, zoals `/`, `/bronnen` of een adres dat niet bestaat, heeft geen huidig onderdeel en geen balk.
 
-Op `/wedstrijden/<seizoen>`, `/wedstrijden/cijfers/<seizoen>` en `/spelers/<seizoen>` nemen de items Wedstrijden en Spelers en de link Cijfers in de balk van Wedstrijden het seizoen van de pagina mee (`seasonOfPath` en `hrefOf`), zodat een bezoeker in een afgelopen seizoen daarin blijft.
+Op `/wedstrijden/<seizoen>`, `/wedstrijden/cijfers/<seizoen>` `/spelers/<seizoen>` en `/spelers/cijfers/<seizoen>` nemen de items Wedstrijden en Spelers en de link Cijfers in de balk van Wedstrijden het seizoen van de pagina mee (`seasonOfPath` en `hrefOf`), zodat een bezoeker in een afgelopen seizoen daarin blijft.
 Een pad zonder seizoen, of met een waarde die geen seizoen is (`seasonFromSlug`), laat de adressen zoals ze zijn.
 
 De oude adressen `/podcasts` en `/zoeken` bestaan niet meer en hebben geen omleiding: er waren nog geen openbare links (zie de beslissing in `docs/beslissingen/site.md`).
@@ -431,7 +431,8 @@ Daarom tekent het slot `@subnav` van de layout de balk op de server (`app/@subna
 Alleen de pagina's van Wedstrijden (ook Zoeken), Cijfers en Tegenstanders hebben een route in het slot, en zij worden al per verzoek gemaakt; elke andere pagina, ook Spelers, krijgt een leeg slot.
 Op `/wedstrijden` en zijn seizoenen is geen subpagina de huidige; op `/wedstrijden/cijfers` en zijn seizoenen is Cijfers het wel, en op `/tegenstanders` en de pagina's van de clubs is het Tegenstanders.
 Wedstrijden is dan het huidige onderdeel van het menu (`aria-current="true"`).
-Op `/spelers` en zijn seizoenen is Spelers het huidige onderdeel van het menu (`aria-current="page"`), zonder balk en zonder dat Wedstrijden meetelt.
+Op `/spelers` en zijn seizoenen is Spelers het huidige onderdeel van het menu (`aria-current="page"`), met de balk Cijfers, Overzicht en Zoeken waarvan geen de huidige pagina is, en zonder dat Wedstrijden meetelt.
+Op `/spelers/cijfers` en zijn seizoenen is Cijfers de huidige pagina en Spelers het huidige onderdeel (`aria-current="true"`).
 Op een breed scherm is de balk er niet.
 De balk volgt de pagina, zoals die van Wedstrijden.
 De stand, de reeksen, de nul gehouden, hoe de wedstrijden verlopen en de uitersten hebben een zacht vlak (`surface="soft"`), het verloop van het seizoen, hoe vaak welke uitslag en de doelpunten per kwartier een warm vlak (`surface="warm"`), en thuis en uit en de toeschouwers zijn wit.
@@ -453,7 +454,226 @@ Onder de Stand en onder de Uitslagen staat op Wedstrijden een link naar "Onze pl
   Een eerder seizoen werkt hetzelfde; is zijn beker niet geïmporteerd, dan telt Alles alleen de wedstrijden die er zijn.
   De cijfers van Wikipedia per speler (`player_season_stats`) kennen alleen de Eredivisie en de KNVB Beker: bij Europa hebben de kaarten die daarop rusten, zoals de kolom W bij de doelpuntenmakers, die kolom niet (`goalsPerMatchOf`).
 
-De kaarten die de keuze volgen, zijn Reeksen, Thuis en uit, Toeschouwers, Hoe vaak welke uitslag, Doelpuntenmakers (op Spelers), Sinds 1990/91 (op Spelers), Bijzondere doelpunten (op Spelers), De nul gehouden, Doelpunten per kwartier en Uitersten.
+De bronvermelding (`SourceCredit`) staat onderaan de rechter kolom, zoals die van Wedstrijden onderaan zijn zijbalk staat.
+`pnpm test:a11y` gebruikt dezelfde verzonnen wedstrijden en stand van de seed.
+
+### De spelers
+
+`/spelers` is een onderdeel van het hoofdmenu, na Wedstrijden en voor het forum, op `/spelers` en `/spelers/<seizoen>`; de oude adressen bestaan niet meer en hebben geen omleiding (zie _Spelers staat in het menu na Wedstrijden_).
+Het toont de kaart Selectie (`SeasonSquadCard` in `src/SeasonSquadCard.tsx`, anker `#selectie`) in de hoofdkolom op het witte vlak: elke speler van het seizoen met rugnummer, de vlag van het land en de naam (een `PlayerName` met `shirtNumber` en `country`, op een regel van `ShortFact` voor de lijntjes), met de hele naam als link naar de pagina van de speler als die er is (`href` van `PlayerName`, het adres uit `playerHref` in `src/player-address.ts`) en anders gewone tekst, in een deel per positie.
+Het land komt uit `players.country` (#946), en anders uit `persons.country`; de positie komt uit `players.position`, en anders uit de linie van de persoon (`persons.line`, #1051).
+De tabel van de pagina Spelers in het beheer volgt dezelfde regel (#1070): de linie van de persoon staat er als "Aanvaller (linie van de persoon)".
+Een speler met een land zonder tekening in het designsysteem toont de landcode in een kader van dezelfde breedte, een speler zonder land krijgt een lege plek, en een deel waarin niemand een land heeft, heeft geen plek voor een vlag.
+Onder de kop staat de zin over de volledigheid van de lijst, uit `squad_completeness` (`completenessSentence` in `src/season-squad.ts`); bij `onbekend` of zonder spelers staat er alleen de kop en die zin.
+Bij de beste bron `verslag` (een seizoen met alleen spelers uit onze verslagen) zegt de zin dat de lijst uit de verslagen komt, en staat er één lijst met alleen namen; spelers uit verslagen staan niet op de kaart als een betere bron het seizoen heeft (`cardPlayers`).
+De spelers komen uit `listSeasonPlayers` in `@fansite/db/queries`, in de volgorde van het rugnummer en daarna de zoekterm en de naam.
+De werkbalk van `/spelers` heeft alleen de seizoenskiezer, zonder keuze van competitie, en `/spelers` leest `?competitie=` niet.
+De zijkolom heeft de sterke kaart "Cijfers van dit seizoen", met de link "Naar de cijfers van de spelers" naar hetzelfde seizoen, en de bronvermelding.
+`/spelers` heeft één kaart en dus geen balk "Op deze pagina:": het slot `app/@shortcuts/spelers` is leeg.
+
+De cijfers van de spelers staan op `/spelers/cijfers` (#1218), met `/spelers/cijfers/<seizoen>` en de route `app/spelers/cijfers/kies`, via `playerFiguresPath` in `src/season-page.ts`.
+`cijfers` is een gereserveerd adres onder `/spelers` (`reservedPlayerSlugs`), net als `kies`, `overzicht` en `zoeken`.
+De pagina is `PlayerFiguresPage` in `app/spelers/cijfers/figures-page.tsx`: de kop "Cijfers van de spelers", de werkbalk met de kiezer en de schakelaar tussen alle wedstrijden en de Eredivisie, een witte hoofdkolom en een zijkolom ("Meer cijfers over de spelers") met zachte kaarten.
+De hoofdkolom heeft Doelpuntenmakers en Alle spelers, de zijkolom Assists, Minuten, Bijzondere doelpunten en de bronvermelding.
+De naam van een speler is hier een link naar zijn pagina als hij er een heeft.
+De kaart Doelpuntenmakers heeft het anker `#doelpuntenmakers` en het oude anker `#topscorers`.
+Dit is de enige plek voor de doelpuntenmakers: de top 5 op `/wedstrijden/cijfers` is vervallen (#774).
+De kaart komt uit `TopScorersCard` in `src/MatchViews.tsx`, op het witte vlak (`surface="default"`), met een rij per speler.
+De kaart heeft een kolom D/W, de doelpunten per wedstrijd, alleen als voor elke speler in de lijst vaststaat hoeveel wedstrijden hij speelde en de cijfers kloppen; anders heeft hij geen D/W, ook geen streepje en geen uitleg (alles of niets).
+`goalsPerMatchOf` in `src/goals-per-match.ts` beslist dat, zonder database, uit de wedstrijden en de optredens van het seizoen (`listSeasonPlayerStats`, via `getSeasonPlayerStats` in `src/season-player-stats.ts`).
+De regel: elke gespeelde wedstrijd die de kaart telt is van de Eredivisie of de KNVB Beker (bij Alles dus niet in een seizoen met een gespeelde wedstrijd van de play-offs of van Europa), elke speler heeft minstens één optreden in die competities, en zijn doelpunten in de selectietabel zijn die van de kaart.
+De cijfers zijn er alleen voor een paar seizoenen, dus de kolom ook.
+De kaart op de pagina van een club heeft de kolom ook niet.
+De pagina van een club heeft er een korte vorm van, de eerste vijf plaatsen (`topFiveOf` in `src/matches.ts`, met spelers met evenveel doelpunten op één rij).
+
+- **De lijst:** `topScorersOf` in `src/matches.ts` telt de doelpunten uit de doelpuntenmakers die bij de wedstrijden horen (`match_goals`), dus er is geen eigen vraag voor.
+  Een strafschop telt mee; een eigen doelpunt niet, ook niet dat van een tegenstander dat voor ons telt, en een doelpunt van de tegenstander ook niet.
+  Een doelpunt telt voor de persoon erachter (`person_id`, zie _Een speler is een persoon met een eigen `id`_ in `docs/beslissingen/hosting-en-data.md`), dus twee titels van één artikel zijn één rij ("Alfreð Finnbogason" en "Alfred Finnbogason"), en twee personen met dezelfde achternaam zijn twee rijen.
+  Heeft het doelpunt geen persoon, dan telt het voor de speler (`player_id`), anders voor de titel van de pagina (`playerPage`), anders voor de naam zoals de wedstrijdpagina hem toont, als een rij van zichzelf, zodat er geen doelpunt verloren gaat, ook niet als het opvragen van een titel mislukte.
+  De naam komt uit `persons`: de voornaam gewoon en het voorvoegsel met de achternaam halfvet, met `PlayerName` (`personNameParts` in `src/player-name.ts`).
+  Heeft de persoon geen achternaam, dan staat de hele naam gewoon; heeft het doelpunt geen persoon, dan staat de naam van de wedstrijdpagina, gesplitst door `splitPersonName`: het eerste woord is de voornaam en de achternaam begint bij het eerste voorvoegsel, zonder verder te raden.
+  Spelers met evenveel doelpunten hebben dezelfde plaats en staan op alfabet van de achternaam zonder voorvoegsel: Joost van Aken staat onder de A.
+  Naast het getal staat dezelfde balk als in de stand (`bar.css` in het designsysteem): de lengte is het aandeel van de doelpunten van de topscorer, die de balk vult.
+  Direct onder de kop, boven de tabel, staat hoeveel spelers er scoorden, zoals "11 spelers hebben gescoord": dezelfde plek en stijl als bij de nul gehouden.
+  Het oude anker `#topscorers` blijft werken: het is een oud anker (`aliases`) op de kop.
+  Mist van een gespeelde wedstrijd met een doelpunt van ons de doelpuntenmakers, dan staat onder de tabel "De doelpuntenmakers van 9 van de 11 gespeelde wedstrijden".
+  De kop van de doelpunten is de afkorting D, met het volle woord onder de tabel.
+  Zonder doelpunten staat er een zin in plaats van een tabel.
+
+De pagina deelt alles rond het seizoen met Cijfers: de kiezer, de adressen `/spelers/2025-26` en de route `app/spelers/kies`, via `playersPath` in `src/season-page.ts`.
+De kaart Sinds 1990/91 staat sinds #1218 op geen van beide pagina's; #1219 zet hem terug bij alle seizoenen.
+De kaart Sinds 1990/91 (`AllTimeScorersCard` in `src/MatchViews.tsx`), met het anker `#sinds-1990-91`, staat onder Doelpuntenmakers op het zachte vlak.
+Ze toont de eerste tien plaatsen van de doelpuntenmakers over alle seizoenen, per persoon, met `TopScorersTable`: spelers met gelijk aantal doelpunten delen een rij, en de plaats van de tiende hoort bij alle rijen ervan.
+De telling is `allTimeScorersOf` in `src/matches.ts`, dus `topScorersOf` over de wedstrijden van alle seizoenen (`getAllTimeMatches`, één query: `listAllMatchGoals` in `@fansite/db/queries`, een uur bewaard).
+De kaart heet "Sinds 1990/91", naar het eerste seizoen met wedstrijden, en zegt hoeveel spelers er scoorden als de lijst is afgekapt.
+Ze volgt de schakelaar, maar niet het seizoen van de kiezer.
+Kan de database niet worden gelezen, dan blijft de kaart weg en houdt de rest van de pagina zijn inhoud.
+De kaart Bijzondere doelpunten (`SpecialGoalsCard` in `src/SpecialGoalsCard.tsx`, met `specialGoalsOf` in `src/matches.ts`), met het anker `#bijzondere-doelpunten`, staat in de zijkolom ("Meer cijfers over de spelers") op het zachte vlak.
+Op een telefoon volgt de zijkolom op de hoofdkolom, dus de lijst met doelpuntenmakers komt eerst, en de bronvermelding sluit de zijkolom af.
+Ze noemt ook de pagina's van de selectie van het seizoen, en Wikidata (CC0) als een speler daarvandaan komt.
+De kaart heeft één kop, van niveau 2, en daaronder een lijst van vier delen, gebouwd zoals de kaart Uitersten: elk deel is een `List.Item` met de naam als rustige tekst erboven (`Text appearance="meta"`) en de waarde eronder in een `ShortFact` van het designsysteem, dat de dunne lijnen tussen de delen tekent.
+De naam en de waarde staan in hetzelfde lijstitem, dus een schermlezer leest ze samen.
+De delen zijn:
+
+- **Hattricks:** de spelers met drie of meer doelpunten in één wedstrijd, achter elkaar met komma's ("Jan Jansen 2×, Piet Pietersen"; één keer staat er geen getal), of "Nog geen" in de rustige kleur.
+  Een speler met een hattrick staat in die wedstrijd niet ook bij de dubbelslagen, maar een andere wedstrijd kan hem wel een dubbelslag geven.
+- **Dubbelslagen:** de spelers met precies twee doelpunten in één wedstrijd, op dezelfde manier.
+- **Strafschoppen:** "1 van de 17 doelpunten", het aantal doelpunten van sc Heerenveen uit een strafschop, van alle doelpunten van sc Heerenveen (een eigen doelpunt van de tegenstander telt mee).
+- **Eigen doelpunten:** "1 door de tegenstander · 0 door ons": het aantal dat een speler van de tegenstander in eigen doel maakte, en het aantal dat een speler van ons deed.
+
+De cijfers van de strafschoppen en de eigen doelpunten blijven staan, ook als ze 0 zijn.
+Zonder doelpunt in een gespeelde wedstrijd is de kaart één zin zonder delen en zonder knop voor een afbeelding.
+De kaart telt de gespeelde wedstrijden waarvan de doelpunten bekend zijn, zoals Doelpunten per kwartier, en zegt onderaan hoeveel wedstrijden ze telt, in dezelfde vorm als de andere kaarten.
+Een speler wordt herkend zoals in de lijst van doelpuntenmakers.
+De balk "Op deze pagina:" van `/spelers/cijfers` heeft twee links, naar Doelpuntenmakers en Bijzondere doelpunten (`playerFiguresShortcuts` in `src/statisticsShortcuts.ts`, `app/@shortcuts/spelers/cijfers`), en vijf bij een seizoen met verslagen (zie hieronder).
+De kaarten Alle spelers, Assists en Minuten (`AllPlayersCard` en `RankingCard` in `src/ReportFiguresCards.tsx`, #832) staan er alleen bij een seizoen met minstens één verslag dat `klaar` is: Alle spelers in de hoofdkolom onder Doelpuntenmakers, Assists en Minuten bovenaan de zijkolom.
+Ze lezen alleen de verslagen (`getSeasonReportFigures` in `src/season-report-figures.ts`, vijf minuten bewaard per seizoen en keuze, met `readPlayerReportStats` van `@fansite/db/match-reports`), volgen de schakelaar, en zeggen onder de kaart op hoeveel van de gespeelde wedstrijden ze rusten, met "Bron: eigen administratie".
+`src/report-figures.ts` zet de cijfers in volgorde: de top 5 met gedeelde plekken (`rankedPlaces`) en de rijen van de tabel op minuten en dan naam (`figureRows`).
+Slaat de redactie een verslag als `klaar` op, dan bewaart `saveReport` elke speler wiens doelpunten in de verslagen afwijken van de tabel van Wikipedia als een rij in `player_stat_differences` (`compareReportGoals`, #974).
+De redactie beslist erover op `/beheer/kwaliteit/<seizoen>/spelerscijfers` (zie _De kwaliteit van de gegevens_).
+De balk "Op deze pagina:" heeft de links erheen alleen bij zo'n seizoen (`playerFiguresShortcutsFor`, met `seasonHasReports`).
+Kan de database niet worden gelezen, dan blijven de kaarten weg en houdt de rest van de pagina zijn inhoud.
+De bezoekteller telt de pagina van een seizoen als een bezoek aan `/spelers`, en `/spelers/cijfers/<seizoen>` als een bezoek aan `/spelers/cijfers`.
+
+### De tegenstanders
+
+`/tegenstanders` is een subpagina van Wedstrijden, naast `/wedstrijden/cijfers`, met de pagina van elke club eronder op `/tegenstanders/<club>`; de oude adressen bestaan niet meer en hebben geen omleiding (zie _Tegenstanders hoort bij Wedstrijden_).
+Het is een tabel met elke club waartegen sc Heerenveen speelde, van A tot Z, met het aantal gespeelde, gewonnen, gelijkgespeelde en verloren wedstrijden, de punten en het doelsaldo.
+Elke clubnaam is een link naar `/tegenstanders/<club>`, waar `<club>` de `slug` van de club is (zie de README van `packages/db`).
+De server stuurt de tabel zonder knoppen om te sorteren, en deze lijst heeft geen paginering.
+Met JavaScript is elke kolom sorteerbaar; de kolom D sorteert op het doelsaldo, dus de club waartegen het best ging, komt bovenaan.
+De zes cijferkolommen hebben een afkorting (G, W, G, V, P, D) met het hele woord voor een schermlezer, en een regel onder de tabel legt ze uit.
+De punten (3 per winst, 1 per gelijkspel) en het doelsaldo (met een teken: `+18`, `−2`, `0`) staan bij beide keuzes, en tellen alle wedstrijden die de lijst telt, de beker ook (`pointsOf` in `src/opponents.ts`).
+De letters en woorden komen uit `tableColumns` van het designsysteem, zoals in elke tabel.
+De rijkop is een link dankzij `href` op een rij van `DataTable`.
+Een club met alleen wedstrijden die nog niet zijn gespeeld, staat erin met nullen.
+De lijst staat in de hoofdkolom, op het witte vlak.
+De zijkolom heeft de zachte kaart "Gemiddeld resultaat" (`TopPointsCard`), met de top 10, en de bronvermelding.
+De kaart toont de tien clubs waartegen we gemiddeld de meeste punten per wedstrijd haalden, van de clubs met minstens 5 gespeelde wedstrijden (`topPointsOf` in `src/opponents.ts`).
+Hij telt dezelfde wedstrijden als de lijst en volgt dus de schakelaar.
+Het is een `DataTable` die niet sorteert: de plaats komt uit `position` van een rij en het gemiddelde is de `key`-kolom, het kerngetal van de tabel.
+Daaronder staat de zachte kaart "Het moeilijkst" (`HardestCard`) met de vijf clubs waartegen we gemiddeld de minste punten per wedstrijd haalden (`hardestOf` in `src/opponents.ts`).
+Ze heeft dezelfde tabel, legenda en regel over het aantal wedstrijden als de top 10, van laag naar hoog, en staat er alleen als minstens 10 clubs 5 gespeelde wedstrijden hebben.
+Daaronder staat de zachte kaart "Laatste overwinning" (`LastWinCard`) met de clubs van het nieuwste seizoen in de stand, zonder sc Heerenveen, van de langste tijd sinds onze laatste overwinning in de Eredivisie tot de kortste (`lastWinsOf` in `src/opponents.ts`).
+De kaart volgt de schakelaar niet, maar haar links houden de keuze, en een zin onder de kop zegt dat alleen wedstrijden in de Eredivisie tellen.
+Het is een `DataTable` met tekst en twee kolommen: de club en "Dagen geleden", een kolom met `bar: true`.
+De dagen staan rechts uitgelijnd en een `Bar` erachter is zo lang als de dagen van de langste wachttijd.
+De datum van de laatste overwinning staat niet op de kaart.
+Een club die we nog nooit versloegen, staat onderaan met "Nog nooit gewonnen" en zonder balk.
+Dat geldt ook voor een club van de stand zonder eigen pagina, die we nooit troffen of die de stand anders schrijft: ze staat er zonder link.
+De dagen tellen kalenderdagen tot vandaag in Nederland en worden bij elke vertoning berekend, niet in de cache bewaard.
+Zonder twee clubs naast sc Heerenveen is er geen kaart.
+
+De pagina van een club heeft de naam als h1, met "Eerder: …" eronder als de redactie een lijst van namen heeft ingevuld (zie _De namen van een club_ onder _Het beheer_).
+De regel noemt de namen vóór de naam van nu met hun periode, zoals "Eerder: FC Zwolle t/m 2011/12" (`earlierNames` in `src/opponents.ts`).
+Een club zonder lijst, of met één naam, heeft geen regel: de andere schrijfwijzen van Wikipedia (`club_names`, zoals `N.E.C.` bij `NEC`) staan er niet onder.
+Heeft een naam een toelichting, dan staat onder de regel het uitklapblok "Over de namen" (`ClubNamesNotes`), met elke naam, zijn periode en de toelichting als gewone tekst.
+De wedstrijden van de lijsten tonen de naam die in het seizoen van de wedstrijd gold; de database bepaalt die (zie _De namen van een club_ in de README van `@fansite/db`).
+De pagina heeft twee kolommen.
+De hoofdkolom heeft de keuze voor de competitie en de kaart Wedstrijden op het witte vlak: elke wedstrijd tegen de club, de nieuwste eerst, als `Match` (`MatchLine` in `src/MatchViews.tsx`, dezelfde code als Uitslagen).
+Een gespeelde wedstrijd toont wat hij bij Uitslagen toont: de doelpuntenmakers waar we ze kennen, verlenging en strafschoppen, met de competitie en de ronde in de regel en de dag met het jaar (`withYear` van `matchMoment` in `src/match-format.ts`), zodat een wedstrijd uit een eerder seizoen te herkennen is.
+Een regel met het seizoen boven de wedstrijd is er niet meer.
+De regel noemt de club zoals Wikipedia hem in die wedstrijd schreef, en onder de lijst staat de legenda van de afkortingen die erin voorkomen (`MatchLegend`).
+De scorers komen uit dezelfde bron als bij Uitslagen: `listClubMatches` leest ze met dezelfde hulpfunctie als `listSeasonMatches`.
+Staat er een wedstrijd in het programma, dan komt die eerst in dezelfde lijst, de eerstvolgende bovenaan, en daarna de gespeelde wedstrijden; er zijn geen onderkoppen, want een wedstrijd zonder uitslag spreekt voor zich.
+Wat komt, bepaalt `programmeOf` in `src/matches.ts`, dezelfde regel als Programma (`upcomingOf` in `src/opponents.ts`), en de keuze voor de competitie telt mee.
+Een club die we nog niet speelden maar die een wedstrijd heeft die komt, heeft alleen die wedstrijden in de kaart, geen zijkolom met uitslagen, en alleen de bronvermelding in de zijkolom.
+De gespeelde wedstrijden staan tien per pagina, met `Pagination` en `?pagina=` (`meetingsPerPage` in `src/opponents.ts`); de keuze Eredivisie gaat voor `pagina` in het adres.
+De komende wedstrijden en de rij "Laatste wedstrijden" staan alleen op de eerste pagina, en een pagina na de laatste is "niet gevonden".
+Op een telefoon staat onder de kop de balk "Op deze pagina:" met een link naar elke kaart die er is (`clubShortcutsOf` in `src/opponents.ts`, `app/@shortcuts/tegenstanders/[club]`).
+Direct onder de kop staat de rij "Laatste wedstrijden" (een `MarkRow`) met de laatste vijf uitslagen als W, G en V, de oudste links en de nieuwste achteraan.
+De rij gebruikt dezelfde wedstrijden als de lijst, dus de keuze Eredivisie verandert hem mee, en bij minder dan vijf gespeelde wedstrijden is er geen rij.
+De zijkolom (een `Page.Section`, zo breed als de hoofdkolom, zoals op Cijfers) volgt op een telefoon op de hoofdkolom, behalve de samenvatting, die ervoor staat.
+Ze heeft acht delen:
+
+- De kaart "Onze uitslagen tegen …" op het zachte vlak met de samenvatting (een `RecordTable` met de rijen Thuis en Uit en eronder Totaal, met het gewicht van het kerngetal, en de kolommen G, W, G, V, P (alleen bij de keuze Eredivisie) en D (het doelsaldo); W, G (gelijk) en V hebben de kleuren van de uitslag, en de woorden van de afkortingen staan onder de tabel), de grootste overwinning en de grootste nederlaag (die twee blijven `ShortMatch`: ze zijn een selectie), de afbeeldingsknop en de zin "Alle 12 gespeelde wedstrijden sinds 2010/11".
+- De kaart "Resultaten sinds 2010" op het witte vlak, direct onder de eerste (`ClubTimelineCard` in `src/OpponentViews.tsx`, met het onderdeel `FormTimeline`): hoe het ons verging tegen de club, seizoen na seizoen.
+  Het jaar in de kop is het eerste seizoen waarvan we wedstrijden hebben, voor alle clubs samen (nu 2010/11), en schuift mee als er eerdere seizoenen bijkomen (#414).
+  De lijn heeft dezelfde tooltip als die van het verloop van het seizoen: het gemiddelde op het dichtstbijzijnde punt.
+  Het is dezelfde grafiek als "Verloop van het seizoen" (staafjes van 3 hoog voor winst, 1 voor gelijk en een streepje voor verlies, en een lijn door het gemiddelde), maar de horizontale as volgt de tijd: elk seizoen heeft twee plekken, de eerste en de tweede gespeelde wedstrijd van de Eredivisie tegen de club op datum (`timelineOf` in `src/opponents.ts`), tot en met het seizoen van nu (een seizoen begint op 1 juli).
+  Een seizoen zonder wedstrijd tegen de club in de Eredivisie, een wedstrijd die nog moet komen en een derde wedstrijd in een seizoen zijn een lege plek of vallen weg; de beker en de play-offs staan er niet in.
+  Onder de as staat een label onder het eerste jaar en daarna elke vijf jaar (10, 15, 20, 25) met de titel "Seizoen".
+  Elke gespeelde wedstrijd heeft een punt op de lijn: het gemiddelde aantal punten over die wedstrijd en de wedstrijden ervoor, hoogstens acht, vier seizoenen (`timelineWindow`, `runningAverage` uit het designsysteem).
+  De eerste punten van een reeks middelen dus over minder dan acht wedstrijden, en bij een gat stopt de lijn en begint een nieuwe.
+  De grafiek is verborgen voor een schermlezer.
+  Onder de grafiek staat één alinea met alleen de sleutel (W, G, V uit `tableColumns`) en "Alleen de Eredivisie."
+  De kaart volgt de schakelaar niet en heeft geen afbeeldingsknop.
+  Hij is er alleen als we minstens 4 wedstrijden in de Eredivisie tegen de club speelden (`hasTimeline` en `timelineMinimum`), zonder zin die zegt waarom.
+- De kaart "Hoe vaak welke uitslag" op het warme vlak, onder "Resultaten sinds": dezelfde kaart als op Wedstrijden (`ScoreCountsView` in `src/MatchViews.tsx`, met `countScores` uit `src/matches.ts`), met een donutgrafiek en de tabellen van de uitslagen, met het aantal in de kop ("Winst 8×").
+  `ClubScoreCountsCard` in `src/OpponentViews.tsx` geeft hem dezelfde wedstrijden als de samenvatting (`meetingsOf`), dus de aantallen kloppen met de rij Totaal, voor beide keuzes van de schakelaar; een bekerwedstrijd die door strafschoppen werd beslist, telt als winst of als verlies.
+  Anders dan op Wedstrijden heeft de kaart naast het eerste diagram een tweede, kleiner donutdiagram (`DonutChart` met `size="small"`) met de doelpunten die we maakten (groen, links) en de tegendoelpunten (rood, rechts) van dezelfde wedstrijden, met het bijschrift "Doelsaldo" erboven en in het gat de doelpunten als "45–31" (`centre`) in een kleinere letter dan het totaal van het eerste diagram.
+  De twee staan naast elkaar in een `DonutChart.Group`, ook op een telefoon.
+  Het diagram is verborgen voor een schermlezer, die direct na de diagrammen de zin hoort "Doelpunten: 45 gemaakt, 31 tegen.".
+  Onder de tabellen van de uitslagen staat een tabel met de competities van de getelde wedstrijden en hun aantal (`competitionCounts`), met de meeste wedstrijden bovenaan en bij gelijk aantal in de volgorde van de site; de schakelaar bepaalt de rijen.
+  Onder de kaart staat alleen het aantal wedstrijden, "Alle 12 gespeelde wedstrijden", zonder "sinds" en zonder "in de Eredivisie".
+  Een club zonder gespeelde wedstrijd krijgt de kaart niet.
+- De kaart "De plek van … en de onze" op het zachte vlak, onder "Hoe vaak welke uitslag" (`ClubPlacesCard` in `src/OpponentViews.tsx`): een tabel met per seizoen waarin we allebei in de Eredivisie speelden onze eindplek en die van de club, de nieuwste eerst.
+  Onze plek komt uit `getFinalPlaces`, die van de club uit `listStandingsPlaces`, gekoppeld via de namen van de club (`clubKeysOf` en `clubPlacesOf` in `src/opponents.ts`), dus ook onder een oude naam.
+  Het lopende seizoen telt niet mee, de kaart volgt de schakelaar niet en eindigt met "Alleen de Eredivisie"; zonder gemeenschappelijk seizoen is er geen kaart.
+- De kaart "Toeschouwers tegen …" op het zachte vlak, met de afbeeldingsknop, na "De plek van … en de onze" en vóór Doelpuntenmakers (`ClubAttendanceCard` in `src/OpponentViews.tsx`, het anker `#toeschouwers`): een staaf (`BarChart`) per thuiswedstrijd tegen de club, van het eerste seizoen naar het laatste, met onder de as het jaar van het eerste seizoen en daarna van elk vijfde (`clubAttendanceOf` in `src/opponents.ts`).
+  Eronder staan twee zinnen, "Gemiddeld … toeschouwers per thuiswedstrijd" en "Het meest: …, in het seizoen …", en de regel dat het aantal een schatting is volgens Wikipedia.
+  De tabel met het aantal per wedstrijd staat in een uitklapper, zoals op Cijfers; de grafiek is verborgen voor een schermlezer, die de zinnen en de tabel krijgt.
+  De telling is die van Cijfers (`attendanceOf` in `src/matches.ts`, nu ook voor `PublicClubMatch`): alleen gespeelde thuiswedstrijden, een onbekend aantal is een lege plek, nul toeschouwers een stompje, en het gemiddelde en het hoogste tellen alleen aantallen boven nul.
+  De kaart volgt de schakelaar; zonder een bekend aantal bij een thuiswedstrijd is er geen kaart en geen zin, en dan ook geen link in de balk.
+  `listClubMatches` geeft daarvoor `attendance` mee.
+- De kaart "Doelpuntenmakers tegen …" op het zachte vlak, met de afbeeldingsknop, onder "Hoe vaak welke uitslag" en boven het stadion (`ClubTopScorersCard` in `src/OpponentViews.tsx`).
+  Hij toont de top 5 van de spelers van sc Heerenveen die tegen de club scoorden, met de regel "De top 5 van 12 spelers die scoorden" (of "3 spelers hebben gescoord" als niemand wegvalt), de tabel `TopScorersTable` (spelers met evenveel doelpunten delen een rij) en, bij onvolledige gegevens, "De doelpuntenmakers van X van de Y gespeelde wedstrijden".
+  Het is dezelfde telling en dezelfde weergave als de kaart op Spelers: `TopScorers` in `src/MatchViews.tsx` krijgt de teksten die verschillen (het bijschrift met `scope`, in plaats van `season`, de zin zonder doelpuntenmakers met `empty`, en met `topOnly` alleen de eerste vijf plaatsen, ook zonder link naar Spelers) en de hulpfuncties in `src/matches.ts` nemen elk type wedstrijd dat een `ScoredMatch` past, dus ook die van een club.
+  De kaart is er alleen als we minstens 5 gespeelde wedstrijden met een uitslag tegen de club hebben, in alle competities samen (`hasClubScorers` en `clubScorersMinimum` in `src/opponents.ts`), ongeacht de schakelaar.
+  Bij minder dan 5 is hij er niet, zonder zin die zegt waarom.
+  De lijst zelf telt de wedstrijden van de schakelaar, dus bij Eredivisie kan hij korter zijn of leeg, en dan staat er "We hebben geen doelpuntenmakers van deze wedstrijden." in plaats van de tabel.
+- De kaart "Nieuws over …" op het zachte vlak, na de kaarten met cijfers en vóór het stadion (`ClubNewsCard` in `src/OpponentViews.tsx`, het anker `#nieuws`): de nieuwste vijf koppen die de club noemen (`clubNewsLimit`), nieuwste eerst, elk als `NewsItem` met de kop als link, de bron en de tijd, en "voor abonnees" bij een betaalmuur.
+  Er is geen inleiding, geen foto, geen afbeeldingsknop en geen link naar meer nieuws.
+  De koppen komen uit `listClubNews` in `@fansite/db` (`getClubNews` in `src/opponents.ts`, vijf minuten onthouden): de koppen die `listRecentItems` ook zou geven (bronnen die aanstaan, geen podcast, niet verborgen, relevant, niet van na nu), met een rij in `item_clubs` onder een van de namen van de club (`clubNamesOf`: de naam nu, de andere schrijfwijzen, de eigen lijst met namen en de naam in elke wedstrijd), zodat een kop met de oude naam ook telt.
+  Een kop die twee clubs noemt, staat bij allebei.
+  Zonder kop is er geen kaart en geen zin, ook niet bij een club met alleen wedstrijden die nog komen: dan staat de kaart bovenaan de zijkolom.
+  `item_clubs` heeft rijen voor koppen die de importer opsloeg sinds #794, en voor oudere koppen na `pnpm run import:item-clubs`; tot dan toont een club alleen de nieuwere koppen.
+- De kaart "Stadion" of "Stadions" op het sterke vlak, met de namen van het stadion van de club in de volgorde waarin we ze zagen (`stadiumsOf` in `src/opponents.ts`, `StadiumsCard` in `src/OpponentViews.tsx`).
+  De namen komen uit onze uitwedstrijden in de Eredivisie, want daar is het stadion dat van de club; een bekerwedstrijd of play-off kan op een neutraal veld zijn en telt niet mee.
+  Een gestaakte wedstrijd telt voor zijn begin, dus ook daar is het stadion dat van de club.
+  Spellingen die alleen verschillen in hoofdletters, spaties of een koppelteken zijn één naam; een twijfelgeval, zoals "Galgenwaard" naast "Stadion Galgenwaard", blijft twee regels.
+  Een naam die terugkomt na een andere, staat opnieuw.
+  Bij één naam staat alleen de naam; bij meer heeft de eerste "t/m" en het laatste seizoen met die naam ("t/m 2018/19"), een naam in het midden zijn seizoen ("2019/20") of "2019/20 t/m 2021/22" als hij langer duurde, en de laatste "vanaf" en het eerste seizoen met die naam (`stadiumPeriods` in `src/match-format.ts`).
+  Het zijn seizoenen van onze wedstrijden, want we bezoeken een club één keer per seizoen en de wedstrijden zeggen niets over de dag dat de naam veranderde.
+  Onder de lijst staat geen zin: de bronvermelding onderaan de pagina zegt waar de namen vandaan komen.
+  De kop heeft het anker `#stadion` bij beide titels.
+  Een club zonder uitwedstrijd in de Eredivisie, of zonder stadion in die wedstrijden, heeft de kaart niet.
+  Heeft de redactie een club een eigen lijst gegeven (zie _De stadions van een club_ onder _Het beheer_), dan toont de kaart alleen die lijst, met de periodes uit de starts (`ownStadiumPeriods` in `src/match-format.ts`) en de toelichting onder de naam van haar regel (de prop `note` van `ShortStaff`), en `stadiumViewsOf` in `src/opponents.ts` kiest tussen de twee.
+  Een club met een eigen lijst heeft de kaart ook als de wedstrijden geen stadion noemen, en ook met de keuze Eredivisie als we hem alleen in de beker troffen.
+  De pagina van een club leest de lijst met de wedstrijden in `getClubPage`, dus een opslag staat er binnen vijf minuten.
+- De bronvermelding, die ook voor deze kaart geldt.
+
+Een slug die geen club heeft, een andere waarde van `?competitie=` en een waarde die twee keer staat, geven "niet gevonden".
+
+De pagina's tellen de wedstrijden van alle seizoenen, dus ze hebben geen seizoenskiezer.
+Ze volgen de schakelaar van de competitie (`CompetitionLinks` in `src/CompetitionSwitch.tsx`, zie _De keuze van de competitie_), die er alleen staat als er iets te kiezen is.
+Een club die we alleen in de beker of de play-offs troffen, staat bij Eredivisie niet in de lijst, en zijn pagina zegt dat we in de Eredivisie nog niet tegen hem speelden.
+De keuze zit in elke link van de lijst.
+
+De code staat in `src/opponents.ts` (de optelling van de wedstrijden en de gecachete lezingen, op de queries van `packages/db`), `src/OpponentViews.tsx` (de kaarten) en `app/tegenstanders` (de twee pagina's).
+De cache heeft twee sleutels voor de lijst en per club een sleutel, pas nadat de slug is gecontroleerd tegen de bekende clubs.
+De bronvermelding onderaan noemt de pagina's van Wikipedia van alle seizoenen in de cijfers (`listAllWikipediaPages`).
+De lijst staat in `src/pages.ts`, dus in de sitemap en de bezoekteller; elke clubpagina staat ook in de sitemap en telt onder zijn eigen adres mee, nadat de database heeft bevestigd dat de club bestaat (`isClubSlug`).
+`pnpm test:a11y` gebruikt de verzonnen wedstrijden van de seed: `testdorp-fc` is een club uit de competitie (we speelden er alleen thuis tegen, dus zonder kaart Stadion, en met de kaarten Resultaten sinds en De plek van … en de onze), `voorbeeld-united` een club met twee namen van zijn stadion en `fc-maquette` een club uit de beker.
+
+### De keuze van de competitie
+
+Bovenaan de hoofdkolom van `/wedstrijden/cijfers` (onder de drie kaarten die hem negeren), in de werkbalk van `/spelers/cijfers`, `/tegenstanders` en de pagina van een club en van een speler staat een schakelaar (`SwitchLinks`, via `CompetitionSwitch` en `CompetitionLinks` in `src/CompetitionSwitch.tsx`) met vier links: Alles, Eredivisie, Beker en Europa.
+Alles is de standaard en heeft geen parameter; de andere zijn `?competitie=eredivisie`, `?competitie=beker` en `?competitie=europa`.
+Alles telt elke gespeelde wedstrijd.
+Europa telt elke Europese beker en de play-offs erom, zoals het filter Competitie in Zoeken (`competitionGroups` in `src/match-search.ts`, de lijsten staan in `src/competition.ts`).
+De schakelaar staat in de normale maat, 44 pixels hoog, zodat de vier waarden op een telefoon van 390 pixels op één regel passen.
+De keuze zit in het adres en niet in een cookie, dus de schakelaar werkt zonder JavaScript en een keuze is te delen.
+Een andere waarde, een lege waarde en een waarde die twee keer staat, geven "niet gevonden" (`parseCompetition` in `src/competition.ts`), ook in de balk "Op deze pagina:", die er dan niet is.
+Een waarde zonder gespeelde wedstrijd in het bereik van de pagina staat niet in de schakelaar (`competitionOptionsOf` in `src/matches.ts`, `optionsOf` in `src/competition.ts`), en blijft er één waarde over, dan is er geen schakelaar: de keuzes tellen dan hetzelfde.
+Een pagina van een seizoen telt met Alles als de gekozen waarde in dat seizoen geen wedstrijd heeft (`choiceFor`), zodat de seizoenskiezer de keuze kan vasthouden zonder lege kaarten.
+In de seizoenen 1991/92 en 1992/93 speelden we in de Eerste divisie: de waarde Eredivisie telt dan die wedstrijden en heet daar "Eerste divisie".
+Een pagina met wedstrijden van beide heet de waarde "Competitie" (`leagueLabel`).
+De bijschriften van de kaarten noemen wat meetelt: "de Eredivisie en de play-offs", of met beide "de Eredivisie, de KNVB Beker en de play-offs" (`competitionNames`).
+Een eerder seizoen werkt hetzelfde; is zijn beker niet geïmporteerd, dan telt Alles alleen de wedstrijden die er zijn.
+De cijfers van Wikipedia per speler (`player_season_stats`) kennen alleen de Eredivisie en de KNVB Beker: bij Europa hebben de kaarten die daarop rusten, zoals de kolom W bij de doelpuntenmakers, die kolom niet (`goalsPerMatchOf`).
+
+De kaarten die de keuze volgen, zijn Reeksen, Thuis en uit, Toeschouwers, Hoe vaak welke uitslag, Doelpuntenmakers (op `/spelers/cijfers`), Bijzondere doelpunten (op `/spelers/cijfers`), De nul gehouden, Doelpunten per kwartier en Uitersten.
 De kaarten Verloop van het seizoen en Hoe de wedstrijden verlopen blijven de Eredivisie, omdat ze op de 34 speelrondes en de stand na 90 minuten rusten.
 Op Cijfers staan ze samen in de groep Competitie, en elk heeft als laatste regel "Alleen de Eredivisie" (`EredivisieOnly`).
 Op de pagina van een club volgt de kaart Resultaten sinds de schakelaar ook niet: hij telt de Eredivisie, omdat de grafiek twee wedstrijden per seizoen kan tonen en een bekerwedstrijd of play-offwedstrijd geen vaste plek in een seizoen heeft.

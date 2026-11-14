@@ -1,27 +1,20 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getAllTimeMatches, getMatchData, getMatchSeasons } from '#src/matches'
+import { getMatchData, getMatchSeasons } from '#src/matches'
 import { getSeasonPlayerStats } from '#src/season-player-stats'
 import { getSeasonReportFigures } from '#src/season-report-figures'
-import { getSeasonSquad } from '#src/season-squad'
-import { playersShortcutsFor } from '#src/statisticsShortcuts'
+import { playerFiguresShortcutsFor } from '#src/statisticsShortcuts'
 import { matchData } from '#src/test-matches'
 import { figuresData, noReports } from '#src/test-report-figures'
-import { squadData } from '#src/test-squad'
 import { withoutIcons } from '#src/without-icons'
 
 import PlayersPage from './page'
 
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
-  getAllTimeMatches: vi.fn(),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
-}))
-vi.mock('#src/season-squad', async (importOriginal) => ({
-  ...(await importOriginal<object>()),
-  getSeasonSquad: vi.fn(),
 }))
 vi.mock('#src/season-player-stats', () => ({ getSeasonPlayerStats: vi.fn() }))
 vi.mock('#src/season-report-figures', () => ({ getSeasonReportFigures: vi.fn(), seasonHasReports: vi.fn() }))
@@ -42,8 +35,6 @@ beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] })
   vi.setSystemTime(now)
   vi.stubEnv('SITE_ENV', 'production')
-  vi.mocked(getAllTimeMatches).mockReset()
-  vi.mocked(getAllTimeMatches).mockResolvedValue([])
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getMatchData).mockResolvedValue(matchData)
   vi.mocked(getMatchSeasons).mockReset()
@@ -52,8 +43,6 @@ beforeEach(() => {
   vi.mocked(getSeasonPlayerStats).mockResolvedValue([])
   vi.mocked(getSeasonReportFigures).mockReset()
   vi.mocked(getSeasonReportFigures).mockResolvedValue(figuresData)
-  vi.mocked(getSeasonSquad).mockReset()
-  vi.mocked(getSeasonSquad).mockResolvedValue(squadData)
 })
 
 afterEach(() => {
@@ -62,7 +51,7 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-describe('the cards with the figures of the match reports on /spelers', () => {
+describe('the cards with the figures of the match reports on /spelers/cijfers', () => {
   it('has the cards Alle spelers, Assists and Minuten for a season with a report that is klaar', async () => {
     const html = await render()
 
@@ -71,23 +60,24 @@ describe('the cards with the figures of the match reports on /spelers', () => {
     }
   })
 
-  it('puts Alle spelers after the squad in the main column, and Assists and Minuten at the end of the side section, before the credit', async () => {
+  it('puts Alle spelers after Doelpuntenmakers in the main column, and Assists, Minuten and Bijzondere doelpunten in the side section, before the credit', async () => {
     const html = await render()
     const main = html.slice(html.indexOf('style="grid-area:main"'), html.indexOf('style="grid-area:side"'))
     const sidebar = html.slice(html.indexOf('style="grid-area:side"'), html.indexOf('</main>'))
 
-    expect(main.indexOf('id="selectie"')).toBeLessThan(main.indexOf('id="alle-spelers"'))
+    expect(main.indexOf('id="doelpuntenmakers"')).toBeLessThan(main.indexOf('id="alle-spelers"'))
+    expect(main).toContain('<section class="hf-card hf-card-shareable" aria-labelledby="alle-spelers">')
     expect(sidebar).not.toContain('id="alle-spelers"')
-    expect(sidebar.indexOf('id="bijzondere-doelpunten"')).toBeLessThan(sidebar.indexOf('id="assists"'))
     expect(sidebar.indexOf('id="assists"')).toBeLessThan(sidebar.indexOf('id="minuten"'))
-    expect(sidebar.indexOf('id="minuten"')).toBeLessThan(sidebar.indexOf('Bron: Wikipedia'))
+    expect(sidebar.indexOf('id="minuten"')).toBeLessThan(sidebar.indexOf('id="bijzondere-doelpunten"'))
+    expect(sidebar.indexOf('id="bijzondere-doelpunten"')).toBeLessThan(sidebar.indexOf('Bron: Wikipedia'))
   })
 
   it('has a heading for every link of the bar, in the order of the bar', async () => {
     const html = await render()
     const ids = [...html.matchAll(/<h2 [^>]*id="([^"]+)"/g)].map(([, id]) => `#${id}`)
 
-    expect(playersShortcutsFor(true).map(({ href }) => href)).toEqual(ids)
+    expect(playerFiguresShortcutsFor(true).map(({ href }) => href)).toEqual(ids)
   })
 
   it('says how many of the played matches each card rests on, and names no source: the figures are our own', async () => {
@@ -184,7 +174,6 @@ describe('the cards with the figures of the match reports on /spelers', () => {
 
     const html = await render()
 
-    expect(html).toContain('id="selectie"')
     expect(html).toContain('id="doelpuntenmakers"')
     expect(html).not.toContain('id="assists"')
     expect(log).toHaveBeenCalledWith(expect.stringContaining('connection lost'))

@@ -3,10 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getMatchData, getMatchSeasons } from '#src/matches'
 import { seasonHasReports } from '#src/season-report-figures'
-import { playersShortcuts, playersShortcutsFor } from '#src/statisticsShortcuts'
+import { playerFiguresShortcuts, playerFiguresShortcutsFor } from '#src/statisticsShortcuts'
 import { matchData } from '#src/test-matches'
 
-import PlayersShortcuts from './page'
+import PlayerFiguresShortcuts from './page'
 
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
@@ -33,25 +33,23 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-const render = async () => renderToStaticMarkup(await PlayersShortcuts({ searchParams: Promise.resolve({}) }))
+const render = async () => renderToStaticMarkup(await PlayerFiguresShortcuts({ searchParams: Promise.resolve({}) }))
 
-describe('the bar of /spelers', () => {
-  it('is a navigation named Op deze pagina:, with four links: to the cards Selectie, Doelpuntenmakers, Sinds 1990/91 and Bijzondere doelpunten', async () => {
+describe('the bar of /spelers/cijfers', () => {
+  it('is a navigation named Op deze pagina:, with two links: to the cards Doelpuntenmakers and Bijzondere doelpunten', async () => {
     const html = await render()
 
     expect(html).toContain('Op deze pagina:')
     expect(
       [...html.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label]),
     ).toEqual([
-      ['#selectie', 'Selectie'],
       ['#doelpuntenmakers', 'Doelpuntenmakers'],
-      ['#sinds-1990-91', 'Sinds 1990/91'],
       ['#bijzondere-doelpunten', 'Bijzondere doelpunten'],
     ])
-    expect(playersShortcuts).toHaveLength(4)
+    expect(playerFiguresShortcuts).toHaveLength(2)
   })
 
-  it('has none of the other eight cards of Cijfers', async () => {
+  it('has none of the cards of the matches', async () => {
     const html = await render()
 
     for (const id of ['reeksen', 'uitersten', 'de-nul-gehouden']) {
@@ -66,7 +64,7 @@ describe('the bar of /spelers', () => {
   it('is left out when the page shows the error page, which has no card to jump to', async () => {
     vi.mocked(getMatchData).mockRejectedValue(new Error('no database'))
 
-    expect(await PlayersShortcuts({ searchParams: Promise.resolve({}) })).toBeNull()
+    expect(await PlayerFiguresShortcuts({ searchParams: Promise.resolve({}) })).toBeNull()
   })
 
   it('asks for the current season only, and not for the seasons to choose from', async () => {
@@ -77,14 +75,16 @@ describe('the bar of /spelers', () => {
   })
 })
 
-describe('the bar of /spelers and the choice of the matches', () => {
+describe('the bar of /spelers/cijfers and the choice of the matches', () => {
   it('is there for the Eredivisie, which is a page, and left out for a value that the page does not know', async () => {
     expect(
-      renderToStaticMarkup(await PlayersShortcuts({ searchParams: Promise.resolve({ competitie: 'eredivisie' }) })),
+      renderToStaticMarkup(
+        await PlayerFiguresShortcuts({ searchParams: Promise.resolve({ competitie: 'eredivisie' }) }),
+      ),
     ).toContain('Op deze pagina:')
 
     for (const competitie of ['alle', '', ['eredivisie', 'eredivisie']]) {
-      expect(await PlayersShortcuts({ searchParams: Promise.resolve({ competitie }) })).toBeNull()
+      expect(await PlayerFiguresShortcuts({ searchParams: Promise.resolve({ competitie }) })).toBeNull()
     }
   })
 })
@@ -100,16 +100,14 @@ describe('the links to the cards with the figures of the match reports, in the c
     ])
 
     expect(found).toEqual([
-      ['#selectie', 'Selectie'],
-      ['#alle-spelers', 'Alle spelers'],
       ['#doelpuntenmakers', 'Doelpuntenmakers'],
-      ['#sinds-1990-91', 'Sinds 1990/91'],
-      ['#bijzondere-doelpunten', 'Bijzondere doelpunten'],
+      ['#alle-spelers', 'Alle spelers'],
       ['#assists', 'Assists'],
       ['#minuten', 'Minuten'],
+      ['#bijzondere-doelpunten', 'Bijzondere doelpunten'],
     ])
     expect(seasonHasReports).toHaveBeenCalledWith('2026/27')
-    expect(playersShortcutsFor(true)).toHaveLength(7)
+    expect(playerFiguresShortcutsFor(true)).toHaveLength(5)
   })
 
   it('has no link to them when the season has no report that is klaar', async () => {

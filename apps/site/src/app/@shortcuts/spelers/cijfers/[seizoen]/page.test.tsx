@@ -3,10 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getMatchData, getMatchSeasons } from '#src/matches'
 import { seasonHasReports } from '#src/season-report-figures'
-import { playersShortcuts, playersShortcutsFor } from '#src/statisticsShortcuts'
+import { playerFiguresShortcuts, playerFiguresShortcutsFor } from '#src/statisticsShortcuts'
 import { matchData } from '#src/test-matches'
 
-import SeasonPlayersShortcuts from './page'
+import SeasonPlayerFiguresShortcuts from './page'
 
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
@@ -35,16 +35,16 @@ afterEach(() => {
 
 const render = async (seizoen: string) =>
   renderToStaticMarkup(
-    await SeasonPlayersShortcuts({ params: Promise.resolve({ seizoen }), searchParams: Promise.resolve({}) }),
+    await SeasonPlayerFiguresShortcuts({ params: Promise.resolve({ seizoen }), searchParams: Promise.resolve({}) }),
   )
 
 const hrefs = (html: string) => [...html.matchAll(/<a [^>]*href="([^"]*)"/g)].map(([, href]) => href)
 
-describe('the bar of the page Spelers of an earlier season', () => {
+describe('the bar of the figures of the players of an earlier season', () => {
   it('has the same links as the current season: the cards are the same', async () => {
     const html = await render('2025-26')
 
-    expect(hrefs(html)).toEqual(playersShortcuts.map(({ href }) => href))
+    expect(hrefs(html)).toEqual(playerFiguresShortcuts.map(({ href }) => href))
     expect(html).toContain('Op deze pagina:')
   })
 
@@ -82,16 +82,14 @@ describe('the links to the cards with the figures of the match reports, in an ea
     ])
 
     expect(found).toEqual([
-      ['#selectie', 'Selectie'],
-      ['#alle-spelers', 'Alle spelers'],
       ['#doelpuntenmakers', 'Doelpuntenmakers'],
-      ['#sinds-1990-91', 'Sinds 1990/91'],
-      ['#bijzondere-doelpunten', 'Bijzondere doelpunten'],
+      ['#alle-spelers', 'Alle spelers'],
       ['#assists', 'Assists'],
       ['#minuten', 'Minuten'],
+      ['#bijzondere-doelpunten', 'Bijzondere doelpunten'],
     ])
     expect(seasonHasReports).toHaveBeenCalledWith('2025/26')
-    expect(playersShortcutsFor(true)).toHaveLength(7)
+    expect(playerFiguresShortcutsFor(true)).toHaveLength(5)
   })
 
   it('has no link to them when the season has no report that is klaar', async () => {

@@ -13,37 +13,34 @@ export const statisticsShortcuts = [
 ] as const
 
 /**
- * The links in the bar under the header of /spelers: the card with the squad of
- * the season, the card with the goal scorers, the card with the scorers of all time and the
- * card with the goals that stand out, in the order of the page. The ids are
- * those of their headings in app/spelers/players-page.tsx (a test checks it). They
- * are the same cards for a season that is over, so the bar is too.
+ * The links in the bar under the header of /spelers/cijfers: the cards in the order of the
+ * page, the main column first, which is the order on a narrow screen: the card Doelpuntenmakers
+ * and the card with the goals that stand out. The credit is not a card to jump to. They are the
+ * same cards for a season that is over, so the bar is too. The ids are those of their headings.
  */
-export const playersShortcuts = [
-  { href: '#selectie', label: 'Selectie' },
+export const playerFiguresShortcuts = [
   { href: '#doelpuntenmakers', label: 'Doelpuntenmakers' },
-  { href: '#sinds-1990-91', label: 'Sinds 1990/91' },
   { href: '#bijzondere-doelpunten', label: 'Bijzondere doelpunten' },
 ] as const
 
 /**
- * The bar of /spelers for a season: the links above, and when the season has match reports
- * the cards from them (#832) in the order of the page: the table Alle spelers after the squad
- * in the main column, and the lists Assists and Minuten at the end of the sidebar. A season
- * without reports has none of these cards, so the bar has no links to them.
+ * The bar of /spelers/cijfers for a season: the links above, and when the season has match
+ * reports the cards from them (#832) in the order of the page: the table Alle spelers after
+ * Doelpuntenmakers in the main column, and the lists Assists and Minuten at the start of the
+ * sidebar. A season without reports has none of these cards, so the bar has no links to them.
  */
-export function playersShortcutsFor(hasReports: boolean) {
+export function playerFiguresShortcutsFor(hasReports: boolean) {
   if (!hasReports) {
-    return playersShortcuts
+    return playerFiguresShortcuts
   }
 
-  const [squad, ...cards] = playersShortcuts
+  const [scorers, special] = playerFiguresShortcuts
 
   return [
-    squad,
+    scorers,
     { href: '#alle-spelers', label: 'Alle spelers' },
-    ...cards,
     { href: '#assists', label: 'Assists' },
     { href: '#minuten', label: 'Minuten' },
+    special,
   ] as const
 }

@@ -338,57 +338,50 @@ test.describe('the bar under the header of /wedstrijden/cijfers', () => {
   })
 })
 
-// The page Spelers has four cards and, for a season with a match report that is klaar (the seed
-// makes up one for the current season), three more, so its bar has seven links or four. It is
-// gone from 52rem on, like the other bars, because the cards then sit in the main column and
-// the sidebar side by side.
-test.describe('the bar under the header of /spelers', () => {
+// The figures of the players have two cards and, for a season with a match report that is
+// klaar (the seed makes up one for the current season), three more, so the bar has five links
+// or two. It is gone from 52rem on, like the other bars, because the cards then sit in the
+// main column and the sidebar side by side.
+test.describe('the bar under the header of /spelers/cijfers', () => {
   for (const colorScheme of ['light', 'dark'] as const) {
-    test(`has seven links on a phone, to the cards, and passes axe in ${colorScheme}`, async ({ page }) => {
+    test(`has five links on a phone, to the cards, and passes axe in ${colorScheme}`, async ({ page }) => {
       await page.emulateMedia({ colorScheme })
       await page.setViewportSize({ height: 800, width: 390 })
-      await page.goto('/spelers')
+      await page.goto('/spelers/cijfers')
 
       const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
 
-      await expect(bar.getByRole('link')).toHaveCount(7)
-      await bar.getByRole('link', { name: 'Selectie' }).click()
-      await expect(page).toHaveURL(/#selectie$/)
-      await bar.getByRole('link', { name: 'Alle spelers' }).click()
-      await expect(page).toHaveURL(/#alle-spelers$/)
+      await expect(bar.getByRole('link')).toHaveCount(5)
       await bar.getByRole('link', { name: 'Doelpuntenmakers' }).click()
       await expect(page).toHaveURL(/#doelpuntenmakers$/)
-      await bar.getByRole('link', { name: 'Sinds 1990/91' }).click()
-      await expect(page).toHaveURL(/#sinds-1990-91$/)
-      await bar.getByRole('link', { name: 'Bijzondere doelpunten' }).click()
-      await expect(page).toHaveURL(/#bijzondere-doelpunten$/)
+      await bar.getByRole('link', { name: 'Alle spelers' }).click()
+      await expect(page).toHaveURL(/#alle-spelers$/)
       await bar.getByRole('link', { name: 'Assists' }).click()
       await expect(page).toHaveURL(/#assists$/)
       await bar.getByRole('link', { name: 'Minuten' }).click()
       await expect(page).toHaveURL(/#minuten$/)
+      await bar.getByRole('link', { name: 'Bijzondere doelpunten' }).click()
+      await expect(page).toHaveURL(/#bijzondere-doelpunten$/)
       expect(await checkPage(page)).toEqual([])
     })
   }
 
   test('brings every click on a link in the bar to the page, also right after another', async ({ page }) => {
     await page.setViewportSize({ height: 800, width: 390 })
-    await page.goto('/spelers')
+    await page.goto('/spelers/cijfers')
 
     const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
 
     // Forwards, then back and forth: each click follows the one before without a pause, while
     // the row of the bar is still scrolling the link of that click to its start.
     for (const [name, hash] of [
-      ['Selectie', 'selectie'],
-      ['Alle spelers', 'alle-spelers'],
       ['Doelpuntenmakers', 'doelpuntenmakers'],
-      ['Sinds 1990/91', 'sinds-1990-91'],
-      ['Bijzondere doelpunten', 'bijzondere-doelpunten'],
+      ['Alle spelers', 'alle-spelers'],
       ['Assists', 'assists'],
       ['Minuten', 'minuten'],
+      ['Bijzondere doelpunten', 'bijzondere-doelpunten'],
       ['Assists', 'assists'],
-      ['Sinds 1990/91', 'sinds-1990-91'],
-      ['Selectie', 'selectie'],
+      ['Doelpuntenmakers', 'doelpuntenmakers'],
       ['Minuten', 'minuten'],
       ['Alle spelers', 'alle-spelers'],
     ] as const) {
@@ -403,17 +396,27 @@ test.describe('the bar under the header of /spelers', () => {
       [832, 0],
     ] as const) {
       await page.setViewportSize({ height: 800, width })
-      await page.goto('/spelers')
+      await page.goto('/spelers/cijfers')
 
       await expect(page.getByRole('navigation', { name: 'Op deze pagina:' })).toHaveCount(bar)
     }
   })
 
-  test('is also on the page of an earlier season, with four links: it has no reports', async ({ page }) => {
+  test('is also on the page of an earlier season, with two links: it has no reports', async ({ page }) => {
     await page.setViewportSize({ height: 800, width: 390 })
-    await page.goto(`/spelers/${earlierSeasonSlug()}`)
+    await page.goto(`/spelers/cijfers/${earlierSeasonSlug()}`)
 
-    await expect(page.getByRole('navigation', { name: 'Op deze pagina:' }).getByRole('link')).toHaveCount(4)
+    await expect(page.getByRole('navigation', { name: 'Op deze pagina:' }).getByRole('link')).toHaveCount(2)
+  })
+})
+
+test.describe('the page /spelers', () => {
+  test('has no bar "Op deze pagina:": it has one card', async ({ page }) => {
+    await page.setViewportSize({ height: 800, width: 390 })
+    await page.goto('/spelers')
+
+    await expect(page.getByRole('navigation', { name: 'Op deze pagina:' })).toHaveCount(0)
+    expect(await checkPage(page)).toEqual([])
   })
 })
 
@@ -432,7 +435,8 @@ test.describe('Spelers in the main menu', () => {
 
     await expect(page).toHaveURL(/\/spelers$/)
     await expect(menu.getByRole('link', { name: 'Spelers' })).toHaveAttribute('aria-current', 'page')
-    await expect(menu.getByRole('link', { name: 'Cijfers' })).toHaveCount(0)
+    // The Cijfers in the bar of Spelers are the figures of the players, not of the matches.
+    await expect(menu.getByRole('link', { name: 'Cijfers' })).toHaveAttribute('href', '/spelers/cijfers')
   })
 
   test('is left when the visitor goes on to Wedstrijden, which is then the current item', async ({ page }) => {

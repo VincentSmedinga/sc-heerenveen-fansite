@@ -1368,33 +1368,30 @@ await withEmptyDatabase((database) =>
     const playersHtml = await playersPage.text()
     assert.equal(playersPage.status, 200)
     assert.match(playersHtml, /<h1[^>]*>Spelers<\/h1>/)
-    // Spelers is an item of the main menu, the current page, with the bar of Overzicht and
-    // Zoeken under the menu (#1141), and neither of them is the current page.
+    // Spelers is an item of the main menu, the current page, with the bar of Cijfers, Overzicht
+    // and Zoeken under the menu (#1141, #1218), and none of them is the current page.
     assert.match(
       playersHtml,
-      /<a aria-current="page" class="hf-navigation-link" href="\/spelers">Spelers<\/a><div class="hf-navigation-bar">.*?href="\/spelers\/overzicht">Overzicht<\/a>.*?href="\/spelers\/zoeken">Zoeken<\/a>/s,
+      /<a aria-current="page" class="hf-navigation-link" href="\/spelers">Spelers<\/a><div class="hf-navigation-bar">.*?href="\/spelers\/cijfers">Cijfers<\/a>.*?href="\/spelers\/overzicht">Overzicht<\/a>.*?href="\/spelers\/zoeken">Zoeken<\/a>/s,
     )
     assert.doesNotMatch(playersHtml, /aria-current="true"/)
     assert.doesNotMatch(
       playersHtml,
       /class="hf-navigation-sublink" aria-current|aria-current="page" class="hf-navigation-sublink"/,
     )
-    assert.deepEqual(
-      [...playersHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
-      // The seed makes up one match report that is klaar, so the three cards with its figures
-      // are there (#832): Alle spelers after the squad, Assists and Minuten after the rest.
-      [
-        '#selectie',
-        '#alle-spelers',
-        '#doelpuntenmakers',
-        '#sinds-1990-91',
-        '#bijzondere-doelpunten',
-        '#assists',
-        '#minuten',
-      ],
-    )
-    assert.match(playersHtml, /Op basis van (?:alle )?\d+ (?:van de \d+ )?gespeelde wedstrijden?\./)
-    assert.doesNotMatch(playersHtml, /Bron: sc Heerenveen Fansite/)
+    // /spelers has the squad alone (#1218): one card, so no bar "Op deze pagina:".
+    assert.doesNotMatch(playersHtml, /class="hf-page-shortcuts"|Op deze pagina:/)
+    for (const id of [
+      'doelpuntenmakers',
+      'sinds-1990-91',
+      'bijzondere-doelpunten',
+      'alle-spelers',
+      'assists',
+      'minuten',
+    ]) {
+      assert.doesNotMatch(playersHtml, new RegExp(`id="${id}"`))
+    }
+    assert.doesNotMatch(playersHtml, /<table|Welke wedstrijden/)
     // The made-up squad is whole: the sentence says so, the four positions are parts of the
     // card in the order of the goal to the front, and the shirt number comes before the name.
     const squadCard = /<section[^>]*aria-labelledby="selectie">.*?<\/section>/s.exec(playersHtml)?.[0] ?? ''
@@ -1413,35 +1410,62 @@ await withEmptyDatabase((database) =>
     )
     // A player without a country, among others who have one, has an empty place for the flag.
     assert.match(squadCard, /<span class="hf-player-name-flag"><\/span><span class="hf-player-name-text">/)
-    assert.ok(playersHtml.indexOf('id="selectie"') < playersHtml.indexOf('aria-label="Meer cijfers over de spelers"'))
+    assert.ok(playersHtml.indexOf('id="selectie"') < playersHtml.indexOf('aria-label="Meer over de spelers"'))
+    // The sidebar has the strong card with the link to the figures of the same season.
+    const figuresLinkCard =
+      /<section class="hf-card hf-card-strong" aria-labelledby="cijfers-van-dit-seizoen">.*?<\/section>/s.exec(
+        playersHtml,
+      )?.[0] ?? ''
+    assert.match(figuresLinkCard, /href="\/spelers\/cijfers"/)
+    assert.match(figuresLinkCard.replaceAll(/<[^>]*>/g, ''), /Naar de cijfers van de spelers/)
+    assert.match(playersHtml, closedWikipediaCredit)
+    // The route behind the season picker sends the visitor on to the page of the season.
+    const pickedPlayers = await fetch(`${origin}/spelers/kies?seizoen=2099-00`, { redirect: 'manual' })
+    assert.equal(pickedPlayers.status, 303)
+    assert.equal(pickedPlayers.headers.get('location'), '/spelers')
+    assert.equal((await fetch(`${origin}/spelers/2099-00`)).status, 404)
+
+    const figuresPage = await fetch(`${origin}/spelers/cijfers`)
+    const figuresHtml = await figuresPage.text()
+    assert.equal(figuresPage.status, 200)
+    assert.match(figuresHtml, /<h1[^>]*>Cijfers van de spelers<\/h1>/)
+    // The item Spelers holds the sub-page Cijfers, which is the current page (#1218).
     assert.match(
-      playersHtml,
+      figuresHtml,
+      /<a aria-current="true" class="hf-navigation-link" href="\/spelers">Spelers<\/a><div class="hf-navigation-bar">.*?<a aria-current="page" class="hf-navigation-sublink" href="\/spelers\/cijfers">Cijfers<\/a>/s,
+    )
+    assert.deepEqual(
+      [...figuresHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
+      // The seed makes up one match report that is klaar, so the three cards with its figures
+      // are there (#832): Alle spelers after Doelpuntenmakers, Assists and Minuten before the
+      // special goals.
+      ['#doelpuntenmakers', '#alle-spelers', '#assists', '#minuten', '#bijzondere-doelpunten'],
+    )
+    assert.match(figuresHtml, /Op basis van (?:alle )?\d+ (?:van de \d+ )?gespeelde wedstrijden?\./)
+    assert.doesNotMatch(figuresHtml, /Bron: sc Heerenveen Fansite/)
+    assert.doesNotMatch(figuresHtml, /id="selectie"|id="sinds-1990-91"/)
+    // The list is the white card of the main column, and the sidebar has the soft cards.
+    assert.match(
+      figuresHtml,
+      /aria-label="De doelpuntenmakers en de spelers van het seizoen"><section class="hf-card hf-card-shareable" aria-labelledby="doelpuntenmakers">/,
+    )
+    assert.match(
+      figuresHtml,
       /<h2[^>]*id="doelpuntenmakers">(?:<span class="hf-heading-target">.*?<\/span>)?(?:<span class="hf-heading-alias" id="topscorers"><\/span>)<a class="hf-heading-link" href="#doelpuntenmakers">Doelpuntenmaker/,
     )
     assert.match(
-      playersHtml,
+      figuresHtml,
       /<caption class="hf-visually-hidden">Doelpuntenmakers van sc Heerenveen in het seizoen \d{4}\/\d{2}, /,
     )
     assert.match(
-      playersHtml,
+      figuresHtml,
       /<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Gerrit<\/span> <span class="hf-player-name-surname">Nepper<\/span><\/span><\/th><td class="hf-numeric hf-key">2<span aria-hidden="true" class="hf-bar"/,
     )
     // Two players called Testvoort are two rows, each with his full name.
-    assert.match(playersHtml, /hf-player-name-given">Joris<\/span> <span class="hf-player-name-surname">Testvoort</)
-    assert.match(playersHtml, /hf-player-name-given">Bas<\/span> <span class="hf-player-name-surname">Testvoort</)
-    assert.doesNotMatch(playersHtml, /<th scope="row">Kopie<\/th>/)
-    assert.doesNotMatch(playersHtml, /Alle (?:<span[^>]*>)?doelpuntenmakers/)
-    // The card Sinds … is under Doelpuntenmakers, soft, with a button for an image. It says
-    // from which season it counts, and it counts the made-up season with the cup.
-    const allTimeCard = /<section[^>]*aria-labelledby="sinds-1990-91">.*?<\/section>/s.exec(playersHtml)?.[0] ?? ''
-    assert.ok(playersHtml.indexOf('id="doelpuntenmakers"') < playersHtml.indexOf('id="sinds-1990-91"'))
-    assert.ok(playersHtml.indexOf('id="sinds-1990-91"') < playersHtml.indexOf('id="bijzondere-doelpunten"'))
-    assert.match(allTimeCard, /^<section class="hf-card hf-card-soft hf-card-shareable"/)
-    assert.match(allTimeCard.replaceAll(/<[^>]*>/g, ''), /Sinds \d{4}\/\d{2}/)
-    assert.match(
-      allTimeCard,
-      /<caption class="hf-visually-hidden">De top 10 van de doelpuntenmakers van sc Heerenveen sinds /,
-    )
+    assert.match(figuresHtml, /hf-player-name-given">Joris<\/span> <span class="hf-player-name-surname">Testvoort</)
+    assert.match(figuresHtml, /hf-player-name-given">Bas<\/span> <span class="hf-player-name-surname">Testvoort</)
+    assert.doesNotMatch(figuresHtml, /<th scope="row">Kopie<\/th>/)
+    assert.doesNotMatch(figuresHtml, /Alle (?:<span[^>]*>)?doelpuntenmakers/)
     // The card Bijzondere doelpunten comes after the list of scorers, in the sidebar. The
     // made-up data has no hattrick, two doubles (Demo, and Proefman in the cup), one penalty
     // and an own goal of the opponent. The card is a list of four parts, each with its name as
@@ -1454,16 +1478,12 @@ await withEmptyDatabase((database) =>
         name,
         value.replaceAll(/<[^>]*>/g, ''),
       ])
-    const specialCard = cardOf(playersHtml)
-    assert.ok(playersHtml.indexOf('id="doelpuntenmakers"') < playersHtml.indexOf('id="bijzondere-doelpunten"'))
+    const specialCard = cardOf(figuresHtml)
+    assert.ok(figuresHtml.indexOf('id="doelpuntenmakers"') < figuresHtml.indexOf('id="bijzondere-doelpunten"'))
     assert.match(specialCard, /^<section class="hf-card hf-card-soft hf-card-shareable"/)
     assert.match(
-      playersHtml,
+      figuresHtml,
       /<section class="hf-page-section"[^>]*aria-label="Meer cijfers over de spelers">.*?id="bijzondere-doelpunten"/s,
-    )
-    assert.match(
-      playersHtml,
-      /<section class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="doelpuntenmakers">/,
     )
     assert.equal(specialCard.match(/<h[1-6]/g)?.length, 1)
     const facts = factsOf(specialCard)
@@ -1480,8 +1500,8 @@ await withEmptyDatabase((database) =>
     // the goals. The made-up season has a played match of the play-offs, which the squad table
     // has no figures for, so all matches has no column, and the Eredivisie has one: Nepper
     // scored two in four matches, and every player has a row of his own.
-    assert.doesNotMatch(playersHtml, /D\/W|doelpunten per wedstrijd/)
-    const eredivisieHtml = await (await fetch(`${origin}/spelers?competitie=eredivisie`)).text()
+    assert.doesNotMatch(figuresHtml, /D\/W|doelpunten per wedstrijd/)
+    const eredivisieHtml = await (await fetch(`${origin}/spelers/cijfers?competitie=eredivisie`)).text()
     assert.match(eredivisieHtml, /<abbr title="doelpunten per wedstrijd"><span aria-hidden="true">D\/W<\/span>/)
     assert.match(
       eredivisieHtml,
@@ -1491,12 +1511,13 @@ await withEmptyDatabase((database) =>
     const eredivisieCard = cardOf(eredivisieHtml)
     assert.doesNotMatch(eredivisieCard, /Proefman/)
     assert.match(factsOf(eredivisieCard)[2][1], /^0 van de \d+ doelpunten$/)
-    assert.match(playersHtml, closedWikipediaCredit)
-    // The route behind the season picker sends the visitor on to the page of the season.
-    const pickedPlayers = await fetch(`${origin}/spelers/kies?seizoen=2099-00`, { redirect: 'manual' })
-    assert.equal(pickedPlayers.status, 303)
-    assert.equal(pickedPlayers.headers.get('location'), '/spelers')
-    assert.equal((await fetch(`${origin}/spelers/2099-00`)).status, 404)
+    assert.match(figuresHtml, closedWikipediaCredit)
+    assert.equal((await fetch(`${origin}/spelers/cijfers?competitie=onzin`)).status, 404)
+    const pickedFigures = await fetch(`${origin}/spelers/cijfers/kies?seizoen=2099-00`, { redirect: 'manual' })
+    assert.equal(pickedFigures.status, 303)
+    assert.equal(pickedFigures.headers.get('location'), '/spelers/cijfers')
+    assert.equal((await fetch(`${origin}/spelers/cijfers/2099-00`)).status, 404)
+
     // The old addresses under Statistieken are gone, with no redirect (the site is not public).
     for (const old of ['/statistieken/spelers', '/statistieken/spelers/2025-26', '/statistieken/spelers/kies']) {
       const gone = await fetch(`${origin}${old}`, { redirect: 'manual' })

@@ -837,7 +837,7 @@ Elke persoon met een rij in `players` heeft een pagina op `/spelers/<slug>` (#10
 - `searchPlayers(db, { words })` zoekt de personen met een `slug` waarvan elk woord een deel is van de naam van nu of van een oude naam (#1130), op achternaam en dan voornaam, hoogstens tien met hun linie en seizoenen, en hoeveel het er in totaal zijn.
   De woorden gaan door `foldLetters` en worden geschreven zoals een adres, met streepjes als scheiding; een `đ` zoekt als `dj` en als `d`.
   `%`, `_` en `|` zoeken zichzelf, en er is geen index: `LIKE` op de lijst van personen.
-- `reservedPlayerSlugs` zijn de adressen onder `/spelers` die een pagina van zichzelf zijn (`kies`, `overzicht` en `zoeken`), zodat geen persoon ze als naam krijgt.
+- `reservedPlayerSlugs` zijn de adressen onder `/spelers` die een pagina van zichzelf zijn (`cijfers`, `kies`, `overzicht` en `zoeken`), zodat geen persoon ze als naam krijgt.
 
 Bij het samenvoegen gaan de namen van de persoon die verdwijnt mee naar de persoon die blijft (`mergePersonInto`).
 De regels staan in `docs/beslissingen/site.md`, onder _De namen in het adres van een speler staan in een eigen tabel, en één functie houdt ze bij_.

@@ -145,14 +145,18 @@ describe('SiteNavigation', () => {
     },
   )
 
-  it.each(['/spelers', '/spelers/2025-26'])(
-    'marks Spelers as the current page on %s, with the bar Overzicht and Zoeken and none of them current',
-    (path) => {
+  it.each([
+    ['/spelers', '/spelers/cijfers'],
+    ['/spelers/2025-26', '/spelers/cijfers/2025-26'],
+  ])(
+    'marks Spelers as the current page on %s, with the bar Cijfers, Overzicht and Zoeken and none of them current',
+    (path, figures) => {
       const html = render(path)
 
       expect(currentLinks(html)).toEqual(['Spelers'])
       expect(linksWith(html, 'true')).toEqual([])
       expect(barLinks(html)).toEqual([
+        [figures, 'Cijfers'],
         ['/spelers/overzicht', 'Overzicht'],
         ['/spelers/zoeken', 'Zoeken'],
       ])
@@ -160,6 +164,8 @@ describe('SiteNavigation', () => {
   )
 
   it.each([
+    ['/spelers/cijfers', 'Cijfers'],
+    ['/spelers/cijfers/2025-26', 'Cijfers'],
     ['/spelers/overzicht', 'Overzicht'],
     ['/spelers/overzicht/land', 'Overzicht'],
     ['/spelers/zoeken', 'Zoeken'],
@@ -347,6 +353,9 @@ describe('seasonOfPath', () => {
 describe('hrefOf', () => {
   it('takes the season of Wedstrijden and Cijfers along to Spelers, and the other way', () => {
     expect(hrefOf('/spelers', '/wedstrijden/2023-24')).toBe('/spelers/2023-24')
+    expect(hrefOf('/spelers', '/spelers/cijfers/2023-24')).toBe('/spelers/2023-24')
+    expect(hrefOf('/spelers/cijfers', '/spelers/2023-24')).toBe('/spelers/cijfers/2023-24')
+    expect(hrefOf('/spelers/cijfers', '/wedstrijden')).toBe('/spelers/cijfers')
     expect(hrefOf('/spelers', '/wedstrijden/cijfers/2023-24')).toBe('/spelers/2023-24')
     expect(hrefOf('/wedstrijden', '/spelers/2023-24')).toBe('/wedstrijden/2023-24')
     expect(hrefOf('/wedstrijden', '/wedstrijden/cijfers/2023-24')).toBe('/wedstrijden/2023-24')
@@ -357,6 +366,7 @@ describe('hrefOf', () => {
   it('gives Spelers its own address on a page without a season', () => {
     expect(hrefOf('/spelers', '/wedstrijden')).toBe('/spelers')
     expect(hrefOf('/spelers', '/spelers/kies')).toBe('/spelers')
+    expect(hrefOf('/spelers', '/spelers/cijfers')).toBe('/spelers')
   })
 
   it('leaves the other items alone, also on the page of a season', () => {
@@ -379,6 +389,9 @@ describe('currentOf', () => {
     ['/wedstrijden/cijfers/2025-26', { item: '/wedstrijden', subitem: '/wedstrijden/cijfers' }],
     ['/spelers', { item: '/spelers' }],
     ['/spelers/2025-26', { item: '/spelers' }],
+    ['/spelers/cijfers', { item: '/spelers', subitem: '/spelers/cijfers' }],
+    ['/spelers/cijfers/2025-26', { item: '/spelers', subitem: '/spelers/cijfers' }],
+    ['/spelers/cijfers/kies', { item: '/spelers', subitem: '/spelers/cijfers' }],
     ['/wedstrijden/cijfers/spelers', { item: '/wedstrijden', subitem: '/wedstrijden/cijfers' }],
     ['/tegenstanders', { item: '/wedstrijden', subitem: '/tegenstanders' }],
     ['/tegenstanders/ado-den-haag', { item: '/wedstrijden', subitem: '/tegenstanders' }],
