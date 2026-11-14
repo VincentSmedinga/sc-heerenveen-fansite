@@ -25,7 +25,7 @@ export const pages = [
   {
     description:
       'De cijfers over sc Heerenveen 1 dit seizoen, zoals de plek in de competitie, de reeksen en de doelpuntenmakers, met de bron erbij: de Nederlandse Wikipedia.',
-    path: '/cijfers',
+    path: '/wedstrijden/cijfers',
   },
   {
     description:

@@ -831,8 +831,8 @@ await withEmptyDatabase((database) =>
     // Before the first page is asked for: the site keeps our places for five minutes, and the
     // check of the anchors asks for the matches page long before the checks of its content.
     await addEarlierStandings(database)
-    // Also before the first page: the card Resultaten per hoofdtrainer on /cijfers counts these
-    // matches of earlier seasons, and the site keeps that for five minutes too.
+    // Also before the first page: the card Resultaten per hoofdtrainer on /wedstrijden/cijfers
+    // counts these matches of earlier seasons, and the site keeps that for five minutes too.
     await addTestdorpMeetings(database)
 
     const home = await fetch(origin)
@@ -1033,11 +1033,11 @@ await withEmptyDatabase((database) =>
     assert.match(matchesHtml, /Testdorp FC/)
     assert.match(
       matchesHtml,
-      /<a href="\/cijfers#onze-plek-in-de-competitie">Onze plek in de <span class="hf-icon-tail">competitie</,
+      /<a href="\/wedstrijden\/cijfers#onze-plek-in-de-competitie">Onze plek in de <span class="hf-icon-tail">competitie</,
     )
     assert.match(
       matchesHtml,
-      /<a href="\/cijfers#verloop-van-het-seizoen">Het verloop van het <span class="hf-icon-tail">seizoen</,
+      /<a href="\/wedstrijden\/cijfers#verloop-van-het-seizoen">Het verloop van het <span class="hf-icon-tail">seizoen</,
     )
     // The cards with figures moved to the statistics page: none of them is left on this one.
     assert.doesNotMatch(matchesHtml, /id="(?:onze-plek-in-de-competitie|reeksen|doelpuntenmakers|uitersten)"/)
@@ -1099,7 +1099,7 @@ await withEmptyDatabase((database) =>
     // The statistics page shows the eleven cards with figures of the made-up matches and table
     // of the seed, in two equal columns (the sidebar is as wide as the main), with the credit
     // for Wikipedia under them.
-    const statisticsPage = await fetch(`${origin}/cijfers`)
+    const statisticsPage = await fetch(`${origin}/wedstrijden/cijfers`)
     const statisticsHtml = await statisticsPage.text()
     assert.equal(statisticsPage.status, 200)
     assert.match(statisticsHtml, /<h1[^>]*>Cijfers<\/h1>/)
@@ -1108,7 +1108,7 @@ await withEmptyDatabase((database) =>
     // sub-page.
     assert.match(
       statisticsHtml,
-      /<a aria-current="true" class="hf-navigation-link" href="\/wedstrijden">Wedstrijden<\/a><div class="hf-navigation-bar">.*?<a aria-current="page" class="hf-navigation-sublink" href="\/cijfers">Cijfers<\/a>.*?<a class="hf-navigation-sublink" href="\/tegenstanders">Tegenstanders<\/a>/s,
+      /<a aria-current="true" class="hf-navigation-link" href="\/wedstrijden">Wedstrijden<\/a><div class="hf-navigation-bar">.*?<a aria-current="page" class="hf-navigation-sublink" href="\/wedstrijden\/cijfers">Cijfers<\/a>.*?<a class="hf-navigation-sublink" href="\/tegenstanders">Tegenstanders<\/a>/s,
     )
     assert.match(statisticsHtml, /<section class="hf-page-section"[^>]*aria-label="Meer cijfers over het seizoen">/)
     assert.match(
@@ -1176,21 +1176,21 @@ await withEmptyDatabase((database) =>
     // Eredivisie, with all the matches chosen. The choice is in the address of the other link.
     assert.match(
       statisticsHtml,
-      /<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-count:2;--hf-segmented-index:0"><a aria-current="page" href="\/cijfers"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden<\/span><\/a><a href="\/cijfers\?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie<\/span><\/a><\/div>/,
+      /<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-count:2;--hf-segmented-index:0"><a aria-current="page" href="\/wedstrijden\/cijfers"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden<\/span><\/a><a href="\/wedstrijden\/cijfers\?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie<\/span><\/a><\/div>/,
     )
-    const leagueResponse = await fetch(`${origin}/cijfers?competitie=eredivisie`)
+    const leagueResponse = await fetch(`${origin}/wedstrijden/cijfers?competitie=eredivisie`)
     const leagueHtml = await leagueResponse.text()
     assert.equal(leagueResponse.status, 200)
     assert.match(
       leagueHtml,
-      /<a href="\/cijfers"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden<\/span><\/a><a aria-current="page" href="\/cijfers\?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie<\/span><\/a>/,
+      /<a href="\/wedstrijden\/cijfers"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden<\/span><\/a><a aria-current="page" href="\/wedstrijden\/cijfers\?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie<\/span><\/a>/,
     )
-    assert.equal((await fetch(`${origin}/cijfers?competitie=onzin`)).status, 404)
+    assert.equal((await fetch(`${origin}/wedstrijden/cijfers?competitie=onzin`)).status, 404)
     // The bar under the menu keeps the choice in both links and marks Cijfers, and the items of
     // the menu itself keep no choice.
     assert.match(
       leagueHtml,
-      /<a aria-current="page" class="hf-navigation-sublink" href="\/cijfers\?competitie=eredivisie">Cijfers<\/a>.*?<a class="hf-navigation-sublink" href="\/tegenstanders\?competitie=eredivisie">Tegenstanders<\/a>/s,
+      /<a aria-current="page" class="hf-navigation-sublink" href="\/wedstrijden\/cijfers\?competitie=eredivisie">Cijfers<\/a>.*?<a class="hf-navigation-sublink" href="\/tegenstanders\?competitie=eredivisie">Tegenstanders<\/a>/s,
     )
     assert.match(leagueHtml, /<a class="hf-navigation-link" href="\/spelers">Spelers<\/a>/)
     // The cup gives no points: all the matches have no rows with points and the Eredivisie has

@@ -78,17 +78,21 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/wedstrijden/2099-00/2099-01-01-testdorp-fc', status: 404 },
   // The figures of the current season, of an earlier season, the route behind the season
   // picker and the addresses that say "niet gevonden", as for Wedstrijden above.
-  { path: '/cijfers', status: 200 },
-  { path: `/cijfers/${earlierSeasonSlug()}`, status: 200 },
-  { path: `/cijfers/kies?seizoen=${earlierSeasonSlug()}`, status: 200 },
-  { path: '/cijfers/kies?seizoen=onzin', status: 200 },
-  { path: '/cijfers/kies', status: 200 },
-  { path: '/cijfers/1992-93', status: 200 },
-  { path: '/cijfers/2004-05', status: 200 },
-  { path: '/cijfers/1992-93?competitie=eredivisie', status: 200 },
+  { path: '/wedstrijden/cijfers', status: 200 },
+  { path: `/wedstrijden/cijfers/${earlierSeasonSlug()}`, status: 200 },
+  { path: `/wedstrijden/cijfers/kies?seizoen=${earlierSeasonSlug()}`, status: 200 },
+  { path: '/wedstrijden/cijfers/kies?seizoen=onzin', status: 200 },
+  { path: '/wedstrijden/cijfers/kies', status: 200 },
+  { path: '/wedstrijden/cijfers/1992-93', status: 200 },
+  { path: '/wedstrijden/cijfers/2004-05', status: 200 },
+  { path: '/wedstrijden/cijfers/1992-93?competitie=eredivisie', status: 200 },
   { path: '/spelers/1992-93', status: 200 },
-  { path: '/cijfers/2099-00', status: 404 },
-  { path: '/cijfers/onzin', status: 404 },
+  { path: '/wedstrijden/cijfers/2099-00', status: 404 },
+  { path: '/wedstrijden/cijfers/onzin', status: 404 },
+  // The old addresses of Cijfers are gone, without a redirect (#1208).
+  { path: '/cijfers', status: 404 },
+  { path: `/cijfers/${earlierSeasonSlug()}`, status: 404 },
+  { path: '/cijfers/kies', status: 404 },
   // The page Spelers, an item of the main menu, with the same set of addresses.
   { path: '/spelers', status: 200 },
   { path: `/spelers/${earlierSeasonSlug()}`, status: 200 },
@@ -170,11 +174,11 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   // The choice between all the matches and the Eredivisie, on both pages: `eredivisie` is the
   // only value, and anything else or the same twice says "niet gevonden". The route behind the
   // season picker keeps the choice, and drops a value it does not know.
-  { path: '/cijfers?competitie=eredivisie', status: 200 },
-  { path: `/cijfers/${earlierSeasonSlug()}?competitie=eredivisie`, status: 200 },
-  { path: '/cijfers?competitie=onzin', status: 404 },
-  { path: '/cijfers?competitie=eredivisie&competitie=eredivisie', status: 404 },
-  { path: `/cijfers/kies?seizoen=${earlierSeasonSlug()}&competitie=eredivisie`, status: 200 },
+  { path: '/wedstrijden/cijfers?competitie=eredivisie', status: 200 },
+  { path: `/wedstrijden/cijfers/${earlierSeasonSlug()}?competitie=eredivisie`, status: 200 },
+  { path: '/wedstrijden/cijfers?competitie=onzin', status: 404 },
+  { path: '/wedstrijden/cijfers?competitie=eredivisie&competitie=eredivisie', status: 404 },
+  { path: `/wedstrijden/cijfers/kies?seizoen=${earlierSeasonSlug()}&competitie=eredivisie`, status: 200 },
   { path: '/spelers?competitie=eredivisie', status: 200 },
   { path: '/spelers?competitie=onzin', status: 404 },
   { path: `/spelers/kies?seizoen=${earlierSeasonSlug()}&competitie=eredivisie`, status: 200 },

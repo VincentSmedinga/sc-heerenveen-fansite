@@ -41,17 +41,17 @@ const articlePath = /^\/redactie\/([^/]+)$/u
 
 const clubPath = /^\/tegenstanders\/([^/]+)$/u
 
-const seasonPath = /^(\/wedstrijden|\/spelers|\/cijfers)\/([^/]+)$/u
+const seasonPath = /^(\/wedstrijden\/cijfers|\/wedstrijden|\/spelers)\/([^/]+)$/u
 
 const matchPath = /^(\/wedstrijden)\/([^/]+)\/\d{4}-\d{2}-\d{2}-[a-z0-9]+(?:-[a-z0-9]+)*$/u
 
 /**
  * The path a visit is counted under. The page of a season, such as `/wedstrijden/2025-26`,
- * `/cijfers/2025-26` or `/spelers/2025-26`, counts as a visit to
- * `/wedstrijden`, `/cijfers` or `/spelers`: it is the same page for another
- * season, and a count per season would be a row for every address that has the shape of one.
- * The page of a match, `/wedstrijden/2025-26/2025-11-01-fc-twente`, counts as a visit to
- * `/wedstrijden` for the same reason.
+ * `/wedstrijden/cijfers/2025-26` or `/spelers/2025-26`, counts as a visit to `/wedstrijden`,
+ * `/wedstrijden/cijfers` or `/spelers`: it is the same page for another season, and a count per
+ * season would be a row for every address that has the shape of one. The page of a match,
+ * `/wedstrijden/2025-26/2025-11-01-fc-twente`, counts as a visit to `/wedstrijden` for the same
+ * reason.
  */
 const countedPathOf = (path: string) => {
   const [, page, slug] = seasonPath.exec(path) ?? matchPath.exec(path) ?? []
