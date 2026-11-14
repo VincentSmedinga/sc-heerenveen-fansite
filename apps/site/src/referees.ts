@@ -10,13 +10,17 @@ export type RefereeRow = { drawn: number; lost: number; name: string; played: nu
 /** How many places the card shows for all seasons, with every name that shares the last one. */
 export const topRefereeCount = 5
 
-/** The last word of a name, by which referees with as many matches are ordered. */
+/** The points per match of a referee: 3 for a win and 1 for a draw, as the card counts them. */
+export const pointsPerMatchOf = ({ drawn, played, won }: RefereeRow) => (3 * won + drawn) / played
+
+/** The last word of a name, by which referees with as many points and matches are ordered. */
 const lastName = (name: string) => name.split(/\s+/u).at(-1) ?? name
 
 /**
  * What the card Scheidsrechters counts (#1214): our played matches of one choice of competition
  * by the referee the database has for them, as it has the name (two spellings of one name are
- * two referees), the one with the most matches first and, with as many, by last name. `played`
+ * two referees), the one with the most points per match first (#1251), with as many the one
+ * with the most matches, then by last name. `played`
  * is the number of played matches of the choice, `known` how many of them have a referee.
  * `referees` is the number of different names. With `top` only the first `top` places are in
  * `rows`, and a name that shares the last place with another stays in: five places can be six
@@ -51,16 +55,24 @@ export function refereesOf(
 
   const sorted = [...tallies.values()].sort(
     (a, b) =>
+      pointsPerMatchOf(b) - pointsPerMatchOf(a) ||
       b.played - a.played ||
       lastName(a.name).localeCompare(lastName(b.name), 'nl') ||
       a.name.localeCompare(b.name, 'nl'),
   )
-  const edge = top === undefined ? undefined : sorted[top - 1]?.played
+  const edgeRow = top === undefined ? undefined : sorted[top - 1]
 
   return {
     known,
     played: played.length,
     referees: sorted.length,
-    rows: edge === undefined ? sorted : sorted.filter(({ played: count }) => count >= edge),
+    rows:
+      edgeRow === undefined
+        ? sorted
+        : sorted.filter(
+            (row) =>
+              pointsPerMatchOf(row) > pointsPerMatchOf(edgeRow) ||
+              (pointsPerMatchOf(row) === pointsPerMatchOf(edgeRow) && row.played >= edgeRow.played),
+          ),
   }
 }

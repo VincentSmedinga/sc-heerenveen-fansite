@@ -269,7 +269,7 @@ describe('the card Scheidsrechters', () => {
     expect(headings.slice(-2)).toEqual(['3 toeschouwers', '3 scheidsrechters'])
     expect(html).toContain('>Scheids Naam4<')
     expect(html).not.toContain('>Scheids Naam5<')
-    expect(html).toContain('6 scheidsrechters, de top 5 op aantal wedstrijden.')
+    expect(html).toContain('6 scheidsrechters, de top 5 op punten per wedstrijd.')
   })
 })
 

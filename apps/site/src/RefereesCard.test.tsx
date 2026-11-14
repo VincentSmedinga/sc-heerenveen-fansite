@@ -27,8 +27,15 @@ describe('RefereesCard', () => {
 
   it('explains the short columns', () => {
     expect(renderToStaticMarkup(<RefereesCard known={85} played={85} referees={2} rows={rows} />)).toContain(
-      'G gespeeld, W winst, G gelijk, V verlies',
+      'G gespeeld, W winst, G gelijk, V verlies, P punten per wedstrijd',
     )
+  })
+
+  it('shows the points per match with a decimal comma', () => {
+    const html = renderToStaticMarkup(<RefereesCard known={85} played={85} referees={2} rows={rows} />)
+
+    expect(html).toContain('>1,09<')
+    expect(html).toContain('>1,54<')
   })
 
   it('says how many of the played matches it counts', () => {
@@ -42,7 +49,7 @@ describe('RefereesCard', () => {
 
   it('says how many referees there are for the top of all seasons only', () => {
     expect(renderToStaticMarkup(<RefereesCard known={85} played={85} referees={158} rows={rows} top />)).toContain(
-      '158 scheidsrechters, de top 5 op aantal wedstrijden.',
+      '158 scheidsrechters, de top 5 op punten per wedstrijd.',
     )
     expect(renderToStaticMarkup(<RefereesCard known={85} played={85} referees={158} rows={rows} />)).not.toContain(
       'de top 5',
