@@ -29,6 +29,9 @@ export type TableColumn = {
  * `A` assists, `Y` geel and `R` rood. `G` is taken for gelijk and gespeeld, so the yellow
  * cards have `Y`; a yellow-red card counts as a yellow and a red card.
  *
+ * The lists of all time of the players have `H` hattricks and `S` strafschoppen (the penalties
+ * they scored); `P` was taken for punten, so the penalties have `S`.
+ *
  * The table of a goalkeeper on the page of a player has `N` nul (the matches in which he
  * kept a clean sheet) and `T` tegendoelpunten (the goals he conceded), both over the matches
  * he played from start to end. `N` and `T` were free, and `G` and `D` are taken.
@@ -41,8 +44,10 @@ export const tableColumns = {
   goalDifference: { abbreviation: 'D', name: 'doelsaldo' },
   goals: { abbreviation: 'D', name: 'doelpunten' },
   goalsPerMatch: { abbreviation: 'D/W', name: 'doelpunten per wedstrijd' },
+  hattricks: { abbreviation: 'H', name: 'hattricks' },
   lost: { abbreviation: 'V', name: 'verlies' },
   minutes: { abbreviation: 'M', name: 'minuten' },
+  penalties: { abbreviation: 'S', name: 'strafschoppen' },
   played: { abbreviation: 'G', name: 'gespeeld' },
   points: { abbreviation: 'P', name: 'punten' },
   pointsPerMatch: { abbreviation: 'P', name: 'punten per wedstrijd' },

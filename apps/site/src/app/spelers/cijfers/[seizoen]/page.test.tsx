@@ -95,6 +95,7 @@ describe('the page of an earlier season, /spelers/cijfers/2025-26', () => {
       )
       expect(html).toContain('action="/spelers/cijfers/kies"')
       expect(options).toEqual([
+        ['alle', 'Alle seizoenen', false],
         ['2026-27', '2026/27', false],
         ['2025-26', '2025/26', true],
         ['2024-25', '2024/25', false],

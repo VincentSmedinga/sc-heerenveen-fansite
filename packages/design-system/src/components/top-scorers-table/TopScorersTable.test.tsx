@@ -234,6 +234,68 @@ describe('TopScorersTable', () => {
     expect(container.firstElementChild?.id).toBe('topscorers')
   })
 
+  describe('with scaleTo', () => {
+    it('makes the bars a share of the goals given instead of the top of the rows', () => {
+      const later: TopScorersTableRow[] = [
+        { goals: 4, players: [{ givenName: 'Gerrit', id: 2, surname: 'Nepper' }], position: 11 },
+        { goals: 2, players: [{ givenName: 'Rick', id: 4, surname: 'Demo' }], position: 12 },
+      ]
+      const { container } = render(<TopScorersTable {...props} rows={later} scaleTo={8} />)
+
+      expect(barLengths(container)).toEqual(['50', '25'])
+    })
+  })
+
+  describe('with showYears', () => {
+    const yearsRows: TopScorersTableRow[] = [
+      { goals: 8, players: [{ givenName: 'Wouter', id: 1, surname: 'Proefman', years: '2012–2014' }], position: 1 },
+      {
+        goals: 4,
+        players: [
+          { givenName: 'Gerrit', id: 2, surname: 'Nepper', years: '2002–2012' },
+          { givenName: 'Joris', id: 3, surname: 'Testvoort', years: '1995–2002' },
+        ],
+        position: 2,
+      },
+    ]
+
+    it('adds the column Jaren between the player and the goals', () => {
+      render(<TopScorersTable {...props} rows={yearsRows} showYears />)
+
+      expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+        '#plaats',
+        'Speler',
+        'Jaren',
+        'Ddoelpunten',
+      ])
+    })
+
+    it('gives every player a row of their own with the years, the place they share and the goals', () => {
+      render(<TopScorersTable {...props} rows={yearsRows} showYears />)
+      const row = (name: RegExp) =>
+        within(screen.getByRole('row', { name }))
+          .getAllByRole('cell')
+          .map((cell) => cell.textContent)
+
+      expect(row(/Wouter Proefman/)).toEqual(['1', '2012–2014', '8'])
+      expect(row(/Joris Testvoort/)).toEqual(['⋮gedeeld 2', '1995–2002', '4'])
+    })
+
+    it('marks the table, so the bars give way earlier in a narrow place', () => {
+      const { container } = render(<TopScorersTable {...props} rows={yearsRows} showYears />)
+      const plain = render(<TopScorersTable {...props} rows={yearsRows} />)
+
+      expect(container.firstElementChild?.classList.contains('hf-top-scorers-years')).toBe(true)
+      expect(plain.container.firstElementChild?.classList.contains('hf-top-scorers-years')).toBe(false)
+    })
+
+    it('keeps the plain legend of the goals', () => {
+      render(<TopScorersTable {...props} rows={yearsRows} showYears />)
+
+      expect(screen.queryByText(/D\/W/)).toBeNull()
+    })
+  })
+
   describe('with showGoalsPerMatch', () => {
     const perMatchRows: TopScorersTableRow[] = [
       { goals: 8, players: [{ givenName: 'Wouter', goalsPerMatch: '0,32', id: 1, surname: 'Proefman' }], position: 1 },

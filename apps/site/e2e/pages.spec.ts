@@ -105,6 +105,9 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: `/spelers/cijfers/kies?seizoen=${earlierSeasonSlug()}`, status: 200 },
   { path: '/spelers/cijfers/kies?seizoen=onzin', status: 200 },
   { path: '/spelers/cijfers/kies', status: 200 },
+  // All seasons (#1219): `alle` is the second scope of the page, and no season.
+  { path: '/spelers/cijfers/alle', status: 200 },
+  { path: '/spelers/cijfers/kies?seizoen=alle', status: 200 },
   { path: '/spelers/cijfers/2099-00', status: 404 },
   { path: '/spelers/cijfers/onzin', status: 404 },
   // The overview of all players, by name and by country (#1138).
@@ -189,6 +192,9 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: `/wedstrijden/cijfers/kies?seizoen=${earlierSeasonSlug()}&competitie=eredivisie`, status: 200 },
   { path: '/spelers/cijfers?competitie=eredivisie', status: 200 },
   { path: '/spelers/cijfers?competitie=onzin', status: 404 },
+  { path: '/spelers/cijfers/alle?competitie=eredivisie', status: 200 },
+  { path: '/spelers/cijfers/alle?competitie=onzin', status: 404 },
+  { path: '/spelers/cijfers/kies?seizoen=alle&competitie=eredivisie', status: 200 },
   { path: `/spelers/cijfers/kies?seizoen=${earlierSeasonSlug()}&competitie=eredivisie`, status: 200 },
   // /spelers has no choice of competition, so it ignores one.
   { path: '/spelers?competitie=onzin', status: 200 },

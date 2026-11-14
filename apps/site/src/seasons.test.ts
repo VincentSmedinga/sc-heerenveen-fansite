@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest'
 
-import { pickedAddress, seasonAddress, seasonChoices, seasonFromSlug, seasonSlug } from './seasons'
+import {
+  allSeasonsAddress,
+  allSeasonsSlug,
+  pickedAddress,
+  seasonAddress,
+  seasonChoices,
+  seasonChoicesWithAll,
+  seasonFromSlug,
+  seasonSlug,
+} from './seasons'
 
 describe('seasonFromSlug', () => {
   it.each([
@@ -61,6 +70,27 @@ describe('seasonChoices', () => {
   })
 })
 
+describe('the choice Alle seizoenen', () => {
+  it('is the address part alle under a base address, which is no season', () => {
+    expect(allSeasonsSlug).toBe('alle')
+    expect(allSeasonsAddress('/spelers/cijfers')).toBe('/spelers/cijfers/alle')
+    expect(seasonFromSlug(allSeasonsSlug)).toBeUndefined()
+  })
+
+  it('comes first in the choices, with the words Alle seizoenen', () => {
+    expect(seasonChoicesWithAll(['2026/27', '2025/26'])).toEqual([
+      { label: 'Alle seizoenen', value: 'alle' },
+      { label: '2026/27', value: '2026-27' },
+      { label: '2025/26', value: '2025-26' },
+    ])
+  })
+
+  it('is left out with fewer than two seasons, where all seasons is the one season', () => {
+    expect(seasonChoicesWithAll(['2026/27'])).toEqual([{ label: '2026/27', value: '2026-27' }])
+    expect(seasonChoicesWithAll([])).toEqual([])
+  })
+})
+
 describe('pickedAddress', () => {
   const known = { current: '2026/27', seasons: ['2026/27', '2025/26', '2024/25'] }
 
@@ -81,6 +111,11 @@ describe('pickedAddress', () => {
   it('goes back to the base address for a season that has no matches', () => {
     expect(pickedAddress('/wedstrijden', '2010-11', known)).toBe('/wedstrijden')
     expect(pickedAddress('/wedstrijden', '2027-28', known)).toBe('/wedstrijden')
+  })
+
+  it('goes to <base>/alle for the value alle on a page that can count all seasons, and nowhere else', () => {
+    expect(pickedAddress('/spelers/cijfers', 'alle', { ...known, allSeasons: true })).toBe('/spelers/cijfers/alle')
+    expect(pickedAddress('/spelers/cijfers', 'alle', known)).toBe('/spelers/cijfers')
   })
 
   it('works for a base address that is not /wedstrijden', () => {

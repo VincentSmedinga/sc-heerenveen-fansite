@@ -11,8 +11,15 @@ const meta = preview.meta({
     caption: { description: 'De tekst van het bijschrift, dat alleen een schermlezer krijgt.' },
     figure: { description: 'De kolom die de lijst telt, uit `tableColumns`: doelpunten, assists of minuten.' },
     rows: { description: 'De plaatsen van boven naar beneden, met de doelpunten en een of meer spelers.' },
+    scaleTo: {
+      description:
+        'De doelpunten die een hele balk vullen. Een tabel met alleen een later deel van de lijst geeft hier de doelpunten van de topscorer van de hele lijst.',
+    },
     showGoalsPerMatch: {
       description: 'Voegt de kolom D/W toe. Elke speler krijgt dan een eigen rij.',
+    },
+    showYears: {
+      description: 'Voegt de kolom Jaren toe, met de jaren bij de club. Elke speler krijgt dan een eigen rij.',
     },
   },
   component: TopScorersTable,
@@ -125,6 +132,15 @@ const perMatchRows: TopScorersTableRow[] = [
   { goals: 1, players: [{ givenName: 'Pieter', goalsPerMatch: '1,00', id: 5, surname: 'Voorbeeld' }], position: 5 },
 ]
 
+// The same players with the years they were with the club, one row each.
+const yearsRows: TopScorersTableRow[] = [
+  { goals: 8, players: [{ givenName: 'Wouter', id: 1, surname: 'Proefman', years: '2012–2014' }], position: 1 },
+  { goals: 4, players: [{ givenName: 'Gerrit', id: 2, surname: 'Nepper', years: '2002–2012' }], position: 2 },
+  { goals: 4, players: [{ givenName: 'Joris', id: 3, surname: 'Testvoort', years: '1995–2002' }], position: 2 },
+  { goals: 2, players: [{ givenName: 'Rick', id: 4, surname: 'Demo', years: '2010–2012' }], position: 4 },
+  { goals: 1, players: [{ givenName: 'Pieter', id: 5, surname: 'Voorbeeld', years: '2014–2022' }], position: 5 },
+]
+
 const caption = 'Doelpuntenmakers van sc Heerenveen in het seizoen 2026/27, in de Eredivisie en de KNVB Beker'
 
 // The minutes of the same players: one row each, and the figure is the minutes.
@@ -192,6 +208,20 @@ export const Shared = meta.story({
 export const PerMatch = meta.story({
   name: 'Met de kolom D/W, een rij per speler',
   render: render('32rem', perMatchRows, true),
+})
+
+export const Years = meta.story({
+  name: 'Met de kolom Jaren, een rij per speler',
+  render: () => (
+    <div style={{ maxInlineSize: '32rem' }}>
+      <Card aria-labelledby="doelpuntenmakers-kop">
+        <Heading id="doelpuntenmakers-kop" level={2}>
+          Topscorers
+        </Heading>
+        <TopScorersTable caption={caption} rows={yearsRows} showYears />
+      </Card>
+    </div>
+  ),
 })
 
 export const LongNames = meta.story({

@@ -10,6 +10,8 @@ import {
   listLeagueResults,
   listMatchDataSources,
   listMatchSeasons,
+  listPersonSeasons,
+  listReportSeasons,
   listSeasonMatches,
   listSeasonStandings,
   listStaffInSeason,
@@ -390,6 +392,26 @@ export const getFinalPlaces = cacheFor(currentSeasonPeriod, loadFinalPlaces)
  * all time. One query for all seasons, kept for an hour like a season that is over.
  */
 export const getAllTimeMatches = cacheFor(pastSeasonPeriod, () => listAllMatchGoals(getDatabase().db))
+
+/**
+ * The seasons in which each person was in the squad, by the id of the person, for the years a
+ * scorer of all time was with the club. One query for all seasons, kept for an hour.
+ */
+export const getPersonSeasons = cacheFor(pastSeasonPeriod, async () => {
+  const seasons = new Map<number, string[]>()
+
+  for (const { personId, season } of await listPersonSeasons(getDatabase().db)) {
+    seasons.set(personId, [...(seasons.get(personId) ?? []), season])
+  }
+
+  return seasons
+})
+
+/**
+ * The seasons whose line-ups we have (they have a finished match report), the oldest first. A
+ * report is saved by hand, so the list is kept for five minutes.
+ */
+export const getReportSeasons = cacheFor(currentSeasonPeriod, () => listReportSeasons(getDatabase().db))
 
 const allMatchSources = cacheFor(pastSeasonPeriod, () => listMatchDataSources(getDatabase().db))
 
@@ -1342,9 +1364,6 @@ export function topScorersOf(matches: ScoredMatch[], choice: CompetitionChoice =
 /** How many places the short list of the goal scorers has. */
 export const topScorersPlaces = 5
 
-/** How many places the list of the goal scorers of all time has. */
-export const allTimePlaces = 10
-
 /**
  * The first places of the list of scorers: everyone who stands in the first five places.
  * Players who share a place all show, so a tie for fifth place gives more than five names, and
@@ -1421,19 +1440,6 @@ export type SpecialGoals = {
 }
 
 /**
- * The goal scorers of all time: the first ten places of `topScorersOf` over every season, how
- * many players scored in all, and the first season that has a match, from which the list
- * counts (`undefined` without a match). `matches` have the season they were played in. The
- * count is the one of the card of a season, so a person who scored in two seasons is one row.
- */
-export function allTimeScorersOf(matches: (ScoredMatch & { season: string })[], choice: CompetitionChoice = 'all') {
-  const scorers = topScorersOf(matches, choice)
-  const since = matches.map((match) => match.season).sort()[0]
-
-  return { scorers: firstPlacesOf(scorers, allTimePlaces), since, total: scorers.length }
-}
-
-/**
  * What a goal counts for: the person behind it, else the player it is linked to, else the
  * Wikipedia page of its player, or else the name the page shows. The first three are what the
  * importer found out; the name is the last resort, so a goal is never lost.
@@ -1497,6 +1503,15 @@ export function scorersByPlace(scorers: TopScorer[]): ScorerPlace[] {
   }
 
   return places
+}
+
+/**
+ * What a list of scorers is put in order by: the family name without its prefix, or the given
+ * name of a person without one, or the surname of the name of the match page for a goal without
+ * a person.
+ */
+export function scorerSortName(goal: ScorerGoal): string {
+  return personNameParts(goal) === undefined ? textSortName(goal.player) : personSortName(goal)
 }
 
 /**
@@ -1632,15 +1647,6 @@ function hasBegun(match: Pick<PublicMatch, 'dateText' | 'kickoffAt' | 'matchDate
   return match.kickoffAt === null
     ? dutchDayFormat.format(now) > lastDayOf(match.dateText, match.matchDate)
     : match.kickoffAt <= now
-}
-
-/**
- * What a list of scorers is put in order by: the family name without its prefix, or the given
- * name of a person without one, or the surname of the name of the match page for a goal without
- * a person.
- */
-function scorerSortName(goal: ScorerGoal): string {
-  return personNameParts(goal) === undefined ? textSortName(goal.player) : personSortName(goal)
 }
 
 export const attendanceStep = 5000
