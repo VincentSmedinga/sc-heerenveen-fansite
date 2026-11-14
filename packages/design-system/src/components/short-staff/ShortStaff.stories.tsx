@@ -26,7 +26,7 @@ const meta = preview.meta({
       description: {
         component: [
           'Een persoon van de staf als korte regel in een lijst: de naam, en als dat iets zegt ervoor wanneer die de functie had of kreeg.',
-          'Het is de korte regel van `ShortMatch` voor een persoon, voor een lijst zoals de hoofdtrainers van een seizoen. Zet de regel in een `List.Item`, de lijst in een `Card` onder een kop van niveau 2, en geef de `List` `role="list"`.',
+          'Het is een korte regel voor een persoon, voor een lijst zoals de hoofdtrainers van een seizoen. Zet de regel in een `List.Item`, de lijst in een `Card` onder een kop van niveau 2, en geef de `List` `role="list"`.',
           'Hij is gebouwd uit `PlayerName` en `Text`.',
         ].join('\n'),
       },

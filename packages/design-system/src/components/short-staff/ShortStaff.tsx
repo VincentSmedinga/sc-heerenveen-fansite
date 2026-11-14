@@ -28,12 +28,11 @@ export type ShortStaffProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> 
 
 /**
  * A person of the staff as a short line in a list: the name, with in front of it, when there is
- * something to say, when they had the job, as in "tot 14 mrt 2026 Robin van Persie". It is the
- * short line of ShortMatch for a person, and it has the look of it: short-match.css draws the
- * lines, the wrapping and the colours, and short-staff.css only makes room for the longer text
- * before the name. The name is a PlayerName, so the given name is in the normal weight, and
- * "(interim)" is in the normal weight and the second colour, like "thuis" in a short match. A
- * line can have a note under it, on a line of its own.
+ * something to say, when they had the job, as in "tot 14 mrt 2026 Robin van Persie". It is a
+ * short line for a person: short-line.css draws the lines, the wrapping and the colours, and
+ * short-staff.css only makes room for the longer text before the name. The name is a
+ * PlayerName, so the given name is in the normal weight, and "(interim)" is in the normal
+ * weight and the second colour. A line can have a note under it, on a line of its own.
  */
 export const ShortStaff = ({
   className,
@@ -44,14 +43,14 @@ export const ShortStaff = ({
   surname,
   ...props
 }: ShortStaffProps) => (
-  <div {...props} className={classNames('hf-short-match', 'hf-short-staff', className)}>
-    {period === undefined ? null : <span className="hf-short-match-when">{period}</span>}
-    <span className="hf-short-match-opponent">
+  <div {...props} className={classNames('hf-short-line', 'hf-short-staff', className)}>
+    {period === undefined ? null : <span className="hf-short-line-when">{period}</span>}
+    <span className="hf-short-line-opponent">
       <PlayerName givenName={givenName} surname={surname} />
       {interim ? (
         <>
           {' '}
-          <span className="hf-short-match-where">(interim)</span>
+          <span className="hf-short-line-where">(interim)</span>
         </>
       ) : null}
     </span>

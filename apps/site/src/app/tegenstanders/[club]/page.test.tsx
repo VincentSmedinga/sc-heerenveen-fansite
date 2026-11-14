@@ -426,15 +426,13 @@ describe('the page of a club', () => {
     ])
   })
 
-  it('has only Match in the list of the card Wedstrijden, a ShortMatch only in Onze uitslagen', async () => {
+  it('has only Match in the list of the card Wedstrijden, and a Match for each selection in Onze uitslagen', async () => {
     const html = await render()
-    const list = listOf(html)
 
     expect(itemsOf(html)).toHaveLength(5)
     expect(itemsOf(html).every((item) => item.startsWith('<div class="hf-match"'))).toBe(true)
-    expect(list).not.toContain('hf-short-match')
-    // The two selections of the summary keep the short line.
-    expect(html.match(/hf-short-match"/g)).toHaveLength(2)
+    // The two selections of the summary are a Match too, and the list has five.
+    expect(html.match(/<div class="hf-match"/g)).toHaveLength(7)
   })
 
   it('has no line with the season above a match: the day shows the year and the line the competition', async () => {

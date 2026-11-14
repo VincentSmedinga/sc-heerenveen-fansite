@@ -108,7 +108,7 @@ describe('the parts that draw their lines with the lines of the card', () => {
     ['components/news-item/news-item.css', '--hf-card-line,', 'the line above a news item'],
     ['components/discussion-item/discussion-item.css', '--hf-card-line,', 'the line above a discussion'],
     ['components/match/match.css', '--hf-card-line,', 'the line above a match'],
-    ['components/short-match/short-match.css', '--hf-card-line,', 'the line above a short match'],
+    ['components/short-line/short-line.css', '--hf-card-line,', 'the line above a short line'],
     ['components/bar-chart/bar-chart.css', '--hf-card-line,', 'the lines across a bar chart'],
     ['components/bar-chart/bar-chart.css', '--hf-card-line-graphic,', 'the ground of a bar chart'],
     ['components/donut-chart/donut-chart.css', '--hf-card-line-graphic,', 'the leader of a donut chart'],

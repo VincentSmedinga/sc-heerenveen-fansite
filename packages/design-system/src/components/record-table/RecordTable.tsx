@@ -64,7 +64,7 @@ const columns: Column[] = [
  * headers with `scope`, a row header for each row, and under the table the full words of the
  * abbreviations, as "G gespeeld, W winst, …". A screen reader hears the full word, not the
  * letter. The wins, draws and losses have the colours of the results (green, grey and red), as
- * in `ShortMatch`; the words in the header say what they are, so the colour is not alone. The
+ * in `Match`; the words in the header say what they are, so the colour is not alone. The
  * points are the key figure, in the heaviest weight, and so is the total row.
  *
  * It is a form of its own next to `StandingsTable` and not a general version of it: a standings
