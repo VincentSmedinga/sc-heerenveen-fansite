@@ -1120,6 +1120,24 @@ export function listSquadPages(db: Database, season: string) {
 }
 
 /**
+ * The name and the page address of each person who was in the squad of any season, for the card
+ * Meeste seizoenen in de selectie. One row per person, in the order of the id.
+ */
+export async function listSquadPeople(db: Database) {
+  return db
+    .selectDistinct({
+      familyName: persons.familyName,
+      familyNamePrefix: persons.familyNamePrefix,
+      givenName: persons.givenName,
+      personId: persons.id,
+      slug: persons.slug,
+    })
+    .from(persons)
+    .innerJoin(players, eq(players.personId, persons.id))
+    .orderBy(asc(persons.id))
+}
+
+/**
  * The staff with a role in a season, such as `2024/25`, in the order their periods began: the
  * people who surely held a day of the season, so a coach whose start is only known to the year
  * is not in the season before it (see `servedInSeason`). It gives what the pages show: the

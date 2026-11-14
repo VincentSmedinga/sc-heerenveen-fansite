@@ -1602,6 +1602,12 @@ await withEmptyDatabase((database) =>
     assert.ok(allHtml.indexOf('id="records"') < allHtml.indexOf('id="strafschoppen"'))
     assert.match(allHtml, /class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="strafschoppen"/)
     assert.match(allHtml, /\d+ strafschop(?:pen)? benut sinds \d{4}\/\d{2}/)
+    // The card Meeste seizoenen in de selectie follows Strafschoppen benut (#1222), if the
+    // made-up data has a squad.
+    assert.ok(
+      !allHtml.includes('id="meeste-seizoenen-in-de-selectie"') ||
+        allHtml.indexOf('id="strafschoppen"') < allHtml.indexOf('id="meeste-seizoenen-in-de-selectie"'),
+    )
     assert.doesNotMatch(allHtml, /id="(?:alle-spelers|assists|minuten|doelpuntenmakers|bijzondere-doelpunten)"/)
     assert.match(
       allHtml,

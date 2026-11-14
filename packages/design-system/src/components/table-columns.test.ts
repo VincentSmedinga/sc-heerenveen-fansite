@@ -26,6 +26,7 @@ describe('tableColumns', () => {
       points: 'P punten',
       pointsPerMatch: 'P punten per wedstrijd',
       red: 'R rood',
+      seasons: 'Z seizoenen',
       started: 'B basis',
       substituted: 'I invallers',
       won: 'W winst',
