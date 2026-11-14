@@ -169,7 +169,50 @@ describe('the page with all seasons, /spelers/cijfers/alle', () => {
     expect(block).not.toContain(' open')
     expect(block).toContain('plaatsen 11 tot en met 25')
     expect(block.match(/<tr>/g)?.length).toBeGreaterThan(0)
-    expect(html.match(/>SpelerA</g)?.length).toBe(1)
+    expect(html.slice(0, html.indexOf('clubtopscorer-per-seizoen')).match(/>SpelerA</g)?.length).toBe(1)
+  })
+
+  it('has the card Clubtopscorer per seizoen under the topscorers, with a link for each season', async () => {
+    const html = await render()
+    const main = html.slice(html.indexOf('style="grid-area:main"'), html.indexOf('style="grid-area:side"'))
+    const card = main.slice(main.indexOf('aria-labelledby="clubtopscorer-per-seizoen"'))
+
+    expect(main.indexOf('id="topscorers-sinds-1990-91"')).toBeLessThan(main.indexOf('id="clubtopscorer-per-seizoen"'))
+    expect(card).toContain('De clubtopscorer van 4 seizoenen')
+    expect(card).toContain('<a href="/spelers/cijfers/2005-06">2005/06</a>')
+    expect(card).toContain('Vijf')
+    expect(card.indexOf('2005/06')).toBeLessThan(card.indexOf('2003/04'))
+  })
+
+  it('has the card Clubtopscorer per seizoen with a star and a line for a season with unknown scorers', async () => {
+    vi.mocked(getAllTimeMatches).mockResolvedValue([
+      match('2000/01', [goal('Een')]),
+      match('2000/01', [], { goalsFor: 2 }),
+    ])
+
+    const html = await render()
+
+    expect(html).toContain('1<span')
+    expect(html).toContain('niet alle doelpuntenmakers bekend')
+    expect(html).toContain('* Van een deel van de wedstrijden van dit seizoen kennen we de doelpuntenmakers niet.')
+  })
+
+  it('has the rest of the seasons in a closed block when there are more than five', async () => {
+    vi.mocked(getAllTimeMatches).mockResolvedValue(
+      Array.from({ length: 7 }, (_, index) => match(`${1995 + index}/${String(96 + index).slice(-2)}`, [goal('Een')])),
+    )
+
+    const html = await render()
+    const block = /<details[^>]*><summary>Toon alle 7 seizoenen.*?<\/details>/s.exec(html)?.[0] ?? ''
+
+    expect(block).not.toContain(' open')
+    expect(block.match(/<tr>/g)).toHaveLength(3)
+  })
+
+  it('has no card Clubtopscorer per seizoen when nobody has scored', async () => {
+    vi.mocked(getAllTimeMatches).mockResolvedValue([])
+
+    expect(await render()).not.toContain('clubtopscorer-per-seizoen')
   })
 
   it('says for how many matches we do not know the scorers', async () => {

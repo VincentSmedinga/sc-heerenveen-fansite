@@ -5662,3 +5662,18 @@
 - **Waarom:** twee kaarten telden alle seizoenen op een pagina over één seizoen en negeerden de kiezer.
   Nu telt elke kaart wat de werkbalk zegt, en alle seizoenen is een tweede bereik van dezelfde pagina.
 - **Alternatieven:** een aparte pagina voor alle seizoenen buiten Cijfers; een grafiek per thuiswedstrijd bij Toeschouwers; de reeksen als eigen kaart houden.
+
+## Spelers · Cijfers van alle seizoenen heeft de kaart Clubtopscorer per seizoen
+
+- **Datum:** 14 november 2026
+- **Besluit:** onder Topscorers sinds 1990/91, in de hoofdkolom van `/spelers/cijfers/alle`, staat de witte kaart "Clubtopscorer per seizoen" (#1220, onderdeel van #1207).
+  - **De telling:** per seizoen de eerste plaats van de lijst met doelpuntenmakers van dat seizoen, geteld zoals de kaart van een seizoen telt (`topScorersOf`), zodat beide kaarten hetzelfde zeggen.
+    Delen spelers de eerste plek, dan staan ze allemaal in de rij, van A tot Z.
+    Een seizoen zonder bekende doelpuntenmaker, of zonder wedstrijd in de gekozen competitie, heeft geen rij.
+  - **De tabel:** het seizoen (een link naar `/spelers/cijfers/<seizoen>`, met de keuze van competitie erbij), de speler en zijn doelpunten, het nieuwste seizoen bovenaan.
+    De laatste vijf seizoenen staan in de tabel en een `Disclosure` "Toon alle <n> seizoenen" heeft de rest.
+  - **Onvolledig:** kennen we van een deel van de gespeelde wedstrijden van een seizoen de doelpuntenmakers niet (dezelfde regel als onder de topscorers), dan staat er een sterretje achter het aantal en een regel onder de tabellen.
+    Voor een schermlezer staat er "niet alle doelpuntenmakers bekend" achter het getal.
+  - **De balk "Op deze pagina:"** heeft er een link bij, "Clubtopscorer", naar `#clubtopscorer-per-seizoen`, en laat hem weg als de kaart er niet is.
+- **Waarom:** de erelijst van onze clubtopscorers, seizoen voor seizoen, past bij de vraag "wie scoorde het vaakst in dat jaar?" en brengt een bezoeker naar de cijfers van dat seizoen.
+- **Alternatieven:** de kaart in de zijkolom (de tabel is breder dan een zijkaart); een rij per seizoen met alleen de eerste van een gedeelde plek; alle seizoenen open in plaats van achter een `Disclosure`.

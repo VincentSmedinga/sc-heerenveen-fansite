@@ -6,6 +6,7 @@ import {
   type ScorerGoal,
   scorerLine,
   scorersByPlace,
+  scorersCoverage,
   scorerSortName,
   type TopScorer,
   topScorersOf,
@@ -80,6 +81,50 @@ export function allTimeScorersOf(
     topGoals: scorers[0]?.goals ?? 0,
     total: scorers.length,
   }
+}
+
+/** How many seasons the card Clubtopscorer per seizoen shows before its closed block. */
+export const clubTopScorerSeasonsShown = 5
+
+/** The top scorer or scorers of one season, with the goals they share. */
+export type ClubTopScorerSeason = {
+  goals: number
+  /** Whether we don't know the scorers of some of the matches of the season. */
+  incomplete: boolean
+  players: [TopScorer, ...TopScorer[]]
+  season: string
+}
+
+/**
+ * The club top scorer of every season, the newest first: the first place of the list of goal
+ * scorers of that season, counted as the card of a season counts it (`topScorersOf`), so the
+ * two cards agree. Players who share the first place are all in the row. A season without a
+ * goal of ours by a known scorer has no row, and a season whose competition has no match in
+ * the choice has none either. `incomplete` says that some played matches of the season have no
+ * scorers, so the top scorer may have scored more.
+ */
+export function clubTopScorersOf(matches: readonly AllTimeMatch[], choice: CompetitionChoice) {
+  const bySeason = new Map<string, AllTimeMatch[]>()
+
+  for (const match of matches) {
+    bySeason.set(match.season, [...(bySeason.get(match.season) ?? []), match])
+  }
+
+  const rows: ClubTopScorerSeason[] = []
+
+  for (const [season, inSeason] of bySeason) {
+    const [first, ...rest] = topScorersOf([...inSeason], choice).filter((scorer) => scorer.position === 1)
+
+    if (first === undefined) {
+      continue
+    }
+
+    const { known, played } = scorersCoverage([...inSeason], choice)
+
+    rows.push({ goals: first.goals, incomplete: known < played, players: [first, ...rest], season })
+  }
+
+  return rows.sort((a, b) => b.season.localeCompare(a.season))
 }
 
 /** Whether a match has a played score with its goals known, as the cards of a season count. */
