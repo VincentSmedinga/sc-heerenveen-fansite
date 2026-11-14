@@ -70,6 +70,15 @@ afterEach(() => {
 })
 
 describe('the page /wedstrijden/cijfers', () => {
+  it('has "Alle seizoenen" as the first choice of the season picker when there are two seasons', async () => {
+    vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26'])
+    const html = await render()
+    const options = [...(html.match(/<select.*?<\/select>/s)?.[0] ?? '').matchAll(/<option[^>]*value="([^"]*)"/g)]
+
+    expect(options.map(([, value]) => value)).toEqual(['alle', '2026-27', '2025-26'])
+    expect(html).toContain('>Alle seizoenen<')
+  })
+
   it('has one h1, four h2 headings for the groups and ten h3 headings for the cards, in the order of the source', async () => {
     const html = await render()
     const headings = [...html.matchAll(/<h([1-6])[^>]*?(?: id="([^"]+)")?>/g)].map(
