@@ -1162,6 +1162,36 @@ await withEmptyDatabase((database) =>
     )
     assert.equal((await fetch(`${origin}/wedstrijden/cijfers?competitie=onzin`)).status, 404)
     assert.equal((await fetch(`${origin}/wedstrijden/cijfers?competitie=beker`)).status, 200)
+    // The page with all seasons, `alle`, is the second scope of Cijfers (#1211): the season
+    // picker has "Alle seizoenen" first, the cards count every season, and the cards of one
+    // season (the course of the season, how the matches go, the streaks) are not on it.
+    const allSeasonsResponse = await fetch(`${origin}/wedstrijden/cijfers/alle`)
+    const allSeasonsHtml = await allSeasonsResponse.text()
+    assert.equal(allSeasonsResponse.status, 200)
+    assert.match(allSeasonsHtml, /<h1[^>]*>Cijfers<\/h1>/)
+    assert.match(allSeasonsHtml, /<option[^>]*value="alle"[^>]*>Alle seizoenen<\/option>/)
+    assert.deepEqual(
+      [...allSeasonsHtml.matchAll(/<h3[^>]*? id="([^"]+)"/g)].map(([, id]) => id).filter((id) => id === 'records'),
+      ['records'],
+    )
+    for (const id of ['uitslagen', 'doelpunten', 'rondom-de-wedstrijd', 'thuis-en-uit', 'toeschouwers']) {
+      assert.match(allSeasonsHtml, new RegExp(`id="${id}"`))
+    }
+    assert.doesNotMatch(
+      allSeasonsHtml,
+      /id="(?:verloop-van-het-seizoen|hoe-de-wedstrijden-verlopen|reeksen|uitersten)"/,
+    )
+    assert.match(
+      allSeasonsHtml,
+      /wedstrijden<\/span><span class="hf-key-figure-stop">, <\/span><span class="hf-key-figure-note">gespeeld in alle competities sinds /,
+    )
+    // The picker sends "Alle seizoenen" on to its address, with the choice of competition.
+    const pickedAllMatches = await fetch(`${origin}/wedstrijden/cijfers/kies?seizoen=alle&competitie=eredivisie`, {
+      redirect: 'manual',
+    })
+    assert.equal(pickedAllMatches.status, 303)
+    assert.equal(pickedAllMatches.headers.get('location'), '/wedstrijden/cijfers/alle?competitie=eredivisie')
+    assert.equal((await fetch(`${origin}/wedstrijden/cijfers/alle?competitie=onzin`)).status, 404)
     // The bar under the menu keeps the choice in both links and marks Cijfers, and the items of
     // the menu itself keep no choice.
     assert.match(

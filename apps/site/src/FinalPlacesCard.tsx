@@ -41,22 +41,23 @@ const shortSeason = (season: string) => season.slice(2)
 
 /**
  * The card "Onze plek door de jaren": our place in the Eredivisie in every season we have a
- * table of, as a line with place 1 at the top, and under it the same numbers in a table,
- * which is what a screen reader gets because the line is hidden from it. It is on Cijfers,
- * under our place in the league (#411), and is the same on every season of the page. The table
- * is in a closed Disclosure (#808). It does not depend on the season of the page or on the
- * switch: `places` is the same on every page. The season that is going on is marked "nu", a
- * season with points taken off says how many in the table, and a season without a table is a
- * gap in the line and a row that says so. A season links to its page when it has one
- * (`linkable` are the seasons that have matches). Without a table of any season there is no
- * card.
+ * table of, as a line with place 1 at the top, and under it the same numbers in a table, which
+ * is what a screen reader gets because the line is hidden from it. It is on Cijfers (#411), and
+ * since #1211 only on the page with all seasons. The table is in a closed Disclosure (#808). It
+ * does not depend on the switch: `places` is the same for every choice. The season that is
+ * going on is marked "nu", a season with points taken off says how many in the table, and a
+ * season without a table is a gap in the line and a row that says so. A season links to its
+ * page when it has one (`linkable` are the seasons that have matches). Without a table of any
+ * season there is no card.
  */
 export function FinalPlacesCard({
   current,
+  level = 2,
   linkable,
   places,
 }: {
   current: string
+  level?: 2 | 3
   linkable: readonly string[]
   places: readonly FinalPlace[]
 }) {
@@ -76,7 +77,7 @@ export function FinalPlacesCard({
 
   return (
     <Card aria-labelledby={finalPlacesCard.id} surface="soft">
-      <Heading anchor id={finalPlacesCard.id} level={2}>
+      <Heading anchor id={finalPlacesCard.id} level={level}>
         {finalPlacesCard.name}
       </Heading>
       <BarChart

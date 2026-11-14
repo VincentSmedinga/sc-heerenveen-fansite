@@ -28,6 +28,11 @@ export const pages = [
     path: '/wedstrijden/cijfers',
   },
   {
+    description:
+      'De cijfers van sc Heerenveen 1 sinds 1990/91, zoals de plek door de jaren, de records en de toeschouwers, met de bronnen erbij: Wikipedia en de oude fansite.',
+    path: '/wedstrijden/cijfers/alle',
+  },
+  {
     description: 'De selectie van sc Heerenveen 1 dit seizoen, met de spelers per positie en de bron erbij: Wikipedia.',
     path: '/spelers',
   },
