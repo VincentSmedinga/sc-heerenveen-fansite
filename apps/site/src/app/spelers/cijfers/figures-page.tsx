@@ -53,14 +53,15 @@ export async function playerFiguresMetadata(season: string): Promise<Metadata> {
  * The figures of the players of a season: `/spelers/cijfers` for the current season and
  * `/spelers/cijfers/2025-26` for another, which is what the two routes render. It has the
  * title row and the toolbar with the season picker and the choice of competition. The main
- * column is white and has the card Doelpuntenmakers (every player who scored, with the column
- * W where we know the matches) and, for a season with match reports, the table Alle spelers.
- * The sidebar has soft cards: Assists and Minuten (for a season with reports), Bijzondere
- * doelpunten, and the credit as the last. The sidebar follows the main column on a phone. The
- * name of a player links to his page when he has one. A season that is over has the cards put
- * the season on their image. A season that has no matches in the database is the page "niet
- * gevonden", and so is a choice of competition that is not known. The cards count all the
- * matches or, with `?competitie=eredivisie`, the Eredivisie alone.
+ * column is white and has the card Doelpuntenmakers (every player who scored, with the
+ * column W where we know the matches) and, for a season with match reports, the table Alle
+ * spelers. The sidebar has soft cards: Assists, Minuten and Invallers die scoorden (for a
+ * season with reports), Bijzondere doelpunten, and the credit as the last. The sidebar
+ * follows the main column on a phone. The name of a player links to his page when he has
+ * one. A season that is over has the cards put the season on their image. A season that has
+ * no matches in the database is the page "niet gevonden", and so is a choice of competition
+ * that is not known. The cards count all the matches or, with `?competitie=eredivisie`, the
+ * Eredivisie alone.
  */
 export async function PlayerFiguresPage({
   searchParams,
@@ -135,6 +136,13 @@ export async function PlayerFiguresPage({
               season={season}
               seasonOnImage={onImage}
             />
+            <RankingCard
+              competition={competition}
+              figure="substituteGoals"
+              figures={figures}
+              season={season}
+              seasonOnImage={onImage}
+            />
           </>
         )}
         <SpecialGoalsCard competition={competition} matches={data.matches} seasonOnImage={onImage} />
@@ -147,9 +155,9 @@ export async function PlayerFiguresPage({
 }
 
 /**
- * The figures from the match reports for the cards Alle spelers, Assists and Minuten, or
- * undefined when they could not be read (the error is logged). The cards are an extra: the page
- * is as it was without them.
+ * The figures from the match reports for the cards Alle spelers, Assists, Minuten and
+ * Invallers die scoorden, or undefined when they could not be read (the error is logged).
+ * The cards are an extra: the page is as it was without them.
  */
 async function loadFigures(season: string, competition: CompetitionChoice) {
   try {

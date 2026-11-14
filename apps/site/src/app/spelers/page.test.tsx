@@ -108,6 +108,7 @@ describe('the page /spelers', () => {
       'alle-spelers',
       'assists',
       'minuten',
+      'invallers-die-scoorden',
     ]) {
       expect(html).not.toContain(`id="${id}"`)
     }

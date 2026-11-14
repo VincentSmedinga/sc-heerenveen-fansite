@@ -5618,3 +5618,18 @@
   We kennen de opstellingen maar van een deel van de seizoenen, dus lijsten aller tijden van wedstrijden, minuten en assists zouden spelers overslaan (zie _Geen lijst aller tijden van wedstrijden, minuten, assists en kaarten per speler_).
 - **Nadeel:** de jaren bij de club zijn de seizoenen in de selectie en kunnen langer zijn dan de jaren waarin een speler scoorde; een speler zonder persoon in de gegevens heeft er geen.
 - **Alternatieven:** de jaren van de eerste tot de laatste doelpunten (zegt niets over zijn tijd bij de club); een tabel met de top 25 in de `Disclosure`, ook de eerste tien (dubbel); een eigen pagina Records.
+
+## Spelers · Cijfers heeft de kaart Invallers die scoorden
+
+- **Datum:** 14 november 2026
+- **Besluit:** de zijkolom van `/spelers/cijfers` en `/spelers/cijfers/<seizoen>` heeft de zachte kaart "Invallers die scoorden", na Minuten en voor Bijzondere doelpunten (#1224, onderdeel van #1207).
+  - **De telling:** een invaller is een speler van ons die niet in de basis stond; zijn doelpunt telt (zonder eigen doelpunten) als `substituteGoals` van `readPlayerReportStats`, naast `goals`.
+    De kaart zet de spelers van de meeste naar de minste neer, de eerste vijf plaatsen, met gedeelde plekken, zoals Assists en Minuten (`rankedPlaces`, `RankingCard`).
+    De kolom is `D doelpunten`.
+  - **Waar:** de kaart staat alleen in een seizoen met verslagen die klaar zijn, zoals Assists en Minuten, en volgt de keuze van competitie.
+    Op `/spelers/cijfers/alle` staat hij niet: de opstellingen kennen we maar van een deel van de seizoenen, dus een telling over alle seizoenen zou spelers overslaan.
+  - **Geen invaller scoorde:** de kaart blijft staan met de zin "Nog geen invaller scoorde." en zonder knop voor een afbeelding.
+    Zo zien bezoekers dat we het weten en dat het antwoord nul is.
+  - **De balk "Op deze pagina:"** heeft er een link bij: "Invallers", naar `#invallers-die-scoorden`.
+- **Waarom:** de gouden wissel: wie scoorde er nadat hij erin kwam? Dat weten we alleen uit de opstellingen en wissels.
+- **Alternatieven:** de kaart weglaten als geen invaller scoorde (de kaart zou dan per competitie komen en gaan, terwijl Assists en Minuten blijven staan); een kolom in Alle spelers (die tabel is al breed, en `I` is het aantal keer dat een speler erin kwam).

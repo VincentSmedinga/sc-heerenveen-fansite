@@ -4,16 +4,16 @@ import type { PlayerFiguresRow, TopScorersTableRow } from '@fansite/design-syste
 import { playerHref } from './player-address'
 import { personNameParts, personSortName } from './player-name'
 
-// What the cards of the page Spelers work out from the match reports (#832): the lists of the
-// assists and the minutes, and the table of all the players. The numbers come from
-// `readPlayerReportStats`, which counts the reports that are `klaar`; this file only puts them
-// in order and in the shape the components show.
+// What the cards of the page Spelers work out from the match reports (#832): the lists of
+// the assists, the minutes and the substitutes who scored (#1224), and the table of all the
+// players. The numbers come from `readPlayerReportStats`, which counts the reports that are
+// `klaar`; this file only puts them in order and in the shape the components show.
 
 /** How many places the lists of the assists and the minutes have, as the goal scorers do. */
 export const reportPlaces = 5
 
 /** A figure the lists are for. */
-export type RankedFigure = 'assists' | 'minutes'
+export type RankedFigure = 'assists' | 'minutes' | 'substituteGoals'
 
 /** The figures of the players of a season and a competition choice, and what they rest on. */
 export type ReportFigures = {

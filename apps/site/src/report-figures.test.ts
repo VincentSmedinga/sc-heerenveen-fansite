@@ -4,6 +4,14 @@ import { basedOnSentence, figureRows, rankedPlaces } from './report-figures'
 import { reportPlayer, reportPlayers } from './test-report-figures'
 
 describe('rankedPlaces', () => {
+  it('ranks the substitutes who scored, the most first, and leaves out the players who did not', () => {
+    const { rows, total } = rankedPlaces(reportPlayers, 'substituteGoals', false)
+
+    expect(total).toBe(1)
+    expect(rows).toEqual([expect.objectContaining({ goals: 2, position: 1 })])
+    expect(rows[0]?.players.map((player) => player.surname)).toEqual(['Bank'])
+  })
+
   it('puts players with the same figure on one place, as one row, in the order of their names, and the next place after them', () => {
     const { rows, total } = rankedPlaces(reportPlayers, 'assists', false)
 

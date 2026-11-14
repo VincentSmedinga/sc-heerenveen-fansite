@@ -1,7 +1,7 @@
 import type { RowDataPacket } from 'mysql2/promise'
 
 import { checkMatchReport } from '@fansite/shared/match-report'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NewMatch, NewMatchAppearance } from './schema.ts'
@@ -603,6 +603,7 @@ describe('the numbers of the players from the reports', () => {
     personSlug: null,
     redCards: 0,
     starts: 0,
+    substituteGoals: 0,
     substitutions: 0,
     yellowCards: 0,
     yellowRedCards: 0,
@@ -626,6 +627,28 @@ describe('the numbers of the players from the reports', () => {
       },
       { ...zero, assists: 1, matches: 1, minutes: 60, name: 'Sander Vos', playerId: vos, starts: 1 },
     ])
+  })
+
+  it('counts the goals of a player who came on from the bench as substitute goals', async () => {
+    const { bank, first } = await season3()
+    const [onTheBench] = await database.db
+      .select()
+      .from(matchAppearances)
+      .where(and(eq(matchAppearances.matchId, first), eq(matchAppearances.playerId, bank)))
+
+    await database.db.insert(matchGoals).values({
+      appearanceId: onTheBench!.id,
+      matchId: first,
+      minute: 75,
+      ours: true,
+      player: 'Bank',
+    })
+
+    const found = await readPlayerReportStats(database.db, season)
+
+    expect(found.find((row) => row.name === 'Jan Bank')).toMatchObject({ goals: 1, substituteGoals: 1 })
+    // Oyen started and scored: that is no substitute goal.
+    expect(found.find((row) => row.name === 'Luca Oyen')).toMatchObject({ goals: 2, substituteGoals: 0 })
   })
 
   it('counts a competition on its own', async () => {
