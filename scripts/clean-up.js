@@ -1,18 +1,15 @@
 // Cleans up what sessions leave behind on this computer: worktrees, local and remote branches,
-// the databases `fansite_<name>` and a stale slot of the heavy checks. The decision "Eén
-// opdracht
-// met vaste controles ruimt op, droog tenzij `--yes`" in docs/beslissingen/werkwijze.md
-// says why.
+// the databases `fansite_<name>` and a stale slot of the heavy checks.
+// The decision "Eén opdracht met vaste controles ruimt op, droog tenzij `--yes`" in
+// docs/beslissingen/werkwijze.md says why.
 //
-//   node scripts/clean-up.js         shows what would be removed and what stays, with the
-// reason
+//   node scripts/clean-up.js         shows what would be removed and what stays, and why
 //   node scripts/clean-up.js --yes   removes it, and prints every removal
 //
-// Nothing is removed on a guess: when a check fails or something can't be determined (`gh`
-// or the
-// database can't be reached), that part stays and is listed. "Merged" comes from the pull
-// request
-// and its head SHA, never from `git branch --merged`, because we merge with squash.
+// Nothing is removed on a guess: when a check fails or something can't be determined (`gh` or
+// the database can't be reached), that part stays and is listed.
+// "Merged" comes from the pull request and its head SHA, never from `git branch --merged`,
+// because we merge with squash.
 //
 // What decides something is `decide`, a function without side effects, exported for the tests.
 // What touches the computer is below that, and only runs when this file is started directly.
@@ -628,7 +625,7 @@ async function gather(root) {
     folder: lockFolder,
     modifiedAt: lockExists ? statSync(lockFolder).mtimeMs : now,
     owner,
-    ownerAlive: owner === undefined ? false : (attempt(() => process.kill(owner.pid, 0) === true) ?? false),
+    ownerAlive: owner === undefined ? false : isAlive(owner.pid),
   }
 
   return {
@@ -653,6 +650,17 @@ function git(args, options = {}) {
     stdio: ['ignore', 'pipe', 'pipe'],
     ...options,
   })
+}
+
+/** Whether a process with this id runs; EPERM means it exists but belongs to someone else. */
+function isAlive(pid) {
+  try {
+    process.kill(pid, 0)
+
+    return true
+  } catch (error) {
+    return error.code === 'EPERM'
+  }
 }
 
 async function main(argv) {
