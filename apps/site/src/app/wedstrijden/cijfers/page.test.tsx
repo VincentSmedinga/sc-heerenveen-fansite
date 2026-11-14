@@ -2000,3 +2000,40 @@ describe('the card Formaties', () => {
     expect(html).toContain('Toeschouwers')
   })
 })
+
+describe('the card Scheidsrechters', () => {
+  const played = matchData.matches.filter((match) => match.status === 'played')
+  const withReferees = (names: (null | string)[]) =>
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: matchData.matches.map((match) => {
+        const index = played.indexOf(match)
+
+        return index === -1 ? match : { ...match, referee: names[index] ?? null }
+      }),
+    })
+
+  it('is not on the page of a season where we know no referee', async () => {
+    const html = await render()
+
+    expect(html).not.toContain('Scheidsrechters')
+  })
+
+  it('is a level 3 heading in Rondom de wedstrijd, after Toeschouwers, with a row for each referee', async () => {
+    withReferees(['Jan Voorbeeld', 'Jan Voorbeeld', 'Karin Proefstad'])
+
+    const html = await render()
+    const headings = [...html.matchAll(/<h([1-6])[^>]*?(?: id="([^"]+)")?>/g)].map(([, level, id]) => `${level} ${id}`)
+
+    expect(headings.slice(-3)).toEqual(['2 rondom-de-wedstrijd', '3 toeschouwers', '3 scheidsrechters'])
+    expect(section(html, 'scheidsrechters')).toContain('>Jan Voorbeeld<')
+    expect(section(html, 'scheidsrechters')).toContain('>Karin Proefstad<')
+    expect(section(html, 'scheidsrechters')).not.toContain('de top 5')
+  })
+
+  it('says how many of the played matches it counts', async () => {
+    withReferees(['Jan Voorbeeld'])
+
+    expect(section(await render(), 'scheidsrechters')).toContain(`Op basis van 1 van de ${played.length} gespeelde`)
+  })
+})

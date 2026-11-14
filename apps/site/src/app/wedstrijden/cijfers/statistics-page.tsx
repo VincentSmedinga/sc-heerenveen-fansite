@@ -25,6 +25,8 @@ import {
   StreaksCard,
 } from '#src/MatchViews'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
+import { refereesOf } from '#src/referees'
+import { RefereesCard } from '#src/RefereesCard'
 import { loadSeasonPage, pickerPathOf, type SearchParams, statisticsPath } from '#src/season-page'
 import { seasonAddress, seasonChoices, seasonSlug } from '#src/seasons'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
@@ -103,6 +105,7 @@ export async function StatisticsPage({
   const imageSeason = current ? undefined : season
   const address = seasonAddress(statisticsPath, season, seasonOf(now))
   const formations = formationsOf(data.matches, await readFormations(season), competition)
+  const referees = refereesOf(data.matches, competition)
   const keyFigures = statisticsKeyFigures(data.standings, homeAwayOf(data.matches, competition).total, competition)
 
   return (
@@ -164,6 +167,7 @@ export async function StatisticsPage({
       </CardGroup>
       <CardGroup area="around" id="rondom-de-wedstrijd" title="Rondom de wedstrijd">
         <AttendanceCard competition={competition} level={3} matches={data.matches} season={imageSeason} />
+        <RefereesCard level={3} {...referees} />
         <FormationsCard level={3} {...formations} />
       </CardGroup>
       {(data.matches.length > 0 || data.standings.length > 0) && (

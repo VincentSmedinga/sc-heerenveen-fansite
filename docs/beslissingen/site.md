@@ -5749,3 +5749,20 @@
   - **Het ontwerp** toont twee kolommen, "W" en "W–G–V"; de kaart heeft de kolommen van Seizoen voor seizoen, zodat de kaarten op de pagina overeenkomen.
 - **Waarom:** supporters willen weten hoe we het deden in de beker en in Europa, en 107 Europese wedstrijden zitten nu in geen enkel getal.
 - **Alternatieven:** een rij per afzonderlijke Europese beker; één kolom W–G–V; de kaart wel laten volgen op de keuze van competitie.
+
+## Wedstrijden · Cijfers heeft de kaart Scheidsrechters, met onze balans per scheidsrechter
+
+- **Datum:** 14 november 2026
+- **Besluit:** in de groep Rondom de wedstrijd staat, na Toeschouwers en voor Formaties, de kaart Scheidsrechters, op het zachte vlak, bij een seizoen en bij alle seizoenen.
+  De tabel heeft een rij per scheidsrechter, met de meeste wedstrijden bovenaan en bij gelijk aantal op achternaam (het laatste woord van de naam), en de kolommen Scheidsrechter, G, W, G en V met een legenda eronder, dezelfde als bij Seizoen voor seizoen.
+  - **Wat telt:** de gespeelde wedstrijden van de gekozen competitie waarvan de database de scheidsrechter heeft (`refereesOf`).
+    Een regel onder de kaart zegt hoeveel dat er zijn: "Op basis van 80 van de 85 gespeelde wedstrijden."
+    Een beslissing door strafschoppen telt als winst of verlies, zoals overal (`resultOf`).
+  - **Bij een seizoen** staan alle scheidsrechters van het seizoen.
+    **Bij alle seizoenen** staat de top 5, met alle namen die de laatste plek delen, en de regel "158 scheidsrechters, de top 5 op aantal wedstrijden."
+  - **De naam** staat zoals de database hem heeft: twee schrijfwijzen van één naam zijn twee scheidsrechters, en de code voegt ze niet samen.
+    De naam is tekst, geen link; de link naar de wedstrijden van een scheidsrechter komt met #1227.
+  - **Weggelaten:** een kaart zonder wedstrijd met een scheidsrechter is er niet, dus ook niet in een seizoen of bij een competitie waarin we er geen kennen.
+  - **Het ontwerp** toont twee kolommen, "W" en "W–G–V"; de kaart heeft de kolommen van Seizoen voor seizoen en Per competitie, zodat de kaarten op de pagina overeenkomen.
+- **Waarom:** "onder wie winnen we, en onder wie nooit?" is een vraag die supporters stellen, en de scheidsrechter staat al bij de wedstrijden.
+- **Alternatieven:** één kolom W–G–V; de namen samenvoegen bij twee schrijfwijzen (dat is een keuze van de importer, #417); de top 10 bij alle seizoenen.
