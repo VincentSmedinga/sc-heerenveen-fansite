@@ -48,16 +48,15 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'doelpunten-per-linie',
   ],
   // All seasons (#1219). The made-up data has no hattrick, so the card Hattricks (anchor
-  // `hattricks`) is left out there, as it is for any choice that has none; the smoke test
-  // checks the cards that the made-up data has.
+  // `hattricks`) is left out there, as it is for any choice that has none. No person has a line
+  // or a country, so the cards Doelpunten per linie and per land (#1223) are left out too. The
+  // smoke test checks the cards that the made-up data has.
   '/spelers/cijfers/alle': [
     'topscorers-sinds-1990-91',
     'clubtopscorer-per-seizoen',
     'records',
     'strafschoppen',
     'meeste-seizoenen-in-de-selectie',
-    'doelpunten-per-linie',
-    'doelpunten-per-land',
   ],
   // The card Stadion(s) is on the page of every club that has one; the smoke test checks the
   // made-up club with two names of its stadium. The card Nieuws is on the page of a club that

@@ -338,20 +338,20 @@ test.describe('the bar under the header of /wedstrijden/cijfers', () => {
   })
 })
 
-// The figures of the players have two cards and, for a season with a match report that is
-// klaar (the seed makes up one for the current season), three more, so the bar has five links
-// or two. It is gone from 52rem on, like the other bars, because the cards then sit in the
+// The figures of the players have three cards and, for a season with a match report that is
+// klaar (the seed makes up one for the current season), four more, so the bar has seven links
+// or three. It is gone from 52rem on, like the other bars, because the cards then sit in the
 // main column and the sidebar side by side.
 test.describe('the bar under the header of /spelers/cijfers', () => {
   for (const colorScheme of ['light', 'dark'] as const) {
-    test(`has six links on a phone, to the cards, and passes axe in ${colorScheme}`, async ({ page }) => {
+    test(`has seven links on a phone, to the cards, and passes axe in ${colorScheme}`, async ({ page }) => {
       await page.emulateMedia({ colorScheme })
       await page.setViewportSize({ height: 800, width: 390 })
       await page.goto('/spelers/cijfers')
 
       const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
 
-      await expect(bar.getByRole('link')).toHaveCount(6)
+      await expect(bar.getByRole('link')).toHaveCount(7)
       await bar.getByRole('link', { name: 'Doelpuntenmakers' }).click()
       await expect(page).toHaveURL(/#doelpuntenmakers$/)
       await bar.getByRole('link', { name: 'Alle spelers' }).click()
@@ -402,11 +402,11 @@ test.describe('the bar under the header of /spelers/cijfers', () => {
     }
   })
 
-  test('is also on the page of an earlier season, with two links: it has no reports', async ({ page }) => {
+  test('is also on the page of an earlier season, with three links: it has no reports', async ({ page }) => {
     await page.setViewportSize({ height: 800, width: 390 })
     await page.goto(`/spelers/cijfers/${earlierSeasonSlug()}`)
 
-    await expect(page.getByRole('navigation', { name: 'Op deze pagina:' }).getByRole('link')).toHaveCount(2)
+    await expect(page.getByRole('navigation', { name: 'Op deze pagina:' }).getByRole('link')).toHaveCount(3)
   })
 })
 
