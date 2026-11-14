@@ -19,7 +19,7 @@ import {
  */
 
 /** The filters of no choice at all, which a question changes. */
-const nothing: Filters = {
+export const nothing: Filters = {
   clubs: [],
   competitions: [],
   days: [],

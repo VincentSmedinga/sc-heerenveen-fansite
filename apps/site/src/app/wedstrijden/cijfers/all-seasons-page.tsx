@@ -10,6 +10,8 @@ import { coachResultsOf, firstSeasonOf } from '#src/coachResults'
 import { CoachResultsCard } from '#src/CoachResultsCard'
 import { type CompetitionChoice, competitionFields, parseCompetition } from '#src/competition'
 import { CompetitionSwitch } from '#src/CompetitionSwitch'
+import { competitionTalliesOf } from '#src/competitionTally'
+import { CompetitionTallyCard } from '#src/CompetitionTallyCard'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { sourceOf } from '#src/match-sources'
@@ -153,6 +155,7 @@ export async function AllSeasonsPage({ searchParams }: { searchParams: Promise<S
             seasons={seasons}
             tallies={tallies}
           />
+          <CompetitionTallyCard level={3} tallies={competitionTalliesOf(matches)} />
           {coachResults}
         </CardGroup>
       )}

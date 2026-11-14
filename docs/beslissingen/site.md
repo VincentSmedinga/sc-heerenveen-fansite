@@ -5716,3 +5716,17 @@
 - **Waarom:** alle seizoenen in één tabel, elk met een weg naar dat seizoen, is wat een eigen pagina Seizoenen (#782) zou doen.
   De kaart doet dat zonder pagina erbij.
 - **Alternatieven:** een eigen pagina `/seizoenen` (#782); één kolom W–G–V; een kolom per seizoen met de hoofdtrainer.
+
+## Wedstrijden · Cijfers heeft de kaart Per competitie, met een rij per soort competitie
+
+- **Datum:** 14 november 2026
+- **Besluit:** op `/wedstrijden/cijfers/alle` staat in de groep Seizoenen, na Seizoen voor seizoen, de kaart Per competitie, op het zachte vlak.
+  De tabel heeft een rij per soort competitie waarvan we een gespeelde wedstrijd hebben, in de volgorde Eredivisie, Eerste divisie, KNVB Beker, Europa en Johan Cruijff Schaal, met de kolommen Competitie, G, W, G, V en D, dezelfde als bij Seizoen voor seizoen en met een legenda eronder.
+  - **De soorten** zijn die van het filter Competitie in Zoeken in wedstrijden (`competitionGroups`), zodat elke competitie van de database in precies één rij valt.
+    Europa telt elke Europese beker en de play-offs erom, en een regel onder de tabel zegt dat.
+  - **De kaart volgt de keuze van competitie niet**: ze telt altijd alle soorten (`competitionTalliesOf`), en zegt dat niet apart.
+    Een beslissing door strafschoppen telt als winst of verlies, zoals overal (`resultOf`).
+  - **Elke rij is een link** naar Zoeken in wedstrijden met die competitie gekozen (`?competitie=<waarde>`), zodat #1225 de getallen kan koppelen aan de lijst erachter.
+  - **Het ontwerp** toont twee kolommen, "W" en "W–G–V"; de kaart heeft de kolommen van Seizoen voor seizoen, zodat de kaarten op de pagina overeenkomen.
+- **Waarom:** supporters willen weten hoe we het deden in de beker en in Europa, en 107 Europese wedstrijden zitten nu in geen enkel getal.
+- **Alternatieven:** een rij per afzonderlijke Europese beker; één kolom W–G–V; de kaart wel laten volgen op de keuze van competitie.

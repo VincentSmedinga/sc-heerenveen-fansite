@@ -1189,6 +1189,10 @@ await withEmptyDatabase((database) =>
     // season, with a link to it, and the first table of five seasons at most.
     assert.match(allSeasonsHtml, /<h3[^>]*id="seizoen-voor-seizoen"/)
     assert.doesNotMatch(allSeasonsHtml, /id="onze-plek-door-de-jaren"/)
+    // The card Per competitie (#1213): a row for each kind of competition with a match, each a
+    // link to the search of matches with that competition chosen.
+    assert.match(allSeasonsHtml, /<h3[^>]*id="per-competitie"/)
+    assert.match(allSeasonsHtml, /<th scope="row"><a href="\/wedstrijden\/zoeken\?competitie=eredivisie"/)
     assert.match(
       allSeasonsHtml,
       /<caption class="hf-visually-hidden">De laatste seizoenen van sc Heerenveen: de plek in de Eredivisie/,
