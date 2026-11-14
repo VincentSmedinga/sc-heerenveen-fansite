@@ -126,9 +126,8 @@ export async function allSeasonsPlayersMetadata(): Promise<Metadata> {
  * the choice of competition. The main column is white and has the cards Topscorers sinds
  * 1990/91 and Clubtopscorer per seizoen.
  * The sidebar has soft cards, Records, Hattricks and Strafschoppen benut, a sentence that says
- * why
- * there is no list of matches, minutes or assists, and the credit. A card with nothing to say
- * is left out. A choice of competition that is not known is the page "niet gevonden".
+ * why there is no list of matches, minutes or assists, and the credit. A card with nothing to
+ * say is left out. A choice of competition that is not known is the page "niet gevonden".
  */
 export async function AllSeasonsPlayersPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const { competitie } = await searchParams
