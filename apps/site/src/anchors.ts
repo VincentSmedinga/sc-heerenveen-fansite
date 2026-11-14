@@ -81,7 +81,9 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   // (#1210), which are anchors too. The card Onze plek in de competitie is gone, because the
   // row of key figures shows our place, and the card Opmerkelijk with it (#1210). Onze plek
   // door de jaren and Resultaten per hoofdtrainer left the page of a season for the page of
-  // all seasons (#1211): their anchors are gone here on purpose.
+  // all seasons (#1211): their anchors are gone here on purpose. The card Formaties (#1216) is
+  // there for a season with a finished match report that has a formation, which the made-up
+  // season has.
   '/wedstrijden/cijfers': [
     'competitie',
     'uitslagen',
@@ -94,6 +96,7 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'reeksen',
     'thuis-en-uit',
     'toeschouwers',
+    'formaties',
     'hoe-de-wedstrijden-verlopen',
     'hoe-vaak-welke-uitslag',
     'uitersten',

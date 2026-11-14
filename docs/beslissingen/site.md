@@ -5662,3 +5662,21 @@
 - **Waarom:** twee kaarten telden alle seizoenen op een pagina over één seizoen en negeerden de kiezer.
   Nu telt elke kaart wat de werkbalk zegt, en alle seizoenen is een tweede bereik van dezelfde pagina.
 - **Alternatieven:** een aparte pagina voor alle seizoenen buiten Cijfers; een grafiek per thuiswedstrijd bij Toeschouwers; de reeksen als eigen kaart houden.
+
+## Wedstrijden · Cijfers heeft de kaart Formaties, alleen bij een seizoen met opstellingen
+
+- **Datum:** 14 november 2026
+- **Besluit:** in de groep Rondom de wedstrijd staat, na Toeschouwers, de kaart Formaties, op het zachte vlak.
+  De tabel heeft een rij voor elke formatie van sc Heerenveen, met de meeste wedstrijden bovenaan en bij gelijk aantal op naam.
+  De kolommen zijn Formatie, G (gespeeld) en Resultaat, het aantal gewonnen–gelijk–verloren in één cel ("6–3–2"), zoals het ontwerp het toont.
+  - **Wat telt:** de gespeelde wedstrijden van de gekozen competitie met een verslag dat klaar is en een formatie heeft (`listSeasonFormations`).
+    De kaart zegt hoeveel dat er zijn: "Op basis van 12 van de 14 gespeelde wedstrijden."
+    Een beslissing door strafschoppen telt als winst of verlies, zoals op de rest van de pagina.
+  - **Weggelaten:** een kaart zonder wedstrijd met een formatie is er niet, dus ook niet bij een competitie waarin geen wedstrijd er een heeft.
+    De balk "Op deze pagina:" verwijst naar groepen en verandert niet.
+    De kaart staat niet bij alle seizoenen: de formaties van 2007 tot 2026 ontbreken (zie #1226).
+  - **Snelheid:** één vraag per seizoen (`getSeasonFormations`), bewaard zoals de wedstrijden van dat seizoen.
+    Kan de vraag niet worden beantwoord, dan toont de pagina zich zonder de kaart.
+- **Waarom:** supporters willen weten met welke opstelling we wonnen.
+  Het verslag van een wedstrijd heeft onze formatie al, dus de kaart kost geen nieuwe gegevens.
+- **Alternatieven:** de kaart ook bij alle seizoenen, met een deel van de wedstrijden; drie kolommen voor gewonnen, gelijk en verloren.

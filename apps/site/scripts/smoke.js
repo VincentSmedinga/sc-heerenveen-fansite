@@ -1133,8 +1133,12 @@ await withEmptyDatabase((database) =>
         '3 de-nul-gehouden',
         '2 rondom-de-wedstrijd',
         '3 toeschouwers',
+        '3 formaties',
       ],
     )
+    // The made-up season has finished reports with a formation, so the card Formaties counts
+    // them (#1216).
+    assert.match(statisticsHtml, /aria-labelledby="formaties".*Op basis van .* gespeelde wedstrijden\./s)
     assert.ok(statisticsHtml.indexOf('aria-label="Kerngetallen"') < statisticsHtml.indexOf('id="competitie"'))
     assert.match(
       statisticsHtml,

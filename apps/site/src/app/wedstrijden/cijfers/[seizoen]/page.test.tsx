@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { FinalPlace } from '#src/matches'
 
-import { getCoachResultData, getFinalPlaces, getMatchData, getMatchSeasons } from '#src/matches'
+import { getCoachResultData, getFinalPlaces, getMatchData, getMatchSeasons, getSeasonFormations } from '#src/matches'
 import { statisticsShortcuts } from '#src/statisticsShortcuts'
 import { coachResultData, matchData } from '#src/test-matches'
 import { withoutIcons } from '#src/without-icons'
@@ -19,6 +19,7 @@ vi.mock('#src/matches', async (importOriginal) => ({
   getFinalPlaces: vi.fn(),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
+  getSeasonFormations: vi.fn(),
 }))
 
 const finalPlaces: FinalPlace[] = [
@@ -60,6 +61,8 @@ beforeEach(() => {
   vi.mocked(getFinalPlaces).mockResolvedValue(finalPlaces)
   vi.mocked(getCoachResultData).mockResolvedValue(coachResultData)
   vi.mocked(getMatchSeasons).mockReset()
+  vi.mocked(getSeasonFormations).mockReset()
+  vi.mocked(getSeasonFormations).mockResolvedValue([])
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26', '2024/25'])
   vi.mocked(getMatchData).mockImplementation((season) =>
     Promise.resolve(season === '2025/26' ? earlier : { ...matchData, season: season ?? '2026/27' }),
