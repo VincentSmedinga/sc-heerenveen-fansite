@@ -74,29 +74,9 @@ describe('/spelers/kies', () => {
   })
 })
 
-describe('/spelers/kies with the choice of the matches', () => {
-  it('sends the choice on to the address of the season, as the season picker asks', async () => {
-    expect((await ask('?seizoen=2025-26&competitie=eredivisie')).headers.get('location')).toBe(
-      '/spelers/2025-26?competitie=eredivisie',
-    )
-    expect((await ask('?seizoen=2026-27&competitie=eredivisie')).headers.get('location')).toBe(
-      '/spelers?competitie=eredivisie',
-    )
-  })
-
-  it('keeps the choice when the season is not one, as the page then shows the current season', async () => {
-    expect((await ask('?seizoen=onzin&competitie=eredivisie')).headers.get('location')).toBe(
-      '/spelers?competitie=eredivisie',
-    )
-  })
-
-  it.each([
-    '?seizoen=2025-26&competitie=',
-    '?seizoen=2025-26&competitie=Eredivisie',
-    '?seizoen=2025-26&competitie=alle',
-    '?seizoen=2025-26&competitie=eredivisie&competitie=eredivisie',
-    '?seizoen=2025-26&competitie[]=eredivisie',
-  ])('leaves out %j, so the picker never sends a visitor to the page "niet gevonden"', async (search) => {
-    expect((await ask(search)).headers.get('location')).toBe('/spelers/2025-26')
+describe('/spelers/kies with a choice of the matches', () => {
+  it('leaves the choice out: /spelers has no choice of competition', async () => {
+    expect((await ask('?seizoen=2025-26&competitie=eredivisie')).headers.get('location')).toBe('/spelers/2025-26')
+    expect((await ask('?seizoen=onzin&competitie=eredivisie')).headers.get('location')).toBe('/spelers')
   })
 })

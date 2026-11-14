@@ -46,21 +46,16 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   ],
   '/over-ons': ['wie-we-zijn', 'hoe-we-werken', 'gegevens'],
   '/privacy': ['tellen', 'hosting', 'cookies', 'berichten', 'andere-sites', 'vragen'],
-  // The card Selectie is the main card (#765). The card Doelpuntenmakers is here as the whole
-  // list, the only place it is (#774). The old anchor topscorers comes along. The card Sinds
-  // 1990/91 (#780) follows it, and the card Bijzondere doelpunten (#403) is under that. The
+  // The card Selectie is the only card of the page Spelers (#1218). The cards Doelpuntenmakers,
+  // Bijzondere doelpunten, Alle spelers, Assists and Minuten moved to /spelers/cijfers with
+  // their anchors, without a redirect: a link to them on /spelers breaks. The card Sinds
+  // 1990/91 and its anchor `sinds-1990-91` are on neither page now, on purpose (#1219 brings
+  // the card back).
+  '/spelers': ['selectie'],
+  // The cards that moved from /spelers (#1218). The old anchor topscorers comes along. The
   // cards Alle spelers, Assists and Minuten (#832) are there for a season with a match report
   // that is klaar, which the made-up season has.
-  '/spelers': [
-    'selectie',
-    'alle-spelers',
-    'doelpuntenmakers',
-    'topscorers',
-    'sinds-1990-91',
-    'bijzondere-doelpunten',
-    'assists',
-    'minuten',
-  ],
+  '/spelers/cijfers': ['doelpuntenmakers', 'topscorers', 'alle-spelers', 'bijzondere-doelpunten', 'assists', 'minuten'],
   // The card Stadion(s) is on the page of every club that has one; the smoke test checks the
   // made-up club with two names of its stadium. The card Nieuws is on the page of a club that
   // headlines name (#777); the smoke test gives Testdorp FC six, so its page is the one that

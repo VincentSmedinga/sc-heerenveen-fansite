@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { playersShortcuts, playersShortcutsFor, statisticsShortcuts } from './statisticsShortcuts'
+import {
+  playerFiguresShortcuts,
+  playerFiguresShortcutsFor,
+  playersShortcuts,
+  statisticsShortcuts,
+} from './statisticsShortcuts'
 
 describe('statisticsShortcuts', () => {
   it('has a link for each of the twelve cards with figures', () => {
@@ -19,36 +24,38 @@ describe('statisticsShortcuts', () => {
 })
 
 describe('playersShortcuts', () => {
-  it('has four links, to the cards Selectie, Doelpuntenmakers, Sinds 1990/91 and Bijzondere doelpunten, in the order of the page', () => {
-    expect(playersShortcuts).toEqual([
-      { href: '#selectie', label: 'Selectie' },
+  it('has one link, to the card Selectie, the only card of /spelers', () => {
+    expect(playersShortcuts).toEqual([{ href: '#selectie', label: 'Selectie' }])
+  })
+})
+
+describe('playerFiguresShortcuts', () => {
+  it('has two links, to the cards Doelpuntenmakers and Bijzondere doelpunten, in the order of the page', () => {
+    expect(playerFiguresShortcuts).toEqual([
       { href: '#doelpuntenmakers', label: 'Doelpuntenmakers' },
-      { href: '#sinds-1990-91', label: 'Sinds 1990/91' },
       { href: '#bijzondere-doelpunten', label: 'Bijzondere doelpunten' },
     ])
   })
 
-  it('has no link on Cijfers, which has no card Doelpuntenmakers any more', () => {
+  it('has no link on Cijfers of the matches, which has no card Doelpuntenmakers', () => {
     expect(statisticsShortcuts.map(({ href }) => href)).not.toContain('#doelpuntenmakers')
   })
 })
 
-describe('playersShortcutsFor', () => {
-  it('is the four links without reports', () => {
-    expect(playersShortcutsFor(false)).toBe(playersShortcuts)
+describe('playerFiguresShortcutsFor', () => {
+  it('is the two links without reports', () => {
+    expect(playerFiguresShortcutsFor(false)).toBe(playerFiguresShortcuts)
   })
 
-  it('adds Alle spelers after the squad and Assists and Minuten at the end when there are reports, with no anchor twice', () => {
-    const links = playersShortcutsFor(true)
+  it('adds Alle spelers after Doelpuntenmakers and Assists and Minuten before the special goals when there are reports, with no anchor twice', () => {
+    const links = playerFiguresShortcutsFor(true)
 
     expect(links.map(({ href }) => href)).toEqual([
-      '#selectie',
-      '#alle-spelers',
       '#doelpuntenmakers',
-      '#sinds-1990-91',
-      '#bijzondere-doelpunten',
+      '#alle-spelers',
       '#assists',
       '#minuten',
+      '#bijzondere-doelpunten',
     ])
     expect(new Set(links.map(({ href }) => href)).size).toBe(links.length)
   })

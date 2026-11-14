@@ -83,8 +83,12 @@ test.describe('the menu and the bar of Wedstrijden without JavaScript', () => {
 
     await expect(menu(page).locator('[aria-current]')).toHaveCount(1)
     await expect(bar(page, 'Spelers')).toHaveAttribute('aria-current', 'page')
-    await expect(menu(page).locator('.hf-navigation-bar').getByRole('link')).toHaveText(['Overzicht', 'Zoeken'])
-    await expect(menu(page).getByRole('link', { name: 'Cijfers' })).toHaveCount(0)
+    await expect(menu(page).locator('.hf-navigation-bar').getByRole('link')).toHaveText([
+      'Cijfers',
+      'Overzicht',
+      'Zoeken',
+    ])
+    await expect(menu(page).getByRole('link', { name: 'Cijfers' })).toHaveAttribute('href', '/spelers/cijfers')
   })
 })
 

@@ -8,7 +8,7 @@ const slug = earlierSeasonSlug()
 // the current season. A visitor in an earlier season must stay in it when a link takes them to
 // another of these pages, so a link to a base address (or to the page of another season) is a
 // link that drops the season. Tegenstanders counts all seasons, so it is not one of them.
-const seasonPages = ['/wedstrijden', '/cijfers', '/spelers']
+const seasonPages = ['/wedstrijden', '/cijfers', '/spelers', '/spelers/cijfers']
 const pathsInSeason = seasonPages.map((base) => `${base}/${slug}`)
 
 test.describe('the links between the pages of a season', () => {
@@ -34,7 +34,7 @@ test.describe('the links between the pages of a season', () => {
             !target.endsWith('/kies') && target !== '/wedstrijden/zoeken' && !target.startsWith('/tegenstanders'),
         )
         // The page of a player is `/spelers/<name>`: a name, not a season (#1087).
-        .filter((target) => !/^\/spelers\/(?!\d{4}-\d{2}$)/u.test(target))
+        .filter((target) => !/^\/spelers\/(?!\d{4}-\d{2}$|cijfers(?:\/|$))/u.test(target))
 
       // The menu alone links to two other pages of a season, so the walk cannot pass by finding
       // nothing.

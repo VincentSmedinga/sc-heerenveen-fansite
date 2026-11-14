@@ -95,6 +95,14 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: `/spelers/kies?seizoen=${earlierSeasonSlug()}`, status: 200 },
   { path: '/spelers/kies?seizoen=onzin', status: 200 },
   { path: '/spelers/kies', status: 200 },
+  // The figures of the players (#1218), with the same set of addresses. `cijfers` is no player.
+  { path: '/spelers/cijfers', status: 200 },
+  { path: `/spelers/cijfers/${earlierSeasonSlug()}`, status: 200 },
+  { path: `/spelers/cijfers/kies?seizoen=${earlierSeasonSlug()}`, status: 200 },
+  { path: '/spelers/cijfers/kies?seizoen=onzin', status: 200 },
+  { path: '/spelers/cijfers/kies', status: 200 },
+  { path: '/spelers/cijfers/2099-00', status: 404 },
+  { path: '/spelers/cijfers/onzin', status: 404 },
   // The overview of all players, by name and by country (#1138).
   { path: '/spelers/overzicht', status: 200 },
   { path: '/spelers/overzicht/land', status: 200 },
@@ -175,9 +183,11 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/cijfers?competitie=onzin', status: 404 },
   { path: '/cijfers?competitie=eredivisie&competitie=eredivisie', status: 404 },
   { path: `/cijfers/kies?seizoen=${earlierSeasonSlug()}&competitie=eredivisie`, status: 200 },
-  { path: '/spelers?competitie=eredivisie', status: 200 },
-  { path: '/spelers?competitie=onzin', status: 404 },
-  { path: `/spelers/kies?seizoen=${earlierSeasonSlug()}&competitie=eredivisie`, status: 200 },
+  { path: '/spelers/cijfers?competitie=eredivisie', status: 200 },
+  { path: '/spelers/cijfers?competitie=onzin', status: 404 },
+  { path: `/spelers/cijfers/kies?seizoen=${earlierSeasonSlug()}&competitie=eredivisie`, status: 200 },
+  // /spelers has no choice of competition, so it ignores one.
+  { path: '/spelers?competitie=onzin', status: 200 },
   // The podcasts: all, one (with the card about it), both (which is all), the second page, and
   // the addresses that say "niet gevonden": an unknown podcast, a podcast given twice and a
   // page that is wrong.

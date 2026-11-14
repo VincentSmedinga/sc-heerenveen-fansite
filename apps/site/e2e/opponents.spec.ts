@@ -430,7 +430,7 @@ test.describe('the bar of Wedstrijden', () => {
 
     const links = page.getByRole('navigation', { name: 'Hoofdmenu' }).locator('.hf-navigation-bar').getByRole('link')
 
-    await expect(links).toHaveText(['Overzicht', 'Zoeken'])
+    await expect(links).toHaveText(['Cijfers', 'Overzicht', 'Zoeken'])
   })
 })
 

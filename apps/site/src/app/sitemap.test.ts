@@ -78,6 +78,8 @@ const notInSitemap: string[] = [
   // The same for the players of a season that is over: only /spelers is listed. The same route
   // is the page of each player, which the sitemap lists from the database.
   '/spelers/[seizoen]',
+  // The figures of the players of a season that is over: only /spelers/cijfers is listed.
+  '/spelers/cijfers/[seizoen]',
   // The matches of a season that is over: only the current season, /wedstrijden, is listed.
   '/wedstrijden/[seizoen]',
   // One page for every match with a report that is klaar: the sitemap lists them from the

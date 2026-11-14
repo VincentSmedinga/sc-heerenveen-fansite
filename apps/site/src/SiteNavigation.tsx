@@ -34,18 +34,23 @@ const matchesSubitems = [
 
 const playersPath = '/spelers'
 
-// The sub-pages of Spelers: the overview of all players (by name, and by country below it) and
-// the search. The page of a season has none of them as its current page.
+// The sub-pages of Spelers: the figures of the players (with the page of each season below
+// it), the overview of all players (by name, and by country below it) and the search. The page
+// of a season has none of them as its current page.
+const playerFiguresPath = `${playersPath}/cijfers`
+
 const playersOverviewPath = `${playersPath}/overzicht`
 
 const playersSearchPath = `${playersPath}/zoeken`
 
 const playersSubitems = [
+  { href: playerFiguresPath, label: 'Cijfers' },
   { href: playersOverviewPath, label: 'Overzicht' },
   { href: playersSearchPath, label: 'Zoeken' },
 ]
 
-const seasonPages = [playersPath, statisticsPath, matchesPath]
+// The figures of the players come before Spelers: the first match decides (see seasonOfPath).
+const seasonPages = [playerFiguresPath, playersPath, statisticsPath, matchesPath]
 
 const newsPath = '/nieuws'
 
@@ -79,8 +84,9 @@ const itemsWithAdmin = [...items.slice(0, -1), adminItem, ...items.slice(-1)]
  * the page and every page below it, such as the season, and a sub-page of its own:
  * Cijfers, with the page of each season below it (`/cijfers/2025-26`), and Tegenstanders,
  * with the page of each club below it (`/tegenstanders/ado-den-haag`). Spelers has the page
- * and the page of each season below it (`/spelers/2025-26`), and two sub-pages: the overview
- * (with the page by country below it) and the search. A path that belongs to no item,
+ * and the page of each season below it (`/spelers/2025-26`), and three sub-pages: the figures
+ * (with the page of each season below it), the overview (with the page by country below it)
+ * and the search. A path that belongs to no item,
  * such as /bronnen, the home page or a page that does not exist, has neither.
  */
 export function currentOf(pathname: string): { item?: string; subitem?: string } {
@@ -108,6 +114,10 @@ export function currentOf(pathname: string): { item?: string; subitem?: string }
 
   if (pathname === '/wedstrijden' || pathname.startsWith('/wedstrijden/')) {
     return { item: '/wedstrijden' }
+  }
+
+  if (pathname === playerFiguresPath || pathname.startsWith(`${playerFiguresPath}/`)) {
+    return { item: playersPath, subitem: playerFiguresPath }
   }
 
   if (pathname === playersOverviewPath || pathname.startsWith(`${playersOverviewPath}/`)) {
@@ -198,7 +208,13 @@ export function SiteNavigation({ matchesBar }: { matchesBar?: ReactNode }) {
         ...(item.href === matchesPath && matchesBar !== undefined && { bar: matchesBar }),
         current: item.href === here.item && here.subitem === undefined,
         ...(item.subitems && {
-          subitems: item.subitems.map((subitem) => ({ ...subitem, current: subitem.href === here.subitem })),
+          subitems: item.subitems.map((subitem) => ({
+            ...subitem,
+            current: subitem.href === here.subitem,
+            // Only the figures of the players keep the season of the page; the bar of
+            // Wedstrijden is drawn by its own slot, and the other sub-pages have no season.
+            href: subitem.href === playerFiguresPath ? hrefOf(subitem.href, pathname) : subitem.href,
+          })),
         }),
       }))}
       label="Hoofdmenu"

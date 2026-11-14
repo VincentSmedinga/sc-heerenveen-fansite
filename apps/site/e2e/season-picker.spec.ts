@@ -10,7 +10,7 @@ const slug = earlierSeasonSlug()
 // The list of seasons, by its label: exactly Seizoen, and not the card Verloop van het seizoen.
 const listOf = (page: Page) => page.getByRole('combobox', { exact: true, name: 'Seizoen' })
 
-// The season picker next to the title of /wedstrijden, /cijfers and /spelers,
+// The season picker next to the title of /wedstrijden, /cijfers, /spelers and /spelers/cijfers,
 // which share it: it works without JavaScript, with JavaScript it changes the page as soon as a
 // season is chosen, and a keyboard can reach every season without the page changing at each
 // arrow key.
@@ -18,6 +18,7 @@ const pickerPages = [
   { heading: 'Wedstrijden', path: '/wedstrijden' },
   { heading: 'Cijfers', path: '/cijfers' },
   { heading: 'Spelers', path: '/spelers' },
+  { heading: 'Cijfers van de spelers', path: '/spelers/cijfers' },
 ] as const
 
 for (const { heading, path } of pickerPages) {

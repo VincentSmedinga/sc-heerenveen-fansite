@@ -30,6 +30,13 @@ export const statisticsPath = '/cijfers'
 export const playersPath = '/spelers'
 
 /**
+ * The base address of the figures of the players, which is the address of its current season.
+ * `cijfers` is a reserved address below `/spelers` (see `reservedPlayerSlugs`), so no player
+ * has it as a name.
+ */
+export const playerFiguresPath = `${playersPath}/cijfers`
+
+/**
  * The matches, the table and the Wikipedia pages of a season, and the seasons to choose from,
  * or what went wrong. A page that throws gets an empty page with a 500 from Next.js, and the
  * text only after JavaScript runs. So the page catches the error and shows the error page
