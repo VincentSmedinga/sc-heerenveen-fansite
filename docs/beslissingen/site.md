@@ -5766,3 +5766,19 @@
   - **Het ontwerp** toont twee kolommen, "W" en "W–G–V"; de kaart heeft de kolommen van Seizoen voor seizoen en Per competitie, zodat de kaarten op de pagina overeenkomen.
 - **Waarom:** "onder wie winnen we, en onder wie nooit?" is een vraag die supporters stellen, en de scheidsrechter staat al bij de wedstrijden.
 - **Alternatieven:** één kolom W–G–V; de namen samenvoegen bij twee schrijfwijzen (dat is een keuze van de importer, #417); de top 10 bij alle seizoenen.
+
+## Wedstrijden · Cijfers heeft de kaart Strafschoppen, met de benutte strafschoppen voor en tegen ons
+
+- **Datum:** 14 november 2026
+- **Besluit:** in de groep Doelpunten staat, na De nul gehouden, de kaart Strafschoppen, op het zachte vlak, bij een seizoen en bij alle seizoenen.
+  De kaart toont twee getallen, "Voor ons, benut" en "Tegen ons, benut", als een lijst met de naam in stille tekst boven het getal, zoals bij Uitersten.
+  - **Wat telt:** de doelpunten die uit een strafschop kwamen (`penalty`), in de gespeelde wedstrijden van de gekozen competitie waarvan we de doelpunten kennen (`matchPenaltiesOf`).
+    Welke kant het is, zegt `ours`.
+    Zo telt de kaart voor ons hetzelfde als Bijzondere doelpunten en Strafschoppen benut op Spelers · Cijfers, en een test controleert dat de twee overeenkomen.
+  - **Een strafschoppenserie** na een verlenging is geen strafschop in de wedstrijd: de schoten staan niet bij de doelpunten en tellen dus niet mee.
+  - **Gemist en gestopt:** die kennen we niet, tot #408 ze importeert.
+    Een regel onder de kaart zegt dat we alleen de benutte strafschoppen kennen, en een tweede regel zegt op hoeveel wedstrijden de getallen rusten ("Op basis van …", `basisOf`).
+  - **Zonder strafschoppen** in het bereik staat er "Geen strafschoppen" in plaats van de lijst, en de kaart blijft staan.
+  - **Het ontwerp** laat de kaart in het zachte vlak zien met twee regels; de kaart heeft de regel over de benutte strafschoppen en de regel "Op basis van" erbij, die het ontwerp niet toont.
+- **Waarom:** supporters willen weten hoeveel strafschoppen we kregen en tegen kregen, en uit de doelpunten weten we welke uit een strafschop kwamen.
+- **Alternatieven:** de strafschoppen van een strafschoppenserie meetellen; wachten tot #408 de gemiste strafschoppen heeft; een tabel in plaats van een lijst.

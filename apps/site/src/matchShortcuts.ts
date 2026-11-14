@@ -40,6 +40,9 @@ export const competitionTallyCard = { id: 'per-competitie', name: 'Per competiti
 /** The name and the anchor of the card with our results per referee, on Cijfers. */
 export const refereesCard = { id: 'scheidsrechters', name: 'Scheidsrechters' } as const
 
+/** The name and the anchor of the card with our penalties for and against, on Cijfers. */
+export const penaltiesCard = { id: 'strafschoppen', name: 'Strafschoppen' } as const
+
 type Shortcut = { href: string; label: string }
 
 const resultsCards: Record<Competition, { id: string; name: string }> = {

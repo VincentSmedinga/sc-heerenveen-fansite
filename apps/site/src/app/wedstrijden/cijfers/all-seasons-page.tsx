@@ -29,6 +29,8 @@ import { CleanSheetsCard, GoalsPerQuarterCard, HomeAwayCard, ScoreCountsCard } f
 import { pageMetadata } from '#src/metadata'
 import { getSourcePages } from '#src/opponents'
 import { OpponentsCredit } from '#src/OpponentViews'
+import { matchPenaltiesOf } from '#src/penalties'
+import { PenaltiesCard } from '#src/PenaltiesCard'
 import { refereesOf, topRefereeCount } from '#src/referees'
 import { RefereesCard } from '#src/RefereesCard'
 import { pickerPathOf, type SearchParams, statisticsPath } from '#src/season-page'
@@ -113,6 +115,7 @@ export async function AllSeasonsPage({ searchParams }: { searchParams: Promise<S
   const [coachResults, finalPlaces] = await Promise.all([loadCoachResults(competition), loadFinalPlaces()])
   const tallies = seasonTalliesOf(matches, competition)
   const referees = refereesOf(matches, competition, { top: topRefereeCount })
+  const penalties = matchPenaltiesOf(matches, competition)
 
   return (
     <Page.Main
@@ -179,6 +182,7 @@ export async function AllSeasonsPage({ searchParams }: { searchParams: Promise<S
           path={allSeasonsPath}
           since={since}
         />
+        <PenaltiesCard level={3} {...penalties} />
       </CardGroup>
       <CardGroup area="around" id="rondom-de-wedstrijd" title="Rondom de wedstrijd">
         <AttendanceRecordsCard competition={competition} level={3} matches={matches} since={since} />

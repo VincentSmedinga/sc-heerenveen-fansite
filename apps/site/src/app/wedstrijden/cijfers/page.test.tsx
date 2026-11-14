@@ -70,7 +70,7 @@ afterEach(() => {
 })
 
 describe('the page /wedstrijden/cijfers', () => {
-  it('has one h1, four h2 headings for the groups and nine h3 headings for the cards, in the order of the source', async () => {
+  it('has one h1, four h2 headings for the groups and ten h3 headings for the cards, in the order of the source', async () => {
     const html = await render()
     const headings = [...html.matchAll(/<h([1-6])[^>]*?(?: id="([^"]+)")?>/g)].map(
       ([, level, id]) => `${level} ${id ?? ''}`,
@@ -89,6 +89,7 @@ describe('the page /wedstrijden/cijfers', () => {
       '2 doelpunten',
       '3 doelpunten-per-kwartier',
       '3 de-nul-gehouden',
+      '3 strafschoppen',
       '2 rondom-de-wedstrijd',
       '3 toeschouwers',
     ])
@@ -207,7 +208,7 @@ describe('the page /wedstrijden/cijfers', () => {
     const groups = [
       ['competitie', ['verloop-van-het-seizoen', 'hoe-de-wedstrijden-verlopen']],
       ['uitslagen', ['thuis-en-uit', 'reeksen', 'hoe-vaak-welke-uitslag', 'uitersten']],
-      ['doelpunten', ['doelpunten-per-kwartier', 'de-nul-gehouden']],
+      ['doelpunten', ['doelpunten-per-kwartier', 'de-nul-gehouden', 'strafschoppen']],
       ['rondom-de-wedstrijd', ['toeschouwers']],
     ] as const
 
@@ -2035,5 +2036,14 @@ describe('the card Scheidsrechters', () => {
     withReferees(['Jan Voorbeeld'])
 
     expect(section(await render(), 'scheidsrechters')).toContain(`Op basis van 1 van de ${played.length} gespeelde`)
+  })
+})
+
+describe('the card Strafschoppen on /wedstrijden/cijfers', () => {
+  it('stays with "Geen strafschoppen" when no goal of the season came from a penalty (#1215)', async () => {
+    const html = await render()
+
+    expect(section(html, 'strafschoppen')).toContain('Geen strafschoppen')
+    expect(section(html, 'strafschoppen')).toContain('We kennen alleen de benutte strafschoppen.')
   })
 })
