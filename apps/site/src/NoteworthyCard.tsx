@@ -2,7 +2,7 @@ import type { PublicMatch, PublicStaff } from '@fansite/db/queries'
 
 import { Card, Heading, Link, Text } from '@fansite/design-system'
 
-import { type CompetitionChoice, competitionParam, leagueValue } from './competition'
+import { type CompetitionChoice, competitionFields } from './competition'
 import { dutchDay, noteworthy, noteworthyFactsOf, orderNoteworthyFacts, pickNoteworthyFact } from './noteworthy'
 
 /**
@@ -41,7 +41,7 @@ export function NoteworthyCard({
     return null
   }
 
-  const query = new URLSearchParams(competition === 'league' ? { [competitionParam]: leagueValue } : {})
+  const query = new URLSearchParams(competitionFields(competition))
 
   if (picked.next !== undefined) {
     query.set(noteworthy.param, String(picked.next))

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   type CareerMatch,
-  playedBesidesEredivisie,
+  playerCompetitionOptions,
   type PlayerSeasonFacts,
   playerSeasonsOf,
   type SeasonAppearance,
@@ -188,12 +188,12 @@ describe('the seasons of a player', () => {
       ],
       tables: [{ appearances: 30, assists: 6, season: '2004/05' }],
     }
-    const [wikipedia, lineups] = playerSeasonsOf(facts, 'Eredivisie')
+    const [wikipedia, lineups] = playerSeasonsOf(facts, ['Eredivisie'])
 
     expect(lineups).toMatchObject({ assists: 1, goals: 1, played: 1, started: 1 })
     expect(wikipedia).toMatchObject({ assists: undefined, goals: 0, played: undefined, source: 'wikipedia' })
     expect(playerSeasonsOf(facts)[0]).toMatchObject({ assists: 6, played: 30 })
-    expect(playedBesidesEredivisie(facts)).toBe(true)
-    expect(playedBesidesEredivisie({ ...facts, appearances: [], goals: [goal('2003/04')] })).toBe(false)
+    expect(playerCompetitionOptions(facts)).toEqual(['all', 'league', 'cup'])
+    expect(playerCompetitionOptions({ ...facts, appearances: [], goals: [goal('2003/04')] })).toEqual([])
   })
 })
