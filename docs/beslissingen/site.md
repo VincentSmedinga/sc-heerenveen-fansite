@@ -952,6 +952,7 @@
 - **Nadeel:** de zoekpagina is minder zichtbaar dan in het hoofdmenu, en het menu in de footer wijst de huidige pagina niet aan.
 - **Hoe:** het formulier en de resultaten staan samen in één kaart, zodat de zijbalk er op een breed scherm gelijk mee begint.
   Voor een zoekvraag, als er nog geen resultaten zijn, heeft de kaart het blauwe vlak (`surface="soft"`); met resultaten is ze wit, zoals de andere kaarten.
+  **Later (#1250):** de kaart met het zoekveld is warm, met en zonder resultaten.
   Boven de lijst met spelers staat "Zoek snel op een achternaam."
   De lijst staat na de resultaten in de bron, dus onder de resultaten op een smal scherm, en ze is van `players` van het lopende seizoen (`listSquad`), per positie.
   Elke naam is een gewone link naar `/zoeken?q=<achternaam>`, met de zoekterm uit de tabel.

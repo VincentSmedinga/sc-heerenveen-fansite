@@ -1,9 +1,11 @@
 import preview from '#.storybook/preview'
 
 import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
+import { Card } from '../card/Card'
 import { CheckboxGroup } from '../checkbox-group/CheckboxGroup'
 import { Disclosure } from '../disclosure/Disclosure'
 import { Field } from '../field/Field'
+import { Heading } from '../heading/Heading'
 import { Select } from '../select/Select'
 import { FilterList } from './FilterList'
 
@@ -19,6 +21,7 @@ const meta = preview.meta({
           'De filters van een zoekopdracht als één lijst van rijen die open- en dichtklappen.',
           'Een dichte rij zegt wat er gekozen is, zodat de bezoeker niet alles hoeft te openen. Zet de lijst in een formulier, zodat het werkt zonder JavaScript.',
           'Hij is gebouwd uit de rijen van `Filter`.',
+          'De rijen zelf zijn warm, want op een zoekpagina is wat filters bevat warm. Een kaart eromheen is niet nodig.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -74,4 +77,18 @@ export const Default = meta.story({
 export const Chosen = meta.story({
   args: { children: rows(true) },
   name: 'Met keuzes',
+})
+
+export const OnASearchPage = meta.story({
+  name: 'Op een zoekpagina',
+  render: () => (
+    <div style={{ display: 'grid', gap: '1rem' }}>
+      {rows(true)}
+      <Card aria-labelledby="resultaten-kop">
+        <Heading appearance={3} id="resultaten-kop" level={2}>
+          1.385 wedstrijden
+        </Heading>
+      </Card>
+    </div>
+  ),
 })

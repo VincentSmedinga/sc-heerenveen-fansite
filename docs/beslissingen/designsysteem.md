@@ -3547,3 +3547,14 @@
   Een `dd` met een `Match` of een alinea heeft de grootte en het gewicht van gewone tekst, en de `Match` in een `dd` heeft alleen een kleine ruimte onder de term, geen eigen ruimte eronder.
 - **Waarom:** een schermlezer hoort dat de naam bij de wedstrijd hoort, en de naam en de wedstrijd zijn niet meer twee losse stukken tekst.
 - **Alternatieven:** alleen de regels met een `Match` een `dl` en de tekstregels een `List.Item` (een `dl` naast losse lijstitems is onzuiver en de opmaak verschilt); een nieuw onderdeel voor gelabelde regels (er is er al een).
+
+## Op een zoekpagina is wat filters of een zoekveld bevat warm
+
+- **Datum:** 14 november 2026
+- **Besluit:** op een zoekpagina is wat filters of een zoekveld bevat warm, en zijn de andere kaarten wit, zacht of sterk, nooit warm (#1250).
+  De rijen van `FilterList` hebben zelf het warme vlak, met de lijnen van het warme vlak voor de rand en de pijl, zonder kaart eromheen.
+  De kaart met het zoekveld op `/spelers/zoeken` en `/nieuws/zoeken` is warm, ook met resultaten.
+  De pagina van `Card` in Storybook zegt het in één alinea.
+- **Waarom:** de bezoeker ziet op elke zoekpagina op dezelfde manier wat hij kan instellen en wat het resultaat is.
+- **Alternatieven:** de filters in één warme kaart zetten, wat een extra laag om de rijen geeft; alleen wit en zacht toestaan voor de andere kaarten, wat sterk uitsluit zonder reden; de regel alleen in de code vastleggen.
+- **Later:** de kaart met het zoekveld was zacht zonder resultaten en wit met resultaten; dat geldt niet meer.

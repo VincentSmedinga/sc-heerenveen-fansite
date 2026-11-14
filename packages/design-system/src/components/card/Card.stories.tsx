@@ -49,6 +49,7 @@ const meta = preview.meta({
         component: [
           'Een kaart zet een blok van de pagina op een eigen vlak, met een rand en ronde hoeken. Zo staat elk blok los op de pagina.',
           'Het vlak zegt wat voor blok het is: wit voor de hoofdinhoud, sterk voor de mensen en organisaties achter de inhoud, zacht voor lijsten en records die erbij horen, warm voor iets opmerkelijks of een uitnodiging, en transparant voor een bronvermelding.',
+          'Op een zoekpagina is wat filters of een zoekveld bevat warm, en zijn de andere kaarten wit, zacht of sterk.',
           'Buurkaarten mogen dezelfde kleur hebben, en kleur is nooit het enige teken: in donker zijn zacht en wit gelijk, en warm en sterk ook.',
           'Met `shareable` krijgt de kaart een knop die er een afbeelding van maakt, met het logo, het adres van de site, de datum en de bron; gebruik hem alleen voor cijfers en feiten, nooit voor het werk van journalisten.',
         ].join('\n'),
