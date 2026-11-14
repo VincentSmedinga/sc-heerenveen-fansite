@@ -96,6 +96,7 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'reeksen',
     'thuis-en-uit',
     'toeschouwers',
+    'scheidsrechters',
     'formaties',
     'hoe-de-wedstrijden-verlopen',
     'hoe-vaak-welke-uitslag',
@@ -120,6 +121,7 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'doelpunten-per-kwartier',
     'de-nul-gehouden',
     'toeschouwers',
+    'scheidsrechters',
   ],
 }
 
