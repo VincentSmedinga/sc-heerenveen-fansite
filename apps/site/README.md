@@ -408,7 +408,7 @@ De plek is die van de stand, ook bij een andere keuze van de competitie; de ande
 Zonder gespeelde wedstrijd blijft alleen de plek over, en minder dan twee getallen geven geen rij.
 Op een telefoon staan de getallen twee aan twee, vanaf 52rem vier naast elkaar.
 De groepen zijn `CardGroup`s uit het designsysteem, elk een gebied van `Page.Main` met een kop van niveau 2 onder een lijn in `sand-700` en de kaarten (kop van niveau 3) in `CardColumns`:
-Competitie (Verloop van het seizoen, Hoe de wedstrijden verlopen), Uitslagen (Thuis en uit, Reeksen, Hoe vaak welke uitslag, Uitersten), Doelpunten (Doelpunten per kwartier, De nul gehouden) en Rondom de wedstrijd (Toeschouwers).
+Competitie (Verloop van het seizoen, Hoe de wedstrijden verlopen), Uitslagen (Thuis en uit, Reeksen, Hoe vaak welke uitslag, Uitersten), Doelpunten (Doelpunten per kwartier, De nul gehouden) en Rondom de wedstrijd (Toeschouwers, Scheidsrechters).
 De kaarten krijgen het niveau van hun kop mee met `level={3}`; zonder staat die op 2, zoals op de andere pagina's.
 De kaarten van een groep staan op een breed scherm in twee even brede kolommen.
 In een browser die CSS Grid Lanes kent (`display: grid-lanes`) sluiten ze in een kolom op elkaar aan; elders staat een raster met twee kaarten per rij.
@@ -416,7 +416,7 @@ De volgorde in de broncode is de volgorde van lezen, met en zonder Grid Lanes.
 De kaarten Onze plek in de competitie en Opmerkelijk zijn van de pagina verdwenen (#1210), en Seizoen voor seizoen (met Onze plek door de jaren erin, #1212) en Resultaten per hoofdtrainer staan alleen bij alle seizoenen (#1211, zie hieronder); hun ankers staan niet meer bij `/wedstrijden/cijfers` in `src/anchors.ts`.
 De seizoenskiezer heeft "Alle seizoenen" als eerste keuze, en die gaat naar `/wedstrijden/cijfers/alle` (`app/wedstrijden/cijfers/all-seasons-page.tsx`, de helpers in `src/seasons.ts`).
 `alle` is geen seizoen.
-Die pagina telt alle wedstrijden sinds het eerste seizoen dat we hebben (1990/91) met dezelfde kaarten, waar ze iets zeggen over alle seizoenen, in de groepen Seizoenen (Seizoen voor seizoen, Per competitie, Resultaten per hoofdtrainer), Uitslagen (Thuis en uit, Hoe vaak welke uitslag, Records), Doelpunten (Doelpunten per kwartier, De nul gehouden) en Rondom de wedstrijd (Toeschouwers).
+Die pagina telt alle wedstrijden sinds het eerste seizoen dat we hebben (1990/91) met dezelfde kaarten, waar ze iets zeggen over alle seizoenen, in de groepen Seizoenen (Seizoen voor seizoen, Per competitie, Resultaten per hoofdtrainer), Uitslagen (Thuis en uit, Hoe vaak welke uitslag, Records), Doelpunten (Doelpunten per kwartier, De nul gehouden) en Rondom de wedstrijd (Toeschouwers, Scheidsrechters).
 De kaarten tellen de wedstrijden van `getAllMatches` (`listAllMatches` in `@fansite/db/queries`: alle wedstrijden met hun doelpunten, drie queries, vijf minuten bewaard).
 Records is Uitersten met de langste reeksen en de strafschoppen erbij (`recordsOf`), Toeschouwers noemt de drukste wedstrijden in plaats van een staaf per wedstrijd (`attendanceRecordsOf`, `src/AllSeasonsCards.tsx`), en een afbeelding van een kaart zegt "Sinds 1990/91" (`since` op `shareable` van `Card`).
 De kaarten van één seizoen, Verloop van het seizoen, Hoe de wedstrijden verlopen en Reeksen, staan er niet.

@@ -243,3 +243,27 @@ describe('the metadata of /wedstrijden/cijfers/alle', () => {
     expect((await generateMetadata()).robots).toEqual({ index: false })
   })
 })
+
+describe('the card Scheidsrechters', () => {
+  const referee = (name: null | string, count: number): AllMatch[] =>
+    Array.from({ length: count }, () => ({ ...older, referee: name }))
+
+  it('is not on the page when we know no referee', async () => {
+    expect(await render()).not.toContain('Scheidsrechters')
+  })
+
+  it('is the last card of Rondom de wedstrijd, with the top 5 and the total', async () => {
+    vi.mocked(getAllMatches).mockResolvedValue([
+      ...matches,
+      ...[6, 5, 4, 3, 2, 1].flatMap((count, index) => referee(`Scheids Naam${index}`, count)),
+    ])
+
+    const html = await render()
+    const headings = [...html.matchAll(/<h([1-6])[^>]*?(?: id="([^"]+)")?>/g)].map(([, level, id]) => `${level} ${id}`)
+
+    expect(headings.slice(-2)).toEqual(['3 toeschouwers', '3 scheidsrechters'])
+    expect(html).toContain('>Scheids Naam4<')
+    expect(html).not.toContain('>Scheids Naam5<')
+    expect(html).toContain('6 scheidsrechters, de top 5 op aantal wedstrijden.')
+  })
+})

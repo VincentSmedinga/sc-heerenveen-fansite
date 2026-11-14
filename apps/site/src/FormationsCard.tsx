@@ -1,20 +1,9 @@
 import { Card, DataTable, Heading, tableColumns, tableLegend, Text } from '@fansite/design-system'
 
 import { type FormationRow } from './formations'
-
-const numberFormat = new Intl.NumberFormat('nl-NL')
+import { basisOf } from './matchBasis'
 
 const columns = ['Formatie', tableColumns.played, 'Resultaat'] as const
-
-/**
- * The line under the table: the sentence on how many matches it counts, as every card with a
- * count of its own says it ("Op basis van 12 van de 14 gespeelde wedstrijden."), and the
- * legend of the two short columns.
- */
-const basisOf = (known: number, played: number) =>
-  known === played
-    ? `Op basis van ${played === 1 ? 'de gespeelde wedstrijd' : `alle ${numberFormat.format(played)} gespeelde wedstrijden`}.`
-    : `Op basis van ${numberFormat.format(known)} van de ${numberFormat.format(played)} gespeelde wedstrijden.`
 
 /**
  * The card "Formaties" of Cijfers for a season: a table with a row for each formation we played

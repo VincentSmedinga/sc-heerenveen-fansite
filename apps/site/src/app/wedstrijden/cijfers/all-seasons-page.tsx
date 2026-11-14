@@ -29,6 +29,8 @@ import { CleanSheetsCard, GoalsPerQuarterCard, HomeAwayCard, ScoreCountsCard } f
 import { pageMetadata } from '#src/metadata'
 import { getSourcePages } from '#src/opponents'
 import { OpponentsCredit } from '#src/OpponentViews'
+import { refereesOf, topRefereeCount } from '#src/referees'
+import { RefereesCard } from '#src/RefereesCard'
 import { pickerPathOf, type SearchParams, statisticsPath } from '#src/season-page'
 import { SeasonBySeasonCard } from '#src/SeasonBySeasonCard'
 import { allSeasonsSlug, seasonChoicesWithAll } from '#src/seasons'
@@ -110,6 +112,7 @@ export async function AllSeasonsPage({ searchParams }: { searchParams: Promise<S
   const keyFigures = allSeasonsKeyFigures(homeAwayOf(matches, competition).total, competition, since)
   const [coachResults, finalPlaces] = await Promise.all([loadCoachResults(competition), loadFinalPlaces()])
   const tallies = seasonTalliesOf(matches, competition)
+  const referees = refereesOf(matches, competition, { top: topRefereeCount })
 
   return (
     <Page.Main
@@ -179,6 +182,7 @@ export async function AllSeasonsPage({ searchParams }: { searchParams: Promise<S
       </CardGroup>
       <CardGroup area="around" id="rondom-de-wedstrijd" title="Rondom de wedstrijd">
         <AttendanceRecordsCard competition={competition} level={3} matches={matches} since={since} />
+        <RefereesCard level={3} top {...referees} />
       </CardGroup>
       {matches.length > 0 && (
         <Page.Cell area="credit">

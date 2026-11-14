@@ -1133,6 +1133,7 @@ await withEmptyDatabase((database) =>
         '3 de-nul-gehouden',
         '2 rondom-de-wedstrijd',
         '3 toeschouwers',
+        '3 scheidsrechters',
         '3 formaties',
       ],
     )
