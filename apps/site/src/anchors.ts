@@ -45,6 +45,7 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'assists',
     'minuten',
     'invallers-die-scoorden',
+    'doelpunten-per-linie',
   ],
   // All seasons (#1219). The made-up data has no hattrick, so the card Hattricks (anchor
   // `hattricks`) is left out there, as it is for any choice that has none; the smoke test
@@ -55,6 +56,8 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'records',
     'strafschoppen',
     'meeste-seizoenen-in-de-selectie',
+    'doelpunten-per-linie',
+    'doelpunten-per-land',
   ],
   // The card Stadion(s) is on the page of every club that has one; the smoke test checks the
   // made-up club with two names of its stadium. The card Nieuws is on the page of a club that

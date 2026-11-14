@@ -8,8 +8,10 @@ import { type CompetitionChoice, competitionFields, parseCompetition } from '#sr
 import { CompetitionSwitch } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
+import { goalsByLineOf, type PersonTraits } from '#src/goal-groups'
+import { GoalsPerLineCard } from '#src/GoalGroupsCards'
 import { seasonSourceOf, sourceName, sourceOf } from '#src/match-sources'
-import { choiceFor } from '#src/matches'
+import { choiceFor, getPersonTraits } from '#src/matches'
 import { SourceCredit, TopScorersCard } from '#src/MatchViews'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
 import { pageAreas } from '#src/page-areas'
@@ -55,8 +57,9 @@ export async function playerFiguresMetadata(season: string): Promise<Metadata> {
  * title row and the toolbar with the season picker and the choice of competition. The main
  * column is white and has the card Doelpuntenmakers (every player who scored, with the
  * column W where we know the matches) and, for a season with match reports, the table Alle
- * spelers. The sidebar has soft cards: Assists, Minuten and Invallers die scoorden (for a
- * season with reports), Bijzondere doelpunten, and the credit as the last. The sidebar
+ * spelers. The sidebar has soft cards: Doelpunten per linie, Assists, Minuten and Invallers
+ * die scoorden (for a season with reports), Bijzondere doelpunten, and the credit as the last.
+ * The sidebar
  * follows the main column on a phone. The name of a player links to his page when he has
  * one. A season that is over has the cards put the season on their image. A season that has
  * no matches in the database is the page "niet gevonden", and so is a choice of competition
@@ -85,6 +88,7 @@ export async function PlayerFiguresPage({
   const competition = choiceFor(loaded.data.matches, chosen)
   const stats = await loadStats(season)
   const figures = await loadFigures(season, competition)
+  const traits = await loadTraits()
   const { data, seasons } = loaded
   const onImage = season === seasonOf(new Date()) ? undefined : season
 
@@ -120,6 +124,7 @@ export async function PlayerFiguresPage({
         )}
       </Page.Section>
       <Page.Section area="side" aria-label="Meer cijfers over de spelers">
+        <GoalsPerLineCard competition={competition} groups={goalsByLineOf(data.matches, competition, traits)} />
         {figures?.seasonHasReports === true && (
           <>
             <RankingCard
@@ -180,5 +185,19 @@ async function loadStats(season: string) {
     console.error(`Could not read the appearances of the players for ${playerFiguresPath}: ${reasonOf(error)}`)
 
     return undefined
+  }
+}
+
+/**
+ * The line of the people for the card Doelpunten per linie. When they could not be read (the
+ * error is logged) nobody has a line, so the card says that we know no goals per line yet.
+ */
+async function loadTraits() {
+  try {
+    return await getPersonTraits()
+  } catch (error) {
+    console.error(`Could not read the lines of the players for ${playerFiguresPath}: ${reasonOf(error)}`)
+
+    return new Map<number, PersonTraits>()
   }
 }

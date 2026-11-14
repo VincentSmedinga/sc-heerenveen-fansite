@@ -27,6 +27,8 @@ import { competitionFields, leagueLabel, parseCompetition } from '#src/competiti
 import { CompetitionLinks } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
+import { goalsByCountryOf, goalsByLineOf } from '#src/goal-groups'
+import { GoalsPerCountryCard, GoalsPerLineCard } from '#src/GoalGroupsCards'
 import {
   choiceFor,
   competitionOptionsOf,
@@ -36,6 +38,7 @@ import {
   getMatchSource,
   getPersonBirthDates,
   getPersonSeasons,
+  getPersonTraits,
   getReportSeasons,
   getSquadPeople,
 } from '#src/matches'
@@ -60,12 +63,13 @@ export const allSeasonsPlayersAddress = allSeasonsAddress(playerFiguresPath)
  */
 const loadAllSeasons = cache(async () => {
   try {
-    const [matches, birthDates, personSeasons, squadPeople, reportSeasons, seasons, pages, edited, source] =
+    const [matches, birthDates, personSeasons, squadPeople, traits, reportSeasons, seasons, pages, edited, source] =
       await Promise.all([
         getAllTimeMatches(),
         getPersonBirthDates(),
         getPersonSeasons(),
         getSquadPeople(),
+        getPersonTraits(),
         getReportSeasons(),
         getMatchSeasons(),
         getSourcePages(),
@@ -84,6 +88,7 @@ const loadAllSeasons = cache(async () => {
       seasons,
       source,
       squadPeople,
+      traits,
     } as const
   } catch (error) {
     console.error(`Could not read the matches for ${allSeasonsPlayersAddress}: ${reasonOf(error)}`)
@@ -109,6 +114,8 @@ export async function allSeasonsCards(competitie: string | string[] | undefined)
 
   return {
     clubTopScorers: clubTopScorersOf(loaded.matches, competition).length > 0,
+    goalsPerCountry: goalsByCountryOf(loaded.matches, competition, loaded.traits).groups.length > 0,
+    goalsPerLine: goalsByLineOf(loaded.matches, competition, loaded.traits).groups.length > 0,
     hattricks: hattricksOf(loaded.matches, competition).total > 0,
     penalties: penaltiesOf(loaded.matches, competition).total > 0,
     records: hasRecords(playerRecordsOf(loaded.matches, competition, loaded.birthDates)),
@@ -143,9 +150,9 @@ export async function allSeasonsPlayersMetadata(): Promise<Metadata> {
  * the choice of competition. The main column is white and has the cards Topscorers sinds
  * 1990/91 and Clubtopscorer per seizoen.
  * The sidebar has soft cards, Records, Hattricks, Strafschoppen benut and Meeste seizoenen in
- * de selectie, a sentence that says why there is no list of matches, minutes or assists, and
- * the credit. A card with nothing to say is left out. A choice of competition that is not
- * known is the page "niet gevonden".
+ * de selectie, Doelpunten per linie and Doelpunten per land, a sentence that says why there is
+ * no list of matches, minutes or assists, and the credit. A card with nothing to say is left
+ * out. A choice of competition that is not known is the page "niet gevonden".
  */
 export async function AllSeasonsPlayersPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const { competitie } = await searchParams
@@ -160,7 +167,8 @@ export async function AllSeasonsPlayersPage({ searchParams }: { searchParams: Pr
     return <ServerError retryHref={allSeasonsPlayersAddress} />
   }
 
-  const { birthDates, edited, matches, pages, personSeasons, reportSeasons, seasons, source, squadPeople } = loaded
+  const { birthDates, edited, matches, pages, personSeasons, reportSeasons, seasons, source, squadPeople, traits } =
+    loaded
   const options = competitionOptionsOf(matches)
   const competition = choiceFor(matches, chosen)
 
@@ -170,6 +178,8 @@ export async function AllSeasonsPlayersPage({ searchParams }: { searchParams: Pr
   const penalties = penaltiesOf(matches, competition)
   const records = playerRecordsOf(matches, competition, birthDates)
   const squadSeasons = squadSeasonsOf(personSeasons, squadPeople)
+  const goalsPerLine = goalsByLineOf(matches, competition, traits)
+  const goalsPerCountry = goalsByCountryOf(matches, competition, traits)
   const hattrickSeasons = new Set(
     [
       ...hattricks.list.map((hattrick) => hattrick.match.season),
@@ -221,6 +231,10 @@ export async function AllSeasonsPlayersPage({ searchParams }: { searchParams: Pr
           <PenaltiesCard competition={competition} matches={matches} penalties={penalties} since={scorers.since} />
         )}
         {squadSeasons.length > 0 && <SquadSeasonsCard rows={squadSeasons} />}
+        {goalsPerLine.groups.length > 0 && <GoalsPerLineCard competition={competition} groups={goalsPerLine} />}
+        {goalsPerCountry.groups.length > 0 && (
+          <GoalsPerCountryCard competition={competition} groups={goalsPerCountry} />
+        )}
         <Text appearance="meta">{lineupSentence(reportSeasons, seasonOf(new Date()))}</Text>
         <OpponentsCredit edited={edited} pages={pages} seasons={seasons} source={source} />
       </Page.Section>

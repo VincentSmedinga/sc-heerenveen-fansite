@@ -36,7 +36,7 @@ afterEach(() => {
 const render = async () => renderToStaticMarkup(await PlayerFiguresShortcuts({ searchParams: Promise.resolve({}) }))
 
 describe('the bar of /spelers/cijfers', () => {
-  it('is a navigation named Op deze pagina:, with two links: to the cards Doelpuntenmakers and Bijzondere doelpunten', async () => {
+  it('is a navigation named Op deze pagina:, with three links: to the cards Doelpuntenmakers, Doelpunten per linie and Bijzondere doelpunten', async () => {
     const html = await render()
 
     expect(html).toContain('Op deze pagina:')
@@ -44,9 +44,10 @@ describe('the bar of /spelers/cijfers', () => {
       [...html.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label]),
     ).toEqual([
       ['#doelpuntenmakers', 'Doelpuntenmakers'],
+      ['#doelpunten-per-linie', 'Linies'],
       ['#bijzondere-doelpunten', 'Bijzondere doelpunten'],
     ])
-    expect(playerFiguresShortcuts).toHaveLength(2)
+    expect(playerFiguresShortcuts).toHaveLength(3)
   })
 
   it('has none of the cards of the matches', async () => {
@@ -90,7 +91,7 @@ describe('the bar of /spelers/cijfers and the choice of the matches', () => {
 })
 
 describe('the links to the cards with the figures of the match reports, in the current season', () => {
-  it('has the links to Alle spelers, Assists, Minuten and Invallers, in the order of the cards, when the season has reports', async () => {
+  it('has the links to Alle spelers, Linies, Assists, Minuten and Invallers, in the order of the cards, when the season has reports', async () => {
     vi.mocked(seasonHasReports).mockResolvedValue(true)
 
     const html = await render()
@@ -102,13 +103,14 @@ describe('the links to the cards with the figures of the match reports, in the c
     expect(found).toEqual([
       ['#doelpuntenmakers', 'Doelpuntenmakers'],
       ['#alle-spelers', 'Alle spelers'],
+      ['#doelpunten-per-linie', 'Linies'],
       ['#assists', 'Assists'],
       ['#minuten', 'Minuten'],
       ['#invallers-die-scoorden', 'Invallers'],
       ['#bijzondere-doelpunten', 'Bijzondere doelpunten'],
     ])
     expect(seasonHasReports).toHaveBeenCalledWith('2026/27')
-    expect(playerFiguresShortcutsFor(true)).toHaveLength(6)
+    expect(playerFiguresShortcutsFor(true)).toHaveLength(7)
   })
 
   it('has no link to them when the season has no report that is klaar', async () => {
