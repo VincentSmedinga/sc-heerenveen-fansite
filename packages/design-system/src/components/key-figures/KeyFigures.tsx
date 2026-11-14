@@ -44,7 +44,16 @@ export const KeyFigures = ({ across = false, className, figures, ...props }: Key
     {figures.map(({ figure, label, note }) => (
       <li className="hf-card hf-key-figure" key={`${figure} ${label}`}>
         <div className="hf-key-figure-parts">
-          <span className="hf-key-figure-number">{figure}</span> <span className="hf-key-figure-label">{label}</span>
+          <span
+            className={classNames(
+              'hf-key-figure-number',
+              figure.length >= 5 && 'hf-key-figure-number-long',
+              figure.length >= 7 && 'hf-key-figure-number-longer',
+            )}
+          >
+            {figure}
+          </span>{' '}
+          <span className="hf-key-figure-label">{label}</span>
           <span className="hf-key-figure-stop">, </span>
           <span className="hf-key-figure-note">{note}</span>
         </div>

@@ -41,6 +41,20 @@ describe('KeyFigures', () => {
     }
   })
 
+  it('marks a figure of five characters or more as long, so it can shrink to its card', () => {
+    const { container } = render(
+      <KeyFigures
+        figures={[
+          { figure: '15–10–14', label: 'gewonnen, gelijk, verloren', note: 'in alle competities' },
+          { figure: '52', label: 'doelpunten', note: 'in alle competities' },
+        ]}
+      />,
+    )
+
+    expect(container.querySelectorAll('.hf-key-figure-number-long')).toHaveLength(1)
+    expect(container.querySelectorAll('.hf-key-figure-number-longer')).toHaveLength(1)
+  })
+
   it('passes other props on', () => {
     const { container } = render(<KeyFigures figures={figures} id="kerngetallen" />)
 

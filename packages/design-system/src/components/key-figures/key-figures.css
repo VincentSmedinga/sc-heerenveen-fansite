@@ -55,6 +55,24 @@
     line-height: 1;
   }
 
+  /*
+   * A long figure, such as 15–10–14, shrinks with the width of its card, so it stays on one
+   * line where the card is narrow. A short one keeps the size of the token.
+   */
+  .hf-key-figure:has(.hf-key-figure-number-long) {
+    container-type: inline-size;
+  }
+
+  .hf-key-figure-number-long {
+    font-size: min(var(--hf-key-figure-font-size), 20cqi);
+    white-space: nowrap;
+  }
+
+  /* Seven characters or more, such as 15–10–14. */
+  .hf-key-figure-number-longer {
+    font-size: min(var(--hf-key-figure-font-size), 13cqi);
+  }
+
   .hf-key-figure-label {
     display: block;
     font-size: var(--hf-body-font-size);
