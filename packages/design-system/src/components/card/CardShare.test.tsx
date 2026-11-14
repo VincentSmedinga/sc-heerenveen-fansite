@@ -182,6 +182,32 @@ describe('a click on the button', () => {
     })
   })
 
+  it('says "Sinds 1990/91" under the image and in the name of the file, for a card of all seasons', async () => {
+    let address: null | string | undefined
+
+    vi.mocked(makeCardImage).mockImplementation((element) => {
+      address = element.querySelector('.hf-card-share-address')?.textContent
+
+      return Promise.resolve(png)
+    })
+    render(
+      <Card aria-labelledby="stand" shareable={{ since: '1990/91', source }}>
+        <Heading id="stand" level={2}>
+          Stand
+        </Heading>
+      </Card>,
+    )
+
+    fireEvent.click(button())
+    await waitFor(() => expect(deliverImage).toHaveBeenCalledOnce())
+
+    expect(address).toBe(`Sinds 1990/91 · ${window.location.host} · 28 okt 2026`)
+    expect(deliverImage).toHaveBeenCalledWith(png, {
+      fileName: 'sc-heerenveen-stand-sinds-1990-91-2026-10-28.png',
+      title: 'Stand',
+    })
+  })
+
   it('makes the image without a credit strip for a card that has no source', async () => {
     let credit: Element | null | undefined
 

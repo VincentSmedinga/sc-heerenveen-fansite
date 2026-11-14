@@ -6,7 +6,7 @@ import { type CompetitionChoice, competitionQuery, parseCompetition } from './co
 import { matchSearchPath } from './match-search'
 import { opponentsPath } from './opponents'
 import { type SearchParams, statisticsPath } from './season-page'
-import { seasonFromSlug, seasonSlug } from './seasons'
+import { allSeasonsAddress, allSeasonsSlug, seasonFromSlug, seasonSlug } from './seasons'
 
 /** The sub-page of Wedstrijden that the visitor is on, or none (the page of a season). */
 export type MatchesSubpage = 'figures' | 'opponents' | 'search' | undefined
@@ -30,8 +30,10 @@ export async function MatchesBar({
   const { competitie } = await searchParams
   const competition = parseCompetition(competitie) ?? 'all'
   const season = slug === undefined ? undefined : seasonFromSlug(slug)
+  // On the page with all seasons, Cijfers is the page itself and keeps "Alle seizoenen".
+  const allSeasons = current === 'figures' && slug === allSeasonsSlug
 
-  return <NavigationBar subitems={matchesBarItems({ competition, current, season })} />
+  return <NavigationBar subitems={matchesBarItems({ allSeasons, competition, current, season })} />
 }
 
 /**
@@ -43,16 +45,23 @@ export async function MatchesBar({
  * counts every season, so it has none.
  */
 export function matchesBarItems({
+  allSeasons = false,
   competition,
   current,
   season,
 }: {
+  /** The visitor is on the page with all seasons, which Cijfers then keeps. */
+  allSeasons?: boolean
   competition: CompetitionChoice
   current: MatchesSubpage
   season?: string | undefined
 }): NavigationSubitem[] {
   const query = competitionQuery(competition)
-  const figures = season === undefined ? statisticsPath : `${statisticsPath}/${seasonSlug(season)}`
+  const figures = allSeasons
+    ? allSeasonsAddress(statisticsPath)
+    : season === undefined
+      ? statisticsPath
+      : `${statisticsPath}/${seasonSlug(season)}`
 
   return [
     { current: current === 'figures', href: `${figures}${query}`, label: 'Cijfers' },

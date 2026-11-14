@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { HomeAwayTally } from './matches'
 
-import { statisticsKeyFigures } from './statistics-key-figures'
+import { allSeasonsKeyFigures, statisticsKeyFigures } from './statistics-key-figures'
 
 const row = (club: string, position: number, played = 30): PublicStandingsRow =>
   ({ club, played, position }) as PublicStandingsRow
@@ -55,5 +55,31 @@ describe('the key figures of Wedstrijden · Cijfers', () => {
   it('has only the place without a played match, and then no row at all', () => {
     expect(statisticsKeyFigures([row('sc Heerenveen', 9)], tally({ played: 0 }), 'all')).toEqual([])
     expect(statisticsKeyFigures([], tally({ played: 0 }), 'all')).toEqual([])
+  })
+})
+
+describe('the key figures of Wedstrijden · Cijfers with all seasons', () => {
+  it('has the matches, won, drawn and lost, and the goals, with a point between the thousands', () => {
+    expect(
+      text(
+        allSeasonsKeyFigures(
+          tally({ drawn: 358, goalsAgainst: 2075, goalsFor: 2259, lost: 475, played: 1385, won: 552 }),
+          'all',
+          '1990/91',
+        ),
+      ),
+    ).toEqual([
+      '1.385 wedstrijden, gespeeld in alle competities sinds 1990/91',
+      '552–358–475 gewonnen, gelijk, verloren, in alle competities sinds 1990/91',
+      '2.259–2.075 doelpunten, voor en tegen in alle competities sinds 1990/91',
+    ])
+  })
+
+  it('names the choice of competition', () => {
+    expect(allSeasonsKeyFigures(tally(), 'league', '1990/91')[0]?.note).toBe('gespeeld in de Eredivisie sinds 1990/91')
+  })
+
+  it('has no figures without a played match', () => {
+    expect(allSeasonsKeyFigures(tally({ played: 0 }), 'all', '1990/91')).toEqual([])
   })
 })

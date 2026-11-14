@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest'
 import {
   allTimeScorersOf,
   attendanceOf,
+  attendanceRecordsOf,
   cleanSheetsOf,
   describeShowDelay,
   extremesOf,
@@ -22,6 +23,7 @@ import {
   parseCleanSheetCount,
   placePerRoundOf,
   programmeOf,
+  recordsOf,
   resultsCardOrder,
   resultsOfSeason,
   resultsPerCompetition,
@@ -2703,5 +2705,117 @@ describe('goalHref and scorerLine', () => {
     const matches = [played([goal('Proefman', { ...person, personSlug: 'piet-proefman' })])]
 
     expect(topScorersOf(matches)[0]?.href).toBe('/spelers/piet-proefman')
+  })
+})
+
+describe('recordsOf', () => {
+  // Scores one after the other, each in a season of its own days.
+  const run = (scores: [number, number, string][], extra: Partial<PublicMatch> = {}) =>
+    scores.map(([goalsFor, goalsAgainst, season], index) => ({
+      ...match(`Speelronde ${index + 1}`, 'played', `2026-08-${String(index + 1).padStart(2, '0')}`),
+      goalsAgainst,
+      goalsFor,
+      season,
+      ...extra,
+    }))
+
+  it('has the longest run without a loss and without a win, with the seasons it ran over', () => {
+    // W W G L G L L: unbeaten for 3 over 2 seasons; winless for 5 from the third match.
+    const matches = run([
+      [1, 0, '1998/99'],
+      [2, 0, '1998/99'],
+      [1, 1, '1999/00'],
+      [0, 1, '1999/00'],
+      [0, 0, '1999/00'],
+      [0, 3, '2000/01'],
+      [1, 2, '2000/01'],
+    ])
+    const { unbeaten, winless } = recordsOf(matches)
+
+    expect(unbeaten).toEqual({ length: 3, seasons: { from: '1998/99', to: '1999/00' } })
+    expect(winless).toEqual({ length: 5, seasons: { from: '1999/00', to: '2000/01' } })
+  })
+
+  it('lets the earlier of two runs of the same length stay the record', () => {
+    const matches = run([
+      [1, 0, '2001/02'],
+      [0, 1, '2001/02'],
+      [1, 0, '2002/03'],
+      [0, 1, '2002/03'],
+    ])
+
+    expect(recordsOf(matches).unbeaten).toEqual({ length: 1, seasons: { from: '2001/02', to: '2001/02' } })
+  })
+
+  it('counts the matches the choice counts, so a cup tie breaks no league streak', () => {
+    const matches = [
+      ...run([[1, 0, '2001/02']]),
+      ...run([[0, 5, '2001/02']], { competition: 'KNVB Beker', matchDate: '2026-08-05' }),
+      ...run([[2, 0, '2001/02']], { matchDate: '2026-08-10' }),
+    ]
+
+    expect(recordsOf(matches, 'league').unbeaten?.length).toBe(2)
+    expect(recordsOf(matches, 'all').unbeaten?.length).toBe(1)
+  })
+
+  it('counts the matches a shoot-out decided, and the ones we won', () => {
+    const matches = [
+      ...run([[1, 1, '2001/02']], { competition: 'KNVB Beker', penaltiesAgainst: 3, penaltiesFor: 4 }),
+      ...run([[0, 0, '2001/02']], {
+        competition: 'KNVB Beker',
+        matchDate: '2026-08-07',
+        penaltiesAgainst: 5,
+        penaltiesFor: 4,
+      }),
+      ...run([[2, 1, '2001/02']], { matchDate: '2026-08-14' }),
+    ]
+
+    expect(recordsOf(matches).shootOuts).toEqual({ total: 2, won: 1 })
+    expect(recordsOf(matches).played).toBe(3)
+  })
+
+  it('has nothing without a played match', () => {
+    expect(recordsOf([])).toEqual({
+      played: 0,
+      shootOuts: { total: 0, won: 0 },
+      unbeaten: undefined,
+      winless: undefined,
+    })
+  })
+})
+
+describe('attendanceRecordsOf', () => {
+  const at = (attendance: null | number, extra: Partial<PublicMatch> = {}) =>
+    ({ ...match('Speelronde 1', 'played', '2026-08-01'), attendance, ...extra }) as PublicMatch
+
+  it('has the match with the most visitors, home or away, the most at home and the average at home', () => {
+    const away = at(54_000, { home: false, opponent: 'Ajax' })
+    const full = at(27_000, { opponent: 'PSV' })
+    const records = attendanceRecordsOf([at(20_000), full, away, at(null), at(0)])
+
+    expect(records.mostEver).toBe(away)
+    expect(records.mostHome).toBe(full)
+    expect(records.average).toBe(23_500)
+    expect(records).toMatchObject({ homeKnown: 2, known: 3, played: 5 })
+  })
+
+  it('keeps the first match played when two have the same number', () => {
+    const first = at(10_000, { opponent: 'A' })
+
+    expect(attendanceRecordsOf([first, at(10_000, { opponent: 'B' })]).mostEver).toBe(first)
+  })
+
+  it('leaves out a match that is not played and one the choice does not count', () => {
+    const records = attendanceRecordsOf(
+      [at(90_000, { status: 'scheduled' }), at(30_000, { competition: 'KNVB Beker' }), at(12_000)],
+      'league',
+    )
+
+    expect(records.mostEver?.attendance).toBe(12_000)
+    expect(records.played).toBe(1)
+  })
+
+  it('has no record without a number', () => {
+    expect(attendanceRecordsOf([at(null)])).toMatchObject({ average: undefined, known: 0, mostEver: undefined })
   })
 })

@@ -5581,3 +5581,28 @@
 - **Waarom:** de cijfers van de spelers stonden in de zijkolom van de selectie en de pagina las als twee pagina's in één.
   Een eigen pagina geeft de cijfers de ruimte en de selectie rust, en past bij Wedstrijden, dat zijn cijfers ook op een eigen pagina krijgt (#1208).
 - **Alternatieven:** de cijfers in de zijkolom houden en er kaarten bij zetten; een tab op `/spelers`; de kaart Sinds 1990/91 al op de nieuwe pagina houden (die komt terug bij alle seizoenen, #1219).
+
+## Wedstrijden · Cijfers telt ook alle seizoenen, op `/wedstrijden/cijfers/alle`
+
+- **Datum:** 14 november 2026
+- **Besluit:** de seizoenskiezer van Wedstrijden · Cijfers heeft als eerste keuze "Alle seizoenen", boven het nieuwste seizoen.
+  De keuze gaat naar `/wedstrijden/cijfers/alle`, met een eigen titel ("Cijfers sinds 1990/91") en beschrijving, en staat in de sitemap (#1211, onderdeel van #1207).
+  `alle` is geen seizoen: `seasonFromSlug` leest het niet als een seizoen, en `kies?seizoen=alle` stuurt naar `/alle`, met de keuze van competitie erbij.
+  - **De kaarten volgen de werkbalk:** de kerngetallen tellen alle wedstrijden ("1.385 wedstrijden … sinds 1990/91"), en dat doen Thuis en uit, Hoe vaak welke uitslag, De nul gehouden en Doelpunten per kwartier ook.
+    Toeschouwers heeft geen grafiek meer, want een staaf voor elke thuiswedstrijd zegt niets: de kaart noemt de drukste wedstrijd ooit, de drukste thuis en het gemiddelde thuis.
+    Een kaart die minder wedstrijden telt dan er gespeeld zijn, zegt hoeveel ("1.333 van de 1.385 gespeelde wedstrijden").
+    De afbeelding van een kaart zegt "Sinds 1990/91" in plaats van een seizoen (`since` op `shareable`, naast `season`).
+  - **Uitersten heet Records:** de grootste zege, de grootste nederlaag en de wedstrijd met de meeste doelpunten, met het jaar erbij, de langste reeks zonder nederlaag en zonder zege met de seizoenen waarover hij liep, en hoe vaak strafschoppen beslisten, met hoe vaak we wonnen.
+    Het vroegste en het laatste doelpunt vervallen: een doelpuntenrecord hoort bij de spelers.
+  - **Vier groepen:** Seizoenen, Uitslagen, Doelpunten en Rondom de wedstrijd.
+    Onze plek door de jaren en Resultaten per hoofdtrainer staan alleen hier, in Seizoenen, en hun ankers staan weer in `src/anchors.ts`, nu bij `/wedstrijden/cijfers/alle`.
+    Verloop van het seizoen, Hoe de wedstrijden verlopen en Reeksen rusten op één seizoen en staan niet bij alle seizoenen; de reeksen zijn er in Records.
+  - **De competitiekeuze werkt hier:** alle kaarten volgen haar, behalve Onze plek door de jaren, die de Eredivisie blijft.
+  - **Het menu:** het hoofdmenu en het submenu nemen "Alle seizoenen" alleen mee naar een pagina die een `/alle` heeft (`allSeasonsPages` in `SiteNavigation.tsx`): Wedstrijden en Spelers gaan naar het lopende seizoen, en Cijfers blijft op `/alle`.
+  - **Snelheid:** één vraag aan de database voor alle wedstrijden met hun doelpunten, `listAllMatches`: drie queries, zoals voor één seizoen.
+    Gemeten op een database met 1.400 wedstrijden en 2.100 doelpunten: ongeveer 30 milliseconden, en het tellen is in het geheugen.
+    Het antwoord wordt vijf minuten bewaard (`getAllMatches`), zoals de gegevens van het lopende seizoen, dat erin zit.
+    Een eigen cache of een tabel met voorberekende totalen is dus niet nodig.
+- **Waarom:** twee kaarten telden alle seizoenen op een pagina over één seizoen en negeerden de kiezer.
+  Nu telt elke kaart wat de werkbalk zegt, en alle seizoenen is een tweede bereik van dezelfde pagina.
+- **Alternatieven:** een aparte pagina voor alle seizoenen buiten Cijfers; een grafiek per thuiswedstrijd bij Toeschouwers; de reeksen als eigen kaart houden.

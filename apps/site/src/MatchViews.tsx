@@ -112,19 +112,35 @@ export function CompactCredit({ lead, source }: { lead?: string; source: MatchSo
  * Wikipedia). A card that counts only matches of the old fansite has no credit: that is our
  * own data. It is a function, so a card that has no facts yet has
  * no button. A card of a season that is over also gets the season (`2025/26`), which goes under
- * the image and into the name of the file.
+ * the image and into the name of the file. A card of all seasons gets `{ since }`, the first
+ * season it counts (`1990/91`), which says "Sinds 1990/91" there.
  */
 export const imageCredit = (
   hasFacts: boolean,
-  season?: string,
+  scope?: string | { since: string },
   matches: MatchSource | readonly Pick<PublicMatch, 'dataSource'>[] = 'wikipedia',
 ) => {
   const source = typeof matches === 'string' ? matches : sourceOf(matches)
+  const credit = source === 'archive' ? undefined : <CompactCredit lead="Gegevens van" source={source} />
 
   return hasFacts
-    ? { season, source: source === 'archive' ? undefined : <CompactCredit lead="Gegevens van" source={source} /> }
+    ? typeof scope === 'object'
+      ? { since: scope.since, source: credit }
+      : { season: scope, source: credit }
     : undefined
 }
+
+/**
+ * What a card says about the time it counts: the season it is about when it is over, "dit
+ * seizoen" for the current one, and "sinds 1990/91" when it counts all seasons (`since`).
+ */
+const whenOf = (season?: string, since?: string) =>
+  since === undefined ? (season === undefined ? 'dit seizoen' : `in ${season}`) : `sinds ${since}`
+
+/** The scope of the image of a card: all seasons since `since`, or the season. */
+const scopeOf = (season?: string, since?: string) => (since === undefined ? season : { since })
+
+const numberFormat = new Intl.NumberFormat('nl-NL')
 
 /**
  * The line under a card with statistics that says how many matches it is based on: all the
@@ -136,8 +152,8 @@ export function BasedOn({ known, played }: { known: number; played: number }) {
       {known === played
         ? known === 1
           ? '1 gespeelde wedstrijd'
-          : `Alle ${known} gespeelde wedstrijden`
-        : `${known} van de ${played} gespeelde wedstrijden`}
+          : `Alle ${numberFormat.format(known)} gespeelde wedstrijden`
+        : `${numberFormat.format(known)} van de ${numberFormat.format(played)} gespeelde wedstrijden`}
     </Text>
   )
 }
@@ -158,6 +174,7 @@ export function CleanSheetsCard({
   now,
   path = '/wedstrijden/cijfers',
   season,
+  since,
 }: {
   competition: CompetitionChoice
   count: number
@@ -166,28 +183,34 @@ export function CleanSheetsCard({
   now: Date
   path?: string
   season?: string | undefined
+  /** The first season of a card that counts all seasons: the dates then have their year. */
+  since?: string | undefined
 }) {
   const { matches: sheets, played } = cleanSheetsOf(matches, competition)
   const shown = sheets.slice(0, count)
 
   return (
-    <Card aria-labelledby="de-nul-gehouden" shareable={imageCredit(played > 0, season, matches)} surface="soft">
+    <Card
+      aria-labelledby="de-nul-gehouden"
+      shareable={imageCredit(played > 0, scopeOf(season, since), matches)}
+      surface="soft"
+    >
       <Heading aliases={['nul-gehouden']} anchor id="de-nul-gehouden" level={level}>
         De nul gehouden
       </Heading>
       {played === 0 ? (
         <Text>We hebben nog geen gespeelde wedstrijden van dit seizoen.</Text>
       ) : sheets.length === 0 ? (
-        <Text>Nog niet de nul gehouden dit seizoen.</Text>
+        <Text>{`Nog niet de nul gehouden ${since === undefined ? 'dit seizoen' : whenOf(season, since)}.`}</Text>
       ) : (
         <>
           <Text>{`${sheets.length} keer de nul gehouden in ${played} ${played === 1 ? 'wedstrijd' : 'wedstrijden'}`}</Text>
           <List role="list">
             {shown.map((match, index) => (
-              <List.Item id={`nul-${index + 1}`} key={`${match.competition}-${match.round}`}>
+              <List.Item id={`nul-${index + 1}`} key={`${match.matchDate}-${match.competition}-${match.opponent}`}>
                 <ShortMatch
                   // Only played matches with both scores are in the list, so these are numbers.
-                  {...matchMoment(match, now)}
+                  {...matchMoment(match, now, { withYear: since !== undefined })}
                   goalsAgainst={match.goalsAgainst ?? 0}
                   goalsFor={match.goalsFor ?? 0}
                   {...shootOutOf(match)}
@@ -306,11 +329,13 @@ export function GoalsPerQuarterCard({
   level = 2,
   matches,
   season,
+  since,
 }: {
   competition: CompetitionChoice
   level?: 2 | 3
   matches: PublicMatch[]
   season?: string | undefined
+  since?: string | undefined
 }) {
   const { conceded, extraTime, known, played, scored } = goalsPerQuarter(matches, competition)
   const { late, stoppage } = lateGoalsOf(matches, competition)
@@ -321,7 +346,7 @@ export function GoalsPerQuarterCard({
       aria-labelledby="doelpunten-per-kwartier"
       shareable={imageCredit(
         [...scored, ...conceded].some((count) => count > 0),
-        season,
+        scopeOf(season, since),
         matches,
       )}
       surface="warm"
@@ -463,71 +488,6 @@ const perMatch = (value: number | undefined) =>
   value === undefined ? '–' : value.toLocaleString('nl-NL', { maximumFractionDigits: 2, minimumFractionDigits: 2 })
 
 /**
- * The card of the statistics page with how sc Heerenveen does at home and away: a table with a
- * column for home, away and both, and a row for the matches, the points and the goals. The
- * numbers come from the score of the played matches that are counted. The rows with the points
- * are only there when every one of them is a match of the Eredivisie, because the cup gives no
- * points. A side with no match yet has a dash where a number is divided and a 0 where it is
- * counted. Without a result it is a sentence for visitors and no table.
- */
-export function HomeAwayCard({
-  competition,
-  level = 2,
-  matches,
-  season,
-}: {
-  competition: CompetitionChoice
-  level?: 2 | 3
-  matches: PublicMatch[]
-  season?: string | undefined
-}) {
-  const { away, home, leagueOnly, total } = homeAwayOf(matches, competition)
-  const sides: HomeAwayTally[] = [home, away, total]
-  const row = (header: string, cell: (side: HomeAwayTally) => number | string) => ({
-    cells: sides.map(cell),
-    header,
-  })
-
-  return (
-    <Card aria-labelledby="thuis-en-uit" shareable={imageCredit(total.played > 0, season, matches)}>
-      <Heading anchor id="thuis-en-uit" level={level}>
-        Thuis en uit
-      </Heading>
-      {total.played === 0 ? (
-        <Text>We hebben nog geen uitslagen van dit seizoen.</Text>
-      ) : (
-        <>
-          <DataTable
-            caption="De uitslagen van sc Heerenveen thuis en uit dit seizoen"
-            columns={['Onderdeel', 'Thuis', 'Uit', 'Totaal']}
-            rows={[
-              row('Gespeeld', (side) => side.played),
-              row('Gewonnen', (side) => side.won),
-              row('Gelijk', (side) => side.drawn),
-              row('Verloren', (side) => side.lost),
-              // The cup gives no points, so these rows need a league match for every match.
-              ...(leagueOnly
-                ? [
-                    row('Punten', (side) => side.points),
-                    row('Punten per wedstrijd', (side) => perMatch(side.pointsPerMatch)),
-                  ]
-                : []),
-              row('Doelpunten voor', (side) => side.goalsFor),
-              row('Doelpunten tegen', (side) => side.goalsAgainst),
-              row('Doelpunten per wedstrijd', (side) => perMatch(side.goalsPerMatch)),
-              row('Zonder tegendoelpunt', (side) => side.cleanSheets),
-            ]}
-          />
-          <BasedOn known={total.played} played={total.played} />
-        </>
-      )}
-    </Card>
-  )
-}
-
-const numberFormat = new Intl.NumberFormat('nl-NL')
-
-/**
  * The card of the statistics page with the visitors at the home matches of the season: a bar
  * for each home match, in the order of the days, and under it two sentences with the average
  * and the largest number, and a table with every match. The chart is hidden from a screen
@@ -613,6 +573,71 @@ export function AttendanceCard({
       <BasedOn known={known} played={played} />
     </>,
     true,
+  )
+}
+
+/**
+ * The card of the statistics page with how sc Heerenveen does at home and away: a table with a
+ * column for home, away and both, and a row for the matches, the points and the goals. The
+ * numbers come from the score of the played matches that are counted. The rows with the points
+ * are only there when every one of them is a match of the Eredivisie, because the cup gives no
+ * points. A side with no match yet has a dash where a number is divided and a 0 where it is
+ * counted. Without a result it is a sentence for visitors and no table.
+ */
+export function HomeAwayCard({
+  competition,
+  level = 2,
+  matches,
+  season,
+  since,
+}: {
+  competition: CompetitionChoice
+  level?: 2 | 3
+  matches: PublicMatch[]
+  season?: string | undefined
+  since?: string | undefined
+}) {
+  const { away, home, leagueOnly, total } = homeAwayOf(matches, competition)
+  const sides: HomeAwayTally[] = [home, away, total]
+  const row = (header: string, cell: (side: HomeAwayTally) => number | string) => ({
+    cells: sides.map(cell),
+    header,
+  })
+
+  return (
+    <Card aria-labelledby="thuis-en-uit" shareable={imageCredit(total.played > 0, scopeOf(season, since), matches)}>
+      <Heading anchor id="thuis-en-uit" level={level}>
+        Thuis en uit
+      </Heading>
+      {total.played === 0 ? (
+        <Text>We hebben nog geen uitslagen van dit seizoen.</Text>
+      ) : (
+        <>
+          <DataTable
+            caption={`De uitslagen van sc Heerenveen thuis en uit ${since === undefined ? 'dit seizoen' : whenOf(season, since)}`}
+            columns={['Onderdeel', 'Thuis', 'Uit', 'Totaal']}
+            rows={[
+              row('Gespeeld', (side) => side.played),
+              row('Gewonnen', (side) => side.won),
+              row('Gelijk', (side) => side.drawn),
+              row('Verloren', (side) => side.lost),
+              // The cup gives no points, so these rows need a league match for every match.
+              ...(leagueOnly
+                ? [
+                    row('Punten', (side) => side.points),
+                    row('Punten per wedstrijd', (side) => perMatch(side.pointsPerMatch)),
+                  ]
+                : []),
+              row('Doelpunten voor', (side) => side.goalsFor),
+              row('Doelpunten tegen', (side) => side.goalsAgainst),
+              row('Doelpunten per wedstrijd', (side) => perMatch(side.goalsPerMatch)),
+              row('Zonder tegendoelpunt', (side) => side.cleanSheets),
+            ]}
+          />
+          <BasedOn known={total.played} played={total.played} />
+        </>
+      )}
+    </Card>
   )
 }
 
@@ -1004,11 +1029,13 @@ export function ScoreCountsCard({
   level = 2,
   matches,
   season,
+  since,
 }: {
   competition?: CompetitionChoice
   level?: 2 | 3
   matches: PublicMatch[]
   season?: string | undefined
+  since?: string | undefined
 }) {
   const counts = scoreCountsOf(matches, competition)
 
@@ -1019,6 +1046,7 @@ export function ScoreCountsCard({
       empty="We hebben nog geen uitslagen van dit seizoen."
       level={level}
       season={season}
+      since={since}
       source={sourceOf(matches)}
     />
   )
@@ -1089,6 +1117,7 @@ export function ScoreCountsView({
   goals,
   level = 2,
   season,
+  since,
   source,
 }: {
   anchored?: boolean
@@ -1098,6 +1127,8 @@ export function ScoreCountsView({
   goals?: undefined | { against: number; for: number }
   level?: 2 | 3
   season?: string | undefined
+  /** The first season of a card that counts all seasons, for the image. */
+  since?: string | undefined
   /** Where the matches the counts are made from come from, for the credit under the image. */
   source?: MatchSource | undefined
 }) {
@@ -1109,7 +1140,11 @@ export function ScoreCountsView({
   }))
 
   return (
-    <Card aria-labelledby={scoreCountsCard.id} shareable={imageCredit(played > 0, season, source)} surface="warm">
+    <Card
+      aria-labelledby={scoreCountsCard.id}
+      shareable={imageCredit(played > 0, scopeOf(season, since), source)}
+      surface="warm"
+    >
       {anchored ? (
         <Heading anchor id={scoreCountsCard.id} level={level}>
           {scoreCountsCard.name}

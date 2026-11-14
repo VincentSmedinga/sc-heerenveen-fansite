@@ -9,6 +9,7 @@ import {
   countPodcastEpisodes,
   findPodcast,
   listAllMatchDays,
+  listAllMatches,
   listAllMatchGoals,
   listAllWikipediaPages,
   listArchivePage,
@@ -1707,6 +1708,41 @@ describe('the matches and the table of a season', () => {
 
     it('gives nothing without matches', async () => {
       expect(await listMatchSeasons(database.db)).toEqual([])
+    })
+  })
+
+  describe('listAllMatches', () => {
+    it('gives the matches of every season with their season and goals, in the order season, day and id', async () => {
+      await database.db.insert(matches).values(await withClubs(database.db, madeUpMatches(now)))
+      await database.db.insert(matches).values(
+        await withClubs(database.db, [
+          {
+            competition: 'Eredivisie',
+            goalsAgainst: 1,
+            goalsFor: 2,
+            home: true,
+            kickoffAt: new Date('2001-09-01T14:30:00Z'),
+            matchDate: '2001-09-01',
+            opponent: 'Oude Gast',
+            round: 'Speelronde 4',
+            season: '2001/02',
+            status: 'played',
+          },
+        ]),
+      )
+
+      const all = await listAllMatches(database.db)
+      const season = await listSeasonMatches(database.db, '2026/27')
+
+      expect(all[0]).toMatchObject({ opponent: 'Oude Gast', season: '2001/02' })
+      expect(all.filter((match) => match.season === '2026/27')).toEqual(
+        season.map((match) => ({ ...match, season: '2026/27' })),
+      )
+      expect(all.map((match) => match.season)).toEqual([...all.map((match) => match.season)].sort())
+    })
+
+    it('is empty without a match', async () => {
+      expect(await listAllMatches(database.db)).toEqual([])
     })
   })
 

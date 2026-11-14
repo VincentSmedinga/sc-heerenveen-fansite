@@ -42,10 +42,12 @@ const matchesLineOf = ({ played, pointsPerMatch }: CoachResult) =>
  */
 export function CoachResultsCard({
   choice,
+  level = 2,
   results,
   since,
 }: {
   choice: CompetitionChoice
+  level?: 2 | 3
   results: readonly CoachResult[]
   since: string
 }) {
@@ -57,7 +59,7 @@ export function CoachResultsCard({
 
   return (
     <Card aria-labelledby={coachResultsCard.id} surface="soft">
-      <Heading anchor id={coachResultsCard.id} level={2}>
+      <Heading anchor id={coachResultsCard.id} level={level}>
         {coachResultsCard.name}
       </Heading>
       <DataTable

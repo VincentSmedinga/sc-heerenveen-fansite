@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest'
 
-import { pickedAddress, seasonAddress, seasonChoices, seasonFromSlug, seasonSlug } from './seasons'
+import {
+  allSeasonsAddress,
+  allSeasonsChoice,
+  allSeasonsSlug,
+  pickedAddress,
+  seasonAddress,
+  seasonChoices,
+  seasonChoicesWithAll,
+  seasonFromSlug,
+  seasonSlug,
+} from './seasons'
 
 describe('seasonFromSlug', () => {
   it.each([
@@ -85,5 +95,36 @@ describe('pickedAddress', () => {
 
   it('works for a base address that is not /wedstrijden', () => {
     expect(pickedAddress('/wedstrijden/cijfers', '2024-25', known)).toBe('/wedstrijden/cijfers/2024-25')
+  })
+})
+
+describe('all seasons', () => {
+  it('has the address part alle, which is no season', () => {
+    expect(allSeasonsSlug).toBe('alle')
+    expect(seasonFromSlug(allSeasonsSlug)).toBeUndefined()
+    expect(allSeasonsAddress('/wedstrijden/cijfers')).toBe('/wedstrijden/cijfers/alle')
+  })
+
+  it('puts "Alle seizoenen" first in the choices, above the newest season', () => {
+    expect(seasonChoicesWithAll(['2026/27', '2025/26'])).toEqual([
+      allSeasonsChoice,
+      { label: '2026/27', value: '2026-27' },
+      { label: '2025/26', value: '2025-26' },
+    ])
+    expect(allSeasonsChoice).toEqual({ label: 'Alle seizoenen', value: 'alle' })
+  })
+
+  it('adds nothing with fewer than two seasons, where all seasons is the one season', () => {
+    expect(seasonChoicesWithAll(['2026/27'])).toEqual(seasonChoices(['2026/27']))
+    expect(seasonChoicesWithAll([])).toEqual([])
+  })
+
+  it('sends alle to <base>/alle only for a page that counts all seasons', () => {
+    const known = { current: '2026/27', seasons: ['2026/27', '2025/26'] }
+
+    expect(pickedAddress('/wedstrijden/cijfers', 'alle', { ...known, allSeasons: true })).toBe(
+      '/wedstrijden/cijfers/alle',
+    )
+    expect(pickedAddress('/wedstrijden', 'alle', known)).toBe('/wedstrijden')
   })
 })

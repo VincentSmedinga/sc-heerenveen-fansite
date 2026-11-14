@@ -130,7 +130,7 @@ describe('SiteNavigation', () => {
     },
   )
 
-  it.each(['/wedstrijden/cijfers', '/wedstrijden/cijfers/2025-26'])(
+  it.each(['/wedstrijden/cijfers', '/wedstrijden/cijfers/2025-26', '/wedstrijden/cijfers/alle'])(
     'marks Cijfers as the current sub-page on %s, and Wedstrijden as the item that holds it',
     (path) => {
       const html = render(path)
@@ -367,6 +367,14 @@ describe('hrefOf', () => {
     expect(hrefOf('/spelers', '/wedstrijden')).toBe('/spelers')
     expect(hrefOf('/spelers', '/spelers/kies')).toBe('/spelers')
     expect(hrefOf('/spelers', '/spelers/cijfers')).toBe('/spelers')
+  })
+
+  it('takes "Alle seizoenen" along to Cijfers of Wedstrijden and to no page that has no /alle', () => {
+    expect(hrefOf('/wedstrijden/cijfers', '/wedstrijden/cijfers/alle')).toBe('/wedstrijden/cijfers/alle')
+    expect(hrefOf('/wedstrijden', '/wedstrijden/cijfers/alle')).toBe('/wedstrijden')
+    expect(hrefOf('/spelers', '/wedstrijden/cijfers/alle')).toBe('/spelers')
+    expect(hrefOf('/spelers/cijfers', '/wedstrijden/cijfers/alle')).toBe('/spelers/cijfers')
+    expect(hrefOf('/wedstrijden/cijfers', '/wedstrijden/cijfers')).toBe('/wedstrijden/cijfers')
   })
 
   it('leaves the other items alone, also on the page of a season', () => {

@@ -87,6 +87,10 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/wedstrijden/cijfers/2004-05', status: 200 },
   { path: '/wedstrijden/cijfers/1992-93?competitie=eredivisie', status: 200 },
   { path: '/spelers/1992-93', status: 200 },
+  // All seasons, the second scope of Cijfers (#1211), and the choice of the picker.
+  { path: '/wedstrijden/cijfers/alle', status: 200 },
+  { path: '/wedstrijden/cijfers/alle?competitie=eredivisie', status: 200 },
+  { path: '/wedstrijden/cijfers/kies?seizoen=alle', status: 200 },
   { path: '/wedstrijden/cijfers/2099-00', status: 404 },
   { path: '/wedstrijden/cijfers/onzin', status: 404 },
   // The old addresses of Cijfers are gone, without a redirect (#1208).

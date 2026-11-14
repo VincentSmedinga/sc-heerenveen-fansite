@@ -40,15 +40,40 @@ export const seasonChoices = (seasons: readonly string[]): SeasonChoice[] =>
   seasons.map((season) => ({ label: season, value: seasonSlug(season) }))
 
 /**
+ * The address part of "Alle seizoenen", the second scope of a page with figures: `/alle` under
+ * the base address. It is no season, so `seasonFromSlug` never reads it as one.
+ */
+export const allSeasonsSlug = 'alle'
+
+/** The choice "Alle seizoenen" of the season picker, which comes first. */
+export const allSeasonsChoice: SeasonChoice = { label: 'Alle seizoenen', value: allSeasonsSlug }
+
+/** The address of the page with all seasons under a base address: `<base>/alle`. */
+export const allSeasonsAddress = (base: string) => `${base}/${allSeasonsSlug}`
+
+/**
+ * The choices of the season picker of a page that can count all seasons: "Alle seizoenen"
+ * first. With fewer than two seasons all seasons is the one season, so there is nothing to
+ * add and the picker, which is nothing below two choices, stays away as it did.
+ */
+export const seasonChoicesWithAll = (seasons: readonly string[]): SeasonChoice[] =>
+  seasons.length < 2 ? seasonChoices(seasons) : [allSeasonsChoice, ...seasonChoices(seasons)]
+
+/**
  * Where the route behind the season picker sends a visitor: to the address of the season that
  * was asked for, and to the base address for a value that isn't a season or a season without
- * data. The current season is the base address too.
+ * data. The current season is the base address too. A page that can count all seasons
+ * (`allSeasons`) sends the value `alle` to `<base>/alle`.
  */
 export function pickedAddress(
   base: string,
   value: string | undefined,
-  { current, seasons }: { current: string; seasons: readonly string[] },
+  { allSeasons = false, current, seasons }: { allSeasons?: boolean; current: string; seasons: readonly string[] },
 ) {
+  if (allSeasons && value === allSeasonsSlug) {
+    return allSeasonsAddress(base)
+  }
+
   const season = seasonFromSlug(value)
 
   return season !== undefined && seasons.includes(season) ? seasonAddress(base, season, current) : base

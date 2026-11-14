@@ -53,10 +53,12 @@ const shortSeason = (season: string) => season.slice(2)
  */
 export function FinalPlacesCard({
   current,
+  level = 2,
   linkable,
   places,
 }: {
   current: string
+  level?: 2 | 3
   linkable: readonly string[]
   places: readonly FinalPlace[]
 }) {
@@ -76,7 +78,7 @@ export function FinalPlacesCard({
 
   return (
     <Card aria-labelledby={finalPlacesCard.id} surface="soft">
-      <Heading anchor id={finalPlacesCard.id} level={2}>
+      <Heading anchor id={finalPlacesCard.id} level={level}>
         {finalPlacesCard.name}
       </Heading>
       <BarChart

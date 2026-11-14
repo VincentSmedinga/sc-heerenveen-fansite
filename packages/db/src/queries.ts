@@ -315,6 +315,16 @@ export async function listAllMatchDays(db: Database) {
 }
 
 /**
+ * Every match of every season in the form of `listSeasonMatches`, each with its `season`, in
+ * the order of season, day, kick-off and `id`. The page Wedstrijden · Cijfers counts them for
+ * "Alle seizoenen". It is three queries for all of them, as for one season, so it costs a
+ * little more than the page of a season and nothing per season.
+ */
+export function listAllMatches(db: Database) {
+  return matchesWithGoals(db, undefined)
+}
+
+/**
  * Every match of every season with what the list of all-time goal scorers counts: the season,
  * the competition, where the match comes from (`dataSource`), the status, the score and the
  * goals, in the form of `listSeasonMatches` (see there for the goals). Nothing else leaves the
@@ -885,43 +895,10 @@ export function listRecentItems(db: Database, { limit, until }: { limit: number;
  * of names of its own (`club_name_periods`), and otherwise the spelling of Wikipedia.
  */
 export async function listSeasonMatches(db: Database, season: string) {
-  const rows = await db
-    .select({
-      afterNinetyAgainst: matches.afterNinetyAgainst,
-      afterNinetyFor: matches.afterNinetyFor,
-      attendance: matches.attendance,
-      clubId: matches.clubId,
-      competition: matches.competition,
-      dataSource: matches.dataSource,
-      dateText: matches.dateText,
-      extraTime: matches.extraTime,
-      goalsAgainst: matches.goalsAgainst,
-      goalsFor: matches.goalsFor,
-      home: matches.home,
-      id: matches.id,
-      kickoffAt: matches.kickoffAt,
-      matchDate: matches.matchDate,
-      note: matches.note,
-      opponent: matches.opponent,
-      penaltiesAgainst: matches.penaltiesAgainst,
-      penaltiesFor: matches.penaltiesFor,
-      referee: matches.referee,
-      round: matches.round,
-      stadium: matches.stadium,
-      status: matches.status,
-    })
-    .from(matches)
-    .where(eq(matches.season, season))
-    .orderBy(asc(matches.matchDate), asc(matches.kickoffAt), asc(matches.id))
+  return (await matchesWithGoals(db, eq(matches.season, season))).map(({ season: matchSeason, ...match }) => {
+    void matchSeason
 
-  // The pages of a season need neither the `id` nor the club, so they stay out of what they
-  // get.
-  const named = await withSeasonNames(db, rows)
-
-  return (await withGoals(db, named, eq(matches.season, season))).map(({ clubId, ...match }) => {
-    void clubId
-
-    return omitId(match)
+    return match
   })
 }
 
@@ -1198,6 +1175,48 @@ export async function searchPublic(
     .slice(0, limit)
 
   return { hits, total: Number(found[0]?.total ?? 0) + Number(written[0]?.total ?? 0) }
+}
+
+async function matchesWithGoals(db: Database, where: SQL | undefined) {
+  const rows = await db
+    .select({
+      afterNinetyAgainst: matches.afterNinetyAgainst,
+      afterNinetyFor: matches.afterNinetyFor,
+      attendance: matches.attendance,
+      clubId: matches.clubId,
+      competition: matches.competition,
+      dataSource: matches.dataSource,
+      dateText: matches.dateText,
+      extraTime: matches.extraTime,
+      goalsAgainst: matches.goalsAgainst,
+      goalsFor: matches.goalsFor,
+      home: matches.home,
+      id: matches.id,
+      kickoffAt: matches.kickoffAt,
+      matchDate: matches.matchDate,
+      note: matches.note,
+      opponent: matches.opponent,
+      penaltiesAgainst: matches.penaltiesAgainst,
+      penaltiesFor: matches.penaltiesFor,
+      referee: matches.referee,
+      round: matches.round,
+      season: matches.season,
+      stadium: matches.stadium,
+      status: matches.status,
+    })
+    .from(matches)
+    .where(where)
+    .orderBy(asc(matches.season), asc(matches.matchDate), asc(matches.kickoffAt), asc(matches.id))
+
+  // The pages of a season need neither the `id` nor the club, so they stay out of what they
+  // get.
+  const named = await withSeasonNames(db, rows)
+
+  return (await withGoals(db, named, where)).map(({ clubId, ...match }) => {
+    void clubId
+
+    return omitId(match)
+  })
 }
 
 /** The match without its `id`. */
