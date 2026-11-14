@@ -1583,6 +1583,10 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(allHtml, /id="hattricks"/)
     // The card Clubtopscorer per seizoen follows the topscorers in the main column (#1220).
     assert.match(allHtml, /aria-labelledby="clubtopscorer-per-seizoen"/)
+    // The card Records is the first of the sidebar (#1221); the made-up goals have no
+    // birth dates.
+    assert.match(allHtml, /class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="records"/)
+    assert.ok(allHtml.indexOf('id="records"') < allHtml.indexOf('id="strafschoppen"'))
     assert.match(allHtml, /class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="strafschoppen"/)
     assert.match(allHtml, /\d+ strafschop(?:pen)? benut sinds \d{4}\/\d{2}/)
     assert.doesNotMatch(allHtml, /id="(?:alle-spelers|assists|minuten|doelpuntenmakers|bijzondere-doelpunten)"/)
@@ -1592,7 +1596,7 @@ await withEmptyDatabase((database) =>
     )
     assert.deepEqual(
       [...allHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
-      ['#topscorers-sinds-1990-91', '#clubtopscorer-per-seizoen', '#strafschoppen'],
+      ['#topscorers-sinds-1990-91', '#clubtopscorer-per-seizoen', '#records', '#strafschoppen'],
     )
     assert.match(allHtml, closedWikipediaCredit)
 

@@ -5695,3 +5695,22 @@
 - **Waarom:** supporters willen weten met welke opstelling we wonnen.
   Het verslag van een wedstrijd heeft onze formatie al, dus de kaart kost geen nieuwe gegevens.
 - **Alternatieven:** de kaart ook bij alle seizoenen, met een deel van de wedstrijden; drie kolommen voor gewonnen, gelijk en verloren.
+
+## Spelers · Cijfers van alle seizoenen heeft de kaart Records, met de speler en de wedstrijd of het seizoen erbij
+
+- **Datum:** 14 november 2026
+- **Besluit:** bovenaan de zijkolom van `/spelers/cijfers/alle` staat de zachte kaart "Records" (#1221, onderdeel van #1207), gebouwd zoals de kaart Records van Wedstrijden · Cijfers: een rustige naam boven elke waarde.
+  - **De vijf records:** de meeste doelpunten in één seizoen, de meeste in één wedstrijd, de jongste en de oudste doelpuntenmaker, en het snelste doelpunt.
+    Een eigen doelpunt telt niet, een strafschop wel, en een wedstrijd waarvan we de doelpunten niet kennen telt niet mee.
+    Een record waar de gegevens niets voor hebben, ontbreekt; zonder één record ontbreekt de kaart en de link in de balk.
+  - **De telling:** de meeste in één seizoen is de eerste plaats van Clubtopscorer per seizoen (`clubTopScorersOf`), zodat de kaarten hetzelfde zeggen.
+    Delen spelers een record, dan staan ze allemaal op de regel, één keer voor elk seizoen of elke wedstrijd.
+  - **De leeftijd:** in jaren en dagen op de dag van de wedstrijd, uit een volledige geboortedatum (`listPersonBirthDates`).
+    Een speler waarvan we alleen het jaar of de maand kennen, telt niet mee voor jongste en oudste.
+    De pagina toont de leeftijd en nooit de geboortedatum, zoals bij de pagina van een speler.
+  - **Het snelste doelpunt** telt alleen doelpunten met een minuut van 1 tot en met 90.
+  - **De wedstrijd** is een link als ze een pagina heeft.
+  - **De balk "Op deze pagina:"** heeft er een link bij, "Records", naar `#records`.
+- **Waarom:** de records van onze spelers horen bij de erelijst van de pagina, en wat we uit doelpunten en geboortedatums kunnen weten, is genoeg.
+  Records over wedstrijden, minuten, assists of kaarten per speler staan er niet, omdat we de opstellingen van 2007/08 tot en met 2025/26 missen (zie #1207).
+- **Alternatieven:** een record voor de speler met de meeste wedstrijden (de opstellingen ontbreken); bij een gedeeld record alleen de eerste tonen; de geboortedatum tonen.

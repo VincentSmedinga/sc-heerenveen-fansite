@@ -314,3 +314,210 @@ export function lineupSentence(seasons: readonly string[], current: string): str
 
 /** The key of a match in the addresses of its page: season, competition and round. */
 export const matchKey = (season: string, competition: string, round: string) => `${season}|${competition}|${round}`
+
+/** One record: the figure, and everyone who shares it. */
+export type PlayerRecord = { entries: [RecordEntry, ...RecordEntry[]]; value: number }
+
+/** The five records of the players, each of them missing when the data has nothing for it. */
+export type PlayerRecords = {
+  fastest?: PlayerRecord
+  mostInMatch?: PlayerRecord
+  mostInSeason?: PlayerRecord
+  oldest?: PlayerRecord
+  youngest?: PlayerRecord
+}
+
+/** What one record says about a goal: the player, the match and the figure behind it. */
+export type RecordEntry = {
+  /** The age on the day of the match, for the youngest and the oldest scorer. */
+  age?: { days: number; years: number }
+  id: string
+  /** The match, for every record but the most goals in a season. */
+  match?: {
+    competition: string
+    date: string
+    label: string
+    round: string
+    season: string
+  }
+  /** The minute, for the fastest goal. */
+  minute?: number
+  scorer: ReturnType<typeof scorerLine>
+  season: string
+}
+
+/** A date `YYYY-MM-DD` as a number of days, so a difference is a number of days. */
+const dayNumber = (date: string) => {
+  const [year = 0, month = 1, day = 1] = date.slice(0, 10).split('-').map(Number)
+
+  return Date.UTC(year, month - 1, day) / 86_400_000
+}
+
+/** The age on a day, in whole years and the days since the last birthday. */
+export function ageOnDay(birthDate: string, day: string): undefined | { days: number; years: number } {
+  const [birthYear = 0, birthMonth = 1, birthDay = 1] = birthDate.slice(0, 10).split('-').map(Number)
+  const year = Number(day.slice(0, 4))
+
+  if (dayNumber(day) < dayNumber(birthDate)) {
+    return undefined
+  }
+
+  let years = year - birthYear
+
+  // A birthday on 29 February is on 1 March in a year that has none.
+  const birthdayIn = (inYear: number) => {
+    const leap = new Date(Date.UTC(inYear, 1, 29)).getUTCMonth() === 1
+
+    return birthMonth === 2 && birthDay === 29 && !leap
+      ? `${inYear}-03-01`
+      : `${inYear}-${pad(birthMonth)}-${pad(birthDay)}`
+  }
+
+  if (dayNumber(day) < dayNumber(birthdayIn(year))) {
+    years -= 1
+  }
+
+  return { days: dayNumber(day) - dayNumber(birthdayIn(birthYear + years)), years }
+}
+
+const pad = (value: number) => String(value).padStart(2, '0')
+
+/**
+ * The records of the players: the most goals in one season (the first place of the card
+ * Clubtopscorer per seizoen, so the two agree), the most in one match, the youngest and the
+ * oldest scorer, and the fastest goal. A goal counts when it is one of ours and not an own
+ * goal, in a match whose goals we know. The age is in whole years and days on the day of the
+ * match, from a full date of birth, so a player known by a year or a month alone is not in the
+ * youngest or the oldest. The fastest goal needs a minute from 1 to 90. Players who share a
+ * record are all in it, once for each season or match. `birthDates` maps a person to the full
+ * date of birth.
+ */
+export function playerRecordsOf(
+  matches: readonly AllTimeMatch[],
+  choice: CompetitionChoice,
+  birthDates: ReadonlyMap<number, string>,
+): PlayerRecords {
+  const records: PlayerRecords = {}
+  const bestOf = (entries: { entry: RecordEntry; score: number }[], best: 'high' | 'low') => {
+    const [first] = entries
+
+    if (first === undefined) {
+      return undefined
+    }
+
+    const target = entries.reduce(
+      (value, { score }) => (best === 'high' ? Math.max(value, score) : Math.min(value, score)),
+      first.score,
+    )
+    const winners = entries.filter(({ score }) => score === target).map(({ entry }) => entry)
+    const [head, ...rest] = winners
+
+    return head === undefined ? undefined : { entries: [head, ...rest] as PlayerRecord['entries'], value: target }
+  }
+  const sorted = (list: RecordEntry[]) =>
+    list.sort((a, b) => (a.match?.date ?? '').localeCompare(b.match?.date ?? '') || a.id.localeCompare(b.id))
+
+  const seasons = clubTopScorersOf(matches, choice)
+  const topSeason = seasons.reduce((most, { goals }) => Math.max(most, goals), 0)
+
+  if (topSeason > 0) {
+    const entries = seasons
+      .filter(({ goals }) => goals === topSeason)
+      .flatMap(({ players, season }) =>
+        players.map((player): RecordEntry => ({ id: player.id, scorer: player, season })),
+      )
+      .sort((a, b) => a.season.localeCompare(b.season) || a.id.localeCompare(b.id))
+    const [head, ...rest] = entries
+
+    if (head !== undefined) {
+      records.mostInSeason = { entries: [head, ...rest], value: topSeason }
+    }
+  }
+
+  const inMatch: { entry: RecordEntry; score: number }[] = []
+  const youngOld: { entry: RecordEntry; score: number }[] = []
+  const quick: { entry: RecordEntry; score: number }[] = []
+
+  for (const match of counted(matches, choice)) {
+    const where = {
+      competition: match.competition,
+      date: match.matchDate,
+      label: matchLabel(match),
+      round: match.round,
+      season: match.season,
+    }
+    const perPlayer = new Map<string, { count: number; goal: ScorerGoal }>()
+
+    for (const goal of match.goals.filter((item) => item.ours && !item.ownGoal)) {
+      const key = keyOf(goal)
+
+      perPlayer.set(key, { count: (perPlayer.get(key)?.count ?? 0) + 1, goal })
+
+      const entry = (extra: Partial<RecordEntry>): RecordEntry => ({
+        id: key,
+        match: where,
+        scorer: scorerLine(goal),
+        season: match.season,
+        ...extra,
+      })
+
+      if (goal.minute !== null && goal.minute >= 1 && goal.minute <= 90) {
+        quick.push({ entry: entry({ minute: goal.minute }), score: goal.minute })
+      }
+
+      const person = personOfKey(key)
+      const born = person === undefined ? undefined : birthDates.get(person)
+      const age = born === undefined ? undefined : ageOnDay(born, match.matchDate)
+
+      if (born !== undefined && age !== undefined) {
+        youngOld.push({ entry: entry({ age }), score: dayNumber(match.matchDate) - dayNumber(born) })
+      }
+    }
+
+    for (const [key, { count, goal }] of perPlayer) {
+      inMatch.push({ entry: { id: key, match: where, scorer: scorerLine(goal), season: match.season }, score: count })
+    }
+  }
+
+  const most = bestOf(inMatch, 'high')
+  const fastest = bestOf(quick, 'low')
+  const youngest = bestOf(youngOld, 'low')
+  const oldest = bestOf(youngOld, 'high')
+
+  // A player with two goals at the same minute, or two on the day of the record, is one line.
+  const once = (record: PlayerRecord | undefined): PlayerRecord | undefined => {
+    if (record === undefined) {
+      return undefined
+    }
+
+    const seen = new Set<string>()
+    const unique = sorted(
+      record.entries.filter((entry) => {
+        const key = `${entry.id}|${entry.match?.date ?? entry.season}`
+
+        return seen.has(key) ? false : (seen.add(key), true)
+      }),
+    )
+    const [head, ...rest] = unique
+
+    return head === undefined ? undefined : { entries: [head, ...rest], value: record.value }
+  }
+
+  const mostRecord = once(most)
+  const fastestRecord = once(fastest)
+
+  if (mostRecord !== undefined) records.mostInMatch = mostRecord
+  if (fastestRecord !== undefined) records.fastest = fastestRecord
+
+  // The youngest and the oldest are told in years and days, so the value is the first entry's.
+  for (const [name, record] of [
+    ['youngest', youngest],
+    ['oldest', oldest],
+  ] as const) {
+    const unique = once(record)
+
+    if (unique !== undefined) records[name] = unique
+  }
+
+  return records
+}

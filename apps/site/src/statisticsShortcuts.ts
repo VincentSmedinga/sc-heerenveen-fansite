@@ -61,13 +61,14 @@ export function playerFiguresShortcutsFor(hasReports: boolean) {
 }
 
 /**
- * The bar of /spelers/cijfers/alle: the four cards in the order of the page, the main column
+ * The bar of /spelers/cijfers/alle: the five cards in the order of the page, the main column
  * first. A card that has nothing to say is not on the page, and the bar leaves it out too (see
  * `allSeasonsShortcutsFor`). The ids are those of their headings.
  */
 export const allSeasonsShortcuts = [
   { href: '#topscorers-sinds-1990-91', label: 'Topscorers' },
   { href: '#clubtopscorer-per-seizoen', label: 'Clubtopscorer' },
+  { href: '#records', label: 'Records' },
   { href: '#hattricks', label: 'Hattricks' },
   { href: '#strafschoppen', label: 'Strafschoppen' },
 ] as const
@@ -77,11 +78,13 @@ export const allSeasonsShortcutsFor = ({
   clubTopScorers,
   hattricks,
   penalties,
+  records,
   scorers,
 }: {
   clubTopScorers: boolean
   hattricks: boolean
   penalties: boolean
+  records: boolean
   scorers: boolean
 }) =>
   allSeasonsShortcuts.filter(({ href }) =>
@@ -89,7 +92,9 @@ export const allSeasonsShortcutsFor = ({
       ? scorers
       : href === '#clubtopscorer-per-seizoen'
         ? clubTopScorers
-        : href === '#hattricks'
-          ? hattricks
-          : penalties,
+        : href === '#records'
+          ? records
+          : href === '#hattricks'
+            ? hattricks
+            : penalties,
   )
