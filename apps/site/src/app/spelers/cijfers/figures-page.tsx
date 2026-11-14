@@ -59,10 +59,9 @@ export async function playerFiguresMetadata(season: string): Promise<Metadata> {
  * column W where we know the matches) and, for a season with match reports, the table Alle
  * spelers. The sidebar has soft cards: Doelpunten per linie, Assists, Minuten and Invallers
  * die scoorden (for a season with reports), Bijzondere doelpunten, and the credit as the last.
- * The sidebar
- * follows the main column on a phone. The name of a player links to his page when he has
- * one. A season that is over has the cards put the season on their image. A season that has
- * no matches in the database is the page "niet gevonden", and so is a choice of competition
+ * The sidebar follows the main column on a phone. The name of a player links to his page when
+ * he has one. A season that is over has the cards put the season on their image. A season that
+ * has no matches in the database is the page "niet gevonden", and so is a choice of competition
  * that is not known. The cards count all the matches or, with `?competitie=eredivisie`, the
  * Eredivisie alone.
  */
