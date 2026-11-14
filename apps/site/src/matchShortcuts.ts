@@ -34,6 +34,9 @@ export const placePerRoundShortcut = { id: 'verloop-op-de-ranglijst', name: 'Ver
 /** The name and the anchor of the card with every season with our place, on Cijfers. */
 export const seasonBySeasonCard = { id: 'seizoen-voor-seizoen', name: 'Seizoen voor seizoen' } as const
 
+/** The name and the anchor of the card with our results per kind of competition, on Cijfers. */
+export const competitionTallyCard = { id: 'per-competitie', name: 'Per competitie' } as const
+
 type Shortcut = { href: string; label: string }
 
 const resultsCards: Record<Competition, { id: string; name: string }> = {

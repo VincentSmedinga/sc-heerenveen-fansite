@@ -82,6 +82,7 @@ describe('the page /wedstrijden/cijfers/alle', () => {
       '1 ',
       '2 seizoenen',
       '3 seizoen-voor-seizoen',
+      '3 per-competitie',
       '3 resultaten-per-hoofdtrainer',
       '2 uitslagen',
       '3 thuis-en-uit',
@@ -176,7 +177,7 @@ describe('the page /wedstrijden/cijfers/alle', () => {
 
   it('has a row with a link for every season in the card Seizoen voor seizoen, with the place of the seasons we know', async () => {
     const html = await render()
-    const card = html.slice(html.indexOf('id="seizoen-voor-seizoen"'), html.indexOf('id="resultaten-per-hoofdtrainer"'))
+    const card = html.slice(html.indexOf('id="seizoen-voor-seizoen"'), html.indexOf('id="per-competitie"'))
 
     expect([...card.matchAll(/<th scope="row"><a href="([^"]+)"/g)].map(([, href]) => href)).toEqual([
       '/wedstrijden',
@@ -185,6 +186,16 @@ describe('the page /wedstrijden/cijfers/alle', () => {
     ])
     expect(card).toContain('2026/27 (nu)')
     expect(card).toContain('We kennen de plek sinds 2025/26.')
+  })
+
+  it('has the card Per competitie with a row for each competition that has a match, linked to the search', async () => {
+    const html = await render()
+    const card = html.slice(html.indexOf('id="per-competitie"'), html.indexOf('id="resultaten-per-hoofdtrainer"'))
+
+    expect([...card.matchAll(/<th scope="row"><a href="([^"]+)"/g)].map(([, href]) => href)).toEqual([
+      '/wedstrijden/zoeken?competitie=eredivisie',
+      '/wedstrijden/zoeken?competitie=knvb-beker',
+    ])
   })
 
   it('shows the card Seizoen voor seizoen without a place when the places can not be read', async () => {

@@ -112,6 +112,7 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'doelpunten',
     'rondom-de-wedstrijd',
     'seizoen-voor-seizoen',
+    'per-competitie',
     'resultaten-per-hoofdtrainer',
     'thuis-en-uit',
     'hoe-vaak-welke-uitslag',
