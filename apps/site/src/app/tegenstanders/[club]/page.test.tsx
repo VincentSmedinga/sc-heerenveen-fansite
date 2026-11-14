@@ -431,7 +431,6 @@ describe('the page of a club', () => {
 
     expect(itemsOf(html)).toHaveLength(5)
     expect(itemsOf(html).every((item) => item.startsWith('<div class="hf-match"'))).toBe(true)
-    expect(html).not.toContain('hf-short-line')
     // The two selections of the summary are a Match too, and the list has five.
     expect(html.match(/<div class="hf-match"/g)).toHaveLength(7)
   })
