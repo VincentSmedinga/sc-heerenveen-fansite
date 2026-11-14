@@ -1172,12 +1172,12 @@ await withEmptyDatabase((database) =>
       statisticsHtml,
       /<section class="hf-card hf-card-warm" aria-labelledby="opmerkelijk"><h2 class="hf-heading-2" id="opmerkelijk">Opmerkelijk<\/h2><p>[^<]*vielen in de 66e en de 67e minuut twee doelpunten achter elkaar\.<\/p><\/section>/,
     )
-    // The seed has played cup ties, so the page has the switch between all the matches, the
-    // Eredivisie and the cup, with all the matches chosen. The choice is in the address of the
-    // other links.
+    // The seed has played cup and Europe matches, so the page has the switch between all the
+    // matches, the Eredivisie, the cup and Europe, with all the matches chosen. The choice is
+    // in the address of the other links.
     assert.match(
       statisticsHtml,
-      /<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-segmented-compact" role="group" style="--hf-segmented-count:3;--hf-segmented-index:0"><a aria-current="page" href="\/wedstrijden\/cijfers"><span class="hf-segmented-label" data-label="Alles">Alles<\/span><\/a><a href="\/wedstrijden\/cijfers\?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie<\/span><\/a><a href="\/wedstrijden\/cijfers\?competitie=beker"><span class="hf-segmented-label" data-label="Beker">Beker<\/span><\/a><\/div>/,
+      /<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-segmented-compact" role="group" style="--hf-segmented-count:4;--hf-segmented-index:0"><a aria-current="page" href="\/wedstrijden\/cijfers"><span class="hf-segmented-label" data-label="Alles">Alles<\/span><\/a><a href="\/wedstrijden\/cijfers\?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie<\/span><\/a><a href="\/wedstrijden\/cijfers\?competitie=beker"><span class="hf-segmented-label" data-label="Beker">Beker<\/span><\/a><a href="\/wedstrijden\/cijfers\?competitie=europa"><span class="hf-segmented-label" data-label="Europa">Europa<\/span><\/a><\/div>/,
     )
     const leagueResponse = await fetch(`${origin}/wedstrijden/cijfers?competitie=eredivisie`)
     const leagueHtml = await leagueResponse.text()

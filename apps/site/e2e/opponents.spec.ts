@@ -219,13 +219,15 @@ test.describe('without JavaScript', () => {
     expect(names).toEqual([...names].toSorted(new Intl.Collator('nl', { sensitivity: 'base' }).compare))
   })
 
-  test('the switch of the list is two links, and a club we only met in the cup leaves the list', async ({ page }) => {
+  test('the switch of the list is a row of links, and a club we only met in the cup leaves the list', async ({
+    page,
+  }) => {
     await page.goto('/tegenstanders')
 
     const choices = page.getByRole('group', { name: 'Welke wedstrijden' })
 
     await expect(list(page).getByRole('rowheader', { name: 'FC Maquette' })).toBeVisible()
-    await choices.getByRole('link', { name: 'Eredivisie' }).click()
+    await choices.getByRole('link', { name: 'Competitie' }).click()
 
     await expect(page).toHaveURL(/\/tegenstanders\?competitie=eredivisie$/)
     await expect(page.getByRole('rowheader', { name: 'FC Maquette' })).toHaveCount(0)
