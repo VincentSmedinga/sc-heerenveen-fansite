@@ -331,13 +331,14 @@ export async function readMatchReport(db: ReportDatabase, matchId: number): Prom
 
 /**
  * The numbers of the players of ours in the reports of a season, one entry for each player who
- * played, by name. With `competition` only the matches of that competition count. A player
- * who is no longer in `players` has no entry, since his rows no longer point to him.
+ * played, by name. With `competition` (one, or a list) only the matches of those competitions
+ * count. A player who is no longer in `players` has no entry, since his rows no longer point
+ * to him.
  */
 export async function readPlayerReportStats(
   db: ReportDatabase,
   season: string,
-  competition?: Competition,
+  competition?: Competition | readonly Competition[],
 ): Promise<PlayerReportStats[]> {
   const finished = await db
     .select({ extraTime: matches.extraTime, id: matches.id })
@@ -348,7 +349,14 @@ export async function readPlayerReportStats(
         eq(matches.season, season),
         eq(matches.status, 'played'),
         eq(matchReports.status, 'klaar'),
-        ...(competition === undefined ? [] : [eq(matches.competition, competition)]),
+        ...(competition === undefined
+          ? []
+          : [
+              inArray(
+                matches.competition,
+                Array.isArray(competition) ? [...competition] : [competition as Competition],
+              ),
+            ]),
       ),
     )
 

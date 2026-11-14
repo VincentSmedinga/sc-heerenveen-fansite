@@ -1,7 +1,7 @@
 import { listSeasonReports, readPlayerReportStats } from '@fansite/db/match-reports'
 
 import { cacheForKey } from './cache'
-import { type CompetitionChoice } from './competition'
+import { type CompetitionChoice, competitionMembers, countsFor } from './competition'
 import { getDatabase } from './database'
 import { type ReportFigures } from './report-figures'
 
@@ -10,14 +10,14 @@ const keptFor = 5 * 60 * 1000
 
 async function loadFigures(key: string): Promise<ReportFigures> {
   const [season = '', choice = 'all'] = key.split('|')
-  const league = choice === 'league'
+  const only = competitionMembers(choice as CompetitionChoice)
   const { db } = getDatabase()
   const [reports, players] = await Promise.all([
     listSeasonReports(db, season),
-    readPlayerReportStats(db, season, league ? 'Eredivisie' : undefined),
+    readPlayerReportStats(db, season, only === undefined ? undefined : [...only]),
   ])
   const played = reports.filter((report) => report.status === 'played')
-  const counted = league ? played.filter((report) => report.competition === 'Eredivisie') : played
+  const counted = played.filter((report) => countsFor(report.competition, choice as CompetitionChoice))
 
   return {
     known: counted.filter((report) => report.reportStatus === 'klaar').length,

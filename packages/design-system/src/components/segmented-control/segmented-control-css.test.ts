@@ -143,6 +143,13 @@ describe('the thumb of the segmented control', () => {
 })
 
 describe('the sizes of the segmented control', () => {
+  it('has a compact variant that only changes the letters and the padding, not the height', () => {
+    const compact = css.slice(css.indexOf('&.hf-segmented-compact'))
+
+    expect(compact).toContain('padding-inline: var(--hf-segmented-edge);')
+    expect(compact.slice(0, compact.indexOf('}'))).not.toContain('min-block-size')
+  })
+
   it('is 44 pixels high, and the small size takes its height from the token', () => {
     expect(css).toContain('min-block-size: var(--hf-size-control);')
     expect(css.slice(css.indexOf('&.hf-size-small'))).toContain('min-block-size: var(--hf-size-control-small);')

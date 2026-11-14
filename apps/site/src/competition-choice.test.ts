@@ -7,9 +7,9 @@ import {
   choiceFor,
   cleanSheetsOf,
   competitionNames,
+  competitionOptionsOf,
   extremesOf,
   goalsPerQuarter,
-  hasPlayedExtraMatch,
   homeAwayOf,
   leagueResultsOf,
   matchFlowOf,
@@ -91,14 +91,24 @@ describe('parseCompetition', () => {
   it('gives all the matches without a parameter, and the Eredivisie for eredivisie', () => {
     expect(parseCompetition(undefined)).toBe('all')
     expect(parseCompetition('eredivisie')).toBe('league')
+    expect(parseCompetition('beker')).toBe('cup')
+    expect(parseCompetition('europa')).toBe('europe')
   })
 
-  it.each(['', 'Eredivisie', 'EREDIVISIE', 'alle', 'alle-wedstrijden', 'beker', ' eredivisie', 'eredivisie '])(
-    'gives nothing for %j, so the page is "niet gevonden"',
-    (value) => {
-      expect(parseCompetition(value)).toBeUndefined()
-    },
-  )
+  it.each([
+    '',
+    'Eredivisie',
+    'EREDIVISIE',
+    'alle',
+    'alle-wedstrijden',
+    'Beker',
+    'europe',
+    'EUROPA',
+    ' eredivisie',
+    'eredivisie ',
+  ])('gives nothing for %j, so the page is "niet gevonden"', (value) => {
+    expect(parseCompetition(value)).toBeUndefined()
+  })
 
   it('gives nothing for a value given twice, also when both are right', () => {
     expect(parseCompetition(['eredivisie', 'eredivisie'])).toBeUndefined()
@@ -113,23 +123,45 @@ describe('competitionQuery', () => {
   })
 })
 
-describe('hasPlayedExtraMatch and competitionNames', () => {
+describe('competitionOptionsOf and competitionNames', () => {
   const league = played('Speelronde 1', '2026-08-01', 1, 0)
 
-  it('is true only for a cup tie that was played and has a score', () => {
-    expect(hasPlayedExtraMatch([league])).toBe(false)
-    expect(hasPlayedExtraMatch([league, cup('Tweede ronde', '2026-09-23', 1, 0)])).toBe(true)
-    expect(hasPlayedExtraMatch([cup('Tweede ronde', '2026-09-23', 1, 0, { status: 'scheduled' })])).toBe(false)
-    expect(hasPlayedExtraMatch([cup('Tweede ronde', '2026-09-23', 1, 0, { goalsAgainst: null, goalsFor: null })])).toBe(
-      false,
-    )
+  it('offers the cup only for a tie that was played and has a score', () => {
+    expect(competitionOptionsOf([league])).toEqual([])
+    expect(competitionOptionsOf([league, cup('Tweede ronde', '2026-09-23', 1, 0)])).toEqual(['all', 'league', 'cup'])
+    expect(competitionOptionsOf([league, cup('Tweede ronde', '2026-09-23', 1, 0, { status: 'scheduled' })])).toEqual([])
+    expect(
+      competitionOptionsOf([league, cup('Tweede ronde', '2026-09-23', 1, 0, { goalsAgainst: null, goalsFor: null })]),
+    ).toEqual([])
+  })
+
+  it('offers Europa for a match of Europe or the play-offs, and the four values in order', () => {
+    const europa = played('Derde voorronde', '2012-08-02', 4, 0, { competition: 'Europa League' })
+
+    expect(competitionOptionsOf([league, europa])).toEqual(['all', 'league', 'europe'])
+    expect(competitionOptionsOf([league, cup('Tweede ronde', '2012-09-23', 1, 0), europa])).toEqual([
+      'all',
+      'league',
+      'cup',
+      'europe',
+    ])
+  })
+
+  it('counts the cup for Beker and Europe for Europa, and falls back to all for a value without matches', () => {
+    const europa = played('Derde voorronde', '2012-08-02', 4, 0, { competition: 'Europa League' })
+    const matches = [league, cup('Tweede ronde', '2012-09-23', 2, 0), europa]
+
+    expect(competitionNames(matches, 'cup')).toBe('de KNVB Beker')
+    expect(competitionNames(matches, 'europe')).toBe('de Europa League')
+    expect(choiceFor(matches, 'europe')).toBe('europe')
+    expect(choiceFor([league, cup('Tweede ronde', '2012-09-23', 2, 0)], 'europe')).toBe('all')
   })
 
   it('is true for a match of the play-offs that was played, and not for one that was not', () => {
-    expect(hasPlayedExtraMatch([league, playoffs('Halve finale', '2027-05-20', 2, 3)])).toBe(true)
-    expect(hasPlayedExtraMatch([league, playoffs('Halve finale', '2027-05-20', 2, 3, { status: 'scheduled' })])).toBe(
-      false,
-    )
+    expect(competitionOptionsOf([league, playoffs('Halve finale', '2027-05-20', 2, 3)])).toContain('europe')
+    expect(
+      competitionOptionsOf([league, playoffs('Halve finale', '2027-05-20', 2, 3, { status: 'scheduled' })]),
+    ).toEqual([])
   })
 
   it('names the play-offs, and not the cup, when only the play-offs were played', () => {
@@ -152,7 +184,7 @@ describe('hasPlayedExtraMatch and competitionNames', () => {
       playoffs('Eerste ronde, wedstrijd 1/2', '2013-05-16', 0, 1, { competition: 'Play-offs Europa League' }),
     ]
 
-    expect(hasPlayedExtraMatch(matches)).toBe(true)
+    expect(competitionOptionsOf(matches)).toContain('europe')
     expect(competitionNames(matches, 'all')).toBe('de Eredivisie en de play-offs')
     expect(competitionNames(matches, 'league')).toBe('de Eredivisie')
   })
@@ -160,7 +192,7 @@ describe('hasPlayedExtraMatch and competitionNames', () => {
   it('counts a match of the Europa League that was played, and names it', () => {
     const europa = played('Derde voorronde, wedstrijd 1/2', '2012-08-02', 4, 0, { competition: 'Europa League' })
 
-    expect(hasPlayedExtraMatch([league, europa])).toBe(true)
+    expect(competitionOptionsOf([league, europa])).toContain('europe')
     expect(competitionNames([league, europa], 'all')).toBe('de Eredivisie en de Europa League')
     expect(competitionNames([league, europa], 'league')).toBe('de Eredivisie')
   })
@@ -187,17 +219,20 @@ describe('hasPlayedExtraMatch and competitionNames', () => {
     expect(competitionNames(matches, 'all')).toBe('de Eredivisie en de play-offs')
   })
 
-  it('has nothing to choose in a season without an Eredivisie match, since the choice would count nothing', () => {
+  it('counts the Eerste divisie as the league in the seasons played there', () => {
     const eerste = played('Wedstrijd 1', '1992-08-15', 2, 1, { competition: 'Eerste divisie' })
 
-    expect(hasPlayedExtraMatch([eerste, cup('Tweede ronde', '1992-09-23', 1, 0)])).toBe(false)
-    expect(hasPlayedExtraMatch([cup('Tweede ronde', '1992-09-23', 1, 0)])).toBe(false)
+    expect(competitionOptionsOf([eerste, cup('Tweede ronde', '1992-09-23', 1, 0)])).toEqual(['all', 'league', 'cup'])
+    expect(competitionOptionsOf([cup('Tweede ronde', '1992-09-23', 1, 0)])).toEqual([])
+    expect(competitionNames([eerste], 'league')).toBe('de Eerste divisie')
   })
 
-  it('counts the choice Eredivisie as all matches in a season without an Eredivisie match', () => {
+  it('counts a choice without a match of its competition as all matches', () => {
     const eerste = played('Wedstrijd 1', '1992-08-15', 2, 1, { competition: 'Eerste divisie' })
 
-    expect(choiceFor([eerste], 'league')).toBe('all')
+    // The Eerste divisie is the league in the seasons played there.
+    expect(choiceFor([eerste], 'league')).toBe('league')
+    expect(choiceFor([eerste], 'cup')).toBe('all')
     expect(choiceFor([eerste], 'all')).toBe('all')
     expect(choiceFor([league, eerste], 'league')).toBe('league')
     // A season that has Eredivisie matches keeps the choice, also before one is played.

@@ -119,6 +119,13 @@
         padding-inline: calc(var(--hf-segmented-edge) + var(--hf-space-s));
       }
     }
+
+    /* Smaller letters and less room round them, at the standard height: four options on a phone. */
+    &.hf-segmented-compact > :is(button, a) {
+      font-size: var(--hf-meta-font-size);
+      line-height: var(--hf-meta-line-height);
+      padding-inline: var(--hf-segmented-edge);
+    }
   }
 
   /*

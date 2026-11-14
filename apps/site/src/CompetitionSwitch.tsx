@@ -1,34 +1,53 @@
 import type { PublicMatch } from '@fansite/db/queries'
 
-import { type CompetitionChoice, competitionParam, competitionQuery, leagueValue } from './competition'
-import { hasPlayedExtraMatch } from './matches'
+import { type CompetitionChoice, competitionChoices, competitionQuery, leagueLabel } from './competition'
+import { competitionOptionsOf } from './matches'
 import { SwitchLinks } from './SwitchLinks'
 
 /**
- * The two links of the switch, for a page that knows itself whether there is anything to
- * choose, such as the pages of the opponents, which count the matches of every season.
+ * The links of the switch, for a page that knows itself what there is to choose, such as the
+ * pages of the opponents, which count the matches of every season. `options` are the choices to
+ * show, `all` first (see `optionsOf`); the switch is left out when there are none. Each choice
+ * is a link to the same page with `?competitie=` (`all` has none), so the switch works without
+ * JavaScript and the choice is in the address. `address` is the address of the page without the
+ * choice, and `league` what the league is called: `Eredivisie`, `Eerste divisie` in the seasons
+ * played there, and `Competitie` for matches of both (see `leagueLabel`).
  */
-export function CompetitionLinks({ address, competition }: { address: string; competition: CompetitionChoice }) {
+export function CompetitionLinks({
+  address,
+  competition,
+  league = 'Eredivisie',
+  options,
+}: {
+  address: string
+  competition: CompetitionChoice
+  league?: string
+  options: readonly CompetitionChoice[]
+}) {
+  if (options.length === 0) {
+    return null
+  }
+
   return (
     <SwitchLinks
+      compact
       label="Welke wedstrijden"
-      options={[
-        { href: address, label: 'Alle wedstrijden', value: 'all' },
-        { href: `${address}${competitionQuery('league')}`, label: 'Eredivisie', value: 'league' },
-      ]}
-      size="small"
+      options={competitionChoices
+        .filter(({ choice }) => options.includes(choice))
+        .map(({ choice, label }) => ({
+          href: `${address}${competitionQuery(choice)}`,
+          label: choice === 'league' ? league : label,
+          value: choice,
+        }))}
       value={competition}
     />
   )
 }
 
 /**
- * The switch of the statistics pages between all the matches (the Eredivisie and the KNVB
- * Beker, the default) and the Eredivisie alone. Both choices are links to the same page, the
- * second with `?competitie=eredivisie`, so the switch works without JavaScript and the choice
- * is in the address. `address` is the address of the page of the season without the choice. The
- * switch is only there when the season has a played cup tie: without one, the two choices count
- * the same matches and there is nothing to choose.
+ * The switch of the pages of a season between every match and the league, the cup or Europe,
+ * each only when the season has a played match in it (see `competitionOptionsOf`). Without
+ * anything to choose, there is no switch.
  */
 export function CompetitionSwitch({
   address,
@@ -39,9 +58,12 @@ export function CompetitionSwitch({
   competition: CompetitionChoice
   matches: PublicMatch[]
 }) {
-  return hasPlayedExtraMatch(matches) ? <CompetitionLinks address={address} competition={competition} /> : null
+  return (
+    <CompetitionLinks
+      address={address}
+      competition={competition}
+      league={leagueLabel(matches.map((match) => match.competition))}
+      options={competitionOptionsOf(matches)}
+    />
+  )
 }
-
-/** What the season picker sends with the season to keep the choice (see `SeasonPicker`). */
-export const competitionFields = (competition: CompetitionChoice): Record<string, string> =>
-  competition === 'league' ? { [competitionParam]: leagueValue } : {}

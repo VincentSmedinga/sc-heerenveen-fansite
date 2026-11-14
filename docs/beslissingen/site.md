@@ -2858,6 +2858,7 @@
   Een telling van de uitslagen past bij de andere tellingen op Cijfers en volgt daar de keuze, terwijl Wedstrijden de lijst en de stand houdt.
 - **Alternatieven:** elke kaart een eigen schakelaar (te veel herhaling); de schakelaar bovenaan de zijkolom, zoals Spelers had; de kaart op Wedstrijden laten staan met alle wedstrijden; een voorproefje van de doelpuntenmakers op Cijfers.
 - **Later:** vervangt _De kaart met de uitslagen staat op Wedstrijden en telt dezelfde wedstrijden als Uitslagen_ (2 november 2026).
+- **Later:** zie _De keuze van competitie heeft vier waarden, en Alles telt elke wedstrijd_ (14 november 2026): de schakelaar heeft nu vier waarden, Alles, Eredivisie, Beker en Europa, en de `hasPlayedExtraMatch` van deze keuze is `competitionOptionsOf`.
   Het vult _Doelpuntenmakers staan op één plek: Spelers_ (6 november 2026) aan: de code toont op Cijfers nu ook geen anker `#doelpuntenmakers` meer.
   Het vult _Een kaart staat op de pagina van de zaak die hij beschrijft, en de hoofd- en zijkolom hebben vaste rollen_ (6 november 2026) aan: de schakelaar is een cel van de hoofdkolom.
 - **Later:** zie _De openbare pagina's gebruiken het raster met benoemde gebieden_ (12 november 2026): de schakelaar is geen cel van de hoofdkolom meer maar staat in de werkbalk onder de kop, op Cijfers, Spelers, Tegenstanders en de pagina van een speler.
@@ -4732,6 +4733,7 @@
   Een streepje is eerlijker dan een getal dat meerdere competities telt.
   We beginnen klein: alleen de tabel.
 - **Alternatieven:** de hele pagina de keuze laten volgen (kan later); de keuze onthouden (vraagt een besluit over opslag); voor een seizoen uit Wikipedia de cijfers van alle wedstrijden tonen met een waarschuwing (twee betekenissen in één tabel).
+- **Later:** zie _De keuze van competitie heeft vier waarden, en Alles telt elke wedstrijd_ (14 november 2026): de schakelaar heeft vier waarden (Alles, Eredivisie, Beker, Europa) en staat er als de speler in minstens twee ervan speelde of scoorde.
 
 ## De grafieken van een speler staan in de zijkolom, in zachte kaarten
 
@@ -5480,8 +5482,24 @@
 - **Datum:** 14 november 2026
 - **Besluit:** Alles, Eredivisie, Beker en Europa (#1209).
   Alles telt elke gespeelde wedstrijd, ook Europa, de play-offs en de Eerste divisie.
+  - **Het adres:** Alles heeft geen parameter; de andere zijn `?competitie=eredivisie`, `?competitie=beker` en `?competitie=europa`.
+    Een andere waarde is "niet gevonden", ook de waarde van een ander aantal hoofdletters.
+  - **Europa** telt elke Europese beker en de play-offs erom, dezelfde lijst als het filter Competitie in Zoeken (`competitionGroups`).
+    De Johan Cruijff Schaal telt alleen bij Alles.
+  - **Wat de schakelaar toont:** een waarde zonder gespeelde wedstrijd in het bereik van de pagina staat er niet in, en blijft er één waarde over, dan is er geen schakelaar (`optionsOf`).
+    Een pagina die een waarde zonder wedstrijden in het adres heeft, houdt die waarde in de schakelaar, zodat de weg terug naar Alles er is.
+    Een pagina van een seizoen telt met Alles als het seizoen geen wedstrijd van de gekozen competitie heeft (`choiceFor`).
+  - **De Eerste divisie** speelden we in 1991/92 en 1992/93: de waarde Eredivisie telt dan de Eerste divisie en heet "Eerste divisie".
+    Een pagina met wedstrijden van beide, zoals Tegenstanders, noemt de waarde "Competitie" (`leagueLabel`).
+  - **De maat:** de schakelaar is nu de normale maat van 44 pixels in plaats van de kleine van 36, zodat elke waarde een doel van 44 pixels is.
+    Op een telefoon van 390 pixels staan de vier waarden op één regel.
+  - **Spelers per seizoen:** de kolom W bij de doelpuntenmakers rust op de cijfers van Wikipedia, die alleen de Eredivisie en de KNVB Beker kennen.
+    Bij Europa is de kolom er niet.
+  - **Eén component:** `CompetitionLinks` (de links) en `CompetitionSwitch` (de links voor de wedstrijden van een seizoen) dienen alle pagina's met de schakelaar: Cijfers, Spelers, Tegenstanders, de pagina van een club en de pagina van een speler.
 - **Waarom:** de 107 Europese wedstrijden en de play-offs stonden in geen enkel cijfer.
-- **Alternatieven:** de twee waarden van nu houden.
+  Een waarde die niets telt, is een doodlopende keuze.
+- **Alternatieven:** de twee waarden van nu houden; de waarden Beker en Europa alleen bij een seizoen met zulke wedstrijden tonen, zonder de uitzondering voor een adres met een lege waarde.
+- **Later:** vervangt de twee waarden in _Een kaart die een telling van meer wedstrijden is, staat op Cijfers, en de schakelaar staat bovenaan de hoofdkolom_ (6 november 2026) en _De kaart Per seizoen van een speler laat kiezen tussen alle wedstrijden en de Eredivisie_ (11 november 2026); `playedBesidesEredivisie` is `playerCompetitionOptions` geworden en `playerSeasonsOf(facts, 'Eredivisie')` neemt een lijst competities.
 
 ## Geen lijst aller tijden van wedstrijden, minuten, assists en kaarten per speler
 

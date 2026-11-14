@@ -3,8 +3,7 @@ import type { PublicStaff } from '@fansite/db/queries'
 import { seasonOf } from '@fansite/db/season'
 import { rangeOf } from '@fansite/db/staff'
 
-import type { CompetitionChoice } from './competition'
-
+import { type CompetitionChoice, countsFor } from './competition'
 import { formatStaffDate } from './match-format'
 import { resultOf } from './match-result'
 
@@ -74,7 +73,7 @@ export function coachResultsOf(
       match.status !== 'played' ||
       match.goalsFor === null ||
       match.goalsAgainst === null ||
-      (choice === 'league' && match.competition !== 'Eredivisie')
+      !countsFor(match.competition, choice)
     ) {
       continue
     }

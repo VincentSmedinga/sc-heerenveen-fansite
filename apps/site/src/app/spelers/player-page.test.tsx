@@ -155,7 +155,7 @@ describe('the switch of the table Per seizoen', () => {
   })
 
   it('is the page "niet gevonden" for a value that is not known', async () => {
-    const digest = await render({}, { competitie: 'beker' }).then(
+    const digest = await render({}, { competitie: 'onzin' }).then(
       () => undefined,
       (error: unknown) => (error as { digest?: string }).digest,
     )

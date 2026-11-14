@@ -6,7 +6,15 @@ import { cache } from 'react'
 
 import type { SearchParams } from '#src/season-page'
 
-import { competitionParam, competitionQuery, leagueValue, parseCompetition } from '#src/competition'
+import {
+  competitionFields,
+  competitionParam,
+  competitionQuery,
+  competitionWords,
+  leagueLabel,
+  optionsOf,
+  parseCompetition,
+} from '#src/competition'
 import { CompetitionLinks } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
@@ -63,9 +71,11 @@ import { withBranch } from '#src/title'
  */
 const loadClubList = cache(async () => {
   try {
-    const [all, league, seasons, pages, edited, source, lastWins] = await Promise.all([
+    const [all, league, cup, europe, seasons, pages, edited, source, lastWins] = await Promise.all([
       getClubRecords('all'),
       getClubRecords('league'),
+      getClubRecords('cup'),
+      getClubRecords('europe'),
       getMatchSeasons(),
       getSourcePages(),
       getEditedMatches(),
@@ -74,7 +84,7 @@ const loadClubList = cache(async () => {
       getLastWinPlaces(dutchDay(new Date())),
     ])
 
-    return { all, edited, kind: 'found', lastWins, league, pages, seasons, source } as const
+    return { edited, kind: 'found', lastWins, pages, records: { all, cup, europe, league }, seasons, source } as const
   } catch (error) {
     console.error(`Could not read the opponents for ${opponentsPath}: ${reasonOf(error)}`)
 
@@ -150,10 +160,16 @@ export async function ClubListPage({ searchParams }: { searchParams: Promise<Sea
   }
 
   const played = (records: { played: number }[]) => records.reduce((sum, record) => sum + record.played, 0)
-  // Without a cup tie the two choices count the same matches and there is nothing to choose.
-  const hasCup = played(loaded.all) > played(loaded.league)
-
-  const records = competition === 'league' ? loaded.league : loaded.all
+  // A choice without a played match is not offered, and with nothing to choose, no switch.
+  // The choice of the address stays in the switch, so a visitor who asked for one without a
+  // match has the way back to `all`.
+  const options = optionsOf(
+    (['league', 'cup', 'europe'] as const).filter(
+      (choice) => choice === competition || played(loaded.records[choice]) > 0,
+    ),
+  )
+  const hasCup = options.length > 0
+  const records = loaded.records[competition]
   const since = sinceOf(loaded.seasons)
 
   return (
@@ -166,7 +182,7 @@ export async function ClubListPage({ searchParams }: { searchParams: Promise<Sea
         </Page.Cell>
         {hasCup && (
           <Page.Toolbar>
-            <CompetitionLinks address={opponentsPath} competition={competition} />
+            <CompetitionLinks address={opponentsPath} competition={competition} league="Competitie" options={options} />
           </Page.Toolbar>
         )}
         <Page.Cell area="main">
@@ -267,15 +283,19 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
   const pageHref = (page: number) =>
     filterHref(
       `${opponentsPath}/${slug}`,
-      filterQuery(competitionParam, competition === 'league' ? [leagueValue] : [], page),
+      filterQuery(competitionParam, Object.values(competitionFields(competition)), page),
     )
-  const hasCup =
-    meetingsOf(matches, 'all').length > meetingsOf(matches, 'league').length ||
-    upcomingOf(matches, 'all', now).length > upcomingOf(matches, 'league', now).length
+  const options = optionsOf(
+    (['league', 'cup', 'europe'] as const).filter(
+      (choice) =>
+        choice === competition || meetingsOf(matches, choice).length > 0 || upcomingOf(matches, choice, now).length > 0,
+    ),
+  )
+  const hasCup = options.length > 0
   const noneYet =
-    competition === 'league'
-      ? 'In de Eredivisie hebben we nog niet tegen deze club gespeeld.'
-      : 'We hebben nog niet tegen deze club gespeeld.'
+    competition === 'all'
+      ? 'We hebben nog niet tegen deze club gespeeld.'
+      : `In ${competitionWords(competition)} hebben we nog niet tegen deze club gespeeld.`
   const earlier = earlierNames(loaded.page.names, club.name)
   const stadiums = stadiumViewsOf(loaded.page.stadiums, matches)
   const hasNews = loaded.news.length > 0
@@ -298,7 +318,12 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
         </Page.Cell>
         {hasCup && (
           <Page.Toolbar>
-            <CompetitionLinks address={`${opponentsPath}/${slug}`} competition={competition} />
+            <CompetitionLinks
+              address={`${opponentsPath}/${slug}`}
+              competition={competition}
+              league={leagueLabel(matches.map((match) => match.competition))}
+              options={options}
+            />
           </Page.Toolbar>
         )}
         {/* The summary stands before the matches in the source, so on a phone it is the first

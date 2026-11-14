@@ -1,7 +1,6 @@
 import type { PublicPlayerStats } from '@fansite/db/queries'
 
-import type { CompetitionChoice } from './competition'
-
+import { type CompetitionChoice, countsFor } from './competition'
 import { keyOf, type ScoredMatch } from './matches'
 
 /** The competitions of the squad table on Wikipedia, so the only ones with appearances. */
@@ -16,8 +15,9 @@ const statsCompetitions = ['Eredivisie', 'KNVB Beker'] as const
  * The card shows the column when three things hold:
  *
  * 1. Every match it counts is a match of the Eredivisie or the cup, the two competitions the
- *    squad table has figures for. With the choice `league` that is always so; with `all` it is
- *    not in a season with a played match of the play-offs or of Europe.
+ *    squad table has figures for. With the choices `league` and `cup` that is always so; with
+ *    `all` it is not in a season with a played match of the play-offs or of Europe, and with
+ *    `europe` the card has no column at all.
  * 2. Every scorer has at least one appearance in the competitions the card counts. The goals
  *    of a person count for all the players (titles) the person has, as the card does.
  * 3. For every scorer, the goals in the squad table, in those competitions, are the goals of
@@ -27,16 +27,21 @@ const statsCompetitions = ['Eredivisie', 'KNVB Beker'] as const
  * the card has no column either. A card without scorers has none.
  *
  * The value is the goals of the card divided by the appearances (also as a substitute) in the
- * competitions the card counts: the Eredivisie for the choice `league`, the Eredivisie and the
- * cup for `all`.
+ * competitions the card counts: the Eredivisie for the choice `league`, the cup for `cup`, and
+ * the Eredivisie and the cup for `all`.
  */
 export function goalsPerMatchOf(
   matches: ScoredMatch[],
   choice: CompetitionChoice,
   stats: Pick<PublicPlayerStats, 'appearances' | 'competition' | 'goals' | 'playerId'>[],
 ): Map<string, number> | undefined {
-  const counted = choice === 'all' ? statsCompetitions : (['Eredivisie'] as const)
-  const isCounted = (match: ScoredMatch) => choice === 'all' || match.competition === 'Eredivisie'
+  // The squad table has no figures for Europe, so the choice Europa has no column.
+  if (choice === 'europe') {
+    return undefined
+  }
+
+  const counted = statsCompetitions.filter((competition) => countsFor(competition, choice))
+  const isCounted = (match: ScoredMatch) => countsFor(match.competition, choice)
   const played = (match: ScoredMatch) => match.status === 'played' || match.goals.length > 0
 
   if (matches.some((match) => isCounted(match) && played(match) && !isStatsCompetition(match.competition))) {

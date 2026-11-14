@@ -9,6 +9,7 @@ import type { FinalPlace } from '#src/matches'
 import { getCoachResultData, getFinalPlaces, getMatchData, getMatchSeasons } from '#src/matches'
 import { statisticsShortcuts } from '#src/statisticsShortcuts'
 import { coachResultData, matchData } from '#src/test-matches'
+import { leagueAndCup, switchHtml } from '#src/test-switch'
 import { withoutIcons } from '#src/without-icons'
 
 import StatisticsPage, { generateMetadata } from './page'
@@ -1678,16 +1679,12 @@ describe('the choice between all the matches and the Eredivisie on /wedstrijden/
       (error: unknown) => (error as { digest?: string }).digest,
     )
 
-  it('has a switch of two links in the toolbar, with the choice that the address asks for marked', async () => {
+  it('has a switch of three links in the toolbar, with the choice that the address asks for marked', async () => {
     const all = await render()
     const league = await render(eredivisie)
 
-    expect(switchOf(all)).toBe(
-      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-count:2;--hf-segmented-index:0"><a aria-current="page" href="/wedstrijden/cijfers"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a href="/wedstrijden/cijfers?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
-    )
-    expect(switchOf(league)).toBe(
-      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-count:2;--hf-segmented-index:1"><a href="/wedstrijden/cijfers"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a aria-current="page" href="/wedstrijden/cijfers?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
-    )
+    expect(switchOf(all)).toBe(switchHtml('/wedstrijden/cijfers', 0, leagueAndCup))
+    expect(switchOf(league)).toBe(switchHtml('/wedstrijden/cijfers', 1, leagueAndCup))
     expect(all.match(/aria-current/g)).toHaveLength(1)
   })
 
@@ -1841,7 +1838,15 @@ describe('the choice between all the matches and the Eredivisie on /wedstrijden/
   })
 
   it('gives the page "niet gevonden" for a value that is not eredivisie, one that is empty and one that is given twice', async () => {
-    for (const competitie of ['Eredivisie', 'alle', 'beker', '', ['eredivisie', 'eredivisie'], ['eredivisie']]) {
+    for (const competitie of [
+      'Eredivisie',
+      'alle',
+      'Beker',
+      'Europa',
+      '',
+      ['eredivisie', 'eredivisie'],
+      ['eredivisie'],
+    ]) {
       expect(await digestOf(render({ competitie })), JSON.stringify(competitie)).toContain('404')
     }
   })

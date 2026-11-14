@@ -565,7 +565,10 @@ export async function listClubNews(
  * competition count, and a club without one in it is left out; without it all of them count.
  * A club that has matches but none played yet is in the list with zeros.
  */
-export function listClubRecords(db: Database, { competition }: { competition?: Competition } = {}) {
+export function listClubRecords(
+  db: Database,
+  { competition }: { competition?: Competition | readonly Competition[] } = {},
+) {
   const played = eq(matches.status, 'played')
   const total = (condition: SQL) => sql<number>`cast(coalesce(sum(${condition}), 0) as unsigned)`.mapWith(Number)
   // The score that decides a match: the shoot-out when there was one (both numbers are set or
@@ -588,7 +591,12 @@ export function listClubRecords(db: Database, { competition }: { competition?: C
     .from(clubs)
     .innerJoin(
       matches,
-      and(eq(matches.clubId, clubs.id), competition === undefined ? undefined : eq(matches.competition, competition)),
+      and(
+        eq(matches.clubId, clubs.id),
+        competition === undefined
+          ? undefined
+          : inArray(matches.competition, Array.isArray(competition) ? [...competition] : [competition as Competition]),
+      ),
     )
     .groupBy(clubs.id)
     .orderBy(asc(clubs.name), asc(clubs.id))

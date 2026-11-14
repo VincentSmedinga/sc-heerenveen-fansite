@@ -32,6 +32,14 @@ describe('SegmentedLinks', () => {
     expect(screen.getByTestId('switch').className).toBe('hf-segmented-control extra')
   })
 
+  it('has the compact letters when asked, and keeps the standard height', () => {
+    render(<SegmentedLinks compact label="Welke wedstrijden" options={options} value="league" />)
+
+    expect(screen.getByRole('group', { name: 'Welke wedstrijden' }).className).toBe(
+      'hf-segmented-control hf-segmented-compact',
+    )
+  })
+
   it('places the thumb under the current link, and has the small size when asked', () => {
     render(<SegmentedLinks label="Welke wedstrijden" options={options} size="small" value="league" />)
     const group = screen.getByRole('group', { name: 'Welke wedstrijden' })

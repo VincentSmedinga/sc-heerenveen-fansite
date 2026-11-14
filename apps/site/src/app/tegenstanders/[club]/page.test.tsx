@@ -474,10 +474,10 @@ describe('the page of a club', () => {
     expect(await render()).toContain('Alle 5 gespeelde wedstrijden sinds 2022/23')
   })
 
-  it('has the switch, with the choice Alle wedstrijden current, because the cup was played', async () => {
+  it('has the switch, with the choice Alles current, because the cup was played', async () => {
     const html = await render()
 
-    expect(html).toMatch(/<a aria-current="page"[^>]*href="\/tegenstanders\/testclub"[^>]*><span[^>]*>Alle wedstrijden/)
+    expect(html).toMatch(/<a aria-current="page"[^>]*href="\/tegenstanders\/testclub"[^>]*><span[^>]*>Alles/)
     expect(html).toContain('href="/tegenstanders/testclub?competitie=eredivisie"')
   })
 
@@ -495,7 +495,7 @@ describe('the page of a club', () => {
 
     expect(html).toContain('In de Eredivisie hebben we nog niet tegen deze club gespeeld.')
     expect(html).not.toContain('<table')
-    expect(html).toMatch(/<a [^>]*href="\/tegenstanders\/beker-united"[^>]*><span[^>]*>Alle wedstrijden/)
+    expect(html).toMatch(/<a [^>]*href="\/tegenstanders\/beker-united"[^>]*><span[^>]*>Alles/)
   })
 
   it('shows the summary for that same club with all the matches, a single cup tie', async () => {
@@ -991,9 +991,9 @@ describe('the matches that are still to come on the page of a club', () => {
   })
 
   it('shows the switch for the competition when only the matches to come are in the cup', async () => {
-    vi.mocked(getClubPage).mockResolvedValue({ ...komend, matches: komend.matches.slice(1, 2) })
+    vi.mocked(getClubPage).mockResolvedValue({ ...komend, matches: komend.matches.slice(0, 2) })
 
-    expect(await render('komend-fc')).toContain('Alle wedstrijden')
+    expect(await render('komend-fc')).toContain('>Alles<')
   })
 
   it('has the card with only the matches to come, no sentence, and only the credit for a club we have not played', async () => {

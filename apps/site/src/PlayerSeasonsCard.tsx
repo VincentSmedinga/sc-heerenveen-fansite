@@ -1,8 +1,8 @@
 import { Card, DataTable, Heading, tableColumns, tableLegend, Text } from '@fansite/design-system'
 
-import type { CompetitionChoice } from './competition'
 import type { PlayerSeason } from './player-seasons'
 
+import { type CompetitionChoice, competitionWords } from './competition'
 import { nextSeason } from './player-page'
 
 /** The figures a column can show, each a field of `PlayerSeason`. */
@@ -94,7 +94,7 @@ export function PlayerSeasonsCard({
 }: {
   /** The address of the page Spelers of a season, such as `/spelers/2025-26`. */
   address: (season: string) => string
-  /** The matches the table counts (#1103): all of them, or the Eredivisie alone. */
+  /** The matches the table counts (#1103): all, or those of the league, the cup or Europe. */
   competition?: CompetitionChoice
   goalkeeper: boolean
   name: string
@@ -112,7 +112,7 @@ export function PlayerSeasonsCard({
         Per seizoen
       </Heading>
       <DataTable
-        caption={`De cijfers van ${name} per seizoen bij sc Heerenveen, ${competition === 'league' ? 'alleen de Eredivisie, ' : ''}het nieuwste seizoen eerst, met het totaal onderaan`}
+        caption={`De cijfers van ${name} per seizoen bij sc Heerenveen, ${competition === 'all' ? '' : `alleen ${competitionWords(competition)}, `}het nieuwste seizoen eerst, met het totaal onderaan`}
         columns={['Seizoen', ...table.columns.map(({ abbreviation, name: word }) => ({ abbreviation, name: word }))]}
         rows={table.rows.map((row) => ({
           cells: row.cells,
@@ -125,7 +125,7 @@ export function PlayerSeasonsCard({
       <Text appearance="meta">
         {[
           `${tableLegend(table.columns)}.`,
-          ...playerSeasonsNotes(seasons, table, goalkeeper, competition === 'league'),
+          ...playerSeasonsNotes(seasons, table, goalkeeper, competition !== 'all'),
         ].join(' ')}
       </Text>
     </Card>
