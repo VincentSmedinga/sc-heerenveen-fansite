@@ -11,6 +11,7 @@ import {
   getPersonBirthDates,
   getPersonSeasons,
   getReportSeasons,
+  getSquadPeople,
 } from '#src/matches'
 import { getSourcePages } from '#src/opponents'
 import { getReportAddresses } from '#src/report-data'
@@ -29,6 +30,7 @@ vi.mock('#src/matches', async (importOriginal) => ({
   getPersonBirthDates: vi.fn(),
   getPersonSeasons: vi.fn(),
   getReportSeasons: vi.fn(),
+  getSquadPeople: vi.fn(),
 }))
 vi.mock('#src/opponents', () => ({ getSourcePages: vi.fn() }))
 vi.mock('#src/report-data', () => ({ getReportAddresses: vi.fn() }))
@@ -112,6 +114,7 @@ beforeEach(() => {
   vi.mocked(getMatchSource).mockResolvedValue('wikipedia')
   vi.mocked(getPersonBirthDates).mockResolvedValue(new Map())
   vi.mocked(getPersonSeasons).mockResolvedValue(new Map())
+  vi.mocked(getSquadPeople).mockResolvedValue(new Map())
   vi.mocked(getReportSeasons).mockResolvedValue(['2003/04', '2004/05', '2005/06', '2026/27'])
   vi.mocked(getReportAddresses).mockResolvedValue(
     new Map([['Eredivisie|Speelronde 9', '/wedstrijden/2003-04/2003-09-12-fc-proef']]),
@@ -330,6 +333,44 @@ describe('the page with all seasons, /spelers/cijfers/alle', () => {
     const html = await render()
 
     expect(html.indexOf('hf-wikipedia-credit')).toBeGreaterThan(html.indexOf('id="strafschoppen"'))
+  })
+
+  it('has the soft card Meeste seizoenen in de selectie under Strafschoppen benut, with the years and what it counts', async () => {
+    vi.mocked(getPersonSeasons).mockResolvedValue(
+      new Map([
+        [1, ['1993/94', '1994/95', '1995/96']],
+        [2, ['1999/00']],
+      ]),
+    )
+    vi.mocked(getSquadPeople).mockResolvedValue(
+      new Map([
+        [1, { familyName: 'Hansma', familyNamePrefix: null, givenName: 'Johan', personId: 1, slug: 'johan-hansma' }],
+        [2, { familyName: 'Vonk', familyNamePrefix: null, givenName: 'Hans', personId: 2, slug: null }],
+      ]),
+    )
+
+    const html = await render()
+    const side = html.slice(html.indexOf('style="grid-area:side"'))
+    const card = side.slice(side.indexOf('aria-labelledby="meeste-seizoenen-in-de-selectie"'))
+
+    expect(card).toMatch(/^aria-labelledby="meeste-seizoenen-in-de-selectie"[^>]*>/)
+    expect(side.indexOf('id="strafschoppen"')).toBeLessThan(side.indexOf('id="meeste-seizoenen-in-de-selectie"'))
+    expect(card).toContain('href="/spelers/johan-hansma"')
+    expect(card).toContain('1993–1996')
+    expect(card).toContain('Het aantal seizoenen waarin de speler in de selectie stond, niet zijn wedstrijden.')
+  })
+
+  it('does not follow the choice of competition', async () => {
+    vi.mocked(getPersonSeasons).mockResolvedValue(new Map([[1, ['1993/94']]]))
+    vi.mocked(getSquadPeople).mockResolvedValue(
+      new Map([[1, { familyName: 'Hansma', familyNamePrefix: null, givenName: 'Johan', personId: 1, slug: null }]]),
+    )
+
+    expect(await render({ competitie: 'beker' })).toContain('Hansma')
+  })
+
+  it('leaves the card Meeste seizoenen in de selectie out when no squad is known', async () => {
+    expect(await render()).not.toContain('meeste-seizoenen-in-de-selectie')
   })
 
   it('leaves out a card that has nothing to say', async () => {

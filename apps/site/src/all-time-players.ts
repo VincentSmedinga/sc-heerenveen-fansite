@@ -11,7 +11,9 @@ import {
   type TopScorer,
   topScorersOf,
 } from './matches'
+import { playerHref } from './player-address'
 import { dayText, listText } from './player-career'
+import { type NameParts, personNameParts, personSortName } from './player-name'
 
 /**
  * The figures of the players over every season, for the page Spelers · Cijfers with the choice
@@ -382,6 +384,18 @@ export function ageOnDay(birthDate: string, day: string): undefined | { days: nu
 
 const pad = (value: number) => String(value).padStart(2, '0')
 
+/** A person of the squads, as `getSquadPeople` gives them. */
+export type SquadPerson = {
+  familyName: null | string
+  familyNamePrefix: null | string
+  givenName: null | string
+  slug: null | string
+}
+
+export type SquadSeasons = ReturnType<typeof squadSeasonsOf>
+
+type SquadRowPlayer = NameParts & { href: string | undefined; id: string; years: string }
+
 /**
  * The records of the players: the most goals in one season (the first place of the card
  * Clubtopscorer per seizoen, so the two agree), the most in one match, the youngest and the
@@ -521,3 +535,60 @@ export function playerRecordsOf(
 
   return records
 }
+
+/**
+ * The card Meeste seizoenen in de selectie: the first five places of the people who were in the
+ * squad of the most seasons, as the rows of `TopScorersTable` (`goals` is the number of
+ * seasons) with the years each was with the club. A person who left and came back counts each
+ * season once, and the count is the one of the seasons of the person (`seasonsOfPerson`), so
+ * it agrees with the number of seasons on the page of the player. Players who share a place are
+ * all in it, by name. A person we know no name of is left out.
+ */
+export function squadSeasonsOf(
+  seasonsOfPerson: ReadonlyMap<number, readonly string[]>,
+  people: ReadonlyMap<number, SquadPerson>,
+) {
+  const counted = [...seasonsOfPerson.entries()].flatMap(([id, seasons]) => {
+    const person = people.get(id)
+    const parts = person === undefined ? undefined : personNameParts(personNames(person))
+
+    return person === undefined || parts === undefined
+      ? []
+      : [
+          {
+            count: new Set(seasons).size,
+            href: playerHref(person.slug),
+            id,
+            parts,
+            sort: personSortName(personNames(person)),
+            years: yearsAtClub(seasons),
+          },
+        ]
+  })
+  const sorted = counted.sort((a, b) => b.count - a.count || a.sort.localeCompare(b.sort, 'nl') || a.id - b.id)
+  const rows: {
+    goals: number
+    players: [SquadRowPlayer, ...SquadRowPlayer[]]
+    position: number
+  }[] = []
+
+  for (const entry of sorted) {
+    const position = sorted.findIndex((other) => other.count === entry.count) + 1
+    const player = { ...entry.parts, href: entry.href, id: `person:${entry.id}`, years: entry.years }
+    const last = rows.at(-1)
+
+    if (last?.position === position) {
+      last.players.push(player)
+    } else if (position <= shortListPlaces) {
+      rows.push({ goals: entry.count, players: [player], position })
+    }
+  }
+
+  return rows
+}
+
+const personNames = (person: SquadPerson) => ({
+  personFamilyName: person.familyName,
+  personFamilyNamePrefix: person.familyNamePrefix,
+  personGivenName: person.givenName,
+})

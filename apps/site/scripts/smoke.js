@@ -1603,6 +1603,10 @@ await withEmptyDatabase((database) =>
     assert.ok(allHtml.indexOf('id="records"') < allHtml.indexOf('id="strafschoppen"'))
     assert.match(allHtml, /class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="strafschoppen"/)
     assert.match(allHtml, /\d+ strafschop(?:pen)? benut sinds \d{4}\/\d{2}/)
+    // The card Meeste seizoenen in de selectie follows Strafschoppen benut (#1222).
+    assert.match(allHtml, /class="hf-card hf-card-soft" aria-labelledby="meeste-seizoenen-in-de-selectie"/)
+    assert.ok(allHtml.indexOf('id="strafschoppen"') < allHtml.indexOf('id="meeste-seizoenen-in-de-selectie"'))
+    assert.match(allHtml, /niet zijn wedstrijden/)
     assert.doesNotMatch(allHtml, /id="(?:alle-spelers|assists|minuten|doelpuntenmakers|bijzondere-doelpunten)"/)
     assert.match(
       allHtml,
@@ -1610,7 +1614,13 @@ await withEmptyDatabase((database) =>
     )
     assert.deepEqual(
       [...allHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
-      ['#topscorers-sinds-1990-91', '#clubtopscorer-per-seizoen', '#records', '#strafschoppen'],
+      [
+        '#topscorers-sinds-1990-91',
+        '#clubtopscorer-per-seizoen',
+        '#records',
+        '#strafschoppen',
+        '#meeste-seizoenen-in-de-selectie',
+      ],
     )
     assert.match(allHtml, closedWikipediaCredit)
 
