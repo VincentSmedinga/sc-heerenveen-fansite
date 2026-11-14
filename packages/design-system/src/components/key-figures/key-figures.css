@@ -64,13 +64,13 @@
   }
 
   .hf-key-figure-number-long {
-    font-size: min(var(--hf-key-figure-font-size), 20cqi);
+    font-size: var(--hf-key-figure-long-font-size);
     white-space: nowrap;
   }
 
   /* Seven characters or more, such as 15–10–14. */
   .hf-key-figure-number-longer {
-    font-size: min(var(--hf-key-figure-font-size), 13cqi);
+    font-size: var(--hf-key-figure-longer-font-size);
   }
 
   .hf-key-figure-label {
