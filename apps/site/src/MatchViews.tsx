@@ -151,6 +151,7 @@ export function BasedOn({ known, played }: { known: number; played: number }) {
 export function CleanSheetsCard({
   competition,
   count,
+  level = 2,
   matches,
   now,
   path = '/wedstrijden/cijfers',
@@ -158,6 +159,7 @@ export function CleanSheetsCard({
 }: {
   competition: CompetitionChoice
   count: number
+  level?: 2 | 3
   matches: PublicMatch[]
   now: Date
   path?: string
@@ -168,7 +170,7 @@ export function CleanSheetsCard({
 
   return (
     <Card aria-labelledby="de-nul-gehouden" shareable={imageCredit(played > 0, season, matches)} surface="soft">
-      <Heading aliases={['nul-gehouden']} anchor id="de-nul-gehouden" level={2}>
+      <Heading aliases={['nul-gehouden']} anchor id="de-nul-gehouden" level={level}>
         De nul gehouden
       </Heading>
       {played === 0 ? (
@@ -222,11 +224,13 @@ export function CleanSheetsCard({
  */
 export function ExtremesCard({
   competition,
+  level = 2,
   matches,
   now,
   season,
 }: {
   competition: CompetitionChoice
+  level?: 2 | 3
   matches: PublicMatch[]
   now: Date
   season?: string | undefined
@@ -246,7 +250,7 @@ export function ExtremesCard({
 
   return (
     <Card aria-labelledby="uitersten" shareable={imageCredit(played > 0, season, matches)} surface="soft">
-      <Heading anchor id="uitersten" level={2}>
+      <Heading anchor id="uitersten" level={level}>
         Uitersten
       </Heading>
       {played === 0 ? (
@@ -297,10 +301,12 @@ export function ExtremesCard({
  */
 export function GoalsPerQuarterCard({
   competition,
+  level = 2,
   matches,
   season,
 }: {
   competition: CompetitionChoice
+  level?: 2 | 3
   matches: PublicMatch[]
   season?: string | undefined
 }) {
@@ -318,7 +324,7 @@ export function GoalsPerQuarterCard({
       )}
       surface="warm"
     >
-      <Heading anchor id="doelpunten-per-kwartier" level={2}>
+      <Heading anchor id="doelpunten-per-kwartier" level={level}>
         Doelpunten per kwartier
       </Heading>
       {[...scored, ...conceded].every((count) => count === 0) ? (
@@ -464,10 +470,12 @@ const perMatch = (value: number | undefined) =>
  */
 export function HomeAwayCard({
   competition,
+  level = 2,
   matches,
   season,
 }: {
   competition: CompetitionChoice
+  level?: 2 | 3
   matches: PublicMatch[]
   season?: string | undefined
 }) {
@@ -480,7 +488,7 @@ export function HomeAwayCard({
 
   return (
     <Card aria-labelledby="thuis-en-uit" shareable={imageCredit(total.played > 0, season, matches)}>
-      <Heading anchor id="thuis-en-uit" level={2}>
+      <Heading anchor id="thuis-en-uit" level={level}>
         Thuis en uit
       </Heading>
       {total.played === 0 ? (
@@ -527,10 +535,12 @@ const numberFormat = new Intl.NumberFormat('nl-NL')
  */
 export function AttendanceCard({
   competition,
+  level = 2,
   matches,
   season,
 }: {
   competition: CompetitionChoice
+  level?: 2 | 3
   matches: PublicMatch[]
   season?: string | undefined
 }) {
@@ -538,7 +548,7 @@ export function AttendanceCard({
   const withNumbers = slots.some((slot) => slot.attendance !== null)
   const played = slots.filter((slot) => slot.match.status === 'played').length
   const heading = (
-    <Heading anchor id="toeschouwers" level={2}>
+    <Heading anchor id="toeschouwers" level={level}>
       Toeschouwers
     </Heading>
   )
@@ -657,7 +667,15 @@ export function MatchesCard({
  * show the first goal, because both clubs scored in the same minute. Without a match with known
  * goals it is a sentence for visitors and no tables.
  */
-export function MatchFlowCard({ matches, season }: { matches: PublicMatch[]; season?: string | undefined }) {
+export function MatchFlowCard({
+  level = 2,
+  matches,
+  season,
+}: {
+  level?: 2 | 3
+  matches: PublicMatch[]
+  season?: string | undefined
+}) {
   const { atHalfTime, firstGoal, known, notWonAfterLead, played, unknownFirstGoal, wonAfterTrailing } =
     matchFlowOf(matches)
 
@@ -667,7 +685,7 @@ export function MatchFlowCard({ matches, season }: { matches: PublicMatch[]; sea
       shareable={imageCredit(known > 0, season, matches)}
       surface="soft"
     >
-      <Heading anchor id="hoe-de-wedstrijden-verlopen" level={2}>
+      <Heading anchor id="hoe-de-wedstrijden-verlopen" level={level}>
         Hoe de wedstrijden verlopen
       </Heading>
       <Tag>Eredivisie</Tag>
@@ -844,7 +862,15 @@ const outcomeWord: Record<FormResult, string> = { G: 'Gelijk', V: 'Verlies', W: 
  * average of each round, which are the numbers the tooltip of the line gives. The cup ties
  * don't count. Without a result it is a sentence for visitors and no chart.
  */
-export function SeasonCard({ matches, season }: { matches: PublicMatch[]; season?: string | undefined }) {
+export function SeasonCard({
+  level = 2,
+  matches,
+  season,
+}: {
+  level?: 2 | 3
+  matches: PublicMatch[]
+  season?: string | undefined
+}) {
   const results = leagueResultsOf(matches)
   // The same function as the line of the chart, so the table and the tooltip agree.
   const averages = averagesOf(results)
@@ -857,7 +883,7 @@ export function SeasonCard({ matches, season }: { matches: PublicMatch[]; season
       shareable={imageCredit(results.length > 0, season, matches)}
       surface="warm"
     >
-      <Heading anchor id="verloop-van-het-seizoen" level={2}>
+      <Heading anchor id="verloop-van-het-seizoen" level={level}>
         Verloop van het seizoen
       </Heading>
       <Tag>Eredivisie</Tag>
@@ -973,10 +999,12 @@ export function lastFiveCaption(lastResultOn: string) {
  */
 export function ScoreCountsCard({
   competition = 'all',
+  level = 2,
   matches,
   season,
 }: {
   competition?: CompetitionChoice
+  level?: 2 | 3
   matches: PublicMatch[]
   season?: string | undefined
 }) {
@@ -987,6 +1015,7 @@ export function ScoreCountsCard({
       anchored
       counts={counts}
       empty="We hebben nog geen uitslagen van dit seizoen."
+      level={level}
       season={season}
       source={sourceOf(matches)}
     />
@@ -1056,6 +1085,7 @@ export function ScoreCountsView({
   counts,
   empty,
   goals,
+  level = 2,
   season,
   source,
 }: {
@@ -1064,6 +1094,7 @@ export function ScoreCountsView({
   counts: ScoreCount[]
   empty: string
   goals?: undefined | { against: number; for: number }
+  level?: 2 | 3
   season?: string | undefined
   /** Where the matches the counts are made from come from, for the credit under the image. */
   source?: MatchSource | undefined
@@ -1078,11 +1109,11 @@ export function ScoreCountsView({
   return (
     <Card aria-labelledby={scoreCountsCard.id} shareable={imageCredit(played > 0, season, source)} surface="warm">
       {anchored ? (
-        <Heading anchor id={scoreCountsCard.id} level={2}>
+        <Heading anchor id={scoreCountsCard.id} level={level}>
           {scoreCountsCard.name}
         </Heading>
       ) : (
-        <Heading id={scoreCountsCard.id} level={2}>
+        <Heading id={scoreCountsCard.id} level={level}>
           {scoreCountsCard.name}
         </Heading>
       )}
@@ -1286,11 +1317,13 @@ export function StandingsCard({
  */
 export function StreaksCard({
   competition,
+  level = 2,
   matches,
   now,
   season,
 }: {
   competition: CompetitionChoice
+  level?: 2 | 3
   matches: PublicMatch[]
   now: Date
   season?: string | undefined
@@ -1301,7 +1334,7 @@ export function StreaksCard({
 
   return (
     <Card aria-labelledby="reeksen" shareable={imageCredit(played > 0, season, matches)} surface="soft">
-      <Heading anchor id="reeksen" level={2}>
+      <Heading anchor id="reeksen" level={level}>
         Reeksen
       </Heading>
       {played === 0 ? (

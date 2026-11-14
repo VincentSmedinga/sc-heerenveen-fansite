@@ -8,10 +8,9 @@ import { getMatchData, getMatchSeasons } from '#src/matches'
 import { statisticsShortcuts } from '#src/statisticsShortcuts'
 
 /**
- * The bar of the page of a season: a link to each of the eleven cards, in the order of a narrow
- * screen, which is the screen the bar is for (the bar is gone where the cards sit side by
- * side). The cards are the same for every season, so the bar is too. When the page can't read
- * its data it shows the error page, which has no cards to jump to, and a season the page
+ * The bar of the page of a season: a link to each of the four groups of cards, in the order of
+ * the page. The groups are the same for every season, so the bar is too. When the page can't
+ * read its data it shows the error page, which has no cards to jump to, and a season the page
  * doesn't have is the page "niet gevonden", so then there is no bar either. `getMatchData`
  * keeps its answer for a few minutes, so asking again costs nothing; the page logs the error.
  * The season is only asked for after it is found among the seasons that have matches, as the

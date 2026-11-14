@@ -2615,6 +2615,7 @@
 - **Nadeel:** dezelfde dag geeft dezelfde volgorde voor iedereen.
   Het derde feit van de dag is niet te vinden zonder drie keer te klikken.
 - **Alternatieven:** een willekeurig feit bij elk bezoek (de pagina verandert bij verversen, en de cache werkt niet); een husselvolgorde met een zaadgetal (elk feit dat erbij komt verschuift alle andere); het volgende feit met een script en een cookie (we bewaren niets over een bezoeker); alle feiten onder elkaar (te lang, en de kaart is er voor één feit); een deelknop (de kaart heeft geen vaste inhoud om te delen); een link naar de pagina van de tegenstander (nieuwe query, zie hierboven); vijf thuiswedstrijden achter elkaar zonder meer (komt in de Eredivisie niet voor); de naam Weetjes (de eerste naam, die de projecteigenaar liet vervangen door Opmerkelijk).
+- **Later:** zie _Wedstrijden · Cijfers begint met vier kerngetallen, en de kaarten staan in vier groepen_ in `site.md` (14 november 2026): de kaart Opmerkelijk staat niet meer op Cijfers.
 
 ## De tabel in "Onze uitslagen tegen …" heeft Thuis en Uit als rijen met Totaal eronder, zoals de kaart Stand
 

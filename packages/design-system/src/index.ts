@@ -24,6 +24,8 @@ export { Button, buttonAppearances, buttonIcons, buttonTypes } from './component
 export type { ButtonAppearance, ButtonIcon, ButtonProps, ButtonType } from './components/button/Button'
 export { CardColumns } from './components/card-columns/CardColumns'
 export type { CardColumnsProps } from './components/card-columns/CardColumns'
+export { CardGroup } from './components/card-group/CardGroup'
+export type { CardGroupProps } from './components/card-group/CardGroup'
 export { Card, cardElements, cardSurfaces } from './components/card/Card'
 export type { CardElement, CardProps, CardSurface } from './components/card/Card'
 export { CareerTimeline } from './components/career-timeline/CareerTimeline'

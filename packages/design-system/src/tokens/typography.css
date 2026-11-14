@@ -117,6 +117,10 @@
     /* The number in a row of key figures */
     --hf-key-figure-font-size: 3.25rem;
 
+    /* A long number (5 to 6 characters, then 7 or more) shrinks with the width of its card, so it stays on one line */
+    --hf-key-figure-long-font-size: min(var(--hf-key-figure-font-size), 20cqi);
+    --hf-key-figure-longer-font-size: min(var(--hf-key-figure-font-size), 13cqi);
+
     /* Emphasis: strong, b, buttons, chart titles, caption, a status not to miss */
     --hf-strong-font-weight: 700;
 
