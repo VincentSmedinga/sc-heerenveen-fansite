@@ -25,6 +25,7 @@ import { seasonPageMetadata } from '#src/metadata'
 import { getSourcePages } from '#src/opponents'
 import { OpponentsCredit } from '#src/OpponentViews'
 import { pageAreas } from '#src/page-areas'
+import { pages } from '#src/pages'
 import { getReportAddresses } from '#src/report-data'
 import { pickerPathOf, playerFiguresPath, type SearchParams } from '#src/season-page'
 import { allSeasonsAddress, allSeasonsSlug, seasonChoicesWithAll } from '#src/seasons'
@@ -90,9 +91,10 @@ export async function allSeasonsPlayersMetadata(): Promise<Metadata> {
     return { robots: { index: false }, title: withBranch(serverErrorTitle, reviewBranch()) }
   }
 
+  const { description } = pages.find((page) => page.path === allSeasonsPlayersAddress) ?? { description: '' }
+
   return seasonPageMetadata(playerFiguresPath, allSeasonsPlayersAddress, {
-    description:
-      'De cijfers van de spelers van sc Heerenveen 1 over alle seizoenen sinds 1990/91: de topscorers, de hattricks en de strafschoppen, met de bronnen erbij.',
+    description,
     title: 'Cijfers van de spelers, alle seizoenen',
   })
 }
