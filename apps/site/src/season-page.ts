@@ -74,12 +74,13 @@ export const pickerPathOf = (path: string) => `${path}/kies`
  * A page that has a choice of competition (`keepCompetition`) gets the choice of the visitor
  * back in the address it is sent to: `?competitie=eredivisie` stays, and anything else, such as
  * a value that is not known or one given twice, is left out, so the picker never sends a
- * visitor to the page "niet gevonden".
+ * visitor to the page "niet gevonden". A page that can count all seasons (`allSeasons`) sends
+ * the value `alle` to `<path>/alle`.
  */
 export async function pickedSeasonResponse(
   request: Request,
   path: string,
-  { keepCompetition = false }: { keepCompetition?: boolean } = {},
+  { allSeasons = false, keepCompetition = false }: { allSeasons?: boolean; keepCompetition?: boolean } = {},
 ) {
   const { searchParams } = new URL(request.url)
   const values = searchParams.getAll('seizoen')
@@ -92,6 +93,7 @@ export async function pickedSeasonResponse(
   }
 
   const address = pickedAddress(path, values.length === 1 ? values[0] : undefined, {
+    allSeasons,
     current: seasonOf(new Date()),
     seasons,
   })

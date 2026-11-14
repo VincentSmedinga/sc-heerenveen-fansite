@@ -310,7 +310,7 @@ Met JavaScript verdwijnen de knop en het zichtbare label en wisselt de pagina bi
 Het lopende seizoen en een eerder seizoen tonen hun uitslagen allebei in een kaart per competitie met wedstrijden (Eredivisie met het anker `uitslagen`, KNVB Beker, Johan Cruijff Schaal, Play-offs Champions League, Play-offs Conference League, Play-offs Europa League en Europa League, zonder het woord Uitslagen in de kop; `resultsPerCompetition` en `resultsCardOf`).
 Het lopende seizoen heeft de nieuwste uitslag bovenaan, een kaart Laatste wedstrijd (de nieuwste begonnen wedstrijd, ook die staat in Uitslagen) en een kaart Programma met alle competities op datum.
 Een eerder seizoen heeft geen kaart Programma en geen kaart Laatste wedstrijd, toont elke kaart van de eerste naar de laatste wedstrijd (`resultsOfSeason`), noemt zijn tabel Eindstand (`standingsCardOf`, met het anker `eindstand`), zet het seizoen op de afbeelding van een kaart en staat niet in de sitemap.
-Een pagina met een ander basisadres (zoals `/wedstrijden/cijfers`) gebruikt dezelfde onderdelen: `loadSeasonPage`, `seasonOfAddress` en `pickedSeasonResponse` in `src/season-page.ts`, `seasonFromSlug`, `seasonAddress`, `seasonChoices` en `pickedAddress` in `src/seasons.ts`, `getMatchSeasons` en `getMatchData` in `src/matches.ts`, `SeasonPicker` en `Page.Toolbar` uit het designsysteem, en een route naast de pagina die `pickedSeasonResponse` aanroept, zoals `app/wedstrijden/kies/route.ts`.
+Een pagina met een ander basisadres (zoals `/wedstrijden/cijfers`) gebruikt dezelfde onderdelen: `loadSeasonPage`, `seasonOfAddress` en `pickedSeasonResponse` in `src/season-page.ts`, `seasonFromSlug`, `seasonAddress`, `seasonChoices`, `seasonChoicesWithAll`, `allSeasonsAddress` en `pickedAddress` in `src/seasons.ts`, `getMatchSeasons` en `getMatchData` in `src/matches.ts`, `SeasonPicker` en `Page.Toolbar` uit het designsysteem, en een route naast de pagina die `pickedSeasonResponse` aanroept, zoals `app/wedstrijden/kies/route.ts`.
 Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
 
 - **Programma:** alle wedstrijden die nog niet zijn begonnen, op volgorde van de dag, ook een uitgestelde wedstrijd (die zegt "Uitgesteld").
@@ -595,13 +595,18 @@ De pagina van een club heeft er een korte vorm van, de eerste vijf plaatsen (`to
   Zonder doelpunten staat er een zin in plaats van een tabel.
 
 De pagina deelt alles rond het seizoen met Cijfers: de kiezer, de adressen `/spelers/2025-26` en de route `app/spelers/kies`, via `playersPath` in `src/season-page.ts`.
-De kaart Sinds 1990/91 staat sinds #1218 op geen van beide pagina's; #1219 zet hem terug bij alle seizoenen.
-De kaart Sinds 1990/91 (`AllTimeScorersCard` in `src/MatchViews.tsx`), met het anker `#sinds-1990-91`, staat onder Doelpuntenmakers op het zachte vlak.
-Ze toont de eerste tien plaatsen van de doelpuntenmakers over alle seizoenen, per persoon, met `TopScorersTable`: spelers met gelijk aantal doelpunten delen een rij, en de plaats van de tiende hoort bij alle rijen ervan.
-De telling is `allTimeScorersOf` in `src/matches.ts`, dus `topScorersOf` over de wedstrijden van alle seizoenen (`getAllTimeMatches`, één query: `listAllMatchGoals` in `@fansite/db/queries`, een uur bewaard).
-De kaart heet "Sinds 1990/91", naar het eerste seizoen met wedstrijden, en zegt hoeveel spelers er scoorden als de lijst is afgekapt.
-Ze volgt de schakelaar, maar niet het seizoen van de kiezer.
-Kan de database niet worden gelezen, dan blijft de kaart weg en houdt de rest van de pagina zijn inhoud.
+Alle seizoenen is het tweede bereik van `/spelers/cijfers` (#1219): `/spelers/cijfers/alle`, `AllSeasonsPlayersPage` in `app/spelers/cijfers/all-seasons-page.tsx`.
+De seizoenskiezer heeft "Alle seizoenen" als eerste keuze (`seasonChoicesWithAll` in `src/seasons.ts`, zonder die keuze bij minder dan twee seizoenen), en de route `app/spelers/cijfers/kies` stuurt de waarde `alle` door naar `/spelers/cijfers/alle` (`allSeasons` bij `pickedSeasonResponse`).
+`alle` is geen seizoen: `seasonFromSlug` leest het niet, en de pagina heeft een eigen balk in `app/@shortcuts/spelers/cijfers/alle`.
+Wedstrijden · Cijfers gebruikt dezelfde hulp voor zijn eigen `/alle` (#1211).
+De keuze van competitie werkt ook hier, via `?competitie=`.
+De wedstrijden van alle seizoenen komen uit `getAllTimeMatches` (één query: `listAllMatchGoals` in `@fansite/db/queries`, een uur bewaard); de tellingen staan in `src/all-time-players.ts` en de kaarten in `src/AllTimePlayersCards.tsx`.
+De hoofdkolom heeft "Topscorers sinds 1990/91" (anker `#topscorers-sinds-1990-91`): de eerste tien plaatsen als `TopScorersTable` met de kolom Jaren (`showYears`), en in een `Disclosure` "Toon de top 25" de plaatsen 11 tot en met 25, met balken naar de topscorer van de hele lijst (`scaleTo`).
+De jaren bij de club komen uit de seizoenen in de selectie (`getPersonSeasons`, `listPersonSeasons`): `2012/13` en `2013/14` zijn `2012–2014`.
+Onder de kaart staat van hoeveel gespeelde wedstrijden we de doelpuntenmakers niet kennen.
+De zijkolom heeft de zachte kaarten Hattricks (`#hattricks`: de eerste vijf plaatsen, met alle hattricks in een `Disclosure`, de wedstrijd als link als ze een pagina heeft) en Strafschoppen benut (`#strafschoppen`: de eerste vijf plaatsen en het totaal), dan de zin die zegt van welke seizoenen we wedstrijden, minuten en assists per speler kennen (`lineupSentence`, uit `listReportSeasons`), en de bronvermelding.
+Een kaart zonder inhoud in de gekozen competitie ontbreekt, ook in de balk "Op deze pagina:".
+De kaarten Alle spelers, Assists en Minuten staan hier niet: we hebben de opstellingen van alle seizoenen niet.
 De kaart Bijzondere doelpunten (`SpecialGoalsCard` in `src/SpecialGoalsCard.tsx`, met `specialGoalsOf` in `src/matches.ts`), met het anker `#bijzondere-doelpunten`, staat in de zijkolom ("Meer cijfers over de spelers") op het zachte vlak.
 Op een telefoon volgt de zijkolom op de hoofdkolom, dus de lijst met doelpuntenmakers komt eerst, en de bronvermelding sluit de zijkolom af.
 Ze noemt ook de pagina's van de selectie van het seizoen, en Wikidata (CC0) als een speler daarvandaan komt.

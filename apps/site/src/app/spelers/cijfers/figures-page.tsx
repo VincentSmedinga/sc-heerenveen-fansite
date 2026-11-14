@@ -17,7 +17,7 @@ import { AllPlayersCard, RankingCard } from '#src/ReportFiguresCards'
 import { loadSeasonPage, pickerPathOf, playerFiguresPath, type SearchParams } from '#src/season-page'
 import { getSeasonPlayerStats } from '#src/season-player-stats'
 import { getSeasonReportFigures } from '#src/season-report-figures'
-import { seasonAddress, seasonChoices, seasonSlug } from '#src/seasons'
+import { seasonAddress, seasonChoicesWithAll, seasonSlug } from '#src/seasons'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { SpecialGoalsCard } from '#src/SpecialGoalsCard'
 import { withBranch } from '#src/title'
@@ -96,7 +96,7 @@ export async function PlayerFiguresPage({
         <SeasonPicker
           action={pickerPath}
           fields={competitionFields(competition)}
-          options={seasonChoices(seasons)}
+          options={seasonChoicesWithAll(seasons)}
           value={seasonSlug(season)}
         />
         <CompetitionSwitch

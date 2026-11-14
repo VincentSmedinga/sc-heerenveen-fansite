@@ -20,6 +20,11 @@ export type TopScorersTablePlayer = {
   id: number | string
   /** The surname of the player, in the stronger weight (see `PlayerName`). */
   surname: string
+  /**
+   * The years the player was with the club as text, such as `2012–2014`: the page works it out
+   * and writes it. Only shown with `showYears`.
+   */
+  years?: string | undefined
 }
 
 export type TopScorersTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
@@ -41,6 +46,12 @@ export type TopScorersTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'childr
   /** The places, from the most goals down. */
   rows: TopScorersTableRow[]
   /**
+   * The goals that fill a whole bar. Without it the top scorer of the rows does. A table that
+   * holds only a later part of a list, such as the places 11 to 25 under the first ten, gives
+   * the goals of the top scorer of the whole list, so its bars are as long as those above.
+   */
+  scaleTo?: number | undefined
+  /**
    * Adds the column D/W, the goals per match, after the goals, with the `goalsPerMatch` of each
    * player. A table with the column has a row for each player, also where players share a
    * place and a row has more than one: the row is split, and the players keep their place and
@@ -48,6 +59,12 @@ export type TopScorersTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'childr
    * matches of every player in the list (all or nothing).
    */
   showGoalsPerMatch?: boolean | undefined
+  /**
+   * Adds the column Jaren, the years the player was with the club, between the player and the
+   * goals, with the `years` of each player. Like `showGoalsPerMatch`, it gives every player a
+   * row of their own, and the players of a place keep their place and their goals.
+   */
+  showYears?: boolean | undefined
 }
 
 export type TopScorersTableRow = {
@@ -90,6 +107,10 @@ const onePlayerPerRow = (rows: TopScorersTableRow[]): TopScorersTableRow[] =>
  * "doelpunten per wedstrijd", and the legend under the table has it too, with a sentence that
  * says what it is. Every player then has a row of their own.
  *
+ * With `showYears` there is a column Jaren between the player and the goals, with the years the
+ * player was with the club. Every player then has a row of their own, as with
+ * `showGoalsPerMatch`.
+ *
  * With `figure` the list is of something else, such as the assists or the minutes: the places
  * and the bar are the same, and the header and the legend have its letter and word.
  */
@@ -98,11 +119,16 @@ export const TopScorersTable = ({
   className,
   figure = tableColumns.goals,
   rows: placedRows,
+  scaleTo,
   showGoalsPerMatch = false,
+  showYears = false,
   ...props
 }: TopScorersTableProps) => {
-  const rows = showGoalsPerMatch ? onePlayerPerRow(placedRows) : placedRows
-  const shares = sharesOf(rows.map((row) => row.goals))
+  const rows = showGoalsPerMatch || showYears ? onePlayerPerRow(placedRows) : placedRows
+  const shares =
+    scaleTo === undefined
+      ? sharesOf(rows.map((row) => row.goals))
+      : (sharesOf([scaleTo, ...rows.map((row) => row.goals)])?.slice(1) ?? null)
   const shared = sharedPlaces(rows.map((row) => row.position))
 
   return (
@@ -118,6 +144,7 @@ export const TopScorersTable = ({
               </abbr>
             </th>
             <th scope="col">Speler</th>
+            {showYears ? <th scope="col">Jaren</th> : null}
             <th className={classNames('hf-numeric', shares !== null && 'hf-bar-head')} scope="col">
               <abbr title={`${figure.name.charAt(0).toUpperCase()}${figure.name.slice(1)}`}>
                 <span aria-hidden="true">{figure.abbreviation}</span>
@@ -146,6 +173,7 @@ export const TopScorersTable = ({
                   </Fragment>
                 ))}
               </th>
+              {showYears ? <td>{row.players[0].years}</td> : null}
               <td className="hf-numeric hf-key">
                 {row.goals}
                 {shares !== null ? <Bar share={shares[index]!} /> : null}

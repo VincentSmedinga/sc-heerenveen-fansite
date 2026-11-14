@@ -3509,3 +3509,19 @@
   Het liggende veld tekende de rijen van onze ploeg van onder naar boven en die van de tegenstander van boven naar onder, dus een linksbuiten stond rechts.
 - **Alternatieven:** de volgorde omdraaien, waarmee alle verslagen van de redactie veranderen.
 - **Niet opgelost:** de opstellingen van de oude fansite (bron "Oude fansite") hebben alleen de linie per speler, dus links en rechts zijn daar niet te vertrouwen.
+
+## `TopScorersTable` heeft de kolom Jaren en de balkschaal `scaleTo`, en `tableColumns` heeft H en S
+
+- **Datum:** 14 november 2026
+- **Besluit:** `TopScorersTable` krijgt de optie `showYears` met een tekst `years` bij elke speler, de optie `scaleTo`, en `tableColumns` krijgt `hattricks` (H) en `penalties` (S) (#1219).
+  - **De kolom Jaren:** tussen de speler en de doelpunten, met het woord "Jaren" als kop en de jaren bij de club als tekst in de cel, zoals `2012–2014`.
+    Het component rekent de jaren niet uit: de pagina schrijft ze.
+    Zoals bij `showGoalsPerMatch` krijgt elke speler dan een eigen rij, en de spelers houden hun plaats en hun doelpunten.
+    De regel onder de tabel blijft die van de doelpunten.
+  - **`scaleTo`:** de doelpunten die een hele balk vullen.
+    Zonder `scaleTo` vult de topscorer van de rijen de balk, zoals altijd.
+    Een tabel met alleen een later deel van een lijst, zoals de plaatsen 11 tot en met 25 onder de eerste tien, geeft de doelpunten van de topscorer van de hele lijst, zodat de balken even lang zijn als boven.
+  - **H en S:** de lijsten van alle seizoenen met de hattricks en de strafschoppen gebruiken `figure`, zoals Assists en Minuten.
+    De `P` was al punten, dus de strafschoppen hebben de `S`.
+- **Waarom:** de topscorers aller tijden willen de jaren bij de club zien, en een tweede tabel onder een `Disclosure` met balken die naar zijn eigen top schalen zou de elfde plek net zo lang maken als de eerste.
+- **Alternatieven:** de jaren achter de naam in dezelfde cel (breekt af op een telefoon, en een schermlezer leest ze dan als deel van de naam); één tabel van 25 rijen in de `Disclosure`, met de eerste tien dubbel.

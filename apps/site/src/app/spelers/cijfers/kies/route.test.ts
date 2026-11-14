@@ -74,6 +74,26 @@ describe('/spelers/cijfers/kies', () => {
   })
 })
 
+describe('/spelers/cijfers/kies with the choice Alle seizoenen', () => {
+  it('sends the value alle on to /spelers/cijfers/alle, with a 303', async () => {
+    const response = await ask('?seizoen=alle')
+
+    expect(response.status).toBe(303)
+    expect(response.headers.get('location')).toBe('/spelers/cijfers/alle')
+  })
+
+  it('keeps the choice of competition', async () => {
+    expect((await ask('?seizoen=alle&competitie=beker')).headers.get('location')).toBe(
+      '/spelers/cijfers/alle?competitie=beker',
+    )
+  })
+
+  it('sends alle given twice, or with another season, back to /spelers/cijfers', async () => {
+    expect((await ask('?seizoen=alle&seizoen=alle')).headers.get('location')).toBe('/spelers/cijfers')
+    expect((await ask('?seizoen=alle&seizoen=2025-26')).headers.get('location')).toBe('/spelers/cijfers')
+  })
+})
+
 describe('/spelers/cijfers/kies with the choice of the matches', () => {
   it('sends the choice on to the address of the season, as the season picker asks', async () => {
     expect((await ask('?seizoen=2025-26&competitie=eredivisie')).headers.get('location')).toBe(
