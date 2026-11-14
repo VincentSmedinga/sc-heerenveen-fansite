@@ -1183,7 +1183,7 @@ await withEmptyDatabase((database) =>
     )
     assert.match(
       allSeasonsHtml,
-      /wedstrijden<\/span> <span class="hf-key-figure-note">gespeeld in alle competities sinds /,
+      /wedstrijden<\/span><span class="hf-key-figure-stop">, <\/span><span class="hf-key-figure-note">gespeeld in alle competities sinds /,
     )
     // The picker sends "Alle seizoenen" on to its address, with the choice of competition.
     const pickedAll = await fetch(`${origin}/wedstrijden/cijfers/kies?seizoen=alle&competitie=eredivisie`, {
