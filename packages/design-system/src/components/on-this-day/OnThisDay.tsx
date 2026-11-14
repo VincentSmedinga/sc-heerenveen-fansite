@@ -18,6 +18,8 @@ export type OnThisDayProps = Omit<ComponentPropsWithoutRef<'section'>, 'children
   children?: ReactNode
   /** One line under the heading: how many matches there are, and where they were played. */
   intro: string
+  /** The level of the heading: 2 on its own, 3 in a group of cards. */
+  level?: 2 | 3
   /** The matches, the newest first. */
   matches: readonly OnThisDayMatch[]
   /** The heading, such as `Op deze dag: 11 november`. */
@@ -29,7 +31,7 @@ export type OnThisDayProps = Omit<ComponentPropsWithoutRef<'section'>, 'children
  * year, the clubs and the result of each, and a link to more. Leave the card out on a day
  * without matches.
  */
-export const OnThisDay = ({ children, className, intro, matches, title, ...props }: OnThisDayProps) => {
+export const OnThisDay = ({ children, className, intro, level = 2, matches, title, ...props }: OnThisDayProps) => {
   const headingId = useId()
 
   return (
@@ -38,7 +40,7 @@ export const OnThisDay = ({ children, className, intro, matches, title, ...props
       className={classNames('hf-card hf-card-warm hf-on-this-day', className)}
       {...props}
     >
-      <Heading id={headingId} level={2}>
+      <Heading id={headingId} level={level}>
         {title}
       </Heading>
       <p className="hf-on-this-day-intro">{intro}</p>
