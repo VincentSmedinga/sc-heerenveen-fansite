@@ -54,6 +54,7 @@ describe('playerFiguresShortcutsFor', () => {
       '#alle-spelers',
       '#assists',
       '#minuten',
+      '#invallers-die-scoorden',
       '#bijzondere-doelpunten',
     ])
     expect(new Set(links.map(({ href }) => href)).size).toBe(links.length)

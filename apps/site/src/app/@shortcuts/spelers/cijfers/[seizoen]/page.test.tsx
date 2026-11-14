@@ -72,7 +72,7 @@ describe('the bar of the figures of the players of an earlier season', () => {
 })
 
 describe('the links to the cards with the figures of the match reports, in an earlier season', () => {
-  it('has the links to Alle spelers, Assists and Minuten, in the order of the cards, when the season has reports', async () => {
+  it('has the links to Alle spelers, Assists, Minuten and Invallers, in the order of the cards, when the season has reports', async () => {
     vi.mocked(seasonHasReports).mockResolvedValue(true)
 
     const html = await render('2025-26')
@@ -86,10 +86,11 @@ describe('the links to the cards with the figures of the match reports, in an ea
       ['#alle-spelers', 'Alle spelers'],
       ['#assists', 'Assists'],
       ['#minuten', 'Minuten'],
+      ['#invallers-die-scoorden', 'Invallers'],
       ['#bijzondere-doelpunten', 'Bijzondere doelpunten'],
     ])
     expect(seasonHasReports).toHaveBeenCalledWith('2025/26')
-    expect(playerFiguresShortcutsFor(true)).toHaveLength(5)
+    expect(playerFiguresShortcutsFor(true)).toHaveLength(6)
   })
 
   it('has no link to them when the season has no report that is klaar', async () => {
