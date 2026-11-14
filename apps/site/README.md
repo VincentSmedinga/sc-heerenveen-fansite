@@ -477,7 +477,9 @@ Onder de kop staat de zin over de volledigheid van de lijst, uit `squad_complete
 Bij de beste bron `verslag` (een seizoen met alleen spelers uit onze verslagen) zegt de zin dat de lijst uit de verslagen komt, en staat er één lijst met alleen namen; spelers uit verslagen staan niet op de kaart als een betere bron het seizoen heeft (`cardPlayers`).
 De spelers komen uit `listSeasonPlayers` in `@fansite/db/queries`, in de volgorde van het rugnummer en daarna de zoekterm en de naam.
 De werkbalk van `/spelers` heeft alleen de seizoenskiezer, zonder keuze van competitie, en `/spelers` leest `?competitie=` niet.
-De zijkolom heeft de sterke kaart "Cijfers van dit seizoen", met de link "Naar de cijfers van de spelers" naar hetzelfde seizoen, en de bronvermelding.
+De zijkolom begint met de zachte kaart "De selectie in het kort" (`SquadSummaryCard` in `src/SquadSummaryCard.tsx`, de cijfers uit `getSquadSummary` in `src/squad-summary.ts`): het aantal spelers van de kaart Selectie, het aantal landen en, alleen in het lopende seizoen, de gemiddelde, jongste en oudste leeftijd (`ageOf`, alleen bij minstens drie kwart van de spelers).
+Mist er iets, dan staat er onder de regels "Op basis van X van de Y spelers."; kent de pagina de selectie niet, dan is er geen kaart, en een geboortedatum verlaat de server niet.
+Daaronder staat de sterke kaart "Cijfers van dit seizoen", met de link "Naar de cijfers van de spelers" naar hetzelfde seizoen, en de bronvermelding.
 `/spelers` heeft één kaart en dus geen balk "Op deze pagina:": het slot `app/@shortcuts/spelers` is leeg.
 
 De cijfers van de spelers staan op `/spelers/cijfers` (#1218), met `/spelers/cijfers/<seizoen>` en de route `app/spelers/cijfers/kies`, via `playerFiguresPath` in `src/season-page.ts`.

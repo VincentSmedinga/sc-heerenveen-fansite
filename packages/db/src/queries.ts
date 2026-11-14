@@ -1000,6 +1000,26 @@ export async function listSeasonMatches(db: Database, season: string) {
 }
 
 /**
+ * The date of birth of every player of a season, such as `2026/27`, by the name of the row
+ * (`name`, unique in a season) and how exactly the date is known (`birthDatePrecision`). It is
+ * for the figures of the card "De selectie in het kort" (an age is worked out from it) and is
+ * not for a page: the date itself must not leave the server. Both are null for a player
+ * without a person or without a date.
+ */
+export function listSeasonPlayerBirths(db: Database, season: string) {
+  return db
+    .select({
+      birthDate: persons.birthDate,
+      birthDatePrecision: persons.birthDatePrecision,
+      name: players.name,
+    })
+    .from(players)
+    .leftJoin(persons, eq(players.personId, persons.id))
+    .where(eq(players.season, season))
+    .orderBy(asc(players.name))
+}
+
+/**
  * Every player of a season, such as `2026/27`, for the card Selectie on the page Spelers: the
  * name, the name kept for the person (`personGivenName`, `personFamilyNamePrefix` and
  * `personFamilyName`, null while the importer has not read the article), the position, the

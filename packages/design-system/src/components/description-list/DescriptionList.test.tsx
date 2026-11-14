@@ -56,4 +56,24 @@ describe('DescriptionList', () => {
 
     expect(container.querySelector('dl.hf-description-list-stacked')).not.toBeNull()
   })
+
+  it('puts the term and the description on one row when it is stacked and aligned', () => {
+    const { container } = render(
+      <DescriptionList aligned stacked>
+        <DescriptionList.Item term="Spelers">28</DescriptionList.Item>
+      </DescriptionList>,
+    )
+
+    expect(container.querySelector('dl.hf-description-list-aligned')).not.toBeNull()
+  })
+
+  it('ignores aligned without stacked', () => {
+    const { container } = render(
+      <DescriptionList aligned>
+        <DescriptionList.Item term="Spelers">28</DescriptionList.Item>
+      </DescriptionList>,
+    )
+
+    expect(container.querySelector('dl.hf-description-list-aligned')).toBeNull()
+  })
 })

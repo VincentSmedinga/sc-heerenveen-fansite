@@ -37,6 +37,18 @@
     overflow-wrap: anywhere;
   }
 
+  /* The term and the description on one row: the term on the left, the description on the right. */
+  .hf-description-list-aligned > div {
+    align-items: baseline;
+    display: flex;
+    gap: var(--hf-space-m);
+    justify-content: space-between;
+  }
+
+  .hf-description-list-aligned dd {
+    text-align: end;
+  }
+
   /*
    * A Match or a paragraph as the description is drawn as it is elsewhere: the size and weight
    * of running text, and a Match without the space it has around itself in a list.

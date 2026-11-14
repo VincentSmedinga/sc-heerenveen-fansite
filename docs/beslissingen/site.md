@@ -5588,6 +5588,7 @@
 - **Waarom:** de cijfers van de spelers stonden in de zijkolom van de selectie en de pagina las als twee pagina's in één.
   Een eigen pagina geeft de cijfers de ruimte en de selectie rust, en past bij Wedstrijden, dat zijn cijfers ook op een eigen pagina krijgt (#1208).
 - **Alternatieven:** de cijfers in de zijkolom houden en er kaarten bij zetten; een tab op `/spelers`; de kaart Sinds 1990/91 al op de nieuwe pagina houden (die komt terug bij alle seizoenen, #1219).
+- **Later:** zie _De kaart toont alleen wat we kennen, en zegt hoeveel dat is_ (14 november 2026): de zijkolom van `/spelers` heeft ook de zachte kaart "De selectie in het kort".
 - **Later:** zie _Spelers · Cijfers telt ook alle seizoenen, met de topscorers sinds 1990/91_ (14 november 2026): de kaart Sinds 1990/91 is terug op `/spelers/cijfers/alle`, met het anker `#topscorers-sinds-1990-91` in plaats van `#sinds-1990-91`.
 
 ## Spelers · Cijfers telt ook alle seizoenen, met de topscorers sinds 1990/91
@@ -5889,3 +5890,27 @@
   Het jaar volgt de bestaande regels van `matchMoment`.
 - **Waarom:** de woorden zijn die van de bron en van de rest van de site, en de regel past op 390 pixel en breder bij een gewone wedstrijd op één regel (zie de metingen in _Een wedstrijd heeft twee metaregels met een vaste rol en een vaste volgorde_ in `designsysteem.md`); op 320 pixel breekt hij vaak af, tussen twee onderdelen.
 - **Alternatieven:** korte namen als bij de competitieschakelaar (Eredivisie, Beker, Europa) en "ronde 9" voor "Speelronde 9".
+
+## De kaart "De selectie in het kort" toont de leeftijd van nu, alleen in het lopende seizoen
+
+- **Datum:** 14 november 2026
+- **Besluit:** de leeftijden op de kaart zijn die van vandaag (zoals op de pagina van een speler), en alleen in het lopende seizoen; in een eerder seizoen valt de leeftijd weg (#1261).
+- **Waarom:** een leeftijd van nu zegt niets over spelers van lang geleden, en de leeftijd van een oud-speler is al niet getoond (zie _De regel onder de naam is plaats, jaar en leeftijd_).
+- **Alternatieven:** de leeftijd op de eerste dag van het seizoen (werkt voor elk seizoen, maar wijkt af van de pagina van een speler en van de leeftijd die een supporter ziet); de volledige geboortedatum tonen (een persoonsgegeven).
+
+## De kaart toont alleen wat we kennen, en zegt hoeveel dat is
+
+- **Datum:** 14 november 2026
+- **Besluit:** Spelers en Landen staan op de kaart zolang de selectie bekend is; de regels met leeftijd alleen bij minstens drie kwart van de spelers met een leeftijd. Mist er iets, dan staat er "Op basis van X van de Y spelers." (#1261).
+  De kaart staat in de zijkolom van `/spelers`, boven "Cijfers van dit seizoen", als zachte kaart (`SquadSummaryCard`).
+  De cijfers worden op de server uitgerekend (`getSquadSummary`): de geboortedatum verlaat die functie niet, alleen het gemiddelde, de jongste en de oudste gaan naar de kaart.
+- **Waarom:** de kaart blijft eerlijk over gaten, zoals de kaarten op de cijferpagina's. Op de acceptatiekopie (10 november 2026) hebben 23 van de 28 spelers van het lopende seizoen een geboortedatum op de dag en 28 van de 28 een land.
+- **Alternatieven:** de kaart alleen tonen als alles bekend is (dan mist hij nu de leeftijd); een gemiddelde van de spelers die we kennen zonder zin (misleidend).
+- **Later:** deze kaart komt bij "`/spelers` toont alleen de selectie: de kaart Selectie en de bronvermelding" in _De cijfers van de spelers staan op `/spelers/cijfers`, en `/spelers` toont alleen de selectie_: de zijkolom heeft nu ook deze kaart, boven "Cijfers van dit seizoen".
+
+## Het land per regel blijft de vlag
+
+- **Datum:** 14 november 2026
+- **Besluit:** de selectie houdt de vlag met de landnaam voor een schermlezer; de landnaam komt niet als tekst naast de vlag (#1261).
+- **Waarom:** de vlag staat er al en een lange naam maakt de regel op een telefoon breed. De kaart telt de landen al.
+- **Alternatieven:** de landnaam rechts op elke regel, zoals in het ontwerp.

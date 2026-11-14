@@ -1461,6 +1461,20 @@ await withEmptyDatabase((database) =>
     // A player without a country, among others who have one, has an empty place for the flag.
     assert.match(squadCard, /<span class="hf-player-name-flag"><\/span><span class="hf-player-name-text">/)
     assert.ok(playersHtml.indexOf('id="selectie"') < playersHtml.indexOf('aria-label="Meer over de spelers"'))
+    // The sidebar starts with the soft card "De selectie in het kort", above the strong card.
+    // The made-up squad has countries, so the card has Spelers and Landen, and no date of birth
+    // (the age lines depend on how many made-up players have a date, so they are not asserted).
+    const summaryCard =
+      /<section class="hf-card hf-card-soft" aria-labelledby="de-selectie-in-het-kort">.*?<\/section>/s.exec(
+        playersHtml,
+      )?.[0] ?? ''
+    assert.match(summaryCard.replaceAll(/<[^>]*>/g, ''), /De selectie in het kortSpelers\d+/)
+    assert.match(
+      summaryCard,
+      /<dl class="hf-description-list hf-description-list-stacked hf-description-list-aligned">/,
+    )
+    assert.doesNotMatch(summaryCard, /\d{4}-\d{2}-\d{2}/)
+    assert.ok(playersHtml.indexOf('id="de-selectie-in-het-kort"') < playersHtml.indexOf('id="cijfers-van-dit-seizoen"'))
     // The sidebar has the strong card with the link to the figures of the same season.
     const figuresLinkCard =
       /<section class="hf-card hf-card-strong" aria-labelledby="cijfers-van-dit-seizoen">.*?<\/section>/s.exec(
