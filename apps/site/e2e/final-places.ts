@@ -10,9 +10,9 @@ import path from 'node:path'
  * off, and the row of Testdorp FC below it, so the card "De plek van <club> en de onze" on the
  * page of that club has three seasons. With the made-up table of this season (see standings.ts)
  * and of the season before it (see earlier-season.ts) the card "Onze plek door de jaren" of
- * /wedstrijden/cijfers has four seasons, so the checks of axe and the page look at a real line.
- * A season that already has a table (a development database that imported one) keeps it. The
- * checks put the rows in before the first test and take them out after the last one.
+ * /wedstrijden/cijfers/alle has four seasons, so the checks of axe and the page look at a real
+ * line. A season that already has a table (a development database that imported one) keeps it.
+ * The checks put the rows in before the first test and take them out after the last one.
  */
 const seasonsAgo = [
   { pointsDeducted: 0, position: 3, theirs: 12, yearsAgo: 2 },

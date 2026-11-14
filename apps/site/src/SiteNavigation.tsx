@@ -165,7 +165,7 @@ export function hrefOf(href: string, pathname: string): string {
  * "Alle seizoenen" goes along to these and to no other page: a page without one has the current
  * season, which is its own address.
  */
-const allSeasonsPages: readonly string[] = [statisticsPath]
+const allSeasonsPages: readonly string[] = [playerFiguresPath, statisticsPath]
 
 /** Whether a path is the page with all seasons of a page that has one, as `…/cijfers/alle`. */
 const isAllSeasonsPath = (pathname: string) => allSeasonsPages.some((page) => pathname === allSeasonsAddress(page))

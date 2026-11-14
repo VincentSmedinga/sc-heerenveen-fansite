@@ -4680,6 +4680,7 @@
 - **Alternatieven:** de doelpunten in de database herstellen (een zaak van de importer, een eigen issue); de links van alle kaarten houden (druk, en de selectie noemt al alle spelers).
 - **Later:** zie _De cijfers van de spelers staan op `/spelers/cijfers`, en `/spelers` toont alleen de selectie_ (14 november 2026): `/spelers` heeft alleen de kaart Selectie, en op `/spelers/cijfers` is de naam van een speler een link als hij een pagina heeft.
   De kaart "Sinds 1990/91" staat op geen van beide pagina's, tot #1219 hem terugzet.
+  Zie _Spelers · Cijfers telt ook alle seizoenen, met de topscorers sinds 1990/91_ (14 november 2026): de kaart is terug als "Topscorers sinds 1990/91" op `/spelers/cijfers/alle`.
 
 ## De zijkolom van de pagina van een speler
 
@@ -5581,6 +5582,42 @@
 - **Waarom:** de cijfers van de spelers stonden in de zijkolom van de selectie en de pagina las als twee pagina's in één.
   Een eigen pagina geeft de cijfers de ruimte en de selectie rust, en past bij Wedstrijden, dat zijn cijfers ook op een eigen pagina krijgt (#1208).
 - **Alternatieven:** de cijfers in de zijkolom houden en er kaarten bij zetten; een tab op `/spelers`; de kaart Sinds 1990/91 al op de nieuwe pagina houden (die komt terug bij alle seizoenen, #1219).
+- **Later:** zie _Spelers · Cijfers telt ook alle seizoenen, met de topscorers sinds 1990/91_ (14 november 2026): de kaart Sinds 1990/91 is terug op `/spelers/cijfers/alle`, met het anker `#topscorers-sinds-1990-91` in plaats van `#sinds-1990-91`.
+
+## Spelers · Cijfers telt ook alle seizoenen, met de topscorers sinds 1990/91
+
+- **Datum:** 14 november 2026
+- **Besluit:** `/spelers/cijfers/alle` toont de cijfers van de spelers over alle seizoenen sinds 1990/91 (#1219, onderdeel van #1207).
+  De seizoenskiezer heeft "Alle seizoenen" als eerste keuze, op `/spelers/cijfers` en op elk seizoen eronder; de keuze van competitie werkt ook bij alle seizoenen.
+  - **De kaarten:** de witte hoofdkolom heeft "Topscorers sinds 1990/91": de eerste tien plaatsen met de plek, de speler (een link), de jaren bij de club en de doelpunten, en een `Disclosure` "Toon de top 25" met de plaatsen 11 tot en met 25.
+    Spelers met evenveel doelpunten delen een plek, en een gedeelde plek staat in één deel: de tiende plek splitst nooit over de twee tabellen.
+    De balken van het tweede deel zijn een aandeel van de topscorer van de hele lijst (`scaleTo` van `TopScorersTable`), zodat ze even lang zijn als bij de eerste tien.
+    Onder de kaart staat "Van <aantal> wedstrijden kennen we de doelpuntenmakers niet", voor de gespeelde wedstrijden met een doelpunt van ons en geen doelpuntenmakers.
+    De zijkolom heeft "Hattricks" (de spelers met de meeste, de eerste vijf plaatsen, en een `Disclosure` met elke hattrick: de speler, de dag en de wedstrijd) en "Strafschoppen benut" (de eerste vijf plaatsen, met het totaal eronder).
+    Daaronder staat de zin die zegt waarom er geen lijst aller tijden van wedstrijden, minuten en assists is, en de bronvermelding als laatste.
+  - **De jaren bij de club** komen uit de rijen van de selectie (`players.person_id`): van het begin van het eerste seizoen tot het einde van het laatste, dus `2012/13` en `2013/14` zijn `2012–2014`.
+    Een speler zonder persoon heeft geen seizoenen en toont een streepje.
+    Het zijn de seizoenen in de selectie, niet de seizoenen waarin hij scoorde.
+  - **Hattricks:** drie doelpunten of meer van één speler in één wedstrijd; een strafschop telt mee, een eigen doelpunt voor niemand.
+    De wedstrijd is een link als ze een pagina heeft, en dat zijn alleen de seizoenen met een verslag (`getReportAddresses`), dus de pagina vraagt alleen die seizoenen op.
+    De lijst begint bij de nieuwste.
+    Een wedstrijd waarvan we de doelpunten niet kennen, telt niet mee (zoals bij Bijzondere doelpunten).
+  - **De zin onder de zijkolom** komt uit de gegevens: de seizoenen met een verslag dat klaar is (`listReportSeasons`), als aaneengesloten stukken, en een stuk dat het lopende seizoen haalt is "vanaf".
+    Nu staat er "van 1992/93 tot en met 2005/06 en vanaf 2026/27", en bij elk nieuw verslag past de zin zich aan.
+  - **Een kaart zonder inhoud staat er niet:** zonder hattricks of strafschoppen in de gekozen competitie ontbreken die kaarten, en de balk "Op deze pagina:" linkt er dan niet naar.
+    Zonder doelpuntenmakers staat er een zin in plaats van de kaart.
+  - **Tabelkolommen:** `H hattricks` en `S strafschoppen` staan nu in `tableColumns`.
+    `P` was al punten, dus de strafschoppen hebben de `S`.
+  - **Anker en adres:** het anker is `#topscorers-sinds-1990-91`, want een anker volgt de titel; `#sinds-1990-91` komt niet terug.
+    `alle` is geen seizoen: `seasonFromSlug` leest het niet, en `/spelers/cijfers/alle` heeft een eigen balk.
+  - **Eén hulp voor beide pagina's Cijfers:** `seasonChoicesWithAll`, `allSeasonsAddress` en `allSeasons` bij `pickedAddress` en `pickedSeasonResponse` staan in `seasons.ts` en `season-page.ts`, zodat Wedstrijden · Cijfers (#1211) dezelfde keuze en hetzelfde adres kan gebruiken.
+    Met minder dan twee seizoenen heeft de kiezer geen "Alle seizoenen": dan is alles één seizoen, en de kiezer blijft weg zoals eerst.
+  - **Snelheid:** de telling over alle wedstrijden duurt ongeveer 1,6 ms voor 1385 wedstrijden; de query (`getAllTimeMatches`) wordt een uur bewaard, net als de seizoenen per persoon.
+- **Waarom:** de pagina van een seizoen liet de ranglijst aller tijden niet zien, terwijl we sinds 1990/91 alle doelpunten kennen.
+  Twee bereiken per pagina zijn in één keer te begrijpen (zie #1207).
+  We kennen de opstellingen maar van een deel van de seizoenen, dus lijsten aller tijden van wedstrijden, minuten en assists zouden spelers overslaan (zie _Geen lijst aller tijden van wedstrijden, minuten, assists en kaarten per speler_).
+- **Nadeel:** de jaren bij de club zijn de seizoenen in de selectie en kunnen langer zijn dan de jaren waarin een speler scoorde; een speler zonder persoon in de gegevens heeft er geen.
+- **Alternatieven:** de jaren van de eerste tot de laatste doelpunten (zegt niets over zijn tijd bij de club); een tabel met de top 25 in de `Disclosure`, ook de eerste tien (dubbel); een eigen pagina Records.
 
 ## Wedstrijden · Cijfers telt ook alle seizoenen, op `/wedstrijden/cijfers/alle`
 
@@ -5598,7 +5635,8 @@
     Onze plek door de jaren en Resultaten per hoofdtrainer staan alleen hier, in Seizoenen, en hun ankers staan weer in `src/anchors.ts`, nu bij `/wedstrijden/cijfers/alle`.
     Verloop van het seizoen, Hoe de wedstrijden verlopen en Reeksen rusten op één seizoen en staan niet bij alle seizoenen; de reeksen zijn er in Records.
   - **De competitiekeuze werkt hier:** alle kaarten volgen haar, behalve Onze plek door de jaren, die de Eredivisie blijft.
-  - **Het menu:** het hoofdmenu en het submenu nemen "Alle seizoenen" alleen mee naar een pagina die een `/alle` heeft (`allSeasonsPages` in `SiteNavigation.tsx`): Wedstrijden en Spelers gaan naar het lopende seizoen, en Cijfers blijft op `/alle`.
+  - **Het menu:** het hoofdmenu en het submenu nemen "Alle seizoenen" alleen mee naar een pagina die een `/alle` heeft (`allSeasonsPages` in `SiteNavigation.tsx`): de twee pagina's Cijfers.
+    Wedstrijden en Spelers zelf hebben er geen en gaan naar het lopende seizoen.
   - **Snelheid:** één vraag aan de database voor alle wedstrijden met hun doelpunten, `listAllMatches`: drie queries, zoals voor één seizoen.
     Gemeten op een database met 1.400 wedstrijden en 2.100 doelpunten: ongeveer 30 milliseconden, en het tellen is in het geheugen.
     Het antwoord wordt vijf minuten bewaard (`getAllMatches`), zoals de gegevens van het lopende seizoen, dat erin zit.

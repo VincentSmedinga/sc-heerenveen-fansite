@@ -20,6 +20,7 @@ import {
   matches,
   matchGoals,
   matchPageKinds,
+  matchReports,
   persons,
   players,
   playerSeasonStats,
@@ -333,18 +334,28 @@ export function listAllMatches(db: Database) {
 export async function listAllMatchGoals(db: Database) {
   const rows = await db
     .select({
+      clubId: matches.clubId,
       competition: matches.competition,
       dataSource: matches.dataSource,
       goalsAgainst: matches.goalsAgainst,
       goalsFor: matches.goalsFor,
+      home: matches.home,
       id: matches.id,
+      matchDate: matches.matchDate,
+      opponent: matches.opponent,
+      round: matches.round,
       season: matches.season,
       status: matches.status,
     })
     .from(matches)
     .orderBy(asc(matches.season), asc(matches.matchDate), asc(matches.id))
+  const named = await withSeasonNames(db, rows)
 
-  return (await withGoals(db, rows, undefined)).map(omitId)
+  return (await withGoals(db, named, undefined)).map(({ clubId, ...match }) => {
+    void clubId
+
+    return omitId(match)
+  })
 }
 
 /**
@@ -763,6 +774,19 @@ export function listNewestDiscussions(db: Database, limit = 5) {
 }
 
 /**
+ * The seasons in which each person was in the squad, for the years a player was with the club:
+ * one row per person and season, in the order of the season. A player without a person has no
+ * row, and a season in which the person has more than one title is one row.
+ */
+export async function listPersonSeasons(db: Database) {
+  return db
+    .selectDistinct({ personId: sql<number>`${players.personId}`.mapWith(Number), season: players.season })
+    .from(players)
+    .where(isNotNull(players.personId))
+    .orderBy(asc(players.season), asc(sql`${players.personId}`))
+}
+
+/**
  * The episodes of the podcasts that are switched on, newest first, from `offset`, at most
  * `limit`, with what the pages show of them: the title, the link to the page of the episode,
  * the time, the name of the podcast, and the duration, the season and the number of the
@@ -866,6 +890,21 @@ export function listRecentItems(db: Database, { limit, until }: { limit: number;
     .where(newsFilter(until))
     .orderBy(desc(items.publishedAt), desc(items.id))
     .limit(limit)
+}
+
+/**
+ * The seasons that have a match report that is finished (`klaar`) for a played match, which are
+ * the seasons whose line-ups we have. The oldest first.
+ */
+export async function listReportSeasons(db: Database) {
+  const rows = await db
+    .selectDistinct({ season: matches.season })
+    .from(matchReports)
+    .innerJoin(matches, eq(matchReports.matchId, matches.id))
+    .where(and(eq(matchReports.status, 'klaar'), eq(matches.status, 'played')))
+    .orderBy(asc(matches.season))
+
+  return rows.map((row) => row.season)
 }
 
 /**

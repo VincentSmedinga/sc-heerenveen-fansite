@@ -1186,11 +1186,11 @@ await withEmptyDatabase((database) =>
       /wedstrijden<\/span><span class="hf-key-figure-stop">, <\/span><span class="hf-key-figure-note">gespeeld in alle competities sinds /,
     )
     // The picker sends "Alle seizoenen" on to its address, with the choice of competition.
-    const pickedAll = await fetch(`${origin}/wedstrijden/cijfers/kies?seizoen=alle&competitie=eredivisie`, {
+    const pickedAllMatches = await fetch(`${origin}/wedstrijden/cijfers/kies?seizoen=alle&competitie=eredivisie`, {
       redirect: 'manual',
     })
-    assert.equal(pickedAll.status, 303)
-    assert.equal(pickedAll.headers.get('location'), '/wedstrijden/cijfers/alle?competitie=eredivisie')
+    assert.equal(pickedAllMatches.status, 303)
+    assert.equal(pickedAllMatches.headers.get('location'), '/wedstrijden/cijfers/alle?competitie=eredivisie')
     assert.equal((await fetch(`${origin}/wedstrijden/cijfers/alle?competitie=onzin`)).status, 404)
     // The bar under the menu keeps the choice in both links and marks Cijfers, and the items of
     // the menu itself keep no choice.
@@ -1547,6 +1547,41 @@ await withEmptyDatabase((database) =>
     assert.equal(pickedFigures.status, 303)
     assert.equal(pickedFigures.headers.get('location'), '/spelers/cijfers')
     assert.equal((await fetch(`${origin}/spelers/cijfers/2099-00`)).status, 404)
+
+    // All seasons (#1219): the picker has "Alle seizoenen" first, and the route behind it sends
+    // the value `alle` on to `/spelers/cijfers/alle`.
+    const pickedAll = await fetch(`${origin}/spelers/cijfers/kies?seizoen=alle`, { redirect: 'manual' })
+    assert.equal(pickedAll.status, 303)
+    assert.equal(pickedAll.headers.get('location'), '/spelers/cijfers/alle')
+    assert.equal((await fetch(`${origin}/spelers/cijfers/alle?competitie=onzin`)).status, 404)
+    assert.match(figuresHtml, /<option value="alle">Alle seizoenen<\/option>/)
+    const allPage = await fetch(`${origin}/spelers/cijfers/alle`)
+    const allHtml = await allPage.text()
+    assert.equal(allPage.status, 200)
+    assert.match(allHtml, /<h1[^>]*>Cijfers van de spelers<\/h1>/)
+    assert.match(allHtml, /<option value="alle" selected="">Alle seizoenen<\/option>/)
+    // The list of scorers is the white card of the main column, with the column Jaren, and
+    // the sidebar has the soft cards. The made-up data has no hattrick, so that card is left
+    // out; it has a penalty. The cards of the line-ups are not on this page, and a sentence
+    // says why.
+    assert.match(
+      allHtml,
+      /aria-label="De topscorers van alle seizoenen"><section class="hf-card hf-card-shareable" aria-labelledby="topscorers-sinds-1990-91">/,
+    )
+    assert.match(allHtml, /<th scope="col">Jaren<\/th>/)
+    assert.doesNotMatch(allHtml, /id="hattricks"/)
+    assert.match(allHtml, /class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="strafschoppen"/)
+    assert.match(allHtml, /\d+ strafschop(?:pen)? benut sinds \d{4}\/\d{2}/)
+    assert.doesNotMatch(allHtml, /id="(?:alle-spelers|assists|minuten|doelpuntenmakers|bijzondere-doelpunten)"/)
+    assert.match(
+      allHtml,
+      /Wedstrijden, minuten en assists per speler kennen we alleen .*Daarom heeft deze pagina er geen lijst aller tijden van\./,
+    )
+    assert.deepEqual(
+      [...allHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
+      ['#topscorers-sinds-1990-91', '#strafschoppen'],
+    )
+    assert.match(allHtml, closedWikipediaCredit)
 
     // The old addresses under Statistieken are gone, with no redirect (the site is not public).
     for (const old of ['/statistieken/spelers', '/statistieken/spelers/2025-26', '/statistieken/spelers/kies']) {

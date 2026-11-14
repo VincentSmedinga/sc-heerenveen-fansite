@@ -369,11 +369,13 @@ describe('hrefOf', () => {
     expect(hrefOf('/spelers', '/spelers/cijfers')).toBe('/spelers')
   })
 
-  it('takes "Alle seizoenen" along to Cijfers of Wedstrijden and to no page that has no /alle', () => {
+  it('takes "Alle seizoenen" along to the two pages Cijfers and to no page that has no /alle', () => {
     expect(hrefOf('/wedstrijden/cijfers', '/wedstrijden/cijfers/alle')).toBe('/wedstrijden/cijfers/alle')
+    expect(hrefOf('/spelers/cijfers', '/wedstrijden/cijfers/alle')).toBe('/spelers/cijfers/alle')
+    expect(hrefOf('/wedstrijden/cijfers', '/spelers/cijfers/alle')).toBe('/wedstrijden/cijfers/alle')
     expect(hrefOf('/wedstrijden', '/wedstrijden/cijfers/alle')).toBe('/wedstrijden')
     expect(hrefOf('/spelers', '/wedstrijden/cijfers/alle')).toBe('/spelers')
-    expect(hrefOf('/spelers/cijfers', '/wedstrijden/cijfers/alle')).toBe('/spelers/cijfers')
+    expect(hrefOf('/spelers', '/spelers/cijfers/alle')).toBe('/spelers')
     expect(hrefOf('/wedstrijden/cijfers', '/wedstrijden/cijfers')).toBe('/wedstrijden/cijfers')
   })
 

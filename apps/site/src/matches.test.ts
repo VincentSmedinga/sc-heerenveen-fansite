@@ -4,7 +4,6 @@ import { competitions } from '@fansite/db/schema'
 import { describe, expect, it } from 'vitest'
 
 import {
-  allTimeScorersOf,
   attendanceOf,
   attendanceRecordsOf,
   cleanSheetsOf,
@@ -869,85 +868,6 @@ describe('scorersByPlace', () => {
 
     expect(place?.players.map((player) => player.id)).toEqual(['name:Alfa', 'name:Beta'])
     expect(place?.players.every((player) => player.goals === 1 && player.position === 1)).toBe(true)
-  })
-})
-
-describe('allTimeScorersOf', () => {
-  const person = (id: number, family: string, options: Partial<Goal> = {}) =>
-    goal(family, { personFamilyName: family, personGivenName: 'Pier', personId: id, ...options })
-  const inSeason = (season: string, goals: Goal[], competition: PublicMatch['competition'] = 'Eredivisie') => ({
-    ...played(goals),
-    competition,
-    season,
-  })
-
-  it('counts a person who scored in two seasons once, with the goals of both', () => {
-    const { scorers } = allTimeScorersOf([
-      inSeason('2010/11', [person(1, 'Dijk'), person(1, 'Dijk')]),
-      inSeason('2011/12', [person(1, 'Dijk', { player: 'P. Dijk' }), person(2, 'Berg')]),
-    ])
-
-    expect(scorers.map((item) => [item.id, item.goals, item.position])).toEqual([
-      ['person:1', 3, 1],
-      ['person:2', 1, 2],
-    ])
-  })
-
-  it('gives a person with squad rows in two seasons one row, with the link to his page', () => {
-    const { scorers } = allTimeScorersOf([
-      inSeason('2010/11', [person(1, 'Dijk', { personSlug: 'pier-dijk', playerId: 10 })]),
-      inSeason('2011/12', [person(1, 'Dijk', { personSlug: 'pier-dijk', playerId: 20 })]),
-    ])
-
-    expect(scorers.map((item) => [item.id, item.goals, item.href])).toEqual([['person:1', 2, '/spelers/pier-dijk']])
-  })
-
-  it('counts a goal without a person for its name, a penalty for the player, and an own goal for nobody', () => {
-    const { scorers, total } = allTimeScorersOf([
-      inSeason('2012/13', [
-        goal('Zonder Persoon'),
-        goal('Zonder Persoon'),
-        person(3, 'Strafschop', { penalty: true }),
-        person(4, 'Eigen', { ownGoal: true }),
-        goal('Tegen', { ours: false }),
-      ]),
-    ])
-
-    expect(scorers.map((item) => [item.id, item.goals])).toEqual([
-      ['name:Zonder Persoon', 2],
-      ['person:3', 1],
-    ])
-    expect(total).toBe(2)
-  })
-
-  it('says from which season it counts: the first season with a match, whatever the order', () => {
-    expect(
-      allTimeScorersOf([inSeason('2012/13', [goal('A')]), inSeason('2010/11', []), inSeason('2011/12', [goal('B')])])
-        .since,
-    ).toBe('2010/11')
-    expect(allTimeScorersOf([]).since).toBeUndefined()
-  })
-
-  it('shows the first ten places and all who share the tenth, and counts everybody who scored', () => {
-    const counts = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 3, 1]
-    const goals = counts.flatMap((count, index) => Array.from({ length: count }, () => goal(`Speler ${index + 10}`)))
-    const { scorers, total } = allTimeScorersOf([inSeason('2010/11', goals)])
-
-    expect(total).toBe(12)
-    expect(scorers).toHaveLength(11)
-    expect(scorers.at(-1)).toMatchObject({ goals: 3, position: 10 })
-    expect(scorers.at(-2)).toMatchObject({ goals: 3, position: 10 })
-    expect(scorers.some((item) => item.goals === 1)).toBe(false)
-  })
-
-  it('follows the choice: the Eredivisie alone leaves out a goal in the cup', () => {
-    const matches = [
-      inSeason('2010/11', [goal('Liga')]),
-      inSeason('2010/11', [goal('Beker'), goal('Beker')], 'KNVB Beker'),
-    ]
-
-    expect(allTimeScorersOf(matches, 'all').scorers.map((item) => item.player)).toEqual(['Beker', 'Liga'])
-    expect(allTimeScorersOf(matches, 'league').scorers.map((item) => item.player)).toEqual(['Liga'])
   })
 })
 

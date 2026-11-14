@@ -43,6 +43,11 @@ export const pages = [
   },
   {
     description:
+      'De topscorers, hattricks en strafschoppen van sc Heerenveen 1 sinds 1990/91, met de bronnen erbij: Wikipedia en de sc Heerenveen Fansite.',
+    path: '/spelers/cijfers/alle',
+  },
+  {
+    description:
       'Alle spelers die ooit in de selectie van sc Heerenveen stonden, op achternaam, met hun linie en jaren. Bron: Wikipedia en sc Heerenveen Fansite.',
     path: '/spelers/overzicht',
   },

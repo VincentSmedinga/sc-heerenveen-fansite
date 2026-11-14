@@ -21,9 +21,11 @@ import {
   listMatchSeasons,
   listMatchSequence,
   listNewestDiscussions,
+  listPersonSeasons,
   listPodcastEpisodes,
   listPodcasts,
   listRecentItems,
+  listReportSeasons,
   listSeasonMatches,
   listSeasonStandings,
   listStandingsPlaces,
@@ -38,6 +40,7 @@ import {
   leagueResults,
   matches,
   matchGoals,
+  matchReports,
   persons,
   players,
   sources,
@@ -1823,10 +1826,58 @@ describe('the matches and the table of a season', () => {
 
       expect(rows.map((match) => match.season)).toEqual(['2010/11', first!.season])
       expect(Object.keys(rows[0]!).sort()).toEqual(
-        ['competition', 'dataSource', 'goals', 'goalsAgainst', 'goalsFor', 'season', 'status'].sort(),
+        [
+          'competition',
+          'dataSource',
+          'goals',
+          'goalsAgainst',
+          'goalsFor',
+          'home',
+          'matchDate',
+          'opponent',
+          'round',
+          'season',
+          'status',
+        ].sort(),
       )
       expect(rows[0]?.goals.map((goal) => goal.player)).toEqual(['Oud'])
       expect(rows[1]?.goals).toEqual([])
+    })
+
+    it('gives the seasons each person was in the squad, once each, and none for a player without a person', async () => {
+      const [{ insertId: personId }] = await database.db
+        .insert(persons)
+        .values({ familyName: 'Oud', givenName: 'Jan', name: 'Jan Oud' })
+
+      await database.db.insert(players).values([
+        { name: 'Jan Oud', personId: personId, searchTerm: 'Oud Jan', season: '2011/12' },
+        { name: 'J. Oud', personId: personId, searchTerm: 'Oud J', season: '2011/12' },
+        { name: 'Jan Oud', personId: personId, searchTerm: 'Oud Jan', season: '2010/11' },
+        { name: 'Zonder Persoon', searchTerm: 'Zonder', season: '2010/11' },
+      ])
+
+      expect(await listPersonSeasons(database.db)).toEqual([
+        { personId: personId, season: '2010/11' },
+        { personId: personId, season: '2011/12' },
+      ])
+    })
+
+    it('gives the seasons that have a finished report of a played match, oldest first', async () => {
+      const [first, second] = madeUpMatches(now)
+      const earlier = { ...second!, season: '2010/11' }
+
+      await database.db.insert(matches).values(await withClubs(database.db, [first!, earlier]))
+
+      const rows = await database.db.select({ id: matches.id, season: matches.season }).from(matches)
+      const idOf = (season: string) => rows.find((row) => row.season === season)?.id ?? 0
+
+      expect(await listReportSeasons(database.db)).toEqual([])
+
+      await database.db.insert(matchReports).values({ matchId: idOf(first!.season), status: 'bezig' })
+      expect(await listReportSeasons(database.db)).toEqual([])
+
+      await database.db.insert(matchReports).values({ matchId: idOf('2010/11'), status: 'klaar' })
+      expect(await listReportSeasons(database.db)).toEqual(['2010/11'])
     })
 
     it('gives the sources the matches come from, each once', async () => {

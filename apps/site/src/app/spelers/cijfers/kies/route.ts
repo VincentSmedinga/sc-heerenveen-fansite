@@ -7,4 +7,5 @@ export const dynamic = 'force-dynamic'
  * What the button "Toon" of the season picker asks for,
  * `/spelers/cijfers/kies?seizoen=2025-26` (see pickedSeasonResponse).
  */
-export const GET = (request: Request) => pickedSeasonResponse(request, playerFiguresPath, { keepCompetition: true })
+export const GET = (request: Request) =>
+  pickedSeasonResponse(request, playerFiguresPath, { allSeasons: true, keepCompetition: true })
