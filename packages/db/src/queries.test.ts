@@ -26,6 +26,7 @@ import {
   listPodcasts,
   listRecentItems,
   listReportSeasons,
+  listSeasonFormations,
   listSeasonMatches,
   listSeasonStandings,
   listStandingsPlaces,
@@ -1878,6 +1879,64 @@ describe('the matches and the table of a season', () => {
 
       await database.db.insert(matchReports).values({ matchId: idOf('2010/11'), status: 'klaar' })
       expect(await listReportSeasons(database.db)).toEqual(['2010/11'])
+    })
+
+    it('gives the formation of ours of each played match of the season that has a finished report with one', async () => {
+      const [first, second] = madeUpMatches(now)
+      const played = (match: typeof first, extra = {}) => ({
+        ...match!,
+        afterNinetyAgainst: null,
+        afterNinetyFor: null,
+        extraTime: false,
+        goalsAgainst: 1,
+        goalsFor: 2,
+        penaltiesAgainst: null,
+        penaltiesFor: null,
+        status: 'played' as const,
+        ...extra,
+      })
+
+      await database.db.insert(matches).values(
+        await withClubs(database.db, [
+          played(first, { opponent: 'Een', round: 'Ronde 1' }),
+          played(first, { opponent: 'Twee', round: 'Ronde 2' }),
+          played(first, { opponent: 'Drie', round: 'Ronde 3' }),
+          played(first, { opponent: 'Vier', round: 'Ronde 4' }),
+          played(second, {
+            attendance: null,
+            goalsAgainst: null,
+            goalsFor: null,
+            opponent: 'Vijf',
+            round: 'Ronde 5',
+            status: 'scheduled',
+          }),
+          played(first, { opponent: 'Zes', season: '2010/11' }),
+        ]),
+      )
+
+      const rows = await database.db.select({ id: matches.id, opponent: matches.opponent }).from(matches)
+      const idOf = (opponent: string) => rows.find((row) => row.opponent === opponent)?.id ?? 0
+
+      expect(await listSeasonFormations(database.db, first!.season)).toEqual([])
+
+      await database.db.insert(matchReports).values([
+        { formationOurs: '4-3-3', matchId: idOf('Een'), status: 'klaar' },
+        { formationOurs: '4-2-3-1', matchId: idOf('Twee'), status: 'bezig' },
+        { formationOurs: null, matchId: idOf('Drie'), status: 'klaar' },
+        { formationOurs: '3-5-2', matchId: idOf('Zes'), status: 'klaar' },
+      ])
+
+      expect(await listSeasonFormations(database.db, first!.season)).toEqual([
+        {
+          competition: first!.competition,
+          formation: '4-3-3',
+          goalsAgainst: 1,
+          goalsFor: 2,
+          penaltiesAgainst: null,
+          penaltiesFor: null,
+        },
+      ])
+      expect(await listSeasonFormations(database.db, '2010/11')).toMatchObject([{ formation: '3-5-2' }])
     })
 
     it('gives the sources the matches come from, each once', async () => {

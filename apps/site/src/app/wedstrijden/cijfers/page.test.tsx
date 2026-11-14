@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { FinalPlace } from '#src/matches'
 
-import { getCoachResultData, getFinalPlaces, getMatchData, getMatchSeasons } from '#src/matches'
+import { getCoachResultData, getFinalPlaces, getMatchData, getMatchSeasons, getSeasonFormations } from '#src/matches'
 import { statisticsShortcuts } from '#src/statisticsShortcuts'
 import { coachResultData, matchData } from '#src/test-matches'
 import { leagueAndCup, switchHtml } from '#src/test-switch'
@@ -21,6 +21,7 @@ vi.mock('#src/matches', async (importOriginal) => ({
   getFinalPlaces: vi.fn(),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
+  getSeasonFormations: vi.fn(),
 }))
 
 const finalPlaces: FinalPlace[] = [
@@ -56,6 +57,8 @@ beforeEach(() => {
   vi.mocked(getFinalPlaces).mockResolvedValue(finalPlaces)
   vi.mocked(getCoachResultData).mockResolvedValue(coachResultData)
   vi.mocked(getMatchSeasons).mockReset()
+  vi.mocked(getSeasonFormations).mockReset()
+  vi.mocked(getSeasonFormations).mockResolvedValue([])
   vi.mocked(getMatchData).mockResolvedValue(matchData)
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27'])
 })
@@ -1936,5 +1939,64 @@ describe('the old addresses of Cijfers', () => {
   // they are "niet gevonden", and there is no redirect: the site is not public yet (#768).
   it.each(['page.tsx', '[seizoen]', 'kies'])('has no route %s under /statistieken', (route) => {
     expect(existsSync(new URL(`../statistieken/${route}`, import.meta.url))).toBe(false)
+  })
+})
+
+describe('the card Formaties', () => {
+  const formation = (
+    name: string,
+    goalsFor: number,
+    goalsAgainst: number,
+    competition: 'Eredivisie' | 'KNVB Beker' = 'Eredivisie',
+  ) => ({
+    competition,
+    formation: name,
+    goalsAgainst,
+    goalsFor,
+    penaltiesAgainst: null,
+    penaltiesFor: null,
+  })
+  const formaties = async (searchParams = {}) => section(await render(searchParams), 'formaties')
+
+  it('is not on the page of a season without a finished report with a formation, and the bar does not change', async () => {
+    const html = await render()
+
+    expect(html).not.toContain('Formaties')
+    expect(statisticsShortcuts.map(({ label }) => label)).not.toContain('Formaties')
+  })
+
+  it('is the last card of Rondom de wedstrijd, a level 3 heading, when the season has formations', async () => {
+    vi.mocked(getSeasonFormations).mockResolvedValue([formation('4-3-3', 2, 0), formation('4-3-3', 0, 1)])
+
+    const html = await render()
+    const headings = [...html.matchAll(/<h([1-6])[^>]*?(?: id="([^"]+)")?>/g)].map(([, level, id]) => `${level} ${id}`)
+
+    expect(headings.slice(-3)).toEqual(['2 rondom-de-wedstrijd', '3 toeschouwers', '3 formaties'])
+    expect(html).toContain('<h3 class="hf-heading-3 hf-heading-anchored" id="formaties">')
+    expect(html).toContain('>1–0–1<')
+    expect(html).toContain('Op basis van 2 van de 4 gespeelde wedstrijden.')
+  })
+
+  it('follows the choice of competition, and is left out when the choice has no formation', async () => {
+    vi.mocked(getSeasonFormations).mockResolvedValue([
+      formation('4-3-3', 2, 0),
+      formation('4-2-3-1', 0, 1, 'KNVB Beker'),
+    ])
+
+    expect(await formaties(eredivisie)).toContain('>4-3-3<')
+    expect(await formaties(eredivisie)).not.toContain('>4-2-3-1<')
+    expect(await render({ competitie: 'beker' })).toContain('>4-2-3-1<')
+    vi.mocked(getSeasonFormations).mockResolvedValue([formation('4-3-3', 2, 0)])
+    expect(await render({ competitie: 'beker' })).not.toContain('id="formaties"')
+  })
+
+  it('leaves the card out, and the rest of the page in, when the formations can not be read', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    vi.mocked(getSeasonFormations).mockRejectedValue(new Error('down'))
+
+    const html = await render()
+
+    expect(html).not.toContain('Formaties')
+    expect(html).toContain('Toeschouwers')
   })
 })

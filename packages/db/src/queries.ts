@@ -908,6 +908,37 @@ export async function listReportSeasons(db: Database) {
 }
 
 /**
+ * The formation of ours in each played match of a season, such as `2026/27`, that has a
+ * finished report (`klaar`) with one, for the card Formaties of Cijfers (#1216): the formation,
+ * the competition and the score, with the shoot-out when there was one, so the card can count
+ * how the matches ended. A match without a finished report or without a formation has no row.
+ */
+export function listSeasonFormations(db: Database, season: string) {
+  return db
+    .select({
+      competition: matches.competition,
+      formation: sql<string>`${matchReports.formationOurs}`,
+      goalsAgainst: sql<number>`${matches.goalsAgainst}`,
+      goalsFor: sql<number>`${matches.goalsFor}`,
+      penaltiesAgainst: matches.penaltiesAgainst,
+      penaltiesFor: matches.penaltiesFor,
+    })
+    .from(matchReports)
+    .innerJoin(matches, eq(matchReports.matchId, matches.id))
+    .where(
+      and(
+        eq(matches.season, season),
+        eq(matches.status, 'played'),
+        isNotNull(matches.goalsFor),
+        isNotNull(matches.goalsAgainst),
+        eq(matchReports.status, 'klaar'),
+        isNotNull(matchReports.formationOurs),
+      ),
+    )
+    .orderBy(asc(matches.matchDate), asc(matches.id))
+}
+
+/**
  * The matches of sc Heerenveen 1 in a season, such as `2026/27`, in the order they are played:
  * by day, then by kick-off, with a match without a kick-off before one with. It gives what the
  * pages show: the competition, the round, the opponent, whether the match is at home, the
