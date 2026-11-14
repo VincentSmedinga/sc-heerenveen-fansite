@@ -5791,6 +5791,7 @@
   De tabel heeft achter V de sleutelkolom P (`tableColumns.pointsPerMatch`), met twee decimalen en een komma, en de legenda noemt hem.
   Bij alle seizoenen is de tabel de top 5 op die volgorde, met elke naam die de vijfde plaats deelt op punten per wedstrijd en wedstrijden, en de regel zegt "de top 5 op punten per wedstrijd".
   Een beslissing door strafschoppen telt zoals in de kolommen W, G en V van dezelfde tabel (`resultOf`), zodat P klopt met wat er staat.
+  Op 320 pixels past de tabel alleen als de kop Scheidsrechter mag afbreken, dus de kop van de eerste kolom breekt overal als er geen plaats is (`data-table.css`).
 - **Waarom:** in één seizoen komen we veel scheidsrechters maar één of twee keer tegen, dus het aantal wedstrijden zegt weinig.
   Punten per wedstrijd laat zien onder wie het ons goed ging.
   Het gevolg: een scheidsrechter met één winst staat bovenaan, en de kolom met de wedstrijden laat dat zien.
