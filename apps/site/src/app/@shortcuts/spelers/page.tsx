@@ -1,12 +1,6 @@
-import { seasonOf } from '@fansite/db/season'
-
-import { SeasonShortcuts } from '#src/app/@shortcuts/wedstrijden/cijfers/season-shortcuts'
-import { playersShortcuts } from '#src/statisticsShortcuts'
-
-// Render on each request, like the page it belongs to, so the build never reads the database.
-export const dynamic = 'force-dynamic'
-
-/** The bar of /spelers, for the current season (see SeasonShortcuts). */
+// /spelers has one card, so it has no bar "Op deze pagina:". The slot is empty here: without
+// this route, a visit that follows a link from a page with a bar would keep the bar of the page
+// before (see layout.tsx).
 export default function PlayersShortcuts() {
-  return SeasonShortcuts({ items: playersShortcuts, searchParams: Promise.resolve({}), season: seasonOf(new Date()) })
+  return null
 }

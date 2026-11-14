@@ -1412,11 +1412,8 @@ await withEmptyDatabase((database) =>
       playersHtml,
       /class="hf-navigation-sublink" aria-current|aria-current="page" class="hf-navigation-sublink"/,
     )
-    // /spelers has the squad alone (#1218): one link in the bar, to its only card.
-    assert.deepEqual(
-      [...playersHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
-      ['#selectie'],
-    )
+    // /spelers has the squad alone (#1218): one card, so no bar "Op deze pagina:".
+    assert.doesNotMatch(playersHtml, /hf-page-shortcuts/)
     for (const id of [
       'doelpuntenmakers',
       'sinds-1990-91',

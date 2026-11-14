@@ -435,16 +435,12 @@ test.describe('the bar under the header of /spelers/cijfers', () => {
   })
 })
 
-test.describe('the bar under the header of /spelers', () => {
-  test('has one link, to the card Selectie', async ({ page }) => {
+test.describe('the page /spelers', () => {
+  test('has no bar "Op deze pagina:": it has one card', async ({ page }) => {
     await page.setViewportSize({ height: 800, width: 390 })
     await page.goto('/spelers')
 
-    const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
-
-    await expect(bar.getByRole('link')).toHaveText(['Selectie'])
-    await bar.getByRole('link', { name: 'Selectie' }).click()
-    await expect(page).toHaveURL(/#selectie$/)
+    await expect(page.getByRole('navigation', { name: 'Op deze pagina:' })).toHaveCount(0)
     expect(await checkPage(page)).toEqual([])
   })
 })

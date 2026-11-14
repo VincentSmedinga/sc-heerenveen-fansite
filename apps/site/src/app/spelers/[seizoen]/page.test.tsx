@@ -4,7 +4,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getAllTimeMatches, getMatchData, getMatchSeasons } from '#src/matches'
 import { getSeasonReportFigures } from '#src/season-report-figures'
 import { getSeasonSquad } from '#src/season-squad'
-import { playersShortcuts } from '#src/statisticsShortcuts'
 import { matchData } from '#src/test-matches'
 import { noReports } from '#src/test-report-figures'
 import { squadData } from '#src/test-squad'
@@ -94,12 +93,6 @@ describe('the page of an earlier season, /spelers/2025-26', () => {
     expect(html).toContain('id="selectie"')
     expect(html).toContain('href="/spelers/cijfers/2025-26"')
     expect(html).not.toContain('<table')
-  })
-
-  it('has a heading for the link of the bar, with the id the link goes to', async () => {
-    const ids = [...(await render()).matchAll(/<h2 [^>]*id="([^"]+)"/g)].map(([, id]) => `#${id}`)
-
-    expect(playersShortcuts.map(({ href }) => href)).toEqual(ids.slice(0, 1))
   })
 
   describe('the picker', () => {

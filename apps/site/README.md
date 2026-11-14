@@ -563,7 +563,7 @@ Bij de beste bron `verslag` (een seizoen met alleen spelers uit onze verslagen) 
 De spelers komen uit `listSeasonPlayers` in `@fansite/db/queries`, in de volgorde van het rugnummer en daarna de zoekterm en de naam.
 De werkbalk van `/spelers` heeft alleen de seizoenskiezer, zonder keuze van competitie, en `/spelers` leest `?competitie=` niet.
 De zijkolom heeft de sterke kaart "Cijfers van dit seizoen", met de link "Naar de cijfers van de spelers" naar hetzelfde seizoen, en de bronvermelding.
-De balk "Op deze pagina:" heeft één link, naar Selectie (`playersShortcuts` in `src/statisticsShortcuts.ts`, `app/@shortcuts/spelers`).
+`/spelers` heeft één kaart en dus geen balk "Op deze pagina:": het slot `app/@shortcuts/spelers` is leeg.
 
 De cijfers van de spelers staan op `/spelers/cijfers` (#1218), met `/spelers/cijfers/<seizoen>` en de route `app/spelers/cijfers/kies`, via `playerFiguresPath` in `src/season-page.ts`.
 `cijfers` is een gereserveerd adres onder `/spelers` (`reservedPlayerSlugs`), net als `kies`, `overzicht` en `zoeken`.

@@ -5,7 +5,6 @@ import { getMatchData, getMatchSeasons } from '#src/matches'
 import { getSeasonPlayerStats } from '#src/season-player-stats'
 import { getSeasonReportFigures } from '#src/season-report-figures'
 import { getSeasonSquad } from '#src/season-squad'
-import { playersShortcuts } from '#src/statisticsShortcuts'
 import { matchData } from '#src/test-matches'
 import { noReports } from '#src/test-report-figures'
 import { squadData } from '#src/test-squad'
@@ -78,10 +77,10 @@ describe('the page /spelers', () => {
     ])
   })
 
-  it('has a heading for the link of the bar under the header, with the id the link goes to', async () => {
+  it('has no bar "Op deze pagina:", for the page has one card', async () => {
     const html = await render()
 
-    expect(playersShortcuts.map(({ href }) => href)).toEqual(['#selectie'])
+    expect(html).not.toContain('hf-page-shortcuts')
     expect(html).toContain('id="selectie"')
   })
 

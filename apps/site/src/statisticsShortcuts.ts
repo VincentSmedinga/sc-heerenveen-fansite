@@ -26,14 +26,6 @@ export const statisticsShortcuts = [
 ] as const
 
 /**
- * The links in the bar under the header of /spelers: the card with the squad of the season, the
- * only card the page has next to the link to the figures. The id is that of its heading in
- * src/SeasonSquadCard.tsx (a test checks it). It is the same card for a season that is over, so
- * the bar is too.
- */
-export const playersShortcuts = [{ href: '#selectie', label: 'Selectie' }] as const
-
-/**
  * The links in the bar under the header of /spelers/cijfers: the cards in the order of the
  * page, the main column first, which is the order on a narrow screen: the card Doelpuntenmakers
  * and the card with the goals that stand out. The credit is not a card to jump to. They are the

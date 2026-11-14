@@ -5541,7 +5541,7 @@
   - **`/spelers` toont alleen de selectie:** de kaart Selectie en de bronvermelding, met alleen de seizoenskiezer in de werkbalk.
     `/spelers` leest `?competitie=` niet meer, en `/spelers/kies` neemt de keuze niet mee.
     De zijkolom heeft een sterke kaart "Cijfers van dit seizoen" met één zin en de link "Naar de cijfers van de spelers", naar hetzelfde seizoen.
-    De balk "Op deze pagina:" van `/spelers` heeft de ene link naar Selectie; die van `/spelers/cijfers` linkt naar de kaarten die er staan.
+    `/spelers` heeft één kaart en dus geen balk "Op deze pagina:", zoals het ontwerp laat zien; die van `/spelers/cijfers` linkt naar de kaarten die er staan.
   - **Het submenu:** Cijfers, Overzicht, Zoeken.
     Cijfers houdt het seizoen van de pagina vast en is op `/spelers/cijfers` en de seizoenen eronder de huidige pagina; het hoofditem Spelers houdt daar ook het seizoen van de pagina vast.
   - **Bezoeken:** `/spelers/cijfers/<seizoen>` telt als een bezoek aan `/spelers/cijfers`.

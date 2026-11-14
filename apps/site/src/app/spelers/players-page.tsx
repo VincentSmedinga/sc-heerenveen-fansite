@@ -52,7 +52,8 @@ export async function playersMetadata(season: string): Promise<Metadata> {
  * what the page is for. The figures of the players are on their own page (Cijfers, see
  * `PlayerFiguresPage`), so the toolbar has no choice of competition, and the sidebar has a
  * strong card that links to the figures of the same season, and ends with the credit. The
- * sidebar follows the main column on a phone, so the squad comes first there. A season that has
+ * sidebar follows the main column on a phone, so the squad comes first there. The page has one
+ * card, so it has no bar "Op deze pagina:". A season that has
  * no matches in the database is the page "niet gevonden".
  */
 export async function PlayersPage({ season }: { season: string }) {
@@ -91,7 +92,7 @@ export async function PlayersPage({ season }: { season: string }) {
           <Heading id="cijfers-van-dit-seizoen" level={2}>
             Cijfers van dit seizoen
           </Heading>
-          <Text>Wie scoorde het vaakst, en wie gaf de meeste assists? De cijfers van de spelers staan bij elkaar.</Text>
+          <Text>De doelpuntenmakers van {data.season}, met assists en minuten waar we die kennen.</Text>
           <Link href={seasonAddress(playerFiguresPath, season, seasonOf(new Date()))} icon="arrow-right">
             Naar de cijfers van de spelers
           </Link>

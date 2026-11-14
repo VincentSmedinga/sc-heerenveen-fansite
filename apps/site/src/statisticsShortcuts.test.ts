@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  playerFiguresShortcuts,
-  playerFiguresShortcutsFor,
-  playersShortcuts,
-  statisticsShortcuts,
-} from './statisticsShortcuts'
+import { playerFiguresShortcuts, playerFiguresShortcutsFor, statisticsShortcuts } from './statisticsShortcuts'
 
 describe('statisticsShortcuts', () => {
   it('has a link for each of the twelve cards with figures', () => {
@@ -20,12 +15,6 @@ describe('statisticsShortcuts', () => {
       expect(href).toMatch(/^#[a-z-]+$/)
       expect(label).not.toBe('')
     }
-  })
-})
-
-describe('playersShortcuts', () => {
-  it('has one link, to the card Selectie, the only card of /spelers', () => {
-    expect(playersShortcuts).toEqual([{ href: '#selectie', label: 'Selectie' }])
   })
 })
 
