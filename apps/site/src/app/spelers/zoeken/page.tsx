@@ -83,7 +83,7 @@ export default async function PlayerSearchPage({ searchParams }: { searchParams:
         <Text appearance="intro">Zoek een speler van sc Heerenveen op zijn naam.</Text>
       </Page.Cell>
       <Page.Cell area="main">
-        <Card as="div" surface={found === undefined ? 'soft' : 'default'}>
+        <Card as="div" surface="warm">
           <SearchForm
             action={playerSearchPath}
             ariaLabel="Zoeken naar een speler"

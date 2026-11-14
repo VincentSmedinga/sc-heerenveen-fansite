@@ -65,6 +65,11 @@ describe('the page Zoeken naar een speler', () => {
     expect(findPlayers).not.toHaveBeenCalled()
   })
 
+  it('puts the search field in a warm card, with and without results', async () => {
+    expect(await render()).toMatch(/<div class="hf-card hf-card-warm"><form/u)
+    expect(await render({ q: 'ak' })).toMatch(/<div class="hf-card hf-card-warm"><form/u)
+  })
+
   it('says how many players there are, and links each to his page with the line and seasons', async () => {
     const html = await render({ q: 'ak' })
 

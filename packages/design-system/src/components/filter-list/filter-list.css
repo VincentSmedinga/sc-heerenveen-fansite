@@ -6,12 +6,23 @@
  * The headings in a row are the size of a label: the legend of a group of checkboxes is not a
  * heading of the page, and the label of a box is plain text, not a name. The two seasons stay
  * in a row, whatever the width.
+ *
+ * On a search page what holds the filters is warm, so the rows themselves have the warm surface:
+ * the background, and the lines of the row and of the arrow from the warm tokens.
  */
 
 @layer hf.components {
   .hf-filter-list {
     display: grid;
     gap: var(--hf-space-s);
+
+    > .hf-disclosure {
+      background-color: var(--hf-colour-background-surface-warm);
+
+      --hf-card-line: var(--hf-colour-border-surface-warm);
+      --hf-card-line-strong: var(--hf-colour-line-darker-surface-warm);
+      --hf-card-line-graphic: var(--hf-colour-line-graphic-surface-warm);
+    }
 
     > .hf-disclosure > summary {
       color: var(--hf-colour-text-default);

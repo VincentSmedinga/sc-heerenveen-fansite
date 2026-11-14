@@ -124,14 +124,14 @@ describe('the page Zoeken without a search', () => {
     expect(html).toMatch(/<form[^>]*role="search"/u)
   })
 
-  it('has the h1 and the sentence in the cell of the heading, and the form in a blue card, so the players start level with it', async () => {
+  it('has the h1 and the sentence in the cell of the heading, and the form in a warm card, so the players start level with it', async () => {
     const html = await render()
 
     expect(html.match(/<main/g)).toHaveLength(1)
     expect(html).toMatch(
       /<div class="hf-page-cell" style="grid-area:head"><h1 class="hf-heading-1">Zoeken<\/h1><p class="hf-intro">.*?<\/p><\/div>/u,
     )
-    expect(html).toMatch(/<div class="hf-page-cell" style="grid-area:main"><div class="hf-card hf-card-soft"><form/u)
+    expect(html).toMatch(/<div class="hf-page-cell" style="grid-area:main"><div class="hf-card hf-card-warm"><form/u)
     expect(html.indexOf('grid-area:main')).toBeLessThan(html.indexOf(section))
   })
 })
@@ -145,14 +145,14 @@ describe('the page Zoeken with a search', () => {
     expect(html).toMatch(/<input[^>]*value="klaverboer"/u)
   })
 
-  it('has the form and the results in one white card', async () => {
+  it('has the form and the results in one warm card', async () => {
     const html = await render({ q: 'klaverboer' })
 
     expect(html).toMatch(
-      /<div class="hf-page-cell" style="grid-area:main"><div class="hf-card"><form.*<\/form><h2[^>]*id="resultaten"/u,
+      /<div class="hf-page-cell" style="grid-area:main"><div class="hf-card hf-card-warm"><form.*<\/form><h2[^>]*id="resultaten"/u,
     )
     expect(html).not.toContain('hf-card-soft')
-    expect(html.match(/<div class="hf-card">/g)).toHaveLength(1)
+    expect(html.match(/<div class="hf-card hf-card-warm">/g)).toHaveLength(1)
   })
 
   it('says "1 resultaat" for one', async () => {
