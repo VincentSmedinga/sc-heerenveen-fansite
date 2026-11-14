@@ -39,8 +39,9 @@ export const playerFiguresShortcuts = [
 /**
  * The bar of /spelers/cijfers for a season: the links above, and when the season has match
  * reports the cards from them (#832) in the order of the page: the table Alle spelers after
- * Doelpuntenmakers in the main column, and the lists Assists and Minuten at the start of the
- * sidebar. A season without reports has none of these cards, so the bar has no links to them.
+ * Doelpuntenmakers in the main column, and the lists Assists, Minuten and Invallers die
+ * scoorden at the start of the sidebar. A season without reports has none of these cards,
+ * so the bar has no links to them.
  */
 export function playerFiguresShortcutsFor(hasReports: boolean) {
   if (!hasReports) {
@@ -54,6 +55,7 @@ export function playerFiguresShortcutsFor(hasReports: boolean) {
     { href: '#alle-spelers', label: 'Alle spelers' },
     { href: '#assists', label: 'Assists' },
     { href: '#minuten', label: 'Minuten' },
+    { href: '#invallers-die-scoorden', label: 'Invallers' },
     special,
   ] as const
 }

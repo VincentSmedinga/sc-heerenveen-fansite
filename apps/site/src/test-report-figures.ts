@@ -15,6 +15,7 @@ const none = {
   personSlug: null,
   redCards: 0,
   starts: 0,
+  substituteGoals: 0,
   substitutions: 0,
   yellowCards: 0,
   yellowRedCards: 0,
@@ -29,7 +30,8 @@ export const reportPlayer = (
 
 /**
  * Five players of ours: Oyen with the most minutes, Vos and Mees with the same minutes and Vos
- * with the same assists as Bank, and Reserve who was on the bench and never came on.
+ * with the same assists as Bank, Reserve who was on the bench and never came on, and Bank who
+ * came on and scored twice.
  */
 export const reportPlayers: PlayerReportStats[] = [
   reportPlayer(1, 'Luca Oyen', {
@@ -57,10 +59,12 @@ export const reportPlayers: PlayerReportStats[] = [
   }),
   reportPlayer(3, 'Jan Bank', {
     assists: 4,
+    goals: 2,
     matches: 6,
     minutes: 120,
     personFamilyName: 'Bank',
     personGivenName: 'Jan',
+    substituteGoals: 2,
     substitutions: 6,
   }),
   reportPlayer(4, 'Kees Reserve', { personFamilyName: 'Reserve', personGivenName: 'Kees' }),

@@ -35,9 +35,17 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   // the title.
   '/spelers': ['selectie'],
   // The cards that moved from /spelers (#1218). The old anchor topscorers comes along. The
-  // cards Alle spelers, Assists and Minuten (#832) are there for a season with a match report
-  // that is klaar, which the made-up season has.
-  '/spelers/cijfers': ['doelpuntenmakers', 'topscorers', 'alle-spelers', 'bijzondere-doelpunten', 'assists', 'minuten'],
+  // cards Alle spelers, Assists, Minuten (#832) and Invallers die scoorden (#1224) are
+  // there for a season with a match report that is klaar, which the made-up season has.
+  '/spelers/cijfers': [
+    'doelpuntenmakers',
+    'topscorers',
+    'alle-spelers',
+    'bijzondere-doelpunten',
+    'assists',
+    'minuten',
+    'invallers-die-scoorden',
+  ],
   // All seasons (#1219). The made-up data has no hattrick, so the card Hattricks (anchor
   // `hattricks`) is left out there, as it is for any choice that has none; the smoke test
   // checks the two cards that the made-up data has.

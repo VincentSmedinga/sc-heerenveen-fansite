@@ -34,6 +34,15 @@ const rankings = {
     line: (total: number) => (total === 1 ? '1 speler heeft gespeeld' : `${total} spelers hebben gespeeld`),
     topLine: (total: number) => `De top ${reportPlaces} van ${total} spelers die speelden`,
   },
+  substituteGoals: {
+    anchor: 'invallers-die-scoorden',
+    caption: 'invallers die scoorden voor sc Heerenveen',
+    column: tableColumns.goals,
+    empty: 'Nog geen invaller scoorde.',
+    heading: 'Invallers die scoorden',
+    line: (total: number) => (total === 1 ? '1 invaller scoorde' : `${total} invallers scoorden`),
+    topLine: (total: number) => `De top ${reportPlaces} van ${total} invallers die scoorden`,
+  },
 } as const satisfies Record<RankedFigure, object>
 
 /**
@@ -78,9 +87,10 @@ export function AllPlayersCard({
 }
 
 /**
- * A card with the top five of a figure (the assists or the minutes): a line under the heading
- * for how many players it is, the table with equal places shared, and under it what the figures
- * rest on. The card is soft and in the sidebar, and has the button for an image.
+ * A card with the top five of a figure (the assists, the minutes or the goals of
+ * substitutes): a line under the heading for how many players it is, the table with equal
+ * places shared, and under it what the figures rest on. The card is soft and in the
+ * sidebar, and has the button for an image.
  */
 export function RankingCard({
   competition,

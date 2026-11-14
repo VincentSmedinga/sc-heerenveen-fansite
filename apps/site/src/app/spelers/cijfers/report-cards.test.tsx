@@ -55,7 +55,7 @@ describe('the cards with the figures of the match reports on /spelers/cijfers', 
   it('has the cards Alle spelers, Assists and Minuten for a season with a report that is klaar', async () => {
     const html = await render()
 
-    for (const id of ['alle-spelers', 'assists', 'minuten']) {
+    for (const id of ['alle-spelers', 'assists', 'invallers-die-scoorden', 'minuten']) {
       expect(html).toContain(`id="${id}"`)
     }
   })
@@ -69,7 +69,8 @@ describe('the cards with the figures of the match reports on /spelers/cijfers', 
     expect(main).toContain('<section class="hf-card hf-card-shareable" aria-labelledby="alle-spelers">')
     expect(sidebar).not.toContain('id="alle-spelers"')
     expect(sidebar.indexOf('id="assists"')).toBeLessThan(sidebar.indexOf('id="minuten"'))
-    expect(sidebar.indexOf('id="minuten"')).toBeLessThan(sidebar.indexOf('id="bijzondere-doelpunten"'))
+    expect(sidebar.indexOf('id="minuten"')).toBeLessThan(sidebar.indexOf('id="invallers-die-scoorden"'))
+    expect(sidebar.indexOf('id="invallers-die-scoorden"')).toBeLessThan(sidebar.indexOf('id="bijzondere-doelpunten"'))
     expect(sidebar.indexOf('id="bijzondere-doelpunten"')).toBeLessThan(sidebar.indexOf('Bron: Wikipedia'))
   })
 
@@ -83,7 +84,7 @@ describe('the cards with the figures of the match reports on /spelers/cijfers', 
   it('says how many of the played matches each card rests on, and names no source: the figures are our own', async () => {
     const html = await render()
 
-    for (const id of ['alle-spelers', 'assists', 'minuten']) {
+    for (const id of ['alle-spelers', 'assists', 'invallers-die-scoorden', 'minuten']) {
       const card = cardOf(html, id)
 
       expect(plain(card)).toContain('Op basis van 12 van de 14 gespeelde wedstrijden.')
@@ -94,7 +95,7 @@ describe('the cards with the figures of the match reports on /spelers/cijfers', 
   it('has a button for an image on each card', async () => {
     const html = await render()
 
-    for (const id of ['alle-spelers', 'assists', 'minuten']) {
+    for (const id of ['alle-spelers', 'assists', 'invallers-die-scoorden', 'minuten']) {
       expect(cardOf(html, id)).toMatch(/hf-card-shareable/)
     }
   })
@@ -114,6 +115,28 @@ describe('the cards with the figures of the match reports on /spelers/cijfers', 
     expect(html.indexOf('Oyen')).toBeLessThan(html.indexOf('Mees'))
     expect(html.indexOf('Mees')).toBeLessThan(html.indexOf('Bank'))
     expect(html).not.toContain('Reserve')
+  })
+
+  it('has the substitutes who scored, with how many times', async () => {
+    const card = plain(cardOf(await render(), 'invallers-die-scoorden'))
+
+    expect(card).toContain('1 invaller scoorde')
+    expect(card).toContain('invallers die scoorden voor sc Heerenveen in het seizoen 2026/27, in alle competities')
+    expect(card).toMatch(/1.*Jan Bank.*2/s)
+  })
+
+  it('has the card Invallers die scoorden with a sentence and no table when nobody came on and scored', async () => {
+    vi.mocked(getSeasonReportFigures).mockResolvedValue({
+      ...figuresData,
+      players: figuresData.players.map((player) => ({ ...player, substituteGoals: 0 })),
+    })
+
+    const html = cardOf(await render(), 'invallers-die-scoorden')
+
+    expect(plain(html)).toContain('Nog geen invaller scoorde.')
+    expect(html).not.toContain('<table')
+    expect(html).not.toContain('hf-card-shareable')
+    expect(plain(html)).toContain('Op basis van 12 van de 14 gespeelde wedstrijden.')
   })
 
   it('has the table with every player of the reports, with a caption and column headers that have a scope, and the bench player with zeros', async () => {
@@ -150,7 +173,7 @@ describe('the cards with the figures of the match reports on /spelers/cijfers', 
 
     const html = await render()
 
-    for (const id of ['alle-spelers', 'assists', 'minuten']) {
+    for (const id of ['alle-spelers', 'assists', 'invallers-die-scoorden', 'minuten']) {
       expect(html).not.toContain(`id="${id}"`)
     }
     expect(html).not.toContain('Op basis van')

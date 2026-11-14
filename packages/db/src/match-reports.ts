@@ -63,6 +63,8 @@ export type PlayerReportStats = {
   playerId: number
   redCards: number
   starts: number
+  /** The goals he scored without own goals after coming on from the bench. */
+  substituteGoals: number
   substitutions: number
   yellowCards: number
   yellowRedCards: number
@@ -423,6 +425,7 @@ export async function readPlayerReportStats(
           playerId: appearance.playerId,
           redCards: 0,
           starts: 0,
+          substituteGoals: 0,
           substitutions: 0,
           yellowCards: 0,
           yellowRedCards: 0,
@@ -469,6 +472,10 @@ export async function readPlayerReportStats(
 
       if (scoring !== undefined) {
         scoring.goals++
+
+        if (scorer?.starter === false) {
+          scoring.substituteGoals++
+        }
       }
 
       if (assisting !== undefined) {
