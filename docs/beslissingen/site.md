@@ -5901,10 +5901,12 @@
 ## De kaart toont alleen wat we kennen, en zegt hoeveel dat is
 
 - **Datum:** 14 november 2026
-- **Besluit:** Spelers en Landen staan op de kaart zolang de selectie bekend is; de regels met leeftijd alleen bij minstens drie kwart van de spelers met een leeftijd. Mist er iets, dan staat er "Op basis van X van de Y spelers." (#1261).
+- **Besluit:** Spelers en Landen staan op de kaart zolang de selectie bekend is; de regels met leeftijd alleen bij minstens drie kwart van de spelers met een leeftijd.
+  Mist er iets, dan staat er "Op basis van X van de Y spelers." (#1261).
   De kaart staat in de zijkolom van `/spelers`, boven "Cijfers van dit seizoen", als zachte kaart (`SquadSummaryCard`).
   De cijfers worden op de server uitgerekend (`getSquadSummary`): de geboortedatum verlaat die functie niet, alleen het gemiddelde, de jongste en de oudste gaan naar de kaart.
-- **Waarom:** de kaart blijft eerlijk over gaten, zoals de kaarten op de cijferpagina's. Op de acceptatiekopie (10 november 2026) hebben 23 van de 28 spelers van het lopende seizoen een geboortedatum op de dag en 28 van de 28 een land.
+- **Waarom:** de kaart blijft eerlijk over gaten, zoals de kaarten op de cijferpagina's.
+  Op de acceptatiekopie (10 november 2026) hebben 23 van de 28 spelers van het lopende seizoen een geboortedatum op de dag en 28 van de 28 een land.
 - **Alternatieven:** de kaart alleen tonen als alles bekend is (dan mist hij nu de leeftijd); een gemiddelde van de spelers die we kennen zonder zin (misleidend).
 - **Later:** deze kaart komt bij "`/spelers` toont alleen de selectie: de kaart Selectie en de bronvermelding" in _De cijfers van de spelers staan op `/spelers/cijfers`, en `/spelers` toont alleen de selectie_: de zijkolom heeft nu ook deze kaart, boven "Cijfers van dit seizoen".
 
@@ -5912,5 +5914,6 @@
 
 - **Datum:** 14 november 2026
 - **Besluit:** de selectie houdt de vlag met de landnaam voor een schermlezer; de landnaam komt niet als tekst naast de vlag (#1261).
-- **Waarom:** de vlag staat er al en een lange naam maakt de regel op een telefoon breed. De kaart telt de landen al.
+- **Waarom:** de vlag staat er al en een lange naam maakt de regel op een telefoon breed.
+  De kaart telt de landen al.
 - **Alternatieven:** de landnaam rechts op elke regel, zoals in het ontwerp.

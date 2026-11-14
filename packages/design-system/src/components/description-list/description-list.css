@@ -37,7 +37,7 @@
     overflow-wrap: anywhere;
   }
 
-  /* The term and the description on one row: the term on the left, the description on the right. */
+  /* The term on the left and the description on the right of one row. */
   .hf-description-list-aligned > div {
     align-items: baseline;
     display: flex;
