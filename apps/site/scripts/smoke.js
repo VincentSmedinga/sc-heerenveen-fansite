@@ -832,8 +832,7 @@ await withEmptyDatabase((database) =>
     // check of the anchors asks for the matches page long before the checks of its content.
     await addEarlierStandings(database)
     // Also before the first page: the card Resultaten per hoofdtrainer on /wedstrijden/cijfers
-    // counts these
-    // matches of earlier seasons, and the site keeps that for five minutes too.
+    // counts these matches of earlier seasons, and the site keeps that for five minutes too.
     await addTestdorpMeetings(database)
 
     const home = await fetch(origin)

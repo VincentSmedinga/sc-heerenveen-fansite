@@ -8,10 +8,8 @@ export const dynamic = 'force-dynamic'
 
 /**
  * The bar of the page of another season, such as /wedstrijden/cijfers/2025-26. An address that
- * isn't a
- * season has no bar: the page is "niet gevonden". The current season is sent to
- * /wedstrijden/cijfers
- * by the page, so it gets the bar there.
+ * isn't a season has no bar: the page is "niet gevonden". The current season is sent to
+ * /wedstrijden/cijfers by the page, so it gets the bar there.
  */
 export default async function SeasonStatisticsShortcuts({
   params,

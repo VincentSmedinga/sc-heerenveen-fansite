@@ -16,9 +16,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
 /**
  * The statistics page of a season other than the current one, such as
- * `/wedstrijden/cijfers/2025-26`.
- * A season that has no matches in the database is the page "niet gevonden" (see
- * StatisticsPage).
+ * `/wedstrijden/cijfers/2025-26`. A season that has no matches in the database is the page
+ * "niet gevonden" (see StatisticsPage).
  */
 export default async function SeasonStatisticsPage({
   params,

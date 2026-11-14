@@ -74,15 +74,14 @@ const itemsWithAdmin = [...items.slice(0, -1), adminItem, ...items.slice(-1)]
 /**
  * The item of the menu and the sub-page that a path belongs to, each as an href, or undefined.
  * Nieuws has the news overview, its sub-pages and the articles of the editors
- * (`/redactie/<name>`), which are in the bar under Redactie; the home page has no item,
- * because it is the front page of the whole site and the logo links to it. Wedstrijden has
- * the page and every page below it, such as the season, and a sub-page of its own:
- * Cijfers, with the page of each season below it (`/wedstrijden/cijfers/2025-26`), and
- * Tegenstanders,
- * with the page of each club below it (`/tegenstanders/ado-den-haag`). Spelers has the page
- * and the page of each season below it (`/spelers/2025-26`), and two sub-pages: the overview
- * (with the page by country below it) and the search. A path that belongs to no item,
- * such as /bronnen, the home page or a page that does not exist, has neither.
+ * (`/redactie/<name>`), which are in the bar under Redactie; the home page has no item, because
+ * it is the front page of the whole site and the logo links to it. Wedstrijden has the page and
+ * every page below it, such as the season, and a sub-page of its own: Cijfers, with the page of
+ * each season below it (`/wedstrijden/cijfers/2025-26`), and Tegenstanders, with the page of
+ * each club below it (`/tegenstanders/ado-den-haag`). Spelers has the page and the page of each
+ * season below it (`/spelers/2025-26`), and two sub-pages: the overview (with the page by
+ * country below it) and the search. A path that belongs to no item, such as /bronnen, the home
+ * page or a page that does not exist, has neither.
  */
 export function currentOf(pathname: string): { item?: string; subitem?: string } {
   const subitem = newsSubitems.find((candidate) => candidate.href === pathname)

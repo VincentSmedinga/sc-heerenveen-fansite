@@ -40,8 +40,7 @@ export const pickerPath = pickerPathOf(statisticsPath)
 /**
  * The title, description and canonical address of the page of a season. The current season is
  * the page `/wedstrijden/cijfers`; another season has an address of its own, which is its
- * canonical
- * address, and a title that names the season.
+ * canonical address, and a title that names the season.
  */
 export async function statisticsMetadata(season: string): Promise<Metadata> {
   const loaded = await loadSeasonPage(season, statisticsPath)
@@ -63,17 +62,16 @@ export async function statisticsMetadata(season: string): Promise<Metadata> {
 
 /**
  * The page of a season: `/wedstrijden/cijfers` for the current season and
- * `/wedstrijden/cijfers/2025-26` for
- * another, which is what the two routes render. The title row has the season picker beside the
- * heading. The twelve cards with figures sit in two equal columns on a wide screen, and under
- * each other on a narrow one, in the order of the bar "Op deze pagina:". The page is the
- * exception to the rule of the columns (see Page.Main): both hold cards with figures. The three
- * cards that stay the Eredivisie come first in the main column, together, and under them is the
- * switch between the matches (see below), a plain cell without a card, directly above the first
- * card that follows it. The card Opmerkelijk is the last of the main column and is not in the
- * bar: it is one fact that changes with the day (see NoteworthyCard).
- * A season that is over has its cards put the season on the image. A season that has no matches
- * in the database is the page "niet gevonden".
+ * `/wedstrijden/cijfers/2025-26` for another, which is what the two routes render. The title
+ * row has the season picker beside the heading. The twelve cards with figures sit in two equal
+ * columns on a wide screen, and under each other on a narrow one, in the order of the bar "Op
+ * deze pagina:". The page is the exception to the rule of the columns (see Page.Main): both
+ * hold cards with figures. The three cards that stay the Eredivisie come first in the main
+ * column, together, and under them is the switch between the matches (see below), a plain cell
+ * without a card, directly above the first card that follows it. The card Opmerkelijk is the
+ * last of the main column and is not in the bar: it is one fact that changes with the day (see
+ * NoteworthyCard). A season that is over has its cards put the season on the image. A season
+ * that has no matches in the database is the page "niet gevonden".
  *
  * The cards count all the matches, the Eredivisie and the KNVB Beker, or the Eredivisie alone
  * with `?competitie=eredivisie` (see CompetitionSwitch). Three cards do not follow the choice:
