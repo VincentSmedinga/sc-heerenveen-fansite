@@ -2945,6 +2945,7 @@
   De kaart Hoofdtrainer(s) op Wedstrijden uitbreiden (die toont één seizoen).
   Een dag in een overlap voor beide trainers tellen (dubbel geteld), of voor geen van beide (een gat in de telling).
 - **Later:** vult _Geschiedenis wordt geen eigen onderdeel van het menu_ (6 november 2026) aan: tot #782 gebouwd is, staan de resultaten per hoofdtrainer op Cijfers, en kan die pagina de kaart overnemen.
+- **Later:** vervangen door _Wedstrijden · Cijfers telt ook alle seizoenen, op `/wedstrijden/cijfers/alle`_ (14 november 2026) waar het de plek betreft: de kaart staat alleen bij alle seizoenen, in de groep Seizoenen, en niet meer op de pagina van een seizoen.
 
 ## De plek van de club en de onze staan in een tabel op de pagina van de club
 
@@ -3976,6 +3977,7 @@
   Wachten op `/seizoenen` laat de kaart zonder plek.
 - **Alternatieven:** wachten op `/seizoenen` (#414 en #782 zijn nog niet gebouwd); op Wedstrijden laten staan.
 - **Later:** vult _Een kaart staat op de pagina van de zaak die hij beschrijft, en de hoofd- en zijkolom hebben vaste rollen_ (6 november 2026) aan: de zijkolom van Wedstrijden heeft nu Stand, Onze plek per speelronde en de bronvermelding, met Hoofdtrainer tussen de laatste twee.
+- **Later:** vervangen door _Wedstrijden · Cijfers telt ook alle seizoenen, op `/wedstrijden/cijfers/alle`_ (14 november 2026) waar het de plek betreft: de kaart staat alleen bij alle seizoenen, in de groep Seizoenen, en is niet meer op elke seizoenspagina van Cijfers dezelfde.
 
 ## De lijst met wedstrijden in het beheer heeft één link per regel, die volgt uit de staat
 
