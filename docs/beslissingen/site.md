@@ -5542,6 +5542,21 @@
 - **Waarom:** zolang de site niet live is, is alles nieuw.
 - **Alternatieven:** het label nu al tonen.
 
+## Wedstrijden · Cijfers begint met vier kerngetallen, en de kaarten staan in vier groepen
+
+- **Datum:** 14 november 2026
+- **Besluit:** de pagina toont onder de werkbalk een rij kerngetallen, en daaronder de kaarten in de groepen Competitie, Uitslagen, Doelpunten en Rondom de wedstrijd (#1210).
+  De rij toont onze plek in de Eredivisie, de gespeelde wedstrijden, gewonnen–gelijk–verloren en de doelpunten voor en tegen.
+  De plek volgt de stand, de andere drie volgen de keuze van de competitie.
+  De kaarten Onze plek in de competitie en Opmerkelijk zijn van de pagina verdwenen.
+  Onze plek door de jaren en Resultaten per hoofdtrainer komen terug bij alle seizoenen (#1211); tot dan staan ze nergens, en hun ankers zijn uit `src/anchors.ts` gehaald.
+  De kop van een kaart in een groep is een kop van niveau 3: de kaarten krijgen `level={3}` mee en staan zonder op niveau 2.
+  De balk "Op deze pagina:" heeft een link per groep.
+- **Waarom:** de plek is één getal en hoort bij de kerngetallen, niet in een kaart met een tabel.
+  Een kaart met één feit per dag is geen cijfer dat je opzoekt.
+  Een kop van niveau 3 voor de kaarten laat de structuur van de pagina kloppen met wat de bezoeker ziet.
+- **Alternatieven:** de kaarten op niveau 2 laten; de bar per kaart houden.
+
 ## De cijfers van de spelers staan op `/spelers/cijfers`, en `/spelers` toont alleen de selectie
 
 - **Datum:** 14 november 2026

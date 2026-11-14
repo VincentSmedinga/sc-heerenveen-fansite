@@ -123,8 +123,10 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   // The matches that have a page of their own: their line links to it.
   const reportAddresses = await reportAddressesOf(season)
   const liveReports = reportAddresses === undefined ? undefined : await getLiveReports(season, now)
-  // The cards with figures are on the statistics page of the same season.
-  const statistics = (id: string) => `${seasonAddress(statisticsPath, season, seasonOf(now))}#${id}`
+  // The cards with figures are on the statistics page of the same season, and its key
+  // figures show our place.
+  const statistics = (id?: string) =>
+    `${seasonAddress(statisticsPath, season, seasonOf(now))}${id === undefined ? '' : `#${id}`}`
 
   const areas = pageAreas({
     before: ['stand'],
@@ -181,7 +183,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
                 {/* An Eindstand no longer changes, so only this season can be behind. */}
                 {current && <StandingsBehind matches={data.matches} now={now} />}
                 <Text>
-                  <Link href={statistics('onze-plek-in-de-competitie')} icon="arrow-right">
+                  <Link href={statistics()} icon="arrow-right">
                     Onze plek in de competitie
                   </Link>
                 </Text>

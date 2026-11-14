@@ -41,6 +41,20 @@ describe('KeyFigures', () => {
     }
   })
 
+  it('marks a figure of five characters or more as long, so it can shrink to its card', () => {
+    const { container } = render(
+      <KeyFigures
+        figures={[
+          { figure: '15–10–14', label: 'gewonnen, gelijk, verloren', note: 'in alle competities' },
+          { figure: '52', label: 'doelpunten', note: 'in alle competities' },
+        ]}
+      />,
+    )
+
+    expect(container.querySelectorAll('.hf-key-figure-number-long')).toHaveLength(1)
+    expect(container.querySelectorAll('.hf-key-figure-number-longer')).toHaveLength(1)
+  })
+
   it('passes other props on', () => {
     const { container } = render(<KeyFigures figures={figures} id="kerngetallen" />)
 
@@ -56,5 +70,20 @@ describe('KeyFigures', () => {
     rerender(<KeyFigures figures={figures} />)
 
     expect(container.querySelector('ul.hf-key-figures-four')).toBeNull()
+  })
+
+  it('puts four figures in one row on a wide page only when the row is across', () => {
+    const four = [...figures, { figure: '3', label: 'seizoenen', note: 'tussen 2002 en 2005' }]
+    const { container, rerender } = render(<KeyFigures across figures={four} />)
+
+    expect(container.querySelector('ul.hf-key-figures-across')).not.toBeNull()
+
+    rerender(<KeyFigures figures={four} />)
+
+    expect(container.querySelector('ul.hf-key-figures-across')).toBeNull()
+
+    rerender(<KeyFigures across figures={figures} />)
+
+    expect(container.querySelector('ul.hf-key-figures-across')).toBeNull()
   })
 })

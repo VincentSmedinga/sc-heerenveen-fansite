@@ -10,6 +10,8 @@ const meta = preview.meta({
         component: [
           'De pagina is de bouwdoos van elke pagina van de site: een header, het hoofdmenu, een body en een footer, in die volgorde.',
           'Je kiest hem voor elke pagina; de inhoud zet je in de `Page.Main` in de `Page.Body`.',
+          'Een pagina met veel kaarten, zoals Cijfers, deelt ze in groepen in (`CardGroup`): elke groep heeft een kop van niveau 2 onder een lijn, en de kaarten erin hebben een kop van niveau 3.',
+          'De kaarten van een groep staan in twee kolommen als er plaats voor is. In een browser die CSS Grid Lanes kent, sluiten ze in een kolom op elkaar aan zonder gaten; elders staan ze in een raster. De volgorde van de bron is ook dan de volgorde voor het toetsenbord en een schermlezer.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

@@ -212,6 +212,7 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
         use: 'As of pijl in een kaart met het warm vlak: haalt 3:1 tegen dat vlak',
       },
       { name: '--hf-colour-border-shortcuts', use: 'Lijn onder de balk Op deze pagina' },
+      { name: '--hf-colour-border-group', use: 'Lijn boven de kop van een groep kaarten' },
       {
         name: '--hf-colour-border-default',
         use: 'Lijn tussen rijen en scheidingslijn buiten een kaart; in een kaart volgt ze de rand van die kaart',
@@ -525,6 +526,7 @@ export const pairGroups: { description: string; label: string; pairs: Pair[]; te
       pair('line-darker-surface-soft', 'surface-soft', 'Donkerder lijn op het zacht vlak', 'decoratief'),
       pair('line-darker-surface-warm', 'surface-warm', 'Donkerder lijn op het warm vlak', 'decoratief'),
       pair('border-shortcuts', 'shortcuts', 'Lijn onder de balk Op deze pagina', 'decoratief'),
+      pair('border-group', 'page', 'Lijn boven de kop van een groep kaarten', 'decoratief'),
       pair('border-default', 'surface', 'Lijn op een vlak', 'decoratief'),
       pair('border-default', 'page', 'Lijn op de pagina', 'decoratief'),
     ],

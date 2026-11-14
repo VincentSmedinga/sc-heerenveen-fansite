@@ -3509,3 +3509,15 @@
   Het liggende veld tekende de rijen van onze ploeg van onder naar boven en die van de tegenstander van boven naar onder, dus een linksbuiten stond rechts.
 - **Alternatieven:** de volgorde omdraaien, waarmee alle verslagen van de redactie veranderen.
 - **Niet opgelost:** de opstellingen van de oude fansite (bron "Oude fansite") hebben alleen de linie per speler, dus links en rechts zijn daar niet te vertrouwen.
+
+## Een groep kaarten is een onderdeel, en een rij van vier kerngetallen kan op een breed scherm in één rij
+
+- **Datum:** 14 november 2026
+- **Besluit:** `CardGroup` is een `section` met een naam: een kop van niveau 2 onder een lijn en de kaarten in `CardColumns` (#1210).
+  De lijn heeft de rol `--hf-colour-border-group`: `sand-700` in licht en `blue-400` in donker.
+  `KeyFigures` krijgt de prop `across`: vier getallen staan dan vanaf 52rem in één rij, en daaronder twee aan twee.
+  Zonder `across` blijft het zoals op de pagina van een speler.
+  Het raster met Grid Lanes is dat van `CardColumns`, dat de pagina Spelers al gebruikt.
+- **Waarom:** Wedstrijden · Cijfers en Spelers · Cijfers (#1218) hebben dezelfde kop met lijn nodig, en één onderdeel houdt ze gelijk.
+  Vier getallen naast elkaar lees je in één blik, en dat is wat de rij is voor.
+- **Alternatieven:** de groep in de site bouwen, zodat twee pagina's hem elk bouwen; een eigen component voor de rij kerngetallen van Cijfers.

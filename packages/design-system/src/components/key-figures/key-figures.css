@@ -2,7 +2,8 @@
  * A row of key figures, each in a card of its own: the number large and heavy, the word below
  * it and then the line that says what it counts. Two or three cards share the width and wrap to
  * the next line when they do not fit, so three become two and one. Four stand two by two at
- * every width, so a row never has three and one.
+ * every width, so a row never has three and one, unless the row is across: then four stand
+ * in one row on a wide page.
  */
 
 @layer hf.components {
@@ -19,6 +20,13 @@
   .hf-key-figures-four {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Across: four in one row from the width where the page has two columns (see Page.Main). */
+  @media (width >= 52rem) {
+    .hf-key-figures-across {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
   }
 
   /* A card without its own element: the surface, border and corners are those of .hf-card. */
@@ -45,6 +53,24 @@
     font-variant-numeric: tabular-nums;
     font-weight: var(--hf-key-figure-font-weight);
     line-height: 1;
+  }
+
+  /*
+   * A long figure, such as 15–10–14, shrinks with the width of its card, so it stays on one
+   * line where the card is narrow. A short one keeps the size of the token.
+   */
+  .hf-key-figure:has(.hf-key-figure-number-long) {
+    container-type: inline-size;
+  }
+
+  .hf-key-figure-number-long {
+    font-size: var(--hf-key-figure-long-font-size);
+    white-space: nowrap;
+  }
+
+  /* Seven characters or more, such as 15–10–14. */
+  .hf-key-figure-number-longer {
+    font-size: var(--hf-key-figure-longer-font-size);
   }
 
   .hf-key-figure-label {

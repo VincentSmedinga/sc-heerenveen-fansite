@@ -38,32 +38,24 @@ describe('the bar of /wedstrijden/cijfers', () => {
     expect(html).toContain(`<span class="hf-page-shortcuts-label" id="${labelId}">Op deze pagina:</span>`)
   })
 
-  it('has the twelve anchors, in the order of a narrow screen, each named for its card', async () => {
+  it('has four anchors, one for each group, in the order of the page', async () => {
     const html = await render()
 
     expect(
       [...html.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label]),
     ).toEqual([
-      ['#onze-plek-in-de-competitie', 'Plek in de competitie'],
-      ['#onze-plek-door-de-jaren', 'Onze plek door de jaren'],
-      ['#verloop-van-het-seizoen', 'Verloop van het seizoen'],
-      ['#hoe-de-wedstrijden-verlopen', 'Hoe wedstrijden verlopen'],
-      ['#reeksen', 'Reeksen'],
-      ['#thuis-en-uit', 'Thuis en uit'],
-      ['#toeschouwers', 'Toeschouwers'],
-      ['#hoe-vaak-welke-uitslag', 'Hoe vaak welke uitslag'],
-      ['#de-nul-gehouden', 'De nul gehouden'],
-      ['#doelpunten-per-kwartier', 'Doelpunten per kwartier'],
-      ['#uitersten', 'Uitersten'],
-      ['#resultaten-per-hoofdtrainer', 'Resultaten per hoofdtrainer'],
+      ['#competitie', 'Competitie'],
+      ['#uitslagen', 'Uitslagen'],
+      ['#doelpunten', 'Doelpunten'],
+      ['#rondom-de-wedstrijd', 'Rondom de wedstrijd'],
     ])
-    expect(statisticsShortcuts).toHaveLength(12)
+    expect(statisticsShortcuts).toHaveLength(4)
   })
 
   it('has no link to a card of Wedstrijden', async () => {
     const html = await render()
 
-    for (const id of ['programma', 'uitslagen', 'stand', 'eindstand', 'hoofdtrainer']) {
+    for (const id of ['programma', 'stand', 'eindstand', 'hoofdtrainer']) {
       expect(html).not.toContain(`href="#${id}"`)
     }
   })
