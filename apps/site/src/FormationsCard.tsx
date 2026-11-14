@@ -21,9 +21,8 @@ const basisOf = (known: number, played: number) =>
  * in, the one with the most matches first, with the number of matches and how they ended
  * (won–drawn–lost, as in "6–3–2"). It counts the played matches of the choice of competition
  * that have a finished report with a formation, and says how many that is of all the played
- * matches. It is the card of a season with such reports only: without a match that has one
- * there is no card (#1216), and a season that is over has no more than one, since the formation
- * of a match comes from its report.
+ * matches. Without a match that has a formation there is no card (#1216), so a season
+ * without finished reports does not have it.
  */
 export function FormationsCard({
   known,
