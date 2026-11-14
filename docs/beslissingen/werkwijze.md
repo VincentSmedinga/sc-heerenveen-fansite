@@ -747,6 +747,7 @@
 - **Alternatieven:** de afspraak scherper opschrijven; dat hielp niet.
   Die opdrachten stilletjes de database van de map geven; dat is wat de projecteigenaar niet wil, omdat een opdracht dan een andere database raakt dan `.env` zegt.
 - **Later:** dit scherpt _Elke werkmap heeft een eigen database en eigen poorten_ aan: daar liepen deze opdrachten bewust niet door het script, en `.env` bleef gelden.
+- **Later:** `pnpm clean-up` is de uitzondering op het weigeren: het verwijdert databases `fansite_<naam>` van mappen die weg zijn, ook vanuit een worktree, en raakt `fansite`, `fansite_acc` en `oldsite_fansitedb` nooit aan (zie _Eén opdracht met vaste controles ruimt op, droog tenzij `--yes`_).
 
 ## Een Builder en een Reviewer kennen het ontwerp waar ze aan werken
 
@@ -780,3 +781,62 @@
 - **Alternatieven:** de hele run opnieuw laten draaien; dat kost veel meer machinetijd.
   Fouten van Lighthouse negeren; een echt probleem blijft dan onzichtbaar.
 - **Later:** dit vult _We meten zelf, elke dag, met een vast budget voor wat kan en een melding voor tijd_ aan, voor een meting die faalt door een fout van Lighthouse zelf.
+
+## Eén opdracht met vaste controles ruimt op, droog tenzij `--yes`
+
+- **Datum:** 14 november 2026
+- **Besluit:** `pnpm clean-up` (`scripts/clean-up.js`) toont zonder vlag wat het verwijdert en wat het houdt, met de reden.
+  `--yes` voert het uit en meldt elke verwijdering.
+  De skill `/clean-up` draait eerst de lijst, controleert per worktree dat geen levende sessie de map als werkmap heeft, en draait dan `pnpm clean-up --yes`, met `--keep <map>` voor elke map die een sessie gebruikt.
+  De beslissingen zitten in functies zonder neveneffecten, met tests zonder echte `gh`, git of database (#1259).
+  `weekly-coordination` en `AGENTS.md` verwijzen naar de skill in plaats van de stappen te herhalen.
+- **Waarom:** elke Coördinator ruimde op eigen manier op, en een gemiste controle verliest werk: levende Builders raakten drie keer hun map kwijt.
+  Een script met vaste regels en tests is dezelfde keer overal hetzelfde.
+- **Alternatieven:** de stappen alleen in `weekly-coordination` laten staan; dat blijft handwerk en wordt per sessie anders gedaan.
+  Eén opdracht die altijd verwijdert; dat laat de lijst niet eerst zien.
+- **Later:** dit vervangt de stappen onder _Clean up_ in `weekly-coordination` en de opruimregel bij de rol van de Coördinator in `AGENTS.md`; het besluit _De Coördinator coördineert alleen en zet werk strikt door naar een eigen sessie_ blijft gelden.
+
+## Samengevoegd komt uit de pull request, op de kop-SHA
+
+- **Datum:** 14 november 2026
+- **Besluit:** een branch geldt als samengevoegd of gesloten via de pull request (`gh`), en alleen als de tip van de branch de kop van die pull request is, of als de tip in `main` zit (gelezen uit `origin/main`).
+  Staat er ook een open pull request met dezelfde kop, dan blijft de branch staan.
+  Een worktree gaat weg onder dezelfde regel voor zijn HEAD, of als zijn HEAD op `origin` staat.
+- **Waarom:** we voegen samen met squash, dus de commits van een branch staan niet in `main`.
+  De kop-SHA bewijst dat er na de pull request niets bijkwam.
+- **Alternatieven:** `git branch --merged`; dat ziet een squash-merge niet.
+  Op de naam van de branch vertrouwen; die kan hergebruikt zijn.
+
+## Een branch zonder pull request blijft staan
+
+- **Datum:** 14 november 2026
+- **Besluit:** een lokale branch zonder pull request, en een branch met commits die nergens anders staan, blijft staan en komt in de lijst, tenzij de tip al in `main` zit.
+  De projecteigenaar beslist daarover met de hand.
+- **Waarom:** zo'n branch kan het enige exemplaar van werk zijn.
+- **Alternatieven:** per branch vragen; dat kost elke keer een vraag.
+
+## Remote branches vallen onder dezelfde opdracht
+
+- **Datum:** 14 november 2026
+- **Besluit:** dezelfde opdracht verwijdert de remote branch van een samengevoegde of gesloten pull request, onder dezelfde regel als de lokale branch.
+  De verwijdering gaat met `--force-with-lease` op de tip die is beoordeeld, dus een branch die intussen verder is gekomen, blijft staan.
+- **Waarom:** de Coördinator doet dat nu al in één stap met de lokale branches.
+- **Alternatieven:** een aparte vlag `--remote`; dat is iets extra's om te onthouden.
+
+## Elke agent mag `--yes` draaien
+
+- **Datum:** 14 november 2026
+- **Besluit:** elke agent mag `/clean-up` met `--yes` draaien zonder eerst te vragen.
+  De vaste controles en de controle op levende sessies zijn de bescherming.
+- **Waarom:** opruimen doet de Coördinator nu al zonder te vragen, en een snelkoppeling waar je eerst voor moet vragen is geen snelkoppeling.
+- **Alternatieven:** alleen de Coördinator of de projecteigenaar; dat haalt het nut weg.
+
+## Een database gaat weg als zijn worktree-map weg is
+
+- **Datum:** 14 november 2026
+- **Besluit:** de database `fansite_<mapnaam>` gaat weg als er geen worktree-map met die naam bestaat.
+  `fansite`, `fansite_acc` en `oldsite_fansitedb` blijven altijd staan.
+  Een database die een test of de rooktest voor één run maakte (`fansite_test_…_<hex>`, `fansite_smoke_…_<hex>`) hoort bij geen map: die gaat pas weg als geen tabel erin de laatste twee uur is gewijzigd, en blijft staan als de leeftijd onbekend is, zodat een draaiende test niet zijn database verliest.
+- **Waarom:** de naam van de database volgt de mapnaam (`scripts/worktree-env.js`), dus zonder map heeft niemand de database nog nodig.
+  Op een computer stonden ruim honderd van die testdatabases over.
+- **Alternatieven:** ze op leeftijd verwijderen; dat raakt een database van een map die nog bestaat.

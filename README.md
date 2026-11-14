@@ -154,6 +154,8 @@ pnpm review:stop
 
 `pnpm review` blijft op de poorten 3000 en 6006 en op de database `fansite`, ook al is de reviewmap een worktree: het is voor jou, en het stopt bewust wat daar al draait.
 De worktrees van agents hebben wel eigen poorten en een eigen database (zie [`packages/db`](packages/db/README.md), _Een database per worktree_).
+`pnpm clean-up` toont welke worktrees, branches en databases van afgeronde pull requests weg kunnen, en waarom de rest blijft; `pnpm clean-up --yes` verwijdert ze.
+Agents gebruiken daarvoor de skill `/clean-up`, die eerst nagaat of geen sessie de map nog gebruikt.
 De reviewmap en de lokale database zijn voor alle branches dezelfde.
 Een migratie van een nieuwere branch blijft dus in de database staan als je daarna een oudere branch bekijkt.
 Wil je opnieuw beginnen, dan wist `docker compose down --volumes` de database.

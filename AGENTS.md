@@ -144,9 +144,8 @@ The skills `weekly-coordination`, `specify` and `release-notes` hold its steps.
   Doesn't build or review itself.
   If it can't start a session (in the iPhone app or a cloud session, say), it offers alternatives first, such as a ready-to-paste prompt for a session the owner starts by hand.
   It builds itself only when there is no other way, and says so.
-- Removes stale branches and worktrees without asking: the remote and local branches of merged or closed pull requests, and their worktrees.
-  It first checks that nothing uncommitted or unpushed is lost.
-  It leaves the branch `pr-screenshots` alone, on the remote and locally: it is never merged and never deleted (see _Screenshots_).
+- Removes stale branches, worktrees and databases without asking, with the `clean-up` skill (`.claude/skills/clean-up/SKILL.md`, `pnpm clean-up`).
+  Its checks and the things it never touches, such as the branch `pr-screenshots`, are in the script and the skill, not here.
 - Merges only with the owner's standing approval, when the Reviewer says ready and CI is green; otherwise the owner merges.
 - Hands over to a successor at the limit, with the steps in `weekly-coordination` (_Hand over_): a note in memory, detach the sessions that must keep running, rename, then archive itself last.
 
@@ -430,7 +429,7 @@ It puts a branch in `../sc-heerenveen-fansite-review`, next to the repository, a
 A branch that exists on the owner's computer is shown as it is there, with commits that aren't pushed; changes that aren't committed are not.
 Each server opens on the page the branch changes, found from the files that differ from `main`.
 Agents don't use that command and don't work in the review folder.
-The Coordinator's clean-up of worktrees leaves it alone.
+The `clean-up` skill leaves it alone.
 
 `pnpm review` stops the fansite's site and Storybook on those ports, whichever folder they run from.
 That includes the Storybook you started for the MCP server (see _The Storybook server_): the server then shows as failed in `/mcp` until the owner reconnects.
@@ -462,7 +461,7 @@ That is expected; carry on from the code.
    If the change shows in the browser, add the screenshots to the description right after (see _Screenshots_).
 7. Right after opening the pull request, start the Reviewer and post its report (see _Reviews_), unless the pull request has no Reviewer.
    Fix its findings, for at most two rounds, and fix CI if Auto-fix reports a failed check.
-8. After the merge, remove the worktree (`git worktree remove`).
+8. After the merge, run the `clean-up` skill: it removes your worktree, branch and database once nothing is lost.
    If your next branch builds on the merged one, rebase it onto `main`.
 
 ### The final check
