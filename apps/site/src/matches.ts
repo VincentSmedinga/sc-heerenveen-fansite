@@ -229,7 +229,7 @@ const pastLeagueResults = cacheForKey(pastSeasonPeriod, (season) => listLeagueRe
 const currentFormations = cacheForKey(currentSeasonPeriod, (season) => listSeasonFormations(getDatabase().db, season))
 const pastFormations = cacheForKey(pastSeasonPeriod, (season) => listSeasonFormations(getDatabase().db, season))
 
-/** One season of the card "Onze plek door de jaren": our place, or none without a table. */
+/** One season of the card "Seizoen voor seizoen": our place, or none without a table. */
 export type FinalPlace = {
   /** Whether this is the season that is going on, whose table is not final. */
   now: boolean
@@ -395,7 +395,7 @@ async function loadFinalPlaces(): Promise<FinalPlace[]> {
 }
 
 /**
- * Our place in the table of every season we have one, for the card "Onze plek door de jaren" of
+ * Our place in the table of every season we have one, for the card "Seizoen voor seizoen" of
  * Cijfers (see `finalPlacesOf`). It does not depend on the season of the page. It is kept
  * for five minutes, like the data of the current season, which is in it.
  */

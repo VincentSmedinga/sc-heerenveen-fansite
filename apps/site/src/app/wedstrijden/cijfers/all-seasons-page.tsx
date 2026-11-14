@@ -12,7 +12,6 @@ import { type CompetitionChoice, competitionFields, parseCompetition } from '#sr
 import { CompetitionSwitch } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
-import { FinalPlacesCard } from '#src/FinalPlacesCard'
 import { sourceOf } from '#src/match-sources'
 import {
   choiceFor,
@@ -29,7 +28,9 @@ import { pageMetadata } from '#src/metadata'
 import { getSourcePages } from '#src/opponents'
 import { OpponentsCredit } from '#src/OpponentViews'
 import { pickerPathOf, type SearchParams, statisticsPath } from '#src/season-page'
+import { SeasonBySeasonCard } from '#src/SeasonBySeasonCard'
 import { allSeasonsSlug, seasonChoicesWithAll } from '#src/seasons'
+import { seasonTalliesOf } from '#src/seasonTally'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { allSeasonsKeyFigures } from '#src/statistics-key-figures'
 import { withBranch } from '#src/title'
@@ -77,13 +78,13 @@ export async function allSeasonsMetadata(): Promise<Metadata> {
  * The page with all seasons, `/wedstrijden/cijfers/alle`: the second scope of Cijfers, chosen
  * with "Alle seizoenen", the first choice of the season picker. It is the page of a season with
  * every card counting every match since the first season we have (1990/91), and four groups:
- * Seizoenen (our place through the years and the results per head coach), Uitslagen (home and
- * away, how often each score, and the records), Doelpunten (per quarter, the clean sheets) and
- * Rondom de wedstrijd (the crowds). The cards that rest on one season, the course of the
- * season, how the matches go and the streaks, are not here, and the streaks are in the records.
- * Every card follows the choice of competition, except our place through the years, which is
- * the Eredivisie. A value of `?competitie=` that is not known is the page "niet
- * gevonden", and so is one given twice.
+ * Seizoenen (season by season, with our place, and the results per head coach), Uitslagen
+ * (home and away, how often each score, and the records), Doelpunten (per quarter, the clean
+ * sheets) and Rondom de wedstrijd (the crowds). The cards that rest on one season, the course
+ * of the season, how the matches go and the streaks, are not here, and the streaks are in the
+ * records. Every card follows the choice of competition, except our place in the card Seizoen
+ * voor seizoen, which is the Eredivisie. A value of `?competitie=` that is not known is the
+ * page "niet gevonden", and so is one given twice.
  */
 export async function AllSeasonsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const { competitie, nul } = await searchParams
@@ -105,7 +106,7 @@ export async function AllSeasonsPage({ searchParams }: { searchParams: Promise<S
   const now = new Date()
   const keyFigures = allSeasonsKeyFigures(homeAwayOf(matches, competition).total, competition, since)
   const [coachResults, finalPlaces] = await Promise.all([loadCoachResults(competition), loadFinalPlaces()])
-  const hasSeasons = coachResults !== null || finalPlaces.length > 0
+  const tallies = seasonTalliesOf(matches, competition)
 
   return (
     <Page.Main
@@ -142,11 +143,16 @@ export async function AllSeasonsPage({ searchParams }: { searchParams: Promise<S
         </Page.Cell>
       )}
       {/* The source order is the reading order, and the bar's (allSeasonsShortcuts). */}
-      {hasSeasons && (
+      {seasons.length > 0 && (
         <CardGroup area="seasons" id="seizoenen" title="Seizoenen">
-          {finalPlaces.length > 0 && (
-            <FinalPlacesCard current={seasonOf(now)} level={3} linkable={seasons} places={finalPlaces} />
-          )}
+          <SeasonBySeasonCard
+            choice={competition}
+            current={seasonOf(now)}
+            level={3}
+            places={finalPlaces}
+            seasons={seasons}
+            tallies={tallies}
+          />
           {coachResults}
         </CardGroup>
       )}
@@ -204,7 +210,7 @@ async function loadCoachResults(competition: CompetitionChoice) {
 }
 
 /**
- * Our place in every season, for the card "Onze plek door de jaren". It is no more than a card:
+ * Our place in every season, for the card "Seizoen voor seizoen". It is no more than a card:
  * when it can't be read, the page is shown without it and the error is logged.
  */
 async function loadFinalPlaces() {

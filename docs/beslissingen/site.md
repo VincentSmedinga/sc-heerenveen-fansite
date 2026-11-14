@@ -3978,6 +3978,7 @@
 - **Alternatieven:** wachten op `/seizoenen` (#414 en #782 zijn nog niet gebouwd); op Wedstrijden laten staan.
 - **Later:** vult _Een kaart staat op de pagina van de zaak die hij beschrijft, en de hoofd- en zijkolom hebben vaste rollen_ (6 november 2026) aan: de zijkolom van Wedstrijden heeft nu Stand, Onze plek per speelronde en de bronvermelding, met Hoofdtrainer tussen de laatste twee.
 - **Later:** vervangen door _Wedstrijden · Cijfers telt ook alle seizoenen, op `/wedstrijden/cijfers/alle`_ (14 november 2026) waar het de plek betreft: de kaart staat alleen bij alle seizoenen, in de groep Seizoenen, en is niet meer op elke seizoenspagina van Cijfers dezelfde.
+- **Later:** vervangen door _Wedstrijden · Cijfers heeft de kaart Seizoen voor seizoen, met een rij per seizoen_ (14 november 2026): de kaart `FinalPlacesCard` heet nu `SeasonBySeasonCard`, het anker `onze-plek-door-de-jaren` is er niet meer, en de tabel heeft elk seizoen met zijn plek en uitslagen.
 
 ## De lijst met wedstrijden in het beheer heeft één link per regel, die volgt uit de staat
 
@@ -5695,3 +5696,23 @@
 - **Waarom:** supporters willen weten met welke opstelling we wonnen.
   Het verslag van een wedstrijd heeft onze formatie al, dus de kaart kost geen nieuwe gegevens.
 - **Alternatieven:** de kaart ook bij alle seizoenen, met een deel van de wedstrijden; drie kolommen voor gewonnen, gelijk en verloren.
+
+## Wedstrijden · Cijfers heeft de kaart Seizoen voor seizoen, met een rij per seizoen
+
+- **Datum:** 14 november 2026
+- **Besluit:** op `/wedstrijden/cijfers/alle` staat als eerste kaart van de groep Seizoenen de kaart Seizoen voor seizoen, op het witte vlak.
+  Bovenaan staat de lijn van onze eindplek, zoals de kaart Onze plek door de jaren die had, die kaart vervalt.
+  De tabel heeft een rij per seizoen waarvan we wedstrijden hebben, het nieuwste bovenaan, met de kolommen Seizoen, Plek, W, G, V en D (doelpunten voor–tegen), en het lopende seizoen heeft "(nu)".
+  - **Gewonnen, gelijk, verloren:** drie kolommen met de letters van `tableColumns` en een legenda onder de tabel, in plaats van één kolom "W–G–V" zoals het ontwerp het toont: zo is elke letter een kolom die een schermlezer kent, en past de tabel op 320 pixels.
+  - **Het seizoen is een link** naar `/wedstrijden/<seizoen>`, het lopende seizoen naar `/wedstrijden`.
+  - **De plek** kennen we sinds het eerste seizoen met een stand (2010/11).
+    Een seizoen zonder stand heeft een streepje, en een schermlezer hoort "geen stand".
+    Een regel onder de tabel zegt sinds wanneer we de plek kennen, en dat de plek altijd die in de Eredivisie is, ook bij de keuze Beker of Europa.
+    Zonder stand van welk seizoen ook is er geen lijn, en de regel zegt dat we de plek nog niet kennen.
+  - **De laatste vijf seizoenen** staan in de tabel, de rest achter een `Disclosure` "Toon alle 37 seizoenen" met een tweede tabel, zonder JavaScript.
+  - **De telling** (`seasonTalliesOf`) volgt de keuze van de competitie en gebruikt `playedMatchesOf` en `resultOf`, dus een beslissing door strafschoppen telt als winst of verlies.
+    Een seizoen zonder gespeelde wedstrijd in die keuze heeft streepjes.
+  - **Weggelaten:** een kolom met de hoofdtrainer of de clubtopscorer (te breed voor een telefoon; de topscorer staat in #1220).
+- **Waarom:** alle seizoenen in één tabel, elk met een weg naar dat seizoen, is wat een eigen pagina Seizoenen (#782) zou doen.
+  De kaart doet dat zonder pagina erbij.
+- **Alternatieven:** een eigen pagina `/seizoenen` (#782); één kolom W–G–V; een kolom per seizoen met de hoofdtrainer.
