@@ -57,4 +57,19 @@ describe('KeyFigures', () => {
 
     expect(container.querySelector('ul.hf-key-figures-four')).toBeNull()
   })
+
+  it('puts four figures in one row on a wide page only when the row is across', () => {
+    const four = [...figures, { figure: '3', label: 'seizoenen', note: 'tussen 2002 en 2005' }]
+    const { container, rerender } = render(<KeyFigures across figures={four} />)
+
+    expect(container.querySelector('ul.hf-key-figures-across')).not.toBeNull()
+
+    rerender(<KeyFigures figures={four} />)
+
+    expect(container.querySelector('ul.hf-key-figures-across')).toBeNull()
+
+    rerender(<KeyFigures across figures={figures} />)
+
+    expect(container.querySelector('ul.hf-key-figures-across')).toBeNull()
+  })
 })

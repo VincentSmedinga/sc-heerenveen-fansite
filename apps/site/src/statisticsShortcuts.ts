@@ -1,28 +1,15 @@
-import { coachResultsCard, finalPlacesShortcut, scoreCountsCard } from './matchShortcuts'
-
 /**
- * The links in the bar under the header of /wedstrijden/cijfers: each goes to the heading of
- * one of the twelve cards with figures, in the order the cards have in the source, which is the
- * order on a narrow screen and the order of the two columns on a wide one, the left one first.
- * The three cards that stay the Eredivisie come first, above the switch. The ids are those of
- * the headings in app/wedstrijden/cijfers/statistics-page.tsx (a test checks it). The cards are
- * the same for a season that is over, so the bar is too. The card Opmerkelijk (id
- * `opmerkelijk`) is not in it: it is one fact that changes with the day, and it may not be
- * there.
+ * The links in the bar under the header of /wedstrijden/cijfers: one to the heading of each of
+ * the four groups of cards, in the order of the page. The ids are those of the headings in
+ * app/wedstrijden/cijfers/statistics-page.tsx (a test checks it). The anchors of the cards in
+ * a group stay, for a link someone made, but the bar does not list them: a visitor reads a
+ * group and finds its cards.
  */
 export const statisticsShortcuts = [
-  { href: '#onze-plek-in-de-competitie', label: 'Plek in de competitie' },
-  { href: `#${finalPlacesShortcut.id}`, label: finalPlacesShortcut.name },
-  { href: '#verloop-van-het-seizoen', label: 'Verloop van het seizoen' },
-  { href: '#hoe-de-wedstrijden-verlopen', label: 'Hoe wedstrijden verlopen' },
-  { href: '#reeksen', label: 'Reeksen' },
-  { href: '#thuis-en-uit', label: 'Thuis en uit' },
-  { href: '#toeschouwers', label: 'Toeschouwers' },
-  { href: `#${scoreCountsCard.id}`, label: scoreCountsCard.name },
-  { href: '#de-nul-gehouden', label: 'De nul gehouden' },
-  { href: '#doelpunten-per-kwartier', label: 'Doelpunten per kwartier' },
-  { href: '#uitersten', label: 'Uitersten' },
-  { href: `#${coachResultsCard.id}`, label: coachResultsCard.name },
+  { href: '#competitie', label: 'Competitie' },
+  { href: '#uitslagen', label: 'Uitslagen' },
+  { href: '#doelpunten', label: 'Doelpunten' },
+  { href: '#rondom-de-wedstrijd', label: 'Rondom de wedstrijd' },
 ] as const
 
 /**

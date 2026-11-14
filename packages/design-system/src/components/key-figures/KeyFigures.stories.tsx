@@ -76,3 +76,19 @@ export const Four = meta.story({
       />,
     ),
 })
+
+export const FourAcross = meta.story({
+  name: 'Een rij van vier, op een breed scherm naast elkaar',
+  render: () =>
+    onPage(
+      <KeyFigures
+        across
+        figures={[
+          { figure: '315', label: 'wedstrijden', note: 'voor Testclub' },
+          { figure: '52', label: 'doelpunten', note: 'in alle competities' },
+          { figure: '1,26', label: 'doelpunten per wedstrijd', note: 'in de 2 seizoenen met opstellingen' },
+          { figure: '103', label: 'keer de nul', note: 'in 1 op de 3 wedstrijden' },
+        ]}
+      />,
+    ),
+})

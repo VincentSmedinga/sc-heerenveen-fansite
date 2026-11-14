@@ -1031,10 +1031,7 @@ await withEmptyDatabase((database) =>
     )
     assert.doesNotMatch(archiveHtml, /Archief/)
     assert.match(matchesHtml, /Testdorp FC/)
-    assert.match(
-      matchesHtml,
-      /<a href="\/wedstrijden\/cijfers#onze-plek-in-de-competitie">Onze plek in de <span class="hf-icon-tail">competitie</,
-    )
+    assert.match(matchesHtml, /<a href="\/wedstrijden\/cijfers">Onze plek in de <span class="hf-icon-tail">competitie</)
     assert.match(
       matchesHtml,
       /<a href="\/wedstrijden\/cijfers#verloop-van-het-seizoen">Het verloop van het <span class="hf-icon-tail">seizoen</,
@@ -1096,81 +1093,58 @@ await withEmptyDatabase((database) =>
       /hf-wikipedia-credit/,
     )
 
-    // The statistics page shows the eleven cards with figures of the made-up matches and table
-    // of the seed, in two equal columns (the sidebar is as wide as the main), with the credit
-    // for Wikipedia under them.
+    // The statistics page shows the key figures of the made-up matches and table of the seed,
+    // and then nine cards with figures in four groups, each under a heading of its own, with
+    // the credit for Wikipedia under them (#1210).
     const statisticsPage = await fetch(`${origin}/wedstrijden/cijfers`)
     const statisticsHtml = await statisticsPage.text()
     assert.equal(statisticsPage.status, 200)
     assert.match(statisticsHtml, /<h1[^>]*>Cijfers<\/h1>/)
-    // The bar with a link to each card comes after the bar of Wedstrijden, outside the main.
     // The menu has Wedstrijden as the item that holds Cijfers, and Cijfers as the current
     // sub-page.
     assert.match(
       statisticsHtml,
       /<a aria-current="true" class="hf-navigation-link" href="\/wedstrijden">Wedstrijden<\/a><div class="hf-navigation-bar">.*?<a aria-current="page" class="hf-navigation-sublink" href="\/wedstrijden\/cijfers">Cijfers<\/a>.*?<a class="hf-navigation-sublink" href="\/tegenstanders">Tegenstanders<\/a>/s,
     )
-    assert.match(statisticsHtml, /<section class="hf-page-section"[^>]*aria-label="Meer cijfers over het seizoen">/)
+    // The bar with a link to each group comes after the bar of Wedstrijden, outside the main.
     assert.match(
       statisticsHtml,
       /<\/header><nav aria-label="Hoofdmenu".*?<\/nav><nav aria-labelledby="([^"]+)" class="hf-page-shortcuts"><span class="hf-page-shortcuts-label" id="\1">Op deze pagina:<\/span>.*<\/nav><div class="hf-page-body"><main/s,
     )
     assert.deepEqual(
       [...statisticsHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
+      ['#competitie', '#uitslagen', '#doelpunten', '#rondom-de-wedstrijd'],
+    )
+    // The groups have a heading of level 2 and the cards in them one of level 3, in the order
+    // of the bar, and the key figures come before the first group.
+    assert.deepEqual(
+      [...statisticsHtml.matchAll(/<h([23])[^>]*? id="([^"]+)"/g)].map(([, level, id]) => `${level} ${id}`),
       [
-        '#onze-plek-in-de-competitie',
-        '#onze-plek-door-de-jaren',
-        '#verloop-van-het-seizoen',
-        '#hoe-de-wedstrijden-verlopen',
-        '#reeksen',
-        '#thuis-en-uit',
-        '#toeschouwers',
-        '#hoe-vaak-welke-uitslag',
-        '#de-nul-gehouden',
-        '#doelpunten-per-kwartier',
-        '#uitersten',
-        '#resultaten-per-hoofdtrainer',
+        '2 competitie',
+        '3 verloop-van-het-seizoen',
+        '3 hoe-de-wedstrijden-verlopen',
+        '2 uitslagen',
+        '3 thuis-en-uit',
+        '3 reeksen',
+        '3 hoe-vaak-welke-uitslag',
+        '3 uitersten',
+        '2 doelpunten',
+        '3 doelpunten-per-kwartier',
+        '3 de-nul-gehouden',
+        '2 rondom-de-wedstrijd',
+        '3 toeschouwers',
       ],
     )
-    // The card with our place in every season moved here from Wedstrijden (#411), directly
-    // under our place in the competition: a chart that a screen reader skips and a table of
-    // four seasons, the newest first. One has no table, one has points taken off. Under it are
-    // the first season and the line that it is the Eredivisie.
-    assert.ok(
-      statisticsHtml.indexOf('id="onze-plek-in-de-competitie"') <
-        statisticsHtml.indexOf('id="onze-plek-door-de-jaren"'),
-    )
-    assert.ok(
-      statisticsHtml.indexOf('id="onze-plek-door-de-jaren"') < statisticsHtml.indexOf('id="verloop-van-het-seizoen"'),
-    )
-    const placesCard = statisticsHtml.slice(statisticsHtml.indexOf('id="onze-plek-door-de-jaren"'))
-    assert.match(placesCard, /class="hf-bar-chart/)
-    const placesTable = placesCard.slice(0, placesCard.indexOf('</table>'))
-    assert.deepEqual(
-      [...placesTable.matchAll(/<th scope="row">.*?(\d{4}\/\d{2})/g)].map(([, season]) => season),
-      [0, 1, 2, 3].map(seasonsAgo),
-    )
-    assert.match(placesTable, /\(nu\)/)
-    assert.match(placesCard, /: 2 punten afgetrokken/)
-    assert.match(placesCard, new RegExp(`Sinds ${seasonsAgo(3)}`))
-    assert.match(placesCard, /Alleen de Eredivisie<\/p><\/section>/)
-    // The card with the results per head coach counts the matches of every season: with the
-    // older made-up matches (see older-meetings.ts) two or more coaches of the seed have one.
-    const coachCard = statisticsHtml.slice(statisticsHtml.indexOf('id="resultaten-per-hoofdtrainer"'))
-    assert.match(
-      coachCard,
-      /^id="resultaten-per-hoofdtrainer">.*?href="#resultaten-per-hoofdtrainer">Resultaten per .*?<\/h2><table/s,
-    )
-    assert.ok(
-      (coachCard.slice(0, coachCard.indexOf('</table>')).match(/<th scope="row">/g) ?? []).length >= 2,
-      'the card Resultaten per hoofdtrainer has a row for at least two head coaches',
-    )
-    assert.match(coachCard, /G gespeeld, W winst, G gelijk, V verlies, P punten per wedstrijd<\/p>/)
-    // The seed has one fact, two goals in minutes that follow each other, so the card
-    // Opmerkelijk has it and no link to a next one.
+    assert.ok(statisticsHtml.indexOf('aria-label="Kerngetallen"') < statisticsHtml.indexOf('id="competitie"'))
     assert.match(
       statisticsHtml,
-      /<section class="hf-card hf-card-warm" aria-labelledby="opmerkelijk"><h2 class="hf-heading-2" id="opmerkelijk">Opmerkelijk<\/h2><p>[^<]*vielen in de 66e en de 67e minuut twee doelpunten achter elkaar\.<\/p><\/section>/,
+      /<span class="hf-key-figure-number">\d+e<\/span> <span class="hf-key-figure-label">plek</,
+    )
+    // Our place is a key figure now, and the cards Onze plek in de competitie, Onze plek door
+    // de jaren, Resultaten per hoofdtrainer and Opmerkelijk are not on the page (#1210).
+    assert.doesNotMatch(
+      statisticsHtml,
+      /id="(?:onze-plek-in-de-competitie|onze-plek-door-de-jaren|resultaten-per-hoofdtrainer|opmerkelijk)"/,
     )
     // The seed has played cup and Europe matches, so the page has the switch between all the
     // matches, the Eredivisie, the cup and Europe, with all the matches chosen. The choice is
@@ -1203,26 +1177,17 @@ await withEmptyDatabase((database) =>
       leagueHtml,
       /<caption class="hf-visually-hidden">De reeksen van sc Heerenveen in de Eredivisie dit seizoen<\/caption>/,
     )
-    // The card with our place in the league: a table of five measures, after the table.
-    assert.match(
-      statisticsHtml,
-      /<h2[^>]*id="onze-plek-in-de-competitie">.*?href="#onze-plek-in-de-competitie">Onze plek in de /s,
-    )
-    assert.match(
-      statisticsHtml,
-      /<caption class="hf-visually-hidden">De plek van sc Heerenveen in de Eredivisie, per onderdeel<\/caption>/,
-    )
     // The card of the season: the chart, and the table of the Eredivisie results under it.
     assert.match(
       statisticsHtml,
-      /<h2[^>]*id="verloop-van-het-seizoen">.*?href="#verloop-van-het-seizoen">Verloop van het /s,
+      /<h3[^>]*id="verloop-van-het-seizoen">.*?href="#verloop-van-het-seizoen">Verloop van het /s,
     )
     assert.match(
       statisticsHtml,
       /<caption class="hf-visually-hidden">Uitslagen van sc Heerenveen dit seizoen, met de punten<\/caption>/,
     )
     // The card of the streaks: the table, and the latest matches under it.
-    assert.match(statisticsHtml, /<h2[^>]*id="reeksen">.*?href="#reeksen">Reeks/s)
+    assert.match(statisticsHtml, /<h3[^>]*id="reeksen">.*?href="#reeksen">Reeks/s)
     assert.match(
       statisticsHtml,
       /<caption class="hf-visually-hidden">De reeksen van sc Heerenveen in de Eredivisie, de KNVB Beker en de play-offs dit seizoen<\/caption>/,
@@ -1232,7 +1197,7 @@ await withEmptyDatabase((database) =>
     // The card of home and away: the table with a column for each.
     assert.match(
       statisticsHtml,
-      /<h2[^>]*id="thuis-en-uit">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#thuis-en-uit">Thuis en /,
+      /<h3[^>]*id="thuis-en-uit">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#thuis-en-uit">Thuis en /,
     )
     assert.match(
       statisticsHtml,
@@ -1244,7 +1209,7 @@ await withEmptyDatabase((database) =>
     // the sums, and under the tables only the number of matches.
     assert.match(
       statisticsHtml,
-      /<h2[^>]*id="hoe-vaak-welke-uitslag">.*?Hoe vaak welke uitsla.*?<\/h2>.*?<div aria-hidden="true" class="hf-donut-chart hf-donut-chart-bare">.*?<div class="hf-data-table-group">.*?<th scope="col"><span aria-hidden="true">Winst \d+×<\/span><span class="hf-visually-hidden">Winst, \d+ keer<\/span><\/th>.*?<th scope="row"><span aria-hidden="true" class="hf-donut-chart-swatch [^"]*" style="--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"><\/span>\d+–\d+<span class="hf-visually-hidden">, (?:winst|gelijk|verlies)<\/span><\/th>/s,
+      /<h3[^>]*id="hoe-vaak-welke-uitslag">.*?Hoe vaak welke uitsla.*?<\/h2>.*?<div aria-hidden="true" class="hf-donut-chart hf-donut-chart-bare">.*?<div class="hf-data-table-group">.*?<th scope="col"><span aria-hidden="true">Winst \d+×<\/span><span class="hf-visually-hidden">Winst, \d+ keer<\/span><\/th>.*?<th scope="row"><span aria-hidden="true" class="hf-donut-chart-swatch [^"]*" style="--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"><\/span>\d+–\d+<span class="hf-visually-hidden">, (?:winst|gelijk|verlies)<\/span><\/th>/s,
     )
     // The card Doelpuntenmakers is on the page Spelers alone (#774): no heading, no anchor and
     // no link to it on this page.
@@ -1252,16 +1217,16 @@ await withEmptyDatabase((database) =>
       statisticsHtml,
       /id="(?:doelpuntenmakers|topscorers)"|Alle <span class="hf-icon-tail">doelpuntenmakers/,
     )
-    // The switch is in the toolbar under the heading, above the cards. The three cards that
-    // stay the Eredivisie come first, then the cards that follow the switch, and each of the
-    // three ends with the line that says so.
+    // The switch is in the toolbar under the heading, above the key figures and the cards. The
+    // two cards that stay the Eredivisie are the group Competitie, and each ends with the line
+    // that says so.
     assert.match(
       statisticsHtml,
-      /<\/h1>.*?class="hf-page-toolbar".*?aria-label="Welke wedstrijden".*?id="onze-plek-in-de-competitie"/s,
+      /<\/h1>.*?class="hf-page-toolbar".*?aria-label="Welke wedstrijden".*?aria-label="Kerngetallen"/s,
     )
     assert.match(
       statisticsHtml,
-      /id="onze-plek-in-de-competitie".*?Alleen de Eredivisie<\/p><\/section>.*?id="verloop-van-het-seizoen".*?Alleen de Eredivisie<\/p><\/section>.*?id="hoe-de-wedstrijden-verlopen".*?Alleen de Eredivisie<\/p><\/section><section[^>]*aria-labelledby="reeksen"/s,
+      /id="verloop-van-het-seizoen".*?Alleen de Eredivisie<\/p><\/section>.*?id="hoe-de-wedstrijden-verlopen".*?Alleen de Eredivisie<\/p><\/section><\/div><\/div><\/section>/s,
     )
     // Spelers is an item of the menu of its own after Wedstrijden, and Cijfers is not one.
     assert.match(
@@ -1276,7 +1241,7 @@ await withEmptyDatabase((database) =>
     }
     assert.match(
       statisticsHtml,
-      /<h2[^>]*id="doelpunten-per-kwartier">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#doelpunten-per-kwartier">Doelpunten per kwartie/,
+      /<h3[^>]*id="doelpunten-per-kwartier">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#doelpunten-per-kwartier">Doelpunten per kwartie/,
     )
     assert.match(
       statisticsHtml,
@@ -1286,7 +1251,7 @@ await withEmptyDatabase((database) =>
     // The two made-up league matches are both won after scoring first and leading at half-time.
     assert.match(
       statisticsHtml,
-      /<h2[^>]*id="hoe-de-wedstrijden-verlopen">.*?href="#hoe-de-wedstrijden-verlopen">Hoe de wedstrijden verlope/s,
+      /<h3[^>]*id="hoe-de-wedstrijden-verlopen">.*?href="#hoe-de-wedstrijden-verlopen">Hoe de wedstrijden verlope/s,
     )
     assert.match(statisticsHtml, /<caption class="hf-visually-hidden">Wat er gebeurt na het eerste doelpunt<\/caption>/)
     assert.match(
@@ -1297,7 +1262,7 @@ await withEmptyDatabase((database) =>
     assert.match(statisticsHtml, /Na een achterstand won sc Heerenveen nog geen wedstrijd\./)
     assert.match(
       statisticsHtml,
-      /<h2[^>]*id="uitersten">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#uitersten">Uiterste/,
+      /<h3[^>]*id="uitersten">(?:<span class="hf-heading-target">.*?<\/span>)?<a class="hf-heading-link" href="#uitersten">Uiterste/,
     )
     assert.match(statisticsHtml, closedWikipediaCredit)
     assert.doesNotMatch(statisticsHtml, /action=history/)

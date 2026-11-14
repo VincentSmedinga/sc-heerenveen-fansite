@@ -2,7 +2,8 @@
  * A row of key figures, each in a card of its own: the number large and heavy, the word below
  * it and then the line that says what it counts. Two or three cards share the width and wrap to
  * the next line when they do not fit, so three become two and one. Four stand two by two at
- * every width, so a row never has three and one.
+ * every width, so a row never has three and one, unless the row is across: then four stand in one
+ * row on a wide page.
  */
 
 @layer hf.components {
@@ -19,6 +20,13 @@
   .hf-key-figures-four {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Across: four in one row from the width where the page has two columns (see Page.Main). */
+  @media (width >= 52rem) {
+    .hf-key-figures-across {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
   }
 
   /* A card without its own element: the surface, border and corners are those of .hf-card. */

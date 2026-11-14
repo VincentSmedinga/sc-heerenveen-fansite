@@ -1,0 +1,17 @@
+/*
+ * A group of cards under a heading of its own. The heading stands under a line in the colour of
+ * the groups, with room above it, so a page of many cards reads in parts.
+ */
+
+@layer hf.components {
+  .hf-card-group {
+    display: grid;
+    gap: var(--hf-space-m);
+
+    > h2 {
+      border-block-start: 2px solid var(--hf-colour-border-group);
+      margin: 0;
+      padding-block-start: var(--hf-space-m);
+    }
+  }
+}

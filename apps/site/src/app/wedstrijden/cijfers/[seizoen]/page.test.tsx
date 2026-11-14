@@ -96,32 +96,34 @@ describe('the page of an earlier season, /wedstrijden/cijfers/2025-26', () => {
   it('has none of the cards of Wedstrijden', async () => {
     const html = await render()
 
-    for (const id of ['programma', 'uitslagen', 'stand', 'eindstand', 'hoofdtrainer']) {
+    for (const id of ['programma', 'stand', 'eindstand', 'hoofdtrainer']) {
       expect(html).not.toContain(`id="${id}"`)
     }
   })
 
-  it('has the same twelve cards as the current season, in the order of the bar', async () => {
+  it('has the same four groups and nine cards as the current season, in the order of the bar', async () => {
     const html = await render()
 
-    expect(html.match(/<h2[^>]*id="([^"]+)"/g)?.map((heading) => /id="([^"]+)"/.exec(heading)?.[1])).toEqual([
-      'onze-plek-in-de-competitie',
-      'onze-plek-door-de-jaren',
+    expect(html.match(/<h[23][^>]*id="([^"]+)"/g)?.map((heading) => /id="([^"]+)"/.exec(heading)?.[1])).toEqual([
+      'competitie',
       'verloop-van-het-seizoen',
       'hoe-de-wedstrijden-verlopen',
-      'reeksen',
+      'uitslagen',
       'thuis-en-uit',
-      'toeschouwers',
+      'reeksen',
       'hoe-vaak-welke-uitslag',
-      'de-nul-gehouden',
-      'doelpunten-per-kwartier',
       'uitersten',
-      'resultaten-per-hoofdtrainer',
+      'doelpunten',
+      'doelpunten-per-kwartier',
+      'de-nul-gehouden',
+      'rondom-de-wedstrijd',
+      'toeschouwers',
     ])
   })
 
   describe('the streaks', () => {
-    const section = (html: string) => html.slice(html.indexOf('id="reeksen"'), html.indexOf('id="thuis-en-uit"'))
+    const section = (html: string) =>
+      html.slice(html.indexOf('id="reeksen"'), html.indexOf('id="hoe-vaak-welke-uitslag"'))
     const columns = (card: string) =>
       [...card.matchAll(/<th [^>]*scope="col"[^>]*>([^<]*)<\/th>/g)].map(([, name]) => name)
 

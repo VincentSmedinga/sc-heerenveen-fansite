@@ -425,9 +425,7 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
   it('has a link under the final table to our place in the league on the statistics page of that season', async () => {
     const html = await render()
 
-    expect(html).toContain(
-      '<a href="/wedstrijden/cijfers/2025-26#onze-plek-in-de-competitie">Onze plek in de competitie</a>',
-    )
+    expect(html).toContain('<a href="/wedstrijden/cijfers/2025-26">Onze plek in de competitie</a>')
   })
 
   it('has a link under the results to the course of the season on the statistics page of that season', async () => {

@@ -3,8 +3,13 @@ import { describe, expect, it } from 'vitest'
 import { playersShortcuts, playersShortcutsFor, statisticsShortcuts } from './statisticsShortcuts'
 
 describe('statisticsShortcuts', () => {
-  it('has a link for each of the twelve cards with figures', () => {
-    expect(statisticsShortcuts).toHaveLength(12)
+  it('has a link for each of the four groups of cards, in the order of the page', () => {
+    expect(statisticsShortcuts).toEqual([
+      { href: '#competitie', label: 'Competitie' },
+      { href: '#uitslagen', label: 'Uitslagen' },
+      { href: '#doelpunten', label: 'Doelpunten' },
+      { href: '#rondom-de-wedstrijd', label: 'Rondom de wedstrijd' },
+    ])
   })
 
   it('has an anchor and a name for each link, and no anchor twice', () => {

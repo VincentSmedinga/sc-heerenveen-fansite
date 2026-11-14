@@ -69,8 +69,16 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   // and Hoe vaak welke uitslag followed (#774). Their anchors on /wedstrijden are gone on
   // purpose, without a redirect: a link to one of them breaks. The card Doelpuntenmakers left
   // /wedstrijden/cijfers for /spelers alone (#774), so its anchors #doelpuntenmakers and
-  // #topscorers are gone here too.
+  // #topscorers are gone here too. The cards are in four groups with a heading of their own
+  // (#1210), which are anchors too. The card Onze plek in de competitie is gone, because the
+  // row of key figures shows our place, and the card Opmerkelijk with it (#1210). Onze plek
+  // door de jaren and Resultaten per hoofdtrainer left the page of a season for the page of
+  // all seasons (#1211): their anchors are gone here on purpose.
   '/wedstrijden/cijfers': [
+    'competitie',
+    'uitslagen',
+    'doelpunten',
+    'rondom-de-wedstrijd',
     'doelpunten-per-kwartier',
     'de-nul-gehouden',
     'nul-gehouden',
@@ -78,12 +86,9 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'reeksen',
     'thuis-en-uit',
     'toeschouwers',
-    'onze-plek-in-de-competitie',
-    'onze-plek-door-de-jaren',
     'hoe-de-wedstrijden-verlopen',
     'hoe-vaak-welke-uitslag',
     'uitersten',
-    'resultaten-per-hoofdtrainer',
   ],
 }
 

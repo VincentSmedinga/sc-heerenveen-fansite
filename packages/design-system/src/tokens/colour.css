@@ -250,6 +250,12 @@
      */
     --hf-colour-background-shortcuts: light-dark(var(--hf-colour-sand-100), var(--hf-colour-blue-900));
     --hf-colour-border-shortcuts: light-dark(var(--hf-colour-sand-300), var(--hf-colour-blue-600));
+
+    /*
+     * The line above the heading of a group of cards (CardGroup): the darkest sand in light, where it divides the
+     * page into parts, and blue-400 in dark. It is decoration, so it needs no contrast.
+     */
+    --hf-colour-border-group: light-dark(var(--hf-colour-sand-700), var(--hf-colour-blue-400));
     --hf-colour-text-shortcuts-label: light-dark(var(--hf-colour-sand-700), var(--hf-colour-blue-200));
     --hf-colour-text-shortcuts-link: light-dark(var(--hf-colour-blue-700), var(--hf-colour-blue-300));
     --hf-colour-text-shortcuts-link-hover: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-200));
@@ -433,6 +439,7 @@
       --hf-colour-background-pitch-stripe: color-mix(in srgb, var(--hf-colour-blue-50) 50%, var(--hf-colour-blue-100));
       --hf-colour-background-shortcuts: var(--hf-colour-sand-100);
       --hf-colour-border-shortcuts: var(--hf-colour-sand-300);
+      --hf-colour-border-group: var(--hf-colour-sand-700);
       --hf-colour-text-shortcuts-label: var(--hf-colour-sand-700);
       --hf-colour-text-shortcuts-link: var(--hf-colour-blue-700);
       --hf-colour-text-shortcuts-link-hover: var(--hf-colour-blue-800);

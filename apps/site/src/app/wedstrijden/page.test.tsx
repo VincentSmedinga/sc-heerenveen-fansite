@@ -151,7 +151,7 @@ describe('the page /wedstrijden', () => {
         '</h2>',
         '<table',
         'hf-bar-legend',
-        '#onze-plek-in-de-competitie',
+        'href="/wedstrijden/cijfers"',
       ])
     })
 
@@ -227,9 +227,7 @@ describe('the page /wedstrijden', () => {
   it('has under the table a link to our place in the league and under the results one to the course of the season, on the page Cijfers', async () => {
     const html = await render()
 
-    expect(section(html, 'stand')).toContain(
-      '<a href="/wedstrijden/cijfers#onze-plek-in-de-competitie">Onze plek in de competitie</a>',
-    )
+    expect(section(html, 'stand')).toContain('<a href="/wedstrijden/cijfers">Onze plek in de competitie</a>')
     expect(section(html, 'uitslagen')).toContain(
       '<a href="/wedstrijden/cijfers#verloop-van-het-seizoen">Het verloop van het seizoen</a>',
     )
@@ -1100,7 +1098,7 @@ describe('the switch of the card Stand, between the whole season and the latest 
       ['3', 'Testdorp FC'],
     ])
     expect(card).toContain('class="hf-highlight hf-standings-table-own"')
-    expect(card).toContain('<a href="/wedstrijden/cijfers#onze-plek-in-de-competitie">')
+    expect(card).toContain('<a href="/wedstrijden/cijfers">')
   })
 
   it('shows the whole season for a value that is not known, an empty one and one given twice', async () => {

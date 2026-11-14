@@ -9,11 +9,12 @@ import { hydrated } from './hydrated'
 // shows, and the check of a window of 320 pixels needs the bar in its wrapped form. Both pages
 // have the bar, with the links to their own cards: Wedstrijden seven (the made-up season has a
 // last match, a result in three competitions and a head coach in the table; its results are of
-// six clubs, so it has no card with our place per round) and Cijfers twelve. The checks of how
+// six clubs, so it has no card with our place per round) and Cijfers four, one for each group.
+// The checks of how
 // it behaves while scrolling are on /wedstrijden/cijfers below, the page with the long cards.
 const withBar = [
   { links: 7, path: '/wedstrijden' },
-  { links: 12, path: '/wedstrijden/cijfers' },
+  { links: 4, path: '/wedstrijden/cijfers' },
 ] as const
 
 for (const { links, path } of withBar) {
@@ -82,7 +83,7 @@ test.describe('the bar under the header of /wedstrijden/cijfers', () => {
     const menu = page.getByRole('navigation', { name: 'Hoofdmenu' })
     const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
 
-    await expect(bar.getByRole('link')).toHaveCount(12)
+    await expect(bar.getByRole('link')).toHaveCount(4)
     await menu.getByRole('link', { name: 'Nieuws' }).click()
     await expect(page).toHaveURL(/\/nieuws$/)
     await expect(page.locator('.hf-page-shortcuts')).toHaveCount(0)
@@ -91,17 +92,17 @@ test.describe('the bar under the header of /wedstrijden/cijfers', () => {
     await menu.getByRole('link', { name: 'Wedstrijden' }).click()
     await menu.getByRole('link', { name: 'Cijfers' }).click()
     await expect(page).toHaveURL(/\/wedstrijden\/cijfers$/)
-    await expect(bar.getByRole('link')).toHaveCount(12)
+    await expect(bar.getByRole('link')).toHaveCount(4)
 
     // The other page with a bar has its own links, not those of the page before.
     await menu.getByRole('link', { name: 'Wedstrijden' }).click()
     await expect(page).toHaveURL(/\/wedstrijden$/)
     await expect(bar.getByRole('link', { name: 'Eredivisie' })).toBeVisible()
-    await expect(bar.getByRole('link', { name: 'Reeksen' })).toHaveCount(0)
+    await expect(bar.getByRole('link', { name: 'Uitslagen' })).toHaveCount(0)
 
     await menu.getByRole('link', { name: 'Cijfers' }).click()
     await expect(page).toHaveURL(/\/wedstrijden\/cijfers$/)
-    await expect(bar.getByRole('link', { name: 'Reeksen' })).toBeVisible()
+    await expect(bar.getByRole('link', { name: 'Uitslagen' })).toBeVisible()
     await expect(bar.getByRole('link', { name: 'Eredivisie' })).toHaveCount(0)
   })
 
@@ -115,11 +116,9 @@ test.describe('the bar under the header of /wedstrijden/cijfers', () => {
     await page.evaluate(() => window.scrollTo({ behavior: 'instant', top: 1500 }))
     expect((await bar.boundingBox())?.y).toBe(0)
 
-    await bar.getByRole('link', { name: 'Hoe vaak welke uitslag' }).click()
-    await expect(page).toHaveURL(/#hoe-vaak-welke-uitslag$/)
-    await expect
-      .poll(async () => (await page.locator('#hoe-vaak-welke-uitslag').boundingBox())?.y ?? 0)
-      .toBeGreaterThanOrEqual(47)
+    await bar.getByRole('link', { name: 'Uitslagen' }).click()
+    await expect(page).toHaveURL(/#uitslagen$/)
+    await expect.poll(async () => (await page.locator('#uitslagen').boundingBox())?.y ?? 0).toBeGreaterThanOrEqual(47)
   })
 
   test('does not stick when it wraps at 320 pixels, where it would take too much of the window', async ({ page }) => {
@@ -178,43 +177,19 @@ test.describe('the bar under the header of /wedstrijden/cijfers', () => {
       }
 
       await links.first().focus()
-      await walk('Tab', [
-        'Onze plek door de jaren',
-        'Verloop van het seizoen',
-        'Hoe wedstrijden verlopen',
-        'Reeksen',
-        'Thuis en uit',
-        'Toeschouwers',
-        'Hoe vaak welke uitslag',
-        'De nul gehouden',
-        'Doelpunten per kwartier',
-        'Uitersten',
-        'Resultaten per hoofdtrainer',
-      ])
-      await walk('Shift+Tab', [
-        'Uitersten',
-        'Doelpunten per kwartier',
-        'De nul gehouden',
-        'Hoe vaak welke uitslag',
-        'Toeschouwers',
-        'Thuis en uit',
-        'Reeksen',
-        'Hoe wedstrijden verlopen',
-        'Verloop van het seizoen',
-        'Onze plek door de jaren',
-        'Plek in de competitie',
-      ])
+      await walk('Tab', ['Uitslagen', 'Doelpunten', 'Rondom de wedstrijd'])
+      await walk('Shift+Tab', ['Doelpunten', 'Uitslagen', 'Competitie'])
     })
   }
 
-  test('brings the keyboard on to the card that a link points to', async ({ page }) => {
+  test('brings the keyboard on to the group that a link points to', async ({ page }) => {
     await page.setViewportSize({ height: 800, width: 390 })
     await page.goto('/wedstrijden/cijfers')
-    await page.getByRole('navigation', { name: 'Op deze pagina:' }).getByRole('link', { name: 'Reeksen' }).click()
-    await expect(page).toHaveURL(/#reeksen$/)
+    await page.getByRole('navigation', { name: 'Op deze pagina:' }).getByRole('link', { name: 'Uitslagen' }).click()
+    await expect(page).toHaveURL(/#uitslagen$/)
     await page.keyboard.press('Tab')
 
-    await expect(page.locator('#reeksen .hf-heading-link')).toBeFocused()
+    await expect(page.locator('#uitslagen .hf-heading-link')).toBeFocused()
   })
 
   test('has no current link at the top of the page, and the link to the card that came past last when scrolling', async ({
@@ -231,11 +206,11 @@ test.describe('the bar under the header of /wedstrijden/cijfers', () => {
 
     // As a click on its link brings the heading to the top, under the bar.
     await page.evaluate(() =>
-      document.getElementById('reeksen')?.scrollIntoView({ behavior: 'instant', block: 'start' }),
+      document.getElementById('uitslagen')?.scrollIntoView({ behavior: 'instant', block: 'start' }),
     )
 
     await expect(current).toHaveCount(1)
-    await expect(current).toHaveText('Reeksen')
+    await expect(current).toHaveText('Uitslagen')
     await expect(current).toHaveAttribute('aria-current', 'location')
   })
 
@@ -247,9 +222,9 @@ test.describe('the bar under the header of /wedstrijden/cijfers', () => {
     const current = page.locator('.hf-page-shortcuts [aria-current="location"]')
 
     await page.evaluate(() =>
-      document.getElementById('reeksen')?.scrollIntoView({ behavior: 'instant', block: 'start' }),
+      document.getElementById('uitslagen')?.scrollIntoView({ behavior: 'instant', block: 'start' }),
     )
-    await expect(current).toHaveText('Reeksen')
+    await expect(current).toHaveText('Uitslagen')
     const top = await page.evaluate(() => window.scrollY)
 
     // The start of the row, after the room for the fade and the ring, is where it snaps to.
@@ -280,10 +255,10 @@ test.describe('the bar under the header of /wedstrijden/cijfers', () => {
       page.evaluate((target) => document.getElementById(target)?.scrollIntoView({ behavior: 'instant' }), id)
 
     for (const [id, name] of [
-      ['thuis-en-uit', 'Thuis en uit'],
-      ['de-nul-gehouden', 'De nul gehouden'],
-      ['reeksen', 'Reeksen'],
-      ['onze-plek-in-de-competitie', 'Plek in de competitie'],
+      ['uitslagen', 'Uitslagen'],
+      ['doelpunten', 'Doelpunten'],
+      ['rondom-de-wedstrijd', 'Rondom de wedstrijd'],
+      ['competitie', 'Competitie'],
     ] as const) {
       await to(id)
       await expect(current).toHaveText(name)
@@ -303,7 +278,7 @@ test.describe('the bar under the header of /wedstrijden/cijfers', () => {
 
     await page.evaluate(() => window.scrollTo({ behavior: 'instant', top: document.documentElement.scrollHeight }))
 
-    await expect(page.locator('.hf-page-shortcuts [aria-current]')).toHaveText('Resultaten per hoofdtrainer')
+    await expect(page.locator('.hf-page-shortcuts [aria-current]')).toHaveText('Rondom de wedstrijd')
   })
 
   test('makes the link that is clicked the current one, and does not scroll the page from under the bar', async ({
@@ -314,12 +289,12 @@ test.describe('the bar under the header of /wedstrijden/cijfers', () => {
     await hydrated(page)
     const bar = page.getByRole('navigation', { name: 'Op deze pagina:' })
 
-    await bar.getByRole('link', { name: 'Hoe vaak welke uitslag' }).click()
+    await bar.getByRole('link', { name: 'Uitslagen' }).click()
 
-    await expect(page).toHaveURL(/#hoe-vaak-welke-uitslag$/)
-    await expect(bar.locator('[aria-current]')).toHaveText('Hoe vaak welke uitslag')
+    await expect(page).toHaveURL(/#uitslagen$/)
+    await expect(bar.locator('[aria-current]')).toHaveText('Uitslagen')
     await expect.poll(async () => (await bar.boundingBox())?.y).toBe(0)
-    await expect(bar.locator('[aria-current]')).toHaveText('Hoe vaak welke uitslag')
+    await expect(bar.locator('[aria-current]')).toHaveText('Uitslagen')
   })
 
   for (const colorScheme of ['light', 'dark'] as const) {
@@ -327,10 +302,10 @@ test.describe('the bar under the header of /wedstrijden/cijfers', () => {
       await page.emulateMedia({ colorScheme })
       await page.setViewportSize({ height: 800, width: 390 })
       await page.goto('/wedstrijden/cijfers')
-      await page.evaluate(() => document.getElementById('reeksen')?.scrollIntoView({ behavior: 'instant' }))
+      await page.evaluate(() => document.getElementById('uitslagen')?.scrollIntoView({ behavior: 'instant' }))
       const current = page.locator('.hf-page-shortcuts [aria-current="location"]')
 
-      await expect(current).toHaveText('Reeksen')
+      await expect(current).toHaveText('Uitslagen')
       await expect(current).toHaveCSS('text-decoration-line', 'underline')
       await expect(current).toHaveCSS('text-decoration-thickness', '3px')
       await expect(current).toHaveCSS('font-weight', '700')
@@ -342,7 +317,7 @@ test.describe('the bar under the header of /wedstrijden/cijfers', () => {
     await page.emulateMedia({ forcedColors: 'active' })
     await page.setViewportSize({ height: 800, width: 390 })
     await page.goto('/wedstrijden/cijfers')
-    await page.evaluate(() => document.getElementById('reeksen')?.scrollIntoView({ behavior: 'instant' }))
+    await page.evaluate(() => document.getElementById('uitslagen')?.scrollIntoView({ behavior: 'instant' }))
     const current = page.locator('.hf-page-shortcuts [aria-current="location"]')
 
     await expect(current).toHaveCSS('text-decoration-line', 'underline')
@@ -357,7 +332,7 @@ test.describe('the bar under the header of /wedstrijden/cijfers', () => {
   test('does not follow the page where the bar is gone', async ({ page }) => {
     await page.setViewportSize({ height: 800, width: 832 })
     await page.goto('/wedstrijden/cijfers')
-    await page.evaluate(() => document.getElementById('reeksen')?.scrollIntoView({ behavior: 'instant' }))
+    await page.evaluate(() => document.getElementById('uitslagen')?.scrollIntoView({ behavior: 'instant' }))
 
     await expect(page.locator('.hf-page-shortcuts [aria-current]')).toHaveCount(0)
   })
