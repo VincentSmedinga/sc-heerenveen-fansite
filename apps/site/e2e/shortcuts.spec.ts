@@ -462,7 +462,8 @@ test.describe('Spelers in the main menu', () => {
 
     await expect(page).toHaveURL(/\/spelers$/)
     await expect(menu.getByRole('link', { name: 'Spelers' })).toHaveAttribute('aria-current', 'page')
-    await expect(menu.getByRole('link', { name: 'Cijfers' })).toHaveCount(0)
+    // The Cijfers in the bar of Spelers are the figures of the players, not of the matches.
+    await expect(menu.getByRole('link', { name: 'Cijfers' })).toHaveAttribute('href', '/spelers/cijfers')
   })
 
   test('is left when the visitor goes on to Wedstrijden, which is then the current item', async ({ page }) => {

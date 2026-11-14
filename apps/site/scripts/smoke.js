@@ -1448,10 +1448,12 @@ await withEmptyDatabase((database) =>
     assert.match(squadCard, /<span class="hf-player-name-flag"><\/span><span class="hf-player-name-text">/)
     assert.ok(playersHtml.indexOf('id="selectie"') < playersHtml.indexOf('aria-label="Meer over de spelers"'))
     // The sidebar has the strong card with the link to the figures of the same season.
-    assert.match(
-      playersHtml,
-      /<section class="hf-card hf-card-strong" aria-labelledby="cijfers-van-dit-seizoen">.*?href="\/spelers\/cijfers"[^>]*>Naar de cijfers van de spelers/s,
-    )
+    const figuresLinkCard =
+      /<section class="hf-card hf-card-strong" aria-labelledby="cijfers-van-dit-seizoen">.*?<\/section>/s.exec(
+        playersHtml,
+      )?.[0] ?? ''
+    assert.match(figuresLinkCard, /href="\/spelers\/cijfers"/)
+    assert.match(figuresLinkCard.replaceAll(/<[^>]*>/g, ''), /Naar de cijfers van de spelers/)
     assert.match(playersHtml, closedWikipediaCredit)
     // The route behind the season picker sends the visitor on to the page of the season.
     const pickedPlayers = await fetch(`${origin}/spelers/kies?seizoen=2099-00`, { redirect: 'manual' })
