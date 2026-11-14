@@ -39,6 +39,6 @@ export default async function SeasonPlayersPage({
   const part = (await params).seizoen
 
   return isSeasonAddress(part)
-    ? PlayersPage({ searchParams, season: seasonOfAddress(part, playersPath) })
+    ? PlayersPage({ season: seasonOfAddress(part, playersPath) })
     : PlayerPageView({ searchParams, slug: part })
 }

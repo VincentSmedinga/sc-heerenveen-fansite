@@ -5,11 +5,11 @@ import { earlierSeasonSlug } from './earlier-season'
 const slug = earlierSeasonSlug()
 
 // The switch of the matches (all, the Eredivisie, the cup and Europe) on /wedstrijden/cijfers
-// and /spelers is a row of links, so it works without JavaScript, and the choice stays in the
-// address when the season is picked. The seed has played cup ties in the current season.
+// and /spelers/cijfers is a row of links, so it works without JavaScript, and the choice stays
+// in the address when the season is picked. The seed has played cup ties in the current season.
 const switchPages = [
   { heading: 'Cijfers', path: '/wedstrijden/cijfers' },
-  { heading: 'Spelers', path: '/spelers' },
+  { heading: 'Cijfers van de spelers', path: '/spelers/cijfers' },
 ] as const
 
 for (const { heading, path } of switchPages) {

@@ -1480,8 +1480,9 @@ export function AllTimeScorersCard({
 }
 
 /**
- * The card Doelpuntenmakers of the page Spelers, with the whole list. The card is soft and in
- * the sidebar.
+ * The card Doelpuntenmakers of the figures of the players, with the whole list. The card is
+ * soft unless the page gives it another surface: on /spelers/cijfers it is white, in the main
+ * column.
  */
 export function TopScorersCard({
   competition,
@@ -1489,6 +1490,7 @@ export function TopScorersCard({
   season,
   seasonOnImage,
   stats,
+  surface = 'soft',
 }: {
   competition: CompetitionChoice
   matches: PublicMatch[]
@@ -1496,12 +1498,13 @@ export function TopScorersCard({
   seasonOnImage?: string | undefined
   /** The appearances of the season, for the column D/W (see `TopScorers`). */
   stats?: PublicPlayerStats[] | undefined
+  surface?: 'default' | 'soft'
 }) {
   return (
     <Card
       aria-labelledby="doelpuntenmakers"
       shareable={imageCredit(topScorersOf(matches, competition).length > 0, seasonOnImage, matches)}
-      surface="soft"
+      surface={surface}
     >
       <Heading aliases={['topscorers']} anchor id="doelpuntenmakers" level={2}>
         Doelpuntenmakers

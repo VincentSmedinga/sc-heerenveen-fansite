@@ -4,7 +4,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getAllTimeMatches, getMatchData, getMatchSeasons } from '#src/matches'
 import { getSeasonReportFigures } from '#src/season-report-figures'
 import { getSeasonSquad } from '#src/season-squad'
-import { playersShortcuts } from '#src/statisticsShortcuts'
 import { matchData } from '#src/test-matches'
 import { noReports } from '#src/test-report-figures'
 import { squadData } from '#src/test-squad'
@@ -86,20 +85,14 @@ describe('the page of an earlier season, /spelers/2025-26', () => {
     expect(getMatchData).toHaveBeenCalledExactlyOnceWith('2025/26')
   })
 
-  it('has the heading Spelers, without the season, and the card with the list of that season', async () => {
+  it('has the heading Spelers, without the season, the card Selectie, and the link to the figures of that season', async () => {
     const html = await render()
 
     expect(html).toContain('<h1 class="hf-heading-1">Spelers</h1>')
     expect(html).not.toContain('Spelers 2025/26</h1>')
-    expect(html).toContain('<p>1 speler heeft gescoord</p>')
-    expect(html).toContain('in het seizoen 2025/26, in de Eredivisie</caption>')
-    expect(html).not.toContain('Alle doelpuntenmakers')
-  })
-
-  it('has a heading for the link of the bar, with the id the link goes to', async () => {
-    const ids = [...(await render()).matchAll(/<h2 [^>]*id="([^"]+)"/g)].map(([, id]) => `#${id}`)
-
-    expect(playersShortcuts.map(({ href }) => href)).toEqual(ids)
+    expect(html).toContain('id="selectie"')
+    expect(html).toContain('href="/spelers/cijfers/2025-26"')
+    expect(html).not.toContain('<table')
   })
 
   describe('the picker', () => {

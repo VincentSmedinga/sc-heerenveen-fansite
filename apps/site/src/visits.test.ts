@@ -234,6 +234,11 @@ describe('visitOf', () => {
     expect(visitOf(request('/spelers/2025-26'))).toMatchObject({ path: '/spelers' })
   })
 
+  it('counts the figures of the players, and the page of a season of them, as a visit to /spelers/cijfers', () => {
+    expect(visitOf(request('/spelers/cijfers'))).toMatchObject({ path: '/spelers/cijfers' })
+    expect(visitOf(request('/spelers/cijfers/2025-26'))).toMatchObject({ path: '/spelers/cijfers' })
+  })
+
   it.each([
     '/wedstrijden/2025-27',
     '/wedstrijden/kies',
@@ -247,6 +252,10 @@ describe('visitOf', () => {
     '/spelers/kies',
     '/spelers/2025-26/extra',
     '/spelers/x',
+    '/spelers/cijfers/2025-27',
+    '/spelers/cijfers/kies',
+    '/spelers/cijfers/2025-26/extra',
+    '/spelers/cijfers/x',
   ])('does not count %s, which is not the page of a season', (path) => {
     expect(visitOf(request(path))).toBeUndefined()
   })
@@ -301,6 +310,7 @@ describe('visitOf', () => {
       '/redactie/[slug]',
       '/wedstrijden/cijfers/[seizoen]',
       '/spelers/[seizoen]',
+      '/spelers/cijfers/[seizoen]',
       '/tegenstanders/[club]',
       '/wedstrijden/[seizoen]',
       '/wedstrijden/[seizoen]/[wedstrijd]',

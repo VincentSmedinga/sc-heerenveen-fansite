@@ -1899,6 +1899,7 @@
 - **Alternatieven:** beide kaarten wit onder elkaar (de bijzaak weegt dan even zwaar als de lijst); alles zoals nu; de zijkolom zo breed als de hoofdkolom (de kaart heeft die breedte niet nodig, en de lijst met doelpuntenmakers wordt er smaller van).
 - **Later:** vult voor de pagina Spelers de beslissing _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (#537) aan, waarin een ranglijst op het zachte vlak staat.
 - **Later:** zie _Op Spelers is de selectie de inhoud van de pagina, en de doelpuntenmakers staan in de zijkolom_ (6 november 2026): de kaart Doelpuntenmakers heeft op Spelers weer het zachte vlak, in de zijkolom, en de kaart Selectie is de witte inhoud van de pagina.
+- **Later:** zie _De cijfers van de spelers staan op `/spelers/cijfers`, en `/spelers` toont alleen de selectie_ (14 november 2026): op `/spelers/cijfers` is Doelpuntenmakers weer de witte inhoud van de pagina, en Bijzondere doelpunten staat in de zijkolom.
 
 ## Het hoofdmenu neemt het seizoen van de pagina mee
 
@@ -4677,6 +4678,8 @@
   - **De gegevens blijven zoals ze zijn:** de doelpunten zelf houden hun lege `person_id` (zie #918).
 - **Waarom:** op acceptatie hadden 1019 van de 2074 doelpunten van ons alleen een rij van de selectie, zodat dezelfde speler soms meer rijen kreeg, zonder link.
 - **Alternatieven:** de doelpunten in de database herstellen (een zaak van de importer, een eigen issue); de links van alle kaarten houden (druk, en de selectie noemt al alle spelers).
+- **Later:** zie _De cijfers van de spelers staan op `/spelers/cijfers`, en `/spelers` toont alleen de selectie_ (14 november 2026): `/spelers` heeft alleen de kaart Selectie, en op `/spelers/cijfers` is de naam van een speler een link als hij een pagina heeft.
+  De kaart "Sinds 1990/91" staat op geen van beide pagina's, tot #1219 hem terugzet.
 
 ## De zijkolom van de pagina van een speler
 
@@ -4889,6 +4892,7 @@
   Een vaste map wint, maar dan mag geen speler dat adres als naam hebben.
   Elke weergave heeft een eigen adres, zodat je er een kunt delen en het zonder JavaScript werkt.
 - **Alternatieven:** `/spelers/alle` of `/spelers?weergave=land` (een vraagteken in het adres is geen eigen pagina en vergt een tweede pad); `/overzicht/spelers` (buiten het onderdeel Spelers).
+- **Later:** zie _De cijfers van de spelers staan op `/spelers/cijfers`, en `/spelers` toont alleen de selectie_ (14 november 2026): `cijfers` is ook een gereserveerd adres.
 
 ## De lijst van alle spelers staat op achternaam zonder voorvoegsel, met alleen naam, linie en jaren
 
@@ -4943,6 +4947,7 @@
   - **De titelrij:** de links "Alle spelers" en "Zoek een speler" zijn uit de titelrij van `/spelers` weg.
 - **Waarom:** het hoofdmenu is al de weg naar `/spelers`, en twee links in de titelrij waren de enige plek waar je de andere pagina's vond.
 - **Alternatieven:** een eerste item "Seizoen" of "Selectie"; een slot `@subnav` voor Spelers, met dezelfde vaste links.
+- **Later:** zie _De cijfers van de spelers staan op `/spelers/cijfers`, en `/spelers` toont alleen de selectie_ (14 november 2026): het submenu heeft drie items, Cijfers, Overzicht en Zoeken.
 
 ## De bronvermelding van Wikipedia blijft in de zijkolom van het overzicht
 
@@ -5536,3 +5541,28 @@
   Na de lancering kan het (#1228).
 - **Waarom:** zolang de site niet live is, is alles nieuw.
 - **Alternatieven:** het label nu al tonen.
+
+## De cijfers van de spelers staan op `/spelers/cijfers`, en `/spelers` toont alleen de selectie
+
+- **Datum:** 14 november 2026
+- **Besluit:** de cijfers van de spelers hebben een eigen pagina, `/spelers/cijfers` voor het lopende seizoen en `/spelers/cijfers/<seizoen>` voor een eerder seizoen, met de seizoenskiezer op `/spelers/cijfers/kies` (#1218, onderdeel van #1207).
+  `cijfers` is een gereserveerd adres onder `/spelers`: `reservedPlayerSlugs` heeft het, zodat geen persoon het als naam krijgt en `/spelers/cijfers` geen seizoen is.
+  - **De opbouw:** de kop "Cijfers van de spelers", de werkbalk met de seizoenskiezer en de keuze van competitie, en dan een witte hoofdkolom en een zijkolom met zachte kaarten.
+    De hoofdkolom heeft Doelpuntenmakers (alle spelers die scoorden, met de kolom W waar we de wedstrijden kennen) en, in een seizoen met opstellingen, de tabel Alle spelers.
+    De zijkolom heeft Assists en Minuten (in een seizoen met opstellingen), Bijzondere doelpunten, en de bronvermelding als laatste.
+    Op een telefoon volgt de zijkolom de hoofdkolom.
+  - **De naam is een link:** op deze pagina linkt de naam van een speler naar zijn pagina als hij er een heeft.
+    Dat vervangt de regel van _Op Spelers linkt alleen de selectie, en een doelpuntenmaker is één rij_ voor deze pagina.
+  - **De ankers verhuizen mee, zonder omleiding:** `#doelpuntenmakers` (met `#topscorers`), `#bijzondere-doelpunten`, `#alle-spelers`, `#assists` en `#minuten` staan nu op `/spelers/cijfers`.
+    Een link ernaar op `/spelers` breekt.
+    Het anker `#sinds-1990-91` staat op geen van beide pagina's, tot #1219 de kaart terugzet.
+  - **`/spelers` toont alleen de selectie:** de kaart Selectie en de bronvermelding, met alleen de seizoenskiezer in de werkbalk.
+    `/spelers` leest `?competitie=` niet meer, en `/spelers/kies` neemt de keuze niet mee.
+    De zijkolom heeft een sterke kaart "Cijfers van dit seizoen" met één zin en de link "Naar de cijfers van de spelers", naar hetzelfde seizoen.
+    `/spelers` heeft één kaart en dus geen balk "Op deze pagina:", zoals het ontwerp laat zien; die van `/spelers/cijfers` linkt naar de kaarten die er staan.
+  - **Het submenu:** Cijfers, Overzicht, Zoeken.
+    Cijfers houdt het seizoen van de pagina vast en is op `/spelers/cijfers` en de seizoenen eronder de huidige pagina; het hoofditem Spelers houdt daar ook het seizoen van de pagina vast.
+  - **Bezoeken:** `/spelers/cijfers/<seizoen>` telt als een bezoek aan `/spelers/cijfers`.
+- **Waarom:** de cijfers van de spelers stonden in de zijkolom van de selectie en de pagina las als twee pagina's in één.
+  Een eigen pagina geeft de cijfers de ruimte en de selectie rust, en past bij Wedstrijden, dat zijn cijfers ook op een eigen pagina krijgt (#1208).
+- **Alternatieven:** de cijfers in de zijkolom houden en er kaarten bij zetten; een tab op `/spelers`; de kaart Sinds 1990/91 al op de nieuwe pagina houden (die komt terug bij alle seizoenen, #1219).

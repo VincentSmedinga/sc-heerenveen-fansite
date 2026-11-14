@@ -119,8 +119,9 @@ describe('the names of the made-up squad of the seed', () => {
 })
 
 describe('isPlayerSlug', () => {
-  it('refuses kies and anything that looks like a season', () => {
+  it('refuses cijfers, kies and anything that looks like a season', () => {
     expect(isPlayerSlug('jan-de-vries')).toBe(true)
+    expect(isPlayerSlug('cijfers')).toBe(false)
     expect(isPlayerSlug('kies')).toBe(false)
     expect(isPlayerSlug('overzicht')).toBe(false)
     expect(isPlayerSlug('zoeken')).toBe(false)
