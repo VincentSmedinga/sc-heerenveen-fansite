@@ -16,6 +16,12 @@ describe('OnThisDay', () => {
     expect(screen.getByRole('region', { name: 'Op deze dag: 11 november' })).toBeTruthy()
   })
 
+  it('has an h3 in a group of cards', () => {
+    render(<OnThisDay intro="Twee keer." level={3} matches={matches} title="Op deze dag: 11 november" />)
+
+    expect(screen.getByRole('heading', { level: 3 }).textContent).toBe('Op deze dag: 11 november')
+  })
+
   it('lists the year, the clubs and the result of each match, in the order given', () => {
     render(<OnThisDay intro="Twee keer." matches={matches} title="Op deze dag: 11 november" />)
     const items = within(screen.getByRole('list')).getAllByRole('listitem')

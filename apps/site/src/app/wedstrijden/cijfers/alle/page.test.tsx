@@ -1,3 +1,4 @@
+import type { SearchableMatch } from '@fansite/db/match-search'
 import type { PublicMatch } from '@fansite/db/queries'
 
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -5,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { AllMatch, FinalPlace } from '#src/matches'
 
+import { getSearchWorld } from '#src/match-search-data'
 import { getAllMatches, getCoachResultData, getEditedMatches, getFinalPlaces, getMatchSeasons } from '#src/matches'
 import { getSourcePages } from '#src/opponents'
 import { allSeasonsStatisticsShortcuts } from '#src/statisticsShortcuts'
@@ -22,6 +24,7 @@ vi.mock('#src/matches', async (importOriginal) => ({
   getFinalPlaces: vi.fn(),
   getMatchSeasons: vi.fn(),
 }))
+vi.mock('#src/match-search-data', () => ({ getSearchWorld: vi.fn() }))
 vi.mock('#src/opponents', () => ({ getSourcePages: vi.fn() }))
 
 const finalPlaces: FinalPlace[] = [
@@ -59,6 +62,7 @@ beforeEach(() => {
   vi.mocked(getCoachResultData).mockResolvedValue(coachResultData)
   vi.mocked(getEditedMatches).mockResolvedValue(false)
   vi.mocked(getFinalPlaces).mockResolvedValue(finalPlaces)
+  vi.mocked(getSearchWorld).mockResolvedValue({ clubs: [], matches: [], seasons: [] } as never)
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26', '2001/02'])
   vi.mocked(getSourcePages).mockResolvedValue([
     { kind: 'results', language: 'nl', readAt: new Date('2026-10-23T10:00:00Z'), season: '2026/27', title: 'x' },
@@ -266,5 +270,54 @@ describe('the card Scheidsrechters', () => {
     expect(html).toContain('>Scheids Naam4<')
     expect(html).not.toContain('>Scheids Naam5<')
     expect(html).toContain('6 scheidsrechters, de top 5 op aantal wedstrijden.')
+  })
+})
+
+describe('the card Op deze dag', () => {
+  // A match of 23 October in an earlier year, the date of `now` in Amsterdam.
+  const played = {
+    clubName: 'Testdorp FC',
+    clubSlug: 'testdorp-fc',
+    competition: 'Eredivisie',
+    goalsAgainst: 1,
+    goalsFor: 3,
+    home: true,
+    id: 1,
+    matchDate: '2009-10-23',
+    opponent: 'Testdorp FC',
+    season: '2009/10',
+    status: 'played',
+  } as SearchableMatch
+
+  it('is not on the page on a day without matches', async () => {
+    expect(await render()).not.toContain('Op deze dag')
+  })
+
+  it('is the last card of Rondom de wedstrijd, the same card as on the search page', async () => {
+    vi.mocked(getSearchWorld).mockResolvedValue({ clubs: [], matches: [played], seasons: [] } as never)
+
+    const html = await render()
+    const headings = [...html.matchAll(/<h([1-6])[^>]*?(?: id="([^"]+)")?>/g)].map(([, level, id]) => `${level} ${id}`)
+
+    expect(headings.at(-1)).toMatch(/^3 /)
+    expect(html).toContain('Op deze dag: 23 oktober')
+    expect(html).toContain('sc Heerenveen – Testdorp FC')
+    expect(html).toContain('Alle wedstrijden in oktober')
+    expect(html.indexOf('Op deze dag')).toBeGreaterThan(html.indexOf('Toeschouwers'))
+  })
+
+  it('ignores the choice of competition', async () => {
+    vi.mocked(getSearchWorld).mockResolvedValue({ clubs: [], matches: [played], seasons: [] } as never)
+
+    expect(await render({ competitie: 'beker' })).toContain('Op deze dag: 23 oktober')
+  })
+
+  it('leaves the card out, and logs why, when the matches can not be read', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    vi.mocked(getSearchWorld).mockRejectedValue(new Error('down'))
+
+    expect(await render()).not.toContain('Op deze dag')
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('this day'))
   })
 })

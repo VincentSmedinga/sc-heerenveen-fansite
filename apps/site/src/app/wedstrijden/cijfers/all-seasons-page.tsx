@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 import { seasonOf } from '@fansite/db/season'
-import { CardGroup, Heading, KeyFigures, Page, SeasonPicker } from '@fansite/design-system'
+import { CardGroup, Heading, KeyFigures, Link, OnThisDay, Page, SeasonPicker } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
 
@@ -14,6 +14,8 @@ import { competitionTalliesOf } from '#src/competitionTally'
 import { CompetitionTallyCard } from '#src/CompetitionTallyCard'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
+import { getSearchWorld } from '#src/match-search-data'
+import { onThisDayOf } from '#src/match-search-start'
 import { sourceOf } from '#src/match-sources'
 import {
   choiceFor,
@@ -86,7 +88,8 @@ export async function allSeasonsMetadata(): Promise<Metadata> {
  * every card counting every match since the first season we have (1990/91), and four groups:
  * Seizoenen (season by season, with our place, our results per kind of competition, and the
  * results per head coach), Uitslagen (home and away, how often each score, and the records),
- * Doelpunten (per quarter, the clean sheets) and Rondom de wedstrijd (the crowds). The cards
+ * Doelpunten (per quarter, the clean sheets) and Rondom de wedstrijd (the crowds, the referees
+ * and the day). The cards
  * that rest on one season, the course of the season, how the matches go and the streaks, are
  * not here, and the streaks are in the records. Every card follows the choice of competition,
  * except our place in the card Seizoen voor seizoen, which is the Eredivisie, and the card Per
@@ -116,6 +119,7 @@ export async function AllSeasonsPage({ searchParams }: { searchParams: Promise<S
   const tallies = seasonTalliesOf(matches, competition)
   const referees = refereesOf(matches, competition, { top: topRefereeCount })
   const penalties = matchPenaltiesOf(matches, competition)
+  const onThisDay = await loadOnThisDay(now)
 
   return (
     <Page.Main
@@ -187,6 +191,11 @@ export async function AllSeasonsPage({ searchParams }: { searchParams: Promise<S
       <CardGroup area="around" id="rondom-de-wedstrijd" title="Rondom de wedstrijd">
         <AttendanceRecordsCard competition={competition} level={3} matches={matches} since={since} />
         <RefereesCard level={3} top {...referees} />
+        {onThisDay === undefined ? null : (
+          <OnThisDay intro={onThisDay.intro} level={3} matches={onThisDay.matches} title={onThisDay.title}>
+            <Link href={onThisDay.monthHref}>{onThisDay.monthLabel}</Link>
+          </OnThisDay>
+        )}
       </CardGroup>
       {matches.length > 0 && (
         <Page.Cell area="credit">
@@ -232,5 +241,22 @@ async function loadFinalPlaces() {
     console.error(`Could not read our place in the seasons for ${allSeasonsPath}: ${reasonOf(error)}`)
 
     return []
+  }
+}
+
+/**
+ * The card "Op deze dag" of the match search, with the date of now in Amsterdam, or nothing on
+ * a day without matches, or when the matches could not be read (the error is logged). It
+ * ignores the choice of competition: it is about the day.
+ */
+async function loadOnThisDay(now: Date) {
+  try {
+    const { matches } = await getSearchWorld()
+
+    return onThisDayOf(matches, now)
+  } catch (error) {
+    console.error(`Could not read the matches of this day for ${allSeasonsPath}: ${reasonOf(error)}`)
+
+    return undefined
   }
 }
