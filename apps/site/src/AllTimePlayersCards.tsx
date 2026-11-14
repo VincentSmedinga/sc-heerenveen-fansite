@@ -34,6 +34,9 @@ import { imageCredit } from './MatchViews'
 /** What the cards say about the competitions they count, such as `alle wedstrijden`. */
 const wordsOf = (competition: CompetitionChoice) => competitionWords(competition)
 
+/** How many players stand in these places: a place can hold more than one. */
+const playersIn = (places: readonly YearsPlace[]) => places.reduce((sum, place) => sum + place.players.length, 0)
+
 /**
  * The card Topscorers sinds <season>: the first ten places of the goal scorers of all seasons,
  * as the card of a season counts them, with the years each was with the club. Under the table a
@@ -53,7 +56,7 @@ export function AllTimeScorersCard({
   const { known, played } = scorersCoverage([...matches], competition)
   const caption = (part: string) =>
     `${part} van sc Heerenveen sinds ${since ?? ''}, in ${wordsOf(competition)}, met de jaren bij de club`
-  const rows = (places: YearsPlace[]) => places
+  const cut = playersIn(top) < total
 
   return (
     <Card aria-labelledby="topscorers-sinds-1990-91" shareable={imageCredit(true, undefined, [...matches])}>
@@ -61,18 +64,22 @@ export function AllTimeScorersCard({
         {`Topscorers sinds ${since ?? ''}`}
       </Heading>
       <Text>
-        {more.length > 0 || top.length < total
+        {cut
           ? `De top ${scorersShown} van ${total} spelers die scoorden`
           : total === 1
             ? '1 speler heeft gescoord'
             : `${total} spelers hebben gescoord`}
       </Text>
-      <TopScorersTable caption={caption(`De top ${scorersShown} van de doelpuntenmakers`)} rows={rows(top)} showYears />
+      <TopScorersTable
+        caption={caption(cut ? `De top ${scorersShown} van de doelpuntenmakers` : 'Doelpuntenmakers')}
+        rows={top}
+        showYears
+      />
       {more.length > 0 && (
         <Disclosure summary={`Toon de top ${scorersMore}`}>
           <TopScorersTable
             caption={caption(`De plaatsen ${scorersShown + 1} tot en met ${scorersMore} van de doelpuntenmakers`)}
-            rows={rows(more)}
+            rows={more}
             scaleTo={topGoals}
             showYears
           />

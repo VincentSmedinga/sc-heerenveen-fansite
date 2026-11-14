@@ -132,7 +132,10 @@ export const TopScorersTable = ({
   const shared = sharedPlaces(rows.map((row) => row.position))
 
   return (
-    <div {...props} className={classNames('hf-top-scorers hf-bar-place', className)}>
+    <div
+      {...props}
+      className={classNames('hf-top-scorers hf-bar-place', showYears && 'hf-top-scorers-years', className)}
+    >
       <table className="hf-top-scorers-table hf-bar-table">
         <caption className="hf-visually-hidden">{caption}</caption>
         <thead>

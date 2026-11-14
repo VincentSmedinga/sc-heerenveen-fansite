@@ -147,6 +147,21 @@ describe('the page with all seasons, /spelers/cijfers/alle', () => {
     expect(main).toContain('Speler')
   })
 
+  it('does not say "de top 10" when everybody who scored is in the table, though they share places', async () => {
+    vi.mocked(getAllTimeMatches).mockResolvedValue([
+      match(
+        '2003/04',
+        ['Alfa', 'Beta', 'Gamma', 'Delta', 'Eta', 'Zeta', 'Theta', 'Iota', 'Kappa', 'Lambda'].map((name) => goal(name)),
+      ),
+    ])
+
+    const html = await render()
+
+    expect(html).toContain('<p>10 spelers hebben gescoord</p>')
+    expect(html).not.toContain('De top 10 van')
+    expect(html).not.toContain('Toon de top 25')
+  })
+
   it('puts the places 11 to 25 in a closed block, without JavaScript, and nobody twice', async () => {
     const html = await render()
     const block = /<details[^>]*><summary>Toon de top 25.*?<\/details>/s.exec(html)?.[0] ?? ''

@@ -108,6 +108,21 @@
   }
 
   /*
+   * A table with the column Jaren has one column more, so on a phone the name would get a few
+   * letters. It gives up its bars at a wider place, so the name keeps its room. The same width
+   * as above is meant by the place of the table, not the screen.
+   */
+  @container hf-bar-place (inline-size < 26rem) {
+    .hf-top-scorers-years .hf-bar {
+      display: none;
+    }
+
+    .hf-top-scorers-years .hf-bar-table th.hf-bar-head {
+      padding-inline-end: var(--hf-space-s);
+    }
+  }
+
+  /*
    * The full words of the abbreviations. The letters are heavier, so they are easy to find in
    * the sentence.
    */

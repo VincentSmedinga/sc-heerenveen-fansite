@@ -281,6 +281,14 @@ describe('TopScorersTable', () => {
       expect(row(/Joris Testvoort/)).toEqual(['⋮gedeeld 2', '1995–2002', '4'])
     })
 
+    it('marks the table, so the bars give way earlier in a narrow place', () => {
+      const { container } = render(<TopScorersTable {...props} rows={yearsRows} showYears />)
+      const plain = render(<TopScorersTable {...props} rows={yearsRows} />)
+
+      expect(container.firstElementChild?.classList.contains('hf-top-scorers-years')).toBe(true)
+      expect(plain.container.firstElementChild?.classList.contains('hf-top-scorers-years')).toBe(false)
+    })
+
     it('keeps the plain legend of the goals', () => {
       render(<TopScorersTable {...props} rows={yearsRows} showYears />)
 
