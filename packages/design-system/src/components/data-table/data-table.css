@@ -6,9 +6,11 @@
 @layer hf.components {
   /*
    * A row header can be a path or another word without spaces. It breaks anywhere when it has
-   * to, so a narrow screen shows all of it and the page does not scroll sideways.
+   * to, so a narrow screen shows all of it and the page does not scroll sideways. The same goes
+   * for the header of that column, such as Scheidsrechter beside five columns of figures.
    */
-  .hf-data-table tbody th {
+  .hf-data-table tbody th,
+  .hf-data-table thead th:first-child {
     overflow-wrap: anywhere;
   }
 }
