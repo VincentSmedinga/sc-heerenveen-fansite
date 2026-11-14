@@ -60,9 +60,10 @@
 
   /*
    * A name above a line or a Match, in the same item, as on the cards with a record or an
-   * extreme: the thin line goes above the name, so the name stays with its line. The name is close to the line, with more space to the line above it
-   * than to its own line. The name comes first in the item, so a screen reader reads it first.
-   * This comes after the rules above, which have the same weight.
+   * extreme: the thin line goes above the name, so the name stays with its line. The name is
+   * close to the line, with more space to the line above it than to its own line. The name
+   * comes first in the item, so a screen reader reads it first. This comes after the rules
+   * above, which have the same weight.
    */
   li > :not(:is(.hf-short-line, .hf-match)):has(+ :is(.hf-short-line, .hf-match)) {
     border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
