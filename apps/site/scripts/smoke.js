@@ -1576,7 +1576,7 @@ await withEmptyDatabase((database) =>
     assert.match(allHtml, /<th scope="col">Jaren<\/th>/)
     assert.doesNotMatch(allHtml, /id="hattricks"/)
     assert.match(allHtml, /class="hf-card hf-card-soft hf-card-shareable" aria-labelledby="strafschoppen"/)
-    assert.match(allHtml, /\d+ strafschoppen? benut sinds \d{4}\/\d{2}/)
+    assert.match(allHtml, /\d+ strafschop(?:pen)? benut sinds \d{4}\/\d{2}/)
     assert.doesNotMatch(allHtml, /id="(?:alle-spelers|assists|minuten|doelpuntenmakers|bijzondere-doelpunten)"/)
     assert.match(
       allHtml,
