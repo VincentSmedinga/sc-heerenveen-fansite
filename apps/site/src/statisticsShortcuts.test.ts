@@ -29,9 +29,10 @@ describe('statisticsShortcuts', () => {
 })
 
 describe('playerFiguresShortcuts', () => {
-  it('has two links, to the cards Doelpuntenmakers and Bijzondere doelpunten, in the order of the page', () => {
+  it('has three links, to the cards Doelpuntenmakers, Doelpunten per linie and Bijzondere doelpunten, in the order of the page', () => {
     expect(playerFiguresShortcuts).toEqual([
       { href: '#doelpuntenmakers', label: 'Doelpuntenmakers' },
+      { href: '#doelpunten-per-linie', label: 'Linies' },
       { href: '#bijzondere-doelpunten', label: 'Bijzondere doelpunten' },
     ])
   })
@@ -42,16 +43,17 @@ describe('playerFiguresShortcuts', () => {
 })
 
 describe('playerFiguresShortcutsFor', () => {
-  it('is the two links without reports', () => {
+  it('is the three links without reports', () => {
     expect(playerFiguresShortcutsFor(false)).toBe(playerFiguresShortcuts)
   })
 
-  it('adds Alle spelers after Doelpuntenmakers and Assists and Minuten before the special goals when there are reports, with no anchor twice', () => {
+  it('adds Alle spelers after Doelpuntenmakers, Doelpunten per linie after it, and Assists and Minuten before the special goals when there are reports, with no anchor twice', () => {
     const links = playerFiguresShortcutsFor(true)
 
     expect(links.map(({ href }) => href)).toEqual([
       '#doelpuntenmakers',
       '#alle-spelers',
+      '#doelpunten-per-linie',
       '#assists',
       '#minuten',
       '#invallers-die-scoorden',
