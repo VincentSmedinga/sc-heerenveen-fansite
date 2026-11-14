@@ -5685,7 +5685,7 @@
 ## Wedstrijden · Cijfers heeft de kaart Seizoen voor seizoen, met een rij per seizoen
 
 - **Datum:** 14 november 2026
-- **Besluit:** op `/wedstrijden/cijfers/alle` staat als eerste kaart van de groep Seizoenen de kaart Seizoen voor seizoen, op het zachte vlak.
+- **Besluit:** op `/wedstrijden/cijfers/alle` staat als eerste kaart van de groep Seizoenen de kaart Seizoen voor seizoen, op het witte vlak.
   Bovenaan staat de lijn van onze eindplek, zoals de kaart Onze plek door de jaren die had, die kaart vervalt.
   De tabel heeft een rij per seizoen waarvan we wedstrijden hebben, het nieuwste bovenaan, met de kolommen Seizoen, Plek, W, G, V en D (doelpunten voor–tegen), en het lopende seizoen heeft "(nu)".
   - **Gewonnen, gelijk, verloren:** drie kolommen met de letters van `tableColumns` en een legenda onder de tabel, in plaats van één kolom "W–G–V" zoals het ontwerp het toont: zo is elke letter een kolom die een schermlezer kent, en past de tabel op 320 pixels.

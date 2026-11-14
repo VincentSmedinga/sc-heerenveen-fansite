@@ -110,7 +110,7 @@ export function SeasonBySeasonCard({
   )
 
   return (
-    <Card aria-labelledby={seasonBySeasonCard.id} surface="soft">
+    <Card aria-labelledby={seasonBySeasonCard.id}>
       <Heading anchor id={seasonBySeasonCard.id} level={level}>
         {seasonBySeasonCard.name}
       </Heading>
