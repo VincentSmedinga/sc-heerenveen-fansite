@@ -1,6 +1,6 @@
 import type { SearchParams } from '#src/season-page'
 
-import { SeasonShortcuts } from '#src/app/@shortcuts/cijfers/season-shortcuts'
+import { SeasonShortcuts } from '#src/app/@shortcuts/wedstrijden/cijfers/season-shortcuts'
 import { seasonHasReports } from '#src/season-report-figures'
 import { seasonFromSlug } from '#src/seasons'
 import { playerFiguresShortcutsFor } from '#src/statisticsShortcuts'

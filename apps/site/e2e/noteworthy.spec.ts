@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 import { earlierSeasonSlug } from './earlier-season'
 
 const slug = earlierSeasonSlug()
-const path = `/cijfers/${slug}`
+const path = `/wedstrijden/cijfers/${slug}`
 
 // The card Opmerkelijk on Cijfers is one fact from the made-up matches. The checks put the
 // seed in the season before the current one, and it has exactly one fact: two goals in the

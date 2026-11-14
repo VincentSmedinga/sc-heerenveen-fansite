@@ -18,8 +18,8 @@ test.describe('the menu and the bar of Wedstrijden without JavaScript', () => {
     page,
   }) => {
     for (const [path, figures] of [
-      ['/wedstrijden', '/cijfers'],
-      [`/wedstrijden/${slug}`, `/cijfers/${slug}`],
+      ['/wedstrijden', '/wedstrijden/cijfers'],
+      [`/wedstrijden/${slug}`, `/wedstrijden/cijfers/${slug}`],
     ] as const) {
       await page.goto(path)
 
@@ -39,9 +39,9 @@ test.describe('the menu and the bar of Wedstrijden without JavaScript', () => {
   })
 
   test('marks Cijfers as the current sub-page, and keeps the choice and the season', async ({ page }) => {
-    await page.goto(`/cijfers/${slug}?competitie=eredivisie`)
+    await page.goto(`/wedstrijden/cijfers/${slug}?competitie=eredivisie`)
 
-    await expect(bar(page, 'Cijfers')).toHaveAttribute('href', `/cijfers/${slug}?competitie=eredivisie`)
+    await expect(bar(page, 'Cijfers')).toHaveAttribute('href', `/wedstrijden/cijfers/${slug}?competitie=eredivisie`)
     await expect(bar(page, 'Cijfers')).toHaveAttribute('aria-current', 'page')
     await expect(bar(page, 'Tegenstanders')).toHaveAttribute('href', '/tegenstanders?competitie=eredivisie')
     await expect(bar(page, 'Wedstrijden')).toHaveAttribute('aria-current', 'true')
@@ -58,14 +58,14 @@ test.describe('the menu and the bar of Wedstrijden without JavaScript', () => {
   })
 
   test('takes the season, and not the choice, to the links of the main menu', async ({ page }) => {
-    await page.goto(`/cijfers/${slug}?competitie=eredivisie`)
+    await page.goto(`/wedstrijden/cijfers/${slug}?competitie=eredivisie`)
 
     await expect(bar(page, 'Wedstrijden')).toHaveAttribute('href', `/wedstrijden/${slug}`)
     await expect(bar(page, 'Spelers')).toHaveAttribute('href', `/spelers/${slug}`)
   })
 
   test('takes the season from Cijfers to Spelers and back to Cijfers, through Wedstrijden', async ({ page }) => {
-    await page.goto(`/cijfers/${slug}`)
+    await page.goto(`/wedstrijden/cijfers/${slug}`)
     await bar(page, 'Spelers').click()
     await expect(page).toHaveURL(new RegExp(`/spelers/${slug}$`))
 
@@ -73,7 +73,7 @@ test.describe('the menu and the bar of Wedstrijden without JavaScript', () => {
     await bar(page, 'Wedstrijden').click()
     await expect(page).toHaveURL(new RegExp(`/wedstrijden/${slug}$`))
     await bar(page, 'Cijfers').click()
-    await expect(page).toHaveURL(new RegExp(`/cijfers/${slug}$`))
+    await expect(page).toHaveURL(new RegExp(`/wedstrijden/cijfers/${slug}$`))
   })
 
   test('marks Spelers as the only current item on /spelers, with the bar of Spelers under the menu', async ({

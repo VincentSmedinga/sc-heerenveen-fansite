@@ -1,4 +1,4 @@
-import { SeasonShortcuts } from '#src/app/@shortcuts/cijfers/season-shortcuts'
+import { SeasonShortcuts } from '#src/app/@shortcuts/wedstrijden/cijfers/season-shortcuts'
 import { seasonFromSlug } from '#src/seasons'
 import { playersShortcuts } from '#src/statisticsShortcuts'
 

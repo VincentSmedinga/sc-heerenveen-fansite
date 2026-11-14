@@ -23,6 +23,7 @@ describe('seasonFromSlug', () => {
     '25-26',
     '0050-51',
     'seizoen',
+    'cijfers',
     '2025-26 ',
     ' 2025-26',
     '2025–26',
@@ -47,7 +48,7 @@ describe('seasonAddress', () => {
 
   it('is the base address with the season for another season, for any base address', () => {
     expect(seasonAddress('/wedstrijden', '2025/26', '2026/27')).toBe('/wedstrijden/2025-26')
-    expect(seasonAddress('/cijfers', '2025/26', '2026/27')).toBe('/cijfers/2025-26')
+    expect(seasonAddress('/wedstrijden/cijfers', '2025/26', '2026/27')).toBe('/wedstrijden/cijfers/2025-26')
   })
 })
 
@@ -83,6 +84,6 @@ describe('pickedAddress', () => {
   })
 
   it('works for a base address that is not /wedstrijden', () => {
-    expect(pickedAddress('/cijfers', '2024-25', known)).toBe('/cijfers/2024-25')
+    expect(pickedAddress('/wedstrijden/cijfers', '2024-25', known)).toBe('/wedstrijden/cijfers/2024-25')
   })
 })

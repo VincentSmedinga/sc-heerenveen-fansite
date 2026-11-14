@@ -4,8 +4,8 @@ import { describe, expect, it } from 'vitest'
 import { SegmentedLinks } from './SegmentedLinks'
 
 const options = [
-  { href: '/cijfers', label: 'Alle wedstrijden', value: 'all' },
-  { href: '/cijfers?competitie=eredivisie', label: 'Eredivisie', value: 'league' },
+  { href: '/wedstrijden/cijfers', label: 'Alle wedstrijden', value: 'all' },
+  { href: '/wedstrijden/cijfers?competitie=eredivisie', label: 'Eredivisie', value: 'league' },
 ] as const
 
 describe('SegmentedLinks', () => {
@@ -14,8 +14,8 @@ describe('SegmentedLinks', () => {
 
     expect(screen.getByRole('group', { name: 'Welke wedstrijden' }).className).toBe('hf-segmented-control')
     expect(screen.getAllByRole('link').map((link) => [link.textContent, link.getAttribute('href')])).toEqual([
-      ['Alle wedstrijden', '/cijfers'],
-      ['Eredivisie', '/cijfers?competitie=eredivisie'],
+      ['Alle wedstrijden', '/wedstrijden/cijfers'],
+      ['Eredivisie', '/wedstrijden/cijfers?competitie=eredivisie'],
     ])
   })
 

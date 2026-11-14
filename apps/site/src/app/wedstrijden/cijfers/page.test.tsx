@@ -65,7 +65,7 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-describe('the page /cijfers', () => {
+describe('the page /wedstrijden/cijfers', () => {
   it('has one h1 and twelve h2 headings in order: our place in the league, our place through the years, the season, how the matches go, the streaks, home and away, the visitors, how often each score was played, the clean sheets, the goals per quarter, the extremes and the results per head coach', async () => {
     const html = await render()
 
@@ -348,7 +348,7 @@ describe('the page /cijfers', () => {
       expect(sheets).toContain('11 keer de nul gehouden in 11 wedstrijden')
       expect(sheets.match(/class="hf-short-match"/g)).toHaveLength(10)
       expect(sheets).toContain('Laad 5 meer')
-      expect(sheets).toContain('action="/cijfers#nul-11"')
+      expect(sheets).toContain('action="/wedstrijden/cijfers#nul-11"')
       expect(sheets).toContain('name="nul"')
       expect(sheets).toContain('value="15"')
       expect(sheets).toContain('id="nul-10"')
@@ -369,7 +369,7 @@ describe('the page /cijfers', () => {
       const sheets = section(await render({ nul: '15' }), 'de-nul-gehouden')
 
       expect(sheets.match(/class="hf-short-match"/g)).toHaveLength(15)
-      expect(sheets).toContain('action="/cijfers#nul-16"')
+      expect(sheets).toContain('action="/wedstrijden/cijfers#nul-16"')
       expect(sheets).toContain('value="20"')
     })
 
@@ -1601,9 +1601,9 @@ describe('the page /cijfers', () => {
     const html = await render()
 
     expect(html.match(/<h1[^>]*>.*?<\/h1>/g)).toEqual(['<h1 class="hf-heading-1">Er ging iets mis</h1>'])
-    expect(html).toContain('<a href="/cijfers">Probeer het opnieuw</a>')
+    expect(html).toContain('<a href="/wedstrijden/cijfers">Probeer het opnieuw</a>')
     expect(error).toHaveBeenCalledWith(
-      'Could not read the matches and the table for /cijfers: Failed query: select 1 (connect ECONNREFUSED 127.0.0.1:3306)',
+      'Could not read the matches and the table for /wedstrijden/cijfers: Failed query: select 1 (connect ECONNREFUSED 127.0.0.1:3306)',
     )
     expect(await generateMetadata()).toEqual({ robots: { index: false }, title: 'Er ging iets mis' })
   })
@@ -1612,12 +1612,12 @@ describe('the page /cijfers', () => {
     const metadata = await generateMetadata()
 
     expect(metadata.title).toBe('Cijfers')
-    expect(metadata.alternates?.canonical).toBe('https://sc.heerenveen.org/cijfers')
+    expect(metadata.alternates?.canonical).toBe('https://sc.heerenveen.org/wedstrijden/cijfers')
     expect(metadata.description).toContain('cijfers')
   })
 })
 
-describe('the season picker on /cijfers', () => {
+describe('the season picker on /wedstrijden/cijfers', () => {
   beforeEach(() => {
     vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26'])
   })
@@ -1637,7 +1637,7 @@ describe('the season picker on /cijfers', () => {
     expect(html).toContain(
       '<option value="2026-27" selected="">2026/27</option><option value="2025-26">2025/26</option>',
     )
-    expect(html).toContain('action="/cijfers/kies"')
+    expect(html).toContain('action="/wedstrijden/cijfers/kies"')
   })
 
   it('keeps the images as they were, without a season on them', async () => {
@@ -1662,7 +1662,7 @@ describe('the season picker on /cijfers', () => {
   })
 })
 
-describe('the choice between all the matches and the Eredivisie on /cijfers', () => {
+describe('the choice between all the matches and the Eredivisie on /wedstrijden/cijfers', () => {
   // The test data has a played cup tie, 1-0 away at SV Proefdorp, beside three played matches
   // of the Eredivisie.
   const switchOf = (html: string) => /<div [^>]*aria-label="Welke wedstrijden"[^>]*>.*?<\/div>/.exec(html)?.[0]
@@ -1683,10 +1683,10 @@ describe('the choice between all the matches and the Eredivisie on /cijfers', ()
     const league = await render(eredivisie)
 
     expect(switchOf(all)).toBe(
-      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-count:2;--hf-segmented-index:0"><a aria-current="page" href="/cijfers"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a href="/cijfers?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
+      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-count:2;--hf-segmented-index:0"><a aria-current="page" href="/wedstrijden/cijfers"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a href="/wedstrijden/cijfers?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
     )
     expect(switchOf(league)).toBe(
-      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-count:2;--hf-segmented-index:1"><a href="/cijfers"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a aria-current="page" href="/cijfers?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
+      '<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group" style="--hf-segmented-count:2;--hf-segmented-index:1"><a href="/wedstrijden/cijfers"><span class="hf-segmented-label" data-label="Alle wedstrijden">Alle wedstrijden</span></a><a aria-current="page" href="/wedstrijden/cijfers?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie</span></a></div>',
     )
     expect(all.match(/aria-current/g)).toHaveLength(1)
   })
@@ -1895,7 +1895,7 @@ describe('the choice between all the matches and the Eredivisie on /cijfers', ()
   })
 })
 
-describe('the card Opmerkelijk on /cijfers', () => {
+describe('the card Opmerkelijk on /wedstrijden/cijfers', () => {
   const base = matchData.matches[1]!
   /** A match with a score of seven goals and no goals listed, so a fact. */
   const manyGoals = (round: number, opponent: string, competition: PublicMatch['competition'] = 'Eredivisie') => ({
@@ -1942,7 +1942,9 @@ describe('the card Opmerkelijk on /cijfers', () => {
     expect(sentence(html)).toMatch(
       /^Thuis tegen Proefclub [ABC] \(3–4, \d+ september 2026\) vielen zeven doelpunten\.$/,
     )
-    expect(card(html)).toMatch(/<a href="\/cijfers\?opmerkelijk=\d#opmerkelijk">Nog iets opmerkelijks<\/a>/)
+    expect(card(html)).toMatch(
+      /<a href="\/wedstrijden\/cijfers\?opmerkelijk=\d#opmerkelijk">Nog iets opmerkelijks<\/a>/,
+    )
   })
 
   it('is the last card of the main column, after home and away', async () => {
@@ -1974,10 +1976,10 @@ describe('the card Opmerkelijk on /cijfers', () => {
         card(await render(fact === undefined ? {} : { opmerkelijk: fact })) ?? '',
       )?.[1]
 
-    expect(await link()).toBe('/cijfers?opmerkelijk=2#opmerkelijk')
-    expect(await link('2')).toBe('/cijfers?opmerkelijk=3#opmerkelijk')
-    expect(await link('3')).toBe('/cijfers?opmerkelijk=1#opmerkelijk')
-    expect(await link('4')).toBe('/cijfers?opmerkelijk=2#opmerkelijk')
+    expect(await link()).toBe('/wedstrijden/cijfers?opmerkelijk=2#opmerkelijk')
+    expect(await link('2')).toBe('/wedstrijden/cijfers?opmerkelijk=3#opmerkelijk')
+    expect(await link('3')).toBe('/wedstrijden/cijfers?opmerkelijk=1#opmerkelijk')
+    expect(await link('4')).toBe('/wedstrijden/cijfers?opmerkelijk=2#opmerkelijk')
   })
 
   it('shows the first fact for a number that is not valid', async () => {
@@ -2007,8 +2009,8 @@ describe('the card Opmerkelijk on /cijfers', () => {
     const all = await render()
     const league = await render(eredivisie)
 
-    expect(card(all)).toContain('href="/cijfers?opmerkelijk=2#opmerkelijk"')
-    expect(card(league)).toContain('href="/cijfers?competitie=eredivisie&amp;opmerkelijk=2#opmerkelijk"')
+    expect(card(all)).toContain('href="/wedstrijden/cijfers?opmerkelijk=2#opmerkelijk"')
+    expect(card(league)).toContain('href="/wedstrijden/cijfers?competitie=eredivisie&amp;opmerkelijk=2#opmerkelijk"')
     expect(card(league)).not.toContain('Bekerclub')
 
     const everyone = await Promise.all(

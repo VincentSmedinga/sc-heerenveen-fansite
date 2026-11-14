@@ -7,7 +7,7 @@ import { checkPage } from './check-page'
 // error page.
 const withoutDatabase = `http://127.0.0.1:${process.env['E2E_WITHOUT_DATABASE_PORT'] ?? '3125'}`
 
-for (const path of ['/', '/bronnen', '/nieuws/podcasts', '/wedstrijden', '/cijfers', '/spelers']) {
+for (const path of ['/', '/bronnen', '/nieuws/podcasts', '/wedstrijden', '/wedstrijden/cijfers', '/spelers']) {
   for (const colorScheme of ['light', 'dark'] as const) {
     test(`the error page on ${path} in ${colorScheme}`, async ({ page }) => {
       await page.emulateMedia({ colorScheme })

@@ -8,7 +8,7 @@ const hrefs = (items: { href: string }[]) => items.map(({ href }) => href)
 describe('matchesBarItems', () => {
   it('goes to Cijfers, Tegenstanders and Zoeken with all matches, the plain addresses', () => {
     expect(hrefs(matchesBarItems({ competition: 'all', current: undefined }))).toEqual([
-      '/cijfers',
+      '/wedstrijden/cijfers',
       '/tegenstanders',
       '/wedstrijden/zoeken',
     ])
@@ -16,7 +16,7 @@ describe('matchesBarItems', () => {
 
   it('keeps the choice of the Eredivisie in the links to Cijfers and Tegenstanders, and not in Zoeken', () => {
     expect(hrefs(matchesBarItems({ competition: 'league', current: undefined }))).toEqual([
-      '/cijfers?competitie=eredivisie',
+      '/wedstrijden/cijfers?competitie=eredivisie',
       '/tegenstanders?competitie=eredivisie',
       '/wedstrijden/zoeken',
     ])
@@ -24,7 +24,7 @@ describe('matchesBarItems', () => {
 
   it('keeps the season of the page in the link to Cijfers, and not in the one to Tegenstanders', () => {
     expect(hrefs(matchesBarItems({ competition: 'league', current: undefined, season: '2023/24' }))).toEqual([
-      '/cijfers/2023-24?competitie=eredivisie',
+      '/wedstrijden/cijfers/2023-24?competitie=eredivisie',
       '/tegenstanders?competitie=eredivisie',
       '/wedstrijden/zoeken',
     ])
@@ -54,7 +54,7 @@ describe('MatchesBar', () => {
 
   it('draws the links of the bar from the choice in the address', async () => {
     expect(links(await render({ competitie: 'eredivisie' }))).toEqual([
-      ['/cijfers?competitie=eredivisie', 'Cijfers'],
+      ['/wedstrijden/cijfers?competitie=eredivisie', 'Cijfers'],
       ['/tegenstanders?competitie=eredivisie', 'Tegenstanders'],
       ['/wedstrijden/zoeken', 'Zoeken'],
     ])
@@ -62,7 +62,7 @@ describe('MatchesBar', () => {
 
   it('draws the plain addresses without a choice', async () => {
     expect(links(await render({}))).toEqual([
-      ['/cijfers', 'Cijfers'],
+      ['/wedstrijden/cijfers', 'Cijfers'],
       ['/tegenstanders', 'Tegenstanders'],
       ['/wedstrijden/zoeken', 'Zoeken'],
     ])
@@ -75,12 +75,12 @@ describe('MatchesBar', () => {
       )
 
     expect(await withSeason('2023-24')).toEqual([
-      ['/cijfers/2023-24', 'Cijfers'],
+      ['/wedstrijden/cijfers/2023-24', 'Cijfers'],
       ['/tegenstanders', 'Tegenstanders'],
       ['/wedstrijden/zoeken', 'Zoeken'],
     ])
     expect(await withSeason('onzin')).toEqual([
-      ['/cijfers', 'Cijfers'],
+      ['/wedstrijden/cijfers', 'Cijfers'],
       ['/tegenstanders', 'Tegenstanders'],
       ['/wedstrijden/zoeken', 'Zoeken'],
     ])
@@ -93,7 +93,7 @@ describe('MatchesBar', () => {
     ['a value that is given twice', ['eredivisie', 'eredivisie']],
   ])('does not repeat %s: the page is "niet gevonden", so the link goes to the default', async (_name, value) => {
     expect(links(await render({ competitie: value }))).toEqual([
-      ['/cijfers', 'Cijfers'],
+      ['/wedstrijden/cijfers', 'Cijfers'],
       ['/tegenstanders', 'Tegenstanders'],
       ['/wedstrijden/zoeken', 'Zoeken'],
     ])

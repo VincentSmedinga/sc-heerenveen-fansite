@@ -49,10 +49,10 @@ const switches: SwitchCase[] = [
     to: 'Laatste 5',
   },
   {
-    after: /\/cijfers\?competitie=eredivisie$/,
+    after: /\/wedstrijden\/cijfers\?competitie=eredivisie$/,
     from: 'Alle wedstrijden',
     group: 'Welke wedstrijden',
-    path: '/cijfers',
+    path: '/wedstrijden/cijfers',
     to: 'Eredivisie',
   },
   {

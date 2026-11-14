@@ -20,9 +20,9 @@ const newsSubitems = [
 // The sub-pages of Wedstrijden. Seizoenen comes later.
 const opponentsPath = '/tegenstanders'
 
-const statisticsPath = '/cijfers'
-
 const matchesPath = '/wedstrijden'
+
+const statisticsPath = `${matchesPath}/cijfers`
 
 const matchesSearchPath = `${matchesPath}/zoeken`
 
@@ -79,15 +79,15 @@ const itemsWithAdmin = [...items.slice(0, -1), adminItem, ...items.slice(-1)]
 /**
  * The item of the menu and the sub-page that a path belongs to, each as an href, or undefined.
  * Nieuws has the news overview, its sub-pages and the articles of the editors
- * (`/redactie/<name>`), which are in the bar under Redactie; the home page has no item,
- * because it is the front page of the whole site and the logo links to it. Wedstrijden has
- * the page and every page below it, such as the season, and a sub-page of its own:
- * Cijfers, with the page of each season below it (`/cijfers/2025-26`), and Tegenstanders,
- * with the page of each club below it (`/tegenstanders/ado-den-haag`). Spelers has the page
- * and the page of each season below it (`/spelers/2025-26`), and three sub-pages: the figures
- * (with the page of each season below it), the overview (with the page by country below it)
- * and the search. A path that belongs to no item,
- * such as /bronnen, the home page or a page that does not exist, has neither.
+ * (`/redactie/<name>`), which are in the bar under Redactie; the home page has no item, because
+ * it is the front page of the whole site and the logo links to it. Wedstrijden has the page and
+ * every page below it, such as the season, and a sub-page of its own: Cijfers, with the page of
+ * each season below it (`/wedstrijden/cijfers/2025-26`), and Tegenstanders, with the page of
+ * each club below it (`/tegenstanders/ado-den-haag`). Spelers has the page and the page of each
+ * season below it (`/spelers/2025-26`), and three sub-pages: the figures (with the page of
+ * each season below it), the overview (with the page by country below it) and the search. A
+ * path that belongs to no item, such as /bronnen, the home page or a page that does not exist,
+ * has neither.
  */
 export function currentOf(pathname: string): { item?: string; subitem?: string } {
   const subitem = newsSubitems.find((candidate) => candidate.href === pathname)
@@ -110,6 +110,10 @@ export function currentOf(pathname: string): { item?: string; subitem?: string }
 
   if (pathname === matchesSearchPath) {
     return { item: matchesPath, subitem: matchesSearchPath }
+  }
+
+  if (pathname === statisticsPath || pathname.startsWith(`${statisticsPath}/`)) {
+    return { item: matchesPath, subitem: statisticsPath }
   }
 
   if (pathname === '/wedstrijden' || pathname.startsWith('/wedstrijden/')) {
@@ -136,10 +140,6 @@ export function currentOf(pathname: string): { item?: string; subitem?: string }
     return { item: matchesPath, subitem: opponentsPath }
   }
 
-  if (pathname === statisticsPath || pathname.startsWith(`${statisticsPath}/`)) {
-    return { item: matchesPath, subitem: statisticsPath }
-  }
-
   return {}
 }
 
@@ -158,7 +158,7 @@ export function hrefOf(href: string, pathname: string): string {
 
 /**
  * The season in the address of a page that has one: `/wedstrijden/2023-24`,
- * `/cijfers/2023-24` and `/spelers/2023-24`. A path without a season, such as
+ * `/wedstrijden/cijfers/2023-24` and `/spelers/2023-24`. A path without a season, such as
  * `/wedstrijden`, and one whose last part is not a season, such as `/wedstrijden/kies` or
  * `/wedstrijden/onzin`, has none. The check is the one the pages use (`seasonFromSlug`).
  */

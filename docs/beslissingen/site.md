@@ -2722,6 +2722,8 @@
   Staat een adres los van het menu, dan kan het menu later weer veranderen zonder omleidingen.
 - **Alternatieven:** adressen onder hun menu-onderdeel, zoals `/wedstrijden/cijfers` (zou bij een volgende wijziging van het menu opnieuw verhuizen).
   Omleidingen met 308 (nu niet nodig).
+- **Later:** zie _Cijfers is twee pagina's, onder Wedstrijden en onder Spelers_ (14 november 2026): de cijfers van wedstrijden staan op `/wedstrijden/cijfers`, en `/cijfers` bestaat niet meer, zonder omleiding.
+  Een adres onder het menu-onderdeel is dus toch gekozen, omdat een cijfer bij de zaak hoort die het beschrijft.
 
 ## Een kaart staat op de pagina van de zaak die hij beschrijft, en de hoofd- en zijkolom hebben vaste rollen
 
@@ -2835,6 +2837,7 @@
   Omleidingen met 308 van de oude adressen (nu niet nodig).
 - **Later:** vult _Het hoofdmenu heeft vier onderdelen: Nieuws, Wedstrijden, Spelers en Forum_ aan: de cijfers van het seizoen staan onder Wedstrijden.
   Alle beslissingen hierboven die de pagina Statistieken noemen, bedoelen sinds #771 Cijfers.
+- **Later:** zie _Cijfers is twee pagina's, onder Wedstrijden en onder Spelers_ (14 november 2026): de adressen zijn nu `/wedstrijden/cijfers`, `/wedstrijden/cijfers/<seizoen>` en `/wedstrijden/cijfers/kies`; `/cijfers` geeft "niet gevonden".
 
 ## Een kaart die een telling van meer wedstrijden is, staat op Cijfers, en de schakelaar staat bovenaan de hoofdkolom
 
@@ -5455,6 +5458,71 @@
 - **Waarom:** de redactie kent veel spelers uit het hoofd, en snel antwoorden is het doel.
   Het formulier van een persoon vraagt dezelfde kant, maar per persoon een pagina.
 - **Alternatieven:** de kant bij elk formulier invullen (veel klikken); de overgeslagen spelers in de database bewaren (een tabel of kolom voor iets dat een sessie duurt).
+
+## Cijfers is twee pagina's, onder Wedstrijden en onder Spelers
+
+- **Datum:** 14 november 2026
+- **Besluit:** de cijfers van wedstrijden staan op `/wedstrijden/cijfers` en die van spelers op `/spelers/cijfers` (#1207, #1208, #1218).
+  `/cijfers` bestaat niet meer, zonder omleiding.
+  `/spelers` toont alleen de selectie.
+  `cijfers` is geen seizoen: `/wedstrijden/cijfers` wordt niet gelezen als de pagina van een seizoen.
+- **Waarom:** een cijfer hoort bij de zaak die het beschrijft.
+  Zo hebben beide onderdelen een overzicht, een detailpagina, cijfers en een zoekpagina.
+- **Alternatieven:** één pagina Cijfers houden met meer kaarten; een eigen onderdeel in het hoofdmenu.
+
+## Een pagina Cijfers telt één seizoen of alle seizoenen, en de seizoenskiezer kiest
+
+- **Datum:** 14 november 2026
+- **Besluit:** de seizoenskiezer heeft op de twee pagina's Cijfers als eerste keuze "Alle seizoenen", met het adres `/alle` (#1211, #1219).
+  Elke kaart volgt de werkbalk.
+  Een kaart die bij een bereik niets zegt, staat er dan niet.
+- **Waarom:** twee kaarten telden alle seizoenen op de pagina van één seizoen, en dat zag je niet.
+  Eén bereik per pagina is in één keer te begrijpen.
+- **Alternatieven:** eigen pagina's Records of Historie in het submenu; een bereik van seizoenen (van, tot) in de werkbalk.
+
+## De keuze van competitie heeft vier waarden, en Alles telt elke wedstrijd
+
+- **Datum:** 14 november 2026
+- **Besluit:** Alles, Eredivisie, Beker en Europa (#1209).
+  Alles telt elke gespeelde wedstrijd, ook Europa, de play-offs en de Eerste divisie.
+- **Waarom:** de 107 Europese wedstrijden en de play-offs stonden in geen enkel cijfer.
+- **Alternatieven:** de twee waarden van nu houden.
+
+## Geen lijst aller tijden van wedstrijden, minuten, assists en kaarten per speler
+
+- **Datum:** 14 november 2026
+- **Besluit:** die lijsten komen er pas als we de opstellingen van alle seizoenen hebben (#1226).
+  Per seizoen blijven ze staan waar we opstellingen hebben.
+- **Waarom:** we hebben opstellingen van 1992/93 tot en met 2005/06 en vanaf 2026/27.
+  Een lijst "meeste wedstrijden ooit" zou twintig jaar spelers overslaan.
+- **Alternatieven:** de lijst wel tonen, met een regel die zegt wat hij telt.
+
+## Cijfers heeft geen eigen filters naast de werkbalk, en linkt naar Zoeken
+
+- **Datum:** 14 november 2026
+- **Besluit:** thuis of uit, tegenstander, een reeks seizoenen, dag en uitslag zijn geen filters op Cijfers.
+  Een cijfer linkt naar Zoeken in wedstrijden, met de filters ingevuld (#1225).
+- **Waarom:** Zoeken heeft die filters al en toont de balans van het resultaat.
+  Twee keer hetzelfde bouwen is niet nodig.
+- **Alternatieven:** een reeks seizoenen in de werkbalk van Cijfers.
+
+## De kaarten staan in groepen, en de kolommen sluiten aan zonder gaten
+
+- **Datum:** 14 november 2026
+- **Besluit:** een pagina Cijfers heeft vier groepen met elk een kop (#1210).
+  De balk "Op deze pagina:" linkt naar de groepen.
+  Op Wedstrijden · Cijfers staan de kaarten in twee even brede kolommen, met CSS Grid Lanes waar de browser dat kan.
+  Spelers · Cijfers heeft de lijst in de witte hoofdkolom en de cijfers in de zijkolom.
+- **Waarom:** twaalf losse kaarten zijn niet te overzien, en een rij met een korte en een lange kaart laat een gat.
+- **Alternatieven:** alle kaarten onder elkaar; een pagina per groep in het submenu.
+
+## Er komt voor de lancering geen label "Nieuw"
+
+- **Datum:** 14 november 2026
+- **Besluit:** nieuwe pagina's en kaarten krijgen geen label.
+  Na de lancering kan het (#1228).
+- **Waarom:** zolang de site niet live is, is alles nieuw.
+- **Alternatieven:** het label nu al tonen.
 
 ## De cijfers van de spelers staan op `/spelers/cijfers`, en `/spelers` toont alleen de selectie
 
