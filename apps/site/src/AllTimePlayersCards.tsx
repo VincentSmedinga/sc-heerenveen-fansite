@@ -29,6 +29,7 @@ import {
   scorersMore,
   scorersShown,
   shortListPlaces,
+  type SquadSeasons,
   type YearsPlace,
 } from './all-time-players'
 import { type CompetitionChoice, competitionQuery, competitionWords } from './competition'
@@ -272,6 +273,32 @@ export function PenaltiesCard({
       />
       <Text appearance="meta">
         {`${total} ${total === 1 ? 'strafschop' : 'strafschoppen'} benut sinds ${since ?? ''}`}
+      </Text>
+    </Card>
+  )
+}
+
+/**
+ * The card Meeste seizoenen in de selectie: the first five places of the players who were in
+ * the squad of the most seasons, with the years they were with the club, and a line that says
+ * what it counts. It does not follow the choice of competition. The card is soft, in the
+ * sidebar, under Strafschoppen benut.
+ */
+export function SquadSeasonsCard({ rows }: { rows: SquadSeasons }) {
+  return (
+    <Card aria-labelledby="meeste-seizoenen-in-de-selectie" surface="soft">
+      <Heading anchor id="meeste-seizoenen-in-de-selectie" level={2}>
+        Meeste seizoenen in de selectie
+      </Heading>
+      <TopScorersTable
+        caption={`De top ${shortListPlaces} van de spelers die de meeste seizoenen in de selectie van sc Heerenveen stonden, met de jaren bij de club`}
+        figure={tableColumns.seasons}
+        rows={rows}
+        showYears
+      />
+      <Text appearance="meta">
+        Het aantal seizoenen waarin de speler in de selectie stond, niet zijn wedstrijden. Een speler die wegging en
+        terugkwam, telt elk seizoen één keer.
       </Text>
     </Card>
   )
