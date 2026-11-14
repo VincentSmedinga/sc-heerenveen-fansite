@@ -228,17 +228,17 @@ describe('the page /wedstrijden', () => {
     const html = await render()
 
     expect(section(html, 'stand')).toContain(
-      '<a href="/cijfers#onze-plek-in-de-competitie">Onze plek in de competitie</a>',
+      '<a href="/wedstrijden/cijfers#onze-plek-in-de-competitie">Onze plek in de competitie</a>',
     )
     expect(section(html, 'uitslagen')).toContain(
-      '<a href="/cijfers#verloop-van-het-seizoen">Het verloop van het seizoen</a>',
+      '<a href="/wedstrijden/cijfers#verloop-van-het-seizoen">Het verloop van het seizoen</a>',
     )
   })
 
   it('has no link to the cards with figures under a table or results that are not there yet', async () => {
     vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [], standings: [] })
 
-    expect(await render()).not.toContain('/cijfers')
+    expect(await render()).not.toContain('/wedstrijden/cijfers')
   })
 
   it('has no order or style attribute but the length of a bar and the place of a label or a bar of a chart, so the order on a phone is the order in the source', async () => {
@@ -1100,7 +1100,7 @@ describe('the switch of the card Stand, between the whole season and the latest 
       ['3', 'Testdorp FC'],
     ])
     expect(card).toContain('class="hf-highlight hf-standings-table-own"')
-    expect(card).toContain('<a href="/cijfers#onze-plek-in-de-competitie">')
+    expect(card).toContain('<a href="/wedstrijden/cijfers#onze-plek-in-de-competitie">')
   })
 
   it('shows the whole season for a value that is not known, an empty one and one given twice', async () => {

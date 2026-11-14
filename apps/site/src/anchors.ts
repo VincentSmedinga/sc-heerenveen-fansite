@@ -25,25 +25,6 @@ export const matchPageAnchors: readonly string[] = ['verloop', 'opstelling']
 /** The anchors per page, as the address of the page without the part after the hash. */
 export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   '/bronnen': ['nieuws', 'podcasts', 'forum', 'wedstrijden-en-spelers', 'voorstellen', 'uitgever', 'nieuwsbrief-lc'],
-  // The nine cards with figures moved to /cijfers (#483), and Hoe vaak welke uitslag followed
-  // (#774). Their anchors on /wedstrijden are gone on purpose, without a redirect: a link to
-  // one of them breaks. The card Doelpuntenmakers left /cijfers for /spelers alone (#774), so
-  // its anchors #doelpuntenmakers and #topscorers are gone here too.
-  '/cijfers': [
-    'doelpunten-per-kwartier',
-    'de-nul-gehouden',
-    'nul-gehouden',
-    'verloop-van-het-seizoen',
-    'reeksen',
-    'thuis-en-uit',
-    'toeschouwers',
-    'onze-plek-in-de-competitie',
-    'onze-plek-door-de-jaren',
-    'hoe-de-wedstrijden-verlopen',
-    'hoe-vaak-welke-uitslag',
-    'uitersten',
-    'resultaten-per-hoofdtrainer',
-  ],
   '/over-ons': ['wie-we-zijn', 'hoe-we-werken', 'gegevens'],
   '/privacy': ['tellen', 'hosting', 'cookies', 'berichten', 'andere-sites', 'vragen'],
   // The card Selectie is the main card (#765). The card Doelpuntenmakers is here as the whole
@@ -69,7 +50,8 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   '/tegenstanders/voorbeeld-united': ['stadion'],
   '/toegankelijkheid': ['belofte', 'wat-we-doen', 'contact', 'nagekeken'],
   '/updates': ['versie-0-1-0', 'versie-0.1.0', 'versie-0-2-0', 'versie-0.2.0'],
-  // The card Onze plek door de jaren moved to /cijfers (#411), and its anchor on /wedstrijden
+  // The card Onze plek door de jaren moved to /wedstrijden/cijfers (#411), and its anchor on
+  // /wedstrijden
   // is gone on purpose, without a redirect. The card Verloop op de ranglijst (anchor
   // `verloop-op-de-ranglijst`) is only on a season whose results are of all clubs, which the
   // made-up current season has not, so it is not published here.
@@ -83,6 +65,27 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
     'uitslagen-knvb-beker',
     'uitslagen-play-offs',
     'hoofdtrainer',
+  ],
+  // The nine cards with figures moved to /wedstrijden/cijfers (#483, now
+  // /wedstrijden/cijfers), and Hoe vaak welke uitslag followed
+  // (#774). Their anchors on /wedstrijden are gone on purpose, without a redirect: a link to
+  // one of them breaks. The card Doelpuntenmakers left /wedstrijden/cijfers for /spelers alone
+  // (#774), so
+  // its anchors #doelpuntenmakers and #topscorers are gone here too.
+  '/wedstrijden/cijfers': [
+    'doelpunten-per-kwartier',
+    'de-nul-gehouden',
+    'nul-gehouden',
+    'verloop-van-het-seizoen',
+    'reeksen',
+    'thuis-en-uit',
+    'toeschouwers',
+    'onze-plek-in-de-competitie',
+    'onze-plek-door-de-jaren',
+    'hoe-de-wedstrijden-verlopen',
+    'hoe-vaak-welke-uitslag',
+    'uitersten',
+    'resultaten-per-hoofdtrainer',
   ],
 }
 

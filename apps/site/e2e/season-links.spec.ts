@@ -8,7 +8,7 @@ const slug = earlierSeasonSlug()
 // the current season. A visitor in an earlier season must stay in it when a link takes them to
 // another of these pages, so a link to a base address (or to the page of another season) is a
 // link that drops the season. Tegenstanders counts all seasons, so it is not one of them.
-const seasonPages = ['/wedstrijden', '/cijfers', '/spelers']
+const seasonPages = ['/wedstrijden', '/wedstrijden/cijfers', '/spelers']
 const pathsInSeason = seasonPages.map((base) => `${base}/${slug}`)
 
 test.describe('the links between the pages of a season', () => {
@@ -54,7 +54,7 @@ test.describe('the links between the pages of a season', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Wedstrijden')
 
     await menu.getByRole('link', { exact: true, name: 'Cijfers' }).click()
-    await expect(page).toHaveURL(new RegExp(`/cijfers/${slug}$`))
+    await expect(page).toHaveURL(new RegExp(`/wedstrijden/cijfers/${slug}$`))
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Cijfers')
   })
 })

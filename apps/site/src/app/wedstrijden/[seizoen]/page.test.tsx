@@ -247,7 +247,7 @@ describe('the cards with results of an earlier season, one for each competition'
   it('has the link to the course of the season in the card of the league only', async () => {
     withMatches(all)
     const html = await render()
-    const link = 'href="/cijfers/2025-26#verloop-van-het-seizoen"'
+    const link = 'href="/wedstrijden/cijfers/2025-26#verloop-van-het-seizoen"'
 
     expect(section(html, 'uitslagen')).toContain(link)
     expect(section(html, 'uitslagen-knvb-beker')).not.toContain('verloop-van-het-seizoen')
@@ -425,13 +425,17 @@ describe('the page of an earlier season, /wedstrijden/2025-26', () => {
   it('has a link under the final table to our place in the league on the statistics page of that season', async () => {
     const html = await render()
 
-    expect(html).toContain('<a href="/cijfers/2025-26#onze-plek-in-de-competitie">Onze plek in de competitie</a>')
+    expect(html).toContain(
+      '<a href="/wedstrijden/cijfers/2025-26#onze-plek-in-de-competitie">Onze plek in de competitie</a>',
+    )
   })
 
   it('has a link under the results to the course of the season on the statistics page of that season', async () => {
     const html = await render()
 
-    expect(html).toContain('<a href="/cijfers/2025-26#verloop-van-het-seizoen">Het verloop van het seizoen</a>')
+    expect(html).toContain(
+      '<a href="/wedstrijden/cijfers/2025-26#verloop-van-het-seizoen">Het verloop van het seizoen</a>',
+    )
   })
 
   it('credits the Wikipedia pages of that season', async () => {

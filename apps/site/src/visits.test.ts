@@ -221,12 +221,12 @@ describe('visitOf', () => {
     expect(visitOf(request('/wedstrijden/2025-26/2025-11-01-fc-twente'))).toMatchObject({ path: '/wedstrijden' })
     expect(visitOf(request('/wedstrijden/2025-27/2025-11-01-fc-twente'))).toBeUndefined()
     expect(visitOf(request('/wedstrijden/2025-26/onzin'))).toBeUndefined()
-    expect(visitOf(request('/cijfers/2025-26/2025-11-01-fc-twente'))).toBeUndefined()
+    expect(visitOf(request('/wedstrijden/cijfers/2025-26/2025-11-01-fc-twente'))).toBeUndefined()
   })
 
-  it('counts the page of a season of Cijfers as a visit to /cijfers', () => {
-    expect(visitOf(request('/cijfers'))).toMatchObject({ path: '/cijfers' })
-    expect(visitOf(request('/cijfers/2025-26'))).toMatchObject({ path: '/cijfers' })
+  it('counts the page of a season of Cijfers as a visit to /wedstrijden/cijfers', () => {
+    expect(visitOf(request('/wedstrijden/cijfers'))).toMatchObject({ path: '/wedstrijden/cijfers' })
+    expect(visitOf(request('/wedstrijden/cijfers/2025-26'))).toMatchObject({ path: '/wedstrijden/cijfers' })
   })
 
   it('counts the page Spelers, and the page of a season of it, as a visit to /spelers', () => {
@@ -239,10 +239,10 @@ describe('visitOf', () => {
     '/wedstrijden/kies',
     '/wedstrijden/2025-26/extra',
     '/wedstrijden/x',
-    '/cijfers/2025-27',
-    '/cijfers/kies',
-    '/cijfers/2025-26/extra',
-    '/cijfers/x',
+    '/wedstrijden/cijfers/2025-27',
+    '/wedstrijden/cijfers/kies',
+    '/wedstrijden/cijfers/2025-26/extra',
+    '/wedstrijden/cijfers/x',
     '/spelers/2025-27',
     '/spelers/kies',
     '/spelers/2025-26/extra',
@@ -270,11 +270,11 @@ describe('visitOf', () => {
   it('counts the address of a switch as a page, and not the request the router makes for it', () => {
     // A click on a switch (`SwitchLinks`) is a router navigation: it asks for the data of the
     // page, and any type is fine. The same address asked for as a page asks for HTML.
-    const address = '/cijfers?competitie=eredivisie'
+    const address = '/wedstrijden/cijfers?competitie=eredivisie'
 
     expect(visitOf(request(address, { accept: '*/*', rsc: '1' }))).toBeUndefined()
     expect(visitOf(request(address, { accept: 'text/x-component' }))).toBeUndefined()
-    expect(visitOf(request(address))).toMatchObject({ path: '/cijfers' })
+    expect(visitOf(request(address))).toMatchObject({ path: '/wedstrijden/cijfers' })
   })
 
   it('has no link of Next.js, so a link loads a whole page that the proxy sees (the switches use the router)', () => {
@@ -291,14 +291,15 @@ describe('visitOf', () => {
 
   it('has a rule for every page of the site', () => {
     // The pages that are on no list on purpose: the admin, the article and the page of a club,
-    // which the database confirms, the page of a season, which counts as /wedstrijden, /cijfers
+    // which the database confirms, the page of a season, which counts as /wedstrijden,
+    // /wedstrijden/cijfers
     // or /spelers, and the page of a match, which counts as /wedstrijden. A slot of the layout
     // (@shortcuts) is not a page of its own.
     const withoutCount = [
       '/beheer',
       '/beheer/[...]',
       '/redactie/[slug]',
-      '/cijfers/[seizoen]',
+      '/wedstrijden/cijfers/[seizoen]',
       '/spelers/[seizoen]',
       '/tegenstanders/[club]',
       '/wedstrijden/[seizoen]',

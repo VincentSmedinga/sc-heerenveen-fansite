@@ -34,12 +34,13 @@ import { seasonAddress, seasonChoices, seasonSlug } from '#src/seasons'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { withBranch } from '#src/title'
 
-/** The route that sends the season picker on to its season (app/cijfers/kies). */
+/** The route that sends the season picker on to its season (app/wedstrijden/cijfers/kies). */
 export const pickerPath = pickerPathOf(statisticsPath)
 
 /**
  * The title, description and canonical address of the page of a season. The current season is
- * the page `/cijfers`; another season has an address of its own, which is its canonical
+ * the page `/wedstrijden/cijfers`; another season has an address of its own, which is its
+ * canonical
  * address, and a title that names the season.
  */
 export async function statisticsMetadata(season: string): Promise<Metadata> {
@@ -61,7 +62,8 @@ export async function statisticsMetadata(season: string): Promise<Metadata> {
 }
 
 /**
- * The page of a season: `/cijfers` for the current season and `/cijfers/2025-26` for
+ * The page of a season: `/wedstrijden/cijfers` for the current season and
+ * `/wedstrijden/cijfers/2025-26` for
  * another, which is what the two routes render. The title row has the season picker beside the
  * heading. The twelve cards with figures sit in two equal columns on a wide screen, and under
  * each other on a narrow one, in the order of the bar "Op deze pagina:". The page is the

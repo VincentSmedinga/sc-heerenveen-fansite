@@ -155,7 +155,7 @@ export function CleanSheetsCard({
   count,
   matches,
   now,
-  path = '/cijfers',
+  path = '/wedstrijden/cijfers',
   season,
 }: {
   competition: CompetitionChoice
