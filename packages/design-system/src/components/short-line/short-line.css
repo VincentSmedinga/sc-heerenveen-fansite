@@ -1,0 +1,87 @@
+/*
+ * A short line: a day or a period before a name or a text, on one line that wraps when the
+ * place is narrow. ShortStaff and ShortFact are drawn with it. A List of short lines has a
+ * thin line between the lines, and a line can have a name above it.
+ */
+
+@layer hf.components {
+  /*
+   * The period and the text sit next to each other. The text wraps at a space as a paragraph
+   * does. A long name breaks instead of making the page scroll sideways.
+   */
+  .hf-short-line {
+    column-gap: var(--hf-space-s);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: var(--hf-body-font-size);
+    overflow-wrap: anywhere;
+    padding-block: var(--hf-space-s);
+  }
+
+  /* The period keeps its width, so the names of the lines start at the same place. */
+  .hf-short-line-when {
+    color: var(--hf-colour-text-secondary);
+    flex: none;
+    min-inline-size: 4.5rem;
+  }
+
+  /*
+   * The main text of a line is .hf-short-line-opponent and the lighter word after it
+   * .hf-short-line-where.
+   */
+  .hf-short-line-opponent {
+    flex: 1 1 8rem;
+    font-weight: var(--hf-headline-font-weight);
+  }
+
+  .hf-short-line-where {
+    color: var(--hf-colour-text-secondary);
+    font-weight: var(--hf-body-font-weight);
+  }
+
+  /* A List with short lines in it: no bullets, no indent, and a thin line between lines. */
+  :is(ul, ol):has(> li > .hf-short-line) {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+
+  li > .hf-short-line {
+    border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
+  }
+
+  li:first-child > .hf-short-line {
+    border-block-start: 0;
+    padding-block-start: 0;
+  }
+
+  li:last-child > .hf-short-line {
+    padding-block-end: 0;
+  }
+
+  /*
+   * A name above a line or a Match, in the same item, as on the cards with a record or an
+   * extreme: the thin line goes above the name, so the name stays with its line. The name is close to the line, with more space to the line above it
+   * than to its own line. The name comes first in the item, so a screen reader reads it first.
+   * This comes after the rules above, which have the same weight.
+   */
+  li > :not(:is(.hf-short-line, .hf-match)):has(+ :is(.hf-short-line, .hf-match)) {
+    border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
+    padding-block-start: var(--hf-space-s);
+  }
+
+  li:first-child > :not(:is(.hf-short-line, .hf-match)):has(+ :is(.hf-short-line, .hf-match)) {
+    border-block-start: 0;
+    padding-block-start: 0;
+  }
+
+  /* The space between the items of a list whose items have a name is the gap of the list. */
+  :is(ul, ol):has(> li > :not(:is(.hf-short-line, .hf-match)) + :is(.hf-short-line, .hf-match)) {
+    display: grid;
+    gap: var(--hf-space-m);
+  }
+
+  li > :not(:is(.hf-short-line, .hf-match)) + :is(.hf-short-line, .hf-match) {
+    border-block-start: 0;
+    padding-block-start: var(--hf-space-xs);
+  }
+}

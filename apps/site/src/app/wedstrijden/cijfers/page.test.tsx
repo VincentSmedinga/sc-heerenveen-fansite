@@ -317,12 +317,12 @@ describe('the page /wedstrijden/cijfers', () => {
       const sheets = section(await render(), 'de-nul-gehouden')
 
       expect(sheets).toContain('2 keer de nul gehouden in 4 wedstrijden')
-      expect(sheets.match(/class="hf-short-match"/g)).toHaveLength(2)
+      expect(sheets.match(/<div class="hf-match"/g)).toHaveLength(2)
       expect(sheets.indexOf('SV Proefdorp')).toBeLessThan(sheets.indexOf('Testdorp FC'))
       expect(sheets).toContain('di 20 okt')
-      expect(sheets).not.toContain('hf-short-match-where')
+      expect(sheets).not.toContain('hf-short-line')
       // Away, the home club and its goals come first: our 1–0 is "SV Proefdorp 0–1".
-      expect(sheets).toContain('<span>SV Proefdorp</span> <span class="hf-short-match-score hf-match-win">')
+      expect(sheets).toContain('<span>SV Proefdorp</span> <span class="hf-match-score hf-match-win">')
       expect(sheets).toContain('0–1')
       expect(sheets).toContain('0 tegen 1')
       expect(sheets).toContain('2–0')
@@ -331,18 +331,21 @@ describe('the page /wedstrijden/cijfers', () => {
       expect(sheets).not.toContain('Voorbeeld United')
     })
 
-    it('has no competition, round, stadium or scorers, and colours the result by the outcome', async () => {
-      const sheets = section(await render(), 'de-nul-gehouden')
+    it('names the competition and the round of a match under all competitions, and not under one', async () => {
+      const all = section(await render(), 'de-nul-gehouden')
 
-      expect(sheets).not.toContain('Eredivisie')
-      expect(sheets).not.toContain('KNVB Beker')
-      expect(sheets).not.toContain('Speelronde')
-      expect(sheets).not.toContain('Stadion Proeflaan')
-      // The colour of the outcome is the one of Match, but nothing else of its line is here.
-      expect(sheets).toContain('hf-match-win')
-      expect(sheets).not.toContain('hf-match-score')
-      expect(sheets).not.toContain('hf-match-clubs')
-      expect(sheets).not.toContain('Proefman')
+      expect(all).toContain('KNVB Beker <span aria-hidden="true">·</span> Tweede ronde')
+      expect(all).toContain('Eredivisie <span aria-hidden="true">·</span> Speelronde 8')
+      expect(all).not.toContain('Stadion Proeflaan')
+      expect(all).not.toContain('Proefman')
+      expect(all).toContain('hf-match-win')
+
+      const league = section(await render(eredivisie), 'de-nul-gehouden')
+
+      expect(league).not.toContain('Eredivisie')
+      expect(league).not.toContain('KNVB Beker')
+      expect(league).toContain('Speelronde 8')
+      expect(league).toContain('hf-match-win')
     })
 
     it('is a list with an item for every line, and no button when there are ten or fewer', async () => {
@@ -376,7 +379,7 @@ describe('the page /wedstrijden/cijfers', () => {
       const sheets = section(await render(), 'de-nul-gehouden')
 
       expect(sheets).toContain('11 keer de nul gehouden in 11 wedstrijden')
-      expect(sheets.match(/class="hf-short-match"/g)).toHaveLength(10)
+      expect(sheets.match(/<div class="hf-match"/g)).toHaveLength(10)
       expect(sheets).toContain('Laad 5 meer')
       expect(sheets).toContain('action="/wedstrijden/cijfers#nul-11"')
       expect(sheets).toContain('name="nul"')
@@ -389,7 +392,7 @@ describe('the page /wedstrijden/cijfers', () => {
 
       const sheets = section(await render(), 'de-nul-gehouden')
 
-      expect(sheets.match(/class="hf-short-match"/g)).toHaveLength(10)
+      expect(sheets.match(/<div class="hf-match"/g)).toHaveLength(10)
       expect(sheets).not.toContain('<button')
     })
 
@@ -398,7 +401,7 @@ describe('the page /wedstrijden/cijfers', () => {
 
       const sheets = section(await render({ nul: '15' }), 'de-nul-gehouden')
 
-      expect(sheets.match(/class="hf-short-match"/g)).toHaveLength(15)
+      expect(sheets.match(/<div class="hf-match"/g)).toHaveLength(15)
       expect(sheets).toContain('action="/wedstrijden/cijfers#nul-16"')
       expect(sheets).toContain('value="20"')
     })
@@ -406,7 +409,7 @@ describe('the page /wedstrijden/cijfers', () => {
     it('starts with ten lines for a number in the address that is none of the steps', async () => {
       vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: manyMatches(21) })
 
-      expect(section(await render({ nul: '12' }), 'de-nul-gehouden').match(/class="hf-short-match"/g)).toHaveLength(10)
+      expect(section(await render({ nul: '12' }), 'de-nul-gehouden').match(/<div class="hf-match"/g)).toHaveLength(10)
     })
 
     it('says so when no match is played yet', async () => {
@@ -698,7 +701,7 @@ describe('the page /wedstrijden/cijfers', () => {
       withSeason(season)
 
       const card = section(await render(eredivisie), 'reeksen')
-      const lines = [...card.matchAll(/<div class="hf-short-match">(.*?)<\/div>/g)].map(([, line]) => line ?? '')
+      const lines = [...card.matchAll(/<div class="hf-match">(.*?)<\/div>/g)].map(([, line]) => line ?? '')
 
       expect(card.match(/hf-mark-row-mark hf-chart-tone-(\w+)">(\w)</g)).toEqual([
         'hf-mark-row-mark hf-chart-tone-positive">W<',
@@ -746,7 +749,7 @@ describe('the page /wedstrijden/cijfers', () => {
     it('shows the matches there are when fewer than five are played', async () => {
       const card = section(await render(eredivisie), 'reeksen')
 
-      expect(card.match(/class="hf-short-match"/g)).toHaveLength(3)
+      expect(card.match(/<div class="hf-match"/g)).toHaveLength(3)
       expect(card).toContain('Alle 3 gespeelde wedstrijden')
     })
 
@@ -755,7 +758,7 @@ describe('the page /wedstrijden/cijfers', () => {
 
       const card = section(await render(eredivisie), 'reeksen')
 
-      expect(card.match(/class="hf-short-match"/g)).toHaveLength(1)
+      expect(card.match(/<div class="hf-match"/g)).toHaveLength(1)
       expect(card.match(/class="hf-mark-row-mark /g)).toHaveLength(1)
       expect(rows(card)).toContainEqual(['Verloren', '1', '1'])
     })
@@ -770,7 +773,7 @@ describe('the page /wedstrijden/cijfers', () => {
 
       expect(card).toContain('We hebben nog geen uitslagen van dit seizoen.')
       expect(card).not.toContain('<table')
-      expect(card).not.toContain('hf-short-match')
+      expect(card).not.toContain('hf-short-line')
       expect(card).not.toContain('gespeelde wedstrijd')
       expect(card).not.toContain('hf-card-shareable')
     })
@@ -1220,11 +1223,11 @@ describe('the page /wedstrijden/cijfers', () => {
           .trim(),
       )
 
-    it('is a card with a list of lines, each with a name above a short match and, for a goal, the minute and the player in the name', async () => {
+    it('is a card with a list of lines, each with a name above a match and, for a goal, the minute and the player in the name', async () => {
       const card = section(await render(eredivisie), 'uitersten')
 
       expect(card.match(/<ul[^>]*role="list"/g)).toHaveLength(1)
-      expect(card.match(/class="hf-short-match"/g)).toHaveLength(4)
+      expect(card.match(/<div class="hf-match"/g)).toHaveLength(4)
       expect(lines(card)).toEqual([
         expect.stringMatching(/^Grootste overwinning .*sc Heerenveen 2–0 2 tegen 0 Testdorp FC$/),
         expect.stringMatching(/^Meeste doelpunten .*Voorbeeld United 2–2 2 tegen 2 sc Heerenveen$/),
@@ -1233,14 +1236,14 @@ describe('the page /wedstrijden/cijfers', () => {
       ])
     })
 
-    it('puts the name in the same item right before the short match, with a dot a screen reader skips', async () => {
+    it('puts the name in the same item right before the match, with a dot a screen reader skips', async () => {
       const card = section(await render(eredivisie), 'uitersten')
 
-      expect(card.match(/<li>(?:<p class="hf-meta">[^]*?<\/p>)<div class="hf-short-match">/g)).toHaveLength(4)
+      expect(card.match(/<li>(?:<p class="hf-meta">[^]*?<\/p>)<div class="hf-match">/g)).toHaveLength(4)
       expect(card).toContain(
-        '<p class="hf-meta">Vroegste doelpunt <span aria-hidden="true">·</span> minuut 34 <span aria-hidden="true">·</span> Proefman</p><div class="hf-short-match">',
+        '<p class="hf-meta">Vroegste doelpunt <span aria-hidden="true">·</span> minuut 34 <span aria-hidden="true">·</span> Proefman</p><div class="hf-match">',
       )
-      expect(card).toContain('<p class="hf-meta">Grootste overwinning</p><div class="hf-short-match">')
+      expect(card).toContain('<p class="hf-meta">Grootste overwinning</p><div class="hf-match">')
     })
 
     it('leaves out a line without a match, such as the biggest loss in a season without a loss, and does not say so', async () => {

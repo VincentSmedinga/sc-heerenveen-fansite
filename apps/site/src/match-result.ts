@@ -37,13 +37,14 @@ const letters = { draw: 'G', loss: 'V', win: 'W' } as const satisfies Record<Mat
 export const letterOf = (match: Scored): FormResult => letters[resultOf(match)]
 
 /**
- * The shoot-out of a match as the props of `ShortMatch`: both scores when it had one, and
+ * The shoot-out of a match as the props of `Match`: both scores when it had one, and
  * nothing when it had none, so a list passes it on with a spread.
  */
 export const shootOutOf = ({
   penaltiesAgainst,
   penaltiesFor,
-}: Pick<Scored, 'penaltiesAgainst' | 'penaltiesFor'>): object | { penaltiesAgainst: number; penaltiesFor: number } =>
+}: Pick<Scored, 'penaltiesAgainst' | 'penaltiesFor'>):
+  { penaltiesAgainst: number; penaltiesFor: number } | { penaltiesAgainst?: never; penaltiesFor?: never } =>
   penaltiesFor !== null && penaltiesFor !== undefined && penaltiesAgainst !== null && penaltiesAgainst !== undefined
     ? { penaltiesAgainst, penaltiesFor }
     : {}

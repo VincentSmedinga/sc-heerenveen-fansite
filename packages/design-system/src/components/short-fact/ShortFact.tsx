@@ -18,13 +18,13 @@ export type ShortFactProps = ComponentPropsWithoutRef<'div'> & {
 /**
  * A fact as a short line in a list, with a name above it in the same item, as the extremes of
  * the season have a name above their match: "Strafschoppen" as a quiet `Text`, then "1 van de
- * 17 doelpunten". It is the short line of `ShortMatch` for a value that is not a match, and it
- * has the look of it: short-match.css draws the thin lines between the lines of a List, the
- * wrapping and the colours. The name comes first in the item, so a screen reader reads it
+ * 17 doelpunten". It is a short line for a value that is not a match, and
+ * short-line.css draws the thin lines between the lines of a List, the wrapping and the
+ * colours. The name comes first in the item, so a screen reader reads it
  * first and the two stay together.
  */
 export const ShortFact = ({ children, className, empty = false, ...props }: ShortFactProps) => (
-  <div {...props} className={classNames('hf-short-match', 'hf-short-fact', className)}>
-    <span className={empty ? 'hf-short-match-where' : 'hf-short-match-opponent'}>{children}</span>
+  <div {...props} className={classNames('hf-short-line', 'hf-short-fact', className)}>
+    <span className={empty ? 'hf-short-line-where' : 'hf-short-line-opponent'}>{children}</span>
   </div>
 )

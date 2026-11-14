@@ -365,7 +365,8 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Een wedstrijd met een `note` in de database (een gestaakte wedstrijd die later is uitgespeeld) toont die tekst als laatste regel onder de wedstrijd, ook onder die zin.
   `MatchLine` in `src/MatchViews.tsx` geeft hem door aan `Match`.
   Programma, Uitslagen en de kaart Wedstrijden op de pagina van een club gebruiken dezelfde `MatchLine`.
-  De lijsten met `ShortMatch` (zie de beslissing van 4 november 2026 in `docs/beslissingen/site.md`) kiezen wedstrijden uit en hebben er geen plek voor.
+  De kaarten die wedstrijden uitkiezen (Records, Uitersten, De nul gehouden, Reeksen en de ontmoetingen op de pagina van een club) tonen ook een `Match`, zonder de scheidsrechter.
+  Ze geven `competition` alleen door bij de keuze "alle competities" (zie de beslissing van 14 november 2026 in `docs/beslissingen/site.md`).
 - **Homepage:** het blok "Wedstrijden" toont in één lijst de vorige wedstrijd (de eerste van Uitslagen, ook zonder uitslag, maar niet een geannuleerde) en de volgende (de eerste in het programma die een datum heeft, dus niet een uitgestelde).
   Het blok "Stand" toont drie clubs met sc Heerenveen in het midden, als dat kan, zonder balk naast de punten, en onder de tabel dezelfde regel "Gegevens nog niet bijgewerkt" als de kaart Stand op Wedstrijden.
   De blokken linken naar "Alle wedstrijden" en "De volledige stand" (`/wedstrijden#stand`).
@@ -600,7 +601,7 @@ De rij gebruikt dezelfde wedstrijden als de lijst, dus de keuze Eredivisie veran
 De zijkolom (een `Page.Section`, zo breed als de hoofdkolom, zoals op Cijfers) volgt op een telefoon op de hoofdkolom, behalve de samenvatting, die ervoor staat.
 Ze heeft acht delen:
 
-- De kaart "Onze uitslagen tegen …" op het zachte vlak met de samenvatting (een `RecordTable` met de rijen Thuis en Uit en eronder Totaal, met het gewicht van het kerngetal, en de kolommen G, W, G, V, P (alleen bij de keuze Eredivisie) en D (het doelsaldo); W, G (gelijk) en V hebben de kleuren van de uitslag, en de woorden van de afkortingen staan onder de tabel), de grootste overwinning en de grootste nederlaag (die twee blijven `ShortMatch`: ze zijn een selectie), de afbeeldingsknop en de zin "Alle 12 gespeelde wedstrijden sinds 2010/11".
+- De kaart "Onze uitslagen tegen …" op het zachte vlak met de samenvatting (een `RecordTable` met de rijen Thuis en Uit en eronder Totaal, met het gewicht van het kerngetal, en de kolommen G, W, G, V, P (alleen bij de keuze Eredivisie) en D (het doelsaldo); W, G (gelijk) en V hebben de kleuren van de uitslag, en de woorden van de afkortingen staan onder de tabel), de grootste overwinning en de grootste nederlaag (die twee zijn een `Match`), de afbeeldingsknop en de zin "Alle 12 gespeelde wedstrijden sinds 2010/11".
 - De kaart "Resultaten sinds 2010" op het witte vlak, direct onder de eerste (`ClubTimelineCard` in `src/OpponentViews.tsx`, met het onderdeel `FormTimeline`): hoe het ons verging tegen de club, seizoen na seizoen.
   Het jaar in de kop is het eerste seizoen waarvan we wedstrijden hebben, voor alle clubs samen (nu 2010/11), en schuift mee als er eerdere seizoenen bijkomen (#414).
   De lijn heeft dezelfde tooltip als die van het verloop van het seizoen: het gemiddelde op het dichtstbijzijnde punt.

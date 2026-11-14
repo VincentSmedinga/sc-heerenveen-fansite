@@ -27,7 +27,6 @@ import {
   MarkRow,
   Match,
   pointsOf,
-  ShortMatch,
   ShortStaff,
   StandingsTable,
   tableColumns,
@@ -212,14 +211,17 @@ export function CleanSheetsCard({
           <List role="list">
             {shown.map((match, index) => (
               <List.Item id={`nul-${index + 1}`} key={`${match.matchDate}-${match.competition}-${match.opponent}`}>
-                <ShortMatch
+                <Match
                   // Only played matches with both scores are in the list, so these are numbers.
+                  competition={competition === 'all' ? match.competition : undefined}
                   {...matchMoment(match, now, { withYear: since !== undefined })}
                   goalsAgainst={match.goalsAgainst ?? 0}
                   goalsFor={match.goalsFor ?? 0}
                   {...shootOutOf(match)}
                   home={match.home}
                   opponent={match.opponent}
+                  round={match.round}
+                  status="played"
                 />
               </List.Item>
             ))}
@@ -244,8 +246,8 @@ export function CleanSheetsCard({
 /**
  * The card of the statistics page with the extremes of the matches that are counted: the
  * biggest win and loss, the match with the most goals, and our earliest and our last goal. Each
- * is a short match with its name above it, as the heading of the line, in the same item as the
- * match. The list draws its line above the name (see short-match.css), so it stays between the
+ * is a `Match` with its name above it, as the heading of the line, in the same item as the
+ * match. The list draws its line above the name (see short-line.css), so it stays between the
  * items. A line without a match is left out, and the card doesn't say so. Under the list stand
  * how many matches the lines are based on: the first three on every played match, the two goals
  * on the matches whose goals are known. Without a played match it is a sentence for visitors
@@ -293,14 +295,17 @@ export function ExtremesCard({
                   {name}
                   {goal !== undefined && goalLine(goal)}
                 </Text>
-                <ShortMatch
+                <Match
                   // Only played matches with both scores count, so these are numbers.
+                  competition={competition === 'all' ? match.competition : undefined}
                   {...matchMoment(match, now)}
                   goalsAgainst={match.goalsAgainst ?? 0}
                   goalsFor={match.goalsFor ?? 0}
                   {...shootOutOf(match)}
                   home={match.home}
                   opponent={match.opponent}
+                  round={match.round}
+                  status="played"
                 />
               </List.Item>
             ))}
@@ -1417,13 +1422,16 @@ export function StreaksCard({
               <List role="list">
                 {last.map(({ match }) => (
                   <List.Item key={`${match.competition}-${match.round}`}>
-                    <ShortMatch
+                    <Match
+                      competition={competition === 'all' ? match.competition : undefined}
                       {...matchMoment(match, now)}
                       goalsAgainst={match.goalsAgainst}
                       goalsFor={match.goalsFor}
                       {...shootOutOf(match)}
                       home={match.home}
                       opponent={match.opponent}
+                      round={match.round}
+                      status="played"
                     />
                   </List.Item>
                 ))}
@@ -1555,7 +1563,7 @@ export function TopScorersCard({
 }
 
 // Between the parts of a line of meta text. The dot is only for the eye and is hidden from a
-// screen reader, as in a short match. The spaces stay outside the hidden span, so the parts
+// screen reader, as in a `Match`. The spaces stay outside the hidden span, so the parts
 // don't run together in the accessibility tree.
 export const metaSeparator = (
   <>
@@ -1655,7 +1663,7 @@ export function MatchLine({
   )
 }
 
-/** A goal for the name above a short match: the minute with stoppage time, and the player. */
+/** A goal for the name above a `Match`: the minute with stoppage time, and the player. */
 function goalLine({ goal }: ExtremeGoal) {
   const minute = goal.stoppageMinutes === null ? `${goal.minute}` : `${goal.minute}+${goal.stoppageMinutes}`
 
