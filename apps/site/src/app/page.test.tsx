@@ -861,10 +861,11 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     expect(html.match(/class="hf-match"/g)).toHaveLength(2)
     expect(html.indexOf('Tweede ronde')).toBeLessThan(html.indexOf('Speelronde 10'))
     expect(html).not.toContain('Speelronde 9')
-    // The form with the competition: the day and the stadium first, the competition and the
-    // round last, and no "Thuis" or "Uit".
-    expect(html).toContain('KNVB Beker <span aria-hidden="true">·</span> Tweede ronde</p>')
-    expect(html).toMatch(/hf-match-when"><time[^>]*>di 20 okt<\/time>.*?hf-match-label">KNVB Beker/s)
+    // The first line has the day, the competition and the round, and no "Thuis" or "Uit".
+    expect(html).toContain(
+      'KNVB Beker</span> <span aria-hidden="true">·</span> <span class="hf-match-part">Tweede ronde</span></p>',
+    )
+    expect(html).toMatch(/hf-match-when"><span class="hf-match-part"><time[^>]*>di 20 okt<\/time>.*?KNVB Beker/s)
     expect(html).not.toMatch(/<span>(?:Thuis|Uit)<\/span>/)
     expect(html).not.toContain('Uitgesteld')
     expect(html).toContain('di 20 okt')
@@ -892,7 +893,9 @@ describe('the matches and the table in the sidebar of the homepage', () => {
 
     const html = await renderMatchesCard()
 
-    expect(html).toContain('Play-offs Conference League <span aria-hidden="true">·</span> Halve finale')
+    expect(html).toContain(
+      'Play-offs Conference League</span> <span aria-hidden="true">·</span> <span class="hf-match-part">Halve finale',
+    )
     expect(html.indexOf('Halve finale')).toBeLessThan(html.indexOf('Speelronde 10'))
     expect(html).not.toContain('KNVB Beker')
   })
@@ -1085,7 +1088,7 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     expect(await renderStandingsCard()).toContain('Wedstrijden en stand: Wikipedia')
   })
 
-  it('ends the line of a played match with the referee, and leaves it out when it is not known', async () => {
+  it('ends the line under the clubs of a played match with the referee, and leaves it out when it is not known', async () => {
     const played = matchData.matches.filter((match) => match.status === 'played')
     const last = played.at(-1)!
 
@@ -1095,10 +1098,10 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     })
 
     expect(withoutIcons(await renderMatchesCard())).toContain(
-      '<span aria-hidden="true">·</span> Tweede ronde <span aria-hidden="true">·</span> <span class="hf-match-referee">Pieter Maquette</span>',
+      'hf-match-where"><span class="hf-match-part">Pieter Maquette</span></p>',
     )
     vi.mocked(getMatchData).mockResolvedValue(matchData)
-    expect(await renderMatchesCard()).not.toContain('hf-match-referee')
+    expect(await renderMatchesCard()).not.toContain('Pieter Maquette')
   })
 
   it('ends the line of the next match with the referee too, when Wikipedia names him before the match', async () => {
@@ -1112,8 +1115,8 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     const html = await renderMatchesCard()
     const next = html.slice(html.indexOf('Proefstad SV'))
 
-    expect(html.match(/hf-match-referee/g)).toHaveLength(1)
-    expect(next).toContain('<span class="hf-match-referee">Pieter Maquette</span>')
+    expect(html.match(/Pieter Maquette/g)).toHaveLength(1)
+    expect(next).toContain('<span class="hf-match-part">Pieter Maquette</span>')
   })
 
   it('shows the referee of both matches when both are known, and nothing for a match without one', async () => {
@@ -1122,17 +1125,17 @@ describe('the matches and the table in the sidebar of the homepage', () => {
       matches: matchData.matches.map((match) => ({ ...match, referee: 'Pieter Maquette' })),
     })
 
-    expect((await renderMatchesCard()).match(/hf-match-referee/g)).toHaveLength(2)
+    expect((await renderMatchesCard()).match(/Pieter Maquette/g)).toHaveLength(2)
 
     vi.mocked(getMatchData).mockResolvedValue({
       ...matchData,
       matches: matchData.matches.map((match) => ({ ...match, referee: null })),
     })
 
-    expect(await renderMatchesCard()).not.toContain('hf-match-referee')
+    expect(await renderMatchesCard()).not.toContain('Pieter Maquette')
   })
 
-  it('has the previous meeting and the form under the clubs of the next match, before its competition', async () => {
+  it('has the previous meeting and the form under the clubs of the next match, before its stadium', async () => {
     vi.mocked(getUpcomingDetails).mockResolvedValue({
       opponentForm: ['W', 'G', 'V'],
       previousMeeting: { dataSource: 'wikipedia', goalsAgainst: 1, goalsFor: 2, matchDate: '2026-04-12' },
@@ -1147,7 +1150,7 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     expect(next).toContain('<span class="hf-visually-hidden">2 tegen 1</span>')
     expect(next).toContain('Vorm Proefstad SV: winst, gelijk, verlies')
     expect(next.indexOf('Vorige keer')).toBeLessThan(next.indexOf('Vorm Proefstad SV'))
-    expect(next.indexOf('Vorm Proefstad SV')).toBeLessThan(next.indexOf('Eredivisie'))
+    expect(next.indexOf('Vorm Proefstad SV')).toBeLessThan(next.indexOf('hf-match-where'))
     // The previous match of the card has no small lines.
     expect(html.slice(0, html.indexOf('Proefstad SV'))).not.toContain('Vorige keer')
     // No heading, no scorers and no legend for the abbreviations in this part of the card.

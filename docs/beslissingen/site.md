@@ -2180,6 +2180,7 @@
 - **Waarom:** in Programma bepaalt de datum de volgorde, dus die staat bovenaan; onder de kop van een competitie leest de ronde als het begin van de regel.
   De volgorde in de broncode is de volgorde op het scherm en voor een schermlezer.
 - **Alternatieven:** overal dezelfde volgorde (de competitie staat dan tientallen keren onder een kop die haar al noemt, zoals bij #658 is besloten).
+- **Later:** zie _Een wedstrijd heeft twee metaregels met een vaste rol en een vaste volgorde_ in `designsysteem.md` (14 november 2026): `competition` kiest geen vorm meer, de dag en de ronde staan altijd boven de clubs, en het stadion staat onder de clubs.
 
 ## De site toont de play-offs voor de Europa League zoals die voor de Conference League
 
@@ -5868,3 +5869,23 @@
 - **Waarom:** de datum links in `ShortMatch` neemt veel ruimte en laat de regel met de clubs toch vaak afbreken; een `Match` met de clubs en de uitslag op een eigen regel kost weinig extra hoogte, en met één onderdeel hoeft de site niet meer te kiezen tussen twee.
 - **Alternatieven:** een eigenschap `showCompetition` op `Match` (meer API, terwijl weglaten van `competition` hetzelfde doet); de eerste regel van `Match` aanpassen zodat de datum altijd bovenaan staat (de eigenaar wil dat later bekijken).
 - **Later:** zie _`Match` is voor een volledige lijst, `ShortMatch` voor een selectie_ (4 november 2026).
+
+## Stadion en scheidsrechter staan alleen op de lijsten met detail
+
+- **Datum:** 14 november 2026
+- **Besluit:** `MatchLines` en `MatchLine` geven `stadium` en `referee` alleen door met `withDetails` (#1258).
+  Dat zijn Home (vorige en volgende wedstrijd), Wedstrijden · Laatste wedstrijd en Programma.
+  Uitslagen per competitie, Zoeken, de pagina's van een club, de kaarten van Cijfers, Records en Onze uitslagen geven ze niet door.
+  `extra` blijft alleen op Home.
+- **Waarom:** waar een lijst vooral dient om wedstrijden te vinden of te vergelijken, is de herkenning genoeg en blijft de regel kort; de regel onder de clubs hoort bij de lijsten die wat meer vertellen.
+- **Alternatieven:** overal tonen, met meer afgebroken regels en een scheidsrechter bij bijna elke wedstrijd.
+- **Later:** de lijst Uitslagen per competitie en Programma hadden het stadion bovenaan, in de regel "ronde · dag · stadion"; dat geldt niet meer.
+
+## Volledige namen van competities en "Speelronde N" blijven in de metaregel
+
+- **Datum:** 14 november 2026
+- **Besluit:** de metaregel boven een wedstrijd houdt de volledige naam van de competitie en de ronde zoals de bron ze heeft, zoals "Play-offs Conference League" en "Speelronde 9" (#1258).
+  De competitie staat alleen waar de lijst competities mengt (Home, Laatste wedstrijd, Programma, Zoeken, de pagina's van een club bij "alle competities", en de kaarten van Cijfers en Records bij "alle competities"); onder een kop of een schakelaar die haar al noemt, staat "dag · ronde".
+  Het jaar volgt de bestaande regels van `matchMoment`.
+- **Waarom:** de woorden zijn die van de bron en van de rest van de site, en de regel past op 390 pixel en breder bij een gewone wedstrijd op één regel (zie de metingen in _Een wedstrijd heeft twee metaregels met een vaste rol en een vaste volgorde_ in `designsysteem.md`); op 320 pixel breekt hij vaak af, tussen twee onderdelen.
+- **Alternatieven:** korte namen als bij de competitieschakelaar (Eredivisie, Beker, Europa) en "ronde 9" voor "Speelronde 9".

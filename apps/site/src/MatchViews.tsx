@@ -693,7 +693,7 @@ export function MatchesCard({
           }
           matches={shown}
           now={now}
-          withReferee
+          withDetails
         />
       )}
       <Text>
@@ -801,7 +801,8 @@ export function MatchLegend({ matches }: { matches: readonly MatchLineMatch[] })
 
 /**
  * A list of matches, each as a line with its own day or time. A line names its competition,
- * unless `withCompetition` is false, for a list under a heading that names it already. The
+ * unless `withCompetition` is false, for a list under a heading that names it already. Only a
+ * list with detail (`withDetails`) has the stadium and the referee under the clubs. The
  * legend under the list holds only the abbreviations of these matches.
  */
 export function MatchLines({
@@ -811,7 +812,7 @@ export function MatchLines({
   now,
   reportAddresses,
   withCompetition = true,
-  withReferee = false,
+  withDetails = false,
 }: {
   /** Small lines under the clubs of a match, or nothing for a match that has none. */
   extraOf?: ((match: PublicMatch) => ReactNode) | undefined
@@ -829,8 +830,8 @@ export function MatchLines({
    */
   reportAddresses?: ReadonlyMap<string, string> | undefined
   withCompetition?: boolean
-  /** Whether the line of a match ends with the referee, when it is known. */
-  withReferee?: boolean
+  /** Whether the line under the clubs has the stadium and the referee, where they are known. */
+  withDetails?: boolean
 }) {
   return (
     <>
@@ -842,9 +843,10 @@ export function MatchLines({
               live={liveReports?.has(`${match.competition}|${match.round}`) === true}
               match={match}
               now={now}
-              referee={withReferee ? match.referee : undefined}
+              referee={withDetails ? match.referee : undefined}
               reportHref={reportAddresses?.get(`${match.competition}|${match.round}`)}
               withCompetition={withCompetition}
+              withStadium={withDetails}
             />
           </List.Item>
         ))}
@@ -1599,6 +1601,7 @@ export function MatchLine({
   referee,
   reportHref,
   withCompetition = true,
+  withStadium = false,
   withYear = false,
 }: {
   /** Small lines under the clubs, such as the previous meeting. */
@@ -1610,11 +1613,13 @@ export function MatchLine({
   live?: boolean
   match: MatchLineMatch
   now: Date
-  /** The referee, for the end of the last line of the match; only the homepage card has it. */
+  /** The referee, for the line under the clubs, after the stadium; detail lists pass it. */
   referee?: null | string | undefined
   /** The address of the page of the match, when it has one: the line then links to it. */
   reportHref?: string | undefined
   withCompetition?: boolean
+  /** Whether the line under the clubs names the stadium, when it is known. */
+  withStadium?: boolean
   withYear?: boolean
 }) {
   const common = {
@@ -1625,7 +1630,7 @@ export function MatchLine({
     opponent: match.opponent,
     referee,
     round: match.round,
-    stadium: match.stadium,
+    stadium: withStadium ? match.stadium : undefined,
   }
 
   if (match.status === 'postponed' || match.status === 'cancelled') {

@@ -88,7 +88,7 @@ describe('the links to the pages of the matches', () => {
     expect(resultCards(html).match(/Het verslag/gu)).toHaveLength(1)
   })
 
-  it('does not show the referee in the line, also for a match that has a page', async () => {
+  it('shows the referee under the clubs in Laatste wedstrijd and Programma, and not in the results', async () => {
     vi.mocked(getReportAddresses).mockResolvedValue(
       new Map([['Eredivisie|Speelronde 7', '/wedstrijden/2026-27/2026-09-20-oud-resultaat']]),
     )
@@ -97,7 +97,10 @@ describe('the links to the pages of the matches', () => {
       matches: matchData.matches.map((match) => ({ ...match, referee: 'Pieter Maquette' })),
     })
 
-    expect(await render()).not.toContain('Pieter Maquette')
+    const html = await render()
+
+    expect(section(html, 'programma')).toContain('Pieter Maquette')
+    expect(resultCards(html)).not.toContain('Pieter Maquette')
   })
 
   it('shows the results without links, and says why in the log, when the pages cannot be read', async () => {
@@ -317,26 +320,30 @@ describe('the page /wedstrijden', () => {
     expect(league.indexOf('Speelronde 9')).toBeGreaterThan(-1)
     expect(cup).toContain('Tweede ronde')
     expect(cup).not.toContain('Speelronde')
-    expect(resultCards(html)).not.toContain('<p class="hf-meta hf-match-label">')
+    expect(resultCards(html)).not.toContain('Eredivisie</span>')
     expect(league).toContain('Het verloop van het seizoen')
     expect(cup).not.toContain('Het verloop van het seizoen')
   })
 
-  it('starts a line of a result with the round, then the day and the stadium', async () => {
+  it('starts a line of a result with the day, then the round, and has no stadium', async () => {
     const results = section(await render(), 'uitslagen')
 
     expect(results).toContain(
-      '<p class="hf-meta hf-match-when">Speelronde 9 <span aria-hidden="true">·</span> <time dateTime="2026-10-11">zo 11 okt</time> <span aria-hidden="true">·</span> <span>Voorbeeldpark</span></p>',
+      '<p class="hf-meta hf-match-when"><span class="hf-match-part"><time dateTime="2026-10-11">zo 11 okt</time></span> <span aria-hidden="true">·</span> <span class="hf-match-part">Speelronde 9</span></p>',
     )
+    expect(results).not.toContain('Voorbeeldpark')
     expect(results).not.toMatch(/Thuis|Uit</)
   })
 
-  it('puts the competition and the round last in the lines of the programme, after the day and the stadium', async () => {
+  it('puts the day, the competition and the round above the clubs in the programme, and the stadium under them', async () => {
     const programme = section(await render(), 'programma')
 
-    expect(programme).toContain('Eredivisie <span aria-hidden="true">·</span> Speelronde 10</p></div>')
+    expect(programme).toContain(
+      'Eredivisie</span> <span aria-hidden="true">·</span> <span class="hf-match-part">Speelronde 10</span></p>',
+    )
+    expect(programme).toContain('hf-match-where"><span class="hf-match-part">Stadion Proeflaan</span></p>')
     expect(programme.indexOf('wo 28 okt 19:45')).toBeLessThan(programme.indexOf('Proefstad SV'))
-    expect(programme.indexOf('Proefstad SV')).toBeLessThan(programme.indexOf('Speelronde 10'))
+    expect(programme.indexOf('Speelronde 10')).toBeLessThan(programme.indexOf('Proefstad SV'))
   })
 
   it('has a card Uitslagen for each competition only when it has a result, in the order of the bar', async () => {

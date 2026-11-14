@@ -15,7 +15,8 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Een wedstrijd van sc Heerenveen 1, als regel in een lijst: de dag en het stadion, de twee clubs met de uitslag ertussen, eventueel de doelpuntenmakers, en de competitie met de ronde.',
+          'Een wedstrijd van sc Heerenveen 1, als regel in een lijst: bovenaan wanneer en wat (de dag, de competitie en de ronde), dan de twee clubs met de uitslag ertussen, eventueel de doelpuntenmakers, en onderaan waar en wie (het stadion en de scheidsrechter).',
+          'De twee metaregels hebben elk een vaste volgorde: dag, competitie, ronde; stadion, scheidsrechter. Een onderdeel breekt niet in tweeën, dus een regel die te lang is, breekt tussen twee onderdelen. De pagina bepaalt wat er staat door iets door te geven of weg te laten: laat `competition` weg onder een kop die de competitie al noemt, en geef `stadium` en `referee` alleen mee waar de lijst die details wil.',
           'Kies hem voor een volledige lijst, zoals een seizoen of alle wedstrijden tegen één club; ook voor een selectie, zoals een record. Laat `competition` weg onder een kop die de competitie al noemt.',
           'De thuisclub staat eerst en de uitslag heeft de kleur van de uitkomst voor sc Heerenveen, nooit als enig teken. Een wedstrijd kan nog moeten komen, uitgesteld of geannuleerd zijn, live gaan, na verlenging of strafschoppen eindigen, of nog geen uitslag hebben.',
           'Zet hem in een `List.Item` met `role="list"` op de `List`, in een `Card` onder een kop van niveau 2. Hij is gebouwd uit `Time`, `Link` en `Text`, met de uitkomst die ook de andere onderdelen met een uitslag gebruiken.',
@@ -593,7 +594,7 @@ const renderWithoutCompetition = () => (
 )
 
 export const WithoutCompetition = meta.story({
-  name: 'Zonder competitie: de ronde eerst, onder een kop die de competitie noemt',
+  name: 'Zonder competitie: dag en ronde, onder een kop die de competitie noemt',
   render: renderWithoutCompetition,
 })
 
@@ -820,6 +821,78 @@ const renderRefereeAndExtra = () => (
 )
 
 export const WithRefereeAndExtra = meta.story({
-  name: 'Met de scheidsrechter na de ronde, en kleine regels onder de clubs',
+  name: 'Met de scheidsrechter na het stadion, en kleine regels onder de clubs',
   render: renderRefereeAndExtra,
+})
+
+// The two small lines in the cases that decide how long they get: a played match with its
+// year, one that is still to come with its time, a weekend without a time, and the longest
+// competition and round. Under the clubs stand the stadium and the referee. The clubs are made
+// up.
+const renderMetaLines = () => (
+  <div style={{ maxInlineSize: '24rem' }}>
+    <Card aria-labelledby="metaregels-kop">
+      <Heading id="metaregels-kop" level={2}>
+        Metaregels
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            dateTime="2015-10-24"
+            goalsAgainst={0}
+            goalsFor={1}
+            home
+            opponent="Voorbeeld United"
+            referee="Jan Voorbeeld"
+            round="Speelronde 9"
+            stadium="Stadion Proeflaan"
+            status="played"
+            time="za 24 okt 2015"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            dateTime="2026-11-07T19:45:00Z"
+            home={false}
+            opponent="Proefstad SV"
+            referee="Karin Proefstad"
+            round="Speelronde 13"
+            stadium="Voorbeeldpark"
+            status="scheduled"
+            time="za 7 nov 20:45"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            dateTime="2027-02-12"
+            home
+            opponent="Nepstad Rangers"
+            round="Speelronde 22"
+            status="scheduled"
+            time="weekend 12–14 februari"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="Play-offs Conference League"
+            dateTime="2027-05-20T19:00:00Z"
+            home={false}
+            opponent="SV Proefdorp"
+            referee="Jan Voorbeeld"
+            round="Eerste ronde, wedstrijd 1/2"
+            status="scheduled"
+            time="do 20 mei 21:00"
+          />
+        </List.Item>
+      </List>
+    </Card>
+  </div>
+)
+
+export const MetaLines = meta.story({
+  name: 'Metaregels: wanneer en wat boven de clubs, waar en wie eronder',
+  render: renderMetaLines,
 })

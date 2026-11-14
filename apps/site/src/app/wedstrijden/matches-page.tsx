@@ -211,7 +211,13 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
               <Heading anchor id={lastMatchCard.id} level={2}>
                 {lastMatchCard.name}
               </Heading>
-              <MatchLines liveReports={liveReports} matches={[previous]} now={now} reportAddresses={reportAddresses} />
+              <MatchLines
+                liveReports={liveReports}
+                matches={[previous]}
+                now={now}
+                reportAddresses={reportAddresses}
+                withDetails
+              />
             </Card>
           </Page.Cell>
         )}
@@ -228,7 +234,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
                     : 'Er staan dit seizoen geen wedstrijden meer op het programma.'}
                 </Text>
               ) : (
-                <MatchLines matches={programme} now={now} />
+                <MatchLines matches={programme} now={now} withDetails />
               )}
             </Card>
           </Page.Cell>

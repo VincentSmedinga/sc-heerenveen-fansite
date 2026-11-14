@@ -113,15 +113,15 @@ type MatchBaseProps = {
   /** A match has no children: everything it shows comes from the props below. */
   children?: never
   /**
-   * The competition as a visitor knows it, such as `Eredivisie` or `KNVB Beker`. It gives the
-   * match the form with the competition: the day first and the competition with the round as
-   * the last line. Leave it out where the heading above the list already names it: the first
-   * line then starts with the round.
+   * The competition as a visitor knows it, such as `Eredivisie` or `KNVB Beker`. It stands in
+   * the line above the clubs, between the day and the round. Leave it out where the heading
+   * above the list or a switch already names it.
    */
   competition?: string | undefined
   /**
-   * Small lines under the clubs, before the line with the competition: something about this
-   * match that the page puts there, such as the previous meeting or the form of the opponent.
+   * Small lines under the clubs, before the line with the stadium and the referee: something
+   * about this match that the page puts there, such as the previous meeting or the form of the
+   * opponent.
    * The match sets them in the small text of its other lines and has no say in what they say.
    */
   extra?: ReactNode
@@ -137,14 +137,17 @@ type MatchBaseProps = {
   /** The club sc Heerenveen plays, as plain text. */
   opponent: string
   /**
-   * The name of the referee, as plain text. It ends the line with the competition and the
-   * round, after another separator: `Eredivisie · Speelronde 2 · Danny Makkelie`, without a
-   * label. It needs `competition`, which has that line, and shows nothing without a name.
+   * The name of the referee, as plain text. It ends the line under the clubs, after the
+   * stadium: `Abe Lenstra Stadion · Danny Makkelie`, without a label. It shows nothing without
+   * a name.
    */
   referee?: null | string | undefined
   /** The round as the source has it, such as `Speelronde 12` or `Tweede ronde`. */
   round: string
-  /** The stadium, as plain text. Without it the line has the day or the time alone. */
+  /**
+   * The stadium, as plain text. It starts the line under the clubs, with the referee after it.
+   * Without a stadium and a referee there is no such line.
+   */
   stadium?: null | string | undefined
 } & Omit<ComponentPropsWithoutRef<'div'>, 'children'>
 
@@ -206,20 +209,20 @@ const separator = (
 )
 
 /**
- * A match of sc Heerenveen 1 as a line in a list: when and where, the two clubs with the result
- * between them, the scorers, and the competition and the round. It is plain text, with no club
- * badge, only the names. Only a match that has a page of its own (`reportHref`) ends with the
- * link "Het verslag"; the others have no link. match.css gives
- * it its look, and draws the lines between the lines of a List.
+ * A match of sc Heerenveen 1 as a line in a list: what it is and when, the two clubs with the
+ * result between them, the scorers, and where and who. It is plain text, with no club badge,
+ * only the names. Only a match that has a page of its own (`reportHref`) ends with the link
+ * "Het verslag"; the others have no link. match.css gives it its look, and draws the lines
+ * between the lines of a List.
  *
- * The order of the lines depends on `competition`. With it, as in Programma and on the
- * homepage, where matches of more than one competition stand together and the day decides the
- * order, the first line is the day or the time and the stadium ("zo 8 nov 12:15 · Abe Lenstra
- * Stadion"), then the clubs and the scorers, and the last line is the competition and the round
- * ("Eredivisie · Speelronde 12"). Without it, under a heading that names the competition, the
- * first line starts with the round ("Speelronde 1 · zo 11 aug 2024 · Johan Cruijff ArenA"),
- * followed by the clubs and the scorers. The order in the source is the order on the screen and
- * the order a screen reader reads.
+ * A match has at most two small lines of its own, each with a fixed role and a fixed order.
+ * Above the clubs stand when and what: the day or the time, the competition and the round ("za
+ * 24 okt · Eredivisie · Speelronde 9"). The page decides what is on it: without `competition`,
+ * under a heading that names it, the line is "za 24 okt · Speelronde 9". Under the clubs and
+ * the scorers stand where and who: the stadium and the referee ("Abe Lenstra Stadion · Danny
+ * Makkelie"), for the lists that want that detail; without both there is no such line. Each
+ * part of a line stays in one piece, so a line that is too long breaks between two parts. The
+ * order in the source is the order on the screen and the order a screen reader reads.
  *
  * The two clubs are in the order they are announced, the home club first, and the stadium says
  * where it is played; the line does not say "Thuis" or "Uit". A played match has the result
@@ -317,28 +320,21 @@ export const Match = ({
     ) : (
       <Time dateTime={dateTime}>{time}</Time>
     )
-  const where = stadium ? (
-    <>
-      {separator}
-      <span>{stadium}</span>
-    </>
-  ) : null
+  const where = [stadium, referee].filter((part) => part)
 
   return (
     <div {...props} className={classNames('hf-match', className)}>
-      {competition ? (
-        <Text appearance="meta" className="hf-match-when">
-          {when}
-          {where}
-        </Text>
-      ) : (
-        <Text appearance="meta" className="hf-match-when">
-          {round}
-          {separator}
-          {when}
-          {where}
-        </Text>
-      )}
+      <Text appearance="meta" className="hf-match-when">
+        <span className="hf-match-part">{when}</span>
+        {competition ? (
+          <>
+            {separator}
+            <span className="hf-match-part">{competition}</span>
+          </>
+        ) : null}
+        {separator}
+        <span className="hf-match-part">{round}</span>
+      </Text>
       <p className="hf-match-clubs">
         <span className={first === ourClub ? 'hf-match-own' : undefined}>{first}</span>{' '}
         <span className={classNames('hf-match-score', outcome ? `hf-match-${outcome}` : 'hf-match-versus')}>
@@ -391,17 +387,14 @@ export const Match = ({
         </p>
       ) : null}
       {extra ? <div className="hf-match-extra-lines">{extra}</div> : null}
-      {competition ? (
-        <Text appearance="meta" className="hf-match-label">
-          {competition}
-          {separator}
-          {round}
-          {referee ? (
-            <>
-              {separator}
-              <span className="hf-match-referee">{referee}</span>
-            </>
-          ) : null}
+      {where.length > 0 ? (
+        <Text appearance="meta" className="hf-match-where">
+          {where.map((part, index) => (
+            <Fragment key={index}>
+              {index > 0 ? separator : null}
+              <span className="hf-match-part">{part}</span>
+            </Fragment>
+          ))}
         </Text>
       ) : null}
       {reportHref === undefined ? null : (

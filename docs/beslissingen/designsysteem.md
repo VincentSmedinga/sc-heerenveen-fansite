@@ -3148,6 +3148,7 @@
 - **Datum:** 9 november 2026
 - **Besluit:** `Match` krijgt twee props.
   `referee` is de naam van de scheidsrechter als tekst: hij staat na de ronde in de laatste regel, zonder label ("Eredivisie · Speelronde 2 · Danny Makkelie"), en alleen met `competition`.
+  **Later:** zie _Een wedstrijd heeft twee metaregels met een vaste rol en een vaste volgorde_ (14 november 2026): `referee` staat nu na het stadion in de regel onder de clubs, ook zonder `competition`.
   `extra` is een plek voor kleine regels onder de clubs: de wedstrijd zet ze in kleine tekst en laat de pagina bepalen wat erin staat.
   Dit wijzigt de keuze van #416 dat `Match` en `ShortMatch` geen scheidsrechter tonen; zie _De kaart Wedstrijden op home toont de vorige ontmoeting, de vorm van de tegenstander en de scheidsrechter_ in `site.md`.
 - **Waarom:** een plek voor kleine regels houdt het component klein en vraagt geen kennis van vorm, uitkomsten of kleuren; de regels van de kaart blijven in de site.
@@ -3558,3 +3559,24 @@
 - **Waarom:** de bezoeker ziet op elke zoekpagina op dezelfde manier wat hij kan instellen en wat het resultaat is.
 - **Alternatieven:** de filters in één warme kaart zetten, wat een extra laag om de rijen geeft; alleen wit en zacht toestaan voor de andere kaarten, wat sterk uitsluit zonder reden; de regel alleen in de code vastleggen.
 - **Later:** de kaart met het zoekveld was zacht zonder resultaten en wit met resultaten; dat geldt niet meer.
+
+## Een wedstrijd heeft twee metaregels met een vaste rol en een vaste volgorde
+
+- **Datum:** 14 november 2026
+- **Besluit:** `Match` heeft hoogstens twee metaregels, elk met een vaste rol en een vaste volgorde (#1258).
+  - **Boven de clubs: wanneer en wat.** De dag (of de tijd bij een wedstrijd die nog komt), de competitie en de ronde, in die volgorde: "za 24 okt 2015 · Eredivisie · Speelronde 9".
+    Zonder `competition` staat de ronde na de dag: "za 24 okt · Speelronde 9".
+  - **Onder de clubs: waar en wie.** Het stadion en de scheidsrechter, in die volgorde, "Abe Lenstra Stadion · Danny Makkelie", na de doelpunten en `extra` en vóór de link naar het verslag.
+    Is er maar één van de twee bekend, dan staat alleen die; is geen van beide bekend, dan is er geen regel.
+    `referee` werkt nu ook zonder `competition`.
+  - **Elk onderdeel blijft in één stuk** (`.hf-match-part`, een `inline-block` met een grootste breedte van de regel), zodat een regel die te lang is tussen twee onderdelen afbreekt; een onderdeel dat breder is dan de regel breekt zoals eerst.
+    De scheidingstekens zijn verborgen voor een schermlezer en de spaties staan erbuiten, zoals voorheen.
+  - **`Match` krijgt geen nieuwe eigenschap die de context noemt.** De pagina laat een onderdeel weg door `competition`, `stadium` of `referee` niet door te geven.
+- **Gemeten** in de gebouwde Storybook (de story _Metaregels_, een kaart van 24 rem): een teken van de metatekst is gemiddeld 6,2 pixel breed, niet de 7,6 pixel van de schatting in het issue.
+  De regel boven de clubs van een gewone Eredivisiewedstrijd ("za 24 okt 2015 · Eredivisie · Speelronde 9", 42 tekens, 256 pixel) past op 390 en 900 pixel op één regel, en onder 320 pixel (254 pixel beschikbaar) net niet.
+  De regel onder de clubs met stadion en scheidsrechter (33 tekens, 209 pixel) past op alle drie de breedtes op één regel.
+  Het weekend zonder tijd (51 tekens, 317 pixel) past op 390 en 900 pixel; de langste combinatie ("do 20 mei 21:00 · Play-offs Conference League · Eerste ronde, wedstrijd 1/2", 464 pixel) breekt op 390 en 900 pixel in twee regels, tussen twee onderdelen.
+  Op een kaart past dus ongeveer 41 tekens op 320 pixel, 52 op 390 pixel en 54 op 900 pixel, meer dan het issue schatte.
+- **Waarom:** de volgorde is op elke kaart dezelfde en leest van groot naar klein; de regel boven de clubs, die de wedstrijd herkenbaar maakt, past bij een gewone wedstrijd op één regel, en een afbreking valt tussen twee onderdelen.
+- **Alternatieven:** alles op één regel boven de clubs (te lang: het stadion is bij ruim de helft van de wedstrijden bekend); het stadion boven en de scheidsrechter onder (de bovenste regel wordt te lang); één eigenschap `context` waarmee `Match` zelf onderdelen weglaat (meer API en een nieuw begrip om te documenteren); een afbreking binnen een onderdeel toestaan (een stadion of een competitie in tweeën op een smalle kaart).
+- **Later:** zie _De volgorde van de regels van een wedstrijd hangt af van de competitie_ in `site.md` (3 november 2026): `competition` kiest de volgorde niet meer, de ronde staat altijd na de dag, en het stadion staat onder de clubs.
