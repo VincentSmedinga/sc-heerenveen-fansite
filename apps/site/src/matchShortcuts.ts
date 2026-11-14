@@ -37,6 +37,9 @@ export const seasonBySeasonCard = { id: 'seizoen-voor-seizoen', name: 'Seizoen v
 /** The name and the anchor of the card with our results per kind of competition, on Cijfers. */
 export const competitionTallyCard = { id: 'per-competitie', name: 'Per competitie' } as const
 
+/** The name and the anchor of the card with our results per referee, on Cijfers. */
+export const refereesCard = { id: 'scheidsrechters', name: 'Scheidsrechters' } as const
+
 type Shortcut = { href: string; label: string }
 
 const resultsCards: Record<Competition, { id: string; name: string }> = {
