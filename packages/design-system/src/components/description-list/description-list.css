@@ -36,4 +36,17 @@
   .hf-description-list-stacked dd {
     overflow-wrap: anywhere;
   }
+
+  /*
+   * A Match or a paragraph as the description is drawn as it is elsewhere: the size and weight
+   * of running text, and a Match without the space it has around itself in a list.
+   */
+  .hf-description-list dd:has(> :is(.hf-match, p)) {
+    font-size: var(--hf-body-font-size);
+    font-weight: var(--hf-body-font-weight);
+  }
+
+  .hf-description-list dd > .hf-match {
+    padding-block: var(--hf-space-xs) 0;
+  }
 }

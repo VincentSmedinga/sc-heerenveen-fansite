@@ -1,6 +1,6 @@
 import type { PublicMatch } from '@fansite/db/queries'
 
-import { Card, Heading, List, Match, Text } from '@fansite/design-system'
+import { Card, DescriptionList, Heading, Match, Text } from '@fansite/design-system'
 
 import type { CijfersSearch } from './cijfers-search'
 
@@ -72,10 +72,9 @@ export function RecordsCard({
         <Text>We hebben geen uitslagen.</Text>
       ) : (
         <>
-          <List role="list">
+          <DescriptionList stacked>
             {shown.map(({ match, name }) => (
-              <List.Item key={name}>
-                <Text appearance="meta">{name}</Text>
+              <DescriptionList.Item key={name} term={name}>
                 <Match
                   // Only played matches with both scores count, so these are numbers.
                   competition={competition === 'all' ? match.competition : undefined}
@@ -88,21 +87,19 @@ export function RecordsCard({
                   round={match.round}
                   status="played"
                 />
-              </List.Item>
+              </DescriptionList.Item>
             ))}
             {streaks.map(({ name, streak }) => (
-              <List.Item key={name}>
-                <Text appearance="meta">{name}</Text>
+              <DescriptionList.Item key={name} term={name}>
                 <Text>{`${streak.length} ${matchesWord(streak.length)}, ${streakSeasons(streak)}`}</Text>
-              </List.Item>
+              </DescriptionList.Item>
             ))}
             {shootOuts.total > 0 && (
-              <List.Item>
-                <Text appearance="meta">Beslist met strafschoppen</Text>
+              <DescriptionList.Item term="Beslist met strafschoppen">
                 <Text>{`${shootOuts.total} keer, ${shootOuts.won} gewonnen`}</Text>
-              </List.Item>
+              </DescriptionList.Item>
             )}
-          </List>
+          </DescriptionList>
           <MatchSearchLink link={search?.biggestWins()} what="die we wonnen, de grootste zege eerst" />
           <BasedOn known={played} played={played} />
         </>

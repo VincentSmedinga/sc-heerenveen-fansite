@@ -366,6 +366,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   `MatchLine` in `src/MatchViews.tsx` geeft hem door aan `Match`.
   Programma, Uitslagen en de kaart Wedstrijden op de pagina van een club gebruiken dezelfde `MatchLine`.
   De kaarten die wedstrijden uitkiezen (Records, Uitersten, De nul gehouden, Reeksen en de ontmoetingen op de pagina van een club) tonen ook een `Match`, zonder de scheidsrechter.
+  Waar de kaart een wedstrijd een naam geeft (Records, Uitersten en "Onze uitslagen tegen …"), is de lijst een `DescriptionList` met `stacked`: de naam is de `dt` en de `Match` of de tekst staat in de `dd`, zodat een schermlezer de naam bij de wedstrijd hoort.
   Ze geven `competition` alleen door bij de keuze "alle competities" (zie de beslissing van 14 november 2026 in `docs/beslissingen/site.md`).
 - **Homepage:** het blok "Wedstrijden" toont in één lijst de vorige wedstrijd (de eerste van Uitslagen, ook zonder uitslag, maar niet een geannuleerde) en de volgende (de eerste in het programma die een datum heeft, dus niet een uitgestelde).
   Het blok "Stand" toont drie clubs met sc Heerenveen in het midden, als dat kan, zonder balk naast de punten, en onder de tabel dezelfde regel "Gegevens nog niet bijgewerkt" als de kaart Stand op Wedstrijden.
@@ -526,7 +527,7 @@ De kaarten Alle spelers, Assists en Minuten staan hier niet: we hebben de opstel
 De kaart Bijzondere doelpunten (`SpecialGoalsCard` in `src/SpecialGoalsCard.tsx`, met `specialGoalsOf` in `src/matches.ts`), met het anker `#bijzondere-doelpunten`, staat in de zijkolom ("Meer cijfers over de spelers") op het zachte vlak.
 Op een telefoon volgt de zijkolom op de hoofdkolom, dus de lijst met doelpuntenmakers komt eerst, en de bronvermelding sluit de zijkolom af.
 Ze noemt ook de pagina's van de selectie van het seizoen, en Wikidata (CC0) als een speler daarvandaan komt.
-De kaart heeft één kop, van niveau 2, en daaronder een lijst van vier delen, gebouwd zoals de kaart Uitersten: elk deel is een `List.Item` met de naam als rustige tekst erboven (`Text appearance="meta"`) en de waarde eronder in een `ShortFact` van het designsysteem, dat de dunne lijnen tussen de delen tekent.
+De kaart heeft één kop, van niveau 2, en daaronder een lijst van vier delen: elk deel is een `List.Item` met de naam als rustige tekst erboven (`Text appearance="meta"`) en de waarde eronder in een `ShortFact` van het designsysteem, dat de dunne lijnen tussen de delen tekent.
 De naam en de waarde staan in hetzelfde lijstitem, dus een schermlezer leest ze samen.
 De delen zijn:
 
