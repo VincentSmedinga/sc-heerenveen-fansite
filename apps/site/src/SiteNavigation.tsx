@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation'
 import { useSyncExternalStore } from 'react'
 
 import { readAdminMarker, subscribeToAdminMarker } from './admin-marker'
-import { seasonFromSlug, seasonSlug } from './seasons'
+import { allSeasonsAddress, seasonFromSlug, seasonSlug } from './seasons'
 
 // The sub-pages of Nieuws, in the bar under the menu: the podcasts, the editors and the
 // search. Nieuws itself is the news overview, so there is no separate archive.
@@ -151,10 +151,24 @@ export function currentOf(pathname: string): { item?: string; subitem?: string }
  * (`/wedstrijden/2026-27`) is redirected by the page itself to the base address.
  */
 export function hrefOf(href: string, pathname: string): string {
+  if (allSeasonsPages.includes(href) && isAllSeasonsPath(pathname)) {
+    return allSeasonsAddress(href)
+  }
+
   const season = seasonPages.includes(href) ? seasonOfPath(pathname) : undefined
 
   return season === undefined ? href : `${href}/${seasonSlug(season)}`
 }
+
+/**
+ * The pages that have an address for all seasons, `<page>/alle` (see `allSeasonsAddress`).
+ * "Alle seizoenen" goes along to these and to no other page: a page without one has the current
+ * season, which is its own address.
+ */
+const allSeasonsPages: readonly string[] = [playerFiguresPath, statisticsPath]
+
+/** Whether a path is the page with all seasons of a page that has one, as `…/cijfers/alle`. */
+const isAllSeasonsPath = (pathname: string) => allSeasonsPages.some((page) => pathname === allSeasonsAddress(page))
 
 /**
  * The season in the address of a page that has one: `/wedstrijden/2023-24`,

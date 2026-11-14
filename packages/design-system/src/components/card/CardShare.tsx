@@ -33,6 +33,12 @@ export type CardShareProps = {
    */
   season?: string | undefined
   /**
+   * The first season of a card that counts all seasons, such as `1990/91`. It goes under the
+   * image as "Sinds 1990/91" and into the name of the file, in the place of a season. Use it or
+   * `season`, not both.
+   */
+  since?: string | undefined
+  /**
    * The credit of the data in the card, which goes under the image. Leave it out for a card
    * that counts only our own data: that needs no credit.
    */
@@ -46,7 +52,9 @@ export type CardShareProps = {
  * makes the image from a copy of the card on a stage out of sight, with the strip under it that
  * holds the logo, the address, the day and the source. card-share.css gives it its look.
  */
-export const CardShare = ({ season, source }: CardShareProps) => {
+export const CardShare = ({ season, since, source }: CardShareProps) => {
+  // What the image says it is about: a season, or all seasons since the first one we count.
+  const scope = since === undefined ? season : `Sinds ${since}`
   const root = useRef<HTMLDivElement>(null)
   const slot = useRef<HTMLDivElement>(null)
   const stage = useRef<HTMLDivElement>(null)
@@ -82,7 +90,7 @@ export const CardShare = ({ season, source }: CardShareProps) => {
     const make = async (target: HTMLElement) => {
       try {
         const blob = await makeCardImage(target)
-        const delivery = await deliverImage(blob, { fileName: imageFileName(title, today, season), title })
+        const delivery = await deliverImage(blob, { fileName: imageFileName(title, today, scope), title })
 
         if (current) {
           setPhase(delivery === 'cancelled' ? 'idle' : 'done')
@@ -99,7 +107,7 @@ export const CardShare = ({ season, source }: CardShareProps) => {
     return () => {
       current = false
     }
-  }, [phase, season, title, today])
+  }, [phase, scope, title, today])
 
   if (title === undefined) {
     return <div className="hf-card-share" ref={root} {...{ [marker]: '' }} />
@@ -138,7 +146,7 @@ export const CardShare = ({ season, source }: CardShareProps) => {
                 <Logo />
                 <div className="hf-card-share-lines">
                   <Text appearance="meta" className="hf-card-share-address">
-                    {season === undefined ? '' : `Seizoen ${season} · `}
+                    {scope === undefined ? '' : `${since === undefined ? 'Seizoen ' : ''}${scope} · `}
                     {window.location.host} · {imageDay(today)}
                   </Text>
                   {source === undefined ? null : <div className="hf-card-share-credit">{source}</div>}

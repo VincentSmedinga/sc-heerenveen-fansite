@@ -3,6 +3,7 @@ import type { FormResult } from '@fansite/design-system'
 import {
   hasEditedMatches,
   listAllMatchDays,
+  listAllMatches,
   listAllMatchGoals,
   listAllStaff,
   listClubStandings,
@@ -388,6 +389,17 @@ async function loadFinalPlaces(): Promise<FinalPlace[]> {
 export const getFinalPlaces = cacheFor(currentSeasonPeriod, loadFinalPlaces)
 
 /**
+ * Every match of every season with its goals, for the page Wedstrijden · Cijfers with all
+ * seasons: about 1,400 matches, in three queries. It is kept for five minutes, like the data of
+ * the current season, which is in it. The page gives each card these matches, so the cards that
+ * count one season count all of them.
+ */
+export const getAllMatches = cacheFor(currentSeasonPeriod, () => listAllMatches(getDatabase().db))
+
+/** A match of any season, which has its `season` (`2025/26`). */
+export type AllMatch = Awaited<ReturnType<typeof getAllMatches>>[number]
+
+/**
  * The score and the goals of every match of every season, for the list of the goal scorers of
  * all time. One query for all seasons, kept for an hour like a season that is over.
  */
@@ -586,9 +598,12 @@ export function leagueResultsOf(matches: PublicMatch[]): FormResult[] {
  * extra time, and a shoot-out is not in it. The result is another matter: a cup tie that a
  * shoot-out decided is a win or a loss (see `resultOf`).
  */
-export function playedMatchesOf(matches: PublicMatch[], choice: CompetitionChoice): LeagueMatch[] {
+export function playedMatchesOf<T extends PublicMatch>(
+  matches: readonly T[],
+  choice: CompetitionChoice,
+): (LeagueMatch & T)[] {
   return matches.filter(
-    (match): match is LeagueMatch =>
+    (match): match is LeagueMatch & T =>
       matchCountsFor(match, choice) &&
       match.status === 'played' &&
       match.goalsFor !== null &&
@@ -1652,6 +1667,46 @@ function hasBegun(match: Pick<PublicMatch, 'dateText' | 'kickoffAt' | 'matchDate
 export const attendanceStep = 5000
 
 /**
+ * What the card Toeschouwers of all seasons shows: the match with the most visitors, home or
+ * away, and the home match with the most, and the average at home. A match without a number, or
+ * one without an audience, counts for nothing, so `known` is the number of matches the figures
+ * come from. The numbers are Wikipedia's estimates, and the importer's for the old fansite.
+ */
+export type AttendanceRecords<T extends AttendanceMatch = PublicMatch> = {
+  /** The average at the home matches with a number, or undefined without one. */
+  average: number | undefined
+  /** The home matches with a number, so the ones the average comes from. */
+  homeKnown: number
+  /** The played matches the choice counts, with a number. */
+  known: number
+  /** The match with the most visitors, or undefined without a number. */
+  mostEver: T | undefined
+  /** The home match with the most visitors, or undefined without a number. */
+  mostHome: T | undefined
+  /** The played matches the choice counts. */
+  played: number
+}
+
+/** A streak across seasons: how many matches in a row, and the seasons it ran over. */
+export type RecordStreak = {
+  length: number
+  /** The season it began in and the one it ended in, the same for a streak in one season. */
+  seasons: { from: string; to: string }
+}
+
+/** What the card Records of all seasons shows, and what it is based on. */
+export type SeasonRecords = {
+  /** The played matches with a score that the choice counts. */
+  played: number
+  /** How many matches a shoot-out decided, and how many of those we won. */
+  shootOuts: { total: number; won: number }
+  /** The longest streak without a loss, or undefined without a played match. */
+  unbeaten: RecordStreak | undefined
+  /** The longest streak without a win, or undefined without a played match. */
+  winless: RecordStreak | undefined
+}
+
+/**
  * The home matches of a season, in the order given, with their number of visitors: the league
  * only for the choice `league`, the cup and the play-offs as well for `all`. An away match
  * never counts, because that audience is the other club's, and neither does a cancelled match.
@@ -1681,4 +1736,85 @@ export function attendanceOf<T extends AttendanceMatch = PublicMatch>(
     slots,
     ticks: Array.from({ length: max / attendanceStep }, (_, index) => (index + 1) * attendanceStep),
   }
+}
+
+/**
+ * The attendance records of the played matches the choice counts. Of two matches with the same
+ * number, the first one played stays the record.
+ */
+export function attendanceRecordsOf<T extends AttendanceMatch = PublicMatch>(
+  matches: readonly T[],
+  choice: CompetitionChoice = 'all',
+): AttendanceRecords<T> {
+  const played = matches.filter((match) => match.status === 'played' && matchCountsFor(match, choice))
+  const counted = played.filter((match) => (match.attendance ?? 0) > 0)
+  const home = counted.filter((match) => match.home)
+  const most = (list: T[]) =>
+    list.reduce<T | undefined>(
+      (top, match) => (top === undefined || (match.attendance ?? 0) > (top.attendance ?? 0) ? match : top),
+      undefined,
+    )
+
+  return {
+    average:
+      home.length === 0
+        ? undefined
+        : Math.round(home.reduce((sum, match) => sum + (match.attendance ?? 0), 0) / home.length),
+    homeKnown: home.length,
+    known: counted.length,
+    mostEver: most(counted),
+    mostHome: most(home),
+    played: played.length,
+  }
+}
+
+/**
+ * The records of all seasons for the card Records, from the played matches with a score that
+ * the choice counts (see `playedMatchesOf`): the longest run without a loss and without a win,
+ * each with its seasons, and how often a shoot-out decided a match, and how often we won it.
+ * The biggest win and loss and the match with the most goals come from `extremesOf`.
+ */
+export function recordsOf(matches: readonly AllMatch[], choice: CompetitionChoice = 'all'): SeasonRecords {
+  const played = playedMatchesOf(matches, choice)
+  const shootOuts = played.filter((match) => match.penaltiesFor !== null && match.penaltiesAgainst !== null)
+
+  return {
+    played: played.length,
+    shootOuts: { total: shootOuts.length, won: shootOuts.filter((match) => resultOf(match) === 'win').length },
+    unbeaten: longestStreak(played, (match) => resultOf(match) !== 'loss'),
+    winless: longestStreak(played, (match) => resultOf(match) !== 'win'),
+  }
+}
+
+/**
+ * The longest run of matches in a row that meet `counts`, with the seasons of its first and its
+ * last match. The matches are in the order they were played. Of two runs of the same length the
+ * earlier one stays, so the record belongs to the one who set it.
+ */
+function longestStreak(
+  played: readonly (AllMatch & LeagueMatch)[],
+  counts: (match: LeagueMatch) => boolean,
+): RecordStreak | undefined {
+  let best: RecordStreak | undefined
+  let length = 0
+  let from = ''
+
+  for (const match of played) {
+    if (!counts(match)) {
+      length = 0
+      continue
+    }
+
+    if (length === 0) {
+      from = match.season
+    }
+
+    length += 1
+
+    if (best === undefined || length > best.length) {
+      best = { length, seasons: { from, to: match.season } }
+    }
+  }
+
+  return best
 }

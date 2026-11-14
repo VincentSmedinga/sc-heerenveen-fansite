@@ -30,6 +30,14 @@ describe('matchesBarItems', () => {
     ])
   })
 
+  it('keeps "Alle seizoenen" in the link to Cijfers on the page with all seasons, with the choice', () => {
+    expect(hrefs(matchesBarItems({ allSeasons: true, competition: 'league', current: 'figures' }))).toEqual([
+      '/wedstrijden/cijfers/alle?competitie=eredivisie',
+      '/tegenstanders?competitie=eredivisie',
+      '/wedstrijden/zoeken',
+    ])
+  })
+
   it('has no link to Spelers, which is an item of the main menu', () => {
     expect(hrefs(matchesBarItems({ competition: 'all', current: undefined })).join()).not.toContain('spelers')
   })
@@ -97,6 +105,14 @@ describe('MatchesBar', () => {
       ['/tegenstanders', 'Tegenstanders'],
       ['/wedstrijden/zoeken', 'Zoeken'],
     ])
+  })
+
+  it('keeps "Alle seizoenen" in Cijfers when the page is /wedstrijden/cijfers/alle, and not on another page', async () => {
+    const bar = async (current: 'figures' | undefined, seasonSlug: string) =>
+      renderToStaticMarkup(await MatchesBar({ current, searchParams: Promise.resolve({}), seasonSlug }))
+
+    expect(await bar('figures', 'alle')).toContain('href="/wedstrijden/cijfers/alle"')
+    expect(await bar(undefined, 'alle')).toContain('href="/wedstrijden/cijfers"')
   })
 
   it('marks the current sub-page with aria-current="page" in the bar of the menu', async () => {

@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { playerFiguresShortcuts, playerFiguresShortcutsFor, statisticsShortcuts } from './statisticsShortcuts'
+import {
+  allSeasonsStatisticsShortcuts,
+  playerFiguresShortcuts,
+  playerFiguresShortcutsFor,
+  statisticsShortcuts,
+} from './statisticsShortcuts'
 
 describe('statisticsShortcuts', () => {
   it('has a link for each of the four groups of cards, in the order of the page', () => {
@@ -52,5 +57,16 @@ describe('playerFiguresShortcutsFor', () => {
       '#bijzondere-doelpunten',
     ])
     expect(new Set(links.map(({ href }) => href)).size).toBe(links.length)
+  })
+})
+
+describe('allSeasonsStatisticsShortcuts', () => {
+  it('has a link for each of the four groups, with Seizoenen where a season has Competitie', () => {
+    expect(allSeasonsStatisticsShortcuts).toEqual([
+      { href: '#seizoenen', label: 'Seizoenen' },
+      { href: '#uitslagen', label: 'Uitslagen' },
+      { href: '#doelpunten', label: 'Doelpunten' },
+      { href: '#rondom-de-wedstrijd', label: 'Rondom de wedstrijd' },
+    ])
   })
 })

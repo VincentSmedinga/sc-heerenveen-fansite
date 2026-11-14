@@ -13,6 +13,19 @@ export const statisticsShortcuts = [
 ] as const
 
 /**
+ * The links in the bar under the header of /wedstrijden/cijfers/alle: one to the heading of
+ * each of the four groups, in the order of the page. The first group is Seizoenen, where a
+ * season has Competitie. The ids are those of the headings in
+ * app/wedstrijden/cijfers/all-seasons-page.tsx (a test checks it).
+ */
+export const allSeasonsStatisticsShortcuts = [
+  { href: '#seizoenen', label: 'Seizoenen' },
+  { href: '#uitslagen', label: 'Uitslagen' },
+  { href: '#doelpunten', label: 'Doelpunten' },
+  { href: '#rondom-de-wedstrijd', label: 'Rondom de wedstrijd' },
+] as const
+
+/**
  * The links in the bar under the header of /spelers/cijfers: the cards in the order of the
  * page, the main column first, which is the order on a narrow screen: the card Doelpuntenmakers
  * and the card with the goals that stand out. The credit is not a card to jump to. They are the

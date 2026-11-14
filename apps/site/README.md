@@ -83,7 +83,7 @@ Voor de pagina van een eerder seizoen, `/wedstrijden/<seizoen>`, zet hij verzonn
 Dat seizoen krijgt vijf hele speelronden van alle 18 clubs (`fullRounds`), zodat de kaart Verloop op de ranglijst een lijn heeft; het lopende seizoen heeft die kaart niet, want zijn verzonnen uitslagen zijn van zes clubs.
 Heeft de database al echte wedstrijden voor dat seizoen, van een import, dan laat hij die staan.
 Verzonnen wedstrijden van een eerdere run haalt hij na de laatste test wel weg.
-Voor de kaart Onze plek door de jaren op `/wedstrijden/cijfers` zet hij onze rij in de stand van twee en drie jaar geleden (`e2e/final-places.ts`), de oudste met twee afgetrokken punten, zodat de kaart een lijn van vier seizoenen heeft, en haalt ze na de laatste test weer weg.
+Voor de kaart Onze plek door de jaren op `/wedstrijden/cijfers/alle` zet hij onze rij in de stand van twee en drie jaar geleden (`e2e/final-places.ts`), de oudste met twee afgetrokken punten, zodat de kaart een lijn van vier seizoenen heeft, en haalt ze na de laatste test weer weg.
 `pnpm --filter site test-data --remove` haalt dat seizoen weg als al zijn wedstrijden verzonnen zijn, ook als een eerdere run ze erin zette, en laat het staan zodra er een echte wedstrijd van een import in staat.
 `e2e/season-picker.spec.ts` toetst de kiezer met en zonder JavaScript, het toetsenbord en de plek naast of onder de kop bij 320, 390 en 900 pixels.
 Een test die de opmaak meet of naar een kaart scrolt, wacht eerst op `hydrated(page)` uit `e2e/hydrated.ts`: tot React de pagina heeft opgebouwd, toont de kiezer nog zijn label en zijn knop, en is de pagina langer.
@@ -413,7 +413,14 @@ De kaarten krijgen het niveau van hun kop mee met `level={3}`; zonder staat die 
 De kaarten van een groep staan op een breed scherm in twee even brede kolommen.
 In een browser die CSS Grid Lanes kent (`display: grid-lanes`) sluiten ze in een kolom op elkaar aan; elders staat een raster met twee kaarten per rij.
 De volgorde in de broncode is de volgorde van lezen, met en zonder Grid Lanes.
-De kaarten Onze plek in de competitie en Opmerkelijk zijn van de pagina verdwenen (#1210), en Onze plek door de jaren en Resultaten per hoofdtrainer staan pas weer bij alle seizoenen (#1211); hun ankers staan niet meer in `src/anchors.ts`.
+De kaarten Onze plek in de competitie en Opmerkelijk zijn van de pagina verdwenen (#1210), en Onze plek door de jaren en Resultaten per hoofdtrainer staan alleen bij alle seizoenen (#1211, zie hieronder); hun ankers staan niet meer bij `/wedstrijden/cijfers` in `src/anchors.ts`.
+De seizoenskiezer heeft "Alle seizoenen" als eerste keuze, en die gaat naar `/wedstrijden/cijfers/alle` (`app/wedstrijden/cijfers/all-seasons-page.tsx`, de helpers in `src/seasons.ts`).
+`alle` is geen seizoen.
+Die pagina telt alle wedstrijden sinds het eerste seizoen dat we hebben (1990/91) met dezelfde kaarten, waar ze iets zeggen over alle seizoenen, in de groepen Seizoenen (Onze plek door de jaren, Resultaten per hoofdtrainer), Uitslagen (Thuis en uit, Hoe vaak welke uitslag, Records), Doelpunten (Doelpunten per kwartier, De nul gehouden) en Rondom de wedstrijd (Toeschouwers).
+De kaarten tellen de wedstrijden van `getAllMatches` (`listAllMatches` in `@fansite/db/queries`: alle wedstrijden met hun doelpunten, drie queries, vijf minuten bewaard).
+Records is Uitersten met de langste reeksen en de strafschoppen erbij (`recordsOf`), Toeschouwers noemt de drukste wedstrijden in plaats van een staaf per wedstrijd (`attendanceRecordsOf`, `src/AllSeasonsCards.tsx`), en een afbeelding van een kaart zegt "Sinds 1990/91" (`since` op `shareable` van `Card`).
+De kaarten van één seizoen, Verloop van het seizoen, Hoe de wedstrijden verlopen en Reeksen, staan er niet.
+Het menu houdt "Alle seizoenen" alleen vast naar een pagina die een `/alle` heeft: de twee pagina's Cijfers (`hrefOf`).
 De bronvermelding staat onder de vier groepen.
 Op een telefoon staan alle kaarten onder elkaar in de volgorde van de groepen.
 Onder de kop staat dan een balk "Op deze pagina:" met een link naar elke groep, niet naar elke kaart (`app/@shortcuts/cijfers`, de links in `src/statisticsShortcuts.ts`).

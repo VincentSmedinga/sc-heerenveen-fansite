@@ -30,6 +30,13 @@ describe('/wedstrijden/cijfers/kies', () => {
     expect(response.headers.get('location')).toBe('/wedstrijden/cijfers/2025-26')
   })
 
+  it('sends "Alle seizoenen" to /wedstrijden/cijfers/alle, and keeps the choice of competition', async () => {
+    const response = await ask('?seizoen=alle&competitie=eredivisie')
+
+    expect(response.status).toBe(303)
+    expect(response.headers.get('location')).toBe('/wedstrijden/cijfers/alle?competitie=eredivisie')
+  })
+
   it('sends the current season to /wedstrijden/cijfers, which is its address', async () => {
     const response = await ask('?seizoen=2026-27')
 
