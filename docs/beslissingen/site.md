@@ -5783,6 +5783,21 @@
   - **Het ontwerp** toont twee kolommen, "W" en "W–G–V"; de kaart heeft de kolommen van Seizoen voor seizoen en Per competitie, zodat de kaarten op de pagina overeenkomen.
 - **Waarom:** "onder wie winnen we, en onder wie nooit?" is een vraag die supporters stellen, en de scheidsrechter staat al bij de wedstrijden.
 - **Alternatieven:** één kolom W–G–V; de namen samenvoegen bij twee schrijfwijzen (dat is een keuze van de importer, #417); de top 10 bij alle seizoenen.
+- **Later:** zie _De kaart Scheidsrechters rangschikt op punten per wedstrijd_ (14 november 2026): de volgorde is niet meer op aantal wedstrijden, de tabel heeft de kolom P, en de regel onder de kaart zegt "de top 5 op punten per wedstrijd".
+
+## De kaart Scheidsrechters rangschikt op punten per wedstrijd
+
+- **Datum:** 14 november 2026
+- **Besluit:** de kaart Scheidsrechters rangschikt op punten per wedstrijd (3 voor een winst, 1 voor een gelijkspel), de hoogste bovenaan, zonder minimum aantal wedstrijden (#1251).
+  Bij gelijke punten komt de scheidsrechter met de meeste wedstrijden eerst, dan de achternaam, dan de hele naam.
+  De tabel heeft achter V de sleutelkolom P (`tableColumns.pointsPerMatch`), met twee decimalen en een komma, en de legenda noemt hem.
+  Bij alle seizoenen is de tabel de top 5 op die volgorde, met elke naam die de vijfde plaats deelt op punten per wedstrijd en wedstrijden, en de regel zegt "de top 5 op punten per wedstrijd".
+  Een beslissing door strafschoppen telt zoals in de kolommen W, G en V van dezelfde tabel (`resultOf`), zodat P klopt met wat er staat.
+  Op 320 pixels past de tabel alleen als de kop Scheidsrechter mag afbreken, dus de kop van de eerste kolom breekt overal als er geen plaats is (`data-table.css`).
+- **Waarom:** in één seizoen komen we veel scheidsrechters maar één of twee keer tegen, dus het aantal wedstrijden zegt weinig.
+  Punten per wedstrijd laat zien onder wie het ons goed ging.
+  Het gevolg: een scheidsrechter met één winst staat bovenaan, en de kolom met de wedstrijden laat dat zien.
+- **Alternatieven:** een minimum aantal wedstrijden, wat in één seizoen bijna alle scheidsrechters wegzet; blijven rangschikken op wedstrijden; de punten niet tonen, wat de volgorde onverklaarbaar maakt.
 
 ## Spelers · Cijfers heeft de kaarten Doelpunten per linie en Doelpunten per land
 
