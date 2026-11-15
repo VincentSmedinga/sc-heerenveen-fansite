@@ -168,6 +168,53 @@ describe('the page Zoeken in wedstrijden', () => {
     expect(await render({ tegen: 'testdorp-fc' })).toContain('href="/wedstrijden/2001-02/2001-09-01-testdorp-fc"')
   })
 
+  describe('with rounds that have the same name in two seasons', () => {
+    const twoSeasons = () => [
+      made({ goalsFor: 5, matchDate: '2001-09-01', round: 'Speelronde 1', season: '2001/02' }),
+      made({ goalsFor: 3, matchDate: '2002-09-01', round: 'Speelronde 1', season: '2002/03' }),
+      made({ goalsFor: 2, matchDate: '2002-09-08', round: 'Speelronde 2', season: '2002/03' }),
+    ]
+    const own = '/wedstrijden/2001-02/2001-09-01-testdorp-fc'
+    const other = '/wedstrijden/2002-03/2002-09-01-testdorp-fc'
+
+    beforeEach(() => {
+      vi.mocked(getSearchWorld).mockResolvedValue(world(twoSeasons()))
+      vi.mocked(getReportAddresses).mockImplementation(async (season) =>
+        season === '2001/02'
+          ? new Map([['Eredivisie|Speelronde 1', own]])
+          : new Map([['Eredivisie|Speelronde 1', other]]),
+      )
+    })
+
+    it('links each match to the page of its own season, ordered by goal difference', async () => {
+      const html = await render({ tegen: 'testdorp-fc', uitslag: 'gewonnen', volgorde: 'doelsaldo' })
+
+      expect(html).toContain(`href="${own}"`)
+      expect(html).toContain(`href="${other}"`)
+      expect(html.indexOf(own)).toBeLessThan(html.indexOf(other))
+    })
+
+    it('links each match to the page of its own season, newest first across the season boundary', async () => {
+      const html = await render({ tegen: 'testdorp-fc', volgorde: 'nieuwste' })
+
+      expect(html).toContain(`href="${own}"`)
+      expect(html).toContain(`href="${other}"`)
+      expect(html.indexOf(other)).toBeLessThan(html.indexOf(own))
+    })
+
+    it('gives no link to a match without a report, not even the address of another match with that round', async () => {
+      vi.mocked(getReportAddresses).mockImplementation(async (season) =>
+        season === '2001/02' ? new Map([['Eredivisie|Speelronde 1', own]]) : new Map(),
+      )
+
+      const html = await render({ tegen: 'testdorp-fc', volgorde: 'nieuwste' })
+
+      expect(html).toContain(`href="${own}"`)
+      expect(html).not.toContain(other)
+      expect(html.match(/Het verslag/gu)).toHaveLength(1)
+    })
+  })
+
   it('has 25 matches to a page, with pagination that keeps the choices', async () => {
     vi.mocked(getSearchWorld).mockResolvedValue(
       world(

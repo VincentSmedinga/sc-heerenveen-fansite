@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Heading, Page, Text } from '@fansite/design-system'
 import { cache } from 'react'
 
+import { matchKey } from '#src/all-time-players'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { matchSearchPath, parseFilters, viewOf } from '#src/match-search'
@@ -58,8 +59,19 @@ const loadSearch = cache(async (query: string) => {
     const shownSeasons = [
       ...new Set(view.result.seasons.flatMap((group) => group.matches.map((match) => match.season))),
     ]
+    // A round has the same name in every season, so the keys have the season too.
     const reportAddresses = new Map(
-      (await Promise.all(shownSeasons.map((season) => getReportAddresses(season)))).flatMap((map) => [...map]),
+      (
+        await Promise.all(
+          shownSeasons.map(async (season) =>
+            [...(await getReportAddresses(season))].map(([key, href]): [string, string] => {
+              const [competition = '', round = ''] = key.split('|')
+
+              return [matchKey(season, competition, round), href]
+            }),
+          ),
+        )
+      ).flat(),
     )
 
     // The start page has no results; it shows the questions and the day instead, counted from
