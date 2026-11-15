@@ -198,6 +198,8 @@ describe('readClubData', () => {
         { country: 'GB-WLS', country_source: 'wikidata', slug: 'ton', wikidata_id: 'Q9002' },
       ])
       expect(report).toMatchObject({ countriesBritish: 2, countriesFilled: 2, warnings: [] })
+      // A club that is read now has its places stored with it: its item is asked for once.
+      expect(asked(served.data).filter((path) => path?.includes('Q9001') === true)).toHaveLength(1)
       expect(describeClubData(report)[0]).toContain(
         '2 clubs got a country (2 in England, Wales, Scotland or Northern Ireland)',
       )
@@ -238,6 +240,12 @@ describe('readClubData', () => {
         { country: 'GB-WLS', country_source: 'wikidata', slug: 'ton', wikidata_id: 'Q9002' },
       ])
       expect(asked(served.nl)).toEqual([])
+      // The item of the club is asked for once more, for its places, and then the chain.
+      expect(asked(served.data)).toEqual([
+        '/wiki/Special:EntityData/Q9002.json',
+        '/wiki/Special:EntityData/Q9201.json',
+        '/wiki/Special:EntityData/Q9202.json',
+      ])
     })
 
     it('never changes a club the editors set, also with GB', async () => {

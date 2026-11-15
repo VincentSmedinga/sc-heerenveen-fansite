@@ -230,6 +230,14 @@ export async function readClubData(
         continue
       }
 
+      // The places of the item go in the database at once, so the chain to a country of the
+      // United Kingdom starts from the database and the item is never asked for twice (#1278).
+      const placeIds = answer.kind === 'text' ? readPlaceIds(answer.text) : null
+
+      if (placeIds !== null) {
+        await storeWikidataPlace(db, wikidataId, placeIds)
+      }
+
       const countryIds = answer.kind === 'text' ? readCountryIds(answer.text) : []
       // The first country that is in the list, else the first one, so the warning names it.
       // One of the four countries of the United Kingdom goes before the United Kingdom itself.

@@ -1167,7 +1167,8 @@ De stap staat in [`src/import-person-data.ts`](src/import-person-data.ts) en dra
   Geeft Wikidata een club alleen het Verenigd Koninkrijk, dan volgt de importer zijn plaatsen (#1278): het hoofdkantoor (`P159`) en de plaatsen waarin hij ligt (`P131`), en van elke plaats weer `P131`, hoogstens zes stappen, tot Engeland, Wales, Schotland of Noord-Ierland.
   Een plaats wordt één keer opgevraagd en staat dan in `wikidata_places` (de plaatsen waarin hij ligt, gescheiden door komma's), zodat een tweede run niets vraagt.
   Eindigt de keten in precies één van de vier, dan krijgt de club die code; eindigt ze in twee of in geen, dan blijft de club `GB`.
-  Ook een club die al gelezen was en `GB` kreeg, wordt zo verfijnd, zonder zijn item opnieuw te lezen: alleen de plaatsen zijn nieuw.
+  Ook een club die al gelezen was en `GB` kreeg, wordt zo verfijnd: zijn item wordt nog één keer opgevraagd voor zijn plaatsen (zonder de pagina van Wikipedia), en daarna staat alles in `wikidata_places`.
+  Een club die nu pas wordt gelezen, krijgt zijn plaatsen bij die eerste lezing en vraagt zijn item niet twee keer.
   Een club met `manual` blijft staan.
   Het logboek zegt erbij hoeveel clubs een van de vier landen kregen: `1 club got a country (1 in England, Wales, Scotland or Northern Ireland)`.
 - **Het land uit de andere bronnen** (#1052): daarna vult dezelfde run, zonder verzoek, het land uit de lijst van spelers en uit de selectielijsten.

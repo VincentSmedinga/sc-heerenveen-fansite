@@ -4163,7 +4163,8 @@
 - **Besluit:** alleen een club met het Verenigd Koninkrijk van Wikidata krijgt de extra verzoeken: de items van de plaatsen, met dezelfde fetcher, controle op `robots.txt`, pauze en stop als nu, en alleen naar Wikidata.
   Een club met `manual` blijft staan, ook als hij `GB` heeft.
   Van elk item dat de importer volgt, bewaart de tabel `wikidata_places` (migratie `0079_add_wikidata_places`) de Q-nummers van zijn hoofdkantoor en zijn plaatsen, ook van een item dat weg is (dan zonder plaatsen), zodat een tweede run niets vraagt.
-  `refreshClubCountries` volgt de keten uit die tabel, zonder verzoek, bij elke run; een club die al gelezen was en `GB` kreeg, wordt dus verfijnd zonder dat zijn item opnieuw wordt gelezen.
+  `refreshClubCountries` volgt de keten uit die tabel, zonder verzoek, bij elke run; een club die al gelezen was en `GB` kreeg, wordt dus verfijnd: zijn item wordt nog één keer opgevraagd voor zijn plaatsen, zonder de pagina van Wikipedia.
+  Een club die nu pas wordt gelezen, krijgt zijn plaatsen bij die eerste lezing.
   De tabel heeft geen verbinding met `wikidata_items`, want die bewaart een label en dit een lijst.
 - **Waarom:** het zijn enkele tientallen clubs, en een run mag niet zwaarder worden dan nodig.
   Een tabel van items met hun plaatsen is genoeg om elke keten opnieuw te volgen, en past bij elke club die dezelfde plaats deelt.
