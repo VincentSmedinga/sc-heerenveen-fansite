@@ -5928,7 +5928,7 @@
   De lijst loopt af op het aantal wedstrijden en gaat bij gelijk aantal op de Nederlandse landnaam.
   De wedstrijden tegen een club zonder land staan altijd onderaan op de regel "Land onbekend", zodat het totaal klopt met de rij Europa van Per competitie.
   De kaart volgt de keuze van de competitie op de pagina (bij Eredivisie of Beker is er geen Europese wedstrijd en valt ze weg), en ook zonder Europese wedstrijden is er geen kaart.
-  Een regel heeft nog geen link: het filter op land in Zoeken in wedstrijden komt met #1267.
+  Een regel heeft nog geen link; die komt met #1274, zie _Een regel van Europa per land linkt naar Zoeken in wedstrijden_.
   De balk "Op deze pagina:" heeft alleen links naar de vier groepen, dus ook deze kaart heeft er geen: net als Per competitie staat ze in de groep Seizoenen.
 - **Waarom:** de vraag "hoe deden we het tegen Duitsland of Scandinavië" is een telling per land, en de kaart sluit aan op de andere kaarten van Cijfers.
   De regel "Land onbekend" houdt de kaart eerlijk zolang de redactie nog niet alle clubs een land heeft gegeven (#1265).
@@ -5962,3 +5962,16 @@
   Een keuze "Onbekend" laat de supporter zoeken op iets wat we niet weten; de werklijst van de redactie (#1265) is de plek om dat op te lossen.
   Eén keuzelijst volgt het filter op de tegenstander, en met toetsenbord en schermlezer werkt een gewone `select` met een label en een gemelde waarde.
 - **Alternatieven:** meer landen tegelijk met vakjes (de lijst is lang, en één land is de vraag die supporters stellen); een keuze "Onbekend" (zie boven); het land als onderdeel van het filter op de tegenstander (twee verschillende vragen in één veld).
+
+## Een regel van Europa per land linkt naar Zoeken in wedstrijden
+
+- **Datum:** 15 november 2026
+- **Besluit:** elke regel van de kaart "Europa per land" met een land is een link naar Zoeken in wedstrijden met dat land en Europa gekozen, zoals `/wedstrijden/zoeken?land=DE&competitie=europa`, zonder andere keuzes (#1274).
+  Het adres en het aantal komen uit `matchLink` van `cijfers-search.ts`, zoals bij Per competitie, dus het aantal wedstrijden dat de zoekpagina vindt is het getal in de kolom Gespeeld.
+  De naam voor een schermlezer is de landnaam, gevolgd door onzichtbare tekst: "toon de 2 wedstrijden in Europa tegen clubs uit Duitsland" (`rowLinkText`).
+  De regel "Land onbekend" en een land waarvoor de zoekopdracht geen wedstrijd vindt, hebben geen link.
+- **Waarom:** de kaart telt alleen Europese wedstrijden, dus alleen met `competitie=europa` klopt het aantal in de link met het getal in de regel.
+  De werkbalk kan alleen Alles of Europa zijn zolang de kaart er staat, en beide geven dezelfde wedstrijden.
+  Het filter heeft geen keuze "Onbekend" (#1267), en een link die niet kan filteren is erger dan geen link.
+- **Alternatieven:** alleen het land (toont ook beker- en competitiewedstrijden tegen clubs uit dat land, dus de aantallen kloppen niet meer); een keuze "Onbekend" in het filter (grotere wijziging, en de redactie vult de landen aan, #1265); alleen de landnaam als naam van de link (een schermlezer weet dan niet waar de link heen gaat).
+- **Later:** vervangt de zin over de link in _De kaart "Europa per land" telt de Europese wedstrijden per land van de tegenstander_.
