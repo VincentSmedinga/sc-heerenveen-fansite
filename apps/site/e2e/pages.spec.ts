@@ -431,6 +431,8 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'editor', path: '/beheer/kwaliteit/personen/snel?lijst=land', status: 200 },
   { admin: 'editor', path: '/beheer/kwaliteit/personen/snel?lijst=land&deel=9', status: 200 },
   { admin: 'editor', path: '/beheer/kwaliteit/personen/snel?lijst=onbekend', status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/clubs/land', status: 200 },
+  { admin: 'editor', path: '/beheer/kwaliteit/clubs/land?deel=9', status: 200 },
   { admin: 'editor', path: '/beheer/kwaliteit/personen?lijst=land', status: 200 },
   { admin: 'editor', path: '/beheer/kwaliteit/namen', status: 200 },
   { admin: 'editor', path: '/beheer/kwaliteit/formaties', status: 200 },
