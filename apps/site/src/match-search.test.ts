@@ -257,9 +257,10 @@ describe('the matches a search finds', () => {
     expect(count({ club: 'voorbeeld-united', outcomes: ['gewonnen'] })).toBe(1)
   })
 
-  it('has Europa as one group of every European cup and its play-offs', () => {
-    expect(count({ competitions: ['europa'] })).toBe(2)
-    expect(count({ competitions: ['europa', 'knvb-beker'] })).toBe(3)
+  it('has Europa as one group of every European cup, and Play-offs as a group of its own', () => {
+    expect(count({ competitions: ['europa'] })).toBe(1)
+    expect(count({ competitions: ['play-offs'] })).toBe(1)
+    expect(count({ competitions: ['europa', 'knvb-beker'] })).toBe(2)
     expect(count({ competitions: ['johan-cruijff-schaal'] })).toBe(0)
   })
 

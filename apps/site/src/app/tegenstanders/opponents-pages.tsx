@@ -71,9 +71,10 @@ import { withBranch } from '#src/title'
  */
 const loadClubList = cache(async () => {
   try {
-    const [all, league, cup, europe, seasons, pages, edited, source, lastWins] = await Promise.all([
+    const [all, league, playoffs, cup, europe, seasons, pages, edited, source, lastWins] = await Promise.all([
       getClubRecords('all'),
       getClubRecords('league'),
+      getClubRecords('playoffs'),
       getClubRecords('cup'),
       getClubRecords('europe'),
       getMatchSeasons(),
@@ -84,7 +85,15 @@ const loadClubList = cache(async () => {
       getLastWinPlaces(dutchDay(new Date())),
     ])
 
-    return { edited, kind: 'found', lastWins, pages, records: { all, cup, europe, league }, seasons, source } as const
+    return {
+      edited,
+      kind: 'found',
+      lastWins,
+      pages,
+      records: { all, cup, europe, league, playoffs },
+      seasons,
+      source,
+    } as const
   } catch (error) {
     console.error(`Could not read the opponents for ${opponentsPath}: ${reasonOf(error)}`)
 
@@ -164,7 +173,7 @@ export async function ClubListPage({ searchParams }: { searchParams: Promise<Sea
   // The choice of the address stays in the switch, so a visitor who asked for one without a
   // match has the way back to `all`.
   const options = optionsOf(
-    (['league', 'cup', 'europe'] as const).filter(
+    (['league', 'playoffs', 'cup', 'europe'] as const).filter(
       (choice) => choice === competition || played(loaded.records[choice]) > 0,
     ),
   )
@@ -286,7 +295,7 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
       filterQuery(competitionParam, Object.values(competitionFields(competition)), page),
     )
   const options = optionsOf(
-    (['league', 'cup', 'europe'] as const).filter(
+    (['league', 'playoffs', 'cup', 'europe'] as const).filter(
       (choice) =>
         choice === competition || meetingsOf(matches, choice).length > 0 || upcomingOf(matches, choice, now).length > 0,
     ),

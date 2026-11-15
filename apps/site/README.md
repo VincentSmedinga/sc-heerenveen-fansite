@@ -427,7 +427,7 @@ De bronvermelding staat onder de vier groepen.
 Op een telefoon staan alle kaarten onder elkaar in de volgorde van de groepen.
 Onder de kop staat dan een balk "Op deze pagina:" met een link naar elke groep, niet naar elke kaart (`app/@shortcuts/cijfers`, de links in `src/statisticsShortcuts.ts`).
 De ankers van de kaarten blijven bestaan.
-De kaarten tellen standaard alle wedstrijden; met `?competitie=eredivisie`, `?competitie=beker` of `?competitie=europa` tellen ze alleen die competitie (zie _De keuze van de competitie_ hieronder).
+De kaarten tellen standaard alle wedstrijden; met `?competitie=eredivisie`, `?competitie=play-offs`, `?competitie=beker` of `?competitie=europa` tellen ze alleen die competitie (zie _De keuze van de competitie_ hieronder).
 Onder het hoofdmenu staat op de pagina's van Wedstrijden een balk met de subpagina's van Wedstrijden: Cijfers, Tegenstanders en Zoeken (Spelers is een onderdeel van het hoofdmenu, zie _De spelers_, en heeft geen balk).
 De links van die balk houden de keuze van de competitie vast: met `?competitie=eredivisie` in het adres blijft de link naar Tegenstanders `/tegenstanders?competitie=eredivisie`, en die naar Cijfers `/wedstrijden/cijfers?competitie=eredivisie`.
 De link naar Cijfers houdt ook het seizoen van de pagina vast, zoals het menu: op `/wedstrijden/2025-26` gaat hij naar `/wedstrijden/cijfers/2025-26`.
@@ -676,11 +676,12 @@ De lijst staat in `src/pages.ts`, dus in de sitemap en de bezoekteller; elke clu
 
 ### De keuze van de competitie
 
-Bovenaan de hoofdkolom van `/wedstrijden/cijfers` (onder de drie kaarten die hem negeren), in de werkbalk van `/spelers/cijfers`, `/tegenstanders` en de pagina van een club en van een speler staat een schakelaar (`SwitchLinks`, via `CompetitionSwitch` en `CompetitionLinks` in `src/CompetitionSwitch.tsx`) met vier links: Alles, Eredivisie, Beker en Europa.
-Alles is de standaard en heeft geen parameter; de andere zijn `?competitie=eredivisie`, `?competitie=beker` en `?competitie=europa`.
+Bovenaan de hoofdkolom van `/wedstrijden/cijfers` (onder de drie kaarten die hem negeren), in de werkbalk van `/spelers/cijfers`, `/tegenstanders` en de pagina van een club en van een speler staat een schakelaar (`SwitchLinks`, via `CompetitionSwitch` en `CompetitionLinks` in `src/CompetitionSwitch.tsx`) met vijf links: Alles, Eredivisie, Play-offs, Beker en Europa.
+Alles is de standaard en heeft geen parameter; de andere zijn `?competitie=eredivisie`, `?competitie=play-offs`, `?competitie=beker` en `?competitie=europa`.
 Alles telt elke gespeelde wedstrijd.
-Europa telt elke Europese beker en de play-offs erom, zoals het filter Competitie in Zoeken (`competitionGroups` in `src/match-search.ts`, de lijsten staan in `src/competition.ts`).
-De schakelaar staat in de normale maat, 44 pixels hoog, zodat de vier waarden op een telefoon van 390 pixels op één regel passen.
+Play-offs telt de vier soorten play-offs voor Europees voetbal (#1282): wedstrijden tegen Nederlandse clubs, dus niet bij Eredivisie en niet bij Europa.
+Europa telt elke Europese beker, zonder de play-offs, zoals het filter Competitie in Zoeken (`competitionGroups` in `src/match-search.ts`, de lijsten staan in `src/competition.ts`).
+De schakelaar staat in de normale maat, 44 pixels hoog, zodat de vijf waarden op een telefoon van 390 pixels op één regel passen.
 De keuze zit in het adres en niet in een cookie, dus de schakelaar werkt zonder JavaScript en een keuze is te delen.
 Een andere waarde, een lege waarde en een waarde die twee keer staat, geven "niet gevonden" (`parseCompetition` in `src/competition.ts`), ook in de balk "Op deze pagina:", die er dan niet is.
 Een waarde zonder gespeelde wedstrijd in het bereik van de pagina staat niet in de schakelaar (`competitionOptionsOf` in `src/matches.ts`, `optionsOf` in `src/competition.ts`), en blijft er één waarde over, dan is er geen schakelaar: de keuzes tellen dan hetzelfde.
@@ -826,22 +827,22 @@ De teller van het bezoek telt `/spelers/zoeken` zonder de vraag; de pagina is `n
 Het is één `GET`-formulier, dus elke keuze staat in het adres en de pagina werkt zonder JavaScript.
 De parameters zijn:
 
-| Parameter         | Waarden                                                                        | Betekenis                                              |
-| ----------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------ |
-| `tegen`           | de adresnaam van een club, zoals `ajax`                                        | de tegenstander                                        |
-| `van`, `tot`      | een seizoen, zoals `2019/20`                                                   | het eerste en het laatste seizoen                      |
-| `waar`            | `thuis`, `uit`                                                                 | thuis of uit; allebei (of geen) telt allebei           |
-| `competitie`      | `eredivisie`, `eerste-divisie`, `knvb-beker`, `europa`, `johan-cruijff-schaal` | de competitie; `europa` is elke Europese beker         |
-| `uitslag`         | `gewonnen`, `gelijk`, `verloren`                                               | de afloop; een strafschoppenreeks telt als gelijk      |
-| `dag`             | `maandag` tot en met `zondag`                                                  | de dag van de week                                     |
-| `doelpuntenmaker` | tekst, de grenzen van `/spelers/zoeken`                                        | een speler die een doelpunt maakte                     |
-| `wij`, `zij`      | een getal van 0 tot en met 99                                                  | de exacte uitslag, onze doelpunten en die van hen      |
-| `clubs`           | de adresnaam van een club, zoals `ajax`, meer keer                             | meer clubs tegelijk (#1151)                            |
-| `doelpunten`      | een getal van 1 tot en met 99                                                  | ten minste zoveel doelpunten van beide clubs           |
-| `strafschoppen`   | `ja`                                                                           | alleen wedstrijden die een strafschoppenreeks besliste |
-| `maand`, `op`     | `maand` een getal van 1 tot en met 12, `op` een dag van die maand              | de maand, of de dag en de maand, in elk jaar           |
-| `volgorde`        | `nieuwste` (standaard), `oudste`, `doelsaldo`                                  | de volgorde van de lijst                               |
-| `pagina`          | een getal vanaf 1                                                              | de pagina van 25 wedstrijden                           |
+| Parameter         | Waarden                                                                                     | Betekenis                                                                     |
+| ----------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `tegen`           | de adresnaam van een club, zoals `ajax`                                                     | de tegenstander                                                               |
+| `van`, `tot`      | een seizoen, zoals `2019/20`                                                                | het eerste en het laatste seizoen                                             |
+| `waar`            | `thuis`, `uit`                                                                              | thuis of uit; allebei (of geen) telt allebei                                  |
+| `competitie`      | `eredivisie`, `eerste-divisie`, `play-offs`, `knvb-beker`, `europa`, `johan-cruijff-schaal` | de competitie; `europa` is elke Europese beker, `play-offs` de play-offs erom |
+| `uitslag`         | `gewonnen`, `gelijk`, `verloren`                                                            | de afloop; een strafschoppenreeks telt als gelijk                             |
+| `dag`             | `maandag` tot en met `zondag`                                                               | de dag van de week                                                            |
+| `doelpuntenmaker` | tekst, de grenzen van `/spelers/zoeken`                                                     | een speler die een doelpunt maakte                                            |
+| `wij`, `zij`      | een getal van 0 tot en met 99                                                               | de exacte uitslag, onze doelpunten en die van hen                             |
+| `clubs`           | de adresnaam van een club, zoals `ajax`, meer keer                                          | meer clubs tegelijk (#1151)                                                   |
+| `doelpunten`      | een getal van 1 tot en met 99                                                               | ten minste zoveel doelpunten van beide clubs                                  |
+| `strafschoppen`   | `ja`                                                                                        | alleen wedstrijden die een strafschoppenreeks besliste                        |
+| `maand`, `op`     | `maand` een getal van 1 tot en met 12, `op` een dag van die maand                           | de maand, of de dag en de maand, in elk jaar                                  |
+| `volgorde`        | `nieuwste` (standaard), `oudste`, `doelsaldo`                                               | de volgorde van de lijst                                                      |
+| `pagina`          | een getal vanaf 1                                                                           | de pagina van 25 wedstrijden                                                  |
 
 Een waarde die niet bestaat wordt genegeerd en geeft geen foutpagina; een seizoen `van` na `tot` wisselt de twee om; een doelpuntenmaker buiten de grenzen krijgt een melding bij het veld en vraagt de database niets.
 Waarden binnen een groep tellen als "of", groepen onderling als "en".

@@ -30,26 +30,27 @@ export const venues = [
 ] as const
 
 /**
- * The competitions as a supporter asks for them. `Europa` is every European cup and the
- * play-offs, so each competition of the database belongs to exactly one of them.
+ * The competitions as a supporter asks for them. `Play-offs` is the four kinds of play-offs for
+ * European football (#1282), and `Europa` is every European cup, so each competition of the
+ * database belongs to exactly one of them.
  */
 export const competitionGroups = [
   { label: 'Eredivisie', members: ['Eredivisie'], value: 'eredivisie' },
   { label: 'Eerste divisie', members: ['Eerste divisie'], value: 'eerste-divisie' },
-  { label: 'KNVB Beker', members: ['KNVB Beker'], value: 'knvb-beker' },
   {
-    label: 'Europa',
+    label: 'Play-offs',
     members: [
-      'Champions League',
-      'Europa League',
-      'Europacup II',
-      'Intertoto Cup',
       'Play-offs Champions League',
       'Play-offs Conference League',
       'Play-offs Europa League',
       'Play-offs UEFA Cup',
-      'UEFA Cup',
     ],
+    value: 'play-offs',
+  },
+  { label: 'KNVB Beker', members: ['KNVB Beker'], value: 'knvb-beker' },
+  {
+    label: 'Europa',
+    members: ['Champions League', 'Europa League', 'Europacup II', 'Intertoto Cup', 'UEFA Cup'],
     value: 'europa',
   },
   { label: 'Johan Cruijff Schaal', members: ['Johan Cruijff Schaal'], value: 'johan-cruijff-schaal' },

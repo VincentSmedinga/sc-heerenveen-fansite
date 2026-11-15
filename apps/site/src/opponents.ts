@@ -557,7 +557,7 @@ export type ClubPage = {
 /**
  * Every club with the record against it, A to Z, for the matches the choice counts. A club
  * without a match of that choice, such as one we only met in the cup with the choice `league`,
- * is not in it. The four choices are the only keys, so the cache never grows.
+ * is not in it. The five choices are the only keys, so the cache never grows.
  */
 export function getClubRecords(choice: CompetitionChoice): Promise<PublicClubRecord[]> {
   return clubRecords(choice)

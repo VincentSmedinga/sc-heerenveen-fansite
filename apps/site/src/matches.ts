@@ -59,16 +59,16 @@ const isPlayedWithScore = (match: Omit<ScoredMatch, 'goals'>) =>
   match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null
 
 /**
- * The choices a page of these matches can make: `all` first, then each of the league, the cup
- * and Europe that has a played match with a score in them. A choice without a match is not
- * offered, and with only one left (just the league, say) the choice would count the same as
- * `all`, so there is nothing to choose and the list is empty.
+ * The choices a page of these matches can make: `all` first, then each of the league, the
+ * play-offs, the cup and Europe that has a played match with a score in them. A choice
+ * without a match is not offered, and with only one left (just the league, say) the choice
+ * would count the same as `all`, so there is nothing to choose and the list is empty.
  */
 export function competitionOptionsOf(matches: readonly Omit<ScoredMatch, 'goals'>[]): CompetitionChoice[] {
   const played = matches.filter(isPlayedWithScore)
 
   return optionsOf(
-    (['league', 'cup', 'europe'] as const).filter((choice) =>
+    (['league', 'playoffs', 'cup', 'europe'] as const).filter((choice) =>
       played.some((match) => countsFor(match.competition, choice)),
     ),
   )

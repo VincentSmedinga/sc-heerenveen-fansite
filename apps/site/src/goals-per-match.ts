@@ -35,8 +35,8 @@ export function goalsPerMatchOf(
   choice: CompetitionChoice,
   stats: Pick<PublicPlayerStats, 'appearances' | 'competition' | 'goals' | 'playerId'>[],
 ): Map<string, number> | undefined {
-  // The squad table has no figures for Europe, so the choice Europa has no column.
-  if (choice === 'europe') {
+  // The squad table has no figures for Europe or the play-offs: these choices have no column.
+  if (choice === 'europe' || choice === 'playoffs') {
     return undefined
   }
 

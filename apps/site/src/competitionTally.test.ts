@@ -18,7 +18,12 @@ const matches = [
 
 describe('competitionTalliesOf', () => {
   it('counts each kind of competition in the order of the search, without the kinds that have no match', () => {
-    expect(competitionTalliesOf(matches).map(({ value }) => value)).toEqual(['eredivisie', 'knvb-beker', 'europa'])
+    expect(competitionTalliesOf(matches).map(({ value }) => value)).toEqual([
+      'eredivisie',
+      'play-offs',
+      'knvb-beker',
+      'europa',
+    ])
   })
 
   it('counts the results and goals, without the matches still to play', () => {
@@ -34,11 +39,22 @@ describe('competitionTalliesOf', () => {
   })
 
   it('counts a cup tie that a shoot-out decided as a win, with the goals after extra time', () => {
-    expect(competitionTalliesOf(matches)[1]).toMatchObject({ drawn: 0, goalsFor: 1, played: 1, won: 1 })
+    expect(competitionTalliesOf(matches)[2]).toMatchObject({ drawn: 0, goalsFor: 1, played: 1, won: 1 })
   })
 
-  it('counts every European cup and the play-offs as Europa', () => {
-    expect(competitionTalliesOf(matches)[2]).toMatchObject({ goalsAgainst: 3, goalsFor: 2, lost: 1, played: 2, won: 1 })
+  it('counts every European cup as Europa, without the play-offs', () => {
+    expect(competitionTalliesOf(matches)[3]).toMatchObject({ goalsAgainst: 3, goalsFor: 0, lost: 1, played: 1, won: 0 })
+  })
+
+  it('counts the play-offs as a kind of their own, between the Eredivisie and the cup', () => {
+    expect(competitionTalliesOf(matches)[1]).toMatchObject({
+      goalsAgainst: 0,
+      goalsFor: 2,
+      label: 'Play-offs',
+      played: 1,
+      value: 'play-offs',
+      won: 1,
+    })
   })
 
   it('is empty without a played match', () => {

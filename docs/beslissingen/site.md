@@ -5086,6 +5086,7 @@
 - **Nadeel:** het aantal achter elke waarde kost per verzoek een telling per waarde, in het geheugen.
   De lijst is klein, dus dat is genoeg; een zoekindex is niet nodig.
 - **Later:** een land van een club hebben we sinds #1264 wel (zie _Een club heeft één land, uit Wikidata of van de redactie_ in `hosting-en-data.md`); het filter op het land van de tegenstander komt in #1267.
+- **Later:** de play-offs zijn sinds #1282 een eigen groep, Play-offs (`play-offs`), en horen niet meer bij Europa; zie _De play-offs voor Europees voetbal zijn een keuze van een eigen, tussen Eredivisie en Beker_.
 
 ## De zoekpagina begint met vragen en met Op deze dag
 
@@ -5515,6 +5516,7 @@
   Een waarde die niets telt, is een doodlopende keuze.
 - **Alternatieven:** de twee waarden van nu houden; de waarden Beker en Europa alleen bij een seizoen met zulke wedstrijden tonen, zonder de uitzondering voor een adres met een lege waarde.
 - **Later:** vervangt de twee waarden in _Een kaart die een telling van meer wedstrijden is, staat op Cijfers, en de schakelaar staat bovenaan de hoofdkolom_ (6 november 2026) en _De kaart Per seizoen van een speler laat kiezen tussen alle wedstrijden en de Eredivisie_ (11 november 2026); `playedBesidesEredivisie` is `playerCompetitionOptions` geworden en `playerSeasonsOf(facts, 'Eredivisie')` neemt een lijst competities.
+- **Later:** de keuze heeft sinds #1282 vijf waarden: Alles, Eredivisie, Play-offs, Beker en Europa, en Europa telt de play-offs niet meer; zie _De play-offs voor Europees voetbal zijn een keuze van een eigen, tussen Eredivisie en Beker_.
 
 ## Geen lijst aller tijden van wedstrijden, minuten, assists en kaarten per speler
 
@@ -5756,6 +5758,7 @@
   - **Het ontwerp** toont twee kolommen, "W" en "W–G–V"; de kaart heeft de kolommen van Seizoen voor seizoen, zodat de kaarten op de pagina overeenkomen.
 - **Waarom:** supporters willen weten hoe we het deden in de beker en in Europa, en 107 Europese wedstrijden zitten nu in geen enkel getal.
 - **Alternatieven:** een rij per afzonderlijke Europese beker; één kolom W–G–V; de kaart wel laten volgen op de keuze van competitie.
+- **Later:** de volgorde van de rijen is sinds #1282 Eredivisie, Eerste divisie, Play-offs, KNVB Beker, Europa en Johan Cruijff Schaal, en Europa telt de play-offs niet meer, dus de regel onder de tabel hoort nu bij de rij Play-offs; zie _De play-offs voor Europees voetbal zijn een keuze van een eigen, tussen Eredivisie en Beker_.
 
 ## Spelers · Cijfers van alle seizoenen heeft de kaart Meeste seizoenen in de selectie
 
@@ -5934,6 +5937,7 @@
 - **Waarom:** de vraag "hoe deden we het tegen Duitsland of Scandinavië" is een telling per land, en de kaart sluit aan op de andere kaarten van Cijfers.
   De regel "Land onbekend" houdt de kaart eerlijk zolang de redactie nog niet alle clubs een land heeft gegeven (#1265).
 - **Alternatieven:** de onbekenden weglaten (de totalen kloppen dan niet met Per competitie); een kaart die elke keuze van competitie negeert, zoals Per competitie (de keuze Europa en Alles zeggen dan hetzelfde en de werkbalk doet niets op deze kaart).
+- **Later:** de kaart telt sinds #1282 de play-offs niet meer, want die zijn tegen Nederlandse clubs; de regel Nederland valt weg als er geen echte Europese wedstrijd tegen een Nederlandse club is; zie _De play-offs voor Europees voetbal zijn een keuze van een eigen, tussen Eredivisie en Beker_.
 
 ## De redactie geeft een club een land op de pagina van de club en op een werklijst
 
@@ -5976,3 +5980,23 @@
   Het filter heeft geen keuze "Onbekend" (#1267), en een link die niet kan filteren is erger dan geen link.
 - **Alternatieven:** alleen het land (toont ook beker- en competitiewedstrijden tegen clubs uit dat land, dus de aantallen kloppen niet meer); een keuze "Onbekend" in het filter (grotere wijziging, en de redactie vult de landen aan, #1265); alleen de landnaam als naam van de link (een schermlezer weet dan niet waar de link heen gaat).
 - **Later:** vervangt de zin over de link in _De kaart "Europa per land" telt de Europese wedstrijden per land van de tegenstander_.
+
+## De play-offs voor Europees voetbal zijn een keuze van een eigen, tussen Eredivisie en Beker
+
+- **Datum:** 15 november 2026
+- **Besluit:** de vier soorten play-offs voor Europees voetbal (Play-offs UEFA Cup, Champions League, Europa League en Conference League) zijn samen één groep, Play-offs, naast Eredivisie, Beker en Europa (#1282).
+  - **De keuze:** in de schakelaar van de pagina's met cijfers en in het filter Competitie van Zoeken in wedstrijden staat ze tussen Eredivisie en Beker: Alles, Eredivisie, Play-offs, Beker, Europa.
+    Het adres is `competitie=play-offs`.
+    Een adres met `competitie=europa` blijft werken en toont alleen de echte Europese wedstrijden.
+  - **Welke wedstrijden:** Europa en de Eredivisie tellen de play-offs niet; Alles telt ze wel.
+    `europeanCompetitions` in `packages/db/src/schema.ts` noemt ze niet meer, dus de werklijst van clubs zonder land en de Europese wedstrijden van een speler tellen ze niet mee.
+  - **De kaarten:** Per competitie heeft een eigen rij Play-offs met een link naar Zoeken in wedstrijden.
+    De kaart "Europa per land" telt de play-offs niet, dus de regel Nederland verdwijnt zolang er geen Europese wedstrijd tegen een Nederlandse club is.
+    De link van een regel vindt nog steeds zoveel wedstrijden als het getal in de regel.
+  - **Spelers:** de selectietabel heeft geen cijfers van de play-offs, dus bij de keuze Play-offs is er, net als bij Europa, geen kolom met doelpunten per wedstrijd.
+- **Waarom:** het zijn wedstrijden tegen Nederlandse clubs, na het seizoen van de Eredivisie, dus ze horen niet bij Europa.
+  Ze tellen ook niet mee in de stand van de Eredivisie en kunnen een verlenging of strafschoppen hebben, dus ze horen niet in de cijfers van de Eredivisie.
+  De vier soorten vormen samen één groep, omdat het 26 wedstrijden over twintig jaar zijn en er per toernooi te weinig overblijft om iets te tellen.
+  De naam van de competitie bij een wedstrijd blijft zoals hij is, bijvoorbeeld "Play-offs Conference League".
+- **Alternatieven:** bij de Eredivisie tellen (dan veranderen records en gemiddelden van de Eredivisie door wedstrijden van een andere soort); bij Europa laten (zoals voor #1282).
+- **Later:** vervangt de zinnen over de play-offs bij Europa in _Wedstrijden hebben een eigen zoekpagina, `/wedstrijden/zoeken`_, _De keuze van competitie heeft vier waarden, en Alles telt elke wedstrijd_, _Wedstrijden · Cijfers heeft de kaart Per competitie, met een rij per soort competitie_ en _De kaart "Europa per land" telt de Europese wedstrijden per land van de tegenstander_.
