@@ -139,6 +139,13 @@ describe('the list of the clubs', () => {
     expect(html).toContain('Eigen lijst (1)')
   })
 
+  it('links to the work list of the clubs without a country, with the number', async () => {
+    const html = await list()
+
+    expect(html).toContain('href="/beheer/kwaliteit/clubs/land"')
+    expect(html).toContain('Clubs zonder land (3)')
+  })
+
   it('filters on the clubs with a list of their own, and says so when there is none', async () => {
     expect(rowsOf(await list({ tonen: 'eigen-lijst' }))).toEqual([])
     expect(await list({ tonen: 'eigen-lijst' })).toContain('Nog geen club heeft een eigen lijst.')
@@ -178,6 +185,18 @@ describe('the form of a club', () => {
     expect(html).toContain('Schrijfwijzen van Wikipedia')
     expect(html).toContain('<li>Oefen A.Z.</li>')
     expect(html).not.toContain('Lijst weghalen')
+  })
+
+  it('has the field Land of the club, with Onbekend and the countries, and says where the country comes from', async () => {
+    await database.pool.query("UPDATE clubs SET country = 'DE', country_source = 'manual' WHERE slug = 'oefenstad-az'")
+
+    const html = await form('oefenstad-az')
+
+    expect(html).toContain('Land van de club')
+    expect(html).toContain('<option value="">Onbekend</option>')
+    expect(html).toMatch(/<option value="DE" selected="">Duitsland \(DE\)<\/option>/u)
+    expect(html).toContain('Nu: Duitsland (DE), van de redactie.')
+    expect(html).toContain('aria-label="Opslaan: land van Oefenstad AZ"')
   })
 
   it('says Wikipedia has one spelling for a club without other names', async () => {

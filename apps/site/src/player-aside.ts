@@ -1,4 +1,4 @@
-import { type Competition, competitions } from '@fansite/db/schema'
+import { type Competition, competitions, europeanCompetitions } from '@fansite/db/schema'
 
 import type { CareerGoal, CareerMatch, PlayerSeason, PlayerSeasonFacts } from './player-seasons'
 
@@ -23,19 +23,6 @@ export type PlayerAside = {
   /** The clubs he scored against most, at most four, each with at least two goals. */
   opponents: readonly AsideOpponent[]
 }
-
-/** The competitions of Europe, the Champions League and its play-offs among them. */
-const europeanCompetitions: readonly Competition[] = [
-  'Champions League',
-  'Europa League',
-  'Europacup II',
-  'Intertoto Cup',
-  'Play-offs Champions League',
-  'Play-offs Conference League',
-  'Play-offs Europa League',
-  'Play-offs UEFA Cup',
-  'UEFA Cup',
-]
 
 const championsLeague: readonly Competition[] = ['Champions League', 'Play-offs Champions League']
 

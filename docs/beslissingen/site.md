@@ -5933,3 +5933,16 @@
 - **Waarom:** de vraag "hoe deden we het tegen Duitsland of Scandinavië" is een telling per land, en de kaart sluit aan op de andere kaarten van Cijfers.
   De regel "Land onbekend" houdt de kaart eerlijk zolang de redactie nog niet alle clubs een land heeft gegeven (#1265).
 - **Alternatieven:** de onbekenden weglaten (de totalen kloppen dan niet met Per competitie); een kaart die elke keuze van competitie negeert, zoals Per competitie (de keuze Europa en Alles zeggen dan hetzelfde en de werkbalk doet niets op deze kaart).
+
+## De redactie geeft een club een land op de pagina van de club en op een werklijst
+
+- **Datum:** 15 november 2026
+- **Besluit:** het land van een club staat als veld "Land" op de pagina van de club in het beheer (`/beheer/clubnamen/<club>`), met de keuze "Onbekend" en dezelfde lijst landen als bij personen (#1265).
+  Een gekozen land krijgt de bron `manual`, en de import verandert het nooit.
+  "Onbekend" haalt land en bron weg, zodat de import het bij de volgende run weer kan aanvullen als Wikidata het land kent.
+  De werklijst `/beheer/kwaliteit/clubs/land` toont de clubs zonder land met bovenaan hoeveel het er nog zijn en hoeveel daarvan wedstrijden in Europa speelden; die staan vooraan, daarna volgt A tot Z, in delen van vijftig.
+  Elke keuze schrijft de nieuwe actie `club.edit` in het logboek, als "land van de club: geen → Duitsland", in dezelfde transactie; de migratie `0077_add_club_edit_action` voegt de actie toe.
+- **Waarom:** van de 63 clubs van Europese wedstrijden hebben er 43 geen Wikipedia-pagina, dus daar geeft Wikidata niets; de redactie vult ze aan zoals bij personen, en de clubs van Europese wedstrijden zijn degene die de kaart van #1266 nodig heeft.
+  Een eigen veld op de pagina van de club en een werklijst volgen het model van het land van een persoon.
+- **Alternatieven:** het veld in het formulier van de namen (dat is een lijst met regels en een eigen knop, en een land is één waarde); de werklijst als onderdeel van de lijst Clubnamen (die lijst gaat over namen); een eigen actie in het logboek weglaten en `club-name.save` hergebruiken (dat zegt "aantallen regels", niet een land).
+- **Land en bron samen:** kiest de redactie het land dat Wikidata al gaf, dan wordt de bron `manual`; de redactie heeft het dan bevestigd en de import laat het staan.

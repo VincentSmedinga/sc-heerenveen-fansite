@@ -14,6 +14,8 @@ import {
 } from '@fansite/db/club-name-periods'
 import { normaliseClubName } from '@fansite/db/clubs'
 import { findClubBySlug, listClubRecords } from '@fansite/db/queries'
+import { clubs } from '@fansite/db/schema'
+import { eq } from 'drizzle-orm'
 
 export { searchClubs } from './stadiums'
 
@@ -21,7 +23,7 @@ export { removeClubNamePeriods, replaceClubNamePeriods }
 
 /** The club an editor opens: it, its own list and the spellings Wikipedia has for it. */
 export type AdminClub = {
-  club: { id: number; name: string; slug: string }
+  club: { country: null | string; countrySource: null | string; id: number; name: string; slug: string }
   own: NamePeriodLine[]
   /** The other spellings in the data of Wikipedia (`club_names`), A to Z. Read only. */
   spellings: string[]
@@ -41,8 +43,19 @@ export async function findAdminClub(db: Database, slug: string): Promise<AdminCl
     return undefined
   }
 
+  const [facts] = await db
+    .select({ country: clubs.country, countrySource: clubs.countrySource })
+    .from(clubs)
+    .where(eq(clubs.id, club.id))
+
   return {
-    club: { id: club.id, name: club.name, slug: club.slug },
+    club: {
+      country: facts?.country ?? null,
+      countrySource: facts?.countrySource ?? null,
+      id: club.id,
+      name: club.name,
+      slug: club.slug,
+    },
     own: await listClubNamePeriods(db, club.id),
     spellings: club.otherNames,
   }
