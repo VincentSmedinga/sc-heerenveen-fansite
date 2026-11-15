@@ -2,7 +2,7 @@ import { listScorerMatchIds, listSearchableMatches, type SearchableMatch } from 
 
 import { cacheFor } from './cache'
 import { getDatabase } from './database'
-import { clubsOf, seasonsOf } from './match-search'
+import { clubsOf, countriesOf, seasonsOf } from './match-search'
 
 /** How long the matches are kept: a new result shows within five minutes of the import. */
 const period = 5 * 60 * 1000
@@ -11,7 +11,7 @@ const period = 5 * 60 * 1000
 export const getSearchWorld = cacheFor(period, async () => {
   const matches: SearchableMatch[] = await listSearchableMatches(getDatabase().db)
 
-  return { clubs: clubsOf(matches), matches, seasons: seasonsOf(matches) }
+  return { clubs: clubsOf(matches), countries: countriesOf(matches), matches, seasons: seasonsOf(matches) }
 })
 
 /**

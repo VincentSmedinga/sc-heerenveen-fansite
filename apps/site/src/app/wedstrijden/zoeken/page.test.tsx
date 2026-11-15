@@ -22,6 +22,7 @@ function made(values: Partial<SearchableMatch>): SearchableMatch {
   return {
     afterNinetyAgainst: null,
     afterNinetyFor: null,
+    clubCountry: null,
     clubId: 1,
     clubName: 'Testdorp FC',
     clubSlug: 'testdorp-fc',
@@ -65,6 +66,7 @@ const world = (matches: SearchableMatch[]) => ({
     { name: 'Testdorp FC', slug: 'testdorp-fc' },
     { name: 'Voorbeeld United', slug: 'voorbeeld-united' },
   ],
+  countries: [...new Set(matches.flatMap((match) => (match.clubCountry === null ? [] : [match.clubCountry])))],
   matches,
   seasons: ['2001/02', '2002/03'],
 })
@@ -99,7 +101,16 @@ describe('the page Zoeken in wedstrijden', () => {
 
     expect(html).toContain('>Zoeken in wedstrijden</h1>')
     expect(html).toMatch(/<form[^>]*action="\/wedstrijden\/zoeken#resultaten"[^>]*method="get"/u)
-    for (const label of ['Tegenstander', 'Van', 'Tot', 'Doelpuntenmaker', 'Wij', 'Zij', 'Toon wedstrijden']) {
+    for (const label of [
+      'Tegenstander',
+      'Land van de tegenstander',
+      'Van',
+      'Tot',
+      'Doelpuntenmaker',
+      'Wij',
+      'Zij',
+      'Toon wedstrijden',
+    ]) {
       expect(html).toContain(label)
     }
     for (const legend of ['Seizoenen', 'Thuis of uit', 'Competitie', 'Uitslag', 'Dag', 'Exacte uitslag']) {
@@ -110,11 +121,12 @@ describe('the page Zoeken in wedstrijden', () => {
     expect(html).toContain('>Begin met een vraag</h2>')
     expect(html).toContain('Bron: Wikipedia en het archief van de oude sc Heerenveen Fansite.')
     expect(html).not.toContain('id="resultaten"')
-    // One level: eight rows, and only Tegenstander and Seizoenen are open.
+    // One level: nine rows, and only Tegenstander and Seizoenen are open.
     expect(html).not.toContain('Meer filters')
     expect(html).not.toContain('<summary>Filters')
     expect(rowsOf(html)).toEqual([
       ['Tegenstander', true],
+      ['Land van de tegenstander', false],
       ['Seizoenen', true],
       ['Competitie', false],
       ['Thuis of uit', false],
@@ -123,6 +135,34 @@ describe('the page Zoeken in wedstrijden', () => {
       ['Dag', false],
       ['Exacte uitslag', false],
     ])
+  })
+
+  it('filters on the country of the opponent, with a count behind each country and the choice in the address', async () => {
+    const abroad = [
+      made({ clubCountry: 'NL', goalsAgainst: 1, goalsFor: 2, matchDate: '2001-09-01' }),
+      made({
+        clubCountry: 'DE',
+        clubName: 'Voorbeeld United',
+        clubSlug: 'voorbeeld-united',
+        matchDate: '2001-09-07',
+        opponent: 'Voorbeeld United',
+      }),
+      made({ clubCountry: null, clubName: 'Proef Boys', clubSlug: 'proef-boys', matchDate: '2001-09-14' }),
+    ]
+
+    vi.mocked(getSearchWorld).mockResolvedValue(world(abroad))
+
+    const html = await render({ land: 'DE' })
+
+    expect(html).toContain('<option value="">Elk land</option>')
+    expect(html).toContain('Duitsland (1)')
+    expect(html).toContain('Nederland (1)')
+    expect(html).not.toContain('Onbekend')
+    expect(html).toMatch(/<option value="DE" selected="">Duitsland \(1\)/u)
+    expect(html).toContain('>1 wedstrijd</h2>')
+    expect(html).toContain('Alle wedstrijden tegen clubs uit Duitsland, sinds 2001/02.')
+    expect(html).toMatch(/<summary>Land van de tegenstander<span class="hf-disclosure-value">[^]*?Duitsland/u)
+    expect(html).toContain('href="/wedstrijden/zoeken"')
   })
 
   it('has a count behind each value, and Wis alles', async () => {

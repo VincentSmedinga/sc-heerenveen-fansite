@@ -56,6 +56,7 @@ export async function listSearchableMatches(db: Pick<Database, 'select'>) {
     .select({
       afterNinetyAgainst: matches.afterNinetyAgainst,
       afterNinetyFor: matches.afterNinetyFor,
+      clubCountry: clubs.country,
       clubId: matches.clubId,
       clubName: clubs.name,
       clubSlug: clubs.slug,

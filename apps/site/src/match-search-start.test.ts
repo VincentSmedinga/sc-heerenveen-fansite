@@ -13,6 +13,7 @@ function made(values: Partial<SearchableMatch>): SearchableMatch {
   return {
     afterNinetyAgainst: null,
     afterNinetyFor: null,
+    clubCountry: null,
     clubId: 1,
     clubName: 'Testdorp FC',
     clubSlug: 'testdorp-fc',
