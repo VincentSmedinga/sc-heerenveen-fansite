@@ -5932,3 +5932,19 @@
   Een eigen veld op de pagina van de club en een werklijst volgen het model van het land van een persoon.
 - **Alternatieven:** het veld in het formulier van de namen (dat is een lijst met regels en een eigen knop, en een land is één waarde); de werklijst als onderdeel van de lijst Clubnamen (die lijst gaat over namen); een eigen actie in het logboek weglaten en `club-name.save` hergebruiken (dat zegt "aantallen regels", niet een land).
 - **Land en bron samen:** kiest de redactie het land dat Wikidata al gaf, dan wordt de bron `manual`; de redactie heeft het dan bevestigd en de import laat het staan.
+
+## Zoeken in wedstrijden filtert op het land van de tegenstander
+
+- **Datum:** 15 november 2026
+- **Besluit:** Zoeken in wedstrijden heeft een rij "Land van de tegenstander" met één keuzelijst, direct onder Tegenstander (#1267).
+  De rij is bij het laden dicht, zoals de andere rijen behalve Tegenstander en Seizoenen.
+  De keuze staat in het adres als `land=<landcode>`, zoals `land=DE`, en een code die niet in de lijst staat valt weg zonder foutmelding.
+  De lijst heeft alleen de landen van clubs waartegen we speelden, op naam, met het aantal wedstrijden erbij; de aantallen volgen de andere keuzes, zoals bij Tegenstander.
+  Een gekozen land blijft in de lijst, ook met 0 wedstrijden.
+  Het land van een club komt uit `clubs.country` (#1264), en de landnaam uit dezelfde lijst als bij spelers (`countryName`).
+  Een wedstrijd tegen een club zonder land valt weg zodra een land is gekozen, en de lijst heeft geen keuze "Onbekend".
+  Het filter heeft een chip "Land: Duitsland", een zin "Alle wedstrijden tegen clubs uit Duitsland" en een naam in de gesloten rij.
+- **Waarom:** de telling is dezelfde als die van de kaart Europa per land (#1266): een wedstrijd telt voor het land van de club in `clubs.country`, en een club zonder land telt nergens.
+  Een keuze "Onbekend" laat de supporter zoeken op iets wat we niet weten; de werklijst van de redactie (#1265) is de plek om dat op te lossen.
+  Eén keuzelijst volgt het filter op de tegenstander, en met toetsenbord en schermlezer werkt een gewone `select` met een label en een gemelde waarde.
+- **Alternatieven:** meer landen tegelijk met vakjes (de lijst is lang, en één land is de vraag die supporters stellen); een keuze "Onbekend" (zie boven); het land als onderdeel van het filter op de tegenstander (twee verschillende vragen in één veld).

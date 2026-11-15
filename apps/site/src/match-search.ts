@@ -1,5 +1,7 @@
 import type { SearchableMatch } from '@fansite/db/match-search'
 
+import { countryName as nameOfCountry } from '@fansite/design-system'
+
 import { parseSearch } from './search'
 
 /**
@@ -8,6 +10,9 @@ import { parseSearch } from './search'
  * (about fourteen hundred), so it needs no database and a test can use made-up matches. The
  * page reads the list once in a while (`match-search-data.ts`) and hands it in.
  */
+
+/** The country in Dutch, or its code when it has no name. */
+const countryNameOf = (code: string) => nameOfCountry(code) ?? code
 
 /** The address of the page. */
 export const matchSearchPath = '/wedstrijden/zoeken'
@@ -97,6 +102,8 @@ export type Filters = {
   /** More clubs at once, as slugs. A card uses them; no field. */
   clubs: string[]
   competitions: CompetitionValue[]
+  /** The country of the club, as a code of two letters (`NL`). */
+  country?: string | undefined
   /** The day of the month and the month a match was played on, or the month alone. */
   date?: undefined | { day?: number | undefined; month: number }
   days: DayValue[]
@@ -133,6 +140,8 @@ export type ScorerMatches = ReadonlySet<number> | undefined
 /** What a search needs to know of the world: the seasons and clubs there are. */
 export type SearchWorld = {
   clubs: readonly { name: string; slug: string }[]
+  /** The countries of the clubs we played, as codes. */
+  countries: readonly string[]
   /** Every season with a match, oldest first. */
   seasons: readonly string[]
 }
@@ -153,6 +162,7 @@ const firstOf = (raw: string | string[] | undefined) => valuesOf(raw)[0]
  */
 export function parseFilters(raw: Raw, world: SearchWorld): Filters {
   const club = firstOf(raw['tegen'])
+  const country = firstOf(raw['land'])
   const known = (season: string | undefined) =>
     season !== undefined && world.seasons.includes(season) ? season : undefined
   let from = known(firstOf(raw['van']))
@@ -179,6 +189,7 @@ export function parseFilters(raw: Raw, world: SearchWorld): Filters {
       (slug, index, all) => all.indexOf(slug) === index && world.clubs.some((candidate) => candidate.slug === slug),
     ),
     competitions: pick(raw['competitie'], competitionGroups),
+    country: country !== undefined && world.countries.includes(country) ? country : undefined,
     date: month === undefined ? undefined : { day: dayAsked, month },
     days: pick(raw['dag'], days),
     from: from === world.seasons[0] ? undefined : from,
@@ -221,6 +232,7 @@ export const hasChoice = (filters: Filters) =>
   filters.club !== undefined ||
   filters.clubs.length > 0 ||
   filters.competitions.length > 0 ||
+  filters.country !== undefined ||
   filters.date !== undefined ||
   filters.days.length > 0 ||
   filters.from !== undefined ||
@@ -246,6 +258,9 @@ export function searchHref(filters: Filters, { page = filters.page }: { page?: n
   }
   for (const slug of filters.clubs) {
     query.append('clubs', slug)
+  }
+  if (filters.country !== undefined) {
+    query.set('land', filters.country)
   }
   if (filters.from !== undefined) {
     query.set('van', filters.from)
@@ -329,6 +344,7 @@ function passes(match: SearchableMatch, filters: Filters, scorer: ScorerMatches)
   return (
     (filters.club === undefined || match.clubSlug === filters.club) &&
     (filters.clubs.length === 0 || filters.clubs.includes(match.clubSlug)) &&
+    (filters.country === undefined || match.clubCountry === filters.country) &&
     (filters.date === undefined || meetsDate(match, filters.date)) &&
     (filters.minGoals === undefined || match.goalsFor + match.goalsAgainst >= filters.minGoals) &&
     (!filters.penalties || match.penaltiesFor !== null) &&
@@ -358,6 +374,11 @@ export function clubsOf(all: readonly SearchableMatch[]): { name: string; slug: 
     .toSorted((first, second) => first.name.localeCompare(second.name, 'nl'))
 }
 
+/** The countries of the clubs we played, as codes. A club without a country adds none. */
+export const countriesOf = (all: readonly SearchableMatch[]): string[] => [
+  ...new Set(all.flatMap((match) => (match.clubCountry === null ? [] : [match.clubCountry]))),
+]
+
 /** The clubs with the count of the matches against each, other choices as they are. */
 export function countClubs(all: readonly SearchableMatch[], filters: Filters, scorer: ScorerMatches) {
   const counts = new Map<string, { count: number; name: string }>()
@@ -370,6 +391,24 @@ export function countClubs(all: readonly SearchableMatch[], filters: Filters, sc
 
   return [...counts]
     .map(([slug, { count, name }]) => ({ count, name, slug }))
+    .toSorted((first, second) => first.name.localeCompare(second.name, 'nl'))
+}
+
+/**
+ * The countries with the count of the matches against clubs from each, other choices as they
+ * are, by name. A match against a club without a country is in no count.
+ */
+export function countCountries(all: readonly SearchableMatch[], filters: Filters, scorer: ScorerMatches) {
+  const counts = new Map<string, number>()
+
+  for (const match of findMatches(all, { ...filters, country: undefined }, scorer)) {
+    if (match.clubCountry !== null) {
+      counts.set(match.clubCountry, (counts.get(match.clubCountry) ?? 0) + 1)
+    }
+  }
+
+  return [...counts]
+    .map(([code, count]) => ({ code, count, name: countryNameOf(code) }))
     .toSorted((first, second) => first.name.localeCompare(second.name, 'nl'))
 }
 
@@ -459,6 +498,7 @@ export type SearchView = {
   chosen: boolean
   clubs: { count: number; name: string; slug: string }[]
   competitions: Counted<CompetitionValue>[]
+  countries: { code: string; count: number; name: string }[]
   days: Counted<DayValue>[]
   outcomes: Counted<OutcomeValue>[]
   relaxed: { count: number; href: string; label: string }[]
@@ -487,6 +527,9 @@ export function choicesOf(filters: Filters, world: SearchWorld): Choice[] {
       ),
       without: without({ clubs: [] }),
     })
+  }
+  if (filters.country !== undefined) {
+    choices.push({ label: `Land: ${countryNameOf(filters.country)}`, without: without({ country: undefined }) })
   }
   if (filters.from !== undefined || filters.to !== undefined) {
     choices.push({
@@ -601,6 +644,7 @@ export function facetValuesOf(filters: Filters, view: SearchView, seasons: reado
   return {
     club: view.clubs.find((club) => club.slug === filters.club)?.name ?? '',
     competitions: ofGroup(view.competitions),
+    country: filters.country === undefined ? '' : countryNameOf(filters.country),
     days: ofGroup(view.days),
     outcomes: ofGroup(view.outcomes),
     score:
@@ -668,6 +712,9 @@ export function sentenceOf(filters: Filters, world: SearchWorld): string {
           ...(club === undefined ? [] : [club.name]),
           ...filters.clubs.flatMap((slug) => world.clubs.find((candidate) => candidate.slug === slug)?.name ?? []),
         ])}`,
+    filters.country === undefined
+      ? ''
+      : `${club === undefined && filters.clubs.length === 0 ? ' tegen clubs' : ', tegen een club'} uit ${countryNameOf(filters.country)}`,
     filters.minGoals === undefined ? '' : ` met ${filters.minGoals} doelpunten of meer`,
     filters.penalties ? ' die met strafschoppen werden beslist' : '',
     filters.competitions.length === 0
@@ -704,6 +751,7 @@ export function viewOf(
   const result = resultOf(found, filters)
   const chosen = hasChoice(filters)
   const clubs = countClubs(all, filters, scorer)
+  const countries = countCountries(all, filters, scorer)
 
   return {
     chips: choicesOf(filters, world),
@@ -717,6 +765,13 @@ export function viewOf(
             ...world.clubs.filter((club) => club.slug === filters.club).map((club) => ({ ...club, count: 0 })),
           ].toSorted((first, second) => first.name.localeCompare(second.name, 'nl')),
     competitions: countGroup(all, filters, scorer, 'competitions', competitionGroups),
+    // A country that is chosen stays in the list, even when the other choices leave no match.
+    countries:
+      filters.country === undefined || countries.some((country) => country.code === filters.country)
+        ? countries
+        : [...countries, { code: filters.country, count: 0, name: countryNameOf(filters.country) }].toSorted(
+            (first, second) => first.name.localeCompare(second.name, 'nl'),
+          ),
     days: countGroup(all, filters, scorer, 'days', days),
     outcomes: countGroup(all, filters, scorer, 'outcomes', outcomes),
     relaxed: chosen && found.length === 0 ? relaxedChoices(all, filters, scorer, world) : [],

@@ -5,7 +5,9 @@ import { describe, expect, it } from 'vitest'
 import {
   byGoalDifference,
   choicesOf,
+  clubsOf,
   competitionGroups,
+  countriesOf,
   days,
   facetValuesOf,
   type Filters,
@@ -33,6 +35,7 @@ function made(values: Partial<SearchableMatch>): SearchableMatch {
   return {
     afterNinetyAgainst: null,
     afterNinetyFor: null,
+    clubCountry: null,
     clubId: 1,
     clubName: 'Testdorp FC',
     clubSlug: 'testdorp-fc',
@@ -107,6 +110,7 @@ const world = {
     { name: 'Testdorp FC', slug: 'testdorp-fc' },
     { name: 'Voorbeeld United', slug: 'voorbeeld-united' },
   ],
+  countries: ['DE', 'NL'],
   seasons: ['2001/02', '2003/04', '2026/27'],
 }
 
@@ -565,6 +569,61 @@ describe('the parameters of the questions (#1151)', () => {
   it('writes a list of names for a sentence', () => {
     expect(listOf(['Ajax'])).toBe('Ajax')
     expect(listOf(['Ajax', 'PSV', 'Feyenoord'])).toBe('Ajax, PSV en Feyenoord')
+  })
+})
+
+describe('the country of the opponent (#1267)', () => {
+  const abroad = [
+    made({ clubCountry: 'NL', goalsAgainst: 1, goalsFor: 2 }),
+    made({ clubCountry: 'DE', clubName: 'Voorbeeld United', clubSlug: 'voorbeeld-united', home: false }),
+    made({ clubCountry: 'DE', clubName: 'Voorbeeld United', clubSlug: 'voorbeeld-united', home: true }),
+    made({ clubCountry: null, clubName: 'Proef Boys', clubSlug: 'proef-boys' }),
+  ]
+  const abroadWorld = { clubs: clubsOf(abroad), countries: countriesOf(abroad), seasons: ['2001/02'] }
+  const view = (filters: Partial<Filters>) => viewOf(abroad, { ...none, ...filters }, undefined, abroadWorld)
+
+  it('lists the countries of the clubs we played, not a club without one', () => {
+    expect(abroadWorld.countries).toEqual(['NL', 'DE'])
+    expect(view({}).countries).toEqual([
+      { code: 'DE', count: 2, name: 'Duitsland' },
+      { code: 'NL', count: 1, name: 'Nederland' },
+    ])
+  })
+
+  it('reads the choice from the address, drops an unknown country and writes it back', () => {
+    const parseAbroad = (raw: Parameters<typeof parseFilters>[0]) => parseFilters(raw, abroadWorld)
+
+    expect(parseAbroad({ land: 'DE' }).country).toBe('DE')
+    expect(parseAbroad({ land: 'FR' }).country).toBeUndefined()
+    expect(parseAbroad({ land: 'de' }).country).toBeUndefined()
+    expect(hasChoice(parseAbroad({ land: 'DE' }))).toBe(true)
+    expect(searchHref(parseAbroad({ land: 'DE', waar: 'uit' }))).toBe('/wedstrijden/zoeken?land=DE&waar=uit')
+    expect(parseAbroad(Object.fromEntries(new URLSearchParams('land=DE')))).toEqual(parseAbroad({ land: 'DE' }))
+  })
+
+  it('finds the matches against clubs of that country, next to the other choices, and none without a country', () => {
+    expect(view({ country: 'DE' }).result.total).toBe(2)
+    expect(view({ country: 'DE', venues: ['uit'] }).result.total).toBe(1)
+    expect(view({ country: 'NL' }).result.total).toBe(1)
+  })
+
+  it('counts the other countries with the other choices, and keeps a chosen country at 0', () => {
+    expect(view({ country: 'DE', venues: ['uit'] }).countries).toEqual([{ code: 'DE', count: 1, name: 'Duitsland' }])
+    expect(view({ country: 'NL', venues: ['uit'] }).countries).toEqual([
+      { code: 'DE', count: 1, name: 'Duitsland' },
+      { code: 'NL', count: 0, name: 'Nederland' },
+    ])
+  })
+
+  it('has a chip, a sentence and a word for the closed row', () => {
+    const filters = { ...none, country: 'DE' }
+
+    expect(choicesOf(filters, abroadWorld).map((choice) => choice.label)).toEqual(['Land: Duitsland'])
+    expect(sentenceOf(filters, abroadWorld)).toBe('Alle wedstrijden tegen clubs uit Duitsland, sinds 2001/02.')
+    expect(sentenceOf({ ...filters, club: 'voorbeeld-united' }, abroadWorld)).toBe(
+      'Alle wedstrijden tegen Voorbeeld United, tegen een club uit Duitsland, sinds 2001/02.',
+    )
+    expect(facetValuesOf(filters, view({ country: 'DE' }), ['2001/02']).country).toBe('Duitsland')
   })
 })
 

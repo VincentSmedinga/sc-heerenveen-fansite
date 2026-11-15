@@ -20,6 +20,7 @@ function made(values: Partial<SearchableMatch>): SearchableMatch {
   return {
     afterNinetyAgainst: null,
     afterNinetyFor: null,
+    clubCountry: null,
     clubId: 1,
     clubName: 'Testdorp FC',
     clubSlug: 'testdorp-fc',
@@ -55,7 +56,11 @@ const all: SearchableMatch[] = [
   made({ goalsAgainst: 0, goalsFor: 5, season: '2003/04' }),
   made({ goalsAgainst: 2, goalsFor: 2, home: false, season: '2003/04' }),
 ]
-const world = { clubs: [{ name: 'Testdorp FC', slug: 'testdorp-fc' }], seasons: ['2001/02', '2002/03', '2003/04'] }
+const world = {
+  clubs: [{ name: 'Testdorp FC', slug: 'testdorp-fc' }],
+  countries: [],
+  seasons: ['2001/02', '2002/03', '2003/04'],
+}
 const scopes: { choice: CompetitionChoice; season?: string }[] = [
   { choice: 'all' },
   { choice: 'all', season: '2003/04' },

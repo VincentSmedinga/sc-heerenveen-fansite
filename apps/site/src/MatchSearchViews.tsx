@@ -89,6 +89,25 @@ export function MatchSearchFilters({
             </Select>
           </Field>
         </Disclosure>
+        <Disclosure summary="Land van de tegenstander" value={values.country}>
+          <Field
+            hideOptional
+            hint="Alleen landen waartegen we speelden. Een club zonder bekend land telt niet mee."
+            id="land"
+            label="Land van de tegenstander"
+            required={false}
+          >
+            <Select defaultValue={filters.country ?? ''} name="land">
+              <Select.Option value="">Elk land</Select.Option>
+              {view.countries.map((country) => (
+                <Select.Option
+                  key={country.code}
+                  value={country.code}
+                >{`${country.name} (${country.count})`}</Select.Option>
+              ))}
+            </Select>
+          </Field>
+        </Disclosure>
         <Disclosure open summary="Seizoenen" value={values.seasons}>
           <FieldGroup legend="Seizoenen" separator="–">
             <Field hideOptional id="van" label="Van" required={false}>

@@ -51,8 +51,8 @@ const rawOf = (query: string): Record<string, string[]> => {
  */
 const loadSearch = cache(async (query: string) => {
   try {
-    const { clubs, matches, seasons } = await getSearchWorld()
-    const world = { clubs, seasons }
+    const { clubs, countries, matches, seasons } = await getSearchWorld()
+    const world = { clubs, countries, seasons }
     const filters = parseFilters(rawOf(query), world)
     const scorer = filters.scorer === undefined ? undefined : await findScorerMatches(filters.scorer.words)
     const view = viewOf(matches, filters, scorer, world)
