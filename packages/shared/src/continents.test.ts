@@ -22,6 +22,12 @@ describe('the table of continents', () => {
     }
   })
 
+  it('puts the four countries of the United Kingdom in Europe, next to GB', () => {
+    for (const code of ['GB', 'GB-ENG', 'GB-NIR', 'GB-SCT', 'GB-WLS']) {
+      expect(continentOf(code)).toBe('europe')
+    }
+  })
+
   it('puts Central America and the Caribbean in North America', () => {
     for (const code of ['GT', 'CW', 'JM', 'CR']) {
       expect(continentOf(code)).toBe('north-america')

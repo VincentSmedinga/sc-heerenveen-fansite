@@ -9,6 +9,7 @@ import type { Person } from '@fansite/db/schema'
 
 import { mergeChosenPersons, type PersonMergePlan, planPersonMerge } from '@fansite/db/person-merge'
 
+import { regionName } from './countries'
 import { refreshCompleteness, refreshPlayerAddresses } from './players'
 
 /** A value both persons have a say in, as the confirmation page and the log name it. */
@@ -191,7 +192,7 @@ const count = (n: number, one: string, more: string) => `${n} ${n === 1 ? one : 
 
 function countryName(code: string) {
   try {
-    return `${new Intl.DisplayNames('nl', { type: 'region' }).of(code) ?? code} (${code})`
+    return `${regionName(code)} (${code})`
   } catch {
     return code
   }

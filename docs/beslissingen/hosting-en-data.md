@@ -1064,4 +1064,26 @@
 - **Namen en vlaggen:** zoals bij personen, met de bestaande vlag en de Nederlandse landnaam als alt-tekst.
   Engeland, Wales en Schotland blijven samen "Verenigd Koninkrijk" (`GB`), omdat we alleen codes van ISO bewaren.
   Een eigen keuze voor de vier landen van het Verenigd Koninkrijk is een apart besluit als de redactie dat wil.
+- **Later:** Engeland, Wales, Schotland en Noord-Ierland zijn sinds #1277 landen van een eigen, met de codes `GB-ENG`, `GB-WLS`, `GB-SCT` en `GB-NIR`; een landcode is dus twee letters of `GB-` met drie letters, en de kolommen zijn `varchar(6)` (zie _Engeland, Wales, Schotland en Noord-Ierland zijn landen van een eigen, met ISO 3166-2_).
+  `GB` blijft Verenigd Koninkrijk, voor een club of persoon die we niet kunnen splitsen.
 - **De kaart:** per land de wedstrijden, winst, gelijk en verlies en de doelpunten, met de wedstrijden zonder bekend land onderaan; zie #1266.
+
+## Engeland, Wales, Schotland en Noord-Ierland zijn landen van een eigen, met ISO 3166-2
+
+- **Datum:** 15 november 2026
+- **Besluit:** `countryCodes` in `@fansite/shared/countries` krijgt `GB-ENG`, `GB-WLS`, `GB-SCT` en `GB-NIR`, de codes van ISO 3166-2 en van flag-icons (#1277).
+  `GB` blijft in de lijst voor een club of persoon die we niet kunnen splitsen.
+  Elke kolom `country` (`clubs`, `persons`, `players` en `player_list_titles`) wordt `varchar(6)`, in de migratie `0078_widen_country_codes`.
+  Die verbreedt alleen, verandert geen waarde en kan opnieuw draaien; terugdraaien op de host staat als opmerking bovenaan het bestand.
+  Elke plek die een code leest of kiest (`isCountryCode`, de keuze in het beheer, de filters en de kaarten) werkt met de langere vorm.
+  Alle vier horen bij Europa in `continents.ts`.
+- **Personen:** een persoon krijgt dezelfde codes.
+  Het land van een persoon is het land waarvoor hij uitkomt of waar zijn nationaliteit op wijst; de redactie kiest het in het beheer, en de importer doet een voorstel (#1278).
+  `manual` blijft altijd staan.
+- **Vlaggen en namen:** de vlaggen `gb-eng`, `gb-wls`, `gb-sct` en `gb-nir` uit flag-icons 7.6.0 (MIT, dezelfde bron als de andere vlaggen) staan als SVG-tekst in `flags.ts`.
+  Engeland en Schotland zijn de echte vlag.
+  Wales en Noord-Ierland zijn te zwaar (een draak, een wapen) en staan bij de vereenvoudigde vlaggen, zoals Spanje en Servië.
+  De namen zijn Engeland, Wales, Schotland en Noord-Ierland.
+  De runtime (`Intl.DisplayNames`) kent die codes niet, dus de keuze in het beheer en de logregels nemen de naam van `flags.ts` voor een code met een streepje (`regionName` in `apps/site/src/beheer/countries.ts`).
+- **Waarom:** het zijn echte codes, zonder een eigen verzinsel dat later botst, en een supporter noemt de vier landen apart.
+- **Alternatieven:** eigen codes van twee letters naast `XK` (geen migratie, maar verzonnen); alles `GB` laten (de eigenaar wil ze gescheiden); de codes als tekst in een kader (de vlag is er, en supporters herkennen die).

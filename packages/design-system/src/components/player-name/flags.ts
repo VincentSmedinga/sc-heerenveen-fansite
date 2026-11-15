@@ -98,6 +98,10 @@ export const countryNames: Record<string, string> = {
   FR: 'Frankrijk',
   GA: 'Gabon',
   GB: 'Verenigd Koninkrijk',
+  'GB-ENG': 'Engeland',
+  'GB-NIR': 'Noord-Ierland',
+  'GB-SCT': 'Schotland',
+  'GB-WLS': 'Wales',
   GD: 'Grenada',
   GE: 'Georgië',
   GF: 'Frans-Guyana',
@@ -331,6 +335,10 @@ export const flagDrawings: Record<string, string> = {
   FR: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#000091" d="M0 0h213v480H0z"/><path fill="#fff" d="M213 0h214v480H213z"/><path fill="#e1000f" d="M427 0h213v480H427z"/></svg>',
   GA: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><g fill-rule="evenodd"><path fill="#ffe700" d="M640 480H0V0h640z"/><path fill="#36a100" d="M640 160H0V0h640z"/><path fill="#006dbc" d="M640 480H0V320h640z"/></g></svg>',
   GB: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#012169" d="M0 0h640v480H0z"/><path fill="#FFF" d="m75 0 244 181L562 0h78v62L400 241l240 178v61h-80L320 301 81 480H0v-60l239-178L0 64V0z"/><path fill="#C8102E" d="m424 281 216 159v40L369 281zm-184 20 6 35L54 480H0zM640 0v3L391 191l2-44L590 0zM0 0l239 176h-60L0 42z"/><path fill="#FFF" d="M241 0v480h160V0zM0 160v160h640V160z"/><path fill="#C8102E" d="M0 193v96h640v-96zM273 0v480h96V0z"/></svg>',
+  'GB-ENG':
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#fff" d="M0 0h640v480H0z"/><path fill="#ce1124" d="M281.6 0h76.8v480h-76.8z"/><path fill="#ce1124" d="M0 201.6h640v76.8H0z"/></svg>',
+  'GB-SCT':
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#0065bd" d="M0 0h640v480H0z"/><path fill="none" stroke="#fff" stroke-width="90" d="M0 0 640 480M0 480 640 0"/></svg>',
   GE: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#fff" d="M0 0h640v480H0z"/><path fill="red" d="M272 0h96v480h-96z"/><path fill="red" d="M0 192h640v96H0z"/><path fill="red" fill-rule="evenodd" d="M147 373c1-17 4-31 4-31l-15 1-15-1s3 14 4 31c-17-1-31-4-31-4l1 15-1 15s14-3 31-4c-1 17-4 31-4 31l15-1 15 1s-3-14-4-31c17 1 31 4 31 4l-1-15 1-15s-14 3-31 4M515 85c1-17 4-31 4-31l-15 1-15-1s3 14 4 31c-17-1-31-4-31-4l1 15-1 15s14-3 31-4c-1 17-4 31-4 31l15-1 15 1s-3-14-4-31c17 1 31 4 31 4l-1-15 1-15s-14 3-31 4m-368 0c1-17 4-31 4-31l-15 1-15-1s3 14 4 31c-17-1-31-4-31-4l1 15-1 15s14-3 31-4c-1 17-4 31-4 31l15-1 15 1s-3-14-4-31c17 1 31 4 31 4l-1-15 1-15s-14 3-31 4m368 288c1-17 4-31 4-31l-15 1-15-1s3 14 4 31c-17-1-31-4-31-4l1 15-1 15s14-3 31-4c-1 17-4 31-4 31l15-1 15 1s-3-14-4-31c17 1 31 4 31 4l-1-15 1-15s-14 3-31 4"/></svg>',
   GF: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#fff" d="M0 0h640v480H0z"/><path fill="#000091" d="M0 0h213v480H0z"/><path fill="#e1000f" d="M427 0h213v480H427z"/></svg>',
   GG: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#fff" d="M0 0h640v480H0z"/><path fill="#e8112d" d="M256 0h128v480H256z"/><path fill="#e8112d" d="M0 176h640v128H0z"/><path fill="#f9dd16" d="m110 287 23-24h210v-46H133l-23-24z"/><path fill="#f9dd16" d="m273 30 24 23v210h46V53l24-23z"/><path fill="#f9dd16" d="m367 450-24-23V217h-46v210l-24 23z"/><path fill="#f9dd16" d="m530 193-23 24H297v46h210l23 24z"/></svg>',
@@ -466,6 +474,10 @@ export const simplifiedFlags: Record<string, string> = {
   EC: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#ffdd00" d="M0 0h640v240h-640z"/><path fill="#034ea2" d="M0 240h640v120h-640z"/><path fill="#ed1c24" d="M0 360h640v120h-640z"/></svg>',
   EG: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#ce1126" d="M0 0h640v160h-640z"/><path fill="#fff" d="M0 160h640v160h-640z"/><path fill="#000" d="M0 320h640v160h-640z"/></svg>',
   ES: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#aa151b" d="M0 0h640v120h-640z"/><path fill="#f1bf00" d="M0 120h640v240h-640z"/><path fill="#aa151b" d="M0 360h640v120h-640z"/></svg>',
+  'GB-NIR':
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#fff" d="M0 0h640v480H0z"/><path fill="#c8102e" d="M280 0h80v480h-80z"/><path fill="#c8102e" d="M0 200h640v80H0z"/><circle fill="#fff" cx="320" cy="240" r="75"/><path fill="#c8102e" d="m320 190 15 35h38l-30 22 12 38-35-24-35 24 12-38-30-22h38z"/></svg>',
+  'GB-WLS':
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#fff" d="M0 0h640v240H0z"/><path fill="#00ab39" d="M0 240h640v240H0z"/><path fill="#c8102e" d="M180 330c40-120 120-170 200-150 40-60 100-70 150-40-30 10-50 30-60 50 20 30 20 70-20 100-60-20-100 10-130 60-50 20-110 20-140-20z"/></svg>',
   GQ: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#3e9a00" d="M0 0h640v160h-640z"/><path fill="#fff" d="M0 160h640v160h-640z"/><path fill="#e32118" d="M0 320h640v160h-640z"/><path fill="#0073ce" d="M0 0 220 240 0 480z"/></svg>',
   GT: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#4997d0" d="M0 0h214v480h-214z"/><path fill="#fff" d="M214 0h213v480h-213z"/><path fill="#4997d0" d="M427 0h213v480h-213z"/></svg>',
   HR: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480"><path fill="#f00" d="M0 0h640v160h-640z"/><path fill="#fff" d="M0 160h640v160h-640z"/><path fill="#171796" d="M0 320h640v160h-640z"/></svg>',

@@ -48,6 +48,20 @@ describe('countryTalliesOf', () => {
     })
   })
 
+  it('counts a club of Wales under Wales and not under the United Kingdom (#1277)', () => {
+    const tallies = countryTalliesOf([
+      match('Europa League', 'GB-WLS', 2, 0),
+      match('Europa League', 'GB', 1, 1),
+      match('UEFA Cup', 'GB-ENG', 0, 1),
+    ])
+
+    expect(tallies.map(({ country, played }) => [country, played]).toSorted()).toEqual([
+      ['GB', 1],
+      ['GB-ENG', 1],
+      ['GB-WLS', 1],
+    ])
+  })
+
   it('leaves out the other competitions and the matches still to play', () => {
     const played = countryTalliesOf(matches).reduce((sum, { played }) => sum + played, 0)
 

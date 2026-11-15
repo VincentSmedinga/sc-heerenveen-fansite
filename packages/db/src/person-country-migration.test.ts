@@ -61,7 +61,7 @@ describe(`the migration ${migration}`, () => {
     expect(await rows('SELECT name, line, line_source, country, country_source FROM persons')).toEqual([
       { country: null, country_source: null, line: 'verdediger', line_source: 'wikidata', name: 'Joost van Aken' },
     ])
-    expect(await rows("SHOW COLUMNS FROM persons LIKE 'country'")).toMatchObject([{ Null: 'YES', Type: 'char(2)' }])
+    expect(await rows("SHOW COLUMNS FROM persons LIKE 'country'")).toMatchObject([{ Null: 'YES', Type: 'varchar(6)' }])
     expect(await rows("SHOW COLUMNS FROM persons LIKE 'country_source'")).toMatchObject([
       { Null: 'YES', Type: "enum('manual','wikidata','list','squad','old-site')" },
     ])

@@ -60,7 +60,7 @@ describe(`the migration ${migration}`, () => {
     expect(await rows('SELECT name, shirt_number, country FROM players')).toEqual([
       { country: null, name: 'Joost van Aken', shirt_number: 4 },
     ])
-    expect(await rows("SHOW COLUMNS FROM players LIKE 'country'")).toMatchObject([{ Null: 'YES', Type: 'char(2)' }])
+    expect(await rows("SHOW COLUMNS FROM players LIKE 'country'")).toMatchObject([{ Null: 'YES', Type: 'varchar(6)' }])
   })
 
   it('can run again after it stopped halfway, and keeps the countries that are stored', async () => {

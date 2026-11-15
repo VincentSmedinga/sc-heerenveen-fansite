@@ -16,24 +16,24 @@ import {
 // on it, and a country that is added there makes this test red until it has a name and a
 // drawing or a place in the list of codes.
 const countriesSource = readFileSync(join(import.meta.dirname, '../../../../shared/src/countries.ts'), 'utf8')
-const countryCodes = [...(countriesSource.match(/\n {2}'[A-Z ]+',/gu) ?? []).join('').matchAll(/[A-Z]{2}/gu)].map(
-  (match) => match[0],
-)
+const countryCodes = [
+  ...(countriesSource.match(/\n {2}'[A-Z -]+',/gu) ?? []).join('').matchAll(/[A-Z]{2}(?:-[A-Z]{3})?/gu),
+].map((match) => match[0])
 
 const codes = Object.keys(flagDrawings)
 const drawings = { ...flagDrawings, ...simplifiedFlags }
 
 describe('the flags', () => {
-  it('reads the 250 countries of countryCodes', () => {
-    expect(countryCodes).toHaveLength(250)
-    expect(new Set(countryCodes).size).toBe(250)
+  it('reads the 254 countries of countryCodes', () => {
+    expect(countryCodes).toHaveLength(254)
+    expect(new Set(countryCodes).size).toBe(254)
   })
 
   it('has a Dutch name for every country of countryCodes, and for no other', () => {
     expect(Object.keys(countryNames).sort()).toEqual([...countryCodes].sort())
 
     for (const [code, name] of Object.entries(countryNames)) {
-      expect(code, name).toMatch(/^[A-Z]{2}$/u)
+      expect(code, name).toMatch(/^[A-Z]{2}(?:-[A-Z]{3})?$/u)
       expect(name.length, code).toBeGreaterThan(2)
     }
   })
@@ -105,6 +105,18 @@ describe('the flags', () => {
       expect(drawing.match(/https?:\/\/[^"']*/gu), code).toEqual(['http://www.w3.org/2000/svg'])
       expect(drawing, code).not.toContain("'")
       expect(drawing, code).not.toMatch(/\sid="flag-icons/u)
+    }
+  })
+
+  it('names and draws the four countries of the United Kingdom next to GB (#1277)', () => {
+    expect(countryName('GB')).toBe('Verenigd Koninkrijk')
+    expect(countryName('GB-ENG')).toBe('Engeland')
+    expect(countryName('gb-wls')).toBe('Wales')
+    expect(countryName('GB-SCT')).toBe('Schotland')
+    expect(countryName('GB-NIR')).toBe('Noord-Ierland')
+
+    for (const code of ['GB-ENG', 'GB-NIR', 'GB-SCT', 'GB-WLS']) {
+      expect(flagAddress(code), code).toMatch(/^data:image\/svg\+xml,/u)
     }
   })
 

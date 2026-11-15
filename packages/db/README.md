@@ -592,7 +592,7 @@ Een naam komt in een seizoen één keer voor, en een pagina ook.
 | `position`                                   | `doelman`, `verdediger`, `middenvelder` of `aanvaller`                                                                                                                             |
 | `shirt_number`                               | Het rugnummer, 1 tot en met 99; leeg bij een speler zonder nummer                                                                                                                  |
 | `previous_shirt_number`, `shirt_number_from` | Het nummer dat de speler eerst droeg en de dag vanaf wanneer `shirt_number` geldt (#1076): allebei ingevuld of allebei leeg, alleen door de redactie, en de importer laat ze staan |
-| `country`                                    | De landcode van twee letters van de vlag in de tabel, zoals `NL`; leeg als de tabel er geen noemt                                                                                  |
+| `country`                                    | De landcode van de vlag in de tabel, zoals `NL`; leeg als de tabel er geen noemt                                                                                                   |
 | `search_term`                                | De naam zonder de eerste voornaam, zoals `van Aken`: waarop de zoekpagina zoekt                                                                                                    |
 | `wikipedia_page`                             | De pagina waar de tabel naar linkt, zoals `Luca Oyen` of `Pim Verbeek (voetballer, 1999)`; leeg zonder link                                                                        |
 | `person_id`                                  | De persoon in `persons` van die pagina; leeg zonder pagina of als de pagina nog niet is opgevraagd (zie _De tabellen `persons` en `person_pages`_)                                 |
@@ -699,7 +699,7 @@ De gegevens komen van Wikipedia en vallen onder CC BY-SA 4.0, zoals de wedstrijd
 | `name`             | De huidige naam: die van het nieuwste seizoen waarin we tegen de club speelden                                                                  |
 | `wikipedia_page`   | De titel van het artikel, na de doorverwijzingen, zoals `Telstar (voetbalclub)`; uniek als hij er is, en leeg voor een club met alleen een naam |
 | `wikidata_id`      | Het Q-nummer van het item op Wikidata (#1264); uniek, en leeg voor een club zonder artikel of item                                              |
-| `country`          | De landcode van twee hoofdletters, het land van nu; leeg als we het niet weten                                                                  |
+| `country`          | De landcode in hoofdletters (twee letters, of `GB-WLS` voor een land van het Verenigd Koninkrijk), het land van nu; leeg als we het niet weten  |
 | `country_source`   | `manual` (de redactie, de importer verandert het nooit) of `wikidata`; leeg zonder land                                                         |
 | `country_item_id`  | Het land van het item (`P17`) zoals Wikidata het gaf, ook als het niet in de lijst staat; verwijst naar `wikidata_items`                        |
 | `wikidata_read_at` | Wanneer de importer het item las, in UTC; een gelezen club krijgt geen verzoek meer                                                             |
@@ -882,14 +882,15 @@ Een persoon heeft ook een land (#1051, migratie `0065_add_country_of_persons`):
 
 | Kolom (`persons`) | Betekenis                                                                                                                                                                                         |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `country`         | De landcode van twee letters in hoofdletters (`NL`); leeg voor een persoon van wie we het land niet kennen                                                                                        |
+| `country`         | De landcode in hoofdletters (`NL`, of `GB-WLS`); leeg voor een persoon van wie we het land niet kennen                                                                                            |
 | `country_source`  | Waar het land vandaan komt, van sterk naar zwak: `manual` (het beheer), `wikidata`, `list` (de lijst van spelers), `old-site` (de oude fansite) of `squad` (de selectielijsten); leeg zonder land |
 
 De linie en het land van een persoon zijn de standaard voor elk seizoen.
 Een rij van een seizoen kan afwijken: `players.position` en `players.country` gaan op de pagina van dat seizoen voor (`listSeasonPlayers`).
 De importer vult het land uit de eerste nationaliteit van Wikidata (`wikidata`); `list`, `squad` en `old-site` zijn voor de bronnen van #1052.
 De migratie voegt alleen de twee kolommen toe, verandert geen rij en kan opnieuw draaien; hoe je haar terugdraait, staat bovenaan het bestand.
-De codes die mogen, staan in `@fansite/shared/countries` (`countryCodes`): de 249 codes van ISO 3166-1 en `XK` voor Kosovo.
+De codes die mogen, staan in `@fansite/shared/countries` (`countryCodes`): de 249 codes van ISO 3166-1, `XK` voor Kosovo en de codes van ISO 3166-2 van de vier landen van het Verenigd Koninkrijk (`GB-ENG`, `GB-NIR`, `GB-SCT` en `GB-WLS`, #1277).
+De kolommen `country` van `clubs`, `persons`, `players` en `player_list_titles` zijn daarom `varchar(6)` (migratie `0078_widen_country_codes`, die alleen verbreedt, geen rij verandert en opnieuw kan draaien).
 
 Drie tabellen horen erbij:
 

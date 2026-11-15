@@ -5,6 +5,7 @@ import { isCountryCode } from '@fansite/shared/countries'
 import { asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm'
 
 import { recordAction } from './audit-log'
+import { regionName } from './countries'
 import { qualityPath } from './quality'
 
 // The country of a club in the admin (#1265): the choice of an editor for one club, and the
@@ -98,7 +99,7 @@ export async function countClubsWithoutCountry(
 
 /** The Dutch name of a country code, for the log and for what the pages say. */
 export function countryName(code: string): string {
-  return new Intl.DisplayNames('nl', { type: 'region' }).of(code) ?? code
+  return regionName(code)
 }
 
 /**
