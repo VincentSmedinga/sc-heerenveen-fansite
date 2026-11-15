@@ -3592,7 +3592,7 @@
 ## Vijf compacte keuzes krijgen kleinere letters en geen opvulling
 
 - **Datum:** 15 november 2026
-- **Besluit:** een compacte `SegmentedControl` of `SegmentedLinks` met vijf of meer keuzes zet de letters een pixel kleiner en laat de opvulling links en rechts weg (#1282).
+- **Besluit:** een compacte `SegmentedControl` of `SegmentedLinks` met vijf of meer keuzes zet de letters op 0,8125 keer de tekst eromheen (13 pixels) en laat de opvulling links en rechts weg (#1282).
   De regel in `segmented-control.css` kijkt met `:has(> :nth-child(5))` of er een vijfde keuze is, dus een component of een pagina hoeft niets door te geven.
   Met vier keuzes of minder verandert er niets.
 - **Waarom:** de schakelaar van de competitie krijgt een vijfde keuze, Play-offs.

@@ -150,10 +150,10 @@ describe('the sizes of the segmented control', () => {
     expect(compact.slice(0, compact.indexOf('}'))).not.toContain('min-block-size')
   })
 
-  it('makes the letters a pixel smaller and drops the padding for five options or more', () => {
+  it('makes the letters smaller, relative to the text around them, and drops the padding for five options or more', () => {
     const five = css.slice(css.indexOf('&.hf-segmented-compact:has(> :nth-child(5))'))
 
-    expect(five.slice(0, five.indexOf('}'))).toContain('font-size: calc(var(--hf-meta-font-size) - 1px);')
+    expect(five.slice(0, five.indexOf('}'))).toContain('font-size: 0.8125em;')
     expect(five.slice(0, five.indexOf('}'))).toContain('padding-inline: 0;')
   })
 
