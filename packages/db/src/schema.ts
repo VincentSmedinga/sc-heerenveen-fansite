@@ -467,6 +467,7 @@ export const auditActions = [
   'account.edit',
   'account.disable',
   'account.enable',
+  'club.edit',
 ] as const
 
 export type AuditAction = (typeof auditActions)[number]
@@ -661,6 +662,19 @@ export const competitions = [
 export const matchDataSources = ['wikipedia', 'oude-fansite', 'redactie'] as const
 
 export type Competition = (typeof competitions)[number]
+
+/** The competitions of Europe, the Champions League and its play-offs among them. */
+export const europeanCompetitions: readonly Competition[] = [
+  'Champions League',
+  'Europa League',
+  'Europacup II',
+  'Intertoto Cup',
+  'Play-offs Champions League',
+  'Play-offs Conference League',
+  'Play-offs Europa League',
+  'Play-offs UEFA Cup',
+  'UEFA Cup',
+]
 
 export type MatchDataSource = (typeof matchDataSources)[number]
 

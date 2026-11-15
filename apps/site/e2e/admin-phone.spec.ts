@@ -49,6 +49,7 @@ const screens = [
   '/beheer/kwaliteit/personen/b',
   '/beheer/kwaliteit/personen/snel',
   '/beheer/kwaliteit/personen/snel?lijst=land',
+  '/beheer/kwaliteit/clubs/land',
   '/beheer/kwaliteit/namen',
   '/beheer/kwaliteit/formaties',
   '/beheer/kwaliteit/plaatsen',

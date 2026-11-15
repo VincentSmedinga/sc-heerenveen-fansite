@@ -53,6 +53,7 @@ const notInSitemap: string[] = [
   '/beheer/kwaliteit/personen',
   '/beheer/kwaliteit/personen/[letter]',
   '/beheer/kwaliteit/personen/snel',
+  '/beheer/kwaliteit/clubs/land',
   '/beheer/kwaliteit/namen',
   '/beheer/kwaliteit/formaties',
   '/beheer/kwaliteit/plaatsen',
