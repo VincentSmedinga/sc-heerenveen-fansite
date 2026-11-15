@@ -179,7 +179,13 @@ export async function AllSeasonsPage({ searchParams }: { searchParams: Promise<S
             matchLink={(value) => matchLink(searchable, { competition: 'all' }, { competitions: [value] })}
             tallies={competitionTalliesOf(matches)}
           />
-          <CountryTallyCard level={3} tallies={countryTalliesOf(matches, competition)} />
+          <CountryTallyCard
+            level={3}
+            matchLink={(country) =>
+              matchLink(searchable, { competition: 'all' }, { competitions: ['europa'], country })
+            }
+            tallies={countryTalliesOf(matches, competition)}
+          />
           {coachResults}
         </CardGroup>
       )}

@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 import { Link, Text } from '@fansite/design-system'
 
 import { type MatchLink, showWords } from './cijfers-search'
@@ -19,7 +21,7 @@ export function MatchSearchLink({ link, what }: { link: MatchLink | undefined; w
  * The text of a link in the header of a table row, which shows `shown` and tells a screen
  * reader where the link goes after it: "1–1" and "toon de 111 wedstrijden met 1–1".
  */
-export const rowLinkText = (shown: string, link: MatchLink, what: string) => (
+export const rowLinkText = (shown: ReactNode, link: MatchLink, what: string) => (
   <>
     {shown}
     <Text as="span" className="hf-visually-hidden">{`, ${showWords(link, what).toLowerCase()}`}</Text>
