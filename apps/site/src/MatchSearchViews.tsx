@@ -26,6 +26,7 @@ import {
 
 import type { OnThisDay as OnThisDayCard, Question } from './match-search-start'
 
+import { matchKey } from './all-time-players'
 import {
   clubsOf,
   facetValuesOf,
@@ -210,6 +211,7 @@ export function MatchSearchResults({
 }: {
   filters: Filters
   now: Date
+  /** By `matchKey`: the season, the competition and the round of a match. */
   reportAddresses: ReadonlyMap<string, string>
   view: SearchView
 }) {
@@ -270,7 +272,7 @@ export function MatchSearchResults({
                     <MatchLine
                       match={matchOf(match)}
                       now={now}
-                      reportHref={reportAddresses.get(`${match.competition}|${match.round}`)}
+                      reportHref={reportAddresses.get(matchKey(match.season, match.competition, match.round))}
                       withYear
                     />
                   </List.Item>
