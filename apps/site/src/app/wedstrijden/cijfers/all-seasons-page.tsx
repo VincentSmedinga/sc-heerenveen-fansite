@@ -13,6 +13,8 @@ import { type CompetitionChoice, competitionFields, parseCompetition } from '#sr
 import { CompetitionSwitch } from '#src/CompetitionSwitch'
 import { competitionTalliesOf } from '#src/competitionTally'
 import { CompetitionTallyCard } from '#src/CompetitionTallyCard'
+import { countryTalliesOf } from '#src/countryTally'
+import { CountryTallyCard } from '#src/CountryTallyCard'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { getSearchWorld } from '#src/match-search-data'
@@ -177,6 +179,7 @@ export async function AllSeasonsPage({ searchParams }: { searchParams: Promise<S
             matchLink={(value) => matchLink(searchable, { competition: 'all' }, { competitions: [value] })}
             tallies={competitionTalliesOf(matches)}
           />
+          <CountryTallyCard level={3} tallies={countryTalliesOf(matches, competition)} />
           {coachResults}
         </CardGroup>
       )}

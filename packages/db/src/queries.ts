@@ -319,10 +319,16 @@ export async function listAllMatchDays(db: Database) {
  * Every match of every season in the form of `listSeasonMatches`, each with its `season`, in
  * the order of season, day, kick-off and `id`. The page Wedstrijden · Cijfers counts them for
  * "Alle seizoenen". It is three queries for all of them, as for one season, so it costs a
- * little more than the page of a season and nothing per season.
+ * little more than the page of a season and nothing per season. Each match also has
+ * `opponentCountry`, the country of the club of the opponent as the club has it now (#1264), or
+ * null for a club without one, for the card Europa per land.
  */
-export function listAllMatches(db: Database) {
-  return matchesWithGoals(db, undefined)
+export async function listAllMatches(db: Database) {
+  return (await matchesWithClub(db, undefined)).map(({ clubId, ...match }) => {
+    void clubId
+
+    return omitId(match)
+  })
 }
 
 /**
@@ -1312,7 +1318,8 @@ export async function searchPublic(
   return { hits, total: Number(found[0]?.total ?? 0) + Number(written[0]?.total ?? 0) }
 }
 
-async function matchesWithGoals(db: Database, where: SQL | undefined) {
+/** The matches of `matchesWithGoals` with their `clubId` and the country of that club. */
+async function matchesWithClub(db: Database, where: SQL | undefined) {
   const rows = await db
     .select({
       afterNinetyAgainst: matches.afterNinetyAgainst,
@@ -1331,6 +1338,7 @@ async function matchesWithGoals(db: Database, where: SQL | undefined) {
       matchDate: matches.matchDate,
       note: matches.note,
       opponent: matches.opponent,
+      opponentCountry: clubs.country,
       penaltiesAgainst: matches.penaltiesAgainst,
       penaltiesFor: matches.penaltiesFor,
       referee: matches.referee,
@@ -1340,15 +1348,21 @@ async function matchesWithGoals(db: Database, where: SQL | undefined) {
       status: matches.status,
     })
     .from(matches)
+    .leftJoin(clubs, eq(clubs.id, matches.clubId))
     .where(where)
     .orderBy(asc(matches.season), asc(matches.matchDate), asc(matches.kickoffAt), asc(matches.id))
 
-  // The pages of a season need neither the `id` nor the club, so they stay out of what they
-  // get.
   const named = await withSeasonNames(db, rows)
 
-  return (await withGoals(db, named, where)).map(({ clubId, ...match }) => {
+  return withGoals(db, named, where)
+}
+
+async function matchesWithGoals(db: Database, where: SQL | undefined) {
+  // The pages of a season need neither the `id` nor the club, so they stay out of what they
+  // get.
+  return (await matchesWithClub(db, where)).map(({ clubId, opponentCountry, ...match }) => {
     void clubId
+    void opponentCountry
 
     return omitId(match)
   })
