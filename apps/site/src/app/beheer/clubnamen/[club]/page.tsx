@@ -17,10 +17,12 @@ import {
 } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
+import { submitClubCountry } from '#src/app/beheer/kwaliteit/clubs/land/actions'
 import { sideAreas } from '#src/beheer/areas'
 import { emptyNameRow, nameFormId } from '#src/beheer/club-name-fields'
 import { rowOf } from '#src/beheer/club-name-form'
 import { findAdminClub, headingNotice } from '#src/beheer/club-names'
+import { countryChoices } from '#src/beheer/countries'
 import { compact } from '#src/beheer/density'
 import { requireRole } from '#src/beheer/require-role'
 import { SaveButtons } from '#src/beheer/SaveButtons'
@@ -28,6 +30,7 @@ import { getDatabase } from '#src/database'
 import { describeShowDelay } from '#src/matches'
 
 import { submitNames, submitReset } from '../actions'
+import { ClubCountryForm } from '../ClubCountryForm'
 import { ClubNameForm } from '../ClubNameForm'
 import { clubNamesPath } from '../paths'
 
@@ -112,6 +115,16 @@ export default async function ClubNamesOfClubPage({ params, searchParams }: Prop
         />
       </Page.Cell>
       <Page.Section area="side" aria-label="Naast de lijst met namen">
+        <ClubCountryForm
+          action={submitClubCountry.bind(null, slug)}
+          countries={countryChoices()}
+          country={club.country}
+          key={`${club.id}-${club.country ?? ''}`}
+          name={club.name}
+          source={
+            club.countrySource === null ? null : club.countrySource === 'manual' ? 'van de redactie' : 'uit Wikidata'
+          }
+        />
         <Card aria-labelledby="schrijfwijzen-kop" surface="soft">
           <Heading id="schrijfwijzen-kop" level={2}>
             Schrijfwijzen van Wikipedia

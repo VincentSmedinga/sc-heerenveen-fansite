@@ -9,6 +9,7 @@ import {
   Form,
   Heading,
   Input,
+  Link,
   Notice,
   Page,
   Tag,
@@ -16,6 +17,7 @@ import {
 } from '@fansite/design-system'
 
 import { toolbarAreas } from '#src/beheer/areas'
+import { clubCountryListPath, countClubsWithoutCountry } from '#src/beheer/club-country'
 import { listAdminClubs, type NamesShow, searchClubs } from '#src/beheer/club-names'
 import { compact } from '#src/beheer/density'
 import { parseSearch, searchMaxLength } from '#src/beheer/items'
@@ -51,6 +53,7 @@ export default async function ClubNamesPage({ searchParams }: { searchParams: Pr
   const own = found.filter((club) => club.own)
   const shown = show === 'eigen-lijst' ? own : found
   const address = (choice: NamesShow) => listPath(choice === 'alles' ? undefined : choice, search)
+  const withoutCountry = await countClubsWithoutCountry(getDatabase().db)
   const notice = typeof fout === 'string' ? notices[fout] : undefined
 
   return (
@@ -60,6 +63,9 @@ export default async function ClubNamesPage({ searchParams }: { searchParams: Pr
         <Text appearance="intro">
           De pagina van een club zegt "Eerder" met de namen die de club droeg, als je hier de lijst invult. Een club
           zonder lijst heeft die regel niet.
+        </Text>
+        <Text>
+          <Link href={clubCountryListPath}>Clubs zonder land ({withoutCountry.total})</Link>
         </Text>
       </Page.Cell>
       <Page.Toolbar>
