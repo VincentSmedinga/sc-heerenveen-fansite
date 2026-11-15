@@ -38,6 +38,7 @@ import {
   searchPublic,
 } from './queries.ts'
 import {
+  clubs,
   discussions,
   feeds,
   items,
@@ -1743,9 +1744,48 @@ describe('the matches and the table of a season', () => {
 
       expect(all[0]).toMatchObject({ opponent: 'Oude Gast', season: '2001/02' })
       expect(all.filter((match) => match.season === '2026/27')).toEqual(
-        season.map((match) => ({ ...match, season: '2026/27' })),
+        season.map((match) => ({ ...match, opponentCountry: null, season: '2026/27' })),
       )
       expect(all.map((match) => match.season)).toEqual([...all.map((match) => match.season)].sort())
+    })
+
+    it('gives each match the country of the club of the opponent, or null for a club without one', async () => {
+      await database.db.insert(matches).values(
+        await withClubs(database.db, [
+          {
+            competition: 'UEFA Cup',
+            goalsAgainst: 1,
+            goalsFor: 2,
+            home: true,
+            kickoffAt: new Date('2001-09-01T14:30:00Z'),
+            matchDate: '2001-09-01',
+            opponent: 'Oude Gast',
+            round: 'Eerste ronde',
+            season: '2001/02',
+            status: 'played',
+          },
+          {
+            competition: 'UEFA Cup',
+            goalsAgainst: 0,
+            goalsFor: 0,
+            home: false,
+            kickoffAt: new Date('2001-09-15T14:30:00Z'),
+            matchDate: '2001-09-15',
+            opponent: 'Verre Gast',
+            round: 'Tweede ronde',
+            season: '2001/02',
+            status: 'played',
+          },
+        ]),
+      )
+      await database.db.update(clubs).set({ country: 'DE', countrySource: 'manual' }).where(eq(clubs.name, 'Oude Gast'))
+
+      expect(
+        (await listAllMatches(database.db)).map(({ opponent, opponentCountry }) => [opponent, opponentCountry]),
+      ).toEqual([
+        ['Oude Gast', 'DE'],
+        ['Verre Gast', null],
+      ])
     })
 
     it('is empty without a match', async () => {

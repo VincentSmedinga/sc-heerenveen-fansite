@@ -42,9 +42,13 @@ const older: AllMatch = {
   home: false,
   matchDate: '2001-09-01',
   opponent: 'Ouwe Bekende',
+  opponentCountry: null,
   season: '2001/02',
 }
-const matches: AllMatch[] = [older, ...matchData.matches.map((match) => ({ ...match, season: '2026/27' }))]
+const matches: AllMatch[] = [
+  older,
+  ...matchData.matches.map((match) => ({ ...match, opponentCountry: null, season: '2026/27' })),
+]
 
 const now = new Date('2026-10-23T13:40:00Z')
 
@@ -205,6 +209,26 @@ describe('the page /wedstrijden/cijfers/alle', () => {
       '/wedstrijden/zoeken?competitie=eredivisie',
       '/wedstrijden/zoeken?competitie=knvb-beker',
     ])
+  })
+
+  it('has the card Europa per land after Per competitie, only with a European match, and follows the choice', async () => {
+    expect(await render()).not.toContain('id="europa-per-land"')
+
+    const european: AllMatch[] = [
+      ...matches,
+      { ...older, competition: 'UEFA Cup', goalsAgainst: 0, goalsFor: 2, opponentCountry: 'DE' },
+      { ...older, competition: 'UEFA Cup', goalsAgainst: 1, goalsFor: 1, opponentCountry: null },
+    ]
+
+    vi.mocked(getAllMatches).mockResolvedValue(european)
+
+    const html = await render()
+    const card = html.slice(html.indexOf('id="europa-per-land"'), html.indexOf('id="resultaten-per-hoofdtrainer"'))
+
+    expect(html.indexOf('id="per-competitie"')).toBeLessThan(html.indexOf('id="europa-per-land"'))
+    expect(card).toContain('Duitsland')
+    expect(card).toContain('Land onbekend')
+    expect(await render({ competitie: 'beker' })).not.toContain('id="europa-per-land"')
   })
 
   it('shows the card Seizoen voor seizoen without a place when the places can not be read', async () => {

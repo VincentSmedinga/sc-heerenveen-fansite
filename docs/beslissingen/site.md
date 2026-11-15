@@ -5920,6 +5920,20 @@
   De kaart telt de landen al.
 - **Alternatieven:** de landnaam rechts op elke regel, zoals in het ontwerp.
 
+## De kaart "Europa per land" telt de Europese wedstrijden per land van de tegenstander
+
+- **Datum:** 15 november 2026
+- **Besluit:** op `/wedstrijden/cijfers/alle` staat in de groep Seizoenen, na Per competitie, de kaart "Europa per land" (`europa-per-land`, #1266).
+  Ze telt de gespeelde wedstrijden van de competities van Europa per land van de club van de tegenstander (`clubs.country`, het land van nu), met per land de vlag met de landnaam, de wedstrijden, winst, gelijk, verlies en de doelpunten voor en tegen.
+  De lijst loopt af op het aantal wedstrijden en gaat bij gelijk aantal op de Nederlandse landnaam.
+  De wedstrijden tegen een club zonder land staan altijd onderaan op de regel "Land onbekend", zodat het totaal klopt met de rij Europa van Per competitie.
+  De kaart volgt de keuze van de competitie op de pagina (bij Eredivisie of Beker is er geen Europese wedstrijd en valt ze weg), en ook zonder Europese wedstrijden is er geen kaart.
+  Een regel heeft nog geen link: het filter op land in Zoeken in wedstrijden komt met #1267.
+  De balk "Op deze pagina:" heeft alleen links naar de vier groepen, dus ook deze kaart heeft er geen: net als Per competitie staat ze in de groep Seizoenen.
+- **Waarom:** de vraag "hoe deden we het tegen Duitsland of Scandinavië" is een telling per land, en de kaart sluit aan op de andere kaarten van Cijfers.
+  De regel "Land onbekend" houdt de kaart eerlijk zolang de redactie nog niet alle clubs een land heeft gegeven (#1265).
+- **Alternatieven:** de onbekenden weglaten (de totalen kloppen dan niet met Per competitie); een kaart die elke keuze van competitie negeert, zoals Per competitie (de keuze Europa en Alles zeggen dan hetzelfde en de werkbalk doet niets op deze kaart).
+
 ## De redactie geeft een club een land op de pagina van de club en op een werklijst
 
 - **Datum:** 15 november 2026
