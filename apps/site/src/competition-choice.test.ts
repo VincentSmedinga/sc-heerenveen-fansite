@@ -2,7 +2,7 @@ import type { PublicMatch } from '@fansite/db/queries'
 
 import { describe, expect, it } from 'vitest'
 
-import { competitionQuery, parseCompetition } from './competition'
+import { competitionQuery, competitionWords, countsFor, parseCompetition } from './competition'
 import {
   choiceFor,
   cleanSheetsOf,
@@ -110,6 +110,13 @@ describe('parseCompetition', () => {
     expect(parseCompetition(value)).toBeUndefined()
   })
 
+  it('counts the Johan Cruijff Schaal for the choice Beker, and says so (#1282)', () => {
+    expect(countsFor('Johan Cruijff Schaal', 'cup')).toBe(true)
+    expect(countsFor('Johan Cruijff Schaal', 'league')).toBe(false)
+    expect(countsFor('Johan Cruijff Schaal', 'europe')).toBe(false)
+    expect(competitionWords('cup')).toBe('de KNVB Beker en de Johan Cruijff Schaal')
+  })
+
   it('reads play-offs as the choice Play-offs, and europa as Europa', () => {
     expect(parseCompetition('play-offs')).toBe('playoffs')
     expect(parseCompetition('europa')).toBe('europe')
@@ -211,6 +218,14 @@ describe('competitionOptionsOf and competitionNames', () => {
     expect(competitionNames(matches, 'all')).toBe('de Eredivisie en de play-offs')
     expect(competitionNames(matches, 'league')).toBe('de Eredivisie')
     expect(competitionNames(matches, 'playoffs')).toBe('de play-offs')
+  })
+
+  it('offers Beker for a Johan Cruijff Schaal, and names it with the cup (#1282)', () => {
+    const schaal = played('Finale', '2013-07-27', 1, 2, { competition: 'Johan Cruijff Schaal' })
+    const matches = [league, cup('Tweede ronde', '2012-09-23', 1, 0), schaal]
+
+    expect(competitionOptionsOf([league, schaal])).toEqual(['all', 'league', 'cup'])
+    expect(competitionNames(matches, 'cup')).toBe('de KNVB Beker en de Johan Cruijff Schaal')
   })
 
   it('counts a match of the Europa League that was played, and names it', () => {

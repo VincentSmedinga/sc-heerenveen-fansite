@@ -9,9 +9,9 @@ import type { Competition } from '@fansite/db/schema'
 /**
  * Which matches the cards count: `all` is every played match, whatever the competition.
  * `league` is the league (the Eredivisie, and in the two seasons of the Eerste divisie that
- * one), `cup` is the KNVB Beker, `europe` is every European cup and `playoffs` is the play-offs
- * for European football (#1282): matches against Dutch clubs after the league season, so they
- * belong to neither the league nor Europe.
+ * one), `cup` is the KNVB Beker and the Johan Cruijff Schaal, `europe` is every European cup
+ * and `playoffs` is the play-offs for European football (#1282): matches against Dutch clubs
+ * after the league season, so they belong to neither the league nor Europe.
  */
 export type CompetitionChoice = 'all' | 'cup' | 'europe' | 'league' | 'playoffs'
 
@@ -38,10 +38,11 @@ export const competitionChoices: { choice: CompetitionChoice; label: string }[] 
 /**
  * The competitions of each choice other than `all`. Europe is every European cup, and the four
  * kinds of play-offs for European football are one choice of their own, as the filter
- * Competitie in the search of matches has it.
+ * Competitie in the search of matches has it. The cup is the KNVB Beker and the Johan Cruijff
+ * Schaal, which the search keeps apart.
  */
 const members: Record<Exclude<CompetitionChoice, 'all'>, readonly Competition[]> = {
-  cup: ['KNVB Beker'],
+  cup: ['KNVB Beker', 'Johan Cruijff Schaal'],
   europe: ['Champions League', 'Europa League', 'Europacup II', 'Intertoto Cup', 'UEFA Cup'],
   league: ['Eredivisie', 'Eerste divisie'],
   playoffs: [
@@ -80,7 +81,7 @@ export const competitionQuery = (choice: CompetitionChoice) =>
 export const competitionWords = (choice: CompetitionChoice) =>
   ({
     all: 'alle competities',
-    cup: 'de KNVB Beker',
+    cup: 'de KNVB Beker en de Johan Cruijff Schaal',
     europe: 'Europa',
     league: 'de Eredivisie',
     playoffs: 'de play-offs',

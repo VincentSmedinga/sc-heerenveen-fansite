@@ -5516,7 +5516,7 @@
   Een waarde die niets telt, is een doodlopende keuze.
 - **Alternatieven:** de twee waarden van nu houden; de waarden Beker en Europa alleen bij een seizoen met zulke wedstrijden tonen, zonder de uitzondering voor een adres met een lege waarde.
 - **Later:** vervangt de twee waarden in _Een kaart die een telling van meer wedstrijden is, staat op Cijfers, en de schakelaar staat bovenaan de hoofdkolom_ (6 november 2026) en _De kaart Per seizoen van een speler laat kiezen tussen alle wedstrijden en de Eredivisie_ (11 november 2026); `playedBesidesEredivisie` is `playerCompetitionOptions` geworden en `playerSeasonsOf(facts, 'Eredivisie')` neemt een lijst competities.
-- **Later:** de keuze heeft sinds #1282 vijf waarden: Alles, Eredivisie, Play-offs, Beker en Europa, en Europa telt de play-offs niet meer; zie _De play-offs voor Europees voetbal zijn een keuze van een eigen, tussen Eredivisie en Beker_.
+- **Later:** de keuze heeft sinds #1282 vijf waarden: Alles, Eredivisie, Play-offs, Beker en Europa, Europa telt de play-offs niet meer, en Beker telt ook de Johan Cruijff Schaal; zie _De play-offs voor Europees voetbal zijn een keuze van een eigen, tussen Eredivisie en Beker_.
 
 ## Geen lijst aller tijden van wedstrijden, minuten, assists en kaarten per speler
 
@@ -5993,6 +5993,10 @@
   - **De kaarten:** Per competitie heeft een eigen rij Play-offs met een link naar Zoeken in wedstrijden.
     De kaart "Europa per land" telt de play-offs niet, dus de regel Nederland verdwijnt zolang er geen Europese wedstrijd tegen een Nederlandse club is.
     De link van een regel vindt nog steeds zoveel wedstrijden als het getal in de regel.
+  - **Beker en de Johan Cruijff Schaal:** de keuze Beker telt ook de wedstrijd om de Johan Cruijff Schaal, en de woorden bij de kaarten zeggen dan "de KNVB Beker en de Johan Cruijff Schaal" (`competitionWords`).
+    Een link van een kaart naar Zoeken in wedstrijden kiest bij Beker allebei de competities, dus het aantal wedstrijden dat de zoekpagina vindt is het getal op de kaart.
+    Het filter Competitie van Zoeken in wedstrijden en de kaart Per competitie houden de Johan Cruijff Schaal apart.
+    Daardoor heeft de kaart met doelpunten per wedstrijd bij Beker geen kolom in een seizoen met een gespeelde Johan Cruijff Schaal, zoals bij Alles, want de selectietabel heeft er geen cijfers van.
   - **Spelers:** de selectietabel heeft geen cijfers van de play-offs, dus bij de keuze Play-offs is er, net als bij Europa, geen kolom met doelpunten per wedstrijd.
 - **Waarom:** het zijn wedstrijden tegen Nederlandse clubs, na het seizoen van de Eredivisie, dus ze horen niet bij Europa.
   Ze tellen ook niet mee in de stand van de Eredivisie en kunnen een verlenging of strafschoppen hebben, dus ze horen niet in de cijfers van de Eredivisie.

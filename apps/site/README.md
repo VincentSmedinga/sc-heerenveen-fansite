@@ -680,6 +680,7 @@ Bovenaan de hoofdkolom van `/wedstrijden/cijfers` (onder de drie kaarten die hem
 Alles is de standaard en heeft geen parameter; de andere zijn `?competitie=eredivisie`, `?competitie=play-offs`, `?competitie=beker` en `?competitie=europa`.
 Alles telt elke gespeelde wedstrijd.
 Play-offs telt de vier soorten play-offs voor Europees voetbal (#1282): wedstrijden tegen Nederlandse clubs, dus niet bij Eredivisie en niet bij Europa.
+Beker telt de KNVB Beker en de Johan Cruijff Schaal; het filter Competitie in Zoeken en de kaart Per competitie houden die twee apart.
 Europa telt elke Europese beker, zonder de play-offs, zoals het filter Competitie in Zoeken (`competitionGroups` in `src/match-search.ts`, de lijsten staan in `src/competition.ts`).
 De schakelaar staat in de normale maat, 44 pixels hoog, zodat de vijf waarden op een telefoon van 390 pixels op één regel passen.
 De keuze zit in het adres en niet in een cookie, dus de schakelaar werkt zonder JavaScript en een keuze is te delen.

@@ -15,9 +15,10 @@ const statsCompetitions = ['Eredivisie', 'KNVB Beker'] as const
  * The card shows the column when three things hold:
  *
  * 1. Every match it counts is a match of the Eredivisie or the cup, the two competitions the
- *    squad table has figures for. With the choices `league` and `cup` that is always so; with
- *    `all` it is not in a season with a played match of the play-offs or of Europe, and with
- *    `europe` the card has no column at all.
+ *    squad table has figures for. With the choice `league` that is always so; with `cup` and
+ *    `all` it is not in a season with a played Johan Cruijff Schaal (and `all` not with a
+ *    played match of the play-offs or of Europe), and with `europe` and `playoffs` the card
+ *    has no column at all.
  * 2. Every scorer has at least one appearance in the competitions the card counts. The goals
  *    of a person count for all the players (titles) the person has, as the card does.
  * 3. For every scorer, the goals in the squad table, in those competitions, are the goals of

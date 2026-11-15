@@ -43,7 +43,7 @@ const competitionsOf = (choice: CompetitionChoice): CompetitionValue[] =>
       : choice === 'playoffs'
         ? ['play-offs']
         : choice === 'cup'
-          ? ['knvb-beker']
+          ? ['knvb-beker', 'johan-cruijff-schaal']
           : ['europa']
 
 /** The filters of the scope of a page, with the choices of one figure added. */
