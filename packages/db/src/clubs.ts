@@ -3,7 +3,8 @@ import { and, asc, eq, inArray, isNotNull, isNull, max, sql } from 'drizzle-orm'
 import type { Database } from './client.ts'
 import type { NewMatch } from './schema.ts'
 
-import { clubNames, clubPages, clubs, matches, wikidataItems } from './schema.ts'
+import { type PlaceParents, resolveBritishCountry } from './british-places.ts'
+import { clubNames, clubPages, clubs, matches, wikidataItems, wikidataPlaces } from './schema.ts'
 import { foldLetters } from './slug-letters.ts'
 
 /**
@@ -19,6 +20,8 @@ const slugBaseLength = 70
 export type ClubCountriesRefresh = {
   /** The clubs that got a country from Wikidata this run, or a different one than before. */
   filled: number
+  /** Of those, the clubs that got England, Wales, Scotland or Northern Ireland (#1278). */
+  filledBritish: number
   /** The countries of Wikidata that are not in the list of countries, with how many clubs. */
   unknown: { clubs: string[]; id: string; label: string }[]
   /** All clubs that have a country now, by whoever set it. */
@@ -78,6 +81,14 @@ type PagesDatabase = Pick<Database, 'transaction'> & RepairDatabase
 type RepairDatabase = Pick<Database, 'delete' | 'insert' | 'select' | 'update'>
 
 /**
+ * The Q-numbers of `codes` that are England, Wales, Scotland or Northern Ireland: the ones
+ * with a code of ISO 3166-2 that starts with `GB-` (#1277).
+ */
+export function britishCountryIds(codes: ReadonlyMap<string, string>): Set<string> {
+  return new Set([...codes].filter(([, code]) => code.startsWith('GB-')).map(([id]) => id))
+}
+
+/**
  * The slug a name gives before it is checked against the slugs that exist: lowercase letters,
  * digits and single hyphens, without the accents, dots and apostrophes (`N.E.C.` gives `nec`
  * and `Be Quick '28` gives `be-quick-28`), with the letters that have no loose accent written
@@ -93,6 +104,28 @@ export function clubSlug(name: string): string {
     .replace(/-+$/u, '')
 
   return slug === '' ? 'club' : slug
+}
+
+/**
+ * The clubs whose item gave `countryItemId` (the United Kingdom, `Q145`) and that the editors
+ * did not set, with the Q-number of their item: the clubs that can still get one of the four
+ * countries through their places (#1278).
+ */
+export async function clubsOfCountryItem(
+  db: Pick<Database, 'select'>,
+  countryItemId: string,
+): Promise<{ id: number; name: string; wikidataId: string }[]> {
+  const rows = await db
+    .select({ id: clubs.id, name: clubs.name, source: clubs.countrySource, wikidataId: clubs.wikidataId })
+    .from(clubs)
+    .where(and(eq(clubs.countryItemId, countryItemId), isNotNull(clubs.wikidataId)))
+    .orderBy(asc(clubs.id))
+
+  return rows.flatMap((row) =>
+    row.wikidataId === null || row.source === 'manual'
+      ? []
+      : [{ id: row.id, name: row.name, wikidataId: row.wikidataId }],
+  )
 }
 
 /**
@@ -363,6 +396,13 @@ export async function knownClubPages(db: Pick<Database, 'select'>): Promise<Set<
   return new Set([...own, ...remembered].flatMap((row) => (row.page === null ? [] : [row.page])))
 }
 
+/** The places the database knows, by Q-number: what the importer followed before (#1278). */
+export async function knownWikidataPlaces(db: Pick<Database, 'select'>): Promise<Map<string, string[]>> {
+  const rows = await db.select().from(wikidataPlaces)
+
+  return new Map(rows.map((row) => [row.id, row.parentIds === '' ? [] : row.parentIds.split(',')]))
+}
+
 /**
  * A name as a computer compares it: without capitals, accents, dots, spaces and other
  * punctuation, so that `N.E.C.` and `NEC`, and `Go Ahead Eagles` and `Go-Ahead Eagles`, are the
@@ -387,7 +427,9 @@ export function normaliseClubName(name: string): string {
 export async function refreshClubCountries(
   db: Pick<Database, 'select' | 'update'>,
   codes: ReadonlyMap<string, string>,
+  places: PlaceParents = new Map(),
 ): Promise<ClubCountriesRefresh> {
+  const britishIds = britishCountryIds(codes)
   const rows = await db
     .select({
       country: clubs.country,
@@ -396,25 +438,35 @@ export async function refreshClubCountries(
       label: wikidataItems.label,
       name: clubs.name,
       source: clubs.countrySource,
+      wikidataId: clubs.wikidataId,
     })
     .from(clubs)
     .leftJoin(wikidataItems, eq(wikidataItems.id, clubs.countryItemId))
     .where(isNotNull(clubs.wikidataReadAt))
     .orderBy(asc(clubs.id))
   const unknown = new Map<string, { clubs: string[]; id: string; label: string }>()
-  const report: ClubCountriesRefresh = { filled: 0, unknown: [], withCountry: 0, withoutCountry: 0 }
+  const report: ClubCountriesRefresh = { filled: 0, filledBritish: 0, unknown: [], withCountry: 0, withoutCountry: 0 }
 
   for (const row of rows) {
     if (row.source === 'manual') {
       continue
     }
 
-    const code = row.itemId === null ? undefined : codes.get(row.itemId)
+    let code = row.itemId === null ? undefined : codes.get(row.itemId)
+
+    // A club of the United Kingdom is refined through the places it lies in (#1278): the
+    // places that the importer followed are in `places`, so this asks nothing.
+    if (code === 'GB' && row.wikidataId !== null) {
+      const place = resolveBritishCountry(row.wikidataId, places, britishIds)
+
+      code = place.kind === 'found' ? (codes.get(place.countryId) ?? code) : code
+    }
 
     if (code !== undefined) {
       if (row.country !== code || row.source !== 'wikidata') {
         await db.update(clubs).set({ country: code, countrySource: 'wikidata' }).where(eq(clubs.id, row.id))
         report.filled++
+        report.filledBritish += code.startsWith('GB-') ? 1 : 0
       }
 
       continue
@@ -658,6 +710,18 @@ export async function storeClubItem(
     .update(clubs)
     .set({ countryItemId: item.countryItemId, wikidataId: item.wikidataId, wikidataReadAt: item.readAt })
     .where(eq(clubs.id, clubId))
+}
+
+/** Stores the places of an item, so the importer never asks about it again (#1278). */
+export async function storeWikidataPlace(
+  db: Pick<Database, 'insert'>,
+  id: string,
+  parentIds: readonly string[],
+): Promise<void> {
+  await db
+    .insert(wikidataPlaces)
+    .values({ id, parentIds: parentIds.join(',') })
+    .onDuplicateKeyUpdate({ set: { parentIds: parentIds.join(',') } })
 }
 
 /**

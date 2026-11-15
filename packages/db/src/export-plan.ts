@@ -100,6 +100,7 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
   visitor_hashes: 'structure',
   visitor_salts: 'structure',
   wikidata_items: 'copy',
+  wikidata_places: 'copy',
   wikipedia_pages: 'copy',
 }
 

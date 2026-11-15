@@ -21,7 +21,7 @@ import { wikidataCountryCodes } from './person-countries.ts'
 import { lineMap, personLines, wikidataPositionLines } from './person-lines.ts'
 import { mostFailuresInARow } from './person-pages.ts'
 import { printable } from './text.ts'
-import { lineOfPositions, readArticleInfo, readItem, readLabel } from './wikidata-item.ts'
+import { lineOfPositions, readArticleInfo, readItem, readLabel, type WikidataItem } from './wikidata-item.ts'
 
 /** The address of Wikidata, where the items of the persons are. */
 export const wikidataOrigin = 'https://www.wikidata.org'
@@ -63,6 +63,8 @@ export type PersonDataReport = {
   articlesAsked: number
   /** With a birth date. */
   birthDate: number
+  /** Of those, the persons that got England, Wales, Scotland or Northern Ireland (#1278). */
+  countriesBritish: number
   /** The persons that got their country from the first nationality of Wikidata this run. */
   countriesFilled: number
   /** The persons that got their country from the first flag in the list of players this run. */
@@ -112,7 +114,7 @@ export function describePersonData(report: PersonDataReport): string[] {
 
   if (linesAgain.squad + linesAgain.wikidata + linesAgain.cleared + countries + fromList + fromSquad > 0) {
     described.push(
-      `persons (line and country): ${linesAgain.squad} ${linesAgain.squad === 1 ? 'line' : 'lines'} from the squad, ${linesAgain.wikidata} from Wikidata, ${linesAgain.cleared} taken away; ${countries} ${countries === 1 ? 'country' : 'countries'} from Wikidata, ${fromList} from the list of players, ${fromSquad} from the squad`,
+      `persons (line and country): ${linesAgain.squad} ${linesAgain.squad === 1 ? 'line' : 'lines'} from the squad, ${linesAgain.wikidata} from Wikidata, ${linesAgain.cleared} taken away; ${countries} ${countries === 1 ? 'country' : 'countries'} from Wikidata${report.countriesBritish > 0 ? ` (${report.countriesBritish} in England, Wales, Scotland or Northern Ireland)` : ''}, ${fromList} from the list of players, ${fromSquad} from the squad`,
     )
   }
 
@@ -160,12 +162,13 @@ export async function readPersonData(
 
   report.linesAgain = await refreshPersonLines(db, wikidataPositionLines)
 
-  const { filled, list, squad, unknown } = await refreshPersonCountries(
+  const { filled, filledBritish, list, squad, unknown } = await refreshPersonCountries(
     db,
     options.countryCodes ?? wikidataCountryCodes,
   )
 
   report.countriesFilled = filled
+  report.countriesBritish = filledBritish
   report.countriesFromList = list
   report.countriesFromSquad = squad
 
@@ -185,6 +188,7 @@ async function readUnreadPersons(
   fetcher: Fetcher,
   {
     clock = () => new Date(),
+    countryCodes = wikidataCountryCodes,
     limit = mostPersonsPerRun,
     lines = lineMap(personLines),
     origin,
@@ -195,6 +199,7 @@ async function readUnreadPersons(
   const report: PersonDataReport = {
     articlesAsked: 0,
     birthDate: 0,
+    countriesBritish: 0,
     countriesFilled: 0,
     countriesFromList: 0,
     countriesFromSquad: 0,
@@ -412,8 +417,9 @@ async function readUnreadPersons(
 
     // The labels of the place, the countries and the positions. One that cannot be asked leaves
     // the person unread, with the Q-number kept.
+    const nationalityIds = withBritishCountry(item, countryCodes)
     const wanted = [
-      ...new Set([...(item.placeId === null ? [] : [item.placeId]), ...item.nationalityIds, ...item.positionIds]),
+      ...new Set([...(item.placeId === null ? [] : [item.placeId]), ...nationalityIds, ...item.positionIds]),
     ]
     let complete = true
 
@@ -439,7 +445,7 @@ async function readUnreadPersons(
       {
         birthDate: item.birth,
         birthPlaceId: item.placeId !== null && known(item.placeId) ? item.placeId : null,
-        nationalityIds: item.nationalityIds.filter(known),
+        nationalityIds: nationalityIds.filter(known),
         positionIds: item.positionIds.filter(known),
         wikidataId: item.id,
         wikipediaPageId: pageId,
@@ -524,4 +530,20 @@ async function readUnreadPersons(
       report.empty++
     }
   }
+}
+
+/**
+ * The nationalities of a person, with one of England, Wales, Scotland or Northern Ireland in
+ * front when Wikidata gives him the United Kingdom first and exactly one of the four as the
+ * country he plays for (`P1532`, #1278). Without that, his birth place says nothing about the
+ * team he plays for, so he stays with the United Kingdom.
+ */
+function withBritishCountry(item: WikidataItem, codes: ReadonlyMap<string, string>): string[] {
+  const [first] = item.nationalityIds
+  const british = item.sportCountryIds.filter((id) => codes.get(id)?.startsWith('GB-') === true)
+  const [only] = british
+
+  return first !== undefined && codes.get(first) === 'GB' && british.length === 1 && only !== undefined
+    ? [only, ...item.nationalityIds.filter((id) => id !== only)]
+    : item.nationalityIds
 }

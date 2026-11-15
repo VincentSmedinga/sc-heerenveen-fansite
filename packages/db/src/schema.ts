@@ -919,6 +919,18 @@ export const wikidataItems = mysqlTable('wikidata_items', {
   label: varchar('label', { length: wikidataLimits.label }).notNull(),
 })
 
+/**
+ * The places an item of Wikidata is in (#1278): for each item the importer followed on its way
+ * from a club to a country of the United Kingdom, the Q-numbers of its headquarters (`P159`)
+ * and of the places it lies in (`P131`), in the order of Wikidata, separated by commas and
+ * empty when it has none. The importer asks about an item once, so a second run follows the
+ * chain from here and asks nothing. The data are CC0.
+ */
+export const wikidataPlaces = mysqlTable('wikidata_places', {
+  id: varchar('id', { length: wikidataLimits.id }).primaryKey(),
+  parentIds: text('parent_ids').notNull(),
+})
+
 export type NewWikidataItem = typeof wikidataItems.$inferInsert
 
 export type WikidataItem = typeof wikidataItems.$inferSelect

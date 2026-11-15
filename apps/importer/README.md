@@ -1156,10 +1156,20 @@ De stap staat in [`src/import-person-data.ts`](src/import-person-data.ts) en dra
   Een land uit een zwakkere bron vervangt hij wel (#1052).
   Staat de eerste nationaliteit niet in de lijst, dan blijft het land leeg en waarschuwt de run met `Persons:` vooraan; de tweede nationaliteit is geen gok.
   Voeg een Q-nummer toe als de waarschuwing een land noemt dat een landcode heeft.
+  Engeland, Wales, Schotland en Noord-Ierland staan er met hun eigen code (`Q21` is `GB-ENG`, `Q25` is `GB-WLS`, `Q22` is `GB-SCT`, `Q26` is `GB-NIR`, #1278).
+  Geeft Wikidata een persoon het Verenigd Koninkrijk (`Q145`) als eerste nationaliteit en precies één van die vier als land voor de sport (`P1532`), dan komt dat land vooraan bij zijn nationaliteiten en krijgt hij die code.
+  Zonder `P1532` blijft hij `GB`: zijn geboorteplaats zegt niet voor welk elftal hij uitkomt.
+  Een persoon die al gelezen is en een datum van overlijden heeft, wordt niet opnieuw gelezen; de redactie zet zijn land in het beheer.
 - **Het land van een club** (`clubs.country`, #1264) leest dezelfde stap, na de personen, uit het item van de club (`P17`), via dezelfde lijst `wikidataCountryCodes`.
   Alleen een club met een pagina krijgt een verzoek, één keer; een club met de bron `manual` verandert de run nooit.
   Staat het land niet in de lijst, dan blijft de club zonder land en waarschuwt elke run met `Clubs:` vooraan.
   Het logboek heeft er een regel voor: `clubs (country): 4 clubs read from Wikidata, 4 clubs got a country, 60 clubs have none yet; 8 items asked`.
+  Geeft Wikidata een club alleen het Verenigd Koninkrijk, dan volgt de importer zijn plaatsen (#1278): het hoofdkantoor (`P159`) en de plaatsen waarin hij ligt (`P131`), en van elke plaats weer `P131`, hoogstens zes stappen, tot Engeland, Wales, Schotland of Noord-Ierland.
+  Een plaats wordt één keer opgevraagd en staat dan in `wikidata_places` (de plaatsen waarin hij ligt, gescheiden door komma's), zodat een tweede run niets vraagt.
+  Eindigt de keten in precies één van de vier, dan krijgt de club die code; eindigt ze in twee of in geen, dan blijft de club `GB`.
+  Ook een club die al gelezen was en `GB` kreeg, wordt zo verfijnd, zonder zijn item opnieuw te lezen: alleen de plaatsen zijn nieuw.
+  Een club met `manual` blijft staan.
+  Het logboek zegt erbij hoeveel clubs een van de vier landen kregen: `1 club got a country (1 in England, Wales, Scotland or Northern Ireland)`.
 - **Het land uit de andere bronnen** (#1052): daarna vult dezelfde run, zonder verzoek, het land uit de lijst van spelers en uit de selectielijsten.
   De volgorde van sterk naar zwak is `manual`, `wikidata`, `list`, `old-site`, `squad`; een zwakkere bron vervangt nooit een sterkere.
   De lijst geeft het land van de eerste vlag aan de persoon met precies die titel (`list`).

@@ -19,6 +19,16 @@ describe('wikidataCountryCodes', () => {
     ])
   })
 
+  it('has the four countries of the United Kingdom next to the United Kingdom itself (#1278)', () => {
+    expect(['Q145', 'Q21', 'Q25', 'Q22', 'Q26'].map((id) => wikidataCountryCodes.get(id))).toEqual([
+      'GB',
+      'GB-ENG',
+      'GB-WLS',
+      'GB-SCT',
+      'GB-NIR',
+    ])
+  })
+
   it('has no country that is gone, so its persons stay a gap', () => {
     expect(wikidataCountryCodes.has('Q36704')).toBe(false)
     expect(wikidataCountryCodes.has('Q15180')).toBe(false)

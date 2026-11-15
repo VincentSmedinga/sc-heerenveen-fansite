@@ -1024,4 +1024,68 @@ describe('the order of the sources of a line and a country (#1052)', () => {
     ])
     expect(report.lines).toEqual({ manual: 0, 'old-site': 1, squad: 0, wikidata: 0 })
   })
+
+  describe('the four countries of the United Kingdom (#1278)', () => {
+    const country = async () =>
+      rows('SELECT country, country_source FROM persons ORDER BY wikipedia_page').then((list) =>
+        list.map((row) => [row['country'], row['country_source']]),
+      )
+
+    async function readBritish(sportCountries: string[] | undefined, nationalities = ['Q145']) {
+      await addPersons('Testspeler Wales')
+
+      const served = await serve(infoRoute('Testspeler Wales', 71, 'Q9701'), {
+        ...itemRoute('Q9701', {
+          labels: { nl: 'Testspeler Wales' },
+          nationalities,
+          ...(sportCountries === undefined ? {} : { sportCountries }),
+        }),
+        ...labelRoute('Q145', 'Verenigd Koninkrijk', 'United Kingdom'),
+        ...labelRoute('Q25', 'Wales'),
+        ...labelRoute('Q21', 'Engeland'),
+      })
+
+      return { report: await read(served), served }
+    }
+
+    it('gives a person with the United Kingdom and one of the four as his country for sport that country', async () => {
+      const { report } = await readBritish(['Q25'])
+
+      expect(await country()).toEqual([['GB-WLS', 'wikidata']])
+      expect(await rows('SELECT item_id FROM person_nationalities ORDER BY position')).toEqual([
+        { item_id: 'Q25' },
+        { item_id: 'Q145' },
+      ])
+      expect(describePersonData(report).join('\n')).toContain(
+        '1 country from Wikidata (1 in England, Wales, Scotland or Northern Ireland)',
+      )
+    })
+
+    it('leaves a person with the United Kingdom without a country for sport as he is', async () => {
+      await readBritish(undefined)
+
+      expect(await country()).toEqual([['GB', 'wikidata']])
+    })
+
+    it('leaves a person as he is when his countries for sport are more than one of the four', async () => {
+      await readBritish(['Q25', 'Q21'])
+
+      expect(await country()).toEqual([['GB', 'wikidata']])
+    })
+
+    it('does not touch a country the editors set', async () => {
+      await addPersons('Testspeler Wales')
+      await database.pool.query("UPDATE persons SET country = 'NL', country_source = 'manual'")
+
+      const served = await serve(infoRoute('Testspeler Wales', 71, 'Q9701'), {
+        ...itemRoute('Q9701', { labels: { nl: 'Testspeler Wales' }, nationalities: ['Q145'], sportCountries: ['Q25'] }),
+        ...labelRoute('Q145', 'Verenigd Koninkrijk'),
+        ...labelRoute('Q25', 'Wales'),
+      })
+
+      await read(served)
+
+      expect(await country()).toEqual([['NL', 'manual']])
+    })
+  })
 })
