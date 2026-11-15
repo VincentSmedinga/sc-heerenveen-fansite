@@ -3,7 +3,7 @@ import { and, asc, eq, inArray, isNotNull, isNull, max, sql } from 'drizzle-orm'
 import type { Database } from './client.ts'
 import type { NewMatch } from './schema.ts'
 
-import { clubNames, clubPages, clubs, matches } from './schema.ts'
+import { clubNames, clubPages, clubs, matches, wikidataItems } from './schema.ts'
 import { foldLetters } from './slug-letters.ts'
 
 /**
@@ -15,6 +15,18 @@ export const reservedClubSlugs: readonly string[] = ['kies']
 /** The longest slug of a name; the rest of the 80 characters is for `-2`, `-3`, and so on. */
 const slugBaseLength = 70
 
+/** What `refreshClubCountries` did: the clubs that got a country, and the ones that cannot. */
+export type ClubCountriesRefresh = {
+  /** The clubs that got a country from Wikidata this run, or a different one than before. */
+  filled: number
+  /** The countries of Wikidata that are not in the list of countries, with how many clubs. */
+  unknown: { clubs: string[]; id: string; label: string }[]
+  /** All clubs that have a country now, by whoever set it. */
+  withCountry: number
+  /** All clubs that have none. */
+  withoutCountry: number
+}
+
 /**
  * A club with its full name and the other spellings that are the same club, such as
  * `Excelsior Rotterdam` with `Excelsior` and `SBV Excelsior`. The importer keeps the list (see
@@ -25,6 +37,14 @@ export type ClubFullName = {
   aliases: readonly string[]
   /** The full name, which is the name of the club and gives its slug. */
   name: string
+}
+
+/** A club whose item of Wikidata the importer has not read yet (#1264). */
+export type ClubToRead = {
+  id: number
+  /** The Q-number we have of it already, from a read that failed halfway. */
+  wikidataId: null | string
+  wikipediaPage: string
 }
 
 /** A match as the importer reads it, before its club is found or made. */
@@ -73,6 +93,28 @@ export function clubSlug(name: string): string {
     .replace(/-+$/u, '')
 
   return slug === '' ? 'club' : slug
+}
+
+/**
+ * The clubs with an article that were not read yet, oldest first. A club without an article is
+ * never here: the editors fill in its country (#1265).
+ */
+export async function clubsToRead(db: Pick<Database, 'select'>): Promise<ClubToRead[]> {
+  return db
+    .select({ id: clubs.id, wikidataId: clubs.wikidataId, wikipediaPage: clubs.wikipediaPage })
+    .from(clubs)
+    .where(and(isNotNull(clubs.wikipediaPage), isNull(clubs.wikidataReadAt)))
+    .orderBy(asc(clubs.id)) as Promise<ClubToRead[]>
+}
+
+/** The Q-numbers that clubs have, so no two clubs get the same one. */
+export async function clubWikidataIds(db: Pick<Database, 'select'>): Promise<Map<string, number>> {
+  const rows = await db
+    .select({ id: clubs.id, wikidataId: clubs.wikidataId })
+    .from(clubs)
+    .where(isNotNull(clubs.wikidataId))
+
+  return new Map(rows.flatMap((row) => (row.wikidataId === null ? [] : [[row.wikidataId, row.id] as const])))
 }
 
 /**
@@ -335,6 +377,85 @@ export function normaliseClubName(name: string): string {
 }
 
 /**
+ * Fills in the country of the clubs (#1264) from the country of their item of Wikidata (`P17`),
+ * through `codes`: the code of two letters by Q-number, the same list as for persons. A club
+ * with the source `manual` never changes. A club with no country or the source `wikidata` gets
+ * the country of its item, and a club whose item has none, or one that is not in `codes`,
+ * stays without a country and without a guess: such a country is in `unknown`. It asks nothing,
+ * and a second run changes nothing.
+ */
+export async function refreshClubCountries(
+  db: Pick<Database, 'select' | 'update'>,
+  codes: ReadonlyMap<string, string>,
+): Promise<ClubCountriesRefresh> {
+  const rows = await db
+    .select({
+      country: clubs.country,
+      id: clubs.id,
+      itemId: clubs.countryItemId,
+      label: wikidataItems.label,
+      name: clubs.name,
+      source: clubs.countrySource,
+    })
+    .from(clubs)
+    .leftJoin(wikidataItems, eq(wikidataItems.id, clubs.countryItemId))
+    .where(isNotNull(clubs.wikidataReadAt))
+    .orderBy(asc(clubs.id))
+  const unknown = new Map<string, { clubs: string[]; id: string; label: string }>()
+  const report: ClubCountriesRefresh = { filled: 0, unknown: [], withCountry: 0, withoutCountry: 0 }
+
+  for (const row of rows) {
+    if (row.source === 'manual') {
+      continue
+    }
+
+    const code = row.itemId === null ? undefined : codes.get(row.itemId)
+
+    if (code !== undefined) {
+      if (row.country !== code || row.source !== 'wikidata') {
+        await db.update(clubs).set({ country: code, countrySource: 'wikidata' }).where(eq(clubs.id, row.id))
+        report.filled++
+      }
+
+      continue
+    }
+
+    if (row.country !== null || row.source !== null) {
+      await db.update(clubs).set({ country: null, countrySource: null }).where(eq(clubs.id, row.id))
+    }
+    if (row.itemId !== null) {
+      const item = unknown.get(row.itemId) ?? { clubs: [], id: row.itemId, label: row.label ?? row.itemId }
+
+      item.clubs.push(row.name)
+      unknown.set(row.itemId, item)
+    }
+  }
+
+  report.unknown = [...unknown.values()]
+
+  const [counts] = await db
+    .select({
+      withCountry: sql<number>`coalesce(sum(${clubs.country} is not null), 0)`.mapWith(Number),
+      withoutCountry: sql<number>`coalesce(sum(${clubs.country} is null), 0)`.mapWith(Number),
+    })
+    .from(clubs)
+
+  report.withCountry = counts?.withCountry ?? 0
+  report.withoutCountry = counts?.withoutCountry ?? 0
+
+  return report
+}
+
+/** Keeps the Q-number of a club whose item was not read: the next run asks for the item. */
+export async function rememberClubWikidataId(
+  db: Pick<Database, 'update'>,
+  clubId: number,
+  wikidataId: string,
+): Promise<void> {
+  await db.update(clubs).set({ wikidataId }).where(eq(clubs.id, clubId))
+}
+
+/**
  * The titles in `club_pages` with the article of their club (`AZ Alkmaar` with
  * `AZ (voetbalclub)`), which is where a redirect to a remembered title ends.
  */
@@ -521,6 +642,22 @@ export async function repairClubs(db: RepairDatabase, fullNames: readonly ClubFu
   }
 
   return events
+}
+
+/**
+ * Stores what the importer read about a club (#1264): its Q-number, the country of its item
+ * (null when the item has none) and the time. The country itself is filled in by
+ * `refreshClubCountries`. Pass null for the Q-number of a club whose article has no item.
+ */
+export async function storeClubItem(
+  db: Pick<Database, 'update'>,
+  clubId: number,
+  item: { countryItemId: null | string; readAt: Date; wikidataId: null | string },
+): Promise<void> {
+  await db
+    .update(clubs)
+    .set({ countryItemId: item.countryItemId, wikidataId: item.wikidataId, wikidataReadAt: item.readAt })
+    .where(eq(clubs.id, clubId))
 }
 
 /**

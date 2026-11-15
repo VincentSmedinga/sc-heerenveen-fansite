@@ -1156,6 +1156,10 @@ De stap staat in [`src/import-person-data.ts`](src/import-person-data.ts) en dra
   Een land uit een zwakkere bron vervangt hij wel (#1052).
   Staat de eerste nationaliteit niet in de lijst, dan blijft het land leeg en waarschuwt de run met `Persons:` vooraan; de tweede nationaliteit is geen gok.
   Voeg een Q-nummer toe als de waarschuwing een land noemt dat een landcode heeft.
+- **Het land van een club** (`clubs.country`, #1264) leest dezelfde stap, na de personen, uit het item van de club (`P17`), via dezelfde lijst `wikidataCountryCodes`.
+  Alleen een club met een pagina krijgt een verzoek, één keer; een club met de bron `manual` verandert de run nooit.
+  Staat het land niet in de lijst, dan blijft de club zonder land en waarschuwt elke run met `Clubs:` vooraan.
+  Het logboek heeft er een regel voor: `clubs (country): 4 clubs read from Wikidata, 4 clubs got a country, 60 clubs have none yet; 8 items asked`.
 - **Het land uit de andere bronnen** (#1052): daarna vult dezelfde run, zonder verzoek, het land uit de lijst van spelers en uit de selectielijsten.
   De volgorde van sterk naar zwak is `manual`, `wikidata`, `list`, `old-site`, `squad`; een zwakkere bron vervangt nooit een sterkere.
   De lijst geeft het land van de eerste vlag aan de persoon met precies die titel (`list`).

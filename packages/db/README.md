@@ -693,12 +693,17 @@ De gegevens komen van Wikipedia en vallen onder CC BY-SA 4.0, zoals de wedstrijd
 
 `clubs` heeft een rij per club.
 
-| Kolom            | Betekenis                                                                                                                                       |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `slug`           | De vaste naam in een adres: kleine letters, cijfers en enkele streepjes, hoogstens 80 tekens; uniek, en een nieuwe naam verandert hem niet      |
-| `name`           | De huidige naam: die van het nieuwste seizoen waarin we tegen de club speelden                                                                  |
-| `wikipedia_page` | De titel van het artikel, na de doorverwijzingen, zoals `Telstar (voetbalclub)`; uniek als hij er is, en leeg voor een club met alleen een naam |
-| `created_at`     | Wanneer de club is toegevoegd, in UTC                                                                                                           |
+| Kolom              | Betekenis                                                                                                                                       |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `slug`             | De vaste naam in een adres: kleine letters, cijfers en enkele streepjes, hoogstens 80 tekens; uniek, en een nieuwe naam verandert hem niet      |
+| `name`             | De huidige naam: die van het nieuwste seizoen waarin we tegen de club speelden                                                                  |
+| `wikipedia_page`   | De titel van het artikel, na de doorverwijzingen, zoals `Telstar (voetbalclub)`; uniek als hij er is, en leeg voor een club met alleen een naam |
+| `wikidata_id`      | Het Q-nummer van het item op Wikidata (#1264); uniek, en leeg voor een club zonder artikel of item                                              |
+| `country`          | De landcode van twee hoofdletters, het land van nu; leeg als we het niet weten                                                                  |
+| `country_source`   | `manual` (de redactie, de importer verandert het nooit) of `wikidata`; leeg zonder land                                                         |
+| `country_item_id`  | Het land van het item (`P17`) zoals Wikidata het gaf, ook als het niet in de lijst staat; verwijst naar `wikidata_items`                        |
+| `wikidata_read_at` | Wanneer de importer het item las, in UTC; een gelezen club krijgt geen verzoek meer                                                             |
+| `created_at`       | Wanneer de club is toegevoegd, in UTC                                                                                                           |
 
 De CHECK-constraint `clubs_slug_format` weigert een slug met hoofdletters, een underscore of twee streepjes achter elkaar, in elke tool.
 `wikipedia_page` vergelijkt letter voor letter (de collatie is `utf8mb4_bin`), want `Go Ahead Eagles` en `Go ahead eagles` zijn twee pagina's.

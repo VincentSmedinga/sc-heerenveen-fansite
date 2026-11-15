@@ -739,6 +739,17 @@ export type ItemClub = typeof itemClubs.$inferSelect
 
 export type NewItemClub = typeof itemClubs.$inferInsert
 
+/** The most characters a Q-number of Wikidata holds (`Q15943430`), and the most of a label. */
+export const wikidataLimits = { id: 20, label: 255 }
+
+/**
+ * Where the country of a club comes from (#1264): the editors in the admin (`manual`, which the
+ * importer never replaces) or Wikidata.
+ */
+export const clubCountrySources = ['manual', 'wikidata'] as const
+
+export type ClubCountrySource = (typeof clubCountrySources)[number]
+
 /**
  * The clubs sc Heerenveen played against. One club is one article on the Dutch Wikipedia:
  * `wikipedia_page` is the title of that article, after any redirects (unique where there is
@@ -756,6 +767,18 @@ export const clubs = mysqlTable(
     slug: varchar('slug', { length: clubLimits.slug }).notNull().unique(),
     name: varchar('name', { length: clubLimits.name }).notNull(),
     wikipediaPage: articleTitle('wikipedia_page').unique(),
+    // The item of Wikidata of the club (#1264), read from its article. Empty for a club without
+    // an article or an item.
+    wikidataId: varchar('wikidata_id', { length: wikidataLimits.id }).unique(),
+    // The country of the club now (#1264): the code of two letters in capitals, and where it
+    // came from. Both are empty for a club whose country we do not know.
+    country: char('country', { length: 2 }),
+    countrySource: mysqlEnum('country_source', clubCountrySources),
+    // The country of the item (`P17`) as Wikidata gave it, also when it is not in the list of
+    // countries: the importer warns about that one. Empty when Wikidata gave none.
+    countryItemId: varchar('country_item_id', { length: wikidataLimits.id }).references(() => wikidataItems.id),
+    // When the importer read the item of the club. It does not ask about a club that was read.
+    wikidataReadAt: datetime('wikidata_read_at'),
     createdAt: datetime('created_at')
       .notNull()
       .default(sql`(UTC_TIMESTAMP())`),
@@ -868,9 +891,6 @@ export type PlayerSide = (typeof playerSides)[number]
 export const birthDateSources = ['wikidata', 'manual'] as const
 
 export type BirthDateSource = (typeof birthDateSources)[number]
-
-/** The most characters a Q-number of Wikidata holds (`Q15943430`), and the most of a label. */
-export const wikidataLimits = { id: 20, label: 255 }
 
 /**
  * The name of an item of Wikidata that a person points at: a country, a place or a position

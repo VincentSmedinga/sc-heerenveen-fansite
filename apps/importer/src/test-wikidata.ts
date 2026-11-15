@@ -11,6 +11,8 @@ import { reply } from './test-server.ts'
 
 export type TestItem = {
   birth?: TimeStatement[]
+  /** The country of the item (`P17`), as a club has it (#1264). */
+  countries?: (ItemStatement | string)[]
   /** The date of death (`P570`). */
   death?: TimeStatement[]
   /** The label in Dutch and in English; leave both out for an item with no label. */
@@ -84,6 +86,9 @@ export function itemJson(id: string, item: TestItem = {}): string {
       rank,
       type: 'statement',
     }))
+  }
+  if (item.countries !== undefined) {
+    claims['P17'] = items(item.countries)
   }
   if (item.place !== undefined) {
     claims['P19'] = items([item.place])

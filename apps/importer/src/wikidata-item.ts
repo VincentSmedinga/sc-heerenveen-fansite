@@ -61,6 +61,18 @@ export function readArticleInfo(html: string): 'missing' | ArticleInfo | null {
 }
 
 /**
+ * The Q-numbers of the country of an item (`P17`, #1264), in the order of Wikidata, with the
+ * same rules as the other properties: a deprecated statement does not count, and a preferred
+ * one goes alone. Empty when the item has none or the text is no item.
+ */
+export function readCountryIds(text: string): string[] {
+  const entity = firstEntity(text)
+  const claims = entity !== null && isRecord(entity['claims']) ? entity['claims'] : {}
+
+  return itemIdsOf(statementsOf(claims, 'P17'))
+}
+
+/**
  * The title of the article on the Dutch Wikipedia that the item links to (`sitelinks.nlwiki`),
  * or null when the item has none or the text is no item.
  */

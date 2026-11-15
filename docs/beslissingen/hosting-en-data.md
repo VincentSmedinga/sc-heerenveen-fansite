@@ -1046,3 +1046,22 @@
 - **Waarom:** met een kant per persoon kunnen we later de opstellingen van de oude fansite verbeteren, waar links en rechts niet te vertrouwen zijn.
   Een bron is niet nodig, want de importer schrijft de kolom nooit.
 - **Alternatieven:** de kolom bij `players` (zoals het issue zei: een kant per seizoen die niemand nodig heeft, en een quiz die elke speler per seizoen vraagt); een kant per linie (een persoon met twee kanten komt zelden voor); een positie in tekst zoals "linksback" (dubbelt de linie).
+
+## Een club heeft één land, uit Wikidata of van de redactie
+
+- **Datum:** 15 november 2026
+- **Besluit:** elke club krijgt één land, als landcode van twee letters uit `@fansite/shared/countries`, met een bron: `manual` of `wikidata` (#1264, onderdeel van #1229).
+  Het is het land van nu, niet van het moment van de wedstrijd.
+  Een club waarvan Wikidata geen land geeft dat in de lijst staat, zoals een staat die niet meer bestaat, blijft zonder land en komt op de lijst van de redactie.
+  - **De kolommen:** de migratie `0076_add_club_country` geeft `clubs` de kolommen `wikidata_id` (uniek, leeg toegestaan), `country`, `country_source` (`manual` of `wikidata`, leeg als er geen land is), `country_item_id` en `wikidata_read_at`.
+    De laatste twee zijn erbij gekomen zodat een club één keer wordt gelezen en de waarschuwing voor een onbekend land bij elke run uit de database komt, zonder verzoek: `country_item_id` is het land van het item zoals Wikidata het gaf, ook als het niet in de lijst staat, en verwijst naar `wikidata_items`.
+  - **Dezelfde opzet als bij personen:** de bron heeft een eigen lijst waarden (`clubCountrySources`), en `refreshClubCountries` in `packages/db/src/clubs.ts` vult het land zoals `refreshPersonCountries`.
+  - **De migratie** voegt alleen toe en kan opnieuw draaien (`IF NOT EXISTS`).
+    Terugdraaien op de host staat als opmerking bovenaan het bestand; de landen die de redactie gaf, zijn dan weg.
+- **Waarom:** het land van een persoon werkt al zo, en de redactie kan het verbeteren (#1265).
+  Het land van nu is genoeg voor de vraag "tegen welke landen speelden we", en een land met data per club is veel werk voor een handvol wedstrijden.
+- **Alternatieven:** het land op het moment van de wedstrijd (codes voor staten die niet meer bestaan en een land met data per club); alleen de clubs van de Europese wedstrijden (de opzoeking gaat toch per club); alleen handmatig, zonder import; `wikidata_read_at` en `country_item_id` weglaten (dan vraagt elke run opnieuw om elke club zonder land).
+- **Namen en vlaggen:** zoals bij personen, met de bestaande vlag en de Nederlandse landnaam als alt-tekst.
+  Engeland, Wales en Schotland blijven samen "Verenigd Koninkrijk" (`GB`), omdat we alleen codes van ISO bewaren.
+  Een eigen keuze voor de vier landen van het Verenigd Koninkrijk is een apart besluit als de redactie dat wil.
+- **De kaart:** per land de wedstrijden, winst, gelijk en verlies en de doelpunten, met de wedstrijden zonder bekend land onderaan; zie #1266.
