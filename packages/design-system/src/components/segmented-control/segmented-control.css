@@ -126,6 +126,16 @@
       line-height: var(--hf-meta-line-height);
       padding-inline: var(--hf-segmented-edge);
     }
+
+    /*
+     * Five options on a phone of 390px: a cell is about 72px, and the longest label in bold
+     * (Competitie) is about 73px at the size of the meta text, so it would break in the word.
+     * A letter a pixel smaller and no padding make it fit.
+     */
+    &.hf-segmented-compact:has(> :nth-child(5)) > :is(button, a) {
+      font-size: calc(var(--hf-meta-font-size) - 1px);
+      padding-inline: 0;
+    }
   }
 
   /*
