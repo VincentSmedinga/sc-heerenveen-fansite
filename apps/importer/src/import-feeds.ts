@@ -21,6 +21,7 @@ import type { MatchDay } from './relevance.ts'
 
 import { alertRunOf, feedSubject, matchesSubject, squadSubject } from './alert-runs.ts'
 import { createFetcher } from './fetcher.ts'
+import { describeClubData, readClubData } from './import-club-data.ts'
 import { importEndedSeason } from './import-ended-season.ts'
 import { formatMatchReport, importMatches, repairKnownClubs, wikipediaOrigin } from './import-matches.ts'
 import { describePersonData, readPersonData, wikidataOrigin } from './import-person-data.ts'
@@ -483,6 +484,22 @@ function formatRelevance({ doubtful, irrelevant, relevant }: RelevanceCounts): s
     : `; ${relevant} relevant, ${doubtful} doubtful, ${irrelevant} irrelevant`
 }
 
+/** Gives the clubs with an article a country from Wikidata (#1264). A failure is a warning. */
+async function importClubData(
+  db: Database,
+  fetcher: Fetcher,
+  options: { clock: () => Date; origin: string; pause: number | undefined; wikidata: string },
+): Promise<string[]> {
+  try {
+    const { pause, ...rest } = options
+    const report = await readClubData(db, fetcher, { ...rest, ...(pause === undefined ? {} : { pause }) })
+
+    return [...report.warnings, ...describeClubData(report)]
+  } catch (error) {
+    return [`Clubs: warning, not read from Wikidata: ${describeError(error)}`]
+  }
+}
+
 /**
  * Reads a feed whose time has come, or reports that it waits. A failure of the database becomes
  * an error report.
@@ -540,6 +557,8 @@ async function importPersonData(
     return []
   }
 
+  const lines: string[] = []
+
   try {
     const report = await readPersonData(db, fetcher, {
       clock,
@@ -548,10 +567,15 @@ async function importPersonData(
       ...(pause === undefined ? {} : { pause }),
     })
 
-    return [...report.warnings, ...describePersonData(report)]
+    lines.push(...report.warnings, ...describePersonData(report))
   } catch (error) {
-    return [`Persons: warning, not read from Wikidata: ${describeError(error)}`]
+    lines.push(`Persons: warning, not read from Wikidata: ${describeError(error)}`)
   }
+
+  // After the persons, from the same two servers, so the same waits and stops apply (#1264).
+  lines.push(...(await importClubData(db, fetcher, { clock, origin, pause, wikidata })))
+
+  return lines
 }
 
 /**

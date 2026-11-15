@@ -4121,3 +4121,23 @@
 - **Waarom:** de redactie weet soms beter dan Wikidata wanneer een speler geboren is, vooral bij een speler zonder item.
   Zonder bron zou de volgende lezing die correctie wissen.
 - **Alternatieven:** een eigen kolom voor de datum van de redactie naast die van Wikidata (twee datums om te kiezen op elke pagina); de importer een persoon met een geboortedatum niet meer laten lezen (dan komt een fout van Wikidata ook nooit meer recht).
+
+## De importer leest het land van een club uit Wikidata, en laat `manual` staan
+
+- **Datum:** 15 november 2026
+- **Besluit:** na de personen leest de importer elke club met een Wikipedia-pagina die nog niet is gelezen (#1264): eerst het Q-nummer uit de paginainformatie van het artikel, zoals bij personen, dan het item op Wikidata en het land ervan (`P17`).
+  Het land komt in `clubs.country` met de bron `wikidata`, via dezelfde lijst `wikidataCountryCodes` als bij personen (`apps/importer/src/person-countries.ts`, geen tweede kopie).
+  - **`manual` blijft:** een club met de bron `manual` verandert de importer nooit.
+    Een club zonder land of met de bron `wikidata` krijgt bij elke run het land van het item, zonder verzoek (`refreshClubCountries`).
+  - **Eén keer lezen:** een gelezen club (`wikidata_read_at`) krijgt geen verzoek meer, ook niet als het item geen land had.
+    Een tweede run zonder wijziging vraagt niets en schrijft niets.
+    Een verzoek dat mislukt laat de club ongelezen, met het Q-nummer bewaard, en de volgende run probeert het opnieuw.
+  - **Onbekend land:** geeft Wikidata geen land dat in de lijst staat, dan blijft de club zonder land en schrijft elke run een waarschuwing met `Clubs:` vooraan, met de club, het Q-nummer en het label.
+    Staan er meer landen op het item, dan telt het eerste dat in de lijst staat.
+  - **Zonder pagina:** een club zonder pagina krijgt geen verzoek en geen land; die vult de redactie (#1265).
+  - **Het logboek:** `clubs (country): 4 clubs read from Wikidata, 4 clubs got a country, 60 clubs have none yet; 8 items asked`, alleen als de run iets las of invulde.
+  - **Verzoeken en bron:** alleen naar Wikipedia en Wikidata, met dezelfde fetcher, dezelfde controle op `robots.txt`, dezelfde pauze en dezelfde stop als bij personen; er komt geen bron van derden bij.
+    De gegevens van Wikidata zijn CC0 (https://creativecommons.org/publicdomain/zero/1.0/), dus een bronvermelding is niet nodig.
+- **Waarom:** de club is bij ons één artikel, dus het Q-nummer en het land volgen dezelfde route als bij een persoon, en de redactie verbetert wat Wikidata niet of verkeerd weet.
+  Eén keer lezen houdt de verzoeken klein: de eerste ronde is ongeveer 58 clubs met een pagina.
+- **Alternatieven:** elke run opnieuw lezen (verzoeken voor niets); het land van de club afleiden uit de landen van de spelers (een gok); een tweede lijst van landen voor clubs.

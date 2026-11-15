@@ -4865,6 +4865,7 @@
   Het gaat om twee clubs met elk één wedstrijd en geen verslag, en de site is nog niet gelanceerd en acceptatie wordt niet geïndexeerd, dus er is geen link van buiten die zou breken.
   Een tabel met doorverwijzingen voor twee adressen is het niet waard.
 - **Alternatieven:** een tabel `club_slugs` met doorverwijzing, zoals bij spelers (een migratie voor twee adressen); alleen de nieuwe clubs het goede adres geven en de twee laten staan (de twee houden dan hun fout).
+- **Later:** een club heeft sinds #1264 wel een land (zie _Een club heeft één land, uit Wikidata of van de redactie_ in `hosting-en-data.md`); de uitzondering voor de đ blijft bij personen, want een adres hangt niet van dat land af.
 
 ## Een overgenomen opstelling krijgt de rugnummers van de dag van de wedstrijd, en een afwijkend nummer wordt gemeld
 
@@ -5083,6 +5084,7 @@
 - **Alternatieven:** het formulier als zin met keuzelijsten; een groot overzicht met een strip per seizoen en feiten bovenaan; één zoekpagina voor de hele site; een eigen kaart per wedstrijd met een W/G/V-vak (de kleuren van `Match` volstaan); een telling per aantal in de database.
 - **Nadeel:** het aantal achter elke waarde kost per verzoek een telling per waarde, in het geheugen.
   De lijst is klein, dus dat is genoeg; een zoekindex is niet nodig.
+- **Later:** een land van een club hebben we sinds #1264 wel (zie _Een club heeft één land, uit Wikidata of van de redactie_ in `hosting-en-data.md`); het filter op het land van de tegenstander komt in #1267.
 
 ## De zoekpagina begint met vragen en met Op deze dag
 
