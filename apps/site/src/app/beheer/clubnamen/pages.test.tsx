@@ -196,7 +196,7 @@ describe('the form of a club', () => {
     expect(html).toContain('<option value="">Onbekend</option>')
     expect(html).toMatch(/<option value="DE" selected="">Duitsland \(DE\)<\/option>/u)
     expect(html).toContain('Nu: Duitsland (DE), van de redactie.')
-    expect(html).toContain('aria-label="Sla op: land van Oefenstad AZ"')
+    expect(html).toContain('aria-label="Opslaan: land van Oefenstad AZ"')
   })
 
   it('says Wikipedia has one spelling for a club without other names', async () => {

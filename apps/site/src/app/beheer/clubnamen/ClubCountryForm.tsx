@@ -76,7 +76,7 @@ export function ClubCountryForm({ action, countries, country, name, source }: Pr
           </Select>
         </Field>
         <Form.Buttons>
-          <Button aria-label={`Sla op: land van ${name}`} disabled={pending} icon="save" type="submit">
+          <Button aria-label={`Opslaan: land van ${name}`} disabled={pending} icon="save" type="submit">
             Opslaan
           </Button>
         </Form.Buttons>

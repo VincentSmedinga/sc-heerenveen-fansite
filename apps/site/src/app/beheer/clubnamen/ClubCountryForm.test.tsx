@@ -39,7 +39,7 @@ describe('the form of the country of a club', () => {
       'Nederland (NL)',
     ])
     expect(list.value).toBe('NL')
-    expect(screen.getByRole('button', { name: 'Sla op: land van Oefenstad FC' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Opslaan: land van Oefenstad FC' })).toBeTruthy()
     expect(screen.getByText(/Nu: Nederland \(NL\), uit Wikidata/u)).toBeTruthy()
   })
 
@@ -50,7 +50,7 @@ describe('the form of the country of a club', () => {
 
     show(action)
     fireEvent.change(screen.getByRole('combobox', { name: 'Land (niet verplicht)' }), { target: { value: 'DE' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Sla op: land van Oefenstad FC' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Opslaan: land van Oefenstad FC' }))
 
     await waitFor(() =>
       expect(screen.getByRole('status').textContent).toBe('Opgeslagen: Oefenstad FC, Duitsland (DE).'),
@@ -60,7 +60,7 @@ describe('the form of the country of a club', () => {
 
   it('says so when the country was taken away', async () => {
     show(() => Promise.resolve({ saved: '' }), 'NL')
-    fireEvent.click(screen.getByRole('button', { name: 'Sla op: land van Oefenstad FC' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Opslaan: land van Oefenstad FC' }))
 
     await waitFor(() =>
       expect(screen.getByRole('status').textContent).toBe('Opgeslagen: Oefenstad FC heeft geen land meer.'),
@@ -69,7 +69,7 @@ describe('the form of the country of a club', () => {
 
   it('shows an error at the list and moves the focus to the list of errors', async () => {
     show(() => Promise.resolve({ error: 'Kies een land uit de lijst.', land: 'XX' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Sla op: land van Oefenstad FC' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Opslaan: land van Oefenstad FC' }))
 
     await waitFor(() => expect(document.activeElement?.id).toBe('land-fouten'))
     expect(screen.getAllByText('Kies een land uit de lijst.').length).toBeGreaterThan(0)
