@@ -3037,6 +3037,7 @@
   De kolommen G en P van de tabel blijven; de regel is er voor wie de naam leest zonder de tabel te volgen.
 - **Waarom:** de projecteigenaar wilde de aantallen bij de naam, en het is de eerste plek die de regel van `PlayerName` gebruikt.
 - **Alternatieven:** de regel in de plaats van de periode (dan mist de periode); de kolommen weghalen (de tabel wordt minder te vergelijken).
+- **Later:** de regel achter de naam is weer weg (#1275): dezelfde getallen staan al in de kolommen Gespeeld en Punten per wedstrijd, dus de regel was dubbel, en een schermlezer las ze twee keer.
 
 ## De doelpuntenmakers op Spelers tonen D/W waar de wedstrijden van elke speler bekend zijn
 
