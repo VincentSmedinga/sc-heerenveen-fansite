@@ -3960,6 +3960,7 @@
   De tweede nationaliteit nemen als de eerste geen code heeft (een gok).
 - **Later:** sinds 10 november 2026 (#1052) vervangt het land van Wikidata ook een land met de bron `list`, `old-site` of `squad`.
   Alleen `manual` blijft altijd staan; zie _De bronnen van de linie en het land hebben een vaste volgorde_.
+- **Later:** sinds #1278 staan Engeland, Wales, Schotland en Noord-Ierland in de lijst, en een persoon met `Q145` en precies één van die vier als `P1532` krijgt dat land (zie _Een Brits land komt uit de plaats, met een diepte van zes stappen_).
 
 ## De bronnen van de linie en het land hebben een vaste volgorde
 
@@ -4141,3 +4142,30 @@
 - **Waarom:** de club is bij ons één artikel, dus het Q-nummer en het land volgen dezelfde route als bij een persoon, en de redactie verbetert wat Wikidata niet of verkeerd weet.
   Eén keer lezen houdt de verzoeken klein: de eerste ronde is ongeveer 58 clubs met een pagina.
 - **Alternatieven:** elke run opnieuw lezen (verzoeken voor niets); het land van de club afleiden uit de landen van de spelers (een gok); een tweede lijst van landen voor clubs.
+- **Later:** sinds #1278 maakt de importer van `Q145` een van de vier landen van het Verenigd Koninkrijk als Wikidata dat kan zien (zie _Een Brits land komt uit de plaats, met een diepte van zes stappen_).
+
+## Een Brits land komt uit de plaats, met een diepte van zes stappen
+
+- **Datum:** 15 november 2026
+- **Besluit:** `wikidataCountryCodes` krijgt `Q21` (`GB-ENG`), `Q25` (`GB-WLS`), `Q22` (`GB-SCT`) en `Q26` (`GB-NIR`), de codes van #1277.
+  Geeft het item van een club zo'n land zelf (`P17`), en is het er precies één, dan telt dat.
+  Geeft het alleen `Q145`, dan volgt de importer het hoofdkantoor (`P159`) en de plaatsen waarin het item ligt (`P131`), en van elke plaats weer `P131`, hoogstens zes stappen diep, tot een van die vier.
+  Eindigt de keten in precies één land, dan komt die code in `clubs.country` met de bron `wikidata`; eindigt ze in verschillende landen of in geen, dan blijft het `GB`, en de club komt niet op de lijst van de redactie, want hij heeft een land.
+  Een persoon met `Q145` als eerste nationaliteit en precies één van de vier als land voor de sport (`P1532`) krijgt dat land: de importer zet het vooraan bij zijn nationaliteiten (`person_nationalities`), zodat `refreshPersonCountries` niets nieuws hoeft te kennen.
+  Zonder `P1532` blijft hij `GB`, want zijn geboorteplaats zegt niet voor welk land hij uitkomt.
+  Een persoon die al gelezen is en een datum van overlijden heeft, wordt niet opnieuw gelezen (#1147); de redactie zet zijn land in het beheer.
+- **Waarom:** de eigenaar wil dat de importer het zelf kan; een plaats in Wales hoort bij Wales, een geboorteplaats bij een speler niet bij zijn land.
+- **Alternatieven:** het artikel op Wikipedia lezen (zwakker en meer verzoeken); alleen handmatig (de eigenaar wil een voorstel van de importer); de geboorteplaats van een persoon (zegt niets over het elftal).
+
+## Alleen `GB` wordt verfijnd, en de plaatsen staan in een eigen tabel
+
+- **Datum:** 15 november 2026
+- **Besluit:** alleen een club met het Verenigd Koninkrijk van Wikidata krijgt de extra verzoeken: de items van de plaatsen, met dezelfde fetcher, controle op `robots.txt`, pauze en stop als nu, en alleen naar Wikidata.
+  Een club met `manual` blijft staan, ook als hij `GB` heeft.
+  Van elk item dat de importer volgt, bewaart de tabel `wikidata_places` (migratie `0079_add_wikidata_places`) de Q-nummers van zijn hoofdkantoor en zijn plaatsen, ook van een item dat weg is (dan zonder plaatsen), zodat een tweede run niets vraagt.
+  `refreshClubCountries` volgt de keten uit die tabel, zonder verzoek, bij elke run; een club die al gelezen was en `GB` kreeg, wordt dus verfijnd: zijn item wordt nog één keer opgevraagd voor zijn plaatsen, zonder de pagina van Wikipedia.
+  Een club die nu pas wordt gelezen, krijgt zijn plaatsen bij die eerste lezing.
+  De tabel heeft geen verbinding met `wikidata_items`, want die bewaart een label en dit een lijst.
+- **Waarom:** het zijn enkele tientallen clubs, en een run mag niet zwaarder worden dan nodig.
+  Een tabel van items met hun plaatsen is genoeg om elke keten opnieuw te volgen, en past bij elke club die dezelfde plaats deelt.
+- **Alternatieven:** de uitkomst per club bewaren (dan weten we niet of een plaats is gevolgd en vragen we bij elke wijziging opnieuw); elke club opnieuw volgen (honderden verzoeken voor niets); de plaatsen in `wikidata_items` stoppen (een kolom voor een lijst die bij een label niet past).

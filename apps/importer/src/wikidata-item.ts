@@ -21,6 +21,8 @@ export type WikidataItem = {
   nationalityIds: string[]
   placeId: null | string
   positionIds: string[]
+  /** The countries he plays for (`P1532`, #1278), in the order of Wikidata. */
+  sportCountryIds: string[]
 }
 
 type Statement = { rank: string; value: unknown }
@@ -110,6 +112,7 @@ export function readItem(text: string): null | WikidataItem {
     nationalityIds: itemIdsOf(statementsOf(claims, 'P27')),
     placeId: itemIdsOf(statementsOf(claims, 'P19'))[0] ?? null,
     positionIds: itemIdsOf(statementsOf(claims, 'P413')),
+    sportCountryIds: itemIdsOf(statementsOf(claims, 'P1532')),
   }
 }
 
@@ -118,6 +121,23 @@ export function readLabel(text: string): null | string {
   const entity = firstEntity(text)
 
   return entity === null ? null : labelOf(entity)
+}
+
+/**
+ * The places an item is in (#1278): its headquarters (`P159`) and the places it lies in
+ * (`P131`), in the order of Wikidata, without a repeat, with the same rules as the other
+ * properties. Empty when it has none. Null when the text is no item.
+ */
+export function readPlaceIds(text: string): null | string[] {
+  const entity = firstEntity(text)
+
+  if (entity === null || typeof entity['id'] !== 'string' || !/^Q\d+$/u.test(entity['id'])) {
+    return null
+  }
+
+  const claims = isRecord(entity['claims']) ? entity['claims'] : {}
+
+  return [...new Set([...itemIdsOf(statementsOf(claims, 'P159')), ...itemIdsOf(statementsOf(claims, 'P131'))])]
 }
 
 function dateOf(statements: Statement[]): WikidataItem['birth'] {

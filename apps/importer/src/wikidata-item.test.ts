@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { infoPage, itemJson } from './test-wikidata.ts'
-import { lineOfPositions, readArticleInfo, readItem, readLabel } from './wikidata-item.ts'
+import { lineOfPositions, readArticleInfo, readItem, readLabel, readPlaceIds } from './wikidata-item.ts'
 
 describe('readArticleInfo', () => {
   it('reads the number and the item of an article', () => {
@@ -78,6 +78,7 @@ describe('readItem', () => {
       nationalityIds: ['Q29999'],
       placeId: 'Q9920',
       positionIds: ['Q336286'],
+      sportCountryIds: [],
     })
   })
 
@@ -175,5 +176,35 @@ describe('lineOfPositions', () => {
   it('gives null when no position is in the list', () => {
     expect(lineOfPositions(['Q9999999'])).toBeNull()
     expect(lineOfPositions([])).toBeNull()
+  })
+})
+
+describe('readPlaceIds (#1278)', () => {
+  it('gives the headquarters and then the places it lies in, without a repeat', () => {
+    expect(readPlaceIds(itemJson('Q1', { headquarters: ['Q2'], placesIn: ['Q3', 'Q2'] }))).toEqual(['Q2', 'Q3'])
+  })
+
+  it('leaves out a deprecated statement, and gives only the preferred ones when there are any', () => {
+    expect(
+      readPlaceIds(
+        itemJson('Q1', {
+          placesIn: [
+            { rank: 'deprecated', value: 'Q2' },
+            { rank: 'normal', value: 'Q3' },
+            { rank: 'preferred', value: 'Q4' },
+          ],
+        }),
+      ),
+    ).toEqual(['Q4'])
+  })
+
+  it('gives an empty list for an item without places, and null for a text that is no item', () => {
+    expect(readPlaceIds(itemJson('Q1', {}))).toEqual([])
+    expect(readPlaceIds('not json')).toBeNull()
+  })
+
+  it('reads the countries a person plays for (P1532)', () => {
+    expect(readItem(itemJson('Q1', { sportCountries: ['Q25'] }))?.sportCountryIds).toEqual(['Q25'])
+    expect(readItem(itemJson('Q1', {}))?.sportCountryIds).toEqual([])
   })
 })

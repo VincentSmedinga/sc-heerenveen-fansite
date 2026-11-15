@@ -170,6 +170,8 @@ export const personTitleAliases: readonly PersonTitleAlias[] = [
 export type PersonCountriesRefresh = {
   /** From the first nationality of Wikidata. */
   filled: number
+  /** Of those, the persons who got England, Wales, Scotland or Northern Ireland (#1278). */
+  filledBritish: number
   /** From the first flag in the list of players. */
   list: number
   /** From the country that stands most often on the rows of the squad lists. */
@@ -627,7 +629,7 @@ export async function refreshPersonCountries(
     .where(sql`${persons.countrySource} is null or ${persons.countrySource} <> 'manual'`)
     .orderBy(asc(persons.id))
   const unknown = new Map<string, { id: string; label: string; persons: number }>()
-  const report: PersonCountriesRefresh = { filled: 0, list: 0, squad: 0, unknown: [] }
+  const report: PersonCountriesRefresh = { filled: 0, filledBritish: 0, list: 0, squad: 0, unknown: [] }
 
   for (const row of rows) {
     const code = codes.get(row.itemId)
@@ -640,6 +642,7 @@ export async function refreshPersonCountries(
     } else if (row.country !== code || row.source !== 'wikidata') {
       await db.update(persons).set({ country: code, countrySource: 'wikidata' }).where(eq(persons.id, row.id))
       report.filled++
+      report.filledBritish += code.startsWith('GB-') ? 1 : 0
     }
   }
   report.unknown = [...unknown.values()]

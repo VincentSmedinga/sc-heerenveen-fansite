@@ -896,6 +896,7 @@ Drie tabellen horen erbij:
 
 - `wikidata_items` heeft het Q-nummer (`id`) en het Nederlandse label, anders het Engelse (`label`), van een land, een plaats of een positie.
   De importer vraagt een Q-nummer dat hier staat nooit nog eens op.
+- `wikidata_places` heeft het Q-nummer van een item (`id`) en de Q-nummers van zijn hoofdkantoor en de plaatsen waarin het ligt (`parent_ids`, gescheiden door komma's, leeg zonder plaatsen): wat de importer volgde van een club van het Verenigd Koninkrijk naar zijn land (#1278, migratie `0079_add_wikidata_places`, die alleen een tabel toevoegt en opnieuw kan draaien).
 - `person_nationalities` en `person_positions` hebben `person_id`, `item_id` (een Q-nummer in `wikidata_items`) en `position`, de volgorde van Wikidata, vanaf 0.
   De sleutel is `person_id` met `position`, een persoon heeft een Q-nummer hoogstens één keer, en de rijen gaan weg met hun persoon.
 

@@ -1,6 +1,8 @@
 /**
  * The countries of Wikidata (`P27`, the nationality of a person) by Q-number, with the code of
- * two letters of each (#1051). The list is every item of Wikidata with a code of ISO 3166-1
+ * each (#1051). The four countries of the United Kingdom are here too, with their code of
+ * ISO 3166-2 (#1278): England, Scotland, Wales and Northern Ireland, next to `Q145`. The rest
+ * of the list is every item of Wikidata with a code of ISO 3166-1
  * that is in use (`P297`, read on 10 November 2026), and Kosovo. Two items without such a code
  * are added by hand, because Wikidata names them as the nationality of many persons: the
  * country Netherlands (`Q55`, next to the kingdom `Q29999`) and the Kingdom of Denmark
@@ -15,6 +17,10 @@ export const wikidataCountryCodes: ReadonlyMap<string, string> = new Map<string,
   ['Q16', 'CA'], // Canada
   ['Q17', 'JP'], // Japan
   ['Q20', 'NO'], // Norway
+  ['Q21', 'GB-ENG'], // England
+  ['Q22', 'GB-SCT'], // Scotland
+  ['Q25', 'GB-WLS'], // Wales
+  ['Q26', 'GB-NIR'], // Northern Ireland
   ['Q27', 'IE'], // Ireland
   ['Q28', 'HU'], // Hungary
   ['Q29', 'ES'], // Spain

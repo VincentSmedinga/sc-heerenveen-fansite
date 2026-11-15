@@ -1,11 +1,16 @@
 import type { Database } from '@fansite/db/client'
 
+import { resolveBritishCountry } from '@fansite/db/british-places'
 import {
+  britishCountryIds,
+  clubsOfCountryItem,
   clubsToRead,
   clubWikidataIds,
+  knownWikidataPlaces,
   refreshClubCountries,
   rememberClubWikidataId,
   storeClubItem,
+  storeWikidataPlace,
 } from '@fansite/db/clubs'
 import { knownWikidataLabels, storeWikidataLabel } from '@fansite/db/persons'
 
@@ -15,7 +20,7 @@ import { infoUrl, itemUrl, pauseBetweenRequests } from './import-person-data.ts'
 import { wikidataCountryCodes } from './person-countries.ts'
 import { mostFailuresInARow } from './person-pages.ts'
 import { printable } from './text.ts'
-import { readArticleInfo, readCountryIds, readLabel } from './wikidata-item.ts'
+import { readArticleInfo, readCountryIds, readLabel, readPlaceIds } from './wikidata-item.ts'
 
 export type ClubDataOptions = {
   clock?: () => Date
@@ -31,6 +36,8 @@ export type ClubDataOptions = {
 
 /** What a run did, for the log. */
 export type ClubDataReport = {
+  /** Of those, the clubs that got England, Wales, Scotland or Northern Ireland (#1278). */
+  countriesBritish: number
   /** The clubs that got a country from Wikidata this run. */
   countriesFilled: number
   /** The items of Wikidata it asked about: clubs and countries. */
@@ -53,9 +60,11 @@ export function describeClubData(report: ClubDataReport): string[] {
   }
 
   const { countriesFilled: filled, withoutCountry: without } = report
+  const british =
+    report.countriesBritish > 0 ? ` (${report.countriesBritish} in England, Wales, Scotland or Northern Ireland)` : ''
 
   return [
-    `clubs (country): ${report.read} ${report.read === 1 ? 'club' : 'clubs'} read from Wikidata, ${filled} ${filled === 1 ? 'club' : 'clubs'} got a country, ${without} ${without === 1 ? 'club has' : 'clubs have'} none yet; ${report.itemsAsked} items asked`,
+    `clubs (country): ${report.read} ${report.read === 1 ? 'club' : 'clubs'} read from Wikidata, ${filled} ${filled === 1 ? 'club' : 'clubs'} got a country${british}, ${without} ${without === 1 ? 'club has' : 'clubs have'} none yet; ${report.itemsAsked} items asked`,
   ]
 }
 
@@ -85,68 +94,75 @@ export async function readClubData(
     wikidata,
   }: ClubDataOptions,
 ): Promise<ClubDataReport> {
-  const report: ClubDataReport = { countriesFilled: 0, itemsAsked: 0, read: 0, warnings: [], withoutCountry: 0 }
+  const report: ClubDataReport = {
+    countriesBritish: 0,
+    countriesFilled: 0,
+    itemsAsked: 0,
+    read: 0,
+    warnings: [],
+    withoutCountry: 0,
+  }
   const todo = await clubsToRead(db)
   const failures: string[] = []
+
+  let asked = 0
+  let failuresInARow = 0
+  let stopped = false
+
+  type Answer = { kind: 'failed' | 'missing' | 'stopped' } | { kind: 'text'; text: string }
+
+  async function ask(url: string): Promise<Answer> {
+    if (asked > 0 && pause > 0) {
+      await new Promise((resolve) => setTimeout(resolve, pause))
+    }
+
+    asked++
+
+    const outcome = await fetcher.fetch(url)
+
+    switch (outcome.kind) {
+      case 'blocked-by-robots':
+        report.warnings.push(
+          `Clubs: robots.txt does not allow ${printable(outcome.url)}, so no more clubs are read this run`,
+        )
+        stopped = true
+
+        return { kind: 'stopped' }
+      case 'error':
+        if (outcome.reason === 'http-status' && outcome.status === 404) {
+          failuresInARow = 0
+
+          return { kind: 'missing' }
+        }
+
+        failures.push(`${printable(url)}: ${printable(outcome.message)}`)
+        failuresInARow++
+        stopped = failuresInARow >= mostFailuresInARow
+
+        return { kind: 'failed' }
+      case 'fetched':
+        failuresInARow = 0
+
+        return { kind: 'text', text: new TextDecoder('utf-8').decode(outcome.body) }
+      case 'not-modified':
+        failures.push(`${printable(url)}: the page answered 304 to a request without conditions`)
+        failuresInARow++
+        stopped = failuresInARow >= mostFailuresInARow
+
+        return { kind: 'failed' }
+      case 'wait':
+        report.warnings.push(
+          `Clubs: the server asks us to wait (${printable(outcome.url)}), so no more clubs are read this run`,
+        )
+        stopped = true
+
+        return { kind: 'stopped' }
+    }
+  }
 
   if (todo.length > 0) {
     const labels = await knownWikidataLabels(db)
     const owners = await clubWikidataIds(db)
-    let asked = 0
-    let failuresInARow = 0
-    let stopped = false
-
-    type Answer = { kind: 'failed' | 'missing' | 'stopped' } | { kind: 'text'; text: string }
-
-    async function ask(url: string): Promise<Answer> {
-      if (asked > 0 && pause > 0) {
-        await new Promise((resolve) => setTimeout(resolve, pause))
-      }
-
-      asked++
-
-      const outcome = await fetcher.fetch(url)
-
-      switch (outcome.kind) {
-        case 'blocked-by-robots':
-          report.warnings.push(
-            `Clubs: robots.txt does not allow ${printable(outcome.url)}, so no more clubs are read this run`,
-          )
-          stopped = true
-
-          return { kind: 'stopped' }
-        case 'error':
-          if (outcome.reason === 'http-status' && outcome.status === 404) {
-            failuresInARow = 0
-
-            return { kind: 'missing' }
-          }
-
-          failures.push(`${printable(url)}: ${printable(outcome.message)}`)
-          failuresInARow++
-          stopped = failuresInARow >= mostFailuresInARow
-
-          return { kind: 'failed' }
-        case 'fetched':
-          failuresInARow = 0
-
-          return { kind: 'text', text: new TextDecoder('utf-8').decode(outcome.body) }
-        case 'not-modified':
-          failures.push(`${printable(url)}: the page answered 304 to a request without conditions`)
-          failuresInARow++
-          stopped = failuresInARow >= mostFailuresInARow
-
-          return { kind: 'failed' }
-        case 'wait':
-          report.warnings.push(
-            `Clubs: the server asks us to wait (${printable(outcome.url)}), so no more clubs are read this run`,
-          )
-          stopped = true
-
-          return { kind: 'stopped' }
-      }
-    }
-
     for (const club of todo) {
       if (stopped) {
         break
@@ -214,9 +230,23 @@ export async function readClubData(
         continue
       }
 
+      // The places of the item go in the database at once, so the chain to a country of the
+      // United Kingdom starts from the database and the item is never asked for twice (#1278).
+      const placeIds = answer.kind === 'text' ? readPlaceIds(answer.text) : null
+
+      if (placeIds !== null) {
+        await storeWikidataPlace(db, wikidataId, placeIds)
+      }
+
       const countryIds = answer.kind === 'text' ? readCountryIds(answer.text) : []
       // The first country that is in the list, else the first one, so the warning names it.
-      const countryId = countryIds.find((id) => countryCodes.has(id)) ?? countryIds[0] ?? null
+      // One of the four countries of the United Kingdom goes before the United Kingdom itself.
+      const britishId = countryIds.filter((id) => countryCodes.get(id)?.startsWith('GB-') === true)
+      const countryId =
+        (britishId.length === 1 ? britishId[0] : undefined) ??
+        countryIds.find((id) => countryCodes.has(id)) ??
+        countryIds[0] ??
+        null
 
       if (countryId !== null && !labels.has(countryId)) {
         report.itemsAsked++
@@ -243,8 +273,49 @@ export async function readClubData(
     }
   }
 
-  const { filled, unknown, withoutCountry } = await refreshClubCountries(db, countryCodes)
+  // The clubs of the United Kingdom, one place at a time up to a country of the four (#1278).
+  const britishIds = britishCountryIds(countryCodes)
+  const places = await knownWikidataPlaces(db)
 
+  if (!stopped && britishIds.size > 0) {
+    const ukItem = [...countryCodes].find(([, code]) => code === 'GB')?.[0]
+
+    for (const club of ukItem === undefined ? [] : await clubsOfCountryItem(db, ukItem)) {
+      let resolution = resolveBritishCountry(club.wikidataId, places, britishIds)
+
+      while (resolution.kind === 'missing' && !stopped) {
+        for (const id of resolution.ids) {
+          if (stopped) {
+            break
+          }
+
+          report.itemsAsked++
+
+          const answer = await ask(itemUrl(wikidata, id))
+          const parents = answer.kind === 'text' ? readPlaceIds(answer.text) : null
+
+          if (answer.kind === 'missing' || parents !== null) {
+            // An item that is gone has no places: remember that too, so nobody asks again.
+            await storeWikidataPlace(db, id, parents ?? [])
+            places.set(id, parents ?? [])
+          } else if (answer.kind === 'text') {
+            failures.push(`${printable(itemUrl(wikidata, id))}: the answer is not an item`)
+            failuresInARow++
+            stopped = failuresInARow >= mostFailuresInARow
+          }
+        }
+
+        const fetched = resolution.ids
+        resolution = fetched.every((id) => places.has(id))
+          ? resolveBritishCountry(club.wikidataId, places, britishIds)
+          : { kind: 'none' }
+      }
+    }
+  }
+
+  const { filled, filledBritish, unknown, withoutCountry } = await refreshClubCountries(db, countryCodes, places)
+
+  report.countriesBritish = filledBritish
   report.countriesFilled = filled
   report.withoutCountry = withoutCountry
 

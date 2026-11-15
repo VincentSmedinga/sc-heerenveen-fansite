@@ -13,7 +13,10 @@ import { infoRoute, itemRoute, labelRoute } from './test-wikidata.ts'
 
 const now = new Date('2026-11-15T12:00:00Z')
 const codes = new Map([
+  ['Q21', 'GB-ENG'],
+  ['Q25', 'GB-WLS'],
   ['Q55', 'NL'],
+  ['Q145', 'GB'],
   ['Q183', 'DE'],
 ])
 
@@ -34,6 +37,7 @@ afterAll(async () => {
 beforeEach(async () => {
   await database.pool.query('DELETE FROM clubs')
   await database.pool.query('DELETE FROM wikidata_items')
+  await database.pool.query('DELETE FROM wikidata_places')
 })
 
 afterEach(async () => {
@@ -161,5 +165,139 @@ describe('readClubData', () => {
     expect(await rows('SELECT wikidata_id, wikidata_read_at FROM clubs')).toEqual([
       { wikidata_id: 'Q15789', wikidata_read_at: null },
     ])
+  })
+
+  describe('the four countries of the United Kingdom (#1278)', () => {
+    // Made-up Q-numbers for the places, in the shape Wikidata has: a club has a headquarters
+    // (`P159`) or lies in a place (`P131`), and a place lies in a larger one, up to a country.
+    const clubs = {
+      newcastle: infoRoute('Newcastle United', 21, 'Q9001'),
+      ton: infoRoute('Ton Pentre FC', 22, 'Q9002'),
+    }
+    const items = {
+      ...itemRoute('Q9001', { countries: ['Q145'], headquarters: ['Q9101'] }),
+      ...itemRoute('Q9002', { countries: ['Q145'], placesIn: ['Q9201'] }),
+      // Newcastle: city, county, England.
+      ...itemRoute('Q9101', { placesIn: ['Q9102'] }),
+      ...itemRoute('Q9102', { placesIn: ['Q21'] }),
+      // Ton Pentre: village, county borough, Wales.
+      ...itemRoute('Q9201', { placesIn: ['Q9202'] }),
+      ...itemRoute('Q9202', { placesIn: ['Q25'] }),
+      ...labelRoute('Q145', 'Verenigd Koninkrijk', 'United Kingdom'),
+    }
+
+    it('gives a club of the United Kingdom the country of the place it lies in', async () => {
+      await addClub('newcastle', 'Newcastle United')
+      await addClub('ton', 'Ton Pentre FC')
+
+      const served = await serve({ ...clubs.newcastle, ...clubs.ton }, items)
+      const report = await read(served)
+
+      expect(await countries()).toEqual([
+        { country: 'GB-ENG', country_source: 'wikidata', slug: 'newcastle', wikidata_id: 'Q9001' },
+        { country: 'GB-WLS', country_source: 'wikidata', slug: 'ton', wikidata_id: 'Q9002' },
+      ])
+      expect(report).toMatchObject({ countriesBritish: 2, countriesFilled: 2, warnings: [] })
+      // A club that is read now has its places stored with it: its item is asked for once.
+      expect(asked(served.data).filter((path) => path?.includes('Q9001') === true)).toHaveLength(1)
+      expect(describeClubData(report)[0]).toContain(
+        '2 clubs got a country (2 in England, Wales, Scotland or Northern Ireland)',
+      )
+    })
+
+    it('asks nothing on a second run: the places are in the database', async () => {
+      await addClub('ton', 'Ton Pentre FC')
+
+      const served = await serve(clubs.ton, items)
+
+      await read(served)
+
+      const before = asked(served.data).length
+      const second = await read(served)
+
+      expect(asked(served.data)).toHaveLength(before)
+      expect(second).toMatchObject({ countriesBritish: 0, countriesFilled: 0, itemsAsked: 0 })
+      expect(describeClubData(second)).toEqual([])
+      expect(await rows('SELECT id, parent_ids FROM wikidata_places ORDER BY id')).toEqual([
+        { id: 'Q9002', parent_ids: 'Q9201' },
+        { id: 'Q9201', parent_ids: 'Q9202' },
+        { id: 'Q9202', parent_ids: 'Q25' },
+      ])
+    })
+
+    it('refines a club that was read before and has the United Kingdom, without reading it again', async () => {
+      await addClub('ton', 'Ton Pentre FC')
+      await database.pool.query("INSERT INTO wikidata_items (id, label) VALUES ('Q145', 'Verenigd Koninkrijk')")
+      await database.pool.query(
+        "UPDATE clubs SET wikidata_id = 'Q9002', country_item_id = 'Q145', country = 'GB', country_source = 'wikidata', wikidata_read_at = NOW()",
+      )
+
+      const served = await serve({}, items)
+
+      await read(served)
+
+      expect(await countries()).toEqual([
+        { country: 'GB-WLS', country_source: 'wikidata', slug: 'ton', wikidata_id: 'Q9002' },
+      ])
+      expect(asked(served.nl)).toEqual([])
+      // The item of the club is asked for once more, for its places, and then the chain.
+      expect(asked(served.data)).toEqual([
+        '/wiki/Special:EntityData/Q9002.json',
+        '/wiki/Special:EntityData/Q9201.json',
+        '/wiki/Special:EntityData/Q9202.json',
+      ])
+    })
+
+    it('never changes a club the editors set, also with GB', async () => {
+      await addClub('ton', 'Ton Pentre FC')
+      await database.pool.query("UPDATE clubs SET country = 'GB', country_source = 'manual'")
+
+      const served = await serve(clubs.ton, items)
+
+      await read(served)
+
+      expect(await countries()).toEqual([
+        { country: 'GB', country_source: 'manual', slug: 'ton', wikidata_id: 'Q9002' },
+      ])
+      expect(asked(served.data)).not.toContain('/wiki/Special:EntityData/Q9201.json')
+    })
+
+    it('leaves a club with the United Kingdom when its places end in two countries or in none', async () => {
+      await addClub('twee', 'Twee FC')
+      await addClub('geen', 'Geen FC')
+
+      const served = await serve(
+        { ...infoRoute('Twee FC', 31, 'Q9301'), ...infoRoute('Geen FC', 32, 'Q9302') },
+        {
+          ...itemRoute('Q9301', { countries: ['Q145'], placesIn: ['Q21', 'Q25'] }),
+          ...itemRoute('Q9302', { countries: ['Q145'], placesIn: ['Q9303'] }),
+          ...itemRoute('Q9303', {}),
+          ...labelRoute('Q145', 'Verenigd Koninkrijk'),
+        },
+      )
+
+      await read(served)
+
+      expect(await countries()).toEqual([
+        { country: 'GB', country_source: 'wikidata', slug: 'geen', wikidata_id: 'Q9302' },
+        { country: 'GB', country_source: 'wikidata', slug: 'twee', wikidata_id: 'Q9301' },
+      ])
+    })
+
+    it('gives a club that Wikidata gives one of the four itself that country, without asking about places', async () => {
+      await addClub('wales', 'Wales FC')
+
+      const served = await serve(infoRoute('Wales FC', 41, 'Q9401'), {
+        ...itemRoute('Q9401', { countries: ['Q145', 'Q25'] }),
+        ...labelRoute('Q25', 'Wales'),
+      })
+
+      await read(served)
+
+      expect(await countries()).toEqual([
+        { country: 'GB-WLS', country_source: 'wikidata', slug: 'wales', wikidata_id: 'Q9401' },
+      ])
+      expect(asked(served.data)).toEqual(['/wiki/Special:EntityData/Q9401.json', '/wiki/Special:EntityData/Q25.json'])
+    })
   })
 })

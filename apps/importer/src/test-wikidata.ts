@@ -15,11 +15,17 @@ export type TestItem = {
   countries?: (ItemStatement | string)[]
   /** The date of death (`P570`). */
   death?: TimeStatement[]
+  /** The headquarters (`P159`) of a club (#1278). */
+  headquarters?: (ItemStatement | string)[]
   /** The label in Dutch and in English; leave both out for an item with no label. */
   labels?: { en?: string; nl?: string }
   nationalities?: (ItemStatement | string)[]
   place?: ItemStatement | string
+  /** The places it lies in (`P131`, #1278). */
+  placesIn?: (ItemStatement | string)[]
   positions?: (ItemStatement | string)[]
+  /** The countries a person plays for (`P1532`, #1278). */
+  sportCountries?: (ItemStatement | string)[]
 }
 
 type ItemStatement = { rank?: Rank; value: string }
@@ -89,6 +95,15 @@ export function itemJson(id: string, item: TestItem = {}): string {
   }
   if (item.countries !== undefined) {
     claims['P17'] = items(item.countries)
+  }
+  if (item.headquarters !== undefined) {
+    claims['P159'] = items(item.headquarters)
+  }
+  if (item.placesIn !== undefined) {
+    claims['P131'] = items(item.placesIn)
+  }
+  if (item.sportCountries !== undefined) {
+    claims['P1532'] = items(item.sportCountries)
   }
   if (item.place !== undefined) {
     claims['P19'] = items([item.place])
