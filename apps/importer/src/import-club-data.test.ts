@@ -40,11 +40,8 @@ afterEach(async () => {
   await Promise.all(servers.splice(0).map((server) => server.close()))
 })
 
-async function addClub(slug: string, page: null | string, extra = '') {
-  await database.pool.query(
-    `INSERT INTO clubs (slug, name, wikipedia_page${extra === '' ? '' : ', ' + extra.split('=')[0]}) VALUES (?, ?, ?${extra === '' ? '' : ', ?'})`,
-    [slug, slug, page, ...(extra === '' ? [] : [extra.split('=')[1]])],
-  )
+async function addClub(slug: string, page: null | string) {
+  await database.pool.query('INSERT INTO clubs (slug, name, wikipedia_page) VALUES (?, ?, ?)', [slug, slug, page])
 }
 
 async function rows(sql: string) {

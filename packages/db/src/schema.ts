@@ -739,7 +739,7 @@ export type ItemClub = typeof itemClubs.$inferSelect
 
 export type NewItemClub = typeof itemClubs.$inferInsert
 
-/** The most characters a Q-number and a label of Wikidata hold. */
+/** The most characters a Q-number of Wikidata holds (`Q15943430`), and the most of a label. */
 export const wikidataLimits = { id: 20, label: 255 }
 
 /**
@@ -892,7 +892,6 @@ export const birthDateSources = ['wikidata', 'manual'] as const
 
 export type BirthDateSource = (typeof birthDateSources)[number]
 
-/** The most characters a Q-number of Wikidata holds (`Q15943430`), and the most of a label. */
 /**
  * The name of an item of Wikidata that a person points at: a country, a place or a position
  * (#898). `id` is the Q-number (`Q29999`) and `label` the Dutch name of the item, or the
