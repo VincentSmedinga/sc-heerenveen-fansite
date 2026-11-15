@@ -414,6 +414,39 @@ export const SimplifiedFlags = meta.story({
   ),
 })
 
+export const UnitedKingdom = meta.story({
+  name: 'De vier landen van het Verenigd Koninkrijk',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Engeland, Noord-Ierland, Schotland en Wales hebben elk een eigen vlag en een eigen naam als tekstalternatief. De vlag van Noord-Ierland en die van Wales zijn vereenvoudigd. `GB` blijft het Verenigd Koninkrijk.',
+      },
+    },
+  },
+  render: () => (
+    <div style={{ maxInlineSize: '16rem' }}>
+      <List role="list">
+        <List.Item>
+          <PlayerName country="GB-ENG" givenName="Testspeler" shirtNumber={1} surname="Engeland" />
+        </List.Item>
+        <List.Item>
+          <PlayerName country="GB-WLS" givenName="Testspeler" shirtNumber={2} surname="Wales" />
+        </List.Item>
+        <List.Item>
+          <PlayerName country="GB-SCT" givenName="Testspeler" shirtNumber={3} surname="Schotland" />
+        </List.Item>
+        <List.Item>
+          <PlayerName country="GB-NIR" givenName="Testspeler" shirtNumber={4} surname="Noord-Ierland" />
+        </List.Item>
+        <List.Item>
+          <PlayerName country="GB" givenName="Testspeler" shirtNumber={5} surname="Verenigd Koninkrijk" />
+        </List.Item>
+      </List>
+    </div>
+  ),
+})
+
 const codeFrameList = (
   <div style={{ maxInlineSize: '16rem' }}>
     <List role="list">

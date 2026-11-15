@@ -7,10 +7,14 @@ describe('countryChoices', () => {
     const choices = countryChoices()
     const labels = choices.map((choice) => choice.label)
 
-    expect(choices).toHaveLength(250)
+    expect(choices).toHaveLength(254)
     expect(labels).toContain('Nederland (NL)')
     expect(labels).toContain('Kosovo (XK)')
     expect(labels).toContain('Verenigd Koninkrijk (GB)')
+    // The four countries of the United Kingdom are choices of their own (#1277).
+    for (const label of ['Engeland (GB-ENG)', 'Noord-Ierland (GB-NIR)', 'Schotland (GB-SCT)', 'Wales (GB-WLS)']) {
+      expect(labels).toContain(label)
+    }
     // By name, not by code: Duitsland (DE) stands before Nederland (NL), Zweden (SE) after it.
     expect(labels.indexOf('Duitsland (DE)')).toBeLessThan(labels.indexOf('Nederland (NL)'))
     expect(labels.indexOf('Nederland (NL)')).toBeLessThan(labels.indexOf('Zweden (SE)'))

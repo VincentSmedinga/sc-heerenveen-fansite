@@ -784,9 +784,10 @@ export const clubs = mysqlTable(
     // The item of Wikidata of the club (#1264), read from its article. Empty for a club without
     // an article or an item.
     wikidataId: varchar('wikidata_id', { length: wikidataLimits.id }).unique(),
-    // The country of the club now (#1264): the code of two letters in capitals, and where it
-    // came from. Both are empty for a club whose country we do not know.
-    country: char('country', { length: 2 }),
+    // The country of the club now (#1264): the code in capitals (`NL`, or `GB-WLS` for
+    // a country of the United Kingdom, #1277, so six characters), and
+    // where it came from. Both are empty for a club whose country we do not know.
+    country: varchar('country', { length: 6 }),
     countrySource: mysqlEnum('country_source', clubCountrySources),
     // The country of the item (`P17`) as Wikidata gave it, also when it is not in the list of
     // countries: the importer warns about that one. Empty when Wikidata gave none.
@@ -978,11 +979,11 @@ export const persons = mysqlTable('persons', {
   // `rechts`, seen in the direction of the attack. Only the editors set it, in the form of the
   // person, so there is no source: no import reads or replaces it. Empty until someone says.
   side: mysqlEnum('side', playerSides),
-  // The country of the person (#1051): the code of two letters in capitals (`NL`), and where
-  // it came from. Both are empty for a person whose country we do not know. A season can
-  // differ: `players.country` goes before it on the page of that season, as `players.position`
-  // goes before `line`.
-  country: char('country', { length: 2 }),
+  // The country of the person (#1051): the code in capitals (`NL`, or `GB-WLS`, six
+  // characters at most, #1277), and where it came from. Both are empty for a person whose
+  // country we do not know. A season can differ: `players.country` goes before it on the page
+  // of that season, as `players.position` goes before `line`.
+  country: varchar('country', { length: 6 }),
   countrySource: mysqlEnum('country_source', personCountrySources),
   wikidataReadAt: datetime('wikidata_read_at'),
   // The title is that of the English Wikipedia: the player has no Dutch article (#1043). The
@@ -1570,7 +1571,7 @@ export type WikipediaPage = typeof wikipediaPages.$inferSelect
  * title (#1052), or empty: `refreshPersonCountries` gives it to the person of that title.
  */
 export const playerListTitles = mysqlTable('player_list_titles', {
-  country: char('country', { length: 2 }),
+  country: varchar('country', { length: 6 }),
   title: articleTitle('title').primaryKey(),
   readAt: datetime('read_at').notNull(),
 })
@@ -1860,7 +1861,7 @@ export const players = mysqlTable(
     shirtNumber: int('shirt_number', { unsigned: true }),
     previousShirtNumber: int('previous_shirt_number', { unsigned: true }),
     shirtNumberFrom: date('shirt_number_from', { mode: 'string' }),
-    country: char('country', { length: 2 }),
+    country: varchar('country', { length: 6 }),
     searchTerm: varchar('search_term', { length: playerNameMaxLength }).notNull(),
     wikipediaPage: varchar('wikipedia_page', { length: wikipediaPageMaxLength }),
     personId: int('person_id', { unsigned: true }).references(() => persons.id, { onDelete: 'set null' }),
