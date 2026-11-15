@@ -42,9 +42,13 @@ const older: AllMatch = {
   home: false,
   matchDate: '2001-09-01',
   opponent: 'Ouwe Bekende',
+  opponentCountry: null,
   season: '2001/02',
 }
-const matches: AllMatch[] = [older, ...matchData.matches.map((match) => ({ ...match, season: '2026/27' }))]
+const matches: AllMatch[] = [
+  older,
+  ...matchData.matches.map((match) => ({ ...match, opponentCountry: null, season: '2026/27' })),
+]
 
 const now = new Date('2026-10-23T13:40:00Z')
 

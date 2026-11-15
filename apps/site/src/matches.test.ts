@@ -2635,6 +2635,7 @@ describe('recordsOf', () => {
       ...match(`Speelronde ${index + 1}`, 'played', `2026-08-${String(index + 1).padStart(2, '0')}`),
       goalsAgainst,
       goalsFor,
+      opponentCountry: null,
       season,
       ...extra,
     }))

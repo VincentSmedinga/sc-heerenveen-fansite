@@ -37,7 +37,7 @@ export function countryTalliesOf(matches: readonly AllMatch[], competition: Comp
   const perCountry = new Map<null | string, typeof played>()
 
   for (const match of played) {
-    const country = (match.opponentCountry ?? null) === null ? null : (match.opponentCountry ?? '').toUpperCase()
+    const country = match.opponentCountry === null ? null : match.opponentCountry.toUpperCase()
 
     perCountry.set(country, [...(perCountry.get(country) ?? []), match])
   }

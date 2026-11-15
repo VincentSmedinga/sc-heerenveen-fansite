@@ -410,15 +410,10 @@ export const getFinalPlaces = cacheFor(currentSeasonPeriod, loadFinalPlaces)
  * the current season, which is in it. The page gives each card these matches, so the cards that
  * count one season count all of them.
  */
-export const getAllMatches = cacheFor(currentSeasonPeriod, async (): Promise<AllMatch[]> =>
-  listAllMatches(getDatabase().db),
-)
+export const getAllMatches = cacheFor(currentSeasonPeriod, () => listAllMatches(getDatabase().db))
 
 /** A match of any season, which has its `season` (`2025/26`). */
-export type AllMatch = Omit<Awaited<ReturnType<typeof listAllMatches>>[number], 'opponentCountry'> & {
-  /** The country of the club of the opponent now (#1264), null without one. */
-  opponentCountry?: null | string
-}
+export type AllMatch = Awaited<ReturnType<typeof getAllMatches>>[number]
 
 /**
  * The score and the goals of every match of every season, for the list of the goal scorers of
