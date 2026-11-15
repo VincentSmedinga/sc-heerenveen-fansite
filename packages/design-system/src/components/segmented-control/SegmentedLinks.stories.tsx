@@ -61,6 +61,22 @@ export const FourOptionsCompact = meta.story({
   name: 'Vier keuzes, zoals de competitie op een telefoon',
 })
 
+export const FiveOptionsCompact = meta.story({
+  args: {
+    compact: true,
+    label: 'Welke wedstrijden',
+    options: [
+      { href: '#alles', label: 'Alles', value: 'all' },
+      { href: '#competitie', label: 'Competitie', value: 'league' },
+      { href: '#play-offs', label: 'Play-offs', value: 'playoffs' },
+      { href: '#beker', label: 'Beker', value: 'cup' },
+      { href: '#europa', label: 'Europa', value: 'europe' },
+    ],
+    value: 'playoffs',
+  },
+  name: 'Vijf keuzes, zoals de competitie met play-offs op een telefoon',
+})
+
 // Pressing a link in the story does not load a page: the story takes over the value, so the
 // thumb slides as it does when a script changes the choice.
 const Sliding = () => {
