@@ -164,7 +164,7 @@ export function playerCompetitionOptions(facts: PlayerSeasonFacts): CompetitionC
   ]
 
   return optionsOf(
-    (['league', 'cup', 'europe'] as const).filter((choice) =>
+    (['league', 'playoffs', 'cup', 'europe'] as const).filter((choice) =>
       played.some((competition) => countsFor(competition, choice)),
     ),
   )

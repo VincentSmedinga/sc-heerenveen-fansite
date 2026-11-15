@@ -65,7 +65,18 @@ describe('countryTalliesOf', () => {
   it('leaves out the other competitions and the matches still to play', () => {
     const played = countryTalliesOf(matches).reduce((sum, { played }) => sum + played, 0)
 
-    expect(played).toBe(9)
+    // The play-offs for the Conference League are against a Dutch club: not a European match.
+    expect(played).toBe(8)
+  })
+
+  it('has no row Nederland for the play-offs, which are against Dutch clubs (#1282)', () => {
+    const tallies = countryTalliesOf([
+      match('Play-offs Conference League', 'NL', 2, 0),
+      match('Play-offs Europa League', 'NL', 1, 1),
+      match('Europa League', 'BE', 1, 0),
+    ])
+
+    expect(tallies.map(({ country }) => country)).toEqual(['BE'])
   })
 
   it('puts the country with the most matches first and, with as many, orders them by their Dutch name', () => {

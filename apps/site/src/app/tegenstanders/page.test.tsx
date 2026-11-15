@@ -43,7 +43,7 @@ beforeEach(() => {
   vi.stubEnv('SITE_ENV', 'production')
   vi.mocked(getClubRecords).mockReset()
   vi.mocked(getClubRecords).mockImplementation((choice) =>
-    Promise.resolve({ all: allRecords, cup: cupRecords, europe: [], league: leagueRecords }[choice]),
+    Promise.resolve({ all: allRecords, cup: cupRecords, europe: [], league: leagueRecords, playoffs: [] }[choice]),
   )
   vi.mocked(getLastWinPlaces).mockReset()
   vi.mocked(getLastWinPlaces).mockResolvedValue(undefined)
@@ -197,7 +197,7 @@ describe('the page /tegenstanders', () => {
 
   it('has no switch when no cup tie was played, because there is nothing to choose', async () => {
     vi.mocked(getClubRecords).mockImplementation((choice) =>
-      Promise.resolve({ all: leagueRecords, cup: [], europe: [], league: leagueRecords }[choice]),
+      Promise.resolve({ all: leagueRecords, cup: [], europe: [], league: leagueRecords, playoffs: [] }[choice]),
     )
 
     expect(await render()).not.toContain('Welke wedstrijden')

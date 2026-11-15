@@ -3588,3 +3588,14 @@
   Zonder `stacked` doet ze niets.
 - **Waarom:** het ontwerp van de kaart "De selectie in het kort" zet de naam links en de waarde rechts, en de kaart moet dan wel een bestaand onderdeel gebruiken; de gestapelde lijst zet de naam boven de waarde, en een kort getal is zo moeilijk te vergelijken.
 - **Alternatieven:** de gestapelde lijst zoals de kaart Records (de naam boven de waarde: het ontwerp wijkt dan af); een nieuw onderdeel voor zulke regels (dubbel werk naast `DescriptionList`).
+
+## Vijf compacte keuzes krijgen kleinere letters en geen opvulling
+
+- **Datum:** 15 november 2026
+- **Besluit:** een compacte `SegmentedControl` of `SegmentedLinks` met vijf of meer keuzes zet de letters op 0,8125 keer de tekst eromheen (13 pixels) en laat de opvulling links en rechts weg (#1282).
+  De regel in `segmented-control.css` kijkt met `:has(> :nth-child(5))` of er een vijfde keuze is, dus een component of een pagina hoeft niets door te geven.
+  Met vier keuzes of minder verandert er niets.
+- **Waarom:** de schakelaar van de competitie krijgt een vijfde keuze, Play-offs.
+  Op een telefoon van 390 pixels is een cel ongeveer 72 pixels breed, en het langste label in vet, "Competitie", is dan 73 pixels breed op de maat van de metatekst, dus het woord brak in twee regels.
+  Met 13 pixels en zonder opvulling past het op één regel, en de pagina scrolt niet zijwaarts.
+- **Alternatieven:** de labels korter maken ("Comp."; een supporter leest het niet); een schakelaar die zijwaarts scrolt (de keuzes zijn dan niet allemaal te zien); een eigenschap voor de maat (dubbel werk, want het aantal keuzes zegt het al).

@@ -2,7 +2,7 @@ import type { PublicMatch } from '@fansite/db/queries'
 
 import { describe, expect, it } from 'vitest'
 
-import { competitionQuery, parseCompetition } from './competition'
+import { competitionQuery, competitionWords, countsFor, parseCompetition } from './competition'
 import {
   choiceFor,
   cleanSheetsOf,
@@ -110,6 +110,22 @@ describe('parseCompetition', () => {
     expect(parseCompetition(value)).toBeUndefined()
   })
 
+  it('counts the Johan Cruijff Schaal for the choice Beker, and says so (#1282)', () => {
+    expect(countsFor('Johan Cruijff Schaal', 'cup')).toBe(true)
+    expect(countsFor('Johan Cruijff Schaal', 'league')).toBe(false)
+    expect(countsFor('Johan Cruijff Schaal', 'europe')).toBe(false)
+    expect(competitionWords('cup')).toBe('de KNVB Beker en de Johan Cruijff Schaal')
+  })
+
+  it('reads play-offs as the choice Play-offs, and europa as Europa', () => {
+    expect(parseCompetition('play-offs')).toBe('playoffs')
+    expect(parseCompetition('europa')).toBe('europe')
+  })
+
+  it.each(['playoffs', 'Play-offs'])('gives nothing for %j, so the page is "niet gevonden"', (value) => {
+    expect(parseCompetition(value)).toBeUndefined()
+  })
+
   it('gives nothing for a value given twice, also when both are right', () => {
     expect(parseCompetition(['eredivisie', 'eredivisie'])).toBeUndefined()
     expect(parseCompetition(['eredivisie'])).toBeUndefined()
@@ -120,6 +136,7 @@ describe('competitionQuery', () => {
   it('is nothing for all the matches, which have no parameter, and the parameter for the Eredivisie', () => {
     expect(competitionQuery('all')).toBe('')
     expect(competitionQuery('league')).toBe('?competitie=eredivisie')
+    expect(competitionQuery('playoffs')).toBe('?competitie=play-offs')
   })
 })
 
@@ -135,7 +152,7 @@ describe('competitionOptionsOf and competitionNames', () => {
     ).toEqual([])
   })
 
-  it('offers Europa for a match of Europe or the play-offs, and the four values in order', () => {
+  it('offers Europa for a match of Europe, and the choices in the order of the switch', () => {
     const europa = played('Derde voorronde', '2012-08-02', 4, 0, { competition: 'Europa League' })
 
     expect(competitionOptionsOf([league, europa])).toEqual(['all', 'league', 'europe'])
@@ -145,6 +162,14 @@ describe('competitionOptionsOf and competitionNames', () => {
       'cup',
       'europe',
     ])
+    expect(
+      competitionOptionsOf([
+        league,
+        cup('Tweede ronde', '2012-09-23', 1, 0),
+        playoffs('Halve finale', '2013-05-20', 2, 3),
+        europa,
+      ]),
+    ).toEqual(['all', 'league', 'playoffs', 'cup', 'europe'])
   })
 
   it('counts the cup for Beker and Europe for Europa, and falls back to all for a value without matches', () => {
@@ -157,8 +182,12 @@ describe('competitionOptionsOf and competitionNames', () => {
     expect(choiceFor([league, cup('Tweede ronde', '2012-09-23', 2, 0)], 'europe')).toBe('all')
   })
 
-  it('is true for a match of the play-offs that was played, and not for one that was not', () => {
-    expect(competitionOptionsOf([league, playoffs('Halve finale', '2027-05-20', 2, 3)])).toContain('europe')
+  it('offers Play-offs for a match of the play-offs that was played, and not for one that was not', () => {
+    expect(competitionOptionsOf([league, playoffs('Halve finale', '2027-05-20', 2, 3)])).toEqual([
+      'all',
+      'league',
+      'playoffs',
+    ])
     expect(
       competitionOptionsOf([league, playoffs('Halve finale', '2027-05-20', 2, 3, { status: 'scheduled' })]),
     ).toEqual([])
@@ -184,9 +213,19 @@ describe('competitionOptionsOf and competitionNames', () => {
       playoffs('Eerste ronde, wedstrijd 1/2', '2013-05-16', 0, 1, { competition: 'Play-offs Europa League' }),
     ]
 
-    expect(competitionOptionsOf(matches)).toContain('europe')
+    expect(competitionOptionsOf(matches)).toContain('playoffs')
+    expect(competitionOptionsOf(matches)).not.toContain('europe')
     expect(competitionNames(matches, 'all')).toBe('de Eredivisie en de play-offs')
     expect(competitionNames(matches, 'league')).toBe('de Eredivisie')
+    expect(competitionNames(matches, 'playoffs')).toBe('de play-offs')
+  })
+
+  it('offers Beker for a Johan Cruijff Schaal, and names it with the cup (#1282)', () => {
+    const schaal = played('Finale', '2013-07-27', 1, 2, { competition: 'Johan Cruijff Schaal' })
+    const matches = [league, cup('Tweede ronde', '2012-09-23', 1, 0), schaal]
+
+    expect(competitionOptionsOf([league, schaal])).toEqual(['all', 'league', 'cup'])
+    expect(competitionNames(matches, 'cup')).toBe('de KNVB Beker en de Johan Cruijff Schaal')
   })
 
   it('counts a match of the Europa League that was played, and names it', () => {

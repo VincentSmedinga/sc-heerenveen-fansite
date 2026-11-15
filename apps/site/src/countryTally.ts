@@ -24,13 +24,14 @@ export type CountryTally = {
 const europe: readonly string[] = competitionGroups.find(({ value }) => value === 'europa')?.members ?? []
 
 /**
- * The tally of the played European matches (the competitions of `Europa`, with the play-offs)
- * per country of the opponent, with the choice of competition of the page applied: a choice
- * that is not Europa or all competitions leaves no European match, so no card. The countries
- * with the most matches come first and, with as many, in the order of their name in Dutch. The
- * matches against clubs without a country are the last row, whatever their number, so the
- * totals are those of the card Per competitie. A shoot-out decides a win or a loss, as
- * everywhere (see `resultOf`).
+ * The tally of the played European matches (the competitions of `Europa`, without the
+ * play-offs: those are matches against Dutch clubs, see #1282) per country of the opponent,
+ * with the choice of competition of the page applied: a choice that is not Europa or all
+ * competitions leaves no European match, so no card. The countries with the most matches come
+ * first and, with as many, in the order of their name in Dutch. The matches against clubs
+ * without a country are the last row, whatever their number, so the totals are those of the
+ * row Europa of the card Per competitie. A shoot-out decides a win or a loss, as everywhere
+ * (see `resultOf`).
  */
 export function countryTalliesOf(matches: readonly AllMatch[], competition: CompetitionChoice = 'all'): CountryTally[] {
   const played = playedMatchesOf(matches, competition).filter((match) => europe.includes(match.competition))

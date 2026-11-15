@@ -663,16 +663,15 @@ export const matchDataSources = ['wikipedia', 'oude-fansite', 'redactie'] as con
 
 export type Competition = (typeof competitions)[number]
 
-/** The competitions of Europe, the Champions League and its play-offs among them. */
+/**
+ * The competitions of Europe. The play-offs for them are matches against Dutch clubs, so they
+ * are not here (#1282).
+ */
 export const europeanCompetitions: readonly Competition[] = [
   'Champions League',
   'Europa League',
   'Europacup II',
   'Intertoto Cup',
-  'Play-offs Champions League',
-  'Play-offs Conference League',
-  'Play-offs Europa League',
-  'Play-offs UEFA Cup',
   'UEFA Cup',
 ]
 

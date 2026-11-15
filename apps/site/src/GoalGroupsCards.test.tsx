@@ -68,6 +68,6 @@ describe('GoalsPerCountryCard', () => {
   it('is a sentence without goals', () => {
     const html = render(<GoalsPerCountryCard competition="cup" groups={{ counted: 0, groups: [], total: 0 }} />)
 
-    expect(html).toContain('We kennen nog geen doelpunten per land van de KNVB Beker.')
+    expect(html).toContain('We kennen nog geen doelpunten per land van de KNVB Beker en de Johan Cruijff Schaal.')
   })
 })

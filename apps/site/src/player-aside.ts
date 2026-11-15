@@ -24,7 +24,7 @@ export type PlayerAside = {
   opponents: readonly AsideOpponent[]
 }
 
-const championsLeague: readonly Competition[] = ['Champions League', 'Play-offs Champions League']
+const championsLeague: readonly Competition[] = ['Champions League']
 
 /** How many clubs "Vaakst raak tegen" shows, and how many goals a club needs to be in it. */
 const opponentLimit = 4

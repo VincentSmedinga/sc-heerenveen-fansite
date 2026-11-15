@@ -12,6 +12,7 @@ const scopes: Record<CompetitionChoice, string> = {
   cup: 'in de Beker',
   europe: 'in Europa',
   league: 'in de Eredivisie',
+  playoffs: 'in de play-offs',
 }
 
 /** A number in Dutch, with a point between the thousands. */

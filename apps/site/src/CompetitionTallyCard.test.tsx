@@ -17,6 +17,7 @@ const tallies: CompetitionTally[] = [
     value: 'eredivisie',
     won: 436,
   },
+  { drawn: 5, goalsAgainst: 20, goalsFor: 25, label: 'Play-offs', lost: 6, played: 26, value: 'play-offs', won: 15 },
   { drawn: 33, goalsAgainst: 120, goalsFor: 110, label: 'Europa', lost: 37, played: 107, value: 'europa', won: 37 },
 ]
 
@@ -46,8 +47,8 @@ describe('CompetitionTallyCard', () => {
     expect(html).toContain('href="/wedstrijden/zoeken?competitie=europa"')
   })
 
-  it('says what Europa counts only when the card has the row', () => {
-    expect(render()).toContain('Europa telt elke Europese beker en de play-offs erom.')
-    expect(render(tallies.slice(0, 1))).not.toContain('Europa telt')
+  it('says what the play-offs are only when the card has the row', () => {
+    expect(render()).toContain('De play-offs zijn de wedstrijden tegen Nederlandse clubs om een plek in Europa.')
+    expect(render(tallies.filter(({ value }) => value !== 'play-offs'))).not.toContain('De play-offs zijn')
   })
 })

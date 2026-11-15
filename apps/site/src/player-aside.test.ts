@@ -179,6 +179,15 @@ describe('the side column of a player', () => {
     ).toBeUndefined()
   })
 
+  it('does not count the play-offs for European football as matches in Europe (#1282)', () => {
+    const lineupMatches = [
+      matchOf(1, '2007/08', { competition: 'Play-offs Champions League' }),
+      matchOf(2, '2007/08', { competition: 'Play-offs UEFA Cup' }),
+    ]
+
+    expect(playerAsideOf([seasonOf('2007/08', { lineupMatches })], nothing, false).europe).toBeUndefined()
+  })
+
   describe('the goals against us', () => {
     const against = (id: number, season: string) => ({ match: matchOf(id, season), minute: 5, stoppage: null })
     const seasons = [seasonOf('2003/04'), seasonOf('2002/03')]

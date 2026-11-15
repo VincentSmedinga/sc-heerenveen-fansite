@@ -52,6 +52,8 @@ const all: SearchableMatch[] = [
   made({ goalsAgainst: 1, goalsFor: 3, season: '2002/03' }),
   made({ competition: 'KNVB Beker', goalsAgainst: 1, goalsFor: 1, penaltiesAgainst: 3, penaltiesFor: 4 }),
   made({ competition: 'UEFA Cup', goalsAgainst: 2, goalsFor: 1, home: false, season: '2002/03' }),
+  made({ competition: 'Johan Cruijff Schaal', goalsAgainst: 1, goalsFor: 2, season: '2002/03' }),
+  made({ competition: 'Play-offs UEFA Cup', goalsAgainst: 0, goalsFor: 2, home: false, season: '2002/03' }),
   made({ competition: 'Eerste divisie', goalsAgainst: 0, goalsFor: 2, season: '2003/04' }),
   made({ goalsAgainst: 0, goalsFor: 5, season: '2003/04' }),
   made({ goalsAgainst: 2, goalsFor: 2, home: false, season: '2003/04' }),
@@ -65,7 +67,10 @@ const scopes: { choice: CompetitionChoice; season?: string }[] = [
   { choice: 'all' },
   { choice: 'all', season: '2003/04' },
   { choice: 'league' },
+  { choice: 'playoffs' },
+  { choice: 'playoffs', season: '2002/03' },
   { choice: 'cup' },
+  { choice: 'cup', season: '2002/03' },
   { choice: 'europe', season: '2002/03' },
 ]
 
@@ -154,8 +159,8 @@ describe('the links of Cijfers to the search', () => {
 
     expect(scores).toContain('href="/wedstrijden/zoeken?wij=0&amp;zij=0"')
     expect(scores).toContain(', toon de 2 wedstrijden met 0–0')
-    expect(sides).toContain('Toon de 5 wedstrijden thuis')
-    expect(sides).toContain('Toon de 3 wedstrijden uit')
+    expect(sides).toContain('Toon de 6 wedstrijden thuis')
+    expect(sides).toContain('Toon de 4 wedstrijden uit')
     expect(sides).toContain('href="/wedstrijden/zoeken?waar=thuis"')
   })
 })
