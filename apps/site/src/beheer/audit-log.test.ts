@@ -149,6 +149,7 @@ describe('recordAction', () => {
       'account.edit',
       'account.disable',
       'account.enable',
+      'club.edit',
     ])
   })
 
