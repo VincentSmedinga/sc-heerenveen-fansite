@@ -29,12 +29,19 @@ describe('match.css', () => {
     expect(rule('.hf-match-missing')).not.toMatch(/outcome|font-weight/u)
   })
 
-  it('gives the link of a match the colour of a link, no underline at rest and one on hover and focus', () => {
+  it('gives the link of a match the colour of a link, underlined at rest and thicker on hover and focus', () => {
     expect(rule('.hf-match-link')).toMatch(/color: var\(--hf-colour-text-link\)/u)
-    expect(rule('.hf-match-link')).toMatch(/text-decoration-line: none/u)
+    expect(rule('.hf-match-link')).toMatch(/text-decoration-line: underline/u)
+    expect(rule('.hf-match-link')).toMatch(/text-decoration-thickness: var\(--hf-link-underline-thickness\)/u)
+    expect(rule('.hf-match-link')).toMatch(/text-underline-offset: var\(--hf-link-underline-offset\)/u)
     expect(css).toMatch(
-      /\.hf-match-link \{[^}]*&:hover,\s*&:focus-visible \{[^}]*color: var\(--hf-colour-text-link-hover\);\s*text-decoration-line: underline/u,
+      /\.hf-match-link \{[^}]*&:hover,\s*&:focus-visible \{[^}]*color: var\(--hf-colour-text-link-hover\);\s*text-decoration-thickness: var\(--hf-link-underline-thickness-hover\)/u,
     )
+  })
+
+  it('gives the score no padding and our own club the weight of a name, in the line with the clubs only', () => {
+    expect(rule('.hf-match-score')).not.toMatch(/padding/u)
+    expect(rule('.hf-match-clubs .hf-match-own')).toMatch(/font-weight: var\(--hf-name-font-weight\)/u)
   })
 
   it('has no line of its own for the link any more', () => {

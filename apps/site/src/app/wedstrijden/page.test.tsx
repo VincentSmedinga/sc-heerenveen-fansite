@@ -328,24 +328,26 @@ describe('the page /wedstrijden', () => {
     expect(cup).not.toContain('Het verloop van het seizoen')
   })
 
-  it('starts a line of a result with the day, then the round, and has no stadium', async () => {
+  it('ends a line of a result with the day, after the round, and has no stadium', async () => {
     const results = section(await render(), 'uitslagen')
 
     expect(results).toContain(
-      '<p class="hf-meta hf-match-when"><span class="hf-match-part"><time dateTime="2026-10-11">zo 11 okt</time></span> <span aria-hidden="true">·</span> <span class="hf-match-part">Speelronde 9</span></p>',
+      '<p class="hf-meta hf-match-when"><span class="hf-match-part">Speelronde 9</span> <span aria-hidden="true">·</span> <span class="hf-match-part"><time dateTime="2026-10-11">zo 11 okt</time></span></p>',
     )
     expect(results).not.toContain('Voorbeeldpark')
     expect(results).not.toMatch(/Thuis|Uit</)
   })
 
-  it('puts the day, the competition and the round above the clubs in the programme, and the stadium under them', async () => {
+  it('puts the competition and the round above the clubs in the programme, and the day and the stadium under them', async () => {
     const programme = section(await render(), 'programma')
 
     expect(programme).toContain(
       'Eredivisie</span> <span aria-hidden="true">·</span> <span class="hf-match-part">Speelronde 10</span></p>',
     )
-    expect(programme).toContain('hf-match-where"><span class="hf-match-part">Stadion Proeflaan</span></p>')
-    expect(programme.indexOf('wo 28 okt 19:45')).toBeLessThan(programme.indexOf('Proefstad SV'))
+    expect(programme).toMatch(
+      /hf-match-where"><span class="hf-match-part"><time[^>]*>wo 28 okt 19:45<\/time><\/span> <span aria-hidden="true">·<\/span> <span class="hf-match-part">Stadion Proeflaan<\/span><\/p>/,
+    )
+    expect(programme.indexOf('wo 28 okt 19:45')).toBeGreaterThan(programme.indexOf('Proefstad SV'))
     expect(programme.indexOf('Speelronde 10')).toBeLessThan(programme.indexOf('Proefstad SV'))
   })
 

@@ -34,12 +34,14 @@ const lines = (container: HTMLElement) =>
   [...container.firstElementChild!.children].map((line) => /hf-match-[a-z]+/u.exec(line.className)?.[0])
 
 describe('Match', () => {
-  it('writes when and what above the clubs, and where and who under them', () => {
+  it('writes the competition and the round above the clubs, and the day, the stadium and the referee under them for a match without a result', () => {
     const { container } = render(<Match {...scheduled} referee="Jan Voorbeeld" />)
 
-    expect(container.querySelector('.hf-match-when')?.textContent).toBe('zo 1 nov 14:30 · Eredivisie · Speelronde 12')
+    expect(container.querySelector('.hf-match-when')?.textContent).toBe('Eredivisie · Speelronde 12')
     expect(container.querySelector('.hf-match-clubs')?.textContent).toBe('Voorbeeld United –tegen sc Heerenveen')
-    expect(container.querySelector('.hf-match-where')?.textContent).toBe('Voorbeeldpark · Jan Voorbeeld')
+    expect(container.querySelector('.hf-match-where')?.textContent).toBe(
+      'zo 1 nov 14:30 · Voorbeeldpark · Jan Voorbeeld',
+    )
   })
 
   describe('a goal without a minute', () => {
@@ -66,11 +68,11 @@ describe('Match', () => {
   })
 
   describe('with a competition', () => {
-    it('has the day, the competition and the round first, then the clubs, the scorers, and the stadium', () => {
+    it('has the competition, the round and the day first, then the clubs, the scorers, and the stadium', () => {
       const { container } = render(<Match {...played} goals={[{ minute: 12, ours: true, player: 'Proefman' }]} />)
 
       expect(lines(container)).toEqual(['hf-match-when', 'hf-match-clubs', 'hf-match-goals', 'hf-match-where'])
-      expect(container.querySelector('.hf-match-when')?.textContent).toBe('zo 11 okt · Eredivisie · Speelronde 9')
+      expect(container.querySelector('.hf-match-when')?.textContent).toBe('Eredivisie · Speelronde 9 · zo 11 okt')
       expect(container.querySelector('.hf-match-where')?.textContent).toBe('Stadion Proeflaan')
     })
 
@@ -86,7 +88,7 @@ describe('Match', () => {
       ])
     })
 
-    it('has "Uitgesteld" in the first line of a postponed match, and the stadium under the clubs', () => {
+    it('has "Uitgesteld" first under the clubs for a postponed match, before the stadium', () => {
       const { container } = render(
         <Match
           competition="Eredivisie"
@@ -98,15 +100,14 @@ describe('Match', () => {
         />,
       )
 
-      expect(container.querySelector('.hf-match-when')?.textContent).toBe('Uitgesteld · Eredivisie · Speelronde 5')
-      expect(container.firstElementChild?.firstElementChild?.className).toContain('hf-match-when')
-      expect(container.querySelector('.hf-match-where')?.textContent).toBe('Stadion Proeflaan')
+      expect(container.querySelector('.hf-match-when')?.textContent).toBe('Eredivisie · Speelronde 5')
+      expect(container.querySelector('.hf-match-where')?.textContent).toBe('Uitgesteld · Stadion Proeflaan')
     })
 
     it('writes the day as given, with the year of a result from another year', () => {
       const { container } = render(<Match {...played} dateTime="2024-08-11" time="zo 11 aug 2024" />)
 
-      expect(container.querySelector('.hf-match-when')?.textContent).toBe('zo 11 aug 2024 · Eredivisie · Speelronde 9')
+      expect(container.querySelector('.hf-match-when')?.textContent).toBe('Eredivisie · Speelronde 9 · zo 11 aug 2024')
       expect(container.querySelector('time')?.getAttribute('datetime')).toBe('2024-08-11')
     })
   })
@@ -114,7 +115,7 @@ describe('Match', () => {
   describe('without a competition', () => {
     const round = { ...played, competition: undefined, round: 'Speelronde 1', stadium: undefined } as const
 
-    it('has the day and the round, then the clubs and the scorers, and no line under them', () => {
+    it('has the round and the day, then the clubs and the scorers, and no line under them', () => {
       const { container } = render(
         <Match
           {...round}
@@ -125,13 +126,14 @@ describe('Match', () => {
       )
 
       expect(lines(container)).toEqual(['hf-match-when', 'hf-match-clubs', 'hf-match-goals'])
-      expect(container.querySelector('.hf-match-when')?.textContent).toBe('zo 11 aug 2024 · Speelronde 1')
+      expect(container.querySelector('.hf-match-when')?.textContent).toBe('Speelronde 1 · zo 11 aug 2024')
     })
 
-    it('puts "Uitgesteld" where the day would be, before the round', () => {
+    it('puts "Uitgesteld" alone in the line under the clubs, with only the round above them', () => {
       const { container } = render(<Match home opponent="Demo Boys" round="Speelronde 5" status="postponed" />)
 
-      expect(container.querySelector('.hf-match-when')?.textContent).toBe('Uitgesteld · Speelronde 5')
+      expect(container.querySelector('.hf-match-when')?.textContent).toBe('Speelronde 5')
+      expect(container.querySelector('.hf-match-where')?.textContent).toBe('Uitgesteld')
     })
 
     it('keeps "Gegevens nog niet beschikbaar" and the note as the last lines', () => {
@@ -139,7 +141,13 @@ describe('Match', () => {
         <Match {...scheduled} competition={undefined} note="Een woord erbij." resultMissing stadium={undefined} />,
       )
 
-      expect(lines(container)).toEqual(['hf-match-when', 'hf-match-clubs', 'hf-match-missing', 'hf-match-note'])
+      expect(lines(container)).toEqual([
+        'hf-match-when',
+        'hf-match-clubs',
+        'hf-match-where',
+        'hf-match-missing',
+        'hf-match-note',
+      ])
     })
   })
 
@@ -193,9 +201,9 @@ describe('Match', () => {
         ['Stadion Proeflaan', 'Jan Voorbeeld'],
       )
       expect([...container.querySelectorAll('.hf-match-when .hf-match-part')].map((part) => part.textContent)).toEqual([
-        'zo 11 okt',
         'Eredivisie',
         'Speelronde 9',
+        'zo 11 okt',
       ])
     })
   })
@@ -446,10 +454,10 @@ describe('Match', () => {
       expect(container.firstElementChild?.hasAttribute('afterninetyfor')).toBe(false)
     })
 
-    it('keeps the first line to the day, the competition and the round, and adds nothing to a match without extra time', () => {
+    it('keeps the first line to the competition, the round and the day, and adds nothing to a match without extra time', () => {
       const { container } = render(<Match {...cup} extraTime penaltiesAgainst={3} penaltiesFor={4} />)
 
-      expect(label(container)?.textContent).toBe('zo 11 okt · KNVB Beker · Tweede ronde')
+      expect(label(container)?.textContent).toBe('KNVB Beker · Tweede ronde · zo 11 okt')
 
       const plain = render(<Match {...cup} />)
 
@@ -564,7 +572,8 @@ describe('Match', () => {
 
     expect(container.querySelector('.hf-match-postponed')?.textContent).toBe('Uitgesteld')
     expect(container.querySelector('time')).toBeNull()
-    expect(container.querySelector('.hf-match-when')?.textContent).toBe('Uitgesteld · Eredivisie · Speelronde 5')
+    expect(container.querySelector('.hf-match-when')?.textContent).toBe('Eredivisie · Speelronde 5')
+    expect(container.querySelector('.hf-match-where')?.textContent).toBe('Uitgesteld')
   })
 
   it('says "Geannuleerd" for a cancelled match where "Uitgesteld" would be, with no result and no missing data', () => {
@@ -582,8 +591,8 @@ describe('Match', () => {
     expect(container.querySelector('.hf-match-cancelled')?.textContent).toBe('Geannuleerd')
     expect(container.querySelector('.hf-match-postponed')).toBeNull()
     expect(container.querySelector('time')).toBeNull()
-    expect(container.querySelector('.hf-match-when')?.textContent).toBe('Geannuleerd · Eredivisie · Speelronde 27')
-    expect(container.querySelector('.hf-match-where')?.textContent).toBe('Koning Willem II Stadion')
+    expect(container.querySelector('.hf-match-when')?.textContent).toBe('Eredivisie · Speelronde 27')
+    expect(container.querySelector('.hf-match-where')?.textContent).toBe('Geannuleerd · Koning Willem II Stadion')
     expect(container.querySelector('.hf-match-missing')).toBeNull()
     expect(container.querySelector('.hf-match-goals')).toBeNull()
   })
@@ -591,7 +600,7 @@ describe('Match', () => {
   it('names a cancelled match for a screen reader as the clubs, the round and "Geannuleerd"', () => {
     const { container } = render(<Match home opponent="Willem II" round="Speelronde 27" status="cancelled" />)
 
-    expect(container.textContent).toBe('Geannuleerd · Speelronde 27sc Heerenveen –tegen Willem II')
+    expect(container.textContent).toBe('Speelronde 27sc Heerenveen –tegen Willem IIGeannuleerd')
   })
 
   describe('a match without a result', () => {
@@ -695,8 +704,8 @@ describe('Match', () => {
 
     expect([...container.querySelectorAll('[aria-hidden="true"]')].map((dot) => dot.textContent)).toEqual([
       '·',
-      '·',
       '–',
+      '·',
     ])
     expect(container.querySelector('.hf-match-when')?.innerHTML).toContain(
       'Eredivisie</span> <span aria-hidden="true">·</span> <span class="hf-match-part">Speelronde',
@@ -706,9 +715,9 @@ describe('Match', () => {
   it('hides the dots of the form without a competition too, and keeps the spaces around them', () => {
     const { container } = render(<Match {...scheduled} competition={undefined} />)
 
-    expect([...container.querySelectorAll('[aria-hidden="true"]')].map((dot) => dot.textContent)).toEqual(['·', '–'])
-    expect(container.querySelector('.hf-match-when')?.innerHTML).toContain(
-      '</time></span> <span aria-hidden="true">·</span> <span class="hf-match-part">Speelronde 12',
+    expect([...container.querySelectorAll('[aria-hidden="true"]')].map((dot) => dot.textContent)).toEqual(['–', '·'])
+    expect(container.querySelector('.hf-match-where')?.innerHTML).toContain(
+      '</time></span> <span aria-hidden="true">·</span> <span class="hf-match-part">Voorbeeldpark',
     )
   })
 
