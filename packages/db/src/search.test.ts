@@ -532,7 +532,7 @@ describe('listSeasonPlayers', () => {
       { ...row, name: 'Alleen Persoon', personId: defender, searchTerm: 'b' },
       // Neither, with a person and without one.
       { ...row, name: 'Geen Van Beide', searchTerm: 'd' },
-      { ...row, name: 'Zonder Persoon', personId: null, searchTerm: 'e' },
+      { ...row, country: 'BE', name: 'Zonder Persoon', personId: null, searchTerm: 'e' },
     ])
     // Both: the person goes before the season for the country, the season before the person for
     // the position. Another season, because a person is in a season once.
@@ -552,7 +552,7 @@ describe('listSeasonPlayers', () => {
       { country: 'BE', name: 'Alleen Seizoen', position: 'doelman' },
       { country: 'NL', name: 'Alleen Persoon', position: 'verdediger' },
       { country: null, name: 'Geen Van Beide', position: null },
-      { country: null, name: 'Zonder Persoon', position: null },
+      { country: 'BE', name: 'Zonder Persoon', position: null },
     ])
     expect(await facts('2025/26')).toEqual([{ country: 'NL', name: 'Beide', position: 'aanvaller' }])
   })
