@@ -158,9 +158,8 @@ export async function PreviewPage({ season: seizoen, slug }: { season: string; s
   const form = forms.length > 0
   const together = headToHead !== undefined
   const shooters = scorers !== undefined
-  // On a phone the cards stand in this order: Stand, Vorm, Onderling, Onze schutters,
-  // Nieuws, Bron. On a wide
-  // screen Onderling and Nieuws have the wide column and the others the narrow one.
+  // On a phone the cards stand in this order: Stand, Vorm, Onderling, Onze schutters, Nieuws,
+  // Bron. On a wide screen Onderling and Nieuws have the wide column and the others the narrow.
   const before = [...(standing ? ['standing'] : []), ...(form ? ['form'] : []), ...(shooters ? ['scorers'] : [])]
   const main = [...(together ? ['headToHead'] : []), ...(news ? ['news'] : [])]
   const areas =
