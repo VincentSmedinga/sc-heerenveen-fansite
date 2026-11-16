@@ -24,13 +24,13 @@ import { parseSearch, searchMaxLength } from '#src/beheer/items'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
-import { clubNamesPath, clubPath, listPath } from './paths'
+import { clubPath, clubsPath, listPath } from './paths'
 
 // Render on each request: who is logged in and which clubs have a list are not known when the
 // site is built.
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Clubnamen' }
+export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Clubs' }
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -59,7 +59,7 @@ export default async function ClubNamesPage({ searchParams }: { searchParams: Pr
   return (
     <Page.Main areas={toolbarAreas} className={compact}>
       <Page.Cell area="head">
-        <Heading level={1}>Clubnamen</Heading>
+        <Heading level={1}>Clubs</Heading>
         <Text appearance="intro">
           De pagina van een club zegt "Eerder" met de namen die de club droeg, als je hier de lijst invult. Een club
           zonder lijst heeft die regel niet.
@@ -69,7 +69,7 @@ export default async function ClubNamesPage({ searchParams }: { searchParams: Pr
         </Text>
       </Page.Cell>
       <Page.Toolbar>
-        <Form action={clubNamesPath} method="get">
+        <Form action={clubsPath} method="get">
           <Field hint="Een deel van de naam van de club." id="zoek" label="Zoeken" required={false}>
             <Input autoCorrect="off" defaultValue={search} maxLength={searchMaxLength} name="q" type="search" />
           </Field>

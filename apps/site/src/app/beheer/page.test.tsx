@@ -8,6 +8,7 @@ import SentPage, { metadata as sentMetadata } from './inloggen/verstuurd/page'
 import AdminPage, { metadata as adminMetadata } from './page'
 
 const {
+  countClubsWithoutCountry,
   countHeldChanges,
   countMatchesWithoutResult,
   countReportsToCheck,
@@ -22,6 +23,7 @@ const {
   requireRole,
   sessionToken,
 } = vi.hoisted(() => ({
+  countClubsWithoutCountry: vi.fn(),
   countHeldChanges: vi.fn(),
   countMatchesWithoutResult: vi.fn(),
   countReportsToCheck: vi.fn(),
@@ -38,6 +40,10 @@ const {
 }))
 
 vi.mock('#src/database', () => ({ getDatabase: () => ({ db: {} }) }))
+vi.mock('#src/beheer/club-country', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  countClubsWithoutCountry,
+}))
 vi.mock('#src/beheer/match-entries', () => ({
   countHeldChanges,
   countMatchesWithoutResult,
@@ -61,6 +67,8 @@ vi.mock('next/navigation', () => ({
 }))
 
 beforeEach(() => {
+  countClubsWithoutCountry.mockReset()
+  countClubsWithoutCountry.mockResolvedValue({ europe: 0, total: 0 })
   countHeldChanges.mockReset()
   countHeldChanges.mockResolvedValue({ seasons: [], total: 0 })
   countMatchesWithoutResult.mockReset()
@@ -137,14 +145,13 @@ describe('the admin', () => {
       '<a class="hf-tile-link" href="/beheer/artikelen">Artikelen</a>',
       '<a class="hf-tile-link" href="/beheer/wedstrijden">Wedstrijden</a>',
       '<a class="hf-tile-link" href="/beheer/stadions">Stadions</a>',
-      '<a class="hf-tile-link" href="/beheer/clubnamen">Clubnamen</a>',
-      '<a class="hf-tile-link" href="/beheer/kwaliteit">Kwaliteit</a>',
+      '<a class="hf-tile-link" href="/beheer/clubs">Clubs</a>',
       '<a class="hf-tile-link" href="/beheer/bezoek">Bezoek</a>',
       '<a class="hf-tile-link" href="/beheer/mijn-account">Mijn account</a>',
     ])
     expect(html).toContain('Vul wedstrijden in of verbeter ze.')
     expect(html).toContain('Beheer de stadions, hun namen en hun adres, en de thuisvelden van een club.')
-    expect(html).toContain('Houd bij welke namen een club droeg, en sinds wanneer.')
+    expect(html).toContain('Houd bij welke namen een club droeg, sinds wanneer, en in welk land hij speelt.')
   })
 
   it('shows the owner the accounts as well', async () => {
@@ -276,6 +283,28 @@ describe('the admin', () => {
     readMatchGaps.mockClear()
     expect(renderToStaticMarkup(await AdminPage())).not.toContain('gaten')
     expect(readMatchGaps).not.toHaveBeenCalled()
+  })
+
+  it('tells an editor how many clubs have no country, with a link to the list, and nobody else (#1306)', async () => {
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'editor', userId: 1 })
+    expect(renderToStaticMarkup(await AdminPage())).not.toContain('zonder land')
+
+    countClubsWithoutCountry.mockResolvedValue({ europe: 1, total: 3 })
+
+    expect(renderToStaticMarkup(await AdminPage())).toContain(
+      '<a href="/beheer/clubs/kwaliteit">3 clubs zonder land</a>',
+    )
+
+    countClubsWithoutCountry.mockResolvedValue({ europe: 0, total: 1 })
+
+    expect(renderToStaticMarkup(await AdminPage())).toContain(
+      '<a href="/beheer/clubs/kwaliteit">1 club zonder land</a>',
+    )
+
+    requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'author', userId: 2 })
+    countClubsWithoutCountry.mockClear()
+    expect(renderToStaticMarkup(await AdminPage())).not.toContain('zonder land')
+    expect(countClubsWithoutCountry).not.toHaveBeenCalled()
   })
 
   it('tells an editor how many gaps the stadiums and clubs have, with a link to the list, and nobody else (#1307)', async () => {

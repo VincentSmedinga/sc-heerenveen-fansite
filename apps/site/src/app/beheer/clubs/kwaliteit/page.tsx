@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 import { Heading, Link, Page, Pagination, Text } from '@fansite/design-system'
 
-import { clubNamesPath } from '#src/app/beheer/clubnamen/paths'
+import { clubsPath } from '#src/app/beheer/clubs/paths'
 import { adminAreas } from '#src/beheer/areas'
 import {
   clubCountryListPath,
@@ -49,8 +49,8 @@ export default async function ClubsWithoutCountryPage({ searchParams }: Props) {
     <Page.Main areas={adminAreas} className={compact}>
       <Page.Cell area="head">
         <Text>
-          <Link href={clubNamesPath} icon="arrow-left">
-            Clubnamen
+          <Link href={clubsPath} icon="arrow-left">
+            Clubs
           </Link>
         </Text>
         <Heading level={1}>{title}</Heading>

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 import { Card, Heading, Link, List, Page, Text } from '@fansite/design-system'
 
-import { longDayOf } from '#src/app/beheer/kwaliteit/gap-table'
+import { longDayOf } from '#src/app/beheer/gap-table'
 import { reportPath } from '#src/app/beheer/wedstrijden/paths'
 import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'

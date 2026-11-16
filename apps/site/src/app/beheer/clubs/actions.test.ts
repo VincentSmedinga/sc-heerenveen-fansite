@@ -134,7 +134,7 @@ const azList = [
 
 describe('submitNames', () => {
   it('saves the lines, writes a row in the log without the note, and ends on the page of the club', async () => {
-    expect(await submit(form(azList))).toEqual({ redirect: '/beheer/clubnamen/oefenstad-az?gedaan=opgeslagen' })
+    expect(await submit(form(azList))).toEqual({ redirect: '/beheer/clubs/oefenstad-az?gedaan=opgeslagen' })
 
     expect(await stored()).toEqual([
       { name: 'Oefen AZ', note: null, startDay: null, startSeason: null },
@@ -201,7 +201,7 @@ describe('submitNames', () => {
 
   it('does not count a line nobody filled in, and asks for at least one line', async () => {
     expect(await submit(form([row(), { ...emptyNameRow }]))).toEqual({
-      redirect: '/beheer/clubnamen/oefenstad-az?gedaan=opgeslagen',
+      redirect: '/beheer/clubs/oefenstad-az?gedaan=opgeslagen',
     })
     expect(await stored()).toHaveLength(1)
     expect(await submit(form([{ ...emptyNameRow }]))).toMatchObject({
@@ -262,8 +262,8 @@ describe('submitNames', () => {
   })
 
   it('ends on the list with a notice for a club that does not exist', async () => {
-    expect(await submit(form(azList), 'bestaat-niet')).toEqual({ redirect: '/beheer/clubnamen?fout=weg' })
-    expect(await submit(form(azList), 42)).toEqual({ redirect: '/beheer/clubnamen?fout=weg' })
+    expect(await submit(form(azList), 'bestaat-niet')).toEqual({ redirect: '/beheer/clubs?fout=weg' })
+    expect(await submit(form(azList), 42)).toEqual({ redirect: '/beheer/clubs?fout=weg' })
     expect(await log()).toEqual([])
   })
 
@@ -286,7 +286,7 @@ describe('submitReset', () => {
   it('takes the whole list away, writes a row in the log and ends on the page of the club', async () => {
     await submit(form(azList))
 
-    expect(await reset()).toEqual({ redirect: '/beheer/clubnamen/oefenstad-az?gedaan=weggehaald' })
+    expect(await reset()).toEqual({ redirect: '/beheer/clubs/oefenstad-az?gedaan=weggehaald' })
     expect(await stored()).toEqual([])
     expect((await log()).map((entry) => [entry.action, entry.detail])).toEqual([
       ['club-name.save', '3 regels, 1 met toelichting, 2 namen erbij voor de import'],
@@ -295,12 +295,12 @@ describe('submitReset', () => {
   })
 
   it('tells a club without a list that there was none, and writes nothing', async () => {
-    expect(await reset()).toEqual({ redirect: '/beheer/clubnamen/oefenstad-az?gedaan=geen-lijst' })
+    expect(await reset()).toEqual({ redirect: '/beheer/clubs/oefenstad-az?gedaan=geen-lijst' })
     expect(await log()).toEqual([])
   })
 
   it('ends on the list with a notice for a club that does not exist', async () => {
-    expect(await reset('bestaat-niet')).toEqual({ redirect: '/beheer/clubnamen?fout=weg' })
+    expect(await reset('bestaat-niet')).toEqual({ redirect: '/beheer/clubs?fout=weg' })
   })
 
   it('is for the editor, and sends somebody without a session to the login page', async () => {

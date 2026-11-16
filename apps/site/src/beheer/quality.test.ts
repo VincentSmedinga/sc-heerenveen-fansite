@@ -11,7 +11,6 @@ import {
   fieldDifferencesPath,
   matchQualityPath,
   playerQualityPath,
-  qualityPath,
   seasonHasPlayers,
   statDifferencesPath,
 } from './quality'
@@ -139,7 +138,6 @@ describe('the addresses of the table', () => {
   it('has the quality of the matches under Wedstrijden, and the other lists where they were (#1304)', () => {
     expect(matchQualityPath).toBe('/beheer/wedstrijden/kwaliteit')
     expect(unusualFormationsPath).toBe('/beheer/wedstrijden/kwaliteit/formaties')
-    expect(qualityPath).toBe('/beheer/kwaliteit')
   })
 
   it('has the quality of the players and persons under Spelers, with the season after the name of the list (#1305)', () => {
