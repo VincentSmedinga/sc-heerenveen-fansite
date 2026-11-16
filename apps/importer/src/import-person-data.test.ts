@@ -32,6 +32,8 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
+  await database.pool.query('DELETE FROM unavailable_marks')
+  await database.pool.query('DELETE FROM audit_log')
   await database.pool.query('DELETE FROM players')
   await database.pool.query('DELETE FROM persons')
   await database.pool.query('DELETE FROM wikidata_place_countries')
@@ -159,6 +161,26 @@ describe('readPersonData', () => {
       'persons (Wikidata): 1 person read, 1 with a birth date, 1 with a nationality, 1 with a line (1 from Wikidata, 0 from the squad, 0 from the old fansite, 0 set by hand), 0 left empty; 1 articles and 6 items asked',
       'persons (line and country): 0 lines from the squad, 0 from Wikidata, 0 taken away; 1 country from Wikidata, 0 from the list of players, 0 from the squad',
     ])
+  })
+
+  it('takes the mark of a gap as not available away when Wikidata gives the birth date (#1308)', async () => {
+    await addPersons('Joost van Aken', 'Pim Verbeek')
+    await database.pool.query(
+      "INSERT INTO unavailable_marks (subject, subject_id, field, checked_on) SELECT 'person', id, 'geboren', '2026-03-02' FROM persons",
+    )
+
+    const report = await read(await serve(joost.wikipedia, joost.wikidata))
+
+    // Only the person the served Wikidata knows gets a birth date, so only his mark goes.
+    expect(report.marksRemoved).toBe(report.birthDate)
+    expect(report.marksRemoved).toBeGreaterThan(0)
+    expect(await rows('SELECT COUNT(*) AS n FROM unavailable_marks')).toEqual([{ n: 2 - report.marksRemoved }])
+    expect(await rows("SELECT action, user_id FROM audit_log WHERE action = 'gap.unmark'")).toEqual(
+      Array.from({ length: report.marksRemoved }, () => ({ action: 'gap.unmark', user_id: null })),
+    )
+    expect(describePersonData(report)).toContain(
+      `persons (Wikidata): ${report.marksRemoved} mark of a gap as not available removed, as the fact is there now`,
+    )
   })
 
   it('asks with our User-Agent', async () => {

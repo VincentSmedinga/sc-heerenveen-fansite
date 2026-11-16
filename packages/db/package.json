@@ -34,6 +34,7 @@
     "./schema": "./src/schema.ts",
     "./season": "./src/season.ts",
     "./season-coverage": "./src/season-coverage.ts",
+    "./unavailable-marks": "./src/unavailable-marks.ts",
     "./squad-completeness": "./src/squad-completeness.ts",
     "./store-completeness": "./src/store-completeness.ts",
     "./seed": "./src/seed.ts",

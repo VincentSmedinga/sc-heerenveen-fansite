@@ -1386,6 +1386,10 @@ De lijst is een onderdeel in de browser (`PersonWorkList.tsx`): een keuze slaat 
 Een regel boven de lijst zegt wat er is opgeslagen en hoeveel er nog zijn, en "Sla over" zet een persoon onderaan tot de pagina opnieuw laadt.
 `choosePersonFact` in `src/beheer/person-facts.ts` zet de waarde met de bron `manual`, die geen import vervangt, en schrijft `person.edit` in het logboek, in één transactie.
 Heeft de persoon de waarde intussen al, dan verandert er niets en staat dat als fout bij de rij.
+
+Een gat dat niemand kan vullen (een persoon zonder Wikipedia-pagina of zonder bekende geboortedatum) markeert de redactie in het formulier van de persoon met het vakje "Niet beschikbaar" onder het lege veld (#1308).
+Het gat is dan uit de tabel, en onder de tabel staat een warme kaart "Niet beschikbaar" met de persoon, het veld en de dag van de laatste controle, een knop "Nog steeds niet beschikbaar" en een knop "Markering weghalen" (`UnavailableCard.tsx` en `marks-actions.ts`).
+De tabel (`readPersonGaps`) negeert een markering op een veld met een waarde, de import haalt een markering weg als hij het feit vindt, en elke wijziging staat in `audit_log` als `gap.mark`, `gap.renew` of `gap.unmark`.
 De knoppen en velden van de lijst zijn 44 pixels hoog, ook al is het beheer compact: de kaarten zetten het token `--hf-size-control` terug.
 
 Op de pagina van een wedstrijd staat een verschil tussen twee bronnen als een kaart met beide waarden en de namen van de bronnen (`differenceWords` in `src/beheer/difference-words.ts`).

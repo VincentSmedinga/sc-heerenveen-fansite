@@ -98,7 +98,11 @@ beforeEach(async () => {
   await database.db.insert(persons).values({ familyName: 'Buiten', name: 'Karel Buiten' })
 })
 
-const overview = async () => renderToStaticMarkup(await PersonQualityPage()).replaceAll('<!-- -->', '')
+const overview = async (searchParams: Record<string, string> = {}) =>
+  renderToStaticMarkup(await PersonQualityPage({ searchParams: Promise.resolve(searchParams) })).replaceAll(
+    '<!-- -->',
+    '',
+  )
 const letterPage = async (letter: string, searchParams: Record<string, string> = {}) =>
   renderToStaticMarkup(
     await LetterPage({ params: Promise.resolve({ letter }), searchParams: Promise.resolve(searchParams) }),

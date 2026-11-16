@@ -473,6 +473,9 @@ export const auditActions = [
   'ground.edit',
   'ground-name.save',
   'home-ground.save',
+  'gap.mark',
+  'gap.renew',
+  'gap.unmark',
 ] as const
 
 export type AuditAction = (typeof auditActions)[number]
@@ -515,6 +518,9 @@ export const auditDetailMaxLength = 1000
  * the person in `item_id` and what changed in `detail`. `person.merge` is two persons the
  * editors made one in the admin (issue 977), with the person that stays in `item_id`; `detail`
  * names both persons, what moved and the values that went, so the merge can be undone by hand.
+ * `gap.mark`, `gap.renew` and `gap.unmark` are an editor marking a gap as not available,
+ * checking it again today, or taking the mark away (issue 1308), with the person in
+ * `item_id`; the import writes `gap.unmark` too, without an account, when it finds the fact.
  */
 export const auditLog = mysqlTable(
   'audit_log',
@@ -2596,3 +2602,37 @@ export const staff = mysqlTable(
 export type NewStaff = typeof staff.$inferInsert
 
 export type StaffMember = typeof staff.$inferSelect
+
+/** What a mark that a gap is not available can belong to: for now only a person (#1308). */
+export const unavailableSubjects = ['person'] as const
+
+/** The facts of a person that an editor can mark as not available (#1308). */
+export const unavailableFields = ['wikipedia', 'geboren'] as const
+
+export type UnavailableField = (typeof unavailableFields)[number]
+
+/**
+ * A gap that nobody can fill, marked by an editor as not available (#1308): a person without a
+ * Wikipedia page or without a known birth date. One row for one fact of one subject, so a
+ * person
+ * can have a page missing and a birth date known. `subject_id` is the number of the person; it
+ * has no foreign key, so a later subject (a match, see #1295) can share the table. `checked_on`
+ * is the day the editor marked the gap or last said it was still not available (UTC), and
+ * nothing expires by itself. A row never hides a fact that exists: the work tables ignore it
+ * when the field has a value, and the import and the editors' form delete it when a value
+ * comes (`clearFilledMarks`).
+ */
+export const unavailableMarks = mysqlTable(
+  'unavailable_marks',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    subject: mysqlEnum('subject', unavailableSubjects).notNull(),
+    subjectId: int('subject_id', { unsigned: true }).notNull(),
+    field: mysqlEnum('field', unavailableFields).notNull(),
+    checkedOn: date('checked_on', { mode: 'string' }).notNull(),
+    userId: int('user_id', { unsigned: true }).references(() => adminUsers.id, { onDelete: 'set null' }),
+  },
+  (table) => [
+    unique('unavailable_marks_subject_subject_id_field_unique').on(table.subject, table.subjectId, table.field),
+  ],
+)
