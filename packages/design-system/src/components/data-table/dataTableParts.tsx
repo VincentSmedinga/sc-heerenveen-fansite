@@ -84,6 +84,7 @@ export const TableRows = ({
 }) => {
   // A gap row, or a row without a place, ends the places before it: the row after it starts
   // with a number, whatever place it has.
+  const hasPositions = rows.some((row) => row.position !== undefined)
   const sharedRows = sharedPlaces(rows.map((row, index) => (row.gap === true ? -index : (row.position ?? -index))))
 
   return (
@@ -91,16 +92,32 @@ export const TableRows = ({
       {rows.map((row, rowIndex) =>
         row.gap === true ? (
           <tr className="hf-data-table-gap" key={`gap-${rowIndex}`}>
+            {withPosition && hasPositions ? <td /> : null}
             <th scope="row">
-              <span aria-hidden="true">⋮</span>
-              <span className="hf-visually-hidden">{row.header}</span>
+              {row.display === undefined ? (
+                <>
+                  <span aria-hidden="true">⋮</span>
+                  <span className="hf-visually-hidden">{row.header}</span>
+                </>
+              ) : (
+                row.display
+              )}
             </th>
             {columns.slice(1).map((column) => (
               <td key={column.name} />
             ))}
           </tr>
         ) : (
-          <tr className={row.total === true ? 'hf-data-table-total' : undefined} key={row.header}>
+          <tr
+            className={
+              row.total === true
+                ? 'hf-data-table-total'
+                : row.highlight === true
+                  ? 'hf-data-table-highlight'
+                  : undefined
+            }
+            key={row.header}
+          >
             {!withPosition || row.position === undefined ? null : (
               <PlaceCell position={row.position} shared={sharedRows[rowIndex] === true} />
             )}

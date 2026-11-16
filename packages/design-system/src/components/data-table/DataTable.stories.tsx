@@ -254,6 +254,70 @@ export const SeasonsWithGap = meta.story({
   ),
 })
 
+const standingColumns = [
+  'Club',
+  { abbreviation: 'G', name: 'gespeeld' },
+  { abbreviation: 'DS', name: 'doelsaldo' },
+  { abbreviation: 'P', key: true, name: 'punten' },
+]
+
+export const StandingStretchNear = meta.story({
+  name: 'Stuk van de stand, met weinig clubs ertussen',
+  render: () => (
+    <div style={{ maxInlineSize: '20rem' }}>
+      <Card aria-labelledby="stand-dichtbij-kop">
+        <Heading id="stand-dichtbij-kop" level={2}>
+          Stand
+        </Heading>
+        <Text appearance="meta">Na speelronde 12</Text>
+        <DataTable
+          caption="Stand, na speelronde 12"
+          columns={standingColumns}
+          rows={[
+            { cells: [12, '+8', 21], header: 'Demo Boys', highlight: true, note: 'onze club', position: 6 },
+            { cells: [12, '0', 20], header: 'Proefstad SV', position: 7 },
+            { cells: [12, '−3', 17], header: 'Voorbeeld United', position: 8 },
+            { cells: [12, '+1', 15], header: 'Testdorp FC', highlight: true, note: 'de tegenstander', position: 9 },
+          ]}
+        />
+        <Text>We staan drie plekken en zes punten boven Testdorp FC.</Text>
+      </Card>
+    </div>
+  ),
+})
+
+export const StandingStretchFar = meta.story({
+  name: 'Stuk van de stand, met veel clubs ertussen',
+  render: () => (
+    <div style={{ maxInlineSize: '20rem' }}>
+      <Card aria-labelledby="stand-ver-kop">
+        <Heading id="stand-ver-kop" level={2}>
+          Stand
+        </Heading>
+        <Text appearance="meta">Na speelronde 12</Text>
+        <DataTable
+          caption="Stand, na speelronde 12"
+          columns={standingColumns}
+          rows={[
+            { cells: [12, '+8', 23], header: 'Nepstad Rangers', position: 5 },
+            { cells: [12, '+8', 21], header: 'Demo Boys', highlight: true, note: 'onze club', position: 6 },
+            { cells: [12, '0', 20], header: 'Proefstad SV', position: 7 },
+            {
+              cells: [],
+              display: '9 clubs ertussen',
+              gap: true,
+              header: '9 clubs ertussen',
+            },
+            { cells: [12, '−9', 9], header: 'Oefenveld AFC', position: 17 },
+            { cells: [12, '−29', 3], header: 'Testdorp FC', highlight: true, note: 'de tegenstander', position: 18 },
+          ]}
+        />
+        <Text>We staan twaalf plekken en achttien punten boven Testdorp FC.</Text>
+      </Card>
+    </div>
+  ),
+})
+
 export const NamesWithPeriods = meta.story({
   name: 'Namen met een tweede regel',
   render: () => (

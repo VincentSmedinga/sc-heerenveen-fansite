@@ -152,6 +152,19 @@
     font-weight: var(--hf-figure-font-weight);
   }
 
+  /*
+   * A highlighted row (`highlight`): the strong fill, not bold (bold is for the key figure),
+   * with a bar on the start side that also shows in forced colours, so it is more than colour.
+   */
+  .hf-data-table .hf-data-table-highlight :is(th, td) {
+    background-color: var(--hf-colour-background-highlight);
+    color: var(--hf-colour-text-highlight);
+  }
+
+  .hf-data-table .hf-data-table-highlight > :first-child {
+    border-inline-start: 0.25rem solid var(--hf-colour-text-highlight);
+  }
+
   /* The second line of a row header, in either table, is secondary text under the header or its link. */
   .hf-data-table .hf-data-table-secondary {
     color: var(--hf-colour-text-secondary);
