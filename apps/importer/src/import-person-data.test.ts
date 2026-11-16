@@ -1061,7 +1061,7 @@ describe('the order of the sources of a line and a country (#1052)', () => {
         { item_id: 'Q145' },
       ])
       expect(describePersonData(report).join('\n')).toContain(
-        '0 countries from Wikidata (1 in England, Wales, Scotland or Northern Ireland), 1 from the country he plays for',
+        '0 countries from Wikidata, 1 from the country he plays for (1 in England, Wales, Scotland or Northern Ireland)',
       )
     })
 
@@ -1233,6 +1233,18 @@ describe('the country he plays for and the country of birth (#1289)', () => {
     await read(served)
 
     expect(await state()).toEqual(['Een Welshman: GB-WLS wikidata Q145'])
+  })
+
+  it('does not keep an answer for a birth place that is no item, and asks the place again next run', async () => {
+    await addPersons('Zonder Plaats')
+
+    const one = routes('Zonder Plaats', 'Q511', { nationalities: ['Q34'] }, 17)
+    const served = await serve(one.wikipedia, { ...one.wikidata, [itemPath('Q100')]: reply(200, 'geen item') })
+    const report = await read(served)
+
+    expect(await rows('SELECT id FROM wikidata_place_countries')).toEqual([])
+    expect(await rows('SELECT wikidata_read_at FROM persons')).toEqual([{ wikidata_read_at: null }])
+    expect(report.warnings[0]).toContain('the answer is not an item')
   })
 
   it('is safe to run twice: a second run of a normal read asks and changes nothing', async () => {

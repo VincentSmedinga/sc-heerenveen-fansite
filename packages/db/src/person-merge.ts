@@ -14,6 +14,7 @@ import {
   personPositions,
   persons,
   personSlugs,
+  personSportCountries,
   type Player,
   players,
   playerSeasonStats,
@@ -224,7 +225,7 @@ export async function mergePersonInto(tx: MergeDatabase, other: Person, kept: Pe
   await tx.update(personSlugs).set({ personId: kept.id }).where(eq(personSlugs.personId, other.id))
   await rememberPage(tx, other.wikipediaPage, kept.id)
 
-  for (const table of [personNationalities, personPositions]) {
+  for (const table of [personNationalities, personPositions, personSportCountries]) {
     const has = await tx.select().from(table).where(eq(table.personId, kept.id)).orderBy(asc(table.position))
     const extra = (await tx.select().from(table).where(eq(table.personId, other.id)).orderBy(asc(table.position)))
       .map((row) => row.itemId)

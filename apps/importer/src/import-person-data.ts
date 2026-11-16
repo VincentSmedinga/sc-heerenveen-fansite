@@ -30,6 +30,7 @@ import {
   readCountryIds,
   readItem,
   readLabel,
+  readPlaceIds,
   type WikidataItem,
 } from './wikidata-item.ts'
 
@@ -146,13 +147,16 @@ export function describePersonData(report: PersonDataReport): string[] {
   ) {
     // The new sources show only when they gave a country, so a log without them reads as
     // before.
-    const sources = [
+    const british =
+      report.countriesBritish > 0 ? ` (${report.countriesBritish} in England, Wales, Scotland or Northern Ireland)` : ''
+    const wikidata = [
+      `${countries} ${countries === 1 ? 'country' : 'countries'} from Wikidata`,
       ...(fromSport > 0 ? [`${fromSport} from the country he plays for`] : []),
       ...(fromBirth > 0 ? [`${fromBirth} from the country of birth`] : []),
     ].join(', ')
 
     described.push(
-      `persons (line and country): ${linesAgain.squad} ${linesAgain.squad === 1 ? 'line' : 'lines'} from the squad, ${linesAgain.wikidata} from Wikidata, ${linesAgain.cleared} taken away; ${countries} ${countries === 1 ? 'country' : 'countries'} from Wikidata${report.countriesBritish > 0 ? ` (${report.countriesBritish} in England, Wales, Scotland or Northern Ireland)` : ''}, ${sources === '' ? '' : `${sources}, `}${fromList} from the list of players, ${fromSquad} from the squad`,
+      `persons (line and country): ${linesAgain.squad} ${linesAgain.squad === 1 ? 'line' : 'lines'} from the squad, ${linesAgain.wikidata} from Wikidata, ${linesAgain.cleared} taken away; ${wikidata}${british}, ${fromList} from the list of players, ${fromSquad} from the squad`,
     )
   }
 
@@ -393,6 +397,16 @@ async function readUnreadPersons(
     }
 
     const text = answer.kind === 'text' ? answer.text : null
+
+    if (text !== null && readPlaceIds(text) === null) {
+      // Not an item: a failed request, so nothing is kept and the place is asked again.
+      failures.push(`${printable(itemUrl(wikidata, id))}: the answer is not an item`)
+      failuresInARow++
+      stopped = failuresInARow >= mostFailuresInARow
+
+      return { countryId: null, ok: false }
+    }
+
     const countryId = text === null ? null : (readCountryIds(text)[0] ?? null)
 
     if (!labels.has(id) && !unlabelled.has(id)) {
