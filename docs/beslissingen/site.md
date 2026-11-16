@@ -6191,3 +6191,18 @@
   Een eigen doelpunt in een uitwedstrijd tegen FC Groningen is opgeslagen als `ours = 0, own_goal = 1`, en is geen doelpunt van de club door een eigen speler.
   We kennen nog geen stadion per wedstrijd als eigen gegeven, dus "daar" betekent alle uitwedstrijden tegen die club, ook die in een ander stadion of onder een andere sponsornaam.
 - **Alternatieven:** alle wedstrijden tegen de club, wat een uitwedstrijd en een thuiswedstrijd door elkaar telt; een eigen doelpunt meetellen voor de speler die hem maakte.
+
+## De Voorbeschouwing toont het stuk van de stand tussen de twee clubs en de vorm van allebei
+
+- **Datum:** 16 november 2026
+- **Besluit:** de kaart Stand toont het stuk van de competitiestand van de ene club tot de andere, met beide rijen gemarkeerd.
+  Staan er hoogstens drie clubs tussen, dan staat het hele stuk erin.
+  Staan er meer tussen, dan krijgt elke club zijn buur erboven en eronder, en één rij zegt hoeveel clubs er tussen staan.
+  Onder de tabel staat één zin over het verschil vanuit ons gezien, met de link "De hele stand".
+  De kaart is er alleen voor een competitiewedstrijd waarvan beide clubs in de stand staan.
+  De kaart Vorm heeft één regel per club met de laatste vijf competitiewedstrijden van het seizoen, de oudste eerst, zonder terugval op het seizoen ervoor.
+  Een deel zonder gegevens valt weg zonder zin (#1317).
+- **Waarom:** de stand tussen twee clubs zegt meer dan de hele tabel, en de vorm zegt hoe elke club het nu doet.
+  De gemarkeerde rij staat op de sterke achtergrond, niet vet (vet is voor het kerncijfer, zie `base/table.css`), met een balk aan het begin van de rij en een tekst voor een schermlezer, zodat kleur niet het enige onderscheid is.
+  `DataTable` heeft daarvoor `highlight` gekregen, en een rij voor een onderbreking kan met `display` zeggen wat hij verbergt.
+- **Alternatieven:** de hele stand tonen, wat op een telefoon te lang is; `StandingsTable` uitbreiden, dat alleen onze eigen rij markeert en geen doelsaldo heeft.
