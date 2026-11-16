@@ -3616,7 +3616,7 @@
 - **Waarom:** bijna elke wedstrijd heeft een pagina, dus een aparte link onder elke regel herhaalde zich tientallen keren, en een hele regel is op een telefoon makkelijk te raken.
   De uitslag hoort bij de link, want een link om alleen de clubs gaf twee links naar dezelfde pagina aan weerszijden van de uitslag.
   Zonder onderstreping zie je aan de kleur van de clubs welke wedstrijd een pagina heeft; een lijst met tientallen onderstreepte regels is onrustig, en de regel staat niet in een zin, dus de eis dat een link in een zin onderstreept is (1.4.1) geldt hier niet.
-  De link is een inline link in een regel tekst: zijn hoogte is die van de regel (1,5 keer de tekst, 24 pixels op de gewone maat), en een lijn met twee clubs die breekt, is twee regels hoog (2.5.8).
+  De link is op 390 pixels 21 pixels hoog en het volgende doel in de lijst, de link van de volgende wedstrijd, ligt ruim 100 pixels verder, dus een cirkel van 24 pixels om de link raakt geen ander doel en de ruimte eromheen haalt 2.5.8 (gemeten in het verhaal Met een pagina).
   In forced colours krijgt de link de kleur van het systeem voor links.
   Een wedstrijd die live is, toont geen eigen teken in de lijst: de pagina van de wedstrijd heeft de stand.
 - **Alternatieven:** de aparte link houden; alleen de clubs als link, zonder de uitslag; altijd onderstreept, met of zonder pijltje; de tekstkleur houden, zodat je in rust niet ziet welke regel een link is; "Live" houden als klein label.
