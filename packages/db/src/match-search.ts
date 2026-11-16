@@ -4,6 +4,7 @@ import type { Database } from './client.ts'
 
 import { searchPlayers } from './person-slugs.ts'
 import { clubs, matches, matchGoals, players } from './schema.ts'
+import { stadiumOnTheDay } from './stadiums.ts'
 
 /**
  * A played match as the search of matches (#1150) needs it: the match with the club of the
@@ -76,7 +77,7 @@ export async function listSearchableMatches(db: Pick<Database, 'select'>) {
       penaltiesFor: matches.penaltiesFor,
       round: matches.round,
       season: matches.season,
-      stadium: matches.stadium,
+      stadium: stadiumOnTheDay,
     })
     .from(matches)
     .innerJoin(clubs, eq(clubs.id, matches.clubId))

@@ -393,7 +393,7 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'editor', path: '/beheer/stadions/stadion/nieuw', status: 200 },
   { admin: 'editor', path: '/beheer/stadions/stadion/999999', status: 404 },
   { admin: 'editor', path: '/beheer/stadions/clubs', status: 200 },
-  { admin: 'editor', path: '/beheer/stadions/clubs?tonen=eigen-lijst', status: 200 },
+  { admin: 'editor', path: '/beheer/stadions/clubs?tonen=thuisvelden', status: 200 },
   { admin: 'editor', path: '/beheer/stadions/clubs?q=proef', status: 200 },
   { admin: 'editor', path: '/beheer/stadions/clubs?fout=weg', status: 200 },
   { admin: 'editor', path: '/beheer/stadions/sv-proefdorp', status: 200 },

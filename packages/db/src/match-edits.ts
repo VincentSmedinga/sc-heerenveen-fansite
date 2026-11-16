@@ -14,7 +14,10 @@ export { matchParts }
 export type { MatchPart }
 
 /** The facts of one match, for a judgement and a line of text. */
-export type FactsFields = Pick<Match, 'attendance' | 'note' | 'referee' | 'stadium'>
+export type FactsFields = Pick<Match, 'attendance' | 'note' | 'referee' | 'stadium'> & {
+  stadiumId?: null | number
+  stadiumLabel?: null | string
+}
 
 /** The goals that are stored, as the comparison needs them. */
 export type GoalFields = Pick<
@@ -48,6 +51,7 @@ export type MatchSnapshot = {
   referee?: null | string
   resultSetAt: null | string
   stadium?: null | string
+  stadiumId?: null | number
   status: Match['status']
 }
 
@@ -103,6 +107,9 @@ export function describeEntryFacts(facts: FactsFields): string {
     `toeschouwers ${facts.attendance === null ? 'geen' : new Intl.NumberFormat('nl-NL').format(facts.attendance)}`,
     `scheidsrechter ${facts.referee ?? 'geen'}`,
     `stadion ${facts.stadium ?? 'geen'}`,
+    ...(facts.stadiumLabel === undefined || facts.stadiumLabel === null
+      ? []
+      : [`gekoppeld stadion ${facts.stadiumLabel}`]),
     `opmerking ${facts.note ?? 'geen'}`,
   ].join(', ')
 }
@@ -191,7 +198,7 @@ export function describeEntryResult(match: ResultFields): string {
 
 const kickoffKeys = ['dateText', 'kickoffAt', 'matchDate'] as const
 
-const factsKeys = ['attendance', 'note', 'referee', 'stadium'] as const
+const factsKeys = ['attendance', 'note', 'referee', 'stadium', 'stadiumId'] as const
 
 const resultKeys = [
   'afterNinetyAgainst',
@@ -243,6 +250,7 @@ export function encodeMatch(match: Match): string {
     referee: match.referee,
     resultSetAt: match.resultSetAt?.toISOString() ?? null,
     stadium: match.stadium,
+    stadiumId: match.stadiumId,
     status: match.status,
   }
 
@@ -393,6 +401,8 @@ export async function removeEntry(db: Writer, edit: MatchEdit) {
         note: before.note ?? null,
         referee: before.referee ?? null,
         stadium: before.stadium ?? null,
+        // A snapshot from before the stadium could be chosen has no number: use the text.
+        stadiumId: before.stadiumId ?? null,
       })
       .where(eq(matches.id, edit.matchId))
   }

@@ -1154,50 +1154,6 @@ export type NewPersonPosition = typeof personPositions.$inferInsert
 
 export type PersonPosition = typeof personPositions.$inferSelect
 
-/** The most characters a column of `club_stadiums` holds. The admin checks them first. */
-export const clubStadiumLimits = { name: 100, note: 200 }
-
-/**
- * The names of the stadium of a club, as the editors keep them in the admin. A club with rows
- * here has its own list, which the card on its page shows instead of what the matches say. The
- * rows are in order: `position` counts from 0, and a club has its rows with 0, 1, 2 and so on.
- * A name starts with a season (`start_season`, such as `2019/20`, counting as 1 July of that
- * year) or with a day (`start_day`), never both, and the next name decides where it ends. Only
- * the first name may have no start. `note` is a short text of our own for the card, such as why
- * a club played elsewhere for a while. The rows go with their club, and a test of the database
- * package keeps the rules of a row.
- */
-export const clubStadiums = mysqlTable(
-  'club_stadiums',
-  {
-    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
-    clubId: int('club_id', { unsigned: true })
-      .notNull()
-      .references(() => clubs.id, { onDelete: 'cascade' }),
-    position: smallint('position', { unsigned: true }).notNull(),
-    name: varchar('name', { length: clubStadiumLimits.name }).notNull(),
-    startSeason: varchar('start_season', { length: matchLimits.season }),
-    startDay: date('start_day', { mode: 'string' }),
-    note: varchar('note', { length: clubStadiumLimits.note }),
-  },
-  (table) => [
-    unique('club_stadiums_club_id_position_unique').on(table.clubId, table.position),
-    check('club_stadiums_one_start', sql`${table.startSeason} is null or ${table.startDay} is null`),
-    check(
-      'club_stadiums_start_season_format',
-      sql`${table.startSeason} is null or ${table.startSeason} regexp '^[0-9]{4}/[0-9]{2}$'`,
-    ),
-    check(
-      'club_stadiums_start_after_first',
-      sql`${table.position} = 0 or ${table.startSeason} is not null or ${table.startDay} is not null`,
-    ),
-  ],
-)
-
-export type ClubStadium = typeof clubStadiums.$inferSelect
-
-export type NewClubStadium = typeof clubStadiums.$inferInsert
-
 /** The most characters a column of the stadium tables holds. The admin checks them first. */
 export const stadiumLimits = { name: 100, note: 200, place: 100, postcode: 12, street: 150 }
 
@@ -1242,7 +1198,7 @@ export type Stadium = typeof stadiums.$inferSelect
 /**
  * The names a stadium has had, in order: `position` counts from 0. A name starts with a season
  * (`start_season`, such as `1994/95`, counting as 1 July of that year) or with a day
- * (`start_day`), never both, and only the first name may have no start, as in `club_stadiums`.
+ * (`start_day`), never both, and only the first name may have no start, as `club_name_periods`.
  * A match is linked to a stadium by a name the stadium has had on the day of the match (see
  * `findStadium`). `note` is a short text of our own. The rows go with their stadium.
  */

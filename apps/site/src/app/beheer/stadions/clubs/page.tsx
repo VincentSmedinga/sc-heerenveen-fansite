@@ -25,23 +25,23 @@ import { getDatabase } from '#src/database'
 
 import { clubPath, clubsPath, listPath, stadiumsPath } from '../paths'
 
-// Render on each request: who is logged in and which clubs have a list are not known when the
-// site is built.
+// Render on each request: who is logged in and which clubs have home grounds are not known when
+// the site is built.
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Clubs en hun stadions' }
 
 type SearchParams = Record<string, string | string[] | undefined>
 
-const shows: readonly StadiumShow[] = ['alles', 'eigen-lijst']
+const shows: readonly StadiumShow[] = ['alles', 'thuisvelden']
 
 const notices: Record<string, string> = {
   weg: 'Deze club bestaat niet. Er is niets veranderd. Kies hieronder een club.',
 }
 
-// The clubs we have matches against, to give the stadium of a club a list of its own. The
-// search is a form with method GET, so the page works without JavaScript. A club with a list of
-// its own says so in words, never in colour alone.
+// The clubs we have matches against, to set the home grounds of a club. The search is a form
+// with method GET, so the page works without JavaScript. A club with home grounds says so in
+// words, never in colour alone.
 export default async function StadiumsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   await requireRole('owner', 'editor')
 
@@ -49,8 +49,8 @@ export default async function StadiumsPage({ searchParams }: { searchParams: Pro
   const search = parseSearch(rawSearch)
   const show = shows.find((choice) => choice === tonen) ?? 'alles'
   const found = searchClubs(await listAdminClubs(getDatabase().db), search)
-  const own = found.filter((club) => club.own)
-  const shown = show === 'eigen-lijst' ? own : found
+  const withGrounds = found.filter((club) => club.grounds)
+  const shown = show === 'thuisvelden' ? withGrounds : found
   const address = (choice: StadiumShow) => listPath(choice === 'alles' ? undefined : choice, search)
   const notice = typeof fout === 'string' ? notices[fout] : undefined
 
@@ -64,9 +64,8 @@ export default async function StadiumsPage({ searchParams }: { searchParams: Pro
         </Text>
         <Heading level={1}>Clubs en hun stadions</Heading>
         <Text appearance="intro">
-          Bij een club zet je zijn thuisvelden, zijn Wikidata-nummer en een eigen lijst voor de kaart op zijn pagina. De
-          kaart op de pagina van een club toont wat de wedstrijden zeggen over zijn stadion. Geef een club hier een
-          eigen lijst, met een toelichting, als dat niet genoeg is.
+          Bij een club zet je zijn thuisvelden en zijn Wikidata-nummer. De kaart op de pagina van een club toont zijn
+          velden met hun namen. Een club zonder thuisvelden toont wat de wedstrijden zeggen over zijn stadion.
         </Text>
       </Page.Cell>
       <Page.Toolbar>
@@ -93,23 +92,27 @@ export default async function StadiumsPage({ searchParams }: { searchParams: Pro
           <Filter
             items={[
               { current: show === 'alles', href: address('alles'), label: `Alles (${found.length})` },
-              { current: show === 'eigen-lijst', href: address('eigen-lijst'), label: `Eigen lijst (${own.length})` },
+              {
+                current: show === 'thuisvelden',
+                href: address('thuisvelden'),
+                label: `Thuisvelden (${withGrounds.length})`,
+              },
             ]}
             label="Clubs filteren"
           />
           {shown.length === 0 ? (
             <Text>
               {search === ''
-                ? 'Nog geen club heeft een eigen lijst.'
-                : `Geen club gevonden met “${search}”${show === 'eigen-lijst' ? ' en een eigen lijst' : ''}.`}
+                ? 'Nog geen club heeft thuisvelden.'
+                : `Geen club gevonden met “${search}”${show === 'thuisvelden' ? ' en thuisvelden' : ''}.`}
             </Text>
           ) : (
             <DataTable
               appearance="text"
-              caption="Clubs met hun lijst van stadions"
-              columns={['Club', 'Lijst']}
+              caption="Clubs met hun thuisvelden"
+              columns={['Club', 'Thuisvelden']}
               rows={shown.map((club) => ({
-                cells: [club.own ? <Tag tone="highlight">Eigen lijst</Tag> : 'Wikipedia'],
+                cells: [club.grounds ? <Tag tone="highlight">Thuisvelden</Tag> : 'Wikipedia'],
                 header: club.name,
                 href: clubPath(club.slug),
               }))}

@@ -1,7 +1,6 @@
 import type { FormResult, PageShortcutsItem } from '@fansite/design-system'
 
 import { listClubNamePeriods, type NamePeriodLine } from '@fansite/db/club-name-periods'
-import { listClubStadiums, type StadiumLine } from '@fansite/db/club-stadiums'
 import { normaliseClubName } from '@fansite/db/clubs'
 import {
   findClubBySlug,
@@ -18,6 +17,7 @@ import {
   type PublicSeasonWikipediaPage,
 } from '@fansite/db/queries'
 import { seasonOf } from '@fansite/db/season'
+import { listClubStadiumLines, type StadiumLine } from '@fansite/db/stadiums'
 
 import { cacheFor, cacheForKey } from './cache'
 import { type CompetitionChoice, competitionMembers, countsFor } from './competition'
@@ -402,9 +402,10 @@ export type Stadium = { firstSeason: string; lastSeason: string; name: string }
 export type StadiumView = { name: string; note?: string | undefined; period?: string | undefined }
 
 /**
- * The lines of the card with the stadium of a club. A club whose editors made a list of its own
- * shows that list, with their notes, and nothing of the matches; a club without a list shows
- * the names of the matches (`stadiumsOf`).
+ * The lines of the card with the stadium of a club. A club with home grounds shows its grounds,
+ * each with the names its stadium had while the club played there, with the notes of the
+ * editors, and nothing of the matches; a club without them shows the names of the matches
+ * (`stadiumsOf`).
  */
 export function stadiumViewsOf(own: readonly StadiumLine[], matches: readonly PublicClubMatch[]): StadiumView[] {
   if (own.length > 0) {
@@ -551,7 +552,7 @@ export type ClubPage = {
   matches: PublicClubMatch[]
   /** The own list of names of the club, which is empty for a club that has none. */
   names: NamePeriodLine[]
-  /** The own list of stadium names of the club, which is empty for a club that has none. */
+  /** The grounds of the club with their names; empty for a club without home grounds. */
   stadiums: StadiumLine[]
 }
 
@@ -574,7 +575,7 @@ const clubPages = cacheForKey(period, async (slug): Promise<ClubPage | undefined
         club,
         matches: await listClubMatches(db, club.id),
         names: await listClubNamePeriods(db, club.id),
-        stadiums: await listClubStadiums(db, club.id),
+        stadiums: await listClubStadiumLines(db, club.id),
       }
 })
 
