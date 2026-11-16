@@ -360,6 +360,8 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Een kaart noemt de competitie niet in de regel (`withCompetition` van `MatchLines`), want de kop noemt haar, elke kaart heeft de legenda van zijn eigen wedstrijden, en de link naar het verloop van het seizoen staat in de kaart Eredivisie.
   Programma houdt alle competities bij elkaar en noemt haar wel.
   `Match` zegt niet "Thuis" of "Uit", en zet met de competitie de dag en het stadion bovenaan en de competitie met de ronde onderaan; zonder de competitie begint de regel met de ronde.
+  Het stadion is de naam die het stadion had op de dag van de wedstrijd, voor een wedstrijd die aan een stadion gekoppeld is (`stadiumOnTheDay` in `@fansite/db/stadiums`, #1301); een wedstrijd zonder stadion toont de tekst van de bron.
+  Dat geldt ook voor de pagina van een wedstrijd en voor het zoeken in wedstrijden.
   Een wedstrijd zonder uitslag staat er ook in, en zegt twee uur na de aanvang "Gegevens nog niet beschikbaar" (zonder aanvangstijd vanaf de dag erna).
   De zin komt van `lacksResult` in `src/matches.ts` en de eigenschap `resultMissing` van `Match`, en verdwijnt zodra de wedstrijd een score heeft.
   Een wedstrijd met een `note` in de database (een gestaakte wedstrijd die later is uitgespeeld) toont die tekst als laatste regel onder de wedstrijd, ook onder die zin.
@@ -663,9 +665,10 @@ Ze heeft acht delen:
   Onder de lijst staat geen zin: de bronvermelding onderaan de pagina zegt waar de namen vandaan komen.
   De kop heeft het anker `#stadion` bij beide titels.
   Een club zonder uitwedstrijd in de Eredivisie, of zonder stadion in die wedstrijden, heeft de kaart niet.
-  Heeft de redactie een club een eigen lijst gegeven (zie _De stadions van een club_ onder _Het beheer_), dan toont de kaart alleen die lijst, met de periodes uit de starts (`ownStadiumPeriods` in `src/match-format.ts`) en de toelichting onder de naam van haar regel (de prop `note` van `ShortStaff`), en `stadiumViewsOf` in `src/opponents.ts` kiest tussen de twee.
-  Een club met een eigen lijst heeft de kaart ook als de wedstrijden geen stadion noemen, en ook met de keuze Eredivisie als we hem alleen in de beker troffen.
-  De pagina van een club leest de lijst met de wedstrijden in `getClubPage`, dus een opslag staat er binnen vijf minuten.
+  Heeft de club thuisvelden (zie _De stadions van een club_ onder _Het beheer_), dan toont de kaart die: elk veld met de namen die het stadion had terwijl de club er speelde (`listClubStadiumLines` in `@fansite/db/stadiums`).
+  De periodes volgen uit de starts (`ownStadiumPeriods` in `src/match-format.ts`), de toelichting van het veld staat onder de naam van haar regel (de prop `note` van `ShortStaff`), en `stadiumViewsOf` in `src/opponents.ts` kiest tussen de velden en de wedstrijden.
+  Een club met thuisvelden heeft de kaart ook als de wedstrijden geen stadion noemen, en ook met de keuze Eredivisie als we hem alleen in de beker troffen.
+  De pagina van een club leest de velden met de wedstrijden in `getClubPage`, dus een opslag staat er binnen vijf minuten.
 - De bronvermelding, die ook voor deze kaart geldt.
 
 Een slug die geen club heeft, een andere waarde van `?competitie=` en een waarde die twee keer staat, geven "niet gevonden".
@@ -1205,10 +1208,11 @@ De clubs, met hun thuisvelden, staan onder `/beheer/stadions/clubs` (zie _De sta
 
 `/beheer/stadions/clubs` (`src/app/beheer/stadions/clubs`) is alleen voor de eigenaar en de redacteuren, zoals de stadions.
 De kaart op de pagina van een club toont wat de wedstrijden zeggen over zijn stadion (zie _De tegenstanders_).
-Hier geeft de redactie een club een eigen lijst van namen, met een start en een toelichting, voor een stadion dat de wedstrijden niet goed vertellen, zoals AZ dat in 2019 een half jaar in Den Haag speelde.
-Bij elke club staan ook zijn thuisvelden en zijn Wikidata-nummer.
+Hier zet de redactie de thuisvelden en het Wikidata-nummer van een club.
+De kaart op de pagina van een club toont zijn velden met hun namen (zie _De tegenstanders_), en zonder thuisvelden wat de wedstrijden zeggen over zijn stadion.
+De namen en perioden van een stadion zelf staan bij het stadion (zie _De stadions_ hierboven).
 
-- De lijst heeft alle clubs waartegen we wedstrijden hebben, met het label "Eigen lijst" bij clubs die er een hebben, het filter Alles of Eigen lijst en zoeken op een deel van de naam.
+- De lijst heeft alle clubs waartegen we wedstrijden hebben, met het label "Thuisvelden" bij clubs die er hebben, het filter Alles of Thuisvelden en zoeken op een deel van de naam.
   Het zoeken is een formulier met `GET`, dus het werkt zonder JavaScript (`searchClubs` in `src/beheer/stadiums.ts`).
 - De thuisvelden (`HomeGroundsForm.tsx`) zijn een lijst van stadions met een begin: de redacteur kiest een bestaand stadion uit een lijst (`stadiumChoices`), met een seizoen of een dag en een toelichting.
   Slaat de redactie ze op, dan zet het beheer `home_grounds_source` van de club op `manual`, zodat de import ze niet meer vervangt (`saveClubHomeGrounds`).
@@ -1216,21 +1220,12 @@ Bij elke club staan ook zijn thuisvelden en zijn Wikidata-nummer.
   Het Wikidata-nummer (`ClubWikidataForm.tsx`, `club-wikidata.ts`) laat de import de club lezen; zonder nummer slaat de import hem over.
   Bij 60 van de 91 clubs van de oude wedstrijden ontbrak het nummer (16 november 2026).
   Het schrijft `home-ground.save` en `club.edit` in het logboek, met aantallen en zonder de tekst van een toelichting.
-- `/beheer/stadions/<club>` is een pagina met twee kolommen en een werkbalk (zie _De pagina's van het beheer gebruiken het raster_ in `docs/beslissingen/site.md`).
-  De hoofdkolom heeft de thuisvelden, het Wikidata-nummer en dan het formulier van de eigen lijst (`StadiumForm.tsx`): een regel per naam met de naam, het seizoen of de dag waarmee hij begint, en een toelichting.
-  Een naam begint met een seizoen (`2019/20`, telt als 1 juli van dat jaar) of met een dag, niet met allebei, en alleen de eerste naam mag zonder start; de starts lopen op, en de naam ervoor eindigt waar de volgende begint.
-  De toelichting is gewone tekst van hoogstens 200 tekens, in eigen woorden, en noemt de bron als die niet Wikipedia is.
-- De werkbalk heeft "Eigen lijst opslaan" en "Annuleren", en het formulier heeft ze aan het einde.
-  De tweede kolom heeft wat de wedstrijden zeggen met de knop "Overnemen", en het uitklapblok "Terug naar Wikipedia".
-  "Overnemen" vult het formulier met die namen en seizoenen, en slaat niets op.
-  "Terug naar Wikipedia" haalt de hele lijst van de club weg, ook de toelichtingen, en vraagt eerst een bevestiging zoals "Invoer weghalen" bij een wedstrijd.
-- Het formulier is een client-component met `useActionState`, en een gewone post die zonder JavaScript werkt.
-  Een regel toevoegen of weghalen en "Overnemen" zijn knoppen van hetzelfde formulier, die de server beantwoordt met de waarden bewaard en de focus op het goede veld; de eerste knop is een verborgen "Opslaan", zodat Enter opslaat.
-  "Overnemen" en de knoppen in de werkbalk horen bij het formulier met het attribuut `form`.
-- `src/beheer/stadium-form.ts` leest en controleert wat het formulier stuurt, altijd opnieuw op de server, met een zin bij elk veld (lengte, vorm van een seizoen, een dag die bestaat, oplopende starts).
-  `replaceClubStadiums` en `removeClubStadiums` uit `@fansite/db/club-stadiums` schrijven de lijst en `stadium.save` of `stadium.reset` in het logboek, in één transactie, met het nummer van de club en de aantallen en zonder de tekst van een toelichting.
+- `/beheer/stadions/<club>` is een pagina met één kolom en een werkbalk (zie _De pagina's van het beheer gebruiken het raster_ in `docs/beslissingen/site.md`) met de thuisvelden en het Wikidata-nummer.
+  De tabel `club_stadiums` en het formulier van een eigen lijst zijn weg (#1301): de kaart leest de velden en namen uit de tabellen van de stadions.
 - Een opslag staat binnen vijf minuten op de pagina van de club: dat is de tijd die `getClubPage` zijn gegevens bewaart.
-- `e2e/stadiums.ts` geeft SV Proefdorp een verzonnen lijst met een toelichting, voor `pnpm test:a11y` en `pnpm --filter site test-data`.
+- sc Heerenveen is geen club in `clubs`, dus zijn thuisvelden staan er niet in dit scherm.
+  Ze staan in `club_home_grounds` met een leeg `club_id` (gezaaid door `seedStadiums`), en alleen een stadion van sc Heerenveen kiezen voor een wedstrijd kan al in het formulier van de wedstrijd.
+- `e2e/stadiums.ts` geeft SV Proefdorp verzonnen thuisvelden met een toelichting, voor `pnpm test:a11y` en `pnpm --filter site test-data`.
 
 ### De namen van een club
 

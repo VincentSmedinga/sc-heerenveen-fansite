@@ -138,27 +138,35 @@ async function addProefdorpNames(database) {
 }
 
 /**
- * Gives SV Proefdorp, a club with a cup tie to come and no match played, a list of stadiums of
- * its own: a name, a name that starts on a day, with a note, and the first name again from a
- * season. Its page then has the card Stadions although the matches name no stadium.
+ * Gives SV Proefdorp, a club with a cup tie to come and no match played, home grounds: its
+ * sportpark, a ground it played on for a while from a day, with a note, and the sportpark again
+ * from a season. Its page then has the card Stadions although the matches name no stadium.
  */
 async function addProefdorpStadiums(database) {
   const { close, pool } = connect(database)
 
   try {
     const [[{ club }]] = await pool.query("SELECT club_id AS club FROM matches WHERE opponent = 'SV Proefdorp' LIMIT 1")
+    const [{ insertId: sportpark }] = await pool.query('INSERT INTO stadiums () VALUES ()')
+    const [{ insertId: temporary }] = await pool.query('INSERT INTO stadiums () VALUES ()')
 
+    await pool.query('INSERT INTO stadium_names (stadium_id, position, name) VALUES (?, 0, ?), (?, 0, ?)', [
+      sportpark,
+      'Sportpark Proefdorp',
+      temporary,
+      'Stadion Tijdelijk',
+    ])
     await pool.query(
-      'INSERT INTO club_stadiums (club_id, position, name, start_season, start_day, note) VALUES (?, 0, ?, NULL, NULL, NULL), (?, 1, ?, NULL, ?, ?), (?, 2, ?, ?, NULL, NULL)',
+      'INSERT INTO club_home_grounds (club_id, stadium_id, position, start_season, start_day, note) VALUES (?, ?, 0, NULL, NULL, NULL), (?, ?, 1, NULL, ?, ?), (?, ?, 2, ?, NULL, NULL)',
       [
         club,
-        'Sportpark Proefdorp',
+        sportpark,
         club,
-        'Stadion Tijdelijk',
+        temporary,
         '2019-08-10',
         'Proefdorp speelde tijdelijk elders.',
         club,
-        'Sportpark Proefdorp',
+        sportpark,
         '2020/21',
       ],
     )
@@ -323,7 +331,7 @@ async function checkAdmin() {
     '/beheer/stadions',
     '/beheer/stadions/stadion/nieuw',
     '/beheer/stadions/clubs',
-    '/beheer/stadions/clubs?tonen=eigen-lijst&q=proef',
+    '/beheer/stadions/clubs?tonen=thuisvelden&q=proef',
     '/beheer/stadions/voorbeeld-united',
     '/beheer/clubnamen',
     '/beheer/clubnamen?tonen=eigen-lijst&q=proef',
@@ -1839,8 +1847,8 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(comingClub, /<h3|nog niet tegen deze club gespeeld/)
     assert.doesNotMatch(comingClub, /id="onze-uitslagen"|id="hoe-vaak-welke-uitslag"|Thuis|>Uit</)
     assert.match(comingClub, /<section class="hf-page-section"[^>]*aria-label="De bron"/)
-    // A club with a list of its own has the card Stadions with it, whatever the matches say:
-    // the periods follow from the starts, the note is under the name of its line, and the
+    // A club with home grounds has the card Stadions with it, whatever the matches say: the
+    // periods follow from the starts, the note is under the name of its line, and the
     // credit follows the card. This club has a cup tie to come and none played.
     const ownListClub = await (await fetch(`${origin}/tegenstanders/sv-proefdorp`)).text()
     assert.match(ownListClub, /<section class="hf-page-section"[^>]*aria-label="Het stadion en de bron"/)

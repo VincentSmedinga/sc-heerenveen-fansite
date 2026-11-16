@@ -28,6 +28,10 @@ const choices: MatchFormChoices = {
   opponent: 'Testclub',
   showDelay: 'binnen vijf minuten',
   squad: [{ id: 11, name: 'Luca Oyen' }],
+  stadiums: [
+    { id: 4, label: 'Abe Lenstra Stadion (Heerenveen)' },
+    { id: 7, label: 'De Kuip (Rotterdam)' },
+  ],
   statuses: [{ label: 'Gespeeld', value: 'played' }],
   timeOptional: false,
 }
@@ -75,9 +79,16 @@ describe('the facts in the form of a match', () => {
       </MatchFormProvider>,
     )
 
-    for (const label of ['Toeschouwers', 'Scheidsrechter', 'Stadion', 'Opmerking']) {
+    for (const label of ['Toeschouwers', 'Scheidsrechter', 'Stadion$', 'Stadion uit de lijst', 'Opmerking']) {
       expect(screen.getByLabelText(new RegExp(`^${label}`, 'u'))).toBeTruthy()
     }
+    const list = screen.getByLabelText(/^Stadion uit de lijst/u) as HTMLSelectElement
+
+    expect([...list.options].map((option) => option.textContent)).toEqual([
+      'Uit de tekst',
+      'Abe Lenstra Stadion (Heerenveen)',
+      'De Kuip (Rotterdam)',
+    ])
     expect((screen.getByLabelText(/^Toeschouwers/u) as HTMLInputElement).value).toBe('21022')
     expect((screen.getByLabelText(/^Opmerking/u) as HTMLInputElement).value).toBe('Begon later')
   })

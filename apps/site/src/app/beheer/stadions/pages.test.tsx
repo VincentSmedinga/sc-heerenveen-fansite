@@ -1,8 +1,7 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { replaceClubStadiums } from '@fansite/db/club-stadiums'
 import { withClubs } from '@fansite/db/clubs'
-import { adminUsers, clubs, matches, type NewMatch } from '@fansite/db/schema'
+import { adminUsers, clubHomeGrounds, clubs, matches, type NewMatch, stadiumNames, stadiums } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -53,7 +52,9 @@ const visit = (opponent: string, stadium: string, season = '2025/26'): Omit<NewM
 
 beforeEach(async () => {
   requireRole.mockReset()
-  await database.pool.query('DELETE FROM club_stadiums')
+  await database.pool.query('DELETE FROM club_home_grounds')
+  await database.pool.query('DELETE FROM stadium_names')
+  await database.pool.query('DELETE FROM stadiums')
   await database.pool.query('DELETE FROM audit_log')
   await database.pool.query('DELETE FROM matches')
   await database.db.delete(adminUsers)
@@ -75,15 +76,24 @@ beforeEach(async () => {
 const clubId = async (slug: string) => (await database.db.select().from(clubs).where(eq(clubs.slug, slug)))[0]?.id ?? 0
 
 async function giveList(slug: string) {
-  await replaceClubStadiums(database.db, userId, await clubId(slug), [
-    { name: 'AFAS Stadion', note: null, startDay: null, startSeason: null },
+  const [{ insertId: afas }] = await database.db.insert(stadiums).values({})
+  const [{ insertId: temporary }] = await database.db.insert(stadiums).values({})
+  const club = await clubId(slug)
+
+  await database.db.insert(stadiumNames).values([
+    { name: 'AFAS Stadion', position: 0, stadiumId: afas },
+    { name: 'Cars Jeans Stadion', position: 0, stadiumId: temporary },
+  ])
+  await database.db.insert(clubHomeGrounds).values([
+    { clubId: club, position: 0, stadiumId: afas },
     {
-      name: 'Cars Jeans Stadion',
+      clubId: club,
       note: 'AZ speelde tijdelijk in Den Haag.',
+      position: 1,
+      stadiumId: temporary,
       startDay: '2019-08-10',
-      startSeason: null,
     },
-    { name: 'AFAS Stadion', note: null, startDay: null, startSeason: '2020/21' },
+    { clubId: club, position: 2, stadiumId: afas, startSeason: '2020/21' },
   ])
 }
 
@@ -123,28 +133,28 @@ describe('the pages of the stadiums', () => {
 })
 
 describe('the list of the clubs', () => {
-  it('has the clubs we have matches against, A to Z, and says in words which have a list of their own', async () => {
+  it('has the clubs we have matches against, A to Z, and says in words which have home grounds', async () => {
     await giveList('oefenstad-az')
 
     const html = await list()
 
     expect(rowsOf(html)).toEqual([
-      ['Oefenstad AZ', 'Eigen lijst'],
+      ['Oefenstad AZ', 'Thuisvelden'],
       ['Oefenstad NAC', 'Wikipedia'],
       ['Oefenstad Zonder', 'Wikipedia'],
     ])
     expect(html).toContain('href="/beheer/stadions/oefenstad-az"')
     expect(html).toContain('Alles (3)')
-    expect(html).toContain('Eigen lijst (1)')
+    expect(html).toContain('Thuisvelden (1)')
   })
 
-  it('filters on the clubs with a list of their own, and says so when there is none', async () => {
-    expect(rowsOf(await list({ tonen: 'eigen-lijst' }))).toEqual([])
-    expect(await list({ tonen: 'eigen-lijst' })).toContain('Nog geen club heeft een eigen lijst.')
+  it('filters on the clubs with home grounds, and says so when there is none', async () => {
+    expect(rowsOf(await list({ tonen: 'thuisvelden' }))).toEqual([])
+    expect(await list({ tonen: 'thuisvelden' })).toContain('Nog geen club heeft thuisvelden.')
 
     await giveList('oefenstad-az')
 
-    expect(rowsOf(await list({ tonen: 'eigen-lijst' }))).toEqual([['Oefenstad AZ', 'Eigen lijst']])
+    expect(rowsOf(await list({ tonen: 'thuisvelden' }))).toEqual([['Oefenstad AZ', 'Thuisvelden']])
   })
 
   it('searches on the name, with a form that works without JavaScript, and keeps the search in the filter', async () => {
@@ -154,7 +164,7 @@ describe('the list of the clubs', () => {
     expect(html).toMatch(/<form[^>]*action="\/beheer\/stadions\/clubs" method="get"/)
     expect(html).toContain('<input')
     expect(html).toContain('value="nac"')
-    expect(html).toContain('href="/beheer/stadions/clubs?tonen=eigen-lijst&amp;q=nac"')
+    expect(html).toContain('href="/beheer/stadions/clubs?tonen=thuisvelden&amp;q=nac"')
     expect(await list({ q: 'bestaat niet' })).toContain('Geen club gevonden met “bestaat niet”.')
   })
 
@@ -164,71 +174,45 @@ describe('the list of the clubs', () => {
   })
 })
 
-describe('the form of a club', () => {
-  it('has one empty line for a club without a list, and what the matches say next to it with the button to take it over', async () => {
+describe('the page of a club', () => {
+  it('says a club without home grounds has none, and that its card shows what the matches say', async () => {
     const html = await form('oefenstad-az')
 
     expect(html).toContain('<h1')
     expect(html).toContain('Oefenstad AZ')
-    expect(html).toContain('Wikipedia')
-    expect(html.match(/name="regel-\d+-naam"/g)).toEqual(['name="regel-1-naam"'])
-    expect(html).toContain('Wat de wedstrijden zeggen')
-    expect(html).toContain('t/m 2024/25')
-    expect(html).toContain('vanaf 2025/26')
-    expect(html).toMatch(/<button[^>]*form="stadions"[^>]*value="overnemen"/)
+    expect(html).toContain('Geen thuisvelden')
+    expect(html).toContain('De kaart toont wat de wedstrijden zeggen.')
+    expect(html).not.toContain('name="regel-')
+    expect(html).not.toContain('Wat de wedstrijden zeggen')
     expect(html).not.toContain('Terug naar Wikipedia')
   })
 
-  it('says there is nothing to take over for a club the matches name no stadium of', async () => {
-    await database.pool.query('UPDATE matches SET stadium = NULL')
-
+  it('has the form of the home grounds and the Wikidata number, and no list of its own any more', async () => {
     const html = await form('oefenstad-az')
 
-    expect(html).toContain('De wedstrijden noemen geen stadion van deze club.')
-    expect(html).not.toContain('value="overnemen"')
+    expect(html).toContain('name="knop"')
+    expect(html).toContain('value="thuis-opslaan"')
+    expect(html).toContain('Wikidata')
+    expect(html).not.toContain('Eigen lijst opslaan')
   })
 
-  it('has the lines of the list of its own, with the note, and the block that goes back to Wikipedia', async () => {
+  it('shows the home grounds of the club with a tag', async () => {
     await giveList('oefenstad-az')
 
     const html = await form('oefenstad-az')
 
-    expect(html.match(/name="regel-\d+-naam"/g)).toHaveLength(3)
-    expect(html).toContain('value="Cars Jeans Stadion"')
+    expect(html).toContain('Thuisvelden')
+    expect(html).toContain('De kaart op de pagina van de club toont deze velden met hun namen.')
     expect(html).toContain('value="2019-08-10"')
-    expect(html).toContain('value="2020/21"')
     expect(html).toContain('AZ speelde tijdelijk in Den Haag.')
-    expect(html).toContain('De kaart op de pagina van de club toont alleen deze lijst.')
-    expect(html).toContain('Eigen lijst')
-    expect(html).toContain('Terug naar Wikipedia')
-    expect(html).toContain('aria-label="Terug naar Wikipedia voor Oefenstad AZ"')
   })
 
-  it('names every field and every button of a line with the line, and has the hint for the note', async () => {
-    await giveList('oefenstad-az')
-
-    const html = await form('oefenstad-az')
-
-    expect(html).toContain('Naam<span class="hf-visually-hidden">, regel 2: Cars Jeans Stadion</span>')
-    expect(html).toContain('Toelichting<span class="hf-visually-hidden">, regel 2: Cars Jeans Stadion</span>')
-    expect(html).toContain('Regel 2: Cars Jeans Stadion weghalen')
-    expect(html).toContain('Schrijf in eigen woorden. Komt het niet van Wikipedia, noem dan de bron in de zin.')
-  })
-
-  it('puts the hidden save button first in the form, so Enter saves and does not remove a line', async () => {
-    const html = await form('oefenstad-az')
-    const first = html.slice(html.indexOf('<form'))
-
-    expect(first.indexOf('value="opslaan"')).toBeLessThan(first.indexOf('value="regel-weghalen-1"'))
-  })
-
-  it.each([
-    ['opgeslagen', 'De lijst is bewaard. Staat binnen vijf minuten op de pagina van de club.'],
-    ['teruggezet', 'De eigen lijst is weg.'],
-    ['geen-lijst', 'Deze club had geen eigen lijst om weg te halen.'],
-  ])('tells what the last action did: %s', async (gedaan, text) => {
-    expect(await form('oefenstad-az', { gedaan })).toContain(text)
-  })
+  it.each([['thuisvelden-opgeslagen', 'De thuisvelden zijn bewaard.']])(
+    'tells what the last action did: %s',
+    async (gedaan, text) => {
+      expect(await form('oefenstad-az', { gedaan })).toContain(text)
+    },
+  )
 
   it('tells nothing for a notice the page does not know', async () => {
     expect(await form('oefenstad-az', { gedaan: 'onzin' })).not.toContain('class="hf-notice')
@@ -236,17 +220,5 @@ describe('the form of a club', () => {
 
   it('does not exist for a club no club has', async () => {
     await expect(form('bestaat-niet')).rejects.toThrow('not found')
-  })
-
-  it('shows a note as text, never as markup', async () => {
-    await replaceClubStadiums(database.db, userId, await clubId('oefenstad-az'), [
-      { name: 'Stadion', note: '<b>vet</b>"><script>alert(1)</script>', startDay: null, startSeason: null },
-    ])
-
-    const html = await form('oefenstad-az')
-
-    expect(html).not.toContain('<b>vet</b>')
-    expect(html).not.toContain('<script>alert(1)')
-    expect(html).toContain('&lt;b&gt;vet&lt;/b&gt;')
   })
 })

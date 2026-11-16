@@ -353,6 +353,7 @@ async function submitForm(
     dataSource: found.match.dataSource,
     opponent: found.match.opponent,
     squad: found.squad,
+    stadiumIds: found.stadiums.map((stadium) => stadium.id),
   })
 
   if (checked.errors !== undefined) {

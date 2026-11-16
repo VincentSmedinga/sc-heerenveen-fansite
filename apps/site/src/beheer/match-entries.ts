@@ -17,9 +17,19 @@ import {
 } from '@fansite/db/match-edits'
 import { mayHaveReport, phaseOf } from '@fansite/db/match-reports'
 import { listWikipediaPages } from '@fansite/db/queries'
-import { adminUsers, matchChanges, matchEdits, matches, matchGoals, matchReports, players } from '@fansite/db/schema'
+import {
+  adminUsers,
+  matchChanges,
+  matchEdits,
+  matches,
+  matchGoals,
+  matchReports,
+  players,
+  stadiumNames,
+} from '@fansite/db/schema'
+import { listAdminStadiums } from '@fansite/db/stadium-admin'
 import { linkMatchToStadium } from '@fansite/db/stadiums'
-import { and, asc, count, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm'
+import { and, asc, count, desc, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm'
 
 import type { EntryGoal, MatchEntry, SquadPlayer } from './match-form'
 
@@ -27,6 +37,7 @@ import { lacksResult } from '../matches'
 import { accountName } from './account-name'
 import { recordAction } from './audit-log'
 import { listReportsToCheck } from './match-reports'
+import { stadiumChoices } from './stadiums'
 
 // Writing the matches in the admin: the list, the one match an editor fills in, and the two
 // changes, the entry and removing it. The entry is written into `matches` and `match_goals`,
@@ -222,6 +233,7 @@ export async function findMatch(db: Pick<Database, 'select'>, id: number) {
     match,
     pages: await listWikipediaPages(db, match.season),
     squad,
+    stadiums: stadiumChoices(await listAdminStadiums(db)),
   }
 }
 
@@ -342,7 +354,11 @@ export async function saveEntry(
           ...(parts.includes('facts') ? facts : {}),
         })
         .where(eq(matches.id, id))
-      await linkMatchToStadium(transaction, id)
+
+      // A stadium the editor chose stays; with none chosen it follows from the text.
+      if (!(parts.includes('facts') && (facts.stadiumId ?? null) !== null)) {
+        await linkMatchToStadium(transaction, id)
+      }
     }
 
     if (parts.includes('goals')) {
@@ -412,7 +428,13 @@ export async function saveEntry(
 
     await recordAction(
       transaction,
-      { action: 'match.edit', detail: describeChanges(match, goals, entry, parts), itemId: id, reason, userId },
+      {
+        action: 'match.edit',
+        detail: describeChanges(match, goals, entry, parts, await stadiumLabels(transaction, match)),
+        itemId: id,
+        reason,
+        userId,
+      },
       now,
     )
 
@@ -571,6 +593,10 @@ function changedParts(match: Match, goals: MatchGoal[], entry: MatchEntry): Matc
     match.attendance !== entry.facts.attendance ||
     match.referee !== entry.facts.referee ||
     match.stadium !== entry.facts.stadium ||
+    // No choice (`null`) follows the text, so it changes nothing by itself.
+    (entry.facts.stadiumId !== undefined &&
+      entry.facts.stadiumId !== null &&
+      entry.facts.stadiumId !== match.stadiumId) ||
     match.note !== entry.facts.note
   ) {
     parts.push('facts')
@@ -580,7 +606,13 @@ function changedParts(match: Match, goals: MatchGoal[], entry: MatchEntry): Matc
 }
 
 /** What changed, for the log: each part with the value before and after. */
-function describeChanges(match: Match, goals: MatchGoal[], entry: MatchEntry, parts: MatchPart[]): string {
+function describeChanges(
+  match: Match,
+  goals: MatchGoal[],
+  entry: MatchEntry,
+  parts: MatchPart[],
+  labels: { after: null | string; before: null | string },
+): string {
   const lines: string[] = []
 
   if (parts.includes('kickoff')) {
@@ -596,7 +628,9 @@ function describeChanges(match: Match, goals: MatchGoal[], entry: MatchEntry, pa
   }
 
   if (parts.includes('facts')) {
-    lines.push(`Gegevens: ${describeEntryFacts(match)} → ${describeEntryFacts(entry.facts)}`)
+    lines.push(
+      `Gegevens: ${describeEntryFacts({ ...match, stadiumLabel: labels.before })} → ${describeEntryFacts({ ...entry.facts, stadiumLabel: labels.after })}`,
+    )
   }
 
   return lines.join('; ')
@@ -654,4 +688,26 @@ function keepStoredLinks(stored: MatchGoal[], entry: EntryGoal[]): EntryGoal[] {
 /** Whether the goals of the entry are the stored goals, in the same order. */
 function sameGoals(stored: MatchGoal[], entry: EntryGoal[]) {
   return stored.length === entry.length && stored.every((goal, index) => isSameGoal(goal, entry[index]!))
+}
+
+/** The name of the stadium linked to the match before and after the entry, for the log. */
+async function stadiumLabels(db: Pick<Database, 'select'>, match: Match) {
+  // Read again: the link has been made by now, so this is the stadium after the entry.
+  const [after] = await db.select({ stadiumId: matches.stadiumId }).from(matches).where(eq(matches.id, match.id))
+  const named = async (stadiumId: null | number) => {
+    if (stadiumId === null) {
+      return null
+    }
+
+    const [row] = await db
+      .select({ name: stadiumNames.name })
+      .from(stadiumNames)
+      .where(eq(stadiumNames.stadiumId, stadiumId))
+      .orderBy(desc(stadiumNames.position))
+      .limit(1)
+
+    return row?.name ?? null
+  }
+
+  return { after: await named(after?.stadiumId ?? null), before: await named(match.stadiumId) }
 }

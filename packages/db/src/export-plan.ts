@@ -58,7 +58,6 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
   club_name_periods: 'copy',
   club_names: 'copy',
   club_pages: 'copy',
-  club_stadiums: 'copy',
   clubs: 'copy',
   daily_visitors: 'copy',
   discussions: 'structure',

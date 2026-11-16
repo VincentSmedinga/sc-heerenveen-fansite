@@ -12,6 +12,8 @@ import {
   type NewMatch,
   persons,
   players,
+  stadiumNames,
+  stadiums,
   wikipediaPages,
 } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
@@ -48,6 +50,9 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM audit_log')
   await database.pool.query('DELETE FROM match_changes')
   await database.pool.query('DELETE FROM matches')
+  await database.pool.query('DELETE FROM club_home_grounds')
+  await database.pool.query('DELETE FROM stadium_names')
+  await database.pool.query('DELETE FROM stadiums')
   await database.pool.query('DELETE FROM players')
   await database.pool.query('DELETE FROM persons')
   await database.db.delete(adminUsers)
@@ -532,6 +537,99 @@ describe('the facts of a match', () => {
     expect(await database.db.select().from(matchChanges)).toMatchObject([
       { resolution: 'replaced', status: 'rejected' },
     ])
+  })
+})
+
+describe('the stadium an editor chooses', () => {
+  const facts = { attendance: null, note: null, referee: null, stadium: 'Neutraal Veld' }
+
+  async function makeStadium(name: string) {
+    const [{ insertId }] = await database.db.insert(stadiums).values({})
+
+    await database.db.insert(stadiumNames).values({ name, position: 0, stadiumId: insertId })
+
+    return insertId
+  }
+
+  it('links the match to it, marks the facts, names it in the log, and keeps it when nothing changes', async () => {
+    const final = await makeStadium('De Kuip')
+    const id = await addMatch({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+
+    expect(
+      await saveEntry(database.db, userId, id, entry({ facts: { ...facts, stadiumId: final } }), 'Finale', t0),
+    ).toEqual({ parts: ['facts'], status: 'saved' })
+    expect(await stored(id)).toMatchObject({ stadium: 'Neutraal Veld', stadiumId: final })
+    expect(await edit(id)).toMatchObject({ factsEdited: true })
+    expect((await log())[0]?.detail).toContain('→ toeschouwers geen, scheidsrechter geen, stadion Neutraal Veld')
+    expect((await log())[0]?.detail).toContain('gekoppeld stadion De Kuip')
+    expect(
+      await saveEntry(database.db, userId, id, entry({ facts: { ...facts, stadiumId: final } }), 'Nog eens', t1),
+    ).toEqual({ status: 'unchanged' })
+  })
+
+  it('changes only the stadium when only the stadium changes, and then leaves the text as it is', async () => {
+    const first = await makeStadium('De Kuip')
+    const second = await makeStadium('Amsterdam ArenA')
+    const id = await addMatch({ goalsAgainst: 1, goalsFor: 2, stadium: 'De Kuip', status: 'played' })
+
+    await saveEntry(
+      database.db,
+      userId,
+      id,
+      entry({ facts: { ...facts, stadium: 'De Kuip', stadiumId: first } }),
+      '',
+      t0,
+    )
+    await saveEntry(
+      database.db,
+      userId,
+      id,
+      entry({ facts: { ...facts, stadium: 'De Kuip', stadiumId: second } }),
+      '',
+      t1,
+    )
+
+    expect(await stored(id)).toMatchObject({ stadium: 'De Kuip', stadiumId: second })
+  })
+
+  it('follows the text when no stadium is chosen, and puts the link back when the entry is taken away', async () => {
+    await makeStadium('Oefenstadion')
+
+    const id = await addMatch({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+
+    await saveEntry(
+      database.db,
+      userId,
+      id,
+      entry({ facts: { ...facts, stadium: 'Oefenstadion', stadiumId: null } }),
+      'Uit het archief',
+      t0,
+    )
+    expect((await stored(id))?.stadiumId).not.toBeNull()
+
+    const chosen = await makeStadium('De Kuip')
+
+    await saveEntry(
+      database.db,
+      userId,
+      id,
+      entry({ facts: { ...facts, stadium: 'Oefenstadion', stadiumId: chosen } }),
+      '',
+      t1,
+    )
+    expect((await stored(id))?.stadiumId).toBe(chosen)
+    expect(await undoEntry(database.db, userId, id, 'Vergissing', t1)).toBe('done')
+    expect(await stored(id)).toMatchObject({ stadium: null, stadiumId: null })
+  })
+
+  it('is offered to the form with the name and the place of each stadium', async () => {
+    const stadium = await makeStadium('De Kuip')
+
+    await database.db.update(stadiums).set({ place: 'Rotterdam' }).where(eq(stadiums.id, stadium))
+
+    const id = await addMatch()
+
+    expect((await findMatch(database.db, id))?.stadiums).toEqual([{ id: stadium, label: 'De Kuip (Rotterdam)' }])
   })
 })
 

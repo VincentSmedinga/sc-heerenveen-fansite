@@ -164,7 +164,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
     notFound()
   }
 
-  const { differences, edit, goals, hasReport, held, match, pages, squad } = found
+  const { differences, edit, goals, hasReport, held, match, pages, squad, stadiums } = found
   const waiting = differences.length + held.length > 0
 
   if (part === 'wijzigingen' && !waiting) {
@@ -241,6 +241,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
           : undefined,
         showDelay,
         squad,
+        stadiums,
         statuses: statusChoices,
         timeOptional: match.dataSource === 'oude-fansite',
       }}

@@ -30,6 +30,7 @@ import {
   standings,
   wikipediaPages,
 } from './schema.ts'
+import { stadiumOnTheDay } from './stadiums.ts'
 import { servedInSeason, type StaffOnDay, staffOnDay } from './staff.ts'
 
 export type MatchInSequence = Awaited<ReturnType<typeof listMatchSequence>>[number]
@@ -536,7 +537,7 @@ export async function listClubMatches(db: Database, club: number, { competition 
       penaltiesFor: matches.penaltiesFor,
       round: matches.round,
       season: matches.season,
-      stadium: matches.stadium,
+      stadium: stadiumOnTheDay,
       status: matches.status,
     })
     .from(matches)
@@ -1345,7 +1346,7 @@ async function matchesWithClub(db: Database, where: SQL | undefined) {
       referee: matches.referee,
       round: matches.round,
       season: matches.season,
-      stadium: matches.stadium,
+      stadium: stadiumOnTheDay,
       status: matches.status,
     })
     .from(matches)

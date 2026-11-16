@@ -10,7 +10,13 @@ const squad = [
   // A player the editors added: a person, and no page to find him by.
   { id: 12, name: 'Bernt Klaverboer', personId: 32, wikipediaPage: null },
 ]
-const league = { competition: 'Eredivisie', dataSource: 'wikipedia', opponent: 'N.E.C.', squad } as const
+const league = {
+  competition: 'Eredivisie',
+  dataSource: 'wikipedia',
+  opponent: 'N.E.C.',
+  squad,
+  stadiumIds: [4, 7],
+} as const
 const cup = { ...league, competition: 'KNVB Beker' } as const
 
 /** A played league match won 2-1, with a time, and the reason. */
@@ -51,8 +57,26 @@ describe('the facts', () => {
       note: 'Begon later door file',
       referee: 'Bas Nijhuis',
       stadium: 'Abe Lenstra Stadion',
+      stadiumId: null,
     })
     expect(validate(filled({ toeschouwers: '0' }), league).entry?.facts.attendance).toBe(0)
+  })
+
+  it('takes the stadium from the list, reads empty as none, and refuses a stadium that is not there', () => {
+    expect(validate(filled({ 'stadion-id': '7' }), league).entry?.facts.stadiumId).toBe(7)
+    expect(validate(filled({ 'stadion-id': '' }), league).entry?.facts.stadiumId).toBeNull()
+
+    for (const wrong of ['8', 'x', '4.5', '-4']) {
+      expect(validate(filled({ 'stadion-id': wrong }), league).errors?.['stadion-id']).toBe(
+        'Kies een stadion uit de lijst, of laat het leeg.',
+      )
+    }
+  })
+
+  it('puts the stadium of the match in the form', () => {
+    const values = valuesOf({ ...({} as Parameters<typeof valuesOf>[0]), kickoffAt: null, stadiumId: 7 }, [])
+
+    expect(values.velden['stadion-id']).toBe('7')
   })
 
   it('has an error at each field that is too long, and at spectators that are not a number', () => {
@@ -114,7 +138,7 @@ describe('validate', () => {
 
     expect(checked.errors).toBeUndefined()
     expect(checked.entry).toEqual({
-      facts: { attendance: null, note: null, referee: null, stadium: null },
+      facts: { attendance: null, note: null, referee: null, stadium: null, stadiumId: null },
       goals: [],
       kickoff: { dateText: null, kickoffAt: new Date('2026-10-31T18:45:00Z'), matchDate: '2026-10-31' },
       result: {

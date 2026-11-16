@@ -7,11 +7,13 @@ import type { NewMatch } from './schema.ts'
 import type { TestDatabase } from './test-database.ts'
 
 import { withClubs } from './clubs.ts'
-import { clubHomeGrounds, clubs, matches, stadiumNames, stadiums } from './schema.ts'
+import { listClubMatches } from './queries.ts'
+import { adminUsers, clubHomeGrounds, clubs, matchEdits, matches, stadiumNames, stadiums } from './schema.ts'
 import {
   findStadium,
   linkMatchesToStadiums,
   linkMatchToStadium,
+  listClubStadiumLines,
   migrateStadiums,
   nameKey,
   replaceHomeGrounds,
@@ -31,11 +33,13 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
+  await database.pool.query('DELETE FROM match_edits')
   await database.pool.query('DELETE FROM matches')
   await database.pool.query('DELETE FROM club_home_grounds')
   await database.pool.query('DELETE FROM stadium_names')
   await database.pool.query('DELETE FROM stadiums')
   await database.pool.query('DELETE FROM clubs')
+  await database.pool.query('DELETE FROM admin_users')
 })
 
 let round = 0
@@ -332,5 +336,132 @@ describe('linkMatchToStadium', () => {
     await database.db.update(matches).set({ stadium: null }).where(eq(matches.id, id))
     expect(await linkMatchToStadium(database.db, id)).toBeNull()
     expect(await stadiumOf(id)).toBeNull()
+  })
+})
+
+describe('linkMatchToStadium and a stadium the editors chose', () => {
+  it('keeps the stadium of a match whose facts the editors entered, and follows the text again without them', async () => {
+    const chosen = await makeStadium(['Neutraal Veld', null])
+
+    await makeStadium(['Oefenstadion', null])
+
+    const id = await played('Oefenstad', { matchDate: '2020-01-01', stadium: 'Oefenstadion' })
+
+    await database.db.update(matches).set({ stadiumId: chosen }).where(eq(matches.id, id))
+    // Without the marker the text decides.
+    expect(await linkMatchToStadium(database.db, id)).not.toBe(chosen)
+
+    await database.db.update(matches).set({ stadiumId: chosen }).where(eq(matches.id, id))
+    const [user] = await database.db
+      .insert(adminUsers)
+      .values({ email: 'redacteur@example.test', role: 'editor' })
+      .$returningId()
+
+    await database.db.insert(matchEdits).values({
+      beforeGoals: '[]',
+      beforeMatch: '{}',
+      editedAt: new Date(),
+      editedBy: user?.id ?? 0,
+      factsEdited: true,
+      matchId: id,
+    })
+    expect(await linkMatchToStadium(database.db, id)).toBe(chosen)
+    expect(await stadiumOf(id)).toBe(chosen)
+  })
+})
+
+describe('the name of the stadium on the day of the match', () => {
+  async function stadiumTextOf(club: string, day: string) {
+    const rows = await listClubMatches(database.db, await clubId(club))
+
+    return rows.find((row) => row.matchDate === day)?.stadium
+  }
+
+  it('is the last name the stadium had by then, or the text of the source without a stadium', async () => {
+    const id = await makeStadium(['Oud Veld', null], ['Nieuwe Arena', '2006/07'])
+
+    await played('Oefenstad', { matchDate: '2005-10-10', stadium: 'Oud Veld' })
+    await played('Oefenstad', { matchDate: '2007-10-10', stadium: 'Oud Veld' })
+    await played('Oefenstad', { matchDate: '2008-10-10', stadium: 'Een Veld Zonder Stadion' })
+    await database.db.update(matches).set({ stadiumId: id }).where(eq(matches.matchDate, '2005-10-10'))
+    await database.db.update(matches).set({ stadiumId: id }).where(eq(matches.matchDate, '2007-10-10'))
+
+    expect(await stadiumTextOf('Oefenstad', '2005-10-10')).toBe('Oud Veld')
+    expect(await stadiumTextOf('Oefenstad', '2007-10-10')).toBe('Nieuwe Arena')
+    expect(await stadiumTextOf('Oefenstad', '2008-10-10')).toBe('Een Veld Zonder Stadion')
+  })
+
+  it('begins a name on its day, not on the first of July of its season, when it has a day', async () => {
+    const [{ insertId }] = await database.db.insert(stadiums).values({})
+
+    await database.db.insert(stadiumNames).values([
+      { name: 'Eerst', position: 0, stadiumId: insertId },
+      { name: 'Daarna', position: 1, stadiumId: insertId, startDay: '2001-03-05' },
+    ])
+    await played('Oefenstad', { matchDate: '2001-03-04', stadium: 'Eerst' })
+    await played('Oefenstad', { matchDate: '2001-03-05', stadium: 'Eerst' })
+    await database.db.update(matches).set({ stadiumId: insertId })
+
+    expect(await stadiumTextOf('Oefenstad', '2001-03-04')).toBe('Eerst')
+    expect(await stadiumTextOf('Oefenstad', '2001-03-05')).toBe('Daarna')
+  })
+})
+
+describe('listClubStadiumLines', () => {
+  async function ground(
+    club: string,
+    rows: { note?: string; stadiumId: number; startDay?: string; startSeason?: string }[],
+  ) {
+    const clubIdValue = await clubId(club)
+
+    await database.db.insert(clubHomeGrounds).values(
+      rows.map((row, position) => ({
+        clubId: clubIdValue,
+        note: row.note ?? null,
+        position,
+        stadiumId: row.stadiumId,
+        startDay: row.startDay ?? null,
+        startSeason: row.startSeason ?? null,
+      })),
+    )
+
+    return clubIdValue
+  }
+
+  beforeEach(async () => {
+    await database.db.insert(clubs).values({ name: 'Oefenstad', slug: 'oefenstad' })
+  })
+
+  it('is empty for a club without home grounds', async () => {
+    expect(await listClubStadiumLines(database.db, await clubId('Oefenstad'))).toEqual([])
+  })
+
+  it('gives each ground with the names its stadium had while the club played there', async () => {
+    const sportpark = await makeStadium(['Sportpark', null], ['Proef Arena', '2020/21'])
+    const temporary = await makeStadium(['Stadion Tijdelijk', null])
+    const club = await ground('Oefenstad', [
+      { stadiumId: sportpark },
+      { note: 'Tijdelijk elders.', stadiumId: temporary, startDay: '2019-08-10' },
+      { stadiumId: sportpark, startSeason: '2020/21' },
+    ])
+
+    expect(await listClubStadiumLines(database.db, club)).toEqual([
+      // The name from 2020/21 began after the club left the sportpark, so it is not here.
+      { name: 'Sportpark', note: null, startDay: null, startSeason: null },
+      { name: 'Stadion Tijdelijk', note: 'Tijdelijk elders.', startDay: '2019-08-10', startSeason: null },
+      // The club came back when the stadium had its new name, so the old name is left out.
+      { name: 'Proef Arena', note: null, startDay: null, startSeason: '2020/21' },
+    ])
+  })
+
+  it('gives a renamed stadium a line for each name, with the start of the name', async () => {
+    const stadium = await makeStadium(['Sportpark', null], ['Proef Arena', '2012/13'], ['Proef Park', '2020/21'])
+    const club = await ground('Oefenstad', [{ stadiumId: stadium }])
+
+    expect(await listClubStadiumLines(database.db, club)).toEqual([
+      { name: 'Sportpark', note: null, startDay: null, startSeason: null },
+      { name: 'Proef Arena', note: null, startDay: null, startSeason: '2012/13' },
+      { name: 'Proef Park', note: null, startDay: null, startSeason: '2020/21' },
+    ])
   })
 })

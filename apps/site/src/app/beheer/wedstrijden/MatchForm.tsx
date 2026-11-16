@@ -82,6 +82,8 @@ export type MatchFormChoices = {
   /** How soon what is saved shows on the site, as "binnen vijf minuten". */
   showDelay: string
   squad: readonly { id: number; name: string }[]
+  /** The stadiums to choose from, each with its name now and its place. */
+  stadiums: readonly { id: number; label: string }[]
   statuses: readonly { label: string; value: string }[]
   /** Whether the time may stay empty: a match of the old fansite's archive has a day only. */
   timeOptional: boolean
@@ -436,6 +438,23 @@ export function MatchFields({ part }: { part?: FormPart | undefined }) {
           </Field>
           <Field error={errors.stadion} hideOptional id="stadion" label="Stadion" required={false}>
             <Input {...field('stadion')} autoComplete="off" autoCorrect="off" />
+          </Field>
+          <Field
+            error={errors['stadion-id']}
+            hideOptional
+            hint="Dit stadion bepaalt de naam op de site, zoals hij op de dag van de wedstrijd was. Laat het leeg om hem uit de tekst te halen."
+            id="stadion-id"
+            label="Stadion uit de lijst"
+            required={false}
+          >
+            <Select {...field('stadion-id')} key={velden['stadion-id']}>
+              <Select.Option value="">Uit de tekst</Select.Option>
+              {choices.stadiums.map((stadium) => (
+                <Select.Option key={stadium.id} value={String(stadium.id)}>
+                  {stadium.label}
+                </Select.Option>
+              ))}
+            </Select>
           </Field>
           <Field
             error={errors.opmerking}

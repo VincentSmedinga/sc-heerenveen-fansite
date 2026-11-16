@@ -55,11 +55,17 @@ export type MatchContext = {
   dataSource: Match['dataSource']
   opponent: string
   squad: SquadPlayer[]
+  /** The numbers of the stadiums an editor may choose. */
+  stadiumIds: readonly number[]
 }
 
 /** What an editor entered, understood and in the shape of the tables. */
 export type MatchEntry = {
-  facts: Pick<Match, 'attendance' | 'note' | 'referee' | 'stadium'>
+  /**
+   * `stadiumId` is the stadium the editor chose, or `null` for none: the stadium then follows
+   * from the text, the day and the home club (see `linkMatchToStadium`).
+   */
+  facts: Pick<Match, 'attendance' | 'note' | 'referee' | 'stadium'> & { stadiumId?: null | number }
   goals: EntryGoal[]
   kickoff: Pick<Match, 'dateText' | 'kickoffAt' | 'matchDate'>
   result: Pick<
@@ -289,6 +295,11 @@ export function validate(
   } else if (attendance !== undefined && !played && status !== undefined) {
     errors.toeschouwers = 'Toeschouwers horen bij een gespeelde wedstrijd. Maak dit veld leeg of kies Gespeeld.'
   }
+  const chosen = fields['stadion-id'] === '' ? null : Number(fields['stadion-id'])
+
+  if (chosen !== null && !(Number.isInteger(chosen) && context.stadiumIds.includes(chosen))) {
+    errors['stadion-id'] = 'Kies een stadion uit de lijst, of laat het leeg.'
+  }
   for (const [name, limit] of [
     ['scheidsrechter', matchLimits.referee],
     ['stadion', matchLimits.stadium],
@@ -405,6 +416,7 @@ export function validate(
         note: fields.opmerking === '' ? null : fields.opmerking,
         referee: fields.scheidsrechter === '' ? null : fields.scheidsrechter,
         stadium: fields.stadion === '' ? null : fields.stadion,
+        stadiumId: chosen,
       },
       // The goals are kept in the order of the clock, as the importer keeps them.
       // A goal without a minute comes last.
@@ -463,6 +475,7 @@ export function valuesOf(match: Match, goals: MatchGoal[]): MatchValues {
       opmerking: match.note ?? '',
       scheidsrechter: match.referee ?? '',
       stadion: match.stadium ?? '',
+      'stadion-id': match.stadiumId === null ? '' : String(match.stadiumId),
       status: match.status,
       'strafschoppen-wij': number(match.penaltiesFor),
       'strafschoppen-zij': number(match.penaltiesAgainst),

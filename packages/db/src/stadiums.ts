@@ -6,13 +6,24 @@ import { and, asc, eq, isNotNull, isNull, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 
-import { clubHomeGrounds, clubs, matches, stadiumLimits, stadiumNames, stadiums } from './schema.ts'
+import { clubHomeGrounds, clubs, matchEdits, matches, stadiumLimits, stadiumNames, stadiums } from './schema.ts'
 
 /** One home ground of a club as it is written: the stadium, a start and a note. */
 export type HomeGroundRow = Start & { note?: null | string; stadiumId: number }
 
 /** What `linkMatchesToStadiums` did: how many it linked, and how many have no stadium. */
 export type LinkResult = { linked: number; unlinked: number }
+
+/**
+ * One name of a stadium as it is kept, for a line of a list. The start is a season
+ * (`2019/20`), a day (`2021-02-14`) or neither, never both; only the first name has neither.
+ */
+export type StadiumLine = {
+  name: string
+  note: null | string
+  startDay: null | string
+  startSeason: null | string
+}
 
 /** What the lookup needs of a match. `homeClubId` is empty when sc Heerenveen was at home. */
 export type StadiumQuery = {
@@ -29,6 +40,21 @@ type StadiumIndex = {
 }
 
 type Start = { startDay: null | string; startSeason: null | string }
+
+/**
+ * The name of the stadium of a match as it was on the day of the match (#1301): the last name
+ * of the linked stadium that had begun by then, or the text of the source when the match has no
+ * stadium. SQL for the `select` of a list of matches that reads from `matches`, without an
+ * alias. A name begins on its day or on 1 July of its season, and the names are in order.
+ */
+export const stadiumOnTheDay = sql<null | string>`coalesce((
+  select ${stadiumNames.name} from ${stadiumNames}
+  where ${stadiumNames.stadiumId} = ${sql.raw('`matches`.`stadium_id`')}
+    and (${stadiumNames.startDay} is null and ${stadiumNames.startSeason} is null
+      or coalesce(${stadiumNames.startDay}, str_to_date(concat(left(${stadiumNames.startSeason}, 4), '-07-01'), '%Y-%m-%d'))
+        <= ${sql.raw('`matches`.`match_date`')})
+  order by ${stadiumNames.position} desc limit 1
+), ${sql.raw('`matches`.`stadium`')})`
 
 /** The stadium of a match, read from the database. For many matches, load the index once. */
 export async function findStadium(db: Pick<Database, 'select'>, query: StadiumQuery): Promise<null | number> {
@@ -101,6 +127,10 @@ export async function linkMatchToStadium(
   if (match === undefined) {
     return null
   }
+  if (match.stadiumId !== null && (await factsAreEdited(db, matchId))) {
+    // The editors entered the facts of this match, and the stadium they chose is one of them.
+    return match.stadiumId
+  }
 
   const stadiumId =
     match.stadium === null
@@ -112,6 +142,69 @@ export async function linkMatchToStadium(
   }
 
   return stadiumId
+}
+
+/**
+ * The lines of the card Stadion on the page of a club: the grounds it played its home matches
+ * on, in order, each with the names the stadium had while the club played there. A name that
+ * began before the club came starts when the club did, and a name that began after the club
+ * left is left out. A ground that has one name is one line. The first line of a ground after
+ * the first starts with the ground, so the card can say from when. The note of the ground wins
+ * over the note of a name. An empty list means the club has no home grounds: the card then
+ * shows what the matches say.
+ */
+export async function listClubStadiumLines(db: Pick<Database, 'select'>, clubId: number): Promise<StadiumLine[]> {
+  const grounds = await db
+    .select({
+      note: clubHomeGrounds.note,
+      stadiumId: clubHomeGrounds.stadiumId,
+      startDay: clubHomeGrounds.startDay,
+      startSeason: clubHomeGrounds.startSeason,
+    })
+    .from(clubHomeGrounds)
+    .where(eq(clubHomeGrounds.clubId, clubId))
+    .orderBy(asc(clubHomeGrounds.position))
+
+  if (grounds.length === 0) {
+    return []
+  }
+
+  const names = await db
+    .select({
+      name: stadiumNames.name,
+      note: stadiumNames.note,
+      stadiumId: stadiumNames.stadiumId,
+      startDay: stadiumNames.startDay,
+      startSeason: stadiumNames.startSeason,
+    })
+    .from(stadiumNames)
+    .orderBy(asc(stadiumNames.stadiumId), asc(stadiumNames.position))
+  const lines: StadiumLine[] = []
+
+  for (const [index, ground] of grounds.entries()) {
+    const from = startDate(ground)
+    const until = grounds[index + 1] === undefined ? null : startDate(grounds[index + 1]!)
+    const own = names.filter((name) => name.stadiumId === ground.stadiumId)
+    // The names in use while the club played: not after the club left, and the last one that
+    // had begun when the club came, with the ones that came after.
+    const inUse = own.filter((name) => until === null || (startDate(name) ?? '') < until)
+    const first = from === null ? 0 : inUse.findLastIndex((name) => (startDate(name) ?? '') <= from)
+    const kept = inUse.slice(Math.max(first, 0))
+
+    for (const [position, name] of kept.entries()) {
+      // The first name of a ground starts with the ground; the next ones start with themselves.
+      const begins = position === 0 ? ground : name
+
+      lines.push({
+        name: name.name,
+        note: position === 0 ? (ground.note ?? name.note) : name.note,
+        startDay: begins.startDay,
+        startSeason: begins.startSeason,
+      })
+    }
+  }
+
+  return lines
 }
 
 /** Reads the names and home grounds, which are few, so a lookup needs no query per match. */
@@ -239,6 +332,16 @@ export async function writeHomeGrounds(
       })),
     )
   }
+}
+
+/** Whether the editors entered the facts of a match, which can include its stadium. */
+async function factsAreEdited(db: Pick<Database, 'select'>, matchId: number): Promise<boolean> {
+  const [edit] = await db
+    .select({ edited: matchEdits.factsEdited })
+    .from(matchEdits)
+    .where(eq(matchEdits.matchId, matchId))
+
+  return edit?.edited === true
 }
 
 const noteOfDerivedStart = 'Begin: de eerste wedstrijd in onze gegevens, niet het echte begin.'
