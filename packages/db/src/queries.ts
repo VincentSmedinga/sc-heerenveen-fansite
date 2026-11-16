@@ -26,6 +26,7 @@ import {
   playerSeasonStats,
   sources,
   squadCompleteness,
+  stadiums,
   staff,
   standings,
   wikipediaPages,
@@ -283,6 +284,16 @@ export async function findSquadPage(db: Database, season: string) {
     .where(and(eq(wikipediaPages.season, season), eq(wikipediaPages.kind, 'squad')))
 
   return row
+}
+
+/**
+ * The place of a stadium, such as `Groningen`, for a heading that says where a match is played.
+ * It gives nothing for a stadium without a place, or one that is not known.
+ */
+export async function findStadiumPlace(db: Database, stadiumId: number) {
+  const [stadium] = await db.select({ place: stadiums.place }).from(stadiums).where(eq(stadiums.id, stadiumId))
+
+  return stadium?.place ?? undefined
 }
 
 /**

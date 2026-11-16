@@ -5,6 +5,7 @@ import {
   Card,
   DataTable,
   type DataTableRow,
+  DescriptionList,
   Heading,
   Link,
   List,
@@ -12,19 +13,24 @@ import {
   MatchHeader,
   type MatchHeaderFact,
   NewsItem,
+  OutcomeBar,
   Text,
 } from '@fansite/design-system'
 
 import type { ClubHeadline } from './opponents'
 
-import { markOf } from './MatchViews'
+import { formatTableDay } from './match-format'
+import { matchSearchPath } from './match-search'
+import { markOf, MatchLine } from './MatchViews'
 import { dateTimeOf, formatNewsTime } from './news'
+import { opponentsPath } from './opponents'
+import { type HeadToHead } from './preview-head-to-head'
 import { type ClubForm, standingRoundOf, standingSentenceOf, type StandingSliceItem } from './preview-standing'
+import { meetingScoreOf } from './upcoming-match'
 
 // The parts of the page of the Voorbeschouwing, a match that has not begun: the header and the
 // cards Stand, Vorm and Nieuws. They take plain data, so the page and its tests share them. The
-// cards of the next issues of the series (#1318 and #1319) are added in the page, each in a
-// cell of its own.
+// cards of the next issue of the series (#1319) is added in the page, in a cell of its own.
 
 /** The id of the card Nieuws. */
 const newsId = 'nieuws'
@@ -37,6 +43,12 @@ const formId = 'vorm'
 
 /** The name of our own club in the table. */
 const ourClub = 'sc Heerenveen'
+
+/** The id of the card Onderling. */
+const headToHeadId = 'onderling'
+
+/** The words for how many matches the list "De laatste ... daar" shows, from one to five. */
+const countWords = ['', '', 'twee', 'drie', 'vier', 'vijf']
 
 /** A goal difference with its sign, as a table shows it: `+8`, `−3` and `0`. */
 const signed = (difference: number) =>
@@ -102,6 +114,92 @@ export function PreviewHeader({
         phase="upcoming"
         pill="Voorbeschouwing"
       />
+    </Card>
+  )
+}
+
+/**
+ * The card "Onderling in <plaats>": how the matches against the club went on the side where the
+ * match to come is played, the last five of them as `Match` shows them, the last win and the
+ * biggest win, and the links to the matches and to the club. `place` is the place of the
+ * ground of the opponent (the stadium of the match), and without it the card says "bij <club>".
+ * A club we have not played on that side gives no card.
+ */
+export function PreviewHeadToHeadCard({
+  headToHead,
+  home,
+  name,
+  now,
+  place,
+  slug,
+}: {
+  headToHead: HeadToHead | undefined
+  home: boolean
+  name: string
+  now: Date
+  place: string | undefined
+  slug: string
+}): null | ReactNode {
+  if (headToHead === undefined) {
+    return null
+  }
+
+  const { biggestWin, last, lastWin, since, tally } = headToHead
+  const where = home ? 'in Heerenveen' : place === undefined ? `bij ${name}` : `in ${place}`
+  const score = (meeting: NonNullable<typeof lastWin>) => {
+    const [first, second] = meetingScoreOf(meeting, meeting.home)
+
+    return `${formatTableDay(meeting.matchDate)}, ${first}–${second}`
+  }
+  const facts = [
+    ...(lastWin === undefined ? [] : [{ term: 'Laatste zege daar', text: score(lastWin) }]),
+    ...(biggestWin === undefined ? [] : [{ term: 'Grootste zege daar', text: score(biggestWin) }]),
+  ]
+
+  return (
+    <Card aria-labelledby={headToHeadId}>
+      <Heading id={headToHeadId} level={2}>
+        {`Onderling ${where}`}
+      </Heading>
+      <Heading appearance={3} level={3}>
+        {`${tally.played} keer ${home ? `thuis tegen ${name}` : where} sinds ${since}`}
+      </Heading>
+      <OutcomeBar draws={tally.drawn} losses={tally.lost} wins={tally.won} />
+      <Text>
+        {`${tally.won} gewonnen · ${tally.drawn} gelijk · ${tally.lost} verloren · doelpunten ${tally.goalsFor}–${tally.goalsAgainst}`}
+      </Text>
+      <Heading appearance={4} level={3}>
+        {last.length === 1 ? 'De laatste daar' : `De laatste ${countWords[last.length]} daar`}
+      </Heading>
+      <List role="list">
+        {last.map((meeting) => (
+          <List.Item key={meeting.id}>
+            <MatchLine match={meeting} now={now} withYear />
+          </List.Item>
+        ))}
+      </List>
+      {facts.length > 0 && (
+        <DescriptionList stacked>
+          {facts.map(({ term, text }) => (
+            <DescriptionList.Item key={term} term={term}>
+              <Text>{text}</Text>
+            </DescriptionList.Item>
+          ))}
+        </DescriptionList>
+      )}
+      <Text>
+        <Link
+          href={`${matchSearchPath}?tegen=${encodeURIComponent(slug)}&waar=${home ? 'thuis' : 'uit'}`}
+          icon="arrow-right"
+        >
+          {tally.played === 1 ? `De wedstrijd ${where}` : `Alle ${tally.played} wedstrijden ${where}`}
+        </Link>
+      </Text>
+      <Text>
+        <Link href={`${opponentsPath}/${slug}`} icon="arrow-right">
+          {`Alles over ${name}`}
+        </Link>
+      </Text>
     </Card>
   )
 }

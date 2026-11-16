@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getMatchNeighbours } from '#src/match-neighbours'
 import { getLeagueResults, getMatchData } from '#src/matches'
-import { type ClubHeadline, type ClubPage, getClubNews, getClubPage } from '#src/opponents'
+import { type ClubHeadline, type ClubPage, getClubNews, getClubPage, getStadiumPlace } from '#src/opponents'
 import { getPreviewMatch, getPublicReport } from '#src/report-data'
 import { matchData } from '#src/test-matches'
 import { reportedMatch } from '#src/test-reports'
@@ -22,6 +22,7 @@ vi.mock('#src/opponents', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getClubNews: vi.fn(),
   getClubPage: vi.fn(),
+  getStadiumPlace: vi.fn(),
 }))
 vi.mock('#src/report-data', async (importOriginal) => ({
   ...(await importOriginal<object>()),
@@ -56,6 +57,7 @@ const scheduled = (values: Partial<ReturnType<typeof reportedMatch>['match']> = 
     matchDate: '2026-11-21',
     referee: null,
     round: 'Speelronde 13',
+    stadiumId: 7,
     status: 'scheduled' as const,
     ...values,
   },
@@ -67,6 +69,33 @@ const headline = (title: string, day: string): ClubHeadline => ({
   sourceName: 'Algemeen Dagblad, ook bij De Gelderlander',
   title,
   url: `https://ad.test/${title.length}`,
+})
+
+/** A played match against Testdorp FC, away unless `more` says otherwise, with its goals. */
+const playedAway = (
+  ours: number,
+  theirs: number,
+  matchDate: string,
+  goals: unknown[] = [],
+  more: Record<string, unknown> = {},
+) => ({
+  ...reportedMatch().match,
+  afterNinetyAgainst: null,
+  afterNinetyFor: null,
+  competition: 'Eredivisie',
+  extraTime: false,
+  goals,
+  goalsAgainst: theirs,
+  goalsFor: ours,
+  home: false,
+  matchDate,
+  opponent: 'Testdorp FC',
+  penaltiesAgainst: null,
+  penaltiesFor: null,
+  round: 'Speelronde 3',
+  season: matchDate.startsWith('2026') ? '2025/26' : matchDate.startsWith('2025') ? '2024/25' : '2023/24',
+  status: 'played' as const,
+  ...more,
 })
 
 const leagueResult = { awayClub: '', awayGoals: 0, homeClub: '', homeGoals: 0, playedOn: '2026-10-04', round: 1 }
@@ -89,7 +118,9 @@ beforeEach(() => {
     Promise.resolve(season === '2026/27' && slug === '2026-11-21-testdorp-fc' ? scheduled() : undefined),
   )
   vi.mocked(getClubPage).mockReset()
-  vi.mocked(getClubPage).mockResolvedValue({} as ClubPage)
+  vi.mocked(getClubPage).mockResolvedValue({ matches: [] } as unknown as ClubPage)
+  vi.mocked(getStadiumPlace).mockReset()
+  vi.mocked(getStadiumPlace).mockResolvedValue('Testdorp')
   vi.mocked(getClubNews).mockReset()
   vi.mocked(getClubNews).mockResolvedValue([
     headline('Nieuwste kop over Testdorp', '2026-11-19'),
@@ -200,6 +231,74 @@ describe('the Voorbeschouwing of a match that has not begun', () => {
     vi.mocked(getMatchData).mockResolvedValue({ ...matchData, standings: [] })
 
     expect(plain(await render())).not.toContain('Na speelronde')
+  })
+
+  it('shows the card Onderling for the matches away, with the heading of the place', async () => {
+    vi.mocked(getClubPage).mockResolvedValue({
+      matches: [
+        playedAway(2, 1, '2026-02-01', [
+          { minute: 15, ours: false, ownGoal: false, penalty: false, player: 'Kopie', stoppageMinutes: null },
+          { minute: 30, ours: false, ownGoal: true, penalty: false, player: 'Autogol', stoppageMinutes: null },
+        ]),
+        playedAway(0, 2, '2025-02-01'),
+        playedAway(3, 3, '2024-02-01', [], { home: true }),
+      ],
+    } as unknown as ClubPage)
+
+    const html = await render()
+    const text = plain(html)
+
+    expect(text).toContain('Onderling in Testdorp')
+    expect(text).toContain('2 keer in Testdorp sinds 2024/25')
+    expect(text).toContain('1 gewonnen · 0 gelijk · 1 verloren · doelpunten 2–3')
+    expect(text).toContain('De laatste twee daar')
+    expect(text).toContain('Laatste zege daar 1 februari 2026, 1–2')
+    expect(text).toContain('Grootste zege daar 1 februari 2026, 1–2')
+    expect(text).toContain('Alle 2 wedstrijden in Testdorp')
+    expect(text).toContain('Alles over Testdorp FC')
+    expect(text).toContain('eigen doelpunt')
+    expect(html).toContain('href="/wedstrijden/zoeken?tegen=testdorp-fc&amp;waar=uit"')
+    expect(html).toContain('href="/tegenstanders/testdorp-fc"')
+    expect(html).toContain('class="hf-outcome-bar"')
+    // On a phone it stands under Vorm and above Nieuws.
+    expect(text.indexOf('Vorm')).toBeLessThan(text.indexOf('Onderling in'))
+    expect(text.indexOf('Onderling in')).toBeLessThan(text.indexOf('Nieuws over'))
+  })
+
+  it('counts the home matches for a home match, and says "in Heerenveen"', async () => {
+    vi.mocked(getPreviewMatch).mockResolvedValue(scheduled({ home: true }))
+    vi.mocked(getClubPage).mockResolvedValue({
+      matches: [playedAway(2, 1, '2026-02-01'), playedAway(3, 3, '2024-02-01', [], { home: true })],
+    } as unknown as ClubPage)
+
+    const html = await render()
+    const text = plain(html)
+
+    expect(text).toContain('Onderling in Heerenveen')
+    expect(text).toContain('1 keer thuis tegen Testdorp FC sinds 2023/24')
+    expect(text).toContain('De wedstrijd in Heerenveen')
+    expect(text).not.toContain('Alle 1 wedstrijden')
+    expect(html).toContain('waar=thuis')
+    expect(getStadiumPlace).not.toHaveBeenCalled()
+  })
+
+  it('says "bij <club>" when the ground has no known place, and leaves out a win that is not there', async () => {
+    vi.mocked(getStadiumPlace).mockResolvedValue(undefined)
+    vi.mocked(getClubPage).mockResolvedValue({ matches: [playedAway(0, 2, '2025-02-01')] } as unknown as ClubPage)
+
+    const text = plain(await render())
+
+    expect(text).toContain('Onderling bij Testdorp FC')
+    expect(text).toContain('De laatste daar')
+    expect(text).not.toContain('zege daar')
+  })
+
+  it('leaves out the card Onderling for a club we have not played on that side', async () => {
+    vi.mocked(getClubPage).mockResolvedValue({
+      matches: [playedAway(3, 3, '2024-02-01', [], { home: true })],
+    } as unknown as ClubPage)
+
+    expect(plain(await render())).not.toContain('Onderling')
   })
 
   it('leaves out the card Nieuws without a headline, with no sentence about it', async () => {
