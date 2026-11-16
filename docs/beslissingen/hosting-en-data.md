@@ -1105,7 +1105,8 @@
 - **Datum:** 16 november 2026
 - **Besluit:** twee stadions kunnen dezelfde naam hebben gehad, op andere perioden.
   Een wedstrijd met alleen een naam in de bron wordt aan een stadion gekoppeld met de naam, de dag van de wedstrijd en de thuisclub samen (`findStadium` in `@fansite/db/stadiums`).
-  Geeft dat geen zekere uitkomst, dan blijft de wedstrijd zonder stadion en staat hij op de pagina Kwaliteit van het beheer, in de kolom Stadion.
+  Geeft dat geen zekere uitkomst, dan blijft de wedstrijd zonder stadion en staat hij op de pagina Kwaliteit van het beheer: de kolom Gegevens telt hem als een gat naast een ontbrekende stadionnaam.
+  Een kolom van zichzelf paste niet: met acht kolommen is de tabel op een telefoon van 320 pixels 18 pixels te breed.
 - **Waarom:** "Abe Lenstra Stadion" op een wedstrijd van 1992 is een ander veld dan in 1996.
 - **Alternatieven:** koppelen op de naam alleen, wat het oude en het nieuwe veld door elkaar haalt.
 - **De regel:** de kandidaten zijn de stadions die de naam op die dag al hadden gehad.

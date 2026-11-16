@@ -132,8 +132,6 @@ function gapWords(column: GapColumn, gap: Gap) {
       return many ? 'gegevens ontbreken' : 'gegeven ontbreekt'
     case 'opstelling':
       return 'opstelling ontbreekt'
-    case 'stadion':
-      return 'stadion niet gekoppeld'
     case 'uitslag':
       return 'uitslag ontbreekt'
     case 'verslag':

@@ -1296,7 +1296,7 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
 `/beheer/wedstrijden/kwaliteit` (`src/app/beheer/wedstrijden/kwaliteit`, onder Wedstrijden sinds #1304) is alleen voor de eigenaar en de redacteuren: een auteur krijgt "niet gevonden".
 De adressen staan als constanten in `src/beheer/quality.ts` (`matchQualityPath`), `quality-table.ts` (`seasonTablePath`) en `formations.ts` (`unusualFormationsPath`); `qualityPath` is nog het begin van de lijsten die niet verhuisd zijn.
 Bovenaan de lijst van wedstrijden staat een link naar deze pagina, en de kaart Te doen op de startpagina telt de gaten en leidt erheen.
-De pagina toont een tabel met een rij per seizoen sinds 1990/91, het nieuwste bovenaan, en een kolom voor elk deel van een wedstrijd (#1163): Uitslag, Aftrap, Doelpunten, Opstelling, Verslag, Gegevens, Stadion en Wacht.
+De pagina toont een tabel met een rij per seizoen sinds 1990/91, het nieuwste bovenaan, en een kolom voor elk deel van een wedstrijd (#1163): Uitslag, Aftrap, Doelpunten, Opstelling, Verslag, Gegevens en Wacht.
 `readMatchGaps` in `src/beheer/quality-table.ts` bepaalt per wedstrijd wat er ontbreekt, en `countGapsBySeason` telt per seizoen de wedstrijden met een gat in elke kolom.
 Een getal in de tabel is een link naar het seizoen met die kolom gekozen; een leeg vak is compleet.
 Op een telefoon is de kop van een kolom een letter (`abbreviation` van `DataTable`), en een regel boven de tabel zegt wat de letters en de tekens betekenen.

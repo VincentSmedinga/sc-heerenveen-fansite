@@ -60,21 +60,18 @@ describe('the gaps of the matches of a season (#1163)', () => {
     expect(gaps.get(ids.complete)?.gegevens).toEqual({ sign: '3', total: 3 })
   })
 
-  it('has its own gap for a stadium name without a stadium, next to the missing facts (#1297)', async () => {
+  it('counts a stadium name without a stadium as a gap of its own in Gegevens (#1297)', async () => {
     const [{ insertId: stadiumId }] = await database.db.insert(stadiums).values({})
+    const gegevens = async () => (await gapsOf()).get(ids.complete)?.gegevens
 
-    expect((await gapsOf()).get(ids.complete)?.stadion).toBeUndefined()
+    expect(await gegevens()).toEqual({ sign: '3', total: 3 })
 
+    // The name is there, so the name is no longer missing, and the missing link counts instead.
     await database.db.update(matches).set({ stadium: 'Oefenstadion' }).where(eq(matches.id, ids.complete))
-
-    const named = (await gapsOf()).get(ids.complete)
-
-    expect(named?.stadion).toEqual({ sign: '?', total: 1 })
-    expect(named?.gegevens).toEqual({ sign: '2', total: 2 })
+    expect(await gegevens()).toEqual({ sign: '3', total: 3 })
 
     await database.db.update(matches).set({ stadiumId }).where(eq(matches.id, ids.complete))
-
-    expect((await gapsOf()).get(ids.complete)?.stadion).toBeUndefined()
+    expect(await gegevens()).toEqual({ sign: '2', total: 2 })
 
     await database.db.update(matches).set({ stadium: null, stadiumId: null }).where(eq(matches.id, ids.complete))
   })
