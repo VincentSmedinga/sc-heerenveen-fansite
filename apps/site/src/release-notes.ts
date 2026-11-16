@@ -54,4 +54,16 @@ export const releaseNotes: ReleaseNotes = {
     'Op wedstrijden: ook de play-offs en de Europa League van eerdere seizoenen.',
     'Nieuws: blader door het archief en kies de bronnen die je wilt zien. Nieuwe bronnen: Rijnmond en De Gelderlander.',
   ],
+  '0.6.0': [
+    'Nieuw: een pagina per wedstrijd, met de opstelling op het veld, de wissels, de kaarten en de doelpunten.',
+    'Wedstrijden vanaf 1990: ook de seizoenen van de oude Fansite, met de Eerste divisie, de UEFA Cup, de Intertoto Cup en de Champions League.',
+    'Nieuw: een pagina per speler, met zijn cijfers per seizoen, zijn loopbaan bij onze club en grafieken.',
+    'Spelers staat nu in het menu: de selectie van elk seizoen, alle spelers op naam of op land, en zoeken op naam.',
+    'Zoeken in wedstrijden: kies een tegenstander, een competitie, een uitslag of een land, of begin met een kant-en-klare vraag. En: wat gebeurde er op deze dag?',
+    'Cijfers van wedstrijden: ook over alle seizoenen samen. Met de hoofdtrainers, formaties, scheidsrechters, strafschoppen, elke competitie en Europa per land.',
+    'Cijfers van spelers: de topscorers sinds 1990, de clubtopscorer per seizoen, records, invallers die scoorden en doelpunten per linie en per land.',
+    'Bij de cijfers: kies Eredivisie, Play-offs, Beker of Europa. Benieuwd naar de wedstrijden achter een getal? Klik door.',
+    'Op home: de laatste wedstrijd, en bij de volgende de vorige ontmoeting, de vorm en de scheidsrechter.',
+    'Op de pagina van een club: het nieuws over die club, hun plek naast de onze en de toeschouwers bij onze thuiswedstrijden tegen hen.',
+  ],
 }
