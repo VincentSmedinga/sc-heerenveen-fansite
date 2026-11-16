@@ -4201,3 +4201,17 @@
   Op 16 november 2026 telde de tabel van 2026/27 18 doelpunten en onze wedstrijden 26, en de pagina zei dat er waarschijnlijk spelers ontbraken terwijl alle doelpuntenmakers in de lijst stonden.
   Voor een seizoen dat voorbij is, wijst een lager totaal wel op een gat.
 - **Alternatieven:** alleen de wedstrijden tot de datum van de tabel vergelijken (preciezer, maar de import moet die datum dan eerst lezen en bewaren); de controle overal weghalen (dan missen we echte gaten in oude seizoenen).
+
+## De import probeert een doelpunt zonder speler bij elke run opnieuw te koppelen
+
+- **Datum:** 16 november 2026
+- **Besluit:** bij elke run van een seizoen probeert de import elk bewaard doelpunt van ons zonder speler opnieuw te koppelen, met `playerLinker`: eerst de persoon, dan de pagina, dan de naam (#1294).
+  - **Niet raden:** past de naam bij meer dan één speler van het seizoen, of bij geen, dan blijft het doelpunt zonder speler.
+  - **Wat de redactie koppelde blijft staan:** de import kijkt alleen naar doelpunten zonder speler.
+  - **Wedstrijden met een verslag of met doelpunten van de redactie** blijven buiten beeld, zoals bij het maken van spelers uit doelpunten (#1024): de doelpunten van zo'n wedstrijd zijn van het verslag of van de redactie.
+  - **Ook in een wedstrijd die wacht:** het koppelen schrijft alleen `player_id` van het doelpunt, en wacht dus niet op een wijziging van de wedstrijd die bij de redactie ligt.
+  - **De regel in het logboek** zegt hoeveel doelpunten de import koppelde en hoeveel er overbleven: `N goals without a player linked, M left without one`.
+    Hij staat er alleen als de import een doelpunt koppelde, en niet als hij in dezelfde run een speler maakte uit een doelpunt, want dan hoort het koppelen bij het maken van die speler.
+- **Waarom:** een speler die later in de selectie kwam, of een persoon die later is samengevoegd, lost het gat dan vanzelf op.
+  Op 16 november 2026 misten 24 doelpunten van ons een speler, 23 daarvan sinds 2020/21, terwijl de spelers er nu wel staan.
+- **Alternatieven:** een losse opdracht die één keer draait (hetzelfde gat komt later terug); een wedstrijd met een verslag ook koppelen (het verslag bepaalt dan niet meer alleen zijn doelpunten).
