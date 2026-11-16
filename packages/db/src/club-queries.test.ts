@@ -4,8 +4,15 @@ import type { NewMatchWithoutClub } from './clubs.ts'
 import type { TestDatabase } from './test-database.ts'
 
 import { withClubs } from './clubs.ts'
-import { findClubBySlug, findPreviousMeeting, listClubLastWins, listClubMatches, listClubRecords } from './queries.ts'
-import { clubNames, clubs, matches, matchGoals } from './schema.ts'
+import {
+  findClubBySlug,
+  findPreviousMeeting,
+  findStadiumPlace,
+  listClubLastWins,
+  listClubMatches,
+  listClubRecords,
+} from './queries.ts'
+import { clubNames, clubs, matches, matchGoals, stadiums } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
 let database: TestDatabase
@@ -209,6 +216,21 @@ describe('findClubBySlug', () => {
 
   it('gives nothing for a slug that no club has', async () => {
     expect(await findClubBySlug(database.db, 'bestaat-niet')).toBeUndefined()
+  })
+})
+
+describe('findStadiumPlace', () => {
+  it('gives the place of a stadium, and nothing for one without a place or one that is unknown', async () => {
+    const [known, bare] = await database.db
+      .insert(stadiums)
+      .values([{ place: 'Groningen', placeSource: 'manual' }, {}])
+      .$returningId()
+
+    expect(await findStadiumPlace(database.db, known!.id)).toBe('Groningen')
+    expect(await findStadiumPlace(database.db, bare!.id)).toBeUndefined()
+    expect(await findStadiumPlace(database.db, 4_000_000)).toBeUndefined()
+
+    await database.pool.query('DELETE FROM stadiums WHERE id IN (?, ?)', [known!.id, bare!.id])
   })
 })
 

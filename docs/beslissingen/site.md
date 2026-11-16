@@ -6206,3 +6206,16 @@
   De gemarkeerde rij staat op de sterke achtergrond, niet vet (vet is voor het kerncijfer, zie `base/table.css`), met een balk aan het begin van de rij en een tekst voor een schermlezer, zodat kleur niet het enige onderscheid is.
   `DataTable` heeft daarvoor `highlight` gekregen, en een rij voor een onderbreking kan met `display` zeggen wat hij verbergt.
 - **Alternatieven:** de hele stand tonen, wat op een telefoon te lang is; `StandingsTable` uitbreiden, dat alleen onze eigen rij markeert en geen doelsaldo heeft.
+
+## De Voorbeschouwing toont de onderlinge wedstrijden in een kaart die de plaats van het veld noemt
+
+- **Datum:** 16 november 2026
+- **Besluit:** de kaart Onderling telt elke gespeelde wedstrijd met een uitslag tegen de club op dezelfde kant als de komende wedstrijd, in elke competitie, en toont de aantallen, de balk, de laatste vijf als `Match`, de laatste en de grootste zege en twee links (#1318).
+  De grootste zege is die met het grootste doelsaldo, dan die met de meeste doelpunten van ons, dan de nieuwste.
+  Een zege met een gelijke stand na strafschoppen telt in de aantallen, maar is nooit de grootste zege.
+  De koppen noemen de plaats van het stadion van de wedstrijd ("Onderling in Groningen"), uit `stadiums.place`; zonder plaats staat er "bij FC Groningen".
+  Voor een thuiswedstrijd staat er altijd "in Heerenveen".
+  Voor een club die we op die kant nog niet troffen, valt de kaart weg.
+- **Waarom:** de plaats hoort bij het veld waar we spelen, en dat is wat een supporter bedoelt met "daar".
+  De aantallen volgen `resultOf`, zoals de pagina van de tegenstander.
+- **Alternatieven:** de plaats uit de naam van de club halen, wat voor "FC Groningen" werkt maar niet voor "sc Cambuur"; de balk als kop van de kaart.

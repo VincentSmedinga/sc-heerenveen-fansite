@@ -5,6 +5,7 @@ import { listClubStadiums, type StadiumLine } from '@fansite/db/club-stadiums'
 import { normaliseClubName } from '@fansite/db/clubs'
 import {
   findClubBySlug,
+  findStadiumPlace,
   listAllWikipediaPages,
   listClubLastWins,
   listClubMatches,
@@ -576,6 +577,12 @@ const clubPages = cacheForKey(period, async (slug): Promise<ClubPage | undefined
         stadiums: await listClubStadiums(db, club.id),
       }
 })
+
+/**
+ * The place of a stadium (`Groningen`), kept as the page of the club is. The ids come from the
+ * programme and not from a visitor, so the cache stays small.
+ */
+export const getStadiumPlace = cacheForKey(period, (id) => findStadiumPlace(getDatabase().db, Number(id)))
 
 /** One season of the card "De plek van <club> en de onze": both places in the Eredivisie. */
 export type ClubPlace = { ours: number; season: string; theirs: number }
