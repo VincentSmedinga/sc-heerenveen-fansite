@@ -35,6 +35,7 @@ import { readDatabaseEnv } from '@fansite/db/env'
 import { checkMigrations, describeMigrationCheck } from '@fansite/db/migration-check'
 import { parseArgs } from 'node:util'
 
+import { runCountryFactsCommand } from './country-facts.ts'
 import { runChangesCommand } from './import-changes.ts'
 import { runImport } from './import-feeds.ts'
 import { oldSiteUsage, runOldSiteImport, runOldSiteReport } from './import-old-site.ts'
@@ -49,6 +50,7 @@ const { positionals, values } = parseArgs({
   options: {
     changes: { type: 'boolean' },
     completeness: { type: 'boolean' },
+    'country-facts': { type: 'boolean' },
     'dry-run': { type: 'boolean' },
     'from-season': { type: 'boolean' },
     'from-squad': { type: 'boolean' },
@@ -65,6 +67,7 @@ const fromSquad = values['from-squad']
 const modes = [
   values.changes,
   values.completeness,
+  values['country-facts'],
   fromSeason,
   fromSquad,
   values['item-clubs'],
@@ -122,10 +125,12 @@ process.exitCode = fromSeason
             ? await showStatus(DATABASE_URL)
             : values.completeness
               ? await runCompletenessCommand(DATABASE_URL)
-              : values['item-clubs']
-                ? await runItemClubsCommand(DATABASE_URL)
-                : values['old-site']
-                  ? values.report
-                    ? await runOldSiteReport(DATABASE_URL)
-                    : await runOldSiteImport(DATABASE_URL, { dryRun: values['dry-run'] === true })
-                  : await runImport(DATABASE_URL)
+              : values['country-facts']
+                ? await runCountryFactsCommand(DATABASE_URL)
+                : values['item-clubs']
+                  ? await runItemClubsCommand(DATABASE_URL)
+                  : values['old-site']
+                    ? values.report
+                      ? await runOldSiteReport(DATABASE_URL)
+                      : await runOldSiteImport(DATABASE_URL, { dryRun: values['dry-run'] === true })
+                    : await runImport(DATABASE_URL)

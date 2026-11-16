@@ -23,6 +23,7 @@ import {
   personPages,
   personPositions,
   persons,
+  personSportCountries,
   players,
   playerSeasonStats,
   playerStatDifferences,
@@ -154,6 +155,7 @@ describe('mergePersons', () => {
       { itemId: 'Q43', personId: other, position: 1 },
     ])
     await database.db.insert(personPositions).values({ itemId: 'Q280658', personId: other, position: 0 })
+    await database.db.insert(personSportCountries).values({ itemId: 'Q43', personId: other, position: 0 })
 
     const squad = await addPlayer({
       name: 'Uğur Yıldırım',
@@ -218,6 +220,9 @@ describe('mergePersons', () => {
     ])
     expect(await database.db.select().from(personPositions)).toEqual([
       { itemId: 'Q280658', personId: kept, position: 0 },
+    ])
+    expect(await database.db.select().from(personSportCountries)).toEqual([
+      { itemId: 'Q43', personId: kept, position: 0 },
     ])
 
     // A second run changes and says nothing.

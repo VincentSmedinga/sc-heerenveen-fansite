@@ -63,7 +63,7 @@ describe(`the migration ${migration}`, () => {
     ])
     expect(await rows("SHOW COLUMNS FROM persons LIKE 'country'")).toMatchObject([{ Null: 'YES', Type: 'varchar(6)' }])
     expect(await rows("SHOW COLUMNS FROM persons LIKE 'country_source'")).toMatchObject([
-      { Null: 'YES', Type: "enum('manual','wikidata','list','squad','old-site')" },
+      { Null: 'YES', Type: "enum('manual','wikidata','list','squad','old-site','wikidata-sport','wikidata-birth')" },
     ])
   })
 
