@@ -793,6 +793,7 @@
   De thuisclub staat nog eerst, de uitslag is nog "2–0" vanaf de thuiskant, en de aftrap is nog een `Time`.
 - **Later:** zie _De pagina van een wedstrijd staat op `/wedstrijden/<seizoen>/<datum>-<club>`, en alleen voor een verslag dat klaar is en klopt_ (7 november 2026).
   Een wedstrijd met zo'n pagina heeft wel een link, "Het verslag", als laatste regel van zijn plek in de lijst; de andere wedstrijden blijven een regel zonder link, en er zijn nog steeds geen clubwapens.
+  Sinds 16 november 2026 heeft ook een geplande wedstrijd zonder verslag een pagina, en zijn link zegt "Voorbeschouwing" (zie _Elke geplande wedstrijd heeft een pagina op het gewone adres, de Voorbeschouwing_).
 
 ## De stand is een tabel met een scrollgebied en een korte vorm voor de zijbalk
 
@@ -3176,6 +3177,7 @@
   De regel onder de uitslag is nu één zin met een tussenstand erbij, zoals "Na verlenging (na 90 minuten 1–1)".
 - **Later:** zie _De pagina bestaat ook voor een verslag dat nog niet klaar is, met de melding "We vullen dit verslag nog in"_ (7 november 2026): de pagina bestaat ook voor een verslag dat `bezig` is of niet meer klopt, met een melding, `noindex` en zonder plek in de sitemap; alleen een wedstrijd zonder verslag heeft geen pagina.
 - **Later:** zie _De kaart Wedstrijden op home toont de vorige ontmoeting, de vorm van de tegenstander en de scheidsrechter_ (9 november 2026): de scheidsrechter staat in de regel van de kaart Wedstrijden op home.
+- **Later:** zie _Elke geplande wedstrijd heeft een pagina op het gewone adres, de Voorbeschouwing_ (16 november 2026): een wedstrijd die `scheduled` is, heeft de pagina ook zonder verslag, tot de aftrap.
 
 ## De pagina bestaat ook voor een verslag dat nog niet klaar is, met de melding "We vullen dit verslag nog in"
 
@@ -6141,3 +6143,51 @@
 - **Nadeel:** PDOK kent alleen adressen in Nederland, dus voor een stadion in het buitenland vult de redacteur het adres zelf in.
   Het dichtstbijzijnde adres bij het midden van een stadion is niet altijd de ingang.
 - **Alternatieven:** Nominatim van OpenStreetMap, dat ook buiten Nederland werkt maar niet door de overheid wordt beheerd; het verzoek in de browser van de redacteur (dan bereikt de browser een derde partij); geen knop; thuisvelden met een nieuw stadion in dezelfde regel (meer formulier voor weinig winst).
+
+## Elke geplande wedstrijd heeft een pagina op het gewone adres, de Voorbeschouwing
+
+- **Datum:** 16 november 2026
+- **Besluit:** elke wedstrijd met de status `scheduled` en een club heeft een pagina op `/wedstrijden/<seizoen>/<datum>-<club>`, ook zonder verslag (#1316).
+  Een wedstrijd met een andere status houdt de regels van _De pagina van een wedstrijd staat op `/wedstrijden/<seizoen>/<datum>-<club>`, en alleen voor een verslag dat klaar is en klopt_.
+  Een geplande wedstrijd zonder club heeft geen pagina.
+  - **Tot de aftrap** is de pagina de Voorbeschouwing (`phaseOf` is `upcoming`): `noindex`, niet in de sitemap, en een beschrijving die niets over een uitslag zegt.
+    Programma en de kaart Wedstrijden op de homepage linken ernaar met "Voorbeschouwing", als laatste regel van de wedstrijd.
+    Vanaf de aftrap is het adres de pagina van de live wedstrijd en later het verslag, en de delen van de Voorbeschouwing zijn weg.
+    Een wedstrijd zonder verslag heeft vanaf de aftrap geen pagina meer, want er is dan niets live te tonen.
+  - **Een verslag wint:** een geplande wedstrijd die al een verslag heeft, toont altijd het verslag, ook vóór de aftrap (de opstelling), en de lijsten linken er met "Het verslag" naar.
+    De Voorbeschouwing is de pagina van een wedstrijd zonder verslag.
+  - **De kop** is `MatchHeader` met fase `upcoming` op de sterke kaart.
+    De pil zegt "Voorbeschouwing" (de eigenschap `pill`), de clubs hebben streepjes in plaats van een uitslag, en een verborgen regel zegt "Nog niet gespeeld: <clubs>".
+    De feiten zijn de competitie, de ronde, de dag met de aftrap ("Zaterdag 21 november, 20.00 uur", of "aftrap volgt") en het stadion; een onbekend stadion valt weg.
+  - **De kaart Nieuws** staat in de brede kolom en toont hoogstens drie koppen die aan de club zijn gekoppeld (`getClubNews`), met "Meer nieuws over <club>" naar het zoeken in het nieuws op de naam van de club.
+    Zonder koppen valt de kaart weg.
+    De Bron (`WikipediaCredit` met het archief aan) staat in de smalle kolom.
+    De kaarten van #1317, #1318 en #1319 komen elk als een eigen cel van de pagina bij.
+- **Waarom:** een supporter wil vooraf weten wat hij kan verwachten, en het adres blijft hetzelfde als de wedstrijd begint en later het verslag krijgt.
+  Na de aftrap zijn de delen van vóór de wedstrijd niet meer wat de lezer zoekt.
+  Een bestaand verslag heeft meer te bieden dan een voorbeschouwing, en de pagina met de opstelling bestond al.
+- **Nadeel:** het nieuws zoekt op de naam van de club, en het zoeken in het nieuws kan nog niet filteren op een club (de koppeling `item_clubs`).
+- **Alternatieven:** een apart adres voor de voorbeschouwing, dat bij de aftrap doorstuurt; de delen laten staan onder het verslag; de Voorbeschouwing ook voor een wedstrijd met een verslag van vóór de aftrap (dan verdwijnt de opstelling).
+- **Later:** vervangt _De pagina van een wedstrijd staat op `/wedstrijden/<seizoen>/<datum>-<club>`, en alleen voor een verslag dat klaar is en klopt_ (7 november 2026) waar die zegt dat een wedstrijd zonder verslag geen pagina heeft.
+
+## De Voorbeschouwing is gebouwd met onderdelen van het designsysteem en heeft geen invulveld voor de redactie
+
+- **Datum:** 16 november 2026
+- **Besluit:** de pagina gebruikt `MatchHeader`, `Card`, `Match`, `MarkRow`, `OutcomeBar`, `NewsItem` en `WikipediaCredit`; een nieuw onderdeel komt er alleen als geen bestaand past (#1315).
+  Er is voorlopig geen invulveld voor de redactie, zoals een naam voor een derby of een inleiding.
+  Niet op de pagina: "Op deze pagina", `MatchNeighbours`, een kaart Stadion en cijfers van ons eigen seizoen, zoals de schutters van dit seizoen.
+- **Waarom:** de pagina blijft klein en komt volledig uit gegevens; de rest van de site doet het zo.
+- **Alternatieven:** een veld voor de redactie, dat elke week werk kost.
+
+## De onderlinge wedstrijden van de Voorbeschouwing tellen alleen dezelfde kant, en een eigen doelpunt telt nooit voor onze schutters
+
+- **Datum:** 16 november 2026
+- **Besluit:** de onderlinge wedstrijden tellen alleen de wedstrijden op dezelfde kant: voor een uitwedstrijd alleen onze uitwedstrijden tegen de club ("in Groningen"), voor een thuiswedstrijd alleen thuiswedstrijden ("in Heerenveen").
+  De cijfers, de laatste vijf, de laatste en de grootste zege en onze schutters volgen dezelfde regel (#1318 en #1319).
+  Een doelpunt uit eigen doel telt voor de club die ervan profiteert (`ours` is die club) en staat op naam van een speler van de andere club, zoals `MatchGoal.ownGoal` in `Match` al doet.
+  Onze schutters tellen een eigen doelpunt nooit mee: niet dat van een tegenstander, want dat is geen doelpunt van een speler van ons, en niet dat van een speler van ons, want dat telt voor de tegenstander.
+  Dezelfde regel geldt voor elke koppeling van schutters van de tegenstander met onze spelers die later komt.
+- **Waarom:** een stadion en een publiek horen bij één kant.
+  Een eigen doelpunt in een uitwedstrijd tegen FC Groningen is opgeslagen als `ours = 0, own_goal = 1`, en is geen doelpunt van de club door een eigen speler.
+  We kennen nog geen stadion per wedstrijd als eigen gegeven, dus "daar" betekent alle uitwedstrijden tegen die club, ook die in een ander stadion of onder een andere sponsornaam.
+- **Alternatieven:** alle wedstrijden tegen de club, wat een uitwedstrijd en een thuiswedstrijd door elkaar telt; een eigen doelpunt meetellen voor de speler die hem maakte.

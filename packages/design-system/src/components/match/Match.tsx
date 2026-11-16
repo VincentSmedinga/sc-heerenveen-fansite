@@ -58,6 +58,7 @@ export type MatchProps =
          * match without a page, which is plain text.
          */
         live?: never
+        preview?: never
         reportHref?: string | undefined
         resultMissing?: never
         status: 'played'
@@ -79,6 +80,12 @@ export type MatchProps =
       live?: boolean
       penaltiesAgainst?: never
       penaltiesFor?: never
+      /**
+       * Whether the page of this match is its Voorbeschouwing, the page before the kick-off.
+       * The
+       * link then says "Voorbeschouwing" instead of "Het verslag". It needs `reportHref`.
+       */
+      preview?: boolean
       /**
        * The address of the page of this match, when it has one before the match is over: a
        * report that is filled in while the match is played (`live`), or a line-up before the
@@ -163,6 +170,7 @@ type MatchCalledOffProps<Status extends 'cancelled' | 'postponed'> = MatchBasePr
   live?: never
   penaltiesAgainst?: never
   penaltiesFor?: never
+  preview?: never
   reportHref?: never
   resultMissing?: never
   status: Status
@@ -274,6 +282,7 @@ export const Match = ({
   opponent,
   penaltiesAgainst,
   penaltiesFor,
+  preview,
   referee,
   reportHref,
   resultMissing,
@@ -400,7 +409,13 @@ export const Match = ({
       {reportHref === undefined ? null : (
         <Text className="hf-match-report">
           <Link href={reportHref} icon="arrow-right">
-            {live === true ? <span className="hf-match-live">Live</span> : 'Het verslag'}
+            {live === true ? (
+              <span className="hf-match-live">Live</span>
+            ) : preview === true ? (
+              'Voorbeschouwing'
+            ) : (
+              'Het verslag'
+            )}
             <span className="hf-visually-hidden">{` ${live === true ? 'verslag ' : ''}van ${first} tegen ${second}`}</span>
           </Link>
         </Text>

@@ -8,6 +8,7 @@ import { getDiscussions } from '../discussions'
 import { getHeadlines } from '../headlines'
 import { getMatchData, type MatchData } from '../matches'
 import { getLatestEpisodes } from '../podcasts'
+import { getPreviewAddresses } from '../report-data'
 import { matchData } from '../test-matches'
 import { getUpcomingDetails } from '../upcoming-match'
 import { withoutIcons } from '../without-icons'
@@ -18,6 +19,10 @@ vi.mock('../headlines', async (importOriginal) => ({ ...(await importOriginal<ob
 vi.mock('../articles', () => ({ getNewestArticle: vi.fn() }))
 vi.mock('../discussions', () => ({ getDiscussions: vi.fn() }))
 vi.mock('../podcasts', () => ({ getLatestEpisodes: vi.fn() }))
+vi.mock('../report-data', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  getPreviewAddresses: vi.fn(),
+}))
 vi.mock('../upcoming-match', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getUpcomingDetails: vi.fn(),
@@ -130,6 +135,8 @@ beforeEach(() => {
   vi.mocked(getMatchData).mockResolvedValue(noMatchData)
   vi.mocked(getUpcomingDetails).mockReset()
   vi.mocked(getUpcomingDetails).mockResolvedValue({ opponentForm: [], previousMeeting: undefined })
+  vi.mocked(getPreviewAddresses).mockReset()
+  vi.mocked(getPreviewAddresses).mockResolvedValue(new Map())
 })
 
 afterEach(() => {
@@ -1155,6 +1162,33 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     expect(html.slice(0, html.indexOf('Proefstad SV'))).not.toContain('Vorige keer')
     // No heading, no scorers and no legend for the abbreviations in this part of the card.
     expect(next).not.toContain('hf-match-goals')
+  })
+
+  it('ends the next match with the link "Voorbeschouwing" when it has a page, and the previous match has none', async () => {
+    vi.mocked(getPreviewAddresses).mockResolvedValue(
+      new Map([['Eredivisie|Speelronde 10', '/wedstrijden/2026-27/2026-10-28-proefstad-sv']]),
+    )
+
+    const html = await renderMatchesCard()
+    const next = html.slice(html.indexOf('Proefstad SV'))
+
+    expect(next).toContain('href="/wedstrijden/2026-27/2026-10-28-proefstad-sv"')
+    expect(next).toContain(
+      'Voorbeschouwing<span class="hf-visually-hidden"> van sc Heerenveen tegen Proefstad SV</span>',
+    )
+    expect(html.match(/Voorbeschouwing/g)).toHaveLength(1)
+  })
+
+  it('has no link when the addresses can not be read, and logs why', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    vi.mocked(getPreviewAddresses).mockRejectedValue(new Error('Failed query: select 1'))
+
+    const html = await renderMatchesCard()
+
+    expect(html).toContain('Proefstad SV')
+    expect(html).not.toContain('Voorbeschouwing')
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('Could not read the matches with a Voorbeschouwing'))
   })
 
   it('names the home club first in the previous meeting, and takes the colour from the side of sc Heerenveen', async () => {

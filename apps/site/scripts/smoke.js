@@ -1072,6 +1072,27 @@ await withEmptyDatabase((database) =>
     assert.match(matchesHtml, closedWikipediaCredit)
     assert.doesNotMatch(matchesHtml, /action=history/)
 
+    // A match that has not begun and has no report ends with the link "Voorbeschouwing" to the
+    // page of its Voorbeschouwing (#1316): the clubs with dashes, the news about the opponent
+    // and the credit. Search engines do not index it, and the sitemap does not list it.
+    const previewAddress =
+      /href="(\/wedstrijden\/\d{4}-\d{2}\/[^"]+)"[^>]*>(?:<span class="hf-icon-tail">)?Voorbeschouwing/.exec(
+        matchesHtml,
+      )?.[1]
+
+    assert.ok(previewAddress, 'a match that has not begun and has no report must link to its Voorbeschouwing')
+
+    const previewResponse = await fetch(origin + previewAddress)
+    const previewHtml = await previewResponse.text()
+
+    assert.equal(previewResponse.status, 200, previewAddress)
+    assert.match(previewHtml, /<h1[^>]*class="[^"]*hf-visually-hidden[^"]*"[^>]*>[^<]*sc Heerenveen[^<]*<\/h1>/)
+    assert.match(previewHtml, /class="hf-match-header-outcome">Voorbeschouwing</)
+    assert.match(previewHtml, /Nog niet gespeeld: /)
+    assert.match(previewHtml, /<meta name="robots" content="noindex/)
+    assert.doesNotMatch(previewHtml, /Eindstand|Tussenstand/)
+    assert.doesNotMatch(await (await fetch(`${origin}/sitemap.xml`)).text(), new RegExp(previewAddress))
+
     // The made-up matches of the old fansite: a season in the Eerste divisie shows its card
     // first, a played match without a time shows the day alone, and there is no credit:
     // the matches are ours, and Wikipedia has nothing of that season.

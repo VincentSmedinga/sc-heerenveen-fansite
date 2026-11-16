@@ -32,7 +32,7 @@ import {
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
 import { pageAreas } from '#src/page-areas'
 import { PlacePerRoundCard } from '#src/PlacePerRoundCard'
-import { getLiveReports, getReportAddresses } from '#src/report-data'
+import { getLiveReports, getPreviewAddresses, getReportAddresses } from '#src/report-data'
 import { loadSeasonPage, matchesPath, pickerPathOf, type SearchParams, statisticsPath } from '#src/season-page'
 import { seasonAddress, seasonChoices, seasonSlug } from '#src/seasons'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
@@ -123,6 +123,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   // The matches that have a page of their own: their line links to it.
   const reportAddresses = await reportAddressesOf(season)
   const liveReports = reportAddresses === undefined ? undefined : await getLiveReports(season, now)
+  const previewAddresses = reportAddresses === undefined ? undefined : await getPreviewAddresses(season, now)
   // The cards with figures are on the statistics page of the same season, and its key
   // figures show our place.
   const statistics = (id?: string) =>
@@ -234,7 +235,13 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
                     : 'Er staan dit seizoen geen wedstrijden meer op het programma.'}
                 </Text>
               ) : (
-                <MatchLines matches={programme} now={now} withDetails />
+                <MatchLines
+                  matches={programme}
+                  now={now}
+                  previewAddresses={previewAddresses}
+                  reportAddresses={reportAddresses}
+                  withDetails
+                />
               )}
             </Card>
           </Page.Cell>

@@ -728,6 +728,37 @@ export const Live = meta.story({
   render: renderLive,
 })
 
+// A match that has not begun and has a Voorbeschouwing: the link says so.
+const renderPreview = () => (
+  <div style={{ maxInlineSize: '24rem' }}>
+    <Card aria-labelledby="voorbeschouwing-kop">
+      <Heading id="voorbeschouwing-kop" level={2}>
+        Eredivisie
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <Match
+            dateTime="2026-11-21T19:00:00Z"
+            home={false}
+            opponent="Voorbeeld United"
+            preview
+            reportHref="#voorbeschouwing"
+            round="Speelronde 13"
+            stadium="Voorbeeldpark"
+            status="scheduled"
+            time="za 21 nov 20:00"
+          />
+        </List.Item>
+      </List>
+    </Card>
+  </div>
+)
+
+export const Preview = meta.story({
+  name: 'Nog niet begonnen: de regel eindigt met de link "Voorbeschouwing"',
+  render: renderPreview,
+})
+
 // The goals of an old match: the minute of one goal is not known, so its line has a dash.
 const renderGoalWithoutMinute = () => (
   <div style={{ maxInlineSize: '24rem' }}>

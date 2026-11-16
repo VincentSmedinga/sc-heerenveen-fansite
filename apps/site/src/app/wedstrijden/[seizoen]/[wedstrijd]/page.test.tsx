@@ -19,6 +19,7 @@ vi.mock('#src/matches', async (importOriginal) => ({
 }))
 vi.mock('#src/report-data', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  getPreviewMatch: vi.fn(() => Promise.resolve(undefined)),
   getPublicReport: vi.fn(),
 }))
 

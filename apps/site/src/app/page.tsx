@@ -14,6 +14,7 @@ import { dateTimeOf, dayOf, formatArticleDate, formatNewsTime } from '../news'
 import { DiscussionsCard, EpisodesCard, loadArticle } from '../NewsCards'
 import { pageAreas } from '../page-areas'
 import { getLatestEpisodes } from '../podcasts'
+import { getPreviewAddresses } from '../report-data'
 import { ServerError, serverErrorTitle } from '../ServerError'
 import { withBranch } from '../title'
 import { getUpcomingDetails, type UpcomingDetails } from '../upcoming-match'
@@ -32,6 +33,27 @@ async function loadMatches(): Promise<MatchData | undefined> {
     return await getMatchData()
   } catch (error) {
     console.error(`Could not read the matches and the table for the homepage: ${reasonOf(error)}`)
+
+    return undefined
+  }
+}
+
+/**
+ * The addresses of the Voorbeschouwing of the matches that have not begun, for the link under
+ * the
+ * next match, or undefined when the database can't give them: the card then has no link, and
+ * the
+ * log says why.
+ */
+async function loadPreviewAddresses(data: MatchData | undefined) {
+  if (data === undefined) {
+    return undefined
+  }
+
+  try {
+    return await getPreviewAddresses(data.season)
+  } catch (error) {
+    console.error(`Could not read the matches with a Voorbeschouwing for the homepage: ${reasonOf(error)}`)
 
     return undefined
   }
@@ -73,9 +95,9 @@ const loadContent = cache(async () => {
       loadMatches(),
     ])
 
-    const details = await loadUpcomingDetails(matches)
+    const [details, previewAddresses] = await Promise.all([loadUpcomingDetails(matches), loadPreviewAddresses(matches)])
 
-    return { article, details, discussions, episodes, headlines, matches }
+    return { article, details, discussions, episodes, headlines, matches, previewAddresses }
   } catch (error) {
     console.error(`Could not read the headlines, discussions and episodes for the homepage: ${reasonOf(error)}`)
 
@@ -99,7 +121,7 @@ export default async function HomePage() {
     return <ServerError retryHref="/" />
   }
 
-  const { article, details, discussions, episodes, headlines, matches } = content
+  const { article, details, discussions, episodes, headlines, matches, previewAddresses } = content
   const now = new Date()
   const news = headlinesOfTheWindow(headlines, now)
 
@@ -169,7 +191,7 @@ export default async function HomePage() {
         <Page.Section area="side" aria-label="De wedstrijden, de stand, het forum en de podcasts">
           {matches !== undefined && (
             <>
-              <MatchesCard data={matches} details={details} now={now} />
+              <MatchesCard data={matches} details={details} now={now} previewAddresses={previewAddresses} />
               <StandingsCard
                 archive={details?.previousMeeting?.dataSource === 'oude-fansite'}
                 data={matches}

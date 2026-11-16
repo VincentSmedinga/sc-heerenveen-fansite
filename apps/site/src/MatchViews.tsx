@@ -668,11 +668,16 @@ export function MatchesCard({
   data,
   details,
   now,
+  previewAddresses,
 }: {
   data: MatchData
   /** What goes under the clubs of the next match; without it that match has no small lines. */
   details?: undefined | UpcomingDetails
   now: Date
+  /**
+   * The addresses of the Voorbeschouwing of the matches that have not begun (see `MatchLines`).
+   */
+  previewAddresses?: ReadonlyMap<string, string> | undefined
 }) {
   const { next, previous } = overviewOf(data.matches, now)
   const shown = [previous, next].filter((match) => match !== undefined)
@@ -693,6 +698,7 @@ export function MatchesCard({
           }
           matches={shown}
           now={now}
+          previewAddresses={previewAddresses}
           withDetails
         />
       )}
@@ -810,6 +816,7 @@ export function MatchLines({
   liveReports,
   matches,
   now,
+  previewAddresses,
   reportAddresses,
   withCompetition = true,
   withDetails = false,
@@ -824,6 +831,12 @@ export function MatchLines({
   matches: PublicMatch[]
   now: Date
   /**
+   * The addresses of the Voorbeschouwing of the matches that have not begun, by
+   * `<competition>|<round>` (see `getPreviewAddresses`). A line of a match in it ends with the
+   * link "Voorbeschouwing", unless the match has a report: its page is then the report's.
+   */
+  previewAddresses?: ReadonlyMap<string, string> | undefined
+  /**
    * The addresses of the pages of the matches that have one, by `<competition>|<round>` (see
    * `getReportAddresses`). A line of a match in it ends with the link "Het verslag"; the others
    * are plain text.
@@ -836,20 +849,27 @@ export function MatchLines({
   return (
     <>
       <List role="list">
-        {matches.map((match) => (
-          <List.Item key={`${match.competition}-${match.round}`}>
-            <MatchLine
-              extra={extraOf?.(match)}
-              live={liveReports?.has(`${match.competition}|${match.round}`) === true}
-              match={match}
-              now={now}
-              referee={withDetails ? match.referee : undefined}
-              reportHref={reportAddresses?.get(`${match.competition}|${match.round}`)}
-              withCompetition={withCompetition}
-              withStadium={withDetails}
-            />
-          </List.Item>
-        ))}
+        {matches.map((match) => {
+          const key = `${match.competition}|${match.round}`
+          const reportHref = reportAddresses?.get(key)
+          const previewHref = reportHref === undefined ? previewAddresses?.get(key) : undefined
+
+          return (
+            <List.Item key={`${match.competition}-${match.round}`}>
+              <MatchLine
+                extra={extraOf?.(match)}
+                live={liveReports?.has(key) === true}
+                match={match}
+                now={now}
+                preview={previewHref !== undefined}
+                referee={withDetails ? match.referee : undefined}
+                reportHref={reportHref ?? previewHref}
+                withCompetition={withCompetition}
+                withStadium={withDetails}
+              />
+            </List.Item>
+          )
+        })}
       </List>
       <MatchLegend matches={matches} />
     </>
@@ -1598,6 +1618,7 @@ export function MatchLine({
   live = false,
   match,
   now,
+  preview = false,
   referee,
   reportHref,
   withCompetition = true,
@@ -1613,6 +1634,11 @@ export function MatchLine({
   live?: boolean
   match: MatchLineMatch
   now: Date
+  /**
+   * Whether the page at `reportHref` is the Voorbeschouwing of a match that has not begun: the
+   * link then says so. It needs `reportHref`.
+   */
+  preview?: boolean
   /** The referee, for the line under the clubs, after the stadium; detail lists pass it. */
   referee?: null | string | undefined
   /** The address of the page of the match, when it has one: the line then links to it. */
@@ -1666,7 +1692,7 @@ export function MatchLine({
     <Match
       {...common}
       {...matchMoment(match, now)}
-      {...(reportHref === undefined ? {} : { live, reportHref })}
+      {...(reportHref === undefined ? {} : { live, preview, reportHref })}
       resultMissing={lacksResult(match, now)}
       status="scheduled"
     />
