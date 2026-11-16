@@ -6015,12 +6015,14 @@
     Delen drie of meer spelers een plaats, dan staat er "4 spelers" zonder namen.
     Zo is elke kaart hoogstens drie regels hoog.
   - **Dezelfde getallen als de grote kaarten:** de kaarten gebruiken `topScorersOf`, `rankedPlaces` en `cleanSheetsOf`, en tellen alle competities van het gekozen seizoen.
-  - **De nul gehouden:** één groot getal (`BigFigure`, nieuw in het designsysteem) en één regel eronder, zonder lijst.
-    De regel noemt het aantal wedstrijden en de laatste keer met score, thuis of uit, tegenstander en dag.
+  - **De nul gehouden:** één zin, zonder lijst en zonder groot getal: "**3 keer** de nul gehouden in 7 wedstrijden", met het aantal keren dikgedrukt (`Strong`).
+    Daarna volgt de laatste keer met score, thuis of uit, tegenstander en dag.
+    Een groot getal was te groot voor een kleine kaart naast drie kaarten met regels; de ontwerper vroeg om een zin.
     Bij nul keer staat er "Nog niet de nul gehouden dit seizoen." en geen regel over de laatste keer.
   - **Links:** elke kaart eindigt met een link naar haar grote kaart voor hetzelfde seizoen, met een eigen tekst: "Alle doelpuntenmakers", "Alle assists", "Alle wedstrijden waarin we de nul hielden" en "Alle minuten".
   - **Zonder gegevens:** een kaart zonder gegevens staat er niet.
     Assists en Minuten alleen bij een verslag dat klaar is, en een verslag dat niet te lezen is laat alleen die twee kaarten weg.
+  - **Dikgedrukt getal in een zin:** past dit patroon ook elders, dan krijgt het een eigen plek in het designsysteem; nu is het alleen `Strong` in een `Text`.
   - **De kolom met het getal van `BarList`** is zo breed als het langste getal, met ruimte voor twee cijfers, zodat minuten met vier cijfers niet over de balk lopen.
 - **Waarom:** een kaart met alleen een link nodigt niet uit, en de eerste drie namen van een lijst wel.
   Drie regels per kaart houden de zijkolom kort, ook als veel spelers evenveel hebben.

@@ -1,19 +1,10 @@
 import type { PublicMatch } from '@fansite/db/queries'
 
-import {
-  BarList,
-  BigFigure,
-  Card,
-  Heading,
-  Link,
-  PlayerName,
-  Text,
-  type TopScorersTableRow,
-} from '@fansite/design-system'
+import { BarList, Card, Heading, Link, PlayerName, Strong, Text, type TopScorersTableRow } from '@fansite/design-system'
 import { Fragment } from 'react'
 
 import { cleanSheetsOf, scorersByPlace, topScorersOf } from './matches'
-import { cleanSheetsLine, crowdedLabel, firstPlaces, isCrowded } from './players-top'
+import { cleanSheetsSentence, crowdedLabel, firstPlaces, isCrowded } from './players-top'
 import { rankedPlaces, type ReportFigures } from './report-figures'
 
 // The four small cards of the page Spelers (#1286): the top of the season in a few lines each,
@@ -39,8 +30,9 @@ const barRowsOf = (places: readonly TopScorersTableRow[]) =>
   }))
 
 /**
- * The card De nul gehouden: one large number and one line under it, and the link to the large
- * card on the page Cijfers of the matches. It is there once a match is played, also with zero.
+ * The card De nul gehouden: one sentence with the number of times in bold, and the link to the
+ * large card on the page Cijfers of the matches. It is there once a match is played, also
+ * with zero.
  */
 export function CleanSheetsShortCard({
   href,
@@ -60,13 +52,21 @@ export function CleanSheetsShortCard({
     return null
   }
 
+  const { count, rest } = cleanSheetsSentence({ last: sheets[0], played, sheets: sheets.length }, now, when)
+
   return (
     <Card aria-labelledby="kort-de-nul-gehouden" surface="soft">
       <Heading id="kort-de-nul-gehouden" level={2}>
         De nul gehouden
       </Heading>
-      <BigFigure figure={`${sheets.length} keer`} label="de nul gehouden" />
-      <Text>{cleanSheetsLine({ last: sheets[0], played, sheets: sheets.length }, now, when)}</Text>
+      <Text>
+        {count === undefined ? null : (
+          <>
+            <Strong>{count}</Strong>{' '}
+          </>
+        )}
+        {rest}
+      </Text>
       <Link href={href} icon="arrow-right">
         Alle wedstrijden waarin we de nul hielden
       </Link>

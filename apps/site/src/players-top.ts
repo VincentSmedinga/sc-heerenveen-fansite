@@ -19,24 +19,27 @@ export const isCrowded = (row: Pick<TopScorersTableRow, 'players'>) => row.playe
 export const crowdedLabel = (row: Pick<TopScorersTableRow, 'players'>) => `${row.players.length} spelers`
 
 /**
- * The text of the line under the number of clean sheets: how many matches were played, and the
- * last time we kept a clean sheet as the score, the side, the opponent and the day, such as
- * "In 39 wedstrijden. De laatste keer: 2–0 thuis tegen NEC, zo 18 okt." Without a clean
- * sheet it says so (`when` is "dit seizoen" or "in 2025/26") and has no line about the last
- * time. `last` is the newest clean sheet, which is a played match with both scores.
+ * The sentence of the card De nul gehouden, in two parts so the page can bold the number:
+ * `count` ("3 keer") and what follows it, "de nul gehouden in 39 wedstrijden. De laatste keer:
+ * 2–0 thuis tegen NEC, zo 18 okt." The last time is the score, the side, the opponent and the
+ * day. Without a clean sheet there is no `count` and the sentence says so (`when` is "dit
+ * seizoen" or "in 2025/26"). `last` is the newest clean sheet, a played match with both scores.
  */
-export function cleanSheetsLine(
+export function cleanSheetsSentence(
   { last, played, sheets }: { last: PublicMatch | undefined; played: number; sheets: number },
   now: Date,
   when: string,
-): string {
+): { count?: string; rest: string } {
   if (sheets === 0 || last === undefined) {
-    return `Nog niet de nul gehouden ${when}.`
+    return { rest: `Nog niet de nul gehouden ${when}.` }
   }
 
   const { time } = matchMoment(last, now)
-  const score = `${last.goalsFor ?? 0}–${last.goalsAgainst ?? 0}`
+  const score = `${last.goalsFor ?? 0}\u2013${last.goalsAgainst ?? 0}`
   const side = last.home ? 'thuis tegen' : 'uit bij'
 
-  return `In ${played} ${played === 1 ? 'wedstrijd' : 'wedstrijden'}. De laatste keer: ${score} ${side} ${last.opponent}, ${time}.`
+  return {
+    count: `${sheets} keer`,
+    rest: `de nul gehouden in ${played} ${played === 1 ? 'wedstrijd' : 'wedstrijden'}. De laatste keer: ${score} ${side} ${last.opponent}, ${time}.`,
+  }
 }

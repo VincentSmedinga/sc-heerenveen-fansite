@@ -89,12 +89,13 @@ describe('the small card De nul gehouden', () => {
       ),
     )
 
-  it('is one number and one line, with the number read together with what it counts, and no list', () => {
+  it('is one sentence with the number of times in bold, and no list', () => {
     const html = render()
 
-    expect(html).toContain('<p class="hf-big-figure">')
-    expect(plain(html)).toMatch(/\d+ keer de nul gehouden/)
-    expect(plain(html)).toMatch(/In \d+ wedstrijden?\. De laatste keer: \d–0 (thuis tegen|uit bij) .+, .+\./)
+    expect(html).toMatch(/<p><strong>\d+ keer<\/strong> de nul gehouden in \d+ wedstrijden?\./)
+    expect(plain(html)).toMatch(
+      /\d+ keer de nul gehouden in \d+ wedstrijden?\. De laatste keer: \d–0 (thuis tegen|uit bij) .+, .+\./,
+    )
     expect(html).not.toContain('<li')
     expect(html).toContain(
       '<a href="/wedstrijden/cijfers#de-nul-gehouden">Alle wedstrijden waarin we de nul hielden</a>',
@@ -108,8 +109,8 @@ describe('the small card De nul gehouden', () => {
     }))
     const html = render(conceded)
 
-    expect(plain(html)).toContain('0 keer de nul gehouden')
     expect(plain(html)).toContain('Nog niet de nul gehouden dit seizoen.')
+    expect(html).not.toContain('<strong>')
     expect(html).not.toContain('De laatste keer')
   })
 

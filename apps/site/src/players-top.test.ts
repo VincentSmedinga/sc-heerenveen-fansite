@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { cleanSheetsLine, crowdedLabel, firstPlaces, isCrowded } from './players-top'
+import { cleanSheetsSentence, crowdedLabel, firstPlaces, isCrowded } from './players-top'
 
 const place = (position: number, count: number) => ({
   goals: 4 - position,
@@ -24,7 +24,7 @@ describe('a crowded place', () => {
   })
 })
 
-describe('cleanSheetsLine', () => {
+describe('cleanSheetsSentence', () => {
   const last = {
     dateText: null,
     goalsAgainst: 0,
@@ -38,14 +38,15 @@ describe('cleanSheetsLine', () => {
   const now = new Date('2026-10-23T13:40:00Z')
 
   it('names the matches played, the score, the side, the opponent and the day', () => {
-    expect(cleanSheetsLine({ last, played: 39, sheets: 9 }, now, 'dit seizoen')).toBe(
-      'In 39 wedstrijden. De laatste keer: 2–0 uit bij NEC, zo 18 okt.',
-    )
+    expect(cleanSheetsSentence({ last, played: 39, sheets: 9 }, now, 'dit seizoen')).toEqual({
+      count: '9 keer',
+      rest: 'de nul gehouden in 39 wedstrijden. De laatste keer: 2–0 uit bij NEC, zo 18 okt.',
+    })
   })
 
   it('says "Nog niet" and nothing about the last time without a clean sheet', () => {
-    expect(cleanSheetsLine({ last: undefined, played: 3, sheets: 0 }, now, 'in 2025/26')).toBe(
-      'Nog niet de nul gehouden in 2025/26.',
-    )
+    expect(cleanSheetsSentence({ last: undefined, played: 3, sheets: 0 }, now, 'in 2025/26')).toEqual({
+      rest: 'Nog niet de nul gehouden in 2025/26.',
+    })
   })
 })
