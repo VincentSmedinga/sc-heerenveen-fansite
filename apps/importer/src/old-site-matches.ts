@@ -243,6 +243,7 @@ function deriveOne(match: OldSiteMatch, number: number, groupSize: number): Deri
       season: oldSiteSeason(match.season),
       sourceLine: null,
       stadium: null,
+      stadiumId: null,
       status: 'played',
     },
   }

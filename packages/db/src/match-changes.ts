@@ -11,6 +11,7 @@ import type { Competition, Match, MatchChange, MatchStatus, NewMatchGoal } from 
 
 import { recordAction } from './audit-log.ts'
 import { matchChanges, matches, matchGoals } from './schema.ts'
+import { linkMatchToStadium } from './stadiums.ts'
 
 /**
  * A decision about a held change. `take-over` makes the match what the change proposes (or
@@ -257,7 +258,7 @@ export async function storeGoals(db: Pick<Database, 'insert'>, matchId: number, 
  * `goalsChanged` says they differ.
  */
 export async function updateMatch(
-  db: Pick<Database, 'delete' | 'insert' | 'update'>,
+  db: Pick<Database, 'delete' | 'insert' | 'select' | 'update'>,
   before: Pick<Match, 'goalsAgainst' | 'goalsFor' | 'id' | 'resultSetAt' | 'status'>,
   proposal: Proposal,
   goalsChanged: boolean,
@@ -275,6 +276,7 @@ export async function updateMatch(
       resultSetAt: sameResult ? before.resultSetAt : match.status === 'played' ? now : null,
     })
     .where(eq(matches.id, before.id))
+  await linkMatchToStadium(db, before.id)
 
   if (goalsChanged) {
     await db.delete(matchGoals).where(eq(matchGoals.matchId, before.id))

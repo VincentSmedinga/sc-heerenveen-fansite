@@ -41,6 +41,7 @@
     "./source-differences": "./src/source-differences.ts",
     "./staff": "./src/staff.ts",
     "./staff-seed": "./src/staff-seed.ts",
+    "./stadiums": "./src/stadiums.ts",
     "./visits": "./src/visits.ts",
     "./test-database": "./src/test-database.ts"
   },

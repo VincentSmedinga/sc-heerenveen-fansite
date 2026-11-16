@@ -34,6 +34,7 @@ const match: Match = {
   season: '2026/27',
   sourceLine: null,
   stadium: 'Stadion Proeflaan',
+  stadiumId: null,
   status: 'played',
 }
 

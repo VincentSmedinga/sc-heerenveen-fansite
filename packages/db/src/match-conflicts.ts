@@ -14,6 +14,7 @@ import { recordAction } from './audit-log.ts'
 import { clearParts, insertGoals } from './match-edits.ts'
 import { matchChanges, matchEdits, matches, matchGoals, matchReports } from './schema.ts'
 import { seasonOf } from './season.ts'
+import { linkMatchToStadium } from './stadiums.ts'
 
 /**
  * A decision about a difference. `take-over` makes the part what Wikipedia says and lets the
@@ -301,6 +302,22 @@ export function encodePartProposal(
 
 /** Writes the part of a match as the proposal has it. */
 async function applyPart(db: Writer, matchId: number, proposal: PartProposal, now: Date) {
+  await writePart(db, matchId, proposal, now)
+  await linkMatchToStadium(db, matchId)
+}
+
+/** Whether the match has a report, bezig or klaar. */
+async function hasReport(db: Pick<Database, 'select'>, matchId: number): Promise<boolean> {
+  const found = await db
+    .select({ id: matchReports.matchId })
+    .from(matchReports)
+    .where(eq(matchReports.matchId, matchId))
+    .limit(1)
+
+  return found.length > 0
+}
+
+async function writePart(db: Writer, matchId: number, proposal: PartProposal, now: Date) {
   if (proposal.part === 'goals') {
     await db.delete(matchGoals).where(eq(matchGoals.matchId, matchId))
     await insertGoals(db, matchId, proposal.goals)
@@ -353,15 +370,4 @@ async function applyPart(db: Writer, matchId: number, proposal: PartProposal, no
       ...(proposal.status === 'played' ? {} : { attendance: null }),
     })
     .where(eq(matches.id, matchId))
-}
-
-/** Whether the match has a report, bezig or klaar. */
-async function hasReport(db: Pick<Database, 'select'>, matchId: number): Promise<boolean> {
-  const found = await db
-    .select({ id: matchReports.matchId })
-    .from(matchReports)
-    .where(eq(matchReports.matchId, matchId))
-    .limit(1)
-
-  return found.length > 0
 }

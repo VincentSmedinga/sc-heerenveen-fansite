@@ -1,7 +1,9 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
+import { matches, stadiums } from '@fansite/db/schema'
 import { readSeasonCoverage } from '@fansite/db/season-coverage'
 import { createTestDatabase } from '@fansite/db/test-database'
+import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { unusualFormationsPath } from './formations'
@@ -63,6 +65,22 @@ describe('the gaps of the matches of a season (#1163)', () => {
     expect(gaps.get(ids.waiting)?.wacht).toEqual({ sign: '2', total: 2 })
     expect(gaps.get(ids.complete)?.wacht).toBeUndefined()
     expect(gaps.get(ids.complete)?.gegevens).toEqual({ sign: '3', total: 3 })
+  })
+
+  it('counts a stadium name without a stadium as a gap of its own in Gegevens (#1297)', async () => {
+    const [{ insertId: stadiumId }] = await database.db.insert(stadiums).values({})
+    const gegevens = async () => (await gapsOf()).get(ids.complete)?.gegevens
+
+    expect(await gegevens()).toEqual({ sign: '3', total: 3 })
+
+    // The name is there, so the name is no longer missing, and the missing link counts instead.
+    await database.db.update(matches).set({ stadium: 'Oefenstadion' }).where(eq(matches.id, ids.complete))
+    expect(await gegevens()).toEqual({ sign: '3', total: 3 })
+
+    await database.db.update(matches).set({ stadiumId }).where(eq(matches.id, ids.complete))
+    expect(await gegevens()).toEqual({ sign: '2', total: 2 })
+
+    await database.db.update(matches).set({ stadium: null, stadiumId: null }).where(eq(matches.id, ids.complete))
   })
 
   it('has a ? for the kick-off and the line-up of a played match without them', async () => {

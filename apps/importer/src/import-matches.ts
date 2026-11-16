@@ -17,6 +17,7 @@ import {
 } from '@fansite/db/schema'
 import { seasonOf, seasonStart } from '@fansite/db/season'
 import { keepSourceDifferences, readTakenOverParts } from '@fansite/db/source-differences'
+import { linkMatchToStadium } from '@fansite/db/stadiums'
 import { and, asc, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
 
 import type { Judgement } from './classify-change.ts'
@@ -1333,6 +1334,7 @@ async function storeMatches(
         if (Object.keys(compared.fill).length > 0) {
           counts.updated++
           await db.update(matches).set(compared.fill).where(eq(matches.id, lookup.match.id))
+          await linkMatchToStadium(db, lookup.match.id)
         } else {
           counts.unchanged++
         }
@@ -1532,6 +1534,7 @@ async function storeMatches(
         season,
       })
 
+      await linkMatchToStadium(db, insertId)
       await storeGoals(db, insertId, entry.proposal.goals)
       continue
     }

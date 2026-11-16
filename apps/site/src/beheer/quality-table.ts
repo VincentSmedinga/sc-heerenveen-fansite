@@ -128,6 +128,7 @@ export async function readMatchGaps(db: Pick<Database, 'select'>, season?: strin
       referee: matches.referee,
       season: matches.season,
       stadium: matches.stadium,
+      stadiumId: matches.stadiumId,
       status: matches.status,
     })
     .from(matches)
@@ -174,7 +175,10 @@ export async function readMatchGaps(db: Pick<Database, 'select'>, season?: strin
     const goal = goalsOf.get(match.id)
     const report = reportOf.get(match.id)
     const scored = (match.goalsFor ?? 0) + (match.goalsAgainst ?? 0)
-    const missingFacts = [match.attendance, match.referee, match.stadium].filter((value) => value === null).length
+    // A stadium name without a certain stadium is a gap of its own, besides a missing name.
+    const unlinked = match.stadium !== null && match.stadiumId === null ? 1 : 0
+    const missingFacts =
+      [match.attendance, match.referee, match.stadium].filter((value) => value === null).length + unlinked
     const wait = waitingOf.get(match.id) ?? 0
 
     if (lacksResult(match, now)) {
