@@ -1023,7 +1023,14 @@ Clubs die op hetzelfde artikel uitkomen, zijn één club, in een transactie per 
 
 Hebben twee clubs elk een eigen artikel dat geen doorverwijzing is, dan komen ze op een ander artikel uit en blijven ze twee clubs.
 
-Staat de club niet in die lijst en is zijn titel geen doorverwijzing, dan voegt de projecteigenaar of een Builder ze met de hand samen.
+De redactie voegt twee clubs ook samen onder Beheer, op `/beheer/clubs/samenvoegen` (#1345), met `mergeChosenClubs` uit `@fansite/db/club-merge`.
+Dat is één transactie die `matches.club_id`, `club_names`, `club_pages`, `club_name_periods` en `club_home_grounds` naar de club die blijft zet, zonder dubbele sleutels, en de rijen die de club bij zijn naam noemen (`item_clubs`, `standings` en `league_results`) naar de naam van de club die blijft.
+Een seizoen, stadion, artikel of kop dat beide clubs al hadden, blijft één keer staan.
+Het Wikidata-nummer en het artikel gaan mee als de club die blijft er geen heeft, anders wordt het artikel een titel in `club_pages`.
+Hebben beide clubs een Wikidata-nummer, dan doet de functie niets (`both-wikidata`).
+`club.merge` staat in `audit_log`, en de naam van de club die verdwijnt wordt een andere naam, zodat de import van de oude fansite de club bij die naam vindt.
+
+Staat de club niet in die lijst en is zijn titel geen doorverwijzing, dan voegt de redactie ze samen onder Beheer (zie hierboven), of de projecteigenaar of een Builder doet het met de hand.
 Er is geen opdracht voor, want het komt zelden voor.
 Doe het in één transactie, met `<blijft>` en `<gaat weg>` als het `id` van de twee clubs:
 

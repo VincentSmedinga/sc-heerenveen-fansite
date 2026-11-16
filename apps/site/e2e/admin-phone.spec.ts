@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 
 import { adminCookie } from './admin'
 import { articleIdOf, testArticles } from './articles'
+import { clubPair } from './club-pair'
 import { earlierSeasonSlug } from './earlier-season'
 import { heldMatchId, statSeasonSlug } from './held-changes'
 import { cupReportMatchId, matchId, playedMatchId } from './matches'
@@ -44,6 +45,7 @@ const screens = [
   '/beheer/stadions/sv-proefdorp',
   '/beheer/clubs',
   '/beheer/clubs/sv-proefdorp',
+  '/beheer/clubs/samenvoegen?club={club}&met={otherClub}',
   '/beheer/clubs/kwaliteit',
   '/beheer/wedstrijden/kwaliteit',
   `/beheer/wedstrijden/kwaliteit/${earlierSeasonSlug()}`,
@@ -74,6 +76,8 @@ async function withNumbers(path: string) {
     .replace('{player}', path.includes('{player}') ? String(await squadPlayerId()) : '')
     .replace('{person}', path.includes('{person}') ? String((await mergePair()).person) : '')
     .replace('{otherPerson}', path.includes('{otherPerson}') ? String((await mergePair()).other) : '')
+    .replace('{club}', path.includes('{club}') ? String((await clubPair()).club) : '')
+    .replace('{otherClub}', path.includes('{otherClub}') ? String((await clubPair()).other) : '')
 }
 
 test.use({ hasTouch: true, isMobile: true, viewport: { height: 780, width: 390 } })

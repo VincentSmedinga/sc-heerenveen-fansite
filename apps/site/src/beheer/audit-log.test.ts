@@ -157,6 +157,7 @@ describe('recordAction', () => {
       'gap.mark',
       'gap.renew',
       'gap.unmark',
+      'club.merge',
     ])
   })
 

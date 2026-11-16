@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test'
 import { adminAccountId, adminCookie, type E2eRole } from './admin'
 import { articleIdOf, testArticles } from './articles'
 import { checkPage } from './check-page'
+import { clubPair } from './club-pair'
 import { earlierSeasonSlug } from './earlier-season'
 import { heldMatchId, statSeasonSlug } from './held-changes'
 import { incompleteReportPath } from './incomplete-report'
@@ -413,6 +414,12 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'editor', path: '/beheer/clubs?fout=weg', status: 200 },
   { admin: 'editor', path: '/beheer/clubs/sv-proefdorp', status: 200 },
   { admin: 'editor', path: '/beheer/clubs/sv-proefdorp?gedaan=opgeslagen', status: 200 },
+  { admin: 'editor', path: '/beheer/clubs/sv-proefdorp?gedaan=samengevoegd', status: 200 },
+  // The page that merges two clubs (#1345): two made-up clubs, one club twice, and no clubs.
+  { admin: 'editor', path: '/beheer/clubs/samenvoegen?club={club}&met={otherClub}', status: 200 },
+  { admin: 'editor', path: '/beheer/clubs/samenvoegen?club={club}&met={club}', status: 200 },
+  { admin: 'editor', path: '/beheer/clubs/samenvoegen', status: 200 },
+  { admin: 'author', path: '/beheer/clubs/samenvoegen', status: 404 },
   { admin: 'editor', path: '/beheer/clubs/voorbeeld-united', status: 200 },
   { admin: 'editor', path: '/beheer/clubs/bestaat-niet', status: 404 },
   { admin: 'author', path: '/beheer/clubs', status: 404 },
@@ -525,6 +532,8 @@ async function withNumbers(path: string) {
         .replace('{player}', path.includes('{player}') ? String(await squadPlayerId()) : '{player}')
         .replaceAll('{person}', path.includes('{person}') ? String((await mergePair()).person) : '{person}')
         .replace('{otherPerson}', path.includes('{otherPerson}') ? String((await mergePair()).other) : '{otherPerson}')
+        .replaceAll('{club}', path.includes('{club}') ? String((await clubPair()).club) : '{club}')
+        .replace('{otherClub}', path.includes('{otherClub}') ? String((await clubPair()).other) : '{otherClub}')
     : path
 }
 

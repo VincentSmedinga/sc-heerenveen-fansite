@@ -12,19 +12,21 @@ import {
   Link,
   Notice,
   Page,
+  Select,
   Tag,
   Text,
 } from '@fansite/design-system'
 
 import { toolbarAreas } from '#src/beheer/areas'
 import { clubCountryListPath, countClubsWithoutCountry } from '#src/beheer/club-country'
+import { listMergeChoices } from '#src/beheer/club-merge'
 import { listAdminClubs, type NamesShow, searchClubs } from '#src/beheer/club-names'
 import { compact } from '#src/beheer/density'
 import { parseSearch, searchMaxLength } from '#src/beheer/items'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
-import { clubPath, clubsPath, listPath } from './paths'
+import { clubPath, clubsPath, listPath, mergePagePath } from './paths'
 
 // Render on each request: who is logged in and which clubs have a list are not known when the
 // site is built.
@@ -54,6 +56,7 @@ export default async function ClubNamesPage({ searchParams }: { searchParams: Pr
   const shown = show === 'eigen-lijst' ? own : found
   const address = (choice: NamesShow) => listPath(choice === 'alles' ? undefined : choice, search)
   const withoutCountry = await countClubsWithoutCountry(getDatabase().db)
+  const choices = await listMergeChoices(getDatabase().db, 0)
   const notice = typeof fout === 'string' ? notices[fout] : undefined
 
   return (
@@ -114,6 +117,38 @@ export default async function ClubNamesPage({ searchParams }: { searchParams: Pr
               }))}
             />
           )}
+        </Card>
+        <Card aria-labelledby="samenvoegen-kop">
+          <Heading id="samenvoegen-kop" level={2}>
+            Twee clubs samenvoegen
+          </Heading>
+          <Text>
+            Staat dezelfde club twee keer in de lijst? Kies de twee. Je leest eerst wat samenvoegen doet; er verandert
+            niets voor je daar op de knop drukt.
+          </Text>
+          <Form action={mergePagePath} method="get">
+            <Field id="club" label="Eerste club">
+              <Select name="club">
+                {choices.map((choice) => (
+                  <Select.Option key={choice.id} value={String(choice.id)}>
+                    {choice.label}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Field>
+            <Field id="met" label="Dezelfde club als">
+              <Select name="met">
+                {choices.map((choice) => (
+                  <Select.Option key={choice.id} value={String(choice.id)}>
+                    {choice.label}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Field>
+            <Button appearance="soft" type="submit">
+              Bekijk wat samenvoegen doet
+            </Button>
+          </Form>
         </Card>
       </Page.Cell>
     </Page.Main>

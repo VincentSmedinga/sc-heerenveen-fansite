@@ -5,12 +5,15 @@ import {
   Button,
   Card,
   Disclosure,
+  Field,
   Form,
   Heading,
+  Input,
   Link,
   List,
   Notice,
   Page,
+  Select,
   Strong,
   Tag,
   Text,
@@ -19,6 +22,7 @@ import { notFound } from 'next/navigation'
 
 import { submitClubCountry } from '#src/app/beheer/clubs/kwaliteit/actions'
 import { sideAreas } from '#src/beheer/areas'
+import { listMergeChoices } from '#src/beheer/club-merge'
 import { emptyNameRow, nameFormId } from '#src/beheer/club-name-fields'
 import { rowOf } from '#src/beheer/club-name-form'
 import { findAdminClub, headingNotice } from '#src/beheer/club-names'
@@ -32,7 +36,7 @@ import { describeShowDelay } from '#src/matches'
 import { submitNames, submitReset } from '../actions'
 import { ClubCountryForm } from '../ClubCountryForm'
 import { ClubNameForm } from '../ClubNameForm'
-import { clubsPath } from '../paths'
+import { clubsPath, mergePagePath } from '../paths'
 
 // Render on each request: the list changes with every save.
 export const dynamic = 'force-dynamic'
@@ -65,6 +69,10 @@ export default async function ClubNamesOfClubPage({ params, searchParams }: Prop
   const notices: Record<string, { text: string; title: string }> = {
     'geen-lijst': { text: 'Deze club had geen eigen lijst om weg te halen.', title: 'Niets weggehaald' },
     opgeslagen: { text: `De lijst is bewaard. Staat ${showDelay} op de pagina van de club.`, title: 'Opgeslagen' },
+    samengevoegd: {
+      text: 'De twee clubs zijn één club. De wedstrijden, namen en andere gegevens van de club die verdween staan nu hier, en zijn naam is een andere naam van deze club.',
+      title: 'Samengevoegd',
+    },
     weggehaald: {
       text: `De lijst is weg. De pagina van de club zegt ${showDelay} niets meer over eerdere namen.`,
       title: 'Lijst weggehaald',
@@ -72,6 +80,7 @@ export default async function ClubNamesOfClubPage({ params, searchParams }: Prop
   }
   const notice = typeof gedaan === 'string' ? notices[gedaan] : undefined
   const mismatch = headingNotice(club.name, own)
+  const others = await listMergeChoices(getDatabase().db, club.id)
 
   return (
     <Page.Main areas={sideAreas} className={compact}>
@@ -141,6 +150,29 @@ export default async function ClubNamesOfClubPage({ params, searchParams }: Prop
             </>
           )}
         </Card>
+        {others.length === 0 ? null : (
+          <Disclosure summary="Samenvoegen met een andere club">
+            <Text>
+              Staat dezelfde club twee keer in de lijst, bijvoorbeeld onder een eerdere naam? Kies de andere club. Je
+              leest eerst wat samenvoegen doet; er verandert niets voor je daar op de knop drukt.
+            </Text>
+            <Form action={mergePagePath} method="get">
+              <Input name="club" type="hidden" value={String(club.id)} />
+              <Field id="met" label="Dezelfde club als">
+                <Select name="met">
+                  {others.map((other) => (
+                    <Select.Option key={other.id} value={String(other.id)}>
+                      {other.label}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Field>
+              <Button appearance="soft" type="submit">
+                Bekijk wat samenvoegen doet
+              </Button>
+            </Form>
+          </Disclosure>
+        )}
         {own.length === 0 ? null : (
           <Disclosure summary="Lijst weghalen">
             <Text>

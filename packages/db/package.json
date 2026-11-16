@@ -26,6 +26,7 @@
     "./player-field-differences": "./src/player-field-differences.ts",
     "./player-stat-differences": "./src/player-stat-differences.ts",
     "./prepare": "./src/prepare.ts",
+    "./club-merge": "./src/club-merge.ts",
     "./person-merge": "./src/person-merge.ts",
     "./person-slugs": "./src/person-slugs.ts",
     "./slug-letters": "./src/slug-letters.ts",

@@ -476,6 +476,7 @@ export const auditActions = [
   'gap.mark',
   'gap.renew',
   'gap.unmark',
+  'club.merge',
 ] as const
 
 export type AuditAction = (typeof auditActions)[number]

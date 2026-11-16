@@ -21,3 +21,20 @@ export function listPath(show?: string, search?: string) {
 
   return query.size === 0 ? clubsPath : `${clubsPath}?${query}`
 }
+
+/** The address of the page that merges two clubs (#1345). */
+export const mergePagePath = `${clubsPath}/samenvoegen`
+
+/**
+ * The address of the page that merges two clubs: the club the editor came from (`club`), the
+ * other club (`met`) and which of the two stays (`blijft`, none for the default).
+ */
+export function mergePath({ clubId, keptId, withId }: { clubId: number; keptId?: number | undefined; withId: number }) {
+  const query = new URLSearchParams({ club: String(clubId), met: String(withId) })
+
+  if (keptId !== undefined) {
+    query.set('blijft', String(keptId))
+  }
+
+  return `${mergePagePath}?${query}`
+}
