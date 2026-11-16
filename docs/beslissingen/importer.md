@@ -3986,6 +3986,7 @@
   - De lijst van spelers geeft het land alleen aan de persoon met precies die titel, nooit op een naam.
     Een naamgenoot zonder artikel krijgt dus niets.
 - **Alternatieven:** de oude fansite bovenaan (die kent geen dubbele nationaliteit en is van 2007); de bronnen elkaar laten tegenspreken in een lijst van afwijkingen (te veel werk voor een gat dat een mens snel zelf sluit).
+- **Later:** sinds 16 november 2026 (#1289) heeft Wikidata drie stappen in plaats van één: eerst het land waarvoor iemand sport (`wikidata-sport`), dan het geboorteland (`wikidata-birth`) en dan de eerste nationaliteit (`wikidata`); zie _De import kiest het land van een speler uit drie antwoorden van Wikidata_.
 
 ## Van de lijst van spelers telt de eerste vlag
 
@@ -4187,6 +4188,32 @@
   Een speler speelt wel echt op een andere plek in een ander seizoen, dus de positie blijft zoals ze was.
 - **Alternatieven:** het land van het seizoen laten voorgaan (een verbetering is dan niet te zien); het land van het seizoen ook in het beheer laten zetten (hetzelfde antwoord per seizoen invullen); de kolom `players.country` weghalen (de import gebruikt haar als bron voor een persoon zonder land).
 - **Later:** vervangt de regel over het land in _Een persoon heeft een linie en een land, en een seizoen kan afwijken_.
+
+## De import kiest het land van een speler uit drie antwoorden van Wikidata
+
+- **Datum:** 16 november 2026
+- **Besluit:** de import bewaart van een persoon twee feiten naast het land dat de site toont (#1289): de landen waarvoor hij sport (`P1532`, in `person_sport_countries`) en zijn geboorteland (`persons.birth_country_id`, het `P17` van zijn geboorteplaats).
+  Het land dat de site toont (`persons.country`) kiest `refreshPersonCountries` zonder verzoek, van sterk naar zwak: wat de redactie zette (`manual`); het ene land waarvoor hij sport (`wikidata-sport`); het geboorteland (`wikidata-birth`); de eerste nationaliteit (`wikidata`); en dan de bronnen die er al waren (`list`, `old-site`, `squad`).
+  De bron zegt welke stap het gaf, in plaats van alleen `wikidata`.
+- **Waarom:** een voetballer hoort voor een supporter bij het land van zijn elftal, en dat is vaak niet zijn eerste nationaliteit.
+  Met beide feiten opgeslagen kunnen we later het andere tonen of er cijfers van maken zonder Wikidata opnieuw te vragen.
+  De bron per stap laat zien welke antwoorden zwakker zijn.
+- **Eigen keuze bij het bouwen:**
+  - Noemt Wikidata meer dan één land waarvoor hij sport, dan beslist de vlag op zijn rij van het laatste seizoen als dat land er een van is.
+    Anders valt de import terug op het geboorteland.
+    Nooit het eerste van de lijst, want die volgorde zegt niets.
+  - Een land dat niet in onze lijst staat, geeft een waarschuwing per soort (nationaliteit, land waarvoor hij sport, geboorteland) en geen gok.
+    De volgende stap beslist dan.
+  - Het Verenigd Koninkrijk als geboorteland gaat niet voor een eerste nationaliteit die Engeland, Wales, Schotland of Noord-Ierland is (#1278): die is nauwkeuriger.
+  - Het land van een geboorteplaats staat in `wikidata_place_countries`: een plaats kost één verzoek, voor alle personen en alle runs.
+    Het item van de plaats geeft ook zijn label, dus dat is geen tweede verzoek.
+  - De kolom `country_facts_read_at` zegt voor wie de twee feiten zijn opgeslagen.
+    `pnpm run import:country-facts` leest elke persoon met een Q-nummer en zonder die datum één keer opnieuw, met de pauzes van de import, onder de lock van de import.
+    Een tweede keer vindt niemand, en een gestopte run gaat bij de volgende verder.
+    Het moet na de uitrol op acceptatie één keer draaien.
+  - Bij het samenvoegen van twee personen komen de landen waarvoor de ander sport achter die van de persoon die blijft, en zijn geboorteland komt van de ander als hij er geen heeft.
+    Iemand kan zo twee landen krijgen, waarna de vlag van zijn laatste seizoen of het geboorteland kiest.
+- **Alternatieven:** de leden van een nationaal elftal (`P54`) gebruiken (jeugdelftallen staan ertussen, en in de steekproef gaf het twee keer het verkeerde land); alleen het uitgerekende land bewaren (dan is het andere weg); het eerste land van `P1532` nemen (de volgorde zegt niets); de eerste nationaliteit houden.
 
 ## De controle op de doelpunten van de tabel draait niet in het seizoen dat loopt
 

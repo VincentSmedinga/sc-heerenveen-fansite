@@ -353,7 +353,7 @@ async function showPersonData(db: Database, write: (line: string) => void): Prom
     `  persons per line: ${counts.byLine.doelman} doelman, ${counts.byLine.verdediger} verdediger, ${counts.byLine.middenvelder} middenvelder, ${counts.byLine.aanvaller} aanvaller`,
   )
   write(
-    `  country: ${countries.wikidata} from Wikidata, ${countries.manual} set by hand, ${countries.list} from the list of players, ${countries['old-site']} from the old fansite, ${countries.squad} from the squad, ${counts.noCountry} without`,
+    `  country: ${countries.wikidata} from Wikidata (first nationality), ${countries['wikidata-sport']} from the country he plays for, ${countries['wikidata-birth']} from the country of birth, ${countries.manual} set by hand, ${countries.list} from the list of players, ${countries['old-site']} from the old fansite, ${countries.squad} from the squad, ${counts.noCountry} without`,
   )
 }
 

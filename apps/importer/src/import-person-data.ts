@@ -4,14 +4,17 @@ import type { PersonLineSource, PlayerPosition } from '@fansite/db/schema'
 
 import {
   applyManualLines,
+  knownPlaceCountries,
   knownWikidataLabels,
   personsByWikidataId,
   personsToRead,
+  personsToReadCountryFacts,
   refreshPersonCountries,
   refreshPersonLines,
   rememberWikidataId,
   squadLines,
   storePersonData,
+  storePlaceCountry,
   storeWikidataLabel,
 } from '@fansite/db/persons'
 
@@ -21,7 +24,15 @@ import { wikidataCountryCodes } from './person-countries.ts'
 import { lineMap, personLines, wikidataPositionLines } from './person-lines.ts'
 import { mostFailuresInARow } from './person-pages.ts'
 import { printable } from './text.ts'
-import { lineOfPositions, readArticleInfo, readItem, readLabel, type WikidataItem } from './wikidata-item.ts'
+import {
+  lineOfPositions,
+  readArticleInfo,
+  readCountryIds,
+  readItem,
+  readLabel,
+  readPlaceIds,
+  type WikidataItem,
+} from './wikidata-item.ts'
 
 /** The address of Wikidata, where the items of the persons are. */
 export const wikidataOrigin = 'https://www.wikidata.org'
@@ -45,6 +56,12 @@ export type PersonDataOptions = {
   clock?: () => Date
   /** The code of two letters of a country of Wikidata, by Q-number. A test gives its own. */
   countryCodes?: ReadonlyMap<string, string>
+  /**
+   * Read the persons whose countries for sport and birth country were never stored (#1289),
+   * all of them, instead of the persons that were not read. The command
+   * `import:country-facts` sets it.
+   */
+  countryFacts?: boolean
   /** The most persons to read. */
   limit?: number
   /** The list of lines of our own. A test gives its own. */
@@ -67,8 +84,12 @@ export type PersonDataReport = {
   countriesBritish: number
   /** The persons that got their country from the first nationality of Wikidata this run. */
   countriesFilled: number
+  /** The persons that got the country of their birth place this run (#1289). */
+  countriesFromBirth: number
   /** The persons that got their country from the first flag in the list of players this run. */
   countriesFromList: number
+  /** The persons that got the one country they play for this run (#1289). */
+  countriesFromSport: number
   /** The persons that got their country from their rows of the squad lists this run. */
   countriesFromSquad: number
   /** Persons without an article or without an item: read, with nothing from Wikidata. */
@@ -111,10 +132,31 @@ export function describePersonData(report: PersonDataReport): string[] {
     )
   }
   const { countriesFilled: countries, countriesFromList: fromList, countriesFromSquad: fromSquad } = report
+  const { countriesFromBirth: fromBirth, countriesFromSport: fromSport } = report
 
-  if (linesAgain.squad + linesAgain.wikidata + linesAgain.cleared + countries + fromList + fromSquad > 0) {
+  if (
+    linesAgain.squad +
+      linesAgain.wikidata +
+      linesAgain.cleared +
+      countries +
+      fromBirth +
+      fromList +
+      fromSport +
+      fromSquad >
+    0
+  ) {
+    // The new sources show only when they gave a country, so a log without them reads as
+    // before.
+    const british =
+      report.countriesBritish > 0 ? ` (${report.countriesBritish} in England, Wales, Scotland or Northern Ireland)` : ''
+    const wikidata = [
+      `${countries} ${countries === 1 ? 'country' : 'countries'} from Wikidata`,
+      ...(fromSport > 0 ? [`${fromSport} from the country he plays for`] : []),
+      ...(fromBirth > 0 ? [`${fromBirth} from the country of birth`] : []),
+    ].join(', ')
+
     described.push(
-      `persons (line and country): ${linesAgain.squad} ${linesAgain.squad === 1 ? 'line' : 'lines'} from the squad, ${linesAgain.wikidata} from Wikidata, ${linesAgain.cleared} taken away; ${countries} ${countries === 1 ? 'country' : 'countries'} from Wikidata${report.countriesBritish > 0 ? ` (${report.countriesBritish} in England, Wales, Scotland or Northern Ireland)` : ''}, ${fromList} from the list of players, ${fromSquad} from the squad`,
+      `persons (line and country): ${linesAgain.squad} ${linesAgain.squad === 1 ? 'line' : 'lines'} from the squad, ${linesAgain.wikidata} from Wikidata, ${linesAgain.cleared} taken away; ${wikidata}${british}, ${fromList} from the list of players, ${fromSquad} from the squad`,
     )
   }
 
@@ -162,22 +204,34 @@ export async function readPersonData(
 
   report.linesAgain = await refreshPersonLines(db, wikidataPositionLines)
 
-  const { filled, filledBritish, list, squad, unknown } = await refreshPersonCountries(
+  const { birth, filled, filledBritish, list, sport, squad, unknown } = await refreshPersonCountries(
     db,
     options.countryCodes ?? wikidataCountryCodes,
   )
 
   report.countriesFilled = filled
   report.countriesBritish = filledBritish
+  report.countriesFromBirth = birth
   report.countriesFromList = list
+  report.countriesFromSport = sport
   report.countriesFromSquad = squad
 
-  if (unknown.length > 0) {
-    const persons = unknown.reduce((sum, item) => sum + item.persons, 0)
+  const unknownKinds = [
+    ['nationality', 'a first nationality that is not in the list of countries, so no country is filled in'],
+    ['sport', 'a country they play for that is not in the list of countries, so it gives no country'],
+    ['birth', 'a country of birth that is not in the list of countries, so it gives no country'],
+  ] as const
 
-    report.warnings.push(
-      `Persons: ${persons} ${persons === 1 ? 'person has' : 'persons have'} a first nationality that is not in the list of countries, so no country is filled in: ${unknown.map((item) => `${item.id} (${printable(item.label)}, ${item.persons})`).join(', ')}`,
-    )
+  for (const [kind, text] of unknownKinds) {
+    const items = unknown.filter((item) => item.kind === kind)
+
+    if (items.length > 0) {
+      const persons = items.reduce((sum, item) => sum + item.persons, 0)
+
+      report.warnings.push(
+        `Persons: ${persons} ${persons === 1 ? 'person has' : 'persons have'} ${text}: ${items.map((item) => `${item.id} (${printable(item.label)}, ${item.persons})`).join(', ')}`,
+      )
+    }
   }
 
   return report
@@ -189,6 +243,7 @@ async function readUnreadPersons(
   {
     clock = () => new Date(),
     countryCodes = wikidataCountryCodes,
+    countryFacts = false,
     limit = mostPersonsPerRun,
     lines = lineMap(personLines),
     origin,
@@ -201,7 +256,9 @@ async function readUnreadPersons(
     birthDate: 0,
     countriesBritish: 0,
     countriesFilled: 0,
+    countriesFromBirth: 0,
     countriesFromList: 0,
+    countriesFromSport: 0,
     countriesFromSquad: 0,
     empty: 0,
     itemsAsked: 0,
@@ -216,13 +273,16 @@ async function readUnreadPersons(
   // A list of our own goes before everything, also for a person that was read earlier.
   await applyManualLines(db, lines)
 
-  const todo = await personsToRead(db, limit, new Date(clock().getTime() - rereadAfterDays * 86_400_000))
+  const todo = countryFacts
+    ? await personsToReadCountryFacts(db, Number.MAX_SAFE_INTEGER)
+    : await personsToRead(db, limit, new Date(clock().getTime() - rereadAfterDays * 86_400_000))
 
   if (todo.length === 0) {
     return report
   }
 
   const labels = await knownWikidataLabels(db)
+  const placeCountries = await knownPlaceCountries(db)
   const owners = await personsByWikidataId(db)
   const fromSquad = await squadLines(
     db,
@@ -300,7 +360,14 @@ async function readUnreadPersons(
       return false
     }
 
-    const label = answer.kind === 'text' ? readLabel(answer.text) : null
+    await rememberLabel(id, answer.kind === 'text' ? answer.text : null)
+
+    return true
+  }
+
+  /** Stores the label of an item from its text, or warns when it has none. */
+  async function rememberLabel(id: string, text: null | string): Promise<void> {
+    const label = text === null ? null : readLabel(text)
 
     if (label === null) {
       unlabelled.add(id)
@@ -309,8 +376,47 @@ async function readUnreadPersons(
       await storeWikidataLabel(db, id, label.slice(0, 255))
       labels.set(id, label.slice(0, 255))
     }
+  }
 
-    return true
+  /**
+   * The Q-number of the country of a birth place (`P17`, #1289), from the cache or from one
+   * request for the item of the place, which also gives its label. `ok` is false when the
+   * request failed or the run stopped, so the person stays unread.
+   */
+  async function countryOfPlace(id: string): Promise<{ countryId: null | string; ok: boolean }> {
+    if (placeCountries.has(id)) {
+      return { countryId: placeCountries.get(id) ?? null, ok: true }
+    }
+
+    report.itemsAsked++
+
+    const answer = await ask(itemUrl(wikidata, id))
+
+    if (answer.kind === 'failed' || answer.kind === 'stopped') {
+      return { countryId: null, ok: false }
+    }
+
+    const text = answer.kind === 'text' ? answer.text : null
+
+    if (text !== null && readPlaceIds(text) === null) {
+      // Not an item: a failed request, so nothing is kept and the place is asked again.
+      failures.push(`${printable(itemUrl(wikidata, id))}: the answer is not an item`)
+      failuresInARow++
+      stopped = failuresInARow >= mostFailuresInARow
+
+      return { countryId: null, ok: false }
+    }
+
+    const countryId = text === null ? null : (readCountryIds(text)[0] ?? null)
+
+    if (!labels.has(id) && !unlabelled.has(id)) {
+      await rememberLabel(id, text)
+    }
+
+    await storePlaceCountry(db, id, countryId)
+    placeCountries.set(id, countryId)
+
+    return { countryId, ok: true }
   }
 
   for (const person of todo) {
@@ -342,10 +448,12 @@ async function readUnreadPersons(
       if (info === 'missing' || info.wikidataId === null) {
         // No article, or an article without an item: nothing to read, and nothing to guess.
         await finish(person, {
+          birthCountryId: null,
           birthDate: null,
           birthPlaceId: null,
           nationalityIds: [],
           positionIds: [],
+          sportCountryIds: [],
           wikidataId: null,
           wikipediaPageId: info === 'missing' ? null : info.pageId,
         })
@@ -364,10 +472,12 @@ async function readUnreadPersons(
         `Persons: '${printable(person.wikipediaPage)}' and '${printable(owner)}' have the same item ${wikidataId}, so only the first keeps it`,
       )
       await finish(person, {
+        birthCountryId: null,
         birthDate: null,
         birthPlaceId: null,
         nationalityIds: [],
         positionIds: [],
+        sportCountryIds: [],
         wikidataId: null,
         wikipediaPageId: pageId,
       })
@@ -404,10 +514,12 @@ async function readUnreadPersons(
     if (item === null) {
       // The item is gone (404): the person stays without data.
       await finish(person, {
+        birthCountryId: null,
         birthDate: null,
         birthPlaceId: null,
         nationalityIds: [],
         positionIds: [],
+        sportCountryIds: [],
         wikidataId: null,
         wikipediaPageId: pageId,
       })
@@ -418,12 +530,28 @@ async function readUnreadPersons(
     // The labels of the place, the countries and the positions. One that cannot be asked leaves
     // the person unread, with the Q-number kept.
     const nationalityIds = withBritishCountry(item, countryCodes)
-    const wanted = [
-      ...new Set([...(item.placeId === null ? [] : [item.placeId]), ...nationalityIds, ...item.positionIds]),
-    ]
+    let birthCountryId: null | string = null
     let complete = true
 
-    for (const id of wanted) {
+    // The country of the birth place comes from the item of the place, once for each place.
+    if (item.placeId !== null) {
+      const place = await countryOfPlace(item.placeId)
+
+      complete = place.ok
+      birthCountryId = place.countryId
+    }
+
+    const wanted = [
+      ...new Set([
+        ...(item.placeId === null ? [] : [item.placeId]),
+        ...(birthCountryId === null ? [] : [birthCountryId]),
+        ...nationalityIds,
+        ...item.sportCountryIds,
+        ...item.positionIds,
+      ]),
+    ]
+
+    for (const id of complete ? wanted : []) {
       if (stopped || !(await labelOf(id))) {
         complete = false
 
@@ -443,10 +571,12 @@ async function readUnreadPersons(
     await finish(
       person,
       {
+        birthCountryId: birthCountryId !== null && known(birthCountryId) ? birthCountryId : null,
         birthDate: item.birth,
         birthPlaceId: item.placeId !== null && known(item.placeId) ? item.placeId : null,
         nationalityIds: nationalityIds.filter(known),
         positionIds: item.positionIds.filter(known),
+        sportCountryIds: item.sportCountryIds.filter(known),
         wikidataId: item.id,
         wikipediaPageId: pageId,
       },

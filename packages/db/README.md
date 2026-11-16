@@ -880,16 +880,26 @@ Hij blijft in de database, en de site toont hem pas na een eigen besluit.
 
 Een persoon heeft ook een land (#1051, migratie `0065_add_country_of_persons`):
 
-| Kolom (`persons`) | Betekenis                                                                                                                                                                                         |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `country`         | De landcode in hoofdletters (`NL`, of `GB-WLS`); leeg voor een persoon van wie we het land niet kennen                                                                                            |
-| `country_source`  | Waar het land vandaan komt, van sterk naar zwak: `manual` (het beheer), `wikidata`, `list` (de lijst van spelers), `old-site` (de oude fansite) of `squad` (de selectielijsten); leeg zonder land |
+| Kolom (`persons`) | Betekenis                                                                                                                                                                                                                                                                                                            |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `country`         | De landcode in hoofdletters (`NL`, of `GB-WLS`); leeg voor een persoon van wie we het land niet kennen                                                                                                                                                                                                               |
+| `country_source`  | Waar het land vandaan komt, van sterk naar zwak: `manual` (het beheer), `wikidata-sport` (het ene land waarvoor hij sport), `wikidata-birth` (het geboorteland), `wikidata` (de eerste nationaliteit), `list` (de lijst van spelers), `old-site` (de oude fansite) of `squad` (de selectielijsten); leeg zonder land |
 
 De linie en het land van een persoon zijn de standaard voor elk seizoen.
 Een rij van een seizoen kan afwijken in de positie: `players.position` gaat op de pagina van dat seizoen voor (`listSeasonPlayers`).
 Het land is dat van de persoon, in elk seizoen; `players.country` toont de site alleen voor een rij zonder persoon of met een persoon zonder land (#1287).
-De importer vult het land uit de eerste nationaliteit van Wikidata (`wikidata`); `list`, `squad` en `old-site` zijn voor de bronnen van #1052.
-De migratie voegt alleen de twee kolommen toe, verandert geen rij en kan opnieuw draaien; hoe je haar terugdraait, staat bovenaan het bestand.
+De importer kiest het land uit Wikidata in drie stappen (#1289, migratie `0080_add_country_for_sport_and_birth`): het land waarvoor hij sport, het geboorteland en de eerste nationaliteit; `list`, `squad` en `old-site` komen uit de bronnen van #1052.
+Daarnaast bewaart hij die twee feiten zelf, los van het land dat de site toont:
+
+| Waar                            | Betekenis                                                                                                                                                 |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `person_sport_countries`        | De landen waarvoor hij sport (`P1532`), in de volgorde van Wikidata (`position` telt vanaf 0); verwijst naar `wikidata_items`, en gaat weg met de persoon |
+| `persons.birth_country_id`      | Het land van zijn geboorteplaats (`P17` van de plaats); verwijst naar `wikidata_items`, leeg als we het niet kennen                                       |
+| `wikidata_place_countries`      | Per geboorteplaats het land (`country_id`, of leeg zonder land), zodat de importer een plaats één keer vraagt                                             |
+| `persons.country_facts_read_at` | Wanneer die twee feiten voor de persoon zijn opgeslagen; leeg voor wie `import:country-facts` nog niet las                                                |
+
+De migraties voegen alleen kolommen en tabellen toe, veranderen geen rij en kunnen opnieuw draaien; hoe je ze terugdraait, staat bovenaan het bestand.
+De migratie van #1289 zet de nieuwe waarden van `country_source` achteraan de lijst, dus een rij met `wikidata` blijft de eerste nationaliteit zeggen.
 De codes die mogen, staan in `@fansite/shared/countries` (`countryCodes`): de 249 codes van ISO 3166-1, `XK` voor Kosovo en de codes van ISO 3166-2 van de vier landen van het Verenigd Koninkrijk (`GB-ENG`, `GB-NIR`, `GB-SCT` en `GB-WLS`, #1277).
 De kolommen `country` van `clubs`, `persons`, `players` en `player_list_titles` zijn daarom `varchar(6)` (migratie `0078_widen_country_codes`, die alleen verbreedt, geen rij verandert en opnieuw kan draaien).
 

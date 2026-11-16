@@ -868,13 +868,23 @@ export const personLineSources = ['wikidata', 'squad', 'manual', 'old-site'] as 
 export type PersonLineSource = (typeof personLineSources)[number]
 
 /**
- * Where the country of a person comes from (#1051), from strong to weak (#1052): the editors
- * in the admin (`manual`), Wikidata, the flag in the list of players (`list`), the table of
- * players of the old fansite (`old-site`) and the squad lists (`squad`). A stronger source
- * replaces a weaker one, never the other way round. The order of the values in the column is
- * that of #1051 and says nothing.
+ * Where the country of a person comes from (#1051), from strong to weak (#1052, #1289): the
+ * editors in the admin (`manual`), the one country he plays for on Wikidata (`wikidata-sport`,
+ * `P1532`), the country of his birth place (`wikidata-birth`), his first nationality
+ * (`wikidata`), the flag in the list of players (`list`), the table of players of the old
+ * fansite (`old-site`) and the squad lists (`squad`). A stronger source replaces a weaker one,
+ * never the other way round. The order of the values in the column says nothing: the new ones
+ * are at the end, so no row changes.
  */
-export const personCountrySources = ['manual', 'wikidata', 'list', 'squad', 'old-site'] as const
+export const personCountrySources = [
+  'manual',
+  'wikidata',
+  'list',
+  'squad',
+  'old-site',
+  'wikidata-sport',
+  'wikidata-birth',
+] as const
 
 export type PersonCountrySource = (typeof personCountrySources)[number]
 
@@ -928,6 +938,17 @@ export const wikidataItems = mysqlTable('wikidata_items', {
 export const wikidataPlaces = mysqlTable('wikidata_places', {
   id: varchar('id', { length: wikidataLimits.id }).primaryKey(),
   parentIds: text('parent_ids').notNull(),
+})
+
+/**
+ * The country of a place (#1289): for each birth place the importer asked about, the Q-number
+ * of its country (`P17`), or empty when the item has none. The importer asks about a place
+ * once, so a second run and the reading of every person again ask nothing about it. The data
+ * are CC0.
+ */
+export const wikidataPlaceCountries = mysqlTable('wikidata_place_countries', {
+  id: varchar('id', { length: wikidataLimits.id }).primaryKey(),
+  countryId: varchar('country_id', { length: wikidataLimits.id }),
 })
 
 export type NewWikidataItem = typeof wikidataItems.$inferInsert
@@ -996,6 +1017,12 @@ export const persons = mysqlTable('persons', {
   // is only shown for a row without a person, or whose person has no country (#1287).
   country: varchar('country', { length: 6 }),
   countrySource: mysqlEnum('country_source', personCountrySources),
+  // The country of his birth place (#1289): the `P17` of the item of the place, a row of
+  // `wikidata_items`. It is a fact next to `country`, which is the one the site shows.
+  birthCountryId: varchar('birth_country_id', { length: wikidataLimits.id }).references(() => wikidataItems.id),
+  // When the importer last stored the countries he plays for and his birth country (#1289),
+  // so the command that reads every person once again knows who is done.
+  countryFactsReadAt: datetime('country_facts_read_at'),
   wikidataReadAt: datetime('wikidata_read_at'),
   // The title is that of the English Wikipedia: the player has no Dutch article (#1043). The
   // importer never asks the Dutch Wikipedia or Wikidata about such a title.
@@ -1054,6 +1081,25 @@ export type PersonSlug = typeof personSlugs.$inferSelect
  */
 export const personNationalities = mysqlTable(
   'person_nationalities',
+  {
+    personId: int('person_id', { unsigned: true })
+      .notNull()
+      .references(() => persons.id, { onDelete: 'cascade' }),
+    position: smallint('position', { unsigned: true }).notNull(),
+    itemId: varchar('item_id', { length: wikidataLimits.id })
+      .notNull()
+      .references(() => wikidataItems.id),
+  },
+  (table) => [primaryKey({ columns: [table.personId, table.position] }), unique().on(table.personId, table.itemId)],
+)
+
+/**
+ * The countries a person plays for (`P1532` on Wikidata, #1289), in the order Wikidata lists
+ * them: `position` counts from 0. Nothing for a person without one. The rows go with their
+ * person.
+ */
+export const personSportCountries = mysqlTable(
+  'person_sport_countries',
   {
     personId: int('person_id', { unsigned: true })
       .notNull()

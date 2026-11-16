@@ -1198,6 +1198,25 @@ De regel `country` zegt hoeveel personen een land hebben, per bron, en hoeveel g
 Daaronder staat per seizoen hoeveel verslagen een opstelling van ons hebben en hoeveel daarvan een formatie voor ons en voor de tegenstander (`Formations of match reports`).
 Op acceptatie lees je dat zonder SSH met de workflow _Import old site_ en de keuze `status`: de uitvoer staat in de samenvatting van de run.
 
+#### Het land waarvoor een speler sport, en zijn geboorteland (#1289)
+
+Naast de nationaliteiten bewaart de import de landen waarvoor een speler sport (`P1532`, `person_sport_countries`) en zijn geboorteland (`persons.birth_country_id`).
+Het geboorteland is het `P17` van de geboorteplaats, het item van een andere plaats: een plaats kost één extra verzoek, en `wikidata_place_countries` onthoudt het antwoord voor alle personen en alle runs.
+Het land dat de site toont, kiest `refreshPersonCountries` bij elke run zonder verzoek, van sterk naar zwak:
+
+1. wat de redactie zette (`manual`), dat blijft altijd staan;
+2. het ene land waarvoor hij sport (`wikidata-sport`); noemt Wikidata er meer dan één, dan beslist de vlag van zijn laatste seizoen als die er een van is, en anders volgt stap 3, nooit het eerste van de lijst;
+3. het geboorteland (`wikidata-birth`), behalve het Verenigd Koninkrijk als zijn eerste nationaliteit Engeland, Wales, Schotland of Noord-Ierland is;
+4. de eerste nationaliteit (`wikidata`);
+5. dan de bronnen die er al waren: de spelerslijst (`list`), de oude fansite (`old-site`) en de selectietabel (`squad`).
+
+Een land dat niet in `person-countries.ts` staat, geeft een waarschuwing per soort (`a country they play for`, `a country of birth`, `a first nationality`) en geen gok.
+
+**Eenmalig na de uitrol op acceptatie:** `pnpm run import:country-facts` (op de host `import.mjs --country-facts`) leest elke persoon met een Q-nummer die nog geen `country_facts_read_at` heeft één keer opnieuw, met de pauzes en de stops van de import, onder de lock van de import.
+Het is veilig om twee keer te draaien: een tweede keer vindt niemand en schrijft `Country facts: nobody to read.`.
+Een run die stopt, bijvoorbeeld bij drie mislukte verzoeken op rij, gaat bij de volgende keer verder met wie nog mist.
+Een gewone run slaat de twee feiten ook op, voor de personen die hij zelf leest.
+
 ### De clubs van de tegenstanders
 
 Elke wedstrijd hangt aan een club (`matches.club_id`, zie _De tabellen `clubs` en `club_names`_ in de [README van `@fansite/db`](../../packages/db/README.md)).
