@@ -886,7 +886,8 @@ Een persoon heeft ook een land (#1051, migratie `0065_add_country_of_persons`):
 | `country_source`  | Waar het land vandaan komt, van sterk naar zwak: `manual` (het beheer), `wikidata`, `list` (de lijst van spelers), `old-site` (de oude fansite) of `squad` (de selectielijsten); leeg zonder land |
 
 De linie en het land van een persoon zijn de standaard voor elk seizoen.
-Een rij van een seizoen kan afwijken: `players.position` en `players.country` gaan op de pagina van dat seizoen voor (`listSeasonPlayers`).
+Een rij van een seizoen kan afwijken in de positie: `players.position` gaat op de pagina van dat seizoen voor (`listSeasonPlayers`).
+Het land is dat van de persoon, in elk seizoen; `players.country` toont de site alleen voor een rij zonder persoon of met een persoon zonder land (#1287).
 De importer vult het land uit de eerste nationaliteit van Wikidata (`wikidata`); `list`, `squad` en `old-site` zijn voor de bronnen van #1052.
 De migratie voegt alleen de twee kolommen toe, verandert geen rij en kan opnieuw draaien; hoe je haar terugdraait, staat bovenaan het bestand.
 De codes die mogen, staan in `@fansite/shared/countries` (`countryCodes`): de 249 codes van ISO 3166-1, `XK` voor Kosovo en de codes van ISO 3166-2 van de vier landen van het Verenigd Koninkrijk (`GB-ENG`, `GB-NIR`, `GB-SCT` en `GB-WLS`, #1277).

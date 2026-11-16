@@ -4265,6 +4265,8 @@
   Het besluit over de gegevens zelf staat in `importer.md`, onder _Een persoon heeft een linie en een land, en een seizoen kan afwijken_.
 - **Waarom:** een speler zonder positie in een seizoen viel weg uit de lijst per positie, terwijl we zijn linie wel kenden.
 - **Alternatieven:** de linie van de persoon naar elke rij van een seizoen kopiëren (dezelfde gegevens op tientallen plekken, en een verbetering komt niet overal aan).
+- **Later:** sinds 16 november 2026 (#1287) geeft `listSeasonPlayers` het land van de persoon, en anders dat van de rij; zie _Een speler heeft in elk seizoen het land van zijn persoon_ in `importer.md`.
+  De positie blijft zoals hier.
 
 ## Het beheer zet de linie en het land van een persoon in het formulier van een speler
 
