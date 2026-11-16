@@ -134,7 +134,7 @@ describe('the list of the clubs', () => {
       ['Oefenstad NAC', 'Geen lijst'],
       ['Oefenstad Zonder', 'Geen lijst'],
     ])
-    expect(html).toContain('href="/beheer/clubnamen/oefenstad-az"')
+    expect(html).toContain('href="/beheer/clubs/oefenstad-az"')
     expect(html).toContain('Alles (3)')
     expect(html).toContain('Eigen lijst (1)')
   })
@@ -142,7 +142,7 @@ describe('the list of the clubs', () => {
   it('links to the work list of the clubs without a country, with the number', async () => {
     const html = await list()
 
-    expect(html).toContain('href="/beheer/kwaliteit/clubs/land"')
+    expect(html).toContain('href="/beheer/clubs/kwaliteit"')
     expect(html).toContain('Clubs zonder land (3)')
   })
 
@@ -159,10 +159,10 @@ describe('the list of the clubs', () => {
     const html = await list({ q: 'nac' })
 
     expect(rowsOf(html)).toEqual([['Oefenstad NAC', 'Geen lijst']])
-    expect(html).toMatch(/<form[^>]*action="\/beheer\/clubnamen" method="get"/)
+    expect(html).toMatch(/<form[^>]*action="\/beheer\/clubs" method="get"/)
     expect(html).toContain('<input')
     expect(html).toContain('value="nac"')
-    expect(html).toContain('href="/beheer/clubnamen?tonen=eigen-lijst&amp;q=nac"')
+    expect(html).toContain('href="/beheer/clubs?tonen=eigen-lijst&amp;q=nac"')
     expect(await list({ q: 'bestaat niet' })).toContain('Geen club gevonden met “bestaat niet”.')
   })
 

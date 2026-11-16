@@ -7,7 +7,7 @@ import { firstCoverageSeason, seasonsBetween } from '@fansite/db/season-coverage
 import { Card, DataTable, Heading, Link, Notice, Page, Strong, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
-import { gapLegend, gapTableColumns, matchGapRow } from '#src/app/beheer/kwaliteit/gap-table'
+import { gapLegend, gapTableColumns, matchGapRow } from '#src/app/beheer/gap-table'
 import { listPath as playersListPath } from '#src/app/beheer/spelers/paths'
 import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'

@@ -74,12 +74,12 @@ describe('the page of the clubs without a country', () => {
 
     expect(first.match(/<h2/gu)).toHaveLength(50)
     expect(first).toContain('Nog 51 clubs zonder land')
-    expect(first).toContain('href="/beheer/kwaliteit/clubs/land?deel=2"')
+    expect(first).toContain('href="/beheer/clubs/kwaliteit?deel=2"')
 
     const second = await page({ deel: '2' })
 
     expect(second.match(/<h2/gu)).toHaveLength(1)
-    expect(second).toContain('href="/beheer/kwaliteit/clubs/land"')
+    expect(second).toContain('href="/beheer/clubs/kwaliteit"')
     expect(await page({ deel: '9' })).toContain('Pagina 2 van 2')
     expect(await page({ deel: 'x' })).toContain('Pagina 1 van 2')
   })

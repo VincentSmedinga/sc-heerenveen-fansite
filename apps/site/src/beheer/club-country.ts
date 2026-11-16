@@ -6,7 +6,6 @@ import { asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm'
 
 import { recordAction } from './audit-log'
 import { regionName } from './countries'
-import { qualityPath } from './quality'
 
 // The country of a club in the admin (#1265): the choice of an editor for one club, and the
 // work list of the clubs without a country. A choice and its row in the log of the admin are
@@ -19,7 +18,11 @@ export type ClubWithoutCountry = Awaited<ReturnType<typeof listClubsWithoutCount
 /** How many clubs one part of the work list shows. */
 export const clubListLength = 50
 
-export const clubCountryListPath = `${qualityPath}/clubs/land`
+/**
+ * The list of the clubs without a country. It is under Clubs, so the bar marks that screen, and
+ * `kwaliteit` is a fixed name beside the part of a club (#1306).
+ */
+export const clubCountryListPath = '/beheer/clubs/kwaliteit'
 
 /** Whether the club is the opponent in a match of a European competition. */
 const inEurope = sql`EXISTS (SELECT 1 FROM ${matches} WHERE ${matches.clubId} = ${clubs.id} AND ${inArray(matches.competition, [...europeanCompetitions])})`

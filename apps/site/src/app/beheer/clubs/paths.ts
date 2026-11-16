@@ -1,8 +1,8 @@
-export const clubNamesPath = '/beheer/clubnamen'
+export const clubsPath = '/beheer/clubs'
 
 /** The address of the form of a club, with what the last action left to say (`gedaan`). */
 export function clubPath(slug: string, done?: string) {
-  return done === undefined ? `${clubNamesPath}/${slug}` : `${clubNamesPath}/${slug}?gedaan=${done}`
+  return done === undefined ? `${clubsPath}/${slug}` : `${clubsPath}/${slug}?gedaan=${done}`
 }
 
 /**
@@ -19,5 +19,5 @@ export function listPath(show?: string, search?: string) {
     query.set('q', search)
   }
 
-  return query.size === 0 ? clubNamesPath : `${clubNamesPath}?${query}`
+  return query.size === 0 ? clubsPath : `${clubsPath}?${query}`
 }

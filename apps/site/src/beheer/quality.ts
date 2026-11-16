@@ -32,12 +32,6 @@ export const playerQualityPath = '/beheer/spelers/kwaliteit'
 export const stadiumQualityPath = '/beheer/stadions/kwaliteit'
 
 /**
- * The start of the lists that have not moved yet: the persons, the names, the usual places, the
- * clubs without a country. #1306 moves them to Clubs, and this address goes with them.
- */
-export const qualityPath = '/beheer/kwaliteit'
-
-/**
  * The address of the page with the players of a season of whom the import read another value
  * than the editors set: `/beheer/spelers/kwaliteit/spelersgegevens/2026-27`.
  */

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 import { Card, DataTable, Heading, Link, Page, Text } from '@fansite/design-system'
 
-import { personGapLegend, personGapTableColumns } from '#src/app/beheer/kwaliteit/gap-table'
+import { personGapLegend, personGapTableColumns } from '#src/app/beheer/gap-table'
 import { playersPath } from '#src/app/beheer/spelers/paths'
 import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'

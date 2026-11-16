@@ -480,7 +480,7 @@
 - **Datum:** 4 november 2026
 - **Besluit:** een nieuwe tabel `club_name_periods` bewaart per club de namen die hij droeg, met een start (een seizoen of een dag) en een toelichting (#705).
   `club_names` blijft wat het is: de schrijfwijzen die de import gebruikt om een club te vinden.
-  De redactie beheert de lijst in `/beheer/clubnamen`, en alleen daar (zie _De namen van een club hebben een eigen scherm_ in `site.md`).
+  De redactie beheert de lijst in `/beheer/clubs`, en alleen daar (zie _De namen van een club hebben een eigen scherm_ in `site.md`).
   - **De rij en de controles:** zoals `club_stadiums` (zie _De eigen lijst van stadions van een club staat in `club_stadiums`_): `club_id` met `ON DELETE CASCADE`, `position`, de naam (1 tot 100 tekens), `start_season` of `start_day` en de toelichting (hoogstens 200 tekens), met dezelfde CHECK-constraints en `(club_id, position)` uniek.
   - **Het logboek:** de acties `club-name.save` en `club-name.reset` met het nummer van de club als `item_id` en in `detail` de aantallen (de regels, hoeveel een toelichting hebben, hoeveel namen erbij kwamen in `club_names`), nooit de tekst van een toelichting.
     Opslaan en logboek zijn één transactie (`replaceClubNamePeriods` en `removeClubNamePeriods` in `@fansite/db/club-name-periods`).

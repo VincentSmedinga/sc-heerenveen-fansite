@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { readSeasonCoverage } from '@fansite/db/season-coverage'
 import { Card, DataTable, Heading, Link, Page, Text } from '@fansite/design-system'
 
-import { gapLegend, gapTableColumns } from '#src/app/beheer/kwaliteit/gap-table'
+import { gapLegend, gapTableColumns } from '#src/app/beheer/gap-table'
 import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { unusualFormationsPath } from '#src/beheer/formations'

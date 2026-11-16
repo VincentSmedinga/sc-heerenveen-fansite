@@ -918,7 +918,7 @@ Functies in `@fansite/db/persons` voor de importer: `personsToRead`, `rememberWi
 Voor het beheer is er `setEditorsPersonFacts`, dat de linie en het land van een persoon zet met de bron `manual`, of weghaalt.
 De werklijst van het beheer (`/beheer/spelers/kwaliteit/personen/snel`, #1053) gebruikt het ook, en schrijft dan `person.edit` in het logboek.
 De migratie `0067_add_person_edit_action` voegt die actie toe aan de lijst van `audit_log.action`.
-Het land van een club (#1265) zetten de redactie op de pagina van de club (`/beheer/clubnamen/<club>`) en op de werklijst `/beheer/kwaliteit/clubs/land`, met de bron `manual`; dat schrijft `club.edit` in het logboek, en de migratie `0077_add_club_edit_action` voegt die actie toe.
+Het land van een club (#1265) zetten de redactie op de pagina van de club (`/beheer/clubs/<club>`) en op de werklijst `/beheer/clubs/kwaliteit`, met de bron `manual`; dat schrijft `club.edit` in het logboek, en de migratie `0077_add_club_edit_action` voegt die actie toe.
 
 `@fansite/db/person-merge` voegt twee personen samen, voor de importer en voor het beheer.
 `mergePersonInto` zet alles wat naar de ene persoon wijst naar de andere, onthoudt zijn titel in `person_pages` en maakt van twee rijen in één seizoen één rij (`mergePlayerInto`).

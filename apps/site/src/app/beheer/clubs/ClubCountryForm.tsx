@@ -3,7 +3,7 @@
 import { Button, Card, ErrorSummary, Field, Form, Heading, Select, Text } from '@fansite/design-system'
 import { useActionState, useEffect, useRef } from 'react'
 
-import type { ClubCountryState } from '#src/app/beheer/kwaliteit/clubs/land/actions'
+import type { ClubCountryState } from '#src/app/beheer/clubs/kwaliteit/actions'
 import type { CountryChoice } from '#src/beheer/countries'
 
 type Props = {

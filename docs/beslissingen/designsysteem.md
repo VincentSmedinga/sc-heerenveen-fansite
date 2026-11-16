@@ -3360,7 +3360,7 @@
 - **Besluit:** `Breadcrumb` verdwijnt uit het designsysteem (#1142): het onderdeel, de export, de CSS, de story en de tests.
   Een pagina die onder een lijst hangt, krijgt bovenaan een link terug met `Link` en het teken `arrow-left`, zoals "Terug naar Wedstrijden".
   Een lijst en een pagina onder het menu krijgen niets: het menu is er.
-  - **Beheer:** de pagina's onder Clubnamen, Stadions, Spelers en Wedstrijden wijzen naar hun lijst, de pagina's van het verslag naar de wedstrijd of het verslag, en de pagina's van de kwaliteit naar de kwaliteit van de gegevens.
+  - **Beheer:** de pagina's onder Clubs, Stadions, Spelers en Wedstrijden wijzen naar hun lijst, de pagina's van het verslag naar de wedstrijd of het verslag, en de pagina's van de kwaliteit naar de kwaliteit van de gegevens.
   - **Geen nieuw onderdeel:** de link terug is gewoon `Link`.
 - **Waarom:** het kruimelpad deed op ondiepe pagina's niet meer dan het menu, en een link terug is voor diepe pagina's kleiner en duidelijker.
 - **Alternatieven:** het onderdeel houden en niet gebruiken; een link terug op elke pagina.

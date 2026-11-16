@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import type { ClubCountryState } from '#src/app/beheer/kwaliteit/clubs/land/actions'
+import type { ClubCountryState } from '#src/app/beheer/clubs/kwaliteit/actions'
 
 import { ClubCountryForm } from './ClubCountryForm'
 

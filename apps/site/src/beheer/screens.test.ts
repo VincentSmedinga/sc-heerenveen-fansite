@@ -13,17 +13,7 @@ describe('the screens of the admin', () => {
     expect(screensFor('author').map(({ label }) => label)).toEqual(['Beheer', 'Artikelen', 'Mijn account'])
   })
 
-  const work = [
-    'Beheer',
-    'Berichten',
-    'Artikelen',
-    'Wedstrijden',
-    'Spelers',
-    'Stadions',
-    'Clubnamen',
-    'Kwaliteit',
-    'Bezoek',
-  ]
+  const work = ['Beheer', 'Berichten', 'Artikelen', 'Wedstrijden', 'Spelers', 'Stadions', 'Clubs', 'Bezoek']
 
   it('shows an editor every screen but the accounts', () => {
     expect(screensFor('editor').map(({ label }) => label)).toEqual([...work, 'Mijn account'])
@@ -46,6 +36,8 @@ describe('the screens of the admin', () => {
     ['/beheer/wedstrijden/2025-26', '/beheer/wedstrijden'],
     ['/beheer/wedstrijden/kwaliteit/2005-06', '/beheer/wedstrijden'],
     ['/beheer/spelers/kwaliteit/personen', '/beheer/spelers'],
+    ['/beheer/clubs/kwaliteit', '/beheer/clubs'],
+    ['/beheer/clubs/sv-proefdorp', '/beheer/clubs'],
     ['/beheer/bezoek', '/beheer/bezoek'],
     ['/beheer/accounts/4', '/beheer/accounts'],
     ['/beheer/mijn-account', '/beheer/mijn-account'],

@@ -317,7 +317,7 @@ async function checkAdmin() {
     '/beheer/artikelen/1/versies/1',
     '/beheer/artikelen/1/voorbeeld',
     '/beheer/bezoek',
-    '/beheer/kwaliteit',
+    '/beheer/clubs/kwaliteit',
     '/beheer/wedstrijden/kwaliteit',
     '/beheer/wedstrijden/kwaliteit/2005-06',
     '/beheer/spelers/kwaliteit/personen',
@@ -335,9 +335,9 @@ async function checkAdmin() {
     '/beheer/stadions/clubs',
     '/beheer/stadions/clubs?tonen=thuisvelden&q=proef',
     '/beheer/stadions/voorbeeld-united',
-    '/beheer/clubnamen',
-    '/beheer/clubnamen?tonen=eigen-lijst&q=proef',
-    '/beheer/clubnamen/voorbeeld-united',
+    '/beheer/clubs',
+    '/beheer/clubs?tonen=eigen-lijst&q=proef',
+    '/beheer/clubs/voorbeeld-united',
   ]) {
     const response = await fetch(origin + path, { redirect: 'manual' })
     assert.equal(response.status, 307, path)
