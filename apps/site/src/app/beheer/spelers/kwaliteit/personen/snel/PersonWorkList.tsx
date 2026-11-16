@@ -185,7 +185,7 @@ function PersonCard({
   }, [countries, fact, onSaved, row.name, state, summaryId])
 
   return (
-    <Card aria-labelledby={headingId(row.id)} style={touch}>
+    <Card aria-labelledby={headingId(row.id)} style={touch} surface="warm">
       <Heading id={headingId(row.id)} level={2} tabIndex={-1}>
         {row.name}
       </Heading>

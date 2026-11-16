@@ -6,7 +6,7 @@ import { createTestDatabase } from '@fansite/db/test-database'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import QualityPage from '../page'
+import PersonQualityPage from '../personen/page'
 import UsualSlotsPage, { metadata } from './page'
 
 const { requireRole } = vi.hoisted(() => ({ requireRole: vi.fn() }))
@@ -113,7 +113,7 @@ describe('the page Vaste plaatsen', () => {
     expect(html).toContain('verdediger, 1 van 4')
     expect(html).toContain('aanvaller, 3 van 3')
     expect(html).toContain('10 wedstrijden, elke keer')
-    expect(html).toContain('href="/beheer/kwaliteit"')
+    expect(html).toContain('href="/beheer/spelers"')
   })
 
   it('counts only a 4-3-3 and players with ten matches, shows a share under 100, and links a known player', async () => {
@@ -138,10 +138,10 @@ describe('the page Vaste plaatsen', () => {
     // Player 2 is in the first place of the defence in nine of ten.
     expect(html).toMatch(/Speler 2.*?verdediger, 1 van 4.*?10 wedstrijden, 90%/su)
     expect(html).toContain(`href="/beheer/spelers/${playerId}"`)
-    expect(html.match(/href="\/beheer\/spelers\//g)).toHaveLength(1)
+    expect(html.match(/href="\/beheer\/spelers\/\d/g)).toHaveLength(1)
   })
 
-  it('is linked from the page Kwaliteit', async () => {
-    expect(renderToStaticMarkup(await QualityPage())).toContain('href="/beheer/kwaliteit/plaatsen"')
+  it('is linked from the table of the persons', async () => {
+    expect(renderToStaticMarkup(await PersonQualityPage())).toContain('href="/beheer/spelers/kwaliteit/plaatsen"')
   })
 })

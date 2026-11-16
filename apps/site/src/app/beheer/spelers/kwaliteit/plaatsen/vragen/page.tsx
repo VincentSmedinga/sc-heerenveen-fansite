@@ -67,7 +67,7 @@ export default async function SideQuizPage({
             : `${answered.name ?? 'De speler'}: ${sideWords[answered.side]} opgeslagen.`}
         </Notice>
         {next === undefined ? (
-          <Card aria-labelledby="vraag-kop">
+          <Card aria-labelledby="vraag-kop" surface="warm">
             <QuestionHeading focus={answeredId !== undefined || skipped.length > 0} personId={0}>
               {skipped.length === 0
                 ? 'Alle spelers hebben een kant.'
@@ -80,7 +80,7 @@ export default async function SideQuizPage({
             </Text>
           </Card>
         ) : (
-          <Card aria-labelledby="vraag-kop">
+          <Card aria-labelledby="vraag-kop" surface="warm">
             <QuestionHeading focus={answeredId !== undefined || skipped.length > 0} personId={next.question.personId}>
               {next.question.name}
             </QuestionHeading>

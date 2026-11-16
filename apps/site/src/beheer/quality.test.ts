@@ -5,7 +5,14 @@ import { createTestDatabase } from '@fansite/db/test-database'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { unusualFormationsPath } from './formations'
-import { matchQualityPath, qualityPath, seasonHasPlayers } from './quality'
+import {
+  fieldDifferencesPath,
+  matchQualityPath,
+  playerQualityPath,
+  qualityPath,
+  seasonHasPlayers,
+  statDifferencesPath,
+} from './quality'
 import { addQualitySeason, season } from './quality-fixtures'
 import { countGapsBySeason, nextWithGap, readMatchGaps, seasonTablePath } from './quality-table'
 
@@ -100,6 +107,12 @@ describe('the addresses of the table', () => {
     expect(matchQualityPath).toBe('/beheer/wedstrijden/kwaliteit')
     expect(unusualFormationsPath).toBe('/beheer/wedstrijden/kwaliteit/formaties')
     expect(qualityPath).toBe('/beheer/kwaliteit')
+  })
+
+  it('has the quality of the players and persons under Spelers, with the season after the name of the list (#1305)', () => {
+    expect(playerQualityPath).toBe('/beheer/spelers/kwaliteit')
+    expect(statDifferencesPath('2026/27')).toBe('/beheer/spelers/kwaliteit/spelerscijfers/2026-27')
+    expect(fieldDifferencesPath('2026/27')).toBe('/beheer/spelers/kwaliteit/spelersgegevens/2026-27')
   })
 
   it('names the season, and the column and the notice when given', () => {

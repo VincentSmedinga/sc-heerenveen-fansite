@@ -16,18 +16,26 @@ import { seasonSlug } from '../seasons'
 export const matchQualityPath = '/beheer/wedstrijden/kwaliteit'
 
 /**
+ * The start of the quality of the players and persons (#1305): the table of the persons with
+ * its letters and the quick list, the names, the usual places with the quiz, and the
+ * differences in the numbers and data of a season. It is under Spelers, so the bar marks that
+ * screen. The season comes after the name of the list, so a season never meets a fixed name
+ * on one level, as a letter of a person and `snel` do.
+ */
+export const playerQualityPath = '/beheer/spelers/kwaliteit'
+
+/**
  * The start of the lists that have not moved yet: the persons, the names, the usual places, the
- * clubs without a country and the differences in the numbers and data of players. #1305 and
- * #1306 move them to their own subject, and this address goes with the last of them.
+ * clubs without a country. #1306 moves them to Clubs, and this address goes with them.
  */
 export const qualityPath = '/beheer/kwaliteit'
 
 /**
  * The address of the page with the players of a season of whom the import read another value
- * than the editors set: `/beheer/kwaliteit/2026-27/spelersgegevens`.
+ * than the editors set: `/beheer/spelers/kwaliteit/spelersgegevens/2026-27`.
  */
 export function fieldDifferencesPath(season: string) {
-  return `${qualityPath}/${seasonSlug(season)}/spelersgegevens`
+  return `${playerQualityPath}/spelersgegevens/${seasonSlug(season)}`
 }
 
 /**
@@ -42,8 +50,8 @@ export async function seasonHasPlayers(db: Pick<Database, 'select'>, season: str
 
 /**
  * The address of the page with the players of a season whose numbers differ between the squad
- * table and the matches or the reports: `/beheer/kwaliteit/2026-27/spelerscijfers`.
+ * table and the matches or the reports: `/beheer/spelers/kwaliteit/spelerscijfers/2026-27`.
  */
 export function statDifferencesPath(season: string) {
-  return `${qualityPath}/${seasonSlug(season)}/spelerscijfers`
+  return `${playerQualityPath}/spelerscijfers/${seasonSlug(season)}`
 }

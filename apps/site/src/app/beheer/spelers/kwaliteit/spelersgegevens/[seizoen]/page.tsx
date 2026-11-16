@@ -7,11 +7,11 @@ import { firstCoverageSeason, seasonsBetween } from '@fansite/db/season-coverage
 import { Card, Heading, Link, List, Notice, Page, Strong, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
-import { submitFieldDifference } from '#src/app/beheer/kwaliteit/actions'
+import { submitFieldDifference } from '#src/app/beheer/spelers/kwaliteit/actions'
+import { playersPath } from '#src/app/beheer/spelers/paths'
 import { ConflictForm } from '#src/app/beheer/wedstrijden/ConflictForm'
 import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
-import { qualityPath } from '#src/beheer/quality'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 import { seasonFromSlug } from '#src/seasons'
@@ -78,8 +78,8 @@ export default async function FieldDifferencesPage({ params, searchParams }: Pro
     <Page.Main areas={adminAreas} className={compact}>
       <Page.Cell area="head">
         <Text>
-          <Link href={qualityPath} icon="arrow-left">
-            Terug naar de kwaliteit van de gegevens
+          <Link href={playersPath} icon="arrow-left">
+            Spelers
           </Link>
         </Text>
         <Heading level={1}>
@@ -103,7 +103,7 @@ export default async function FieldDifferencesPage({ params, searchParams }: Pro
             const field = playerFieldLabels[difference.field]
 
             return (
-              <Card aria-labelledby={`verschil-${difference.id}-kop`} key={difference.id}>
+              <Card aria-labelledby={`verschil-${difference.id}-kop`} key={difference.id} surface="warm">
                 <Heading id={`verschil-${difference.id}-kop`} level={2}>
                   {difference.name}: {field}
                 </Heading>

@@ -5,6 +5,7 @@ import { Card, DataTable, Heading, Link, Notice, Page, SeasonPicker, Tag, Text }
 
 import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
+import { personQualityPath } from '#src/beheer/person-table'
 import { positionChoices } from '#src/beheer/player-fields'
 import { type AdminPlayerRow, doubleShirtNumbers, listAdminPlayers, listPlayerSeasons } from '#src/beheer/players'
 import { requireRole } from '#src/beheer/require-role'
@@ -94,6 +95,9 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
         </Text>
         <Text>
           <Link href={addPlayerPath(season)}>Speler toevoegen aan {season}</Link>
+        </Text>
+        <Text>
+          <Link href={personQualityPath}>Kwaliteit van spelers en personen</Link>: wat we missen, per letter.
         </Text>
       </Page.Cell>
       <Page.Cell area="main">

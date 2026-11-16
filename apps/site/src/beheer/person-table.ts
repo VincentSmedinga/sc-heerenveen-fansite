@@ -7,7 +7,7 @@ import { eq, isNotNull } from 'drizzle-orm'
 import type { PersonPart } from './person-fields'
 
 import { letterOf, overviewOf, sortPlayers, yearsOf } from '../players-overview'
-import { qualityPath } from './quality'
+import { playerQualityPath } from './quality'
 
 // The work table of the persons on the page Kwaliteit (issue 1165): for each person who stood
 // in our squad in at least one season, what he still misses, in one column for each fact. A
@@ -47,10 +47,10 @@ export type PersonGaps = {
 }
 
 /** The address of the overview of the persons. */
-export const personQualityPath = `${qualityPath}/personen`
+export const personQualityPath = `${playerQualityPath}/personen`
 
 /** The address of the page with the names that look alike and the list of Wikipedia. */
-export const namesQualityPath = `${qualityPath}/namen`
+export const namesQualityPath = `${playerQualityPath}/namen`
 
 /** For each letter, how many persons it has and how many of them have a gap in each column. */
 export function countPersonGapsByLetter(rows: readonly PersonGaps[]) {
@@ -88,7 +88,7 @@ export function letterFromSlug(slug: string): string | undefined {
 
 /**
  * The address of a letter of the table, with one column chosen and what the last action left
- * to say: `/beheer/kwaliteit/personen/b?kolom=land`.
+ * to say: `/beheer/spelers/kwaliteit/personen/b?kolom=land`.
  */
 export function letterTablePath(letter: string, column?: PersonGapColumn, done?: string) {
   const query = new URLSearchParams()

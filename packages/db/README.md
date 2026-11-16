@@ -913,7 +913,7 @@ Drie tabellen horen erbij:
 
 Functies in `@fansite/db/persons` voor de importer: `personsToRead`, `rememberWikidataId`, `storePersonData`, `storeWikidataLabel`, `knownWikidataLabels`, `personsByWikidataId`, `squadLines`, `applyManualLines`, `refreshPersonLines`, `refreshPersonCountries` en `countPersonData`.
 Voor het beheer is er `setEditorsPersonFacts`, dat de linie en het land van een persoon zet met de bron `manual`, of weghaalt.
-De werklijst van het beheer (`/beheer/kwaliteit/personen/snel`, #1053) gebruikt het ook, en schrijft dan `person.edit` in het logboek.
+De werklijst van het beheer (`/beheer/spelers/kwaliteit/personen/snel`, #1053) gebruikt het ook, en schrijft dan `person.edit` in het logboek.
 De migratie `0067_add_person_edit_action` voegt die actie toe aan de lijst van `audit_log.action`.
 Het land van een club (#1265) zetten de redactie op de pagina van de club (`/beheer/clubnamen/<club>`) en op de werklijst `/beheer/kwaliteit/clubs/land`, met de bron `manual`; dat schrijft `club.edit` in het logboek, en de migratie `0077_add_club_edit_action` voegt die actie toe.
 

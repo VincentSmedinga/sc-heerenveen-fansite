@@ -12,9 +12,12 @@ const {
   countMatchesWithoutResult,
   countReportsToCheck,
   countWaitingDifferences,
+  countWaitingFieldDifferences,
+  countWaitingStatDifferences,
   findSession,
   loginLinkWorks,
   readMatchGaps,
+  readPersonGaps,
   requireRole,
   sessionToken,
 } = vi.hoisted(() => ({
@@ -22,9 +25,12 @@ const {
   countMatchesWithoutResult: vi.fn(),
   countReportsToCheck: vi.fn(),
   countWaitingDifferences: vi.fn(),
+  countWaitingFieldDifferences: vi.fn(),
+  countWaitingStatDifferences: vi.fn(),
   findSession: vi.fn(),
   loginLinkWorks: vi.fn(),
   readMatchGaps: vi.fn(),
+  readPersonGaps: vi.fn(),
   requireRole: vi.fn(),
   sessionToken: vi.fn(),
 }))
@@ -36,6 +42,12 @@ vi.mock('#src/beheer/match-entries', () => ({
   countWaitingDifferences,
 }))
 vi.mock('#src/beheer/match-reports', () => ({ countReportsToCheck }))
+vi.mock('@fansite/db/player-field-differences', () => ({ countWaitingFieldDifferences }))
+vi.mock('@fansite/db/player-stat-differences', () => ({ countWaitingStatDifferences }))
+vi.mock('#src/beheer/person-table', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  readPersonGaps,
+}))
 vi.mock('#src/beheer/quality-table', () => ({ readMatchGaps }))
 vi.mock('#src/beheer/require-role', () => ({ requireRole, sessionToken }))
 vi.mock('#src/beheer/sessions', () => ({ findSession, loginLinkWorks }))
@@ -58,6 +70,12 @@ beforeEach(() => {
   loginLinkWorks.mockReset()
   readMatchGaps.mockReset()
   readMatchGaps.mockResolvedValue([])
+  readPersonGaps.mockReset()
+  readPersonGaps.mockResolvedValue([])
+  countWaitingStatDifferences.mockReset()
+  countWaitingStatDifferences.mockResolvedValue(new Map())
+  countWaitingFieldDifferences.mockReset()
+  countWaitingFieldDifferences.mockResolvedValue(new Map())
   requireRole.mockReset()
   sessionToken.mockReset()
   sessionToken.mockResolvedValue(undefined)
@@ -253,6 +271,39 @@ describe('the admin', () => {
     readMatchGaps.mockClear()
     expect(renderToStaticMarkup(await AdminPage())).not.toContain('gaten')
     expect(readMatchGaps).not.toHaveBeenCalled()
+  })
+
+  it('tells an editor how many persons have a gap, and which player differences wait, and nobody else (#1305)', async () => {
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'editor', userId: 1 })
+    expect(renderToStaticMarkup(await AdminPage())).not.toContain('persoon')
+
+    readPersonGaps.mockResolvedValue([
+      { gaps: { geboren: true, land: true }, id: 1 },
+      { gaps: {}, id: 2 },
+      { gaps: { naam: true }, id: 3 },
+    ])
+    countWaitingStatDifferences.mockResolvedValue(new Map([['2024/25', 2]]))
+    countWaitingFieldDifferences.mockResolvedValue(
+      new Map([
+        ['2023/24', 1],
+        [currentSeason, 3],
+      ]),
+    )
+
+    const html = renderToStaticMarkup(await AdminPage())
+
+    expect(html).toContain('<a href="/beheer/spelers/kwaliteit/personen">3 gaten bij 2 personen</a>')
+    expect(html).toContain(
+      '<a href="/beheer/spelers/kwaliteit/spelerscijfers/2024-25">2 spelerscijfers verschillen en wachten op een besluit</a>',
+    )
+    expect(html).toContain(
+      `<a href="/beheer/spelers/kwaliteit/spelersgegevens/${currentSeason.replace('/', '-')}">4 spelersgegevens verschillen en wachten op een besluit</a>`,
+    )
+
+    requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'author', userId: 2 })
+    readPersonGaps.mockClear()
+    expect(renderToStaticMarkup(await AdminPage())).not.toContain('persoon')
+    expect(readPersonGaps).not.toHaveBeenCalled()
   })
 
   it('tells an editor how many reports that were klaar are no longer right, with a link to the list (#1077)', async () => {
