@@ -192,7 +192,7 @@ export function PreviewHeadToHeadCard({
           href={`${matchSearchPath}?tegen=${encodeURIComponent(slug)}&waar=${home ? 'thuis' : 'uit'}`}
           icon="arrow-right"
         >
-          {`Alle ${tally.played} wedstrijden ${where}`}
+          {tally.played === 1 ? `De wedstrijd ${where}` : `Alle ${tally.played} wedstrijden ${where}`}
         </Link>
       </Text>
       <Text>

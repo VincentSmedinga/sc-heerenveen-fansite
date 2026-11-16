@@ -276,6 +276,8 @@ describe('the Voorbeschouwing of a match that has not begun', () => {
 
     expect(text).toContain('Onderling in Heerenveen')
     expect(text).toContain('1 keer thuis tegen Testdorp FC sinds 2023/24')
+    expect(text).toContain('De wedstrijd in Heerenveen')
+    expect(text).not.toContain('Alle 1 wedstrijden')
     expect(html).toContain('waar=thuis')
     expect(getStadiumPlace).not.toHaveBeenCalled()
   })
