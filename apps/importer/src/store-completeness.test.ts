@@ -37,7 +37,7 @@ beforeEach(async () => {
   }
 })
 
-async function goal(player: string, round: string) {
+async function goal(player: string, round: string, inSeason = season) {
   const [{ id }] = (await database.db
     .insert(matches)
     .values({
@@ -50,7 +50,7 @@ async function goal(player: string, round: string) {
       matchDate: '2013-09-01',
       opponent: 'FC Test',
       round,
-      season,
+      season: inSeason,
       status: 'played',
     })
     .$returningId()) as [{ id: number }]
@@ -127,6 +127,44 @@ describe('storeCompleteness', () => {
     })
     await storeCompleteness(database.db, season, undefined, later)
     expect((await rowOf())?.probability).toBe(95)
+  })
+
+  it('does not let a table that lags lower the chance of the season that is running, and fixes a row that it did lower', async () => {
+    const running = '2026/27'
+
+    await database.db.insert(players).values(
+      Array.from({ length: 29 }, (_, index) => ({
+        name: `Speler ${index}`,
+        searchTerm: `Speler ${index}`,
+        season: running,
+        source: 'selectie' as const,
+      })),
+    )
+    await goal('Speler 1', 'Speelronde 1', running)
+    await goal('Speler 1', 'Speelronde 2', running)
+    await goal('Speler 2', 'Speelronde 3', running)
+    // The row as it was before the rule: the table of 1 goal against our 3 failed the check.
+    await database.db.insert(squadCompleteness).values({
+      bestSource: 'selectie',
+      calculatedAt: first,
+      checks: [
+        { detail: 'the list has 29 players, a squad has 20 or more', name: 'size', outcome: 'passed' },
+        { detail: 'x', name: 'goals', outcome: 'failed' },
+      ],
+      goalsTotal: 1,
+      level: 'deels',
+      matchesTotal: null,
+      playerCount: 29,
+      probability: 45,
+      season: running,
+    })
+
+    // The next import calculates the season again, with the sums that were stored.
+    const change = await storeCompleteness(database.db, running, undefined, later)
+
+    expect(change.kind).toBe('changed')
+    expect(await rowOf()).toMatchObject({ calculatedAt: later, goalsTotal: 1, level: 'compleet', probability: 95 })
+    expect((await rowOf())?.checks.find((check) => check.name === 'goals')).toMatchObject({ outcome: 'unavailable' })
   })
 
   it('has no row for a season without players, and removes the row when the players are gone', async () => {

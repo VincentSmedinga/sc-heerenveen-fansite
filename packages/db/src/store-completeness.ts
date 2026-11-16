@@ -62,6 +62,8 @@ export async function storeCompleteness(
     players: list,
     playersPerSource,
     scorers: await scorersOf(db, season),
+    season,
+    today: now,
   })
   const bestSource = playerSources.find((source) => (playersPerSource[source] ?? 0) > 0) ?? 'selectie'
   const row: SquadCompletenessRow = {

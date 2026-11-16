@@ -21,6 +21,9 @@ function season(overrides: Partial<SquadCompletenessInput> = {}): SquadCompleten
     players: list,
     playersPerSource: { selectie: 28 },
     scorers: scorersOf(list, 10),
+    // A season that is over: 16 November 2026 is in 2026/27.
+    season: '2025/26',
+    today: new Date('2026-11-16T12:00:00Z'),
     ...overrides,
   }
 }
@@ -95,6 +98,34 @@ describe('squadCompleteness', () => {
 
     expect(result.checks.find((check) => check.name === 'goals')?.outcome).toBe('failed')
     expect(result.level).toBe('deels')
+  })
+
+  it('does not run the check of the goals in the season that is running, so a table that lags changes nothing', () => {
+    // The table of 2026/27 added up to 18 goals on 16 November 2026, our matches to 26.
+    const list = players(29)
+    const scorers = [{ goals: 26, name: list[0]!.name, personId: list[0]!.personId }]
+    const input = season({ goalsTotal: 18, players: list, scorers, season: '2026/27' })
+    const result = squadCompleteness(input)
+    const check = result.checks.find((item) => item.name === 'goals')
+
+    expect(check?.outcome).toBe('unavailable')
+    expect(check?.detail).toContain('the season is running')
+    expect(result.level).toBe('compleet')
+    expect(result.probability).toBe(sourceCeilings.selectie)
+  })
+
+  it('runs the check of the goals again once the season is over, on the last day of June and the first of July', () => {
+    const list = players(28)
+    const scorers = [{ goals: 26, name: list[0]!.name, personId: list[0]!.personId }]
+    const input = season({ goalsTotal: 18, players: list, scorers, season: '2026/27' })
+
+    const goalsOn = (day: string) =>
+      squadCompleteness({ ...input, today: new Date(`${day}T12:00:00Z`) }).checks.find(
+        (check) => check.name === 'goals',
+      )?.outcome
+
+    expect(goalsOn('2027-06-30')).toBe('unavailable')
+    expect(goalsOn('2027-07-01')).toBe('failed')
   })
 
   it('lowers the chance for a squad with few players', () => {
