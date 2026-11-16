@@ -27,10 +27,15 @@ export type MatchHeaderProps = MatchHeaderBase & {
   /**
    * Where a match stands that has no result yet. `live` is a match that is being played: the
    * goals are the stand so far, and the pill says "Live" in place of an outcome. `upcoming` is
-   * a match that has not begun: no stand, a dash, and the pill says "Nog niet begonnen". Leave
-   * it out for a match that was played.
+   * a match that has not begun: no stand, a dash, and the pill says "Nog niet begonnen", or the
+   * words of `pill`. Leave it out for a match that was played.
    */
   phase?: 'live' | 'upcoming' | undefined
+  /**
+   * The words in the pill of a match that has not begun, in place of "Nog niet begonnen": the
+   * page of the Voorbeschouwing says so. Only `upcoming` uses it.
+   */
+  pill?: string | undefined
   /**
    * The goals of the opponent, under its name, in the order of the clock. Leave it out and
    * nothing stands there. An own goal of sc Heerenveen is in this list.
@@ -181,6 +186,7 @@ export const MatchHeader = ({
   penaltiesAgainst,
   penaltiesFor,
   phase,
+  pill,
   scorersAgainst,
   scorersFor,
   ...props
@@ -240,14 +246,16 @@ export const MatchHeader = ({
           >
             {result}
           </p>
-          {phase === 'upcoming' ? null : (
+          {phase === 'upcoming' ? (
+            <p className="hf-visually-hidden">Nog niet gespeeld: {clubs.map((club) => club.name).join(' tegen ')}</p>
+          ) : (
             <p className="hf-visually-hidden">
               {phase === 'live' ? 'Tussenstand' : 'Eindstand'}: {sides(home, goalsFor, goalsAgainst, ' tegen ')}
             </p>
           )}
           {outcome === undefined ? (
             <p className={classNames('hf-match-header-outcome', phase === 'live' && 'hf-match-header-live')}>
-              {phase === 'live' ? 'Live' : 'Nog niet begonnen'}
+              {phase === 'live' ? 'Live' : (pill ?? 'Nog niet begonnen')}
             </p>
           ) : (
             <p className={classNames('hf-match-header-outcome', `hf-match-${outcome}`)}>{outcomeWords[outcome]}</p>

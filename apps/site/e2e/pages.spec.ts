@@ -7,7 +7,7 @@ import { earlierSeasonSlug } from './earlier-season'
 import { heldMatchId, statSeasonSlug } from './held-changes'
 import { incompleteReportPath } from './incomplete-report'
 import { liveReportMatchId, liveReportPath } from './live-report'
-import { cupReportMatchId, cupReportPath, matchId, playedMatchId, reportPath } from './matches'
+import { cupReportMatchId, cupReportPath, matchId, playedMatchId, previewPath, reportPath } from './matches'
 import { mergePair, playerPages } from './persons'
 import { squadPlayerId } from './players'
 
@@ -25,7 +25,8 @@ import { squadPlayerId } from './players'
 // match, for the screen of its report in the admin, and `{incompleteReport}` for the page of
 // the report that is still being filled in (see incomplete-report.ts), and `{liveReport}` and
 // `{liveMatch}` for the page and the number of the made-up match that is being played (see
-// live-report.ts).
+// live-report.ts), and `{preview}` for the page of the made-up match that has not begun and has
+// no report, the Voorbeschouwing (see matches.ts).
 const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/', status: 200 },
   // The news archive: all sources, one source, more sources, the second page (the made-up
@@ -73,6 +74,8 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '{incompleteReport}', status: 200 },
   // The made-up match that is being played: the page with "Live" (#906).
   { path: '{liveReport}', status: 200 },
+  // The made-up match that has not begun and has no report: the Voorbeschouwing (#1316).
+  { path: '{preview}', status: 200 },
   { path: `/wedstrijden/${earlierSeasonSlug()}/2000-01-01-testdorp-fc`, status: 404 },
   { path: '/wedstrijden/2026-27/onzin', status: 404 },
   { path: '/wedstrijden/2099-00/2099-01-01-testdorp-fc', status: 404 },
@@ -510,6 +513,7 @@ async function withNumbers(path: string) {
           '{incompleteReport}',
           path.includes('{incompleteReport}') ? await incompleteReportPath() : '{incompleteReport}',
         )
+        .replace('{preview}', path.includes('{preview}') ? await previewPath() : '{preview}')
         .replace('{liveReport}', path.includes('{liveReport}') ? await liveReportPath() : '{liveReport}')
         .replace('{liveMatch}', path.includes('{liveMatch}') ? String(await liveReportMatchId()) : '{liveMatch}')
         .replace('{cupMatch}', path.includes('{cupMatch}') ? String(await cupReportMatchId()) : '{cupMatch}')

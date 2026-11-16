@@ -275,6 +275,13 @@ describe('MatchHeader for a match without a result', () => {
     expect(container.textContent).not.toMatch(/Tussenstand|Eindstand/u)
   })
 
+  it('says in hidden words that a match that has not begun was not played, and may change the pill', () => {
+    const { container } = render(<MatchHeader {...props} phase="upcoming" pill="Voorbeschouwing" />)
+
+    expect(text(container, '.hf-match-header-outcome')).toBe('Voorbeschouwing')
+    expect(container.querySelector('.hf-visually-hidden')?.textContent).toMatch(/^Nog niet gespeeld: .+ tegen .+$/u)
+  })
+
   it('does not write extra time or a shoot-out into a match that is being played', () => {
     const { container } = render(
       <MatchHeader {...props} extraTime penaltiesAgainst={3} penaltiesFor={4} phase="live" />,

@@ -12,6 +12,7 @@ import {
   findReportedMatch,
   findReportGoalDifferences,
   listReportedMatches,
+  listScheduledMatches,
   listSeasonReports,
   matchForRules,
   mayHaveReport,
@@ -1055,6 +1056,18 @@ describe('a match that is still being played', () => {
       (await findReportedMatch(database.db, { clubSlug: 'testdorp-fc', matchDate: '2026-08-15', season }))?.match
         .status,
     ).toBe('scheduled')
+  })
+
+  it('is listed as a scheduled match until it has a report, and only with a club', async () => {
+    const without = await scheduledMatch({ matchDate: '2026-11-21', round: 'Speelronde 13' })
+    const withReport = await scheduledMatch({ matchDate: '2026-08-15', round: 'Speelronde 2' })
+
+    await playedMatch()
+    await report(withReport, 'bezig')
+
+    expect((await listScheduledMatches(database.db, season)).map(({ match }) => match.id)).toEqual([without])
+    expect((await listScheduledMatches(database.db, season))[0]?.clubSlug).toBe('testdorp-fc')
+    expect(await listScheduledMatches(database.db, '2025/26')).toEqual([])
   })
 
   it('may have a report from its day on, in Dutch time, and only when it is played or scheduled', () => {

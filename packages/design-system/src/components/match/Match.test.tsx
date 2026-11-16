@@ -940,6 +940,13 @@ describe('Match that is being played', () => {
     expect(container.querySelector('.hf-match-live')).toBeNull()
   })
 
+  it('links the Voorbeschouwing of a match before its kick-off with those words, named with the clubs', () => {
+    const { container } = render(<Match {...scheduled} preview reportHref="#voorbeschouwing" />)
+
+    expect(container.querySelector('a')?.textContent).toBe('Voorbeschouwing van Voorbeeld United tegen sc Heerenveen')
+    expect(container.textContent).not.toContain('Het verslag')
+  })
+
   describe('extra', () => {
     it('puts the small lines under the clubs and before the stadium', () => {
       const { container } = render(<Match {...scheduled} extra={<p>Vorige keer: 12 apr 2026, 2–1</p>} />)

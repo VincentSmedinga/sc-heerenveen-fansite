@@ -1,7 +1,7 @@
 import { connect } from '@fansite/db/client'
 import { clubs, matches, matchReports } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
-import { and, asc, desc, eq } from 'drizzle-orm'
+import { and, asc, desc, eq, gt, isNull, or } from 'drizzle-orm'
 
 import { databaseEnv, loopback } from './articles'
 import { earlierSeason } from './earlier-season'
@@ -139,6 +139,49 @@ export async function playedMatchId() {
     }
 
     return row.id
+  } finally {
+    await close()
+  }
+}
+
+/**
+ * The address of the page of the made-up match that has not begun and has no report, the
+ * Voorbeschouwing (#1316): the last match of the seed that is still to come, since the checks
+ * of the admin fill in the first one (see `matchId`). Like `matchId`, it only reads a database
+ * on this computer.
+ */
+export async function previewPath() {
+  const { DATABASE_URL } = databaseEnv()
+
+  if (!loopback.has(new URL(DATABASE_URL).hostname)) {
+    throw new Error('The checks of the matches only read a database on this computer.')
+  }
+
+  const { close, db } = connect(DATABASE_URL)
+
+  try {
+    const season = seasonOf(new Date())
+    const [row] = await db
+      .select({ matchDate: matches.matchDate, slug: clubs.slug })
+      .from(matches)
+      .innerJoin(clubs, eq(clubs.id, matches.clubId))
+      .leftJoin(matchReports, eq(matchReports.matchId, matches.id))
+      .where(
+        and(
+          eq(matches.season, season),
+          eq(matches.status, 'scheduled'),
+          isNull(matchReports.matchId),
+          or(isNull(matches.kickoffAt), gt(matches.kickoffAt, new Date())),
+        ),
+      )
+      .orderBy(desc(matches.id))
+      .limit(1)
+
+    if (row === undefined) {
+      throw new Error('There is no made-up match to come without a report in the database. Did the global setup run?')
+    }
+
+    return `/wedstrijden/${season.replace('/', '-')}/${row.matchDate}-${row.slug}`
   } finally {
     await close()
   }
