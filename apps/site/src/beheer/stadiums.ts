@@ -12,11 +12,16 @@ import {
   type StadiumLine,
 } from '@fansite/db/club-stadiums'
 import { findClubBySlug, listClubMatches, listClubRecords } from '@fansite/db/queries'
+import { clubs } from '@fansite/db/schema'
+import { type AdminStadiumRow, listClubHomeGrounds } from '@fansite/db/stadium-admin'
+import { eq } from 'drizzle-orm'
 
 import type { StadiumView } from '../opponents'
+import type { HomeGroundRowValues } from './home-ground-fields'
 import type { StadiumRowValues } from './stadium-fields'
 
 import { stadiumsOf, stadiumViewsOf } from '../opponents'
+import { homeGroundRowOf } from './home-ground-form'
 
 export { removeClubStadiums, replaceClubStadiums }
 
@@ -43,6 +48,22 @@ export function searchClubs<T extends { name: string }>(clubs: readonly T[], sea
   return clubs.filter((club) => words.every((word) => plain(club.name).includes(word)))
 }
 
+/**
+ * The stadiums as choices for a list: the name now and the place. Two stadiums with the same
+ * label get their number, so a screen reader and the eye can tell them apart.
+ */
+export function stadiumChoices(rows: readonly AdminStadiumRow[]): { id: number; label: string }[] {
+  const labels = rows.map((row) => (row.place === null ? row.name : `${row.name} (${row.place})`))
+
+  return rows.map((row, index) => ({
+    id: row.id,
+    label:
+      labels.filter((label) => label === labels[index]).length > 1
+        ? `${labels[index]}, nummer ${row.id}`
+        : labels[index]!,
+  }))
+}
+
 const plain = (text: string) =>
   text
     .normalize('NFD')
@@ -53,7 +74,9 @@ const plain = (text: string) =>
 
 /** The club an editor opens: it, its own list and what the matches say. */
 export type AdminClub = {
-  club: { id: number; name: string; slug: string }
+  club: { id: number; name: string; slug: string; wikidataId: null | string }
+  /** The home grounds of the club as lines of the form, and who set them. */
+  homeGrounds: { rows: HomeGroundRowValues[]; source: 'manual' | 'wikidata' | null }
   own: StadiumLine[]
   /** What the matches say, as the card of a club without a list shows it. */
   wikipedia: StadiumView[]
@@ -69,10 +92,19 @@ export async function findAdminClub(db: Database, slug: string): Promise<AdminCl
     return undefined
   }
 
-  const [own, matches] = await Promise.all([listClubStadiums(db, club.id), listClubMatches(db, club.id)])
+  const [own, matches, grounds, [extra]] = await Promise.all([
+    listClubStadiums(db, club.id),
+    listClubMatches(db, club.id),
+    listClubHomeGrounds(db, club.id),
+    db
+      .select({ source: clubs.homeGroundsSource, wikidataId: clubs.wikidataId })
+      .from(clubs)
+      .where(eq(clubs.id, club.id)),
+  ])
 
   return {
-    club: { id: club.id, name: club.name, slug: club.slug },
+    club: { id: club.id, name: club.name, slug: club.slug, wikidataId: extra?.wikidataId ?? null },
+    homeGrounds: { rows: grounds.map(homeGroundRowOf), source: extra?.source ?? null },
     own,
     wikipedia: stadiumViewsOf([], matches),
     wikipediaRows: stadiumsOf(matches).map((stadium, index) => ({

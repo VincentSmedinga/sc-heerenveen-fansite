@@ -150,6 +150,10 @@ describe('recordAction', () => {
       'account.disable',
       'account.enable',
       'club.edit',
+      'ground.create',
+      'ground.edit',
+      'ground-name.save',
+      'home-ground.save',
     ])
   })
 

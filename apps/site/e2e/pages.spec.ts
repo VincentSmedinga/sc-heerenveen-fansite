@@ -382,17 +382,23 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'editor', path: '/beheer/personen/{person}/constructor', status: 404 },
   { admin: 'editor', path: '/beheer/personen/999999', status: 404 },
   { admin: 'author', path: '/beheer/personen/{person}', status: 404 },
-  // The stadiums: the list of the clubs with its filter and search, a club with a list of its
-  // own and a note (made up, see stadiums.ts), a club without one, and a club that is no club.
+  // The stadiums: the list of the stadiums and the form of a new one, the list of the clubs
+  // with its filter and search, a club with a list of its own and a note (made up, see
+  // stadiums.ts), a club without one, and a club that is no club.
   { admin: 'editor', path: '/beheer/stadions', status: 200 },
-  { admin: 'editor', path: '/beheer/stadions?tonen=eigen-lijst', status: 200 },
-  { admin: 'editor', path: '/beheer/stadions?q=proef', status: 200 },
   { admin: 'editor', path: '/beheer/stadions?fout=weg', status: 200 },
+  { admin: 'editor', path: '/beheer/stadions/stadion/nieuw', status: 200 },
+  { admin: 'editor', path: '/beheer/stadions/stadion/999999', status: 404 },
+  { admin: 'editor', path: '/beheer/stadions/clubs', status: 200 },
+  { admin: 'editor', path: '/beheer/stadions/clubs?tonen=eigen-lijst', status: 200 },
+  { admin: 'editor', path: '/beheer/stadions/clubs?q=proef', status: 200 },
+  { admin: 'editor', path: '/beheer/stadions/clubs?fout=weg', status: 200 },
   { admin: 'editor', path: '/beheer/stadions/sv-proefdorp', status: 200 },
   { admin: 'editor', path: '/beheer/stadions/sv-proefdorp?gedaan=opgeslagen', status: 200 },
   { admin: 'editor', path: '/beheer/stadions/voorbeeld-united', status: 200 },
   { admin: 'editor', path: '/beheer/stadions/bestaat-niet', status: 404 },
   { admin: 'author', path: '/beheer/stadions', status: 404 },
+  { admin: 'author', path: '/beheer/stadions/stadion/nieuw', status: 404 },
   { admin: 'author', path: '/beheer/stadions/sv-proefdorp', status: 404 },
   // The names of the clubs: the same pages as the stadiums, with a club that has a list of
   // names of its own and a note (made up, see club-names.ts).

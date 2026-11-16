@@ -11,7 +11,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import { createAccount } from '#src/beheer/accounts'
 
 import ClubPage, { metadata as clubMetadata } from './[club]/page'
-import ListPage, { metadata as listMetadata } from './page'
+import ListPage, { metadata as listMetadata } from './clubs/page'
 
 const { requireRole } = vi.hoisted(() => ({ requireRole: vi.fn() }))
 
@@ -151,10 +151,10 @@ describe('the list of the clubs', () => {
     const html = await list({ q: 'nac' })
 
     expect(rowsOf(html)).toEqual([['Oefenstad NAC', 'Wikipedia']])
-    expect(html).toMatch(/<form[^>]*action="\/beheer\/stadions" method="get"/)
+    expect(html).toMatch(/<form[^>]*action="\/beheer\/stadions\/clubs" method="get"/)
     expect(html).toContain('<input')
     expect(html).toContain('value="nac"')
-    expect(html).toContain('href="/beheer/stadions?tonen=eigen-lijst&amp;q=nac"')
+    expect(html).toContain('href="/beheer/stadions/clubs?tonen=eigen-lijst&amp;q=nac"')
     expect(await list({ q: 'bestaat niet' })).toContain('Geen club gevonden met “bestaat niet”.')
   })
 

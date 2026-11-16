@@ -8,6 +8,9 @@ import type { Database } from './client.ts'
 
 import { clubHomeGrounds, clubs, matches, stadiumLimits, stadiumNames, stadiums } from './schema.ts'
 
+/** One home ground of a club as it is written: the stadium, a start and a note. */
+export type HomeGroundRow = Start & { note?: null | string; stadiumId: number }
+
 /** What `linkMatchesToStadiums` did: how many it linked, and how many have no stadium. */
 export type LinkResult = { linked: number; unlinked: number }
 
@@ -168,31 +171,9 @@ export function nameKey(name: string): string {
 export async function replaceHomeGrounds(
   db: Database,
   clubId: null | number,
-  rows: readonly (Start & { note?: null | string; stadiumId: number })[],
+  rows: readonly HomeGroundRow[],
 ): Promise<void> {
-  await db.transaction(async (transaction) => {
-    await transaction
-      .select({ id: clubHomeGrounds.id })
-      .from(clubHomeGrounds)
-      .where(clubId === null ? isNull(clubHomeGrounds.clubId) : eq(clubHomeGrounds.clubId, clubId))
-      .for('update')
-    await transaction
-      .delete(clubHomeGrounds)
-      .where(clubId === null ? isNull(clubHomeGrounds.clubId) : eq(clubHomeGrounds.clubId, clubId))
-
-    if (rows.length > 0) {
-      await transaction.insert(clubHomeGrounds).values(
-        rows.map((row, position) => ({
-          clubId,
-          note: row.note ?? null,
-          position,
-          stadiumId: row.stadiumId,
-          startDay: row.startDay,
-          startSeason: row.startSeason,
-        })),
-      )
-    }
-  })
+  await db.transaction((transaction) => writeHomeGrounds(transaction, clubId, rows))
 }
 
 /**
@@ -229,6 +210,35 @@ export function startDate({ startDay, startSeason }: Start): null | string {
   }
 
   return startSeason === null ? null : `${startSeason.slice(0, 4)}-07-01`
+}
+
+/** The body of `replaceHomeGrounds`, for a caller that has a transaction of its own. */
+export async function writeHomeGrounds(
+  transaction: Pick<Database, 'delete' | 'insert' | 'select'>,
+  clubId: null | number,
+  rows: readonly HomeGroundRow[],
+): Promise<void> {
+  await transaction
+    .select({ id: clubHomeGrounds.id })
+    .from(clubHomeGrounds)
+    .where(clubId === null ? isNull(clubHomeGrounds.clubId) : eq(clubHomeGrounds.clubId, clubId))
+    .for('update')
+  await transaction
+    .delete(clubHomeGrounds)
+    .where(clubId === null ? isNull(clubHomeGrounds.clubId) : eq(clubHomeGrounds.clubId, clubId))
+
+  if (rows.length > 0) {
+    await transaction.insert(clubHomeGrounds).values(
+      rows.map((row, position) => ({
+        clubId,
+        note: row.note ?? null,
+        position,
+        stadiumId: row.stadiumId,
+        startDay: row.startDay,
+        startSeason: row.startSeason,
+      })),
+    )
+  }
 }
 
 const noteOfDerivedStart = 'Begin: de eerste wedstrijd in onze gegevens, niet het echte begin.'

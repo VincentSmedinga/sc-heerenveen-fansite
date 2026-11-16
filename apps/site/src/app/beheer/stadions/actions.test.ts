@@ -2,17 +2,19 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { listClubStadiums } from '@fansite/db/club-stadiums'
 import { withClubs } from '@fansite/db/clubs'
-import { adminUsers, auditLog, clubs, matches, type NewMatch } from '@fansite/db/schema'
+import { adminUsers, auditLog, clubHomeGrounds, clubs, matches, type NewMatch, stadiums } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import type { HomeGroundRowValues } from '#src/beheer/home-ground-fields'
 
 import { createAccount } from '#src/beheer/accounts'
 import { sessionCookieName } from '#src/beheer/require-role'
 import { startSession } from '#src/beheer/sessions'
 import { emptyRow, type StadiumFormState, type StadiumRowValues } from '#src/beheer/stadium-fields'
 
-import { submitReset, submitStadiums } from './actions'
+import { submitClubWikidata, submitHomeGrounds, submitReset, submitStadiums } from './actions'
 
 const { jar } = vi.hoisted(() => ({ jar: new Map<string, string>() }))
 
@@ -69,6 +71,8 @@ const visit = (matchDate: string, season: string, stadium: string): Omit<NewMatc
 beforeEach(async () => {
   jar.clear()
   await database.pool.query('DELETE FROM club_stadiums')
+  await database.pool.query('DELETE FROM club_home_grounds')
+  await database.pool.query('UPDATE clubs SET home_grounds_source = NULL, wikidata_id = NULL')
   await database.pool.query('DELETE FROM audit_log')
   await database.pool.query('DELETE FROM matches')
   await database.db.delete(adminUsers)
@@ -256,8 +260,8 @@ describe('submitStadiums', () => {
   })
 
   it('ends on the list with a notice for a club that does not exist', async () => {
-    expect(await submit(form(azList), 'bestaat-niet')).toEqual({ redirect: '/beheer/stadions?fout=weg' })
-    expect(await submit(form(azList), 42)).toEqual({ redirect: '/beheer/stadions?fout=weg' })
+    expect(await submit(form(azList), 'bestaat-niet')).toEqual({ redirect: '/beheer/stadions/clubs?fout=weg' })
+    expect(await submit(form(azList), 42)).toEqual({ redirect: '/beheer/stadions/clubs?fout=weg' })
     expect(await log()).toEqual([])
   })
 
@@ -294,7 +298,7 @@ describe('submitReset', () => {
   })
 
   it('ends on the list with a notice for a club that does not exist', async () => {
-    expect(await reset('bestaat-niet')).toEqual({ redirect: '/beheer/stadions?fout=weg' })
+    expect(await reset('bestaat-niet')).toEqual({ redirect: '/beheer/stadions/clubs?fout=weg' })
   })
 
   it('is for the editor, and sends somebody without a session to the login page', async () => {
@@ -305,5 +309,109 @@ describe('submitReset', () => {
     jar.clear()
     expect(await reset()).toEqual({ redirect: '/beheer/inloggen' })
     expect(await stored()).toHaveLength(3)
+  })
+})
+
+const emptyGround = { dag: '', seizoen: '', stadion: '', toelichting: '' }
+const homeGrounds = (rows: Partial<HomeGroundRowValues>[], knop = 'thuis-opslaan') => {
+  const formData = new FormData()
+
+  rows.forEach((values, index) => {
+    for (const [field, value] of Object.entries({ ...emptyGround, ...values })) {
+      formData.set(`thuis-${index + 1}-${field}`, value)
+    }
+  })
+  formData.set('knop', knop)
+
+  return formData
+}
+const saveGrounds = (formData: FormData, clubSlug = slug) =>
+  resultOf(() => submitHomeGrounds(clubSlug, { errors: {}, values: [] }, formData))
+
+describe('submitHomeGrounds', () => {
+  it('saves the grounds, sets the source of the club to manual so the import leaves them alone, and logs counts only', async () => {
+    const [one, two] = (await database.db.select().from(stadiums)).map((stadium) => String(stadium.id)) as [
+      string,
+      string,
+    ]
+
+    expect(
+      await saveGrounds(
+        homeGrounds([{ stadion: one }, { seizoen: '2005/06', stadion: two, toelichting: 'Een geheime toelichting' }]),
+      ),
+    ).toEqual({ redirect: '/beheer/stadions/oefenstad-az?gedaan=thuisvelden-opgeslagen' })
+
+    expect(
+      (await database.db.select().from(clubHomeGrounds).where(eq(clubHomeGrounds.clubId, clubId))).map(
+        (row) => row.stadiumId,
+      ),
+    ).toEqual([Number(one), Number(two)])
+    expect((await database.db.select().from(clubs).where(eq(clubs.id, clubId)))[0]?.homeGroundsSource).toBe('manual')
+    expect((await log()).map((entry) => [entry.action, entry.detail])).toEqual([
+      ['home-ground.save', '2 thuisvelden, 1 met toelichting'],
+    ])
+  })
+
+  it('says what is wrong at each field and saves nothing', async () => {
+    const [one] = (await database.db.select().from(stadiums)).map((stadium) => String(stadium.id)) as [string]
+    const answer = await saveGrounds(homeGrounds([{ stadion: 'onzin' }, { seizoen: '1999', stadion: one }]))
+
+    expect(answer).toMatchObject({
+      errors: {
+        'thuis-1-stadion': 'Kies een stadion uit de lijst.',
+        'thuis-2-seizoen': 'Schrijf het seizoen zoals 2019/20.',
+      },
+    })
+    expect(await database.db.select().from(clubHomeGrounds)).toEqual([])
+    expect((await database.db.select().from(clubs).where(eq(clubs.id, clubId)))[0]?.homeGroundsSource).toBeNull()
+  })
+
+  it('adds and removes a line without saving, and puts the focus where the editor was', async () => {
+    expect(await saveGrounds(homeGrounds([{ stadion: '1' }], 'thuis-toevoegen'))).toMatchObject({
+      focus: 'thuis-2-stadion',
+      values: [{ stadion: '1' }, emptyGround],
+    })
+    expect(await saveGrounds(homeGrounds([{ stadion: '1' }, { stadion: '2' }], 'thuis-weghalen-1'))).toMatchObject({
+      focus: 'thuis-1-stadion',
+      values: [{ stadion: '2' }],
+    })
+    expect(await log()).toEqual([])
+  })
+
+  it('is for the editor, and ends on the list for a club that does not exist', async () => {
+    expect(await saveGrounds(homeGrounds([]), 'bestaat-niet')).toEqual({ redirect: '/beheer/stadions/clubs?fout=weg' })
+
+    jar.set(sessionCookieName, await startSession(database.db, authorId))
+    await expect(saveGrounds(homeGrounds([]))).rejects.toThrow('not found')
+  })
+})
+
+describe('submitClubWikidata', () => {
+  const save = (value: string, clubSlug = slug) => {
+    const formData = new FormData()
+
+    formData.set('wikidata', value)
+
+    return resultOf(() => submitClubWikidata(clubSlug, {}, formData))
+  }
+
+  it('saves a number, reads it case-insensitively, and writes it in the log', async () => {
+    expect(await save(' q1234 ')).toEqual({ saved: 'Q1234', value: 'Q1234' })
+    expect((await database.db.select().from(clubs).where(eq(clubs.id, clubId)))[0]?.wikidataId).toBe('Q1234')
+    expect((await log()).map((entry) => entry.action)).toEqual(['club.edit'])
+  })
+
+  it('takes the number away with an empty field', async () => {
+    await save('Q1234')
+    expect(await save('')).toEqual({ saved: '', value: '' })
+    expect((await database.db.select().from(clubs).where(eq(clubs.id, clubId)))[0]?.wikidataId).toBeNull()
+  })
+
+  it('says at the field when the number is wrong or belongs to another club', async () => {
+    expect(await save('1234')).toMatchObject({ error: expect.stringContaining('Q1234') as string })
+    await database.db.insert(clubs).values({ name: 'Oefenstad Andere', slug: 'oefenstad-andere', wikidataId: 'Q55' })
+
+    expect(await save('Q55')).toMatchObject({ error: expect.stringContaining('hoort al bij') as string })
+    expect(await log()).toEqual([])
   })
 })
