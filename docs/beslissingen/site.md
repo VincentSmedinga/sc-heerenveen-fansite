@@ -4337,6 +4337,7 @@
   Na elke keuze de pagina opnieuw laden (wist wat de redactie in een andere rij al koos).
   De actie `player.edit` van een speler van de persoon gebruiken (een persoon zonder speler heeft er geen, en het logboek zou een speler noemen die niet veranderde).
   Een zoekveld met suggesties voor het land (zie het besluit over het formulier van een speler hierboven).
+- **Later:** sinds 16 november 2026 staat de snelle lijst op `/beheer/spelers/kwaliteit/personen/snel` (#1305, zie _De kwaliteit van spelers en personen staat onder Spelers_).
 
 ## De redactie voegt twee personen samen in het beheer
 
@@ -5244,6 +5245,7 @@
 - **Besluit:** de kaarten "Personen die op elkaar lijken" en "Namen en de lijst van spelers" gaan naar `/beheer/kwaliteit/namen`, met een link boven de tabel van personen (#1161, gebouwd in #1165).
 - **Waarom:** het zijn lijsten om te lezen, geen gaten om in te vullen.
 - **Alternatieven:** ze onder de tabel laten staan.
+- **Later:** de pagina met de namen staat sinds 16 november 2026 op `/beheer/spelers/kwaliteit/namen`, en de link boven de tabel van de personen blijft (#1305, zie _De kwaliteit van spelers en personen staat onder Spelers_).
 
 ## De delen van het formulier van een wedstrijd
 
@@ -5341,6 +5343,7 @@
 - **Waarom:** de kolommen volgen de delen van het formulier van een persoon uit #1164, zodat een tik op een `?` het goede deel opent.
   Dezelfde letter als de lijst van alle spelers maakt een persoon makkelijk te vinden.
 - **Alternatieven:** een kolom Verschil met de import (er is nog geen telling per persoon); de letter van de hele naam (van den Berg zou bij V staan); een navigatie met alleen de letters die personen hebben (de rij springt dan per letter anders).
+- **Later:** de tabel van de personen staat sinds 16 november 2026 op `/beheer/spelers/kwaliteit/personen` en een letter op `/beheer/spelers/kwaliteit/personen/<letter>`; de snelle lijst op `/beheer/spelers/kwaliteit/personen/snel`; de oude adressen hebben geen doorverwijzing, ook `?lijst=` en `?deel=` op de tabel niet (#1305, zie _De kwaliteit van spelers en personen staat onder Spelers_).
 
 ## Een fout in het beheer logt geen waarden
 
@@ -5450,6 +5453,7 @@
   Onder de tien wedstrijden is een percentage toeval.
   Eerst zien wat er is, dan beslissen wat we eraan doen.
 - **Alternatieven:** alle formaties meetellen (een plaats in een rij van vier en in een rij van drie is niet te vergelijken); de lijst vanaf één wedstrijd (te veel toeval).
+- **Later:** de pagina staat sinds 16 november 2026 op `/beheer/spelers/kwaliteit/plaatsen` (#1305, zie _De kwaliteit van spelers en personen staat onder Spelers_).
 
 ## De spelers van een opstelling gaan omhoog of omlaag, met de volgorde van de rijen als volgorde
 
@@ -5478,6 +5482,7 @@
 - **Waarom:** de redactie kent veel spelers uit het hoofd, en snel antwoorden is het doel.
   Het formulier van een persoon vraagt dezelfde kant, maar per persoon een pagina.
 - **Alternatieven:** de kant bij elk formulier invullen (veel klikken); de overgeslagen spelers in de database bewaren (een tabel of kolom voor iets dat een sessie duurt).
+- **Later:** de quiz staat sinds 16 november 2026 op `/beheer/spelers/kwaliteit/plaatsen/vragen` (#1305, zie _De kwaliteit van spelers en personen staat onder Spelers_).
 
 ## Cijfers is twee pagina's, onder Wedstrijden en onder Spelers
 
@@ -6087,3 +6092,19 @@
   `qualityPath` (`/beheer/kwaliteit`) blijft het begin van de lijsten die nog niet verhuisd zijn.
 - **Waarom:** Next.js haalt anders adressen door elkaar, en de balk markeert Wedstrijden bij elke pagina eronder, zonder uitzondering in `screens.ts`.
 - **Alternatieven:** `/beheer/kwaliteit` laten bestaan voor de wedstrijden (dat blijft het onderdeel Kwaliteit dat we weghalen); `/beheer/wedstrijden/gaten` (de tabel heet bij de redactie Kwaliteit).
+
+## De kwaliteit van spelers en personen staat onder Spelers
+
+- **Datum:** 16 november 2026
+- **Besluit:** de tabel van de personen, de snelle lijst van linie en land, de namen, de vaste plaatsen met de quiz en de verschillen in spelerscijfers en spelersgegevens staan onder `/beheer/spelers/kwaliteit` (#1305).
+  `playerQualityPath` in `src/beheer/quality.ts` is het begin; `personQualityPath` is `.../personen` (met `.../personen/<letter>` en `.../personen/snel`), `namesQualityPath` is `.../namen`, `usualSlotsPath` is `.../plaatsen` (met `.../plaatsen/vragen`).
+  De verschillen hebben het seizoen achter de naam van de lijst: `.../spelerscijfers/<seizoen>` (`statDifferencesPath`) en `.../spelersgegevens/<seizoen>` (`fieldDifferencesPath`).
+  Boven de lijst van spelers staat een link naar de tabel van de personen, en elke pagina eronder heeft een link terug naar Spelers.
+  `/beheer/spelers/kwaliteit` zelf is geen pagina.
+  De doorverwijzing van de tabel van de personen naar de snelle lijst (`?lijst=` en `?deel=`) is weg, zoals de andere (#1303).
+  De kaart "Te doen" telt de personen met een gat (naar de tabel) en de spelerscijfers en spelersgegevens die op een besluit wachten (naar de pagina van het seizoen met de meeste recente verschillen).
+  De kaarten hebben het warme vlak, en niemand krijgt of verliest toegang: de eigenaar en de redacteuren zien de pagina's, een auteur krijgt "niet gevonden".
+- **Waarom:** de redactie zoekt een gat bij het onderwerp (#1303).
+  De lijsten staan onder `/beheer/spelers/kwaliteit` en niet naast `[id]`, zodat een vaste naam als `personen` of `namen` geen dynamisch deel van het niveau van een speler overlapt.
+  Het seizoen staat achter de naam van de lijst, zodat een seizoen en een vaste naam (`snel`, een letter) nooit op één niveau staan.
+- **Alternatieven:** `/beheer/spelers/personen` en `/beheer/spelers/namen` zonder `kwaliteit` (dichter bij Spelers, maar naast `[id]` en `nieuw`, en minder duidelijk dat het een lijst met gaten is); het seizoen voor de naam van de lijst, zoals het was.

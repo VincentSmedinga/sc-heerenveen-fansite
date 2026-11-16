@@ -6,7 +6,7 @@ import { persons, players } from '@fansite/db/schema'
 import { asc, count, desc, eq, isNotNull, isNull, max, min, sql } from 'drizzle-orm'
 
 import { recordAction } from './audit-log'
-import { qualityPath } from './quality'
+import { playerQualityPath } from './quality'
 
 // The work list of the admin that fills in the line and the country of persons (issue 1053):
 // the persons without one of the two, and the choice of an editor for one person. A choice and
@@ -23,7 +23,7 @@ export const personFacts = ['linie', 'land'] as const
 /** How many persons one part of the list shows. */
 export const personListLength = 50
 
-export const personFactsPath = `${qualityPath}/personen/snel`
+export const personFactsPath = `${playerQualityPath}/personen/snel`
 
 /** The name of a person in the list: the name, the title of the article or a player's name. */
 const listedName = sql<string>`COALESCE(${persons.name}, ${persons.wikipediaPage}, MAX(${players.name}), CONCAT('Persoon ', ${persons.id}))`

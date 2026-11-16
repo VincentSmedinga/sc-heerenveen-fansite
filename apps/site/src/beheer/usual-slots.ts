@@ -3,14 +3,14 @@ import type { Database } from '@fansite/db/client'
 import { matchAppearances, matchReports } from '@fansite/db/schema'
 import { and, asc, eq } from 'drizzle-orm'
 
-import { qualityPath } from './quality'
+import { playerQualityPath } from './quality'
 
 // The usual slot of a player in a 4-3-3 (issue 1193): a list to read on the page Kwaliteit. The
 // place of a player in his row comes from the order of the line-up, and it is only worth
 // something for a player who stood in the same slot most of the time.
 
 /** The address of the page with the usual slots. */
-export const usualSlotsPath = `${qualityPath}/plaatsen`
+export const usualSlotsPath = `${playerQualityPath}/plaatsen`
 
 /** The formation whose slots are counted, and the fewest matches a player needs in it. */
 export const countedFormation = '4-3-3'

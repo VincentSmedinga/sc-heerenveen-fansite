@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 
 import { Card, DataTable, Heading, Link, Page, Text } from '@fansite/design-system'
-import { redirect } from 'next/navigation'
 
 import { personGapLegend, personGapTableColumns } from '#src/app/beheer/kwaliteit/gap-table'
+import { playersPath } from '#src/app/beheer/spelers/paths'
 import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { personFactsPath } from '#src/beheer/person-facts'
@@ -15,6 +15,7 @@ import {
   readPersonGaps,
 } from '#src/beheer/person-table'
 import { requireRole } from '#src/beheer/require-role'
+import { usualSlotsPath } from '#src/beheer/usual-slots'
 import { getDatabase } from '#src/database'
 
 // Render on each request: who is logged in and what the database holds are not known when the
@@ -23,29 +24,15 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Kwaliteit van de personen' }
 
-type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
-
 const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`
 
 /**
  * What we miss of the persons in our squads, for an editor (issue 1165): one row for each
  * letter, with a column for each fact. A number is how many persons of the letter have a gap
- * in that column, and leads to them. The quick list of the line and the country that stood
- * here moved to `snel`, and an old address of it goes there.
+ * in that column, and leads to them. The quick list of the line and the country is at `snel`.
  */
-export default async function PersonQualityPage({ searchParams }: Props) {
+export default async function PersonQualityPage() {
   await requireRole('owner', 'editor')
-
-  const { deel, lijst } = await searchParams
-
-  if (lijst !== undefined || deel !== undefined) {
-    const query = new URLSearchParams({
-      ...(typeof lijst === 'string' ? { lijst } : {}),
-      ...(typeof deel === 'string' ? { deel } : {}),
-    })
-
-    redirect(query.size === 0 ? personFactsPath : `${personFactsPath}?${query}`)
-  }
 
   const all = await readPersonGaps(getDatabase().db)
   const counts = countPersonGapsByLetter(all)
@@ -55,7 +42,12 @@ export default async function PersonQualityPage({ searchParams }: Props) {
   return (
     <Page.Main areas={adminAreas} className={compact}>
       <Page.Cell area="head">
-        <Heading level={1}>Kwaliteit</Heading>
+        <Text>
+          <Link href={playersPath} icon="arrow-left">
+            Spelers
+          </Link>
+        </Text>
+        <Heading level={1}>Kwaliteit van personen</Heading>
         <Text appearance="intro">
           {withGaps.length === 0
             ? 'Alle personen zijn compleet.'
@@ -66,7 +58,10 @@ export default async function PersonQualityPage({ searchParams }: Props) {
         <Text>
           <Link href={personFactsPath}>Linie en land snel aanvullen</Link>
         </Text>
-        <Card aria-labelledby="letters-kop">
+        <Text>
+          <Link href={usualSlotsPath}>Vaste plaatsen in een 4-3-3</Link>: waar spelers meestal stonden in hun rij.
+        </Text>
+        <Card aria-labelledby="letters-kop" surface="warm">
           <Heading id="letters-kop" level={2}>
             Per letter
           </Heading>

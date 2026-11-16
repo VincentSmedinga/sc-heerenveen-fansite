@@ -25,7 +25,10 @@ const countries = {
   ],
 }
 
-const paths = { land: '/beheer/kwaliteit/personen/snel?lijst=land', linie: '/beheer/kwaliteit/personen/snel' }
+const paths = {
+  land: '/beheer/spelers/kwaliteit/personen/snel?lijst=land',
+  linie: '/beheer/spelers/kwaliteit/personen/snel',
+}
 
 type Action = Parameters<typeof PersonWorkList>[0]['action']
 

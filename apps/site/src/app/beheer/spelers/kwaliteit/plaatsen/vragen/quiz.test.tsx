@@ -141,8 +141,8 @@ describe('the addresses of the quiz', () => {
   })
 
   it('keeps the skipped players and the answered one in the address', () => {
-    expect(sideQuizAddress([])).toBe('/beheer/kwaliteit/plaatsen/vragen')
-    expect(sideQuizAddress([4, 9], 12)).toBe('/beheer/kwaliteit/plaatsen/vragen?over=4%2C9&gedaan=12')
+    expect(sideQuizAddress([])).toBe('/beheer/spelers/kwaliteit/plaatsen/vragen')
+    expect(sideQuizAddress([4, 9], 12)).toBe('/beheer/spelers/kwaliteit/plaatsen/vragen?over=4%2C9&gedaan=12')
   })
 })
 
@@ -246,7 +246,7 @@ describe('the page of the quiz', () => {
     expect(html).toContain('Alle spelers hebben een kant.')
     // The text is the heading that gets the focus, as the heading of a question does.
     expect(html).toMatch(/<h2[^>]*id="vraag-kop"[^>]*>Alle spelers hebben een kant\./u)
-    expect(html).toContain('href="/beheer/kwaliteit/plaatsen"')
+    expect(html).toContain('href="/beheer/spelers/kwaliteit/plaatsen"')
   })
 })
 
@@ -272,7 +272,7 @@ describe('the answer to a question', () => {
   it('gives the person the side, writes it in the log and goes on with the skipped players kept', async () => {
     const id = personIds['Speler 4']!
 
-    expect(await answer(id, '3,5', 'links')).toBe(`/beheer/kwaliteit/plaatsen/vragen?over=3%2C5&gedaan=${id}`)
+    expect(await answer(id, '3,5', 'links')).toBe(`/beheer/spelers/kwaliteit/plaatsen/vragen?over=3%2C5&gedaan=${id}`)
     expect((await database.db.select().from(persons).where(eq(persons.id, id)))[0]?.side).toBe('links')
     expect((await database.db.select().from(auditLog).orderBy(asc(auditLog.id))).map((row) => row.detail)).toEqual([
       'Aangepast: Speler 4. kant: geen → links.',
@@ -282,7 +282,7 @@ describe('the answer to a question', () => {
   it('skips a player without saving, and keeps him out of the quiz for now', async () => {
     const id = personIds['Speler 5']!
 
-    expect(await answer(id, '', 'overslaan')).toBe(`/beheer/kwaliteit/plaatsen/vragen?over=${id}`)
+    expect(await answer(id, '', 'overslaan')).toBe(`/beheer/spelers/kwaliteit/plaatsen/vragen?over=${id}`)
     expect((await database.db.select().from(persons).where(eq(persons.id, id)))[0]?.side).toBeNull()
     expect(await database.db.select().from(auditLog)).toHaveLength(0)
   })
@@ -290,9 +290,9 @@ describe('the answer to a question', () => {
   it('refuses a word that is not a side, a player that is not there, and a call without an editor', async () => {
     const id = personIds['Speler 6']!
 
-    expect(await answer(id, '', 'boven')).toBe(`/beheer/kwaliteit/plaatsen/vragen?over=${id}`)
-    expect(await answer(999_999, '', 'links')).toBe('/beheer/kwaliteit/plaatsen/vragen?over=999999')
-    expect(await answer(Number.NaN, '', 'links')).toBe('/beheer/kwaliteit/plaatsen/vragen')
+    expect(await answer(id, '', 'boven')).toBe(`/beheer/spelers/kwaliteit/plaatsen/vragen?over=${id}`)
+    expect(await answer(999_999, '', 'links')).toBe('/beheer/spelers/kwaliteit/plaatsen/vragen?over=999999')
+    expect(await answer(Number.NaN, '', 'links')).toBe('/beheer/spelers/kwaliteit/plaatsen/vragen')
     expect((await database.db.select().from(persons).where(eq(persons.id, id)))[0]?.side).toBeNull()
 
     requireRole.mockRejectedValue(new Error('redirect to /beheer/inloggen'))

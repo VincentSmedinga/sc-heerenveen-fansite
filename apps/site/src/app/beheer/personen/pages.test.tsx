@@ -123,7 +123,7 @@ describe('the page of a person', () => {
   })
 
   it('has Opslaan en volgende only for a column of the table that leads to this part', async () => {
-    const from = { kolom: 'wikipedia', terug: '/beheer/kwaliteit/personen/v?kolom=wikipedia' }
+    const from = { kolom: 'wikipedia', terug: '/beheer/spelers/kwaliteit/personen/v?kolom=wikipedia' }
 
     expect(await page(personId, ['naam'], from)).toContain('value="volgende"')
     expect(await page(personId, ['naam'], { ...from, gedaan: 'volgende-opgeslagen' })).toContain(

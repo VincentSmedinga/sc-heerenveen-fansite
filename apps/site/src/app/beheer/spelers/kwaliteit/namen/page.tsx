@@ -42,7 +42,7 @@ export default async function NamesQualityPage() {
         <Heading level={1}>{title}</Heading>
       </Page.Cell>
       <Page.Cell area="main">
-        <Card aria-labelledby="personen-kop">
+        <Card aria-labelledby="personen-kop" surface="warm">
           <Heading id="personen-kop" level={2}>
             Personen die op elkaar lijken
           </Heading>
@@ -92,7 +92,7 @@ function PlayerListCard({ report }: { report: PlayerListReport }) {
   ]
 
   return (
-    <Card aria-labelledby="lijst-kop">
+    <Card aria-labelledby="lijst-kop" surface="warm">
       <Heading id="lijst-kop" level={2}>
         Namen en de lijst van spelers
       </Heading>

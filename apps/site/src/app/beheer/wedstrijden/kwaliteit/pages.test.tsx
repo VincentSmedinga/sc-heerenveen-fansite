@@ -72,7 +72,7 @@ describe('the page Kwaliteit van wedstrijden', () => {
     const html = renderToStaticMarkup(await QualityPage())
 
     expect(html).not.toContain('Welke gegevens')
-    expect(html).not.toContain('href="/beheer/kwaliteit/personen"')
+    expect(html).not.toContain('href="/beheer/spelers/kwaliteit/personen"')
     expect(html).toContain('href="/beheer/wedstrijden"')
     expect(html).toContain('href="/beheer/wedstrijden/kwaliteit/formaties"')
   })
