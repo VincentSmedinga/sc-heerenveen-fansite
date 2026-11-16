@@ -1127,7 +1127,8 @@ De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 - `@fansite/db/test-database`: `createTestDatabase()` maakt een eigen database met de migraties erop, voor tests in andere packages (zie _Tests_);
 - `@fansite/db/env`: het Zod-schema voor `DATABASE_URL`, om in het schema van een app te zetten;
 - `@fansite/db/lock`: `withLock(pool, name, waitSeconds, task)` doet een taak terwijl het een slot in de database houdt (`GET_LOCK`), en `lockNameFor(url, task)` geeft de naam daarvan, met de taak en de naam van de database erin.
-  De migraties en de import gebruiken het, elk met een eigen naam;
+  De migraties en de import gebruiken het, elk met een eigen naam.
+  De verbinding met het slot vraagt elke 30 seconden iets aan de server, en het vrijgeven geeft na 10 seconden op en vernietigt dan de verbinding, zodat een taak van een kwartier niet blijft hangen op een verbinding die stil is geworden (#1313);
 - `@fansite/db/prepare`: `prepareDatabase({ migrationsFolder, seed, url })` draait de migraties die de database nog niet had en zet op verzoek de echte bronnen en de verzonnen wedstrijden uit de seed erin: `seed` is de omgeving (`acceptance`, `production` of `local`), want alleen `acceptance` krijgt ook de verzonnen wedstrijden en haalt de testbronnen weg, en `local` krijgt niets.
   Een slot in de database (`fansite_migrate_<database>`) laat twee processen die tegelijk starten, om de beurt werken.
   De site roept het aan als hij start.

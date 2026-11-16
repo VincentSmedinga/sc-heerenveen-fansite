@@ -188,6 +188,7 @@
   `GET_LOCK` hoort bij de verbinding, dus een proces dat sterft, laat de lock vanzelf los.
 - **Alternatieven:** wachten tot de lock vrij is; dan stapelen de runs zich op als er een blijft hangen.
   Of een rij in een tabel als lock; die blijft staan als het proces sterft.
+- **Later:** op 16 november 2026 hield een run van een kwartier het proces open, omdat de stille verbinding met de lock bleef hangen (#1313); zie _De verbinding met het slot van de import houdt zich levend en laat los met een tijdslimiet_.
 
 ## Elke run komt in de database, en een feed is ongezond na drie mislukte runs op rij
 
