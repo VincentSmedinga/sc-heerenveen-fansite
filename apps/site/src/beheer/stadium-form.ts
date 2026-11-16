@@ -136,7 +136,7 @@ export function rowOf(line: StadiumLine): StadiumRowValues {
  */
 export function validateStadiumRows(
   rows: readonly StadiumRowValues[],
-  emptyMessage = 'Een lijst heeft minstens één regel. Wil je er geen eigen lijst meer? Kies "Terug naar Wikipedia".',
+  emptyMessage = 'Een lijst heeft minstens één regel.',
 ): { errors: StadiumErrors; lines?: undefined } | { errors?: undefined; lines: StadiumLine[] } {
   const errors: StadiumErrors = {}
 
