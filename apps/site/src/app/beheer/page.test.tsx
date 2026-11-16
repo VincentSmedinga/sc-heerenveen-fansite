@@ -18,6 +18,7 @@ const {
   loginLinkWorks,
   readMatchGaps,
   readPersonGaps,
+  readStadiumGaps,
   requireRole,
   sessionToken,
 } = vi.hoisted(() => ({
@@ -31,6 +32,7 @@ const {
   loginLinkWorks: vi.fn(),
   readMatchGaps: vi.fn(),
   readPersonGaps: vi.fn(),
+  readStadiumGaps: vi.fn(),
   requireRole: vi.fn(),
   sessionToken: vi.fn(),
 }))
@@ -49,6 +51,7 @@ vi.mock('#src/beheer/person-table', async (importOriginal) => ({
   readPersonGaps,
 }))
 vi.mock('#src/beheer/quality-table', () => ({ readMatchGaps }))
+vi.mock('#src/beheer/stadium-quality', () => ({ readStadiumGaps }))
 vi.mock('#src/beheer/require-role', () => ({ requireRole, sessionToken }))
 vi.mock('#src/beheer/sessions', () => ({ findSession, loginLinkWorks }))
 vi.mock('next/navigation', () => ({
@@ -72,6 +75,8 @@ beforeEach(() => {
   readMatchGaps.mockResolvedValue([])
   readPersonGaps.mockReset()
   readPersonGaps.mockResolvedValue([])
+  readStadiumGaps.mockReset()
+  readStadiumGaps.mockResolvedValue({ total: 0 })
   countWaitingStatDifferences.mockReset()
   countWaitingStatDifferences.mockResolvedValue(new Map())
   countWaitingFieldDifferences.mockReset()
@@ -271,6 +276,22 @@ describe('the admin', () => {
     readMatchGaps.mockClear()
     expect(renderToStaticMarkup(await AdminPage())).not.toContain('gaten')
     expect(readMatchGaps).not.toHaveBeenCalled()
+  })
+
+  it('tells an editor how many gaps the stadiums and clubs have, with a link to the list, and nobody else (#1307)', async () => {
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'editor', userId: 1 })
+    expect(renderToStaticMarkup(await AdminPage())).not.toContain('stadions en clubs')
+
+    readStadiumGaps.mockResolvedValue({ total: 5 })
+
+    expect(renderToStaticMarkup(await AdminPage())).toContain(
+      '<a href="/beheer/stadions/kwaliteit">5 gaten bij stadions en clubs</a>',
+    )
+
+    requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'author', userId: 2 })
+    readStadiumGaps.mockClear()
+    expect(renderToStaticMarkup(await AdminPage())).not.toContain('stadions en clubs')
+    expect(readStadiumGaps).not.toHaveBeenCalled()
   })
 
   it('tells an editor how many persons have a gap, and which player differences wait, and nobody else (#1305)', async () => {

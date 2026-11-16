@@ -64,23 +64,38 @@ describe('the gaps of the matches of a season (#1163)', () => {
 
     expect(gaps.get(ids.waiting)?.wacht).toEqual({ sign: '2', total: 2 })
     expect(gaps.get(ids.complete)?.wacht).toBeUndefined()
-    expect(gaps.get(ids.complete)?.gegevens).toEqual({ sign: '3', total: 3 })
+    expect(gaps.get(ids.complete)?.gegevens).toEqual({ sign: '2', total: 2 })
   })
 
-  it('counts a stadium name without a stadium as a gap of its own in Gegevens (#1297)', async () => {
+  it('has a ? in Stadion for a played match without a stadium, even one with a name (#1307)', async () => {
     const [{ insertId: stadiumId }] = await database.db.insert(stadiums).values({})
-    const gegevens = async () => (await gapsOf()).get(ids.complete)?.gegevens
+    const stadion = async () => (await gapsOf()).get(ids.complete)?.stadion
 
-    expect(await gegevens()).toEqual({ sign: '3', total: 3 })
+    expect(await stadion()).toEqual({ sign: '?', total: 1 })
 
-    // The name is there, so the name is no longer missing, and the missing link counts instead.
+    // The name of the source is there, but no stadium answers to it: the editors choose one.
     await database.db.update(matches).set({ stadium: 'Oefenstadion' }).where(eq(matches.id, ids.complete))
-    expect(await gegevens()).toEqual({ sign: '3', total: 3 })
+    expect(await stadion()).toEqual({ sign: '?', total: 1 })
+
+    // The stadium is no longer a fact of Gegevens, so it does not count there twice.
+    expect((await gapsOf()).get(ids.complete)?.gegevens).toEqual({ sign: '2', total: 2 })
 
     await database.db.update(matches).set({ stadiumId }).where(eq(matches.id, ids.complete))
-    expect(await gegevens()).toEqual({ sign: '2', total: 2 })
+    expect(await stadion()).toBeUndefined()
 
     await database.db.update(matches).set({ stadium: null, stadiumId: null }).where(eq(matches.id, ids.complete))
+  })
+
+  it('has no stadium gap for a match that was not played', async () => {
+    await database.db
+      .update(matches)
+      .set({ goalsAgainst: null, goalsFor: null, status: 'scheduled' })
+      .where(eq(matches.id, ids.complete))
+    expect((await gapsOf()).get(ids.complete)?.stadion).toBeUndefined()
+    await database.db
+      .update(matches)
+      .set({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+      .where(eq(matches.id, ids.complete))
   })
 
   it('has a ? for the kick-off and the line-up of a played match without them', async () => {

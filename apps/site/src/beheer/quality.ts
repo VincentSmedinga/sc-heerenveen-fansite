@@ -25,6 +25,13 @@ export const matchQualityPath = '/beheer/wedstrijden/kwaliteit'
 export const playerQualityPath = '/beheer/spelers/kwaliteit'
 
 /**
+ * The list of what the stadiums and the clubs still miss (#1307): a card for each kind. It is
+ * under Stadions, so the bar marks that screen. `kwaliteit` stands beside `clubs` and
+ * `stadion`, the other fixed names of that level, and no club has that address part.
+ */
+export const stadiumQualityPath = '/beheer/stadions/kwaliteit'
+
+/**
  * The start of the lists that have not moved yet: the persons, the names, the usual places, the
  * clubs without a country. #1306 moves them to Clubs, and this address goes with them.
  */
