@@ -32,4 +32,19 @@ describe('BarList', () => {
     expect(fills.every((fill) => fill.classList.contains('hf-chart-tone-plain'))).toBe(true)
     expect(fills.map((fill) => fill.style.getPropertyValue('--hf-bar-list-share'))).toEqual(['100', '50'])
   })
+
+  it('gives the number column the width of the longest number, so four digits do not spill', () => {
+    const { container } = render(
+      <BarList
+        rows={[
+          { label: 'a', value: 1170 },
+          { label: 'b', value: 90 },
+        ]}
+      />,
+    )
+
+    expect(container.querySelector<HTMLElement>('.hf-bar-list')?.style.getPropertyValue('--hf-bar-list-digits')).toBe(
+      '4',
+    )
+  })
 })

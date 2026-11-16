@@ -7,7 +7,7 @@ import { getSeasonReportFigures } from '#src/season-report-figures'
 import { getSeasonSquad } from '#src/season-squad'
 import { getSquadSummary } from '#src/squad-summary'
 import { matchData } from '#src/test-matches'
-import { noReports } from '#src/test-report-figures'
+import { figuresData, noReports } from '#src/test-report-figures'
 import { squadData } from '#src/test-squad'
 import { withoutIcons } from '#src/without-icons'
 
@@ -73,7 +73,7 @@ afterEach(() => {
 })
 
 describe('the page /spelers', () => {
-  it('has one h1, Spelers, the h2 Selectie with an h3 for each position, the h2 of the card with the squad in short and the h2 of the card with the link to the figures', async () => {
+  it('has one h1, Spelers, the h2 Selectie with an h3 for each position, the h2 of the card with the squad in short and the h2 of the four small cards', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
@@ -84,7 +84,8 @@ describe('the page /spelers', () => {
       '<h3 class="hf-heading-3">Middenvelders</h3>',
       '<h3 class="hf-heading-3">Aanvallers</h3>',
       '<h2 class="hf-heading-2" id="de-selectie-in-het-kort">De selectie in het kort</h2>',
-      '<h2 class="hf-heading-2" id="cijfers-van-dit-seizoen">Cijfers van dit seizoen</h2>',
+      '<h2 class="hf-heading-2" id="kort-topscorers">Topscorers</h2>',
+      '<h2 class="hf-heading-2" id="kort-de-nul-gehouden">De nul gehouden</h2>',
     ])
   })
 
@@ -95,17 +96,56 @@ describe('the page /spelers', () => {
     expect(html).toContain('id="selectie"')
   })
 
-  it('has the white card Selectie in the main column, and the strong card with the link to the figures and the credit in the side section', async () => {
+  it('has the white card Selectie in the main column, and the small cards and the credit in the side section', async () => {
     const html = await render()
     const main = html.slice(html.indexOf('style="grid-area:main"'), html.indexOf('style="grid-area:side"'))
     const sidebar = html.slice(html.indexOf('style="grid-area:side"'), html.indexOf('</main>'))
 
     expect(sidebar).toMatch(/^style="grid-area:side" aria-label="Meer over de spelers">/)
     expect(main).toContain('<section class="hf-card" aria-labelledby="selectie">')
-    expect(sidebar).toContain('<section class="hf-card hf-card-strong" aria-labelledby="cijfers-van-dit-seizoen">')
-    expect(sidebar).toContain('href="/spelers/cijfers"')
-    expect(sidebar).toContain('Naar de cijfers van de spelers')
-    expect(sidebar.indexOf('hf-card-strong')).toBeLessThan(sidebar.indexOf('hf-wikipedia-credit'))
+    expect(sidebar).not.toContain('hf-card-strong')
+    expect(sidebar).not.toContain('cijfers-van-dit-seizoen')
+    expect(sidebar.indexOf('kort-topscorers')).toBeLessThan(sidebar.indexOf('hf-wikipedia-credit'))
+  })
+
+  it('has the cards Topscorers and De nul gehouden, each with a link to its large card, and no Assists or Minuten without a match report', async () => {
+    const html = await render()
+    const sidebar = html.slice(html.indexOf('style="grid-area:side"'), html.indexOf('</main>'))
+
+    expect(sidebar).toContain('<a href="/spelers/cijfers#doelpuntenmakers">Alle doelpuntenmakers</a>')
+    expect(sidebar).toContain(
+      '<a href="/wedstrijden/cijfers#de-nul-gehouden">Alle wedstrijden waarin we de nul hielden</a>',
+    )
+    expect(sidebar.indexOf('kort-topscorers')).toBeLessThan(sidebar.indexOf('kort-de-nul-gehouden'))
+    expect(sidebar).not.toContain('kort-assists')
+    expect(sidebar).not.toContain('kort-minuten')
+  })
+
+  it('has the four cards in the order Topscorers, Assists, De nul gehouden and Minuten for a season with match reports', async () => {
+    vi.mocked(getSeasonReportFigures).mockResolvedValue(figuresData)
+
+    const html = await render()
+    const ids = [...html.matchAll(/aria-labelledby="(kort-[a-z-]+)"/g)].map((match) => match[1])
+
+    expect(ids).toEqual(['kort-topscorers', 'kort-assists', 'kort-de-nul-gehouden', 'kort-minuten'])
+    expect(html).toContain('<a href="/spelers/cijfers#assists">Alle assists</a>')
+    expect(html).toContain('<a href="/spelers/cijfers#minuten">Alle minuten</a>')
+    expect(getSeasonReportFigures).toHaveBeenCalledWith('2026/27', 'all')
+  })
+
+  it('leaves out only Assists and Minuten, and logs it, when the match reports can not be read', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    vi.mocked(getSeasonReportFigures).mockRejectedValue(new Error('connect ECONNREFUSED 127.0.0.1:3306'))
+
+    const html = await render()
+
+    expect(html).toContain('kort-topscorers')
+    expect(html).toContain('kort-de-nul-gehouden')
+    expect(html).not.toContain('kort-assists')
+    expect(error).toHaveBeenCalledWith(
+      'Could not read the match reports for /spelers: connect ECONNREFUSED 127.0.0.1:3306',
+    )
   })
 
   it('has the soft card "De selectie in het kort" in the sidebar, above the strong card, with the figures of the summary', async () => {
@@ -113,7 +153,7 @@ describe('the page /spelers', () => {
     const sidebar = html.slice(html.indexOf('style="grid-area:side"'), html.indexOf('</main>'))
 
     expect(sidebar).toContain('<section class="hf-card hf-card-soft" aria-labelledby="de-selectie-in-het-kort">')
-    expect(sidebar.indexOf('hf-card-soft')).toBeLessThan(sidebar.indexOf('hf-card-strong'))
+    expect(sidebar.indexOf('de-selectie-in-het-kort')).toBeLessThan(sidebar.indexOf('kort-topscorers'))
     expect(plain(sidebar)).toContain('Spelers5Gemiddelde leeftijd24,3 jaarJongste17 jaarOudste34 jaarLanden3')
     expect(getSquadSummary).toHaveBeenCalledWith(squadData, '2026/27', now)
   })
@@ -124,7 +164,7 @@ describe('the page /spelers', () => {
     const html = await render()
 
     expect(html).not.toContain('de-selectie-in-het-kort')
-    expect(html).toContain('cijfers-van-dit-seizoen')
+    expect(html).toContain('kort-topscorers')
   })
 
   it('has no date of birth anywhere in the page', async () => {
@@ -168,7 +208,7 @@ describe('the page /spelers', () => {
     vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26'])
     const html = withoutIcons(renderToStaticMarkup(await PlayersPageOf({ season: '2025/26' })))
 
-    expect(html).toContain('href="/spelers/cijfers/2025-26"')
+    expect(html).toContain('href="/spelers/cijfers/2025-26#doelpuntenmakers"')
   })
 
   it('shows the error page in the HTML, and logs the reason, when the database can not be read', async () => {
