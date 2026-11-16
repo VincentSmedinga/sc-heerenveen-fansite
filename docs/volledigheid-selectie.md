@@ -4,7 +4,7 @@ Dit is het antwoord op issue #745.
 Per seizoen geven we een kans dat de lijst met spelers iedereen bevat die in de selectie zat, ook wie niet speelde.
 Het is een schatting en geen gemeten waarheid, en elk getal op de site zegt dat ook.
 De regel staat in `packages/db/src/squad-completeness.ts` (`squadCompleteness`).
-De functie leest niets en vraagt niets: de aanroeper geeft de gegevens van één seizoen.
+De functie leest niets en vraagt niets: de aanroeper geeft de gegevens van één seizoen en de dag van vandaag, zodat een test die kan zetten.
 
 ## De regel
 
@@ -42,12 +42,16 @@ Een bron met meer spelers komt nooit boven zijn plafond.
 | `scorers` | een doelpuntenmaker van ons uit `match_goals` staat niet in de lijst (op persoon of op naam zonder accenten)         | hoogstens 50, naar rato van het aandeel dat er wel in staat |
 | `matches` | alleen bij de bron `statistieken`: de wedstrijden van de tabel tellen op tot minder dan 11 maal 34                   | hoogstens 45                                                |
 | `goals`   | de doelpunten van de tabel tellen op tot minder dan de doelpunten van ons in `match_goals` (zonder eigen doelpunten) | hoogstens 45                                                |
+|           | alleen in een seizoen dat voorbij is: in het seizoen dat loopt draait de controle niet                               | niets, de controle is `unavailable`                         |
 
 Eén ontbrekende doelpuntenmaker brengt de kans dus onder `bijna`.
 De naam is de terugval, ook voor een doelpuntenmaker met een persoon: de Engelse selecties hebben geen personen (#743), dus alleen de naam kan hen vinden.
 Een Engelse selectie wordt daarom hoogstens `bijna`, het plafond van 70.
 `scorers` en `goals` kunnen niet draaien in een seizoen zonder doelpunten in de database.
 `matches` en `goals` kunnen niet draaien als de tabel geen wedstrijden of doelpunten geeft.
+`goals` draait ook niet in het seizoen dat loopt (`seasonOf` van de dag van vandaag, zoals de rest van de site het lopende seizoen kent), want de tabel van Wikipedia loopt dan weken achter op onze wedstrijden (#1291).
+De uitkomst is `unavailable`, met de uitleg dat het seizoen loopt en de tabel kan achterlopen, en ze verlaagt de kans niet.
+Zodra het seizoen voorbij is (1 juli), werkt de controle weer zoals hierboven.
 
 ## De meting
 

@@ -1,3 +1,4 @@
+import { squadCompleteness } from '@fansite/db/squad-completeness'
 import { describe, expect, it } from 'vitest'
 
 import { completenessSentence, isEnglishPage, squadPageName, squadParts } from './season-squad'
@@ -121,5 +122,26 @@ describe('the credit of the pages of the squad', () => {
       'Sc Heerenveen in het seizoen 2006/07',
     )
     expect(squadPageName('2018–19 SC Heerenveen season', '2018/19', 1)).toBe('Selectie 2018/19 (Engelse Wikipedia)')
+  })
+})
+
+describe('the sentence of a running season whose table lags behind our matches (#1291)', () => {
+  it('does not say that players are missing for the data of 2026/27 of 16 November 2026', () => {
+    // 29 players, all ten scorers in the list, and a table of 18 goals against our 26.
+    const list = Array.from({ length: 29 }, (_, index) => ({ name: `Speler ${index}`, personId: index + 1 }))
+    const result = squadCompleteness({
+      goalsTotal: 18,
+      matchesTotal: null,
+      players: list,
+      playersPerSource: { selectie: 29 },
+      scorers: list.slice(0, 10).map((player, index) => ({ ...player, goals: index < 6 ? 3 : 2 })),
+      season: '2026/27',
+      today: new Date('2026-11-16T12:00:00Z'),
+    })
+
+    expect(result.level).toBe('compleet')
+    expect(completenessSentence({ bestSource: 'selectie', level: result.level, playerCount: 29 })).toBe(
+      'We kennen 29 spelers van dit seizoen. Waarschijnlijk staat iedereen uit de selectie erbij.',
+    )
   })
 })

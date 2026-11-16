@@ -2520,6 +2520,7 @@
   De bron zegt het meest over wat ontbreekt, en een plafond voorkomt dat meer controles ooit meer beloven dan de bron weet.
 - **Alternatieven:** een percentage van het aantal spelers tegenover een vast getal (zegt niets over wie ontbreekt).
   De kans uitrekenen met twee bronnen tegelijk, vangst en terugvangst (zwaar voor de eerste versie en onbetrouwbaar met twee bronnen die niet los van elkaar zijn).
+- **Later:** zie _De controle op de doelpunten van de tabel draait niet in het seizoen dat loopt_ (16 november 2026): de controle op de doelpunten is `unavailable` in het lopende seizoen.
 
 ## De importer berekent de volledigheid en bewaart hem, de site rekent niet
 
@@ -4210,3 +4211,19 @@
     Het moet na de uitrol op acceptatie één keer draaien.
   - Bij het samenvoegen van twee personen houdt de persoon die blijft zijn landen waarvoor hij sport; zijn geboorteland komt van de ander als hij er geen heeft.
 - **Alternatieven:** de leden van een nationaal elftal (`P54`) gebruiken (jeugdelftallen staan ertussen, en in de steekproef gaf het twee keer het verkeerde land); alleen het uitgerekende land bewaren (dan is het andere weg); het eerste land van `P1532` nemen (de volgorde zegt niets); de eerste nationaliteit houden.
+
+## De controle op de doelpunten van de tabel draait niet in het seizoen dat loopt
+
+- **Datum:** 16 november 2026
+- **Besluit:** in het seizoen dat loopt, geeft de controle `goals` van `squadCompleteness` de uitkomst `unavailable` en verlaagt ze de kans niet; voor een seizoen dat voorbij is, werkt ze zoals eerst (#1291).
+  - **Het lopende seizoen** is het seizoen van `seasonOf` voor de dag van vandaag, de regel die de rest van de site ook heeft.
+    De functie krijgt het seizoen en de dag mee in haar invoer (`season` en `today`) en leest de klok niet zelf, zodat een test de dag kan zetten.
+    `storeCompleteness` geeft de dag door die het al kreeg.
+  - **De uitleg** in de lijst met controles zegt dat het seizoen loopt en dat de tabel kan achterlopen.
+  - **De bewaarde kans** van het lopende seizoen verbetert vanzelf: de uurlijkse import rekent haar na de wedstrijden opnieuw uit, en schrijft haar over als de controles anders zijn.
+    Een losse opdracht is niet nodig.
+  - **De tekst op de pagina** verandert niet.
+- **Waarom:** de tabel van Wikipedia wordt met de hand bijgewerkt en loopt tijdens een seizoen weken achter op onze wedstrijden.
+  Op 16 november 2026 telde de tabel van 2026/27 18 doelpunten en onze wedstrijden 26, en de pagina zei dat er waarschijnlijk spelers ontbraken terwijl alle doelpuntenmakers in de lijst stonden.
+  Voor een seizoen dat voorbij is, wijst een lager totaal wel op een gat.
+- **Alternatieven:** alleen de wedstrijden tot de datum van de tabel vergelijken (preciezer, maar de import moet die datum dan eerst lezen en bewaren); de controle overal weghalen (dan missen we echte gaten in oude seizoenen).
