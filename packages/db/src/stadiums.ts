@@ -56,6 +56,85 @@ export const stadiumOnTheDay = sql<null | string>`coalesce((
   order by ${stadiumNames.position} desc limit 1
 ), ${sql.raw('`matches`.`stadium`')})`
 
+/** What the fill needs of a match. */
+export type FillQuery = {
+  competition: string
+  homeClubId: null | number
+  matchDate: string
+  round: string
+}
+
+/** What `fillStadiumsFromHomeGrounds` did: the matches it filled, and those left, by reason. */
+export type FillResult = { filled: number; skipped: Record<FillSkipReason, number> }
+
+/**
+ * Why a played match without a stadium was left alone (#1293): `edited` (the editors entered
+ * its facts, so an empty stadium may be their choice), `neutral` (not played on the ground of
+ * either club), `noGround` (the home club has no home ground at all), `notYet` (it has
+ * grounds, but none had begun on the day) and `text` (the source gave a stadium name that no
+ * stadium answers to, and the name of a source is not replaced by a guess).
+ */
+export type FillSkipReason = 'edited' | 'neutral' | 'noGround' | 'notYet' | 'text'
+
+/**
+ * Fills `stadium_id` of the played matches that have neither a stadium nor a text, with the
+ * home ground of the home club on the day of the match (`homeGroundOnTheDay`). It leaves a
+ * match it is not sure of (see `FillSkipReason`) and never changes a match that has a stadium,
+ * so it can run again and again.
+ */
+export async function fillStadiumsFromHomeGrounds(db: Database): Promise<FillResult> {
+  const waiting = await db
+    .select({
+      clubId: matches.clubId,
+      competition: matches.competition,
+      edited: matchEdits.factsEdited,
+      home: matches.home,
+      id: matches.id,
+      matchDate: matches.matchDate,
+      round: matches.round,
+      stadium: matches.stadium,
+    })
+    .from(matches)
+    .leftJoin(matchEdits, eq(matchEdits.matchId, matches.id))
+    .where(and(eq(matches.status, 'played'), isNull(matches.stadiumId)))
+  const index = await loadStadiumIndex(db)
+  const result: FillResult = { filled: 0, skipped: { edited: 0, neutral: 0, noGround: 0, notYet: 0, text: 0 } }
+
+  for (const match of waiting) {
+    if (match.stadium !== null) {
+      result.skipped.text += 1
+
+      continue
+    }
+    if (match.edited === true) {
+      result.skipped.edited += 1
+
+      continue
+    }
+
+    const found = homeGroundOnTheDay(index, {
+      competition: match.competition,
+      homeClubId: homeClubOf(match),
+      matchDate: match.matchDate,
+      round: match.round,
+    })
+
+    if (typeof found !== 'number') {
+      result.skipped[found] += 1
+
+      continue
+    }
+
+    await db
+      .update(matches)
+      .set({ stadiumId: found })
+      .where(and(eq(matches.id, match.id), isNull(matches.stadiumId)))
+    result.filled += 1
+  }
+
+  return result
+}
+
 /** The stadium of a match, read from the database. For many matches, load the index once. */
 export async function findStadium(db: Pick<Database, 'select'>, query: StadiumQuery): Promise<null | number> {
   return resolveStadium(await loadStadiumIndex(db), query)
@@ -93,6 +172,49 @@ export async function hasChosenStadium(db: Pick<Database, 'select'>, matchId: nu
 /** The home club of a match for `findStadium`: none for sc Heerenveen, else the opponent. */
 export function homeClubOf(match: { clubId: number; home: boolean }): null | number {
   return match.home ? null : match.clubId
+}
+
+/**
+ * The stadium of the home club on the day of the match, or the reason it is not certain. The
+ * rule for a neutral ground lives here only: `isOnNeutralGround`. The grounds are in order, so
+ * the last one that had begun is the one in use.
+ */
+export function homeGroundOnTheDay(
+  index: StadiumIndex,
+  query: FillQuery,
+): Exclude<FillSkipReason, 'edited' | 'text'> | number {
+  if (isOnNeutralGround(query)) {
+    return 'neutral'
+  }
+
+  const grounds = index.grounds.get(query.homeClubId) ?? []
+
+  if (grounds.length === 0) {
+    return 'noGround'
+  }
+
+  const inUse = grounds.filter((ground) => ground.start === null || ground.start <= query.matchDate).at(-1)
+
+  return inUse === undefined ? 'notYet' : inUse.stadiumId
+}
+
+/**
+ * Whether a match is played on a ground that belongs to neither club. A final is, and so is a
+ * match of the Johan Cruijff Schaal. The old fansite names no round for a cup match (only
+ * `Wedstrijd 5`), so a cup match in May or June counts as a final: that is when the finals of
+ * the KNVB Beker were played (this leaves out a semi-final in May, which is fine: a gap is
+ * better than a wrong stadium).
+ */
+export function isOnNeutralGround({
+  competition,
+  matchDate,
+  round,
+}: Pick<FillQuery, 'competition' | 'matchDate' | 'round'>): boolean {
+  return (
+    competition === 'Johan Cruijff Schaal' ||
+    /^finale$/iu.test(round) ||
+    (competition === 'KNVB Beker' && [5, 6].includes(Number(matchDate.slice(5, 7))))
+  )
 }
 
 /**
