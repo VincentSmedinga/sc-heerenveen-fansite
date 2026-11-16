@@ -82,8 +82,7 @@ export type MatchProps =
       penaltiesFor?: never
       /**
        * Whether the page of this match is its Voorbeschouwing, the page before the kick-off.
-       * The
-       * link then says "Voorbeschouwing" instead of "Het verslag". It needs `reportHref`.
+       * The link then says "Voorbeschouwing" instead of "Het verslag". It needs `reportHref`.
        */
       preview?: boolean
       /**

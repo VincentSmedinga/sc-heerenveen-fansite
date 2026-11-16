@@ -40,10 +40,8 @@ async function loadMatches(): Promise<MatchData | undefined> {
 
 /**
  * The addresses of the Voorbeschouwing of the matches that have not begun, for the link under
- * the
- * next match, or undefined when the database can't give them: the card then has no link, and
- * the
- * log says why.
+ * the next match, or undefined when the database can't give them: the card then has no link,
+ * and the log says why.
  */
 async function loadPreviewAddresses(data: MatchData | undefined) {
   if (data === undefined) {

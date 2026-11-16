@@ -23,8 +23,7 @@ import { withBranch } from '#src/title'
 // The page of a match that is still `scheduled`, has no report and has not begun: the
 // Voorbeschouwing. It has the address of the match, so from the kick-off it is the page of the
 // live match and later the report (see `ReportPage`). Each part that comes after the header is
-// a
-// card of its own in a cell of the page; the parts of the next issues of the series (#1317,
+// a card of its own in a cell of the page; the parts of the next issues of the series (#1317,
 // #1318 and #1319) each add one cell.
 
 /** How many headlines the card Nieuws shows at most. */

@@ -8,9 +8,8 @@ import { dateTimeOf, formatNewsTime } from './news'
 
 // The parts of the page of the Voorbeschouwing, a match that has not begun: the header and the
 // card Nieuws. They take plain data, so the page and its tests share them. The cards of the
-// next
-// issues of the series (#1317, #1318 and #1319) are added in the page, each in a cell of its
-// own.
+// next issues of the series (#1317, #1318 and #1319) are added in the page, each in a cell of
+// its own.
 
 /** The id of the card Nieuws. */
 const newsId = 'nieuws'
@@ -18,8 +17,7 @@ const newsId = 'nieuws'
 /**
  * The header of the page, in the strong card: the title for a screen reader (the `h1`, visually
  * hidden since the clubs are what the eye sees), the clubs with dashes in place of a result,
- * and
- * the facts: the competition and the round, the day with the kick-off, and the stadium.
+ * and the facts: the competition and the round, the day with the kick-off, and the stadium.
  */
 export function PreviewHeader({
   facts,

@@ -162,8 +162,8 @@ const pastPreviews = cacheForKey(pastSeasonPeriod, (season) => listScheduledMatc
 
 /**
  * The addresses of the pages of the Voorbeschouwing of a season, by `<competition>|<round>`
- * like
- * `getReportAddresses`: the lines of a list of matches end with the link "Voorbeschouwing".
+ * like `getReportAddresses`: the lines of a list of matches end with the link
+ * "Voorbeschouwing".
  */
 export async function getPreviewAddresses(season: string, now = new Date()) {
   return new Map(
@@ -192,10 +192,9 @@ export async function getPreviewMatch(season: string, slug: string, now = new Da
 
 /**
  * The matches of a season that have the page of the Voorbeschouwing at `now`: still
- * `scheduled`,
- * without a report, with a club, and not begun (see `phaseOf`). Whether a match has begun is
- * worked out at each call, so a page changes at the kick-off, whatever the cache holds. The
- * caller asks for a season of `getMatchSeasons` only.
+ * `scheduled`, without a report, with a club, and not begun (see `phaseOf`). Whether a match
+ * has begun is worked out at each call, so a page changes at the kick-off, whatever the cache
+ * holds. The caller asks for a season of `getMatchSeasons` only.
  */
 export async function getPreviewMatches(season: string, now = new Date()): Promise<ScheduledMatch[]> {
   const scheduled = await (season === seasonOf(now) ? currentPreviews(season) : pastPreviews(season))
