@@ -6222,6 +6222,21 @@
   De aantallen volgen `resultOf`, zoals de pagina van de tegenstander.
 - **Alternatieven:** de plaats uit de naam van de club halen, wat voor "FC Groningen" werkt maar niet voor "sc Cambuur"; de balk als kop van de kaart.
 
+## De Voorbeschouwing toont onze schutters op de kant waar we spelen, met de selectie van nu apart
+
+- **Datum:** 16 november 2026
+- **Besluit:** de kaart Onze schutters telt de doelpunten van ons in de gespeelde wedstrijden tegen de club op dezelfde kant als de komende wedstrijd, in elke competitie (#1319).
+  Een doelpunt uit eigen doel telt nooit mee, aan geen van beide kanten (zie _De onderlinge wedstrijden van de Voorbeschouwing tellen alleen dezelfde kant_).
+  Een doelpunt telt per persoon als de schutter er een heeft, en anders per naam zoals de bron hem schrijft; `keyOf` bepaalt dat, zoals bij de topscorers.
+  Bovenaan staat de doos "Uit de selectie van nu": de personen uit `players` met `in_squad` van dit seizoen die daar scoorden, allemaal.
+  Daaronder staat "Het vaakst": de eerste vijf op aantal doelpunten, dan het nieuwste laatste doelpunt, dan de naam van A tot Z.
+  De tabellen hebben de kolommen Speler, Laatst (het jaar) en Goals; de naam is een link als de persoon een pagina heeft.
+  De kop noemt de plaats zoals de kaart Onderling: "in Groningen" uit `stadiums.place`, anders "bij <club>", en "in Heerenveen" bij een thuiswedstrijd.
+  Heeft de club op die kant geen doelpunt van ons gezien, dan valt de kaart weg.
+- **Waarom:** een supporter wil weten wie daar al scoorde, en wie van hen nog bij ons speelt.
+  De selectie komt uit de gegevens die er al zijn, zodat de kaart niets hoeft te onthouden.
+- **Alternatieven:** een naam zonder persoon aan een persoon koppelen, wat een gok is (een speler kan dan op twee regels staan); alleen de selectie tonen, wat een kaart zonder inhoud geeft als niemand er nog is.
+
 ## De site toont de naam van het stadion zoals hij op de dag van de wedstrijd was
 
 - **Datum:** 16 november 2026

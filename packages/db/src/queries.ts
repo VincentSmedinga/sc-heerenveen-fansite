@@ -1189,6 +1189,20 @@ export async function listSquadPeople(db: Database) {
 }
 
 /**
+ * The ids of the persons in the squad of a season (`in_squad`), for the card "Onze schutters"
+ * of the Voorbeschouwing: which scorers are with the club now. A player without a person is
+ * left out.
+ */
+export async function listSquadPersonIds(db: Database, season: string) {
+  const rows = await db
+    .select({ personId: players.personId })
+    .from(players)
+    .where(and(eq(players.season, season), eq(players.inSquad, true), isNotNull(players.personId)))
+
+  return rows.flatMap(({ personId }) => (personId === null ? [] : [personId]))
+}
+
+/**
  * The staff with a role in a season, such as `2024/25`, in the order their periods began: the
  * people who surely held a day of the season, so a coach whose start is only known to the year
  * is not in the season before it (see `servedInSeason`). It gives what the pages show: the
