@@ -1,8 +1,8 @@
 /*
  * A match: the two clubs with the result between them, with small type around them. Above them
- * are the day, the competition and the round; under them the stadium and the referee. A club is
- * not a link, so the line has no underline and no hover. A List of matches has a thin line
- * between the matches.
+ * are the day, the competition and the round; under them the stadium and the referee. The line
+ * with the clubs is the link to the page of the match, when it has one. A List of matches has a
+ * thin line between the matches.
  */
 
 @layer hf.components {
@@ -59,10 +59,28 @@
     margin-block: 0;
   }
 
-  /* The link to the page of the match is the last line, in the text of the clubs. */
-  .hf-match-report {
-    margin-block: 0;
-    padding-block-start: var(--hf-space-xs);
+  /*
+   * The line with the two clubs is the link to the page of the match. At rest it has the colour
+   * of a link on the names and the dash, and no underline: a list of lines that are all
+   * underlined is restless, and the colour shows which match has a page. Under the mouse and
+   * with the focus of the keyboard it is underlined, as the title of a discussion is (see
+   * discussion-item.css). The colour of the result stays the one of the outcome in every state,
+   * and a visited link has the colour of one that is not. The focus ring comes from
+   * base/focus.css.
+   * A link in running text is underlined (WCAG 1.4.1), but this line stands on its own.
+   */
+  .hf-match-link {
+    color: var(--hf-colour-text-link);
+    text-decoration-line: none;
+    text-decoration-skip-ink: auto;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 0.1em;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--hf-colour-text-link-hover);
+      text-decoration-line: underline;
+    }
   }
 
   /*
@@ -126,11 +144,6 @@
   /* The dotted line under an abbreviation has the colour of the result, not blue-grey. */
   .hf-match-extra abbr {
     text-decoration-color: currentcolor;
-  }
-
-  /* "Live" in the link of a match that is being played: the weight of a time. */
-  .hf-match-live {
-    font-weight: var(--hf-strong-font-weight);
   }
 
   .hf-match-versus {

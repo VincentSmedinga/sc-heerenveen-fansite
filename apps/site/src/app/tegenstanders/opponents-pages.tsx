@@ -36,6 +36,7 @@ import {
   hasClubScorers,
   meetingPageCount,
   meetingsOf,
+  meetingsOnPage,
   opponentsPath,
   seasonsOf,
   stadiumViewsOf,
@@ -60,6 +61,7 @@ import {
   TopPointsCard,
 } from '#src/OpponentViews'
 import { pageAreas } from '#src/page-areas'
+import { getMatchPages } from '#src/report-data'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { withBranch } from '#src/title'
 
@@ -289,6 +291,8 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
     notFound()
   }
 
+  // The lines on this page of the list link to the pages of their matches, where there are any.
+  const pages = await getMatchPages([...(query.page === 1 ? upcoming : []), ...meetingsOnPage(meetings, query.page)])
   const pageHref = (page: number) =>
     filterHref(
       `${opponentsPath}/${slug}`,
@@ -353,7 +357,14 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
           {meetings.length === 0 && upcoming.length === 0 ? (
             <Text>{noneYet}</Text>
           ) : (
-            <ClubMeetingsCard meetings={meetings} now={now} page={query.page} pageHref={pageHref} upcoming={upcoming} />
+            <ClubMeetingsCard
+              meetings={meetings}
+              now={now}
+              page={query.page}
+              pageHref={pageHref}
+              pages={pages}
+              upcoming={upcoming}
+            />
           )}
         </Page.Cell>
         {/* On a phone the cards beside the matches follow them: the timeline, the names of the

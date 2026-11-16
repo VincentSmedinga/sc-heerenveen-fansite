@@ -1,7 +1,6 @@
 import { type ComponentPropsWithoutRef, Fragment, type ReactNode } from 'react'
 
 import { classNames } from '../classNames'
-import { Link } from '../link/Link'
 import { outcomeOf } from '../outcome'
 import { Text } from '../text/Text'
 import { Time } from '../time/Time'
@@ -54,8 +53,8 @@ export type MatchProps =
         goalsFor: number
         /**
          * The address of the page of this match, when it has one: a page exists for a match
-         * with a report. The line then ends with the link "Het verslag". Leave it out for a
-         * match without a page, which is plain text.
+         * with a report. The line with the two clubs and the result is then the link. Leave it
+         * out for a match without a page, which is plain text.
          */
         live?: never
         preview?: never
@@ -74,21 +73,24 @@ export type MatchProps =
       goalsFor?: never
       /**
        * Whether the match is being played and has a page with a report that is filled in as it
-       * goes. The link under the match then says "Live" instead of "Het verslag", and the line
-       * does not say that the data is not available. It needs `reportHref`.
+       * goes. The name of the link then ends with "live verslag" for a screen reader, and the
+       * line does not say that the data is not available. It shows nothing more: the line of
+       * the clubs looks the same. It needs `reportHref`.
        */
       live?: boolean
       penaltiesAgainst?: never
       penaltiesFor?: never
       /**
        * Whether the page of this match is its Voorbeschouwing, the page before the kick-off.
-       * The link then says "Voorbeschouwing" instead of "Het verslag". It needs `reportHref`.
+       * The name of the link then ends with "voorbeschouwing" for a screen reader, instead of
+       * "verslag". It shows nothing more. It needs `reportHref`.
        */
       preview?: boolean
       /**
        * The address of the page of this match, when it has one before the match is over: a
        * report that is filled in while the match is played (`live`), or a line-up before the
-       * kick-off. The line then ends with a link. Leave it out for a match without a page.
+       * kick-off. The line with the two clubs is then the link. Leave it out for a match
+       * without a page.
        */
       reportHref?: string | undefined
       /**
@@ -218,9 +220,17 @@ const separator = (
 /**
  * A match of sc Heerenveen 1 as a line in a list: what it is and when, the two clubs with the
  * result between them, the scorers, and where and who. It is plain text, with no club badge,
- * only the names. Only a match that has a page of its own (`reportHref`) ends with the link
- * "Het verslag"; the others have no link. match.css gives it its look, and draws the lines
+ * only the names. Only a match that has a page of its own (`reportHref`) has a link, and the
+ * link is the line with the two clubs and the result: no separate line says "Het verslag" or
+ * "Voorbeschouwing". The others have no link. match.css gives it its look, and draws the lines
  * between the lines of a List.
+ *
+ * The link has the colour of a link on the names of the clubs and on the dash, so you see
+ * which match has a page; the result keeps the colour of the outcome. It is underlined under
+ * the mouse and with the focus of the keyboard, and not otherwise, as the title of a
+ * discussion is. A screen reader hears what is on the line and then where the link goes, as
+ * "sc Heerenveen 2 tegen 0 Ajax, verslag", "Ajax tegen sc Heerenveen, voorbeschouwing" or "sc
+ * Heerenveen tegen Ajax, live verslag".
  *
  * A match has at most two small lines of its own, each with a fixed role and a fixed order.
  * Above the clubs stand when and what: the day or the time, the competition and the round ("za
@@ -253,8 +263,8 @@ const separator = (
  * op 11 mei gespeeld in het Abe Lenstra Stadion."
  *
  * A match that is being played and has a report that is filled in as it goes (`live`, with
- * `reportHref`) ends with the link "Live" in place of "Het verslag" and has no result between
- * the names: the stand changes, and the page of the match has it.
+ * `reportHref`) has no result between the names: the stand changes, and the page of the match
+ * has it. Its line is the link like any other, and the page says that it is live.
  *
  * The scorers of a played match are one line under the clubs, in the order of
  * the clock with the goals of both clubs: "34’ Trenskow, 45’+1 Vente, 80’ Van Bergen". The
@@ -330,6 +340,45 @@ export const Match = ({
     )
   const where = [stadium, referee].filter((part) => part)
 
+  // The two clubs with the result between them: the line that is the link with a page.
+  const clubs = (
+    <>
+      <span className={first === ourClub ? 'hf-match-own' : undefined}>{first}</span>{' '}
+      <span className={classNames('hf-match-score', outcome ? `hf-match-${outcome}` : 'hf-match-versus')}>
+        <span aria-hidden="true">
+          {score.shown}
+          {afterNinety ? (
+            // A non-breaking space keeps "n.v. (1–1)" and "5–3 n.s." in one piece, so a
+            // narrow card breaks the line between the parts.
+            <span className="hf-match-extra">
+              {' '}
+              <abbr title="Na verlenging">n.v.</abbr>
+              {`\u00a0(${sides(home, afterNinetyFor, afterNinetyAgainst, '–')})`}
+              {shootOut ? (
+                <>
+                  {`, ${sides(home, penaltiesFor, penaltiesAgainst, '–')}\u00a0`}
+                  <abbr title="Na strafschoppen">n.s.</abbr>
+                </>
+              ) : null}
+            </span>
+          ) : shootOut ? (
+            <span className="hf-match-extra">
+              {' '}
+              ({sides(home, penaltiesFor, penaltiesAgainst, '–')} <abbr title="Na strafschoppen">n.s.</abbr>)
+            </span>
+          ) : extraTime ? (
+            <span className="hf-match-extra">
+              {' '}
+              <abbr title="Na verlenging">n.v.</abbr>
+            </span>
+          ) : null}
+        </span>
+        <span className="hf-visually-hidden">{score.hidden}</span>
+      </span>{' '}
+      <span className={second === ourClub ? 'hf-match-own' : undefined}>{second}</span>
+    </>
+  )
+
   return (
     <div {...props} className={classNames('hf-match', className)}>
       <Text appearance="meta" className="hf-match-when">
@@ -344,39 +393,16 @@ export const Match = ({
         <span className="hf-match-part">{round}</span>
       </Text>
       <p className="hf-match-clubs">
-        <span className={first === ourClub ? 'hf-match-own' : undefined}>{first}</span>{' '}
-        <span className={classNames('hf-match-score', outcome ? `hf-match-${outcome}` : 'hf-match-versus')}>
-          <span aria-hidden="true">
-            {score.shown}
-            {afterNinety ? (
-              // A non-breaking space keeps "n.v. (1–1)" and "5–3 n.s." in one piece, so a
-              // narrow card breaks the line between the parts.
-              <span className="hf-match-extra">
-                {' '}
-                <abbr title="Na verlenging">n.v.</abbr>
-                {`\u00a0(${sides(home, afterNinetyFor, afterNinetyAgainst, '–')})`}
-                {shootOut ? (
-                  <>
-                    {`, ${sides(home, penaltiesFor, penaltiesAgainst, '–')}\u00a0`}
-                    <abbr title="Na strafschoppen">n.s.</abbr>
-                  </>
-                ) : null}
-              </span>
-            ) : shootOut ? (
-              <span className="hf-match-extra">
-                {' '}
-                ({sides(home, penaltiesFor, penaltiesAgainst, '–')} <abbr title="Na strafschoppen">n.s.</abbr>)
-              </span>
-            ) : extraTime ? (
-              <span className="hf-match-extra">
-                {' '}
-                <abbr title="Na verlenging">n.v.</abbr>
-              </span>
-            ) : null}
-          </span>
-          <span className="hf-visually-hidden">{score.hidden}</span>
-        </span>{' '}
-        <span className={second === ourClub ? 'hf-match-own' : undefined}>{second}</span>
+        {reportHref === undefined ? (
+          clubs
+        ) : (
+          <a className="hf-match-link" href={reportHref}>
+            {clubs}
+            <span className="hf-visually-hidden">
+              {live === true ? ', live verslag' : preview === true ? ', voorbeschouwing' : ', verslag'}
+            </span>
+          </a>
+        )}
       </p>
       {goals !== undefined && goals.length > 0 ? (
         <p className="hf-match-goals">
@@ -405,20 +431,6 @@ export const Match = ({
           ))}
         </Text>
       ) : null}
-      {reportHref === undefined ? null : (
-        <Text className="hf-match-report">
-          <Link href={reportHref} icon="arrow-right">
-            {live === true ? (
-              <span className="hf-match-live">Live</span>
-            ) : preview === true ? (
-              'Voorbeschouwing'
-            ) : (
-              'Het verslag'
-            )}
-            <span className="hf-visually-hidden">{` ${live === true ? 'verslag ' : ''}van ${first} tegen ${second}`}</span>
-          </Link>
-        </Text>
-      )}
       {resultMissing && live !== true ? (
         <Text appearance="meta" className="hf-match-missing">
           Gegevens nog niet beschikbaar

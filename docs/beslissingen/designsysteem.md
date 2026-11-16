@@ -3601,3 +3601,22 @@
   Op een telefoon van 390 pixels is een cel ongeveer 72 pixels breed, en het langste label in vet, "Competitie", is dan 73 pixels breed op de maat van de metatekst, dus het woord brak in twee regels.
   Met 13 pixels en zonder opvulling past het op één regel, en de pagina scrolt niet zijwaarts.
 - **Alternatieven:** de labels korter maken ("Comp."; een supporter leest het niet); een schakelaar die zijwaarts scrolt (de keuzes zijn dan niet allemaal te zien); een eigenschap voor de maat (dubbel werk, want het aantal keuzes zegt het al).
+
+## De regel met de clubs in `Match` is de link naar de pagina van de wedstrijd
+
+- **Datum:** 16 november 2026
+- **Besluit:** `Match` met `reportHref` maakt de regel met de twee clubs en de uitslag de link naar de pagina van de wedstrijd, en de aparte regel eronder met "Voorbeschouwing", "Het verslag" of "Live" is weg, met de klasse `hf-match-report` en `hf-match-live` (#1332).
+  De namen van de clubs en het streepje hebben de kleur van een link (`--hf-colour-text-link`, onder de muis `--hf-colour-text-link-hover`), in het gewicht van de regel: sc Heerenveen zwaarder.
+  De uitslag houdt de kleur van de uitkomst in elke toestand, ook onder de muis, en een bezochte link heeft dezelfde kleur als een die niet bezocht is.
+  In rust is er geen onderstreping en geen pijltje; onder de muis en bij focus van het toetsenbord is de regel onderstreept, zoals de titel van een discussie (`DiscussionItem`), en de focusring komt uit `base/focus.css`.
+  Een wedstrijd zonder pagina is gewone tekst in de tekstkleur.
+  De naam van de link begint met wat je ziet en zegt daarna waar hij heen gaat, in tekst voor een schermlezer: "sc Heerenveen 2 tegen 0 Ajax, verslag", "Ajax tegen sc Heerenveen, voorbeschouwing" en "sc Heerenveen tegen Ajax, live verslag".
+  De eigenschappen `live` en `preview` blijven en bepalen alleen nog die woorden.
+  De andere regels van de wedstrijd (wanneer, de doelpuntenmakers, waar en wie, "Gegevens nog niet beschikbaar" en de notitie) staan buiten de link.
+- **Waarom:** bijna elke wedstrijd heeft een pagina, dus een aparte link onder elke regel herhaalde zich tientallen keren, en een hele regel is op een telefoon makkelijk te raken.
+  De uitslag hoort bij de link, want een link om alleen de clubs gaf twee links naar dezelfde pagina aan weerszijden van de uitslag.
+  Zonder onderstreping zie je aan de kleur van de clubs welke wedstrijd een pagina heeft; een lijst met tientallen onderstreepte regels is onrustig, en de regel staat niet in een zin, dus de eis dat een link in een zin onderstreept is (1.4.1) geldt hier niet.
+  De link is op 390 pixels 21 pixels hoog en het volgende doel in de lijst, de link van de volgende wedstrijd, ligt ruim 100 pixels verder, dus een cirkel van 24 pixels om de link raakt geen ander doel en de ruimte eromheen haalt 2.5.8 (gemeten in het verhaal Met een pagina).
+  In forced colours krijgt de link de kleur van het systeem voor links.
+  Een wedstrijd die live is, toont geen eigen teken in de lijst: de pagina van de wedstrijd heeft de stand.
+- **Alternatieven:** de aparte link houden; alleen de clubs als link, zonder de uitslag; altijd onderstreept, met of zonder pijltje; de tekstkleur houden, zodat je in rust niet ziet welke regel een link is; "Live" houden als klein label.

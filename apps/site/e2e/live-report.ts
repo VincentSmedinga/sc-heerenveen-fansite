@@ -9,7 +9,7 @@ import { databaseEnv, loopback } from './articles'
 // A made-up match that is being played, for the checks of the page "Live" (#906): a match of
 // the Beker that began an hour ago and has no result, with a report that is `bezig` and one
 // goal of ours. The seed has no such match, and it changes what other pages show (a line with
-// the link "Live" in Wedstrijden), so the checks put it in before the first test and take it
+// a link in Wedstrijden), so the checks put it in before the first test and take it
 // out after the last one.
 
 const madeUp = { competition: 'KNVB Beker', opponent: 'Testdorp FC', round: 'Live-controle' } as const

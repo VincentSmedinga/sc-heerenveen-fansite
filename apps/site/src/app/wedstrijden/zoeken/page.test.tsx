@@ -251,7 +251,7 @@ describe('the page Zoeken in wedstrijden', () => {
 
       expect(html).toContain(`href="${own}"`)
       expect(html).not.toContain(other)
-      expect(html.match(/Het verslag/gu)).toHaveLength(1)
+      expect(html.match(/class="hf-match-link"/gu)).toHaveLength(1)
     })
   })
 

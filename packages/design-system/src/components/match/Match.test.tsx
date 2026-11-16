@@ -164,7 +164,7 @@ describe('Match', () => {
       expect(container.querySelector('.hf-match-where')).toBeNull()
     })
 
-    it('comes after the scorers and the small lines, and before the link, the missing data and the note', () => {
+    it('comes after the scorers and the small lines, and before the missing data and the note', () => {
       const { container } = render(
         <Match
           {...scheduled}
@@ -181,7 +181,6 @@ describe('Match', () => {
         'hf-match-clubs',
         'hf-match-extra',
         'hf-match-where',
-        'hf-match-report',
         'hf-match-missing',
         'hf-match-note',
       ])
@@ -883,37 +882,62 @@ describe('the scorers', () => {
 })
 
 describe('Match with a page of its own', () => {
-  it('ends with the link "Het verslag" for a played match that has a page, with the clubs in its name', () => {
+  it('makes the line with the two clubs and the result the link, named by what it shows and then where it goes', () => {
     const { container } = render(<Match {...played} reportHref="/wedstrijden/2026-27/2026-10-11-testdorp-fc" />)
     const link = container.querySelector('a')
 
     expect(link?.getAttribute('href')).toBe('/wedstrijden/2026-27/2026-10-11-testdorp-fc')
-    expect(link?.textContent).toBe('Het verslag van sc Heerenveen tegen Testdorp FC')
-    expect(container.querySelector('.hf-match-report')).not.toBeNull()
+    expect(link?.className).toBe('hf-match-link')
+    expect(link?.parentElement?.className).toBe('hf-match-clubs')
+    expect(link?.textContent).toMatch(/^sc Heerenveen.*2–0.*2 tegen 0.*Testdorp FC, verslag$/)
+    expect(link?.querySelector('.hf-match-score')?.className).toContain('hf-match-win')
+    expect(link?.lastElementChild?.textContent).toBe(', verslag')
   })
 
   it('names the clubs of a match away in the order they are announced', () => {
     const { container } = render(<Match {...played} home={false} reportHref="#verslag" />)
 
-    expect(container.querySelector('a')?.textContent).toBe('Het verslag van Testdorp FC tegen sc Heerenveen')
+    expect(container.querySelector('a')?.textContent).toMatch(/^Testdorp FC.*sc Heerenveen, verslag$/)
+  })
+
+  it('has no separate line with a link, and no class of one', () => {
+    const { container } = render(<Match {...played} reportHref="#verslag" />)
+
+    expect(container.querySelectorAll('a')).toHaveLength(1)
+    expect(container.querySelector('.hf-match-report')).toBeNull()
+    expect(container.textContent).not.toContain('Het verslag')
+    expect(lines(container)).toEqual(['hf-match-when', 'hf-match-clubs', 'hf-match-where'])
+  })
+
+  it('keeps the lines under the clubs outside the link', () => {
+    const scorers = [{ minute: 34, ours: true, player: 'Trenskow' }]
+    const { container } = render(
+      <Match {...played} goals={scorers} note="Gestaakt." reportHref="#verslag" stadium="Stadion Proeflaan" />,
+    )
+
+    expect(container.querySelector('a')?.textContent).not.toContain('Stadion Proeflaan')
+    expect(container.querySelector('a')?.textContent).not.toContain('Gestaakt')
+    expect(container.querySelector('a')?.closest('.hf-match-goals')).toBeNull()
   })
 
   it('has no link for a match without a page', () => {
-    expect(render(<Match {...played} />).container.querySelector('a')).toBeNull()
+    const { container } = render(<Match {...played} />)
+
+    expect(container.querySelector('a')).toBeNull()
+    expect(container.querySelector('.hf-match-clubs')?.textContent).toContain('Testdorp FC')
   })
 })
 
 describe('Match that is being played', () => {
   const live = { ...scheduled, live: true, reportHref: '/wedstrijden/2026-27/2026-11-01-voorbeeld-united' } as const
 
-  it('ends with the link "Live" to its page, named with the clubs, in place of "Het verslag"', () => {
+  it('is a link to its page whose name ends with "live verslag", with nothing more on the line', () => {
     const { container } = render(<Match {...live} />)
     const link = container.querySelector('a')
 
     expect(link?.getAttribute('href')).toBe('/wedstrijden/2026-27/2026-11-01-voorbeeld-united')
-    expect(link?.textContent).toBe('Live verslag van Voorbeeld United tegen sc Heerenveen')
-    expect(link?.querySelector('.hf-match-live')?.textContent).toBe('Live')
-    expect(container.textContent).not.toContain('Het verslag')
+    expect(link?.textContent).toMatch(/^Voorbeeld United.*tegen.*sc Heerenveen, live verslag$/)
+    expect(container.textContent).not.toMatch(/Live|Het verslag/)
   })
 
   it('has no result between the names, only the dash that is read as "tegen"', () => {
@@ -933,18 +957,17 @@ describe('Match that is being played', () => {
     )
   })
 
-  it('links a match before its kick-off that has a page as "Het verslag"', () => {
+  it('links a match before its kick-off that has a page, named as a report', () => {
     const { container } = render(<Match {...scheduled} reportHref="#opstelling" />)
 
-    expect(container.querySelector('a')?.textContent).toBe('Het verslag van Voorbeeld United tegen sc Heerenveen')
-    expect(container.querySelector('.hf-match-live')).toBeNull()
+    expect(container.querySelector('a')?.textContent).toMatch(/sc Heerenveen, verslag$/)
   })
 
-  it('links the Voorbeschouwing of a match before its kick-off with those words, named with the clubs', () => {
+  it('links the Voorbeschouwing of a match before its kick-off, named so for a screen reader', () => {
     const { container } = render(<Match {...scheduled} preview reportHref="#voorbeschouwing" />)
 
-    expect(container.querySelector('a')?.textContent).toBe('Voorbeschouwing van Voorbeeld United tegen sc Heerenveen')
-    expect(container.textContent).not.toContain('Het verslag')
+    expect(container.querySelector('a')?.textContent).toMatch(/^Voorbeeld United.*sc Heerenveen, voorbeschouwing$/)
+    expect(container.textContent).not.toMatch(/Het verslag|Voorbeschouwing/)
   })
 
   describe('extra', () => {

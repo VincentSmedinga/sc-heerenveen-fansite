@@ -5,6 +5,7 @@ import { getMatchSeasons } from './matches'
 import {
   getAllReportAddresses,
   getLiveReports,
+  getMatchPages,
   getPreviewAddresses,
   getPreviewMatch,
   getPreviewMatches,
@@ -333,6 +334,31 @@ describe('the Voorbeschouwing of a match until there is result data', () => {
     expect(await getPreviewAddresses('2026/27')).toEqual(
       new Map([['Eredivisie|Speelronde 13', reportAddress('2026/27', coming.match.matchDate, 'testdorp-fc')]]),
     )
+  })
+
+  it('gives a line over seasons the page of a match, by season, competition and round', async () => {
+    const coming = scheduled(30, { round: 'Speelronde 13' })
+    const reported = reportedMatch()
+
+    vi.mocked(listScheduledMatches).mockImplementation((_db, season) =>
+      Promise.resolve(season === '2026/27' ? [coming] : []),
+    )
+
+    const pages = await getMatchPages([
+      { competition: 'Eredivisie', round: 'Speelronde 13', season: '2026/27' },
+      { competition: reported.match.competition, round: reported.match.round, season: '2026/27' },
+      { competition: 'Eredivisie', round: 'Speelronde 13', season: '2025/26' },
+    ])
+
+    expect(pages.get('2026/27|Eredivisie|Speelronde 13')).toEqual({
+      href: reportAddress('2026/27', coming.match.matchDate, 'testdorp-fc'),
+      live: false,
+      preview: true,
+    })
+    expect(pages.get(`2026/27|${reported.match.competition}|${reported.match.round}`)).toMatchObject({
+      preview: false,
+    })
+    expect(pages.has('2025/26|Eredivisie|Speelronde 13')).toBe(false)
   })
 
   it('is not in the sitemap, before or after the kick-off', async () => {

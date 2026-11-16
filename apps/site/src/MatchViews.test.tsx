@@ -140,12 +140,12 @@ describe('the line of a match that is being played', () => {
   }
   const address = '/wedstrijden/2026-27/2026-10-30-testdorp-fc'
 
-  it('links to its page with the text Live in place of the result, and no stand', () => {
+  it('links to its page, named live verslag, in place of the result, and no stand', () => {
     const html = renderToStaticMarkup(<MatchLine live match={live} now={now} reportHref={address} />)
 
     expect(html).toContain(`href="${address}"`)
-    expect(textOf(<MatchLine live match={live} now={now} reportHref={address} />)).toContain('Live verslag van')
-    expect(html).not.toContain('Het verslag')
+    expect(textOf(<MatchLine live match={live} now={now} reportHref={address} />)).toMatch(/, live verslag$/)
+    expect(html).not.toMatch(/>Live<|Het verslag/)
     expect(html).not.toContain('Gegevens nog niet beschikbaar')
     expect(html).not.toMatch(/\d–\d/u)
   })
@@ -157,15 +157,15 @@ describe('the line of a match that is being played', () => {
     expect(html).toContain('Gegevens nog niet beschikbaar')
   })
 
-  it('links a match before its kick-off with the report to its page as "Het verslag", not as Live', () => {
+  it('links a match before its kick-off with the report to its page as a report, not as live', () => {
     const upcoming = { ...live, kickoffAt: new Date('2026-10-30T18:30:00Z') }
     const html = renderToStaticMarkup(<MatchLine match={upcoming} now={now} reportHref={address} />)
 
-    expect(html).toContain('Het verslag')
-    expect(html).not.toContain('>Live<')
+    expect(html).toContain(', verslag</span>')
+    expect(html).not.toContain('live verslag')
   })
 
-  it('says Live for the matches of the set only, in a list', () => {
+  it('names live verslag for the matches of the set only, in a list', () => {
     const other = { ...live, opponent: 'Andere Club', round: 'Speelronde 11' }
     const html = renderToStaticMarkup(
       <MatchLines
@@ -181,8 +181,8 @@ describe('the line of a match that is being played', () => {
       />,
     )
 
-    expect(html.match(/>Live</g)).toHaveLength(1)
-    expect(html.match(/Het verslag/g)).toHaveLength(1)
+    expect(html.match(/, live verslag</g)).toHaveLength(1)
+    expect(html.match(/, verslag</g)).toHaveLength(1)
   })
 })
 
