@@ -1003,6 +1003,7 @@ Een sessie die verloopt haalt hem niet weg: daar is hij voor.
 - `/beheer/clubnamen` is alleen voor de eigenaar en de redacteuren: bijhouden welke namen een club droeg en sinds wanneer, met een toelichting (zie _De namen van een club_).
 - `/beheer/wedstrijden/kwaliteit` is alleen voor de eigenaar en de redacteuren: wat er van elk seizoen ontbreekt, in een tabel met een kolom per deel van een wedstrijd (zie _De kwaliteit van de gegevens_).
 - `/beheer/spelers/kwaliteit/personen` is alleen voor de eigenaar en de redacteuren: wat we van personen missen, per letter, met de snelle lijst, de namen, de vaste plaatsen en de verschillen in spelerscijfers en spelersgegevens eronder (zie _De kwaliteit van de gegevens_).
+- `/beheer/stadions/kwaliteit` is alleen voor de eigenaar en de redacteuren: wat de stadions en de clubs nog missen, met de wedstrijden zonder stadion in de tabel bij Wedstrijden (zie _De kwaliteit van de gegevens_).
 - `/beheer/kwaliteit` leidt nog naar de lijst die niet verhuisd is: de clubs zonder land (#1303).
 - `/beheer/bezoek` is alleen voor de eigenaar en de redacteuren: de cijfers over het bezoek van de laatste dagen (zie _Het bezoek bekijken_).
 - `/beheer/accounts` is alleen voor de eigenaar: de accounts met voornaam, adres, rol en aan of uit (zie _De accounts beheren_).
@@ -1324,7 +1325,10 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
 `/beheer/wedstrijden/kwaliteit` (`src/app/beheer/wedstrijden/kwaliteit`, onder Wedstrijden sinds #1304) is alleen voor de eigenaar en de redacteuren: een auteur krijgt "niet gevonden".
 De adressen staan als constanten in `src/beheer/quality.ts` (`matchQualityPath`), `quality-table.ts` (`seasonTablePath`) en `formations.ts` (`unusualFormationsPath`); `playerQualityPath` (`quality.ts`) is het begin van de kwaliteit van spelers en personen (#1305), en `qualityPath` is nog het begin van de lijst die niet verhuisd is: de clubs zonder land.
 Bovenaan de lijst van wedstrijden staat een link naar deze pagina, en de kaart Te doen op de startpagina telt de gaten en leidt erheen.
-De pagina toont een tabel met een rij per seizoen sinds 1990/91, het nieuwste bovenaan, en een kolom voor elk deel van een wedstrijd (#1163): Uitslag, Aftrap, Doelpunten, Opstelling, Verslag, Gegevens en Wacht.
+De pagina toont een tabel met een rij per seizoen sinds 1990/91, het nieuwste bovenaan, en een kolom voor elk deel van een wedstrijd (#1163): Uitslag, Aftrap, Doelpunten, Opstelling, Verslag, Gegevens, Stadion en Wacht.
+Stadion (S) is een `?` bij een gespeelde wedstrijd zonder stadion (#1307): de import was er niet zeker van, of de wedstrijd is neutraal, en de redactie koos er nog geen.
+Het stadion telt dus niet meer mee in Gegevens, dat alleen het aantal toeschouwers en de scheidsrechter telt.
+De link in de kolom leidt naar het deel Gegevens van de wedstrijd, waar de keuzelijst Stadion staat.
 `readMatchGaps` in `src/beheer/quality-table.ts` bepaalt per wedstrijd wat er ontbreekt, en `countGapsBySeason` telt per seizoen de wedstrijden met een gat in elke kolom.
 Een getal in de tabel is een link naar het seizoen met die kolom gekozen; een leeg vak is compleet.
 Op een telefoon is de kop van een kolom een letter (`abbreviation` van `DataTable`), en een regel boven de tabel zegt wat de letters en de tekens betekenen.
@@ -1337,6 +1341,12 @@ Heeft het seizoen geen enkele speler (`seasonHasPlayers`), dan staat dat in een 
 De oude werklijsten, zoals `/beheer/kwaliteit/<seizoen>/zonder-doelpunten`, en de oude adressen onder `/beheer/kwaliteit` sturen niet meer door (#1304).
 De tellingen van de doelpunten en de verslagen zijn die van `readSeasonCoverage`; `src/beheer/quality.test.ts` houdt ze daaraan.
 Een adres zonder seizoen sinds 1990/91 geeft "niet gevonden".
+
+`/beheer/stadions/kwaliteit` (`src/app/beheer/stadions/kwaliteit`, `stadiumQualityPath` in `quality.ts`) is alleen voor de eigenaar en de redacteuren: wat de stadions en de clubs nog missen (#1307).
+Een link "Wat ontbreekt" staat in de balk bovenaan Stadions, en de kaart Te doen telt de gaten.
+Elk van de vier soorten heeft een warme kaart met een lijst van links naar het scherm van het stadion of de club: stadions zonder Wikidata-nummer, zonder coördinaten, zonder adres (straat en postcode), en clubs zonder thuisveld.
+Een club mist een thuisveld als hij thuis speelde tegen ons en geen thuisveld heeft, of zijn eerste thuisveld begon na zijn eerste thuiswedstrijd; de thuisvelden van sc Heerenveen tellen niet.
+`readStadiumGaps` in `src/beheer/stadium-quality.ts` leest de vier lijsten.
 
 Verschillen de doelpunten van een speler in de selectietabel van die in de wedstrijden of de verslagen, dan heeft de pagina van het seizoen een koppeling "spelerscijfers verschillen" (#974).
 Ze leidt naar `/beheer/spelers/kwaliteit/spelerscijfers/<seizoen>` (`src/app/beheer/spelers/kwaliteit/spelerscijfers/[seizoen]`, onder Spelers sinds #1305, met het seizoen achter de naam van de lijst, zodat een seizoen en een vaste naam nooit op één niveau staan), met per verschil de speler, de competitie en de twee aantallen.

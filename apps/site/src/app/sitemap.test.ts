@@ -47,6 +47,7 @@ const notInSitemap: string[] = [
   '/beheer/spelers/samenvoegen',
   '/beheer/stadions',
   '/beheer/stadions/clubs',
+  '/beheer/stadions/kwaliteit',
   '/beheer/stadions/[club]',
   '/beheer/stadions/stadion/[id]',
   '/beheer/clubnamen',

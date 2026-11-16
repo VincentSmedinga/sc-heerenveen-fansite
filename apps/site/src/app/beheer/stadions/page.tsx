@@ -5,6 +5,7 @@ import { Card, DataTable, Heading, Link, Notice, Page, Tag, Text } from '@fansit
 
 import { toolbarAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
+import { stadiumQualityPath } from '#src/beheer/quality'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
@@ -46,6 +47,9 @@ export default async function StadiumsPage({ searchParams }: { searchParams: Pro
         </Text>
         <Text>
           <Link href={clubsPath}>Clubs en hun stadions</Link>
+        </Text>
+        <Text>
+          <Link href={stadiumQualityPath}>Wat ontbreekt</Link>
         </Text>
       </Page.Toolbar>
       <Page.Cell area="main">

@@ -1114,6 +1114,7 @@
   Een naam telt dus ook na een hernoeming, want de bron schrijft soms de oude naam.
   Is er één kandidaat, dan is dat het stadion; zijn er meer, dan beslist het veld dat de thuisclub op die dag gebruikte, als dat een van hen is; anders is de wedstrijd niet zeker.
   Hoofdletters, spaties, accenten en leestekens tellen niet mee: `Koning Willem II-stadion` en `Koning Willem II Stadion` zijn één naam.
+- **Later:** de wedstrijd zonder stadion telt sinds #1307 niet meer mee in de kolom Gegevens, maar heeft de kolom Stadion naast Gegevens; het besluit en de telefoon staan in _Een wedstrijd zonder stadion staat in een kolom van zichzelf, en Stadions krijgt een lijst van wat ontbreekt_ in `site.md` (16 november 2026).
 
 ## De tabellen van de stadions zijn `stadiums`, `stadium_names` en `club_home_grounds`
 

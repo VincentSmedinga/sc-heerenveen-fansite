@@ -20,13 +20,20 @@ export const gapColumns = [
   { key: 'opstelling', letter: 'O', name: 'Opstelling' },
   { key: 'verslag', letter: 'V', name: 'Verslag' },
   { key: 'gegevens', letter: 'G', name: 'Gegevens' },
+  { key: 'stadion', letter: 'S', name: 'Stadion' },
   { key: 'wacht', letter: 'W', name: 'Wacht' },
 ] as const
 
 export type GapColumn = (typeof gapColumns)[number]['key']
 
 /** The columns that lead to a part of the form, where "Opslaan en volgende" can go on. */
-export const formColumns = ['uitslag', 'aftrap', 'doelpunten', 'gegevens'] as const satisfies readonly GapColumn[]
+export const formColumns = [
+  'uitslag',
+  'aftrap',
+  'doelpunten',
+  'gegevens',
+  'stadion',
+] as const satisfies readonly GapColumn[]
 
 export type FormColumn = (typeof formColumns)[number]
 
@@ -35,6 +42,7 @@ export const columnParts = {
   aftrap: 'uitslag',
   doelpunten: 'doelpunten',
   gegevens: 'gegevens',
+  stadion: 'gegevens',
   uitslag: 'uitslag',
 } as const satisfies Record<FormColumn, string>
 
@@ -127,7 +135,6 @@ export async function readMatchGaps(db: Pick<Database, 'select'>, season?: strin
       opponent: matches.opponent,
       referee: matches.referee,
       season: matches.season,
-      stadium: matches.stadium,
       stadiumId: matches.stadiumId,
       status: matches.status,
     })
@@ -175,10 +182,7 @@ export async function readMatchGaps(db: Pick<Database, 'select'>, season?: strin
     const goal = goalsOf.get(match.id)
     const report = reportOf.get(match.id)
     const scored = (match.goalsFor ?? 0) + (match.goalsAgainst ?? 0)
-    // A stadium name without a certain stadium is a gap of its own, besides a missing name.
-    const unlinked = match.stadium !== null && match.stadiumId === null ? 1 : 0
-    const missingFacts =
-      [match.attendance, match.referee, match.stadium].filter((value) => value === null).length + unlinked
+    const missingFacts = [match.attendance, match.referee].filter((value) => value === null).length
     const wait = waitingOf.get(match.id) ?? 0
 
     if (lacksResult(match, now)) {
@@ -204,6 +208,11 @@ export async function readMatchGaps(db: Pick<Database, 'select'>, season?: strin
     }
     if (played && missingFacts > 0) {
       gaps.gegevens = { sign: String(missingFacts), total: missingFacts }
+    }
+    // Without a stadium: the import was not sure of it (a neutral ground, a home club without a
+    // ground), and the editors have not chosen one (#1301).
+    if (played && match.stadiumId === null) {
+      gaps.stadion = { sign: '?', total: 1 }
     }
     if (wait > 0) {
       gaps.wacht = { sign: String(wait), total: wait }
