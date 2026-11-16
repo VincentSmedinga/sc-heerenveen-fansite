@@ -3437,6 +3437,7 @@
   Altijd letters, ook op een breed scherm.
   Een eigen tabel in de site, die geen eigen CSS heeft.
 - **Later:** een teken heeft sinds #1307 geen ruimte meer aan de zijkanten (de 1,5rem is de breedte van het doel, en de ruimte kwam er nog bij), zodat een kolom 1,5rem breed is en acht kolommen op 320 pixels passen: de tabel van de kwaliteit van wedstrijden kreeg de kolom Stadion en was daarmee 18 pixels te breed (16 november 2026).
+  Een teken van twee of drie cijfers past in die 1,5rem; `e2e/admin-phone.spec.ts` controleert op 320 pixels dat de tabel met acht kolommen en getallen van twee cijfers niet breder wordt dan het scherm (16 november 2026).
 
 ### Een brede pagina zonder zijbalk vult de hele breedte
 
