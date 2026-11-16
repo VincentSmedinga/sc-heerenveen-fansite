@@ -13,7 +13,14 @@ export type Database = ReturnType<typeof connect>['db']
  * same for a date that you pass to a query yourself.
  */
 export function connect(url: string) {
-  const pool = createPool({ charset: 'UTF8MB4_UNICODE_CI', timezone: 'Z', uri: url })
+  const pool = createPool({
+    charset: 'UTF8MB4_UNICODE_CI',
+    // The operating system then notices a connection that a firewall dropped without a word.
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 30_000,
+    timezone: 'Z',
+    uri: url,
+  })
 
   return { close: () => pool.end(), db: drizzle({ client: pool, mode: 'default', schema }), pool }
 }

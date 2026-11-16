@@ -107,6 +107,32 @@ async function runCommand(
   }
 }
 
+// A command that holds the process open after its work was the bug of #1313: it never ended.
+// Each runs as its own process, against a database with nothing to do, and must end by itself
+// with code 0 within the time-out, without a `process.exit`.
+describe.each([['--country-facts'], ['--stadiums'], ['--fill-stadiums'], ['--completeness'], ['--item-clubs']])(
+  'the command %s',
+  (option) => {
+    it('ends by itself when it is done', async () => {
+      try {
+        await promisify(execFile)(process.execPath, [script, option], {
+          env: { ...process.env, DATABASE_URL: database.url },
+          timeout: 30_000,
+        })
+      } catch (error) {
+        const { code, killed, stderr, stdout } = error as {
+          code: number
+          killed: boolean
+          stderr: string
+          stdout: string
+        }
+
+        expect({ code, killed, stderr, stdout }).toEqual({ code: 0, killed: false, stderr: '', stdout: '' })
+      }
+    }, 40_000)
+  },
+)
+
 describe('the import', () => {
   it('reads the feeds, stores their items, and prints a line for each feed', async () => {
     const server = await addFeed('krant.test', reply(200, recording, { 'Content-Type': 'text/xml' }))
