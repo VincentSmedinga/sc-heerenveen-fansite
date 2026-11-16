@@ -29,6 +29,18 @@ describe('match.css', () => {
     expect(rule('.hf-match-missing')).not.toMatch(/outcome|font-weight/u)
   })
 
+  it('gives the link of a match the colour of a link, no underline at rest and one on hover and focus', () => {
+    expect(rule('.hf-match-link')).toMatch(/color: var\(--hf-colour-text-link\)/u)
+    expect(rule('.hf-match-link')).toMatch(/text-decoration-line: none/u)
+    expect(css).toMatch(
+      /\.hf-match-link \{[^}]*&:hover,\s*&:focus-visible \{[^}]*color: var\(--hf-colour-text-link-hover\);\s*text-decoration-line: underline/u,
+    )
+  })
+
+  it('has no line of its own for the link any more', () => {
+    expect(css).not.toMatch(/hf-match-report|hf-match-live/u)
+  })
+
   it('does not take the colour away in forced colours: the weight stays whatever the browser does', () => {
     expect(css).not.toMatch(/forced-color-adjust/u)
   })

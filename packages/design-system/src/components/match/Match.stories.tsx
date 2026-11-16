@@ -19,7 +19,8 @@ const meta = preview.meta({
           'De twee metaregels hebben elk een vaste volgorde: dag, competitie, ronde; stadion, scheidsrechter. Een onderdeel breekt niet in tweeën, dus een regel die te lang is, breekt tussen twee onderdelen. De pagina bepaalt wat er staat door iets door te geven of weg te laten: laat `competition` weg onder een kop die de competitie al noemt, en geef `stadium` en `referee` alleen mee waar de lijst die details wil.',
           'Kies hem voor een volledige lijst, zoals een seizoen of alle wedstrijden tegen één club; ook voor een selectie, zoals een record. Laat `competition` weg onder een kop die de competitie al noemt.',
           'De thuisclub staat eerst en de uitslag heeft de kleur van de uitkomst voor sc Heerenveen, nooit als enig teken. Een wedstrijd kan nog moeten komen, uitgesteld of geannuleerd zijn, live gaan, na verlenging of strafschoppen eindigen, of nog geen uitslag hebben.',
-          'Zet hem in een `List.Item` met `role="list"` op de `List`, in een `Card` onder een kop van niveau 2. Hij is gebouwd uit `Time`, `Link` en `Text`, met de uitkomst die ook de andere onderdelen met een uitslag gebruiken.',
+          'Een wedstrijd met een eigen pagina (`reportHref`) heeft de regel met de twee clubs en de uitslag als link. De namen en het streepje hebben de kleur van een link, de uitslag houdt de kleur van de uitkomst, en de regel is alleen onderstreept onder de muis en bij focus van het toetsenbord. Zo zie je aan de kleur welke wedstrijd een pagina heeft. Een schermlezer hoort wat er staat en dan waar de link heen gaat, zoals "sc Heerenveen 2 tegen 0 Ajax, verslag". Een wedstrijd zonder pagina is gewone tekst. De andere regels staan buiten de link.',
+          'Zet hem in een `List.Item` met `role="list"` op de `List`, in een `Card` onder een kop van niveau 2. Hij is gebouwd uit `Time` en `Text`, met de uitkomst die ook de andere onderdelen met een uitslag gebruiken.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -651,8 +652,8 @@ export const Cancelled = meta.story({
   render: renderCancelled,
 })
 
-// A match with a report has a page of its own, and its line ends with the link. The club and
-// the address are made up.
+// A match with a report has a page of its own, and the line with the clubs is the link. The
+// club and the address are made up.
 const renderWithReport = () => (
   <div style={{ maxInlineSize: '24rem' }}>
     <Card aria-labelledby="uitslagen-verslag-kop">
@@ -693,11 +694,11 @@ const renderWithReport = () => (
 )
 
 export const WithReport = meta.story({
-  name: 'Met een pagina: de regel eindigt met de link naar het verslag, de andere regel heeft geen link',
+  name: 'Met een pagina: de regel met de clubs is de link naar het verslag, de andere regel is gewone tekst',
   render: renderWithReport,
 })
 
-// A match that is being played and has a page: the link says "Live", with no result.
+// A match that is being played and has a page: its line is the link, with no result.
 const renderLive = () => (
   <div style={{ maxInlineSize: '24rem' }}>
     <Card aria-labelledby="live-kop">
@@ -724,11 +725,11 @@ const renderLive = () => (
 )
 
 export const Live = meta.story({
-  name: 'Wordt gespeeld: de regel eindigt met de link "Live", zonder uitslag',
+  name: 'Wordt gespeeld: de regel met de clubs is de link, zonder uitslag',
   render: renderLive,
 })
 
-// A match that has not begun and has a Voorbeschouwing: the link says so.
+// A match that has not begun and has a Voorbeschouwing: its line is the link.
 const renderPreview = () => (
   <div style={{ maxInlineSize: '24rem' }}>
     <Card aria-labelledby="voorbeschouwing-kop">
@@ -755,7 +756,7 @@ const renderPreview = () => (
 )
 
 export const Preview = meta.story({
-  name: 'Nog niet begonnen: de regel eindigt met de link "Voorbeschouwing"',
+  name: 'Nog niet begonnen: de regel met de clubs is de link naar de Voorbeschouwing',
   render: renderPreview,
 })
 

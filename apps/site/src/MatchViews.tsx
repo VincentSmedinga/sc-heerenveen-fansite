@@ -824,22 +824,22 @@ export function MatchLines({
   /** Small lines under the clubs of a match, or nothing for a match that has none. */
   extraOf?: ((match: PublicMatch) => ReactNode) | undefined
   /**
-   * The matches that are live, by `<competition>|<round>` (see `getLiveReports`): their line
-   * says "Live" in the link to their page.
+   * The matches that are live, by `<competition>|<round>` (see `getLiveReports`): the link of
+   * their line is named "live verslag" for a screen reader.
    */
   liveReports?: ReadonlySet<string> | undefined
   matches: PublicMatch[]
   now: Date
   /**
    * The addresses of the Voorbeschouwing of the matches that are still scheduled, by
-   * `<competition>|<round>` (see `getPreviewAddresses`). A line of a match in it ends with the
-   * link "Voorbeschouwing", unless the match has a report: its page is then the report's.
+   * `<competition>|<round>` (see `getPreviewAddresses`). The line of a match in it is the link
+   * to the Voorbeschouwing, unless the match has a report: its page is then the report's.
    */
   previewAddresses?: ReadonlyMap<string, string> | undefined
   /**
    * The addresses of the pages of the matches that have one, by `<competition>|<round>` (see
-   * `getReportAddresses`). A line of a match in it ends with the link "Het verslag"; the others
-   * are plain text.
+   * `getReportAddresses`). The line with the clubs of a match in it is the link to its page;
+   * the others are plain text.
    */
   reportAddresses?: ReadonlyMap<string, string> | undefined
   withCompetition?: boolean
@@ -1628,8 +1628,8 @@ export function MatchLine({
   /** Small lines under the clubs, such as the previous meeting. */
   extra?: ReactNode
   /**
-   * Whether the match is being played and has a page with its report: the link then says "Live"
-   * and the line has no result. It needs `reportHref`.
+   * Whether the match is being played and has a page with its report: the line has no result,
+   * and the name of the link says "live verslag". It needs `reportHref`.
    */
   live?: boolean
   match: MatchLineMatch

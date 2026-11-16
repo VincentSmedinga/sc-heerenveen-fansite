@@ -21,6 +21,7 @@ import {
 import type { ClubHeadline } from './opponents'
 
 import { formatTableDay } from './match-format'
+import { type MatchPage, matchPageKey, pageProps } from './match-pages'
 import { matchSearchPath } from './match-search'
 import { markOf, MatchLine } from './MatchViews'
 import { dateTimeOf, formatNewsTime } from './news'
@@ -135,6 +136,7 @@ export function PreviewHeadToHeadCard({
   home,
   name,
   now,
+  pages,
   place,
   slug,
 }: {
@@ -142,6 +144,8 @@ export function PreviewHeadToHeadCard({
   home: boolean
   name: string
   now: Date
+  /** The pages of the matches that have one (see `getMatchPages`): the lines link to them. */
+  pages?: ReadonlyMap<string, MatchPage> | undefined
   place: string | undefined
   slug: string
 }): null | ReactNode {
@@ -179,7 +183,7 @@ export function PreviewHeadToHeadCard({
       <List role="list">
         {last.map((meeting) => (
           <List.Item key={meeting.id}>
-            <MatchLine match={meeting} now={now} withYear />
+            <MatchLine {...pageProps(pages?.get(matchPageKey(meeting)))} match={meeting} now={now} withYear />
           </List.Item>
         ))}
       </List>

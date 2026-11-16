@@ -1164,19 +1164,18 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     expect(next).not.toContain('hf-match-goals')
   })
 
-  it('ends the next match with the link "Voorbeschouwing" when it has a page, and the previous match has none', async () => {
+  it('makes the line of the next match the link to its Voorbeschouwing, and the previous match has none', async () => {
     vi.mocked(getPreviewAddresses).mockResolvedValue(
       new Map([['Eredivisie|Speelronde 10', '/wedstrijden/2026-27/2026-10-28-proefstad-sv']]),
     )
 
     const html = await renderMatchesCard()
-    const next = html.slice(html.indexOf('Proefstad SV'))
+    const next = html.slice(html.indexOf('hf-match-link') - 20)
 
     expect(next).toContain('href="/wedstrijden/2026-27/2026-10-28-proefstad-sv"')
-    expect(next).toContain(
-      'Voorbeschouwing<span class="hf-visually-hidden"> van sc Heerenveen tegen Proefstad SV</span>',
-    )
-    expect(html.match(/Voorbeschouwing/g)).toHaveLength(1)
+    expect(next).toContain('<span>Proefstad SV</span><span class="hf-visually-hidden">, voorbeschouwing</span></a>')
+    expect(html.match(/, voorbeschouwing</g)).toHaveLength(1)
+    expect(html).not.toMatch(/>Voorbeschouwing</)
   })
 
   it('has no link when the addresses can not be read, and logs why', async () => {

@@ -25,7 +25,7 @@ import { pageAreas } from '#src/page-areas'
 import { headToHeadOf } from '#src/preview-head-to-head'
 import { scorersOf } from '#src/preview-scorers'
 import { formsOf, standingSentenceOf, standingSliceOf } from '#src/preview-standing'
-import { getPreviewMatch, reportAddress } from '#src/report-data'
+import { getMatchPages, getPreviewMatch, reportAddress } from '#src/report-data'
 import { matchesPath } from '#src/season-page'
 import { seasonAddress, seasonFromSlug } from '#src/seasons'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
@@ -71,6 +71,7 @@ const loadPreview = cache(async (seizoen: string, wedstrijd: string) => {
     // The head-to-head counts the matches on the side of this match only (#1315). "Daar" is the
     // place of the ground of the opponent, which only an away match needs.
     const headToHead = club === undefined ? undefined : headToHeadOf(club.matches, found.match.home)
+    const pages = headToHead === undefined ? undefined : await getMatchPages(headToHead.last)
     const scorers =
       club === undefined ? undefined : scorersOf(club.matches, found.match.home, new Set(await getSquadPersonIds()))
     const { stadiumId } = found.match
@@ -86,6 +87,7 @@ const loadPreview = cache(async (seizoen: string, wedstrijd: string) => {
       headlines: headlines.slice(0, newsLimit),
       headToHead,
       kind: 'found',
+      pages,
       place,
       scorers,
       season,
@@ -149,7 +151,7 @@ export async function PreviewPage({ season: seizoen, slug }: { season: string; s
     return <ServerError retryHref={`${matchesPath}/${seizoen}/${slug}`} />
   }
 
-  const { data, forms, found, headlines, headToHead, place, scorers, season, slice } = loaded
+  const { data, forms, found, headlines, headToHead, pages, place, scorers, season, slice } = loaded
   const { match } = found
   const now = new Date()
   const [first, second] = clubsOf(match)
@@ -207,6 +209,7 @@ export async function PreviewPage({ season: seizoen, slug }: { season: string; s
             home={match.home}
             name={match.opponent}
             now={now}
+            pages={pages}
             place={place}
             slug={found.clubSlug}
           />

@@ -1082,15 +1082,16 @@ await withEmptyDatabase((database) =>
     assert.match(matchesHtml, closedWikipediaCredit)
     assert.doesNotMatch(matchesHtml, /action=history/)
 
-    // A match that has not begun and has no report ends with the link "Voorbeschouwing" to the
-    // page of its Voorbeschouwing (#1316): the clubs with dashes, the news about the opponent
-    // and the credit. Search engines do not index it, and the sitemap does not list it.
+    // A match that has not begun and has no report has the line with its clubs as the link to
+    // the page of its Voorbeschouwing (#1316, #1332): the clubs with dashes, the news about the
+    // opponent and the credit. Search engines do not index it, and the sitemap leaves it out.
     const previewAddress =
-      /href="(\/wedstrijden\/\d{4}-\d{2}\/[^"]+)"[^>]*>(?:<span class="hf-icon-tail">)?Voorbeschouwing/.exec(
+      /<a class="hf-match-link" href="(\/wedstrijden\/\d{4}-\d{2}\/[^"]+)">(?:(?!<\/a>).)*, voorbeschouwing<\/span><\/a>/s.exec(
         matchesHtml,
       )?.[1]
 
     assert.ok(previewAddress, 'a match that has not begun and has no report must link to its Voorbeschouwing')
+    assert.doesNotMatch(matchesHtml, /hf-match-report|>Voorbeschouwing<\/a>|>Het verslag<\/a>/)
 
     const previewResponse = await fetch(origin + previewAddress)
     const previewHtml = await previewResponse.text()

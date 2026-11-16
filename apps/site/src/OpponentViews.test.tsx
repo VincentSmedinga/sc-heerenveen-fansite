@@ -6,7 +6,9 @@ import { afterEach, describe, expect, it } from 'vitest'
 
 import type { Meeting } from './opponents'
 
+import { matchPageKey } from './match-pages'
 import {
+  ClubMeetingsCard,
   ClubPlacesCard,
   ClubsCard,
   ClubScoreCountsCard,
@@ -258,6 +260,35 @@ describe('LastWinCard', () => {
     const { container } = render(<LastWinCard address="/tegenstanders" places={undefined} query="" />)
 
     expect(container.textContent).toBe('')
+  })
+})
+
+describe('ClubMeetingsCard', () => {
+  const meetings = testclub.matches.filter(
+    (match): match is Meeting => match.goalsFor !== null && match.goalsAgainst !== null,
+  )
+
+  it('makes the line of a match with a page the link to it, and leaves the other lines plain', () => {
+    const [first] = meetings
+    const pages = new Map([
+      [matchPageKey(first!), { href: '/wedstrijden/2026-27/een-dag-testclub', live: false, preview: false }],
+    ])
+    const { container } = render(
+      <ClubMeetingsCard meetings={meetings} now={new Date('2026-11-16T12:00:00Z')} pages={pages} upcoming={[]} />,
+    )
+    const links = [...container.querySelectorAll('a.hf-match-link')]
+
+    expect(links.map((link) => link.getAttribute('href'))).toEqual(['/wedstrijden/2026-27/een-dag-testclub'])
+    expect(links[0]?.textContent).toMatch(/, verslag$/)
+    expect(container.textContent).not.toContain('Het verslag')
+  })
+
+  it('has no link for a line when the pages could not be read', () => {
+    const { container } = render(
+      <ClubMeetingsCard meetings={meetings} now={new Date('2026-11-16T12:00:00Z')} upcoming={[]} />,
+    )
+
+    expect(container.querySelector('a.hf-match-link')).toBeNull()
   })
 })
 

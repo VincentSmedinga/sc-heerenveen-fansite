@@ -12,6 +12,8 @@ import { checkMatchReport } from '@fansite/shared/match-report'
 
 import { cacheForKey } from './cache'
 import { getDatabase } from './database'
+import { reasonOf } from './errors'
+import { type MatchPage, type MatchPageKey, matchPageKey } from './match-pages'
 import { getMatchSeasons } from './matches'
 import { seasonSlug } from './seasons'
 
@@ -160,6 +162,45 @@ export async function getReportAddresses(season: string) {
 
 const currentPreviews = cacheForKey(currentSeasonPeriod, (season) => listScheduledMatches(getDatabase().db, season))
 const pastPreviews = cacheForKey(pastSeasonPeriod, (season) => listScheduledMatches(getDatabase().db, season))
+
+/**
+ * The pages of the matches in a list that runs over seasons, by `matchPageKey`: the page of a
+ * report (also of a match that is live) or, for a match that is still scheduled, its
+ * Voorbeschouwing, as the lists of one season have them. It reads each season once, from the
+ * readings the pages of a season share. A season that can't be read is logged and has no
+ * links: a page is more than a link, so the list is shown without them.
+ */
+export async function getMatchPages(matches: readonly MatchPageKey[], now = new Date()) {
+  const pages = new Map<string, MatchPage>()
+
+  for (const season of new Set(matches.map((match) => match.season))) {
+    try {
+      const [reports, previews, live] = await Promise.all([
+        getReportAddresses(season),
+        getPreviewAddresses(season),
+        getLiveReports(season, now),
+      ])
+
+      for (const match of matches.filter((candidate) => candidate.season === season)) {
+        const key = `${match.competition}|${match.round}`
+        const href = reports.get(key)
+        const preview = href === undefined ? previews.get(key) : undefined
+
+        if (href !== undefined || preview !== undefined) {
+          pages.set(matchPageKey(match), {
+            href: href ?? preview ?? '',
+            live: live.has(key),
+            preview: preview !== undefined,
+          })
+        }
+      }
+    } catch (error) {
+      console.error(`Could not read the pages of the matches of ${season}: ${reasonOf(error)}`)
+    }
+  }
+
+  return pages
+}
 
 /**
  * The addresses of the pages of the Voorbeschouwing of a season, by `<competition>|<round>`

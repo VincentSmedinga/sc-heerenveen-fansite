@@ -75,10 +75,10 @@ afterEach(() => {
 
 describe('the links to the pages of the matches', () => {
   it('has no link in the results when no match has a page', async () => {
-    expect(resultCards(await render())).not.toContain('Het verslag')
+    expect(resultCards(await render())).not.toContain('hf-match-link')
   })
 
-  it('ends the line of a match that has a page with a link to it, and leaves the other lines plain', async () => {
+  it('makes the line with the clubs the link to the page of a match, and leaves the other lines plain of a match that has a page with a link to it, and leaves the other lines plain', async () => {
     vi.mocked(getReportAddresses).mockResolvedValue(
       new Map([['Eredivisie|Speelronde 7', '/wedstrijden/2026-27/2026-09-20-oud-resultaat']]),
     )
@@ -87,8 +87,8 @@ describe('the links to the pages of the matches', () => {
     const links = [...html.matchAll(/<a[^>]*href="(\/wedstrijden\/2026-27\/[^"]*)"[^>]*>(.*?)<\/a>/gu)]
 
     expect(links.map((link) => link[1])).toEqual(['/wedstrijden/2026-27/2026-09-20-oud-resultaat'])
-    expect(links[0]?.[2]).toContain('Het verslag')
-    expect(resultCards(html).match(/Het verslag/gu)).toHaveLength(1)
+    expect(links[0]?.[2]).toContain(', verslag</span>')
+    expect(resultCards(html).match(/class="hf-match-link"/gu)).toHaveLength(1)
   })
 
   it('shows the referee under the clubs in Laatste wedstrijd and Programma, and not in the results', async () => {
@@ -113,7 +113,7 @@ describe('the links to the pages of the matches', () => {
 
     const html = await render()
 
-    expect(resultCards(html)).not.toContain('Het verslag')
+    expect(resultCards(html)).not.toContain('hf-match-link')
     expect(error).toHaveBeenCalledWith(expect.stringContaining('Could not read the match reports'))
   })
 })
@@ -1297,10 +1297,10 @@ describe('the card Laatste wedstrijd', () => {
     expect(html.match(/SV Proefdorp/g)).toHaveLength(2)
   })
 
-  it('links to the page of the match with "Het verslag"', async () => {
+  it('makes the line of the match the link to its page, named verslag', async () => {
     vi.mocked(getReportAddresses).mockResolvedValue(new Map([[key, '/wedstrijden/2026-27/2026-10-20-sv-proefdorp']]))
 
-    expect(card(await render())).toContain('Het verslag')
+    expect(card(await render())).toContain(', verslag</span></a>')
   })
 
   it('links a match that has not begun to its Voorbeschouwing, in the programme', async () => {
@@ -1312,7 +1312,9 @@ describe('the card Laatste wedstrijd', () => {
     const programme = section(await render(), 'programma')
 
     expect(programme).toContain(`href="${address}"`)
-    expect(programme).toContain('Voorbeschouwing<span class="hf-visually-hidden"> van sc Heerenveen tegen Proefstad SV')
+    expect(programme).toContain(
+      '<span>Proefstad SV</span><span class="hf-visually-hidden">, voorbeschouwing</span></a>',
+    )
     expect(programme).not.toContain('Het verslag')
   })
 
@@ -1325,10 +1327,10 @@ describe('the card Laatste wedstrijd', () => {
     const programme = section(await render(), 'programma')
 
     expect(programme).toContain('href="/verslag"')
-    expect(programme).not.toContain('Voorbeschouwing')
+    expect(programme).not.toContain('voorbeschouwing')
   })
 
-  it('says "Live" for a match that is live, without a result', async () => {
+  it('names the link of a match that is live "live verslag", without a result', async () => {
     vi.mocked(getReportAddresses).mockResolvedValue(new Map([[key, '/wedstrijden/2026-27/2026-10-20-sv-proefdorp']]))
     vi.mocked(getLiveReports).mockResolvedValue(new Set([key]))
     vi.mocked(getMatchData).mockResolvedValue({
@@ -1348,7 +1350,7 @@ describe('the card Laatste wedstrijd', () => {
 
     const last = card(await render())
 
-    expect(last).toContain('Live')
+    expect(last).toContain(', live verslag</span></a>')
     expect(last).not.toMatch(/\d+ tegen \d+/)
   })
 

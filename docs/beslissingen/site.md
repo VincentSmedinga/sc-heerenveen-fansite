@@ -794,6 +794,7 @@
 - **Later:** zie _De pagina van een wedstrijd staat op `/wedstrijden/<seizoen>/<datum>-<club>`, en alleen voor een verslag dat klaar is en klopt_ (7 november 2026).
   Een wedstrijd met zo'n pagina heeft wel een link, "Het verslag", als laatste regel van zijn plek in de lijst; de andere wedstrijden blijven een regel zonder link, en er zijn nog steeds geen clubwapens.
   Sinds 16 november 2026 heeft ook een geplande wedstrijd zonder verslag een pagina, en zijn link zegt "Voorbeschouwing" (zie _Elke geplande wedstrijd heeft een pagina op het gewone adres, de Voorbeschouwing_).
+- **Later:** zie _De regel met de clubs is de link naar de pagina van de wedstrijd_ (16 november 2026): de link is de regel met de twee clubs en de uitslag, niet meer een aparte regel met "Het verslag", "Voorbeschouwing" of "Live".
 
 ## De stand is een tabel met een scrollgebied en een korte vorm voor de zijbalk
 
@@ -3181,6 +3182,7 @@
 - **Later:** zie _De pagina bestaat ook voor een verslag dat nog niet klaar is, met de melding "We vullen dit verslag nog in"_ (7 november 2026): de pagina bestaat ook voor een verslag dat `bezig` is of niet meer klopt, met een melding, `noindex` en zonder plek in de sitemap; alleen een wedstrijd zonder verslag heeft geen pagina.
 - **Later:** zie _De kaart Wedstrijden op home toont de vorige ontmoeting, de vorm van de tegenstander en de scheidsrechter_ (9 november 2026): de scheidsrechter staat in de regel van de kaart Wedstrijden op home.
 - **Later:** zie _Elke geplande wedstrijd heeft een pagina op het gewone adres, de Voorbeschouwing_ (16 november 2026): een wedstrijd die `scheduled` is, heeft de pagina ook zonder verslag, tot er uitslaggegevens zijn (zie _De Voorbeschouwing blijft op de pagina tot er uitslaggegevens zijn_).
+- **Later:** zie _De regel met de clubs is de link naar de pagina van de wedstrijd_ (16 november 2026): de link is de regel met de twee clubs en de uitslag, niet meer een aparte regel met "Het verslag", "Voorbeschouwing" of "Live".
 
 ## De pagina bestaat ook voor een verslag dat nog niet klaar is, met de melding "We vullen dit verslag nog in"
 
@@ -3209,6 +3211,7 @@
 - **Later:** vervangt _De pagina van een wedstrijd staat op `/wedstrijden/<seizoen>/<datum>-<club>`, en alleen voor een verslag dat klaar is en klopt_ (7 november 2026) waar die zegt dat de pagina alleen voor een klaar verslag bestaat: het adres, de `slug` en de sitemap voor klare verslagen blijven.
 - **Later:** zie _Een wedstrijd die nog wordt gespeeld heeft een pagina met "Live" en een knop voor het einde_ (8 november 2026): de pagina bestaat ook voor een wedstrijd die nog `scheduled` is, vanaf zijn dag.
   Zijn titel en beschrijving noemen dan geen stand, want die verandert; alleen de titel "... 2–1 ..." van een wedstrijd met een uitslag blijft zoals hij was.
+- **Later:** zie _De regel met de clubs is de link naar de pagina van de wedstrijd_ (16 november 2026): de link is de regel met de twee clubs en de uitslag, niet meer een aparte regel met "Het verslag", "Voorbeschouwing" of "Live".
 
 ## Het voorbeeld van de wedstrijdpagina staat naast het formulier van het verslag
 
@@ -3698,6 +3701,7 @@
 - **Nadeel:** een pagina wordt tot vijf minuten bewaard (de verslagen van het lopende seizoen), dus een doelpunt staat niet meteen op de pagina.
   Het verversen is werk van #908.
 - **Alternatieven:** een bevestiging als dialoog met JavaScript (werkt niet zonder, en de focus is moeilijker goed te krijgen); de knop meteen laten schrijven zonder bevestiging (een verkeerde stand komt dan op de site); de stand in de titel en de beschrijving (die veranderen na elk doelpunt).
+- **Later:** zie _De regel met de clubs is de link naar de pagina van de wedstrijd_ (16 november 2026): de link is de regel met de twee clubs en de uitslag, niet meer een aparte regel met "Het verslag", "Voorbeschouwing" of "Live".
 
 ## De laatste wedstrijd staat in een eigen kaart bovenaan Wedstrijden
 
@@ -3713,6 +3717,7 @@
 - **Waarom:** de laatste wedstrijd is het eerste wat supporters willen weten, en stond onder een lange lijst.
   Dezelfde wedstrijd twee keer is goedkoper dan Uitslagen een wedstrijd laten missen, want Uitslagen telt dezelfde wedstrijden als de rest van de site.
 - **Alternatieven:** een grotere regel in Uitslagen (valt minder op); de laatste wedstrijd uit Uitslagen halen (geen dubbele regel, maar Uitslagen mist dan de nieuwste); de kaart ook in een afgelopen seizoen (de laatste is daar niet bijzonder).
+- **Later:** zie _De regel met de clubs is de link naar de pagina van de wedstrijd_ (16 november 2026): de link is de regel met de twee clubs en de uitslag, niet meer een aparte regel met "Het verslag", "Voorbeschouwing" of "Live".
 
 ## Een naam zonder persoon splitsen we op het eerste woord, met een vaste lijst voorvoegsels
 
@@ -6175,6 +6180,7 @@
 - **Alternatieven:** een apart adres voor de voorbeschouwing, dat bij de aftrap doorstuurt; de delen laten staan onder het verslag; de Voorbeschouwing ook voor een wedstrijd met een verslag van vóór de aftrap (dan verdwijnt de opstelling).
 - **Later:** vervangt _De pagina van een wedstrijd staat op `/wedstrijden/<seizoen>/<datum>-<club>`, en alleen voor een verslag dat klaar is en klopt_ (7 november 2026) waar die zegt dat een wedstrijd zonder verslag geen pagina heeft.
 - **Later:** zie _De Voorbeschouwing blijft op de pagina tot er uitslaggegevens zijn_ (16 november 2026): de pagina verdwijnt niet bij de aftrap, en de delen van de Voorbeschouwing blijven staan.
+- **Later:** zie _De regel met de clubs is de link naar de pagina van de wedstrijd_ (16 november 2026): de link is de regel met de twee clubs en de uitslag, niet meer een aparte regel met "Het verslag", "Voorbeschouwing" of "Live".
 
 ## De Voorbeschouwing is gebouwd met onderdelen van het designsysteem en heeft geen invulveld voor de redactie
 
@@ -6318,3 +6324,13 @@
   De rollen blijven: de eigenaar en de redacteuren zien de pagina's, een auteur krijgt "niet gevonden".
 - **Waarom:** de redactie zoekt het land van een club bij de clubs, en met de laatste lijst verhuisd heeft Kwaliteit geen reden meer (#1303).
 - **Alternatieven:** `/beheer/clubs/land` (een club die zo heet botst dan met zijn eigen adres; `kwaliteit` heet geen club, en het is de naam die Stadions en Wedstrijden ook gebruiken); een doorverwijzing van `/beheer/clubnamen` (zie _De oude adressen onder `/beheer/kwaliteit` krijgen geen doorverwijzing_).
+
+## Ook de pagina van een club en de eerdere ontmoetingen van een Voorbeschouwing linken naar de wedstrijd
+
+- **Datum:** 16 november 2026
+- **Besluit:** de lijst met wedstrijden op de pagina van een club in Tegenstanders en de eerdere ontmoetingen op de pagina van een Voorbeschouwing hebben de regel met de twee clubs als link naar de pagina van de wedstrijd, als die er is (#1332).
+  `getMatchPages` in `report-data.ts` geeft die pagina's voor een lijst die over seizoenen loopt, met één sleutel per wedstrijd: het seizoen, de competitie en de ronde (`matchPageKey` in `match-pages.ts`).
+  Het leest elk seizoen één keer, uit dezelfde bewaarde lezingen als de lijsten van één seizoen, en gebruikt `getReportAddresses`, `getPreviewAddresses` en `getLiveReports`, dus er is geen tweede regel voor welke wedstrijd een pagina heeft: `getPreviewMatches` blijft die ene regel.
+  De pagina van een club vraagt alleen de wedstrijden van de pagina die je ziet, en een seizoen dat niet te lezen is, staat zonder links in de lijst en in het log.
+- **Waarom:** dezelfde regel ziet er overal hetzelfde uit en doet overal hetzelfde.
+- **Alternatieven:** alleen de plekken die nu al een link hebben; een eigen lezing per wedstrijd (dubbel werk naast de lijsten van een seizoen).

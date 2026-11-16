@@ -28,6 +28,7 @@ import {
 
 import { type CompetitionChoice, competitionWords } from './competition'
 import { creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
+import { type MatchPage, matchPageKey, pageProps } from './match-pages'
 import { shootOutOf } from './match-result'
 import { type MatchSource, sourceOf } from './match-sources'
 import { competitionNames, countScores, topScorersOf } from './matches'
@@ -137,12 +138,15 @@ export function ClubMeetingsCard({
   now,
   page = 1,
   pageHref = () => '',
+  pages,
   upcoming,
 }: {
   meetings: Meeting[]
   now: Date
   page?: number
   pageHref?: (page: number) => string
+  /** The pages of the matches that have one (see `getMatchPages`): the lines link to them. */
+  pages?: ReadonlyMap<string, MatchPage> | undefined
   upcoming: PublicClubMatch[]
 }) {
   const pageCount = meetingPageCount(meetings)
@@ -159,7 +163,7 @@ export function ClubMeetingsCard({
         {shown.map((match) => (
           // A competition and a round come back every season, so the match itself is the key.
           <List.Item key={match.id}>
-            <MatchLine match={match} now={now} withYear />
+            <MatchLine {...pageProps(pages?.get(matchPageKey(match)))} match={match} now={now} withYear />
           </List.Item>
         ))}
       </List>
