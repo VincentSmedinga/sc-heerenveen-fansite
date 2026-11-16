@@ -1309,6 +1309,29 @@ Het logboek heeft er één regel voor: `stadiums: N clubs read from Wikidata (..
 Het is veilig om twee keer te draaien: een tweede keer vindt niemand en schrijft `Stadiums: no clubs to read.`.
 Een run die stopt gaat de volgende keer verder met wie nog mist.
 
+### Het stadion van wedstrijden die er geen hebben
+
+De wedstrijden van de oude Fansite hebben geen tekst voor het stadion, en de importer vult `matches.stadium_id` voor hen in (#1293).
+Een gespeelde wedstrijd zonder stadion en zonder tekst krijgt het thuisveld van de thuisclub op de dag van de wedstrijd, uit `club_home_grounds`: dat van sc Heerenveen bij een thuiswedstrijd, dat van de tegenstander bij een uitwedstrijd.
+Het is het laatste veld van de club dat op die dag was begonnen, dus een club die later verhuisde krijgt op een oude wedstrijd het oude veld.
+De importer laat een wedstrijd zonder stadion als hij het niet zeker weet:
+
+- **Neutraal terrein:** een finale, een wedstrijd van de Johan Cruijff Schaal en een bekerwedstrijd vanaf mei.
+  De oude Fansite noemt geen ronde voor een bekerwedstrijd, en de finales van de KNVB Beker waren in mei.
+  Deze regel staat op één plek: `isOnNeutralGround` in `packages/db/src/stadiums.ts`.
+- **Geen thuisveld:** de thuisclub heeft er geen, of geen dat op die dag al was begonnen.
+- **Een tekst die bij geen stadion past:** de bron noemt een naam, en die vervangt de importer niet door een gok.
+- **Een wedstrijd waarvan de redactie de gegevens invoerde:** een leeg stadion kan dan haar keuze zijn.
+
+Een wedstrijd die een stadion heeft, verandert niet.
+De gewone import doet het als laatste stap, zodat een nieuwe wedstrijd zonder stadion er vanzelf een krijgt.
+Het logboek van de gewone import heeft er alleen regels voor als hij een wedstrijd vulde; de opdracht noemt ook wat hij oversloeg.
+De regels zijn: `Stadiums of matches: N filled from the home grounds, M left without.`, en per reden een regel `Stadiums of matches: N left, <reason>.`.
+
+**Eenmalig na de uitrol op acceptatie:** `pnpm run import:fill-stadiums` (op de host `import.mjs --fill-stadiums`) vult de wedstrijden van 1990/91 tot en met 2006/07, onder de lock van de import, en zegt hoeveel het vulde en hoeveel het oversloeg, met de reden.
+Draai het pas als de thuisvelden van de clubs er zijn (`import:stadiums`, #1298).
+Het is veilig om twee keer te draaien: een tweede keer vindt niets meer en schrijft `Stadiums of matches: nothing to fill.`, of alleen de wedstrijden die het oversloeg.
+
 ### Een doorverwijzing is hetzelfde artikel
 
 Op de Nederlandse Wikipedia is `AZ Alkmaar` een doorverwijzing naar `AZ (voetbalclub)`, en `SBV Excelsior` een naar `Excelsior Rotterdam`.

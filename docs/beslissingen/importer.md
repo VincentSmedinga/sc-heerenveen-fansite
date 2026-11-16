@@ -4266,3 +4266,21 @@
 - **Waarom:** de plaats en de coördinaten zijn er in Wikidata bijna overal, en de thuisvelden van onze tegenstanders staan er bij 44 van de 58 clubs met een Q-nummer (kopie van acceptatie, 16 november 2026).
   Een nieuw veld voor een nieuw Q-nummer vraagt geen opdracht van de redactie.
 - **Alternatieven:** alleen de "preferred" uitspraken (mist de oude velden); een tweede opdracht die alle stadions elke run opnieuw leest (veel verzoeken voor weinig verandering); de bron van de thuisvelden op elke rij van `club_home_grounds` (de redactie bewaart een club als geheel).
+
+## De wedstrijden van de oude Fansite krijgen het thuisveld van de thuisclub
+
+- **Datum:** 16 november 2026
+- **Besluit:** een gespeelde wedstrijd zonder stadion en zonder tekst voor het stadion krijgt het thuisveld van de thuisclub op de dag van de wedstrijd (#1293): `fillStadiumsFromHomeGrounds` in `packages/db/src/stadiums.ts`.
+  - **Welk veld:** het laatste thuisveld van de club (bij sc Heerenveen een thuiswedstrijd, anders de tegenstander) waarvan het begin op die dag voorbij was.
+    Een veld zonder begin telt altijd.
+    Het nieuwe stadion van sc Heerenveen begint met het seizoen 1994/95, dus een thuiswedstrijd in het voorjaar van 1994 krijgt Sportpark Noord.
+  - **Wat de importer overslaat, en telt per reden:** neutraal terrein, een club zonder thuisveld, een club waarvan nog geen veld was begonnen, een wedstrijd met een tekst voor het stadion die bij geen stadion past, en een wedstrijd waarvan de redactie de gegevens invoerde.
+  - **Neutraal terrein:** een finale, de Johan Cruijff Schaal, en een bekerwedstrijd vanaf mei.
+    De oude Fansite noemt voor een bekerwedstrijd alleen `Wedstrijd N`, dus een finale herkennen we aan de maand.
+    Een halve finale in mei valt er ook onder, en blijft een gat voor de redactie.
+    De regel staat op één plek, `isOnNeutralGround`.
+  - **Altijd veilig:** de importer vult alleen een leeg `stadium_id`, dus een stadion van de redactie of van een bron blijft staan en een tweede run verandert niets.
+  - **Wanneer:** eenmalig als opdracht (`--fill-stadiums`), en als laatste stap van elke gewone import, zodat een nieuwe wedstrijd zonder stadion er vanzelf een krijgt.
+- **Waarom:** het klopt voor bijna elke wedstrijd, en het is een berekening op gegevens die er al zijn.
+  Een fout stadion is erger dan een leeg veld, dus de importer slaat over wat hij niet zeker weet.
+- **Alternatieven:** de redactie 671 keer een stadion laten kiezen; een tekst voor het stadion maken en die door `linkMatchesToStadiums` laten koppelen (dat vervuilt de tekst van de bron, die de importer juist wil vergelijken).

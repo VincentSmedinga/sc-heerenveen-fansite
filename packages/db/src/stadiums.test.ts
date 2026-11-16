@@ -10,8 +10,10 @@ import { withClubs } from './clubs.ts'
 import { listClubMatches } from './queries.ts'
 import { adminUsers, clubHomeGrounds, clubs, matchEdits, matches, stadiumNames, stadiums } from './schema.ts'
 import {
+  fillStadiumsFromHomeGrounds,
   findStadium,
   hasChosenStadium,
+  isOnNeutralGround,
   linkMatchesToStadiums,
   linkMatchToStadium,
   listClubStadiumLines,
@@ -49,6 +51,13 @@ async function clubId(name: string): Promise<number> {
   const [found] = await database.db.select({ id: clubs.id }).from(clubs).where(eq(clubs.name, name))
 
   return found?.id ?? 0
+}
+
+/** The club a match is against. */
+async function clubOf(matchId: number): Promise<number> {
+  const [row] = await database.db.select({ id: matches.clubId }).from(matches).where(eq(matches.id, matchId))
+
+  return row?.id ?? 0
 }
 
 /** A stadium with these names in order, each with a start season (the first may lack one). */
@@ -493,5 +502,128 @@ describe('listClubStadiumLines', () => {
       { name: 'Proef Arena', note: null, startDay: null, startSeason: '2012/13' },
       { name: 'Proef Park', note: null, startDay: null, startSeason: '2020/21' },
     ])
+  })
+})
+
+describe('isOnNeutralGround', () => {
+  it('counts a final, a Super Cup and a cup match from May as neutral, and a league match not', () => {
+    const day = '2010-03-01'
+
+    expect(isOnNeutralGround({ competition: 'KNVB Beker', matchDate: day, round: 'Finale' })).toBe(true)
+    expect(isOnNeutralGround({ competition: 'Johan Cruijff Schaal', matchDate: day, round: 'Wedstrijd 1' })).toBe(true)
+    expect(isOnNeutralGround({ competition: 'KNVB Beker', matchDate: '1997-05-08', round: 'Wedstrijd 8' })).toBe(true)
+    expect(isOnNeutralGround({ competition: 'KNVB Beker', matchDate: '1997-04-30', round: 'Halve finale' })).toBe(false)
+    expect(isOnNeutralGround({ competition: 'Eredivisie', matchDate: '1997-05-08', round: 'Speelronde 34' })).toBe(
+      false,
+    )
+  })
+})
+
+describe('fillStadiumsFromHomeGrounds', () => {
+  /** An old-site match: no text, played, with a round of its own. */
+  async function oldMatch(
+    opponent: string,
+    parts: { competition?: 'Eredivisie' | 'KNVB Beker'; home: boolean; matchDate: string; round?: string },
+  ): Promise<number> {
+    const id = await played(opponent, { home: parts.home, matchDate: parts.matchDate, stadium: null })
+
+    await database.db
+      .update(matches)
+      .set({
+        competition: parts.competition ?? 'Eredivisie',
+        ...(parts.round === undefined ? {} : { round: parts.round }),
+      })
+      .where(eq(matches.id, id))
+
+    return id
+  }
+
+  it('gives a home match the ground of sc Heerenveen of that day, before and after 20 August 1994', async () => {
+    const old = await makeStadium(['Sportpark Noord', null])
+    const current = await makeStadium(['Abe Lenstra Stadion', '1994/95'])
+
+    await replaceHomeGrounds(database.db, null, [
+      { stadiumId: old, startDay: null, startSeason: null },
+      { stadiumId: current, startDay: null, startSeason: '1994/95' },
+    ])
+
+    const before = await oldMatch('Oefenstad', { home: true, matchDate: '1994-05-01' })
+    const after = await oldMatch('Oefenstad', { home: true, matchDate: '1994-08-20' })
+    const result = await fillStadiumsFromHomeGrounds(database.db)
+
+    expect(await stadiumOf(before)).toBe(old)
+    expect(await stadiumOf(after)).toBe(current)
+    expect(result.filled).toBe(2)
+  })
+
+  it('gives an away match the ground of the opponent, also the old one of a club that moved', async () => {
+    const oldGround = await makeStadium(['Oud Veld', null])
+    const newGround = await makeStadium(['Nieuw Veld', '2005/06'])
+    const club = await played('Verhuis FC', { matchDate: '2001-09-01', stadium: null })
+
+    await replaceHomeGrounds(database.db, await clubOf(club), [
+      { stadiumId: oldGround, startDay: null, startSeason: null },
+      { stadiumId: newGround, startDay: null, startSeason: '2005/06' },
+    ])
+
+    const early = await oldMatch('Verhuis FC', { home: false, matchDate: '2003-09-01' })
+    const late = await oldMatch('Verhuis FC', { home: false, matchDate: '2006-02-01' })
+
+    await fillStadiumsFromHomeGrounds(database.db)
+
+    expect(await stadiumOf(early)).toBe(oldGround)
+    expect(await stadiumOf(late)).toBe(newGround)
+  })
+
+  it('leaves what it is not sure of, counts the reasons, and can run again', async () => {
+    const ground = await makeStadium(['Veld', '2010/11'])
+    const withGround = await played('Met Veld', { matchDate: '2012-01-01', stadium: null })
+
+    await replaceHomeGrounds(database.db, await clubOf(withGround), [
+      { stadiumId: ground, startDay: null, startSeason: null },
+    ])
+
+    const final = await oldMatch('Met Veld', { competition: 'KNVB Beker', home: false, matchDate: '2011-05-12' })
+    const noGround = await oldMatch('Zonder Veld', { home: false, matchDate: '2011-02-01' })
+    const text = await played('Met Veld', { matchDate: '2011-03-01', stadium: 'Onbekend Park' })
+    const filled = await oldMatch('Met Veld', { home: false, matchDate: '2011-04-01' })
+    const first = await fillStadiumsFromHomeGrounds(database.db)
+
+    expect(first.skipped).toEqual({ edited: 0, neutral: 1, noGround: 1, notYet: 0, text: 1 })
+    expect(await stadiumOf(final)).toBeNull()
+    expect(await stadiumOf(noGround)).toBeNull()
+    expect(await stadiumOf(text)).toBeNull()
+    expect(await stadiumOf(filled)).toBe(ground)
+    // The second run changes nothing, and counts the same ones left.
+    expect((await fillStadiumsFromHomeGrounds(database.db)).filled).toBe(0)
+  })
+
+  it('leaves a match without a ground begun by the day, and a match whose facts the editors entered', async () => {
+    const ground = await makeStadium(['Laat Veld', '2015/16'])
+    const club = await played('Laat FC', { matchDate: '2012-01-01', stadium: null })
+
+    await replaceHomeGrounds(database.db, await clubOf(club), [
+      { stadiumId: ground, startDay: null, startSeason: null },
+    ])
+
+    const edited = await oldMatch('Laat FC', { home: false, matchDate: '2013-01-01' })
+    const [user] = await database.db
+      .insert(adminUsers)
+      .values({ email: 'redacteur@example.test', role: 'editor' })
+      .$returningId()
+
+    await database.db.insert(matchEdits).values({
+      beforeGoals: '[]',
+      beforeMatch: '{}',
+      editedAt: new Date(),
+      editedBy: user?.id ?? 0,
+      factsEdited: true,
+      matchId: edited,
+    })
+
+    const result = await fillStadiumsFromHomeGrounds(database.db)
+
+    expect(result.skipped.edited).toBe(1)
+    expect(await stadiumOf(edited)).toBeNull()
   })
 })

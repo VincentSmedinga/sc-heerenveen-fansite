@@ -11,6 +11,7 @@
     "import:completeness": "node ../../scripts/worktree-env.js guard -- node --env-file-if-exists=../../.env src/import.ts --completeness",
     "import:stadiums": "node ../../scripts/worktree-env.js guard -- node --env-file-if-exists=../../.env src/import.ts --stadiums",
     "import:country-facts": "node ../../scripts/worktree-env.js guard -- node --env-file-if-exists=../../.env src/import.ts --country-facts",
+    "import:fill-stadiums": "node ../../scripts/worktree-env.js guard -- node --env-file-if-exists=../../.env src/import.ts --fill-stadiums",
     "import:item-clubs": "node ../../scripts/worktree-env.js guard -- node --env-file-if-exists=../../.env src/import.ts --item-clubs",
     "import:changes": "node ../../scripts/worktree-env.js guard -- node --env-file-if-exists=../../.env src/import.ts --changes",
     "import:old-site": "node ../../scripts/worktree-env.js guard -- node --env-file-if-exists=../../.env src/import.ts --old-site",
