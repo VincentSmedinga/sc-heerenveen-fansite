@@ -6,6 +6,7 @@ import type { Database } from './client.ts'
 import { migrateArticleBodies } from './article-body-migration.ts'
 import { connect } from './client.ts'
 import { readDatabaseEnv } from './env.ts'
+import { migrateStadiums } from './stadiums.ts'
 
 /**
  * Runs the migrations in `drizzle/` that the database hasn't had yet, and then puts the text of
@@ -16,6 +17,7 @@ import { readDatabaseEnv } from './env.ts'
 export async function migrateDatabase(db: Database) {
   await migrate(db, { migrationsFolder: fileURLToPath(new URL('../drizzle', import.meta.url)) })
   await migrateArticleBodies(db)
+  await migrateStadiums(db)
 }
 
 if (import.meta.main) {

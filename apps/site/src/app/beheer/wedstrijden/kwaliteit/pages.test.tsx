@@ -91,7 +91,9 @@ describe('the page Kwaliteit van wedstrijden', () => {
       'Gegevens',
       'Wacht',
     ])
-    expect(html).toContain('U Uitslag, A Aftrap, D Doelpunten, O Opstelling, V Verslag, G Gegevens, W Wacht.')
+    expect(html).toContain(
+      'U Uitslag, A Aftrap, D Doelpunten, O Opstelling, V Verslag, G Gegevens, S Stadion, W Wacht.',
+    )
     expect(seasons.at(-1)).toBe('1990/91')
     expect(seasons).toEqual(seasons.toSorted().reverse())
   })

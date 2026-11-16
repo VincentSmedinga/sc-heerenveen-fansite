@@ -1,7 +1,9 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
+import { matches, stadiums } from '@fansite/db/schema'
 import { readSeasonCoverage } from '@fansite/db/season-coverage'
 import { createTestDatabase } from '@fansite/db/test-database'
+import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { unusualFormationsPath } from './formations'
@@ -56,6 +58,25 @@ describe('the gaps of the matches of a season (#1163)', () => {
     expect(gaps.get(ids.waiting)?.wacht).toEqual({ sign: '2', total: 2 })
     expect(gaps.get(ids.complete)?.wacht).toBeUndefined()
     expect(gaps.get(ids.complete)?.gegevens).toEqual({ sign: '3', total: 3 })
+  })
+
+  it('has its own gap for a stadium name without a stadium, next to the missing facts (#1297)', async () => {
+    const [{ insertId: stadiumId }] = await database.db.insert(stadiums).values({})
+
+    expect((await gapsOf()).get(ids.complete)?.stadion).toBeUndefined()
+
+    await database.db.update(matches).set({ stadium: 'Oefenstadion' }).where(eq(matches.id, ids.complete))
+
+    const named = (await gapsOf()).get(ids.complete)
+
+    expect(named?.stadion).toEqual({ sign: '?', total: 1 })
+    expect(named?.gegevens).toEqual({ sign: '2', total: 2 })
+
+    await database.db.update(matches).set({ stadiumId }).where(eq(matches.id, ids.complete))
+
+    expect((await gapsOf()).get(ids.complete)?.stadion).toBeUndefined()
+
+    await database.db.update(matches).set({ stadium: null, stadiumId: null }).where(eq(matches.id, ids.complete))
   })
 
   it('has a ? for the kick-off and the line-up of a played match without them', async () => {

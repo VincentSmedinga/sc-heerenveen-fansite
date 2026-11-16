@@ -984,6 +984,33 @@ Zes functies in `@fansite/db/club-name-periods` horen erbij:
 Het logboek krijgt het nummer van de club en de aantallen, en nooit de tekst van een toelichting.
 De dump van `pnpm db:backup` neemt de tabel mee met haar rijen.
 
+### De tabellen van de stadions
+
+Een stadion is het veld zelf (#1297, de beslissingen staan in `hosting-en-data.md`).
+`club_stadiums` blijft zoals hij is: de pagina's gebruiken hem tot #1301.
+
+| Tabel                | Betekenis                                                                                                                                                                      |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `stadiums`           | Het veld: `wikidata_id` (uniek, mag leeg), `place`, `latitude` en `longitude` (samen, of allebei leeg), `place_source` (`manual` of `wikidata`), `street` en `postcode`        |
+| `stadium_names`      | De namen van een stadion in volgorde (`position` vanaf 0), met `start_season` of `start_day`, en een toelichting; alleen de eerste naam mag zonder start; rij gaat met stadion |
+| `club_home_grounds`  | De velden van een club in volgorde, met dezelfde start; `club_id` is leeg voor sc Heerenveen; `ON DELETE RESTRICT` op het stadion                                              |
+| `matches.stadium_id` | Het stadion van een wedstrijd, leeg als er geen zeker stadion is; `matches.stadium` blijft de tekst van de bron                                                                |
+
+De migratie `0081_add_stadiums` maakt de tabellen en de kolom leeg.
+De stadions zelf komen uit een stap erna, `migrateStadiums`, die `prepareDatabase` en `pnpm db:migrate` draaien:
+
+- `seedStadiums(db)` maakt de twee stadions van sc Heerenveen en een stadion voor elke naam in de wedstrijden (spelling en hernoemingen samengevoegd, zie `renamedStadiums`), en de thuisvelden van de clubs die de meeste uitwedstrijden op een veld speelden.
+  Het doet niets zodra er een stadion is.
+  De start van een naam of een veld na het eerste is de eerste wedstrijd in onze gegevens, en de toelichting zegt dat; de redactie kan hem verbeteren.
+- `linkMatchesToStadiums(db)` koppelt de wedstrijden met een stadiontekst en zonder stadion, met `findStadium`, en geeft terug hoeveel er gekoppeld zijn en hoeveel niet.
+  Een wedstrijd die niet zeker is, houdt zijn tekst.
+- `findStadium(db, { homeClubId, matchDate, name })` geeft het stadion dat die naam op die dag al had gehad, of bij meer kandidaten het veld dat de thuisclub toen gebruikte; anders niets.
+  `homeClubId` is leeg als sc Heerenveen thuis speelde.
+- `linkMatchToStadium(db, matchId)` zet het stadion van één wedstrijd opnieuw uit zijn tekst; de import en het beheer roepen het aan na elke schrijfactie die de tekst, de dag of de thuisclub kan veranderen.
+- `replaceHomeGrounds(db, clubId, rows)` schrijft de velden van een club (of van sc Heerenveen, met `null`) in één transactie, want een UNIQUE-sleutel houdt een tweede reeks voor een lege club niet tegen.
+
+De dump van `pnpm db:backup` neemt de drie tabellen mee met hun rijen (`exportPlan`).
+
 ### Een club met twee namen samenvoegen
 
 Staat een club twee keer in `clubs` omdat Wikipedia hem op twee manieren schrijft, zoals `Excelsior` en `Excelsior Rotterdam`, dan zijn er twee wegen.
@@ -1023,6 +1050,7 @@ Heeft hij titels in `club_pages`, zet die dan ook over: `UPDATE club_pages SET c
 Heeft hij een eigen lijst in `club_stadiums` en de club die blijft niet, zet die dan ook over met `UPDATE club_stadiums SET club_id = <blijft> WHERE club_id = <gaat weg>;`.
 Hebben allebei een lijst, kies er dan een en haal de andere weg: de lijsten van twee clubs laten zich niet samenvoegen.
 Hetzelfde geldt voor een lijst in `club_name_periods`: zet hem over met `UPDATE club_name_periods SET club_id = <blijft> WHERE club_id = <gaat weg>;` als de club die blijft er geen heeft, anders kies je een lijst.
+Hetzelfde geldt voor de thuisvelden in `club_home_grounds`: ze gaan met hun club mee weg, dus zet ze over met `UPDATE club_home_grounds SET club_id = <blijft> WHERE club_id = <gaat weg>;` als de club die blijft er geen heeft.
 De slug van de club die weggaat, werkt dan niet meer; de slug van de club die blijft verandert niet.
 
 ## De tabel `staff`
@@ -1086,8 +1114,9 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `club_pages`, `persons`, `person_pages`, `player_list_titles`, `club_stadiums`, `club_name_periods`, `standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, `squad_completeness`, `item_clubs`, `match_reports`, `match_appearances`, `match_substitutions`, `match_cards`, `match_incidents`, `match_shootout_kicks`, `match_statistics`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `club_pages`, `persons`, `person_pages`, `player_list_titles`, `club_stadiums`, `stadiums`, `stadium_names`, `club_home_grounds`, `club_name_periods`, `standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, `squad_completeness`, `item_clubs`, `match_reports`, `match_appearances`, `match_substitutions`, `match_cards`, `match_incidents`, `match_shootout_kicks`, `match_statistics`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
 - `@fansite/db/visits`: `createVisitCounter(db)` geeft `record({ address, now, path, userAgent })`, dat een paginaweergave en, als de bezoeker vandaag nog niet is gezien, een bezoeker telt; `removeVisitorData(db, now)` gooit het zout en de kenmerken van eerdere dagen weg, `visitDay(moment)` geeft de dag in Nederland en `visitorHash(salt, address, userAgent)` het kenmerk;
+- `@fansite/db/stadiums`: `findStadium`, `resolveStadium`, `loadStadiumIndex`, `linkMatchToStadium`, `linkMatchesToStadiums`, `replaceHomeGrounds`, `seedStadiums`, `migrateStadiums`, `nameKey` en `startDate` voor de stadions (zie _De tabellen van de stadions_);
 - `@fansite/db/club-name-periods`: `listClubNamePeriods`, `listClubsWithNamePeriods`, `replaceClubNamePeriods`, `removeClubNamePeriods`, `nameOnDay` en `withSeasonNames` voor de lijsten van namen (zie _De tabel `club_name_periods`_);
 - `@fansite/db/club-stadiums`: `listClubStadiums`, `listClubsWithStadiums`, `replaceClubStadiums` en `removeClubStadiums` voor de eigen lijsten van stadions (zie _De tabel `club_stadiums`_);
 - `@fansite/db/persons`: `createPersonBook(db, { aliases, redirects })` geeft `resolve(titel)`, dat de persoon van een titel vindt of maakt en zijn titels in `person_pages` zet, met `knownPersonPages` en `rememberedPersonArticles` voor de titels in `person_pages`;

@@ -20,13 +20,20 @@ export const gapColumns = [
   { key: 'opstelling', letter: 'O', name: 'Opstelling' },
   { key: 'verslag', letter: 'V', name: 'Verslag' },
   { key: 'gegevens', letter: 'G', name: 'Gegevens' },
+  { key: 'stadion', letter: 'S', name: 'Stadion' },
   { key: 'wacht', letter: 'W', name: 'Wacht' },
 ] as const
 
 export type GapColumn = (typeof gapColumns)[number]['key']
 
 /** The columns that lead to a part of the form, where "Opslaan en volgende" can go on. */
-export const formColumns = ['uitslag', 'aftrap', 'doelpunten', 'gegevens'] as const satisfies readonly GapColumn[]
+export const formColumns = [
+  'uitslag',
+  'aftrap',
+  'doelpunten',
+  'gegevens',
+  'stadion',
+] as const satisfies readonly GapColumn[]
 
 export type FormColumn = (typeof formColumns)[number]
 
@@ -35,6 +42,7 @@ export const columnParts = {
   aftrap: 'uitslag',
   doelpunten: 'doelpunten',
   gegevens: 'gegevens',
+  stadion: 'gegevens',
   uitslag: 'uitslag',
 } as const satisfies Record<FormColumn, string>
 
@@ -128,6 +136,7 @@ export async function readMatchGaps(db: Pick<Database, 'select'>, season?: strin
       referee: matches.referee,
       season: matches.season,
       stadium: matches.stadium,
+      stadiumId: matches.stadiumId,
       status: matches.status,
     })
     .from(matches)
@@ -200,6 +209,10 @@ export async function readMatchGaps(db: Pick<Database, 'select'>, season?: strin
     }
     if (played && missingFacts > 0) {
       gaps.gegevens = { sign: String(missingFacts), total: missingFacts }
+    }
+    // A stadium name that no stadium is certain for has its own gap, next to the missing facts.
+    if (played && match.stadium !== null && match.stadiumId === null) {
+      gaps.stadion = { sign: '?', total: 1 }
     }
     if (wait > 0) {
       gaps.wacht = { sign: String(wait), total: wait }

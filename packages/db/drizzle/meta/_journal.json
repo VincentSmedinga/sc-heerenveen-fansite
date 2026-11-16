@@ -568,6 +568,13 @@
       "when": 1794820916154,
       "tag": "0080_add_country_for_sport_and_birth",
       "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "5",
+      "when": 1794827446680,
+      "tag": "0081_add_stadiums",
+      "breakpoints": true
     }
   ]
 }

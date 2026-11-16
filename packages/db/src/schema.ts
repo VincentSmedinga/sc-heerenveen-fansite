@@ -7,6 +7,7 @@ import {
   customType,
   date,
   datetime,
+  decimal,
   foreignKey,
   index,
   int,
@@ -1182,6 +1183,125 @@ export type ClubStadium = typeof clubStadiums.$inferSelect
 
 export type NewClubStadium = typeof clubStadiums.$inferInsert
 
+/** The most characters a column of the stadium tables holds. The admin checks them first. */
+export const stadiumLimits = { name: 100, note: 200, place: 100, postcode: 12, street: 150 }
+
+/** Where the place and coordinates of a stadium come from, as `clubCountrySources` does. */
+export const stadiumPlaceSources = ['manual', 'wikidata'] as const
+
+export type StadiumPlaceSource = (typeof stadiumPlaceSources)[number]
+
+/**
+ * A stadium is the ground itself and nothing else (#1297): a club that moves plays in another
+ * stadium, and a stadium that is renamed gets another name in `stadium_names`. A name is not
+ * unique, because two grounds can have had the same name in different times. `wikidata_id` is
+ * the item of Wikidata, empty for a ground we have no item for. The place and the coordinates
+ * come from Wikidata (`place_source` is `wikidata`) or from the editors (`manual`), and the
+ * importer leaves all three alone for a `manual` stadium; they are empty together with their
+ * source. The street and the postcode are always the editors'.
+ */
+export const stadiums = mysqlTable(
+  'stadiums',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    wikidataId: varchar('wikidata_id', { length: wikidataLimits.id }).unique(),
+    place: varchar('place', { length: stadiumLimits.place }),
+    latitude: decimal('latitude', { precision: 9, scale: 6 }),
+    longitude: decimal('longitude', { precision: 9, scale: 6 }),
+    placeSource: mysqlEnum('place_source', stadiumPlaceSources),
+    street: varchar('street', { length: stadiumLimits.street }),
+    postcode: varchar('postcode', { length: stadiumLimits.postcode }),
+  },
+  (table) => [
+    check(
+      'stadiums_coordinates_in_a_pair',
+      sql`(${table.latitude} is null and ${table.longitude} is null) or (${table.latitude} is not null and ${table.longitude} is not null)`,
+    ),
+  ],
+)
+
+export type NewStadium = typeof stadiums.$inferInsert
+
+export type Stadium = typeof stadiums.$inferSelect
+
+/**
+ * The names a stadium has had, in order: `position` counts from 0. A name starts with a season
+ * (`start_season`, such as `1994/95`, counting as 1 July of that year) or with a day
+ * (`start_day`), never both, and only the first name may have no start, as in `club_stadiums`.
+ * A match is linked to a stadium by a name the stadium has had on the day of the match (see
+ * `findStadium`). `note` is a short text of our own. The rows go with their stadium.
+ */
+export const stadiumNames = mysqlTable(
+  'stadium_names',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    stadiumId: int('stadium_id', { unsigned: true })
+      .notNull()
+      .references(() => stadiums.id, { onDelete: 'cascade' }),
+    position: smallint('position', { unsigned: true }).notNull(),
+    name: varchar('name', { length: stadiumLimits.name }).notNull(),
+    startSeason: varchar('start_season', { length: 7 }),
+    startDay: date('start_day', { mode: 'string' }),
+    note: varchar('note', { length: stadiumLimits.note }),
+  },
+  (table) => [
+    unique('stadium_names_stadium_id_position_unique').on(table.stadiumId, table.position),
+    index('stadium_names_name_idx').on(table.name),
+    check('stadium_names_one_start', sql`${table.startSeason} is null or ${table.startDay} is null`),
+    check(
+      'stadium_names_start_season_format',
+      sql`${table.startSeason} is null or ${table.startSeason} regexp '^[0-9]{4}/[0-9]{2}$'`,
+    ),
+    check(
+      'stadium_names_start_after_first',
+      sql`${table.position} = 0 or ${table.startSeason} is not null or ${table.startDay} is not null`,
+    ),
+  ],
+)
+
+export type NewStadiumName = typeof stadiumNames.$inferInsert
+
+export type StadiumName = typeof stadiumNames.$inferSelect
+
+/**
+ * The grounds a club has played its home matches on, in order, with the same start as a name.
+ * sc Heerenveen is no opponent and is not in `clubs`, so its rows have an empty `club_id`: a
+ * UNIQUE key does not stop a second row with an empty club, so the code keeps one series, in
+ * a transaction (`replaceHomeGrounds`). A neutral ground has no row: a match points to its own
+ * stadium, and a ground that belongs to neither club is a stadium without a home club.
+ */
+export const clubHomeGrounds = mysqlTable(
+  'club_home_grounds',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    clubId: int('club_id', { unsigned: true }).references(() => clubs.id, { onDelete: 'cascade' }),
+    stadiumId: int('stadium_id', { unsigned: true })
+      .notNull()
+      .references(() => stadiums.id, { onDelete: 'restrict' }),
+    position: smallint('position', { unsigned: true }).notNull(),
+    startSeason: varchar('start_season', { length: 7 }),
+    startDay: date('start_day', { mode: 'string' }),
+    note: varchar('note', { length: stadiumLimits.note }),
+  },
+  (table) => [
+    unique('club_home_grounds_club_id_position_unique').on(table.clubId, table.position),
+    index('club_home_grounds_stadium_id_idx').on(table.stadiumId),
+    check('club_home_grounds_one_start', sql`${table.startSeason} is null or ${table.startDay} is null`),
+    check(
+      'club_home_grounds_start_season_format',
+      sql`${table.startSeason} is null or ${table.startSeason} regexp '^[0-9]{4}/[0-9]{2}$'`,
+    ),
+    check(
+      'club_home_grounds_start_after_first',
+      sql`${table.position} = 0 or ${table.startSeason} is not null or ${table.startDay} is not null`,
+    ),
+  ],
+)
+
+export type ClubHomeGround = typeof clubHomeGrounds.$inferSelect
+
+export type NewClubHomeGround = typeof clubHomeGrounds.$inferInsert
+
 /** The most characters a column of `club_name_periods` holds. The admin checks them first. */
 export const clubNamePeriodLimits = { name: clubLimits.name, note: 200 }
 
@@ -1291,6 +1411,9 @@ export const matches = mysqlTable(
       .references(() => clubs.id),
     home: boolean('home').notNull(),
     stadium: varchar('stadium', { length: matchLimits.stadium }),
+    // The stadium as a thing of its own (#1297), empty while no stadium is certain. `stadium`
+    // stays the text of the source.
+    stadiumId: int('stadium_id', { unsigned: true }).references(() => stadiums.id, { onDelete: 'set null' }),
     status: mysqlEnum('status', matchStatuses).notNull(),
     goalsFor: int('goals_for', { unsigned: true }),
     goalsAgainst: int('goals_against', { unsigned: true }),

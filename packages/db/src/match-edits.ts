@@ -8,6 +8,7 @@ import type { Database } from './client.ts'
 import type { Match, MatchEdit, MatchGoal, MatchPart, NewMatchGoal } from './schema.ts'
 
 import { matchEdits, matches, matchGoals, matchParts, players } from './schema.ts'
+import { linkMatchToStadium } from './stadiums.ts'
 
 export { matchParts }
 export type { MatchPart }
@@ -394,6 +395,9 @@ export async function removeEntry(db: Writer, edit: MatchEdit) {
         stadium: before.stadium ?? null,
       })
       .where(eq(matches.id, edit.matchId))
+  }
+  if (parts.includes('kickoff') || parts.includes('result') || parts.includes('facts')) {
+    await linkMatchToStadium(db, edit.matchId)
   }
   if (parts.includes('goals')) {
     await db.delete(matchGoals).where(eq(matchGoals.matchId, edit.matchId))

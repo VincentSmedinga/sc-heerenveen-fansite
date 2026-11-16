@@ -1087,3 +1087,86 @@
   De runtime (`Intl.DisplayNames`) kent die codes niet, dus de keuze in het beheer en de logregels nemen de naam van `flags.ts` voor een code met een streepje (`regionName` in `apps/site/src/beheer/countries.ts`).
 - **Waarom:** het zijn echte codes, zonder een eigen verzinsel dat later botst, en een supporter noemt de vier landen apart.
 - **Alternatieven:** eigen codes van twee letters naast `XK` (geen migratie, maar verzonnen); alles `GB` laten (de eigenaar wil ze gescheiden); de codes als tekst in een kader (de vlag is er, en supporters herkennen die).
+
+## Een stadion is het fysieke veld, en alleen dat
+
+- **Datum:** 16 november 2026
+- **Besluit:** een stadion is het veld zelf, en een stadion is een rij in `stadiums` (#1297, uit de reeks van #1300).
+  Verhuist een club, dan is het nieuwe veld een nieuw stadion.
+  Krijgt een stadion een andere naam, dan krijgt het een naam erbij in `stadium_names`.
+  sc Heerenveen speelde in Sportpark Noord, dat in 1986 Abe Lenstra Stadion werd, en verhuisde op 20 augustus 1994 naar een nieuw stadion dat dezelfde naam hield.
+  ADO Den Haag verhuisde van het Zuiderpark naar een nieuw veld, dat om de paar jaar een sponsornaam kreeg.
+- **Waarom:** naam, plek en gebruikende club veranderen los van elkaar.
+- **Alternatieven:** een stadion als naam met een periode per club, zoals `club_stadiums` dat doet, die geen verhuizing van een gelijknamig stadion kan uitdrukken.
+- **Later:** `club_stadiums` blijft voorlopig zoals het is, want de pagina's gebruiken hem tot #1301 (zie _De eigen lijst van stadions van een club staat in `club_stadiums`_).
+
+## Een naam van een stadion is niet uniek, en een wedstrijd wordt gekoppeld met naam, dag en thuisclub
+
+- **Datum:** 16 november 2026
+- **Besluit:** twee stadions kunnen dezelfde naam hebben gehad, op andere perioden.
+  Een wedstrijd met alleen een naam in de bron wordt aan een stadion gekoppeld met de naam, de dag van de wedstrijd en de thuisclub samen (`findStadium` in `@fansite/db/stadiums`).
+  Geeft dat geen zekere uitkomst, dan blijft de wedstrijd zonder stadion en staat hij op de pagina Kwaliteit van het beheer, in de kolom Stadion.
+- **Waarom:** "Abe Lenstra Stadion" op een wedstrijd van 1992 is een ander veld dan in 1996.
+- **Alternatieven:** koppelen op de naam alleen, wat het oude en het nieuwe veld door elkaar haalt.
+- **De regel:** de kandidaten zijn de stadions die de naam op die dag al hadden gehad.
+  Een naam telt dus ook na een hernoeming, want de bron schrijft soms de oude naam.
+  Is er één kandidaat, dan is dat het stadion; zijn er meer, dan beslist het veld dat de thuisclub op die dag gebruikte, als dat een van hen is; anders is de wedstrijd niet zeker.
+  Hoofdletters, spaties, accenten en leestekens tellen niet mee: `Koning Willem II-stadion` en `Koning Willem II Stadion` zijn één naam.
+
+## De tabellen van de stadions zijn `stadiums`, `stadium_names` en `club_home_grounds`
+
+- **Datum:** 16 november 2026
+- **Besluit:** `stadiums` is het veld, met het Wikidata-nummer (uniek, mag leeg zijn), de plaats, de coördinaten, de straat, de postcode en de markering `place_source` (`manual` of `wikidata`) voor plaats en coördinaten.
+  `stadium_names` heeft de namen van een stadion in volgorde, met een start als seizoen of als dag, zoals `club_stadiums`: nooit allebei, en alleen de eerste rij mag zonder start.
+  `club_home_grounds` heeft per club de velden waarop hij thuis speelde, in volgorde, met dezelfde start.
+  `matches.stadium_id` verwijst naar het stadion van een wedstrijd, en `matches.stadium` blijft de tekst van de bron.
+  De migratie is `0081_add_stadiums`; ze maakt de tabellen leeg en zet de kolom leeg, en kan opnieuw draaien.
+  De dump van `pnpm db:backup` neemt de drie tabellen mee met hun rijen, want het is werk van de redactie.
+- **Waarom:** de import en de redactie kunnen een gegeven blijven aanvullen zonder de tekst van een bron te verliezen.
+- **Alternatieven:** de tekst vervangen door het nummer, wat de vergelijking met de bron weghaalt.
+- **De rij:** de coördinaten staan in een paar (beide of geen), de naam is hoogstens 100 tekens.
+  Een stadion dat verdwijnt, laat zijn wedstrijden zonder stadion (`ON DELETE SET NULL`), en een stadion met een thuisclub kan niet weg zonder eerst die rij weg te halen (`ON DELETE RESTRICT`).
+
+## Neutraal terrein krijgt geen markering
+
+- **Datum:** 16 november 2026
+- **Besluit:** een wedstrijd verwijst naar zijn eigen stadion.
+  Een finale op een veld van geen van beide clubs is een stadion dat bij geen van beide hoort.
+- **Waarom:** een markering zegt minder dan het stadion zelf.
+- **Alternatieven:** een vlag "neutraal" op de wedstrijd.
+
+## sc Heerenveen staat met een lege club in `club_home_grounds`
+
+- **Datum:** 16 november 2026
+- **Besluit:** sc Heerenveen is geen tegenstander en staat niet in `clubs`.
+  Zijn thuisvelden staan in `club_home_grounds` met een leeg `club_id`, en de code bewaakt dat er één reeks is, in een transactie (`replaceHomeGrounds`), omdat een UNIQUE-sleutel op een lege waarde meer rijen toelaat.
+  Een wedstrijd waarin sc Heerenveen thuis speelt, heeft dus een lege thuisclub voor `findStadium`.
+- **Waarom:** een rij voor sc Heerenveen in `clubs` zou in elke lijst van tegenstanders opduiken.
+- **Alternatieven:** een rij voor sc Heerenveen in `clubs`, met een uitzondering in elke lijst.
+- **De velden:** Sportpark Noord, dat vanaf 1986/87 ook Abe Lenstra Stadion heet (de dag in 1986 kennen we niet; onze wedstrijden beginnen in 1990, dus het maakt voor de koppeling niet uit), en het nieuwe Abe Lenstra Stadion vanaf het seizoen 1994/95, met de inhuldiging van 20 augustus 1994 in de toelichting.
+
+## De plaats en de coördinaten van een stadion komen uit Wikidata of van de redactie
+
+- **Datum:** 16 november 2026
+- **Besluit:** de plaats en de coördinaten komen uit Wikidata (`P131` en `P625`) en hebben een markering `manual` of `wikidata`, zoals het land van een club.
+  Zet de redactie er één met de hand, dan laat de importer ze alle drie staan.
+  Het adres (straat en postcode) is altijd van de redactie.
+  Dit issue maakt de kolommen; de importer vult ze in #1298.
+- **Waarom:** coördinaten zijn er bijna overal, een adres bijna nergens: van 60 stadions had op 16 november 2026 geen enkele een straat en twee een postcode, maar 59 hadden coördinaten.
+- **Alternatieven:** het adres ook uit Wikidata proberen.
+
+## De stadions van de bestaande wedstrijden komen uit een stap na de migraties
+
+- **Datum:** 16 november 2026
+- **Besluit:** een stap na de migraties (`migrateStadiums`, in `prepareDatabase` en in `pnpm db:migrate`) maakt de stadions één keer (`seedStadiums`) en koppelt daarna de wedstrijden met een stadiontekst en zonder stadion (`linkMatchesToStadiums`).
+  De eerste doet niets zodra er een stadion is, de tweede kijkt alleen naar wedstrijden zonder koppeling, dus de stap is te herhalen.
+  Een wedstrijd waarvan geen stadion zeker is, houdt zijn tekst en blijft zonder `stadium_id`.
+  De import koppelt een nieuwe wedstrijd, en elke schrijfactie die de tekst, de dag of de thuisclub van een wedstrijd kan veranderen, koppelt hem opnieuw (`linkMatchToStadium`): de import van Wikipedia, een wijziging of verschil dat de redactie overneemt, het formulier van het beheer en het ongedaan maken ervan.
+- **Waarom:** de koppeling heeft de logica van `findStadium` nodig, en dezelfde code doet het voor een nieuwe wedstrijd, zodat de migratie en de import niet uit elkaar lopen.
+  Een stap in TypeScript is te testen met een database en te herhalen, wat een SQL-migratie met een lijst namen niet is.
+- **Alternatieven:** de stadions en de koppeling in de SQL van de migratie (de logica van de koppeling zou er twee keer staan); een eigen opdracht die de eigenaar draait (dan staan de stadions niet klaar bij de volgende start).
+- **Wat erin zit:** een stadion voor elke naam in de wedstrijden, behalve dat de schrijfwijzen van één naam en de namen van één veld bij elkaar horen.
+  Die lijst staat in `renamedStadiums` in `stadiums.ts`, in de volgorde van de namen; de eerste naam heeft geen start en elke volgende begint met het seizoen van de eerste wedstrijd met die naam in onze gegevens.
+  De toelichting zegt dat dit niet het echte begin is; de redactie kan het verbeteren.
+  Een club heeft een veld als thuisveld als hij de meeste uitwedstrijden daar speelde; een veld waar geen club de meeste had, zoals een neutraal terrein, heeft geen thuisclub.
+  De velden van een club komen in de volgorde van zijn eerste wedstrijd daar.

@@ -5,6 +5,7 @@ import { connect } from './client.ts'
 import { lockNameFor, withLock } from './lock.ts'
 import { updatePlayerAddresses } from './person-slugs.ts'
 import { removeTestSources, seedMatches, seedRealSources, seedSquad } from './seed.ts'
+import { migrateStadiums } from './stadiums.ts'
 import { seedStaff } from './staff-seed.ts'
 
 export type PrepareOptions = {
@@ -76,6 +77,8 @@ export async function prepareDatabase({
         await seedMatches(db)
         await seedSquad(db)
       }
+
+      await migrateStadiums(db)
     })
 
     if (!ran) {

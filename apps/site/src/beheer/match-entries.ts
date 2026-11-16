@@ -18,6 +18,7 @@ import {
 import { mayHaveReport, phaseOf } from '@fansite/db/match-reports'
 import { listWikipediaPages } from '@fansite/db/queries'
 import { adminUsers, matchChanges, matchEdits, matches, matchGoals, matchReports, players } from '@fansite/db/schema'
+import { linkMatchToStadium } from '@fansite/db/stadiums'
 import { and, asc, count, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm'
 
 import type { EntryGoal, MatchEntry, SquadPlayer } from './match-form'
@@ -341,6 +342,7 @@ export async function saveEntry(
           ...(parts.includes('facts') ? facts : {}),
         })
         .where(eq(matches.id, id))
+      await linkMatchToStadium(transaction, id)
     }
 
     if (parts.includes('goals')) {
