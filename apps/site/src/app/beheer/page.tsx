@@ -9,6 +9,8 @@ import { adminAreas, todoAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { countHeldChanges, countMatchesWithoutResult, countWaitingDifferences } from '#src/beheer/match-entries'
 import { countReportsToCheck } from '#src/beheer/match-reports'
+import { matchQualityPath } from '#src/beheer/quality'
+import { readMatchGaps } from '#src/beheer/quality-table'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
@@ -45,6 +47,12 @@ export default async function AdminPage() {
   // The reports that were klaar and are no longer right, which the list shows as "Klopt niet".
   const { seasons: wrongSeasons, total: wrong } = editor ? await countReportsToCheck(db) : { seasons: [], total: 0 }
   const wrongSeason = wrongSeasons.includes(current) ? current : wrongSeasons[0]
+  // What the table of the quality of the matches counts: the matches with a gap, and the gaps.
+  const gapMatches = editor ? (await readMatchGaps(db)).filter((match) => Object.keys(match.gaps).length > 0) : []
+  const gapTotal = gapMatches.reduce(
+    (sum, match) => sum + Object.values(match.gaps).reduce((inMatch, gap) => inMatch + gap.total, 0),
+    0,
+  )
   const todo: TodoItem[] = []
 
   if (waiting > 0) {
@@ -70,6 +78,13 @@ export default async function AdminPage() {
     todo.push({
       href: wrongSeason === undefined ? matchesPath : listPath(wrongSeason, 'alles'),
       text: plural(wrong, 'verslag klopt niet', 'verslagen kloppen niet'),
+    })
+  }
+
+  if (gapMatches.length > 0) {
+    todo.push({
+      href: matchQualityPath,
+      text: `${plural(gapTotal, 'gat', 'gaten')} in ${plural(gapMatches.length, 'wedstrijd', 'wedstrijden')}`,
     })
   }
 

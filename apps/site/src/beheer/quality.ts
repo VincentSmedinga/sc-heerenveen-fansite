@@ -5,9 +5,21 @@ import { eq } from 'drizzle-orm'
 
 import { seasonSlug } from '../seasons'
 
-// The addresses of the page Kwaliteit of the admin and of the pages of a season under it, and
-// whether a season has a player to choose for a goal. The table itself is in quality-table.ts.
+// The addresses of the quality pages of the admin, and whether a season has a player to choose
+// for a goal. The table of the matches is in quality-table.ts.
 
+/**
+ * The start of the quality of the matches (#1304): the table of the gaps for each season, with
+ * the table of one season and the unusual formations under it. It is under Wedstrijden, so the
+ * bar marks that screen. The name Kwaliteit stays out of the address of every other screen.
+ */
+export const matchQualityPath = '/beheer/wedstrijden/kwaliteit'
+
+/**
+ * The start of the lists that have not moved yet: the persons, the names, the usual places, the
+ * clubs without a country and the differences in the numbers and data of players. #1305 and
+ * #1306 move them to their own subject, and this address goes with the last of them.
+ */
 export const qualityPath = '/beheer/kwaliteit'
 
 /**

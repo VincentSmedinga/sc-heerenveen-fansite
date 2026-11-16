@@ -125,7 +125,7 @@ Wie op de server werkt, kan hetzelfde met `pnpm run import:changes`: `accept` ne
 
 Soms zeggen twee bronnen iets anders over dezelfde wedstrijd, zoals de sc Heerenveen Fansite en Wikipedia over de uitslag.
 De wedstrijd houdt dan de waarde van de bron waar hij van komt, en het verschil wacht op een besluit.
-Je vindt zo'n wedstrijd op `/beheer/kwaliteit`, onder "wijzigingen wachten" bij het seizoen.
+Je vindt zo'n wedstrijd op `/beheer/wedstrijden/kwaliteit`, onder "wijzigingen wachten" bij het seizoen.
 
 Op de pagina van de wedstrijd staat een kaart met de twee waarden en de namen van de bronnen.
 Schrijf bij "Reden" waarom je beslist, als dat iets toevoegt, en kies welke bron je overneemt of houdt.
@@ -135,7 +135,7 @@ Een verschil dat je afwijst, komt niet terug zolang beide bronnen hetzelfde blij
 ## Spelerscijfers die verschillen
 
 De selectietabel van Wikipedia heeft per speler het aantal doelpunten in een competitie.
-Is dat een ander aantal dan in de wedstrijden of de verslagen, dan staat op `/beheer/kwaliteit` bij het seizoen "spelerscijfers verschillen".
+Is dat een ander aantal dan in de wedstrijden of de verslagen, dan staat op `/beheer/wedstrijden/kwaliteit` bij het seizoen "spelerscijfers verschillen".
 De pagina erachter noemt de speler, de competitie en de twee aantallen.
 Schrijf een reden als dat iets toevoegt, en kies:
 
@@ -149,7 +149,7 @@ Klopt een wedstrijd of een verslag niet, verbeter dan die: het verschil verdwijn
 
 Wat je in het beheer van een speler invult of aanpast, blijft staan: de naam, het rugnummer, de positie en de Wikipedia-pagina.
 De import schrijft die velden daarna niet meer.
-Leest hij op Wikipedia iets anders, dan staat op `/beheer/kwaliteit` bij het seizoen "spelersgegevens verschillen".
+Leest hij op Wikipedia iets anders, dan staat op `/beheer/wedstrijden/kwaliteit` bij het seizoen "spelersgegevens verschillen".
 De pagina erachter noemt de speler, het veld, jouw waarde en die van de import.
 Schrijf een reden, en kies:
 

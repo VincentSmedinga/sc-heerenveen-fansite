@@ -412,10 +412,17 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   // (the made-up change that waits, see held-changes.ts), one column of it, an old work list
   // that forwards to its column, a season without matches, and seasons it does not know.
   { admin: 'editor', path: '/beheer/kwaliteit', status: 200 },
-  { admin: 'editor', path: `/beheer/kwaliteit/${earlierSeasonSlug()}`, status: 200 },
-  { admin: 'editor', path: `/beheer/kwaliteit/${earlierSeasonSlug()}?kolom=wacht`, status: 200 },
-  { admin: 'editor', path: `/beheer/kwaliteit/${earlierSeasonSlug()}/wachtende-wijzigingen`, status: 200 },
-  { admin: 'editor', path: '/beheer/kwaliteit/1990-91', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden/kwaliteit', status: 200 },
+  { admin: 'editor', path: `/beheer/wedstrijden/kwaliteit/${earlierSeasonSlug()}`, status: 200 },
+  { admin: 'editor', path: `/beheer/wedstrijden/kwaliteit/${earlierSeasonSlug()}?kolom=wacht`, status: 200 },
+  // The old work lists no longer forward to a column of the table (#1304).
+  { admin: 'editor', path: `/beheer/wedstrijden/kwaliteit/${earlierSeasonSlug()}/wachtende-wijzigingen`, status: 404 },
+  { admin: 'editor', path: '/beheer/wedstrijden/kwaliteit/1990-91', status: 200 },
+  { admin: 'editor', path: '/beheer/wedstrijden/kwaliteit/1989-90', status: 404 },
+  { admin: 'editor', path: '/beheer/wedstrijden/kwaliteit/formaties', status: 200 },
+  { admin: 'author', path: '/beheer/wedstrijden/kwaliteit', status: 404 },
+  { admin: 'author', path: '/beheer/wedstrijden/kwaliteit/1990-91', status: 404 },
+  { admin: 'author', path: '/beheer/wedstrijden/kwaliteit/formaties', status: 404 },
   // The persons without a line or a country (made up, see persons.ts): both lists, a part
   // that does not exist, which shows the last one, and a list that is no list, which is the
   // first.
@@ -435,13 +442,11 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'editor', path: '/beheer/kwaliteit/clubs/land?deel=9', status: 200 },
   { admin: 'editor', path: '/beheer/kwaliteit/personen?lijst=land', status: 200 },
   { admin: 'editor', path: '/beheer/kwaliteit/namen', status: 200 },
-  { admin: 'editor', path: '/beheer/kwaliteit/formaties', status: 200 },
   { admin: 'editor', path: '/beheer/kwaliteit/plaatsen', status: 200 },
   { admin: 'editor', path: '/beheer/kwaliteit/plaatsen/vragen', status: 200 },
   { admin: 'author', path: '/beheer/kwaliteit/personen', status: 404 },
   { admin: 'author', path: '/beheer/kwaliteit/personen/b', status: 404 },
   { admin: 'author', path: '/beheer/kwaliteit/namen', status: 404 },
-  { admin: 'author', path: '/beheer/kwaliteit/formaties', status: 404 },
   { admin: 'author', path: '/beheer/kwaliteit/plaatsen', status: 404 },
   { admin: 'author', path: '/beheer/kwaliteit/plaatsen/vragen', status: 404 },
   // The players whose numbers differ: a season with the made-up difference, and an empty one.
@@ -454,10 +459,10 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'editor', path: '/beheer/kwaliteit/1990-91/spelersgegevens', status: 200 },
   { admin: 'editor', path: '/beheer/kwaliteit/1989-90/spelersgegevens', status: 404 },
   { admin: 'author', path: '/beheer/kwaliteit/1990-91/spelersgegevens', status: 404 },
-  { admin: 'editor', path: '/beheer/kwaliteit/1989-90', status: 404 },
   { admin: 'editor', path: '/beheer/kwaliteit/1990-91/bestaat-niet', status: 404 },
+  // The page of a season has moved: the old address has no page left (#1304).
+  { admin: 'editor', path: '/beheer/kwaliteit/1990-91', status: 404 },
   { admin: 'author', path: '/beheer/kwaliteit', status: 404 },
-  { admin: 'author', path: '/beheer/kwaliteit/1990-91', status: 404 },
   { admin: 'editor', path: '/beheer/bezoek', status: 200 },
   { admin: 'author', path: '/beheer/bezoek', status: 404 },
   // The overview of the articles of the editors: the first page, and the addresses that say

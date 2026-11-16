@@ -9,6 +9,7 @@ import type { AdminMatchRow } from '#src/beheer/match-entries'
 import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { listAdminMatches } from '#src/beheer/match-entries'
+import { matchQualityPath } from '#src/beheer/quality'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 import { describeShowDelay } from '#src/matches'
@@ -89,6 +90,9 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         </Text>
         <Text>
           <Link href={addPath}>Wedstrijd toevoegen</Link>
+        </Text>
+        <Text>
+          <Link href={matchQualityPath}>Kwaliteit van wedstrijden</Link>: wat er per seizoen ontbreekt.
         </Text>
       </Page.Cell>
       <Page.Cell area="main">

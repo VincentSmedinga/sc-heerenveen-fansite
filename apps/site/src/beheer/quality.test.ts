@@ -4,7 +4,8 @@ import { readSeasonCoverage } from '@fansite/db/season-coverage'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { seasonHasPlayers } from './quality'
+import { unusualFormationsPath } from './formations'
+import { matchQualityPath, qualityPath, seasonHasPlayers } from './quality'
 import { addQualitySeason, season } from './quality-fixtures'
 import { countGapsBySeason, nextWithGap, readMatchGaps, seasonTablePath } from './quality-table'
 
@@ -95,10 +96,16 @@ describe('the gaps of the matches of a season (#1163)', () => {
 })
 
 describe('the addresses of the table', () => {
+  it('has the quality of the matches under Wedstrijden, and the other lists where they were (#1304)', () => {
+    expect(matchQualityPath).toBe('/beheer/wedstrijden/kwaliteit')
+    expect(unusualFormationsPath).toBe('/beheer/wedstrijden/kwaliteit/formaties')
+    expect(qualityPath).toBe('/beheer/kwaliteit')
+  })
+
   it('names the season, and the column and the notice when given', () => {
-    expect(seasonTablePath('2005/06')).toBe('/beheer/kwaliteit/2005-06')
+    expect(seasonTablePath('2005/06')).toBe('/beheer/wedstrijden/kwaliteit/2005-06')
     expect(seasonTablePath('2005/06', 'doelpunten', 'kolom-compleet')).toBe(
-      '/beheer/kwaliteit/2005-06?kolom=doelpunten&gedaan=kolom-compleet',
+      '/beheer/wedstrijden/kwaliteit/2005-06?kolom=doelpunten&gedaan=kolom-compleet',
     )
   })
 })

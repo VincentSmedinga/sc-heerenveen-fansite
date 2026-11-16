@@ -3,14 +3,14 @@ import type { Database } from '@fansite/db/client'
 import { matches, matchReports } from '@fansite/db/schema'
 import { and, asc, desc, eq, isNotNull, notInArray } from 'drizzle-orm'
 
-import { qualityPath } from './quality'
+import { matchQualityPath } from './quality'
 
 // The matches whose formation of ours is not an ordinary one (issue 1191): a list to read on
-// the page Kwaliteit, not a gap to fill in. An unusual formation is often a mistake: one
-// derived from the lines of the old fansite, or a typing error in a report.
+// the quality pages of the matches, not a gap to fill in. An unusual formation is often a
+// mistake: one derived from the lines of the old fansite, or a typing error in a report.
 
 /** The address of the page with the unusual formations. */
-export const unusualFormationsPath = `${qualityPath}/formaties`
+export const unusualFormationsPath = `${matchQualityPath}/formaties`
 
 /** The formations we played almost always. Add one here when a new one becomes ordinary. */
 export const usualFormations = ['4-3-3', '4-2-3-1'] as const

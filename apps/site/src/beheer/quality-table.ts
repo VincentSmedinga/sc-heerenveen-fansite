@@ -4,7 +4,7 @@ import { matchAppearances, matchChanges, matches, matchGoals, matchReports } fro
 import { and, asc, count, eq, isNotNull, sql } from 'drizzle-orm'
 
 import { lacksResult } from '../matches'
-import { qualityPath } from './quality'
+import { matchQualityPath } from './quality'
 
 // The work table of the page Kwaliteit (issue 1163): for each match, what it still misses, in
 // one column for each part of a match. A cell holds a short sign: a number for how many are
@@ -220,7 +220,7 @@ export async function readMatchGaps(db: Pick<Database, 'select'>, season?: strin
 
 /**
  * The address of the table of a season, with one column chosen:
- * `/beheer/kwaliteit/2005-06?kolom=doelpunten`.
+ * `/beheer/wedstrijden/kwaliteit/2005-06?kolom=doelpunten`.
  */
 export function seasonTablePath(season: string, column?: GapColumn, done?: string) {
   const query = new URLSearchParams()
@@ -232,7 +232,7 @@ export function seasonTablePath(season: string, column?: GapColumn, done?: strin
     query.set('gedaan', done)
   }
 
-  const path = `${qualityPath}/${season.replace('/', '-')}`
+  const path = `${matchQualityPath}/${season.replace('/', '-')}`
 
   return query.size === 0 ? path : `${path}?${query}`
 }

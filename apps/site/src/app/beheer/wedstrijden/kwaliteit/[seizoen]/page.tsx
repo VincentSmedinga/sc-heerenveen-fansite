@@ -11,7 +11,7 @@ import { gapLegend, gapTableColumns, matchGapRow } from '#src/app/beheer/kwalite
 import { listPath as playersListPath } from '#src/app/beheer/spelers/paths'
 import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
-import { fieldDifferencesPath, qualityPath, seasonHasPlayers, statDifferencesPath } from '#src/beheer/quality'
+import { fieldDifferencesPath, matchQualityPath, seasonHasPlayers, statDifferencesPath } from '#src/beheer/quality'
 import { gapColumns, isGapColumn, readMatchGaps, seasonTablePath } from '#src/beheer/quality-table'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
@@ -69,8 +69,8 @@ export default async function SeasonQualityPage({ params, searchParams }: Props)
     <Page.Main areas={adminAreas} className={compact}>
       <Page.Cell area="head">
         <Text>
-          <Link href={qualityPath} icon="arrow-left">
-            Kwaliteit
+          <Link href={matchQualityPath} icon="arrow-left">
+            Kwaliteit van wedstrijden
           </Link>
         </Text>
         <Heading level={1}>{season}</Heading>
@@ -124,7 +124,7 @@ export default async function SeasonQualityPage({ params, searchParams }: Props)
           const id = `competitie-${competition.toLowerCase().replaceAll(/[^a-z0-9]+/gu, '-')}`
 
           return (
-            <Card aria-labelledby={id} key={competition}>
+            <Card aria-labelledby={id} key={competition} surface="warm">
               <Heading id={id} level={2}>
                 {competition}
               </Heading>

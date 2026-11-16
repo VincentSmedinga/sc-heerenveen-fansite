@@ -14,6 +14,7 @@ const {
   countWaitingDifferences,
   findSession,
   loginLinkWorks,
+  readMatchGaps,
   requireRole,
   sessionToken,
 } = vi.hoisted(() => ({
@@ -23,6 +24,7 @@ const {
   countWaitingDifferences: vi.fn(),
   findSession: vi.fn(),
   loginLinkWorks: vi.fn(),
+  readMatchGaps: vi.fn(),
   requireRole: vi.fn(),
   sessionToken: vi.fn(),
 }))
@@ -34,6 +36,7 @@ vi.mock('#src/beheer/match-entries', () => ({
   countWaitingDifferences,
 }))
 vi.mock('#src/beheer/match-reports', () => ({ countReportsToCheck }))
+vi.mock('#src/beheer/quality-table', () => ({ readMatchGaps }))
 vi.mock('#src/beheer/require-role', () => ({ requireRole, sessionToken }))
 vi.mock('#src/beheer/sessions', () => ({ findSession, loginLinkWorks }))
 vi.mock('next/navigation', () => ({
@@ -53,6 +56,8 @@ beforeEach(() => {
   countWaitingDifferences.mockResolvedValue({ seasons: [], total: 0 })
   findSession.mockReset()
   loginLinkWorks.mockReset()
+  readMatchGaps.mockReset()
+  readMatchGaps.mockResolvedValue([])
   requireRole.mockReset()
   sessionToken.mockReset()
   sessionToken.mockResolvedValue(undefined)
@@ -228,6 +233,26 @@ describe('the admin', () => {
     countMatchesWithoutResult.mockClear()
     expect(renderToStaticMarkup(await AdminPage())).not.toContain('zonder uitslag')
     expect(countMatchesWithoutResult).not.toHaveBeenCalled()
+  })
+
+  it('tells an editor how many gaps the matches have, with a link to the table, and nobody else (#1304)', async () => {
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', role: 'editor', userId: 1 })
+    expect(renderToStaticMarkup(await AdminPage())).not.toContain('gat')
+
+    readMatchGaps.mockResolvedValue([
+      { gaps: { doelpunten: { sign: '2', total: 2 }, verslag: { sign: '?', total: 1 } }, id: 1 },
+      { gaps: {}, id: 2 },
+      { gaps: { uitslag: { sign: '?', total: 1 } }, id: 3 },
+    ])
+
+    const html = renderToStaticMarkup(await AdminPage())
+
+    expect(html).toContain('<a href="/beheer/wedstrijden/kwaliteit">4 gaten in 2 wedstrijden</a>')
+
+    requireRole.mockResolvedValue({ email: 'sanne@example.org', role: 'author', userId: 2 })
+    readMatchGaps.mockClear()
+    expect(renderToStaticMarkup(await AdminPage())).not.toContain('gaten')
+    expect(readMatchGaps).not.toHaveBeenCalled()
   })
 
   it('tells an editor how many reports that were klaar are no longer right, with a link to the list (#1077)', async () => {

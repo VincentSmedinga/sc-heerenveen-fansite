@@ -4,14 +4,7 @@ import { DataTable } from '@fansite/design-system'
 
 import { personPartPath } from '#src/app/beheer/personen/paths'
 import { matchPartPath, reportPath } from '#src/app/beheer/wedstrijden/paths'
-import {
-  personColumnParts,
-  type PersonGapColumn,
-  personGapColumns,
-  type PersonGaps,
-  personQualityPath,
-} from '#src/beheer/person-table'
-import { qualityPath } from '#src/beheer/quality'
+import { personColumnParts, type PersonGapColumn, personGapColumns, type PersonGaps } from '#src/beheer/person-table'
 import {
   columnParts,
   type Gap,
@@ -28,18 +21,6 @@ import {
 /** The columns of a table of persons, after the column of the row headers. */
 export function personGapTableColumns(first: string): (DataTableTextColumn | string)[] {
   return [first, ...personGapColumns.map(({ letter, name }) => ({ abbreviation: letter, mark: true, name }))]
-}
-
-/** The switch between the tables of the matches and of the persons, at the top of both. */
-export function qualitySwitch(value: 'personen' | 'wedstrijden') {
-  return {
-    label: 'Welke gegevens',
-    options: [
-      { href: qualityPath, label: 'Wedstrijden', value: 'wedstrijden' },
-      { href: personQualityPath, label: 'Personen', value: 'personen' },
-    ],
-    value,
-  }
 }
 
 /** The line above a table of persons that explains the letters of the headers and the sign. */

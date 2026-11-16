@@ -112,10 +112,10 @@ describe('the page Afwijkende formaties', () => {
     expect(html).toContain('4-4-2: Vroeg (u), 13 augustus 2005')
     expect(html).toContain('(Oude fansite)')
     expect(html.indexOf('2006/07')).toBeLessThan(html.indexOf('2005/06'))
-    expect(html).toContain('href="/beheer/kwaliteit"')
+    expect(html).toContain('href="/beheer/wedstrijden/kwaliteit"')
   })
 
   it('is linked from the page Kwaliteit', async () => {
-    expect(renderToStaticMarkup(await QualityPage())).toContain('href="/beheer/kwaliteit/formaties"')
+    expect(renderToStaticMarkup(await QualityPage())).toContain('href="/beheer/wedstrijden/kwaliteit/formaties"')
   })
 })
