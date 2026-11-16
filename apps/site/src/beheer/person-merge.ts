@@ -31,7 +31,12 @@ export type MergeView = 'missing' | 'same' | PersonMergePlan
 export const none = 'geen'
 
 const lineSources = { manual: 'redactie', 'old-site': 'sc Heerenveen Fansite', squad: 'selectie', wikidata: 'Wikidata' }
-const countrySources = { ...lineSources, list: 'spelerslijst' }
+const countrySources = {
+  ...lineSources,
+  list: 'spelerslijst',
+  'wikidata-birth': 'Wikidata, geboorteland',
+  'wikidata-sport': 'Wikidata, land van het elftal',
+}
 
 type Facts = Pick<
   Person,

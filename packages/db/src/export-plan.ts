@@ -85,6 +85,7 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
   person_pages: 'copy',
   person_positions: 'copy',
   person_slugs: 'copy',
+  person_sport_countries: 'copy',
   persons: 'copy',
   player_field_differences: 'copy',
   player_list_titles: 'copy',
@@ -100,6 +101,7 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
   visitor_hashes: 'structure',
   visitor_salts: 'structure',
   wikidata_items: 'copy',
+  wikidata_place_countries: 'copy',
   wikidata_places: 'copy',
   wikipedia_pages: 'copy',
 }

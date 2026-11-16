@@ -66,11 +66,14 @@ describe(`the migration ${migration}`, () => {
     await prepareDatabase({ migrationsFolder, seed: false, url: database.url })
 
     // Later migrations add `slug` (#1079), the date of death (#1147), the source of the birth
-    // date (#1164) and the side (#1194), which stay empty here: these persons have none.
+    // date (#1164), the side (#1194) and the birth country and the date of the country facts
+    // (#1289), which stay empty here: these persons have none.
     expect(await rows('SELECT * FROM persons ORDER BY id')).toEqual(
       before.map((row) => ({
         ...row,
+        birth_country_id: null,
         birth_date_source: null,
+        country_facts_read_at: null,
         death_date: null,
         death_date_precision: null,
         death_date_source: null,
@@ -85,7 +88,7 @@ describe(`the migration ${migration}`, () => {
       { Null: 'YES', Type: "enum('wikidata','squad','manual','old-site')" },
     ])
     expect(await rows("SHOW COLUMNS FROM persons LIKE 'country_source'")).toMatchObject([
-      { Null: 'YES', Type: "enum('manual','wikidata','list','squad','old-site')" },
+      { Null: 'YES', Type: "enum('manual','wikidata','list','squad','old-site','wikidata-sport','wikidata-birth')" },
     ])
     expect(await rows("SHOW COLUMNS FROM player_list_titles LIKE 'country'")).toMatchObject([
       { Null: 'YES', Type: 'varchar(6)' },

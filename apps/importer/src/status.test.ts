@@ -125,7 +125,7 @@ describe('the overview', () => {
         '  with a Q-number: 0, with a birth date: 0, with a nationality: 0',
         '  line: 0 from Wikidata, 0 from the old fansite, 0 from the squad, 0 set by hand, 0 without',
         '  persons per line: 0 doelman, 0 verdediger, 0 middenvelder, 0 aanvaller',
-        '  country: 0 from Wikidata, 0 set by hand, 0 from the list of players, 0 from the old fansite, 0 from the squad, 0 without',
+        '  country: 0 from Wikidata (first nationality), 0 from the country he plays for, 0 from the country of birth, 0 set by hand, 0 from the list of players, 0 from the old fansite, 0 from the squad, 0 without',
         'Formations of match reports: no report has a line-up yet',
       ],
     })
@@ -204,7 +204,7 @@ describe('the overview', () => {
         '  with a Q-number: 0, with a birth date: 0, with a nationality: 0',
         '  line: 0 from Wikidata, 0 from the old fansite, 0 from the squad, 0 set by hand, 0 without',
         '  persons per line: 0 doelman, 0 verdediger, 0 middenvelder, 0 aanvaller',
-        '  country: 0 from Wikidata, 0 set by hand, 0 from the list of players, 0 from the old fansite, 0 from the squad, 0 without',
+        '  country: 0 from Wikidata (first nationality), 0 from the country he plays for, 0 from the country of birth, 0 set by hand, 0 from the list of players, 0 from the old fansite, 0 from the squad, 0 without',
         'Formations of match reports: no report has a line-up yet',
       ],
     })
@@ -296,7 +296,7 @@ describe('the overview', () => {
       '  with a Q-number: 1, with a birth date: 1, with a nationality: 1',
       '  line: 1 from Wikidata, 1 from the old fansite, 0 from the squad, 0 set by hand, 1 without',
       '  persons per line: 1 doelman, 0 verdediger, 0 middenvelder, 1 aanvaller',
-      '  country: 1 from Wikidata, 1 set by hand, 0 from the list of players, 1 from the old fansite, 0 from the squad, 0 without',
+      '  country: 1 from Wikidata (first nationality), 0 from the country he plays for, 0 from the country of birth, 1 set by hand, 0 from the list of players, 1 from the old fansite, 0 from the squad, 0 without',
     ])
   })
 
@@ -323,7 +323,7 @@ describe('the overview', () => {
     )
 
     expect((await statusAt(start)).lines.slice(-4)).toEqual([
-      '  country: 0 from Wikidata, 0 set by hand, 0 from the list of players, 0 from the old fansite, 0 from the squad, 0 without',
+      '  country: 0 from Wikidata (first nationality), 0 from the country he plays for, 0 from the country of birth, 0 set by hand, 0 from the list of players, 0 from the old fansite, 0 from the squad, 0 without',
       'Formations of match reports, by season, of the reports with a line-up:',
       '  2004/05: 2 with a line-up, 2 with a formation for us, 1 for the opponent',
       '  2003/04: 1 with a line-up, 0 with a formation for us, 0 for the opponent',

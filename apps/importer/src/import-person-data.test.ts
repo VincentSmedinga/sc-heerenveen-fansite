@@ -8,6 +8,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { Handler, TestServer } from './test-server.ts'
 
+import { runCountryFactsCommand } from './country-facts.ts'
 import { runImport } from './import-feeds.ts'
 import { describePersonData, readPersonData } from './import-person-data.ts'
 import { lineMap } from './person-lines.ts'
@@ -33,6 +34,7 @@ afterAll(async () => {
 beforeEach(async () => {
   await database.pool.query('DELETE FROM players')
   await database.pool.query('DELETE FROM persons')
+  await database.pool.query('DELETE FROM wikidata_place_countries')
   await database.pool.query('DELETE FROM wikidata_items')
   await database.pool.query('DELETE FROM player_list_titles')
 })
@@ -211,6 +213,8 @@ describe('readPersonData', () => {
     await database.pool.query(
       "INSERT INTO wikidata_items (id, label) VALUES ('Q9920', 'Haarlem'), ('Q29999', 'Nederland'), ('Q155', 'Brazilië'), ('Q9999999', 'x'), ('Q336286', 'verdediger')",
     )
+
+    await database.pool.query("INSERT INTO wikidata_place_countries (id, country_id) VALUES ('Q9920', NULL)")
 
     const served = await serve(joost.wikipedia, joost.wikidata)
 
@@ -1051,13 +1055,13 @@ describe('the order of the sources of a line and a country (#1052)', () => {
     it('gives a person with the United Kingdom and one of the four as his country for sport that country', async () => {
       const { report } = await readBritish(['Q25'])
 
-      expect(await country()).toEqual([['GB-WLS', 'wikidata']])
+      expect(await country()).toEqual([['GB-WLS', 'wikidata-sport']])
       expect(await rows('SELECT item_id FROM person_nationalities ORDER BY position')).toEqual([
         { item_id: 'Q25' },
         { item_id: 'Q145' },
       ])
       expect(describePersonData(report).join('\n')).toContain(
-        '1 country from Wikidata (1 in England, Wales, Scotland or Northern Ireland)',
+        '0 countries from Wikidata (1 in England, Wales, Scotland or Northern Ireland), 1 from the country he plays for',
       )
     })
 
@@ -1087,5 +1091,259 @@ describe('the order of the sources of a line and a country (#1052)', () => {
 
       expect(await country()).toEqual([['NL', 'manual']])
     })
+  })
+})
+
+describe('the country he plays for and the country of birth (#1289)', () => {
+  const state = () =>
+    rows('SELECT wikipedia_page AS title, country, country_source, birth_country_id FROM persons ORDER BY id').then(
+      (list) =>
+        list.map((row) => `${row['title']}: ${row['country']} ${row['country_source']} ${row['birth_country_id']}`),
+    )
+
+  /** The routes of one person, whose birth place Q100 lies in the Netherlands. */
+  function routes(title: string, id: string, item: Parameters<typeof itemRoute>[1], pageId = 10) {
+    return {
+      wikidata: {
+        ...itemRoute(id, { labels: { nl: title }, place: 'Q100', ...item }),
+        ...itemRoute('Q100', { countries: ['Q55'], labels: { nl: 'Plaats' } }),
+        ...labelRoute('Q55', 'Nederland', 'Netherlands'),
+        ...labelRoute('Q183', 'Duitsland', 'Germany'),
+        ...labelRoute('Q1246', 'Kosovo'),
+        ...labelRoute('Q1028', 'Marokko', 'Morocco'),
+        ...labelRoute('Q25', 'Wales'),
+        ...labelRoute('Q145', 'Verenigd Koninkrijk'),
+        ...labelRoute('Q34', 'Zweden', 'Sweden'),
+      },
+      wikipedia: infoRoute(title, pageId, id),
+    }
+  }
+
+  it('gives the one country he plays for, before the country of birth and the nationality, and keeps both facts', async () => {
+    await addPersons('Een Kosovaar')
+
+    const one = routes('Een Kosovaar', 'Q501', { nationalities: ['Q34'], sportCountries: ['Q1246'] })
+    const report = await read(await serve(one.wikipedia, one.wikidata))
+
+    expect(await state()).toEqual(['Een Kosovaar: XK wikidata-sport Q55'])
+    expect(await rows('SELECT item_id, position FROM person_sport_countries')).toEqual([
+      { item_id: 'Q1246', position: 0 },
+    ])
+    expect(await rows('SELECT id, country_id FROM wikidata_place_countries')).toEqual([
+      { country_id: 'Q55', id: 'Q100' },
+    ])
+    expect(report).toMatchObject({ countriesFromBirth: 0, countriesFromSport: 1, warnings: [] })
+    expect(describePersonData(report)[1]).toContain('1 from the country he plays for')
+  })
+
+  it('takes the country of the birth place when he plays for none, and the nationality when the place has no country', async () => {
+    await addPersons('Zonder Elftal', 'Plaats Zonder Land')
+
+    const first = routes('Zonder Elftal', 'Q502', { nationalities: ['Q34'] }, 11)
+    const second = routes('Plaats Zonder Land', 'Q503', { nationalities: ['Q34'], place: 'Q101' }, 12)
+    const served = await serve(
+      { ...first.wikipedia, ...second.wikipedia },
+      { ...first.wikidata, ...second.wikidata, ...itemRoute('Q101', { labels: { nl: 'Verdwenen plaats' } }) },
+    )
+    const report = await read(served)
+
+    expect(await state()).toEqual(['Zonder Elftal: NL wikidata-birth Q55', 'Plaats Zonder Land: SE wikidata null'])
+    expect(report).toMatchObject({ countriesFilled: 1, countriesFromBirth: 1, countriesFromSport: 0 })
+    expect(await rows('SELECT id, country_id FROM wikidata_place_countries ORDER BY id')).toEqual([
+      { country_id: 'Q55', id: 'Q100' },
+      { country_id: null, id: 'Q101' },
+    ])
+  })
+
+  it('asks about a birth place once, for every person and in a second run', async () => {
+    await addPersons('Eerste Speler', 'Tweede Speler')
+
+    const first = routes('Eerste Speler', 'Q504', {}, 13)
+    const second = routes('Tweede Speler', 'Q505', {}, 14)
+    const served = await serve({ ...first.wikipedia, ...second.wikipedia }, { ...first.wikidata, ...second.wikidata })
+
+    await read(served)
+
+    expect(asked(served.data).filter((path) => path === itemPath('Q100'))).toHaveLength(1)
+    expect(asked(served.data).filter((path) => path === itemPath('Q55'))).toHaveLength(1)
+  })
+
+  it('lets the flag on his latest season row choose among more than one country he plays for, and never the first', async () => {
+    await addPersons('Twee Elftallen', 'Twee Zonder Vlag')
+
+    const first = routes('Twee Elftallen', 'Q506', { sportCountries: ['Q1246', 'Q1028'] }, 15)
+    const second = routes('Twee Zonder Vlag', 'Q507', { sportCountries: ['Q1246', 'Q1028'] }, 16)
+    const [{ id: firstId }] = (await rows("SELECT id FROM persons WHERE wikipedia_page = 'Twee Elftallen'")) as [
+      { id: number },
+    ]
+
+    for (const [season, country] of [
+      ['2003/04', 'XK'],
+      ['2005/06', 'MA'],
+    ] as const) {
+      await database.pool.query(
+        'INSERT INTO players (season, name, search_term, country, person_id) VALUES (?, ?, ?, ?, ?)',
+        [season, 'Twee Elftallen', 'Twee', country, firstId],
+      )
+    }
+
+    await read(await serve({ ...first.wikipedia, ...second.wikipedia }, { ...first.wikidata, ...second.wikidata }))
+
+    // The flag of the latest season is one of his countries; without a flag the birth country
+    // follows.
+    expect(await state()).toEqual(['Twee Elftallen: MA wikidata-sport Q55', 'Twee Zonder Vlag: NL wikidata-birth Q55'])
+  })
+
+  it('gives a country we do not know a warning and no guess, and goes on to the next step', async () => {
+    await addPersons('Onbekend Elftal')
+
+    const one = routes('Onbekend Elftal', 'Q508', { nationalities: ['Q34'], sportCountries: ['Q36704'] })
+    const report = await read(
+      await serve(one.wikipedia, { ...one.wikidata, ...labelRoute('Q36704', 'Joegoslavië', 'Yugoslavia') }),
+    )
+
+    expect(await state()).toEqual(['Onbekend Elftal: NL wikidata-birth Q55'])
+    expect(report.warnings).toEqual([
+      'Persons: 1 person has a country they play for that is not in the list of countries, so it gives no country: Q36704 (Joegoslavië, 1)',
+    ])
+  })
+
+  it('never changes a country the editors set, and keeps the facts', async () => {
+    await addPersons('Door De Redactie')
+    await database.pool.query("UPDATE persons SET country = 'RS', country_source = 'manual'")
+
+    const one = routes('Door De Redactie', 'Q509', { sportCountries: ['Q1246'] })
+
+    await read(await serve(one.wikipedia, one.wikidata))
+
+    expect(await state()).toEqual(['Door De Redactie: RS manual Q55'])
+    expect(await rows('SELECT item_id FROM person_sport_countries')).toEqual([{ item_id: 'Q1246' }])
+  })
+
+  it('keeps England, Wales, Scotland and Northern Ireland above the United Kingdom as a country of birth', async () => {
+    await addPersons('Een Welshman')
+
+    const one = routes('Een Welshman', 'Q510', { nationalities: ['Q25'] })
+    const served = await serve(one.wikipedia, {
+      ...one.wikidata,
+      ...itemRoute('Q100', { countries: ['Q145'], labels: { nl: 'Plaats' } }),
+      ...labelRoute('Q145', 'Verenigd Koninkrijk'),
+    })
+
+    await read(served)
+
+    expect(await state()).toEqual(['Een Welshman: GB-WLS wikidata Q145'])
+  })
+
+  it('is safe to run twice: a second run of a normal read asks and changes nothing', async () => {
+    await addPersons('Een Kosovaar')
+
+    const one = routes('Een Kosovaar', 'Q501', { sportCountries: ['Q1246'] })
+    const served = await serve(one.wikipedia, one.wikidata)
+
+    await read(served)
+
+    const before = await state()
+    const askedBefore = asked(served.data).length
+
+    expect((await read(served)).countriesFromSport).toBe(0)
+    expect(await state()).toEqual(before)
+    expect(asked(served.data)).toHaveLength(askedBefore)
+  })
+})
+
+describe('reading every person again for the countries (#1289)', () => {
+  const stamped = new Date('2026-11-01T10:00:00Z')
+
+  async function addReadPersonWithItem(title: string, itemId: string, columns = '') {
+    await database.pool.query(
+      `INSERT INTO persons (wikipedia_page, wikidata_id, wikipedia_page_id, wikidata_read_at${columns === '' ? '' : ', ' + columns.split('=')[0]}) VALUES (?, ?, 77, ?${columns === '' ? '' : ', ' + columns.split('=')[1]})`,
+      [title, itemId, stamped],
+    )
+  }
+
+  const itemWith = (id: string, sportCountries: string[]) => ({
+    ...itemRoute(id, { labels: { nl: id }, nationalities: ['Q34'], sportCountries }),
+    ...labelRoute('Q34', 'Zweden', 'Sweden'),
+    ...labelRoute('Q1246', 'Kosovo'),
+  })
+
+  it('reads the persons who were read before once, and a second run asks nothing', async () => {
+    await addReadPersonWithItem('Eerder Gelezen', 'Q601')
+    await addReadPersonWithItem('Ook Eerder Gelezen', 'Q602')
+    await addPersons('Nog Nooit Gelezen')
+
+    const served = await serve({}, { ...itemWith('Q601', ['Q1246']), ...itemWith('Q602', []) })
+    const run = () =>
+      readPersonData(connection.db, fetcherFor([served.nl, served.data]), {
+        clock: () => now,
+        countryFacts: true,
+        origin: served.nl.origin,
+        pause: 0,
+        wikidata: served.data.origin,
+      })
+    const report = await run()
+
+    expect(report.read).toBe(2)
+    expect(
+      (await rows('SELECT wikipedia_page, country, country_source FROM persons ORDER BY id')).map(
+        (row) => `${row['wikipedia_page']}: ${row['country']} ${row['country_source']}`,
+      ),
+    ).toEqual(['Eerder Gelezen: XK wikidata-sport', 'Ook Eerder Gelezen: SE wikidata', 'Nog Nooit Gelezen: null null'])
+    expect(await rows('SELECT wikipedia_page FROM persons WHERE country_facts_read_at IS NULL')).toEqual([
+      { wikipedia_page: 'Nog Nooit Gelezen' },
+    ])
+
+    const askedBefore = asked(served.data).length
+    const again = await run()
+
+    expect(again.read).toBe(0)
+    expect(asked(served.data)).toHaveLength(askedBefore)
+  })
+
+  it('never changes a country the editors set', async () => {
+    await addReadPersonWithItem('Door De Redactie', 'Q603', "country='RS'")
+    await database.pool.query("UPDATE persons SET country_source = 'manual'")
+
+    const served = await serve({}, itemWith('Q603', ['Q1246']))
+
+    await readPersonData(connection.db, fetcherFor([served.nl, served.data]), {
+      clock: () => now,
+      countryFacts: true,
+      origin: served.nl.origin,
+      pause: 0,
+      wikidata: served.data.origin,
+    })
+
+    expect(await rows('SELECT country, country_source FROM persons')).toEqual([
+      { country: 'RS', country_source: 'manual' },
+    ])
+  })
+  it('is the command import:country-facts: it says what it did, and the second time nobody is left', async () => {
+    await addReadPersonWithItem('Eerder Gelezen', 'Q601')
+
+    const served = await serve({}, itemWith('Q601', ['Q1246']))
+    const lines: string[] = []
+    const run = () =>
+      runCountryFactsCommand(database.url, {
+        clock: () => now,
+        makeFetcher: () => fetcherFor([served.nl, served.data]),
+        personDataPause: 0,
+        wikidataOrigin: served.data.origin,
+        wikipediaOrigin: served.nl.origin,
+        write: (line) => lines.push(line),
+      })
+
+    expect(await run()).toBe(0)
+    expect(lines.join('\n')).toContain('1 person read')
+    expect(lines.join('\n')).toContain('1 from the country he plays for')
+
+    lines.length = 0
+
+    const askedBefore = asked(served.data).length
+
+    expect(await run()).toBe(0)
+    expect(lines).toEqual(['Country facts: nobody to read.'])
+    expect(asked(served.data)).toHaveLength(askedBefore)
   })
 })

@@ -159,6 +159,7 @@ export function mergedPersonValues(other: Person, kept: Person) {
   const pageFrom = kept.wikipediaPage === null ? other : kept
 
   return {
+    birthCountryId: kept.birthCountryId ?? other.birthCountryId,
     birthDate: birthFrom.birthDate,
     birthDatePrecision: birthFrom.birthDatePrecision,
     birthDateSource: birthFrom.birthDateSource,

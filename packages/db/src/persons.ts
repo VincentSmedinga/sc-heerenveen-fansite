@@ -15,11 +15,13 @@ import {
   personPages,
   personPositions,
   persons,
+  personSportCountries,
   playerListTitles,
   type PlayerPosition,
   players,
   type PlayerSide,
   wikidataItems,
+  wikidataPlaceCountries,
 } from './schema.ts'
 
 /** The name of a person in parts, as the editors fill it in in the admin (issue 1020). */
@@ -34,6 +36,8 @@ export type PersonBookCounts = { people: number; titles: number }
 
 /** What the importer reads from Wikidata about one person (#898). Everything may be empty. */
 export type PersonData = {
+  /** The Q-number of the country of his birth place (#1289). Its label is in the items. */
+  birthCountryId: null | string
   /** The birth date of Wikidata. `keep` leaves what is there: a date of the editors (#1164). */
   birthDate: 'keep' | null | { date: string; precision: BirthDatePrecision }
   /** The Q-number of the birth place. Its label is in `wikidata_items`. */
@@ -46,6 +50,8 @@ export type PersonData = {
   nationalityIds: readonly string[]
   /** The Q-numbers of the positions, in the order of Wikidata. */
   positionIds: readonly string[]
+  /** The Q-numbers of the countries he plays for (`P1532`, #1289), in the order of Wikidata. */
+  sportCountryIds: readonly string[]
   wikidataId: null | string
   wikipediaPageId: null | number
 }
@@ -168,16 +174,20 @@ export const personTitleAliases: readonly PersonTitleAlias[] = [
 
 /** What `refreshPersonCountries` did: the persons that got a country, by its source. */
 export type PersonCountriesRefresh = {
+  /** From the country of his birth place (#1289). */
+  birth: number
   /** From the first nationality of Wikidata. */
   filled: number
-  /** Of those, the persons who got England, Wales, Scotland or Northern Ireland (#1278). */
+  /** Of those from Wikidata, the persons who got England, Wales, Scotland or N. Ireland. */
   filledBritish: number
   /** From the first flag in the list of players. */
   list: number
+  /** From the country he plays for (`P1532`, #1289). */
+  sport: number
   /** From the country that stands most often on the rows of the squad lists. */
   squad: number
-  /** The first nationalities of Wikidata that are not in the list of countries. */
-  unknown: { id: string; label: string; persons: number }[]
+  /** The countries of Wikidata that are not in the list of countries, by what they were for. */
+  unknown: { id: string; kind: UnknownCountryKind; label: string; persons: number }[]
 }
 
 /** A title of the list of players with the country of its first flag, or null. */
@@ -197,6 +207,9 @@ export type PlayerListReport = {
   /** Pairs of our title and the title of the list that differ only in a sign. */
   spelling: [string, string][]
 }
+
+/** What a country of Wikidata that we do not know was for (#1289). */
+export type UnknownCountryKind = 'birth' | 'nationality' | 'sport'
 
 /** What the book of persons reads and writes through. */
 type PersonDatabase = Pick<Database, 'insert' | 'select'>
@@ -242,7 +255,7 @@ export async function countPersonData(db: Pick<Database, 'select'>): Promise<Per
   const counts: PersonDataCounts = {
     birthDate: 0,
     byLine: { aanvaller: 0, doelman: 0, middenvelder: 0, verdediger: 0 },
-    countries: { list: 0, manual: 0, 'old-site': 0, squad: 0, wikidata: 0 },
+    countries: { list: 0, manual: 0, 'old-site': 0, squad: 0, wikidata: 0, 'wikidata-birth': 0, 'wikidata-sport': 0 },
     lines: { manual: 0, 'old-site': 0, squad: 0, wikidata: 0 },
     nationality: 0,
     noCountry: 0,
@@ -457,9 +470,53 @@ export async function knownPersonPages(db: Pick<Database, 'select'>): Promise<Se
   return new Set((await db.select({ page: personPages.page }).from(personPages)).map((row) => row.page))
 }
 
+/**
+ * The country of each birth place the importer asked about (#1289), by the Q-number of the
+ * place. The value is null for a place whose item has no country, which is an answer too.
+ */
+export async function knownPlaceCountries(db: Pick<Database, 'select'>): Promise<Map<string, null | string>> {
+  const rows = await db.select().from(wikidataPlaceCountries)
+
+  return new Map(rows.map((row) => [row.id, row.countryId]))
+}
+
 /** The labels the database has, by Q-number. The importer never asks again about these. */
 export async function knownWikidataLabels(db: Pick<Database, 'select'>): Promise<Map<string, string>> {
   return new Map((await db.select().from(wikidataItems)).map((row) => [row.id, row.label]))
+}
+
+/**
+ * The country on the latest season row of each person that has one (#1289): `players.country`
+ * of the row with the highest season, among the rows with a code in the list of countries.
+ */
+export async function latestSquadCountries(
+  db: Pick<Database, 'select'>,
+  personIds: readonly number[],
+): Promise<Map<number, string>> {
+  const latest = new Map<number, { country: string; season: string }>()
+
+  if (personIds.length === 0) {
+    return new Map()
+  }
+
+  const rows = await db
+    .select({ country: players.country, personId: players.personId, season: players.season })
+    .from(players)
+    .where(and(inArray(players.personId, [...personIds]), isNotNull(players.country)))
+
+  for (const row of rows) {
+    if (row.personId === null || row.country === null || !isCountryCode(row.country)) {
+      continue
+    }
+
+    const current = latest.get(row.personId)
+
+    if (current === undefined || row.season > current.season) {
+      latest.set(row.personId, { country: row.country, season: row.season })
+    }
+  }
+
+  return new Map([...latest].map(([id, { country }]) => [id, country]))
 }
 
 /**
@@ -516,6 +573,39 @@ export async function personsToRead(
       ),
     )
     .orderBy(asc(persons.wikidataReadAt), asc(persons.id))
+    .limit(limit)
+
+  return rows.flatMap((row) => (row.wikipediaPage === null ? [] : [{ ...row, wikipediaPage: row.wikipediaPage }]))
+}
+
+/**
+ * The persons whose countries for sport and birth country were never stored (#1289): the ones
+ * with a Q-number whose `country_facts_read_at` is empty, the lowest number first, at most
+ * `limit`. The command `import:country-facts` reads them. A person stored by a normal run, or
+ * by this command, has the date, so a second run finds nobody.
+ */
+export async function personsToReadCountryFacts(db: Pick<Database, 'select'>, limit: number): Promise<PersonToRead[]> {
+  const rows = await db
+    .select({
+      birthDateSource: persons.birthDateSource,
+      deathDateSource: persons.deathDateSource,
+      id: persons.id,
+      lineSource: persons.lineSource,
+      readAt: persons.wikidataReadAt,
+      wikidataId: persons.wikidataId,
+      wikipediaPage: persons.wikipediaPage,
+      wikipediaPageId: persons.wikipediaPageId,
+    })
+    .from(persons)
+    .where(
+      and(
+        isNull(persons.countryFactsReadAt),
+        isNotNull(persons.wikidataId),
+        isNotNull(persons.wikipediaPage),
+        eq(persons.englishTitle, false),
+      ),
+    )
+    .orderBy(asc(persons.id))
     .limit(limit)
 
   return rows.flatMap((row) => (row.wikipediaPage === null ? [] : [{ ...row, wikipediaPage: row.wikipediaPage }]))
@@ -591,15 +681,22 @@ export async function playerListReport(
 }
 
 /**
- * Fills in the country of the persons (#1051, #1052) from three sources, the strongest first.
- * A stronger source replaces a weaker one and never the other way round; the country the
+ * Fills in the country of the persons (#1051, #1052, #1289) from the sources, the strongest
+ * first. A stronger source replaces a weaker one and never the other way round; the country the
  * editors set (`manual`) never changes, and the one of the old fansite (`old-site`, filled by
  * the import of the old fansite) sits between the list and the squad.
  *
- * - Wikidata: the first nationality (`person_nationalities`, position 0), through `codes`: the
- *   code of two letters by Q-number. A first nationality that is not in `codes` gives no
- *   country and no guess: the item is in `unknown` with its label and how many persons have
- *   it, and a weaker source may fill the person in.
+ * - Wikidata, in three steps, through `codes`: the code of two letters by Q-number. A country
+ *   that is not in `codes` gives no country and no guess: the item is in `unknown` with its
+ *   label, what it was for and how many persons have it, and the next step decides.
+ *   1. The country he plays for (`person_sport_countries`, `P1532`), source `wikidata-sport`,
+ *      when Wikidata names exactly one. With more than one, the country of the flag on his
+ *      latest season row decides if it is one of them; otherwise the birth country follows.
+ *      Never the first of the list.
+ *   2. The country of his birth place (`persons.birth_country_id`), source `wikidata-birth`.
+ *      The United Kingdom as a birth country gives way to a first nationality that is England,
+ *      Wales, Scotland or Northern Ireland (#1278), which is more precise.
+ *   3. The first nationality (`person_nationalities`, position 0), source `wikidata`.
  * - The list of players: the country of the title of the person in `player_list_titles`. Only
  *   the title of his article counts, never a name, so a namesake gets nothing.
  * - The squad lists: the country that stands most often on his rows of `players`, and for a
@@ -614,35 +711,98 @@ export async function refreshPersonCountries(
 ): Promise<PersonCountriesRefresh> {
   const rows = await db
     .select({
+      birthCountryId: persons.birthCountryId,
       country: persons.country,
       id: persons.id,
-      itemId: personNationalities.itemId,
-      label: wikidataItems.label,
       source: persons.countrySource,
     })
     .from(persons)
-    .innerJoin(
-      personNationalities,
-      and(eq(personNationalities.personId, persons.id), eq(personNationalities.position, 0)),
-    )
-    .innerJoin(wikidataItems, eq(wikidataItems.id, personNationalities.itemId))
     .where(sql`${persons.countrySource} is null or ${persons.countrySource} <> 'manual'`)
     .orderBy(asc(persons.id))
-  const unknown = new Map<string, { id: string; label: string; persons: number }>()
-  const report: PersonCountriesRefresh = { filled: 0, filledBritish: 0, list: 0, squad: 0, unknown: [] }
+  const nationalities = await firstItemPerPerson(db, personNationalities)
+  const sports = new Map<number, { id: string; label: string }[]>()
+
+  for (const row of await db
+    .select({ id: personSportCountries.itemId, label: wikidataItems.label, personId: personSportCountries.personId })
+    .from(personSportCountries)
+    .innerJoin(wikidataItems, eq(wikidataItems.id, personSportCountries.itemId))
+    .orderBy(asc(personSportCountries.personId), asc(personSportCountries.position))) {
+    sports.set(row.personId, [...(sports.get(row.personId) ?? []), { id: row.id, label: row.label }])
+  }
+
+  const birthLabels = new Map(
+    (await db.select({ id: wikidataItems.id, label: wikidataItems.label }).from(wikidataItems)).map((row) => [
+      row.id,
+      row.label,
+    ]),
+  )
+  const manySports = [...sports].filter(([, list]) => list.length > 1).map(([id]) => id)
+  const flags = await latestSquadCountries(db, manySports)
+  const unknown = new Map<string, { id: string; kind: UnknownCountryKind; label: string; persons: number }>()
+  const report: PersonCountriesRefresh = {
+    birth: 0,
+    filled: 0,
+    filledBritish: 0,
+    list: 0,
+    sport: 0,
+    squad: 0,
+    unknown: [],
+  }
+  const warn = (kind: UnknownCountryKind, id: string, label: string) => {
+    const item = unknown.get(`${kind}:${id}`) ?? { id, kind, label, persons: 0 }
+
+    item.persons++
+    unknown.set(`${kind}:${id}`, item)
+  }
 
   for (const row of rows) {
-    const code = codes.get(row.itemId)
+    const sport = sports.get(row.id) ?? []
+    const nationality = nationalities.get(row.id)
+    const birthCode = row.birthCountryId === null ? undefined : codes.get(row.birthCountryId)
+    const nationalityCode = nationality === undefined ? undefined : codes.get(nationality.id)
+    let found: undefined | { code: string; source: 'wikidata' | 'wikidata-birth' | 'wikidata-sport' }
 
-    if (code === undefined) {
-      const item = unknown.get(row.itemId) ?? { id: row.itemId, label: row.label, persons: 0 }
+    for (const country of sport) {
+      if (!codes.has(country.id)) {
+        warn('sport', country.id, country.label)
+      }
+    }
 
-      item.persons++
-      unknown.set(row.itemId, item)
-    } else if (row.country !== code || row.source !== 'wikidata') {
-      await db.update(persons).set({ country: code, countrySource: 'wikidata' }).where(eq(persons.id, row.id))
-      report.filled++
-      report.filledBritish += code.startsWith('GB-') ? 1 : 0
+    const sportCodes = sport.flatMap((country) => codes.get(country.id) ?? [])
+    const flag = flags.get(row.id)
+
+    if (sport.length === 1 && sportCodes[0] !== undefined) {
+      found = { code: sportCodes[0], source: 'wikidata-sport' }
+    } else if (sport.length > 1 && flag !== undefined && sportCodes.includes(flag)) {
+      found = { code: flag, source: 'wikidata-sport' }
+    }
+
+    if (found === undefined) {
+      if (row.birthCountryId !== null && birthCode === undefined) {
+        warn('birth', row.birthCountryId, birthLabels.get(row.birthCountryId) ?? row.birthCountryId)
+      }
+      if (birthCode !== undefined && !(birthCode === 'GB' && nationalityCode?.startsWith('GB-') === true)) {
+        found = { code: birthCode, source: 'wikidata-birth' }
+      }
+    }
+    if (nationality !== undefined && nationalityCode === undefined) {
+      warn('nationality', nationality.id, nationality.label)
+    }
+    if (found === undefined && nationalityCode !== undefined) {
+      found = { code: nationalityCode, source: 'wikidata' }
+    }
+    if (found !== undefined && (row.country !== found.code || row.source !== found.source)) {
+      await db.update(persons).set({ country: found.code, countrySource: found.source }).where(eq(persons.id, row.id))
+
+      if (found.source === 'wikidata-sport') {
+        report.sport++
+      } else if (found.source === 'wikidata-birth') {
+        report.birth++
+      } else {
+        report.filled++
+      }
+
+      report.filledBritish += found.code.startsWith('GB-') ? 1 : 0
     }
   }
   report.unknown = [...unknown.values()]
@@ -995,7 +1155,9 @@ export async function storePersonData(
             birthDatePrecision: data.birthDate?.precision ?? null,
             birthDateSource: data.birthDate === null ? null : ('wikidata' as const),
           }),
+      birthCountryId: data.birthCountryId,
       birthPlaceId: data.birthPlaceId,
+      countryFactsReadAt: readAt,
       ...(data.deathDate === 'keep' || data.deathDate === undefined
         ? {}
         : {
@@ -1011,7 +1173,13 @@ export async function storePersonData(
     .where(eq(persons.id, personId))
   await db.delete(personNationalities).where(eq(personNationalities.personId, personId))
   await db.delete(personPositions).where(eq(personPositions.personId, personId))
+  await db.delete(personSportCountries).where(eq(personSportCountries.personId, personId))
 
+  if (data.sportCountryIds.length > 0) {
+    await db
+      .insert(personSportCountries)
+      .values(data.sportCountryIds.map((itemId, position) => ({ itemId, personId, position })))
+  }
   if (data.nationalityIds.length > 0) {
     await db
       .insert(personNationalities)
@@ -1071,6 +1239,18 @@ export async function storePersonNames(
   return { counts, guessed }
 }
 
+/** Remembers the country of a birth place, or that it has none, so nobody asks (#1289). */
+export async function storePlaceCountry(
+  db: Pick<Database, 'insert'>,
+  placeId: string,
+  countryId: null | string,
+): Promise<void> {
+  await db
+    .insert(wikidataPlaceCountries)
+    .values({ countryId, id: placeId })
+    .onDuplicateKeyUpdate({ set: { countryId } })
+}
+
 /**
  * Keeps the titles of the list as the import read them, each with the country of its first
  * flag (#1052): a title that is new is added, one that is gone is removed, and the time of the
@@ -1114,6 +1294,20 @@ function decidedTitles(): string[] {
 
 function editorsNameColumns(name: EditorsName) {
   return { ...name, name: joinNameParts(name), nameSource: 'redactie' as const }
+}
+
+/** The item at position 0 of each person in `person_nationalities`, with its label. */
+async function firstItemPerPerson(
+  db: Pick<Database, 'select'>,
+  table: typeof personNationalities,
+): Promise<Map<number, { id: string; label: string }>> {
+  const rows = await db
+    .select({ id: table.itemId, label: wikidataItems.label, personId: table.personId })
+    .from(table)
+    .innerJoin(wikidataItems, eq(wikidataItems.id, table.itemId))
+    .where(eq(table.position, 0))
+
+  return new Map(rows.map((row) => [row.personId, { id: row.id, label: row.label }]))
 }
 
 /** A title as a computer compares it: no accents, capitals, hyphens, spaces or apostrophes. */
