@@ -119,6 +119,7 @@ export type ReportPhase = 'live' | 'upcoming'
 export type SeasonMatchReport = Pick<
   Match,
   | 'competition'
+  | 'extraTime'
   | 'goalsAgainst'
   | 'goalsFor'
   | 'home'
@@ -244,6 +245,7 @@ export async function listSeasonReports(db: ReportDatabase, season: string): Pro
   return db
     .select({
       competition: matches.competition,
+      extraTime: matches.extraTime,
       goalsAgainst: matches.goalsAgainst,
       goalsFor: matches.goalsFor,
       home: matches.home,

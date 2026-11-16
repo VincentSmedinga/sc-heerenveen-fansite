@@ -483,6 +483,7 @@ Daaronder staan vier kleine zachte kaarten (`src/PlayersTopCards.tsx`, #1286): T
 De drie kaarten met een ranglijst tonen de eerste drie plaatsen als een regel per plaats (`BarList`): de naam of namen, het getal en een balk.
 Delen drie of meer spelers een plaats, dan staat er "4 spelers" zonder namen (`src/players-top.ts`).
 De getallen komen uit dezelfde functies als de grote kaarten (`topScorersOf`, `rankedPlaces`), en tellen alle competities van het gekozen seizoen.
+Onder Minuten staat het maximum: 90 minuten voor elke wedstrijd met een verslag dat klaar is, en 120 voor een wedstrijd met verlenging (`maxMinutes` in `getSeasonReportFigures`).
 De nul gehouden toont één zin, met het aantal keren dikgedrukt, die ook de laatste keer noemt (`cleanSheetsOf`, `cleanSheetsSentence`), en geen lijst.
 Elke kaart eindigt met een link naar haar grote kaart voor hetzelfde seizoen: `#doelpuntenmakers`, `#assists` en `#minuten` op `/spelers/cijfers`, en `#de-nul-gehouden` op `/wedstrijden/cijfers`.
 Een kaart zonder gegevens staat er niet; Assists en Minuten alleen in een seizoen met een verslag dat klaar is, en een verslag dat niet te lezen is, laat alleen die twee kaarten weg.

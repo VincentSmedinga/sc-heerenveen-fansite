@@ -6022,6 +6022,7 @@
   - **Links:** elke kaart eindigt met een link naar haar grote kaart voor hetzelfde seizoen, met een eigen tekst: "Alle doelpuntenmakers", "Alle assists", "Alle wedstrijden waarin we de nul hielden" en "Alle minuten".
   - **Zonder gegevens:** een kaart zonder gegevens staat er niet.
     Assists en Minuten alleen bij een verslag dat klaar is, en een verslag dat niet te lezen is laat alleen die twee kaarten weg.
+  - **Minuten:** onder de lijst staat "Van het maximum van 1170 minuten in 13 wedstrijden.": het hoogste aantal minuten dat een speler kan hebben, 90 voor elke wedstrijd met een verslag dat klaar is en 120 voor een wedstrijd met verlenging.
   - **Dikgedrukt getal in een zin:** past dit patroon ook elders, dan krijgt het een eigen plek in het designsysteem; nu is het alleen `Strong` in een `Text`.
   - **De kolom met het getal van `BarList`** is zo breed als het langste getal, met ruimte voor twee cijfers, zodat minuten met vier cijfers niet over de balk lopen.
 - **Waarom:** een kaart met alleen een link nodigt niet uit, en de eerste drie namen van een lijst wel.

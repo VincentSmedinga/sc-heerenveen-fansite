@@ -24,7 +24,7 @@ const players = [
   reportPlayer(7, 'Vier Vier', { assists: 2, minutes: 45 }),
   reportPlayer(8, 'Laatste Plaats', { assists: 1, minutes: 10 }),
 ]
-const figures: ReportFigures = { known: 3, played: 3, players, seasonHasReports: true }
+const figures: ReportFigures = { known: 3, maxMinutes: 300, played: 3, players, seasonHasReports: true }
 
 const cardOf = (figure: 'assists' | 'minutes') =>
   withoutIcons(renderToStaticMarkup(<ReportShortCard figure={figure} figures={figures} href={`/x#${figure}`} />))
@@ -48,8 +48,10 @@ describe('the small cards with a ranking', () => {
     expect(html).toContain('--hf-bar-list-share:100')
   })
 
-  it('write the minutes as the large card does, a plain number', () => {
+  it('write the minutes as the large card does, a plain number, with the most a player can have', () => {
     expect(plain(cardOf('minutes'))).toContain('Een Alleen1170')
+    expect(plain(cardOf('minutes'))).toContain('Van het maximum van 300 minuten in 3 wedstrijden.')
+    expect(plain(cardOf('assists'))).not.toContain('maximum')
   })
 
   it('end with a link that says where it goes, a different text on each card', () => {

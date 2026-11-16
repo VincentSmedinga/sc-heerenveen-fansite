@@ -19,6 +19,11 @@ export type RankedFigure = 'assists' | 'minutes' | 'substituteGoals'
 export type ReportFigures = {
   /** The played matches of the choice that have a report that is `klaar`. */
   known: number
+  /**
+   * The most minutes a player can have in those matches: 90 for each, and 120 for a match that
+   * went to extra time.
+   */
+  maxMinutes: number
   /** The played matches of the choice. */
   played: number
   players: PlayerReportStats[]

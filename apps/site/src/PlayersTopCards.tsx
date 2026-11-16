@@ -93,7 +93,14 @@ export function ReportShortCard({
   return figure === 'assists' ? (
     <RankedCard heading="Assists" href={href} id="kort-assists" linkText="Alle assists" places={rows} />
   ) : (
-    <RankedCard heading="Minuten" href={href} id="kort-minuten" linkText="Alle minuten" places={rows} />
+    <RankedCard
+      heading="Minuten"
+      href={href}
+      id="kort-minuten"
+      linkText="Alle minuten"
+      note={`Van het maximum van ${figures.maxMinutes} minuten in ${figures.known} ${figures.known === 1 ? 'wedstrijd' : 'wedstrijden'}.`}
+      places={rows}
+    />
   )
 }
 
@@ -122,12 +129,15 @@ function RankedCard({
   href,
   id,
   linkText,
+  note,
   places,
 }: {
   heading: string
   href: string
   id: string
   linkText: string
+  /** A line under the list that says what the numbers are measured against. */
+  note?: string
   places: readonly TopScorersTableRow[]
 }) {
   return (
@@ -136,6 +146,7 @@ function RankedCard({
         {heading}
       </Heading>
       <BarList aria-label={heading} rows={barRowsOf(firstPlaces(places))} wide />
+      {note === undefined ? null : <Text appearance="meta">{note}</Text>}
       <Link href={href} icon="arrow-right">
         {linkText}
       </Link>
