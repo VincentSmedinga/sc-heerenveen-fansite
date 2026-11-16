@@ -1,6 +1,17 @@
 'use client'
 
-import { Button, Card, ErrorSummary, Field, Form, Heading, Input, Link, Text } from '@fansite/design-system'
+import {
+  Button,
+  Card,
+  CheckboxGroup,
+  ErrorSummary,
+  Field,
+  Form,
+  Heading,
+  Input,
+  Link,
+  Text,
+} from '@fansite/design-system'
 import { useActionState, useEffect } from 'react'
 
 import type { CountryChoice } from '#src/beheer/countries'
@@ -59,6 +70,22 @@ export function PersonForm({
     }
   }, [state, summary.length])
 
+  // The box Niet beschikbaar (issue 1308) stands under a field that was empty when the form
+  // opened. It is a group with a legend, so a screen reader hears which field it belongs to.
+  const unavailable = (name: 'geboren' | 'wikipedia', legend: string) => {
+    const box = `${name}-niet-beschikbaar` as const
+
+    return initial[name] === '' ? (
+      <CheckboxGroup
+        key={`${box}-${values[box]}`}
+        legend={legend}
+        name={box}
+        options={[{ label: 'Niet beschikbaar', value: '1' }]}
+        value={values[box] === '1' ? ['1'] : []}
+      />
+    ) : null
+  }
+
   // The value is the key of a field that a server answer must reset: React keeps what is typed.
   const field = (name: PersonFieldName) => ({ defaultValue: values[name], key: `${name}-${values[name]}`, name })
 
@@ -85,6 +112,7 @@ export function PersonForm({
             input={field}
             pageHint="Een persoon zonder pagina krijgt hem, en zijn spelers in de seizoenen zonder pagina ook. Een persoon met een pagina houdt die. Hoort de pagina bij een andere persoon? Voeg de twee dan samen."
           />
+          {unavailable('wikipedia', 'Wikipedia-pagina: niet te vinden?')}
           {/* The way on from a page of another person: the page that merges the two. */}
           {merge === undefined ? null : (
             <Text>
@@ -107,6 +135,7 @@ export function PersonForm({
           >
             <Input {...field('geboren')} autoComplete="off" width="natural" />
           </Field>
+          {unavailable('geboren', 'Geboortedatum: niet te vinden?')}
           <DeathYearField
             error={errors.overleden}
             hint="Het jaar van overlijden, met vier cijfers. Een jaar dat je hier invult, gaat voor Wikidata. Maak je het leeg, dan geldt weer Wikidata."

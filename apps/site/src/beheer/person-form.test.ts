@@ -91,6 +91,7 @@ describe('the form of a person', () => {
     expect(await valuesOf({ reden: '' })).toEqual({
       achternaam: 'Verzonnen',
       geboren: '3-1990',
+      'geboren-niet-beschikbaar': '',
       kant: '',
       land: 'NL',
       linie: 'aanvaller',
@@ -99,6 +100,7 @@ describe('the form of a person', () => {
       tussenvoegsel: '',
       voornaam: 'Jan',
       wikipedia: '',
+      'wikipedia-niet-beschikbaar': '',
     })
   })
 

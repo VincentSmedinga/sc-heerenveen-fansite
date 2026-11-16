@@ -811,6 +811,8 @@ Het beheer maakt en vindt een persoon met vier functies uit hetzelfde bestand (#
 - `findOrAddEditorsPerson(db, { name, page })` geeft de persoon van een titel, gevonden of gemaakt door `createPersonBook`, of maakt zonder titel een persoon met alleen een naam.
   Een persoon die ze maakt, en een persoon van de titel die nog geen naam had, krijgt de naam met de bron `redactie`.
 - `givePersonPage(db, personId, page)` geeft een persoon zonder titel de titel van zijn artikel, en zet die in `person_pages`.
+- `@fansite/db/unavailable-marks` bewaart een gat dat de redactie markeerde als niet beschikbaar (`unavailable_marks`, #1308): `markUnavailable`, `renewMark` en `unmark` schrijven `gap.mark`, `gap.renew` en `gap.unmark` in het logboek, en `clearFilledMarks` haalt de markeringen weg van velden die een waarde kregen (de import en het formulier van een persoon roepen het aan, in de transactie van de wijziging).
+  De migratie `0085_add_unavailable_marks` maakt de tabel en de drie acties, en kan opnieuw draaien.
 - `setEditorsName(db, personId, name)` zet de naam die de redactie invulde op een persoon, met de bron `redactie`.
 - `joinNameParts(name)` maakt van de delen van een naam de hele naam.
 
@@ -966,12 +968,13 @@ De dump van `pnpm db:backup` neemt de tabel mee met haar rijen.
 Een stadion is het veld zelf (#1297, de beslissingen staan in `hosting-en-data.md`).
 De tabel `club_stadiums` is weg (#1301): de kaart op de pagina van een club leest de velden en namen uit deze tabellen.
 
-| Tabel                | Betekenis                                                                                                                                                                      |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `stadiums`           | Het veld: `wikidata_id` (uniek, mag leeg), `place`, `latitude` en `longitude` (samen, of allebei leeg), `place_source` (`manual` of `wikidata`), `street` en `postcode`        |
-| `stadium_names`      | De namen van een stadion in volgorde (`position` vanaf 0), met `start_season` of `start_day`, en een toelichting; alleen de eerste naam mag zonder start; rij gaat met stadion |
-| `club_home_grounds`  | De velden van een club in volgorde, met dezelfde start; `club_id` is leeg voor sc Heerenveen; `ON DELETE RESTRICT` op het stadion                                              |
-| `matches.stadium_id` | Het stadion van een wedstrijd, leeg als er geen zeker stadion is; `matches.stadium` blijft de tekst van de bron                                                                |
+| Tabel                | Betekenis                                                                                                                                                                                          |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `stadiums`           | Het veld: `wikidata_id` (uniek, mag leeg), `place`, `latitude` en `longitude` (samen, of allebei leeg), `place_source` (`manual` of `wikidata`), `street` en `postcode`                            |
+| `unavailable_marks`  | Een gat dat de redactie markeerde als niet beschikbaar: `subject` (`person`), `subject_id`, `field` (`wikipedia` of `geboren`), `checked_on` en `user_id`; hoogstens één rij per onderwerp en veld |
+| `stadium_names`      | De namen van een stadion in volgorde (`position` vanaf 0), met `start_season` of `start_day`, en een toelichting; alleen de eerste naam mag zonder start; rij gaat met stadion                     |
+| `club_home_grounds`  | De velden van een club in volgorde, met dezelfde start; `club_id` is leeg voor sc Heerenveen; `ON DELETE RESTRICT` op het stadion                                                                  |
+| `matches.stadium_id` | Het stadion van een wedstrijd, leeg als er geen zeker stadion is; `matches.stadium` blijft de tekst van de bron                                                                                    |
 
 De migratie `0081_add_stadiums` maakt de tabellen en de kolom leeg.
 De stadions zelf komen uit een stap erna, `migrateStadiums`, die `prepareDatabase` en `pnpm db:migrate` draaien:

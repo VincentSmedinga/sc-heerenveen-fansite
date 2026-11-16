@@ -17,6 +17,7 @@ import {
   storePlaceCountry,
   storeWikidataLabel,
 } from '@fansite/db/persons'
+import { clearFilledMarks } from '@fansite/db/unavailable-marks'
 
 import type { Fetcher } from './fetcher.ts'
 
@@ -103,6 +104,8 @@ export type PersonDataReport = {
    * read: the ones that got a line from the squad or from Wikidata, and the ones that lost it.
    */
   linesAgain: { cleared: number; squad: number; wikidata: number }
+  /** The marks of a gap as not available that it took away, as the fact was there (#1308). */
+  marksRemoved: number
   /** With at least one nationality. */
   nationality: number
   /** Persons read: stored, whatever they got. */
@@ -131,6 +134,12 @@ export function describePersonData(report: PersonDataReport): string[] {
       `persons (Wikidata): ${report.read} ${person} read${again}, ${report.birthDate} with a birth date, ${report.nationality} with a nationality, ${withLine} with a line (${lines.wikidata} from Wikidata, ${lines.squad} from the squad, ${lines['old-site']} from the old fansite, ${lines.manual} set by hand), ${report.empty} left empty; ${report.articlesAsked} articles and ${report.itemsAsked} items asked`,
     )
   }
+  if (report.marksRemoved > 0) {
+    described.push(
+      `persons (Wikidata): ${report.marksRemoved} ${report.marksRemoved === 1 ? 'mark' : 'marks'} of a gap as not available removed, as the fact is there now`,
+    )
+  }
+
   const { countriesFilled: countries, countriesFromList: fromList, countriesFromSquad: fromSquad } = report
   const { countriesFromBirth: fromBirth, countriesFromSport: fromSport } = report
 
@@ -264,6 +273,7 @@ async function readUnreadPersons(
     itemsAsked: 0,
     lines: { manual: 0, 'old-site': 0, squad: 0, wikidata: 0 },
     linesAgain: { cleared: 0, squad: 0, wikidata: 0 },
+    marksRemoved: 0,
     nationality: 0,
     read: 0,
     reread: 0,
@@ -625,8 +635,8 @@ async function readUnreadPersons(
         : null
     const stored = kept === null ? line : ('keep' as const)
 
-    await db.transaction((transaction) =>
-      storePersonData(
+    const removed = await db.transaction(async (transaction) => {
+      await storePersonData(
         transaction,
         person.id,
         {
@@ -637,8 +647,13 @@ async function readUnreadPersons(
           line: stored,
         },
         clock(),
-      ),
-    )
+      )
+
+      // A gap marked as not available goes when the fact is found (#1308), with a row in the
+      // log of the admin for the import, which has no account.
+      return clearFilledMarks(transaction, person.id, null, clock())
+    })
+    report.marksRemoved += removed.length
     report.read++
 
     if (person.readAt !== null) {

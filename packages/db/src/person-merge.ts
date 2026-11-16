@@ -20,6 +20,7 @@ import {
   playerSeasonStats,
   playerSources,
   playerStatDifferences,
+  unavailableMarks,
 } from './schema.ts'
 
 /** A row of `players` as a plan of a merge names it. */
@@ -242,6 +243,11 @@ export async function mergePersonInto(tx: MergeDatabase, other: Person, kept: Pe
   // The other person goes first: the Q-number and the title are unique, so two persons cannot
   // have them at once.
   await tx.delete(persons).where(eq(persons.id, other.id))
+  // The marks of a gap as not available (#1308) belong to a person who is gone now. The person
+  // that stays keeps his own, and the merged values may have filled a gap he had marked.
+  await tx
+    .delete(unavailableMarks)
+    .where(and(eq(unavailableMarks.subject, 'person'), eq(unavailableMarks.subjectId, other.id)))
   // A person that stays without a page of his own takes the address of the other, so it keeps
   // working until `updatePlayerAddresses` gives him the slug of his name.
   await tx

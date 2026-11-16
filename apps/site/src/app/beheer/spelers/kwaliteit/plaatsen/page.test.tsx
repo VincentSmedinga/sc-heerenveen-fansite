@@ -142,6 +142,8 @@ describe('the page Vaste plaatsen', () => {
   })
 
   it('is linked from the table of the persons', async () => {
-    expect(renderToStaticMarkup(await PersonQualityPage())).toContain('href="/beheer/spelers/kwaliteit/plaatsen"')
+    expect(renderToStaticMarkup(await PersonQualityPage({ searchParams: Promise.resolve({}) }))).toContain(
+      'href="/beheer/spelers/kwaliteit/plaatsen"',
+    )
   })
 })
