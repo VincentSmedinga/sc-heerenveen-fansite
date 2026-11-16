@@ -21,6 +21,11 @@
 // With `--stadiums` it reads the home grounds of the clubs from Wikidata, for the clubs
 // that were not read yet (`pnpm run import:stadiums`), under the lock of the import.
 //
+// With `--fill-stadiums` it gives the played matches without a stadium the home ground of their
+// home club on the day, from the database and without a request
+// (`pnpm run import:fill-stadiums`).
+// The hourly import does the same as its last step, and speaks only when it filled a match.
+//
 // With `--item-clubs` it works out again which professional clubs each headline names, from the
 // database and without a request (`pnpm run import:item-clubs`).
 //
@@ -39,6 +44,7 @@ import { checkMigrations, describeMigrationCheck } from '@fansite/db/migration-c
 import { parseArgs } from 'node:util'
 
 import { runCountryFactsCommand } from './country-facts.ts'
+import { runFillStadiumsCommand } from './fill-stadiums.ts'
 import { runChangesCommand } from './import-changes.ts'
 import { runStadiumsCommand } from './import-club-stadiums.ts'
 import { runImport } from './import-feeds.ts'
@@ -56,6 +62,7 @@ const { positionals, values } = parseArgs({
     completeness: { type: 'boolean' },
     'country-facts': { type: 'boolean' },
     'dry-run': { type: 'boolean' },
+    'fill-stadiums': { type: 'boolean' },
     'from-season': { type: 'boolean' },
     'from-squad': { type: 'boolean' },
     'item-clubs': { type: 'boolean' },
@@ -73,6 +80,7 @@ const modes = [
   values.changes,
   values.completeness,
   values['country-facts'],
+  values['fill-stadiums'],
   fromSeason,
   fromSquad,
   values['item-clubs'],
@@ -92,7 +100,7 @@ const wrongArguments =
 
 if (wrongArguments) {
   console.error(
-    `Wrong arguments. ${seasonUsage}\n${fromSeasonUsage}\n${squadUsage}\n${fromSquadUsage}\n${oldSiteUsage}\nOr use --status alone, --old-site (alone, or with --dry-run or --report) alone, --completeness alone, --item-clubs alone, --changes, or no argument for the hourly import.`,
+    `Wrong arguments. ${seasonUsage}\n${fromSeasonUsage}\n${squadUsage}\n${fromSquadUsage}\n${oldSiteUsage}\nOr use --status alone, --old-site (alone, or with --dry-run or --report) alone, --completeness alone, --fill-stadiums alone, --item-clubs alone, --changes, or no argument for the hourly import.`,
   )
   process.exit(2)
 }
@@ -133,12 +141,14 @@ process.exitCode = fromSeason
               ? await runCompletenessCommand(DATABASE_URL)
               : values['country-facts']
                 ? await runCountryFactsCommand(DATABASE_URL)
-                : values.stadiums
-                  ? await runStadiumsCommand(DATABASE_URL)
-                  : values['item-clubs']
-                    ? await runItemClubsCommand(DATABASE_URL)
-                    : values['old-site']
-                      ? values.report
-                        ? await runOldSiteReport(DATABASE_URL)
-                        : await runOldSiteImport(DATABASE_URL, { dryRun: values['dry-run'] === true })
-                      : await runImport(DATABASE_URL)
+                : values['fill-stadiums']
+                  ? await runFillStadiumsCommand(DATABASE_URL)
+                  : values.stadiums
+                    ? await runStadiumsCommand(DATABASE_URL)
+                    : values['item-clubs']
+                      ? await runItemClubsCommand(DATABASE_URL)
+                      : values['old-site']
+                        ? values.report
+                          ? await runOldSiteReport(DATABASE_URL)
+                          : await runOldSiteImport(DATABASE_URL, { dryRun: values['dry-run'] === true })
+                        : await runImport(DATABASE_URL)

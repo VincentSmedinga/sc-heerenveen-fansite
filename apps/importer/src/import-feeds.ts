@@ -21,6 +21,7 @@ import type { MatchDay } from './relevance.ts'
 
 import { alertRunOf, feedSubject, matchesSubject, squadSubject } from './alert-runs.ts'
 import { createFetcher } from './fetcher.ts'
+import { fillStadiums } from './fill-stadiums.ts'
 import { describeClubData, readClubData } from './import-club-data.ts'
 import { describeClubStadiums, readClubStadiums } from './import-club-stadiums.ts'
 import { importEndedSeason } from './import-ended-season.ts'
@@ -392,9 +393,16 @@ export async function runImport(
         (error: unknown) => [`Player addresses: warning, not updated: ${describeError(error)}`],
       )
 
+      // Last: a match that came without a stadium gets the home ground of its home club
+      // (#1293).
+      // A failure is a warning, not a failed import.
+      const stadiumLines = await fillStadiums(db).catch((error: unknown) => [
+        `Stadiums of matches: warning, not filled: ${describeError(error)}`,
+      ])
+
       await finishRun(db, runId, clock())
 
-      return { clubLines, personLines: [...personLines, ...addresses], reports, wikipedia }
+      return { clubLines, personLines: [...personLines, ...addresses, ...stadiumLines], reports, wikipedia }
     })
 
     if (!run.ran) {
