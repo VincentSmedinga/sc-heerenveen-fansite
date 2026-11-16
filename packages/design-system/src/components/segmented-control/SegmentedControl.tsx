@@ -1,12 +1,13 @@
-import type { ComponentPropsWithoutRef } from 'react'
+'use client'
 
-import type { Size } from '../size'
+import { type ComponentPropsWithoutRef, useRef } from 'react'
 
 import { Button } from '../button/Button'
 import { classNames } from '../classNames'
 import { attachIcon } from '../icon/attachIcon'
 import { type FilledIconName, Icon } from '../icon/Icon'
-import { segmentedGroup, SegmentedLabel } from './segmented'
+import { type Size, sizeClassName } from '../size'
+import { SegmentedLabel, useSegmentedThumb } from './segmented'
 
 export type SegmentedControlOption<Value extends string> = {
   /**
@@ -59,25 +60,18 @@ export const SegmentedControl = <Value extends string>({
   value,
   ...props
 }: SegmentedControlProps<Value>) => {
-  const {
-    sizeClass,
-    style: groupStyle,
-    ...group
-  } = segmentedGroup(
-    options.map((option) => option.value),
-    value,
-    size,
-    style,
-  )
+  const group = useRef<HTMLDivElement>(null)
+
+  useSegmentedThumb(group, value)
 
   return (
     <div
       {...props}
-      {...group}
       aria-label={label}
-      className={classNames('hf-segmented-control', sizeClass, className)}
+      className={classNames('hf-segmented-control', sizeClassName(size), className)}
+      ref={group}
       role="group"
-      style={groupStyle}
+      style={style}
     >
       {options.map((option) => (
         <Button

@@ -1778,6 +1778,9 @@
   De knop en de keuzes krijgen hun naam van de plek die de pagina aan `SegmentedLinks` geeft, en een pagina mag meer dan één schakelaar hebben als elke een eigen plek heeft.
   Een schakelaar zonder plek doet niet meer mee aan de overgang, ook niet als hij met knoppen werkt.
 - **Later:** zie _De schakelaar gebruikt geen overgang tussen pagina's_ (11 november 2026): `@view-transition` en `view-transition-name` zijn weg uit `segmented-control.css`, en een link zonder JavaScript laadt de pagina met de knop al bij de nieuwe keuze.
+- **Later:** zie _De keuzes van de schakelaar zijn zo breed als hun tekst_ (16 november 2026): de keuzes zijn niet meer even breed en de knop volgt niet meer uit het aantal keuzes en de plaats van de gekozen keuze.
+  De component meet de gekozen keuze en zet de plaats en de breedte van de knop op de groep (`--hf-segmented-x` en `--hf-segmented-width`); zonder script tekent de gekozen keuze de knop zelf.
+  De custom properties voor het aantal en de plaats, en het attribuut `data-empty`, zijn weg.
 
 ## De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past
 
@@ -3601,6 +3604,8 @@
   Op een telefoon van 390 pixels is een cel ongeveer 72 pixels breed, en het langste label in vet, "Competitie", is dan 73 pixels breed op de maat van de metatekst, dus het woord brak in twee regels.
   Met 13 pixels en zonder opvulling past het op één regel, en de pagina scrolt niet zijwaarts.
 - **Alternatieven:** de labels korter maken ("Comp."; een supporter leest het niet); een schakelaar die zijwaarts scrolt (de keuzes zijn dan niet allemaal te zien); een eigenschap voor de maat (dubbel werk, want het aantal keuzes zegt het al).
+- **Later:** zie _De keuzes van de schakelaar zijn zo breed als hun tekst_ (16 november 2026): de regel met `:has(> :nth-child(5))` voor de compacte schakelaar is weg.
+  De keuzes zijn zo breed als hun tekst en de klasse `hf-segmented-compact` neemt altijd de strakke stap (letters van 13 pixels en 0,5 rem aan weerskanten), voor elk aantal keuzes.
 
 ## De regel met de clubs in `Match` is de link naar de pagina van de wedstrijd
 
@@ -3620,3 +3625,32 @@
   In forced colours krijgt de link de kleur van het systeem voor links.
   Een wedstrijd die live is, toont geen eigen teken in de lijst: de pagina van de wedstrijd heeft de stand.
 - **Alternatieven:** de aparte link houden; alleen de clubs als link, zonder de uitslag; altijd onderstreept, met of zonder pijltje; de tekstkleur houden, zodat je in rust niet ziet welke regel een link is; "Live" houden als klein label.
+
+## De keuzes van de schakelaar zijn zo breed als hun tekst
+
+- **Datum:** 16 november 2026
+- **Besluit:** elke keuze van `SegmentedControl` en `SegmentedLinks` is zo breed als zijn label in dikke letters plus 0,75 rem aan weerskanten, en de baan is zo breed als alle keuzes samen (#1323).
+  De baan wordt niet breder of smaller als een andere keuze gekozen wordt, want de dikke letters bepalen de breedte, zoals voorheen.
+  Een schakelaar met drie keuzes is dus korter dan een met vijf.
+  De knop volgt niet meer uit het aantal keuzes en de plaats van de gekozen keuze.
+  Een kleine hulp in de component (`useSegmentedThumb`) meet de gekozen keuze en zet haar plaats en breedte op de groep.
+  De knop schuift met een overgang op `translate` en `inline-size` in dezelfde duur en met dezelfde curve als eerst, en springt met `prefers-reduced-motion: reduce`.
+  Zonder script, en in de HTML van de server, tekent de gekozen keuze de knop zelf met haar eigen `::before`, op dezelfde plek, zodat een link ook dan goed staat.
+  De groep markeert zich met `data-placed` zodra de knop gemeten is; dan neemt de knop van de groep het over.
+  Een keuze is nog steeds over de hele hoogte van de baan te raken.
+- **Waarom:** naast de kop is de ruimte van de werkbalk smal, en gelijke breedtes maken een schakelaar met drie keuzes even breed als een met vijf, terwijl de breedte van de langste keuze het enige is dat de keuzes werkelijk nodig hebben.
+- **Alternatieven:** gelijke breedtes houden en de letters verkleinen (nu 13 pixels bij vijf keuzes, wat de leesbaarheid kost voor alle schakelaars); een schakelaar die op een smalle plek een keuzelijst wordt (een tweede bediening voor dezelfde keuze); de knop plaatsen met CSS anchor positioning (nog niet in elke browser, en een overgang tussen ankers is niet overal te zien); een knop als eigen element per keuze, die niet schuift.
+
+## Een strakke stap op een smalle plek
+
+- **Datum:** 16 november 2026
+- **Besluit:** wordt de plek van een schakelaar smaller dan de schakelaar zelf, dan gaan de letters naar 13 pixels en de ruimte aan weerskanten naar 0,5 rem, op elke schermbreedte (#1323).
+  Het component beslist dit met een containerquery, geen pagina bepaalt zijn eigen indeling.
+  `Page.Toolbar` is daarvoor een plek met een eigen breedte (`container-type: inline-size`), ook onder 52 rem.
+  De grenzen hangen af van het aantal keuzes, want de breedte van de schakelaar doet dat: onder 15 rem voor twee of drie keuzes, onder 19 rem voor vier en onder 24 rem voor vijf of meer.
+  Vijf keuzes krijgen onder 20 rem, op een telefoon van 320 pixels, nog een stap: 0,25 rem aan weerskanten.
+  De klasse `hf-segmented-compact` neemt de strakke stap altijd.
+- **Waarom:** vijf keuzes zijn 368 of 376 pixels breed, en de zijkolom is tussen 52 en 60 rem smaller dan dat; met de strakke stap (311 of 318) past elke schakelaar vanaf 52 rem, en ook op een telefoon van 390 pixels.
+  Op 320 pixels is de werkbalk 288 pixels breed en past vijf keuzes na de extra stap in ongeveer 278 pixels.
+  Een zijkolom van ongeveer 16 rem, op een telefoon op zijn kant met een grote inzet, is smaller dan dat: daar breekt het langste woord, maar de pagina scrolt niet zijwaarts.
+- **Alternatieven:** een extra rij onder de kop als hij te breed is (de projecteigenaar wilde geen terugvalrij); een kleinere schakelaar met minder keuzes; de grenzen uit de inhoud van de schakelaar laten volgen (een containerquery kan niet vragen naar de breedte van wat erin staat).

@@ -1,12 +1,15 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
+import { measureOptions } from './measure-options'
 import { SegmentedLinks } from './SegmentedLinks'
 
 const options = [
   { href: '/wedstrijden/cijfers', label: 'Alle wedstrijden', value: 'all' },
   { href: '/wedstrijden/cijfers?competitie=eredivisie', label: 'Eredivisie', value: 'league' },
 ] as const
+
+measureOptions()
 
 describe('SegmentedLinks', () => {
   it('is a group with a name, with a link for each option and the look of a segmented control', () => {
@@ -44,15 +47,16 @@ describe('SegmentedLinks', () => {
     render(<SegmentedLinks label="Welke wedstrijden" options={options} size="small" value="league" />)
     const group = screen.getByRole('group', { name: 'Welke wedstrijden' })
 
-    expect(group.style.getPropertyValue('--hf-segmented-count')).toBe('2')
-    expect(group.style.getPropertyValue('--hf-segmented-index')).toBe('1')
+    expect(group.style.getPropertyValue('--hf-segmented-x')).toBe('80px')
+    expect(group.style.getPropertyValue('--hf-segmented-width')).toBe('80px')
+    expect(group.hasAttribute('data-placed')).toBe(true)
     expect(group.className).toBe('hf-segmented-control hf-size-small')
   })
 
   it('leaves the thumb out when no link is current', () => {
     render(<SegmentedLinks label="Welke wedstrijden" options={options} value="other" />)
 
-    expect(screen.getByRole('group').hasAttribute('data-empty')).toBe(true)
+    expect(screen.getByRole('group').hasAttribute('data-placed')).toBe(false)
     expect(screen.getAllByRole('link').every((link) => !link.hasAttribute('aria-current'))).toBe(true)
   })
 

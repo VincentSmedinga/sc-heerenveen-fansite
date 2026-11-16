@@ -134,11 +134,13 @@ export const Choosing = meta.story({
   play: async ({ canvas }) => {
     const group = canvas.getByRole('group', { name: 'Thema' })
 
-    await expect(group).toHaveStyle('--hf-segmented-index: 0')
+    const thumbAt = () => Number.parseFloat(group.style.getPropertyValue('--hf-segmented-x'))
+
+    await expect(thumbAt()).toBe(canvas.getByRole('button', { name: 'Licht' }).offsetLeft)
     await userEvent.click(canvas.getByRole('button', { name: 'Donker' }))
     await expect(canvas.getByRole('button', { name: 'Donker' })).toHaveAttribute('aria-pressed', 'true')
     await expect(canvas.getByRole('button', { name: 'Licht' })).toHaveAttribute('aria-pressed', 'false')
-    await expect(group).toHaveStyle('--hf-segmented-index: 1')
+    await expect(thumbAt()).toBe(canvas.getByRole('button', { name: 'Donker' }).offsetLeft)
   },
   render: ({ label, options, size = 'default', value }) => (
     <Example label={label} options={options} size={size} start={value} />

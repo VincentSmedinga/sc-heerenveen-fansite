@@ -228,6 +228,7 @@
    */
   .hf-page-toolbar {
     align-items: center;
+    container-type: inline-size;
     display: flex;
     flex-wrap: wrap;
     gap: var(--hf-space-s) var(--hf-space-l);

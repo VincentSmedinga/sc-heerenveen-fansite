@@ -1,31 +1,52 @@
-import type { CSSProperties, ReactNode } from 'react'
-
-import { type Size, sizeClassName } from '../size'
+import { type ReactNode, type RefObject, useLayoutEffect } from 'react'
 
 /**
- * What a segmented control and its links have in common: the class of the group and the two
- * custom properties that place the thumb. The thumb is drawn by segmented-control.css, in a
- * pseudo-element of the group, and finds its place from the number of options and the index of
- * the chosen one, so it needs no script and no element of its own, also on a page that was
- * rendered on the server. A value that is none of the options leaves the thumb out.
+ * Puts the thumb under the chosen option. The options are as wide as their text, so the thumb
+ * cannot be placed from a count and an index: the group measures the chosen option and gives
+ * the thumb its place and width as two custom properties, `--hf-segmented-x` and
+ * `--hf-segmented-width`, and marks itself with `data-placed`. The stylesheet slides the thumb
+ * with a transition, which the motion tokens make instant with reduced motion. Without script,
+ * and on a page that was rendered on the server, the chosen option draws the thumb itself, in
+ * the same place, so nothing is wrong before the script runs. A value that is none of the
+ * options leaves the thumb out.
  */
-export const segmentedGroup = (
-  values: readonly string[],
-  value: string,
-  size: Size,
-  style: CSSProperties | undefined,
-) => {
-  const index = values.indexOf(value)
+export const useSegmentedThumb = (group: RefObject<HTMLDivElement | null>, value: string) => {
+  useLayoutEffect(() => {
+    const element = group.current
 
-  return {
-    'data-empty': index === -1 ? '' : undefined,
-    sizeClass: sizeClassName(size),
-    style: {
-      ...style,
-      '--hf-segmented-count': values.length,
-      '--hf-segmented-index': Math.max(index, 0),
-    } as CSSProperties,
-  }
+    if (!element) {
+      return
+    }
+
+    const place = () => {
+      const chosen = element.querySelector<HTMLElement>(':scope > [aria-current], :scope > [aria-pressed="true"]')
+
+      if (!chosen) {
+        element.removeAttribute('data-placed')
+
+        return
+      }
+
+      element.style.setProperty('--hf-segmented-x', `${chosen.offsetLeft}px`)
+      element.style.setProperty('--hf-segmented-width', `${chosen.offsetWidth}px`)
+      element.setAttribute('data-placed', '')
+    }
+
+    place()
+
+    // The options change width when the font arrives and when the place gets narrower.
+    if (typeof ResizeObserver === 'undefined') {
+      return
+    }
+
+    const observer = new ResizeObserver(place)
+
+    observer.observe(element)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [group, value])
 }
 
 /**

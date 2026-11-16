@@ -249,7 +249,7 @@ describe('the page /wedstrijden/cijfers', () => {
 
   it('has no order or style attribute but the length of a bar and the place of a label or a bar of a chart, so the order on a phone is the order in the source', async () => {
     expect(await render()).not.toMatch(
-      / style="(?!grid-area:[a-z-]+"|--hf-page-areas-narrow:[^"]*"|--hf-bar-share:[\d.]+"|--hf-segmented-count:\d+;--hf-segmented-index:\d+"|--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"|--hf-donut-cos:|--hf-bar-chart-(?:slots|at|share|across):[\d.]+(?:;--hf-bar-chart-at:[\d.]+)?")|order:/,
+      / style="(?!grid-area:[a-z-]+"|--hf-page-areas-narrow:[^"]*"|--hf-bar-share:[\d.]+""|--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"|--hf-donut-cos:|--hf-bar-chart-(?:slots|at|share|across):[\d.]+(?:;--hf-bar-chart-at:[\d.]+)?")|order:/,
     )
   })
 

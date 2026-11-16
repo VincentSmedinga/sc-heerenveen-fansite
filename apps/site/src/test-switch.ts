@@ -13,7 +13,7 @@ export function switchHtml(address: string, current: number, values: readonly (r
     })
     .join('')
 
-  return `<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-segmented-compact" role="group" style="--hf-segmented-count:${values.length};--hf-segmented-index:${current}">${links}</div>`
+  return `<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-segmented-compact" role="group">${links}</div>`
 }
 
 /** The choices of a season with a league and a cup. */
