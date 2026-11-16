@@ -13,6 +13,7 @@ import {
   matchReports,
   type NewMatch,
   players,
+  stadiums,
 } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
