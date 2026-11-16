@@ -1100,6 +1100,13 @@ await withEmptyDatabase((database) =>
     assert.match(previewHtml, /class="hf-match-header-outcome">Voorbeschouwing</)
     assert.match(previewHtml, /Nog niet gespeeld: /)
     assert.match(previewHtml, /<meta name="robots" content="noindex/)
+    // The page of a match has the bar of Wedstrijden under the menu, as the page of its season
+    // has, with no current sub-page and Cijfers of its season (#1320).
+    assert.match(
+      previewHtml,
+      /<a aria-current="page" class="hf-navigation-link" href="\/wedstrijden">Wedstrijden<\/a><div class="hf-navigation-bar">.*?<a class="hf-navigation-sublink" href="\/wedstrijden\/cijfers\/\d{4}-\d{2}">Cijfers<\/a>.*?<a class="hf-navigation-sublink" href="\/tegenstanders">Tegenstanders<\/a>/s,
+    )
+    assert.doesNotMatch(previewHtml, /<a aria-current="page" class="hf-navigation-sublink"/)
     assert.doesNotMatch(previewHtml, /Eindstand|Tussenstand/)
     assert.doesNotMatch(await (await fetch(`${origin}/sitemap.xml`)).text(), new RegExp(previewAddress))
 
@@ -1209,6 +1216,11 @@ await withEmptyDatabase((database) =>
     const allSeasonsHtml = await allSeasonsResponse.text()
     assert.equal(allSeasonsResponse.status, 200)
     assert.match(allSeasonsHtml, /<h1[^>]*>Cijfers<\/h1>/)
+    // The bar under the menu is on this page too, with Cijfers as the current sub-page (#1320).
+    assert.match(
+      allSeasonsHtml,
+      /<a aria-current="true" class="hf-navigation-link" href="\/wedstrijden">Wedstrijden<\/a><div class="hf-navigation-bar">.*?<a aria-current="page" class="hf-navigation-sublink" href="\/wedstrijden\/cijfers\/alle">Cijfers<\/a>.*?<a class="hf-navigation-sublink" href="\/tegenstanders">Tegenstanders<\/a>/s,
+    )
     assert.match(allSeasonsHtml, /<option[^>]*value="alle"[^>]*>Alle seizoenen<\/option>/)
     assert.deepEqual(
       [...allSeasonsHtml.matchAll(/<h3[^>]*? id="([^"]+)"/g)].map(([, id]) => id).filter((id) => id === 'records'),
