@@ -6015,7 +6015,8 @@
     Delen drie of meer spelers een plaats, dan staat er "4 spelers" zonder namen.
     Zo is elke kaart hoogstens drie regels hoog.
   - **Dezelfde getallen als de grote kaarten:** de kaarten gebruiken `topScorersOf`, `rankedPlaces` en `cleanSheetsOf`, en tellen alle competities van het gekozen seizoen.
-  - **De nul gehouden:** één groot getal (`BigFigure`, nieuw in het designsysteem) en één regel eronder, "In 39 wedstrijden. De laatste keer: 2–0 thuis tegen NEC, zo 18 okt.", zonder lijst.
+  - **De nul gehouden:** één groot getal (`BigFigure`, nieuw in het designsysteem) en één regel eronder, zonder lijst.
+    De regel noemt het aantal wedstrijden en de laatste keer met score, thuis of uit, tegenstander en dag.
     Bij nul keer staat er "Nog niet de nul gehouden dit seizoen." en geen regel over de laatste keer.
   - **Links:** elke kaart eindigt met een link naar haar grote kaart voor hetzelfde seizoen, met een eigen tekst: "Alle doelpuntenmakers", "Alle assists", "Alle wedstrijden waarin we de nul hielden" en "Alle minuten".
   - **Zonder gegevens:** een kaart zonder gegevens staat er niet.
