@@ -1,10 +1,13 @@
-import { listReportedMatches } from '@fansite/db/match-reports'
+import { listReportedMatches, listScheduledMatches } from '@fansite/db/match-reports'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getMatchSeasons } from './matches'
 import {
   getAllReportAddresses,
   getLiveReports,
+  getPreviewAddresses,
+  getPreviewMatch,
+  getPreviewMatches,
   getPublicReport,
   getPublicReports,
   getReportAddresses,
@@ -17,6 +20,7 @@ import { reportedMatch } from './test-reports'
 vi.mock('@fansite/db/match-reports', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   listReportedMatches: vi.fn(),
+  listScheduledMatches: vi.fn(),
 }))
 vi.mock('./database', () => ({ getDatabase: () => ({ db: {} }) }))
 vi.mock('./matches', async (importOriginal) => ({
@@ -246,5 +250,84 @@ describe('how long the reports are kept', () => {
     }
 
     expect(listReportedMatches).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('the Voorbeschouwing of a match that has not begun', () => {
+  /** A match that is still scheduled, kicking off in `hours` hours, with its club slug. */
+  const scheduled = (hours: null | number, values: { round?: string } = {}) => {
+    const { match } = { match: reportedMatch().match }
+    const kickoffAt = hours === null ? null : new Date(Date.now() + hours * 60 * 60 * 1000)
+    const matchDate = (kickoffAt ?? new Date(Date.now() + 24 * 60 * 60 * 1000)).toISOString().slice(0, 10)
+
+    return {
+      clubSlug: 'testdorp-fc',
+      match: {
+        ...match,
+        goalsAgainst: null,
+        goalsFor: null,
+        kickoffAt,
+        matchDate,
+        status: 'scheduled' as const,
+        ...values,
+      },
+    }
+  }
+
+  beforeEach(() => {
+    vi.mocked(listScheduledMatches).mockReset()
+  })
+
+  it('has the matches that have not begun and leaves out the match that has, by its kick-off', async () => {
+    const begun = scheduled(-1, { round: 'Speelronde 1' })
+    const coming = scheduled(30, { round: 'Speelronde 2' })
+
+    vi.mocked(listScheduledMatches).mockResolvedValue([begun, coming])
+
+    expect((await getPreviewMatches('2026/27')).map(({ match }) => match.round)).toEqual(['Speelronde 2'])
+  })
+
+  it('decides at each call whether a match has begun, whatever the cache holds', async () => {
+    vi.mocked(listScheduledMatches).mockResolvedValue([scheduled(1)])
+
+    expect(await getPreviewMatches('2026/27')).toHaveLength(1)
+    expect(await getPreviewMatches('2026/27', new Date(Date.now() + 2 * 60 * 60 * 1000))).toHaveLength(0)
+    expect(listScheduledMatches).toHaveBeenCalledTimes(1)
+  })
+
+  it('has a match without a kick-off until its day, in Dutch time', async () => {
+    vi.mocked(listScheduledMatches).mockResolvedValue([scheduled(null)])
+
+    expect(await getPreviewMatches('2026/27')).toHaveLength(1)
+  })
+
+  it('finds the match of an address, and nothing for another day, club or season, or a bad address', async () => {
+    const coming = scheduled(30)
+
+    vi.mocked(listScheduledMatches).mockResolvedValue([coming])
+
+    const slug = reportAddress('2026/27', coming.match.matchDate, 'testdorp-fc').split('/').pop()!
+
+    expect((await getPreviewMatch('2026/27', slug))?.match.id).toBe(coming.match.id)
+    expect(await getPreviewMatch('2026/27', `${coming.match.matchDate}-ander-fc`)).toBeUndefined()
+    expect(await getPreviewMatch('2026/27', '1999-01-01-testdorp-fc')).toBeUndefined()
+    expect(await getPreviewMatch('2024/25', slug)).toBeUndefined()
+    expect(await getPreviewMatch('2026/27', 'onzin')).toBeUndefined()
+  })
+
+  it('gives the address of a match by its competition and round, like the addresses of reports', async () => {
+    const coming = scheduled(30, { round: 'Speelronde 13' })
+
+    vi.mocked(listScheduledMatches).mockResolvedValue([coming])
+
+    expect(await getPreviewAddresses('2026/27')).toEqual(
+      new Map([['Eredivisie|Speelronde 13', reportAddress('2026/27', coming.match.matchDate, 'testdorp-fc')]]),
+    )
+  })
+
+  it('is not in the sitemap: the page is not indexed before the kick-off', async () => {
+    vi.mocked(listScheduledMatches).mockResolvedValue([scheduled(30)])
+
+    expect(await getAllReportAddresses()).not.toContain(expect.stringContaining('/wedstrijden/'))
   })
 })

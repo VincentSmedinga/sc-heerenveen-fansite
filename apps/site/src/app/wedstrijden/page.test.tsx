@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getLeagueResults, getMatchData, getMatchSeasons } from '#src/matches'
 import { matchShortcutsOf } from '#src/matchShortcuts'
-import { getLiveReports, getReportAddresses } from '#src/report-data'
+import { getLiveReports, getPreviewAddresses, getReportAddresses } from '#src/report-data'
 import { leagueResultsData, leagueRoundOf, matchData } from '#src/test-matches'
 import { withoutIcons } from '#src/without-icons'
 
@@ -23,6 +23,7 @@ vi.mock('#src/matches', async (importOriginal) => ({
 vi.mock('#src/report-data', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getLiveReports: vi.fn(),
+  getPreviewAddresses: vi.fn(),
   getReportAddresses: vi.fn(),
 }))
 
@@ -62,6 +63,8 @@ beforeEach(() => {
   vi.mocked(getReportAddresses).mockResolvedValue(new Map())
   vi.mocked(getLiveReports).mockReset()
   vi.mocked(getLiveReports).mockResolvedValue(new Set())
+  vi.mocked(getPreviewAddresses).mockReset()
+  vi.mocked(getPreviewAddresses).mockResolvedValue(new Map())
 })
 
 afterEach(() => {
@@ -1298,6 +1301,31 @@ describe('the card Laatste wedstrijd', () => {
     vi.mocked(getReportAddresses).mockResolvedValue(new Map([[key, '/wedstrijden/2026-27/2026-10-20-sv-proefdorp']]))
 
     expect(card(await render())).toContain('Het verslag')
+  })
+
+  it('links a match that has not begun to its Voorbeschouwing, in the programme', async () => {
+    const programmeKey = 'Eredivisie|Speelronde 10'
+    const address = '/wedstrijden/2026-27/2026-10-28-proefstad-sv'
+
+    vi.mocked(getPreviewAddresses).mockResolvedValue(new Map([[programmeKey, address]]))
+
+    const programme = section(await render(), 'programma')
+
+    expect(programme).toContain(`href="${address}"`)
+    expect(programme).toContain('Voorbeschouwing<span class="hf-visually-hidden"> van sc Heerenveen tegen Proefstad SV')
+    expect(programme).not.toContain('Het verslag')
+  })
+
+  it('leaves the link to a report as it is when a match has both a report and a Voorbeschouwing', async () => {
+    const programmeKey = 'Eredivisie|Speelronde 10'
+
+    vi.mocked(getPreviewAddresses).mockResolvedValue(new Map([[programmeKey, '/voorbeschouwing']]))
+    vi.mocked(getReportAddresses).mockResolvedValue(new Map([[programmeKey, '/verslag']]))
+
+    const programme = section(await render(), 'programma')
+
+    expect(programme).toContain('href="/verslag"')
+    expect(programme).not.toContain('Voorbeschouwing')
   })
 
   it('says "Live" for a match that is live, without a result', async () => {

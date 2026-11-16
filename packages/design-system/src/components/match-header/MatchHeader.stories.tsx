@@ -205,3 +205,16 @@ export const NotStarted = meta.story({
   },
   name: 'Nog niet begonnen: streepjes en de aftrap bij de feiten',
 })
+
+export const Preview = meta.story({
+  args: {
+    facts,
+    goalsAgainst: 0,
+    goalsFor: 0,
+    home: false,
+    opponent: 'Testdorp FC',
+    phase: 'upcoming',
+    pill: 'Voorbeschouwing',
+  },
+  name: 'Voorbeschouwing: dezelfde streepjes, met "Voorbeschouwing" in de pil',
+})

@@ -1,7 +1,7 @@
 import type { MatchReport as ReportForRules, ReportMatch } from '@fansite/shared/match-report'
 
 import { minutesPlayed, playedMatch } from '@fansite/shared/match-report'
-import { and, asc, eq, inArray, or } from 'drizzle-orm'
+import { and, asc, eq, inArray, isNull, or } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 import type {
@@ -114,6 +114,9 @@ export type ReportGoalDifference = {
  * nothing for a match that was played. See `phaseOf`.
  */
 export type ReportPhase = 'live' | 'upcoming'
+
+/** A match that is still `scheduled` and has no report: the page of its Voorbeschouwing. */
+export type ScheduledMatch = { clubSlug: string; match: Match }
 
 /** A match of a season with the status of its report: `null` for a match without a report. */
 export type SeasonMatchReport = Pick<
@@ -234,6 +237,28 @@ export async function findReportGoalDifferences(db: ReportDatabase, season: stri
  */
 export function listReportedMatches(db: ReportDatabase, season: string): Promise<ReportedMatch[]> {
   return reportedMatchesOf(db, eq(matches.season, season))
+}
+
+/**
+ * The matches of a season that are still `scheduled`, have no report and have a club, from the
+ * first to the last. They have the page of the Voorbeschouwing before their kick-off (see
+ * `phaseOf`); the caller keeps those that have not begun. A match without a club has no
+ * address, so it is not in it.
+ */
+export async function listScheduledMatches(db: ReportDatabase, season: string): Promise<ScheduledMatch[]> {
+  const rows = await db
+    .select({ clubSlug: clubs.slug, match: matches })
+    .from(matches)
+    .innerJoin(clubs, eq(clubs.id, matches.clubId))
+    .leftJoin(matchReports, eq(matchReports.matchId, matches.id))
+    .where(and(eq(matches.season, season), eq(matches.status, 'scheduled'), isNull(matchReports.matchId)))
+    .orderBy(asc(matches.matchDate), asc(matches.kickoffAt), asc(matches.id))
+  const named = await withSeasonNames(
+    db,
+    rows.map((row) => ({ ...row.match, clubSlug: row.clubSlug })),
+  )
+
+  return named.map(({ clubSlug, ...match }) => ({ clubSlug, match }))
 }
 
 /**

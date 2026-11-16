@@ -5,7 +5,6 @@ import { phaseOf } from '@fansite/db/match-reports'
 import { oldSiteReportSource } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { Card, Contents, Link, type MatchHeaderFact, MatchNeighbours, Page, Text, Time } from '@fansite/design-system'
-import { notFound } from 'next/navigation'
 import { cache, type ReactNode } from 'react'
 
 import { reviewBranch } from '#src/env'
@@ -25,6 +24,8 @@ import { matchesPath } from '#src/season-page'
 import { seasonAddress, seasonFromSlug } from '#src/seasons'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { withBranch } from '#src/title'
+
+import { previewMetadata, PreviewPage } from './preview-page'
 
 /**
  * The match of the address and what the credit needs, or what went wrong. A page that throws
@@ -80,8 +81,9 @@ export async function reportMetadata(seizoen: string, wedstrijd: string): Promis
     return { robots: { index: false }, title: withBranch(serverErrorTitle, reviewBranch()) }
   }
 
+  // A match without a report may have the page of its Voorbeschouwing.
   if (loaded.kind === 'unknown') {
-    return {}
+    return previewMetadata(seizoen, wedstrijd)
   }
 
   const { reported, season } = loaded
@@ -140,8 +142,10 @@ const numberFormat = new Intl.NumberFormat('nl-NL')
 export async function ReportPage({ season: seizoen, slug }: { season: string; slug: string }) {
   const loaded = await loadReport(seizoen, slug)
 
+  // A match without a report has a page when it has not begun: its Voorbeschouwing. Any other
+  // address is "niet gevonden".
   if (loaded.kind === 'unknown') {
-    notFound()
+    return PreviewPage({ season: seizoen, slug })
   }
 
   if (loaded.kind === 'error') {
