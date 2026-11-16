@@ -21,6 +21,10 @@
 // With `--stadiums` it reads the home grounds of the clubs from Wikidata, for the clubs
 // that were not read yet (`pnpm run import:stadiums`), under the lock of the import.
 //
+// With `--club-numbers` it searches the clubs without a Wikidata number by the name of the club
+// on Wikipedia, for the clubs that were not searched yet (`pnpm run import:club-numbers`),
+// under the lock of the import (#1341).
+//
 // With `--fill-stadiums` it gives the played matches without a stadium the home ground of their
 // home club on the day, from the database and without a request
 // (`pnpm run import:fill-stadiums`).
@@ -46,6 +50,7 @@ import { parseArgs } from 'node:util'
 import { runCountryFactsCommand } from './country-facts.ts'
 import { runFillStadiumsCommand } from './fill-stadiums.ts'
 import { runChangesCommand } from './import-changes.ts'
+import { runClubNumbersCommand } from './import-club-search.ts'
 import { runStadiumsCommand } from './import-club-stadiums.ts'
 import { runImport } from './import-feeds.ts'
 import { oldSiteUsage, runOldSiteImport, runOldSiteReport } from './import-old-site.ts'
@@ -59,6 +64,7 @@ const { positionals, values } = parseArgs({
   allowPositionals: true,
   options: {
     changes: { type: 'boolean' },
+    'club-numbers': { type: 'boolean' },
     completeness: { type: 'boolean' },
     'country-facts': { type: 'boolean' },
     'dry-run': { type: 'boolean' },
@@ -78,6 +84,7 @@ const fromSeason = values['from-season']
 const fromSquad = values['from-squad']
 const modes = [
   values.changes,
+  values['club-numbers'],
   values.completeness,
   values['country-facts'],
   values['fill-stadiums'],
@@ -100,7 +107,7 @@ const wrongArguments =
 
 if (wrongArguments) {
   console.error(
-    `Wrong arguments. ${seasonUsage}\n${fromSeasonUsage}\n${squadUsage}\n${fromSquadUsage}\n${oldSiteUsage}\nOr use --status alone, --old-site (alone, or with --dry-run or --report) alone, --completeness alone, --fill-stadiums alone, --item-clubs alone, --changes, or no argument for the hourly import.`,
+    `Wrong arguments. ${seasonUsage}\n${fromSeasonUsage}\n${squadUsage}\n${fromSquadUsage}\n${oldSiteUsage}\nOr use --status alone, --old-site (alone, or with --dry-run or --report) alone, --completeness alone, --club-numbers alone, --fill-stadiums alone, --item-clubs alone, --changes, or no argument for the hourly import.`,
   )
   process.exit(2)
 }
@@ -145,10 +152,12 @@ process.exitCode = fromSeason
                   ? await runFillStadiumsCommand(DATABASE_URL)
                   : values.stadiums
                     ? await runStadiumsCommand(DATABASE_URL)
-                    : values['item-clubs']
-                      ? await runItemClubsCommand(DATABASE_URL)
-                      : values['old-site']
-                        ? values.report
-                          ? await runOldSiteReport(DATABASE_URL)
-                          : await runOldSiteImport(DATABASE_URL, { dryRun: values['dry-run'] === true })
-                        : await runImport(DATABASE_URL)
+                    : values['club-numbers']
+                      ? await runClubNumbersCommand(DATABASE_URL)
+                      : values['item-clubs']
+                        ? await runItemClubsCommand(DATABASE_URL)
+                        : values['old-site']
+                          ? values.report
+                            ? await runOldSiteReport(DATABASE_URL)
+                            : await runOldSiteImport(DATABASE_URL, { dryRun: values['dry-run'] === true })
+                          : await runImport(DATABASE_URL)

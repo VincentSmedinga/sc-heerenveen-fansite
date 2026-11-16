@@ -5,7 +5,7 @@
 import type { Database } from '@fansite/db/client'
 
 import { findClubBySlug, listClubRecords } from '@fansite/db/queries'
-import { clubHomeGrounds, clubs } from '@fansite/db/schema'
+import { clubHomeGrounds, clubs, type ClubWikidataSource } from '@fansite/db/schema'
 import { type AdminStadiumRow, listClubHomeGrounds } from '@fansite/db/stadium-admin'
 import { eq } from 'drizzle-orm'
 
@@ -66,7 +66,14 @@ const plain = (text: string) =>
 
 /** The club an editor opens: it, its home grounds and its Wikidata number. */
 export type AdminClub = {
-  club: { id: number; name: string; slug: string; wikidataId: null | string }
+  club: {
+    id: number
+    name: string
+    slug: string
+    wikidataId: null | string
+    /** Where the number came from: the import found it by name (nobody checked it), or not. */
+    wikidataSource: ClubWikidataSource | null
+  }
   /** The home grounds of the club as lines of the form, and who set them. */
   homeGrounds: { rows: HomeGroundRowValues[]; source: 'manual' | 'wikidata' | null }
 }
@@ -82,13 +89,19 @@ export async function findAdminClub(db: Database, slug: string): Promise<AdminCl
   const [grounds, [extra]] = await Promise.all([
     listClubHomeGrounds(db, club.id),
     db
-      .select({ source: clubs.homeGroundsSource, wikidataId: clubs.wikidataId })
+      .select({ source: clubs.homeGroundsSource, wikidataId: clubs.wikidataId, wikidataSource: clubs.wikidataSource })
       .from(clubs)
       .where(eq(clubs.id, club.id)),
   ])
 
   return {
-    club: { id: club.id, name: club.name, slug: club.slug, wikidataId: extra?.wikidataId ?? null },
+    club: {
+      id: club.id,
+      name: club.name,
+      slug: club.slug,
+      wikidataId: extra?.wikidataId ?? null,
+      wikidataSource: extra?.wikidataSource ?? null,
+    },
     homeGrounds: { rows: grounds.map(homeGroundRowOf), source: extra?.source ?? null },
   }
 }

@@ -21,6 +21,8 @@ export type TestItem = {
   headquarters?: (ItemStatement | string)[]
   /** The home grounds (`P115`) of a club, with the dates of their qualifiers (#1298). */
   homeGrounds?: { end?: TimeValue; rank?: Rank; start?: TimeValue; value: string }[]
+  /** What the item is an instance of (`P31`), such as a football club (#1341). */
+  instanceOf?: (ItemStatement | string)[]
   /** The label in Dutch and in English; leave both out for an item with no label. */
   labels?: { en?: string; nl?: string }
   nationalities?: (ItemStatement | string)[]
@@ -44,8 +46,8 @@ const wikidataHeaders = { 'Content-Type': 'application/json; charset=utf-8' }
 const pageHeaders = { 'Content-Type': 'text/html; charset=UTF-8' }
 
 /** The page information of an article: its number and its item. */
-export function infoPage(pageId: number, item: null | string): string {
-  return `<!DOCTYPE html><html><head><script>RLCONF={"wgPageName":"X","wgArticleId":${pageId},"wgNamespaceNumber":0};</script></head><body>${
+export function infoPage(pageId: number, item: null | string, redirect = false): string {
+  return `<!DOCTYPE html><html><head><script>RLCONF={"wgPageName":"X","wgArticleId":${pageId},"wgIsRedirect":${redirect},"wgNamespaceNumber":0};</script></head><body>${
     item === null ? '' : `<a href="https://www.wikidata.org/wiki/Special:EntityPage/${item}">item</a>`
   }</body></html>`
 }
@@ -146,6 +148,9 @@ export function itemJson(id: string, item: TestItem = {}): string {
   if (item.countries !== undefined) {
     claims['P17'] = items(item.countries)
   }
+  if (item.instanceOf !== undefined) {
+    claims['P31'] = items(item.instanceOf)
+  }
   if (item.headquarters !== undefined) {
     claims['P159'] = items(item.headquarters)
   }
@@ -191,4 +196,24 @@ export function itemRoute(id: string, item: TestItem = {}): Record<string, Handl
 /** A route that serves the label of a country, a place or a position. */
 export function labelRoute(id: string, nl: string, en = nl): Record<string, Handler> {
   return itemRoute(id, { labels: { en, nl } })
+}
+
+/**
+ * The routes of a title that is a redirect to an article (#1341): its page information, which
+ * has no item, the text of the redirect, and the page information of the article.
+ */
+export function redirectRoutes(
+  title: string,
+  article: string,
+  pageId: number,
+  item: null | string,
+): Record<string, Handler> {
+  const rawPath = (page: string) => `/wiki/${encodeURIComponent(page.replaceAll(' ', '_'))}?action=raw`
+
+  return {
+    [infoPath(title)]: reply(200, infoPage(pageId + 1, null, true), pageHeaders),
+    [rawPath(article)]: reply(200, 'Een artikel.', { 'Content-Type': 'text/x-wiki; charset=UTF-8' }),
+    [rawPath(title)]: reply(200, `#REDIRECT [[${article}]]`, { 'Content-Type': 'text/x-wiki; charset=UTF-8' }),
+    ...infoRoute(article, pageId, item),
+  }
 }

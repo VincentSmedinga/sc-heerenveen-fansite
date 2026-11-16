@@ -392,7 +392,7 @@ export async function setClubWikidataId(
 ): Promise<ClubWikidataOutcome> {
   return db.transaction(async (transaction) => {
     const [club] = await transaction
-      .select({ name: clubs.name, wikidataId: clubs.wikidataId })
+      .select({ name: clubs.name, searchedAt: clubs.wikidataSearchedAt, wikidataId: clubs.wikidataId })
       .from(clubs)
       .where(eq(clubs.id, clubId))
       .for('update')
@@ -416,7 +416,15 @@ export async function setClubWikidataId(
 
     await transaction
       .update(clubs)
-      .set({ stadiumsReadAt: null, wikidataId, wikidataReadAt: null })
+      .set({
+        stadiumsReadAt: null,
+        wikidataId,
+        wikidataReadAt: null,
+        // The editors' number is theirs, and a number they took away is not searched for again
+        // (#1341).
+        wikidataSearchedAt: wikidataId === null ? now : club.searchedAt,
+        wikidataSource: wikidataId === null ? null : 'manual',
+      })
       .where(eq(clubs.id, clubId))
     await recordAction(
       transaction,

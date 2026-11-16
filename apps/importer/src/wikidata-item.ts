@@ -43,6 +43,11 @@ export type WikidataItem = {
 
 type Statement = { rank: string; value: unknown }
 
+/** Whether the page information is of a redirect (#1341): a redirect has no item of its own. */
+export function isRedirectInfo(html: string): boolean {
+  return /"wgIsRedirect":true/u.test(html)
+}
+
 /**
  * The line of a person from the positions of Wikidata: the first position in the order of
  * Wikidata that the list `wikidataPositionLines` knows. Null when it knows none.
@@ -136,6 +141,17 @@ export function readHomeGrounds(text: string): HomeGround[] {
   }
 
   return grounds
+}
+
+/**
+ * The kinds the item is an instance of (`P31`, #1341), such as a football club, in the order of
+ * Wikidata. Empty when the item has none or the text is no item.
+ */
+export function readInstanceIds(text: string): string[] {
+  const entity = firstEntity(text)
+  const claims = entity !== null && isRecord(entity['claims']) ? entity['claims'] : {}
+
+  return itemIdsOf(statementsOf(claims, 'P31'))
 }
 
 /**

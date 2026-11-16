@@ -1,6 +1,8 @@
 'use client'
 
-import { Button, Card, ErrorSummary, Field, Form, Heading, Input, Text } from '@fansite/design-system'
+import type { ClubWikidataSource } from '@fansite/db/schema'
+
+import { Button, Card, ErrorSummary, Field, Form, Heading, Input, Link, Tag, Text } from '@fansite/design-system'
 import { useActionState, useEffect, useRef } from 'react'
 
 import type { ClubWikidataState } from '#src/beheer/club-wikidata'
@@ -19,11 +21,14 @@ export function ClubWikidataForm({
   action,
   clubName,
   number,
+  source,
 }: {
   action: (previous: ClubWikidataState, formData: FormData) => Promise<ClubWikidataState>
   clubName: string
   /** The number the club has now, if any. */
   number: null | string
+  /** Where the number came from. `name`: the import found it by the name of the club. */
+  source: ClubWikidataSource | null
 }) {
   const [state, formAction, pending] = useActionState<ClubWikidataState, FormData>(action, {})
   const told = useRef(state)
@@ -48,9 +53,18 @@ export function ClubWikidataForm({
         Wikidata-nummer
       </Heading>
       <Text appearance="meta">
-        Met een nummer leest de import de gegevens van de club bij Wikidata, ook zijn thuisvelden. Zonder nummer doet de
-        import niets met deze club. Maak het veld leeg om het nummer weg te halen.
+        Met een nummer leest de import de gegevens van de club bij Wikidata, ook zijn thuisvelden. Zonder nummer zoekt
+        de import één keer een artikel op Wikipedia met precies de naam van de club. Vindt hij niet precies één club,
+        dan blijft het veld leeg en vult de redactie het in. Maak het veld leeg om het nummer weg te halen: de import
+        zoekt dan niet opnieuw.
       </Text>
+      {number !== null && source === 'name' ? (
+        <Text>
+          <Tag>Op naam gevonden</Tag> De import vond dit nummer met de naam van de club en niemand heeft het nagekeken.{' '}
+          <Link href={`https://www.wikidata.org/wiki/${number}`}>Bekijk {number} bij Wikidata</Link>. Klopt het niet?
+          Verander het nummer of maak het veld leeg: de import verandert het daarna niet meer.
+        </Text>
+      ) : null}
       <ErrorSummary
         errors={state.error === undefined ? [] : [{ id: fieldId, message: state.error }]}
         id={summaryId}

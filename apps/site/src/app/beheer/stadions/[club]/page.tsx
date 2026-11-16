@@ -88,6 +88,7 @@ export default async function ClubStadiumsPage({ params, searchParams }: Props) 
           clubName={club.name}
           key={`wikidata-${club.id}`}
           number={club.wikidataId}
+          source={club.wikidataSource}
         />
       </Page.Cell>
     </Page.Main>

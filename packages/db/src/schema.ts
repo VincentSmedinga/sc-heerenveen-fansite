@@ -775,9 +775,19 @@ export const clubCountrySources = ['manual', 'wikidata'] as const
 /** Who set the home grounds of a club (#1298), as `clubCountrySources` does for the country. */
 export const clubHomeGroundSources = ['manual', 'wikidata'] as const
 
+/**
+ * Where the Wikidata number of a club comes from (#1341): the article of the club on Wikipedia
+ * (`wikipedia`), a search for an article with the name of the club (`name`, "op naam
+ * gevonden", which nobody checked), or the editors in the admin (`manual`, which the importer
+ * never changes).
+ */
+export const clubWikidataSources = ['wikipedia', 'name', 'manual'] as const
+
 export type ClubCountrySource = (typeof clubCountrySources)[number]
 
 export type ClubHomeGroundSource = (typeof clubHomeGroundSources)[number]
+
+export type ClubWikidataSource = (typeof clubWikidataSources)[number]
 
 /**
  * The clubs sc Heerenveen played against. One club is one article on the Dutch Wikipedia:
@@ -799,6 +809,11 @@ export const clubs = mysqlTable(
     // The item of Wikidata of the club (#1264), read from its article. Empty for a club without
     // an article or an item.
     wikidataId: varchar('wikidata_id', { length: wikidataLimits.id }).unique(),
+    // Where that number came from (#1341). Empty when the club has no number.
+    wikidataSource: mysqlEnum('wikidata_source', clubWikidataSources),
+    // When the importer looked for an article with the name of the club to find a number
+    // (#1341), or when the editors took the number away. It does not search again after that.
+    wikidataSearchedAt: datetime('wikidata_searched_at'),
     // The country of the club now (#1264): the code in capitals (`NL`, or `GB-WLS` for
     // a country of the United Kingdom, #1277, so six characters), and
     // where it came from. Both are empty for a club whose country we do not know.

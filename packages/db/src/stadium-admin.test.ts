@@ -235,10 +235,36 @@ describe('setClubWikidataId', () => {
 
     const [club] = await database.db.select().from(clubs).where(eq(clubs.id, azId))
 
-    expect(club).toMatchObject({ stadiumsReadAt: null, wikidataId: 'Q99', wikidataReadAt: null })
+    expect(club).toMatchObject({
+      stadiumsReadAt: null,
+      wikidataId: 'Q99',
+      wikidataReadAt: null,
+      wikidataSource: 'manual',
+    })
     expect((await database.db.select().from(auditLog))[0]).toMatchObject({
       action: 'club.edit',
       detail: 'Oefenstad AZ, Wikidata-nummer van de club: geen → Q99',
+    })
+  })
+
+  it('makes a number found by name the editors’ own, and a number they take away is not searched for again', async () => {
+    const now = new Date('2026-11-17T10:00:00Z')
+
+    await database.db.update(clubs).set({ wikidataId: 'Q77', wikidataSource: 'name' }).where(eq(clubs.id, azId))
+    await setClubWikidataId(database.db, adminId, azId, 'Q78', now)
+
+    expect((await database.db.select().from(clubs).where(eq(clubs.id, azId)))[0]).toMatchObject({
+      wikidataId: 'Q78',
+      wikidataSearchedAt: null,
+      wikidataSource: 'manual',
+    })
+
+    await setClubWikidataId(database.db, adminId, azId, null, now)
+
+    expect((await database.db.select().from(clubs).where(eq(clubs.id, azId)))[0]).toMatchObject({
+      wikidataId: null,
+      wikidataSearchedAt: now,
+      wikidataSource: null,
     })
   })
 

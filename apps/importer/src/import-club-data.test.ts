@@ -113,6 +113,24 @@ describe('readClubData', () => {
     ])
   })
 
+  it('says that a number from an article is from Wikipedia, and leaves the source of a number that has one', async () => {
+    await addClub('bayern', 'Bayern München')
+    await addClub('ajax', 'Ajax')
+    await database.pool.query("UPDATE clubs SET wikidata_id = 'Q1', wikidata_source = 'manual' WHERE slug = 'ajax'")
+
+    const served = await serve(
+      { ...infoRoute('Bayern München', 11, 'Q15789') },
+      { ...itemRoute('Q15789', {}), ...itemRoute('Q1', {}) },
+    )
+
+    await read(served)
+
+    expect(await rows('SELECT slug, wikidata_id, wikidata_source FROM clubs ORDER BY slug')).toEqual([
+      { slug: 'ajax', wikidata_id: 'Q1', wikidata_source: 'manual' },
+      { slug: 'bayern', wikidata_id: 'Q15789', wikidata_source: 'wikipedia' },
+    ])
+  })
+
   it('warns about a country that is not in the list, and guesses nothing', async () => {
     await addClub('dynamo', 'Dynamo Dresden')
 

@@ -1,0 +1,6 @@
+-- Two columns on `clubs` for the search by name (#1341): `wikidata_source` (where the Wikidata number came from: `wikipedia` from the article of the club, `name` from a search for an article with the name of the club, `manual` from the editors) and `wikidata_searched_at` (when the importer searched, or the editors took the number away, so the importer does not search again). The clubs that have a number get a source: `wikipedia` when the club has an article, because the import only reads a number from an article, and `manual` otherwise, because only an editor fills in a number for a club without an article. No other row changes.
+-- The statements can run again: MariaDB cannot undo DDL, so a migration that stopped halfway finishes on the next start, and the backfill only touches clubs without a source.
+-- To undo it on the host: `ALTER TABLE clubs DROP COLUMN wikidata_source, DROP COLUMN wikidata_searched_at`.
+ALTER TABLE `clubs` ADD COLUMN IF NOT EXISTS `wikidata_source` enum('wikipedia','name','manual');--> statement-breakpoint
+ALTER TABLE `clubs` ADD COLUMN IF NOT EXISTS `wikidata_searched_at` datetime;--> statement-breakpoint
+UPDATE `clubs` SET `wikidata_source` = IF(`wikipedia_page` IS NOT NULL, 'wikipedia', 'manual') WHERE `wikidata_id` IS NOT NULL AND `wikidata_source` IS NULL;

@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, isNotNull, isNull, max, sql } from 'drizzle-orm'
+import { and, asc, eq, inArray, isNotNull, isNull, max, or, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 import type { NewMatch } from './schema.ts'
@@ -49,6 +49,9 @@ export type ClubToRead = {
   wikidataId: null | string
   wikipediaPage: string
 }
+
+/** A club the importer may search a Wikidata number for (#1341). */
+export type ClubToSearch = { country: string; id: number; name: string }
 
 /** A match as the importer reads it, before its club is found or made. */
 export type NewMatchWithoutClub = Omit<NewMatch, 'clubId'>
@@ -138,6 +141,29 @@ export async function clubsToRead(db: Pick<Database, 'select'>): Promise<ClubToR
     .from(clubs)
     .where(and(isNotNull(clubs.wikipediaPage), isNull(clubs.wikidataReadAt)))
     .orderBy(asc(clubs.id)) as Promise<ClubToRead[]>
+}
+
+/**
+ * The clubs without a Wikidata number that were not searched yet, oldest first (#1341). A club
+ * without a country is never here: the country is what makes a found item certain. A club
+ * with an article that was not read yet waits: the article gives it a number, and a search
+ * would come first.
+ */
+export async function clubsToSearch(db: Pick<Database, 'select'>): Promise<ClubToSearch[]> {
+  const rows = await db
+    .select({ country: clubs.country, id: clubs.id, name: clubs.name })
+    .from(clubs)
+    .where(
+      and(
+        isNull(clubs.wikidataId),
+        isNull(clubs.wikidataSearchedAt),
+        isNotNull(clubs.country),
+        or(isNull(clubs.wikipediaPage), isNotNull(clubs.wikidataReadAt)),
+      ),
+    )
+    .orderBy(asc(clubs.id))
+
+  return rows.flatMap((row) => (row.country === null ? [] : [{ country: row.country, id: row.id, name: row.name }]))
 }
 
 /** The Q-numbers that clubs have, so no two clubs get the same one. */
@@ -504,7 +530,10 @@ export async function rememberClubWikidataId(
   clubId: number,
   wikidataId: string,
 ): Promise<void> {
-  await db.update(clubs).set({ wikidataId }).where(eq(clubs.id, clubId))
+  await db
+    .update(clubs)
+    .set({ wikidataId, wikidataSource: sql`COALESCE(${clubs.wikidataSource}, 'wikipedia')` })
+    .where(eq(clubs.id, clubId))
 }
 
 /**
@@ -708,8 +737,38 @@ export async function storeClubItem(
 ): Promise<void> {
   await db
     .update(clubs)
-    .set({ countryItemId: item.countryItemId, wikidataId: item.wikidataId, wikidataReadAt: item.readAt })
+    .set({
+      countryItemId: item.countryItemId,
+      wikidataId: item.wikidataId,
+      wikidataReadAt: item.readAt,
+      // A number from an article is from Wikipedia, unless the club had a source already: an
+      // editor's number stays the editor's (#1341).
+      wikidataSource: item.wikidataId === null ? null : sql`COALESCE(${clubs.wikidataSource}, 'wikipedia')`,
+    })
     .where(eq(clubs.id, clubId))
+}
+
+/**
+ * Stores what a search for a club found (#1341): when it was searched and, for exactly one
+ * certain item, the number with the source `name`. A club that got a number in the meantime,
+ * from the editors, keeps it.
+ */
+export async function storeClubNameSearch(
+  db: Pick<Database, 'update'>,
+  clubId: number,
+  result: { searchedAt: Date; wikidataId: null | string },
+): Promise<void> {
+  await db
+    .update(clubs)
+    .set({ wikidataSearchedAt: result.searchedAt })
+    .where(and(eq(clubs.id, clubId), isNull(clubs.wikidataSearchedAt)))
+
+  if (result.wikidataId !== null) {
+    await db
+      .update(clubs)
+      .set({ wikidataId: result.wikidataId, wikidataSource: 'name' })
+      .where(and(eq(clubs.id, clubId), isNull(clubs.wikidataId)))
+  }
 }
 
 /** Stores the places of an item, so the importer never asks about it again (#1278). */
