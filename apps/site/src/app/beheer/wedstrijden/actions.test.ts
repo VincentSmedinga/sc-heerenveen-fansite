@@ -459,9 +459,12 @@ describe('submitMatchPart', () => {
       redirect: `/beheer/wedstrijden/${next?.id}/gegevens?gedaan=volgende-opgeslagen&terug=%2Fbeheer%2Fwedstrijden%2Fkwaliteit%2F2026-27&kolom=gegevens`,
     })
 
+    // A stadium name with no stadium behind it is a gap too (#1297), so the match has both.
+    const [stadium] = await database.db.insert(stadiums).values({}).$returningId()
+
     await database.db
       .update(matches)
-      .set({ attendance: 1, referee: 'Iemand', stadium: 'Ergens' })
+      .set({ attendance: 1, referee: 'Iemand', stadium: 'Ergens', stadiumId: stadium?.id ?? null })
       .where(eq(matches.id, next?.id ?? 0))
 
     expect(await resultOf(() => submitMatchPart(matchId, 'gegevens', back, 'gegevens', initial, formData))).toEqual({
