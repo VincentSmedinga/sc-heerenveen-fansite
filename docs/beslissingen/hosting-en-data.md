@@ -1197,3 +1197,15 @@
   De naam van de dag kan alleen kloppen als hij uit de namen van het stadion komt.
 - **Nadeel:** een naam die de redactie alleen in `club_stadiums` kende, bestaat niet meer; op acceptatie waren dat geen rijen.
 - **Alternatieven:** de rijen in een migratie kopiëren (er zijn er geen, en een kopie naar een stadion kan niet zonder te raden welk stadion het is); de tabel laten staan en alleen niet meer lezen (twee bronnen); de naam van de dag in TypeScript uitrekenen (een vraag of een groot gegeven per wedstrijd).
+
+## Een markering "niet beschikbaar" staat in een eigen tabel, met het soort onderwerp
+
+- **Datum:** 16 november 2026
+- **Besluit:** `unavailable_marks` bewaart de gaten die de redactie markeerde als niet beschikbaar (#1308), in een eigen tabel met `subject` (nu alleen `person`), `subject_id`, `field` (`wikipedia` of `geboren`), `checked_on` (een dag) en `user_id` (de redacteur, leeg als het account weg is).
+  Een onderwerp heeft hoogstens één markering per veld (`unavailable_marks_subject_subject_id_field_unique`).
+  `subject_id` heeft geen foreign key, zodat een wedstrijd er later bij kan (toeschouwers en scheidsrechter, zie #1295); een persoon die wordt samengevoegd, laat zijn markeringen achter in `mergePersonInto`.
+  `clearFilledMarks` (`@fansite/db/unavailable-marks`) haalt de markeringen weg van velden die een waarde kregen, en schrijft `gap.unmark` voor elke.
+  De migratie `0085_add_unavailable_marks` maakt de tabel en voegt `gap.mark`, `gap.renew` en `gap.unmark` toe aan de lijst van `audit_log.action`, en verandert geen rij.
+- **Waarom:** de markering hoort bij één veld van één persoon, en bij een wedstrijd komt er straks een ander soort veld.
+  Een kolom op `persons` voor elke markering zou voor wedstrijden niet passen, en #1295 verandert nog wat er overblijft.
+- **Alternatieven:** een kolom op `persons` voor elke markering (past niet bij een wedstrijd); een tabel per soort onderwerp (twee tabellen voor hetzelfde idee).

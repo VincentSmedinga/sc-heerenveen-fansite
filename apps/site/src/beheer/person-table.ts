@@ -1,6 +1,6 @@
 import type { Database } from '@fansite/db/client'
 
-import { persons, players } from '@fansite/db/schema'
+import { persons, players, unavailableMarks } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { eq, isNotNull } from 'drizzle-orm'
 
@@ -130,6 +130,16 @@ export async function readPersonGaps(db: Pick<Database, 'select'>, now = new Dat
     .from(players)
     .innerJoin(persons, eq(persons.id, players.personId))
     .where(isNotNull(players.personId))
+  // A gap marked as not available (issue 1308) is not a gap: no sign, and it is not counted.
+  // A mark on a field that has a value changes nothing: the check is on the empty field.
+  const marked = new Set(
+    (
+      await db
+        .select({ field: unavailableMarks.field, id: unavailableMarks.subjectId })
+        .from(unavailableMarks)
+        .where(eq(unavailableMarks.subject, 'person'))
+    ).map((row) => `${row.id}:${row.field}`),
+  )
   const factsOf = new Map(rows.map((row) => [row.id, row]))
   const current = seasonOf(now)
 
@@ -141,10 +151,10 @@ export async function readPersonGaps(db: Pick<Database, 'select'>, now = new Dat
       if ((facts?.givenName ?? '').trim() === '') {
         gaps.naam = true
       }
-      if (facts?.wikipediaPage === null) {
+      if (facts?.wikipediaPage === null && !marked.has(`${player.id}:wikipedia`)) {
         gaps.wikipedia = true
       }
-      if (facts?.birthDate === null) {
+      if (facts?.birthDate === null && !marked.has(`${player.id}:geboren`)) {
         gaps.geboren = true
       }
       if (facts?.country === null) {

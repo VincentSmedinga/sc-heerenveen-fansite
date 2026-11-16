@@ -7,7 +7,9 @@ export const personFieldNames = [
   'tussenvoegsel',
   'achternaam',
   'wikipedia',
+  'wikipedia-niet-beschikbaar',
   'geboren',
+  'geboren-niet-beschikbaar',
   'overleden',
   'land',
   'linie',
@@ -33,9 +35,9 @@ export const personPartLabels: Record<PersonPart, string> = {
 /** The fields of each part. The reason is on every page. */
 export const personPartFields: Record<PersonPart, readonly PersonFieldName[]> = {
   land: ['land'],
-  leven: ['geboren', 'overleden'],
+  leven: ['geboren', 'geboren-niet-beschikbaar', 'overleden'],
   linie: ['linie', 'kant'],
-  naam: ['voornaam', 'tussenvoegsel', 'achternaam', 'wikipedia'],
+  naam: ['voornaam', 'tussenvoegsel', 'achternaam', 'wikipedia', 'wikipedia-niet-beschikbaar'],
 }
 
 /** The errors by the `id` of the field. `algemeen` is an error that belongs to no field. */
@@ -51,7 +53,10 @@ export type PersonFormState = {
   values: PersonValues
 }
 
-/** What an editor filled in, as text. A field left out is an empty string. */
+/**
+ * What an editor filled in, as text. A field left out is an empty string. The two boxes
+ * `-niet-beschikbaar` (issue 1308) are `1` when checked.
+ */
 export type PersonValues = Record<PersonFieldName, string>
 
 /** Whether a name is one of the parts, also a name such as `constructor` that is no part. */

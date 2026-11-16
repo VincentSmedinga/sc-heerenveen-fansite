@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
-import { Card, DataTable, Heading, Link, Page, Text } from '@fansite/design-system'
+import { listPersonMarks } from '@fansite/db/unavailable-marks'
+import { Card, DataTable, Heading, Link, Notice, Page, Strong, Text } from '@fansite/design-system'
 
 import { personGapLegend, personGapTableColumns } from '#src/app/beheer/gap-table'
 import { playersPath } from '#src/app/beheer/spelers/paths'
@@ -18,11 +19,23 @@ import { requireRole } from '#src/beheer/require-role'
 import { usualSlotsPath } from '#src/beheer/usual-slots'
 import { getDatabase } from '#src/database'
 
+import { UnavailableCard } from './UnavailableCard'
+
 // Render on each request: who is logged in and what the database holds are not known when the
 // site is built.
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Kwaliteit van de personen' }
+
+type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
+
+/** What the last button of the card Niet beschikbaar did, by the word in the address. */
+const notices: Record<string, { text: string; title: string }> = {
+  'markering-weg': { text: 'Deze markering was er al niet meer.', title: 'Niets veranderd.' },
+  mislukt: { text: 'Er is niets veranderd. Probeer het nog eens.', title: 'Niet gelukt.' },
+  vernieuwd: { text: 'De dag van de laatste controle is vandaag.', title: 'Nog steeds niet beschikbaar.' },
+  weggehaald: { text: 'Het gat staat weer in de tabel, als het er nog is.', title: 'Markering weggehaald.' },
+}
 
 const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`
 
@@ -31,10 +44,13 @@ const plural = (count: number, one: string, many: string) => `${count} ${count =
  * letter, with a column for each fact. A number is how many persons of the letter have a gap
  * in that column, and leads to them. The quick list of the line and the country is at `snel`.
  */
-export default async function PersonQualityPage() {
+export default async function PersonQualityPage({ searchParams }: Props) {
   await requireRole('owner', 'editor')
 
-  const all = await readPersonGaps(getDatabase().db)
+  const { gedaan } = await searchParams
+  const { db } = getDatabase()
+  const all = await readPersonGaps(db)
+  const marks = await listPersonMarks(db)
   const counts = countPersonGapsByLetter(all)
   const withGaps = all.filter((person) => Object.keys(person.gaps).length > 0)
   const total = withGaps.reduce((sum, person) => sum + Object.keys(person.gaps).length, 0)
@@ -55,6 +71,11 @@ export default async function PersonQualityPage() {
         </Text>
       </Page.Cell>
       <Page.Cell area="main">
+        {typeof gedaan === 'string' && notices[gedaan] !== undefined ? (
+          <Notice>
+            <Strong>{notices[gedaan].title}</Strong> {notices[gedaan].text}
+          </Notice>
+        ) : null}
         <Text>
           <Link href={personFactsPath}>Linie en land snel aanvullen</Link>
         </Text>
@@ -96,6 +117,7 @@ export default async function PersonQualityPage() {
             })}
           />
         </Card>
+        <UnavailableCard marks={marks} />
         <Text>
           <Link href={namesQualityPath}>Namen die op elkaar lijken en de lijst van Wikipedia</Link>
         </Text>

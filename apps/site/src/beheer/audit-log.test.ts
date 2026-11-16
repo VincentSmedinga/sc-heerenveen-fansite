@@ -154,6 +154,9 @@ describe('recordAction', () => {
       'ground.edit',
       'ground-name.save',
       'home-ground.save',
+      'gap.mark',
+      'gap.renew',
+      'gap.unmark',
     ])
   })
 

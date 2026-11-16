@@ -15,7 +15,9 @@ import {
   type PlayerPosition,
   players,
   type PlayerSide,
+  type UnavailableField,
 } from '@fansite/db/schema'
+import { clearFilledMarks, markUnavailable, readPersonMarks, unmark } from '@fansite/db/unavailable-marks'
 import { and, asc, eq, isNull, ne, or } from 'drizzle-orm'
 
 import { parseReason } from './items'
@@ -36,6 +38,8 @@ import { type MergeOffer, nameValuesOf, refreshPlayerAddresses, searchTermOf } f
 
 /** The person an editor opens, with his player in each season, the oldest season first. */
 export type AdminPerson = {
+  /** The gaps marked as not available (issue 1308): the day of the last check by field. */
+  marks: Partial<Record<UnavailableField, string>>
   person: typeof persons.$inferSelect
   seasons: { id: number; season: string }[]
 }
@@ -50,6 +54,8 @@ export type EditPersonOutcome =
  */
 export type PersonEntry = {
   birthDate?: EditorsBirthDate | null
+  /** Whether the box Niet beschikbaar of the birth date is checked; none if not on the page. */
+  birthUnavailable?: boolean
   country?: null | string
   deathYear?: null | number
   line?: null | PlayerPosition
@@ -57,6 +63,8 @@ export type PersonEntry = {
   page?: null | string
   reason: string | undefined
   side?: null | PlayerSide
+  /** Whether the box Niet beschikbaar of the page is checked; none when not on the page. */
+  wikipediaUnavailable?: boolean
 }
 
 type Transaction = Parameters<Parameters<Database['transaction']>[0]>[0]
@@ -107,7 +115,7 @@ export async function findAdminPerson(db: Pick<Database, 'select'>, id: number):
     .where(eq(players.personId, id))
     .orderBy(asc(players.season))
 
-  return { person, seasons }
+  return { marks: await readPersonMarks(db, id), person, seasons }
 }
 
 /** The name of a person as the page and the log show it. */
@@ -119,16 +127,21 @@ export function personNameOf(person: Pick<AdminPerson['person'], 'id' | 'name' |
  * The values the form opens with. A person without a name in parts gets his name split as well
  * as it can be, as on the form of a player: the editor reads it before saving.
  */
-export function personValuesOf({ person }: Pick<AdminPerson, 'person'>): PersonValues {
+export function personValuesOf({
+  marks = {},
+  person,
+}: Partial<Pick<AdminPerson, 'marks'>> & Pick<AdminPerson, 'person'>): PersonValues {
   return {
     ...nameValuesOf({ name: personNameOf(person).replace(/\s*\([^)]*\)$/u, '') }, person),
     geboren: birthDateText(person.birthDate, person.birthDatePrecision),
+    'geboren-niet-beschikbaar': marks.geboren === undefined ? '' : '1',
     kant: person.side ?? '',
     land: person.country ?? '',
     linie: person.line ?? '',
     overleden: person.deathDate === null ? '' : person.deathDate.slice(0, 4),
     reden: '',
     wikipedia: person.wikipediaPage ?? '',
+    'wikipedia-niet-beschikbaar': marks.wikipedia === undefined ? '' : '1',
   }
 }
 
@@ -162,6 +175,7 @@ export function validatePerson(
   if (shows('naam')) {
     entry.name = checkName(values, errors)
     entry.page = checkPage(values.wikipedia, errors)
+    entry.wikipediaUnavailable = values['wikipedia-niet-beschikbaar'] === '1'
   }
   if (shows('leven')) {
     const birthDate = values.geboren === storedBirthDate ? undefined : checkBirthDate(values.geboren, errors, now)
@@ -181,6 +195,7 @@ export function validatePerson(
     }
 
     entry.deathYear = deathYear
+    entry.birthUnavailable = values['geboren-niet-beschikbaar'] === '1'
   }
   if (shows('land')) {
     entry.country = checkCountry(values.land, errors)
@@ -307,12 +322,56 @@ async function rename(transaction: Transaction, personId: number, name: NonNulla
 }
 
 /**
+ * Puts the marks as the boxes say (issue 1308), after the facts of the save are written. A mark
+ * on a field that has a value goes first. Then a checked box marks a field that is still empty,
+ * and an unchecked box takes the mark away. A box that is not on the page (`undefined`) leaves
+ * its mark as it is. Returns whether a mark changed.
+ */
+async function storeMarks(
+  transaction: Transaction,
+  userId: number,
+  person: AdminPerson['person'],
+  entry: PersonEntry,
+  now: Date,
+): Promise<boolean> {
+  let changed = (await clearFilledMarks(transaction, person.id, userId, now)).length > 0
+  const [stored] = await transaction
+    .select({ birthDate: persons.birthDate, wikipediaPage: persons.wikipediaPage })
+    .from(persons)
+    .where(eq(persons.id, person.id))
+  const wanted = [
+    ['wikipedia', entry.wikipediaUnavailable, stored?.wikipediaPage === null || stored?.wikipediaPage === undefined],
+    ['geboren', entry.birthUnavailable, stored?.birthDate === null || stored?.birthDate === undefined],
+  ] as const
+
+  for (const [field, checked, empty] of wanted) {
+    if (checked === undefined) {
+      continue
+    }
+
+    const done =
+      checked && empty
+        ? await markUnavailable(transaction, userId, person.id, field, now)
+        : checked
+          ? false
+          : await unmark(transaction, userId, person.id, field, now)
+
+    changed ||= done
+  }
+
+  return changed
+}
+
+/**
  * Changes what the editor filled in of a person. A new name goes to the person with the source
  * `redactie` and to his player in every season, where it is the editors' from then on
  * (`players.editors_fields`), so the importer leaves it alone; a season with another player of
  * that name refuses it. A page goes to a person without one, as on the form of a player; a page
  * of another person is refused with the two persons to merge, and a person who has a page keeps
- * it. The birth date, the year of death, the country and the line get the source `manual`, and
+ * it. The boxes Niet beschikbaar (issue 1308) mark a gap that is still empty after the save, or
+ * take the mark away, each with a row of its own in the log; a mark on a field that has a value
+ * now goes too. The birth date, the year of death, the country and the line get the source
+ * `manual`, and
  * an empty one takes the value and its source away (`setEditorsPersonFacts`). Writes
  * `person.edit` with what changed, without the birth date itself, and the reason, and nothing
  * for a save that changes nothing.
@@ -386,11 +445,17 @@ async function storePersonEdit(
       if (facts.side !== undefined) {
         changes.push(`kant: ${person.side ?? 'geen'} → ${facts.side ?? 'geen'}`)
       }
-      if (changes.length === 0) {
-        return { status: 'unchanged' } as const
+
+      if (changes.length > 0) {
+        await setEditorsPersonFacts(transaction, person.id, facts)
       }
 
-      await setEditorsPersonFacts(transaction, person.id, facts)
+      const marksChanged = await storeMarks(transaction, userId, person, entry, now)
+
+      if (changes.length === 0) {
+        return { status: marksChanged ? 'changed' : 'unchanged' } as const
+      }
+
       await recordAction(
         transaction,
         {

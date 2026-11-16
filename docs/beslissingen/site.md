@@ -5355,6 +5355,7 @@
   Dezelfde letter als de lijst van alle spelers maakt een persoon makkelijk te vinden.
 - **Alternatieven:** een kolom Verschil met de import (er is nog geen telling per persoon); de letter van de hele naam (van den Berg zou bij V staan); een navigatie met alleen de letters die personen hebben (de rij springt dan per letter anders).
 - **Later:** de tabel van de personen staat sinds 16 november 2026 op `/beheer/spelers/kwaliteit/personen` en een letter op `/beheer/spelers/kwaliteit/personen/<letter>`; de snelle lijst op `/beheer/spelers/kwaliteit/personen/snel`; de oude adressen hebben geen doorverwijzing, ook `?lijst=` en `?deel=` op de tabel niet (#1305, zie _De kwaliteit van spelers en personen staat onder Spelers_).
+- **Later:** sinds 16 november 2026 telt een gat in Wikipedia of Geboren niet mee als de redactie het markeerde als niet beschikbaar; zie _Een gat dat niemand kan vullen is te markeren als niet beschikbaar_.
 
 ## Een fout in het beheer logt geen waarden
 
@@ -6324,6 +6325,37 @@
   De rollen blijven: de eigenaar en de redacteuren zien de pagina's, een auteur krijgt "niet gevonden".
 - **Waarom:** de redactie zoekt het land van een club bij de clubs, en met de laatste lijst verhuisd heeft Kwaliteit geen reden meer (#1303).
 - **Alternatieven:** `/beheer/clubs/land` (een club die zo heet botst dan met zijn eigen adres; `kwaliteit` heet geen club, en het is de naam die Stadions en Wedstrijden ook gebruiken); een doorverwijzing van `/beheer/clubnamen` (zie _De oude adressen onder `/beheer/kwaliteit` krijgen geen doorverwijzing_).
+
+## Een gat dat niemand kan vullen is te markeren als niet beschikbaar
+
+- **Datum:** 16 november 2026
+- **Besluit:** de redactie markeert een gat in de tabel van de personen als "niet beschikbaar", en het gat gaat dan uit de tabel (#1308).
+  - **Wat:** de markering hoort bij één gat van één persoon, niet bij de persoon: een persoon zonder Wikipedia-pagina kan een geboortedatum hebben.
+    Alleen Wikipedia en Geboren kunnen worden gemarkeerd.
+    Land en linie kiest de redactie altijd, en een ontbrekende voornaam is een gat om te vullen.
+  - **Het formulier:** het deel Naam en het deel Leven van het formulier van een persoon hebben onder het lege veld een vakje "Niet beschikbaar", in een groep met de vraag als kop ("Wikipedia-pagina: niet te vinden?"), zodat een schermlezer zegt bij welk veld het hoort.
+    Aanvinken bewaart de markering met de dag van vandaag, uitzetten haalt haar weg.
+    Het vakje staat er alleen bij een veld dat leeg was toen het formulier openging, en een deel dat niet op de pagina staat, laat zijn markering staan.
+    Vult de redacteur het veld in dezelfde keer in, dan gaat de markering weg.
+  - **De tabel en de kaart Te doen:** `readPersonGaps` telt een gemarkeerd gat niet mee, dus het teken `?` is weg en de aantallen per letter, de regel op de startpagina en "Opslaan en volgende" kloppen.
+    De tabel negeert een markering ook als het veld al een waarde heeft.
+  - **De kaart Niet beschikbaar:** onder de tabel van de personen, warm, met voor elke markering de persoon (een link naar zijn formulier), het veld en de dag van de laatste controle.
+    Elke rij heeft "Nog steeds niet beschikbaar" (de dag wordt vandaag) en "Markering weghalen", met een naam voor een schermlezer die het veld en de persoon noemt.
+    Zonder markeringen staat de kaart er niet.
+    Na een knop zegt een melding bovenaan wat er gebeurde.
+  - **De dag:** "laatst gecontroleerd" is de dag waarop het vakje werd aangevinkt, of waarop de knop werd gebruikt.
+    Niets verloopt vanzelf.
+  - **Het logboek:** zetten, vernieuwen en weghalen staan met de redacteur in `audit_log` als `gap.mark`, `gap.renew` en `gap.unmark`.
+    Een vakje dat een markering zet of weghaalt, schrijft zijn eigen regel, en `person.edit` alleen voor wat er verder veranderde.
+  - **Een feit dat er komt:** de import haalt de markering weg als hij de geboortedatum vindt (`clearFilledMarks` in `finish` van `import-person-data.ts`) en schrijft `gap.unmark` zonder account, met een regel in zijn logboek.
+    De redactie doet het als ze het veld met de hand vult in het formulier van een persoon.
+    Het formulier van een speler en de beslissing over een verschil met de import (`player_field_differences`) halen een markering niet weg: de tabel en de kaart negeren een markering op een gevuld veld, dus er verandert niets voor wie kijkt.
+    Voeg je twee personen samen, dan gaan de markeringen van de persoon die verdwijnt mee weg.
+  - **Wie:** alleen de eigenaar en de redacteuren zien en wijzigen de markeringen, een auteur krijgt "niet gevonden".
+- **Waarom:** een gat dat niemand kan vullen houdt de tabel voor altijd vol, en dan ziet de redactie niet meer wat te doen is.
+  Een markering mag een feit nooit verbergen dat er intussen is.
+- **Nadeel:** een markering die niemand terugziet, blijft staan; daarom staat ze in een kaart met de dag van de laatste controle, en bepaalt de redactie zelf wanneer ze nog eens kijkt.
+- **Alternatieven:** een markering per persoon (verbergt alle gaten tegelijk); elk veld te markeren; een markering die na een jaar vanzelf terugkomt in de tabel; ook auteurs laten markeren.
 
 ## Ook de pagina van een club en de eerdere ontmoetingen van een Voorbeschouwing linken naar de wedstrijd
 
