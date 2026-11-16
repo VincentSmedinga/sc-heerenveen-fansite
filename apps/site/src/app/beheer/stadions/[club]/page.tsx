@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { seasonOf } from '@fansite/db/season'
+import { listAdminStadiums } from '@fansite/db/stadium-admin'
 import {
   Button,
   Card,
@@ -24,12 +25,14 @@ import { requireRole } from '#src/beheer/require-role'
 import { SaveButtons } from '#src/beheer/SaveButtons'
 import { emptyRow, stadiumFormId } from '#src/beheer/stadium-fields'
 import { rowOf } from '#src/beheer/stadium-form'
-import { findAdminClub } from '#src/beheer/stadiums'
+import { findAdminClub, stadiumChoices } from '#src/beheer/stadiums'
 import { getDatabase } from '#src/database'
 import { describeShowDelay } from '#src/matches'
 
-import { submitReset, submitStadiums } from '../actions'
-import { stadiumsPath } from '../paths'
+import { submitClubWikidata, submitHomeGrounds, submitReset, submitStadiums } from '../actions'
+import { ClubWikidataForm } from '../ClubWikidataForm'
+import { HomeGroundsForm } from '../HomeGroundsForm'
+import { clubsPath } from '../paths'
 import { StadiumForm } from '../StadiumForm'
 
 // Render on each request: the list changes with every save.
@@ -50,13 +53,15 @@ export default async function ClubStadiumsPage({ params, searchParams }: Props) 
   await requireRole('owner', 'editor')
 
   const { club: slug } = await params
-  const found = await findAdminClub(getDatabase().db, slug)
+  const { db } = getDatabase()
+  const found = await findAdminClub(db, slug)
 
   if (found === undefined) {
     notFound()
   }
 
-  const { club, own, wikipedia } = found
+  const { club, homeGrounds, own, wikipedia } = found
+  const choices = stadiumChoices(await listAdminStadiums(db))
   const { gedaan } = await searchParams
   // The pages of the clubs keep what they read for as long as the current season does.
   const showDelay = describeShowDelay(seasonOf(new Date()))
@@ -67,6 +72,10 @@ export default async function ClubStadiumsPage({ params, searchParams }: Props) 
       text: `De eigen lijst is weg. De kaart toont ${showDelay} weer wat de wedstrijden zeggen.`,
       title: 'Terug naar Wikipedia',
     },
+    'thuisvelden-opgeslagen': {
+      text: 'De thuisvelden zijn bewaard. Ze zijn nu van de redactie: de import laat ze staan.',
+      title: 'Opgeslagen',
+    },
   }
   const notice = typeof gedaan === 'string' ? notices[gedaan] : undefined
 
@@ -74,8 +83,8 @@ export default async function ClubStadiumsPage({ params, searchParams }: Props) 
     <Page.Main areas={sideAreas} className={compact}>
       <Page.Cell area="head">
         <Text>
-          <Link href={stadiumsPath} icon="arrow-left">
-            Terug naar Stadions
+          <Link href={clubsPath} icon="arrow-left">
+            Terug naar Clubs
           </Link>
         </Text>
         <Heading level={1}>{club.name}</Heading>
@@ -88,8 +97,8 @@ export default async function ClubStadiumsPage({ params, searchParams }: Props) 
       </Page.Cell>
       <Page.Toolbar>
         <SaveButtons
-          buttons={[{ label: 'Opslaan', value: 'opslaan' }]}
-          cancelHref={stadiumsPath}
+          buttons={[{ label: 'Eigen lijst opslaan', value: 'opslaan' }]}
+          cancelHref={clubsPath}
           formId={stadiumFormId}
         />
       </Page.Toolbar>
@@ -99,9 +108,22 @@ export default async function ClubStadiumsPage({ params, searchParams }: Props) 
             <Strong>{notice.title}.</Strong> {notice.text}
           </Notice>
         )}
+        <HomeGroundsForm
+          action={submitHomeGrounds.bind(null, slug)}
+          clubName={club.name}
+          initial={homeGrounds.rows}
+          key={`thuis-${club.id}-${gedaan ?? ''}`}
+          stadiums={choices}
+        />
+        <ClubWikidataForm
+          action={submitClubWikidata.bind(null, slug)}
+          clubName={club.name}
+          key={`wikidata-${club.id}`}
+          number={club.wikidataId}
+        />
         <StadiumForm
           action={submitStadiums.bind(null, slug)}
-          cancelHref={stadiumsPath}
+          cancelHref={clubsPath}
           initial={own.length > 0 ? own.map(rowOf) : [{ ...emptyRow }]}
           key={`${club.id}-${gedaan ?? ''}`}
         />

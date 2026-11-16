@@ -38,6 +38,8 @@ const screens = [
   '/beheer/personen/{person}',
   '/beheer/personen/{person}/leven',
   '/beheer/stadions',
+  '/beheer/stadions/stadion/nieuw',
+  '/beheer/stadions/clubs',
   '/beheer/stadions/sv-proefdorp',
   '/beheer/clubnamen',
   '/beheer/clubnamen/sv-proefdorp',

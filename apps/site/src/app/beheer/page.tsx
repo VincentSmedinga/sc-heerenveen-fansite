@@ -169,7 +169,7 @@ export default async function AdminPage() {
                 Vul wedstrijden in of verbeter ze.
               </Tile>
               <Tile href="/beheer/stadions" icon="ball" level={2} title="Stadions">
-                Geef een club een eigen lijst van stadions, met een toelichting.
+                Beheer de stadions, hun namen en hun adres, en de thuisvelden van een club.
               </Tile>
               <Tile href="/beheer/clubnamen" icon="ball" level={2} title="Clubnamen">
                 Houd bij welke namen een club droeg, en sinds wanneer.

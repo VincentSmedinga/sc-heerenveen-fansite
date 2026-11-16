@@ -2368,6 +2368,7 @@
     **Later:** zie _De pagina's van het beheer gebruiken het raster, met de knoppen om op te slaan in de werkbalk_: ook het stadion heeft geen zijbalk meer, en "Opslaan" staat in de werkbalk en aan het einde van het formulier.
     "Overnemen" vult het formulier en slaat niets op; "Terug naar Wikipedia" haalt de hele lijst weg, ook de toelichtingen, na een bevestiging.
     Voor dezelfde rollen als de wedstrijden: alleen een beheerder.
+    **Later:** zie _De redactie beheert stadions apart van de clubs, en vult het adres in met één klik_ (16 november 2026): de lijst van de clubs staat nu op `/beheer/stadions/clubs`, en `/beheer/stadions` is de lijst van de stadions.
   - **Geen reden:** een opslag of een "Terug naar Wikipedia" vraagt geen reden, anders dan een wedstrijd.
     Het logboek heeft het nummer van de club en de aantallen (`stadium.save` en `stadium.reset`), en de lijst is te lezen op de pagina zelf.
   - **De tabel:** zie _De eigen lijst van stadions van een club staat in `club_stadiums`_ in `hosting-en-data.md`.
@@ -6108,3 +6109,35 @@
   De lijsten staan onder `/beheer/spelers/kwaliteit` en niet naast `[id]`, zodat een vaste naam als `personen` of `namen` geen dynamisch deel van het niveau van een speler overlapt.
   Het seizoen staat achter de naam van de lijst, zodat een seizoen en een vaste naam (`snel`, een letter) nooit op één niveau staan.
 - **Alternatieven:** `/beheer/spelers/personen` en `/beheer/spelers/namen` zonder `kwaliteit` (dichter bij Spelers, maar naast `[id]` en `nieuw`, en minder duidelijk dat het een lijst met gaten is); het seizoen voor de naam van de lijst, zoals het was.
+
+## De redactie beheert stadions apart van de clubs, en vult het adres in met één klik
+
+- **Datum:** 16 november 2026
+- **Besluit:** de redactie beheert de stadions (#1299) op hun eigen schermen, naast die van de clubs.
+  - **De schermen:** `/beheer/stadions` is de lijst van de stadions, met de naam van nu, de plaats en in woorden of er coördinaten en een adres zijn, en een link naar een nieuw stadion.
+    `/beheer/stadions/stadion/<nummer>` (of `nieuw`) is het scherm van één stadion: plaats, coördinaten, adres en de namen met een begin, met dezelfde regels als de namen van een club (`stadium-form.ts`).
+    De lijst van de clubs verhuisde naar `/beheer/stadions/clubs`, en `/beheer/stadions/<club>` houdt de eigen lijst voor de kaart en heeft er de thuisvelden en het Wikidata-nummer van de club bij.
+    Een thuisveld kiest een bestaand stadion; een nieuw stadion maak je eerst op zijn eigen scherm.
+  - **De markering:** verandert de redacteur de plaats of de coördinaten, dan wordt de bron `manual` en laat de import ze staan.
+    "Terug naar Wikidata" (alleen bij een stadion met een nummer van Wikidata en een plaats van de redactie) leegt plaats, coördinaten en bron, en zet bij de clubs die er spelen weer klaar dat de import ze leest.
+    Spelen er alleen clubs waarvan de redactie de thuisvelden zette, dan leest de import niets en zegt het scherm dat.
+  - **De thuisvelden:** slaat de redactie de thuisvelden van een club op, dan wordt `home_grounds_source` van de club `manual`, zodat de import ze niet meer vervangt (#1298).
+    Een Wikidata-nummer bij een club zetten, wijzigen of weghalen maakt de momenten leeg waarop de import de club las, zodat de volgende import zijn item en thuisvelden opnieuw leest.
+  - **Het adres:** de knop "Vul het adres in vanaf de coördinaten" vraagt de Locatieserver van PDOK om het dichtstbijzijnde adres bij de coördinaten van het formulier, en zet straat met huisnummer, postcode en plaats als voorstel in de velden.
+    Het voorstel is pas bewaard als de redacteur opslaat.
+    De knop is uit, met een zin die zegt waarom, zonder beide coördinaten of buiten een vak rond Nederland; de server controleert dat opnieuw.
+  - **De uitzondering op "geen verzoeken aan derden":** die regel gaat over de browser van een bezoeker, en dat blijft zo.
+    Het verzoek aan PDOK doet de server, voor een redacteur in het beheer (`src/beheer/pdok.ts`), nooit de browser en nooit voor een bezoeker.
+    Het gaat naar één vast adres (`https://api.pdok.nl/bzk/locatieserver/search/v3_1/reverse`), met alleen de twee coördinaten, zonder cookies, met een time-out van 5 seconden en zonder een doorverwijzing te volgen.
+    Het antwoord is invoer van buiten: het moet de verwachte vorm hebben (`zod`), een postcode van vier cijfers en twee letters, tekst zonder stuurtekens en van redelijke lengte, en het adres mag niet verder dan 2 kilometer liggen.
+    Anders zegt het scherm dat PDOK geen bruikbaar antwoord gaf, en de redacteur vult het adres met de hand in.
+    Er is geen nieuwe omgevingsvariabele: het adres staat vast in de code.
+  - **Het logboek:** `ground.create` en `ground.edit` met het nummer van het stadion en in `detail` welke delen veranderden, `ground-name.save` en `home-ground.save` met aantallen, nooit de tekst van een toelichting.
+    Een Wikidata-nummer bij een club schrijft `club.edit`.
+    Opslaan en logboek zijn één transactie, en de rij van het stadion of van de club is vergrendeld, zodat twee redacteuren die tegelijk opslaan hun regels niet mengen.
+- **Waarom:** een adres opzoeken kost de redacteur zo één klik, en PDOK is de dienst van de overheid voor adressen in Nederland.
+  Wikidata heeft het adres van de stadions van onze tegenstanders bijna nooit (zie _Stadions worden een eigen gegeven_ in `hosting-en-data.md`).
+  Het verzoek doet de server, zodat er niets van een bezoeker naartoe gaat en de browser van de redacteur geen derde partij bereikt.
+- **Nadeel:** PDOK kent alleen adressen in Nederland, dus voor een stadion in het buitenland vult de redacteur het adres zelf in.
+  Het dichtstbijzijnde adres bij het midden van een stadion is niet altijd de ingang.
+- **Alternatieven:** Nominatim van OpenStreetMap, dat ook buiten Nederland werkt maar niet door de overheid wordt beheerd; het verzoek in de browser van de redacteur (dan bereikt de browser een derde partij); geen knop; thuisvelden met een nieuw stadion in dezelfde regel (meer formulier voor weinig winst).

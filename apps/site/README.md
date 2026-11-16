@@ -992,7 +992,7 @@ Een sessie die verloopt haalt hem niet weg: daar is hij voor.
 - `/beheer/wedstrijden` is alleen voor de eigenaar en de redacteuren: een wedstrijd van het lopende seizoen invullen of verbeteren (zie _Wedstrijden invullen_).
 - `/beheer/spelers` is alleen voor de eigenaar en de redacteuren: een speler toevoegen aan de selectie van een seizoen, of er een aanpassen (zie _De spelers van een seizoen_).
 - `/beheer/personen/<nummer>` is alleen voor de eigenaar en de redacteuren: wat voor een persoon in elk seizoen geldt, zoals de naam en de geboortedatum (zie _De spelers van een seizoen_).
-- `/beheer/stadions` is alleen voor de eigenaar en de redacteuren: een club een eigen lijst van stadions geven, met een toelichting voor de kaart op zijn pagina (zie _De stadions van een club_).
+- `/beheer/stadions` is alleen voor de eigenaar en de redacteuren: de stadions beheren, hun namen, plaats en adres, en de thuisvelden van een club (zie _De stadions_ en _De stadions van een club_).
 - `/beheer/clubnamen` is alleen voor de eigenaar en de redacteuren: bijhouden welke namen een club droeg en sinds wanneer, met een toelichting (zie _De namen van een club_).
 - `/beheer/wedstrijden/kwaliteit` is alleen voor de eigenaar en de redacteuren: wat er van elk seizoen ontbreekt, in een tabel met een kolom per deel van een wedstrijd (zie _De kwaliteit van de gegevens_).
 - `/beheer/spelers/kwaliteit/personen` is alleen voor de eigenaar en de redacteuren: wat we van personen missen, per letter, met de snelle lijst, de namen, de vaste plaatsen en de verschillen in spelerscijfers en spelersgegevens eronder (zie _De kwaliteit van de gegevens_).
@@ -1180,19 +1180,47 @@ Het volledige formulier draagt `reportBasis` mee en weigert te bewaren als het v
   Staat er al een verslag, dan vraagt het scherm eerst of het formulier vervangen mag.
   Het werkt zonder JavaScript: de tekst en daarna het formulier zijn gewone posts naar dezelfde actie, met één `useActionState` voor het hele scherm.
 
-### De stadions van een club
+### De stadions
 
 `/beheer/stadions` (`src/app/beheer/stadions`) is alleen voor de eigenaar en de redacteuren: een auteur krijgt "niet gevonden".
+Een stadion is het veld zelf (zie _Stadions worden een eigen gegeven_ in `docs/beslissingen/hosting-en-data.md`), en de redactie beheert het hier.
+De clubs, met hun thuisvelden, staan onder `/beheer/stadions/clubs` (zie _De stadions van een club_).
+
+- De lijst (`page.tsx`) heeft elk stadion met de naam van nu, de plaats en in woorden of er coördinaten en een adres zijn, en een link naar een nieuw stadion.
+- `/beheer/stadions/stadion/<nummer>` (of `nieuw`) is het scherm van één stadion: een pagina met twee kolommen en een werkbalk.
+  De hoofdkolom heeft het formulier (`stadion/GroundForm.tsx`) met drie kaarten: plaats en coördinaten, het adres met de knop die het invult, en de namen met een begin.
+  De namen volgen de regels van de namen van een club: een seizoen of een dag, oplopend, en alleen de eerste naam zonder begin (`stadium-form.ts`).
+  `ground-form.ts` leest en controleert de rest: de coördinaten (een getal met een punt of een komma, in graden, beide of geen), de plaats, de straat en de postcode, altijd opnieuw op de server en met een zin bij elk veld.
+  De zijkolom heeft de clubs die er spelen en, bij een plaats van de redactie van een stadion met een nummer van Wikidata, "Terug naar Wikidata".
+- Verandert de redacteur de plaats of de coördinaten, dan wordt de bron `manual` en laat de import ze staan; leegmaken zet ook de bron weer leeg.
+  Het adres (straat en postcode) is altijd van de redactie.
+- "Vul het adres in vanaf de coördinaten" vraagt PDOK om het dichtstbijzijnde adres en zet het als voorstel in de velden; pas Opslaan bewaart het.
+  De knop is uit, met een zin die zegt waarom, zonder beide coördinaten of buiten Nederland.
+  Het verzoek doet de server (`src/beheer/pdok.ts`), met alleen de coördinaten, naar één vast adres, met een time-out van 5 seconden, en het antwoord wordt gecontroleerd voordat het in een veld komt.
+  De beslissing en de uitzondering op "geen verzoeken aan derden" staan in `docs/beslissingen/site.md` (_De redactie beheert stadions apart van de clubs_).
+  De tests zetten `fetch` neer, dus er gaat nooit een verzoek naar PDOK uit een test, ook niet uit `pnpm test:a11y`.
+- `saveStadium` en `resetStadiumToWikidata` uit `@fansite/db/stadium-admin` schrijven het stadion en `ground.create`, `ground.edit` en `ground-name.save` in het logboek, in één transactie, met het nummer van het stadion en zonder de tekst van een toelichting.
+
+### De stadions van een club
+
+`/beheer/stadions/clubs` (`src/app/beheer/stadions/clubs`) is alleen voor de eigenaar en de redacteuren, zoals de stadions.
 De kaart op de pagina van een club toont wat de wedstrijden zeggen over zijn stadion (zie _De tegenstanders_).
 Hier geeft de redactie een club een eigen lijst van namen, met een start en een toelichting, voor een stadion dat de wedstrijden niet goed vertellen, zoals AZ dat in 2019 een half jaar in Den Haag speelde.
+Bij elke club staan ook zijn thuisvelden en zijn Wikidata-nummer.
 
 - De lijst heeft alle clubs waartegen we wedstrijden hebben, met het label "Eigen lijst" bij clubs die er een hebben, het filter Alles of Eigen lijst en zoeken op een deel van de naam.
   Het zoeken is een formulier met `GET`, dus het werkt zonder JavaScript (`searchClubs` in `src/beheer/stadiums.ts`).
+- De thuisvelden (`HomeGroundsForm.tsx`) zijn een lijst van stadions met een begin: de redacteur kiest een bestaand stadion uit een lijst (`stadiumChoices`), met een seizoen of een dag en een toelichting.
+  Slaat de redactie ze op, dan zet het beheer `home_grounds_source` van de club op `manual`, zodat de import ze niet meer vervangt (`saveClubHomeGrounds`).
+  Een nieuw stadion maak je eerst op `/beheer/stadions/stadion/nieuw`.
+  Het Wikidata-nummer (`ClubWikidataForm.tsx`, `club-wikidata.ts`) laat de import de club lezen; zonder nummer slaat de import hem over.
+  Bij 60 van de 91 clubs van de oude wedstrijden ontbrak het nummer (16 november 2026).
+  Het schrijft `home-ground.save` en `club.edit` in het logboek, met aantallen en zonder de tekst van een toelichting.
 - `/beheer/stadions/<club>` is een pagina met twee kolommen en een werkbalk (zie _De pagina's van het beheer gebruiken het raster_ in `docs/beslissingen/site.md`).
-  De hoofdkolom heeft het formulier (`StadiumForm.tsx`): een regel per naam met de naam, het seizoen of de dag waarmee hij begint, en een toelichting.
+  De hoofdkolom heeft de thuisvelden, het Wikidata-nummer en dan het formulier van de eigen lijst (`StadiumForm.tsx`): een regel per naam met de naam, het seizoen of de dag waarmee hij begint, en een toelichting.
   Een naam begint met een seizoen (`2019/20`, telt als 1 juli van dat jaar) of met een dag, niet met allebei, en alleen de eerste naam mag zonder start; de starts lopen op, en de naam ervoor eindigt waar de volgende begint.
   De toelichting is gewone tekst van hoogstens 200 tekens, in eigen woorden, en noemt de bron als die niet Wikipedia is.
-- De werkbalk heeft "Opslaan" en "Annuleren", en het formulier heeft ze aan het einde.
+- De werkbalk heeft "Eigen lijst opslaan" en "Annuleren", en het formulier heeft ze aan het einde.
   De tweede kolom heeft wat de wedstrijden zeggen met de knop "Overnemen", en het uitklapblok "Terug naar Wikipedia".
   "Overnemen" vult het formulier met die namen en seizoenen, en slaat niets op.
   "Terug naar Wikipedia" haalt de hele lijst van de club weg, ook de toelichtingen, en vraagt eerst een bevestiging zoals "Invoer weghalen" bij een wedstrijd.
@@ -1215,7 +1243,7 @@ De lijst is alleen voor de weergave: de import bepaalt de naam in de kop en het 
   De regels voor een start zijn die van de stadions, en de periodes komen uit dezelfde functie (`ownListPeriods` in `src/match-format.ts`).
   Boven het formulier staat de naam die de site nu in de kop toont.
   Is de laatste naam van de lijst een andere (`headingNotice`), dan zegt een melding dat in gewone tekst; opslaan kan wel.
-- De werkbalk heeft "Opslaan" en "Annuleren", en het formulier heeft ze aan het einde.
+- De werkbalk heeft "Eigen lijst opslaan" en "Annuleren", en het formulier heeft ze aan het einde.
   De tweede kolom heeft de schrijfwijzen die we van Wikipedia kennen (alleen lezen, uit `club_names`) en het uitklapblok "Lijst weghalen", dat eerst een bevestiging vraagt.
 - Elke naam van de lijst komt bij het opslaan ook in `club_names`, zodat de import de oude naam als dezelfde club vindt en er geen tweede club ontstaat.
   Hoort een naam bij een andere club (op naam, zonder verschil in hoofdletters, accenten en leestekens), dan staat er een fout bij het veld en wordt niets opgeslagen.

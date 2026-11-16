@@ -9,9 +9,60 @@ import type { StadiumErrors, StadiumFieldName, StadiumRowValues } from './stadiu
 
 import { emptyRow, mostStadiumRows, stadiumFieldId, stadiumFieldNames } from './stadium-fields'
 
-/** What a button of the form does: save, add a line, remove a line or take Wikipedia over. */
+/**
+ * What a button of the form does: save, add a line, remove a line, take Wikipedia over, or
+ * (the form of a stadium) look up the address of the coordinates.
+ */
 export type StadiumButton =
-  { kind: 'add' } | { kind: 'remove'; number: number } | { kind: 'save' } | { kind: 'take-over' }
+  { kind: 'add' } | { kind: 'address' } | { kind: 'remove'; number: number } | { kind: 'save' } | { kind: 'take-over' }
+
+/**
+ * Checks the start of a line: a season or a day, never both, in order after `before` (the
+ * start of the line above), and only the first line may have none. Returns the start to compare
+ * the next line with, and the error with the field it belongs to.
+ */
+export function checkStart(
+  { dag: day, seizoen: season }: Pick<StadiumRowValues, 'dag' | 'seizoen'>,
+  index: number,
+  before: string | undefined,
+  first = 'de eerste naam',
+): { before: string | undefined; error?: { field: 'dag' | 'seizoen'; message: string } } {
+  const start = startOf(season, day)
+
+  if (season !== '' && day !== '') {
+    return { before, error: { field: 'seizoen', message: 'Vul een seizoen of een dag in, niet allebei.' } }
+  }
+  if (season !== '' && !isSeason(season)) {
+    return { before, error: { field: 'seizoen', message: 'Schrijf het seizoen zoals 2019/20.' } }
+  }
+  if (day !== '' && !isDay(day)) {
+    return { before, error: { field: 'dag', message: 'Kies een geldige dag.' } }
+  }
+  if (start === undefined) {
+    return index > 0
+      ? {
+          before,
+          error: { field: 'seizoen', message: `Vul een seizoen of een dag in. Alleen ${first} mag zonder start.` },
+        }
+      : { before }
+  }
+  if (before !== undefined && start <= before) {
+    return {
+      before: start,
+      error: {
+        field: season === '' ? 'dag' : 'seizoen',
+        message: 'De start moet na de start van de regel erboven liggen.',
+      },
+    }
+  }
+
+  return { before: start }
+}
+
+/** Control and format characters: not a character that belongs in a name or a note. */
+export function hasOddCharacters(text: string) {
+  return /\p{C}/u.test(text)
+}
 
 /** A line nobody filled in: the form made it, and it is not a name. */
 export function isUntouchedRow(row: StadiumRowValues) {
@@ -26,6 +77,9 @@ export function readStadiumButton(formData: FormData): StadiumButton {
   }
   if (knop === 'overnemen') {
     return { kind: 'take-over' }
+  }
+  if (knop === 'adres-invullen') {
+    return { kind: 'address' }
   }
 
   const removed = typeof knop === 'string' ? /^regel-weghalen-(\d{1,3})$/u.exec(knop) : null
@@ -82,12 +136,12 @@ export function rowOf(line: StadiumLine): StadiumRowValues {
  */
 export function validateStadiumRows(
   rows: readonly StadiumRowValues[],
+  emptyMessage = 'Een lijst heeft minstens één regel. Wil je er geen eigen lijst meer? Kies "Terug naar Wikipedia".',
 ): { errors: StadiumErrors; lines?: undefined } | { errors?: undefined; lines: StadiumLine[] } {
   const errors: StadiumErrors = {}
 
   if (rows.length === 0) {
-    errors['regels'] =
-      'Een lijst heeft minstens één regel. Wil je er geen eigen lijst meer? Kies "Terug naar Wikipedia".'
+    errors['regels'] = emptyMessage
   } else if (rows.length > mostStadiumRows) {
     errors['regels'] = `Een lijst heeft hoogstens ${mostStadiumRows} regels.`
   }
@@ -114,40 +168,23 @@ export function validateStadiumRows(
       errors[id('toelichting')] = 'Gebruik alleen gewone tekens.'
     }
 
-    const season = row.seizoen
-    const day = row.dag
-    const start = startOf(season, day)
+    const found = checkStart(row, index, before)
 
-    if (season !== '' && day !== '') {
-      errors[id('seizoen')] = 'Vul een seizoen of een dag in, niet allebei.'
-    } else if (season !== '' && !isSeason(season)) {
-      errors[id('seizoen')] = 'Schrijf het seizoen zoals 2019/20.'
-    } else if (day !== '' && !isDay(day)) {
-      errors[id('dag')] = 'Kies een geldige dag.'
-    } else if (start === undefined && index > 0) {
-      errors[id('seizoen')] = 'Vul een seizoen of een dag in. Alleen de eerste naam mag zonder start.'
-    } else if (start !== undefined) {
-      if (before !== undefined && start <= before) {
-        errors[id(season === '' ? 'dag' : 'seizoen')] = 'De start moet na de start van de regel erboven liggen.'
-      }
-
-      before = start
+    if (found.error !== undefined) {
+      errors[id(found.error.field)] = found.error.message
     }
+
+    before = found.before
 
     return {
       name,
       note: note === '' ? null : note,
-      startDay: day === '' ? null : day,
-      startSeason: season === '' ? null : season,
+      startDay: row.dag === '' ? null : row.dag,
+      startSeason: row.seizoen === '' ? null : row.seizoen,
     }
   })
 
   return Object.keys(errors).length > 0 ? { errors } : { lines }
-}
-
-/** Control and format characters: not a character that belongs in a name or a note. */
-function hasOddCharacters(text: string) {
-  return /\p{C}/u.test(text)
 }
 
 /** A calendar day as `2021-02-14`, one that exists. */

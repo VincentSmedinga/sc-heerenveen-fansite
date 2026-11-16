@@ -1,8 +1,19 @@
+/** The list of the stadiums. */
 export const stadiumsPath = '/beheer/stadions'
+
+/** The list of the clubs, each with the form of its stadiums. */
+export const clubsPath = `${stadiumsPath}/clubs`
 
 /** The address of the form of a club, with what the last action left to say (`gedaan`). */
 export function clubPath(slug: string, done?: string) {
   return done === undefined ? `${stadiumsPath}/${slug}` : `${stadiumsPath}/${slug}?gedaan=${done}`
+}
+
+/** The address of the form of a stadium (or `nieuw`), with what the last action left to say. */
+export function groundPath(id: 'nieuw' | number, done?: string) {
+  const path = `${stadiumsPath}/stadion/${id}`
+
+  return done === undefined ? path : `${path}?gedaan=${done}`
 }
 
 /**
@@ -19,5 +30,5 @@ export function listPath(show?: string, search?: string) {
     query.set('q', search)
   }
 
-  return query.size === 0 ? stadiumsPath : `${stadiumsPath}?${query}`
+  return query.size === 0 ? clubsPath : `${clubsPath}?${query}`
 }

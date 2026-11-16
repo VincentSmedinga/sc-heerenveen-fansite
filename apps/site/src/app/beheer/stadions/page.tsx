@@ -1,56 +1,34 @@
 import type { Metadata } from 'next'
 
-import {
-  Button,
-  Card,
-  DataTable,
-  Field,
-  Filter,
-  Form,
-  Heading,
-  Input,
-  Notice,
-  Page,
-  Tag,
-  Text,
-} from '@fansite/design-system'
+import { listAdminStadiums } from '@fansite/db/stadium-admin'
+import { Card, DataTable, Heading, Link, Notice, Page, Tag, Text } from '@fansite/design-system'
 
 import { toolbarAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
-import { parseSearch, searchMaxLength } from '#src/beheer/items'
 import { requireRole } from '#src/beheer/require-role'
-import { listAdminClubs, searchClubs, type StadiumShow } from '#src/beheer/stadiums'
 import { getDatabase } from '#src/database'
 
-import { clubPath, listPath, stadiumsPath } from './paths'
+import { clubsPath, groundPath } from './paths'
 
-// Render on each request: who is logged in and which clubs have a list are not known when the
-// site is built.
+// Render on each request: the stadiums change with every save.
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Stadions' }
 
 type SearchParams = Record<string, string | string[] | undefined>
 
-const shows: readonly StadiumShow[] = ['alles', 'eigen-lijst']
-
 const notices: Record<string, string> = {
-  weg: 'Deze club bestaat niet. Er is niets veranderd. Kies hieronder een club.',
+  weg: 'Dit stadion bestaat niet. Er is niets veranderd. Kies hieronder een stadion.',
 }
 
-// The clubs we have matches against, to give the stadium of a club a list of its own. The
-// search is a form with method GET, so the page works without JavaScript. A club with a list of
-// its own says so in words, never in colour alone.
+// The stadiums: one row for each, with its name now, its place and a word for what we know of
+// where it is, never in colour alone. A stadium is made here and changed on its own page. The
+// clubs, with their home grounds, are on the page Clubs.
 export default async function StadiumsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   await requireRole('owner', 'editor')
 
-  const { fout, q: rawSearch, tonen } = await searchParams
-  const search = parseSearch(rawSearch)
-  const show = shows.find((choice) => choice === tonen) ?? 'alles'
-  const found = searchClubs(await listAdminClubs(getDatabase().db), search)
-  const own = found.filter((club) => club.own)
-  const shown = show === 'eigen-lijst' ? own : found
-  const address = (choice: StadiumShow) => listPath(choice === 'alles' ? undefined : choice, search)
+  const { fout } = await searchParams
+  const stadiums = await listAdminStadiums(getDatabase().db)
   const notice = typeof fout === 'string' ? notices[fout] : undefined
 
   return (
@@ -58,53 +36,45 @@ export default async function StadiumsPage({ searchParams }: { searchParams: Pro
       <Page.Cell area="head">
         <Heading level={1}>Stadions</Heading>
         <Text appearance="intro">
-          De kaart op de pagina van een club toont wat de wedstrijden zeggen over zijn stadion. Geef een club hier een
-          eigen lijst, met een toelichting, als dat niet genoeg is.
+          Een stadion is het veld zelf. Het heeft namen, een plaats, coördinaten en een adres. Welke club er wanneer
+          speelde, zet je bij de club.
         </Text>
       </Page.Cell>
       <Page.Toolbar>
-        <Form action={stadiumsPath} method="get">
-          <Field hint="Een deel van de naam van de club." id="zoek" label="Zoeken" required={false}>
-            <Input autoCorrect="off" defaultValue={search} maxLength={searchMaxLength} name="q" type="search" />
-          </Field>
-          {/* The button sends the filter: the design system has no hidden field. */}
-          <Button
-            name={show === 'alles' ? undefined : 'tonen'}
-            type="submit"
-            value={show === 'alles' ? undefined : show}
-          >
-            Zoeken
-          </Button>
-        </Form>
+        <Text>
+          <Link href={groundPath('nieuw')}>Nieuw stadion</Link>
+        </Text>
+        <Text>
+          <Link href={clubsPath}>Clubs en hun stadions</Link>
+        </Text>
       </Page.Toolbar>
       <Page.Cell area="main">
         {notice === undefined ? null : <Notice>{notice}</Notice>}
-        <Card aria-labelledby="clubs-kop">
-          <Heading className="hf-visually-hidden" id="clubs-kop" level={2}>
-            Clubs
+        <Card aria-labelledby="stadions-kop">
+          <Heading className="hf-visually-hidden" id="stadions-kop" level={2}>
+            Stadions
           </Heading>
-          <Filter
-            items={[
-              { current: show === 'alles', href: address('alles'), label: `Alles (${found.length})` },
-              { current: show === 'eigen-lijst', href: address('eigen-lijst'), label: `Eigen lijst (${own.length})` },
-            ]}
-            label="Clubs filteren"
-          />
-          {shown.length === 0 ? (
-            <Text>
-              {search === ''
-                ? 'Nog geen club heeft een eigen lijst.'
-                : `Geen club gevonden met “${search}”${show === 'eigen-lijst' ? ' en een eigen lijst' : ''}.`}
-            </Text>
+          {stadiums.length === 0 ? (
+            <Text>Er zijn nog geen stadions.</Text>
           ) : (
             <DataTable
               appearance="text"
-              caption="Clubs met hun lijst van stadions"
-              columns={['Club', 'Lijst']}
-              rows={shown.map((club) => ({
-                cells: [club.own ? <Tag tone="highlight">Eigen lijst</Tag> : 'Wikipedia'],
-                header: club.name,
-                href: clubPath(club.slug),
+              caption="Stadions met hun plaats en wat we weten"
+              columns={['Stadion', 'Plaats', 'Gegevens']}
+              rows={stadiums.map((stadium) => ({
+                cells: [
+                  stadium.place ?? 'Onbekend',
+                  stadium.hasCoordinates || stadium.hasAddress ? (
+                    <>
+                      {stadium.hasCoordinates ? <Tag tone="highlight">Coördinaten</Tag> : null}{' '}
+                      {stadium.hasAddress ? <Tag tone="highlight">Adres</Tag> : null}
+                    </>
+                  ) : (
+                    'Nog niets'
+                  ),
+                ],
+                header: stadium.name,
+                href: groundPath(stadium.id),
               }))}
             />
           )}

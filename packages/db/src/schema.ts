@@ -469,6 +469,10 @@ export const auditActions = [
   'account.disable',
   'account.enable',
   'club.edit',
+  'ground.create',
+  'ground.edit',
+  'ground-name.save',
+  'home-ground.save',
 ] as const
 
 export type AuditAction = (typeof auditActions)[number]

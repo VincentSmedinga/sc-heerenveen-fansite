@@ -138,7 +138,7 @@ describe('the admin', () => {
       '<a class="hf-tile-link" href="/beheer/mijn-account">Mijn account</a>',
     ])
     expect(html).toContain('Vul wedstrijden in of verbeter ze.')
-    expect(html).toContain('Geef een club een eigen lijst van stadions, met een toelichting.')
+    expect(html).toContain('Beheer de stadions, hun namen en hun adres, en de thuisvelden van een club.')
     expect(html).toContain('Houd bij welke namen een club droeg, en sinds wanneer.')
   })
 
