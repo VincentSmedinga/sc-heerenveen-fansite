@@ -241,8 +241,8 @@ export function listReportedMatches(db: ReportDatabase, season: string): Promise
 
 /**
  * The matches of a season that are still `scheduled`, have no report and have a club, from the
- * first to the last. They have the page of the Voorbeschouwing before their kick-off (see
- * `phaseOf`); the caller keeps those that have not begun. A match without a club has no
+ * first to the last. They have the page of the Voorbeschouwing until there is result data (a
+ * report, or another status), whether or not they have begun. A match without a club has no
  * address, so it is not in it.
  */
 export async function listScheduledMatches(db: ReportDatabase, season: string): Promise<ScheduledMatch[]> {

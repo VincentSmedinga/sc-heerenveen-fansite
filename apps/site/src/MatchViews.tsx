@@ -675,7 +675,7 @@ export function MatchesCard({
   details?: undefined | UpcomingDetails
   now: Date
   /**
-   * The addresses of the Voorbeschouwing of the matches that have not begun (see `MatchLines`).
+   * The addresses of the Voorbeschouwing of the matches that are scheduled (see `MatchLines`).
    */
   previewAddresses?: ReadonlyMap<string, string> | undefined
 }) {
@@ -831,7 +831,7 @@ export function MatchLines({
   matches: PublicMatch[]
   now: Date
   /**
-   * The addresses of the Voorbeschouwing of the matches that have not begun, by
+   * The addresses of the Voorbeschouwing of the matches that are still scheduled, by
    * `<competition>|<round>` (see `getPreviewAddresses`). A line of a match in it ends with the
    * link "Voorbeschouwing", unless the match has a report: its page is then the report's.
    */
@@ -1635,7 +1635,7 @@ export function MatchLine({
   match: MatchLineMatch
   now: Date
   /**
-   * Whether the page at `reportHref` is the Voorbeschouwing of a match that has not begun: the
+   * Whether the page at `reportHref` is the Voorbeschouwing of a match that is still scheduled:
    * link then says so. It needs `reportHref`.
    */
   preview?: boolean

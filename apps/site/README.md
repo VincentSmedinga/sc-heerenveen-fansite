@@ -301,7 +301,7 @@ Een pagina van een wedstrijd die live is, ververst zichzelf (`LiveRefresh` in `s
 Hij wacht als het tabblad verborgen is, stopt als de pagina niet meer live is en uiterlijk vier uur na de aftrap, en laat bij een mislukt verzoek de pagina staan.
 De regel met `role="status"` zegt alleen een nieuw doelpunt en het einde van de wedstrijd, uit de verborgen regel `LiveState`; zonder JavaScript is er een link "Ververs nu".
 `getPublicReports` bewaart het seizoen met een wedstrijd die live is 15 seconden, en anders 5 minuten.
-Een wedstrijd die `scheduled` is, een club heeft en geen verslag, heeft tot de aftrap de Voorbeschouwing op hetzelfde adres (`getPreviewMatch` in `src/report-data.ts`, `listScheduledMatches` van `@fansite/db/match-reports`, de pagina in `preview-page.tsx`).
+Een wedstrijd die `scheduled` is, een club heeft en geen verslag, heeft de Voorbeschouwing op hetzelfde adres, tot er uitslaggegevens zijn (een verslag, of een andere status), dus ook na de aftrap (`getPreviewMatch` in `src/report-data.ts`, `listScheduledMatches` van `@fansite/db/match-reports`, de pagina in `preview-page.tsx`).
 De kop is `MatchHeader` met fase `upcoming` en de pil "Voorbeschouwing", daaronder staat de kaart Nieuws over de tegenstander (hoogstens drie koppen uit `getClubNews`) en de Bron.
 De pagina heeft `noindex` en staat niet in de sitemap, en Programma en de kaart Wedstrijden op de homepage linken ernaar met "Voorbeschouwing" (`getPreviewAddresses`).
 Een wedstrijd met een verslag toont altijd het verslag; zonder verslag is het adres vanaf de aftrap "niet gevonden".

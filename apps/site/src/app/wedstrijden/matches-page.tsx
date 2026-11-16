@@ -123,7 +123,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   // The matches that have a page of their own: their line links to it.
   const reportAddresses = await reportAddressesOf(season)
   const liveReports = reportAddresses === undefined ? undefined : await getLiveReports(season, now)
-  const previewAddresses = reportAddresses === undefined ? undefined : await getPreviewAddresses(season, now)
+  const previewAddresses = reportAddresses === undefined ? undefined : await getPreviewAddresses(season)
   // The cards with figures are on the statistics page of the same season, and its key
   // figures show our place.
   const statistics = (id?: string) =>

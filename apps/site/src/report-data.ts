@@ -23,7 +23,8 @@ import { seasonSlug } from './seasons'
 // een verslag dat nog niet klaar is_ in docs/beslissingen/site.md). A match that is still being
 // played (`scheduled`) has a page too once it has a report, and it is "Live" from its kick-off
 // (see `phaseOf`). A match that is still `scheduled` and has no report has a page too, the
-// Voorbeschouwing, until its kick-off (see `getPreviewMatch`).
+// Voorbeschouwing, until there is result data: a report, or another status (see
+// `getPreviewMatches`).
 
 /** The base address of the matches page, which the address of a match builds on. */
 const matchesPath = '/wedstrijden'
@@ -165,9 +166,9 @@ const pastPreviews = cacheForKey(pastSeasonPeriod, (season) => listScheduledMatc
  * like `getReportAddresses`: the lines of a list of matches end with the link
  * "Voorbeschouwing".
  */
-export async function getPreviewAddresses(season: string, now = new Date()) {
+export async function getPreviewAddresses(season: string) {
   return new Map(
-    (await getPreviewMatches(season, now)).map(({ clubSlug, match }): [string, string] => [
+    (await getPreviewMatches(season)).map(({ clubSlug, match }): [string, string] => [
       `${match.competition}|${match.round}`,
       reportAddress(season, match.matchDate, clubSlug),
     ]),
@@ -178,26 +179,25 @@ export async function getPreviewAddresses(season: string, now = new Date()) {
  * The match of the address `/wedstrijden/<seizoen>/<datum>-<club>` when it has the page of the
  * Voorbeschouwing, or undefined (see `getPreviewMatches`).
  */
-export async function getPreviewMatch(season: string, slug: string, now = new Date()) {
+export async function getPreviewMatch(season: string, slug: string) {
   const address = parseReportSlug(slug)
 
   if (address === undefined || !(await getMatchSeasons()).includes(season)) {
     return undefined
   }
 
-  return (await getPreviewMatches(season, now)).find(
+  return (await getPreviewMatches(season)).find(
     ({ clubSlug, match }) => match.matchDate === address.matchDate && clubSlug === address.clubSlug,
   )
 }
 
 /**
- * The matches of a season that have the page of the Voorbeschouwing at `now`: still
- * `scheduled`, without a report, with a club, and not begun (see `phaseOf`). Whether a match
- * has begun is worked out at each call, so a page changes at the kick-off, whatever the cache
- * holds. The caller asks for a season of `getMatchSeasons` only.
+ * The matches of a season that have the page of the Voorbeschouwing: still `scheduled`, without
+ * a report and with a club. That is the one rule for the page, its links in the lists and the
+ * sitemap, which leaves it out: there is no result data until there is a report or the import
+ * gives the match another status, so the page stays after the kick-off. The caller asks for a
+ * season of `getMatchSeasons` only.
  */
-export async function getPreviewMatches(season: string, now = new Date()): Promise<ScheduledMatch[]> {
-  const scheduled = await (season === seasonOf(now) ? currentPreviews(season) : pastPreviews(season))
-
-  return scheduled.filter(({ match }) => phaseOf(match, now) === 'upcoming')
+export async function getPreviewMatches(season: string): Promise<ScheduledMatch[]> {
+  return season === seasonOf(new Date()) ? currentPreviews(season) : pastPreviews(season)
 }
