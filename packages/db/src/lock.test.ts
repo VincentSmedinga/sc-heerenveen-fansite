@@ -1,9 +1,10 @@
-import type { RowDataPacket } from 'mysql2/promise'
-
+import { createPool, type RowDataPacket } from 'mysql2/promise'
+import { createServer, type Server, type Socket } from 'node:net'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { TestDatabase } from './test-database.ts'
 
+import { connect } from './client.ts'
 import { lockNameFor, withLock } from './lock.ts'
 import { createTestDatabase } from './test-database.ts'
 
@@ -74,4 +75,101 @@ describe('withLock', () => {
     ).rejects.toThrow('Mislukt')
     expect(await isFree(name())).toBe(true)
   })
+})
+
+/**
+ * A proxy to the database that can go silent: it keeps every connection open and passes on
+ * nothing, as a firewall does that drops an idle connection without a word. The client then
+ * waits for ever for an answer it will not get.
+ */
+async function silentProxy() {
+  const target = new URL(database.url)
+  const sockets = new Set<Socket>()
+  let silent = false
+  const server: Server = createServer((client) => {
+    const upstream = new (client.constructor as new () => Socket)()
+
+    upstream.connect(Number(target.port || 3306), target.hostname)
+    sockets.add(client).add(upstream)
+    client.on('data', (chunk) => silent || upstream.write(chunk))
+    upstream.on('data', (chunk) => silent || client.write(chunk))
+    client.on('error', () => undefined)
+    upstream.on('error', () => undefined)
+  })
+
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
+
+  const address = server.address()
+  const url = new URL(database.url)
+
+  url.host = `127.0.0.1:${typeof address === 'object' && address !== null ? address.port : 0}`
+
+  return {
+    close: () => {
+      for (const socket of sockets) {
+        socket.destroy()
+      }
+      server.close()
+    },
+    goSilent: () => {
+      silent = true
+    },
+    url: url.href,
+  }
+}
+
+describe('withLock on a connection that goes silent', () => {
+  it('returns when the connection dies during a long task, and the pool closes', async () => {
+    const proxy = await silentProxy()
+    const { close, pool } = connect(proxy.url)
+
+    try {
+      const outcome = await withLock(
+        pool,
+        `${lockNameFor(database.url, 'import')}_silent`,
+        0,
+        async () => {
+          proxy.goSilent()
+
+          return 'done'
+        },
+        { releaseTimeoutMs: 500 },
+      )
+
+      expect(outcome).toEqual({ ran: true, result: 'done' })
+      await close()
+    } finally {
+      proxy.close()
+    }
+  }, 10_000)
+})
+
+describe('withLock on a long task', () => {
+  it('keeps the lock when the server drops idle connections', async () => {
+    const pool = createPool({ uri: database.url })
+    const lockName = `${lockNameFor(database.url, 'import')}_idle`
+
+    // The pool.pool of the promise pool is the pool that makes the connections.
+    pool.pool.on('connection', (connection) => connection.query('SET SESSION wait_timeout = 2'))
+
+    try {
+      const outcome = await withLock(
+        pool,
+        lockName,
+        0,
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 3500))
+
+          const [rows] = await database.pool.query<RowDataPacket[]>('SELECT IS_FREE_LOCK(?) AS free', [lockName])
+
+          return rows[0]?.['free']
+        },
+        { keepAliveMs: 500 },
+      )
+
+      expect(outcome).toEqual({ ran: true, result: 0 })
+    } finally {
+      await pool.end()
+    }
+  }, 15_000)
 })
