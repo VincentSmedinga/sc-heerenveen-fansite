@@ -11,12 +11,16 @@ import { reply } from './test-server.ts'
 
 export type TestItem = {
   birth?: TimeStatement[]
+  /** The coordinates of a stadium (`P625`, #1298). */
+  coordinates?: { latitude: number; longitude: number }
   /** The country of the item (`P17`), as a club has it (#1264). */
   countries?: (ItemStatement | string)[]
   /** The date of death (`P570`). */
   death?: TimeStatement[]
   /** The headquarters (`P159`) of a club (#1278). */
   headquarters?: (ItemStatement | string)[]
+  /** The home grounds (`P115`) of a club, with the dates of their qualifiers (#1298). */
+  homeGrounds?: { end?: TimeValue; rank?: Rank; start?: TimeValue; value: string }[]
   /** The label in Dutch and in English; leave both out for an item with no label. */
   labels?: { en?: string; nl?: string }
   nationalities?: (ItemStatement | string)[]
@@ -33,6 +37,8 @@ type ItemStatement = { rank?: Rank; value: string }
 type Rank = 'deprecated' | 'normal' | 'preferred'
 
 type TimeStatement = { precision: number; rank?: Rank; time: string }
+
+type TimeValue = { precision: number; time: string }
 
 const wikidataHeaders = { 'Content-Type': 'application/json; charset=utf-8' }
 const pageHeaders = { 'Content-Type': 'text/html; charset=UTF-8' }
@@ -92,6 +98,50 @@ export function itemJson(id: string, item: TestItem = {}): string {
       rank,
       type: 'statement',
     }))
+  }
+  if (item.homeGrounds !== undefined) {
+    const qualifier = (time: TimeValue | undefined, property: string) =>
+      time === undefined
+        ? {}
+        : {
+            [property]: [
+              {
+                datavalue: {
+                  type: 'time',
+                  value: { calendarmodel: 'http://www.wikidata.org/entity/Q1985727', ...time },
+                },
+                property,
+                snaktype: 'value',
+              },
+            ],
+          }
+
+    claims['P115'] = item.homeGrounds.map(({ end, rank = 'normal', start, value }) => ({
+      mainsnak: {
+        datavalue: { type: 'wikibase-entityid', value: { 'entity-type': 'item', id: value } },
+        property: 'P115',
+        snaktype: 'value',
+      },
+      qualifiers: { ...qualifier(start, 'P580'), ...qualifier(end, 'P582') },
+      rank,
+      type: 'statement',
+    }))
+  }
+  if (item.coordinates !== undefined) {
+    claims['P625'] = [
+      {
+        mainsnak: {
+          datavalue: {
+            type: 'globecoordinate',
+            value: { ...item.coordinates, globe: 'http://www.wikidata.org/entity/Q2', precision: 0.0001 },
+          },
+          property: 'P625',
+          snaktype: 'value',
+        },
+        rank: 'normal',
+        type: 'statement',
+      },
+    ]
   }
   if (item.countries !== undefined) {
     claims['P17'] = items(item.countries)

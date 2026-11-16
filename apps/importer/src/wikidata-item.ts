@@ -9,6 +9,22 @@ export type ArticleInfo = {
   wikidataId: null | string
 }
 
+/** A home ground (`P115`) of a club (#1298), with the dates of its qualifiers if any. */
+export type HomeGround = { end: null | PartialDate; stadiumId: string; start: null | PartialDate }
+
+/** A date of a statement as Wikidata knows it: a day, a month or a year, never coarser. */
+export type PartialDate = { day: null | number; month: null | number; year: number }
+
+/** What the importer takes from the item of a stadium: its coordinates and where it lies. */
+export type StadiumItem = {
+  /** The coordinates (`P625`), both or none. */
+  coordinates: null | { latitude: number; longitude: number }
+  /** The Dutch label, else the English one, else null. */
+  label: null | string
+  /** The Q-number of the place it lies in (`P131`), the first in the order of Wikidata. */
+  placeId: null | string
+}
+
 /** What the importer takes from the item of a person on Wikidata. */
 export type WikidataItem = {
   birth: null | { date: string; precision: BirthDatePrecision }
@@ -88,6 +104,41 @@ export function readDutchTitle(text: string): null | string {
 }
 
 /**
+ * The home grounds of a club (`P115`, #1298), in the order of Wikidata, each with its start
+ * (`P580`) and end (`P582`) when the statement has them. Unlike the other properties every
+ * statement counts that is not deprecated, preferred or not: a club that moved has the old
+ * ground too, and Wikidata often marks only the current one as preferred. The same stadium
+ * may come twice, with other dates. A date coarser than a year, or one that is no date, is
+ * left out. Empty when the item has none or the text is no item.
+ */
+export function readHomeGrounds(text: string): HomeGround[] {
+  const entity = firstEntity(text)
+  const claims = entity !== null && isRecord(entity['claims']) ? entity['claims'] : {}
+  const list = Array.isArray(claims['P115']) ? (claims['P115'] as unknown[]) : []
+  const grounds: HomeGround[] = []
+
+  for (const claim of list) {
+    if (!isRecord(claim) || claim['rank'] === 'deprecated' || !isRecord(claim['mainsnak'])) {
+      continue
+    }
+
+    const snak = claim['mainsnak']
+    const data = snak['datavalue']
+    const id = isRecord(data) && isRecord(data['value']) ? data['value']['id'] : undefined
+
+    if (snak['snaktype'] !== 'value' || typeof id !== 'string' || !/^Q\d+$/u.test(id)) {
+      continue
+    }
+
+    const qualifiers = isRecord(claim['qualifiers']) ? claim['qualifiers'] : {}
+
+    grounds.push({ end: qualifierDate(qualifiers['P582']), stadiumId: id, start: qualifierDate(qualifiers['P580']) })
+  }
+
+  return grounds
+}
+
+/**
  * Reads the item of Wikidata (`Special:EntityData/Q….json`): the birth date (`P569`), the date
  * of death (`P570`, with the same rules), the birth
  * place (`P19`), the nationalities (`P27`) and the positions (`P413`). A statement with the
@@ -138,6 +189,39 @@ export function readPlaceIds(text: string): null | string[] {
   const claims = isRecord(entity['claims']) ? entity['claims'] : {}
 
   return [...new Set([...itemIdsOf(statementsOf(claims, 'P159')), ...itemIdsOf(statementsOf(claims, 'P131'))])]
+}
+
+/**
+ * The item of a stadium (#1298): the label, the place it lies in (`P131`) and the coordinates
+ * (`P625`), with the rules of the other properties. Null for a text that is no item.
+ */
+export function readStadium(text: string): null | StadiumItem {
+  const entity = firstEntity(text)
+
+  if (entity === null || typeof entity['id'] !== 'string' || !/^Q\d+$/u.test(entity['id'])) {
+    return null
+  }
+
+  const claims = isRecord(entity['claims']) ? entity['claims'] : {}
+  let coordinates: StadiumItem['coordinates'] = null
+
+  for (const { value } of statementsOf(claims, 'P625')) {
+    const latitude = isRecord(value) ? value['latitude'] : undefined
+    const longitude = isRecord(value) ? value['longitude'] : undefined
+
+    if (
+      typeof latitude === 'number' &&
+      typeof longitude === 'number' &&
+      Math.abs(latitude) <= 90 &&
+      Math.abs(longitude) <= 180
+    ) {
+      coordinates = { latitude, longitude }
+
+      break
+    }
+  }
+
+  return { coordinates, label: labelOf(entity), placeId: itemIdsOf(statementsOf(claims, 'P131'))[0] ?? null }
 }
 
 function dateOf(statements: Statement[]): WikidataItem['birth'] {
@@ -201,6 +285,32 @@ function labelOf(entity: Record<string, unknown>): null | string {
 
     if (isRecord(label) && typeof label['value'] === 'string' && label['value'].trim() !== '') {
       return label['value'].trim()
+    }
+  }
+
+  return null
+}
+
+/** The first date of the qualifiers of a property that is a day, a month or a year. */
+function qualifierDate(qualifiers: unknown): null | PartialDate {
+  for (const qualifier of Array.isArray(qualifiers) ? (qualifiers as unknown[]) : []) {
+    const data = isRecord(qualifier) ? qualifier['datavalue'] : undefined
+    const value = isRecord(data) ? data['value'] : undefined
+
+    if (!isRecord(value) || typeof value['time'] !== 'string' || typeof value['precision'] !== 'number') {
+      continue
+    }
+
+    const parts = /^\+(\d{4})-(\d\d)-(\d\d)T/u.exec(value['time'])
+
+    if (parts?.[1] === undefined || value['precision'] < 9) {
+      continue
+    }
+
+    return {
+      day: value['precision'] >= 11 && parts[3] !== '00' ? Number(parts[3]) : null,
+      month: value['precision'] >= 10 && parts[2] !== '00' ? Number(parts[2]) : null,
+      year: Number(parts[1]),
     }
   }
 

@@ -6,7 +6,7 @@ import { and, asc, eq, isNotNull, isNull, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 
-import { clubHomeGrounds, matches, stadiumNames, stadiums } from './schema.ts'
+import { clubHomeGrounds, clubs, matches, stadiumLimits, stadiumNames, stadiums } from './schema.ts'
 
 /** What `linkMatchesToStadiums` did: how many it linked, and how many have no stadium. */
 export type LinkResult = { linked: number; unlinked: number }
@@ -278,6 +278,31 @@ const heerenveenStadiums = [
   },
 ] as const
 
+/** A club whose home grounds the importer has not read yet, with who set the grounds it has. */
+export type ClubToReadStadiums = { homeGroundsSource: 'manual' | 'wikidata' | null; id: number; wikidataId: string }
+
+/** What `storeWikidataStadium` did with one stadium. */
+export type StadiumStored = { created: boolean; id: number; updated: boolean }
+
+/** What the importer takes from the item of a stadium on Wikidata. */
+export type WikidataStadium = {
+  /** The coordinates (`P625`), both or none. */
+  coordinates: null | { latitude: number; longitude: number }
+  label: string
+  /** The label of the place the stadium lies in (`P131`), cut to fit. */
+  place: null | string
+  wikidataId: string
+}
+
+/** The clubs with a Q-number that were not read for their stadiums yet, oldest club first. */
+export async function clubsToReadStadiums(db: Pick<Database, 'select'>): Promise<ClubToReadStadiums[]> {
+  return db
+    .select({ homeGroundsSource: clubs.homeGroundsSource, id: clubs.id, wikidataId: clubs.wikidataId })
+    .from(clubs)
+    .where(and(isNotNull(clubs.wikidataId), isNull(clubs.stadiumsReadAt)))
+    .orderBy(asc(clubs.id)) as Promise<ClubToReadStadiums[]>
+}
+
 /**
  * The step after the migrations: makes the stadiums once (`seedStadiums`) and links the matches
  * that are not linked (`linkMatchesToStadiums`). It can run again, and it does nothing in a
@@ -460,4 +485,96 @@ export async function seedStadiums(db: Database): Promise<number> {
 
     return ourStadiumIds.length + groups.length
   })
+}
+
+/** Remembers that the stadiums of a club were read, so the importer does not ask again. */
+export async function storeClubStadiumsRead(
+  db: Pick<Database, 'update'>,
+  clubId: number,
+  readAt: Date,
+  homeGroundsSource: 'wikidata' | null = null,
+): Promise<void> {
+  await db
+    .update(clubs)
+    .set({ stadiumsReadAt: readAt, ...(homeGroundsSource === null ? {} : { homeGroundsSource }) })
+    .where(eq(clubs.id, clubId))
+}
+
+/**
+ * Stores a stadium from Wikidata (#1298) and says which one it is. A stadium with this item is
+ * updated; else a stadium without an item that has this name at this club (a name of one of
+ * its names, in the grounds of the club) takes the item; else a new stadium is made, with the
+ * label as its first name. The place and the coordinates follow Wikidata, with the source
+ * `wikidata`, unless the editors set them (`manual`): then nothing of the stadium changes.
+ * The street and the postcode are never written. Wikidata with neither a place nor
+ * coordinates changes nothing either.
+ */
+export async function storeWikidataStadium(
+  db: Database,
+  clubId: number,
+  stadium: WikidataStadium,
+): Promise<StadiumStored> {
+  const [byItem] = await db.select().from(stadiums).where(eq(stadiums.wikidataId, stadium.wikidataId))
+  let found = byItem
+  let created = false
+
+  if (found === undefined) {
+    const key = nameKey(stadium.label)
+    const grounds = await db
+      .select({ id: stadiums.id, name: stadiumNames.name })
+      .from(clubHomeGrounds)
+      .innerJoin(stadiums, eq(stadiums.id, clubHomeGrounds.stadiumId))
+      .innerJoin(stadiumNames, eq(stadiumNames.stadiumId, stadiums.id))
+      .where(and(eq(clubHomeGrounds.clubId, clubId), isNull(stadiums.wikidataId)))
+    const same = [...new Set(grounds.filter((ground) => nameKey(ground.name) === key).map((ground) => ground.id))]
+
+    if (same.length === 1) {
+      const [only] = await db.select().from(stadiums).where(eq(stadiums.id, same[0]!))
+
+      found = only
+    }
+  }
+  if (found === undefined) {
+    const [{ insertId }] = await db.insert(stadiums).values({ wikidataId: stadium.wikidataId })
+
+    await db
+      .insert(stadiumNames)
+      .values({ name: stadium.label.slice(0, stadiumLimits.name), position: 0, stadiumId: insertId })
+    ;[found] = await db.select().from(stadiums).where(eq(stadiums.id, insertId))
+    created = true
+  }
+  if (found === undefined) {
+    throw new Error(`The stadium ${stadium.wikidataId} was not found after it was made`)
+  }
+
+  const hasPlace = stadium.place !== null || stadium.coordinates !== null
+  const latitude = stadium.coordinates === null ? null : stadium.coordinates.latitude.toFixed(6)
+  const longitude = stadium.coordinates === null ? null : stadium.coordinates.longitude.toFixed(6)
+  const changed =
+    found.wikidataId !== stadium.wikidataId ||
+    (hasPlace &&
+      (found.place !== stadium.place ||
+        found.latitude !== latitude ||
+        found.longitude !== longitude ||
+        found.placeSource !== 'wikidata'))
+
+  if (found.placeSource === 'manual') {
+    // The editors' place stays, but a stadium that had no item may still get its number.
+    if (found.wikidataId === null) {
+      await db.update(stadiums).set({ wikidataId: stadium.wikidataId }).where(eq(stadiums.id, found.id))
+    }
+
+    return { created, id: found.id, updated: found.wikidataId === null && !created }
+  }
+  if (changed) {
+    await db
+      .update(stadiums)
+      .set({
+        wikidataId: stadium.wikidataId,
+        ...(hasPlace ? { latitude, longitude, place: stadium.place, placeSource: 'wikidata' as const } : {}),
+      })
+      .where(eq(stadiums.id, found.id))
+  }
+
+  return { created, id: found.id, updated: changed && !created }
 }

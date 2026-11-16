@@ -1277,6 +1277,38 @@ Een club aan de lijst toevoegen:
 
 `otherClubGroups` in `relevance-terms.ts` is een andere lijst met een ander doel, het filter van de koppen, en blijft zoals hij is.
 
+### De stadions van de clubs
+
+De importer leest de thuisvelden van elke club met een Q-nummer uit Wikidata (#1298): de uitspraken `P115` met hun begin (`P580`) en einde (`P582`), en van elk stadion het label, de plaats (`P131`) en de coördinaten (`P625`).
+Hij maakt er stadions (`stadiums`, met een naam in `stadium_names`) en thuisvelden (`club_home_grounds`) van.
+Wat hij schrijft:
+
+- **Een stadion met dit Wikidata-nummer** wordt bijgewerkt.
+  Een stadion zonder nummer met dezelfde naam bij dezelfde club (zonder letters, accenten of leestekens te tellen) krijgt het nummer, in plaats van dat er een tweede stadion komt.
+  Anders ontstaat een nieuw stadion met het label als enige naam.
+- **De plaats en de coördinaten** komen uit Wikidata, met de markering `wikidata`.
+  Een stadion waarvan de redactie ze zette (`manual`) verandert niet.
+  De straat en de postcode schrijft de importer nooit.
+  Een stadion zonder plaats en zonder coördinaten in Wikidata blijft zoals het was.
+- **De thuisvelden van een club** komen op volgorde van `P580`, met als begin het seizoen waarin die datum valt, of de dag als de datum een dag is.
+  Een maand voor juli hoort bij het seizoen dat het jaar daarvoor begon; een jaar zonder maand telt als het seizoen dat in dat jaar begint.
+  Een veld zonder begin neemt het einde (`P582`) van het veld ervoor.
+  Lukt dat niet, dan schrijft de importer niets voor die club en waarschuwt hij: alleen het eerste veld mag zonder begin.
+  Een club zonder `P115` krijgt niets en een regel in het logboek telt hem als gelezen.
+- **Een club waarvan de redactie de thuisvelden zette** (`clubs.home_grounds_source` is `manual`) laat de importer staan, en hij vraagt er niets over.
+  Een club die de importer zelf las, krijgt `wikidata`.
+
+Een club wordt één keer gelezen (`clubs.stadiums_read_at`), en een verzoek dat mislukt laat hem ongelezen, zoals bij het land van een club.
+Elk item vraagt hij één keer, ook als meer clubs een stadion of een plaats delen, met de pauzes en de stops van de import.
+Een club wordt in één keer opgeslagen nadat al zijn verzoeken lukten.
+De gewone import doet het voor een club die nieuw een Q-nummer kreeg, direct na de landen van de clubs.
+Na afloop koppelt hij de wedstrijden zonder stadion die nu zeker bij een stadion passen (`linkMatchesToStadiums`).
+Het logboek heeft er één regel voor: `stadiums: N clubs read from Wikidata (...), N stadiums made and N updated, N home grounds written, N matches linked`.
+
+**Eenmalig na de uitrol op acceptatie:** `pnpm run import:stadiums` (op de host `import.mjs --stadiums`) leest elke club met een Q-nummer die nog geen `stadiums_read_at` heeft, onder de lock van de import.
+Het is veilig om twee keer te draaien: een tweede keer vindt niemand en schrijft `Stadiums: no clubs to read.`.
+Een run die stopt gaat de volgende keer verder met wie nog mist.
+
 ### Een doorverwijzing is hetzelfde artikel
 
 Op de Nederlandse Wikipedia is `AZ Alkmaar` een doorverwijzing naar `AZ (voetbalclub)`, en `SBV Excelsior` een naar `Excelsior Rotterdam`.
