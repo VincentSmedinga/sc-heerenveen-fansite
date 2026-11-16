@@ -15,6 +15,7 @@ import { lockNameFor, withLock } from '@fansite/db/lock'
 import type { Fetcher } from './fetcher.ts'
 import type { ImportOptions } from './import-feeds.ts'
 
+import { lookUpTitles } from './club-pages.ts'
 import { createFetcher } from './fetcher.ts'
 import { englishWikipediaOrigin, wikipediaOrigin } from './import-matches.ts'
 import { infoUrl, itemUrl, pauseBetweenRequests, wikidataOrigin } from './import-person-data.ts'
@@ -22,7 +23,7 @@ import { wikidataCountryCodes } from './person-countries.ts'
 import { mostFailuresInARow } from './person-pages.ts'
 import { robotsStoreFor } from './robots-store.ts'
 import { printable } from './text.ts'
-import { readArticleInfo, readCountryIds, readInstanceIds } from './wikidata-item.ts'
+import { isRedirectInfo, readArticleInfo, readCountryIds, readInstanceIds } from './wikidata-item.ts'
 
 /** The kind `association football club` on Wikidata. */
 export const footballClubItem = 'Q476028'
@@ -230,8 +231,39 @@ export async function searchClubNumbers(
         continue
       }
 
-      const answer = await ask(infoUrl(wikipedia, club.name))
+      let title = club.name
+      let answer = await ask(infoUrl(wikipedia, title))
 
+      // A redirect has no item: the title of the club may redirect to its article, as
+      // `West Ham United` does on the English Wikipedia. The redirect is followed as the book
+      // of clubs does, and the page information of the article gives the item.
+      if (answer.kind === 'text' && isRedirectInfo(answer.text)) {
+        const lookup = await lookUpTitles(fetcher, wikipedia, [title], new Map())
+
+        asked++
+
+        if (lookup.kind === 'blocked-by-robots' || lookup.kind === 'wait') {
+          report.warnings.push(
+            `Clubs: ${lookup.kind === 'wait' ? 'the server asks us to wait' : 'robots.txt does not allow'} ${printable(lookup.url)}, so no more clubs are searched this run`,
+          )
+          stopped = true
+          complete = false
+
+          break
+        }
+        if (lookup.kind === 'error' && lookup.missing === undefined) {
+          failures.push(lookup.message)
+          failuresInARow++
+          stopped = failuresInARow >= mostFailuresInARow
+          complete = false
+
+          break
+        }
+
+        failuresInARow = 0
+        title = lookup.kind === 'found' ? (lookup.redirects.get(title) ?? title) : title
+        answer = title === club.name ? { kind: 'missing' } : await ask(infoUrl(wikipedia, title))
+      }
       if (answer.kind === 'failed' || answer.kind === 'stopped') {
         complete = false
 

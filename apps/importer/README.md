@@ -1297,7 +1297,7 @@ Dan krijgt de club het nummer met de herkomst `name` (`clubs.wikidata_source`, "
 Bij geen of meer dan één kandidaat, of een nummer van een andere club, schrijft de importer niets en zet hij een regel in het logboek met het aantal kandidaten.
 Een club zonder land, met een nummer, of waarvan de redactie het nummer leegmaakte, zoekt hij niet; de redactie vult het nummer in op de pagina van de club onder Stadions in Beheer.
 Een club wordt één keer gezocht (`clubs.wikidata_searched_at`), en een verzoek dat mislukt laat hem ongezocht, met de pauzes en de stops van de import.
-Een artikel dat een doorverwijzing is, heeft geen eigen item en telt niet.
+Een titel die een doorverwijzing is, zoals `West Ham United` op de Engelse Wikipedia, heeft geen eigen item: de importer volgt hem naar het artikel (`?action=raw`, zoals het boek van de clubs doet) en leest de pagina-informatie van dat artikel.
 Het logboek heeft één regel: `clubs (number by name): N clubs searched on Wikipedia, N got a number, N did not`.
 
 `pnpm run import:club-numbers` (op de host `import.mjs --club-numbers`) doet alleen dit, onder de lock van de import.

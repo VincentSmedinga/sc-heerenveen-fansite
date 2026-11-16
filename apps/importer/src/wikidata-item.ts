@@ -43,6 +43,11 @@ export type WikidataItem = {
 
 type Statement = { rank: string; value: unknown }
 
+/** Whether the page information is of a redirect (#1341): a redirect has no item of its own. */
+export function isRedirectInfo(html: string): boolean {
+  return /"wgIsRedirect":true/u.test(html)
+}
+
 /**
  * The line of a person from the positions of Wikidata: the first position in the order of
  * Wikidata that the list `wikidataPositionLines` knows. Null when it knows none.

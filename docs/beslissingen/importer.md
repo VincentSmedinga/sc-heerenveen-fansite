@@ -4311,6 +4311,7 @@
 - **Besluit:** een club zonder Wikidata-nummer wordt in elke import één keer gezocht, direct na de landen van de clubs en vóór de stadions (#1341).
   De importer vraagt de Nederlandse en de Engelse Wikipedia om de pagina-informatie van een artikel met precies de naam van de club, neemt het Wikidata-nummer van dat artikel, en leest het item via `Special:EntityData`.
   Hij schrijft het nummer alleen bij precies één item dat een voetbalclub is (`P31` is `Q476028`), hetzelfde land heeft als de club bij ons (`P17`; het Verenigd Koninkrijk past bij elk van de vier landen) en nog van geen andere club is.
+  Een titel die een doorverwijzing is, zoals `West Ham United` op de Engelse Wikipedia, wordt gevolgd naar zijn artikel, zoals het boek van de clubs dat doet.
   Een vrouwenelftal of tweede elftal heeft een ander soort item en valt af; twee artikelen met hetzelfde item tellen als één.
   Het nummer krijgt de herkomst `name` in `clubs.wikidata_source`, naast `wikipedia` (uit het artikel van de club) en `manual` (van de redactie).
   Bij geen of meer kandidaten, een ander land of een nummer van een andere club schrijft de importer niets en zet hij een regel in het logboek met het aantal kandidaten.
@@ -4325,6 +4326,6 @@
   De fetcher houdt zich aan `robots.txt` (zie _Een herkenbare fetcher die zich aan robots.txt houdt_), dus een zoekopdracht daar kan niet.
   De pagina-informatie van een artikel mag wel, en de importer gebruikt die al voor de clubs met een artikel (#1264).
   Een verkeerd nummer geeft een club een verkeerd stadion, en dat valt niet op, dus de regel is streng: een artikel met precies de naam, de soort voetbalclub en hetzelfde land als de redactie invulde.
-  De telling van de Specifier op 16 november 2026 (60 clubs zonder nummer, 29 met één kandidaat) ging met een zoekopdracht op Wikidata zelf, die de importer niet mag doen; met artikelen op naam krijgen minder clubs een nummer.
+  De telling van de Specifier op 16 november 2026 (60 clubs zonder nummer, 29 met één kandidaat) ging met een zoekopdracht op Wikidata zelf, die de importer niet mag doen; met artikelen op naam krijgen minder clubs een nummer: een run op een kopie van de 60 clubs zonder nummer van acceptatie gaf er 40 een, na het volgen van doorverwijzingen (zonder dat gaven 22 clubs een nummer).
   Zo ziet de redactie ook welke nummers geen mens heeft nagekeken, en verbetert ze een vergissing op de plek waar ze een nummer invult.
 - **Alternatieven:** de zoekopdracht van Wikidata (`api.php`) toch doen met onze User-Agent en een pauze (dat gaat tegen de `robots.txt` in, en dan hadden we een uitzondering op onze regel nodig); geen automatisch zoeken, alleen een link van de pagina van de club naar de zoekfunctie van Wikidata (de redactie zoekt 60 clubs met de hand); een nummer voorstellen en door de redactie laten bevestigen (meer werk voor de redactie voor 29 duidelijke gevallen); een eigen opdracht die iemand één keer draait (een club die later bijkomt, krijgt dan geen nummer zonder dat iemand eraan denkt).

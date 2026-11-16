@@ -19,7 +19,7 @@ import {
 import { readClubStadiums } from './import-club-stadiums.ts'
 import { runImport } from './import-feeds.ts'
 import { fetcherFor, reply, startServer } from './test-server.ts'
-import { infoRoute, itemRoute, labelRoute } from './test-wikidata.ts'
+import { infoRoute, itemRoute, labelRoute, redirectRoutes } from './test-wikidata.ts'
 
 const now = new Date('2026-11-17T12:00:00Z')
 const codes = new Map([
@@ -141,6 +141,25 @@ describe('searchClubNumbers', () => {
 
     expect(report.found).toBe(1)
     expect(await numbers()).toMatchObject([{ country: 'GB-ENG', wikidata_id: 'Q11', wikidata_source: 'name' }])
+  })
+
+  it('follows a title that redirects to the article of the club, and takes the item of the article', async () => {
+    await addClub('west-ham', 'West Ham United', 'GB-ENG')
+
+    const served = await serve({
+      en: redirectRoutes('West Ham United', 'West Ham United F.C.', 7, 'Q11'),
+      nl: infoRoute('West Ham United', 3, 'Q99'),
+      wikidata: { ...itemRoute('Q11', club('Q145')), ...itemRoute('Q99', { countries: [], instanceOf: ['Q4167410'] }) },
+    })
+
+    expect(await search(served)).toMatchObject({ found: 1, searched: 1 })
+    expect(await numbers()).toMatchObject([{ wikidata_id: 'Q11', wikidata_source: 'name' }])
+    expect(asked(served.en)).toEqual([
+      '/wiki/West_Ham_United?action=info',
+      '/wiki/West_Ham_United?action=raw',
+      '/wiki/West_Ham_United_F.C.?action=raw',
+      '/wiki/West_Ham_United_F.C.?action=info',
+    ])
   })
 
   it('leaves a women’s team next to the club out: it is another kind of item', async () => {
