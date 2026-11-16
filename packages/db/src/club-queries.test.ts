@@ -11,8 +11,9 @@ import {
   listClubLastWins,
   listClubMatches,
   listClubRecords,
+  listSquadPersonIds,
 } from './queries.ts'
-import { clubNames, clubs, matches, matchGoals, stadiums } from './schema.ts'
+import { clubNames, clubs, matches, matchGoals, persons, players, stadiums } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
 let database: TestDatabase
@@ -231,6 +232,30 @@ describe('findStadiumPlace', () => {
     expect(await findStadiumPlace(database.db, 4_000_000)).toBeUndefined()
 
     await database.pool.query('DELETE FROM stadiums WHERE id IN (?, ?)', [known!.id, bare!.id])
+  })
+})
+
+describe('listSquadPersonIds', () => {
+  it('gives the persons of the players in the squad of the season, and nobody who left or has no person', async () => {
+    const [person, gone] = await database.db
+      .insert(persons)
+      .values([
+        { familyName: 'Squadman', givenName: 'Test', name: 'Test Squadman', slug: 'test-squadman-1319' },
+        { familyName: 'Gone', givenName: 'Test', name: 'Test Gone', slug: 'test-gone-1319' },
+      ])
+      .$returningId()
+
+    await database.db.insert(players).values([
+      { name: 'Test Squadman', personId: person!.id, searchTerm: 'Test Squadman', season: '2026/27' },
+      { inSquad: false, name: 'Test Gone', personId: gone!.id, searchTerm: 'Test Gone', season: '2026/27' },
+      { name: 'Test Nobody', searchTerm: 'Test Nobody', season: '2026/27' },
+      { name: 'Test Old', personId: gone!.id, searchTerm: 'Test Old', season: '2025/26' },
+    ])
+
+    expect(await listSquadPersonIds(database.db, '2026/27')).toEqual([person!.id])
+
+    await database.pool.query("DELETE FROM players WHERE search_term LIKE 'Test %'")
+    await database.pool.query('DELETE FROM persons WHERE id IN (?, ?)', [person!.id, gone!.id])
   })
 })
 

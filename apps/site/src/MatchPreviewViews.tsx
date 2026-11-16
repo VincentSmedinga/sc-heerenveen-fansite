@@ -14,6 +14,7 @@ import {
   type MatchHeaderFact,
   NewsItem,
   OutcomeBar,
+  PlayerName,
   Text,
 } from '@fansite/design-system'
 
@@ -25,12 +26,13 @@ import { markOf, MatchLine } from './MatchViews'
 import { dateTimeOf, formatNewsTime } from './news'
 import { opponentsPath } from './opponents'
 import { type HeadToHead } from './preview-head-to-head'
+import { type PreviewScorer, type PreviewScorers } from './preview-scorers'
 import { type ClubForm, standingRoundOf, standingSentenceOf, type StandingSliceItem } from './preview-standing'
 import { meetingScoreOf } from './upcoming-match'
 
 // The parts of the page of the Voorbeschouwing, a match that has not begun: the header and the
-// cards Stand, Vorm and Nieuws. They take plain data, so the page and its tests share them. The
-// cards of the next issue of the series (#1319) is added in the page, in a cell of its own.
+// cards Stand, Vorm, Onderling, Onze schutters and Nieuws. They take plain data, so the page
+// and its tests share them.
 
 /** The id of the card Nieuws. */
 const newsId = 'nieuws'
@@ -46,6 +48,9 @@ const ourClub = 'sc Heerenveen'
 
 /** The id of the card Onderling. */
 const headToHeadId = 'onderling'
+
+/** The id of the card Onze schutters. */
+const scorersId = 'onze-schutters'
 
 /** The words for how many matches the list "De laatste ... daar" shows, from one to five. */
 const countWords = ['', '', 'twee', 'drie', 'vier', 'vijf']
@@ -251,6 +256,50 @@ export function PreviewNewsCard({
 }
 
 /**
+ * The card "Onze schutters in <plaats>": who of ours scored on the side where the match to come
+ * is played. First the scorers who are in the squad now, in a soft box of their own, then the
+ * five who scored most. `place` is the place of the ground of the opponent, and without it the
+ * card says "bij <club>", as the card Onderling does. Without a goal of ours on that side there
+ * is no card.
+ */
+export function PreviewScorersCard({
+  home,
+  name,
+  place,
+  scorers,
+}: {
+  home: boolean
+  name: string
+  place: string | undefined
+  scorers: PreviewScorers | undefined
+}): null | ReactNode {
+  if (scorers === undefined) {
+    return null
+  }
+
+  const where = home ? 'in Heerenveen' : place === undefined ? `bij ${name}` : `in ${place}`
+  const squadId = `${scorersId}-selectie`
+
+  return (
+    <Card aria-labelledby={scorersId}>
+      <Heading id={scorersId} level={2}>
+        {`Onze schutters ${where}`}
+      </Heading>
+      {scorers.squad.length > 0 && (
+        <Card aria-labelledby={squadId} surface="soft">
+          <Heading id={squadId} level={3}>
+            Uit de selectie van nu
+          </Heading>
+          <ScorersTable caption={`Spelers uit de selectie van nu die scoorden ${where}`} scorers={scorers.squad} />
+        </Card>
+      )}
+      <Heading level={3}>Het vaakst</Heading>
+      <ScorersTable caption={`De spelers die ${where} het vaakst scoorden`} scorers={scorers.mostOften} />
+    </Card>
+  )
+}
+
+/**
  * The card "Stand": the stretch of the league table from one club to the other with both
  * clubs marked, the sentence about the gap between them, and the link to the whole table.
  * Without a stretch (a club that is not in the table) there is no card and no sentence.
@@ -312,5 +361,21 @@ export function PreviewStandingCard({
         </Link>
       </Text>
     </Card>
+  )
+}
+
+/** The table of scorers: the player, the year of the last goal and the goals. */
+function ScorersTable({ caption, scorers }: { caption: string; scorers: readonly PreviewScorer[] }) {
+  return (
+    <DataTable
+      caption={caption}
+      columns={['Speler', 'Laatst', 'Goals']}
+      rows={scorers.map((scorer): DataTableRow => ({
+        // The year is text, as a number would get a point between the thousands.
+        cells: [String(scorer.last), scorer.goals],
+        display: <PlayerName givenName={scorer.givenName} href={scorer.href} surname={scorer.surname} />,
+        header: scorer.name,
+      }))}
+    />
   )
 }

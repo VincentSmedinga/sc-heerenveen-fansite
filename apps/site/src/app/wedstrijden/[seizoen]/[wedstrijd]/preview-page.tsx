@@ -15,13 +15,15 @@ import {
   PreviewHeader,
   PreviewHeadToHeadCard,
   PreviewNewsCard,
+  PreviewScorersCard,
   PreviewStandingCard,
 } from '#src/MatchPreviewViews'
 import { SourceCredit } from '#src/MatchViews'
 import { seasonPageMetadata } from '#src/metadata'
-import { getClubNews, getClubPage, getStadiumPlace } from '#src/opponents'
+import { getClubNews, getClubPage, getSquadPersonIds, getStadiumPlace } from '#src/opponents'
 import { pageAreas } from '#src/page-areas'
 import { headToHeadOf } from '#src/preview-head-to-head'
+import { scorersOf } from '#src/preview-scorers'
 import { formsOf, standingSentenceOf, standingSliceOf } from '#src/preview-standing'
 import { getPreviewMatch, reportAddress } from '#src/report-data'
 import { matchesPath } from '#src/season-page'
@@ -32,8 +34,7 @@ import { withBranch } from '#src/title'
 // The page of a match that is still `scheduled`, has no report and has not begun: the
 // Voorbeschouwing. It has the address of the match, so from the kick-off it is the page of the
 // live match and later the report (see `ReportPage`). Each part that comes after the header is
-// a card of its own in a cell of the page; the part of the next issue of the series (#1319)
-// adds one cell.
+// a card of its own in a cell of the page.
 
 /** How many headlines the card Nieuws shows at most. */
 const newsLimit = 3
@@ -70,9 +71,11 @@ const loadPreview = cache(async (seizoen: string, wedstrijd: string) => {
     // The head-to-head counts the matches on the side of this match only (#1315). "Daar" is the
     // place of the ground of the opponent, which only an away match needs.
     const headToHead = club === undefined ? undefined : headToHeadOf(club.matches, found.match.home)
+    const scorers =
+      club === undefined ? undefined : scorersOf(club.matches, found.match.home, new Set(await getSquadPersonIds()))
     const { stadiumId } = found.match
     const place =
-      headToHead === undefined || found.match.home || stadiumId === null
+      (headToHead === undefined && scorers === undefined) || found.match.home || stadiumId === null
         ? undefined
         : await getStadiumPlace(String(stadiumId))
 
@@ -84,6 +87,7 @@ const loadPreview = cache(async (seizoen: string, wedstrijd: string) => {
       headToHead,
       kind: 'found',
       place,
+      scorers,
       season,
       slice,
     } as const
@@ -129,10 +133,10 @@ const clubsOf = (match: ScheduledMatch['match']) =>
 
 /**
  * The page of the Voorbeschouwing: the header, the table, the form, the matches against the
- * opponent on this side, the news about the opponent and the credit. On a phone the cards stand
- * under each other, and on a wide screen the cards of the main column (Onderling and Nieuws)
- * stand beside those of the narrow column (Stand, Vorm and Bron). Any other address is
- * "niet gevonden".
+ * opponent on this side, our scorers there, the news about the opponent and the credit. On a
+ * phone the cards stand under each other, and on a wide screen the cards of the main column
+ * (Onderling and Nieuws) stand beside those of the narrow column (Stand, Vorm, Onze schutters
+ * and Bron). Any other address is "niet gevonden".
  */
 export async function PreviewPage({ season: seizoen, slug }: { season: string; slug: string }) {
   const loaded = await loadPreview(seizoen, slug)
@@ -145,7 +149,7 @@ export async function PreviewPage({ season: seizoen, slug }: { season: string; s
     return <ServerError retryHref={`${matchesPath}/${seizoen}/${slug}`} />
   }
 
-  const { data, forms, found, headlines, headToHead, place, season, slice } = loaded
+  const { data, forms, found, headlines, headToHead, place, scorers, season, slice } = loaded
   const { match } = found
   const now = new Date()
   const [first, second] = clubsOf(match)
@@ -153,15 +157,27 @@ export async function PreviewPage({ season: seizoen, slug }: { season: string; s
   const standing = slice !== undefined && standingSentenceOf(data.standings, match.opponent) !== undefined
   const form = forms.length > 0
   const together = headToHead !== undefined
-  // On a phone the cards stand in this order: Stand, Vorm, Onderling, Nieuws, Bron. On a wide
+  const shooters = scorers !== undefined
+  // On a phone the cards stand in this order: Stand, Vorm, Onderling, Onze schutters,
+  // Nieuws, Bron. On a wide
   // screen Onderling and Nieuws have the wide column and the others the narrow one.
-  const before = [...(standing ? ['standing'] : []), ...(form ? ['form'] : [])]
+  const before = [...(standing ? ['standing'] : []), ...(form ? ['form'] : []), ...(shooters ? ['scorers'] : [])]
   const main = [...(together ? ['headToHead'] : []), ...(news ? ['news'] : [])]
+  const areas =
+    main.length > 0 ? pageAreas({ after: ['source'], before, main }) : pageAreas({ before, main: ['source'] })
+  // The scorers stand in the narrow column on a wide screen, but under Onderling on a phone.
+  const phone = [
+    'head',
+    ...(standing ? ['standing'] : []),
+    ...(form ? ['form'] : []),
+    ...(together ? ['headToHead'] : []),
+    ...(shooters ? ['scorers'] : []),
+    ...(news ? ['news'] : []),
+    'source',
+  ]
 
   return (
-    <Page.Main
-      areas={main.length > 0 ? pageAreas({ after: ['source'], before, main }) : pageAreas({ before, main: ['source'] })}
-    >
+    <Page.Main areas={main.length > 0 ? { ...areas, narrow: phone } : areas}>
       <Page.Cell area="head">
         <Text>
           <Link href={seasonAddress(matchesPath, season, seasonOf(now))} icon="arrow-left">
@@ -195,6 +211,11 @@ export async function PreviewPage({ season: seizoen, slug }: { season: string; s
             place={place}
             slug={found.clubSlug}
           />
+        </Page.Cell>
+      )}
+      {shooters && (
+        <Page.Cell area="scorers">
+          <PreviewScorersCard home={match.home} name={match.opponent} place={place} scorers={scorers} />
         </Page.Cell>
       )}
       {news && (

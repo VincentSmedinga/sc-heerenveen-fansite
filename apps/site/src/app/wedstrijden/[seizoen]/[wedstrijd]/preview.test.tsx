@@ -3,7 +3,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getMatchNeighbours } from '#src/match-neighbours'
 import { getLeagueResults, getMatchData } from '#src/matches'
-import { type ClubHeadline, type ClubPage, getClubNews, getClubPage, getStadiumPlace } from '#src/opponents'
+import {
+  type ClubHeadline,
+  type ClubPage,
+  getClubNews,
+  getClubPage,
+  getSquadPersonIds,
+  getStadiumPlace,
+} from '#src/opponents'
 import { getPreviewMatch, getPublicReport } from '#src/report-data'
 import { matchData } from '#src/test-matches'
 import { reportedMatch } from '#src/test-reports'
@@ -22,6 +29,7 @@ vi.mock('#src/opponents', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getClubNews: vi.fn(),
   getClubPage: vi.fn(),
+  getSquadPersonIds: vi.fn(),
   getStadiumPlace: vi.fn(),
 }))
 vi.mock('#src/report-data', async (importOriginal) => ({
@@ -119,6 +127,8 @@ beforeEach(() => {
   )
   vi.mocked(getClubPage).mockReset()
   vi.mocked(getClubPage).mockResolvedValue({ matches: [] } as unknown as ClubPage)
+  vi.mocked(getSquadPersonIds).mockReset()
+  vi.mocked(getSquadPersonIds).mockResolvedValue([])
   vi.mocked(getStadiumPlace).mockReset()
   vi.mocked(getStadiumPlace).mockResolvedValue('Testdorp')
   vi.mocked(getClubNews).mockReset()
@@ -299,6 +309,80 @@ describe('the Voorbeschouwing of a match that has not begun', () => {
     } as unknown as ClubPage)
 
     expect(plain(await render())).not.toContain('Onderling')
+  })
+
+  it('shows the card Onze schutters with the squad apart, between Onderling and Nieuws on a phone', async () => {
+    const goal = (player: string, personId: null | number, more: Record<string, unknown> = {}) => ({
+      minute: 10,
+      ours: true,
+      ownGoal: false,
+      penalty: false,
+      personFamilyName: personId === null ? null : player.split(' ')[1],
+      personFamilyNamePrefix: null,
+      personGivenName: personId === null ? null : player.split(' ')[0],
+      personId,
+      personSlug: personId === null ? null : player.toLowerCase().replace(' ', '-'),
+      player,
+      playerId: null,
+      playerPage: null,
+      stoppageMinutes: null,
+      ...more,
+    })
+
+    vi.mocked(getSquadPersonIds).mockResolvedValue([5])
+    vi.mocked(getClubPage).mockResolvedValue({
+      matches: [
+        playedAway(3, 1, '2026-02-01', [
+          goal('Ada Aalders', 5),
+          goal('Ada Aalders', 5),
+          goal('Piet Proefman', null),
+          goal('Eigen Doelpunt', 6, { ownGoal: true }),
+        ]),
+        playedAway(1, 0, '2025-02-01', [goal('Bo Bakker', 7)]),
+      ],
+    } as unknown as ClubPage)
+
+    const html = await render()
+    const text = plain(html)
+
+    expect(text).toContain('Onze schutters in Testdorp')
+    expect(text).toContain('Uit de selectie van nu')
+    expect(text).toContain('Het vaakst')
+    const card = text.slice(text.indexOf('Onze schutters in'), text.indexOf('Nieuws over'))
+
+    expect(card).toContain('Ada Aalders 2026 2')
+    expect(card).toContain('Piet Proefman 2026 1')
+    expect(card).not.toContain('Eigen Doelpunt')
+    expect(html).toContain('href="/spelers/ada-aalders"')
+    expect(html).not.toContain('href="/spelers/piet-proefman"')
+    expect(text.indexOf('Onderling in')).toBeLessThan(text.indexOf('Onze schutters in'))
+    expect(text.indexOf('Onze schutters in')).toBeLessThan(text.indexOf('Nieuws over'))
+    // Bo Bakker is not in the squad, so the box holds Ada alone.
+    expect(text.slice(text.indexOf('Uit de selectie van nu'), text.indexOf('Het vaakst'))).not.toContain('Bo Bakker')
+  })
+
+  it('leaves out the box of the squad when no scorer is in it, and the card when no goal of ours was scored', async () => {
+    vi.mocked(getClubPage).mockResolvedValue({
+      matches: [
+        playedAway(0, 2, '2025-02-01', [{ minute: 5, ours: false, ownGoal: false, penalty: false, player: 'Tegen' }]),
+      ],
+    } as unknown as ClubPage)
+
+    expect(plain(await render())).not.toContain('Onze schutters')
+
+    vi.mocked(getClubPage).mockResolvedValue({
+      matches: [
+        playedAway(1, 0, '2025-02-01', [
+          { minute: 5, ours: true, ownGoal: false, penalty: false, personId: null, player: 'Piet Proefman' },
+        ]),
+      ],
+    } as unknown as ClubPage)
+
+    const text = plain(await render())
+
+    expect(text).toContain('Onze schutters in Testdorp')
+    expect(text).not.toContain('Uit de selectie van nu')
+    expect(text).toContain('Het vaakst')
   })
 
   it('leaves out the card Nieuws without a headline, with no sentence about it', async () => {

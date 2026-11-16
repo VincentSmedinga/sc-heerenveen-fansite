@@ -10,6 +10,7 @@ import {
   listClubMatches,
   listClubNews,
   listClubRecords,
+  listSquadPersonIds,
   listStandingsPlaces,
   type PublicClubLastWin,
   type PublicClubMatch,
@@ -789,3 +790,8 @@ const sourcePages = cacheFor(period, () => listAllWikipediaPages(getDatabase().d
 export function getSourcePages(): Promise<PublicSeasonWikipediaPage[]> {
   return sourcePages()
 }
+
+/** The ids of the persons in the squad of this season, for the scorers of the preview. */
+export const getSquadPersonIds = cacheFor(5 * 60 * 1000, async () =>
+  listSquadPersonIds(getDatabase().db, seasonOf(new Date())),
+)
