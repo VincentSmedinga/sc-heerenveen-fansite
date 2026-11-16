@@ -1104,7 +1104,7 @@ await withEmptyDatabase((database) =>
     // has, with no current sub-page and Cijfers of its season (#1320).
     assert.match(
       previewHtml,
-      /<a aria-current="true" class="hf-navigation-link" href="\/wedstrijden">Wedstrijden<\/a><div class="hf-navigation-bar">.*?<a class="hf-navigation-sublink" href="\/wedstrijden\/cijfers\/\d{4}-\d{2}">Cijfers<\/a>.*?<a class="hf-navigation-sublink" href="\/tegenstanders">Tegenstanders<\/a>/s,
+      /<a aria-current="page" class="hf-navigation-link" href="\/wedstrijden">Wedstrijden<\/a><div class="hf-navigation-bar">.*?<a class="hf-navigation-sublink" href="\/wedstrijden\/cijfers\/\d{4}-\d{2}">Cijfers<\/a>.*?<a class="hf-navigation-sublink" href="\/tegenstanders">Tegenstanders<\/a>/s,
     )
     assert.doesNotMatch(previewHtml, /<a aria-current="page" class="hf-navigation-sublink"/)
     assert.doesNotMatch(previewHtml, /Eindstand|Tussenstand/)
