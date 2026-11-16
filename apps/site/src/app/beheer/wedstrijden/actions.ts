@@ -322,7 +322,10 @@ async function submitForm(
   }
 
   const read = readValues(formData)
-  const sent = part === undefined ? read : mergePart(part, read, valuesOf(found.match, found.goals))
+  const sent =
+    part === undefined
+      ? read
+      : mergePart(part, read, valuesOf(found.match, found.goals, found.edit?.factsEdited === true))
   // The goals of a match with a report are the report's: the form shows them, and sends none.
   const values = found.hasReport ? { ...sent, doelpunten: [] } : sent
   const button = readButton(formData)

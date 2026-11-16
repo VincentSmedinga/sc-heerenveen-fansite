@@ -328,14 +328,14 @@ export async function saveEntry(
       .from(matchGoals)
       .where(eq(matchGoals.matchId, id))
       .orderBy(asc(matchGoals.id))
-    const parts = changedParts(match, goals, entry)
+    const [edit] = await transaction.select().from(matchEdits).where(eq(matchEdits.matchId, id)).for('update')
+    const parts = changedParts(match, goals, entry, edit?.factsEdited === true)
 
     if (parts.length === 0) {
       return { status: 'unchanged' } as const
     }
 
     const { facts, kickoff, result } = entry
-    const [edit] = await transaction.select().from(matchEdits).where(eq(matchEdits.matchId, id)).for('update')
 
     if (parts.includes('kickoff') || parts.includes('result') || parts.includes('facts')) {
       await transaction
@@ -562,7 +562,7 @@ export async function waitingHeldChanges(db: Pick<Database, 'select'>, matchId: 
 const minuteOf = (moment: Date | null) => (moment === null ? null : Math.floor(moment.getTime() / 60_000))
 
 /** The parts of the entry that differ from what is stored. */
-function changedParts(match: Match, goals: MatchGoal[], entry: MatchEntry): MatchPart[] {
+function changedParts(match: Match, goals: MatchGoal[], entry: MatchEntry, factsEdited: boolean): MatchPart[] {
   const parts: MatchPart[] = []
   const { kickoff, result } = entry
 
@@ -593,10 +593,7 @@ function changedParts(match: Match, goals: MatchGoal[], entry: MatchEntry): Matc
     match.attendance !== entry.facts.attendance ||
     match.referee !== entry.facts.referee ||
     match.stadium !== entry.facts.stadium ||
-    // No choice (`null`) follows the text, so it changes nothing by itself.
-    (entry.facts.stadiumId !== undefined &&
-      entry.facts.stadiumId !== null &&
-      entry.facts.stadiumId !== match.stadiumId) ||
+    stadiumChanged(match, entry, factsEdited) ||
     match.note !== entry.facts.note
   ) {
     parts.push('facts')
@@ -688,6 +685,17 @@ function keepStoredLinks(stored: MatchGoal[], entry: EntryGoal[]): EntryGoal[] {
 /** Whether the goals of the entry are the stored goals, in the same order. */
 function sameGoals(stored: MatchGoal[], entry: EntryGoal[]) {
   return stored.length === entry.length && stored.every((goal, index) => isSameGoal(goal, entry[index]!))
+}
+
+/**
+ * Whether the entry changes the stadium. No choice follows the text, so it changes nothing
+ * by itself, unless the editors had entered the facts with a stadium: then clearing it is a
+ * change.
+ */
+function stadiumChanged(match: Match, entry: MatchEntry, factsEdited: boolean): boolean {
+  const chosen = entry.facts.stadiumId ?? null
+
+  return chosen === null ? factsEdited && match.stadiumId !== null : chosen !== match.stadiumId
 }
 
 /** The name of the stadium linked to the match before and after the entry, for the log. */

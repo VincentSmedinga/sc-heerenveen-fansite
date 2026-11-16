@@ -442,7 +442,7 @@ export function MatchFields({ part }: { part?: FormPart | undefined }) {
           <Field
             error={errors['stadion-id']}
             hideOptional
-            hint="Dit stadion bepaalt de naam op de site, zoals hij op de dag van de wedstrijd was. Laat het leeg om hem uit de tekst te halen."
+            hint="Dit stadion bepaalt de naam op de site, zoals hij op de dag van de wedstrijd was. Een gekozen stadion blijft staan als je de tekst verandert. Kies Uit de tekst om hem weer uit de tekst te halen."
             id="stadion-id"
             label="Stadion uit de lijst"
             required={false}

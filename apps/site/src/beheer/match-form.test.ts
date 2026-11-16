@@ -73,8 +73,8 @@ describe('the facts', () => {
     }
   })
 
-  it('puts the stadium of the match in the form', () => {
-    const values = valuesOf({ ...({} as Parameters<typeof valuesOf>[0]), kickoffAt: null, stadiumId: 7 }, [])
+  it('puts the stadium the editors chose in the form', () => {
+    const values = valuesOf({ ...({} as Parameters<typeof valuesOf>[0]), kickoffAt: null, stadiumId: 7 }, [], true)
 
     expect(values.velden['stadion-id']).toBe('7')
   })

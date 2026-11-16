@@ -245,7 +245,11 @@ export default async function MatchPage({ params, searchParams }: Props) {
         statuses: statusChoices,
         timeOptional: match.dataSource === 'oude-fansite',
       }}
-      initial={hasReport ? { ...valuesOf(match, []), doelpunten: [] } : valuesOf(match, goals)}
+      initial={
+        hasReport
+          ? { ...valuesOf(match, [], edit?.factsEdited === true), doelpunten: [] }
+          : valuesOf(match, goals, edit?.factsEdited === true)
+      }
       key={`${match.id}-${edit?.editedAt.getTime() ?? 0}-${gedaan ?? ''}`}
     >
       <Page.Main areas={toolbarAreas} className={compact}>

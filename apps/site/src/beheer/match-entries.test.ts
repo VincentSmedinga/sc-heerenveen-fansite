@@ -1,3 +1,4 @@
+import type { Match } from '@fansite/db/schema'
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
@@ -34,6 +35,7 @@ import {
   saveEntry,
   undoEntry,
 } from './match-entries'
+import { valuesOf } from './match-form'
 
 let database: TestDatabase
 let userId: number
@@ -620,6 +622,26 @@ describe('the stadium an editor chooses', () => {
     expect((await stored(id))?.stadiumId).toBe(chosen)
     expect(await undoEntry(database.db, userId, id, 'Vergissing', t1)).toBe('done')
     expect(await stored(id)).toMatchObject({ stadium: null, stadiumId: null })
+  })
+
+  it('counts clearing a chosen stadium as a change, and puts the link back from the text', async () => {
+    const chosen = await makeStadium('De Kuip')
+    const id = await addMatch({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+
+    await saveEntry(database.db, userId, id, entry({ facts: { ...facts, stadiumId: chosen } }), '', t0)
+
+    expect(await saveEntry(database.db, userId, id, entry({ facts: { ...facts, stadiumId: null } }), '', t1)).toEqual({
+      parts: ['facts'],
+      status: 'saved',
+    })
+    expect((await stored(id))?.stadiumId).toBeNull()
+  })
+
+  it('shows a link the import made as no choice, and a chosen stadium as the choice', () => {
+    const match = { ...({} as Match), kickoffAt: null, stadiumId: 7 }
+
+    expect(valuesOf(match, []).velden['stadion-id']).toBe('')
+    expect(valuesOf(match, [], true).velden['stadion-id']).toBe('7')
   })
 
   it('is offered to the form with the name and the place of each stadium', async () => {

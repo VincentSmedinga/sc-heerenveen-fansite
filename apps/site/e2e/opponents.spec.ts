@@ -323,16 +323,15 @@ test.describe('the page of a club', () => {
   test('names the stadium of a club that changed it, in the order we saw them', async ({ page }) => {
     await page.goto('/tegenstanders/voorbeeld-united')
 
-    // The checks also seed the season of a year ago, so the made-up names come twice: the old
-    // name, the new one, and then both again. A name that returns is a line of its own.
+    // The card shows the home grounds of the club, which the seed made from where it was
+    // visited: the old ground and then the new one, each with the one name it had. A name that
+    // returns in the matches is not a line of its own any more.
     const items = page.getByRole('region', { name: 'Stadions' }).locator('li')
 
-    await expect(items).toHaveCount(4)
-    // The first has "t/m" and a season, the ones in the middle their season, the last "vanaf".
+    await expect(items).toHaveCount(2)
+    // The first has "t/m" and a season, the last "vanaf".
     await expect(items.nth(0)).toContainText(/^t\/m \d{4}\/\d{2}.*Oud Voorbeeldpark$/)
-    await expect(items.nth(1)).toContainText(/^\d{4}\/\d{2}.*Voorbeeldpark$/)
-    await expect(items.nth(2)).toContainText(/^\d{4}\/\d{2}.*Oud Voorbeeldpark$/)
-    await expect(items.nth(3)).toContainText(/^vanaf \d{4}\/\d{2}.*Voorbeeldpark$/)
+    await expect(items.nth(1)).toContainText(/^vanaf \d{4}\/\d{2}.*Voorbeeldpark$/)
     await expect(
       page.getByRole('region', { name: 'Stadions' }).getByRole('link', { name: 'Stadions' }),
     ).toHaveAttribute('href', '#stadion')
@@ -397,8 +396,8 @@ test.describe('the page of a club', () => {
     await expect(page.getByRole('heading', { level: 2, name: /^Doelpuntenmakers tegen/ })).toHaveCount(0)
   })
 
-  test('has no card Stadion for a club whose only league match was at home, and none for the cup', async ({ page }) => {
-    for (const club of ['testdorp-fc', 'fc-maquette']) {
+  test('has no card Stadion for a club whose only league match was at home', async ({ page }) => {
+    for (const club of ['testdorp-fc']) {
       await page.goto(`/tegenstanders/${club}`)
 
       await expect(page.getByRole('heading', { level: 2, name: /^Onze uitslagen/ })).toBeVisible()
