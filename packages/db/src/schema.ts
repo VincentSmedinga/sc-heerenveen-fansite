@@ -992,8 +992,8 @@ export const persons = mysqlTable('persons', {
   side: mysqlEnum('side', playerSides),
   // The country of the person (#1051): the code in capitals (`NL`, or `GB-WLS`, six
   // characters at most, #1277), and where it came from. Both are empty for a person whose
-  // country we do not know. A season can differ: `players.country` goes before it on the page
-  // of that season, as `players.position` goes before `line`.
+  // country we do not know. It is the country of the player in every season: `players.country`
+  // is only shown for a row without a person, or whose person has no country (#1287).
   country: varchar('country', { length: 6 }),
   countrySource: mysqlEnum('country_source', personCountrySources),
   wikidataReadAt: datetime('wikidata_read_at'),

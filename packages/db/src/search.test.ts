@@ -514,7 +514,7 @@ describe('listSeasonPlayers', () => {
     ])
   })
 
-  it('gives the position and the country of the season, else those of the person, else none (#1051)', async () => {
+  it('gives the position of the season and the country of the person, else the other, else none (#1051, #1287)', async () => {
     const [{ insertId: defender }] = await database.db.insert(persons).values({
       country: 'NL',
       countrySource: 'wikidata',
@@ -534,8 +534,8 @@ describe('listSeasonPlayers', () => {
       { ...row, name: 'Geen Van Beide', searchTerm: 'd' },
       { ...row, name: 'Zonder Persoon', personId: null, searchTerm: 'e' },
     ])
-    // Both: the season goes before the person. Another season, because a person is in a season
-    // once.
+    // Both: the person goes before the season for the country, the season before the person for
+    // the position. Another season, because a person is in a season once.
     await database.db.insert(players).values({
       country: 'SR',
       name: 'Beide',
@@ -554,7 +554,7 @@ describe('listSeasonPlayers', () => {
       { country: null, name: 'Geen Van Beide', position: null },
       { country: null, name: 'Zonder Persoon', position: null },
     ])
-    expect(await facts('2025/26')).toEqual([{ country: 'SR', name: 'Beide', position: 'aanvaller' }])
+    expect(await facts('2025/26')).toEqual([{ country: 'NL', name: 'Beide', position: 'aanvaller' }])
   })
 })
 

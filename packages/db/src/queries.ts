@@ -1031,17 +1031,18 @@ export function listSeasonPlayerBirths(db: Database, season: string) {
  * `personFamilyName`, null while the importer has not read the article), the position, the
  * shirt number (null when the list the player comes from gives none), `personSlug` (the address
  * name of his page, null while he has none), the country code of the
- * flag (`country`) and the source of the row. The position and the country are those of the
- * row of the season, and else the line and the country of the person (#1051); null when
- * neither has one. Unlike `listSquad`, this also gives a player who left the squad:
- * he belongs to the season. The order is the shirt number, players without one last, then the
+ * flag (`country`) and the source of the row. The position is that of the row of the season,
+ * and else the line of the person (#1051). The country is that of the person, in every season,
+ * and else that of the row (#1287); each is null when neither has one.
+ * Unlike `listSquad`, this also gives a player who left the squad: he belongs to the season.
+ * The order is the shirt number, players without one last, then the
  * surname the search page looks for (`searchTerm`, so `van Aken` stands under the V) and the
  * name.
  */
 export function listSeasonPlayers(db: Database, season: string) {
   return db
     .select({
-      country: sql<null | string>`coalesce(${players.country}, ${persons.country})`,
+      country: sql<null | string>`coalesce(${persons.country}, ${players.country})`,
       name: players.name,
       personFamilyName: persons.familyName,
       personFamilyNamePrefix: persons.familyNamePrefix,

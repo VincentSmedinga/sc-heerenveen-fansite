@@ -3924,6 +3924,7 @@
 - **Alternatieven:** alles per seizoen laten (dezelfde gegevens tientallen keren invullen).
   Alleen het land van de eerste nationaliteit van Wikidata tonen, zonder eigen veld (de redactie kan het dan niet verbeteren).
 - **Later:** sinds 10 november 2026 (#1052) vult de importer ook de bronnen `list`, `old-site` en `squad`; zie _De bronnen van de linie en het land hebben een vaste volgorde_.
+- **Later:** sinds 16 november 2026 (#1287) toont een seizoen het land van de persoon, en alleen zijn eigen land als de rij geen persoon heeft of de persoon geen land; zie _Een speler heeft in elk seizoen het land van zijn persoon_.
 
 ## De linie van een persoon volgt de posities van zijn seizoenen
 
@@ -4169,3 +4170,17 @@
 - **Waarom:** het zijn enkele tientallen clubs, en een run mag niet zwaarder worden dan nodig.
   Een tabel van items met hun plaatsen is genoeg om elke keten opnieuw te volgen, en past bij elke club die dezelfde plaats deelt.
 - **Alternatieven:** de uitkomst per club bewaren (dan weten we niet of een plaats is gevolgd en vragen we bij elke wijziging opnieuw); elke club opnieuw volgen (honderden verzoeken voor niets); de plaatsen in `wikidata_items` stoppen (een kolom voor een lijst die bij een label niet past).
+
+## Een speler heeft in elk seizoen het land van zijn persoon
+
+- **Datum:** 16 november 2026
+- **Besluit:** de site toont voor een speler één land, dat van de persoon (`persons.country`), in elk seizoen.
+  Het land van een rij in een seizoen (`players.country`) toont de site alleen als de rij geen persoon heeft of de persoon geen land.
+  De positie van een seizoen blijft voorgaan op de linie van de persoon.
+  De kolom `players.country` blijft, en de import vult haar en een persoon zonder land er nog steeds uit.
+- **Waarom:** een speler heeft één land in zijn loopbaan, en een verbetering van de redactie moet overal te zien zijn.
+  De redactie kan het land van een seizoen nergens zetten, dus een fout land in de selectietabel was niet te verbeteren.
+  De verschillen tussen de twee zijn bijna steeds twee bronnen die elk een andere nationaliteit kiezen.
+  Een speler speelt wel echt op een andere plek in een ander seizoen, dus de positie blijft zoals ze was.
+- **Alternatieven:** het land van het seizoen laten voorgaan (een verbetering is dan niet te zien); het land van het seizoen ook in het beheer laten zetten (hetzelfde antwoord per seizoen invullen); de kolom `players.country` weghalen (de import gebruikt haar als bron voor een persoon zonder land).
+- **Later:** vervangt de regel over het land in _Een persoon heeft een linie en een land, en een seizoen kan afwijken_.
