@@ -65,7 +65,8 @@
    * underlined is restless, and the colour shows which match has a page. Under the mouse and
    * with the focus of the keyboard it is underlined, as the title of a discussion is (see
    * discussion-item.css). The colour of the result stays the one of the outcome in every state,
-   * and a visited link has the colour of one that is not. The focus ring comes from base/focus.css.
+   * and a visited link has the colour of one that is not. The focus ring comes from
+   * base/focus.css.
    * A link in running text is underlined (WCAG 1.4.1), but this line stands on its own.
    */
   .hf-match-link {
