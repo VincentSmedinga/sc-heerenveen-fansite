@@ -163,7 +163,7 @@ describe('the width of the options', () => {
 
     // Two to three, four, and five or more options, and one more step for five options.
     expect(queries).toEqual([15, 19, 24, 20])
-    expect(css).toContain('--hf-segmented-font-size: 0.8125em;')
+    expect(css).toContain('font-size: 0.8125em;')
     expect(css).toContain('--hf-segmented-padding: var(--hf-space-s);')
   })
 })

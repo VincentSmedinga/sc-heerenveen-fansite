@@ -96,6 +96,12 @@ export const ShortAndLong = meta.story({
       },
     },
   },
+  play: async ({ canvas }) => {
+    const three = canvas.getByRole('group', { name: 'Drie keuzes' })
+    const five = canvas.getByRole('group', { name: 'Vijf keuzes' })
+
+    await expect(three.getBoundingClientRect().width).toBeLessThan(five.getBoundingClientRect().width)
+  },
   render: () => (
     <div style={{ display: 'grid', gap: '1rem' }}>
       <SegmentedLinks label="Drie keuzes" options={competitions.slice(0, 3)} size="small" value="all" />
@@ -113,6 +119,16 @@ export const NarrowPlace = meta.story({
           'In een werkbalk die smaller is dan de schakelaar zelf neemt hij een strakke stap, zonder dat de pagina daar iets voor doet. Erboven staat dezelfde schakelaar op een plek waar hij past.',
       },
     },
+  },
+  play: async ({ canvas }) => {
+    const wide = canvas.getByRole('group', { name: 'Op een ruime plek' })
+    const narrow = canvas.getByRole('group', { name: 'Op een smalle plek' })
+
+    // The tight step is smaller, and it stays inside the toolbar it stands in.
+    await expect(narrow.getBoundingClientRect().width).toBeLessThan(wide.getBoundingClientRect().width)
+    await expect(narrow.getBoundingClientRect().width).toBeLessThanOrEqual(
+      narrow.parentElement?.getBoundingClientRect().width ?? 0,
+    )
   },
   render: () => (
     <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'minmax(0, 1fr)' }}>

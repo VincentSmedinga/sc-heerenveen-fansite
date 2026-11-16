@@ -31,8 +31,6 @@
 @layer hf.components {
   .hf-segmented-control {
     --hf-segmented-edge: var(--hf-space-xs);
-    --hf-segmented-font-size: 1em;
-    --hf-segmented-line-height: var(--hf-body-line-height);
     --hf-segmented-padding: var(--hf-space-m);
 
     background-color: var(--hf-colour-background-track);
@@ -100,10 +98,8 @@
       cursor: pointer;
       display: flex;
       flex: 0 1 auto;
-      font-size: var(--hf-segmented-font-size);
       font-weight: var(--hf-body-font-weight);
       justify-content: center;
-      line-height: var(--hf-segmented-line-height);
       min-block-size: 0;
       min-inline-size: 0;
       overflow-wrap: anywhere;
@@ -141,18 +137,24 @@
 
     /* The small size. */
     &.hf-size-small {
-      --hf-segmented-font-size: var(--hf-meta-font-size);
-      --hf-segmented-line-height: var(--hf-meta-line-height);
       --hf-segmented-padding: calc(var(--hf-segmented-edge) + var(--hf-space-s));
 
       min-block-size: var(--hf-size-control-small);
+
+      > :is(button, a) {
+        font-size: var(--hf-meta-font-size);
+        line-height: var(--hf-meta-line-height);
+      }
     }
 
     /* The tight step: smaller letters and less room, at the same height. */
     &.hf-segmented-compact {
-      --hf-segmented-font-size: 0.8125em;
-      --hf-segmented-line-height: var(--hf-meta-line-height);
       --hf-segmented-padding: var(--hf-space-s);
+
+      > :is(button, a) {
+        font-size: 0.8125em;
+        line-height: var(--hf-meta-line-height);
+      }
     }
   }
 
@@ -164,25 +166,34 @@
    */
   @container (inline-size < 15rem) {
     .hf-segmented-control:not(:has(> :nth-child(4))) {
-      --hf-segmented-font-size: 0.8125em;
-      --hf-segmented-line-height: var(--hf-meta-line-height);
       --hf-segmented-padding: var(--hf-space-s);
+
+      > :is(button, a) {
+        font-size: 0.8125em;
+        line-height: var(--hf-meta-line-height);
+      }
     }
   }
 
   @container (inline-size < 19rem) {
     .hf-segmented-control:has(> :nth-child(4)):not(:has(> :nth-child(5))) {
-      --hf-segmented-font-size: 0.8125em;
-      --hf-segmented-line-height: var(--hf-meta-line-height);
       --hf-segmented-padding: var(--hf-space-s);
+
+      > :is(button, a) {
+        font-size: 0.8125em;
+        line-height: var(--hf-meta-line-height);
+      }
     }
   }
 
   @container (inline-size < 24rem) {
     .hf-segmented-control:has(> :nth-child(5)) {
-      --hf-segmented-font-size: 0.8125em;
-      --hf-segmented-line-height: var(--hf-meta-line-height);
       --hf-segmented-padding: var(--hf-space-s);
+
+      > :is(button, a) {
+        font-size: 0.8125em;
+        line-height: var(--hf-meta-line-height);
+      }
     }
   }
 
