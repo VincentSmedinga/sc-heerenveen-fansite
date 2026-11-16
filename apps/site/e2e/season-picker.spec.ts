@@ -136,7 +136,11 @@ for (const { heading, path } of pickerPages) {
 
 test.describe('the toolbar with the season picker', () => {
   for (const width of [300, 320, 390, 900]) {
-    test(`is under the heading, in the toolbar, at ${width} pixels, and does not scroll the page`, async ({ page }) => {
+    const beside = width >= 832
+
+    test(`is ${beside ? 'beside' : 'under'} the heading, in the toolbar, at ${width} pixels, and does not scroll the page`, async ({
+      page,
+    }) => {
       await page.setViewportSize({ height: 900, width })
       await page.goto(`/wedstrijden/${slug}`)
       await hydrated(page)
@@ -145,19 +149,27 @@ test.describe('the toolbar with the season picker', () => {
       const picker = (await page.getByRole('form', { name: 'Seizoen kiezen' }).boundingBox())!
       const toolbar = (await page.locator('.hf-page-toolbar').boundingBox())!
 
-      expect(picker.y).toBeGreaterThanOrEqual(heading.y + heading.height)
+      if (beside) {
+        // In the second column, level with the top of the heading.
+        expect(picker.x).toBeGreaterThanOrEqual(heading.x + heading.width)
+        expect(toolbar.y).toBeCloseTo(heading.y, 0)
+      } else {
+        expect(picker.y).toBeGreaterThanOrEqual(heading.y + heading.height)
+      }
+
       expect(picker.x).toBeGreaterThanOrEqual(toolbar.x)
       expect(picker.x + picker.width).toBeLessThanOrEqual(toolbar.x + toolbar.width + 1)
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
     })
   }
 
-  test('has targets of 44 pixels high', async ({ page }) => {
+  test('has the small size, with targets of 36 pixels high', async ({ page }) => {
     await page.goto(`/wedstrijden/${slug}`)
 
     const list = (await listOf(page).boundingBox())!
 
-    expect(list.height).toBeGreaterThanOrEqual(44)
+    expect(list.height).toBeGreaterThanOrEqual(36)
+    expect(list.height).toBeLessThan(44)
   })
 
   for (const colorScheme of ['light', 'dark'] as const) {

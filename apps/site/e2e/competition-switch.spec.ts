@@ -48,7 +48,9 @@ for (const { heading, path } of switchPages) {
 test.describe('the switch of the matches on a phone', () => {
   test.use({ viewport: { height: 844, width: 390 } })
 
-  test('has its choices on one line within the width, each at least 44 pixels high', async ({ page }) => {
+  test('has its choices on one line within the width, each at least 36 pixels high, the small size', async ({
+    page,
+  }) => {
     await page.goto('/wedstrijden/cijfers')
 
     const links = page.getByRole('group', { name: 'Welke wedstrijden' }).getByRole('link')
@@ -63,7 +65,7 @@ test.describe('the switch of the matches on a phone', () => {
     expect(boxes.length).toBeGreaterThanOrEqual(3)
 
     for (const box of boxes) {
-      expect(box.height).toBeGreaterThanOrEqual(44)
+      expect(box.height).toBeGreaterThanOrEqual(36)
       expect(box.top).toBeCloseTo(boxes[0]!.top, 0)
       expect(box.left).toBeGreaterThanOrEqual(0)
       expect(box.right).toBeLessThanOrEqual(390)
