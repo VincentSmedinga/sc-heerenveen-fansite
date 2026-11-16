@@ -1,12 +1,15 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
+import { measureOptions } from './measure-options'
 import { SegmentedControl } from './SegmentedControl'
 
 const options = [
   { label: 'Licht', value: 'light' },
   { label: 'Donker', value: 'dark' },
 ] as const
+
+measureOptions()
 
 describe('SegmentedControl', () => {
   it('is a group with a name, with a button for each option', () => {
@@ -90,7 +93,7 @@ describe('SegmentedControl', () => {
     expect(screen.getByRole('button', { name: 'Licht' }).getAttribute('aria-pressed')).toBe('true')
   })
 
-  it('places the thumb with the number of options and the index of the chosen one', () => {
+  it('places the thumb under the pressed button, from where that button measures', () => {
     const { rerender } = render(
       <SegmentedControl
         label="Thema"
@@ -101,9 +104,9 @@ describe('SegmentedControl', () => {
     )
     const group = screen.getByRole('group', { name: 'Thema' })
 
-    expect(group.style.getPropertyValue('--hf-segmented-count')).toBe('3')
-    expect(group.style.getPropertyValue('--hf-segmented-index')).toBe('1')
-    expect(group.hasAttribute('data-empty')).toBe(false)
+    expect(group.style.getPropertyValue('--hf-segmented-x')).toBe('80px')
+    expect(group.style.getPropertyValue('--hf-segmented-width')).toBe('80px')
+    expect(group.hasAttribute('data-placed')).toBe(true)
 
     rerender(
       <SegmentedControl
@@ -114,13 +117,14 @@ describe('SegmentedControl', () => {
       />,
     )
 
-    expect(group.style.getPropertyValue('--hf-segmented-index')).toBe('2')
+    expect(group.style.getPropertyValue('--hf-segmented-x')).toBe('160px')
+    expect(group.style.getPropertyValue('--hf-segmented-width')).toBe('80px')
   })
 
   it('leaves the thumb out when the value is none of the options', () => {
     render(<SegmentedControl label="Thema" onChange={vi.fn()} options={options} value={'other' as 'light'} />)
 
-    expect(screen.getByRole('group', { name: 'Thema' }).hasAttribute('data-empty')).toBe(true)
+    expect(screen.getByRole('group', { name: 'Thema' }).hasAttribute('data-placed')).toBe(false)
   })
 
   it('has the standard size without a class, and the small size with the shared class', () => {
@@ -149,7 +153,6 @@ describe('SegmentedControl', () => {
 
     expect(group.className).toBe('hf-segmented-control extra')
     expect(group.style.marginBlockStart).toBe('1px')
-    expect(group.style.getPropertyValue('--hf-segmented-count')).toBe('2')
   })
 
   it('wraps the text of an option with a copy of it for the bold width, and the name stays the text', () => {

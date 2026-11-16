@@ -6366,3 +6366,11 @@
   De pagina van een club vraagt alleen de wedstrijden van de pagina die je ziet, en een seizoen dat niet te lezen is, staat zonder links in de lijst en in het log.
 - **Waarom:** dezelfde regel ziet er overal hetzelfde uit en doet overal hetzelfde.
 - **Alternatieven:** alleen de plekken die nu al een link hebben; een eigen lezing per wedstrijd (dubbel werk naast de lijsten van een seizoen).
+
+## De schakelaar en de seizoenskiezer zijn altijd klein
+
+- **Datum:** 16 november 2026
+- **Besluit:** op de site staan de schakelaar van de competitie en de seizoenskiezer altijd in de kleine maat (36 pixels, tekst van Meta), op elke breedte (#1323, #1324).
+  Het designsysteem levert de kleine maat en de strakke stap (zie _De keuzes van de schakelaar zijn zo breed als hun tekst_ en _Een strakke stap op een smalle plek_ in `designsysteem.md`); de pagina's gaan hem gebruiken in #1324.
+- **Waarom:** naast de kop zijn twee bedieningselementen van 44 pixels te opvallend, en de kleine maat is bedoeld voor een kiezer of een schakelaar in een werkbalk (zie _Knoppen en velden hebben een kleine maat van 36 pixels naast de standaardmaat_).
+- **Alternatieven:** de kleine maat alleen vanaf 52 rem (twee maten voor dezelfde bediening).

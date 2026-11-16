@@ -1199,7 +1199,7 @@ await withEmptyDatabase((database) =>
     // choice is in the address of the other links.
     assert.match(
       statisticsHtml,
-      /<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-segmented-compact" role="group" style="--hf-segmented-count:4;--hf-segmented-index:0"><a aria-current="page" href="\/wedstrijden\/cijfers"><span class="hf-segmented-label" data-label="Alles">Alles<\/span><\/a><a href="\/wedstrijden\/cijfers\?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie<\/span><\/a><a href="\/wedstrijden\/cijfers\?competitie=play-offs"><span class="hf-segmented-label" data-label="Play-offs">Play-offs<\/span><\/a><a href="\/wedstrijden\/cijfers\?competitie=beker"><span class="hf-segmented-label" data-label="Beker">Beker<\/span><\/a><\/div>/,
+      /<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-segmented-compact" role="group"><a aria-current="page" href="\/wedstrijden\/cijfers"><span class="hf-segmented-label" data-label="Alles">Alles<\/span><\/a><a href="\/wedstrijden\/cijfers\?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie<\/span><\/a><a href="\/wedstrijden\/cijfers\?competitie=play-offs"><span class="hf-segmented-label" data-label="Play-offs">Play-offs<\/span><\/a><a href="\/wedstrijden\/cijfers\?competitie=beker"><span class="hf-segmented-label" data-label="Beker">Beker<\/span><\/a><\/div>/,
     )
     const leagueResponse = await fetch(`${origin}/wedstrijden/cijfers?competitie=eredivisie`)
     const leagueHtml = await leagueResponse.text()

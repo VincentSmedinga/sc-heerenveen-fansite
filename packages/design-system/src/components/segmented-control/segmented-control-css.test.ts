@@ -10,8 +10,10 @@ const read = (file: string) =>
 const css = read('components/segmented-control/segmented-control.css')
 const colour = read('tokens/colour.css')
 
-// The thumb is the first rule with ::before, up to the next rule that is not nested in it.
-const thumb = css.slice(css.indexOf('&::before {'), css.indexOf('&[data-empty]::before'))
+// The look of the thumb: the rule for the ::before of the group and of an option together.
+const thumb = css.slice(css.indexOf('&::before,'), css.indexOf('/* The thumb of the chosen option'))
+// The thumb of the group, once it is measured: where it stands and how it slides.
+const placed = css.slice(css.indexOf('&::before {'), css.indexOf('&[data-placed]::before'))
 
 // A colour role as the pair it picks in light and in dark, as hex values from the scales.
 const scale = (name: string) => {
@@ -123,8 +125,9 @@ describe('the thumb of the segmented control', () => {
   })
 
   it('slides with a transition on translate that takes its time and curve from the motion tokens', () => {
-    expect(thumb).toContain('transition: translate var(--hf-motion-duration-medium) var(--hf-motion-ease-change);')
-    expect(thumb).toContain('translate: calc(var(--hf-segmented-index) *')
+    expect(placed).toContain('translate var(--hf-motion-duration-medium) var(--hf-motion-ease-change)')
+    expect(placed).toContain('inline-size var(--hf-motion-duration-medium) var(--hf-motion-ease-change)')
+    expect(placed).toContain('translate: var(--hf-segmented-x) 0;')
   })
 
   it('lets the letters of an option go from regular to bold in the duration of the thumb', () => {
@@ -136,9 +139,32 @@ describe('the thumb of the segmented control', () => {
     expect(thumb).toMatch(/@media \(forced-colors: active\) \{\s*border-color: CanvasText;\s*border-width: 2px;/)
   })
 
-  it('is as wide as one option, less the edge on both sides', () => {
-    expect(thumb).toContain('inline-size: calc(100% / var(--hf-segmented-count) - 2 * var(--hf-segmented-edge));')
+  it('is as wide as the chosen option, which the component measures', () => {
+    expect(placed).toContain('inline-size: var(--hf-segmented-width);')
     expect(css).toContain('--hf-segmented-edge: var(--hf-space-xs);')
+  })
+
+  it('is drawn by the chosen option itself until it is measured, so the HTML of the server is right', () => {
+    expect(css).toContain("&:not([data-placed]) > :is([aria-pressed='true'], [aria-current])::before {")
+  })
+})
+
+describe('the width of the options', () => {
+  it('lets each option be as wide as its text, so the track is as wide as the options together', () => {
+    expect(css).not.toContain('grid-auto-columns')
+    expect(css).not.toContain('minmax(0, 1fr)')
+    expect(css).toContain('display: inline-flex;')
+    expect(css).toContain('flex: 0 1 auto;')
+    expect(css).toContain('padding-inline: var(--hf-segmented-padding);')
+  })
+
+  it('takes a tight step in a place that is narrower than the control, by a container query', () => {
+    const queries = [...css.matchAll(/@container \(inline-size < ([\d.]+)rem\)/g)].map((match) => Number(match[1]))
+
+    // Two to three, four, and five or more options, and one more step for five options.
+    expect(queries).toEqual([15, 19, 24, 20])
+    expect(css).toContain('--hf-segmented-font-size: 0.8125em;')
+    expect(css).toContain('--hf-segmented-padding: var(--hf-space-s);')
   })
 })
 
@@ -146,15 +172,8 @@ describe('the sizes of the segmented control', () => {
   it('has a compact variant that only changes the letters and the padding, not the height', () => {
     const compact = css.slice(css.indexOf('&.hf-segmented-compact'))
 
-    expect(compact).toContain('padding-inline: var(--hf-segmented-edge);')
+    expect(compact.slice(0, compact.indexOf('}'))).toContain('--hf-segmented-padding: var(--hf-space-s);')
     expect(compact.slice(0, compact.indexOf('}'))).not.toContain('min-block-size')
-  })
-
-  it('makes the letters smaller, relative to the text around them, and drops the padding for five options or more', () => {
-    const five = css.slice(css.indexOf('&.hf-segmented-compact:has(> :nth-child(5))'))
-
-    expect(five.slice(0, five.indexOf('}'))).toContain('font-size: 0.8125em;')
-    expect(five.slice(0, five.indexOf('}'))).toContain('padding-inline: 0;')
   })
 
   it('is 44 pixels high, and the small size takes its height from the token', () => {
@@ -169,7 +188,7 @@ describe('the change of the choice', () => {
   })
 
   it('slides the thumb with the duration and the curve of the motion tokens, which are 0s with reduced motion', () => {
-    expect(thumb).toContain('transition: translate var(--hf-motion-duration-medium) var(--hf-motion-ease-change);')
+    expect(placed).toContain('translate var(--hf-motion-duration-medium) var(--hf-motion-ease-change)')
     expect(css).not.toContain('prefers-reduced-motion: no-preference')
   })
 

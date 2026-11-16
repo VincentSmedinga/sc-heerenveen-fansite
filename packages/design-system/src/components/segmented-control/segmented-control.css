@@ -1,20 +1,27 @@
 /*
  * A segmented control: a rounded track with the options side by side and a thumb under the
- * chosen one. The options share the width of the track equally, and the thumb is as wide as one
- * option, less a margin all round. The standard size is 44px high and the small size, with the
- * class hf-size-small, 36px from the token of the sizes, so an option is a target of that
- * height over its whole cell. In a grid, such as the cells of a page, the group keeps the width
- * of its options and stays at the start.
+ * chosen one. Each option is as wide as its label in bold plus a fixed space on both sides, so
+ * the track is as wide as all the options together: three options are shorter than five. The
+ * standard size is 44px high and the small size, with the class hf-size-small, 36px from the
+ * token of the sizes, so an option is a target of that height over its whole cell. In a grid,
+ * such as the cells of a page, the group keeps the width of its options and stays at the start.
  *
- * The thumb is the pseudo-element ::before of the group. It finds its place from two custom
- * properties that the component sets, the number of options and the index of the chosen one, so
- * it works for links without JavaScript, and for buttons whose value the page changes. It
- * slides with a transition on `translate` in the medium duration, and the letters of the
- * chosen option go from regular to bold in the same time (the font is variable, and the copy
- * in bold below keeps the width). The motion tokens make both 0s with reduced motion, so it
- * jumps there. The chosen option is shown by more than colour: the thumb has a border
- * that reaches 3:1 against the track, and the letters are heavier. A label is laid over a copy
- * of itself in bold (see SegmentedLabel), so the track does not change width with the choice.
+ * The thumb can't be placed from the number of options and the index of the chosen one, because
+ * the options differ in width. The component measures the chosen option and sets two custom
+ * properties on the group, the place and the width of the thumb, and the attribute data-placed
+ * (see useSegmentedThumb). The thumb is the pseudo-element ::before of the group, and slides
+ * with a transition on `translate` and `inline-size` in the medium duration. Before the script
+ * has run, and for links without script, the chosen option draws the thumb itself in the same
+ * place with its own ::before, so the HTML of the server is right. The letters of the chosen
+ * option go from regular to bold in the same time (the font is variable, and the copy in bold
+ * below keeps the width). The motion tokens make all of it 0s with reduced motion, so it jumps
+ * there. The chosen option is shown by more than colour: the thumb has a border that reaches
+ * 3:1 against the track, and the letters are heavier.
+ *
+ * In a place that is narrower than the control itself, the control takes a tight step: a little
+ * smaller letters and less room on both sides. The place decides, with a container query, so no
+ * page does. Page.Toolbar is such a place. The limits depend on the number of options, because
+ * the width of the control does. The class hf-segmented-compact takes the tight step always.
  *
  * Between two pages, when the options are links without script, the next page loads with the
  * thumb already under the new choice: nothing slides and nothing flashes. There is no view
@@ -24,33 +31,46 @@
 @layer hf.components {
   .hf-segmented-control {
     --hf-segmented-edge: var(--hf-space-xs);
+    --hf-segmented-font-size: 1em;
+    --hf-segmented-line-height: var(--hf-body-line-height);
+    --hf-segmented-padding: var(--hf-space-m);
 
     background-color: var(--hf-colour-background-track);
     border-radius: 0.5rem;
     box-sizing: border-box;
-    display: inline-grid;
-    grid-auto-columns: minmax(0, 1fr);
-    grid-auto-flow: column;
+    display: inline-flex;
     isolation: isolate;
     justify-self: start;
     max-inline-size: 100%;
     min-block-size: var(--hf-size-control);
+    padding-inline: var(--hf-segmented-edge);
     position: relative;
 
-    /* The thumb. */
+    /* The thumb of the group, once it is measured. */
     &::before {
+      display: none;
+      inline-size: var(--hf-segmented-width);
+      inset-block: var(--hf-segmented-edge);
+      inset-inline-start: 0;
+      transition:
+        translate var(--hf-motion-duration-medium) var(--hf-motion-ease-change),
+        inline-size var(--hf-motion-duration-medium) var(--hf-motion-ease-change);
+      translate: var(--hf-segmented-x) 0;
+    }
+
+    &[data-placed]::before {
+      display: block;
+    }
+
+    &::before,
+    > :is(button, a)::before {
       background-color: var(--hf-colour-background-thumb);
       border: 1px solid var(--hf-colour-border-input);
       border-radius: 0.25rem;
       box-shadow: 0 1px 2px var(--hf-colour-shadow-thumb);
       box-sizing: border-box;
       content: '';
-      inline-size: calc(100% / var(--hf-segmented-count) - 2 * var(--hf-segmented-edge));
-      inset-block: var(--hf-segmented-edge);
-      inset-inline-start: var(--hf-segmented-edge);
       position: absolute;
-      transition: translate var(--hf-motion-duration-medium) var(--hf-motion-ease-change);
-      translate: calc(var(--hf-segmented-index) * (100% + 2 * var(--hf-segmented-edge))) 0;
       z-index: -1;
 
       @media (forced-colors: active) {
@@ -59,8 +79,14 @@
       }
     }
 
-    &[data-empty]::before {
+    /* The thumb of the chosen option, for the HTML of the server and without script. */
+    > :is(button, a)::before {
       display: none;
+      inset: var(--hf-segmented-edge) 0;
+    }
+
+    &:not([data-placed]) > :is([aria-pressed='true'], [aria-current])::before {
+      display: block;
     }
 
     /* The options: a button, or a link that looks like one. */
@@ -73,13 +99,17 @@
       color: var(--hf-colour-text-secondary);
       cursor: pointer;
       display: flex;
+      flex: 0 1 auto;
+      font-size: var(--hf-segmented-font-size);
       font-weight: var(--hf-body-font-weight);
       justify-content: center;
+      line-height: var(--hf-segmented-line-height);
       min-block-size: 0;
       min-inline-size: 0;
       overflow-wrap: anywhere;
-      padding-block: var(--hf-space-s);
-      padding-inline: var(--hf-space-m);
+      padding-block: 0;
+      padding-inline: var(--hf-segmented-padding);
+      position: relative;
       text-align: center;
       text-decoration: none;
       transition:
@@ -111,33 +141,54 @@
 
     /* The small size. */
     &.hf-size-small {
+      --hf-segmented-font-size: var(--hf-meta-font-size);
+      --hf-segmented-line-height: var(--hf-meta-line-height);
+      --hf-segmented-padding: calc(var(--hf-segmented-edge) + var(--hf-space-s));
+
       min-block-size: var(--hf-size-control-small);
-
-      > :is(button, a) {
-        font-size: var(--hf-meta-font-size);
-        line-height: var(--hf-meta-line-height);
-        padding-inline: calc(var(--hf-segmented-edge) + var(--hf-space-s));
-      }
     }
 
-    /*
-     * Smaller letters and less room, at the standard height: four options on a phone (five
-     * get less, see below).
-     */
-    &.hf-segmented-compact > :is(button, a) {
-      font-size: var(--hf-meta-font-size);
-      line-height: var(--hf-meta-line-height);
-      padding-inline: var(--hf-segmented-edge);
+    /* The tight step: smaller letters and less room, at the same height. */
+    &.hf-segmented-compact {
+      --hf-segmented-font-size: 0.8125em;
+      --hf-segmented-line-height: var(--hf-meta-line-height);
+      --hf-segmented-padding: var(--hf-space-s);
     }
+  }
 
-    /*
-     * Five options on a phone of 390px: a cell is about 72px, and the longest label in bold
-     * (Competitie) is about 73px at the size of the meta text, so it would break in the word.
-     * Letters of 0.8125 times the text around the control (13px) and no padding make it fit.
-     */
-    &.hf-segmented-compact:has(> :nth-child(5)) > :is(button, a) {
-      font-size: 0.8125em;
-      padding-inline: 0;
+  /*
+   * In a place narrower than the control the tight step comes by itself. The limits are the
+   * widths of the control with its widest labels, a little over, for two to three options, for
+   * four, and for five or more. Five options take one step more in a place under 20rem, a phone
+   * of 320px, where the tight step is still a little too wide.
+   */
+  @container (inline-size < 15rem) {
+    .hf-segmented-control:not(:has(> :nth-child(4))) {
+      --hf-segmented-font-size: 0.8125em;
+      --hf-segmented-line-height: var(--hf-meta-line-height);
+      --hf-segmented-padding: var(--hf-space-s);
+    }
+  }
+
+  @container (inline-size < 19rem) {
+    .hf-segmented-control:has(> :nth-child(4)):not(:has(> :nth-child(5))) {
+      --hf-segmented-font-size: 0.8125em;
+      --hf-segmented-line-height: var(--hf-meta-line-height);
+      --hf-segmented-padding: var(--hf-space-s);
+    }
+  }
+
+  @container (inline-size < 24rem) {
+    .hf-segmented-control:has(> :nth-child(5)) {
+      --hf-segmented-font-size: 0.8125em;
+      --hf-segmented-line-height: var(--hf-meta-line-height);
+      --hf-segmented-padding: var(--hf-space-s);
+    }
+  }
+
+  @container (inline-size < 20rem) {
+    .hf-segmented-control:has(> :nth-child(5)) {
+      --hf-segmented-padding: var(--hf-space-xs);
     }
   }
 
