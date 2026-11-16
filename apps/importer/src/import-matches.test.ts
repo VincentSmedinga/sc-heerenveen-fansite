@@ -2870,6 +2870,80 @@ describe('linking the goals to the players of the squad', () => {
     expect(await linksOf('Speelronde 2')).toContainEqual(['Rivera', 'Maxence Rivera', null])
   })
 
+  describe('trying again for a goal without a player (#1294)', () => {
+    const days = (count: number) => new Date(first.getTime() + hours(24 * count))
+    const rivera = async () =>
+      (
+        await database.db.select().from(matchGoals).where(eq(matchGoals.player, 'Rivera')).orderBy(asc(matchGoals.id))
+      )[0]
+
+    /**
+     * Reads the season with Rivera named without a link, so his goal has no player. Five days
+     * later the page moves the goal of Trenskow in the same match, which waits: the match is
+     * not written again, so only the new try can link the goal of Rivera.
+     */
+    async function waitingMatch(setUp: () => Promise<void>) {
+      const { pages, server } = await serve({ programme: withoutLinks(original.programme, ['Rivera']) })
+
+      await importAt(server, first)
+      expect((await rivera())?.playerId).toBeNull()
+      await setUp()
+      pages.programme = pages.programme.replace(
+        '{{goal|45}} [[Jacob Trenskow|Trenskow]]',
+        '{{goal|46}} [[Jacob Trenskow|Trenskow]]',
+      )
+
+      const report = await importAt(server, days(5))
+
+      expect(report).toMatchObject({ kind: 'imported', matches: { held: 1 } })
+
+      return report.kind === 'imported' ? report.persons : []
+    }
+
+    it('links a goal that fits one player of the season now, also in a match that waits', async () => {
+      const lines = await waitingMatch(() => addPlayers([['Maxence Rivera', null]]))
+      const [player] = await database.db.select().from(players).where(eq(players.name, 'Maxence Rivera'))
+
+      expect((await rivera())?.playerId).toBe(player?.id)
+      expect(lines).toContainEqual(expect.stringMatching(/^1 goal without a player linked, \d+ left without one$/u))
+    })
+
+    it('leaves a goal whose name fits two players of the season as it is', async () => {
+      const lines = await waitingMatch(() =>
+        addPlayers([
+          ['Maxence Rivera', null],
+          ['Jorg Rivera', null],
+        ]),
+      )
+
+      expect((await rivera())?.playerId).toBeNull()
+      expect(lines.filter((line) => line.includes('without a player linked'))).toEqual([])
+    })
+
+    it('leaves a goal whose name fits no player of the season as it is', async () => {
+      const lines = await waitingMatch(() => addPlayers([['Jorg Haverkort', null]]))
+
+      expect((await rivera())?.playerId).toBeNull()
+      expect(lines.filter((line) => line.includes('without a player linked'))).toEqual([])
+    })
+
+    it('keeps a goal the editors linked to a player', async () => {
+      // The first read made Trenskow a player from his goals.
+      const trenskow = async () =>
+        (await database.db.select().from(players).where(eq(players.name, 'Jacob Trenskow')))[0]
+
+      await waitingMatch(async () => {
+        await addPlayers([['Maxence Rivera', null]])
+        await database.db
+          .update(matchGoals)
+          .set({ playerId: (await trenskow())?.id })
+          .where(eq(matchGoals.player, 'Rivera'))
+      })
+
+      expect((await rivera())?.playerId).toBe((await trenskow())?.id)
+    })
+  })
+
   it('warns, once the squad is read, how many goals of ours have no player and whose they are', async () => {
     await addPlayers([['Jacob Trenskow', 'Jacob Trenskow']])
 

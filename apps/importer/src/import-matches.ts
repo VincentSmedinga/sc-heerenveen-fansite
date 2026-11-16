@@ -640,15 +640,17 @@ export function unlinkedWarning(goals: LinkedGoal[]): string | undefined {
  * with a page that has no person yet, makes no player, and neither does a scorer whose name or
  * person another player of the season already has: such a goal stays without a player. Then
  * every stored goal of these matches that still has no player gets the player the rules of
- * `playerLinker` find now, so a goal that names only his surname has him in the same run.
- * Gives the names of the players it made.
+ * `playerLinker` finds now, whether or not a player was made: a goal that names only his
+ * surname has him in the same run, and a goal that stayed without a player in an earlier run
+ * has one as soon as the squad or the persons allow it (#1294). Gives the names of the players
+ * it made, how many goals it linked and how many of these goals are left.
  */
 async function adoptScorers(
   db: Pick<Database, 'insert' | 'select' | 'update'>,
   season: string,
   squad: Player[],
   skip: ReadonlySet<number>,
-): Promise<string[]> {
+): Promise<{ adopted: string[]; left: number; linked: number }> {
   const adopted: string[] = []
   const goals = (
     await db
@@ -703,19 +705,23 @@ async function adoptScorers(
     adopted.push(name)
   }
 
-  if (adopted.length > 0) {
-    const link = playerLinker(squad)
+  // Every run tries again for each stored goal without a player (#1294), with the rules of a
+  // new goal: a squad that grew, or a person that was merged since, finds him now. A goal that
+  // has a player is not in `goals`, so what the editors linked stays, and `playerLinker` never
+  // guesses: a name that fits two players, or none, leaves the goal as it is.
+  const link = playerLinker(squad)
+  let linked = 0
 
-    for (const goal of goals) {
-      const playerId = link(goal)
+  for (const goal of goals) {
+    const playerId = link(goal)
 
-      if (playerId !== null) {
-        await db.update(matchGoals).set({ playerId }).where(eq(matchGoals.id, goal.id))
-      }
+    if (playerId !== null) {
+      await db.update(matchGoals).set({ playerId }).where(eq(matchGoals.id, goal.id))
+      linked++
     }
   }
 
-  return adopted
+  return { adopted, left: goals.length - linked, linked }
 }
 
 /** The line of the log for a change that was taken over with a note, or that waits. */
@@ -1602,8 +1608,8 @@ async function storeMatches(
   // old fansite has its players from there. A match whose goals the editors entered is
   // compared with the page as it is: its scorer becomes a player once the entry is gone, so a
   // goal they entered by name stays the same goal as the one on the page (`judgeGoals`).
-  const adopted = seasonRows.some((row) => row.dataSource === 'oude-fansite')
-    ? []
+  const { adopted, left, linked } = seasonRows.some((row) => row.dataSource === 'oude-fansite')
+    ? { adopted: [], left: 0, linked: 0 }
     : await adoptScorers(
         db,
         season,
@@ -1635,10 +1641,19 @@ async function storeMatches(
     overwrites: mass,
     persons: personBook.counts,
     // One line for the log, such as `1 player added from a goal: Pelle van Amersfoort`.
-    players:
-      adopted.length === 0
+    players: [
+      ...(adopted.length === 0
         ? []
-        : [`${adopted.length} ${adopted.length === 1 ? 'player' : 'players'} added from a goal: ${adopted.join(', ')}`],
+        : [
+            `${adopted.length} ${adopted.length === 1 ? 'player' : 'players'} added from a goal: ${adopted.join(', ')}`,
+          ]),
+      // How the new try for the goals without a player went (#1294). It is news only when it
+      // linked a goal; when a player was made from a goal in this run, that player's goals are
+      // linked as part of making him.
+      ...(adopted.length > 0 || linked === 0
+        ? []
+        : [`${linked} ${linked === 1 ? 'goal' : 'goals'} without a player linked, ${left} left without one`]),
+    ],
     warnings,
   }
 }
