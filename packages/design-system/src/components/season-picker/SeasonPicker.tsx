@@ -9,6 +9,8 @@ import {
   useSyncExternalStore,
 } from 'react'
 
+import type { Size } from '../size'
+
 import { Button } from '../button/Button'
 import { classNames } from '../classNames'
 import { Select } from '../select/Select'
@@ -35,6 +37,8 @@ export type SeasonPickerProps = Omit<
   fields?: Readonly<Record<string, string>>
   /** The seasons to choose from, in the order shown. With fewer than two there is no picker. */
   options: readonly SeasonPickerOption[]
+  /** `default` is the standard size. `small` is lower, for a picker in a toolbar. */
+  size?: Size
   /** The value of the season the page shows. */
   value: string
 }
@@ -74,7 +78,15 @@ export const choosesByKey = ({
  * open list sends at once. A choice that is not confirmed is put back when the list loses the
  * focus, so the list never shows a season the page does not.
  */
-export const SeasonPicker = ({ action, className, fields = {}, options, value, ...props }: SeasonPickerProps) => {
+export const SeasonPicker = ({
+  action,
+  className,
+  fields = {},
+  options,
+  size = 'default',
+  value,
+  ...props
+}: SeasonPickerProps) => {
   const id = useId()
   const hintId = `${id}-hint`
   // Whether script runs: only then the button and the label are hidden and the line is there.
@@ -149,6 +161,7 @@ export const SeasonPicker = ({ action, className, fields = {}, options, value, .
               onPointerDown={() => {
                 byKey.current = false
               }}
+              size={size}
             >
               {options.map((option) => (
                 <Select.Option key={option.value} value={option.value}>

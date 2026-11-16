@@ -2765,6 +2765,7 @@
 - **Alternatieven:** een seizoenskiezer in de kop van elke pagina.
 - **Later:** zie _De openbare pagina's gebruiken het raster met benoemde gebieden_ (12 november 2026): de seizoenskiezer staat niet meer in de titel maar in de werkbalk onder de kop (`Page.Toolbar`), met de schakelaar voor de competitie ernaast.
   Het seizoen blijft een instelling van de pagina, in het adres.
+- **Later:** zie _De werkbalk staat naast de kop, boven de tweede kolom_ (16 november 2026): de seizoenskiezer staat vanaf 52 rem naast de kop, in de tweede kolom, en niet meer onder de kop.
 
 ## Tegenstanders hoort bij Wedstrijden
 
@@ -2873,6 +2874,7 @@
   Het vult _Een kaart staat op de pagina van de zaak die hij beschrijft, en de hoofd- en zijkolom hebben vaste rollen_ (6 november 2026) aan: de schakelaar is een cel van de hoofdkolom.
 - **Later:** zie _De openbare pagina's gebruiken het raster met benoemde gebieden_ (12 november 2026): de schakelaar is geen cel van de hoofdkolom meer maar staat in de werkbalk onder de kop, op Cijfers, Spelers, Tegenstanders en de pagina van een speler.
   De kolommen van Cijfers zijn twee secties (`first` en `second`) in plaats van een hoofdkolom en een zijbalk.
+- **Later:** zie _De werkbalk staat naast de kop, boven de tweede kolom_ (16 november 2026): de werkbalk met de schakelaar staat vanaf 52 rem naast de kop, in de tweede kolom.
 
 ## Onze eindplek per seizoen staat als lijn op Wedstrijden
 
@@ -5383,6 +5385,9 @@
 - **Waarom:** zie #206.
   Een cel uit de zijkolom kon op een telefoon niet vóór de hoofdinhoud staan zonder `order`, en de seizoenskiezer in de titel nam de plek van de kop in.
 - **Alternatieven:** per pagina eigen rijen voor de hoofdinhoud (een hoge kaart naast de zijkolom rekt dan de rij op); een `Page.Section` voor elke hoofdkolom (te veel landmarks).
+- **Later:** zie _De werkbalk staat naast de kop, boven de tweede kolom_ (16 november 2026): de werkbalk staat vanaf 52 rem niet meer onder de kop, over de hele breedte, maar in de tweede kolom, in de rij van de kop.
+  Onder 52 rem blijft de volgorde kop, werkbalk, inhoud.
+  De terugkeerlink op de pagina van een speler staat in een gebied van zijn eigen.
 
 ## De pagina's van het beheer gebruiken het raster, met de knoppen om op te slaan in de werkbalk
 
@@ -6374,3 +6379,27 @@
   Het designsysteem levert de kleine maat en de strakke stap (zie _De keuzes van de schakelaar zijn zo breed als hun tekst_ en _Een strakke stap op een smalle plek_ in `designsysteem.md`); de pagina's gaan hem gebruiken in #1324.
 - **Waarom:** naast de kop zijn twee bedieningselementen van 44 pixels te opvallend, en de kleine maat is bedoeld voor een kiezer of een schakelaar in een werkbalk (zie _Knoppen en velden hebben een kleine maat van 36 pixels naast de standaardmaat_).
 - **Alternatieven:** de kleine maat alleen vanaf 52 rem (twee maten voor dezelfde bediening).
+
+## De werkbalk staat naast de kop, boven de tweede kolom
+
+- **Datum:** 16 november 2026
+- **Besluit:** vanaf 52 rem staat de werkbalk van elke openbare pagina in de tweede kolom, in de rij van het kopblok, met zijn bovenkant op de hoogte van de bovenkant van de paginanaam (#1324).
+  Het kopblok is de paginanaam met de meta eronder, in de eerste kolom.
+  Dat geldt voor elke pagina met een werkbalk, ook als de inhoud eronder over beide kolommen loopt, zoals Cijfers van wedstrijden en een club in Tegenstanders zonder zijkaart.
+  Onder 52 rem verandert niets: kop, werkbalk en inhoud staan elk op een eigen rij, in die volgorde.
+  `pageAreas` zet de rij `head toolbar` in plaats van twee rijen, en de pagina's met eigen rijen (Cijfers van wedstrijden) doen hetzelfde.
+  De volgorde in de bron blijft de kop vóór de werkbalk, dus een schermlezer en de tab-toets komen de kop eerst tegen.
+- **Besluit:** de meta staat onder de naam, nooit ernaast.
+  Op de pagina van een speler gaat `Page.Title` met de feiten ernaast weg: de feiten (`PlayerFacts`) staan op elke breedte onder de naam, in de gewone tekstgrootte van de pagina en niet in de kleinere maat van metatekst.
+  De terugkeerlink van die pagina staat in een gebied van zijn eigen (`back`, `Page.Back`): een regel over de hele breedte boven het kopblok, en op een telefoon nog boven de naam, op dezelfde afstand als eerst.
+- **Besluit:** de seizoenskiezer en de schakelaar blijven in de werkbalk en staan op elke breedte in de kleine maat, op de zeven pagina's met een werkbalk.
+  `CompetitionLinks` geeft de schakelaar de kleine maat en laat `compact` weg: de strakke stap komt van de plek (zie _Een strakke stap op een smalle plek_ in `designsysteem.md`).
+  `SeasonPicker` heeft daarvoor een eigenschap `size`.
+- **Besluit:** het beheer verandert niet.
+  De 17 werkbalken daar houden hun eigen rij onder de kop (`apps/site/src/beheer/areas.ts`).
+- **Waarom:** een eigen rij voor de werkbalk drukt de inhoud naar beneden, en met de bediening in de tweede kolom staat ze altijd op dezelfde plek, ook op pagina's zonder zijkolom.
+  Met de bovenkant op de bovenkant van de naam blijft de werkbalk op één plek staan, ook als de naam op twee regels staat.
+  Naast de naam wordt het kopblok breder dan zijn kolom, en op die plek staat de werkbalk.
+  De werkbalk van het beheer heeft knoppen om op te slaan, een zoekveld en filters, en gaat over de volle breedte.
+- **Alternatieven:** de werkbalk onder de kop houden; de kiezer naast de kop in de hoofdkolom (de tweede kolom blijft dan soms leeg); een terugvalrij onder de kop als de werkbalk niet past (de bedieningselementen stapelen en worden strakker); de werkbalk gecentreerd of op de onderkant van de naam; de feiten naast de naam laten op een breed scherm; hetzelfde raster in het beheer.
+- **Later:** vervangt de regel uit _De openbare pagina's gebruiken het raster met benoemde gebieden_ (12 november 2026) dat de werkbalk onder de kop staat, en vult _De schakelaar en de seizoenskiezer zijn altijd klein_ (16 november 2026) aan: de pagina's gebruiken de kleine maat nu.

@@ -95,7 +95,7 @@ export async function PlayersPage({ season }: { season: string }) {
         <Heading level={1}>Spelers</Heading>
       </Page.Cell>
       <Page.Toolbar>
-        <SeasonPicker action={pickerPath} options={seasonChoices(seasons)} value={seasonSlug(season)} />
+        <SeasonPicker action={pickerPath} options={seasonChoices(seasons)} size="small" value={seasonSlug(season)} />
       </Page.Toolbar>
       <Page.Section area="main" aria-label="De selectie van het seizoen">
         <SeasonSquadCard squad={squad} />

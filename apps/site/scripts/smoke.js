@@ -1199,7 +1199,7 @@ await withEmptyDatabase((database) =>
     // choice is in the address of the other links.
     assert.match(
       statisticsHtml,
-      /<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-segmented-compact" role="group"><a aria-current="page" href="\/wedstrijden\/cijfers"><span class="hf-segmented-label" data-label="Alles">Alles<\/span><\/a><a href="\/wedstrijden\/cijfers\?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie<\/span><\/a><a href="\/wedstrijden\/cijfers\?competitie=play-offs"><span class="hf-segmented-label" data-label="Play-offs">Play-offs<\/span><\/a><a href="\/wedstrijden\/cijfers\?competitie=beker"><span class="hf-segmented-label" data-label="Beker">Beker<\/span><\/a><\/div>/,
+      /<div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group"><a aria-current="page" href="\/wedstrijden\/cijfers"><span class="hf-segmented-label" data-label="Alles">Alles<\/span><\/a><a href="\/wedstrijden\/cijfers\?competitie=eredivisie"><span class="hf-segmented-label" data-label="Eredivisie">Eredivisie<\/span><\/a><a href="\/wedstrijden\/cijfers\?competitie=play-offs"><span class="hf-segmented-label" data-label="Play-offs">Play-offs<\/span><\/a><a href="\/wedstrijden\/cijfers\?competitie=beker"><span class="hf-segmented-label" data-label="Beker">Beker<\/span><\/a><\/div>/,
     )
     const leagueResponse = await fetch(`${origin}/wedstrijden/cijfers?competitie=eredivisie`)
     const leagueHtml = await leagueResponse.text()
@@ -1314,7 +1314,7 @@ await withEmptyDatabase((database) =>
       statisticsHtml,
       /id="(?:doelpuntenmakers|topscorers)"|Alle <span class="hf-icon-tail">doelpuntenmakers/,
     )
-    // The switch is in the toolbar under the heading, above the key figures and the cards. The
+    // The switch is in the toolbar beside the heading, above the key figures and the cards. The
     // two cards that stay the Eredivisie are the group Competitie, and each ends with the line
     // that says so.
     assert.match(

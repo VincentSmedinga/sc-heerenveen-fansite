@@ -134,8 +134,7 @@ export async function AllSeasonsPage({ searchParams }: { searchParams: Promise<S
       areas={{
         narrow: ['head', 'toolbar', 'figures', 'seasons', 'results', 'goals', 'around', 'credit'],
         wide: [
-          'head head',
-          'toolbar toolbar',
+          'head toolbar',
           'figures figures',
           'seasons seasons',
           'results results',
@@ -154,6 +153,7 @@ export async function AllSeasonsPage({ searchParams }: { searchParams: Promise<S
           action={pickerPathOf(statisticsPath)}
           fields={competitionFields(competition)}
           options={seasonChoicesWithAll(seasons)}
+          size="small"
           value={allSeasonsSlug}
         />
         <CompetitionSwitch address={allSeasonsPath} competition={competition} matches={matches} />

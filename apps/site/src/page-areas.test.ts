@@ -21,10 +21,25 @@ describe('pageAreas', () => {
     })
   })
 
-  it('puts the toolbar under the heading over the whole width', () => {
+  it('puts the toolbar under the heading on a phone and beside it, in the second column, on a wide screen', () => {
     expect(pageAreas({ toolbar: true })).toEqual({
       narrow: ['head', 'toolbar', 'main'],
-      wide: ['head head', 'toolbar toolbar', 'main main'],
+      wide: ['head toolbar', 'main main'],
+    })
+  })
+
+  it('keeps the toolbar in the second column when the cells beside the content stand in the first', () => {
+    expect(pageAreas({ before: ['filter'], start: true, toolbar: true }).wide).toEqual(['head toolbar', 'filter main'])
+  })
+
+  it('gives the link back a row of its own over the whole width, above the heading and the toolbar', () => {
+    expect(pageAreas({ after: ['side'], back: true, toolbar: true })).toEqual({
+      narrow: ['back', 'head', 'toolbar', 'main', 'side'],
+      wide: ['back back', 'head toolbar', 'main side'],
+    })
+    expect(pageAreas({ back: true })).toEqual({
+      narrow: ['back', 'head', 'main'],
+      wide: ['back back', 'head head', 'main main'],
     })
   })
 

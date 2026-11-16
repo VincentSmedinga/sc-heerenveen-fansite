@@ -547,7 +547,7 @@ describe('the choice between all the matches and the Eredivisie on /spelers/cijf
     const toolbar = html.slice(html.indexOf('<div class="hf-page-toolbar"'), html.indexOf('style="grid-area:main"'))
 
     expect(
-      /^<div class="hf-page-toolbar"[^>]*><div aria-label="Welke wedstrijden" class="hf-segmented-control hf-segmented-compact" role="group"/.test(
+      /^<div class="hf-page-toolbar"[^>]*><div aria-label="Welke wedstrijden" class="hf-segmented-control hf-size-small" role="group"/.test(
         toolbar,
       ),
     ).toBe(true)

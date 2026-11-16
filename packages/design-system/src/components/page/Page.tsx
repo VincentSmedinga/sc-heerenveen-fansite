@@ -9,8 +9,11 @@ import { ShortcutsRow } from './ShortcutsRow'
  * The areas of a page, as the rows of the grid, one string per row with a name for each column,
  * such as `'main side'`: the same name in two columns, or in two rows, is one area. `narrow` is
  * for a screen under 52rem, with one column, and `wide` for the screen from there on, with two
- * columns. The rows come in a fixed order: the heading (`head`), the toolbar (`toolbar`), the
- * content and last the credit (`source`). A row of a page without a toolbar is left out.
+ * columns. The rows come in a fixed order: the link back (`back`, see Page.Back), the heading
+ * (`head`), the toolbar (`toolbar`), the content and last the credit (`source`). A row of a
+ * page without one of them is left out. From 52rem the heading stands in the first column and
+ * the toolbar in the second, in one row: `'head toolbar'`; the link back has a row of its own
+ * across the page.
  */
 export type PageAreas = {
   /** The rows under 52rem, with one column, in the order of the source. */
@@ -18,6 +21,8 @@ export type PageAreas = {
   /** The rows from 52rem, with two columns. Use `.` for an empty place. */
   wide: readonly string[]
 }
+
+export type PageBackProps = ComponentPropsWithoutRef<'div'>
 
 export type PageBodyProps = ComponentPropsWithoutRef<'div'>
 
@@ -207,12 +212,26 @@ const Section = ({ area, className, style, ...props }: PageSectionProps) => (
 )
 
 /**
- * The row under the heading, as wide as the page, for what steers the whole page: the choice of
- * a season, a switch, and in the admin the filter and the buttons to save. It wraps on a phone
- * and does not stick. It is no landmark and has no role `toolbar`, which promises arrow keys
- * between its controls: each control in it has a name of its own. It sits in the area `toolbar`
- * of a Page.Main with `areas`, and comes after the heading in the source. A page without one
- * has no row for it, so there is no empty space.
+ * The link back of a page, such as "Spelers" on the page of a player, in the area `back` of a
+ * Page.Main with `areas`. It stands on a line of its own above the heading, across the page,
+ * and is the first thing in the source. The space under it is the medium step, so it sits close
+ * to the heading, as the first line of a cell would.
+ */
+const Back = ({ className, style, ...props }: PageBackProps) => (
+  <div className={classNames('hf-page-back', className)} style={{ gridArea: 'back', ...style }} {...props} />
+)
+
+/**
+ * What steers the whole page: the choice of a season, a switch, and in the admin the filter and
+ * the buttons to save. It sits in the area `toolbar` of a Page.Main with `areas`, and comes
+ * after the heading in the source, so a screen reader and the Tab key meet the heading first.
+ * Under 52rem it is a row under the heading. From there it depends on the areas of the page:
+ * the public pages put it in the second column, in the row of the heading, level with the top
+ * of the page name, and the controls wrap inside that column. The admin gives it a row of its
+ * own across the page. It is a place with a width of its own, so a control can take a tighter
+ * step when it does not fit. It does not stick. It is no landmark and has no role `toolbar`,
+ * which promises arrow keys between its controls: each control in it has a name of its own. A
+ * page without one has no row for it, so there is no empty space.
  */
 const Toolbar = ({ className, style, ...props }: PageToolbarProps) => (
   <div className={classNames('hf-page-toolbar', className)} style={{ gridArea: 'toolbar', ...style }} {...props} />
@@ -264,6 +283,7 @@ const TopLink = ({ className, label, ...props }: PageTopLinkProps) => (
 )
 
 // The names in React's developer tools and in the code examples in Storybook.
+Back.displayName = 'Page.Back'
 Header.displayName = 'Page.Header'
 Shortcuts.displayName = 'Page.Shortcuts'
 Body.displayName = 'Page.Body'
@@ -293,6 +313,7 @@ export const Page = ({ children, className, ...props }: PageProps) => (
   </div>
 )
 
+Page.Back = Back
 Page.Header = Header
 Page.Shortcuts = Shortcuts
 Page.Body = Body

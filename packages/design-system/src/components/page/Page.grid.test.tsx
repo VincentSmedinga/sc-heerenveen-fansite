@@ -5,7 +5,7 @@ import { Page } from './Page'
 
 const areas = {
   narrow: ['head', 'toolbar', 'filter', 'main'],
-  wide: ['head head', 'toolbar toolbar', 'main filter', 'main stack'],
+  wide: ['head toolbar', 'main filter', 'main stack'],
 }
 
 const renderGrid = () =>
@@ -30,11 +30,9 @@ describe('Page.Main with areas', () => {
     const main = screen.getByRole('main')
 
     expect(main.style.getPropertyValue('--hf-page-areas-narrow')).toBe('"head" "toolbar" "filter" "main"')
-    expect(main.style.getPropertyValue('--hf-page-areas-wide')).toBe(
-      '"head head" "toolbar toolbar" "main filter" "main stack"',
-    )
+    expect(main.style.getPropertyValue('--hf-page-areas-wide')).toBe('"head toolbar" "main filter" "main stack"')
     expect(main.style.getPropertyValue('--hf-page-columns')).toBe('var(--hf-page-columns-narrow-side)')
-    expect(main.style.getPropertyValue('--hf-page-rows-wide')).toBe('auto auto auto 1fr')
+    expect(main.style.getPropertyValue('--hf-page-rows-wide')).toBe('auto auto 1fr')
     expect(main.className).toContain('hf-page-main-grid')
   })
 
@@ -62,6 +60,25 @@ describe('Page.Main with areas', () => {
     ])
     expect(container.innerHTML).not.toMatch(/order/)
     expect(main.querySelector('h1')).not.toBeNull()
+  })
+
+  it('puts the link back in the area back, before the heading in the source', () => {
+    render(
+      <Page.Main areas={{ narrow: ['back', 'head', 'main'], wide: ['back back', 'head head', 'main main'] }}>
+        <Page.Back>
+          <a href="/spelers">Spelers</a>
+        </Page.Back>
+        <Page.Cell area="head">
+          <h1>Naam</h1>
+        </Page.Cell>
+      </Page.Main>,
+    )
+
+    const back = screen.getByRole('link', { name: 'Spelers' }).parentElement
+
+    expect(back?.style.gridArea).toBe('back')
+    expect(back?.className).toBe('hf-page-back')
+    expect(back?.nextElementSibling?.querySelector('h1')).not.toBeNull()
   })
 
   it('makes a section with a name a landmark region inside the main, and the toolbar none', () => {
