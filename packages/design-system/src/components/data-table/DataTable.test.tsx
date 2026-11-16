@@ -513,6 +513,33 @@ describe('DataTable.Group', () => {
       expect(document.querySelectorAll('tbody tr.hf-data-table-gap th [aria-hidden="true"]')).toHaveLength(1)
     })
 
+    it('marks a highlighted row by more than colour, and says in a gap row what it hides', () => {
+      render(
+        <DataTable
+          {...ranked}
+          rows={[
+            { cells: ['2,00', 5], header: 'FC Voorbeeld', highlight: true, note: 'onze club', position: 6 },
+            {
+              cells: [],
+              display: '9 clubs ertussen',
+              gap: true,
+              header: '9 clubs ertussen',
+            },
+            { cells: ['2,00', 5], header: 'SV Proefdorp', position: 17 },
+          ]}
+        />,
+      )
+
+      const rows = [...document.querySelectorAll('tbody tr')]
+
+      expect(rows.map((row) => row.className)).toEqual(['hf-data-table-highlight', 'hf-data-table-gap', ''])
+      expect(rows[0]?.querySelector('th')?.textContent).toBe('FC Voorbeeld, onze club')
+      expect(rows[1]?.querySelector('th')?.textContent).toBe('9 clubs ertussen')
+      expect(rows[1]?.querySelector('[aria-hidden="true"]')).toBeNull()
+      // The gap row has an empty cell in the column of the places, so the columns line up.
+      expect(rows[1]?.querySelectorAll('td')).toHaveLength(3)
+    })
+
     it('has no such column when no row has a position', () => {
       render(<DataTable {...props} />)
 

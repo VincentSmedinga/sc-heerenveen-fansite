@@ -63,11 +63,19 @@ export type DataTableRow = {
    * club between two spells: a vertical ellipsis (⋮) in the row header and empty cells. The
    * sign is hidden from a screen reader, which reads `header` instead, such as `niet bij sc
    * Heerenveen`. The header of such a row need not be unique. It is for a table that is not
-   * sortable, and `cells` stay empty.
+   * sortable, and `cells` stay empty. A gap row with `display` shows that text in place of the
+   * sign, for an interruption that says what it hides, such as `9 clubs ertussen`.
    */
   gap?: boolean
   /** What the row is about, as plain text. It is the row header, so it must be unique. */
   header: string
+  /**
+   * Marks the row as one the table is about, such as the two clubs of a match in a stretch of
+   * the league table: the strong fill and a bar on the start side that also shows in
+   * forced colours. Colour is never the only sign, so give the row a `note` that says why it
+   * stands out, such as `deze club`. Not for a total (use `total`).
+   */
+  highlight?: boolean
   /**
    * Makes the row header a link, to the page about what the row is about, such as the page of a
    * club in a list of clubs. The link says the same as the header, so it names where it goes.

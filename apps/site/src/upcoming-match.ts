@@ -19,22 +19,36 @@ export type UpcomingDetails = {
 }
 
 /**
+ * The form of `club` as `opponentFormOf` has it, with what the marks add up to: the points
+ * (three for a win, one for a draw) and the goals for and against in those matches.
+ */
+export function formOf(results: readonly PublicLeagueResult[], club: string) {
+  const form = { goalsAgainst: 0, goalsFor: 0, marks: [] as FormResult[], points: 0 }
+
+  for (const result of results
+    .filter((one) => one.homeClub === club || one.awayClub === club)
+    .toSorted((a, b) => a.playedOn.localeCompare(b.playedOn) || a.round - b.round)
+    .slice(-formLength)) {
+    const [own, other] =
+      result.homeClub === club ? [result.homeGoals, result.awayGoals] : [result.awayGoals, result.homeGoals]
+
+    form.goalsFor += own
+    form.goalsAgainst += other
+    form.marks.push(own > other ? 'W' : own === other ? 'G' : 'V')
+    form.points += own > other ? 3 : own === other ? 1 : 0
+  }
+
+  return form
+}
+
+/**
  * The last league results of `club`, the oldest first, from the results of every club in the
  * season (see `leagueResultsOfAllClubs`): at most five, as many as it has played, and none for
  * a club with no league result, such as a cup opponent from a lower division. There is no
  * fallback to the season before: the form says how the club does now.
  */
 export function opponentFormOf(results: readonly PublicLeagueResult[], club: string): FormResult[] {
-  return results
-    .filter((result) => result.homeClub === club || result.awayClub === club)
-    .toSorted((a, b) => a.playedOn.localeCompare(b.playedOn) || a.round - b.round)
-    .slice(-formLength)
-    .map((result): FormResult => {
-      const [own, other] =
-        result.homeClub === club ? [result.homeGoals, result.awayGoals] : [result.awayGoals, result.homeGoals]
-
-      return own > other ? 'W' : own === other ? 'G' : 'V'
-    })
+  return formOf(results, club).marks
 }
 
 /**

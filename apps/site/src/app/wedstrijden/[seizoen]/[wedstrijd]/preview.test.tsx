@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getMatchNeighbours } from '#src/match-neighbours'
-import { getMatchData } from '#src/matches'
+import { getLeagueResults, getMatchData } from '#src/matches'
 import { type ClubHeadline, type ClubPage, getClubNews, getClubPage } from '#src/opponents'
 import { getPreviewMatch, getPublicReport } from '#src/report-data'
 import { matchData } from '#src/test-matches'
@@ -14,6 +14,7 @@ import MatchPage, { generateMetadata } from './page'
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getEditorSources: vi.fn(() => Promise.resolve([])),
+  getLeagueResults: vi.fn(),
   getMatchData: vi.fn(),
 }))
 vi.mock('#src/match-neighbours', () => ({ getMatchNeighbours: vi.fn() }))
@@ -68,12 +69,19 @@ const headline = (title: string, day: string): ClubHeadline => ({
   url: `https://ad.test/${title.length}`,
 })
 
+const leagueResult = { awayClub: '', awayGoals: 0, homeClub: '', homeGoals: 0, playedOn: '2026-10-04', round: 1 }
+
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] })
   vi.setSystemTime(now)
   vi.stubEnv('SITE_ENV', 'production')
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getMatchData).mockResolvedValue(matchData)
+  vi.mocked(getLeagueResults).mockReset()
+  vi.mocked(getLeagueResults).mockResolvedValue([
+    { ...leagueResult, awayClub: 'Testdorp FC', awayGoals: 0, homeClub: 'Voorbeeld United', homeGoals: 2 },
+    { ...leagueResult, awayClub: 'Voorbeeld United', awayGoals: 1, homeClub: 'Testdorp FC', homeGoals: 1, round: 2 },
+  ])
   vi.mocked(getPublicReport).mockReset()
   vi.mocked(getPublicReport).mockResolvedValue(undefined)
   vi.mocked(getPreviewMatch).mockReset()
@@ -98,11 +106,13 @@ afterEach(() => {
 })
 
 describe('the Voorbeschouwing of a match that has not begun', () => {
-  it('has one h1 with the clubs and an h2 for the news, in the order of the page', async () => {
+  it('has one h1 with the clubs and an h2 for each card, in the order of a phone', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)?.map((heading) => plain(heading))).toEqual([
       'Testdorp FC – sc Heerenveen',
+      'Stand',
+      'Vorm',
       'Nieuws over Testdorp FC',
     ])
     expect(html.match(/<h1/g)).toHaveLength(1)
@@ -141,6 +151,55 @@ describe('the Voorbeschouwing of a match that has not begun', () => {
     expect(text).toContain('Meer nieuws over Testdorp FC')
     // The headline is the link, to the source.
     expect(html).toContain('href="https://ad.test/')
+  })
+
+  it('shows the card Stand with both clubs marked and the sentence about the gap', async () => {
+    const html = await render()
+    const text = plain(html)
+
+    expect(text).toContain('Na speelronde 2')
+    expect(text).toContain('Stand, na speelronde 2')
+    expect(html.match(/class="hf-data-table-highlight"/g)).toHaveLength(2)
+    expect(text).toContain('sc Heerenveen , onze club')
+    expect(text).toContain('Testdorp FC , de tegenstander')
+    expect(text).toContain('We staan één plek en vijf punten boven Testdorp FC.')
+    expect(html).toContain('href="/wedstrijden#stand"')
+  })
+
+  it('shows the card Vorm with one line for each club, ours first', async () => {
+    const html = await render()
+    const text = plain(html)
+
+    expect(text).toContain('De laatste vijf in de competitie, de oudste eerst')
+    expect(text).toContain('sc Heerenveen: winst, winst, gelijk 7 punten · doelpunten 7–3')
+    expect(text).toContain('Testdorp FC: verlies, gelijk, verlies 1 punt · doelpunten 1–5')
+    expect(text.indexOf('sc Heerenveen: winst')).toBeLessThan(text.indexOf('Testdorp FC: verlies'))
+  })
+
+  it('leaves out the card Stand for a cup match, and the lines of a club without a league result', async () => {
+    vi.mocked(getPreviewMatch).mockResolvedValue(scheduled({ competition: 'KNVB Beker', opponent: 'SV Proefdorp' }))
+    vi.mocked(getLeagueResults).mockResolvedValue([])
+
+    const text = plain(await render())
+
+    expect(text).not.toContain('Stand')
+    expect(text).not.toContain('Na speelronde')
+  })
+
+  it('leaves out the card Vorm when neither club has a league result, but keeps the card Stand', async () => {
+    vi.mocked(getLeagueResults).mockResolvedValue([])
+    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [] })
+
+    const text = plain(await render())
+
+    expect(text).toContain('Stand')
+    expect(text).not.toContain('Vorm')
+  })
+
+  it('leaves out the card Stand without a table for the season', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, standings: [] })
+
+    expect(plain(await render())).not.toContain('Na speelronde')
   })
 
   it('leaves out the card Nieuws without a headline, with no sentence about it', async () => {
