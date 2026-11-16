@@ -3436,7 +3436,7 @@
 - **Alternatieven:** de tabel met getallen, die alleen letters kent en geen links in een cel heeft.
   Altijd letters, ook op een breed scherm.
   Een eigen tabel in de site, die geen eigen CSS heeft.
-- **Later:** een teken heeft sinds #1307 aan de zijkanten de helft van de ruimte (`--hf-space-xs` gedeeld door twee), zodat een getal van twee cijfers binnen de 1,5rem van het doel blijft en acht kolommen op 320 pixels passen: de tabel van de kwaliteit van wedstrijden kreeg de kolom Stadion en was daarmee 18 pixels te breed (16 november 2026).
+- **Later:** een teken heeft sinds #1307 geen ruimte meer aan de zijkanten (de 1,5rem is de breedte van het doel, en de ruimte kwam er nog bij), zodat een kolom 1,5rem breed is en acht kolommen op 320 pixels passen: de tabel van de kwaliteit van wedstrijden kreeg de kolom Stadion en was daarmee 18 pixels te breed (16 november 2026).
 
 ### Een brede pagina zonder zijbalk vult de hele breedte
 

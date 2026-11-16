@@ -233,8 +233,9 @@
    * strong fill, so it stands out from the empty cells of what is complete. It keeps the weight
    * of the cell: bold in a table is only for the key figure (see weight-css.test.ts). The cells
    * of such a column have no padding at the sides: eight columns and a row header then fit a
-   * phone of 320 pixels, and the sign itself keeps its size as a target. Its own room at the
-   * sides is small, so a number of two digits stays within the 1.5rem of the target.
+   * phone of 320 pixels, and the sign itself keeps its size as a target. It has no room of
+   * its own at the sides either (the 1.5rem is the width of the target), so a column is
+   * 1.5rem wide and not two pixels more.
    */
   .hf-data-table-text .hf-data-table-mark-column {
     padding-inline: 0;
@@ -249,7 +250,7 @@
     line-height: 1.5rem;
     min-block-size: 1.5rem;
     min-inline-size: 1.5rem;
-    padding-inline: calc(var(--hf-space-xs) / 2);
+    padding-inline: 0;
     text-align: center;
     text-decoration: none;
   }
