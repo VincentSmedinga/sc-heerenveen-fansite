@@ -22,6 +22,7 @@ import type { MatchDay } from './relevance.ts'
 import { alertRunOf, feedSubject, matchesSubject, squadSubject } from './alert-runs.ts'
 import { createFetcher } from './fetcher.ts'
 import { describeClubData, readClubData } from './import-club-data.ts'
+import { describeClubStadiums, readClubStadiums } from './import-club-stadiums.ts'
 import { importEndedSeason } from './import-ended-season.ts'
 import { formatMatchReport, importMatches, repairKnownClubs, wikipediaOrigin } from './import-matches.ts'
 import { describePersonData, readPersonData, wikidataOrigin } from './import-person-data.ts'
@@ -500,6 +501,22 @@ async function importClubData(
   }
 }
 
+/** Gives the clubs with a Q-number their stadiums from Wikidata (#1298); failure warns. */
+async function importClubStadiums(
+  db: Database,
+  fetcher: Fetcher,
+  options: { clock: () => Date; pause: number | undefined; wikidata: string },
+): Promise<string[]> {
+  try {
+    const { pause, ...rest } = options
+    const report = await readClubStadiums(db, fetcher, { ...rest, ...(pause === undefined ? {} : { pause }) })
+
+    return [...report.warnings, ...describeClubStadiums(report)]
+  } catch (error) {
+    return [`Stadiums: warning, not read from Wikidata: ${describeError(error)}`]
+  }
+}
+
 /**
  * Reads a feed whose time has come, or reports that it waits. A failure of the database becomes
  * an error report.
@@ -574,6 +591,8 @@ async function importPersonData(
 
   // After the persons, from the same two servers, so the same waits and stops apply (#1264).
   lines.push(...(await importClubData(db, fetcher, { clock, origin, pause, wikidata })))
+  // Then the stadiums of the clubs that have a Q-number now, from the same server (#1298).
+  lines.push(...(await importClubStadiums(db, fetcher, { clock, pause, wikidata })))
 
   return lines
 }

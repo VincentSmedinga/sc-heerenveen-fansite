@@ -18,6 +18,9 @@
 // With `--completeness` it works out again how likely it is that the squad of each season is
 // whole, from the database and without a request (`pnpm run import:completeness`).
 //
+// With `--stadiums` it reads the home grounds of the clubs from Wikidata, for the clubs
+// that were not read yet (`pnpm run import:stadiums`), under the lock of the import.
+//
 // With `--item-clubs` it works out again which professional clubs each headline names, from the
 // database and without a request (`pnpm run import:item-clubs`).
 //
@@ -37,6 +40,7 @@ import { parseArgs } from 'node:util'
 
 import { runCountryFactsCommand } from './country-facts.ts'
 import { runChangesCommand } from './import-changes.ts'
+import { runStadiumsCommand } from './import-club-stadiums.ts'
 import { runImport } from './import-feeds.ts'
 import { oldSiteUsage, runOldSiteImport, runOldSiteReport } from './import-old-site.ts'
 import { fromSeasonUsage, runSeasonImport, runSeasonsImport, seasonUsage } from './import-season.ts'
@@ -59,6 +63,7 @@ const { positionals, values } = parseArgs({
     report: { type: 'boolean' },
     season: { type: 'boolean' },
     squad: { type: 'boolean' },
+    stadiums: { type: 'boolean' },
     status: { type: 'boolean' },
   },
 })
@@ -74,6 +79,7 @@ const modes = [
   values['old-site'],
   values.season,
   values.squad,
+  values.stadiums,
   values.status,
 ].filter(Boolean).length
 const wrongArguments =
@@ -127,10 +133,12 @@ process.exitCode = fromSeason
               ? await runCompletenessCommand(DATABASE_URL)
               : values['country-facts']
                 ? await runCountryFactsCommand(DATABASE_URL)
-                : values['item-clubs']
-                  ? await runItemClubsCommand(DATABASE_URL)
-                  : values['old-site']
-                    ? values.report
-                      ? await runOldSiteReport(DATABASE_URL)
-                      : await runOldSiteImport(DATABASE_URL, { dryRun: values['dry-run'] === true })
-                    : await runImport(DATABASE_URL)
+                : values.stadiums
+                  ? await runStadiumsCommand(DATABASE_URL)
+                  : values['item-clubs']
+                    ? await runItemClubsCommand(DATABASE_URL)
+                    : values['old-site']
+                      ? values.report
+                        ? await runOldSiteReport(DATABASE_URL)
+                        : await runOldSiteImport(DATABASE_URL, { dryRun: values['dry-run'] === true })
+                      : await runImport(DATABASE_URL)

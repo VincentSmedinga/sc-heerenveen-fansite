@@ -762,7 +762,12 @@ export const wikidataLimits = { id: 20, label: 255 }
  */
 export const clubCountrySources = ['manual', 'wikidata'] as const
 
+/** Who set the home grounds of a club (#1298), as `clubCountrySources` does for the country. */
+export const clubHomeGroundSources = ['manual', 'wikidata'] as const
+
 export type ClubCountrySource = (typeof clubCountrySources)[number]
+
+export type ClubHomeGroundSource = (typeof clubHomeGroundSources)[number]
 
 /**
  * The clubs sc Heerenveen played against. One club is one article on the Dutch Wikipedia:
@@ -794,6 +799,12 @@ export const clubs = mysqlTable(
     countryItemId: varchar('country_item_id', { length: wikidataLimits.id }).references(() => wikidataItems.id),
     // When the importer read the item of the club. It does not ask about a club that was read.
     wikidataReadAt: datetime('wikidata_read_at'),
+    // When the importer read the home grounds (`P115`) of the item of the club (#1298). It does
+    // not ask about a club that was read.
+    stadiumsReadAt: datetime('stadiums_read_at'),
+    // Who set the home grounds in `club_home_grounds`. `manual`: the editors, so the importer
+    // leaves the club alone. Empty: nobody did, so the importer may write them.
+    homeGroundsSource: mysqlEnum('home_grounds_source', clubHomeGroundSources),
     createdAt: datetime('created_at')
       .notNull()
       .default(sql`(UTC_TIMESTAMP())`),

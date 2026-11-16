@@ -4244,3 +4244,25 @@
 - **Waarom:** een speler die later in de selectie kwam, of een persoon die later is samengevoegd, lost het gat dan vanzelf op.
   Op 16 november 2026 misten 24 doelpunten van ons een speler, 23 daarvan sinds 2020/21, terwijl de spelers er nu wel staan.
 - **Alternatieven:** een losse opdracht die één keer draait (hetzelfde gat komt later terug); een wedstrijd met een verslag ook koppelen (het verslag bepaalt dan niet meer alleen zijn doelpunten).
+
+## De importer leest de thuisvelden van clubs uit Wikidata
+
+- **Datum:** 16 november 2026
+- **Besluit:** de importer leest van elke club met een Q-nummer de uitspraken `P115` met begin (`P580`) en einde (`P582`), en van elk stadion het label, de plaats (`P131`) en de coördinaten (`P625`), en maakt er stadions en thuisvelden van (#1298).
+  - **Welke uitspraken tellen:** elke uitspraak die niet "deprecated" is, ook als een andere "preferred" is.
+    Een club die verhuisde heeft het oude veld erbij, en Wikidata markeert vaak alleen het huidige als voorkeur.
+  - **Een stadion vinden:** eerst op het Wikidata-nummer.
+    Anders krijgt een stadion zonder nummer, met dezelfde naam bij dezelfde club (de sleutel van `nameKey`), het nummer.
+    Anders ontstaat een nieuw stadion met het label als enige naam, zonder begin.
+  - **Het begin van een thuisveld:** de dag als `P580` een dag is, anders het seizoen met die maand (een maand voor juli hoort bij het seizoen dat het jaar daarvoor begon), en bij alleen een jaar het seizoen dat in dat jaar begint.
+    Een veld zonder begin neemt het einde van het veld ervoor.
+    Lukt dat niet voor een veld dat niet het eerste is, dan schrijft de importer niets voor die club en waarschuwt hij.
+  - **Wat van de redactie blijft:** een stadion met `place_source` `manual` verandert niet, en een club met `home_grounds_source` `manual` laat de importer staan.
+    Daarom heeft `clubs` twee kolommen erbij: `stadiums_read_at` (een club wordt één keer gelezen) en `home_grounds_source`.
+    De redactie zet `manual` zodra zij thuisvelden van een club bewaart (#1299).
+    De rijen die de stap na de migraties uit de wedstrijden maakte (#1297) hebben geen bron, en de importer vervangt ze.
+  - **Een club zonder `P115`** krijgt niets, en wat hij had blijft staan.
+  - **Het einde (`P582`)** bepaalt alleen de volgorde en het begin van een veld zonder begin, want `club_home_grounds` kent geen einde: het begin van het volgende veld is het einde van het vorige.
+- **Waarom:** de plaats en de coördinaten zijn er in Wikidata bijna overal, en de thuisvelden van onze tegenstanders staan er bij 44 van de 58 clubs met een Q-nummer (kopie van acceptatie, 16 november 2026).
+  Een nieuw veld voor een nieuw Q-nummer vraagt geen opdracht van de redactie.
+- **Alternatieven:** alleen de "preferred" uitspraken (mist de oude velden); een tweede opdracht die alle stadions elke run opnieuw leest (veel verzoeken voor weinig verandering); de bron van de thuisvelden op elke rij van `club_home_grounds` (de redactie bewaart een club als geheel).
