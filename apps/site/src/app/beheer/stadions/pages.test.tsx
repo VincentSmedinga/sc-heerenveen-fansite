@@ -196,6 +196,21 @@ describe('the page of a club', () => {
     expect(html).not.toContain('Eigen lijst opslaan')
   })
 
+  it('says that a number was found by name, with a link to the item, and not for another source', async () => {
+    await database.pool.query(
+      "UPDATE clubs SET wikidata_id = 'Q70', wikidata_source = 'name' WHERE slug = 'oefenstad-az'",
+    )
+
+    const found = await form('oefenstad-az')
+
+    expect(found).toContain('Op naam gevonden')
+    expect(found).toContain('href="https://www.wikidata.org/wiki/Q70"')
+
+    await database.pool.query("UPDATE clubs SET wikidata_source = 'manual' WHERE slug = 'oefenstad-az'")
+
+    expect(await form('oefenstad-az')).not.toContain('Op naam gevonden')
+  })
+
   it('shows the home grounds of the club with a tag', async () => {
     await giveList('oefenstad-az')
 

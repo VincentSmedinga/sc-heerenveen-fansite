@@ -139,6 +139,17 @@ export function readHomeGrounds(text: string): HomeGround[] {
 }
 
 /**
+ * The kinds the item is an instance of (`P31`, #1341), such as a football club, in the order of
+ * Wikidata. Empty when the item has none or the text is no item.
+ */
+export function readInstanceIds(text: string): string[] {
+  const entity = firstEntity(text)
+  const claims = entity !== null && isRecord(entity['claims']) ? entity['claims'] : {}
+
+  return itemIdsOf(statementsOf(claims, 'P31'))
+}
+
+/**
  * Reads the item of Wikidata (`Special:EntityData/Q….json`): the birth date (`P569`), the date
  * of death (`P570`, with the same rules), the birth
  * place (`P19`), the nationalities (`P27`) and the positions (`P413`). A statement with the

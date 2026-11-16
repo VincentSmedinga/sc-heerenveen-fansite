@@ -8,6 +8,7 @@
   "scripts": {
     "export:old-site": "node --env-file-if-exists=../../.env src/export-old-site.ts",
     "import": "node ../../scripts/worktree-env.js guard -- node --env-file-if-exists=../../.env src/import.ts",
+    "import:club-numbers": "node ../../scripts/worktree-env.js guard -- node --env-file-if-exists=../../.env src/import.ts --club-numbers",
     "import:completeness": "node ../../scripts/worktree-env.js guard -- node --env-file-if-exists=../../.env src/import.ts --completeness",
     "import:stadiums": "node ../../scripts/worktree-env.js guard -- node --env-file-if-exists=../../.env src/import.ts --stadiums",
     "import:country-facts": "node ../../scripts/worktree-env.js guard -- node --env-file-if-exists=../../.env src/import.ts --country-facts",

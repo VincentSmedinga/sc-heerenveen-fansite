@@ -21,6 +21,8 @@ export type TestItem = {
   headquarters?: (ItemStatement | string)[]
   /** The home grounds (`P115`) of a club, with the dates of their qualifiers (#1298). */
   homeGrounds?: { end?: TimeValue; rank?: Rank; start?: TimeValue; value: string }[]
+  /** What the item is an instance of (`P31`), such as a football club (#1341). */
+  instanceOf?: (ItemStatement | string)[]
   /** The label in Dutch and in English; leave both out for an item with no label. */
   labels?: { en?: string; nl?: string }
   nationalities?: (ItemStatement | string)[]
@@ -145,6 +147,9 @@ export function itemJson(id: string, item: TestItem = {}): string {
   }
   if (item.countries !== undefined) {
     claims['P17'] = items(item.countries)
+  }
+  if (item.instanceOf !== undefined) {
+    claims['P31'] = items(item.instanceOf)
   }
   if (item.headquarters !== undefined) {
     claims['P159'] = items(item.headquarters)

@@ -4304,3 +4304,27 @@
 - **Waarom:** een `process.exit` aan het eind verbergt de oorzaak en kapt een nog lopende schrijfactie af.
   De import van elk uur duurt te kort om dit te raken, de opdrachten van een kwartier of langer niet.
 - **Alternatieven:** een `process.exit` na de opdracht (verbergt de oorzaak); de fetcher een `close()` geven (de fetcher was het niet); een eigen verbinding per slot zonder keep-alive (de verbinding blijft dan stil en breekt weer).
+
+## De importer zoekt clubs zonder Wikidata-nummer op in Wikipedia, op naam
+
+- **Datum:** 17 november 2026
+- **Besluit:** een club zonder Wikidata-nummer wordt in elke import één keer gezocht, direct na de landen van de clubs en vóór de stadions (#1341).
+  De importer vraagt de Nederlandse en de Engelse Wikipedia om de pagina-informatie van een artikel met precies de naam van de club, neemt het Wikidata-nummer van dat artikel, en leest het item via `Special:EntityData`.
+  Hij schrijft het nummer alleen bij precies één item dat een voetbalclub is (`P31` is `Q476028`), hetzelfde land heeft als de club bij ons (`P17`; het Verenigd Koninkrijk past bij elk van de vier landen) en nog van geen andere club is.
+  Een vrouwenelftal of tweede elftal heeft een ander soort item en valt af; twee artikelen met hetzelfde item tellen als één.
+  Het nummer krijgt de herkomst `name` in `clubs.wikidata_source`, naast `wikipedia` (uit het artikel van de club) en `manual` (van de redactie).
+  Bij geen of meer kandidaten, een ander land of een nummer van een andere club schrijft de importer niets en zet hij een regel in het logboek met het aantal kandidaten.
+  Een club zonder land wordt niet gezocht, want zonder land is er geen controle.
+  Een club wordt één keer gezocht (`clubs.wikidata_searched_at`); een verzoek dat mislukt laat hem ongezocht.
+  Een nummer dat de redactie invult of leegmaakt verandert de importer nooit: de redactie maakt het nummer `manual`, en een leeggemaakt nummer krijgt een zoekdatum, zodat de importer de club niet opnieuw zoekt.
+  Beheer toont "Op naam gevonden" bij zo'n nummer, met een link naar het item op Wikidata.
+  De opdracht `pnpm run import:club-numbers` doet alleen deze stap, onder de lock van de import.
+- **Waarom:** Wikidata zelf zoeken kan de importer niet.
+  De `robots.txt` van `www.wikidata.org` verbiedt `/w/` (dus `api.php` met `wbsearchentities`), `Special:Search` en `/api/`, en laat alleen `Special:EntityData/*.<extensie>` toe.
+  De `robots.txt` van `query.wikidata.org` verbiedt `/sparql`.
+  De fetcher houdt zich aan `robots.txt` (zie _Een herkenbare fetcher die zich aan robots.txt houdt_), dus een zoekopdracht daar kan niet.
+  De pagina-informatie van een artikel mag wel, en de importer gebruikt die al voor de clubs met een artikel (#1264).
+  Een verkeerd nummer geeft een club een verkeerd stadion, en dat valt niet op, dus de regel is streng: een artikel met precies de naam, de soort voetbalclub en hetzelfde land als de redactie invulde.
+  De telling van de Specifier op 16 november 2026 (60 clubs zonder nummer, 29 met één kandidaat) ging met een zoekopdracht op Wikidata zelf, die de importer niet mag doen; met artikelen op naam krijgen minder clubs een nummer.
+  Zo ziet de redactie ook welke nummers geen mens heeft nagekeken, en verbetert ze een vergissing op de plek waar ze een nummer invult.
+- **Alternatieven:** de zoekopdracht van Wikidata (`api.php`) toch doen met onze User-Agent en een pauze (dat gaat tegen de `robots.txt` in, en dan hadden we een uitzondering op onze regel nodig); geen automatisch zoeken, alleen een link van de pagina van de club naar de zoekfunctie van Wikidata (de redactie zoekt 60 clubs met de hand); een nummer voorstellen en door de redactie laten bevestigen (meer werk voor de redactie voor 29 duidelijke gevallen); een eigen opdracht die iemand één keer draait (een club die later bijkomt, krijgt dan geen nummer zonder dat iemand eraan denkt).

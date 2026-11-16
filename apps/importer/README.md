@@ -1278,6 +1278,31 @@ Een club aan de lijst toevoegen:
 
 `otherClubGroups` in `relevance-terms.ts` is een andere lijst met een ander doel, het filter van de koppen, en blijft zoals hij is.
 
+### Het nummer van clubs zonder artikel
+
+Een club die uit de oude Fansite kwam, heeft vaak geen artikel op Wikipedia en dus geen Wikidata-nummer (#1341).
+Zonder nummer leest de importer zijn stadions niet, en krijgt een oude wedstrijd bij die club geen stadion.
+De gewone import zoekt daarom elke club zonder nummer één keer, direct na de landen van de clubs en vóór de stadions.
+
+Wikidata zelf kan hij niet doorzoeken: de `robots.txt` van `www.wikidata.org` verbiedt `/w/` (`api.php`) en `Special:Search`, en die van `query.wikidata.org` verbiedt `/sparql`.
+Toegestaan is alleen `Special:EntityData`, het item zelf.
+Daarom vraagt de importer de Nederlandse en de Engelse Wikipedia om de pagina-informatie van een artikel met precies de naam van de club (`/wiki/<naam>?action=info`), neemt het Wikidata-nummer van dat artikel, en leest het item.
+De regel voor zekerheid:
+
+- het item is een voetbalclub (`P31` is `Q476028`) en heeft hetzelfde land (`P17`) als de club bij ons, waarbij het Verenigd Koninkrijk past bij elk van de vier landen;
+- precies één item voldoet: twee artikelen met hetzelfde item tellen als één, en een item van een vrouwenelftal of een tweede elftal heeft een ander soort en valt af;
+- geen andere club heeft dat nummer.
+
+Dan krijgt de club het nummer met de herkomst `name` (`clubs.wikidata_source`, "Op naam gevonden" in Beheer).
+Bij geen of meer dan één kandidaat, of een nummer van een andere club, schrijft de importer niets en zet hij een regel in het logboek met het aantal kandidaten.
+Een club zonder land, met een nummer, of waarvan de redactie het nummer leegmaakte, zoekt hij niet; de redactie vult het nummer in op de pagina van de club onder Stadions in Beheer.
+Een club wordt één keer gezocht (`clubs.wikidata_searched_at`), en een verzoek dat mislukt laat hem ongezocht, met de pauzes en de stops van de import.
+Een artikel dat een doorverwijzing is, heeft geen eigen item en telt niet.
+Het logboek heeft één regel: `clubs (number by name): N clubs searched on Wikipedia, N got a number, N did not`.
+
+`pnpm run import:club-numbers` (op de host `import.mjs --club-numbers`) doet alleen dit, onder de lock van de import.
+Een tweede keer vindt niemand en schrijft `Clubs: no clubs to search.`.
+
 ### De stadions van de clubs
 
 De importer leest de thuisvelden van elke club met een Q-nummer uit Wikidata (#1298): de uitspraken `P115` met hun begin (`P580`) en einde (`P582`), en van elk stadion het label, de plaats (`P131`) en de coördinaten (`P625`).

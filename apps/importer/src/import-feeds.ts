@@ -23,9 +23,16 @@ import { alertRunOf, feedSubject, matchesSubject, squadSubject } from './alert-r
 import { createFetcher } from './fetcher.ts'
 import { fillStadiums } from './fill-stadiums.ts'
 import { describeClubData, readClubData } from './import-club-data.ts'
+import { describeClubSearch, searchClubNumbers } from './import-club-search.ts'
 import { describeClubStadiums, readClubStadiums } from './import-club-stadiums.ts'
 import { importEndedSeason } from './import-ended-season.ts'
-import { formatMatchReport, importMatches, repairKnownClubs, wikipediaOrigin } from './import-matches.ts'
+import {
+  englishWikipediaOrigin,
+  formatMatchReport,
+  importMatches,
+  repairKnownClubs,
+  wikipediaOrigin,
+} from './import-matches.ts'
 import { describePersonData, readPersonData, wikidataOrigin } from './import-person-data.ts'
 import { formatSquadReport, importSquad } from './import-squad.ts'
 import { withOpponentPreviousDay } from './league-results.ts'
@@ -381,6 +388,9 @@ export async function runImport(
       // run.
       const personLines = await importPersonData(db, fetcher, {
         clock,
+        // The English Wikipedia is asked only when the Dutch one is the real one, or when a
+        // test gives its own address (#1341).
+        englishOrigin: englishOrigin ?? (origin === wikipediaOrigin ? englishWikipediaOrigin : null),
         origin,
         pause: personDataPause,
         wikidata: wikidata === undefined ? (origin === wikipediaOrigin ? wikidataOrigin : null) : wikidata,
@@ -509,6 +519,28 @@ async function importClubData(
   }
 }
 
+/** Gives the clubs without a Q-number one by the name of the club (#1341). Failure warns. */
+async function importClubSearch(
+  db: Database,
+  fetcher: Fetcher,
+  options: {
+    clock: () => Date
+    englishOrigin: null | string
+    origin: string
+    pause: number | undefined
+    wikidata: string
+  },
+): Promise<string[]> {
+  try {
+    const { pause, ...rest } = options
+    const report = await searchClubNumbers(db, fetcher, { ...rest, ...(pause === undefined ? {} : { pause }) })
+
+    return [...report.warnings, ...describeClubSearch(report)]
+  } catch (error) {
+    return [`Clubs: warning, no numbers searched on Wikipedia: ${describeError(error)}`]
+  }
+}
+
 /** Gives the clubs with a Q-number their stadiums from Wikidata (#1298); failure warns. */
 async function importClubStadiums(
   db: Database,
@@ -573,10 +605,17 @@ async function importPersonData(
   fetcher: Fetcher,
   {
     clock,
+    englishOrigin,
     origin,
     pause,
     wikidata,
-  }: { clock: () => Date; origin: null | string; pause: number | undefined; wikidata: null | string },
+  }: {
+    clock: () => Date
+    englishOrigin: null | string
+    origin: null | string
+    pause: number | undefined
+    wikidata: null | string
+  },
 ): Promise<string[]> {
   if (origin === null || wikidata === null) {
     return []
@@ -599,6 +638,9 @@ async function importPersonData(
 
   // After the persons, from the same two servers, so the same waits and stops apply (#1264).
   lines.push(...(await importClubData(db, fetcher, { clock, origin, pause, wikidata })))
+  // Then a number for the clubs that have none, from an article with the name of the club
+  // (#1341), so the stadiums below read them in the same run.
+  lines.push(...(await importClubSearch(db, fetcher, { clock, englishOrigin, origin, pause, wikidata })))
   // Then the stadiums of the clubs that have a Q-number now, from the same server (#1298).
   lines.push(...(await importClubStadiums(db, fetcher, { clock, pause, wikidata })))
 
