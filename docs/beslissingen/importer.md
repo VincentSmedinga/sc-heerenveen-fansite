@@ -4275,7 +4275,7 @@
     Een veld zonder begin telt altijd.
     Het nieuwe stadion van sc Heerenveen begint met het seizoen 1994/95, dus een thuiswedstrijd in het voorjaar van 1994 krijgt Sportpark Noord.
   - **Wat de importer overslaat, en telt per reden:** neutraal terrein, een club zonder thuisveld, een club waarvan nog geen veld was begonnen, een wedstrijd met een tekst voor het stadion die bij geen stadion past, en een wedstrijd waarvan de redactie de gegevens invoerde.
-  - **Neutraal terrein:** een finale, de Johan Cruijff Schaal, en een bekerwedstrijd vanaf mei.
+  - **Neutraal terrein:** een finale, de Johan Cruijff Schaal, en een bekerwedstrijd in mei of juni.
     De oude Fansite noemt voor een bekerwedstrijd alleen `Wedstrijd N`, dus een finale herkennen we aan de maand.
     Een halve finale in mei valt er ook onder, en blijft een gat voor de redactie.
     De regel staat op één plek, `isOnNeutralGround`.

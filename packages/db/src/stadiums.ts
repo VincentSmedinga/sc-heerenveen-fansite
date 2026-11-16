@@ -201,7 +201,7 @@ export function homeGroundOnTheDay(
 /**
  * Whether a match is played on a ground that belongs to neither club. A final is, and so is a
  * match of the Johan Cruijff Schaal. The old fansite names no round for a cup match (only
- * `Wedstrijd 5`), so a cup match in May or later counts as a final: that is when the finals of
+ * `Wedstrijd 5`), so a cup match in May or June counts as a final: that is when the finals of
  * the KNVB Beker were played (this leaves out a semi-final in May, which is fine: a gap is
  * better than a wrong stadium).
  */
@@ -213,7 +213,7 @@ export function isOnNeutralGround({
   return (
     competition === 'Johan Cruijff Schaal' ||
     /^finale$/iu.test(round) ||
-    (competition === 'KNVB Beker' && Number(matchDate.slice(5, 7)) >= 5)
+    (competition === 'KNVB Beker' && [5, 6].includes(Number(matchDate.slice(5, 7))))
   )
 }
 

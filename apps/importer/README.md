@@ -1316,7 +1316,7 @@ Een gespeelde wedstrijd zonder stadion en zonder tekst krijgt het thuisveld van 
 Het is het laatste veld van de club dat op die dag was begonnen, dus een club die later verhuisde krijgt op een oude wedstrijd het oude veld.
 De importer laat een wedstrijd zonder stadion als hij het niet zeker weet:
 
-- **Neutraal terrein:** een finale, een wedstrijd van de Johan Cruijff Schaal en een bekerwedstrijd vanaf mei.
+- **Neutraal terrein:** een finale, een wedstrijd van de Johan Cruijff Schaal en een bekerwedstrijd in mei of juni.
   De oude Fansite noemt geen ronde voor een bekerwedstrijd, en de finales van de KNVB Beker waren in mei.
   Deze regel staat op één plek: `isOnNeutralGround` in `packages/db/src/stadiums.ts`.
 - **Geen thuisveld:** de thuisclub heeft er geen, of geen dat op die dag al was begonnen.

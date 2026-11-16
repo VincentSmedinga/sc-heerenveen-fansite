@@ -506,12 +506,13 @@ describe('listClubStadiumLines', () => {
 })
 
 describe('isOnNeutralGround', () => {
-  it('counts a final, a Super Cup and a cup match from May as neutral, and a league match not', () => {
+  it('counts a final, a Super Cup and a cup match in May or June as neutral, and a league match not', () => {
     const day = '2010-03-01'
 
     expect(isOnNeutralGround({ competition: 'KNVB Beker', matchDate: day, round: 'Finale' })).toBe(true)
     expect(isOnNeutralGround({ competition: 'Johan Cruijff Schaal', matchDate: day, round: 'Wedstrijd 1' })).toBe(true)
     expect(isOnNeutralGround({ competition: 'KNVB Beker', matchDate: '1997-05-08', round: 'Wedstrijd 8' })).toBe(true)
+    expect(isOnNeutralGround({ competition: 'KNVB Beker', matchDate: '1997-10-08', round: 'Wedstrijd 3' })).toBe(false)
     expect(isOnNeutralGround({ competition: 'KNVB Beker', matchDate: '1997-04-30', round: 'Halve finale' })).toBe(false)
     expect(isOnNeutralGround({ competition: 'Eredivisie', matchDate: '1997-05-08', round: 'Speelronde 34' })).toBe(
       false,
