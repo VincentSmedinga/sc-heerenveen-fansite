@@ -4209,7 +4209,8 @@
     `pnpm run import:country-facts` leest elke persoon met een Q-nummer en zonder die datum één keer opnieuw, met de pauzes van de import, onder de lock van de import.
     Een tweede keer vindt niemand, en een gestopte run gaat bij de volgende verder.
     Het moet na de uitrol op acceptatie één keer draaien.
-  - Bij het samenvoegen van twee personen houdt de persoon die blijft zijn landen waarvoor hij sport; zijn geboorteland komt van de ander als hij er geen heeft.
+  - Bij het samenvoegen van twee personen komen de landen waarvoor de ander sport achter die van de persoon die blijft, en zijn geboorteland komt van de ander als hij er geen heeft.
+    Iemand kan zo twee landen krijgen, waarna de vlag van zijn laatste seizoen of het geboorteland kiest.
 - **Alternatieven:** de leden van een nationaal elftal (`P54`) gebruiken (jeugdelftallen staan ertussen, en in de steekproef gaf het twee keer het verkeerde land); alleen het uitgerekende land bewaren (dan is het andere weg); het eerste land van `P1532` nemen (de volgorde zegt niets); de eerste nationaliteit houden.
 
 ## De controle op de doelpunten van de tabel draait niet in het seizoen dat loopt
