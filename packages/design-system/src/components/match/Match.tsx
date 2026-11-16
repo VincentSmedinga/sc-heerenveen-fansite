@@ -90,8 +90,7 @@ export type MatchProps =
        * The address of the page of this match, when it has one before the match is over: a
        * report that is filled in while the match is played (`live`), or a line-up before the
        * kick-off. The line with the two clubs is then the link. Leave it out for a match
-       * without
-       * a page.
+       * without a page.
        */
       reportHref?: string | undefined
       /**
