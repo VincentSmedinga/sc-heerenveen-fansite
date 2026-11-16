@@ -450,7 +450,7 @@ export function validate(
  * with more goals than are stored gets empty goals for the rest, so the editor sees what is
  * missing.
  */
-export function valuesOf(match: Match, goals: MatchGoal[], factsEdited = false): MatchValues {
+export function valuesOf(match: Match, goals: MatchGoal[], stadiumChosen = false): MatchValues {
   const local = match.kickoffAt === null ? undefined : utcToAmsterdam(match.kickoffAt)
   const number = (value: null | number) => (value === null ? '' : String(value))
   const played = match.status === 'played'
@@ -475,9 +475,9 @@ export function valuesOf(match: Match, goals: MatchGoal[], factsEdited = false):
       opmerking: match.note ?? '',
       scheidsrechter: match.referee ?? '',
       stadion: match.stadium ?? '',
-      // Only a stadium the editors entered with the facts is a choice; a link the import made
+      // Only a stadium the editors chose is a choice (`stadiumChosen`); a link the import made
       // follows the text, so the form shows "Uit de tekst" for it.
-      'stadion-id': factsEdited && match.stadiumId !== null ? String(match.stadiumId) : '',
+      'stadion-id': stadiumChosen && match.stadiumId !== null ? String(match.stadiumId) : '',
       status: match.status,
       'strafschoppen-wij': number(match.penaltiesFor),
       'strafschoppen-zij': number(match.penaltiesAgainst),

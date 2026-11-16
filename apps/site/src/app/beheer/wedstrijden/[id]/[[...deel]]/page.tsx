@@ -164,7 +164,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
     notFound()
   }
 
-  const { differences, edit, goals, hasReport, held, match, pages, squad, stadiums } = found
+  const { differences, edit, goals, hasReport, held, match, pages, squad, stadiumChosen, stadiums } = found
   const waiting = differences.length + held.length > 0
 
   if (part === 'wijzigingen' && !waiting) {
@@ -246,9 +246,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
         timeOptional: match.dataSource === 'oude-fansite',
       }}
       initial={
-        hasReport
-          ? { ...valuesOf(match, [], edit?.factsEdited === true), doelpunten: [] }
-          : valuesOf(match, goals, edit?.factsEdited === true)
+        hasReport ? { ...valuesOf(match, [], stadiumChosen), doelpunten: [] } : valuesOf(match, goals, stadiumChosen)
       }
       key={`${match.id}-${edit?.editedAt.getTime() ?? 0}-${gedaan ?? ''}`}
     >

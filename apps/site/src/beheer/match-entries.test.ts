@@ -637,6 +637,27 @@ describe('the stadium an editor chooses', () => {
     expect((await stored(id))?.stadiumId).toBeNull()
   })
 
+  it('keeps a link the import made as no choice when other facts change, so it follows the text later', async () => {
+    const first = await makeStadium('Oefenstadion')
+    const second = await makeStadium('Tweede Veld')
+    const id = await addMatch({ goalsAgainst: 1, goalsFor: 2, stadium: 'Oefenstadion', status: 'played' })
+    const text = { ...facts, stadium: 'Oefenstadion', stadiumId: null }
+
+    await database.db.update(matches).set({ stadiumId: first }).where(eq(matches.id, id))
+    // Only the spectators change; the form gives no choice, because the link follows the text.
+    await saveEntry(database.db, userId, id, entry({ facts: { ...text, attendance: 500 } }), '', t0)
+    expect((await findMatch(database.db, id))?.stadiumChosen).toBe(false)
+    await saveEntry(
+      database.db,
+      userId,
+      id,
+      entry({ facts: { ...text, attendance: 500, stadium: 'Tweede Veld' } }),
+      '',
+      t1,
+    )
+    expect((await stored(id))?.stadiumId).toBe(second)
+  })
+
   it('shows a link the import made as no choice, and a chosen stadium as the choice', () => {
     const match = { ...({} as Match), kickoffAt: null, stadiumId: 7 }
 

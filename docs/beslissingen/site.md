@@ -6205,8 +6205,8 @@
     De tekst van de periodes en de toelichting onder een naam zijn die van de eigen lijst die eraan voorafging.
     Een club zonder thuisvelden houdt de namen uit zijn wedstrijden.
   - **Het formulier:** het formulier van een wedstrijd heeft onder Gegevens, naast de tekst, een keuzelijst "Stadion uit de lijst" met alle stadions (de naam van nu en de plaats).
-    Een gekozen stadion bepaalt de naam op de site en blijft bij een volgende opslag, de import en het terugzetten van andere delen staan; zo krijgt een finale op een neutraal veld een stadion dat bij geen van beide clubs hoort.
-    "Uit de tekst" laat het stadion volgen uit de tekst, de dag en de thuisclub, zoals de import dat doet.
+    Een gekozen stadion (een dat afwijkt van wat de tekst, de dag en de thuisclub geven) bepaalt de naam op de site en blijft bij een volgende opslag, de import en het terugzetten van andere delen staan; zo krijgt een finale op een neutraal veld een stadion dat bij geen van beide clubs hoort.
+    "Uit de tekst" laat het stadion volgen uit de tekst, de dag en de thuisclub, zoals de import dat doet; een koppeling die de import maakte staat daar ook, en wordt pas een keuze als de redacteur een ander stadion kiest.
     Een keuze telt als een wijziging van de gegevens: ze komt in het logboek als "gekoppeld stadion" en in de snapshot, en terugzetten zet het stadion terug.
   - **De thuisvelden van sc Heerenveen:** de tabel `club_home_grounds` heeft er rijen voor met een leeg `club_id`, maar het scherm van een club kan ze niet tonen, want sc Heerenveen is geen club in `clubs`.
     Ze blijven zoals `seedStadiums` ze zette; de wedstrijden van sc Heerenveen volgen uit de namen van zijn twee stadions, en een ander stadion voor een wedstrijd kies je in het formulier van de wedstrijd.

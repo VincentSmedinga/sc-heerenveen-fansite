@@ -11,6 +11,7 @@ import { listClubMatches } from './queries.ts'
 import { adminUsers, clubHomeGrounds, clubs, matchEdits, matches, stadiumNames, stadiums } from './schema.ts'
 import {
   findStadium,
+  hasChosenStadium,
   linkMatchesToStadiums,
   linkMatchToStadium,
   listClubStadiumLines,
@@ -367,6 +368,35 @@ describe('linkMatchToStadium and a stadium the editors chose', () => {
     })
     expect(await linkMatchToStadium(database.db, id)).toBe(chosen)
     expect(await stadiumOf(id)).toBe(chosen)
+  })
+})
+
+describe('hasChosenStadium', () => {
+  it('is true only for a stadium that differs from the text, in a match whose facts the editors entered', async () => {
+    const own = await makeStadium(['Oefenstadion', null])
+    const other = await makeStadium(['Neutraal Veld', null])
+    const id = await played('Oefenstad', { matchDate: '2020-01-01', stadium: 'Oefenstadion' })
+    const [user] = await database.db
+      .insert(adminUsers)
+      .values({ email: 'keuze@example.test', role: 'editor' })
+      .$returningId()
+
+    await database.db.update(matches).set({ stadiumId: other }).where(eq(matches.id, id))
+    expect(await hasChosenStadium(database.db, id)).toBe(false)
+    await database.db.insert(matchEdits).values({
+      beforeGoals: '[]',
+      beforeMatch: '{}',
+      editedAt: new Date(),
+      editedBy: user?.id ?? 0,
+      factsEdited: true,
+      matchId: id,
+    })
+    expect(await hasChosenStadium(database.db, id)).toBe(true)
+    await database.db.update(matches).set({ stadiumId: own }).where(eq(matches.id, id))
+    expect(await hasChosenStadium(database.db, id)).toBe(false)
+    // A match without a stadium has no choice.
+    await database.db.update(matches).set({ stadiumId: null }).where(eq(matches.id, id))
+    expect(await hasChosenStadium(database.db, id)).toBe(false)
   })
 })
 

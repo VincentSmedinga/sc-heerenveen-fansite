@@ -1187,7 +1187,8 @@
     Het kiest de laatste naam van het gekoppelde stadion die op de dag van de wedstrijd al was begonnen (een dag of 1 juli van het seizoen), en zonder stadion de tekst van de bron.
     De lijsten van de pagina's (`listClubMatches`, `listSeasonMatches` en `listSearchableMatches`) geven hem als `stadium`, dus elke plek op de site toont dezelfde naam.
     De schermen van het beheer lezen `matches.stadium` zelf, want de redactie ziet de tekst van de bron.
-  - **Een gekozen stadion blijft:** zijn de gegevens van een wedstrijd door de redactie ingevoerd (`facts_edited`) en staat er een stadion, dan zet `linkMatchToStadium` het niet meer om uit de tekst.
+  - **Een gekozen stadion blijft:** zijn de gegevens van een wedstrijd door de redactie ingevoerd (`facts_edited`) en wijkt het stadion af van wat de tekst, de dag en de thuisclub geven (`hasChosenStadium`), dan zet `linkMatchToStadium` het niet meer om uit de tekst.
+    Een koppeling die de import maakte, volgt de tekst ook nadat de redactie andere gegevens invoerde.
     De snapshot `before_match` bewaart `stadiumId`, zodat het terugzetten van een invoer het stadion terugzet.
   - **Het logboek:** `stadium.save` en `stadium.reset` blijven in de lijst van acties, want oude rijen in het logboek hebben ze.
     Nieuwe rijen komen er niet meer bij.

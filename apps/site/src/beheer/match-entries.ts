@@ -28,7 +28,7 @@ import {
   stadiumNames,
 } from '@fansite/db/schema'
 import { listAdminStadiums } from '@fansite/db/stadium-admin'
-import { linkMatchToStadium } from '@fansite/db/stadiums'
+import { hasChosenStadium, linkMatchToStadium } from '@fansite/db/stadiums'
 import { and, asc, count, desc, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm'
 
 import type { EntryGoal, MatchEntry, SquadPlayer } from './match-form'
@@ -233,6 +233,7 @@ export async function findMatch(db: Pick<Database, 'select'>, id: number) {
     match,
     pages: await listWikipediaPages(db, match.season),
     squad,
+    stadiumChosen: await hasChosenStadium(db, id),
     stadiums: stadiumChoices(await listAdminStadiums(db)),
   }
 }
@@ -329,7 +330,7 @@ export async function saveEntry(
       .where(eq(matchGoals.matchId, id))
       .orderBy(asc(matchGoals.id))
     const [edit] = await transaction.select().from(matchEdits).where(eq(matchEdits.matchId, id)).for('update')
-    const parts = changedParts(match, goals, entry, edit?.factsEdited === true)
+    const parts = changedParts(match, goals, entry, await hasChosenStadium(transaction, id))
 
     if (parts.length === 0) {
       return { status: 'unchanged' } as const
@@ -562,7 +563,7 @@ export async function waitingHeldChanges(db: Pick<Database, 'select'>, matchId: 
 const minuteOf = (moment: Date | null) => (moment === null ? null : Math.floor(moment.getTime() / 60_000))
 
 /** The parts of the entry that differ from what is stored. */
-function changedParts(match: Match, goals: MatchGoal[], entry: MatchEntry, factsEdited: boolean): MatchPart[] {
+function changedParts(match: Match, goals: MatchGoal[], entry: MatchEntry, stadiumChosen: boolean): MatchPart[] {
   const parts: MatchPart[] = []
   const { kickoff, result } = entry
 
@@ -593,7 +594,7 @@ function changedParts(match: Match, goals: MatchGoal[], entry: MatchEntry, facts
     match.attendance !== entry.facts.attendance ||
     match.referee !== entry.facts.referee ||
     match.stadium !== entry.facts.stadium ||
-    stadiumChanged(match, entry, factsEdited) ||
+    stadiumChanged(match, entry, stadiumChosen) ||
     match.note !== entry.facts.note
   ) {
     parts.push('facts')
@@ -689,13 +690,12 @@ function sameGoals(stored: MatchGoal[], entry: EntryGoal[]) {
 
 /**
  * Whether the entry changes the stadium. No choice follows the text, so it changes nothing
- * by itself, unless the editors had entered the facts with a stadium: then clearing it is a
- * change.
+ * by itself, unless the editors had chosen the stadium: then clearing the choice is a change.
  */
-function stadiumChanged(match: Match, entry: MatchEntry, factsEdited: boolean): boolean {
+function stadiumChanged(match: Match, entry: MatchEntry, stadiumChosen: boolean): boolean {
   const chosen = entry.facts.stadiumId ?? null
 
-  return chosen === null ? factsEdited && match.stadiumId !== null : chosen !== match.stadiumId
+  return chosen === null ? stadiumChosen : chosen !== match.stadiumId
 }
 
 /** The name of the stadium linked to the match before and after the entry, for the log. */

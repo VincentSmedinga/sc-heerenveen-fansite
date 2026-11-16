@@ -61,6 +61,35 @@ export async function findStadium(db: Pick<Database, 'select'>, query: StadiumQu
   return resolveStadium(await loadStadiumIndex(db), query)
 }
 
+/**
+ * Whether the editors chose the stadium of a match: they entered its facts, and the stadium is
+ * not the one the text, the day and the home club give. A link the import made, which follows
+ * the text, is no choice, so it is not kept when the text changes.
+ */
+export async function hasChosenStadium(db: Pick<Database, 'select'>, matchId: number): Promise<boolean> {
+  const [match] = await db
+    .select({
+      clubId: matches.clubId,
+      home: matches.home,
+      matchDate: matches.matchDate,
+      stadium: matches.stadium,
+      stadiumId: matches.stadiumId,
+    })
+    .from(matches)
+    .where(eq(matches.id, matchId))
+
+  if (match?.stadiumId === null || match === undefined || !(await factsAreEdited(db, matchId))) {
+    return false
+  }
+
+  const resolved =
+    match.stadium === null
+      ? null
+      : await findStadium(db, { homeClubId: homeClubOf(match), matchDate: match.matchDate, name: match.stadium })
+
+  return resolved !== match.stadiumId
+}
+
 /** The home club of a match for `findStadium`: none for sc Heerenveen, else the opponent. */
 export function homeClubOf(match: { clubId: number; home: boolean }): null | number {
   return match.home ? null : match.clubId
@@ -127,15 +156,17 @@ export async function linkMatchToStadium(
   if (match === undefined) {
     return null
   }
-  if (match.stadiumId !== null && (await factsAreEdited(db, matchId))) {
-    // The editors entered the facts of this match, and the stadium they chose is one of them.
-    return match.stadiumId
-  }
 
   const stadiumId =
     match.stadium === null
       ? null
       : await findStadium(db, { homeClubId: homeClubOf(match), matchDate: match.matchDate, name: match.stadium })
+
+  if (match.stadiumId !== null && stadiumId !== match.stadiumId && (await factsAreEdited(db, matchId))) {
+    // The editors entered the facts of this match, and the stadium differs from what the text
+    // says, so they chose it.
+    return match.stadiumId
+  }
 
   if (stadiumId !== match.stadiumId) {
     await db.update(matches).set({ stadiumId }).where(eq(matches.id, matchId))

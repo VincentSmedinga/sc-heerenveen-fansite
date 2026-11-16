@@ -984,7 +984,7 @@ De stadions zelf komen uit een stap erna, `migrateStadiums`, die `prepareDatabas
 - `findStadium(db, { homeClubId, matchDate, name })` geeft het stadion dat die naam op die dag al had gehad, of bij meer kandidaten het veld dat de thuisclub toen gebruikte; anders niets.
   `homeClubId` is leeg als sc Heerenveen thuis speelde.
 - `linkMatchToStadium(db, matchId)` zet het stadion van één wedstrijd opnieuw uit zijn tekst; de import en het beheer roepen het aan na elke schrijfactie die de tekst, de dag of de thuisclub kan veranderen.
-  Hebben de redacteuren de gegevens van de wedstrijd ingevoerd (`facts_edited`) en staat er een stadion, dan blijft dat het stadion dat ze kozen.
+  Hebben de redacteuren de gegevens van de wedstrijd ingevoerd (`facts_edited`) en wijkt het stadion af van wat de tekst geeft, dan blijft dat het stadion dat ze kozen (`hasChosenStadium`).
 - `stadiumOnTheDay` is een stuk SQL voor de `select` van een lijst wedstrijden (#1301): de laatste naam van het gekoppelde stadion die op de dag van de wedstrijd al begonnen was, of de tekst van de bron zonder stadion.
   `listClubMatches`, `listSeasonMatches` en `listSearchableMatches` geven hem als `stadium`, zodat elke pagina de naam van die dag toont.
   De schermen van het beheer lezen `matches.stadium` zelf, de tekst van de bron.

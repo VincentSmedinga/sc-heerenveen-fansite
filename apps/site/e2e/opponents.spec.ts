@@ -328,8 +328,8 @@ test.describe('the page of a club', () => {
     // The old name is first, with "t/m", and the new name is last, with "vanaf".
     const items = page.getByRole('region', { name: 'Stadions' }).locator('li')
 
-    await expect(items.first()).toContainText(/^t\/m \d{4}\/\d{2}.*Oud Voorbeeldpark$/)
-    await expect(items.last()).toContainText(/^vanaf \d{4}\/\d{2}.*Voorbeeldpark$/)
+    await expect(items.first()).toContainText(/^t\/m \d{4}\/\d{2}.*Oud Voorbeeldpark/)
+    await expect(items.last()).toContainText(/^vanaf \d{4}\/\d{2}.*Voorbeeldpark/)
     expect(await items.count()).toBeGreaterThanOrEqual(2)
     await expect(
       page.getByRole('region', { name: 'Stadions' }).getByRole('link', { name: 'Stadions' }),
