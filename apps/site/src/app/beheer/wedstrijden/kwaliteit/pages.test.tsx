@@ -89,6 +89,7 @@ describe('the page Kwaliteit van wedstrijden', () => {
       'Opstelling',
       'Verslag',
       'Gegevens',
+      'Stadion',
       'Wacht',
     ])
     expect(html).toContain(
@@ -103,7 +104,7 @@ describe('the page Kwaliteit van wedstrijden', () => {
     const row = rowOf(html, '2005/06')
 
     expect(row).toContain('<span class="hf-data-table-secondary">6 wedstrijden</span>')
-    expect(signsOf(row)).toEqual(['', '6', '2', '6', '5', '6', '1'])
+    expect(signsOf(row)).toEqual(['', '6', '2', '6', '5', '6', '', '1'])
     expect(row).toContain(
       '<a href="/beheer/wedstrijden/kwaliteit/2005-06?kolom=doelpunten" class="hf-data-table-mark">2 <span class="hf-visually-hidden">wedstrijden met een gat in Doelpunten in 2005/06</span></a>',
     )
@@ -114,7 +115,7 @@ describe('the page Kwaliteit van wedstrijden', () => {
     const row = rowOf(renderToStaticMarkup(await QualityPage()), '1990/91')
 
     expect(row).toContain('0 wedstrijden, alles compleet')
-    expect(signsOf(row)).toEqual(['', '', '', '', '', '', ''])
+    expect(signsOf(row)).toEqual(['', '', '', '', '', '', '', ''])
   })
 })
 
@@ -134,7 +135,7 @@ describe('the table of a season (#1163)', () => {
 
     expect(html).toContain('<h2 class="hf-heading-2" id="competitie-eredivisie">Eredivisie</h2>')
     expect(row).toContain('<span class="hf-data-table-secondary">Nepstad Rangers (t)</span>')
-    expect(signsOf(row)).toEqual(['', '?', '2', '?', '?', '3', ''])
+    expect(signsOf(row)).toEqual(['', '?', '2', '?', '?', '3', '', ''])
     expect(row).toContain(
       `href="/beheer/wedstrijden/${ids.unlinked}/doelpunten?terug=%2Fbeheer%2Fwedstrijden%2Fkwaliteit%2F2005-06&amp;kolom=doelpunten" class="hf-data-table-mark">2 <span class="hf-visually-hidden">doelpunten zonder speler bij Nepstad Rangers (t), 17 september 2005</span>`,
     )
