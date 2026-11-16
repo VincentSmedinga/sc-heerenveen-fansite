@@ -78,7 +78,13 @@ export const reportPlayers: PlayerReportStats[] = [
 ]
 
 /** Twelve of the fourteen played matches have a report that is klaar. */
-export const figuresData: ReportFigures = { known: 12, played: 14, players: reportPlayers, seasonHasReports: true }
+export const figuresData: ReportFigures = {
+  known: 12,
+  maxMinutes: 1080,
+  played: 14,
+  players: reportPlayers,
+  seasonHasReports: true,
+}
 
 /** A season without a report that is klaar. */
-export const noReports: ReportFigures = { known: 0, played: 14, players: [], seasonHasReports: false }
+export const noReports: ReportFigures = { known: 0, maxMinutes: 0, played: 14, players: [], seasonHasReports: false }

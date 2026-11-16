@@ -479,7 +479,14 @@ De spelers komen uit `listSeasonPlayers` in `@fansite/db/queries`, in de volgord
 De werkbalk van `/spelers` heeft alleen de seizoenskiezer, zonder keuze van competitie, en `/spelers` leest `?competitie=` niet.
 De zijkolom begint met de zachte kaart "De selectie in het kort" (`SquadSummaryCard` in `src/SquadSummaryCard.tsx`, de cijfers uit `getSquadSummary` in `src/squad-summary.ts`): het aantal spelers van de kaart Selectie, het aantal landen en, alleen in het lopende seizoen, de gemiddelde, jongste en oudste leeftijd (`ageOf`, alleen bij minstens drie kwart van de spelers).
 Mist er iets, dan staat er onder de regels "Op basis van X van de Y spelers."; kent de pagina de selectie niet, dan is er geen kaart, en een geboortedatum verlaat de server niet.
-Daaronder staat de sterke kaart "Cijfers van dit seizoen", met de link "Naar de cijfers van de spelers" naar hetzelfde seizoen, en de bronvermelding.
+Daaronder staan vier kleine zachte kaarten (`src/PlayersTopCards.tsx`, #1286): Topscorers, Assists, De nul gehouden en Minuten, met de bronvermelding erna.
+De drie kaarten met een ranglijst tonen de eerste drie plaatsen als een regel per plaats (`BarList`): de naam of namen, het getal en een balk.
+Delen drie of meer spelers een plaats, dan staat er "4 spelers" zonder namen (`src/players-top.ts`).
+De getallen komen uit dezelfde functies als de grote kaarten (`topScorersOf`, `rankedPlaces`), en tellen alle competities van het gekozen seizoen.
+Onder Minuten staat het maximum: 90 minuten voor elke wedstrijd met een verslag dat klaar is, en 120 voor een wedstrijd met verlenging (`maxMinutes` in `getSeasonReportFigures`).
+De nul gehouden toont één zin, met het aantal keren dikgedrukt, die ook de laatste keer noemt (`cleanSheetsOf`, `cleanSheetsSentence`), en geen lijst.
+Elke kaart eindigt met een link naar haar grote kaart voor hetzelfde seizoen: `#doelpuntenmakers`, `#assists` en `#minuten` op `/spelers/cijfers`, en `#de-nul-gehouden` op `/wedstrijden/cijfers`.
+Een kaart zonder gegevens staat er niet; Assists en Minuten alleen in een seizoen met een verslag dat klaar is, en een verslag dat niet te lezen is, laat alleen die twee kaarten weg.
 `/spelers` heeft één kaart en dus geen balk "Op deze pagina:": het slot `app/@shortcuts/spelers` is leeg.
 
 De cijfers van de spelers staan op `/spelers/cijfers` (#1218), met `/spelers/cijfers/<seizoen>` en de route `app/spelers/cijfers/kies`, via `playerFiguresPath` in `src/season-page.ts`.

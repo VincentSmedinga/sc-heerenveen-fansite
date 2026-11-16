@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 import { seasonOf } from '@fansite/db/season'
-import { Card, Heading, Link, Page, SeasonPicker, Text } from '@fansite/design-system'
+import { Heading, Page, SeasonPicker } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
 import { reviewBranch } from '#src/env'
@@ -10,7 +10,9 @@ import { seasonSourceOf, sourceName, sourceOf } from '#src/match-sources'
 import { SourceCredit } from '#src/MatchViews'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
 import { pageAreas } from '#src/page-areas'
-import { loadSeasonPage, pickerPathOf, playerFiguresPath, playersPath } from '#src/season-page'
+import { CleanSheetsShortCard, ReportShortCard, TopScorersShortCard } from '#src/PlayersTopCards'
+import { loadSeasonPage, pickerPathOf, playerFiguresPath, playersPath, statisticsPath } from '#src/season-page'
+import { getSeasonReportFigures } from '#src/season-report-figures'
 import { getSeasonSquad, type SeasonSquad } from '#src/season-squad'
 import { seasonAddress, seasonChoices, seasonSlug } from '#src/seasons'
 import { SeasonSquadCard } from '#src/SeasonSquadCard'
@@ -53,8 +55,11 @@ export async function playersMetadata(season: string): Promise<Metadata> {
  * position and, under the heading, how complete that list is. That card is white: the squad is
  * what the page is for. The figures of the players are on their own page (Cijfers, see
  * `PlayerFiguresPage`), so the toolbar has no choice of competition. The sidebar has the soft
- * card "De selectie in het kort" (`SquadSummaryCard`, when the squad is known), a strong card
- * that links to the figures of the same season, and ends with the credit. The
+ * card "De selectie in het kort" (`SquadSummaryCard`, when the squad is known), the four small
+ * soft cards Topscorers, Assists, De nul gehouden and Minuten (`PlayersTopCards`), each with
+ * the first three places of its figure and a link to its large card for the same season, and
+ * ends with the credit. A card without figures is left out, and so are Assists and Minuten
+ * when the season has no match report that is `klaar`. The
  * sidebar follows the main column on a phone, so the squad comes first there. The page has one
  * list, so it has no bar "Op deze pagina:". A season that has
  * no matches in the database is the page "niet gevonden".
@@ -78,6 +83,10 @@ export async function PlayersPage({ season }: { season: string }) {
 
   const { data, seasons } = loaded
   const summary = await loadSummary(squad, season)
+  const figures = await loadFigures(season)
+  const current = seasonOf(new Date())
+  const playerFigures = seasonAddress(playerFiguresPath, season, current)
+  const showsReports = figures?.seasonHasReports === true
   const squadSource = { pages: squad.pages, wikidata: squad.players.some((player) => player.source === 'wikidata') }
 
   return (
@@ -93,15 +102,15 @@ export async function PlayersPage({ season }: { season: string }) {
       </Page.Section>
       <Page.Section area="side" aria-label="Meer over de spelers">
         {summary === undefined ? null : <SquadSummaryCard summary={summary} />}
-        <Card aria-labelledby="cijfers-van-dit-seizoen" surface="strong">
-          <Heading id="cijfers-van-dit-seizoen" level={2}>
-            Cijfers van dit seizoen
-          </Heading>
-          <Text>De doelpuntenmakers van {data.season}, met assists en minuten waar we die kennen.</Text>
-          <Link href={seasonAddress(playerFiguresPath, season, seasonOf(new Date()))} icon="arrow-right">
-            Naar de cijfers van de spelers
-          </Link>
-        </Card>
+        <TopScorersShortCard href={`${playerFigures}#doelpuntenmakers`} matches={data.matches} />
+        {showsReports && <ReportShortCard figure="assists" figures={figures} href={`${playerFigures}#assists`} />}
+        <CleanSheetsShortCard
+          href={`${seasonAddress(statisticsPath, season, current)}#de-nul-gehouden`}
+          matches={data.matches}
+          now={new Date()}
+          when={season === current ? 'dit seizoen' : `in ${season}`}
+        />
+        {showsReports && <ReportShortCard figure="minutes" figures={figures} href={`${playerFigures}#minuten`} />}
         {(data.matches.length > 0 || data.standings.length > 0 || squad.pages.length > 0) && (
           <SourceCredit
             edited={data.edited}
@@ -114,6 +123,20 @@ export async function PlayersPage({ season }: { season: string }) {
       </Page.Section>
     </Page.Main>
   )
+}
+
+/**
+ * The figures of the match reports for the cards Assists and Minuten, or undefined when they
+ * could not be read (the error is logged): the two cards are left out and the page stays.
+ */
+async function loadFigures(season: string) {
+  try {
+    return await getSeasonReportFigures(season, 'all')
+  } catch (error) {
+    console.error(`Could not read the match reports for ${playersPath}: ${reasonOf(error)}`)
+
+    return undefined
+  }
 }
 
 /** The squad of the season, or undefined when it could not be read (the error is logged). */

@@ -101,13 +101,14 @@ describe('the page of an earlier season, /spelers/2025-26', () => {
     expect(getSquadSummary).toHaveBeenCalledWith(squadData, '2025/26', expect.any(Date))
   })
 
-  it('has the heading Spelers, without the season, the card Selectie, and the link to the figures of that season', async () => {
+  it('has the heading Spelers, without the season, the card Selectie, and the links to the large cards of that season', async () => {
     const html = await render()
 
     expect(html).toContain('<h1 class="hf-heading-1">Spelers</h1>')
     expect(html).not.toContain('Spelers 2025/26</h1>')
     expect(html).toContain('id="selectie"')
-    expect(html).toContain('href="/spelers/cijfers/2025-26"')
+    expect(html).toContain('href="/spelers/cijfers/2025-26#doelpuntenmakers"')
+    expect(html).toContain('href="/wedstrijden/cijfers/2025-26#de-nul-gehouden"')
     expect(html).not.toContain('<table')
   })
 

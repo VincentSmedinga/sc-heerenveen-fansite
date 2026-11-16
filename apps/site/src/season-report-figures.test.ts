@@ -177,6 +177,14 @@ describe('getSeasonReportFigures', () => {
     expect(await getSeasonReportFigures(season, 'all')).toMatchObject({ known: 2, played: 5, seasonHasReports: true })
   })
 
+  it('has the most minutes a player can have: 90 for each match with a report, 120 after extra time', async () => {
+    await aSeason()
+    await database.pool.query("UPDATE matches SET extra_time = 1 WHERE competition = 'KNVB Beker'")
+
+    expect(await getSeasonReportFigures(season, 'all')).toMatchObject({ known: 2, maxMinutes: 90 + 120 })
+    expect(await getSeasonReportFigures(season, 'league')).toMatchObject({ known: 1, maxMinutes: 90 })
+  })
+
   it('counts the league alone for the choice of the Eredivisie, and all the competitions for the other', async () => {
     const { oyen } = await aSeason()
     const all = await getSeasonReportFigures(season, 'all')

@@ -183,7 +183,13 @@ describe('the cards with the figures of the match reports on /spelers/cijfers', 
   })
 
   it('keeps the cards for the other choice of the switch when one competition has no report, and says it rests on none', async () => {
-    vi.mocked(getSeasonReportFigures).mockResolvedValue({ known: 0, played: 12, players: [], seasonHasReports: true })
+    vi.mocked(getSeasonReportFigures).mockResolvedValue({
+      known: 0,
+      maxMinutes: 0,
+      played: 12,
+      players: [],
+      seasonHasReports: true,
+    })
 
     const html = await render({ competitie: 'eredivisie' })
 

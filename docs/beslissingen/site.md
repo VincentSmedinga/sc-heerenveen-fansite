@@ -5595,6 +5595,7 @@
 - **Alternatieven:** de cijfers in de zijkolom houden en er kaarten bij zetten; een tab op `/spelers`; de kaart Sinds 1990/91 al op de nieuwe pagina houden (die komt terug bij alle seizoenen, #1219).
 - **Later:** zie _De kaart toont alleen wat we kennen, en zegt hoeveel dat is_ (14 november 2026): de zijkolom van `/spelers` heeft ook de zachte kaart "De selectie in het kort".
 - **Later:** zie _Spelers · Cijfers telt ook alle seizoenen, met de topscorers sinds 1990/91_ (14 november 2026): de kaart Sinds 1990/91 is terug op `/spelers/cijfers/alle`, met het anker `#topscorers-sinds-1990-91` in plaats van `#sinds-1990-91`.
+- **Later:** zie _De pagina Spelers toont de top van het seizoen in vier kleine kaarten_ (16 november 2026): de sterke kaart "Cijfers van dit seizoen" is weg, en vier kleine kaarten staan ervoor in de plaats.
 
 ## Spelers · Cijfers telt ook alle seizoenen, met de topscorers sinds 1990/91
 
@@ -6004,3 +6005,26 @@
   De naam van de competitie bij een wedstrijd blijft zoals hij is, bijvoorbeeld "Play-offs Conference League".
 - **Alternatieven:** bij de Eredivisie tellen (dan veranderen records en gemiddelden van de Eredivisie door wedstrijden van een andere soort); bij Europa laten (zoals voor #1282).
 - **Later:** vervangt de zinnen over de play-offs bij Europa in _Wedstrijden hebben een eigen zoekpagina, `/wedstrijden/zoeken`_, _De keuze van competitie heeft vier waarden, en Alles telt elke wedstrijd_, _Wedstrijden · Cijfers heeft de kaart Per competitie, met een rij per soort competitie_ en _De kaart "Europa per land" telt de Europese wedstrijden per land van de tegenstander_.
+
+## De pagina Spelers toont de top van het seizoen in vier kleine kaarten
+
+- **Datum:** 16 november 2026
+- **Besluit:** de zijkolom van `/spelers` heeft in plaats van de sterke kaart "Cijfers van dit seizoen" vier zachte kaarten onder "De selectie in het kort": Topscorers, Assists, De nul gehouden en Minuten, in die volgorde (#1286).
+  - **De ranglijsten:** Topscorers, Assists en Minuten tonen de eerste drie plaatsen, een regel per plaats, met de naam of namen, het getal en een balk (`BarList`).
+    Delen één of twee spelers een plaats, dan staan hun namen op die regel, elk als link waar de speler een pagina heeft.
+    Delen drie of meer spelers een plaats, dan staat er "4 spelers" zonder namen.
+    Zo is elke kaart hoogstens drie regels hoog.
+  - **Dezelfde getallen als de grote kaarten:** de kaarten gebruiken `topScorersOf`, `rankedPlaces` en `cleanSheetsOf`, en tellen alle competities van het gekozen seizoen.
+  - **De nul gehouden:** één zin, zonder lijst en zonder groot getal: "**3 keer** de nul gehouden in 7 wedstrijden", met het aantal keren dikgedrukt (`Strong`).
+    Daarna volgt de laatste keer met score, thuis of uit, tegenstander en dag.
+    Een groot getal was te groot voor een kleine kaart naast drie kaarten met regels; de ontwerper vroeg om een zin.
+    Bij nul keer staat er "Nog niet de nul gehouden dit seizoen." en geen regel over de laatste keer.
+  - **Links:** elke kaart eindigt met een link naar haar grote kaart voor hetzelfde seizoen, met een eigen tekst: "Alle doelpuntenmakers", "Alle assists", "Alle wedstrijden waarin we de nul hielden" en "Alle minuten".
+  - **Zonder gegevens:** een kaart zonder gegevens staat er niet.
+    Assists en Minuten alleen bij een verslag dat klaar is, en een verslag dat niet te lezen is laat alleen die twee kaarten weg.
+  - **Minuten:** onder de lijst staat "Van het maximum van 1170 minuten in 13 wedstrijden.": het hoogste aantal minuten dat een speler kan hebben, 90 voor elke wedstrijd met een verslag dat klaar is en 120 voor een wedstrijd met verlenging.
+  - **Dikgedrukt getal in een zin:** past dit patroon ook elders, dan krijgt het een eigen plek in het designsysteem; nu is het alleen `Strong` in een `Text`.
+  - **De kolom met het getal van `BarList`** is zo breed als het langste getal, met ruimte voor twee cijfers, zodat minuten met vier cijfers niet over de balk lopen.
+- **Waarom:** een kaart met alleen een link nodigt niet uit, en de eerste drie namen van een lijst wel.
+  Drie regels per kaart houden de zijkolom kort, ook als veel spelers evenveel hebben.
+- **Alternatieven:** de kaart houden en er cijfers in zetten (vier onderwerpen worden één lange kaart); een lijst van wedstrijden bij De nul gehouden (die staat op de pagina Cijfers van de wedstrijden, waar de link heen gaat).

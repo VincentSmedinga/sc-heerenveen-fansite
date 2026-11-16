@@ -19,8 +19,11 @@ async function loadFigures(key: string): Promise<ReportFigures> {
   const played = reports.filter((report) => report.status === 'played')
   const counted = played.filter((report) => countsFor(report.competition, choice as CompetitionChoice))
 
+  const known = counted.filter((report) => report.reportStatus === 'klaar')
+
   return {
-    known: counted.filter((report) => report.reportStatus === 'klaar').length,
+    known: known.length,
+    maxMinutes: known.reduce((total, report) => total + (report.extraTime ? 120 : 90), 0),
     played: counted.length,
     players,
     seasonHasReports: played.some((report) => report.reportStatus === 'klaar'),

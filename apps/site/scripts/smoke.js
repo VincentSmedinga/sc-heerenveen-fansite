@@ -1474,14 +1474,19 @@ await withEmptyDatabase((database) =>
       /<dl class="hf-description-list hf-description-list-stacked hf-description-list-aligned">/,
     )
     assert.doesNotMatch(summaryCard, /\d{4}-\d{2}-\d{2}/)
-    assert.ok(playersHtml.indexOf('id="de-selectie-in-het-kort"') < playersHtml.indexOf('id="cijfers-van-dit-seizoen"'))
-    // The sidebar has the strong card with the link to the figures of the same season.
-    const figuresLinkCard =
-      /<section class="hf-card hf-card-strong" aria-labelledby="cijfers-van-dit-seizoen">.*?<\/section>/s.exec(
+    assert.ok(playersHtml.indexOf('id="de-selectie-in-het-kort"') < playersHtml.indexOf('id="kort-topscorers"'))
+    // The sidebar has the small cards of the top of the season, each linking to its large card.
+    assert.doesNotMatch(playersHtml, /cijfers-van-dit-seizoen/)
+    for (const [id, link] of [
+      ['kort-topscorers', '/spelers/cijfers#doelpuntenmakers'],
+      ['kort-de-nul-gehouden', '/wedstrijden/cijfers#de-nul-gehouden'],
+    ]) {
+      const card = new RegExp(`<section class="hf-card hf-card-soft" aria-labelledby="${id}">.*?</section>`, 's').exec(
         playersHtml,
-      )?.[0] ?? ''
-    assert.match(figuresLinkCard, /href="\/spelers\/cijfers"/)
-    assert.match(figuresLinkCard.replaceAll(/<[^>]*>/g, ''), /Naar de cijfers van de spelers/)
+      )?.[0]
+      assert.ok(card, `/spelers has the card ${id}`)
+      assert.ok(card.includes(`href="${link}"`), `the card ${id} links to ${link}`)
+    }
     assert.match(playersHtml, closedWikipediaCredit)
     // The route behind the season picker sends the visitor on to the page of the season.
     const pickedPlayers = await fetch(`${origin}/spelers/kies?seizoen=2099-00`, { redirect: 'manual' })

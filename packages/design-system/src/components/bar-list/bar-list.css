@@ -18,12 +18,12 @@
     align-items: center;
     column-gap: var(--hf-space-m);
     display: grid;
-    grid-template-columns: 4.5em minmax(0, 1fr) 2em;
+    grid-template-columns: 4.5em minmax(0, 1fr) max(2em, calc(var(--hf-bar-list-digits, 2) * 1ch));
     padding-block: var(--hf-space-xs);
   }
 
   .hf-bar-list-wide .hf-bar-list-row {
-    grid-template-columns: 8em minmax(0, 1fr) 2em;
+    grid-template-columns: 8em minmax(0, 1fr) max(2em, calc(var(--hf-bar-list-digits, 2) * 1ch));
   }
 
   /*
