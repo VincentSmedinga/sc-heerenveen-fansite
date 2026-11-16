@@ -293,9 +293,10 @@ test.describe('the open list of the season picker', () => {
       expect(menu.top).toBeGreaterThanOrEqual(0)
       expect(menu.bottom).toBeLessThanOrEqual(height)
       expect(menu.right - menu.left).toBeGreaterThanOrEqual(field.width)
-      // Options keep a target of 44 pixels, and a long text wraps instead of widening the list.
-      expect(menu.shortest).toBeGreaterThanOrEqual(44)
-      expect(menu.longest).toBeGreaterThan(44)
+      // Options keep a target of 36 pixels, the small size of the picker, and a long text wraps
+      // instead of widening the list.
+      expect(menu.shortest).toBeGreaterThanOrEqual(36)
+      expect(menu.longest).toBeGreaterThan(36)
       // The list is longer than the room, so it scrolls itself, and the page behind it does
       // not.
       expect(menu.optionsHeight).toBeGreaterThan(menu.bottom - menu.top)
