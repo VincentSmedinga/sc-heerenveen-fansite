@@ -3179,7 +3179,7 @@
   De regel onder de uitslag is nu één zin met een tussenstand erbij, zoals "Na verlenging (na 90 minuten 1–1)".
 - **Later:** zie _De pagina bestaat ook voor een verslag dat nog niet klaar is, met de melding "We vullen dit verslag nog in"_ (7 november 2026): de pagina bestaat ook voor een verslag dat `bezig` is of niet meer klopt, met een melding, `noindex` en zonder plek in de sitemap; alleen een wedstrijd zonder verslag heeft geen pagina.
 - **Later:** zie _De kaart Wedstrijden op home toont de vorige ontmoeting, de vorm van de tegenstander en de scheidsrechter_ (9 november 2026): de scheidsrechter staat in de regel van de kaart Wedstrijden op home.
-- **Later:** zie _Elke geplande wedstrijd heeft een pagina op het gewone adres, de Voorbeschouwing_ (16 november 2026): een wedstrijd die `scheduled` is, heeft de pagina ook zonder verslag, tot de aftrap.
+- **Later:** zie _Elke geplande wedstrijd heeft een pagina op het gewone adres, de Voorbeschouwing_ (16 november 2026): een wedstrijd die `scheduled` is, heeft de pagina ook zonder verslag, tot er uitslaggegevens zijn (zie _De Voorbeschouwing blijft op de pagina tot er uitslaggegevens zijn_).
 
 ## De pagina bestaat ook voor een verslag dat nog niet klaar is, met de melding "We vullen dit verslag nog in"
 
@@ -6156,6 +6156,8 @@
     Programma en de kaart Wedstrijden op de homepage linken ernaar met "Voorbeschouwing", als laatste regel van de wedstrijd.
     Vanaf de aftrap is het adres de pagina van de live wedstrijd en later het verslag, en de delen van de Voorbeschouwing zijn weg.
     Een wedstrijd zonder verslag heeft vanaf de aftrap geen pagina meer, want er is dan niets live te tonen.
+    **Later:** zie _De Voorbeschouwing blijft op de pagina tot er uitslaggegevens zijn_ (16 november 2026).
+    Dit geldt niet meer.
   - **Een verslag wint:** een geplande wedstrijd die al een verslag heeft, toont altijd het verslag, ook vóór de aftrap (de opstelling), en de lijsten linken er met "Het verslag" naar.
     De Voorbeschouwing is de pagina van een wedstrijd zonder verslag.
   - **De kop** is `MatchHeader` met fase `upcoming` op de sterke kaart.
@@ -6171,6 +6173,7 @@
 - **Nadeel:** het nieuws zoekt op de naam van de club, en het zoeken in het nieuws kan nog niet filteren op een club (de koppeling `item_clubs`).
 - **Alternatieven:** een apart adres voor de voorbeschouwing, dat bij de aftrap doorstuurt; de delen laten staan onder het verslag; de Voorbeschouwing ook voor een wedstrijd met een verslag van vóór de aftrap (dan verdwijnt de opstelling).
 - **Later:** vervangt _De pagina van een wedstrijd staat op `/wedstrijden/<seizoen>/<datum>-<club>`, en alleen voor een verslag dat klaar is en klopt_ (7 november 2026) waar die zegt dat een wedstrijd zonder verslag geen pagina heeft.
+- **Later:** zie _De Voorbeschouwing blijft op de pagina tot er uitslaggegevens zijn_ (16 november 2026): de pagina verdwijnt niet bij de aftrap, en de delen van de Voorbeschouwing blijven staan.
 
 ## De Voorbeschouwing is gebouwd met onderdelen van het designsysteem en heeft geen invulveld voor de redactie
 
@@ -6261,6 +6264,22 @@
 - **Nadeel:** een gekozen stadion en de tekst van de bron kunnen elkaar tegenspreken; het formulier laat ze naast elkaar staan en de redactie ziet het verschil.
   Een naam die de redactie vroeger in een eigen lijst zette, moet nu bij het stadion staan.
 - **Alternatieven:** de tekst van de wedstrijd laten bepalen wat de site toont (een oude wedstrijd toont dan de naam van nu, of een spelling van Wikipedia); een vlag "neutraal" op de wedstrijd (zegt minder dan het stadion zelf); de koppeling bij elke opslag opnieuw uit de tekst halen (een gekozen stadion zou verdwijnen).
+
+## De Voorbeschouwing blijft op de pagina tot er uitslaggegevens zijn
+
+- **Datum:** 16 november 2026
+- **Besluit:** een wedstrijd die `scheduled` is, geen verslag heeft en een club, heeft de Voorbeschouwing op het gewone adres tot er uitslaggegevens zijn: een verslag, of een status anders dan `scheduled`, die de import zet samen met de uitslag (#1328).
+  - **Eén regel:** `getPreviewMatches` in `src/report-data.ts` bepaalt dat, en de pagina, de adressen voor Programma en de kaart Wedstrijden op de homepage (`getPreviewAddresses`) gebruiken hem.
+    De sitemap noemt de pagina niet, en de pagina houdt `noindex` en een beschrijving zonder uitslag.
+    Er is geen tijd meer in de regel, dus ook de `now` van de functies is weg.
+  - **Na de aftrap** zegt de pagina nog "Voorbeschouwing", met de dag en de aftrap in de kop en streepjes in plaats van een uitslag, en de kaarten blijven staan.
+    Dat is voorlopig.
+  - **Een verslag wint** zoals voorheen, en een wedstrijd die `played` is zonder verslag heeft nog geen pagina.
+- **Waarom:** een wedstrijd die net is begonnen of is afgelopen zonder dat de import een uitslag heeft, moet geen "niet gevonden" geven en Programma moet er niet ineens niet meer naar linken.
+- **Nadeel:** een lezer die de pagina tijdens de wedstrijd opent, ziet nog "Voorbeschouwing" en de stand van vóór de wedstrijd.
+  Een eigen weergave voor die periode volgt later.
+- **Alternatieven:** de pagina laten verdwijnen bij de aftrap, zoals #1316 deed; een aparte fase "bezig" zonder verslag.
+- **Later:** vervangt _Elke geplande wedstrijd heeft een pagina op het gewone adres, de Voorbeschouwing_ (16 november 2026) waar die zegt dat de pagina tot de aftrap bestaat.
 
 ## Een wedstrijd zonder stadion staat in een kolom van zichzelf, en Stadions krijgt een lijst van wat ontbreekt
 

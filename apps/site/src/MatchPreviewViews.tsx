@@ -30,7 +30,7 @@ import { type PreviewScorer, type PreviewScorers } from './preview-scorers'
 import { type ClubForm, standingRoundOf, standingSentenceOf, type StandingSliceItem } from './preview-standing'
 import { meetingScoreOf } from './upcoming-match'
 
-// The parts of the page of the Voorbeschouwing, a match that has not begun: the header and the
+// The parts of the page of the Voorbeschouwing, a scheduled match: the header and the
 // cards Stand, Vorm, Onderling, Onze schutters and Nieuws. They take plain data, so the page
 // and its tests share them.
 

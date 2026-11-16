@@ -253,7 +253,7 @@ describe('how long the reports are kept', () => {
   })
 })
 
-describe('the Voorbeschouwing of a match that has not begun', () => {
+describe('the Voorbeschouwing of a match until there is result data', () => {
   /** A match that is still scheduled, kicking off in `hours` hours, with its club slug. */
   const scheduled = (hours: null | number, values: { round?: string } = {}) => {
     const { match } = { match: reportedMatch().match }
@@ -278,25 +278,35 @@ describe('the Voorbeschouwing of a match that has not begun', () => {
     vi.mocked(listScheduledMatches).mockReset()
   })
 
-  it('has the matches that have not begun and leaves out the match that has, by its kick-off', async () => {
+  it('keeps the page of a match after its kick-off, until there is result data', async () => {
     const begun = scheduled(-1, { round: 'Speelronde 1' })
     const coming = scheduled(30, { round: 'Speelronde 2' })
 
     vi.mocked(listScheduledMatches).mockResolvedValue([begun, coming])
 
-    expect((await getPreviewMatches('2026/27')).map(({ match }) => match.round)).toEqual(['Speelronde 2'])
+    expect((await getPreviewMatches('2026/27')).map(({ match }) => match.round)).toEqual([
+      'Speelronde 1',
+      'Speelronde 2',
+    ])
   })
 
-  it('decides at each call whether a match has begun, whatever the cache holds', async () => {
-    vi.mocked(listScheduledMatches).mockResolvedValue([scheduled(1)])
+  it('has the page, its address and the link of Programma for a match that kicked off hours ago', async () => {
+    const begun = scheduled(-5, { round: 'Speelronde 3' })
+    const slug = reportAddress('2026/27', begun.match.matchDate, 'testdorp-fc').split('/').pop()!
 
-    expect(await getPreviewMatches('2026/27')).toHaveLength(1)
-    expect(await getPreviewMatches('2026/27', new Date(Date.now() + 2 * 60 * 60 * 1000))).toHaveLength(0)
-    expect(listScheduledMatches).toHaveBeenCalledTimes(1)
+    vi.mocked(listScheduledMatches).mockResolvedValue([begun])
+
+    expect((await getPreviewMatch('2026/27', slug))?.match.id).toBe(begun.match.id)
+    expect((await getPreviewAddresses('2026/27')).get(`${begun.match.competition}|Speelronde 3`)).toBe(
+      reportAddress('2026/27', begun.match.matchDate, 'testdorp-fc'),
+    )
   })
 
-  it('has a match without a kick-off until its day, in Dutch time', async () => {
-    vi.mocked(listScheduledMatches).mockResolvedValue([scheduled(null)])
+  it('has a match without a kick-off and a day in the past', async () => {
+    const withoutKickoff = scheduled(null)
+    const pastDay = { ...withoutKickoff, match: { ...withoutKickoff.match, matchDate: '2026-01-01' } }
+
+    vi.mocked(listScheduledMatches).mockResolvedValue([pastDay])
 
     expect(await getPreviewMatches('2026/27')).toHaveLength(1)
   })
@@ -325,7 +335,7 @@ describe('the Voorbeschouwing of a match that has not begun', () => {
     )
   })
 
-  it('is not in the sitemap: the page is not indexed before the kick-off', async () => {
+  it('is not in the sitemap, before or after the kick-off', async () => {
     vi.mocked(listScheduledMatches).mockResolvedValue([scheduled(30)])
 
     expect(await getAllReportAddresses()).not.toContain(expect.stringContaining('/wedstrijden/'))

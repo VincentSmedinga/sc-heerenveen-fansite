@@ -31,10 +31,10 @@ import { seasonAddress, seasonFromSlug } from '#src/seasons'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { withBranch } from '#src/title'
 
-// The page of a match that is still `scheduled`, has no report and has not begun: the
-// Voorbeschouwing. It has the address of the match, so from the kick-off it is the page of the
-// live match and later the report (see `ReportPage`). Each part that comes after the header is
-// a card of its own in a cell of the page.
+// The page of a match that is still `scheduled` and has no report: the Voorbeschouwing. It has
+// the address of the match, so once there is a report it is the page of the match (see
+// `ReportPage`); until then it stays, also after the kick-off. Each part that comes after the
+// header is a card of its own in a cell of the page.
 
 /** How many headlines the card Nieuws shows at most. */
 const newsLimit = 3
@@ -122,7 +122,7 @@ export async function previewMetadata(seizoen: string, wedstrijd: string): Promi
       description: `De voorbeschouwing van ${first} – ${second} op ${day}, ${match.competition}.`,
       title: `Voorbeschouwing ${first} – ${second}, ${day}`,
     }),
-    // The page is the page of the match, which is indexed from the kick-off on.
+    // Never indexed: the page has no result, and the report has its own page.
     robots: { index: false },
   }
 }
