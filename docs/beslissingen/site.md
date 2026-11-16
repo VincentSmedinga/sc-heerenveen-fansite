@@ -2479,6 +2479,7 @@
 - **Waarom:** zonder het scherm blijft de tabel leeg, en #694 bewijst dat de combinatie in één pull request past.
   Eén patroon voor de twee schermen houdt het beheer te leren en te onderhouden.
 - **Alternatieven:** twee issues, eerst de tabel met een lijst in de code en dan het scherm (de lijst in de code moet daarna weer weg); `Overnemen` ook hier (maakt van elke schrijfwijze een naamswijziging, wat de lijst juist niet wil zijn).
+- **Later:** het scherm heet sinds 16 november 2026 Clubs en staat op `/beheer/clubs`, zie _De clubs staan onder `/beheer/clubs`, met de clubs zonder land eronder_. `/beheer/clubnamen` bestaat niet meer.
 
 ## Een staafje is een wedstrijd van de Eredivisie, twee per seizoen, op een as van seizoenen
 
@@ -5960,10 +5961,10 @@
 ## De redactie geeft een club een land op de pagina van de club en op een werklijst
 
 - **Datum:** 15 november 2026
-- **Besluit:** het land van een club staat als veld "Land" op de pagina van de club in het beheer (`/beheer/clubnamen/<club>`), met de keuze "Onbekend" en dezelfde lijst landen als bij personen (#1265).
+- **Besluit:** het land van een club staat als veld "Land" op de pagina van de club in het beheer (sinds #1306 `/beheer/clubs/<club>`), met de keuze "Onbekend" en dezelfde lijst landen als bij personen (#1265).
   Een gekozen land krijgt de bron `manual`, en de import verandert het nooit.
   "Onbekend" haalt land en bron weg, zodat de import het bij de volgende run weer kan aanvullen als Wikidata het land kent.
-  De werklijst `/beheer/kwaliteit/clubs/land` toont de clubs zonder land met bovenaan hoeveel het er nog zijn en hoeveel daarvan wedstrijden in Europa speelden; die staan vooraan, daarna volgt A tot Z, in delen van vijftig.
+  De werklijst (sinds #1306 `/beheer/clubs/kwaliteit`) toont de clubs zonder land met bovenaan hoeveel het er nog zijn en hoeveel daarvan wedstrijden in Europa speelden; die staan vooraan, daarna volgt A tot Z, in delen van vijftig.
   Elke keuze schrijft de nieuwe actie `club.edit` in het logboek, als "land van de club: geen → Duitsland", in dezelfde transactie; de migratie `0077_add_club_edit_action` voegt de actie toe.
 - **Waarom:** van de 63 clubs van Europese wedstrijden hebben er 43 geen Wikipedia-pagina, dus daar geeft Wikidata niets; de redactie vult ze aan zoals bij personen, en de clubs van Europese wedstrijden zijn degene die de kaart van #1266 nodig heeft.
   Een eigen veld op de pagina van de club en een werklijst volgen het model van het land van een persoon.
@@ -6063,7 +6064,7 @@
   Voor de wedstrijden is dat de regel "4 gaten in 2 wedstrijden", met de aantallen die de tabel telt, naar `/beheer/wedstrijden/kwaliteit` (#1304).
 - **Waarom:** de startpagina telt al wat te doen is, en een tweede teller zou ze dubbel houden.
 - **Alternatieven:** een overzicht dat alle gaten telt.
-- **Tot dan:** zolang de lijsten van spelers en clubs niet verhuisd zijn, leidt `/beheer/kwaliteit` nog naar die lijsten, met een korte pagina zonder tellers die #1306 weghaalt.
+- **Tot dan:** zolang de lijsten van spelers en clubs niet verhuisd waren, leidde `/beheer/kwaliteit` nog naar die lijsten, met een korte pagina zonder tellers; #1306 haalde de pagina weg.
 
 ## De oude adressen onder `/beheer/kwaliteit` krijgen geen doorverwijzing
 
@@ -6084,7 +6085,7 @@
 
 - **Datum:** 16 november 2026
 - **Besluit:** Clubnamen heet Clubs, in de balk, op de startpagina en in het adres (`/beheer/clubs`), omdat het onderwerp nu ook het land van een club heeft (#1303).
-  De hernoeming zelf volgt in #1306.
+  De hernoeming gebeurde in #1306.
 - **Waarom:** de naam dekt anders niet wat er staat.
 - **Alternatieven:** de naam houden.
 
@@ -6094,7 +6095,7 @@
 - **Besluit:** de adressen van de lijsten staan onder het onderwerp, als constanten in `src/beheer`, en een vaste naam overlapt geen dynamisch deel van hetzelfde niveau (#1303).
   De wedstrijden (#1304): `matchQualityPath` is `/beheer/wedstrijden/kwaliteit`, met `/beheer/wedstrijden/kwaliteit/<seizoen>` (`seasonTablePath`) en `/beheer/wedstrijden/kwaliteit/formaties` (`unusualFormationsPath`).
   `kwaliteit` staat naast `nieuw` en `[id]` onder `/beheer/wedstrijden`, en `formaties` naast `[seizoen]`: een seizoen is `2005-06` en een vaste naam wint in Next.js, dus ze botsen niet.
-  `qualityPath` (`/beheer/kwaliteit`) blijft het begin van de lijsten die nog niet verhuisd zijn.
+  `qualityPath` (`/beheer/kwaliteit`) bestond tot #1306 voor de lijsten die nog niet verhuisd waren, en is weg.
 - **Waarom:** Next.js haalt anders adressen door elkaar, en de balk markeert Wedstrijden bij elke pagina eronder, zonder uitzondering in `screens.ts`.
 - **Alternatieven:** `/beheer/kwaliteit` laten bestaan voor de wedstrijden (dat blijft het onderdeel Kwaliteit dat we weghalen); `/beheer/wedstrijden/gaten` (de tabel heet bij de redactie Kwaliteit).
 
@@ -6284,3 +6285,17 @@
   De controle van `e2e/admin-phone.spec.ts` kijkt of de pagina niet breder wordt dan het scherm.
 - **Alternatieven:** het stadion in Gegevens laten tellen, zoals eerst (de tabel blijft op zeven kolommen, maar een gat in het stadion valt weg tussen toeschouwers en scheidsrechter); een lijst van wedstrijden zonder stadion onder Stadions (een plek meer om te zoeken, naast de tabel van de seizoenen).
 - **Later:** vervangt de regel in _Een naam van een stadion is niet uniek, en een wedstrijd wordt gekoppeld met naam, dag en thuisclub_ (`hosting-en-data.md`) dat de wedstrijd zonder stadion als gat in Gegevens staat.
+
+## De clubs staan onder `/beheer/clubs`, met de clubs zonder land eronder, en Kwaliteit is uit de balk
+
+- **Datum:** 16 november 2026
+- **Besluit:** Clubnamen heet Clubs en staat op `/beheer/clubs`, met de pagina's per club op `/beheer/clubs/<club>` (#1306).
+  De lijst van clubs zonder land staat op `/beheer/clubs/kwaliteit` (`clubCountryListPath` in `club-country.ts`), met een link bovenaan de lijst van clubs, en de kaart "Te doen" heeft de regel "3 clubs zonder land" naar die lijst.
+  `kwaliteit` is een vaste naam naast het dynamische deel van een club, en een vaste naam wint in Next.js.
+  De kaarten van die lijst hebben het warme vlak.
+  Het scherm Kwaliteit is weg uit de balk (`screens.ts`) en de tegels van de startpagina, `/beheer/kwaliteit` en `src/app/beheer/kwaliteit` bestaan niet meer, en `qualityPath` is weg.
+  De gedeelde tabelhulp `gap-table.tsx` verhuisde van die map naar `src/app/beheer`.
+  De oude adressen `/beheer/kwaliteit`, `/beheer/kwaliteit/clubs/land` en `/beheer/clubnamen` (met de pagina's van een club) geven "niet gevonden", zonder doorverwijzing, zoals de andere (#1303).
+  De rollen blijven: de eigenaar en de redacteuren zien de pagina's, een auteur krijgt "niet gevonden".
+- **Waarom:** de redactie zoekt het land van een club bij de clubs, en met de laatste lijst verhuisd heeft Kwaliteit geen reden meer (#1303).
+- **Alternatieven:** `/beheer/clubs/land` (een club die zo heet botst dan met zijn eigen adres; `kwaliteit` heet geen club, en het is de naam die Stadions en Wedstrijden ook gebruiken); een doorverwijzing van `/beheer/clubnamen` (zie _De oude adressen onder `/beheer/kwaliteit` krijgen geen doorverwijzing_).

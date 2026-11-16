@@ -1000,11 +1000,11 @@ Een sessie die verloopt haalt hem niet weg: daar is hij voor.
 - `/beheer/spelers` is alleen voor de eigenaar en de redacteuren: een speler toevoegen aan de selectie van een seizoen, of er een aanpassen (zie _De spelers van een seizoen_).
 - `/beheer/personen/<nummer>` is alleen voor de eigenaar en de redacteuren: wat voor een persoon in elk seizoen geldt, zoals de naam en de geboortedatum (zie _De spelers van een seizoen_).
 - `/beheer/stadions` is alleen voor de eigenaar en de redacteuren: de stadions beheren, hun namen, plaats en adres, en de thuisvelden van een club (zie _De stadions_ en _De stadions van een club_).
-- `/beheer/clubnamen` is alleen voor de eigenaar en de redacteuren: bijhouden welke namen een club droeg en sinds wanneer, met een toelichting (zie _De namen van een club_).
+- `/beheer/clubs` is alleen voor de eigenaar en de redacteuren: bijhouden welke namen een club droeg en sinds wanneer, met een toelichting, en het land van een club (zie _De namen van een club_).
 - `/beheer/wedstrijden/kwaliteit` is alleen voor de eigenaar en de redacteuren: wat er van elk seizoen ontbreekt, in een tabel met een kolom per deel van een wedstrijd (zie _De kwaliteit van de gegevens_).
 - `/beheer/spelers/kwaliteit/personen` is alleen voor de eigenaar en de redacteuren: wat we van personen missen, per letter, met de snelle lijst, de namen, de vaste plaatsen en de verschillen in spelerscijfers en spelersgegevens eronder (zie _De kwaliteit van de gegevens_).
 - `/beheer/stadions/kwaliteit` is alleen voor de eigenaar en de redacteuren: wat de stadions en de clubs nog missen, met de wedstrijden zonder stadion in de tabel bij Wedstrijden (zie _De kwaliteit van de gegevens_).
-- `/beheer/kwaliteit` leidt nog naar de lijst die niet verhuisd is: de clubs zonder land (#1303).
+- `/beheer/clubs/kwaliteit` is alleen voor de eigenaar en de redacteuren: de clubs zonder land, met een keuze per club (zie _De kwaliteit van de gegevens_).
 - `/beheer/bezoek` is alleen voor de eigenaar en de redacteuren: de cijfers over het bezoek van de laatste dagen (zie _Het bezoek bekijken_).
 - `/beheer/accounts` is alleen voor de eigenaar: de accounts met voornaam, adres, rol en aan of uit (zie _De accounts beheren_).
 - `/beheer/mijn-account` is voor elke rol: de eigen voornaam, het adres en de rol, en voor de eigenaar en een redacteur de keuze voor de mail over afwijkingen van Wikipedia.
@@ -1234,12 +1234,12 @@ De namen en perioden van een stadion zelf staan bij het stadion (zie _De stadion
 
 ### De namen van een club
 
-`/beheer/clubnamen` (`src/app/beheer/clubnamen`) is alleen voor de eigenaar en de redacteuren, zoals de stadions.
+`/beheer/clubs` (`src/app/beheer/clubs`, tot #1306 Clubnamen op `/beheer/clubnamen`) is alleen voor de eigenaar en de redacteuren, zoals de stadions.
 De data van Wikipedia kent alleen schrijfwijzen, geen jaren: hier houdt de redactie bij welke namen een club droeg, vanaf wanneer, en waarom.
 De lijst is alleen voor de weergave: de import bepaalt de naam in de kop en het adres van de pagina (de slug), ook voor een club met een lijst.
 
 - De lijst van clubs en het zoeken zijn die van de stadions (`searchClubs` komt uit `src/beheer/stadiums.ts`), met het label "Eigen lijst" en het filter Alles of Eigen lijst.
-- `/beheer/clubnamen/<club>` heeft het formulier (`ClubNameForm.tsx`) met een regel per naam: de naam (1 tot 100 tekens), het seizoen of de dag waarmee hij begint, en een toelichting van hoogstens 200 tekens.
+- `/beheer/clubs/<club>` heeft het formulier (`ClubNameForm.tsx`) met een regel per naam: de naam (1 tot 100 tekens), het seizoen of de dag waarmee hij begint, en een toelichting van hoogstens 200 tekens.
   De regels voor een start zijn die van de stadions, en de periodes komen uit dezelfde functie (`ownListPeriods` in `src/match-format.ts`).
   Boven het formulier staat de naam die de site nu in de kop toont.
   Is de laatste naam van de lijst een andere (`headingNotice`), dan zegt een melding dat in gewone tekst; opslaan kan wel.
@@ -1323,7 +1323,7 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
 ### De kwaliteit van de gegevens
 
 `/beheer/wedstrijden/kwaliteit` (`src/app/beheer/wedstrijden/kwaliteit`, onder Wedstrijden sinds #1304) is alleen voor de eigenaar en de redacteuren: een auteur krijgt "niet gevonden".
-De adressen staan als constanten in `src/beheer/quality.ts` (`matchQualityPath`), `quality-table.ts` (`seasonTablePath`) en `formations.ts` (`unusualFormationsPath`); `playerQualityPath` (`quality.ts`) is het begin van de kwaliteit van spelers en personen (#1305), en `qualityPath` is nog het begin van de lijst die niet verhuisd is: de clubs zonder land.
+De adressen staan als constanten in `src/beheer/quality.ts` (`matchQualityPath`), `quality-table.ts` (`seasonTablePath`) en `formations.ts` (`unusualFormationsPath`); `playerQualityPath` (`quality.ts`) is het begin van de kwaliteit van spelers en personen (#1305), en `clubCountryListPath` (`club-country.ts`) is die van de clubs zonder land (#1306).
 Bovenaan de lijst van wedstrijden staat een link naar deze pagina, en de kaart Te doen op de startpagina telt de gaten en leidt erheen.
 De pagina toont een tabel met een rij per seizoen sinds 1990/91, het nieuwste bovenaan, en een kolom voor elk deel van een wedstrijd (#1163): Uitslag, Aftrap, Doelpunten, Opstelling, Verslag, Gegevens, Stadion en Wacht.
 Stadion (S) is een `?` bij een gespeelde wedstrijd zonder stadion (#1307): de import was er niet zeker van, of de wedstrijd is neutraal, en de redactie koos er nog geen.
@@ -1338,7 +1338,7 @@ Een vak toont een getal (zoveel ontbreekt), `?` (het hele deel ontbreekt) of `�
 `?kolom=<kolom>` houdt alleen de wedstrijden met een gat in die kolom over.
 De link naar een deel heeft `terug` en `kolom`, zodat het deel de knop "Opslaan en volgende" heeft: die slaat op en opent het volgende gat in die kolom (`nextWithGap`), of keert terug naar de tabel als de kolom compleet is.
 Heeft het seizoen geen enkele speler (`seasonHasPlayers`), dan staat dat in een zin boven de tabel, met een link naar `/beheer/spelers?seizoen=<seizoen>`.
-De oude werklijsten, zoals `/beheer/kwaliteit/<seizoen>/zonder-doelpunten`, en de oude adressen onder `/beheer/kwaliteit` sturen niet meer door (#1304).
+De oude werklijsten, zoals `/beheer/kwaliteit/<seizoen>/zonder-doelpunten`, en de oude adressen onder `/beheer/kwaliteit` sturen niet meer door (#1304, #1306).
 De tellingen van de doelpunten en de verslagen zijn die van `readSeasonCoverage`; `src/beheer/quality.test.ts` houdt ze daaraan.
 Een adres zonder seizoen sinds 1990/91 geeft "niet gevonden".
 
@@ -1361,7 +1361,12 @@ Heeft een andere speler van het seizoen de naam of de pagina van de import al, d
 
 De tabel van de personen, `/beheer/spelers/kwaliteit/personen` (#1165), staat onder Spelers sinds #1305 (`src/app/beheer/spelers/kwaliteit`) en is te bereiken met een link boven de lijst van spelers; elke pagina eronder heeft een link terug naar Spelers.
 De schakelaar tussen de wedstrijden en de personen is weg (#1304), en de oude adressen onder `/beheer/kwaliteit` sturen niet meer door.
+Het scherm Kwaliteit is weg uit de balk en de startpagina (#1306).
 `/beheer/spelers/kwaliteit` zelf is geen pagina.
+
+`/beheer/clubs/kwaliteit` (`src/app/beheer/clubs/kwaliteit`, `clubCountryListPath`) toont de clubs zonder land (#1265), die van de wedstrijden in Europa eerst, met een link bovenaan de lijst van clubs en een regel in de kaart Te doen.
+`kwaliteit` is een vaste naam naast het deel van een club, en een club heet nooit zo.
+Een keuze bewaart `submitClubCountryFromList` (`actions.ts` ernaast).
 De kaart Te doen op de startpagina telt de personen met een gat en de spelerscijfers en spelersgegevens die op een besluit wachten.
 Die heeft een rij per letter van de achternaam zonder voorvoegsel, zoals de lijst van alle spelers (`letterOf`), en een kolom per gegeven: Naam (geen voornaam), Wikipedia, Geboren, Land en Linie.
 Een getal leidt naar de letter, `/beheer/spelers/kwaliteit/personen/<letter>` (`overig` voor een naam zonder letter), met `?kolom=` voor één kolom.

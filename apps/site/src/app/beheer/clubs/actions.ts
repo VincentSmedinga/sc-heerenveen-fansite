@@ -8,7 +8,7 @@ import { findAdminClub, removeClubNamePeriods, replaceClubNamePeriods } from '#s
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
-import { clubNamesPath, clubPath } from './paths'
+import { clubPath, clubsPath } from './paths'
 
 // The actions of the names of the clubs. Only an editor keeps them, as with the matches. The
 // address part of the club is bound to the action (`submitNames.bind(null, slug)`) and is input
@@ -28,7 +28,7 @@ export async function submitNames(slug: string, _previous: NameFormState, formDa
   const found = await findAdminClub(db, slug)
 
   if (found === undefined) {
-    redirect(`${clubNamesPath}?fout=weg`)
+    redirect(`${clubsPath}?fout=weg`)
   }
 
   const rows = readNameRows(formData)
@@ -60,7 +60,7 @@ export async function submitNames(slug: string, _previous: NameFormState, formDa
   const outcome = await replaceClubNamePeriods(db, userId, found.club.id, checked.lines)
 
   if (outcome === 'missing') {
-    redirect(`${clubNamesPath}?fout=weg`)
+    redirect(`${clubsPath}?fout=weg`)
   }
   if (outcome !== 'saved') {
     return {
@@ -87,14 +87,12 @@ export async function submitReset(slug: string): Promise<void> {
   const found = await findAdminClub(db, slug)
 
   if (found === undefined) {
-    redirect(`${clubNamesPath}?fout=weg`)
+    redirect(`${clubsPath}?fout=weg`)
   }
 
   const outcome = await removeClubNamePeriods(db, userId, found.club.id)
 
   redirect(
-    outcome === 'missing'
-      ? `${clubNamesPath}?fout=weg`
-      : clubPath(slug, outcome === 'done' ? 'weggehaald' : 'geen-lijst'),
+    outcome === 'missing' ? `${clubsPath}?fout=weg` : clubPath(slug, outcome === 'done' ? 'weggehaald' : 'geen-lijst'),
   )
 }

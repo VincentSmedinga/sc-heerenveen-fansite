@@ -4,7 +4,7 @@ import { Card, DataTable, Heading, Link, Notice, Page, Strong, Text } from '@fan
 import { notFound } from 'next/navigation'
 import { Fragment } from 'react'
 
-import { personGapLegend, personGapRow, personGapTableColumns } from '#src/app/beheer/kwaliteit/gap-table'
+import { personGapLegend, personGapRow, personGapTableColumns } from '#src/app/beheer/gap-table'
 import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { personFactsPath } from '#src/beheer/person-facts'

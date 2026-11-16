@@ -8,6 +8,7 @@ import { Card, Heading, Link, List, Page, Text, Tile } from '@fansite/design-sys
 
 import { roleLabels } from '#src/beheer/account-fields'
 import { adminAreas, todoAreas } from '#src/beheer/areas'
+import { clubCountryListPath, countClubsWithoutCountry } from '#src/beheer/club-country'
 import { compact } from '#src/beheer/density'
 import { countHeldChanges, countMatchesWithoutResult, countWaitingDifferences } from '#src/beheer/match-entries'
 import { countReportsToCheck } from '#src/beheer/match-reports'
@@ -68,6 +69,8 @@ export default async function AdminPage() {
   const fieldWaiting = editor ? await countWaitingFieldDifferences(db) : new Map<string, number>()
   // What the list of the stadiums counts (#1307): the gaps in the stadiums and the clubs.
   const stadiumGaps = editor ? await readStadiumGaps(db) : undefined
+  // What the list of the clubs without a country counts (#1306).
+  const withoutCountry = editor ? (await countClubsWithoutCountry(db)).total : 0
   const todo: TodoItem[] = []
 
   if (waiting > 0) {
@@ -107,6 +110,13 @@ export default async function AdminPage() {
     todo.push({
       href: stadiumQualityPath,
       text: `${plural(stadiumGaps.total, 'gat', 'gaten')} bij stadions en clubs`,
+    })
+  }
+
+  if (withoutCountry > 0) {
+    todo.push({
+      href: clubCountryListPath,
+      text: plural(withoutCountry, 'club zonder land', 'clubs zonder land'),
     })
   }
 
@@ -181,11 +191,8 @@ export default async function AdminPage() {
               <Tile href="/beheer/stadions" icon="ball" level={2} title="Stadions">
                 Beheer de stadions, hun namen en hun adres, en de thuisvelden van een club.
               </Tile>
-              <Tile href="/beheer/clubnamen" icon="ball" level={2} title="Clubnamen">
-                Houd bij welke namen een club droeg, en sinds wanneer.
-              </Tile>
-              <Tile href="/beheer/kwaliteit" icon="chart" level={2} title="Kwaliteit">
-                Bekijk per seizoen wat we weten en wat ontbreekt.
+              <Tile href="/beheer/clubs" icon="ball" level={2} title="Clubs">
+                Houd bij welke namen een club droeg, sinds wanneer, en in welk land hij speelt.
               </Tile>
               <Tile href="/beheer/bezoek" icon="chart" level={2} title="Bezoek">
                 Bekijk hoeveel mensen de site bezoeken.

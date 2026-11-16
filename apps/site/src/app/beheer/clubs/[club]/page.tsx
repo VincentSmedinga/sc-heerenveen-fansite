@@ -17,7 +17,7 @@ import {
 } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
-import { submitClubCountry } from '#src/app/beheer/kwaliteit/clubs/land/actions'
+import { submitClubCountry } from '#src/app/beheer/clubs/kwaliteit/actions'
 import { sideAreas } from '#src/beheer/areas'
 import { emptyNameRow, nameFormId } from '#src/beheer/club-name-fields'
 import { rowOf } from '#src/beheer/club-name-form'
@@ -32,7 +32,7 @@ import { describeShowDelay } from '#src/matches'
 import { submitNames, submitReset } from '../actions'
 import { ClubCountryForm } from '../ClubCountryForm'
 import { ClubNameForm } from '../ClubNameForm'
-import { clubNamesPath } from '../paths'
+import { clubsPath } from '../paths'
 
 // Render on each request: the list changes with every save.
 export const dynamic = 'force-dynamic'
@@ -77,8 +77,8 @@ export default async function ClubNamesOfClubPage({ params, searchParams }: Prop
     <Page.Main areas={sideAreas} className={compact}>
       <Page.Cell area="head">
         <Text>
-          <Link href={clubNamesPath} icon="arrow-left">
-            Terug naar Clubnamen
+          <Link href={clubsPath} icon="arrow-left">
+            Terug naar Clubs
           </Link>
         </Text>
         <Heading level={1}>{club.name}</Heading>
@@ -95,11 +95,7 @@ export default async function ClubNamesOfClubPage({ params, searchParams }: Prop
         {mismatch === undefined ? null : <Notice>{mismatch}</Notice>}
       </Page.Cell>
       <Page.Toolbar>
-        <SaveButtons
-          buttons={[{ label: 'Opslaan', value: 'opslaan' }]}
-          cancelHref={clubNamesPath}
-          formId={nameFormId}
-        />
+        <SaveButtons buttons={[{ label: 'Opslaan', value: 'opslaan' }]} cancelHref={clubsPath} formId={nameFormId} />
       </Page.Toolbar>
       <Page.Cell area="main">
         {notice === undefined ? null : (
@@ -109,7 +105,7 @@ export default async function ClubNamesOfClubPage({ params, searchParams }: Prop
         )}
         <ClubNameForm
           action={submitNames.bind(null, slug)}
-          cancelHref={clubNamesPath}
+          cancelHref={clubsPath}
           initial={own.length > 0 ? own.map(rowOf) : [{ ...emptyNameRow }]}
           key={`${club.id}-${gedaan ?? ''}`}
         />

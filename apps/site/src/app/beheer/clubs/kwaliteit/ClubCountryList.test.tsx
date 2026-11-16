@@ -31,7 +31,7 @@ const show = (action: Action) =>
     <ClubCountryList
       action={action}
       countries={countries}
-      path="/beheer/kwaliteit/clubs/land"
+      path="/beheer/clubs/kwaliteit"
       rows={rows}
       totals={{ europe: 5, total: 20 }}
     />,
@@ -98,7 +98,7 @@ describe('the work list of clubs without a country', () => {
       <ClubCountryList
         action={saves}
         countries={countries}
-        path="/beheer/kwaliteit/clubs/land"
+        path="/beheer/clubs/kwaliteit"
         rows={[]}
         totals={{ europe: 0, total: 0 }}
       />,
