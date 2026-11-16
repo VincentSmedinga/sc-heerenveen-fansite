@@ -147,6 +147,8 @@ async function addProefdorpStadiums(database) {
 
   try {
     const [[{ club }]] = await pool.query("SELECT club_id AS club FROM matches WHERE opponent = 'SV Proefdorp' LIMIT 1")
+    // The seed may have given the club a ground already, from what its matches say.
+    await pool.query('DELETE FROM club_home_grounds WHERE club_id = ?', [club])
     const [{ insertId: sportpark }] = await pool.query('INSERT INTO stadiums () VALUES ()')
     const [{ insertId: temporary }] = await pool.query('INSERT INTO stadiums () VALUES ()')
 
@@ -1838,7 +1840,7 @@ await withEmptyDatabase((database) =>
     assert.match(cupClub, /In de Eredivisie hebben we nog niet tegen deze club gespeeld\./)
     // A club with a match to come and none played: the card Wedstrijden has the match as Match
     // (the competition and round in its line, without Thuis or Uit) with no subheadings and no
-    // sentence, and only the credit in the sidebar.
+    // sentence.
     const comingClub = await (await fetch(`${origin}/tegenstanders/nepstad-rangers`)).text()
     assert.match(
       comingClub,
@@ -1846,7 +1848,12 @@ await withEmptyDatabase((database) =>
     )
     assert.doesNotMatch(comingClub, /<h3|nog niet tegen deze club gespeeld/)
     assert.doesNotMatch(comingClub, /id="onze-uitslagen"|id="hoe-vaak-welke-uitslag"|Thuis|>Uit</)
-    assert.match(comingClub, /<section class="hf-page-section"[^>]*aria-label="De bron"/)
+    // The seed gave it a home ground from the stadium of that match, so the sidebar has the
+    // card Stadion with the name, and the credit.
+    assert.match(
+      comingClub,
+      /<section class="hf-page-section"[^>]*aria-label="Het stadion en de bron".*id="stadion".*Nepstadion/s,
+    )
     // A club with home grounds has the card Stadions with it, whatever the matches say: the
     // periods follow from the starts, the note is under the name of its line, and the
     // credit follows the card. This club has a cup tie to come and none played.
