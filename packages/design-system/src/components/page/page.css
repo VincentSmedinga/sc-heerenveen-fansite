@@ -229,7 +229,7 @@
    * difference back: the space under the link is the medium step, as in a cell, on every width.
    */
   .hf-page-back {
-    /* stylelint-disable-next-line declaration-property-value-allowed-list -- It takes back part of the gap. */
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- Takes back gap. */
     margin-block-end: calc(var(--hf-space-m) - var(--hf-page-body-cell-gap));
   }
 
