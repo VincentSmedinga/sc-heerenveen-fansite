@@ -66,6 +66,7 @@ De tijden staan in UTC.
 ### Eén run tegelijk
 
 Een run neemt eerst een lock in de database, met `GET_LOCK` en de naam `fansite_import_<database>`.
+De verbinding met de lock houdt zich levend en laat los met een tijdslimiet, zodat ook een run van een kwartier eindigt (zie `withLock` in `packages/db/src/lock.ts`).
 Is de lock bezet, omdat een andere run nog bezig is, dan schrijft de run dat in het logboek en stopt hij meteen, met exitcode 0:
 
 ```text

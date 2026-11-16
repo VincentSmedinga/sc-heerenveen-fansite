@@ -188,6 +188,7 @@
   `GET_LOCK` hoort bij de verbinding, dus een proces dat sterft, laat de lock vanzelf los.
 - **Alternatieven:** wachten tot de lock vrij is; dan stapelen de runs zich op als er een blijft hangen.
   Of een rij in een tabel als lock; die blijft staan als het proces sterft.
+- **Later:** op 16 november 2026 hield een run van een kwartier het proces open, omdat de stille verbinding met de lock bleef hangen (#1313); zie _De verbinding met het slot van de import houdt zich levend en laat los met een tijdslimiet_.
 
 ## Elke run komt in de database, en een feed is ongezond na drie mislukte runs op rij
 
@@ -4284,3 +4285,22 @@
 - **Waarom:** het klopt voor bijna elke wedstrijd, en het is een berekening op gegevens die er al zijn.
   Een fout stadion is erger dan een leeg veld, dus de importer slaat over wat hij niet zeker weet.
 - **Alternatieven:** de redactie 671 keer een stadion laten kiezen; een tekst voor het stadion maken en die door `linkMatchesToStadiums` laten koppelen (dat vervuilt de tekst van de bron, die de importer juist wil vergelijken).
+
+## De verbinding met het slot van de import houdt zich levend en laat los met een tijdslimiet
+
+- **Datum:** 16 november 2026
+- **Besluit:** `withLock` in `packages/db/src/lock.ts` laat de verbinding die het slot houdt elke 30 seconden iets aan de server vragen (`SELECT 1`), en geeft het vrijgeven van het slot en elke vraag aan de server een tijdslimiet van 10 seconden (#1313).
+  Antwoordt de verbinding niet, dan vernietigt `withLock` haar in plaats van haar aan de pool terug te geven.
+  De pool zet ook TCP keep-alive aan.
+  - **Wat er mis ging:** `--country-facts` werkte 14 minuten en bleef daarna hangen.
+    De verbinding met het slot doet niets zolang de taak loopt.
+    Op acceptatie verbrak een server of firewall die stille verbinding, en dan wacht `DO RELEASE_LOCK` voor altijd op een antwoord dat niet komt: er is geen tijdslimiet, en `.catch` helpt niet bij een belofte die nooit eindigt.
+    Het proces eindigt dus nooit, en schrijft zijn samenvatting niet.
+    Het lokaal nabootsen met een proxy die zwijgt, laat precies dit zien (de test in `lock.test.ts`).
+  - **Elke losse opdracht:** alle opdrachten met een slot (`--country-facts`, `--stadiums`, `--fill-stadiums`, `--changes`, `--season`, `--squad` en de gewone import) gebruiken `withLock`, dus de oplossing geldt voor allemaal.
+    De fetcher en zijn `Agent` hielden het proces niet open: een proces met een open keep-alive-verbinding eindigt gewoon.
+    `import.test.ts` draait de opdrachten die geen verzoek doen als eigen proces en eist dat ze binnen de tijdslimiet eindigen met code 0.
+  - **Een verbroken verbinding midden in de taak:** zonder keep-alive liet de server het slot los zodra hij de stille verbinding afbrak, en kon een tweede opdracht tegelijk beginnen.
+- **Waarom:** een `process.exit` aan het eind verbergt de oorzaak en kapt een nog lopende schrijfactie af.
+  De import van elk uur duurt te kort om dit te raken, de opdrachten van een kwartier of langer niet.
+- **Alternatieven:** een `process.exit` na de opdracht (verbergt de oorzaak); de fetcher een `close()` geven (de fetcher was het niet); een eigen verbinding per slot zonder keep-alive (de verbinding blijft dan stil en breekt weer).
