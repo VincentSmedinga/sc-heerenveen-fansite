@@ -3476,6 +3476,7 @@
 - **Waarom:** `match_changes` hangt aan één wedstrijd, en de doelpunten van een speler in een seizoen horen bij geen enkele wedstrijd.
   Zonder `table_goals` schreef de volgende lezing van de selectie het oude getal terug, een uur na het besluit.
 - **Alternatieven:** `match_changes` met een lege wedstrijd (de rij verliest dan zijn betekenis, en elk scherm moet die uitzondering kennen); het besluit alleen vastleggen en de tabel nooit aanpassen (overnemen en houden doen dan hetzelfde); de waarschuwing houden naast de rij (twee plekken voor hetzelfde nieuws).
+- **Later:** de pagina staat sinds 16 november 2026 op `/beheer/spelers/kwaliteit/spelerscijfers/<seizoen>`, en de pagina Kwaliteit bestaat voor de spelers niet meer (#1305).
 
 ## Het seizoen dat net voorbij is, wordt tot 1 september nog elke week gelezen
 
@@ -3774,6 +3775,7 @@
   De velden afleiden uit het logboek bij elke run (traag, en het logboek is tekst voor mensen).
   De waarde van Wikipedia bewaren naast die van de redactie, zoals `table_goals` (dan volgt de import Wikipedia weer zodra de tabel verandert, en beslist de redactie niets).
   Een lege waarde van een lijst als afwijking tellen (de lijsten van eerdere seizoenen hebben vaak geen rugnummer, dus dat geeft bij elke speler een wijziging).
+- **Later:** de pagina staat sinds 16 november 2026 op `/beheer/spelers/kwaliteit/spelersgegevens/<seizoen>` (#1305).
 
 ## Een speler van de redactie en een speler van de import worden één rij
 

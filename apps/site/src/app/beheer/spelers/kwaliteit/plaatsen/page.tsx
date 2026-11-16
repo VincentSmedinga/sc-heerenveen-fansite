@@ -2,10 +2,9 @@ import type { Metadata } from 'next'
 
 import { Card, DataTable, Heading, Link, Page, Text } from '@fansite/design-system'
 
-import { playerPath } from '#src/app/beheer/spelers/paths'
+import { playerPath, playersPath } from '#src/app/beheer/spelers/paths'
 import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
-import { qualityPath } from '#src/beheer/quality'
 import { requireRole } from '#src/beheer/require-role'
 import { sideQuizPath } from '#src/beheer/side-quiz'
 import {
@@ -39,8 +38,8 @@ export default async function UsualSlotsPage() {
     <Page.Main areas={adminAreas} className={compact}>
       <Page.Cell area="head">
         <Text>
-          <Link href={qualityPath} icon="arrow-left">
-            Kwaliteit
+          <Link href={playersPath} icon="arrow-left">
+            Spelers
           </Link>
         </Text>
         <Heading level={1}>{title}</Heading>
@@ -53,7 +52,7 @@ export default async function UsualSlotsPage() {
         </Text>
       </Page.Cell>
       <Page.Cell area="main">
-        <Card aria-labelledby="plaatsen-kop">
+        <Card aria-labelledby="plaatsen-kop" surface="warm">
           <Heading id="plaatsen-kop" level={2}>
             Per speler
           </Heading>

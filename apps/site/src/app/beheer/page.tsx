@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 
+import { countWaitingFieldDifferences } from '@fansite/db/player-field-differences'
+import { countWaitingStatDifferences } from '@fansite/db/player-stat-differences'
 import { adminRoles } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { Card, Heading, Link, List, Page, Text, Tile } from '@fansite/design-system'
@@ -9,7 +11,8 @@ import { adminAreas, todoAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { countHeldChanges, countMatchesWithoutResult, countWaitingDifferences } from '#src/beheer/match-entries'
 import { countReportsToCheck } from '#src/beheer/match-reports'
-import { matchQualityPath } from '#src/beheer/quality'
+import { personQualityPath, readPersonGaps } from '#src/beheer/person-table'
+import { fieldDifferencesPath, matchQualityPath, statDifferencesPath } from '#src/beheer/quality'
 import { readMatchGaps } from '#src/beheer/quality-table'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
@@ -53,6 +56,15 @@ export default async function AdminPage() {
     (sum, match) => sum + Object.values(match.gaps).reduce((inMatch, gap) => inMatch + gap.total, 0),
     0,
   )
+  // What the quality of the players and persons counts (#1305): the persons with a gap, and
+  // the differences in the numbers and data of players that wait for a decision. A difference
+  // leads to the page of this season's if it has any, else of the newest season that has.
+  const personsWithGaps = editor
+    ? (await readPersonGaps(db)).filter((person) => Object.keys(person.gaps).length > 0)
+    : []
+  const personGapTotal = personsWithGaps.reduce((sum, person) => sum + Object.keys(person.gaps).length, 0)
+  const statWaiting = editor ? await countWaitingStatDifferences(db) : new Map<string, number>()
+  const fieldWaiting = editor ? await countWaitingFieldDifferences(db) : new Map<string, number>()
   const todo: TodoItem[] = []
 
   if (waiting > 0) {
@@ -85,6 +97,35 @@ export default async function AdminPage() {
     todo.push({
       href: matchQualityPath,
       text: `${plural(gapTotal, 'gat', 'gaten')} in ${plural(gapMatches.length, 'wedstrijd', 'wedstrijden')}`,
+    })
+  }
+
+  if (personsWithGaps.length > 0) {
+    todo.push({
+      href: personQualityPath,
+      text: `${plural(personGapTotal, 'gat', 'gaten')} bij ${plural(personsWithGaps.length, 'persoon', 'personen')}`,
+    })
+  }
+  const statTotal = [...statWaiting.values()].reduce((sum, total) => sum + total, 0)
+  const statSeason = statWaiting.has(current) ? current : [...statWaiting.keys()].sort().reverse()[0]
+
+  if (statTotal > 0 && statSeason !== undefined) {
+    todo.push({
+      href: statDifferencesPath(statSeason),
+      text:
+        plural(statTotal, 'spelerscijfer verschilt en wacht', 'spelerscijfers verschillen en wachten') +
+        ' op een besluit',
+    })
+  }
+  const fieldTotal = [...fieldWaiting.values()].reduce((sum, total) => sum + total, 0)
+  const fieldSeason = fieldWaiting.has(current) ? current : [...fieldWaiting.keys()].sort().reverse()[0]
+
+  if (fieldTotal > 0 && fieldSeason !== undefined) {
+    todo.push({
+      href: fieldDifferencesPath(fieldSeason),
+      text:
+        plural(fieldTotal, 'spelersgegeven verschilt en wacht', 'spelersgegevens verschillen en wachten') +
+        ' op een besluit',
     })
   }
 

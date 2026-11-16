@@ -2131,7 +2131,7 @@ Het is geen waarschuwing meer en er komt geen regel in het logboek van het behee
 - Hetzelfde verschil komt er één keer: een volgende run zet alleen `last_seen_at` bij.
 - Veranderen de aantallen, dan vervalt de rij (`replaced`) en komt er een nieuwe.
 - Is het verschil weg, dan sluit de rij zichzelf (`reverted`).
-- De redactie beslist op `/beheer/kwaliteit/<seizoen>/spelerscijfers`.
+- De redactie beslist op `/beheer/spelers/kwaliteit/spelerscijfers/<seizoen>`.
   Neemt ze het andere aantal over, dan staat dat in `player_season_stats.goals`, en `table_goals` onthoudt wat de tabel van Wikipedia zei.
   Zolang de tabel dat nog zegt, laat de import het aantal van de redactie staan; zegt de tabel iets anders, dan geldt de tabel weer.
 - Een verschil dat een mens afwees, komt niet terug zolang de twee aantallen gelijk blijven.
@@ -2146,7 +2146,7 @@ Dat geldt voor de import van de selectie (`import-squad.ts`), van een vorige sel
 - Leest de import een andere waarde voor een veld van de redactie, dan komt er een rij in `player_field_differences` met de speler, het seizoen, het veld en de twee waarden (`keepPlayerFieldDifferences` in `@fansite/db/player-field-differences`).
   Dezelfde afwijking komt er één keer, een afwijking met andere waarden vervangt de oude (`replaced`), en een afwijking die weg is sluit zichzelf (`reverted`).
   Een veld dat een lijst niet geeft, is geen afwijking.
-- De redactie beslist op `/beheer/kwaliteit/<seizoen>/spelersgegevens`.
+- De redactie beslist op `/beheer/spelers/kwaliteit/spelersgegevens/<seizoen>`.
   Neemt ze de waarde van de import over, dan is het veld niet meer van de redactie en houdt de import het weer bij.
   Houdt ze haar eigen waarde, dan komt dezelfde afwijking niet terug zolang beide waarden gelijk blijven.
 - De import vindt een speler van de redactie op zijn pagina, zijn naam of zijn persoon (`editorsByPerson`), en maakt dan geen tweede rij.

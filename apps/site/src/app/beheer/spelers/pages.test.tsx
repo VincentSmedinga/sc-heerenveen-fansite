@@ -168,6 +168,7 @@ describe('the list of the players', () => {
     expect(html).toContain(`Er zijn nog geen spelers in het seizoen ${current}.`)
     expect(html).toContain(`href="/beheer/spelers/nieuw?seizoen=${current.replace('/', '-')}"`)
     expect(html).toContain(`Speler toevoegen aan ${current}`)
+    expect(html).toContain('<a href="/beheer/spelers/kwaliteit/personen">Kwaliteit van spelers en personen</a>')
   })
 
   it('has the players of the chosen season with number, line, source and whether they are in the squad', async () => {

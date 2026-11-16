@@ -106,16 +106,18 @@ describe('the page of the persons without a line or a country', () => {
     expect(first.match(/<h2/gu)).toHaveLength(50)
     expect(first).toContain('Nog 51 personen zonder linie.')
     expect(first).toContain('Pagina 1 van 2')
-    expect(first).toContain('href="/beheer/kwaliteit/personen/snel?deel=2"')
+    expect(first).toContain('href="/beheer/spelers/kwaliteit/personen/snel?deel=2"')
 
     const second = await page({ deel: '2' })
 
     expect(second.match(/<h2/gu)).toHaveLength(1)
     expect(second).toContain('>Verzonnen 51<')
-    expect(second).toContain('href="/beheer/kwaliteit/personen/snel"')
+    expect(second).toContain('href="/beheer/spelers/kwaliteit/personen/snel"')
     // A part that does not exist is the last one, and a part that is no number the first.
     expect(await page({ deel: '9' })).toContain('Pagina 2 van 2')
     expect(await page({ deel: 'x' })).toContain('Pagina 1 van 2')
-    expect(await page({ deel: '2', lijst: 'land' })).toContain('href="/beheer/kwaliteit/personen/snel?lijst=land"')
+    expect(await page({ deel: '2', lijst: 'land' })).toContain(
+      'href="/beheer/spelers/kwaliteit/personen/snel?lijst=land"',
+    )
   })
 })

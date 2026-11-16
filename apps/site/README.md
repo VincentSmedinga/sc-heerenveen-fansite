@@ -130,7 +130,7 @@ Kies een andere map met `--out <map>`.
 `--full-page` neemt de hele pagina in plaats van het eerste scherm.
 
 De homepage (met de kaart van het artikel), `/redactie/e2e-artikel`, `/nieuws`, `/nieuws/podcasts` en de pagina van een eerder seizoen, `/wedstrijden/<seizoen>`, hebben de verzonnen gegevens van de toegankelijkheidscontrole nodig (zie _Toegankelijkheid controleren_), en `pnpm test:a11y` haalt ze er na afloop weer uit.
-De werklijst `/beheer/kwaliteit/personen/snel` heeft de verzonnen personen zonder linie of land nodig (`e2e/persons.ts`).
+De werklijst `/beheer/spelers/kwaliteit/personen/snel` heeft de verzonnen personen zonder linie of land nodig (`e2e/persons.ts`).
 `pnpm --filter site test-data` zet ze in de database van je `.env`, en `pnpm --filter site test-data --remove` haalt ze er weer uit.
 Gebruik daarvoor de database waarmee je ontwikkelt, niet die van de controle of van de hosting.
 Vanuit de root:
@@ -555,7 +555,7 @@ De kaarten Alle spelers, Assists en Minuten (`AllPlayersCard` en `RankingCard` i
 Ze lezen alleen de verslagen (`getSeasonReportFigures` in `src/season-report-figures.ts`, vijf minuten bewaard per seizoen en keuze, met `readPlayerReportStats` van `@fansite/db/match-reports`), volgen de schakelaar, en zeggen onder de kaart op hoeveel van de gespeelde wedstrijden ze rusten, met "Bron: eigen administratie".
 `src/report-figures.ts` zet de cijfers in volgorde: de top 5 met gedeelde plekken (`rankedPlaces`) en de rijen van de tabel op minuten en dan naam (`figureRows`).
 Slaat de redactie een verslag als `klaar` op, dan bewaart `saveReport` elke speler wiens doelpunten in de verslagen afwijken van de tabel van Wikipedia als een rij in `player_stat_differences` (`compareReportGoals`, #974).
-De redactie beslist erover op `/beheer/kwaliteit/<seizoen>/spelerscijfers` (zie _De kwaliteit van de gegevens_).
+De redactie beslist erover op `/beheer/spelers/kwaliteit/spelerscijfers/<seizoen>` (zie _De kwaliteit van de gegevens_).
 De balk "Op deze pagina:" heeft de links erheen alleen bij zo'n seizoen (`playerFiguresShortcutsFor`, met `seasonHasReports`).
 Kan de database niet worden gelezen, dan blijven de kaarten weg en houdt de rest van de pagina zijn inhoud.
 De bezoekteller telt de pagina van een seizoen als een bezoek aan `/spelers`, en `/spelers/cijfers/<seizoen>` als een bezoek aan `/spelers/cijfers`.
@@ -995,7 +995,8 @@ Een sessie die verloopt haalt hem niet weg: daar is hij voor.
 - `/beheer/stadions` is alleen voor de eigenaar en de redacteuren: een club een eigen lijst van stadions geven, met een toelichting voor de kaart op zijn pagina (zie _De stadions van een club_).
 - `/beheer/clubnamen` is alleen voor de eigenaar en de redacteuren: bijhouden welke namen een club droeg en sinds wanneer, met een toelichting (zie _De namen van een club_).
 - `/beheer/wedstrijden/kwaliteit` is alleen voor de eigenaar en de redacteuren: wat er van elk seizoen ontbreekt, in een tabel met een kolom per deel van een wedstrijd (zie _De kwaliteit van de gegevens_).
-- `/beheer/kwaliteit` leidt nog naar de lijsten die niet verhuisd zijn: de personen, de namen, de vaste plaatsen en de clubs zonder land (#1303).
+- `/beheer/spelers/kwaliteit/personen` is alleen voor de eigenaar en de redacteuren: wat we van personen missen, per letter, met de snelle lijst, de namen, de vaste plaatsen en de verschillen in spelerscijfers en spelersgegevens eronder (zie _De kwaliteit van de gegevens_).
+- `/beheer/kwaliteit` leidt nog naar de lijst die niet verhuisd is: de clubs zonder land (#1303).
 - `/beheer/bezoek` is alleen voor de eigenaar en de redacteuren: de cijfers over het bezoek van de laatste dagen (zie _Het bezoek bekijken_).
 - `/beheer/accounts` is alleen voor de eigenaar: de accounts met voornaam, adres, rol en aan of uit (zie _De accounts beheren_).
 - `/beheer/mijn-account` is voor elke rol: de eigen voornaam, het adres en de rol, en voor de eigenaar en een redacteur de keuze voor de mail over afwijkingen van Wikipedia.
@@ -1285,7 +1286,7 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
 - Het uitklapblok "Uit de selectie halen" zet `in_squad` uit, met het moment; de rij blijft staan.
   Een speler met een doelpunt, een optreden in een verslag of cijfers in de tabel hoort bij het seizoen: hij heeft het blok niet, en de pagina zegt waarom.
 - Wat de redactie zet, is daarna van de redactie (`players.editors_fields`, #1022): bij toevoegen de naam en elk ingevuld veld, bij aanpassen de velden die veranderden.
-  De import schrijft die velden niet meer, en een andere waarde van de import wacht op `/beheer/kwaliteit/<seizoen>/spelersgegevens`.
+  De import schrijft die velden niet meer, en een andere waarde van de import wacht op `/beheer/spelers/kwaliteit/spelersgegevens/<seizoen>`.
 - `addPlayer`, `editPlayer` en `removePlayer` in `src/beheer/players.ts` schrijven de wijziging en `player.add`, `player.edit` of `player.remove` in het logboek, in één transactie, met het nummer van de speler.
 - De speler staat daarna in de kiezer van een doelpunt van dat seizoen en op de pagina Spelers, met dezelfde bronvermelding als de andere spelers.
   Een doelpunt krijgt in het formulier van een wedstrijd de persoon van de gekozen speler (`personId` in `SquadPlayer`), zodat het ook zonder Wikipedia-pagina voor de persoon telt.
@@ -1294,7 +1295,7 @@ Bij een doelpunt kiest de redactie de speler uit de selectie van het seizoen; hi
 ### De kwaliteit van de gegevens
 
 `/beheer/wedstrijden/kwaliteit` (`src/app/beheer/wedstrijden/kwaliteit`, onder Wedstrijden sinds #1304) is alleen voor de eigenaar en de redacteuren: een auteur krijgt "niet gevonden".
-De adressen staan als constanten in `src/beheer/quality.ts` (`matchQualityPath`), `quality-table.ts` (`seasonTablePath`) en `formations.ts` (`unusualFormationsPath`); `qualityPath` is nog het begin van de lijsten die niet verhuisd zijn.
+De adressen staan als constanten in `src/beheer/quality.ts` (`matchQualityPath`), `quality-table.ts` (`seasonTablePath`) en `formations.ts` (`unusualFormationsPath`); `playerQualityPath` (`quality.ts`) is het begin van de kwaliteit van spelers en personen (#1305), en `qualityPath` is nog het begin van de lijst die niet verhuisd is: de clubs zonder land.
 Bovenaan de lijst van wedstrijden staat een link naar deze pagina, en de kaart Te doen op de startpagina telt de gaten en leidt erheen.
 De pagina toont een tabel met een rij per seizoen sinds 1990/91, het nieuwste bovenaan, en een kolom voor elk deel van een wedstrijd (#1163): Uitslag, Aftrap, Doelpunten, Opstelling, Verslag, Gegevens en Wacht.
 `readMatchGaps` in `src/beheer/quality-table.ts` bepaalt per wedstrijd wat er ontbreekt, en `countGapsBySeason` telt per seizoen de wedstrijden met een gat in elke kolom.
@@ -1311,28 +1312,31 @@ De tellingen van de doelpunten en de verslagen zijn die van `readSeasonCoverage`
 Een adres zonder seizoen sinds 1990/91 geeft "niet gevonden".
 
 Verschillen de doelpunten van een speler in de selectietabel van die in de wedstrijden of de verslagen, dan heeft de pagina van het seizoen een koppeling "spelerscijfers verschillen" (#974).
-Ze leidt naar `/beheer/kwaliteit/<seizoen>/spelerscijfers` (`src/app/beheer/kwaliteit/[seizoen]/spelerscijfers`, nog onder Kwaliteit tot #1305), met per verschil de speler, de competitie en de twee aantallen.
-Elk verschil heeft een formulier met een reden (die mag leeg) en twee knoppen: het andere aantal overnemen, of de selectietabel houden (`submitStatDifference` in `src/app/beheer/kwaliteit/actions.ts`).
+Ze leidt naar `/beheer/spelers/kwaliteit/spelerscijfers/<seizoen>` (`src/app/beheer/spelers/kwaliteit/spelerscijfers/[seizoen]`, onder Spelers sinds #1305, met het seizoen achter de naam van de lijst, zodat een seizoen en een vaste naam nooit op één niveau staan), met per verschil de speler, de competitie en de twee aantallen.
+Elk verschil heeft een formulier met een reden (die mag leeg) en twee knoppen: het andere aantal overnemen, of de selectietabel houden (`submitStatDifference` in `src/app/beheer/spelers/kwaliteit/actions.ts`).
 Het besluit staat in het logboek als `player.stats-take-over` of `player.stats-keep`.
 
 Leest de import voor een speler iets anders dan de redactie invulde, dan heeft de pagina van het seizoen een koppeling "spelersgegevens verschillen" (#1022).
-Ze leidt naar `/beheer/kwaliteit/<seizoen>/spelersgegevens` (`src/app/beheer/kwaliteit/[seizoen]/spelersgegevens`), met per afwijking de speler, het veld, de waarde van de redactie en die van de import.
-Elke afwijking heeft een formulier met een reden (die mag leeg) en twee knoppen: de import overnemen, of de redactie houden (`submitFieldDifference` in `src/app/beheer/kwaliteit/actions.ts`).
+Ze leidt naar `/beheer/spelers/kwaliteit/spelersgegevens/<seizoen>` (`src/app/beheer/spelers/kwaliteit/spelersgegevens/[seizoen]`), met per afwijking de speler, het veld, de waarde van de redactie en die van de import.
+Elke afwijking heeft een formulier met een reden (die mag leeg) en twee knoppen: de import overnemen, of de redactie houden (`submitFieldDifference` in `src/app/beheer/spelers/kwaliteit/actions.ts`).
 Het besluit staat in het logboek als `player.field-take-over` of `player.field-keep`.
 Heeft een andere speler van het seizoen de naam of de pagina van de import al, dan verandert er niets en zegt de pagina dat.
 
-De tabel van de personen, `/beheer/kwaliteit/personen` (#1165), staat nog onder Kwaliteit en is te bereiken vanaf `/beheer/kwaliteit`; de schakelaar tussen de wedstrijden en de personen is weg (#1304).
+De tabel van de personen, `/beheer/spelers/kwaliteit/personen` (#1165), staat onder Spelers sinds #1305 (`src/app/beheer/spelers/kwaliteit`) en is te bereiken met een link boven de lijst van spelers; elke pagina eronder heeft een link terug naar Spelers.
+De schakelaar tussen de wedstrijden en de personen is weg (#1304), en de oude adressen onder `/beheer/kwaliteit` sturen niet meer door.
+`/beheer/spelers/kwaliteit` zelf is geen pagina.
+De kaart Te doen op de startpagina telt de personen met een gat en de spelerscijfers en spelersgegevens die op een besluit wachten.
 Die heeft een rij per letter van de achternaam zonder voorvoegsel, zoals de lijst van alle spelers (`letterOf`), en een kolom per gegeven: Naam (geen voornaam), Wikipedia, Geboren, Land en Linie.
-Een getal leidt naar de letter, `/beheer/kwaliteit/personen/<letter>` (`overig` voor een naam zonder letter), met `?kolom=` voor één kolom.
+Een getal leidt naar de letter, `/beheer/spelers/kwaliteit/personen/<letter>` (`overig` voor een naam zonder letter), met `?kolom=` voor één kolom.
 Daar staat een rij per persoon met een gat; een `?` leidt naar het deel van zijn formulier, met "Opslaan en volgende" binnen de letter en de kolom (`src/beheer/person-table.ts`).
-`/beheer/kwaliteit/namen` toont de personen die op elkaar lijken en wat de lijst van spelers van Wikipedia over onze namen zegt.
+`/beheer/spelers/kwaliteit/namen` toont de personen die op elkaar lijken en wat de lijst van spelers van Wikipedia over onze namen zegt.
 `/beheer/wedstrijden/kwaliteit/formaties` toont per seizoen de wedstrijden waarvan de formatie van ons niet 4-3-3 of 4-2-3-1 is (`usualFormations` in `src/beheer/formations.ts`, #1191), met een link naar het verslag.
 De link naar die pagina staat boven de tabel van de wedstrijden.
-`/beheer/kwaliteit/plaatsen` toont per speler met minstens 10 wedstrijden in een 4-3-3 op welke plaats van zijn rij hij het vaakst stond en in hoeveel procent van die wedstrijden (`src/beheer/usual-slots.ts`, #1193).
+`/beheer/spelers/kwaliteit/plaatsen` toont per speler met minstens 10 wedstrijden in een 4-3-3 op welke plaats van zijn rij hij het vaakst stond en in hoeveel procent van die wedstrijden (`src/beheer/usual-slots.ts`, #1193).
 De plaats komt uit de volgorde van de opstelling; er verandert niets in de gegevens.
-`/beheer/kwaliteit/plaatsen/vragen` is de quiz (#1194): een speler tegelijk zonder kant, met drie knoppen Links, Midden en Rechts en een knop Overslaan.
+`/beheer/spelers/kwaliteit/plaatsen/vragen` is de quiz (#1194): een speler tegelijk zonder kant, met drie knoppen Links, Midden en Rechts en een knop Overslaan.
 Het antwoord is de kant van de persoon (`persons.side`), zoals het formulier van een persoon hem heeft, in het deel Linie en kant; geen import leest of vervangt hem.
-Boven de tabel van de personen staat een link naar `/beheer/kwaliteit/personen/snel` (`src/app/beheer/kwaliteit/personen/snel`, #1053); een oud adres met `?lijst=` of `?deel=` gaat daarheen.
+Boven de tabel van de personen staat een link naar `/beheer/spelers/kwaliteit/personen/snel` (`src/app/beheer/spelers/kwaliteit/personen/snel`, #1053).
 Die pagina heeft twee lijsten, `?lijst=land` voor de tweede, elk in delen van 50 (`?deel=2`), de personen van de nieuwste seizoenen eerst.
 Een rij toont de naam, het eerste en het laatste seizoen en een link naar het artikel op Wikipedia.
 Voor de linie heeft ze vier knoppen, voor het land een keuzelijst met eerst de landen die onze personen al hebben, en een knop.
@@ -1345,7 +1349,7 @@ De knoppen en velden van de lijst zijn 44 pixels hoog, ook al is het beheer comp
 Op de pagina van een wedstrijd staat een verschil tussen twee bronnen als een kaart met beide waarden en de namen van de bronnen (`differenceWords` in `src/beheer/difference-words.ts`).
 De kaart zegt dat de import hier niets vanzelf overneemt, en de knoppen noemen de bron die je overneemt of houdt.
 
-Op `/beheer/kwaliteit/namen` staan de personen die op elkaar lijken: personen met dezelfde titel op Wikipedia, op accenten, hoofdletters, streepjes, spaties en apostroffen na (`similarPersons` in `@fansite/db/persons`).
+Op `/beheer/spelers/kwaliteit/namen` staan de personen die op elkaar lijken: personen met dezelfde titel op Wikipedia, op accenten, hoofdletters, streepjes, spaties en apostroffen na (`similarPersons` in `@fansite/db/persons`).
 De import waarschuwt voor dezelfde groepen en voegt ze niet samen.
 Een groep uit de lijst `personsWhoDiffer` staat er niet: dat zijn twee mensen, zoals Jordy Bruijn en Jordy Buijs.
 

@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 
 import type { ConflictFormState } from '#src/app/beheer/wedstrijden/actions'
 
+import { playersPath } from '#src/app/beheer/spelers/paths'
 import { parseItemId, parseReason } from '#src/beheer/items'
 import { fieldDifferencesPath, statDifferencesPath } from '#src/beheer/quality'
 import { requireRole } from '#src/beheer/require-role'
@@ -30,7 +31,7 @@ export async function submitFieldDifference(
   const season = seasonFromSlug(seasonSlug)
 
   if (season === undefined) {
-    redirect('/beheer/kwaliteit')
+    redirect(playersPath)
   }
 
   const page = fieldDifferencesPath(season)
@@ -87,7 +88,7 @@ export async function submitStatDifference(
   const season = seasonFromSlug(seasonSlug)
 
   if (season === undefined) {
-    redirect('/beheer/kwaliteit')
+    redirect(playersPath)
   }
 
   const page = statDifferencesPath(season)

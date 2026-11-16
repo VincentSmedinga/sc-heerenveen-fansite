@@ -98,11 +98,7 @@ beforeEach(async () => {
   await database.db.insert(persons).values({ familyName: 'Buiten', name: 'Karel Buiten' })
 })
 
-const overview = async (searchParams: Record<string, string> = {}) =>
-  renderToStaticMarkup(await PersonQualityPage({ searchParams: Promise.resolve(searchParams) })).replaceAll(
-    '<!-- -->',
-    '',
-  )
+const overview = async () => renderToStaticMarkup(await PersonQualityPage()).replaceAll('<!-- -->', '')
 const letterPage = async (letter: string, searchParams: Record<string, string> = {}) =>
   renderToStaticMarkup(
     await LetterPage({ params: Promise.resolve({ letter }), searchParams: Promise.resolve(searchParams) }),
@@ -141,8 +137,8 @@ describe('the gaps of the persons', () => {
     expect(letterFromSlug('overig')).toBe('#')
     expect(letterFromSlug('B')).toBeUndefined()
     expect(letterFromSlug('bb')).toBeUndefined()
-    expect(letterTablePath('B', 'land')).toBe('/beheer/kwaliteit/personen/b?kolom=land')
-    expect(letterTablePath('#')).toBe('/beheer/kwaliteit/personen/overig')
+    expect(letterTablePath('B', 'land')).toBe('/beheer/spelers/kwaliteit/personen/b?kolom=land')
+    expect(letterTablePath('#')).toBe('/beheer/spelers/kwaliteit/personen/overig')
   })
 })
 
@@ -160,8 +156,13 @@ describe('the overview of the persons (#1165)', () => {
 
     expect(html).not.toContain('Welke gegevens')
     expect(html).not.toContain('aria-current="page"')
-    expect(html).toContain('<a href="/beheer/kwaliteit/personen/snel">Linie en land snel aanvullen</a>')
-    expect(html).toContain('<a href="/beheer/kwaliteit/namen">Namen die op elkaar lijken en de lijst van Wikipedia</a>')
+    expect(html).toContain('<a href="/beheer/spelers/kwaliteit/personen/snel">Linie en land snel aanvullen</a>')
+    expect(html).toContain(
+      '<a href="/beheer/spelers/kwaliteit/namen">Namen die op elkaar lijken en de lijst van Wikipedia</a>',
+    )
+    expect(html).toContain('<a href="/beheer/spelers/kwaliteit/plaatsen">Vaste plaatsen in een 4-3-3</a>')
+    // The way back to the list of lists, which the switch of #1304 left without.
+    expect(html).toContain('href="/beheer/spelers"')
     expect(html).toContain('N Naam, P Wikipedia, B Geboren, L Land, I Linie. ?: ontbreekt. Leeg: compleet.')
   })
 
@@ -172,7 +173,7 @@ describe('the overview of the persons (#1165)', () => {
     expect(row).toContain('<span class="hf-data-table-secondary">3 personen</span>')
     expect(signsOf(row)).toEqual(['', '2', '2', '1', '1'])
     expect(row).toContain(
-      '<a href="/beheer/kwaliteit/personen/b?kolom=wikipedia" class="hf-data-table-mark">2 <span class="hf-visually-hidden">personen met een gat in Wikipedia bij de letter B</span></a>',
+      '<a href="/beheer/spelers/kwaliteit/personen/b?kolom=wikipedia" class="hf-data-table-mark">2 <span class="hf-visually-hidden">personen met een gat in Wikipedia bij de letter B</span></a>',
     )
     expect(html).toContain('Nog 11 gaten bij 3 personen van de 4.')
   })
@@ -187,12 +188,6 @@ describe('the overview of the persons (#1165)', () => {
     expect(row).toContain('1 persoon, alles compleet')
     expect(signsOf(row)).toEqual(['', '', '', '', ''])
   })
-
-  it('sends an old address of the quick list there', async () => {
-    await expect(overview({ deel: '2', lijst: 'land' })).rejects.toThrow(
-      'redirect to /beheer/kwaliteit/personen/snel?lijst=land&deel=2',
-    )
-  })
 })
 
 describe('the table of a letter (#1165)', () => {
@@ -206,7 +201,7 @@ describe('the table of a letter (#1165)', () => {
     expect(row).toContain('<span class="hf-data-table-secondary">2004–2007</span>')
     expect(signsOf(row)).toEqual(['', '?', '?', '', '?'])
     expect(row).toContain(
-      `href="/beheer/personen/${ids['berg']}/naam?terug=%2Fbeheer%2Fkwaliteit%2Fpersonen%2Fb&amp;kolom=wikipedia" class="hf-data-table-mark">? <span class="hf-visually-hidden">Wikipedia-pagina ontbreekt bij Berg, Pieter van den</span>`,
+      `href="/beheer/personen/${ids['berg']}/naam?terug=%2Fbeheer%2Fspelers%2Fkwaliteit%2Fpersonen%2Fb&amp;kolom=wikipedia" class="hf-data-table-mark">? <span class="hf-visually-hidden">Wikipedia-pagina ontbreekt bij Berg, Pieter van den</span>`,
     )
     expect(row).toContain(`href="/beheer/personen/${ids['berg']}/leven?`)
     expect(row).toContain(`href="/beheer/personen/${ids['berg']}/linie?`)
@@ -216,9 +211,9 @@ describe('the table of a letter (#1165)', () => {
     const html = await letterPage('b')
 
     expect(html).toMatch(
-      /<a [^>]*aria-current="page"[^>]*href="\/beheer\/kwaliteit\/personen\/b"[^>]*><strong[^>]*>B<\/strong><\/a>/u,
+      /<a [^>]*aria-current="page"[^>]*href="\/beheer\/spelers\/kwaliteit\/personen\/b"[^>]*><strong[^>]*>B<\/strong><\/a>/u,
     )
-    expect(html).toContain('<a href="/beheer/kwaliteit/personen/d">D</a>')
+    expect(html).toContain('<a href="/beheer/spelers/kwaliteit/personen/d">D</a>')
     expect(html).toMatch(/<\/a> C <a /u)
   })
 
@@ -227,7 +222,7 @@ describe('the table of a letter (#1165)', () => {
 
     expect([...html.matchAll(/<tr><th scope="row">/gu)]).toHaveLength(1)
     expect(html).toContain('Bakker, Jan')
-    expect(html).toContain('<a href="/beheer/kwaliteit/personen/b">Alle kolommen</a>')
+    expect(html).toContain('<a href="/beheer/spelers/kwaliteit/personen/b">Alle kolommen</a>')
     expect(html).toContain('1 persoon van de 3 heeft een gat in de kolom Land.')
   })
 
@@ -254,7 +249,7 @@ describe('Opslaan en volgende on a part of a person (#1165)', () => {
     return data
   }
   const empty = { errors: {}, values: {} } as never
-  const back = '/beheer/kwaliteit/personen/b?kolom=wikipedia'
+  const back = '/beheer/spelers/kwaliteit/personen/b?kolom=wikipedia'
 
   it('goes on to the next person of the letter with a gap in the column', async () => {
     await expect(
@@ -267,7 +262,7 @@ describe('Opslaan en volgende on a part of a person (#1165)', () => {
         form({ achternaam: 'Bakker', knop: 'volgende', reden: 'Clubblad', voornaam: 'Jan', wikipedia: 'Jan Bakker' }),
       ),
     ).rejects.toThrow(
-      `redirect to /beheer/personen/${ids['berg']}/naam?gedaan=volgende-opgeslagen&terug=%2Fbeheer%2Fkwaliteit%2Fpersonen%2Fb%3Fkolom%3Dwikipedia&kolom=wikipedia`,
+      `redirect to /beheer/personen/${ids['berg']}/naam?gedaan=volgende-opgeslagen&terug=%2Fbeheer%2Fspelers%2Fkwaliteit%2Fpersonen%2Fb%3Fkolom%3Dwikipedia&kolom=wikipedia`,
     )
   })
 
@@ -281,7 +276,7 @@ describe('Opslaan en volgende on a part of a person (#1165)', () => {
         empty,
         form({ knop: 'volgende', land: 'NL', reden: 'Clubblad' }),
       ),
-    ).rejects.toThrow('redirect to /beheer/kwaliteit/personen/b?gedaan=kolom-compleet')
+    ).rejects.toThrow('redirect to /beheer/spelers/kwaliteit/personen/b?gedaan=kolom-compleet')
   })
 
   it('saves and stays without the button, or with a column of another part', async () => {

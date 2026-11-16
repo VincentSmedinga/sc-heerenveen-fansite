@@ -114,7 +114,7 @@ export default async function LetterQualityPage({ params, searchParams }: Props)
           <Link href={personFactsPath}>Linie en land snel aanvullen</Link>
         </Text>
         {withGaps.length === 0 ? null : (
-          <Card aria-labelledby="personen-kop">
+          <Card aria-labelledby="personen-kop" surface="warm">
             <Heading id="personen-kop" level={2}>
               {plural(withGaps.length, 'persoon', 'personen')} met een gat
             </Heading>

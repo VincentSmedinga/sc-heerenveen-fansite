@@ -49,7 +49,7 @@ let authorId: number
 let differenceId: number
 let playerId: number
 
-const page = '/beheer/kwaliteit/2026-27/spelerscijfers'
+const page = '/beheer/spelers/kwaliteit/spelerscijfers/2026-27'
 
 beforeAll(async () => {
   database = await createTestDatabase()
@@ -164,7 +164,7 @@ describe('deciding a difference in the numbers of a player', () => {
     })
     expect(await decide('abc', { besluit: 'houden', reden: 'Daarom' })).toEqual({ redirect: `${page}?fout=besloten` })
     expect(await decide(differenceId, { besluit: 'houden', reden: 'Daarom' }, 'geen-seizoen')).toEqual({
-      redirect: '/beheer/kwaliteit',
+      redirect: '/beheer/spelers',
     })
 
     await database.db.update(playerStatDifferences).set({ decidedAt: null, resolution: null, status: 'pending' })
@@ -183,7 +183,7 @@ describe('deciding a difference in the numbers of a player', () => {
 })
 
 describe('deciding a difference between the editors and the import about a player', () => {
-  const fieldPage = '/beheer/kwaliteit/2026-27/spelersgegevens'
+  const fieldPage = '/beheer/spelers/kwaliteit/spelersgegevens/2026-27'
   let fieldDifferenceId: number
 
   beforeEach(async () => {
@@ -281,7 +281,7 @@ describe('deciding a difference between the editors and the import about a playe
       redirect: `${fieldPage}?fout=besloten`,
     })
     expect(await decideField(fieldDifferenceId, { besluit: 'houden', reden: 'Daarom' }, 'geen-seizoen')).toEqual({
-      redirect: '/beheer/kwaliteit',
+      redirect: '/beheer/spelers',
     })
 
     await database.db.insert(players).values({ name: 'Luuk Oyen', searchTerm: 'Oyen', season: '2026/27' })

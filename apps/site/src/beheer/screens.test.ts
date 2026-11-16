@@ -45,7 +45,7 @@ describe('the screens of the admin', () => {
     ['/beheer/artikelen/12/versies/3', '/beheer/artikelen'],
     ['/beheer/wedstrijden/2025-26', '/beheer/wedstrijden'],
     ['/beheer/wedstrijden/kwaliteit/2005-06', '/beheer/wedstrijden'],
-    ['/beheer/kwaliteit/personen', '/beheer/kwaliteit'],
+    ['/beheer/spelers/kwaliteit/personen', '/beheer/spelers'],
     ['/beheer/bezoek', '/beheer/bezoek'],
     ['/beheer/accounts/4', '/beheer/accounts'],
     ['/beheer/mijn-account', '/beheer/mijn-account'],
