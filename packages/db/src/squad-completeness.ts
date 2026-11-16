@@ -5,8 +5,13 @@
 // check that cannot run changes nothing, so we claim no more than we can check. The numbers
 // come from a measurement on ten seasons with a table of the whole squad
 // (docs/volledigheid-selectie.md).
-// The function reads nothing and asks nothing: the caller gives it the facts of one season.
+// The function reads nothing and asks nothing: the caller gives it the facts of one season and
+// today's date, so a test can set the day. The check of the goals does not run in the season
+// that is running: the table of Wikipedia is changed by hand, so it lags behind our matches by
+// weeks, and a lower total then says nothing about who is in the squad (#1291).
 import type { PlayerSource } from './schema.ts'
+
+import { seasonOf } from './season.ts'
 
 export type CompletenessCheck = {
   /** What the check found, in one sentence. */
@@ -49,6 +54,10 @@ export type SquadCompletenessInput = {
    * when the season has no goals in the database.
    */
   scorers: CompletenessScorer[] | null
+  /** The season of the list, such as `2026/27`. */
+  season: string
+  /** Today, which tells the season that is running (`seasonOf`) from one that is over. */
+  today: Date
 }
 
 /** A key that treats names as the database does: without accents and capitals. */
@@ -130,8 +139,13 @@ function failed(name: CompletenessCheckName, cap: number, detail: string): Check
   return { cap, check: { detail, name, outcome: 'failed' } }
 }
 
-function goalsCheck({ goalsTotal, scorers }: SquadCompletenessInput): Checked {
+function goalsCheck({ goalsTotal, scorers, season, today }: SquadCompletenessInput): Checked {
   const name = 'goals'
+
+  // The page of the season is edited by hand and lags behind our matches while the season runs.
+  if (season === seasonOf(today)) {
+    return unavailable(name, 'the season is running, and the table can lag behind our matches')
+  }
 
   if (goalsTotal === null || scorers === null) {
     return unavailable(name, 'the table gives no goals, or the season has none in the database')

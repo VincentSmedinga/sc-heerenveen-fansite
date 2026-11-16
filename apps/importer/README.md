@@ -1880,6 +1880,8 @@ De tests staan in [`src/import-squads.test.ts`](src/import-squads.test.ts): ze d
 De kans dat de spelers van een seizoen de hele selectie zijn (`squadCompleteness`, zie [`docs/volledigheid-selectie.md`](../../docs/volledigheid-selectie.md)) staat per seizoen in de tabel `squad_completeness`.
 De site leest haar alleen; de importer en Beheer rekenen haar uit (`storeCompleteness` in [`packages/db/src/store-completeness.ts`](../../packages/db/src/store-completeness.ts)), de import van wedstrijden ook voor een seizoen zonder selectiepagina.
 Een seizoen zonder spelers heeft geen rij, en de site leest dat als `onbekend`.
+In het seizoen dat loopt draait de controle op de doelpunten van de tabel niet (de uitkomst is `unavailable`), omdat de tabel op Wikipedia weken achterloopt (#1291).
+De volgende uurlijkse import rekent de rij van het lopende seizoen opnieuw uit, na de wedstrijden, en schrijft haar over als de controles anders zijn: een losse opdracht is niet nodig.
 
 - **Wanneer:** aan het eind van een lezing van de selectie.
   Dat is de uurlijkse import van het lopende seizoen (na de wedstrijden, in dezelfde run), en `import:squad` en `import:squads` voor een afgelopen seizoen.
