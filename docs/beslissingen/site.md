@@ -2379,6 +2379,7 @@
 - **Nadeel:** een nieuwe naam op Wikipedia verschijnt bij een club met een eigen lijst niet vanzelf.
   De lijst van de wedstrijden staat naast het formulier, dus de redactie ziet het verschil.
 - **Alternatieven:** een toelichting of een dag aan een naam uit de wedstrijden hangen (blijft kloppen bij een nieuwe naam op Wikipedia, maar koppelt aan een spelling die we niet beheren); een reden bij elke opslag, zoals bij een wedstrijd (een lijst heeft geen eerdere waarde om te verantwoorden, en de aantallen in het logboek volstaan).
+- **Later:** zie _De site toont de naam van het stadion zoals hij op de dag van de wedstrijd was_ (16 november 2026): de eigen lijst is vervangen door de thuisvelden en namen van de stadions, en `club_stadiums` is weg.
 
 ## Een naam begint met een seizoen of met een dag, en de volgende bepaalt waar hij eindigt
 
@@ -2397,6 +2398,7 @@
   Het issue schreef "tot 14 februari 2021" als voorbeeld; de korte vorm houdt de periode ook op een telefoon kort.
 - **Alternatieven:** een start én een einde per regel (kan gaten en overlap hebben en vraagt meer controles).
 - **Later:** zie _Een stadion toont seizoenen, en een dag alleen als het beheer die kent_ (4 november 2026) voor de kaart zonder eigen lijst: daar blijven de perioden seizoenen.
+- **Later:** zie _De site toont de naam van het stadion zoals hij op de dag van de wedstrijd was_ (16 november 2026): de periodes van de kaart volgen nu uit de starts van de thuisvelden en van de namen, met dezelfde tekst.
 
 ## Een toelichting is korte tekst bij een naam
 
@@ -6206,3 +6208,28 @@
   De gemarkeerde rij staat op de sterke achtergrond, niet vet (vet is voor het kerncijfer, zie `base/table.css`), met een balk aan het begin van de rij en een tekst voor een schermlezer, zodat kleur niet het enige onderscheid is.
   `DataTable` heeft daarvoor `highlight` gekregen, en een rij voor een onderbreking kan met `display` zeggen wat hij verbergt.
 - **Alternatieven:** de hele stand tonen, wat op een telefoon te lang is; `StandingsTable` uitbreiden, dat alleen onze eigen rij markeert en geen doelsaldo heeft.
+
+## De site toont de naam van het stadion zoals hij op de dag van de wedstrijd was
+
+- **Datum:** 16 november 2026
+- **Besluit:** een wedstrijd met een stadion toont de naam die dat stadion op de dag van de wedstrijd had, en de redactie kiest het stadion van een wedstrijd (#1301, zie _Stadions worden een eigen gegeven_ in `hosting-en-data.md`).
+  - **De naam:** een wedstrijd met een `stadium_id` toont de laatste naam die het stadion op die dag al had (`stadiumOnTheDay`); een wedstrijd zonder koppeling toont de tekst van de bron, zoals eerder.
+    Dat geldt voor `Match`, de pagina van een wedstrijd en Zoeken in wedstrijden; er is geen tweede plek voor het stadion.
+  - **De kaart:** de kaart Stadion of Stadions op de pagina van een club toont zijn thuisvelden, elk met de namen die het stadion had terwijl de club er speelde (`listClubStadiumLines`).
+    Een naam die begon voordat de club kwam, telt niet apart, en een naam die begon nadat de club vertrok, ontbreekt.
+    De tekst van de periodes en de toelichting onder een naam zijn die van de eigen lijst die eraan voorafging.
+    Een club zonder thuisvelden houdt de namen uit zijn wedstrijden.
+  - **Het formulier:** het formulier van een wedstrijd heeft onder Gegevens, naast de tekst, een keuzelijst "Stadion uit de lijst" met alle stadions (de naam van nu en de plaats).
+    Een gekozen stadion (een dat afwijkt van wat de tekst, de dag en de thuisclub geven) bepaalt de naam op de site en blijft bij een volgende opslag, de import en het terugzetten van andere delen staan; zo krijgt een finale op een neutraal veld een stadion dat bij geen van beide clubs hoort.
+    "Uit de tekst" laat het stadion volgen uit de tekst, de dag en de thuisclub, zoals de import dat doet; een koppeling die de import maakte staat daar ook, en wordt pas een keuze als de redacteur een ander stadion kiest.
+    Een keuze telt als een wijziging van de gegevens: ze komt in het logboek als "gekoppeld stadion" en in de snapshot, en terugzetten zet het stadion terug.
+  - **De thuisvelden van sc Heerenveen:** de tabel `club_home_grounds` heeft er rijen voor met een leeg `club_id`, maar het scherm van een club kan ze niet tonen, want sc Heerenveen is geen club in `clubs`.
+    Ze blijven zoals `seedStadiums` ze zette; de wedstrijden van sc Heerenveen volgen uit de namen van zijn twee stadions, en een ander stadion voor een wedstrijd kies je in het formulier van de wedstrijd.
+    Een scherm voor die reeks is een eigen issue.
+  - **De tabel:** `club_stadiums`, zijn scherm met een eigen lijst en zijn functies zijn weg (zie _De tabel `club_stadiums` gaat weg, en de naam van de dag komt uit `stadium_names`_ in `hosting-en-data.md`).
+    De lijst van de clubs in het beheer heeft nu het filter Thuisvelden in plaats van Eigen lijst, met `?tonen=thuisvelden`.
+- **Waarom:** een stadion dat van naam verandert, moet bij een oude wedstrijd de oude naam tonen en bij een nieuwe de nieuwe, en alleen de namen van het stadion kunnen dat zeggen.
+  Een keuze in het formulier lost de gevallen op die de tekst niet kan: een neutraal veld, of een tekst die de koppeling niet zeker maakt.
+- **Nadeel:** een gekozen stadion en de tekst van de bron kunnen elkaar tegenspreken; het formulier laat ze naast elkaar staan en de redactie ziet het verschil.
+  Een naam die de redactie vroeger in een eigen lijst zette, moet nu bij het stadion staan.
+- **Alternatieven:** de tekst van de wedstrijd laten bepalen wat de site toont (een oude wedstrijd toont dan de naam van nu, of een spelling van Wikipedia); een vlag "neutraal" op de wedstrijd (zegt minder dan het stadion zelf); de koppeling bij elke opslag opnieuw uit de tekst halen (een gekozen stadion zou verdwijnen).

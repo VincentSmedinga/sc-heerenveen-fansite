@@ -939,32 +939,6 @@ De importer leest de personen dan opnieuw.
 `listScorerMatchIds` geeft de wedstrijden waarin een speler van ons scoorde, met de woorden gezocht zoals `searchPlayers` doet (dus ook onder een oude naam).
 Een eigen doelpunt telt niet voor de speler, en een doelpunt dat niet aan een speler is gekoppeld vindt niemand.
 
-### De tabel `club_stadiums`
-
-De eigen lijst van namen van het stadion van een club, die de redactie bijhoudt in het beheer (zie _De stadions van een club_ in de [README van de site](../../apps/site/README.md)).
-Heeft een club rijen in deze tabel, dan toont de kaart op zijn pagina alleen die lijst; heeft hij er geen, dan toont de kaart wat de wedstrijden zeggen.
-De migratie `0038_add_club_stadiums` maakt de tabel leeg: de redactie vult de clubs in die het nodig hebben.
-
-| Kolom          | Betekenis                                                                                                                  |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `club_id`      | De club van de naam; de rij gaat weg met haar club                                                                         |
-| `position`     | De plaats in de lijst, vanaf 0; samen met `club_id` uniek                                                                  |
-| `name`         | De naam van het stadion (1 tot 100 tekens)                                                                                 |
-| `start_season` | Het seizoen waarmee de naam begint, zoals `2019/20`; telt als 1 juli van dat jaar; leeg als de naam met een dag begint     |
-| `start_day`    | De dag waarmee de naam begint; nooit samen met `start_season`; alleen de eerste naam van een lijst mag allebei leeg hebben |
-| `note`         | Een toelichting van hoogstens 200 tekens als gewone tekst, of leeg                                                         |
-
-De naam ervoor eindigt waar de volgende begint, dus een naam heeft geen eigen einde.
-De tabel zelf controleert wat zij kan (`start_season` of `start_day`, de vorm van een seizoen, een start na de eerste regel); de rest, zoals de lengte van een naam en dat de starts oplopen, controleert het beheer (`stadium-form.ts` in de site).
-Drie functies in `@fansite/db/club-stadiums` horen erbij:
-
-- `listClubStadiums(db, clubId)` geeft de lijst van een club in volgorde, en `listClubsWithStadiums(db)` de nummers van de clubs die er een hebben;
-- `replaceClubStadiums(db, userId, clubId, lines)` vervangt de lijst van een club en schrijft `stadium.save` in het logboek, in één transactie;
-- `removeClubStadiums(db, userId, clubId)` haalt de lijst weg en schrijft `stadium.reset`; een club zonder lijst verandert niets en laat geen regel achter.
-
-Het logboek krijgt het nummer van de club en de aantallen, en nooit de tekst van een toelichting.
-De dump van `pnpm db:backup` neemt de tabel mee met haar rijen, en `pnpm db:restore` zet haar terug (`structureOnlyTables` in `src/backup.ts` noemt haar niet).
-
 ### De tabel `club_name_periods`
 
 De namen die een club droeg, met een start en een toelichting, die de redactie bijhoudt in het beheer (zie _De namen van een club_ in de [README van de site](../../apps/site/README.md)).
@@ -972,7 +946,7 @@ De lijst is alleen voor de weergave: de pagina van de club zegt "Eerder" uit dez
 De importer bepaalt de naam in de kop en de slug, en vindt een hernoemde club via `club_names`, waar elke naam van de lijst bij het opslaan ook in komt.
 De migratie `0039_add_club_name_periods` maakt de tabel leeg: de redactie vult de clubs in die het nodig hebben.
 
-De kolommen en de controles in de tabel zijn die van `club_stadiums` (`club_id`, `position`, `name` van 1 tot 100 tekens, `start_season`, `start_day`, `note` van hoogstens 200 tekens).
+De kolommen en de controles in de tabel zijn die van `stadium_names` (`stadium_id` in plaats van `club_id`, `club_id`, `position`, `name` van 1 tot 100 tekens, `start_season`, `start_day`, `note` van hoogstens 200 tekens).
 Zes functies in `@fansite/db/club-name-periods` horen erbij:
 
 - `listClubNamePeriods(db, clubId)` geeft de lijst van een club in volgorde, en `listClubsWithNamePeriods(db)` de nummers van de clubs die er een hebben;
@@ -990,7 +964,7 @@ De dump van `pnpm db:backup` neemt de tabel mee met haar rijen.
 ### De tabellen van de stadions
 
 Een stadion is het veld zelf (#1297, de beslissingen staan in `hosting-en-data.md`).
-`club_stadiums` blijft zoals hij is: de pagina's gebruiken hem tot #1301.
+De tabel `club_stadiums` is weg (#1301): de kaart op de pagina van een club leest de velden en namen uit deze tabellen.
 
 | Tabel                | Betekenis                                                                                                                                                                      |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -1010,6 +984,13 @@ De stadions zelf komen uit een stap erna, `migrateStadiums`, die `prepareDatabas
 - `findStadium(db, { homeClubId, matchDate, name })` geeft het stadion dat die naam op die dag al had gehad, of bij meer kandidaten het veld dat de thuisclub toen gebruikte; anders niets.
   `homeClubId` is leeg als sc Heerenveen thuis speelde.
 - `linkMatchToStadium(db, matchId)` zet het stadion van één wedstrijd opnieuw uit zijn tekst; de import en het beheer roepen het aan na elke schrijfactie die de tekst, de dag of de thuisclub kan veranderen.
+  Hebben de redacteuren de gegevens van de wedstrijd ingevoerd (`facts_edited`) en wijkt het stadion af van wat de tekst geeft, dan blijft dat het stadion dat ze kozen (`hasChosenStadium`).
+- `stadiumOnTheDay` is een stuk SQL voor de `select` van een lijst wedstrijden (#1301): de laatste naam van het gekoppelde stadion die op de dag van de wedstrijd al begonnen was, of de tekst van de bron zonder stadion.
+  `listClubMatches`, `listSeasonMatches` en `listSearchableMatches` geven hem als `stadium`, zodat elke pagina de naam van die dag toont.
+  De schermen van het beheer lezen `matches.stadium` zelf, de tekst van de bron.
+- `listClubStadiumLines(db, clubId)` geeft de regels van de kaart Stadion op de pagina van een club: zijn thuisvelden in volgorde, elk met de namen die het stadion had terwijl de club er speelde.
+  Een naam die begon vóór de club kwam, telt niet apart, en een naam die begon nadat de club vertrok, ontbreekt.
+  Een club zonder thuisvelden geeft een lege lijst, en de kaart toont dan wat de wedstrijden zeggen.
 - `replaceHomeGrounds(db, clubId, rows)` schrijft de velden van een club (of van sc Heerenveen, met `null`) in één transactie, want een UNIQUE-sleutel houdt een tweede reeks voor een lege club niet tegen.
 - `@fansite/db/stadium-admin` (#1299) is wat het beheer van de stadions doet, elk in één transactie met zijn rij in het logboek: `saveStadium` maakt een stadion of bewaart het met zijn namen (de bron van plaats en coördinaten wordt `manual` als de redacteur ze verandert), `resetStadiumToWikidata` leegt ze weer en zet de clubs die er spelen klaar voor een nieuwe lezing, `saveClubHomeGrounds` bewaart de velden van een club en zet `home_grounds_source` op `manual`, en `setClubWikidataId` zet het Wikidata-nummer van een club.
   De migratie `0083_add_stadium_admin_actions` voegt de vier acties van het logboek toe.
@@ -1052,8 +1033,8 @@ De naam van de club die weggaat, staat daarna bij de andere namen van de club di
 Schrijft Wikipedia die naam later weer, zonder link, dan vindt de importer de club die blijft.
 Had de club die weggaat een eigen artikel dat geen doorverwijzing is, dan is het geen samenvoegen maar een vergissing: één artikel is één club, en de importer maakt de club bij de volgende lezing opnieuw.
 Heeft hij titels in `club_pages`, zet die dan ook over: `UPDATE club_pages SET club_id = <blijft> WHERE club_id = <gaat weg>;` vóór de `DELETE`, want de rijen gaan met hun club mee weg.
-Heeft hij een eigen lijst in `club_stadiums` en de club die blijft niet, zet die dan ook over met `UPDATE club_stadiums SET club_id = <blijft> WHERE club_id = <gaat weg>;`.
-Hebben allebei een lijst, kies er dan een en haal de andere weg: de lijsten van twee clubs laten zich niet samenvoegen.
+Heeft hij thuisvelden in `club_home_grounds` en de club die blijft niet, zet die dan ook over met `UPDATE club_home_grounds SET club_id = <blijft> WHERE club_id = <gaat weg>;`.
+Hebben allebei thuisvelden, kies er dan een reeks en haal de andere weg: de reeksen van twee clubs laten zich niet samenvoegen.
 Hetzelfde geldt voor een lijst in `club_name_periods`: zet hem over met `UPDATE club_name_periods SET club_id = <blijft> WHERE club_id = <gaat weg>;` als de club die blijft er geen heeft, anders kies je een lijst.
 Hetzelfde geldt voor de thuisvelden in `club_home_grounds`: ze gaan met hun club mee weg, dus zet ze over met `UPDATE club_home_grounds SET club_id = <blijft> WHERE club_id = <gaat weg>;` als de club die blijft er geen heeft.
 De slug van de club die weggaat, werkt dan niet meer; de slug van de club die blijft verandert niet.
@@ -1122,9 +1103,8 @@ De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 - `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `club_pages`, `persons`, `person_pages`, `player_list_titles`, `club_stadiums`, `stadiums`, `stadium_names`, `club_home_grounds`, `club_name_periods`, `standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, `squad_completeness`, `item_clubs`, `match_reports`, `match_appearances`, `match_substitutions`, `match_cards`, `match_incidents`, `match_shootout_kicks`, `match_statistics`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
 - `@fansite/db/visits`: `createVisitCounter(db)` geeft `record({ address, now, path, userAgent })`, dat een paginaweergave en, als de bezoeker vandaag nog niet is gezien, een bezoeker telt; `removeVisitorData(db, now)` gooit het zout en de kenmerken van eerdere dagen weg, `visitDay(moment)` geeft de dag in Nederland en `visitorHash(salt, address, userAgent)` het kenmerk;
 - `@fansite/db/stadium-admin`: `listAdminStadiums`, `findAdminStadium`, `listClubHomeGrounds`, `saveStadium`, `resetStadiumToWikidata`, `saveClubHomeGrounds` en `setClubWikidataId` voor het beheer van de stadions;
-- `@fansite/db/stadiums`: `findStadium`, `resolveStadium`, `loadStadiumIndex`, `linkMatchToStadium`, `linkMatchesToStadiums`, `replaceHomeGrounds`, `seedStadiums`, `migrateStadiums`, `nameKey` en `startDate` voor de stadions (zie _De tabellen van de stadions_);
+- `@fansite/db/stadiums`: `stadiumOnTheDay`, `listClubStadiumLines`, `findStadium`, `resolveStadium`, `loadStadiumIndex`, `linkMatchToStadium`, `linkMatchesToStadiums`, `replaceHomeGrounds`, `seedStadiums`, `migrateStadiums`, `nameKey` en `startDate` voor de stadions (zie _De tabellen van de stadions_);
 - `@fansite/db/club-name-periods`: `listClubNamePeriods`, `listClubsWithNamePeriods`, `replaceClubNamePeriods`, `removeClubNamePeriods`, `nameOnDay` en `withSeasonNames` voor de lijsten van namen (zie _De tabel `club_name_periods`_);
-- `@fansite/db/club-stadiums`: `listClubStadiums`, `listClubsWithStadiums`, `replaceClubStadiums` en `removeClubStadiums` voor de eigen lijsten van stadions (zie _De tabel `club_stadiums`_);
 - `@fansite/db/persons`: `createPersonBook(db, { aliases, redirects })` geeft `resolve(titel)`, dat de persoon van een titel vindt of maakt en zijn titels in `person_pages` zet, met `knownPersonPages` en `rememberedPersonArticles` voor de titels in `person_pages`;
 - `@fansite/db/clubs`: `createClubBook(db, { fullNames, redirects })` geeft `resolve({ name, page, season })`, dat de club van een tegenstander vindt of maakt en de regels voor het logboek geeft, en een naam uit de lijst met volledige namen eerst als de volledige naam neemt, en een titel die een doorverwijzing is als het artikel waar hij naartoe gaat; `repairClubs(db, fullNames)` voegt een club uit die lijst samen die er twee keer staat; `repairClubPages(db, doorverwijzingen)` voegt clubs samen die op hetzelfde artikel uitkomen, met `knownClubPages`, `rememberedClubArticles` en `unrememberedClubPages` voor de titels in `club_pages`; `withClubs(db, wedstrijden)` zet de club bij wedstrijden die er nog geen hebben; `clubSlug(naam)` en `normaliseClubName(naam)` rekenen de slug en de vergelijkingsvorm uit;
 - `@fansite/db/match-reports`: `readMatchReport`, `listScheduledMatches`, `listSeasonReports`, `readPlayerReportStats`, `reportForRules`, `matchForRules`, `mayHaveReport` en `phaseOf` voor de verslagen van wedstrijden (zie _De tabellen van een verslag_);

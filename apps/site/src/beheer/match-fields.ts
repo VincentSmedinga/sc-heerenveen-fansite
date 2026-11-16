@@ -17,6 +17,7 @@ export const matchFieldNames = [
   'toeschouwers',
   'scheidsrechter',
   'stadion',
+  'stadion-id',
   'opmerking',
 ] as const
 
@@ -38,6 +39,7 @@ export type MatchErrors = {
   reden?: string
   scheidsrechter?: string
   stadion?: string
+  'stadion-id'?: string
   status?: string
   toeschouwers?: string
   verlenging?: string
@@ -97,8 +99,10 @@ export type FormPart = (typeof formParts)[number]
 /** The fields of a part that are not goals. The part `doelpunten` has the goals only. */
 const partFields: Record<FormPart, readonly MatchFieldName[]> = {
   doelpunten: [],
-  gegevens: ['toeschouwers', 'scheidsrechter', 'stadion', 'opmerking'],
-  uitslag: matchFieldNames.filter((name) => !['opmerking', 'scheidsrechter', 'stadion', 'toeschouwers'].includes(name)),
+  gegevens: ['toeschouwers', 'scheidsrechter', 'stadion', 'stadion-id', 'opmerking'],
+  uitslag: matchFieldNames.filter(
+    (name) => !['opmerking', 'scheidsrechter', 'stadion', 'stadion-id', 'toeschouwers'].includes(name),
+  ),
 }
 
 /** Whether the field with this `id` is on the page of a part: `reden` is on every one. */

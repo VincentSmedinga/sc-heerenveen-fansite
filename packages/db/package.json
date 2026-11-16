@@ -12,7 +12,6 @@
     "./client": "./src/client.ts",
     "./club-name-periods": "./src/club-name-periods.ts",
     "./british-places": "./src/british-places.ts",
-    "./club-stadiums": "./src/club-stadiums.ts",
     "./clubs": "./src/clubs.ts",
     "./env": "./src/env.ts",
     "./lock": "./src/lock.ts",

@@ -473,6 +473,7 @@
 - **Waarom:** de namen uit de wedstrijden kunnen niet zeggen waarom een club tijdelijk elders speelde, en een lijst per club is de kleinste vorm die dat kan.
   Een `position` houdt de volgorde vast die de redactie ziet, ook voor een naam die terugkomt (A, B, A), waar sorteren op de start niet genoeg is voor de eerste regel zonder start.
 - **Alternatieven:** een tabel met stadions los van clubs, met een stadion dat van naam verandert of door meer clubs wordt gebruikt (#549 vroeg erom en is gesloten omdat de namen uit de wedstrijden volstonden; een lijst per club heeft zo'n tabel niet nodig); een lijst als tekst of JSON in `clubs` (geen controles in de database, en de back-up en het logboek hebben er dan geen aandacht voor).
+- **Later:** zie _De tabel `club_stadiums` gaat weg, en de naam van de dag komt uit `stadium_names`_ (16 november 2026): de tabel is weg, en de kaart leest de velden en namen uit de tabellen van de stadions.
 
 ## De namen van een club staan in `club_name_periods`, naast de schrijfwijzen in `club_names`
 
@@ -1098,7 +1099,7 @@
   ADO Den Haag verhuisde van het Zuiderpark naar een nieuw veld, dat om de paar jaar een sponsornaam kreeg.
 - **Waarom:** naam, plek en gebruikende club veranderen los van elkaar.
 - **Alternatieven:** een stadion als naam met een periode per club, zoals `club_stadiums` dat doet, die geen verhuizing van een gelijknamig stadion kan uitdrukken.
-- **Later:** `club_stadiums` blijft voorlopig zoals het is, want de pagina's gebruiken hem tot #1301 (zie _De eigen lijst van stadions van een club staat in `club_stadiums`_).
+- **Later:** `club_stadiums` bleef zoals hij was tot #1301; zie _De tabel `club_stadiums` gaat weg, en de naam van de dag komt uit `stadium_names`_ (16 november 2026).
 
 ## Een naam van een stadion is niet uniek, en een wedstrijd wordt gekoppeld met naam, dag en thuisclub
 
@@ -1171,3 +1172,27 @@
   De toelichting zegt dat dit niet het echte begin is; de redactie kan het verbeteren.
   Een club heeft een veld als thuisveld als hij de meeste uitwedstrijden daar speelde; een veld waar geen club de meeste had, zoals een neutraal terrein, heeft geen thuisclub.
   De velden van een club komen in de volgorde van zijn eerste wedstrijd daar.
+
+## De tabel `club_stadiums` gaat weg, en de naam van de dag komt uit `stadium_names`
+
+- **Datum:** 16 november 2026
+- **Besluit:** de tabel `club_stadiums` is weg (#1301).
+  De velden van een club en de namen van die velden staan in `club_home_grounds` en `stadium_names`, en de site leest ze daar.
+  - **De migratie:** `0084_drop_club_stadiums` laat de tabel vallen.
+    Op acceptatie had de tabel op 16 november 2026 geen rijen, dus er wordt niets gekopieerd.
+    Heeft een tabel toch rijen, dan faalt de migratie met een melding: de eerste opdracht voegt een controle toe die geen rij kan halen, en MariaDB weigert die bij een tabel met rijen.
+    De naam van de controle (`club_stadiums_still_has_rows_copy_them_to_stadium_names_first`) staat in de foutmelding en zegt wat er moet gebeuren.
+    De opdrachten kunnen opnieuw draaien, want een migratie die halverwege stopte, maakt zich bij de volgende start af.
+  - **De naam van de dag in SQL:** `stadiumOnTheDay` in `stadiums.ts` is een stuk SQL, geen aparte vraag per wedstrijd.
+    Het kiest de laatste naam van het gekoppelde stadion die op de dag van de wedstrijd al was begonnen (een dag of 1 juli van het seizoen), en zonder stadion de tekst van de bron.
+    De lijsten van de pagina's (`listClubMatches`, `listSeasonMatches` en `listSearchableMatches`) geven hem als `stadium`, dus elke plek op de site toont dezelfde naam.
+    De schermen van het beheer lezen `matches.stadium` zelf, want de redactie ziet de tekst van de bron.
+  - **Een gekozen stadion blijft:** zijn de gegevens van een wedstrijd door de redactie ingevoerd (`facts_edited`) en wijkt het stadion af van wat de tekst, de dag en de thuisclub geven (`hasChosenStadium`), dan zet `linkMatchToStadium` het niet meer om uit de tekst.
+    Een koppeling die de import maakte, volgt de tekst ook nadat de redactie andere gegevens invoerde.
+    De snapshot `before_match` bewaart `stadiumId`, zodat het terugzetten van een invoer het stadion terugzet.
+  - **Het logboek:** `stadium.save` en `stadium.reset` blijven in de lijst van acties, want oude rijen in het logboek hebben ze.
+    Nieuwe rijen komen er niet meer bij.
+- **Waarom:** een tabel die naast de nieuwe tabellen een eigen lijst namen houdt, laat twee waarheden bestaan over hetzelfde veld.
+  De naam van de dag kan alleen kloppen als hij uit de namen van het stadion komt.
+- **Nadeel:** een naam die de redactie alleen in `club_stadiums` kende, bestaat niet meer; op acceptatie waren dat geen rijen.
+- **Alternatieven:** de rijen in een migratie kopiëren (er zijn er geen, en een kopie naar een stadion kan niet zonder te raden welk stadion het is); de tabel laten staan en alleen niet meer lezen (twee bronnen); de naam van de dag in TypeScript uitrekenen (een vraag of een groot gegeven per wedstrijd).

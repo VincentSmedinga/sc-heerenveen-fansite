@@ -1,9 +1,9 @@
 // Reading and checking the form of the stadiums of a club: the lines an editor filled in, the
 // button that was pressed, and the lines as the table holds them. The values are text; the
 // checks are the same as the table's (see `club_stadiums`), with a sentence at each field.
-import type { StadiumLine } from '@fansite/db/club-stadiums'
+import type { StadiumLine } from '@fansite/db/stadiums'
 
-import { clubStadiumLimits } from '@fansite/db/schema'
+import { stadiumLimits } from '@fansite/db/schema'
 
 import type { StadiumErrors, StadiumFieldName, StadiumRowValues } from './stadium-fields'
 
@@ -136,7 +136,7 @@ export function rowOf(line: StadiumLine): StadiumRowValues {
  */
 export function validateStadiumRows(
   rows: readonly StadiumRowValues[],
-  emptyMessage = 'Een lijst heeft minstens één regel. Wil je er geen eigen lijst meer? Kies "Terug naar Wikipedia".',
+  emptyMessage = 'Een lijst heeft minstens één regel.',
 ): { errors: StadiumErrors; lines?: undefined } | { errors?: undefined; lines: StadiumLine[] } {
   const errors: StadiumErrors = {}
 
@@ -156,14 +156,14 @@ export function validateStadiumRows(
 
     if (name === '') {
       errors[id('naam')] = 'Vul de naam van het stadion in.'
-    } else if ([...name].length > clubStadiumLimits.name) {
-      errors[id('naam')] = `Schrijf hoogstens ${clubStadiumLimits.name} tekens.`
+    } else if ([...name].length > stadiumLimits.name) {
+      errors[id('naam')] = `Schrijf hoogstens ${stadiumLimits.name} tekens.`
     } else if (hasOddCharacters(name)) {
       errors[id('naam')] = 'Gebruik alleen gewone tekens.'
     }
 
-    if ([...note].length > clubStadiumLimits.note) {
-      errors[id('toelichting')] = `Schrijf hoogstens ${clubStadiumLimits.note} tekens.`
+    if ([...note].length > stadiumLimits.note) {
+      errors[id('toelichting')] = `Schrijf hoogstens ${stadiumLimits.note} tekens.`
     } else if (hasOddCharacters(note)) {
       errors[id('toelichting')] = 'Gebruik alleen gewone tekens.'
     }

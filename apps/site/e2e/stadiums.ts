@@ -1,33 +1,23 @@
 import { connect } from '@fansite/db/client'
 import { readDatabaseEnv } from '@fansite/db/env'
-import { clubs, clubStadiums } from '@fansite/db/schema'
-import { eq } from 'drizzle-orm'
+import { clubHomeGrounds, clubs, stadiumNames, stadiums } from '@fansite/db/schema'
+import { eq, inArray } from 'drizzle-orm'
 import path from 'node:path'
 
 /**
- * A made-up list of stadiums of its own for SV Proefdorp, with a name that starts on a day and
- * a note, so the page of the club and the screen of the admin are checked with one (see
- * `/tegenstanders/sv-proefdorp` and `/beheer/stadions/sv-proefdorp` in
- * pages.spec.ts). SV Proefdorp has a cup tie to come and no match played, so its page has the
- * card Stadion only because of this list, also with the choice Eredivisie. The rows go straight
- * into the table, because they are not an action of the admin and no row of the log should
- * outlast the accounts of the checks. It only writes to a database on this computer. The file
- * imports nothing from this folder, because `pnpm --filter site test-data` runs it with Node.
+ * Made-up home grounds for SV Proefdorp: its sportpark, a ground it played on for a while, with
+ * a note, and the sportpark again from a season. The page of the club and the screen of the
+ * admin are checked with them (see `/tegenstanders/sv-proefdorp` and
+ * `/beheer/stadions/sv-proefdorp` in pages.spec.ts). SV Proefdorp has a cup tie to come and no
+ * match played, so its page has the card Stadion only because of these grounds, also with the
+ * choice Eredivisie. The rows go straight into the tables, because they are not an action of
+ * the admin and no row of the log should outlast the accounts of the checks. It only writes to
+ * a database on this computer. The file imports nothing from this folder, because
+ * `pnpm --filter site test-data` runs it with Node.
  */
 const slug = 'sv-proefdorp'
 
-const lines = [
-  { name: 'Sportpark Proefdorp', note: null, startDay: null, startSeason: null },
-  {
-    name: 'Stadion Tijdelijk',
-    note: 'Proefdorp speelde tijdelijk elders, tijdens de verbouwing van het sportpark.',
-    startDay: '2019-08-10',
-    startSeason: null,
-  },
-  { name: 'Sportpark Proefdorp', note: null, startDay: null, startSeason: '2020/21' },
-] as const
-
-/** Gives the club its list and returns the function that takes it away again. */
+/** Gives the club its home grounds and returns the function that takes them away again. */
 export async function addStadiums() {
   const { DATABASE_URL } = databaseEnv()
 
@@ -37,6 +27,7 @@ export async function addStadiums() {
 
   const { close, db } = connect(DATABASE_URL)
   let clubId: number
+  let stadiumIds: number[]
 
   try {
     const [found] = await db.select({ id: clubs.id }).from(clubs).where(eq(clubs.slug, slug))
@@ -46,8 +37,27 @@ export async function addStadiums() {
     }
 
     clubId = found.id
-    await db.delete(clubStadiums).where(eq(clubStadiums.clubId, clubId))
-    await db.insert(clubStadiums).values(lines.map((line, position) => ({ ...line, clubId, position })))
+    await db.delete(clubHomeGrounds).where(eq(clubHomeGrounds.clubId, clubId))
+
+    const [{ insertId: sportpark }] = await db.insert(stadiums).values({})
+    const [{ insertId: temporary }] = await db.insert(stadiums).values({})
+
+    stadiumIds = [sportpark, temporary]
+    await db.insert(stadiumNames).values([
+      { name: 'Sportpark Proefdorp', position: 0, stadiumId: sportpark },
+      { name: 'Stadion Tijdelijk', position: 0, stadiumId: temporary },
+    ])
+    await db.insert(clubHomeGrounds).values([
+      { clubId, position: 0, stadiumId: sportpark },
+      {
+        clubId,
+        note: 'Proefdorp speelde tijdelijk elders, tijdens de verbouwing van het sportpark.',
+        position: 1,
+        stadiumId: temporary,
+        startDay: '2019-08-10',
+      },
+      { clubId, position: 2, stadiumId: sportpark, startSeason: '2020/21' },
+    ])
   } finally {
     await close()
   }
@@ -56,7 +66,8 @@ export async function addStadiums() {
     const connection = connect(DATABASE_URL)
 
     try {
-      await connection.db.delete(clubStadiums).where(eq(clubStadiums.clubId, clubId))
+      await connection.db.delete(clubHomeGrounds).where(eq(clubHomeGrounds.clubId, clubId))
+      await connection.db.delete(stadiums).where(inArray(stadiums.id, stadiumIds))
     } finally {
       await connection.close()
     }

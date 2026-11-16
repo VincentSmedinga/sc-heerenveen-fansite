@@ -1,41 +1,33 @@
-// The stadiums of the clubs in the admin: the list of the clubs, the club an editor opens with
-// its own list and what the matches say, and the two changes, saving a list and going back to
-// Wikipedia. A change and its row in the log are one transaction (see `club-stadiums.ts` in
-// the database package). The checks of what an editor fills in are in `stadium-form.ts`.
+// The stadiums of the clubs in the admin: the list of the clubs and the club an editor opens
+// with its home grounds and its Wikidata number. A change and its row in the log are one
+// transaction (see `stadium-admin.ts` in the database package). The checks of what an editor
+// fills in are in `stadium-form.ts`.
 import type { Database } from '@fansite/db/client'
 
-import {
-  listClubStadiums,
-  listClubsWithStadiums,
-  removeClubStadiums,
-  replaceClubStadiums,
-  type StadiumLine,
-} from '@fansite/db/club-stadiums'
-import { findClubBySlug, listClubMatches, listClubRecords } from '@fansite/db/queries'
-import { clubs } from '@fansite/db/schema'
+import { findClubBySlug, listClubRecords } from '@fansite/db/queries'
+import { clubHomeGrounds, clubs } from '@fansite/db/schema'
 import { type AdminStadiumRow, listClubHomeGrounds } from '@fansite/db/stadium-admin'
 import { eq } from 'drizzle-orm'
 
-import type { StadiumView } from '../opponents'
 import type { HomeGroundRowValues } from './home-ground-fields'
-import type { StadiumRowValues } from './stadium-fields'
 
-import { stadiumsOf, stadiumViewsOf } from '../opponents'
 import { homeGroundRowOf } from './home-ground-form'
 
-export { removeClubStadiums, replaceClubStadiums }
+/** One club in the list: its name and address part, and whether it has home grounds. */
+export type AdminClubRow = { grounds: boolean; id: number; name: string; slug: string }
 
-/** One club in the list: its name and address part, and whether it has a list of its own. */
-export type AdminClubRow = { id: number; name: string; own: boolean; slug: string }
+/** What the list shows: every club, or those with home grounds. */
+export type StadiumShow = 'alles' | 'thuisvelden'
 
-/** What the list shows: every club, or those with a list of their own. */
-export type StadiumShow = 'alles' | 'eigen-lijst'
-
-/** The clubs sc Heerenveen has a match against, A to Z, with whether each has its own list. */
+/** The clubs sc Heerenveen has a match against, A to Z, with whether each has home grounds. */
 export async function listAdminClubs(db: Database): Promise<AdminClubRow[]> {
-  const [records, own] = await Promise.all([listClubRecords(db), listClubsWithStadiums(db)])
+  const [records, withGrounds] = await Promise.all([
+    listClubRecords(db),
+    db.selectDistinct({ clubId: clubHomeGrounds.clubId }).from(clubHomeGrounds),
+  ])
+  const have = new Set(withGrounds.map((row) => row.clubId))
 
-  return records.map(({ id, name, slug }) => ({ id, name, own: own.has(id), slug }))
+  return records.map(({ id, name, slug }) => ({ grounds: have.has(id), id, name, slug }))
 }
 
 /**
@@ -72,16 +64,11 @@ const plain = (text: string) =>
     .replaceAll(/[\s‐-―-]+/gu, ' ')
     .trim()
 
-/** The club an editor opens: it, its own list and what the matches say. */
+/** The club an editor opens: it, its home grounds and its Wikidata number. */
 export type AdminClub = {
   club: { id: number; name: string; slug: string; wikidataId: null | string }
   /** The home grounds of the club as lines of the form, and who set them. */
   homeGrounds: { rows: HomeGroundRowValues[]; source: 'manual' | 'wikidata' | null }
-  own: StadiumLine[]
-  /** What the matches say, as the card of a club without a list shows it. */
-  wikipedia: StadiumView[]
-  /** The same names and seasons as lines of the form, for the button "Overnemen". */
-  wikipediaRows: StadiumRowValues[]
 }
 
 /** The club with this address part, or undefined for one no club has. */
@@ -92,9 +79,7 @@ export async function findAdminClub(db: Database, slug: string): Promise<AdminCl
     return undefined
   }
 
-  const [own, matches, grounds, [extra]] = await Promise.all([
-    listClubStadiums(db, club.id),
-    listClubMatches(db, club.id),
+  const [grounds, [extra]] = await Promise.all([
     listClubHomeGrounds(db, club.id),
     db
       .select({ source: clubs.homeGroundsSource, wikidataId: clubs.wikidataId })
@@ -105,13 +90,5 @@ export async function findAdminClub(db: Database, slug: string): Promise<AdminCl
   return {
     club: { id: club.id, name: club.name, slug: club.slug, wikidataId: extra?.wikidataId ?? null },
     homeGrounds: { rows: grounds.map(homeGroundRowOf), source: extra?.source ?? null },
-    own,
-    wikipedia: stadiumViewsOf([], matches),
-    wikipediaRows: stadiumsOf(matches).map((stadium, index) => ({
-      dag: '',
-      naam: stadium.name,
-      seizoen: index === 0 ? '' : stadium.firstSeason,
-      toelichting: '',
-    })),
   }
 }

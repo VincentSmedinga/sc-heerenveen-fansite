@@ -2,7 +2,7 @@
 // and the button that was pressed. The start follows the rules of the names of a club.
 import type { HomeGroundRow } from '@fansite/db/stadiums'
 
-import { clubStadiumLimits } from '@fansite/db/schema'
+import { stadiumLimits } from '@fansite/db/schema'
 
 import type { HomeGroundRowValues } from './home-ground-fields'
 import type { StadiumErrors } from './stadium-fields'
@@ -97,8 +97,8 @@ export function validateHomeGroundRows(
     if (!known.has(stadiumId)) {
       errors[id('stadion')] = 'Kies een stadion uit de lijst.'
     }
-    if ([...note].length > clubStadiumLimits.note) {
-      errors[id('toelichting')] = `Schrijf hoogstens ${clubStadiumLimits.note} tekens.`
+    if ([...note].length > stadiumLimits.note) {
+      errors[id('toelichting')] = `Schrijf hoogstens ${stadiumLimits.note} tekens.`
     } else if (hasOddCharacters(note)) {
       errors[id('toelichting')] = 'Gebruik alleen gewone tekens.'
     }

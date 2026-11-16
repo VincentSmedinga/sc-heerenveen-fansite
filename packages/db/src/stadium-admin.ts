@@ -6,8 +6,7 @@
 import { and, asc, eq, inArray, isNull, or, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
-import type { StadiumLine } from './club-stadiums.ts'
-import type { HomeGroundRow } from './stadiums.ts'
+import type { HomeGroundRow, StadiumLine } from './stadiums.ts'
 
 import { recordAction } from './audit-log.ts'
 import { clubHomeGrounds, clubs, stadiumNames, stadiums } from './schema.ts'

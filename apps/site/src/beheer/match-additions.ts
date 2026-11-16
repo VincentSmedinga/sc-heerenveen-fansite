@@ -200,7 +200,7 @@ export function validateAdd(
         verlenging: 'nee',
       },
     } satisfies MatchValues,
-    { competition: competition ?? 'Eredivisie', dataSource: 'redactie', opponent, squad: [] },
+    { competition: competition ?? 'Eredivisie', dataSource: 'redactie', opponent, squad: [], stadiumIds: [] },
   )
 
   for (const [id, message] of Object.entries(checked.errors ?? {})) {

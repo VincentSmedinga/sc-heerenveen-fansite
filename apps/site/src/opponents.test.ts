@@ -1,6 +1,6 @@
 import type { NamePeriodLine } from '@fansite/db/club-name-periods'
-import type { StadiumLine } from '@fansite/db/club-stadiums'
 import type { PublicClubMatch, PublicClubRecord, PublicMatch } from '@fansite/db/queries'
+import type { StadiumLine } from '@fansite/db/stadiums'
 
 import { seasonOf } from '@fansite/db/season'
 import { describe, expect, it } from 'vitest'
