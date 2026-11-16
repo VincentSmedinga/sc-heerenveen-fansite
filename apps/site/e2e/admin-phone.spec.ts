@@ -40,6 +40,7 @@ const screens = [
   '/beheer/stadions',
   '/beheer/stadions/stadion/nieuw',
   '/beheer/stadions/clubs',
+  '/beheer/stadions/kwaliteit',
   '/beheer/stadions/sv-proefdorp',
   '/beheer/clubnamen',
   '/beheer/clubnamen/sv-proefdorp',

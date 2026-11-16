@@ -400,7 +400,9 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'editor', path: '/beheer/stadions/sv-proefdorp?gedaan=opgeslagen', status: 200 },
   { admin: 'editor', path: '/beheer/stadions/voorbeeld-united', status: 200 },
   { admin: 'editor', path: '/beheer/stadions/bestaat-niet', status: 404 },
+  { admin: 'editor', path: '/beheer/stadions/kwaliteit', status: 200 },
   { admin: 'author', path: '/beheer/stadions', status: 404 },
+  { admin: 'author', path: '/beheer/stadions/kwaliteit', status: 404 },
   { admin: 'author', path: '/beheer/stadions/stadion/nieuw', status: 404 },
   { admin: 'author', path: '/beheer/stadions/sv-proefdorp', status: 404 },
   // The names of the clubs: the same pages as the stadiums, with a club that has a list of

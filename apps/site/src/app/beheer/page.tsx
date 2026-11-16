@@ -12,9 +12,10 @@ import { compact } from '#src/beheer/density'
 import { countHeldChanges, countMatchesWithoutResult, countWaitingDifferences } from '#src/beheer/match-entries'
 import { countReportsToCheck } from '#src/beheer/match-reports'
 import { personQualityPath, readPersonGaps } from '#src/beheer/person-table'
-import { fieldDifferencesPath, matchQualityPath, statDifferencesPath } from '#src/beheer/quality'
+import { fieldDifferencesPath, matchQualityPath, stadiumQualityPath, statDifferencesPath } from '#src/beheer/quality'
 import { readMatchGaps } from '#src/beheer/quality-table'
 import { requireRole } from '#src/beheer/require-role'
+import { readStadiumGaps } from '#src/beheer/stadium-quality'
 import { getDatabase } from '#src/database'
 
 import { listPath, matchesPath } from './wedstrijden/paths'
@@ -65,6 +66,8 @@ export default async function AdminPage() {
   const personGapTotal = personsWithGaps.reduce((sum, person) => sum + Object.keys(person.gaps).length, 0)
   const statWaiting = editor ? await countWaitingStatDifferences(db) : new Map<string, number>()
   const fieldWaiting = editor ? await countWaitingFieldDifferences(db) : new Map<string, number>()
+  // What the list of the stadiums counts (#1307): the gaps in the stadiums and the clubs.
+  const stadiumGaps = editor ? await readStadiumGaps(db) : undefined
   const todo: TodoItem[] = []
 
   if (waiting > 0) {
@@ -97,6 +100,13 @@ export default async function AdminPage() {
     todo.push({
       href: matchQualityPath,
       text: `${plural(gapTotal, 'gat', 'gaten')} in ${plural(gapMatches.length, 'wedstrijd', 'wedstrijden')}`,
+    })
+  }
+
+  if (stadiumGaps !== undefined && stadiumGaps.total > 0) {
+    todo.push({
+      href: stadiumQualityPath,
+      text: `${plural(stadiumGaps.total, 'gat', 'gaten')} bij stadions en clubs`,
     })
   }
 

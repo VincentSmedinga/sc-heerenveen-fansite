@@ -6246,3 +6246,26 @@
 - **Nadeel:** een gekozen stadion en de tekst van de bron kunnen elkaar tegenspreken; het formulier laat ze naast elkaar staan en de redactie ziet het verschil.
   Een naam die de redactie vroeger in een eigen lijst zette, moet nu bij het stadion staan.
 - **Alternatieven:** de tekst van de wedstrijd laten bepalen wat de site toont (een oude wedstrijd toont dan de naam van nu, of een spelling van Wikipedia); een vlag "neutraal" op de wedstrijd (zegt minder dan het stadion zelf); de koppeling bij elke opslag opnieuw uit de tekst halen (een gekozen stadion zou verdwijnen).
+
+## Een wedstrijd zonder stadion staat in een kolom van zichzelf, en Stadions krijgt een lijst van wat ontbreekt
+
+- **Datum:** 16 november 2026
+- **Besluit:** de tabel van de kwaliteit bij Wedstrijden heeft een achtste kolom, Stadion (letter S), en onder Stadions staat de lijst `/beheer/stadions/kwaliteit` van wat de stadions en de clubs missen (#1307, onderdeel van #1303).
+  - **De kolom:** een gespeelde wedstrijd zonder `stadium_id` heeft een `?` in Stadion, met een link naar het deel Gegevens van de wedstrijd, waar de keuzelijst Stadion staat (#1301).
+    Het is dus ook een wedstrijd waarvan de bron een stadionnaam heeft, als geen stadion die naam zeker is.
+    Een wedstrijd waarvan de redactie het stadion koos heeft een `stadium_id` en staat er niet in.
+    Een neutraal veld, een thuisclub zonder thuisveld en een thuisveld dat nog niet begon staan er altijd in, want de import laat die wedstrijden bewust leeg (#1293); alleen de redactie kan er een stadion bij kiezen.
+    De kolom is een kolom van het formulier: "Opslaan en volgende" gaat door met de volgende wedstrijd zonder stadion.
+  - **Gegevens:** de kolom Gegevens telt alleen nog het aantal toeschouwers en de scheidsrechter.
+    Het stadion telde er eerst als gat in mee, ook als een naam zonder koppeling een tweede gat was; dat staat nu op één plek.
+  - **De lijst:** onder Stadions, met een link "Wat ontbreekt" in de balk, vier warme kaarten met elk een lijst van links: stadions zonder Wikidata-nummer, zonder coördinaten, zonder adres (straat en postcode) en clubs zonder thuisveld.
+    Een club mist een thuisveld als hij thuis speelde tegen ons en geen thuisveld heeft, of als zijn eerste thuisveld begon na zijn eerste thuiswedstrijd (`readStadiumGaps`); de thuisvelden van sc Heerenveen hebben geen club en tellen niet.
+    Een stadion zonder plaats staat er niet bij, want de plaats is geen vraag van de redactie maar volgt uit Wikidata of het scherm van het stadion.
+  - **Het adres:** `/beheer/stadions/kwaliteit` staat naast `clubs` en `stadion`, de andere vaste namen op dat niveau, naast het deel van een club; er is geen club met het adresdeel `kwaliteit`.
+  - **Te doen:** de kaart op de startpagina heeft één regel voor de lijst: "N gaten bij stadions en clubs".
+- **Waarom:** de stadions-reeks heeft zelf geen werklijst, en een wedstrijd die niet aan een stadion te koppelen is, moet ergens te vinden zijn, bij de rest van de wedstrijden.
+  De redactie zoekt een gat bij het onderwerp (zie _De kwaliteit van wedstrijden staat onder Wedstrijden, en elk onderwerp krijgt zijn eigen kwaliteitslijst_).
+- **Nadeel:** met acht kolommen is de tabel op een telefoon smal.
+  De controle van `e2e/admin-phone.spec.ts` kijkt of de pagina niet breder wordt dan het scherm.
+- **Alternatieven:** het stadion in Gegevens laten tellen, zoals eerst (de tabel blijft op zeven kolommen, maar een gat in het stadion valt weg tussen toeschouwers en scheidsrechter); een lijst van wedstrijden zonder stadion onder Stadions (een plek meer om te zoeken, naast de tabel van de seizoenen).
+- **Later:** vervangt de regel in _Een naam van een stadion is niet uniek, en een wedstrijd wordt gekoppeld met naam, dag en thuisclub_ (`hosting-en-data.md`) dat de wedstrijd zonder stadion als gat in Gegevens staat.
