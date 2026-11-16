@@ -3472,6 +3472,7 @@
 - **Waarom:** de zes vaste verdelingen en de regels met `:has()` groeiden per pagina, en een cel uit de zijkolom kon op een telefoon nooit vóór de hoofdinhoud staan zonder `order`, dat de volgorde van het toetsenbord breekt (2.4.3).
 - **Alternatieven:** een algemeen rastercomponent met kolommen en `span` (meer API voor weinig winst); de huidige varianten uitbreiden met een eigenschap per cel; `order`; een stap die de CSS uit de tokens maakt (een extra gereedschap dat geen issue vraagt).
 - **Later:** #1182 haalt de oude opbouw weg, zie _De oude opbouw van een pagina is weg_.
+- **Later:** zie _De werkbalk staat naast de kop_ (16 november 2026): vanaf 52 rem staat de werkbalk in de tweede kolom, in de rij van de kop, en niet meer in een rij onder de kop.
 
 ## De oude opbouw van een pagina is weg
 
@@ -3654,3 +3655,20 @@
   Op 320 pixels is de werkbalk 288 pixels breed en past vijf keuzes na de extra stap in ongeveer 278 pixels.
   Een zijkolom van ongeveer 16 rem, op een telefoon op zijn kant met een grote inzet, is smaller dan dat: daar breekt het langste woord, maar de pagina scrolt niet zijwaarts.
 - **Alternatieven:** een extra rij onder de kop als hij te breed is (de projecteigenaar wilde geen terugvalrij); een kleinere schakelaar met minder keuzes; de grenzen uit de inhoud van de schakelaar laten volgen (een containerquery kan niet vragen naar de breedte van wat erin staat).
+
+## De werkbalk staat naast de kop, de terugkeerlink heeft een gebied, en Kop 1 en Kop 2 krijgen meer lucht
+
+- **Datum:** 16 november 2026
+- **Besluit:** `Page.Toolbar` zit in het gebied `toolbar`, en de pagina bepaalt waar dat gebied staat (#1324).
+  De openbare pagina's zetten het vanaf 52 rem in de rij van de kop, in de tweede kolom (`'head toolbar'`), met zijn bovenkant op de bovenkant van de kop; het beheer houdt een eigen rij over de hele breedte.
+  De werkbalk is een plek met een eigen breedte (`container-type: inline-size`), dus de bedieningselementen slaan om binnen de kolom, en een schakelaar die breder is dan de kolom neemt zelf de strakke stap.
+  Er is geen terugvalrij onder de kop.
+- **Besluit:** `Page.Back` is een cel in het gebied `back`, voor een terugkeerlink boven de kop.
+  Vanaf 52 rem staat het gebied in een rij over de hele breedte, onder 52 rem is het de eerste rij.
+  De ruimte onder de link is de middelgrote stap, op elke breedte, zodat de link dicht bij de kop staat.
+  `Page.Title` blijft bestaan voor de pagina's die een kop met één bediening ernaast willen; de pagina van een speler gebruikt het niet meer.
+- **Besluit:** `--hf-heading-1-line-height` en `--hf-heading-2-line-height` zijn 1,15 (was 1 en 1,05), net als Kop 3.
+- **Waarom:** een naam die op twee regels staat, heeft ruimte tussen de regels nodig, en Kop 1 zou anders losser zijn dan Kop 2.
+  Het component beslist over de strakke stap en de pagina over het gebied, zodat geen pagina zijn eigen indeling van de werkbalk bepaalt.
+- **Alternatieven:** alleen Kop 1 aanpassen (Kop 1 wordt dan losser dan Kop 2); de werkbalk in `Page.Title` zetten; een eigenschap op `Page.Toolbar` die de plek kiest.
+- **Later:** vervangt de regel _Een werkbalk onder de kop_ in _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ (12 november 2026), en vult _Een strakke stap op een smalle plek_ aan: de werkbalk is nu de tweede kolom naast de kop.

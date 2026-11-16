@@ -30,7 +30,6 @@ export function CompetitionLinks({
 
   return (
     <SwitchLinks
-      compact
       label="Welke wedstrijden"
       options={competitionChoices
         .filter(({ choice }) => options.includes(choice))
@@ -39,6 +38,7 @@ export function CompetitionLinks({
           label: choice === 'league' ? league : label,
           value: choice,
         }))}
+      size="small"
       value={competition}
     />
   )

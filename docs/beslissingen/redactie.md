@@ -2266,6 +2266,7 @@
 - **Alternatieven:** de kiezer in de site laten, naast de kop (dan bouwt elke pagina hem opnieuw).
   Een eigenschap `actions` op `Page.Main` (de kop staat in `intro`, en een eigenschap erbij maakt twee manieren om dezelfde plek te vullen).
 - **Later:** zie _De openbare pagina's gebruiken het raster met benoemde gebieden_ in `site.md` (12 november 2026): de kiezer staat niet meer in de titelrij maar in de werkbalk, `Page.Toolbar`, onder de kop.
+- **Later:** zie _De werkbalk staat naast de kop, boven de tweede kolom_ in `site.md` (16 november 2026): de werkbalk met de kiezer staat vanaf 52 rem naast de kop, in de tweede kolom, en niet meer onder de kop.
 
 ## Een eerder seizoen toont zijn uitslagen van oud naar nieuw, en zijn tabel heet Eindstand
 

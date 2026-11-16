@@ -198,6 +198,7 @@ export async function AllSeasonsPlayersPage({ searchParams }: { searchParams: Pr
           action={pickerPathOf(playerFiguresPath)}
           fields={competitionFields(competition)}
           options={seasonChoicesWithAll(seasons)}
+          size="small"
           value={allSeasonsSlug}
         />
         <CompetitionLinks

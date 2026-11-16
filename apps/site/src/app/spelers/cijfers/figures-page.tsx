@@ -101,6 +101,7 @@ export async function PlayerFiguresPage({
           action={pickerPath}
           fields={competitionFields(competition)}
           options={seasonChoicesWithAll(seasons)}
+          size="small"
           value={seasonSlug(season)}
         />
         <CompetitionSwitch

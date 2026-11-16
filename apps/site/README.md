@@ -311,7 +311,7 @@ Het voorbeeld naast het formulier van het verslag (`ReportPreview`, `src/beheer/
 In de lijst is de regel met de twee clubs en de uitslag de link naar die pagina (`Match` met `reportHref`); er is geen aparte regel meer met "Het verslag", "Voorbeschouwing" of "Live".
 Een schermlezer hoort waar de link heen gaat aan het einde van zijn naam: "verslag", "voorbeschouwing" of "live verslag" (`Match` met `preview` en `live`, de sleutels uit `getLiveReports`).
 Ook de lijst met wedstrijden op de pagina van een club en de eerdere ontmoetingen op de pagina van een Voorbeschouwing linken zo, met de adressen uit `getMatchPages`.
-In de werkbalk onder de kop staat de seizoenskiezer (`SeasonPicker` in `Page.Toolbar`), zolang er meer dan één seizoen is: een formulier dat zonder JavaScript met de knop "Toon" werkt, via `app/wedstrijden/kies`, die doorverwijst (303).
+In de werkbalk (naast de kop vanaf 52 rem, op een telefoon eronder) staat de seizoenskiezer (`SeasonPicker` in `Page.Toolbar`), zolang er meer dan één seizoen is: een formulier dat zonder JavaScript met de knop "Toon" werkt, via `app/wedstrijden/kies`, die doorverwijst (303).
 Met JavaScript verdwijnen de knop en het zichtbare label en wisselt de pagina bij een keuze, en met het toetsenbord bevestig je een keuze met Enter; een verborgen regel legt dat aan een schermlezer uit.
 Het lopende seizoen en een eerder seizoen tonen hun uitslagen allebei in een kaart per competitie met wedstrijden (Eredivisie met het anker `uitslagen`, KNVB Beker, Johan Cruijff Schaal, Play-offs Champions League, Play-offs Conference League, Play-offs Europa League en Europa League, zonder het woord Uitslagen in de kop; `resultsPerCompetition` en `resultsCardOf`).
 Het lopende seizoen heeft de nieuwste uitslag bovenaan, een kaart Laatste wedstrijd (de nieuwste begonnen wedstrijd, ook die staat in Uitslagen) en een kaart Programma met alle competities op datum.
@@ -413,7 +413,7 @@ De andere clubs hebben er minder en hebben geen rij.
 
 `/wedstrijden/cijfers` toont de cijfers over sc Heerenveen 1 (mannen) in het lopende seizoen: eerst een rij kerngetallen, dan negen kaarten in vier groepen.
 Wedstrijden is wat je opzoekt, een lijst van wedstrijden en de stand; Cijfers is wat uit veel wedstrijden volgt, een telling, een rangorde of een verloop (de beslissing staat in `docs/beslissingen/site.md`, _De site heeft vier onderdelen_).
-Onder de kop staat de werkbalk met de seizoenskiezer en de schakelaar, en daaronder de rij kerngetallen (`KeyFigures` met `across`, de cijfers uit `statisticsKeyFigures` in `src/statistics-key-figures.ts`): onze plek in de Eredivisie, de gespeelde wedstrijden, gewonnen–gelijk–verloren en de doelpunten voor en tegen.
+Naast de kop staat de werkbalk met de seizoenskiezer en de schakelaar (op een telefoon eronder), en onder de kop de rij kerngetallen (`KeyFigures` met `across`, de cijfers uit `statisticsKeyFigures` in `src/statistics-key-figures.ts`): onze plek in de Eredivisie, de gespeelde wedstrijden, gewonnen–gelijk–verloren en de doelpunten voor en tegen.
 De plek is die van de stand, ook bij een andere keuze van de competitie; de andere drie tellen de wedstrijden van de keuze.
 Zonder gespeelde wedstrijd blijft alleen de plek over, en minder dan twee getallen geven geen rij.
 Op een telefoon staan de getallen twee aan twee, vanaf 52rem vier naast elkaar.

@@ -146,7 +146,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
           <Heading level={1}>Wedstrijden</Heading>
         </Page.Cell>
         <Page.Toolbar>
-          <SeasonPicker action={pickerPath} options={seasonChoices(seasons)} value={seasonSlug(season)} />
+          <SeasonPicker action={pickerPath} options={seasonChoices(seasons)} size="small" value={seasonSlug(season)} />
         </Page.Toolbar>
         {/* The table stands before the matches in the source, so on a phone it is the first
             thing under the season picker, and on a wide screen it is the second column. */}

@@ -130,6 +130,7 @@ export async function PlayerPageView({ searchParams, slug }: { searchParams: Pro
       <Page.Main
         areas={pageAreas({
           after: ['side'],
+          back: true,
           main: [
             ...(keyFigures.length === 0 ? [] : ['figures']),
             ...(seasons === undefined ? [] : ['seasons']),
@@ -138,18 +139,19 @@ export async function PlayerPageView({ searchParams, slug }: { searchParams: Pro
           toolbar: switchAddress !== undefined,
         })}
       >
-        <Page.Cell area="head">
+        <Page.Back>
           <Text>
             <Link href={playersPath} icon="arrow-left">
               Spelers
             </Link>
           </Text>
-          <Page.Title wrapped="start">
-            <Heading level={1}>
-              <PlayerName givenName={page.nameParts.givenName} surname={page.nameParts.surname} />
-            </Heading>
-            <PlayerFacts page={page} />
-          </Page.Title>
+        </Page.Back>
+        <Page.Cell area="head">
+          {/* The facts stand close under the name, as the meta of the page does. */}
+          <Heading className="hf-space-end-s" level={1}>
+            <PlayerName givenName={page.nameParts.givenName} surname={page.nameParts.surname} />
+          </Heading>
+          <PlayerFacts page={page} />
         </Page.Cell>
         {switchAddress === undefined ? null : (
           <Page.Toolbar>
@@ -319,7 +321,7 @@ function PlayerFacts({ page }: { page: PlayerPage }) {
   }
 
   return (
-    <Text appearance="meta">
+    <Text>
       {parts.map((part, index) => (
         <Fragment key={index}>
           {index > 0 && ' · '}

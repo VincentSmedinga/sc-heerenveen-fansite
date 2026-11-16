@@ -147,6 +147,20 @@ describe('the switch of the table Per seizoen', () => {
     expect(league).toMatch(/<h2[^>]*>Per seizoen<\/h2>/)
   })
 
+  it('stands beside the heading from 52rem and after it in the source, and is the small size', async () => {
+    vi.mocked(loadPlayerSeasonFacts).mockResolvedValue(cupFacts)
+
+    const html = await render()
+    const wide = /--hf-page-areas-wide:(.*?);--hf-page-columns/.exec(html)?.[1] ?? ''
+
+    expect(wide).toContain('&quot;head toolbar&quot;')
+    expect(wide).not.toMatch(/&quot;toolbar toolbar&quot;/)
+    expect(html.indexOf('hf-heading-1')).toBeLessThan(html.indexOf('hf-page-toolbar'))
+    expect(html).toMatch(
+      /<div class="hf-page-toolbar"[^>]*><div aria-label="Welke wedstrijden" class="[^"]*hf-size-small/,
+    )
+  })
+
   it('is left out when nothing was played outside the Eredivisie, and the choice still works', async () => {
     const html = await render({}, { competitie: 'eredivisie' })
 
@@ -185,9 +199,10 @@ describe('the page of a player', () => {
     const html = await render()
 
     expect(html).not.toContain('Kruimelpad')
-    expect(html).toMatch(/<a href="\/spelers">Spelers<\/a>.*?<div class="hf-page-title hf-page-title-start"><h1/s)
+    expect(html).toMatch(/<div class="hf-page-back" style="grid-area:back"><p><a href="\/spelers">Spelers<\/a>.*?<h1/s)
+    expect(html).not.toContain('hf-page-title')
     expect(html).toContain(
-      '<h1 class="hf-heading-1"><span class="hf-player-name"><span class="hf-player-name-given">Jan</span> <span class="hf-player-name-surname">de Vries</span></span></h1>',
+      '<h1 class="hf-heading-1 hf-space-end-s"><span class="hf-player-name"><span class="hf-player-name-given">Jan</span> <span class="hf-player-name-surname">de Vries</span></span></h1>',
     )
   })
 
@@ -211,7 +226,7 @@ describe('the page of a player', () => {
 
   it('has one line with the line, the flag as decoration with the country in words, and the place, year and age', async () => {
     const html = await render()
-    const line = /<p class="hf-meta">(Aanvaller · .*?)<\/p>/s.exec(html)?.[1] ?? ''
+    const line = /<p>(Aanvaller · .*?)<\/p>/s.exec(html)?.[1] ?? ''
 
     expect(line).toMatch(
       /^Aanvaller · <span class="hf-country-name"><img alt="" class="hf-player-name-flag" [^>]*src="data:[^"]*"[^>]*\/>Nederland<\/span> · Emmen, 1974 · 52 jaar$/s,
@@ -230,14 +245,14 @@ describe('the page of a player', () => {
     const died = { age: undefined, birthYear: undefined, deathYear: '2020' }
 
     expect(await render({ ...died, birthPlace: undefined, country: undefined, line: undefined })).toContain(
-      '<p class="hf-meta">Overleden in 2020</p>',
+      '<p>Overleden in 2020</p>',
     )
     expect(await render({ ...died, birthPlace: 'Herten', country: undefined, line: undefined })).toContain(
-      '<p class="hf-meta">Geboren in Herten, overleden in 2020</p>',
+      '<p>Geboren in Herten, overleden in 2020</p>',
     )
     // The line under the name has no dash, no age and no place next to the year of death.
     const html = await render({ ...died, birthPlace: 'Herten' })
-    const line = /<p class="hf-meta">(Aanvaller · .*?)<\/p>/s.exec(html)?.[1] ?? ''
+    const line = /<p>(Aanvaller · .*?)<\/p>/s.exec(html)?.[1] ?? ''
 
     expect(line).toMatch(/ · geboren in Herten, overleden in 2020$/u)
     expect(line).not.toMatch(/–|jaar/u)
@@ -252,22 +267,18 @@ describe('the page of a player', () => {
 
   it('leaves out what we do not know, with its separator', async () => {
     expect(await render({ birthPlace: undefined, country: undefined, line: undefined })).toContain(
-      '<p class="hf-meta">1974 · 52 jaar</p>',
+      '<p>1974 · 52 jaar</p>',
     )
-    expect(await render({ age: undefined, country: undefined, line: undefined })).toContain(
-      '<p class="hf-meta">Emmen, 1974</p>',
-    )
-    expect(await render({ birthYear: undefined, country: undefined, line: undefined })).toContain(
-      '<p class="hf-meta">Emmen</p>',
-    )
+    expect(await render({ age: undefined, country: undefined, line: undefined })).toContain('<p>Emmen, 1974</p>')
+    expect(await render({ birthYear: undefined, country: undefined, line: undefined })).toContain('<p>Emmen</p>')
     expect(await render({ birthPlace: undefined, birthYear: undefined })).toMatch(
-      /<p class="hf-meta">Aanvaller · <span class="hf-country-name">.*?Nederland<\/span><\/p>/s,
+      /<p>Aanvaller · <span class="hf-country-name">.*?Nederland<\/span><\/p>/s,
     )
     // The legend of the table is a line of its own, so the table is left out here.
     vi.mocked(loadPlayerSeasons).mockResolvedValue([])
     expect(
       await render({ birthPlace: undefined, birthYear: undefined, country: undefined, line: undefined }),
-    ).not.toContain('class="hf-meta">')
+    ).not.toContain('</h1><p>')
   })
 
   it('has the career under the table, with the periods, a gap and a moment that links to its match', async () => {

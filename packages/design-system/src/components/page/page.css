@@ -223,8 +223,23 @@
   }
 
   /*
-   * The toolbar: one row as wide as the page, which wraps on a phone. It does not stick, and it has no space of its own
-   * above or below, which the gap of the main sets.
+   * The link back: a cell of its own in the first row, so on a wide screen it is a line across
+   * the page above the heading and the toolbar. The grid puts the gap of the main under it,
+   * which is more than the space between a line and a heading, so the margin takes the
+   * difference back: the space under the link is the medium step, as in a cell, on every width.
+   */
+  .hf-page-back {
+    /* stylelint-disable-next-line declaration-property-value-allowed-list -- It takes back part of the gap. */
+    margin-block-end: calc(var(--hf-space-m) - var(--hf-page-body-cell-gap));
+  }
+
+  /*
+   * The toolbar: what steers the page, in a row that wraps. It does not stick, and it has no
+   * space of its own above or below, which the gap of the main sets. Its width is the width of
+   * its area: the whole page in the admin, and the second column, beside the heading, on the
+   * public pages from 52rem, with the top at the top of the page name. It is a place of its own
+   * (container-type), so a control that is wider than it takes a tighter step by itself (see
+   * segmented-control.css).
    */
   .hf-page-toolbar {
     align-items: center;

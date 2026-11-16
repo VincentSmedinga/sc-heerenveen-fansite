@@ -119,8 +119,7 @@ export async function StatisticsPage({
       areas={{
         narrow: ['head', 'toolbar', 'figures', 'competition', 'results', 'goals', 'around', 'credit'],
         wide: [
-          'head head',
-          'toolbar toolbar',
+          'head toolbar',
           'figures figures',
           'competition competition',
           'results results',
@@ -139,6 +138,7 @@ export async function StatisticsPage({
           action={pickerPath}
           fields={competitionFields(competition)}
           options={seasonChoicesWithAll(seasons)}
+          size="small"
           value={seasonSlug(season)}
         />
         <CompetitionSwitch address={address} competition={competition} matches={data.matches} />
