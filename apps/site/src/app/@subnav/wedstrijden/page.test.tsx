@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -6,8 +6,10 @@ import NoSubnav from '../[...rest]/page'
 import Home from '../page'
 import ClubSubnav from '../tegenstanders/[club]/page'
 import OpponentsSubnav from '../tegenstanders/page'
+import MatchSubnav from './[seizoen]/[wedstrijd]/page'
 import SeasonMatchesSubnav from './[seizoen]/page'
 import SeasonFiguresSubnav from './cijfers/[seizoen]/page'
+import AllSeasonsFiguresSubnav from './cijfers/alle/page'
 import FiguresSubnav from './cijfers/page'
 import MatchesSubnav from './page'
 import SearchSubnav from './zoeken/page'
@@ -83,6 +85,42 @@ describe('the slot @subnav, for the bar of Wedstrijden in the main menu', () => 
     for (const html of [figures, season]) {
       expect(current(html)).toBe('Cijfers')
     }
+  })
+
+  it('marks Cijfers on the page with all seasons, which keeps the choice and its own address', async () => {
+    const html = renderToStaticMarkup(await AllSeasonsFiguresSubnav(search({ competitie: 'eredivisie' })))
+
+    expect(links(html)).toEqual([
+      '/wedstrijden/cijfers/alle?competitie=eredivisie',
+      '/tegenstanders?competitie=eredivisie',
+      '/wedstrijden/zoeken',
+    ])
+    expect(current(html)).toBe('Cijfers')
+  })
+
+  it('has the bar of its season on the page of a match, and marks no sub-page', async () => {
+    const html = renderToStaticMarkup(await MatchSubnav(search({ competitie: 'eredivisie' }, '2023-24')))
+
+    expect(links(html)).toEqual([
+      '/wedstrijden/cijfers/2023-24?competitie=eredivisie',
+      '/tegenstanders?competitie=eredivisie',
+      '/wedstrijden/zoeken',
+    ])
+    expect(current(html)).toBeUndefined()
+  })
+
+  it('has a route in the slot for every page of Wedstrijden and Tegenstanders', () => {
+    // A page without a route here shows no bar: Next.js draws default.tsx instead.
+    const app = new URL('../../', import.meta.url).pathname
+    const pagesUnder = (dir: string): string[] =>
+      readdirSync(`${app}${dir}`, { withFileTypes: true }).flatMap((entry) =>
+        entry.isDirectory() ? pagesUnder(`${dir}/${entry.name}`) : entry.name === 'page.tsx' ? [dir] : [],
+      )
+    const missing = ['wedstrijden', 'tegenstanders']
+      .flatMap(pagesUnder)
+      .filter((route) => !existsSync(`${app}@subnav/${route}/page.tsx`))
+
+    expect(missing).toEqual([])
   })
 
   it('has no bar for Spelers, which has no sub-pages', () => {
