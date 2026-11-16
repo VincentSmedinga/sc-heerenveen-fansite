@@ -425,8 +425,10 @@ describe('submitMatchPart', () => {
   it('keeps the address the editor came from, when it is a page of the admin', async () => {
     await submit(matchId, form())
 
-    expect(await part('gegevens', only({ stadion: 'Abe Lenstra Stadion' }), '/beheer/kwaliteit/2026-27')).toEqual({
-      redirect: `/beheer/wedstrijden/${matchId}/gegevens?gedaan=opgeslagen&terug=%2Fbeheer%2Fkwaliteit%2F2026-27`,
+    expect(
+      await part('gegevens', only({ stadion: 'Abe Lenstra Stadion' }), '/beheer/wedstrijden/kwaliteit/2026-27'),
+    ).toEqual({
+      redirect: `/beheer/wedstrijden/${matchId}/gegevens?gedaan=opgeslagen&terug=%2Fbeheer%2Fwedstrijden%2Fkwaliteit%2F2026-27`,
     })
     expect(await part('gegevens', only({ stadion: 'De Vliert' }), 'https://example.org/beheer')).toEqual({
       redirect: `/beheer/wedstrijden/${matchId}/gegevens?gedaan=opgeslagen`,
@@ -447,14 +449,14 @@ describe('submitMatchPart', () => {
       },
     ])
     const [next] = await database.db.insert(matches).values(values!).$returningId()
-    const back = '/beheer/kwaliteit/2026-27'
+    const back = '/beheer/wedstrijden/kwaliteit/2026-27'
     const formData = only({ scheidsrechter: 'Kevin Blom' })
 
     formData.set('knop', 'volgende')
     await submit(matchId, form())
 
     expect(await resultOf(() => submitMatchPart(matchId, 'gegevens', back, 'gegevens', initial, formData))).toEqual({
-      redirect: `/beheer/wedstrijden/${next?.id}/gegevens?gedaan=volgende-opgeslagen&terug=%2Fbeheer%2Fkwaliteit%2F2026-27&kolom=gegevens`,
+      redirect: `/beheer/wedstrijden/${next?.id}/gegevens?gedaan=volgende-opgeslagen&terug=%2Fbeheer%2Fwedstrijden%2Fkwaliteit%2F2026-27&kolom=gegevens`,
     })
 
     await database.db
@@ -463,7 +465,7 @@ describe('submitMatchPart', () => {
       .where(eq(matches.id, next?.id ?? 0))
 
     expect(await resultOf(() => submitMatchPart(matchId, 'gegevens', back, 'gegevens', initial, formData))).toEqual({
-      redirect: '/beheer/kwaliteit/2026-27?gedaan=kolom-compleet',
+      redirect: '/beheer/wedstrijden/kwaliteit/2026-27?gedaan=kolom-compleet',
     })
   })
 

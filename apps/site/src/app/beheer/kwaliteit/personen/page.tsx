@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
 
-import { Card, DataTable, Heading, Link, Page, SegmentedLinks, Text } from '@fansite/design-system'
+import { Card, DataTable, Heading, Link, Page, Text } from '@fansite/design-system'
 import { redirect } from 'next/navigation'
 
-import { personGapLegend, personGapTableColumns, qualitySwitch } from '#src/app/beheer/kwaliteit/gap-table'
-import { toolbarAreas } from '#src/beheer/areas'
+import { personGapLegend, personGapTableColumns } from '#src/app/beheer/kwaliteit/gap-table'
+import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { personFactsPath } from '#src/beheer/person-facts'
 import {
@@ -53,7 +53,7 @@ export default async function PersonQualityPage({ searchParams }: Props) {
   const total = withGaps.reduce((sum, person) => sum + Object.keys(person.gaps).length, 0)
 
   return (
-    <Page.Main areas={toolbarAreas} className={compact}>
+    <Page.Main areas={adminAreas} className={compact}>
       <Page.Cell area="head">
         <Heading level={1}>Kwaliteit</Heading>
         <Text appearance="intro">
@@ -62,9 +62,6 @@ export default async function PersonQualityPage({ searchParams }: Props) {
             : `Nog ${plural(total, 'gat', 'gaten')} bij ${plural(withGaps.length, 'persoon', 'personen')} van de ${all.length}. Een getal in de tabel leidt naar de personen van die letter met een gat in die kolom.`}
         </Text>
       </Page.Cell>
-      <Page.Toolbar>
-        <SegmentedLinks {...qualitySwitch('personen')} />
-      </Page.Toolbar>
       <Page.Cell area="main">
         <Text>
           <Link href={personFactsPath}>Linie en land snel aanvullen</Link>

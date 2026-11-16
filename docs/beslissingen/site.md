@@ -4144,6 +4144,7 @@
   Later krijgt elke seizoenspagina een zin over wat we weten, zoals de kaart Selectie al doet.
 - **Waarom:** de werklijsten zijn voor de redactie, en een bezoeker heeft genoeg aan één zin.
 - **Alternatieven:** de tabel meteen openbaar.
+- **Later:** de pagina met de gaten per seizoen staat sinds 16 november 2026 op `/beheer/wedstrijden/kwaliteit` (#1304); zie _De kwaliteit van wedstrijden staat onder Wedstrijden, en elk onderwerp krijgt zijn eigen kwaliteitslijst_.
 
 ## De werklijsten van de kwaliteit zijn eigen pagina's, en een cel zegt in woorden wat ze telt
 
@@ -4162,6 +4163,7 @@
   Zonder die regel brak de tabel een seizoen als `2025/26` in tweeën, naast kolommen vol tekst.
 - **Alternatieven:** vier filters erbij in `/beheer/wedstrijden`; een tabel met getallen en afkortingen die opzij schuift; `similarPersons` in de site nog een keer schrijven.
 - **Later:** zie _De pagina Kwaliteit is een werktabel met een kolom per deel van de gegevens_ (12 november 2026): de zinnen per seizoen en de werklijsten maken plaats voor een tabel met een teken per gat (#1163).
+- **Later:** het adres van een werklijst, `/beheer/kwaliteit/<seizoen>/<lijst>`, bestaat sinds 16 november 2026 niet meer, ook niet als doorverwijzing; zie _De kwaliteit van wedstrijden staat onder Wedstrijden, en elk onderwerp krijgt zijn eigen kwaliteitslijst_ (#1304).
 
 ## Spelers voegt de redactie toe door een persoon te kiezen of te maken
 
@@ -5194,6 +5196,7 @@
   Dezelfde kolommen op beide niveaus maken de tabel snel te leren.
 - **Alternatieven:** de zinnen per seizoen houden, met een werklijst per soort gat (veel klikken en geen overzicht per wedstrijd).
   Een kolom per veld (te breed voor een telefoon).
+- **Later:** de schakelaar tussen de tabel van de wedstrijden en die van de personen is sinds 16 november 2026 weg; de tabel van de wedstrijden staat onder Wedstrijden en wie naar de personen wil, gaat via Spelers zodra #1305 klaar is (#1304).
 
 ## Een detailtabel van de kwaliteit toont alleen rijen met een gat
 
@@ -5297,6 +5300,7 @@
   De tabel met tekst van het designsysteem doet de rest zonder een nieuw onderdeel.
 - **Alternatieven:** een cel over de hele breedte en een tussenkop per competitie (een nieuw onderdeel voor één pagina).
   De werklijsten houden naast de tabel (twee wegen naar hetzelfde).
+- **Later:** de tabel staat sinds 16 november 2026 op `/beheer/wedstrijden/kwaliteit` en de tabel van een seizoen op `/beheer/wedstrijden/kwaliteit/<seizoen>`; de oude adressen hebben geen doorverwijzing (#1304, zie _De kwaliteit van wedstrijden staat onder Wedstrijden, en elk onderwerp krijgt zijn eigen kwaliteitslijst_).
 
 ## Het formulier van een persoon geeft een nieuwe naam aan elk seizoen
 
@@ -5431,6 +5435,7 @@
 - **Waarom:** een andere formatie is geen gat maar iets om na te kijken, vaak een fout: een formatie die uit de lijnen van de oude fansite is afgeleid, of een tikfout.
   Dat past bij de lijsten om te lezen, zoals die van de namen, en houdt de tabel met gaten kort.
 - **Alternatieven:** een kolom in de tabel (een formatie is geen gat, en de kolom is bijna overal leeg); een instelling in het beheer voor de gewone formaties (niemand vraagt erom).
+- **Later:** de pagina staat sinds 16 november 2026 op `/beheer/wedstrijden/kwaliteit/formaties`, onder Wedstrijden (#1304, zie _De kwaliteit van wedstrijden staat onder Wedstrijden, en elk onderwerp krijgt zijn eigen kwaliteitslijst_).
 
 ## De vaste plaatsen van spelers in een 4-3-3 staan op een eigen pagina van Kwaliteit
 
@@ -6030,3 +6035,55 @@
 - **Waarom:** een kaart met alleen een link nodigt niet uit, en de eerste drie namen van een lijst wel.
   Drie regels per kaart houden de zijkolom kort, ook als veel spelers evenveel hebben.
 - **Alternatieven:** de kaart houden en er cijfers in zetten (vier onderwerpen worden één lange kaart); een lijst van wedstrijden bij De nul gehouden (die staat op de pagina Cijfers van de wedstrijden, waar de link heen gaat).
+
+## De kwaliteit van wedstrijden staat onder Wedstrijden, en elk onderwerp krijgt zijn eigen kwaliteitslijst
+
+- **Datum:** 16 november 2026
+- **Besluit:** de kwaliteitslijsten gaan naar het onderwerp waar ze over gaan, en de balk van het beheer heeft geen scherm Kwaliteit meer als de reeks klaar is (#1303).
+  Wedstrijden krijgt de gaten per seizoen, de tabel van een seizoen en de afwijkende formaties.
+  Spelers krijgt de tabel van de personen, de snelle lijst, de namen, de vaste plaatsen met de quiz en de verschillen in spelerscijfers en spelersgegevens.
+  Clubs krijgt de clubs zonder land, en Stadions krijgt een eigen lijst zodra de stadions-reeks klaar is.
+- **Waarom:** de redactie zoekt een gat bij het onderwerp, niet in een apart onderdeel, en elk nieuw onderwerp (stadions, het land van een speler) krijgt zo een plaats zonder dat Kwaliteit groeit.
+- **Alternatieven:** Kwaliteit houden als overzicht dat alleen telt en doorverwijst, wat een plek meer is om bij te houden.
+
+## Er komt geen overzichtspagina Kwaliteit, en de kaart Te doen telt per onderwerp
+
+- **Datum:** 16 november 2026
+- **Besluit:** de kaart "Te doen" op de startpagina van het beheer krijgt per onderwerp een regel die telt wat er ontbreekt en naar de lijst van dat onderwerp leidt (#1303).
+  Voor de wedstrijden is dat de regel "4 gaten in 2 wedstrijden", met de aantallen die de tabel telt, naar `/beheer/wedstrijden/kwaliteit` (#1304).
+- **Waarom:** de startpagina telt al wat te doen is, en een tweede teller zou ze dubbel houden.
+- **Alternatieven:** een overzicht dat alle gaten telt.
+- **Tot dan:** zolang de lijsten van spelers en clubs niet verhuisd zijn, leidt `/beheer/kwaliteit` nog naar die lijsten, met een korte pagina zonder tellers die #1306 weghaalt.
+
+## De oude adressen onder `/beheer/kwaliteit` krijgen geen doorverwijzing
+
+- **Datum:** 16 november 2026
+- **Besluit:** een adres dat verhuist, krijgt geen doorverwijzing, en de bestaande doorverwijzingen van de oude werklijsten (`/beheer/kwaliteit/<seizoen>/zonder-doelpunten` en de drie andere in `next.config.ts`) zijn weg (#1303, #1304).
+- **Waarom:** het beheer is privé en niet geïndexeerd, en een link die ergens in een mail of notitie staat, is zo te herstellen.
+- **Alternatieven:** tijdelijke doorverwijzingen naar de nieuwe adressen; ze moeten bij elke verhuizing worden bijgehouden.
+
+## De kaarten van de kwaliteitspagina's hebben het warme vlak
+
+- **Datum:** 16 november 2026
+- **Besluit:** de kaarten op de kwaliteitspagina's hebben `surface="warm"`, zodat ze tussen de rest van het beheer opvallen (#1303, #1304).
+  De tabellen houden hun bijschrift, hun kopcellen en hun namen voor een schermlezer.
+- **Waarom:** het zijn de plekken waar de redactie werk vindt.
+- **Alternatieven:** het gewone witte vlak.
+
+## Clubnamen heet voortaan Clubs
+
+- **Datum:** 16 november 2026
+- **Besluit:** Clubnamen heet Clubs, in de balk, op de startpagina en in het adres (`/beheer/clubs`), omdat het onderwerp nu ook het land van een club heeft (#1303).
+  De hernoeming zelf volgt in #1306.
+- **Waarom:** de naam dekt anders niet wat er staat.
+- **Alternatieven:** de naam houden.
+
+## De adressen van de kwaliteit staan onder hun onderwerp, in `src/beheer`
+
+- **Datum:** 16 november 2026
+- **Besluit:** de adressen van de lijsten staan onder het onderwerp, als constanten in `src/beheer`, en een vaste naam overlapt geen dynamisch deel van hetzelfde niveau (#1303).
+  De wedstrijden (#1304): `matchQualityPath` is `/beheer/wedstrijden/kwaliteit`, met `/beheer/wedstrijden/kwaliteit/<seizoen>` (`seasonTablePath`) en `/beheer/wedstrijden/kwaliteit/formaties` (`unusualFormationsPath`).
+  `kwaliteit` staat naast `nieuw` en `[id]` onder `/beheer/wedstrijden`, en `formaties` naast `[seizoen]`: een seizoen is `2005-06` en een vaste naam wint in Next.js, dus ze botsen niet.
+  `qualityPath` (`/beheer/kwaliteit`) blijft het begin van de lijsten die nog niet verhuisd zijn.
+- **Waarom:** Next.js haalt anders adressen door elkaar, en de balk markeert Wedstrijden bij elke pagina eronder, zonder uitzondering in `screens.ts`.
+- **Alternatieven:** `/beheer/kwaliteit` laten bestaan voor de wedstrijden (dat blijft het onderdeel Kwaliteit dat we weghalen); `/beheer/wedstrijden/gaten` (de tabel heet bij de redactie Kwaliteit).

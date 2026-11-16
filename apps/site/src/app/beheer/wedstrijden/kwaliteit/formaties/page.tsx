@@ -7,7 +7,7 @@ import { reportPath } from '#src/app/beheer/wedstrijden/paths'
 import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { readUnusualFormations, usualFormations } from '#src/beheer/formations'
-import { qualityPath } from '#src/beheer/quality'
+import { matchQualityPath } from '#src/beheer/quality'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
@@ -35,8 +35,8 @@ export default async function UnusualFormationsPage() {
     <Page.Main areas={adminAreas} className={compact}>
       <Page.Cell area="head">
         <Text>
-          <Link href={qualityPath} icon="arrow-left">
-            Kwaliteit
+          <Link href={matchQualityPath} icon="arrow-left">
+            Kwaliteit van wedstrijden
           </Link>
         </Text>
         <Heading level={1}>{title}</Heading>
@@ -46,12 +46,12 @@ export default async function UnusualFormationsPage() {
       </Page.Cell>
       <Page.Cell area="main">
         {unusual.length === 0 ? (
-          <Card>
+          <Card surface="warm">
             <Text>Geen afwijkende formaties.</Text>
           </Card>
         ) : (
           seasons.map((season) => (
-            <Card aria-labelledby={`seizoen-${season.replace('/', '-')}`} key={season}>
+            <Card aria-labelledby={`seizoen-${season.replace('/', '-')}`} key={season} surface="warm">
               <Heading id={`seizoen-${season.replace('/', '-')}`} level={2}>
                 {season}
               </Heading>

@@ -155,10 +155,11 @@ describe('the overview of the persons (#1165)', () => {
     expect(letterMetadata.robots).toEqual({ follow: false, index: false })
   })
 
-  it('has the switch with the persons as the current choice, and the links to the quick list and the names', async () => {
+  it('has no switch to the matches, and the links to the quick list and the names', async () => {
     const html = await overview()
 
-    expect(html).toContain('<a aria-current="page" href="/beheer/kwaliteit/personen">')
+    expect(html).not.toContain('Welke gegevens')
+    expect(html).not.toContain('aria-current="page"')
     expect(html).toContain('<a href="/beheer/kwaliteit/personen/snel">Linie en land snel aanvullen</a>')
     expect(html).toContain('<a href="/beheer/kwaliteit/namen">Namen die op elkaar lijken en de lijst van Wikipedia</a>')
     expect(html).toContain('N Naam, P Wikipedia, B Geboren, L Land, I Linie. ?: ontbreekt. Leeg: compleet.')

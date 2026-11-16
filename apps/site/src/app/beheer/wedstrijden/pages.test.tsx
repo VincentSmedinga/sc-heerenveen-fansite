@@ -1151,8 +1151,8 @@ describe('the parts of the form of a match (#1162)', () => {
   it('goes back to where the editor came from, only for a page of the admin', async () => {
     const id = await addMatch({ goalsAgainst: 0, goalsFor: 1, status: 'played' })
 
-    expect(await partForm(id, 'gegevens', { terug: '/beheer/kwaliteit' })).toContain(
-      'href="/beheer/kwaliteit">Annuleren</a>',
+    expect(await partForm(id, 'gegevens', { terug: '/beheer/wedstrijden/kwaliteit' })).toContain(
+      'href="/beheer/wedstrijden/kwaliteit">Annuleren</a>',
     )
     expect(await partForm(id, 'gegevens', { terug: 'https://example.org' })).toContain(
       'href="/beheer/wedstrijden">Annuleren</a>',
