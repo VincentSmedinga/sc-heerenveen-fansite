@@ -631,3 +631,68 @@ export const Marks = meta.story({
   },
   render: renderMarks('48rem'),
 })
+
+// The card "Onze schutters" of the Voorbeschouwing, with made-up players.
+const scorerRow = (given: string, surname: string, last: string, goals: number, href?: string): DataTableRow => ({
+  cells: [last, goals],
+  display: <PlayerName givenName={given} href={href} surname={surname} />,
+  header: `${given} ${surname}`,
+})
+
+const scorerColumns = ['Speler', 'Laatst', 'Goals']
+
+const renderScorers = (withSquad: boolean) => () => (
+  <Card aria-labelledby="schutters-kop" style={{ maxInlineSize: '24rem' }}>
+    <Heading id="schutters-kop" level={2}>
+      Onze schutters in Proefstad
+    </Heading>
+    {withSquad && (
+      <Card aria-labelledby="schutters-selectie" surface="soft">
+        <Heading id="schutters-selectie" level={3}>
+          Uit de selectie van nu
+        </Heading>
+        <DataTable
+          caption="Spelers uit de selectie van nu die scoorden in Proefstad"
+          columns={scorerColumns}
+          rows={[scorerRow('Joris', 'Voorbeeld', '2025', 1, '#')]}
+        />
+      </Card>
+    )}
+    <Heading level={3}>Het vaakst</Heading>
+    <DataTable
+      caption="De spelers die in Proefstad het vaakst scoorden"
+      columns={scorerColumns}
+      rows={[
+        scorerRow('Piet', 'Proefman', '2023', 2, '#'),
+        scorerRow('Nick', 'Nepper', '2021', 2),
+        scorerRow('Joris', 'Voorbeeld', '2025', 1, '#'),
+        scorerRow('Kees', 'Kopie', '2017', 1),
+      ]}
+    />
+  </Card>
+)
+
+export const Scorers = meta.story({
+  name: 'Onze schutters, met spelers uit de selectie',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'De kaart Onze schutters van de Voorbeschouwing: een zachte kaart met de spelers uit de selectie van nu, en daaronder de vijf die het vaakst scoorden, in dezelfde tabel. De naam is een link als de speler een pagina heeft. Het jaar van het laatste doelpunt en het aantal staan rechts.',
+      },
+    },
+  },
+  render: renderScorers(true),
+})
+
+export const ScorersWithoutSquad = meta.story({
+  name: 'Onze schutters, zonder spelers uit de selectie',
+  parameters: {
+    docs: {
+      description: {
+        story: 'Scoorde niemand uit de selectie op die kant, dan valt de zachte kaart weg en blijft "Het vaakst" over.',
+      },
+    },
+  },
+  render: renderScorers(false),
+})
