@@ -10,7 +10,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De cijfers van alle spelers die in de verslagen van de wedstrijden staan, als echte `table`: wedstrijden, basisplaatsen, invallen, minuten, doelpunten, assists en kaarten.',
+          'De cijfers van alle spelers die in de verslagen van de wedstrijden staan, als echte `table`: minuten, basis, gewisseld, ingevallen, doelpunten, assists, geel en rood.',
           'Kies hem voor een lijst van alle spelers van een seizoen; een speler van de bank die niet inviel, staat er ook, met nullen.',
           'De pagina geeft het bijschrift en de rijen mee, in de volgorde waarin ze staan: het component sorteert niet.',
           'Hij is gebouwd uit `DataTable`-kolommen uit `tableColumns` en `PlayerName`, in een `Card` onder een kop van niveau 2.',
