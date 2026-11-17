@@ -5,7 +5,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component:
-          'Links zijn altijd onderstreept. Onder de muis wordt de lijn dikker en de kleur donkerder (licht) of lichter (donker). Een bezochte link ziet er hetzelfde uit als een link die je nog niet hebt geopend. Alleen de kop van een nieuwsbericht en de titel van een discussie worden grijs als je ze hebt geopend.',
+          'Links in de inhoud zijn altijd onderstreept; het menu, de paginering, de filters en de footer zijn bediening en hebben hun eigen uiterlijk. Onder de muis en met de focus wordt de lijn dikker en de kleur donkerder (licht) of lichter (donker). Een bezochte link ziet er hetzelfde uit als een link die je nog niet hebt geopend. Alleen de kop van een nieuwsbericht en de titel van een discussie worden grijs als je ze hebt geopend.',
       },
     },
   },

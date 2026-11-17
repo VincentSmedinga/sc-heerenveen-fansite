@@ -71,17 +71,12 @@
   }
 
   /*
-   * The link has no underline, until the mouse is over it. Its area is the whole tile: the
+   * The link is underlined, as any link in the content, and thicker under the mouse (see link.css): the ::after of
+   * the link is part of it, so the mouse anywhere on the tile counts. Its area is the whole tile: the
    * empty ::after covers the card, which is the one that is positioned (see card.css), so a
    * click or a tap anywhere on the tile goes to the link.
    */
   .hf-tile-link {
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-
     &::after {
       content: '';
       inset: 0;

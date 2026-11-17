@@ -23,7 +23,8 @@
   }
 
   /*
-   * The link is the card. It has no underline, and under the mouse the border takes the colour
+   * The link is the card. Only the question is underlined, as it names what the link goes to: the
+   * figure and the note are not. Under the mouse and with the focus the line is thicker, and the border takes the colour
    * of a highlight, so the card shows it is a link, without moving. The card has a touch target
    * of its own that is far above 44 pixels.
    */
@@ -33,7 +34,7 @@
     flex-direction: column;
     gap: var(--hf-space-xs);
     padding: var(--hf-space-m);
-    text-decoration: none;
+    text-decoration-line: none;
 
     &:hover {
       border-color: var(--hf-colour-border-highlight);
@@ -43,9 +44,13 @@
   .hf-question-text {
     color: var(--hf-colour-link);
     font-weight: var(--hf-name-font-weight);
+    text-decoration-line: underline;
+    text-decoration-skip-ink: auto;
+    text-decoration-thickness: var(--hf-link-underline-thickness);
+    text-underline-offset: var(--hf-link-underline-offset);
 
-    .hf-question-card:hover & {
-      text-decoration: underline;
+    .hf-question-card:is(:hover, :focus-visible) & {
+      text-decoration-thickness: var(--hf-link-underline-thickness-hover);
     }
   }
 

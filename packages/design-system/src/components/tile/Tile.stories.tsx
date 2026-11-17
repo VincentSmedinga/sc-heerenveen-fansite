@@ -37,7 +37,7 @@ const meta = preview.meta({
         component: [
           'Een tegel is een kaart die één link is, naar een plek op de site: een kop met de naam van de plek, een regel beschrijving en eventueel een pictogram.',
           'Kies hem voor een startpagina waar de bezoeker een plek kiest, zoals de startpagina van het beheer; een kaart met inhoud blijft een `Card`.',
-          'De kop is de tekst van de link, dus de tegel heeft zijn naam, en de hele tegel is aan te klikken, met één focusrand eromheen.',
+          'De kop is de tekst van de link en is onderstreept, dus de tegel heeft zijn naam, en de hele tegel is aan te klikken, met één focusrand eromheen.',
           'Zet de tegels in een `Tile.Grid`: dat is de lijst, met de tegels naast elkaar waar ze passen en onder elkaar op een smal scherm.',
         ].join('\n'),
       },

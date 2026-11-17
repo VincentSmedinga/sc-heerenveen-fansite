@@ -63,7 +63,7 @@
     /* Nieuwskop: the line readers come for. Also the first line of a match. */
     --hf-headline-font-size: 1.125rem;
     --hf-headline-font-weight: 500;
-    --hf-headline-line-height: 1.35;
+    --hf-headline-line-height: 1.5;
 
     /* Tekst */
     --hf-body-font-size: 1rem;
@@ -121,9 +121,12 @@
     --hf-key-figure-long-font-size: min(var(--hf-key-figure-font-size), 20cqi);
     --hf-key-figure-longer-font-size: min(var(--hf-key-figure-font-size), 13cqi);
 
-    /* The underline of a link: the thickness at rest and under the mouse, and the distance from the text. In em, so it scales with the text */
+    /*
+     * The underline of a link: the thickness at rest and under the mouse, and the distance from the text.
+     * The thickness at rest is in em, so it scales with the text; under the mouse it is 1,5 pixels, whatever the size.
+     */
     --hf-link-underline-thickness: 0.0625em;
-    --hf-link-underline-thickness-hover: 0.125em;
+    --hf-link-underline-thickness-hover: 1.5px;
     --hf-link-underline-offset: 0.15em;
 
     /* Emphasis: strong, b, buttons, chart titles, caption, a status not to miss */
