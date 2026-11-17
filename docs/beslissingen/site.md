@@ -3720,6 +3720,7 @@
   Dezelfde wedstrijd twee keer is goedkoper dan Uitslagen een wedstrijd laten missen, want Uitslagen telt dezelfde wedstrijden als de rest van de site.
 - **Alternatieven:** een grotere regel in Uitslagen (valt minder op); de laatste wedstrijd uit Uitslagen halen (geen dubbele regel, maar Uitslagen mist dan de nieuwste); de kaart ook in een afgelopen seizoen (de laatste is daar niet bijzonder).
 - **Later:** zie _De regel met de clubs is de link naar de pagina van de wedstrijd_ (16 november 2026): de link is de regel met de twee clubs en de uitslag, niet meer een aparte regel met "Het verslag", "Voorbeschouwing" of "Live".
+- **Later:** zie _Wedstrijden heeft geen kaart Laatste wedstrijd meer, en Uitslagen staat bovenaan de tweede kolom_ (17 november 2026): de kaart en het anker `laatste-wedstrijd` zijn weg uit het lopende seizoen.
 
 ## Een naam zonder persoon splitsen we op het eerste woord, met een vaste lijst voorvoegsels
 
@@ -5388,6 +5389,7 @@
 - **Later:** zie _De werkbalk staat naast de kop, boven de tweede kolom_ (16 november 2026): de werkbalk staat vanaf 52 rem niet meer onder de kop, over de hele breedte, maar in de tweede kolom, in de rij van de kop.
   Onder 52 rem blijft de volgorde kop, werkbalk, inhoud.
   De terugkeerlink op de pagina van een speler staat in een gebied van zijn eigen.
+- **Later:** zie _Wedstrijden heeft geen kaart Laatste wedstrijd meer, en Uitslagen staat bovenaan de tweede kolom_ (17 november 2026): in het lopende seizoen staat de stand op `/wedstrijden` niet meer vóór maar na de uitslagen, en de balk begint met Programma.
 
 ## De pagina's van het beheer gebruiken het raster, met de knoppen om op te slaan in de werkbalk
 
@@ -6434,6 +6436,20 @@
   Een nummer is een club, zoals de importer ook twee artikelen als twee clubs ziet.
   Een eerdere naam hoort bij zijn jaren, maar niet elke redacteur weet ze, dus het seizoen is vrij.
 - **Alternatieven:** altijd de club met een nummer laten blijven, zonder keuze; het nummer van de club die blijft houden en dat van de ander weggooien; de oude slug omleiden; een eigen tabel met samenvoegingen; altijd alleen een andere naam, de jaren later invullen in het formulier van de club.
+
+## Wedstrijden heeft geen kaart Laatste wedstrijd meer, en Uitslagen staat bovenaan de tweede kolom
+
+- **Datum:** 17 november 2026
+- **Besluit:** Wedstrijden van het lopende seizoen heeft de kaart "Laatste wedstrijd" niet meer (#1348).
+  Programma staat in de eerste kolom, en in de tweede kolom staan bovenaan de kaarten met uitslagen, daaronder Stand en daaronder het verloop of de hoofdtrainers.
+  Op een smal scherm, en dus in de broncode, is de volgorde Programma, Uitslagen, Stand, het verloop.
+  De balk "Op deze pagina:" volgt die volgorde (`matchShortcutsOf`) en heeft geen link "Laatste wedstrijd" meer.
+  De kaarten met uitslagen blijven wit en Stand houdt het zachte vlak.
+  Een seizoen dat voorbij is, verandert niet.
+- **Waarom:** dezelfde wedstrijd stond twee keer op de pagina, op de kaart en bovenaan Uitslagen.
+  Nu staan de volgende wedstrijd (bovenaan Programma) en de vorige (bovenaan Uitslagen) naast elkaar bovenaan.
+- **Alternatieven:** de kaart houden; Stand bovenaan houden, of eerst op een telefoon.
+- **Later:** zie _De laatste wedstrijd staat in een eigen kaart bovenaan Wedstrijden_ (8 november 2026): de kaart is weer weg.
 
 ## De kaarten van de kwaliteitspagina's zijn wit
 

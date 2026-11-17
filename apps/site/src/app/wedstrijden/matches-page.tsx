@@ -18,7 +18,7 @@ import {
   resultsPerCompetition,
 } from '#src/matches'
 import { getEditorSources } from '#src/matches'
-import { coachesCardOf, lastMatchCard, resultsCardOf, standingsCardOf } from '#src/matchShortcuts'
+import { coachesCardOf, resultsCardOf, standingsCardOf } from '#src/matchShortcuts'
 import {
   CoachesCard,
   EditorSources,
@@ -71,9 +71,9 @@ export async function matchesMetadata(season: string): Promise<Metadata> {
  * another, which is what the two routes render. The title row has the season picker beside the
  * heading. The results are in a card for each competition with a result (Eredivisie, KNVB
  * Beker and so on, the link to the course of the season in the first): the newest first in the
- * current season, which also has the card Laatste wedstrijd above Programma (the newest match
- * that has begun, which stays in Uitslagen too) and the card Programma with every competition
- * on one list, and from the first match to the last in a season that is over, which has no
+ * current season, which also has the card Programma with every competition on one list, in the
+ * first column beside the results, and from the first match to the last in a season that is
+ * over, which has no
  * Programma and calls its table Eindstand. Under the table and the results is a link to the
  * card with figures that belongs to it on the page Cijfers, of the same season. A season that
  * has no matches in the database is the page "niet gevonden".
@@ -107,7 +107,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   // The cards of a season that is over say which one on their image. The current season is the
   // one the image has always been of.
   const imageSeason = current ? undefined : season
-  const { previous, programme, results: newestFirst } = overviewOf(data.matches, now)
+  const { programme, results: newestFirst } = overviewOf(data.matches, now)
   const results = resultsOfSeason(newestFirst, season, now)
   // A card for each competition with a result, the newest first in the current season. A season
   // without a result has the one card Uitslagen.
@@ -129,15 +129,64 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   const statistics = (id?: string) =>
     `${seasonAddress(statisticsPath, season, seasonOf(now))}${id === undefined ? '' : `#${id}`}`
 
-  const areas = pageAreas({
-    before: ['stand'],
-    main: [
-      ...(current && previous !== undefined ? ['last'] : []),
-      ...(current ? ['programme'] : []),
-      ...(resultCards.length === 0 ? ['results-0'] : resultCards.map((_, index) => `results-${index}`)),
-    ],
-    toolbar: true,
-  })
+  const standSection = (
+    <Page.Section
+      area="stand"
+      aria-label={`${current ? 'De stand' : 'De eindstand'}${data.coaches.length > 0 && placePerRound === undefined ? ` en de ${coachesCard.name.toLowerCase()}` : ''}`}
+    >
+      <Card
+        aria-labelledby={standingsCard.id}
+        shareable={imageCredit(data.standings.length > 0, imageSeason)}
+        surface="soft"
+      >
+        <Heading anchor id={standingsCard.id} level={2}>
+          {standingsCard.name}
+        </Heading>
+        {data.standings.length === 0 ? (
+          <Text>{`We hebben ${current ? 'de stand' : 'de eindstand'} nog niet gevonden. Kijk straks nog eens.`}</Text>
+        ) : (
+          <>
+            {lastFive !== undefined && (
+              <StandingsSwitch
+                address={seasonAddress(matchesPath, season, seasonOf(now))}
+                anchor={standingsCard.id}
+                view={lastFiveShown ? 'last-five' : 'season'}
+              />
+            )}
+            <StandingsTable
+              caption={
+                lastFiveShown
+                  ? lastFiveCaption(lastFive.lastResultOn)
+                  : standingsCaption(data.standings, standingsCard.name)
+              }
+              rows={lastFiveShown ? lastFive.rows : data.standings}
+            />
+            {/* An Eindstand no longer changes, so only this season can be behind. */}
+            {current && <StandingsBehind matches={data.matches} now={now} />}
+            <Text>
+              <Link href={statistics()} icon="arrow-right">
+                Onze plek in de competitie
+              </Link>
+            </Text>
+          </>
+        )}
+      </Card>
+      {placePerRound !== undefined && (
+        <PlacePerRoundCard coaches={data.coaches} matches={data.matches} places={placePerRound} />
+      )}
+      {placePerRound === undefined && <CoachesCard coaches={data.coaches} />}
+      {(data.matches.length > 0 || data.standings.length > 0) && (
+        <SourceCredit edited={data.edited} pages={data.pages} season={data.season} source={sourceOf(data.matches)} />
+      )}
+      <EditorSources sources={editorSources} />
+    </Page.Section>
+  )
+
+  const resultAreas = resultCards.length === 0 ? ['results-0'] : resultCards.map((_, index) => `results-${index}`)
+  // A season that is over has the table in the second column, before the results in the source.
+  // The current season has Programma in the first column and the results above the table in the
+  // second, which is also the order on a phone: the next match, the previous, then the table.
+  const areas = current ? currentAreas(resultAreas) : pageAreas({ before: ['stand'], main: resultAreas, toolbar: true })
 
   return (
     <>
@@ -148,80 +197,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
         <Page.Toolbar>
           <SeasonPicker action={pickerPath} options={seasonChoices(seasons)} size="small" value={seasonSlug(season)} />
         </Page.Toolbar>
-        {/* The table stands before the matches in the source, so on a phone it is the first
-            thing under the season picker, and on a wide screen it is the second column. */}
-        <Page.Section
-          area="stand"
-          aria-label={`${current ? 'De stand' : 'De eindstand'}${data.coaches.length > 0 && placePerRound === undefined ? ` en de ${coachesCard.name.toLowerCase()}` : ''}`}
-        >
-          <Card
-            aria-labelledby={standingsCard.id}
-            shareable={imageCredit(data.standings.length > 0, imageSeason)}
-            surface="soft"
-          >
-            <Heading anchor id={standingsCard.id} level={2}>
-              {standingsCard.name}
-            </Heading>
-            {data.standings.length === 0 ? (
-              <Text>{`We hebben ${current ? 'de stand' : 'de eindstand'} nog niet gevonden. Kijk straks nog eens.`}</Text>
-            ) : (
-              <>
-                {lastFive !== undefined && (
-                  <StandingsSwitch
-                    address={seasonAddress(matchesPath, season, seasonOf(now))}
-                    anchor={standingsCard.id}
-                    view={lastFiveShown ? 'last-five' : 'season'}
-                  />
-                )}
-                <StandingsTable
-                  caption={
-                    lastFiveShown
-                      ? lastFiveCaption(lastFive.lastResultOn)
-                      : standingsCaption(data.standings, standingsCard.name)
-                  }
-                  rows={lastFiveShown ? lastFive.rows : data.standings}
-                />
-                {/* An Eindstand no longer changes, so only this season can be behind. */}
-                {current && <StandingsBehind matches={data.matches} now={now} />}
-                <Text>
-                  <Link href={statistics()} icon="arrow-right">
-                    Onze plek in de competitie
-                  </Link>
-                </Text>
-              </>
-            )}
-          </Card>
-          {placePerRound !== undefined && (
-            <PlacePerRoundCard coaches={data.coaches} matches={data.matches} places={placePerRound} />
-          )}
-          {placePerRound === undefined && <CoachesCard coaches={data.coaches} />}
-          {(data.matches.length > 0 || data.standings.length > 0) && (
-            <SourceCredit
-              edited={data.edited}
-              pages={data.pages}
-              season={data.season}
-              source={sourceOf(data.matches)}
-            />
-          )}
-          <EditorSources sources={editorSources} />
-        </Page.Section>
-        {/* The latest match that has begun, current season only. Uitslagen has it too. */}
-        {current && previous !== undefined && (
-          <Page.Cell area="last">
-            <Card aria-labelledby={lastMatchCard.id}>
-              <Heading anchor id={lastMatchCard.id} level={2}>
-                {lastMatchCard.name}
-              </Heading>
-              <MatchLines
-                liveReports={liveReports}
-                matches={[previous]}
-                now={now}
-                reportAddresses={reportAddresses}
-                withDetails
-              />
-            </Card>
-          </Page.Cell>
-        )}
+        {!current && standSection}
         {current && (
           <Page.Cell area="programme">
             <Card aria-labelledby="programma">
@@ -278,9 +254,26 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
             )
           })
         )}
+        {current && standSection}
       </Page.Main>
     </>
   )
+}
+
+/**
+ * The areas of the current season: Programma in the first column, over every row, and in the
+ * second the cards with results and under them the table. On a phone the order is Programma,
+ * the results, the table (the one the source has).
+ */
+function currentAreas(resultAreas: readonly string[]) {
+  const { narrow, wide } = pageAreas({ main: resultAreas, toolbar: true })
+  const top = narrow.slice(0, narrow.indexOf(resultAreas[0] ?? ''))
+  const topWide = wide.slice(0, wide.length - resultAreas.length)
+
+  return {
+    narrow: [...top, 'programme', ...resultAreas, 'stand'],
+    wide: [...topWide, ...[...resultAreas, 'stand'].map((area) => `programme ${area}`)],
+  }
 }
 
 /**
