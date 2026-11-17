@@ -2,7 +2,7 @@ import type { SearchableMatch } from '@fansite/db/match-search'
 
 import type { CompetitionChoice } from './competition'
 
-import { type CompetitionValue, type Filters, findMatches, matchCount, searchHref } from './match-search'
+import { type CompetitionValue, europeValues, type Filters, findMatches, matchCount, searchHref } from './match-search'
 import { nothing } from './match-search-start'
 
 /**
@@ -44,7 +44,7 @@ const competitionsOf = (choice: CompetitionChoice): CompetitionValue[] =>
         ? ['play-offs']
         : choice === 'cup'
           ? ['knvb-beker', 'johan-cruijff-schaal']
-          : ['europa']
+          : [...europeValues]
 
 /** The filters of the scope of a page, with the choices of one figure added. */
 export const filtersOf = ({ competition, season }: CijfersScope, choices: Partial<Filters> = {}): Filters => ({

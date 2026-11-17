@@ -9,7 +9,7 @@ import type { AllMatch } from './matches'
 import { matchLink } from './cijfers-search'
 import { countryTalliesOf } from './countryTally'
 import { CountryTallyCard } from './CountryTallyCard'
-import { findMatches, parseFilters } from './match-search'
+import { europeValues, findMatches, parseFilters } from './match-search'
 import { withoutIcons } from './without-icons'
 
 const tallies: CountryTally[] = [
@@ -85,7 +85,8 @@ const list = [
 ]
 // The search only has played matches, as `listSearchableMatches` does.
 const searchable = list.filter(({ status }) => status === 'played')
-const link = (country: string) => matchLink(searchable, { competition: 'all' }, { competitions: ['europa'], country })
+const link = (country: string) =>
+  matchLink(searchable, { competition: 'all' }, { competitions: [...europeValues], country })
 const renderLinked = () =>
   withoutIcons(renderToStaticMarkup(<CountryTallyCard matchLink={link} tallies={countryTalliesOf(list)} />))
 

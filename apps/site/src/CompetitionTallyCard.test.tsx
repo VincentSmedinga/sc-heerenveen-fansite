@@ -18,7 +18,16 @@ const tallies: CompetitionTally[] = [
     won: 436,
   },
   { drawn: 5, goalsAgainst: 20, goalsFor: 25, label: 'Play-offs', lost: 6, played: 26, value: 'play-offs', won: 15 },
-  { drawn: 33, goalsAgainst: 120, goalsFor: 110, label: 'Europa', lost: 37, played: 107, value: 'europa', won: 37 },
+  {
+    drawn: 4,
+    goalsAgainst: 40,
+    goalsFor: 38,
+    label: 'UEFA Cup',
+    lost: 13,
+    played: 31,
+    value: 'uefa-cup',
+    won: 14,
+  },
 ]
 
 const render = (rows = tallies) => withoutIcons(renderToStaticMarkup(<CompetitionTallyCard tallies={rows} />))
@@ -44,7 +53,8 @@ describe('CompetitionTallyCard', () => {
     const html = render()
 
     expect(html).toContain('href="/wedstrijden/zoeken?competitie=eredivisie"')
-    expect(html).toContain('href="/wedstrijden/zoeken?competitie=europa"')
+    expect(html).toContain('href="/wedstrijden/zoeken?competitie=uefa-cup"')
+    expect(html).not.toContain('competitie=europa')
   })
 
   it('says what the play-offs are only when the card has the row', () => {
