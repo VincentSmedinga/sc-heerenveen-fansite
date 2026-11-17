@@ -66,6 +66,15 @@
     .hf-icon:first-child {
       margin-inline: 0 0.125em;
     }
+
+    /*
+     * The underline of the button says "press to sort". An abbreviation inside it would add a
+     * dotted one that says "hover for the word", two lines under one letter. The word is
+     * still in the title and in the name of the button.
+     */
+    abbr {
+      text-decoration: none;
+    }
   }
 
   /*

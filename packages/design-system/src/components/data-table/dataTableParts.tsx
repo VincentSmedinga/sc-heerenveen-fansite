@@ -173,9 +173,8 @@ export const textColumnClass = (column: DataTableTextColumn) =>
 /**
  * The text of a header of a table with text: the whole name, or an abbreviation that shows the
  * whole name where the table has room. In a button (`named`) the abbreviation is not hidden
- * from
- * a screen reader, so the name is what the eye reads (WCAG 2.5.3): whichever of the two is
- * shown, the other is not displayed.
+ * from a screen reader, so the name is what the eye reads (WCAG 2.5.3): whichever of the two
+ * is shown, the other is not displayed.
  */
 export const TextColumnText = ({ column, named = false }: { column: DataTableTextColumn; named?: boolean }) =>
   column.abbreviation === undefined ? (

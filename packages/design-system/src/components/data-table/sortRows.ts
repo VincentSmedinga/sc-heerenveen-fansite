@@ -103,8 +103,7 @@ export function describeSorting(name: string, direction: SortDirection | undefin
  * a capital and an accent do not count and a number in a name counts by its value. An empty
  * cell stands last, whichever way the column is sorted. Rows with equal values keep the order
  * they were given in, or with `byHeader` stand in the order of the row headers, A to Z,
- * whatever
- * the direction. It does not change `rows`.
+ * whatever the direction. It does not change `rows`.
  */
 export function sortRows<Row extends SortableRow>(
   rows: readonly Row[],
