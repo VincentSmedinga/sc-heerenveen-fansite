@@ -212,11 +212,11 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
                 </Text>
               ) : (
                 <MatchLines
+                  liveReports={liveReports}
                   matches={programme}
                   now={now}
                   previewAddresses={previewAddresses}
                   reportAddresses={reportAddresses}
-                  withDetails
                 />
               )}
             </Card>

@@ -14,10 +14,9 @@ import { dateTimeOf, dayOf, formatArticleDate, formatNewsTime } from '../news'
 import { DiscussionsCard, EpisodesCard, loadArticle } from '../NewsCards'
 import { pageAreas } from '../page-areas'
 import { getLatestEpisodes } from '../podcasts'
-import { getPreviewAddresses } from '../report-data'
+import { getLiveReports, getPreviewAddresses, getReportAddresses } from '../report-data'
 import { ServerError, serverErrorTitle } from '../ServerError'
 import { withBranch } from '../title'
-import { getUpcomingDetails, type UpcomingDetails } from '../upcoming-match'
 
 // Render on each request, so the build never reads the database. getHeadlines caches the list
 // itself.
@@ -39,38 +38,25 @@ async function loadMatches(): Promise<MatchData | undefined> {
 }
 
 /**
- * The addresses of the Voorbeschouwing of the matches that are scheduled, for the link under
- * the next match, or undefined when the database can't give them: the card then has no link,
- * and the log says why.
+ * The addresses of the pages of the matches, of their Voorbeschouwing and of the ones that
+ * are live, for the links of the lines of the card Wedstrijden, or undefined when the database
+ * can't give them: the lines are then plain text, and the log says why.
  */
-async function loadPreviewAddresses(data: MatchData | undefined) {
+async function loadMatchLinks(data: MatchData | undefined) {
   if (data === undefined) {
     return undefined
   }
 
   try {
-    return await getPreviewAddresses(data.season)
+    const [reportAddresses, previewAddresses, liveReports] = await Promise.all([
+      getReportAddresses(data.season),
+      getPreviewAddresses(data.season),
+      getLiveReports(data.season, new Date()),
+    ])
+
+    return { liveReports, previewAddresses, reportAddresses }
   } catch (error) {
-    console.error(`Could not read the matches with a Voorbeschouwing for the homepage: ${reasonOf(error)}`)
-
-    return undefined
-  }
-}
-
-/**
- * The previous meeting and the form of the next opponent for the card Wedstrijden, or undefined
- * when the database can't give them: the card then has no small lines under the clubs, and the
- * log says why.
- */
-async function loadUpcomingDetails(data: MatchData | undefined): Promise<undefined | UpcomingDetails> {
-  if (data === undefined) {
-    return undefined
-  }
-
-  try {
-    return await getUpcomingDetails(data, new Date())
-  } catch (error) {
-    console.error(`Could not read the previous meeting and the form for the homepage: ${reasonOf(error)}`)
+    console.error(`Could not read the pages of the matches for the homepage: ${reasonOf(error)}`)
 
     return undefined
   }
@@ -93,9 +79,9 @@ const loadContent = cache(async () => {
       loadMatches(),
     ])
 
-    const [details, previewAddresses] = await Promise.all([loadUpcomingDetails(matches), loadPreviewAddresses(matches)])
+    const matchLinks = await loadMatchLinks(matches)
 
-    return { article, details, discussions, episodes, headlines, matches, previewAddresses }
+    return { article, discussions, episodes, headlines, matches, matchLinks }
   } catch (error) {
     console.error(`Could not read the headlines, discussions and episodes for the homepage: ${reasonOf(error)}`)
 
@@ -119,7 +105,7 @@ export default async function HomePage() {
     return <ServerError retryHref="/" />
   }
 
-  const { article, details, discussions, episodes, headlines, matches, previewAddresses } = content
+  const { article, discussions, episodes, headlines, matches, matchLinks } = content
   const now = new Date()
   const news = headlinesOfTheWindow(headlines, now)
 
@@ -189,12 +175,14 @@ export default async function HomePage() {
         <Page.Section area="side" aria-label="De wedstrijden, de stand, het forum en de podcasts">
           {matches !== undefined && (
             <>
-              <MatchesCard data={matches} details={details} now={now} previewAddresses={previewAddresses} />
-              <StandingsCard
-                archive={details?.previousMeeting?.dataSource === 'oude-fansite'}
+              <MatchesCard
                 data={matches}
+                liveReports={matchLinks?.liveReports}
                 now={now}
+                previewAddresses={matchLinks?.previewAddresses}
+                reportAddresses={matchLinks?.reportAddresses}
               />
+              <StandingsCard data={matches} now={now} />
             </>
           )}
           <DiscussionsCard discussions={discussions} now={now} />

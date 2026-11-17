@@ -4132,6 +4132,7 @@
   De lijsten Wedstrijden en de pagina's van clubs tonen hem niet; de projecteigenaar kijkt later of dat ook moet.
   `Match` heeft de props `referee` en `extra` (zie de beslissing in `designsysteem.md`).
 - **Alternatieven:** de vorm laten terugvallen op vorig seizoen (een andere ploeg en een andere stand); alleen competitiewedstrijden tellen voor "Vorige keer" (mist de bekerontmoeting van vorige maand); een eigen kop met een tabel (te zwaar voor de kaart); de scheidsrechter meteen in elke lijst (de regel wordt overal een regel langer, wat #416 juist wilde voorkomen).
+- **Later:** zie _De kaart Wedstrijden op home toont de wedstrijden zoals de pagina Wedstrijden_ (17 november 2026): de vorige ontmoeting en de vorm van de tegenstander vervallen op home, en de vorige wedstrijd toont geen scheidsrechter meer.
 
 ## Een redacteur kan een twijfelgeval of een bericht dat het filter weghoudt op de site zetten
 
@@ -6459,3 +6460,19 @@
 - **Waarom:** zand was niet de bedoeling, en kaarten in het beheer zijn wit.
 - **Alternatieven:** zand houden.
 - **Later:** vervangt _De kaarten van de kwaliteitspagina's hebben het warme vlak_ (#1304).
+
+## De kaart Wedstrijden op home toont de wedstrijden zoals de pagina Wedstrijden
+
+- **Datum:** 17 november 2026
+- **Besluit:** de vorige wedstrijd op home ziet eruit als de bovenste regel van Uitslagen op de pagina Wedstrijden, en de volgende wedstrijd als de bovenste regel van Programma (#1352).
+  Dat betekent dezelfde link (naar de pagina van de wedstrijd, of naar de Voorbeschouwing), dezelfde kleine regels en dezelfde weergave van een wedstrijd die live is, uitgesteld of afgelast.
+  `MatchLines` tekent ze op beide plaatsen en kiest zelf per wedstrijd of de regel stadion, toeschouwers en scheidsrechter krijgt: een wedstrijd die nog niet is begonnen wel, een die is begonnen niet.
+  De competitie op de regel is het enige wat per plek verschilt: de kaart op home houdt haar bij beide wedstrijden, want daar staat geen kop per competitie.
+- **Besluit:** de kaart op home houdt haar vorm: het zachte vlak, de kop "Wedstrijden", één lijst met eerst de vorige en dan de volgende wedstrijd, en de link "Alle wedstrijden".
+- **Besluit:** de vorige ontmoeting en de vorm van de tegenstander onder de volgende wedstrijd vervallen op home, met `NextMatchExtra`, `getUpcomingDetails` en `findPreviousMeeting` (`@fansite/db/queries`), die er alleen voor waren.
+  De kaart Stand noemt het archief van de oude fansite dan niet meer in zijn bronvermelding: dat kwam alleen van de vorige ontmoeting.
+  `formOf` en `meetingScoreOf` blijven, want de Voorbeschouwing gebruikt ze.
+- **Waarom:** dezelfde wedstrijd zag er op home anders uit dan op de pagina, en de regel met de clubs was op home geen link naar een verslag.
+  De pagina is de maat, en één functie voorkomt dat ze weer uit elkaar groeien.
+- **Alternatieven:** de vorige ontmoeting en de vorm op home houden, of ook aan Programma toevoegen; alleen de gegevens gelijk doorgeven, zonder gedeelde functie; ook de kaart wit maken.
+- **Later:** vervangt de regels van _De kaart Wedstrijden op home toont de vorige ontmoeting, de vorm van de tegenstander en de scheidsrechter_ (9 november 2026).
