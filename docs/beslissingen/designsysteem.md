@@ -740,6 +740,7 @@
   Of de lijn net zo dik als bij hover (`0.125em`, 2 pixels) en op de gewone afstand; dat was de opzet daarna, tot de proef met 1,5 pixel.
   Voor Safari: latin-ext weglaten; dan vallen de ligaturen Ĳ en ĳ en andere tekens terug op een ander lettertype.
   Of de lijn zo ver van de tekst zetten dat hij onder de staarten blijft; dan staat hij ver van de kop.
+- **Later:** vervangt dat de kop van een nieuwsregel en de titel van een discussie in rust niet onderstreept zijn, en de lijn van 1,5 pixel die alleen zij hadden: zie _Links in de inhoud zijn onderstreept in rust en worden onder de muis altijd dikker_ (17 november 2026). Beide zijn nu onderstreept in rust, en onder de muis geldt voor elke link 1,5 pixel.
 
 ## Voorlopig heeft de kop van een nieuwsregel de maat van gewone tekst en gewicht 500
 
@@ -2219,6 +2220,7 @@
 - **Nadeel:** de tekst in een tegel is niet te selecteren, want het `::after` van de link ligt erover.
   Een tegel met een tweede link erin kan niet; dat is de bedoeling, want een tegel is één bestemming.
 - **Alternatieven:** de hele tegel in een `a` (de kop, de beschrijving en het pictogram worden samen de naam van de link, die dan lang is en de beschrijving twee keer voorleest bij een lijst van koppen); een kaart met een knop of link eronder (twee Tab-stops voor één plek); een `Card` met `onClick` (werkt niet zonder JavaScript en niet met het toetsenbord); `:has()` om de rand van de tegel te tekenen als de link focus heeft (werkt, maar het `::after` van de link doet hetzelfde zonder een selector van de ouder); een eigen vlak per tegel, zoals `soft` of `warm` (de kleur zegt hier niets).
+- **Later:** de koptekst van de tegel is in rust onderstreept, niet alleen onder de muis: zie _Links in de inhoud zijn onderstreept in rust en worden onder de muis altijd dikker_ (17 november 2026).
 
 ## De kaart of de cel bepaalt de verticale witruimte tussen wat erin staat
 
@@ -3414,6 +3416,7 @@
 - **Waarom:** de zoekpagina voor wedstrijden begint met negen vragen en een kaart met de wedstrijden van vandaag in eerdere jaren, en beide komen op meer pagina's voor als de site groeit.
   `Tile` past niet voor de vraagkaart: die heeft een kop en een beschrijving, en geen groot getal.
 - **Alternatieven:** de kaarten in `apps/site` houden; `Tile` met een getal in de beschrijving; `KeyFigures` (dat is geen link).
+- **Later:** de tekst van de vraag is in rust onderstreept, en niet alleen zolang de kaart onder de muis staat: zie _Links in de inhoud zijn onderstreept in rust en worden onder de muis altijd dikker_ (17 november 2026).
 
 ## De filters zijn een lijst van rijen, en een `Disclosure` zegt wat erin gekozen is
 
@@ -3633,6 +3636,7 @@
   Een wedstrijd die live is, toont geen eigen teken in de lijst: de pagina van de wedstrijd heeft de stand.
 - **Alternatieven:** de aparte link houden; alleen de clubs als link, zonder de uitslag; altijd onderstreept, met of zonder pijltje; de tekstkleur houden, zodat je in rust niet ziet welke regel een link is; "Live" houden als klein label.
 - **Later:** de regel is in rust niet meer zonder onderstreping: hij is onderstreept als een gewone link en wordt onder de muis en bij focus dikker (zie _Een wedstrijd toont de regel met de clubs als gewone link, en de dag staat op een eigen plek_, 17 november 2026).
+- **Later:** de regel is in rust onderstreept en wordt onder de muis dikker, zoals elke link in de inhoud: zie _Links in de inhoud zijn onderstreept in rust en worden onder de muis altijd dikker_ (17 november 2026).
 
 ## De keuzes van de schakelaar zijn zo breed als hun tekst
 
@@ -3707,6 +3711,7 @@
   De lijsten met details (`withDetails`) geven `matches.attendance` door, op de plaatsen waar ze het stadion en de scheidsrechter al doorgeven.
   **Waarom:** de eigenaar wil het aantal toeschouwers in de lijst zien, en het staat al in de gegevens en op de pagina van een wedstrijd, dus het bronbeleid verandert niet.
   **Alternatief:** alleen op de pagina van de wedstrijd laten staan.
+- **Later:** vervangt dat de kop van een nieuwsitem en de titel van een discussie alleen onder de muis en met focus onderstreept zijn, en de dikte van `0.125em` onder de muis in `--hf-link-underline-thickness-hover` (nu `1.5px`): zie _Links in de inhoud zijn onderstreept in rust en worden onder de muis altijd dikker_ (17 november 2026). Wat voor `.hf-match-link` gold, geldt nu voor alle links in de inhoud.
 
 ## Het teken in een `DataTable` zegt dat er iets ontbreekt, en is rood
 
@@ -3786,3 +3791,53 @@
 - **Besluit:** twee nieuwe vulkleuren als tokens: `--hf-colour-icon-shirt` (lichtblauw, blauw-300 in licht en donker) en `--hf-colour-icon-boot` (grijs, grijs-400 in licht en grijs-300 in donker), met randen in `--hf-colour-text-default`.
 - **Waarom:** de rand houdt het 3:1 van niet-tekstcontrast, zoals bij de kaarten, zodat de vulling zelf niet aan 3:1 hoeft te voldoen.
   De tokens zijn alleen voor het shirt en de schoen.
+
+## Links in de inhoud zijn onderstreept in rust en worden onder de muis altijd dikker
+
+- **Datum:** 17 november 2026
+- **Besluit:** elke link in de inhoud van een pagina heeft een onderstreping in rust, en krijgt onder de muis en met de focus een lijn van 1,5 pixel, ook als hij in rust geen lijn heeft (#1371).
+  Dat geldt voor het hele site, het beheer inbegrepen.
+- **Waarom:** twee soorten links in dezelfde inhoud (met en zonder lijn) zijn onrustig en niet te verklaren: de koppen van nieuws en forum hadden geen lijn, de links naar wedstrijden en spelers wel.
+  Eén regel is voorspelbaar, en herkenning is niet meer afhankelijk van alleen de kleur (1.4.1).
+  Eén dikte onder de muis maakt hover overal hetzelfde teken.
+- **Alternatieven:** de koppen laten zoals ze waren; geen lijn in rust voor alle links (een link in een zin is dan alleen aan kleur te herkennen); 2 pixel onder de muis, zoals de basisregel tot nu toe had.
+- **Later:** vervangt _Koppen in een nieuwsregel zijn pas onderstreept bij hover en focus_ (23 oktober 2026), de regel over de titel van een discussie en over `Tile` en `QuestionCard` die in rust geen lijn hebben, en de dikte van 2 pixel onder de muis van de basisregel (`0.125em`).
+  Het slot van _De regel met de clubs in `Match` …_ (#1332) en _Een wedstrijd toont de regel met de clubs als gewone link_ (17 november 2026) is hierdoor de regel voor alle links in de inhoud.
+
+## Wat navigatie is, blijft zoals het is
+
+- **Datum:** 17 november 2026
+- **Besluit:** het hoofdmenu, de balk met snelkoppelingen, de schakellinks, de paginering, de filterchips, de ronde link naar boven, de ankerlinks bij een kop en de sorteerknoppen in tabelkoppen vallen niet onder de regel voor inhoud.
+  De paginering blijft onderstreept, de sorteerknoppen houden hun lijn en krijgen onder de muis de lijn van 1,5 pixel.
+- **Waarom:** het zijn bediening, geen inhoud, en de huidige pagina is er al zichtbaar gemarkeerd met een lijn of gewicht.
+- **Alternatieven:** ook deze links gelijk trekken met de regel voor inhoud; de paginering zonder lijn in rust.
+
+## In een kaart of rij die een link is, is alleen de tekst die het doel noemt onderstreept
+
+- **Datum:** 17 november 2026
+- **Besluit:** bij een kaart of rij die als geheel een link is, staat de lijn onder de kop, de titel, de naam of de vraag, en niet onder datum, bron of andere kleine tekst.
+- **Waarom:** de lijn zegt wat de link noemt, en een rij vol onderstreepte kleine tekst is onrustig.
+- **Alternatieven:** alles in de kaart onderstrepen; de kaart zonder lijn in rust laten.
+
+## De footer heeft geen onderstreping in rust
+
+- **Datum:** 17 november 2026
+- **Besluit:** de links in de footer zijn in rust niet onderstreept en krijgen onder de muis en met de focus de lijn van 1,5 pixel.
+- **Waarom:** de footer is een rij met korte links, zoals de header, en geen inhoud.
+- **Alternatieven:** de footer onderstreept laten.
+
+## De Nieuwskop heeft regelafstand 1,5
+
+- **Datum:** 17 november 2026
+- **Besluit:** `--hf-headline-line-height` gaat van 1,35 naar 1,5.
+- **Waarom:** de lijn onder een kop die altijd zichtbaar is, heeft meer ruimte nodig tussen twee regels van een kop die afbreekt, anders raken de lijn en de regel eronder elkaar.
+- **Alternatieven:** 1,35 houden; de regelafstand alleen bij `NewsItem` en `DiscussionItem` verhogen, zodat andere koppen hetzelfde blijven.
+- **Later:** vervangt de regelafstand van 1,35 van de Nieuwskop, zoals die in `typography.css` en in de besluiten over de Nieuwskop staat.
+
+## De lijn onder de muis is 1,5 pixel, overal
+
+- **Datum:** 17 november 2026
+- **Besluit:** `--hf-link-underline-thickness-hover` wordt `1.5px`, en de losse waarden van 1,5 pixel bij de kop van een nieuwsregel en de titel van een discussie verdwijnen.
+- **Waarom:** één dikte, voor een link met en zonder lijn in rust, en een lijn die niet te zwaar wordt naast de tekst.
+- **Alternatieven:** 2 pixel (`0.125em`), zoals de basisregel had; 1,5 pixel alleen bij koppen.
+- **Later:** vervangt de dikte van `0.125em` onder de muis uit de basisregel van `Link`.

@@ -65,8 +65,9 @@ const separator = (
  * line, and a date and a time break onto two lines in it. Next to it the headline as a link to
  * the item at the source, and under it the name of the source with an icon for a link to
  * another site, "voor abonnees" if the item is behind a paywall, and short facts such as the
- * duration of a podcast episode. The headline is not underlined, except under the mouse and
- * with the focus of the keyboard. There is no intro and no image: we only show those with the
+ * duration of a podcast episode. The headline is underlined, as every link in the content
+ * is, and the line is thicker under the mouse and with the focus of the keyboard.
+ * There is no intro and no image: we only show those with the
  * permission of the source (editorial principles 1 and 2). In a line narrower than 24rem the
  * day and the time are above the headline, chosen with a container query in news-item.css; the
  * order in the HTML is the same. The outer div is the container, and the layout div inside it

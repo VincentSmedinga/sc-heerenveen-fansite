@@ -145,7 +145,7 @@ Zet JavaScript uit en kijk of de tabel er in de volgorde van de server staat, zo
       Bij ons haalt lopende tekst 7:1.
 - [ ] Randen van velden, focusranden, pictogrammen en grafiekjes halen 3:1 (1.4.11).
 - [ ] Dat geldt in beide thema's, en ook bij hover, focus en bezocht.
-- [ ] Kleur is nooit het enige signaal: een fout heeft ook tekst, een link in een zin is onderstreept (1.4.1).
+- [ ] Kleur is nooit het enige signaal: een fout heeft ook tekst, een link in de inhoud is onderstreept, ook als hij niet in een zin staat, en krijgt onder de muis en met de focus een dikkere lijn (1.4.1).
 
 Zo test je het: Tokens/Kleur in Storybook toont het contrast van elk paar in beide thema's.
 Gebruik de semantische tokens; een paar dat daar niet staat, meet je na met de contrastmeter in de ontwikkelhulpmiddelen van je browser.

@@ -373,6 +373,11 @@
       position: relative;
     }
 
+    /* The footer is a row of short links, not content: no line at rest, and the line of every link under the mouse. */
+    & a:not(:hover, :focus-visible) {
+      text-decoration-line: none;
+    }
+
     &::before,
     &::after {
       background-image: repeating-linear-gradient(

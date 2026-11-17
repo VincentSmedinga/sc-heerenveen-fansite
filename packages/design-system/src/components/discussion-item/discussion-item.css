@@ -1,7 +1,7 @@
 /*
  * A line of the discussions of the forum: the title as a link, and under it the replies, the screen name of the last
- * poster and the time. The title is underlined under the mouse and with the focus of the keyboard, not otherwise, as the
- * headline of a news line is. A List of lines has a thin line between the lines.
+ * poster and the time. The title is underlined, as the headline of a news line is, and the line is thicker under the mouse and with the focus of
+ * the keyboard. A List of lines has a thin line between the lines.
  */
 
 @layer hf.components {
@@ -21,13 +21,11 @@
    * title has the size of the text and the weight Medium, as a news headline has. The components layer comes after the
    * typography layer, so this wins over the .hf-headline rule.
    *
-   * The title is on a line of its own, heavier than the text and in the colour of links, so it is a link without the
-   * line to the eye (WCAG 1.4.1 asks for more than colour mostly for a link in a sentence). The line is 1.5 pixels thick
-   * and sits close to the text, and skips the descenders of letters. Both are set for the two states, so the focus gets
-   * the same line as hover. The colour of hover and the focus ring stay as the base styles make them. The title is one of
-   * the two links that show you have opened them (the other is the headline of a news item), so it keeps the colour for
-   * a visited link. That rule is in this layer, which wins over the hover of the base styles, so it leaves out the title
-   * under the mouse: that one gets the colour for hover, visited or not.
+   * Underlined at rest, as every link in the content is (see link.css), and thicker under the mouse and with the focus of
+   * the keyboard. The line skips the descenders of letters. The colour of hover, the thickness and the focus ring stay as
+   * the base styles make them. The title is one of the two links that show you have opened them (the other is the headline
+   * of a news item), so it keeps the colour for a visited link. That rule is in this layer, which wins over the hover of
+   * the base styles, so it leaves out the title under the mouse: that one gets the colour for hover, visited or not.
    */
   .hf-discussion-item-title {
     display: inline-block;
@@ -35,16 +33,9 @@
     font-size: var(--hf-body-font-size);
     font-weight: var(--hf-headline-font-weight);
     min-block-size: 1.5rem;
-    text-decoration-line: none;
+    text-decoration-line: underline;
     text-decoration-skip-ink: auto;
-    text-decoration-thickness: var(--hf-link-underline-thickness);
     text-underline-offset: var(--hf-link-underline-offset);
-
-    &:hover,
-    &:focus-visible {
-      text-decoration-line: underline;
-      text-decoration-thickness: var(--hf-link-underline-thickness-hover);
-    }
 
     &:visited:not(:hover) {
       color: var(--hf-colour-text-link-visited);

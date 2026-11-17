@@ -19,7 +19,7 @@ const meta = preview.meta({
         component: [
           'Een vraagkaart is een kaart die één link is: een vraag, het antwoord als groot getal en een korte regel eronder.',
           'Kies hem om een bezoeker die nog niet weet wat hij zoekt, te laten beginnen bij een vraag waarvan hij het aantal al ziet.',
-          'De link heeft de vraag, het getal en de regel samen als naam, en de hele kaart is aan te klikken.',
+          'De link heeft de vraag, het getal en de regel samen als naam, en de hele kaart is aan te klikken. Alleen de vraag is onderstreept, omdat die zegt waar de link heen gaat.',
           'Zet de kaarten in een `QuestionCard.Grid`: dat is de lijst, met drie kolommen op een breed scherm en één op een telefoon.',
         ].join('\n'),
       },

@@ -64,7 +64,7 @@
       text-underline-offset: var(--hf-link-underline-offset);
     }
 
-    &:hover .hf-player-name {
+    &:is(:hover, :focus-visible) .hf-player-name {
       color: var(--hf-colour-text-link-hover);
       text-decoration-thickness: var(--hf-link-underline-thickness-hover);
     }
