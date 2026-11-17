@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
 import { RefereesCard } from './RefereesCard'
+import { legendsOf } from './test-legend'
 
 const rows = [
   { drawn: 12, lost: 20, name: 'Bas Nijhuis', played: 44, won: 12 },
@@ -26,9 +27,9 @@ describe('RefereesCard', () => {
   })
 
   it('explains the short columns', () => {
-    expect(renderToStaticMarkup(<RefereesCard known={85} played={85} referees={2} rows={rows} />)).toContain(
-      'G gespeeld, W winst, G gelijk, V verlies, P punten per wedstrijd',
-    )
+    expect(legendsOf(renderToStaticMarkup(<RefereesCard known={85} played={85} referees={2} rows={rows} />))).toEqual([
+      'gespeeld, winst, gelijk, verlies, punten per wedstrijd',
+    ])
   })
 
   it('shows the points per match with a decimal comma', () => {

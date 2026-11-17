@@ -17,6 +17,10 @@ const figures = (name: string) =>
     .getAllByRole('cell')
     .map((cell) => cell.textContent)
 
+/** The items of a legend: the word of each column, without the icon beside it. */
+const legendOf = (container: HTMLElement) =>
+  [...container.querySelectorAll('.hf-bar-legend .hf-table-legend-item')].map((item) => item.textContent?.trim())
+
 describe('RecordTable', () => {
   it('is a real table with the caption that names it, for a screen reader only', () => {
     render(<RecordTable {...props} />)
@@ -25,12 +29,13 @@ describe('RecordTable', () => {
     expect(document.querySelector('caption')?.className).toBe('hf-visually-hidden')
   })
 
-  it('has the columns G, W, G, V, P and D, with a column header with scope for each', () => {
+  it('has the columns gespeeld, winst, gelijk, verlies, punten and doelsaldo, with an icon and a header with scope for each', () => {
     render(<RecordTable {...props} />)
 
     expect(
-      screen.getAllByRole('columnheader').map((header) => header.querySelector('[aria-hidden="true"]')?.textContent),
-    ).toEqual([undefined, 'G', 'W', 'G', 'V', 'P', 'D'])
+      screen.getAllByRole('columnheader').map((header) => header.querySelector('.hf-visually-hidden')?.textContent),
+    ).toEqual(['Onderdeel', 'gespeeld', 'winst', 'gelijk', 'verlies', 'punten', 'doelsaldo'])
+    expect(screen.getAllByRole('columnheader').filter((header) => header.querySelector('svg')).length).toBe(6)
     expect(screen.getAllByRole('columnheader').every((header) => header.getAttribute('scope') === 'col')).toBe(true)
   })
 
@@ -121,9 +126,7 @@ describe('RecordTable', () => {
 
     expect(screen.queryByRole('columnheader', { name: 'punten' })).toBeNull()
     expect(figures('Totaal')).toEqual(['5', '3', '1', '1', '+6'])
-    expect(container.querySelector('.hf-bar-legend')?.textContent).toBe(
-      'G gespeeld, W winst, G gelijk, V verlies, D doelsaldo',
-    )
+    expect(legendOf(container)).toEqual(['gespeeld', 'winst', 'gelijk', 'verlies', 'doelsaldo'])
   })
 
   it('has no foot without a total', () => {
@@ -132,10 +135,10 @@ describe('RecordTable', () => {
     expect(container.querySelector('tfoot')).toBeNull()
   })
 
-  it('gives every abbreviation its full word, in the title and under the table', () => {
+  it('gives every icon its full word, in the title and under the table', () => {
     const { container } = render(<RecordTable {...props} />)
 
-    expect([...container.querySelectorAll('thead abbr')].map((abbr) => abbr.getAttribute('title'))).toEqual([
+    expect([...container.querySelectorAll('thead th span[title]')].map((head) => head.getAttribute('title'))).toEqual([
       'Gespeeld',
       'Winst',
       'Gelijk',
@@ -143,9 +146,7 @@ describe('RecordTable', () => {
       'Punten',
       'Doelsaldo',
     ])
-    expect(container.querySelector('.hf-bar-legend')?.textContent).toBe(
-      'G gespeeld, W winst, G gelijk, V verlies, P punten, D doelsaldo',
-    )
+    expect(legendOf(container)).toEqual(['gespeeld', 'winst', 'gelijk', 'verlies', 'punten', 'doelsaldo'])
   })
 
   it('has no bars, no area that scrolls sideways, no link and no image', () => {
@@ -154,7 +155,8 @@ describe('RecordTable', () => {
     expect(container.querySelector('.hf-bar')).toBeNull()
     expect(container.querySelector('[tabindex]')).toBeNull()
     expect(screen.queryAllByRole('link')).toHaveLength(0)
-    expect(container.querySelector('img, svg, picture')).toBeNull()
+    // The icons of the headers are drawings, hidden from assistive technology: no image.
+    expect(container.querySelector('img, picture, [role="img"]')).toBeNull()
   })
 
   it('shows the names of rows as text, not as HTML', () => {

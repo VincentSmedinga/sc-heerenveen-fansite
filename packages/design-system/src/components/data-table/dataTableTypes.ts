@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 
+import type { TableColumnIconName } from '../table-column-icon/TableColumnIcon'
+
 /**
  * A cell: a number or text, or text with the value the column sorts on, such as `7–5` that
  * sorts as the goal difference `2`. Text that is empty sorts as an empty cell.
@@ -8,8 +10,9 @@ export type DataTableCell = number | string | { sortValue: DataTableSortValue; t
 
 export type DataTableColumn = {
   /**
-   * What the header shows, one letter such as `G`. Without it the header shows
-   * `name` itself, as it does for a column given as a string.
+   * What the header shows, a short text such as `Gem.`. Without it the header shows
+   * `name` itself, as it does for a column given as a string. A column of `tableColumns` has
+   * an `icon` and no abbreviation.
    */
   abbreviation?: string
   /**
@@ -18,6 +21,11 @@ export type DataTableColumn = {
    * button.
    */
   hidden?: boolean
+  /**
+   * The icon the header shows instead of the words, from `tableColumns`. A screen reader hears
+   * the whole `name`, and a sortable header's button is named by it.
+   */
+  icon?: TableColumnIconName
   /**
    * Makes this column the key figure of the table: its cells get the heaviest weight, for the
    * figure the table is ordered by or the answer it gives, such as the average in a ranking.
@@ -132,9 +140,9 @@ export type DataTableSortValue = null | number | string
 /** A column of a table with text, given as an object when it can fold. */
 export type DataTableTextColumn = {
   /**
-   * A short header, such as one letter, for a table with many columns: where the table is too
-   * narrow for the whole words the header shows it, and where it has room the whole `name`. A
-   * screen reader always hears the `name`. Explain the letters in a line above the table.
+   * A short header for a table with many columns, such as `Gem.`: where the table is too narrow
+   * for the whole words the header shows it, and where it has room the whole `name`. A screen
+   * reader always hears the `name`. Explain it in a line above the table.
    */
   abbreviation?: string
   /**
@@ -149,6 +157,11 @@ export type DataTableTextColumn = {
    * gone. Without it, the column is always there.
    */
   fold?: boolean
+  /**
+   * The icon the header shows with the whole `name` where the table has room, and alone where
+   * it has not, from `tableColumns`. A screen reader always hears the `name`.
+   */
+  icon?: TableColumnIconName
   /**
    * Makes the column one of short signs, each a `DataTable.Mark` or empty, such as the gaps in
    * the data of a match: the header and the cells are centred.

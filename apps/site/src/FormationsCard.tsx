@@ -41,7 +41,7 @@ export function FormationsCard({
           header: formation,
         }))}
       />
-      <Text appearance="meta">{`${tableLegend([tableColumns.played])}. Resultaat: gewonnen–gelijk–verloren.`}</Text>
+      <Text appearance="meta">{tableLegend([tableColumns.played])}. Resultaat: gewonnen–gelijk–verloren.</Text>
       <Text appearance="meta">{basisOf(known, played)}</Text>
     </Card>
   )

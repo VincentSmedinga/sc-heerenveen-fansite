@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getMatchSeasons } from '#src/matches'
 import { type ClubPage, getClubNews, getClubPage, getClubPlaces, getSourcePages } from '#src/opponents'
+import { legendsOf } from '#src/test-legend'
 import { beker, komend, matchSeasons, promovendus, sourcePages, testclub } from '#src/test-opponents'
 import { withoutIcons } from '#src/without-icons'
 
@@ -281,13 +282,11 @@ describe('the page of a club', () => {
       [
         ...html
           .slice(0, html.indexOf('id="hoe-vaak-welke-uitslag"'))
-          .matchAll(/<th [^>]*scope="col"[^>]*>(?:<abbr[^>]*><span aria-hidden="true">([^<]*)<)?/g),
+          .matchAll(/<th [^>]*scope="col"[^>]*>(?:<span title="[^"]*"><span class="hf-visually-hidden">([^<]*)<)?/g),
       ].map(([, header]) => header),
-    ).toEqual([undefined, 'G', 'W', 'G', 'V', 'D'])
-    expect(plain(html.slice(html.indexOf('hf-bar-legend')))).toMatch(
-      /^[^>]*> G gespeeld , W winst , G gelijk , V verlies , D doelsaldo/,
-    )
-    // G, W, G, V, D: Thuis and Uit in the body, Totaal in the foot.
+    ).toEqual([undefined, 'gespeeld', 'winst', 'gelijk', 'verlies', 'doelsaldo'])
+    expect(legendsOf(html)[0]).toBe('gespeeld, winst, gelijk, verlies, doelsaldo')
+    // Gespeeld, winst, gelijk, verlies, doelsaldo: Thuis, Uit and Totaal.
     expect(summaryOf(html)).toEqual([
       ['Thuis', [2, 2, 0, 0, 5]],
       ['Uit', [3, 1, 1, 1, 1]],
@@ -321,20 +320,20 @@ describe('the page of a club', () => {
     const html = await render()
 
     expect(html).not.toContain('Punten')
-    expect(html).not.toContain('>P</span>')
+    expect(html).not.toContain('title="Punten"')
   })
 
   it('has a bold column of points with the Eredivisie, 3 for a win and 1 for a draw', async () => {
     const html = await render('testclub', { competitie: 'eredivisie' })
 
-    expect(html).toContain('>P</span><span class="hf-visually-hidden">punten</span>')
+    expect(html).toContain('<span title="Punten"><span class="hf-visually-hidden">punten</span></span>')
     expect(summaryOf(html).map(([name, figures]) => [name, figures.at(-2)])).toEqual([
       ['Thuis', 6],
       ['Uit', 4],
       ['Totaal', 10],
     ])
     expect(html).toContain('<td class="hf-numeric hf-key">10</td>')
-    expect(plain(html.slice(html.indexOf('hf-bar-legend')))).toContain('P punten')
+    expect(legendsOf(html)[0]).toBe('gespeeld, winst, gelijk, verlies, punten, doelsaldo')
   })
 
   it.each([[undefined], ['eredivisie']])(

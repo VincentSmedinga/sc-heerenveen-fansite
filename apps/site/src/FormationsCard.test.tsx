@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
 import { FormationsCard } from './FormationsCard'
+import { legendsOf } from './test-legend'
 
 const rows = [
   { drawn: 3, formation: '4-3-3', lost: 2, played: 11, won: 6 },
@@ -37,8 +38,9 @@ describe('FormationsCard', () => {
   })
 
   it('explains the two short columns', () => {
-    expect(renderToStaticMarkup(<FormationsCard known={13} played={13} rows={rows} />)).toContain(
-      'G gespeeld. Resultaat: gewonnen–gelijk–verloren.',
-    )
+    const html = renderToStaticMarkup(<FormationsCard known={13} played={13} rows={rows} />)
+
+    expect(legendsOf(html)).toEqual(['gespeeld'])
+    expect(html).toContain('. Resultaat: gewonnen–gelijk–verloren.')
   })
 })

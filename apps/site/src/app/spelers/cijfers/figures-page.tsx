@@ -175,8 +175,9 @@ async function loadFigures(season: string, competition: CompetitionChoice) {
 }
 
 /**
- * The figures of the players of the season for the column D/W, or undefined when they could not
- * be read (the error is logged). The column is an extra: the card shows the goals without it.
+ * The figures of the players of the season for the column of the goals per match, or undefined
+ * when they could not be read (the error is logged). The column is an extra: the card shows the
+ * goals without it.
  */
 async function loadStats(season: string) {
   try {

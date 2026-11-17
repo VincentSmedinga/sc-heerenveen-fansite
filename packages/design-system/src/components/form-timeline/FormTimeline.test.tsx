@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import type { FormResult } from '../form-chart/form'
 
-import { tableColumns, tableLegend } from '../table-columns'
+import { tableColumns } from '../table-columns'
 import { FormTimeline } from './FormTimeline'
 
 const props = { firstYear: 1990, scope: 'Alleen de Eredivisie.', title: 'Seizoen' }
@@ -106,12 +106,12 @@ describe('FormTimeline', () => {
     expect(textOf(container)).toEqual(['W winst (3 punten), G gelijk (1), V verlies (0). Alleen de Eredivisie.'])
   })
 
-  it('uses the letters and words of the columns under the tables', () => {
+  it('uses the words of the columns under the tables', () => {
     const { drawn, lost, won } = tableColumns
     const { container } = render(<FormTimeline {...props} results={places({})} />)
 
-    for (const item of tableLegend([won, drawn, lost]).split(', '))
-      expect(container.querySelector('.hf-form-key')?.textContent).toContain(item)
+    for (const { name } of [won, drawn, lost])
+      expect(container.querySelector('.hf-form-key')?.textContent).toContain(name)
   })
 
   it('takes the window, the places per year and the distance between labels from its props', () => {

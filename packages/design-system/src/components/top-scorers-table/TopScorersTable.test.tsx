@@ -17,6 +17,10 @@ const props = { caption: 'Doelpuntenmakers van sc Heerenveen in het seizoen 2026
 const barLengths = (container: HTMLElement) =>
   [...container.querySelectorAll<HTMLElement>('.hf-bar')].map((bar) => bar.style.getPropertyValue('--hf-bar-share'))
 
+/** The items of a legend: the word of each column, without the icon beside it. */
+const legendOf = (container: HTMLElement) =>
+  [...container.querySelectorAll('.hf-bar-legend .hf-table-legend-item')].map((item) => item.textContent?.trim())
+
 describe('TopScorersTable', () => {
   it('is a real table with the caption that names it, for a screen reader only', () => {
     render(<TopScorersTable {...props} />)
@@ -29,7 +33,7 @@ describe('TopScorersTable', () => {
     render(<TopScorersTable {...props} />)
     const headers = screen.getAllByRole('columnheader')
 
-    expect(headers.map((header) => header.textContent)).toEqual(['#plaats', 'Speler', 'Ddoelpunten'])
+    expect(headers.map((header) => header.textContent)).toEqual(['#plaats', 'Speler', 'doelpunten'])
     expect(headers.every((header) => header.getAttribute('scope') === 'col')).toBe(true)
     expect(screen.getByRole('columnheader', { name: 'plaats' })).toBeTruthy()
     expect(screen.getByRole('columnheader', { name: 'doelpunten' })).toBeTruthy()
@@ -164,14 +168,13 @@ describe('TopScorersTable', () => {
     })
   })
 
-  it('abbreviates the goals to D, with the full word in the title and under the table', () => {
+  it('shows the goals as an icon, with the full word in the title and under the table', () => {
     const { container } = render(<TopScorersTable {...props} />)
 
-    expect([...container.querySelectorAll('thead abbr')].map((abbr) => abbr.getAttribute('title'))).toEqual([
-      'Plaats',
-      'Doelpunten',
-    ])
-    expect(container.querySelector('.hf-bar-legend')?.textContent).toBe('D doelpunten')
+    expect(
+      [...container.querySelectorAll('thead abbr, thead span[title]')].map((head) => head.getAttribute('title')),
+    ).toEqual(['Plaats', 'Doelpunten'])
+    expect(legendOf(container)).toEqual(['doelpunten'])
   })
 
   it('makes the goals bold with the class of the standings points, in the last column', () => {
@@ -208,7 +211,7 @@ describe('TopScorersTable', () => {
     it('gives the header of the goals the space of the bar, so it stays above the numbers', () => {
       const { container } = render(<TopScorersTable {...props} />)
 
-      expect(container.querySelector('th.hf-bar-head')?.textContent).toBe('Ddoelpunten')
+      expect(container.querySelector('th.hf-bar-head')?.textContent).toBe('doelpunten')
     })
 
     it('makes equal goals equal bars', () => {
@@ -266,7 +269,7 @@ describe('TopScorersTable', () => {
         '#plaats',
         'Speler',
         'Jaren',
-        'Ddoelpunten',
+        'doelpunten',
       ])
     })
 
@@ -309,14 +312,14 @@ describe('TopScorersTable', () => {
       },
     ]
 
-    it('adds the column D/W after the goals, named "doelpunten per wedstrijd" for a screen reader', () => {
+    it('adds the column doelpunten per wedstrijd after the goals, named "doelpunten per wedstrijd" for a screen reader', () => {
       render(<TopScorersTable {...props} rows={perMatchRows} showGoalsPerMatch />)
 
       expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
         '#plaats',
         'Speler',
-        'Ddoelpunten',
-        'D/Wdoelpunten per wedstrijd',
+        'doelpunten',
+        'doelpunten per wedstrijd',
       ])
       expect(screen.getByRole('columnheader', { name: 'doelpunten per wedstrijd' }).getAttribute('scope')).toBe('col')
     })
@@ -343,17 +346,18 @@ describe('TopScorersTable', () => {
       expect(barLengths(container)).toEqual(['100', '50', '50'])
     })
 
-    it('says in the legend what D/W is, with the letters of both columns', () => {
+    it('says in the legend what doelpunten per wedstrijd is, with the icons of both columns', () => {
       const { container } = render(<TopScorersTable {...props} rows={perMatchRows} showGoalsPerMatch />)
 
-      expect(container.querySelector('.hf-bar-legend')?.textContent).toBe(
-        'D doelpunten, D/W doelpunten per wedstrijd. D/W: de doelpunten gedeeld door de wedstrijden die de speler speelde, ook als invaller, volgens de selectie op Wikipedia.',
+      expect(legendOf(container)).toEqual(['doelpunten', 'doelpunten per wedstrijd'])
+      expect(container.querySelector('.hf-bar-legend')?.textContent).toContain(
+        '. Doelpunten per wedstrijd: de doelpunten gedeeld door de wedstrijden die de speler speelde, ook als invaller, volgens de selectie op Wikipedia.',
       )
     })
   })
 
   describe('without showGoalsPerMatch', () => {
-    it('is as it was: no D/W column, shared rows stay shared and the legend is the letter D alone', () => {
+    it('is as it was: no column per match, shared rows stay shared and the legend is the goals alone', () => {
       const shared: TopScorersTableRow[] = [
         {
           goals: 4,
@@ -369,25 +373,25 @@ describe('TopScorersTable', () => {
       expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
         '#plaats',
         'Speler',
-        'Ddoelpunten',
+        'doelpunten',
       ])
       expect(screen.getAllByRole('rowheader')).toHaveLength(1)
       expect(container.textContent).not.toContain('0,17')
-      expect(container.querySelector('.hf-bar-legend')?.textContent).toBe('D doelpunten')
+      expect(legendOf(container)).toEqual(['doelpunten'])
     })
   })
 
-  it('has the letter and the word of the figure it is for in the header and the legend, instead of the goals', () => {
+  it('has the icon and the word of the figure it is for in the header and the legend, instead of the goals', () => {
     const { container } = render(<TopScorersTable {...props} figure={tableColumns.minutes} />)
 
     expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
       '#plaats',
       'Speler',
-      'Mminuten',
+      'minuten',
     ])
     expect(screen.getByRole('columnheader', { name: 'minuten' })).toBeTruthy()
-    expect(container.querySelector('.hf-bar-legend')?.textContent).toBe('M minuten')
-    expect(container.querySelector('abbr[title="Minuten"]')).toBeTruthy()
+    expect(legendOf(container)).toEqual(['minuten'])
+    expect(container.querySelector('span[title="Minuten"]')).toBeTruthy()
   })
 
   it('makes the name of a player with a page a link, and leaves the others as text', () => {

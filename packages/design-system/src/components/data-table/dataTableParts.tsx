@@ -13,6 +13,8 @@ import type {
 import { classNames } from '../classNames'
 import { Link } from '../link/Link'
 import { PlaceCell, sharedPlaces } from '../place-cell/PlaceCell'
+import { TableColumnHead } from '../table-column-icon/TableColumnHead'
+import { TableColumnIcon } from '../table-column-icon/TableColumnIcon'
 import { isSortableColumn } from './sortRows'
 
 const numberFormat = new Intl.NumberFormat('nl-NL')
@@ -47,11 +49,11 @@ const textOf = (cell: DataTableCell) => {
 }
 
 /**
- * The text of a column header: the abbreviation, with the whole word for a screen reader, or
- * the name itself when the column has no abbreviation. In a button (`named`) the abbreviation
- * is part of the name as well, as in `G gelijk`, so what the visitor reads is in the name and
- * speech control can say "click G gelijk" (WCAG 2.5.3). A column with `shown` has that text
- * for the eye and `name` for a screen reader, in a table whose headers are no buttons.
+ * The text of a column header: the icon, with the whole word for a screen reader (the name of
+ * a button too, so speech control can say "click gespeeld", WCAG 2.5.3), or the abbreviation
+ * with the whole word, or the name itself when the column has neither. A column with `shown`
+ * has that text for the eye and `name` for a screen reader, in a table whose headers are no
+ * buttons.
  */
 export const ColumnText = ({ column, named = false }: { column: DataTableColumn; named?: boolean }) =>
   column.shown !== undefined && !named ? (
@@ -59,6 +61,8 @@ export const ColumnText = ({ column, named = false }: { column: DataTableColumn;
       <span aria-hidden="true">{column.shown}</span>
       <span className="hf-visually-hidden">{column.name}</span>
     </>
+  ) : column.icon !== undefined ? (
+    <TableColumnHead icon={column.icon} name={column.name} />
   ) : column.abbreviation === undefined ? (
     column.name
   ) : (
@@ -171,13 +175,18 @@ export const textColumnClass = (column: DataTableTextColumn) =>
   )
 
 /**
- * The text of a header of a table with text: the whole name, or an abbreviation that shows the
- * whole name where the table has room. In a button (`named`) the abbreviation is not hidden
- * from a screen reader, so the name is what the eye reads (WCAG 2.5.3): whichever of the two
- * is shown, the other is not displayed.
+ * The text of a header of a table with text: the whole name, an abbreviation that shows the
+ * whole name where the table has room, or an icon that shows the name beside it where the
+ * table has room. In a button (`named`) the abbreviation is not hidden from a screen reader,
+ * so the name is what the eye reads (WCAG 2.5.3): whichever of the two is shown, the other is
+ * not displayed. The icon is always shown, and hidden from assistive technology.
  */
 export const TextColumnText = ({ column, named = false }: { column: DataTableTextColumn; named?: boolean }) =>
-  column.abbreviation === undefined ? (
+  column.icon !== undefined ? (
+    <span title={column.name.charAt(0).toUpperCase() + column.name.slice(1)}>
+      <TableColumnIcon name={column.icon} /> <span className="hf-data-table-long">{column.name}</span>
+    </span>
+  ) : column.abbreviation === undefined ? (
     column.name
   ) : (
     <abbr title={column.name}>
@@ -190,7 +199,7 @@ export const TextColumnText = ({ column, named = false }: { column: DataTableTex
 
 /** Whether the headers of a table with text need a container for the room of the table. */
 export const needsFoldContainer = (columns: readonly DataTableTextColumn[]) =>
-  columns.some((column) => column.fold === true || column.abbreviation !== undefined)
+  columns.some((column) => column.fold === true || column.abbreviation !== undefined || column.icon !== undefined)
 
 /**
  * For each column whether the table can sort on it: the column does not opt out, a header that

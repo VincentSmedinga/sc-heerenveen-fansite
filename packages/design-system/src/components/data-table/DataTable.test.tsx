@@ -120,6 +120,46 @@ describe('DataTable', () => {
     expect(header.className).toBe('hf-numeric')
   })
 
+  it('shows the icon of a column of tableColumns and gives a screen reader the whole word', () => {
+    render(
+      <DataTable
+        caption="Uitslagen"
+        columns={['Stand', tableColumns.drawn, tableColumns.goalDifference]}
+        rows={[{ cells: [2, 7], header: 'Voor' }]}
+        sortable={false}
+      />,
+    )
+
+    const header = screen.getAllByRole('columnheader')[1] as HTMLElement
+
+    expect(header.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
+    expect(header.querySelector('span[title]')?.getAttribute('title')).toBe('Gelijk')
+    expect(header.querySelector('.hf-visually-hidden')?.textContent).toBe('gelijk')
+    expect(header.textContent).toBe('gelijk')
+    expect(screen.getByRole('columnheader', { name: 'gelijk' })).toBeTruthy()
+    expect(screen.getByRole('columnheader', { name: 'doelsaldo' })).toBeTruthy()
+    expect(header.className).toBe('hf-numeric')
+  })
+
+  it('shows the icon beside the whole word in a table with text, and the word is cut by the container query', () => {
+    render(
+      <DataTable
+        appearance="text"
+        caption="Uitslagen"
+        columns={['Wedstrijd', tableColumns.played]}
+        rows={[{ cells: ['2'], header: 'Voor' }]}
+        sortable={false}
+      />,
+    )
+
+    const header = screen.getAllByRole('columnheader')[1] as HTMLElement
+
+    expect(header.querySelectorAll('svg[aria-hidden="true"]')).toHaveLength(1)
+    expect(header.querySelector('.hf-data-table-long')?.textContent).toBe('gespeeld')
+    expect(screen.getByRole('columnheader', { name: 'gespeeld' })).toBeTruthy()
+    expect(screen.getByRole('table').parentElement?.className).toBe('hf-data-table-fold')
+  })
+
   it('shows the text of a column and gives a screen reader its name, with no abbreviation', () => {
     render(
       <DataTable

@@ -7,6 +7,7 @@ import { getMatchData, getMatchSeasons, getPersonTraits } from '#src/matches'
 import { getSeasonPlayerStats } from '#src/season-player-stats'
 import { getSeasonReportFigures } from '#src/season-report-figures'
 import { playerFiguresShortcuts } from '#src/statisticsShortcuts'
+import { legendsOf } from '#src/test-legend'
 import { matchData } from '#src/test-matches'
 import { noReports } from '#src/test-report-figures'
 import { leagueAndCup, switchHtml } from '#src/test-switch'
@@ -147,7 +148,7 @@ describe('the page /spelers/cijfers', () => {
       '<caption class="hf-visually-hidden">Doelpuntenmakers van sc Heerenveen in het seizoen 2026/27, in de Eredivisie en de KNVB Beker</caption>',
     )
     expect(card.match(/<table/g)).toHaveLength(1)
-    expect(card).toContain('<p class="hf-meta hf-bar-legend"><b>D</b> doelpunten</p>')
+    expect(legendsOf(card)).toEqual(['doelpunten'])
   })
 
   it('has the soft card Doelpunten per linie first in the side section, with a bar per line', async () => {
@@ -596,7 +597,7 @@ describe('the choice between all the matches and the Eredivisie on /spelers/cijf
 /** The page without the flags: images whose address holds the drawing. */
 const withoutFlags = (html: string) => html.replace(/<img alt="[^"]*" class="hf-player-name-flag"[^>]*\/>/g, '')
 
-describe('the column D/W on the card Doelpuntenmakers', () => {
+describe('the column doelpunten per wedstrijd on the card Doelpuntenmakers', () => {
   const stat = (playerId: number, appearances: number, goals: number) => ({
     appearances,
     assists: 0,
@@ -618,26 +619,28 @@ describe('the column D/W on the card Doelpuntenmakers', () => {
 
     const html = await render()
 
-    expect(html).toContain('<abbr title="doelpunten per wedstrijd"><span aria-hidden="true">D/W</span>')
+    expect(html).toContain(
+      '<span title="Doelpunten per wedstrijd"><span class="hf-visually-hidden">doelpunten per wedstrijd</span></span>',
+    )
     expect(html).toContain('<td class="hf-numeric">0,50</td>')
     expect(html).toContain('<td class="hf-numeric">0,25</td>')
+    expect(legendsOf(html)).toEqual(['doelpunten, doelpunten per wedstrijd'])
     expect(html).toContain(
-      'D doelpunten, D/W doelpunten per wedstrijd. D/W: de doelpunten gedeeld door de wedstrijden die de speler speelde, ook als invaller, volgens de selectie op Wikipedia.',
+      '. Doelpunten per wedstrijd: de doelpunten gedeeld door de wedstrijden die de speler speelde, ook als invaller, volgens de selectie op Wikipedia.',
     )
   })
 
   it('is not there, and nothing says so, for a season without figures', async () => {
     const html = await render()
 
-    expect(html).not.toContain('D/W')
     expect(html).not.toContain('doelpunten per wedstrijd')
-    expect(html).toContain('<p class="hf-meta hf-bar-legend"><b>D</b> doelpunten</p>')
+    expect(legendsOf(html)).toEqual(['doelpunten'])
   })
 
   it('is not there when the goals in the table differ from the goals of the card for one player', async () => {
     vi.mocked(getSeasonPlayerStats).mockResolvedValue([stat(1, 6, 3), stat(2, 4, 2)])
 
-    expect(await render()).not.toContain('D/W')
+    expect(await render()).not.toContain('doelpunten per wedstrijd')
   })
 
   it('is not there when the figures could not be read, and the card still shows the goals', async () => {
@@ -646,7 +649,7 @@ describe('the column D/W on the card Doelpuntenmakers', () => {
 
     const html = await render()
 
-    expect(html).not.toContain('D/W')
+    expect(html).not.toContain('doelpunten per wedstrijd')
     expect(html).toContain('id="doelpuntenmakers"')
     expect(console.error).toHaveBeenCalledOnce()
   })

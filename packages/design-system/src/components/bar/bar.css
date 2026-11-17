@@ -123,8 +123,8 @@
   }
 
   /*
-   * The full words of the abbreviations. The letters are heavier, so they are easy to find in
-   * the sentence.
+   * The legend under a table or a list: an icon and a word for each column, in the colour of
+   * secondary text.
    */
   .hf-bar-legend {
     color: var(--hf-colour-text-secondary);

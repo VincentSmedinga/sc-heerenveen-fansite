@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getEditedMatches, getMatchSeasons, getMatchSource } from '#src/matches'
 import { getClubRecords, getLastWinPlaces, getSourcePages } from '#src/opponents'
+import { legendsOf } from '#src/test-legend'
 import { allRecords, cupRecords, leagueRecords, matchSeasons, sourcePages } from '#src/test-opponents'
 import { withoutIcons } from '#src/without-icons'
 
@@ -129,9 +130,10 @@ describe('the page /tegenstanders', () => {
     expect(html).toContain('<caption class="hf-visually-hidden">De tegenstanders van sc Heerenveen, van A tot Z')
     expect(mainOf(html).match(/<th [^>]*scope="col"/g)).toHaveLength(7)
     expect(html).toContain('<span class="hf-visually-hidden">winst</span>')
-    expect(html).toContain(
-      'G gespeeld, W winst, G gelijk, V verlies, P punten (3 per winst, 1 per gelijkspel), D doelsaldo',
-    )
+    expect(legendsOf(html)).toEqual([
+      'gespeeld, winst, gelijk, verlies, punten (3 per winst, 1 per gelijkspel), doelsaldo',
+      'punten per wedstrijd, gespeeld',
+    ])
   })
 
   it('sends the table without buttons, because sorting needs JavaScript, and has no pagination', async () => {
@@ -151,22 +153,22 @@ describe('the page /tegenstanders', () => {
 
     expect([...mainOf(html).matchAll(/<th [^>]*scope="col">(.*?)<\/th>/g)].map(([, header]) => header)).toEqual([
       'Club',
-      '<abbr title="Gespeeld"><span aria-hidden="true">G</span><span class="hf-visually-hidden">gespeeld</span></abbr>',
-      '<abbr title="Winst"><span aria-hidden="true">W</span><span class="hf-visually-hidden">winst</span></abbr>',
-      '<abbr title="Gelijk"><span aria-hidden="true">G</span><span class="hf-visually-hidden">gelijk</span></abbr>',
-      '<abbr title="Verlies"><span aria-hidden="true">V</span><span class="hf-visually-hidden">verlies</span></abbr>',
-      '<abbr title="Punten"><span aria-hidden="true">P</span><span class="hf-visually-hidden">punten</span></abbr>',
-      '<abbr title="Doelsaldo"><span aria-hidden="true">D</span><span class="hf-visually-hidden">doelsaldo</span></abbr>',
+      '<span title="Gespeeld"><span class="hf-visually-hidden">gespeeld</span></span>',
+      '<span title="Winst"><span class="hf-visually-hidden">winst</span></span>',
+      '<span title="Gelijk"><span class="hf-visually-hidden">gelijk</span></span>',
+      '<span title="Verlies"><span class="hf-visually-hidden">verlies</span></span>',
+      '<span title="Punten"><span class="hf-visually-hidden">punten</span></span>',
+      '<span title="Doelsaldo"><span class="hf-visually-hidden">doelsaldo</span></span>',
     ])
   })
 
   it('has Punten and Doelsaldo with both choices, and counts the cup in the points of Alle wedstrijden', async () => {
     const all = await render()
     const league = await render({ competitie: 'eredivisie' })
-    const legend = 'G gespeeld, W winst, G gelijk, V verlies, P punten (3 per winst, 1 per gelijkspel), D doelsaldo'
+    const legend = 'gespeeld, winst, gelijk, verlies, punten (3 per winst, 1 per gelijkspel), doelsaldo'
 
-    expect(all).toContain(legend)
-    expect(league).toContain(legend)
+    expect(legendsOf(all)).toContain(legend)
+    expect(legendsOf(league)).toContain(legend)
     expect(mainOf(league).match(/<th [^>]*scope="col"/g)).toHaveLength(7)
     expect(rowsOf(league)).toEqual([
       ['FC Voorbeeld', '/tegenstanders/fc-voorbeeld?competitie=eredivisie', ['3', '1', '1', '1', '4', '0']],

@@ -205,6 +205,14 @@
     --hf-colour-card-red: light-dark(var(--hf-colour-red-600), var(--hf-colour-red-400));
 
     /*
+     * The fill of the shirt and the boot in the icons of the table columns (TableColumnIcon).
+     * Only for those two shapes: the rim in the colour of the text (--hf-colour-text-default)
+     * gives the shape its 3:1, as on the cards, so the fill itself need not reach it.
+     */
+    --hf-colour-icon-shirt: light-dark(var(--hf-colour-blue-300), var(--hf-colour-blue-300));
+    --hf-colour-icon-boot: light-dark(var(--hf-colour-grey-400), var(--hf-colour-grey-300));
+
+    /*
      * The grass of the pitch in the line-up of a match (MatchPitch): pale blue in light, and
      * the deepest blue of the page in dark, so the pitch stands out from a card in both themes
      * (in dark the soft surface is the colour of a card). The stripe is the second colour of
@@ -439,6 +447,8 @@
       --hf-colour-outcome-draw: var(--hf-colour-grey-600);
       --hf-colour-card-yellow: var(--hf-colour-yellow-400);
       --hf-colour-card-red: var(--hf-colour-red-600);
+      --hf-colour-icon-shirt: var(--hf-colour-blue-300);
+      --hf-colour-icon-boot: var(--hf-colour-grey-400);
       --hf-colour-background-pitch: var(--hf-colour-blue-50);
       --hf-colour-background-pitch-stripe: color-mix(in srgb, var(--hf-colour-blue-50) 50%, var(--hf-colour-blue-100));
       --hf-colour-background-shortcuts: var(--hf-colour-sand-100);

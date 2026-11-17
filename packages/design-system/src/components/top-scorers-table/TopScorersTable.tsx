@@ -4,6 +4,7 @@ import { Bar, sharesOf } from '../bar/Bar'
 import { classNames } from '../classNames'
 import { PlaceCell, sharedPlaces } from '../place-cell/PlaceCell'
 import { PlayerName } from '../player-name/PlayerName'
+import { TableColumnHead } from '../table-column-icon/TableColumnHead'
 import { type TableColumn, tableColumns, tableLegend } from '../table-columns'
 
 export type TopScorersTablePlayer = {
@@ -52,7 +53,7 @@ export type TopScorersTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'childr
    */
   scaleTo?: number | undefined
   /**
-   * Adds the column D/W, the goals per match, after the goals, with the `goalsPerMatch` of each
+   * Adds the column goals per match, after the goals, with the `goalsPerMatch` of each
    * player. A table with the column has a row for each player, also where players share a
    * place and a row has more than one: the row is split, and the players keep their place and
    * their goals. A table without it is as it was. The page only sets it when it knows the
@@ -82,9 +83,9 @@ export type TopScorersTableRow = {
   position: number
 }
 
-/** What D/W is, under the table of a card that has the column. */
+/** What the goals per match are, under the table of a card that has the column. */
 const goalsPerMatchSentence =
-  'D/W: de doelpunten gedeeld door de wedstrijden die de speler speelde, ook als invaller, volgens de selectie op Wikipedia.'
+  'Doelpunten per wedstrijd: de doelpunten gedeeld door de wedstrijden die de speler speelde, ook als invaller, volgens de selectie op Wikipedia.'
 
 /** The rows with one player each: a shared row is split, and each player keeps the place. */
 const onePlayerPerRow = (rows: TopScorersTableRow[]): TopScorersTableRow[] =>
@@ -99,20 +100,20 @@ const onePlayerPerRow = (rows: TopScorersTableRow[]): TopScorersTableRow[] =>
  * ordered by them, belong to each player of the row, and have a bar next to them that is as
  * long as the share of the top scorer's goals.
  * The bar is the one of the standings: decoration that a screen reader skips, which goes when
- * the place of the table is too narrow. The header of the goals is the abbreviation D, so the
- * full word stands under the table as well, because a title on an abbreviation only shows under
- * a mouse. bar.css gives the look.
+ * the place of the table is too narrow. The header of the goals is an icon, so the
+ * word stands under the table as well, because a title on an icon only shows under a mouse.
+ * bar.css gives the look.
  *
- * With `showGoalsPerMatch` there is a column D/W after the goals, for a screen reader
- * "doelpunten per wedstrijd", and the legend under the table has it too, with a sentence that
- * says what it is. Every player then has a row of their own.
+ * With `showGoalsPerMatch` there is a column of the goals per match after the goals, for a
+ * screen reader "doelpunten per wedstrijd", and the legend under the table has it too, with a
+ * sentence that says what it is. Every player then has a row of their own.
  *
  * With `showYears` there is a column Jaren between the player and the goals, with the years the
  * player was with the club. Every player then has a row of their own, as with
  * `showGoalsPerMatch`.
  *
  * With `figure` the list is of something else, such as the assists or the minutes: the places
- * and the bar are the same, and the header and the legend have its letter and word.
+ * and the bar are the same, and the header and the legend have its icon and word.
  */
 export const TopScorersTable = ({
   caption,
@@ -149,17 +150,11 @@ export const TopScorersTable = ({
             <th scope="col">Speler</th>
             {showYears ? <th scope="col">Jaren</th> : null}
             <th className={classNames('hf-numeric', shares !== null && 'hf-bar-head')} scope="col">
-              <abbr title={`${figure.name.charAt(0).toUpperCase()}${figure.name.slice(1)}`}>
-                <span aria-hidden="true">{figure.abbreviation}</span>
-                <span className="hf-visually-hidden">{figure.name}</span>
-              </abbr>
+              <TableColumnHead icon={figure.icon} name={figure.name} />
             </th>
             {showGoalsPerMatch ? (
               <th className="hf-numeric" scope="col">
-                <abbr title={tableColumns.goalsPerMatch.name}>
-                  <span aria-hidden="true">{tableColumns.goalsPerMatch.abbreviation}</span>
-                  <span className="hf-visually-hidden">{tableColumns.goalsPerMatch.name}</span>
-                </abbr>
+                <TableColumnHead icon={tableColumns.goalsPerMatch.icon} name={tableColumns.goalsPerMatch.name} />
               </th>
             ) : null}
           </tr>
@@ -188,11 +183,11 @@ export const TopScorersTable = ({
       </table>
       <p className="hf-meta hf-bar-legend">
         {showGoalsPerMatch ? (
-          `${tableLegend([figure, tableColumns.goalsPerMatch])}. ${goalsPerMatchSentence}`
-        ) : (
           <>
-            <b>{figure.abbreviation}</b> {figure.name}
+            {tableLegend([figure, tableColumns.goalsPerMatch])}. {goalsPerMatchSentence}
           </>
+        ) : (
+          tableLegend([figure])
         )}
       </p>
     </div>

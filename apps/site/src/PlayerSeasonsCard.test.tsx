@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import type { PlayerSeason } from './player-seasons'
 
 import { PlayerSeasonsCard, playerSeasonsTable } from './PlayerSeasonsCard'
+import { legendsOf } from './test-legend'
 import { withoutIcons } from './without-icons'
 
 const season = (name: string, extra: Partial<PlayerSeason> = {}): PlayerSeason => ({
@@ -39,18 +40,18 @@ const render = (seasons: PlayerSeason[], goalkeeper = false) =>
   )
 
 describe('the table Per seizoen', () => {
-  it('has G, B, D and A for a player of the field, the newest season first and a row Totaal', () => {
+  it('has gespeeld, basis, doelpunten and assists for a player of the field, the newest season first and a row Totaal', () => {
     const html = render([season('2004/05', { shirtNumber: 35 }), season('2003/04', { goals: 6 })])
 
     expect(html).toContain('<h2')
     expect(html).toContain('Per seizoen')
     expect(html).toMatch(/<caption class="hf-visually-hidden">De cijfers van Test Speler per seizoen/)
     expect(html).toMatch(/<th scope="col">Seizoen<\/th>/)
-    expect(html.match(/<abbr title="[^"]+">/g)).toEqual([
-      '<abbr title="Gespeeld">',
-      '<abbr title="Basis">',
-      '<abbr title="Doelpunten">',
-      '<abbr title="Assists">',
+    expect(html.match(/<span title="[^"]+">/g)).toEqual([
+      '<span title="Gespeeld">',
+      '<span title="Basis">',
+      '<span title="Doelpunten">',
+      '<span title="Assists">',
     ])
     expect(html.indexOf('2004/05')).toBeLessThan(html.indexOf('2003/04'))
     expect(html).toContain('<a href="/spelers/2004-05">2004/05</a>')
@@ -75,17 +76,17 @@ describe('the table Per seizoen', () => {
     expect(render([season('2004/05'), season('2003/04')])).not.toContain('hf-data-table-gap')
   })
 
-  it('has G, N, T and Y for a goalkeeper, and not the matches he started or his goals', () => {
+  it('has gespeeld, nul, tegendoelpunten and geel for a goalkeeper, and not the matches he started or his goals', () => {
     const keeper = { assists: undefined, cleanSheets: 9, conceded: 30, goals: 0, started: 30 }
     const html = render([season('2004/05', keeper)], true)
 
-    expect(html.match(/<abbr title="[^"]+">/g)).toEqual([
-      '<abbr title="Gespeeld">',
-      '<abbr title="Nul">',
-      '<abbr title="Tegendoelpunten">',
-      '<abbr title="Geel">',
+    expect(html.match(/<span title="[^"]+">/g)).toEqual([
+      '<span title="Gespeeld">',
+      '<span title="Nul">',
+      '<span title="Tegendoelpunten">',
+      '<span title="Geel">',
     ])
-    expect(html).toContain('N nul, T tegendoelpunten')
+    expect(legendsOf(html)).toEqual(['gespeeld, nul, tegendoelpunten, geel'])
     expect(html).toContain('van begin tot eind')
   })
 

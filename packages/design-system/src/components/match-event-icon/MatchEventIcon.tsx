@@ -120,7 +120,7 @@ const drawings: Record<MatchEventIconKind, ReactNode> = {
  * colours come from tokens and keep their contrast in light and dark. The icon does not carry
  * the word of the event: the page writes "Gele kaart" beside it, so the icon is hidden from
  * assistive technology. Give it a `label` where no text stands beside it, and it becomes an
- * image with that name. All the icons are turned 12 degrees clockwise, as the design has them.
+ * image with that name. All the icons are turned 8 degrees clockwise, as the design has them.
  */
 export const MatchEventIcon = ({ kind, label, size = 'text' }: MatchEventIconProps) => (
   <svg

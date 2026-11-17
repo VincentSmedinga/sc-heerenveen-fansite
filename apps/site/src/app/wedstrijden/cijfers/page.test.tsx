@@ -8,6 +8,7 @@ import type { FinalPlace } from '#src/matches'
 
 import { getCoachResultData, getFinalPlaces, getMatchData, getMatchSeasons, getSeasonFormations } from '#src/matches'
 import { statisticsShortcuts } from '#src/statisticsShortcuts'
+import { legendsOf } from '#src/test-legend'
 import { coachResultData, matchData } from '#src/test-matches'
 import { leagueAndCup, switchHtml } from '#src/test-switch'
 import { withoutIcons } from '#src/without-icons'
@@ -167,7 +168,7 @@ describe('the page /wedstrijden/cijfers', () => {
         '</h3>',
         '<table',
         'Na een voorsprong',
-        'G gespeeld, W winst',
+        'class="hf-table-legend"',
         'gespeelde wedstrijd',
       ])
     })
@@ -1078,11 +1079,11 @@ describe('the page /wedstrijden/cijfers', () => {
       expect(first).toContain('<caption class="hf-visually-hidden">Wat er gebeurt na het eerste doelpunt</caption>')
       expect([...(first ?? '').matchAll(/<th[^>]*scope="col">(.*?)<\/th>/g)].map(([, name]) => name)).toEqual([
         'Eerste doelpunt',
-        '<abbr title="Gespeeld"><span aria-hidden="true">G</span><span class="hf-visually-hidden">gespeeld</span></abbr>',
-        '<abbr title="Winst"><span aria-hidden="true">W</span><span class="hf-visually-hidden">winst</span></abbr>',
-        '<abbr title="Gelijk"><span aria-hidden="true">G</span><span class="hf-visually-hidden">gelijk</span></abbr>',
-        '<abbr title="Verlies"><span aria-hidden="true">V</span><span class="hf-visually-hidden">verlies</span></abbr>',
-        '<abbr title="Punten"><span aria-hidden="true">P</span><span class="hf-visually-hidden">punten</span></abbr>',
+        '<span title="Gespeeld"><span class="hf-visually-hidden">gespeeld</span></span>',
+        '<span title="Winst"><span class="hf-visually-hidden">winst</span></span>',
+        '<span title="Gelijk"><span class="hf-visually-hidden">gelijk</span></span>',
+        '<span title="Verlies"><span class="hf-visually-hidden">verlies</span></span>',
+        '<span title="Punten"><span class="hf-visually-hidden">punten</span></span>',
       ])
       expect(tableRows(first ?? '')).toEqual([
         ['Wij scoren eerst', '1', '1', '0', '0', '3'],
@@ -1104,9 +1105,9 @@ describe('the page /wedstrijden/cijfers', () => {
     it('explains the abbreviations of the columns in a line under the tables and the sentences', async () => {
       const card = section(await render(), 'hoe-de-wedstrijden-verlopen')
 
-      expect(card).toContain('G gespeeld, W winst, G gelijk, V verlies, P punten')
-      expect(card.lastIndexOf('</table>')).toBeLessThan(card.indexOf('G gespeeld, W winst'))
-      expect(card.indexOf('Na een voorsprong')).toBeLessThan(card.indexOf('G gespeeld, W winst'))
+      expect(legendsOf(card)).toEqual(['gespeeld, winst, gelijk, verlies, punten'])
+      expect(card.lastIndexOf('</table>')).toBeLessThan(card.indexOf('class="hf-table-legend"'))
+      expect(card.indexOf('Na een voorsprong')).toBeLessThan(card.indexOf('class="hf-table-legend"'))
     })
 
     it('says in how many matches sc Heerenveen won after trailing and did not win after leading', async () => {

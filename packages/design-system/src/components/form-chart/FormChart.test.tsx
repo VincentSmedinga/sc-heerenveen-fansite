@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 import type { FormResult } from './form'
 
-import { tableColumns, tableLegend } from '../table-columns'
+import { tableColumns } from '../table-columns'
 import { averagesOf, formatAverage, formOf } from './form'
 import { FormChart } from './FormChart'
 
@@ -105,15 +105,13 @@ describe('FormChart', () => {
     expect(textOf(container).join(' ')).toContain('W winst (3 punten), G gelijk (1), V verlies (0). Lijn gemiddeld')
   })
 
-  it('uses the letters and words of the columns under the tables for winst, gelijk and verlies', () => {
+  it('uses the words of the columns under the tables for winst, gelijk and verlies', () => {
     const { drawn, lost, won } = tableColumns
     const { container } = render(<FormChart results={season} />)
 
-    expect(formOf(['W', 'G', 'V']).map((mark) => `${mark.mark} ${mark.label}`)).toEqual(
-      tableLegend([won, drawn, lost]).split(', '),
-    )
-    for (const item of tableLegend([won, drawn, lost]).split(', '))
-      expect(container.querySelector('.hf-form-chart-key')?.textContent).toContain(item)
+    expect(formOf(['W', 'G', 'V']).map((mark) => mark.label)).toEqual([won.name, drawn.name, lost.name])
+    for (const { name } of [won, drawn, lost])
+      expect(container.querySelector('.hf-form-chart-key')?.textContent).toContain(name)
   })
 
   it('takes the number of matches and the size of the window from its props', () => {

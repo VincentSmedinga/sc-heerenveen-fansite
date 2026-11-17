@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import type { CompetitionTally } from './competitionTally'
 
 import { CompetitionTallyCard } from './CompetitionTallyCard'
+import { legendsOf } from './test-legend'
 import { withoutIcons } from './without-icons'
 
 const tallies: CompetitionTally[] = [
@@ -45,7 +46,7 @@ describe('CompetitionTallyCard', () => {
     expect(html).toContain('hf-card-soft')
     expect(html).toContain('1.126')
     expect(html).toContain('1600–1500')
-    expect(html).toContain('G gespeeld, W winst, G gelijk, V verlies, D doelpunten (voor–tegen)')
+    expect(legendsOf(html)).toEqual(['gespeeld, winst, gelijk, verlies, doelpunten (voor–tegen)'])
     expect(html).toContain('<caption')
   })
 

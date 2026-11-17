@@ -16,6 +16,10 @@ const props = { caption: 'Stand op 18 oktober 2026', rows }
 const barLengths = (container: HTMLElement) =>
   [...container.querySelectorAll<HTMLElement>('.hf-bar')].map((bar) => bar.style.getPropertyValue('--hf-bar-share'))
 
+/** The items of a legend: the word of each column, without the icon beside it. */
+const legendOf = (container: HTMLElement) =>
+  [...container.querySelectorAll('.hf-bar-legend .hf-table-legend-item')].map((item) => item.textContent?.trim())
+
 describe('pointsShares', () => {
   it('gives the leader the whole bar and a club with half of the points half', () => {
     expect(
@@ -82,11 +86,11 @@ describe('StandingsTable', () => {
 
     const headers = screen.getAllByRole('columnheader')
 
-    expect(headers.map((header) => header.querySelector('[aria-hidden="true"]')?.textContent ?? 'Club')).toEqual([
-      '#',
+    expect(headers.map((header) => header.querySelector('[aria-hidden="true"]')?.tagName ?? 'Club')).toEqual([
+      'SPAN',
       'Club',
-      'G',
-      'P',
+      'svg',
+      'svg',
     ])
     expect(headers.every((header) => header.getAttribute('scope') === 'col')).toBe(true)
     expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual([
@@ -128,15 +132,13 @@ describe('StandingsTable', () => {
     expect(screen.getByRole('columnheader', { name: 'punten' })).toBeTruthy()
   })
 
-  it('gives every abbreviation its full word, in the title and under the table', () => {
+  it('gives every icon its full word, in the title and under the table', () => {
     const { container } = render(<StandingsTable {...props} />)
 
-    expect([...container.querySelectorAll('thead abbr')].map((abbr) => abbr.getAttribute('title'))).toEqual([
-      'Positie',
-      'Gespeeld',
-      'Punten',
-    ])
-    expect(container.querySelector('.hf-bar-legend')?.textContent).toBe('G gespeeld, P punten')
+    expect(
+      [...container.querySelectorAll('thead abbr, thead span[title]')].map((head) => head.getAttribute('title')),
+    ).toEqual(['Positie', 'Gespeeld', 'Punten'])
+    expect(legendOf(container)).toEqual(['gespeeld', 'punten'])
   })
 
   it('writes the numbers of a club in the columns of the headers', () => {
@@ -176,7 +178,7 @@ describe('StandingsTable', () => {
     const { container, rerender } = render(<StandingsTable {...props} />)
 
     expect(container.querySelectorAll('th.hf-bar-head')).toHaveLength(1)
-    expect(container.querySelector('th.hf-bar-head')?.textContent).toBe('Ppunten')
+    expect(container.querySelector('th.hf-bar-head')?.textContent).toBe('punten')
 
     rerender(<StandingsTable {...props} columns="compact" />)
 
@@ -280,12 +282,16 @@ describe('StandingsTable', () => {
   describe('a deduction of points', () => {
     const deducted = rows.map((row) => (row.club === 'Testdorp FC' ? { ...row, pointsDeducted: 6 } : row))
     const lines = (container: HTMLElement) =>
-      [...container.querySelectorAll('.hf-bar-legend')].map((line) => line.textContent)
+      [...container.querySelectorAll('.hf-bar-legend')].map((line) =>
+        line.querySelector('.hf-table-legend')
+          ? [...line.querySelectorAll('.hf-table-legend-item')].map((item) => item.textContent?.trim()).join(', ')
+          : line.textContent,
+      )
 
     it('gets a line under the table, after the words of the abbreviations, that names the club', () => {
       const { container } = render(<StandingsTable {...props} rows={deducted} />)
 
-      expect(lines(container)).toEqual(['G gespeeld, P punten', 'Testdorp FC: 6 punten aftrek.'])
+      expect(lines(container)).toEqual(['gespeeld, punten', 'Testdorp FC: 6 punten aftrek.'])
       expect(container.querySelector('table')?.nextElementSibling?.lastElementChild?.textContent).toBe(
         'Testdorp FC: 6 punten aftrek.',
       )
@@ -309,7 +315,7 @@ describe('StandingsTable', () => {
       const none = rows.map((row) => ({ ...row, pointsDeducted: 0 }))
       const { container } = render(<StandingsTable {...props} rows={none} />)
 
-      expect(lines(container)).toEqual(['G gespeeld, P punten'])
+      expect(lines(container)).toEqual(['gespeeld, punten'])
     })
 
     it('has no line in the short form', () => {
@@ -330,7 +336,8 @@ describe('StandingsTable', () => {
     const { container } = render(<StandingsTable {...props} />)
 
     expect(screen.queryAllByRole('link')).toHaveLength(0)
-    expect(container.querySelector('img, svg, picture')).toBeNull()
+    // The icons of the headers are drawings, hidden from assistive technology: no image.
+    expect(container.querySelector('img, picture, [role="img"]')).toBeNull()
   })
 
   it('passes other props on and adds its own class to a given one', () => {

@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest'
 import type { DataTableProps } from './DataTable'
 import type { DataTableRow } from './dataTableTypes'
 
+import { tableColumns } from '../table-columns'
 import { DataTable } from './DataTable'
 
 const props: DataTableProps = {
@@ -56,6 +57,28 @@ describe('DataTable with sortable columns', () => {
 
     expect(screen.getByRole('button', { name: 'G gespeeld' })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'W winst' })).toBeTruthy()
+  })
+
+  it('names the button of a column with an icon by the whole word, and hides the icon from assistive technology', () => {
+    render(
+      <DataTable
+        caption="De tegenstanders van sc Heerenveen"
+        columns={['Club', tableColumns.played, tableColumns.won]}
+        rows={[
+          { cells: [4, 2], header: 'Alkmaar' },
+          { cells: [10, 6], header: 'Breda' },
+        ]}
+      />,
+    )
+
+    expect(button('gespeeld').querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
+    expect(button('gespeeld').textContent).toBe('gespeeld')
+    expect(button('winst')).toBeTruthy()
+
+    fireEvent.click(button('gespeeld'))
+
+    expect(screen.getByRole('columnheader', { name: 'gespeeld' }).getAttribute('aria-sort')).toBe('descending')
+    expect(order()).toEqual(['Breda', 'Alkmaar'])
   })
 
   it('names two columns with the same letter differently, so a visitor can tell the buttons apart', () => {

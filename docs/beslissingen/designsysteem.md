@@ -1726,6 +1726,7 @@
 - **Alternatieven:** sorteren op de server met `?sorteer=` in het adres (werkt zonder JavaScript, maar laadt de pagina opnieuw, past niet bij de schakelaar en maakt de volgorde onderdeel van het adres: het issue sluit dat uit); knoppen in de koppen ook zonder JavaScript (knoppen die niets doen); de pagina laten sorteren met eigen code (dan bouwt elke tabel het opnieuw); het doelpuntensaldo als waarde van Doelpunten (zegt niet hoe vaak we scoorden); sorteren op meer kolommen tegelijk, filteren en paginering (buiten het issue); alle kolommen met een pijl van een neutrale vorm (een extra pictogram en meer breedte op 320 pixels).
 - **Later:** zie _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_.
   De knop heet nog letter en woord, maar G heeft nu twee woorden: "G gespeeld" en "G gelijk", en "GL gelijk" bestaat niet meer.
+- **Later:** zie _De kolommen van de tabellen hebben een pictogram in plaats van een letter_ (17 november 2026): de knop heet naar het woord, "gespeeld" of "gelijk", en het pictogram staat in de knop, verborgen voor schermlezers.
 - **Later:** zie _De lijst met tegenstanders sorteert op het doelsaldo en heeft altijd een kolom Punten_.
   De kolom Doelpunten is vervallen: de laatste kolom is het doelsaldo en sorteert daarop, en Punten staat bij beide keuzes.
 - **Later:** zie _Elke tabel van `DataTable` die een lijst is, sorteert standaard_ (17 november 2026): een tabel sorteert niet meer op aanvraag maar standaard, ook een tabel met tekst, een derde klik zet de tabel terug in de volgorde van de pagina, en gelijke waarden staan op de gegeven volgorde, behalve in een tabel met getallen, waar de eerste kolom nog beslist.
@@ -2148,6 +2149,7 @@
 - **Later:** zie _`TopScorersTable` heeft de kolom D/W, en `tableColumns` heeft één afkorting van twee letters_ (7 november 2026): `D/W` is de uitzondering op één letter per kolom, en de test legt G, D en P vast als de letters met twee woorden.
 - **Later:** zie _De tabel Per seizoen heeft kolommen naar de linie van de speler_ in `site.md` (11 november 2026): `tableColumns` heeft ook N nul en T tegendoelpunten, voor de tabel van een doelman.
   Het blijft één letter per kolom, en N en T waren vrij.
+- **Later:** zie _De kolommen van de tabellen hebben een pictogram in plaats van een letter_ (17 november 2026): `tableColumns` heeft pictogrammen en geen letters meer, en de regel dat G, D en P twee woorden hebben vervalt.
 
 ## Een donutdiagram heeft een plak per uitslag, en de tabel is de legenda
 
@@ -2744,6 +2746,7 @@
 - **Alternatieven:** een andere letter voor de kolom (de projecteigenaar koos D/W).
   Een regel achter de naam, zoals bij de hoofdtrainers (#812), die de gedeelde rijen laat staan.
 - **Later:** dit vult _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_ (2 november 2026) aan met één afkorting van twee letters, en vervangt voor tabellen met de kolom het deel van _Een rij van de tabel met doelpuntenmakers heeft een of meer spelers_ (4 november 2026) dat rijen met meer dan één speler toestaat.
+- **Later:** zie _De kolommen van de tabellen hebben een pictogram in plaats van een letter_ (17 november 2026): `goalsPerMatch` heeft een eigen pictogram, en de zin onder de tabel begint met "Doelpunten per wedstrijd" in plaats van "D/W".
 
 ## De lettertypes zijn kleiner gemaakt en laden zonder verspringen
 
@@ -2812,6 +2815,7 @@
 - **Waarom:** kleur mag nooit het enige verschil zijn (WCAG 1.4.1), en een pagina met vijf soorten gebeurtenissen naast elkaar wordt anders alleen een rij gekleurde stippen.
 - **Alternatieven:** een gekleurde stip per soort (kleur is dan het enige onderscheid).
 - **Later:** zie _Een wissel is één regel met één pictogram: "A voor B"_ (7 november 2026): staat er een woord naast het pictogram dat hetzelfde zegt, dan blijft het woord weg voor wie ziet, en hoort een schermlezer het in de verborgen tekst.
+- **Later:** zie _De kolommen van de tabellen hebben een pictogram in plaats van een letter_ (17 november 2026): alle pictogrammen staan 8 graden gedraaid, niet 12.
 
 ## De kaarten bij een wedstrijd hebben twee kleurtokens, elk met een paar voor licht en donker
 
@@ -3748,3 +3752,37 @@
   De volgorde van de pagina heeft betekenis (de nieuwste eerst, A tot Z), en een bezoeker die hem kwijt is, heeft anders alleen een nieuwe lading als weg terug.
 - **Alternatieven:** alleen de lijsten kiezen die erom vroegen (blijft ongelijk, en elke pagina moet eraan denken); sorteren in het adres (elke pagina krijgt een parameter en een herlading, meerdere tabellen op één pagina botsen, en de pagina's zijn statisch en gecachet op gedeelde hosting); twee standen in plaats van drie (geen weg terug zonder te herladen); een aparte knop voor de oorspronkelijke volgorde (een extra bedieningselement per tabel); de keuze bewaren in `localStorage` (een sleutel per tabel en een afspraak over wat we bewaren); een voorvoegsel zelf weglaten (het component kent de namen niet, en "De Graafschap" is een club en geen achternaam).
 - **Later:** vervangt van _Een tabel sorteert op een kolom met knoppen in de koppen, die er alleen met JavaScript zijn_ (31 oktober 2026) de regels dat een tabel opt-in sorteert, dat een tabel met tekst niet sorteert en dat twee klikken genoeg zijn.
+
+## De kolommen van de tabellen hebben een pictogram in plaats van een letter
+
+- **Datum:** 17 november 2026
+- **Besluit:** de kolommen van `tableColumns` hebben een pictogram in plaats van een letter, en de legenda toont pictogram en woord (#1368).
+  `TableColumnIcon` tekent de pictogrammen, `DataTable` en de tabellen die hun koppen uit `tableColumns` halen (`StandingsTable`, `TopScorersTable`, `RecordTable` en `PlayerFiguresTable`) tonen ze, en `tableLegend` levert de legenda als iets wat een pagina kan tonen.
+  - **Het stelsel:** het veld is de wedstrijd en de bal is het doelpunt.
+    Een grote badge zegt de uitkomst of het teken, een klein veld erover zegt "per wedstrijd", en een doel met iets eronder is een strafschop (de stip) of een nul.
+    Kleur herhaalt altijd een vorm en vervangt hem nooit.
+  - **De namen:** het pictogram heeft de naam van de sleutel in `tableColumns`.
+    `abbreviation` is uit `tableColumns` verdwenen, en `DataTableColumn` houdt `abbreviation` voor kolommen die er niet in staan, zoals `Gem.`.
+  - **De toegankelijkheid:** het pictogram is `aria-hidden`, de kop en de sorteerknop hebben het hele woord als naam, en de legenda blijft onder elke tabel.
+    In geforceerde kleuren zijn de vullingen `CanvasText` of `Canvas`.
+  - **De ballen:** elke bal heeft een eigen `useId` voor zijn clip, zodat twee ballen in één tabel elkaar niet storen.
+  - **De legenda:** de items staan los van elkaar met ruimte ertussen, zonder komma's, en een `note` blijft tussen haakjes.
+- **Waarom:** de letters moesten uitgelegd worden, en drie letters hadden twee woorden (G, D, P).
+  Een pictogram is te zien zonder legenda en heeft per kolom één betekenis.
+  De projecteigenaar koos de set na drie rondes.
+- **Alternatieven:** de letters houden; de woorden altijd tonen (te breed op een telefoon); de letters met een pictogram ernaast.
+- **Later:** vervangt _Alle tabellen gebruiken één stel afkortingen voor hun kolommen_ (2 november 2026), voor zover het gaat om letters.
+
+- **Datum:** 17 november 2026
+- **Besluit:** de pictogrammen van de kolommen en `MatchEventIcon` staan 8 graden gedraaid (rechtsom), niet 12.
+- **Waarom:** één hoek voor alle pictogrammen; de projecteigenaar koos 8 graden.
+
+- **Datum:** 17 november 2026
+- **Besluit:** het woord van `substituted` is "ingevallen", en `substitutedOff` is "gewisseld".
+- **Waarom:** de twee woorden zijn samen een paar (voltooid deelwoord), en passen bij de pijlen van `MatchEventIcon`.
+- **Alternatieven:** "invallers" houden; dan staan "invallers" en "gewisseld" naast elkaar in een andere vorm.
+
+- **Datum:** 17 november 2026
+- **Besluit:** twee nieuwe vulkleuren als tokens: `--hf-colour-icon-shirt` (lichtblauw, blauw-300 in licht en donker) en `--hf-colour-icon-boot` (grijs, grijs-400 in licht en grijs-300 in donker), met randen in `--hf-colour-text-default`.
+- **Waarom:** de rand houdt het 3:1 van niet-tekstcontrast, zoals bij de kaarten, zodat de vulling zelf niet aan 3:1 hoeft te voldoen.
+  De tokens zijn alleen voor het shirt en de schoen.

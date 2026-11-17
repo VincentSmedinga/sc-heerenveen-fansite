@@ -3,7 +3,8 @@ import type { ComponentPropsWithoutRef } from 'react'
 import { Bar, sharesOf } from '../bar/Bar'
 import { classNames } from '../classNames'
 import { PlaceCell, sharedPlaces } from '../place-cell/PlaceCell'
-import { tableColumns } from '../table-columns'
+import { TableColumnHead } from '../table-column-icon/TableColumnHead'
+import { type TableColumn, tableColumns, tableLegend } from '../table-columns'
 
 /** The name of our own club, whose row stands out. */
 const ourClub = 'sc Heerenveen'
@@ -17,10 +18,10 @@ export type StandingsTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'childre
   /** A standings table has no children: everything it shows comes from the props below. */
   children?: never
   /**
-   * `all` (default) is the full table: a bar next to the points, which goes
-   * when the place is too narrow, and the full words of the abbreviations under the table,
-   * with a line for each club that has a deduction of points.
-   * `compact` has none of these, and fits a narrow column such as the sidebar of the homepage.
+   * `all` (default) is the full table: a bar next to the points, which goes when the place is
+   * too narrow, and the legend with the icons and their words under the table, with a line for
+   * each club that has a deduction of points. `compact` has none of these, and fits a narrow
+   * column such as the sidebar of the homepage.
    */
   columns?: 'all' | 'compact'
   /** The rows of the table, from the first place down. */
@@ -43,11 +44,9 @@ export type StandingsTableRow = {
   position: number
 }
 
-type Column = {
-  abbreviation: string
+type Column = TableColumn & {
   /** What the column is, for the key of its cells. */
   id: string
-  name: string
   value: (row: StandingsTableRow) => number | string
 }
 
@@ -67,9 +66,9 @@ export function pointsShares(rows: StandingsTableRow[]): null | number[] {
 
 /**
  * The league table: a real `table` with a caption that is not shown, column headers with
- * `scope` and a row header for each club. The headers are abbreviations. In the full table the
- * full words stand under it as well, as "G gespeeld, P punten, …", because a title on an
- * abbreviation only shows under a mouse. A screen reader hears the full word, not the letter.
+ * `scope` and a row header for each club. The headers are icons. In the full table the
+ * words stand under it as well, in the legend, because a title on an icon only shows under a
+ * mouse. A screen reader hears the full word, not the icon.
  * The row of sc Heerenveen is bold, has a bar on its start side and says so for a screen
  * reader, so it stands out by more than colour.
  *
@@ -77,7 +76,7 @@ export function pointsShares(rows: StandingsTableRow[]): null | number[] {
  * cell, as long as the points are compared to those of the leader. The bar is decoration: it
  * is hidden from a screen reader, which reads the numbers only. It goes when the place of the
  * table is too narrow, chosen with a container query. A club with a deduction of points gets
- * a line of plain text under the table, after the words of the abbreviations. bar.css gives
+ * a line of plain text under the table, after the legend. bar.css gives
  * the bar, and standings-table.css the rest of the look.
  */
 export const StandingsTable = ({ caption, className, columns: set = 'all', rows, ...props }: StandingsTableProps) => {
@@ -104,10 +103,7 @@ export const StandingsTable = ({ caption, className, columns: set = 'all', rows,
                 key={column.id}
                 scope="col"
               >
-                <abbr title={capitalise(column.name)}>
-                  <span aria-hidden="true">{column.abbreviation}</span>
-                  <span className="hf-visually-hidden">{column.name}</span>
-                </abbr>
+                <TableColumnHead icon={column.icon} name={column.name} />
               </th>
             ))}
           </tr>
@@ -132,14 +128,7 @@ export const StandingsTable = ({ caption, className, columns: set = 'all', rows,
       </table>
       {set === 'all' && (
         <div className="hf-standings-notes">
-          <p className="hf-meta hf-bar-legend">
-            {columns.map((column, index) => (
-              <span key={column.id}>
-                {index > 0 ? ', ' : ''}
-                <b>{column.abbreviation}</b> {column.name}
-              </span>
-            ))}
-          </p>
+          <p className="hf-meta hf-bar-legend">{tableLegend(columns)}</p>
           {deductions.map((row) => (
             <p className="hf-meta hf-bar-legend" key={row.position}>
               {row.club}: {row.pointsDeducted} {row.pointsDeducted === 1 ? 'punt' : 'punten'} aftrek.
@@ -149,8 +138,4 @@ export const StandingsTable = ({ caption, className, columns: set = 'all', rows,
       )}
     </div>
   )
-}
-
-function capitalise(text: string) {
-  return text.charAt(0).toUpperCase() + text.slice(1)
 }

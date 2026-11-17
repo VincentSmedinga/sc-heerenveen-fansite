@@ -2,6 +2,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 
 import { classNames } from '../classNames'
 import { PlayerName } from '../player-name/PlayerName'
+import { TableColumnHead } from '../table-column-icon/TableColumnHead'
 import { tableColumns, tableLegend } from '../table-columns'
 
 export type PlayerFiguresRow = {
@@ -60,10 +61,10 @@ const columns = [
  * The figures of every player of the match reports: a real `table` with a caption that is not
  * shown, column headers with `scope` and a row header for each player, whose name is a
  * `PlayerName`. The columns are the matches, the line-ups, the times he came on, the minutes,
- * the goals, the assists and the yellow and red cards, each with the letter of `tableColumns`
+ * the goals, the assists and the yellow and red cards, each with the icon of `tableColumns`
  * in the header, which a screen reader reads as the whole word. The minutes are bold, because
  * the page orders the list by them: they are the key figure of the table. Under the table
- * stand the letters with their words, and that a yellow-red card counts as a yellow and a red
+ * stand the icons with their words, and that a yellow-red card counts as a yellow and a red
  * card.
  * The table has no bars: it is for looking a player up, and its columns keep close together so
  * it fits a phone. player-figures.css gives the look.
@@ -77,10 +78,7 @@ export const PlayerFiguresTable = ({ caption, className, rows, ...props }: Playe
           <th scope="col">Speler</th>
           {columns.map(({ column, id }) => (
             <th className="hf-numeric" key={id} scope="col">
-              <abbr title={`${column.name.charAt(0).toUpperCase()}${column.name.slice(1)}`}>
-                <span aria-hidden="true">{column.abbreviation}</span>
-                <span className="hf-visually-hidden">{column.name}</span>
-              </abbr>
+              <TableColumnHead icon={column.icon} name={column.name} />
             </th>
           ))}
         </tr>
