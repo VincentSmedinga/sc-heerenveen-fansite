@@ -21,7 +21,7 @@ import { clubPath, clubsPath, mergePath } from './paths'
 // same form, which the server answers with the form again and saves nothing.
 
 /** What the form that merges two clubs shows after a merge that did not work. */
-export type MergeClubsState = { error?: string; sinds?: string }
+export type MergeClubsState = { error?: string; failure?: string; sinds?: string }
 
 /**
  * Merges two clubs (#1345): `otherId` goes into `keptId`. The page says what the merge does and
@@ -60,7 +60,7 @@ export async function submitMergeClubs(
   } catch (error) {
     console.error(adminFailure(`merge club ${other} into club ${kept}`, error))
 
-    return { ...text, error: 'De clubs zijn niet samengevoegd. Er is niets veranderd. Probeer het nog eens.' }
+    return { ...text, failure: 'De clubs zijn niet samengevoegd. Er is niets veranderd. Probeer het nog eens.' }
   }
 
   if (typeof outcome === 'string') {

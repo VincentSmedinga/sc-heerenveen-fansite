@@ -6422,6 +6422,12 @@
 - **Besluit:** de samenvoeging staat in `audit_log` als `club.merge`, met de club die blijft in `item_id` en in `detail` beide clubs met hun nummer, adres, Wikidata-nummer en artikel, wat er verhuisde in aantallen, de namen en titels, en het seizoen.
   De oude slug van de club die verdwijnt wordt niet omgeleid, want er zijn nog geen openbare links (zie #33).
   Na de samenvoeging gaat de redacteur terug naar het formulier van de club die bleef, met een bericht.
+- **Besluit:** wat een club bij zijn naam noemt, volgt de naam van de club die blijft: `item_clubs`, `standings` en `league_results` hebben geen clubnummer maar de naam, en de rijen van de club die verdwijnt krijgen de naam van de club die blijft.
+  Een rij die beide clubs al hadden (een kop, een seizoen in de stand, een uitslag), blijft één keer staan.
+  Na "Dordrecht '90" in "FC Dordrecht" staat in de stand en de uitslagen van oude seizoenen dus "FC Dordrecht".
+- **Besluit:** een thuisstadion van de club die verdwijnt gaat mee als de club die blijft het stadion nog niet heeft en het een plaats in de reeks kan krijgen.
+  Een stadion dat de club die blijft al heeft, blijft één keer staan.
+  Een stadion zonder start dat na het eerste komt, mag volgens de controle van `club_home_grounds` niet, en blijft achter; de pagina en het logboek noemen het.
 - **Waarom:** dezelfde club stond twee keer in de database (op acceptatie op 16 november 2026 "VVV" naast "VVV-Venlo" en "Dordrecht '90" naast "FC Dordrecht"), en het Wikidata-nummer is uniek, dus je kunt het niet bij de tweede club invullen.
   De opzet is die van het samenvoegen van personen (#977), en de regels zijn die van de importer.
   Een nummer is een club, zoals de importer ook twee artikelen als twee clubs ziet.

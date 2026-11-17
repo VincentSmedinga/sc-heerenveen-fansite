@@ -189,7 +189,12 @@ export async function planClubMerge(
   )
   const pages = otherPages.filter((page) => !keptPages.has(page))
 
-  if (other.wikipediaPage !== null && !keptPages.has(other.wikipediaPage) && !pages.includes(other.wikipediaPage)) {
+  if (
+    other.wikipediaPage !== null &&
+    kept.wikipediaPage !== null &&
+    !keptPages.has(other.wikipediaPage) &&
+    !pages.includes(other.wikipediaPage)
+  ) {
     pages.push(other.wikipediaPage)
   }
 
@@ -459,6 +464,11 @@ async function movePeriods(db: MergeDatabase, plan: ClubMergePlan) {
       { clubId: kept.id, name: kept.name, position: 1, startSeason: since },
     ])
 
+    return
+  }
+
+  // The list already begins with the name that goes: nothing to put in front.
+  if (normaliseClubName(own[0]!.name) === normaliseClubName(other.name)) {
     return
   }
 

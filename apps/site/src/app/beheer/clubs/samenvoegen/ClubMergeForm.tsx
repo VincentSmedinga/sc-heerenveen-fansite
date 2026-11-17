@@ -7,12 +7,14 @@ import type { MergeClubsState } from '../actions'
 
 const summaryId = 'samenvoegen-fouten'
 const fieldId = 'sinds'
+const failureId = 'samenvoegen-fout'
 
 /**
  * The form that merges two clubs: the optional season the name that stays begins in, one button
  * whose text names both clubs, and the link that goes back without merging. Nothing moves
- * before the button is pressed. An error is at its field and in the list of errors, which gets
- * the focus. It works without JavaScript: the server answers with the page again.
+ * before the button is pressed. An error in the season is at its field and in the list of
+ * errors, which gets the focus. A merge that failed has no field: it is a line above the form,
+ * which gets the focus. It works without JavaScript: the server answers with the page again.
  */
 export function ClubMergeForm({
   action,
@@ -34,6 +36,8 @@ export function ClubMergeForm({
   useEffect(() => {
     if (state.error !== undefined) {
       document.getElementById(summaryId)?.focus()
+    } else if (state.failure !== undefined) {
+      document.getElementById(failureId)?.focus()
     }
   }, [state])
 
@@ -45,6 +49,14 @@ export function ClubMergeForm({
         level={2}
         tabIndex={-1}
       />
+      {state.failure === undefined ? null : (
+        <Text className="hf-field-error" id={failureId} tabIndex={-1}>
+          <Text as="span" className="hf-visually-hidden">
+            Fout:
+          </Text>{' '}
+          {state.failure}
+        </Text>
+      )}
       <Form action={formAction}>
         <Field
           error={state.error}

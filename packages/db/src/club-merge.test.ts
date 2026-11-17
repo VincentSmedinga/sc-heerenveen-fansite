@@ -357,7 +357,7 @@ describe('mergeChosenClubs', () => {
     ])
   })
 
-  it('leaves the name another club has alone, and writes nothing for a refusal', async () => {
+  it('writes nothing for a refusal', async () => {
     const a = await addClub({ name: 'A', slug: 'a', wikidataId: 'Q1' })
     const b = await addClub({ name: 'B', slug: 'b', wikidataId: 'Q2' })
 
@@ -369,5 +369,120 @@ describe('mergeChosenClubs', () => {
     )
     expect(await database.db.select().from(clubs)).toHaveLength(2)
     expect(await database.db.select().from(auditLog)).toHaveLength(0)
+  })
+
+  it('puts the name that goes in front of the list of the club that stays, with the season', async () => {
+    const stays = await addClub({ name: 'Nieuw', slug: 'nieuw' })
+    const goes = await addClub({ name: 'Oud', slug: 'oud' })
+
+    await database.db.insert(clubNamePeriods).values({ clubId: stays, name: 'Nieuw', position: 0 })
+    await mergeChosenClubs(database.db, {
+      describe: describe_,
+      keptId: stays,
+      otherId: goes,
+      since: '1999/00',
+      userId: null,
+    })
+
+    expect(
+      (await database.db.select().from(clubNamePeriods).orderBy(asc(clubNamePeriods.position))).map((row) => [
+        row.name,
+        row.startSeason,
+      ]),
+    ).toEqual([
+      ['Oud', null],
+      ['Nieuw', '1999/00'],
+    ])
+  })
+
+  it('does not put the name twice when the list of the club that stays begins with it', async () => {
+    const stays = await addClub({ name: 'Nieuw', slug: 'nieuw' })
+    const goes = await addClub({ name: 'Oud', slug: 'oud' })
+
+    await database.db.insert(clubNamePeriods).values([
+      { clubId: stays, name: 'Oud', position: 0 },
+      { clubId: stays, name: 'Nieuw', position: 1, startSeason: '1990/91' },
+    ])
+    await mergeChosenClubs(database.db, {
+      describe: describe_,
+      keptId: stays,
+      otherId: goes,
+      since: '1999/00',
+      userId: null,
+    })
+
+    expect(
+      (await database.db.select().from(clubNamePeriods).orderBy(asc(clubNamePeriods.position))).map((row) => [
+        row.name,
+        row.startSeason,
+      ]),
+    ).toEqual([
+      ['Oud', null],
+      ['Nieuw', '1990/91'],
+    ])
+  })
+
+  it('leaves the list of the club that goes when the club that stays has one, and says so', async () => {
+    const stays = await addClub({ name: 'Nieuw', slug: 'nieuw' })
+    const goes = await addClub({ name: 'Oud', slug: 'oud' })
+
+    await database.db.insert(clubNamePeriods).values([
+      { clubId: stays, name: 'Nieuw', position: 0 },
+      { clubId: goes, name: 'Oudste', position: 0 },
+    ])
+
+    const plan = await mergeChosenClubs(database.db, {
+      describe: describe_,
+      keptId: stays,
+      otherId: goes,
+      userId: null,
+    })
+
+    expect(plan).toMatchObject({ periodsLeft: true, periodsMoved: 0 })
+    expect((await database.db.select().from(clubNamePeriods)).map((row) => row.name)).toEqual(['Nieuw'])
+  })
+
+  it('does not take the name another club has as another name', async () => {
+    const stays = await addClub({ name: 'Nieuw', slug: 'nieuw' })
+    const goes = await addClub({ name: 'Oud', slug: 'oud' })
+    const third = await addClub({ name: 'Derde', slug: 'derde' })
+
+    await database.db.insert(clubNames).values({ clubId: third, name: 'Oud' })
+    await mergeChosenClubs(database.db, { describe: describe_, keptId: stays, otherId: goes, userId: null })
+
+    expect(await database.db.select().from(clubNames)).toMatchObject([{ clubId: third, name: 'Oud' }])
+  })
+
+  it('leaves a ground without a start behind when it has no place in the series', async () => {
+    const stays = await addClub({ name: 'Nieuw', slug: 'nieuw' })
+    const goes = await addClub({ name: 'Oud', slug: 'oud' })
+    const first = await addStadium()
+    const second = await addStadium()
+    const third = await addStadium()
+
+    await database.db.insert(clubHomeGrounds).values([
+      { clubId: stays, position: 0, stadiumId: first },
+      { clubId: goes, position: 0, stadiumId: second },
+      { clubId: goes, position: 1, stadiumId: third, startSeason: '2010/11' },
+    ])
+
+    const plan = await mergeChosenClubs(database.db, {
+      describe: describe_,
+      keptId: stays,
+      otherId: goes,
+      userId: null,
+    })
+
+    expect(plan).toMatchObject({ groundsLeft: [`stadion ${second}`], groundsMoved: 1 })
+    expect(
+      (await database.db.select().from(clubHomeGrounds).orderBy(asc(clubHomeGrounds.position))).map((row) => [
+        row.clubId,
+        row.stadiumId,
+        row.position,
+      ]),
+    ).toEqual([
+      [stays, first, 0],
+      [stays, third, 1],
+    ])
   })
 })
