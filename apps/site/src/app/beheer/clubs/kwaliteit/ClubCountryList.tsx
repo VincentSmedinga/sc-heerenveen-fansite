@@ -129,7 +129,7 @@ function ClubCard({
   }, [countries, onSaved, row.name, state, summaryId])
 
   return (
-    <Card aria-labelledby={headingId(row.slug)} style={touch} surface="warm">
+    <Card aria-labelledby={headingId(row.slug)} style={touch}>
       <Heading id={headingId(row.slug)} level={2} tabIndex={-1}>
         {row.name}
       </Heading>

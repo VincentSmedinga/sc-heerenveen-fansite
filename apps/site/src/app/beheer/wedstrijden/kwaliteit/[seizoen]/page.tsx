@@ -124,7 +124,7 @@ export default async function SeasonQualityPage({ params, searchParams }: Props)
           const id = `competitie-${competition.toLowerCase().replaceAll(/[^a-z0-9]+/gu, '-')}`
 
           return (
-            <Card aria-labelledby={id} key={competition} surface="warm">
+            <Card aria-labelledby={id} key={competition}>
               <Heading id={id} level={2}>
                 {competition}
               </Heading>

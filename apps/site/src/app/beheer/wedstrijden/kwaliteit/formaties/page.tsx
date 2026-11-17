@@ -46,12 +46,12 @@ export default async function UnusualFormationsPage() {
       </Page.Cell>
       <Page.Cell area="main">
         {unusual.length === 0 ? (
-          <Card surface="warm">
+          <Card>
             <Text>Geen afwijkende formaties.</Text>
           </Card>
         ) : (
           seasons.map((season) => (
-            <Card aria-labelledby={`seizoen-${season.replace('/', '-')}`} key={season} surface="warm">
+            <Card aria-labelledby={`seizoen-${season.replace('/', '-')}`} key={season}>
               <Heading id={`seizoen-${season.replace('/', '-')}`} level={2}>
                 {season}
               </Heading>

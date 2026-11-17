@@ -75,7 +75,7 @@ export default async function StadiumQualityPage() {
       </Page.Cell>
       <Page.Cell area="main">
         {kinds.map((kind) => (
-          <Card aria-labelledby={`${kind.id}-kop`} key={kind.id} surface="warm">
+          <Card aria-labelledby={`${kind.id}-kop`} key={kind.id}>
             <Heading id={`${kind.id}-kop`} level={2}>
               {kind.title}
             </Heading>

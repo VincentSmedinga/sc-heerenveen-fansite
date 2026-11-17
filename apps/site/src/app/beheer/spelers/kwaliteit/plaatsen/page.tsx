@@ -52,7 +52,7 @@ export default async function UsualSlotsPage() {
         </Text>
       </Page.Cell>
       <Page.Cell area="main">
-        <Card aria-labelledby="plaatsen-kop" surface="warm">
+        <Card aria-labelledby="plaatsen-kop">
           <Heading id="plaatsen-kop" level={2}>
             Per speler
           </Heading>
