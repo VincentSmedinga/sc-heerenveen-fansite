@@ -3702,3 +3702,16 @@
   De lijsten met details (`withDetails`) geven `matches.attendance` door, op de plaatsen waar ze het stadion en de scheidsrechter al doorgeven.
   **Waarom:** de eigenaar wil het aantal toeschouwers in de lijst zien, en het staat al in de gegevens en op de pagina van een wedstrijd, dus het bronbeleid verandert niet.
   **Alternatief:** alleen op de pagina van de wedstrijd laten staan.
+
+## Het teken in een `DataTable` zegt dat er iets ontbreekt, en is rood
+
+- **Datum:** 17 november 2026
+- **Besluit:** `.hf-data-table-mark` heeft een rode achtergrond (`--hf-colour-background-missing`, rood 100 in licht en rood 900 in donker) en rode tekst (`--hf-colour-text-missing`).
+  De tekst haalt 4,5:1 op die achtergrond in licht en donker, en `data-table-css.test.ts` controleert dat.
+  Het teken houdt zijn letter of getal en zijn naam voor een schermlezer, dus rood is niet het enige signaal.
+- **Besluit:** er is één vorm, geen extra klasse of optie.
+  Elk gebruik van `mark: true` en van `DataTable.Mark` zegt dat er iets ontbreekt: de tabellen met gaten in het beheer en de story van het component.
+  De vakjes met een volgnummer (`mark: String(number)`) in de formulieren van het beheer zijn iets anders en gebruiken `DataTable.Mark` niet.
+- **Waarom:** rood zegt dat er werk ligt, en je ziet in één blik waar iets ontbreekt.
+  De sterke achtergrond van een vlak viel te weinig op.
+- **Alternatieven:** een extra klasse en optie voor een neutraal teken (geen gebruik dat het nodig heeft); alle tekens rood met een eigen tekstkleur zonder token.

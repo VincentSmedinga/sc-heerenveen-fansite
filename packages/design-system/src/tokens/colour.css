@@ -176,6 +176,9 @@
      * bright, and the same in dark.
      */
     --hf-colour-text-missing: light-dark(var(--hf-colour-red-800), var(--hf-colour-red-300));
+
+    /* The sign that says something is missing (DataTable.Mark), under --hf-colour-text-missing. */
+    --hf-colour-background-missing: light-dark(var(--hf-colour-red-100), var(--hf-colour-red-900));
     --hf-colour-text-highlight: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-50));
     --hf-colour-text-on-header: var(--hf-colour-blue-50);
     --hf-colour-text-on-header-secondary: var(--hf-colour-blue-200);
@@ -427,6 +430,7 @@
       --hf-colour-text-link-visited: var(--hf-colour-grey-600);
       --hf-colour-text-accent: var(--hf-colour-red-700);
       --hf-colour-text-missing: var(--hf-colour-red-800);
+      --hf-colour-background-missing: var(--hf-colour-red-100);
       --hf-colour-text-highlight: var(--hf-colour-blue-800);
       --hf-colour-text-on-button: var(--hf-colour-white);
       --hf-colour-text-on-button-soft: var(--hf-colour-blue-800);

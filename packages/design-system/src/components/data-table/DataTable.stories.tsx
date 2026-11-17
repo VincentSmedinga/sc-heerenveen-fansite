@@ -625,7 +625,7 @@ export const Marks = meta.story({
     docs: {
       description: {
         story:
-          'Een kolom met `mark` heeft korte tekens, elk een `DataTable.Mark`, en een lege cel voor wat compleet is. Met ruimte staat het hele woord boven de kolom; in een smalle ruimte is de kop de letter uit `abbreviation`, en een schermlezer hoort het hele woord.',
+          'Een kolom met `mark` heeft korte tekens, elk een `DataTable.Mark`, en een lege cel voor wat compleet is. Het teken is rood: kies het voor wat ontbreekt, en niet voor een gewone waarde. Met ruimte staat het hele woord boven de kolom; in een smalle ruimte is de kop de letter uit `abbreviation`, en een schermlezer hoort het hele woord.',
       },
     },
   },
