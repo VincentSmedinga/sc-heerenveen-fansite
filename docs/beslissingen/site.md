@@ -6524,3 +6524,12 @@
   Het manifest en de iconen zijn er al, en een installatieknop vraagt JavaScript in de browser dat de site nu niet heeft.
 - **Waarom:** zo is supporters met één tik bij het nieuws, zonder nieuw onderdeel of nieuw token, en blijft de kaart klein in de smalle zijbalk.
 - **Alternatieven:** een eigen kop in de hoofdkolom, afgewezen omdat het geen onderdeel is van wie we zijn of hoe we werken; alleen de iPhone, afgewezen omdat veel supporters Android hebben; een knop met `beforeinstallprompt`, afgewezen om de reden hierboven.
+
+## Een tabel van de site schrijft nooit zelf een letter voor een kolom van `tableColumns`
+
+- **Datum:** 17 november 2026
+- **Besluit:** een tabel van de site neemt een kolom die `tableColumns` heeft uit die lijst, en schrijft er geen eigen `abbreviation` voor (#1369).
+  De tabellen met eigen koppen, zoals `Gem.`, de `#` van de plaats en de kolommen van de beheerpagina's, houden hun tekst.
+  Een test in `table-column-order.test.ts` zoekt in de code van de site naar zo'n letter.
+- **Waarom:** één lijst houdt de tabellen gelijk, zoals het besluit van 2 november 2026 al zei, en met pictogrammen valt een afwijkende letter nog meer op.
+- **Later:** vult _De kolommen van de tabellen hebben een pictogram in plaats van een letter_ in `designsysteem.md` (17 november 2026) aan voor de tabellen van de site.

@@ -158,7 +158,7 @@ export const SpaceBelow = meta.story({
     docs: {
       description: {
         story:
-          'Een tabel met cijfers is een grote bouwsteen: staat er iets onder, zoals een regel met de afkortingen, dan staat daartussen de grote ruimte. Is de tabel het laatste in de kaart, dan komt er geen ruimte onder.',
+          'Een tabel met cijfers is een grote bouwsteen: staat er iets onder, zoals een legenda met de pictogrammen, dan staat daartussen de grote ruimte. Is de tabel het laatste in de kaart, dan komt er geen ruimte onder.',
       },
     },
   },

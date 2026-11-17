@@ -15,6 +15,7 @@ import {
   NewsItem,
   OutcomeBar,
   PlayerName,
+  tableColumns,
   Text,
 } from '@fansite/design-system'
 
@@ -350,12 +351,7 @@ export function PreviewStandingCard({
       <Text appearance="meta">{round}</Text>
       <DataTable
         caption={`Stand, ${round.toLowerCase()}`}
-        columns={[
-          'Club',
-          { abbreviation: 'G', name: 'gespeeld' },
-          { abbreviation: 'DS', name: 'doelsaldo' },
-          { abbreviation: 'P', key: true, name: 'punten' },
-        ]}
+        columns={['Club', tableColumns.played, tableColumns.goalDifference, { ...tableColumns.points, key: true }]}
         rows={rows}
         // A stretch of the league table is in the order of the places, so it does not sort.
         sortable={false}
