@@ -84,7 +84,8 @@ export const sources = mysqlTable(
     // another.
     publisher: varchar('publisher', { length: 100 }),
     // Whether the source is the local paper of its publisher: of two sources with the same
-    // publisher, the lists show the story of the local one.
+    // publisher, the lists show the story of the local one when it is about a club that the
+    // source follows (see `sourceClubs`), and otherwise the story of the other one.
     local: boolean('local').notNull().default(false),
 
     // The permission: whether we asked, whether the source gave it, since when and what was
@@ -743,6 +744,28 @@ export const clubLimits = { name: matchLimits.opponent, slug: 80 }
 const articleTitle = customType<{ data: string }>({
   dataType: () => `varchar(${wikipediaPageMaxLength}) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin`,
 })
+
+/**
+ * The clubs that a regional source follows: names like `matches.opponent` has them, the same
+ * as in `item_clubs` ("N.E.C.", "Vitesse"). Of an article that two sources of one publisher
+ * have, the source that is `local` is shown only when a headline of the article names one of
+ * these clubs (see `isShownOnce` in `queries.ts`). A source with no rows follows no club. The
+ * seed fills the table from the register (`realSources`); the rows go with their source.
+ */
+export const sourceClubs = mysqlTable(
+  'source_clubs',
+  {
+    sourceId: int('source_id', { unsigned: true })
+      .notNull()
+      .references(() => sources.id, { onDelete: 'cascade' }),
+    club: varchar('club', { length: matchLimits.opponent }).notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.sourceId, table.club] })],
+)
+
+export type NewSourceClub = typeof sourceClubs.$inferInsert
+
+export type SourceClub = typeof sourceClubs.$inferSelect
 
 /**
  * The professional clubs a headline names, other than sc Heerenveen: one row for each club of

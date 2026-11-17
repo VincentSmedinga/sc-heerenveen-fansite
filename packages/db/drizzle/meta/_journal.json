@@ -617,6 +617,13 @@
       "when": 1794871146852,
       "tag": "0087_add_club_merge_action",
       "breakpoints": true
+    },
+    {
+      "idx": 88,
+      "version": "5",
+      "when": 1794951044091,
+      "tag": "0088_add_source_clubs",
+      "breakpoints": true
     }
   ]
 }

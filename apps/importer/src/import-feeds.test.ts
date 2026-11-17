@@ -1906,9 +1906,8 @@ describe('the versions of a story', () => {
     ])
   })
 
-  it('shows an article that both newspapers of DPG Media have under one code of nine characters once', async () => {
-    const link = 'https://krant.test/sport/een-verzonnen-kop~a25b60e29/'
-    const pubDate = 'Thu, 22 Oct 2026 08:00:00 GMT'
+  /** The two papers of one publisher, the regional one following N.E.C. */
+  async function addPapers() {
     const dagblad = await addFeed('http://ad.test/rss/', {
       domain: 'www.ad.nl',
       publisher: 'dpg-media',
@@ -1921,23 +1920,51 @@ describe('the versions of a story', () => {
       slug: 'de-gelderlander',
     })
 
+    await database.pool.query("INSERT INTO source_clubs (source_id, club) SELECT id, 'N.E.C.' FROM sources WHERE local")
+
+    return { dagblad, regio }
+  }
+
+  it('shows an article that both newspapers of DPG Media have under one code of nine characters once', async () => {
+    const link = 'https://krant.test/sport/een-verzonnen-kop~a25b60e29/'
+    const pubDate = 'Thu, 22 Oct 2026 08:00:00 GMT'
+    const { dagblad, regio } = await addPapers()
+
     await importBody(
       dagblad,
-      feedWith(entry('ad', { link: link.replace('krant', 'ad'), pubDate, title: 'Een verzonnen kop (AD)' })),
+      feedWith(entry('ad', { link: link.replace('krant', 'ad'), pubDate, title: 'N.E.C. wint thuis (AD)' })),
     )
     await importBody(
       regio,
-      feedWith(entry('gld', { link: link.replace('krant', 'gld'), pubDate, title: 'Een verzonnen kop (GLD)' })),
+      feedWith(entry('gld', { link: link.replace('krant', 'gld'), pubDate, title: 'N.E.C. wint thuis (GLD)' })),
     )
 
     expect((await itemsInDatabase()).map((row) => row.threadKey)).toEqual(['~a25b60e29', '~a25b60e29'])
-    expect(await shownTitles()).toEqual(['Een verzonnen kop (GLD)'])
+    expect(await shownTitles()).toEqual(['N.E.C. wint thuis (GLD)'])
     expect(await countArchiveItems(database.db, { until: later })).toBe(1)
     expect(
       (await listArchivePage(database.db, { limit: 50, sources: ['algemeen-dagblad'], until: later })).map(
         (item) => item.title,
       ),
-    ).toEqual(['Een verzonnen kop (AD)'])
+    ).toEqual(['N.E.C. wint thuis (AD)'])
+  })
+
+  it('shows the Algemeen Dagblad for an article that De Gelderlander shares but is not about its clubs', async () => {
+    const link = 'https://krant.test/sport/een-verzonnen-kop~a25b60e29/'
+    const pubDate = 'Thu, 22 Oct 2026 08:00:00 GMT'
+    const { dagblad, regio } = await addPapers()
+
+    await importBody(
+      dagblad,
+      feedWith(entry('ad', { link: link.replace('krant', 'ad'), pubDate, title: 'sc Heerenveen wint (AD)' })),
+    )
+    await importBody(
+      regio,
+      feedWith(entry('gld', { link: link.replace('krant', 'gld'), pubDate, title: 'sc Heerenveen wint (GLD)' })),
+    )
+
+    expect(await shownTitles()).toEqual(['sc Heerenveen wint (AD)'])
+    expect(await countArchiveItems(database.db, { until: later })).toBe(1)
   })
 
   it('counts an item with a key as unchanged when the next import finds it the same', async () => {

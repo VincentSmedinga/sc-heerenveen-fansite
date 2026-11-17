@@ -18,6 +18,7 @@ import {
   playerPositions,
   players,
   playerSeasonStats,
+  sourceClubs,
   sourceKinds,
   sources,
   standings,
@@ -227,6 +228,31 @@ describe('the seed', () => {
     expect(gelderlander?.description?.length).toBeLessThanOrEqual(300)
     expect(gelderlanderFeeds.map((feed) => [feed.url, feed.filter])).toEqual([
       ['https://www.gelderlander.nl/sport/rss.xml', 'club'],
+    ])
+
+    const followed = await database.db
+      .select({ club: sourceClubs.club })
+      .from(sourceClubs)
+      .where(eq(sourceClubs.sourceId, gelderlander?.id ?? 0))
+
+    expect(followed.map((row) => row.club).toSorted()).toEqual(['De Graafschap', 'De Treffers', 'N.E.C.', 'Vitesse'])
+  })
+
+  it('keeps the clubs of a regional source in step with the register, without duplicates', async () => {
+    await seedSources(database.db)
+    await database.pool.query(
+      "INSERT INTO source_clubs (source_id, club) SELECT id, 'Ajax' FROM sources WHERE domain = ?",
+      ['www.gelderlander.nl'],
+    )
+    await seedSources(database.db)
+
+    const [rows] = await database.pool.query('SELECT club FROM source_clubs ORDER BY club')
+
+    expect((rows as { club: string }[]).map((row) => row.club)).toEqual([
+      'De Graafschap',
+      'De Treffers',
+      'N.E.C.',
+      'Vitesse',
     ])
   })
 

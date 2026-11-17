@@ -1558,15 +1558,21 @@ function isShown(until?: Date, { merge = false }: { merge?: boolean } = {}) {
  * story, when the lists show a story of one publisher once. The story is every item of the
  * sources that are switched on, no podcast and have this publisher, under this key. It is
  * relevant when one of the items that no editor hid is, whatever the source. Each source
- * puts forward its newest item that no editor hid. Of those, the one of a `local` source
- * goes first, and then the one that was published first, and then the lowest `id`. The others
- * are not shown. An editor who hid the item of the winner, or a winner that was never in the
- * feed, leaves the item of another source to be shown.
+ * puts forward its newest item that no editor hid. Of those, the one of a regional source
+ * goes first, then the one of a source that is not `local`, then the one of a `local` source
+ * that does not follow the story, and among equals the one that was published first, and then
+ * the lowest `id`. A source is regional for a story when it is `local` and a headline of the
+ * story, at any source of the publisher, names a club that the source follows (`source_clubs`,
+ * and `item_clubs` for the clubs of a headline). So a story about another club is shown from
+ * the other source. The others are not shown. An editor who hid
+ * the item of the winner, or a winner that was never in the feed, leaves the item of another
+ * source to be shown.
  */
 function isShownOnce(until?: Date) {
   const other = alias(items, 'other')
   const otherSource = alias(sources, 'other_source')
   const later = alias(items, 'later')
+  const named = alias(items, 'of_story')
   const dated = (item: { publishedAt: AnyMySqlColumn }) =>
     until === undefined ? sql`` : sql` and ${lte(item.publishedAt, until)}`
   // The newest item of its source that no editor hid: no item of the same key that is not
@@ -1574,7 +1580,12 @@ function isShownOnce(until?: Date) {
   const newestOf = (item: Record<'id' | 'publishedAt' | 'sourceId' | 'threadKey', AnyMySqlColumn>) =>
     sql`not exists (select 1 from items later where ${later.sourceId} = ${item.sourceId} and ${later.threadKey} = ${item.threadKey} and ${later.hiddenAt} is null${dated(later)} and (${later.publishedAt} > ${item.publishedAt} or (${later.publishedAt} = ${item.publishedAt} and ${later.id} > ${item.id})))`
   const ofStory = sql`${otherSource.id} = ${other.sourceId} and ${otherSource.publisher} = ${sources.publisher} and ${otherSource.enabled} = true and ${otherSource.kind} <> 'podcast' and ${other.threadKey} = ${items.threadKey} and ${other.hiddenAt} is null${dated(other)}`
-  const beats = sql`(${otherSource.local} > ${sources.local} or (${otherSource.local} = ${sources.local} and (${other.publishedAt} < ${items.publishedAt} or (${other.publishedAt} = ${items.publishedAt} and ${other.id} < ${items.id}))))`
+  // 2 when the source is regional for this story (local, and a headline names a club it
+  // follows), 1 when it is not local, and 0 when it is local but the story is about another
+  // club.
+  const regional = (source: Record<'id' | 'local' | 'publisher', AnyMySqlColumn>) =>
+    sql`(case when ${source.local} = false then 1 when exists (select 1 from source_clubs followed, sources of_publisher, items of_story, item_clubs named where followed.source_id = ${source.id} and of_publisher.publisher = ${source.publisher} and of_publisher.enabled = true and of_publisher.kind <> 'podcast' and of_story.source_id = of_publisher.id and of_story.thread_key = ${items.threadKey} and of_story.hidden_at is null${dated(named)} and named.item_id = of_story.id and named.club = followed.club) then 2 else 0 end)`
+  const beats = sql`(${regional(otherSource)} > ${regional(sources)} or (${regional(otherSource)} = ${regional(sources)} and (${other.publishedAt} < ${items.publishedAt} or (${other.publishedAt} = ${items.publishedAt} and ${other.id} < ${items.id}))))`
 
   return and(
     isNotNull(sources.publisher),
