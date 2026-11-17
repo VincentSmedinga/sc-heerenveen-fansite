@@ -82,7 +82,7 @@ export default async function PersonQualityPage({ searchParams }: Props) {
         <Text>
           <Link href={usualSlotsPath}>Vaste plaatsen in een 4-3-3</Link>: waar spelers meestal stonden in hun rij.
         </Text>
-        <Card aria-labelledby="letters-kop" surface="warm">
+        <Card aria-labelledby="letters-kop">
           <Heading id="letters-kop" level={2}>
             Per letter
           </Heading>

@@ -27,7 +27,7 @@ export function UnavailableCard({ marks }: { marks: readonly UnavailableMark[] }
   }
 
   return (
-    <Card aria-labelledby="niet-beschikbaar-kop" surface="warm">
+    <Card aria-labelledby="niet-beschikbaar-kop">
       <Heading id="niet-beschikbaar-kop" level={2}>
         Niet beschikbaar
       </Heading>

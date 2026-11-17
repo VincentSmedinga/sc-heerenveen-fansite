@@ -98,7 +98,7 @@ export default async function StatDifferencesPage({ params, searchParams }: Prop
             const other = statSourceLabels[difference.comparedWith]
 
             return (
-              <Card aria-labelledby={`verschil-${difference.id}-kop`} key={difference.id} surface="warm">
+              <Card aria-labelledby={`verschil-${difference.id}-kop`} key={difference.id}>
                 <Heading id={`verschil-${difference.id}-kop`} level={2}>
                   {difference.name}: {difference.competition}, tegen de {other}
                 </Heading>

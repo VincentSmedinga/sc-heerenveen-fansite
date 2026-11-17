@@ -51,7 +51,7 @@ describe('the page Kwaliteit van stadions (#1307)', () => {
     expect(html).toContain('Elk stadion heeft coördinaten.')
   })
 
-  it('has a warm card for each kind, with a link to the stadium that misses something', async () => {
+  it('has a card for each kind, with a link to the stadium that misses something', async () => {
     const [{ insertId }] = await database.db.insert(stadiums).values({})
 
     await database.db.insert(stadiumNames).values({ name: 'Kaal Veld', position: 0, stadiumId: insertId })
@@ -64,7 +64,8 @@ describe('the page Kwaliteit van stadions (#1307)', () => {
       'Zonder adres',
       'Clubs zonder thuisveld',
     ])
-    expect(html.match(/hf-card-warm/g)).toHaveLength(4)
+    expect(html.match(/<section class="hf-card/g)).toHaveLength(4)
+    expect(html).not.toContain('hf-card-warm')
     expect(html).toContain(`<a href="/beheer/stadions/stadion/${insertId}">Kaal Veld</a>`)
     expect(html).toContain('Nog 3 gaten bij de stadions en de clubs.')
   })

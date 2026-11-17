@@ -6091,6 +6091,7 @@
   De tabellen houden hun bijschrift, hun kopcellen en hun namen voor een schermlezer.
 - **Waarom:** het zijn de plekken waar de redactie werk vindt.
 - **Alternatieven:** het gewone witte vlak.
+- **Later:** de kaarten op de kwaliteitspagina's zijn sinds 17 november 2026 weer wit (#1347); zie _De kaarten van de kwaliteitspagina's zijn wit_.
 
 ## Clubnamen heet voortaan Clubs
 
@@ -6433,3 +6434,12 @@
   Een nummer is een club, zoals de importer ook twee artikelen als twee clubs ziet.
   Een eerdere naam hoort bij zijn jaren, maar niet elke redacteur weet ze, dus het seizoen is vrij.
 - **Alternatieven:** altijd de club met een nummer laten blijven, zonder keuze; het nummer van de club die blijft houden en dat van de ander weggooien; de oude slug omleiden; een eigen tabel met samenvoegingen; altijd alleen een andere naam, de jaren later invullen in het formulier van de club.
+
+## De kaarten van de kwaliteitspagina's zijn wit
+
+- **Datum:** 17 november 2026
+- **Besluit:** de kaarten op de kwaliteitspagina's van wedstrijden, spelers, stadions en clubs in het beheer hebben het gewone witte vlak (#1347).
+  De warme kaarten op de openbare pagina's blijven zoals ze zijn.
+- **Waarom:** zand was niet de bedoeling, en kaarten in het beheer zijn wit.
+- **Alternatieven:** zand houden.
+- **Later:** vervangt _De kaarten van de kwaliteitspagina's hebben het warme vlak_ (#1304).
