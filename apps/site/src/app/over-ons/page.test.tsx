@@ -13,8 +13,13 @@ const plain = withoutHeadingLinks(html)
 /** The sidebar, and the main column without it. */
 const [mainHtml = '', sidebarHtml = ''] = html.split('<section class="hf-page-section"')
 
-/** The words of the text in the sidebar, without the heading. */
-const sidebarWords = sidebarHtml
+/** The card with the data, and the card with the steps for the Home Screen. */
+const [dataHtml = '', homeScreenHtml = ''] = sidebarHtml.split(
+  '<section class="hf-card hf-card-soft" aria-labelledby="als-app">',
+)
+
+/** The words of the text in the card with the data, without the heading. */
+const sidebarWords = dataHtml
   .replace(/^[^>]*>/, '')
   .replace(/<h2.*?<\/h2>/, '')
   .replace(/<[^>]*>/g, ' ')
@@ -53,8 +58,8 @@ describe('the page Over ons', () => {
     expect(sidebarHtml).toMatch(/^ style="grid-area:side" aria-label="Over de gegevens">.*<\/section><\/main>$/)
   })
 
-  it('has a section for the sidebar with one card, named by its h2 Waar de gegevens vandaan komen, with an anchor', () => {
-    expect(sidebarHtml.match(/<section/g)).toHaveLength(1)
+  it('has a section for the sidebar with two cards, the first named by its h2 Waar de gegevens vandaan komen, with an anchor', () => {
+    expect(sidebarHtml.match(/<section/g)).toHaveLength(2)
     expect(sidebarHtml).toContain('<section class="hf-card hf-card-soft" aria-labelledby="gegevens">')
     expect(plain).toContain(
       '<h2 class="hf-heading-3 hf-heading-anchored" id="gegevens">Waar de gegevens vandaan komen</h2>',
@@ -62,7 +67,7 @@ describe('the page Over ons', () => {
   })
 
   it('names the sources and what can go wrong: Wikipedia and its licence, a late result, other spelling and the filter', () => {
-    const text = sidebarHtml.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ')
+    const text = dataHtml.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ')
 
     expect(text).toContain('Nederlandse Wikipedia (CC BY-SA 4.0)')
     expect(text).toContain('een uitslag kan achterlopen')
@@ -75,8 +80,25 @@ describe('the page Over ons', () => {
 
   it('keeps the card compact: about 100 words, with a heading per subject and no list', () => {
     expect(sidebarWords.length).toBeLessThanOrEqual(110)
-    expect(sidebarHtml).not.toMatch(/<[ou]l[ >]/)
-    expect(sidebarHtml.match(/<h3 class="hf-heading-4">/g)).toHaveLength(4)
+    expect(dataHtml).not.toMatch(/<[ou]l[ >]/)
+    expect(dataHtml.match(/<h3 class="hf-heading-4">/g)).toHaveLength(4)
+  })
+
+  it('has a second card in the sidebar, Als app op je startscherm, under the data, with the steps to put the site on the Home Screen', () => {
+    const text = withoutHeadingLinks(homeScreenHtml)
+      .replace(/<\/h2>/, ' ')
+      .replace(/<[^>]*>/g, '')
+
+    expect(sidebarHtml.indexOf('id="gegevens"')).toBeLessThan(sidebarHtml.indexOf('id="als-app"'))
+    expect(homeScreenHtml).toContain('<h2 class="hf-heading-3 hf-heading-anchored" id="als-app">')
+    expect(text).toContain('Als app op je startscherm')
+    expect(text).toContain('Zo open je de Fansite voortaan met één tik.')
+    expect(text).toContain('Op een iPhone: tik op Deel, kies Zet op beginscherm en tik op Voeg toe.')
+    expect(text).toContain(
+      'Op Android: tik op het menu met de drie puntjes, kies Toevoegen aan startscherm en tik op Toevoegen.',
+    )
+    expect(text.indexOf('Op Android')).toBeLessThan(text.indexOf('Op een iPhone'))
+    expect(withoutHeadingLinks(homeScreenHtml)).not.toMatch(/<(a|button|[ou]l|h3)[ >]/)
   })
 
   it('shows the first paragraph under the h1, below the h2 Wie we zijn, as the intro, and no other paragraph', () => {
@@ -94,6 +116,7 @@ describe('the page Over ons', () => {
       '<h2 class="hf-heading-2 hf-heading-anchored" id="wie-we-zijn">Wie we zijn</h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="hoe-we-werken">Hoe we werken</h2>',
       '<h2 class="hf-heading-3 hf-heading-anchored" id="gegevens">Waar de gegevens vandaan komen</h2>',
+      '<h2 class="hf-heading-3 hf-heading-anchored" id="als-app">Als app op je startscherm</h2>',
     ])
   })
 
@@ -102,6 +125,7 @@ describe('the page Over ons', () => {
       ['wie-we-zijn', 'Wie we zijn'],
       ['hoe-we-werken', 'Hoe we werken'],
       ['gegevens', 'Waar de gegevens vandaan komen'],
+      ['als-app', 'Als app op je startscherm'],
     ])
   })
 

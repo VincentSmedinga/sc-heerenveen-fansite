@@ -19,7 +19,8 @@ const EmailLink = () => (
 )
 
 // Who we are and how we work, each in a few sentences, and in the sidebar where the data comes
-// from and what can go wrong with it. What we do with data is on its own page, Privacy.
+// from and what can go wrong with it, and how to put the site on the Home Screen. What we do
+// with data is on its own page, Privacy.
 export default function AboutPage() {
   return (
     <>
@@ -96,6 +97,16 @@ export default function AboutPage() {
             <Text>
               Meld hem via <Link href="/contact">Contact</Link>. Staat hij ook op Wikipedia, verbeter hem dan daar.
             </Text>
+          </Card>
+          <Card aria-labelledby="als-app" surface="soft">
+            <Heading anchor appearance={3} id="als-app" level={2}>
+              Als app op je startscherm
+            </Heading>
+            <Text>Zo open je de Fansite voortaan met één tik.</Text>
+            <Text>
+              Op Android: tik op het menu met de drie puntjes, kies Toevoegen aan startscherm en tik op Toevoegen.
+            </Text>
+            <Text>Op een iPhone: tik op Deel, kies Zet op beginscherm en tik op Voeg toe.</Text>
           </Card>
         </Page.Section>
       </Page.Main>
