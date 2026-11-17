@@ -476,6 +476,7 @@ export const auditActions = [
   'gap.mark',
   'gap.renew',
   'gap.unmark',
+  'club.merge',
 ] as const
 
 export type AuditAction = (typeof auditActions)[number]
@@ -521,6 +522,9 @@ export const auditDetailMaxLength = 1000
  * `gap.mark`, `gap.renew` and `gap.unmark` are an editor marking a gap as not available,
  * checking it again today, or taking the mark away (issue 1308), with the person in
  * `item_id`; the import writes `gap.unmark` too, without an account, when it finds the fact.
+ * `club.merge` is two clubs the editors made one in the admin (issue 1345), with the club that
+ * stays in `item_id`; `detail` names both clubs and what moved, so the merge can be undone by
+ * hand.
  */
 export const auditLog = mysqlTable(
   'audit_log',

@@ -1254,6 +1254,12 @@ De lijst is alleen voor de weergave: de import bepaalt de naam in de kop en het 
 - Een opslag staat binnen vijf minuten op de pagina van de club (de tijd die `getClubPage` zijn gegevens bewaart); de lijsten met wedstrijden volgen als de pagina's van het seizoen verversen.
 - `e2e/club-names.ts` geeft SV Proefdorp een verzonnen lijst met een toelichting, voor `pnpm test:a11y` en `pnpm --filter site test-data`.
 
+- `/beheer/clubs/samenvoegen?club=<nummer>&met=<nummer>&blijft=<nummer>` (`samenvoegen/page.tsx`) is de bevestigingspagina waar de redactie twee clubs samenvoegt (#1345), en de enige plek waar het beheer dat doet.
+  Het formulier van een club (het uitklapblok "Samenvoegen met een andere club") en de lijst van clubs leiden ernaartoe.
+  De pagina toont de twee clubs naast elkaar, welke blijft en waarom, en wat er verhuist; het veld "De blijvende naam heet sinds seizoen" (`2002/03`, vrij) bepaalt de jaren van de eerdere naam.
+  De samenvoeging is één transactie in `mergeChosenClubs` (`@fansite/db/club-merge`), schrijft `club.merge` in het logboek en eindigt op het formulier van de club die bleef.
+  Twee clubs met een Wikidata-nummer zijn twee clubs en worden niet samengevoegd.
+
 ### De spelers van een seizoen
 
 `/beheer/spelers` (`src/app/beheer/spelers`) is alleen voor de eigenaar en de redacteuren: een auteur krijgt "niet gevonden" (#1020).

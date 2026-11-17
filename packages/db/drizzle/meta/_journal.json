@@ -610,6 +610,13 @@
       "when": 1794859408450,
       "tag": "0086_add_club_wikidata_source",
       "breakpoints": true
+    },
+    {
+      "idx": 87,
+      "version": "5",
+      "when": 1794871146852,
+      "tag": "0087_add_club_merge_action",
+      "breakpoints": true
     }
   ]
 }

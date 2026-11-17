@@ -2,13 +2,16 @@
 
 import { redirect } from 'next/navigation'
 
+import { mergeClubs, parseSince } from '#src/beheer/club-merge'
 import { addNameRowId, emptyNameRow, nameFieldId, type NameFormState } from '#src/beheer/club-name-fields'
 import { isUntouchedRow, readNameButton, readNameRows, validateNameRows } from '#src/beheer/club-name-form'
 import { findAdminClub, removeClubNamePeriods, replaceClubNamePeriods } from '#src/beheer/club-names'
+import { adminFailure } from '#src/beheer/failure'
+import { parseItemId } from '#src/beheer/items'
 import { requireRole } from '#src/beheer/require-role'
 import { getDatabase } from '#src/database'
 
-import { clubPath, clubsPath } from './paths'
+import { clubPath, clubsPath, mergePath } from './paths'
 
 // The actions of the names of the clubs. Only an editor keeps them, as with the matches. The
 // address part of the club is bound to the action (`submitNames.bind(null, slug)`) and is input
@@ -16,6 +19,56 @@ import { clubPath, clubsPath } from './paths'
 // returns to the form with the values kept, and one that works ends on the page of the club
 // with a notice: both work without JavaScript. Adding and removing a line are buttons of the
 // same form, which the server answers with the form again and saves nothing.
+
+/** What the form that merges two clubs shows after a merge that did not work. */
+export type MergeClubsState = { error?: string; failure?: string; sinds?: string }
+
+/**
+ * Merges two clubs (#1345): `otherId` goes into `keptId`. The page says what the merge does and
+ * the form has the field for the season the name that stays begins in, and a button. A merge
+ * that worked ends on the form of the club that stayed, with a notice. One club twice, a club
+ * that is gone or two Wikidata numbers end on the page of the merge again, which says so; a
+ * season that is wrong or a merge that failed comes back as an error, which gets the focus.
+ */
+export async function submitMergeClubs(
+  otherId: number,
+  keptId: number,
+  _previous: MergeClubsState,
+  formData: FormData,
+): Promise<MergeClubsState> {
+  const { userId } = await requireRole('owner', 'editor')
+  const { db } = getDatabase()
+  const other = parseItemId(otherId)
+  const kept = parseItemId(keptId)
+
+  if (other === undefined || kept === undefined) {
+    redirect(`${clubsPath}?fout=weg`)
+  }
+
+  const value = formData.get('sinds')
+  const text = typeof value === 'string' ? { sinds: value } : {}
+  const parsed = parseSince(value)
+
+  if ('error' in parsed) {
+    return { ...text, error: parsed.error }
+  }
+
+  let outcome: Awaited<ReturnType<typeof mergeClubs>>
+
+  try {
+    outcome = await mergeClubs(db, userId, { keptId: kept, otherId: other, since: parsed.since })
+  } catch (error) {
+    console.error(adminFailure(`merge club ${other} into club ${kept}`, error))
+
+    return { ...text, failure: 'De clubs zijn niet samengevoegd. Er is niets veranderd. Probeer het nog eens.' }
+  }
+
+  if (typeof outcome === 'string') {
+    redirect(mergePath({ clubId: other, withId: kept }))
+  }
+
+  redirect(clubPath(outcome.kept.slug, 'samengevoegd'))
+}
 
 /**
  * What a button of the form of a club does: a line is added or removed, or the form is checked

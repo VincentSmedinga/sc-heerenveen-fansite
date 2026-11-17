@@ -4329,3 +4329,13 @@
   De telling van de Specifier op 16 november 2026 (60 clubs zonder nummer, 29 met één kandidaat) ging met een zoekopdracht op Wikidata zelf, die de importer niet mag doen; met artikelen op naam krijgen minder clubs een nummer: een run op een kopie van de 60 clubs zonder nummer van acceptatie gaf er 40 een, na het volgen van doorverwijzingen (zonder dat gaven 22 clubs een nummer).
   Zo ziet de redactie ook welke nummers geen mens heeft nagekeken, en verbetert ze een vergissing op de plek waar ze een nummer invult.
 - **Alternatieven:** de zoekopdracht van Wikidata (`api.php`) toch doen met onze User-Agent en een pauze (dat gaat tegen de `robots.txt` in, en dan hadden we een uitzondering op onze regel nodig); geen automatisch zoeken, alleen een link van de pagina van de club naar de zoekfunctie van Wikidata (de redactie zoekt 60 clubs met de hand); een nummer voorstellen en door de redactie laten bevestigen (meer werk voor de redactie voor 29 duidelijke gevallen); een eigen opdracht die iemand één keer draait (een club die later bijkomt, krijgt dan geen nummer zonder dat iemand eraan denkt).
+
+## Een samenvoeging van clubs door de redactie leert de import van de oude fansite de naam
+
+- **Datum:** 17 november 2026
+- **Besluit:** voegt de redactie twee clubs samen onder Beheer (#1345, zie _De redactie voegt twee clubs samen op een pagina onder Beheer_ in `site.md`), dan wordt de naam van de club die verdwijnt een andere naam van de club die blijft, in `club_names`.
+  De import van de oude fansite (`findClub` in `apps/importer/src/old-site-clubs.ts`) zoekt een club bij een naam in `clubs.name`, `club_names` en `club_pages` en maakt alleen een club als geen van die de naam heeft.
+  Dus vindt hij bij de volgende run de club die bleef, en maakt hij "VVV" niet opnieuw.
+  De importer verandert niet; een test in `old-site-clubs.test.ts` houdt het vast.
+- **Waarom:** dat doet `repairClubs` al voor de clubs uit zijn eigen lijsten, en de import vindt een club zo bij elke naam.
+- **Alternatieven:** een eigen tabel met samenvoegingen waar de importer in kijkt.

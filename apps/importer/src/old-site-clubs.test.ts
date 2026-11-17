@@ -1,5 +1,6 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
+import { mergeChosenClubs } from '@fansite/db/club-merge'
 import { createClubBook } from '@fansite/db/clubs'
 import { clubNames, clubPages, clubs } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
@@ -167,6 +168,19 @@ describe('the step clubs', () => {
 
     expect(report).toMatchObject({ created: 0, unchanged: 1 })
     expect(await rows()).toHaveLength(1)
+  })
+
+  it('finds the club that stayed after the editors merged two clubs, and makes the one that went no more', async () => {
+    const stays = await club('VVV-Venlo', 'vvv-venlo', 'VVV-Venlo')
+    const goes = await club('VVV', 'vvv')
+
+    await mergeChosenClubs(database.db, { describe: () => 'samengevoegd', keptId: stays, otherId: goes, userId: null })
+
+    const report = await run([old('vvv', 'VVV')])
+
+    expect(report).toMatchObject({ created: 0, skipped: 0, unchanged: 1 })
+    expect(await rows()).toMatchObject([{ id: stays, name: 'VVV-Venlo' }])
+    expect(await oldSiteClubIds(database.db, [old('vvv', 'VVV')])).toEqual(new Map([['vvv', stays]]))
   })
 
   it('has only names in its list that are not listed twice, and codes that are in the files', async () => {
