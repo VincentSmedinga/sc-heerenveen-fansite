@@ -1728,6 +1728,7 @@
   De knop heet nog letter en woord, maar G heeft nu twee woorden: "G gespeeld" en "G gelijk", en "GL gelijk" bestaat niet meer.
 - **Later:** zie _De lijst met tegenstanders sorteert op het doelsaldo en heeft altijd een kolom Punten_.
   De kolom Doelpunten is vervallen: de laatste kolom is het doelsaldo en sorteert daarop, en Punten staat bij beide keuzes.
+- **Later:** zie _Elke tabel van `DataTable` die een lijst is, sorteert standaard_ (17 november 2026): een tabel sorteert niet meer op aanvraag maar standaard, ook een tabel met tekst, een derde klik zet de tabel terug in de volgorde van de pagina, en gelijke waarden staan op de gegeven volgorde, behalve in een tabel met getallen, waar de eerste kolom nog beslist.
 
 ## De schakelaar is een baan met een schuivende knop
 
@@ -3715,3 +3716,35 @@
 - **Waarom:** rood zegt dat er werk ligt, en je ziet in één blik waar iets ontbreekt.
   De sterke achtergrond van een vlak viel te weinig op.
 - **Alternatieven:** een extra klasse en optie voor een neutraal teken (geen gebruik dat het nodig heeft); alle tekens rood met een eigen tekstkleur zonder token.
+
+## Elke tabel van `DataTable` die een lijst is, sorteert standaard
+
+- **Datum:** 17 november 2026
+- **Besluit:** elke tabel van `DataTable` die een lijst is, sorteert standaard, in de browser, en een tabel gaat er alleen uit met een reden (#1355).
+  Een ranglijst, een lijst in twee tabellen, een tabel met een totaalrij of een gaprij, een vaste reeks in een eigen volgorde en een vergelijking naast elkaar sorteren niet.
+  Dat geldt voor tabellen met getallen en met tekst, op de site en in het beheer.
+  - **Wat de pagina doet:** niets, om te sorteren.
+    `sortable={false}` op de tabel zet het uit, `sortable: false` op een kolom zet het voor die kolom uit, en de code zegt waarom.
+    Een kolom met een verborgen kop (`hidden`) of een andere zichtbare kop (`shown`) sorteert alleen met `sortable: true`, want de knop heet naar `name`.
+    Een tabel van minder dan twee rijen heeft niets om te ordenen en geeft geen knoppen.
+  - **Een fout, geen stil verkeerde volgorde:** een tabel met `position`, een `total`-rij of een `gap`-rij, of in een `DataTable.Group`, die niet `sortable={false}` zegt, geeft een fout bij het tekenen.
+    `DataTable.Group` kijkt naar zijn directe kinderen; een tabel die een component eromheen zet, moet het zelf zeggen.
+  - **De waarden:** een cel van een tabel met getallen is een getal, tekst of `{ sortValue, text }`.
+    Een cel van een tabel met tekst is tekst, een getal of `{ sortValue, content }`.
+    `sortValue: null` is een lege cel, zoals `?` en `…` in de tabellen met gaten.
+    Een cel zonder waarde, zoals een koppeling of een teken, laat de kolom niet sorteren.
+    Een rij kan `sortHeader` hebben, de waarde van de rijkop om op te sorteren, zodat "van Basten" onder de B staat en "de Jong" onder de J; de kop zelf blijft zoals hij is.
+  - **Het ordenen:** getallen sorteren als getallen en tekst met de Nederlandse regels (`Intl.Collator('nl')`).
+    Een lege cel staat bij elke richting achteraan.
+    Gelijke waarden staan in de gegeven volgorde van de rijen, behalve in een tabel met getallen, waar de rijkop nog beslist, zodat de lijst met tegenstanders zich gedraagt zoals hij deed.
+  - **Drie klikken:** de tabel begint in de volgorde van de pagina, zonder pijl en met `aria-sort="none"` op elke kop.
+    De eerste klik sorteert (het grootste getal eerst, tekst van A tot Z), de tweede keert om, en de derde zet de tabel terug in de volgorde van de pagina.
+    De beleefde regel zegt dan "Niet meer gesorteerd, in de volgorde van de pagina".
+  - **Zonder JavaScript en zonder sorteren:** de server stuurt de tabel in de volgorde van `rows`, met koppen van gewone tekst.
+    Een tabel die niet sorteert, stuurt geen script mee.
+    De gekozen volgorde staat niet in het adres en wordt niet bewaard.
+- **Waarom:** de bezoeker zoekt een uiterste (de meeste toeschouwers, de meeste doelpunten) in lijsten van tientallen rijen, en moet dat in elke tabel op dezelfde manier kunnen.
+  Als standaard kost het de pagina niets, en vergeet niemand een tabel.
+  De volgorde van de pagina heeft betekenis (de nieuwste eerst, A tot Z), en een bezoeker die hem kwijt is, heeft anders alleen een nieuwe lading als weg terug.
+- **Alternatieven:** alleen de lijsten kiezen die erom vroegen (blijft ongelijk, en elke pagina moet eraan denken); sorteren in het adres (elke pagina krijgt een parameter en een herlading, meerdere tabellen op één pagina botsen, en de pagina's zijn statisch en gecachet op gedeelde hosting); twee standen in plaats van drie (geen weg terug zonder te herladen); een aparte knop voor de oorspronkelijke volgorde (een extra bedieningselement per tabel); de keuze bewaren in `localStorage` (een sleutel per tabel en een afspraak over wat we bewaren); een voorvoegsel zelf weglaten (het component kent de namen niet, en "De Graafschap" is een club en geen achternaam).
+- **Later:** vervangt van _Een tabel sorteert op een kolom met knoppen in de koppen, die er alleen met JavaScript zijn_ (31 oktober 2026) de regels dat een tabel opt-in sorteert, dat een tabel met tekst niet sorteert en dat twee klikken genoeg zijn.

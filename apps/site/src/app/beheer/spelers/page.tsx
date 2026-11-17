@@ -128,9 +128,13 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
               ]}
               rows={rows.map((player) => ({
                 cells: [
-                  player.shirtNumber === null ? 'Geen rugnummer' : `Rugnummer ${player.shirtNumber}`,
+                  player.shirtNumber === null
+                    ? { content: 'Geen rugnummer', sortValue: null }
+                    : { content: `Rugnummer ${player.shirtNumber}`, sortValue: player.shirtNumber },
                   positionText(player),
-                  player.source === 'redactie' ? <Tag tone="highlight">Redactie</Tag> : sourceLabels[player.source],
+                  player.source === 'redactie'
+                    ? { content: <Tag tone="highlight">Redactie</Tag>, sortValue: 'Redactie' }
+                    : sourceLabels[player.source],
                   player.inSquad ? 'In de selectie' : 'Uit de selectie',
                 ],
                 header: player.name,

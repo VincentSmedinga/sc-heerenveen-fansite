@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
 import type { DataTableProps } from './DataTable'
+import type { DataTableRow } from './dataTableTypes'
 
 import { DataTable } from './DataTable'
 
@@ -14,7 +15,7 @@ const props: DataTableProps = {
     { name: 'Club', sortable: true },
     { abbreviation: 'G', name: 'gespeeld', sortable: true },
     { abbreviation: 'W', name: 'winst', sortable: true },
-    { abbreviation: 'D', name: 'doelpunten' },
+    { abbreviation: 'D', name: 'doelpunten', sortable: false },
   ],
   rows: [
     { cells: [4, 2, { sortValue: 2, text: '7–5' }], header: 'Alkmaar' },
@@ -66,11 +67,14 @@ describe('DataTable with sortable columns', () => {
           { abbreviation: 'G', name: 'gespeeld', sortable: true },
           { abbreviation: 'G', name: 'gelijk', sortable: true },
         ]}
-        rows={[{ cells: [4, 1], header: 'Alkmaar' }]}
+        rows={[
+          { cells: [4, 1], header: 'Alkmaar' },
+          { cells: [5, 2], header: 'Breda' },
+        ]}
       />,
     )
 
-    expect(screen.getAllByRole('button').map((item) => item.textContent)).toEqual(['G gespeeld', 'G gelijk'])
+    expect(screen.getAllByRole('button').map((item) => item.textContent)).toEqual(['Club', 'G gespeeld', 'G gelijk'])
     expect(button('G gespeeld')).not.toBe(button('G gelijk'))
   })
 
@@ -226,19 +230,23 @@ describe('DataTable with sortable columns', () => {
     expect(button('G gespeeld')).toBe(target)
   })
 
-  it('leaves a table without a sortable column alone: the same table, no buttons, no live region', () => {
+  it('leaves a table with sortable={false} alone: the same table, no buttons, no live region', () => {
     const columns = ['Club', { abbreviation: 'G', name: 'gespeeld' }]
-    const rows = [{ cells: [4], header: 'Alkmaar', href: '#alkmaar' }]
-    const html = renderToStaticMarkup(<DataTable caption="Een tabel" columns={columns} rows={rows} />)
+    const rows = [
+      { cells: [4], header: 'Alkmaar', href: '#alkmaar' },
+      { cells: [5], header: 'Breda' },
+    ]
+    const html = renderToStaticMarkup(<DataTable caption="Een tabel" columns={columns} rows={rows} sortable={false} />)
 
     expect(html).toBe(
       '<table class="hf-data-table"><caption class="hf-visually-hidden">Een tabel</caption><thead><tr>' +
         '<th scope="col">Club</th><th class="hf-numeric" scope="col"><abbr title="Gespeeld">' +
         '<span aria-hidden="true">G</span><span class="hf-visually-hidden">gespeeld</span></abbr></th></tr></thead>' +
-        '<tbody><tr><th scope="row"><a href="#alkmaar">Alkmaar</a></th><td class="hf-numeric">4</td></tr></tbody></table>',
+        '<tbody><tr><th scope="row"><a href="#alkmaar">Alkmaar</a></th><td class="hf-numeric">4</td></tr>' +
+        '<tr><th scope="row">Breda</th><td class="hf-numeric">5</td></tr></tbody></table>',
     )
 
-    render(<DataTable caption="Een tabel" columns={columns} rows={rows} />)
+    render(<DataTable caption="Een tabel" columns={columns} rows={rows} sortable={false} />)
 
     expect(screen.queryByRole('button')).toBeNull()
     expect(screen.queryByRole('status')).toBeNull()
@@ -364,10 +372,173 @@ describe('data-table.css for a sortable column', () => {
     expect(css.slice(start, css.indexOf('}', start))).toMatch(/white-space: nowrap/u)
   })
 
-  it('leaves out the position of a row, because a sorted table has no # column', () => {
-    render(<DataTable {...props} rows={props.rows.map((row, index) => ({ ...row, position: index + 1 }))} />)
+  it('throws when a table with a position, a total row or a gap row is left to sort', () => {
+    const throws = (row: DataTableRow) =>
+      expect(() => renderToStaticMarkup(<DataTable {...props} rows={[...props.rows, row]} />)).toThrow(/cannot sort/u)
 
-    expect(document.querySelector('.hf-rank')).toBeNull()
-    expect(screen.getAllByRole('columnheader')).toHaveLength(4)
+    throws({ cells: [1, 1, 1], header: 'Eva', position: 9 })
+    throws({ cells: [1, 1, 1], header: 'Totaal', total: true })
+    throws({ cells: [], gap: true, header: 'niet bij ons' })
+  })
+
+  it('does not throw for such a table that says it does not sort, and has no buttons then', () => {
+    render(
+      <DataTable
+        {...props}
+        rows={props.rows.map((row, index) => ({ ...row, position: index + 1 }))}
+        sortable={false}
+      />,
+    )
+
+    expect(screen.queryByRole('button')).toBeNull()
+    expect(screen.getAllByRole('columnheader')).toHaveLength(5)
+  })
+
+  it('throws for a table in a group that is left to sort', () => {
+    expect(() =>
+      renderToStaticMarkup(
+        <DataTable.Group>
+          <DataTable {...props} />
+        </DataTable.Group>,
+      ),
+    ).toThrow(/DataTable.Group/u)
+  })
+})
+
+describe('the three clicks on a header', () => {
+  it('sort, turn round and give the order of the page back, with no arrow and aria-sort none everywhere', () => {
+    render(<DataTable {...props} />)
+
+    fireEvent.click(button('G gespeeld'))
+    fireEvent.click(button('G gespeeld'))
+    expect(order()).toEqual(['Dalen', 'Alkmaar', 'Breda', 'Cambuur'])
+    fireEvent.click(button('G gespeeld'))
+
+    expect(order()).toEqual(['Alkmaar', 'Breda', 'Cambuur', 'Dalen'])
+    expect(screen.getAllByRole('columnheader').map((header) => header.getAttribute('aria-sort'))).toEqual([
+      'none',
+      'none',
+      'none',
+      null,
+    ])
+    expect(document.querySelector('.hf-icon')).toBeNull()
+    expect(screen.getByRole('status').textContent).toBe('Niet meer gesorteerd, in de volgorde van de pagina')
+  })
+
+  it('start again with the first direction after the third click', () => {
+    render(<DataTable {...props} />)
+
+    fireEvent.click(button('Club'))
+    fireEvent.click(button('Club'))
+    fireEvent.click(button('Club'))
+    fireEvent.click(button('Club'))
+
+    expect(screen.getByRole('columnheader', { name: 'Club' }).getAttribute('aria-sort')).toBe('ascending')
+  })
+})
+
+describe('a table with text that sorts', () => {
+  const textProps: DataTableProps = {
+    appearance: 'text',
+    caption: 'Wedstrijden',
+    columns: ['Wedstrijd', 'Datum', { name: 'Verslag', sortable: false }, 'Bezoekers'],
+    rows: [
+      {
+        cells: [{ content: '8 mei 2021', sortValue: '2021-05-08' }, <a href="#a">Lees</a>, 'veel'],
+        header: 'Ajax',
+        sortHeader: 'Ajax',
+      },
+      { cells: [{ content: '3 mei 2020', sortValue: '2020-05-03' }, <a href="#b">Lees</a>, ''], header: 'van Basten' },
+      {
+        cells: [{ content: '1 mei 2022', sortValue: '2022-05-01' }, <a href="#c">Lees</a>, 'weinig'],
+        header: 'Cambuur',
+      },
+      { cells: [{ content: '9 mei 2019', sortValue: '2019-05-09' }, <a href="#d">Lees</a>, 'Éen'], header: 'de Jong' },
+    ],
+  }
+
+  it('makes the headers of the columns with a value buttons, and leaves the others', () => {
+    render(<DataTable {...textProps} />)
+
+    expect(screen.getAllByRole('button').map((item) => item.textContent)).toEqual(['Wedstrijd', 'Datum', 'Bezoekers'])
+    expect(within(screen.getByRole('columnheader', { name: 'Verslag' })).queryByRole('button')).toBeNull()
+  })
+
+  it('sorts on the sort value of a cell and shows its content', () => {
+    render(<DataTable {...textProps} />)
+
+    fireEvent.click(button('Datum'))
+
+    expect(order()).toEqual(['de Jong', 'van Basten', 'Ajax', 'Cambuur'])
+    expect(screen.getByText('3 mei 2020')).toBeTruthy()
+  })
+
+  it('puts an empty cell last, whichever the direction, and sorts text by the Dutch rules', () => {
+    render(<DataTable {...textProps} />)
+
+    fireEvent.click(button('Bezoekers'))
+    expect(order()).toEqual(['de Jong', 'Ajax', 'Cambuur', 'van Basten'])
+
+    fireEvent.click(button('Bezoekers'))
+    expect(order()).toEqual(['Cambuur', 'Ajax', 'de Jong', 'van Basten'])
+  })
+
+  it('sorts a row header on its sortHeader and keeps the header as it is', () => {
+    const rows = textProps.rows.map((row) =>
+      row.header === 'van Basten' ? { ...row, sortHeader: 'Basten, van' } : row,
+    )
+
+    render(<DataTable {...textProps} rows={rows} />)
+
+    fireEvent.click(button('Wedstrijd'))
+
+    expect(order()).toEqual(['Ajax', 'van Basten', 'Cambuur', 'de Jong'])
+  })
+
+  it('has no button on a column with a link and no sort value, and sends plain markup without script', () => {
+    const html = renderToStaticMarkup(<DataTable {...textProps} />)
+
+    expect(html).not.toContain('<button')
+    expect(html).not.toContain('aria-sort')
+    expect(html).toContain('hf-data-table hf-data-table-text')
+  })
+
+  it('does not sort at all with sortable={false}', () => {
+    render(<DataTable {...textProps} sortable={false} />)
+
+    expect(screen.queryByRole('button')).toBeNull()
+  })
+
+  it('keeps equal values in the order of the page', () => {
+    const rows = ['Ajax', 'Breda', 'Cambuur'].map((header, index) => ({ cells: [index < 2 ? 'zelfde' : 'a'], header }))
+
+    render(<DataTable appearance="text" caption="Gelijk" columns={['Naam', 'Waarde']} rows={rows} />)
+    fireEvent.click(button('Waarde'))
+    fireEvent.click(button('Waarde'))
+
+    expect(order()).toEqual(['Ajax', 'Breda', 'Cambuur'])
+  })
+})
+
+describe('the columns of a table that sort by default', () => {
+  it('leaves a column with a hidden header or a shown header alone, unless it asks for sorting', () => {
+    render(
+      <DataTable
+        caption="Hoeveel"
+        columns={['Naam', { hidden: true, name: 'keer' }, { name: 'winst, 12 keer', shown: 'Winst 12×' }]}
+        rows={[
+          { cells: [1, 2], header: 'A' },
+          { cells: [3, 4], header: 'B' },
+        ]}
+      />,
+    )
+
+    expect(screen.getAllByRole('button').map((item) => item.textContent)).toEqual(['Naam'])
+  })
+
+  it('does not sort a table of one row', () => {
+    render(<DataTable caption="Een rij" columns={['Naam', 'Aantal']} rows={[{ cells: [1], header: 'A' }]} />)
+
+    expect(screen.queryByRole('button')).toBeNull()
   })
 })

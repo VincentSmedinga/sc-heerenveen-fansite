@@ -136,6 +136,8 @@ function MergePlan({
             },
             { cells: [kept.id, other.id], header: 'Nummer van de persoon' },
           ]}
+          // A comparison side by side, not a list: no sorting.
+          sortable={false}
         />
         <Text>
           Moet de andere blijven?{' '}

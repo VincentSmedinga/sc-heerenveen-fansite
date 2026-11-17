@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { DataTableRow } from './dataTableTypes'
 
-import { describeSorting, firstDirection, isNumericColumn, sortRows } from './sortRows'
+import { describeSorting, firstDirection, isNumericColumn, isSortableColumn, sortRows, sortValueOf } from './sortRows'
 
 const headers = (rows: readonly DataTableRow[]) => rows.map((row) => row.header)
 
@@ -55,7 +55,7 @@ describe('sortRows', () => {
     expect(headers(sortRows(rows, { column: 0, direction: 'descending' })).at(0)).toBe('Zwolle')
   })
 
-  it('keeps equal values in the order of the first column, A to Z, whichever the direction', () => {
+  it('keeps equal values in the order of the row headers, A to Z, with byHeader, whichever the direction', () => {
     const rows = [
       { cells: [3], header: 'Cees' },
       { cells: [5], header: 'Bas' },
@@ -63,8 +63,20 @@ describe('sortRows', () => {
       { cells: [5], header: 'Dirk' },
     ]
 
-    expect(headers(sortRows(rows, { column: 1, direction: 'descending' }))).toEqual(['Bas', 'Dirk', 'Anne', 'Cees'])
-    expect(headers(sortRows(rows, { column: 1, direction: 'ascending' }))).toEqual(['Anne', 'Cees', 'Bas', 'Dirk'])
+    expect(headers(sortRows(rows, { column: 1, direction: 'descending' }, { byHeader: true }))).toEqual([
+      'Bas',
+      'Dirk',
+      'Anne',
+      'Cees',
+    ])
+    expect(headers(sortRows(rows, { column: 1, direction: 'ascending' }, { byHeader: true }))).toEqual([
+      'Anne',
+      'Cees',
+      'Bas',
+      'Dirk',
+    ])
+    // Without it, equal values stay in the order of the page.
+    expect(headers(sortRows(rows, { column: 1, direction: 'ascending' }))).toEqual(['Cees', 'Anne', 'Bas', 'Dirk'])
   })
 
   it('keeps the given order for rows that are equal in every way', () => {
@@ -126,5 +138,60 @@ describe('describeSorting', () => {
     expect(describeSorting('gespeeld', 'ascending', true)).toBe('Gesorteerd op Gespeeld, van laag naar hoog')
     expect(describeSorting('Club', 'ascending', false)).toBe('Gesorteerd op Club, van A tot Z')
     expect(describeSorting('Club', 'descending', false)).toBe('Gesorteerd op Club, van Z tot A')
+  })
+})
+
+describe('empty cells and sort values', () => {
+  const rows = [
+    { cells: [''], header: 'Leeg 1' },
+    { cells: [5], header: 'Vijf' },
+    { cells: [{ sortValue: null, text: '?' }], header: 'Leeg 2' },
+    { cells: [{ sortValue: 9, text: 'negen' }], header: 'Negen' },
+  ]
+
+  it('puts an empty cell last, whichever the direction', () => {
+    expect(headers(sortRows(rows, { column: 1, direction: 'ascending' }))).toEqual([
+      'Vijf',
+      'Negen',
+      'Leeg 1',
+      'Leeg 2',
+    ])
+    expect(headers(sortRows(rows, { column: 1, direction: 'descending' }))).toEqual([
+      'Negen',
+      'Vijf',
+      'Leeg 1',
+      'Leeg 2',
+    ])
+  })
+
+  it('counts a column with numbers and empty cells as numbers', () => {
+    expect(isNumericColumn(rows, 1)).toBe(true)
+    expect(firstDirection(rows, 1)).toBe('descending')
+  })
+
+  it('sorts a row header on its sortHeader', () => {
+    const named = [
+      { cells: [], header: 'van Basten', sortHeader: 'Basten, van' },
+      { cells: [], header: 'Aad' },
+      { cells: [], header: 'de Jong', sortHeader: 'Jong, de' },
+    ]
+
+    expect(headers(sortRows(named, { column: 0, direction: 'ascending' }))).toEqual(['Aad', 'van Basten', 'de Jong'])
+  })
+
+  it('knows a cell without a value: a link or a sign has none, text and a sortValue have', () => {
+    expect(sortValueOf(<a href="#a">x</a>)).toBeUndefined()
+    expect(sortValueOf({ content: <a href="#a">x</a>, sortValue: 3 })).toBe(3)
+    expect(sortValueOf('tekst')).toBe('tekst')
+    expect(sortValueOf(undefined)).toBeNull()
+    expect(
+      isSortableColumn(
+        [
+          { cells: [<a href="#a">x</a>], header: 'A' },
+          { cells: ['b'], header: 'B' },
+        ],
+        1,
+      ),
+    ).toBe(false)
   })
 })

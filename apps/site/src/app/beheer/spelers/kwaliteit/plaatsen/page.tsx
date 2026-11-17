@@ -15,6 +15,7 @@ import {
   usualSlots,
 } from '#src/beheer/usual-slots'
 import { getDatabase } from '#src/database'
+import { textSortName } from '#src/player-name'
 
 // Render on each request: who is logged in and what the database holds are not known when the
 // site is built.
@@ -70,6 +71,7 @@ export default async function UsualSlotsPage() {
                 header: slot.name,
                 // The count and the share under the name: two columns fit a phone, five do not.
                 secondary: `${slot.matches} wedstrijden, ${slot.percentage === 100 ? 'elke keer' : `${slot.percentage}%`}`,
+                sortHeader: textSortName(slot.name),
                 ...(slot.playerId === null ? {} : { href: playerPath(slot.playerId) }),
               }))}
             />

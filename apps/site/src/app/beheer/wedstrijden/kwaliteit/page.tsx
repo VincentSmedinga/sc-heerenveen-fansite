@@ -76,15 +76,20 @@ export default async function MatchQualityPage() {
                 cells: gapColumns.map(({ key, name }) => {
                   const total = counts?.columns[key] ?? 0
 
-                  return total === 0 ? null : (
-                    <DataTable.Mark
-                      description={`${total === 1 ? 'wedstrijd' : 'wedstrijden'} met een gat in ${name} in ${row.season}`}
-                      href={seasonTablePath(row.season, key)}
-                      key={key}
-                    >
-                      {String(total)}
-                    </DataTable.Mark>
-                  )
+                  return total === 0
+                    ? null
+                    : {
+                        content: (
+                          <DataTable.Mark
+                            description={`${total === 1 ? 'wedstrijd' : 'wedstrijden'} met een gat in ${name} in ${row.season}`}
+                            href={seasonTablePath(row.season, key)}
+                            key={key}
+                          >
+                            {String(total)}
+                          </DataTable.Mark>
+                        ),
+                        sortValue: total,
+                      }
                 }),
                 header: row.season,
                 href: seasonTablePath(row.season),

@@ -87,16 +87,16 @@ test.describe('sorting the list', () => {
   test('sorts with the keyboard, keeps the focus on the button and says what happened', async ({ page }) => {
     await page.goto('/tegenstanders')
 
-    const played = page.getByRole('button', { exact: true, name: 'G gespeeld' })
+    const played = list(page).getByRole('button', { exact: true, name: 'G gespeeld' })
     // The line of the table is a div. The switch Welke wedstrijden has a line of its own, a p.
-    const status = page.locator('div[role="status"]')
+    const status = list(page).locator('div[role="status"]')
     const given = await clubNames(page)
 
-    await expect(page.getByRole('columnheader', { exact: true, name: 'G gespeeld' })).toHaveAttribute(
+    await expect(list(page).getByRole('columnheader', { exact: true, name: 'G gespeeld' })).toHaveAttribute(
       'aria-sort',
       'none',
     )
-    await expect(page.getByRole('columnheader', { exact: true, name: 'D doelsaldo' })).toHaveAttribute(
+    await expect(list(page).getByRole('columnheader', { exact: true, name: 'D doelsaldo' })).toHaveAttribute(
       'aria-sort',
       'none',
     )
@@ -104,11 +104,11 @@ test.describe('sorting the list', () => {
     await page.keyboard.press('Enter')
 
     await expect(played).toBeFocused()
-    await expect(page.getByRole('columnheader', { exact: true, name: 'G gespeeld' })).toHaveAttribute(
+    await expect(list(page).getByRole('columnheader', { exact: true, name: 'G gespeeld' })).toHaveAttribute(
       'aria-sort',
       'descending',
     )
-    await expect(page.getByRole('columnheader', { exact: true, name: 'D doelsaldo' })).toHaveAttribute(
+    await expect(list(page).getByRole('columnheader', { exact: true, name: 'D doelsaldo' })).toHaveAttribute(
       'aria-sort',
       'none',
     )
@@ -122,7 +122,7 @@ test.describe('sorting the list', () => {
     await page.keyboard.press('Space')
 
     await expect(played).toBeFocused()
-    await expect(page.getByRole('columnheader', { exact: true, name: 'G gespeeld' })).toHaveAttribute(
+    await expect(list(page).getByRole('columnheader', { exact: true, name: 'G gespeeld' })).toHaveAttribute(
       'aria-sort',
       'ascending',
     )
@@ -134,16 +134,16 @@ test.describe('sorting the list', () => {
 
   test('sorts the clubs from A to Z on the first click on Club, then from Z to A', async ({ page }) => {
     await page.goto('/tegenstanders')
-    await page.getByRole('button', { exact: true, name: 'G gespeeld' }).click()
-    await page.getByRole('button', { exact: true, name: 'Club' }).click()
+    await list(page).getByRole('button', { exact: true, name: 'G gespeeld' }).click()
+    await list(page).getByRole('button', { exact: true, name: 'Club' }).click()
 
     const collator = new Intl.Collator('nl', { sensitivity: 'base' })
     const names = await clubNames(page)
 
     expect(names).toEqual([...names].toSorted(collator.compare))
-    await expect(page.locator('div[role="status"]')).toHaveText('Gesorteerd op Club, van A tot Z')
+    await expect(list(page).locator('div[role="status"]')).toHaveText('Gesorteerd op Club, van A tot Z')
 
-    await page.getByRole('button', { exact: true, name: 'Club' }).click()
+    await list(page).getByRole('button', { exact: true, name: 'Club' }).click()
 
     expect(await clubNames(page)).toEqual(names.toReversed())
   })
@@ -154,35 +154,35 @@ test.describe('sorting the list', () => {
     }) => {
       await page.goto(`/tegenstanders${choice}`)
 
-      await expect(page.getByRole('columnheader', { exact: true, name: 'P punten' })).toHaveAttribute(
+      await expect(list(page).getByRole('columnheader', { exact: true, name: 'P punten' })).toHaveAttribute(
         'aria-sort',
         'none',
       )
-      await expect(page.getByRole('columnheader', { exact: true, name: 'D doelsaldo' })).toHaveAttribute(
+      await expect(list(page).getByRole('columnheader', { exact: true, name: 'D doelsaldo' })).toHaveAttribute(
         'aria-sort',
         'none',
       )
       await expect(list(page).locator('thead th')).toHaveCount(7)
 
-      await page.getByRole('button', { exact: true, name: 'P punten' }).click()
+      await list(page).getByRole('button', { exact: true, name: 'P punten' }).click()
 
       const points = await columnFigures(page, 5)
 
       expect(points.length).toBeGreaterThan(0)
       expect(points).toEqual([...points].toSorted((a, b) => b - a))
-      await expect(page.locator('div[role="status"]')).toHaveText('Gesorteerd op Punten, van hoog naar laag')
+      await expect(list(page).locator('div[role="status"]')).toHaveText('Gesorteerd op Punten, van hoog naar laag')
 
-      await page.getByRole('button', { exact: true, name: 'D doelsaldo' }).click()
+      await list(page).getByRole('button', { exact: true, name: 'D doelsaldo' }).click()
 
       const differences = await columnFigures(page, 6)
 
       expect(differences.length).toBeGreaterThan(0)
       expect(differences).toEqual([...differences].toSorted((a, b) => b - a))
-      await expect(page.getByRole('columnheader', { exact: true, name: 'D doelsaldo' })).toHaveAttribute(
+      await expect(list(page).getByRole('columnheader', { exact: true, name: 'D doelsaldo' })).toHaveAttribute(
         'aria-sort',
         'descending',
       )
-      await expect(page.locator('div[role="status"]')).toHaveText('Gesorteerd op Doelsaldo, van hoog naar laag')
+      await expect(list(page).locator('div[role="status"]')).toHaveText('Gesorteerd op Doelsaldo, van hoog naar laag')
       expect(await list(page).locator('tbody td:nth-of-type(6)').first().innerText()).toMatch(/^([+−]\d+|0)$/)
     })
   }
@@ -190,13 +190,13 @@ test.describe('sorting the list', () => {
   test('fits a phone of 320 pixels, with the arrow and every column', async ({ page }) => {
     await page.setViewportSize({ height: 800, width: 320 })
     await page.goto('/tegenstanders?competitie=eredivisie')
-    await page.getByRole('button', { exact: true, name: 'D doelsaldo' }).click()
+    await list(page).getByRole('button', { exact: true, name: 'D doelsaldo' }).click()
 
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
     ).toBe(true)
     for (const name of ['Club', 'G gespeeld', 'W winst', 'G gelijk', 'V verlies', 'D doelsaldo', 'P punten']) {
-      const box = await page.getByRole('button', { exact: true, name }).boundingBox()
+      const box = await list(page).getByRole('button', { exact: true, name }).boundingBox()
 
       expect(box?.width ?? 0).toBeGreaterThanOrEqual(24)
       expect(box?.height ?? 0).toBeGreaterThanOrEqual(24)
@@ -210,7 +210,7 @@ test.describe('without JavaScript', () => {
   test('the headers are plain text and the list stays A to Z', async ({ page }) => {
     await page.goto('/tegenstanders')
 
-    await expect(page.getByRole('button')).toHaveCount(0)
+    await expect(list(page).getByRole('button')).toHaveCount(0)
     await expect(list(page).getByRole('columnheader', { exact: true, name: 'gespeeld' })).toBeVisible()
 
     const names = await clubNames(page)

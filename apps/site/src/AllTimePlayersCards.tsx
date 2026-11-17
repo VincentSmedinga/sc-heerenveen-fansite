@@ -36,6 +36,7 @@ import { type CompetitionChoice, competitionQuery, competitionWords } from './co
 import { formatTableDay } from './match-format'
 import { scorersCoverage } from './matches'
 import { imageCredit } from './MatchViews'
+import { textSortName } from './player-name'
 import { playerFiguresPath } from './season-page'
 import { seasonAddress } from './seasons'
 
@@ -134,25 +135,31 @@ export function ClubTopScorersCard({
       columns={['Seizoen', 'Speler', { abbreviation: 'D', name: 'Doelpunten' }]}
       rows={rows.map(({ goals, incomplete, players, season }) => ({
         cells: [
-          players.map((player, index) => (
-            <Text as="span" key={player.id}>
-              {index > 0 && ', '}
-              <PlayerName givenName={player.givenName} href={player.href} surname={player.surname} />
-            </Text>
-          )),
-          incomplete ? (
-            <>
-              {goals}
-              <Text aria-hidden="true" as="span">
-                *
+          {
+            content: players.map((player, index) => (
+              <Text as="span" key={player.id}>
+                {index > 0 && ', '}
+                <PlayerName givenName={player.givenName} href={player.href} surname={player.surname} />
               </Text>
-              <Text as="span" className="hf-visually-hidden">
-                , niet alle doelpuntenmakers bekend
-              </Text>
-            </>
-          ) : (
-            goals
-          ),
+            )),
+            sortValue: players.map((player) => textSortName(player.surname)).join(', '),
+          },
+          {
+            content: incomplete ? (
+              <>
+                {goals}
+                <Text aria-hidden="true" as="span">
+                  *
+                </Text>
+                <Text as="span" className="hf-visually-hidden">
+                  , niet alle doelpuntenmakers bekend
+                </Text>
+              </>
+            ) : (
+              goals
+            ),
+            sortValue: goals,
+          },
         ],
         header: season,
         href: `${seasonAddress(playerFiguresPath, season, current)}${competitionQuery(competition)}`,

@@ -13,10 +13,17 @@ import {
   isFormColumn,
   type MatchGaps,
 } from '#src/beheer/quality-table'
+import { textSortName } from '#src/player-name'
 
 // The pieces of the tables of the page Kwaliteit (issue 1163): the columns with a letter for a
 // phone, the line that explains the letters and the signs, and a row for a match, and the same
 // for a person (issue 1165).
+
+/**
+ * What a column of signs sorts on: the number a sign shows, and nothing for a sign that is
+ * no number, such as `?` and `…`, which count as an empty cell.
+ */
+export const signValue = (sign: string) => (/^\d+$/u.test(sign) ? Number(sign) : null)
 
 /** The columns of a table of persons, after the column of the row headers. */
 export function personGapTableColumns(first: string): (DataTableTextColumn | string)[] {
@@ -48,18 +55,24 @@ export function gapTableColumns(first: string): (DataTableTextColumn | string)[]
 export function personGapRow(person: PersonGaps, back: string): DataTableTextRow {
   return {
     cells: personGapColumns.map(({ key }) =>
-      person.gaps[key] === true ? (
-        <DataTable.Mark
-          description={`${personGapWords[key]} bij ${person.name}`}
-          href={personPartPath(person.id, personColumnParts[key], { back, column: key })}
-          key={key}
-        >
-          ?
-        </DataTable.Mark>
-      ) : null,
+      person.gaps[key] === true
+        ? {
+            content: (
+              <DataTable.Mark
+                description={`${personGapWords[key]} bij ${person.name}`}
+                href={personPartPath(person.id, personColumnParts[key], { back, column: key })}
+                key={key}
+              >
+                ?
+              </DataTable.Mark>
+            ),
+            sortValue: signValue('?'),
+          }
+        : null,
     ),
     header: person.name,
     secondary: person.years,
+    sortHeader: textSortName(person.name),
   }
 }
 
@@ -92,15 +105,26 @@ export function matchGapRow(match: MatchGaps, back: string): DataTableTextRow {
     cells: gapColumns.map(({ key }) => {
       const gap = match.gaps[key]
 
-      return gap === undefined ? null : (
-        <DataTable.Mark description={`${gapWords(key, gap)} bij ${where}`} href={gapPath(match, key, back)} key={key}>
-          {gap.sign}
-        </DataTable.Mark>
-      )
+      return gap === undefined
+        ? null
+        : {
+            content: (
+              <DataTable.Mark
+                description={`${gapWords(key, gap)} bij ${where}`}
+                href={gapPath(match, key, back)}
+                key={key}
+              >
+                {gap.sign}
+              </DataTable.Mark>
+            ),
+            sortValue: signValue(gap.sign),
+          }
     }),
     // Unique within a season: sc Heerenveen plays at most once a day.
     header: shortDayOf(match.matchDate),
     secondary: opponent,
+    // The days sort by the date, not by the words of the day.
+    sortHeader: match.matchDate,
   }
 }
 

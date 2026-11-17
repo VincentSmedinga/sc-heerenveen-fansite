@@ -1,4 +1,5 @@
 import type { PublicClubMatch, PublicClubRecord, PublicSeasonWikipediaPage } from '@fansite/db/queries'
+import type { DataTableCell } from '@fansite/design-system'
 
 import { competitions } from '@fansite/db/schema'
 import {
@@ -58,6 +59,7 @@ import {
   topPointsMinimum,
   topPointsOf,
 } from './opponents'
+import { figureCell } from './table-values'
 
 /**
  * What the cards of the opponents say about the matches they count: all the played matches
@@ -97,12 +99,9 @@ const clubFigures = [
 
 /**
  * The columns of the list: the club, and a number each, with the word a screen reader says.
- * Every column can be sorted.
+ * Every column can be sorted, as in every table.
  */
-export const clubColumns = [
-  { name: 'Club', sortable: true },
-  ...clubFigures.map((column) => ({ ...column, sortable: true })),
-] as const
+export const clubColumns = [{ name: 'Club' }, ...clubFigures] as const
 
 /** The legend under the list: the columns of the table, with what the points are. */
 const clubLegend = tableLegend(
@@ -292,7 +291,10 @@ export function ClubPlacesCard({ name, places }: { name: string; places: readonl
       <DataTable
         caption={`De plek in de Eredivisie waarin ${name} en sc Heerenveen eindigden, per seizoen`}
         columns={['Seizoen', 'Onze plek', 'Hun plek']}
-        rows={places.map(({ ours, season, theirs }) => ({ cells: [String(ours), String(theirs)], header: season }))}
+        rows={places.map(({ ours, season, theirs }) => ({
+          cells: [figureCell(ours, String(ours)), figureCell(theirs, String(theirs))],
+          header: season,
+        }))}
       />
       <EredivisieOnly />
     </Card>
@@ -470,8 +472,11 @@ export function ClubAttendanceCard({
     return null
   }
 
-  const cell = (value: null | number) =>
-    value === null ? 'Niet bekend' : value === 0 ? 'Zonder publiek' : attendanceFormat.format(value)
+  // A match without a number sorts last, whichever way the column is sorted.
+  const cell = (value: null | number): DataTableCell =>
+    value === null
+      ? { sortValue: null, text: 'Niet bekend' }
+      : { sortValue: value, text: value === 0 ? 'Zonder publiek' : attendanceFormat.format(value) }
 
   return (
     <Card aria-labelledby={clubAttendanceId} shareable={imageCredit(true, undefined, source)} surface="soft">
@@ -499,6 +504,8 @@ export function ClubAttendanceCard({
           rows={slots.map((slot) => ({
             cells: [...(choice === 'all' ? [slot.match.competition] : []), cell(slot.attendance)],
             header: formatTableDay(slot.match.matchDate),
+            // The days sort by the date, not by the words of the day.
+            sortHeader: slot.match.matchDate,
           }))}
         />
       </Disclosure>
@@ -700,6 +707,8 @@ export function HardestCard({
           href: `${address}/${place.slug}${query}`,
           position: place.place,
         }))}
+        // A ranking: its order is the answer, and the caption says which way: no sorting.
+        sortable={false}
       />
       <Text appearance="meta">{topPointsLegend}</Text>
       <BasedOnSince
@@ -749,14 +758,20 @@ export function LastWinCard({
           caption="De clubs in de Eredivisie, van de langste tijd sinds onze laatste overwinning tegen hen tot de kortste"
           columns={['Club', { bar: true, name: 'Dagen geleden' }]}
           rows={places.map((place, index) => ({
+            // A club we never beat has no number, so it stands last in either direction.
             cells:
               place.days === null
-                ? ['Nog nooit gewonnen']
+                ? [{ content: 'Nog nooit gewonnen', sortValue: null }]
                 : [
-                    <>
-                      {place.days.toLocaleString('nl-NL')}
-                      {shares === null ? null : <Bar share={shares[index] ?? 0} />}
-                    </>,
+                    {
+                      content: (
+                        <>
+                          {place.days.toLocaleString('nl-NL')}
+                          {shares === null ? null : <Bar share={shares[index] ?? 0} />}
+                        </>
+                      ),
+                      sortValue: place.days,
+                    },
                   ],
             header: place.name,
             ...(place.slug === null ? {} : { href: `${address}/${place.slug}${query}` }),
@@ -842,6 +857,8 @@ export function TopPointsCard({
               href: `${address}/${place.slug}${query}`,
               position: place.place,
             }))}
+            // A ranking: its order is the answer, and the caption says which way: no sorting.
+            sortable={false}
           />
           <Text appearance="meta">{topPointsLegend}</Text>
           <BasedOnSince

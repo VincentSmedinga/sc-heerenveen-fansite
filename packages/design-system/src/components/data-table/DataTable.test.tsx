@@ -68,6 +68,7 @@ describe('DataTable', () => {
           { aside: 'nr. 35', cells: [28], header: '2025/26' },
           { cells: [28], header: 'Totaal', total: true },
         ]}
+        sortable={false}
       />,
     )
     const [season, total] = [...container.querySelectorAll('tbody tr')] as HTMLElement[]
@@ -89,6 +90,7 @@ describe('DataTable', () => {
           { cells: [], gap: true, header: 'niet bij sc Heerenveen' },
           { cells: [30], header: '2020/21' },
         ]}
+        sortable={false}
       />,
     )
     const gaps = [...container.querySelectorAll('tbody tr.hf-data-table-gap')]
@@ -139,7 +141,7 @@ describe('DataTable', () => {
   })
 
   it('has the hf-data-table class and passes on other attributes and a class', () => {
-    render(<DataTable {...props} className="extra" id="tabel" />)
+    render(<DataTable {...props} className="extra" id="tabel" sortable={false} />)
 
     expect(screen.getByRole('table').className).toBe('hf-data-table extra')
     expect(screen.getByRole('table').id).toBe('tabel')
@@ -343,7 +345,7 @@ describe('DataTable with text', () => {
   })
 
   it('leaves the table of numbers as it was: no text class, and the numbers aligned to the end', () => {
-    render(<DataTable {...props} />)
+    render(<DataTable {...props} sortable={false} />)
 
     expect(screen.getByRole('table').className).toBe('hf-data-table')
     expect(document.querySelectorAll('.hf-numeric')).toHaveLength(2 + 4)
@@ -423,7 +425,7 @@ describe('DataTable.Group', () => {
   it('is a div with the class of the group, and passes other props on', () => {
     const { container } = render(
       <DataTable.Group className="extra" id="tabellen">
-        <DataTable {...props} />
+        <DataTable {...props} sortable={false} />
       </DataTable.Group>,
     )
 
@@ -443,7 +445,7 @@ describe('DataTable.Group', () => {
     }
 
     it('has a column before the row headers, named plaats for a screen reader, and a place in every row', () => {
-      render(<DataTable {...ranked} />)
+      render(<DataTable {...ranked} sortable={false} />)
 
       expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
         '#plaats',
@@ -457,7 +459,13 @@ describe('DataTable.Group', () => {
     })
 
     it('gives the cells of the column with key the class of the key figure and leaves the others', () => {
-      render(<DataTable {...ranked} columns={['Club', { ...tableColumns.pointsPerMatch, key: true }, 'G']} />)
+      render(
+        <DataTable
+          {...ranked}
+          columns={['Club', { ...tableColumns.pointsPerMatch, key: true }, 'G']}
+          sortable={false}
+        />,
+      )
 
       expect([...document.querySelectorAll('tbody td.hf-key')].map((cell) => cell.textContent)).toEqual([
         '2,50',
@@ -472,14 +480,15 @@ describe('DataTable.Group', () => {
         { key: true, name: 'G' },
       ]
 
-      expect(() => renderToStaticMarkup(<DataTable {...ranked} columns={['Club', ...twice]} />)).toThrow(
-        /at most one key column.*P, G/u,
-      )
+      expect(() =>
+        renderToStaticMarkup(<DataTable {...ranked} columns={['Club', ...twice]} sortable={false} />),
+      ).toThrow(/at most one key column.*P, G/u)
     })
 
     it('shows the number once for a shared place and a sign on the rows after it, heard as the place', () => {
       render(
         <DataTable
+          sortable={false}
           {...ranked}
           rows={[
             { cells: ['2,50', 6], header: 'Testclub', position: 1 },
@@ -500,6 +509,7 @@ describe('DataTable.Group', () => {
     it('starts the places again after a row for a time away, which has its own sign in the row header', () => {
       render(
         <DataTable
+          sortable={false}
           {...ranked}
           rows={[
             { cells: ['2,00', 5], header: 'FC Voorbeeld', position: 2 },
@@ -516,6 +526,7 @@ describe('DataTable.Group', () => {
     it('marks a highlighted row by more than colour, and says in a gap row what it hides', () => {
       render(
         <DataTable
+          sortable={false}
           {...ranked}
           rows={[
             { cells: ['2,00', 5], header: 'FC Voorbeeld', highlight: true, note: 'onze club', position: 6 },

@@ -156,13 +156,40 @@ function tableRows(matches: readonly AdminMatchRow[]) {
     const clubs = names[index] as string
 
     return {
-      cells: [<ResultCell key="uitslag" match={match} />, <ReportCell key="verslag" match={match} />],
+      cells: [
+        { content: <ResultCell key="uitslag" match={match} />, sortValue: resultWordOf(match) },
+        { content: <ReportCell key="verslag" match={match} />, sortValue: reportWordOf(match) },
+      ],
       header: names.indexOf(clubs) === names.lastIndexOf(clubs) ? clubs : `${clubs} (${match.round})`,
       href: targetOf(match),
       secondary: `${whenOf(match)} · ${match.competition}, ${match.round}`,
+      // The matches sort by the day and the kick-off, not by the names of the clubs.
+      sortHeader: `${match.matchDate} ${match.kickoffAt?.toISOString() ?? ''}`,
     }
   })
 }
+
+/** What the report column sorts on: the word of the state of the report. */
+const reportWordOf = (match: AdminMatchRow) =>
+  !match.reportable
+    ? null
+    : match.live
+      ? 'Live'
+      : match.reportToCheck
+        ? 'Klopt niet'
+        : match.reportStatus === 'klaar'
+          ? 'Klaar'
+          : match.reportStatus === 'bezig'
+            ? 'Niet af'
+            : 'Geen'
+
+/** What the result column sorts on: the score, or the status when there is none. */
+const resultWordOf = (match: AdminMatchRow) =>
+  match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null
+    ? match.home
+      ? `${match.goalsFor} - ${match.goalsAgainst}`
+      : `${match.goalsAgainst} - ${match.goalsFor}`
+    : null
 
 const clubsOf = (match: Pick<AdminMatchRow, 'home' | 'opponent'>) =>
   match.home ? `sc Heerenveen - ${match.opponent}` : `${match.opponent} - sc Heerenveen`

@@ -14,8 +14,7 @@ import type { CountryTally } from './countryTally'
 
 import { rowLinkText } from './MatchSearchLink'
 import { europeByCountryCard } from './matchShortcuts'
-
-const numberFormat = new Intl.NumberFormat('nl-NL')
+import { scoreCell } from './table-values'
 
 const figureColumns = [
   tableColumns.played,
@@ -67,7 +66,7 @@ export function CountryTallyCard({
           const link = country === null ? undefined : matchLink?.(country)
 
           return {
-            cells: [numberFormat.format(played), won, drawn, lost, `${goalsFor}–${goalsAgainst}`],
+            cells: [played, won, drawn, lost, scoreCell(goalsFor, goalsAgainst)],
             ...(country === null
               ? {}
               : {

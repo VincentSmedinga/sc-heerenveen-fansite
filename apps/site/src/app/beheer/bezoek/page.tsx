@@ -57,6 +57,8 @@ export default async function VisitPage() {
                   { cells: [totalShort.visitors, totalShort.views], header: `Laatste ${shortDays} dagen` },
                   { cells: [total.visitors, total.views], header: `Laatste ${days} dagen` },
                 ]}
+                // Two periods, the shorter first: a fixed series, so no sorting.
+                sortable={false}
               />
             </Card>
             <Card aria-labelledby="dagen-kop">
@@ -66,7 +68,12 @@ export default async function VisitPage() {
               <DataTable
                 caption={`Unieke bezoekers en paginaweergaven per dag, de laatste ${days} dagen, de nieuwste dag bovenaan`}
                 columns={['Dag', 'Unieke bezoekers', 'Weergaven']}
-                rows={perDay.map((row) => ({ cells: [row.visitors, row.views], header: formatDay(row.day) }))}
+                rows={perDay.map((row) => ({
+                  cells: [row.visitors, row.views],
+                  header: formatDay(row.day),
+                  // The days sort by the date, not by the words of the day.
+                  sortHeader: row.day,
+                }))}
               />
             </Card>
             <Card aria-labelledby="pagina-kop">
