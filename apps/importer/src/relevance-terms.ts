@@ -6,8 +6,9 @@
  * transfer windows (February and September), and add a word when a missed headline shows one
  * is missing (see the README of the importer, _Een naam toevoegen_).
  *
- * Last checked: 25 October 2026, against the page of the season 2026/27 on nl.wikipedia.org
- * (updated 17 October 2026) and the squad on vi.nl. Only names: no other data about a person.
+ * Last checked: 17 November 2026, against the page of the season 2026/27 on nl.wikipedia.org
+ * (updated 17 October 2026), the squad on vi.nl and, for the head coaches, the list of coaches
+ * on nl.wikipedia.org (of the season 2025/26). Only names: no other data about a person.
  *
  * Every term is written in the form `normaliseTitle` gives: lower case, without accents, with
  * words split at anything that isn't a letter or a digit. A test checks it. A term of more than
@@ -44,9 +45,11 @@ export const clubNames = ['heerenveen', 'hearrenfean'] as const
  * Someone so much part of the club that a headline about them belongs on the site without the
  * name of the club: Abe Lenstra, our greatest player of all time (the project owner decided
  * this on 25 October 2026). It matches "Abe Lenstra Stadion" too. A headline about the Abe
- * Lenstra Boulevard gets in as well; an editor can hide it.
+ * Lenstra Boulevard gets in as well; an editor can hide it. Foppe de Haan and Riemer van der
+ * Velde are on it too (17 November 2026), so that the story of a coach who left for Tuvalu,
+ * in the general sport section of a newspaper, gets in. "Foppen" is no match: whole words only.
  */
-export const clubLegends = ['abe lenstra'] as const
+export const clubLegends = ['abe lenstra', 'foppe de haan', 'riemer van der velde'] as const
 
 /**
  * The first team of sc Heerenveen and the staff around it, and those who left in 2026: their
@@ -92,6 +95,23 @@ export const clubPeople = [
   'erwin koenis',
   'johan hansma',
   'ferry de haan',
+  'martin koopman',
+  // Head coaches since 1990/91, the full name only (the list of coaches on nl.wikipedia.org);
+  // some of them worked elsewhere too, and an editor hides a headline that doesn't fit.
+  'fritz korbach',
+  'gertjan verbeek',
+  'trond sollied',
+  'jan everse',
+  'jan de jonge',
+  'ron jans',
+  'marco van basten',
+  'dwight lodeweges',
+  'jurgen streppel',
+  'jan olde riekerink',
+  'johnny jansen',
+  'ole tobiassen',
+  'kees van wonderen',
+  'robin van persie',
   // Left in 2026
   'amourricho van axel dongen',
   'eser gurbuz',
@@ -145,6 +165,7 @@ export const clubSurnames = [
   'schepens',
   'koenis',
   'hansma',
+  'koopman',
   // Left in 2026
   'van axel dongen',
   'gurbuz',

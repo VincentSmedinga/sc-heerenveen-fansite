@@ -117,6 +117,7 @@ describe('the seed', () => {
     const rows = await database.db.select({ filter: feeds.filter, url: feeds.url }).from(feeds)
 
     expect(rows.filter((feed) => feed.filter === 'club').map((feed) => feed.url)).toEqual([
+      'https://www.lc.nl/sport/rss/',
       'https://www.omropfryslan.nl/rss/index.xml',
       'https://feeds.nos.nl/nosvoetbal',
       'https://www.ad.nl/voetbal/rss.xml',
@@ -331,7 +332,7 @@ describe('the seed', () => {
     ])
   })
 
-  it('puts the Leeuwarder Courant in the register with its feed and the strictest policy', async () => {
+  it('puts the Leeuwarder Courant in the register with a plain club feed, a sport feed on the club filter and the strictest policy', async () => {
     await seedSources(database.db)
 
     const [courant] = await database.db.select().from(sources).where(eq(sources.domain, 'www.lc.nl'))
@@ -351,7 +352,10 @@ describe('the seed', () => {
     expect(courant?.consentStatus).not.toBe('given')
     expect(courant?.description).toBeTruthy()
     expect(courant?.description?.length).toBeLessThanOrEqual(300)
-    expect(courantFeeds.map((feed) => feed.url)).toEqual(['https://www.lc.nl/sport/sc-heerenveen/rss/'])
+    expect(courantFeeds.map((feed) => [feed.url, feed.filter])).toEqual([
+      ['https://www.lc.nl/sport/sc-heerenveen/rss/', 'none'],
+      ['https://www.lc.nl/sport/rss/', 'club'],
+    ])
   })
 
   it('puts Voetbal International in the register with its feed and the strictest policy', async () => {

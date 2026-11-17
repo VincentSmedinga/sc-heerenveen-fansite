@@ -73,12 +73,12 @@ Zegt een bron dat we moeten stoppen, dan zetten we hem meteen uit (`enabled` in 
 
 ### Overzicht
 
-| Besluit                             | Bronnen                                                                                                                                                                                                                                                                                                                                                                                             |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nemen                               | Leeuwarder Courant, Voetbal International (tagfeed), De Telegraaf, Omrop Fryslân (met het filter), NOS (met het filter), Algemeen Dagblad (met het filter), De Gelderlander (met het filter), ESPN NL (met het filter), Rijnmond (sportfeed, met het filter), RTV Noord (sportfeed, met het filter), OOG Groningen (twee feeds, één met het filter), Omroep Abe (podcast), Radio Camataru (podcast) |
-| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed)                                                                                                                                                                                                                                                                                                                                                                  |
-| Eerst toestemming                   | sc Heerenveen (officieel nieuws)                                                                                                                                                                                                                                                                                                                                                                    |
-| Afwijzen                            | Dagblad van het Noorden, RTV Drenthe, RTV Oost, Omroep Gelderland, RTV Utrecht, Omroep Flevoland, NH Nieuws, Omroep West, Omroep Zeeland, Omroep Brabant, L1 Nieuws, Eredivisie.nl, De Stentor, FC Groningen, PEC Zwolle, Sportcast (podcast), NOS Voetbalpodcast                                                                                                                                   |
+| Besluit                             | Bronnen                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Nemen                               | Leeuwarder Courant (twee feeds, één met het filter), Voetbal International (tagfeed), De Telegraaf, Omrop Fryslân (met het filter), NOS (met het filter), Algemeen Dagblad (met het filter), De Gelderlander (met het filter), ESPN NL (met het filter), Rijnmond (sportfeed, met het filter), RTV Noord (sportfeed, met het filter), OOG Groningen (twee feeds, één met het filter), Omroep Abe (podcast), Radio Camataru (podcast) |
+| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed)                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Eerst toestemming                   | sc Heerenveen (officieel nieuws)                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Afwijzen                            | Dagblad van het Noorden, RTV Drenthe, RTV Oost, Omroep Gelderland, RTV Utrecht, Omroep Flevoland, NH Nieuws, Omroep West, Omroep Zeeland, Omroep Brabant, L1 Nieuws, Eredivisie.nl, De Stentor, FC Groningen, PEC Zwolle, Sportcast (podcast), NOS Voetbalpodcast                                                                                                                                                                    |
 
 ## Nemen
 
@@ -95,7 +95,17 @@ Al in het register (#72).
   - Werkt: ja, RSS 2.0 met 50 berichten; het nieuwste is van 23 oktober 2026, het oudste van 15 augustus 2026.
   - Over sc Heerenveen: 47 van de 50 noemen Heerenveen in de kop of de categorieën.
   - Betaalmuur: ja, 8 van de 50 berichten staan erachter.
-- **`robots.txt`:** laat ons de feed toe.
+- **Tweede feed, de hele sportrubriek (#1353):** `https://www.lc.nl/sport/rss/`, met het filter `club`.
+  - Waarom: de krant zet een bericht over mensen van de club soms onder de algemene sportrubriek en niet onder die van de club, zoals het artikel over Foppe de Haan als bondscoach van Tuvalu.
+  - Werkt: ja, RSS 2.0 met 50 berichten, van 6 tot 16 november 2026, dus ongeveer vijf per dag; dezelfde opbouw, dezelfde `guid`s, dezelfde `<premium>`-markering en dezelfde tijdzone als de feed over de club.
+    7 van de 50 staan ook in de feed over de club, met dezelfde `guid` en link.
+    Verder gaat het vooral over Friese sport: Cambuur, amateurvoetbal, schaatsen.
+  - Gemeten op 17 november 2026, met één run van de importer op een lege database: 50 berichten gelezen, waarvan 43 nieuw en 7 al uit de feed over de club.
+    Het filter gaf 10 keer `relevant` (de 7 gedeelde en 3 nieuwe, waaronder het artikel over Foppe de Haan), 2 keer `doubtful` en 38 keer `irrelevant`; de importer sloeg niets over.
+    Van de 43 nieuwe berichten staan er 15 achter de betaalmuur (`<premium>`, per domein al ingesteld).
+    Dat zijn zo'n drie nieuwe berichten in tien dagen op de site.
+  - Een bericht dat beide feeds hebben, is één rij, en blijft `relevant` in welke volgorde de feeds ook draaien (zie _Een bericht dat een feed zonder filter aanbiedt, blijft `relevant`_ in [`beslissingen/importer.md`](beslissingen/importer.md)).
+- **`robots.txt`:** laat ons de feed toe, ook `/sport/rss/` (op 17 november 2026 gelezen, met onze user agent).
   Bovenaan staat een voorbehoud: alle rechten zijn voorbehouden, de inhoud is alleen voor persoonlijk gebruik, en de site mag niet worden gebruikt voor tekst- en datamining, scrapen of het automatisch verzamelen van gegevens.
   Het verwijst daarvoor naar artikel 4 van de Europese richtlijn voor auteursrecht in de digitale eengemaakte markt en naar de voorwaarden van de site.
 - **Voorwaarden:** niet gelezen (zie _De controle_).
@@ -103,6 +113,7 @@ Al in het register (#72).
 - **Besluit: nemen.**
   De feed gaat bijna helemaal over de club en `robots.txt` laat ons de feed lezen.
   Het voorbehoud tegen datamining houdt dat niet tegen; we tonen alleen de kop, de link, de bronnaam en de tijd.
+  Voor de tweede feed is er geen nieuwe beoordeling: het is dezelfde bron met dezelfde regels.
 
 ### Voetbal International, de tagfeed over sc Heerenveen
 
