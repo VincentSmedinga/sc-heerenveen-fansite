@@ -3697,3 +3697,8 @@
   **Waarom:** de eigenaar vindt 700 te zwaar naast de uitslag, en het designsysteem heeft al een token voor het gewicht van een naam; een eigen getal mag niet (`weight-css.test.ts`).
   **Alternatief:** een eigen token voor deze ene naam.
 - **Later:** vervangt de onderstreping van `.hf-match-link` uit _De regel met de clubs in `Match` is de link naar de pagina van de wedstrijd_ (#1332) en de rol van de twee metaregels uit _Een wedstrijd heeft twee metaregels met een vaste rol en een vaste volgorde_ (#1258).
+- **Besluit:** `Match` krijgt `attendance`, het aantal toeschouwers, en een gespeelde wedstrijd zet het in de onderste metaregel tussen het stadion en de scheidsrechter, elk alleen als we het weten (#1346).
+  Het getal staat in de Nederlandse notatie met het woord erachter ("26.100 toeschouwers"), 0 is "Zonder publiek", zoals de pagina van een wedstrijd het zegt, en een onbekend aantal toont niets.
+  De lijsten met details (`withDetails`) geven `matches.attendance` door, op de plaatsen waar ze het stadion en de scheidsrechter al doorgeven.
+  **Waarom:** de eigenaar wil het aantal toeschouwers in de lijst zien, en het staat al in de gegevens en op de pagina van een wedstrijd, dus het bronbeleid verandert niet.
+  **Alternatief:** alleen op de pagina van de wedstrijd laten staan.

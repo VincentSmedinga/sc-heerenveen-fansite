@@ -166,6 +166,24 @@ describe('Match', () => {
       expect(referee.container.querySelector('.hf-match-where')?.textContent).toBe('Jan Voorbeeld')
     })
 
+    it('has the stadium, the spectators and the referee in that order, with a Dutch number', () => {
+      const { container } = render(<Match {...played} attendance={26100} referee="Jan Voorbeeld" />)
+
+      expect(container.querySelector('.hf-match-where')?.textContent).toBe(
+        'Stadion Proeflaan · 26.100 toeschouwers · Jan Voorbeeld',
+      )
+    })
+
+    it('says "Zonder publiek" for 0, and shows nothing for an unknown number or a match not played', () => {
+      const none = render(<Match {...played} attendance={0} />)
+      const unknown = render(<Match {...played} attendance={null} />)
+      const scheduledMatch = render(<Match {...scheduled} attendance={500} />)
+
+      expect(none.container.querySelector('.hf-match-where')?.textContent).toBe('Stadion Proeflaan · Zonder publiek')
+      expect(unknown.container.querySelector('.hf-match-where')?.textContent).toBe('Stadion Proeflaan')
+      expect(scheduledMatch.container.textContent).not.toContain('toeschouwers')
+    })
+
     it('is left out when neither is given', () => {
       const { container } = render(<Match {...played} referee="" stadium={undefined} />)
 

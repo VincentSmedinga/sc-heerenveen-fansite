@@ -8,6 +8,8 @@ import { Time } from '../time/Time'
 /** The name of our own club, which a match always has on one side. */
 const ourClub = 'sc Heerenveen'
 
+const attendanceFormat = new Intl.NumberFormat('nl-NL')
+
 /**
  * Where a match stands: still to be played, played, called off without a new date, or called
  * off for good.
@@ -117,7 +119,13 @@ type MatchAfterNinety =
     }
   | { afterNinetyAgainst?: never; afterNinetyFor?: never }
 
-type MatchBaseProps = {
+type MatchBaseProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
+  /**
+   * The number of spectators of a played match. It stands in the line under the clubs, between
+   * the stadium and the referee, as `12.345 toeschouwers`, or `Zonder publiek` for 0. A match
+   * that is not played, and a match without a known number (`null`), shows nothing.
+   */
+  attendance?: null | number | undefined
   /** A match has no children: everything it shows comes from the props below. */
   children?: never
   /**
@@ -153,11 +161,11 @@ type MatchBaseProps = {
   /** The round as the source has it, such as `Speelronde 12` or `Tweede ronde`. */
   round: string
   /**
-   * The stadium, as plain text. It starts the line under the clubs, with the referee after it.
-   * Without a stadium and a referee there is no such line.
+   * The stadium, as plain text. It starts the line under the clubs, with the spectators and the
+   * referee after it. Without any of the three there is no such line.
    */
   stadium?: null | string | undefined
-} & Omit<ComponentPropsWithoutRef<'div'>, 'children'>
+}
 
 /** A match that is called off has no time and no result, only the word for its status. */
 type MatchCalledOffProps<Status extends 'cancelled' | 'postponed'> = MatchBaseProps & {
@@ -234,8 +242,9 @@ const separator = (
  * A match has at most two small lines of its own, each with a fixed order. A match with a
  * result, a live one too, has above the clubs the competition, the round and the day
  * ("Eredivisie · Speelronde 9 · za 24 okt 2015"), and under the clubs and the scorers the
- * stadium and the referee ("Abe Lenstra Stadion · Danny Makkelie"), for lists that want that
- * detail; without both there is no such line. A match without a result puts the day (or the
+ * stadium, the spectators and the referee ("Abe Lenstra Stadion · 26.100 toeschouwers · Danny
+ * Makkelie"), each only when known, for lists that want that detail; without them there is no
+ * such line. A match without a result puts the day (or the
  * time, "Uitgesteld" or "Geannuleerd") first under the clubs, before the stadium and the
  * referee, so that line is always there, and has above them only the competition and the round
  * ("Eredivisie · Speelronde 9"). The page decides what is on it: without `competition`, under a
@@ -279,6 +288,7 @@ const separator = (
 export const Match = ({
   afterNinetyAgainst,
   afterNinetyFor,
+  attendance,
   className,
   competition,
   dateTime,
@@ -340,7 +350,13 @@ export const Match = ({
     ) : (
       <Time dateTime={dateTime}>{time}</Time>
     )
-  const where = [stadium, referee].filter((part) => part)
+  const crowd =
+    status !== 'played' || attendance === null || attendance === undefined
+      ? undefined
+      : attendance === 0
+        ? 'Zonder publiek'
+        : `${attendanceFormat.format(attendance)} toeschouwers`
+  const where = [stadium, crowd, referee].filter((part) => part)
   // A match without a result puts the day under the clubs, before the stadium; one with a
   // result (a live one too) ends the line above the clubs with it.
   const dateBelow = status !== 'played' && live !== true

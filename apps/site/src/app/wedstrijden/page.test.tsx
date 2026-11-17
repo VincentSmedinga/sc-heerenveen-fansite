@@ -106,6 +106,18 @@ describe('the links to the pages of the matches', () => {
     expect(resultCards(html)).not.toContain('Pieter Maquette')
   })
 
+  it('shows the spectators between the stadium and the referee of a played match, not in the results', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: matchData.matches.map((match) => ({ ...match, attendance: 26100, referee: 'Pieter Maquette' })),
+    })
+
+    const html = await render()
+
+    expect(html).toMatch(/26\.100 toeschouwers<\/span> <span aria-hidden="true">·<\/span> <span[^>]*>Pieter Maquette/)
+    expect(resultCards(html)).not.toContain('toeschouwers')
+  })
+
   it('shows the results without links, and says why in the log, when the pages cannot be read', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
 

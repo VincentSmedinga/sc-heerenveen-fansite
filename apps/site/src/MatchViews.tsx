@@ -808,7 +808,8 @@ export function MatchLegend({ matches }: { matches: readonly MatchLineMatch[] })
 /**
  * A list of matches, each as a line with its own day or time. A line names its competition,
  * unless `withCompetition` is false, for a list under a heading that names it already. Only a
- * list with detail (`withDetails`) has the stadium and the referee under the clubs. The
+ * list with detail (`withDetails`) has the stadium, the spectators and the referee under the
+ * clubs. The
  * legend under the list holds only the abbreviations of these matches.
  */
 export function MatchLines({
@@ -843,7 +844,7 @@ export function MatchLines({
    */
   reportAddresses?: ReadonlyMap<string, string> | undefined
   withCompetition?: boolean
-  /** Whether the line under the clubs has the stadium and the referee, where they are known. */
+  /** Whether the line under the clubs has the stadium, spectators and referee, where known. */
   withDetails?: boolean
 }) {
   return (
@@ -857,6 +858,7 @@ export function MatchLines({
           return (
             <List.Item key={`${match.competition}-${match.round}`}>
               <MatchLine
+                attendance={withDetails ? match.attendance : undefined}
                 extra={extraOf?.(match)}
                 live={liveReports?.has(key) === true}
                 match={match}
@@ -1603,7 +1605,8 @@ export const metaSeparator = (
 
 /**
  * What a line of a match needs, which a match of a season has and so has a match against a
- * club: the number of spectators and the referee are the only fields that a line leaves out.
+ * club: the number of spectators and the referee are the only fields that a line leaves out,
+ * and a list with detail passes them as props.
  */
 export type MatchLineMatch = Omit<PublicMatch, 'attendance' | 'referee'>
 
@@ -1614,6 +1617,7 @@ export type MatchLineMatch = Omit<PublicMatch, 'attendance' | 'referee'>
  * `withYear`, which gives the day of a played match its year (see `matchMoment`).
  */
 export function MatchLine({
+  attendance,
   extra,
   live = false,
   match,
@@ -1625,6 +1629,8 @@ export function MatchLine({
   withStadium = false,
   withYear = false,
 }: {
+  /** The number of spectators, for the line under the clubs; only a played match shows it. */
+  attendance?: null | number | undefined
   /** Small lines under the clubs, such as the previous meeting. */
   extra?: ReactNode
   /**
@@ -1665,6 +1671,7 @@ export function MatchLine({
   if (match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null) {
     const result = {
       ...common,
+      attendance,
       ...matchMoment(match, now, { withYear }),
       extraTime: match.extraTime,
       goals: goalsWithInitials(match.goals),

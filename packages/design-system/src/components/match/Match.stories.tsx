@@ -16,7 +16,7 @@ const meta = preview.meta({
       description: {
         component: [
           'Een wedstrijd van sc Heerenveen 1, als regel in een lijst: bovenaan de competitie en de ronde, dan de twee clubs met de uitslag ertussen, eventueel de doelpuntenmakers, en onderaan het stadion en de scheidsrechter. De dag staat bij een gespeelde wedstrijd achter de ronde, en bij een wedstrijd zonder uitslag vooraan in de regel onder de clubs.',
-          'De twee metaregels hebben elk een vaste volgorde: competitie, ronde, dag bij een uitslag; dag, stadion, scheidsrechter bij een wedstrijd zonder uitslag. De onderste regel is er dan altijd, ook voor "Uitgesteld" en "Geannuleerd". Een onderdeel breekt niet in tweeën, dus een regel die te lang is, breekt tussen twee onderdelen. De pagina bepaalt wat er staat door iets door te geven of weg te laten: laat `competition` weg onder een kop die de competitie al noemt, en geef `stadium` en `referee` alleen mee waar de lijst die details wil.',
+          'De twee metaregels hebben elk een vaste volgorde: competitie, ronde, dag bij een uitslag; dag, stadion, toeschouwers (alleen bij een uitslag), scheidsrechter bij een wedstrijd zonder uitslag. De onderste regel is er dan altijd, ook voor "Uitgesteld" en "Geannuleerd". Een onderdeel breekt niet in tweeën, dus een regel die te lang is, breekt tussen twee onderdelen. De pagina bepaalt wat er staat door iets door te geven of weg te laten: laat `competition` weg onder een kop die de competitie al noemt, en geef `stadium` en `referee` alleen mee waar de lijst die details wil.',
           'Kies hem voor een volledige lijst, zoals een seizoen of alle wedstrijden tegen één club; ook voor een selectie, zoals een record. Laat `competition` weg onder een kop die de competitie al noemt.',
           'De thuisclub staat eerst en de uitslag heeft de kleur van de uitkomst voor sc Heerenveen, nooit als enig teken. Een wedstrijd kan nog moeten komen, uitgesteld of geannuleerd zijn, live gaan, na verlenging of strafschoppen eindigen, of nog geen uitslag hebben.',
           'Een wedstrijd met een eigen pagina (`reportHref`) heeft de regel met de twee clubs en de uitslag als link. De namen en het streepje hebben de kleur van een link, de uitslag houdt de kleur van de uitkomst, en de regel is onderstreept als een gewone link, en dikker onder de muis en bij focus van het toetsenbord. Een schermlezer hoort wat er staat en dan waar de link heen gaat, zoals "sc Heerenveen 2 tegen 0 Ajax, verslag". Een wedstrijd zonder pagina is gewone tekst. De andere regels staan buiten de link.',
@@ -870,6 +870,7 @@ const renderMetaLines = () => (
       <List role="list">
         <List.Item>
           <Match
+            attendance={26100}
             competition="Eredivisie"
             dateTime="2015-10-24"
             goalsAgainst={0}
