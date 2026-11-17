@@ -243,6 +243,11 @@
     text-align: center;
   }
 
+  /* The button of a column of signs is centred too, so the letter stands over the signs. */
+  .hf-data-table-text .hf-data-table-mark-column .hf-data-table-sort {
+    justify-content: center;
+  }
+
   .hf-data-table-mark {
     background-color: var(--hf-colour-background-missing);
     border-radius: 0.25rem;

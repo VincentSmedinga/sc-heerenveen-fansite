@@ -1,4 +1,9 @@
-import type { DataTableCell, DataTableRow } from './dataTableTypes'
+import { isValidElement } from 'react'
+
+import type { DataTableSortValue } from './dataTableTypes'
+
+/** What sorting needs of a row, with numbers or text: the row header and the cells. */
+export type SortableRow = { cells: readonly unknown[]; header: string; sortHeader?: string }
 
 export type SortDirection = 'ascending' | 'descending'
 
@@ -7,24 +12,55 @@ export type Sorting = { column: number; direction: SortDirection }
 
 const collator = new Intl.Collator('nl', { numeric: true, sensitivity: 'base' })
 
-/** The value a cell sorts on: its `sortValue`, or the cell itself. */
-export const sortValueOf = (cell: DataTableCell): number | string => (typeof cell === 'object' ? cell.sortValue : cell)
+/**
+ * The value a cell sorts on: its `sortValue`, or the number or text it is. `null` is an empty
+ * cell (nothing, or `sortValue: null` for a sign such as `?`), and `undefined` is a cell that
+ * has no value to sort on, such as a link without a `sortValue`.
+ */
+export const sortValueOf = (cell: unknown): DataTableSortValue | undefined => {
+  if (cell === null || cell === undefined || typeof cell === 'boolean') {
+    return null
+  }
 
-const valueIn = (row: DataTableRow, column: number): number | string => {
-  const cell = row.cells[column - 1]
+  if (typeof cell === 'number') {
+    return Number.isNaN(cell) ? null : cell
+  }
 
-  return column === 0 || cell === undefined ? row.header : sortValueOf(cell)
+  if (typeof cell === 'string') {
+    return cell.trim() === '' ? null : cell
+  }
+
+  if (typeof cell === 'object' && !isValidElement(cell) && 'sortValue' in cell) {
+    const value = (cell as { sortValue: DataTableSortValue }).sortValue
+
+    return typeof value === 'string' && value.trim() === '' ? null : value
+  }
+
+  return undefined
 }
 
+const valueIn = (row: SortableRow, column: number): DataTableSortValue | undefined =>
+  column === 0 ? (row.sortHeader ?? row.header) : sortValueOf(row.cells[column - 1])
+
 /**
- * Whether a column holds numbers only. The row headers and a column with any text are sorted as
- * text, from A to Z. A column without rows has nothing to sort, so it counts as text.
+ * Whether a table can sort on a column: every cell has a value to sort on, or is empty. The
+ * row headers always have one. A table with fewer than two rows has nothing to put in order.
  */
-export const isNumericColumn = (rows: readonly DataTableRow[], column: number) =>
-  column > 0 && rows.length > 0 && rows.every((row) => typeof valueIn(row, column) === 'number')
+export const isSortableColumn = (rows: readonly SortableRow[], column: number) =>
+  rows.length > 1 && rows.every((row) => valueIn(row, column) !== undefined)
+
+/**
+ * Whether a column holds numbers only, apart from empty cells. The row headers and a column
+ * with any text are sorted as text, from A to Z. A column with nothing in it counts as text.
+ */
+export const isNumericColumn = (rows: readonly SortableRow[], column: number) => {
+  const values = rows.map((row) => valueIn(row, column)).filter((value) => value !== null)
+
+  return column > 0 && values.length > 0 && values.every((value) => typeof value === 'number')
+}
 
 /** The direction a first click on the column sorts in: the biggest number first, or A to Z. */
-export const firstDirection = (rows: readonly DataTableRow[], column: number): SortDirection =>
+export const firstDirection = (rows: readonly SortableRow[], column: number): SortDirection =>
   isNumericColumn(rows, column) ? 'descending' : 'ascending'
 
 const compareValues = (left: number | string, right: number | string) => {
@@ -41,10 +77,16 @@ const compareValues = (left: number | string, right: number | string) => {
 }
 
 /**
- * The line a screen reader hears after a sort, such as `Gesorteerd op Gespeeld, van hoog naar
+ * The line a screen reader hears after a click, such as `Gesorteerd op Gespeeld, van hoog naar
  * laag`: the name of the column with a capital, and the direction in words that fit the column.
+ * Without a sorting, which is the third click, it says the table is back in the order of the
+ * page.
  */
-export function describeSorting(name: string, direction: SortDirection, numeric: boolean) {
+export function describeSorting(name: string, direction: SortDirection | undefined, numeric: boolean) {
+  if (direction === undefined) {
+    return 'Niet meer gesorteerd, in de volgorde van de pagina'
+  }
+
   const way = numeric
     ? direction === 'ascending'
       ? 'van laag naar hoog'
@@ -58,20 +100,33 @@ export function describeSorting(name: string, direction: SortDirection, numeric:
 
 /**
  * The rows sorted on a column. Numbers are sorted as numbers and text by the Dutch rules, where
- * a capital and an accent do not count. Rows with equal values stay in the order of the row
- * headers, A to Z, whatever the direction, and rows that are equal in that too keep the order
- * they were given in. It does not change `rows`.
+ * a capital and an accent do not count and a number in a name counts by its value. An empty
+ * cell stands last, whichever way the column is sorted. Rows with equal values keep the order
+ * they were given in, or with `byHeader` stand in the order of the row headers, A to Z,
+ * whatever
+ * the direction. It does not change `rows`.
  */
-export function sortRows(rows: readonly DataTableRow[], { column, direction }: Sorting): DataTableRow[] {
+export function sortRows<Row extends SortableRow>(
+  rows: readonly Row[],
+  { column, direction }: Sorting,
+  { byHeader = false }: { byHeader?: boolean } = {},
+): Row[] {
   const sign = direction === 'ascending' ? 1 : -1
 
   return rows
-    .map((row, index) => ({ index, row, value: valueIn(row, column) }))
-    .sort(
-      (left, right) =>
+    .map((row, index) => ({ index, row, value: valueIn(row, column) ?? null }))
+    .sort((left, right) => {
+      if (left.value === null || right.value === null) {
+        return left.value === right.value ? left.index - right.index : left.value === null ? 1 : -1
+      }
+
+      return (
         sign * compareValues(left.value, right.value) ||
-        collator.compare(left.row.header, right.row.header) ||
-        left.index - right.index,
-    )
+        (byHeader
+          ? collator.compare(left.row.sortHeader ?? left.row.header, right.row.sortHeader ?? right.row.header)
+          : 0) ||
+        left.index - right.index
+      )
+    })
     .map(({ row }) => row)
 }
