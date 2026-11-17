@@ -1,4 +1,4 @@
-import { Card, DataTable, Heading, tableColumns, tableLegend, Text } from '@fansite/design-system'
+import { Card, DataTable, Heading, type TableColumn, tableColumns, tableLegend, Text } from '@fansite/design-system'
 
 import type { PlayerSeason } from './player-seasons'
 
@@ -25,8 +25,8 @@ const dash = '–'
 
 /** What the table shows for a player: the columns, the rows and the sentences under it. */
 export type PlayerSeasonsTable = {
-  /** The letters and words of the columns, in order. */
-  columns: { abbreviation: string; id: FigureId; name: string }[]
+  /** The icons and words of the columns, in order. */
+  columns: (TableColumn & { id: FigureId })[]
   /** Whether a column adds up every season: the total is then complete. */
   complete: Record<FigureId, boolean>
   /** The seasons, the newest first, and the total. A figure we do not have is a dash. */
@@ -82,7 +82,7 @@ const seasonsText = (seasons: readonly string[]) =>
  * The card "Per seizoen" of the page of a player (#1082): a table with a row for each season,
  * the newest first, and a row Totaal. The season is a link to its page Spelers, with the shirt
  * number under it. The columns follow his line (see `playerSeasonsTable`), and under the table
- * stand the letters with their words and the sentences that say what a dash and the total mean
+ * stand the icons with their words and the sentences that say what a dash and the total mean
  * (see `playerSeasonsNotes`).
  */
 export function PlayerSeasonsCard({
@@ -113,7 +113,7 @@ export function PlayerSeasonsCard({
       </Heading>
       <DataTable
         caption={`De cijfers van ${name} per seizoen bij sc Heerenveen, ${competition === 'all' ? '' : `alleen ${competitionWords(competition)}, `}het nieuwste seizoen eerst, met het totaal onderaan`}
-        columns={['Seizoen', ...table.columns.map(({ abbreviation, name: word }) => ({ abbreviation, name: word }))]}
+        columns={['Seizoen', ...table.columns.map(({ icon, name: word }) => ({ icon, name: word }))]}
         rows={table.rows.map((row) => ({
           cells: row.cells,
           ...(row.gap === true ? { gap: true } : {}),
@@ -125,10 +125,7 @@ export function PlayerSeasonsCard({
         sortable={false}
       />
       <Text appearance="meta">
-        {[
-          `${tableLegend(table.columns)}.`,
-          ...playerSeasonsNotes(seasons, table, goalkeeper, competition !== 'all'),
-        ].join(' ')}
+        {tableLegend(table.columns)}. {playerSeasonsNotes(seasons, table, goalkeeper, competition !== 'all').join(' ')}
       </Text>
     </Card>
   )

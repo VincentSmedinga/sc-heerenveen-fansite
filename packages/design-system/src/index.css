@@ -71,6 +71,7 @@
 @import url('./components/discussion-item/discussion-item.css');
 @import url('./components/match/match.css');
 @import url('./components/match-event-icon/match-event-icon.css');
+@import url('./components/table-column-icon/table-column-icon.css');
 @import url('./components/match-header/match-header.css');
 @import url('./components/match-neighbours/match-neighbours.css');
 @import url('./components/match-penalty-series/match-penalty-series.css');

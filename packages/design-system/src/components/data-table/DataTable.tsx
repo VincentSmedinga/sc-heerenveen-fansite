@@ -49,9 +49,9 @@ export type DataTableProps =
        * The column headers, in order. The first column holds the row headers (a day, a path),
        * and the others hold numbers, aligned to the end. Keep a header short: it only wraps at
        * a space, so a long word makes the table wider than a phone. A table with many columns,
-       * which does not fit a phone with whole words, gives a column as
-       * `{ abbreviation, name }`: the header shows the abbreviation, and the page explains it
-       * in a line under the table.
+       * which does not fit a phone with whole words, gives a column from `tableColumns`: the
+       * header shows its icon, and the page explains it in a legend under the table
+       * (`tableLegend`). A column that is not in `tableColumns` can give an `abbreviation`.
        * A column given as `{ name, sortable: false }` has no sorting, such as one with only a
        * link.
        */

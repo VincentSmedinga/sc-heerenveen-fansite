@@ -5,6 +5,7 @@ import type { FinalPlace } from './matches'
 import type { SeasonTally } from './seasonTally'
 
 import { lineOf, SeasonBySeasonCard } from './SeasonBySeasonCard'
+import { legendsOf } from './test-legend'
 import { withoutIcons } from './without-icons'
 
 const row = (position: number, pointsDeducted = 0, goalDifference = 5) => ({
@@ -109,8 +110,8 @@ describe('SeasonBySeasonCard', () => {
 
     expect(html).toContain('>12<')
     expect(html).toContain('54–55')
-    expect(html).toContain('W winst, G gelijk, V verlies, D doelpunten (voor–tegen)')
-    expect(html).toContain('<abbr title="Winst">')
+    expect(legendsOf(html)).toEqual(['winst, gelijk, verlies, doelpunten (voor–tegen)'])
+    expect(html).toContain('<span title="Winst">')
   })
 
   it('marks the going season as nu and says in the caption which competitions are counted', () => {

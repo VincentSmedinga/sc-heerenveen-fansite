@@ -238,6 +238,8 @@ export type { StandingsTableProps, StandingsTableRow } from './components/standi
 export { Strong } from './components/strong/Strong'
 export { Switch } from './components/switch/Switch'
 export type { SwitchProps } from './components/switch/Switch'
+export { TableColumnIcon, tableColumnIconNames } from './components/table-column-icon/TableColumnIcon'
+export type { TableColumnIconName, TableColumnIconProps } from './components/table-column-icon/TableColumnIcon'
 export { signedNumber, tableColumns, tableLegend } from './components/table-columns'
 export type { TableColumn } from './components/table-columns'
 export { Tag, tagTones } from './components/tag/Tag'

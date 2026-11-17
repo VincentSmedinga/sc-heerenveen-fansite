@@ -42,7 +42,7 @@ async function clickThreeTimes(page: Page, name: string) {
 
 test('puts a table of the site back in the order of the page on the third click', async ({ page }) => {
   await page.goto('/tegenstanders')
-  await clickThreeTimes(page, 'G gespeeld')
+  await clickThreeTimes(page, 'gespeeld')
 })
 
 test('puts a table of the admin back in the order of the page on the third click', async ({

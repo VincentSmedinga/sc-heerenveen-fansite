@@ -1010,9 +1010,7 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     expect(html.match(/<th class="hf-numeric" scope="col">/g)).toHaveLength(3)
     expect(html).not.toContain('role="region"')
     expect(html.match(/class="hf-highlight hf-standings-table-own"/g)).toHaveLength(1)
-    expect(html).toContain(
-      '<abbr title="Punten"><span aria-hidden="true">P</span><span class="hf-visually-hidden">punten</span></abbr>',
-    )
+    expect(withoutIcons(html)).toContain('<span title="Punten"><span class="hf-visually-hidden">punten</span></span>')
     expect(html).not.toContain('hf-bar-legend')
   })
 
@@ -1024,10 +1022,10 @@ describe('the matches and the table in the sidebar of the homepage', () => {
       html.indexOf('</tr>', html.indexOf('hf-standings-table-own')),
     )
 
-    expect([...head.matchAll(/<span aria-hidden="true">([^<]*)<\/span>/g)].map((match) => match[1])).toEqual([
-      '#',
-      'G',
-      'P',
+    expect([...head.matchAll(/<span class="hf-visually-hidden">([^<]*)<\/span>/g)].map((match) => match[1])).toEqual([
+      'positie',
+      'gespeeld',
+      'punten',
     ])
     expect([...ours.matchAll(/<td[^>]*>([^<]*)<\/td>/g)].map((match) => match[1])).toEqual(['2', '2', '6'])
     expect(html).not.toContain('class="hf-bar"')

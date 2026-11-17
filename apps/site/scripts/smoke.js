@@ -1614,18 +1614,22 @@ await withEmptyDatabase((database) =>
     assert.match(facts[2][1], /^1 van de \d+ doelpunten$/)
     assert.match(facts[3][1], /^1 door de tegenstander · 0 door ons$/)
     assert.match(specialCard, /Alle \d+ gespeelde wedstrijden/)
-    // The column D/W is only there when the matches of every scorer are known and agree with
-    // the goals. The made-up season has a played match of the play-offs, which the squad table
-    // has no figures for, so all matches has no column, and the Eredivisie has one: Nepper
-    // scored two in four matches, and every player has a row of his own.
-    assert.doesNotMatch(figuresHtml, /D\/W|doelpunten per wedstrijd/)
+    // The column doelpunten per wedstrijd is only there when the matches of every scorer are
+    // known and agree with the goals. The made-up season has a played match of the play-offs,
+    // which the squad table has no figures for, so all matches has no column, and the
+    // Eredivisie has one: Nepper scored two in four matches, and every player has a row of his
+    // own.
+    assert.doesNotMatch(figuresHtml, /doelpunten per wedstrijd/)
     const eredivisieHtml = await (await fetch(`${origin}/spelers/cijfers?competitie=eredivisie`)).text()
-    assert.match(eredivisieHtml, /<abbr title="doelpunten per wedstrijd"><span aria-hidden="true">D\/W<\/span>/)
+    assert.match(
+      eredivisieHtml,
+      /<span title="Doelpunten per wedstrijd"><svg[^>]*aria-hidden="true".*?<\/svg><span class="hf-visually-hidden">doelpunten per wedstrijd<\/span><\/span>/,
+    )
     assert.match(
       eredivisieHtml,
       /hf-player-name-surname">Nepper<\/span><\/span><\/th><td class="hf-numeric hf-key">2<span[^>]*><\/span><\/td><td class="hf-numeric">0,50<\/td>/,
     )
-    assert.match(eredivisieHtml, /D doelpunten, D\/W doelpunten per wedstrijd\. D\/W: de doelpunten gedeeld door/)
+    assert.match(eredivisieHtml, /\. Doelpunten per wedstrijd: de doelpunten gedeeld door/)
     const eredivisieCard = cardOf(eredivisieHtml)
     assert.doesNotMatch(eredivisieCard, /Proefman/)
     assert.match(factsOf(eredivisieCard)[2][1], /^0 van de \d+ doelpunten$/)

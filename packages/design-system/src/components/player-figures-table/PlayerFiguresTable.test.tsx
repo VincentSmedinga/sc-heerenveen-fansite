@@ -54,25 +54,28 @@ describe('PlayerFiguresTable', () => {
     expect(document.querySelector('caption')?.className).toBe('hf-visually-hidden')
   })
 
-  it('has column headers with scope, the letters of tableColumns for the eye and the words for a screen reader', () => {
+  it('has column headers with scope, the icons of tableColumns for the eye and the words for a screen reader', () => {
     render(<PlayerFiguresTable {...props} />)
 
     const headers = screen.getAllByRole('columnheader')
 
     expect(headers.map((header) => header.textContent)).toEqual([
       'Speler',
-      'Ggespeeld',
-      'Bbasis',
-      'Iinvallers',
-      'Mminuten',
-      'Ddoelpunten',
-      'Aassists',
-      'Ygeel',
-      'Rrood',
+      'gespeeld',
+      'basis',
+      'ingevallen',
+      'minuten',
+      'doelpunten',
+      'assists',
+      'geel',
+      'rood',
     ])
+    expect(headers.slice(1).every((header) => header.querySelectorAll('svg[aria-hidden="true"]').length === 1)).toBe(
+      true,
+    )
     expect(headers.every((header) => header.getAttribute('scope') === 'col')).toBe(true)
     expect(screen.getByRole('columnheader', { name: 'gespeeld' })).toBeTruthy()
-    expect(screen.getByRole('columnheader', { name: 'invallers' })).toBeTruthy()
+    expect(screen.getByRole('columnheader', { name: 'ingevallen' })).toBeTruthy()
   })
 
   it('has a row header with the name of each player as one name, and his figures in the order of the columns', () => {
@@ -109,11 +112,21 @@ describe('PlayerFiguresTable', () => {
     expect([...container.querySelectorAll('td.hf-key')].map((cell) => cell.textContent)).toEqual(['905', '0', '1710'])
   })
 
-  it('says under the table what the letters are, in the order of the columns, and how a yellow-red card counts', () => {
+  it('says under the table what the icons are, in the order of the columns, and how a yellow-red card counts', () => {
     const { container } = render(<PlayerFiguresTable {...props} />)
 
-    expect(container.querySelector('.hf-bar-legend')?.textContent).toBe(
-      'G gespeeld, B basis, I invallers, M minuten, D doelpunten, A assists, Y geel, R rood. Een geel-rode kaart telt als een gele en een rode.',
+    expect([...container.querySelectorAll('.hf-table-legend-item')].map((item) => item.textContent?.trim())).toEqual([
+      'gespeeld',
+      'basis',
+      'ingevallen',
+      'minuten',
+      'doelpunten',
+      'assists',
+      'geel',
+      'rood',
+    ])
+    expect(container.querySelector('.hf-bar-legend')?.textContent).toMatch(
+      /\. Een geel-rode kaart telt als een gele en een rode\.$/u,
     )
   })
 

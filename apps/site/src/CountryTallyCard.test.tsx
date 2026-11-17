@@ -10,6 +10,7 @@ import { matchLink } from './cijfers-search'
 import { countryTalliesOf } from './countryTally'
 import { CountryTallyCard } from './CountryTallyCard'
 import { europeValues, findMatches, parseFilters } from './match-search'
+import { legendsOf } from './test-legend'
 import { withoutIcons } from './without-icons'
 
 const tallies: CountryTally[] = [
@@ -32,7 +33,7 @@ describe('CountryTallyCard', () => {
     expect(html).toContain('hf-card-soft')
     expect(html).toContain('<caption')
     expect(html).toContain('15–12')
-    expect(html).toContain('G gespeeld, W winst, G gelijk, V verlies, D doelpunten (voor–tegen)')
+    expect(legendsOf(html)).toEqual(['gespeeld, winst, gelijk, verlies, doelpunten (voor–tegen)'])
   })
 
   it('shows the country in words after its flag, and the row without a country as Land onbekend', () => {

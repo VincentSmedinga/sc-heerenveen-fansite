@@ -153,6 +153,19 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
     ],
   },
   {
+    label: 'Pictogrammen van de kolommen',
+    tokens: [
+      {
+        name: '--hf-colour-icon-shirt',
+        use: 'Vulling van het shirt (basis) in de pictogrammen van de kolommen, alleen daarvoor',
+      },
+      {
+        name: '--hf-colour-icon-boot',
+        use: 'Vulling van de voetbalschoen (assists) in de pictogrammen van de kolommen, alleen daarvoor',
+      },
+    ],
+  },
+  {
     label: 'Veld bij een wedstrijd',
     tokens: [
       { name: '--hf-colour-background-pitch', use: 'Grasmat van het veld met de opstelling van een wedstrijd' },

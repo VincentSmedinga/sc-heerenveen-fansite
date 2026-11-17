@@ -16,7 +16,7 @@ const meta = preview.meta({
         'De doelpunten die een hele balk vullen. Een tabel met alleen een later deel van de lijst geeft hier de doelpunten van de topscorer van de hele lijst.',
     },
     showGoalsPerMatch: {
-      description: 'Voegt de kolom D/W toe. Elke speler krijgt dan een eigen rij.',
+      description: 'Voegt de kolom doelpunten per wedstrijd toe. Elke speler krijgt dan een eigen rij.',
     },
     showYears: {
       description: 'Voegt de kolom Jaren toe, met de jaren bij de club. Elke speler krijgt dan een eigen rij.',
@@ -186,7 +186,7 @@ export const Default = meta.story({
 })
 
 export const Minutes = meta.story({
-  name: 'Een lijst van de minuten, met de letter M',
+  name: 'Een lijst van de minuten, met het pictogram van de minuten',
   render: render('32rem', minutesRows, false, tableColumns.minutes),
 })
 
@@ -206,7 +206,7 @@ export const Shared = meta.story({
 })
 
 export const PerMatch = meta.story({
-  name: 'Met de kolom D/W, een rij per speler',
+  name: 'Met de kolom doelpunten per wedstrijd, een rij per speler',
   render: render('32rem', perMatchRows, true),
 })
 

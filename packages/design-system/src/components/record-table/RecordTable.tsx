@@ -1,7 +1,8 @@
 import type { ComponentPropsWithoutRef } from 'react'
 
 import { classNames } from '../classNames'
-import { signedNumber, type TableColumn, tableColumns } from '../table-columns'
+import { TableColumnHead } from '../table-column-icon/TableColumnHead'
+import { signedNumber, type TableColumn, tableColumns, tableLegend } from '../table-columns'
 
 export type RecordTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   /**
@@ -61,10 +62,10 @@ const columns: Column[] = [
  * The record of sc Heerenveen against one opponent: a real `table` with a row for each part
  * (at home and away) and a column for each figure, and under them the row with the total. It
  * has the look of the table of `StandingsTable`, with a caption that is not shown, column
- * headers with `scope`, a row header for each row, and under the table the full words of the
- * abbreviations, as "G gespeeld, W winst, …". A screen reader hears the full word, not the
- * letter. The wins, draws and losses have the colours of the results (green, grey and red), as
- * in `Match`; the words in the header say what they are, so the colour is not alone. The
+ * headers with `scope`, a row header for each row, and under the table the legend with the
+ * icons and their words (`tableLegend`). A screen reader hears the full word, not the icon.
+ * The wins, draws and losses have the colours of the results (green, grey and red), as in
+ * `Match`; the words in the header say what they are, so the colour is not alone. The
  * points are the key figure, in the heaviest weight, and so is the total row.
  *
  * It is a form of its own next to `StandingsTable` and not a general version of it: a standings
@@ -94,10 +95,7 @@ export const RecordTable = ({ caption, className, rows, total, ...props }: Recor
             </th>
             {shown.map((column) => (
               <th className="hf-numeric" key={column.id} scope="col">
-                <abbr title={capitalise(column.name)}>
-                  <span aria-hidden="true">{column.abbreviation}</span>
-                  <span className="hf-visually-hidden">{column.name}</span>
-                </abbr>
+                <TableColumnHead icon={column.icon} name={column.name} />
               </th>
             ))}
           </tr>
@@ -119,18 +117,7 @@ export const RecordTable = ({ caption, className, rows, total, ...props }: Recor
           </tfoot>
         )}
       </table>
-      <p className="hf-meta hf-bar-legend">
-        {shown.map((column, index) => (
-          <span key={column.id}>
-            {index > 0 ? ', ' : ''}
-            <b>{column.abbreviation}</b> {column.name}
-          </span>
-        ))}
-      </p>
+      <p className="hf-meta hf-bar-legend">{tableLegend(shown)}</p>
     </div>
   )
-}
-
-function capitalise(text: string) {
-  return text.charAt(0).toUpperCase() + text.slice(1)
 }

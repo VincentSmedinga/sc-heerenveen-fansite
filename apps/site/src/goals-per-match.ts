@@ -8,9 +8,9 @@ const statsCompetitions = ['Eredivisie', 'KNVB Beker'] as const
 
 /**
  * The goals per match of each player on a card with goal scorers, or undefined when the card
- * may not show the column D/W (all or nothing: a list with gaps invites a comparison on unequal
- * figures, and a wrong number is worse than none). The key of a figure is the key of the
- * scorer (`keyOf`), the same as `TopScorer.id`.
+ * may not show the column of the goals per match (all or nothing: a list with gaps invites a
+ * comparison on unequal figures, and a wrong number is worse than none). The key of a figure is
+ * the key of the scorer (`keyOf`), the same as `TopScorer.id`.
  *
  * The card shows the column when three things hold:
  *

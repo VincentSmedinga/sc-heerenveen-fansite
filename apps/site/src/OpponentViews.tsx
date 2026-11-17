@@ -185,7 +185,7 @@ export function ClubMeetingsCard({
  * the page of that club (`address` is the base address of the pages of the clubs; `query` is
  * the part of the address that holds the choice, which every link keeps). The columns are the
  * played, won, drawn and lost matches, the points and the goal difference, with its sign, as
- * "+18". They are abbreviations, which fit a phone, and the line under the table explains them.
+ * "+18". They are icons, which fit a phone, and the legend under the table explains them.
  * The visitor can sort on every column, with JavaScript; the table of the server is A to Z. The
  * goal difference sorts on the number, so the club we did best against is on top. There is no
  * pagination: the list is one page. It is the main content of the page, so it has the white
@@ -242,7 +242,7 @@ export function ClubsCard({
 /** An average of points as the Dutch write it, with two decimals and a comma: `2,43`. */
 const averageFormat = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 2, minimumFractionDigits: 2 })
 
-/** The legend of the card: the letters of its two columns. The place has no line. */
+/** The legend of the card: the icons and words of its two columns. The place has no line. */
 const topPointsLegend = tableLegend([tableColumns.pointsPerMatch, tableColumns.played])
 
 /**

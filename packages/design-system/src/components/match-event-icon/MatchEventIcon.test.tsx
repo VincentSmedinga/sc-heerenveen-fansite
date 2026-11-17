@@ -46,8 +46,8 @@ describe('MatchEventIcon', () => {
     expect(css).toMatch(/\.hf-match-event-icon-large \{\s*--hf-match-event-icon-size: 1\.375;/u)
   })
 
-  it('turns every icon 12 degrees clockwise', () => {
-    expect(css).toMatch(/\.hf-match-event-icon \{[^}]*transform: rotate\(12deg\);/u)
+  it('turns every icon 8 degrees clockwise', () => {
+    expect(css).toMatch(/\.hf-match-event-icon \{[^}]*transform: rotate\(8deg\);/u)
   })
 
   it('draws the own goal in the colour of a loss and the goal in the colour of a heading', () => {

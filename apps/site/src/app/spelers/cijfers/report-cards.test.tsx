@@ -5,6 +5,7 @@ import { getMatchData, getMatchSeasons, getPersonTraits } from '#src/matches'
 import { getSeasonPlayerStats } from '#src/season-player-stats'
 import { getSeasonReportFigures } from '#src/season-report-figures'
 import { playerFiguresShortcutsFor } from '#src/statisticsShortcuts'
+import { legendsOf } from '#src/test-legend'
 import { matchData } from '#src/test-matches'
 import { figuresData, noReports } from '#src/test-report-figures'
 import { withoutIcons } from '#src/without-icons'
@@ -149,9 +150,7 @@ describe('the cards with the figures of the match reports on /spelers/cijfers', 
     expect(html.match(/<th scope="col"/g)?.length).toBeGreaterThan(0)
     expect(html.match(/<th scope="row">/g)).toHaveLength(5)
     expect(html).toContain('Reserve')
-    expect(plain(html)).toContain(
-      'G gespeeld, B basis, I invallers, M minuten, D doelpunten, A assists, Y geel, R rood',
-    )
+    expect(legendsOf(html)).toEqual(['gespeeld, basis, ingevallen, minuten, doelpunten, assists, geel, rood'])
   })
 
   it('reads a name as one name', async () => {

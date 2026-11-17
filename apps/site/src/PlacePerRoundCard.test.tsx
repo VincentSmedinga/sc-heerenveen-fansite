@@ -250,7 +250,8 @@ describe('PlacePerRoundCard', () => {
 
       expect(head).toContain('Ronde')
       expect(head).toContain('<span aria-hidden="true">#</span><span class="hf-visually-hidden">plek</span>')
-      expect(head).toContain('<span aria-hidden="true">P</span><span class="hf-visually-hidden">punten</span>')
+      expect(head).toContain('title="Punten"')
+      expect(head).toContain('<span class="hf-visually-hidden">punten</span>')
     }
   })
 

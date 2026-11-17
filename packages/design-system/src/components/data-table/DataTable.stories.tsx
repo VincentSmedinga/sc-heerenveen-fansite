@@ -55,7 +55,7 @@ const clubLegend = tableLegend(clubColumns)
 
 const sortableColumns: DataTableProps['columns'] = [
   'Club',
-  ...clubColumns.map((column) => ({ ...column, key: column.abbreviation === 'P' })),
+  ...clubColumns.map((column) => ({ ...column, key: column.icon === 'points' })),
 ]
 
 const meta = preview.meta({
@@ -71,7 +71,7 @@ const meta = preview.meta({
         component: [
           'Een tabel met getallen, als echte `table`: een lijst van dingen met elk een paar getallen. De eerste kolom heeft de rijkoppen, zoals een dag of een club, en de andere kolommen hebben getallen die recht onder elkaar staan.',
           'Het bijschrift (`caption`) zegt wat erin staat, maar alleen een schermlezer krijgt het: zet dus een kop boven de tabel, bijvoorbeeld in een kaart.',
-          'Past een tabel met veel kolommen niet met hele woorden, geef een kolom dan als `{ abbreviation, name }`: de kop toont de afkorting, een schermlezer hoort het hele woord, en de pagina zet een regel onder de tabel die de afkortingen uitlegt.',
+          'Past een tabel met veel kolommen niet met hele woorden, geef een kolom dan uit `tableColumns`: de kop toont het pictogram, een schermlezer hoort het hele woord, en de pagina zet een legenda onder de tabel (`tableLegend`) met het pictogram en het woord. Een kolom die niet in `tableColumns` staat, kan een `abbreviation` hebben.',
           'Elke tabel sorteert op zijn kolommen: de bezoeker zoekt een uiterste, zoals de meeste toeschouwers. Een klik sorteert, een tweede klik keert om en een derde zet de tabel terug in de volgorde van de pagina. Sorteren werkt met JavaScript; zonder blijft de tabel in de volgorde van `rows`.',
           'Een tabel gaat er alleen met een reden uit, met `sortable={false}`: een ranglijst, een lijst in twee tabellen, een tabel met een totaalrij of een gaprij, of een korte reeks in een eigen volgorde. Een tabel met een rangorde (`position`), een totaalrij of een gaprij, of in een `DataTable.Group`, geeft een fout als hij niet `sortable={false}` zegt. Een kolom die geen volgorde heeft, zoals een kolom met alleen een koppeling, gaat er uit met `sortable: false`.',
           'Tekst sorteert met de Nederlandse regels en een lege cel staat achteraan. Geef een cel met een datum of een stand een `sortValue`, en een rij met een voorvoegsel een `sortHeader`, zodat "van Basten" onder de B staat.',
@@ -165,7 +165,7 @@ const results: DataTableRow[] = [
 
 const renderAbbreviations = () => (
   <div style={{ maxInlineSize: '20rem' }}>
-    <Card aria-labelledby="afkortingen-kop">
+    <Card aria-labelledby="pictogrammen-kop">
       <Heading id="afkortingen-kop" level={2}>
         Na het eerste doelpunt
       </Heading>
@@ -180,7 +180,7 @@ const renderAbbreviations = () => (
 )
 
 export const Abbreviations = meta.story({
-  name: 'Kolommen met een afkorting',
+  name: 'Kolommen met een pictogram',
   render: renderAbbreviations,
 })
 

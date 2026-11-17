@@ -113,9 +113,12 @@ Zo test je het: verstuur het formulier leeg en met foute waarden, met alleen het
 ### Tabellen
 
 - [ ] Een tabel is een echte `table` met een bijschrift, kolomkoppen en rijkoppen met `scope`.
-      Een afgekorte kop heeft het hele woord voor een schermlezer, en een regel onder de tabel legt de afkortingen uit (1.3.1).
-      De letters en woorden komen uit één lijst, `tableColumns` in het designsysteem (G gespeeld, W winst, G gelijk, V verlies, P punten, P punten per wedstrijd, D doelpunten, D doelsaldo, en voor de tabel van de spelers B basis, I invallers, M minuten, A assists, Y geel en R rood, voor de tabel van een doelman N nul en T tegendoelpunten, en voor de lijsten van alle seizoenen H hattricks, S strafschoppen en Z seizoenen in de selectie).
-      Alleen G, D en P hebben twee woorden: een sorteerknop heet daarom letter en woord, "G gespeeld" of "G gelijk", "D doelsaldo", zodat twee koppen met dezelfde letter verschillende namen hebben (2.5.3).
+      Een kop met een pictogram heeft het hele woord voor een schermlezer, en een regel onder de tabel zet het pictogram en het woord bij elkaar (1.3.1).
+      Het pictogram is `aria-hidden`.
+      De pictogrammen en woorden komen uit één lijst, `tableColumns` in het designsysteem, en elke kolom heeft een eigen pictogram en een eigen woord.
+      Een sorteerknop heet naar het woord, "gespeeld" of "gelijk", zodat spraakbesturing "klik gespeeld" kan zeggen (2.5.3).
+      De randen en vullingen van een pictogram halen minstens 3:1 tegen het vlak (1.4.11), en kleur herhaalt altijd een vorm (1.4.1).
+      In geforceerde kleuren zijn de vullingen `CanvasText` of `Canvas`.
 - [ ] Elke tabel die een lijst is, kan sorteren, en een tabel gaat er alleen uit met een reden: een ranglijst, een lijst in twee tabellen, een tabel met een totaalrij of een gaprij, of een vaste reeks.
       Een tabel die niet sorteert, stuurt geen script mee.
 - [ ] Een tabel die kan sorteren, werkt ook zonder JavaScript: de server stuurt de hele tabel in de volgorde van de pagina, met koppen van gewone tekst en zonder knoppen die niets doen.
@@ -130,7 +133,7 @@ Zo test je het: verstuur het formulier leeg en met foute waarden, met alleen het
       Na de derde klik zegt hij "Niet meer gesorteerd, in de volgorde van de pagina".
       De regio is er al voor de klik, en de focus blijft op de knop (2.4.3).
 - [ ] De knop in de kop is minstens 24 bij 24 pixels (2.5.8), en de tabel past op 320 pixels zonder zijwaarts scrollen (1.4.10).
-      Een tabel die niet past met hele woorden, krijgt afkortingen.
+      Een tabel die niet past met hele woorden, krijgt pictogrammen.
 
 Zo test je het: tab naar een kop, druk Enter en spatie, en kijk of de volgorde en de pijl veranderen, de focus blijft en de schermlezer de regel voorleest.
 Druk een derde keer en kijk of de tabel in de volgorde van de pagina terug is.

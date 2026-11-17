@@ -525,7 +525,7 @@ De pagina van een club heeft er een korte vorm van, de eerste vijf plaatsen (`to
   Direct onder de kop, boven de tabel, staat hoeveel spelers er scoorden, zoals "11 spelers hebben gescoord": dezelfde plek en stijl als bij de nul gehouden.
   Het oude anker `#topscorers` blijft werken: het is een oud anker (`aliases`) op de kop.
   Mist van een gespeelde wedstrijd met een doelpunt van ons de doelpuntenmakers, dan staat onder de tabel "De doelpuntenmakers van 9 van de 11 gespeelde wedstrijden".
-  De kop van de doelpunten is de afkorting D, met het volle woord onder de tabel.
+  De kop van de doelpunten is het pictogram van de doelpunten, met het woord erbij onder de tabel.
   Zonder doelpunten staat er een zin in plaats van een tabel.
 
 De pagina deelt alles rond het seizoen met Cijfers: de kiezer, de adressen `/spelers/2025-26` en de route `app/spelers/kies`, via `playersPath` in `src/season-page.ts`.
@@ -576,11 +576,11 @@ De bezoekteller telt de pagina van een seizoen als een bezoek aan `/spelers`, en
 Het is een tabel met elke club waartegen sc Heerenveen speelde, van A tot Z, met het aantal gespeelde, gewonnen, gelijkgespeelde en verloren wedstrijden, de punten en het doelsaldo.
 Elke clubnaam is een link naar `/tegenstanders/<club>`, waar `<club>` de `slug` van de club is (zie de README van `packages/db`).
 De server stuurt de tabel in de volgorde van A tot Z zonder knoppen om te sorteren, en deze lijst heeft geen paginering.
-Met JavaScript is elke kolom sorteerbaar, zoals elke lijst op de site; de kolom D sorteert op het doelsaldo, dus de club waartegen het best ging, komt bovenaan.
+Met JavaScript is elke kolom sorteerbaar, zoals elke lijst op de site; de kolom met het doelsaldo sorteert op het doelsaldo, dus de club waartegen het best ging, komt bovenaan.
 Een derde klik op dezelfde kolom zet de lijst terug in A tot Z.
-De zes cijferkolommen hebben een afkorting (G, W, G, V, P, D) met het hele woord voor een schermlezer, en een regel onder de tabel legt ze uit.
+De zes cijferkolommen hebben een pictogram met het hele woord voor een schermlezer, en een regel onder de tabel legt ze uit.
 De punten (3 per winst, 1 per gelijkspel) en het doelsaldo (met een teken: `+18`, `−2`, `0`) staan bij beide keuzes, en tellen alle wedstrijden die de lijst telt, de beker ook (`pointsOf` in `src/opponents.ts`).
-De letters en woorden komen uit `tableColumns` van het designsysteem, zoals in elke tabel.
+De pictogrammen en woorden komen uit `tableColumns` van het designsysteem, zoals in elke tabel.
 De rijkop is een link dankzij `href` op een rij van `DataTable`.
 Een club met alleen wedstrijden die nog niet zijn gespeeld, staat erin met nullen.
 De lijst staat in de hoofdkolom, op het witte vlak.

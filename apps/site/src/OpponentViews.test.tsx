@@ -17,6 +17,7 @@ import {
   LastWinCard,
   TopPointsCard,
 } from './OpponentViews'
+import { legendsOf } from './test-legend'
 import { testclub } from './test-opponents'
 
 const record = (
@@ -63,19 +64,19 @@ describe('ClubsCard', () => {
     render(card('league'))
 
     expect(screen.getAllByRole('columnheader')).toHaveLength(7)
-    expect(screen.getByRole('button', { name: 'P punten' })).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'D doelsaldo' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'punten' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'doelsaldo' })).toBeTruthy()
   })
 
-  it('puts the club with the highest goal difference on top on the first click on D, not the one with most goals', () => {
+  it('puts the club with the highest goal difference on top on the first click on doelsaldo, not the one with most goals', () => {
     render(card())
-    fireEvent.click(screen.getByRole('button', { name: 'D doelsaldo' }))
+    fireEvent.click(screen.getByRole('button', { name: 'doelsaldo' }))
 
     expect(names()).toEqual(['Zwolle', 'Sparta', 'Venlo'])
-    expect(screen.getByRole('columnheader', { name: 'D doelsaldo' }).getAttribute('aria-sort')).toBe('descending')
+    expect(screen.getByRole('columnheader', { name: 'doelsaldo' }).getAttribute('aria-sort')).toBe('descending')
     expect(screen.getByRole('status').textContent).toBe('Gesorteerd op Doelsaldo, van hoog naar laag')
 
-    fireEvent.click(screen.getByRole('button', { name: 'D doelsaldo' }))
+    fireEvent.click(screen.getByRole('button', { name: 'doelsaldo' }))
 
     expect(names()).toEqual(['Venlo', 'Sparta', 'Zwolle'])
   })
@@ -107,8 +108,8 @@ describe('TopPointsCard', () => {
     expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
       '#plaats',
       'Club',
-      'Ppunten per wedstrijd',
-      'Ggespeeld',
+      'punten per wedstrijd',
+      'gespeeld',
     ])
     expect(screen.getByRole('link', { name: 'Zwolle' }).getAttribute('href')).toBe('/tegenstanders/zwolle')
   })
@@ -144,7 +145,7 @@ describe('TopPointsCard', () => {
   it('names the minimum, the legend and what the card is based on', () => {
     render(card())
 
-    expect(screen.getByText('P punten per wedstrijd, G gespeeld')).toBeTruthy()
+    expect(legendsOf(document.body.innerHTML)).toEqual(['punten per wedstrijd, gespeeld'])
     expect(
       screen.getByText('Alle 22 gespeelde wedstrijden sinds 2022/23, tegen clubs met minstens 5 gespeelde wedstrijden'),
     ).toBeTruthy()
@@ -189,7 +190,7 @@ describe('HardestCard', () => {
         name: 'De vijf clubs waartegen sc Heerenveen gemiddeld de minste punten per wedstrijd haalt, van laag naar hoog',
       }),
     ).toBeTruthy()
-    expect(screen.getByText('P punten per wedstrijd, G gespeeld')).toBeTruthy()
+    expect(legendsOf(document.body.innerHTML)).toEqual(['punten per wedstrijd, gespeeld'])
     expect(screen.getByText(/^Alle 50 gespeelde wedstrijden sinds 2022\/23, tegen clubs met minstens 5/)).toBeTruthy()
   })
 

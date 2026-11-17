@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getLeagueResults, getMatchData, getMatchSeasons } from '#src/matches'
 import { matchShortcutsOf } from '#src/matchShortcuts'
 import { getLiveReports, getPreviewAddresses, getReportAddresses } from '#src/report-data'
+import { legendsOf } from '#src/test-legend'
 import { leagueResultsData, leagueRoundOf, matchData } from '#src/test-matches'
 import { withoutIcons } from '#src/without-icons'
 
@@ -759,8 +760,7 @@ describe('the page /wedstrijden', () => {
     expect(stand).toContain('<caption class="hf-visually-hidden">Stand op 18 oktober 2026</caption>')
     expect(stand).not.toContain('role="region"')
     expect(stand).toContain('class="hf-highlight hf-standings-table-own"')
-    expect(stand).toContain('<b>G</b> gespeeld')
-    expect(stand).toContain('<b>P</b> punten')
+    expect(legendsOf(stand)).toEqual(['gespeeld, punten'])
     expect(stand.match(/<th scope="col"/g)?.length).toBeGreaterThan(0)
     expect(stand.match(/<tr[ >]/g)).toHaveLength(4)
   })
@@ -787,10 +787,10 @@ describe('the page /wedstrijden', () => {
       stand.indexOf('</tr>', stand.indexOf('hf-standings-table-own')),
     )
 
-    expect([...head.matchAll(/<span aria-hidden="true">([^<]*)<\/span>/g)].map((match) => match[1])).toEqual([
-      '#',
-      'G',
-      'P',
+    expect([...head.matchAll(/<span class="hf-visually-hidden">([^<]*)<\/span>/g)].map((match) => match[1])).toEqual([
+      'positie',
+      'gespeeld',
+      'punten',
     ])
     // The bar is inside a cell, so the text of a cell is what is left without the tags.
     expect([...ours.matchAll(/<td[^>]*>(.*?)<\/td>/g)].map((match) => match[1]?.replaceAll(/<[^>]*>/g, ''))).toEqual([
@@ -798,7 +798,6 @@ describe('the page /wedstrijden', () => {
       '2',
       '6',
     ])
-    expect(stand).toContain('<span>, <b>P</b> punten</span>')
   })
 
   it('shows a bar next to the points of every club in the full table, hidden from a screen reader', async () => {

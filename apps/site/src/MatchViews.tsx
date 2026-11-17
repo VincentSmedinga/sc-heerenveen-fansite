@@ -395,9 +395,9 @@ export function GoalsPerQuarterCard({
 const flowCells = (row: FlowRow) => [row.matches, row.won, row.drawn, row.lost, row.points]
 
 /**
- * The columns are abbreviations, because five columns with whole words are wider than a phone
- * and than the sidebar of a small desktop. The line under the two sentences explains them, with
- * the same letters and words as every other table (`tableColumns`).
+ * The columns are icons, because five columns with whole words are wider than a phone
+ * and than the sidebar of a small desktop. The legend under the two sentences explains them,
+ * with the same icons and words as every other table (`tableColumns`).
  */
 export const flowColumns = [
   tableColumns.played,
@@ -1456,7 +1456,8 @@ export function TopScorers({
   empty?: string
   matches: ScoredMatch[]
   /**
-   * The appearances of the players of the season (`player_season_stats`), for the column D/W.
+   * The appearances of the players of the season (`player_season_stats`), for the column of the
+   * goals per match.
    * The column is there when `goalsPerMatchOf` says every scorer's figures are known and agree
    * with the goals; without this, or without agreement, the table has no column.
    */
@@ -1525,7 +1526,7 @@ export function TopScorersCard({
   matches: PublicMatch[]
   season: string
   seasonOnImage?: string | undefined
-  /** The appearances of the season, for the column D/W (see `TopScorers`). */
+  /** The appearances of the season, for the goals per match (see `TopScorers`). */
   stats?: PublicPlayerStats[] | undefined
   surface?: 'default' | 'soft'
 }) {
