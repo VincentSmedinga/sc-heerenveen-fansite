@@ -47,15 +47,14 @@ describe('the bar of /wedstrijden', () => {
     expect(
       [...html.matchAll(/<a [^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map(([, href, label]) => [href, label]),
     ).toEqual([
-      ['#stand', 'Stand'],
-      ['#laatste-wedstrijd', 'Laatste wedstrijd'],
       ['#programma', 'Programma'],
       ['#uitslagen', 'Eredivisie'],
       ['#uitslagen-knvb-beker', 'KNVB Beker'],
+      ['#stand', 'Stand'],
     ])
   })
 
-  it('has a link to the head coaches straight after the table, first on the page, when the season has a coach in the table', async () => {
+  it('has a link to the head coaches straight after the table, when the season has a coach in the table', async () => {
     vi.mocked(getMatchData).mockResolvedValue({
       ...matchData,
       coaches: [
@@ -77,12 +76,11 @@ describe('the bar of /wedstrijden', () => {
         label,
       ]),
     ).toEqual([
-      ['#stand', 'Stand'],
-      ['#hoofdtrainer', 'Hoofdtrainer'],
-      ['#laatste-wedstrijd', 'Laatste wedstrijd'],
       ['#programma', 'Programma'],
       ['#uitslagen', 'Eredivisie'],
       ['#uitslagen-knvb-beker', 'KNVB Beker'],
+      ['#stand', 'Stand'],
+      ['#hoofdtrainer', 'Hoofdtrainer'],
     ])
   })
 
@@ -113,12 +111,11 @@ describe('the bar of /wedstrijden for the current season', () => {
     vi.mocked(getPlacePerRound).mockResolvedValue([{ points: 3, position: 1, round: 1 }])
 
     expect([...(await render()).matchAll(/<a [^>]*href="(#[^"]*)"/g)].map(([, href]) => href)).toEqual([
-      '#stand',
-      '#verloop-op-de-ranglijst',
-      '#laatste-wedstrijd',
       '#programma',
       '#uitslagen',
       '#uitslagen-knvb-beker',
+      '#stand',
+      '#verloop-op-de-ranglijst',
     ])
   })
 

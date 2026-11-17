@@ -21,11 +21,11 @@ describe('matchShortcutsOf', () => {
     expect(scoreCountsCard.id).toBe('hoe-vaak-welke-uitslag')
   })
 
-  it('has the card with our place per round right after the table, before the matches, only when the page has it', () => {
+  it('has the card with our place per round right after the table, only when the page has it', () => {
     const hrefs = (current: boolean, withPlacePerRound: boolean) =>
       matchShortcutsOf(current, 1, [], withPlacePerRound).map(({ href }) => href)
 
-    expect(hrefs(true, true)).toEqual(['#stand', '#verloop-op-de-ranglijst', '#programma', '#uitslagen'])
+    expect(hrefs(true, true)).toEqual(['#programma', '#uitslagen', '#stand', '#verloop-op-de-ranglijst'])
     expect(hrefs(false, true)).toEqual(['#eindstand', '#verloop-op-de-ranglijst', '#uitslagen'])
     expect(hrefs(true, false)).not.toContain('#verloop-op-de-ranglijst')
   })
@@ -44,11 +44,7 @@ describe('matchShortcutsOf', () => {
 
     expect(links).toHaveLength(2)
     expect(links.map(({ href }) => href)).not.toContain('#programma')
-    expect(links.map(({ href }) => href)).toEqual(
-      matchShortcuts
-        .map(({ href }) => (href === '#stand' ? '#eindstand' : href))
-        .filter((href) => href !== '#programma'),
-    )
+    expect(links.map(({ href }) => href)).toEqual(['#eindstand', '#uitslagen'])
   })
 
   it('calls Stand Eindstand for a season that is over, and links to the anchor of its card', () => {
@@ -64,7 +60,7 @@ describe('matchShortcutsOf with head coaches', () => {
   it('has a link to the card Hoofdtrainer after the table for one coach', () => {
     const hrefs = matchShortcutsOf(true, 1).map(({ href }) => href)
 
-    expect(hrefs).toEqual(['#stand', '#hoofdtrainer', '#programma', '#uitslagen'])
+    expect(hrefs).toEqual(['#programma', '#uitslagen', '#stand', '#hoofdtrainer'])
     expect(matchShortcutsOf(true, 1)).toContainEqual({ href: '#hoofdtrainer', label: 'Hoofdtrainer' })
   })
 
@@ -164,29 +160,35 @@ describe('matchShortcutsOf with the cards with results', () => {
 
   it('has the same links for the current season, with Programma and Stand for Eindstand', () => {
     expect(matchShortcutsOf(true, 0, all)).toEqual([
-      { href: '#stand', label: 'Stand' },
       { href: '#programma', label: 'Programma' },
       { href: '#uitslagen', label: 'Eredivisie' },
       { href: '#uitslagen-knvb-beker', label: 'KNVB Beker' },
       { href: '#uitslagen-play-offs', label: 'Play-offs Conference League' },
+      { href: '#stand', label: 'Stand' },
     ])
     expect(matchShortcutsOf(true, 1, ['Eredivisie']).map(({ href }) => href)).toEqual([
-      '#stand',
-      '#hoofdtrainer',
       '#programma',
       '#uitslagen',
+      '#stand',
+      '#hoofdtrainer',
     ])
   })
 })
 
-describe('matchShortcutsOf with a last match', () => {
-  it('puts Laatste wedstrijd before Programma in the current season only', () => {
-    expect(matchShortcutsOf(true, 0, [], false, true).map(({ href }) => href)).toEqual([
-      '#stand',
-      '#laatste-wedstrijd',
+describe('matchShortcutsOf order', () => {
+  it('puts Programma and the results before Stand in the current season only', () => {
+    expect(matchShortcutsOf(true, 1, ['Eredivisie', 'KNVB Beker']).map(({ href }) => href)).toEqual([
       '#programma',
       '#uitslagen',
+      '#uitslagen-knvb-beker',
+      '#stand',
+      '#hoofdtrainer',
     ])
-    expect(matchShortcutsOf(false, 0, [], false, true).map(({ href }) => href)).not.toContain('#laatste-wedstrijd')
+    expect(matchShortcutsOf(false, 1, ['Eredivisie', 'KNVB Beker']).map(({ href }) => href)).toEqual([
+      '#eindstand',
+      '#hoofdtrainer',
+      '#uitslagen',
+      '#uitslagen-knvb-beker',
+    ])
   })
 })

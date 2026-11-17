@@ -1018,15 +1018,7 @@ await withEmptyDatabase((database) =>
     )
     assert.deepEqual(
       [...matchesHtml.matchAll(/class="hf-page-shortcuts-link" href="(#[^"]+)">/g)].map(([, href]) => href),
-      [
-        '#stand',
-        '#hoofdtrainer',
-        '#laatste-wedstrijd',
-        '#programma',
-        '#uitslagen',
-        '#uitslagen-knvb-beker',
-        '#uitslagen-play-offs',
-      ],
+      ['#programma', '#uitslagen', '#uitslagen-knvb-beker', '#uitslagen-play-offs', '#stand', '#hoofdtrainer'],
     )
     // The made-up results of the current season are of six clubs, so the card with our place
     // per round is left out, with its link in the bar. The card with our place in every season
