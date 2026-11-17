@@ -17,6 +17,7 @@ import { countryTalliesOf } from '#src/countryTally'
 import { CountryTallyCard } from '#src/CountryTallyCard'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
+import { europeValues } from '#src/match-search'
 import { getSearchWorld } from '#src/match-search-data'
 import { onThisDayOf } from '#src/match-search-start'
 import { sourceOf } from '#src/match-sources'
@@ -182,7 +183,7 @@ export async function AllSeasonsPage({ searchParams }: { searchParams: Promise<S
           <CountryTallyCard
             level={3}
             matchLink={(country) =>
-              matchLink(searchable, { competition: 'all' }, { competitions: ['europa'], country })
+              matchLink(searchable, { competition: 'all' }, { competitions: [...europeValues], country })
             }
             tallies={countryTalliesOf(matches, competition)}
           />

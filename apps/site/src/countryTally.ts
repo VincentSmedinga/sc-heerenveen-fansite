@@ -2,7 +2,7 @@ import { countryName } from '@fansite/design-system'
 
 import { type CompetitionChoice } from './competition'
 import { resultOf } from './match-result'
-import { competitionGroups } from './match-search'
+import { competitionGroups, europeValues } from './match-search'
 import { type AllMatch, playedMatchesOf } from './matches'
 
 /**
@@ -21,7 +21,9 @@ export type CountryTally = {
   won: number
 }
 
-const europe: readonly string[] = competitionGroups.find(({ value }) => value === 'europa')?.members ?? []
+const europe: readonly string[] = competitionGroups
+  .filter(({ value }) => europeValues.some((one) => one === value))
+  .flatMap(({ members }) => members)
 
 /**
  * The tally of the played European matches (the competitions of `Europa`, without the

@@ -21,7 +21,8 @@ export type CompetitionTally = {
 /**
  * The tally of every kind of competition that has a played match with a score, in the order
  * of `competitionGroups`: the Eredivisie, the Eerste divisie, the play-offs, the KNVB Beker,
- * Europa and the Johan Cruijff Schaal. Europa is every European cup, without the play-offs.
+ * each European cup (Champions League, Europacup II, UEFA Cup, Europa League and Intertoto Cup)
+ * and the Johan Cruijff Schaal. There is no total for Europe.
  * A kind without such a match is not in the list. A cup tie that a shoot-out decided is a win
  * or a loss, as everywhere (see `resultOf`), and the score is the one after extra time.
  */

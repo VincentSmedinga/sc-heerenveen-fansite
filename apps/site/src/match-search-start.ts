@@ -5,6 +5,7 @@ import {
   dateLabel,
   dayOf,
   days,
+  europeValues,
   type Filters,
   findMatches,
   months,
@@ -81,7 +82,7 @@ export function questionsOf(all: readonly SearchableMatch[], firstSeason: string
 
   add(
     'Elke uitzege in Europa',
-    { competitions: ['europa'], outcomes: ['gewonnen'], theirs: 0, venues: ['uit'] },
+    { competitions: [...europeValues], outcomes: ['gewonnen'], theirs: 0, venues: ['uit'] },
     () => 'en geen tegendoelpunt',
   )
   add('De derby tegen sc Cambuur', { club: 'sc-cambuur' }, (found) => `${wonCount(found)} keer gewonnen`)
