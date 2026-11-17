@@ -13,6 +13,8 @@ const matches = [
   match('Eredivisie', 4, 0, { status: 'scheduled' }),
   match('KNVB Beker', 1, 1, { penaltiesAgainst: 3, penaltiesFor: 4 }),
   match('UEFA Cup', 0, 3),
+  match('Intertoto Cup', 1, 0),
+  match('Europa League', 2, 2, { status: 'scheduled' }),
   match('Play-offs Conference League', 2, 0),
 ]
 
@@ -22,7 +24,8 @@ describe('competitionTalliesOf', () => {
       'eredivisie',
       'play-offs',
       'knvb-beker',
-      'europa',
+      'uefa-cup',
+      'intertoto-cup',
     ])
   })
 
@@ -42,8 +45,17 @@ describe('competitionTalliesOf', () => {
     expect(competitionTalliesOf(matches)[2]).toMatchObject({ drawn: 0, goalsFor: 1, played: 1, won: 1 })
   })
 
-  it('counts every European cup as Europa, without the play-offs', () => {
-    expect(competitionTalliesOf(matches)[3]).toMatchObject({ goalsAgainst: 3, goalsFor: 0, lost: 1, played: 1, won: 0 })
+  it('gives every European cup a row of its own, without the play-offs and without a total', () => {
+    expect(competitionTalliesOf(matches)[3]).toMatchObject({
+      goalsAgainst: 3,
+      goalsFor: 0,
+      label: 'UEFA Cup',
+      lost: 1,
+      played: 1,
+      won: 0,
+    })
+    expect(competitionTalliesOf(matches)[4]).toMatchObject({ label: 'Intertoto Cup', played: 1, won: 1 })
+    expect(competitionTalliesOf(matches).map(({ label }) => label)).not.toContain('Europa')
   })
 
   it('counts the play-offs as a kind of their own, between the Eredivisie and the cup', () => {

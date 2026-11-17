@@ -31,8 +31,8 @@ export const venues = [
 
 /**
  * The competitions as a supporter asks for them. `Play-offs` is the four kinds of play-offs for
- * European football (#1282), and `Europa` is every European cup, so each competition of the
- * database belongs to exactly one of them.
+ * European football (#1282), and every European cup has a group of its own (#1354), so each
+ * competition of the database belongs to exactly one of them.
  */
 export const competitionGroups = [
   { label: 'Eredivisie', members: ['Eredivisie'], value: 'eredivisie' },
@@ -48,13 +48,22 @@ export const competitionGroups = [
     value: 'play-offs',
   },
   { label: 'KNVB Beker', members: ['KNVB Beker'], value: 'knvb-beker' },
-  {
-    label: 'Europa',
-    members: ['Champions League', 'Europa League', 'Europacup II', 'Intertoto Cup', 'UEFA Cup'],
-    value: 'europa',
-  },
+  { label: 'Champions League', members: ['Champions League'], value: 'champions-league' },
+  { label: 'Europacup II', members: ['Europacup II'], value: 'europacup-ii' },
+  { label: 'UEFA Cup', members: ['UEFA Cup'], value: 'uefa-cup' },
+  { label: 'Europa League', members: ['Europa League'], value: 'europa-league' },
+  { label: 'Intertoto Cup', members: ['Intertoto Cup'], value: 'intertoto-cup' },
   { label: 'Johan Cruijff Schaal', members: ['Johan Cruijff Schaal'], value: 'johan-cruijff-schaal' },
 ] as const
+
+/** The values of the European cups, which the old value `europa` of an address stands for. */
+export const europeValues = [
+  'champions-league',
+  'europacup-ii',
+  'uefa-cup',
+  'europa-league',
+  'intertoto-cup',
+] as const satisfies readonly CompetitionValue[]
 
 export const outcomes = [
   { label: 'Gewonnen', value: 'gewonnen' },
@@ -189,7 +198,11 @@ export function parseFilters(raw: Raw, world: SearchWorld): Filters {
     clubs: valuesOf(raw['clubs']).filter(
       (slug, index, all) => all.indexOf(slug) === index && world.clubs.some((candidate) => candidate.slug === slug),
     ),
-    competitions: pick(raw['competitie'], competitionGroups),
+    // The value `europa` of older addresses stands for every European cup.
+    competitions: pick(
+      valuesOf(raw['competitie']).flatMap((value) => (value === 'europa' ? europeValues : [value])),
+      competitionGroups,
+    ),
     country: country !== undefined && world.countries.includes(country) ? country : undefined,
     date: month === undefined ? undefined : { day: dayAsked, month },
     days: pick(raw['dag'], days),
@@ -272,8 +285,16 @@ export function searchHref(filters: Filters, { page = filters.page }: { page?: n
   for (const value of filters.venues) {
     query.append('waar', value)
   }
+  // All European cups together are the short, older value `europa`, which `parseFilters` reads.
+  const wholeEurope = europeValues.every((value) => filters.competitions.includes(value))
+
   for (const value of filters.competitions) {
-    query.append('competitie', value)
+    if (!wholeEurope || !(europeValues as readonly string[]).includes(value)) {
+      query.append('competitie', value)
+    }
+  }
+  if (wholeEurope) {
+    query.append('competitie', 'europa')
   }
   for (const value of filters.outcomes) {
     query.append('uitslag', value)

@@ -131,6 +131,7 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/wedstrijden/zoeken', status: 200 },
   { path: '/wedstrijden/zoeken?waar=uit&uitslag=gewonnen', status: 200 },
   { path: '/wedstrijden/zoeken?competitie=europa&volgorde=oudste&pagina=9', status: 200 },
+  { path: '/wedstrijden/zoeken?competitie=uefa-cup&competitie=intertoto-cup', status: 200 },
   {
     path: '/wedstrijden/zoeken?waar=thuis&uitslag=verloren&dag=vrijdag&doelpuntenmaker=bestaat+echt+niet',
     status: 200,
