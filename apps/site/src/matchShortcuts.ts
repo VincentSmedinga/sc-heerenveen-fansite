@@ -10,13 +10,10 @@ export const scoreCountsCard = { id: 'hoe-vaak-welke-uitslag', name: 'Hoe vaak w
  * bar, on /wedstrijden/cijfers (see statisticsShortcuts.ts).
  */
 export const matchShortcuts = [
-  { href: '#stand', label: 'Stand' },
   { href: '#programma', label: 'Programma' },
   { href: '#uitslagen', label: 'Uitslagen' },
+  { href: '#stand', label: 'Stand' },
 ] as const
-
-/** The name and the anchor of the card with the latest match that has begun. */
-export const lastMatchCard = { id: 'laatste-wedstrijd', name: 'Laatste wedstrijd' } as const
 
 /**
  * The name and the anchor of the card with the league table: Stand for the current season, and
@@ -89,19 +86,18 @@ export const coachesCardOf = (coachCount: number) =>
 
 /**
  * The links of the bar for the page of a season, in the order of the cards in the source, which
- * is the order on a narrow screen: Stand (Eindstand for a season that is over) first, and after
- * it the card with our place after each round when the season has one (`withPlacePerRound`),
- * or else the card with the head coaches when the season has a coach in the table (`coachCount`
- * above 0). Then comes the card Laatste wedstrijd when a match has begun (`withLastMatch`,
- * current season only), Programma (only the current season has it) and a link for each card
- * with results (`withResults` are the competitions that have one, see `resultsCardsOf`).
+ * is the order on a narrow screen. The current season has Programma first, then a link for each
+ * card with results (`withResults` are the competitions that have one, see `resultsCardsOf`),
+ * then Stand, and after it the card with our place after each round when the season has one
+ * (`withPlacePerRound`), or else the card with the head coaches when the season has a coach in
+ * the table (`coachCount` above 0). A season that is over has Eindstand first, then that card,
+ * and then the results.
  */
 export const matchShortcutsOf = (
   current: boolean,
   coachCount = 0,
   withResults: readonly Competition[] = [],
   withPlacePerRound = false,
-  withLastMatch = false,
 ): Shortcut[] => {
   const standings = standingsCardOf(current)
   const coaches = coachesCardOf(coachCount)
@@ -114,16 +110,7 @@ export const matchShortcutsOf = (
     links.push({ href: `#${coaches.id}`, label: coaches.name })
   }
 
-  // The card with the last match is above Programma, in the current season only.
-  if (current && withLastMatch) {
-    links.push({ href: `#${lastMatchCard.id}`, label: lastMatchCard.name })
-  }
+  const results = resultsCardsOf(withResults).map(({ id, name }) => ({ href: `#${id}`, label: name }))
 
-  if (current) {
-    links.push({ href: '#programma', label: 'Programma' })
-  }
-
-  links.push(...resultsCardsOf(withResults).map(({ id, name }) => ({ href: `#${id}`, label: name })))
-
-  return links
+  return current ? [{ href: '#programma', label: 'Programma' }, ...results, ...links] : [...links, ...results]
 }

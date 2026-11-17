@@ -72,15 +72,7 @@ export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   // which the made-up current season has not, so it is not published here. The results are a
   // card for each competition with a result. The Eredivisie keeps the anchor `uitslagen`; the
   // made-up season has a result in each of the three competitions (#665).
-  '/wedstrijden': [
-    'laatste-wedstrijd',
-    'programma',
-    'stand',
-    'uitslagen',
-    'uitslagen-knvb-beker',
-    'uitslagen-play-offs',
-    'hoofdtrainer',
-  ],
+  '/wedstrijden': ['programma', 'stand', 'uitslagen', 'uitslagen-knvb-beker', 'uitslagen-play-offs', 'hoofdtrainer'],
   // The nine cards with figures moved to /cijfers (#483, now /wedstrijden/cijfers),
   // and Hoe vaak welke uitslag followed (#774). Their anchors on /wedstrijden are gone on
   // purpose, without a redirect: a link to one of them breaks. The card Doelpuntenmakers left

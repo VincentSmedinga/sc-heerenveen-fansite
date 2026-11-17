@@ -23,7 +23,6 @@ export async function SeasonShortcuts({ season }: { season: string }) {
   let coachCount: number
   let withResults: Competition[]
   let withPlacePerRound: boolean
-  let withLastMatch: boolean
 
   try {
     if (!current && !(await getMatchSeasons()).includes(season)) {
@@ -36,7 +35,6 @@ export async function SeasonShortcuts({ season }: { season: string }) {
 
     const overview = overviewOf(data.matches, new Date())
 
-    withLastMatch = overview.previous !== undefined
     withResults = resultsPerCompetition(overview.results).map(({ competition }) => competition)
   } catch {
     return null
@@ -52,7 +50,7 @@ export async function SeasonShortcuts({ season }: { season: string }) {
 
   return (
     <Page.Shortcuts
-      items={matchShortcutsOf(current, coachCount, withResults, withPlacePerRound, withLastMatch)}
+      items={matchShortcutsOf(current, coachCount, withResults, withPlacePerRound)}
       label="Op deze pagina:"
     />
   )
