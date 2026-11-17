@@ -25,6 +25,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
+          'De kop is onderstreept, zoals elke link in de inhoud, en de lijn wordt dikker onder de muis en met de focus.',
           'Een regel nieuws van een andere bron: de dag en de tijd, de kop als link naar het bericht bij de bron, en daaronder de naam van de bron, met "voor abonnees" als het bericht achter een betaalmuur staat.',
           'Is de regel zelf smal, zoals op een telefoon of in de zijbalk, dan staan de dag en de tijd boven de kop; het component kiest dat op zijn eigen breedte.',
           'Het component heeft geen intro of foto: die tonen we alleen met toestemming van de bron (principe 1 en 2 van de Redactie), en er staat nooit een logo van de bron bij (principe 3).',

@@ -12,6 +12,7 @@ const meta = preview.meta({
       description: {
         component: [
           'De onderkant van de pagina: een `footer` met twee regels tekst en de links over de site, in een `Navigation`.',
+          'De links in de footer hebben geen onderstreping in rust, want het is een rij korte links en geen inhoud; onder de muis en met de focus krijgen ze de lijn.',
           'Je kiest hem voor elke pagina; de strepen van de Friese vlag horen erbij, dus je hoeft er niets voor te doen.',
         ].join('\n'),
       },

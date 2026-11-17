@@ -22,6 +22,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
+          'De titel is onderstreept, zoals elke link in de inhoud, en de lijn wordt dikker onder de muis en met de focus.',
           'Een regel met een discussie van ons eigen forum: de titel als link, en eronder het aantal reacties, wie het laatst reageerde en wanneer, zoals "83 reacties · laatst Buffon1 · 13:28".',
           'De schermnaam is gewone tekst, en het component laat nooit de tekst van een bericht zien (zie Redactie, "Ons eigen forum").',
           'Zet hem in een `List.Item` voor een lijst met discussies, met `role="list"` op de `List`, in een `Card` onder een kop van niveau 2 met onderaan een link naar het forum.',

@@ -21,7 +21,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Een link brengt de bezoeker naar een andere pagina, en is altijd onderstreept.',
+          'Een link brengt de bezoeker naar een andere pagina, en is onderstreept, ook als hij niet in een zin staat. Alleen de bediening (het menu, de snelkoppelingen, de paginering, de filters) en de footer hebben geen lijn in rust.',
           'De tekst zegt waar de link heen gaat, ook los van de zin eromheen; dus geen "lees meer" of "klik hier".',
           'Met `icon` zet je een pictogram bij de tekst, voor een link naar meer, naar buiten de site, naar een mail of terug.',
         ].join('\n'),

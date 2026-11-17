@@ -1,7 +1,7 @@
 /*
  * A line of news: the short day and the time, or the short day and the date, in red on the left, and next to it the
- * headline as a link, with the source and the paywall under it. The headline is underlined under the mouse and with the
- * focus of the keyboard, not otherwise. A line narrower than 24rem puts the day and the time above the headline
+ * headline as a link, with the source and the paywall under it. The headline is underlined, and the line is thicker under
+ * the mouse and with the focus of the keyboard. A line narrower than 24rem puts the day and the time above the headline
  * instead. A List of lines has a thin line between the lines.
  */
 
@@ -67,32 +67,20 @@
    * The headline has the size of the text and the weight Medium, with the line height of a Nieuwskop. The components
    * layer comes after the typography layer, so this wins over the .hf-headline rule.
    *
-   * Not underlined, except under the mouse and with the focus of the keyboard: a list of headlines with a line under
-   * each is busy. The headline is on a line of its own, heavier than the text and in the colour of links, so it is a
-   * link without the line (WCAG 1.4.1 asks for more than colour mostly for a link in a sentence). The line is 1.5
-   * pixels thick, between the 1 pixel of a link that is not under the mouse and the 2 of the base styles under the
-   * mouse, to go with the weight of the text. It sits closer to the text than for other links. Both are set for the
-   * two states, so the focus gets the same line as hover. The line skips the descenders of letters, such as the g and
-   * the p. Only the line is set here, and the colour of a visited headline: the colour of hover and the focus ring
-   * stay as the base styles make them. The headline is one of the two links that show you have opened them (the other is
-   * the title of a discussion), so it keeps the colour for a visited link. That rule is in this layer, which wins over the
-   * hover of the base styles, so it leaves out the headline under the mouse: that one gets the colour for hover, visited
-   * or not.
+   * Underlined at rest, as every link in the content is (see link.css), and thicker under the mouse and with the focus of
+   * the keyboard. The line skips the descenders of letters, such as the g and the p. Only the line and the colour of a
+   * visited headline are set here: the colour of hover, the thickness and the focus ring stay as the base styles make them.
+   * The headline is one of the two links that show you have opened them (the other is the title of a discussion), so it
+   * keeps the colour for a visited link. That rule is in this layer, which wins over the hover of the base styles, so it
+   * leaves out the headline under the mouse: that one gets the colour for hover, visited or not.
    */
   .hf-news-item-headline {
     font-size: var(--hf-body-font-size);
     font-weight: var(--hf-headline-font-weight);
     min-block-size: 1.5rem;
-    text-decoration-line: none;
+    text-decoration-line: underline;
     text-decoration-skip-ink: auto;
-    text-decoration-thickness: var(--hf-link-underline-thickness);
     text-underline-offset: var(--hf-link-underline-offset);
-
-    &:hover,
-    &:focus-visible {
-      text-decoration-line: underline;
-      text-decoration-thickness: var(--hf-link-underline-thickness-hover);
-    }
 
     &:visited:not(:hover) {
       color: var(--hf-colour-text-link-visited);
