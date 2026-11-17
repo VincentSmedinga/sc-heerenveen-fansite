@@ -2,7 +2,7 @@ import type { PublicLeagueResult } from '@fansite/db/queries'
 
 import { describe, expect, it } from 'vitest'
 
-import { meetingOutcomeOf, meetingScoreOf, opponentFormOf } from './upcoming-match'
+import { formOf, meetingScoreOf } from './upcoming-match'
 
 const result = (
   round: number,
@@ -19,7 +19,7 @@ const result = (
   round,
 })
 
-describe('opponentFormOf', () => {
+describe('formOf', () => {
   it('gives the last five results of the club, the oldest first, from its own side', () => {
     const results = [
       result(1, 'Ajax', 3, 'PSV', 0),
@@ -31,22 +31,22 @@ describe('opponentFormOf', () => {
       result(7, 'PSV', 4, 'FC Twente', 0),
     ]
 
-    expect(opponentFormOf(results, 'Ajax')).toEqual(['G', 'V', 'W', 'V', 'G'])
+    expect(formOf(results, 'Ajax').marks).toEqual(['G', 'V', 'W', 'V', 'G'])
   })
 
   it('gives fewer than five early in the season', () => {
-    expect(opponentFormOf([result(1, 'Ajax', 3, 'PSV', 0), result(2, 'PSV', 1, 'Ajax', 1)], 'PSV')).toEqual(['V', 'G'])
+    expect(formOf([result(1, 'Ajax', 3, 'PSV', 0), result(2, 'PSV', 1, 'Ajax', 1)], 'PSV').marks).toEqual(['V', 'G'])
   })
 
   it('gives nothing for a club with no league result, such as a cup opponent or a newly promoted club', () => {
-    expect(opponentFormOf([result(1, 'Ajax', 3, 'PSV', 0)], 'FC Eindhoven')).toEqual([])
-    expect(opponentFormOf([], 'Ajax')).toEqual([])
+    expect(formOf([result(1, 'Ajax', 3, 'PSV', 0)], 'FC Eindhoven').marks).toEqual([])
+    expect(formOf([], 'Ajax').marks).toEqual([])
   })
 
   it('orders by day and then by round, whatever the order the results come in', () => {
     const results = [result(3, 'Ajax', 1, 'PSV', 0), result(1, 'Ajax', 0, 'PSV', 1), result(2, 'Ajax', 2, 'PSV', 2)]
 
-    expect(opponentFormOf(results, 'Ajax')).toEqual(['V', 'G', 'W'])
+    expect(formOf(results, 'Ajax').marks).toEqual(['V', 'G', 'W'])
   })
 })
 
@@ -54,11 +54,5 @@ describe('the previous meeting', () => {
   it('names the home club first, whichever side sc Heerenveen was on', () => {
     expect(meetingScoreOf({ goalsAgainst: 1, goalsFor: 2 }, true)).toEqual([2, 1])
     expect(meetingScoreOf({ goalsAgainst: 1, goalsFor: 2 }, false)).toEqual([1, 2])
-  })
-
-  it('takes the outcome for sc Heerenveen, not for the home club', () => {
-    expect(meetingOutcomeOf({ goalsAgainst: 1, goalsFor: 2 })).toBe('win')
-    expect(meetingOutcomeOf({ goalsAgainst: 3, goalsFor: 2 })).toBe('loss')
-    expect(meetingOutcomeOf({ goalsAgainst: 2, goalsFor: 2 })).toBe('draw')
   })
 })

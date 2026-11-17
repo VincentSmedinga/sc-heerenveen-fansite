@@ -216,7 +216,6 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
                   now={now}
                   previewAddresses={previewAddresses}
                   reportAddresses={reportAddresses}
-                  withDetails
                 />
               )}
             </Card>

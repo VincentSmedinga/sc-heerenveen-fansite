@@ -1546,6 +1546,26 @@ export const goalHref = (goal: Pick<ScorerGoal, 'ours' | 'personSlug'>) =>
   goal.ours ? playerHref(goal.personSlug) : undefined
 
 /**
+ * Whether a match has begun at `now`: its kick-off is past, or, without a kick-off, its day in
+ * Dutch time is over (it counts as not begun until the end of that day, and a weekend until the
+ * end of its last day). A match that is played
+ * has begun whatever the clock says, and one that is called off with no new date never has.
+ * A match that is cancelled is over: it is in the results and never in the programme.
+ */
+export function hasBegun(match: Pick<PublicMatch, 'dateText' | 'kickoffAt' | 'matchDate' | 'status'>, now: Date) {
+  if (match.status === 'played' || match.status === 'cancelled') {
+    return true
+  }
+  if (match.status === 'postponed') {
+    return false
+  }
+
+  return match.kickoffAt === null
+    ? dutchDayFormat.format(now) > lastDayOf(match.dateText, match.matchDate)
+    : match.kickoffAt <= now
+}
+
+/**
  * The scorers per place, for the short forms of the table, so players with the same goals share
  * a row. It keeps the order of the list it gets (`topScorersOf` or `topFiveOf`: the place, then
  * the surname, then the given name), so the places are in order and the players in a place too.
@@ -1689,26 +1709,6 @@ function goalGroups(goals: ScorerGoal[]): ScorerGoal[][] {
   }
 
   return groups
-}
-
-/**
- * Whether a match has begun at `now`: its kick-off is past, or, without a kick-off, its day in
- * Dutch time is over (it counts as not begun until the end of that day, and a weekend until the
- * end of its last day). A match that is played
- * has begun whatever the clock says, and one that is called off with no new date never has.
- * A match that is cancelled is over: it is in the results and never in the programme.
- */
-function hasBegun(match: Pick<PublicMatch, 'dateText' | 'kickoffAt' | 'matchDate' | 'status'>, now: Date) {
-  if (match.status === 'played' || match.status === 'cancelled') {
-    return true
-  }
-  if (match.status === 'postponed') {
-    return false
-  }
-
-  return match.kickoffAt === null
-    ? dutchDayFormat.format(now) > lastDayOf(match.dateText, match.matchDate)
-    : match.kickoffAt <= now
 }
 
 export const attendanceStep = 5000

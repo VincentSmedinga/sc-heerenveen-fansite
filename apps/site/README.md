@@ -378,6 +378,7 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   Waar de kaart een wedstrijd een naam geeft (Records, Uitersten en "Onze uitslagen tegen …"), is de lijst een `DescriptionList` met `stacked`: de naam is de `dt` en de `Match` of de tekst staat in de `dd`, zodat een schermlezer de naam bij de wedstrijd hoort.
   Ze geven `competition` alleen door bij de keuze "alle competities" (zie de beslissing van 14 november 2026 in `docs/beslissingen/site.md`).
 - **Homepage:** het blok "Wedstrijden" toont in één lijst de vorige wedstrijd (de eerste van Uitslagen, ook zonder uitslag, maar niet een geannuleerde) en de volgende (de eerste in het programma die een datum heeft, dus niet een uitgestelde).
+  Beide zien eruit als de bovenste regel van Uitslagen en van Programma op de pagina Wedstrijden: `MatchLines` tekent ze op beide plaatsen, met dezelfde links (`getReportAddresses`, `getPreviewAddresses`) en dezelfde kleine regels, alleen met de competitie op de regel.
   Het blok "Stand" toont drie clubs met sc Heerenveen in het midden, als dat kan, zonder balk naast de punten, en onder de tabel dezelfde regel "Gegevens nog niet bijgewerkt" als de kaart Stand op Wedstrijden.
   De blokken linken naar "Alle wedstrijden" en "De volledige stand" (`/wedstrijden#stand`).
 
