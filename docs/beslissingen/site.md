@@ -6519,7 +6519,7 @@
 - **Datum:** 17 november 2026
 - **Besluit:** de uitleg staat als tweede kaart in de zijbalk van Over ons, onder de kaart met de gegevens (#1365).
   Het is dezelfde `Card` met het zachte vlak, met de kop "Als app op je startscherm", een zin die zegt waarom en twee korte regels, één voor de iPhone en één voor Android.
-  De namen van de knoppen staan vet, zodat je ze in het menu herkent.
+  De regel voor Android staat boven die voor de iPhone, en de namen van de knoppen staan in gewone tekst, zonder nadruk.
 - **Besluit:** alleen de kaart, geen knop om te installeren.
   Het manifest en de iconen zijn er al, en een installatieknop vraagt JavaScript in de browser dat de site nu niet heeft.
 - **Waarom:** zo is supporters met één tik bij het nieuws, zonder nieuw onderdeel of nieuw token, en blijft de kaart klein in de smalle zijbalk.

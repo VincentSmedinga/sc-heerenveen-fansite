@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Card, Heading, Link, Page, Strong, Text } from '@fansite/design-system'
+import { Card, Heading, Link, Page, Text } from '@fansite/design-system'
 
 import { email } from '#src/contact'
 import { pageMetadata } from '#src/metadata'
@@ -102,15 +102,11 @@ export default function AboutPage() {
             <Heading anchor appearance={3} id="als-app" level={2}>
               Als app op je startscherm
             </Heading>
-            <Text>Doe dit één keer en je opent de Fansite voortaan met één tik op je telefoon of tablet.</Text>
+            <Text>Zo open je de Fansite voortaan met één tik.</Text>
             <Text>
-              Op Android: tik op het menu met de <Strong>drie puntjes</Strong>, kies{' '}
-              <Strong>Toevoegen aan startscherm</Strong> en tik op <Strong>Toevoegen</Strong>.
+              Op Android: tik op het menu met de drie puntjes, kies Toevoegen aan startscherm en tik op Toevoegen.
             </Text>
-            <Text>
-              Op een iPhone: tik op <Strong>Deel</Strong>, kies <Strong>Zet op beginscherm</Strong> en tik op{' '}
-              <Strong>Voeg toe</Strong>.
-            </Text>
+            <Text>Op een iPhone: tik op Deel, kies Zet op beginscherm en tik op Voeg toe.</Text>
           </Card>
         </Page.Section>
       </Page.Main>

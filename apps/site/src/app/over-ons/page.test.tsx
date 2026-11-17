@@ -92,14 +92,12 @@ describe('the page Over ons', () => {
     expect(sidebarHtml.indexOf('id="gegevens"')).toBeLessThan(sidebarHtml.indexOf('id="als-app"'))
     expect(homeScreenHtml).toContain('<h2 class="hf-heading-3 hf-heading-anchored" id="als-app">')
     expect(text).toContain('Als app op je startscherm')
-    expect(text).toContain('Doe dit één keer en je opent de Fansite voortaan met één tik op je telefoon of tablet.')
+    expect(text).toContain('Zo open je de Fansite voortaan met één tik.')
     expect(text).toContain('Op een iPhone: tik op Deel, kies Zet op beginscherm en tik op Voeg toe.')
     expect(text).toContain(
       'Op Android: tik op het menu met de drie puntjes, kies Toevoegen aan startscherm en tik op Toevoegen.',
     )
     expect(text.indexOf('Op Android')).toBeLessThan(text.indexOf('Op een iPhone'))
-    expect(homeScreenHtml).toContain('<strong>Zet op beginscherm</strong>')
-    expect(homeScreenHtml).toContain('<strong>Toevoegen aan startscherm</strong>')
     expect(withoutHeadingLinks(homeScreenHtml)).not.toMatch(/<(a|button|[ou]l|h3)[ >]/)
   })
 
