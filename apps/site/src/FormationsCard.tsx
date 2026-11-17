@@ -37,7 +37,7 @@ export function FormationsCard({
         caption="Hoe vaak sc Heerenveen met welke formatie speelde, en hoe die wedstrijden eindigden"
         columns={columns}
         rows={rows.map(({ drawn, formation, lost, played: matches, won }) => ({
-          cells: [matches, `${won}–${drawn}–${lost}`],
+          cells: [matches, { sortValue: won - lost, text: `${won}–${drawn}–${lost}` }],
           header: formation,
         }))}
       />

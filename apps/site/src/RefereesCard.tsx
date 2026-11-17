@@ -2,7 +2,9 @@ import { Card, DataTable, Heading, tableColumns, tableLegend, Text } from '@fans
 
 import { basisOf } from './matchBasis'
 import { refereesCard } from './matchShortcuts'
+import { textSortName } from './player-name'
 import { pointsPerMatchOf, type RefereeRow } from './referees'
+import { figureCell } from './table-values'
 
 const numberFormat = new Intl.NumberFormat('nl-NL')
 const pointsFormat = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 2, minimumFractionDigits: 2 })
@@ -55,13 +57,14 @@ export function RefereesCard({
         columns={columns}
         rows={rows.map((row) => ({
           cells: [
-            numberFormat.format(row.played),
+            row.played,
             row.won,
             row.drawn,
             row.lost,
-            pointsFormat.format(pointsPerMatchOf(row)),
+            figureCell(pointsPerMatchOf(row), pointsFormat.format(pointsPerMatchOf(row))),
           ],
           header: row.name,
+          sortHeader: textSortName(row.name),
         }))}
       />
       <Text appearance="meta">{legend}</Text>

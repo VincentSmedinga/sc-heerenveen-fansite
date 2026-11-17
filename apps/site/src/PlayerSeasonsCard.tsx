@@ -121,6 +121,8 @@ export function PlayerSeasonsCard({
           ...(row.season === undefined ? (row.gap === true ? {} : { total: true }) : { href: address(row.season) }),
           ...(row.shirtNumber === undefined ? {} : { aside: `nr. ${row.shirtNumber}` }),
         }))}
+        // The total stays at the bottom and a gap where it is, so the table does not sort.
+        sortable={false}
       />
       <Text appearance="meta">
         {[

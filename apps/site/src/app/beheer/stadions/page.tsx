@@ -68,14 +68,18 @@ export default async function StadiumsPage({ searchParams }: { searchParams: Pro
               rows={stadiums.map((stadium) => ({
                 cells: [
                   stadium.place ?? 'Onbekend',
-                  stadium.hasCoordinates || stadium.hasAddress ? (
-                    <>
-                      {stadium.hasCoordinates ? <Tag tone="highlight">Coördinaten</Tag> : null}{' '}
-                      {stadium.hasAddress ? <Tag tone="highlight">Adres</Tag> : null}
-                    </>
-                  ) : (
-                    'Nog niets'
-                  ),
+                  stadium.hasCoordinates || stadium.hasAddress
+                    ? {
+                        content: (
+                          <>
+                            {stadium.hasCoordinates ? <Tag tone="highlight">Coördinaten</Tag> : null}{' '}
+                            {stadium.hasAddress ? <Tag tone="highlight">Adres</Tag> : null}
+                          </>
+                        ),
+                        // What we know of the stadium: the number of the things we have.
+                        sortValue: Number(stadium.hasCoordinates) + Number(stadium.hasAddress),
+                      }
+                    : { content: 'Nog niets', sortValue: 0 },
                 ],
                 header: stadium.name,
                 href: groundPath(stadium.id),

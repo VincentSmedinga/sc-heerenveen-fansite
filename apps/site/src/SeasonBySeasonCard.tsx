@@ -125,10 +125,21 @@ export function SeasonBySeasonCard({
           <BarChart.Trend labels={labels} values={values} />
         </BarChart>
       )}
-      <DataTable caption={caption('De laatste seizoenen')} columns={columns} rows={recent.map(rowOf)} />
+      {/* The seasons are one list in two tables, so sorting one half would be wrong. */}
+      <DataTable
+        caption={caption('De laatste seizoenen')}
+        columns={columns}
+        rows={recent.map(rowOf)}
+        sortable={false}
+      />
       {rest.length === 0 ? null : (
         <Disclosure summary={`Toon alle ${seasons.length} seizoenen`}>
-          <DataTable caption={caption('De eerdere seizoenen')} columns={columns} rows={rest.map(rowOf)} />
+          <DataTable
+            caption={caption('De eerdere seizoenen')}
+            columns={columns}
+            rows={rest.map(rowOf)}
+            sortable={false}
+          />
         </Disclosure>
       )}
       <Text appearance="meta">{legend}</Text>

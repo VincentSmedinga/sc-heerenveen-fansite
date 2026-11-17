@@ -100,15 +100,20 @@ export default async function PersonQualityPage({ searchParams }: Props) {
                 cells: personGapColumns.map(({ key, name }) => {
                   const gaps = count.columns[key]
 
-                  return gaps === 0 ? null : (
-                    <DataTable.Mark
-                      description={`${gaps === 1 ? 'persoon' : 'personen'} met een gat in ${name} bij de letter ${shown}`}
-                      href={letterTablePath(letter, key)}
-                      key={key}
-                    >
-                      {String(gaps)}
-                    </DataTable.Mark>
-                  )
+                  return gaps === 0
+                    ? null
+                    : {
+                        content: (
+                          <DataTable.Mark
+                            description={`${gaps === 1 ? 'persoon' : 'personen'} met een gat in ${name} bij de letter ${shown}`}
+                            href={letterTablePath(letter, key)}
+                            key={key}
+                          >
+                            {String(gaps)}
+                          </DataTable.Mark>
+                        ),
+                        sortValue: gaps,
+                      }
                 }),
                 header: shown,
                 href: letterTablePath(letter),

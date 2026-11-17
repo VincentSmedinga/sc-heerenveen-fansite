@@ -6,7 +6,7 @@ import type {
   PublicStandingsRow,
   PublicWikipediaPage,
 } from '@fansite/db/queries'
-import type { FormResult, MarkRowMark } from '@fansite/design-system'
+import type { DataTableCell, FormResult, MarkRowMark } from '@fansite/design-system'
 import type { ReactNode } from 'react'
 
 import {
@@ -92,6 +92,7 @@ import { MatchSearchLink, rowLinkText } from './MatchSearchLink'
 import { coachesCardOf, scoreCountsCard } from './matchShortcuts'
 import { splitPersonName } from './player-name'
 import { isEnglishPage, squadPageName } from './season-squad'
+import { figureCell } from './table-values'
 import { meetingOutcomeOf, meetingScoreOf } from './upcoming-match'
 
 /**
@@ -383,6 +384,8 @@ export function GoalsPerQuarterCard({
               cells: [scored[index] ?? 0, conceded[index] ?? 0],
               header: label,
             }))}
+            // A fixed series in its own order, from the first quarter to the last: no sorting.
+            sortable={false}
           />
           <Text>{`Na de 80e minuut: ${late.scored} voor, ${late.conceded} tegen`}</Text>
           <Text>{`In blessuretijd: ${stoppage.scored} voor, ${stoppage.conceded} tegen`}</Text>
@@ -483,6 +486,8 @@ export function LeaguePlaceCard({
               cells: [`${shared ? 'gedeeld ' : ''}${rank}e`, measureValue(measure, value)],
               header: measureNames[measure],
             }))}
+            // The places per part are a short list in its own order: no sorting.
+            sortable={false}
           />
           {placeSentences(place).map((sentence) => (
             <Text key={sentence}>{sentence}</Text>
@@ -549,14 +554,15 @@ export function AttendanceCard({
     )
   }
 
-  const cell = ({ attendance, match }: (typeof slots)[number]) =>
+  // A match without a number sorts last, whichever way the column is sorted.
+  const cell = ({ attendance, match }: (typeof slots)[number]): DataTableCell =>
     match.status !== 'played'
-      ? 'Nog niet gespeeld'
+      ? { sortValue: null, text: 'Nog niet gespeeld' }
       : attendance === null
-        ? 'Niet bekend'
+        ? { sortValue: null, text: 'Niet bekend' }
         : attendance === 0
-          ? 'Zonder publiek'
-          : numberFormat.format(attendance)
+          ? { sortValue: 0, text: 'Zonder publiek' }
+          : { sortValue: attendance, text: numberFormat.format(attendance) }
 
   return card(
     <>
@@ -581,6 +587,8 @@ export function AttendanceCard({
           rows={slots.map((slot) => ({
             cells: [...(competition === 'all' ? [slot.match.competition] : []), cell(slot)],
             header: `${formatTableDay(slot.match.matchDate)}, ${slot.match.opponent}`,
+            // The days sort by the date, not by the words of the day.
+            sortHeader: slot.match.matchDate,
           }))}
         />
       </Disclosure>
@@ -650,6 +658,8 @@ export function HomeAwayCard({
               row('Doelpunten per wedstrijd', (side) => perMatch(side.goalsPerMatch)),
               row('Zonder tegendoelpunt', (side) => side.cleanSheets),
             ]}
+            // A fixed series of figures in an order that tells a story: no sorting.
+            sortable={false}
           />
           <MatchSearchLink link={search?.venue('thuis')} what="thuis" />
           <MatchSearchLink link={search?.venue('uit')} what="uit" />
@@ -752,6 +762,8 @@ export function MatchFlowCard({
               { cells: flowCells(firstGoal.ours), header: 'Wij scoren eerst' },
               { cells: flowCells(firstGoal.opponent), header: 'De tegenstander scoort eerst' },
             ]}
+            // Two rows in their own order: no sorting.
+            sortable={false}
           />
           <DataTable
             caption="Wat er gebeurt na de stand bij de rust"
@@ -761,6 +773,8 @@ export function MatchFlowCard({
               { cells: flowCells(atHalfTime.level), header: 'Gelijk' },
               { cells: flowCells(atHalfTime.behind), header: 'Achter' },
             ]}
+            // Three rows in their own order, from ahead to behind: no sorting.
+            sortable={false}
           />
           <Text>
             {wonAfterTrailing === 0
@@ -971,13 +985,19 @@ export function SeasonCard({
               { cells: [lost, 0], header: 'Verlies' },
               { cells: [results.length, won * 3 + drawn], header: 'Totaal' },
             ]}
+            // The results with the points are a short series in their own order: no sorting.
+            sortable={false}
           />
           <Disclosure summary="Uitslag en gemiddelde per speelronde">
             <DataTable
               caption="Uitslagen van sc Heerenveen per speelronde, met de punten en het gemiddelde aantal punten per wedstrijd over de laatste 5 wedstrijden"
               columns={['Ronde', 'Uitslag', 'Punten', { abbreviation: 'Gem.', name: 'Gemiddelde' }]}
               rows={results.map((result, index) => ({
-                cells: [outcomeWord[result], pointsOf(result), formatAverage(averages[index] ?? 0)],
+                cells: [
+                  outcomeWord[result],
+                  pointsOf(result),
+                  figureCell(averages[index] ?? 0, formatAverage(averages[index] ?? 0)),
+                ],
                 header: String(index + 1),
               }))}
             />
@@ -1254,6 +1274,8 @@ export function ScoreCountsView({
                       note: outcomeWords[outcome],
                     }
                   })}
+                  // The outcomes are one list in a few tables, so none of them sorts.
+                  sortable={false}
                 />
               )
             })}

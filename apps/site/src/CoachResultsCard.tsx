@@ -4,7 +4,8 @@ import { type CoachResult } from './coachResults'
 import { type CompetitionChoice, competitionWords } from './competition'
 import { coachResultsCard } from './matchShortcuts'
 import { BasedOnSince } from './OpponentViews'
-import { splitPersonName } from './player-name'
+import { splitPersonName, textSortName } from './player-name'
+import { figureCell } from './table-values'
 
 /** The columns of the figures, in order, with the points per match as the key figure. */
 const figureColumns = [
@@ -62,10 +63,17 @@ export function CoachResultsCard({
         caption={`De resultaten van sc Heerenveen per hoofdtrainer, de nieuwste eerst${choice === 'all' ? '' : `, in ${competitionWords(choice)}`}`}
         columns={['Hoofdtrainer', ...figureColumns]}
         rows={results.map((result) => ({
-          cells: [result.played, result.won, result.drawn, result.lost, result.pointsPerMatch],
+          cells: [
+            result.played,
+            result.won,
+            result.drawn,
+            result.lost,
+            figureCell(Number(result.pointsPerMatch.replace(',', '.')), result.pointsPerMatch),
+          ],
           display: <PlayerName {...splitPersonName(result.name)} />,
           header: headerOf(result),
           secondary: periodLineOf(result),
+          sortHeader: textSortName(result.name),
         }))}
       />
       <Text appearance="meta">{legend}</Text>
