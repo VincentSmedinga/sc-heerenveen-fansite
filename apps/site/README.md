@@ -574,8 +574,9 @@ De bezoekteller telt de pagina van een seizoen als een bezoek aan `/spelers`, en
 `/tegenstanders` is een subpagina van Wedstrijden, naast `/wedstrijden/cijfers`, met de pagina van elke club eronder op `/tegenstanders/<club>`; de oude adressen bestaan niet meer en hebben geen omleiding (zie _Tegenstanders hoort bij Wedstrijden_).
 Het is een tabel met elke club waartegen sc Heerenveen speelde, van A tot Z, met het aantal gespeelde, gewonnen, gelijkgespeelde en verloren wedstrijden, de punten en het doelsaldo.
 Elke clubnaam is een link naar `/tegenstanders/<club>`, waar `<club>` de `slug` van de club is (zie de README van `packages/db`).
-De server stuurt de tabel zonder knoppen om te sorteren, en deze lijst heeft geen paginering.
-Met JavaScript is elke kolom sorteerbaar; de kolom D sorteert op het doelsaldo, dus de club waartegen het best ging, komt bovenaan.
+De server stuurt de tabel in de volgorde van A tot Z zonder knoppen om te sorteren, en deze lijst heeft geen paginering.
+Met JavaScript is elke kolom sorteerbaar, zoals elke lijst op de site; de kolom D sorteert op het doelsaldo, dus de club waartegen het best ging, komt bovenaan.
+Een derde klik op dezelfde kolom zet de lijst terug in A tot Z.
 De zes cijferkolommen hebben een afkorting (G, W, G, V, P, D) met het hele woord voor een schermlezer, en een regel onder de tabel legt ze uit.
 De punten (3 per winst, 1 per gelijkspel) en het doelsaldo (met een teken: `+18`, `−2`, `0`) staan bij beide keuzes, en tellen alle wedstrijden die de lijst telt, de beker ook (`pointsOf` in `src/opponents.ts`).
 De letters en woorden komen uit `tableColumns` van het designsysteem, zoals in elke tabel.
@@ -585,7 +586,7 @@ De lijst staat in de hoofdkolom, op het witte vlak.
 De zijkolom heeft de zachte kaart "Gemiddeld resultaat" (`TopPointsCard`), met de top 10, en de bronvermelding.
 De kaart toont de tien clubs waartegen we gemiddeld de meeste punten per wedstrijd haalden, van de clubs met minstens 5 gespeelde wedstrijden (`topPointsOf` in `src/opponents.ts`).
 Hij telt dezelfde wedstrijden als de lijst en volgt dus de schakelaar.
-Het is een `DataTable` die niet sorteert: de plaats komt uit `position` van een rij en het gemiddelde is de `key`-kolom, het kerngetal van de tabel.
+Het is een `DataTable` met `sortable={false}`: de plaats komt uit `position` van een rij en het gemiddelde is de `key`-kolom, het kerngetal van de tabel.
 Daaronder staat de zachte kaart "Het moeilijkst" (`HardestCard`) met de vijf clubs waartegen we gemiddeld de minste punten per wedstrijd haalden (`hardestOf` in `src/opponents.ts`).
 Ze heeft dezelfde tabel, legenda en regel over het aantal wedstrijden als de top 10, van laag naar hoog, en staat er alleen als minstens 10 clubs 5 gespeelde wedstrijden hebben.
 Daaronder staat de zachte kaart "Laatste overwinning" (`LastWinCard`) met de clubs van het nieuwste seizoen in de stand, zonder sc Heerenveen, van de langste tijd sinds onze laatste overwinning in de Eredivisie tot de kortste (`lastWinsOf` in `src/opponents.ts`).

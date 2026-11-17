@@ -6476,3 +6476,18 @@
 - **Waarom:** zand was niet de bedoeling, en kaarten in het beheer zijn wit.
 - **Alternatieven:** zand houden.
 - **Later:** vervangt _De kaarten van de kwaliteitspagina's hebben het warme vlak_ (#1304).
+
+## Elke lijst op de site en in het beheer sorteert, een vaste reeks of ranglijst niet
+
+- **Datum:** 17 november 2026
+- **Besluit:** de tabellen van de site en van het beheer die een lijst van vergelijkbare dingen zijn, sorteren op hun kolommen (#1355).
+  Een tabel gaat er uit met een reden, en de reden staat als commentaar bij `sortable={false}`.
+  - **Sorteren:** de resultaten per hoofdtrainer, de wedstrijden per land van de tegenstander, per soort competitie en per formatie, de scheidsrechters, het aantal toeschouwers per thuiswedstrijd, de plek per seizoen en de competities op de pagina van een tegenstander, de uitslagen per speelronde, de clubtopscorer per seizoen, de dagen sinds onze laatste overwinning en de lijst met tegenstanders.
+    In het beheer sorteren de bezoekers per dag, de meest bekeken pagina's, de lijsten met clubs, stadions, clubs met thuisvelden, spelers en wedstrijden, de tabellen met gaten en de vaakste plaats van elke speler.
+  - **Niet sorteren:** een ranglijst met `position` (de top 5 en top 10 tegenstanders, de stand en de scorers in de voorbeschouwing), een lijst in twee tabellen (de plek per ronde, en de laatste en eerdere seizoenen per seizoen), een tabel met een `total`-rij of een `gap`-rij (de cijfers van een speler per seizoen, de stand met gaten), een vaste reeks in een eigen volgorde (doelpunten per kwartier, wat er gebeurt na het eerste doelpunt en na de rust, de uitslagen thuis en uit, de uitslagen met punten, de uitkomsten per aantal, de plek van sc Heerenveen per onderdeel, de periodetabel van de bezoekers) en een vergelijking naast elkaar in het beheer (clubs en spelers samenvoegen).
+  - **De waarden:** waar de getoonde tekst niet de goede volgorde geeft, heeft de cel een `sortValue`: een stand als "7–5" sorteert op het doelsaldo, "6–3–2" op winst min verlies, een datum op de dag, het getal in `1,71` als getal, en een teken in een tabel met gaten op het getal dat het toont (`?` en `…` zijn leeg).
+    Een naam met een voorvoegsel heeft een `sortHeader` met de achternaam zonder voorvoegsel (`textSortName`).
+    Het aantal toeschouwers van een wedstrijd die niet gespeeld is of waarvan we het aantal niet kennen, is leeg en staat achteraan.
+- **Waarom:** de bezoeker en de redacteur zoeken een uiterste in lijsten van tientallen rijen, en een ranglijst of een vaste reeks heeft zijn volgorde als antwoord.
+- **Alternatieven:** alleen de lijsten die erom vroegen; elke tabel, ook een ranglijst (de plaats zou dan niet meer kloppen met de volgorde).
+- **Later:** vervangt van _Een tabel sorteert op een kolom met knoppen in de koppen, die er alleen met JavaScript zijn_ (31 oktober 2026) dat alleen de lijst van de tegenstanders sorteert.
