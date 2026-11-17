@@ -132,7 +132,7 @@ export function ClubTopScorersCard({
     <DataTable
       appearance="text"
       caption={caption(part)}
-      columns={['Seizoen', 'Speler', { abbreviation: 'D', name: 'Doelpunten' }]}
+      columns={['Seizoen', 'Speler', tableColumns.goals]}
       rows={rows.map(({ goals, incomplete, players, season }) => ({
         cells: [
           {
