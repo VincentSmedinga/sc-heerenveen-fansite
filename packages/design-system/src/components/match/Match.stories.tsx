@@ -15,11 +15,11 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Een wedstrijd van sc Heerenveen 1, als regel in een lijst: bovenaan wanneer en wat (de dag, de competitie en de ronde), dan de twee clubs met de uitslag ertussen, eventueel de doelpuntenmakers, en onderaan waar en wie (het stadion en de scheidsrechter).',
-          'De twee metaregels hebben elk een vaste volgorde: dag, competitie, ronde; stadion, scheidsrechter. Een onderdeel breekt niet in tweeën, dus een regel die te lang is, breekt tussen twee onderdelen. De pagina bepaalt wat er staat door iets door te geven of weg te laten: laat `competition` weg onder een kop die de competitie al noemt, en geef `stadium` en `referee` alleen mee waar de lijst die details wil.',
+          'Een wedstrijd van sc Heerenveen 1, als regel in een lijst: bovenaan de competitie en de ronde, dan de twee clubs met de uitslag ertussen, eventueel de doelpuntenmakers, en onderaan het stadion en de scheidsrechter. De dag staat bij een gespeelde wedstrijd achter de ronde, en bij een wedstrijd zonder uitslag vooraan in de regel onder de clubs.',
+          'De twee metaregels hebben elk een vaste volgorde: competitie, ronde, dag bij een uitslag; dag, stadion, toeschouwers (alleen bij een uitslag), scheidsrechter bij een wedstrijd zonder uitslag. De onderste regel is er dan altijd, ook voor "Uitgesteld" en "Geannuleerd". Een onderdeel breekt niet in tweeën, dus een regel die te lang is, breekt tussen twee onderdelen. De pagina bepaalt wat er staat door iets door te geven of weg te laten: laat `competition` weg onder een kop die de competitie al noemt, en geef `stadium` en `referee` alleen mee waar de lijst die details wil.',
           'Kies hem voor een volledige lijst, zoals een seizoen of alle wedstrijden tegen één club; ook voor een selectie, zoals een record. Laat `competition` weg onder een kop die de competitie al noemt.',
           'De thuisclub staat eerst en de uitslag heeft de kleur van de uitkomst voor sc Heerenveen, nooit als enig teken. Een wedstrijd kan nog moeten komen, uitgesteld of geannuleerd zijn, live gaan, na verlenging of strafschoppen eindigen, of nog geen uitslag hebben.',
-          'Een wedstrijd met een eigen pagina (`reportHref`) heeft de regel met de twee clubs en de uitslag als link. De namen en het streepje hebben de kleur van een link, de uitslag houdt de kleur van de uitkomst, en de regel is alleen onderstreept onder de muis en bij focus van het toetsenbord. Zo zie je aan de kleur welke wedstrijd een pagina heeft. Een schermlezer hoort wat er staat en dan waar de link heen gaat, zoals "sc Heerenveen 2 tegen 0 Ajax, verslag". Een wedstrijd zonder pagina is gewone tekst. De andere regels staan buiten de link.',
+          'Een wedstrijd met een eigen pagina (`reportHref`) heeft de regel met de twee clubs en de uitslag als link. De namen en het streepje hebben de kleur van een link, de uitslag houdt de kleur van de uitkomst, en de regel is onderstreept als een gewone link, en dikker onder de muis en bij focus van het toetsenbord. Een schermlezer hoort wat er staat en dan waar de link heen gaat, zoals "sc Heerenveen 2 tegen 0 Ajax, verslag". Een wedstrijd zonder pagina is gewone tekst. De andere regels staan buiten de link.',
           'Zet hem in een `List.Item` met `role="list"` op de `List`, in een `Card` onder een kop van niveau 2. Hij is gebouwd uit `Time` en `Text`, met de uitkomst die ook de andere onderdelen met een uitslag gebruiken.',
         ].join('\n'),
       },
@@ -858,9 +858,9 @@ export const WithRefereeAndExtra = meta.story({
 })
 
 // The two small lines in the cases that decide how long they get: a played match with its
-// year, one that is still to come with its time, a weekend without a time, and the longest
-// competition and round. Under the clubs stand the stadium and the referee. The clubs are made
-// up.
+// year at the end of the line above the clubs, one that is still to come with its time first in
+// the line under them, a weekend without a time, the longest competition and round, and the
+// two cases without a competition. The clubs are made up.
 const renderMetaLines = () => (
   <div style={{ maxInlineSize: '24rem' }}>
     <Card aria-labelledby="metaregels-kop">
@@ -870,6 +870,7 @@ const renderMetaLines = () => (
       <List role="list">
         <List.Item>
           <Match
+            attendance={26100}
             competition="Eredivisie"
             dateTime="2015-10-24"
             goalsAgainst={0}
@@ -919,12 +920,35 @@ const renderMetaLines = () => (
             time="do 20 mei 21:00"
           />
         </List.Item>
+        <List.Item>
+          <Match
+            dateTime="2015-10-31"
+            goalsAgainst={2}
+            goalsFor={2}
+            home={false}
+            opponent="Testdorp FC"
+            round="Speelronde 10"
+            stadium="Stadion Proeflaan"
+            status="played"
+            time="za 31 okt 2015"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            dateTime="2027-03-06T19:45:00Z"
+            home
+            opponent="Proefstad SV"
+            round="Speelronde 25"
+            status="scheduled"
+            time="za 6 mrt 20:45"
+          />
+        </List.Item>
       </List>
     </Card>
   </div>
 )
 
 export const MetaLines = meta.story({
-  name: 'Metaregels: wanneer en wat boven de clubs, waar en wie eronder',
+  name: 'Metaregels: de dag bij de ronde of onder de clubs',
   render: renderMetaLines,
 })

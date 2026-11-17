@@ -362,7 +362,7 @@ describe('the page of a club', () => {
     expect(html).toContain('<dt>Grootste overwinning</dt><dd><div class="hf-match"')
     expect(html).toContain('<dt>Grootste nederlaag</dt><dd><div class="hf-match"')
     expect(plain(html.slice(html.indexOf('Grootste overwinning')))).toMatch(
-      /^Grootste overwinning vr 24 okt 2025 · Eredivisie · Speelronde 2 sc Heerenveen 3–0 3 tegen 0 Testclub.*Grootste nederlaag/,
+      /^Grootste overwinning Eredivisie · Speelronde 2 · vr 24 okt 2025 sc Heerenveen 3–0 3 tegen 0 Testclub.*Grootste nederlaag/,
     )
   })
 
@@ -418,11 +418,11 @@ describe('the page of a club', () => {
 
   it('lists every meeting as a Match, the newest first, with the day and its year, the competition and the result', async () => {
     expect(meetingsOf(await render())).toEqual([
-      'zo 20 sep 2026 · KNVB Beker · Speelronde 1 Testclub 1–0 n.v. (0–0) 1 tegen 0, na verlenging; na 90 minuten 0 tegen 0 sc Heerenveen 112’ minuut 112, Voorbeeld , Testclub',
-      'vr 24 okt 2025 · Eredivisie · Speelronde 2 sc Heerenveen 3–0 3 tegen 0 Testclub 12’ minuut 12, Vroeg str. , strafschop , sc Heerenveen , ; 40’ minuut 40, Midden , sc Heerenveen , ; 77’ minuut 77, Laat , sc Heerenveen',
-      'za 1 mrt 2025 · Eredivisie · Speelronde 3 Oude Testclub 1–1 1 tegen 1 sc Heerenveen',
-      'za 9 nov 2024 · Eredivisie · Speelronde 4 sc Heerenveen 2–0 2 tegen 0 Testclub',
-      'zo 2 apr 2023 · Eredivisie · Speelronde 5 Testclub 2–4 2 tegen 4 sc Heerenveen',
+      'KNVB Beker · Speelronde 1 · zo 20 sep 2026 Testclub 1–0 n.v. (0–0) 1 tegen 0, na verlenging; na 90 minuten 0 tegen 0 sc Heerenveen 112’ minuut 112, Voorbeeld , Testclub',
+      'Eredivisie · Speelronde 2 · vr 24 okt 2025 sc Heerenveen 3–0 3 tegen 0 Testclub 12’ minuut 12, Vroeg str. , strafschop , sc Heerenveen , ; 40’ minuut 40, Midden , sc Heerenveen , ; 77’ minuut 77, Laat , sc Heerenveen',
+      'Eredivisie · Speelronde 3 · za 1 mrt 2025 Oude Testclub 1–1 1 tegen 1 sc Heerenveen',
+      'Eredivisie · Speelronde 4 · za 9 nov 2024 sc Heerenveen 2–0 2 tegen 0 Testclub',
+      'Eredivisie · Speelronde 5 · zo 2 apr 2023 Testclub 2–4 2 tegen 4 sc Heerenveen',
     ])
   })
 
@@ -927,8 +927,8 @@ describe('the matches that are still to come on the page of a club', () => {
     // Called off: the day is not known, so the line says so instead of a time.
     expect(lines[0]).toContain('Uitgesteld')
     expect(lines[0]).toContain('Eredivisie · Speelronde 11')
-    expect(lines[1]).toMatch(/wo 18 nov 20:45 · KNVB Beker · Achtste finale.*Komend FC/)
-    expect(lines[2]).toMatch(/za 5 dec 20:30 · Eredivisie · Speelronde 15.*Komend FC/)
+    expect(lines[1]).toMatch(/KNVB Beker · Achtste finale.*Komend FC.*wo 18 nov 20:45/)
+    expect(lines[2]).toMatch(/Eredivisie · Speelronde 15.*Komend FC.*za 5 dec 20:30/)
     expect(html).toContain('<time dateTime="2026-12-05T19:30:00.000Z"')
   })
 

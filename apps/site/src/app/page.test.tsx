@@ -868,11 +868,10 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     expect(html.match(/class="hf-match"/g)).toHaveLength(2)
     expect(html.indexOf('Tweede ronde')).toBeLessThan(html.indexOf('Speelronde 10'))
     expect(html).not.toContain('Speelronde 9')
-    // The first line has the day, the competition and the round, and no "Thuis" or "Uit".
-    expect(html).toContain(
-      'KNVB Beker</span> <span aria-hidden="true">·</span> <span class="hf-match-part">Tweede ronde</span></p>',
+    // The played match has the competition, the round and the day in its first line.
+    expect(html).toMatch(
+      /hf-match-when"><span class="hf-match-part">KNVB Beker<\/span> <span aria-hidden="true">·<\/span> <span class="hf-match-part">Tweede ronde<\/span> <span aria-hidden="true">·<\/span> <span class="hf-match-part"><time[^>]*>di 20 okt<\/time>/,
     )
-    expect(html).toMatch(/hf-match-when"><span class="hf-match-part"><time[^>]*>di 20 okt<\/time>.*?KNVB Beker/s)
     expect(html).not.toMatch(/<span>(?:Thuis|Uit)<\/span>/)
     expect(html).not.toContain('Uitgesteld')
     expect(html).toContain('di 20 okt')

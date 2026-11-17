@@ -6,12 +6,12 @@
 @layer hf.base {
   a {
     color: var(--hf-colour-text-link);
-    text-decoration-thickness: 0.0625em;
-    text-underline-offset: 0.15em;
+    text-decoration-thickness: var(--hf-link-underline-thickness);
+    text-underline-offset: var(--hf-link-underline-offset);
 
     &:hover {
       color: var(--hf-colour-text-link-hover);
-      text-decoration-thickness: 0.125em;
+      text-decoration-thickness: var(--hf-link-underline-thickness-hover);
     }
   }
 

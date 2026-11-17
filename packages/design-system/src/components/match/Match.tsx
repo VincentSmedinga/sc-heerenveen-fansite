@@ -8,6 +8,8 @@ import { Time } from '../time/Time'
 /** The name of our own club, which a match always has on one side. */
 const ourClub = 'sc Heerenveen'
 
+const attendanceFormat = new Intl.NumberFormat('nl-NL')
+
 /**
  * Where a match stands: still to be played, played, called off without a new date, or called
  * off for good.
@@ -117,7 +119,13 @@ type MatchAfterNinety =
     }
   | { afterNinetyAgainst?: never; afterNinetyFor?: never }
 
-type MatchBaseProps = {
+type MatchBaseProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
+  /**
+   * The number of spectators of a played match. It stands in the line under the clubs, between
+   * the stadium and the referee, as `12.345 toeschouwers`, or `Zonder publiek` for 0. A match
+   * that is not played, and a match without a known number (`null`), shows nothing.
+   */
+  attendance?: null | number | undefined
   /** A match has no children: everything it shows comes from the props below. */
   children?: never
   /**
@@ -153,11 +161,11 @@ type MatchBaseProps = {
   /** The round as the source has it, such as `Speelronde 12` or `Tweede ronde`. */
   round: string
   /**
-   * The stadium, as plain text. It starts the line under the clubs, with the referee after it.
-   * Without a stadium and a referee there is no such line.
+   * The stadium, as plain text. It starts the line under the clubs, with the spectators and the
+   * referee after it. Without any of the three there is no such line.
    */
   stadium?: null | string | undefined
-} & Omit<ComponentPropsWithoutRef<'div'>, 'children'>
+}
 
 /** A match that is called off has no time and no result, only the word for its status. */
 type MatchCalledOffProps<Status extends 'cancelled' | 'postponed'> = MatchBaseProps & {
@@ -226,18 +234,21 @@ const separator = (
  * between the lines of a List.
  *
  * The link has the colour of a link on the names of the clubs and on the dash, so you see
- * which match has a page; the result keeps the colour of the outcome. It is underlined under
- * the mouse and with the focus of the keyboard, and not otherwise, as the title of a
- * discussion is. A screen reader hears what is on the line and then where the link goes, as
- * "sc Heerenveen 2 tegen 0 Ajax, verslag", "Ajax tegen sc Heerenveen, voorbeschouwing" or "sc
- * Heerenveen tegen Ajax, live verslag".
+ * which match has a page; the result keeps the colour of the outcome. It is underlined like any
+ * other link, thicker under the mouse and with the focus of the keyboard. A screen reader hears
+ * what is on the line and then where the link goes, as "sc Heerenveen 2 tegen 0 Ajax, verslag",
+ * "Ajax tegen sc Heerenveen, voorbeschouwing" or "sc Heerenveen tegen Ajax, live verslag".
  *
- * A match has at most two small lines of its own, each with a fixed role and a fixed order.
- * Above the clubs stand when and what: the day or the time, the competition and the round ("za
- * 24 okt · Eredivisie · Speelronde 9"). The page decides what is on it: without `competition`,
- * under a heading that names it, the line is "za 24 okt · Speelronde 9". Under the clubs and
- * the scorers stand where and who: the stadium and the referee ("Abe Lenstra Stadion · Danny
- * Makkelie"), for the lists that want that detail; without both there is no such line. Each
+ * A match has at most two small lines of its own, each with a fixed order. A match with a
+ * result, a live one too, has above the clubs the competition, the round and the day
+ * ("Eredivisie · Speelronde 9 · za 24 okt 2015"), and under the clubs and the scorers the
+ * stadium, the spectators and the referee ("Abe Lenstra Stadion · 26.100 toeschouwers · Danny
+ * Makkelie"), each only when known, for lists that want that detail; without them there is no
+ * such line. A match without a result puts the day (or the
+ * time, "Uitgesteld" or "Geannuleerd") first under the clubs, before the stadium and the
+ * referee, so that line is always there, and has above them only the competition and the round
+ * ("Eredivisie · Speelronde 9"). The page decides what is on it: without `competition`, under a
+ * heading that names it, the top line is only the round. Each
  * part of a line stays in one piece, so a line that is too long breaks between two parts. The
  * order in the source is the order on the screen and the order a screen reader reads.
  *
@@ -277,6 +288,7 @@ const separator = (
 export const Match = ({
   afterNinetyAgainst,
   afterNinetyFor,
+  attendance,
   className,
   competition,
   dateTime,
@@ -338,7 +350,18 @@ export const Match = ({
     ) : (
       <Time dateTime={dateTime}>{time}</Time>
     )
-  const where = [stadium, referee].filter((part) => part)
+  const crowd =
+    status !== 'played' || attendance === null || attendance === undefined
+      ? undefined
+      : attendance === 0
+        ? 'Zonder publiek'
+        : `${attendanceFormat.format(attendance)} toeschouwers`
+  const where = [stadium, crowd, referee].filter((part) => part)
+  // A match without a result puts the day under the clubs, before the stadium; one with a
+  // result (a live one too) ends the line above the clubs with it.
+  const dateBelow = status !== 'played' && live !== true
+  const top = (dateBelow ? [competition, round] : [competition, round, when]).filter((part) => part)
+  const bottom = dateBelow ? [when, ...where] : where
 
   // The two clubs with the result between them: the line that is the link with a page.
   const clubs = (
@@ -382,15 +405,12 @@ export const Match = ({
   return (
     <div {...props} className={classNames('hf-match', className)}>
       <Text appearance="meta" className="hf-match-when">
-        <span className="hf-match-part">{when}</span>
-        {competition ? (
-          <>
-            {separator}
-            <span className="hf-match-part">{competition}</span>
-          </>
-        ) : null}
-        {separator}
-        <span className="hf-match-part">{round}</span>
+        {top.map((part, index) => (
+          <Fragment key={index}>
+            {index > 0 ? separator : null}
+            <span className="hf-match-part">{part}</span>
+          </Fragment>
+        ))}
       </Text>
       <p className="hf-match-clubs">
         {reportHref === undefined ? (
@@ -421,9 +441,9 @@ export const Match = ({
         </p>
       ) : null}
       {extra ? <div className="hf-match-extra-lines">{extra}</div> : null}
-      {where.length > 0 ? (
+      {bottom.length > 0 ? (
         <Text appearance="meta" className="hf-match-where">
-          {where.map((part, index) => (
+          {bottom.map((part, index) => (
             <Fragment key={index}>
               {index > 0 ? separator : null}
               <span className="hf-match-part">{part}</span>

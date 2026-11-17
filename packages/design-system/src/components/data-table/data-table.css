@@ -44,13 +44,13 @@
     min-inline-size: 1.5rem;
     padding: 0;
     text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.25em;
+    text-decoration-thickness: var(--hf-link-underline-thickness);
+    text-underline-offset: var(--hf-link-underline-offset);
 
     &:hover {
       background-color: transparent;
       color: var(--hf-colour-text-default);
-      text-decoration-thickness: 2px;
+      text-decoration-thickness: var(--hf-link-underline-thickness-hover);
     }
 
     /*

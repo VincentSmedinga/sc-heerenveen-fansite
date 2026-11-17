@@ -3578,6 +3578,7 @@
   - **Elk onderdeel blijft in één stuk** (`.hf-match-part`, een `inline-block` met een grootste breedte van de regel), zodat een regel die te lang is tussen twee onderdelen afbreekt; een onderdeel dat breder is dan de regel breekt zoals eerst.
     De scheidingstekens zijn verborgen voor een schermlezer en de spaties staan erbuiten, zoals voorheen.
   - **`Match` krijgt geen nieuwe eigenschap die de context noemt.** De pagina laat een onderdeel weg door `competition`, `stadium` of `referee` niet door te geven.
+- **Later:** de rol van de twee regels (boven: wanneer en wat, onder: waar en wie) geldt niet meer voor een wedstrijd zonder uitslag: die zet de dag eerst in de onderste regel, en een wedstrijd met een uitslag zet de dag achter de ronde (zie _Een wedstrijd toont de regel met de clubs als gewone link, en de dag staat op een eigen plek_, 17 november 2026).
 - **Gemeten** in de gebouwde Storybook (de story _Metaregels_, een kaart van 24 rem): een teken van de metatekst is gemiddeld 6,2 pixel breed, niet de 7,6 pixel van de schatting in het issue.
   De regel boven de clubs van een gewone Eredivisiewedstrijd ("za 24 okt 2015 · Eredivisie · Speelronde 9", 42 tekens, 256 pixel) past op 390 en 900 pixel op één regel, en onder 320 pixel (254 pixel beschikbaar) net niet.
   De regel onder de clubs met stadion en scheidsrechter (33 tekens, 209 pixel) past op alle drie de breedtes op één regel.
@@ -3626,6 +3627,7 @@
   In forced colours krijgt de link de kleur van het systeem voor links.
   Een wedstrijd die live is, toont geen eigen teken in de lijst: de pagina van de wedstrijd heeft de stand.
 - **Alternatieven:** de aparte link houden; alleen de clubs als link, zonder de uitslag; altijd onderstreept, met of zonder pijltje; de tekstkleur houden, zodat je in rust niet ziet welke regel een link is; "Live" houden als klein label.
+- **Later:** de regel is in rust niet meer zonder onderstreping: hij is onderstreept als een gewone link en wordt onder de muis en bij focus dikker (zie _Een wedstrijd toont de regel met de clubs als gewone link, en de dag staat op een eigen plek_, 17 november 2026).
 
 ## De keuzes van de schakelaar zijn zo breed als hun tekst
 
@@ -3672,3 +3674,31 @@
   Het component beslist over de strakke stap en de pagina over het gebied, zodat geen pagina zijn eigen indeling van de werkbalk bepaalt.
 - **Alternatieven:** alleen Kop 1 aanpassen (Kop 1 wordt dan losser dan Kop 2); de werkbalk in `Page.Title` zetten; een eigenschap op `Page.Toolbar` die de plek kiest.
 - **Later:** vervangt de regel _Een werkbalk onder de kop_ in _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ (12 november 2026), en vult _Een strakke stap op een smalle plek_ aan: de werkbalk is nu de tweede kolom naast de kop.
+
+## Een wedstrijd toont de regel met de clubs als gewone link, en de dag staat op een eigen plek
+
+- **Datum:** 17 november 2026
+- **Besluit:** alle links gebruiken drie tokens voor de onderstreping: `--hf-link-underline-thickness` (`0.0625em`), `--hf-link-underline-thickness-hover` (`0.125em`) en `--hf-link-underline-offset` (`0.15em`), in `tokens/typography.css` (#1346).
+  De gewone link, `.hf-match-link`, de kop van een nieuwsitem, de titel van een discussie, de spelernaam in `MatchSubstitutes` en de sorteerlink in `DataTable` gebruiken ze.
+  De navigatie en de snelkoppelingen houden hun eigen markering van de huidige pagina.
+  **Waarom:** de waarden stonden op zes plaatsen los en liepen uiteen, in em en in pixels.
+  Em schaalt mee met de tekst, en één plek maakt een volgende wijziging klein.
+  **Alternatieven:** pixels voor alles (schaalt niet mee met de tekst), of de waarden per component laten (de uiteenloop blijft).
+- **Besluit:** `.hf-match-link` is in rust onderstreept en wordt onder de muis en met focus dikker, zoals een gewone link.
+  De kop van een nieuwsitem en de titel van een discussie blijven alleen onder de muis en met focus onderstreept, en worden dan dikker.
+  **Waarom:** de eigenaar wil dat de regel met de clubs als link te herkennen is, ook zonder muis.
+  **Alternatief:** onderstreping alleen onder de muis laten, zoals eerst.
+- **Besluit:** een wedstrijd zonder uitslag zet de dag (of de tijd, of "Uitgesteld" of "Geannuleerd") als eerste onderdeel van de onderste metaregel; de bovenste regel heeft dan alleen de competitie en de ronde, en de onderste regel is er altijd.
+  Een wedstrijd met een uitslag, een lopende wedstrijd ook, zet de dag als laatste onderdeel van de bovenste regel ("Eredivisie · Speelronde 9 · za 24 okt 2015"), en de onderste regel heeft de dag niet.
+  **Waarom:** bij een wedstrijd die komt staat eerst wat het is en dan wanneer en waar, en bij een gespeelde wedstrijd staat de dag bij de ronde.
+  **Alternatief:** de dag altijd bovenaan laten staan.
+- **Besluit:** `.hf-match-score` heeft geen opvulling meer, en de naam van onze club in de regel met de clubs heeft het gewicht van een naam, `--hf-name-font-weight` (600), in plaats van dat van nadruk (700).
+  De regel is `.hf-match-clubs .hf-match-own`: de naam in de kop van de pagina van een wedstrijd (`MatchHeader`) gebruikt dezelfde klasse en blijft zoals hij was, in het gewicht van Kop 3.
+  **Waarom:** de eigenaar vindt 700 te zwaar naast de uitslag, en het designsysteem heeft al een token voor het gewicht van een naam; een eigen getal mag niet (`weight-css.test.ts`).
+  **Alternatief:** een eigen token voor deze ene naam.
+- **Later:** vervangt de onderstreping van `.hf-match-link` uit _De regel met de clubs in `Match` is de link naar de pagina van de wedstrijd_ (#1332) en de rol van de twee metaregels uit _Een wedstrijd heeft twee metaregels met een vaste rol en een vaste volgorde_ (#1258).
+- **Besluit:** `Match` krijgt `attendance`, het aantal toeschouwers, en een gespeelde wedstrijd zet het in de onderste metaregel tussen het stadion en de scheidsrechter, elk alleen als we het weten (#1346).
+  Het getal staat in de Nederlandse notatie met het woord erachter ("26.100 toeschouwers"), 0 is "Zonder publiek", zoals de pagina van een wedstrijd het zegt, en een onbekend aantal toont niets.
+  De lijsten met details (`withDetails`) geven `matches.attendance` door, op de plaatsen waar ze het stadion en de scheidsrechter al doorgeven.
+  **Waarom:** de eigenaar wil het aantal toeschouwers in de lijst zien, en het staat al in de gegevens en op de pagina van een wedstrijd, dus het bronbeleid verandert niet.
+  **Alternatief:** alleen op de pagina van de wedstrijd laten staan.

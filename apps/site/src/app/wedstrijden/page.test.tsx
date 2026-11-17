@@ -106,6 +106,18 @@ describe('the links to the pages of the matches', () => {
     expect(resultCards(html)).not.toContain('Pieter Maquette')
   })
 
+  it('shows the spectators between the stadium and the referee of a played match, not in the results', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({
+      ...matchData,
+      matches: matchData.matches.map((match) => ({ ...match, attendance: 26100, referee: 'Pieter Maquette' })),
+    })
+
+    const html = await render()
+
+    expect(html).toMatch(/26\.100 toeschouwers<\/span> <span aria-hidden="true">·<\/span> <span[^>]*>Pieter Maquette/)
+    expect(resultCards(html)).not.toContain('toeschouwers')
+  })
+
   it('shows the results without links, and says why in the log, when the pages cannot be read', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
 
@@ -328,24 +340,26 @@ describe('the page /wedstrijden', () => {
     expect(cup).not.toContain('Het verloop van het seizoen')
   })
 
-  it('starts a line of a result with the day, then the round, and has no stadium', async () => {
+  it('ends a line of a result with the day, after the round, and has no stadium', async () => {
     const results = section(await render(), 'uitslagen')
 
     expect(results).toContain(
-      '<p class="hf-meta hf-match-when"><span class="hf-match-part"><time dateTime="2026-10-11">zo 11 okt</time></span> <span aria-hidden="true">·</span> <span class="hf-match-part">Speelronde 9</span></p>',
+      '<p class="hf-meta hf-match-when"><span class="hf-match-part">Speelronde 9</span> <span aria-hidden="true">·</span> <span class="hf-match-part"><time dateTime="2026-10-11">zo 11 okt</time></span></p>',
     )
     expect(results).not.toContain('Voorbeeldpark')
     expect(results).not.toMatch(/Thuis|Uit</)
   })
 
-  it('puts the day, the competition and the round above the clubs in the programme, and the stadium under them', async () => {
+  it('puts the competition and the round above the clubs in the programme, and the day and the stadium under them', async () => {
     const programme = section(await render(), 'programma')
 
     expect(programme).toContain(
       'Eredivisie</span> <span aria-hidden="true">·</span> <span class="hf-match-part">Speelronde 10</span></p>',
     )
-    expect(programme).toContain('hf-match-where"><span class="hf-match-part">Stadion Proeflaan</span></p>')
-    expect(programme.indexOf('wo 28 okt 19:45')).toBeLessThan(programme.indexOf('Proefstad SV'))
+    expect(programme).toMatch(
+      /hf-match-where"><span class="hf-match-part"><time[^>]*>wo 28 okt 19:45<\/time><\/span> <span aria-hidden="true">·<\/span> <span class="hf-match-part">Stadion Proeflaan<\/span><\/p>/,
+    )
+    expect(programme.indexOf('wo 28 okt 19:45')).toBeGreaterThan(programme.indexOf('Proefstad SV'))
     expect(programme.indexOf('Speelronde 10')).toBeLessThan(programme.indexOf('Proefstad SV'))
   })
 
