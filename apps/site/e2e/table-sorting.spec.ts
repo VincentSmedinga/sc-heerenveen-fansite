@@ -35,7 +35,7 @@ async function clickThreeTimes(page: Page, name: string) {
   await expect(header).toHaveAttribute('aria-sort', 'none')
   expect(await rowHeaders(page)).toEqual(given)
   await expect(page.locator('table').first().locator('thead [aria-sort]:not([aria-sort="none"])')).toHaveCount(0)
-  await expect(page.locator('div[role="status"]').first()).toHaveText(
+  await expect(page.locator('table').first().locator('xpath=following-sibling::div[@role="status"]')).toHaveText(
     'Niet meer gesorteerd, in de volgorde van de pagina',
   )
 }
