@@ -437,14 +437,14 @@ export const Sorted = meta.story({
     },
   },
   play: async ({ canvas }) => {
-    const header = () => canvas.getByRole('columnheader', { name: 'D doelsaldo' })
+    const header = () => canvas.getByRole('columnheader', { name: 'doelsaldo' })
 
-    await userEvent.click(canvas.getByRole('button', { name: 'D doelsaldo' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'doelsaldo' }))
     await expect(header()).toHaveAttribute('aria-sort', 'descending')
-    await expect(canvas.getByRole('button', { name: 'D doelsaldo' })).toHaveFocus()
-    await userEvent.click(canvas.getByRole('button', { name: 'D doelsaldo' }))
+    await expect(canvas.getByRole('button', { name: 'doelsaldo' })).toHaveFocus()
+    await userEvent.click(canvas.getByRole('button', { name: 'doelsaldo' }))
     await expect(header()).toHaveAttribute('aria-sort', 'ascending')
-    await userEvent.click(canvas.getByRole('button', { name: 'D doelsaldo' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'doelsaldo' }))
     await expect(header()).toHaveAttribute('aria-sort', 'none')
     await expect(canvas.getByRole('status')).toHaveTextContent('Niet meer gesorteerd, in de volgorde van de pagina')
   },
@@ -466,7 +466,7 @@ export const SortedKey = meta.story({
       [...canvasElement.querySelectorAll('tbody tr:first-child td')].map((cell) => cell.classList.contains('hf-key'))
 
     await expect(keys()).toEqual([false, false, false, false, true, false])
-    await userEvent.click(canvas.getByRole('button', { name: 'D doelsaldo' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'doelsaldo' }))
     await expect(keys()).toEqual([false, false, false, false, false, true])
   },
   render: renderSortable('40rem'),

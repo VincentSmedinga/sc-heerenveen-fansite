@@ -14,7 +14,9 @@ const rowHeaders = (page: Page) => page.locator('table').first().locator('tbody 
 
 /** Clicks the header three times and checks what each click did. */
 async function clickThreeTimes(page: Page, name: string) {
-  const header = page.getByRole('columnheader', { exact: true, name })
+  // The first one: a page can have a table in the sidebar with a header of the same name that
+  // does not sort.
+  const header = page.getByRole('columnheader', { exact: true, name }).first()
   const button = page.getByRole('button', { exact: true, name })
   const given = await rowHeaders(page)
 
