@@ -15,7 +15,7 @@ const [mainHtml = '', sidebarHtml = ''] = html.split('<section class="hf-page-se
 
 /** The card with the data, and the card with the steps for the Home Screen. */
 const [dataHtml = '', homeScreenHtml = ''] = sidebarHtml.split(
-  '<section class="hf-card hf-card-soft" aria-labelledby="startscherm">',
+  '<section class="hf-card hf-card-soft" aria-labelledby="als-app">',
 )
 
 /** The words of the text in the card with the data, without the heading. */
@@ -84,19 +84,21 @@ describe('the page Over ons', () => {
     expect(dataHtml.match(/<h3 class="hf-heading-4">/g)).toHaveLength(4)
   })
 
-  it('has a second card in the sidebar, under the data, with the steps to put the site on the Home Screen', () => {
+  it('has a second card in the sidebar, Als app op je startscherm, under the data, with the steps to put the site on the Home Screen', () => {
     const text = withoutHeadingLinks(homeScreenHtml)
-      .replace(/<[^>]*>/g, ' ')
-      .replace(/\s+/g, ' ')
+      .replace(/<\/h2>/, ' ')
+      .replace(/<[^>]*>/g, '')
 
-    expect(sidebarHtml.indexOf('id="gegevens"')).toBeLessThan(sidebarHtml.indexOf('id="startscherm"'))
-    expect(homeScreenHtml).toContain('<h2 class="hf-heading-3 hf-heading-anchored" id="startscherm">')
-    expect(text).toContain('De site op je startscherm')
-    expect(text).toContain('Wil je met één tik bij het nieuws? Zet de site op het startscherm van je telefoon.')
-    expect(text).toContain('Op een iPhone (Safari): tik op Deel, kies Zet op beginscherm en tik op Voeg toe.')
+    expect(sidebarHtml.indexOf('id="gegevens"')).toBeLessThan(sidebarHtml.indexOf('id="als-app"'))
+    expect(homeScreenHtml).toContain('<h2 class="hf-heading-3 hf-heading-anchored" id="als-app">')
+    expect(text).toContain('Als app op je startscherm')
+    expect(text).toContain('Doe dit één keer en je opent de Fansite voortaan met één tik op je telefoon of tablet.')
+    expect(text).toContain('Op een iPhone: tik op Deel, kies Zet op beginscherm en tik op Voeg toe.')
     expect(text).toContain(
-      'Op Android (Chrome): tik op het menu met de drie puntjes, kies Toevoegen aan startscherm en tik op Toevoegen.',
+      'Op Android: tik op het menu met de drie puntjes, kies Toevoegen aan startscherm en tik op Toevoegen.',
     )
+    expect(homeScreenHtml).toContain('<strong>Zet op beginscherm</strong>')
+    expect(homeScreenHtml).toContain('<strong>Toevoegen aan startscherm</strong>')
     expect(withoutHeadingLinks(homeScreenHtml)).not.toMatch(/<(a|button|[ou]l|h3)[ >]/)
   })
 
@@ -115,7 +117,7 @@ describe('the page Over ons', () => {
       '<h2 class="hf-heading-2 hf-heading-anchored" id="wie-we-zijn">Wie we zijn</h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="hoe-we-werken">Hoe we werken</h2>',
       '<h2 class="hf-heading-3 hf-heading-anchored" id="gegevens">Waar de gegevens vandaan komen</h2>',
-      '<h2 class="hf-heading-3 hf-heading-anchored" id="startscherm">De site op je startscherm</h2>',
+      '<h2 class="hf-heading-3 hf-heading-anchored" id="als-app">Als app op je startscherm</h2>',
     ])
   })
 
@@ -124,7 +126,7 @@ describe('the page Over ons', () => {
       ['wie-we-zijn', 'Wie we zijn'],
       ['hoe-we-werken', 'Hoe we werken'],
       ['gegevens', 'Waar de gegevens vandaan komen'],
-      ['startscherm', 'De site op je startscherm'],
+      ['als-app', 'Als app op je startscherm'],
     ])
   })
 

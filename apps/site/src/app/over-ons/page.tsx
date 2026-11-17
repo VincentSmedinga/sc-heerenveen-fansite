@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Card, Heading, Link, Page, Text } from '@fansite/design-system'
+import { Card, Heading, Link, Page, Strong, Text } from '@fansite/design-system'
 
 import { email } from '#src/contact'
 import { pageMetadata } from '#src/metadata'
@@ -98,15 +98,18 @@ export default function AboutPage() {
               Meld hem via <Link href="/contact">Contact</Link>. Staat hij ook op Wikipedia, verbeter hem dan daar.
             </Text>
           </Card>
-          <Card aria-labelledby="startscherm" surface="soft">
-            <Heading anchor appearance={3} id="startscherm" level={2}>
-              De site op je startscherm
+          <Card aria-labelledby="als-app" surface="soft">
+            <Heading anchor appearance={3} id="als-app" level={2}>
+              Als app op je startscherm
             </Heading>
-            <Text>Wil je met één tik bij het nieuws? Zet de site op het startscherm van je telefoon.</Text>
-            <Text>Op een iPhone (Safari): tik op Deel, kies Zet op beginscherm en tik op Voeg toe.</Text>
+            <Text>Doe dit één keer en je opent de Fansite voortaan met één tik op je telefoon of tablet.</Text>
             <Text>
-              Op Android (Chrome): tik op het menu met de drie puntjes, kies Toevoegen aan startscherm en tik op
-              Toevoegen.
+              Op een iPhone: tik op <Strong>Deel</Strong>, kies <Strong>Zet op beginscherm</Strong> en tik op{' '}
+              <Strong>Voeg toe</Strong>.
+            </Text>
+            <Text>
+              Op Android: tik op het menu met de <Strong>drie puntjes</Strong>, kies{' '}
+              <Strong>Toevoegen aan startscherm</Strong> en tik op <Strong>Toevoegen</Strong>.
             </Text>
           </Card>
         </Page.Section>
