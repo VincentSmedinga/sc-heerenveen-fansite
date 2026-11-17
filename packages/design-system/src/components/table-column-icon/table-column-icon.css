@@ -1,9 +1,13 @@
-/* The icons of the columns of the tables: a ball, a pitch, a shirt, a boot, a tally and a few more. */
+/*
+ * The icons of the columns of the tables: a ball, a pitch, a shirt, a boot, a tally and a few
+ * more.
+ */
 
 @layer hf.components {
   /*
-   * In line with the text and as large as it (in em), turned 8 degrees clockwise as the design has it, like MatchEventIcon. The
-   * base styles make an svg a block, so it is put back in the line here. The drawings are in a square of 16 by 16.
+   * In line with the text and as large as it (in em), turned 8 degrees clockwise as the design
+   * has it, like MatchEventIcon. The base styles make an svg a block, so it is put back in the
+   * line here. The drawings are in a square of 16 by 16.
    */
   .hf-table-icon {
     block-size: 1em;
@@ -73,9 +77,10 @@
   }
 
   /*
-   * A badge says the result or the sign of the figure, in the colour of a win, a draw or a loss. The sign inside it repeats the
-   * colour, so the colour is never the only sign. The rim is in the colour of the surface and is drawn under the fill, so the
-   * badge stands free of what is behind it.
+   * A badge says the result or the sign of the figure, in the colour of a win, a draw or a
+   * loss. The sign inside it repeats the colour, so the colour is never the only sign. The rim
+   * is in the colour of the surface and is drawn under the fill, so the badge stands free of
+   * what is behind it.
    */
   .hf-table-icon-win {
     fill: var(--hf-colour-outcome-win);
@@ -111,8 +116,8 @@
   }
 
   /*
-   * The shirt, the boot and the cards have a rim in the colour of the text, and the rim gives the shape its 3:1 against the
-   * surface, so the fill only says which shape it is.
+   * The shirt, the boot and the cards have a rim in the colour of the text, and the rim gives
+   * the shape its 3:1 against the surface, so the fill only says which shape it is.
    */
   .hf-table-icon-rim,
   .hf-table-icon-card {
@@ -154,8 +159,9 @@
   }
 
   /*
-   * In forced colours the fills are the text colour or the background, and every line stays the text colour, so each icon
-   * stays readable: a badge is a filled disc with a sign in the background colour, a shirt, a boot and a card are outlined.
+   * In forced colours the fills are the text colour or the background, and every line stays the
+   * text colour, so each icon stays readable: a badge is a filled disc with a sign in the
+   * background colour, a shirt, a boot and a card are outlined.
    */
   @media (forced-colors: active) {
     .hf-table-icon-fill,
@@ -193,8 +199,9 @@
   }
 
   /*
-   * The legend under a table: an icon and a word for each column, with room between the items and no commas. An item does not
-   * break between its icon and its word, and the items wrap where the line is full.
+   * The legend under a table: an icon and a word for each column, with room between the items
+   * and no commas. An item does not break between its icon and its word, and the items wrap
+   * where the line is full.
    */
   .hf-table-legend-item {
     display: inline-block;

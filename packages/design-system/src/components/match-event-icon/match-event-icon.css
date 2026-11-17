@@ -2,8 +2,9 @@
 
 @layer hf.components {
   /*
-   * In line with the text, turned 8 degrees clockwise as the design has it. The size is in em so it follows the text
-   * beside it. The base styles make an svg a block, so it is put back in the line here.
+   * In line with the text, turned 8 degrees clockwise as the design has it. The size is in em so
+   * it follows the text beside it. The base styles make an svg a block, so it is put back in the
+   * line here.
    */
   .hf-match-event-icon {
     --hf-match-event-icon-size: 1;

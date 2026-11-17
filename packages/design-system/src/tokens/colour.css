@@ -205,9 +205,9 @@
     --hf-colour-card-red: light-dark(var(--hf-colour-red-600), var(--hf-colour-red-400));
 
     /*
-     * The fill of the shirt and the boot in the icons of the table columns (TableColumnIcon). Only for those two shapes: the
-     * rim in the colour of the text (--hf-colour-text-default) gives the shape its 3:1, as on the cards, so the fill itself
-     * need not reach it.
+     * The fill of the shirt and the boot in the icons of the table columns (TableColumnIcon).
+     * Only for those two shapes: the rim in the colour of the text (--hf-colour-text-default)
+     * gives the shape its 3:1, as on the cards, so the fill itself need not reach it.
      */
     --hf-colour-icon-shirt: light-dark(var(--hf-colour-blue-300), var(--hf-colour-blue-300));
     --hf-colour-icon-boot: light-dark(var(--hf-colour-grey-400), var(--hf-colour-grey-300));

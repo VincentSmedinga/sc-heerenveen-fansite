@@ -76,7 +76,7 @@
       text-decoration: none;
     }
 
-    /* The icon is a drawing, so it needs no line under it either, and no `title` hover underline. */
+    /* The icon is a drawing, so it needs no line under it either. */
     .hf-table-icon {
       text-decoration: none;
     }
@@ -217,7 +217,8 @@
    * A short header (`abbreviation`) shows the whole word where the table has room, and the
    * letter where it has not, at the same 44rem. A header with an `icon` shows the icon at every
    * width and the word beside it where the table has room. The word stays for a screen reader
-   * at every width: it is hidden from the eye only, and the letter is hidden from a screen reader.
+   * at every width: it is hidden from the eye only, and the letter is hidden from a screen
+   * reader.
    */
   .hf-data-table-text .hf-data-table-short {
     display: none;
