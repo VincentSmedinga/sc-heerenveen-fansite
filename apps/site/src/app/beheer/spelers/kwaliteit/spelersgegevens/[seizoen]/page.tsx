@@ -103,7 +103,7 @@ export default async function FieldDifferencesPage({ params, searchParams }: Pro
             const field = playerFieldLabels[difference.field]
 
             return (
-              <Card aria-labelledby={`verschil-${difference.id}-kop`} key={difference.id} surface="warm">
+              <Card aria-labelledby={`verschil-${difference.id}-kop`} key={difference.id}>
                 <Heading id={`verschil-${difference.id}-kop`} level={2}>
                   {difference.name}: {field}
                 </Heading>

@@ -2,6 +2,8 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
+import { contrast, fallback, role } from '../../tokens/colourRoles'
+
 const css = readFileSync(join(import.meta.dirname, 'data-table.css'), 'utf8').replaceAll(/\/\*.*?\*\//gsu, '')
 
 describe('data-table.css', () => {
@@ -42,5 +44,19 @@ describe('data-table.css', () => {
       /grid-template-columns: repeat\(auto-fit, minmax\(min\(\d+(?:\.\d+)?rem, 100%\), 1fr\)\)/u,
     )
     expect(css).not.toMatch(/@media \((?:min|max)-width/u)
+  })
+
+  it('draws a sign in red text on a red fill', () => {
+    expect(css).toMatch(
+      /\.hf-data-table-mark \{[^}]*background-color: var\(--hf-colour-background-missing\);[^}]*color: var\(--hf-colour-text-missing\);/u,
+    )
+  })
+
+  it.each(['light', 'dark'] as const)('has a sign whose text reaches 4.5:1 on its fill in %s', (theme) => {
+    expect(contrast(role('text-missing')[theme], role('background-missing')[theme])).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('has a sign whose text reaches 4.5:1 on its fill in a browser without light-dark()', () => {
+    expect(contrast(fallback('text-missing'), fallback('background-missing'))).toBeGreaterThanOrEqual(4.5)
   })
 })

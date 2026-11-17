@@ -58,7 +58,7 @@ export default async function MatchQualityPage() {
           <Link href={unusualFormationsPath}>Afwijkende formaties</Link>: de wedstrijden waarvan de formatie niet 4-3-3
           of 4-2-3-1 is.
         </Text>
-        <Card aria-labelledby="seizoenen-kop" surface="warm">
+        <Card aria-labelledby="seizoenen-kop">
           <Heading id="seizoenen-kop" level={2}>
             Per seizoen
           </Heading>

@@ -6093,6 +6093,7 @@
   De tabellen houden hun bijschrift, hun kopcellen en hun namen voor een schermlezer.
 - **Waarom:** het zijn de plekken waar de redactie werk vindt.
 - **Alternatieven:** het gewone witte vlak.
+- **Later:** de kaarten op de kwaliteitspagina's zijn sinds 17 november 2026 weer wit (#1347); zie _De kaarten van de kwaliteitspagina's zijn wit_.
 
 ## Clubnamen heet voortaan Clubs
 
@@ -6450,3 +6451,12 @@
   Zonder gesplitst filter zou een regel naar alle Europese wedstrijden linken en klopt het aantal bij de regel niet.
   Vijf keuzes in de schakelaar passen op een telefoon, een seizoen heeft hoogstens drie Europese competities, en de kaarten die de schakelaar volgt tellen Europa als geheel.
 - **Alternatieven:** een totaalregel erbij; regels met weinig wedstrijden samenvoegen; op jaar of op aantal wedstrijden sorteren; UEFA Cup omschrijven als opvolger van de Europa League; alleen de kaart splitsen, met links naar heel Europa; negen keuzes in de schakelaar, wat op een telefoon te veel is en veel teksten ("in Europa") laat herschrijven.
+
+## De kaarten van de kwaliteitspagina's zijn wit
+
+- **Datum:** 17 november 2026
+- **Besluit:** de kaarten op de kwaliteitspagina's van wedstrijden, spelers, stadions en clubs in het beheer hebben het gewone witte vlak (#1347).
+  De warme kaarten op de openbare pagina's blijven zoals ze zijn.
+- **Waarom:** zand was niet de bedoeling, en kaarten in het beheer zijn wit.
+- **Alternatieven:** zand houden.
+- **Later:** vervangt _De kaarten van de kwaliteitspagina's hebben het warme vlak_ (#1304).
