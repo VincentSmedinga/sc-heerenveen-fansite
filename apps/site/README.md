@@ -426,7 +426,7 @@ De volgorde in de broncode is de volgorde van lezen, met en zonder Grid Lanes.
 De kaarten Onze plek in de competitie en Opmerkelijk zijn van de pagina verdwenen (#1210), en Seizoen voor seizoen (met Onze plek door de jaren erin, #1212) en Resultaten per hoofdtrainer staan alleen bij alle seizoenen (#1211, zie hieronder); hun ankers staan niet meer bij `/wedstrijden/cijfers` in `src/anchors.ts`.
 De seizoenskiezer heeft "Alle seizoenen" als eerste keuze, en die gaat naar `/wedstrijden/cijfers/alle` (`app/wedstrijden/cijfers/all-seasons-page.tsx`, de helpers in `src/seasons.ts`).
 `alle` is geen seizoen.
-Die pagina telt alle wedstrijden sinds het eerste seizoen dat we hebben (1990/91) met dezelfde kaarten, waar ze iets zeggen over alle seizoenen, in de groepen Seizoenen (Seizoen voor seizoen, Per competitie, Europa per land, Resultaten per hoofdtrainer; een regel van Europa per land met een land linkt naar Zoeken in wedstrijden met dat land en Europa gekozen, en "Land onbekend" linkt niet), Uitslagen (Thuis en uit, Hoe vaak welke uitslag, Records), Doelpunten (Doelpunten per kwartier, De nul gehouden) en Rondom de wedstrijd (Toeschouwers, Scheidsrechters).
+Die pagina telt alle wedstrijden sinds het eerste seizoen dat we hebben (1990/91) met dezelfde kaarten, waar ze iets zeggen over alle seizoenen, in de groepen Seizoenen (Seizoen voor seizoen, Per competitie met een regel voor elke Europese beker en geen regel Europa, Europa per land, Resultaten per hoofdtrainer; een regel van Europa per land met een land linkt naar Zoeken in wedstrijden met dat land en Europa gekozen, en "Land onbekend" linkt niet), Uitslagen (Thuis en uit, Hoe vaak welke uitslag, Records), Doelpunten (Doelpunten per kwartier, De nul gehouden) en Rondom de wedstrijd (Toeschouwers, Scheidsrechters).
 De kaarten tellen de wedstrijden van `getAllMatches` (`listAllMatches` in `@fansite/db/queries`: alle wedstrijden met hun doelpunten, drie queries, vijf minuten bewaard).
 Records is Uitersten met de langste reeksen en de strafschoppen erbij (`recordsOf`), Toeschouwers noemt de drukste wedstrijden in plaats van een staaf per wedstrijd (`attendanceRecordsOf`, `src/AllSeasonsCards.tsx`), en een afbeelding van een kaart zegt "Sinds 1990/91" (`since` op `shareable` van `Card`).
 De kaarten van één seizoen, Verloop van het seizoen, Hoe de wedstrijden verlopen en Reeksen, staan er niet.
@@ -697,7 +697,8 @@ Alles is de standaard en heeft geen parameter; de andere zijn `?competitie=eredi
 Alles telt elke gespeelde wedstrijd.
 Play-offs telt de vier soorten play-offs voor Europees voetbal (#1282): wedstrijden tegen Nederlandse clubs, dus niet bij Eredivisie en niet bij Europa.
 Beker telt de KNVB Beker en de Johan Cruijff Schaal; het filter Competitie in Zoeken en de kaart Per competitie houden die twee apart.
-Europa telt elke Europese beker, zonder de play-offs, zoals het filter Competitie in Zoeken (`competitionGroups` in `src/match-search.ts`, de lijsten staan in `src/competition.ts`).
+Europa telt elke Europese beker, zonder de play-offs: de vijf waarden `europeValues` van het filter Competitie in Zoeken (`competitionGroups` in `src/match-search.ts`, de lijsten staan in `src/competition.ts`).
+Dat filter heeft een keuze per Europese beker, en een adres met de oude waarde `europa` geeft ze alle vijf.
 De schakelaar staat in de normale maat, 44 pixels hoog, zodat de vijf waarden op een telefoon van 390 pixels op één regel passen.
 De keuze zit in het adres en niet in een cookie, dus de schakelaar werkt zonder JavaScript en een keuze is te delen.
 Een andere waarde, een lege waarde en een waarde die twee keer staat, geven "niet gevonden" (`parseCompetition` in `src/competition.ts`), ook in de balk "Op deze pagina:", die er dan niet is.

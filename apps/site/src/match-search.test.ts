@@ -9,6 +9,7 @@ import {
   competitionGroups,
   countriesOf,
   days,
+  europeValues,
   facetValuesOf,
   type Filters,
   findMatches,
@@ -137,7 +138,7 @@ describe('parseFilters', () => {
       waar: ['uit', 'thuis'],
     })
 
-    expect(filters.competitions).toEqual(['eredivisie', 'europa'])
+    expect(filters.competitions).toEqual(['eredivisie', ...europeValues])
     expect(filters.days).toEqual(['maandag', 'zondag'])
     expect(filters.venues).toEqual(['thuis', 'uit'])
     expect(filters).toMatchObject({ club: undefined, from: undefined, outcomes: [] })
@@ -257,10 +258,20 @@ describe('the matches a search finds', () => {
     expect(count({ club: 'voorbeeld-united', outcomes: ['gewonnen'] })).toBe(1)
   })
 
-  it('has Europa as one group of every European cup, and Play-offs as a group of its own', () => {
-    expect(count({ competitions: ['europa'] })).toBe(1)
+  it('reads the old value europa as every European cup, and writes all five as europa again', () => {
+    expect(parse({ competitie: 'europa' }).competitions).toEqual([...europeValues])
+    expect(searchHref(parse({ competitie: 'europa' }))).toBe('/wedstrijden/zoeken?competitie=europa')
+    expect(searchHref(parse({ competitie: ['uefa-cup', 'intertoto-cup'] }))).toBe(
+      '/wedstrijden/zoeken?competitie=uefa-cup&competitie=intertoto-cup',
+    )
+  })
+
+  it('has a group for each European cup, and Play-offs as a group of its own', () => {
+    expect(count({ competitions: ['uefa-cup'] })).toBe(1)
+    expect(count({ competitions: ['champions-league'] })).toBe(0)
+    expect(count({ competitions: [...europeValues] })).toBe(1)
     expect(count({ competitions: ['play-offs'] })).toBe(1)
-    expect(count({ competitions: ['europa', 'knvb-beker'] })).toBe(2)
+    expect(count({ competitions: ['uefa-cup', 'knvb-beker'] })).toBe(2)
     expect(count({ competitions: ['johan-cruijff-schaal'] })).toBe(0)
   })
 
@@ -355,7 +366,7 @@ describe('the record, the sentence and the way out of nothing', () => {
     expect(
       sentenceOf(
         parse({
-          competitie: 'europa',
+          competitie: 'uefa-cup',
           dag: 'vrijdag',
           tegen: 'testdorp-fc',
           uitslag: ['gewonnen', 'gelijk'],
@@ -364,7 +375,7 @@ describe('the record, the sentence and the way out of nothing', () => {
         world,
       ),
     ).toBe(
-      'Alle uitwedstrijden tegen Testdorp FC in Europa die we wonnen of gelijkspeelden, op een vrijdag, sinds 2001/02.',
+      'Alle uitwedstrijden tegen Testdorp FC in UEFA Cup die we wonnen of gelijkspeelden, op een vrijdag, sinds 2001/02.',
     )
     expect(sentenceOf(parse({ tot: '2003/04' }), world)).toBe('Alle wedstrijden, van 2001/02 tot en met 2003/04.')
   })

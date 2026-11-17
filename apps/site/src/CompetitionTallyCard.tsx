@@ -27,8 +27,8 @@ const legend = tableLegend(figureColumns)
  * and the goals for and against, the same columns as Seizoen voor seizoen. A row is a link to
  * the search of matches with that competition chosen. The card counts every competition
  * whatever the choice of the page, so it does not say so. A line under the table says that
- * Play-offs is the play-offs for European football, and Europa is every European cup. Without a
- * match there is no card.
+ * Play-offs is the play-offs for European football. Every European cup has a row of its own,
+ * and there is no row Europa (#1354). Without a match there is no card.
  */
 export function CompetitionTallyCard({
   level = 2,

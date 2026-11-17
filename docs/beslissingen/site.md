@@ -5105,6 +5105,7 @@
   De lijst is klein, dus dat is genoeg; een zoekindex is niet nodig.
 - **Later:** een land van een club hebben we sinds #1264 wel (zie _Een club heeft één land, uit Wikidata of van de redactie_ in `hosting-en-data.md`); het filter op het land van de tegenstander komt in #1267.
 - **Later:** de play-offs zijn sinds #1282 een eigen groep, Play-offs (`play-offs`), en horen niet meer bij Europa; zie _De play-offs voor Europees voetbal zijn een keuze van een eigen, tussen Eredivisie en Beker_.
+- **Later:** de groep Europa van het filter Competitie is sinds #1354 vijf keuzes, een per Europese beker; zie _De kaart Per competitie toont elke Europese competitie op een eigen regel_.
 
 ## De zoekpagina begint met vragen en met Op deze dag
 
@@ -5789,6 +5790,7 @@
 - **Waarom:** supporters willen weten hoe we het deden in de beker en in Europa, en 107 Europese wedstrijden zitten nu in geen enkel getal.
 - **Alternatieven:** een rij per afzonderlijke Europese beker; één kolom W–G–V; de kaart wel laten volgen op de keuze van competitie.
 - **Later:** de volgorde van de rijen is sinds #1282 Eredivisie, Eerste divisie, Play-offs, KNVB Beker, Europa en Johan Cruijff Schaal, en Europa telt de play-offs niet meer, dus de regel onder de tabel hoort nu bij de rij Play-offs; zie _De play-offs voor Europees voetbal zijn een keuze van een eigen, tussen Eredivisie en Beker_.
+- **Later:** de kaart heeft sinds #1354 geen regel Europa meer, maar een regel voor elke Europese beker; zie _De kaart Per competitie toont elke Europese competitie op een eigen regel_.
 
 ## Spelers · Cijfers van alle seizoenen heeft de kaart Meeste seizoenen in de selectie
 
@@ -6433,3 +6435,18 @@
   Een nummer is een club, zoals de importer ook twee artikelen als twee clubs ziet.
   Een eerdere naam hoort bij zijn jaren, maar niet elke redacteur weet ze, dus het seizoen is vrij.
 - **Alternatieven:** altijd de club met een nummer laten blijven, zonder keuze; het nummer van de club die blijft houden en dat van de ander weggooien; de oude slug omleiden; een eigen tabel met samenvoegingen; altijd alleen een andere naam, de jaren later invullen in het formulier van de club.
+
+## De kaart Per competitie toont elke Europese competitie op een eigen regel
+
+- **Datum:** 17 november 2026
+- **Besluit:** de kaart Per competitie op Wedstrijden · Cijfers (alle seizoenen) toont elke Europese competitie met een gespeelde wedstrijd op een eigen regel, ook als dat er maar vier zijn, en geen totaalregel Europa.
+  De regels heten Champions League, Europacup II, UEFA Cup, Europa League en Intertoto Cup, in die volgorde, na KNVB Beker en voor Johan Cruijff Schaal.
+- **Besluit:** het filter Competitie in Zoeken in wedstrijden splitst Europa ook: de zes keuzes zijn er tien, met de waarden `champions-league`, `europacup-ii`, `uefa-cup`, `europa-league` en `intertoto-cup` (`competitionGroups`).
+  Elke regel van de kaart linkt naar het filter met zijn competitie gekozen, en het aantal bij de link klopt met de regel.
+- **Besluit:** de oude waarde `competitie=europa` in een adres geeft alle vijf de Europese competities (`europeValues` in `match-search.ts`), en een keuze van alle vijf schrijft `searchHref` weer als `competitie=europa`.
+  De links die al naar Europa gaan (Europa per land, de koppen onder de keuze Europa op de pagina's met cijfers) vinden dezelfde wedstrijden en houden hun korte adres.
+- **Besluit:** de schakelaar Alles, Eredivisie, Play-offs, Beker en Europa, de kaart Europa per land, de pagina's van spelers, tegenstanders en seizoenen en de regel Play-offs blijven zoals ze zijn.
+- **Waarom:** Europa per land toont al het geheel van Europa, de kaart groeit maar met vier regels, en een regel Overig Europa verbergt wat een supporter zoekt.
+  Zonder gesplitst filter zou een regel naar alle Europese wedstrijden linken en klopt het aantal bij de regel niet.
+  Vijf keuzes in de schakelaar passen op een telefoon, een seizoen heeft hoogstens drie Europese competities, en de kaarten die de schakelaar volgt tellen Europa als geheel.
+- **Alternatieven:** een totaalregel erbij; regels met weinig wedstrijden samenvoegen; op jaar of op aantal wedstrijden sorteren; UEFA Cup omschrijven als opvolger van de Europa League; alleen de kaart splitsen, met links naar heel Europa; negen keuzes in de schakelaar, wat op een telefoon te veel is en veel teksten ("in Europa") laat herschrijven.

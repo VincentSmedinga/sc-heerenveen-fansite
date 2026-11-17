@@ -1239,9 +1239,11 @@ await withEmptyDatabase((database) =>
     assert.match(allSeasonsHtml, /<h3[^>]*id="seizoen-voor-seizoen"/)
     assert.doesNotMatch(allSeasonsHtml, /id="onze-plek-door-de-jaren"/)
     // The card Per competitie (#1213): a row for each kind of competition with a match, each a
-    // link to the search of matches with that competition chosen.
+    // link to the search of matches with that competition chosen. Every European cup has a row
+    // of its own (#1354), and there is no row Europa.
     assert.match(allSeasonsHtml, /<h3[^>]*id="per-competitie"/)
     assert.match(allSeasonsHtml, /<th scope="row"><a href="\/wedstrijden\/zoeken\?competitie=eredivisie"/)
+    assert.doesNotMatch(allSeasonsHtml, /<th scope="row"><a href="\/wedstrijden\/zoeken\?competitie=europa"/)
     assert.match(
       allSeasonsHtml,
       /<caption class="hf-visually-hidden">De laatste seizoenen van sc Heerenveen: de plek in de Eredivisie/,
