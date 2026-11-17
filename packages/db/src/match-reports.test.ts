@@ -604,6 +604,7 @@ describe('the numbers of the players from the reports', () => {
     personSlug: null,
     redCards: 0,
     starts: 0,
+    substitutedOff: 0,
     substituteGoals: 0,
     substitutions: 0,
     yellowCards: 0,
@@ -626,8 +627,38 @@ describe('the numbers of the players from the reports', () => {
         yellowCards: 1,
         yellowRedCards: 1,
       },
-      { ...zero, assists: 1, matches: 1, minutes: 60, name: 'Sander Vos', playerId: vos, starts: 1 },
+      {
+        ...zero,
+        assists: 1,
+        matches: 1,
+        minutes: 60,
+        name: 'Sander Vos',
+        playerId: vos,
+        starts: 1,
+        substitutedOff: 1,
+      },
     ])
+  })
+
+  it('counts the times a player went off for another, also after he came on, and not a red card', async () => {
+    const { bank, first, oyen } = await season3()
+    const [onTheBench] = await database.db
+      .select()
+      .from(matchAppearances)
+      .where(and(eq(matchAppearances.matchId, first), eq(matchAppearances.playerId, bank)))
+    const replacement = await appearance(first, { name: 'Kees Reserve', shirtNumber: 20, starter: false })
+
+    // Bank came on at 60 and goes off again at 85.
+    await database.db
+      .insert(matchSubstitutions)
+      .values({ appearanceInId: replacement, appearanceOutId: onTheBench!.id, matchId: first, minute: 85, ours: true })
+
+    const found = await readPlayerReportStats(database.db, season)
+
+    expect(found.find((row) => row.name === 'Jan Bank')).toMatchObject({ substitutedOff: 1, substitutions: 1 })
+    expect(found.find((row) => row.name === 'Sander Vos')).toMatchObject({ substitutedOff: 1 })
+    // Oyen was sent off in the cup match with a yellow-red card: he did not go off for another.
+    expect(found.find((row) => row.playerId === oyen)).toMatchObject({ substitutedOff: 0 })
   })
 
   it('counts the goals of a player who came on from the bench as substitute goals', async () => {

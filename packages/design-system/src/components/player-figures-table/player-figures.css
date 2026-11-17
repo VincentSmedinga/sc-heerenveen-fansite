@@ -1,15 +1,15 @@
 /*
  * The table of the figures of the players. The table itself takes its look from base/table.css,
- * and the place, the name column and the legend from bar/bar.css. This file keeps the eight
- * columns of figures close together, so the table fits a phone: the figures have a smaller
- * space on each side than the other tables have, and the name takes what is left.
+ * and the place, the name column and the legend from bar/bar.css. This file gives
+ * the eight columns of figures room for their icons, a little more on the start side than on the
+ * end side, and keeps them narrow enough for a phone: the name takes what is left.
  */
 
 @layer hf.components {
   .hf-player-figures table {
     th.hf-numeric,
     td.hf-numeric {
-      padding-inline: var(--hf-space-xs);
+      padding-inline: 0.875rem var(--hf-space-xs);
     }
 
     /* The last column does not need the room on the end side that a card gives it. */

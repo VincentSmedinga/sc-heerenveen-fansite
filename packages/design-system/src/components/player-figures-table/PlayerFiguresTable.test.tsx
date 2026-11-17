@@ -10,10 +10,10 @@ const rows: PlayerFiguresRow[] = [
     goals: 5,
     id: 1,
     minutes: 1710,
-    played: 19,
     red: 0,
     started: 18,
     substituted: 1,
+    substitutedOff: 1,
     surname: 'Proefman',
     yellow: 3,
   },
@@ -23,10 +23,10 @@ const rows: PlayerFiguresRow[] = [
     goals: 0,
     id: 2,
     minutes: 0,
-    played: 0,
     red: 0,
     started: 0,
     substituted: 0,
+    substitutedOff: 0,
     surname: 'Nepper',
     yellow: 0,
   },
@@ -35,10 +35,10 @@ const rows: PlayerFiguresRow[] = [
     goals: 1,
     id: 'naam:Testvoort',
     minutes: 905,
-    played: 12,
     red: 1,
     started: 8,
     substituted: 4,
+    substitutedOff: 2,
     surname: 'Testvoort',
     yellow: 2,
   },
@@ -61,10 +61,10 @@ describe('PlayerFiguresTable', () => {
 
     expect(headers.map((header) => header.textContent)).toEqual([
       'Speler',
-      'gespeeld',
-      'basis',
-      'ingevallen',
       'minuten',
+      'basis',
+      'gewisseld',
+      'ingevallen',
       'doelpunten',
       'assists',
       'geel',
@@ -74,7 +74,8 @@ describe('PlayerFiguresTable', () => {
       true,
     )
     expect(headers.every((header) => header.getAttribute('scope') === 'col')).toBe(true)
-    expect(screen.getByRole('columnheader', { name: 'gespeeld' })).toBeTruthy()
+    expect(screen.getByRole('columnheader', { name: 'gewisseld' })).toBeTruthy()
+    expect(screen.queryByRole('columnheader', { name: 'gespeeld' })).toBeNull()
     expect(screen.getByRole('columnheader', { name: 'ingevallen' })).toBeTruthy()
   })
 
@@ -90,7 +91,7 @@ describe('PlayerFiguresTable', () => {
       within(screen.getByRole('row', { name: /Proefman/u }))
         .getAllByRole('cell')
         .map((cell) => cell.textContent),
-    ).toEqual(['19', '18', '1', '1710', '5', '2', '3', '0'])
+    ).toEqual(['1710', '18', '1', '1', '5', '2', '3', '0'])
     // A player of the bench who did not come on has a row with zeros.
     expect(
       within(screen.getByRole('row', { name: /Nepper/u }))
@@ -116,10 +117,10 @@ describe('PlayerFiguresTable', () => {
     const { container } = render(<PlayerFiguresTable {...props} />)
 
     expect([...container.querySelectorAll('.hf-table-legend-item')].map((item) => item.textContent?.trim())).toEqual([
-      'gespeeld',
-      'basis',
-      'ingevallen',
       'minuten',
+      'basis',
+      'gewisseld',
+      'ingevallen',
       'doelpunten',
       'assists',
       'geel',

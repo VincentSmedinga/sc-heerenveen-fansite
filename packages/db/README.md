@@ -318,7 +318,7 @@ MariaDB laat geen check toe op een kolom die zo op leeg gaat, dus dat een speler
 - `listSeasonReports(db, season)` geeft de wedstrijden van een seizoen met de status van hun verslag (`bezig`, `klaar` of leeg);
 - `listScheduledMatches(db, seizoen)` geeft de wedstrijden van een seizoen die nog `scheduled` zijn, een club hebben en geen verslag: de wedstrijden met een Voorbeschouwing tot de aftrap;
 - `mayHaveReport(match, now)` zegt of een wedstrijd een verslag kan hebben: hij is gespeeld, of hij is nog `scheduled` en zijn dag (Nederlandse tijd) is gekomen, en `phaseOf(match, now)` zegt of zo'n wedstrijd `live` is (vanaf de aftrap, zonder aftrap vanaf de dag) of `upcoming`;
-- `readPlayerReportStats(db, season, competition?)` geeft per speler de optredens, basisplaatsen, invalbeurten, minuten, doelpunten, assists en kaarten uit de verslagen met status `klaar`, en laat een verslag dat `bezig` is buiten beschouwing.
+- `readPlayerReportStats(db, season, competition?)` geeft per speler de optredens, basisplaatsen, invalbeurten, de keren dat hij werd gewisseld (`substitutedOff`), minuten, doelpunten, assists en kaarten uit de verslagen met status `klaar`, en laat een verslag dat `bezig` is buiten beschouwing.
   Een speler van de bank die niet inviel, heeft een rij met nullen, en een speler met een persoon heeft de delen van zijn naam (`personGivenName` en de twee andere).
 - `findReportGoalDifferences(db, season)` vergelijkt de doelpunten per speler uit de verslagen met die van `player_season_stats`, alleen voor een competitie waarvan elke gespeelde wedstrijd een verslag heeft dat `klaar` is (#832).
   `compareReportGoals` in `@fansite/db/player-stat-differences` bewaart elk verschil als een rij in `player_stat_differences` (#974).

@@ -91,10 +91,10 @@ describe('figureRows', () => {
       assists: 2,
       goals: 5,
       minutes: 930,
-      played: 12,
       red: 0,
       started: 10,
       substituted: 2,
+      substitutedOff: 4,
       yellow: 3,
     })
     // Vos has one yellow card, one yellow-red card and one red card.
@@ -103,10 +103,10 @@ describe('figureRows', () => {
       assists: 0,
       goals: 0,
       minutes: 0,
-      played: 0,
       red: 0,
       started: 0,
       substituted: 0,
+      substitutedOff: 0,
       yellow: 0,
     })
   })

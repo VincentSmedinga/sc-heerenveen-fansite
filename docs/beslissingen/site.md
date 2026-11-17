@@ -3426,7 +3426,7 @@
     Een speler zonder assists of zonder minuten staat er niet in, en bij gelijke aantallen telt de achternaam.
   - **De tabel** heeft een rij voor elke speler die in een verslag stond, dus ook een speler van de bank die niet inviel, met nullen.
     De volgorde is minuten en dan achternaam.
-    De kolommen zijn G gespeeld (ook als invaller), B basis, I invallers, M minuten, D doelpunten, A assists, Y geel en R rood; een geel-rode kaart telt als een gele en een rode, en dat staat onder de tabel.
+    De kolommen zijn G gespeeld (ook als invaller), B basis, I invallers, M minuten, D doelpunten, A assists, Y geel en R rood (**Later:** zie _De tabel Alle spelers begint met minuten, basis, gewisseld en ingevallen_ hieronder: de kolommen en hun volgorde zijn veranderd); een geel-rode kaart telt als een gele en een rode, en dat staat onder de tabel.
     De minuten zijn vet, want de lijst is erop gesorteerd.
   - **De letters** komen uit `tableColumns`, dat er zes bij krijgt (B, I, M, A, Y en R); A was gereserveerd voor deze tabel.
     G is al gelijk en gespeeld, dus de gele kaarten hebben Y.
@@ -6533,3 +6533,20 @@
   Een test in `table-column-order.test.ts` zoekt in de code van de site naar zo'n letter.
 - **Waarom:** één lijst houdt de tabellen gelijk, zoals het besluit van 2 november 2026 al zei, en met pictogrammen valt een afwijkende letter nog meer op.
 - **Later:** vult _De kolommen van de tabellen hebben een pictogram in plaats van een letter_ in `designsysteem.md` (17 november 2026) aan voor de tabellen van de site.
+
+## De tabel Alle spelers begint met minuten, basis, gewisseld en ingevallen
+
+- **Datum:** 17 november 2026
+- **Besluit:** de tabel Alle spelers heeft de kolommen minuten, basis, gewisseld, ingevallen, doelpunten, assists, geel en rood, in die volgorde (#1370).
+  De kolom gespeeld is weg en gewisseld is nieuw.
+  De kolommen staan verder uit elkaar dan eerst, met ongeveer 14 pixels ruimte links van elke cel.
+- **Waarom:** gespeeld is basis plus ingevallen, en de kolom kost op een telefoon ruimte.
+  De volgorde vertelt het verhaal van een wedstrijd: hoe lang, uit de basis, eruit, erin.
+  De minuten blijven de sleutelkolom, want de lijst is erop gesorteerd.
+- **Alternatieven:** gespeeld houden als eerste kolom, afgewezen omdat het negen kolommen geeft en de tabel op een telefoon breder wordt.
+- **Later:** vervangt de kolommen en hun volgorde in _De kaarten Assists, Minuten en Alle spelers lezen alleen de verslagen_ (7 november 2026).
+
+- **Datum:** 17 november 2026
+- **Besluit:** gewisseld is een nieuwe kolom, geteld uit `match_substitutions` door `readPlayerReportStats` als `substitutedOff`: de keren dat een speler in een verslag dat `klaar` is uit het veld ging voor een wisselspeler.
+  Een speler die in de wedstrijd van een rode kaart af ging, is niet gewisseld, en een speler die eerst inviel en dan werd gewisseld, telt in beide kolommen.
+- **Waarom:** de gegevens zijn er al, en ingevallen zonder gewisseld laat de helft van de wissels weg.
