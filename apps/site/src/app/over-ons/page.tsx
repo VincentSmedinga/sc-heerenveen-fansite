@@ -19,7 +19,8 @@ const EmailLink = () => (
 )
 
 // Who we are and how we work, each in a few sentences, and in the sidebar where the data comes
-// from and what can go wrong with it. What we do with data is on its own page, Privacy.
+// from and what can go wrong with it, and how to put the site on the Home Screen. What we do
+// with data is on its own page, Privacy.
 export default function AboutPage() {
   return (
     <>
@@ -95,6 +96,17 @@ export default function AboutPage() {
             </Heading>
             <Text>
               Meld hem via <Link href="/contact">Contact</Link>. Staat hij ook op Wikipedia, verbeter hem dan daar.
+            </Text>
+          </Card>
+          <Card aria-labelledby="startscherm" surface="soft">
+            <Heading anchor appearance={3} id="startscherm" level={2}>
+              De site op je startscherm
+            </Heading>
+            <Text>Wil je met één tik bij het nieuws? Zet de site op het startscherm van je telefoon.</Text>
+            <Text>Op een iPhone (Safari): tik op Deel, kies Zet op beginscherm en tik op Voeg toe.</Text>
+            <Text>
+              Op Android (Chrome): tik op het menu met de drie puntjes, kies Toevoegen aan startscherm en tik op
+              Toevoegen.
             </Text>
           </Card>
         </Page.Section>
