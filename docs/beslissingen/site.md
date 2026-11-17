@@ -5389,6 +5389,7 @@
 - **Later:** zie _De werkbalk staat naast de kop, boven de tweede kolom_ (16 november 2026): de werkbalk staat vanaf 52 rem niet meer onder de kop, over de hele breedte, maar in de tweede kolom, in de rij van de kop.
   Onder 52 rem blijft de volgorde kop, werkbalk, inhoud.
   De terugkeerlink op de pagina van een speler staat in een gebied van zijn eigen.
+- **Later:** zie _Wedstrijden heeft geen kaart Laatste wedstrijd meer, en Uitslagen staat bovenaan de tweede kolom_ (17 november 2026): in het lopende seizoen staat de stand op `/wedstrijden` niet meer vóór maar na de uitslagen, en de balk begint met Programma.
 
 ## De pagina's van het beheer gebruiken het raster, met de knoppen om op te slaan in de werkbalk
 
