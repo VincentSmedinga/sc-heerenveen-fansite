@@ -793,14 +793,12 @@ async function storeDiscussions(db: Executor, feed: StoredFeed, found: ForumDisc
  *
  * Every item gets its relevance: `relevant` for a feed without a filter, and for an item that a
  * feed without a filter of the same source offers (it stays with that feed, whichever runs
- * last),
- * and for a feed with the filter `club` what `judgeRelevance` says about the headline and
- * the opponents of the
- * matches around its publication, each time the item comes by, so an improved rule
- * works on items we already have, and so does a match that becomes known after the item. A
- * different value counts as a change. The items are all stored, whatever the value. The counts
- * of the values hold the decision for every item of the feed, also for a hidden item, whose own
- * value stays as it is.
+ * last), and for a feed with the filter `club` what `judgeRelevance` says about the headline
+ * and the opponents of the matches around its publication, each time the item comes by, so an
+ * improved rule works on items we already have, and so does a match that becomes known after
+ * the item. A different value counts as a change. The items are all stored, whatever the
+ * value. The counts of the values hold the decision for every item of the feed, also for a
+ * hidden item, whose own value stays as it is.
  *
  * Every item also gets the clubs its headline names in `item_clubs` (`clubsNamed`), whatever
  * the filter of the feed, and a changed title gives changed rows.
