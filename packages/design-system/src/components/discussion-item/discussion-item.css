@@ -1,7 +1,7 @@
 /*
  * A line of the discussions of the forum: the title as a link, and under it the replies, the screen name of the last
- * poster and the time. The title is underlined, as the headline of a news line is, and the line is thicker under the mouse and with the focus of
- * the keyboard. A List of lines has a thin line between the lines.
+ * poster and the time. The title is underlined, as the headline of a news line is, and the line is thicker under the mouse
+ * and with the focus of the keyboard. A List of lines has a thin line between the lines.
  */
 
 @layer hf.components {

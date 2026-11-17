@@ -740,7 +740,8 @@
   Of de lijn net zo dik als bij hover (`0.125em`, 2 pixels) en op de gewone afstand; dat was de opzet daarna, tot de proef met 1,5 pixel.
   Voor Safari: latin-ext weglaten; dan vallen de ligaturen Ĳ en ĳ en andere tekens terug op een ander lettertype.
   Of de lijn zo ver van de tekst zetten dat hij onder de staarten blijft; dan staat hij ver van de kop.
-- **Later:** vervangt dat de kop van een nieuwsregel en de titel van een discussie in rust niet onderstreept zijn, en de lijn van 1,5 pixel die alleen zij hadden: zie _Links in de inhoud zijn onderstreept in rust en worden onder de muis altijd dikker_ (17 november 2026). Beide zijn nu onderstreept in rust, en onder de muis geldt voor elke link 1,5 pixel.
+- **Later:** vervangt dat de kop van een nieuwsregel en de titel van een discussie in rust niet onderstreept zijn, en de lijn van 1,5 pixel die alleen zij hadden: zie _Links in de inhoud zijn onderstreept in rust en worden onder de muis altijd dikker_ (17 november 2026).
+  Beide zijn nu onderstreept in rust, en onder de muis geldt voor elke link 1,5 pixel.
 
 ## Voorlopig heeft de kop van een nieuwsregel de maat van gewone tekst en gewicht 500
 
@@ -3711,7 +3712,8 @@
   De lijsten met details (`withDetails`) geven `matches.attendance` door, op de plaatsen waar ze het stadion en de scheidsrechter al doorgeven.
   **Waarom:** de eigenaar wil het aantal toeschouwers in de lijst zien, en het staat al in de gegevens en op de pagina van een wedstrijd, dus het bronbeleid verandert niet.
   **Alternatief:** alleen op de pagina van de wedstrijd laten staan.
-- **Later:** vervangt dat de kop van een nieuwsitem en de titel van een discussie alleen onder de muis en met focus onderstreept zijn, en de dikte van `0.125em` onder de muis in `--hf-link-underline-thickness-hover` (nu `1.5px`): zie _Links in de inhoud zijn onderstreept in rust en worden onder de muis altijd dikker_ (17 november 2026). Wat voor `.hf-match-link` gold, geldt nu voor alle links in de inhoud.
+- **Later:** vervangt dat de kop van een nieuwsitem en de titel van een discussie alleen onder de muis en met focus onderstreept zijn, en de dikte van `0.125em` onder de muis in `--hf-link-underline-thickness-hover` (nu `1.5px`): zie _Links in de inhoud zijn onderstreept in rust en worden onder de muis altijd dikker_ (17 november 2026).
+  Wat voor `.hf-match-link` gold, geldt nu voor alle links in de inhoud.
 
 ## Het teken in een `DataTable` zegt dat er iets ontbreekt, en is rood
 

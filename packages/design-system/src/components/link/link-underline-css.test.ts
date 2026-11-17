@@ -54,3 +54,24 @@ describe('the links that are not content', () => {
     expect(rule(read('../page/page.css'), '& a:not\\(:hover, :focus-visible\\)')).toMatch(/text-decoration-line: none/u)
   })
 })
+
+describe('the links that are navigation', () => {
+  // The base styles underline a link with the focus, so each of these sets its own line, in the
+  // components layer, which wins over the base layer.
+  it.each([
+    ['../navigation/navigation.css', 'the menu and the pagination'],
+    ['../page/shortcuts.css', 'the shortcuts'],
+    ['../segmented-control/segmented-control.css', 'the switch links'],
+    ['../chip/chip.css', 'the filter chips'],
+    ['../page/top-link.css', 'the round link to the top'],
+    ['../heading/heading.css', 'the anchor link at a heading'],
+  ])('keeps its own line in %s, for %s', (path) => {
+    expect(read(path)).toMatch(/text-decoration(-line)?: none/u)
+  })
+
+  it('gives the sort button of a table header the line of 1,5 pixels under the mouse', () => {
+    expect(read('../data-table/data-table.css')).toMatch(
+      /&:hover \{[^}]*text-decoration-thickness: var\(--hf-link-underline-thickness-hover\)/u,
+    )
+  })
+})
