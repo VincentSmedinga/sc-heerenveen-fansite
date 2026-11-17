@@ -261,8 +261,9 @@ Zo komt een bericht in de database ([`src/read-feed.ts`](src/read-feed.ts)):
   Bij het Algemeen Dagblad en De Gelderlander (DPG Media) is het de code `~` met acht of negen letters en cijfers aan het eind van het pad, zoals `~a40dbd48` in `…/een-kop~a40dbd48/`: de kop in de link verandert, de code niet.
   Een bron zonder regel, en een link zonder die code, krijgt geen sleutel; zo'n bericht is zijn eigen verhaal.
   Dezelfde code bij twee bronnen is geen verband, tenzij de bronnen dezelfde `publisher` hebben: het Algemeen Dagblad en De Gelderlander hebben `dpg-media`, en De Gelderlander is `local`.
-  Dan toont de site een artikel dat beide geven één keer, bij de lokale krant (zie de [README van de database](../../packages/db/README.md), _Eén artikel van twee kranten_).
-  `publisher` en `local` staan in het register (`realSources` in `packages/db/src/seed.ts`) en de seed zet ze; de importer leest ze niet.
+  Dan toont de site een artikel dat beide geven één keer, bij De Gelderlander als de kop een club noemt die zij volgt, en anders bij het Algemeen Dagblad (zie de [README van de database](../../packages/db/README.md), _Eén artikel van twee kranten_).
+  `publisher`, `local` en de gevolgde clubs (`followedClubs`: N.E.C., Vitesse, De Graafschap en De Treffers) staan in het register (`realSources` in `packages/db/src/seed.ts`) en de seed zet ze; de importer leest ze niet.
+  De clubs van een kop komen uit `item_clubs`, dat de importer schrijft: een kop die N.E.C. noemt, maakt het artikel regionaal.
   Een bron krijgt pas een `publisher` als de feeds van die bronnen bewezen dezelfde artikelcodes delen.
   De importer bewaart elke versie en verwijdert er geen; de site toont de laatste (zie de [README van de database](../../packages/db/README.md), _De versies van een verhaal_).
   Bij elke import van een bron met een regel krijgt een bericht dat de sleutel nog mist hem uit zijn bewaarde link, ook als de feed niet gewijzigd is (`backfillThreadKeys` in [`src/import-feeds.ts`](src/import-feeds.ts)); een verborgen bericht blijft zoals het is.

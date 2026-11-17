@@ -1640,6 +1640,9 @@
   De landelijke krant laten winnen (het nieuws staat dan minder dicht bij de lezer).
   Een instelling per wedstrijd om te kiezen welke krant lokaal is (meer werk voor één wedstrijd, en niet nodig voor het eerste geval).
   De oudere versies verwijderen (de importer verwijdert geen berichten).
+- **Later:** zie _Een regionale krant wint alleen bij een club uit haar regio_ (17 november 2026).
+  De bron met `local` gaat niet meer altijd voor: ze wint alleen als de kop een club noemt die ze volgt, en anders wint de bron die niet regionaal is.
+  "De landelijke krant laten winnen" is daarmee het antwoord voor een artikel over een andere club.
 
 ## Een afwijking van Wikipedia komt bij een redacteur, die beslist
 
@@ -4371,3 +4374,23 @@
 - **Waarom:** een kop met zo'n naam gaat bijna altijd over de club.
   Dat sommige trainers (Marco van Basten, Robin van Persie, Ron Jans) ook elders werkten, nemen we op de koop toe: het filter is niet streng met opzet, en een moderator verbergt een bericht dat toch niet past.
 - **Alternatieven:** alleen Foppe de Haan (kleinste regel, mist de rest); ook achternamen alleen (valse treffers bij Jans, Bos en Everse).
+
+## Een regionale krant wint alleen bij een club uit haar regio
+
+- **Datum:** 17 november 2026
+- **Besluit:** bij een artikel dat twee bronnen van één uitgever geven, wint de regionale bron (`local`) alleen als de kop een club noemt die zij volgt; anders wint de bron die niet regionaal is.
+  - **De lijst:** een bron krijgt een lijst van gevolgde clubs in de tabel `source_clubs` (migratie `0088_add_source_clubs`), met de namen zoals `matches.opponent` ze heeft.
+    De lijst staat in het register (`followedClubs` in `realSources`), en de seed zet haar.
+    Voor De Gelderlander: N.E.C., Vitesse, De Graafschap en De Treffers.
+    De namen komen uit `otherClubFullNames` in `apps/importer/src/relevance-terms.ts`; De Treffers staat daar nog niet, dus de regel treft die club pas als de importer haar herkent.
+  - **Wanneer wint de regionale bron:** de clubs van een artikel komen uit `item_clubs`, van de berichten van het verhaal bij elke bron van de uitgever.
+    Noemt een van die koppen een club uit de lijst van de bron, dan telt het artikel als regionaal voor haar.
+    Er komt geen nieuwe tekstanalyse bij.
+  - **De volgorde:** een regionale bron voor dit artikel gaat voor, dan een bron die niet `local` is, dan een `local` bron voor wie het artikel over een andere club gaat; bij gelijke rang de vroegste `published_at`, en dan het laagste `id`.
+    Een regionale bron zonder lijst volgt geen club, en bij elk artikel wint dan de andere bron.
+  - **Eén plek:** de keuze blijft in `isShownOnce` in `packages/db/src/queries.ts`, dus er verandert niets aan bewaarde berichten, en er is geen nieuwe import nodig.
+- **Waarom:** een landelijke krant is de logischere bron voor een artikel over een club buiten de regio van de regionale krant, zoals sc Heerenveen in De Gelderlander.
+  Een lijst per bron is een regel in het register, en `item_clubs` bestaat al (#794) en houdt het bij de koppen.
+  De keuze bij het tonen laat de bewaarde berichten staan en kost geen import.
+- **Later:** vervangt in _Een artikel van twee kranten van één uitgever staat één keer in de lijst, bij de lokale krant_ (1 november 2026) de regel dat de bron met `local` altijd voorgaat, en de afweging "de landelijke krant laten winnen" bij de alternatieven; wie wint hangt nu van het artikel af.
+- **Alternatieven:** de gevolgde clubs afleiden uit wat een bron vaak noemt (minder voorspelbaar, moeilijker te testen); de wedstrijden rond de publicatie als extra bewijs nemen (meer werk voor weinig winst); een eigen regel voor sc Heerenveen (geen bron heeft nu een landelijke tegenhanger voor een Friese regionale krant); bronnen van verschillende uitgevers samenvoegen (er is geen gedeelde sleutel).

@@ -36,6 +36,7 @@ import {
   persons,
   players,
   playerSeasonStats,
+  sourceClubs,
   sources,
   squadCompleteness,
   standings,
@@ -153,9 +154,11 @@ export const testSources = [
  *
  * A `publisher` names the company that publishes several of the sources, such as `dpg-media`
  * for the Algemeen Dagblad and De Gelderlander, which print one article under one article code.
- * The lists show such an article once, from the source that is `local`, the paper closest to
- * the news (De Gelderlander for N.E.C.). A source with no publisher is never merged with
- * another.
+ * The lists show such an article once. The source that is `local`, the paper closest to the
+ * news (De Gelderlander for N.E.C.), wins when a headline of the article names a club it
+ * follows (`followedClubs`, written like `matches.opponent`); otherwise the other source wins.
+ * A local source with no `followedClubs` follows no club. A source with no publisher is never
+ * merged with another.
  *
  * The forum's "feed" is the list of discussions of its API, which the importer reads as a guest
  * (see `read-forum.ts`).
@@ -259,6 +262,7 @@ export const realSources = [
       'Regionaal dagblad voor Gelderland. In de sportfeed staat het sportnieuws van de regio, ook veel achter de betaalmuur; we tonen de berichten over sc Heerenveen en, rond een wedstrijd, over de tegenstander.',
     domain: 'www.gelderlander.nl',
     feeds: [{ filter: 'club', url: 'https://www.gelderlander.nl/sport/rss.xml' }],
+    followedClubs: ['N.E.C.', 'Vitesse', 'De Graafschap', 'De Treffers'],
     kind: 'news',
     local: true,
     name: 'De Gelderlander',
@@ -304,7 +308,10 @@ export const realSources = [
     name: 'OOG Groningen',
     slug: 'oog-groningen',
   },
-] satisfies (NewSource & { feeds: (string | { filter: FeedFilter; url: string })[] })[]
+] satisfies (NewSource & {
+  feeds: (string | { filter: FeedFilter; url: string })[]
+  followedClubs?: string[]
+})[]
 
 /**
  * The fields of a source that the admin changes (see #31), so a seed that finds the source
@@ -349,7 +356,8 @@ export async function removeTestSources(db: Database): Promise<number> {
  * goes when the admin (#31) can add sources, because the register is then the only truth.
  */
 export async function seedRealSources(db: Database) {
-  for (const { feeds: urls, ...source } of realSources) {
+  for (const entry of realSources) {
+    const { feeds: urls, followedClubs = [], ...source } = entry as typeof entry & { followedClubs?: string[] }
     const update = Object.fromEntries(
       Object.entries(source).filter(([field]) => !(adminFields as readonly string[]).includes(field)),
     )
@@ -360,6 +368,13 @@ export async function seedRealSources(db: Database) {
 
     if (row === undefined) {
       throw new Error(`The source ${source.domain} is not in the register after the seed put it there.`)
+    }
+
+    // The register is the truth: a club that is no longer in the list goes.
+    await db.delete(sourceClubs).where(eq(sourceClubs.sourceId, row.id))
+
+    if (followedClubs.length > 0) {
+      await db.insert(sourceClubs).values(followedClubs.map((club) => ({ club, sourceId: row.id })))
     }
 
     for (const feed of urls) {

@@ -41,6 +41,7 @@ import {
   clubs,
   discussions,
   feeds,
+  itemClubs,
   items,
   leagueResults,
   matches,
@@ -48,6 +49,7 @@ import {
   matchReports,
   persons,
   players,
+  sourceClubs,
   sources,
   standings,
   wikipediaPages,
@@ -963,25 +965,41 @@ describe('a story that two sources of one publisher have', () => {
     ids: { feedId: number; sourceId: number },
     title: string,
     publishedAt: string,
-    overrides: Partial<typeof items.$inferInsert> = {},
+    { clubs = ['N.E.C.'], ...overrides }: Partial<typeof items.$inferInsert> & { clubs?: string[] } = {},
   ) {
-    await database.db.insert(items).values({
-      ...ids,
-      key: title,
-      publishedAt: new Date(publishedAt),
-      threadKey: key,
-      title,
-      url: `https://proef.test/${title}`,
-      ...overrides,
-    })
+    const [item] = await database.db
+      .insert(items)
+      .values({
+        ...ids,
+        key: title,
+        publishedAt: new Date(publishedAt),
+        threadKey: key,
+        title,
+        url: `https://proef.test/${title}`,
+        ...overrides,
+      })
+      .$returningId()
+
+    if (item !== undefined && clubs.length > 0) {
+      await database.db.insert(itemClubs).values(clubs.map((club) => ({ club, itemId: item.id })))
+    }
+  }
+
+  /** The clubs that a regional paper follows. */
+  async function follow(ids: { sourceId: number }, ...clubs: string[]) {
+    await database.db.insert(sourceClubs).values(clubs.map((club) => ({ club, sourceId: ids.sourceId })))
   }
 
   /** A local and a national paper of one publisher, and a paper of another. */
   async function addPapers() {
+    const lokaal = await addSource('lokaal', { local: true })
+
+    await follow(lokaal, 'N.E.C.', 'Vitesse')
+
     return {
       andere: await addSource('andere', { publisher: 'uitgever-b' }),
       landelijk: await addSource('landelijk'),
-      lokaal: await addSource('lokaal', { local: true }),
+      lokaal,
     }
   }
 
@@ -1028,11 +1046,101 @@ describe('a story that two sources of one publisher have', () => {
     const { landelijk, lokaal } = await addPapers()
     const tweede = await addSource('tweede-lokaal', { local: true })
 
+    await follow(tweede, 'N.E.C.')
+
     await addItem(lokaal, 'Verslag lokaal', '2026-10-22T08:05:00Z')
     await addItem(tweede, 'Verslag tweede lokaal', '2026-10-22T08:01:00Z')
     await addItem(landelijk, 'Verslag landelijk', '2026-10-22T08:00:00Z')
 
     expect(await archive()).toEqual(['Verslag tweede lokaal'])
+  })
+
+  it('shows the item of the national source when the headline names a club the local source does not follow', async () => {
+    const { landelijk, lokaal } = await addPapers()
+
+    await addItem(landelijk, 'Verslag landelijk', '2026-10-22T08:00:00Z', { clubs: ['sc Heerenveen'] })
+    await addItem(lokaal, 'Verslag lokaal', '2026-10-22T08:05:00Z', { clubs: ['sc Heerenveen'] })
+
+    expect(await archive()).toEqual(['Verslag landelijk'])
+    expect(await recent()).toEqual(['Verslag landelijk'])
+    expect(await searched()).toEqual(['Verslag landelijk'])
+    expect(await countArchiveItems(database.db, { until: now })).toBe(1)
+    expect(await listArchivePage(database.db, { limit: 50, until: now })).toEqual([
+      {
+        paywalled: false,
+        publishedAt: new Date('2026-10-22T08:00:00Z'),
+        sourceName: 'landelijk',
+        title: 'Verslag landelijk',
+        url: 'https://proef.test/Verslag landelijk',
+      },
+    ])
+  })
+
+  it('shows the item of the national source when no headline names a club', async () => {
+    const { landelijk, lokaal } = await addPapers()
+
+    await addItem(landelijk, 'Verslag landelijk', '2026-10-22T08:00:00Z', { clubs: [] })
+    await addItem(lokaal, 'Verslag lokaal', '2026-10-22T08:05:00Z', { clubs: [] })
+
+    expect(await archive()).toEqual(['Verslag landelijk'])
+  })
+
+  it('shows the item of the local source when the headline of the other source names its club', async () => {
+    const { landelijk, lokaal } = await addPapers()
+
+    await addItem(landelijk, 'Verslag landelijk', '2026-10-22T08:00:00Z', { clubs: ['Vitesse', 'sc Heerenveen'] })
+    await addItem(lokaal, 'Verslag lokaal', '2026-10-22T08:05:00Z', { clubs: [] })
+
+    expect(await archive()).toEqual(['Verslag lokaal'])
+  })
+
+  it('shows the item of the other source for every story when the local source follows no club', async () => {
+    const { landelijk } = await addPapers()
+    const zonder = await addSource('zonder-lijst', { local: true })
+
+    await addItem(landelijk, 'Verslag landelijk', '2026-10-22T08:00:00Z')
+    await addItem(zonder, 'Verslag zonder lijst', '2026-10-22T07:00:00Z')
+
+    expect(await archive()).toEqual(['Verslag landelijk'])
+  })
+
+  it('judges each local source by its own list, and keeps the old order when both or neither follow', async () => {
+    const eerste = await addSource('eerste-lokaal', { local: true })
+    const tweede = await addSource('tweede-lokaal', { local: true })
+    const namesClubs = async (...clubs: string[]) => {
+      await database.pool.query('DELETE FROM item_clubs')
+      await database.pool.query('INSERT INTO item_clubs (item_id, club) SELECT id, ? FROM items WHERE title = ?', [
+        clubs[0] ?? '',
+        'Verslag eerste',
+      ])
+    }
+
+    await follow(eerste, 'N.E.C.')
+    await follow(tweede, 'Vitesse')
+    await addItem(eerste, 'Verslag eerste', '2026-10-22T08:00:00Z', { clubs: [] })
+    await addItem(tweede, 'Verslag tweede', '2026-10-22T08:05:00Z', { clubs: [] })
+
+    // Only the second source follows Vitesse, so it wins although it was later.
+    await namesClubs('Vitesse')
+    expect(await archive()).toEqual(['Verslag tweede'])
+
+    // Neither follows sc Heerenveen: the first published wins.
+    await namesClubs('sc Heerenveen')
+    expect(await archive()).toEqual(['Verslag eerste'])
+
+    // Both follow the club: the first published wins.
+    await follow(eerste, 'Vitesse')
+    await namesClubs('Vitesse')
+    expect(await archive()).toEqual(['Verslag eerste'])
+  })
+
+  it('shows the item of the other source about another club when the local winner is hidden', async () => {
+    const { landelijk, lokaal } = await addPapers()
+
+    await addItem(landelijk, 'Verslag landelijk', '2026-10-22T08:00:00Z')
+    await addItem(lokaal, 'Verslag lokaal', '2026-10-22T08:05:00Z', { hiddenAt: new Date('2026-10-22T09:00:00Z') })
+
+    expect(await archive()).toEqual(['Verslag landelijk'])
   })
 
   it('shows the item of the lowest id when the time is the same too', async () => {
