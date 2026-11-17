@@ -6539,7 +6539,7 @@
 - **Datum:** 17 november 2026
 - **Besluit:** de tabel Alle spelers heeft de kolommen minuten, basis, gewisseld, ingevallen, doelpunten, assists, geel en rood, in die volgorde (#1370).
   De kolom gespeeld is weg en gewisseld is nieuw.
-  De kolommen staan verder uit elkaar dan eerst, met ongeveer 14 pixels ruimte links van elke cel.
+  De kolommen staan verder uit elkaar dan eerst, met ongeveer 12 pixels ruimte links van elke cel: dat is zo veel als de tabel op een telefoon van 390 pixels breed aankan zonder zijwaarts te scrollen.
 - **Waarom:** gespeeld is basis plus ingevallen, en de kolom kost op een telefoon ruimte.
   De volgorde vertelt het verhaal van een wedstrijd: hoe lang, uit de basis, eruit, erin.
   De minuten blijven de sleutelkolom, want de lijst is erop gesorteerd.

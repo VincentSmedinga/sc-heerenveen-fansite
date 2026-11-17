@@ -9,7 +9,7 @@
   .hf-player-figures table {
     th.hf-numeric,
     td.hf-numeric {
-      padding-inline: 0.875rem var(--hf-space-xs);
+      padding-inline: calc(var(--hf-space-s) + var(--hf-space-xs)) var(--hf-space-xs);
     }
 
     /* The last column does not need the room on the end side that a card gives it. */
