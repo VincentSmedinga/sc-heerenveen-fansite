@@ -170,7 +170,7 @@ export const realSources = [
     description:
       'Dagblad uit Leeuwarden voor Friesland. Op de sportpagina’s staan verslagen, interviews en columns over sc Heerenveen.',
     domain: 'www.lc.nl',
-    feeds: ['https://www.lc.nl/sport/sc-heerenveen/rss/'],
+    feeds: ['https://www.lc.nl/sport/sc-heerenveen/rss/', { filter: 'club', url: 'https://www.lc.nl/sport/rss/' }],
     kind: 'news',
     name: 'Leeuwarder Courant',
     slug: 'leeuwarder-courant',

@@ -381,7 +381,7 @@ Een kop die al `relevant` is, blijft het, en de andere regels veranderen niet.
 ### Een feed op `club` zetten
 
 De kolom `feeds.filter` is `none` of `club`.
-Een feed die alleen over de club gaat, zoals die van de Leeuwarder Courant en Voetbal International, blijft op `none`: elk bericht is dan `relevant`.
+Een feed die alleen over de club gaat, zoals die van de Leeuwarder Courant over sc Heerenveen en die van Voetbal International, blijft op `none`: elk bericht is dan `relevant`.
 Zet je een feed die over meer gaat op `club`, dan beoordeelt de importer elke kop.
 Er is geen scherm voor; gebruik phpMyAdmin op de host, of lokaal `docker compose exec mariadb mariadb fansite`:
 
@@ -394,7 +394,16 @@ Zet je hem terug op `none`, dan worden ze weer allemaal `relevant`.
 Een bericht dat een redacteur verborg, houdt zijn waarde (zie _Wat de adapter bewaart_).
 De seed laat `filter` met rust, dus een nieuwe seed zet de waarde niet terug.
 Een feed in `realSources` die over meer gaat dan de club, begint op `club`: de seed zet de waarde alleen als hij de feed in het register zet.
-Dat zijn nu de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_), die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_), die van De Gelderlander (zie _De sportfeed van De Gelderlander_), die van ESPN (zie _De voetbalfeed van ESPN NL_), de sportfeed van Rijnmond (zie _De sportfeed van Rijnmond_), de sportfeed van RTV Noord en de FC Groningen-feed van OOG Groningen (zie _De feeds van RTV Noord en OOG Groningen_).
+Dat zijn nu de sportfeed van de Leeuwarder Courant (zie _De sportfeed van de Leeuwarder Courant_), de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_), die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_), die van De Gelderlander (zie _De sportfeed van De Gelderlander_), die van ESPN (zie _De voetbalfeed van ESPN NL_), de sportfeed van Rijnmond (zie _De sportfeed van Rijnmond_), de sportfeed van RTV Noord en de FC Groningen-feed van OOG Groningen (zie _De feeds van RTV Noord en OOG Groningen_).
+
+### De sportfeed van de Leeuwarder Courant
+
+De feed `https://www.lc.nl/sport/rss/` gaat over de hele sportrubriek van de krant, en dezelfde bron heeft ook de feed over sc Heerenveen.
+De seed zet hem op `club`; de feed over de club blijft op `none`.
+Hij heeft dezelfde opbouw als die van de club (zie _De velden van de feed van de Leeuwarder Courant_), en `<premium>` telt ook hier als betaalmuur.
+Een bericht dat in beide feeds staat, is één rij, en blijft `relevant`: een feed op `club` beoordeelt een bericht niet opnieuw als het bij een feed op `none` van dezelfde bron hoort (zie _We volgen de sportfeed van de Leeuwarder Courant ook_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md)).
+Een run van 17 november 2026 las 50 berichten: 10 `relevant`, 2 `doubtful` en 38 `irrelevant`.
+De sportfeed brengt berichten over mensen van de club die de krant buiten zijn clubrubriek zet, zoals het artikel over Foppe de Haan als bondscoach van Tuvalu; daarom staan Foppe de Haan, Riemer van der Velde, Martin Koopman en de hoofdtrainers sinds 1990/91 op de lijst met namen.
 
 ### De uitkomst bekijken
 
@@ -420,6 +429,7 @@ Zo voeg je er een toe:
    Een volledige naam maakt een kop `relevant`; een achternaam alleen maakt hem `doubtful`, en `relevant` met "Heerenveen", met een voetbalwoord of met een tweede achternaam van de club.
    Is de achternaam ook een gewoon woord, zoals Proper of Zaal, zet dan alleen de volledige naam op de lijst.
    Ook een speler die vertrok mag erop; berichten over hem lezen we graag.
+   Iemand die zo bij de club hoort dat elke kop over hem erop thuishoort, zoals Abe Lenstra, Foppe de Haan en Riemer van der Velde, staat in `clubLegends`: alleen de volledige naam, zonder achternaam.
 3. Pas bovenaan de datum van de laatste controle aan.
 4. Voeg in [`src/relevance.test.ts`](src/relevance.test.ts) een kop toe die de uitkomst laat zien.
 

@@ -4339,3 +4339,35 @@
   De importer verandert niet; een test in `old-site-clubs.test.ts` houdt het vast.
 - **Waarom:** dat doet `repairClubs` al voor de clubs uit zijn eigen lijsten, en de import vindt een club zo bij elke naam.
 - **Alternatieven:** een eigen tabel met samenvoegingen waar de importer in kijkt.
+
+## We volgen de sportfeed van de Leeuwarder Courant ook, met het filter `club`
+
+- **Datum:** 17 november 2026
+- **Besluit:** we volgen de sportfeed van de Leeuwarder Courant (`https://www.lc.nl/sport/rss/`) ook, met het filter `club`, in plaats van losse artikelen met de hand toe te voegen.
+  De feed over de club (`https://www.lc.nl/sport/sc-heerenveen/rss/`) blijft op `none`.
+  Het staat in `realSources` als tweede feed van dezelfde bron (#1353).
+- **Waarom:** de krant zet verhalen over mensen van de club soms onder de algemene sportrubriek, en de feed over de club mist ze dan, zoals het artikel over Foppe de Haan als bondscoach van Tuvalu.
+  Het filter bepaalt wat erdoor komt, en de sportfeed geeft zo'n drie nieuwe berichten in tien dagen, dus er is geen opruimwerk.
+  Het past bij _We nemen het AD, met het filter `club`_ en de andere brede feeds.
+- **Gemeten** (17 november 2026): 50 berichten, 10 `relevant`, 2 `doubtful`, 38 `irrelevant`, geen overgeslagen (zie [`bronnen.md`](../bronnen.md)).
+- **Alternatieven:** losse artikelen met de hand toevoegen (elk gemist artikel blijft gemist tot iemand het ziet, en het beheer heeft er geen scherm voor).
+
+## Een bericht dat een feed zonder filter aanbiedt, blijft `relevant`
+
+- **Datum:** 17 november 2026
+- **Besluit:** een bericht dat een feed zonder filter (`none`) van dezelfde bron ook aanbiedt, blijft `relevant`, ongeacht de volgorde waarin de feeds draaien.
+  De importer doet dat zo: een feed met `club` die een bericht ziet dat al bij een feed met `none` van die bron hoort (`items.feed_id`), beoordeelt het niet opnieuw en laat de rij zoals ze is.
+  Een bericht dat alleen in de feed met `club` staat, gaat door het filter.
+- **Waarom:** de rij van een bericht is er één per bron en `guid`, en de laatste feed die draait schrijft `relevance` (zie _Een feed heeft een filter, `none` of `club`, en de importer beoordeelt elk bericht opnieuw_).
+  Zonder deze regel kan de sportfeed een bericht van de feed over de club tot `irrelevant` maken.
+- **Later:** de regel "bij een feed met `none` is de waarde altijd `relevant`" en "elk bericht van een feed met `club` wordt bij elke run opnieuw beoordeeld" in _Een feed heeft een filter…_ gelden nog, met deze ene uitzondering.
+- **Alternatieven:** de feeds altijd in een vaste volgorde draaien (breekt bij een run van één feed en is makkelijk te vergeten); de sportfeed zelf `none` maken (dan komt elk sportbericht van de LC op de site).
+
+## Foppe de Haan, Riemer van der Velde, Martin Koopman en de hoofdtrainers sinds 1990/91 staan op de lijst met namen
+
+- **Datum:** 17 november 2026
+- **Besluit:** de lijst met namen (`relevance-terms.ts`) krijgt Foppe de Haan en Riemer van der Velde als clubiconen (`clubLegends`), Martin Koopman als directeur (`clubPeople` en `clubSurnames`) en alle hoofdtrainers van het eerste mannenelftal sinds 1990/91 (besluit van de projecteigenaar, uit _Lijst van trainers van sc Heerenveen (mannen)_ op nl.wikipedia.org) in `clubPeople`, alleen met de volledige naam.
+  Een kop met zo'n naam is `relevant`, ook zonder de club, en alleen als hele woorden naast elkaar: "Foppen" is het niet.
+- **Waarom:** een kop met zo'n naam gaat bijna altijd over de club.
+  Dat sommige trainers (Marco van Basten, Robin van Persie, Ron Jans) ook elders werkten, nemen we op de koop toe: het filter is niet streng met opzet, en een moderator verbergt een bericht dat toch niet past.
+- **Alternatieven:** alleen Foppe de Haan (kleinste regel, mist de rest); ook achternamen alleen (valse treffers bij Jans, Bos en Everse).

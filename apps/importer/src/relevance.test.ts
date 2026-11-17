@@ -130,6 +130,26 @@ const legends: Case[] = [
   ['Lenstra opent nieuwe garage in Drachten', 'irrelevant'],
 ]
 
+/** Icons, the director and head coaches since 1990/91: a full name is enough (17 Nov 2026). */
+const iconsAndCoaches: Case[] = [
+  // The story that was missed in the general sport feed of the Leeuwarder Courant (made up).
+  ['Foppe de Haan wordt bondscoach van Tuvalu', 'relevant'],
+  ['Riemer van der Velde kijkt terug op zijn tijd bij de club', 'relevant'],
+  ['Martin Koopman over de plannen voor volgend seizoen', 'relevant'],
+  ['Fritz Korbach blikt terug', 'relevant'],
+  ['Gertjan Verbeek en Trond Sollied over de titelstrijd', 'relevant'],
+  ['Jan Everse, Jan de Jonge en Ron Jans in een praatprogramma', 'relevant'],
+  ['Marco van Basten en Robin van Persie bij een gala', 'relevant'],
+  ['Dwight Lodeweges, Jurgen Streppel en Jan Olde Riekerink aan tafel', 'relevant'],
+  ['Johnny Jansen, Ole Tobiassen en Kees van Wonderen samen op een foto', 'relevant'],
+  // Whole words next to each other: the runner Foppen is not Foppe de Haan.
+  ['Foppen wint de tien kilometer van Leeuwarden', 'irrelevant'],
+  ['Foppen verbetert het record op de ijsbaan', 'irrelevant'],
+  ['Foppe wint de tien kilometer van Leeuwarden', 'irrelevant'],
+  ['De Haan opent een winkel in Drachten', 'irrelevant'],
+  ['Koopman verhuist naar Zwolle', 'doubtful'],
+]
+
 /** Players and staff who left in 2026 are on the list, so news about them gets in. */
 const leftTheClub: Case[] = [
   ['Luuk Brouwers tekent bij Omonia Nicosia', 'relevant'],
@@ -420,6 +440,7 @@ describe('judgeRelevance', () => {
     ['names another professional club', otherClubCases],
     ['names a full name', fullNames],
     ['names a legend', legends],
+    ['names an icon or a head coach', iconsAndCoaches],
     ['names someone who left the club', leftTheClub],
     ['the recordings of the club feeds', recordings],
     ['names the club in Frisian', frisianClub],
