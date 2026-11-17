@@ -4132,6 +4132,7 @@
   De lijsten Wedstrijden en de pagina's van clubs tonen hem niet; de projecteigenaar kijkt later of dat ook moet.
   `Match` heeft de props `referee` en `extra` (zie de beslissing in `designsysteem.md`).
 - **Alternatieven:** de vorm laten terugvallen op vorig seizoen (een andere ploeg en een andere stand); alleen competitiewedstrijden tellen voor "Vorige keer" (mist de bekerontmoeting van vorige maand); een eigen kop met een tabel (te zwaar voor de kaart); de scheidsrechter meteen in elke lijst (de regel wordt overal een regel langer, wat #416 juist wilde voorkomen).
+- **Later:** zie _De kaart Wedstrijden op home toont de wedstrijden zoals de pagina Wedstrijden_ (17 november 2026): de vorige ontmoeting en de vorm van de tegenstander vervallen op home, en de vorige wedstrijd toont geen scheidsrechter meer.
 
 ## Een redacteur kan een twijfelgeval of een bericht dat het filter weghoudt op de site zetten
 
@@ -6433,6 +6434,11 @@
 - **Besluit:** een thuisstadion van de club die verdwijnt gaat mee als de club die blijft het stadion nog niet heeft en het een plaats in de reeks kan krijgen.
   Een stadion dat de club die blijft al heeft, blijft één keer staan.
   Een stadion zonder start dat na het eerste komt, mag volgens de controle van `club_home_grounds` niet, en blijft achter; de pagina en het logboek noemen het.
+- **Besluit:** na het samenvoegen staan de thuisstadions van de club die blijft op volgorde van hun start (17 november 2026, #1351).
+  Een stadion zonder start blijft vooraan staan, en bij dezelfde start gaan de stadions van de club die blijft voor.
+  Een stadion van de club die verdwijnt komt dus niet meer achteraan, maar op zijn plaats in de tijd.
+  De redacteur hoeft de volgorde niet na te lopen.
+  Alternatieven: achteraan laten staan en de redacteur de volgorde laten nalopen (de reeks kan dan tijdelijk niet kloppen); alleen opnieuw nummeren zonder te sorteren (lost niets op).
 - **Waarom:** dezelfde club stond twee keer in de database (op acceptatie op 16 november 2026 "VVV" naast "VVV-Venlo" en "Dordrecht '90" naast "FC Dordrecht"), en het Wikidata-nummer is uniek, dus je kunt het niet bij de tweede club invullen.
   De opzet is die van het samenvoegen van personen (#977), en de regels zijn die van de importer.
   Een nummer is een club, zoals de importer ook twee artikelen als twee clubs ziet.
@@ -6491,3 +6497,19 @@
 - **Waarom:** de bezoeker en de redacteur zoeken een uiterste in lijsten van tientallen rijen, en een ranglijst of een vaste reeks heeft zijn volgorde als antwoord.
 - **Alternatieven:** alleen de lijsten die erom vroegen; elke tabel, ook een ranglijst (de plaats zou dan niet meer kloppen met de volgorde).
 - **Later:** vervangt van _Een tabel sorteert op een kolom met knoppen in de koppen, die er alleen met JavaScript zijn_ (31 oktober 2026) dat alleen de lijst van de tegenstanders sorteert.
+
+## De kaart Wedstrijden op home toont de wedstrijden zoals de pagina Wedstrijden
+
+- **Datum:** 17 november 2026
+- **Besluit:** de vorige wedstrijd op home ziet eruit als de bovenste regel van Uitslagen op de pagina Wedstrijden, en de volgende wedstrijd als de bovenste regel van Programma (#1352).
+  Dat betekent dezelfde link (naar de pagina van de wedstrijd, of naar de Voorbeschouwing), dezelfde kleine regels en dezelfde weergave van een wedstrijd die live is, uitgesteld of afgelast.
+  `MatchLines` tekent ze op beide plaatsen en kiest zelf per wedstrijd of de regel stadion, toeschouwers en scheidsrechter krijgt: een wedstrijd die nog niet is begonnen wel, een die is begonnen niet.
+  De competitie op de regel is het enige wat per plek verschilt: de kaart op home houdt haar bij beide wedstrijden, want daar staat geen kop per competitie.
+- **Besluit:** de kaart op home houdt haar vorm: het zachte vlak, de kop "Wedstrijden", één lijst met eerst de vorige en dan de volgende wedstrijd, en de link "Alle wedstrijden".
+- **Besluit:** de vorige ontmoeting en de vorm van de tegenstander onder de volgende wedstrijd vervallen op home, met `NextMatchExtra`, `getUpcomingDetails` en `findPreviousMeeting` (`@fansite/db/queries`), die er alleen voor waren.
+  De kaart Stand noemt het archief van de oude fansite dan niet meer in zijn bronvermelding: dat kwam alleen van de vorige ontmoeting.
+  `formOf` en `meetingScoreOf` blijven, want de Voorbeschouwing gebruikt ze.
+- **Waarom:** dezelfde wedstrijd zag er op home anders uit dan op de pagina, en de regel met de clubs was op home geen link naar een verslag.
+  De pagina is de maat, en één functie voorkomt dat ze weer uit elkaar groeien.
+- **Alternatieven:** de vorige ontmoeting en de vorm op home houden, of ook aan Programma toevoegen; alleen de gegevens gelijk doorgeven, zonder gedeelde functie; ook de kaart wit maken.
+- **Later:** vervangt de regels van _De kaart Wedstrijden op home toont de vorige ontmoeting, de vorm van de tegenstander en de scheidsrechter_ (9 november 2026).

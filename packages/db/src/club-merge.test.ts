@@ -485,4 +485,59 @@ describe('mergeChosenClubs', () => {
       [stays, third, 1],
     ])
   })
+
+  it('puts a ground that moves in order of its start, and keeps the one without a start first', async () => {
+    const stays = await addClub({ name: 'Nieuw', slug: 'nieuw' })
+    const goes = await addClub({ name: 'Oud', slug: 'oud' })
+    const [a, b, c, d] = [await addStadium(), await addStadium(), await addStadium(), await addStadium()]
+
+    await database.db.insert(clubHomeGrounds).values([
+      { clubId: stays, position: 0, stadiumId: a },
+      { clubId: stays, position: 1, stadiumId: b, startSeason: '2000/01' },
+      { clubId: stays, position: 2, stadiumId: c, startDay: '2012-01-01' },
+      { clubId: goes, position: 0, stadiumId: d, startSeason: '2005/06' },
+    ])
+    await mergeChosenClubs(database.db, { describe: describe_, keptId: stays, otherId: goes, userId: null })
+
+    expect(
+      (await database.db.select().from(clubHomeGrounds).orderBy(asc(clubHomeGrounds.position))).map((row) => [
+        row.stadiumId,
+        row.position,
+      ]),
+    ).toEqual([
+      [a, 0],
+      [b, 1],
+      [d, 2],
+      [c, 3],
+    ])
+  })
+
+  it('does not put the name that goes in the list again when it is not the first line', async () => {
+    const stays = await addClub({ name: 'Nieuw', slug: 'nieuw' })
+    const goes = await addClub({ name: 'Oud', slug: 'oud' })
+
+    await database.db.insert(clubNamePeriods).values([
+      { clubId: stays, name: 'Eerst', position: 0 },
+      { clubId: stays, name: 'Oud', position: 1, startSeason: '1990/91' },
+      { clubId: stays, name: 'Nieuw', position: 2, startSeason: '1995/96' },
+    ])
+    await mergeChosenClubs(database.db, {
+      describe: describe_,
+      keptId: stays,
+      otherId: goes,
+      since: '1999/00',
+      userId: null,
+    })
+
+    expect(
+      (await database.db.select().from(clubNamePeriods).orderBy(asc(clubNamePeriods.position))).map((row) => [
+        row.name,
+        row.startSeason,
+      ]),
+    ).toEqual([
+      ['Eerst', null],
+      ['Oud', '1990/91'],
+      ['Nieuw', '1995/96'],
+    ])
+  })
 })

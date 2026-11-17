@@ -484,6 +484,46 @@ describe('the relevance filter', () => {
     expect((await itemsInDatabase()).every((row) => row.relevance === 'relevant')).toBe(true)
   })
 
+  describe('with a feed without a filter and a feed with the filter club in one source', () => {
+    // The headline of `beide` doesn't pass the filter; `alleen` is only in the feed on `club`.
+    const clubFeed = () => feedWith(entry('beide', { title: 'Nieuws uit de regio' }))
+    const sportFeed = () =>
+      feedWith(entry('beide', { title: 'Nieuws uit de regio' }), entry('alleen', { title: 'Leeuwarden krijgt museum' }))
+
+    async function addBoth() {
+      const plainServer = await serve(clubFeed())
+      const sportServer = await serve(sportFeed())
+      const plain = await addFeed(`${plainServer.origin}/rss/`, { filter: 'none' })
+      const [sport] = await database.db
+        .insert(feeds)
+        .values({ filter: 'club', sourceId: plain.sourceId, url: `${sportServer.origin}/rss/` })
+        .$returningId()
+
+      return { plain, sport: await storedFeed(sport?.id ?? 0) }
+    }
+
+    it.each([
+      ['the feed without a filter runs first', true],
+      ['the feed with the filter runs first', false],
+    ])(
+      'keeps an item both offer relevant when %s, and judges an item only the filter feed has',
+      async (_name, plainFirst) => {
+        const { plain, sport } = await addBoth()
+        const order = plainFirst ? [plain, sport, plain, sport] : [sport, plain, sport, plain]
+
+        for (const [index, feed] of order.entries()) {
+          await importFeed(database.db, fetcherFor(servers), feed, new Date(firstRun.getTime() + index * 60_000))
+          // Once the feed without a filter offered it, the other feed doesn't take it over.
+          if (order.slice(0, index + 1).includes(plain)) {
+            expect((await relevanceByKey())['beide']).toBe('relevant')
+          }
+        }
+
+        expect(await relevanceByKey()).toEqual({ alleen: 'irrelevant', beide: 'relevant' })
+      },
+    )
+  })
+
   it('leaves the value alone when the item comes by again as it was', async () => {
     const server = await serve(mixed())
     const feed = await addFeed(`${server.origin}/rss/`, { filter: 'club' })

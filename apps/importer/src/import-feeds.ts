@@ -791,13 +791,14 @@ async function storeDiscussions(db: Executor, feed: StoredFeed, found: ForumDisc
  * without a valid time gets the time we first saw it. An item that an editor hid is never
  * changed, whatever the source offers, and counts as unchanged.
  *
- * Every item gets its relevance: `relevant` for a feed without a filter, and for a feed with
- * the filter `club` what `judgeRelevance` says about the headline and the opponents of the
- * matches around its publication, each time the item comes by, so an improved rule
- * works on items we already have, and so does a match that becomes known after the item. A
- * different value counts as a change. The items are all stored, whatever the value. The counts
- * of the values hold the decision for every item of the feed, also for a hidden item, whose own
- * value stays as it is.
+ * Every item gets its relevance: `relevant` for a feed without a filter, and for an item that a
+ * feed without a filter of the same source offers (it stays with that feed, whichever runs
+ * last), and for a feed with the filter `club` what `judgeRelevance` says about the headline
+ * and the opponents of the matches around its publication, each time the item comes by, so an
+ * improved rule works on items we already have, and so does a match that becomes known after
+ * the item. A different value counts as a change. The items are all stored, whatever the
+ * value. The counts of the values hold the decision for every item of the feed, also for a
+ * hidden item, whose own value stays as it is.
  *
  * Every item also gets the clubs its headline names in `item_clubs` (`clubsNamed`), whatever
  * the filter of the feed, and a changed title gives changed rows.
@@ -811,6 +812,19 @@ async function storeItems(
 ) {
   const counts = { added: 0, unchanged: 0, updated: 0 }
   const relevance: RelevanceCounts = { doubtful: 0, irrelevant: 0, relevant: 0 }
+
+  // The feeds of this source without a filter: an item one of them offered stays theirs.
+  const unfilteredFeedIds =
+    feed.filter === 'club'
+      ? new Set(
+          (
+            await db
+              .select({ id: feeds.id })
+              .from(feeds)
+              .where(and(eq(feeds.sourceId, feed.sourceId), eq(feeds.filter, 'none')))
+          ).map((row) => row.id),
+        )
+      : new Set<number>()
 
   for (const batch of chunks(found, batchSize)) {
     const known = new Map(
@@ -833,8 +847,14 @@ async function storeItems(
     const rows = batch.map((item) => {
       const before = known.get(item.key)
       const publishedAt = item.publishedAt ?? before?.publishedAt ?? now
+      // An item that a feed without a filter of the same source offers is `relevant`,
+      // whichever feed runs last: it stays with that feed (its `feedId`), so a run of the
+      // feed with the filter doesn't take it over.
+      const ownedByUnfilteredFeed = before !== undefined && unfilteredFeedIds.has(before.feedId)
       const itemRelevance =
-        feed.filter === 'club' ? judgeRelevance(item.title, opponentsAround(publishedAt, seasonMatches)) : 'relevant'
+        feed.filter === 'club' && !ownedByUnfilteredFeed
+          ? judgeRelevance(item.title, opponentsAround(publishedAt, seasonMatches))
+          : 'relevant'
 
       relevance[itemRelevance]++
 
@@ -860,7 +880,7 @@ async function storeItems(
       return {
         durationSeconds: item.durationSeconds,
         episodeNumber: item.episodeNumber,
-        feedId: feed.id,
+        feedId: ownedByUnfilteredFeed ? before.feedId : feed.id,
         firstSeenAt: now,
         key: item.key,
         lastSeenAt: now,

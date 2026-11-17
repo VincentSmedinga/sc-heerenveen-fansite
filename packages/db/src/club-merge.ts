@@ -1,4 +1,4 @@
-import { and, asc, count, eq, inArray, or, sql } from 'drizzle-orm'
+import { and, asc, count, eq, inArray, isNotNull, or, sql } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 
@@ -322,8 +322,28 @@ async function moveGrounds(db: MergeDatabase, plan: ClubMergePlan) {
 
   await db.delete(clubHomeGrounds).where(eq(clubHomeGrounds.clubId, other.id))
 
-  for (const [index, ground] of moved.entries()) {
-    await db.insert(clubHomeGrounds).values({ ...ground, clubId: kept.id, id: undefined, position: own.length + index })
+  // The series is in order of time: a ground without a start first (only the first row may have
+  // none, and it stays first), the rest by start, the ones of the club that stays before the
+  // ones that came when the starts are the same.
+  const series = [...own, ...moved].sort((a, b) => startKey(a).localeCompare(startKey(b)))
+
+  // Clear the places of the rows that have a start, so the new places can't clash.
+  await db
+    .update(clubHomeGrounds)
+    .set({ position: sql`${clubHomeGrounds.position} + 1000` })
+    .where(
+      and(
+        eq(clubHomeGrounds.clubId, kept.id),
+        or(isNotNull(clubHomeGrounds.startSeason), isNotNull(clubHomeGrounds.startDay)),
+      ),
+    )
+
+  for (const [position, ground] of series.entries()) {
+    if (own.includes(ground)) {
+      await db.update(clubHomeGrounds).set({ position }).where(eq(clubHomeGrounds.id, ground.id))
+    } else {
+      await db.insert(clubHomeGrounds).values({ ...ground, clubId: kept.id, id: undefined, position })
+    }
   }
 }
 
@@ -467,8 +487,8 @@ async function movePeriods(db: MergeDatabase, plan: ClubMergePlan) {
     return
   }
 
-  // The list already begins with the name that goes: nothing to put in front.
-  if (normaliseClubName(own[0]!.name) === normaliseClubName(other.name)) {
+  // The list already has the name that goes, on any line: nothing to put in front.
+  if (own.some((row) => normaliseClubName(row.name) === normaliseClubName(other.name))) {
     return
   }
 
@@ -517,4 +537,13 @@ function placeGrounds(gone: Ground[], kept: Ground[]) {
   }
 
   return { left, moved }
+}
+
+/** When a ground starts, as a day that sorts as text; a season counts as 1 July. */
+function startKey(ground: Ground): string {
+  if (ground.startDay !== null) {
+    return ground.startDay
+  }
+
+  return ground.startSeason === null ? '' : `${ground.startSeason.slice(0, 4)}-07-01`
 }

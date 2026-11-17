@@ -6,11 +6,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getNewestArticle } from '../articles'
 import { getDiscussions } from '../discussions'
 import { getHeadlines } from '../headlines'
-import { getMatchData, type MatchData } from '../matches'
+import { getMatchData, type MatchData, overviewOf } from '../matches'
+import { MatchLines } from '../MatchViews'
 import { getLatestEpisodes } from '../podcasts'
-import { getPreviewAddresses } from '../report-data'
+import { getLiveReports, getPreviewAddresses, getReportAddresses } from '../report-data'
 import { matchData } from '../test-matches'
-import { getUpcomingDetails } from '../upcoming-match'
 import { withoutIcons } from '../without-icons'
 import HomePage, { generateMetadata } from './page'
 
@@ -21,11 +21,9 @@ vi.mock('../discussions', () => ({ getDiscussions: vi.fn() }))
 vi.mock('../podcasts', () => ({ getLatestEpisodes: vi.fn() }))
 vi.mock('../report-data', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  getLiveReports: vi.fn(),
   getPreviewAddresses: vi.fn(),
-}))
-vi.mock('../upcoming-match', async (importOriginal) => ({
-  ...(await importOriginal<object>()),
-  getUpcomingDetails: vi.fn(),
+  getReportAddresses: vi.fn(),
 }))
 // The query is replaced; the split into the next match and the results is the real one.
 vi.mock('../matches', async (importOriginal) => ({ ...(await importOriginal<object>()), getMatchData: vi.fn() }))
@@ -133,10 +131,12 @@ beforeEach(() => {
   vi.mocked(getLatestEpisodes).mockResolvedValue([])
   vi.mocked(getMatchData).mockReset()
   vi.mocked(getMatchData).mockResolvedValue(noMatchData)
-  vi.mocked(getUpcomingDetails).mockReset()
-  vi.mocked(getUpcomingDetails).mockResolvedValue({ opponentForm: [], previousMeeting: undefined })
   vi.mocked(getPreviewAddresses).mockReset()
   vi.mocked(getPreviewAddresses).mockResolvedValue(new Map())
+  vi.mocked(getReportAddresses).mockReset()
+  vi.mocked(getReportAddresses).mockResolvedValue(new Map())
+  vi.mocked(getLiveReports).mockReset()
+  vi.mocked(getLiveReports).mockResolvedValue(new Set())
 })
 
 afterEach(() => {
@@ -1079,35 +1079,21 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     expect(standings).not.toContain('wikipedia.org')
   })
 
-  it('names the archive in the credit when the previous meeting comes from it', async () => {
-    vi.mocked(getUpcomingDetails).mockResolvedValue({
-      opponentForm: [],
-      previousMeeting: { dataSource: 'oude-fansite', goalsAgainst: 4, goalsFor: 1, matchDate: '2005-03-05' },
-    })
-
-    expect(await renderStandingsCard()).toContain('Wedstrijden en stand: Wikipedia en sc Heerenveen Fansite')
-  })
-
   it('shows the credit with a programme and no table', async () => {
     vi.mocked(getMatchData).mockResolvedValue({ ...matchData, standings: [] })
 
     expect(await renderStandingsCard()).toContain('Wedstrijden en stand: Wikipedia')
   })
 
-  it('ends the line under the clubs of a played match with the referee, and leaves it out when it is not known', async () => {
-    const played = matchData.matches.filter((match) => match.status === 'played')
-    const last = played.at(-1)!
-
+  it('leaves the referee out of the line of the previous match, as Uitslagen on the page does', async () => {
     vi.mocked(getMatchData).mockResolvedValue({
       ...matchData,
-      matches: matchData.matches.map((match) => (match === last ? { ...match, referee: 'Pieter Maquette' } : match)),
+      matches: matchData.matches.map((match) => ({ ...match, referee: 'Pieter Maquette' })),
     })
 
-    expect(withoutIcons(await renderMatchesCard())).toContain(
-      'hf-match-where"><span class="hf-match-part">Pieter Maquette</span></p>',
-    )
-    vi.mocked(getMatchData).mockResolvedValue(matchData)
-    expect(await renderMatchesCard()).not.toContain('Pieter Maquette')
+    const html = await renderMatchesCard()
+
+    expect(html.slice(0, html.indexOf('Speelronde 10'))).not.toContain('Pieter Maquette')
   })
 
   it('ends the line of the next match with the referee too, when Wikipedia names him before the match', async () => {
@@ -1123,44 +1109,6 @@ describe('the matches and the table in the sidebar of the homepage', () => {
 
     expect(html.match(/Pieter Maquette/g)).toHaveLength(1)
     expect(next).toContain('<span class="hf-match-part">Pieter Maquette</span>')
-  })
-
-  it('shows the referee of both matches when both are known, and nothing for a match without one', async () => {
-    vi.mocked(getMatchData).mockResolvedValue({
-      ...matchData,
-      matches: matchData.matches.map((match) => ({ ...match, referee: 'Pieter Maquette' })),
-    })
-
-    expect((await renderMatchesCard()).match(/Pieter Maquette/g)).toHaveLength(2)
-
-    vi.mocked(getMatchData).mockResolvedValue({
-      ...matchData,
-      matches: matchData.matches.map((match) => ({ ...match, referee: null })),
-    })
-
-    expect(await renderMatchesCard()).not.toContain('Pieter Maquette')
-  })
-
-  it('has the previous meeting and the form under the clubs of the next match, before its stadium', async () => {
-    vi.mocked(getUpcomingDetails).mockResolvedValue({
-      opponentForm: ['W', 'G', 'V'],
-      previousMeeting: { dataSource: 'wikipedia', goalsAgainst: 1, goalsFor: 2, matchDate: '2026-04-12' },
-    })
-
-    const html = await renderMatchesCard()
-    const next = html.slice(html.indexOf('Proefstad SV'))
-
-    expect(next).toContain('Vorige keer: 12 apr')
-    // At home: sc Heerenveen is named first, so its 2 goals come first, in the colour of a win.
-    expect(next).toContain('<span class="hf-match-previous-score hf-match-win" aria-hidden="true">2–1</span>')
-    expect(next).toContain('<span class="hf-visually-hidden">2 tegen 1</span>')
-    expect(next).toContain('Vorm Proefstad SV: winst, gelijk, verlies')
-    expect(next.indexOf('Vorige keer')).toBeLessThan(next.indexOf('Vorm Proefstad SV'))
-    expect(next.indexOf('Vorm Proefstad SV')).toBeLessThan(next.indexOf('hf-match-where'))
-    // The previous match of the card has no small lines.
-    expect(html.slice(0, html.indexOf('Proefstad SV'))).not.toContain('Vorige keer')
-    // No heading, no scorers and no legend for the abbreviations in this part of the card.
-    expect(next).not.toContain('hf-match-goals')
   })
 
   it('makes the line of the next match the link to its Voorbeschouwing, and the previous match has none', async () => {
@@ -1186,51 +1134,83 @@ describe('the matches and the table in the sidebar of the homepage', () => {
 
     expect(html).toContain('Proefstad SV')
     expect(html).not.toContain('Voorbeschouwing')
-    expect(error).toHaveBeenCalledWith(expect.stringContaining('Could not read the matches with a Voorbeschouwing'))
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('Could not read the pages of the matches'))
   })
 
-  it('names the home club first in the previous meeting, and takes the colour from the side of sc Heerenveen', async () => {
+  it('makes the line of the previous match the link to its page, like the page Wedstrijden does', async () => {
+    vi.mocked(getReportAddresses).mockResolvedValue(
+      new Map([['KNVB Beker|Tweede ronde', '/wedstrijden/2026-27/2026-10-20-bekerstad']]),
+    )
+
+    const html = await renderMatchesCard()
+    const previous = html.slice(0, html.indexOf('Speelronde 10'))
+
+    expect(previous).toContain('href="/wedstrijden/2026-27/2026-10-20-bekerstad"')
+    expect(html.match(/hf-match-link/g)).toHaveLength(1)
+  })
+
+  it('draws a match with the same lines as the page Wedstrijden: the top of Programma and of Uitslagen', async () => {
+    const { next, previous } = overviewOf(matchData.matches, now)
+    const addresses = new Map([[`${previous!.competition}|${previous!.round}`, '/wedstrijden/2026-27/x']])
+    const draw = (matches: PublicMatch[], withCompetition: boolean) =>
+      renderToStaticMarkup(
+        <MatchLines matches={matches} now={now} reportAddresses={addresses} withCompetition={withCompetition} />,
+      )
+
+    vi.mocked(getReportAddresses).mockResolvedValue(addresses)
+
+    const html = await renderMatchesCard()
+
+    // The homepage keeps the competition on the line, the page has it in the heading.
+    expect(html).toContain(
+      draw([previous!], true)
+        .replace(/^<ul[^>]*>|<\/ul>$/g, '')
+        .replace(/<\/?li>/g, ''),
+    )
+    expect(html).toContain(
+      draw([next!], true)
+        .replace(/^<ul[^>]*>|<\/ul>$/g, '')
+        .replace(/<\/?li>/g, ''),
+    )
+  })
+
+  it('names a live match "live verslag" for a screen reader, as the page does', async () => {
+    const [first, second, third, cup, ...rest] = matchData.matches
+    const key = `${cup!.competition}|${cup!.round}`
+
     vi.mocked(getMatchData).mockResolvedValue({
       ...matchData,
-      matches: matchData.matches.map((match) => (match.status === 'scheduled' ? { ...match, home: false } : match)),
+      matches: [
+        first!,
+        second!,
+        third!,
+        { ...cup!, goals: [], goalsAgainst: null, goalsFor: null, status: 'scheduled' },
+        ...rest,
+      ],
     })
-    vi.mocked(getUpcomingDetails).mockResolvedValue({
-      opponentForm: [],
-      previousMeeting: { dataSource: 'wikipedia', goalsAgainst: 1, goalsFor: 2, matchDate: '2026-04-12' },
-    })
+    vi.mocked(getReportAddresses).mockResolvedValue(new Map([[key, '/wedstrijden/2026-27/x']]))
+    vi.mocked(getLiveReports).mockResolvedValue(new Set([key]))
 
-    expect(await renderMatchesCard()).toContain('hf-match-win" aria-hidden="true">1–2</span>')
+    expect(await renderMatchesCard()).toContain('live verslag')
   })
 
-  it('leaves out the line without a previous meeting, and the form of a club with no league results', async () => {
-    vi.mocked(getUpcomingDetails).mockResolvedValue({
-      opponentForm: ['G'],
-      previousMeeting: undefined,
-    })
-
-    const onlyForm = await renderMatchesCard()
-
-    expect(onlyForm).not.toContain('Vorige keer')
-    expect(onlyForm).toContain('Vorm Proefstad SV')
-
-    vi.mocked(getUpcomingDetails).mockResolvedValue({ opponentForm: [], previousMeeting: undefined })
-
-    const none = await renderMatchesCard()
-
-    expect(none).not.toContain('Vorm ')
-    expect(none).not.toContain('hf-match-extra-lines')
-  })
-
-  it('shows the card without the small lines, and logs why, when they can not be read', async () => {
+  it('shows the card with plain lines, and logs why, when the addresses of the pages can not be read', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
 
-    vi.mocked(getUpcomingDetails).mockRejectedValue(new Error('Failed query: select 1'))
+    vi.mocked(getReportAddresses).mockRejectedValue(new Error('Failed query: select 1'))
 
     const html = await renderMatchesCard()
 
     expect(html).toContain('Proefstad SV')
+    expect(html).not.toContain('hf-match-link')
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('Could not read the pages of the matches'))
+  })
+
+  it('has nothing under the clubs of the next match but the lines the page Programma has', async () => {
+    const html = await renderMatchesCard()
+
     expect(html).not.toContain('Vorige keer')
-    expect(error).toHaveBeenCalledWith(expect.stringContaining('Could not read the previous meeting and the form'))
+    expect(html).not.toContain('Vorm ')
   })
 
   it('says in a sentence for visitors that there is no programme or table yet, with no credit', async () => {

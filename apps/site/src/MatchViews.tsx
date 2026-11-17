@@ -1,5 +1,4 @@
 import type {
-  PreviousMeeting,
   PublicMatch,
   PublicPlayerStats,
   PublicStaff,
@@ -40,20 +39,11 @@ import {
 
 import type { CijfersSearch } from './cijfers-search'
 import type { FlowRow, HomeAwayTally, MatchData } from './matches'
-import type { UpcomingDetails } from './upcoming-match'
 
 import { type CompetitionChoice, competitionFields } from './competition'
 import { goalsPerMatchOf } from './goals-per-match'
 import { moreCleanSheets } from './items-per-card'
-import {
-  coachPeriods,
-  creditName,
-  formatReadAt,
-  formatStaffDate,
-  formatTableDay,
-  matchMoment,
-  wikipediaUrl,
-} from './match-format'
+import { coachPeriods, creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
 import { shootOutOf } from './match-result'
 import { type MatchSource, sourceOf } from './match-sources'
 import {
@@ -64,6 +54,7 @@ import {
   extremesOf,
   goalsPerQuarter,
   goalsWithInitials,
+  hasBegun,
   homeAwayOf,
   lacksResult,
   lateGoalsOf,
@@ -93,7 +84,6 @@ import { coachesCardOf, scoreCountsCard } from './matchShortcuts'
 import { splitPersonName } from './player-name'
 import { isEnglishPage, squadPageName } from './season-squad'
 import { figureCell } from './table-values'
-import { meetingOutcomeOf, meetingScoreOf } from './upcoming-match'
 
 /**
  * The short credit of a small card for the source of its matches: Wikipedia, or Wikipedia and
@@ -672,22 +662,24 @@ export function HomeAwayCard({
 
 /**
  * The block of the homepage with the previous and the next match in one list, and a link to the
- * page with them all. Without matches it says so in a sentence for visitors.
+ * page with them all. The lines are the top ones of Uitslagen and Programma on that page, drawn
+ * by the same `MatchLines`. Without matches it says so in a sentence for visitors.
  */
 export function MatchesCard({
   data,
-  details,
+  liveReports,
   now,
   previewAddresses,
+  reportAddresses,
 }: {
   data: MatchData
-  /** What goes under the clubs of the next match; without it that match has no small lines. */
-  details?: undefined | UpcomingDetails
+  /** The matches that are live (see `MatchLines`). */
+  liveReports?: ReadonlySet<string> | undefined
   now: Date
-  /**
-   * The addresses of the Voorbeschouwing of the matches that are scheduled (see `MatchLines`).
-   */
+  /** The addresses of the Voorbeschouwing of the matches still scheduled (see `MatchLines`). */
   previewAddresses?: ReadonlyMap<string, string> | undefined
+  /** The addresses of the pages of the matches that have one (see `MatchLines`). */
+  reportAddresses?: ReadonlyMap<string, string> | undefined
 }) {
   const { next, previous } = overviewOf(data.matches, now)
   const shown = [previous, next].filter((match) => match !== undefined)
@@ -701,15 +693,11 @@ export function MatchesCard({
         <Text>We hebben het programma nog niet gevonden. Kijk straks nog eens.</Text>
       ) : (
         <MatchLines
-          extraOf={(match) =>
-            match === next && details !== undefined && hasUpcomingDetails(details) ? (
-              <NextMatchExtra details={details} match={match} />
-            ) : null
-          }
+          liveReports={liveReports}
           matches={shown}
           now={now}
           previewAddresses={previewAddresses}
-          withDetails
+          reportAddresses={reportAddresses}
         />
       )}
       <Text>
@@ -820,24 +808,21 @@ export function MatchLegend({ matches }: { matches: readonly MatchLineMatch[] })
 }
 
 /**
- * A list of matches, each as a line with its own day or time. A line names its competition,
- * unless `withCompetition` is false, for a list under a heading that names it already. Only a
- * list with detail (`withDetails`) has the stadium, the spectators and the referee under the
- * clubs. The
- * legend under the list holds only the abbreviations of these matches.
+ * A list of matches, each as a line with its own day or time: the one function that draws a
+ * match on the homepage and on the page Wedstrijden. A line names its competition, unless
+ * `withCompetition` is false, for a list under a heading that names it already. A match that
+ * has not begun (Programma) has the stadium, the spectators and the referee under the clubs,
+ * and one that has (Uitslagen) has not. The legend under the list holds only the
+ * abbreviations of these matches.
  */
 export function MatchLines({
-  extraOf,
   liveReports,
   matches,
   now,
   previewAddresses,
   reportAddresses,
   withCompetition = true,
-  withDetails = false,
 }: {
-  /** Small lines under the clubs of a match, or nothing for a match that has none. */
-  extraOf?: ((match: PublicMatch) => ReactNode) | undefined
   /**
    * The matches that are live, by `<competition>|<round>` (see `getLiveReports`): the link of
    * their line is named "live verslag" for a screen reader.
@@ -858,8 +843,6 @@ export function MatchLines({
    */
   reportAddresses?: ReadonlyMap<string, string> | undefined
   withCompetition?: boolean
-  /** Whether the line under the clubs has the stadium, spectators and referee, where known. */
-  withDetails?: boolean
 }) {
   return (
     <>
@@ -868,12 +851,12 @@ export function MatchLines({
           const key = `${match.competition}|${match.round}`
           const reportHref = reportAddresses?.get(key)
           const previewHref = reportHref === undefined ? previewAddresses?.get(key) : undefined
+          const withDetails = !hasBegun(match, now)
 
           return (
             <List.Item key={`${match.competition}-${match.round}`}>
               <MatchLine
                 attendance={withDetails ? match.attendance : undefined}
-                extra={extraOf?.(match)}
                 live={liveReports?.has(key) === true}
                 match={match}
                 now={now}
@@ -888,50 +871,6 @@ export function MatchLines({
         })}
       </List>
       <MatchLegend matches={matches} />
-    </>
-  )
-}
-
-/** Whether there is a previous meeting or a form to show under the next match. */
-const hasUpcomingDetails = ({ opponentForm, previousMeeting }: UpcomingDetails) =>
-  previousMeeting !== undefined || opponentForm.length > 0
-
-/**
- * The small lines under the clubs of the next match on the homepage: the last meeting at the
- * same ground and the form of the opponent. Each is left out when there is nothing to say, so a
- * club we never met and one without league results give no lines at all.
- */
-function NextMatchExtra({ details, match }: { details: UpcomingDetails; match: PublicMatch }) {
-  const { opponentForm, previousMeeting } = details
-
-  return (
-    <>
-      {previousMeeting === undefined ? null : (
-        <Text appearance="meta">
-          {`Vorige keer: ${formatStaffDate({ date: previousMeeting.matchDate, precision: 'day' })}, `}
-          <PreviousScore home={match.home} meeting={previousMeeting} />
-        </Text>
-      )}
-      <MarkRow marks={opponentForm.map((result) => markOf[result])} title={`Vorm ${match.opponent}`} />
-    </>
-  )
-}
-
-/**
- * The result of the previous meeting in bold, in the colour of the outcome for sc Heerenveen.
- * The colour is not the only sign: it is the score, and a screen reader hears "2 tegen 1".
- */
-function PreviousScore({ home, meeting }: { home: boolean; meeting: PreviousMeeting }) {
-  const [first, second] = meetingScoreOf(meeting, home)
-
-  return (
-    <>
-      <Text
-        aria-hidden="true"
-        as="span"
-        className={`hf-match-previous-score hf-match-${meetingOutcomeOf(meeting)}`}
-      >{`${first}–${second}`}</Text>
-      <Text as="span" className="hf-visually-hidden">{`${first} tegen ${second}`}</Text>
     </>
   )
 }
@@ -1382,16 +1321,7 @@ export function standingsCaption(rows: PublicStandingsRow[], name = 'Stand') {
  * The block of the homepage with three clubs of the league table in its short form, with sc
  * Heerenveen in the middle if possible, and a link to the full table on the matches page.
  */
-export function StandingsCard({
-  archive = false,
-  data,
-  now,
-}: {
-  /** Whether the previous meeting under the next match comes from the old fansite's archive. */
-  archive?: boolean
-  data: MatchData
-  now: Date
-}) {
+export function StandingsCard({ data, now }: { data: MatchData; now: Date }) {
   return (
     <Card aria-labelledby="standings-heading" surface="soft">
       <Heading id="standings-heading" level={2}>
@@ -1413,7 +1343,7 @@ export function StandingsCard({
         </Link>
       </Text>
       {(data.standings.length > 0 || data.matches.length > 0) && (
-        <WikipediaCredit archive={archive} compact lead="Wedstrijden en stand:" />
+        <WikipediaCredit compact lead="Wedstrijden en stand:" />
       )}
     </Card>
   )
