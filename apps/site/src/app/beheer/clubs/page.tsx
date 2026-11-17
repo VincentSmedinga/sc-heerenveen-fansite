@@ -111,7 +111,12 @@ export default async function ClubNamesPage({ searchParams }: { searchParams: Pr
               caption="Clubs met hun lijst van namen"
               columns={['Club', 'Lijst']}
               rows={shown.map((club) => ({
-                cells: [club.own ? <Tag tone="highlight">Eigen lijst</Tag> : 'Geen lijst'],
+                cells: [
+                  {
+                    content: club.own ? <Tag tone="highlight">Eigen lijst</Tag> : 'Geen lijst',
+                    sortValue: club.own ? 'Eigen lijst' : 'Geen lijst',
+                  },
+                ],
                 header: club.name,
                 href: clubPath(club.slug),
               }))}

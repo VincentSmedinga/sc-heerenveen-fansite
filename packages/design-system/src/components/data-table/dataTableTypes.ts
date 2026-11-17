@@ -2,9 +2,9 @@ import type { ReactNode } from 'react'
 
 /**
  * A cell: a number or text, or text with the value the column sorts on, such as `7–5` that
- * sorts as the goal difference `2`.
+ * sorts as the goal difference `2`. Text that is empty sorts as an empty cell.
  */
-export type DataTableCell = number | string | { sortValue: number | string; text: string }
+export type DataTableCell = number | string | { sortValue: DataTableSortValue; text: string }
 
 export type DataTableColumn = {
   /**
@@ -34,8 +34,11 @@ export type DataTableColumn = {
    */
   shown?: string
   /**
-   * Lets the visitor sort the table on this column. It only works with JavaScript: without it
-   * the header is plain text and the table keeps the order of `rows`.
+   * Whether the visitor can sort the table on this column, which is the default. It only works
+   * with JavaScript: without it the header is plain text and the table keeps the order of
+   * `rows`. Give `false`, with the reason in a comment, for a column that has no order, such as
+   * one with only a link. A column with a `hidden` header or a `shown` header does not sort
+   * unless it says `sortable: true`.
    */
   sortable?: boolean
 }
@@ -63,8 +66,9 @@ export type DataTableRow = {
    * club between two spells: a vertical ellipsis (⋮) in the row header and empty cells. The
    * sign is hidden from a screen reader, which reads `header` instead, such as `niet bij sc
    * Heerenveen`. The header of such a row need not be unique. It is for a table that is not
-   * sortable, and `cells` stay empty. A gap row with `display` shows that text in place of the
-   * sign, for an interruption that says what it hides, such as `9 clubs ertussen`.
+   * sortable (`sortable={false}`, or it throws), and `cells` stay empty. A gap row with
+   * `display` shows that text in place of the sign, for an interruption that says what it
+   * hides, such as `9 clubs ertussen`.
    */
   gap?: boolean
   /** What the row is about, as plain text. It is the row header, so it must be unique. */
@@ -97,8 +101,8 @@ export type DataTableRow = {
    * hears as "gedeeld 4" (see `PlaceCell`). A table in which a row has one gets a column
    * before the row headers, with the header `#` (`plaats` for a screen reader), and the rows
    * are in the order of the ranking, so give a place to every row or to none. It is for a
-   * table that is not sortable: a sorted table keeps the places it was given, which would no
-   * longer be the order.
+   * table that is not sortable (`sortable={false}`, or it throws): a sorted table keeps the
+   * places it was given, which would no longer be the order.
    */
   position?: number
   /**
@@ -107,12 +111,23 @@ export type DataTableRow = {
    */
   secondary?: string
   /**
+   * What the row header sorts on, when that is not the header itself, such as `Basten, van` for
+   * `van Basten`, so he stands under the B. The header is shown as it is.
+   */
+  sortHeader?: string
+  /**
    * Makes this row the total of the table: bold, with a fill and a heavier line above it, for
    * the last row, such as `Totaal` under the seasons. A table has at most one, and it is not
-   * sortable: a sorted table moves the row.
+   * sortable (`sortable={false}`, or it throws): a sorted table moves the row.
    */
   total?: boolean
 }
+
+/**
+ * What a cell sorts on: a number, text, or `null` for a cell that counts as empty, such as `?`.
+ * An empty cell stands last, whichever way the column is sorted.
+ */
+export type DataTableSortValue = null | number | string
 
 /** A column of a table with text, given as an object when it can fold. */
 export type DataTableTextColumn = {
@@ -141,18 +156,31 @@ export type DataTableTextColumn = {
   mark?: boolean
   /** The header of the column, as plain text. It must be unique. */
   name: string
+  /**
+   * Whether the visitor can sort the table on this column, which is the default. Give `false`,
+   * with the reason in a comment, for a column that has no order, such as one with only a link.
+   * A column of which a cell is more than text or a number, with no `sortValue`, does not sort.
+   */
+  sortable?: boolean
 }
 
 export type DataTableTextRow = {
   /**
    * The cells of the row, one for each column after the first. A cell is text, a number or any
    * other content, such as a link, but not interactive controls that need a label of their own.
+   * A cell as `{ content, sortValue }` shows `content` and sorts on `sortValue`. A column in
+   * which a cell is a link or a sign without a `sortValue` does not sort.
    */
-  cells: readonly ReactNode[]
+  cells: readonly (DataTableTextValueCell | ReactNode)[]
   /** What the row is about, as plain text. It is the row header, so it must be unique. */
   header: string
   /** Makes the row header a link, as in a row with numbers. The link repeats the header. */
   href?: string
   /** A second line under the row header, in secondary text, such as the date of a match. */
   secondary?: string
+  /** What the row header sorts on, as in a row with numbers. */
+  sortHeader?: string
 }
+
+/** A cell of a table with text that holds more than text, with the value to sort on. */
+export type DataTableTextValueCell = { content: ReactNode; sortValue: DataTableSortValue }

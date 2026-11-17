@@ -73,6 +73,8 @@ export const InADataTable = meta.story({
         { cells: ['2,00', 5], header: 'SV Proefdorp', position: 2 },
         { cells: ['1,50', 4], header: 'Maquette United', position: 4 },
       ]}
+      // A ranking is in the order of its places, so it does not sort.
+      sortable={false}
     />
   ),
 })

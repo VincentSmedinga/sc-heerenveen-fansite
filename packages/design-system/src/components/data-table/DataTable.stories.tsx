@@ -54,8 +54,8 @@ const clubColumns = [
 const clubLegend = tableLegend(clubColumns)
 
 const sortableColumns: DataTableProps['columns'] = [
-  { name: 'Club', sortable: true },
-  ...clubColumns.map((column) => ({ ...column, key: column.abbreviation === 'P', sortable: true })),
+  'Club',
+  ...clubColumns.map((column) => ({ ...column, key: column.abbreviation === 'P' })),
 ]
 
 const meta = preview.meta({
@@ -72,9 +72,11 @@ const meta = preview.meta({
           'Een tabel met getallen, als echte `table`: een lijst van dingen met elk een paar getallen. De eerste kolom heeft de rijkoppen, zoals een dag of een club, en de andere kolommen hebben getallen die recht onder elkaar staan.',
           'Het bijschrift (`caption`) zegt wat erin staat, maar alleen een schermlezer krijgt het: zet dus een kop boven de tabel, bijvoorbeeld in een kaart.',
           'Past een tabel met veel kolommen niet met hele woorden, geef een kolom dan als `{ abbreviation, name }`: de kop toont de afkorting, een schermlezer hoort het hele woord, en de pagina zet een regel onder de tabel die de afkortingen uitlegt.',
-          'Kies sorteerbare kolommen (`sortable`) voor een tabel met veel rijen, als de bezoeker een uiterste zoekt. Sorteren werkt met JavaScript; zonder blijft de tabel in de volgorde van `rows`.',
+          'Elke tabel sorteert op zijn kolommen: de bezoeker zoekt een uiterste, zoals de meeste toeschouwers. Een klik sorteert, een tweede klik keert om en een derde zet de tabel terug in de volgorde van de pagina. Sorteren werkt met JavaScript; zonder blijft de tabel in de volgorde van `rows`.',
+          'Een tabel gaat er alleen met een reden uit, met `sortable={false}`: een ranglijst, een lijst in twee tabellen, een tabel met een totaalrij of een gaprij, of een korte reeks in een eigen volgorde. Een tabel met een rangorde (`position`), een totaalrij of een gaprij, of in een `DataTable.Group`, geeft een fout als hij niet `sortable={false}` zegt. Een kolom die geen volgorde heeft, zoals een kolom met alleen een koppeling, gaat er uit met `sortable: false`.',
+          'Tekst sorteert met de Nederlandse regels en een lege cel staat achteraan. Geef een cel met een datum of een stand een `sortValue`, en een rij met een voorvoegsel een `sortHeader`, zodat "van Basten" onder de B staat.',
           'In een tabel is vet voor één ding: het kerngetal, de kolom met `key` of, in een tabel die sorteert, de kolom waarop de bezoeker sorteerde. Vet is nooit het enige teken.',
-          'Met `appearance="text"` is het een tabel met tekst, zoals een lijst van wedstrijden; die kan niet sorteren. De stand van de competitie heeft een eigen component, `StandingsTable`.',
+          'Met `appearance="text"` is het een tabel met tekst, zoals een lijst van wedstrijden. De stand van de competitie heeft een eigen component, `StandingsTable`.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -210,6 +212,9 @@ const seasonColumns = [tableColumns.played, tableColumns.started, tableColumns.g
 
 export const SeasonsWithTotal = meta.story({
   name: 'Seizoenen met een totaal',
+  parameters: {
+    docs: { description: { story: 'Een totaalrij blijft onderaan staan, dus deze tabel sorteert niet.' } },
+  },
   render: () => (
     <div style={{ maxInlineSize: '20rem' }}>
       <Card aria-labelledby="seizoenen-kop">
@@ -224,6 +229,8 @@ export const SeasonsWithTotal = meta.story({
             { cells: [30, 26, 12, '–'], header: '2024/25', href: '/spelers/2024-25' },
             { cells: [58, 50, 21, 4], header: 'Totaal', total: true },
           ]}
+          // The total stays at the bottom, so the table does not sort.
+          sortable={false}
         />
         <Text appearance="meta">{tableLegend(seasonColumns)}.</Text>
       </Card>
@@ -233,6 +240,9 @@ export const SeasonsWithTotal = meta.story({
 
 export const SeasonsWithGap = meta.story({
   name: 'Seizoenen met een onderbreking',
+  parameters: {
+    docs: { description: { story: 'Een gaprij blijft op zijn plek staan, dus deze tabel sorteert niet.' } },
+  },
   render: () => (
     <div style={{ maxInlineSize: '20rem' }}>
       <Card aria-labelledby="onderbreking-kop">
@@ -248,6 +258,8 @@ export const SeasonsWithGap = meta.story({
             { cells: [30, 26, 12, '–'], header: '2022/23', href: '/spelers/2022-23' },
             { cells: [58, 50, 21, 4], header: 'Totaal', total: true },
           ]}
+          // The gap stays where it is, so the table does not sort.
+          sortable={false}
         />
       </Card>
     </div>
@@ -279,6 +291,8 @@ export const StandingStretchNear = meta.story({
             { cells: [12, '−3', 17], header: 'Voorbeeld United', position: 8 },
             { cells: [12, '+1', 15], header: 'Testdorp FC', highlight: true, note: 'de tegenstander', position: 9 },
           ]}
+          // A stretch of the league table is in the order of the places, so it does not sort.
+          sortable={false}
         />
         <Text>We staan drie plekken en zes punten boven Testdorp FC.</Text>
       </Card>
@@ -311,6 +325,8 @@ export const StandingStretchFar = meta.story({
             { cells: [12, '−9', 9], header: 'Oefenveld AFC', position: 17 },
             { cells: [12, '−29', 3], header: 'Testdorp FC', highlight: true, note: 'de tegenstander', position: 18 },
           ]}
+          // A stretch of the league table is in the order of the places, so it does not sort.
+          sortable={false}
         />
         <Text>We staan twaalf plekken en achttien punten boven Testdorp FC.</Text>
       </Card>
@@ -356,6 +372,14 @@ export const NamesWithPeriods = meta.story({
 
 export const Ranked = meta.story({
   name: 'Met de plaats in de ranglijst',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Een ranglijst heeft de volgorde als antwoord, en het bijschrift zegt in welke richting. Hij sorteert dus niet.',
+      },
+    },
+  },
   render: () => (
     <div style={{ maxInlineSize: '20rem' }}>
       <Card aria-labelledby="ranglijst-kop" surface="soft">
@@ -370,6 +394,8 @@ export const Ranked = meta.story({
             { cells: ['2,10', 10], header: 'Nepclub ’s-Gravenvoorbeeld', href: '#club', position: 2 },
             { cells: ['1,88', 8], header: 'FC Voorbeeld', href: '#club', position: 3 },
           ]}
+          // The order is the answer of a ranking, so it does not sort.
+          sortable={false}
         />
         <Text appearance="meta">{tableLegend([tableColumns.pointsPerMatch, tableColumns.played])}</Text>
       </Card>
@@ -401,11 +427,26 @@ export const SortableLast = meta.story({
 })
 
 export const Sorted = meta.story({
-  name: 'Gesorteerd',
+  name: 'Gesorteerd, met drie klikken',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'De eerste klik sorteert, de tweede keert om en de derde zet de tabel terug in de volgorde van de pagina, zonder pijl.',
+      },
+    },
+  },
   play: async ({ canvas }) => {
+    const header = () => canvas.getByRole('columnheader', { name: 'D doelsaldo' })
+
     await userEvent.click(canvas.getByRole('button', { name: 'D doelsaldo' }))
-    await expect(canvas.getByRole('columnheader', { name: 'D doelsaldo' })).toHaveAttribute('aria-sort', 'descending')
+    await expect(header()).toHaveAttribute('aria-sort', 'descending')
     await expect(canvas.getByRole('button', { name: 'D doelsaldo' })).toHaveFocus()
+    await userEvent.click(canvas.getByRole('button', { name: 'D doelsaldo' }))
+    await expect(header()).toHaveAttribute('aria-sort', 'ascending')
+    await userEvent.click(canvas.getByRole('button', { name: 'D doelsaldo' }))
+    await expect(header()).toHaveAttribute('aria-sort', 'none')
+    await expect(canvas.getByRole('status')).toHaveTextContent('Niet meer gesorteerd, in de volgorde van de pagina')
   },
   render: renderSortable('20rem'),
 })
@@ -445,11 +486,7 @@ export const SortableLongHeaders = meta.story({
         </Heading>
         <DataTable
           caption="Unieke bezoekers en paginaweergaven per dag"
-          columns={[
-            { name: 'Dag', sortable: true },
-            { name: 'Bezoekers', sortable: true },
-            { name: 'Weergaven', sortable: true },
-          ]}
+          columns={['Dag', 'Bezoekers', 'Weergaven']}
           rows={days}
         />
       </Card>
@@ -476,6 +513,57 @@ const matches: DataTableTextRow[] = [
     secondary: 'zaterdag 3 oktober 2026, Eredivisie',
   },
 ]
+
+const sortableMatches: DataTableTextRow[] = [
+  {
+    cells: [{ content: '1 november 2026', sortValue: '2026-11-01' }, '2 - 1'],
+    header: 'Testclub - FC Voorbeeld',
+  },
+  {
+    cells: [{ content: '28 oktober 2026', sortValue: '2026-10-28' }, ''],
+    header: 'Proefstad SV - Testclub',
+  },
+  {
+    cells: [{ content: '3 oktober 2026', sortValue: '2026-10-03' }, '0 - 0'],
+    header: 'Testclub - Teststad Boys',
+  },
+]
+
+export const TextTableSorted = meta.story({
+  name: 'Tabel met tekst die sorteert',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Een datum sorteert op een `sortValue` en niet op de woorden. Een lege cel staat achteraan, welke kant ook op, en een kolom met een koppeling zonder waarde sorteert niet.',
+      },
+    },
+  },
+  play: async ({ canvas }) => {
+    const first = () => canvas.getAllByRole('rowheader')[0]
+
+    await userEvent.click(canvas.getByRole('button', { name: 'Datum' }))
+    await expect(first()).toHaveTextContent('Testclub - Teststad Boys')
+    await userEvent.click(canvas.getByRole('button', { name: 'Datum' }))
+    await expect(first()).toHaveTextContent('Testclub - FC Voorbeeld')
+    await userEvent.click(canvas.getByRole('button', { name: 'Uitslag' }))
+    await userEvent.click(canvas.getByRole('button', { name: 'Uitslag' }))
+    await expect(canvas.getAllByRole('rowheader')[2]).toHaveTextContent('Proefstad SV - Testclub')
+  },
+  render: () => (
+    <Card aria-labelledby="sorteerbare-wedstrijden-kop" style={{ maxInlineSize: '40rem' }}>
+      <Heading id="sorteerbare-wedstrijden-kop" level={2}>
+        Wedstrijden
+      </Heading>
+      <DataTable
+        appearance="text"
+        caption="Wedstrijden van Testclub, de nieuwste eerst"
+        columns={['Wedstrijd', 'Datum', 'Uitslag']}
+        rows={sortableMatches}
+      />
+    </Card>
+  ),
+})
 
 export const TextTable = meta.story({
   name: 'Tabel met tekst',

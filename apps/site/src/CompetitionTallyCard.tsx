@@ -8,8 +8,7 @@ import { searchHref } from './match-search'
 import { nothing } from './match-search-start'
 import { rowLinkText } from './MatchSearchLink'
 import { competitionTallyCard } from './matchShortcuts'
-
-const numberFormat = new Intl.NumberFormat('nl-NL')
+import { scoreCell } from './table-values'
 
 const figureColumns = [
   tableColumns.played,
@@ -56,7 +55,7 @@ export function CompetitionTallyCard({
           const link = matchLink?.(value)
 
           return {
-            cells: [numberFormat.format(played), won, drawn, lost, `${goalsFor}–${goalsAgainst}`],
+            cells: [played, won, drawn, lost, scoreCell(goalsFor, goalsAgainst)],
             header: label,
             href: link?.href ?? searchHref({ ...nothing, competitions: [value] }),
             ...(link === undefined ? {} : { display: rowLinkText(label, link, `in ${label}`) }),

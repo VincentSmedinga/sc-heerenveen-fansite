@@ -207,6 +207,8 @@ const ScoresCard = ({
                 marker: <DonutChart.Swatch index={index} ranked slices={slices} />,
                 note: word,
               }))}
+              // The outcomes are half of a list in two tables, so neither sorts.
+              sortable={false}
             />
           )
         })}

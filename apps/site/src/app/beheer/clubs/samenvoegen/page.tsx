@@ -118,6 +118,8 @@ function MergePlan({ plan, reason }: { plan: ClubMergePlan; reason: string }) {
             })),
             { cells: [kept.id, other.id], header: 'Nummer van de club' },
           ]}
+          // A comparison side by side, not a list: no sorting.
+          sortable={false}
         />
         <Text>{reason}</Text>
         <Text>

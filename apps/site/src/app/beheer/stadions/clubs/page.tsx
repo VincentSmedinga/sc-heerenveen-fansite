@@ -112,7 +112,12 @@ export default async function StadiumsPage({ searchParams }: { searchParams: Pro
               caption="Clubs met hun thuisvelden"
               columns={['Club', 'Thuisvelden']}
               rows={shown.map((club) => ({
-                cells: [club.grounds ? <Tag tone="highlight">Thuisvelden</Tag> : 'Wikipedia'],
+                cells: [
+                  {
+                    content: club.grounds ? <Tag tone="highlight">Thuisvelden</Tag> : 'Wikipedia',
+                    sortValue: club.grounds ? 'Thuisvelden' : 'Wikipedia',
+                  },
+                ],
                 header: club.name,
                 href: clubPath(club.slug),
               }))}

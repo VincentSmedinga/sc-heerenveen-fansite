@@ -188,6 +188,8 @@ export function PlacePerRoundCard({
                   header: `Ronde ${round}`,
                   ...(place === null ? { note: 'nog niet alle wedstrijden gespeeld' } : {}),
                 }))}
+                // The rounds are one list in a few tables, so sorting one half would be wrong.
+                sortable={false}
               />
             )
           })}

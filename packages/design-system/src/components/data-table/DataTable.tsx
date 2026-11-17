@@ -1,17 +1,29 @@
-import type { ComponentPropsWithoutRef } from 'react'
+import { Children, type ComponentPropsWithoutRef, isValidElement } from 'react'
 
 import type { DataTableColumn, DataTableRow, DataTableTextColumn, DataTableTextRow } from './dataTableTypes'
 
 import { classNames } from '../classNames'
-import { columnOf, ColumnText, keyColumnOf, TableRows, TextTableRows } from './dataTableParts'
+import {
+  columnOf,
+  ColumnText,
+  keyColumnOf,
+  needsFoldContainer,
+  sortableColumnsOf,
+  TableRows,
+  textColumnClass,
+  TextColumnText,
+  TextTableRows,
+} from './dataTableParts'
 import { SortableDataTable } from './SortableDataTable'
 
 export type {
   DataTableCell,
   DataTableColumn,
   DataTableRow,
+  DataTableSortValue,
   DataTableTextColumn,
   DataTableTextRow,
+  DataTableTextValueCell,
 } from './dataTableTypes'
 
 export type DataTableProps =
@@ -27,7 +39,7 @@ export type DataTableProps =
        * narrow for it, such as the date of a match on a phone.
        */
       columns: readonly (DataTableTextColumn | string)[]
-      /** The rows of the table, from the first down. They can't be sorted. */
+      /** The rows of the table, from the first down. */
       rows: readonly DataTableTextRow[]
     })
   | (DataTableBaseProps & {
@@ -40,7 +52,8 @@ export type DataTableProps =
        * which does not fit a phone with whole words, gives a column as
        * `{ abbreviation, name }`: the header shows the abbreviation, and the page explains it
        * in a line under the table.
-       * A column given as `{ name, sortable: true }` lets the visitor sort the table on it.
+       * A column given as `{ name, sortable: false }` has no sorting, such as one with only a
+       * link.
        */
       columns: readonly (DataTableColumn | string)[]
       /** The rows of the table, from the first down. */
@@ -57,6 +70,14 @@ type DataTableBaseProps = Omit<ComponentPropsWithoutRef<'table'>, 'children'> & 
   caption: string
   /** A data table has no children: everything it shows comes from the props below. */
   children?: never
+  /**
+   * Whether the visitor can sort the table on its columns, which is the default for a list of
+   * things that can be compared. Give `false`, with the reason in a comment, for a table that
+   * is in its order for a reason: a ranking, a short series in its own order, one half of a
+   * list in two tables. A table with a `position`, a `total` row or a `gap` row, and a table
+   * in a `DataTable.Group`, cannot sort and throws when it is not `false`.
+   */
+  sortable?: boolean
 }
 
 /**
@@ -73,57 +94,74 @@ type DataTableBaseProps = Omit<ComponentPropsWithoutRef<'table'>, 'children'> & 
  * A column can be the `key` figure, in the heaviest weight: the figure the table is ordered by
  * or the answer it gives. Bold means nothing else in a table, and there is at most one.
  *
- * A column can be `sortable`. The table then lets the visitor sort on it, which needs
- * JavaScript: the server sends the whole table in the order of `rows`, with plain headers, and
- * in the browser the headers of the sortable columns become buttons (see SortableDataTable). A
- * table without a sortable column is the same plain table as ever and sends no script.
+ * A table lets the visitor sort on a column, which needs JavaScript: the server sends the whole
+ * table in the order of `rows`, with plain headers, and in the browser the headers of the
+ * columns that can sort become buttons (see SortableDataTable). A click sorts, a second click
+ * turns round and a third gives the order of `rows` back. A table that cannot sort, or has
+ * `sortable={false}`, is the same plain table as ever and sends no script.
  */
-export const DataTable = ({ appearance = 'numbers', caption, className, columns, rows, ...props }: DataTableProps) => {
+export const DataTable = ({
+  appearance = 'numbers',
+  caption,
+  className,
+  columns,
+  rows,
+  sortable = true,
+  ...props
+}: DataTableProps) => {
+  if (sortable) {
+    const clash = (rows as readonly DataTableRow[]).some(
+      (row) => row.position !== undefined || row.total === true || row.gap === true,
+    )
+
+    if (clash) {
+      throw new Error(
+        `A table with a position, a total row or a gap row cannot sort, so give it sortable={false}: ${caption}`,
+      )
+    }
+  }
+
   // The union of the props is lost by taking them apart, so the two kinds are told apart here.
   if (appearance === 'text') {
     const textColumns = (columns as readonly (DataTableTextColumn | string)[]).map((column) =>
       typeof column === 'string' ? { name: column } : column,
     )
+    const textRows = rows as readonly DataTableTextRow[]
+    const sortableColumns = sortable ? sortableColumnsOf(textColumns, textRows) : []
+
+    if (sortableColumns.includes(true)) {
+      return (
+        <SortableDataTable
+          {...props}
+          appearance="text"
+          caption={caption}
+          className={className}
+          columns={textColumns}
+          rows={textRows}
+          sortableColumns={sortableColumns}
+        />
+      )
+    }
+
     const table = (
       <table {...props} className={classNames('hf-data-table', 'hf-data-table-text', className)}>
         <caption className="hf-visually-hidden">{caption}</caption>
         <thead>
           <tr>
             {textColumns.map((column) => (
-              <th
-                className={classNames(
-                  column.fold === true && 'hf-data-table-fold-column',
-                  column.bar === true && 'hf-numeric',
-                  column.mark === true && 'hf-data-table-mark-column',
-                )}
-                key={column.name}
-                scope="col"
-              >
-                {column.abbreviation === undefined ? (
-                  column.name
-                ) : (
-                  <abbr title={column.name}>
-                    <span aria-hidden="true" className="hf-data-table-short">
-                      {column.abbreviation}
-                    </span>
-                    <span className="hf-data-table-long">{column.name}</span>
-                  </abbr>
-                )}
+              <th className={textColumnClass(column)} key={column.name} scope="col">
+                <TextColumnText column={column} />
               </th>
             ))}
           </tr>
         </thead>
-        <TextTableRows columns={textColumns} rows={rows as readonly DataTableTextRow[]} />
+        <TextTableRows columns={textColumns} rows={textRows} />
       </table>
     )
 
     // The room of the table itself decides when a column folds, or a header is short, so it
     // needs a container.
-    return textColumns.some((column) => column.fold === true || column.abbreviation !== undefined) ? (
-      <div className="hf-data-table-fold">{table}</div>
-    ) : (
-      table
-    )
+    return needsFoldContainer(textColumns) ? <div className="hf-data-table-fold">{table}</div> : table
   }
 
   const all = (columns as readonly (DataTableColumn | string)[]).map(columnOf)
@@ -131,8 +169,20 @@ export const DataTable = ({ appearance = 'numbers', caption, className, columns,
 
   const keyColumn = keyColumnOf(all)
 
-  if (all.some((column) => column.sortable === true)) {
-    return <SortableDataTable {...props} caption={caption} className={className} columns={all} rows={numberRows} />
+  const sortableColumns = sortable ? sortableColumnsOf(all, numberRows) : []
+
+  if (sortableColumns.includes(true)) {
+    return (
+      <SortableDataTable
+        {...props}
+        appearance="numbers"
+        caption={caption}
+        className={className}
+        columns={all}
+        rows={numberRows}
+        sortableColumns={sortableColumns}
+      />
+    )
   }
 
   return (
@@ -168,14 +218,26 @@ export const DataTable = ({ appearance = 'numbers', caption, className, columns,
 
 /**
  * Tables next to each other where there is room, and under each other where there is not, such
- * as the wins, the draws and the losses of a season. Each table is as wide as its content
- * needs, and the cells have less space round them than in a table of its own, so three small
- * tables fit a phone. It only works round DataTable elements, so it is written as
- * DataTable.Group.
+ * as the wins, the draws and the losses of a season. Its tables do not sort. Each table is as
+ * wide as its content needs, and the cells have less space round them than in a table of its
+ * own, so three small tables fit a phone. It only works round DataTable elements, so it is
+ * written as DataTable.Group.
  */
-const Group = ({ className, ...props }: ComponentPropsWithoutRef<'div'>) => (
-  <div {...props} className={classNames('hf-data-table-group', className)} />
-)
+const Group = ({ children, className, ...props }: ComponentPropsWithoutRef<'div'>) => {
+  // Sorting each half of a list that is in two tables is wrong, so a table in a group says it
+  // does not sort.
+  Children.forEach(children, (child) => {
+    if (isValidElement<{ sortable?: boolean }>(child) && child.type === DataTable && child.props.sortable !== false) {
+      throw new Error('A DataTable in a DataTable.Group cannot sort, so give it sortable={false}')
+    }
+  })
+
+  return (
+    <div {...props} className={classNames('hf-data-table-group', className)}>
+      {children}
+    </div>
+  )
+}
 
 // The name in React's developer tools and in the code examples in Storybook.
 Group.displayName = 'DataTable.Group'

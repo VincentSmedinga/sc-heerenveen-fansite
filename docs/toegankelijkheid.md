@@ -116,17 +116,24 @@ Zo test je het: verstuur het formulier leeg en met foute waarden, met alleen het
       Een afgekorte kop heeft het hele woord voor een schermlezer, en een regel onder de tabel legt de afkortingen uit (1.3.1).
       De letters en woorden komen uit één lijst, `tableColumns` in het designsysteem (G gespeeld, W winst, G gelijk, V verlies, P punten, P punten per wedstrijd, D doelpunten, D doelsaldo, en voor de tabel van de spelers B basis, I invallers, M minuten, A assists, Y geel en R rood, voor de tabel van een doelman N nul en T tegendoelpunten, en voor de lijsten van alle seizoenen H hattricks, S strafschoppen en Z seizoenen in de selectie).
       Alleen G, D en P hebben twee woorden: een sorteerknop heet daarom letter en woord, "G gespeeld" of "G gelijk", "D doelsaldo", zodat twee koppen met dezelfde letter verschillende namen hebben (2.5.3).
-- [ ] Een tabel die kan sorteren, werkt ook zonder JavaScript: de server stuurt de hele tabel in een vaste volgorde, met koppen van gewone tekst en zonder knoppen die niets doen.
+- [ ] Elke tabel die een lijst is, kan sorteren, en een tabel gaat er alleen uit met een reden: een ranglijst, een lijst in twee tabellen, een tabel met een totaalrij of een gaprij, of een vaste reeks.
+      Een tabel die niet sorteert, stuurt geen script mee.
+- [ ] Een tabel die kan sorteren, werkt ook zonder JavaScript: de server stuurt de hele tabel in de volgorde van de pagina, met koppen van gewone tekst en zonder knoppen die niets doen.
       Met JavaScript wordt de kop van een sorteerbare kolom een knop (4.1.2).
 - [ ] De gesorteerde kop heeft `aria-sort="ascending"` of `"descending"`, en de andere sorteerbare koppen `"none"`.
+      De tabel begint ongesorteerd, met `"none"` op elke kop en zonder pijl.
+      Een derde klik op dezelfde kop zet hem terug in de volgorde van de pagina, met `"none"` op elke kop.
+      Een kolom waarvan een cel geen waarde heeft om op te sorteren, zoals een koppeling, heeft geen knop.
       Een pijl laat het zien, want kleur is niet het enige teken (1.4.1).
       De pijl haalt 3:1 (1.4.11) en de kop 4,5:1 (1.4.3), in licht en donker.
 - [ ] Na een klik zegt een beleefde regel (`role="status"`, niet te zien) wat er gebeurde, zoals "Gesorteerd op Gespeeld, van hoog naar laag" (4.1.3).
+      Na de derde klik zegt hij "Niet meer gesorteerd, in de volgorde van de pagina".
       De regio is er al voor de klik, en de focus blijft op de knop (2.4.3).
 - [ ] De knop in de kop is minstens 24 bij 24 pixels (2.5.8), en de tabel past op 320 pixels zonder zijwaarts scrollen (1.4.10).
       Een tabel die niet past met hele woorden, krijgt afkortingen.
 
 Zo test je het: tab naar een kop, druk Enter en spatie, en kijk of de volgorde en de pijl veranderen, de focus blijft en de schermlezer de regel voorleest.
+Druk een derde keer en kijk of de tabel in de volgorde van de pagina terug is.
 Zet JavaScript uit en kijk of de tabel er in de volgorde van de server staat, zonder knoppen.
 
 ### Contrast in licht en donker

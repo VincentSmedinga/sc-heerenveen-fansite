@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import { Fragment } from 'react'
+import { Fragment, isValidElement } from 'react'
 
 import type {
   DataTableCell,
@@ -13,6 +13,7 @@ import type {
 import { classNames } from '../classNames'
 import { Link } from '../link/Link'
 import { PlaceCell, sharedPlaces } from '../place-cell/PlaceCell'
+import { isSortableColumn } from './sortRows'
 
 const numberFormat = new Intl.NumberFormat('nl-NL')
 
@@ -152,7 +153,60 @@ export const TableRows = ({
   )
 }
 
-const textOfNode = (cell: ReactNode) => (typeof cell === 'number' ? numberFormat.format(cell) : cell)
+/** What a cell of a table with text shows: its `content` when it has a sort value. */
+const textOfNode = (cell: unknown): ReactNode => {
+  if (typeof cell === 'object' && cell !== null && !isValidElement(cell) && 'sortValue' in cell) {
+    return textOfNode((cell as { content?: ReactNode }).content)
+  }
+
+  return typeof cell === 'number' ? numberFormat.format(cell) : (cell as ReactNode)
+}
+
+/** The classes of the header and the cells of a column of a table with text. */
+export const textColumnClass = (column: DataTableTextColumn) =>
+  classNames(
+    column.fold === true && 'hf-data-table-fold-column',
+    column.bar === true && 'hf-numeric',
+    column.mark === true && 'hf-data-table-mark-column',
+  )
+
+/**
+ * The text of a header of a table with text: the whole name, or an abbreviation that shows the
+ * whole name where the table has room. In a button (`named`) the abbreviation is not hidden
+ * from a screen reader, so the name is what the eye reads (WCAG 2.5.3): whichever of the two
+ * is shown, the other is not displayed.
+ */
+export const TextColumnText = ({ column, named = false }: { column: DataTableTextColumn; named?: boolean }) =>
+  column.abbreviation === undefined ? (
+    column.name
+  ) : (
+    <abbr title={column.name}>
+      <span aria-hidden={named ? undefined : 'true'} className="hf-data-table-short">
+        {column.abbreviation}
+      </span>
+      <span className="hf-data-table-long">{column.name}</span>
+    </abbr>
+  )
+
+/** Whether the headers of a table with text need a container for the room of the table. */
+export const needsFoldContainer = (columns: readonly DataTableTextColumn[]) =>
+  columns.some((column) => column.fold === true || column.abbreviation !== undefined)
+
+/**
+ * For each column whether the table can sort on it: the column does not opt out, a header that
+ * is hidden or shown differently only sorts when it says so, and every cell has a value to sort
+ * on (see `sortValueOf`). The first column holds the row headers.
+ */
+export const sortableColumnsOf = (
+  columns: readonly (DataTableColumn | DataTableTextColumn)[],
+  rows: readonly { cells: readonly unknown[]; header: string; sortHeader?: string }[],
+) =>
+  columns.map((column, index) => {
+    const numbers = column as DataTableColumn
+    const quiet = numbers.hidden === true || numbers.shown !== undefined
+
+    return (column.sortable === true || (column.sortable !== false && !quiet)) && isSortableColumn(rows, index)
+  })
 
 /**
  * The rows of a table with text: the cells start at the start and can hold any content, and the

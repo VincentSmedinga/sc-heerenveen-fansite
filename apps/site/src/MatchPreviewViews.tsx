@@ -357,6 +357,8 @@ export function PreviewStandingCard({
           { abbreviation: 'P', key: true, name: 'punten' },
         ]}
         rows={rows}
+        // A stretch of the league table is in the order of the places, so it does not sort.
+        sortable={false}
       />
       <Text>{sentence}</Text>
       <Text>
@@ -380,6 +382,8 @@ function ScorersTable({ caption, scorers }: { caption: string; scorers: readonly
         display: <PlayerName givenName={scorer.givenName} href={scorer.href} surname={scorer.surname} />,
         header: scorer.name,
       }))}
+      // The scorers are a ranking, with the most goals first, so the table does not sort.
+      sortable={false}
     />
   )
 }
