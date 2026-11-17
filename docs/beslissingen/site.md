@@ -6428,6 +6428,11 @@
 - **Besluit:** een thuisstadion van de club die verdwijnt gaat mee als de club die blijft het stadion nog niet heeft en het een plaats in de reeks kan krijgen.
   Een stadion dat de club die blijft al heeft, blijft één keer staan.
   Een stadion zonder start dat na het eerste komt, mag volgens de controle van `club_home_grounds` niet, en blijft achter; de pagina en het logboek noemen het.
+- **Besluit:** na het samenvoegen staan de thuisstadions van de club die blijft op volgorde van hun start (17 november 2026, #1351).
+  Een stadion zonder start blijft vooraan staan, en bij dezelfde start gaan de stadions van de club die blijft voor.
+  Een stadion van de club die verdwijnt komt dus niet meer achteraan, maar op zijn plaats in de tijd.
+  De redacteur hoeft de volgorde niet na te lopen.
+  Alternatieven: achteraan laten staan en de redacteur de volgorde laten nalopen (de reeks kan dan tijdelijk niet kloppen); alleen opnieuw nummeren zonder te sorteren (lost niets op).
 - **Waarom:** dezelfde club stond twee keer in de database (op acceptatie op 16 november 2026 "VVV" naast "VVV-Venlo" en "Dordrecht '90" naast "FC Dordrecht"), en het Wikidata-nummer is uniek, dus je kunt het niet bij de tweede club invullen.
   De opzet is die van het samenvoegen van personen (#977), en de regels zijn die van de importer.
   Een nummer is een club, zoals de importer ook twee artikelen als twee clubs ziet.

@@ -7,6 +7,8 @@ import { eq } from 'drizzle-orm'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import type * as clubMerge from '#src/beheer/club-merge'
+
 import { createAccount } from '#src/beheer/accounts'
 
 import ClubPage from './[club]/page'
@@ -14,10 +16,19 @@ import { submitMergeClubs } from './actions'
 import ListPage from './page'
 import MergePage, { metadata } from './samenvoegen/page'
 
-const { requireRole } = vi.hoisted(() => ({ requireRole: vi.fn() }))
+const { failMerge, requireRole } = vi.hoisted(() => ({ failMerge: { on: false }, requireRole: vi.fn() }))
 
 vi.mock('#src/database', () => ({ getDatabase: () => database }))
 vi.mock('#src/beheer/require-role', () => ({ requireRole }))
+vi.mock('#src/beheer/club-merge', async (importOriginal) => {
+  const original = await importOriginal<typeof clubMerge>()
+
+  return {
+    ...original,
+    mergeClubs: (...args: Parameters<typeof original.mergeClubs>) =>
+      failMerge.on ? Promise.reject(new Error('the database is gone')) : original.mergeClubs(...args),
+  }
+})
 vi.mock('next/navigation', () => ({
   notFound: () => {
     throw new Error('not found')
@@ -43,6 +54,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   requireRole.mockReset()
+  failMerge.on = false
   for (const table of ['audit_log', 'matches', 'club_names', 'clubs']) {
     await database.pool.query(`DELETE FROM ${table}`)
   }
@@ -184,6 +196,21 @@ describe('the action that merges two clubs', () => {
       sinds: '2002/04',
     })
     expect(await database.db.select().from(clubs)).toHaveLength(3)
+  })
+
+  it('answers a merge that failed with a message, keeps the season and writes nothing', async () => {
+    failMerge.on = true
+
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    expect(await submitMergeClubs(double, venlo, {}, form('2002/03'))).toEqual({
+      failure: 'De clubs zijn niet samengevoegd. Er is niets veranderd. Probeer het nog eens.',
+      sinds: '2002/03',
+    })
+    expect(error).toHaveBeenCalled()
+    error.mockRestore()
+    expect(await database.db.select().from(clubs)).toHaveLength(3)
+    expect(await database.db.select().from(auditLog)).toHaveLength(0)
   })
 
   it('sends two clubs with a number back to the page, which says so', async () => {
