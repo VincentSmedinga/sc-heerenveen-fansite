@@ -177,7 +177,7 @@
      */
     --hf-colour-text-missing: light-dark(var(--hf-colour-red-800), var(--hf-colour-red-300));
 
-    /* The sign that says something is missing (DataTable.Mark), under --hf-colour-text-missing. */
+    /* The fill of the sign that says something is missing (DataTable.Mark). */
     --hf-colour-background-missing: light-dark(var(--hf-colour-red-100), var(--hf-colour-red-900));
     --hf-colour-text-highlight: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-50));
     --hf-colour-text-on-header: var(--hf-colour-blue-50);
