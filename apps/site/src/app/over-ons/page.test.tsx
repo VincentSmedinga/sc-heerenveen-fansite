@@ -97,6 +97,7 @@ describe('the page Over ons', () => {
     expect(text).toContain(
       'Op Android: tik op het menu met de drie puntjes, kies Toevoegen aan startscherm en tik op Toevoegen.',
     )
+    expect(text.indexOf('Op Android')).toBeLessThan(text.indexOf('Op een iPhone'))
     expect(homeScreenHtml).toContain('<strong>Zet op beginscherm</strong>')
     expect(homeScreenHtml).toContain('<strong>Toevoegen aan startscherm</strong>')
     expect(withoutHeadingLinks(homeScreenHtml)).not.toMatch(/<(a|button|[ou]l|h3)[ >]/)

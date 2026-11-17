@@ -104,12 +104,12 @@ export default function AboutPage() {
             </Heading>
             <Text>Doe dit één keer en je opent de Fansite voortaan met één tik op je telefoon of tablet.</Text>
             <Text>
-              Op een iPhone: tik op <Strong>Deel</Strong>, kies <Strong>Zet op beginscherm</Strong> en tik op{' '}
-              <Strong>Voeg toe</Strong>.
-            </Text>
-            <Text>
               Op Android: tik op het menu met de <Strong>drie puntjes</Strong>, kies{' '}
               <Strong>Toevoegen aan startscherm</Strong> en tik op <Strong>Toevoegen</Strong>.
+            </Text>
+            <Text>
+              Op een iPhone: tik op <Strong>Deel</Strong>, kies <Strong>Zet op beginscherm</Strong> en tik op{' '}
+              <Strong>Voeg toe</Strong>.
             </Text>
           </Card>
         </Page.Section>
