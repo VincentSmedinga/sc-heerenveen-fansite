@@ -148,6 +148,7 @@ describe('the seed', () => {
       'https://www.ad.nl/voetbal/rss.xml',
       'https://www.gelderlander.nl/sport/rss.xml',
       'https://www.espn.nl/espn/rss/soccer/news',
+      'https://www.espn.nl/espn/rss/news',
       'https://www.rijnmond.nl/rss/sport.xml',
       'https://www.rtvnoord.nl/rss/sport.xml',
       'https://www.oogtv.nl/tag/fc-groningen/feed/',
@@ -383,6 +384,7 @@ describe('the seed', () => {
     expect(espn?.description?.length).toBeLessThanOrEqual(300)
     expect(espnFeeds.map((feed) => [feed.url, feed.filter])).toEqual([
       ['https://www.espn.nl/espn/rss/soccer/news', 'club'],
+      ['https://www.espn.nl/espn/rss/news', 'club'],
     ])
   })
 

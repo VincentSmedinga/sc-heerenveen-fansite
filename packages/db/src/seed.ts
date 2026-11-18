@@ -474,9 +474,12 @@ export const realSources = [
   },
   {
     description:
-      'Nederlandse nieuwssite van de sportzender ESPN. In de voetbalfeed staat het voetbalnieuws uit binnen- en buitenland; we tonen alleen de berichten waarvan de kop over sc Heerenveen gaat.',
+      'Nederlandse nieuwssite van de sportzender ESPN. We lezen twee feeds: de voetbalfeed en de algemene feed, met nieuws uit binnen- en buitenland en een paar andere sporten; we tonen alleen de berichten waarvan de kop over sc Heerenveen gaat.',
     domain: 'www.espn.nl',
-    feeds: [{ filter: 'club', url: 'https://www.espn.nl/espn/rss/soccer/news' }],
+    feeds: [
+      { filter: 'club', url: 'https://www.espn.nl/espn/rss/soccer/news' },
+      { filter: 'club', url: 'https://www.espn.nl/espn/rss/news' },
+    ],
     kind: 'news',
     name: 'ESPN',
     slug: 'espn',

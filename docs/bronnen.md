@@ -305,8 +305,15 @@ Al in het register (#311), met het filter `club`.
 
 - **Domein:** `www.espn.nl`
 - **Soort:** nieuws, voetbalsite van de sportzender ESPN, onderdeel van Disney
-- **Feed:** `https://www.espn.nl/espn/rss/soccer/news`
-  - Werkt: ja, RSS 2.0 met 25 berichten.
+- **Feeds:** `https://www.espn.nl/espn/rss/soccer/news` en, sinds 18 november 2026, `https://www.espn.nl/espn/rss/news`, allebei met het filter `club`.
+  - De algemene feed: 72 berichten over zes dagen (12 tot 18 november 2026), waarvan 70 over voetbal, 1 over NBA en 1 over NFL.
+    Hij had het bericht van 18 november 2026 over de club dat de voetbalfeed miste.
+    `/espn/rss/soccer/eredivisie/news` geeft dezelfde feed.
+    Dezelfde tijdzone `EST` en dezelfde regel gelden.
+    Het filter houdt de berichten over andere sporten weg, want het kijkt alleen naar de kop.
+  - De voetbalfeed heeft vier berichten van 17 november 2026 die de algemene feed niet heeft, dus we lezen ze allebei.
+    Een bericht in beide feeds heeft dezelfde link en komt één keer in het nieuws.
+  - De voetbalfeed: werkt: ja, RSS 2.0 met 25 berichten.
     Op 26 oktober 2026 (10:34 UTC) was het nieuwste van die dag en het oudste van 24 oktober 2026.
     Elk bericht heeft een kop, een beschrijving, een auteur, een link, een `guid` en een tijd.
     De berichten hebben geen afbeelding; alleen de feed zelf heeft een logo.
