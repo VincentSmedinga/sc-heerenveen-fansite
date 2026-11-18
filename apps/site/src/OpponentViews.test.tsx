@@ -28,6 +28,7 @@ const record = (
   goalsFor: number,
   goalsAgainst: number,
 ): PublicClubRecord => ({
+  country: null,
   drawn,
   goalsAgainst,
   goalsFor,
@@ -58,6 +59,30 @@ describe('ClubsCard', () => {
 
     expect(figures(5)).toEqual(['14', '4', '15'])
     expect(figures(6)).toEqual(['+5', '−8', '+8'])
+  })
+
+  it('shows the flag of the country before the name, as decoration in a link named by the club', () => {
+    render(
+      <ClubsCard
+        address="/tegenstanders"
+        choice="all"
+        query=""
+        records={records.map((entry, index) => ({ ...entry, country: index === 0 ? 'NL' : index === 1 ? 'DE' : null }))}
+        since="2022/23"
+      />,
+    )
+
+    const links = screen.getAllByRole('link')
+
+    expect(links.map((link) => link.textContent)).toEqual(['Sparta', 'Venlo', 'Zwolle'])
+    expect(links[0]?.getAttribute('href')).toBe('/tegenstanders/sparta')
+    expect(document.querySelectorAll('tbody img.hf-player-name-flag')).toHaveLength(2)
+    expect(
+      [...document.querySelectorAll('tbody img.hf-player-name-flag')].every((img) => img.getAttribute('alt') === ''),
+    ).toBe(true)
+    // The club without a country has an empty place of the same width, and no picture.
+    expect(document.querySelectorAll('tbody span.hf-player-name-flag')).toHaveLength(1)
+    expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual(['Sparta', 'Venlo', 'Zwolle'])
   })
 
   it('has the same columns with the choice Eredivisie', () => {

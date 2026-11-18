@@ -6567,3 +6567,15 @@
   De doelpunten en de toeschouwers zijn de verschillen waar Wikipedia iets aan heeft en die de importer leest.
   #974 liet zien dat ze voorkomen: de kopie van acceptatie van 16 november 2026 heeft twaalf wijzigingen, waarvan elf in de doelpunten.
 - **Alternatieven:** een bot of een knop die op Wikipedia schrijft, afgewezen omdat het besluit zegt dat de redactie het zelf doet; alle delen van een wedstrijd, afgewezen omdat de rest zelden voorkomt en een eigen issue is.
+
+## De clubs in Alle tegenstanders tonen de vlag van hun land
+
+- **Datum:** 18 november 2026
+- **Besluit:** elke club in de kaart Alle tegenstanders heeft de vlag van haar land (`clubs.country`, #1264) voor haar naam, zoals een speler: `PlayerName` met de clubnaam als naam, en de vlag als versiering in de link.
+  De naam van de link blijft de naam van de club.
+  Een club zonder land krijgt geen vlag maar een lege plek van dezelfde breedte, zodat de namen onder elkaar beginnen.
+  `listClubRecords` geeft het land als `country` mee, en `null` voor een club zonder land.
+- **Waarom:** de vlag laat in één oogopslag zien welke tegenstanders uit het buitenland komen, en de vlaggen en de landen bestaan al.
+  De vlag is versiering in de link, zoals bij een speler met een pagina, dus de schermlezer leest de naam van de club en niet twee keer het land.
+  De tabel sorteert op de naam en de cijfers, dus de vlag schuift niet mee.
+- **Alternatieven:** alleen buitenlandse clubs een vlag geven (dan valt een Nederlandse club zonder land samen met een club waarvan we het land niet weten); `CountryName` (dat toont de naam van het land, niet van de club).

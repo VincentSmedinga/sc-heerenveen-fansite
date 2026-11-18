@@ -6,7 +6,7 @@
 @layer hf.components {
   .hf-country-name {
     align-items: baseline;
-    column-gap: var(--hf-space-xs);
+    column-gap: var(--hf-space-s);
     display: inline-flex;
   }
 

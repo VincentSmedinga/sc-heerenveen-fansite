@@ -575,6 +575,7 @@ describe('upcomingOf', () => {
 describe('topPointsOf', () => {
   /** A record with the results given, the goals do not matter for the average. */
   const record = (name: string, won: number, drawn: number, lost: number): PublicClubRecord => ({
+    country: null,
     drawn,
     goalsAgainst: 0,
     goalsFor: 0,
@@ -661,6 +662,7 @@ describe('topPointsOf', () => {
 
 describe('hardestOf', () => {
   const record = (name: string, won: number, drawn: number, lost: number): PublicClubRecord => ({
+    country: null,
     drawn,
     goalsAgainst: 0,
     goalsFor: 0,
