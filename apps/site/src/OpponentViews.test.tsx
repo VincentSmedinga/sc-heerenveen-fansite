@@ -146,9 +146,7 @@ describe('TopPointsCard', () => {
     render(card())
 
     expect(legendsOf(document.body.innerHTML)).toEqual(['punten per wedstrijd, gespeeld'])
-    expect(
-      screen.getByText('Alle 22 gespeelde wedstrijden sinds 2022/23, tegen clubs met minstens 5 gespeelde wedstrijden'),
-    ).toBeTruthy()
+    expect(screen.getByText('Sinds 2022/23, tegen clubs met minstens 5 gespeelde wedstrijden')).toBeTruthy()
   })
 
   it('says one sentence, and shows no table, when no club has five played matches', () => {
@@ -191,7 +189,7 @@ describe('HardestCard', () => {
       }),
     ).toBeTruthy()
     expect(legendsOf(document.body.innerHTML)).toEqual(['punten per wedstrijd, gespeeld'])
-    expect(screen.getByText(/^Alle 50 gespeelde wedstrijden sinds 2022\/23, tegen clubs met minstens 5/)).toBeTruthy()
+    expect(screen.getByText(/^Sinds 2022\/23, tegen clubs met minstens 5/)).toBeTruthy()
   })
 
   it('follows the switch: Eredivisie in the caption and in every link', () => {

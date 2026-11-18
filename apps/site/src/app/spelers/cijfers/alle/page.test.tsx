@@ -225,7 +225,7 @@ describe('the page with all seasons, /spelers/cijfers/alle', () => {
   })
 
   it('says for how many matches we do not know the scorers', async () => {
-    expect(await render()).toContain('Van 1 wedstrijd kennen we de doelpuntenmakers niet.')
+    expect(await render()).toMatch(/De doelpuntenmakers van \d+ van de \d+ gespeelde wedstrijden/)
   })
 
   it('has the soft cards Hattricks and Strafschoppen benut in the side column, not Alle spelers, Assists or Minuten', async () => {
@@ -387,7 +387,7 @@ describe('the page with all seasons, /spelers/cijfers/alle', () => {
     expect(country).toContain('Nederland')
     expect(country).toContain('Het land van de doelpuntenmaker.')
     // The 79 goals of the other scorers have no person we know.
-    expect(country).toContain('Op basis van 8 van de 87 doelpunten')
+    expect(country).toContain('8 van de 87 doelpunten')
 
     expect(await render({ competitie: 'beker' })).not.toContain('id="doelpunten-per-linie"')
   })

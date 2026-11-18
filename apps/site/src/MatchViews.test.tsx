@@ -3,7 +3,7 @@ import type { PublicMatch } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
-import { EditorSources, imageCredit, MatchLine, MatchLines, playedLine, SourceCredit } from './MatchViews'
+import { EditorSources, imageCredit, MatchLine, MatchLines, SourceCredit } from './MatchViews'
 import { OpponentsCredit } from './OpponentViews'
 
 const textOf = (element: Parameters<typeof renderToStaticMarkup>[0]) =>
@@ -101,14 +101,6 @@ describe('OpponentsCredit', () => {
 
   it('is nothing for Wikipedia without a page', () => {
     expect(credit({})).toBe('')
-  })
-})
-
-describe('playedLine', () => {
-  it('says how many matches the card counts, without a base or a season', () => {
-    expect(playedLine(40)).toBe('Alle 40 gespeelde wedstrijden')
-    expect(playedLine(2)).toBe('Alle 2 gespeelde wedstrijden')
-    expect(playedLine(1)).toBe('1 gespeelde wedstrijd')
   })
 })
 

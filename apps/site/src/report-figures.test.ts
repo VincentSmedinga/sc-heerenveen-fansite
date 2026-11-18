@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { basedOnSentence, figureRows, rankedPlaces } from './report-figures'
+import { figureRows, rankedPlaces } from './report-figures'
 import { reportPlayer, reportPlayers } from './test-report-figures'
 
 describe('rankedPlaces', () => {
@@ -109,16 +109,5 @@ describe('figureRows', () => {
       substitutedOff: 0,
       yellow: 0,
     })
-  })
-})
-
-describe('basedOnSentence', () => {
-  it('says how many of the played matches the figures rest on', () => {
-    expect(basedOnSentence({ known: 12, played: 14 })).toBe('Op basis van 12 van de 14 gespeelde wedstrijden.')
-  })
-
-  it('says "alle" when every played match has a report, and names the only match', () => {
-    expect(basedOnSentence({ known: 14, played: 14 })).toBe('Op basis van alle 14 gespeelde wedstrijden.')
-    expect(basedOnSentence({ known: 1, played: 1 })).toBe('Op basis van de enige gespeelde wedstrijd.')
   })
 })

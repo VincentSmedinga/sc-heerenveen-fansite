@@ -28,7 +28,7 @@ describe('PlayerChartsCards', () => {
     expect(html.replaceAll(/\u2060/gu, '').replaceAll('\u00A0', ' ')).toContain(
       '1–15: 12 · 16–30: 10 · 31–45: 10 · 46–60: 6 · 61–75: 5 · 76–90: 7',
     )
-    expect(html).toContain('Van 2 van de 52 kennen we de minuut niet.')
+    expect(html).toContain('2 van de 52 doelpunten zonder minuut')
   })
 
   it('puts every card on the soft surface of the side column', () => {

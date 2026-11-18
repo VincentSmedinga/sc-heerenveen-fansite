@@ -449,11 +449,11 @@ describe('the card Bijzondere doelpunten on /spelers/cijfers', () => {
 
     expect(all).toContain('HattricksBekerman')
     expect(all).toContain('1 van de 4 doelpunten')
-    expect(all).toContain('Alle 2 gespeelde wedstrijden')
+    expect(all).not.toContain('Alle 2 gespeelde wedstrijden')
     expect(league).not.toContain('Bekerman')
     expect(league).toContain('HattricksNog geen')
     expect(league).toContain('0 van de 1 doelpunt')
-    expect(league).toContain('1 gespeelde wedstrijd')
+    expect(league).not.toContain('1 gespeelde wedstrijd')
   })
 
   it('loads nothing from another domain and has no link outside the page', async () => {

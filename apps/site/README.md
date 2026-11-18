@@ -488,7 +488,7 @@ Bij de beste bron `verslag` (een seizoen met alleen spelers uit onze verslagen) 
 De spelers komen uit `listSeasonPlayers` in `@fansite/db/queries`, in de volgorde van het rugnummer en daarna de zoekterm en de naam.
 De werkbalk van `/spelers` heeft alleen de seizoenskiezer, zonder keuze van competitie, en `/spelers` leest `?competitie=` niet.
 De zijkolom begint met de zachte kaart "De selectie in het kort" (`SquadSummaryCard` in `src/SquadSummaryCard.tsx`, de cijfers uit `getSquadSummary` in `src/squad-summary.ts`): het aantal spelers van de kaart Selectie, het aantal landen en, alleen in het lopende seizoen, de gemiddelde, jongste en oudste leeftijd (`ageOf`, alleen bij minstens drie kwart van de spelers).
-Mist er iets, dan staat er onder de regels "Op basis van X van de Y spelers."; kent de pagina de selectie niet, dan is er geen kaart, en een geboortedatum verlaat de server niet.
+Mist er iets, dan staat er onder de regels "X van de Y spelers" (zie `DataLine`); kent de pagina de selectie niet, dan is er geen kaart, en een geboortedatum verlaat de server niet.
 Daaronder staan vier kleine zachte kaarten (`src/PlayersTopCards.tsx`, #1286): Topscorers, Assists, De nul gehouden en Minuten, met de bronvermelding erna.
 De drie kaarten met een ranglijst tonen de eerste drie plaatsen als een regel per plaats (`BarList`): de naam of namen, het getal en een balk.
 Delen drie of meer spelers een plaats, dan staat er "4 spelers" zonder namen (`src/players-top.ts`).
@@ -642,7 +642,7 @@ Ze heeft acht delen:
   De twee staan naast elkaar in een `DonutChart.Group`, ook op een telefoon.
   Het diagram is verborgen voor een schermlezer, die direct na de diagrammen de zin hoort "Doelpunten: 45 gemaakt, 31 tegen.".
   Onder de tabellen van de uitslagen staat een tabel met de competities van de getelde wedstrijden en hun aantal (`competitionCounts`), met de meeste wedstrijden bovenaan en bij gelijk aantal in de volgorde van de site; de schakelaar bepaalt de rijen.
-  Onder de kaart staat alleen het aantal wedstrijden, "Alle 12 gespeelde wedstrijden", zonder "sinds" en zonder "in de Eredivisie".
+  Onder de kaart staat niets over het aantal wedstrijden: volledige gegevens zijn stil (zie `DataLine`).
   Een club zonder gespeelde wedstrijd krijgt de kaart niet.
 - De kaart "De plek van … en de onze" op het zachte vlak, onder "Hoe vaak welke uitslag" (`ClubPlacesCard` in `src/OpponentViews.tsx`): een tabel met per seizoen waarin we allebei in de Eredivisie speelden onze eindplek en die van de club, de nieuwste eerst.
   Onze plek komt uit `getFinalPlaces`, die van de club uit `listStandingsPlaces`, gekoppeld via de namen van de club (`clubKeysOf` en `clubPlacesOf` in `src/opponents.ts`), dus ook onder een oude naam.

@@ -1,6 +1,6 @@
 import { Card, Heading, List, ShortFact, Text } from '@fansite/design-system'
 
-import { basisOf } from './matchBasis'
+import { DataLine, incompleteMatches } from './DataLine'
 import { penaltiesCard } from './matchShortcuts'
 
 /**
@@ -45,7 +45,7 @@ export function PenaltiesCard({
         </List>
       )}
       <Text appearance="meta">We kennen alleen de benutte strafschoppen.</Text>
-      <Text appearance="meta">{basisOf(known, played)}</Text>
+      <DataLine limits={[incompleteMatches(known, played)]} />
     </Card>
   )
 }

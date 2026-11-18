@@ -1,6 +1,6 @@
 import { Card, DataTable, Heading, tableColumns, tableLegend, Text } from '@fansite/design-system'
 
-import { basisOf } from './matchBasis'
+import { DataLine, incompleteMatches } from './DataLine'
 import { refereesCard } from './matchShortcuts'
 import { textSortName } from './player-name'
 import { pointsPerMatchOf, type RefereeRow } from './referees'
@@ -71,7 +71,7 @@ export function RefereesCard({
       {top && (
         <Text appearance="meta">{`${numberFormat.format(referees)} scheidsrechters, de top 5 op punten per wedstrijd.`}</Text>
       )}
-      <Text appearance="meta">{basisOf(known, played)}</Text>
+      <DataLine limits={[incompleteMatches(known, played)]} />
     </Card>
   )
 }

@@ -41,10 +41,10 @@ describe('RefereesCard', () => {
 
   it('says how many of the played matches it counts', () => {
     expect(renderToStaticMarkup(<RefereesCard known={80} played={85} referees={2} rows={rows} />)).toContain(
-      'Op basis van 80 van de 85 gespeelde wedstrijden.',
+      '80 van de 85 gespeelde wedstrijden',
     )
-    expect(renderToStaticMarkup(<RefereesCard known={85} played={85} referees={2} rows={rows} />)).toContain(
-      'Op basis van alle 85 gespeelde wedstrijden.',
+    expect(renderToStaticMarkup(<RefereesCard known={85} played={85} referees={2} rows={rows} />)).not.toContain(
+      'gespeelde wedstrijden',
     )
   })
 

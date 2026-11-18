@@ -146,7 +146,7 @@ describe('the page of an earlier season, /wedstrijden/cijfers/2025-26', () => {
       expect(card).not.toContain('hf-mark-row')
       expect(card).not.toContain('<ul')
       expect(card).not.toContain('Vorig Seizoen FC')
-      expect(card).toContain('gespeelde wedstrijd')
+      expect(card).not.toContain('gespeelde wedstrijd')
     })
 
     it('names the season in the caption and not "this season"', async () => {

@@ -90,7 +90,7 @@ describe('the cards with the figures of the match reports on /spelers/cijfers', 
     for (const id of ['alle-spelers', 'assists', 'invallers-die-scoorden', 'minuten']) {
       const card = cardOf(html, id)
 
-      expect(plain(card)).toContain('Op basis van 12 van de 14 gespeelde wedstrijden.')
+      expect(plain(card)).toContain('12 van de 14 gespeelde wedstrijden')
       expect(plain(card)).not.toContain('Bron: ')
     }
   })
@@ -139,7 +139,7 @@ describe('the cards with the figures of the match reports on /spelers/cijfers', 
     expect(plain(html)).toContain('Nog geen invaller scoorde.')
     expect(html).not.toContain('<table')
     expect(html).not.toContain('hf-card-shareable')
-    expect(plain(html)).toContain('Op basis van 12 van de 14 gespeelde wedstrijden.')
+    expect(plain(html)).toContain('12 van de 14 gespeelde wedstrijden')
   })
 
   it('has the table with every player of the reports, with a caption and column headers that have a scope, and the bench player with zeros', async () => {
@@ -193,7 +193,7 @@ describe('the cards with the figures of the match reports on /spelers/cijfers', 
     const html = await render({ competitie: 'eredivisie' })
 
     expect(plain(cardOf(html, 'assists'))).toContain('Er is nog geen assist in de verslagen.')
-    expect(plain(cardOf(html, 'assists'))).toContain('Op basis van 0 van de 12 gespeelde wedstrijden.')
+    expect(plain(cardOf(html, 'assists'))).toContain('0 van de 12 gespeelde wedstrijden')
     expect(cardOf(html, 'assists')).not.toContain('hf-card-shareable')
   })
 

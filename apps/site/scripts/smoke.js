@@ -1174,7 +1174,7 @@ await withEmptyDatabase((database) =>
     )
     // The made-up season has finished reports with a formation, so the card Formaties counts
     // them (#1216).
-    assert.match(statisticsHtml, /aria-labelledby="formaties".*Op basis van .* gespeelde wedstrijden\./s)
+    assert.match(statisticsHtml, /aria-labelledby="formaties"/)
     assert.ok(statisticsHtml.indexOf('aria-label="Kerngetallen"') < statisticsHtml.indexOf('id="competitie"'))
     assert.match(
       statisticsHtml,
@@ -1283,7 +1283,8 @@ await withEmptyDatabase((database) =>
       /<caption class="hf-visually-hidden">De reeksen van sc Heerenveen in de Eredivisie, de KNVB Beker en de play-offs dit seizoen<\/caption>/,
     )
     assert.match(statisticsHtml, /<th scope="row">Zonder tegendoelpunt<\/th>/)
-    assert.match(statisticsHtml, /(?:Alle \d+|1) gespeelde wedstrijd/)
+    // Complete data say nothing: no card says how many matches it counts when it counts all.
+    assert.doesNotMatch(statisticsHtml, /Alle \d+ gespeelde wedstrijden/)
     // The card of home and away: the table with a column for each.
     assert.match(
       statisticsHtml,
@@ -1317,7 +1318,7 @@ await withEmptyDatabase((database) =>
     )
     assert.match(
       statisticsHtml,
-      /id="verloop-van-het-seizoen".*?Alleen de Eredivisie<\/p><\/section>.*?id="hoe-de-wedstrijden-verlopen".*?Alleen de Eredivisie<\/p><\/section><\/div><\/div><\/section>/s,
+      /id="verloop-van-het-seizoen".*?Alleen de Eredivisie(?:, [^<]*)?<\/p><\/section>.*?id="hoe-de-wedstrijden-verlopen".*?Alleen de Eredivisie(?:, [^<]*)?<\/p><\/section><\/div><\/div><\/section>/s,
     )
     // Spelers is an item of the menu of its own after Wedstrijden, and Cijfers is not one.
     assert.match(
@@ -1559,7 +1560,7 @@ await withEmptyDatabase((database) =>
         '#bijzondere-doelpunten',
       ],
     )
-    assert.match(figuresHtml, /Op basis van (?:alle )?\d+ (?:van de \d+ )?gespeelde wedstrijden?\./)
+    assert.doesNotMatch(figuresHtml, /Op basis van|Alle \d+ gespeelde wedstrijden/)
     assert.doesNotMatch(figuresHtml, /Bron: sc Heerenveen Fansite/)
     assert.doesNotMatch(figuresHtml, /id="selectie"|id="sinds-1990-91"/)
     // The list is the white card of the main column, and the sidebar has the soft cards.
@@ -1613,7 +1614,7 @@ await withEmptyDatabase((database) =>
     assert.match(facts[1][1], /Demo.*Proefman/)
     assert.match(facts[2][1], /^1 van de \d+ doelpunten$/)
     assert.match(facts[3][1], /^1 door de tegenstander · 0 door ons$/)
-    assert.match(specialCard, /Alle \d+ gespeelde wedstrijden/)
+    assert.doesNotMatch(specialCard, /Alle \d+ gespeelde wedstrijden/)
     // The column doelpunten per wedstrijd is only there when the matches of every scorer are
     // known and agree with the goals. The made-up season has a played match of the play-offs,
     // which the squad table has no figures for, so all matches has no column, and the
@@ -1721,7 +1722,7 @@ await withEmptyDatabase((database) =>
     assert.match(opponentsHtml, /<span class="hf-visually-hidden">punten<\/span>/)
     assert.match(opponentsHtml, /<span class="hf-visually-hidden">doelsaldo<\/span>/)
     assert.match(opponentsHtml, /punten(?:<!-- -->)? \(3 per winst, 1 per gelijkspel\).*?doelsaldo/)
-    assert.match(opponentsHtml, /Alle \d+ gespeelde wedstrijden sinds \d{4}\/\d{2}/)
+    assert.match(opponentsHtml, /Sinds \d{4}\/\d{2}/)
     // The sidebar has the top 10 of the average points: a table for the clubs with five played
     // matches, or the sentence when there is none, and the credit.
     assert.match(opponentsHtml, /<h2[^>]*id="gemiddeld-resultaat">Gemiddeld resultaat<\/h2>/)
@@ -1862,7 +1863,7 @@ await withEmptyDatabase((database) =>
     // Voorbeeld United is only in the table of the season that is going on, so it has no season
     // in common with us that is over and no card with the places.
     assert.doesNotMatch(stadiumClub, /id="plek-in-de-competitie"/)
-    assert.match(clubHtml, /(?:1 gespeelde wedstrijd|Alle \d+ gespeelde wedstrijden) sinds \d{4}\/\d{2}/)
+    assert.match(clubHtml, /Sinds \d{4}\/\d{2}/)
     assert.match(clubHtml, closedWikipediaCredit)
     assert.match(
       clubHtml,
