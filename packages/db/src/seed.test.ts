@@ -566,7 +566,8 @@ describe('the seed', () => {
   it.each([
     {
       apple: 'https://podcasts.apple.com/nl/podcast/omroep-abe/id1589027848',
-      description: 'Podcast van de Leeuwarder Courant.',
+      description:
+        'Omroep Abe is de podcast over SC Heerenveen van de Leeuwarder Courant. Clubwatcher Sander de Vries bespreekt met oud-spelers Gerald Sibon, Geert Arend Roorda en Henrico Drost wekelijks de actualiteiten en achtergronden bij de club.',
       domain: 'omny.fm',
       feed: 'https://www.omnycontent.com/d/playlist/fdd7ab40-270d-4a1e-a257-acd200da1324/6470c909-db21-4ceb-a53d-b2940145c1ee/06a49ae8-2226-44c4-bbf0-b2940145c83c/podcast.rss',
       name: 'Omroep Abe',
@@ -575,7 +576,7 @@ describe('the seed', () => {
     },
     {
       apple: 'https://podcasts.apple.com/nl/podcast/radio-camataru/id1436580634',
-      description: 'Supporterspodcast.',
+      description: 'Wekelijkse supporterspodcast over sc Heerenveen!',
       domain: 'radiocamataru.podbean.com',
       feed: 'https://feed.podbean.com/radiocamataru/feed.xml',
       name: 'Radio Camataru',
@@ -605,8 +606,8 @@ describe('the seed', () => {
         spotifyUrl: spotify,
       })
       expect(podcast?.consentStatus).not.toBe('given')
-      // One short sentence of our own, as for every other source (see _De pagina 'Onze bronnen'
-      // is compact_ in docs/beslissingen/redactie.md).
+      // The text of the maker from the channel of the feed, as it is written but without the
+      // HTML.
       expect(podcast?.description).toBe(description)
       expect(podcast?.description?.length).toBeLessThanOrEqual(300)
       expect(podcast?.description).not.toMatch(/[<>]/u)
@@ -654,17 +655,6 @@ describe('the seed', () => {
       'De Gelderlander',
     ])
     expect(testSources.some((source) => 'publisher' in source || 'local' in source)).toBe(false)
-  })
-
-  it('gives every real source a description of one short sentence, in plain words', () => {
-    for (const source of realSources) {
-      const description = 'description' in source ? source.description : undefined
-
-      expect(description, source.name).toBeTruthy()
-      // One sentence: one full stop at the end.
-      expect(description, source.name).toMatch(/^[^.!?]+[.]$/u)
-      expect(description?.length, source.name).toBeLessThanOrEqual(64)
-    }
   })
 
   it('gives every source that can have headlines a slug of its own, and the forum none', () => {

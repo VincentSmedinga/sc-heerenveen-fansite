@@ -940,7 +940,7 @@ await withEmptyDatabase((database) =>
     const sourcesHtml = await sources.text()
     assert.equal(sources.status, 200)
     assert.match(sourcesHtml, /<h1[^>]*>Onze bronnen<\/h1>/)
-    assert.match(sourcesHtml, /Leeuwarder Courant/)
+    assert.match(sourcesHtml.replaceAll(/<[^>]*>/g, ''), /Leeuwarder Courant/)
     assert.match(sourcesHtml, /<h2[^>]*id="wedstrijden-en-spelers">/)
     assert.doesNotMatch(sourcesHtml, /Testkrant|Uitgezette testbron/)
 
@@ -2027,7 +2027,7 @@ await withEmptyDatabase((database) =>
     const sources = await fetch(`${origin}/bronnen`)
     const sourcesHtml = await sources.text()
     assert.equal(sources.status, 200)
-    assert.match(sourcesHtml, /Leeuwarder Courant/)
+    assert.match(sourcesHtml.replaceAll(/<[^>]*>/g, ''), /Leeuwarder Courant/)
     assert.doesNotMatch(sourcesHtml, /Testkrant|We hebben nog geen bronnen/)
 
     // The feed links to production, not to acceptance.

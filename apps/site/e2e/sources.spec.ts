@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 // The unit tests can't see this: it needs a browser that wraps the lines of each source at the
 // width of a small phone, with the fonts and the styles of the real page.
 test.describe('the sources on /bronnen', () => {
-  test('are one short sentence each, at most three lines high at 320 px, and the page doesn’t scroll sideways', async ({
+  test('are only a name, at most three lines high at 320 px, and the page doesn’t scroll sideways', async ({
     page,
   }) => {
     await page.setViewportSize({ height: 800, width: 320 })
@@ -24,6 +24,11 @@ test.describe('the sources on /bronnen', () => {
     for (const row of rows) {
       expect(row.height, row.text).toBeLessThanOrEqual(row.lineHeight * 3 + 1)
     }
+
+    // Only the name: no description under it.
+    const descriptions = await page.locator('[aria-labelledby="nieuws"] li p').count()
+
+    expect(descriptions).toBe(0)
 
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,

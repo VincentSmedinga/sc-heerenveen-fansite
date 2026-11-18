@@ -887,10 +887,10 @@ De teller van het bezoek telt `/wedstrijden/zoeken` zonder de vraag; de pagina i
 
 ## De bronnen
 
-`/bronnen` toont de bronnen die aanstaan, per soort, elk met een link naar de website en de beschrijving uit het register.
-Die beschrijving is één korte zin: wat de bron is.
+`/bronnen` toont de bronnen die aanstaan, per soort, elk alleen als naam met een link naar de website.
+Een beschrijving staat er niet bij: bezoekers kennen de bronnen.
 In een kaart staan eerst de Friese bronnen, dan de landelijke en dan de rest, elk in de volgorde van de naam (`regionRank` in `src/register.ts`, met de domeinen als lijst in dat bestand).
-De test in `e2e/sources.spec.ts` meet dat een bron op 320 pixels hoogstens drie regels hoog is.
+De test in `e2e/sources.spec.ts` meet dat een bron op 320 pixels hoogstens drie regels hoog is en dat er geen beschrijving staat.
 De koppen van de soorten staan in `src/register.ts`.
 De server bewaart de lijst een uur (`src/sources.ts`), dus een wijziging in het register staat binnen een uur op de pagina.
 De pagina's delen één verbinding met de database (`src/database.ts`).

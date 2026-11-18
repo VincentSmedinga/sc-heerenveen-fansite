@@ -116,14 +116,14 @@ export const Loose = meta.story({
       <List loose>
         <List.Item>
           <Link href="#testkrant">Testkrant</Link>
-          <Text>Verzonnen dagblad.</Text>
+          <Text>Een verzonnen dagblad om de site mee te testen. Het schrijft elke dag over sc Heerenveen.</Text>
         </List.Item>
         <List.Item>
           <Link href="#proefforum">Proefforum</Link>
         </List.Item>
         <List.Item>
           <Link href="#testpodcast">Testpodcast</Link>
-          <Text>Verzonnen podcast.</Text>
+          <Text>Een verzonnen podcast waarin supporters na elke wedstrijd napraten.</Text>
         </List.Item>
       </List>
       <Text>Onder de lijst staat evenveel ruimte als onder een gewone lijst.</Text>

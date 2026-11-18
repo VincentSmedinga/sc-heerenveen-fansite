@@ -52,7 +52,7 @@ import { seedStaff } from './staff-seed.ts'
  */
 export const testSources = [
   {
-    description: 'Verzonnen dagblad.',
+    description: 'Een verzonnen dagblad om de site mee te testen. Het schrijft elke dag over sc Heerenveen.',
     domain: 'testkrant.test',
     kind: 'news',
     name: 'Testkrant',
@@ -61,7 +61,7 @@ export const testSources = [
   {
     consentNote: 'Verzonnen: toestemming gevraagd, nog geen antwoord.',
     consentStatus: 'asked',
-    description: 'Verzonnen nieuwssite.',
+    description: 'Een verzonnen nieuwssite met verslagen van elke wedstrijd.',
     domain: 'proefnieuws.test',
     kind: 'news',
     name: 'Proefnieuws',
@@ -73,7 +73,7 @@ export const testSources = [
     consentDate: '2026-01-15',
     consentNote: 'Verzonnen: intro tot 200 tekens en foto, zonder insluiten.',
     consentStatus: 'given',
-    description: 'Verzonnen regionale krant.',
+    description: 'Een verzonnen regionale krant, met nieuws over de club en de spelers.',
     domain: 'voorbeeldkrant.test',
     introMaxLength: 200,
     kind: 'news',
@@ -86,7 +86,7 @@ export const testSources = [
     consentDate: '2026-02-03',
     consentNote: 'Verzonnen: alleen insluiten van afleveringen.',
     consentStatus: 'given',
-    description: 'Verzonnen podcast.',
+    description: 'Een verzonnen podcast waarin supporters na elke wedstrijd napraten.',
     domain: 'testpodcast.test',
     kind: 'podcast',
     name: 'Testpodcast',
@@ -95,7 +95,7 @@ export const testSources = [
   },
   {
     applePodcastsUrl: 'https://apple.test/podcast/proefpodcast',
-    description: 'Verzonnen jeugdpodcast.',
+    description: 'Een verzonnen podcast over de jeugd van de club, met alleen een link naar Apple Podcasts.',
     domain: 'proefpodcast.test',
     kind: 'podcast',
     name: 'Proefpodcast',
@@ -170,7 +170,8 @@ export const testSources = [
  */
 export const realSources = [
   {
-    description: 'Dagblad voor Friesland.',
+    description:
+      'Dagblad uit Leeuwarden voor Friesland. Op de sportpagina’s staan verslagen, interviews en columns over sc Heerenveen.',
     domain: 'www.lc.nl',
     feeds: ['https://www.lc.nl/sport/sc-heerenveen/rss/', { filter: 'club', url: 'https://www.lc.nl/sport/rss/' }],
     kind: 'news',
@@ -178,7 +179,8 @@ export const realSources = [
     slug: 'leeuwarder-courant',
   },
   {
-    description: 'Landelijk voetbaltijdschrift.',
+    description:
+      'Landelijk voetbaltijdschrift en nieuwssite over het betaalde voetbal. De feed bevat de berichten, analyses en video’s over sc Heerenveen; een deel daarvan staat achter een betaalmuur.',
     domain: 'www.vi.nl',
     feeds: ['https://www.vi.nl/feed/news.xml?tag=sc-heerenveen'],
     kind: 'news',
@@ -186,7 +188,8 @@ export const realSources = [
     slug: 'voetbal-international',
   },
   {
-    description: 'Landelijk dagblad.',
+    description:
+      'Landelijk dagblad uit Amsterdam. Onder het onderwerp sc Heerenveen staan verslagen, nieuws over transfers en interviews; een deel daarvan staat achter een betaalmuur.',
     domain: 'www.telegraaf.nl',
     feeds: [
       'https://www.telegraaf.nl/tag/sc-heerenveen/rss/',
@@ -198,7 +201,8 @@ export const realSources = [
     slug: 'de-telegraaf',
   },
   {
-    description: 'Dagblad uit Groningen.',
+    description:
+      'Dagblad uit Groningen voor Groningen en Drenthe. In de sportrubriek staan verslagen en nieuws over clubs uit het noorden; we tonen alleen wat over sc Heerenveen gaat.',
     domain: 'www.dvhn.nl',
     feeds: [
       { filter: 'club', url: 'https://www.dvhn.nl/sport/rss/' },
@@ -209,7 +213,8 @@ export const realSources = [
     slug: 'dagblad-van-het-noorden',
   },
   {
-    description: 'Friese krant uit Leeuwarden.',
+    description:
+      'Dagblad uit Leeuwarden voor Friesland. In de sportrubriek staan verslagen en interviews over Friese clubs; we tonen alleen wat over sc Heerenveen gaat.',
     domain: 'www.frieschdagblad.nl',
     feeds: [{ filter: 'club', url: 'https://www.frieschdagblad.nl/sport/rss/' }],
     kind: 'news',
@@ -217,7 +222,8 @@ export const realSources = [
     slug: 'friesch-dagblad',
   },
   {
-    description: 'Dagblad uit Limburg.',
+    description:
+      'Dagblad uit Limburg. In de sportrubriek staat nieuws over voetbal in het hele land; we tonen alleen wat over sc Heerenveen gaat.',
     domain: 'www.limburger.nl',
     feeds: [
       { filter: 'club', url: 'https://www.limburger.nl/sport/rss/' },
@@ -228,7 +234,8 @@ export const realSources = [
     slug: 'de-limburger',
   },
   {
-    description: 'Dagblad uit Noord-Holland.',
+    description:
+      'Dagblad uit Noord-Holland. In de sportrubriek staat nieuws over voetbal, ook over AZ; we tonen alleen wat over sc Heerenveen gaat.',
     domain: 'www.noordhollandsdagblad.nl',
     feeds: [
       { filter: 'club', url: 'https://www.noordhollandsdagblad.nl/sport/rss/' },
@@ -239,7 +246,8 @@ export const realSources = [
     slug: 'noordhollands-dagblad',
   },
   {
-    description: 'Dagblad voor het Gooi.',
+    description:
+      'Regionaal dagblad voor het Gooi en Eemland. In de sportrubriek staat nieuws over voetbal; we tonen alleen wat over sc Heerenveen gaat.',
     domain: 'www.gooieneemlander.nl',
     feeds: [{ filter: 'club', url: 'https://www.gooieneemlander.nl/sport/rss/' }],
     kind: 'news',
@@ -247,7 +255,8 @@ export const realSources = [
     slug: 'de-gooi-en-eemlander',
   },
   {
-    description: 'Dagblad uit Haarlem.',
+    description:
+      'Regionaal dagblad voor Haarlem en omstreken. In de sportrubriek staat nieuws over voetbal; we tonen alleen wat over sc Heerenveen gaat.',
     domain: 'www.haarlemsdagblad.nl',
     feeds: [{ filter: 'club', url: 'https://www.haarlemsdagblad.nl/sport/rss/' }],
     kind: 'news',
@@ -255,7 +264,8 @@ export const realSources = [
     slug: 'haarlems-dagblad',
   },
   {
-    description: 'Dagblad uit Leiden.',
+    description:
+      'Regionaal dagblad voor Leiden en omstreken. In de sportrubriek staat nieuws over voetbal; we tonen alleen wat over sc Heerenveen gaat.',
     domain: 'www.leidschdagblad.nl',
     feeds: [{ filter: 'club', url: 'https://www.leidschdagblad.nl/sport/rss/' }],
     kind: 'news',
@@ -263,7 +273,8 @@ export const realSources = [
     slug: 'leidsch-dagblad',
   },
   {
-    description: 'Dagblad uit IJmuiden.',
+    description:
+      'Regionaal dagblad voor IJmuiden en omstreken. In de sportrubriek staat nieuws over voetbal; we tonen alleen wat over sc Heerenveen gaat.',
     domain: 'www.ijmuidercourant.nl',
     feeds: [{ filter: 'club', url: 'https://www.ijmuidercourant.nl/sport/rss/' }],
     kind: 'news',
@@ -271,7 +282,8 @@ export const realSources = [
     slug: 'ijmuider-courant',
   },
   {
-    description: 'Dagblad uit Zwolle.',
+    description:
+      'Regionaal dagblad voor Overijssel en Gelderland rond Zwolle en Apeldoorn. In de sportfeed staat het sportnieuws van de regio, ook veel achter de betaalmuur; we tonen de berichten over sc Heerenveen en, rond een wedstrijd, over de tegenstander.',
     domain: 'www.destentor.nl',
     feeds: [{ filter: 'club', url: 'https://www.destentor.nl/sport/rss.xml' }],
     followedClubs: ['PEC Zwolle', 'Go Ahead Eagles'],
@@ -282,7 +294,8 @@ export const realSources = [
     slug: 'de-stentor',
   },
   {
-    description: 'Dagblad uit Noord-Brabant.',
+    description:
+      'Regionaal dagblad voor Noord-Brabant rond Breda, Tilburg en Den Bosch. In de sportfeed staat het sportnieuws van de regio, ook veel achter de betaalmuur; we tonen de berichten over sc Heerenveen en, rond een wedstrijd, over de tegenstander.',
     domain: 'www.bd.nl',
     feeds: [{ filter: 'club', url: 'https://www.bd.nl/sport/rss.xml' }],
     followedClubs: ['NAC Breda', 'Willem II', 'RKC Waalwijk', 'FC Den Bosch', 'TOP Oss'],
@@ -293,7 +306,8 @@ export const realSources = [
     slug: 'brabants-dagblad',
   },
   {
-    description: 'Dagblad uit Twente.',
+    description:
+      'Regionaal dagblad voor Twente. In de sportfeed staat het sportnieuws van de regio, ook veel achter de betaalmuur; we tonen de berichten over sc Heerenveen en, rond een wedstrijd, over de tegenstander.',
     domain: 'www.tubantia.nl',
     feeds: [{ filter: 'club', url: 'https://www.tubantia.nl/sport/rss.xml' }],
     followedClubs: ['FC Twente', 'Heracles Almelo'],
@@ -304,7 +318,8 @@ export const realSources = [
     slug: 'tubantia',
   },
   {
-    description: 'Dagblad uit Eindhoven.',
+    description:
+      'Regionaal dagblad voor Oost-Brabant rond Eindhoven. In de sportfeed staat het sportnieuws van de regio, ook veel achter de betaalmuur; we tonen de berichten over sc Heerenveen en, rond een wedstrijd, over de tegenstander.',
     domain: 'www.ed.nl',
     feeds: [{ filter: 'club', url: 'https://www.ed.nl/sport/rss.xml' }],
     followedClubs: ['PSV', 'Jong PSV', 'FC Eindhoven', 'Helmond Sport'],
@@ -315,7 +330,8 @@ export const realSources = [
     slug: 'eindhovens-dagblad',
   },
   {
-    description: 'Dagblad uit West-Brabant.',
+    description:
+      'Regionaal dagblad voor West-Brabant rond Bergen op Zoom en Breda. In de sportfeed staat het sportnieuws van de regio, ook veel achter de betaalmuur; we tonen de berichten over sc Heerenveen en, rond een wedstrijd, over de tegenstander.',
     domain: 'www.bndestem.nl',
     feeds: [{ filter: 'club', url: 'https://www.bndestem.nl/sport/rss.xml' }],
     followedClubs: ['NAC Breda'],
@@ -326,7 +342,8 @@ export const realSources = [
     slug: 'bn-destem',
   },
   {
-    description: 'Dagblad uit Zeeland.',
+    description:
+      'Regionaal dagblad voor Zeeland. In de sportfeed staat het sportnieuws van de regio, ook veel achter de betaalmuur; we tonen de berichten over sc Heerenveen.',
     domain: 'www.pzc.nl',
     feeds: [{ filter: 'club', url: 'https://www.pzc.nl/sport/rss.xml' }],
     kind: 'news',
@@ -335,7 +352,8 @@ export const realSources = [
     slug: 'pzc',
   },
   {
-    description: 'Landelijk dagblad.',
+    description:
+      'Landelijk dagblad. In de sportfeed staat het sportnieuws uit binnen- en buitenland; we tonen alleen de berichten waarvan de kop over sc Heerenveen gaat.',
     domain: 'www.volkskrant.nl',
     feeds: [{ filter: 'club', url: 'https://www.volkskrant.nl/sport/rss.xml' }],
     kind: 'news',
@@ -344,7 +362,8 @@ export const realSources = [
     slug: 'de-volkskrant',
   },
   {
-    description: 'Landelijk dagblad.',
+    description:
+      'Landelijk dagblad. In de sportfeed staat het sportnieuws uit binnen- en buitenland; we tonen alleen de berichten waarvan de kop over sc Heerenveen gaat.',
     domain: 'www.trouw.nl',
     feeds: [{ filter: 'club', url: 'https://www.trouw.nl/sport/rss.xml' }],
     kind: 'news',
@@ -353,7 +372,8 @@ export const realSources = [
     slug: 'trouw',
   },
   {
-    description: 'Dagblad uit Amsterdam.',
+    description:
+      'Landelijk dagblad. In de sportfeed staat het sportnieuws uit binnen- en buitenland; we tonen alleen de berichten waarvan de kop over sc Heerenveen gaat.',
     domain: 'www.parool.nl',
     feeds: [{ filter: 'club', url: 'https://www.parool.nl/sport/rss.xml' }],
     kind: 'news',
@@ -362,7 +382,8 @@ export const realSources = [
     slug: 'het-parool',
   },
   {
-    description: 'Blad voor Flevoland.',
+    description:
+      'Regionaal huis-aan-huisblad voor Flevoland, van Mediahuis Noord. In de sportfeed staat het sportnieuws van de regio; we tonen alleen wat over sc Heerenveen gaat.',
     domain: 'www.flevopost.nl',
     feeds: [{ filter: 'club', url: 'https://www.flevopost.nl/sport/rss/' }],
     kind: 'news',
@@ -370,7 +391,8 @@ export const realSources = [
     slug: 'de-flevopost',
   },
   {
-    description: 'Christelijk dagblad.',
+    description:
+      'Landelijk dagblad op protestants-christelijke grondslag. In de sportfeed staat het sportnieuws; we tonen alleen de berichten waarvan de kop over sc Heerenveen gaat.',
     domain: 'www.nd.nl',
     feeds: [{ filter: 'club', url: 'https://www.nd.nl/sport/rss' }],
     kind: 'news',
@@ -378,7 +400,8 @@ export const realSources = [
     slug: 'nederlands-dagblad',
   },
   {
-    description: 'Ons eigen forum.',
+    description:
+      'Het forum van onze eigen gemeenschap, waar supporters praten over wedstrijden, spelers en transfers. We tonen alleen de titels van de nieuwste discussies, hoeveel reacties er zijn en wie het laatst reageerde.',
     domain: 'forum.heerenveen.org',
     feeds: [
       'https://forum.heerenveen.org/api/discussions?sort=-lastPostedAt&page[limit]=30&include=lastPostedUser,tags',
@@ -388,7 +411,8 @@ export const realSources = [
   },
   {
     applePodcastsUrl: 'https://podcasts.apple.com/nl/podcast/omroep-abe/id1589027848',
-    description: 'Podcast van de Leeuwarder Courant.',
+    description:
+      'Omroep Abe is de podcast over SC Heerenveen van de Leeuwarder Courant. Clubwatcher Sander de Vries bespreekt met oud-spelers Gerald Sibon, Geert Arend Roorda en Henrico Drost wekelijks de actualiteiten en achtergronden bij de club.',
     domain: 'omny.fm',
     feeds: [
       'https://www.omnycontent.com/d/playlist/fdd7ab40-270d-4a1e-a257-acd200da1324/6470c909-db21-4ceb-a53d-b2940145c1ee/06a49ae8-2226-44c4-bbf0-b2940145c83c/podcast.rss',
@@ -400,7 +424,7 @@ export const realSources = [
   },
   {
     applePodcastsUrl: 'https://podcasts.apple.com/nl/podcast/radio-camataru/id1436580634',
-    description: 'Supporterspodcast.',
+    description: 'Wekelijkse supporterspodcast over sc Heerenveen!',
     domain: 'radiocamataru.podbean.com',
     feeds: ['https://feed.podbean.com/radiocamataru/feed.xml'],
     kind: 'podcast',
@@ -409,7 +433,8 @@ export const realSources = [
     spotifyUrl: 'https://open.spotify.com/show/51W3UP2B4H2kBK9Ukyv8et',
   },
   {
-    description: 'Friese omroep.',
+    description:
+      'Regionale publieke omroep van Friesland. Het regionieuws van de provincie van de club; we tonen alleen de berichten waarvan de kop over sc Heerenveen gaat.',
     domain: 'www.omropfryslan.nl',
     feeds: [{ filter: 'club', url: 'https://www.omropfryslan.nl/rss/index.xml' }],
     kind: 'news',
@@ -417,7 +442,8 @@ export const realSources = [
     slug: 'omrop-fryslan',
   },
   {
-    description: 'Landelijke omroep.',
+    description:
+      'Landelijke publieke nieuwsomroep. In de voetbalfeed staat het voetbalnieuws uit binnen- en buitenland; we tonen alleen de berichten waarvan de kop over sc Heerenveen gaat.',
     domain: 'nos.nl',
     feeds: [{ filter: 'club', url: 'https://feeds.nos.nl/nosvoetbal' }],
     kind: 'news',
@@ -425,7 +451,8 @@ export const realSources = [
     slug: 'nos',
   },
   {
-    description: 'Landelijk dagblad.',
+    description:
+      'Landelijk dagblad. In de voetbalfeed staat het voetbalnieuws uit binnen- en buitenland, ook veel achter de betaalmuur; we tonen alleen de berichten waarvan de kop over sc Heerenveen gaat.',
     domain: 'www.ad.nl',
     feeds: [{ filter: 'club', url: 'https://www.ad.nl/voetbal/rss.xml' }],
     kind: 'news',
@@ -434,7 +461,8 @@ export const realSources = [
     slug: 'algemeen-dagblad',
   },
   {
-    description: 'Dagblad uit Gelderland.',
+    description:
+      'Regionaal dagblad voor Gelderland. In de sportfeed staat het sportnieuws van de regio, ook veel achter de betaalmuur; we tonen de berichten over sc Heerenveen en, rond een wedstrijd, over de tegenstander.',
     domain: 'www.gelderlander.nl',
     feeds: [{ filter: 'club', url: 'https://www.gelderlander.nl/sport/rss.xml' }],
     followedClubs: ['N.E.C.', 'Vitesse', 'De Graafschap', 'De Treffers'],
@@ -445,7 +473,8 @@ export const realSources = [
     slug: 'de-gelderlander',
   },
   {
-    description: 'Nederlandse sportsite.',
+    description:
+      'Nederlandse nieuwssite van de sportzender ESPN. In de voetbalfeed staat het voetbalnieuws uit binnen- en buitenland; we tonen alleen de berichten waarvan de kop over sc Heerenveen gaat.',
     domain: 'www.espn.nl',
     feeds: [{ filter: 'club', url: 'https://www.espn.nl/espn/rss/soccer/news' }],
     kind: 'news',
@@ -453,7 +482,8 @@ export const realSources = [
     slug: 'espn',
   },
   {
-    description: 'Omroep uit Rotterdam.',
+    description:
+      'Regionale publieke omroep van Rotterdam. In de sportfeed staat vooral nieuws over Feyenoord, Sparta en Excelsior; we tonen alleen berichten over sc Heerenveen, en over de Rotterdamse tegenstander rond een wedstrijd.',
     domain: 'www.rijnmond.nl',
     feeds: [{ filter: 'club', url: 'https://www.rijnmond.nl/rss/sport.xml' }],
     kind: 'news',
@@ -461,7 +491,8 @@ export const realSources = [
     slug: 'rijnmond',
   },
   {
-    description: 'Omroep uit Groningen.',
+    description:
+      'Regionale publieke omroep van Groningen en Drenthe. In de sportfeed staat vooral nieuws over FC Groningen; we tonen alleen berichten over sc Heerenveen, en over FC Groningen rond een wedstrijd tegen ons.',
     domain: 'www.rtvnoord.nl',
     feeds: [{ filter: 'club', url: 'https://www.rtvnoord.nl/rss/sport.xml' }],
     kind: 'news',
@@ -469,7 +500,8 @@ export const realSources = [
     slug: 'rtv-noord',
   },
   {
-    description: 'Lokale omroep in Groningen.',
+    description:
+      'Lokale omroep van de stad Groningen. We lezen twee feeds: de berichten die OOG bij sc Heerenveen heeft gezet, en die bij FC Groningen, waarvan we alleen de berichten rond een wedstrijd tegen ons tonen.',
     domain: 'www.oogtv.nl',
     feeds: [
       'https://www.oogtv.nl/tag/sc-heerenveen/feed/',

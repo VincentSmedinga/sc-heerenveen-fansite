@@ -366,7 +366,6 @@
   - Radio Camataru: "Wekelijkse supporterspodcast over sc Heerenveen!"
 
   Beschrijvingen van bronnen van een ander soort blijven in eigen woorden (zie _De pagina 'Onze bronnen' toont per bron een beschrijving, niet wat we tonen_).
-  Later: sinds 18 november 2026 zijn ook de twee podcasts één korte zin in eigen woorden (zie _De pagina 'Onze bronnen' is compact, ook met tientallen bronnen_ in `redactie.md`).
 
 - **Waarom:** de maker publiceert deze tekst in de feed die wij lezen, dus zijn tekst gaat voor onze omschrijving.
   Het is één alinea over de podcast zelf, geen intro bij een aflevering.
