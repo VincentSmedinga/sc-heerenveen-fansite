@@ -1649,6 +1649,14 @@ export type NewMatchEdit = typeof matchEdits.$inferInsert
 export const standingsClubMaxLength = 100
 
 /**
+ * The leagues a table of `standings` can be of. sc Heerenveen played in the Eerste divisie in
+ * 1991/92 and 1992/93, so the table of those seasons is the table of that league.
+ */
+export const standingsCompetitions = ['Eredivisie', 'Eerste divisie'] as const
+
+export type StandingsCompetition = (typeof standingsCompetitions)[number]
+
+/**
  * The league table of the Eredivisie, one row per club, from the Dutch Wikipedia. `valid_on` is
  * the day the table holds for: the day of the last match that has been played. Every row of a
  * season has the same day, because the importer replaces the whole table at once. A table of
@@ -1663,6 +1671,8 @@ export const standings = mysqlTable(
   'standings',
   {
     season: varchar('season', { length: matchLimits.season }).notNull(),
+    /** The league the table is of. A season has one table, because we play in one league. */
+    competition: mysqlEnum('competition', standingsCompetitions).notNull().default('Eredivisie'),
     position: int('position', { unsigned: true }).notNull(),
     club: varchar('club', { length: standingsClubMaxLength }).notNull(),
     played: int('played', { unsigned: true }).notNull(),

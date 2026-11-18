@@ -119,6 +119,18 @@ describe('the card Eindstand of an earlier season', () => {
     expect(getLeagueResults).toHaveBeenCalledExactlyOnceWith('2025/26')
   })
 
+  it('names the league when the table is of the Eerste divisie, in the heading and for a screen reader', async () => {
+    const firstDivision = table.map((row) => ({ ...row, competition: 'Eerste divisie' as const }))
+
+    vi.mocked(getMatchData).mockResolvedValue({ ...earlier, matches: [], season: '2025/26', standings: firstDivision })
+
+    const html = await render()
+
+    expect(html).toContain('Eindstand Eerste divisie</a></h2>')
+    expect(html).toContain('Eindstand Eerste divisie op 18 oktober 2026</caption>')
+    expect(html).toContain('id="eindstand"')
+  })
+
   it('shows the whole season for ?stand=laatste-5, as the normal card', async () => {
     const html = await render('2025-26', { stand: 'laatste-5' })
 

@@ -125,7 +125,7 @@ De workflow draait op de host hetzelfde bestand als cron (`apps/importer/import.
 Hij gebruikt de omgeving `acceptatie` en dezelfde geheimen als de deploy, dus hij vraagt niets extra's.
 Ontbreekt een geheim, dan slaat de workflow de import over met een melding en blijft hij groen.
 
-Elke run van _Import season_, _Import seasons_, _Import squads_ en _Import old site_ (de actie `import`) maakt eerst een back-up van de database, met `packages/db/backup.mjs backup`.
+Elke run van _Import season_, _Import seasons_, _Import squads_, _Import tables_ en _Import old site_ (de actie `import`) maakt eerst een back-up van de database, met `packages/db/backup.mjs backup`.
 Dat gebeurt in de stap _Back up the database on the host_, over SSH, met dezelfde Node en hetzelfde bestand voor `DATABASE_URL` als de import.
 Faalt de back-up, dan wordt de run rood en importeert hij niets.
 De samenvatting van de run noemt het bestand van de back-up, zodat je weet wat je kunt terugzetten (zie [Back-ups](back-ups.md)).
@@ -198,6 +198,24 @@ De workflow [`import-seasons.yml`](../.github/workflows/import-seasons.yml) doet
   Alle seizoenen vanaf 2010/11 zijn dus een paar minuten, en de workflow breekt na 30 minuten af.
 - **Let op:** de run houdt de `concurrency`-groep `acceptance` vast tot hij klaar is, dus een deploy wacht zolang de import loopt.
   Voor één seizoen duurt dat seconden, voor alle seizoenen een paar minuten.
+
+### De eindstanden van 1990/91 tot en met 2009/10 importeren
+
+De workflow [`import-tables.yml`](../.github/workflows/import-tables.yml) leest de eindstand van de competitie van die twintig seizoenen van de Nederlandse Wikipedia.
+Hij schrijft alleen de tabel `standings`, en bewaart de pagina voor de bronvermelding.
+Start hem eenmalig na de deploy van #1402, en opnieuw als een stand fout bleek:
+
+1. Open in GitHub _Actions → Import tables_ en kies _Run workflow_, met de branch `main`.
+2. Laat het seizoen leeg voor alle twintig, of vul er één in, zoals `1998/99`.
+   De workflow weigert een andere vorm dan `1998/99`, voordat hij verbinding maakt, en de opdracht weigert een seizoen dat niet in de lijst staat (`oldStandingsPages` in `apps/importer/src/old-standings.ts`).
+3. Lees het logboek van de stap _Import the final tables on the host_.
+   Daar staat per seizoen een regel, zoals `Table 1991/92: 20 clubs of the Eerste divisie for 1992-05-24`.
+   Aan het eind staat `Tables: 20 of 20 stored.`
+   Een tweede run verandert niets.
+
+- Een tabel die een controle niet haalt (het aantal clubs, de punten met twee punten per overwinning tot en met 1994/95, het doelsaldo) wordt niet opgeslagen: het seizoen blijft zoals het was en de run wordt rood, maar de opdracht gaat door met het volgende seizoen.
+- De rij van sc Heerenveen wordt vergeleken met onze wedstrijden als we alle wedstrijden van dat seizoen hebben.
+  Een verschil is een regel in het logboek en geen fout.
 
 ### De selectie van afgelopen seizoenen importeren
 

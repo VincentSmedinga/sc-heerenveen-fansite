@@ -162,29 +162,35 @@ export function checkSquad(players: ReadPlayer[]): string[] {
  * cannot be more than 3 x won + drawn. Over the whole table the goals for equal the goals
  * against and the wins equal the losses. The row of sc Heerenveen must agree with the league
  * matches we have of our own: matches played, goals and points (after its deduction, if any).
+ * A table of a season long ago (`old-standings.ts`) says how many clubs it has and how many
+ * points a win earned (two before 1995/96), and has no matches to be compared with.
  */
-export function checkStandings(rows: ReadStandingsRow[], matches: ReadMatch[]): string[] {
+export function checkStandings(
+  rows: ReadStandingsRow[],
+  matches: ReadMatch[] | undefined,
+  { clubs = clubsInLeague, pointsPerWin = 3 }: { clubs?: number; pointsPerWin?: number } = {},
+): string[] {
   const problems: string[] = []
 
-  if (rows.length !== clubsInLeague) {
-    problems.push(`the table has ${rows.length} clubs, not ${clubsInLeague}`)
+  if (rows.length !== clubs) {
+    problems.push(`the table has ${rows.length} clubs, not ${clubs}`)
   }
 
   for (const row of rows) {
     if (row.played !== row.won + row.drawn + row.lost) {
       problems.push(`${row.club}: played is not won + drawn + lost`)
     }
-    const earned = 3 * row.won + row.drawn
+    const earned = pointsPerWin * row.won + row.drawn
 
     if (row.pointsDeducted > earned) {
       problems.push(
-        `${row.club}: the deduction of ${row.pointsDeducted} points is more than 3 x won + drawn (${earned})`,
+        `${row.club}: the deduction of ${row.pointsDeducted} points is more than ${pointsPerWin} x won + drawn (${earned})`,
       )
     } else if (row.points !== earned - row.pointsDeducted) {
       problems.push(
         row.pointsDeducted === 0
-          ? `${row.club}: points are not 3 x won + drawn`
-          : `${row.club}: points are not 3 x won + drawn - the deduction of ${row.pointsDeducted}`,
+          ? `${row.club}: points are not ${pointsPerWin} x won + drawn`
+          : `${row.club}: points are not ${pointsPerWin} x won + drawn - the deduction of ${row.pointsDeducted}`,
       )
     }
     if (row.goalDifference !== row.goalsFor - row.goalsAgainst) {
@@ -205,6 +211,9 @@ export function checkStandings(rows: ReadStandingsRow[], matches: ReadMatch[]): 
   if (row === undefined || ours.length > 1) {
     problems.push(`the table has ${ours.length} rows for ${ourClub}, not 1`)
 
+    return problems
+  }
+  if (matches === undefined) {
     return problems
   }
 

@@ -6,6 +6,7 @@ import { formsOf, standingRoundOf, standingSentenceOf, standingSliceOf } from '.
 
 const row = (position: number, club: string, points = 30 - position): PublicStandingsRow => ({
   club,
+  competition: 'Eredivisie',
   drawn: 0,
   goalDifference: 0,
   goalsAgainst: 0,

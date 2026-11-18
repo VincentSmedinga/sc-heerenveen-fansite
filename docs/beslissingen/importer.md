@@ -1943,6 +1943,7 @@
   De zin onder **Waarom** over 2011/12 en de zin onder **Nadeel** hierboven gelden niet meer: de wedstrijd Excelsior – AZ is in de rust gestaakt en later alleen in de tweede helft afgemaakt, niet helemaal opnieuw gespeeld.
   `checkResults` is niet veranderd.
 - **Later:** zie _Een wedstrijd die nooit meer wordt gespeeld heeft een eigen status, `cancelled`, en de importer bepaalt dat per seizoen dat voorbij is_ (3 november 2026): de acht wedstrijden van 2019/20 die niet zijn gespeeld, staan nu als geannuleerd in de database en niet als uitgesteld.
+- **Later:** sinds 18 november 2026 leest de lezer van de oudere tabel ook `Eindstand 1998-1999` (met het seizoen in de kop) en een doelsaldo met een gedachtestreepje (`–18`); zie _De eindstand van 1990/91 tot en met 2009/10 komt van de Nederlandse Wikipedia, per seizoen uit een lijst_.
 
 ## Een puntenaftrek staat in een kolom van `standings`, komt uit de kolom `PA` en telt mee in `checkStandings`
 
@@ -4446,6 +4447,29 @@
   Eén wedstrijd is één ronde, dus het enkelvoud, en de site kan een ronde zo ook herkennen (zie _Het bekerkaartje noemt de ronde van de uitschakeling_ in `site.md`).
 - **Alternatieven:** het meervoud van de kopjes houden; cijfers als `3e ronde`; de namen alleen in de site omzetten (dan staat de database nog steeds door elkaar).
 - **Later:** vervangt de ronde `Halve finales` en `2e ronde` tot en met `4e ronde` in _De ronde is de kop boven de wedstrijd, en de versie van een pagina is de `Last-Modified`_: de kop boven de wedstrijd blijft de ronde, maar in deze schrijfwijze.
+
+## De eindstand van 1990/91 tot en met 2009/10 komt van de Nederlandse Wikipedia, per seizoen uit een lijst
+
+- **Datum:** 18 november 2026
+- **Besluit:** de eindstand van de competitie van 1990/91 tot en met 2009/10 komt van de Nederlandse Wikipedia, van de pagina van de Eredivisie of de Eerste divisie van dat seizoen, en de importer raadt niets (#1402).
+  - **De lijst:** `oldStandingsPages` in `old-standings.ts` zegt per seizoen welke pagina het is, in welke competitie sc Heerenveen speelde en hoeveel clubs er waren (20 in 1991/92, anders 18).
+    Voor een seizoen dat er niet in staat, komt geen verzoek.
+  - **De opdracht:** `pnpm run import:tables [<seizoen>]` (op de host `--tables`, op acceptatie de workflow _Import tables_) leest alle twintig of één seizoen, neemt per seizoen de lock van de import, en gaat door na een seizoen dat mislukt.
+    Ze schrijft alleen `standings` en bewaart de pagina in `wikipedia_pages` (soort `standings`), zodat de kaart van het seizoen de bron noemt.
+  - **De controles:** `checkStandings` met het aantal clubs van het seizoen en twee punten voor een overwinning tot en met 1994/95 (`pointsPerWinIn`), want de punten op de pagina volgen die regel.
+    Een tabel die ze niet haalt, wordt niet opgeslagen.
+    De rij van sc Heerenveen wordt vergeleken met onze wedstrijden als we alle wedstrijden van het seizoen in die competitie hebben; een verschil is een regel in het logboek en geen fout, omdat de wedstrijden van de oude fansite van Wikipedia kunnen afwijken en de tabel die van de pagina is.
+  - **De dag:** de tabel geldt voor de dag van de laatste gespeelde wedstrijd die we hebben in die competitie, of anders voor 30 juni van het jaar waarin het seizoen eindigt.
+- **Waarom:** nl.wikipedia is de goedgekeurde bron voor wedstrijdgegevens, de pagina's hebben de eindstand, en onze wedstrijden zijn voor 1991/92 en 2007/08 te onvolledig om er een stand uit te rekenen.
+  In een proef op 18 november 2026 las de lezer van de oudere tabel 18 van de 20 pagina's zoals ze waren; twee kleine aanpassingen (het jaar in de kop van 1998/99, het gedachtestreepje in 2003/04) deden de rest.
+- **Alternatieven:** de stand uit onze wedstrijden berekenen (faalt bij 1991/92 en 2007/08 en geeft nooit de punten of het doelsaldo van de pagina); de Engelse Wikipedia (alleen nodig als een Nederlandse pagina de stand niet heeft, en geen enkele zat in dat geval).
+
+- **Datum:** 18 november 2026
+- **Besluit:** `standings` krijgt een kolom `competition` (`Eredivisie` of `Eerste divisie`, standaard `Eredivisie`), met migratie `0091_add_standings_competition`.
+  De sleutel blijft (seizoen, positie): een seizoen heeft één tabel, omdat sc Heerenveen in één competitie speelt.
+  De site zegt het bij de eindstand van een seizoen in de Eerste divisie: `Eindstand Eerste divisie`, in de kop en in het opschrift voor een schermlezer.
+- **Waarom:** 1991/92 en 1992/93 hebben een tabel van de Eerste divisie, en de lezer moet weten welke tabel het is.
+- **Alternatieven:** de competitie afleiden uit de wedstrijden van het seizoen (breekt bij 1991/92, waar we er maar 4 hebben); de sleutel uitbreiden met de competitie, zoals het issue eerst zei (geeft niets extra's zolang een seizoen één tabel heeft, en een migratie van de sleutel meer).
 
 ## De groepstabel van een Europees toernooi komt in een eigen tabel, van een vaste lijst pagina's
 

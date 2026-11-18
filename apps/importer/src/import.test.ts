@@ -261,6 +261,7 @@ describe('the check of the migrations', () => {
     ['--from-season', '2024/25'],
     ['--squad', '2024/25'],
     ['--from-squad', '2024/25'],
+    ['--tables'],
     ['--old-site'],
   ])('stops with one line and exit code 1, and writes nothing: %s', async (...args) => {
     const before = await countRows()

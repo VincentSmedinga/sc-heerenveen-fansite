@@ -2244,6 +2244,38 @@ describe('the table of the older seasons', () => {
     expect(read.kind === 'read' ? read.rows[0] : read).toMatchObject({ club: 'Ajax', goalDifference: -52 })
   })
 
+  describe('the seasons before 2010', () => {
+    const season = (name: string) =>
+      readFileSync(new URL(`./fixtures/wikipedia-standings-${name}.wiki`, import.meta.url), 'utf8')
+
+    it('reads 1998/99, where the year stands in the heading: Eindstand 1998-1999', () => {
+      const read = readStandings(season('1998-99'))
+
+      expect(read.kind === 'read' ? [read.rows.length, read.rows[0]] : read).toMatchObject([
+        18,
+        { club: 'Feyenoord', goalDifference: 38, points: 80, position: 1, won: 25 },
+      ])
+    })
+
+    it('reads a goal difference written with an en dash', () => {
+      const read = readStandings(season('2003-04'))
+
+      expect(read.kind === 'read' ? read.rows.find((row) => row.club === 'N.E.C.') : read).toMatchObject({
+        goalDifference: -18,
+        points: 34,
+      })
+    })
+
+    it('reads the 20 clubs of the Eerste divisie of 1991/92, and sc Heerenveen in third place', () => {
+      const read = readStandings(season('1991-92'))
+
+      expect(read.kind === 'read' ? [read.rows.length, read.rows[2]] : read).toMatchObject([
+        20,
+        { club: 'sc Heerenveen', played: 38, position: 3 },
+      ])
+    })
+  })
+
   describe('a deduction of points in the column PA', () => {
     const club = (text: string, name: string) => {
       const read = readStandings(text)

@@ -1113,6 +1113,7 @@ export function listSeasonStandings(db: Database, season: string) {
   return db
     .select({
       club: standings.club,
+      competition: standings.competition,
       drawn: standings.drawn,
       goalDifference: standings.goalDifference,
       goalsAgainst: standings.goalsAgainst,
