@@ -18,6 +18,7 @@ import {
   submitRemoveEntry,
 } from '#src/app/beheer/wedstrijden/actions'
 import { ConflictForm } from '#src/app/beheer/wedstrijden/ConflictForm'
+import { CopyForWikipedia } from '#src/app/beheer/wedstrijden/CopyForWikipedia'
 import { HeldChangeForm } from '#src/app/beheer/wedstrijden/HeldChangeForm'
 import {
   MatchErrorSummary,
@@ -40,6 +41,7 @@ import { goalKinds, isKnockout, statusChoices, valuesOf } from '#src/beheer/matc
 import { columnParts, isFormColumn } from '#src/beheer/quality-table'
 import { requireRole } from '#src/beheer/require-role'
 import { SaveButtons } from '#src/beheer/SaveButtons'
+import { copyForWikipedia } from '#src/beheer/wikipedia-copy'
 import { getDatabase } from '#src/database'
 import { wikipediaUrl } from '#src/match-format'
 import { describeShowDelay, lacksResult } from '#src/matches'
@@ -306,6 +308,8 @@ export default async function MatchPage({ params, searchParams }: Props) {
             ? null
             : differences.map((difference) => {
                 const words = differenceWords(difference, match, now, hasReport)
+                const copy = copyForWikipedia(difference, match, goals)
+                const page = pages.find((candidate) => candidate.kind === pageKindOf(match.competition))
 
                 return (
                   <Card aria-labelledby={`afwijking-${difference.id}-kop`} key={difference.id}>
@@ -325,6 +329,18 @@ export default async function MatchPage({ params, searchParams }: Props) {
                       </List.Item>
                     </List>
                     <Text appearance="meta">{words.note}</Text>
+                    {copy === undefined ? null : (
+                      <>
+                        <CopyForWikipedia id={difference.id} text={copy.text} title={title} what={copy.what} />
+                        {page === undefined ? null : (
+                          <Text>
+                            <Link href={wikipediaUrl(page.title, page.language)} icon="external-link">
+                              Plak het op {page.title} op Wikipedia
+                            </Link>
+                          </Text>
+                        )}
+                      </>
+                    )}
                     <ConflictForm
                       action={submitConflict.bind(null, difference.id)}
                       id={difference.id}

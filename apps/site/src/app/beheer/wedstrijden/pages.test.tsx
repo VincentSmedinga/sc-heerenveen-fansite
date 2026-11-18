@@ -751,6 +751,79 @@ describe('the match', () => {
       expect(html.match(/id="besluit-\d+-reden"/g)).toHaveLength(1)
     })
 
+    describe('"Kopieer voor Wikipedia" (#1026)', () => {
+      /** A played match with our goals, and a pending difference about one part. */
+      async function withCopy(part: 'facts' | 'goals' | 'kickoff' | 'result') {
+        const id = await addMatch({ attendance: 26100, goalsAgainst: 0, goalsFor: 1, status: 'played' })
+
+        await database.db.insert(wikipediaPages).values({
+          kind: 'programme',
+          language: 'nl',
+          readAt: new Date('2026-11-03T10:00:00Z'),
+          season,
+          title: 'Eredivisie 2026/27',
+        })
+        await database.db.insert(matchGoals).values({
+          matchId: id,
+          minute: 12,
+          ours: true,
+          player: 'Van Bergen',
+        })
+        await database.db.insert(matchChanges).values({
+          changed: part,
+          class: 'improvement',
+          competition: 'Eredivisie',
+          firstSeenAt: new Date('2026-11-02T10:00:00Z'),
+          lastSeenAt: new Date('2026-11-02T10:00:00Z'),
+          matchId: id,
+          newValue: 'andere waarde',
+          oldValue: 'onze waarde',
+          part,
+          proposal: JSON.stringify({ attendance: 12000, note: null, part: 'facts', referee: null, stadium: null }),
+          reason: 'wijkt af van de invoer van de redactie',
+          round: 'Speelronde 11',
+          season,
+          status: 'pending',
+        })
+
+        return id
+      }
+
+      it('gives the goals a field with the text and a link to the page, and a note about a published source', async () => {
+        const html = await form(await withCopy('goals'))
+
+        expect(html).toContain('Tekst voor Wikipedia: de doelpunten van')
+        expect(html).toContain('|goals1=[[Van Bergen]] {{goal|12}}')
+        expect(html).toContain('href="https://nl.wikipedia.org/wiki/Eredivisie_2026/27"')
+        expect(html).toContain('Plak het op Eredivisie 2026/27 op ')
+        expect(html).toContain('gepubliceerde bron')
+        expect(html).not.toContain('sc Heerenveen Fansite</textarea>')
+        expect(html).toMatch(/<textarea[^>]*readOnly=""|<textarea[^>]*readonly=""/i)
+      })
+
+      it('gives the attendance a field when Wikipedia has another number', async () => {
+        const html = await form(await withCopy('facts'))
+
+        expect(html).toContain('Tekst voor Wikipedia: het aantal toeschouwers van')
+        expect(html).toContain('|attendance=26100')
+      })
+
+      it.each(['kickoff', 'result'] as const)('gives no field or button for the part %s', async (part) => {
+        const html = await form(await withCopy(part))
+
+        expect(html).toContain('Wikipedia wijkt af')
+        expect(html).not.toContain('Tekst voor Wikipedia')
+        expect(html).not.toContain('Kopieer voor Wikipedia')
+      })
+
+      it('never names our own site in the text', async () => {
+        const html = await form(await withCopy('goals'))
+        const text = /<textarea[^>]*>([^<]*)<\/textarea>/.exec(html)?.[1] ?? ''
+
+        expect(text).not.toMatch(/heerenveen\.org|Fansite/i)
+      })
+    })
+
     it('shows nothing about a difference when none waits, or when it was decided', async () => {
       const id = await withDifference()
 

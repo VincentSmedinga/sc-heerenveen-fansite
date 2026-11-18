@@ -6550,3 +6550,20 @@
 - **Besluit:** gewisseld is een nieuwe kolom, geteld uit `match_substitutions` door `readPlayerReportStats` als `substitutedOff`: de keren dat een speler in een verslag dat `klaar` is uit het veld ging voor een wisselspeler.
   Een speler die in de wedstrijd van een rode kaart af ging, is niet gewisseld, en een speler die eerst inviel en dan werd gewisseld, telt in beide kolommen.
 - **Waarom:** de gegevens zijn er al, en ingevallen zonder gewisseld laat de helft van de wissels weg.
+
+## Bij een wachtend verschil in de doelpunten of de toeschouwers kopieert de redactie de tekst voor Wikipedia
+
+- **Datum:** 18 november 2026
+- **Besluit:** een verschil dat wacht, waarvan het deel de doelpunten is of de gegevens met een ander aantal toeschouwers, heeft op de pagina van de wedstrijd het veld "Tekst voor Wikipedia" en een knop "Kopieer voor Wikipedia" (#1026).
+  De tekst is onze waarde in de opmaak van de wedstrijdbox: `|goals1=` en `|goals2=` met `{{goal|minuut}}`, of `|attendance=` met het getal zonder scheidingsteken.
+  Bij de tekst staan een link naar de pagina van het seizoen en de regel dat een verbetering een gepubliceerde bron vraagt, en onze eigen site er geen is.
+  De tekst noemt onze site nergens.
+- **Besluit:** zonder JavaScript staat dezelfde tekst in een veld dat de redactie zelf selecteert.
+  Met JavaScript komt de knop erbij, met een naam die de wedstrijd noemt, en een regel met `role="status"` zegt na het kopiëren dat het gelukt is, of dat de redactie het zelf moet doen.
+  De knop doet geen verzoek aan een derde en het beheer bewaart de tekst niet.
+- **Besluit:** uitslag, aftrap en de andere gegevens (scheidsrechter, stadion, opmerking) krijgen niets, evenmin als de doelpunten van de oude fansite die niet optellen en een verschil met de oude fansite.
+  Een verschil in de gegevens krijgt de tekst alleen als de aantallen toeschouwers verschillen.
+- **Waarom:** wie Wikipedia wil verbeteren, doet dat zelf, onder een eigen account en met een gepubliceerde bron (besluit van 10 november 2026, #1024).
+  De doelpunten en de toeschouwers zijn de verschillen waar Wikipedia iets aan heeft en die de importer leest.
+  #974 liet zien dat ze voorkomen: de kopie van acceptatie van 16 november 2026 heeft twaalf wijzigingen, waarvan elf in de doelpunten.
+- **Alternatieven:** een bot of een knop die op Wikipedia schrijft, afgewezen omdat het besluit zegt dat de redactie het zelf doet; alle delen van een wedstrijd, afgewezen omdat de rest zelden voorkomt en een eigen issue is.
