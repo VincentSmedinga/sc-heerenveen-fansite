@@ -1,6 +1,7 @@
 /*
- * The drawing of a cup: upright, twice as high as wide. The size is the size of the artwork,
- * and on a screen narrower than that it shrinks with the card, keeping its proportions.
+ * The drawing of a cup: upright, twice as high as wide, and centred in its card. It is as big
+ * as the artwork, and on a screen narrower than that it shrinks with the card, keeping its
+ * proportions. The parts that are closed shapes are filled with a light surface.
  */
 
 @layer hf.components {
@@ -9,6 +10,11 @@
     color: var(--hf-colour-text-secondary);
     display: block;
     inline-size: 6rem;
+    margin-inline: auto;
     max-inline-size: 100%;
+  }
+
+  .hf-cup-fill {
+    fill: var(--hf-colour-background-surface-strong);
   }
 }

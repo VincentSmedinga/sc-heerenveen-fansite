@@ -250,12 +250,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
                     withCompetition={false}
                   />
                   {competition === 'KNVB Beker' && cupOutcome?.kind === 'lost' && <Text>{cupOutcome.line}</Text>}
-                  {competition === 'KNVB Beker' && cupOutcome?.kind === 'won' && (
-                    <>
-                      <Text>Bekerwinnaar</Text>
-                      <Cup />
-                    </>
-                  )}
+                  {competition === 'KNVB Beker' && cupOutcome?.kind === 'won' && <Cup />}
                   {competition === 'Eredivisie' && <SeasonCourseLink href={statistics('verloop-van-het-seizoen')} />}
                 </Card>
               </Page.Cell>

@@ -252,10 +252,10 @@ describe('the cards with results of an earlier season, one for each competition'
 
     expect(section(html, 'uitslagen-knvb-beker')).toContain('Uitgeschakeld in de achtste finale')
     expect(section(html, 'uitslagen')).not.toContain('Uitgeschakeld')
-    expect(html).not.toContain('Bekerwinnaar')
+    expect(html).not.toContain('hf-cup')
   })
 
-  it('draws the cup at the bottom of the card of a won cup, and says so in words', async () => {
+  it('draws the cup at the bottom of the card of a won cup', async () => {
     withMatches([
       match('KNVB Beker', 'Finale', '2026-05-10', {
         goalsAgainst: 2,
@@ -267,10 +267,9 @@ describe('the cards with results of an earlier season, one for each competition'
     // The drawing is an icon, which `render` leaves out, so the page is rendered as it is.
     const card = section(renderToStaticMarkup(await SeasonMatchesPage(params('2025-26'))), 'uitslagen-knvb-beker')
 
-    expect(card).toContain('Bekerwinnaar')
     expect(card).toContain('hf-cup')
     expect(card).not.toContain('Uitgeschakeld')
-    expect(card.indexOf('hf-cup')).toBeGreaterThan(card.indexOf('Bekerwinnaar'))
+    expect(card.indexOf('hf-cup')).toBeGreaterThan(card.indexOf('Finale'))
   })
 
   it('has neither a line nor a drawing while the cup goes on', async () => {
@@ -278,7 +277,7 @@ describe('the cards with results of an earlier season, one for each competition'
     const html = await render()
 
     expect(html).not.toContain('Uitgeschakeld')
-    expect(html).not.toContain('Bekerwinnaar')
+    expect(html).not.toContain('hf-cup')
   })
 
   it('has the link to the course of the season in the card of the league only', async () => {
