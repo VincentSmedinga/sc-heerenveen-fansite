@@ -203,6 +203,14 @@ describe('the English page of the season 2009/10', () => {
     expect(match).toMatchObject({ dateText: '25 juli 2009', kickoffAt: null, matchDate: '2009-07-25' })
   })
 
+  it('reads Willem II under both titles the English page has used for the club', () => {
+    const renamed = read('2009–10 SC Heerenveen season', (text) =>
+      text.replaceAll('[[Willem II (football club)|Willem II]]', '[[Willem II Tilburg|Willem II]]'),
+    )
+
+    expect(renamed).toEqual(matches)
+  })
+
   it('has one match whose scorers do not add up to the result, which the import leaves without scorers', () => {
     expect(matches.filter((match) => checkGoals(match) !== undefined).map((match) => match.round)).toEqual([
       'Speelronde 15',
