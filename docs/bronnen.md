@@ -540,7 +540,7 @@ Al in het register (#1004), met twee feeds.
 
 - **Domein:** `www.dvhn.nl`
 - **Soort:** nieuws, regionaal dagblad van Groningen en Drenthe
-- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen in het register (zie _De Mediahuis-kranten_).
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen `publisher` in het register (zie _De Mediahuis-kranten_).
 - **Feeds:** met het filter `club`
   - `https://www.dvhn.nl/sport/rss/`: een 200 met 50 berichten.
   - `https://www.dvhn.nl/sport/fc-groningen/rss/`: een 200 met 50 berichten.
@@ -548,7 +548,8 @@ Al in het register (#1004), met twee feeds.
   - Gemeten op 18 november 2026, met één run van de importer op een lege database:
     `/sport/rss/`: 50 berichten gelezen, 1 `relevant`, 0 `doubtful` en 49 `irrelevant`; de importer sloeg niets over.
     `/sport/fc-groningen/rss/`: 50 berichten gelezen, 1 `relevant`, 0 `doubtful` en 49 `irrelevant`; de importer sloeg niets over.
-    Het nieuwste bericht van de bron is van De rubriek over FC Groningen gaat vooral over die club; wat er over sc Heerenveen in staat, is nieuws rond een wedstrijd tegen Groningen.; 56 van de 95 bewaarde berichten staan achter de betaalmuur (`<premium>`).
+    Het nieuwste bericht van de bron is van 17 november 2026; 56 van de 95 bewaarde berichten staan achter de betaalmuur (`<premium>`).
+  - De rubriek over FC Groningen gaat vooral over die club; wat er over sc Heerenveen in staat, is nieuws rond een wedstrijd tegen Groningen.
   - Daarom komt er van deze krant weinig of niets op de site tot een bericht het filter haalt.
 - **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met onze user agent.
   Het is hetzelfde sjabloon als dat van de Leeuwarder Courant: het voorbehoud tegen tekst- en datamining staat als commentaar, `user-agent: *` heeft `Allow: /`, en alleen genoemde AI-crawlers zijn geweigerd.
@@ -563,13 +564,13 @@ Al in het register (#1004), met twee feeds.
 
 - **Domein:** `www.frieschdagblad.nl`
 - **Soort:** nieuws, regionaal dagblad voor Friesland
-- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen in het register (zie _De Mediahuis-kranten_).
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen `publisher` in het register (zie _De Mediahuis-kranten_).
 - **Feed:** `https://www.frieschdagblad.nl/sport/rss/`, met het filter `club`
   - Werkt: ja, RSS 2.0 met 50 berichten; dezelfde opbouw als de feeds van de Leeuwarder Courant.
   - Een feed over alleen de club bestaat niet: `/sport/sc-heerenveen/rss/` geeft een 404.
   - Gemeten op 18 november 2026, met één run van de importer op een lege database:
     `/sport/rss/`: 50 berichten gelezen, 0 `relevant`, 1 `doubtful` en 49 `irrelevant`; de importer sloeg niets over.
-    Het nieuwste bericht van de bron is van Het nieuwste bericht van de feed is van 17 oktober 2026, dus de feed is stil: bijna een maand zonder nieuw bericht.; 25 van de 50 bewaarde berichten staan achter de betaalmuur (`<premium>`).
+    Het nieuwste bericht van de bron is van 17 oktober 2026; 25 van de 50 bewaarde berichten staan achter de betaalmuur (`<premium>`).
   - Daarom komt er van deze krant weinig of niets op de site tot een bericht het filter haalt.
 - **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met onze user agent.
   Het is hetzelfde sjabloon als dat van de Leeuwarder Courant: het voorbehoud tegen tekst- en datamining staat als commentaar, `user-agent: *` heeft `Allow: /`, en alleen genoemde AI-crawlers zijn geweigerd.
@@ -584,7 +585,7 @@ Al in het register (#1004), met twee feeds.
 
 - **Domein:** `www.limburger.nl`
 - **Soort:** nieuws, regionaal dagblad voor Limburg
-- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen in het register (zie _De Mediahuis-kranten_).
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen `publisher` in het register (zie _De Mediahuis-kranten_).
 - **Feeds:** met het filter `club`
   - `https://www.limburger.nl/sport/rss/`: een 200 met 39 berichten.
   - `https://www.limburger.nl/sport/voetbal/rss/`: een 200 met 50 berichten.
@@ -592,7 +593,8 @@ Al in het register (#1004), met twee feeds.
   - Gemeten op 18 november 2026, met één run van de importer op een lege database:
     `/sport/rss/`: 39 berichten gelezen, 0 `relevant`, 0 `doubtful` en 39 `irrelevant`; de importer sloeg niets over.
     `/sport/voetbal/rss/`: 50 berichten gelezen, 0 `relevant`, 0 `doubtful` en 50 `irrelevant`; de importer sloeg niets over.
-    Het nieuwste bericht van de bron is van Geen bericht gaat over sc Heerenveen; de feeds leveren pas iets bij een bericht dat het filter herkent.; 54 van de 64 bewaarde berichten staan achter de betaalmuur (`<premium>`).
+    Het nieuwste bericht van de bron is van 18 november 2026; 54 van de 64 bewaarde berichten staan achter de betaalmuur (`<premium>`).
+  - Geen bericht gaat over sc Heerenveen; de feeds leveren pas iets bij een bericht dat het filter herkent.
   - Daarom komt er van deze krant weinig of niets op de site tot een bericht het filter haalt.
 - **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met onze user agent.
   Het is hetzelfde sjabloon als dat van de Leeuwarder Courant: het voorbehoud tegen tekst- en datamining staat als commentaar, `user-agent: *` heeft `Allow: /`, en alleen genoemde AI-crawlers zijn geweigerd.
@@ -606,7 +608,7 @@ Al in het register (#1004), met twee feeds.
 
 - **Domein:** `www.noordhollandsdagblad.nl`
 - **Soort:** nieuws, regionaal dagblad voor Noord-Holland
-- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen in het register (zie _De Mediahuis-kranten_).
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen `publisher` in het register (zie _De Mediahuis-kranten_).
 - **Feeds:** met het filter `club`
   - `https://www.noordhollandsdagblad.nl/sport/rss/`: een 200 met 50 berichten.
   - `https://www.noordhollandsdagblad.nl/sport/az/rss/`: een 200 met 50 berichten.
@@ -614,7 +616,8 @@ Al in het register (#1004), met twee feeds.
   - Gemeten op 18 november 2026, met één run van de importer op een lege database:
     `/sport/rss/`: 50 berichten gelezen, 0 `relevant`, 0 `doubtful` en 50 `irrelevant`; de importer sloeg niets over.
     `/sport/az/rss/`: 50 berichten gelezen, 1 `relevant`, 0 `doubtful` en 49 `irrelevant`; de importer sloeg niets over.
-    Het nieuwste bericht van de bron is van De rubriek over AZ gaat over die club; het ene bericht dat het filter doorlaat, noemt een oud-speler van sc Heerenveen.; 54 van de 98 bewaarde berichten staan achter de betaalmuur (`<premium>`).
+    Het nieuwste bericht van de bron is van 18 november 2026; 54 van de 98 bewaarde berichten staan achter de betaalmuur (`<premium>`).
+  - De rubriek over AZ gaat over die club; het ene bericht dat het filter doorlaat, noemt een oud-speler van sc Heerenveen.
   - Daarom komt er van deze krant weinig of niets op de site tot een bericht het filter haalt.
 - **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met onze user agent.
   Het is hetzelfde sjabloon als dat van de Leeuwarder Courant: het voorbehoud tegen tekst- en datamining staat als commentaar, `user-agent: *` heeft `Allow: /`, en alleen genoemde AI-crawlers zijn geweigerd.
@@ -628,13 +631,13 @@ Al in het register (#1004), met twee feeds.
 
 - **Domein:** `www.gooieneemlander.nl`
 - **Soort:** nieuws, regionaal dagblad voor het Gooi en Eemland
-- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen in het register (zie _De Mediahuis-kranten_).
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen `publisher` in het register (zie _De Mediahuis-kranten_).
 - **Feed:** `https://www.gooieneemlander.nl/sport/rss/`, met het filter `club`
   - Werkt: ja, RSS 2.0 met 50 berichten; dezelfde opbouw als de feeds van de Leeuwarder Courant.
   - Een feed over alleen de club bestaat niet: `/sport/sc-heerenveen/rss/` geeft een 404.
   - Gemeten op 18 november 2026, met één run van de importer op een lege database:
     `/sport/rss/`: 50 berichten gelezen, 0 `relevant`, 0 `doubtful` en 50 `irrelevant`; de importer sloeg niets over.
-    Het nieuwste bericht van de bron is van ; 28 van de 50 bewaarde berichten staan achter de betaalmuur (`<premium>`).
+    Het nieuwste bericht van de bron is van 18 november 2026; 28 van de 50 bewaarde berichten staan achter de betaalmuur (`<premium>`).
   - Daarom komt er van deze krant weinig of niets op de site tot een bericht het filter haalt.
 - **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met onze user agent.
   Het is hetzelfde sjabloon als dat van de Leeuwarder Courant: het voorbehoud tegen tekst- en datamining staat als commentaar, `user-agent: *` heeft `Allow: /`, en alleen genoemde AI-crawlers zijn geweigerd.
@@ -648,13 +651,13 @@ Al in het register (#1004), met twee feeds.
 
 - **Domein:** `www.haarlemsdagblad.nl`
 - **Soort:** nieuws, regionaal dagblad voor Haarlem en omstreken
-- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen in het register (zie _De Mediahuis-kranten_).
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen `publisher` in het register (zie _De Mediahuis-kranten_).
 - **Feed:** `https://www.haarlemsdagblad.nl/sport/rss/`, met het filter `club`
   - Werkt: ja, RSS 2.0 met 50 berichten; dezelfde opbouw als de feeds van de Leeuwarder Courant.
   - Een feed over alleen de club bestaat niet: `/sport/sc-heerenveen/rss/` geeft een 404.
   - Gemeten op 18 november 2026, met één run van de importer op een lege database:
     `/sport/rss/`: 50 berichten gelezen, 0 `relevant`, 0 `doubtful` en 50 `irrelevant`; de importer sloeg niets over.
-    Het nieuwste bericht van de bron is van ; 29 van de 50 bewaarde berichten staan achter de betaalmuur (`<premium>`).
+    Het nieuwste bericht van de bron is van 18 november 2026; 29 van de 50 bewaarde berichten staan achter de betaalmuur (`<premium>`).
   - Daarom komt er van deze krant weinig of niets op de site tot een bericht het filter haalt.
 - **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met onze user agent.
   Het is hetzelfde sjabloon als dat van de Leeuwarder Courant: het voorbehoud tegen tekst- en datamining staat als commentaar, `user-agent: *` heeft `Allow: /`, en alleen genoemde AI-crawlers zijn geweigerd.
@@ -668,13 +671,13 @@ Al in het register (#1004), met twee feeds.
 
 - **Domein:** `www.leidschdagblad.nl`
 - **Soort:** nieuws, regionaal dagblad voor Leiden en omstreken
-- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen in het register (zie _De Mediahuis-kranten_).
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen `publisher` in het register (zie _De Mediahuis-kranten_).
 - **Feed:** `https://www.leidschdagblad.nl/sport/rss/`, met het filter `club`
   - Werkt: ja, RSS 2.0 met 50 berichten; dezelfde opbouw als de feeds van de Leeuwarder Courant.
   - Een feed over alleen de club bestaat niet: `/sport/sc-heerenveen/rss/` geeft een 404.
   - Gemeten op 18 november 2026, met één run van de importer op een lege database:
     `/sport/rss/`: 50 berichten gelezen, 0 `relevant`, 0 `doubtful` en 50 `irrelevant`; de importer sloeg niets over.
-    Het nieuwste bericht van de bron is van ; 30 van de 50 bewaarde berichten staan achter de betaalmuur (`<premium>`).
+    Het nieuwste bericht van de bron is van 18 november 2026; 30 van de 50 bewaarde berichten staan achter de betaalmuur (`<premium>`).
   - Daarom komt er van deze krant weinig of niets op de site tot een bericht het filter haalt.
 - **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met onze user agent.
   Het is hetzelfde sjabloon als dat van de Leeuwarder Courant: het voorbehoud tegen tekst- en datamining staat als commentaar, `user-agent: *` heeft `Allow: /`, en alleen genoemde AI-crawlers zijn geweigerd.
@@ -688,13 +691,13 @@ Al in het register (#1004), met twee feeds.
 
 - **Domein:** `www.ijmuidercourant.nl`
 - **Soort:** nieuws, regionaal dagblad voor IJmuiden en omstreken
-- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen in het register (zie _De Mediahuis-kranten_).
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen `publisher` in het register (zie _De Mediahuis-kranten_).
 - **Feed:** `https://www.ijmuidercourant.nl/sport/rss/`, met het filter `club`
   - Werkt: ja, RSS 2.0 met 50 berichten; dezelfde opbouw als de feeds van de Leeuwarder Courant.
   - Een feed over alleen de club bestaat niet: `/sport/sc-heerenveen/rss/` geeft een 404.
   - Gemeten op 18 november 2026, met één run van de importer op een lege database:
     `/sport/rss/`: 50 berichten gelezen, 0 `relevant`, 0 `doubtful` en 50 `irrelevant`; de importer sloeg niets over.
-    Het nieuwste bericht van de bron is van ; 29 van de 50 bewaarde berichten staan achter de betaalmuur (`<premium>`).
+    Het nieuwste bericht van de bron is van 18 november 2026; 29 van de 50 bewaarde berichten staan achter de betaalmuur (`<premium>`).
   - Daarom komt er van deze krant weinig of niets op de site tot een bericht het filter haalt.
 - **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met onze user agent.
   Het is hetzelfde sjabloon als dat van de Leeuwarder Courant: het voorbehoud tegen tekst- en datamining staat als commentaar, `user-agent: *` heeft `Allow: /`, en alleen genoemde AI-crawlers zijn geweigerd.
