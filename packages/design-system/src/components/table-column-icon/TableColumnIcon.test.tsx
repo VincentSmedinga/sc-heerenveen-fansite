@@ -65,7 +65,7 @@ describe('TableColumnIcon', () => {
     expect(badge('won')).toContain('hf-table-icon-win')
     expect(badge('lost')).toContain('hf-table-icon-loss')
     expect(badge('drawn')).toContain('hf-table-icon-draw')
-    expect(badge('goals')).toContain('hf-table-icon-win')
+    expect(badge('goals')).toBeUndefined()
     expect(badge('conceded')).toContain('hf-table-icon-loss')
     expect(badge('goalDifference')).toContain('hf-table-icon-draw')
     expect(css).toMatch(/\.hf-table-icon-win \{\s*fill: var\(--hf-colour-outcome-win\)/u)
