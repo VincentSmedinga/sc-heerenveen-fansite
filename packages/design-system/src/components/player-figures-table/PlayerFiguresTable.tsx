@@ -65,9 +65,8 @@ const columns = [
  * `tableColumns` in the header, which a screen reader reads as the whole word. The matches he
  * played are not a column: they are the line-ups and the times he came on together. The
  * minutes come first and are bold, because the page orders the list by them: they are the key
- * figure of the table. Under the table
- * stand the icons with their words, and that a yellow-red card counts as a yellow and a red
- * card.
+ * figure of the table. Under the table stand the icons with their words, and that a
+ * yellow-red card counts as a yellow and a red card.
  * The table has no bars: it is for looking a player up, and its columns keep close together so
  * it fits a phone. player-figures.css gives the look.
  */
