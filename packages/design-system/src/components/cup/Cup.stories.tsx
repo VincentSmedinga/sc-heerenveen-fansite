@@ -9,7 +9,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Een lijntekening van een beker, voor de kaart van een gewonnen beker.',
+          'Een lijntekening van de Denneappel, de beker van de KNVB Beker, voor de kaart van een gewonnen beker.',
           'De tekening is versiering: een schermlezer slaat hem over, dus de tekst ernaast zegt waar hij voor staat.',
           'De lijnen nemen de kleur van de tekst eromheen, in licht en in donker.',
         ].join('\n'),
