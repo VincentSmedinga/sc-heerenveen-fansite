@@ -107,6 +107,16 @@ describe('listClubRecords', () => {
     ])
   })
 
+  it('gives the country of the club, and null for a club whose country we do not know', async () => {
+    await store(played('FC Twente', 2, 0), played('Ajax', 1, 2))
+    await database.pool.query("UPDATE clubs SET country = 'NL', country_source = 'manual' WHERE name = 'FC Twente'")
+
+    expect(await listClubRecords(database.db)).toMatchObject([
+      { country: null, name: 'Ajax' },
+      { country: 'NL', name: 'FC Twente' },
+    ])
+  })
+
   it('counts a cup tie that a shoot-out decided as won or lost, with the goals as they were', async () => {
     const cup = (penaltiesFor: number, penaltiesAgainst: number) =>
       played('Testdorp FC', 1, 1, { competition: 'KNVB Beker', extraTime: true, penaltiesAgainst, penaltiesFor })

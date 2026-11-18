@@ -18,6 +18,7 @@ const record = (
   goals: [number, number],
 ) =>
   ({
+    country: slug === 'testclub' ? 'NL' : slug === 'fc-voorbeeld' ? null : 'DE',
     drawn,
     goalsAgainst: goals[1],
     goalsFor: goals[0],

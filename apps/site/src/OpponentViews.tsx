@@ -7,6 +7,7 @@ import {
   BarChart,
   BarPlace,
   Card,
+  countryName,
   DataTable,
   DescriptionList,
   Disclosure,
@@ -17,6 +18,7 @@ import {
   Match,
   NewsItem,
   Pagination,
+  PlayerName,
   RecordTable,
   sharesOf,
   ShortStaff,
@@ -182,14 +184,17 @@ export function ClubMeetingsCard({
 
 /**
  * The card of the page Tegenstanders with every club we played, A to Z, each name a link to
- * the page of that club (`address` is the base address of the pages of the clubs; `query` is
- * the part of the address that holds the choice, which every link keeps). The columns are the
- * played, won, drawn and lost matches, the points and the goal difference, with its sign, as
- * "+18". They are icons, which fit a phone, and the legend under the table explains them.
- * The visitor can sort on every column, with JavaScript; the table of the server is A to Z. The
- * goal difference sorts on the number, so the club we did best against is on top. There is no
- * pagination: the list is one page. It is the main content of the page, so it has the white
- * surface.
+ * the page of that club, with the flag of the country of the club before it (a decoration in
+ * the link, so the link is named by the club, and the country in words for a screen reader
+ * after the link, once) and an empty place of the same width for a club without a
+ * country, so the names stay under each other. `address` is the base address of the pages of
+ * the clubs; `query` is the part of the address that holds the choice, which every link keeps.
+ * The columns are the played, won, drawn and lost matches, the points and the goal difference,
+ * with its sign, as "+18". They are icons, which fit a phone, and the legend under the table
+ * explains them. The visitor can sort on every column, with JavaScript; the table of the
+ * server is A to Z. The goal difference sorts on the number, so the club we did best against
+ * is on top. There is no pagination: the list is one page. It is the main content of the page,
+ * so it has the white surface.
  */
 export function ClubsCard({
   address,
@@ -227,8 +232,20 @@ export function ClubsCard({
                 pointsOf(record),
                 { sortValue: goalDifference(record), text: signedNumber(goalDifference(record)) },
               ],
+              display: (
+                <>
+                  <PlayerName
+                    country={record.country}
+                    givenName={record.name}
+                    href={`${address}/${record.slug}${query}`}
+                    surname=""
+                  />
+                  {record.country === null || countryName(record.country) === undefined ? null : (
+                    <Text as="span" className="hf-visually-hidden">{`, ${countryName(record.country)}`}</Text>
+                  )}
+                </>
+              ),
               header: record.name,
-              href: `${address}/${record.slug}${query}`,
             }))}
           />
           <Text appearance="meta">{clubLegend}</Text>
