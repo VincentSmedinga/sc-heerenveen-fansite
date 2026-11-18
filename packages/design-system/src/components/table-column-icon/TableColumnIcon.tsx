@@ -102,7 +102,6 @@ const signs = {
   cross: 'M9.7 9.7l3.3 3.3m0-3.3l-3.3 3.3',
   equals: 'M9.1 10.2h4.6M9.1 12.6h4.6',
   minus: 'M9 11.4h4.8',
-  plus: 'M11.4 9v4.8M9 11.4h4.8',
   plusMinus: 'M11.4 8.5v3.3M9.8 10.15h3.2M9.8 13.7h3.2',
 } as const
 
@@ -170,12 +169,7 @@ const drawings: Record<TableColumnIconName, () => ReactNode> = {
       <Badge colour="draw" sign="plusMinus" />
     </>
   ),
-  goals: () => (
-    <>
-      <Ball />
-      <Badge colour="win" sign="plus" />
-    </>
-  ),
+  goals: () => <Ball />,
   goalsPerMatch: () => (
     <>
       <Ball />
@@ -241,10 +235,10 @@ const drawings: Record<TableColumnIconName, () => ReactNode> = {
 }
 
 /**
- * The icon of a column of a table, such as a ball with a green plus for the goals. It is a
+ * The icon of a column of a table, such as a plain ball for the goals. It is a
  * drawing in a square of 16 by 16, as large as the text beside it (in `em`) and turned 8
  * degrees like `MatchEventIcon`. The colours come from tokens and follow the theme, and colour
- * always repeats a shape (a check, a cross, a plus, a minus), so it is never alone. The icon
+ * always repeats a shape (a check, a cross, a minus), so it is never alone. The icon
  * has no word: it is hidden from assistive technology, and the header or the legend that holds
  * it writes the whole word.
  */
