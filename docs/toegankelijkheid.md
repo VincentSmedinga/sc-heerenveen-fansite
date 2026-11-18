@@ -115,7 +115,7 @@ Zo test je het: verstuur het formulier leeg en met foute waarden, met alleen het
 - [ ] Een tabel is een echte `table` met een bijschrift, kolomkoppen en rijkoppen met `scope`.
       Een kop met een pictogram heeft het hele woord voor een schermlezer, en een regel onder de tabel zet het pictogram en het woord bij elkaar (1.3.1).
       Het pictogram is `aria-hidden`.
-      De pictogrammen en woorden komen uit één lijst, `tableColumns` in het designsysteem, en elke kolom heeft een eigen pictogram en een eigen woord.
+      De pictogrammen en woorden komen uit één lijst, `tableColumns` in het designsysteem, en elke kolom heeft een eigen pictogram en een eigen woord, behalve `goalsFor`, dat "doelpunten" zegt zoals `goals` en nooit in een tabel met `goals` staat.
       Een sorteerknop heet naar het woord, "gespeeld" of "gelijk", zodat spraakbesturing "klik gespeeld" kan zeggen (2.5.3).
       De randen en vullingen van een pictogram halen minstens 3:1 tegen het vlak (1.4.11), en kleur herhaalt altijd een vorm (1.4.1).
       In geforceerde kleuren zijn de vullingen `CanvasText` of `Canvas`.
