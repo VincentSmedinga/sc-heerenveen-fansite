@@ -3884,9 +3884,11 @@
 ## Een kolom krijgt een pictogram als er een is dat precies zegt wat de kolom telt, en de plus staat alleen naast de min
 
 - **Datum:** 18 november 2026
-- **Besluit:** een kolom krijgt een pictogram als `tableColumns` er een heeft dat precies zegt wat de kolom telt. Anders blijft het woord.
+- **Besluit:** een kolom krijgt een pictogram als `tableColumns` er een heeft dat precies zegt wat de kolom telt.
+  Anders blijft het woord.
   De doelpunten voor hebben een eigen sleutel, `goalsFor`, met het woord "doelpunten voor" en een bal met een groene plus, alleen voor een tabel waarin de tegendoelpunten (`conceded`) ernaast staan.
   Vijf tabellen kregen daarmee pictogrammen: Verloop van het seizoen (ook het uitklapdeel), de competities van de wedstrijden bij een tegenstander, de twee tabellen Onze schutters en Doelpunten per kwartier (#1391).
-- **Waarom:** de tabellen spreken zo één taal, maar een pictogram dat bijna klopt, zegt het verkeerde. De plus betekent alleen iets naast de min, zoals bij #1383 besloten.
+- **Waarom:** de tabellen spreken zo één taal, maar een pictogram dat bijna klopt, zegt het verkeerde.
+  De plus betekent alleen iets naast de min, zoals bij #1383 besloten.
 - **Alternatieven:** Voor en Tegen als woorden houden (kort en duidelijk, maar anders dan de andere tabellen met doelpunten); `goals` weer de plus geven (dan staat de plus weer overal waar geen min staat).
 - **Later:** vult _Het pictogram van de doelpunten is een gewone bal_ (18 november 2026, #1383) aan: de plus komt terug als eigen sleutel, niet bij `goals`.
