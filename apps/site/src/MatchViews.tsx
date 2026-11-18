@@ -146,7 +146,7 @@ export function BasedOn({
 }: {
   known: number
   /** Other limits of the card, such as "Alleen de Eredivisie". */
-  limits?: readonly string[]
+  limits?: readonly (false | string | undefined)[]
   played: number
 }) {
   return <DataLine limits={[...limits, incompleteMatches(known, played)]} />
@@ -732,7 +732,8 @@ export function MatchFlowCard({
   matches: PublicMatch[]
   season?: string | undefined
 }) {
-  const { atHalfTime, firstGoal, known, notWonAfterLead, played, wonAfterTrailing } = matchFlowOf(matches)
+  const { atHalfTime, firstGoal, known, notWonAfterLead, played, unknownFirstGoal, wonAfterTrailing } =
+    matchFlowOf(matches)
 
   return (
     <Card
@@ -782,7 +783,15 @@ export function MatchFlowCard({
           <Text appearance="meta">{tableLegend(flowColumns)}</Text>
         </>
       )}
-      <BasedOn known={known === 0 ? played : known} limits={['alleen de Eredivisie']} played={played} />
+      <BasedOn
+        known={known === 0 ? played : known}
+        limits={[
+          'alleen de Eredivisie',
+          unknownFirstGoal > 0 &&
+            `eerste doelpunt onbekend bij ${unknownFirstGoal === 1 ? '1 wedstrijd' : `${unknownFirstGoal} wedstrijden`}`,
+        ]}
+        played={played}
+      />
     </Card>
   )
 }

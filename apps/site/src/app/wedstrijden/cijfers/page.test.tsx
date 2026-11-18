@@ -1180,7 +1180,9 @@ describe('the page /wedstrijden/cijfers', () => {
 
       const card = section(await render(), 'hoe-de-wedstrijden-verlopen')
 
-      expect(card).toMatch(/Alleen de Eredivisie, \d+ van de \d+ gespeelde wedstrijden/)
+      expect(card).toMatch(
+        /Alleen de Eredivisie, eerste doelpunt onbekend bij 1 wedstrijd, \d+ van de \d+ gespeelde wedstrijden/,
+      )
       expect(tableRows((await tables())[0] ?? '')).toEqual([
         ['Wij scoren eerst', '1', '1', '0', '0', '3'],
         ['De tegenstander scoort eerst', '0', '0', '0', '0', '0'],
