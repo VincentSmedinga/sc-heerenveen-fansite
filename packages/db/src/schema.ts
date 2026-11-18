@@ -1687,6 +1687,55 @@ export type NewStandingsRow = typeof standings.$inferInsert
 export type StandingsRow = typeof standings.$inferSelect
 
 /**
+ * The table of one group of a European tournament (#1405), from the page of the Dutch
+ * Wikipedia that has the group stage: one row per club, for the group sc Heerenveen played in.
+ * Our own matches are in `matches`, but the other clubs and their results are not, so the table
+ * is read and not worked out. It is apart from `standings`, which is our own league.
+ *
+ * `competition` is the name `matches.competition` has (`UEFA Cup`), and `group_name` the
+ * heading of the group (`Groep D`). `club_id` is the club, and null for sc Heerenveen itself,
+ * which is no club of `clubs`. `source_page`, `language` and `read_at` (UTC) say where and when
+ * the table was read, for the credit; the licence is that of the Wikipedia of the language
+ * (CC BY-SA 4.0).
+ *
+ * The numbers are those of the page, checked when they were read: `played` is won + drawn +
+ * lost, `goal_difference` is goals for − against (it can be negative) and `points` is 3 × won
+ * + drawn.
+ */
+export const groupStandings = mysqlTable(
+  'group_standings',
+  {
+    season: varchar('season', { length: matchLimits.season }).notNull(),
+    competition: mysqlEnum('competition', competitions).notNull(),
+    groupName: varchar('group_name', { length: 40 }).notNull(),
+    position: int('position', { unsigned: true }).notNull(),
+    clubId: int('club_id', { unsigned: true }).references(() => clubs.id, { onDelete: 'cascade' }),
+    played: int('played', { unsigned: true }).notNull(),
+    won: int('won', { unsigned: true }).notNull(),
+    drawn: int('drawn', { unsigned: true }).notNull(),
+    lost: int('lost', { unsigned: true }).notNull(),
+    goalsFor: int('goals_for', { unsigned: true }).notNull(),
+    goalsAgainst: int('goals_against', { unsigned: true }).notNull(),
+    goalDifference: int('goal_difference').notNull(),
+    points: int('points', { unsigned: true }).notNull(),
+    sourcePage: varchar('source_page', { length: 255 }).notNull(),
+    language: char('language', { length: 2 }).notNull(),
+    readAt: datetime('read_at', { mode: 'date' }).notNull(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.season, table.competition, table.groupName, table.position],
+      name: 'group_standings_pk',
+    }),
+    unique('group_standings_club_unique').on(table.season, table.competition, table.groupName, table.clubId),
+  ],
+)
+
+export type GroupStandingsRow = typeof groupStandings.$inferSelect
+
+export type NewGroupStandingsRow = typeof groupStandings.$inferInsert
+
+/**
  * The results of the Eredivisie, one row per played league match of any club, from the
  * programme page of the Dutch Wikipedia. The importer replaces the rows of a season at once,
  * like the table. A match without a result (planned or postponed) has no row until it is

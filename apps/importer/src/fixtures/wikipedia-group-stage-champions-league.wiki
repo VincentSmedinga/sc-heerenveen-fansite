@@ -1,0 +1,54 @@
+Een stuk van de pagina van de Champions League 2000/01.
+
+==Groepsfase==
+===Groep A===
+{| style=border-collapse:collapse border=1 cellspacing=0 cellpadding=5
+|- align=center bgcolor=#efefef
+!Team
+!width=20|Ptn
+!width=20|Wed
+!width=20|W
+!width=20|G
+!width=20|V
+!width=20|DV
+!width=20|DT
+!width=25|GD
+|- align=center bgcolor=#ccffcc
+|align=left|1. {{ES-VLAG}} '''[[Real Madrid]]'''
+|'''13'''||6||4||1||1||15||8||+7
+|- align=center bgcolor=#ccffcc
+|align=left|2. {{RU-VLAG}} '''[[Spartak Moskou]]'''
+|'''12'''||6||4||0||2||9||3||+6
+|- align=center bgcolor=#FFCCCC
+|align=left|3. {{DE-VLAG}} '''''[[Bayer 04 Leverkusen|Bayer Leverkusen]]'''''
+|'''7'''||6||2||1||3||9||12||−3
+|- align=center
+|align=left|4. {{PT-VLAG}} ''[[Sporting Clube de Portugal]]''
+|'''2'''||6||0||2||4||5||15||−10
+|}
+
+===Groep C===
+{| style=border-collapse:collapse border=1 cellspacing=0 cellpadding=5
+|- align=center bgcolor=#efefef
+!width=185|Team
+!width=20|Ptn
+!width=20|Wed
+!width=20|W
+!width=20|G
+!width=20|V
+!width=20|DV
+!width=20|DT
+!width=20|DS
+|- align=center bgcolor=#ccffcc
+|align=left|1. {{ES-VLAG}} '''[[Valencia CF]]'''
+|'''13'''||6||4||1||1||7||4||+3
+|- align=center bgcolor=#ccffcc
+|align=left|2. {{FR-VLAG}} '''[[Olympique Lyonnais]]'''
+|'''9'''||6||3||0||3||8||6||+2
+|- align=center bgcolor=#FFCCCC
+|align=left|3. {{GR-VLAG}} '''''[[Olympiakos Piraeus]]'''''
+|'''9'''||6||3||0||3||6||5||+1
+|- align=center
+|align=left|4. {{NL-VLAG}} ''[[sc Heerenveen]]''
+|'''4'''||6||1||1||4||3||9||−6
+|}

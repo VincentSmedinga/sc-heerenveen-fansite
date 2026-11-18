@@ -57,6 +57,14 @@ const deductedRows: StandingsTableRow[] = rows.map((row) =>
   row.club === 'Testdorp FC' ? { ...row, points: 9, pointsDeducted: 6 } : row,
 )
 
+// A group of a European tournament after six matches: four clubs, two with the same points.
+const groupRows: StandingsTableRow[] = [
+  { club: 'Demo Boys', played: 6, points: 13, position: 1 },
+  { club: 'Proefstad SV', played: 6, points: 9, position: 2 },
+  { club: 'Voorbeeld United', played: 6, points: 9, position: 3 },
+  { club: 'sc Heerenveen', played: 6, points: 4, position: 4 },
+]
+
 const caption = 'Stand op 18 oktober 2026'
 
 const renderFull = (tableRows: StandingsTableRow[]) => () => (
@@ -104,4 +112,19 @@ export const Compact = meta.story({
   args: { caption, columns: 'compact', rows: rows.slice(1, 4) },
   name: 'Korte stand met drie clubs, zonder balk',
   render: Default.input.render,
+})
+
+export const Group = meta.story({
+  name: 'Tabel van een groep onder de wedstrijden van een toernooi',
+  render: () => (
+    <div style={{ maxInlineSize: '32rem' }}>
+      <Card aria-labelledby="toernooi-kop">
+        <Heading id="toernooi-kop" level={2}>
+          Europa League
+        </Heading>
+        <Heading level={3}>Tabel van groep d</Heading>
+        <StandingsTable caption="Tabel van groep d in de Europa League van 2026/27" rows={groupRows} />
+      </Card>
+    </div>
+  ),
 })

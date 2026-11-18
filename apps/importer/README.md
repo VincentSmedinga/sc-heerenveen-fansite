@@ -1936,6 +1936,11 @@ Zo komt een late verbetering op Wikipedia binnen zonder dat iemand `import:seaso
   Na zo'n opdracht leest de uurlijkse import het seizoen dus een uur later nog eens, en wacht dan weer een week.
 - Een lezing die faalt, is een waarschuwing in de uitvoer en in de rij van dat seizoen in `match_imports` of `squad_imports`.
   Ze stopt de selectie en het lopende seizoen niet, verandert de exitcode niet en telt niet voor de mail over een import die blijft falen.
+- Een seizoen met een groepsfase van een Europees toernooi krijgt er een regel bij, `Group stage Europa League 2009/10: Groep D, 4 clubs, stored` (#1405).
+  De groepstabel van sc Heerenveen komt van de Nederlandse Wikipedia, van een vaste lijst pagina's (`groupStages` in `src/import-group-standings.ts`), en staat in `group_standings`.
+  De lezer is `src/read-group-standings.ts`; hij bewaart de tabel alleen als de getallen kloppen, en een afwijking is een regel met de naam van de club.
+  Een pagina zonder tabel is ook een regel, en geeft exitcode 1 zonder de tabel die er al was te verwijderen.
+  De seizoenen van vóór 2010/11 geven voor de wedstrijden nog een waarschuwing en exitcode 1, tot het vervolg op #1402 hun pagina's leest; de groepstabel wordt dan wel bewaard.
 - `pnpm run import:status` blijft over het lopende seizoen gaan.
 
 #### Alle afgelopen seizoenen

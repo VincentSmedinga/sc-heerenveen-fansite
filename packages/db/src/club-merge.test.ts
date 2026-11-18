@@ -12,6 +12,7 @@ import {
   clubPages,
   clubs,
   feeds,
+  groupStandings,
   itemClubs,
   items,
   leagueResults,
@@ -39,6 +40,7 @@ beforeEach(async () => {
     'matches',
     'item_clubs',
     'standings',
+    'group_standings',
     'league_results',
     'club_home_grounds',
     'stadiums',
@@ -330,6 +332,36 @@ describe('mergeChosenClubs', () => {
 
     expect(await database.db.select().from(clubs)).toMatchObject([{ id: stays, wikipediaPage: 'A (club)' }])
     expect((await database.db.select().from(clubPages)).map((row) => row.page)).toEqual(['B (club)'])
+  })
+
+  it('moves the row of the club that goes in the table of a group stage to the club that stays', async () => {
+    const stays = await addClub({ name: 'Sporting', slug: 'sporting' })
+    const goes = await addClub({ name: 'Sporting Lissabon', slug: 'sporting-lissabon' })
+    const row = {
+      competition: 'Europa League',
+      drawn: 0,
+      goalDifference: 0,
+      goalsAgainst: 0,
+      goalsFor: 0,
+      groupName: 'Groep D',
+      language: 'nl',
+      lost: 0,
+      played: 0,
+      points: 0,
+      readAt: new Date('2026-11-18T10:00:00Z'),
+      season: '2009/10',
+      sourcePage: 'UEFA Europa League 2009/10',
+      won: 0,
+    } as const
+
+    await database.db.insert(groupStandings).values({ ...row, clubId: goes, position: 1 })
+    await database.db.insert(groupStandings).values({ ...row, clubId: null, position: 2 })
+
+    await mergeChosenClubs(database.db, { describe: describe_, keptId: stays, otherId: goes, userId: null })
+
+    expect(
+      (await database.db.select().from(groupStandings).orderBy(asc(groupStandings.position))).map((r) => r.clubId),
+    ).toEqual([stays, null])
   })
 
   it('moves the list of names of the club that goes and puts the name that stays after it', async () => {

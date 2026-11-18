@@ -13,6 +13,7 @@ import {
   clubNames,
   clubs,
   discussions,
+  groupStandings,
   itemClubs,
   items,
   leagueResults,
@@ -59,6 +60,8 @@ export type PublicClubRecord = Awaited<ReturnType<typeof listClubRecords>>[numbe
 export type PublicDiscussion = Awaited<ReturnType<typeof listNewestDiscussions>>[number]
 
 export type PublicEpisode = Awaited<ReturnType<typeof listPodcastEpisodes>>[number]
+
+export type PublicGroupStandingsRow = Awaited<ReturnType<typeof listGroupStandings>>[number]
 
 export type PublicItem = Awaited<ReturnType<typeof listRecentItems>>[number]
 
@@ -641,6 +644,38 @@ export function listEnabledSources(db: Database) {
     .from(sources)
     .where(eq(sources.enabled, true))
     .orderBy(asc(sources.name))
+}
+
+/**
+ * The tables of the groups of the European tournaments of a season (#1405), from the first
+ * place down in each group: the competition, the heading of the group, the position, the club
+ * (sc Heerenveen, which has no row in `clubs`, when `club_id` is empty), the numbers of the
+ * page, and the page the table was read from with its language and the time, for the credit.
+ * A season without a group stage gives none.
+ */
+export function listGroupStandings(db: Database, season: string) {
+  return db
+    .select({
+      club: sql<string>`coalesce(${clubs.name}, 'sc Heerenveen')`.mapWith(String),
+      competition: groupStandings.competition,
+      drawn: groupStandings.drawn,
+      goalDifference: groupStandings.goalDifference,
+      goalsAgainst: groupStandings.goalsAgainst,
+      goalsFor: groupStandings.goalsFor,
+      groupName: groupStandings.groupName,
+      language: groupStandings.language,
+      lost: groupStandings.lost,
+      played: groupStandings.played,
+      points: groupStandings.points,
+      position: groupStandings.position,
+      readAt: groupStandings.readAt,
+      sourcePage: groupStandings.sourcePage,
+      won: groupStandings.won,
+    })
+    .from(groupStandings)
+    .leftJoin(clubs, eq(groupStandings.clubId, clubs.id))
+    .where(eq(groupStandings.season, season))
+    .orderBy(asc(groupStandings.competition), asc(groupStandings.groupName), asc(groupStandings.position))
 }
 
 /**

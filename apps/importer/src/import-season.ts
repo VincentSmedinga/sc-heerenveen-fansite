@@ -7,13 +7,14 @@
 // With `--from-season 2020/21` it reads every season that is over from that season on, the
 // oldest first, one after the other (`import.mjs --from-season 2020/21` on the host). The loop
 // is here and not in the workflow, so it has a test.
-import { connect } from '@fansite/db/client'
+import { connect, type Database } from '@fansite/db/client'
 import { lockNameFor, withLock } from '@fansite/db/lock'
 import { seasonOf } from '@fansite/db/season'
 
 import type { ImportOptions } from './import-feeds.ts'
 
-import { createFetcher } from './fetcher.ts'
+import { createFetcher, type Fetcher } from './fetcher.ts'
+import { groupStagesOf, importGroupStages } from './import-group-standings.ts'
 import {
   englishWikipediaOrigin,
   formatMatchReport,
@@ -150,15 +151,13 @@ export async function runSeasonImport(
         write(line)
       }
 
-      try {
-        return await importPastSeason(db, fetcher, parsed.season, {
-          clock,
-          englishOrigin,
-          origin,
-        })
-      } catch (error) {
-        return { kind: 'error', message: describeError(error), season: parsed.season } as const
-      }
+      const report = await importPastSeason(db, fetcher, parsed.season, {
+        clock,
+        englishOrigin,
+        origin,
+      }).catch((error: unknown) => ({ kind: 'error', message: describeError(error), season: parsed.season }) as const)
+
+      return { groups: await readGroupStages(db, fetcher, parsed.season, origin, clock), report }
     })
 
     if (!run.ran) {
@@ -167,9 +166,12 @@ export async function runSeasonImport(
       return 1
     }
 
-    write(formatMatchReport(run.result))
+    write(formatMatchReport(run.result.report))
+    for (const line of run.result.groups.lines) {
+      write(line)
+    }
 
-    return run.result.kind === 'imported' ? 0 : 1
+    return run.result.report.kind === 'imported' && run.result.groups.ok ? 0 : 1
   } finally {
     await close()
   }
@@ -220,11 +222,11 @@ export async function runSeasonsImport(
       const run = await withLock(pool, lockNameFor(databaseUrl, 'import'), 0, async () => {
         const lines = await repairKnownClubs(db, fetcher, origin, clock)
 
-        try {
-          return { lines, report: await importPastSeason(db, fetcher, season, { clock, englishOrigin, origin }) }
-        } catch (error) {
-          return { lines, report: { kind: 'error', message: describeError(error), season } as const }
-        }
+        const report = await importPastSeason(db, fetcher, season, { clock, englishOrigin, origin }).catch(
+          (error: unknown) => ({ kind: 'error', message: describeError(error), season }) as const,
+        )
+
+        return { groups: await readGroupStages(db, fetcher, season, origin, clock), lines, report }
       })
 
       if (!run.ran) {
@@ -241,8 +243,13 @@ export async function runSeasonsImport(
       const text = formatMatchReport(run.result.report)
 
       write(text)
+      for (const line of run.result.groups.lines) {
+        write(line)
+      }
       if (run.result.report.kind !== 'imported') {
         failed.push({ reason: text.slice(`Matches ${season}: `.length), season })
+      } else if (!run.result.groups.ok) {
+        failed.push({ reason: run.result.groups.lines.join('; '), season })
       }
     }
   } finally {
@@ -283,4 +290,21 @@ function checkSeason(argument: string | undefined): Checked {
   }
 
   return { kind: 'season', season: argument }
+}
+
+/**
+ * Reads the tables of the group stages of a season (#1405), after the matches of the season.
+ * Most seasons have none and cost no request. A table that cannot be read is no reason to fail
+ * the matches that were stored: it is a line in the log, and it makes the command exit with 1.
+ */
+async function readGroupStages(db: Database, fetcher: Fetcher, season: string, origin: string, clock: () => Date) {
+  if (groupStagesOf(season).length === 0) {
+    return { lines: [], ok: true }
+  }
+
+  try {
+    return await importGroupStages(db, fetcher, season, origin, clock())
+  } catch (error) {
+    return { lines: [`Group stage ${season}: not stored, ${describeError(error)}`], ok: false }
+  }
 }

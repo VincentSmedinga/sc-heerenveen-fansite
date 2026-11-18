@@ -4446,3 +4446,31 @@
   Eén wedstrijd is één ronde, dus het enkelvoud, en de site kan een ronde zo ook herkennen (zie _Het bekerkaartje noemt de ronde van de uitschakeling_ in `site.md`).
 - **Alternatieven:** het meervoud van de kopjes houden; cijfers als `3e ronde`; de namen alleen in de site omzetten (dan staat de database nog steeds door elkaar).
 - **Later:** vervangt de ronde `Halve finales` en `2e ronde` tot en met `4e ronde` in _De ronde is de kop boven de wedstrijd, en de versie van een pagina is de `Last-Modified`_: de kop boven de wedstrijd blijft de ronde, maar in deze schrijfwijze.
+
+## De groepstabel van een Europees toernooi komt in een eigen tabel, van een vaste lijst pagina's
+
+- **Datum:** 18 november 2026
+- **Besluit:** de groepstabel van een Europees toernooi komt in een eigen tabel `group_standings` (seizoen, competitie, groep, positie, club, gespeeld, gewonnen, gelijk, verloren, doelpunten voor en tegen, doelsaldo, punten), van de Wikipedia-pagina van de groepsfase.
+  Per rij bewaart de tabel ook de bron: de pagina (`source_page`), de taal (`language`) en het tijdstip van het lezen (`read_at`).
+  De club is een `club_id` van `clubs`; sc Heerenveen zelf staat daar niet in, dus zijn rij heeft geen `club_id`, zoals bij `matches`.
+  Een samenvoeging van clubs zet het nummer mee over (`mergeClubInto`).
+- **Waarom:** de tabel heeft clubs van elders en een groep, en past niet in `standings`, die onze competitie is. Een eigen tabel laat de sleutel (seizoen, competitie, groep, positie) kloppen.
+  De wedstrijden van de andere clubs hebben we niet, dus de tabel valt niet uit onze wedstrijden uit te rekenen.
+- **Alternatieven:** een kolom `competition` in `standings` (maakt van onze competitie een rommellade); de tabel uit onze eigen wedstrijden berekenen (de wedstrijden van de andere clubs ontbreken); de naam van de club als tekst bewaren zoals `standings` doet (dan moet een samenvoeging van clubs er ook de namen in nalopen).
+
+- **Datum:** 18 november 2026
+- **Besluit:** een vaste lijst in de code, `groupStages` in `import-group-standings.ts`, zegt per seizoen en competitie welke pagina van de Nederlandse Wikipedia de groepstabel heeft: de Champions League van 2000/01, de UEFA Cup van 2004/05, 2005/06, 2006/07 en 2008/09, de Europa League van 2009/10 en de Intertoto Cup van 1995 tot en met 1997.
+  Voor een ander seizoen komt geen verzoek.
+  `pnpm run import:season <seizoen>` leest ze na de wedstrijden van dat seizoen, met de bestaande fetcher, en `import:seasons` doet het voor elk seizoen dat het loopt.
+  De lezer (`read-group-standings.ts`) neemt de tabel waar een rij van sc Heerenveen in staat en leest de kolommen uit de kop (`Ptn Wed W G V DV DT DS`, ook `Pts` en de vorm van 2009/10 met `GS` en `P`).
+  Een tabel wordt alleen bewaard als de getallen kloppen: gespeeld is gewonnen plus gelijk plus verloren, het doelsaldo is voor min tegen, de punten zijn 3 × gewonnen plus gelijk, elke club speelde evenveel wedstrijden en de doelpunten voor en tegen zijn samen gelijk.
+  Een afwijking noemt de club in het logboek en laat de tabel die er al was staan.
+  Een pagina die de tabel niet geeft, wordt ook een regel in het logboek en geen groepstabel.
+  De clubs worden gekoppeld zoals bij de wedstrijden (`createClubBook` met `clubFullNames`, en de omleidingen van de artikelen), zodat `Sporting Lissabon` geen tweede club naast die van de wedstrijden wordt.
+  De Intertoto Cup van 1998 en later was een knock-outtoernooi en staat er niet in.
+  De pagina van 1996 heeft de groep van sc Heerenveen ook, onder `Sc Heerenveen`; de namen van de pagina's schrijven de club op meer manieren.
+- **Waarom:** de pagina's staan niet onder één naam of in één vorm, en een verzoek op een gok kost een verzoek aan een pagina die niet bestaat.
+  De lijst is klein en wordt bijgewerkt als een seizoen erbij komt.
+  Een tabel die niet klopt is erger dan geen tabel: de bezoeker leest de uitslagen als waar.
+- **Alternatieven:** de pagina's raden uit het seizoen (de titels verschillen: `UEFA Cup 2004/05`, `UEFA Champions League 2000/01`, `UEFA Intertoto Cup 1995`); een eigen opdracht voor de groepsfases (de bestaande werkstroom `Import season` leest dan niets); de Engelse Wikipedia (de Nederlandse pagina's hebben de tabellen al).
+- **Let op:** voor seizoenen van vóór 2010/11 geeft het deel van `import:season` met de wedstrijden nu nog een waarschuwing en exitcode 1, omdat de pagina's van de Eredivisie van die seizoenen niet bestaan (het vervolg op #1402 verandert dat); de groepstabel wordt dan wel gelezen en bewaard.

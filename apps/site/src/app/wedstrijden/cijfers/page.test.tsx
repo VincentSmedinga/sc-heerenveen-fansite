@@ -1512,6 +1512,7 @@ describe('the page /wedstrijden/cijfers', () => {
     vi.mocked(getMatchData).mockResolvedValue({
       coaches: [],
       edited: false,
+      groupStandings: [],
       matches: [],
       pages: [],
       season: '2026/27',
