@@ -135,14 +135,16 @@ jobs:
             "$SSH_USER@$SSH_HOST" "mkdir -p $(printf '%q' "$DEPLOY_PATH")/tmp && touch $(printf '%q' "$DEPLOY_PATH")/tmp/restart.txt"
 
       # The site migrates the database and puts the real sources in it when the host starts the app, and takes out the test
-      # sources it had, so a page that reads the register shows whether that worked. A migration that fails turns this
-      # run red. The host starts the app on the first request after the restart, so the check tries for a minute.
+      # sources it had, so a page that reads the register shows whether that worked. The check looks for the link to the
+      # site of the Leeuwarder Courant, not for its name, because the icon sits inside the last word of the name. A
+      # migration that fails turns this run red. The host starts the app on the first request after the restart, so the
+      # check tries for a minute.
       - name: Check the sources page on acceptance
         if: steps.secrets.outputs.ready == 'true'
         run: |
           while [ "$SECONDS" -lt 60 ]; do
             status=$(curl --silent --max-time 10 --output "$RUNNER_TEMP/bronnen.html" --write-out '%{http_code}' https://acc.sc.heerenveen.org/bronnen || true)
-            if [ "$status" = 200 ] && grep -q "Leeuwarder Courant" "$RUNNER_TEMP/bronnen.html" && ! grep -q Testkrant "$RUNNER_TEMP/bronnen.html"; then
+            if [ "$status" = 200 ] && grep -q 'href="https://www.lc.nl"' "$RUNNER_TEMP/bronnen.html" && ! grep -q Testkrant "$RUNNER_TEMP/bronnen.html"; then
               echo "https://acc.sc.heerenveen.org/bronnen shows the real sources."
               exit 0
             fi
