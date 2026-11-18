@@ -33,6 +33,7 @@
 ## De pagina 'Onze bronnen' toont per bron een beschrijving, niet wat we tonen
 
 - **Datum:** 22 oktober 2026
+- **Later:** de beschrijving is nu één korte zin, zie _De pagina 'Onze bronnen' is compact, ook met tientallen bronnen_ (18 november 2026).
 - **Besluit:** de pagina zegt in één zin dat dit de bronnen zijn waar we het nieuws vandaan halen.
   Per bron staan er de naam als link naar de website en een beschrijving van een of twee zinnen, per soort onder een kop.
   Wat we van een bron tonen, en de toestemming, staan er niet.
@@ -3093,3 +3094,24 @@
 - **Waarom:** de gegevens komen uit de wedstrijden die we van Wikipedia lezen, en een pagina heeft één bronvermelding (zie _Een pagina met gegevens van Wikipedia heeft één bronvermelding_).
 - **Alternatieven:** een regel onder de kaart zoals "Het moeilijkst" die had.
 - **Later:** 12 november 2026 (#1152): de kaart toont de datum niet meer, alleen een clubnaam en een aantal dagen.
+
+## De pagina 'Onze bronnen' is compact, ook met tientallen bronnen
+
+- **Datum:** 18 november 2026
+- **Besluit:** elke bron op `/bronnen` is de naam als link naar de website, met daaronder één zin in gewoon lettertype: waar de bron over gaat en wat wij ervan lezen of tonen.
+  De uitgever staat er niet bij en er komen geen zoekveld, geen subkoppen en geen geneste lijsten.
+  De kaart per soort (Nieuws, Podcasts, Forum, Club, Video) blijft, met dezelfde kop en hetzelfde anker, en ook de lijst blijft één lijst.
+  - **De zin:** de bron en een puntkomma en dan wat we lezen, zoals "Dagblad uit Limburg; we lezen de koppen over de club."
+    Een zin is hoogstens 64 tekens, zodat een bron op 320 pixels niet hoger is dan drie regels: de naam en twee regels.
+    De test in `packages/db/src/seed.test.ts` bewaakt de lengte en dat het één zin is; de test in `apps/site/e2e/sources.spec.ts` meet de regels in de browser.
+  - **De volgorde:** in een kaart staan eerst de Friese bronnen, dan de landelijke, dan de rest.
+    Binnen zo'n groep komt de huidige volgorde terug, die van de naam.
+    De rangorde is een lijst met domeinen in `apps/site/src/register.ts` (`regionRank`), niet een kolom in het register: ze bepaalt de volgorde van één pagina en verandert alleen als er een Friese of landelijke bron bij komt.
+    Een test controleert dat elke bron uit de seed die we Fries of landelijk noemen, ook zo gerangschikt staat.
+  - **De podcasts:** de beschrijving van Omroep Abe en Radio Camataru is nu ook één zin in onze eigen woorden.
+    De tekst van de maker (zie _De beschrijving van een podcast is die van de maker_) staat er dus niet meer, ook niet in de zijbalk van de podcastpagina.
+- **Waarom:** de pagina is naslag, en met de dagbladen van #1380 en #1382 zijn er ongeveer driemaal zoveel nieuwsbronnen, zodat de kaart Nieuws drie schermen lang werd.
+  Eén zin per bron houdt de lijst kort genoeg om te scannen, op 320 pixels en met een schermlezer, zonder dat een bezoeker iets mist wat hij nodig heeft.
+  De club is Fries, dus de Friese bronnen staan bovenaan.
+- **Alternatieven:** een tabel met uitgever en beschrijving; kleiner lettertype; de beschrijving achter "Meer"; groeperen per uitgever; een zoekveld; de rangorde als kolom in het register (een migratie voor een pagina met één lijst).
+- **Later:** dit past _De pagina 'Onze bronnen' toont per bron een beschrijving, niet wat we tonen_ (22 oktober 2026) aan, en voor de twee podcasts ook _De beschrijving van een podcast is die van de maker_ (24 oktober 2026).
