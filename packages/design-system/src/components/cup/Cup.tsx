@@ -5,12 +5,11 @@ import { classNames } from '../classNames'
 export type CupProps = Omit<ComponentPropsWithoutRef<'svg'>, 'aria-hidden' | 'children' | 'focusable' | 'viewBox'>
 
 /**
- * A line drawing of the Denneappel, the cup of the KNVB Beker, upright: a round urn with a lid
- * that ends in a pine cone, a broad belt with a plate for the names, ribs on the belly, and a
- * narrow foot on a disc. It
- * is for a card that celebrates a won cup. It is decoration: it is hidden from a screen reader,
- * so the text next to it says what it stands for. The lines take the colour of the text around
- * it.
+ * A line drawing of the Denneappel, the cup of the KNVB Beker, upright: the pine cone on the
+ * lid with its garlands, the shoulder that widens into a broad band of plates for the names,
+ * the leaves on the belly, and the short stem on a foot and a plinth. It is for a card that
+ * celebrates a won cup. It is decoration: it is hidden from a screen reader, so the text next
+ * to it says what it stands for. The lines take the colour of the text around it.
  */
 export const Cup = ({ className, ...props }: CupProps) => (
   <svg
@@ -25,21 +24,24 @@ export const Cup = ({ className, ...props }: CupProps) => (
     strokeWidth={3}
     viewBox="0 0 96 192"
   >
-    <g transform="translate(0 22)">
-      <ellipse cx={48} cy={16} rx={8} ry={12} />
-      <path d="M41 11L55 25M41 19L52 28M55 11L41 25M55 19L44 28" />
-      <path d="M42 28H54L56 33H40Z" />
-      <path d="M36 33C28 38 26 46 26 54M60 33C68 38 70 46 70 54" />
-      <path d="M30 45C40 42 56 42 66 45" />
-      <path d="M22 54H74V58H22Z" />
-      <path d="M24 58C10 72 10 100 26 118M72 58C86 72 86 100 70 118" />
-      <path d="M17 77C40 83 56 83 79 77M15 93C40 99 56 99 81 93" />
-      <rect height={10} rx={2} width={30} x={33} y={81} />
-      <path d="M26 100C28 108 34 114 40 118M38 98C38 106 42 114 44 121M48 99V122M58 98C58 106 54 114 52 121M70 100C68 108 62 114 56 118" />
-      <path d="M26 118C36 124 60 124 70 118" />
-      <path d="M42 122L44 130H52L54 122" />
-      <path d="M44 130L38 142H58L52 130" />
-      <path d="M24 142H72L76 150H20Z" />
-    </g>
+    <ellipse cx={48} cy={23} rx={7} ry={11} />
+    <path d="M42 17L54 29M42 25L50 33M54 17L42 29M54 25L46 33" />
+    <path d="M32 52C32 42 38 36 48 36C58 36 64 42 64 52" />
+    <path d="M30 52H66M32 56H64M34 56V70M62 56V70" />
+    <path d="M33 60C36 74 44 74 48 66C52 74 60 74 63 60" />
+    <path d="M32 62C28 70 30 78 34 84M64 62C68 70 66 78 62 84" />
+    <path d="M34 70C32 78 30 80 30 82M62 70C64 78 66 80 66 82" />
+    <path d="M30 82C28 92 14 96 8 100M66 82C68 92 82 96 88 100" />
+    <path d="M8 100H88V122H8Z" />
+    <path d="M20 100V122M34 100V122M62 100V122M76 100V122" />
+    <rect height={14} rx={1} width={22} x={37} y={104} />
+    <path d="M10 122C12 138 28 148 38 152M86 122C84 138 68 148 58 152" />
+    <path d="M28 126C24 134 28 142 34 146C36 138 34 130 28 126ZM68 126C72 134 68 142 62 146C60 138 62 130 68 126ZM48 126C43 134 44 142 48 148C52 142 53 134 48 126Z" />
+    <path d="M38 152H58" />
+    <path d="M40 152C34 156 36 162 42 164H54C60 162 62 156 56 152" />
+    <path d="M42 164V168M54 164V168" />
+    <path d="M42 168C40 174 34 176 30 178H66C62 176 56 174 54 168" />
+    <path d="M28 178H68V182H28Z" />
+    <path d="M14 182H82V190H14Z" />
   </svg>
 )
