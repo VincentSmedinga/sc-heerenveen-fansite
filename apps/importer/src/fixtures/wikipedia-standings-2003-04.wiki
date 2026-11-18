@@ -1,0 +1,49 @@
+== Eindstand ==
+{| class="wikitable sortable" cellspacing="0" cellpadding="3" style="background-color: #f9f9f9; font-size: 90%; text-align: center; border:1px solid #aaa;"
+!width=36|{{afkorting|pos|positie}}
+!align=left width=130|club
+!width=31|{{afkorting|gs|aantal gespeelde wedstrijden}}
+!width=26|{{afkorting|w|aantal gewonnen wedstrijden}}
+!width=26|{{afkorting|g|aantal gelijk gespeelde wedstrijden}}
+!width=26|{{afkorting|v|aantal verloren wedstrijden}}
+!width=34|{{afkorting|pnt|totaal punten}}
+!width=31|{{afkorting|dv|aantal gemaakte doelpunten}}
+!width=31|{{afkorting|dt|aantal doelpunten tegen}}
+!width=31|{{afkorting|ds|doelsaldo}}
+|- style="background:#ACE1AF;"
+| 1. ||align=left| [[AFC Ajax|Ajax]] || 34 || 25 || 5 || 4 || '''80''' || 79 || 31 || +48
+|- style="background:#C0F0D0;"
+| 2. ||align=left| [[PSV (voetbalclub)|PSV]] || 34 || 23 || 5 || 6 || '''74''' || 92 || 30 || +62
+|- style="background:#81BEF7;"
+| 3. ||align=left| [[Feyenoord]] || 34 || 20 || 8 || 6 || '''68''' || 71 || 38 || +33
+|- style="background:#81BEF7;"
+| 4. ||align=left| [[sc Heerenveen]] || 34 || 17 || 7 || 10 || '''58''' || 45 || 35 || +10
+|- style="background:#81BEF7;"
+| 5. ||align=left| [[AZ (voetbalclub)|AZ]] || 34 || 17 || 6 || 11 || '''57''' || 65 || 42 || +23
+|- style="background:#FF7F33;"
+| 6. ||align=left| [[Roda JC Kerkrade|Roda JC]] || 34 || 14 || 11 || 9 || '''53''' || 60 || 41 || +19
+|-
+| 7. ||align=left| [[Willem II (voetbalclub)|Willem II]] || 34 || 13 || 10 || 11 || '''49''' || 47 || 54 || –7
+|-
+| 8. ||align=left| [[FC Twente]] || 34 || 15 || 3 || 16 || '''48''' || 56 || 53 || +3
+|-
+| 9. ||align=left| [[NAC Breda]] || 34 || 12 || 10 || 12 || '''46''' || 58 || 55 || +3
+|- style="background:#EEE8AA;"
+| 10. ||align=left| [[FC Utrecht]] || 34 || 13 || 7 || 14 || '''46''' || 42 || 52 || –10
+|-
+| 11. ||align=left| [[RKC Waalwijk]] || 34 || 10 || 10 || 14 || '''40''' || 47 || 55 || –8
+|-
+| 12. ||align=left| [[RBC (voetbalclub)|RBC Roosendaal]] || 34 || 10 || 10 || 14 || '''40''' || 34 || 47 || –13
+|-
+| 13. ||align=left| [[FC Groningen]] || 34 || 9 || 10 || 15 || '''37''' || 38 || 53 || –15
+|- style="background:#FF9F33;"
+| 14. ||align=left| [[N.E.C.]] || 34 || 10 || 4 || 20 || '''34''' || 44 || 62 || –18
+|-
+| 15. ||align=left| [[ADO Den Haag]] || 34 || 9 || 7 || 18 || '''34''' || 36 || 61 || –25
+|- style="background:#FFCCCC;"
+| 16. ||align=left| [[SBV Vitesse|Vitesse]] || 34 || 4 || 16 || 14 || '''28''' || 39 || 56 || –17
+|- style="background:#FFCCCC;"
+| 17. ||align=left| [[FC Volendam]] || 34 || 7 || 6 || 21 || '''27''' || 31 || 79 || –48
+|- style="background:#FF8888;"
+| 18. ||align=left| [[PEC Zwolle|FC Zwolle]] || 34 || 5 || 11 || 18 || '''26''' || 27 || 67 || –40
+|}

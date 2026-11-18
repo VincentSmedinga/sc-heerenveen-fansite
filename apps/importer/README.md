@@ -1960,6 +1960,27 @@ pnpm run import:seasons 2020/21
 - Op de host draait hetzelfde bestand als de cronjob de opdracht, met `--from-season` en het beginseizoen erachter.
   Op acceptatie start je dat in GitHub met de workflow _Import seasons_ (zie _Alle afgelopen seizoenen importeren_ in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md)).
 
+#### De eindstanden van 1990/91 tot en met 2009/10
+
+Deze twintig seizoenen hebben op de Nederlandse Wikipedia geen pagina met wedstrijden die de lezer van een seizoen kent, maar wel een pagina van de competitie met de eindstand (zie _De eindstand van 1990/91 tot en met 2009/10 komt van de Nederlandse Wikipedia, per seizoen uit een lijst_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md)):
+
+```sh
+pnpm run import:tables
+pnpm run import:tables 1998/99
+```
+
+Zonder seizoen leest de opdracht alle twintig, het oudste eerst; met een seizoen één.
+Ze schrijft alleen `standings` en bewaart de pagina in `wikipedia_pages`, voor de bronvermelding.
+Ze neemt de lock van de import voor elk seizoen, deelt één fetcher over de run en gaat door na een seizoen dat mislukt.
+Op de host is het de optie `--tables` van `import.mjs`; op acceptatie start je haar met de workflow _Import tables_ (zie _De eindstanden van 1990/91 tot en met 2009/10 importeren_ in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md)).
+
+- `oldStandingsPages` in [`src/old-standings.ts`](src/old-standings.ts) zegt per seizoen welke pagina het is, in welke competitie sc Heerenveen speelde en hoeveel clubs er waren (20 in 1991/92).
+  Een seizoen dat er niet in staat, wordt geweigerd, voordat er iets gevraagd wordt.
+- De controles zijn die van `checkStandings`, met het aantal clubs van het seizoen en twee punten per overwinning tot en met 1994/95 (`pointsPerWinIn`).
+  Een tabel die ze niet haalt, wordt niet opgeslagen.
+- De rij van sc Heerenveen wordt vergeleken met onze wedstrijden als we alle wedstrijden van het seizoen in die competitie hebben; een verschil is een regel in het logboek.
+- De dag waarvoor de tabel geldt is de dag van de laatste wedstrijd die we hebben, of anders 30 juni van het jaar waarin het seizoen eindigt.
+
 #### De selectie van afgelopen seizoenen
 
 De uurlijkse import leest de selectie van het lopende seizoen.

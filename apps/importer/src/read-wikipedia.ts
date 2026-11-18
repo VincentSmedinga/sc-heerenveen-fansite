@@ -614,7 +614,7 @@ export function readStandings(text: string): ReadStandings {
  * 34 wedstrijden` and `Eindstand na 34 wedstrijden`. `Officiële eindstand`, the order after the
  * play-offs, has only the reasons and is not matched.
  */
-const standingsHeading = /^=+[ \t]*(?:eind)?stand(?: na \d+ wedstrijden)?[ \t]*=+[ \t]*$/imu
+const standingsHeading = /^=+[ \t]*(?:eind)?stand(?: na \d+ wedstrijden)?(?: \d{4}[-–/]\d{2,4})?[ \t]*=+[ \t]*$/imu
 
 /**
  * The first season whose page of the play-offs we read: 2010/11, the page of 2011. The page
@@ -1258,7 +1258,7 @@ function readTableStandings(text: string): ReadStandings {
 
     for (const field of Object.keys(standingsColumns) as (keyof typeof standingsColumns)[]) {
       const value = plain(cells[index[field] ?? 0] ?? '')
-        .replaceAll('−', '-')
+        .replaceAll(/[−–]/gu, '-')
         .replace(/^\+/u, '')
 
       if (!/^-?\d{1,3}$/u.test(value)) {

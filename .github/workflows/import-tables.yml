@@ -1,0 +1,118 @@
+# Reads the final table of the seasons 1990/91 to 2009/10 from Wikipedia into the database of the
+# acceptance environment, by running `import.mjs --tables [<season>]` on the host over SSH.
+# Started by hand, with a season as the only input, or none for all twenty. The loop is in the
+# importer, which carries on after a season that fails and exits with 1 at the end if one did.
+# It uses the environment and the secrets of acceptance.yml, and docs/acceptatieomgeving.md says
+# how to start it. Until the secrets are there, it skips the import with a notice, so the run
+# stays green. The matches of a season are read by import-season.yml.
+
+name: Import tables
+
+on:
+  workflow_dispatch:
+    inputs:
+      season:
+        description: One season from 1990/91 to 2009/10, such as 1998/99. Leave it empty for all of them.
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+# The same group as acceptance.yml, so an import never runs next to a deploy, and a running one
+# finishes. GitHub keeps one waiting run per group, so start the import again if a newer run
+# took its place.
+concurrency:
+  cancel-in-progress: false
+  group: acceptance
+
+jobs:
+  import:
+    name: Import the final tables on acceptance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: acceptatie
+      url: https://acc.sc.heerenveen.org
+    steps:
+      # The season is typed by a person, so it is checked before anything connects, and it
+      # reaches the steps only through an environment variable, never in the text of a command.
+      # The command itself refuses a season that has no page in its list.
+      - name: Check the season
+        shell: bash
+        env:
+          SEASON: ${{ inputs.season }}
+        run: |
+          pattern='^[0-9]{4}/[0-9]{2}$'
+          if [[ -n "$SEASON" && ! "$SEASON" =~ $pattern ]]; then
+            echo "::error title=Season refused::The season must look like 1998/99, or be empty."
+            exit 1
+          fi
+
+      - id: secrets
+        name: Check the secrets
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          for name in DEPLOY_PATH SSH_HOST SSH_KNOWN_HOSTS SSH_PRIVATE_KEY SSH_USER; do
+            if [ -z "${!name}" ]; then
+              echo "::notice title=Import skipped::$name is not set in the environment acceptatie. See docs/acceptatieomgeving.md."
+              echo "ready=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+
+      - name: Set up SSH
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          umask 077
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/acceptance_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      # Backs up the database first, with the same Node and the same file of variables as the
+      # import, so a mistake in a long run costs nothing. The step turns red when the backup
+      # fails, and the steps after it do not run, so nothing is imported without a backup. The
+      # line with the name of the file goes to the summary of the run
+      # (docs/back-ups.md says how to restore it).
+      - name: Back up the database on the host
+        if: steps.secrets.outputs.ready == 'true'
+        shell: bash
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          ssh -p 26 -i "$HOME/.ssh/acceptance_key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            "$SSH_USER@$SSH_HOST" "/opt/alt/alt-nodejs24/root/usr/bin/node --env-file=\"\$HOME/fansite-acceptatie.env\" $(printf '%q' "$DEPLOY_PATH")/packages/db/backup.mjs backup" \
+            | tee "$RUNNER_TEMP/backup-output.txt"
+          {
+            echo '### Back-up before the import'
+            echo '```text'
+            cat "$RUNNER_TEMP/backup-output.txt"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Runs the importer as cron does on the host: the Node 24 of the hosting, by its full
+      # path, and DATABASE_URL from the file in the home folder. The output goes to this log and
+      # not to ~/fansite-import.log. ssh exits with the exit code of the command, so a refused
+      # season, a failed check or a busy lock turns this step red. The path and the season go
+      # through printf %q, so the remote shell reads them as one word each.
+      - name: Import the final tables on the host
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          SEASON: ${{ inputs.season }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          ssh -p 26 -i "$HOME/.ssh/acceptance_key" -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            "$SSH_USER@$SSH_HOST" "/opt/alt/alt-nodejs24/root/usr/bin/node --env-file=\"\$HOME/fansite-acceptatie.env\" $(printf '%q' "$DEPLOY_PATH")/apps/importer/import.mjs --tables $(printf '%q' "$SEASON")"

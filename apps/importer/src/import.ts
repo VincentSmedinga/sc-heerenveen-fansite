@@ -56,6 +56,7 @@ import { runImport } from './import-feeds.ts'
 import { oldSiteUsage, runOldSiteImport, runOldSiteReport } from './import-old-site.ts'
 import { fromSeasonUsage, runSeasonImport, runSeasonsImport, seasonUsage } from './import-season.ts'
 import { fromSquadUsage, runSquadImport, runSquadsImport, squadUsage } from './import-squads.ts'
+import { runTablesImport, tablesUsage } from './import-tables.ts'
 import { showStatus } from './status.ts'
 import { runCompletenessCommand } from './store-completeness.ts'
 import { runItemClubsCommand } from './store-item-clubs.ts'
@@ -78,6 +79,7 @@ const { positionals, values } = parseArgs({
     squad: { type: 'boolean' },
     stadiums: { type: 'boolean' },
     status: { type: 'boolean' },
+    tables: { type: 'boolean' },
   },
 })
 const fromSeason = values['from-season']
@@ -96,18 +98,23 @@ const modes = [
   values.squad,
   values.stadiums,
   values.status,
+  values.tables,
 ].filter(Boolean).length
 const wrongArguments =
   modes > 1 ||
   (values['dry-run'] === true && values['old-site'] !== true) ||
   (values.report === true && (values['old-site'] !== true || values['dry-run'] === true)) ||
-  (values.season === true || fromSeason === true || values.squad === true || fromSquad === true
+  (values.season === true ||
+  fromSeason === true ||
+  values.squad === true ||
+  fromSquad === true ||
+  values.tables === true
     ? positionals.length > 1
     : values.changes !== true && positionals.length > 0)
 
 if (wrongArguments) {
   console.error(
-    `Wrong arguments. ${seasonUsage}\n${fromSeasonUsage}\n${squadUsage}\n${fromSquadUsage}\n${oldSiteUsage}\nOr use --status alone, --old-site (alone, or with --dry-run or --report) alone, --completeness alone, --club-numbers alone, --fill-stadiums alone, --item-clubs alone, --changes, or no argument for the hourly import.`,
+    `Wrong arguments. ${seasonUsage}\n${fromSeasonUsage}\n${squadUsage}\n${fromSquadUsage}\n${tablesUsage}\n${oldSiteUsage}\nOr use --status alone, --old-site (alone, or with --dry-run or --report) alone, --completeness alone, --club-numbers alone, --fill-stadiums alone, --item-clubs alone, --changes, or no argument for the hourly import.`,
   )
   process.exit(2)
 }
@@ -132,32 +139,34 @@ if (error !== undefined) {
   }
 }
 
-process.exitCode = fromSeason
-  ? await runSeasonsImport(DATABASE_URL, positionals[0])
-  : values.season
-    ? await runSeasonImport(DATABASE_URL, positionals[0])
-    : fromSquad
-      ? await runSquadsImport(DATABASE_URL, positionals[0])
-      : values.squad
-        ? await runSquadImport(DATABASE_URL, positionals[0])
-        : values.changes
-          ? await runChangesCommand(DATABASE_URL, positionals)
-          : values.status
-            ? await showStatus(DATABASE_URL)
-            : values.completeness
-              ? await runCompletenessCommand(DATABASE_URL)
-              : values['country-facts']
-                ? await runCountryFactsCommand(DATABASE_URL)
-                : values['fill-stadiums']
-                  ? await runFillStadiumsCommand(DATABASE_URL)
-                  : values.stadiums
-                    ? await runStadiumsCommand(DATABASE_URL)
-                    : values['club-numbers']
-                      ? await runClubNumbersCommand(DATABASE_URL)
-                      : values['item-clubs']
-                        ? await runItemClubsCommand(DATABASE_URL)
-                        : values['old-site']
-                          ? values.report
-                            ? await runOldSiteReport(DATABASE_URL)
-                            : await runOldSiteImport(DATABASE_URL, { dryRun: values['dry-run'] === true })
-                          : await runImport(DATABASE_URL)
+process.exitCode = values.tables
+  ? await runTablesImport(DATABASE_URL, positionals[0])
+  : fromSeason
+    ? await runSeasonsImport(DATABASE_URL, positionals[0])
+    : values.season
+      ? await runSeasonImport(DATABASE_URL, positionals[0])
+      : fromSquad
+        ? await runSquadsImport(DATABASE_URL, positionals[0])
+        : values.squad
+          ? await runSquadImport(DATABASE_URL, positionals[0])
+          : values.changes
+            ? await runChangesCommand(DATABASE_URL, positionals)
+            : values.status
+              ? await showStatus(DATABASE_URL)
+              : values.completeness
+                ? await runCompletenessCommand(DATABASE_URL)
+                : values['country-facts']
+                  ? await runCountryFactsCommand(DATABASE_URL)
+                  : values['fill-stadiums']
+                    ? await runFillStadiumsCommand(DATABASE_URL)
+                    : values.stadiums
+                      ? await runStadiumsCommand(DATABASE_URL)
+                      : values['club-numbers']
+                        ? await runClubNumbersCommand(DATABASE_URL)
+                        : values['item-clubs']
+                          ? await runItemClubsCommand(DATABASE_URL)
+                          : values['old-site']
+                            ? values.report
+                              ? await runOldSiteReport(DATABASE_URL)
+                              : await runOldSiteImport(DATABASE_URL, { dryRun: values['dry-run'] === true })
+                            : await runImport(DATABASE_URL)

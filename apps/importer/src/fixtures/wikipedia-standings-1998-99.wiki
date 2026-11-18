@@ -1,0 +1,49 @@
+== Eindstand 1998-1999 ==
+{| class="wikitable sortable" cellspacing="0" cellpadding="3" style="background-color: #f9f9f9; font-size: 90%; text-align: center; border:1px solid #aaa;"
+!width=36|{{afkorting|pos|positie}}
+!align=left width=130|club
+!width=31|{{afkorting|gs|aantal gespeelde wedstrijden}}
+!width=26|{{afkorting|w|aantal gewonnen wedstrijden}}
+!width=26|{{afkorting|g|aantal gelijk gespeelde wedstrijden}}
+!width=26|{{afkorting|v|aantal verloren wedstrijden}}
+!width=34|{{afkorting|pnt|totaal punten}}
+!width=31|{{afkorting|dv|aantal gemaakte doelpunten}}
+!width=31|{{afkorting|dt|aantal doelpunten tegen}}
+!width=31|{{afkorting|ds|doelsaldo}}
+|- style="background:#ACE1AF;"
+| 1. ||align=left| [[Feyenoord]] || 34 || 25 || 5 || 4 || '''80''' || 76 || 38 || 38
+|- style="background:#ACE1AF;"
+| 2. ||align=left| [[Willem II (voetbalclub)|Willem II]] || 34 || 20 || 5 || 9 || '''65''' || 69 || 46 || 23
+|- style="background:#C0F0D0;"
+| 3. ||align=left| [[PSV (voetbalclub)|PSV]] || 34 || 17 || 10 || 7 || '''61''' || 87 || 55 || 32
+|- style="background:#81BEF7;"
+| 4. ||align=left| [[SBV Vitesse|Vitesse]] || 34 || 18 || 7 || 9 || '''61''' || 61 || 44 || 17
+|- style="background:#81BEF7;"
+| 5. ||align=left| [[Roda JC Kerkrade|Roda JC]] || 34 || 17 || 9 || 8 || '''60''' || 59 || 40 || 19
+|- style="background:#EEE8AA;"
+| 6. ||align=left| [[AFC Ajax|Ajax]] || 34 || 16 || 9 || 9 || '''57''' || 73 || 41 || 32
+|- style="background:#FF7F33;"
+| 7. ||align=left| [[sc Heerenveen]] || 34 || 14 || 12 || 8 || '''54''' || 53 || 41 || 12
+|-
+| 8. ||align=left| [[FC Twente]] || 34 || 13 || 13 || 8 || '''52''' || 51 || 45 || 6
+|-
+| 9. ||align=left| [[AZ (voetbalclub)|AZ]] || 34 || 12 || 12 || 10 || '''48''' || 52 || 60 || -8
+|-
+| 10. ||align=left| [[Fortuna Sittard]] || 34 || 12 || 8 || 14 || '''44''' || 49 || 56 || -7
+|-
+| 11. ||align=left| [[N.E.C.]] || 34 || 10 || 9 || 15 || '''39''' || 42 || 56 || -14
+|-
+| 12. ||align=left| [[FC Utrecht]] || 34 || 10 || 8 || 16 || '''38''' || 54 || 64 || -10
+|-
+| 13. ||align=left| [[BV De Graafschap|De Graafschap]] || 34 || 8 || 12 || 14 || '''36''' || 40 || 57 || -17
+|-
+| 14. ||align=left| [[MVV Maastricht|MVV]] || 34 || 7 || 11 || 16 || '''32''' || 42 || 63 || -21
+|-
+| 15. ||align=left| [[SC Cambuur|Cambuur Leeuwarden]] || 34 || 7 || 11 || 16 || '''32''' || 37 || 64 || -27
+|- style="background:#FFCCCC;"
+| 16. ||align=left| [[RKC Waalwijk]] || 34 || 6 || 9 || 19 || '''27''' || 41 || 62 || -21
+|- style="background:#FFCCCC;"
+| 17. ||align=left| [[Sparta Rotterdam]] || 34 || 7 || 5 || 22 || '''26''' || 37 || 71 || -34
+|- style="background:#FF8888;"
+| 18. ||align=left| [[NAC Breda|NAC]] || 34 || 4 || 11 || 19 || '''23''' || 41 || 61 || -20
+|}

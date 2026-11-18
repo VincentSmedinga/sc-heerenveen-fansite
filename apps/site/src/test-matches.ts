@@ -229,6 +229,7 @@ export const matchData: MatchData = {
   standings: [
     {
       club: 'Demo Boys',
+      competition: 'Eredivisie',
       drawn: 1,
       goalDifference: 1,
       goalsAgainst: 4,
@@ -243,6 +244,7 @@ export const matchData: MatchData = {
     },
     {
       club: 'sc Heerenveen',
+      competition: 'Eredivisie',
       drawn: 0,
       goalDifference: 3,
       goalsAgainst: 0,
@@ -257,6 +259,7 @@ export const matchData: MatchData = {
     },
     {
       club: 'Testdorp FC',
+      competition: 'Eredivisie',
       drawn: 1,
       goalDifference: -2,
       goalsAgainst: 4,

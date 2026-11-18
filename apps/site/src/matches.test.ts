@@ -490,6 +490,7 @@ describe('lacksResult', () => {
 
 const row = (position: number, club: string): PublicStandingsRow => ({
   club,
+  competition: 'Eredivisie',
   drawn: 0,
   goalDifference: 0,
   goalsAgainst: 0,

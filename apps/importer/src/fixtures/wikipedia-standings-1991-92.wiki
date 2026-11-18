@@ -1,0 +1,53 @@
+=== Eindstand ===
+{| class="wikitable sortable" cellspacing="0" cellpadding="3" style="background-color: #f9f9f9; font-size: 90%; text-align: center; border:1px solid #aaa;"
+! width="36" |{{afkorting|pos|positie}}
+! align="left" width="130" |club
+! width="31" |{{afkorting|gs|aantal gespeelde wedstrijden}}
+! width="26" |{{afkorting|w|aantal gewonnen wedstrijden}}
+! width="26" |{{afkorting|g|aantal gelijk gespeelde wedstrijden}}
+! width="26" |{{afkorting|v|aantal verloren wedstrijden}}
+! width="34" |{{afkorting|pnt|totaal punten}}
+! width="31" |{{afkorting|dv|aantal gemaakte doelpunten}}
+! width="31" |{{afkorting|dt|aantal doelpunten tegen}}
+! width="31" |{{afkorting|ds|doelsaldo}}
+|- style="background:#C0F0C0;"
+| 1. || align="left" | [[SC Cambuur|Cambuur Leeuwarden]] || 38 || 22 || 9 || 7 || '''53''' || 67 || 40 || 27
+|- style="background:#CCFFCC;"
+| 2. || align="left" | [[FC Den Bosch|BVV Den Bosch]] || 38 || 18 || 11 || 9 || '''47''' || 57 || 42 || 15
+|-
+| 3. || align="left" | [[sc Heerenveen]] || 38 || 19 || 7 || 12 || '''45''' || 79 || 50 || 29
+|- style="background:#CCFFCC;"
+| 4. || align="left" | [[NAC Breda|NAC]] || 38 || 16 || 12 || 10 || '''44''' || 65 || 48 || 17
+|-
+| 5. || align="left" | [[RBC (voetbalclub)|RBC]] || 38 || 15 || 14 || 9 || '''44''' || 60 || 45 || 15
+|- style="background:#CCFFCC;"
+| 6. || align="left" | [[Heracles Almelo|Heracles '74]] || 38 || 16 || 12 || 10 || '''44''' || 61 || 50 || 11
+|-
+| 7. || align="left" | [[Telstar (voetbalclub)|Telstar]] || 38 || 17 || 7 || 14 || '''41''' || 78 || 61 || 17
+|-
+| 8. || align="left" | [[N.E.C.]] || 38 || 16 || 9 || 13 || '''41''' || 66 || 54 || 12
+|- style="background:#FFFF55;"
+| 9. || align="left" | [[FC Wageningen]] || 38 || 15 || 11 || 12 || '''41''' || 43 || 36 || 7
+|-
+| 10. || align="left" | [[HFC Haarlem|FC Haarlem]] || 38 || 16 || 9 || 13 || '''41''' || 56 || 60 || -4
+|- style="background:#CCFFCC;"
+| 11. || align="left" | [[Go Ahead Eagles]] || 38 || 17 || 6 || 15 || '''40''' || 63 || 59 || 4
+|-
+| 12. || align="left" | [[SC Veendam|BV Veendam]] || 38 || 15 || 10 || 13 || '''40''' || 48 || 49 || -1
+|-
+| 13. || align="left" | [[AZ (voetbalclub)|AZ]] || 38 || 14 || 11 || 13 || '''39''' || 55 || 40 || 15
+|- style="background:#CCFFCC;"
+| 14. || align="left" | [[FC Eindhoven|Eindhoven]]<sup>1</sup> || 38 || 12 || 13 || 13 || '''37''' || 49 || 48 || 1
+|- style="background:#CCFFCC;"
+| 15. || align="left" | [[Excelsior Rotterdam|Excelsior]] || 38 || 14 || 6 || 18 || '''34''' || 61 || 74 || -13
+|-
+| 16. || align="left" | [[Helmond Sport]] || 38 || 11 || 11 || 16 || '''33''' || 50 || 69 || -19
+|-
+| 17. || align="left" | [[PEC Zwolle|FC Zwolle]] || 38 || 9 || 13 || 16 || '''31''' || 44 || 64 || -20
+|-
+| 18. || align="left" | [[FC Emmen|Emmen]] || 38 || 8 || 13 || 17 || '''29''' || 37 || 56 || -19
+|-
+| 19. || align="left" | [[TOP Oss|TOP]] || 38 || 6 || 10 || 22 || '''22''' || 40 || 77 || -37
+|- style="background:#FFFF55;"
+| 20. || align="left" | [[VC Vlissingen|VCV Zeeland]] || 38 || 4 || 6 || 28 || '''14''' || 36 || 93 || -57
+|}

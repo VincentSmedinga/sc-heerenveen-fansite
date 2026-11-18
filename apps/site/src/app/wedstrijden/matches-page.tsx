@@ -115,6 +115,9 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   const resultCards = resultsPerCompetition(results)
   const cupOutcome = cupOutcomeOf(data.matches)
   const standingsCard = standingsCardOf(current)
+  // A season in the Eerste divisie (1991/92 and 1992/93) says so: it is not the Eredivisie.
+  const tableName =
+    data.standings[0]?.competition === 'Eerste divisie' ? `${standingsCard.name} Eerste divisie` : standingsCard.name
   // The results of every club, for the switch of the table and for the line of our place.
   const leagueResults = await leagueResultsOfSeason(data)
   const lastFive = current ? lastFiveOfSeason(data, leagueResults) : undefined
@@ -142,7 +145,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
         surface="soft"
       >
         <Heading anchor id={standingsCard.id} level={2}>
-          {standingsCard.name}
+          {tableName}
         </Heading>
         {data.standings.length === 0 ? (
           <Text>{`We hebben ${current ? 'de stand' : 'de eindstand'} nog niet gevonden. Kijk straks nog eens.`}</Text>
@@ -157,9 +160,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
             )}
             <StandingsTable
               caption={
-                lastFiveShown
-                  ? lastFiveCaption(lastFive.lastResultOn)
-                  : standingsCaption(data.standings, standingsCard.name)
+                lastFiveShown ? lastFiveCaption(lastFive.lastResultOn) : standingsCaption(data.standings, tableName)
               }
               rows={lastFiveShown ? lastFive.rows : data.standings}
             />

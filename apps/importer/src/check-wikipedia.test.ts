@@ -349,3 +349,23 @@ describe('the checks of the squad', () => {
     expect(checkSquad(squad.map((player) => ({ ...player, wikipediaPage: null })))).toEqual([])
   })
 })
+
+describe('the checks of a table of a season long ago', () => {
+  // A win earned two points until 1994/95: the same table with the points of that time.
+  const twoPoints = rows.map((row) => ({ ...row, points: 2 * row.won + row.drawn - row.pointsDeducted }))
+
+  it('take the points a win earned', () => {
+    expect(checkStandings(twoPoints, undefined, { pointsPerWin: 2 })).toEqual([])
+    expect(checkStandings(twoPoints, undefined)).toContain('Ajax: points are not 3 x won + drawn')
+    expect(checkStandings(rows, undefined, { pointsPerWin: 2 })).toContain('Ajax: points are not 2 x won + drawn')
+  })
+
+  it('take the number of clubs of that season', () => {
+    expect(checkStandings(rows.slice(1), undefined, { clubs: 17 })).not.toContain('the table has 17 clubs, not 17')
+    expect(checkStandings(rows.slice(1), undefined, { clubs: 20 })).toContain('the table has 17 clubs, not 20')
+  })
+
+  it('compare nothing with matches when there are none to compare with', () => {
+    expect(checkStandings(rows, undefined)).toEqual([])
+  })
+})

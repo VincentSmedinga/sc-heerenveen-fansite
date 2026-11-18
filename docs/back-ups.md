@@ -149,7 +149,7 @@ Dat voegt het vervolgissue (#347) toe aan `acceptance.yml` en `production.yml`.
 Een dump op aanvraag past in dezelfde map en telt mee voor het opruimen: na 14 dagen gaat hij weg, net als de nachtelijke.
 Twee dumps in dezelfde seconde krijgen dezelfde naam; de tweede weigert dan, en je probeert het een moment later opnieuw.
 
-De vier workflows die met de hand een import starten (_Import season_, _Import seasons_, _Import squads_ en _Import old site_ met de actie `import`) maken zo eerst een dump, met dezelfde Node en hetzelfde bestand met variabelen als de import.
+De vijf workflows die met de hand een import starten (_Import season_, _Import seasons_, _Import squads_, _Import tables_ en _Import old site_ met de actie `import`) maken zo eerst een dump, met dezelfde Node en hetzelfde bestand met variabelen als de import.
 Faalt de dump, dan importeert de workflow niets.
 De samenvatting van de run noemt het bestand.
 De acties `report` en `status` maken geen dump.

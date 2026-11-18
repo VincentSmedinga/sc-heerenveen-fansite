@@ -631,6 +631,13 @@
       "when": 1795024389826,
       "tag": "0089_normalise_cup_round_names",
       "breakpoints": true
+    },
+    {
+      "idx": 90,
+      "version": "5",
+      "when": 1795037137806,
+      "tag": "0090_add_standings_competition",
+      "breakpoints": true
     }
   ]
 }

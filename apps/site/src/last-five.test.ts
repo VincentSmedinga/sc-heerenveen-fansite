@@ -40,6 +40,7 @@ const ours = (overrides: Partial<PublicMatch>): PublicMatch => ({
 
 const row = (club: string, played: number): PublicStandingsRow => ({
   club,
+  competition: 'Eredivisie',
   drawn: 0,
   goalDifference: 0,
   goalsAgainst: 0,
