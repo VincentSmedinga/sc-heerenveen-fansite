@@ -25,7 +25,7 @@ De workflow [`acceptance.yml`](../.github/workflows/acceptance.yml) doet bij elk
 4. Hij kopieert de map met rsync over SSH, op poort 26, naar de map van de app op de host.
 5. Hij raakt `tmp/restart.txt` aan, zodat de host de app opnieuw start.
 6. Hij vraagt <https://acc.sc.heerenveen.org/bronnen> op, tot een minuut lang.
-   Hij faalt als de pagina niet met 200 antwoordt, geen echte bron toont (de Leeuwarder Courant) of nog een testbron toont (Testkrant).
+   Hij faalt als de pagina niet met 200 antwoordt, geen echte bron toont (de link naar de site van de Leeuwarder Courant, `https://www.lc.nl`) of nog een testbron toont (Testkrant).
    Zo geeft een migratie die op de host mislukt, een rode run.
 
 Op de server bouwen we niets.
