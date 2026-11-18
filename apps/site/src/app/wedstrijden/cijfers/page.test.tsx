@@ -583,9 +583,11 @@ describe('the page /wedstrijden/cijfers', () => {
         const card = section(await render(), 'verloop-van-het-seizoen')
 
         expect(card).toContain('Uitslagen van sc Heerenveen per speelronde, met de punten en het gemiddelde')
-        for (const column of ['Ronde', 'Uitslag', 'Punten']) {
+        for (const column of ['Ronde', 'Uitslag']) {
           expect(card).toContain(`>${column}</`)
         }
+        // The points are an icon, with the whole word for a screen reader.
+        expect(card).toContain('<span class="hf-visually-hidden">punten</span>')
         // The average is shortened to fit a phone, with the whole word for a screen reader.
         expect(card).toContain('<span aria-hidden="true">Gem.</span><span class="hf-visually-hidden">Gemiddelde</span>')
         expect(card).toContain('Gem. is het gemiddelde aantal punten per wedstrijd over de laatste 5 wedstrijden')
@@ -930,9 +932,9 @@ describe('the page /wedstrijden/cijfers', () => {
         ...table.matchAll(/<tr><th scope="row">([^<]*)<\/th><td[^>]*>(\d+)<\/td><td[^>]*>(\d+)<\/td><\/tr>/g),
       ]
 
-      expect(table).toContain(
-        '<th class="hf-numeric" scope="col">Voor</th><th class="hf-numeric" scope="col">Tegen</th>',
-      )
+      expect(table).toContain('<span title="Doelpunten voor"><svg')
+      expect(table).toContain('<span class="hf-visually-hidden">doelpunten voor</span>')
+      expect(table).toContain('<span class="hf-visually-hidden">tegendoelpunten</span>')
       expect(rows.map(([, quarter, scored, conceded]) => [quarter, scored, conceded])).toEqual([
         ['1–15', '0', '1'],
         ['16–30', '0', '0'],
