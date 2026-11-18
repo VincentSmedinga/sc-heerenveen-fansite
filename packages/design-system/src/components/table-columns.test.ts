@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { tableColumnIconNames } from './table-column-icon/TableColumnIcon'
-import { tableColumns } from './table-columns'
+import { tableColumns, tableLegend } from './table-columns'
 
 const all = Object.entries(tableColumns)
 
@@ -49,5 +49,10 @@ describe('tableColumns', () => {
 
   it('has no letter left', () => {
     for (const [, column] of all) expect(column).not.toHaveProperty('abbreviation')
+  })
+
+  it('refuses a legend with both the goals and the goals for, which say the same word', () => {
+    expect(() => tableLegend([tableColumns.goals, tableColumns.goalsFor])).toThrow(/cannot share a table/u)
+    expect(() => tableLegend([tableColumns.goalsFor, tableColumns.conceded])).not.toThrow()
   })
 })

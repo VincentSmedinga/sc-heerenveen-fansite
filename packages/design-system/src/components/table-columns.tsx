@@ -66,16 +66,25 @@ export const tableColumns = {
  * `doelpunten (voor–tegen)`. It is something a page can show, in a `Text` or a paragraph, and
  * more text can follow it.
  */
-export const tableLegend = (columns: readonly TableColumn[], className?: string) => (
-  <span className={classNames('hf-table-legend', className)}>
-    {columns.map(({ icon, name, note }) => (
-      <span className="hf-table-legend-item" key={name}>
-        <TableColumnIcon name={icon} /> {name}
-        {note === undefined ? '' : ` (${note})`}
-      </span>
-    ))}
-  </span>
-)
+export const tableLegend = (columns: readonly TableColumn[], className?: string) => {
+  // `goals` and `goalsFor` both say `doelpunten`, which is fine alone and beside `conceded`. In
+  // one table they need other words (`doelpunten`, `doelpunten voor`, `doelpunten tegen`), and
+  // nobody has asked for that table, so it is refused until someone does.
+  if (columns.includes(tableColumns.goals) && columns.includes(tableColumns.goalsFor)) {
+    throw new Error('goals and goalsFor say the same word and cannot share a table without new words')
+  }
+
+  return (
+    <span className={classNames('hf-table-legend', className)}>
+      {columns.map(({ icon, name, note }) => (
+        <span className="hf-table-legend-item" key={name}>
+          <TableColumnIcon name={icon} /> {name}
+          {note === undefined ? '' : ` (${note})`}
+        </span>
+      ))}
+    </span>
+  )
+}
 
 /** A goal difference with its sign: `+6`, `−2` (a real minus sign) or `0`. */
 export const signedNumber = (value: number) => (value > 0 ? `+${value}` : value < 0 ? `−${-value}` : String(value))
