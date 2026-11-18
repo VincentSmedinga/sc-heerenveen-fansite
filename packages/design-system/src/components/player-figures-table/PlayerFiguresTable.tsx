@@ -18,14 +18,14 @@ export type PlayerFiguresRow = {
   id: number | string
   /** The minutes he played. */
   minutes: number
-  /** The matches he was in, also as a substitute. */
-  played: number
   /** The red cards, and the yellow-red cards. */
   red: number
   /** The times he was in the line-up. */
   started: number
   /** The times he came on. */
   substituted: number
+  /** The times he went off for another player. A red card is not a substitution. */
+  substitutedOff: number
   /** The surname of the player, in the stronger weight (see `PlayerName`). */
   surname: string
   /** The yellow cards, and the yellow-red cards. */
@@ -47,10 +47,10 @@ export type PlayerFiguresTableProps = Omit<ComponentPropsWithoutRef<'div'>, 'chi
 
 /** The columns of the figures, in the order they are shown. */
 const columns = [
-  { column: tableColumns.played, id: 'played' },
-  { column: tableColumns.started, id: 'started' },
-  { column: tableColumns.substituted, id: 'substituted' },
   { column: tableColumns.minutes, id: 'minutes' },
+  { column: tableColumns.started, id: 'started' },
+  { column: tableColumns.substitutedOff, id: 'substitutedOff' },
+  { column: tableColumns.substituted, id: 'substituted' },
   { column: tableColumns.goals, id: 'goals' },
   { column: tableColumns.assists, id: 'assists' },
   { column: tableColumns.yellow, id: 'yellow' },
@@ -60,12 +60,13 @@ const columns = [
 /**
  * The figures of every player of the match reports: a real `table` with a caption that is not
  * shown, column headers with `scope` and a row header for each player, whose name is a
- * `PlayerName`. The columns are the matches, the line-ups, the times he came on, the minutes,
- * the goals, the assists and the yellow and red cards, each with the icon of `tableColumns`
- * in the header, which a screen reader reads as the whole word. The minutes are bold, because
- * the page orders the list by them: they are the key figure of the table. Under the table
- * stand the icons with their words, and that a yellow-red card counts as a yellow and a red
- * card.
+ * `PlayerName`. The columns are the minutes, the line-ups, the times he went off, the times he
+ * came on, the goals, the assists and the yellow and red cards, each with the icon of
+ * `tableColumns` in the header, which a screen reader reads as the whole word. The matches he
+ * played are not a column: they are the line-ups and the times he came on together. The
+ * minutes come first and are bold, because the page orders the list by them: they are the key
+ * figure of the table. Under the table stand the icons with their words, and that a
+ * yellow-red card counts as a yellow and a red card.
  * The table has no bars: it is for looking a player up, and its columns keep close together so
  * it fits a phone. player-figures.css gives the look.
  */

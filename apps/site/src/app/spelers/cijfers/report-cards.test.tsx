@@ -150,7 +150,7 @@ describe('the cards with the figures of the match reports on /spelers/cijfers', 
     expect(html.match(/<th scope="col"/g)?.length).toBeGreaterThan(0)
     expect(html.match(/<th scope="row">/g)).toHaveLength(5)
     expect(html).toContain('Reserve')
-    expect(legendsOf(html)).toEqual(['gespeeld, basis, ingevallen, minuten, doelpunten, assists, geel, rood'])
+    expect(legendsOf(html)).toEqual(['minuten, basis, gewisseld, ingevallen, doelpunten, assists, geel, rood'])
   })
 
   it('reads a name as one name', async () => {

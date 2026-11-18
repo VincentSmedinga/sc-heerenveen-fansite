@@ -43,7 +43,8 @@ import { utcToAmsterdam } from './season.ts'
 /**
  * What a player did in the matches with a report that is `klaar`. `matches` is the number of
  * matches he played (in the line-up or from the bench), `starts` the line-ups, `substitutions`
- * the times he came on, `minutes` the minutes from `minutesPlayed`, and `goals` the goals he
+ * the times he came on, `substitutedOff` the times he went off for another player (not a red
+ * card), `minutes` the minutes from `minutesPlayed`, and `goals` the goals he
  * scored without own goals. `assists` are the goals he gave. A match that is `bezig` counts for
  * nobody. A player of ours who was on the bench and did not come on has an entry with zeros, so
  * he does not disappear from a list of all the players of the reports.
@@ -63,6 +64,7 @@ export type PlayerReportStats = {
   playerId: number
   redCards: number
   starts: number
+  substitutedOff: number
   /** The goals he scored without own goals after coming on from the bench. */
   substituteGoals: number
   substitutions: number
@@ -452,6 +454,7 @@ export async function readPlayerReportStats(
           playerId: appearance.playerId,
           redCards: 0,
           starts: 0,
+          substitutedOff: 0,
           substituteGoals: 0,
           substitutions: 0,
           yellowCards: 0,
@@ -479,6 +482,10 @@ export async function readPlayerReportStats(
         found.starts++
       } else {
         found.substitutions++
+      }
+
+      if (report.substitutions.some((substitution) => substitution.outId === player.id)) {
+        found.substitutedOff++
       }
     }
 

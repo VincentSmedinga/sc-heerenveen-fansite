@@ -562,6 +562,7 @@ De kaart telt de gespeelde wedstrijden waarvan de doelpunten bekend zijn, zoals 
 Een speler wordt herkend zoals in de lijst van doelpuntenmakers.
 De balk "Op deze pagina:" van `/spelers/cijfers` heeft drie links, naar Doelpuntenmakers, Doelpunten per linie en Bijzondere doelpunten (`playerFiguresShortcuts` in `src/statisticsShortcuts.ts`, `app/@shortcuts/spelers/cijfers`), en vijf bij een seizoen met verslagen (zie hieronder).
 De kaarten Alle spelers, Assists en Minuten (`AllPlayersCard` en `RankingCard` in `src/ReportFiguresCards.tsx`, #832) staan er alleen bij een seizoen met minstens één verslag dat `klaar` is: Alle spelers in de hoofdkolom onder Doelpuntenmakers, Assists en Minuten bovenaan de zijkolom.
+De tabel Alle spelers heeft de kolommen minuten, basis, gewisseld, ingevallen, doelpunten, assists, geel en rood, in die volgorde.
 Ze lezen alleen de verslagen (`getSeasonReportFigures` in `src/season-report-figures.ts`, vijf minuten bewaard per seizoen en keuze, met `readPlayerReportStats` van `@fansite/db/match-reports`), volgen de schakelaar, en zeggen onder de kaart op hoeveel van de gespeelde wedstrijden ze rusten, met "Bron: eigen administratie".
 `src/report-figures.ts` zet de cijfers in volgorde: de top 5 met gedeelde plekken (`rankedPlaces`) en de rijen van de tabel op minuten en dan naam (`figureRows`).
 Slaat de redactie een verslag als `klaar` op, dan bewaart `saveReport` elke speler wiens doelpunten in de verslagen afwijken van de tabel van Wikipedia als een rij in `player_stat_differences` (`compareReportGoals`, #974).
