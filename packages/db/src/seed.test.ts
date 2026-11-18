@@ -132,6 +132,17 @@ describe('the seed', () => {
       'https://www.haarlemsdagblad.nl/sport/rss/',
       'https://www.leidschdagblad.nl/sport/rss/',
       'https://www.ijmuidercourant.nl/sport/rss/',
+      'https://www.destentor.nl/sport/rss.xml',
+      'https://www.bd.nl/sport/rss.xml',
+      'https://www.tubantia.nl/sport/rss.xml',
+      'https://www.ed.nl/sport/rss.xml',
+      'https://www.bndestem.nl/sport/rss.xml',
+      'https://www.pzc.nl/sport/rss.xml',
+      'https://www.volkskrant.nl/sport/rss.xml',
+      'https://www.trouw.nl/sport/rss.xml',
+      'https://www.parool.nl/sport/rss.xml',
+      'https://www.flevopost.nl/sport/rss/',
+      'https://www.nd.nl/sport/rss',
       'https://www.omropfryslan.nl/rss/index.xml',
       'https://feeds.nos.nl/nosvoetbal',
       'https://www.ad.nl/voetbal/rss.xml',
@@ -179,6 +190,46 @@ describe('the seed', () => {
       expect(paperFeeds.map((feed) => [feed.url, feed.filter])).toEqual(
         paths.map((path) => [`https://${domain}${path}`, 'club']),
       )
+    }
+  })
+
+  it('puts the other dailies in the register with their sports feeds on the club filter and the strictest policy', async () => {
+    await seedSources(database.db)
+
+    const expected: Record<string, [string, null | string]> = {
+      'www.bd.nl': ['/sport/rss.xml', 'dpg-media'],
+      'www.bndestem.nl': ['/sport/rss.xml', 'dpg-media'],
+      'www.destentor.nl': ['/sport/rss.xml', 'dpg-media'],
+      'www.ed.nl': ['/sport/rss.xml', 'dpg-media'],
+      'www.flevopost.nl': ['/sport/rss/', null],
+      'www.nd.nl': ['/sport/rss', null],
+      'www.parool.nl': ['/sport/rss.xml', 'dpg-media'],
+      'www.pzc.nl': ['/sport/rss.xml', 'dpg-media'],
+      'www.trouw.nl': ['/sport/rss.xml', 'dpg-media'],
+      'www.tubantia.nl': ['/sport/rss.xml', 'dpg-media'],
+      'www.volkskrant.nl': ['/sport/rss.xml', 'dpg-media'],
+    }
+
+    for (const [domain, [path, publisher]] of Object.entries(expected)) {
+      const [paper] = await database.db.select().from(sources).where(eq(sources.domain, domain))
+      const paperFeeds = await database.db
+        .select()
+        .from(feeds)
+        .where(eq(feeds.sourceId, paper?.id ?? 0))
+
+      expect(paper).toMatchObject({
+        allowEmbed: false,
+        allowImage: false,
+        enabled: true,
+        introMaxLength: 0,
+        kind: 'news',
+        publisher,
+      })
+      expect(paper?.consentStatus).not.toBe('given')
+      expect(paper?.slug).toBeTruthy()
+      expect(paper?.description).toBeTruthy()
+      expect(paper?.description?.length).toBeLessThanOrEqual(300)
+      expect(paperFeeds.map((feed) => [feed.url, feed.filter])).toEqual([[`https://${domain}${path}`, 'club']])
     }
   })
 
@@ -298,7 +349,9 @@ describe('the seed', () => {
     )
     await seedSources(database.db)
 
-    const [rows] = await database.pool.query('SELECT club FROM source_clubs ORDER BY club')
+    const [rows] = await database.pool.query(
+      "SELECT club FROM source_clubs WHERE source_id = (SELECT id FROM sources WHERE domain = 'www.gelderlander.nl') ORDER BY club",
+    )
 
     expect((rows as { club: string }[]).map((row) => row.club)).toEqual([
       'De Graafschap',
@@ -576,14 +629,29 @@ describe('the seed', () => {
     }
   })
 
-  it('gives only the Algemeen Dagblad and De Gelderlander a publisher, and makes only De Gelderlander local', () => {
+  it('gives only the dailies of DPG Media a publisher, and makes only the regional papers with a club local', () => {
     const withPublisher = realSources.filter((source) => 'publisher' in source)
 
-    expect(withPublisher.map((source) => [source.name, source.publisher])).toEqual([
-      ['Algemeen Dagblad', 'dpg-media'],
-      ['De Gelderlander', 'dpg-media'],
+    expect(withPublisher.map((source) => source.name)).toEqual([
+      'De Stentor',
+      'Brabants Dagblad',
+      'Tubantia',
+      'Eindhovens Dagblad',
+      'BN DeStem',
+      'PZC',
+      'de Volkskrant',
+      'Trouw',
+      'Het Parool',
+      'Algemeen Dagblad',
+      'De Gelderlander',
     ])
+    expect(withPublisher.every((source) => source.publisher === 'dpg-media')).toBe(true)
     expect(realSources.filter((source) => 'local' in source && source.local).map((source) => source.name)).toEqual([
+      'De Stentor',
+      'Brabants Dagblad',
+      'Tubantia',
+      'Eindhovens Dagblad',
+      'BN DeStem',
       'De Gelderlander',
     ])
     expect(testSources.some((source) => 'publisher' in source || 'local' in source)).toBe(false)

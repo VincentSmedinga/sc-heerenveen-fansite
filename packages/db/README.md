@@ -80,7 +80,7 @@ Een bron die er al staat, werkt hij bij op haar domein, behalve wat het beheer s
 Op acceptatie haalt de site ook de testbronnen weg die er voor 26 oktober 2026 stonden (`removeTestSources`).
 Hij herkent ze aan hun domein uit `testSources`, en verwijdert die rijen met hun feeds en berichten; een echte bron blijft ongemoeid.
 Zodra het beheer (#31) bronnen kan toevoegen, verdwijnt `realSources` uit de seed.
-Een feed die over meer gaat dan de club, zoals die van Omrop Fryslân, NOS, het Algemeen Dagblad, De Gelderlander, ESPN, Rijnmond, RTV Noord, de FC Groningen-feed van OOG Groningen, de sportfeeds van De Telegraaf en de sport- en voetbalfeeds van de andere dagbladen van Mediahuis, staat in de seed met `{ filter: 'club', url }`; de seed zet het filter alleen als hij de feed toevoegt (zie de README van de importer, _Het relevantiefilter_).
+Een feed die over meer gaat dan de club, zoals die van Omrop Fryslân, NOS, het Algemeen Dagblad, De Gelderlander, ESPN, Rijnmond, RTV Noord, de FC Groningen-feed van OOG Groningen, de sportfeeds van De Telegraaf, de sport- en voetbalfeeds van de andere dagbladen van Mediahuis, de sportfeeds van de kranten van DPG Media en de algemene feed van het Nederlands Dagblad, staat in de seed met `{ filter: 'club', url }`; de seed zet het filter alleen als hij de feed toevoegt (zie de README van de importer, _Het relevantiefilter_).
 
 ## Het schema wijzigen
 
@@ -207,7 +207,7 @@ De oudere versies blijven in de tabel, en het beheer toont ze allemaal.
 
 ### Eén artikel van twee kranten
 
-Twee kranten van één uitgever kunnen hetzelfde artikel geven onder één artikelcode: het Algemeen Dagblad en De Gelderlander (beide `publisher` `dpg-media`) zetten het verslag van een wedstrijd van N.E.C. allebei in hun feed.
+Twee kranten van één uitgever kunnen hetzelfde artikel geven onder één artikelcode: het Algemeen Dagblad en De Gelderlander (beide `publisher` `dpg-media`, net als de andere kranten van DPG Media) zetten het verslag van een wedstrijd van N.E.C. allebei in hun feed.
 Beide hebben dan dezelfde `thread_key`.
 Bij een bron met een `publisher` toont de lijst van berichten van alle bronnen, dus `/nieuws` zonder keuze van een bron, de homepage en de zoekresultaten, zo'n verhaal één keer (`isShownOnce` in `queries.ts`, via `isShown(until, { merge: true })`):
 

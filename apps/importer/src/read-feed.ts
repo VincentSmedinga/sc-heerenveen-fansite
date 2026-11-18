@@ -125,10 +125,10 @@ export function cleanHeadline(raw: string): string {
 
 /**
  * How a source says an item is behind a paywall, by the domain of the source. Voetbal
- * International gives such an item a category with this `domain`, and the Algemeen Dagblad and
- * De Gelderlander an element `paid` in a namespace with this address (see `paywallNamespaces`);
- * every other source uses the `<premium>` element of the Leeuwarder Courant. A feed without any
- * of these signs has no paywall.
+ * International gives such an item a category with this `domain`, and the Algemeen Dagblad,
+ * De Gelderlander and the six regional papers of DPG Media an element `paid` in a namespace
+ * with this address (see `paywallNamespaces`); every other source uses the `<premium>` element
+ * of the Leeuwarder Courant. A feed without any of these signs has no paywall.
  */
 const paywallCategories: Record<string, string> = {
   'www.vi.nl': 'https://www.vi.nl/pro',
@@ -136,13 +136,20 @@ const paywallCategories: Record<string, string> = {
 
 /**
  * The namespaces of the `<paid>` element, by the domain of the source. DPG Media, the publisher
- * of the Algemeen Dagblad and De Gelderlander, puts `<dpp:paid>true</dpp:paid>` in an item
+ * of the Algemeen Dagblad, De Gelderlander and six regional papers, puts
+ * `<dpp:paid>true</dpp:paid>` in an item
  * behind the paywall. The namespace is known by its address, because the feed may choose
  * another prefix than `dpp`.
  */
 const paywallNamespaces: Record<string, string> = {
   'www.ad.nl': 'https://www.dpgmedia.cloud/paidrss',
+  'www.bd.nl': 'https://www.dpgmedia.cloud/paidrss',
+  'www.bndestem.nl': 'https://www.dpgmedia.cloud/paidrss',
+  'www.destentor.nl': 'https://www.dpgmedia.cloud/paidrss',
+  'www.ed.nl': 'https://www.dpgmedia.cloud/paidrss',
   'www.gelderlander.nl': 'https://www.dpgmedia.cloud/paidrss',
+  'www.pzc.nl': 'https://www.dpgmedia.cloud/paidrss',
+  'www.tubantia.nl': 'https://www.dpgmedia.cloud/paidrss',
 }
 
 /**
@@ -177,12 +184,12 @@ export function paywallNamespaceFor(sourceDomain: string): string | undefined {
 }
 
 /**
- * The code of DPG Media, the publisher of the Algemeen Dagblad and De Gelderlander: a tilde and
- * eight or nine letters and digits at the end of the path, as in `/regio/een-kop~a40dbd48/` or
- * `/regio/een-kop~a25b60e29/`. The feeds of 2 November 2026 held both lengths and no other. The
- * text before the tilde is the headline and changes with every version, the code does not. It
- * is the same code at both newspapers for an article they share, which is why the key only
- * joins items of one source.
+ * The code of DPG Media, the publisher of the Algemeen Dagblad, De Gelderlander and the other
+ * dailies in `threadRules`: a tilde and eight or nine letters and digits at the end of the
+ * path, as in `/regio/een-kop~a40dbd48/` or `/regio/een-kop~a25b60e29/`. The feeds of 2
+ * November 2026 held both lengths and no other. The text before the tilde is the headline and
+ * changes with every version, the code does not. It is the same code at both newspapers for an
+ * article they share, which is why the key only joins items of one source.
  */
 const dpgMediaThread: ThreadRule = /~([a-z0-9]{8,9})\/?$/iu
 
@@ -192,7 +199,16 @@ const dpgMediaThread: ThreadRule = /~([a-z0-9]{8,9})\/?$/iu
  */
 const threadRules: Record<string, ThreadRule> = {
   'www.ad.nl': dpgMediaThread,
+  'www.bd.nl': dpgMediaThread,
+  'www.bndestem.nl': dpgMediaThread,
+  'www.destentor.nl': dpgMediaThread,
+  'www.ed.nl': dpgMediaThread,
   'www.gelderlander.nl': dpgMediaThread,
+  'www.parool.nl': dpgMediaThread,
+  'www.pzc.nl': dpgMediaThread,
+  'www.trouw.nl': dpgMediaThread,
+  'www.tubantia.nl': dpgMediaThread,
+  'www.volkskrant.nl': dpgMediaThread,
 }
 
 /**
