@@ -12,6 +12,7 @@ import OpponentsPage, { generateMetadata } from './page'
 /** A club with five played matches, five wins, for the tests that need a club in the top 10. */
 const fiveMatchRecords = [
   {
+    country: null,
     drawn: 0,
     goalsAgainst: 1,
     goalsFor: 10,
