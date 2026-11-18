@@ -71,6 +71,16 @@
     white-space: nowrap;
   }
 
+  /*
+   * On the narrowest phones a column of figures gives up half of its padding before it gives up
+   * any of its content, so a table with seven columns still fits at 320 pixels.
+   */
+  @media (width < 24rem) {
+    :is(th, td).hf-numeric {
+      padding-inline: var(--hf-space-xs);
+    }
+  }
+
   /* The key figure of the table: the column the table is ordered by, or the answer it gives. */
   .hf-key {
     font-weight: var(--hf-figure-font-weight);

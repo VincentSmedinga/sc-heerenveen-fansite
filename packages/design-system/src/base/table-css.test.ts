@@ -16,6 +16,12 @@ describe('the columns of figures', () => {
     )
   })
 
+  it('give up half of their padding on the narrowest phones, before any of their content', () => {
+    expect(table).toMatch(
+      /@media \(width < 24rem\) \{\s*:is\(th, td\)\.hf-numeric \{\s*padding-inline: var\(--hf-space-xs\);/u,
+    )
+  })
+
   it('still end their figures at the end of the cell', () => {
     expect(table).toMatch(/:is\(th, td\)\.hf-numeric \{[^}]*text-align: end;/u)
   })
