@@ -187,7 +187,7 @@ export function ClubMeetingsCard({
  * the page of that club, with the flag of the country of the club before it (a decoration in
  * the link, so the link is named by the club, and the country in words for a screen reader
  * after the link, once) and an empty place of the same width for a club without a
- * country, so the names stay under each other). `address` is the base address of the pages of
+ * country, so the names stay under each other. `address` is the base address of the pages of
  * the clubs; `query` is the part of the address that holds the choice, which every link keeps.
  * The columns are the played, won, drawn and lost matches, the points and the goal difference,
  * with its sign, as "+18". They are icons, which fit a phone, and the legend under the table
