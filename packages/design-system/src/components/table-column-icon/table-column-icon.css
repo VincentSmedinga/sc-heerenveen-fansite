@@ -185,6 +185,20 @@
    * and no commas. An item does not break between its icon and its word, and the items wrap
    * where the line is full.
    */
+  .hf-table-legend {
+    display: inline-block;
+  }
+
+  /*
+   * The lines of a legend that wraps are balanced, so a legend is not five items on the first
+   * line and one on the second. Balancing needs a block, so the legend is an inline block.
+   */
+  @supports (text-wrap: balance) {
+    .hf-table-legend {
+      text-wrap: balance;
+    }
+  }
+
   .hf-table-legend-item {
     display: inline-block;
     margin-inline-end: 1.25em;

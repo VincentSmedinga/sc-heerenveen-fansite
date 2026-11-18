@@ -3873,7 +3873,8 @@
 - **Besluit:** het shirt van `started` heeft drie witte en twee blauwe strepen over het hele shirt, bijgesneden op de vorm, en twee pompeblêden van het logo (`pompebledPath`) boven elkaar in de middelste streep.
   Drie tokens vervangen `--hf-colour-icon-shirt`: `--hf-colour-icon-stripe-blue` (blauw-500), `--hf-colour-icon-stripe-white` (wit, in donker blauw-100) en `--hf-colour-icon-pompebled` (`#E30613`, het rood van het clubwapen).
   De rand van een badge en van het kleine veld is doorzichtig: de tekening eronder is met een masker weggesneden.
-  Alle lijnen in de pictogrammen zijn 1,2 dik, zoals die van het veld, behalve de dunne netlijnen en de naden van de bal, en de tekens in een badge, die 1,4 zijn (#1387).
+  Alle lijnen in de pictogrammen zijn 1,2 dik, zoals die van het veld, behalve de dunne netlijnen en de naden van de bal, en de tekens in een badge, die 1,4 zijn.
+  De legenda onder een tabel is een inline blok met `text-wrap: balance`, zodat de regels gelijk gevuld zijn (#1387).
 - **Waarom:** het shirt lijkt zo op het thuisshirt van de club, en de pompeblêden zijn kenmerkend voor ons.
   Een eigen rood houdt het rood van verlies en kaarten apart.
   Een doorzichtige rand laat het pictogram op elke achtergrond staan, en één lijndikte maakt de set rustiger.

@@ -126,6 +126,13 @@ describe('the shirt and the overlays', () => {
   })
 })
 
+describe('the legend', () => {
+  it('balances its lines, so a legend that wraps is not five items and then one', () => {
+    expect(css).toMatch(/\.hf-table-legend \{\s*display: inline-block;/u)
+    expect(css).toMatch(/@supports \(text-wrap: balance\) \{\s*\.hf-table-legend \{\s*text-wrap: balance;/u)
+  })
+})
+
 describe('the colours of the icons of the columns', () => {
   const surfaces = ['surface', 'page', 'surface-strong', 'surface-soft', 'surface-warm'].map((name) =>
     role(`background-${name}`),
