@@ -1,6 +1,7 @@
 import { type ReactNode, useId } from 'react'
 
 import { classNames } from '../classNames'
+import { pompebledPath, pompebledRotation } from '../logo/Pompebled'
 
 /**
  * The icons of the columns of the tables, one for each column of `tableColumns`. The key of a
@@ -92,8 +93,8 @@ const Ball = ({
 // The upright pitch of the played matches: thin lines, a box at each end, no centre circle.
 const Pitch = () => (
   <>
-    <rect className={`${p}-line ${p}-thin-line`} height="13.6" rx="1.5" width="10.8" x="2.6" y="1.2" />
-    <path className={`${p}-line ${p}-thin-line`} d="M2.6 8h10.8M5.6 1.2v2.4h4.8V1.2M5.6 14.8v-2.4h4.8v2.4" />
+    <rect className={`${p}-line`} height="13.6" rx="1.5" width="10.8" x="2.6" y="1.2" />
+    <path className={`${p}-line`} d="M2.6 8h10.8M5.6 1.2v2.4h4.8V1.2M5.6 14.8v-2.4h4.8v2.4" />
   </>
 )
 
@@ -105,27 +106,54 @@ const signs = {
   plusMinus: 'M11.4 8.5v3.3M9.8 10.15h3.2M9.8 13.7h3.2',
 } as const
 
-// A large badge with a sign: the result or the sign of the figure. It has a rim in the colour
-// of the surface, so it stands free of what is behind it. The sign repeats the colour.
-const Badge = ({ colour, sign }: { colour: 'draw' | 'loss' | 'win'; sign: keyof typeof signs }) => (
+// Under an overlay (a badge, the small pitch of "per match") the drawing is cut away with a
+// mask, so the overlay has a border that is transparent and the icon stands on any background.
+const Cut = ({ children, hole }: { children: ReactNode; hole: ReactNode }) => {
+  const mask = useId()
+
+  return (
+    <>
+      <mask height="20" id={mask} maskUnits="userSpaceOnUse" width="20" x="-2" y="-2">
+        <rect fill="#fff" height="20" width="20" x="-2" y="-2" />
+        {hole}
+      </mask>
+      <g mask={`url(#${mask})`}>{children}</g>
+    </>
+  )
+}
+
+// A large badge with a sign: the result or the sign of the figure, over a drawing that is cut
+// away round it. The sign repeats the colour.
+const Badged = ({
+  children,
+  colour,
+  sign,
+}: {
+  children: ReactNode
+  colour: 'draw' | 'loss' | 'win'
+  sign: keyof typeof signs
+}) => (
   <>
+    <Cut hole={<circle cx="11.4" cy="11.4" fill="#000" r="6.2" />}>{children}</Cut>
     <circle className={`${p}-${colour} ${p}-badge`} cx="11.4" cy="11.4" r="4.8" />
     <path className={`${p}-sign`} d={signs[sign]} />
   </>
 )
 
-// A small plain pitch at the bottom right, with a wide halo in the colour of the surface: "per
-// match".
-const PerMatch = () => (
+// A small pitch at the bottom right: "per match". It has a box at each end like the big pitch,
+// in thinner lines, and the drawing under it is cut away round it.
+const PerMatchOver = ({ children }: { children: ReactNode }) => (
   <>
-    <rect className={`${p}-halo`} height="8.2" rx="1.1" width="6" x="9.2" y="7.4" />
+    <Cut hole={<rect fill="#000" height="8.2" rx="1.1" stroke="#000" strokeWidth="3.6" width="6" x="9.2" y="7.4" />}>
+      {children}
+    </Cut>
     <rect className={`${p}-line ${p}-small-line`} height="8.2" rx="1.1" width="6" x="9.2" y="7.4" />
-    <path className={`${p}-line ${p}-small-line`} d="M9.2 11.5h6" />
+    <path className={`${p}-line ${p}-small-line`} d="M9.2 11.5h6M11 7.4v1.3h2.4V7.4M11 15.6v-1.3h2.4v1.3" />
   </>
 )
 
 const Tally = () => (
-  <path className={`${p}-line ${p}-tally`} d="M3.4 2.6v10.8M6.5 2.6v10.8M9.6 2.6v10.8M12.7 2.6v10.8M1.6 11.6l13-7" />
+  <path className={`${p}-line`} d="M3.4 2.6v10.8M6.5 2.6v10.8M9.6 2.6v10.8M12.7 2.6v10.8M1.6 11.6l13-7" />
 )
 
 // A goal with a net, in thin lines at half the opacity; the figure under it says what it is.
@@ -136,45 +164,81 @@ const Goal = () => (
   </>
 )
 
+const shirtPath =
+  'M5.2 1.6L.9 3.9l1.8 3.6 1.5-.7V14.4h7.6V6.8l1.5.7 1.8-3.6-4.3-2.3C10.4 2.9 9.4 3.7 8 3.7S5.6 2.9 5.2 1.6z'
+
+// The shirt of the starting line-up: three white and two blue stripes across the whole shirt,
+// clipped to its shape, and two pompeblêden of the logo, one above the other in the middle
+// stripe. The rim in the colour of the text gives the shape its 3:1.
+const Shirt = () => {
+  const clip = useId()
+  const width = 14.2 / 5
+
+  return (
+    <>
+      <clipPath id={clip}>
+        <path d={shirtPath} />
+      </clipPath>
+      <g clipPath={`url(#${clip})`}>
+        {[0, 1, 2, 3, 4].map((i) => (
+          <rect
+            className={`${p}-stripe-${i % 2 === 0 ? 'white' : 'blue'}`}
+            height="14"
+            key={i}
+            width={width + 0.02}
+            x={(0.9 + i * width).toFixed(2)}
+            y="1"
+          />
+        ))}
+      </g>
+      {[7.6, 11.7].map((y) => (
+        <path
+          className={`${p}-pompebled`}
+          d={pompebledPath}
+          key={y}
+          transform={`translate(7.8 ${y}) scale(0.09) rotate(${pompebledRotation})`}
+        />
+      ))}
+      <path className={`${p}-rim ${p}-shirt-rim`} d={shirtPath} />
+    </>
+  )
+}
+
 const arrow = (colour: 'loss' | 'win', d: string) => <path className={`${p}-arrow ${p}-${colour}-line`} d={d} />
 
 const drawings: Record<TableColumnIconName, () => ReactNode> = {
   assists: () => (
     <>
       <path className={`${p}-boot ${p}-rim`} d="M2.4 4.6h4.4v2.4c2.4.3 4.9 1.2 6.4 2.3 1 .7 1.4 1.7 1.4 2.9H2.4z" />
-      <path className={`${p}-line ${p}-studs`} d="M4 12.9v1.1M7.2 12.9v1.1M10.4 12.9v1.1M13.3 12.9v1" />
+      <path className={`${p}-line`} d="M4 12.9v1.1M7.2 12.9v1.1M10.4 12.9v1.1M13.3 12.9v1" />
     </>
   ),
   cleanSheets: () => (
     <>
       <Goal />
-      <ellipse className={`${p}-line ${p}-medium-line`} cx="8" cy="12.9" rx="1.5" ry="2.1" />
+      <ellipse className={`${p}-line`} cx="8" cy="12.9" rx="1.5" ry="2.1" />
     </>
   ),
   conceded: () => (
-    <>
+    <Badged colour="loss" sign="minus">
       <Ball />
-      <Badge colour="loss" sign="minus" />
-    </>
+    </Badged>
   ),
   drawn: () => (
-    <>
+    <Badged colour="draw" sign="equals">
       <Pitch />
-      <Badge colour="draw" sign="equals" />
-    </>
+    </Badged>
   ),
   goalDifference: () => (
-    <>
+    <Badged colour="draw" sign="plusMinus">
       <Ball />
-      <Badge colour="draw" sign="plusMinus" />
-    </>
+    </Badged>
   ),
   goals: () => <Ball />,
   goalsPerMatch: () => (
-    <>
+    <PerMatchOver>
       <Ball />
-      <PerMatch />
-    </>
+    </PerMatchOver>
   ),
   hattricks: () => (
     <>
@@ -184,10 +248,9 @@ const drawings: Record<TableColumnIconName, () => ReactNode> = {
     </>
   ),
   lost: () => (
-    <>
+    <Badged colour="loss" sign="cross">
       <Pitch />
-      <Badge colour="loss" sign="cross" />
-    </>
+    </Badged>
   ),
   minutes: () => (
     <>
@@ -204,10 +267,9 @@ const drawings: Record<TableColumnIconName, () => ReactNode> = {
   played: () => <Pitch />,
   points: () => <Tally />,
   pointsPerMatch: () => (
-    <>
+    <PerMatchOver>
       <Tally />
-      <PerMatch />
-    </>
+    </PerMatchOver>
   ),
   red: () => <rect className={`${p}-card ${p}-red`} height="13" rx="1.5" width="9" x="3.5" y="1.5" />,
   seasons: () => (
@@ -217,19 +279,13 @@ const drawings: Record<TableColumnIconName, () => ReactNode> = {
       <path className={`${p}-fill`} d="M4.3 9h1.8v1.8H4.3zM7.1 9h1.8v1.8H7.1zM9.9 9h1.8v1.8H9.9z" />
     </>
   ),
-  started: () => (
-    <path
-      className={`${p}-shirt ${p}-rim`}
-      d="M5.2 1.6L.9 3.9l1.8 3.6 1.5-.7V14.4h7.6V6.8l1.5.7 1.8-3.6-4.3-2.3C10.4 2.9 9.4 3.7 8 3.7S5.6 2.9 5.2 1.6z"
-    />
-  ),
+  started: () => <Shirt />,
   substituted: () => arrow('win', 'M8 13V3.5M4 7.5l4-4 4 4'),
   substitutedOff: () => arrow('loss', 'M8 3v9.5M4 8.5l4 4 4-4'),
   won: () => (
-    <>
+    <Badged colour="win" sign="check">
       <Pitch />
-      <Badge colour="win" sign="check" />
-    </>
+    </Badged>
   ),
   yellow: () => <rect className={`${p}-card ${p}-yellow`} height="13" rx="1.5" width="9" x="3.5" y="1.5" />,
 }

@@ -36,30 +36,16 @@
     stroke: var(--hf-colour-text-heading);
     stroke-linecap: round;
     stroke-linejoin: round;
-    stroke-width: 1.6;
-  }
-
-  .hf-table-icon-thin-line {
     stroke-width: 1.2;
   }
 
-  .hf-table-icon-small-line {
-    stroke-width: 1.1;
-  }
-
-  .hf-table-icon-medium-line {
-    stroke-width: 1.4;
-  }
-
-  .hf-table-icon-tally {
-    stroke-width: 1.8;
-  }
-
-  .hf-table-icon-studs {
-    stroke-width: 1.3;
-  }
-
   /* The net of a goal: thin lines at half the opacity. */
+
+  /* The small pitch of "per match" is drawn in thinner lines, so its boxes still show. */
+  .hf-table-icon-small-line {
+    stroke-width: 0.8;
+  }
+
   .hf-table-icon-net {
     fill: none;
     opacity: 0.55;
@@ -81,9 +67,9 @@
 
   /*
    * A badge says the result or the sign of the figure, in the colour of a win, a draw or a
-   * loss. The sign inside it repeats the colour, so the colour is never the only sign. The rim
-   * is in the colour of the surface and is drawn under the fill, so the badge stands free of
-   * what is behind it.
+   * loss. The sign inside it repeats the colour, so the colour is never the only sign. The
+   * drawing under a badge is cut away round it (a mask), so the badge stands free of what is
+   * behind it and its border is transparent.
    */
   .hf-table-icon-win {
     fill: var(--hf-colour-outcome-win);
@@ -97,25 +83,12 @@
     fill: var(--hf-colour-outcome-draw);
   }
 
-  .hf-table-icon-badge {
-    paint-order: stroke;
-    stroke: var(--hf-colour-background-surface);
-    stroke-width: 1.4;
-  }
-
   .hf-table-icon-sign {
     fill: none;
     stroke: var(--hf-colour-background-surface);
     stroke-linecap: round;
     stroke-linejoin: round;
-    stroke-width: 1.7;
-  }
-
-  /* The small pitch of "per match" has a wide halo in the colour of the surface. */
-  .hf-table-icon-halo {
-    fill: var(--hf-colour-background-surface);
-    stroke: var(--hf-colour-background-surface);
-    stroke-width: 3.6;
+    stroke-width: 1.4;
   }
 
   /*
@@ -129,8 +102,21 @@
     stroke-width: 1.2;
   }
 
-  .hf-table-icon-shirt {
-    fill: var(--hf-colour-icon-shirt);
+  /* The shirt: stripes clipped to its shape, and two pompeblêden of the logo on it. */
+  .hf-table-icon-stripe-blue {
+    fill: var(--hf-colour-icon-stripe-blue);
+  }
+
+  .hf-table-icon-stripe-white {
+    fill: var(--hf-colour-icon-stripe-white);
+  }
+
+  .hf-table-icon-pompebled {
+    fill: var(--hf-colour-icon-pompebled);
+  }
+
+  .hf-table-icon-shirt-rim {
+    fill: none;
   }
 
   .hf-table-icon-boot {
@@ -150,7 +136,7 @@
     fill: none;
     stroke-linecap: round;
     stroke-linejoin: round;
-    stroke-width: 1.8;
+    stroke-width: 1.4;
   }
 
   .hf-table-icon-win-line {
@@ -164,10 +150,12 @@
   /*
    * In forced colours the fills are the text colour or the background, and every line stays the
    * text colour, so each icon stays readable: a badge is a filled disc with a sign in the
-   * background colour, a shirt, a boot and a card are outlined.
+   * background colour, a shirt has black and white stripes, and a boot and a card are outlined.
    */
   @media (forced-colors: active) {
     .hf-table-icon-fill,
+    .hf-table-icon-stripe-blue,
+    .hf-table-icon-pompebled,
     .hf-table-icon-win,
     .hf-table-icon-loss,
     .hf-table-icon-draw {
@@ -175,16 +163,13 @@
     }
 
     .hf-table-icon-surface,
-    .hf-table-icon-halo,
-    .hf-table-icon-shirt,
+    .hf-table-icon-stripe-white,
     .hf-table-icon-boot,
     .hf-table-icon-yellow,
     .hf-table-icon-red {
       fill: Canvas;
     }
 
-    .hf-table-icon-halo,
-    .hf-table-icon-badge,
     .hf-table-icon-sign {
       stroke: Canvas;
     }
@@ -206,6 +191,20 @@
    * and no commas. An item does not break between its icon and its word, and the items wrap
    * where the line is full.
    */
+  .hf-table-legend {
+    display: inline-block;
+  }
+
+  /*
+   * The lines of a legend that wraps are balanced, so a legend is not five items on the first
+   * line and one on the second. Balancing needs a block, so the legend is an inline block.
+   */
+  @supports (text-wrap: balance) {
+    .hf-table-legend {
+      text-wrap: balance;
+    }
+  }
+
   .hf-table-legend-item {
     display: inline-block;
     margin-inline-end: 1.25em;

@@ -205,11 +205,16 @@
     --hf-colour-card-red: light-dark(var(--hf-colour-red-600), var(--hf-colour-red-400));
 
     /*
-     * The fill of the shirt and the boot in the icons of the table columns (TableColumnIcon).
-     * Only for those two shapes: the rim in the colour of the text (--hf-colour-text-default)
-     * gives the shape its 3:1, as on the cards, so the fill itself need not reach it.
+     * The fills of the shirt and the boot in the icons of the table columns (TableColumnIcon).
+     * Only for those shapes: the rim in the colour of the text (--hf-colour-text-default)
+     * gives the shape its 3:1, as on the cards, so the fill itself need not reach it. The
+     * shirt has blue and white stripes, with the white a little softer in dark, and the leaves
+     * of the pompeblêd are in the red of the crest (#E30613), apart from the red of a loss and
+     * of a card.
      */
-    --hf-colour-icon-shirt: light-dark(var(--hf-colour-blue-300), var(--hf-colour-blue-300));
+    --hf-colour-icon-stripe-blue: light-dark(var(--hf-colour-blue-500), var(--hf-colour-blue-500));
+    --hf-colour-icon-stripe-white: light-dark(var(--hf-colour-white), var(--hf-colour-blue-100));
+    --hf-colour-icon-pompebled: light-dark(#e30613, #e30613);
     --hf-colour-icon-boot: light-dark(var(--hf-colour-grey-400), var(--hf-colour-grey-300));
 
     /*
@@ -447,7 +452,9 @@
       --hf-colour-outcome-draw: var(--hf-colour-grey-600);
       --hf-colour-card-yellow: var(--hf-colour-yellow-400);
       --hf-colour-card-red: var(--hf-colour-red-600);
-      --hf-colour-icon-shirt: var(--hf-colour-blue-300);
+      --hf-colour-icon-stripe-blue: var(--hf-colour-blue-500);
+      --hf-colour-icon-stripe-white: var(--hf-colour-blue-100);
+      --hf-colour-icon-pompebled: #e30613;
       --hf-colour-icon-boot: var(--hf-colour-grey-400);
       --hf-colour-background-pitch: var(--hf-colour-blue-50);
       --hf-colour-background-pitch-stripe: color-mix(in srgb, var(--hf-colour-blue-50) 50%, var(--hf-colour-blue-100));
