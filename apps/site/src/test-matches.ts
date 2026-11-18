@@ -30,6 +30,7 @@ const base = {
 export const matchData: MatchData = {
   coaches: [],
   edited: false,
+  groupStandings: [],
   matches: [
     {
       ...base,

@@ -635,8 +635,15 @@
     {
       "idx": 90,
       "version": "5",
-      "when": 1795037137806,
-      "tag": "0090_add_standings_competition",
+      "when": 1795037170959,
+      "tag": "0090_add_group_standings",
+      "breakpoints": true
+    },
+    {
+      "idx": 91,
+      "version": "5",
+      "when": 1795044486479,
+      "tag": "0091_add_standings_competition",
       "breakpoints": true
     }
   ]

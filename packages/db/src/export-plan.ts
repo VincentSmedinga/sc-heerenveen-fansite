@@ -62,6 +62,7 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
   daily_visitors: 'copy',
   discussions: 'structure',
   feeds: 'copy',
+  group_standings: 'copy',
   import_alerts: 'copy',
   import_results: 'copy',
   import_runs: 'copy',

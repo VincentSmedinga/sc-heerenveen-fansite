@@ -544,6 +544,78 @@ describe('the page /wedstrijden', () => {
     })
   })
 
+  describe('the table of a group stage', () => {
+    const group = (club: string, position: number, points: number) => ({
+      club,
+      competition: 'Europa League' as const,
+      drawn: 0,
+      goalDifference: 0,
+      goalsAgainst: 0,
+      goalsFor: 0,
+      groupName: 'Groep D',
+      language: 'nl',
+      lost: 0,
+      played: 6,
+      points,
+      position,
+      readAt: new Date('2026-11-18T10:00:00Z'),
+      sourcePage: 'UEFA Europa League 2009/10',
+      won: 0,
+    })
+    const europe = {
+      ...matchData.matches[3]!,
+      competition: 'Europa League',
+      round: 'Groepsfase, wedstrijd 1/6',
+    } as const
+    const rows = [
+      group('Demo Boys', 1, 11),
+      group('Proefstad SV', 2, 8),
+      group('sc Heerenveen', 3, 8),
+      group('Testdorp FC', 4, 3),
+    ]
+
+    it('shows the table under the matches of its competition, with our club marked in words', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        groupStandings: rows,
+        matches: [...matchData.matches, europe],
+      })
+
+      const card = section(await render(), 'uitslagen-europa-league')
+
+      expect(card).toContain('Tabel van groep d')
+      expect(card).toContain('Tabel van groep d in de Europa League van 2026/27')
+      expect(card).toMatch(
+        /<th scope="row">sc Heerenveen<span class="hf-visually-hidden"> \(onze club\)<\/span><\/th>/u,
+      )
+      expect(card.indexOf('Groepsfase')).toBeLessThan(card.indexOf('Tabel van groep d'))
+      expect(card).toContain('UEFA Europa League 2009/10')
+      expect(card).toContain('https://nl.wikipedia.org/wiki/UEFA_Europa_League_2009/10')
+      expect(card).toContain('CC BY-SA 4.0')
+    })
+
+    it('shows the table in none of the other cards', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({
+        ...matchData,
+        groupStandings: rows,
+        matches: [...matchData.matches, europe],
+      })
+
+      const html = await render()
+
+      expect(html.match(/Tabel van groep d<\/h3>/gu)).toHaveLength(1)
+    })
+
+    it('leaves the card as it was when there is no table', async () => {
+      vi.mocked(getMatchData).mockResolvedValue({ ...matchData, matches: [...matchData.matches, europe] })
+
+      const html = await render()
+
+      expect(html).toContain('Groepsfase')
+      expect(html).not.toContain('Tabel van groep')
+    })
+  })
+
   describe('a cup tie after extra time or penalties', () => {
     const tie = {
       ...matchData.matches[3]!,
@@ -860,6 +932,7 @@ describe('the page /wedstrijden', () => {
     vi.mocked(getMatchData).mockResolvedValue({
       coaches: [],
       edited: false,
+      groupStandings: [],
       matches: [],
       pages: [],
       season: '2026/27',

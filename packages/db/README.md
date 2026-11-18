@@ -532,6 +532,10 @@ De sleutel is het seizoen met de plaats.
 | `points_deducted`                               | De punten die de club door een aftrek kwijt is (standaard 0)                     |
 | `valid_on`                                      | De dag waarvoor de stand geldt: die van de laatste gespeelde competitiewedstrijd |
 
+`group_standings` heeft de tabel van de groep van sc Heerenveen in een Europees toernooi (#1405): een rij per club, met `competition`, `group_name` (`Groep D`), de getallen van de pagina en de bron (`source_page`, `language` en `read_at`).
+De club is een `club_id`, en leeg voor sc Heerenveen zelf, dat geen club van `clubs` is.
+`listGroupStandings(db, seizoen)` geeft ze voor één seizoen.
+
 `league_results` heeft een rij voor elke gespeelde competitiewedstrijd van elke club van de Eredivisie, uit de pagina met het programma.
 De sleutel is het seizoen met de thuisclub en de uitclub.
 
@@ -1119,7 +1123,7 @@ Ze slaan niets over: zo geeft een CI zonder database geen groene vink.
 
 De exports zijn TypeScript-bronnen, zoals bij de andere packages:
 
-- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `club_pages`, `persons`, `person_pages`, `player_list_titles`, `club_stadiums`, `stadiums`, `stadium_names`, `club_home_grounds`, `club_name_periods`, `standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, `squad_completeness`, `item_clubs`, `source_clubs`, `match_reports`, `match_appearances`, `match_substitutions`, `match_cards`, `match_incidents`, `match_shootout_kicks`, `match_statistics`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
+- `@fansite/db/schema`: de tabellen (`sources`, `feeds`, `items`, `articles`, `import_runs`, `import_results`, `robots_txt`, `audit_log`, `matches`, `match_goals`, `clubs`, `club_names`, `club_pages`, `persons`, `person_pages`, `player_list_titles`, `club_stadiums`, `stadiums`, `stadium_names`, `club_home_grounds`, `club_name_periods`, `standings`, `group_standings`, `league_results`, `wikipedia_pages`, `match_imports`, `players`, `player_season_stats`, `squad_imports`, `squad_completeness`, `item_clubs`, `source_clubs`, `match_reports`, `match_appearances`, `match_substitutions`, `match_cards`, `match_incidents`, `match_shootout_kicks`, `match_statistics`, die van het tellen van bezoeken en die van het beheer), hun types en de lengtes van `items`;
 - `@fansite/db/visits`: `createVisitCounter(db)` geeft `record({ address, now, path, userAgent })`, dat een paginaweergave en, als de bezoeker vandaag nog niet is gezien, een bezoeker telt; `removeVisitorData(db, now)` gooit het zout en de kenmerken van eerdere dagen weg, `visitDay(moment)` geeft de dag in Nederland en `visitorHash(salt, address, userAgent)` het kenmerk;
 - `@fansite/db/stadium-admin`: `listAdminStadiums`, `findAdminStadium`, `listClubHomeGrounds`, `saveStadium`, `resetStadiumToWikidata`, `saveClubHomeGrounds` en `setClubWikidataId` voor het beheer van de stadions;
 - `@fansite/db/stadiums`: `fillStadiumsFromHomeGrounds`, `homeGroundOnTheDay`, `isOnNeutralGround`, `stadiumOnTheDay`, `listClubStadiumLines`, `findStadium`, `resolveStadium`, `loadStadiumIndex`, `linkMatchToStadium`, `linkMatchesToStadiums`, `replaceHomeGrounds`, `seedStadiums`, `migrateStadiums`, `nameKey` en `startDate` voor de stadions (zie _De tabellen van de stadions_);

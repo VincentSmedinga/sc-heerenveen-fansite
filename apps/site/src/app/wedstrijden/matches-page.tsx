@@ -8,6 +8,7 @@ import { notFound } from 'next/navigation'
 import { cupOutcomeOf } from '#src/cup-outcome'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
+import { GroupStageTable } from '#src/GroupStageTable'
 import { lastFiveOf } from '#src/last-five'
 import { seasonSourceOf, sourceName, sourceOf } from '#src/match-sources'
 import {
@@ -249,6 +250,10 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
                     now={now}
                     reportAddresses={reportAddresses}
                     withCompetition={false}
+                  />
+                  <GroupStageTable
+                    rows={data.groupStandings.filter((row) => row.competition === competition)}
+                    season={season}
                   />
                   {competition === 'KNVB Beker' && cupOutcome?.kind === 'lost' && <Text>{cupOutcome.line}</Text>}
                   {competition === 'KNVB Beker' && cupOutcome?.kind === 'won' && <Cup />}

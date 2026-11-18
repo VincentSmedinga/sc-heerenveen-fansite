@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "d99d6379-d812-4d95-a90d-fa889c6bd1db",
+  "id": "08a4afda-4b25-4a6b-81ab-a56a4e101fc0",
   "prevId": "6cedac37-99d6-4cba-98b0-0f8a87000f61",
   "tables": {
     "admin_login_attempts": {
@@ -1359,6 +1359,155 @@
           "name": "feeds_url_unique",
           "columns": [
             "url"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    },
+    "group_standings": {
+      "name": "group_standings",
+      "columns": {
+        "season": {
+          "name": "season",
+          "type": "varchar(7)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "competition": {
+          "name": "competition",
+          "type": "enum('Eredivisie','KNVB Beker','Play-offs Conference League','Europa League','Play-offs Europa League','Eerste divisie','Champions League','Europacup II','UEFA Cup','Intertoto Cup','Play-offs UEFA Cup','Johan Cruijff Schaal','Play-offs Champions League')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "group_name": {
+          "name": "group_name",
+          "type": "varchar(40)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "position": {
+          "name": "position",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "club_id": {
+          "name": "club_id",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "played": {
+          "name": "played",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "won": {
+          "name": "won",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "drawn": {
+          "name": "drawn",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "lost": {
+          "name": "lost",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "goals_for": {
+          "name": "goals_for",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "goals_against": {
+          "name": "goals_against",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "goal_difference": {
+          "name": "goal_difference",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "points": {
+          "name": "points",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_page": {
+          "name": "source_page",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "language": {
+          "name": "language",
+          "type": "char(2)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "group_standings_club_id_clubs_id_fk": {
+          "name": "group_standings_club_id_clubs_id_fk",
+          "tableFrom": "group_standings",
+          "tableTo": "clubs",
+          "columnsFrom": [
+            "club_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "group_standings_pk": {
+          "name": "group_standings_pk",
+          "columns": [
+            "season",
+            "competition",
+            "group_name",
+            "position"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "group_standings_club_unique": {
+          "name": "group_standings_club_unique",
+          "columns": [
+            "season",
+            "competition",
+            "group_name",
+            "club_id"
           ]
         }
       },
@@ -5609,14 +5758,6 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
-        },
-        "competition": {
-          "name": "competition",
-          "type": "enum('Eredivisie','Eerste divisie')",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'Eredivisie'"
         },
         "position": {
           "name": "position",

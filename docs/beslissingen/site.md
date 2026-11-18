@@ -6591,3 +6591,14 @@
   De tekening is versiering en voor een schermlezer verborgen; de winst staat ook in de uitslag van de finale zelf.
   Een gewonnen beker verdient een eigen moment, en alleen dan, zodat het een verrassing blijft.
 - **Alternatieven:** een eigen kaart met de weg door de beker (#404); de tekening in elk seizoen; een foto of een logo van de KNVB (rechten en een verzoek naar derden).
+
+## De tabel van een groepsfase staat op de kaart van de competitie, onder de wedstrijden
+
+- **Datum:** 18 november 2026
+- **Besluit:** de tabel staat op de kaart van de competitie op Wedstrijden, onder de wedstrijden van de groepsfase, en toont de club van de site gemarkeerd.
+  Ze gebruikt `StandingsTable` van het designsysteem onder een kop van niveau 3 (`Tabel van groep d`), met de bronvermelding van de pagina en de licentie (CC BY-SA 4.0) eronder (`GroupStageTable`).
+  Een competitie zonder groepstabel verandert niet.
+  De tabel toont de positie, de club, de gespeelde wedstrijden en de punten, zoals de stand van de competitie; de doelpunten en het doelsaldo staan in de database en niet op de kaart.
+- **Waarom:** de bezoeker ziet daar al de wedstrijden van het toernooi, en een tabel eronder legt uit hoe de groep eindigde.
+  Eén tabel voor alle standen houdt de koppen, de markering van onze club en de uitleg van de afkortingen gelijk.
+- **Alternatieven:** een eigen pagina (te veel voor zes wedstrijden); de wedstrijdpagina (de tabel hoort bij de competitie, niet bij één wedstrijd); een eigen component met alle kolommen (veel breedte voor een kaart die al smal is).

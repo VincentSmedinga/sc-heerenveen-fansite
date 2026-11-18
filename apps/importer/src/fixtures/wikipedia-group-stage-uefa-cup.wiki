@@ -1,0 +1,34 @@
+Een stuk van de pagina van de UEFA Cup 2008/09.
+
+==Groepsfase==
+===Groep E===
+{| class="wikitable" style="text-align: center;"
+|-
+!width=165|Team
+!width=20|Ptn
+!width=20|Wed
+!width=20|W
+!width=20|G
+!width=20|V
+!width=20|DV
+!width=20|DT
+!width=20|DS
+|-
+|- align=center bgcolor=ccffcc
+|style="text-align:left;"|{{DE-VLAG}} '''[[VfL Wolfsburg]]'''
+|'''10'''||4||3||1||0||13||7||6
+|-
+|- align=center bgcolor=ccffcc
+|style="text-align:left;"|{{IT-VLAG}} '''[[AC Milan]]'''
+|'''8'''||4||2||2||0||8||5||3
+|-
+|- align=center bgcolor=ccffcc
+|style="text-align:left;"|{{PT-VLAG}} '''[[Sporting Clube de Braga|SC Braga]]'''
+|'''6'''||4||2||0||2||7||5||2
+|-
+|style="text-align:left;"|{{EN-VLAG}} [[Portsmouth FC]]
+|'''4'''||4||1||1||2||7||8||−1
+|-
+|style="text-align:left;"|{{NL-VLAG}} [[sc Heerenveen]]
+|'''0'''||4||0||0||4||3||13||−10
+|}
