@@ -140,14 +140,15 @@ const Badged = ({
   </>
 )
 
-// A small plain pitch at the bottom right, with the drawing cut away round it: "per match".
+// A small pitch at the bottom right: "per match". It has a box at each end like the big pitch,
+// in thinner lines, and the drawing under it is cut away round it.
 const PerMatchOver = ({ children }: { children: ReactNode }) => (
   <>
     <Cut hole={<rect fill="#000" height="8.2" rx="1.1" stroke="#000" strokeWidth="3.6" width="6" x="9.2" y="7.4" />}>
       {children}
     </Cut>
-    <rect className={`${p}-line`} height="8.2" rx="1.1" width="6" x="9.2" y="7.4" />
-    <path className={`${p}-line`} d="M9.2 11.5h6" />
+    <rect className={`${p}-line ${p}-small-line`} height="8.2" rx="1.1" width="6" x="9.2" y="7.4" />
+    <path className={`${p}-line ${p}-small-line`} d="M9.2 11.5h6M11 7.4v1.3h2.4V7.4M11 15.6v-1.3h2.4v1.3" />
   </>
 )
 

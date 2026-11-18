@@ -40,6 +40,12 @@
   }
 
   /* The net of a goal: thin lines at half the opacity. */
+
+  /* The small pitch of "per match" is drawn in thinner lines, so its boxes still show. */
+  .hf-table-icon-small-line {
+    stroke-width: 0.8;
+  }
+
   .hf-table-icon-net {
     fill: none;
     opacity: 0.55;
@@ -96,7 +102,7 @@
     stroke-width: 1.2;
   }
 
-  /* The shirt: stripes clipped to its shape, and two pompeblêden of the logo on the white one. */
+  /* The shirt: stripes clipped to its shape, and two pompeblêden of the logo on it. */
   .hf-table-icon-stripe-blue {
     fill: var(--hf-colour-icon-stripe-blue);
   }
