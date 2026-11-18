@@ -6,7 +6,8 @@ export type CupProps = Omit<ComponentPropsWithoutRef<'svg'>, 'aria-hidden' | 'ch
 
 /**
  * A line drawing of the Denneappel, the cup of the KNVB Beker, upright: a round urn with a lid
- * that ends in a pine cone, a belt with a plate for the names, and a foot on a stepped base. It
+ * that ends in a pine cone, a broad belt with a plate for the names, ribs on the belly, and a
+ * narrow foot on a disc. It
  * is for a card that celebrates a won cup. It is decoration: it is hidden from a screen reader,
  * so the text next to it says what it stands for. The lines take the colour of the text around
  * it.
@@ -24,18 +25,21 @@ export const Cup = ({ className, ...props }: CupProps) => (
     strokeWidth={3}
     viewBox="0 0 96 192"
   >
-    <ellipse cx={48} cy={18} rx={7} ry={11} />
-    <path d="M42 14L54 22M42 22L54 14M44 29H52" />
-    <path d="M30 56C30 40 38 32 48 32C58 32 66 40 66 56" />
-    <path d="M26 56H70M28 60H68" />
-    <path d="M22 62C20 70 20 74 22 80H74C76 74 76 70 74 62Z" />
-    <rect height={10} rx={2} width={28} x={34} y={66} />
-    <path d="M22 66C10 66 10 80 20 84M74 66C86 66 86 80 76 84" />
-    <path d="M22 80C16 108 28 134 42 144H54C68 134 80 108 74 80" />
-    <path d="M36 84C32 108 38 128 44 142M48 84V142M60 84C64 108 58 128 52 142" />
-    <path d="M42 144L40 152H56L54 144" />
-    <path d="M34 152H62V158H34Z" />
-    <path d="M26 158H70V170H26Z" />
-    <path d="M20 170H76V182H20Z" />
+    <g transform="translate(0 22)">
+      <ellipse cx={48} cy={16} rx={8} ry={12} />
+      <path d="M41 11L55 25M41 19L52 28M55 11L41 25M55 19L44 28" />
+      <path d="M42 28H54L56 33H40Z" />
+      <path d="M36 33C28 38 26 46 26 54M60 33C68 38 70 46 70 54" />
+      <path d="M30 45C40 42 56 42 66 45" />
+      <path d="M22 54H74V58H22Z" />
+      <path d="M24 58C10 72 10 100 26 118M72 58C86 72 86 100 70 118" />
+      <path d="M17 77C40 83 56 83 79 77M15 93C40 99 56 99 81 93" />
+      <rect height={10} rx={2} width={30} x={33} y={81} />
+      <path d="M26 100C28 108 34 114 40 118M38 98C38 106 42 114 44 121M48 99V122M58 98C58 106 54 114 52 121M70 100C68 108 62 114 56 118" />
+      <path d="M26 118C36 124 60 124 70 118" />
+      <path d="M42 122L44 130H52L54 122" />
+      <path d="M44 130L38 142H58L52 130" />
+      <path d="M24 142H72L76 150H20Z" />
+    </g>
   </svg>
 )
