@@ -4410,3 +4410,26 @@
   Een 404 met een lege RSS-tekst is een fout van de feed: de fetcher oordeelt op de status.
 - **Alternatieven:** alleen de kranten met berichten over de club; de feeds over FC Groningen en AZ weglaten; nu een `publisher` en een sleutelregel voor Mediahuis maken.
 - **Later:** vervangt _We wijzen het Dagblad van het Noorden af_ (9 november 2026).
+
+## We nemen de DPG-kranten met een sportfeed, NRC niet, en we geven ze één uitgever
+
+- **Datum:** 18 november 2026
+- **Besluit:** de zes regionale kranten van DPG Media (De Stentor, Brabants Dagblad, Tubantia, Eindhovens Dagblad, BN DeStem en de PZC), de Volkskrant, Trouw, Het Parool, De Flevopost en het Nederlands Dagblad staan in het register, met het filter `club` op de feed van de sport.
+  De negen kranten van DPG Media krijgen `publisher` `dpg-media`, en dezelfde regels als het AD en De Gelderlander voor de artikelcode (`threadRules`) en, voor de zes regionale, voor de betaalmuur (`paywallNamespaces`).
+  NRC staat niet in het register: zijn feed is sinds 29 april 2019 niet bijgewerkt.
+  Reformatorisch Dagblad, Het Financieele Dagblad en de Barneveldse Krant hebben geen feed en blijven erbuiten.
+  - **Wie lokaal is:** een regionale krant krijgt `local` en een lijst met gevolgde clubs als een club uit het register in haar regio speelt, anders niet.
+    De Stentor: PEC Zwolle en Go Ahead Eagles (Zwolle en Deventer).
+    Brabants Dagblad: NAC Breda, Willem II, RKC Waalwijk, FC Den Bosch en TOP Oss (Breda, Tilburg, Waalwijk, Den Bosch en Oss).
+    Tubantia: FC Twente en Heracles Almelo (Twente).
+    Eindhovens Dagblad: PSV, Jong PSV, FC Eindhoven en Helmond Sport (Eindhoven en Helmond).
+    BN DeStem: NAC Breda (West-Brabant).
+    De PZC (Zeeland) volgt geen club, en de Volkskrant, Trouw en Het Parool zijn landelijk.
+  - **Wat dat doet:** een artikel dat een regionale krant met het AD of De Gelderlander deelt, staat bij die regionale krant als de kop een club uit haar lijst noemt, en anders bij het AD (zie _Een regionale krant wint alleen bij een club uit haar regio_).
+  - **De betaalmuur:** de zes regionale kranten hebben `<dpp:paid>` in de feed; de Volkskrant, Trouw en Het Parool niet, dus de importer zet daar geen betaalmuur.
+- **Waarom:** de feeds zijn open (een 200), `robots.txt` weert ons niet, en het filter laat alleen berichten over de club door; een krant zonder bericht kost een verzoek per run.
+  Met `publisher` `dpg-media` komt een artikel dat in meer kranten staat één keer in de lijst: in een run op 18 november 2026 stond van de 30 of 31 berichten van een regionale krant er 19 tot 27 ook in het AD of De Gelderlander.
+  De Volkskrant, Trouw en Het Parool hebben dezelfde codes met een `~`, maar geen code stond ook in het AD; ze krijgen de uitgever toch, omdat het hetzelfde platform is en dat zo blijft.
+  De feed van NRC lijkt een 200 te geven, maar de berichten zijn van april 2019, dus er valt niets te tonen.
+- **Alternatieven:** de zes regionale kranten weglaten (bijna alles staat al in het AD en De Gelderlander, en zes feeds met betaalmuur meer onderhouden); alleen de Volkskrant nemen; alle regionale kranten `local` maken zonder lijst (dan wint het AD altijd); NRC toch opnemen en de stilte van de feed opvangen met de gezondheid van de feed.
+- **Later:** vervangt het besluit om De Stentor af te wijzen, omdat we geen feed kenden (24 oktober 2026, in [`bronnen.md`](../bronnen.md)): `/sport/rss.xml` werkt.

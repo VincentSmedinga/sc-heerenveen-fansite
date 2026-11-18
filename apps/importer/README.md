@@ -251,18 +251,18 @@ Zo komt een bericht in de database ([`src/read-feed.ts`](src/read-feed.ts)):
   `feedsmith` leest elementen die het niet kent niet, dus een tweede lezing met `fast-xml-parser` zoekt dit ene element.
   Bij Voetbal International is het de categorie met `domain="https://www.vi.nl/pro"` (tekst `PRO`), die `feedsmith` wel leest.
   De categorie zelf bewaren we niet; de adapter gebruikt haar alleen voor `items.paywalled`.
-  Bij het Algemeen Dagblad en De Gelderlander (beide van DPG Media) is het het element `<dpp:paid>true</dpp:paid>`, met `false` of zonder het element is het bericht open.
+  Bij het Algemeen Dagblad, De Gelderlander en de zes regionale kranten van DPG Media is het het element `<dpp:paid>true</dpp:paid>`, met `false` of zonder het element is het bericht open.
   De adapter herkent de naamruimte aan haar adres, `https://www.dpgmedia.cloud/paidrss`, en niet aan het voorvoegsel `dpp`: hij leest eerst welke voorvoegsels de feed voor dat adres kiest.
   Ook dit element leest de tweede lezing, want `feedsmith` kent het niet.
   Een feed zonder het teken van zijn bron heeft geen betaalmuur.
 - **Versies van een verhaal:** een bron kan een verhaal steeds onder een nieuwe kop in de feed zetten, zoals een liveblog dat bij elke update een nieuwe kop krijgt.
   Elke versie is dan een bericht met een eigen link en sleutel.
   De adapter kiest aan het domein van de bron of die versies een gedeelde sleutel krijgen (`threadRules` in [`src/read-feed.ts`](src/read-feed.ts)), en zet hem in `items.thread_key`.
-  Bij het Algemeen Dagblad en De Gelderlander (DPG Media) is het de code `~` met acht of negen letters en cijfers aan het eind van het pad, zoals `~a40dbd48` in `…/een-kop~a40dbd48/`: de kop in de link verandert, de code niet.
+  Bij de kranten van DPG Media (het Algemeen Dagblad, De Gelderlander, de zes regionale kranten, de Volkskrant, Trouw en Het Parool) is het de code `~` met acht of negen letters en cijfers aan het eind van het pad, zoals `~a40dbd48` in `…/een-kop~a40dbd48/`: de kop in de link verandert, de code niet.
   Een bron zonder regel, en een link zonder die code, krijgt geen sleutel; zo'n bericht is zijn eigen verhaal.
-  Dezelfde code bij twee bronnen is geen verband, tenzij de bronnen dezelfde `publisher` hebben: het Algemeen Dagblad en De Gelderlander hebben `dpg-media`, en De Gelderlander is `local`.
-  Dan toont de site een artikel dat beide geven één keer, bij De Gelderlander als de kop een club noemt die zij volgt, en anders bij het Algemeen Dagblad (zie de [README van de database](../../packages/db/README.md), _Eén artikel van twee kranten_).
-  `publisher`, `local` en de gevolgde clubs (`followedClubs`: N.E.C., Vitesse, De Graafschap en De Treffers) staan in het register (`realSources` in `packages/db/src/seed.ts`) en de seed zet ze; de importer leest ze niet.
+  Dezelfde code bij twee bronnen is geen verband, tenzij de bronnen dezelfde `publisher` hebben: alle kranten van DPG Media hebben `dpg-media`, en De Gelderlander en de regionale kranten met een club in hun regio zijn `local`.
+  Dan toont de site een artikel dat beide geven één keer, bij de regionale krant als de kop een club noemt die zij volgt (voor De Gelderlander N.E.C., Vitesse, De Graafschap en De Treffers), en anders bij het Algemeen Dagblad (zie de [README van de database](../../packages/db/README.md), _Eén artikel van twee kranten_).
+  `publisher`, `local` en de gevolgde clubs (`followedClubs`, per krant in _De kranten van DPG Media_ hieronder) staan in het register (`realSources` in `packages/db/src/seed.ts`) en de seed zet ze; de importer leest ze niet.
   De clubs van een kop komen uit `item_clubs`, dat de importer schrijft: een kop die N.E.C. noemt, maakt het artikel regionaal.
   Een bron krijgt pas een `publisher` als de feeds van die bronnen bewezen dezelfde artikelcodes delen.
   De importer bewaart elke versie en verwijdert er geen; de site toont de laatste (zie de [README van de database](../../packages/db/README.md), _De versies van een verhaal_).
@@ -395,7 +395,7 @@ Zet je hem terug op `none`, dan worden ze weer allemaal `relevant`.
 Een bericht dat een redacteur verborg, houdt zijn waarde (zie _Wat de adapter bewaart_).
 De seed laat `filter` met rust, dus een nieuwe seed zet de waarde niet terug.
 Een feed in `realSources` die over meer gaat dan de club, begint op `club`: de seed zet de waarde alleen als hij de feed in het register zet.
-Dat zijn nu de sportfeed van de Leeuwarder Courant (zie _De sportfeed van de Leeuwarder Courant_), de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_), die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_), die van De Gelderlander (zie _De sportfeed van De Gelderlander_), die van ESPN (zie _De voetbalfeed van ESPN NL_), de sportfeed van Rijnmond (zie _De sportfeed van Rijnmond_), de sportfeed van RTV Noord en de FC Groningen-feed van OOG Groningen (zie _De feeds van RTV Noord en OOG Groningen_), en de sport- en voetbalfeeds van de andere dagbladen van Mediahuis (zie _De dagbladen van Mediahuis_).
+Dat zijn nu de sportfeed van de Leeuwarder Courant (zie _De sportfeed van de Leeuwarder Courant_), de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_), die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_), die van De Gelderlander (zie _De sportfeed van De Gelderlander_), die van ESPN (zie _De voetbalfeed van ESPN NL_), de sportfeed van Rijnmond (zie _De sportfeed van Rijnmond_), de sportfeed van RTV Noord en de FC Groningen-feed van OOG Groningen (zie _De feeds van RTV Noord en OOG Groningen_), de sport- en voetbalfeeds van de andere dagbladen van Mediahuis en de sportfeed van De Flevopost (zie _De dagbladen van Mediahuis_), de sportfeeds van de kranten van DPG Media (zie _De kranten van DPG Media_) en de algemene feed van het Nederlands Dagblad.
 
 ### De sportfeed van de Leeuwarder Courant
 
@@ -591,8 +591,23 @@ De adapter leest ze zonder aanpassing, en `<premium>` telt bij elke krant als be
 Een feed over alleen de club bestaat niet; alleen de sport- en voetbalfeeds, met het filter `club` in de seed (`/sport/rss/`, `/sport/voetbal/rss/`, en de rubriek van FC Groningen of AZ).
 Een rubriek die niet bestaat, geeft een 404 met een lege RSS-tekst: de fetcher meldt dat als fout (`http-status`), dus de feed bewaart niets en de gezondheid laat de fout zien.
 Een run van 18 november 2026 las 16 feeds van 10 kranten: 720 berichten, waarvan er 4 bij de kranten van het noorden en AZ `relevant` of `doubtful` waren; zie [`docs/bronnen.md`](../../docs/bronnen.md) voor de cijfers per feed.
+De Flevopost (Mediahuis Noord) heeft dezelfde opbouw, zonder `<premium>`, en staat met `/sport/rss/` in de seed.
 Geen artikelcode stond bij twee kranten, dus een gedeeld artikel krijgt geen regel (zie _We nemen de Nederlandse dagbladen van Mediahuis_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md)).
 De tests in `src/import-feeds.test.ts` ("importing the dailies of Mediahuis, the way the register has them") lezen een verzonnen feed in deze vorm, [`src/fixtures/mediahuis-sport-sample.xml`](src/fixtures/mediahuis-sport-sample.xml).
+
+## De kranten van DPG Media
+
+De zes regionale kranten (De Stentor, het Brabants Dagblad, Tubantia, het Eindhovens Dagblad, BN DeStem en de PZC), de Volkskrant, Trouw en Het Parool hebben dezelfde opbouw als het Algemeen Dagblad en De Gelderlander (zie _De voetbalfeed van het Algemeen Dagblad_ en _De sportfeed van De Gelderlander_).
+Elke feed is `/sport/rss.xml` van de krant, met het filter `club` in de seed.
+De regionale kranten hebben `<dpp:paid>`; de adapter kent hun domein bij `paywallNamespaces`.
+De Volkskrant, Trouw en Het Parool hebben het element niet, dus ze staan niet in `paywallNamespaces` en hun berichten zijn nooit betaalmuur.
+Alle negen staan in `threadRules`, en hebben `publisher` `dpg-media`.
+De gevolgde clubs (`followedClubs`) zijn: De Stentor PEC Zwolle en Go Ahead Eagles; het Brabants Dagblad NAC Breda, Willem II, RKC Waalwijk, FC Den Bosch en TOP Oss; Tubantia FC Twente en Heracles Almelo; het Eindhovens Dagblad PSV, Jong PSV, FC Eindhoven en Helmond Sport; BN DeStem NAC Breda.
+De PZC volgt geen club, en de landelijke kranten ook niet.
+Het Nederlands Dagblad (`/sport/rss`) is de algemene feed van de krant, met het filter `club`, en heeft geen regel: de tijden met `Z` worden als UTC gelezen.
+Een run van 18 november 2026 bewaarde 30 of 31 berichten per regionale krant, 38 van de Volkskrant, 35 van Trouw, 41 van Het Parool en 50 van het Nederlands Dagblad; geen enkel bericht was `relevant` of `doubtful`.
+Zie [`docs/bronnen.md`](../../docs/bronnen.md) voor de cijfers per feed, en _We nemen de DPG-kranten met een sportfeed, NRC niet, en we geven ze één uitgever_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md).
+De tests in `src/import-feeds.test.ts` ("importing the dailies of DPG Media, the way the register has them") lezen een verzonnen feed in deze vorm, [`src/fixtures/dpg-regional-sample.xml`](src/fixtures/dpg-regional-sample.xml).
 
 ## De velden van de feed van de Leeuwarder Courant
 

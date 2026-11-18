@@ -283,6 +283,124 @@ export const realSources = [
   },
   {
     description:
+      'Regionaal dagblad voor Overijssel en Gelderland rond Zwolle en Apeldoorn. In de sportfeed staat het sportnieuws van de regio, ook veel achter de betaalmuur; we tonen de berichten over sc Heerenveen en, rond een wedstrijd, over de tegenstander.',
+    domain: 'www.destentor.nl',
+    feeds: [{ filter: 'club', url: 'https://www.destentor.nl/sport/rss.xml' }],
+    followedClubs: ['PEC Zwolle', 'Go Ahead Eagles'],
+    kind: 'news',
+    local: true,
+    name: 'De Stentor',
+    publisher: 'dpg-media',
+    slug: 'de-stentor',
+  },
+  {
+    description:
+      'Regionaal dagblad voor Noord-Brabant rond Breda, Tilburg en Den Bosch. In de sportfeed staat het sportnieuws van de regio, ook veel achter de betaalmuur; we tonen de berichten over sc Heerenveen en, rond een wedstrijd, over de tegenstander.',
+    domain: 'www.bd.nl',
+    feeds: [{ filter: 'club', url: 'https://www.bd.nl/sport/rss.xml' }],
+    followedClubs: ['NAC Breda', 'Willem II', 'RKC Waalwijk', 'FC Den Bosch', 'TOP Oss'],
+    kind: 'news',
+    local: true,
+    name: 'Brabants Dagblad',
+    publisher: 'dpg-media',
+    slug: 'brabants-dagblad',
+  },
+  {
+    description:
+      'Regionaal dagblad voor Twente. In de sportfeed staat het sportnieuws van de regio, ook veel achter de betaalmuur; we tonen de berichten over sc Heerenveen en, rond een wedstrijd, over de tegenstander.',
+    domain: 'www.tubantia.nl',
+    feeds: [{ filter: 'club', url: 'https://www.tubantia.nl/sport/rss.xml' }],
+    followedClubs: ['FC Twente', 'Heracles Almelo'],
+    kind: 'news',
+    local: true,
+    name: 'Tubantia',
+    publisher: 'dpg-media',
+    slug: 'tubantia',
+  },
+  {
+    description:
+      'Regionaal dagblad voor Oost-Brabant rond Eindhoven. In de sportfeed staat het sportnieuws van de regio, ook veel achter de betaalmuur; we tonen de berichten over sc Heerenveen en, rond een wedstrijd, over de tegenstander.',
+    domain: 'www.ed.nl',
+    feeds: [{ filter: 'club', url: 'https://www.ed.nl/sport/rss.xml' }],
+    followedClubs: ['PSV', 'Jong PSV', 'FC Eindhoven', 'Helmond Sport'],
+    kind: 'news',
+    local: true,
+    name: 'Eindhovens Dagblad',
+    publisher: 'dpg-media',
+    slug: 'eindhovens-dagblad',
+  },
+  {
+    description:
+      'Regionaal dagblad voor West-Brabant rond Bergen op Zoom en Breda. In de sportfeed staat het sportnieuws van de regio, ook veel achter de betaalmuur; we tonen de berichten over sc Heerenveen en, rond een wedstrijd, over de tegenstander.',
+    domain: 'www.bndestem.nl',
+    feeds: [{ filter: 'club', url: 'https://www.bndestem.nl/sport/rss.xml' }],
+    followedClubs: ['NAC Breda'],
+    kind: 'news',
+    local: true,
+    name: 'BN DeStem',
+    publisher: 'dpg-media',
+    slug: 'bn-destem',
+  },
+  {
+    description:
+      'Regionaal dagblad voor Zeeland. In de sportfeed staat het sportnieuws van de regio, ook veel achter de betaalmuur; we tonen de berichten over sc Heerenveen.',
+    domain: 'www.pzc.nl',
+    feeds: [{ filter: 'club', url: 'https://www.pzc.nl/sport/rss.xml' }],
+    kind: 'news',
+    name: 'PZC',
+    publisher: 'dpg-media',
+    slug: 'pzc',
+  },
+  {
+    description:
+      'Landelijk dagblad. In de sportfeed staat het sportnieuws uit binnen- en buitenland; we tonen alleen de berichten waarvan de kop over sc Heerenveen gaat.',
+    domain: 'www.volkskrant.nl',
+    feeds: [{ filter: 'club', url: 'https://www.volkskrant.nl/sport/rss.xml' }],
+    kind: 'news',
+    name: 'de Volkskrant',
+    publisher: 'dpg-media',
+    slug: 'de-volkskrant',
+  },
+  {
+    description:
+      'Landelijk dagblad. In de sportfeed staat het sportnieuws uit binnen- en buitenland; we tonen alleen de berichten waarvan de kop over sc Heerenveen gaat.',
+    domain: 'www.trouw.nl',
+    feeds: [{ filter: 'club', url: 'https://www.trouw.nl/sport/rss.xml' }],
+    kind: 'news',
+    name: 'Trouw',
+    publisher: 'dpg-media',
+    slug: 'trouw',
+  },
+  {
+    description:
+      'Landelijk dagblad. In de sportfeed staat het sportnieuws uit binnen- en buitenland; we tonen alleen de berichten waarvan de kop over sc Heerenveen gaat.',
+    domain: 'www.parool.nl',
+    feeds: [{ filter: 'club', url: 'https://www.parool.nl/sport/rss.xml' }],
+    kind: 'news',
+    name: 'Het Parool',
+    publisher: 'dpg-media',
+    slug: 'het-parool',
+  },
+  {
+    description:
+      'Regionaal huis-aan-huisblad voor Flevoland, van Mediahuis Noord. In de sportfeed staat het sportnieuws van de regio; we tonen alleen wat over sc Heerenveen gaat.',
+    domain: 'www.flevopost.nl',
+    feeds: [{ filter: 'club', url: 'https://www.flevopost.nl/sport/rss/' }],
+    kind: 'news',
+    name: 'De Flevopost',
+    slug: 'de-flevopost',
+  },
+  {
+    description:
+      'Landelijk dagblad op protestants-christelijke grondslag. In de sportfeed staat het sportnieuws; we tonen alleen de berichten waarvan de kop over sc Heerenveen gaat.',
+    domain: 'www.nd.nl',
+    feeds: [{ filter: 'club', url: 'https://www.nd.nl/sport/rss' }],
+    kind: 'news',
+    name: 'Nederlands Dagblad',
+    slug: 'nederlands-dagblad',
+  },
+  {
+    description:
       'Het forum van onze eigen gemeenschap, waar supporters praten over wedstrijden, spelers en transfers. We tonen alleen de titels van de nieuwste discussies, hoeveel reacties er zijn en wie het laatst reageerde.',
     domain: 'forum.heerenveen.org',
     feeds: [

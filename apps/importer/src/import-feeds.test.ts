@@ -3,7 +3,17 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
 import { countArchiveItems, listArchivePage, listRecentItems } from '@fansite/db/queries'
-import { adminUsers, feeds, importResults, itemClubs, items, leagueResults, matches, sources } from '@fansite/db/schema'
+import {
+  adminUsers,
+  feeds,
+  importResults,
+  itemClubs,
+  items,
+  leagueResults,
+  matches,
+  sourceClubs,
+  sources,
+} from '@fansite/db/schema'
 import { seedSources } from '@fansite/db/seed'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq, inArray } from 'drizzle-orm'
@@ -1695,6 +1705,169 @@ describe('importing the dailies of Mediahuis, the way the register has them', ()
     const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-11-19T00:00:00Z') })
 
     expect(shown.map((entry) => entry.sourceName).sort()).toEqual(['Dagblad van het Noorden', 'Friesch Dagblad'])
+  })
+})
+
+describe('importing the dailies of DPG Media, the way the register has them', () => {
+  const sample = readFileSync(new URL('./fixtures/dpg-regional-sample.xml', import.meta.url), 'utf8')
+  const dpgRun = new Date('2026-11-18T09:30:00Z')
+  const pecZwolle = [{ matchDate: '2026-11-19', opponent: 'PEC Zwolle', status: 'scheduled' as const }]
+  const regionals = ['www.destentor.nl', 'www.bd.nl', 'www.tubantia.nl', 'www.ed.nl', 'www.bndestem.nl', 'www.pzc.nl']
+  const nationals = ['www.volkskrant.nl', 'www.trouw.nl', 'www.parool.nl']
+
+  /** The first feed of a daily as the seed registers it, pointed at the test server. */
+  async function dailyFeed(domain: string, origin: string) {
+    await seedSources(database.db)
+
+    const [row] = await database.db
+      .select({ id: feeds.id })
+      .from(feeds)
+      .innerJoin(sources, eq(feeds.sourceId, sources.id))
+      .where(eq(sources.domain, domain))
+      .orderBy(feeds.id)
+      .limit(1)
+
+    await database.db
+      .update(feeds)
+      .set({ url: `${origin}/rss/` })
+      .where(eq(feeds.id, row?.id ?? 0))
+
+    return storedFeed(row?.id ?? 0)
+  }
+
+  const sourceOf = async (domain: string) => {
+    const [row] = await database.db.select().from(sources).where(eq(sources.domain, domain))
+    const clubs = await database.db
+      .select({ club: sourceClubs.club })
+      .from(sourceClubs)
+      .where(eq(sourceClubs.sourceId, row?.id ?? 0))
+      .orderBy(sourceClubs.club)
+
+    return { ...row, clubs: clubs.map((entry) => entry.club) }
+  }
+
+  it('has every paper on the club filter, with the sports feed and the publisher of DPG Media', async () => {
+    await seedSources(database.db)
+
+    for (const domain of [...regionals, ...nationals]) {
+      const paper = await sourceOf(domain)
+      const own = await database.db
+        .select({ filter: feeds.filter, url: feeds.url })
+        .from(feeds)
+        .where(eq(feeds.sourceId, paper.id ?? 0))
+
+      expect(paper.publisher).toBe('dpg-media')
+      expect(own).toEqual([{ filter: 'club', url: `https://${domain}/sport/rss.xml` }])
+    }
+  })
+
+  it('makes a regional paper local only when a club of the register is in its region', async () => {
+    await seedSources(database.db)
+
+    expect((await sourceOf('www.destentor.nl')).clubs).toEqual(['Go Ahead Eagles', 'PEC Zwolle'])
+    expect((await sourceOf('www.tubantia.nl')).clubs).toEqual(['FC Twente', 'Heracles Almelo'])
+    expect((await sourceOf('www.bndestem.nl')).clubs).toEqual(['NAC Breda'])
+    expect((await sourceOf('www.pzc.nl')).local).toBe(false)
+    expect((await sourceOf('www.pzc.nl')).clubs).toEqual([])
+
+    for (const domain of nationals) {
+      expect(await sourceOf(domain)).toMatchObject({ clubs: [], local: false })
+    }
+  })
+
+  it.each([...regionals, ...nationals])(
+    'reads %s on the club filter, with the code of the article, and keeps no intro or author',
+    async (domain) => {
+      const server = await serve(sample)
+      const report = await importFeed(database.db, fetcherFor(servers), await dailyFeed(domain, server.origin), dpgRun)
+
+      expect(report).toMatchObject({ added: 4, relevance: { doubtful: 0, irrelevant: 2, relevant: 2 }, skipped: [] })
+
+      const rows = await itemsInDatabase()
+
+      expect(rows.map((row) => row.threadKey)).toEqual(['~dp0000001', '~dp0000002', '~dp0000003', '~dp0000004'])
+
+      const stored = JSON.stringify(await database.db.select().from(items))
+
+      expect(stored).not.toContain('VERZONNEN-INTRO')
+      expect(stored).not.toContain('Verzonnen Auteur')
+    },
+  )
+
+  it.each(regionals)('reads the paywall of %s from dpp:paid, and the national papers have none', async (domain) => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await dailyFeed(domain, server.origin), dpgRun)
+
+    expect((await itemsInDatabase()).map((row) => row.paywalled)).toEqual([true, false, true, false])
+  })
+
+  it.each(nationals)('does not put %s behind a paywall, since its feed has no dpp:paid', async (domain) => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await dailyFeed(domain, server.origin), dpgRun)
+
+    expect((await itemsInDatabase()).every((row) => !row.paywalled)).toBe(true)
+  })
+
+  it('shows an article that the Algemeen Dagblad and a regional paper share once, from the Algemeen Dagblad', async () => {
+    const dagblad = await serve(sample)
+    const regio = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await dailyFeed('www.ad.nl', dagblad.origin), dpgRun)
+    await importFeed(database.db, fetcherFor(servers), await dailyFeed('www.destentor.nl', regio.origin), dpgRun)
+
+    const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-11-19T00:00:00Z') })
+
+    expect(shown.map((item) => [item.title, item.sourceName])).toEqual([
+      ['SC Heerenveen wint in de verzonnen uitwedstrijd', 'Algemeen Dagblad'],
+      ['Interview met de verzonnen trainer van Heerenveen: ’We blijven bij ons plan’', 'Algemeen Dagblad'],
+    ])
+  })
+
+  it('shows an article about a club of the region under the regional paper', async () => {
+    const dagblad = await serve(sample)
+    const regio = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await dailyFeed('www.ad.nl', dagblad.origin), dpgRun, pecZwolle)
+    await importFeed(
+      database.db,
+      fetcherFor(servers),
+      await dailyFeed('www.destentor.nl', regio.origin),
+      dpgRun,
+      pecZwolle,
+    )
+
+    const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-11-19T00:00:00Z') })
+
+    expect(shown.map((item) => [item.title, item.sourceName])).toEqual([
+      ['SC Heerenveen wint in de verzonnen uitwedstrijd', 'Algemeen Dagblad'],
+      ['PEC Zwolle wint de verzonnen derby', 'De Stentor'],
+      ['Interview met de verzonnen trainer van Heerenveen: ’We blijven bij ons plan’', 'Algemeen Dagblad'],
+    ])
+  })
+
+  it('shows an article that two regional papers of DPG Media share once', async () => {
+    const first = await serve(sample)
+    const second = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await dailyFeed('www.bd.nl', first.origin), dpgRun)
+    await importFeed(database.db, fetcherFor(servers), await dailyFeed('www.pzc.nl', second.origin), dpgRun)
+
+    const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-11-19T00:00:00Z') })
+
+    expect(shown).toHaveLength(2)
+  })
+
+  it('gives a paper of another publisher no code and no paywall element, however its links look', async () => {
+    const server = await serve(sample)
+    const feed = await dailyFeed('www.nd.nl', server.origin)
+
+    await importFeed(database.db, fetcherFor(servers), feed, dpgRun)
+
+    const rows = await itemsInDatabase()
+
+    expect(rows.every((row) => row.threadKey === null && !row.paywalled)).toBe(true)
   })
 })
 

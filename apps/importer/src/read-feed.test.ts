@@ -972,6 +972,23 @@ describe('the paywall of the Algemeen Dagblad and De Gelderlander', () => {
     expect(paywallNamespaceFor('www.ad.nl')).toBe(dpp)
     expect(paywallNamespaceFor('www.gelderlander.nl')).toBe(dpp)
     expect(paywallNamespaceFor('www.lc.nl')).toBeUndefined()
+  })
+
+  it('also reads it for the six regional papers of DPG Media, and for no national one', () => {
+    for (const domain of [
+      'www.destentor.nl',
+      'www.bd.nl',
+      'www.tubantia.nl',
+      'www.ed.nl',
+      'www.bndestem.nl',
+      'www.pzc.nl',
+    ]) {
+      expect(paywallNamespaceFor(domain)).toBe(dpp)
+    }
+
+    for (const domain of ['www.volkskrant.nl', 'www.trouw.nl', 'www.parool.nl', 'www.nd.nl', 'www.flevopost.nl']) {
+      expect(paywallNamespaceFor(domain)).toBeUndefined()
+    }
     expect(paywallNamespaceFor('www.vi.nl')).toBeUndefined()
   })
 })
@@ -988,6 +1005,28 @@ describe('the key of the versions of a story', () => {
     expect(threadRuleFor('www.lc.nl')).toBeUndefined()
     expect(threadRuleFor('www.vi.nl')).toBeUndefined()
     expect(threadRuleFor('')).toBeUndefined()
+  })
+
+  it('has the same rule for every daily of DPG Media, and none for a paper of another publisher', () => {
+    const dpg = [
+      'www.destentor.nl',
+      'www.bd.nl',
+      'www.tubantia.nl',
+      'www.ed.nl',
+      'www.bndestem.nl',
+      'www.pzc.nl',
+      'www.volkskrant.nl',
+      'www.trouw.nl',
+      'www.parool.nl',
+    ]
+
+    for (const domain of dpg) {
+      expect(threadRuleFor(domain)).toBe(threadRuleFor('www.ad.nl'))
+    }
+
+    for (const domain of ['www.nrc.nl', 'www.nd.nl', 'www.flevopost.nl', 'www.dvhn.nl']) {
+      expect(threadRuleFor(domain)).toBeUndefined()
+    }
   })
 
   it('is the code after the tilde at the end of the path, whatever the headline in front of it says', () => {

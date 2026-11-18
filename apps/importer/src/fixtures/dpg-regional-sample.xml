@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  A small, made-up feed in the shape of the sport feeds of the regional dailies of DPG Media, such as
+  De Stentor (see docs/bronnen.md, De Stentor): RSS 2.0 with the namespaces `dpp` (the paywall) and
+  `media`, times in GMT, a guid that is the link, and per item a description, an author and a
+  media:content. The headlines, links and texts are invented, on a `.test` domain; none is copied
+  from a real feed. The description, the author and the images are here to show that the importer
+  does not read them. `dpp:paid` is true or false. The first item is about the club and shares its
+  code (`~dp0000001`) with an item in the second feed of the test, the second is about the local
+  club PEC Zwolle, and the others name no club.
+-->
+<rss xmlns:dpp="https://www.dpgmedia.cloud/paidrss" xmlns:media="http://search.yahoo.com/mrss/" version="2.0">
+  <channel>
+    <title>Sport (verzonnen)</title>
+    <link>https://regio.test</link>
+    <description>Een verzonnen feed om de importer mee te testen.</description>
+    <language>nl-NL</language>
+    <copyright>Verzonnen</copyright>
+    <pubDate>Tue, 17 Nov 2026 20:00:00 GMT</pubDate>
+    <lastBuildDate>Tue, 17 Nov 2026 20:00:00 GMT</lastBuildDate>
+    <item>
+      <title>SC Heerenveen wint in de verzonnen uitwedstrijd</title>
+      <link>https://regio.test/voetbal/sc-heerenveen-wint-in-de-verzonnen-uitwedstrijd~dp0000001/</link>
+      <description>VERZONNEN-INTRO die we niet bewaren.</description>
+      <pubDate>Tue, 17 Nov 2026 19:30:00 GMT</pubDate>
+      <author>Verzonnen Auteur</author>
+      <guid>https://regio.test/voetbal/sc-heerenveen-wint-in-de-verzonnen-uitwedstrijd~dp0000001/</guid>
+      <media:content type="image/jpeg" url="https://images.regio.test/foto/1/fit-width/400/een-verzonnen-bijschrift.jpg"/>
+      <dpp:paid>true</dpp:paid>
+    </item>
+    <item>
+      <title>PEC Zwolle wint de verzonnen derby</title>
+      <link>https://regio.test/voetbal/pec-zwolle-wint-de-verzonnen-derby~dp0000002/</link>
+      <description>VERZONNEN-INTRO die we niet bewaren.</description>
+      <pubDate>Tue, 17 Nov 2026 19:00:00 GMT</pubDate>
+      <author>Verzonnen Auteur</author>
+      <guid>https://regio.test/voetbal/pec-zwolle-wint-de-verzonnen-derby~dp0000002/</guid>
+      <dpp:paid>false</dpp:paid>
+    </item>
+    <item>
+      <title>De verzonnen schaatsers rijden een baanrecord</title>
+      <link>https://regio.test/sport/de-verzonnen-schaatsers-rijden-een-baanrecord~dp0000003/</link>
+      <description>VERZONNEN-INTRO die we niet bewaren.</description>
+      <pubDate>Tue, 17 Nov 2026 18:00:00 GMT</pubDate>
+      <author>Verzonnen Auteur</author>
+      <guid>https://regio.test/sport/de-verzonnen-schaatsers-rijden-een-baanrecord~dp0000003/</guid>
+      <dpp:paid>true</dpp:paid>
+    </item>
+    <item>
+      <title>Interview met de verzonnen trainer van Heerenveen: ’We blijven bij ons plan’</title>
+      <link>https://regio.test/voetbal/interview-met-de-verzonnen-trainer~dp0000004/</link>
+      <description>VERZONNEN-INTRO die we niet bewaren.</description>
+      <pubDate>Tue, 17 Nov 2026 17:00:00 GMT</pubDate>
+      <author>Verzonnen Auteur</author>
+      <guid>https://regio.test/voetbal/interview-met-de-verzonnen-trainer~dp0000004/</guid>
+    </item>
+  </channel>
+</rss>

@@ -1,6 +1,6 @@
 # Bronnen
 
-Dit document beoordeelt de bronnen die we voor de site hebben overwogen: 38 bronnen met hun feeds, waaronder vier podcasts.
+Dit document beoordeelt de bronnen die we voor de site hebben overwogen: 52 bronnen met hun feeds, waaronder vier podcasts.
 Elke bron krijgt één besluit, met een reden.
 De bronnen met het besluit "nemen" staan in het register (`realSources` in `packages/db/src/seed.ts`) en draaien mee in de import.
 Dit document is de enige plek met de lijst; de andere documenten verwijzen hiernaartoe.
@@ -21,7 +21,7 @@ Omrop Fryslân hebben we op 25 oktober 2026 nog eens gelezen, en NOS, het Algeme
 De Gelderlander en de feed van de sport van Rijnmond lazen we op 1 november 2026.
 Alle zes deden we met een run van de importer (zie bij de bron).
 De sportfeed van RTV Noord, de twee feeds van OOG Groningen en het Dagblad van het Noorden lazen we op 9 november 2026; de eerste twee met een run van de importer.
-De kranten van Mediahuis lazen we op 18 november 2026, allemaal met een run van de importer.
+De kranten van Mediahuis, de kranten van DPG Media, NRC, De Flevopost en het Nederlands Dagblad lazen we op 18 november 2026, allemaal met een run van de importer.
 
 - **Wat we tellen:** het aantal berichten, de datum van het nieuwste (in UTC) en hoeveel berichten over sc Heerenveen gaan.
   Een bericht gaat over de club als "Heerenveen" in de kop of in de categorieën staat, zonder op hoofdletters te letten.
@@ -74,12 +74,12 @@ Zegt een bron dat we moeten stoppen, dan zetten we hem meteen uit (`enabled` in 
 
 ### Overzicht
 
-| Besluit                             | Bronnen                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Nemen                               | Leeuwarder Courant (twee feeds, één met het filter), Voetbal International (tagfeed), De Telegraaf (de tagfeed en twee sportfeeds met het filter), Dagblad van het Noorden, Friesch Dagblad, De Limburger, Noordhollands Dagblad, De Gooi- en Eemlander, Haarlems Dagblad, Leidsch Dagblad, IJmuider Courant (allemaal met het filter), Omrop Fryslân (met het filter), NOS (met het filter), Algemeen Dagblad (met het filter), De Gelderlander (met het filter), ESPN NL (met het filter), Rijnmond (sportfeed, met het filter), RTV Noord (sportfeed, met het filter), OOG Groningen (twee feeds, één met het filter), Omroep Abe (podcast), Radio Camataru (podcast) |
-| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Eerst toestemming                   | sc Heerenveen (officieel nieuws)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| Afwijzen                            | RTV Drenthe, RTV Oost, Omroep Gelderland, RTV Utrecht, Omroep Flevoland, NH Nieuws, Omroep West, Omroep Zeeland, Omroep Brabant, L1 Nieuws, Eredivisie.nl, De Stentor, FC Groningen, PEC Zwolle, Sportcast (podcast), NOS Voetbalpodcast                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Besluit                             | Bronnen                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nemen                               | Leeuwarder Courant (twee feeds, één met het filter), Voetbal International (tagfeed), De Telegraaf (de tagfeed en twee sportfeeds met het filter), Dagblad van het Noorden, Friesch Dagblad, De Limburger, Noordhollands Dagblad, De Gooi- en Eemlander, Haarlems Dagblad, Leidsch Dagblad, IJmuider Courant, De Flevopost (allemaal met het filter), De Stentor, Brabants Dagblad, Tubantia, Eindhovens Dagblad, BN DeStem, PZC, de Volkskrant, Trouw, Het Parool (allemaal met het filter, uitgever DPG Media), Nederlands Dagblad (met het filter), Omrop Fryslân (met het filter), NOS (met het filter), Algemeen Dagblad (met het filter), De Gelderlander (met het filter), ESPN NL (met het filter), Rijnmond (sportfeed, met het filter), RTV Noord (sportfeed, met het filter), OOG Groningen (twee feeds, één met het filter), Omroep Abe (podcast), Radio Camataru (podcast) |
+| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Eerst toestemming                   | sc Heerenveen (officieel nieuws)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Afwijzen                            | RTV Drenthe, RTV Oost, Omroep Gelderland, RTV Utrecht, Omroep Flevoland, NH Nieuws, Omroep West, Omroep Zeeland, Omroep Brabant, L1 Nieuws, Eredivisie.nl, NRC, Reformatorisch Dagblad, Het Financieele Dagblad, Barneveldse Krant, FC Groningen, PEC Zwolle, Sportcast (podcast), NOS Voetbalpodcast                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
 ## Nemen
 
@@ -707,9 +707,27 @@ Al in het register (#1004), met twee feeds.
   De feeds zijn open en `robots.txt` weert ons niet.
   Het filter laat alleen berichten over de club door.
 
+### De Flevopost
+
+- **Domein:** `www.flevopost.nl`
+- **Soort:** nieuws, regionaal huis-aan-huisblad voor Flevoland, van Mediahuis Noord
+- **Uitgever:** Mediahuis, geen `publisher` in het register (zie _De Mediahuis-kranten_).
+  De Flevopost staat in #1382 en niet in #1380.
+- **Feed:** `https://www.flevopost.nl/sport/rss/`, met het filter `club`
+  - Werkt: ja, RSS 2.0 met 50 berichten; dezelfde opbouw als de feeds van de Leeuwarder Courant, maar zonder `<premium>`.
+  - Gemeten op 18 november 2026, met een run van de importer op een lege database: 50 berichten gelezen, 0 `relevant`, 0 `doubtful` en 50 `irrelevant`; de importer sloeg niets over.
+    Het nieuwste bericht is van 16 november 2026, het oudste van 14 september 2026.
+    Geen bericht staat achter de betaalmuur.
+- **`robots.txt`:** laat ons de feed toe, hetzelfde sjabloon als dat van de andere kranten van Mediahuis.
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** toestemming nodig; we tonen de kop, de link en de bronnaam.
+- **Besluit: nemen.**
+  De feed is open en `robots.txt` weert ons niet.
+  Het filter laat alleen berichten over de club door.
+
 ### De Mediahuis-kranten
 
-De kranten hierboven delen één platform en hebben dezelfde opbouw als de Leeuwarder Courant: dezelfde `<premium>`-markering, dezelfde tijdzone en dezelfde `guid`s.
+De kranten hierboven delen één platform en hebben dezelfde opbouw als de Leeuwarder Courant: dezelfde `<premium>`-markering (De Flevopost heeft geen berichten achter de betaalmuur), dezelfde tijdzone en dezelfde `guid`s.
 De importer leest ze zonder aanpassing.
 Een rubriek die niet bestaat, geeft een 404 met een lege RSS-tekst; de fetcher meldt een 404 als fout (`http-status`), dus de importer oordeelt op de status en niet op de tekst.
 
@@ -717,6 +735,214 @@ Een artikel kan onder meer merken staan.
 De artikelcode is het getal voor `.html` in de link, en het is niet de code met een `~` van DPG Media (#1367).
 Op 18 november 2026 vergeleken we de codes van alle feeds van Mediahuis, in één run op een lege database: 720 berichten van 10 kranten, en geen enkele code stond bij twee kranten (de berichten die twee feeds van één krant delen, zijn één rij).
 Daarom is er geen `publisher` voor Mediahuis en geen sleutelregel voor een gedeeld artikel; zie _We nemen de Nederlandse dagbladen van Mediahuis_ in [`beslissingen/importer.md`](beslissingen/importer.md).
+
+### De Stentor
+
+- **Domein:** `www.destentor.nl`
+- **Soort:** nieuws, regionaal dagblad voor de regio rond Zwolle en Apeldoorn, van DPG Media
+- **Uitgever:** `dpg-media`, lokaal (#567): een artikel dat ook in het Algemeen Dagblad staat, tonen we bij deze krant als de kop PEC Zwolle of Go Ahead Eagles noemt, en anders bij het AD.
+- **Feed:** `https://www.destentor.nl/sport/rss.xml`, met het filter `club`
+  - Werkt: ja, een 200 met RSS 2.0, 31 berichten.
+  - Gemeten op 18 november 2026, met een run van de importer op een lege database: 31 berichten gelezen, 0 `relevant`, 0 `doubtful` en 31 `irrelevant`; de importer sloeg niets over.
+    Het nieuwste bericht is van 18 november 2026 (09:49 UTC).
+  - Betaalmuur: ja, 5 van de 31 berichten hebben `<dpp:paid>true</dpp:paid>`; de importer leest ze als betaalmuur.
+  - Gedeelde artikelen: 27 van de 31 berichten hebben een artikelcode die ook in het AD of De Gelderlander staat.
+  - Het adres is `www.destentor.nl`; `www.stentor.nl` is een andere site (404).
+- **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met de user agent van de importer.
+  Het is hetzelfde sjabloon als dat van het Algemeen Dagblad (zie _De kranten van DPG Media_).
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** het voorbehoud zegt dat we de inhoud niet mogen hergebruiken; we tonen de kop, de link en de bronnaam.
+- **Later:** vervangt het besluit om De Stentor af te wijzen, omdat we geen feed kenden (24 oktober 2026): `/sport/rss.xml` werkt, en `/voetbal/rss.xml` geeft hetzelfde.
+- **Besluit: nemen.**
+  De feed is open en `robots.txt` weert ons niet.
+  Het filter laat alleen berichten over de club door.
+
+### Brabants Dagblad
+
+- **Domein:** `www.bd.nl`
+- **Soort:** nieuws, regionaal dagblad van DPG Media voor Noord-Brabant
+- **Uitgever:** `dpg-media`, lokaal (#567): een artikel dat ook in het Algemeen Dagblad staat, tonen we bij deze krant als de kop NAC Breda, Willem II, RKC Waalwijk, FC Den Bosch of TOP Oss noemt, en anders bij het AD.
+- **Feed:** `https://www.bd.nl/sport/rss.xml`, met het filter `club`
+  - Werkt: ja, een 200 met RSS 2.0, 31 berichten.
+  - Gemeten op 18 november 2026, met een run van de importer op een lege database: 31 berichten gelezen, 0 `relevant`, 0 `doubtful` en 31 `irrelevant`; de importer sloeg niets over.
+    Het nieuwste bericht is van 18 november 2026 (09:49 UTC).
+  - Betaalmuur: ja, 15 van de 31 berichten hebben `<dpp:paid>true</dpp:paid>`; de importer leest ze als betaalmuur.
+  - Gedeelde artikelen: 19 van de 31 berichten hebben een artikelcode die ook in het AD of De Gelderlander staat.
+- **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met de user agent van de importer.
+  Het is hetzelfde sjabloon als dat van het Algemeen Dagblad (zie _De kranten van DPG Media_).
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** het voorbehoud zegt dat we de inhoud niet mogen hergebruiken; we tonen de kop, de link en de bronnaam.
+- **Besluit: nemen.**
+  De feed is open en `robots.txt` weert ons niet.
+  Het filter laat alleen berichten over de club door.
+
+### Tubantia
+
+- **Domein:** `www.tubantia.nl`
+- **Soort:** nieuws, regionaal dagblad van DPG Media voor Twente
+- **Uitgever:** `dpg-media`, lokaal (#567): een artikel dat ook in het Algemeen Dagblad staat, tonen we bij deze krant als de kop FC Twente of Heracles Almelo noemt, en anders bij het AD.
+- **Feed:** `https://www.tubantia.nl/sport/rss.xml`, met het filter `club`
+  - Werkt: ja, een 200 met RSS 2.0, 30 berichten.
+  - Gemeten op 18 november 2026, met een run van de importer op een lege database: 30 berichten gelezen, 0 `relevant`, 0 `doubtful` en 30 `irrelevant`; de importer sloeg niets over.
+    Het nieuwste bericht is van 18 november 2026 (09:55 UTC).
+  - Betaalmuur: ja, 8 van de 30 berichten hebben `<dpp:paid>true</dpp:paid>`; de importer leest ze als betaalmuur.
+  - Gedeelde artikelen: 24 van de 30 berichten hebben een artikelcode die ook in het AD of De Gelderlander staat.
+- **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met de user agent van de importer.
+  Het is hetzelfde sjabloon als dat van het Algemeen Dagblad (zie _De kranten van DPG Media_).
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** het voorbehoud zegt dat we de inhoud niet mogen hergebruiken; we tonen de kop, de link en de bronnaam.
+- **Besluit: nemen.**
+  De feed is open en `robots.txt` weert ons niet.
+  Het filter laat alleen berichten over de club door.
+
+### Eindhovens Dagblad
+
+- **Domein:** `www.ed.nl`
+- **Soort:** nieuws, regionaal dagblad van DPG Media voor Oost-Brabant
+- **Uitgever:** `dpg-media`, lokaal (#567): een artikel dat ook in het Algemeen Dagblad staat, tonen we bij deze krant als de kop PSV, Jong PSV, FC Eindhoven of Helmond Sport noemt, en anders bij het AD.
+- **Feed:** `https://www.ed.nl/sport/rss.xml`, met het filter `club`
+  - Werkt: ja, een 200 met RSS 2.0, 31 berichten.
+  - Gemeten op 18 november 2026, met een run van de importer op een lege database: 31 berichten gelezen, 0 `relevant`, 0 `doubtful` en 31 `irrelevant`; de importer sloeg niets over.
+    Het nieuwste bericht is van 18 november 2026 (09:49 UTC).
+  - Betaalmuur: ja, 14 van de 31 berichten hebben `<dpp:paid>true</dpp:paid>`; de importer leest ze als betaalmuur.
+  - Gedeelde artikelen: 19 van de 31 berichten hebben een artikelcode die ook in het AD of De Gelderlander staat.
+- **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met de user agent van de importer.
+  Het is hetzelfde sjabloon als dat van het Algemeen Dagblad (zie _De kranten van DPG Media_).
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** het voorbehoud zegt dat we de inhoud niet mogen hergebruiken; we tonen de kop, de link en de bronnaam.
+- **Besluit: nemen.**
+  De feed is open en `robots.txt` weert ons niet.
+  Het filter laat alleen berichten over de club door.
+
+### BN DeStem
+
+- **Domein:** `www.bndestem.nl`
+- **Soort:** nieuws, regionaal dagblad van DPG Media voor West-Brabant
+- **Uitgever:** `dpg-media`, lokaal (#567): een artikel dat ook in het Algemeen Dagblad staat, tonen we bij deze krant als de kop NAC Breda noemt, en anders bij het AD.
+- **Feed:** `https://www.bndestem.nl/sport/rss.xml`, met het filter `club`
+  - Werkt: ja, een 200 met RSS 2.0, 31 berichten.
+  - Gemeten op 18 november 2026, met een run van de importer op een lege database: 31 berichten gelezen, 0 `relevant`, 0 `doubtful` en 31 `irrelevant`; de importer sloeg niets over.
+    Het nieuwste bericht is van 18 november 2026 (09:49 UTC).
+  - Betaalmuur: ja, 14 van de 31 berichten hebben `<dpp:paid>true</dpp:paid>`; de importer leest ze als betaalmuur.
+  - Gedeelde artikelen: 21 van de 31 berichten hebben een artikelcode die ook in het AD of De Gelderlander staat.
+- **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met de user agent van de importer.
+  Het is hetzelfde sjabloon als dat van het Algemeen Dagblad (zie _De kranten van DPG Media_).
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** het voorbehoud zegt dat we de inhoud niet mogen hergebruiken; we tonen de kop, de link en de bronnaam.
+- **Besluit: nemen.**
+  De feed is open en `robots.txt` weert ons niet.
+  Het filter laat alleen berichten over de club door.
+
+### PZC
+
+- **Domein:** `www.pzc.nl`
+- **Soort:** nieuws, regionaal dagblad van DPG Media voor Zeeland
+- **Uitgever:** `dpg-media`, niet lokaal (zie _De kranten van DPG Media_): de krant volgt geen club uit het register, dus een artikel dat ook in het AD staat, tonen we bij het AD.
+- **Feed:** `https://www.pzc.nl/sport/rss.xml`, met het filter `club`
+  - Werkt: ja, een 200 met RSS 2.0, 30 berichten.
+  - Gemeten op 18 november 2026, met een run van de importer op een lege database: 30 berichten gelezen, 0 `relevant`, 0 `doubtful` en 30 `irrelevant`; de importer sloeg niets over.
+    Het nieuwste bericht is van 18 november 2026 (09:49 UTC).
+  - Betaalmuur: ja, 6 van de 30 berichten hebben `<dpp:paid>true</dpp:paid>`; de importer leest ze als betaalmuur.
+  - Gedeelde artikelen: 23 van de 30 berichten hebben een artikelcode die ook in het AD of De Gelderlander staat.
+  - In Zeeland speelt geen club uit het register: de krant is niet lokaal en heeft geen lijst met clubs.
+- **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met de user agent van de importer.
+  Het is hetzelfde sjabloon als dat van het Algemeen Dagblad (zie _De kranten van DPG Media_).
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** het voorbehoud zegt dat we de inhoud niet mogen hergebruiken; we tonen de kop, de link en de bronnaam.
+- **Besluit: nemen.**
+  De feed is open en `robots.txt` weert ons niet.
+  Het filter laat alleen berichten over de club door.
+
+### de Volkskrant
+
+- **Domein:** `www.volkskrant.nl`
+- **Soort:** nieuws, landelijk dagblad van DPG Media
+- **Uitgever:** `dpg-media`, niet lokaal (zie _De kranten van DPG Media_): de krant volgt geen club uit het register, dus een artikel dat ook in het AD staat, tonen we bij het AD.
+- **Feed:** `https://www.volkskrant.nl/sport/rss.xml`, met het filter `club`
+  - Werkt: ja, een 200 met RSS 2.0, 38 berichten.
+  - Gemeten op 18 november 2026, met een run van de importer op een lege database: 38 berichten gelezen, 0 `relevant`, 0 `doubtful` en 38 `irrelevant`; de importer sloeg niets over.
+    Het nieuwste bericht is van 17 november 2026 (14:38 UTC).
+  - Betaalmuur: de feed heeft geen `<dpp:paid>`; de importer zet geen betaalmuur.
+  - Gedeelde artikelen: geen berichten van de 38 hebben een artikelcode die ook in het AD of De Gelderlander staat, al hebben alle 38 een code met een `~`.
+  - Geen kop noemt Heerenveen; het filter liet dus niets door.
+- **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met de user agent van de importer.
+  Het is hetzelfde sjabloon als dat van het Algemeen Dagblad (zie _De kranten van DPG Media_).
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** het voorbehoud zegt dat we de inhoud niet mogen hergebruiken; we tonen de kop, de link en de bronnaam.
+- **Besluit: nemen.**
+  De feed is open en `robots.txt` weert ons niet.
+  Het filter laat alleen berichten over de club door.
+
+### Trouw
+
+- **Domein:** `www.trouw.nl`
+- **Soort:** nieuws, landelijk dagblad van DPG Media
+- **Uitgever:** `dpg-media`, niet lokaal (zie _De kranten van DPG Media_): de krant volgt geen club uit het register, dus een artikel dat ook in het AD staat, tonen we bij het AD.
+- **Feed:** `https://www.trouw.nl/sport/rss.xml`, met het filter `club`
+  - Werkt: ja, een 200 met RSS 2.0, 35 berichten.
+  - Gemeten op 18 november 2026, met een run van de importer op een lege database: 35 berichten gelezen, 0 `relevant`, 0 `doubtful` en 35 `irrelevant`; de importer sloeg niets over.
+    Het nieuwste bericht is van 17 november 2026 (11:00 UTC).
+  - Betaalmuur: de feed heeft geen `<dpp:paid>`; de importer zet geen betaalmuur.
+  - Gedeelde artikelen: geen berichten van de 35 hebben een artikelcode die ook in het AD of De Gelderlander staat, al hebben alle 35 een code met een `~`.
+  - Het oudste bericht is van 27 december 2024.
+- **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met de user agent van de importer.
+  Het is hetzelfde sjabloon als dat van het Algemeen Dagblad (zie _De kranten van DPG Media_).
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** het voorbehoud zegt dat we de inhoud niet mogen hergebruiken; we tonen de kop, de link en de bronnaam.
+- **Besluit: nemen.**
+  De feed is open en `robots.txt` weert ons niet.
+  Het filter laat alleen berichten over de club door.
+
+### Het Parool
+
+- **Domein:** `www.parool.nl`
+- **Soort:** nieuws, landelijk dagblad van DPG Media voor Amsterdam
+- **Uitgever:** `dpg-media`, niet lokaal (zie _De kranten van DPG Media_): de krant volgt geen club uit het register, dus een artikel dat ook in het AD staat, tonen we bij het AD.
+- **Feed:** `https://www.parool.nl/sport/rss.xml`, met het filter `club`
+  - Werkt: ja, een 200 met RSS 2.0, 41 berichten.
+  - Gemeten op 18 november 2026, met een run van de importer op een lege database: 41 berichten gelezen, 0 `relevant`, 0 `doubtful` en 41 `irrelevant`; de importer sloeg niets over.
+    Het nieuwste bericht is van 17 november 2026 (14:32 UTC).
+  - Betaalmuur: de feed heeft geen `<dpp:paid>`; de importer zet geen betaalmuur.
+  - Gedeelde artikelen: geen berichten van de 41 hebben een artikelcode die ook in het AD of De Gelderlander staat, al hebben alle 41 een code met een `~`.
+- **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met de user agent van de importer.
+  Het is hetzelfde sjabloon als dat van het Algemeen Dagblad (zie _De kranten van DPG Media_).
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** het voorbehoud zegt dat we de inhoud niet mogen hergebruiken; we tonen de kop, de link en de bronnaam.
+- **Besluit: nemen.**
+  De feed is open en `robots.txt` weert ons niet.
+  Het filter laat alleen berichten over de club door.
+
+### De kranten van DPG Media
+
+De vijf regionale kranten hierboven, de Volkskrant, Trouw en Het Parool delen één platform met het Algemeen Dagblad en De Gelderlander: dezelfde opbouw van de feed, dezelfde `robots.txt` en dezelfde artikelcode (de acht of negen tekens achter de `~` in de link).
+Alle negen hebben `publisher` `dpg-media`, zodat een artikel dat in meer dan één krant staat, één keer in de lijst komt (#1367).
+Een regionale krant is `local` en heeft een lijst met gevolgde clubs als er een club uit het register in haar regio speelt; De Stentor volgt PEC Zwolle en Go Ahead Eagles, het Brabants Dagblad NAC Breda, Willem II, RKC Waalwijk, FC Den Bosch en TOP Oss, Tubantia FC Twente en Heracles Almelo, het Eindhovens Dagblad PSV, Jong PSV, FC Eindhoven en Helmond Sport, en BN DeStem NAC Breda.
+De PZC en de drie landelijke kranten volgen geen club.
+De namen zijn die van `otherClubFullNames` in `apps/importer/src/relevance-terms.ts`.
+De zes regionale kranten hebben `<dpp:paid>` en lezen de paywall zoals het AD (`paywallNamespaces` in `apps/importer/src/read-feed.ts`); de Volkskrant, Trouw en Het Parool hebben het element niet, dus de importer zet geen betaalmuur.
+De tijden zijn in GMT, zoals bij het AD, en er is geen regel per domein voor de tijdzone nodig.
+De `robots.txt` weert ons niet van de feeds; het voorbehoud tegen scrapen staat als commentaar en verwijst naar de voorwaarden, zoals bij het AD en De Gelderlander, die we al nemen.
+De tests staan in `apps/importer/src/import-feeds.test.ts` ("importing the dailies of DPG Media, the way the register has them") en `apps/importer/src/read-feed.test.ts`.
+
+### Nederlands Dagblad
+
+- **Domein:** `www.nd.nl`
+- **Soort:** nieuws, landelijk dagblad op christelijke grondslag
+- **Uitgever:** geen in het register.
+- **Feed:** `https://www.nd.nl/sport/rss`, met het filter `club`
+  - Werkt: ja, RSS 2.0 met 50 berichten, met tijden als `Z`; de importer leest ze als UTC.
+  - Het is de algemene feed van de krant: geen van de 50 links staat onder een sportrubriek (`/varia/`, `/nieuws/economie/` en dergelijke).
+    Het filter blijft er dus op, en het is nodig.
+  - Gemeten op 18 november 2026, met een run van de importer op een lege database: 50 berichten gelezen, 0 `relevant`, 0 `doubtful` en 50 `irrelevant`; de importer sloeg niets over.
+    Het nieuwste bericht is van 18 november 2026 (09:57 UTC).
+    Geen bericht staat achter de betaalmuur; de feed heeft er geen teken voor.
+- **`robots.txt`:** laat ons toe (`User-agent: *` met `Allow: /`).
+  De regel `Content-Signal: ai-train=no, search=yes, ai-input=no` en de geweigerde AI-crawlers gaan over AI en zoekmachines, niet over een importer die een kop en een link overneemt.
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** toestemming nodig; we tonen de kop, de link en de bronnaam.
+- **Besluit: nemen.**
+  De feed is open en `robots.txt` weert ons niet.
+  Het filter laat alleen berichten over de club door.
 
 ## Nemen na het relevantiefilter (#74)
 
@@ -937,21 +1163,44 @@ Hoort bij #16.
 - **Besluit: afwijzen.**
   `robots.txt` weigert ons de feed, en de voorwaarden verbieden robots en links zonder toestemming.
 
-### De Stentor
+### NRC
 
-- **Domein:** `www.destentor.nl`
-- **Soort:** nieuws, regionaal dagblad
-- **Feed:** er is geen feed om te beoordelen; we kennen er geen.
-  - Werkt: niet van toepassing.
-  - Over sc Heerenveen: niet te tellen.
-  - Betaalmuur: niet te zeggen.
-- **`robots.txt`:** laat ons toe, behalve enkele paden voor zoeken, inloggen en widgets.
-  Het heeft hetzelfde voorbehoud als dat van het Algemeen Dagblad (DPG Media): rechten voorbehouden en geen gegevens verzamelen met scrapen of een andere geautomatiseerde werkwijze.
-  Het weigert ook een lijst AI-crawlers bij naam.
-- **Voorwaarden:** niet gelezen (zie _De controle_).
-- **Meer tonen:** het voorbehoud zegt dat we de inhoud niet mogen hergebruiken; meer dan de standaard kan alleen met toestemming.
+- **Domein:** `www.nrc.nl`
+- **Soort:** nieuws, landelijk dagblad
+- **Feed:** `https://www.nrc.nl/sectie/sport/rss/`
+  - Werkt: nee, in de zin dat hij niets nieuws geeft: een 200 met RSS 2.0 en 29 berichten, maar het nieuwste is van 29 april 2019 en het oudste van 11 april 2019.
+  - Gemeten op 18 november 2026, met een run van de importer: 29 berichten, geen enkele over sc Heerenveen.
+  - Betaalmuur: de feed heeft er geen teken voor.
+- **`robots.txt`:** weert ons niet van de feed; het voorbehoud tegen tekst- en datamining staat als commentaar.
+- **Voorwaarden:** niet gelezen (zie _De controle_); de feed zegt zelf dat hij alleen voor persoonlijk, niet-commercieel gebruik is.
+- **Meer tonen:** toestemming nodig.
 - **Besluit: afwijzen.**
-  Er is geen feed om te lezen, en de krant schrijft voor de regio rond Zwolle en Apeldoorn, niet over sc Heerenveen.
+  De feed is al meer dan zeven jaar niet bijgewerkt.
+  Geeft NRC een feed die wel loopt, dan komt hij erin met het filter `club`.
+
+### Reformatorisch Dagblad
+
+- **Domein:** `www.rd.nl`
+- **Soort:** nieuws, landelijk dagblad op reformatorische grondslag
+- **Feed:** er is geen feed om te beoordelen; we vonden er geen.
+- **Besluit: afwijzen.**
+  Zonder feed is er niets te lezen.
+
+### Het Financieele Dagblad
+
+- **Domein:** `fd.nl`
+- **Soort:** nieuws, landelijk dagblad voor economie
+- **Feed:** er is geen feed om te beoordelen; we vonden er geen.
+- **Besluit: afwijzen.**
+  Zonder feed is er niets te lezen, en de krant schrijft zelden over voetbal.
+
+### Barneveldse Krant
+
+- **Domein:** `www.barneveldsekrant.nl`
+- **Soort:** nieuws, regionaal dagblad
+- **Feed:** er is alleen een algemene feed (`/rss`) van de hele krant; een feed van de sport vonden we niet.
+- **Besluit: afwijzen.**
+  Er is geen feed van de sport, en de krant schrijft voor de regio rond Barneveld.
 
 ### FC Groningen
 
