@@ -108,9 +108,9 @@ describe('the English page of the season 2009/10', () => {
     expect(matches.map((match) => match.round)).toEqual([
       'Finale',
       ...Array.from({ length: 34 }, (_, index) => `Speelronde ${index + 1}`),
-      '2e ronde',
-      '3e ronde',
-      '4e ronde',
+      'Tweede ronde',
+      'Derde ronde',
+      'Vierde ronde',
       'Play-offronde, wedstrijd 1/2',
       'Play-offronde, wedstrijd 2/2',
       ...Array.from({ length: 6 }, (_, index) => `Groepsfase, wedstrijd ${index + 1}/6`),
@@ -172,7 +172,7 @@ describe('the English page of the season 2009/10', () => {
     expect(matches.filter((match) => match.attendance !== null).map((match) => match.competition)).toEqual(
       Array.from({ length: 8 }, () => 'Europa League'),
     )
-    expect(roundOf(matches, '2e ronde')).toMatchObject({ opponent: 'SDC Putten', referee: null })
+    expect(roundOf(matches, 'Tweede ronde')).toMatchObject({ opponent: 'SDC Putten', referee: null })
     expect(matches.filter((match) => match.referee === null)).toHaveLength(1)
     expect(matches.every((match) => match.factsProblem === null)).toBe(true)
   })
@@ -241,10 +241,10 @@ describe('the Dutch page of the KNVB Beker 2008/09', () => {
     expect(
       matches.map((match) => [match.competition, match.round, match.opponent, match.goalsFor, match.goalsAgainst]),
     ).toEqual([
-      ['KNVB Beker', '3e ronde', 'Haaglandia/Sir Winston', 7, 0],
-      ['KNVB Beker', '4e ronde', 'Feyenoord', 3, 0],
-      ['KNVB Beker', 'Kwartfinales', 'N.E.C.', 3, 1],
-      ['KNVB Beker', 'Halve finales', 'FC Volendam', 2, 0],
+      ['KNVB Beker', 'Derde ronde', 'Haaglandia/Sir Winston', 7, 0],
+      ['KNVB Beker', 'Vierde ronde', 'Feyenoord', 3, 0],
+      ['KNVB Beker', 'Kwartfinale', 'N.E.C.', 3, 1],
+      ['KNVB Beker', 'Halve finale', 'FC Volendam', 2, 0],
       ['KNVB Beker', 'Finale', 'FC Twente', 2, 2],
     ])
   })
@@ -273,7 +273,7 @@ describe('the Dutch page of the KNVB Beker 2008/09', () => {
 
   it('keeps the links of the scorers of a Dutch page, and leaves the cards and substitutions out', () => {
     // The semi-final lists five substitutions and two cards between two goals.
-    expect(roundOf(matches, 'Halve finales')?.goals).toEqual([
+    expect(roundOf(matches, 'Halve finale')?.goals).toEqual([
       {
         minute: 10,
         ours: true,

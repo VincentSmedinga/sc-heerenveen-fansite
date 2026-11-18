@@ -864,6 +864,7 @@
   Een tweede verzoek om het versienummer uit de HTML te halen (ongeveer tien keer zo veel gegevens).
 - **Later:** zie _De bronvermelding staat in een doorzichtige kaart, zonder link naar de geschiedenis_.
   De bronvermelding linkt niet meer naar de geschiedenis van de pagina; de bezoeker bereikt haar vanaf het artikel zelf.
+- **Later:** zie _De rondes van de beker hebben één schrijfwijze, in woorden en in het enkelvoud_: de kop `3e ronde` of `Achtste finales` wordt `Derde ronde` of `Achtste finale`.
 
 ## De verzonnen wedstrijden komen alleen in een leeg seizoen
 
@@ -4433,3 +4434,15 @@
   De feed van NRC lijkt een 200 te geven, maar de berichten zijn van april 2019, dus er valt niets te tonen.
 - **Alternatieven:** de zes regionale kranten weglaten (bijna alles staat al in het AD en De Gelderlander, en zes feeds met betaalmuur meer onderhouden); alleen de Volkskrant nemen; alle regionale kranten `local` maken zonder lijst (dan wint het AD altijd); NRC toch opnemen en de stilte van de feed opvangen met de gezondheid van de feed.
 - **Later:** vervangt het besluit om De Stentor af te wijzen, omdat we geen feed kenden (24 oktober 2026, in [`bronnen.md`](../bronnen.md)): `/sport/rss.xml` werkt.
+
+## De rondes van de beker hebben één schrijfwijze, in woorden en in het enkelvoud
+
+- **Datum:** 18 november 2026
+- **Besluit:** de importer schrijft elke ronde van de KNVB Beker op één manier: `Eerste ronde`, `Tweede ronde`, `Derde ronde`, `Vierde ronde`, `Achtste finale`, `Kwartfinale`, `Halve finale` en `Finale`.
+  `cupRoundName` in `read-wikipedia.ts` zet `3e ronde` en `Achtste finales` om, en de bekerpagina van 2008/09 en de Engelse seizoenspagina van 2009/10 gaan er ook doorheen.
+  Een migratie (`0089_normalise_cup_round_names`) zet de rijen die er al zijn op dezelfde namen, zodat de volgende import ze vindt onder dezelfde sleutel (seizoen, competitie, ronde) en geen tweede rij maakt.
+  Een kop die geen van deze is, blijft zoals hij is.
+- **Waarom:** de pagina's van Wikipedia schrijven allebei de vormen, `3e ronde` naast `Derde ronde` en `Achtste finales` naast `Halve finale`, en de bezoeker zag ze zo door elkaar.
+  Eén wedstrijd is één ronde, dus het enkelvoud, en de site kan een ronde zo ook herkennen (zie _Het bekerkaartje noemt de ronde van de uitschakeling_ in `site.md`).
+- **Alternatieven:** het meervoud van de kopjes houden; cijfers als `3e ronde`; de namen alleen in de site omzetten (dan staat de database nog steeds door elkaar).
+- **Later:** vervangt de ronde `Halve finales` en `2e ronde` tot en met `4e ronde` in _De ronde is de kop boven de wedstrijd, en de versie van een pagina is de `Last-Modified`_: de kop boven de wedstrijd blijft de ronde, maar in deze schrijfwijze.

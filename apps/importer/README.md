@@ -244,7 +244,7 @@ Zo komt een bericht in de database ([`src/read-feed.ts`](src/read-feed.ts)):
   Een bericht dat al een sleutel heeft die eerder in dezelfde feed stond, slaat de adapter over.
 - **Tijd:** `pubDate` (RSS) of `published` (Atom, anders `updated`), omgezet naar UTC, op hele seconden.
   Een tijd zonder zone, in een vorm die we niet kennen, van vóór 1990 of meer dan een dag in de toekomst is niet geldig.
-  De zone `EST` kennen we niet, behalve bij ESPN NL (zie _De voetbalfeed van ESPN NL_).
+  De zone `EST` kennen we niet, behalve bij ESPN NL (zie _De feeds van ESPN NL_).
   Dan geldt de tijd waarop we het bericht voor het eerst zagen, en een bekend bericht houdt de tijd die het had.
 - **Betaalmuur:** elke bron zegt het op een eigen manier, en de adapter kiest aan de hand van het domein van de bron (`paywallCategories` en `paywallNamespaces` in [`src/read-feed.ts`](src/read-feed.ts)).
   Bij de Leeuwarder Courant en De Telegraaf is het het element `<premium>true</premium>`.
@@ -395,7 +395,7 @@ Zet je hem terug op `none`, dan worden ze weer allemaal `relevant`.
 Een bericht dat een redacteur verborg, houdt zijn waarde (zie _Wat de adapter bewaart_).
 De seed laat `filter` met rust, dus een nieuwe seed zet de waarde niet terug.
 Een feed in `realSources` die over meer gaat dan de club, begint op `club`: de seed zet de waarde alleen als hij de feed in het register zet.
-Dat zijn nu de sportfeed van de Leeuwarder Courant (zie _De sportfeed van de Leeuwarder Courant_), de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_), die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_), die van De Gelderlander (zie _De sportfeed van De Gelderlander_), die van ESPN (zie _De voetbalfeed van ESPN NL_), de sportfeed van Rijnmond (zie _De sportfeed van Rijnmond_), de sportfeed van RTV Noord en de FC Groningen-feed van OOG Groningen (zie _De feeds van RTV Noord en OOG Groningen_), de sport- en voetbalfeeds van de andere dagbladen van Mediahuis en de sportfeed van De Flevopost (zie _De dagbladen van Mediahuis_), de sportfeeds van de kranten van DPG Media (zie _De kranten van DPG Media_) en de algemene feed van het Nederlands Dagblad.
+Dat zijn nu de sportfeed van de Leeuwarder Courant (zie _De sportfeed van de Leeuwarder Courant_), de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_), die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_), die van De Gelderlander (zie _De sportfeed van De Gelderlander_), die van ESPN (zie _De feeds van ESPN NL_), de sportfeed van Rijnmond (zie _De sportfeed van Rijnmond_), de sportfeed van RTV Noord en de FC Groningen-feed van OOG Groningen (zie _De feeds van RTV Noord en OOG Groningen_), de sport- en voetbalfeeds van de andere dagbladen van Mediahuis en de sportfeed van De Flevopost (zie _De dagbladen van Mediahuis_), de sportfeeds van de kranten van DPG Media (zie _De kranten van DPG Media_) en de algemene feed van het Nederlands Dagblad.
 
 ### De sportfeed van de Leeuwarder Courant
 
@@ -521,10 +521,13 @@ De test in `src/import-feeds.test.ts` ("importing the football feed of the Algem
 De fixture heeft ook een bericht zonder `dpp:paid` en een bericht dat de club alleen in de beschrijving noemt: het filter kijkt alleen naar de kop, dus dat is `irrelevant`.
 De test van de adapter zelf ("the paywall of the Algemeen Dagblad and De Gelderlander", in `src/read-feed.test.ts`) laat zien dat een ander voorvoegsel voor hetzelfde adres ook werkt.
 
-## De voetbalfeed van ESPN NL
+## De feeds van ESPN NL
 
-ESPN NL is een bron met de feed `https://www.espn.nl/espn/rss/soccer/news`, het voetbalnieuws van de sportzender ESPN.
-De club is er een klein deel van, dus de feed staat in de seed op `club`.
+ESPN NL is een bron met twee feeds, `https://www.espn.nl/espn/rss/soccer/news` en `https://www.espn.nl/espn/rss/news`, het voetbalnieuws en het algemene nieuws van de sportzender ESPN.
+De voetbalfeed heeft 25 berichten die ESPN kiest en miste op 18 november 2026 een bericht over de club; de algemene feed heeft er ongeveer 70 over zes dagen, en een paar over andere sporten.
+De voetbalfeed heeft op zijn beurt berichten die de algemene feed niet heeft, dus we lezen ze allebei.
+De club is er een klein deel van, dus beide feeds staan in de seed op `club`; het filter kijkt naar de kop en houdt de andere sporten weg.
+Een bericht in beide feeds heeft dezelfde link en wordt één keer bewaard.
 De feed schrijft de tijden met de zone `EST`, bijvoorbeeld `Mon, 26 Oct 2026 11:26:08 EST`, maar het is de Nederlandse tijd, met zomer- en wintertijd (zie [`docs/bronnen.md`](../../docs/bronnen.md) voor hoe we dat hebben vastgesteld).
 De adapter heeft daarom per domein een regel, `timeRules` in [`src/read-feed.ts`](src/read-feed.ts): voor `www.espn.nl` geldt `EST` als `Europe/Amsterdam`.
 De regel geldt voor deze bron alleen.
@@ -534,7 +537,7 @@ In de nacht van het begin ervan bestaat 02:00 tot 03:00 niet; de adapter leest d
 Een run van 26 oktober 2026 bewaarde alle 25 berichten, en het filter vond er 1 `relevant`, 0 `doubtful` en 24 `irrelevant`.
 Elk bericht in de feed heeft een beschrijving en een auteur, en de feed heeft een logo.
 De adapter leest ze niet en de database heeft er geen kolom voor, dus ze worden niet bewaard of getoond.
-De test in `src/import-feeds.test.ts` ("importing the football feed of ESPN NL, the way the register has it") leest een verzonnen feed in deze vorm, [`src/fixtures/espn-sample.xml`](src/fixtures/espn-sample.xml), via de bron zoals de seed hem in het register zet.
+De test in `src/import-feeds.test.ts` ("importing the feeds of ESPN NL, the way the register has it") leest een verzonnen feed in deze vorm, [`src/fixtures/espn-sample.xml`](src/fixtures/espn-sample.xml), via de bron zoals de seed hem in het register zet.
 De fixture heeft berichten van vlak vóór en vlak na het einde van de zomertijd op 25 oktober 2026, een bericht met een tijd die geen tijd is, en een samenvatting die de club alleen in de beschrijving noemt.
 De tests van de regel zelf staan in `src/read-feed.test.ts`.
 
@@ -1846,7 +1849,7 @@ De beslissingen zijn _De wedstrijden van 2007/08 tot en met 2009/10 komen uit de
   De tabel heeft geen tijd, geen toeschouwers en geen scheidsrechter.
   De tabellen van de UEFA Cup en de beker op dezelfde pagina leest hij niet.
   De rij van 15 november 2008 noemt geen uitclub; de lijst vult daar FC Utrecht in, zolang de cel leeg is.
-- **De rondes:** `Finale` (Johan Cruijff Schaal), `Speelronde 12`, `2e ronde` tot en met `4e ronde` en de kop van de bekerpagina (`Kwartfinales`), `Play-offronde, wedstrijd 1/2`, `Groepsfase, wedstrijd 2/6`, `Eerste ronde, wedstrijd 1/2`, en voor de play-offs van 2008 `Halve finale, wedstrijd 1/2` (Ajax) en `Ronde 2, wedstrijd 1/2` (NAC Breda).
+- **De rondes:** `Finale` (Johan Cruijff Schaal), `Speelronde 12`, `Tweede ronde` tot en met `Vierde ronde` en de kop van de bekerpagina (`Kwartfinale`), `Play-offronde, wedstrijd 1/2`, `Groepsfase, wedstrijd 2/6`, `Eerste ronde, wedstrijd 1/2`, en voor de play-offs van 2008 `Halve finale, wedstrijd 1/2` (Ajax) en `Ronde 2, wedstrijd 1/2` (NAC Breda).
 - **De controles:** elke pagina heeft het aantal wedstrijden uit de lijst, elke wedstrijd staat onder een kop en in een ronde die we kennen, en elke wedstrijd heeft een uitslag.
   De seizoenen 2008/09 en 2009/10 moeten 34 competitiewedstrijden hebben, 17 thuis en 17 uit; 2007/08 heeft er op deze pagina's geen.
   De tabel van 2008/09 moet de zeven kolommen hebben die we kennen, en elke rij zeven cellen.

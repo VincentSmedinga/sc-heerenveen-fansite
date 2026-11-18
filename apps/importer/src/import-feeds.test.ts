@@ -1362,11 +1362,11 @@ describe('importing the sport feed of De Gelderlander, the way the register has 
   })
 })
 
-describe('importing the football feed of ESPN NL, the way the register has it', () => {
+describe('importing the feeds of ESPN NL, the way the register has it', () => {
   const sample = readFileSync(new URL('./fixtures/espn-sample.xml', import.meta.url), 'utf8')
   const espnRun = new Date('2026-10-26T12:00:00Z')
 
-  /** The football feed of ESPN NL as the seed registers it, pointed at the test server. */
+  /** The football feed of ESPN NL, the first of its two, as the seed registers it. */
   async function espnFeed(origin: string) {
     await seedSources(database.db)
 
@@ -1452,6 +1452,38 @@ describe('importing the football feed of ESPN NL, the way the register has it', 
       'sc Heerenveen kijkt terug op een bewogen avond',
     ])
     expect(shown.every((item) => item.sourceName === 'ESPN')).toBe(true)
+  })
+
+  it('stores an item once when the football feed and the general feed both have it', async () => {
+    const server = await serve(sample, { '/rss/0': reply(200, sample, xml), '/rss/1': reply(200, sample, xml) })
+
+    await seedSources(database.db)
+
+    const espnFeeds = await database.db
+      .select({ id: feeds.id, url: feeds.url })
+      .from(feeds)
+      .innerJoin(sources, eq(feeds.sourceId, sources.id))
+      .where(eq(sources.domain, 'www.espn.nl'))
+
+    expect(espnFeeds.map((feed) => feed.url)).toEqual([
+      'https://www.espn.nl/espn/rss/soccer/news',
+      'https://www.espn.nl/espn/rss/news',
+    ])
+
+    // Both registered feeds serve the same made-up items.
+    for (const [index, feed] of espnFeeds.entries()) {
+      await database.db
+        .update(feeds)
+        .set({ url: `${server.origin}/rss/${index}` })
+        .where(eq(feeds.id, feed.id))
+    }
+
+    const first = await importFeed(database.db, fetcherFor(servers), await storedFeed(espnFeeds[0]?.id ?? 0), espnRun)
+    const second = await importFeed(database.db, fetcherFor(servers), await storedFeed(espnFeeds[1]?.id ?? 0), espnRun)
+
+    expect(first).toMatchObject({ added: 7 })
+    expect(second).toMatchObject({ added: 0 })
+    expect(await itemsInDatabase()).toHaveLength(7)
   })
 
   it('does not read EST as Dutch time for another source', async () => {

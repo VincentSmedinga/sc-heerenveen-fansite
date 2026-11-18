@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { checkGoals, checkResults } from './check-wikipedia.ts'
 import {
   clubName,
+  cupRoundName,
   europaLeaguePage,
   linkedPage,
   pageCandidates,
@@ -878,8 +879,8 @@ describe('a match that was stopped', () => {
     ).toEqual([
       ['Eerste ronde', 3, 0],
       ['Tweede ronde', 3, 2],
-      ['Achtste finales', 3, 1],
-      ['Kwartfinales', 1, 4],
+      ['Achtste finale', 3, 1],
+      ['Kwartfinale', 1, 4],
     ])
   })
 
@@ -973,8 +974,8 @@ describe('the cup pages of 2021/22 to 2024/25', () => {
     expect(read(cupPages['2022-23']!)).toMatchObject([
       { extraTime: true, goalsAgainst: 2, goalsFor: 4, home: false, round: 'Eerste ronde', status: 'played' },
       { extraTime: false, goalsAgainst: 0, goalsFor: 2, home: true, round: 'Tweede ronde' },
-      { extraTime: false, goalsAgainst: 1, goalsFor: 2, home: false, round: 'Achtste finales' },
-      { extraTime: false, goalsAgainst: 1, goalsFor: 0, home: true, round: 'Kwartfinales' },
+      { extraTime: false, goalsAgainst: 1, goalsFor: 2, home: false, round: 'Achtste finale' },
+      { extraTime: false, goalsAgainst: 1, goalsFor: 0, home: true, round: 'Kwartfinale' },
     ])
   })
 
@@ -987,7 +988,7 @@ describe('the cup pages of 2021/22 to 2024/25', () => {
         goalsAgainst: 3,
         goalsFor: 2,
         kickoffAt: new Date('2025-01-16T20:00:00Z'),
-        round: 'Achtste finales',
+        round: 'Achtste finale',
       },
     ])
   })
@@ -1434,8 +1435,8 @@ describe('the spectators and the referee', () => {
     expect(read.matches.map((match) => [match.round, match.attendance, match.referee])).toEqual([
       ['Eerste ronde', null, 'Stan Teuben'],
       ['Tweede ronde', null, 'Bas Nijhuis'],
-      ['Achtste finales', 16593, 'Martijn Vos'],
-      ['Kwartfinales', 26200, 'Joey Kooij'],
+      ['Achtste finale', 16593, 'Martijn Vos'],
+      ['Kwartfinale', 26200, 'Joey Kooij'],
     ])
     expect(read.matches.every((match) => match.factsProblem === null)).toBe(true)
   })
@@ -1598,13 +1599,13 @@ describe('the goal scorers', () => {
 
     expect(goalCodesCupPage).toContain('{{goal|66|o.g.}}')
     expect(goalCodesCupPage).toContain('{{goal|63|p}}')
-    expect(goals('Achtste finales')?.find((goal) => goal.minute === 66)).toMatchObject({
+    expect(goals('Achtste finale')?.find((goal) => goal.minute === 66)).toMatchObject({
       ours: true,
       ownGoal: true,
       penalty: false,
       player: 'van Peppen',
     })
-    expect(goals('Halve finales')?.find((goal) => goal.minute === 63)).toMatchObject({
+    expect(goals('Halve finale')?.find((goal) => goal.minute === 63)).toMatchObject({
       ours: false,
       ownGoal: false,
       penalty: true,
@@ -1763,20 +1764,20 @@ describe('the goal scorers', () => {
     expect(round('Speelronde 9')?.goals?.[0]).toMatchObject({ minute: 11, penalty: true, player: 'Vente' })
     expect(round('Speelronde 10')?.goals).toHaveLength(5)
     expect(round('Speelronde 6')?.goals).toBeNull()
-    expect(round('Achtste finales')?.goals).toMatchObject([
+    expect(round('Achtste finale')?.goals).toMatchObject([
       { minute: 20, ours: true, player: 'Trenskow' },
       { minute: 65, ours: false, player: 'Uneken' },
       { minute: 75, ours: true, player: 'Braude' },
       { minute: 90, ours: true, player: 'Trenskow', stoppageMinutes: 1 },
     ])
-    expect(round('Kwartfinales')?.goals?.map((goal) => goal.player)).toEqual([
+    expect(round('Kwartfinale')?.goals?.map((goal) => goal.player)).toEqual([
       'Bajraktarević',
       'Bajraktarević',
       'Perišić',
       'Wanner',
       'Oyen',
     ])
-    expect(round('Kwartfinales')?.goals?.[0]?.minute).toBe(23)
+    expect(round('Kwartfinale')?.goals?.[0]?.minute).toBe(23)
   })
 
   it('has scorers that agree with the result for every played match of the real fixtures', () => {
@@ -2314,7 +2315,7 @@ describe('the cup pages of the older seasons', () => {
       goalsAgainst: 1,
       goalsFor: 2,
       kickoffAt: new Date('2012-01-31T19:45:00Z'),
-      round: 'Kwartfinales',
+      round: 'Kwartfinale',
     })
   })
 
@@ -2931,5 +2932,31 @@ describe('a date without a year', () => {
 
   it('is not a date for a weekend or for two days', () => {
     expect(matchDate('12-14 februari', '2010/11')).toContain('a date we do not know')
+  })
+})
+
+describe('cupRoundName', () => {
+  it('writes every round in words and in the singular', () => {
+    expect(['1e ronde', '2e ronde', '3e ronde', '4e ronde'].map((heading) => cupRoundName(heading))).toEqual([
+      'Eerste ronde',
+      'Tweede ronde',
+      'Derde ronde',
+      'Vierde ronde',
+    ])
+    expect(['Achtste finales', 'Kwartfinales', 'Halve finales'].map((heading) => cupRoundName(heading))).toEqual([
+      'Achtste finale',
+      'Kwartfinale',
+      'Halve finale',
+    ])
+  })
+
+  it('leaves a round that is right, and a heading it does not know, as it is', () => {
+    expect(['Derde ronde', 'Achtste finale', 'Finale', 'Voorronde'].map((heading) => cupRoundName(heading))).toEqual([
+      'Derde ronde',
+      'Achtste finale',
+      'Finale',
+      'Voorronde',
+    ])
+    expect(cupRoundName(null)).toBeNull()
   })
 })
