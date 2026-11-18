@@ -1248,7 +1248,7 @@ describe('the goal scorers', () => {
     const { server } = await serve({ cup: goalsCup })
 
     expect(await importAt(server, first)).toMatchObject({ kind: 'imported', warnings: [] })
-    expect(await scorersOf('Achtste finales')).toEqual([
+    expect(await scorersOf('Achtste finale')).toEqual([
       [20, null, 'Trenskow', true, false, false],
       [65, null, 'Uneken', false, false, false],
       [75, null, 'Braude', true, false, false],

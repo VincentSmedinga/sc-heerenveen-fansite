@@ -22,7 +22,7 @@ const stored = {
   penaltiesAgainst: null,
   penaltiesFor: null,
   referee: null,
-  round: 'Achtste finales',
+  round: 'Achtste finale',
   stadium: null,
   status: 'played',
 } as unknown as Match

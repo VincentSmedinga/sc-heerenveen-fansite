@@ -1846,7 +1846,7 @@ De beslissingen zijn _De wedstrijden van 2007/08 tot en met 2009/10 komen uit de
   De tabel heeft geen tijd, geen toeschouwers en geen scheidsrechter.
   De tabellen van de UEFA Cup en de beker op dezelfde pagina leest hij niet.
   De rij van 15 november 2008 noemt geen uitclub; de lijst vult daar FC Utrecht in, zolang de cel leeg is.
-- **De rondes:** `Finale` (Johan Cruijff Schaal), `Speelronde 12`, `2e ronde` tot en met `4e ronde` en de kop van de bekerpagina (`Kwartfinales`), `Play-offronde, wedstrijd 1/2`, `Groepsfase, wedstrijd 2/6`, `Eerste ronde, wedstrijd 1/2`, en voor de play-offs van 2008 `Halve finale, wedstrijd 1/2` (Ajax) en `Ronde 2, wedstrijd 1/2` (NAC Breda).
+- **De rondes:** `Finale` (Johan Cruijff Schaal), `Speelronde 12`, `Tweede ronde` tot en met `Vierde ronde` en de kop van de bekerpagina (`Kwartfinale`), `Play-offronde, wedstrijd 1/2`, `Groepsfase, wedstrijd 2/6`, `Eerste ronde, wedstrijd 1/2`, en voor de play-offs van 2008 `Halve finale, wedstrijd 1/2` (Ajax) en `Ronde 2, wedstrijd 1/2` (NAC Breda).
 - **De controles:** elke pagina heeft het aantal wedstrijden uit de lijst, elke wedstrijd staat onder een kop en in een ronde die we kennen, en elke wedstrijd heeft een uitslag.
   De seizoenen 2008/09 en 2009/10 moeten 34 competitiewedstrijden hebben, 17 thuis en 17 uit; 2007/08 heeft er op deze pagina's geen.
   De tabel van 2008/09 moet de zeven kolommen hebben die we kennen, en elke rij zeven cellen.

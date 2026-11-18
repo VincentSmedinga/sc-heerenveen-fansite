@@ -246,6 +246,40 @@ describe('the cards with results of an earlier season, one for each competition'
     expect(section(html, 'uitslagen-play-offs')).not.toContain('n.v. na verlenging')
   })
 
+  it('says in which round we were knocked out, in the card of the cup only', async () => {
+    withMatches([match('KNVB Beker', 'Achtste finale', '2025-12-10', { goalsAgainst: 2, goalsFor: 1 }), all[0]!])
+    const html = await render()
+
+    expect(section(html, 'uitslagen-knvb-beker')).toContain('Uitgeschakeld in de achtste finale')
+    expect(section(html, 'uitslagen')).not.toContain('Uitgeschakeld')
+    expect(html).not.toContain('hf-cup')
+  })
+
+  it('draws the cup at the bottom of the card of a won cup', async () => {
+    withMatches([
+      match('KNVB Beker', 'Finale', '2026-05-10', {
+        goalsAgainst: 2,
+        goalsFor: 2,
+        penaltiesAgainst: 4,
+        penaltiesFor: 5,
+      }),
+    ])
+    // The drawing is an icon, which `render` leaves out, so the page is rendered as it is.
+    const card = section(renderToStaticMarkup(await SeasonMatchesPage(params('2025-26'))), 'uitslagen-knvb-beker')
+
+    expect(card).toContain('hf-cup')
+    expect(card).not.toContain('Uitgeschakeld')
+    expect(card.indexOf('hf-cup')).toBeGreaterThan(card.indexOf('Finale'))
+  })
+
+  it('has neither a line nor a drawing while the cup goes on', async () => {
+    withMatches([match('KNVB Beker', 'Tweede ronde', '2025-08-05'), all[0]!])
+    const html = await render()
+
+    expect(html).not.toContain('Uitgeschakeld')
+    expect(html).not.toContain('hf-cup')
+  })
+
   it('has the link to the course of the season in the card of the league only', async () => {
     withMatches(all)
     const html = await render()

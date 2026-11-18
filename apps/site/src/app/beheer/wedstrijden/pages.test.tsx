@@ -936,7 +936,7 @@ describe('the match', () => {
       penaltiesAgainst: null,
       penaltiesFor: null,
       referee: null,
-      round: 'Achtste finales',
+      round: 'Achtste finale',
       stadium: null,
       status: 'played',
     }
@@ -951,7 +951,7 @@ describe('the match', () => {
         matchDate: '2014-02-05',
         opponent: 'Ajax',
         resultSetAt: new Date('2014-02-05T22:00:00Z'),
-        round: 'Achtste finales',
+        round: 'Achtste finale',
         season,
         status: 'played',
       })
@@ -989,7 +989,7 @@ describe('the match', () => {
             match: wikipedia,
           }),
           reason: 'the goals changed in a match played 4 days ago',
-          round: 'Achtste finales',
+          round: 'Achtste finale',
           season,
           status: 'pending',
           timesSeen: 2,
@@ -1072,9 +1072,9 @@ describe('the match', () => {
         expect.arrayContaining([
           [
             'Neem Wikipedia over',
-            expect.stringMatching(/^Neem Wikipedia over: doelpunten van Achtste finales \(KNVB Beker\)/),
+            expect.stringMatching(/^Neem Wikipedia over: doelpunten van Achtste finale \(KNVB Beker\)/),
           ],
-          ['Wijs af', expect.stringMatching(/^Wijs af: doelpunten van Achtste finales \(KNVB Beker\)/)],
+          ['Wijs af', expect.stringMatching(/^Wijs af: doelpunten van Achtste finale \(KNVB Beker\)/)],
         ]),
       )
       expect(html).toContain('Reden voor je besluit over doelpunten')
@@ -1104,7 +1104,7 @@ describe('the match', () => {
       expect(html).toContain('Wikipedia wacht (1)')
       expect(html).toContain('Alles (2)')
       expect(html.match(/<span class="hf-tag hf-tag-attention">Wikipedia wacht<\/span>/g)).toHaveLength(1)
-      expect(html).toContain('Achtste finales')
+      expect(html).toContain('Achtste finale')
       expect(html).not.toContain('Speelronde 12')
       expect(html).not.toContain('hf-tag-attention">Wikipedia wijkt af')
     })
