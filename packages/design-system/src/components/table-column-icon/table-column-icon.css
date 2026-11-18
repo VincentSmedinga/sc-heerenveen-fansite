@@ -7,13 +7,16 @@
   /*
    * In line with the text and as large as it (in em), turned 8 degrees clockwise as the design
    * has it, like MatchEventIcon. The base styles make an svg a block, so it is put back in the
-   * line here. The drawings are in a square of 16 by 16.
+   * line here. The drawings are in a square of 16 by 16. The base styles also give an svg a
+   * largest width of 100% of its surroundings, which a column as narrow as its figures turns
+   * into nothing, so the icon would shrink above it: it has no largest width.
    */
   .hf-table-icon {
     block-size: 1em;
     display: inline-block;
     flex-shrink: 0;
     inline-size: 1em;
+    max-inline-size: none;
     overflow: visible;
     transform: rotate(8deg);
     vertical-align: -0.15em;

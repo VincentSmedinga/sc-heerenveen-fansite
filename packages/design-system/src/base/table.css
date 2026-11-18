@@ -54,8 +54,31 @@
     border-block-start-color: var(--hf-card-line, var(--hf-colour-border-default));
   }
 
-  .hf-numeric {
+  /*
+   * A column of figures is as wide as its figures and no wider: room for two digits at least,
+   * more when the content asks for it (a score such as 35–17, a header with a word), and never
+   * the room the row has left, which is for the row header, the first column. A width of 1% is
+   * the smallest the cell can have, so the table gives it its content and gives the rest to the
+   * columns without it. The room for the digits is added to the padding, so the padding never
+   * eats it. Two tables with the same columns under each other then have the same columns,
+   * whatever their row headers are.
+   */
+  :is(th, td).hf-numeric {
+    box-sizing: content-box;
+    inline-size: 1%;
+    min-inline-size: 2ch;
     text-align: end;
+    white-space: nowrap;
+  }
+
+  /*
+   * On the narrowest phones a column of figures gives up half of its padding before it gives up
+   * any of its content, so a table with seven columns still fits at 320 pixels.
+   */
+  @media (width < 24rem) {
+    :is(th, td).hf-numeric {
+      padding-inline: var(--hf-space-xs);
+    }
   }
 
   /* The key figure of the table: the column the table is ordered by, or the answer it gives. */

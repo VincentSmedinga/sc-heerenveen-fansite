@@ -3843,3 +3843,18 @@
 - **Waarom:** één dikte, voor een link met en zonder lijn in rust, en een lijn die niet te zwaar wordt naast de tekst.
 - **Alternatieven:** 2 pixel (`0.125em`), zoals de basisregel had; 1,5 pixel alleen bij koppen.
 - **Later:** vervangt de dikte van `0.125em` onder de muis uit de basisregel van `Link`.
+
+## Het pictogram in een tabelkop krimpt niet, en een kolom met cijfers is zo breed als zijn cijfers
+
+- **Datum:** 18 november 2026
+- **Besluit:** `.hf-table-icon` en `.hf-match-event-icon` krijgen `max-inline-size: none` (#1376).
+- **Waarom:** de basisstijl voor `svg` geeft elke tekening een grootste breedte van 100% van haar omgeving, en in een kolom die zo smal is als zijn cijfers rekent de browser dat terug naar nul, waardoor het pictogram krimpt.
+- **Alternatieven:** het pictogram een vaste breedte geven met `min-inline-size`, wat de oorzaak laat staan; de basisstijl veranderen, wat alle tekeningen raakt.
+
+- **Datum:** 18 november 2026
+- **Besluit:** elke cel en kop met `hf-numeric` heeft `inline-size: 1%`, `min-inline-size: 2ch`, `box-sizing: content-box` en `white-space: nowrap`.
+  De kolom is zo breed als zijn inhoud, met ruimte voor twee cijfers, en de rijkop neemt de ruimte die de rij overhoudt.
+  Twee tabellen met dezelfde cijferkolommen onder elkaar, zoals in de kaart "Hoe de wedstrijden verlopen", hebben daardoor kolommen van dezelfde breedte, ook als hun rijkoppen verschillen.
+  De tabel Alle spelers zet de minimale breedte op 0, omdat acht kolommen met ruimte voor twee cijfers niet op een telefoon van 320 pixels passen; haar kolommen zijn zo breed als hun cijfers en pictogram.
+- **Waarom:** de breedte van een cijferkolom hoort niet af te hangen van de lengte van de rijkoppen, en `content-box` houdt de ruimte voor twee cijfers los van de padding, die per tabel verschilt.
+- **Alternatieven:** een vaste breedte voor cijferkolommen, wat breekt bij een score als 35–17 en bij een kop met een woord; alleen `DataTable`, wat de andere tabellen uit de pas laat lopen; `table-layout: fixed`, waarbij de browser de inhoud niet kent.

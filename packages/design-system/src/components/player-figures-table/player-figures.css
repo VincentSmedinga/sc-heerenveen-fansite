@@ -7,15 +7,33 @@
 
 @layer hf.components {
   .hf-player-figures table {
+    /*
+     * Eight columns do not fit a phone of 320 pixels with room for two digits in each, so here
+     * a column is as wide as its figures and the icon above them, which are mostly one digit,
+     * and on the narrowest phones it has less room at its sides.
+     */
     th.hf-numeric,
     td.hf-numeric {
-      padding-inline: calc(var(--hf-space-s) + var(--hf-space-xs) / 2) var(--hf-space-xs);
+      min-inline-size: 0;
+      padding-inline: calc(var(--hf-space-xs) * 1.5) calc(var(--hf-space-xs) / 2);
     }
 
-    /* The last column does not need the room on the end side that a card gives it. */
     th.hf-numeric:last-child,
     td.hf-numeric:last-child {
-      padding-inline-end: var(--hf-space-s);
+      padding-inline-end: var(--hf-space-xs);
+    }
+
+    @media (width >= 24rem) {
+      th.hf-numeric,
+      td.hf-numeric {
+        padding-inline: calc(var(--hf-space-s) + var(--hf-space-xs) / 2) var(--hf-space-xs);
+      }
+
+      /* The last column does not need the room on the end side that a card gives it. */
+      th.hf-numeric:last-child,
+      td.hf-numeric:last-child {
+        padding-inline-end: var(--hf-space-s);
+      }
     }
   }
 }
