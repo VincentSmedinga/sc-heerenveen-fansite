@@ -7,8 +7,13 @@
 
 @layer hf.components {
   .hf-player-figures table {
+    /*
+     * Eight columns do not fit a phone of 320 pixels with room for two digits in each, so here
+     * a column is as wide as its figures and the icon above them, which are mostly one digit.
+     */
     th.hf-numeric,
     td.hf-numeric {
+      min-inline-size: 0;
       padding-inline: calc(var(--hf-space-s) + var(--hf-space-xs) / 2) var(--hf-space-xs);
     }
 

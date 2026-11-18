@@ -184,6 +184,34 @@ export const Abbreviations = meta.story({
   render: renderAbbreviations,
 })
 
+const shortResults: DataTableRow[] = [
+  { cells: [3, 1, 1, 1, 4], header: 'Voor' },
+  { cells: [2, 0, 1, 1, 1], header: 'Gelijk' },
+  { cells: [1, 0, 0, 1, 0], header: 'Achter' },
+]
+
+const renderStacked = () => (
+  <div style={{ maxInlineSize: '28rem' }}>
+    <Card aria-labelledby="onder-elkaar-kop">
+      <Heading id="onder-elkaar-kop" level={2}>
+        Hoe de wedstrijden verlopen
+      </Heading>
+      <DataTable
+        caption="Wat er gebeurt na het eerste doelpunt"
+        columns={['Eerste doelpunt', ...flowColumns]}
+        rows={results}
+      />
+      <DataTable caption="Wat er gebeurt bij de rust" columns={['Bij de rust', ...flowColumns]} rows={shortResults} />
+      <Text appearance="meta">{tableLegend(flowColumns)}</Text>
+    </Card>
+  </div>
+)
+
+export const StackedTables = meta.story({
+  name: 'Twee tabellen onder elkaar',
+  render: renderStacked,
+})
+
 export const LongRowHeader = meta.story({
   name: 'Een lange rijkop breekt af',
   render: renderPages('20rem'),
