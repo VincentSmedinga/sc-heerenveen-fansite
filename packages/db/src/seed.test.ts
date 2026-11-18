@@ -119,6 +119,19 @@ describe('the seed', () => {
 
     expect(rows.filter((feed) => feed.filter === 'club').map((feed) => feed.url)).toEqual([
       'https://www.lc.nl/sport/rss/',
+      'https://www.telegraaf.nl/sport/rss/',
+      'https://www.telegraaf.nl/sport/voetbal/rss/',
+      'https://www.dvhn.nl/sport/rss/',
+      'https://www.dvhn.nl/sport/fc-groningen/rss/',
+      'https://www.frieschdagblad.nl/sport/rss/',
+      'https://www.limburger.nl/sport/rss/',
+      'https://www.limburger.nl/sport/voetbal/rss/',
+      'https://www.noordhollandsdagblad.nl/sport/rss/',
+      'https://www.noordhollandsdagblad.nl/sport/az/rss/',
+      'https://www.gooieneemlander.nl/sport/rss/',
+      'https://www.haarlemsdagblad.nl/sport/rss/',
+      'https://www.leidschdagblad.nl/sport/rss/',
+      'https://www.ijmuidercourant.nl/sport/rss/',
       'https://www.omropfryslan.nl/rss/index.xml',
       'https://feeds.nos.nl/nosvoetbal',
       'https://www.ad.nl/voetbal/rss.xml',
@@ -128,6 +141,45 @@ describe('the seed', () => {
       'https://www.rtvnoord.nl/rss/sport.xml',
       'https://www.oogtv.nl/tag/fc-groningen/feed/',
     ])
+  })
+
+  it('puts the dailies of Mediahuis in the register with their sports feeds on the club filter and the strictest policy', async () => {
+    await seedSources(database.db)
+
+    const expected: Record<string, string[]> = {
+      'www.dvhn.nl': ['/sport/rss/', '/sport/fc-groningen/rss/'],
+      'www.frieschdagblad.nl': ['/sport/rss/'],
+      'www.gooieneemlander.nl': ['/sport/rss/'],
+      'www.haarlemsdagblad.nl': ['/sport/rss/'],
+      'www.ijmuidercourant.nl': ['/sport/rss/'],
+      'www.leidschdagblad.nl': ['/sport/rss/'],
+      'www.limburger.nl': ['/sport/rss/', '/sport/voetbal/rss/'],
+      'www.noordhollandsdagblad.nl': ['/sport/rss/', '/sport/az/rss/'],
+    }
+
+    for (const [domain, paths] of Object.entries(expected)) {
+      const [paper] = await database.db.select().from(sources).where(eq(sources.domain, domain))
+      const paperFeeds = await database.db
+        .select()
+        .from(feeds)
+        .where(eq(feeds.sourceId, paper?.id ?? 0))
+
+      expect(paper).toMatchObject({
+        allowEmbed: false,
+        allowImage: false,
+        enabled: true,
+        introMaxLength: 0,
+        kind: 'news',
+        publisher: null,
+      })
+      expect(paper?.consentStatus).not.toBe('given')
+      expect(paper?.slug).toBeTruthy()
+      expect(paper?.description).toBeTruthy()
+      expect(paper?.description?.length).toBeLessThanOrEqual(300)
+      expect(paperFeeds.map((feed) => [feed.url, feed.filter])).toEqual(
+        paths.map((path) => [`https://${domain}${path}`, 'club']),
+      )
+    }
   })
 
   it('puts Omrop Fryslân in the register with its feed on the club filter and the strictest policy', async () => {
@@ -426,7 +478,11 @@ describe('the seed', () => {
     })
     expect(telegraaf?.consentStatus).not.toBe('given')
     expect(telegraaf?.description?.length).toBeLessThanOrEqual(300)
-    expect(telegraafFeeds.map((feed) => feed.url)).toEqual(['https://www.telegraaf.nl/tag/sc-heerenveen/rss/'])
+    expect(telegraafFeeds.map((feed) => [feed.url, feed.filter])).toEqual([
+      ['https://www.telegraaf.nl/tag/sc-heerenveen/rss/', 'none'],
+      ['https://www.telegraaf.nl/sport/rss/', 'club'],
+      ['https://www.telegraaf.nl/sport/voetbal/rss/', 'club'],
+    ])
   })
 
   it('puts the forum in the register as a forum, with its API as the feed and the strictest policy', async () => {

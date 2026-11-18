@@ -395,7 +395,7 @@ Zet je hem terug op `none`, dan worden ze weer allemaal `relevant`.
 Een bericht dat een redacteur verborg, houdt zijn waarde (zie _Wat de adapter bewaart_).
 De seed laat `filter` met rust, dus een nieuwe seed zet de waarde niet terug.
 Een feed in `realSources` die over meer gaat dan de club, begint op `club`: de seed zet de waarde alleen als hij de feed in het register zet.
-Dat zijn nu de sportfeed van de Leeuwarder Courant (zie _De sportfeed van de Leeuwarder Courant_), de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_), die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_), die van De Gelderlander (zie _De sportfeed van De Gelderlander_), die van ESPN (zie _De voetbalfeed van ESPN NL_), de sportfeed van Rijnmond (zie _De sportfeed van Rijnmond_), de sportfeed van RTV Noord en de FC Groningen-feed van OOG Groningen (zie _De feeds van RTV Noord en OOG Groningen_).
+Dat zijn nu de sportfeed van de Leeuwarder Courant (zie _De sportfeed van de Leeuwarder Courant_), de feed van Omrop Fryslân (zie _De regionale feed van Omrop Fryslân_), de voetbalfeed van NOS (zie _De voetbalfeed van NOS_), die van het Algemeen Dagblad (zie _De voetbalfeed van het Algemeen Dagblad_), die van De Gelderlander (zie _De sportfeed van De Gelderlander_), die van ESPN (zie _De voetbalfeed van ESPN NL_), de sportfeed van Rijnmond (zie _De sportfeed van Rijnmond_), de sportfeed van RTV Noord en de FC Groningen-feed van OOG Groningen (zie _De feeds van RTV Noord en OOG Groningen_), en de sport- en voetbalfeeds van de andere dagbladen van Mediahuis (zie _De dagbladen van Mediahuis_).
 
 ### De sportfeed van de Leeuwarder Courant
 
@@ -580,10 +580,19 @@ Alle drie zijn RSS 2.0 met tijden in GMT of `+0000`, en geen heeft een betaalmuu
 De feed van sc Heerenveen van OOG gaat helemaal over de club en staat als gewone feed in de seed.
 De sportfeed van RTV Noord en de feed van FC Groningen van OOG gaan vooral over FC Groningen; de seed zet ze op `club`, en ze tellen door de regel van de tegenstander: een kop over FC Groningen is `relevant` vanaf de dag nadat beide clubs hun vorige wedstrijd speelden tot 3 dagen na een wedstrijd tegen hen (zie _Het relevantiefilter_).
 Een kop over schaatsen in Heerenveen krijgt de waarde `doubtful` en wordt dus niet getoond.
-Het Dagblad van het Noorden staat niet in het register: zijn feeds geven een 403 (zie [`docs/bronnen.md`](../../docs/bronnen.md)).
 Een run van 9 november 2026 bewaarde 50 berichten van RTV Noord (0 `relevant`, 50 `irrelevant`), 10 van de feed van sc Heerenveen van OOG (10 `relevant`) en 10 van de feed van FC Groningen van OOG (10 `irrelevant`), want er was geen wedstrijd tegen FC Groningen in de buurt.
 Elk bericht heeft een beschrijving en een afbeelding of een auteur; de adapter leest ze niet en de database heeft er geen kolom voor, dus ze worden niet bewaard of getoond.
 De tests in `src/import-feeds.test.ts` ("importing RTV Noord and OOG Groningen, the way the register has them") lezen verzonnen feeds in deze vorm, [`src/fixtures/rtv-noord-sample.xml`](src/fixtures/rtv-noord-sample.xml), [`src/fixtures/oog-groningen-sample.xml`](src/fixtures/oog-groningen-sample.xml) en [`src/fixtures/oog-groningen-club-sample.xml`](src/fixtures/oog-groningen-club-sample.xml), met een proefwedstrijd tegen FC Groningen.
+
+## De dagbladen van Mediahuis
+
+Het Dagblad van het Noorden, het Friesch Dagblad, De Limburger, het Noordhollands Dagblad, De Gooi- en Eemlander, het Haarlems Dagblad, het Leidsch Dagblad en de IJmuider Courant hebben dezelfde opbouw als de Leeuwarder Courant, net als de sportfeeds van De Telegraaf (zie _De velden van de feed van de Leeuwarder Courant_).
+De adapter leest ze zonder aanpassing, en `<premium>` telt bij elke krant als betaalmuur.
+Een feed over alleen de club bestaat niet; alleen de sport- en voetbalfeeds, met het filter `club` in de seed (`/sport/rss/`, `/sport/voetbal/rss/`, en de rubriek van FC Groningen of AZ).
+Een rubriek die niet bestaat, geeft een 404 met een lege RSS-tekst: de fetcher meldt dat als fout (`http-status`), dus de feed bewaart niets en de gezondheid laat de fout zien.
+Een run van 18 november 2026 las 16 feeds van 10 kranten: 720 berichten, waarvan er 4 bij de kranten van het noorden en AZ `relevant` of `doubtful` waren; zie [`docs/bronnen.md`](../../docs/bronnen.md) voor de cijfers per feed.
+Geen artikelcode stond bij twee kranten, dus een gedeeld artikel krijgt geen regel (zie _We nemen de Nederlandse dagbladen van Mediahuis_ in [`docs/beslissingen/importer.md`](../../docs/beslissingen/importer.md)).
+De tests in `src/import-feeds.test.ts` ("importing the dailies of Mediahuis, the way the register has them") lezen een verzonnen feed in deze vorm, [`src/fixtures/mediahuis-sport-sample.xml`](src/fixtures/mediahuis-sport-sample.xml).
 
 ## De velden van de feed van de Leeuwarder Courant
 

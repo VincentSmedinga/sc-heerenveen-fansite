@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title><![CDATA[Een krant - Sport]]></title>
+    <link>https://www.dagblad.test/sport/</link>
+    <item>
+      <title><![CDATA[SC Heerenveen wint in de slotminuut van de verzonnen uitwedstrijd]]></title>
+      <link>https://www.dagblad.test/sport/verzonnen-uitwedstrijd/900000101.html</link>
+      <guid isPermaLink="false">sportify-00000000-0000-0000-0000-000000000101</guid>
+      <pubDate>Tue, 17 Nov 2026 20:15:00 GMT</pubDate>
+      <description><![CDATA[VERZONNEN-INTRO een verzonnen intro die we niet bewaren.]]></description>
+      <author>Verzonnen Auteur</author>
+      <premium>false</premium>
+    </item>
+    <item>
+      <title><![CDATA[Verzonnen interview met de trainer van Heerenveen: ’We blijven bij ons plan’]]></title>
+      <link>https://www.dagblad.test/sport/verzonnen-interview/900000102.html</link>
+      <guid isPermaLink="false">Kordiam-0000000102</guid>
+      <pubDate>Tue, 17 Nov 2026 18:00:00 GMT</pubDate>
+      <description><![CDATA[VERZONNEN-INTRO]]></description>
+      <author>Verzonnen Auteur</author>
+      <premium>true</premium>
+    </item>
+    <item>
+      <title><![CDATA[Verzonnen schaatser wint de tweede wedstrijd van het weekend]]></title>
+      <link>https://www.dagblad.test/sport/verzonnen-schaatser/900000103.html</link>
+      <guid isPermaLink="false">Kordiam-0000000103</guid>
+      <pubDate>Tue, 17 Nov 2026 12:00:00 GMT</pubDate>
+      <premium>false</premium>
+    </item>
+    <item>
+      <title><![CDATA[Verzonnen club uit het noorden haalt een nieuwe aanvaller]]></title>
+      <link>https://www.dagblad.test/sport/verzonnen-aanvaller/900000104.html</link>
+      <guid isPermaLink="false">Kordiam-0000000104</guid>
+      <pubDate>Mon, 16 Nov 2026 12:00:00 GMT</pubDate>
+      <premium>true</premium>
+    </item>
+  </channel>
+</rss>

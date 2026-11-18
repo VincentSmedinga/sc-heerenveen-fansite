@@ -80,7 +80,7 @@ Een bron die er al staat, werkt hij bij op haar domein, behalve wat het beheer s
 Op acceptatie haalt de site ook de testbronnen weg die er voor 26 oktober 2026 stonden (`removeTestSources`).
 Hij herkent ze aan hun domein uit `testSources`, en verwijdert die rijen met hun feeds en berichten; een echte bron blijft ongemoeid.
 Zodra het beheer (#31) bronnen kan toevoegen, verdwijnt `realSources` uit de seed.
-Een feed die over meer gaat dan de club, zoals die van Omrop Fryslân, NOS, het Algemeen Dagblad, De Gelderlander, ESPN, Rijnmond, RTV Noord en de FC Groningen-feed van OOG Groningen, staat in de seed met `{ filter: 'club', url }`; de seed zet het filter alleen als hij de feed toevoegt (zie de README van de importer, _Het relevantiefilter_).
+Een feed die over meer gaat dan de club, zoals die van Omrop Fryslân, NOS, het Algemeen Dagblad, De Gelderlander, ESPN, Rijnmond, RTV Noord, de FC Groningen-feed van OOG Groningen, de sportfeeds van De Telegraaf en de sport- en voetbalfeeds van de andere dagbladen van Mediahuis, staat in de seed met `{ filter: 'club', url }`; de seed zet het filter alleen als hij de feed toevoegt (zie de README van de importer, _Het relevantiefilter_).
 
 ## Het schema wijzigen
 

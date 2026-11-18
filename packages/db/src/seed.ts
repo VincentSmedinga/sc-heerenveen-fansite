@@ -191,10 +191,95 @@ export const realSources = [
     description:
       'Landelijk dagblad uit Amsterdam. Onder het onderwerp sc Heerenveen staan verslagen, nieuws over transfers en interviews; een deel daarvan staat achter een betaalmuur.',
     domain: 'www.telegraaf.nl',
-    feeds: ['https://www.telegraaf.nl/tag/sc-heerenveen/rss/'],
+    feeds: [
+      'https://www.telegraaf.nl/tag/sc-heerenveen/rss/',
+      { filter: 'club', url: 'https://www.telegraaf.nl/sport/rss/' },
+      { filter: 'club', url: 'https://www.telegraaf.nl/sport/voetbal/rss/' },
+    ],
     kind: 'news',
     name: 'De Telegraaf',
     slug: 'de-telegraaf',
+  },
+  {
+    description:
+      'Dagblad uit Groningen voor Groningen en Drenthe. In de sportrubriek staan verslagen en nieuws over clubs uit het noorden; we tonen alleen wat over sc Heerenveen gaat.',
+    domain: 'www.dvhn.nl',
+    feeds: [
+      { filter: 'club', url: 'https://www.dvhn.nl/sport/rss/' },
+      { filter: 'club', url: 'https://www.dvhn.nl/sport/fc-groningen/rss/' },
+    ],
+    kind: 'news',
+    name: 'Dagblad van het Noorden',
+    slug: 'dagblad-van-het-noorden',
+  },
+  {
+    description:
+      'Dagblad uit Leeuwarden voor Friesland. In de sportrubriek staan verslagen en interviews over Friese clubs; we tonen alleen wat over sc Heerenveen gaat.',
+    domain: 'www.frieschdagblad.nl',
+    feeds: [{ filter: 'club', url: 'https://www.frieschdagblad.nl/sport/rss/' }],
+    kind: 'news',
+    name: 'Friesch Dagblad',
+    slug: 'friesch-dagblad',
+  },
+  {
+    description:
+      'Dagblad uit Limburg. In de sportrubriek staat nieuws over voetbal in het hele land; we tonen alleen wat over sc Heerenveen gaat.',
+    domain: 'www.limburger.nl',
+    feeds: [
+      { filter: 'club', url: 'https://www.limburger.nl/sport/rss/' },
+      { filter: 'club', url: 'https://www.limburger.nl/sport/voetbal/rss/' },
+    ],
+    kind: 'news',
+    name: 'De Limburger',
+    slug: 'de-limburger',
+  },
+  {
+    description:
+      'Dagblad uit Noord-Holland. In de sportrubriek staat nieuws over voetbal, ook over AZ; we tonen alleen wat over sc Heerenveen gaat.',
+    domain: 'www.noordhollandsdagblad.nl',
+    feeds: [
+      { filter: 'club', url: 'https://www.noordhollandsdagblad.nl/sport/rss/' },
+      { filter: 'club', url: 'https://www.noordhollandsdagblad.nl/sport/az/rss/' },
+    ],
+    kind: 'news',
+    name: 'Noordhollands Dagblad',
+    slug: 'noordhollands-dagblad',
+  },
+  {
+    description:
+      'Regionaal dagblad voor het Gooi en Eemland. In de sportrubriek staat nieuws over voetbal; we tonen alleen wat over sc Heerenveen gaat.',
+    domain: 'www.gooieneemlander.nl',
+    feeds: [{ filter: 'club', url: 'https://www.gooieneemlander.nl/sport/rss/' }],
+    kind: 'news',
+    name: 'De Gooi- en Eemlander',
+    slug: 'de-gooi-en-eemlander',
+  },
+  {
+    description:
+      'Regionaal dagblad voor Haarlem en omstreken. In de sportrubriek staat nieuws over voetbal; we tonen alleen wat over sc Heerenveen gaat.',
+    domain: 'www.haarlemsdagblad.nl',
+    feeds: [{ filter: 'club', url: 'https://www.haarlemsdagblad.nl/sport/rss/' }],
+    kind: 'news',
+    name: 'Haarlems Dagblad',
+    slug: 'haarlems-dagblad',
+  },
+  {
+    description:
+      'Regionaal dagblad voor Leiden en omstreken. In de sportrubriek staat nieuws over voetbal; we tonen alleen wat over sc Heerenveen gaat.',
+    domain: 'www.leidschdagblad.nl',
+    feeds: [{ filter: 'club', url: 'https://www.leidschdagblad.nl/sport/rss/' }],
+    kind: 'news',
+    name: 'Leidsch Dagblad',
+    slug: 'leidsch-dagblad',
+  },
+  {
+    description:
+      'Regionaal dagblad voor IJmuiden en omstreken. In de sportrubriek staat nieuws over voetbal; we tonen alleen wat over sc Heerenveen gaat.',
+    domain: 'www.ijmuidercourant.nl',
+    feeds: [{ filter: 'club', url: 'https://www.ijmuidercourant.nl/sport/rss/' }],
+    kind: 'news',
+    name: 'IJmuider Courant',
+    slug: 'ijmuider-courant',
   },
   {
     description:
