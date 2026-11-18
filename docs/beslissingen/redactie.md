@@ -1639,6 +1639,8 @@
   Alle 25 tijden waren geldig.
 - **Alternatieven:** wachten op schriftelijke toestemming van Disney (voorzichtiger, maar Disney antwoordt zelden); `EST` voor alle feeds als Nederlandse tijd lezen (verkeerd voor een feed waar het echt EST is); de tijd van deze bron negeren en alleen het moment van eerste zien gebruiken (de berichten staan dan niet op hun echte tijd).
 - **Daarna:** schriftelijk toestemming vragen aan Disney hoort bij #35; de projecteigenaar nam het voorbehoud van Disney aan bij het goedkeuren van het issue.
+- **Later:** zie _ESPN NL leest ook de algemene feed_.
+  Het register heeft nu twee feeds voor ESPN NL.
 
 ## We nemen De Gelderlander na het relevantiefilter
 
@@ -3131,3 +3133,14 @@
   De club is Fries, dus de Friese bronnen staan bovenaan.
 - **Alternatieven:** een tabel met uitgever en beschrijving; één korte zin per bron (eerst gebouwd, daarna geschrapt); kleiner lettertype; de beschrijving achter "Meer"; groeperen per uitgever; een zoekveld; de rangorde als kolom in het register (een migratie voor een pagina met één lijst).
 - **Later:** dit past _De pagina 'Onze bronnen' toont per bron een beschrijving, niet wat we tonen_ (22 oktober 2026) aan: de pagina toont geen beschrijving meer.
+
+## ESPN NL leest ook de algemene feed
+
+- **Datum:** 18 november 2026
+- **Besluit:** de bron ESPN krijgt twee feeds, `https://www.espn.nl/espn/rss/soccer/news` en `https://www.espn.nl/espn/rss/news`, allebei met het filter `club`.
+  Een bericht dat in beide staat, komt één keer in het nieuws, want de link is dezelfde.
+- **Waarom:** het bericht van ESPN NL over de club van 18 november 2026 stond niet in de voetbalfeed, want die heeft 25 berichten die ESPN kiest.
+  De algemene feed had het wel (72 berichten over zes dagen), maar mist op zijn beurt vier berichten van 17 november 2026 die de voetbalfeed heeft.
+  Samen missen we niets.
+  De algemene feed heeft ook berichten over andere sporten (1 over NBA en 1 over NFL), maar het filter kijkt naar de kop en laat ze niet door.
+- **Alternatieven:** alleen de algemene feed (mist de vier berichten die alleen in de voetbalfeed staan); een regel die links buiten `/voetbal/` weglaat (extra code zonder gemeten winst).
