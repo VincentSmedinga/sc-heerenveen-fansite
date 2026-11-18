@@ -566,7 +566,7 @@ describe('the seed', () => {
   it.each([
     {
       apple: 'https://podcasts.apple.com/nl/podcast/omroep-abe/id1589027848',
-      description: 'Podcast van de Leeuwarder Courant; we tonen de afleveringen.',
+      description: 'Podcast van de Leeuwarder Courant.',
       domain: 'omny.fm',
       feed: 'https://www.omnycontent.com/d/playlist/fdd7ab40-270d-4a1e-a257-acd200da1324/6470c909-db21-4ceb-a53d-b2940145c1ee/06a49ae8-2226-44c4-bbf0-b2940145c83c/podcast.rss',
       name: 'Omroep Abe',
@@ -575,7 +575,7 @@ describe('the seed', () => {
     },
     {
       apple: 'https://podcasts.apple.com/nl/podcast/radio-camataru/id1436580634',
-      description: 'Supporterspodcast; we tonen de afleveringen.',
+      description: 'Supporterspodcast.',
       domain: 'radiocamataru.podbean.com',
       feed: 'https://feed.podbean.com/radiocamataru/feed.xml',
       name: 'Radio Camataru',
@@ -661,11 +661,9 @@ describe('the seed', () => {
       const description = 'description' in source ? source.description : undefined
 
       expect(description, source.name).toBeTruthy()
-      // One sentence: one full stop at the end, and a semicolon between what the source is and
-      // what we read.
+      // One sentence: one full stop at the end.
       expect(description, source.name).toMatch(/^[^.!?]+[.]$/u)
       expect(description?.length, source.name).toBeLessThanOrEqual(64)
-      expect(description, source.name).toMatch(/lezen|tonen/u)
     }
   })
 

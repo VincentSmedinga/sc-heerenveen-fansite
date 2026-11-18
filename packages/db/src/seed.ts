@@ -52,7 +52,7 @@ import { seedStaff } from './staff-seed.ts'
  */
 export const testSources = [
   {
-    description: 'Verzonnen dagblad; we lezen de koppen over de club.',
+    description: 'Verzonnen dagblad.',
     domain: 'testkrant.test',
     kind: 'news',
     name: 'Testkrant',
@@ -61,7 +61,7 @@ export const testSources = [
   {
     consentNote: 'Verzonnen: toestemming gevraagd, nog geen antwoord.',
     consentStatus: 'asked',
-    description: 'Verzonnen nieuwssite; we lezen de koppen over de club.',
+    description: 'Verzonnen nieuwssite.',
     domain: 'proefnieuws.test',
     kind: 'news',
     name: 'Proefnieuws',
@@ -73,7 +73,7 @@ export const testSources = [
     consentDate: '2026-01-15',
     consentNote: 'Verzonnen: intro tot 200 tekens en foto, zonder insluiten.',
     consentStatus: 'given',
-    description: 'Verzonnen regionale krant; we lezen de koppen over de club.',
+    description: 'Verzonnen regionale krant.',
     domain: 'voorbeeldkrant.test',
     introMaxLength: 200,
     kind: 'news',
@@ -86,7 +86,7 @@ export const testSources = [
     consentDate: '2026-02-03',
     consentNote: 'Verzonnen: alleen insluiten van afleveringen.',
     consentStatus: 'given',
-    description: 'Verzonnen podcast; we tonen de afleveringen.',
+    description: 'Verzonnen podcast.',
     domain: 'testpodcast.test',
     kind: 'podcast',
     name: 'Testpodcast',
@@ -95,7 +95,7 @@ export const testSources = [
   },
   {
     applePodcastsUrl: 'https://apple.test/podcast/proefpodcast',
-    description: 'Verzonnen jeugdpodcast; we tonen de afleveringen.',
+    description: 'Verzonnen jeugdpodcast.',
     domain: 'proefpodcast.test',
     kind: 'podcast',
     name: 'Proefpodcast',
@@ -170,7 +170,7 @@ export const testSources = [
  */
 export const realSources = [
   {
-    description: 'Dagblad voor Friesland; we lezen de koppen over de club.',
+    description: 'Dagblad voor Friesland.',
     domain: 'www.lc.nl',
     feeds: ['https://www.lc.nl/sport/sc-heerenveen/rss/', { filter: 'club', url: 'https://www.lc.nl/sport/rss/' }],
     kind: 'news',
@@ -178,7 +178,7 @@ export const realSources = [
     slug: 'leeuwarder-courant',
   },
   {
-    description: 'Landelijk voetbaltijdschrift; we lezen de koppen over de club.',
+    description: 'Landelijk voetbaltijdschrift.',
     domain: 'www.vi.nl',
     feeds: ['https://www.vi.nl/feed/news.xml?tag=sc-heerenveen'],
     kind: 'news',
@@ -186,7 +186,7 @@ export const realSources = [
     slug: 'voetbal-international',
   },
   {
-    description: 'Landelijk dagblad; we lezen de koppen over de club.',
+    description: 'Landelijk dagblad.',
     domain: 'www.telegraaf.nl',
     feeds: [
       'https://www.telegraaf.nl/tag/sc-heerenveen/rss/',
@@ -198,7 +198,7 @@ export const realSources = [
     slug: 'de-telegraaf',
   },
   {
-    description: 'Dagblad uit Groningen; we lezen de koppen over de club.',
+    description: 'Dagblad uit Groningen.',
     domain: 'www.dvhn.nl',
     feeds: [
       { filter: 'club', url: 'https://www.dvhn.nl/sport/rss/' },
@@ -209,7 +209,7 @@ export const realSources = [
     slug: 'dagblad-van-het-noorden',
   },
   {
-    description: 'Friese krant uit Leeuwarden; we lezen de koppen over de club.',
+    description: 'Friese krant uit Leeuwarden.',
     domain: 'www.frieschdagblad.nl',
     feeds: [{ filter: 'club', url: 'https://www.frieschdagblad.nl/sport/rss/' }],
     kind: 'news',
@@ -217,7 +217,7 @@ export const realSources = [
     slug: 'friesch-dagblad',
   },
   {
-    description: 'Dagblad uit Limburg; we lezen de koppen over de club.',
+    description: 'Dagblad uit Limburg.',
     domain: 'www.limburger.nl',
     feeds: [
       { filter: 'club', url: 'https://www.limburger.nl/sport/rss/' },
@@ -228,7 +228,7 @@ export const realSources = [
     slug: 'de-limburger',
   },
   {
-    description: 'Dagblad uit Noord-Holland; we lezen de koppen over de club.',
+    description: 'Dagblad uit Noord-Holland.',
     domain: 'www.noordhollandsdagblad.nl',
     feeds: [
       { filter: 'club', url: 'https://www.noordhollandsdagblad.nl/sport/rss/' },
@@ -239,7 +239,7 @@ export const realSources = [
     slug: 'noordhollands-dagblad',
   },
   {
-    description: 'Dagblad voor het Gooi; we lezen de koppen over de club.',
+    description: 'Dagblad voor het Gooi.',
     domain: 'www.gooieneemlander.nl',
     feeds: [{ filter: 'club', url: 'https://www.gooieneemlander.nl/sport/rss/' }],
     kind: 'news',
@@ -247,7 +247,7 @@ export const realSources = [
     slug: 'de-gooi-en-eemlander',
   },
   {
-    description: 'Dagblad uit Haarlem; we lezen de koppen over de club.',
+    description: 'Dagblad uit Haarlem.',
     domain: 'www.haarlemsdagblad.nl',
     feeds: [{ filter: 'club', url: 'https://www.haarlemsdagblad.nl/sport/rss/' }],
     kind: 'news',
@@ -255,7 +255,7 @@ export const realSources = [
     slug: 'haarlems-dagblad',
   },
   {
-    description: 'Dagblad uit Leiden; we lezen de koppen over de club.',
+    description: 'Dagblad uit Leiden.',
     domain: 'www.leidschdagblad.nl',
     feeds: [{ filter: 'club', url: 'https://www.leidschdagblad.nl/sport/rss/' }],
     kind: 'news',
@@ -263,7 +263,7 @@ export const realSources = [
     slug: 'leidsch-dagblad',
   },
   {
-    description: 'Dagblad uit IJmuiden; we lezen de koppen over de club.',
+    description: 'Dagblad uit IJmuiden.',
     domain: 'www.ijmuidercourant.nl',
     feeds: [{ filter: 'club', url: 'https://www.ijmuidercourant.nl/sport/rss/' }],
     kind: 'news',
@@ -271,7 +271,7 @@ export const realSources = [
     slug: 'ijmuider-courant',
   },
   {
-    description: 'Dagblad uit Zwolle; we lezen de koppen over de club.',
+    description: 'Dagblad uit Zwolle.',
     domain: 'www.destentor.nl',
     feeds: [{ filter: 'club', url: 'https://www.destentor.nl/sport/rss.xml' }],
     followedClubs: ['PEC Zwolle', 'Go Ahead Eagles'],
@@ -282,7 +282,7 @@ export const realSources = [
     slug: 'de-stentor',
   },
   {
-    description: 'Dagblad uit Noord-Brabant; we lezen de koppen over de club.',
+    description: 'Dagblad uit Noord-Brabant.',
     domain: 'www.bd.nl',
     feeds: [{ filter: 'club', url: 'https://www.bd.nl/sport/rss.xml' }],
     followedClubs: ['NAC Breda', 'Willem II', 'RKC Waalwijk', 'FC Den Bosch', 'TOP Oss'],
@@ -293,7 +293,7 @@ export const realSources = [
     slug: 'brabants-dagblad',
   },
   {
-    description: 'Dagblad uit Twente; we lezen de koppen over de club.',
+    description: 'Dagblad uit Twente.',
     domain: 'www.tubantia.nl',
     feeds: [{ filter: 'club', url: 'https://www.tubantia.nl/sport/rss.xml' }],
     followedClubs: ['FC Twente', 'Heracles Almelo'],
@@ -304,7 +304,7 @@ export const realSources = [
     slug: 'tubantia',
   },
   {
-    description: 'Dagblad uit Eindhoven; we lezen de koppen over de club.',
+    description: 'Dagblad uit Eindhoven.',
     domain: 'www.ed.nl',
     feeds: [{ filter: 'club', url: 'https://www.ed.nl/sport/rss.xml' }],
     followedClubs: ['PSV', 'Jong PSV', 'FC Eindhoven', 'Helmond Sport'],
@@ -315,7 +315,7 @@ export const realSources = [
     slug: 'eindhovens-dagblad',
   },
   {
-    description: 'Dagblad uit West-Brabant; we lezen de koppen over de club.',
+    description: 'Dagblad uit West-Brabant.',
     domain: 'www.bndestem.nl',
     feeds: [{ filter: 'club', url: 'https://www.bndestem.nl/sport/rss.xml' }],
     followedClubs: ['NAC Breda'],
@@ -326,7 +326,7 @@ export const realSources = [
     slug: 'bn-destem',
   },
   {
-    description: 'Dagblad uit Zeeland; we lezen de koppen over de club.',
+    description: 'Dagblad uit Zeeland.',
     domain: 'www.pzc.nl',
     feeds: [{ filter: 'club', url: 'https://www.pzc.nl/sport/rss.xml' }],
     kind: 'news',
@@ -335,7 +335,7 @@ export const realSources = [
     slug: 'pzc',
   },
   {
-    description: 'Landelijk dagblad; we lezen de koppen over de club.',
+    description: 'Landelijk dagblad.',
     domain: 'www.volkskrant.nl',
     feeds: [{ filter: 'club', url: 'https://www.volkskrant.nl/sport/rss.xml' }],
     kind: 'news',
@@ -344,7 +344,7 @@ export const realSources = [
     slug: 'de-volkskrant',
   },
   {
-    description: 'Landelijk dagblad; we lezen de koppen over de club.',
+    description: 'Landelijk dagblad.',
     domain: 'www.trouw.nl',
     feeds: [{ filter: 'club', url: 'https://www.trouw.nl/sport/rss.xml' }],
     kind: 'news',
@@ -353,7 +353,7 @@ export const realSources = [
     slug: 'trouw',
   },
   {
-    description: 'Dagblad uit Amsterdam; we lezen de koppen over de club.',
+    description: 'Dagblad uit Amsterdam.',
     domain: 'www.parool.nl',
     feeds: [{ filter: 'club', url: 'https://www.parool.nl/sport/rss.xml' }],
     kind: 'news',
@@ -362,7 +362,7 @@ export const realSources = [
     slug: 'het-parool',
   },
   {
-    description: 'Blad voor Flevoland; we lezen de koppen over de club.',
+    description: 'Blad voor Flevoland.',
     domain: 'www.flevopost.nl',
     feeds: [{ filter: 'club', url: 'https://www.flevopost.nl/sport/rss/' }],
     kind: 'news',
@@ -370,7 +370,7 @@ export const realSources = [
     slug: 'de-flevopost',
   },
   {
-    description: 'Christelijk dagblad; we lezen de koppen over de club.',
+    description: 'Christelijk dagblad.',
     domain: 'www.nd.nl',
     feeds: [{ filter: 'club', url: 'https://www.nd.nl/sport/rss' }],
     kind: 'news',
@@ -378,7 +378,7 @@ export const realSources = [
     slug: 'nederlands-dagblad',
   },
   {
-    description: 'Ons eigen forum; we tonen de titels van de discussies.',
+    description: 'Ons eigen forum.',
     domain: 'forum.heerenveen.org',
     feeds: [
       'https://forum.heerenveen.org/api/discussions?sort=-lastPostedAt&page[limit]=30&include=lastPostedUser,tags',
@@ -388,7 +388,7 @@ export const realSources = [
   },
   {
     applePodcastsUrl: 'https://podcasts.apple.com/nl/podcast/omroep-abe/id1589027848',
-    description: 'Podcast van de Leeuwarder Courant; we tonen de afleveringen.',
+    description: 'Podcast van de Leeuwarder Courant.',
     domain: 'omny.fm',
     feeds: [
       'https://www.omnycontent.com/d/playlist/fdd7ab40-270d-4a1e-a257-acd200da1324/6470c909-db21-4ceb-a53d-b2940145c1ee/06a49ae8-2226-44c4-bbf0-b2940145c83c/podcast.rss',
@@ -400,7 +400,7 @@ export const realSources = [
   },
   {
     applePodcastsUrl: 'https://podcasts.apple.com/nl/podcast/radio-camataru/id1436580634',
-    description: 'Supporterspodcast; we tonen de afleveringen.',
+    description: 'Supporterspodcast.',
     domain: 'radiocamataru.podbean.com',
     feeds: ['https://feed.podbean.com/radiocamataru/feed.xml'],
     kind: 'podcast',
@@ -409,7 +409,7 @@ export const realSources = [
     spotifyUrl: 'https://open.spotify.com/show/51W3UP2B4H2kBK9Ukyv8et',
   },
   {
-    description: 'Friese omroep; we lezen de koppen over de club.',
+    description: 'Friese omroep.',
     domain: 'www.omropfryslan.nl',
     feeds: [{ filter: 'club', url: 'https://www.omropfryslan.nl/rss/index.xml' }],
     kind: 'news',
@@ -417,7 +417,7 @@ export const realSources = [
     slug: 'omrop-fryslan',
   },
   {
-    description: 'Landelijke omroep; we lezen de koppen over de club.',
+    description: 'Landelijke omroep.',
     domain: 'nos.nl',
     feeds: [{ filter: 'club', url: 'https://feeds.nos.nl/nosvoetbal' }],
     kind: 'news',
@@ -425,7 +425,7 @@ export const realSources = [
     slug: 'nos',
   },
   {
-    description: 'Landelijk dagblad; we lezen de koppen over de club.',
+    description: 'Landelijk dagblad.',
     domain: 'www.ad.nl',
     feeds: [{ filter: 'club', url: 'https://www.ad.nl/voetbal/rss.xml' }],
     kind: 'news',
@@ -434,7 +434,7 @@ export const realSources = [
     slug: 'algemeen-dagblad',
   },
   {
-    description: 'Dagblad uit Gelderland; we lezen de koppen over de club.',
+    description: 'Dagblad uit Gelderland.',
     domain: 'www.gelderlander.nl',
     feeds: [{ filter: 'club', url: 'https://www.gelderlander.nl/sport/rss.xml' }],
     followedClubs: ['N.E.C.', 'Vitesse', 'De Graafschap', 'De Treffers'],
@@ -445,7 +445,7 @@ export const realSources = [
     slug: 'de-gelderlander',
   },
   {
-    description: 'Nederlandse sportsite; we lezen de koppen over de club.',
+    description: 'Nederlandse sportsite.',
     domain: 'www.espn.nl',
     feeds: [{ filter: 'club', url: 'https://www.espn.nl/espn/rss/soccer/news' }],
     kind: 'news',
@@ -453,7 +453,7 @@ export const realSources = [
     slug: 'espn',
   },
   {
-    description: 'Omroep uit Rotterdam; we lezen de koppen over de club.',
+    description: 'Omroep uit Rotterdam.',
     domain: 'www.rijnmond.nl',
     feeds: [{ filter: 'club', url: 'https://www.rijnmond.nl/rss/sport.xml' }],
     kind: 'news',
@@ -461,7 +461,7 @@ export const realSources = [
     slug: 'rijnmond',
   },
   {
-    description: 'Omroep uit Groningen; we lezen de koppen over de club.',
+    description: 'Omroep uit Groningen.',
     domain: 'www.rtvnoord.nl',
     feeds: [{ filter: 'club', url: 'https://www.rtvnoord.nl/rss/sport.xml' }],
     kind: 'news',
@@ -469,7 +469,7 @@ export const realSources = [
     slug: 'rtv-noord',
   },
   {
-    description: 'Lokale omroep in Groningen; we lezen de koppen over de club.',
+    description: 'Lokale omroep in Groningen.',
     domain: 'www.oogtv.nl',
     feeds: [
       'https://www.oogtv.nl/tag/sc-heerenveen/feed/',

@@ -3098,10 +3098,11 @@
 ## De pagina 'Onze bronnen' is compact, ook met tientallen bronnen
 
 - **Datum:** 18 november 2026
-- **Besluit:** elke bron op `/bronnen` is de naam als link naar de website, met daaronder één zin in gewoon lettertype: waar de bron over gaat en wat wij ervan lezen of tonen.
+- **Besluit:** elke bron op `/bronnen` is de naam als link naar de website, met daaronder één zin in gewoon lettertype: wat de bron is.
   De uitgever staat er niet bij en er komen geen zoekveld, geen subkoppen en geen geneste lijsten.
   De kaart per soort (Nieuws, Podcasts, Forum, Club, Video) blijft, met dezelfde kop en hetzelfde anker, en ook de lijst blijft één lijst.
-  - **De zin:** de bron en een puntkomma en dan wat we lezen, zoals "Dagblad uit Limburg; we lezen de koppen over de club."
+  - **De zin:** wat de bron is, zoals "Dagblad uit Limburg."
+    Wat we ervan tonen staat er niet bij: dat is overal hetzelfde en staat in het hoofdstuk Redactie.
     Een zin is hoogstens 64 tekens, zodat een bron op 320 pixels niet hoger is dan drie regels: de naam en twee regels.
     De test in `packages/db/src/seed.test.ts` bewaakt de lengte en dat het één zin is; de test in `apps/site/e2e/sources.spec.ts` meet de regels in de browser.
   - **De volgorde:** in een kaart staan eerst de Friese bronnen, dan de landelijke, dan de rest.

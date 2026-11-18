@@ -1724,7 +1724,7 @@ describe('the podcasts', () => {
 
       expect(both).toEqual({
         applePodcastsUrl: 'https://apple.test/podcast/testpodcast',
-        description: 'Verzonnen podcast; we tonen de afleveringen.',
+        description: 'Verzonnen podcast.',
         name: 'Testpodcast',
         slug: 'testpodcast',
         spotifyUrl: 'https://spotify.test/show/testpodcast',
