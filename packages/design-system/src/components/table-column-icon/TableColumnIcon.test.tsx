@@ -121,7 +121,7 @@ describe('the shirt and the overlays', () => {
 
   it('draws every line with the width of the pitch', () => {
     expect(css).toMatch(/\.hf-table-icon-line \{[^}]*stroke-width: 1\.2;/u)
-    expect(css).toMatch(/\.hf-table-icon-arrow \{[^}]*stroke-width: 1\.2;/u)
+    expect(css).toMatch(/\.hf-table-icon-arrow \{[^}]*stroke-width: 1\.4;/u)
     expect(css).not.toMatch(/stroke-width: 1\.[1368];|stroke-width: 1\.7;/u)
   })
 })
