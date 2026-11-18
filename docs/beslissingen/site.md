@@ -6572,10 +6572,10 @@
 
 - **Datum:** 18 november 2026
 - **Besluit:** elke club in de kaart Alle tegenstanders heeft de vlag van haar land (`clubs.country`, #1264) voor haar naam, zoals een speler: `PlayerName` met de clubnaam als naam, en de vlag als versiering in de link.
-  De naam van de link blijft de naam van de club.
+  De naam van de link blijft de naam van de club, en het land staat achter de link als tekst voor een schermlezer.
   Een club zonder land krijgt geen vlag maar een lege plek van dezelfde breedte, zodat de namen onder elkaar beginnen.
   `listClubRecords` geeft het land als `country` mee, en `null` voor een club zonder land.
 - **Waarom:** de vlag laat in één oogopslag zien welke tegenstanders uit het buitenland komen, en de vlaggen en de landen bestaan al.
-  De vlag is versiering in de link, zoals bij een speler met een pagina, dus de schermlezer leest de naam van de club en niet twee keer het land.
+  De vlag is versiering in de link, zoals bij een speler met een pagina, en het land staat één keer in woorden achter de link, alleen voor een schermlezer: de link heet dan de naam van de club en het land klinkt niet twee keer.
   De tabel sorteert op de naam en de cijfers, dus de vlag schuift niet mee.
 - **Alternatieven:** alleen buitenlandse clubs een vlag geven (dan valt een Nederlandse club zonder land samen met een club waarvan we het land niet weten); `CountryName` (dat toont de naam van het land, niet van de club).

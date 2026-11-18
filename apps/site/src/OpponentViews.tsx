@@ -7,6 +7,7 @@ import {
   BarChart,
   BarPlace,
   Card,
+  countryName,
   DataTable,
   DescriptionList,
   Disclosure,
@@ -184,7 +185,8 @@ export function ClubMeetingsCard({
 /**
  * The card of the page Tegenstanders with every club we played, A to Z, each name a link to
  * the page of that club, with the flag of the country of the club before it (a decoration in
- * the link, as with a player, and an empty place of the same width for a club without a
+ * the link, so the link is named by the club, and the country in words for a screen reader
+ * after the link, once) and an empty place of the same width for a club without a
  * country, so the names stay under each other). `address` is the base address of the pages of
  * the clubs; `query` is the part of the address that holds the choice, which every link keeps.
  * The columns are the played, won, drawn and lost matches, the points and the goal difference,
@@ -231,12 +233,17 @@ export function ClubsCard({
                 { sortValue: goalDifference(record), text: signedNumber(goalDifference(record)) },
               ],
               display: (
-                <PlayerName
-                  country={record.country}
-                  givenName={record.name}
-                  href={`${address}/${record.slug}${query}`}
-                  surname=""
-                />
+                <>
+                  <PlayerName
+                    country={record.country}
+                    givenName={record.name}
+                    href={`${address}/${record.slug}${query}`}
+                    surname=""
+                  />
+                  {record.country === null || countryName(record.country) === undefined ? null : (
+                    <Text as="span" className="hf-visually-hidden">{`, ${countryName(record.country)}`}</Text>
+                  )}
+                </>
               ),
               header: record.name,
             }))}

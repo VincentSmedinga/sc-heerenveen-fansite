@@ -82,7 +82,12 @@ describe('ClubsCard', () => {
     ).toBe(true)
     // The club without a country has an empty place of the same width, and no picture.
     expect(document.querySelectorAll('tbody span.hf-player-name-flag')).toHaveLength(1)
-    expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual(['Sparta', 'Venlo', 'Zwolle'])
+    // The country is read once, after the link, in words for a screen reader.
+    expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual([
+      'Sparta, Nederland',
+      'Venlo, Duitsland',
+      'Zwolle',
+    ])
   })
 
   it('has the same columns with the choice Eredivisie', () => {

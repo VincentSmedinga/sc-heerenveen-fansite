@@ -81,7 +81,7 @@ const placesOf = (html: string) =>
 const rowsOf = (html: string) =>
   [
     ...html.matchAll(
-      /<tr><th scope="row"><span[^>]*><a class="hf-player-name-link" href="([^"]*)">(?:<img[^>]*\/>|<span class="hf-player-name-flag"><\/span>)?<span class="hf-player-name-text">(.+?)<\/span><\/a><\/span><\/th>(.*?)<\/tr>/g,
+      /<tr><th scope="row"><span[^>]*><a class="hf-player-name-link" href="([^"]*)">(?:<img[^>]*\/>|<span class="hf-player-name-flag"><\/span>)?<span class="hf-player-name-text">(.+?)<\/span><\/a><\/span>(?:<span class="hf-visually-hidden">[^<]*<\/span>)?<\/th>(.*?)<\/tr>/g,
     ),
   ].map(([, href, name, cells]) => [
     (name ?? '').replaceAll(/<[^>]*>/g, ''),
