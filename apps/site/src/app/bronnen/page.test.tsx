@@ -41,7 +41,7 @@ afterEach(() => {
 })
 
 describe('the page Onze bronnen', () => {
-  it('lists the sources under a heading per kind, each with a link to its website and its description', async () => {
+  it('lists the sources under a heading per kind, each only as a name with a link to its website', async () => {
     vi.mocked(getSources).mockResolvedValue(sources)
 
     const html = await render()
@@ -57,12 +57,10 @@ describe('the page Onze bronnen', () => {
       '<h2 class="hf-heading-2 hf-heading-anchored" id="uitgever">Ben je zelf een bron?</h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="nieuwsbrief-lc">Abonneer je op de nieuwsbrief van de LC!</h2>',
     ])
-    expect(withoutIcons(html)).toContain(
-      '<li><a href="https://testkrant.test">Testkrant</a><p>Een dagblad. Het schrijft over sc Heerenveen.</p></li>',
-    )
-    expect(withoutIcons(html)).toContain(
-      '<li><a href="https://testpodcast.test">Testpodcast</a><p>Een podcast.</p></li>',
-    )
+    // The description is in the register, but the page shows only the name.
+    expect(withoutIcons(html)).toContain('<li><a href="https://testkrant.test">Testkrant</a></li>')
+    expect(withoutIcons(html)).toContain('<li><a href="https://testpodcast.test">Testpodcast</a></li>')
+    expect(html).not.toContain('Het schrijft over sc Heerenveen')
   })
 
   it('draws the icon for a link to another site behind the name of every source, hidden from screen readers, and nowhere else', async () => {
@@ -189,7 +187,7 @@ describe('the page Onze bronnen', () => {
     )
   })
 
-  it('shows a source without a description with its link only', async () => {
+  it('shows a source without a description like the others', async () => {
     vi.mocked(getSources).mockResolvedValue(sources)
 
     expect(withoutIcons(await render())).toContain('<li><a href="https://proefnieuws.test">Proefnieuws</a></li>')

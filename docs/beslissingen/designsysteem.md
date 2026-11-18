@@ -3893,3 +3893,12 @@
 - **Alternatieven:** Voor en Tegen als woorden houden (kort en duidelijk, maar anders dan de andere tabellen met doelpunten); `goals` weer de plus geven (dan staat de plus weer overal waar geen min staat).
 - **Later:** vult _Het pictogram van de doelpunten is een gewone bal_ (18 november 2026, #1383) aan: de plus komt terug als eigen sleutel, niet bij `goals`.
   Het woord van `goalsFor` is hetzelfde als dat van `goals`, op verzoek van de projecteigenaar; de regel "een eigen pictogram en een eigen woord" uit _De kolommen van de tabellen hebben een pictogram in plaats van een letter_ (17 november 2026) geldt daarom niet voor dat paar, dat nooit in één tabel staat: staan ze toch samen, dan heten ze "doelpunten", "doelpunten voor" en "doelpunten tegen", en `tableLegend` weigert die combinatie tot iemand die woorden uitwerkt.
+
+## De vlag in `CountryName` heeft meer ruimte tot de naam
+
+- **Datum:** 18 november 2026
+- **Besluit:** de ruimte tussen de vlag en de naam in `CountryName` is `--hf-space-s` in plaats van `--hf-space-xs` (#1392).
+  Het geldt overal waar `CountryName` staat: bij spelers en in Europa per land.
+- **Waarom:** de projecteigenaar vond de vlag te dicht op de naam zitten.
+- **Alternatieven:** alleen in de nieuwe kaart een grotere ruimte geven (dan zien de vlaggen op de site er verschillend uit).
+- **Later:** vervangt niets; de maat van de vlag (_De vlag_ bij `PlayerName`) blijft zoals hij was.

@@ -71,7 +71,6 @@ export default async function SourcesPage() {
                     <Link href={websiteOf(source)} icon="external-link">
                       {source.name}
                     </Link>
-                    {source.description && <Text>{source.description}</Text>}
                   </List.Item>
                 ))}
               </List>

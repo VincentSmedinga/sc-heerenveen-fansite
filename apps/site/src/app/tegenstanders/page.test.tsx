@@ -12,6 +12,7 @@ import OpponentsPage, { generateMetadata } from './page'
 /** A club with five played matches, five wins, for the tests that need a club in the top 10. */
 const fiveMatchRecords = [
   {
+    country: null,
     drawn: 0,
     goalsAgainst: 1,
     goalsFor: 10,
@@ -76,15 +77,17 @@ const placesOf = (html: string) =>
     ),
   ].map(([, place, href, name, average, played]) => [place, name, href, average, played])
 
-/** The rows of the table: the name of the club, its address and the figures. */
+/** The rows of the table: the name of the club (after its flag), its address, the figures. */
 const rowsOf = (html: string) =>
-  [...html.matchAll(/<tr><th scope="row"><a href="([^"]*)">(.+?)<\/a><\/th>(.*?)<\/tr>/g)].map(
-    ([, href, name, cells]) => [
-      name,
-      href,
-      [...(cells ?? '').matchAll(/<td[^>]*>(.*?)<\/td>/g)].map(([, cell]) => cell),
-    ],
-  )
+  [
+    ...html.matchAll(
+      /<tr><th scope="row"><span[^>]*><a class="hf-player-name-link" href="([^"]*)">(?:<img[^>]*\/>|<span class="hf-player-name-flag"><\/span>)?<span class="hf-player-name-text">(.+?)<\/span><\/a><\/span>(?:<span class="hf-visually-hidden">[^<]*<\/span>)?<\/th>(.*?)<\/tr>/g,
+    ),
+  ].map(([, href, name, cells]) => [
+    (name ?? '').replaceAll(/<[^>]*>/g, ''),
+    href,
+    [...(cells ?? '').matchAll(/<td[^>]*>(.*?)<\/td>/g)].map(([, cell]) => cell),
+  ])
 
 describe('the page /tegenstanders', () => {
   it('has one h1, Tegenstanders, and two h2s: the card Alle tegenstanders and the top 10', async () => {

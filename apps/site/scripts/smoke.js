@@ -940,7 +940,7 @@ await withEmptyDatabase((database) =>
     const sourcesHtml = await sources.text()
     assert.equal(sources.status, 200)
     assert.match(sourcesHtml, /<h1[^>]*>Onze bronnen<\/h1>/)
-    assert.match(sourcesHtml, /Leeuwarder Courant/)
+    assert.match(sourcesHtml.replaceAll(/<[^>]*>/g, ''), /Leeuwarder Courant/)
     assert.match(sourcesHtml, /<h2[^>]*id="wedstrijden-en-spelers">/)
     assert.doesNotMatch(sourcesHtml, /Testkrant|Uitgezette testbron/)
 
@@ -1712,7 +1712,7 @@ await withEmptyDatabase((database) =>
     assert.match(opponentsHtml, /<caption class="hf-visually-hidden">De tegenstanders van sc Heerenveen, van A tot Z/)
     assert.match(
       opponentsHtml,
-      /<th scope="row"><a href="\/tegenstanders\/testdorp-fc">Testdorp FC<\/a><\/th><td class="hf-numeric">\d+<\/td>/,
+      /<th scope="row"><span class="hf-player-name hf-player-name-numbered"><a class="hf-player-name-link" href="\/tegenstanders\/testdorp-fc"><(?:img|span) [^>]*class="hf-player-name-flag"[^>]*>(?:<\/span>)?<span class="hf-player-name-text"><span class="hf-player-name-given">Testdorp FC<\/span><\/span><\/a><\/span>(?:<span class="hf-visually-hidden">[^<]*<\/span>)?<\/th><td class="hf-numeric">\d+<\/td>/,
     )
     // The server sends the whole table in the given order, with plain headers: sorting is for
     // the browser, so there is no button or aria-sort yet. The columns Punten and Doelsaldo are
@@ -2028,7 +2028,7 @@ await withEmptyDatabase((database) =>
     const sources = await fetch(`${origin}/bronnen`)
     const sourcesHtml = await sources.text()
     assert.equal(sources.status, 200)
-    assert.match(sourcesHtml, /Leeuwarder Courant/)
+    assert.match(sourcesHtml.replaceAll(/<[^>]*>/g, ''), /Leeuwarder Courant/)
     assert.doesNotMatch(sourcesHtml, /Testkrant|We hebben nog geen bronnen/)
 
     // The feed links to production, not to acceptance.

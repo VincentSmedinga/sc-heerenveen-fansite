@@ -563,7 +563,8 @@ export async function listClubNews(
  * a cup tie that a shoot-out decided after a level score is won or lost, with level goals
  * (the rule is `resultOf` in the site). With `competition` only the matches of that
  * competition count, and a club without one in it is left out; without it all of them count.
- * A club that has matches but none played yet is in the list with zeros.
+ * A club that has matches but none played yet is in the list with zeros. `country` is the code
+ * of the country of the club (`NL`), or `null` for a club whose country we do not know.
  */
 export function listClubRecords(
   db: Database,
@@ -578,6 +579,7 @@ export function listClubRecords(
 
   return db
     .select({
+      country: clubs.country,
       drawn: total(and(played, sql`${ours} = ${theirs}`) as SQL),
       goalsAgainst: sql<number>`cast(coalesce(sum(${matches.goalsAgainst}), 0) as unsigned)`.mapWith(Number),
       goalsFor: sql<number>`cast(coalesce(sum(${matches.goalsFor}), 0) as unsigned)`.mapWith(Number),

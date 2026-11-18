@@ -33,6 +33,7 @@
 ## De pagina 'Onze bronnen' toont per bron een beschrijving, niet wat we tonen
 
 - **Datum:** 22 oktober 2026
+- **Later:** de beschrijving is nu één korte zin, zie _De pagina 'Onze bronnen' is compact, ook met tientallen bronnen_ (18 november 2026).
 - **Besluit:** de pagina zegt in één zin dat dit de bronnen zijn waar we het nieuws vandaan halen.
   Per bron staan er de naam als link naar de website en een beschrijving van een of twee zinnen, per soort onder een kop.
   Wat we van een bron tonen, en de toestemming, staan er niet.
@@ -3111,3 +3112,22 @@
 - **Later:** dit past aan _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_: "Gebaseerd op" bij volledige gegevens vervalt.
   En _De zin onder een kaart met cijfers zegt alleen waarop de telling rust_ (9 november 2026): "Alle 7 gespeelde wedstrijden" en "1 gespeelde wedstrijd" vervallen.
   En _Inleidingen en toelichtingen_ in `editorial.mdx` (regel 4 en "Wat blijft staan"): de zin over het aantal wedstrijden staat alleen bij onvolledige gegevens, samen met de andere beperkingen.
+
+## De pagina 'Onze bronnen' is compact, ook met tientallen bronnen
+
+- **Datum:** 18 november 2026
+- **Besluit:** elke bron op `/bronnen` is alleen de naam als link naar de website, zonder beschrijving.
+  De uitgever staat er niet bij en er komen geen zoekveld, geen subkoppen en geen geneste lijsten.
+  De kaart per soort (Nieuws, Podcasts, Forum, Club, Video) blijft, met dezelfde kop en hetzelfde anker, en ook de lijst blijft één lijst.
+  - **Geen beschrijving:** supporters kennen de bronnen, dus een zin eronder voegt niets toe.
+    De beschrijving blijft in het register, want de zijbalk van de podcastpagina gebruikt die van de maker (zie _De beschrijving van een podcast is die van de maker_); de pagina toont hem niet meer.
+    De test in `apps/site/e2e/sources.spec.ts` meet in de browser dat een bron op 320 pixels hoogstens drie regels hoog is en dat er geen tekst onder staat.
+  - **De volgorde:** in een kaart staan eerst de Friese bronnen, dan de landelijke, dan de rest.
+    Binnen zo'n groep komt de huidige volgorde terug, die van de naam.
+    De rangorde is een lijst met domeinen in `apps/site/src/register.ts` (`regionRank`), niet een kolom in het register: ze bepaalt de volgorde van één pagina en verandert alleen als er een Friese of landelijke bron bij komt.
+    Een test controleert dat elke bron uit de seed die we Fries of landelijk noemen, ook zo gerangschikt staat.
+- **Waarom:** de pagina is naslag, en met de dagbladen van #1380 en #1382 zijn er ongeveer driemaal zoveel nieuwsbronnen, zodat de kaart Nieuws drie schermen lang werd.
+  Alleen de naam houdt de lijst kort genoeg om te scannen, op 320 pixels en met een schermlezer, zonder dat een bezoeker iets mist wat hij nodig heeft.
+  De club is Fries, dus de Friese bronnen staan bovenaan.
+- **Alternatieven:** een tabel met uitgever en beschrijving; één korte zin per bron (eerst gebouwd, daarna geschrapt); kleiner lettertype; de beschrijving achter "Meer"; groeperen per uitgever; een zoekveld; de rangorde als kolom in het register (een migratie voor een pagina met één lijst).
+- **Later:** dit past _De pagina 'Onze bronnen' toont per bron een beschrijving, niet wat we tonen_ (22 oktober 2026) aan: de pagina toont geen beschrijving meer.
