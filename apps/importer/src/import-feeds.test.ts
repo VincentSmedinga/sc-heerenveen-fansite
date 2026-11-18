@@ -6,7 +6,7 @@ import { countArchiveItems, listArchivePage, listRecentItems } from '@fansite/db
 import { adminUsers, feeds, importResults, itemClubs, items, leagueResults, matches, sources } from '@fansite/db/schema'
 import { seedSources } from '@fansite/db/seed'
 import { createTestDatabase } from '@fansite/db/test-database'
-import { eq } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 import { readFileSync } from 'node:fs'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
@@ -1571,6 +1571,133 @@ describe('importing the sports feed of Rijnmond, the way the register has it', (
   })
 })
 
+describe('importing the dailies of Mediahuis, the way the register has them', () => {
+  const sample = readFileSync(new URL('./fixtures/mediahuis-sport-sample.xml', import.meta.url), 'utf8')
+  const mediahuisRun = new Date('2026-11-18T09:30:00Z')
+  const dailies = [
+    'www.dvhn.nl',
+    'www.frieschdagblad.nl',
+    'www.limburger.nl',
+    'www.noordhollandsdagblad.nl',
+    'www.gooieneemlander.nl',
+    'www.haarlemsdagblad.nl',
+    'www.leidschdagblad.nl',
+    'www.ijmuidercourant.nl',
+  ]
+
+  /** The first feed of a daily as the seed registers it, pointed at the test server. */
+  async function dailyFeed(domain: string, origin: string) {
+    await seedSources(database.db)
+
+    const [row] = await database.db
+      .select({ id: feeds.id })
+      .from(feeds)
+      .innerJoin(sources, eq(feeds.sourceId, sources.id))
+      .where(eq(sources.domain, domain))
+      .orderBy(feeds.id)
+      .limit(1)
+
+    await database.db
+      .update(feeds)
+      .set({ url: `${origin}/rss/` })
+      .where(eq(feeds.id, row?.id ?? 0))
+
+    return storedFeed(row?.id ?? 0)
+  }
+
+  it('has every general sports feed of every daily on the club filter', async () => {
+    await seedSources(database.db)
+
+    const rows = await database.db
+      .select({ domain: sources.domain, filter: feeds.filter, url: feeds.url })
+      .from(feeds)
+      .innerJoin(sources, eq(feeds.sourceId, sources.id))
+      .where(eq(sources.slug, 'de-telegraaf'))
+
+    expect(rows.filter((row) => row.url.includes('/sport/')).every((row) => row.filter === 'club')).toBe(true)
+
+    for (const domain of dailies) {
+      const own = await database.db
+        .select({ filter: feeds.filter })
+        .from(feeds)
+        .innerJoin(sources, eq(feeds.sourceId, sources.id))
+        .where(eq(sources.domain, domain))
+
+      expect(own.length).toBeGreaterThan(0)
+      expect(own.every((feed) => feed.filter === 'club')).toBe(true)
+    }
+  })
+
+  it.each(dailies)('reads %s as the Leeuwarder Courant: the paywall, the filter and nothing more', async (domain) => {
+    const server = await serve(sample)
+    const feed = await dailyFeed(domain, server.origin)
+
+    const report = await importFeed(database.db, fetcherFor(servers), feed, mediahuisRun)
+
+    expect(report).toMatchObject({ added: 4, relevance: { doubtful: 0, irrelevant: 2, relevant: 2 }, skipped: [] })
+
+    const rows = await itemsInDatabase()
+
+    expect(rows.filter((row) => row.paywalled).map((row) => row.key)).toEqual([
+      'Kordiam-0000000102',
+      'Kordiam-0000000104',
+    ])
+    expect(rows.find((row) => row.key === 'sportify-00000000-0000-0000-0000-000000000101')?.publishedAt).toEqual(
+      new Date('2026-11-17T20:15:00Z'),
+    )
+
+    const stored = JSON.stringify(await database.db.select().from(items))
+
+    expect(stored).not.toContain('VERZONNEN-INTRO')
+    expect(stored).not.toContain('Verzonnen Auteur')
+  })
+
+  it('shows only the relevant items, with the name of the paper', async () => {
+    const server = await serve(sample)
+
+    await importFeed(database.db, fetcherFor(servers), await dailyFeed('www.dvhn.nl', server.origin), mediahuisRun)
+
+    const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-11-19T00:00:00Z') })
+
+    expect(shown.map((item) => item.title)).toEqual([
+      'SC Heerenveen wint in de slotminuut van de verzonnen uitwedstrijd',
+      'Verzonnen interview met de trainer van Heerenveen: ’We blijven bij ons plan’',
+    ])
+    expect(shown.every((item) => item.sourceName === 'Dagblad van het Noorden')).toBe(true)
+  })
+
+  it('shows an article that two papers share under each paper, because there is no publisher', async () => {
+    const shared = feedWith(
+      entry('Kordiam-0000000999', {
+        link: 'https://www.dagblad.test/sport/gedeeld/900000999.html',
+        pubDate: 'Tue, 17 Nov 2026 20:15:00 GMT',
+        title: 'SC Heerenveen speelt gelijk in de verzonnen topper',
+      }),
+    )
+    const first = await serve(shared)
+    const second = await serve(shared)
+
+    await importFeed(database.db, fetcherFor(servers), await dailyFeed('www.dvhn.nl', first.origin), mediahuisRun)
+    await importFeed(
+      database.db,
+      fetcherFor(servers),
+      await dailyFeed('www.frieschdagblad.nl', second.origin),
+      mediahuisRun,
+    )
+
+    const brands = await database.db
+      .select({ publisher: sources.publisher })
+      .from(sources)
+      .where(inArray(sources.domain, ['www.dvhn.nl', 'www.frieschdagblad.nl']))
+
+    expect(brands).toEqual([{ publisher: null }, { publisher: null }])
+
+    const shown = await listRecentItems(database.db, { limit: 20, until: new Date('2026-11-19T00:00:00Z') })
+
+    expect(shown.map((entry) => entry.sourceName).sort()).toEqual(['Dagblad van het Noorden', 'Friesch Dagblad'])
+  })
+})
+
 describe('importing RTV Noord and OOG Groningen, the way the register has them', () => {
   const rtvSample = readFileSync(new URL('./fixtures/rtv-noord-sample.xml', import.meta.url), 'utf8')
   const oogSample = readFileSync(new URL('./fixtures/oog-groningen-sample.xml', import.meta.url), 'utf8')
@@ -2290,6 +2417,11 @@ describe('a feed the source does not give', () => {
       'a feed that stops halfway',
       reply(200, '<rss version="2.0"><channel><item><title>Kop</title>', xml),
       'not well-formed XML',
+    ],
+    [
+      'a section that is not there, which answers 404 with an empty RSS body',
+      reply(404, '<rss version="2.0"><channel><title>Sport</title></channel></rss>', xml),
+      'HTTP 404',
     ],
   ])('is reported as an error for %s', async (_, handler, message) => {
     const server = await serve(handler)

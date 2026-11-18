@@ -3272,6 +3272,7 @@
   Daarbij verbiedt `robots.txt` tekst- en datamining, scrapen en het automatisch verzamelen van gegevens.
   Dat is een ander voorbehoud dan bij de bronnen die we wel nemen, want daar stond de feed voor ons open (zie _Een bron nemen we als zijn feed over de club gaat en `robots.txt` ons toelaat_).
 - **Alternatieven:** eerst toestemming vragen; dat kan later, buiten #1004.
+- **Later:** vervangen door _We nemen de Nederlandse dagbladen van Mediahuis_ (18 november 2026): de 403's kwamen van adressen die niet bestaan, en `robots.txt` is hetzelfde sjabloon als dat van de Leeuwarder Courant.
 
 ## Twee achternamen, of een achternaam met een voetbalwoord, maken een kop `relevant`
 
@@ -4394,3 +4395,18 @@
   De keuze bij het tonen laat de bewaarde berichten staan en kost geen import.
 - **Later:** vervangt in _Een artikel van twee kranten van één uitgever staat één keer in de lijst, bij de lokale krant_ (1 november 2026) de regel dat de bron met `local` altijd voorgaat, en de afweging "de landelijke krant laten winnen" bij de alternatieven; wie wint hangt nu van het artikel af.
 - **Alternatieven:** de gevolgde clubs afleiden uit wat een bron vaak noemt (minder voorspelbaar, moeilijker te testen); de wedstrijden rond de publicatie als extra bewijs nemen (meer werk voor weinig winst); een eigen regel voor sc Heerenveen (geen bron heeft nu een landelijke tegenhanger voor een Friese regionale krant); bronnen van verschillende uitgevers samenvoegen (er is geen gedeelde sleutel).
+
+## We nemen de Nederlandse dagbladen van Mediahuis
+
+- **Datum:** 18 november 2026
+- **Besluit:** het Dagblad van het Noorden, het Friesch Dagblad, De Limburger, het Noordhollands Dagblad, De Gooi- en Eemlander, het Haarlems Dagblad, het Leidsch Dagblad en de IJmuider Courant staan in het register, en De Telegraaf krijgt twee sportfeeds erbij.
+  Elke algemene sport- of voetbalfeed heeft het filter `club`, ook die over FC Groningen en AZ.
+  Een gedeeld artikel binnen Mediahuis krijgt geen regel: geen `publisher` en geen `local`.
+- **Waarom:** de feeds zijn open (een 200), en `robots.txt` weert ons niet: het voorbehoud tegen datamining is commentaar, en alleen genoemde AI-crawlers zijn geweigerd, net als bij de Leeuwarder Courant.
+  Het filter laat alleen berichten over de club door.
+  Een krant zonder bericht kost een verzoek per run.
+  De feeds over andere clubs geven nieuws over de tegenstander rond een wedstrijd.
+  In een run op 18 november 2026 stond geen artikelcode bij twee kranten (720 berichten), en de regel van #1367 hangt aan het teken `~` van DPG Media, dus een regel voor Mediahuis zou werk zonder winst zijn.
+  Een 404 met een lege RSS-tekst is een fout van de feed: de fetcher oordeelt op de status.
+- **Alternatieven:** alleen de kranten met berichten over de club; de feeds over FC Groningen en AZ weglaten; nu een `publisher` en een sleutelregel voor Mediahuis maken.
+- **Later:** vervangt _We wijzen het Dagblad van het Noorden af_ (9 november 2026).

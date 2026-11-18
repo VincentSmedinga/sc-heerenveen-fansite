@@ -1,6 +1,6 @@
 # Bronnen
 
-Dit document beoordeelt de bronnen die we voor de site hebben overwogen: 31 bronnen met hun feeds, waaronder vier podcasts.
+Dit document beoordeelt de bronnen die we voor de site hebben overwogen: 38 bronnen met hun feeds, waaronder vier podcasts.
 Elke bron krijgt één besluit, met een reden.
 De bronnen met het besluit "nemen" staan in het register (`realSources` in `packages/db/src/seed.ts`) en draaien mee in de import.
 Dit document is de enige plek met de lijst; de andere documenten verwijzen hiernaartoe.
@@ -21,6 +21,7 @@ Omrop Fryslân hebben we op 25 oktober 2026 nog eens gelezen, en NOS, het Algeme
 De Gelderlander en de feed van de sport van Rijnmond lazen we op 1 november 2026.
 Alle zes deden we met een run van de importer (zie bij de bron).
 De sportfeed van RTV Noord, de twee feeds van OOG Groningen en het Dagblad van het Noorden lazen we op 9 november 2026; de eerste twee met een run van de importer.
+De kranten van Mediahuis lazen we op 18 november 2026, allemaal met een run van de importer.
 
 - **Wat we tellen:** het aantal berichten, de datum van het nieuwste (in UTC) en hoeveel berichten over sc Heerenveen gaan.
   Een bericht gaat over de club als "Heerenveen" in de kop of in de categorieën staat, zonder op hoofdletters te letten.
@@ -73,12 +74,12 @@ Zegt een bron dat we moeten stoppen, dan zetten we hem meteen uit (`enabled` in 
 
 ### Overzicht
 
-| Besluit                             | Bronnen                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Nemen                               | Leeuwarder Courant (twee feeds, één met het filter), Voetbal International (tagfeed), De Telegraaf, Omrop Fryslân (met het filter), NOS (met het filter), Algemeen Dagblad (met het filter), De Gelderlander (met het filter), ESPN NL (met het filter), Rijnmond (sportfeed, met het filter), RTV Noord (sportfeed, met het filter), OOG Groningen (twee feeds, één met het filter), Omroep Abe (podcast), Radio Camataru (podcast) |
-| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed)                                                                                                                                                                                                                                                                                                                                                                                                   |
-| Eerst toestemming                   | sc Heerenveen (officieel nieuws)                                                                                                                                                                                                                                                                                                                                                                                                     |
-| Afwijzen                            | Dagblad van het Noorden, RTV Drenthe, RTV Oost, Omroep Gelderland, RTV Utrecht, Omroep Flevoland, NH Nieuws, Omroep West, Omroep Zeeland, Omroep Brabant, L1 Nieuws, Eredivisie.nl, De Stentor, FC Groningen, PEC Zwolle, Sportcast (podcast), NOS Voetbalpodcast                                                                                                                                                                    |
+| Besluit                             | Bronnen                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Nemen                               | Leeuwarder Courant (twee feeds, één met het filter), Voetbal International (tagfeed), De Telegraaf (de tagfeed en twee sportfeeds met het filter), Dagblad van het Noorden, Friesch Dagblad, De Limburger, Noordhollands Dagblad, De Gooi- en Eemlander, Haarlems Dagblad, Leidsch Dagblad, IJmuider Courant (allemaal met het filter), Omrop Fryslân (met het filter), NOS (met het filter), Algemeen Dagblad (met het filter), De Gelderlander (met het filter), ESPN NL (met het filter), Rijnmond (sportfeed, met het filter), RTV Noord (sportfeed, met het filter), OOG Groningen (twee feeds, één met het filter), Omroep Abe (podcast), Radio Camataru (podcast) |
+| Nemen na het relevantiefilter (#74) | Voetbal International (brede feed)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Eerst toestemming                   | sc Heerenveen (officieel nieuws)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Afwijzen                            | RTV Drenthe, RTV Oost, Omroep Gelderland, RTV Utrecht, Omroep Flevoland, NH Nieuws, Omroep West, Omroep Zeeland, Omroep Brabant, L1 Nieuws, Eredivisie.nl, De Stentor, FC Groningen, PEC Zwolle, Sportcast (podcast), NOS Voetbalpodcast                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ## Nemen
 
@@ -150,6 +151,10 @@ Al in het register (#142).
     De categorieën noemen de club niet.
     De andere acht gaan over andere clubs en spelers.
   - Betaalmuur: ja, 8 van de 50 berichten staan erachter.
+- **Sportfeeds (#1380):** `https://www.telegraaf.nl/sport/rss/` en `https://www.telegraaf.nl/sport/voetbal/rss/`, met het filter `club`.
+  Op 18 november 2026 gaven ze elk een 200 met 50 berichten.
+  Een run van de importer gaf voor de eerste 0 `relevant`, 1 `doubtful` en 49 `irrelevant`, en voor de tweede 0 `relevant`, 0 `doubtful` en 50 `irrelevant`; de tagfeed gaf 50 `relevant`.
+  Het nieuwste bericht is van 18 november 2026.
 - **`robots.txt`:** laat ons de feed toe.
   Het heeft hetzelfde voorbehoud als dat van de Leeuwarder Courant: alle rechten voorbehouden, niet voor tekst- en datamining, scrapen of automatisch verzamelen van gegevens, met verwijzing naar artikel 4 van de richtlijn en naar de voorwaarden.
   Daarnaast weigert het een lijst AI-crawlers bij naam.
@@ -531,6 +536,185 @@ Al in het register (#1004), met twee feeds.
 - **Importer:** leest beide feeds met één nieuwe regel: de `utm_`-tags gaan van de link af.
   De tests staan in `apps/importer/src/import-feeds.test.ts` (zie bij RTV Noord) en `apps/importer/src/read-feed.test.ts`.
 
+### Dagblad van het Noorden
+
+- **Domein:** `www.dvhn.nl`
+- **Soort:** nieuws, regionaal dagblad van Groningen en Drenthe
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen in het register (zie _De Mediahuis-kranten_).
+- **Feeds:** met het filter `club`
+  - `https://www.dvhn.nl/sport/rss/`: een 200 met 50 berichten.
+  - `https://www.dvhn.nl/sport/fc-groningen/rss/`: een 200 met 50 berichten.
+  - Een feed over alleen de club bestaat niet: `/sport/sc-heerenveen/rss/` geeft een 404.
+  - Gemeten op 18 november 2026, met één run van de importer op een lege database:
+    `/sport/rss/`: 50 berichten gelezen, 1 `relevant`, 0 `doubtful` en 49 `irrelevant`; de importer sloeg niets over.
+    `/sport/fc-groningen/rss/`: 50 berichten gelezen, 1 `relevant`, 0 `doubtful` en 49 `irrelevant`; de importer sloeg niets over.
+    Het nieuwste bericht van de bron is van De rubriek over FC Groningen gaat vooral over die club; wat er over sc Heerenveen in staat, is nieuws rond een wedstrijd tegen Groningen.; 56 van de 95 bewaarde berichten staan achter de betaalmuur (`<premium>`).
+  - Daarom komt er van deze krant weinig of niets op de site tot een bericht het filter haalt.
+- **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met onze user agent.
+  Het is hetzelfde sjabloon als dat van de Leeuwarder Courant: het voorbehoud tegen tekst- en datamining staat als commentaar, `user-agent: *` heeft `Allow: /`, en alleen genoemde AI-crawlers zijn geweigerd.
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** toestemming nodig; we tonen de kop, de link en de bronnaam.
+- **Besluit: nemen.**
+  De feeds zijn open en `robots.txt` weert ons niet.
+  Het filter laat alleen berichten over de club door.
+  Dit vervangt het besluit van 9 november 2026 om het Dagblad van het Noorden af te wijzen: de 403's kwamen van adressen die niet bestaan (`/rss.xml` en dergelijke).
+
+### Friesch Dagblad
+
+- **Domein:** `www.frieschdagblad.nl`
+- **Soort:** nieuws, regionaal dagblad voor Friesland
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen in het register (zie _De Mediahuis-kranten_).
+- **Feed:** `https://www.frieschdagblad.nl/sport/rss/`, met het filter `club`
+  - Werkt: ja, RSS 2.0 met 50 berichten; dezelfde opbouw als de feeds van de Leeuwarder Courant.
+  - Een feed over alleen de club bestaat niet: `/sport/sc-heerenveen/rss/` geeft een 404.
+  - Gemeten op 18 november 2026, met één run van de importer op een lege database:
+    `/sport/rss/`: 50 berichten gelezen, 0 `relevant`, 1 `doubtful` en 49 `irrelevant`; de importer sloeg niets over.
+    Het nieuwste bericht van de bron is van Het nieuwste bericht van de feed is van 17 oktober 2026, dus de feed is stil: bijna een maand zonder nieuw bericht.; 25 van de 50 bewaarde berichten staan achter de betaalmuur (`<premium>`).
+  - Daarom komt er van deze krant weinig of niets op de site tot een bericht het filter haalt.
+- **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met onze user agent.
+  Het is hetzelfde sjabloon als dat van de Leeuwarder Courant: het voorbehoud tegen tekst- en datamining staat als commentaar, `user-agent: *` heeft `Allow: /`, en alleen genoemde AI-crawlers zijn geweigerd.
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** toestemming nodig; we tonen de kop, de link en de bronnaam.
+- **Besluit: nemen.**
+  De feeds zijn open en `robots.txt` weert ons niet.
+  Het filter laat alleen berichten over de club door.
+  Het nieuwste bericht is van 17 oktober 2026; de feed levert dus nu niets.
+
+### De Limburger
+
+- **Domein:** `www.limburger.nl`
+- **Soort:** nieuws, regionaal dagblad voor Limburg
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen in het register (zie _De Mediahuis-kranten_).
+- **Feeds:** met het filter `club`
+  - `https://www.limburger.nl/sport/rss/`: een 200 met 39 berichten.
+  - `https://www.limburger.nl/sport/voetbal/rss/`: een 200 met 50 berichten.
+  - Een feed over alleen de club bestaat niet: `/sport/sc-heerenveen/rss/` geeft een 404.
+  - Gemeten op 18 november 2026, met één run van de importer op een lege database:
+    `/sport/rss/`: 39 berichten gelezen, 0 `relevant`, 0 `doubtful` en 39 `irrelevant`; de importer sloeg niets over.
+    `/sport/voetbal/rss/`: 50 berichten gelezen, 0 `relevant`, 0 `doubtful` en 50 `irrelevant`; de importer sloeg niets over.
+    Het nieuwste bericht van de bron is van Geen bericht gaat over sc Heerenveen; de feeds leveren pas iets bij een bericht dat het filter herkent.; 54 van de 64 bewaarde berichten staan achter de betaalmuur (`<premium>`).
+  - Daarom komt er van deze krant weinig of niets op de site tot een bericht het filter haalt.
+- **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met onze user agent.
+  Het is hetzelfde sjabloon als dat van de Leeuwarder Courant: het voorbehoud tegen tekst- en datamining staat als commentaar, `user-agent: *` heeft `Allow: /`, en alleen genoemde AI-crawlers zijn geweigerd.
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** toestemming nodig; we tonen de kop, de link en de bronnaam.
+- **Besluit: nemen.**
+  De feeds zijn open en `robots.txt` weert ons niet.
+  Het filter laat alleen berichten over de club door.
+
+### Noordhollands Dagblad
+
+- **Domein:** `www.noordhollandsdagblad.nl`
+- **Soort:** nieuws, regionaal dagblad voor Noord-Holland
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen in het register (zie _De Mediahuis-kranten_).
+- **Feeds:** met het filter `club`
+  - `https://www.noordhollandsdagblad.nl/sport/rss/`: een 200 met 50 berichten.
+  - `https://www.noordhollandsdagblad.nl/sport/az/rss/`: een 200 met 50 berichten.
+  - Een feed over alleen de club bestaat niet: `/sport/sc-heerenveen/rss/` geeft een 404.
+  - Gemeten op 18 november 2026, met één run van de importer op een lege database:
+    `/sport/rss/`: 50 berichten gelezen, 0 `relevant`, 0 `doubtful` en 50 `irrelevant`; de importer sloeg niets over.
+    `/sport/az/rss/`: 50 berichten gelezen, 1 `relevant`, 0 `doubtful` en 49 `irrelevant`; de importer sloeg niets over.
+    Het nieuwste bericht van de bron is van De rubriek over AZ gaat over die club; het ene bericht dat het filter doorlaat, noemt een oud-speler van sc Heerenveen.; 54 van de 98 bewaarde berichten staan achter de betaalmuur (`<premium>`).
+  - Daarom komt er van deze krant weinig of niets op de site tot een bericht het filter haalt.
+- **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met onze user agent.
+  Het is hetzelfde sjabloon als dat van de Leeuwarder Courant: het voorbehoud tegen tekst- en datamining staat als commentaar, `user-agent: *` heeft `Allow: /`, en alleen genoemde AI-crawlers zijn geweigerd.
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** toestemming nodig; we tonen de kop, de link en de bronnaam.
+- **Besluit: nemen.**
+  De feeds zijn open en `robots.txt` weert ons niet.
+  Het filter laat alleen berichten over de club door.
+
+### De Gooi- en Eemlander
+
+- **Domein:** `www.gooieneemlander.nl`
+- **Soort:** nieuws, regionaal dagblad voor het Gooi en Eemland
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen in het register (zie _De Mediahuis-kranten_).
+- **Feed:** `https://www.gooieneemlander.nl/sport/rss/`, met het filter `club`
+  - Werkt: ja, RSS 2.0 met 50 berichten; dezelfde opbouw als de feeds van de Leeuwarder Courant.
+  - Een feed over alleen de club bestaat niet: `/sport/sc-heerenveen/rss/` geeft een 404.
+  - Gemeten op 18 november 2026, met één run van de importer op een lege database:
+    `/sport/rss/`: 50 berichten gelezen, 0 `relevant`, 0 `doubtful` en 50 `irrelevant`; de importer sloeg niets over.
+    Het nieuwste bericht van de bron is van ; 28 van de 50 bewaarde berichten staan achter de betaalmuur (`<premium>`).
+  - Daarom komt er van deze krant weinig of niets op de site tot een bericht het filter haalt.
+- **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met onze user agent.
+  Het is hetzelfde sjabloon als dat van de Leeuwarder Courant: het voorbehoud tegen tekst- en datamining staat als commentaar, `user-agent: *` heeft `Allow: /`, en alleen genoemde AI-crawlers zijn geweigerd.
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** toestemming nodig; we tonen de kop, de link en de bronnaam.
+- **Besluit: nemen.**
+  De feeds zijn open en `robots.txt` weert ons niet.
+  Het filter laat alleen berichten over de club door.
+
+### Haarlems Dagblad
+
+- **Domein:** `www.haarlemsdagblad.nl`
+- **Soort:** nieuws, regionaal dagblad voor Haarlem en omstreken
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen in het register (zie _De Mediahuis-kranten_).
+- **Feed:** `https://www.haarlemsdagblad.nl/sport/rss/`, met het filter `club`
+  - Werkt: ja, RSS 2.0 met 50 berichten; dezelfde opbouw als de feeds van de Leeuwarder Courant.
+  - Een feed over alleen de club bestaat niet: `/sport/sc-heerenveen/rss/` geeft een 404.
+  - Gemeten op 18 november 2026, met één run van de importer op een lege database:
+    `/sport/rss/`: 50 berichten gelezen, 0 `relevant`, 0 `doubtful` en 50 `irrelevant`; de importer sloeg niets over.
+    Het nieuwste bericht van de bron is van ; 29 van de 50 bewaarde berichten staan achter de betaalmuur (`<premium>`).
+  - Daarom komt er van deze krant weinig of niets op de site tot een bericht het filter haalt.
+- **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met onze user agent.
+  Het is hetzelfde sjabloon als dat van de Leeuwarder Courant: het voorbehoud tegen tekst- en datamining staat als commentaar, `user-agent: *` heeft `Allow: /`, en alleen genoemde AI-crawlers zijn geweigerd.
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** toestemming nodig; we tonen de kop, de link en de bronnaam.
+- **Besluit: nemen.**
+  De feeds zijn open en `robots.txt` weert ons niet.
+  Het filter laat alleen berichten over de club door.
+
+### Leidsch Dagblad
+
+- **Domein:** `www.leidschdagblad.nl`
+- **Soort:** nieuws, regionaal dagblad voor Leiden en omstreken
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen in het register (zie _De Mediahuis-kranten_).
+- **Feed:** `https://www.leidschdagblad.nl/sport/rss/`, met het filter `club`
+  - Werkt: ja, RSS 2.0 met 50 berichten; dezelfde opbouw als de feeds van de Leeuwarder Courant.
+  - Een feed over alleen de club bestaat niet: `/sport/sc-heerenveen/rss/` geeft een 404.
+  - Gemeten op 18 november 2026, met één run van de importer op een lege database:
+    `/sport/rss/`: 50 berichten gelezen, 0 `relevant`, 0 `doubtful` en 50 `irrelevant`; de importer sloeg niets over.
+    Het nieuwste bericht van de bron is van ; 30 van de 50 bewaarde berichten staan achter de betaalmuur (`<premium>`).
+  - Daarom komt er van deze krant weinig of niets op de site tot een bericht het filter haalt.
+- **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met onze user agent.
+  Het is hetzelfde sjabloon als dat van de Leeuwarder Courant: het voorbehoud tegen tekst- en datamining staat als commentaar, `user-agent: *` heeft `Allow: /`, en alleen genoemde AI-crawlers zijn geweigerd.
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** toestemming nodig; we tonen de kop, de link en de bronnaam.
+- **Besluit: nemen.**
+  De feeds zijn open en `robots.txt` weert ons niet.
+  Het filter laat alleen berichten over de club door.
+
+### IJmuider Courant
+
+- **Domein:** `www.ijmuidercourant.nl`
+- **Soort:** nieuws, regionaal dagblad voor IJmuiden en omstreken
+- **Uitgever:** Mediahuis, net als de Leeuwarder Courant en De Telegraaf; geen in het register (zie _De Mediahuis-kranten_).
+- **Feed:** `https://www.ijmuidercourant.nl/sport/rss/`, met het filter `club`
+  - Werkt: ja, RSS 2.0 met 50 berichten; dezelfde opbouw als de feeds van de Leeuwarder Courant.
+  - Een feed over alleen de club bestaat niet: `/sport/sc-heerenveen/rss/` geeft een 404.
+  - Gemeten op 18 november 2026, met één run van de importer op een lege database:
+    `/sport/rss/`: 50 berichten gelezen, 0 `relevant`, 0 `doubtful` en 50 `irrelevant`; de importer sloeg niets over.
+    Het nieuwste bericht van de bron is van ; 29 van de 50 bewaarde berichten staan achter de betaalmuur (`<premium>`).
+  - Daarom komt er van deze krant weinig of niets op de site tot een bericht het filter haalt.
+- **`robots.txt`:** laat ons de feed toe, op 18 november 2026 gelezen met onze user agent.
+  Het is hetzelfde sjabloon als dat van de Leeuwarder Courant: het voorbehoud tegen tekst- en datamining staat als commentaar, `user-agent: *` heeft `Allow: /`, en alleen genoemde AI-crawlers zijn geweigerd.
+- **Voorwaarden:** niet gelezen (zie _De controle_).
+- **Meer tonen:** toestemming nodig; we tonen de kop, de link en de bronnaam.
+- **Besluit: nemen.**
+  De feeds zijn open en `robots.txt` weert ons niet.
+  Het filter laat alleen berichten over de club door.
+
+### De Mediahuis-kranten
+
+De kranten hierboven delen één platform en hebben dezelfde opbouw als de Leeuwarder Courant: dezelfde `<premium>`-markering, dezelfde tijdzone en dezelfde `guid`s.
+De importer leest ze zonder aanpassing.
+Een rubriek die niet bestaat, geeft een 404 met een lege RSS-tekst; de fetcher meldt een 404 als fout (`http-status`), dus de importer oordeelt op de status en niet op de tekst.
+
+Een artikel kan onder meer merken staan.
+De artikelcode is het getal voor `.html` in de link, en het is niet de code met een `~` van DPG Media (#1367).
+Op 18 november 2026 vergeleken we de codes van alle feeds van Mediahuis, in één run op een lege database: 720 berichten van 10 kranten, en geen enkele code stond bij twee kranten (de berichten die twee feeds van één krant delen, zijn één rij).
+Daarom is er geen `publisher` voor Mediahuis en geen sleutelregel voor een gedeeld artikel; zie _We nemen de Nederlandse dagbladen van Mediahuis_ in [`beslissingen/importer.md`](beslissingen/importer.md).
+
 ## Nemen na het relevantiefilter (#74)
 
 Deze feeds zijn breed.
@@ -576,22 +760,6 @@ Hoort bij #16.
   Dat valt onder #16.
 
 ## Afwijzen
-
-### Dagblad van het Noorden
-
-- **Domein:** `www.dvhn.nl`
-- **Soort:** nieuws, regionaal dagblad van Groningen en Drenthe
-- **Feed:** geen die we kunnen lezen.
-  Op 9 november 2026 gaf elk adres dat we één keer probeerden, een 403: `/rss.xml`, `/sport/rss.xml`, `/sport/voetbal/rss.xml` en `/tags/sc-heerenveen/rss.xml`.
-  We omzeilen dat niet.
-- **`robots.txt`:** zegt dat alle rechten zijn voorbehouden, en dat tekst- en datamining, scrapen en programma's of robots voor het automatisch verzamelen van gegevens niet mogen, met een verwijzing naar de voorwaarden.
-  De sitemaps die erin staan (`/sitemap.xml` en `/sitemap-news.xml`) geven ook een 403, van Cloudflare ("Attention Required").
-  De importer leest alleen RSS en Atom, dus een sitemap als feed gebruiken vraagt ook nieuwe code.
-- **Voorwaarden:** niet gelezen; de site laat ons niet binnen en we haalden geen pagina op buiten de feedadressen en `robots.txt`.
-- **Meer tonen:** niet van toepassing.
-- **Besluit: afwijzen.**
-  De feed geeft ons een 403 en `robots.txt` verbiedt het automatisch verzamelen.
-  Eerst toestemming vragen kan later, buiten dit issue (#1004).
 
 ### RTV Drenthe
 
