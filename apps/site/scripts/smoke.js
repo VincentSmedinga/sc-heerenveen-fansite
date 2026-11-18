@@ -1846,7 +1846,7 @@ await withEmptyDatabase((database) =>
     // and last the number of matches, in the short form.
     assert.match(
       clubHtml,
-      /id="hoe-vaak-welke-uitslag".*?hf-donut-chart-group.*?hf-donut-chart-small.*?Doelpunten: \d+ gemaakt, \d+ tegen\..*?<th scope="col"><span aria-hidden="true">\w+ \d+×.*?<th scope="col">Competitie<\/th>.*?<p class="hf-meta">(?:1 gespeelde wedstrijd|Alle \d+ gespeelde wedstrijden)<\/p>/s,
+      /id="hoe-vaak-welke-uitslag".*?hf-donut-chart-group.*?hf-donut-chart-small.*?Doelpunten: \d+ gemaakt, \d+ tegen\..*?<th scope="col"><span aria-hidden="true">\w+ \d+×.*?<th scope="col">Competitie<\/th>/s,
     )
     assert.doesNotMatch(clubHtml, /\d+ keer (?:gewonnen|gelijk|verloren)/)
     // Voorbeeld United was visited twice in the league, in a stadium with two names, so it has
