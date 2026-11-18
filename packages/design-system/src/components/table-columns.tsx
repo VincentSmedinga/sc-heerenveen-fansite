@@ -23,6 +23,10 @@ export type TableColumn = {
  * `substitutedOff` (the times he went off, `gewisseld`), `minutes`, `goals`, `assists`,
  * `yellow` and `red`; a yellow-red card counts as a yellow and a red card.
  *
+ * The table of the goals per quarter has `goalsFor` (a ball with a green plus) next to
+ * `conceded` (a ball with a red minus): the plus only means something beside the minus.
+ * Everywhere else the goals are `goals`, a plain ball.
+ *
  * The lists of all time of the players have `hattricks` and `penalties` (the penalties they
  * scored). The seasons in the squad are `seasons`.
  *
@@ -37,6 +41,7 @@ export const tableColumns = {
   drawn: { icon: 'drawn', name: 'gelijk' },
   goalDifference: { icon: 'goalDifference', name: 'doelsaldo' },
   goals: { icon: 'goals', name: 'doelpunten' },
+  goalsFor: { icon: 'goalsFor', name: 'doelpunten voor' },
   goalsPerMatch: { icon: 'goalsPerMatch', name: 'doelpunten per wedstrijd' },
   hattricks: { icon: 'hattricks', name: 'hattricks' },
   lost: { icon: 'lost', name: 'verlies' },

@@ -14,6 +14,7 @@ describe('tableColumns', () => {
       drawn: 'drawn gelijk',
       goalDifference: 'goalDifference doelsaldo',
       goals: 'goals doelpunten',
+      goalsFor: 'goalsFor doelpunten voor',
       goalsPerMatch: 'goalsPerMatch doelpunten per wedstrijd',
       hattricks: 'hattricks hattricks',
       lost: 'lost verlies',

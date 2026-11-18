@@ -16,6 +16,7 @@ import {
   OutcomeBar,
   PlayerName,
   tableColumns,
+  tableLegend,
   Text,
 } from '@fansite/design-system'
 
@@ -369,17 +370,20 @@ export function PreviewStandingCard({
 /** The table of scorers: the player, the year of the last goal and the goals. */
 function ScorersTable({ caption, scorers }: { caption: string; scorers: readonly PreviewScorer[] }) {
   return (
-    <DataTable
-      caption={caption}
-      columns={['Speler', 'Laatst', 'Goals']}
-      rows={scorers.map((scorer): DataTableRow => ({
-        // The year is text, as a number would get a point between the thousands.
-        cells: [String(scorer.last), scorer.goals],
-        display: <PlayerName givenName={scorer.givenName} href={scorer.href} surname={scorer.surname} />,
-        header: scorer.name,
-      }))}
-      // The scorers are a ranking, with the most goals first, so the table does not sort.
-      sortable={false}
-    />
+    <>
+      <DataTable
+        caption={caption}
+        columns={['Speler', 'Laatst', tableColumns.goals]}
+        rows={scorers.map((scorer): DataTableRow => ({
+          // The year is text, as a number would get a point between the thousands.
+          cells: [String(scorer.last), scorer.goals],
+          display: <PlayerName givenName={scorer.givenName} href={scorer.href} surname={scorer.surname} />,
+          header: scorer.name,
+        }))}
+        // The scorers are a ranking, with the most goals first, so the table does not sort.
+        sortable={false}
+      />
+      <Text appearance="meta">{tableLegend([tableColumns.goals])}</Text>
+    </>
   )
 }

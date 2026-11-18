@@ -14,6 +14,7 @@ export const tableColumnIconNames = [
   'drawn',
   'goalDifference',
   'goals',
+  'goalsFor',
   'goalsPerMatch',
   'hattricks',
   'lost',
@@ -103,6 +104,7 @@ const signs = {
   cross: 'M9.7 9.7l3.3 3.3m0-3.3l-3.3 3.3',
   equals: 'M9.1 10.2h4.6M9.1 12.6h4.6',
   minus: 'M9 11.4h4.8',
+  plus: 'M11.4 9v4.8M9 11.4h4.8',
   plusMinus: 'M11.4 8.5v3.3M9.8 10.15h3.2M9.8 13.7h3.2',
 } as const
 
@@ -235,6 +237,11 @@ const drawings: Record<TableColumnIconName, () => ReactNode> = {
     </Badged>
   ),
   goals: () => <Ball />,
+  goalsFor: () => (
+    <Badged colour="win" sign="plus">
+      <Ball />
+    </Badged>
+  ),
   goalsPerMatch: () => (
     <PerMatchOver>
       <Ball />
