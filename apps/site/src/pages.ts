@@ -72,7 +72,7 @@ export const pages = [
     path: '/redactie',
   },
   {
-    description: 'De media waar we het nieuws over sc Heerenveen vandaan halen, met een korte beschrijving van elk.',
+    description: 'De media waar we het nieuws over sc Heerenveen vandaan halen, met een link naar elk.',
     path: '/bronnen',
   },
   {
