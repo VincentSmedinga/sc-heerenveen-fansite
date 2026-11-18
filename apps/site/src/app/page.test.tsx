@@ -84,6 +84,7 @@ const discussions: PublicDiscussion[] = [
 const noMatchData: MatchData = {
   coaches: [],
   edited: false,
+  groupStandings: [],
   matches: [],
   pages: [],
   season: '2026/27',

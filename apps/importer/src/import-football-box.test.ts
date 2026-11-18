@@ -5,6 +5,7 @@ import { listWikipediaPages } from '@fansite/db/queries'
 import { clubs, matches, matchGoals, matchImports, players, standings, wikipediaPages } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
+import { readFileSync } from 'node:fs'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { Handler, TestServer } from './test-server.ts'
@@ -85,6 +86,19 @@ async function serve(change: Record<string, (text: string) => string> = {}) {
     routes[page.language][pageUrl('', page.title)] = reply(200, text, wiki)
   }
 
+  // The import of a season with a group stage reads its table too (#1405).
+  const groupStageRoutes: Record<string, Handler> = {}
+  const groupStagePages = {
+    'UEFA Cup 2008/09': 'wikipedia-group-stage-uefa-cup.wiki',
+    'UEFA Europa League 2009/10': 'wikipedia-group-stage-europa-league.wiki',
+  }
+
+  for (const [title, file] of Object.entries(groupStagePages)) {
+    const text = readFileSync(new URL(`./fixtures/${file}`, import.meta.url), 'utf8')
+
+    Object.assign(groupStageRoutes, articleRoutes([text]), { [pageUrl('', title)]: reply(200, text, wiki) })
+  }
+
   const dutch = await startServer({
     ...articleRoutes(
       pages.filter((page) => page.language === 'nl').map((page) => footballBoxText(page.title)),
@@ -109,6 +123,7 @@ async function serve(change: Record<string, (text: string) => string> = {}) {
     ...articleRoutes(['[[AC Milan]] [[ADO Den Haag]] [[FC Groningen]] [[FC Utrecht]] [[Helsingborgs IF]]']),
     ...articleRoutes(['[[Heracles Almelo]] [[Hertha BSC]] [[RKC Waalwijk]] [[Sparta Rotterdam]] [[VfL Wolfsburg]]']),
     ...articleRoutes(['[[VVV-Venlo]]']),
+    ...groupStageRoutes,
     ...robots,
     ...routes.nl,
   })

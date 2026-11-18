@@ -8,6 +8,7 @@ import {
   listAllStaff,
   listClubStandings,
   listEditorSources,
+  listGroupStandings,
   listLeagueResults,
   listMatchDataSources,
   listMatchSeasons,
@@ -22,6 +23,7 @@ import {
   listStaffInSeason,
   listStandingsSeasons,
   listWikipediaPages,
+  type PublicGroupStandingsRow,
   type PublicLeagueResult,
   type PublicMatch,
   type PublicStaff,
@@ -136,6 +138,8 @@ export type MatchData = {
   coaches: PublicStaff[]
   /** Whether the editors entered data that Wikipedia has not taken over yet. */
   edited: boolean
+  /** The tables of the group stages of the season, one group for each European competition. */
+  groupStandings: PublicGroupStandingsRow[]
   matches: PublicMatch[]
   pages: PublicWikipediaPage[]
   season: string
@@ -189,15 +193,16 @@ function describePeriod(period: number): string {
 
 async function loadSeason(season: string): Promise<MatchData> {
   const { db } = getDatabase()
-  const [matches, standings, pages, coaches, edited] = await Promise.all([
+  const [matches, standings, groupStandings, pages, coaches, edited] = await Promise.all([
     listSeasonMatches(db, season),
     listSeasonStandings(db, season),
+    listGroupStandings(db, season),
     listWikipediaPages(db, season),
     listStaffInSeason(db, 'coach', season),
     hasEditedMatches(db),
   ])
 
-  return { coaches, edited, matches, pages, season, standings }
+  return { coaches, edited, groupStandings, matches, pages, season, standings }
 }
 
 const currentSeasonData = cacheForKey(currentSeasonPeriod, loadSeason)

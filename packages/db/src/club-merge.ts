@@ -11,6 +11,7 @@ import {
   clubNames,
   clubPages,
   clubs,
+  groupStandings,
   itemClubs,
   leagueResults,
   matches,
@@ -268,6 +269,8 @@ async function mergeClubInto(db: MergeDatabase, plan: ClubMergePlan): Promise<vo
   // The rows that go with the club's number.
   await db.update(matches).set({ clubId: kept.id }).where(eq(matches.clubId, other.id))
   await db.update(clubPages).set({ clubId: kept.id }).where(eq(clubPages.clubId, other.id))
+  // The table of a group stage follows the number too (#1405).
+  await db.update(groupStandings).set({ clubId: kept.id }).where(eq(groupStandings.clubId, other.id))
   // A title the club that stays has is not in `plan.pages`; one that went with the move can't
   // clash, a title is unique.
   await moveNames(db, kept, other, names)
