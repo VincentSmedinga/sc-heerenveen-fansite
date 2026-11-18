@@ -15,7 +15,7 @@ const meta = preview.meta({
         component: [
           'Het pictogram van een kolom van een tabel, in plaats van een letter. De kolommen staan in `tableColumns`, en `DataTable` en de legenda tekenen het pictogram zelf.',
           'Het veld is de wedstrijd en de bal is het doelpunt. Een grote ronde badge zegt de uitkomst of het teken, een klein veld erover zegt "per wedstrijd", en een doel met iets eronder is een strafschop (de stip) of een nul.',
-          'Kleur herhaalt altijd een vorm (een vinkje, een kruis, een plus, een min) en vervangt hem nooit. Het pictogram is verborgen voor schermlezers: de kop en de legenda schrijven het hele woord.',
+          'Kleur herhaalt altijd een vorm (een vinkje, een kruis, een min) en vervangt hem nooit. Het pictogram is verborgen voor schermlezers: de kop en de legenda schrijven het hele woord.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

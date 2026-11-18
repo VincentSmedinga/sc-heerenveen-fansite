@@ -3858,3 +3858,11 @@
   De tabel Alle spelers zet de minimale breedte op 0, omdat acht kolommen met ruimte voor twee cijfers niet op een telefoon van 320 pixels passen; haar kolommen zijn zo breed als hun cijfers en pictogram.
 - **Waarom:** de breedte van een cijferkolom hoort niet af te hangen van de lengte van de rijkoppen, en `content-box` houdt de ruimte voor twee cijfers los van de padding, die per tabel verschilt.
 - **Alternatieven:** een vaste breedte voor cijferkolommen, wat breekt bij een score als 35–17 en bij een kop met een woord; alleen `DataTable`, wat de andere tabellen uit de pas laat lopen; `table-layout: fixed`, waarbij de browser de inhoud niet kent.
+
+## De doelpunten hebben een gewone bal, zonder plus
+
+- **Datum:** 18 november 2026
+- **Besluit:** het pictogram van `goals` is een gewone bal zonder badge (#1383).
+- **Waarom:** de plus betekent alleen iets naast de min van de tegendoelpunten, en die staan in geen enkele tabel naast elkaar. Een speler scoort alleen, en in de tabellen van clubs staat "voor–tegen" al in de legenda.
+- **Alternatieven:** een tweede pictogram met de plus voor de doelpunten van een club (twee sleutels voor één woord, en de plus staat dan nog steeds nergens naast de min); een prop op `TableColumnIcon`.
+- **Later:** vervangt van _De kolommen van de tabellen hebben een pictogram in plaats van een letter_ (17 november 2026) alleen de beschrijving dat `goals` een bal met een groene plus is.
