@@ -4465,7 +4465,7 @@
 - **Alternatieven:** de stand uit onze wedstrijden berekenen (faalt bij 1991/92 en 2007/08 en geeft nooit de punten of het doelsaldo van de pagina); de Engelse Wikipedia (alleen nodig als een Nederlandse pagina de stand niet heeft, en geen enkele zat in dat geval).
 
 - **Datum:** 18 november 2026
-- **Besluit:** `standings` krijgt een kolom `competition` (`Eredivisie` of `Eerste divisie`, standaard `Eredivisie`), met migratie `0090_add_standings_competition`.
+- **Besluit:** `standings` krijgt een kolom `competition` (`Eredivisie` of `Eerste divisie`, standaard `Eredivisie`), met migratie `0091_add_standings_competition`.
   De sleutel blijft (seizoen, positie): een seizoen heeft één tabel, omdat sc Heerenveen in één competitie speelt.
   De site zegt het bij de eindstand van een seizoen in de Eerste divisie: `Eindstand Eerste divisie`, in de kop en in het opschrift voor een schermlezer.
 - **Waarom:** 1991/92 en 1992/93 hebben een tabel van de Eerste divisie, en de lezer moet weten welke tabel het is.
