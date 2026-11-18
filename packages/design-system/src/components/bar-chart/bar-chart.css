@@ -168,6 +168,12 @@
     transform: translate(-50%, 50%);
   }
 
+  /* A place that is not part of the line: a ring in the colour of the line, open in the middle. */
+  .hf-bar-chart-trend-dot-apart {
+    background-color: var(--hf-colour-chart-line-edge);
+    border-color: var(--hf-colour-chart-line);
+  }
+
   /*
    * The layer over the plot that takes the pointer, when the trend has labels. Moving the
    * pointer sideways picks a place, and so does dragging a finger sideways; a swipe up or down
@@ -296,6 +302,11 @@
     .hf-bar-chart-trend-dot {
       background-color: CanvasText;
       border-color: Canvas;
+    }
+
+    .hf-bar-chart-trend-dot-apart {
+      background-color: Canvas;
+      border-color: CanvasText;
     }
   }
 }

@@ -479,8 +479,8 @@ describe('ClubTopScorersCard', () => {
 
 describe('ClubPlacesCard', () => {
   const places = [
-    { ours: 8, season: '2025/26', theirs: 16 },
-    { ours: 4, season: '2022/23', theirs: 11 },
+    { competition: 'Eredivisie' as const, ours: 8, season: '2025/26', theirs: 16 },
+    { competition: 'Eredivisie' as const, ours: 4, season: '2022/23', theirs: 11 },
   ]
 
   it('names the club in the heading and the caption, and says it counts the Eredivisie alone', () => {
@@ -489,10 +489,24 @@ describe('ClubPlacesCard', () => {
     expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('De plek van Testclub en de onze')
     expect(
       screen.getByRole('table', {
-        name: 'De plek in de Eredivisie waarin Testclub en sc Heerenveen eindigden, per seizoen',
+        name: 'De plek in de competitie waarin Testclub en sc Heerenveen eindigden, per seizoen',
       }),
     ).toBeTruthy()
     expect(screen.getByText('Alleen de Eredivisie')).toBeTruthy()
+  })
+
+  it('writes the league next to the places of a season outside the Eredivisie, and says so under the table', () => {
+    render(
+      <ClubPlacesCard
+        name="Testclub"
+        places={[{ competition: 'Eerste divisie', ours: 3, season: '1991/92', theirs: 9 }]}
+      />,
+    )
+
+    expect(screen.getByText('3 (Eerste divisie)')).toBeTruthy()
+    expect(screen.getByText('9 (Eerste divisie)')).toBeTruthy()
+    expect(screen.getByText(/tenzij de competitie erbij staat/u)).toBeTruthy()
+    expect(screen.queryByText('Alleen de Eredivisie')).toBeNull()
   })
 
   it('has a row for each season with the seasons as row headers, in the order given', () => {

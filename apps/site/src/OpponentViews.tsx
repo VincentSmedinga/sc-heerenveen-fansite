@@ -62,6 +62,7 @@ import {
   topPointsMinimum,
   topPointsOf,
 } from './opponents'
+import { placeInLeague } from './SeasonBySeasonCard'
 import { figureCell } from './table-values'
 
 /**
@@ -285,11 +286,12 @@ export function ClubNamesNotes({ names }: { names: ClubNameView[] }) {
 
 /**
  * The card "De plek van <club> en de onze" of the page of a club: a table with, for every
- * season in which both clubs were in the table of the Eredivisie, the place each of us ended
- * in, the newest season first (see `clubPlacesOf`). It is a competition table, so it doesn't
- * follow the switch between all the matches and the Eredivisie, and it says it counts the
- * Eredivisie alone. It is figures, so it has the soft surface, in the sidebar under "Hoe vaak
- * welke uitslag". Without a season in which both were in the table there is no card.
+ * season in which both clubs were in the same table, the place each of us ended in, the newest
+ * season first (see `clubPlacesOf`). A season in the Eerste divisie says so next to the place.
+ * It is a competition table, so it doesn't follow the switch between all the matches and the
+ * Eredivisie, and a line says so. It is figures, so it has the soft surface, in the sidebar
+ * under "Hoe vaak welke uitslag". Without a season in which both were in the table there is no
+ * card.
  */
 export function ClubPlacesCard({ name, places }: { name: string; places: readonly ClubPlace[] }) {
   if (places.length === 0) {
@@ -302,14 +304,24 @@ export function ClubPlacesCard({ name, places }: { name: string; places: readonl
         {`De plek van ${name} en de onze`}
       </Heading>
       <DataTable
-        caption={`De plek in de Eredivisie waarin ${name} en sc Heerenveen eindigden, per seizoen`}
+        caption={`De plek in de competitie waarin ${name} en sc Heerenveen eindigden, per seizoen`}
         columns={['Seizoen', 'Onze plek', 'Hun plek']}
-        rows={places.map(({ ours, season, theirs }) => ({
-          cells: [figureCell(ours, String(ours)), figureCell(theirs, String(theirs))],
+        rows={places.map(({ competition, ours, season, theirs }) => ({
+          cells: [
+            figureCell(ours, placeInLeague(ours, competition)),
+            figureCell(theirs, placeInLeague(theirs, competition)),
+          ],
           header: season,
         }))}
       />
-      <EredivisieOnly />
+      {places.every(({ competition }) => competition === 'Eredivisie') ? (
+        <EredivisieOnly />
+      ) : (
+        <Text appearance="meta">
+          De plekken zijn die in de Eredivisie, tenzij de competitie erbij staat. Ze volgen niet de keuze tussen alle
+          wedstrijden en de Eredivisie.
+        </Text>
+      )}
     </Card>
   )
 }

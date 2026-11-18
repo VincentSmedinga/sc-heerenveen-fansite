@@ -101,6 +101,12 @@ export type BarChartProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & 
 }
 
 export type BarChartTrendProps = {
+  /**
+   * Points that are not part of the line, one per place and on the same scale: a hollow dot at
+   * that place, with no line to the places around it. `null` is no dot. Use it for a place that
+   * is of another kind than the rest, so it is not read as part of the line.
+   */
+  apart?: readonly (null | number)[]
   /** `smooth` (the default) never goes past its values, `straight` has straight stretches. */
   curve?: TrendCurve
   /** Whether the line has an edge round it that parts it from the bars. The default is yes. */
@@ -135,18 +141,30 @@ const percentOf = (value: number, max: number) => Math.round(Math.min(1, Math.ma
  * that keeps its width in pixels. There is no line before its first point. With `labels`, a
  * tooltip follows the pointer along the line (see `TrendPointer`).
  */
-const Trend = ({ curve = 'smooth', edge = true, endDot = true, labels, max, values }: BarChartTrendProps) => {
-  const scale = max ?? Math.max(1, ...values.map((value) => value ?? 0))
+const Trend = ({ apart, curve = 'smooth', edge = true, endDot = true, labels, max, values }: BarChartTrendProps) => {
+  const scale = max ?? Math.max(1, ...values.map((value) => value ?? 0), ...(apart ?? []).map((value) => value ?? 0))
   const path = monotonePath(values, scale, curve)
   const last = values.findLastIndex((value) => value !== null)
   const lastValue = values[last] ?? null
+  // A value between two gaps has no line, so it gets a dot of its own.
+  const lone = values.flatMap((value, index) =>
+    value !== null && (values[index - 1] ?? null) === null && (values[index + 1] ?? null) === null && index !== last
+      ? [index]
+      : [],
+  )
+  const dotStyle = (index: number, value: number) =>
+    ({
+      '--hf-bar-chart-across': Math.round(((index + 0.5) / values.length) * 10000) / 100,
+      '--hf-bar-chart-at': percentOf(value, scale),
+    }) as CSSProperties
   const points = labels
     ? values.map((value, index) => {
+        const own = value ?? apart?.[index] ?? null
         const label = labels[index]
 
-        return value === null || label === null || label === undefined || label === false
+        return own === null || label === null || label === undefined || label === false
           ? null
-          : { across: acrossOf(index + 0.5, values.length), at: percentOf(value, scale), label }
+          : { across: acrossOf(index + 0.5, values.length), at: percentOf(own, scale), label }
       })
     : null
 
@@ -172,6 +190,18 @@ const Trend = ({ curve = 'smooth', edge = true, endDot = true, labels, max, valu
             } as CSSProperties
           }
         />
+      )}
+      {lone.map((index) => (
+        <span className="hf-bar-chart-trend-dot" key={`lone-${index}`} style={dotStyle(index, values[index] ?? 0)} />
+      ))}
+      {apart?.map((value, index) =>
+        value === null ? null : (
+          <span
+            className="hf-bar-chart-trend-dot hf-bar-chart-trend-dot-apart"
+            key={`apart-${index}`}
+            style={dotStyle(index, value)}
+          />
+        ),
       )}
       {points && <TrendPointer points={points} />}
     </>

@@ -181,7 +181,15 @@ const places = [9, 7, 5, 4, 6, 8, 7, 5, 4, 3, 5, 6, 8, 9, 7, 6, 5, 4, 4, 6, 7, 9
  * A line of places with place 1 at the top: the chart grows upwards, so a place is turned into
  * a height (`19 - place`). A round without a place is a gap (`null`).
  */
-const PlaceLine = ({ dividers = [], rounds }: { dividers?: readonly number[]; rounds: readonly (null | number)[] }) => (
+const PlaceLine = ({
+  apart,
+  dividers = [],
+  rounds,
+}: {
+  apart?: readonly (null | number)[]
+  dividers?: readonly number[]
+  rounds: readonly (null | number)[]
+}) => (
   <div style={{ maxInlineSize: '36rem' }}>
     <Card aria-labelledby="plek-kop">
       <Heading id="plek-kop" level={2}>
@@ -200,10 +208,11 @@ const PlaceLine = ({ dividers = [], rounds }: { dividers?: readonly number[]; ro
         tickText={(height) => String(19 - height)}
       >
         <BarChart.Trend
+          {...(apart && { apart: apart.map((place) => (place === null ? null : 19 - place)) })}
           labels={rounds.map((place, index) =>
-            place === null ? null : (
+            place === null && (apart?.[index] ?? null) === null ? null : (
               <>
-                Ronde {index + 1}: <Strong>plek {place}</Strong>
+                Ronde {index + 1}: <Strong>plek {place ?? apart?.[index]}</Strong>
               </>
             ),
           )}
@@ -227,6 +236,16 @@ export const PlaceDividers = meta.story({
 export const PlaceSeasonInProgress = meta.story({
   name: 'Lijn met omgekeerde as: een seizoen dat nog bezig is',
   render: () => <PlaceLine rounds={[...places.slice(0, 12), ...Array.from({ length: 22 }, () => null)]} />,
+})
+
+export const PlaceApart = meta.story({
+  name: 'Lijn met omgekeerde as: twee plekken die er los van staan, als holle stip',
+  render: () => (
+    <PlaceLine
+      apart={places.map((place, index) => (index === 12 || index === 13 ? place : null))}
+      rounds={places.map((place, index) => (index === 12 || index === 13 ? null : place))}
+    />
+  ),
 })
 
 export const PlaceOpenPlace = meta.story({

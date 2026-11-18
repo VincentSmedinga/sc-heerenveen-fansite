@@ -59,6 +59,13 @@ describe('bar-chart.css', () => {
     expect(css).toMatch(/\.hf-bar-chart-trend-edge \{\s*stroke: var\(--hf-colour-chart-line-edge\)/u)
   })
 
+  it('opens the dot of a place that is apart, with the line colour on its ring', () => {
+    expect(declarationsOf('.hf-bar-chart-trend-dot-apart')).toMatch(
+      /background-color: var\(--hf-colour-chart-line-edge\)/u,
+    )
+    expect(declarationsOf('.hf-bar-chart-trend-dot-apart')).toMatch(/border-color: var\(--hf-colour-chart-line\)/u)
+  })
+
   it('puts a dot of 10 pixels with a ring of 2 on the end of the line, in the colours of the line and the edge', () => {
     expect(declarationsOf('.hf-bar-chart-trend-dot')).toMatch(/background-color: var\(--hf-colour-chart-line\)/u)
     expect(declarationsOf('.hf-bar-chart-trend-dot')).toMatch(/border: 2px solid var\(--hf-colour-chart-line-edge\)/u)

@@ -2975,6 +2975,7 @@
   De namen van de wedstrijden erbij nemen vangt een naam die in de stand anders is geschreven dan in `club_names`: de importer legt de namen in de stand niet vast aan een club.
 - **Alternatieven:** een grafiek met twee lijnen (meer ontwerp, weinig extra); een rij onder Verloop sinds 1990; het lopende seizoen met "nu" erbij (zijn stand is nog niet af).
 - **Later:** vult _Onze eindplek per seizoen staat als lijn op Wedstrijden_ (6 november 2026) aan: de vraag die `finalPlacesOf` voor de club van de pagina kon stellen, wordt hier alleen voor onze eigen plek gebruikt; de plek van de club komt uit `listStandingsPlaces`.
+- **Later:** zie _Een seizoen in de Eerste divisie is een holle stip buiten de lijn, met de competitie bij de plek_ (19 november 2026): de tabel schrijft de competitie bij de plek van een seizoen buiten de Eredivisie.
 
 ## Late doelpunten en doelpunten in blessuretijd staan onder Doelpunten per kwartier
 
@@ -5778,6 +5779,7 @@
 - **Waarom:** alle seizoenen in één tabel, elk met een weg naar dat seizoen, is wat een eigen pagina Seizoenen (#782) zou doen.
   De kaart doet dat zonder pagina erbij.
 - **Alternatieven:** een eigen pagina `/seizoenen` (#782); één kolom W–G–V; een kolom per seizoen met de hoofdtrainer.
+- **Later:** zie _Een seizoen in de Eerste divisie is een holle stip buiten de lijn, met de competitie bij de plek_ (19 november 2026): de plek is die van de competitie waarin we speelden, en de Eerste divisie staat erbij.
 
 ## Wedstrijden · Cijfers heeft de kaart Per competitie, met een rij per soort competitie
 
@@ -6602,3 +6604,25 @@
 - **Waarom:** de bezoeker ziet daar al de wedstrijden van het toernooi, en een tabel eronder legt uit hoe de groep eindigde.
   Eén tabel voor alle standen houdt de koppen, de markering van onze club en de uitleg van de afkortingen gelijk.
 - **Alternatieven:** een eigen pagina (te veel voor zes wedstrijden); de wedstrijdpagina (de tabel hoort bij de competitie, niet bij één wedstrijd); een eigen component met alle kolommen (veel breedte voor een kaart die al smal is).
+
+## Een seizoen in de Eerste divisie is een holle stip buiten de lijn, met de competitie bij de plek
+
+- **Datum:** 19 november 2026
+- **Besluit:** op de kaart Seizoen voor seizoen loopt de lijn alleen door seizoenen in de Eredivisie.
+  Een seizoen in een andere competitie (1991/92 en 1992/93, de Eerste divisie) is een holle stip op de plek van dat seizoen, op dezelfde schaal van 1 tot 18, zonder lijn naar de seizoenen ervoor of erna.
+  In de tabel staat de plek als "3 (Eerste divisie)", zonder extra kolom, en het label voor de schermlezer zegt "plek 3 in de Eerste divisie".
+  Onder de kaart staat welke seizoenen dat zijn, uit de gegevens zelf.
+  De bijschriften en de regel onder de kaart zeggen dat de plek die van de competitie is waarin we speelden.
+- **Waarom:** de plek blijft zichtbaar en vergelijkbaar op één schaal, en de bezoeker ziet dat het seizoen anders is.
+  Sinds #1402 staat de eindstand van 1990/91 tot en met 2009/10 in `standings`, met de kolom `competition`, en zonder dit lijkt een plek in de Eerste divisie er een in de Eredivisie.
+  Een Eredivisie-seizoen met een gat aan beide kanten, zoals 1990/91, krijgt een gewone stip, want een enkele waarde heeft geen lijn.
+- **Alternatieven:** een leeg gat (verbergt dat we zijn gedaald en teruggekomen); de plekken onder de schaal van de Eredivisie op een tweede as (meer werk en moeilijker te lezen); een kolom Competitie voor elk seizoen (breder dan 320 pixels).
+
+## De kaart met plekken bij een tegenstander noemt de competitie van een seizoen buiten de Eredivisie
+
+- **Datum:** 19 november 2026
+- **Besluit:** `clubPlacesOf` geeft de competitie van het seizoen mee, en de kaart "De plek van … en de onze" schrijft die bij beide plekken, zoals de tabel van Seizoen voor seizoen.
+  Hebben alle seizoenen de Eredivisie, dan blijft de regel "Alleen de Eredivisie"; anders staat er dat de plekken die van de Eredivisie zijn, tenzij de competitie erbij staat.
+  De overige lezers van `standings` blijven zoals ze zijn: ze gebruiken alleen het huidige seizoen of wedstrijden (de kaart per ronde, de laatste overwinning, de kerncijfers).
+- **Waarom:** dezelfde verkeerde lezing doet zich daar voor, want zowel onze plek als die van de club komt uit de Eerste divisie.
+- **Alternatieven:** alleen de kaart Seizoen voor seizoen aanpassen en de andere in een apart issue doen.

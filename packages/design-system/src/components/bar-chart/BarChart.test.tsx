@@ -295,6 +295,22 @@ describe('BarChart.Trend', () => {
     expect(dot.style.getPropertyValue('--hf-bar-chart-at')).toBe('100')
   })
 
+  it('draws a hollow dot for a point that is apart, and keeps the line from running through it', () => {
+    const { container } = render(
+      <BarChart bars={bars} max={3}>
+        <BarChart.Trend apart={[null, 2, 3, null, null, null]} endDot={false} values={[1, null, null, 3, 2, 1]} />
+      </BarChart>,
+    )
+    const dots = [...container.querySelectorAll<HTMLElement>('.hf-bar-chart-trend-dot-apart')]
+
+    expect(dots).toHaveLength(2)
+    expect(dots[0]!.style.getPropertyValue('--hf-bar-chart-at')).toBe('66.67')
+    expect(Number(dots[0]!.style.getPropertyValue('--hf-bar-chart-across'))).toBeCloseTo((1.5 / 6) * 100, 1)
+    // The first value has gaps on both sides, so it is a dot of its own and not a line.
+    expect(container.querySelectorAll('.hf-bar-chart-trend-dot:not(.hf-bar-chart-trend-dot-apart)')).toHaveLength(1)
+    expect(container.querySelector('.hf-bar-chart-trend-line')!.getAttribute('d')).not.toMatch(/M0\.5/u)
+  })
+
   it('has no dot when asked, and none without values', () => {
     const { container, rerender } = render(
       <BarChart bars={bars} max={3}>

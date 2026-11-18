@@ -3902,3 +3902,13 @@
 - **Waarom:** de projecteigenaar vond de vlag te dicht op de naam zitten.
 - **Alternatieven:** alleen in de nieuwe kaart een grotere ruimte geven (dan zien de vlaggen op de site er verschillend uit).
 - **Later:** vervangt niets; de maat van de vlag (_De vlag_ bij `PlayerName`) blijft zoals hij was.
+
+## `BarChart.Trend` kan plekken tonen die buiten de lijn staan, als holle stip
+
+- **Datum:** 19 november 2026
+- **Besluit:** `BarChart.Trend` heeft een optie `apart`: een waarde per plek op dezelfde schaal, met een holle stip op die plek en geen lijn naar de plekken eromheen.
+  Een enkele waarde tussen twee gaten, die geen lijn heeft, krijgt een eigen stip, zodat hij niet verdwijnt.
+  De stip is open in het midden (de kleur van de rand van de lijn) met een ring in de kleur van de lijn, en in geforceerde kleuren `Canvas` met een rand van `CanvasText`.
+- **Waarom:** een plek die van een andere soort is dan de rest, zoals een seizoen in een andere competitie, moet niet als deel van de lijn gelezen worden, en een leeg gat verbergt hem.
+  De vorm verschilt, dus kleur is niet het enige teken (1.4.1).
+- **Alternatieven:** een kleur voor de afwijkende stip (alleen kleur is geen teken); een tweede `Trend` over dezelfde grafiek (dubbele schaal en dubbel werk).
