@@ -156,8 +156,16 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
     label: 'Pictogrammen van de kolommen',
     tokens: [
       {
-        name: '--hf-colour-icon-shirt',
-        use: 'Vulling van het shirt (basis) in de pictogrammen van de kolommen, alleen daarvoor',
+        name: '--hf-colour-icon-stripe-blue',
+        use: 'Blauwe strepen van het shirt (basis) in de pictogrammen van de kolommen, alleen daarvoor',
+      },
+      {
+        name: '--hf-colour-icon-stripe-white',
+        use: 'Witte strepen van het shirt (basis), in donker iets zachter dan wit, alleen daarvoor',
+      },
+      {
+        name: '--hf-colour-icon-pompebled',
+        use: 'De pompeblêden op het shirt (basis), in het rood van het clubwapen, alleen daarvoor',
       },
       {
         name: '--hf-colour-icon-boot',
