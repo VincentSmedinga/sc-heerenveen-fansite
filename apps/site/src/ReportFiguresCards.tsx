@@ -3,7 +3,8 @@ import { Card, Heading, PlayerFiguresTable, tableColumns, Text, TopScorersTable 
 import type { ReportFigures } from './report-figures'
 
 import { type CompetitionChoice, competitionWords } from './competition'
-import { basedOnSentence, figureRows, type RankedFigure, rankedPlaces, reportPlaces } from './report-figures'
+import { DataLine, incompleteMatches } from './DataLine'
+import { figureRows, type RankedFigure, rankedPlaces, reportPlaces } from './report-figures'
 
 // The cards of the page Spelers with the figures of the match reports (#832): the lists of the
 // assists and the minutes, and the table of all the players. They count only the reports that
@@ -12,7 +13,7 @@ import { basedOnSentence, figureRows, type RankedFigure, rankedPlaces, reportPla
 
 /** What the figures rest on: the line under the content of a card. */
 function Footing({ figures }: { figures: Pick<ReportFigures, 'known' | 'played'> }) {
-  return <Text appearance="meta">{basedOnSentence(figures)}</Text>
+  return <DataLine limits={[incompleteMatches(figures.known, figures.played)]} />
 }
 
 const rankings = {

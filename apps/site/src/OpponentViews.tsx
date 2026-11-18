@@ -30,6 +30,7 @@ import {
 } from '@fansite/design-system'
 
 import { type CompetitionChoice, competitionWords } from './competition'
+import { DataLine } from './DataLine'
 import { creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
 import { type MatchPage, matchPageKey, pageProps } from './match-pages'
 import { shootOutOf } from './match-result'
@@ -64,28 +65,25 @@ import {
 import { figureCell } from './table-values'
 
 /**
- * What the cards of the opponents say about the matches they count: all the played matches
- * since the first season we have, in the Eredivisie alone when the choice is `league`. The
- * form is the one of the cards on Cijfers ("Alle 7 gespeelde wedstrijden"), with the
- * season from which we have data, so a visitor knows how far back the record goes.
+ * What limits the data of the cards of the opponents, in one line at the end of the card: the
+ * season from which we have data, so a visitor knows how far back the record goes, the
+ * Eredivisie alone when the choice is `league`, and what the matches have in common beyond
+ * that.
  */
 export function BasedOnSince({
   choice,
   condition,
-  played,
   since,
 }: {
   choice: CompetitionChoice
   /** What the matches have in common beyond the choice, such as "tegen clubs met …". */
   condition?: string
-  played: number
   since: string
 }) {
-  const matches = played === 1 ? '1 gespeelde wedstrijd' : `Alle ${played} gespeelde wedstrijden`
-  const where = condition === undefined ? '' : `, ${condition}`
-
   return (
-    <Text appearance="meta">{`${matches}${choice === 'all' ? '' : ` in ${competitionWords(choice)}`} sinds ${since}${where}`}</Text>
+    <DataLine
+      limits={[choice === 'all' ? undefined : `alleen ${competitionWords(choice)}`, `sinds ${since}`, condition]}
+    />
   )
 }
 
@@ -209,8 +207,6 @@ export function ClubsCard({
   records: PublicClubRecord[]
   since: string
 }) {
-  const played = records.reduce((sum, record) => sum + record.played, 0)
-
   return (
     <Card aria-labelledby="alle-tegenstanders">
       <Heading id="alle-tegenstanders" level={2}>
@@ -249,7 +245,7 @@ export function ClubsCard({
             }))}
           />
           <Text appearance="meta">{clubLegend}</Text>
-          <BasedOnSince choice={choice} played={played} since={since} />
+          <BasedOnSince choice={choice} since={since} />
         </>
       )}
     </Card>
@@ -408,7 +404,7 @@ export function ClubSummaryCard({
           ))}
         </DescriptionList>
       )}
-      <BasedOnSince choice={choice} played={summary.total.played} since={since} />
+      <BasedOnSince choice={choice} since={since} />
     </Card>
   )
 }
@@ -450,10 +446,10 @@ export function ClubTimelineCard({
       <FormTimeline
         firstYear={firstYear}
         results={timelineOf(matches, now, firstYear)}
-        scope="Alleen de Eredivisie."
         title="Seizoen"
         window={timelineWindow}
       />
+      <EredivisieOnly />
     </Card>
   )
 }
@@ -705,7 +701,7 @@ export function HardestCard({
   records: PublicClubRecord[]
   since: string
 }) {
-  const { places, played } = hardestOf(records)
+  const { places } = hardestOf(records)
 
   if (places.length === 0) {
     return null
@@ -732,7 +728,6 @@ export function HardestCard({
       <BasedOnSince
         choice={choice}
         condition={`tegen clubs met minstens ${topPointsMinimum} gespeelde wedstrijden`}
-        played={played}
         since={since}
       />
     </Card>
@@ -855,7 +850,7 @@ export function TopPointsCard({
   records: PublicClubRecord[]
   since: string
 }) {
-  const { places, played } = topPointsOf(records)
+  const { places } = topPointsOf(records)
 
   return (
     <Card aria-labelledby="gemiddeld-resultaat" surface="soft">
@@ -882,7 +877,6 @@ export function TopPointsCard({
           <BasedOnSince
             choice={choice}
             condition={`tegen clubs met minstens ${topPointsMinimum} gespeelde wedstrijden`}
-            played={played}
             since={since}
           />
         </>

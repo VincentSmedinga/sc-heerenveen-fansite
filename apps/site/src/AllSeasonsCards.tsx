@@ -101,7 +101,6 @@ export function RecordsCard({
             )}
           </DescriptionList>
           <MatchSearchLink link={search?.biggestWins()} what="die we wonnen, de grootste zege eerst" />
-          <BasedOn known={played} played={played} />
         </>
       )}
     </Card>
@@ -145,8 +144,11 @@ export function AttendanceRecordsCard({
           {average !== undefined && (
             <Text>{`Gemiddeld ${numberFormat.format(average)} toeschouwers per thuiswedstrijd, in ${homeKnown} ${matchesWord(homeKnown)}`}</Text>
           )}
-          <Text appearance="meta">Het aantal toeschouwers is een schatting, volgens Wikipedia.</Text>
-          <BasedOn known={known} played={played} />
+          <BasedOn
+            known={known}
+            limits={['het aantal toeschouwers is een schatting, volgens Wikipedia']}
+            played={played}
+          />
         </>
       )}
     </Card>

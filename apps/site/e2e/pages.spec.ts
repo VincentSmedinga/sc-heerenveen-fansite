@@ -585,7 +585,7 @@ test('the table Per seizoen has the columns of the figures that we have, and a d
   await expect(table.getByRole('row', { name: /2001\/02/ })).toContainText('–')
   await expect(table.getByRole('row', { name: /Totaal/ })).toContainText('28')
   await expect(page.getByText('Een streepje: van dat seizoen hebben we geen opstellingen.')).toBeVisible()
-  await expect(page.getByText(/tabel van Wikipedia, die alleen de competities van die tabel telt/)).toBeVisible()
+  await expect(page.getByText(/Cijfers van Wikipedia: \d{4}\/\d{2}/)).toBeVisible()
 
   await page.goto(playerPages.goalkeeper)
   expect(

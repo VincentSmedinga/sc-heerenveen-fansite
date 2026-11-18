@@ -4,6 +4,7 @@ import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Card } from '../card/Card'
 import { type FormResult } from '../form-chart/form'
 import { Heading } from '../heading/Heading'
+import { Text } from '../text/Text'
 import { FormTimeline } from './FormTimeline'
 
 const meta = preview.meta({
@@ -51,16 +52,16 @@ const places = (from: number, pattern: string): (FormResult | null)[] =>
       : null,
   )
 
-const TimelineCard = ({ results, scope }: { results: readonly (FormResult | null)[]; scope: string }) => (
+const TimelineCard = ({ limit, results }: { limit: boolean; results: readonly (FormResult | null)[] }) => (
   <Card aria-labelledby="resultaten-kop">
     <Heading id="resultaten-kop" level={2}>
       Resultaten sinds 2010
     </Heading>
-    <FormTimeline firstYear={firstYear} results={results} scope={scope} title="Seizoen" />
+    <FormTimeline firstYear={firstYear} results={results} title="Seizoen" />
+    {/* A limit of the data is one line at the end of the card; complete data say nothing. */}
+    {limit && <Text appearance="meta">Alleen de Eredivisie</Text>}
   </Card>
 )
-
-const scope = 'Alleen de Eredivisie.'
 
 // The club played a division lower from 2013 to 2016 and again in 2021.
 const withGaps = places(2010, 'WWGVWGGWVWWGWVGWWGVWGWVWWGGWWVWGW').map((result, place) =>
@@ -68,13 +69,13 @@ const withGaps = places(2010, 'WWGVWGGWVWWGWVGWWGVWGWVWWGGWWVWGW').map((result, 
 )
 
 export const WithGaps = meta.story({
-  args: { firstYear, results: withGaps, scope, title: 'Seizoen' },
+  args: { firstYear, results: withGaps, title: 'Seizoen' },
   name: 'Een club die tussendoor lager speelde, de lijn stopt bij een gat',
-  render: (args) => <TimelineCard results={args.results} scope={args.scope} />,
+  render: (args) => <TimelineCard limit results={args.results} />,
 })
 
 export const OnePiece = meta.story({
-  args: { firstYear, results: places(2018, 'WGVWWGVWGWGV'), scope, title: 'Seizoen' },
+  args: { firstYear, results: places(2018, 'WGVWWGVWGWGV'), title: 'Seizoen' },
   name: 'Een club die pas laat in de Eredivisie kwam, de eerste jaren zijn leeg',
-  render: (args) => <TimelineCard results={args.results} scope={args.scope} />,
+  render: (args) => <TimelineCard limit={false} results={args.results} />,
 })

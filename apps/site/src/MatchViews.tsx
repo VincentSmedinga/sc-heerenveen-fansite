@@ -41,6 +41,7 @@ import type { CijfersSearch } from './cijfers-search'
 import type { FlowRow, HomeAwayTally, MatchData } from './matches'
 
 import { type CompetitionChoice, competitionFields } from './competition'
+import { DataLine, incompleteMatches } from './DataLine'
 import { goalsPerMatchOf } from './goals-per-match'
 import { moreCleanSheets } from './items-per-card'
 import { coachPeriods, creditName, formatReadAt, formatTableDay, matchMoment, wikipediaUrl } from './match-format'
@@ -134,19 +135,21 @@ const scopeOf = (season?: string, since?: string) => (since === undefined ? seas
 const numberFormat = new Intl.NumberFormat('nl-NL')
 
 /**
- * The line under a card with statistics that says how many matches it is based on: all the
- * played matches, or `known` of the `played` ones when only some have what the card counts.
+ * The line at the end of a card with statistics when its figures count only some of the played
+ * matches (`known` of the `played` ones), with any other limit of the card (`limits`) in the
+ * same line. When it counts them all, the data are complete and it says nothing.
  */
-export function BasedOn({ known, played }: { known: number; played: number }) {
-  return (
-    <Text appearance="meta">
-      {known === played
-        ? known === 1
-          ? '1 gespeelde wedstrijd'
-          : `Alle ${numberFormat.format(known)} gespeelde wedstrijden`
-        : `${numberFormat.format(known)} van de ${numberFormat.format(played)} gespeelde wedstrijden`}
-    </Text>
-  )
+export function BasedOn({
+  known,
+  limits = [],
+  played,
+}: {
+  known: number
+  /** Other limits of the card, such as "Alleen de Eredivisie". */
+  limits?: readonly (false | string | undefined)[]
+  played: number
+}) {
+  return <DataLine limits={[...limits, incompleteMatches(known, played)]} />
 }
 
 /**
@@ -306,10 +309,13 @@ export function ExtremesCard({
               </DescriptionList.Item>
             ))}
           </DescriptionList>
-          <BasedOn known={played} played={played} />
-          {known > 0 && known < played && (
-            <Text appearance="meta">{`Vroegste en laatste doelpunt: ${known} van de ${played} gespeelde wedstrijden`}</Text>
-          )}
+          <DataLine
+            limits={[
+              known > 0 &&
+                known < played &&
+                `vroegste en laatste doelpunt: ${known} van de ${played} gespeelde wedstrijden`,
+            ]}
+          />
         </>
       )}
     </Card>
@@ -424,7 +430,7 @@ const pointsPerMatchFormat = new Intl.NumberFormat('nl-NL', { maximumFractionDig
  * Eredivisie alone. The cards that do it stand together above the switch (see StatisticsPage).
  */
 export function EredivisieOnly() {
-  return <Text appearance="meta">Alleen de Eredivisie</Text>
+  return <DataLine limits={['alleen de Eredivisie']} />
 }
 
 /** The value of a measure as the table writes it: the goal difference with its sign. */
@@ -654,7 +660,6 @@ export function HomeAwayCard({
           />
           <MatchSearchLink link={search?.venue('thuis')} what="thuis" />
           <MatchSearchLink link={search?.venue('uit')} what="uit" />
-          <BasedOn known={total.played} played={total.played} />
         </>
       )}
     </Card>
@@ -776,15 +781,17 @@ export function MatchFlowCard({
               : `Na een voorsprong haalde sc Heerenveen in ${notWonAfterLead === 1 ? '1 wedstrijd' : `${notWonAfterLead} wedstrijden`} geen winst.`}
           </Text>
           <Text appearance="meta">{tableLegend(flowColumns)}</Text>
-          <BasedOn known={known} played={played} />
-          {unknownFirstGoal > 0 && (
-            <Text appearance="meta">
-              {`Bij ${unknownFirstGoal === 1 ? '1 wedstrijd' : `${unknownFirstGoal} wedstrijden`} is niet te zien wie het eerst scoorde.`}
-            </Text>
-          )}
         </>
       )}
-      <EredivisieOnly />
+      <BasedOn
+        known={known === 0 ? played : known}
+        limits={[
+          'alleen de Eredivisie',
+          unknownFirstGoal > 0 &&
+            `eerste doelpunt onbekend bij ${unknownFirstGoal === 1 ? '1 wedstrijd' : `${unknownFirstGoal} wedstrijden`}`,
+        ]}
+        played={played}
+      />
     </Card>
   )
 }
@@ -1073,10 +1080,6 @@ const outcomeColumn = (heading: string, count: number) => ({
   shown: `${heading} ${count}×`,
 })
 
-/** The line that closes the card: how many matches its figures count. */
-export const playedLine = (played: number) =>
-  played === 1 ? '1 gespeelde wedstrijd' : `Alle ${played} gespeelde wedstrijden`
-
 /**
  * The credit of the matches the editors added themselves, which no import reads: each with the
  * source the editors took it from, such as a newspaper. Without such a match it shows nothing.
@@ -1223,7 +1226,6 @@ export function ScoreCountsView({
             })}
           </DataTable.Group>
           {children}
-          <Text appearance="meta">{playedLine(played)}</Text>
         </>
       )}
     </Card>
@@ -1422,7 +1424,6 @@ export function StreaksCard({
               </List>
             </>
           )}
-          <BasedOn known={played} played={played} />
         </>
       )}
     </Card>

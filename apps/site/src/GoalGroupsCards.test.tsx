@@ -30,9 +30,7 @@ describe('GoalsPerLineCard', () => {
   it('says on how many goals it rests when some have no line', () => {
     const html = render(<GoalsPerLineCard competition="all" groups={{ ...lineGroups, total: 12 }} />)
 
-    expect(html).toContain(
-      'Op basis van 9 van de 12 doelpunten: van de rest kennen we de linie van de doelpuntenmaker niet.',
-    )
+    expect(html).toContain('9 van de 12 doelpunten (van de rest kennen we de linie van de doelpuntenmaker niet)')
   })
 
   it('is a sentence without goals, with the competition it counts', () => {
@@ -60,9 +58,7 @@ describe('GoalsPerCountryCard', () => {
     expect(html).toContain('Nederland')
     expect(html).toContain('Denemarken')
     expect(html).toContain('Het land van de doelpuntenmaker.')
-    expect(html).toContain(
-      'Op basis van 10 van de 11 doelpunten: van de rest kennen we het land van de doelpuntenmaker niet.',
-    )
+    expect(html).toContain('10 van de 11 doelpunten (van de rest kennen we het land van de doelpuntenmaker niet)')
   })
 
   it('is a sentence without goals', () => {

@@ -31,17 +31,6 @@ export type ReportFigures = {
   seasonHasReports: boolean
 }
 
-/** What the figures rest on, in a sentence under the card: "Op basis van 12 van de 14 …". */
-export function basedOnSentence({ known, played }: Pick<ReportFigures, 'known' | 'played'>): string {
-  if (known === played) {
-    return played === 1
-      ? 'Op basis van de enige gespeelde wedstrijd.'
-      : `Op basis van alle ${played} gespeelde wedstrijden.`
-  }
-
-  return `Op basis van ${known} van de ${played} gespeelde wedstrijden.`
-}
-
 /**
  * The rows of the table of all the players: everybody who stood in a report, the most minutes
  * first and then by name, so a player of the bench who did not come on is at the end with

@@ -52,8 +52,6 @@ export function CoachResultsCard({
     return null
   }
 
-  const played = results.reduce((sum, result) => sum + result.played, 0)
-
   return (
     <Card aria-labelledby={coachResultsCard.id} surface="soft">
       <Heading anchor id={coachResultsCard.id} level={level}>
@@ -77,7 +75,7 @@ export function CoachResultsCard({
         }))}
       />
       <Text appearance="meta">{legend}</Text>
-      <BasedOnSince choice={choice} played={played} since={since} />
+      <BasedOnSince choice={choice} since={since} />
     </Card>
   )
 }

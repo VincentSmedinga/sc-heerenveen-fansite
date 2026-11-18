@@ -33,6 +33,7 @@ import {
   type YearsPlace,
 } from './all-time-players'
 import { type CompetitionChoice, competitionQuery, competitionWords } from './competition'
+import { DataLine } from './DataLine'
 import { formatTableDay } from './match-format'
 import { scorersCoverage } from './matches'
 import { imageCredit } from './MatchViews'
@@ -97,11 +98,9 @@ export function AllTimeScorersCard({
           />
         </Disclosure>
       )}
-      {known < played && (
-        <Text appearance="meta">
-          {`Van ${played - known} ${played - known === 1 ? 'wedstrijd' : 'wedstrijden'} kennen we de doelpuntenmakers niet.`}
-        </Text>
-      )}
+      <DataLine
+        limits={[known < played && `de doelpuntenmakers van ${known} van de ${played} gespeelde wedstrijden`]}
+      />
     </Card>
   )
 }

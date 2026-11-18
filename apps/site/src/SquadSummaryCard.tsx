@@ -1,6 +1,8 @@
-import { Card, DescriptionList, Heading, Text } from '@fansite/design-system'
+import { Card, DescriptionList, Heading } from '@fansite/design-system'
 
 import type { SquadSummary } from './squad-summary'
+
+import { DataLine } from './DataLine'
 
 const oneDecimal = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 1, minimumFractionDigits: 1 })
 
@@ -33,11 +35,7 @@ export function SquadSummaryCard({ summary }: { summary: SquadSummary }) {
         )}
         {countries === undefined ? null : <DescriptionList.Item term="Landen">{countries}</DescriptionList.Item>}
       </DescriptionList>
-      {basis === undefined ? null : (
-        <Text appearance="meta">
-          Op basis van {basis.known} van de {basis.total} spelers.
-        </Text>
-      )}
+      {basis === undefined ? null : <DataLine limits={[`${basis.known} van de ${basis.total} spelers`]} />}
     </Card>
   )
 }

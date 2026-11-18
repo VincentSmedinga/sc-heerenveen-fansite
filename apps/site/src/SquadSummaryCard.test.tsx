@@ -33,8 +33,8 @@ describe('the card "De selectie in het kort"', () => {
       },
     })
 
-    expect(plain(html)).toContain('Op basis van 23 van de 28 spelers.')
-    expect(html.indexOf('</dl>')).toBeLessThan(html.indexOf('Op basis van'))
+    expect(plain(html)).toContain('23 van de 28 spelers')
+    expect(html.indexOf('</dl>')).toBeLessThan(html.indexOf('23 van de 28 spelers'))
   })
 
   it('has no lines with an age and no line Landen when the summary has none', () => {

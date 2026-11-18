@@ -3,6 +3,7 @@ import { BarList, Card, CountryName, Heading, Text } from '@fansite/design-syste
 import type { GoalGroups } from './goal-groups'
 
 import { type CompetitionChoice, competitionWords } from './competition'
+import { DataLine } from './DataLine'
 
 /**
  * The card Doelpunten per land: the five countries with the most goals, each with the country
@@ -63,6 +64,8 @@ function Basis({ groups, trait }: { groups: GoalGroups; trait: string }) {
   const { counted, total } = groups
 
   return counted < total ? (
-    <Text appearance="meta">{`Op basis van ${counted} van de ${total} doelpunten: van de rest kennen we ${trait} van de doelpuntenmaker niet.`}</Text>
+    <DataLine
+      limits={[`${counted} van de ${total} doelpunten (van de rest kennen we ${trait} van de doelpuntenmaker niet)`]}
+    />
   ) : null
 }

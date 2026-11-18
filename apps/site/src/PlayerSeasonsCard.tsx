@@ -74,9 +74,24 @@ export function playerSeasonsTable(seasons: readonly PlayerSeason[], goalkeeper:
   }
 }
 
-/** Seasons as words in Dutch: "2003/04", "2003/04 en 2004/05", "a, b en c". */
-const seasonsText = (seasons: readonly string[]) =>
-  seasons.length < 2 ? (seasons[0] ?? '') : `${seasons.slice(0, -1).join(', ')} en ${seasons.at(-1)}`
+/**
+ * Seasons as ranges in Dutch: "2001/02 t/m 2003/04, 2005/06". A run of two or more seasons in a
+ * row is one range, so a gap is a short phrase and not a sentence per season.
+ */
+const seasonRanges = (seasons: readonly string[]) => {
+  const sorted = seasons.toSorted()
+  const ranges: string[] = []
+
+  for (let start = 0; start < sorted.length;) {
+    let end = start
+
+    while (end + 1 < sorted.length && nextSeason(sorted[end]!) === sorted[end + 1]) end += 1
+    ranges.push(end === start ? sorted[start]! : `${sorted[start]} t/m ${sorted[end]}`)
+    start = end + 1
+  }
+
+  return ranges.join(', ')
+}
 
 /**
  * The card "Per seizoen" of the page of a player (#1082): a table with a row for each season,
@@ -132,8 +147,9 @@ export function PlayerSeasonsCard({
 }
 
 /**
- * The sentences under the legend: what a dash means, where the figures of a season come from
- * when that is not the line-ups, and that the total counts only the seasons with a figure.
+ * The lines under the legend: what a dash means, one short line for each kind of gap in the
+ * line-ups (some, none, the table of Wikipedia) with the seasons as ranges, and that the total
+ * counts only the seasons with a figure.
  */
 export function playerSeasonsNotes(
   seasons: readonly PlayerSeason[],
@@ -155,17 +171,21 @@ export function playerSeasonsNotes(
   if (hasDash) {
     notes.push('Een streepje: van dat seizoen hebben we geen opstellingen.')
   }
-  if (league && wikipedia.length > 0) {
-    notes.push(`Voor ${seasonsText(wikipedia)} kennen we de cijfers niet per competitie.`)
-  } else if (wikipedia.length > 0) {
+  // One short line for each kind of gap, with the seasons as ranges.
+  const some = seasons.filter((season) => season.source === 'some-lineups')
+
+  if (some.length > 0) {
     notes.push(
-      `In ${seasonsText(wikipedia)} komen de cijfers uit de tabel van Wikipedia, die alleen de competities van die tabel telt.`,
+      `Opstellingen: ${some.map((season) => `${season.season} (${season.reportedMatches} van ${season.matchesInSeason})`).join(', ')}.`,
     )
   }
-  for (const season of seasons.filter((candidate) => candidate.source === 'some-lineups')) {
-    notes.push(
-      `Uit ${season.reportedMatches} van de ${season.matchesInSeason} wedstrijden van ${season.season} hebben we een opstelling.`,
-    )
+  const goalsOnly = seasons.filter((season) => season.source === 'none').map(({ season }) => season)
+
+  if (goalsOnly.length > 0) {
+    notes.push(`Alleen de doelpunten: ${seasonRanges(goalsOnly)}.`)
+  }
+  if (wikipedia.length > 0) {
+    notes.push(`${league ? 'Geen cijfers per competitie' : 'Cijfers van Wikipedia'}: ${seasonRanges(wikipedia)}.`)
   }
   if (shown.some((id) => !table.complete[id])) {
     notes.push('Het totaal telt alleen de seizoenen met een cijfer.')

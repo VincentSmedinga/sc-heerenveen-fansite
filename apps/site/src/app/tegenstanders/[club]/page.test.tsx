@@ -468,7 +468,7 @@ describe('the page of a club', () => {
   })
 
   it('says how many matches it is based on and since which season we have them', async () => {
-    expect(await render()).toContain('Alle 5 gespeelde wedstrijden sinds 2022/23')
+    expect(await render()).toContain('Sinds 2022/23')
   })
 
   it('has the switch, with the choice Alles current, because the cup was played', async () => {
@@ -483,7 +483,7 @@ describe('the page of a club', () => {
 
     expect(meetingsOf(html)).toHaveLength(4)
     expect(meetingsOf(html).join(' ')).not.toContain('KNVB Beker')
-    expect(html).toContain('Alle 4 gespeelde wedstrijden in de Eredivisie sinds 2022/23')
+    expect(html).toContain('Alleen de Eredivisie, sinds 2022/23')
     expect(html).toContain('in de Eredivisie, thuis, uit en in totaal')
   })
 
@@ -583,10 +583,10 @@ describe('the page of a club', () => {
 
     expect(sentenceOf(all)).toEqual({ drawn: 1, lost: 1, won: 3 })
     expect(plain(all)).toContain('Winst 3× Winst, 3 keer')
-    expect(plain(all)).toContain('Alle 5 gespeelde wedstrijden')
+    expect(plain(all)).not.toContain('Alle 5 gespeelde wedstrijden')
     expect(sentenceOf(league)).toEqual({ drawn: 1, lost: 0, won: 3 })
     expect(plain(league)).not.toContain('Verlies')
-    expect(plain(league)).toContain('Alle 4 gespeelde wedstrijden')
+    expect(plain(league)).not.toContain('Alle 4 gespeelde wedstrijden')
 
     for (const card of [all, league]) {
       expect(card).not.toContain('keer gewonnen')
@@ -613,8 +613,7 @@ describe('the page of a club', () => {
     const card = plain(scoreCardOf(await render()))
 
     expect(card).toContain('Winst, 1 keer')
-    expect(card).toContain('1 gespeelde wedstrijd')
-    expect(card).not.toContain('Alle 1')
+    expect(card).not.toContain('gespeelde wedstrijd')
   })
 
   describe('the competitions and the goals', () => {
@@ -641,7 +640,6 @@ describe('the page of a club', () => {
       expect(table).toContain('<th scope="col">Competitie</th>')
       expect(table).toContain('<span class="hf-visually-hidden">gespeeld</span>')
       expect(card.indexOf('Winst')).toBeLessThan(card.lastIndexOf('<table'))
-      expect(card.lastIndexOf('</table>')).toBeLessThan(card.indexOf('Alle 5 gespeelde wedstrijden'))
     })
 
     it('adds the competitions up to the matches of the card, for both choices', async () => {
@@ -1191,8 +1189,10 @@ describe('the card Resultaten sinds', () => {
     const html = await render()
     const card = cardOf(html)
 
-    expect(card.match(/<p /g)).toHaveLength(1)
-    expect(plain(card)).toContain('W winst (3 punten), G gelijk (1), V verlies (0). Alleen de Eredivisie.')
+    // The key, and the line at the end of the card with what limits the data.
+    expect(card.match(/<p /g)).toHaveLength(2)
+    expect(plain(card)).toContain('W winst (3 punten), G gelijk (1), V verlies (0).')
+    expect(plain(card)).toContain('Alleen de Eredivisie')
     expect(card).not.toContain('href="#wedstrijden"')
     expect(plain(card)).not.toMatch(/De lijn|gespeelde wedstrijden|De hele lijst/)
   })

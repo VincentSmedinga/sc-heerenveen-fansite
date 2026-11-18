@@ -18,7 +18,7 @@ describe('PenaltiesCard', () => {
     const html = renderToStaticMarkup(<PenaltiesCard against={1} for={2} known={30} played={39} />)
 
     expect(html).toContain('We kennen alleen de benutte strafschoppen.')
-    expect(html).toContain('Op basis van 30 van de 39 gespeelde wedstrijden.')
+    expect(html).toContain('30 van de 39 gespeelde wedstrijden')
   })
 
   it('stays, without a list, when there is no penalty', () => {

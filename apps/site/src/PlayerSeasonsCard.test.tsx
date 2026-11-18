@@ -133,16 +133,26 @@ describe('the table Per seizoen', () => {
     expect(html).not.toContain('totaal telt')
   })
 
-  it('says that the table of Wikipedia counts only the competitions of that table, and how many line-ups a season has', () => {
+  it('has one short line for each kind of gap, with the seasons as ranges', () => {
     const html = render([
       season('2026/27', { source: 'wikipedia', started: undefined, yellow: undefined }),
       season('2007/08', { matchesInSeason: 41, reportedMatches: 8, source: 'some-lineups' }),
     ])
 
-    expect(html).toContain(
-      'In 2026/27 komen de cijfers uit de tabel van Wikipedia, die alleen de competities van die tabel telt.',
-    )
-    expect(html).toContain('Uit 8 van de 41 wedstrijden van 2007/08 hebben we een opstelling.')
+    expect(html).toContain('Cijfers van Wikipedia: 2026/27.')
+    expect(html).toContain('Opstellingen: 2007/08 (8 van 41).')
+  })
+
+  it('writes a run of seasons as a range and a lone season as it is', () => {
+    const html = render([
+      season('2005/06', { source: 'none' }),
+      season('2004/05', { source: 'none' }),
+      season('2003/04', { source: 'none' }),
+      season('2001/02', { source: 'none' }),
+      season('2000/01'),
+    ])
+
+    expect(html).toContain('Alleen de doelpunten: 2001/02, 2003/04 t/m 2005/06.')
   })
 
   it('says under the Eredivisie that a season of Wikipedia has no split, with a dash and no zero', () => {
@@ -162,7 +172,7 @@ describe('the table Per seizoen', () => {
     )
 
     expect(html).toContain('alleen de Eredivisie, ')
-    expect(html).toContain('Voor 2004/05 kennen we de cijfers niet per competitie.')
+    expect(html).toContain('Geen cijfers per competitie: 2004/05.')
     expect(html).not.toContain('geen opstellingen')
     expect(html).toContain('–')
   })

@@ -1,7 +1,7 @@
 import { Card, DataTable, Heading, tableColumns, tableLegend, Text } from '@fansite/design-system'
 
+import { DataLine, incompleteMatches } from './DataLine'
 import { type FormationRow } from './formations'
-import { basisOf } from './matchBasis'
 
 const columns = ['Formatie', tableColumns.played, 'Resultaat'] as const
 
@@ -42,7 +42,7 @@ export function FormationsCard({
         }))}
       />
       <Text appearance="meta">{tableLegend([tableColumns.played])}. Resultaat: gewonnen–gelijk–verloren.</Text>
-      <Text appearance="meta">{basisOf(known, played)}</Text>
+      <DataLine limits={[incompleteMatches(known, played)]} />
     </Card>
   )
 }

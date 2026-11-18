@@ -2,6 +2,7 @@ import { BarChart, BarList, Card, Heading, Link, OutcomeBar, Text } from '@fansi
 
 import type { GoalQuarters, PlayerRecord, SeasonBars } from './player-charts'
 
+import { DataLine } from './DataLine'
 import { quarters } from './player-charts'
 
 /** The ids of the cards, for the headings that name them. */
@@ -29,9 +30,7 @@ export function PlayerQuartersCard({ quarters: goals }: { quarters: GoalQuarters
       <Text className="hf-visually-hidden">
         {quarters.map((quarter, index) => `${joined(quarter)}:\u00A0${goals.counts[index]}`).join(' · ')}
       </Text>
-      {goals.unknown > 0 && (
-        <Text appearance="meta">{`Van ${goals.unknown} van de ${goals.total} kennen we de minuut niet.`}</Text>
-      )}
+      {goals.unknown > 0 && <DataLine limits={[`${goals.unknown} van de ${goals.total} doelpunten zonder minuut`]} />}
     </Card>
   )
 }

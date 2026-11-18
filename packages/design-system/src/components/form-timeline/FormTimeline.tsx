@@ -22,9 +22,10 @@ export type FormTimelineProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'
    */
   results: readonly (FormResult | null)[]
   /**
-   * The text after the key, in the same paragraph: what counts, such as the competition.
+   * More text after the key, in the same paragraph. A limit of the data, such as the
+   * competition, goes in the line at the end of the card instead (`DataLine` in the site).
    */
-  scope: string
+  scope?: string
   /** The caption under the labels, such as `Seizoen`. */
   title: string
   /**

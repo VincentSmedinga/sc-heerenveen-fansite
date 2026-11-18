@@ -9,7 +9,7 @@ import { reasonOf } from '#src/errors'
 import { matchSearchPath, parseFilters, viewOf } from '#src/match-search'
 import { findScorerMatches, getSearchWorld } from '#src/match-search-data'
 import { onThisDayOf, questionsOf } from '#src/match-search-start'
-import { formatCount, MatchSearchFilters, MatchSearchResults, MatchSearchStart } from '#src/MatchSearchViews'
+import { MatchSearchFilters, MatchSearchResults, MatchSearchStart } from '#src/MatchSearchViews'
 import { pageAreas } from '#src/page-areas'
 import { getReportAddresses } from '#src/report-data'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
@@ -106,8 +106,7 @@ export default async function MatchSearchPage({ searchParams }: { searchParams: 
     return <ServerError retryHref={query === '' ? matchSearchPath : `${matchSearchPath}?${query}`} />
   }
 
-  const { allClubs, filters, matches, reportAddresses, seasons, start, view } = loaded
-  const first = seasons[0]?.slice(0, 4)
+  const { allClubs, filters, reportAddresses, seasons, start, view } = loaded
 
   return (
     <>
@@ -116,7 +115,9 @@ export default async function MatchSearchPage({ searchParams }: { searchParams: 
           <Page.Title>
             <Heading level={1}>Zoeken in wedstrijden</Heading>
           </Page.Title>
-          <Text appearance="intro">{`Alle ${formatCount(matches)} gespeelde wedstrijden sinds ${first ?? ''}, van de Eredivisie tot de Intertoto Cup.`}</Text>
+          <Text appearance="intro">
+            Zoek in de wedstrijden van sc Heerenveen, van de Eredivisie tot de Intertoto Cup.
+          </Text>
         </Page.Cell>
         <Page.Section area="filter" aria-label="Filters">
           <MatchSearchFilters allClubs={allClubs} filters={filters} seasons={seasons} view={view} />

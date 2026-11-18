@@ -3095,6 +3095,24 @@
 - **Alternatieven:** een regel onder de kaart zoals "Het moeilijkst" die had.
 - **Later:** 12 november 2026 (#1152): de kaart toont de datum niet meer, alleen een clubnaam en een aantal dagen.
 
+## Een kaart zegt alleen dat gegevens onvolledig zijn, en die regels staan overal op dezelfde plek
+
+- **Datum:** 18 november 2026
+- **Besluit:** volledig is stil.
+  Rusten de cijfers van een kaart of tabel op alle gespeelde wedstrijden of alle spelers, dan staat er geen regel, ook niet "1 gespeelde wedstrijd".
+  Alleen bij onvolledige gegevens of een beperking staat er één korte regel, in het kleine lettertype (`Text appearance="meta"`), aan het einde van de kaart: na de inhoud en de legenda, vóór de link naar meer en de bronvermelding.
+  Wat de gegevens beperkt (onvolledig, "Alleen de Eredivisie", "sinds 2020/21", een minimum) staat samen in die ene regel, zoals "Alleen de Eredivisie, 13 van de 14 gespeelde wedstrijden".
+  Onder de kop van een kaart staat alleen een uitleg die de inhoud nodig heeft om te begrijpen.
+  De seizoenen onder de tabel van een speler zijn één compacte regel per soort gat, met reeksen als "t/m": "Opstellingen: 2005/06 (12 van 34), 2006/07 (20 van 34). Alleen de doelpunten: 2001/02 t/m 2003/04. Cijfers van Wikipedia: 1998/99 t/m 2000/01."
+  In de site doet `DataLine` (`apps/site/src/DataLine.tsx`) dit, met `incompleteMatches` voor het aantal wedstrijden (#1388).
+- **Waarom:** een regel die altijd hetzelfde zegt, wordt niet meer gelezen en kost een regel hoogte, vooral op een telefoon.
+  Een regel die er alleen staat bij een gat, valt op.
+  Een vaste plek en maat maken de kaarten voorspelbaar.
+- **Alternatieven:** de regel op elke kaart houden; de beperkingen op een eigen regel laten staan; de regel onder de kop zetten; één zin per seizoen houden.
+- **Later:** dit past aan _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_: "Gebaseerd op" bij volledige gegevens vervalt.
+  En _De zin onder een kaart met cijfers zegt alleen waarop de telling rust_ (9 november 2026): "Alle 7 gespeelde wedstrijden" en "1 gespeelde wedstrijd" vervallen.
+  En _Inleidingen en toelichtingen_ in `editorial.mdx` (regel 4 en "Wat blijft staan"): de zin over het aantal wedstrijden staat alleen bij onvolledige gegevens, samen met de andere beperkingen.
+
 ## De pagina 'Onze bronnen' is compact, ook met tientallen bronnen
 
 - **Datum:** 18 november 2026
