@@ -932,8 +932,8 @@ describe('the page /wedstrijden/cijfers', () => {
         ...table.matchAll(/<tr><th scope="row">([^<]*)<\/th><td[^>]*>(\d+)<\/td><td[^>]*>(\d+)<\/td><\/tr>/g),
       ]
 
-      expect(table).toContain('<span title="Doelpunten voor">')
-      expect(table).toContain('<span class="hf-visually-hidden">doelpunten voor</span>')
+      expect(table).toContain('<span title="Doelpunten">')
+      expect(table).toContain('<span class="hf-visually-hidden">doelpunten</span>')
       expect(table).toContain('<span class="hf-visually-hidden">tegendoelpunten</span>')
       expect(rows.map(([, quarter, scored, conceded]) => [quarter, scored, conceded])).toEqual([
         ['1–15', '0', '1'],

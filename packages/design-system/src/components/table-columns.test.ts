@@ -14,7 +14,7 @@ describe('tableColumns', () => {
       drawn: 'drawn gelijk',
       goalDifference: 'goalDifference doelsaldo',
       goals: 'goals doelpunten',
-      goalsFor: 'goalsFor doelpunten voor',
+      goalsFor: 'goalsFor doelpunten',
       goalsPerMatch: 'goalsPerMatch doelpunten per wedstrijd',
       hattricks: 'hattricks hattricks',
       lost: 'lost verlies',
@@ -33,9 +33,14 @@ describe('tableColumns', () => {
     })
   })
 
-  it('gives every column an icon of its own and a word of its own', () => {
+  it('gives every column an icon of its own and a word of its own, except the goals for', () => {
     expect(new Set(all.map(([, { icon }]) => icon)).size).toBe(all.length)
-    expect(new Set(all.map(([, { name }]) => name)).size).toBe(all.length)
+    // `goalsFor` says `doelpunten` like `goals`: it is only used beside `conceded`, never in a
+    // table with `goals`.
+    const others = all.filter(([key]) => key !== 'goalsFor')
+
+    expect(new Set(others.map(([, { name }]) => name)).size).toBe(others.length)
+    expect(tableColumns.goalsFor.name).toBe(tableColumns.goals.name)
   })
 
   it('has an icon for every column and a column for every icon', () => {

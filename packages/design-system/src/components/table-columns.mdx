@@ -23,7 +23,7 @@ Kleur herhaalt altijd een vorm en vervangt hem nooit.
 | `points`               | punten                   | een telstreepje                                  |
 | `pointsPerMatch`       | punten per wedstrijd     | het telstreepje met een klein veld erover        |
 | `goals`                | doelpunten               | een gewone bal, zonder badge                     |
-| `goalsFor`             | doelpunten voor          | een bal met een groene badge met een plus        |
+| `goalsFor`             | doelpunten               | een bal met een groene badge met een plus        |
 | `conceded`             | tegendoelpunten          | een bal met een rode badge met een min           |
 | `goalDifference`       | doelsaldo                | een bal met een badge met plus-min               |
 | `goalsPerMatch`        | doelpunten per wedstrijd | een bal met een klein veld erover                |
@@ -50,6 +50,7 @@ Alle lijnen zijn even dik als die van het veld, behalve het kleine veld van "per
   Het is verborgen voor schermlezers, en de kop heeft het hele woord, verborgen voor het oog.
   Een sorteerknop heet naar het woord, "gespeeld" of "gelijk", zodat spraakbesturing "klik gespeeld" kan zeggen.
 - **Elke kolom heeft een eigen pictogram en een eigen woord.**
+  Alleen `goalsFor` zegt hetzelfde als `goals`, "doelpunten", want de bal met de plus staat alleen naast de bal met de min, en nooit in een tabel met `goals`.
   De test van `tableColumns` legt dat vast.
 - **De regel onder de tabel** is de legenda: het pictogram en het woord van elke kolom die de tabel heeft, in de volgorde van de kolommen, zonder komma's en nooit met de `#` van de plaats.
   Een legenda die op meer regels staat, verdeelt de items gelijk over de regels.
