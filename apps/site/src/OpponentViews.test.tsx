@@ -315,12 +315,12 @@ describe('ClubScoreCountsCard', () => {
       within(table)
         .getAllByRole('columnheader')
         .map((header) => header.textContent),
-    ).toEqual(['Competitie', 'Wedstrijden'])
+    ).toEqual(['Competitie', 'gespeeld'])
     expect(
       within(table)
         .getAllByRole('row')
         .map((row) => row.textContent),
-    ).toEqual(['CompetitieWedstrijden', 'Eredivisie4', 'KNVB Beker1'])
+    ).toEqual(['Competitiegespeeld', 'Eredivisie4', 'KNVB Beker1'])
   })
 
   it('draws the goals against first, so the goals for are green at the left, as in the hole', () => {

@@ -639,7 +639,7 @@ describe('the page of a club', () => {
 
       expect(table).toContain('<caption class="hf-visually-hidden">De competities van deze wedstrijden')
       expect(table).toContain('<th scope="col">Competitie</th>')
-      expect(table).toContain('Wedstrijden</th>')
+      expect(table).toContain('<span class="hf-visually-hidden">gespeeld</span>')
       expect(card.indexOf('Winst')).toBeLessThan(card.lastIndexOf('<table'))
       expect(card.lastIndexOf('</table>')).toBeLessThan(card.indexOf('Alle 5 gespeelde wedstrijden'))
     })

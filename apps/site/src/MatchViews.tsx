@@ -369,7 +369,7 @@ export function GoalsPerQuarterCard({
           </DonutChart.Group>
           <DataTable
             caption="Doelpunten van sc Heerenveen en van de tegenstanders per kwartier van de wedstrijd"
-            columns={['Kwartier', 'Voor', 'Tegen']}
+            columns={['Kwartier', tableColumns.goalsFor, tableColumns.conceded]}
             rows={quarterLabels.map((label, index) => ({
               cells: [scored[index] ?? 0, conceded[index] ?? 0],
               header: label,
@@ -377,6 +377,7 @@ export function GoalsPerQuarterCard({
             // A fixed series in its own order, from the first quarter to the last: no sorting.
             sortable={false}
           />
+          <Text appearance="meta">{tableLegend([tableColumns.goalsFor, tableColumns.conceded])}</Text>
           <Text>{`Na de 80e minuut: ${late.scored} voor, ${late.conceded} tegen`}</Text>
           <Text>{`In blessuretijd: ${stoppage.scored} voor, ${stoppage.conceded} tegen`}</Text>
           <BasedOn known={known} played={played} />
@@ -917,7 +918,7 @@ export function SeasonCard({
           <FormChart results={results} />
           <DataTable
             caption="Uitslagen van sc Heerenveen dit seizoen, met de punten"
-            columns={['Uitslag', 'Wedstrijden', 'Punten']}
+            columns={['Uitslag', tableColumns.played, tableColumns.points]}
             rows={[
               { cells: [won, won * 3], header: 'Winst' },
               { cells: [drawn, drawn], header: 'Gelijk' },
@@ -927,10 +928,11 @@ export function SeasonCard({
             // The results with the points are a short series in their own order: no sorting.
             sortable={false}
           />
+          <Text appearance="meta">{tableLegend([tableColumns.played, tableColumns.points])}</Text>
           <Disclosure summary="Uitslag en gemiddelde per speelronde">
             <DataTable
               caption="Uitslagen van sc Heerenveen per speelronde, met de punten en het gemiddelde aantal punten per wedstrijd over de laatste 5 wedstrijden"
-              columns={['Ronde', 'Uitslag', 'Punten', { abbreviation: 'Gem.', name: 'Gemiddelde' }]}
+              columns={['Ronde', 'Uitslag', tableColumns.points, { abbreviation: 'Gem.', name: 'Gemiddelde' }]}
               rows={results.map((result, index) => ({
                 cells: [
                   outcomeWord[result],
@@ -940,6 +942,7 @@ export function SeasonCard({
                 header: String(index + 1),
               }))}
             />
+            <Text appearance="meta">{tableLegend([tableColumns.points])}</Text>
             <Text appearance="meta">
               Gem. is het gemiddelde aantal punten per wedstrijd over de laatste 5 wedstrijden, zoals de lijn.
             </Text>

@@ -327,9 +327,10 @@ export function ClubScoreCountsCard({ meetings }: { meetings: readonly Meeting[]
     >
       <DataTable
         caption="De competities van deze wedstrijden en hoeveel wedstrijden er in elke werden gespeeld"
-        columns={['Competitie', 'Wedstrijden']}
+        columns={['Competitie', tableColumns.played]}
         rows={competitionCounts(meetings).map(({ competition, count }) => ({ cells: [count], header: competition }))}
       />
+      <Text appearance="meta">{tableLegend([tableColumns.played])}</Text>
     </ScoreCountsView>
   )
 }
