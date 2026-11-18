@@ -235,6 +235,8 @@ const englishClubs: Readonly<Record<string, { name: string; page: string }>> = {
   'Vitória F.C.': { name: 'Vitória Setúbal', page: 'Vitória FC (Setúbal)' },
   'VVV-Venlo': { name: 'VVV-Venlo', page: 'VVV-Venlo' },
   'Willem II (football club)': { name: 'Willem II', page: 'Willem II (voetbalclub)' },
+  // The English page now links the club under this title, which redirects to the same article.
+  'Willem II Tilburg': { name: 'Willem II', page: 'Willem II (voetbalclub)' },
 }
 
 /** How the pages name us: the Dutch ones by our name, the English ones also by the town. */
