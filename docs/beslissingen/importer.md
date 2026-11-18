@@ -4454,7 +4454,8 @@
   Per rij bewaart de tabel ook de bron: de pagina (`source_page`), de taal (`language`) en het tijdstip van het lezen (`read_at`).
   De club is een `club_id` van `clubs`; sc Heerenveen zelf staat daar niet in, dus zijn rij heeft geen `club_id`, zoals bij `matches`.
   Een samenvoeging van clubs zet het nummer mee over (`mergeClubInto`).
-- **Waarom:** de tabel heeft clubs van elders en een groep, en past niet in `standings`, die onze competitie is. Een eigen tabel laat de sleutel (seizoen, competitie, groep, positie) kloppen.
+- **Waarom:** de tabel heeft clubs van elders en een groep, en past niet in `standings`, die onze competitie is.
+  Een eigen tabel laat de sleutel (seizoen, competitie, groep, positie) kloppen.
   De wedstrijden van de andere clubs hebben we niet, dus de tabel valt niet uit onze wedstrijden uit te rekenen.
 - **Alternatieven:** een kolom `competition` in `standings` (maakt van onze competitie een rommellade); de tabel uit onze eigen wedstrijden berekenen (de wedstrijden van de andere clubs ontbreken); de naam van de club als tekst bewaren zoals `standings` doet (dan moet een samenvoeging van clubs er ook de namen in nalopen).
 
@@ -4468,7 +4469,7 @@
   Een pagina die de tabel niet geeft, wordt ook een regel in het logboek en geen groepstabel.
   De clubs worden gekoppeld zoals bij de wedstrijden (`createClubBook` met `clubFullNames`, en de omleidingen van de artikelen), zodat `Sporting Lissabon` geen tweede club naast die van de wedstrijden wordt.
   De Intertoto Cup van 1998 en later was een knock-outtoernooi en staat er niet in.
-  De pagina van 1996 heeft de groep van sc Heerenveen ook, onder `Sc Heerenveen`; de namen van de pagina's schrijven de club op meer manieren.
+  De pagina van 1996 heeft de groep van sc Heerenveen ook; de pagina's schrijven de club op meer manieren (`sc Heerenveen`, `SC Heerenveen` en `Sc Heerenveen`), en de lezer kent ze alle drie.
 - **Waarom:** de pagina's staan niet onder één naam of in één vorm, en een verzoek op een gok kost een verzoek aan een pagina die niet bestaat.
   De lijst is klein en wordt bijgewerkt als een seizoen erbij komt.
   Een tabel die niet klopt is erger dan geen tabel: de bezoeker leest de uitslagen als waar.
