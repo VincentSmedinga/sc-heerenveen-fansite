@@ -1,0 +1,14 @@
+/*
+ * The drawing of a cup: upright, twice as high as wide. The size is the size of the artwork,
+ * and on a screen narrower than that it shrinks with the card, keeping its proportions.
+ */
+
+@layer hf.components {
+  .hf-cup {
+    block-size: auto;
+    color: var(--hf-colour-text-secondary);
+    display: block;
+    inline-size: 6rem;
+    max-inline-size: 100%;
+  }
+}

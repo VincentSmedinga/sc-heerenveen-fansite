@@ -2,9 +2,10 @@ import type { PublicLeagueResult } from '@fansite/db/queries'
 import type { Metadata } from 'next'
 
 import { seasonOf } from '@fansite/db/season'
-import { Card, Heading, Link, Page, SeasonPicker, StandingsTable, Text } from '@fansite/design-system'
+import { Card, Cup, Heading, Link, Page, SeasonPicker, StandingsTable, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
+import { cupOutcomeOf } from '#src/cup-outcome'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
 import { lastFiveOf } from '#src/last-five'
@@ -112,6 +113,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   // A card for each competition with a result, the newest first in the current season. A season
   // without a result has the one card Uitslagen.
   const resultCards = resultsPerCompetition(results)
+  const cupOutcome = cupOutcomeOf(data.matches)
   const standingsCard = standingsCardOf(current)
   // The results of every club, for the switch of the table and for the line of our place.
   const leagueResults = await leagueResultsOfSeason(data)
@@ -247,6 +249,13 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
                     reportAddresses={reportAddresses}
                     withCompetition={false}
                   />
+                  {competition === 'KNVB Beker' && cupOutcome?.kind === 'lost' && <Text>{cupOutcome.line}</Text>}
+                  {competition === 'KNVB Beker' && cupOutcome?.kind === 'won' && (
+                    <>
+                      <Text>Bekerwinnaar</Text>
+                      <Cup />
+                    </>
+                  )}
                   {competition === 'Eredivisie' && <SeasonCourseLink href={statistics('verloop-van-het-seizoen')} />}
                 </Card>
               </Page.Cell>

@@ -46,6 +46,8 @@ export type { ChipListProps, ChipProps } from './components/chip/Chip'
 export { Contents } from './components/contents/Contents'
 export { CountryName } from './components/country-name/CountryName'
 export type { CountryNameProps } from './components/country-name/CountryName'
+export { Cup } from './components/cup/Cup'
+export type { CupProps } from './components/cup/Cup'
 export { DataTable } from './components/data-table/DataTable'
 export type {
   DataTableCell,

@@ -236,6 +236,33 @@ export function plain(value: string): string {
     .trim()
 }
 
+/** The numbers of the rounds in words, as the cup rounds are written (#1397). */
+const roundNumbers: readonly string[] = ['Eerste', 'Tweede', 'Derde', 'Vierde', 'Vijfde']
+
+/**
+ * The name of a cup round with one spelling: in words and in the singular, so `3e ronde` is
+ * `Derde ronde` and `Achtste finales` is `Achtste finale`. The pages of Wikipedia write both
+ * forms, and a heading that is neither is returned as it is.
+ */
+export function cupRoundName(heading: null | string): null | string {
+  if (heading === null) {
+    return null
+  }
+
+  const numbered = /^(\d)e ronde$/iu.exec(heading)
+  const word = numbered === null ? undefined : roundNumbers[Number(numbered[1]) - 1]
+
+  if (word !== undefined) {
+    return `${word} ronde`
+  }
+
+  const plural = /^(achtste finale|kwartfinale|halve finale)s$/iu.exec(heading)
+
+  return plural === null
+    ? heading
+    : `${(plural[1] ?? '').charAt(0).toUpperCase()}${(plural[1] ?? '').slice(1).toLowerCase()}`
+}
+
 /**
  * Reads the KNVB Beker page for the matches of sc Heerenveen. The round is the heading above
  * the match, so a new round needs no code. There may be no match of ours yet (before the draw,
@@ -254,7 +281,7 @@ export function readCup(text: string): ReadProgramme {
   const problems: string[] = []
 
   for (const box of boxes.filter((found) => isOurs(found) && !isRestOfStopped(found, boxes))) {
-    const match = readMatch(box, 'KNVB Beker', box.heading, restOf(box, boxes))
+    const match = readMatch(box, 'KNVB Beker', cupRoundName(box.heading), restOf(box, boxes))
 
     if (typeof match === 'string') {
       problems.push(match)

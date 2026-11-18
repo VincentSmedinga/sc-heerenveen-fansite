@@ -879,9 +879,9 @@ describe('the changes of Wikipedia that are held back', () => {
 
   it('counts the held changes in all seasons and names the seasons, the newest first', async () => {
     const now = await addMatch()
-    const before = await addMatch({ round: 'Achtste finales', season: '2013/14' })
+    const before = await addMatch({ round: 'Achtste finale', season: '2013/14' })
 
-    await addHeld(before, { round: 'Achtste finales', season: '2013/14' })
+    await addHeld(before, { round: 'Achtste finale', season: '2013/14' })
     await addHeld(now)
     await addHeld(now, { newValue: null })
 

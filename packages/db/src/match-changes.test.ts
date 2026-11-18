@@ -41,7 +41,7 @@ const stored: Omit<NewMatch, 'clubId'> = {
   matchDate: '2014-02-05',
   opponent: 'Ajax',
   resultSetAt: new Date('2014-02-05T22:00:00Z'),
-  round: 'Achtste finales',
+  round: 'Achtste finale',
   season: '2013/14',
   status: 'played',
 }
@@ -68,7 +68,7 @@ const read: ReadMatch = {
   penaltiesAgainst: null,
   penaltiesFor: null,
   referee: null,
-  round: 'Achtste finales',
+  round: 'Achtste finale',
   stadium: null,
   status: 'played',
 }
@@ -107,7 +107,7 @@ async function heldChange(newValue: null | string = 'sc Heerenveen 3–0 Ajax') 
       oldValue: 'sc Heerenveen 2–0 Ajax',
       proposal: newValue === null ? null : encodeProposal(proposal),
       reason: 'the season is over, and its matches do not change',
-      round: 'Achtste finales',
+      round: 'Achtste finale',
       season: '2013/14',
       status: 'pending',
     })

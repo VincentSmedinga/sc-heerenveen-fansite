@@ -6579,3 +6579,15 @@
   De vlag is versiering in de link, zoals bij een speler met een pagina, en het land staat één keer in woorden achter de link, alleen voor een schermlezer: de link heet dan de naam van de club en het land klinkt niet twee keer.
   De tabel sorteert op de naam en de cijfers, dus de vlag schuift niet mee.
 - **Alternatieven:** alleen buitenlandse clubs een vlag geven (dan valt een Nederlandse club zonder land samen met een club waarvan we het land niet weten); `CountryName` (dat toont de naam van het land, niet van de club).
+
+## Het bekerkaartje noemt de ronde van de uitschakeling, en viert een gewonnen beker met een tekening
+
+- **Datum:** 18 november 2026
+- **Besluit:** onderaan de kaart KNVB Beker op Wedstrijden staat, als de laatste bekerwedstrijd van het seizoen is verloren in een ronde die we kunnen noemen, een regel: `Uitgeschakeld in de achtste finale`, en na een verloren finale `Verloren in de finale`.
+  Is de laatste wedstrijd een gewonnen finale, dan staat er `Bekerwinnaar` en daaronder een lijntekening van een beker (`Cup` in het designsysteem), als verrassing voor wie het seizoen opent.
+  Gelijkspel na verlenging beslissen de strafschoppen.
+  Zolang er een wedstrijd gepland is, bij een ontbrekende uitslag, bij een ronde zonder naam (`Wedstrijd 6` van de oude fansite) en in een seizoen zonder bekerwedstrijd staat er niets (`cupOutcomeOf`).
+- **Waarom:** de kaart toont de weg door de beker al, dus een eigen kaart (#404) voegt weinig toe: alleen de regel over de uitschakeling ontbrak.
+  De tekening is versiering (voor een schermlezer verborgen), en de winst staat in woorden ernaast.
+  Een gewonnen beker verdient een eigen moment, en alleen dan, zodat het een verrassing blijft.
+- **Alternatieven:** een eigen kaart met de weg door de beker (#404); de tekening in elk seizoen; een foto of een logo van de KNVB (rechten en een verzoek naar derden).

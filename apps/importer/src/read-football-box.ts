@@ -14,6 +14,7 @@ import type { ReadGoal, ReadMatch, ReadProgramme, Template } from './read-wikipe
 
 import {
   clean,
+  cupRoundName,
   findTemplates,
   linkedPage,
   linkTarget,
@@ -76,9 +77,9 @@ type Section = {
 
 /** The cup rounds on the English page of 2009/10, as the Dutch pages of then name them. */
 const cupRounds: Readonly<Record<string, string>> = {
-  'Fourth round': '4e ronde',
-  'Second round': '2e ronde',
-  'Third round': '3e ronde',
+  'Fourth round': 'Vierde ronde',
+  'Second round': 'Tweede ronde',
+  'Third round': 'Derde ronde',
 }
 
 /** What the `round` field of a match of a tie says, and which of the two matches it is. */
@@ -140,7 +141,7 @@ const footballBoxSeasons: Readonly<Record<string, readonly FootballBoxPage[]>> =
         {
           competition: 'KNVB Beker',
           heading: /^Wedstrijd(?:en)?$/u,
-          round: ({ topHeading }) => (topHeading === '' ? undefined : topHeading),
+          round: ({ topHeading }) => (topHeading === '' ? undefined : (cupRoundName(topHeading) ?? undefined)),
         },
       ],
       title: 'KNVB Beker 2008/09 (mannen)',
