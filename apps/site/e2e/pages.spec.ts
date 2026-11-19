@@ -166,6 +166,9 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/tegenstanders?competitie=onzin', status: 404 },
   { path: '/tegenstanders/testdorp-fc', status: 200 },
   { path: '/tegenstanders/testdorp-fc?competitie=eredivisie', status: 200 },
+  { path: '/tegenstanders/testdorp-fc?waar=thuis', status: 200 },
+  { path: '/tegenstanders/testdorp-fc?competitie=eredivisie&waar=uit', status: 200 },
+  { path: '/tegenstanders/testdorp-fc?waar=onzin', status: 200 },
   { path: '/tegenstanders/voorbeeld-united', status: 200 },
   { path: '/tegenstanders/fc-maquette', status: 200 },
   // Clubs that only the made-up old matches meet: the archive is the only source of their page.

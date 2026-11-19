@@ -22,7 +22,13 @@ import { seasonOf } from '@fansite/db/season'
 import { listClubStadiumLines, type StadiumLine } from '@fansite/db/stadiums'
 
 import { cacheFor, cacheForKey } from './cache'
-import { type CompetitionChoice, competitionMembers, countsFor } from './competition'
+import {
+  type CompetitionChoice,
+  competitionMembers,
+  competitionParam,
+  competitionValues,
+  countsFor,
+} from './competition'
 import { getDatabase } from './database'
 import { ownListPeriods, stadiumPeriods } from './match-format'
 import { letterOf, resultOf } from './match-result'
@@ -530,6 +536,52 @@ export const shownPlaces = 5
 export type Venue = 'all' | 'away' | 'home'
 
 export const venues = ['all', 'home', 'away'] as const
+
+/** The name of the query parameter of the choice Alle, Thuis or Uit on the page of a club. */
+export const venueParam = 'waar'
+
+/** The value of each venue in the address; Alle has no parameter. */
+const venueValues = { away: 'uit', home: 'thuis' } as const
+
+/**
+ * The venue an address asks for with `?waar=`: `thuis` is home and `uit` is away. No parameter
+ * and anything else, such as an unknown value or one given twice, is Alle, so a wrong link
+ * shows the card as it opens.
+ */
+export function parseVenue(value: string | string[] | undefined): Venue {
+  return value === venueValues.home ? 'home' : value === venueValues.away ? 'away' : 'all'
+}
+
+/** The matches played at home or away; all of them for Alle. The order stays as given. */
+export const venueMatchesOf = <T extends { home: boolean }>(matches: readonly T[], venue: Venue) =>
+  venue === 'all' ? [...matches] : matches.filter((match) => match.home === (venue === 'home'))
+
+/**
+ * Whether the card has a choice of venue: the matches have both a home match and an away match,
+ * whatever their status, since otherwise the choice would do nothing.
+ */
+export const hasBothVenues = (matches: readonly { home: boolean }[]) =>
+  matches.some((match) => match.home) && matches.some((match) => !match.home)
+
+/**
+ * The query of the page of a club, without the question mark: the competition, the venue and
+ * the page, in that order, each only when it is not the one the page opens with.
+ */
+export function clubQuery(competition: CompetitionChoice, venue: Venue, page: number) {
+  const parameters = new URLSearchParams()
+
+  if (competition !== 'all') {
+    parameters.set(competitionParam, competitionValues[competition])
+  }
+  if (venue !== 'all') {
+    parameters.set(venueParam, venueValues[venue])
+  }
+  if (page > 1) {
+    parameters.set('pagina', String(page))
+  }
+
+  return parameters.toString()
+}
 
 /**
  * The 25 clubs against which sc Heerenveen took the fewest points per match, for the card Het
