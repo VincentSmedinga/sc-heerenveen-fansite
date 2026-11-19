@@ -1793,9 +1793,9 @@
   Eén regel voor wat komt, in Programma en hier, voorkomt dat de twee pagina's het oneens zijn over een uitgestelde of een begonnen wedstrijd.
 - **Alternatieven:** een eigen kaart voor de komende wedstrijden, erboven of in de zijkolom; de keuze voor de competitie negeren, zoals de kaart Stadion doet; alleen de eerstvolgende wedstrijd tonen; een zin "we spelen niet meer tegen deze club" als er niets komt (fout als het programma nog niet gepubliceerd is); `ShortMatch` als regel, zoals de gespeelde wedstrijden; twee onderkoppen, "Komende wedstrijden" en "Gespeelde wedstrijden", en een zin onder de tweede voor een club die we nog niet speelden (de projecteigenaar wilde geen koppen; het ontbreken van een uitslag zegt genoeg).
 - **Later:** zie _`Match` is voor een volledige lijst, `ShortMatch` voor een selectie_ (4 november 2026): `ShortMatch` voor de gespeelde wedstrijden is vervallen.
+  De kaart Wedstrijden heeft sindsdien één soort regel, `Match`, voor de komende en de gespeelde wedstrijden; een komende wedstrijd valt nog altijd op omdat hij geen uitslag heeft.
 - **Later:** de volgorde van de wedstrijden die nog komen is op de kaart Wedstrijden van een club omgekeerd (zie _De kaart Wedstrijden van een club heeft een keuze Alle, Thuis en Uit en toont de wedstrijden die nog komen van ver naar dichtbij_, 19 november 2026): de verst weg eerst, de eerstvolgende laatst.
   Programma houdt de eerstvolgende bovenaan, en `upcomingOf` geeft hem nog zo; de kaart draait hem om.
-  De kaart Wedstrijden heeft sindsdien één soort regel, `Match`, voor de komende en de gespeelde wedstrijden; een komende wedstrijd valt nog altijd op omdat hij geen uitslag heeft.
 
 ## De balk van Statistieken komt uit een slot van de layout en houdt het seizoen en de keuze vast
 
