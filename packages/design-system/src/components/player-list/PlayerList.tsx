@@ -36,28 +36,30 @@ export type PlayerListProps = Omit<ComponentPropsWithoutRef<'ul'>, 'children'> &
  * A list of players for a long page: one row for each, with the family name in the stronger
  * weight, a comma and the rest of the name (`Aken, Joost van`), and under it in small, quiet
  * letters what we know of his time with us. The name links to his page when he has one. On a
- * narrow screen the rows stand in one column; on a wide one in two, read from top to bottom.
+ * narrow column the rows stand in one column; in a wide one in two, read from top to bottom.
  * player-list.css gives the look.
  */
 export const PlayerList = ({ className, order = 'surname-first', players, ...props }: PlayerListProps) => (
-  <ul {...props} className={classNames('hf-player-list', className)} role="list">
-    {players.map(({ facts, href, key, rest, surname }) => {
-      const name =
-        order === 'given-first' ? (
-          <PlayerName givenName={rest} surname={surname} />
-        ) : (
-          <>
-            <strong className="hf-player-list-surname">{surname}</strong>
-            {rest === undefined || rest === '' ? null : `, ${rest}`}
-          </>
-        )
+  <div className="hf-player-list-container">
+    <ul {...props} className={classNames('hf-player-list', className)} role="list">
+      {players.map(({ facts, href, key, rest, surname }) => {
+        const name =
+          order === 'given-first' ? (
+            <PlayerName givenName={rest} surname={surname} />
+          ) : (
+            <>
+              <strong className="hf-player-list-surname">{surname}</strong>
+              {rest === undefined || rest === '' ? null : `, ${rest}`}
+            </>
+          )
 
-      return (
-        <li className="hf-player-list-row" key={key}>
-          {href === undefined ? name : <Link href={href}>{name}</Link>}
-          {facts === undefined || facts === '' ? null : <span className="hf-player-list-facts">{facts}</span>}
-        </li>
-      )
-    })}
-  </ul>
+        return (
+          <li className="hf-player-list-row" key={key}>
+            {href === undefined ? name : <Link href={href}>{name}</Link>}
+            {facts === undefined || facts === '' ? null : <span className="hf-player-list-facts">{facts}</span>}
+          </li>
+        )
+      })}
+    </ul>
+  </div>
 )

@@ -3558,6 +3558,7 @@
 - **Waarom:** Wedstrijden · Cijfers en Spelers · Cijfers (#1218) hebben dezelfde kop met lijn nodig, en één onderdeel houdt ze gelijk.
   Vier getallen naast elkaar lees je in één blik, en dat is wat de rij is voor.
 - **Alternatieven:** de groep in de site bouwen, zodat twee pagina's hem elk bouwen; een eigen component voor de rij kerngetallen van Cijfers.
+- **Later:** de 52 rem van `across` is de breedte van de kolom geworden, 42 rem (zie _Rasters en rijen van cijfers, vragen, spelers en uitslagen wisselen op de breedte van hun eigen kolom_, 19 november 2026).
 
 ## Een naam bij een wedstrijd is een `dt` in een `dl`, met de `Match` in de `dd`
 
@@ -3984,3 +3985,24 @@
   Reflow (WCAG 1.4.10) blijft goed: inzoomen maakt het venster en dus de kolom in rem smaller, dus de smalle opvulling volgt vanzelf.
 - **Alternatieven:** de media queries laten staan (klopt niet in een smalle kolom); een wrapper om elke tabel in elk component (alleen waar nog geen container om de tabel stond: `DataTable`); een container op de tabel zelf (werkt niet, zie boven); een naamloze container (breekt de queries van de containers eromheen).
 - **Later:** maakt de regels over 24 rem voor de kolommen met cijfers (_Het pictogram in een tabelkop krimpt niet, en een kolom met cijfers is zo breed als zijn cijfers_ en de besluiten over `PlayerFiguresTable` en de paginering) tot regels voor de breedte van de tabel of de plek, niet van het venster.
+
+## Rasters en rijen van cijfers, vragen, spelers en uitslagen wisselen op de breedte van hun eigen kolom
+
+- **Datum:** 19 november 2026
+- **Besluit:** `KeyFigures`, `QuestionCard.Grid`, `PlayerList` en `OutcomeLine`, die op 52 rem, 40 rem, 52 rem en 40 rem van het venster wisselden, wisselen met een container query en een eigen naam, en de `@media`-regels op breedte zijn uit hun bestanden.
+  Een element kan niet naar zijn eigen breedte vragen, dus de container is steeds een ander element:
+  - **`KeyFigures` en `QuestionCard.Grid`:** de lijst zelf is de container (`hf-key-figures`, `hf-question-grid`) en de kaarten vragen het hem.
+    De lijst is daarom een `flex` met een basis per kaart in plaats van een raster, want een raster kan zijn eigen kolommen niet laten wisselen.
+    De HTML en de plaats in `hf-flow` blijven gelijk.
+  - **`PlayerList`:** `columns` staat op de lijst zelf, dus de lijst staat nu in een `div` (`hf-player-list-container`, de container `hf-player-list`).
+    De volgorde voor het toetsenbord en voor een schermlezer blijft gelijk.
+  - **`OutcomeLine`:** de regel is de container (`hf-outcome-line`) en alleen de balk vraagt het hem.
+  - De getallen: vier cijfers naast elkaar vanaf 42 rem (vier kaarten van 9,4 rem en drie ruimtes van 1 rem komen op 40,5 rem); drie vragen vanaf 40 rem (drie kaarten van ongeveer 12 rem); twee kolommen spelers vanaf 32 rem (twee regels van ongeveer 13 rem en 2 rem ertussen komen op 28 rem, met ruimte voor een lange naam); de balk van 10 rem naast de tekst vanaf 40 rem.
+  - De regel in `card-columns.css` die `PlayerList` in een kaart op één kolom zette, is weg: de lijst ziet nu zelf dat de kaart smal is.
+  - `key-figures-css.test.ts` en `QuestionCard.test.tsx` houden de namen en de grenzen vast, en elk onderdeel heeft een verhaal in een smalle kolom (en `PlayerList` ook in een brede).
+  - `container-queries.spec.ts` is een uitzondering op de regel dat maten en breedtes geen e2e-test krijgen: dat een query ook echt past bij de container is alleen in een browser te zien (Chrome liet een tabel niet de container van zijn eigen cellen zijn), en een CSS-test ziet het niet.
+    De test zet elk onderdeel in een kolom van 300 en van 800 pixels, in een venster van 320, 390 en 1280 pixels.
+- **Waarom:** zie _Een regel over de ruimte van het component is een container query, een regel over het scherm een media query_.
+  Reflow (WCAG 1.4.10) blijft goed: inzoomen maakt de kolom in rem smaller, dus de rijen worden één kolom.
+- **Alternatieven:** de media queries houden (klopt niet in een zijbalk); één vaste grens voor alle vier (de vier hebben andere kolombreedtes); een `div` om elke lijst (alleen bij `PlayerList`, waar `columns` het niet anders toelaat).
+- **Later:** vervangt de grenzen van het venster (52 rem en 40 rem) die `KeyFigures`, `QuestionCard.Grid`, `PlayerList` en `OutcomeLine` volgens eerdere besluiten hadden, en maakt van `across` "vanaf 42 rem van de kolom" in plaats van "vanaf de breedte van een brede pagina".

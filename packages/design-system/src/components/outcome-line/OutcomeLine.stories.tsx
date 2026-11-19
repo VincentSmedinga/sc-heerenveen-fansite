@@ -33,3 +33,14 @@ const meta = preview.meta({
 })
 
 export const Default = meta.story({ name: 'De uitslagen in één regel' })
+
+export const Narrow = meta.story({
+  name: 'In een smalle kolom staat de balk boven de tekst',
+  render: () => (
+    <div style={{ maxInlineSize: '20rem' }}>
+      <OutcomeLine draws={15} losses={52} wins={9}>
+        9 gewonnen · 15 gelijk · 52 verloren
+      </OutcomeLine>
+    </div>
+  ),
+})

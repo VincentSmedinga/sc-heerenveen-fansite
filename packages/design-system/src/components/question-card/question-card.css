@@ -2,24 +2,32 @@
 
 @layer hf.components {
   /*
-   * Three columns on a wide screen and one on a phone. The cells of a row are as high as the
-   * highest one, so the row has an even edge.
+   * Three columns where the column is wide and one where it is narrow. The cells of a row are
+   * as high as the highest one, so the row has an even edge. The list is the container and its
+   * items ask it, because a list can't ask for its own width. Three cards of about 12rem and
+   * two gaps of 1rem need 40rem.
    */
   .hf-question-grid {
-    display: grid;
+    container-name: hf-question-grid;
+    container-type: inline-size;
+    display: flex;
+    flex-wrap: wrap;
     gap: var(--hf-space-m);
-    grid-template-columns: minmax(0, 1fr);
     list-style: none;
     margin: 0;
     padding: 0;
-
-    @media (width >= 40rem) {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
   }
 
   .hf-question-item {
     display: grid;
+    flex: 0 0 100%;
+    min-inline-size: 0;
+  }
+
+  @container hf-question-grid (inline-size >= 40rem) {
+    .hf-question-item {
+      flex-basis: calc((100% - 2 * var(--hf-space-m)) / 3);
+    }
   }
 
   /*

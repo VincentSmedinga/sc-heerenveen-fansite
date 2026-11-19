@@ -34,7 +34,7 @@ export const Default = meta.story({
   args: { children: 'sinds 1990/91', figure: '228', href: '#vraag', question: 'Tegen Testclub, Voorbeeld en Proef' },
   name: 'Kaart',
   render: (args) => (
-    <QuestionCard.Grid aria-label="Voorbeeld" style={{ gridTemplateColumns: '1fr', maxInlineSize: '20rem' }}>
+    <QuestionCard.Grid aria-label="Voorbeeld" style={{ maxInlineSize: '20rem' }}>
       <QuestionCard {...args} />
     </QuestionCard.Grid>
   ),
@@ -59,5 +59,22 @@ export const Grid = meta.story({
         de lijst, op doelsaldo
       </QuestionCard>
     </QuestionCard.Grid>
+  ),
+})
+
+export const NarrowGrid = meta.story({
+  name: 'Raster van kaarten in een smalle kolom, ook in een breed venster, onder elkaar',
+  render: () => (
+    <div style={{ maxInlineSize: '20rem' }}>
+      <QuestionCard.Grid aria-label="Begin met een vraag">
+        <QuestionCard figure="8" href="#uit" question="Elke uitzege in Europa">
+          en geen tegendoelpunt
+        </QuestionCard>
+        <QuestionCard figure="22" href="#derby" question="De derby tegen Testdorp">
+          13 keer gewonnen
+        </QuestionCard>
+        <QuestionCard figure="111" href="#nul" question="Alle 0–0’s" />
+      </QuestionCard.Grid>
+    </div>
   ),
 })

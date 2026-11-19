@@ -3,11 +3,14 @@
  * it and then the line that says what it counts. Two or three cards share the width and wrap to
  * the next line when they do not fit, so three become two and one. Four stand two by two at
  * every width, so a row never has three and one, unless the row is across: then four stand
- * in one row on a wide page.
+ * in one row where the column is wide. The width that counts is that of the column, not of the
+ * screen: the list is the container, and the cards ask it (a list can't ask for its own width).
  */
 
 @layer hf.components {
   .hf-key-figures {
+    container-name: hf-key-figures;
+    container-type: inline-size;
     display: flex;
     flex-wrap: wrap;
     gap: var(--hf-space-m);
@@ -16,25 +19,28 @@
     padding: 0;
   }
 
-  /* Four figures: two columns at every width, so the row is never three and one. */
-  .hf-key-figures-four {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  /* Across: four in one row from the width where the page has two columns (see Page.Main). */
-  @media (width >= 52rem) {
-    .hf-key-figures-across {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-  }
-
   /* A card without its own element: the surface, border and corners are those of .hf-card. */
   .hf-key-figure {
     flex: 1 1 9.375rem;
     min-inline-size: 0;
     overflow-wrap: anywhere;
     padding: calc(var(--hf-space-m) * 0.75) var(--hf-space-m);
+  }
+
+  /* Four figures: two to a row at every width, so the row is never three and one. */
+  .hf-key-figures-four > .hf-key-figure {
+    flex: 0 0 calc((100% - var(--hf-space-m)) / 2);
+  }
+
+  /*
+   * Across: four in one row from 42rem of column. Each card needs about 9.4rem (the basis of
+   * .hf-key-figure) and the three gaps are 3rem, which is 40.5rem; the rest is room to breathe.
+   * A main column on a wide page is wider than this, a sidebar is not.
+   */
+  @container hf-key-figures (inline-size >= 42rem) {
+    .hf-key-figures-across > .hf-key-figure {
+      flex-basis: calc((100% - 3 * var(--hf-space-m)) / 4);
+    }
   }
 
   /* The parts have an element of their own, so the flow of the card adds no space to them. */

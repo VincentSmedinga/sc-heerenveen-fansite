@@ -14,7 +14,7 @@ export type KeyFigure = {
 
 export type KeyFiguresProps = Omit<ComponentPropsWithoutRef<'ul'>, 'children'> & {
   /**
-   * Four figures in one row from the width of a wide page, and two by two below it. Without it
+   * Four figures in one row from 42rem of column, and two by two below it. Without it
    * four stand two by two at every width. Two or three are not changed by it.
    */
   across?: boolean
@@ -27,7 +27,7 @@ export type KeyFiguresProps = Omit<ComponentPropsWithoutRef<'ul'>, 'children'> &
  * of a player. It is a list, so a screen reader says how many figures there are, and each item
  * reads as one sentence: "52 doelpunten, in alle competities". The number is plain text and not
  * a heading. key-figures.css sets the cards. Four stand two by two, at every width, unless the
- * row is `across`: then they stand in one row from the width of a wide page. Two or three share
+ * row is `across`: then they stand in one row from 42rem of column. Two or three share
  * the row when they fit, and otherwise wrap: three become two and one, never three and one.
  */
 export const KeyFigures = ({ across = false, className, figures, ...props }: KeyFiguresProps) => (

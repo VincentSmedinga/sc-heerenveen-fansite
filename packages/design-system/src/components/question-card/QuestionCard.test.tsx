@@ -46,9 +46,10 @@ describe('QuestionCard', () => {
 })
 
 describe('the CSS of the question card', () => {
-  it('has three columns on a wide screen and one on a phone', () => {
-    expect(css).toMatch(/grid-template-columns:\s*minmax\(0, 1fr\);/)
-    expect(css).toMatch(/@media \(width >= 40rem\)\s*{\s*grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/)
+  it('has three columns in a wide column and one in a narrow one, asked of the list itself', () => {
+    expect(css).toMatch(/\.hf-question-grid \{[^}]*container-name: hf-question-grid;\s*container-type: inline-size;/)
+    expect(css).toMatch(/@container hf-question-grid \(inline-size >= 40rem\) \{\s*\.hf-question-item \{/)
+    expect(css).not.toMatch(/@media \(width/)
   })
 
   it('takes every colour from a token', () => {
