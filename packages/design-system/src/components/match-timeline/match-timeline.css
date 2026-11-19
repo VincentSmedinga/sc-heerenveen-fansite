@@ -127,7 +127,7 @@
 
   /*
    * The score after a goal, between the icon and the name: bold, in tabular figures, and in the
-   * colour of the result for sc Heerenveen (the tokens of an outcome, which reach 4.5:1 as text).
+   * colour of the result for sc Heerenveen (the outcome tokens, which reach 4.5:1 as text).
    * The colour only adds to the figures, which say who leads.
    */
   .hf-match-event-score {

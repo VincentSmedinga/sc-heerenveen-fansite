@@ -299,7 +299,7 @@ describe('the score after a goal', () => {
     homeName: ourSide === 'home' ? 'sc Heerenveen' : 'Testdorp FC',
     ourSide,
   })
-  const goal = (scored?: ReturnType<typeof score>): MatchTimelineEvent => ({
+  const goal = (scored?: ReturnType<typeof score>): Extract<MatchTimelineEvent, { kind: 'goal' }> => ({
     kind: 'goal',
     minute: 12,
     ours: true,
