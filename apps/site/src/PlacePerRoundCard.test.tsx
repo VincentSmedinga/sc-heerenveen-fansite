@@ -150,7 +150,7 @@ describe('PlacePerRoundCard', () => {
 
     expect(disclosure).not.toContain('<details open')
     expect(disclosure).toContain('<summary>Plek per speelronde</summary>')
-    expect(disclosure).toContain('<div class="hf-data-table-group"><table')
+    expect(disclosure).toContain('<div class="hf-data-table-group"><div class="hf-table-container"><table')
     expect(disclosure).not.toContain('<p')
     expect(tables.map(rounds)).toEqual([
       Array.from({ length: 17 }, (_, index) => String(index + 1)),
