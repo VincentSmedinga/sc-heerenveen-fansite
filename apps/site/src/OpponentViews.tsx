@@ -17,6 +17,7 @@ import {
   List,
   MarkRow,
   Match,
+  MoreRows,
   NewsItem,
   Pagination,
   PlayerName,
@@ -62,9 +63,9 @@ import {
   startYearOf,
   timelineOf,
   timelineWindow,
+  topPointsClubs,
   topPointsMinimum,
   topPointsOf,
-  topPointsPlaces,
   type Venue,
   venues,
 } from './opponents'
@@ -940,11 +941,12 @@ function MeetingLine({ choice, match, now }: { choice: CompetitionChoice; match:
 }
 
 /**
- * What a ranking card shows for one venue: a sentence when fewer than `topPointsPlaces` clubs
- * count, else the table with the first `shownPlaces` places, a Disclosure "Toon 5 meer" with
- * the rest, the legend and the line "Gebaseerd op". The order is the answer, and the caption
- * says which way it runs, so the tables do not sort. `low` is the card Het moeilijkst, which
- * runs from low to high; the caption names the venue and the choice of competition.
+ * What a ranking card shows for one venue: a sentence when fewer than `topPointsClubs` clubs
+ * count, else the table with the first `shownPlaces` places and a button that adds as many
+ * again up to the last place (`MoreRows`), the legend and the line "Gebaseerd op". The order is
+ * the answer, and the caption says which way it runs, so the table does not sort. `low` is
+ * the card Het moeilijkst, which runs from low to high; the caption names the venue and the
+ * choice of competition.
  */
 function RankingPanel({
   address,
@@ -965,7 +967,7 @@ function RankingPanel({
   venue: Venue
 }) {
   if (places.length === 0) {
-    return <Text>{`Nog geen ${topPointsPlaces} clubs met minstens ${topPointsMinimum} ${venueMatches[venue]}.`}</Text>
+    return <Text>{`Nog geen ${topPointsClubs} clubs met minstens ${topPointsMinimum} ${venueMatches[venue]}.`}</Text>
   }
 
   const caption = (what: string) =>
@@ -973,27 +975,25 @@ function RankingPanel({
   const lead = low
     ? 'waartegen sc Heerenveen gemiddeld de minste punten per wedstrijd haalt, van laag naar hoog'
     : 'waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt, van hoog naar laag'
-  const table = (rows: PointsPlace[], what: string) => (
-    <DataTable
-      caption={caption(what)}
-      columns={['Club', { ...tableColumns.pointsPerMatch, key: true }, tableColumns.played]}
-      rows={rows.map((place) => ({
-        cells: [averageFormat.format(place.points / place.played), place.played],
-        header: place.name,
-        href: `${address}/${place.slug}${query}`,
-        position: place.place,
-      }))}
-      sortable={false}
-    />
-  )
-  const rest = places.slice(shownPlaces)
+  const rows = places.map((place) => ({
+    cells: [averageFormat.format(place.points / place.played), place.played],
+    header: place.name,
+    href: `${address}/${place.slug}${query}`,
+    position: place.place,
+  }))
 
   return (
     <>
-      {table(places.slice(0, shownPlaces), `De vijf clubs ${lead}`)}
-      {rest.length === 0 ? null : (
-        <Disclosure summary={`Toon ${rest.length} meer`}>{table(rest, `De volgende vijf clubs ${lead}`)}</Disclosure>
-      )}
+      <MoreRows
+        caption={caption(`De eerste {shown} clubs ${lead}`)}
+        columns={['Club', { ...tableColumns.pointsPerMatch, key: true }, tableColumns.played]}
+        initial={shownPlaces}
+        key={`${choice}-${venue}`}
+        name={low ? 'Het moeilijkst' : 'Het makkelijkst'}
+        rows={rows}
+        step={shownPlaces}
+        unit="clubs"
+      />
       <Text appearance="meta">{topPointsLegend}</Text>
       <BasedOnSince
         choice={choice}

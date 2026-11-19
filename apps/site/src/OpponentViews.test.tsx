@@ -192,35 +192,33 @@ describe.each([
     expect(screen.getByText('Gemiddeld aantal punten per wedstrijd')).toBeTruthy()
   })
 
-  it('shows the first five places with two decimals and a comma, and the next five behind "Toon 5 meer"', () => {
+  it('shows the first five places with two decimals and a comma, then five more a press up to the last', () => {
     render(make({}))
 
-    const [first, second] = tables()
+    const first = tables()[0]
+    const column = () =>
+      [...(tables()[0]?.querySelectorAll('tbody td:nth-of-type(1)') ?? [])].map((cell) => cell.textContent)
 
+    expect(tables()).toHaveLength(1)
     expect(namesIn(first ?? null)).toEqual(firstFive)
-    expect([...(first?.querySelectorAll('tbody td:nth-of-type(1)') ?? [])].map((cell) => cell.textContent)).toEqual([
-      '1',
-      '2',
-      '3',
-      '4',
-      '5',
-    ])
+    expect(column()).toEqual(['1', '2', '3', '4', '5'])
     expect([...(first?.querySelectorAll('td.hf-key') ?? [])].map((cell) => cell.textContent)).toEqual(points)
-    expect(first?.querySelector('caption')?.textContent).toBe(`De vijf clubs ${caption}`)
+    expect(first?.querySelector('caption')?.textContent).toBe(`De eerste 5 clubs ${caption}`)
 
-    const fold = screen.getByText('Toon 5 meer').closest('details')
+    fireEvent.click(screen.getByRole('button', { name: `Toon 5 meer, ${title}` }))
 
-    expect(fold?.hasAttribute('open')).toBe(false)
-    expect(fold?.contains(second ?? null)).toBe(true)
-    expect(namesIn(second ?? null)).toEqual(nextFive)
-    expect(second?.querySelector('caption')?.textContent).toBe(`De volgende vijf clubs ${caption}`)
-    expect([...(second?.querySelectorAll('tbody td:nth-of-type(1)') ?? [])].map((cell) => cell.textContent)).toEqual([
-      '6',
-      '7',
-      '8',
-      '9',
-      '10',
-    ])
+    expect(namesIn(tables()[0] ?? null)).toEqual([...firstFive, ...nextFive])
+    expect(column()).toEqual(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'])
+    expect(tables()[0]?.querySelector('caption')?.textContent).toBe(`De eerste 10 clubs ${caption}`)
+    expect(within(tables()[0]?.closest('.hf-more-rows') as HTMLElement).getByRole('status').textContent).toBe(
+      '5 clubs meer getoond, nu 10',
+    )
+
+    // Eleven clubs count, so the last press shows the one that is left, and the end resets.
+    fireEvent.click(screen.getByRole('button', { name: `Toon 1 meer, ${title}` }))
+    expect(namesIn(tables()[0] ?? null)).toHaveLength(11)
+    fireEvent.click(screen.getByRole('button', { name: `Herstel naar top 5, ${title}` }))
+    expect(namesIn(tables()[0] ?? null)).toEqual(firstFive)
   })
 
   it('cannot be sorted, and has real column headers and a link named by the club', () => {
@@ -258,7 +256,7 @@ describe.each([
 
     expect(screen.getByRole('button', { name: 'Thuis' }).getAttribute('aria-pressed')).toBe('true')
     expect(namesIn(tables()[0] ?? null)[0]).toBe(homeFirst)
-    expect(tables()[0]?.querySelector('caption')?.textContent).toBe(`De vijf clubs ${caption}, thuis`)
+    expect(tables()[0]?.querySelector('caption')?.textContent).toBe(`De eerste 5 clubs ${caption}, thuis`)
     expect(screen.getByText('Sinds 2022/23, tegen clubs met minstens 5 gespeelde thuiswedstrijden')).toBeTruthy()
 
     chooseVenue('Alle')
@@ -270,13 +268,15 @@ describe.each([
   it('has a line for a screen reader that is empty at first and says which choice was made', () => {
     render(make({}))
 
-    const status = screen.getByRole('status')
+    const venueStatus = () =>
+      screen.getAllByRole('status').find((line) => !line.closest('.hf-more-rows')) as HTMLElement
+    const status = venueStatus()
 
     expect(status.textContent).toBe('')
 
     chooseVenue('Thuis')
 
-    expect(screen.getByRole('status')).toBe(status)
+    expect(venueStatus()).toBe(status)
     expect(status.textContent).toBe('Thuis gekozen')
   })
 
@@ -286,14 +286,14 @@ describe.each([
 
     expect(screen.getByText('Nog geen 10 clubs met minstens 5 gespeelde uitwedstrijden.')).toBeTruthy()
     expect(tables()).toEqual([])
-    expect(screen.queryByText('Toon 5 meer')).toBeNull()
+    expect(screen.queryByRole('button', { name: /Toon 5 meer/ })).toBeNull()
     expect(screen.getByRole('heading', { level: 2, name: title })).toBeTruthy()
   })
 
   it('names the Eredivisie in the caption, and keeps the choice in every link', () => {
     render(make({ choice: 'league', query: '?competitie=eredivisie' }))
 
-    expect(tables()[0]?.querySelector('caption')?.textContent).toBe(`De vijf clubs ${caption}, in de Eredivisie`)
+    expect(tables()[0]?.querySelector('caption')?.textContent).toBe(`De eerste 5 clubs ${caption}, in de Eredivisie`)
     expect(
       [...document.querySelectorAll('a')].every((link) =>
         link.getAttribute('href')?.endsWith('?competitie=eredivisie'),
@@ -315,7 +315,8 @@ describe.each([
     expect(html).not.toContain('aria-pressed')
     expect(html).not.toContain('<button')
     expect(html).toContain(firstFive[0])
-    expect(html).toContain('Toon 5 meer')
+    expect(html).not.toContain('Toon 5 meer')
+    expect(html.match(/<tbody>.*?<\/tbody>/s)?.[0].match(/<tr/g)).toHaveLength(5)
   })
 })
 

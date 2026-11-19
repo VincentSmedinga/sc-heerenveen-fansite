@@ -4039,7 +4039,7 @@
 - **Datum:** 9 november 2026
 - **Besluit:** de zijkolom van Tegenstanders toont onder `TopPointsCard` de zachte kaart `HardestCard`, die niets rendert als `hardestOf` in `src/opponents.ts` geen plaatsen geeft.
   `hardestOf` gebruikt dezelfde punten (`pointsOf`), hetzelfde minimum (`topPointsMinimum`) en dezelfde volgorde op de echte verhouding als `topPointsOf`, maar dan laag naar hoog, met de vijf laagste, zonder database.
-  Heeft minder dan `topPointsPlaces` (10) clubs het minimum, dan zijn `places` leeg en `played` 0.
+  Heeft minder dan `topPointsClubs` (10) clubs het minimum, dan zijn `places` leeg en `played` 0.
   De regels voor wat bezoekers zien staan in _De kaart Het moeilijkst toont de vijf clubs met de minste punten, vanaf 10 clubs_ in `redactie.md`.
 - **Waarom:** een eigen kaart en een eigen functie houden de top 10 zoals hij was, en de kaart verdwijnt zonder lege staat, want een zin "geen clubs" zou hier niets toevoegen.
 - **Alternatieven:** `topPointsOf` laten kiezen tussen boven- en onderkant (de teruggegeven vorm wordt dan voor twee dingen gebruikt); de kaart een zin laten tonen als er te weinig clubs zijn.
