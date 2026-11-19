@@ -1,3 +1,5 @@
+import type { StandingsCompetition } from '@fansite/db/schema'
+
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
@@ -8,7 +10,13 @@ import { lineOf, SeasonBySeasonCard } from './SeasonBySeasonCard'
 import { legendsOf } from './test-legend'
 import { withoutIcons } from './without-icons'
 
-const row = (position: number, pointsDeducted = 0, goalDifference = 5) => ({
+const row = (
+  position: number,
+  pointsDeducted = 0,
+  goalDifference = 5,
+  competition: StandingsCompetition = 'Eredivisie',
+) => ({
+  competition,
   goalDifference,
   points: 60,
   pointsDeducted,
@@ -67,8 +75,61 @@ describe('lineOf', () => {
     expect(ticks[0]).toBe(max)
   })
 
+  it('puts a season in the Eerste divisie in a band under the 18, and makes the line drop into it', () => {
+    const { apart, max, textOf, ticks, values } = lineOf([
+      { now: false, row: row(7), season: '1990/91' },
+      { now: false, row: row(3, 0, 5, 'Eerste divisie'), season: '1991/92' },
+      { now: false, row: row(2, 0, 5, 'Eerste divisie'), season: '1992/93' },
+      { now: false, row: row(5), season: '1993/94' },
+    ])
+
+    // Three places of the band, a gap of one, and the 18 places of the Eredivisie.
+    expect(max).toBe(22)
+    expect(values).toEqual([16, null, null, 18])
+    expect(apart).toEqual([null, 1, 2, null])
+    expect(ticks).toEqual([22, 18, 13, 8, 5, 1])
+    expect(ticks.map(textOf)).toEqual(['1', '5', '10', '15', '18', '3'])
+  })
+
+  it('has no band without a season in another league', () => {
+    const { apart, max, ticks } = lineOf(places)
+
+    expect(max).toBe(18)
+    expect(apart.every((height) => height === null)).toBe(true)
+    expect(ticks).toHaveLength(5)
+  })
+
   it('stretches the scale for a table of more than 18 clubs', () => {
     expect(lineOf([{ now: false, row: row(20), season: '2000/01' }]).max).toBe(20)
+  })
+})
+
+describe('SeasonBySeasonCard with a season in the Eerste divisie', () => {
+  const mixed: FinalPlace[] = [
+    { now: false, row: row(3, 0, 5, 'Eerste divisie'), season: '2023/24' },
+    { now: false, row: row(2, 0, 5, 'Eerste divisie'), season: '2024/25' },
+    { now: false, row: row(9, 2), season: '2025/26' },
+    { now: true, row: row(1), season: '2026/27' },
+  ]
+
+  it('writes the league in the place cell, only for a season outside the Eredivisie', () => {
+    const html = render({ places: mixed })
+
+    expect(html).toContain('3 (Eerste divisie)')
+    expect(html).toContain('2 (Eerste divisie)')
+    expect(html).not.toContain('9 (')
+    expect(html).not.toContain('1 (')
+  })
+
+  it('names those seasons under the card and says what the dotted line is', () => {
+    const html = render({ places: mixed })
+
+    expect(html).toContain('In 2023/24 en 2024/25 speelden we in de Eerste divisie.')
+    expect(html).toContain('gestippeld')
+  })
+
+  it('has no such line when every season is in the Eredivisie', () => {
+    expect(render()).not.toContain('gestippeld')
   })
 })
 
@@ -132,7 +193,7 @@ describe('SeasonBySeasonCard', () => {
     const html = render({ choice: 'europe' })
 
     expect(html).toContain('We kennen de plek sinds 2023/24.')
-    expect(html).toContain('De plek is altijd die in de Eredivisie')
+    expect(html).toContain('De plek is die in de competitie waarin we speelden')
     expect(html).toContain('2025/26: 2 punten afgetrokken')
   })
 

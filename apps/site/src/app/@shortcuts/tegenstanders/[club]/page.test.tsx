@@ -104,7 +104,7 @@ describe('the bar of the page of a club', () => {
   it('has a link to the card with the places only when the club has a season in common with us', async () => {
     expect(hrefs(renderToStaticMarkup((await bar('testclub')) ?? <></>))).not.toContain('#plek-in-de-competitie')
 
-    vi.mocked(getClubPlaces).mockResolvedValue([{ ours: 3, season: '2025/26', theirs: 9 }])
+    vi.mocked(getClubPlaces).mockResolvedValue([{ competition: 'Eredivisie', ours: 3, season: '2025/26', theirs: 9 }])
 
     expect(hrefs(renderToStaticMarkup((await bar('testclub')) ?? <></>))).toEqual([
       '#wedstrijden',

@@ -1,3 +1,4 @@
+import type { StandingsCompetition } from '@fansite/db/schema'
 import type { FormResult, PageShortcutsItem } from '@fansite/design-system'
 
 import { listClubNamePeriods, type NamePeriodLine } from '@fansite/db/club-name-periods'
@@ -607,8 +608,11 @@ const clubPages = cacheForKey(period, async (slug): Promise<ClubPage | undefined
  */
 export const getStadiumPlace = cacheForKey(period, (id) => findStadiumPlace(getDatabase().db, Number(id)))
 
-/** One season of the card "De plek van <club> en de onze": both places in the Eredivisie. */
-export type ClubPlace = { ours: number; season: string; theirs: number }
+/**
+ * One season of the card "De plek van <club> en de onze": both places in the league of that
+ * season, which is the Eredivisie unless `competition` says otherwise.
+ */
+export type ClubPlace = { competition: StandingsCompetition; ours: number; season: string; theirs: number }
 
 /**
  * The names a club goes by, normalised (see `normaliseClubName`): its name, the other spellings
@@ -628,7 +632,7 @@ export function clubKeysOf(page: Pick<ClubPage, 'club' | 'matches' | 'names'>): 
 }
 
 /**
- * The seasons in which both sc Heerenveen and the club are in the table of the Eredivisie, the
+ * The seasons in which both sc Heerenveen and the club are in the table of the same league, the
  * newest first, with the two places. `ours` are the places of every season (`getFinalPlaces`),
  * `table` the rows of every club (`listStandingsPlaces`) and `keys` the names of the club
  * (`clubKeysOf`). The season that is going on is left out: its table is not final, and these
@@ -637,7 +641,7 @@ export function clubKeysOf(page: Pick<ClubPage, 'club' | 'matches' | 'names'>): 
  */
 export function clubPlacesOf(
   ours: readonly FinalPlace[],
-  table: readonly { club: string; position: number; season: string }[],
+  table: readonly { club: string; competition: StandingsCompetition; position: number; season: string }[],
   keys: ReadonlySet<string>,
 ): ClubPlace[] {
   const places: ClubPlace[] = []
@@ -646,7 +650,7 @@ export function clubPlacesOf(
     const theirs = table.find((candidate) => candidate.season === season && keys.has(normaliseClubName(candidate.club)))
 
     if (!now && row !== undefined && theirs !== undefined) {
-      places.push({ ours: row.position, season, theirs: theirs.position })
+      places.push({ competition: row.competition, ours: row.position, season, theirs: theirs.position })
     }
   }
 

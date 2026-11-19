@@ -2514,6 +2514,20 @@ describe('the matches and the table of a season', () => {
       expect(await listClubStandings(database.db, 'Onbekend')).toEqual([])
     })
 
+    it('gives the league of each table, the Eerste divisie for a season in it', async () => {
+      await database.db.insert(standings).values(season('2026-10-25T12:00:00Z', 1))
+      await database.db
+        .insert(standings)
+        .values(season('1991-10-25T12:00:00Z', 3).map((row) => ({ ...row, competition: 'Eerste divisie' as const })))
+
+      const rows = await listClubStandings(database.db, 'sc Heerenveen')
+
+      expect(rows.map((row) => [row.season, row.competition, row.position])).toEqual([
+        ['1991/92', 'Eerste divisie', 3],
+        ['2026/27', 'Eredivisie', 1],
+      ])
+    })
+
     it('gives the place of every club in every season, the oldest season first and from the top', async () => {
       await database.db.insert(standings).values(season('2026-10-25T12:00:00Z', 2))
       await database.db.insert(standings).values(season('2024-10-25T12:00:00Z', 1))
@@ -2522,8 +2536,8 @@ describe('the matches and the table of a season', () => {
 
       expect(rows).toHaveLength(12)
       expect(rows.slice(0, 2)).toEqual([
-        { club: 'sc Heerenveen', position: 1, season: '2024/25' },
-        { club: 'Club 2', position: 2, season: '2024/25' },
+        { club: 'sc Heerenveen', competition: 'Eredivisie', position: 1, season: '2024/25' },
+        { club: 'Club 2', competition: 'Eredivisie', position: 2, season: '2024/25' },
       ])
       expect(rows.at(-1)).toMatchObject({ position: 6, season: '2026/27' })
       expect(await listStandingsPlaces(database.db)).toEqual(rows)

@@ -233,8 +233,8 @@ describe('the page of a club', () => {
 
   describe('the card with the places of the club and ours', () => {
     const places = [
-      { ours: 8, season: '2025/26', theirs: 16 },
-      { ours: 4, season: '2022/23', theirs: 11 },
+      { competition: 'Eredivisie' as const, ours: 8, season: '2025/26', theirs: 16 },
+      { competition: 'Eredivisie' as const, ours: 4, season: '2022/23', theirs: 11 },
     ]
     const card = (html: string) => {
       const start = html.indexOf('id="plek-in-de-competitie"')
@@ -1507,7 +1507,9 @@ describe('the card Toeschouwers tegen <club> on the page of a club', () => {
 
   it('is after the places and before Doelpuntenmakers, and has no card on a club we only play away', async () => {
     withCrowds([24000, 20000, 18000, 16000])
-    vi.mocked(getClubPlaces).mockResolvedValue([{ ours: 3, season: '2025/26', theirs: 9 }])
+    vi.mocked(getClubPlaces).mockResolvedValue([
+      { competition: 'Eredivisie' as const, ours: 3, season: '2025/26', theirs: 9 },
+    ])
 
     const html = await render()
 

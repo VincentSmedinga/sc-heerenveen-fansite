@@ -295,6 +295,33 @@ describe('BarChart.Trend', () => {
     expect(dot.style.getPropertyValue('--hf-bar-chart-at')).toBe('100')
   })
 
+  it('draws a dotted stretch for the places that are apart, joined to the line on both sides', () => {
+    const { container } = render(
+      <BarChart bars={bars} max={4}>
+        <BarChart.Trend apart={[null, 1, 2, null, null, null]} endDot={false} values={[4, null, null, 4, 3, 2]} />
+      </BarChart>,
+    )
+    const apart = container.querySelector('.hf-bar-chart-trend-apart')!.getAttribute('d')!
+    const line = container.querySelector('.hf-bar-chart-trend-line')!.getAttribute('d')!
+
+    // The dotted path starts on the first place and ends on the fourth, which are on the line.
+    expect(apart).toMatch(/^M0\.5 /u)
+    expect(apart).toMatch(/3\.5 [\d.]+$/u)
+    // The line itself has a gap where the dotted stretch is: it has no curve from place 1.
+    expect(line).not.toMatch(/^M0\.5 [\d.]+ C/u)
+  })
+
+  it('has no dotted stretch without places that are apart, and a value between gaps gets a dot', () => {
+    const { container } = render(
+      <BarChart bars={bars} max={3}>
+        <BarChart.Trend endDot={false} values={[1, null, 2, 3, null, null]} />
+      </BarChart>,
+    )
+
+    expect(container.querySelector('.hf-bar-chart-trend-apart')).toBeNull()
+    expect(container.querySelectorAll('.hf-bar-chart-trend-dot')).toHaveLength(1)
+  })
+
   it('has no dot when asked, and none without values', () => {
     const { container, rerender } = render(
       <BarChart bars={bars} max={3}>

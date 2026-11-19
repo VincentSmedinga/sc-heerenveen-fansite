@@ -361,6 +361,9 @@
     --hf-colour-chart-line: light-dark(var(--hf-colour-blue-900), var(--hf-colour-blue-50));
     --hf-colour-chart-line-edge: light-dark(var(--hf-colour-white), var(--hf-colour-blue-800));
 
+    /* The dotted stretch of a line that is of another kind, such as another league. */
+    --hf-colour-chart-line-apart: light-dark(var(--hf-colour-sand-500), var(--hf-colour-sand-300));
+
     /*
      * The bars that count something on a card: blue-500 in light (4.9:1 on white) and blue-400
      * in dark (5.4:1 on the card), so a bar reaches 3:1 on its surface. The track behind a bar
@@ -488,6 +491,7 @@
       --hf-colour-border-chart-slice: var(--hf-colour-white);
       --hf-colour-chart-line: var(--hf-colour-blue-900);
       --hf-colour-chart-line-edge: var(--hf-colour-white);
+      --hf-colour-chart-line-apart: var(--hf-colour-sand-500);
       --hf-colour-chart-bar: var(--hf-colour-blue-500);
       --hf-colour-border-default: var(--hf-colour-grey-200);
       --hf-colour-border-input: var(--hf-colour-grey-500);

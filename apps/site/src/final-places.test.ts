@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { finalPlacesOf } from './matches'
 
 const row = (season: string, position: number, extra: object = {}) => ({
+  competition: 'Eredivisie' as const,
   goalDifference: 10 - position,
   points: 70 - position,
   pointsDeducted: 0,
@@ -24,14 +25,24 @@ describe('finalPlacesOf', () => {
       ['2025/26', 3],
       ['2026/27', 1],
     ])
-    expect(places[0]?.row).toEqual({ goalDifference: 4, points: 64, pointsDeducted: 0, position: 6 })
+    expect(places[0]?.row).toEqual({
+      competition: 'Eredivisie',
+      goalDifference: 4,
+      points: 64,
+      pointsDeducted: 0,
+      position: 6,
+    })
   })
 
   it('makes a season without a table a place with no row, and marks the current season as now', () => {
     const places = finalPlacesOf([row('2024/25', 6)], ['2024/25'], '2026/27')
 
     expect(places).toEqual([
-      { now: false, row: { goalDifference: 4, points: 64, pointsDeducted: 0, position: 6 }, season: '2024/25' },
+      {
+        now: false,
+        row: { competition: 'Eredivisie', goalDifference: 4, points: 64, pointsDeducted: 0, position: 6 },
+        season: '2024/25',
+      },
       { now: false, row: undefined, season: '2025/26' },
       { now: true, row: undefined, season: '2026/27' },
     ])

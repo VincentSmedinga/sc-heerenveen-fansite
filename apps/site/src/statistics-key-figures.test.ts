@@ -6,8 +6,12 @@ import type { HomeAwayTally } from './matches'
 
 import { allSeasonsKeyFigures, statisticsKeyFigures } from './statistics-key-figures'
 
-const row = (club: string, position: number, played = 30): PublicStandingsRow =>
-  ({ club, played, position }) as PublicStandingsRow
+const row = (
+  club: string,
+  position: number,
+  played = 30,
+  competition: PublicStandingsRow['competition'] = 'Eredivisie',
+): PublicStandingsRow => ({ club, competition, played, position }) as PublicStandingsRow
 
 const tally = (extra: Partial<HomeAwayTally> = {}): HomeAwayTally => ({
   cleanSheets: 9,
@@ -34,6 +38,12 @@ describe('the key figures of Wedstrijden · Cijfers', () => {
       '15–10–14 gewonnen, gelijk, verloren, in alle competities',
       '69–66 doelpunten, voor en tegen in alle competities',
     ])
+  })
+
+  it('says the Eerste divisie for the place in a season in which we played in it', () => {
+    const figures = statisticsKeyFigures([row('sc Heerenveen', 2, 30, 'Eerste divisie')], tally({ played: 1 }), 'all')
+
+    expect(text(figures)[0]).toBe('2e plek, in de Eerste divisie')
   })
 
   it('names the choice of competition under the three counts, but not under the place', () => {
