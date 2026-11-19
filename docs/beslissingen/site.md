@@ -6248,6 +6248,7 @@
 - **Waarom:** de plaats hoort bij het veld waar we spelen, en dat is wat een supporter bedoelt met "daar".
   De aantallen volgen `resultOf`, zoals de pagina van de tegenstander.
 - **Alternatieven:** de plaats uit de naam van de club halen, wat voor "FC Groningen" werkt maar niet voor "sc Cambuur"; de balk als kop van de kaart.
+- **Later:** zie _De laatste wedstrijden van de kaart Onderling staan als rij met W, G en V boven de lijst_ (19 november 2026): de kop "De laatste vijf daar" is een rij geworden.
 
 ## De Voorbeschouwing toont onze schutters op de kant waar we spelen, met de selectie van nu apart
 
@@ -6713,3 +6714,21 @@
   Een lijst die van later naar eerder loopt, leest van boven naar onder in één richting.
 - **Alternatieven:** `VenueSwitch` hergebruiken en de paginering in de browser doen; alleen de lijst filteren en de rij en de legenda laten staan (de kaart zou dan dingen laten zien die niet bij de keuze horen); de volgorde van Programma houden; de dag op deze kaart anders zetten.
 - **Later:** vult _De pagina van een club toont ook de wedstrijden die nog komen, bovenaan de kaart Wedstrijden_ (3 november 2026) aan met de keuze en de omgekeerde volgorde.
+
+## De laatste wedstrijden van de kaart Onderling staan als rij met W, G en V boven de lijst
+
+- **Datum:** 19 november 2026
+- **Besluit:** op de kaart "Onderling in <plaats>" van de Voorbeschouwing staat in plaats van de kop "De laatste vijf daar" een `MarkRow` met de uitslagen van dezelfde wedstrijden (#1437).
+  - **De rij** gebruikt `markOf` en `letterOf` zoals de kaart Vorm en loopt van oud naar nieuw: de oudste wedstrijd links, de nieuwste rechts.
+    De lijst met `Match` eronder blijft van nieuw naar oud en heeft een naam voor een schermlezer die dat zegt ("De laatste wedstrijden daar, de nieuwste eerst").
+  - **De titel van de rij** houdt het aantal: "De laatste vijf daar", en "twee", "drie", "vier" of "De laatste daar" bij minder wedstrijden.
+    Een schermlezer hoort dus welke wedstrijden het zijn ("De laatste vijf daar: winst, verlies, …"), zodat er niets verloren gaat doordat de kop weg is.
+  - **De koppen** blijven in orde: het niveau 2 van de kaart en daarna de regel met het aantal als niveau 3.
+    De kop met het uiterlijk van niveau 4 was een kop van niveau 3 en is weg, dus er komt geen sprong in de koppen.
+  - **De twee feiten** onder de lijst, "Laatste zege daar" en "Grootste zege daar", staan los van de lijst: er zit de grote stap ruimte tussen (`hf-space-end-l` op de lijst), en ze staan naast elkaar in twee kolommen van een `DescriptionList`, elke term boven zijn waarde.
+    De lijst is niet meer `stacked`, want die zet de paren onder elkaar met lijnen; de gewone vorm zet ze in kolommen die op een smalle kaart onder elkaar komen.
+    Het designsysteem had die vorm al, dus er komt geen nieuwe variant bij.
+- **Waarom:** de projecteigenaar wil in één oogopslag zien hoe het daar ging, zoals bij Vorm.
+  Een rij die overal van oud naar nieuw loopt, leest overal hetzelfde.
+- **Alternatieven:** de rij van nieuw naar oud, passend bij de lijst maar anders dan Vorm en de rij op de pagina van een club; een korte titel zoals "Daar", die niet zegt hoeveel wedstrijden het zijn.
+- **Later:** vervangt in _De Voorbeschouwing toont de onderlinge wedstrijden in een kaart die de plaats van het veld noemt_ (16 november 2026) de kop "De laatste vijf daar" boven de laatste wedstrijden.
