@@ -1,7 +1,8 @@
 /*
- * The way to the previous and the next page: "Vorige" on the left, "Pagina 2 van 9" in the middle, "Volgende" on the
- * right. The text stays in the middle when one of the links is missing, because each has a column of its own. When
- * the pagination is narrow, such as 320 pixels wide, the text goes on top and the links are under it, each on its own side.
+ * The way to the previous and the next page: "Vorige" on the left, "Pagina 2 van 9" in the
+ * middle, "Volgende" on the right. The text stays in the middle when one of the links is
+ * missing, because each has a column of its own. When the pagination is narrow, such as 320
+ * pixels wide, the text goes on top and the links are under it, each on its own side.
  */
 
 @layer hf.components {
