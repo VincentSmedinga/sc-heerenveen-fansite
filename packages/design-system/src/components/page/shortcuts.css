@@ -33,8 +33,9 @@
    * sides have it, so the bar is centred like the menu (see below).
    *
    * It is for a narrow or a low screen. From 52rem wide and 32rem high the Page.Body has two
-   * columns, so the cells are side by side and nothing hides behind a long cell: the bar is gone, with display: none, so a
-   * screen reader doesn't read it either. The number is the one of the two columns in page.css
+   * columns, so the cells are side by side and nothing hides behind a long cell: the bar is
+   * gone, with display: none, so a screen reader doesn't read it either. The numbers are the
+   * ones of the two columns in page.css
    * (a media query can't use a custom property).
    */
   :root {
