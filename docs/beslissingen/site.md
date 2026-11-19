@@ -6619,7 +6619,7 @@
 - **Datum:** 19 november 2026
 - **Besluit:** in een smalle kaart Alle tegenstanders, zoals op een telefoon, staan alleen de club, gespeeld, punten en doelsaldo in de tabel, en een knop "Toon meer" toont ook winst, gelijk en verlies ("Toon minder" verbergt ze weer).
   Een kolom die achter de knop staat, heeft `more: true` in `DataTable`, en `DataTable.More` om de tabel en de legenda zet de knop en doet het verbergen.
-  Het verbergen volgt de breedte van het blok zelf (een container query op 30rem), niet die van het scherm.
+  Het verbergen volgt de breedte van het blok zelf (een container query op 24rem: zo breed moet het blok zijn voor de zes cijfers en een naam als "Go Ahead Eagles" op één regel; de kaart naast de zijkolom op een bureaublad is ongeveer 28rem, die op een telefoon ongeveer 20rem), niet die van het scherm.
   Is het blok breder, dan staan alle zes cijfers er altijd en is er geen knop.
   Zonder JavaScript staan alle kolommen er ook en is er geen knop: de CSS verbergt pas iets als het script gedraaid heeft (`data-ready`).
   De legenda onder de tabel noemt alleen de kolommen die te zien zijn.

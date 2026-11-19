@@ -190,6 +190,7 @@ test.describe('sorting the list', () => {
   test('fits a phone of 320 pixels, with the arrow and every column', async ({ page }) => {
     await page.setViewportSize({ height: 800, width: 320 })
     await page.goto('/tegenstanders?competitie=eredivisie')
+    await list(page).getByRole('button', { exact: true, name: 'Toon meer' }).click()
     await list(page).getByRole('button', { exact: true, name: 'doelsaldo' }).click()
 
     expect(
@@ -201,6 +202,47 @@ test.describe('sorting the list', () => {
       expect(box?.width ?? 0).toBeGreaterThanOrEqual(24)
       expect(box?.height ?? 0).toBeGreaterThanOrEqual(24)
     }
+  })
+})
+
+test.describe('the columns behind Toon meer', () => {
+  const headers = (page: Page) => list(page).getByRole('columnheader').allInnerTexts()
+
+  test('show only gespeeld, punten and doelsaldo on a phone, and all six figures after Toon meer', async ({ page }) => {
+    await page.setViewportSize({ height: 800, width: 390 })
+    await page.goto('/tegenstanders')
+
+    const button = list(page).getByRole('button', { exact: true, name: 'Toon meer' })
+
+    await expect(button).toHaveAttribute('aria-expanded', 'false')
+    expect((await headers(page)).map((text) => text.trim())).toEqual(['Club', 'gespeeld', 'punten', 'doelsaldo'])
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
+    ).toBe(true)
+
+    await button.click()
+
+    await expect(list(page).getByRole('button', { exact: true, name: 'Toon minder' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    )
+    expect((await headers(page)).map((text) => text.trim())).toEqual([
+      'Club',
+      'gespeeld',
+      'winst',
+      'gelijk',
+      'verlies',
+      'punten',
+      'doelsaldo',
+    ])
+  })
+
+  test('show every figure and no button where the card is wide enough', async ({ page }) => {
+    await page.setViewportSize({ height: 800, width: 900 })
+    await page.goto('/tegenstanders')
+
+    await expect(list(page).getByRole('columnheader', { exact: true, name: 'verlies' })).toBeVisible()
+    await expect(list(page).getByRole('button', { name: /^Toon (meer|minder)$/ })).toBeHidden()
   })
 })
 
