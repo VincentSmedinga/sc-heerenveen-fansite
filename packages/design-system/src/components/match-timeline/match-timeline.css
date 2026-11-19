@@ -5,7 +5,8 @@
  * name. The rows are parted by a thin line. The blocks sit next to each other when the place
  * they are in is wide enough, and under each other when it is not: the width is that of the
  * place the timeline is in, such as a card, and not of the screen. Nothing here depends on a
- * colour: the pill says whose event it is to the eye, and the hidden text says it in words.
+ * colour: the pill says whose event it is to the eye, and the hidden text says it in words. The
+ * score of a goal has a colour, but the figures say who leads.
  */
 
 @layer hf.components {
@@ -122,6 +123,28 @@
   /* The icon is in front of the name, with the space of a word. */
   .hf-match-event-line .hf-match-event-icon {
     margin-inline-end: var(--hf-space-s);
+  }
+
+  /*
+   * The score after a goal, between the icon and the name: bold, in tabular figures, and in the
+   * colour of the result for sc Heerenveen (the outcome tokens, which reach 4.5:1 as text).
+   * The colour only adds to the figures, which say who leads.
+   */
+  .hf-match-event-score {
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-figure-font-weight);
+  }
+
+  .hf-match-event-score-win {
+    color: var(--hf-colour-outcome-win);
+  }
+
+  .hf-match-event-score-draw {
+    color: var(--hf-colour-outcome-draw);
+  }
+
+  .hf-match-event-score-loss {
+    color: var(--hf-colour-outcome-loss);
   }
 
   .hf-match-event-kind {

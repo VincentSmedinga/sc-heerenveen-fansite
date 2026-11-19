@@ -65,6 +65,11 @@ export type MatchTimelineEvent =
       penalty?: boolean | undefined
       /** The player who scored. */
       player: MatchPlayerName
+      /**
+       * The score after this goal. Leave it out when it is not certain, such as for a match
+       * whose goals do not add up to the result: the line is then as it was.
+       */
+      score?: MatchTimelineScore | undefined
     })
   | (MatchEventBase & {
       kind: 'substitution'
@@ -91,6 +96,20 @@ export type MatchTimelineProps = Omit<ComponentPropsWithoutRef<'div'>, 'children
    * for a page where the course of the match has a heading of level 2.
    */
   headingLevel?: Exclude<HeadingLevel, 1> | undefined
+}
+
+/**
+ * The score of the match at the moment of a goal, with the goal in it: the goals of both clubs
+ * and their names, so the line can write it in the order of the header (the home club first)
+ * and say whose goals they are. `ourSide` is the side of sc Heerenveen, which decides the
+ * colour: green when we lead, grey when level and red when we trail.
+ */
+export type MatchTimelineScore = {
+  away: number
+  awayName: string
+  home: number
+  homeName: string
+  ourSide: 'away' | 'home'
 }
 
 /**
@@ -134,20 +153,34 @@ function kindName(event: MatchTimelineEvent) {
   return event.ownGoal ? 'Eigen doelpunt' : event.penalty ? 'Doelpunt (strafschop)' : 'Doelpunt'
 }
 
+/** Whether we lead, the match is level or we trail after the goal: the tone of the score. */
+function toneOf({ away, home, ourSide }: MatchTimelineScore): 'draw' | 'loss' | 'win' {
+  const ours = ourSide === 'home' ? home : away
+  const theirs = ourSide === 'home' ? away : home
+
+  return ours > theirs ? 'win' : ours < theirs ? 'loss' : 'draw'
+}
+
 const hasWord = (event: MatchTimelineEvent) => event.kind === 'penalty-missed' || event.kind === 'penalty-saved'
 
 const hasAddedTime = (event: MatchTimelineEvent) =>
   event.stoppageMinutes !== null && event.stoppageMinutes !== undefined
 
-/** What a screen reader hears first: the team, the minute and the kind of event. */
+/** What a screen reader hears of the score: the clubs with their goals, as the eye reads it. */
+const spokenScore = ({ away, awayName, home, homeName }: MatchTimelineScore) =>
+  `, stand ${homeName} ${home}, ${awayName} ${away}`
+
+/** What a screen reader hears first: the team, the minute, the kind of event and the score. */
 const spoken = (event: MatchTimelineEvent) => {
+  const score = event.kind === 'goal' && event.score !== undefined ? spokenScore(event.score) : ''
+
   if (event.minute === null) {
-    return `${event.team}: ${kindName(event)}: `
+    return `${event.team}: ${kindName(event)}${score}: `
   }
 
   const added = hasAddedTime(event) ? ` plus ${event.stoppageMinutes}` : ''
 
-  return `${event.team}: Minuut ${event.minute}${added}, ${kindName(event)}: `
+  return `${event.team}: Minuut ${event.minute}${added}, ${kindName(event)}${score}: `
 }
 
 function Event({ event }: { event: MatchTimelineEvent }) {
@@ -164,6 +197,16 @@ function Event({ event }: { event: MatchTimelineEvent }) {
         <span className="hf-visually-hidden">{spoken(event)}</span>
         <span className="hf-match-event-line">
           <MatchEventIcon kind={iconKind(event)} />
+          {event.kind === 'goal' && event.score !== undefined ? (
+            <>
+              <span
+                aria-hidden="true"
+                className={classNames('hf-match-event-score', `hf-match-event-score-${toneOf(event.score)}`)}
+              >
+                {event.score.home}–{event.score.away}
+              </span>{' '}
+            </>
+          ) : null}
           {hasWord(event) ? (
             <>
               <span aria-hidden="true" className="hf-match-event-kind">

@@ -28,6 +28,7 @@ const meta = preview.meta({
         component: [
           'Het verloop van een gespeelde wedstrijd in twee helften naast elkaar, en na een verlenging een derde blok eronder.',
           'Elke gebeurtenis is één regel: de minuut in een pil, gevuld voor sc Heerenveen en open voor de tegenstander, en daarna het pictogram en de naam. De blokken zijn genummerde lijsten met een naam, onder een kop van het niveau dat de pagina kiest.',
+          'Bij een doelpunt kan de stand erbij staan, tussen het pictogram en de naam: vet, met de thuisclub eerst, en groen als sc Heerenveen voorstaat, grijs bij gelijk en rood bij achterstand. De kleur komt erbij: het getal zegt wie voorstaat, en een schermlezer hoort de stand met de namen van de clubs.',
           'Hij is gebouwd uit `MatchEventIcon`, `PlayerName` en `Heading`.',
         ].join('\n'),
       },
@@ -70,6 +71,53 @@ const regularTime: MatchTimelineEvent[] = [
 export const Default = meta.story({
   args: { events: regularTime, extraTime: false, headingLevel: 3 },
   name: 'Een wedstrijd van 90 minuten',
+})
+
+// The score after each goal, home club first: we play at home and trail, level, lead and lead
+// further. The colour follows sc Heerenveen: red, grey, green.
+const scoreAfter = (home: number, away: number) => ({
+  away,
+  awayName: theirs,
+  home,
+  homeName: ours,
+  ourSide: 'home' as const,
+})
+
+export const WithScore = meta.story({
+  args: {
+    events: [
+      {
+        kind: 'goal',
+        minute: 8,
+        ours: false,
+        player: name('Dummydijk', 'Frank'),
+        score: scoreAfter(0, 1),
+        team: theirs,
+      },
+      { kind: 'goal', minute: 31, ours: true, player: name('Demo', 'Rick'), score: scoreAfter(1, 1), team: ours },
+      { kind: 'yellow-card', minute: 40, ours: false, player: name('Proefveld', 'Ronald'), team: theirs },
+      {
+        kind: 'goal',
+        minute: 52,
+        ours: true,
+        player: name('Voorbeeld', 'Pieter'),
+        score: scoreAfter(2, 1),
+        team: ours,
+      },
+      {
+        kind: 'goal',
+        minute: 77,
+        ours: true,
+        penalty: true,
+        player: name('Demo', 'Rick'),
+        score: scoreAfter(3, 1),
+        team: ours,
+      },
+    ],
+    extraTime: false,
+    headingLevel: 3,
+  },
+  name: 'Met de stand na elk doelpunt, in de kleur van sc Heerenveen',
 })
 
 const withPage = (surname: string, givenName: string, href: string) => ({ ...name(surname, givenName), href })
