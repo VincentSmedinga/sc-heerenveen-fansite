@@ -30,13 +30,13 @@
    * Rows, and parts of the text next to a list, that only a wide or only a narrow screen shows,
    * so a phone gets a shorter list.
    */
-  @media (width < 52rem) {
+  @media (width < 52rem) or (height < 32rem) {
     .hf-bar-list-wide-only {
       display: none;
     }
   }
 
-  @media (width >= 52rem) {
+  @media (width >= 52rem) and (height >= 32rem) {
     .hf-bar-list-narrow-only {
       display: none;
     }

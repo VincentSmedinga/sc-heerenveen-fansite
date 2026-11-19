@@ -5,11 +5,11 @@
  */
 
 /**
- * The widths at which the bar shows: under the width where the Page.Body has two columns, and
- * the bar is gone (see shortcuts.css, which a test compares with this). From there on nothing
- * listens to the scrolling.
+ * The sizes at which the bar shows: under the width or the height where the Page.Body has two
+ * columns, and the bar is gone (see shortcuts.css, which a test compares with this). From there
+ * on nothing listens to the scrolling.
  */
-export const barWidths = '(width < 52rem)'
+export const barWidths = '((width < 52rem) or (height < 32rem))'
 
 /**
  * The index of the current target, from whether each target in the order of the page has come

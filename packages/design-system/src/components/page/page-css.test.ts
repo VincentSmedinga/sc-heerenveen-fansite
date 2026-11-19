@@ -241,7 +241,9 @@ describe('the body in page.css', () => {
     expect(token('--hf-content-max-width')).toBe(38)
     expect(token('--hf-page-max-width')).toBe(64)
     expect(body).toContain('grid-template-columns: minmax(0, var(--hf-content-max-width));')
-    expect(body).toMatch(/@media \(width >= 52rem\) \{\s*grid-template-columns: minmax\(0, 1fr\);/)
+    expect(body).toMatch(
+      /@media \(width >= 52rem\) and \(height >= 32rem\) \{\s*grid-template-columns: minmax\(0, 1fr\);/,
+    )
     expect(body.match(/grid-template-columns:/g)).toHaveLength(2)
   })
 
@@ -301,7 +303,7 @@ describe('the grid of a page with areas in page.css', () => {
 
   it('has one rule for a narrow screen and one from 52rem, and 52rem is written out once for the grid', () => {
     expect(grid).toContain('grid-template-areas: var(--hf-page-areas-narrow);')
-    expect(grid).toContain('@media (width >= 52rem)')
+    expect(grid).toContain('@media (width >= 52rem) and (height >= 32rem)')
     expect(grid).toContain('grid-template-areas: var(--hf-page-areas-wide);')
     expect(grid).toContain('grid-template-columns: var(--hf-page-columns);')
     expect(grid.match(/52rem/g)).toHaveLength(1)

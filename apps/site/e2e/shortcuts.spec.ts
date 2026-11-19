@@ -48,15 +48,21 @@ for (const { links, path } of withBar) {
       await expect(page.getByRole('navigation', { name: 'Op deze pagina:' })).toBeVisible()
     })
 
-    test('is there exactly when the main has one column, at 51.9rem and at 52rem', async ({ page }) => {
+    test('is there exactly when the main has one column, at 51.9rem and at 52rem, and at 31.9rem and at 32rem high', async ({
+      page,
+    }) => {
       const columns = () =>
         page.locator('.hf-page-main').evaluate((main) => getComputedStyle(main).gridTemplateColumns.split(' ').length)
 
-      for (const [width, count, bar] of [
-        [831, 1, 1],
-        [832, 2, 0],
+      for (const [width, height, count, bar] of [
+        [831, 800, 1, 1],
+        [832, 800, 2, 0],
+        [844, 390, 1, 1],
+        [844, 511, 1, 1],
+        [844, 512, 2, 0],
+        [844, 800, 2, 0],
       ] as const) {
-        await page.setViewportSize({ height: 800, width })
+        await page.setViewportSize({ height, width })
         await page.goto(path)
 
         expect(await columns()).toBe(count)
@@ -391,11 +397,13 @@ test.describe('the bar under the header of /spelers/cijfers', () => {
   })
 
   test('is gone, also for a screen reader, from 52rem on, and is there one pixel under it', async ({ page }) => {
-    for (const [width, bar] of [
-      [831, 1],
-      [832, 0],
+    for (const [width, height, bar] of [
+      [831, 800, 1],
+      [832, 800, 0],
+      [844, 390, 1],
+      [844, 800, 0],
     ] as const) {
-      await page.setViewportSize({ height: 800, width })
+      await page.setViewportSize({ height, width })
       await page.goto('/spelers/cijfers')
 
       await expect(page.getByRole('navigation', { name: 'Op deze pagina:' })).toHaveCount(bar)
