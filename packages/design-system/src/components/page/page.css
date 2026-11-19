@@ -118,7 +118,8 @@
    * Page.Main in it is as wide as the page (64rem) from 52rem, in line with the logo. Under 52rem the track is as wide as
    * the content (--hf-content-max-width, 38rem) and centred, and on a screen narrower than that it is as wide as the
    * screen: the margin on the end side gives way.
-   * A media query can't use a custom property, so 52rem and 32rem (the height under which a phone lies on its side) are written out here and below. The Page.Main divides the 64rem
+   * A media query can't use a custom property, so 52rem and 32rem (the height under which a
+   * phone lies on its side) are written out here and below. The Page.Main divides the 64rem
    * itself (see .hf-page-main-grid), with tracks that shrink to a width that fits in 52rem with the insets of a phone on
    * its side. The margin is as wide as the inset of the device, and a media query can't read that. A phone on its side
    * has up to 62px (3.875rem) on both sides, which leaves 52 - 2 * 3.875 - 2 = 42.25rem for the tracks at 52rem, with the space
@@ -177,7 +178,8 @@
    * a set from layout.css (--hf-page-columns). The page names its areas as custom properties in `style`, and each cell
    * names its area (grid-area), so a cell can stand first on a phone and beside the main content on a wide screen
    * without `order`: the source is the order on a phone, and so the order of the keyboard.
-   * 52rem and 32rem are written out here, as in the rules above: a media query can't read a custom property.
+   * 52rem and 32rem are written out here, as in the rules above: a media query can't read a
+   * custom property.
    * The last row of the wide grid takes the height of a tall main (--hf-page-rows-wide), so the rows beside it stay as
    * tall as their cells. The space between the cells is the gap of the main, 2rem, across and down.
    */
