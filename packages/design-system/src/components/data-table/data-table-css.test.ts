@@ -36,6 +36,21 @@ describe('data-table.css', () => {
     expect(css).toMatch(/\.hf-data-table-text \.hf-data-table-folded \{\s*display: none;/u)
   })
 
+  it('hides the more columns only in a block under 30rem of its own, and only after the script has run', () => {
+    expect(css).toMatch(/\.hf-data-table-more \{[^}]*container-type: inline-size;/u)
+    expect(css).toMatch(/\.hf-data-table-more \.hf-data-table-more-button \{\s*display: none;/u)
+
+    const start = css.indexOf('@container (inline-size < 30rem)')
+
+    expect(start).not.toBe(-1)
+    expect(css.slice(start)).toMatch(
+      /\.hf-data-table-more\[data-ready\] \.hf-data-table-more-button \{\s*display: inline-block;/u,
+    )
+    expect(css.slice(start)).toMatch(
+      /\.hf-data-table-more\[data-ready\]:not\(\[data-open\]\) \.hf-more-column \{\s*display: none;/u,
+    )
+  })
+
   it('puts small tables side by side only as far as they fit, by the width of their place and not the screen', () => {
     const start = css.indexOf('.hf-data-table-group {')
 

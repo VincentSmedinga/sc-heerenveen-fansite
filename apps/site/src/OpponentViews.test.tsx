@@ -61,6 +61,18 @@ describe('ClubsCard', () => {
     expect(figures(6)).toEqual(['+5', '−8', '+8'])
   })
 
+  it('puts winst, gelijk and verlies behind the button Toon meer in a narrow card, with their items in the legend', () => {
+    const { container } = render(card())
+
+    expect(screen.getByRole('button', { name: 'Toon meer' })).toBeTruthy()
+    expect(
+      [...container.querySelectorAll('thead th.hf-more-column')].map((header) => header.textContent?.trim()),
+    ).toEqual(['winst', 'gelijk', 'verlies'])
+    expect(container.querySelectorAll('tbody td.hf-more-column')).toHaveLength(records.length * 3)
+    expect(container.querySelectorAll('.hf-table-legend-item.hf-more-column')).toHaveLength(3)
+    expect(container.querySelectorAll('.hf-table-legend-item')).toHaveLength(6)
+  })
+
   it('shows the flag of the country before the name, as decoration in a link named by the club', () => {
     render(
       <ClubsCard

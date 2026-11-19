@@ -90,9 +90,9 @@ export function BasedOnSince({
 /** The figures of the list in the order of its columns, as `tableColumns` sets them. */
 const clubFigures = [
   tableColumns.played,
-  tableColumns.won,
-  tableColumns.drawn,
-  tableColumns.lost,
+  { ...tableColumns.won, more: true },
+  { ...tableColumns.drawn, more: true },
+  { ...tableColumns.lost, more: true },
   tableColumns.points,
   tableColumns.goalDifference,
 ] as const
@@ -216,35 +216,37 @@ export function ClubsCard({
         <Text>We hebben nog geen uitslagen. Kijk straks nog eens.</Text>
       ) : (
         <>
-          <DataTable
-            caption={`De tegenstanders van sc Heerenveen, van A tot Z, met onze uitslagen tegen elk${choice === 'all' ? '' : ` in ${competitionWords(choice)}`}`}
-            columns={clubColumns}
-            rows={records.map((record) => ({
-              cells: [
-                record.played,
-                record.won,
-                record.drawn,
-                record.lost,
-                pointsOf(record),
-                { sortValue: goalDifference(record), text: signedNumber(goalDifference(record)) },
-              ],
-              display: (
-                <>
-                  <PlayerName
-                    country={record.country}
-                    givenName={record.name}
-                    href={`${address}/${record.slug}${query}`}
-                    surname=""
-                  />
-                  {record.country === null || countryName(record.country) === undefined ? null : (
-                    <Text as="span" className="hf-visually-hidden">{`, ${countryName(record.country)}`}</Text>
-                  )}
-                </>
-              ),
-              header: record.name,
-            }))}
-          />
-          <Text appearance="meta">{clubLegend}</Text>
+          <DataTable.More>
+            <DataTable
+              caption={`De tegenstanders van sc Heerenveen, van A tot Z, met onze uitslagen tegen elk${choice === 'all' ? '' : ` in ${competitionWords(choice)}`}`}
+              columns={clubColumns}
+              rows={records.map((record) => ({
+                cells: [
+                  record.played,
+                  record.won,
+                  record.drawn,
+                  record.lost,
+                  pointsOf(record),
+                  { sortValue: goalDifference(record), text: signedNumber(goalDifference(record)) },
+                ],
+                display: (
+                  <>
+                    <PlayerName
+                      country={record.country}
+                      givenName={record.name}
+                      href={`${address}/${record.slug}${query}`}
+                      surname=""
+                    />
+                    {record.country === null || countryName(record.country) === undefined ? null : (
+                      <Text as="span" className="hf-visually-hidden">{`, ${countryName(record.country)}`}</Text>
+                    )}
+                  </>
+                ),
+                header: record.name,
+              }))}
+            />
+            <Text appearance="meta">{clubLegend}</Text>
+          </DataTable.More>
           <BasedOnSince choice={choice} since={since} />
         </>
       )}

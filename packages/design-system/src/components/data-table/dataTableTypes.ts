@@ -33,6 +33,13 @@ export type DataTableColumn = {
    * throws an error. In a table that sorts, the column the visitor sorts on takes over.
    */
   key?: boolean
+  /**
+   * Puts this column behind the button of `MoreColumns` where the table is narrow, such as the
+   * wins, draws and losses on a phone. Where the table has room, and without JavaScript, the
+   * column is always there. Only a column of a table of numbers can have it, and it needs a
+   * `MoreColumns` round the table, which also holds the button.
+   */
+  more?: boolean
   /** The whole word, as a screen reader says it, such as `gelijk`. It must be unique. */
   name: string
   /**

@@ -5,6 +5,11 @@ import { TableColumnIcon, type TableColumnIconName } from './table-column-icon/T
 export type TableColumn = {
   /** The icon the header shows instead of a letter, and the legend shows beside the word. */
   icon: TableColumnIconName
+  /**
+   * The column is behind the button of `MoreColumns`, so its item in the legend goes with it
+   * (see `DataTableColumn`).
+   */
+  more?: boolean
   /** The whole word, such as `gespeeld`: what a screen reader says and the legend gives. */
   name: string
   /** What the cells hold, if the word alone does not say it, such as `voor–tegen`. */
@@ -76,8 +81,8 @@ export const tableLegend = (columns: readonly TableColumn[], className?: string)
 
   return (
     <span className={classNames('hf-table-legend', className)}>
-      {columns.map(({ icon, name, note }) => (
-        <span className="hf-table-legend-item" key={name}>
+      {columns.map(({ icon, more, name, note }) => (
+        <span className={classNames('hf-table-legend-item', more === true && 'hf-more-column')} key={name}>
           <TableColumnIcon name={icon} /> {name}
           {note === undefined ? '' : ` (${note})`}
         </span>
