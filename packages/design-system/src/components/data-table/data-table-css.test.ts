@@ -39,6 +39,7 @@ describe('data-table.css', () => {
   it('hides the more columns only in a block under 24rem of its own, and only after the script has run', () => {
     expect(css).toMatch(/\.hf-data-table-more \{[^}]*container-type: inline-size;/u)
     expect(css).toMatch(/\.hf-data-table-more \.hf-data-table-more-button \{\s*display: none;/u)
+    expect(css).toMatch(/\.hf-data-table-more-button \{[^}]*font-size: var\(--hf-body-font-size\);/u)
 
     const start = css.indexOf('@container (inline-size < 24rem)')
 

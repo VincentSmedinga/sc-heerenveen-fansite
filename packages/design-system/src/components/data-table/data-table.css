@@ -320,8 +320,10 @@
     container-type: inline-size;
   }
 
+  /* The small height of the button, with the text of running text (the small size has less). */
   .hf-data-table-more .hf-data-table-more-button {
     display: none;
+    font-size: var(--hf-body-font-size);
   }
 
   @container (inline-size < 24rem) {
