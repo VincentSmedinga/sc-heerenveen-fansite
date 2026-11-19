@@ -3169,6 +3169,7 @@
 - **Alternatieven:** één keuze voor beide kaarten (een plek boven de zijkolom en een gedeelde client-component); links met een parameter (elke keuze een adres, maar de pagina laadt opnieuw en de parameter botst met de competitie); het minimum op het totaal houden (een club met één of twee thuiswedstrijden kan dan bovenaan staan); een alias voor het oude anker (er is niets dat ernaar verwijst).
 - **Later:** zie _Tegenstanders heeft een zijkolom met de kaart Gemiddeld resultaat, en "Alle tegenstanders" is wit_ (4 november 2026) in `site.md`: de kaart heet sinds deze beslissing "Het makkelijkst".
 - **Later:** zie _De kaarten Het makkelijkst en Het moeilijkst tonen vijf clubs per druk, tot 25, en gaan dan terug naar de top 5_ (19 november 2026): "Toon 5 meer" is geen `Disclosure` meer maar een knop die vijf rijen toevoegt.
+  Daarna vervangen door _De kaarten Het makkelijkst en Het moeilijkst tonen een vaste top 10 in één onderdeel, `RankingCard`_ (19 november 2026): de top 5 en "Toon 5 meer" zijn weg, de kaart toont tien clubs in één tabel.
 
 ## De kaarten Het makkelijkst en Het moeilijkst tonen vijf clubs per druk, tot 25, en gaan dan terug naar de top 5
 
@@ -3192,3 +3193,21 @@
   De lijst eindigt op 25 en de knop zet de kaart terug, zodat de zijkolom beheersbaar blijft en de knop op dezelfde plek staat.
 - **Alternatieven:** de `Disclosure` houden, die alleen alles of niets toont; zonder script de hele lijst tonen (een lange kaart in de zijkolom); de knop na de laatste rij laten verdwijnen; de focus naar de eerste nieuwe rij zetten (de knop gaat onder de vingers weg).
 - **Later:** vervangt in _De kaarten Het makkelijkst en Het moeilijkst hebben een keuze Alle, Thuis en Uit en een top 5_ (19 november 2026) de top 5 met "Toon 5 meer" als `Disclosure` met de plaatsen 6 tot en met 10 in een tweede tabel.
+- **Later:** vervangen door _De kaarten Het makkelijkst en Het moeilijkst tonen een vaste top 10 in één onderdeel, `RankingCard`_ (19 november 2026): geen knop meer, geen top 25 en geen `MoreRows`.
+
+## De kaarten Het makkelijkst en Het moeilijkst tonen een vaste top 10 in één onderdeel, `RankingCard`
+
+- **Datum:** 19 november 2026
+- **Besluit:** beide kaarten tonen een vaste top 10 in één tabel, zonder knop, meldingsgebied of `Disclosure` (#1435).
+  - **De lijst:** `topPointsPlaces` en `hardestPlaces` zijn 10 en `shownPlaces` is weg.
+    Het bijschrift is "De eerste 10 clubs waartegen …".
+    Het minimum blijft: een kaart toont een lijst bij minstens 10 clubs (`topPointsClubs`) met minstens 5 wedstrijden per club in de keuze, en anders een zin.
+  - **Eén onderdeel:** `TopPointsCard` en `HardestCard` zijn één `RankingCard` met een prop `low` in `OpponentViews.tsx`.
+    Ze deelden al `RankingPanel` en verschilden alleen in kop, anker, sleutel van de keuze en richting.
+    Het uiterlijk en het gedrag zijn gelijk gebleven: dezelfde koppen en ankers (`het-makkelijkst`, `het-moeilijkst`), dezelfde volgorde en dezelfde keuze Alle, Thuis en Uit.
+  - **`MoreRows` is weg** uit het designsysteem, met zijn verhaal, zijn tests en zijn export: niets anders gebruikte het.
+- **Waarom:** de projecteigenaar vindt een top 25 niet zo nuttig als gedacht.
+  Een lijst van tien past in de zijkolom zonder knop, werkt zonder JavaScript en blijft één lijst voor een schermlezer.
+  Eén onderdeel haalt de herhaling tussen de twee kaarten weg.
+- **Alternatieven:** terug naar een top 5 met de plaatsen 6 tot en met 10 achter een `Disclosure` (de opzet van #1416); `MoreRows` houden voor een volgende kaart; één kaart die beide lijsten toont (zichtbaar anders, met nieuwe koppen en ankers); twee onderdelen houden.
+- **Later:** vervangt _De kaarten Het makkelijkst en Het moeilijkst tonen vijf clubs per druk, tot 25, en gaan dan terug naar de top 5_ (19 november 2026) en de top 5 uit _De kaarten Het makkelijkst en Het moeilijkst hebben een keuze Alle, Thuis en Uit en een top 5_ (19 november 2026).
