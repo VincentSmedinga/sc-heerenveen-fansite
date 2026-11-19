@@ -252,7 +252,7 @@ describe('the page /wedstrijden/cijfers', () => {
 
   it('has no order or style attribute but the length of a bar and the place of a label or a bar of a chart, so the order on a phone is the order in the source', async () => {
     expect(await render()).not.toMatch(
-      / style="(?!grid-area:[a-z-]+"|--hf-page-areas-narrow:[^"]*"|--hf-bar-share:[\d.]+""|--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"|--hf-donut-cos:|--hf-bar-chart-(?:slots|at|share|across):[\d.]+(?:;--hf-bar-chart-at:[\d.]+)?")|order:/,
+      / style="(?!grid-area:[a-z-]+"|--hf-page-areas-narrow:[^"]*"|--hf-bar-share:[\d.]+""|--hf-donut-scale:[\d.]+"|--hf-donut-strength:\d+%(?:;--hf-donut-deepen:\d+%)?"|--hf-donut-cos:|--hf-bar-chart-(?:slots|at|share|across):[\d.]+(?:;--hf-bar-chart-at:[\d.]+)?")|order:/,
     )
   })
 
@@ -924,8 +924,18 @@ describe('the page /wedstrijden/cijfers', () => {
     it('hides both charts from a screen reader and leaves the numbers to the table', async () => {
       const card = section(await render(), 'doelpunten-per-kwartier')
 
-      expect(card.match(/<div aria-hidden="true" class="hf-donut-chart /g)).toHaveLength(2)
+      expect(card.match(/<div[^>]* aria-hidden="true" class="hf-donut-chart /g)).toHaveLength(2)
       expect(card.match(/<table[^>]*>.*<\/table>/s)?.[0]).not.toContain('aria-hidden')
+    })
+
+    it('sizes the two rings by their totals, the larger total the full size and none under half', async () => {
+      const card = section(await render(), 'doelpunten-per-kwartier')
+      const scales = [...card.matchAll(/--hf-donut-scale:([\d.]+)/g)].map(([, scale]) => Number(scale))
+
+      expect(card).toContain('hf-donut-chart-group-scaled')
+      expect(scales).toHaveLength(2)
+      expect(Math.max(...scales)).toBe(1)
+      expect(Math.min(...scales)).toBeGreaterThanOrEqual(0.5)
     })
 
     it('has the goals for and against per quarter in the table, the six quarters in order', async () => {
