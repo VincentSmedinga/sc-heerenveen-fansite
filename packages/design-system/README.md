@@ -68,6 +68,9 @@ Wat elk component doet, staat in de hoofdstukken Componenten en Patronen van Sto
 
 - **Puur CSS:** custom properties, cascade layers en geneste regels.
   Geen Sass, CSS-in-JS of Tailwind.
+- **Container query of media query:** een regel over de ruimte van het component zelf is een container query, met een naam; een regel over het scherm of de pagina (de pagina met zijn kolommen, de balk, de navigatie) is een media query.
+  De twee kolommen van de pagina beginnen bij een breedte van minstens 52 rem én een hoogte van minstens 32 rem.
+  De afspraak staat in _Een regel over de ruimte van het component is een container query_ in `docs/beslissingen/designsysteem.md`.
 - **Voorvoegsel `hf-`** (Heerenveen Fansite) voor klassen en custom properties: `.hf-heading-3`, `--hf-colour-text-default`.
 - **Lagen:** `hf.tokens`, `hf.base`, `hf.typography`, `hf.components`, `hf.flow`, `hf.utilities`.
   Een hulpklasse zit in `hf.utilities`, de sterkste laag, zodat een component of typestijl haar niet ongedaan maakt.

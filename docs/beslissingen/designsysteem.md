@@ -708,6 +708,7 @@
   Of de dag en de tijd altijd boven de kop; dan lijnen de koppen op een breed scherm niet meer uit en wordt de lijst langer.
   Of de kolom smaller maken; "wo 14:05" past niet in minder ruimte.
   Of het `li` als container nemen, zonder extra element; dan klopt het niet voor een `NewsItem` buiten een `List`.
+- **Later:** zie _Een regel over de ruimte van het component is een container query, een regel over het scherm een media query_ (19 november 2026): dit besluit is er een voorbeeld van.
 
 ## Koppen in een nieuwsregel zijn pas onderstreept bij hover en focus
 
@@ -1543,6 +1544,8 @@
   Een grens op oriëntatie of hoogte (laat zoom en tekstvergroting op een liggend scherm twee kolommen houden, en breekt het herschikken).
 - **Later:** zie _Een pagina is een raster met benoemde gebieden, met een werkbalk onder de kop_ en _De oude opbouw van een pagina is weg_ (#1182): `Page.Sidebar`, het raster met kolommen in `Page.Body` en de eigenschappen `intro`, `wide`, `narrow`, `split`, `start` en `sticky` bestaan niet meer.
   De kolommen zijn de verdelingen uit `layout.css`, en 52 rem blijft de grens.
+- **Later:** zie _De pagina heeft twee kolommen vanaf 52 rem breed én 32 rem hoog, anders één_ (19 november 2026): de grens is niet meer alleen een breedte, ook een liggende telefoon krijgt één kolom.
+  Het getal staat in `page.css` twee keer, niet drie.
 
 ## Een keuzelijst krijgt de opmaak van de site met `appearance: base-select`, binnen `@supports`, te beginnen bij de seizoenskiezer
 
@@ -1959,6 +1962,7 @@
 - **Later:** zie _Een rij van een tabel om in te vullen heeft twee regels, een nummer en een prullenbak_.
   De tabel is nu een blok per rij met twee regels, vanaf 40 rem naast het nummer en de knop, en zonder kolomkoppen.
   Wat blijft: de breedte is die van de tabel zelf, en elk veld heeft een volledig label.
+- **Later:** zie _Een regel over de ruimte van het component is een container query, een regel over het scherm een media query_ (19 november 2026): dit besluit is er een voorbeeld van.
 
 ## Dichtheid is een klasse die tokens verandert, los van het kleurthema
 
@@ -3927,3 +3931,36 @@
 - **Waarom:** een stuk dat van een andere soort is dan de rest, zoals de seizoenen in een andere competitie, moet te zien zijn zonder dat de lijn breekt.
   De streepjes verschillen in vorm van de gewone lijn, dus kleur is niet het enige teken (1.4.1).
 - **Alternatieven:** een holle stip per plek (te nadrukkelijk, en de lijn breekt); een tweede `Trend` over dezelfde grafiek (dubbele schaal en dubbel werk).
+
+## Een regel over de ruimte van het component is een container query, een regel over het scherm een media query
+
+- **Datum:** 19 november 2026
+- **Besluit:** een regel die over de ruimte van het component zelf gaat, is een container query: een rooster of rij die smaller wordt in een smalle kolom, een tabel die niet meer past, een kaart met minder binnenruimte.
+  Een regel die over het scherm of de pagina gaat, blijft een media query: het paginaraster, de balk met snelkoppelingen, het woordmerk, de marge van de pagina en de navigatie (66 rem en 20em), en alles wat niet over breedte gaat (gedwongen kleuren, hover, afdrukken, minder beweging).
+  Een container krijgt altijd een naam (`container-name`), want een naamloze query pakt de dichtstbijzijnde voorouder.
+  `container-type: inline-size` laat een element niet meer meegroeien met zijn inhoud: gebruik het alleen op een element met een breedte die van buiten komt.
+  Een element kan niet naar zijn eigen breedte vragen, dus de container is een voorouder van het element dat de query gebruikt.
+  Wie een regel schrijft, vraagt zich dus eerst af: gaat dit over de ruimte van het component, of over het scherm?
+  #1420 (tabellen en paginering), #1421 (rasters en rijen) en #1422 (binnenruimte van een kaart) passen deze afspraak toe op de regels die nu nog een media query zijn.
+- **Waarom:** een component weet niet in welke kolom het staat, het venster zegt dat niet (zie _Een smalle nieuwsregel zet de dag en de tijd boven de kop, met een container query_ en _Een tabel om in te vullen wordt een blok per rij waar hij niet past, naar de breedte van de tabel zelf_).
+  De pagina en de balk beslissen wel over het venster.
+  Browserondersteuning is geen reden om te wachten: Chrome 124, Firefox 125 en Safari 17.4 staan in de browserslist.
+- **Alternatieven:** overal media queries (klopt niet in een smalle kolom); overal container queries (de pagina en de balk hebben het venster nodig).
+- **Later:** vult de besluiten over de nieuwsregel (23 oktober 2026) en `InputTable` (2 november 2026) aan: ze zijn nu een voorbeeld van de afspraak, niet meer een uitzondering.
+
+## De pagina heeft twee kolommen vanaf 52 rem breed én 32 rem hoog, anders één
+
+- **Datum:** 19 november 2026
+- **Besluit:** de pagina heeft twee kolommen bij een breedte van minstens 52 rem én een hoogte van minstens 32 rem, anders één.
+  Een telefoon in liggende stand (ongeveer 844 pixels breed) is ongeveer 24 rem hoog en krijgt zo één kolom, zoals de kaarten dan ook breder zijn.
+  De balk met snelkoppelingen volgt dezelfde grens: hij staat er onder de grens, ook op een liggende telefoon, en de ruimte voor het scrollen (`scroll-padding`) volgt hem.
+  De kolommen en de balk wisselen op hetzelfde moment, zoals het besluit over 52 rem al zei.
+  De rijen van `BarList` die alleen op een telefoon of alleen op een groot scherm staan, volgen dezelfde combinatie.
+  De grens staat uitgeschreven in `page.css` (twee keer, voor de sporen en voor de gebieden), `shortcuts.css` (de balk en de ruimte voor het scrollen), `bar-list.css` en `barWidths` in `followPage.ts`, omdat een media query geen custom property kan gebruiken.
+  `page-css.test.ts`, `shortcuts-css.test.ts`, `followPage.test.ts` en de e2e-test van de balk (op 844 bij 390 en 844 bij 800 pixels) houden de getallen gelijk.
+  Dit is een media query, want het gaat over het scherm (zie _Een regel over de ruimte van het component is een container query, een regel over het scherm een media query_).
+- **Waarom:** de hoogte onderscheidt een liggende telefoon van een klein venster op een computer.
+  Rem volgt de tekstgrootte, dus inzoomen geeft ook één kolom (WCAG 1.4.10).
+- **Alternatieven:** een hogere breedtegrens (raakt ook tablets en smalle vensters, en breekt de 52 rem); de beeldverhouding (minder voorspelbaar in een smal venster).
+- **Later:** vult _De tweede kolom begint bij 52 rem, voor alle pagina's met een zijbalk_ (de grens is niet meer alleen een breedte) en alle besluiten waar "52 rem blijft de grens" staat: lees daar "52 rem breed en 32 rem hoog".
+  Het aantal van drie keer in `page.css` in dat besluit is er twee: het gaat om de sporen van `Page.Body` en de gebieden van `Page.Main`.

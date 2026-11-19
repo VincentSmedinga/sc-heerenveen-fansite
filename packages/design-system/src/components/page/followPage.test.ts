@@ -27,9 +27,9 @@ describe('pickCurrent', () => {
 describe('the narrow width of followPage', () => {
   it('is the width where the body has one column, the same as the one in shortcuts.css', () => {
     const css = readFileSync(join(import.meta.dirname, 'shortcuts.css'), 'utf8')
-    const wide = css.match(/@media \(width >= ([\d.]+rem)\) \{\s*display: none;/)?.[1]
+    const wide = css.match(/@media \(width >= ([\d.]+rem)\) and \(height >= ([\d.]+rem)\) \{\s*display: none;/)
 
-    expect(barWidths).toBe(`(width < ${wide})`)
+    expect(barWidths).toBe(`((width < ${wide?.[1]}) or (height < ${wide?.[2]}))`)
   })
 })
 
