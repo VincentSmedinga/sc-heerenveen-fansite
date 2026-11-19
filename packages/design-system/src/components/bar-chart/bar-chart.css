@@ -148,6 +148,16 @@
     stroke-width: var(--hf-bar-chart-line);
   }
 
+  /* The stretch of another kind: a dotted line in sand, on the same edge as the line. */
+  .hf-bar-chart-trend-apart {
+    fill: none;
+    stroke: var(--hf-colour-chart-line-apart);
+    stroke-dasharray: 0.1 6;
+    stroke-linecap: round;
+    stroke-width: calc(var(--hf-bar-chart-line) + 1px);
+    vector-effect: non-scaling-stroke;
+  }
+
   .hf-bar-chart-trend-edge {
     stroke: var(--hf-colour-chart-line-edge);
     stroke-width: var(--hf-bar-chart-edge);
@@ -296,6 +306,10 @@
     .hf-bar-chart-trend-dot {
       background-color: CanvasText;
       border-color: Canvas;
+    }
+
+    .hf-bar-chart-trend-apart {
+      stroke: GrayText;
     }
   }
 }

@@ -1238,7 +1238,7 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(allSeasonsHtml, /<th scope="row"><a href="\/wedstrijden\/zoeken\?competitie=europa"/)
     assert.match(
       allSeasonsHtml,
-      /<caption class="hf-visually-hidden">De laatste seizoenen van sc Heerenveen: de plek in de Eredivisie/,
+      /<caption class="hf-visually-hidden">De laatste seizoenen van sc Heerenveen: de plek in de competitie waarin we speelden/,
     )
     assert.match(allSeasonsHtml, /<th scope="row"><a href="\/wedstrijden">[^<]*\(nu\)<\/a><\/th>/)
     assert.match(
@@ -1723,19 +1723,17 @@ await withEmptyDatabase((database) =>
     assert.match(opponentsHtml, /<span class="hf-visually-hidden">doelsaldo<\/span>/)
     assert.match(opponentsHtml, /punten(?:<!-- -->)? \(3 per winst, 1 per gelijkspel\).*?doelsaldo/)
     assert.match(opponentsHtml, /Sinds \d{4}\/\d{2}/)
-    // The sidebar has the top 10 of the average points: a table for the clubs with five played
-    // matches, or the sentence when there is none, and the credit.
-    assert.match(opponentsHtml, /<h2[^>]*id="gemiddeld-resultaat">Gemiddeld resultaat<\/h2>/)
+    // The sidebar has the cards Het makkelijkst and Het moeilijkst: a table with the first five
+    // places for the clubs with five played matches, or the sentence when fewer than ten count.
+    assert.match(opponentsHtml, /<h2[^>]*id="het-makkelijkst">Het makkelijkst<\/h2>/)
+    assert.match(opponentsHtml, /<h2[^>]*id="het-moeilijkst">Het moeilijkst<\/h2>/)
+    assert.match(opponentsHtml, /Gemiddeld aantal punten per wedstrijd/)
     assert.match(
       opponentsHtml,
-      /tegen clubs met minstens 5 gespeelde wedstrijden|Nog geen club met minstens 5 gespeelde wedstrijden\./,
+      /tegen clubs met minstens 5 gespeelde wedstrijden|Nog geen 10 clubs met minstens 5 gespeelde wedstrijden\./,
     )
-    // The card Het moeilijkst is there only with ten clubs of five played matches, so the
-    // made-up matches may or may not have it; if so, it has its own heading and caption.
-    if (opponentsHtml.includes('id="het-moeilijkst"')) {
-      assert.match(opponentsHtml, /<h2[^>]*id="het-moeilijkst">Het moeilijkst<\/h2>/)
-      assert.match(opponentsHtml, /van laag naar hoog/)
-    }
+    // Without JavaScript the choice Alle, Thuis and Uit has no buttons that would do nothing.
+    assert.doesNotMatch(opponentsHtml, /aria-pressed/)
     // The card Laatste overwinning needs the table of the newest season, so the made-up data
     // may or may not have it; if so, it has its own heading and caption, before the credit.
     if (opponentsHtml.includes('id="laatste-overwinning"')) {
@@ -1828,7 +1826,7 @@ await withEmptyDatabase((database) =>
     // counts the Eredivisie alone. The season that is going on is not in it.
     assert.match(
       clubHtml,
-      /id="hoe-vaak-welke-uitslag".*<h2[^>]*id="plek-in-de-competitie">.*?De plek van Testdorp FC en de onz.*?<\/h2>.*?<caption class="hf-visually-hidden">De plek in de Eredivisie waarin Testdorp FC en sc Heerenveen eindigden, per seizoen<\/caption>/s,
+      /id="hoe-vaak-welke-uitslag".*<h2[^>]*id="plek-in-de-competitie">.*?De plek van Testdorp FC en de onz.*?<\/h2>.*?<caption class="hf-visually-hidden">De plek in de competitie waarin Testdorp FC en sc Heerenveen eindigden, per seizoen<\/caption>/s,
     )
     const clubPlaces = clubHtml.slice(clubHtml.indexOf('id="plek-in-de-competitie"'))
     const placeRow = (years, ours, theirs) =>

@@ -445,7 +445,7 @@ function measureValue(measure: LeagueMeasure, value: number): number | string {
 const pointsWord = (points: number) => `${points} ${points === 1 ? 'punt' : 'punten'}`
 
 /**
- * The card of the statistics page with the place of sc Heerenveen in the Eredivisie on five
+ * The card of the statistics page with the place of sc Heerenveen in its league on five
  * measures, in a table, and under it two sentences on the points to the leader and to the last.
  * The places come from the table of the whole league, in which the clubs have not all played
  * the same number of matches, and the line under the card says after how many matches of ours
@@ -459,6 +459,8 @@ export function LeaguePlaceCard({
   standings: PublicStandingsRow[]
 }) {
   const place = leaguePlaceOf(standings)
+  // The table is of the Eredivisie, or of the Eerste divisie in two seasons.
+  const league = standings.at(0)?.competition ?? 'Eredivisie'
   // The card of a season that is over has a season, and calls its table the final one.
   const table = season === undefined ? 'de stand' : 'de eindstand'
 
@@ -467,7 +469,7 @@ export function LeaguePlaceCard({
       <Heading anchor id="onze-plek-in-de-competitie" level={2}>
         Onze plek in de competitie
       </Heading>
-      <Tag>Eredivisie</Tag>
+      <Tag>{league}</Tag>
       {place === undefined ? (
         <Text>
           {standings.length === 0
@@ -477,7 +479,7 @@ export function LeaguePlaceCard({
       ) : (
         <>
           <DataTable
-            caption="De plek van sc Heerenveen in de Eredivisie, per onderdeel"
+            caption={`De plek van sc Heerenveen in de ${league}, per onderdeel`}
             columns={['Onderdeel', 'Plaats', 'Waarde']}
             rows={place.measures.map(({ measure, place: rank, shared, value }) => ({
               cells: [`${shared ? 'gedeeld ' : ''}${rank}e`, measureValue(measure, value)],
@@ -494,7 +496,7 @@ export function LeaguePlaceCard({
           </Text>
         </>
       )}
-      <EredivisieOnly />
+      <DataLine limits={[`alleen de ${league}`]} />
     </Card>
   )
 }

@@ -1,3 +1,4 @@
+import type { StandingsCompetition } from '@fansite/db/schema'
 import type { FormResult, PageShortcutsItem } from '@fansite/design-system'
 
 import { listClubNamePeriods, type NamePeriodLine } from '@fansite/db/club-name-periods'
@@ -492,10 +493,15 @@ export type PointsPlace = { name: string; place: number; played: number; points:
  * otherwise be on top. Level averages go by the number of matches, then by name; the order
  * compares the real ratio and not the rounded number, and every club has a place of its own.
  * `played` is the number of matches of all the clubs that count, not only of the ten shown.
- * With no club that counts, `places` is empty.
+ * With fewer than `topPointsPlaces` clubs that count, `places` is empty and `played` is 0.
  */
 export function topPointsOf(records: readonly PublicClubRecord[]) {
   const counting = records.filter((record) => record.played >= topPointsMinimum)
+
+  if (counting.length < topPointsPlaces) {
+    return { places: [] as PointsPlace[], played: 0 }
+  }
+
   const places = counting
     .map((record) => ({ name: record.name, played: record.played, points: pointsOf(record), slug: record.slug }))
     // Compare points/played without dividing, so 7 out of 3 is not the same as 2,33 rounded.
@@ -508,15 +514,26 @@ export function topPointsOf(records: readonly PublicClubRecord[]) {
   return { places, played: counting.reduce((sum, record) => sum + record.played, 0) }
 }
 
-/** How many places the card Het moeilijkst has. */
-export const hardestPlaces = 5
+/** How many places the card Het moeilijkst has, of which `shownPlaces` show at first. */
+export const hardestPlaces = 10
+
+/** How many places of a card show before the button "Toon 5 meer". */
+export const shownPlaces = 5
 
 /**
- * The five clubs against which sc Heerenveen took the fewest points per match, for the card Het
+ * Where sc Heerenveen played the matches that a card counts: `all`, at home (`home`) or away
+ * (`away`). The cards Het makkelijkst and Het moeilijkst let a visitor choose.
+ */
+export type Venue = 'all' | 'away' | 'home'
+
+export const venues = ['all', 'home', 'away'] as const
+
+/**
+ * The ten clubs against which sc Heerenveen took the fewest points per match, for the card Het
  * moeilijkst under the top 10. It counts the same clubs (`topPointsMinimum` played matches) and
  * the same points, and orders on the real ratio, lowest first. Level ratios go by the most
- * matches, then by name. It has places only when at least `topPointsPlaces` clubs count, as the
- * issue decided; otherwise `places` is empty and `played` is 0. `played` is the number of
+ * matches, then by name. It has places only when at least `topPointsPlaces` clubs count;
+ * otherwise `places` is empty and `played` is 0. `played` is the number of
  * matches of all the clubs that count.
  */
 export function hardestOf(records: readonly PublicClubRecord[]) {
@@ -541,10 +558,14 @@ export function hardestOf(records: readonly PublicClubRecord[]) {
 export const seasonsOf = (matches: readonly PublicClubMatch[]) =>
   [...new Set(matches.map((match) => match.season))].sort().reverse()
 
-const clubRecords = cacheForKey(period, (choice) => {
-  const only = competitionMembers(choice as CompetitionChoice)
+const clubRecords = cacheForKey(period, (key) => {
+  const [choice, venue] = key.split(':') as [CompetitionChoice, Venue]
+  const only = competitionMembers(choice)
 
-  return listClubRecords(getDatabase().db, only === undefined ? {} : { competition: only })
+  return listClubRecords(getDatabase().db, {
+    ...(only === undefined ? {} : { competition: only }),
+    ...(venue === 'all' ? {} : { venue }),
+  })
 })
 
 /** The club and every match against it, whatever the competition. */
@@ -560,10 +581,11 @@ export type ClubPage = {
 /**
  * Every club with the record against it, A to Z, for the matches the choice counts. A club
  * without a match of that choice, such as one we only met in the cup with the choice `league`,
- * is not in it. The five choices are the only keys, so the cache never grows.
+ * is not in it. With `venue` only the matches at home or away count. The five choices and
+ * three venues are the only keys, so the cache never grows.
  */
-export function getClubRecords(choice: CompetitionChoice): Promise<PublicClubRecord[]> {
-  return clubRecords(choice)
+export function getClubRecords(choice: CompetitionChoice, venue: Venue = 'all'): Promise<PublicClubRecord[]> {
+  return clubRecords(`${choice}:${venue}`)
 }
 
 const clubPages = cacheForKey(period, async (slug): Promise<ClubPage | undefined> => {
@@ -586,8 +608,11 @@ const clubPages = cacheForKey(period, async (slug): Promise<ClubPage | undefined
  */
 export const getStadiumPlace = cacheForKey(period, (id) => findStadiumPlace(getDatabase().db, Number(id)))
 
-/** One season of the card "De plek van <club> en de onze": both places in the Eredivisie. */
-export type ClubPlace = { ours: number; season: string; theirs: number }
+/**
+ * One season of the card "De plek van <club> en de onze": both places in the league of that
+ * season, which is the Eredivisie unless `competition` says otherwise.
+ */
+export type ClubPlace = { competition: StandingsCompetition; ours: number; season: string; theirs: number }
 
 /**
  * The names a club goes by, normalised (see `normaliseClubName`): its name, the other spellings
@@ -607,7 +632,7 @@ export function clubKeysOf(page: Pick<ClubPage, 'club' | 'matches' | 'names'>): 
 }
 
 /**
- * The seasons in which both sc Heerenveen and the club are in the table of the Eredivisie, the
+ * The seasons in which both sc Heerenveen and the club are in the table of the same league, the
  * newest first, with the two places. `ours` are the places of every season (`getFinalPlaces`),
  * `table` the rows of every club (`listStandingsPlaces`) and `keys` the names of the club
  * (`clubKeysOf`). The season that is going on is left out: its table is not final, and these
@@ -616,7 +641,7 @@ export function clubKeysOf(page: Pick<ClubPage, 'club' | 'matches' | 'names'>): 
  */
 export function clubPlacesOf(
   ours: readonly FinalPlace[],
-  table: readonly { club: string; position: number; season: string }[],
+  table: readonly { club: string; competition: StandingsCompetition; position: number; season: string }[],
   keys: ReadonlySet<string>,
 ): ClubPlace[] {
   const places: ClubPlace[] = []
@@ -625,7 +650,7 @@ export function clubPlacesOf(
     const theirs = table.find((candidate) => candidate.season === season && keys.has(normaliseClubName(candidate.club)))
 
     if (!now && row !== undefined && theirs !== undefined) {
-      places.push({ ours: row.position, season, theirs: theirs.position })
+      places.push({ competition: row.competition, ours: row.position, season, theirs: theirs.position })
     }
   }
 

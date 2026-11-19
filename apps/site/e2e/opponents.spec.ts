@@ -56,7 +56,7 @@ for (const choice of ['', '?competitie=eredivisie']) {
 
     const card = placesCard(page)
     const table = card.getByRole('table', {
-      name: 'De plek in de Eredivisie waarin Testdorp FC en sc Heerenveen eindigden, per seizoen',
+      name: 'De plek in de competitie waarin Testdorp FC en sc Heerenveen eindigden, per seizoen',
     })
 
     await expect(card.getByRole('heading', { level: 2 })).toHaveText('De plek van Testdorp FC en de onze')

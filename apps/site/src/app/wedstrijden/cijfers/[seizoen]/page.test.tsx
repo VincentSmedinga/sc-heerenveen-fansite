@@ -23,8 +23,16 @@ vi.mock('#src/matches', async (importOriginal) => ({
 }))
 
 const finalPlaces: FinalPlace[] = [
-  { now: false, row: { goalDifference: 3, points: 50, pointsDeducted: 0, position: 6 }, season: '2025/26' },
-  { now: true, row: { goalDifference: 9, points: 20, pointsDeducted: 0, position: 2 }, season: '2026/27' },
+  {
+    now: false,
+    row: { competition: 'Eredivisie', goalDifference: 3, points: 50, pointsDeducted: 0, position: 6 },
+    season: '2025/26',
+  },
+  {
+    now: true,
+    row: { competition: 'Eredivisie', goalDifference: 9, points: 20, pointsDeducted: 0, position: 2 },
+    season: '2026/27',
+  },
 ]
 
 // The afternoon of Friday 23 October 2026 in the Netherlands, in the season 2026/27.

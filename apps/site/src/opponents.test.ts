@@ -587,14 +587,24 @@ describe('topPointsOf', () => {
     won,
   })
 
+  /** The clubs given and clubs without a point, so that ten clubs count: the card needs ten. */
+  const withFiller = (clubs: PublicClubRecord[]) => [
+    ...clubs,
+    ...Array.from({ length: Math.max(0, 10 - clubs.filter(({ played }) => played >= 5).length) }, (_, index) =>
+      record(`Zzz vul ${index}`, 0, 0, 5),
+    ),
+  ]
+
   it('counts 3 points for a win and 1 for a draw, as the column Punten does', () => {
     expect(pointsOf(record('A', 2, 1, 3))).toBe(7)
   })
 
   it('divides the points by the played matches and puts the highest average first', () => {
-    const { places } = topPointsOf([record('Laag', 1, 1, 3), record('Hoog', 4, 1, 0), record('Midden', 2, 2, 1)])
+    const { places } = topPointsOf(
+      withFiller([record('Laag', 1, 1, 3), record('Hoog', 4, 1, 0), record('Midden', 2, 2, 1)]),
+    )
 
-    expect(places.map(({ name, place, played, points }) => [place, name, points, played])).toEqual([
+    expect(places.slice(0, 3).map(({ name, place, played, points }) => [place, name, points, played])).toEqual([
       [1, 'Hoog', 13, 5],
       [2, 'Midden', 8, 5],
       [3, 'Laag', 4, 5],
@@ -602,14 +612,15 @@ describe('topPointsOf', () => {
   })
 
   it('leaves out a club with fewer than five played matches, whatever its average', () => {
-    const { places, played } = topPointsOf([
-      record('Eén keer', 1, 0, 0),
-      record('Vier keer', 4, 0, 0),
-      record('Vijf', 0, 0, 5),
-    ])
+    const { places, played } = topPointsOf(
+      withFiller([record('Eén keer', 1, 0, 0), record('Vier keer', 4, 0, 0), record('Vijf', 0, 0, 5)]),
+    )
 
-    expect(places.map(({ name }) => name)).toEqual(['Vijf'])
-    expect(played).toBe(5)
+    expect(places.map(({ name }) => name)).toContain('Vijf')
+    expect(places.map(({ name }) => name)).not.toContain('Eén keer')
+    expect(places.map(({ name }) => name)).not.toContain('Vier keer')
+    // Vijf and nine clubs without a point, five matches each.
+    expect(played).toBe(50)
   })
 
   it('counts the matches of every club that counts, not only those of the ten shown', () => {
@@ -624,34 +635,36 @@ describe('topPointsOf', () => {
 
   it('puts the club with more matches first on a level average, and then goes by name', () => {
     // 2 points per match for each: 10 out of 5, 12 out of 6, and the same 10 out of 5 twice.
-    const { places } = topPointsOf([
-      record('Zeta', 3, 1, 1),
-      record('Beta', 3, 1, 1),
-      record('Alfa', 3, 3, 0),
-      record('Gamma', 3, 0, 3),
-    ])
+    const { places } = topPointsOf(
+      withFiller([record('Zeta', 3, 1, 1), record('Beta', 3, 1, 1), record('Alfa', 3, 3, 0), record('Gamma', 3, 0, 3)]),
+    )
 
-    expect(places.map(({ name }) => name)).toEqual(['Alfa', 'Beta', 'Zeta', 'Gamma'])
+    expect(places.slice(0, 4).map(({ name }) => name)).toEqual(['Alfa', 'Beta', 'Zeta', 'Gamma'])
   })
 
   it('orders on the real ratio and not on the rounded average', () => {
     // 19 out of 8 (2,375) and 31 out of 13 (2,3846) both show as 2,38; the second is higher.
-    const { places } = topPointsOf([record('Acht', 6, 1, 1), record('Dertien', 10, 1, 2)])
+    const { places } = topPointsOf(withFiller([record('Acht', 6, 1, 1), record('Dertien', 10, 1, 2)]))
 
-    expect(places.map(({ name }) => name)).toEqual(['Dertien', 'Acht'])
+    expect(places.slice(0, 2).map(({ name }) => name)).toEqual(['Dertien', 'Acht'])
   })
 
   it('gives clubs with the same average each a place of their own, from 1', () => {
-    const { places } = topPointsOf([record('B', 2, 1, 2), record('A', 2, 1, 2)])
+    const { places } = topPointsOf(withFiller([record('B', 2, 1, 2), record('A', 2, 1, 2)]))
 
-    expect(places.map(({ name, place }) => [place, name])).toEqual([
+    expect(places.slice(0, 2).map(({ name, place }) => [place, name])).toEqual([
       [1, 'A'],
       [2, 'B'],
     ])
   })
 
-  it('shows fewer than ten places when fewer clubs count', () => {
-    expect(topPointsOf([record('Eén', 5, 0, 0), record('Twee', 0, 5, 0)]).places).toHaveLength(2)
+  it('has places from ten clubs that count, and none with nine', () => {
+    const nine = Array.from({ length: 9 }, (_, index) => record(`Club ${index}`, index, 0, 5 - index))
+
+    expect(topPointsOf(nine)).toEqual({ places: [], played: 0 })
+    expect(topPointsOf([...nine, record('Tien', 5, 0, 0)]).places).toHaveLength(10)
+    // A club of four matches is no tenth club.
+    expect(topPointsOf([...nine, record('Vier', 4, 0, 0)])).toEqual({ places: [], played: 0 })
   })
 
   it('has no places, and no matches, when no club has five played matches', () => {
@@ -679,7 +692,7 @@ describe('hardestOf', () => {
     record('Tweede', 1, 0, 4),
   ]
 
-  it('gives the five clubs with the fewest points per match, the lowest first, from place 1', () => {
+  it('gives the ten clubs with the fewest points per match, the lowest first, from place 1', () => {
     const { places } = hardestOf([
       ...many,
       record('Derde', 1, 1, 3),
@@ -687,13 +700,14 @@ describe('hardestOf', () => {
       record('Vijfde', 2, 0, 3),
     ])
 
-    expect(places.map(({ name, place, points }) => [place, name, points])).toEqual([
+    expect(places.slice(0, 5).map(({ name, place, points }) => [place, name, points])).toEqual([
       [1, 'Laagste', 0],
       [2, 'Tweede', 3],
       [3, 'Derde', 4],
       [4, 'Vierde', 5],
       [5, 'Vijfde', 6],
     ])
+    expect(places).toHaveLength(10)
   })
 
   it('puts the club with more matches first on a level ratio, and then goes by name', () => {
@@ -706,7 +720,7 @@ describe('hardestOf', () => {
       record('Gamma', 0, 5, 0),
     ])
 
-    expect(places.map(({ name }) => name)).toEqual(['Alfa', 'Beta', 'Gamma', 'Zeta', 'Hoog 0'])
+    expect(places.slice(0, 5).map(({ name }) => name)).toEqual(['Alfa', 'Beta', 'Gamma', 'Zeta', 'Hoog 0'])
   })
 
   it('orders on the real ratio and not on the rounded average', () => {
@@ -726,12 +740,12 @@ describe('hardestOf', () => {
     expect(places.map(({ name }) => name)).not.toContain('Vier keer')
   })
 
-  it('counts the matches of every club that counts, not only those of the five shown', () => {
+  it('counts the matches of every club that counts, not only those of the ten shown', () => {
     expect(hardestOf(many).played).toBe(55)
   })
 
   it('shows from ten clubs that count, and has no places with nine', () => {
-    expect(hardestOf(many).places).toHaveLength(5)
+    expect(hardestOf(many).places).toHaveLength(10)
     expect(hardestOf(many.slice(0, 9))).toEqual({ places: [], played: 0 })
     // A club of four matches is no tenth club.
     expect(hardestOf([...many.slice(0, 9), record('Vier', 0, 0, 4)])).toEqual({ places: [], played: 0 })
@@ -741,7 +755,7 @@ describe('hardestOf', () => {
     expect(hardestOf([])).toEqual({ places: [], played: 0 })
   })
 
-  it('has no club that is also in the top 10 from fifteen clubs on', () => {
+  it('has no club among its first five that is also among the first five of the top 10, from fifteen clubs on', () => {
     // Five matches each, with 0 to 13 and 15 points: no two clubs are level.
     const clubs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15].map((points) =>
       record(
@@ -751,8 +765,12 @@ describe('hardestOf', () => {
         5 - Math.floor(points / 3) - (points % 3),
       ),
     )
-    const top = topPointsOf(clubs).places.map(({ slug }) => slug)
-    const hardest = hardestOf(clubs).places.map(({ slug }) => slug)
+    const top = topPointsOf(clubs)
+      .places.slice(0, 5)
+      .map(({ slug }) => slug)
+    const hardest = hardestOf(clubs)
+      .places.slice(0, 5)
+      .map(({ slug }) => slug)
 
     expect(hardest).toHaveLength(5)
     expect(hardest.filter((slug) => top.includes(slug))).toEqual([])
@@ -897,7 +915,10 @@ describe('hasTimeline', () => {
 describe('clubPlacesOf', () => {
   const ours = (season: string, position: number | undefined, now = false): FinalPlace => ({
     now,
-    row: position === undefined ? undefined : { goalDifference: 0, points: 0, pointsDeducted: 0, position },
+    row:
+      position === undefined
+        ? undefined
+        : { competition: 'Eredivisie', goalDifference: 0, points: 0, pointsDeducted: 0, position },
     season,
   })
   const places = [
@@ -907,7 +928,17 @@ describe('clubPlacesOf', () => {
     ours('2025/26', 8),
     ours('2026/27', 2, true),
   ]
-  const table = (season: string, club: string, position: number) => ({ club, position, season })
+  const table = (
+    season: string,
+    club: string,
+    position: number,
+    competition: 'Eerste divisie' | 'Eredivisie' = 'Eredivisie',
+  ) => ({
+    club,
+    competition,
+    position,
+    season,
+  })
 
   const club = (names: readonly NamePeriodLine[], otherNames: string[], opponents: string[]) => ({
     club: { id: 1, name: 'FC Zwolle', otherNames, slug: 'fc-zwolle', wikipediaPage: null },
@@ -923,9 +954,24 @@ describe('clubPlacesOf', () => {
     ]
 
     expect(clubPlacesOf(places, rows, clubKeysOf(club([], [], [])))).toEqual([
-      { ours: 8, season: '2025/26', theirs: 16 },
-      { ours: 6, season: '2023/24', theirs: 9 },
-      { ours: 4, season: '2022/23', theirs: 11 },
+      { competition: 'Eredivisie', ours: 8, season: '2025/26', theirs: 16 },
+      { competition: 'Eredivisie', ours: 6, season: '2023/24', theirs: 9 },
+      { competition: 'Eredivisie', ours: 4, season: '2022/23', theirs: 11 },
+    ])
+  })
+
+  it('gives the league of a season that was not in the Eredivisie', () => {
+    const eerste: FinalPlace[] = [
+      {
+        now: false,
+        row: { competition: 'Eerste divisie', goalDifference: 0, points: 0, pointsDeducted: 0, position: 3 },
+        season: '1991/92',
+      },
+    ]
+    const rows = [table('1991/92', 'FC Zwolle', 9, 'Eerste divisie')]
+
+    expect(clubPlacesOf(eerste, rows, clubKeysOf(club([], [], [])))).toEqual([
+      { competition: 'Eerste divisie', ours: 3, season: '1991/92', theirs: 9 },
     ])
   })
 

@@ -4,6 +4,7 @@ import { Heading, Page, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
 
+import type { CompetitionChoice } from '#src/competition'
 import type { SearchParams } from '#src/season-page'
 
 import {
@@ -103,6 +104,23 @@ const loadClubList = cache(async () => {
   }
 })
 
+/**
+ * The records of the matches at home and away for the choice of the page, for the cards that
+ * let a visitor choose Thuis or Uit. They are read in the page, because only the choice of the
+ * page is known there, and fail on their own so the page can show the error page.
+ */
+const loadVenueRecords = cache(async (competition: CompetitionChoice) => {
+  try {
+    const [home, away] = await Promise.all([getClubRecords(competition, 'home'), getClubRecords(competition, 'away')])
+
+    return { away, home, kind: 'found' } as const
+  } catch (error) {
+    console.error(`Could not read the opponents at home and away for ${opponentsPath}: ${reasonOf(error)}`)
+
+    return { kind: 'error' } as const
+  }
+})
+
 const loadClub = cache(async (slug: string) => {
   try {
     const page = await getClubPage(slug)
@@ -150,9 +168,10 @@ export async function clubListMetadata(): Promise<Metadata> {
  * and the switch is the one of Cijfers. A club we only met in the cup is not in the list
  * with the choice Eredivisie. The switch is only there when a cup tie was played. A value of
  * the choice that is not known is the page "niet gevonden". The list is the main column, on the
- * white surface. The sidebar has the top 10 of the average points per match (`TopPointsCard`),
- * which counts the same matches as the list, the card Het moeilijkst (`HardestCard`) when at
- * least ten clubs count, the card Laatste overwinning (`LastWinCard`) with the clubs of the
+ * white surface. The sidebar has the cards Het makkelijkst (`TopPointsCard`) and Het moeilijkst
+ * (`HardestCard`), the best and the worst ten of the average points per match, which count the
+ * same matches as the list and let a visitor choose Alle, Thuis or Uit, the card Laatste
+ * overwinning (`LastWinCard`) with the clubs of the
  * Eredivisie, and the credit under it. On a phone it follows the
  * list.
  */
@@ -164,9 +183,9 @@ export async function ClubListPage({ searchParams }: { searchParams: Promise<Sea
     notFound()
   }
 
-  const loaded = await loadClubList()
+  const [loaded, venueLoaded] = await Promise.all([loadClubList(), loadVenueRecords(competition)])
 
-  if (loaded.kind === 'error') {
+  if (loaded.kind === 'error' || venueLoaded.kind === 'error') {
     return <ServerError retryHref={opponentsPath} />
   }
 
@@ -181,6 +200,7 @@ export async function ClubListPage({ searchParams }: { searchParams: Promise<Sea
   )
   const hasCup = options.length > 0
   const records = loaded.records[competition]
+  const venueRecords = { all: records, away: venueLoaded.away, home: venueLoaded.home }
   const since = sinceOf(loaded.seasons)
 
   return (
@@ -205,19 +225,19 @@ export async function ClubListPage({ searchParams }: { searchParams: Promise<Sea
             since={since}
           />
         </Page.Cell>
-        <Page.Section area="side" aria-label="Het gemiddelde resultaat en de bron">
+        <Page.Section area="side" aria-label="Het makkelijkst, het moeilijkst en de bron">
           <TopPointsCard
             address={opponentsPath}
             choice={competition}
             query={competitionQuery(competition)}
-            records={records}
+            records={venueRecords}
             since={since}
           />
           <HardestCard
             address={opponentsPath}
             choice={competition}
             query={competitionQuery(competition)}
-            records={records}
+            records={venueRecords}
             since={since}
           />
           <LastWinCard address={opponentsPath} places={loaded.lastWins} query={competitionQuery(competition)} />
