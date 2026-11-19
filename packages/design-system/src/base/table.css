@@ -15,19 +15,24 @@
    * A table is a large building block: in a card or a cell the flow (utilities/flow.css) puts
    * the large space under it when something follows, and none when it is the last. It sets no
    * space of its own.
-   *
-   * The width of the table decides how tight its columns are, not the width of the window: a
-   * table in a narrow column of a wide screen is as tight as one on a phone. The table is its
-   * own container, which is safe because its width comes from outside (100%). A rule for the
-   * cells of a table asks for this container by its name, so a table inside another container
-   * does not change which one a rule means.
    */
   table {
     border-collapse: collapse;
-    container: hf-table / inline-size;
     font-variant-numeric: tabular-nums;
     inline-size: 100%;
     margin-block: 0;
+  }
+
+  /*
+   * The width of the table decides how tight its columns are, not the width of the window: a
+   * table in a narrow column of a wide screen is as tight as one on a phone. A table can't be
+   * the container of its own cells (a browser does not look at a table for them), so a table
+   * sits in a block that is: this one, or the place of a bar table (bar.css), which has the
+   * name as well. A rule for the cells of a table asks for the container by this name, so a
+   * table inside another container does not change which one a rule means.
+   */
+  .hf-table-container {
+    container: hf-table / inline-size;
   }
 
   caption {

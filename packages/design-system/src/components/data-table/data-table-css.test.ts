@@ -26,7 +26,7 @@ describe('data-table.css', () => {
   })
 
   it('folds a column under 44rem of the table itself, and not of the window', () => {
-    expect(css).toMatch(/\.hf-data-table-fold \{[^}]*container: hf-data-table-fold \/ inline-size;/u)
+    expect(css).toMatch(/\.hf-data-table-fold \{[^}]*container: hf-data-table-fold hf-table \/ inline-size;/u)
 
     const start = css.indexOf('@container hf-data-table-fold (inline-size < 44rem)')
 

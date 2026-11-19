@@ -196,7 +196,7 @@
    * (`display: none`), so nothing is read twice.
    */
   .hf-data-table-fold {
-    container: hf-data-table-fold / inline-size;
+    container: hf-data-table-fold hf-table / inline-size;
   }
 
   .hf-data-table-text .hf-data-table-folded {
@@ -296,7 +296,7 @@
     gap: var(--hf-space-m) var(--hf-space-l);
     grid-template-columns: repeat(auto-fit, minmax(min(5.5rem, 100%), 1fr));
 
-    & > table {
+    & > :is(table, .hf-table-container) {
       margin-block-end: 0;
     }
 

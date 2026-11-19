@@ -10,6 +10,7 @@ import {
   ColumnText,
   keyColumnOf,
   needsFoldContainer,
+  TableContainer,
   TableRows,
   textColumnClass,
   TextColumnText,
@@ -169,11 +170,9 @@ export const SortableDataTable = ({
 
   return (
     <>
-      {text && needsFoldContainer(columns as readonly DataTableTextColumn[]) ? (
-        <div className="hf-data-table-fold">{table}</div>
-      ) : (
-        table
-      )}
+      <TableContainer fold={text && needsFoldContainer(columns as readonly DataTableTextColumn[])}>
+        {table}
+      </TableContainer>
       {scripted && (
         <div className="hf-visually-hidden" role="status">
           {announcement}

@@ -3969,7 +3969,10 @@
 
 - **Datum:** 19 november 2026
 - **Besluit:** de vier regels die op de breedte van het venster wisselden, wisselen nu op de breedte van het component zelf, met een container query en een eigen naam.
-  Een tabel is zijn eigen container (`hf-table`, in `base/table.css`), want zijn breedte komt van buiten (`inline-size: 100%`) en inline-size containment verandert die dus niet.
+  Een tabel kan niet de container van zijn eigen cellen zijn: Chrome kijkt voor een cel niet naar de tabel zelf (we hebben het geprobeerd, geen van de queries pakte).
+  Een tabel staat dus in een blok dat `hf-table` heet (`.hf-table-container` in `base/table.css`).
+  `DataTable` zet dat blok om elke tabel, en een tabel met inklapbare kolommen of korte koppen heeft het al in `hf-data-table-fold`, dat de naam er ook bij krijgt.
+  De tabellen met een balk (stand, topscorers, records en spelers) staan al in `hf-bar-place`, en dat heeft de naam er nu ook bij (`container-name: hf-bar-place hf-table`), dus hun HTML verandert niet.
   Dat zijn de kolommen met cijfers van elke tabel en die van een tabel die sorteert (`data-table.css`), allebei bij 24 rem.
   De cijfers van de spelers (`player-figures.css`) volgen de container van hun plek, `hf-bar-place`, bij dezelfde 24 rem.
   `Pagination` heeft een binnenste `div` (`hf-pagination-row`) met het raster, omdat een raster niet naar zijn eigen breedte kan vragen: de `nav` is de container (`hf-pagination`) en zet de tekst boven de links bij 24 rem of smaller.
@@ -3979,5 +3982,5 @@
   `table-css.test.ts` en `pagination-css.test.ts` houden de namen en de getallen vast.
 - **Waarom:** zie _Een regel over de ruimte van het component is een container query, een regel over het scherm een media query_: een tabel moet wisselen als hij niet past, niet als het venster smal is.
   Reflow (WCAG 1.4.10) blijft goed: inzoomen maakt het venster en dus de kolom in rem smaller, dus de smalle opvulling volgt vanzelf.
-- **Alternatieven:** de media queries laten staan (klopt niet in een smalle kolom); een wrapper om elke tabel (verandert de HTML van elke pagina); een naamloze container op de tabel (breekt de queries van de containers eromheen).
+- **Alternatieven:** de media queries laten staan (klopt niet in een smalle kolom); een wrapper om elke tabel in elk component (alleen waar nog geen container om de tabel stond: `DataTable`); een container op de tabel zelf (werkt niet, zie boven); een naamloze container (breekt de queries van de containers eromheen).
 - **Later:** maakt de regels over 24 rem voor de kolommen met cijfers (_Het pictogram in een tabelkop krimpt niet, en een kolom met cijfers is zo breed als zijn cijfers_ en de besluiten over `PlayerFiguresTable` en de paginering) tot regels voor de breedte van de tabel of de plek, niet van het venster.

@@ -19,7 +19,7 @@
     --hf-bar-gap: var(--hf-space-m);
     --hf-bar-size: 3.5rem;
 
-    container-name: hf-bar-place;
+    container-name: hf-bar-place hf-table;
     container-type: inline-size;
     display: grid;
     gap: var(--hf-space-m);

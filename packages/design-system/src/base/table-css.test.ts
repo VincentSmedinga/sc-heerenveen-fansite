@@ -28,8 +28,12 @@ describe('the columns of figures', () => {
 })
 
 describe('the tables', () => {
-  it('are the container of their own width, by a name, and no rule of a table asks for the window', () => {
-    expect(read('base/table.css')).toMatch(/\n {2}table \{[^}]*container: hf-table \/ inline-size;/u)
+  it('sit in a container of their own width, by a name, and no rule of a table asks for the window', () => {
+    expect(read('base/table.css')).toMatch(/\.hf-table-container \{\s*container: hf-table \/ inline-size;\s*\}/u)
+    expect(read('components/bar/bar.css')).toMatch(/container-name: hf-bar-place hf-table;/u)
+    expect(read('components/data-table/data-table.css')).toMatch(
+      /container: hf-data-table-fold hf-table \/ inline-size;/u,
+    )
     expect(read('base/table.css')).not.toMatch(/@media[^{]*width/u)
     expect(read('components/data-table/data-table.css')).not.toMatch(/@media[^{]*width/u)
     expect(read('components/player-figures-table/player-figures.css')).not.toMatch(/@media[^{]*width/u)
