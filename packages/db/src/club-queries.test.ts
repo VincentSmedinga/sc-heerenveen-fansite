@@ -147,6 +147,25 @@ describe('listClubRecords', () => {
     expect((await listClubRecords(database.db)).map((club) => club.name)).toEqual(['FC Twente', 'Quick Boys'])
   })
 
+  it('counts only the matches at home or only those away when asked, and leaves out a club without one', async () => {
+    await store(
+      played('FC Twente', 2, 0),
+      played('FC Twente', 0, 1, { home: false, matchDate: '2026-02-01', season: '2025/26' }),
+      played('Quick Boys', 4, 0, { competition: 'KNVB Beker', home: false }),
+    )
+
+    expect(await listClubRecords(database.db, { venue: 'home' })).toMatchObject([
+      { goalsAgainst: 0, goalsFor: 2, name: 'FC Twente', played: 1, won: 1 },
+    ])
+    expect(await listClubRecords(database.db, { venue: 'away' })).toMatchObject([
+      { lost: 1, name: 'FC Twente', played: 1 },
+      { name: 'Quick Boys', played: 1, won: 1 },
+    ])
+    expect(await listClubRecords(database.db, { competition: 'Eredivisie', venue: 'away' })).toMatchObject([
+      { lost: 1, name: 'FC Twente', played: 1 },
+    ])
+  })
+
   it('gives the same figures for all matches and for the Eredivisie in a season without cup matches', async () => {
     await store(played('FC Twente', 2, 0), played('FC Twente', 1, 1, { home: false, matchDate: '2026-02-01' }))
 

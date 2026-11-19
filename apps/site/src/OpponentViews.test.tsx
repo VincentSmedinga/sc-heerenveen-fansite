@@ -2,6 +2,7 @@
 import type { PublicClubMatch, PublicClubRecord } from '@fansite/db/queries'
 
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { renderToString } from 'react-dom/server'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import type { Meeting } from './opponents'
@@ -112,129 +113,197 @@ describe('ClubsCard', () => {
   })
 })
 
-describe('TopPointsCard', () => {
-  // Sparta has 10 played matches and 14 points, Zwolle 5 and 15, Venlo 7 and 4.
-  const card = (choice: 'all' | 'league' = 'all', query = '') => (
-    <TopPointsCard address="/tegenstanders" choice={choice} query={query} records={records} since="2022/23" />
+/**
+ * Eleven clubs of ten played matches: Club 00 won none, Club 10 won them all, so Club 10 is the
+ * easiest and Club 00 the hardest, from 0,00 to 3,00 points per match in steps of 0,30. The
+ * matches at home are the other way round, and the ones away have no club of ten matches.
+ */
+const ladder = (order: (index: number) => number) =>
+  Array.from({ length: 11 }, (_, index) =>
+    record(`Club ${String(index).padStart(2, '0')}`, order(index), 0, 10 - order(index), 0, 0),
   )
+const venueRecords = {
+  all: ladder((index) => index),
+  away: ladder((index) => index).slice(0, 4),
+  home: ladder((index) => 10 - index),
+}
 
-  it('ranks the clubs on the average points per match with two decimals and a comma', () => {
-    render(card())
+/** The names in the rows of a table, in order. */
+const namesIn = (table: Element | null) => [...(table?.querySelectorAll('tbody th') ?? [])].map((th) => th.textContent)
+const tables = () => [...document.querySelectorAll('table')]
+const chooseVenue = (name: 'Alle' | 'Thuis' | 'Uit') => fireEvent.click(screen.getByRole('button', { name }))
 
-    expect(names()).toEqual(['Zwolle', 'Sparta', 'Venlo'])
-    expect(figures(1)).toEqual(['1', '2', '3'])
-    expect(figures(2)).toEqual(['3,00', '1,40', '0,57'])
-    expect(figures(3)).toEqual(['5', '10', '7'])
+describe.each([
+  {
+    caption: 'waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt, van hoog naar laag',
+    firstFive: ['Club 10', 'Club 09', 'Club 08', 'Club 07', 'Club 06'],
+    homeFirst: 'Club 00',
+    id: 'het-makkelijkst',
+    make: (props: { choice?: 'all' | 'league'; query?: string; records?: typeof venueRecords }) => (
+      <TopPointsCard
+        address="/tegenstanders"
+        choice={props.choice ?? 'all'}
+        query={props.query ?? ''}
+        records={props.records ?? venueRecords}
+        since="2022/23"
+      />
+    ),
+    nextFive: ['Club 05', 'Club 04', 'Club 03', 'Club 02', 'Club 01'],
+    points: ['3,00', '2,70', '2,40', '2,10', '1,80'],
+    title: 'Het makkelijkst',
+  },
+  {
+    caption: 'waartegen sc Heerenveen gemiddeld de minste punten per wedstrijd haalt, van laag naar hoog',
+    firstFive: ['Club 00', 'Club 01', 'Club 02', 'Club 03', 'Club 04'],
+    homeFirst: 'Club 10',
+    id: 'het-moeilijkst',
+    make: (props: { choice?: 'all' | 'league'; query?: string; records?: typeof venueRecords }) => (
+      <HardestCard
+        address="/tegenstanders"
+        choice={props.choice ?? 'all'}
+        query={props.query ?? ''}
+        records={props.records ?? venueRecords}
+        since="2022/23"
+      />
+    ),
+    nextFive: ['Club 05', 'Club 06', 'Club 07', 'Club 08', 'Club 09'],
+    points: ['0,00', '0,30', '0,60', '0,90', '1,20'],
+    title: 'Het moeilijkst',
+  },
+])('$title', ({ caption, firstFive, homeFirst, id, make, nextFive, points, title }) => {
+  it('has the title as its heading, with the anchor of the title, and says what the figure is', () => {
+    render(make({}))
+
+    const heading = screen.getByRole('heading', { level: 2, name: title })
+
+    expect(heading.id).toBe(id)
+    expect(screen.getByText('Gemiddeld aantal punten per wedstrijd')).toBeTruthy()
   })
 
-  it('has a hidden caption that names the order, real column headers and a link named by the club', () => {
-    render(card())
+  it('shows the first five places with two decimals and a comma, and the next five behind "Toon 5 meer"', () => {
+    render(make({}))
 
-    expect(
-      screen.getByRole('table', {
-        name: /^De tien clubs waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt, van hoog naar laag$/,
-      }),
-    ).toBeTruthy()
-    expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+    const [first, second] = tables()
+
+    expect(namesIn(first ?? null)).toEqual(firstFive)
+    expect([...(first?.querySelectorAll('tbody td:nth-of-type(1)') ?? [])].map((cell) => cell.textContent)).toEqual([
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+    ])
+    expect([...(first?.querySelectorAll('td.hf-key') ?? [])].map((cell) => cell.textContent)).toEqual(points)
+    expect(first?.querySelector('caption')?.textContent).toBe(`De vijf clubs ${caption}`)
+
+    const fold = screen.getByText('Toon 5 meer').closest('details')
+
+    expect(fold?.hasAttribute('open')).toBe(false)
+    expect(fold?.contains(second ?? null)).toBe(true)
+    expect(namesIn(second ?? null)).toEqual(nextFive)
+    expect(second?.querySelector('caption')?.textContent).toBe(`De volgende vijf clubs ${caption}`)
+    expect([...(second?.querySelectorAll('tbody td:nth-of-type(1)') ?? [])].map((cell) => cell.textContent)).toEqual([
+      '6',
+      '7',
+      '8',
+      '9',
+      '10',
+    ])
+  })
+
+  it('cannot be sorted, and has real column headers and a link named by the club', () => {
+    render(make({}))
+
+    expect(document.querySelector('[aria-sort]')).toBeNull()
+    expect([...(tables()[0]?.querySelectorAll('thead th') ?? [])].map((header) => header.textContent)).toEqual([
       '#plaats',
       'Club',
       'punten per wedstrijd',
       'gespeeld',
     ])
-    expect(screen.getByRole('link', { name: 'Zwolle' }).getAttribute('href')).toBe('/tegenstanders/zwolle')
+    expect(screen.getByRole('link', { name: firstFive[0] ?? '' }).getAttribute('href')).toBe(
+      `/tegenstanders/${(firstFive[0] ?? '').toLowerCase()}`,
+    )
   })
 
-  it('says it is the Eredivisie in the caption and keeps the choice in every link', () => {
-    render(card('league', '?competitie=eredivisie'))
+  it('has the choice Alle, Thuis and Uit, with Alle pressed, in a group named after the card', () => {
+    render(make({}))
 
-    expect(screen.getByRole('table').querySelector('caption')?.textContent).toMatch(/, in de Eredivisie$/)
-    expect(screen.getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
-      '/tegenstanders/zwolle?competitie=eredivisie',
-      '/tegenstanders/sparta?competitie=eredivisie',
-      '/tegenstanders/venlo?competitie=eredivisie',
-    ])
+    const group = screen.getByRole('group', { name: `${title}: waar we speelden` })
+
+    expect(
+      within(group)
+        .getAllByRole('button')
+        .map((button) => button.textContent),
+    ).toEqual(['Alle', 'Thuis', 'Uit'])
+    expect(screen.getByRole('button', { name: 'Alle' }).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.getByRole('button', { name: 'Thuis' }).getAttribute('aria-pressed')).toBe('false')
   })
 
-  it('sets the average as the key figure', () => {
-    render(card())
+  it('shows the matches at home for Thuis, and names the choice in the caption and the line under it', () => {
+    render(make({}))
+    chooseVenue('Thuis')
 
-    expect([...document.querySelectorAll('td.hf-key')].map((cell) => cell.textContent)).toEqual([
-      '3,00',
-      '1,40',
-      '0,57',
-    ])
+    expect(screen.getByRole('button', { name: 'Thuis' }).getAttribute('aria-pressed')).toBe('true')
+    expect(namesIn(tables()[0] ?? null)[0]).toBe(homeFirst)
+    expect(tables()[0]?.querySelector('caption')?.textContent).toBe(`De vijf clubs ${caption}, thuis`)
+    expect(screen.getByText('Sinds 2022/23, tegen clubs met minstens 5 gespeelde thuiswedstrijden')).toBeTruthy()
+
+    chooseVenue('Alle')
+
+    expect(namesIn(tables()[0] ?? null)).toEqual(firstFive)
+    expect(screen.getByText('Sinds 2022/23, tegen clubs met minstens 5 gespeelde wedstrijden')).toBeTruthy()
   })
 
-  it('cannot be sorted: no buttons and no sort order', () => {
-    render(card())
+  it('has a line for a screen reader that is empty at first and says which choice was made', () => {
+    render(make({}))
 
-    expect(screen.queryAllByRole('button')).toEqual([])
-    expect(document.querySelector('[aria-sort]')).toBeNull()
+    const status = screen.getByRole('status')
+
+    expect(status.textContent).toBe('')
+
+    chooseVenue('Thuis')
+
+    expect(screen.getByRole('status')).toBe(status)
+    expect(status.textContent).toBe('Thuis gekozen')
   })
 
-  it('names the minimum, the legend and what the card is based on', () => {
-    render(card())
+  it('says one sentence, and shows no table, for a choice with fewer than ten clubs that count', () => {
+    render(make({}))
+    chooseVenue('Uit')
+
+    expect(screen.getByText('Nog geen 10 clubs met minstens 5 gespeelde uitwedstrijden.')).toBeTruthy()
+    expect(tables()).toEqual([])
+    expect(screen.queryByText('Toon 5 meer')).toBeNull()
+    expect(screen.getByRole('heading', { level: 2, name: title })).toBeTruthy()
+  })
+
+  it('names the Eredivisie in the caption, and keeps the choice in every link', () => {
+    render(make({ choice: 'league', query: '?competitie=eredivisie' }))
+
+    expect(tables()[0]?.querySelector('caption')?.textContent).toBe(`De vijf clubs ${caption}, in de Eredivisie`)
+    expect(
+      [...document.querySelectorAll('a')].every((link) =>
+        link.getAttribute('href')?.endsWith('?competitie=eredivisie'),
+      ),
+    ).toBe(true)
+  })
+
+  it('names the legend and what the card is based on', () => {
+    render(make({}))
 
     expect(legendsOf(document.body.innerHTML)).toEqual(['punten per wedstrijd, gespeeld'])
     expect(screen.getByText('Sinds 2022/23, tegen clubs met minstens 5 gespeelde wedstrijden')).toBeTruthy()
   })
 
-  it('says one sentence, and shows no table, when no club has five played matches', () => {
-    render(
-      <TopPointsCard
-        address="/tegenstanders"
-        choice="all"
-        query=""
-        records={[record('Venlo', 1, 1, 2, 3, 4)]}
-        since="2022/23"
-      />,
-    )
+  it('shows Alle and no buttons without JavaScript, since the buttons would do nothing', () => {
+    const html = renderToString(make({}))
 
-    expect(screen.getByRole('heading', { name: 'Gemiddeld resultaat' })).toBeTruthy()
-    expect(screen.getByText('Nog geen club met minstens 5 gespeelde wedstrijden.')).toBeTruthy()
-    expect(screen.queryByRole('table')).toBeNull()
-    expect(screen.queryByText(/^Alle \d+ gespeelde wedstrijden/)).toBeNull()
-  })
-})
-
-describe('HardestCard', () => {
-  // Ten clubs of five matches: five that won them all, and Club 5 to 9 with 4 down to 0 points.
-  const many = Array.from({ length: 10 }, (_, index) =>
-    index < 5 ? record(`Club ${index}`, 5, 0, 0, 0, 0) : record(`Club ${index}`, 0, 9 - index, index - 4, 0, 0),
-  )
-  const card = (choice: 'all' | 'league' = 'all', query = '', list = many) => (
-    <HardestCard address="/tegenstanders" choice={choice} query={query} records={list} since="2022/23" />
-  )
-
-  it('ranks the five lowest averages from low to high, with the caption of our points', () => {
-    render(card())
-
-    expect(screen.getByRole('heading', { level: 2, name: 'Het moeilijkst' })).toBeTruthy()
-    expect(names()).toEqual(['Club 9', 'Club 8', 'Club 7', 'Club 6', 'Club 5'])
-    expect(figures(1)).toEqual(['1', '2', '3', '4', '5'])
-    expect(figures(2)).toEqual(['0,00', '0,20', '0,40', '0,60', '0,80'])
-    expect(
-      screen.getByRole('table', {
-        name: 'De vijf clubs waartegen sc Heerenveen gemiddeld de minste punten per wedstrijd haalt, van laag naar hoog',
-      }),
-    ).toBeTruthy()
-    expect(legendsOf(document.body.innerHTML)).toEqual(['punten per wedstrijd, gespeeld'])
-    expect(screen.getByText(/^Sinds 2022\/23, tegen clubs met minstens 5/)).toBeTruthy()
-  })
-
-  it('follows the switch: Eredivisie in the caption and in every link', () => {
-    render(card('league', '?competitie=eredivisie'))
-
-    expect(screen.getByRole('table').querySelector('caption')?.textContent).toMatch(/, in de Eredivisie$/)
-    expect(screen.getAllByRole('link').map((link) => link.getAttribute('href'))[0]).toBe(
-      '/tegenstanders/club 9?competitie=eredivisie',
-    )
-  })
-
-  it('is not there with fewer than ten clubs that count', () => {
-    const { container } = render(card('all', '', many.slice(0, 9)))
-
-    expect(container.textContent).toBe('')
+    expect(html).toContain(`id="${id}"`)
+    expect(html).not.toContain('aria-pressed')
+    expect(html).not.toContain('<button')
+    expect(html).toContain(firstFive[0])
+    expect(html).toContain('Toon 5 meer')
   })
 })
 

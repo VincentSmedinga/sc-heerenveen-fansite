@@ -567,11 +567,13 @@ export async function listClubNews(
  * (the rule is `resultOf` in the site). With `competition` only the matches of that
  * competition count, and a club without one in it is left out; without it all of them count.
  * A club that has matches but none played yet is in the list with zeros. `country` is the code
- * of the country of the club (`NL`), or `null` for a club whose country we do not know.
+ * of the country of the club (`NL`), or `null` for a club whose country we do not know. With
+ * `venue` set to `home` or `away` only the matches at home or away count, and a club without
+ * one is left out; a match has no third place, so a neutral ground counts as it was recorded.
  */
 export function listClubRecords(
   db: Database,
-  { competition }: { competition?: Competition | readonly Competition[] } = {},
+  { competition, venue }: { competition?: Competition | readonly Competition[]; venue?: 'away' | 'home' } = {},
 ) {
   const played = eq(matches.status, 'played')
   const total = (condition: SQL) => sql<number>`cast(coalesce(sum(${condition}), 0) as unsigned)`.mapWith(Number)
@@ -601,6 +603,7 @@ export function listClubRecords(
         competition === undefined
           ? undefined
           : inArray(matches.competition, Array.isArray(competition) ? [...competition] : [competition as Competition]),
+        venue === undefined ? undefined : eq(matches.home, venue === 'home'),
       ),
     )
     .groupBy(clubs.id)
