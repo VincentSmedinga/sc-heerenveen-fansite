@@ -6618,11 +6618,12 @@
   Een Eredivisie-seizoen met een gat aan beide kanten, zoals 1990/91, krijgt een gewone stip, want een enkele waarde heeft geen lijn.
 - **Alternatieven:** een leeg gat (verbergt dat we zijn gedaald en teruggekomen); de plekken onder de schaal van de Eredivisie op een tweede as (meer werk en moeilijker te lezen); een kolom Competitie voor elk seizoen (breder dan 320 pixels).
 
-## De kaart met plekken bij een tegenstander noemt de competitie van een seizoen buiten de Eredivisie
+## De kaarten met een plek uit `standings` noemen de competitie van een seizoen buiten de Eredivisie
 
 - **Datum:** 19 november 2026
 - **Besluit:** `clubPlacesOf` geeft de competitie van het seizoen mee, en de kaart "De plek van … en de onze" schrijft die bij beide plekken, zoals de tabel van Seizoen voor seizoen.
   Hebben alle seizoenen de Eredivisie, dan blijft de regel "Alleen de Eredivisie"; anders staat er dat de plekken die van de Eredivisie zijn, tenzij de competitie erbij staat.
-  De overige lezers van `standings` blijven zoals ze zijn: ze gebruiken alleen het huidige seizoen of wedstrijden (de kaart per ronde, de laatste overwinning, de kerncijfers).
+  Ook de kerncijfer "plek" bovenaan Cijfers van een seizoen zegt de competitie van de stand ("2e plek, in de Eerste divisie"), en de kaart `LeaguePlaceCard` (nu niet op een pagina) noemt haar in het label, het bijschrift en de laatste regel.
+  De overige lezers van `standings` blijven zoals ze zijn: ze gebruiken alleen het huidige seizoen of wedstrijden (de kaart per ronde en de laatste overwinning).
 - **Waarom:** dezelfde verkeerde lezing doet zich daar voor, want zowel onze plek als die van de club komt uit de Eerste divisie.
 - **Alternatieven:** alleen de kaart Seizoen voor seizoen aanpassen en de andere in een apart issue doen.
