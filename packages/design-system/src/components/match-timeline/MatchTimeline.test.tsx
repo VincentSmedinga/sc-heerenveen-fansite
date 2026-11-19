@@ -319,7 +319,7 @@ describe('the score after a goal', () => {
 
     expect(figure?.textContent).toBe('2–1')
     expect(figure?.previousElementSibling?.classList.contains('hf-match-event-icon')).toBe(true)
-    expect(figure?.nextElementSibling?.classList.contains('hf-player-name') ?? true).toBe(true)
+    expect(item.querySelector('.hf-match-event-line')?.textContent).toMatch(/^2–1\s+Rick\s*Demo/u)
   })
 
   it('has the tone of sc Heerenveen: green when we lead, grey when level and red when we trail', () => {
