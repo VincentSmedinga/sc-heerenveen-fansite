@@ -5,8 +5,13 @@ import type { GoalQuarters, PlayerRecord, SeasonBars } from './player-charts'
 import { DataLine } from './DataLine'
 import { quarters } from './player-charts'
 
-/** The ids of the cards, for the headings that name them. */
-const ids = { quarters: 'wanneer-hij-scoort', record: 'uitslagen', seasons: 'grafiek-per-seizoen' } as const
+/** The ids of the cards, for the headings that name them and the bar "Op deze pagina:". */
+export const playerChartIds = {
+  quarters: 'wanneer-hij-scoort',
+  record: 'uitslagen',
+  seasons: 'grafiek-per-seizoen',
+} as const
+const ids = playerChartIds
 
 /**
  * The card "Wanneer hij scoort": six bars, one per quarter of an hour, and the same numbers as

@@ -125,3 +125,6 @@ export function seasonOfAddress(slug: string, path: string) {
 
   return season
 }
+
+/** Whether the part of the address looks like a season, such as `2025-26`, and not a player. */
+export const isSeasonAddress = (part: string) => /^\d{4}-\d{2}$/u.test(part)

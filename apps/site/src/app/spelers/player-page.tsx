@@ -35,6 +35,7 @@ import {
   type PlayerSeason,
   playerSeasonsOf,
 } from '#src/player-seasons'
+import { playerShortcutsOf } from '#src/player-shortcuts'
 import { PlayerAside as PlayerAsideColumn } from '#src/PlayerAside'
 import { PlayerCareerCard } from '#src/PlayerCareerCard'
 import { PlayerQuartersCard, PlayerRecordCard, PlayerSeasonBarsCard } from '#src/PlayerChartsCards'
@@ -207,6 +208,29 @@ export async function PlayerPageView({ searchParams, slug }: { searchParams: Pro
       </Page.Main>
     </>
   )
+}
+
+/**
+ * The bar of the page of a player (see `playerShortcutsOf`). A choice that the page doesn't
+ * know, a player nobody has, an address that moved and a page that can't read its data have no
+ * cards to jump to, so there is no bar. The readings are the page's own, cached, so this costs
+ * no query. The links stay on the page, so they keep the choice.
+ */
+export async function playerShortcuts({ searchParams, slug }: { searchParams: Promise<SearchParams>; slug: string }) {
+  if (parseCompetition((await searchParams)[competitionParam]) === undefined) {
+    return null
+  }
+
+  const loaded = await loadPlayerPage(slug)
+
+  if (loaded.kind !== 'found') {
+    return null
+  }
+
+  const seasons = await readSeasons(loaded.page)
+  const items = seasons === undefined ? [] : playerShortcutsOf(seasons, loaded.page.line)
+
+  return items.length === 0 ? null : <Page.Shortcuts items={items} label="Op deze pagina:" />
 }
 
 /** The seasons of the matches the side column shows. */
