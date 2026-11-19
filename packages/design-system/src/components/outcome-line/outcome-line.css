@@ -1,6 +1,7 @@
 /*
  * The line of the results: a thin bar next to the text: the whole width in a narrow column,
- * with the text under it, and a fixed width in a wide one. The line is the container; the bar asks it. The bar is the `OutcomeBar` with a lower height.
+ * with the text under it, and a fixed width in a wide one. The line is the container; the bar
+ * asks it. The bar is the `OutcomeBar` with a lower height.
  */
 
 @layer hf.components {

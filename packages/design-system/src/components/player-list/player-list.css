@@ -31,7 +31,7 @@
     font-size: var(--hf-meta-font-size);
   }
 
-  /* Two names of about 13rem and a gap of 2rem need 28rem; 32rem leaves room for a long name. */
+  /* Two names of about 13rem and a gap of 2rem need 28rem; 32rem leaves room for long names. */
   @container hf-player-list (inline-size >= 32rem) {
     .hf-player-list {
       column-gap: var(--hf-space-xl);

@@ -3991,8 +3991,11 @@
 - **Datum:** 19 november 2026
 - **Besluit:** `KeyFigures` (52 rem), `QuestionCard.Grid` (40 rem), `PlayerList` (52 rem) en `OutcomeLine` (40 rem) wisselen met een container query en een eigen naam, en de `@media`-regels op breedte zijn uit hun bestanden.
   Een element kan niet naar zijn eigen breedte vragen, dus de container is steeds een ander element:
-  - **`KeyFigures` en `QuestionCard.Grid`:** de lijst zelf is de container (`hf-key-figures`, `hf-question-grid`) en de kaarten vragen het hem. De lijst is daarom een `flex` met een basis per kaart in plaats van een raster, want een raster kan zijn eigen kolommen niet laten wisselen. De HTML en de plaats in `hf-flow` blijven gelijk.
-  - **`PlayerList`:** `columns` staat op de lijst zelf, dus de lijst staat nu in een `div` (`hf-player-list-container`, de container `hf-player-list`). De volgorde voor het toetsenbord en voor een schermlezer blijft gelijk.
+  - **`KeyFigures` en `QuestionCard.Grid`:** de lijst zelf is de container (`hf-key-figures`, `hf-question-grid`) en de kaarten vragen het hem.
+    De lijst is daarom een `flex` met een basis per kaart in plaats van een raster, want een raster kan zijn eigen kolommen niet laten wisselen.
+    De HTML en de plaats in `hf-flow` blijven gelijk.
+  - **`PlayerList`:** `columns` staat op de lijst zelf, dus de lijst staat nu in een `div` (`hf-player-list-container`, de container `hf-player-list`).
+    De volgorde voor het toetsenbord en voor een schermlezer blijft gelijk.
   - **`OutcomeLine`:** de regel is de container (`hf-outcome-line`) en alleen de balk vraagt het hem.
   - De getallen: vier cijfers naast elkaar vanaf 42 rem (vier kaarten van 9,4 rem en drie ruimtes van 1 rem komen op 40,5 rem); drie vragen vanaf 40 rem (drie kaarten van ongeveer 12 rem); twee kolommen spelers vanaf 32 rem (twee regels van ongeveer 13 rem en 2 rem ertussen komen op 28 rem, met ruimte voor een lange naam); de balk van 10 rem naast de tekst vanaf 40 rem.
   - De regel in `card-columns.css` die `PlayerList` in een kaart op één kolom zette, is weg: de lijst ziet nu zelf dat de kaart smal is.
