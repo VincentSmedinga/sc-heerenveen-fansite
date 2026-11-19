@@ -7,6 +7,7 @@ import type {
   MatchScoreBarGoal,
   MatchSubstitute,
   MatchTimelineEvent,
+  MatchTimelineScore,
 } from '@fansite/design-system'
 
 // What the page of a match shows, worked out from plain data: the data of the report with the
@@ -184,7 +185,11 @@ const cardWeight = { geel: 0, 'geel-rood': 1, rood: 2 } as const
  * of the team that gets it, except an own goal: that has the team of the player who scored it,
  * so the line says whose player made it.
  */
-function eventsOf(data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlayer>): MatchTimelineEvent[] {
+function eventsOf(
+  data: MatchPageData,
+  byId: ReadonlyMap<number, MatchPagePlayer>,
+  withScore: boolean,
+): MatchTimelineEvent[] {
   const nameOf = (id: number): MatchPlayerName => byId.get(id)?.name ?? { surname: '' }
   const teamOf = (ours: boolean) => (ours ? ourClub : data.opponent)
   const events: MatchTimelineEvent[] = []
@@ -263,7 +268,40 @@ function eventsOf(data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlayer
 
   // A stable sort keeps the order above for two events at the same moment. Added time of a half
   // comes before the next half, so 45+2 is earlier than 46.
-  return events.toSorted(byClock)
+  const sorted = events.toSorted(byClock)
+
+  return withScore ? withScores(data, sorted) : sorted
+}
+
+/**
+ * Gives each goal the score after it (#1412), counting the goals in the order of the clock. The
+ * score is written with the home club first, as the header has it. An own goal has the team of
+ * the player who made it, so it counts for the other club.
+ */
+function withScores(data: MatchPageData, events: MatchTimelineEvent[]): MatchTimelineEvent[] {
+  let ourGoals = 0
+  let theirGoals = 0
+
+  return events.map((event) => {
+    if (event.kind !== 'goal') {
+      return event
+    }
+
+    const forUs = event.ownGoal === true ? !event.ours : event.ours
+
+    ourGoals += forUs ? 1 : 0
+    theirGoals += forUs ? 0 : 1
+
+    const score: MatchTimelineScore = {
+      away: data.home ? theirGoals : ourGoals,
+      awayName: data.home ? data.opponent : ourClub,
+      home: data.home ? ourGoals : theirGoals,
+      homeName: data.home ? ourClub : data.opponent,
+      ourSide: data.home ? 'home' : 'away',
+    }
+
+    return { ...event, score }
+  })
 }
 
 /** The goals under a club in the header, in the order of the clock. */
@@ -384,8 +422,24 @@ export function buildMatchPage(data: MatchPageData): BuiltMatchPage {
     goal.minute === null ? [] : [{ minute: goal.minute, ours: goal.ours, stoppageMinutes: goal.stoppageMinutes }],
   )
 
+  // A report that is complete passed the rules, which let a goal of an opponent without a
+  // line-up have no player: its bar is the bar of the goals it has.
+  const scoreBarAgrees =
+    scoreBar.length === known.length &&
+    (data.complete ||
+      (scoreBar.filter((goal) => goal.ours).length === data.goalsFor &&
+        scoreBar.filter((goal) => !goal.ours).length === data.goalsAgainst))
+
   return {
-    events: eventsOf(data, byId),
+    // The score after a goal needs every goal: each has a minute and a player, and together
+    // they add up to the result. Otherwise it would be wrong for the goals that follow.
+    events: eventsOf(
+      data,
+      byId,
+      scoreBar.length === data.goals.length &&
+        scoreBar.filter((goal) => goal.ours).length === data.goalsFor &&
+        scoreBar.filter((goal) => !goal.ours).length === data.goalsAgainst,
+    ),
     pitch: {
       opponent: data.opponentComplete
         ? { formation: data.formations.opponent, name: data.opponent, players: theirs.starters }
@@ -393,13 +447,7 @@ export function buildMatchPage(data: MatchPageData): BuiltMatchPage {
       ours: { formation: data.formations.ours, name: ourClub, players: ours.starters },
     },
     scoreBar,
-    // A report that is complete passed the rules, which let a goal of an opponent without a
-    // line-up have no player: its bar is the bar of the goals it has.
-    scoreBarAgrees:
-      scoreBar.length === known.length &&
-      (data.complete ||
-        (scoreBar.filter((goal) => goal.ours).length === data.goalsFor &&
-          scoreBar.filter((goal) => !goal.ours).length === data.goalsAgainst)),
+    scoreBarAgrees,
     scorersAgainst: scorersOf(data, byId, false),
     scorersFor: scorersOf(data, byId, true),
     series: roundsOf(data, byId),

@@ -290,3 +290,75 @@ describe('MatchTimeline', () => {
     ])
   })
 })
+
+describe('the score after a goal', () => {
+  const score = (home: number, away: number, ourSide: 'away' | 'home' = 'home') => ({
+    away,
+    awayName: ourSide === 'home' ? 'Testdorp FC' : 'sc Heerenveen',
+    home,
+    homeName: ourSide === 'home' ? 'sc Heerenveen' : 'Testdorp FC',
+    ourSide,
+  })
+  const goal = (scored?: ReturnType<typeof score>): MatchTimelineEvent => ({
+    kind: 'goal',
+    minute: 12,
+    ours: true,
+    player: name('Demo', 'Rick'),
+    ...(scored === undefined ? {} : { score: scored }),
+    team: 'sc Heerenveen',
+  })
+  const line = (event: MatchTimelineEvent) => {
+    const { container } = render(<MatchTimeline events={[event]} />)
+
+    return container.querySelector('li')!
+  }
+
+  it('shows the score between the icon and the name, in the home club first order', () => {
+    const item = line(goal(score(2, 1)))
+    const figure = item.querySelector('.hf-match-event-score')
+
+    expect(figure?.textContent).toBe('2–1')
+    expect(figure?.previousElementSibling?.classList.contains('hf-match-event-icon')).toBe(true)
+    expect(figure?.nextElementSibling?.classList.contains('hf-player-name') ?? true).toBe(true)
+  })
+
+  it('has the tone of sc Heerenveen: green when we lead, grey when level and red when we trail', () => {
+    expect(line(goal(score(2, 1))).querySelector('.hf-match-event-score-win')).not.toBeNull()
+    expect(line(goal(score(1, 1))).querySelector('.hf-match-event-score-draw')).not.toBeNull()
+    expect(line(goal(score(1, 2))).querySelector('.hf-match-event-score-loss')).not.toBeNull()
+  })
+
+  it('takes the side of sc Heerenveen for the tone, also when we play away', () => {
+    expect(line(goal(score(1, 2, 'away'))).querySelector('.hf-match-event-score-win')).not.toBeNull()
+    expect(line(goal(score(2, 1, 'away'))).querySelector('.hf-match-event-score-loss')).not.toBeNull()
+  })
+
+  it('hides the figures from a screen reader and says the score with the clubs in the hidden text', () => {
+    const item = line(goal(score(2, 1)))
+
+    expect(item.querySelector('.hf-match-event-score')?.getAttribute('aria-hidden')).toBe('true')
+    expect(spoken(item)).toBe('sc Heerenveen: Minuut 12, Doelpunt, stand sc Heerenveen 2, Testdorp FC 1: ')
+  })
+
+  it('says the clubs in the order of the eye when we play away', () => {
+    expect(spoken(line(goal(score(1, 2, 'away'))))).toBe(
+      'sc Heerenveen: Minuut 12, Doelpunt, stand Testdorp FC 1, sc Heerenveen 2: ',
+    )
+  })
+
+  it('is as it was without a score', () => {
+    const item = line(goal())
+
+    expect(item.querySelector('.hf-match-event-score')).toBeNull()
+    expect(spoken(item)).toBe('sc Heerenveen: Minuut 12, Doelpunt: ')
+  })
+
+  it('also gives an own goal and a goal without a minute their score', () => {
+    const own = line({ ...goal(score(0, 1)), ours: false, ownGoal: true, team: 'Testdorp FC' })
+    const noMinute = line({ ...goal(score(1, 0)), minute: null })
+
+    expect(own.querySelector('.hf-match-event-score')?.textContent).toBe('0–1')
+    expect(spoken(own)).toBe('Testdorp FC: Minuut 12, Eigen doelpunt, stand sc Heerenveen 0, Testdorp FC 1: ')
+    expect(spoken(noMinute)).toBe('sc Heerenveen: Doelpunt, stand sc Heerenveen 1, Testdorp FC 0: ')
+  })
+})
