@@ -6732,3 +6732,12 @@
   Een rij die overal van oud naar nieuw loopt, leest overal hetzelfde.
 - **Alternatieven:** de rij van nieuw naar oud, passend bij de lijst maar anders dan Vorm en de rij op de pagina van een club; een korte titel zoals "Daar", die niet zegt hoeveel wedstrijden het zijn.
 - **Later:** vervangt in _De Voorbeschouwing toont de onderlinge wedstrijden in een kaart die de plaats van het veld noemt_ (16 november 2026) de kop "De laatste vijf daar" boven de laatste wedstrijden.
+
+### De kop van de Voorbeschouwing toont de scheidsrechter na het stadion
+
+- **Datum:** 18 november 2026
+- **Besluit:** de kop van de Voorbeschouwing toont de scheidsrechter (`matches.referee`) als feit "Scheidsrechter" direct na het stadion, en alleen als hij er is (#1408).
+  Een wedstrijd zonder scheidsrechter laat niets zien: geen streepje en geen "onbekend".
+- **Waarom:** de gegevens zijn er al, en de lijsten tonen hem onder de clubs, dus de bezoeker verwacht hem ook in de kop.
+  Het feit staat als tekst in dezelfde lijst als het stadion, net als op de pagina van een gespeelde wedstrijd.
+- **Alternatieven:** een eigen regel, die op een telefoon meer ruimte geeft aan één naam.

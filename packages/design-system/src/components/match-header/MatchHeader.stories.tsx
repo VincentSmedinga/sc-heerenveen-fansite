@@ -218,3 +218,22 @@ export const Preview = meta.story({
   },
   name: 'Voorbeschouwing: dezelfde streepjes, met "Voorbeschouwing" in de pil',
 })
+
+export const PreviewWithReferee = meta.story({
+  args: {
+    facts: [
+      { label: 'Competitie', value: 'Eredivisie' },
+      { label: 'Ronde', value: 'Speelronde 13' },
+      { label: 'Datum', value: <Time dateTime="2026-11-21T19:00:00Z">Zaterdag 21 november, 20.00 uur</Time> },
+      { label: 'Stadion', value: 'Stadion Proeflaan' },
+      { label: 'Scheidsrechter', value: 'Pieter Maquette' },
+    ],
+    goalsAgainst: 0,
+    goalsFor: 0,
+    home: false,
+    opponent: 'Testdorp FC',
+    phase: 'upcoming',
+    pill: 'Voorbeschouwing',
+  },
+  name: 'Voorbeschouwing met de scheidsrechter na het stadion',
+})
