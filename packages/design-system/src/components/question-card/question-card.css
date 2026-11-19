@@ -2,10 +2,10 @@
 
 @layer hf.components {
   /*
-   * Three columns where the column is wide and one where it is narrow. The cells of a row are as
-   * high as the highest one, so the row has an even edge. The list is the container and its
-   * items ask it, because a list can't ask for its own width. Three cards of about 12rem and two
-   * gaps of 1rem need 40rem.
+   * Three columns where the column is wide and one where it is narrow. The cells of a row are
+   * as high as the highest one, so the row has an even edge. The list is the container and its
+   * items ask it, because a list can't ask for its own width. Three cards of about 12rem and
+   * two gaps of 1rem need 40rem.
    */
   .hf-question-grid {
     container-name: hf-question-grid;

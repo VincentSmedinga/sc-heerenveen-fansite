@@ -1,7 +1,7 @@
 /*
  * A list of players: the name, and under it a quiet line with the years. A row never breaks
- * across the two columns of a wide column. The block around the list is the container, as a list
- * can't ask for the width it lays out its own columns in.
+ * across the two columns of a wide column. The block around the list is the container, as a
+ * list can't ask for the width it lays out its own columns in.
  */
 
 @layer hf.components {
