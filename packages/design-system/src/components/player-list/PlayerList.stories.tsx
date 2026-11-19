@@ -65,3 +65,26 @@ export const GivenNameFirst = meta.story({
     </Card>
   ),
 })
+
+export const Wide = meta.story({
+  name: 'In een brede kolom twee kolommen, in een smalle één',
+  render: () => {
+    const players = [
+      { facts: 'Verdediger · 2013–2017', key: 'a', rest: 'Joost van', surname: 'Aken' },
+      { facts: 'Aanvaller · 2024/25', key: 'b', rest: 'Alfreð', surname: 'Finnbogason' },
+      { facts: 'Middenvelder · sinds 2024', key: 'c', rest: 'Luka', surname: 'Ødegaard' },
+      { facts: '2009/10', key: 'd', surname: 'Dinho' },
+    ]
+
+    return (
+      <div className="hf-flow">
+        <div style={{ maxInlineSize: '40rem' }}>
+          <PlayerList players={players} />
+        </div>
+        <div style={{ maxInlineSize: '18rem' }}>
+          <PlayerList players={players} />
+        </div>
+      </div>
+    )
+  },
+})

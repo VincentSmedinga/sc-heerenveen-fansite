@@ -3999,7 +3999,9 @@
   - **`OutcomeLine`:** de regel is de container (`hf-outcome-line`) en alleen de balk vraagt het hem.
   - De getallen: vier cijfers naast elkaar vanaf 42 rem (vier kaarten van 9,4 rem en drie ruimtes van 1 rem komen op 40,5 rem); drie vragen vanaf 40 rem (drie kaarten van ongeveer 12 rem); twee kolommen spelers vanaf 32 rem (twee regels van ongeveer 13 rem en 2 rem ertussen komen op 28 rem, met ruimte voor een lange naam); de balk van 10 rem naast de tekst vanaf 40 rem.
   - De regel in `card-columns.css` die `PlayerList` in een kaart op één kolom zette, is weg: de lijst ziet nu zelf dat de kaart smal is.
-  - `key-figures-css.test.ts`, `QuestionCard.test.tsx` en `container-queries.spec.ts` houden de namen en het wisselen vast, ook in een smalle kolom in een breed venster (320, 390 en 1280 pixels).
+  - `key-figures-css.test.ts` en `QuestionCard.test.tsx` houden de namen en de grenzen vast, en elk onderdeel heeft een verhaal in een smalle kolom (en `PlayerList` ook in een brede).
+  - `container-queries.spec.ts` is een uitzondering op de regel dat maten en breedtes geen e2e-test krijgen: dat een query ook echt past bij de container is alleen in een browser te zien (Chrome liet een tabel niet de container van zijn eigen cellen zijn), en een CSS-test ziet het niet.
+    De test zet elk onderdeel in een kolom van 300 en van 800 pixels, in een venster van 320, 390 en 1280 pixels.
 - **Waarom:** zie _Een regel over de ruimte van het component is een container query, een regel over het scherm een media query_.
   Reflow (WCAG 1.4.10) blijft goed: inzoomen maakt de kolom in rem smaller, dus de rijen worden één kolom.
 - **Alternatieven:** de media queries houden (klopt niet in een zijbalk); één vaste grens voor alle vier (de vier hebben andere kolombreedtes); een `div` om elke lijst (alleen bij `PlayerList`, waar `columns` het niet anders toelaat).
