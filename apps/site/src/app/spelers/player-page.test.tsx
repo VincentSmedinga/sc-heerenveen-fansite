@@ -180,7 +180,7 @@ describe('the switch of the table Per seizoen', () => {
 
 describe('the page of a player', () => {
   it('has the table Per seizoen under the seasons, and leaves it out when the seasons cannot be read', async () => {
-    expect(await render()).toMatch(/<h2[^>]*>Per seizoen<\/h2><table/)
+    expect(await render()).toMatch(/<h2[^>]*>Per seizoen<\/h2><div class="hf-table-container"><table/)
     expect(loadPlayerSeasons).toHaveBeenCalledWith(7)
 
     const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
@@ -323,7 +323,9 @@ describe('the page of a player', () => {
 
     const html = await render()
 
-    expect(html).toMatch(/<h2[^>]*>Per seizoen<\/h2><table.*<h2[^>]*>Loopbaan bij sc Heerenveen<\/h2>/u)
+    expect(html).toMatch(
+      /<h2[^>]*>Per seizoen<\/h2><div class="hf-table-container"><table.*<h2[^>]*>Loopbaan bij sc Heerenveen<\/h2>/u,
+    )
     expect(html).toContain('Van alle 3 seizoenen hebben we de opstellingen.')
     expect(html).toContain('2004/05 tot en met 2006/07: niet in de selectie')
     expect(html).toContain('<a href="/wedstrijden/2003-04/2004-04-10-testclub">sc Heerenveen – Testclub</a>')

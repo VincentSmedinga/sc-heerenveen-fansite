@@ -23,6 +23,18 @@
     margin-block: 0;
   }
 
+  /*
+   * The width of the table decides how tight its columns are, not the width of the window: a
+   * table in a narrow column of a wide screen is as tight as one on a phone. A table can't be
+   * the container of its own cells (a browser does not look at a table for them), so a table
+   * sits in a block that is: this one, or the place of a bar table (bar.css), which has the
+   * name as well. A rule for the cells of a table asks for the container by this name, so a
+   * table inside another container does not change which one a rule means.
+   */
+  .hf-table-container {
+    container: hf-table / inline-size;
+  }
+
   caption {
     color: var(--hf-colour-text-heading);
     font-weight: var(--hf-strong-font-weight);
@@ -75,7 +87,7 @@
    * On the narrowest phones a column of figures gives up half of its padding before it gives up
    * any of its content, so a table with seven columns still fits at 320 pixels.
    */
-  @media (width < 24rem) {
+  @container hf-table (inline-size < 24rem) {
     :is(th, td).hf-numeric {
       padding-inline: var(--hf-space-xs);
     }

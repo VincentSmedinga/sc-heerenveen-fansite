@@ -16,14 +16,39 @@ describe('the columns of figures', () => {
     )
   })
 
-  it('give up half of their padding on the narrowest phones, before any of their content', () => {
+  it('give up half of their padding in a table narrower than 24rem, before any of their content', () => {
     expect(table).toMatch(
-      /@media \(width < 24rem\) \{\s*:is\(th, td\)\.hf-numeric \{\s*padding-inline: var\(--hf-space-xs\);/u,
+      /@container hf-table \(inline-size < 24rem\) \{\s*:is\(th, td\)\.hf-numeric \{\s*padding-inline: var\(--hf-space-xs\);/u,
     )
   })
 
   it('still end their figures at the end of the cell', () => {
     expect(table).toMatch(/:is\(th, td\)\.hf-numeric \{[^}]*text-align: end;/u)
+  })
+})
+
+describe('the tables', () => {
+  it('sit in a container of their own width, by a name, and no rule of a table asks for the window', () => {
+    expect(read('base/table.css')).toMatch(/\.hf-table-container \{\s*container: hf-table \/ inline-size;\s*\}/u)
+    expect(read('components/bar/bar.css')).toMatch(/container-name: hf-bar-place hf-table;/u)
+    expect(read('components/data-table/data-table.css')).toMatch(
+      /container: hf-data-table-fold hf-table \/ inline-size;/u,
+    )
+    expect(read('base/table.css')).not.toMatch(/@media[^{]*width/u)
+    expect(read('components/data-table/data-table.css')).not.toMatch(/@media[^{]*width/u)
+    expect(read('components/player-figures-table/player-figures.css')).not.toMatch(/@media[^{]*width/u)
+  })
+
+  it('give a sortable table less room in a table narrower than 24rem, and the same room above it', () => {
+    expect(read('components/data-table/data-table.css')).toMatch(
+      /@container hf-table \(inline-size >= 24rem\) \{\s*\.hf-data-table-sortable :is\(th, td\)\.hf-numeric \{\s*padding-inline: var\(--hf-space-xs\);/u,
+    )
+  })
+
+  it('give the figures of the players more room in a place of 24rem, by the container of the place', () => {
+    expect(read('components/player-figures-table/player-figures.css')).toMatch(
+      /@container hf-bar-place \(inline-size >= 24rem\) \{\s*th\.hf-numeric,/u,
+    )
   })
 })
 

@@ -273,3 +273,11 @@ export const TextTableRows = ({
     })}
   </tbody>
 )
+
+/**
+ * The block round a table that is the container of its width (see base/table.css). A table with
+ * folding columns or short headers has the container for that too, so it is one block.
+ */
+export const TableContainer = ({ children, fold = false }: { children: ReactNode; fold?: boolean }) => (
+  <div className={fold ? 'hf-data-table-fold' : 'hf-table-container'}>{children}</div>
+)

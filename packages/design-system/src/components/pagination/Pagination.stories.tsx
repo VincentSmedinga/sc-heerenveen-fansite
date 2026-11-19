@@ -54,3 +54,22 @@ export const Last = meta.story({
 })
 
 export const Small = meta.story({ args: { size: 'small' }, name: 'Kleine maat' })
+
+export const NarrowColumn = meta.story({
+  decorators: [
+    (Story) => (
+      <div style={{ maxInlineSize: '20rem' }}>
+        <Story />
+      </div>
+    ),
+  ],
+  name: 'Smalle kolom',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'De tekst staat boven de twee links als de paginering zelf smal is, ook op een breed scherm: de breedte van de kolom beslist, niet die van het venster.',
+      },
+    },
+  },
+})

@@ -10,6 +10,7 @@ import {
   ColumnText,
   keyColumnOf,
   needsFoldContainer,
+  TableContainer,
   TableRows,
   textColumnClass,
   TextColumnText,
@@ -167,18 +168,15 @@ export const SortableDataTable = ({
     </table>
   )
 
+  // The message for screen readers stays next to the table, inside its block.
   return (
-    <>
-      {text && needsFoldContainer(columns as readonly DataTableTextColumn[]) ? (
-        <div className="hf-data-table-fold">{table}</div>
-      ) : (
-        table
-      )}
+    <TableContainer fold={text && needsFoldContainer(columns as readonly DataTableTextColumn[])}>
+      {table}
       {scripted && (
         <div className="hf-visually-hidden" role="status">
           {announcement}
         </div>
       )}
-    </>
+    </TableContainer>
   )
 }

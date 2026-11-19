@@ -110,7 +110,7 @@
     padding-inline-end: calc(var(--hf-space-xs) / 2);
   }
 
-  @media (width >= 24rem) {
+  @container hf-table (inline-size >= 24rem) {
     .hf-data-table-sortable :is(th, td).hf-numeric {
       padding-inline: var(--hf-space-xs);
     }
@@ -196,14 +196,14 @@
    * (`display: none`), so nothing is read twice.
    */
   .hf-data-table-fold {
-    container-type: inline-size;
+    container: hf-data-table-fold hf-table / inline-size;
   }
 
   .hf-data-table-text .hf-data-table-folded {
     display: none;
   }
 
-  @container (inline-size < 44rem) {
+  @container hf-data-table-fold (inline-size < 44rem) {
     .hf-data-table-text .hf-data-table-fold-column {
       display: none;
     }
@@ -228,7 +228,7 @@
     text-decoration: none;
   }
 
-  @container (inline-size < 44rem) {
+  @container hf-data-table-fold (inline-size < 44rem) {
     .hf-data-table-text .hf-data-table-short {
       display: inline;
     }
@@ -296,7 +296,7 @@
     gap: var(--hf-space-m) var(--hf-space-l);
     grid-template-columns: repeat(auto-fit, minmax(min(5.5rem, 100%), 1fr));
 
-    & > table {
+    & > :is(table, .hf-table-container) {
       margin-block-end: 0;
     }
 
@@ -317,7 +317,7 @@
    * column is gone for a screen reader as well (`display: none`), so the table reads as shown.
    */
   .hf-data-table-more {
-    container-type: inline-size;
+    container: hf-data-table-more / inline-size;
   }
 
   /* The small height of the button, with the text of running text (the small size has less). */
@@ -326,7 +326,7 @@
     font-size: var(--hf-body-font-size);
   }
 
-  @container (inline-size < 24rem) {
+  @container hf-data-table-more (inline-size < 24rem) {
     .hf-data-table-more[data-ready] .hf-data-table-more-button {
       display: inline-block;
     }

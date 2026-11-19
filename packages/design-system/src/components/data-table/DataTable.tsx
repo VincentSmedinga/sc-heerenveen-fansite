@@ -9,6 +9,7 @@ import {
   keyColumnOf,
   needsFoldContainer,
   sortableColumnsOf,
+  TableContainer,
   TableRows,
   textColumnClass,
   TextColumnText,
@@ -162,7 +163,7 @@ export const DataTable = ({
 
     // The room of the table itself decides when a column folds, or a header is short, so it
     // needs a container.
-    return needsFoldContainer(textColumns) ? <div className="hf-data-table-fold">{table}</div> : table
+    return <TableContainer fold={needsFoldContainer(textColumns)}>{table}</TableContainer>
   }
 
   const all = (columns as readonly (DataTableColumn | string)[]).map(columnOf)
@@ -187,37 +188,39 @@ export const DataTable = ({
   }
 
   return (
-    <table {...props} className={classNames('hf-data-table', className)}>
-      <caption className="hf-visually-hidden">{caption}</caption>
-      <thead>
-        <tr>
-          {numberRows.some((row) => row.position !== undefined) && (
-            <th className="hf-numeric" scope="col">
-              <abbr title="Plaats">
-                <span aria-hidden="true">#</span>
-                <span className="hf-visually-hidden">plaats</span>
-              </abbr>
-            </th>
-          )}
-          {all.map((column, index) => (
-            <th
-              className={index === 0 ? undefined : classNames('hf-numeric', column.more === true && 'hf-more-column')}
-              key={column.name}
-              scope="col"
-            >
-              {column.hidden === true ? (
-                <span className="hf-visually-hidden">
+    <TableContainer>
+      <table {...props} className={classNames('hf-data-table', className)}>
+        <caption className="hf-visually-hidden">{caption}</caption>
+        <thead>
+          <tr>
+            {numberRows.some((row) => row.position !== undefined) && (
+              <th className="hf-numeric" scope="col">
+                <abbr title="Plaats">
+                  <span aria-hidden="true">#</span>
+                  <span className="hf-visually-hidden">plaats</span>
+                </abbr>
+              </th>
+            )}
+            {all.map((column, index) => (
+              <th
+                className={index === 0 ? undefined : classNames('hf-numeric', column.more === true && 'hf-more-column')}
+                key={column.name}
+                scope="col"
+              >
+                {column.hidden === true ? (
+                  <span className="hf-visually-hidden">
+                    <ColumnText column={column} />
+                  </span>
+                ) : (
                   <ColumnText column={column} />
-                </span>
-              ) : (
-                <ColumnText column={column} />
-              )}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <TableRows columns={all} keyColumn={keyColumn} rows={numberRows} />
-    </table>
+                )}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <TableRows columns={all} keyColumn={keyColumn} rows={numberRows} />
+      </table>
+    </TableContainer>
   )
 }
 

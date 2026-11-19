@@ -26,9 +26,9 @@ describe('data-table.css', () => {
   })
 
   it('folds a column under 44rem of the table itself, and not of the window', () => {
-    expect(css).toMatch(/\.hf-data-table-fold \{[^}]*container-type: inline-size;/u)
+    expect(css).toMatch(/\.hf-data-table-fold \{[^}]*container: hf-data-table-fold hf-table \/ inline-size;/u)
 
-    const start = css.indexOf('@container (inline-size < 44rem)')
+    const start = css.indexOf('@container hf-data-table-fold (inline-size < 44rem)')
 
     expect(start).not.toBe(-1)
     expect(css.slice(start)).toMatch(/\.hf-data-table-fold-column \{\s*display: none;/u)
@@ -37,11 +37,11 @@ describe('data-table.css', () => {
   })
 
   it('hides the more columns only in a block under 24rem of its own, and only after the script has run', () => {
-    expect(css).toMatch(/\.hf-data-table-more \{[^}]*container-type: inline-size;/u)
+    expect(css).toMatch(/\.hf-data-table-more \{[^}]*container: hf-data-table-more \/ inline-size;/u)
     expect(css).toMatch(/\.hf-data-table-more \.hf-data-table-more-button \{\s*display: none;/u)
     expect(css).toMatch(/\.hf-data-table-more-button \{[^}]*font-size: var\(--hf-body-font-size\);/u)
 
-    const start = css.indexOf('@container (inline-size < 24rem)')
+    const start = css.indexOf('@container hf-data-table-more (inline-size < 24rem)')
 
     expect(start).not.toBe(-1)
     expect(css.slice(start)).toMatch(

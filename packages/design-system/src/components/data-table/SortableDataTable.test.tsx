@@ -262,11 +262,11 @@ describe('DataTable with sortable columns', () => {
     const html = renderToStaticMarkup(<DataTable caption="Een tabel" columns={columns} rows={rows} sortable={false} />)
 
     expect(html).toBe(
-      '<table class="hf-data-table"><caption class="hf-visually-hidden">Een tabel</caption><thead><tr>' +
+      '<div class="hf-table-container"><table class="hf-data-table"><caption class="hf-visually-hidden">Een tabel</caption><thead><tr>' +
         '<th scope="col">Club</th><th class="hf-numeric" scope="col"><abbr title="Gespeeld">' +
         '<span aria-hidden="true">G</span><span class="hf-visually-hidden">gespeeld</span></abbr></th></tr></thead>' +
         '<tbody><tr><th scope="row"><a href="#alkmaar">Alkmaar</a></th><td class="hf-numeric">4</td></tr>' +
-        '<tr><th scope="row">Breda</th><td class="hf-numeric">5</td></tr></tbody></table>',
+        '<tr><th scope="row">Breda</th><td class="hf-numeric">5</td></tr></tbody></table></div>',
     )
 
     render(<DataTable caption="Een tabel" columns={columns} rows={rows} sortable={false} />)
