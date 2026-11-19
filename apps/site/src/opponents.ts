@@ -692,12 +692,28 @@ export async function getClubPage(slug: string): Promise<ClubPage | undefined> {
   return known.some((record) => record.slug === slug) ? clubPages(slug) : undefined
 }
 
-/** The places of the card "Laatste overwinning": the table and the last wins are cached. */
-export async function getLastWinPlaces(today: string): Promise<LastWinPlace[] | undefined> {
+/**
+ * The places of the card "Laatste overwinning" for each choice of Alle, Thuis and Uit: the
+ * table and the last wins are cached. All three have the same clubs, so there is a card for
+ * all or for none.
+ */
+export async function getLastWinPlaces(today: string): Promise<Record<Venue, LastWinPlace[]> | undefined> {
   const [table, clubs] = await Promise.all([standingsPlaces(), clubLastWins()])
+  const all = lastWinsOf(table, clubs, today, 'all')
 
-  return lastWinsOf(table, clubs, today)
+  if (all === undefined) {
+    return undefined
+  }
+
+  return {
+    all,
+    away: lastWinsOf(table, clubs, today, 'away') ?? [],
+    home: lastWinsOf(table, clubs, today, 'home') ?? [],
+  }
 }
+
+/** The key of `PublicClubLastWin` that holds the last win for each venue. */
+const lastWinKeys = { all: 'lastWin', away: 'lastWinAway', home: 'lastWinHome' } as const
 
 /**
  * The clubs of the newest season in the table, without sc Heerenveen, for the card "Laatste
@@ -708,12 +724,15 @@ export async function getLastWinPlaces(today: string): Promise<LastWinPlace[] | 
  * has no page of its own, because we never played it or the table spells it another way, is
  * there as well, as a club we never beat and without a link. With fewer than
  * `lastWinMinimum` clubs, or no table, the result is undefined: no card. The days are not kept
- * anywhere, so they are right after midnight.
+ * anywhere, so they are right after midnight. `venue` is the choice Alle, Thuis or Uit: with
+ * Thuis only the last win at home counts, with Uit only the last win away.
  */
 export function lastWinsOf(
   table: readonly { club: string; season: string }[],
-  clubs: readonly Pick<PublicClubLastWin, 'lastWin' | 'name' | 'otherNames' | 'slug'>[],
+  clubs: readonly (Partial<Pick<PublicClubLastWin, 'lastWinAway' | 'lastWinHome'>> &
+    Pick<PublicClubLastWin, 'lastWin' | 'name' | 'otherNames' | 'slug'>)[],
   today: string,
+  venue: Venue = 'all',
 ): LastWinPlace[] | undefined {
   const newest = table.reduce((latest, row) => (row.season > latest ? row.season : latest), '')
   const places: LastWinPlace[] = []
@@ -735,9 +754,11 @@ export function lastWinsOf(
         places.push({ days: null, lastWin: null, name: row.club, slug: null })
       }
     } else if (!places.some((place) => place.slug === club.slug)) {
+      const lastWin = club[lastWinKeys[venue]] ?? null
+
       places.push({
-        days: club.lastWin === null ? null : daysBetween(club.lastWin, today),
-        lastWin: club.lastWin,
+        days: lastWin === null ? null : daysBetween(lastWin, today),
+        lastWin,
         name: club.name,
         slug: club.slug,
       })

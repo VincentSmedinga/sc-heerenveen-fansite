@@ -594,7 +594,7 @@ De server bouwt de drie panelen, ook de records van thuis en uit (`getClubRecord
 Een club telt bij een keuze mee met minstens 5 gespeelde wedstrijden in die keuze, en een keuze toont een lijst als minstens 10 clubs meetellen; anders staat er een zin.
 Daaronder staat de zachte kaart "Het moeilijkst" (`HardestCard`) met de clubs waartegen we gemiddeld de minste punten per wedstrijd haalden (`hardestOf` in `src/opponents.ts`).
 Ze heeft dezelfde opzet als "Het makkelijkst": dezelfde uitleg, keuze, tabel, legenda en regel over het aantal wedstrijden, van laag naar hoog.
-Daaronder staat de zachte kaart "Laatste overwinning" (`LastWinCard`) met de clubs van het nieuwste seizoen in de stand, zonder sc Heerenveen, van de langste tijd sinds onze laatste overwinning in de Eredivisie tot de kortste (`lastWinsOf` in `src/opponents.ts`).
+Daaronder staat de zachte kaart "Laatste overwinning" (`LastWinCard`) met de clubs van het nieuwste seizoen in de stand, zonder sc Heerenveen, van de langste tijd sinds onze laatste overwinning in de Eredivisie tot de kortste (`lastWinsOf` in `src/opponents.ts`), met de keuze Alle, Thuis en Uit (`VenueSwitch`) voor de laatste overwinning thuis en uit.
 De kaart volgt de schakelaar niet, maar haar links houden de keuze, en een zin onder de kop zegt dat alleen wedstrijden in de Eredivisie tellen.
 Het is een `DataTable` met tekst en twee kolommen: de club en "Dagen geleden", een kolom met `bar: true`.
 De dagen staan rechts uitgelijnd en een `Bar` erachter is zo lang als de dagen van de langste wachttijd.

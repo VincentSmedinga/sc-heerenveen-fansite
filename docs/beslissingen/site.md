@@ -6669,3 +6669,19 @@
   Het wint weinig: 10% kleiner is ongeveer 10% meer breedte, minder dan één kolom minder.
   Het echte probleem is de breedte van de tabel.
 - **Alternatieven:** fluïde lettergrootte voor lopende tekst; de lettergrootte alleen in tabellen verkleinen (zelfde bezwaar).
+
+## De kaart "Laatste overwinning" heeft de keuze Alle, Thuis en Uit
+
+- **Datum:** 19 november 2026
+- **Besluit:** de kaart heeft onder de kop de keuze Alle, Thuis en Uit (`VenueSwitch`, een `SegmentedControl`), met Alle als standaard (#1415).
+  De server zet de gegevens voor alle drie de keuzes klaar (`getLastWinPlaces`), en de browser toont er één, zonder de pagina te laden en zonder adres.
+  Zonder JavaScript zie je Alle en zijn er geen knoppen.
+  - **Welke winst:** bij Thuis telt alleen de laatste thuisoverwinning in de Eredivisie, bij Uit alleen de laatste uitoverwinning (`lastWinHome` en `lastWinAway` in `listClubLastWins`).
+    Een neutraal veld heeft geen regel: de Eredivisie kent alleen thuis en uit.
+  - **Volgorde en balken:** elke keuze heeft haar eigen volgorde en haar eigen langste wachttijd voor de balken.
+    Een club die we daar nog nooit versloegen staat laatst met "Nog nooit gewonnen" en zonder balk.
+  - **De regel en het bijschrift** noemen de keuze: "thuis en uit samen", "alleen de thuiswedstrijden" of "alleen de uitwedstrijden".
+  - **De kaart volgt de keuze voor competitie** van de pagina nog steeds niet.
+- **Waarom:** een supporter wil weten wanneer we een club voor het laatst thuis of uit versloegen, en wie zonder keuze kijkt, ziet wat hij gewend is.
+- **Alternatieven:** alleen Thuis en Uit; links met een parameter (`SegmentedLinks`), die zonder JavaScript werken maar een adres per keuze geven; de volgorde van Alle voor elke keuze.
+- **Later:** wijzigt het besluit van 9 november 2026 (#989): de kaart telde thuis en uit samen en had geen keuze.

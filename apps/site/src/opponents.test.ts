@@ -1214,6 +1214,52 @@ describe('lastWinsOf', () => {
   })
 })
 
+describe('lastWinsOf for Thuis and Uit', () => {
+  const rows = ['Ajax', 'FC Twente', 'Nooit Thuis'].map((club) => ({ club, season: '2026/27' }))
+  const club = (name: string, lastWinHome: null | string, lastWinAway: null | string) => ({
+    lastWin:
+      [lastWinHome, lastWinAway]
+        .filter((day) => day !== null)
+        .toSorted()
+        .at(-1) ?? null,
+    lastWinAway,
+    lastWinHome,
+    name,
+    otherNames: [],
+    slug: name.toLowerCase().replaceAll(' ', '-'),
+  })
+  const clubs = [
+    club('Ajax', '2024-03-02', '2020-01-01'),
+    club('FC Twente', '2019-04-21', '2025-05-05'),
+    club('Nooit Thuis', null, '2023-02-02'),
+  ]
+
+  it('counts only the last win at home for Thuis, longest wait first, a club never beaten there last', () => {
+    expect(lastWinsOf(rows, clubs, '2026-11-12', 'home')).toEqual([
+      { days: 2762, lastWin: '2019-04-21', name: 'FC Twente', slug: 'fc-twente' },
+      { days: 985, lastWin: '2024-03-02', name: 'Ajax', slug: 'ajax' },
+      { days: null, lastWin: null, name: 'Nooit Thuis', slug: 'nooit-thuis' },
+    ])
+  })
+
+  it('counts only the last win away for Uit, with its own order', () => {
+    expect(lastWinsOf(rows, clubs, '2026-11-12', 'away')?.map((place) => [place.name, place.lastWin])).toEqual([
+      ['Ajax', '2020-01-01'],
+      ['Nooit Thuis', '2023-02-02'],
+      ['FC Twente', '2025-05-05'],
+    ])
+  })
+
+  it('shows the later of the two for Alle, and has no card without enough clubs in any choice', () => {
+    expect(lastWinsOf(rows, clubs, '2026-11-12')?.map((place) => place.lastWin)).toEqual([
+      '2023-02-02',
+      '2024-03-02',
+      '2025-05-05',
+    ])
+    expect(lastWinsOf(rows.slice(0, 1), clubs, '2026-11-12', 'home')).toBeUndefined()
+  })
+})
+
 describe('daysBetween', () => {
   it('counts calendar days, also over a change of the clock', () => {
     expect(daysBetween('2026-03-28', '2026-03-30')).toBe(2)
