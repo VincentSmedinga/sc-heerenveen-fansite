@@ -6605,6 +6605,17 @@
   Eén tabel voor alle standen houdt de koppen, de markering van onze club en de uitleg van de afkortingen gelijk.
 - **Alternatieven:** een eigen pagina (te veel voor zes wedstrijden); de wedstrijdpagina (de tabel hoort bij de competitie, niet bij één wedstrijd); een eigen component met alle kolommen (veel breedte voor een kaart die al smal is).
 
+## De kaart Verloop toont de stand bij een doelpunt alleen als hij zeker is
+
+- **Datum:** 19 november 2026
+- **Besluit:** `buildMatchPage` geeft elk doelpunt in de kaart Verloop de stand erna, geteld in de volgorde van de klok, doorlopend over de helften en de verlenging, zonder de strafschoppenserie.
+  De thuisclub staat eerst, een eigen doelpunt telt voor de andere club, en een strafschop in de wedstrijd telt gewoon.
+  De stand staat er alleen als elk doelpunt een minuut en een speler heeft en de doelpunten samen de eindstand halen (na 90 minuten, of na de verlenging).
+  Anders heeft geen enkel doelpunt van die wedstrijd een stand.
+  Het voorbeeld in het beheer gebruikt dezelfde kaart en dus dezelfde regels.
+- **Waarom:** een verkeerde stand is erger dan geen stand: bij de wedstrijden van de oude fansite (127 doelpunten in 36 wedstrijden zonder minuut op de acceptatiekopie van 16 november 2026) en bij een onvolledige lijst klopt de volgorde niet altijd, en één fout doelpunt maakt de stand van alle volgende doelpunten fout.
+- **Alternatieven:** de doelpunten tellen die er zijn, in de volgorde van de klok, ook als ze niet bij de eindstand passen.
+
 ## Een seizoen in de Eerste divisie is een holle stip buiten de lijn, met de competitie bij de plek
 
 - **Datum:** 19 november 2026

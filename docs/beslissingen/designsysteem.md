@@ -3903,6 +3903,20 @@
 - **Alternatieven:** alleen in de nieuwe kaart een grotere ruimte geven (dan zien de vlaggen op de site er verschillend uit).
 - **Later:** vervangt niets; de maat van de vlag (_De vlag_ bij `PlayerName`) blijft zoals hij was.
 
+## Een doelpunt in `MatchTimeline` kan de stand erna dragen, vet en in de kleur van sc Heerenveen
+
+- **Datum:** 19 november 2026
+- **Besluit:** een doelpunt in `MatchTimeline` heeft een optionele eigenschap `score` (`MatchTimelineScore`: de doelpunten en de namen van beide clubs, en de kant van sc Heerenveen).
+  De stand staat tussen het pictogram en de naam, vet (`--hf-figure-font-weight`), in tabelcijfers, met een streepje van gedachten (`2–1`) en de thuisclub eerst, zoals de kop van de wedstrijd.
+  De kleur volgt sc Heerenveen: `--hf-colour-outcome-win` bij voorstaan, `--hf-colour-outcome-draw` bij gelijk en `--hf-colour-outcome-loss` bij achterstand; er komt geen nieuwe kleur bij.
+  Zonder `score` ziet de regel eruit als eerst.
+  De verborgen tekst vooraan zegt de stand met de namen van de clubs in de volgorde van het oog: "sc Heerenveen: Minuut 63, Doelpunt, stand sc Heerenveen 2, Testdorp FC 1: …".
+  Het zichtbare getal is `aria-hidden`, zodat de stand niet twee keer klinkt.
+- **Waarom:** het getal zegt wie voorstaat, en de kleur komt erbij (WCAG 1.4.1); de tokens van een uitkomst halen al 4,5:1 als tekst in licht en donker.
+  Met de thuisclub eerst zegt "2 om 1" zonder namen niet wie er voorstaat, dus de namen horen bij de verborgen tekst.
+- **Alternatieven:** een eigen tokenpaar voor de kaart (twee systemen voor dezelfde betekenis); altijd sc Heerenveen eerst; het woord "voor", "gelijk" of "achter" in de verborgen tekst (langer bij elk doelpunt).
+- **Later:** vervangt de zin "Nothing here depends on a colour" uit de kop van `match-timeline.css` niet, maar nuanceert hem: de minuutpil is nog steeds zonder kleur te lezen, en ook de stand zegt het zonder kleur, met het getal.
+
 ## `BarChart.Trend` kan plekken tonen die buiten de lijn staan, als holle stip
 
 - **Datum:** 19 november 2026

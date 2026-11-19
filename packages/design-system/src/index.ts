@@ -160,6 +160,7 @@ export type {
   MatchPlayerName,
   MatchTimelineEvent,
   MatchTimelineProps,
+  MatchTimelineScore,
 } from './components/match-timeline/MatchTimeline'
 export { Match, matchStatuses } from './components/match/Match'
 export type { MatchGoal, MatchProps, MatchStatus } from './components/match/Match'

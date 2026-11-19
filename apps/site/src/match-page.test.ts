@@ -98,6 +98,106 @@ describe('the events', () => {
   })
 })
 
+/** A goal for the page, with the player's id; `ours` is who gains from it. */
+const goal = (
+  minute: null | number,
+  playerId: number,
+  ours: boolean,
+  extra: { ownGoal?: boolean; penalty?: boolean; stoppageMinutes?: number } = {},
+) => ({
+  assistId: null,
+  minute,
+  ours,
+  ownGoal: extra.ownGoal ?? false,
+  penalty: extra.penalty ?? false,
+  playerId,
+  stoppageMinutes: extra.stoppageMinutes ?? null,
+})
+
+/** The score of each goal in the timeline, as the line writes it with its tone. */
+function scoresOf(overrides: Partial<MatchPageData>) {
+  const page = buildMatchPage({ ...cup(), penalties: null, ...overrides })
+
+  return page.events.flatMap((event) =>
+    event.kind === 'goal' ? [event.score === undefined ? null : `${event.score.home}–${event.score.away}`] : [],
+  )
+}
+
+describe('the score after a goal', () => {
+  const players = [player(1, true, 1), player(12, false, 1)]
+  const result = { afterNinety: null, extraTime: false, players }
+
+  it('writes the home club first in a home match, and counts for us', () => {
+    const goals = [goal(10, 12, false), goal(30, 1, true), goal(70, 1, true)]
+
+    expect(scoresOf({ ...result, goals, goalsAgainst: 1, goalsFor: 2, home: true })).toEqual(['0–1', '1–1', '2–1'])
+  })
+
+  it('writes the opponent first in an away match, so the home club is always first', () => {
+    const goals = [goal(10, 12, false), goal(30, 1, true), goal(70, 1, true)]
+    const page = buildMatchPage({
+      ...cup(),
+      ...result,
+      goals,
+      goalsAgainst: 1,
+      goalsFor: 2,
+      home: false,
+      penalties: null,
+    })
+    const [first, , last] = page.events.flatMap((event) => (event.kind === 'goal' ? [event.score] : []))
+
+    expect(first).toMatchObject({ away: 0, awayName: ourClub, home: 1, homeName: 'Cupdorp', ourSide: 'away' })
+    expect(last).toMatchObject({ away: 2, home: 1 })
+  })
+
+  it('counts an own goal for the other club, from either side', () => {
+    const goals = [goal(20, 1, false, { ownGoal: true }), goal(50, 12, true, { ownGoal: true })]
+
+    expect(scoresOf({ ...result, goals, goalsAgainst: 1, goalsFor: 1, home: true })).toEqual(['0–1', '1–1'])
+  })
+
+  it('counts a penalty in the match like any goal', () => {
+    const goals = [goal(33, 1, true, { penalty: true })]
+
+    expect(scoresOf({ ...result, goals, goalsAgainst: 0, goalsFor: 1, home: true })).toEqual(['1–0'])
+  })
+
+  it('goes on over the halves and the extra time, and leaves out the shoot-out', () => {
+    const goals = [goal(44, 1, true), goal(46, 12, false), goal(105, 1, true)]
+
+    expect(scoresOf({ ...result, extraTime: true, goals, goalsAgainst: 1, goalsFor: 2, home: true })).toEqual([
+      '1–0',
+      '1–1',
+      '2–1',
+    ])
+  })
+
+  it('counts the goals in the order of the clock and keeps the order of two goals in one minute', () => {
+    const goals = [goal(70, 1, true), goal(10, 12, false), goal(70, 12, false)]
+
+    expect(scoresOf({ ...result, goals, goalsAgainst: 2, goalsFor: 1, home: true })).toEqual(['0–1', '1–1', '1–2'])
+  })
+
+  it('shows no score at all when a goal has no minute', () => {
+    const goals = [goal(10, 12, false), goal(null, 1, true)]
+
+    expect(scoresOf({ ...result, goals, goalsAgainst: 1, goalsFor: 1, home: true })).toEqual([null, null])
+  })
+
+  it('shows no score at all when the goals do not add up to the result', () => {
+    const goals = [goal(10, 12, false), goal(30, 1, true)]
+
+    expect(scoresOf({ ...result, goals, goalsAgainst: 1, goalsFor: 2, home: true })).toEqual([null, null])
+  })
+
+  it('names the clubs and the side of sc Heerenveen, for the colour and the spoken text', () => {
+    const goals = [goal(10, 12, false)]
+    const [event] = buildMatchPage({ ...cup(), ...result, goals, goalsAgainst: 1, goalsFor: 0, home: true }).events
+
+    expect(event).toMatchObject({ score: { awayName: 'Cupdorp', homeName: ourClub, ourSide: 'home' } })
+  })
+})
+
 describe('the header', () => {
   it('lists the goals under the club that gets them, in the order of the clock, with an own goal under the other club', () => {
     const { scorersAgainst, scorersFor } = built()
