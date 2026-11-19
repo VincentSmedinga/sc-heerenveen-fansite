@@ -447,6 +447,7 @@ export async function listArticleLines(db: Database, until: Date, limit: number,
  * Every club with the day of the last match of the Eredivisie that sc Heerenveen won against
  * it, as `2019-04-21`, or `null` when we never did. A win is a played match with more goals
  * for than against. The Eredivisie has no shoot-outs, but a level score never counts as a win.
+ * `lastWinHome` and `lastWinAway` are the same for the matches at home and away only.
  * The names are the other spellings of the club, so the table of a season is found under the
  * name it was written with. A club without a match is not in it.
  */
@@ -457,6 +458,12 @@ export async function listClubLastWins(db: Database) {
       lastWin: sql<
         null | string
       >`max(case when ${matches.status} = 'played' and ${matches.competition} = 'Eredivisie' and ${matches.goalsFor} > ${matches.goalsAgainst} then ${matches.matchDate} end)`,
+      lastWinAway: sql<
+        null | string
+      >`max(case when ${matches.status} = 'played' and ${matches.competition} = 'Eredivisie' and ${matches.home} = false and ${matches.goalsFor} > ${matches.goalsAgainst} then ${matches.matchDate} end)`,
+      lastWinHome: sql<
+        null | string
+      >`max(case when ${matches.status} = 'played' and ${matches.competition} = 'Eredivisie' and ${matches.home} = true and ${matches.goalsFor} > ${matches.goalsAgainst} then ${matches.matchDate} end)`,
       name: clubs.name,
       slug: clubs.slug,
     })

@@ -314,17 +314,27 @@ describe('LastWinCard', () => {
     { days: null, lastWin: null, name: 'Nooit FC', slug: 'nooit-fc' },
     { days: null, lastWin: null, name: 'Zonder Pagina', slug: null },
   ]
+  const homePlaces = [
+    { days: 400, lastWin: '2025-10-08', name: 'Ajax', slug: 'ajax' },
+    { days: 100, lastWin: '2026-08-11', name: 'FC Twente', slug: 'fc-twente' },
+    { days: null, lastWin: null, name: 'Nooit FC', slug: 'nooit-fc' },
+  ]
+  const awayPlaces = [
+    { days: 50, lastWin: '2026-09-30', name: 'Nooit FC', slug: 'nooit-fc' },
+    ...homePlaces.slice(0, 2),
+  ]
+  const choices = { all: places, away: awayPlaces, home: homePlaces }
 
   it('shows the clubs in the order given, with the days and the links keeping the choice', () => {
     const { container } = render(
-      <LastWinCard address="/tegenstanders" places={places} query="?competitie=eredivisie" />,
+      <LastWinCard address="/tegenstanders" places={choices} query="?competitie=eredivisie" />,
     )
 
     expect(screen.getByRole('heading', { level: 2, name: 'Laatste overwinning' })).toBeTruthy()
-    expect(screen.getByText('Alleen wedstrijden in de Eredivisie tellen.')).toBeTruthy()
+    expect(screen.getByText('Alleen wedstrijden in de Eredivisie tellen, thuis en uit samen.')).toBeTruthy()
     expect(
       screen.getByRole('table', {
-        name: 'De clubs in de Eredivisie, van de langste tijd sinds onze laatste overwinning tegen hen tot de kortste',
+        name: 'De clubs in de Eredivisie, van de langste tijd sinds onze laatste overwinning tegen hen tot de kortste, thuis en uit samen',
       }),
     ).toBeTruthy()
     expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual(['Club', 'Dagen geleden'])
@@ -352,6 +362,58 @@ describe('LastWinCard', () => {
 
     expect(bars.map((bar) => bar.getAttribute('aria-hidden'))).toEqual(['true', 'true'])
     expect(bars.map((bar) => (bar as HTMLElement).style.getPropertyValue('--hf-bar-share'))).toEqual(['100', '35.66'])
+  })
+
+  it('has the choice Alle, Thuis and Uit, with Alle pressed, in a group with a name', () => {
+    render(<LastWinCard address="/tegenstanders" places={choices} query="" />)
+
+    const group = screen.getByRole('group', { name: 'Laatste overwinning: waar we wonnen' })
+
+    expect(
+      within(group)
+        .getAllByRole('button')
+        .map((button) => [button.textContent, button.getAttribute('aria-pressed')]),
+    ).toEqual([
+      ['Alle', 'true'],
+      ['Thuis', 'false'],
+      ['Uit', 'false'],
+    ])
+  })
+
+  it('shows the clubs, the line, the caption and the bars of the choice, and goes back to Alle', () => {
+    const { container } = render(<LastWinCard address="/tegenstanders" places={choices} query="" />)
+    const shares = () =>
+      [...container.querySelectorAll('.hf-bar')].map((bar) =>
+        (bar as HTMLElement).style.getPropertyValue('--hf-bar-share'),
+      )
+
+    chooseVenue('Thuis')
+
+    expect(names()).toEqual(['Ajax', 'FC Twente', 'Nooit FC'])
+    expect(screen.getByText('Alleen wedstrijden in de Eredivisie tellen, alleen de thuiswedstrijden.')).toBeTruthy()
+    expect(screen.getByRole('table').querySelector('caption')?.textContent).toMatch(/, alleen de thuiswedstrijden$/)
+    expect(screen.getByRole('button', { name: 'Thuis' }).getAttribute('aria-pressed')).toBe('true')
+    expect(screen.getAllByText('Nog nooit gewonnen')).toHaveLength(1)
+    // The bars are of the longest wait of this choice, and the club never beaten has none.
+    expect(shares()).toEqual(['100', '25'])
+
+    chooseVenue('Uit')
+
+    expect(names()).toEqual(['Nooit FC', 'Ajax', 'FC Twente'])
+    expect(screen.getByText('Alleen wedstrijden in de Eredivisie tellen, alleen de uitwedstrijden.')).toBeTruthy()
+    expect(screen.queryByText('Nog nooit gewonnen')).toBeNull()
+
+    chooseVenue('Alle')
+
+    expect(names()).toEqual(['FC Twente', 'Ajax', 'Nooit FC', 'Zonder Pagina'])
+  })
+
+  it('shows Alle and no buttons without JavaScript', () => {
+    const html = renderToString(<LastWinCard address="/tegenstanders" places={choices} query="" />)
+
+    expect(html).not.toContain('<button')
+    expect(html).toContain('thuis en uit samen')
+    expect(html).not.toContain('alleen de thuiswedstrijden')
   })
 
   it('is not there without places', () => {

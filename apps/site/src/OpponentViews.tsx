@@ -749,14 +749,12 @@ export function HardestCard({
 }
 
 /**
- * The card Laatste overwinning under Het moeilijkst: the clubs of the Eredivisie now, the one
- * we have not beaten for the longest time first (see `lastWinsOf`), on the soft surface. The
- * table has the club as a link and the calendar days since our last win in the Eredivisie,
- * aligned to the end, with a `Bar` after the days, as long as the days are of the longest wait.
- * The bar is decoration: a screen reader reads the days. A club we never beat says so in place
- * of the days, and has no bar. The card does not follow the switch of the page,
- * which is why the caption says the Eredivisie, but its links keep the choice (`address` and
- * `query`). Without `places` there is no card.
+ * The card Laatste overwinning under Het moeilijkst, on the soft surface, with a choice of
+ * Alle, Thuis or Uit (`VenueSwitch`), of which `places` has the clubs for each. Alle is what
+ * the card showed before; Thuis and Uit count only the last win at home or away, each in its
+ * own order (see `LastWinPanel`). The card does not follow the switch of the page, which is why
+ * the line says the Eredivisie, but its links keep the choice (`address` and `query`). Without
+ * `places` there is no card.
  */
 export function LastWinCard({
   address,
@@ -764,47 +762,29 @@ export function LastWinCard({
   query,
 }: {
   address: string
-  places: LastWinPlace[] | undefined
+  places: Record<Venue, LastWinPlace[]> | undefined
   query: string
 }) {
   if (places === undefined) {
     return null
   }
 
-  const shares = sharesOf(places.map((place) => place.days ?? 0))
-
   return (
     <Card aria-labelledby="laatste-overwinning" surface="soft">
       <Heading id="laatste-overwinning" level={2}>
         Laatste overwinning
       </Heading>
-      <Text>Alleen wedstrijden in de Eredivisie tellen.</Text>
-      <BarPlace>
-        <DataTable
-          appearance="text"
-          caption="De clubs in de Eredivisie, van de langste tijd sinds onze laatste overwinning tegen hen tot de kortste"
-          columns={['Club', { bar: true, name: 'Dagen geleden' }]}
-          rows={places.map((place, index) => ({
-            // A club we never beat has no number, so it stands last in either direction.
-            cells:
-              place.days === null
-                ? [{ content: 'Nog nooit gewonnen', sortValue: null }]
-                : [
-                    {
-                      content: (
-                        <>
-                          {place.days.toLocaleString('nl-NL')}
-                          {shares === null ? null : <Bar share={shares[index] ?? 0} />}
-                        </>
-                      ),
-                      sortValue: place.days,
-                    },
-                  ],
-            header: place.name,
-            ...(place.slug === null ? {} : { href: `${address}/${place.slug}${query}` }),
-          }))}
-        />
-      </BarPlace>
+      <VenueSwitch
+        label="Laatste overwinning: waar we wonnen"
+        panels={
+          Object.fromEntries(
+            venues.map((venue) => [
+              venue,
+              <LastWinPanel address={address} key={venue} places={places[venue]} query={query} venue={venue} />,
+            ]),
+          ) as Record<Venue, ReactNode>
+        }
+      />
     </Card>
   )
 }
@@ -877,6 +857,63 @@ export function TopPointsCard({
         panels={rankingPanels(topPointsOf, records, { address, choice, low: false, query, since })}
       />
     </Card>
+  )
+}
+
+/**
+ * What the card Laatste overwinning shows for one choice of Alle, Thuis or Uit: the line that
+ * says which matches count, and the table of the clubs of the Eredivisie, the one we have not
+ * beaten for the longest time (in that choice) first (see `lastWinsOf`). The table has the club
+ * as a link and the calendar days since our last win, aligned to the end, with a `Bar` after
+ * the days, as long as the days are of the longest wait of this choice. The bar is decoration:
+ * a screen reader reads the days. A club we never beat says so in place of the days, and has
+ * no bar. The line and the caption name the choice, so a screen reader knows what the table
+ * shows.
+ */
+function LastWinPanel({
+  address,
+  places,
+  query,
+  venue,
+}: {
+  address: string
+  places: LastWinPlace[]
+  query: string
+  venue: Venue
+}) {
+  const shares = sharesOf(places.map((place) => place.days ?? 0))
+  const only = { all: ', thuis en uit samen', away: ', alleen de uitwedstrijden', home: ', alleen de thuiswedstrijden' }
+
+  return (
+    <>
+      <Text>{`Alleen wedstrijden in de Eredivisie tellen${only[venue]}.`}</Text>
+      <BarPlace>
+        <DataTable
+          appearance="text"
+          caption={`De clubs in de Eredivisie, van de langste tijd sinds onze laatste overwinning tegen hen tot de kortste${only[venue]}`}
+          columns={['Club', { bar: true, name: 'Dagen geleden' }]}
+          rows={places.map((place, index) => ({
+            // A club we never beat has no number, so it stands last in either direction.
+            cells:
+              place.days === null
+                ? [{ content: 'Nog nooit gewonnen', sortValue: null }]
+                : [
+                    {
+                      content: (
+                        <>
+                          {place.days.toLocaleString('nl-NL')}
+                          {shares === null ? null : <Bar share={shares[index] ?? 0} />}
+                        </>
+                      ),
+                      sortValue: place.days,
+                    },
+                  ],
+            header: place.name,
+            ...(place.slug === null ? {} : { href: `${address}/${place.slug}${query}` }),
+          }))}
+        />
+      </BarPlace>
+    </>
   )
 }
 

@@ -79,6 +79,25 @@ describe('listClubLastWins', () => {
   })
 })
 
+describe('listClubLastWins at home and away', () => {
+  it('gives the last win at home and the last win away apart, and null where we never won', async () => {
+    await store(
+      played('FC Twente', 2, 0, { home: true, matchDate: '2025-03-01', season: '2024/25' }),
+      played('FC Twente', 3, 1, { home: false, matchDate: '2026-02-01' }),
+      played('FC Twente', 1, 0, { home: true, matchDate: '2025-10-01', season: '2025/26' }),
+      played('Ajax', 2, 0, { home: true, matchDate: '2026-03-01' }),
+      played('Ajax', 0, 2, { home: false, matchDate: '2026-04-01' }),
+      played('Quick Boys', 4, 0, { competition: 'KNVB Beker', home: false }),
+    )
+
+    expect(await listClubLastWins(database.db)).toMatchObject([
+      { lastWin: '2026-03-01', lastWinAway: null, lastWinHome: '2026-03-01', name: 'Ajax' },
+      { lastWin: '2026-02-01', lastWinAway: '2026-02-01', lastWinHome: '2025-10-01', name: 'FC Twente' },
+      { lastWin: null, lastWinAway: null, lastWinHome: null, name: 'Quick Boys' },
+    ])
+  })
+})
+
 describe('listClubRecords', () => {
   it('gives nothing while there are no matches', async () => {
     expect(await listClubRecords(database.db)).toEqual([])

@@ -104,10 +104,12 @@ describe('the page /tegenstanders', () => {
   })
 
   it('has the card Laatste overwinning after the top 10 and before the credit, when there are places', async () => {
-    vi.mocked(getLastWinPlaces).mockResolvedValue([
+    const places = [
       { days: 2762, lastWin: '2019-04-21', name: 'FC Twente', slug: 'fc-twente' },
       { days: null, lastWin: null, name: 'Ajax', slug: 'ajax' },
-    ])
+    ]
+
+    vi.mocked(getLastWinPlaces).mockResolvedValue({ all: places, away: places, home: places })
 
     const html = await render({ competitie: 'eredivisie' })
 
@@ -115,7 +117,7 @@ describe('the page /tegenstanders', () => {
     expect(html.indexOf('id="laatste-overwinning"')).toBeLessThan(html.indexOf('Wikipedia'))
     expect(html).toContain('href="/tegenstanders/fc-twente?competitie=eredivisie"')
     expect(html).toContain('Nog nooit gewonnen')
-    expect(html).toContain('Alleen wedstrijden in de Eredivisie tellen.')
+    expect(html).toContain('Alleen wedstrijden in de Eredivisie tellen, thuis en uit samen.')
   })
 
   it('has no card Laatste overwinning without places', async () => {
