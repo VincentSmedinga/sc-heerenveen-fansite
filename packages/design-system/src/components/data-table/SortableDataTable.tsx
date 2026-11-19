@@ -113,7 +113,13 @@ export const SortableDataTable = ({
     return (
       <th
         aria-sort={sortable ? (active ? sorting.direction : 'none') : undefined}
-        className={text ? textColumnClass(column as DataTableTextColumn) : index === 0 ? undefined : 'hf-numeric'}
+        className={
+          text
+            ? textColumnClass(column as DataTableTextColumn)
+            : index === 0
+              ? undefined
+              : classNames('hf-numeric', (column as DataTableColumn).more === true && 'hf-more-column')
+        }
         key={column.name}
         scope="col"
       >

@@ -14,6 +14,7 @@ import {
   TextColumnText,
   TextTableRows,
 } from './dataTableParts'
+import { MoreColumns } from './MoreColumns'
 import { SortableDataTable } from './SortableDataTable'
 
 export type {
@@ -199,7 +200,11 @@ export const DataTable = ({
             </th>
           )}
           {all.map((column, index) => (
-            <th className={index === 0 ? undefined : 'hf-numeric'} key={column.name} scope="col">
+            <th
+              className={index === 0 ? undefined : classNames('hf-numeric', column.more === true && 'hf-more-column')}
+              key={column.name}
+              scope="col"
+            >
               {column.hidden === true ? (
                 <span className="hf-visually-hidden">
                   <ColumnText column={column} />
@@ -243,6 +248,8 @@ const Group = ({ children, className, ...props }: ComponentPropsWithoutRef<'div'
 Group.displayName = 'DataTable.Group'
 
 DataTable.Group = Group
+
+DataTable.More = MoreColumns
 
 /**
  * A short sign in a cell that is a link, such as `2` or `?` for what a match still misses: on a

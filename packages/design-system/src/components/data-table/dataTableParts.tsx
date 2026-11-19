@@ -144,7 +144,11 @@ export const TableRows = ({
             </th>
             {row.cells.map((cell, index) => (
               <td
-                className={index + 1 === keyColumn ? 'hf-numeric hf-key' : 'hf-numeric'}
+                className={classNames(
+                  'hf-numeric',
+                  index + 1 === keyColumn && 'hf-key',
+                  columns[index + 1]?.more === true && 'hf-more-column',
+                )}
                 key={columns[index + 1]?.name ?? index}
               >
                 {textOf(cell)}

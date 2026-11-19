@@ -1,4 +1,4 @@
-import { expect, userEvent } from 'storybook/test'
+import { expect, userEvent, within } from 'storybook/test'
 
 import preview from '#.storybook/preview'
 
@@ -428,6 +428,62 @@ export const Ranked = meta.story({
         <Text appearance="meta">{tableLegend([tableColumns.pointsPerMatch, tableColumns.played])}</Text>
       </Card>
     </div>
+  ),
+})
+
+const moreColumns: DataTableProps['columns'] = [
+  'Club',
+  ...clubColumns.map((column) => ({
+    ...column,
+    key: column.icon === 'points',
+    more: column.icon === 'won' || column.icon === 'drawn' || column.icon === 'lost',
+  })),
+]
+const moreLegend = tableLegend(
+  clubColumns.map((column) => ({
+    ...column,
+    more: column.icon === 'won' || column.icon === 'drawn' || column.icon === 'lost',
+  })),
+)
+
+const renderMore = (maxInlineSize: string, id: string, title: string) => (
+  <div style={{ maxInlineSize }}>
+    <Card aria-labelledby={id}>
+      <Heading id={id} level={2}>
+        {title}
+      </Heading>
+      <DataTable.More>
+        <DataTable caption="De tegenstanders van sc Heerenveen" columns={moreColumns} rows={manyClubs} />
+        <Text appearance="meta">{moreLegend}</Text>
+      </DataTable.More>
+    </Card>
+  </div>
+)
+
+export const MoreColumns = meta.story({
+  name: 'Kolommen achter een knop',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Waar het blok smal is, zoals op een telefoon, staan winst, gelijk en verlies achter de knop Toon meer, en de legenda gaat mee. Waar het blok breed genoeg is, staan alle kolommen er en is er geen knop. De ruimte is die van het blok zelf, niet die van het venster.',
+      },
+    },
+  },
+  play: async ({ canvas }) => {
+    const narrow = within(canvas.getAllByRole('table')[0]?.closest('.hf-data-table-more') as HTMLElement)
+
+    await expect(narrow.getByRole('button', { name: 'Toon meer' })).toHaveAttribute('aria-expanded', 'false')
+    await expect(narrow.getAllByRole('columnheader')).toHaveLength(4)
+    await userEvent.click(narrow.getByRole('button', { name: 'Toon meer' }))
+    await expect(narrow.getByRole('button', { name: 'Toon minder' })).toHaveAttribute('aria-expanded', 'true')
+    await expect(narrow.getAllByRole('columnheader')).toHaveLength(7)
+  },
+  render: () => (
+    <>
+      {renderMore('21rem', 'meer-smal', 'Alle tegenstanders, smal')}
+      {renderMore('40rem', 'meer-breed', 'Alle tegenstanders, breed')}
+    </>
   ),
 })
 

@@ -6642,3 +6642,30 @@
   De overige lezers van `standings` blijven zoals ze zijn: ze gebruiken alleen het huidige seizoen of wedstrijden (de kaart per ronde en de laatste overwinning).
 - **Waarom:** dezelfde verkeerde lezing doet zich daar voor, want zowel onze plek als die van de club komt uit de Eerste divisie.
 - **Alternatieven:** alleen de kaart Seizoen voor seizoen aanpassen en de andere in een apart issue doen.
+
+## Een smalle kaart Alle tegenstanders laat eerst gespeeld, punten en doelsaldo zien; winst, gelijk en verlies staan achter Toon meer
+
+- **Datum:** 19 november 2026
+- **Besluit:** in een smalle kaart Alle tegenstanders, zoals op een telefoon, staan alleen de club, gespeeld, punten en doelsaldo in de tabel, en een knop "Toon meer" toont ook winst, gelijk en verlies ("Toon minder" verbergt ze weer).
+  Een kolom die achter de knop staat, heeft `more: true` in `DataTable`, en `DataTable.More` om de tabel en de legenda zet de knop en doet het verbergen.
+  Het verbergen volgt de breedte van het blok zelf (een container query op 24rem: zo breed moet het blok zijn voor de zes cijfers en een naam als "Go Ahead Eagles" op één regel; de kaart naast de zijkolom op een bureaublad is ongeveer 28rem, die op een telefoon ongeveer 20rem), niet die van het scherm.
+  Is het blok breder, dan staan alle zes cijfers er altijd en is er geen knop.
+  Zonder JavaScript staan alle kolommen er ook en is er geen knop: de CSS verbergt pas iets als het script gedraaid heeft (`data-ready`).
+  De legenda onder de tabel noemt alleen de kolommen die te zien zijn.
+- **Waarom:** de punten en het doelsaldo zijn de cijfers waarop bezoekers sorteren, en met winst, gelijk en verlies erbij houdt de clubnaam op 390 px nog maar 118 px over, zodat "Go Ahead Eagles" over twee regels breekt.
+  Met drie cijfers is dat ongeveer 215 px, en het blijft een gewone tabel met dezelfde koppen en hetzelfde sorteren.
+  De ruimte van het blok, niet van het scherm, beslist, omdat de kaart in een smalle kolom op een breed scherm net zo krap kan zijn.
+  Een verborgen kolom is er ook niet voor een schermlezer (`display: none`), zodat de tabel leest zoals hij te zien is.
+- **Alternatieven:** een vaste clubkolom en zijwaarts scrollen (alle cijfers blijven, maar punten en doelsaldo staan buiten beeld, en het scrollgebied vraagt om een toetsenbordstop en een naam); de compacte dichtheid van de tokens (tekst van 15 px, onder de lopende tekst, en maar 133 px voor de club); twee regels per club (leest het best, maar vraagt een andere opbouw dan een tabel en sorteren met een keuzelijst).
+- **Niet in dit besluit:** onthouden welke stand de knop had tussen twee bezoeken, en andere tabellen met zes cijfers.
+
+## Tekst op een telefoon wordt niet kleiner met fluïde lettergrootte
+
+- **Datum:** 19 november 2026
+- **Besluit:** lopende tekst blijft op elke breedte even groot.
+  Alleen de koppen 1 tot 3 en het menu schalen mee (`tokens/typography.css`).
+- **Waarom:** een telefoon wordt dichtbij gehouden en 16 px leest daar prima.
+  Kleinere tekst botst met de regel dat geen tekst kleiner is dan lopende tekst, en met de lettergrootte die de bezoeker zelf instelt.
+  Het wint weinig: 10% kleiner is ongeveer 10% meer breedte, minder dan één kolom minder.
+  Het echte probleem is de breedte van de tabel.
+- **Alternatieven:** fluïde lettergrootte voor lopende tekst; de lettergrootte alleen in tabellen verkleinen (zelfde bezwaar).
