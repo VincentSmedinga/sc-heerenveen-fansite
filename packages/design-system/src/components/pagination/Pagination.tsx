@@ -42,18 +42,20 @@ export const Pagination = ({
   ...props
 }: PaginationProps) => (
   <nav {...props} aria-label={label} className={classNames('hf-pagination', sizeClassName(size), className)}>
-    {previousHref === undefined ? null : (
-      <Link className="hf-pagination-link hf-pagination-previous" href={previousHref} icon="arrow-left" rel="prev">
-        Vorige
-      </Link>
-    )}
-    <span className="hf-pagination-status">
-      Pagina {current} van {total}
-    </span>
-    {nextHref === undefined ? null : (
-      <Link className="hf-pagination-link hf-pagination-next" href={nextHref} icon="arrow-right" rel="next">
-        Volgende
-      </Link>
-    )}
+    <div className="hf-pagination-row">
+      {previousHref === undefined ? null : (
+        <Link className="hf-pagination-link hf-pagination-previous" href={previousHref} icon="arrow-left" rel="prev">
+          Vorige
+        </Link>
+      )}
+      <span className="hf-pagination-status">
+        Pagina {current} van {total}
+      </span>
+      {nextHref === undefined ? null : (
+        <Link className="hf-pagination-link hf-pagination-next" href={nextHref} icon="arrow-right" rel="next">
+          Volgende
+        </Link>
+      )}
+    </div>
   </nav>
 )

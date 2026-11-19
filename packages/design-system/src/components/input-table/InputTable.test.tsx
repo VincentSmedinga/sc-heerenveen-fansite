@@ -369,8 +369,8 @@ describe('input-table.css', () => {
   const css = readFileSync(join(import.meta.dirname, 'input-table.css'), 'utf8').replaceAll(/\/\*.*?\*\//gsu, '')
 
   it('asks the table itself for its room, not the window, so it is right in any column', () => {
-    expect(css).toContain('container-type: inline-size;')
-    expect(css).toContain('@container (inline-size >= 40rem)')
+    expect(css).toContain('container: hf-input-table / inline-size;')
+    expect(css).toContain('@container hf-input-table (inline-size >= 40rem)')
     expect(css).not.toContain('@media')
   })
 

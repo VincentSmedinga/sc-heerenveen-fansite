@@ -1,11 +1,19 @@
 /*
  * The way to the previous and the next page: "Vorige" on the left, "Pagina 2 van 9" in the middle, "Volgende" on the
- * right. The text stays in the middle when one of the links is missing, because each has a column of its own. On a
- * narrow screen, such as 320 pixels wide, the text goes on top and the links are under it, each on its own side.
+ * right. The text stays in the middle when one of the links is missing, because each has a column of its own. When
+ * the pagination is narrow, such as 320 pixels wide, the text goes on top and the links are under it, each on its own side.
  */
 
 @layer hf.components {
+  /*
+   * The nav is the container, because a grid can't ask for its own width. Its width comes from
+   * outside, as a nav is a block, so it does not change what the nav measures.
+   */
   .hf-pagination {
+    container: hf-pagination / inline-size;
+  }
+
+  .hf-pagination-row {
     align-items: center;
     display: grid;
     gap: 0 var(--hf-space-m);
@@ -43,8 +51,8 @@
     justify-self: end;
   }
 
-  @media (width <= 24rem) {
-    .hf-pagination {
+  @container hf-pagination (inline-size <= 24rem) {
+    .hf-pagination-row {
       grid-template-columns: 1fr 1fr;
     }
 

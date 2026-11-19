@@ -3964,3 +3964,20 @@
 - **Alternatieven:** een hogere breedtegrens (raakt ook tablets en smalle vensters, en breekt de 52 rem); de beeldverhouding (minder voorspelbaar in een smal venster).
 - **Later:** vult _De tweede kolom begint bij 52 rem, voor alle pagina's met een zijbalk_ (de grens is niet meer alleen een breedte) en alle besluiten waar "52 rem blijft de grens" staat: lees daar "52 rem breed en 32 rem hoog".
   Het aantal van drie keer in `page.css` in dat besluit is er twee: het gaat om de sporen van `Page.Body` en de gebieden van `Page.Main`.
+
+## Tabellen en paginering wisselen op de breedte van hun eigen kolom
+
+- **Datum:** 19 november 2026
+- **Besluit:** de vier regels die op de breedte van het venster wisselden, wisselen nu op de breedte van het component zelf, met een container query en een eigen naam.
+  Een tabel is zijn eigen container (`hf-table`, in `base/table.css`), want zijn breedte komt van buiten (`inline-size: 100%`) en inline-size containment verandert die dus niet.
+  Dat zijn de kolommen met cijfers van elke tabel en die van een tabel die sorteert (`data-table.css`), allebei bij 24 rem.
+  De cijfers van de spelers (`player-figures.css`) volgen de container van hun plek, `hf-bar-place`, bij dezelfde 24 rem.
+  `Pagination` heeft een binnenste `div` (`hf-pagination-row`) met het raster, omdat een raster niet naar zijn eigen breedte kan vragen: de `nav` is de container (`hf-pagination`) en zet de tekst boven de links bij 24 rem of smaller.
+  De getallen blijven gelijk.
+  De containers die nog geen naam hadden en die een tabel omsluit (`hf-data-table-fold`, `hf-data-table-more` en `hf-input-table`) hebben er nu een, want een naamloze query pakt de dichtstbijzijnde container, en dat is nu de tabel zelf.
+  Een tabel in een kaart op een telefoon van 390 pixels is ongeveer 20 rem breed en krijgt zo de smalle opvulling, ook als het venster breder is dan 24 rem: dat is de bedoeling.
+  `table-css.test.ts` en `pagination-css.test.ts` houden de namen en de getallen vast.
+- **Waarom:** zie _Een regel over de ruimte van het component is een container query, een regel over het scherm een media query_: een tabel moet wisselen als hij niet past, niet als het venster smal is.
+  Reflow (WCAG 1.4.10) blijft goed: inzoomen maakt het venster en dus de kolom in rem smaller, dus de smalle opvulling volgt vanzelf.
+- **Alternatieven:** de media queries laten staan (klopt niet in een smalle kolom); een wrapper om elke tabel (verandert de HTML van elke pagina); een naamloze container op de tabel (breekt de queries van de containers eromheen).
+- **Later:** maakt de regels over 24 rem voor de kolommen met cijfers (_Het pictogram in een tabelkop krimpt niet, en een kolom met cijfers is zo breed als zijn cijfers_ en de besluiten over `PlayerFiguresTable` en de paginering) tot regels voor de breedte van de tabel of de plek, niet van het venster.
