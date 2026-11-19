@@ -1,6 +1,6 @@
 'use client'
 
-import { SegmentedControl } from '@fansite/design-system'
+import { SegmentedControl, Text } from '@fansite/design-system'
 import { type ReactNode, useState, useSyncExternalStore } from 'react'
 
 import type { Venue } from './opponents'
@@ -16,10 +16,13 @@ const options = [
  * for each choice, which the server has built. The choice is made in the browser, without a
  * page load, and is not kept or put in the address. The server and a page without JavaScript
  * show Alle and no buttons, since the buttons would do nothing. Only the panel that is chosen
- * is in the page.
+ * is in the page. A line for a screen reader, which is in the page before the first press, says
+ * which choice was made (4.1.3).
  */
 export function VenueSwitch({ label, panels }: { label: string; panels: Record<Venue, ReactNode> }) {
   const [venue, setVenue] = useState<Venue>('all')
+  // What the line for a screen reader says: empty until a button is pressed.
+  const [announced, setAnnounced] = useState(false)
   // Whether the page is live in the browser: the server and a page without JavaScript say no.
   const live = useSyncExternalStore(
     () => () => undefined,
@@ -30,8 +33,21 @@ export function VenueSwitch({ label, panels }: { label: string; panels: Record<V
   return (
     <>
       {live ? (
-        <SegmentedControl label={label} onChange={setVenue} options={options} size="small" value={venue} />
+        <SegmentedControl
+          label={label}
+          onChange={(value) => {
+            setVenue(value)
+            setAnnounced(true)
+          }}
+          options={options}
+          size="small"
+          value={venue}
+        />
       ) : null}
+      {/* It is there before the first press, so a screen reader reads what changes in it. */}
+      <Text className="hf-visually-hidden" role="status">
+        {announced ? `${options.find((option) => option.value === venue)?.label} gekozen` : ''}
+      </Text>
       {panels[venue]}
     </>
   )

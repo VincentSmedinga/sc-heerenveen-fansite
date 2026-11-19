@@ -255,6 +255,19 @@ describe.each([
     expect(screen.getByText('Sinds 2022/23, tegen clubs met minstens 5 gespeelde wedstrijden')).toBeTruthy()
   })
 
+  it('has a line for a screen reader that is empty at first and says which choice was made', () => {
+    render(make({}))
+
+    const status = screen.getByRole('status')
+
+    expect(status.textContent).toBe('')
+
+    chooseVenue('Thuis')
+
+    expect(screen.getByRole('status')).toBe(status)
+    expect(status.textContent).toBe('Thuis gekozen')
+  })
+
   it('says one sentence, and shows no table, for a choice with fewer than ten clubs that count', () => {
     render(make({}))
     chooseVenue('Uit')

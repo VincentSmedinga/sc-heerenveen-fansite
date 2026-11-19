@@ -150,9 +150,9 @@ describe('the page /tegenstanders', () => {
 
     expect(html).not.toContain('<button')
     expect(html).not.toContain('aria-sort')
-    // The only line for a screen reader is the empty one of the switch (see `SwitchLinks`), and
-    // not the one of the sort.
-    expect(html.replace('<p class="hf-visually-hidden" role="status"></p>', '')).not.toContain('role="status"')
+    // The only lines for a screen reader are the empty ones of the switches (see `SwitchLinks`
+    // and `VenueSwitch`), and not the one of the sort.
+    expect(html.replaceAll('<p class="hf-visually-hidden" role="status"></p>', '')).not.toContain('role="status"')
     expect(html).not.toContain('aria-label="Paginering"')
     expect(html).not.toContain('pagina=')
   })
