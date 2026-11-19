@@ -191,14 +191,26 @@ describe('the page of a match', () => {
 
     expect(course).toContain('role="group"')
     expect(course.match(/<ol aria-label="(?:Eerste|Tweede) helft"/g)).toHaveLength(2)
-    expect(plain(course)).toContain('Minuut 12, Doelpunt: ')
-    expect(plain(course)).toContain('Eigen doelpunt: ')
-    expect(plain(course)).toContain('Doelpunt (strafschop): ')
+    expect(plain(course)).toContain('Minuut 12, Doelpunt, stand sc Heerenveen 1, Testdorp FC 0: ')
+    expect(plain(course)).toContain('Eigen doelpunt, stand sc Heerenveen 2, Testdorp FC 1: ')
+    expect(plain(course)).toContain('Doelpunt (strafschop), stand sc Heerenveen 1, Testdorp FC 1: ')
     expect(plain(course)).toContain('Gemiste strafschop')
     expect(plain(course)).toContain('Wissel: ')
     expect(plain(course)).toContain('Gele kaart: ')
     expect(plain(course)).toContain('Rode kaart: ')
     expect(plain(course)).toContain('assist Thijs Idzenga')
+  })
+
+  it('shows the score after each goal in the course, bold and in the colour of the lead of sc Heerenveen', async () => {
+    const html = await render()
+    const course = html.slice(html.indexOf('id="verloop"'))
+    const scores = [...course.matchAll(/hf-match-event-score hf-match-event-score-(\w+)"[^>]*>([^<]*)</gu)]
+
+    expect(scores.map((score) => [score[2], score[1]])).toEqual([
+      ['1–0', 'win'],
+      ['1–1', 'draw'],
+      ['2–1', 'win'],
+    ])
   })
 
   it('shows both teams on the pitch, each with a sentence for every player in the order of the report', async () => {
