@@ -361,7 +361,7 @@
     --hf-colour-chart-line: light-dark(var(--hf-colour-blue-900), var(--hf-colour-blue-50));
     --hf-colour-chart-line-edge: light-dark(var(--hf-colour-white), var(--hf-colour-blue-800));
 
-    /* The dotted stretch of the line that is of another kind, such as a season in another league. */
+    /* The dotted stretch of a line that is of another kind, such as another league. */
     --hf-colour-chart-line-apart: light-dark(var(--hf-colour-sand-500), var(--hf-colour-sand-300));
 
     /*
