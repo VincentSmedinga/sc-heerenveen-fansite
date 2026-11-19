@@ -168,16 +168,15 @@ export const SortableDataTable = ({
     </table>
   )
 
+  // The message for screen readers stays next to the table, inside its block.
   return (
-    <>
-      <TableContainer fold={text && needsFoldContainer(columns as readonly DataTableTextColumn[])}>
-        {table}
-      </TableContainer>
+    <TableContainer fold={text && needsFoldContainer(columns as readonly DataTableTextColumn[])}>
+      {table}
       {scripted && (
         <div className="hf-visually-hidden" role="status">
           {announcement}
         </div>
       )}
-    </>
+    </TableContainer>
   )
 }
