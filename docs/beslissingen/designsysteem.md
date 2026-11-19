@@ -3921,6 +3921,17 @@
 - **Alternatieven:** een eigen tokenpaar voor de kaart (twee systemen voor dezelfde betekenis); altijd sc Heerenveen eerst; het woord "voor", "gelijk" of "achter" in de verborgen tekst (langer bij elk doelpunt).
 - **Later:** vervangt de zin "Nothing here depends on a colour" uit de kop van `match-timeline.css` niet, maar nuanceert hem: de minuutpil is nog steeds zonder kleur te lezen, en ook de stand zegt het zonder kleur, met het getal.
 
+## `BarChart.Trend` kan een stuk van de lijn gestippeld en in zand tekenen
+
+- **Datum:** 19 november 2026
+- **Besluit:** `BarChart.Trend` heeft een optie `apart`: een waarde per plek op dezelfde schaal, waarvan het stuk lijn gestippeld en in zand wordt getekend (`--hf-colour-chart-line-apart`, zand-500 in licht en zand-300 in donker, en `GrayText` in geforceerde kleuren).
+  Dat stuk sluit aan op de plekken ervoor en erna, dus de lijn breekt niet.
+  Een enkele waarde tussen twee gaten, die geen lijn heeft, krijgt een eigen stip, zodat hij niet verdwijnt.
+  De hoogte van de grafiek volgt `--hf-bar-chart-height`, die de pagina op de grafiek kan zetten.
+- **Waarom:** een stuk dat van een andere soort is dan de rest, zoals de seizoenen in een andere competitie, moet te zien zijn zonder dat de lijn breekt.
+  De streepjes verschillen in vorm van de gewone lijn, dus kleur is niet het enige teken (1.4.1).
+- **Alternatieven:** een holle stip per plek (te nadrukkelijk, en de lijn breekt); een tweede `Trend` over dezelfde grafiek (dubbele schaal en dubbel werk).
+
 ## Een regel over de ruimte van het component is een container query, een regel over het scherm een media query
 
 - **Datum:** 19 november 2026

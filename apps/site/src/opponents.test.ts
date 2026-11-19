@@ -915,7 +915,10 @@ describe('hasTimeline', () => {
 describe('clubPlacesOf', () => {
   const ours = (season: string, position: number | undefined, now = false): FinalPlace => ({
     now,
-    row: position === undefined ? undefined : { goalDifference: 0, points: 0, pointsDeducted: 0, position },
+    row:
+      position === undefined
+        ? undefined
+        : { competition: 'Eredivisie', goalDifference: 0, points: 0, pointsDeducted: 0, position },
     season,
   })
   const places = [
@@ -925,7 +928,17 @@ describe('clubPlacesOf', () => {
     ours('2025/26', 8),
     ours('2026/27', 2, true),
   ]
-  const table = (season: string, club: string, position: number) => ({ club, position, season })
+  const table = (
+    season: string,
+    club: string,
+    position: number,
+    competition: 'Eerste divisie' | 'Eredivisie' = 'Eredivisie',
+  ) => ({
+    club,
+    competition,
+    position,
+    season,
+  })
 
   const club = (names: readonly NamePeriodLine[], otherNames: string[], opponents: string[]) => ({
     club: { id: 1, name: 'FC Zwolle', otherNames, slug: 'fc-zwolle', wikipediaPage: null },
@@ -941,9 +954,24 @@ describe('clubPlacesOf', () => {
     ]
 
     expect(clubPlacesOf(places, rows, clubKeysOf(club([], [], [])))).toEqual([
-      { ours: 8, season: '2025/26', theirs: 16 },
-      { ours: 6, season: '2023/24', theirs: 9 },
-      { ours: 4, season: '2022/23', theirs: 11 },
+      { competition: 'Eredivisie', ours: 8, season: '2025/26', theirs: 16 },
+      { competition: 'Eredivisie', ours: 6, season: '2023/24', theirs: 9 },
+      { competition: 'Eredivisie', ours: 4, season: '2022/23', theirs: 11 },
+    ])
+  })
+
+  it('gives the league of a season that was not in the Eredivisie', () => {
+    const eerste: FinalPlace[] = [
+      {
+        now: false,
+        row: { competition: 'Eerste divisie', goalDifference: 0, points: 0, pointsDeducted: 0, position: 3 },
+        season: '1991/92',
+      },
+    ]
+    const rows = [table('1991/92', 'FC Zwolle', 9, 'Eerste divisie')]
+
+    expect(clubPlacesOf(eerste, rows, clubKeysOf(club([], [], [])))).toEqual([
+      { competition: 'Eerste divisie', ours: 3, season: '1991/92', theirs: 9 },
     ])
   })
 

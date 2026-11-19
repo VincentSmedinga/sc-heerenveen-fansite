@@ -28,8 +28,16 @@ vi.mock('#src/match-search-data', () => ({ getSearchWorld: vi.fn() }))
 vi.mock('#src/opponents', () => ({ getSourcePages: vi.fn() }))
 
 const finalPlaces: FinalPlace[] = [
-  { now: false, row: { goalDifference: 3, points: 50, pointsDeducted: 0, position: 6 }, season: '2025/26' },
-  { now: true, row: { goalDifference: 9, points: 20, pointsDeducted: 0, position: 2 }, season: '2026/27' },
+  {
+    now: false,
+    row: { competition: 'Eredivisie', goalDifference: 3, points: 50, pointsDeducted: 0, position: 6 },
+    season: '2025/26',
+  },
+  {
+    now: true,
+    row: { competition: 'Eredivisie', goalDifference: 9, points: 20, pointsDeducted: 0, position: 2 },
+    season: '2026/27',
+  },
 ]
 
 // The made-up matches of the current season, and one of an older season with a number of

@@ -101,6 +101,13 @@ export type BarChartProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & 
 }
 
 export type BarChartTrendProps = {
+  /**
+   * A stretch of the line that is of another kind than the rest, one value per place on the
+   * same scale, such as the seasons in another league: it is drawn dotted and in sand, and
+   * joins the places before and after it, so the line goes down and up with it. `null` is a
+   * place that is not part of it. Give what it means as text next to the chart.
+   */
+  apart?: readonly (null | number)[]
   /** `smooth` (the default) never goes past its values, `straight` has straight stretches. */
   curve?: TrendCurve
   /** Whether the line has an edge round it that parts it from the bars. The default is yes. */
@@ -135,18 +142,47 @@ const percentOf = (value: number, max: number) => Math.round(Math.min(1, Math.ma
  * that keeps its width in pixels. There is no line before its first point. With `labels`, a
  * tooltip follows the pointer along the line (see `TrendPointer`).
  */
-const Trend = ({ curve = 'smooth', edge = true, endDot = true, labels, max, values }: BarChartTrendProps) => {
-  const scale = max ?? Math.max(1, ...values.map((value) => value ?? 0))
+const Trend = ({ apart, curve = 'smooth', edge = true, endDot = true, labels, max, values }: BarChartTrendProps) => {
+  const scale = max ?? Math.max(1, ...values.map((value) => value ?? 0), ...(apart ?? []).map((value) => value ?? 0))
   const path = monotonePath(values, scale, curve)
+  // The dotted stretch joins the places on both sides of it, so the line does not break.
+  const apartPath = monotonePath(
+    values.map((value, index) => {
+      const own = apart?.[index] ?? null
+
+      return own !== null ||
+        (value !== null && ((apart?.[index - 1] ?? null) !== null || (apart?.[index + 1] ?? null) !== null))
+        ? (own ?? value)
+        : null
+    }),
+    scale,
+    curve,
+  )
   const last = values.findLastIndex((value) => value !== null)
   const lastValue = values[last] ?? null
+  // A value between two gaps has no line, so it gets a dot of its own.
+  const lone = values.flatMap((value, index) =>
+    value !== null &&
+    [values[index - 1], values[index + 1], apart?.[index - 1], apart?.[index + 1]].every(
+      (next) => (next ?? null) === null,
+    ) &&
+    index !== last
+      ? [index]
+      : [],
+  )
+  const dotStyle = (index: number, value: number) =>
+    ({
+      '--hf-bar-chart-across': Math.round(((index + 0.5) / values.length) * 10000) / 100,
+      '--hf-bar-chart-at': percentOf(value, scale),
+    }) as CSSProperties
   const points = labels
     ? values.map((value, index) => {
+        const own = value ?? apart?.[index] ?? null
         const label = labels[index]
 
-        return value === null || label === null || label === undefined || label === false
+        return own === null || label === null || label === undefined || label === false
           ? null
-          : { across: acrossOf(index + 0.5, values.length), at: percentOf(value, scale), label }
+          : { across: acrossOf(index + 0.5, values.length), at: percentOf(own, scale), label }
       })
     : null
 
@@ -160,7 +196,9 @@ const Trend = ({ curve = 'smooth', edge = true, endDot = true, labels, max, valu
         viewBox={`0 0 ${Math.max(1, values.length)} 100`}
       >
         {edge && <path className="hf-bar-chart-trend-edge" d={path} />}
+        {edge && apartPath !== '' && <path className="hf-bar-chart-trend-edge" d={apartPath} />}
         <path className="hf-bar-chart-trend-line" d={path} />
+        {apartPath !== '' && <path className="hf-bar-chart-trend-apart" d={apartPath} />}
       </svg>
       {endDot && lastValue !== null && (
         <span
@@ -173,6 +211,9 @@ const Trend = ({ curve = 'smooth', edge = true, endDot = true, labels, max, valu
           }
         />
       )}
+      {lone.map((index) => (
+        <span className="hf-bar-chart-trend-dot" key={`lone-${index}`} style={dotStyle(index, values[index] ?? 0)} />
+      ))}
       {points && <TrendPointer points={points} />}
     </>
   )

@@ -30,7 +30,7 @@ import {
   type PublicStandingsRow,
   type PublicWikipediaPage,
 } from '@fansite/db/queries'
-import { type Competition } from '@fansite/db/schema'
+import { type Competition, type StandingsCompetition } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 
 import { cacheFor, cacheForKey } from './cache'
@@ -242,7 +242,12 @@ export type FinalPlace = {
   /** Whether this is the season that is going on, whose table is not final. */
   now: boolean
   /** Our row of the table, or undefined for a season in which we are not in a table. */
-  row: Pick<PublicStandingsRow, 'goalDifference' | 'points' | 'pointsDeducted' | 'position'> | undefined
+  row:
+    | (Pick<PublicStandingsRow, 'goalDifference' | 'points' | 'pointsDeducted' | 'position'> & {
+        /** The league the table is of: the Eredivisie, or the Eerste divisie in two seasons. */
+        competition: StandingsCompetition
+      })
+    | undefined
   season: string
 }
 
@@ -280,6 +285,7 @@ export function finalPlacesOf(
         row === undefined
           ? undefined
           : {
+              competition: row.competition,
               goalDifference: row.goalDifference,
               points: row.points,
               pointsDeducted: row.pointsDeducted,
