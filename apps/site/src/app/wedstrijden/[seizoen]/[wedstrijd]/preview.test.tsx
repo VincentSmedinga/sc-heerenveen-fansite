@@ -262,6 +262,15 @@ describe('the Voorbeschouwing of a match that has not begun', () => {
     expect(text).toContain('2 keer in Testdorp sinds 2024/25')
     expect(text).toContain('1 gewonnen · 0 gelijk · 1 verloren · doelpunten 2–3')
     expect(text).toContain('De laatste twee daar')
+    // The row of marks has the oldest match first and the newest last: the 0–2 loss of 2025 and
+    // then the 2–1 win of 2026, while the list below has the win first. The title says which
+    // matches they are for a screen reader.
+    const card = html.slice(html.indexOf('id="onderling"'))
+
+    expect([...card.matchAll(/hf-mark-row-mark[^>]*>([WGV])</g)].map(([, letter]) => letter)).toEqual(['V', 'W'])
+    expect(card).toContain('De laatste twee daar: verlies, winst')
+    expect(html).toContain('aria-label="De laatste wedstrijden daar, de nieuwste eerst"')
+    expect(html).not.toMatch(/<h3[^>]*>De laatste/)
     expect(text).toContain('Laatste zege daar 1 februari 2026, 1–2')
     expect(text).toContain('Grootste zege daar 1 februari 2026, 1–2')
     expect(text).toContain('Alle 2 wedstrijden in Testdorp')

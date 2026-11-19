@@ -24,6 +24,7 @@ import type { ClubHeadline } from './opponents'
 
 import { formatTableDay } from './match-format'
 import { type MatchPage, matchPageKey, pageProps } from './match-pages'
+import { letterOf } from './match-result'
 import { matchSearchPath } from './match-search'
 import { markOf, MatchLine } from './MatchViews'
 import { dateTimeOf, formatNewsTime } from './news'
@@ -55,7 +56,7 @@ const headToHeadId = 'onderling'
 /** The id of the card Onze schutters. */
 const scorersId = 'onze-schutters'
 
-/** The words for how many matches the list "De laatste ... daar" shows, from one to five. */
+/** The words for how many matches the row "De laatste ... daar" shows, from one to five. */
 const countWords = ['', '', 'twee', 'drie', 'vier', 'vijf']
 
 /** A goal difference with its sign, as a table shows it: `+8`, `−3` and `0`. */
@@ -128,7 +129,8 @@ export function PreviewHeader({
 
 /**
  * The card "Onderling in <plaats>": how the matches against the club went on the side where the
- * match to come is played, the last five of them as `Match` shows them, the last win and the
+ * match to come is played, the last five of them as a row of marks, oldest first, and as
+ * `Match` shows them, newest first, the last win and the
  * biggest win, and the links to the matches and to the club. `place` is the place of the
  * ground of the opponent (the stadium of the match), and without it the card says "bij <club>".
  * A club we have not played on that side gives no card.
@@ -179,10 +181,12 @@ export function PreviewHeadToHeadCard({
       <Text>
         {`${tally.won} gewonnen · ${tally.drawn} gelijk · ${tally.lost} verloren · doelpunten ${tally.goalsFor}–${tally.goalsAgainst}`}
       </Text>
-      <Heading appearance={4} level={3}>
-        {last.length === 1 ? 'De laatste daar' : `De laatste ${countWords[last.length]} daar`}
-      </Heading>
-      <List role="list">
+      {/* Oldest first, like Vorm; the list below is newest first. */}
+      <MarkRow
+        marks={last.toReversed().map((meeting) => markOf[letterOf(meeting)])}
+        title={last.length === 1 ? 'De laatste daar' : `De laatste ${countWords[last.length]} daar`}
+      />
+      <List aria-label="De laatste wedstrijden daar, de nieuwste eerst" role="list">
         {last.map((meeting) => (
           <List.Item key={meeting.id}>
             <MatchLine {...pageProps(pages?.get(matchPageKey(meeting)))} match={meeting} now={now} withYear />
