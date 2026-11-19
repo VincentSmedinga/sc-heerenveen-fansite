@@ -186,7 +186,12 @@ export function PreviewHeadToHeadCard({
         marks={last.toReversed().map((meeting) => markOf[letterOf(meeting)])}
         title={last.length === 1 ? 'De laatste daar' : `De laatste ${countWords[last.length]} daar`}
       />
-      <List aria-label="De laatste wedstrijden daar, de nieuwste eerst" role="list">
+      {/* The two facts under the list stand apart from it, with the large step of space. */}
+      <List
+        aria-label="De laatste wedstrijden daar, de nieuwste eerst"
+        className={facts.length > 0 ? 'hf-space-end-l' : undefined}
+        role="list"
+      >
         {last.map((meeting) => (
           <List.Item key={meeting.id}>
             <MatchLine {...pageProps(pages?.get(matchPageKey(meeting)))} match={meeting} now={now} withYear />
@@ -194,7 +199,7 @@ export function PreviewHeadToHeadCard({
         ))}
       </List>
       {facts.length > 0 && (
-        <DescriptionList stacked>
+        <DescriptionList>
           {facts.map(({ term, text }) => (
             <DescriptionList.Item key={term} term={term}>
               <Text>{text}</Text>

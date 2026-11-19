@@ -6725,6 +6725,9 @@
     Een schermlezer hoort dus welke wedstrijden het zijn ("De laatste vijf daar: winst, verlies, …"), zodat er niets verloren gaat doordat de kop weg is.
   - **De koppen** blijven in orde: het niveau 2 van de kaart en daarna de regel met het aantal als niveau 3.
     De kop met het uiterlijk van niveau 4 was een kop van niveau 3 en is weg, dus er komt geen sprong in de koppen.
+  - **De twee feiten** onder de lijst, "Laatste zege daar" en "Grootste zege daar", staan los van de lijst: er zit de grote stap ruimte tussen (`hf-space-end-l` op de lijst), en ze staan naast elkaar in twee kolommen van een `DescriptionList`, elke term boven zijn waarde.
+    De lijst is niet meer `stacked`, want die zet de paren onder elkaar met lijnen; de gewone vorm zet ze in kolommen die op een smalle kaart onder elkaar komen.
+    Het designsysteem had die vorm al, dus er komt geen nieuwe variant bij.
 - **Waarom:** de projecteigenaar wil in één oogopslag zien hoe het daar ging, zoals bij Vorm.
   Een rij die overal van oud naar nieuw loopt, leest overal hetzelfde.
 - **Alternatieven:** de rij van nieuw naar oud, passend bij de lijst maar anders dan Vorm en de rij op de pagina van een club; een korte titel zoals "Daar", die niet zegt hoeveel wedstrijden het zijn.

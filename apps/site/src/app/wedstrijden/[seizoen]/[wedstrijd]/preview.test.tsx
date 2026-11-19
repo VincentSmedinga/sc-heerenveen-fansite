@@ -269,6 +269,11 @@ describe('the Voorbeschouwing of a match that has not begun', () => {
 
     expect([...card.matchAll(/hf-mark-row-mark[^>]*>([WGV])</g)].map(([, letter]) => letter)).toEqual(['V', 'W'])
     expect(card).toContain('De laatste twee daar: verlies, winst')
+    // The two wins are set apart from the list by space and stand in two columns of a
+    // description list, the term above its value, and not under each other with lines.
+    expect(card).toMatch(/<ul[^>]*class="[^"]*hf-space-end-l[^"]*"/)
+    expect(card).toMatch(/<dl class="hf-description-list">/)
+    expect(card).not.toContain('hf-description-list-stacked')
     expect(html).toContain('aria-label="De laatste wedstrijden daar, de nieuwste eerst"')
     expect(html).not.toMatch(/<h3[^>]*>De laatste/)
     expect(text).toContain('Laatste zege daar 1 februari 2026, 1–2')
