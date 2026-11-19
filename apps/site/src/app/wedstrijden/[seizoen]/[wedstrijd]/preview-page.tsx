@@ -261,7 +261,7 @@ export function dayOf({ kickoffAt, matchDate }: Pick<ScheduledMatch['match'], 'k
 
 /**
  * The facts under the clubs: the competition, the round, the day with the kick-off, the
- * stadium.
+ * stadium and the referee, the last two when we have them.
  */
 function factsOf(match: ScheduledMatch['match']): MatchHeaderFact[] {
   const day = dayOf(match)
@@ -273,6 +273,10 @@ function factsOf(match: ScheduledMatch['match']): MatchHeaderFact[] {
 
   if (match.stadium !== null) {
     facts.push({ label: 'Stadion', value: match.stadium })
+  }
+
+  if (match.referee !== null) {
+    facts.push({ label: 'Scheidsrechter', value: match.referee })
   }
 
   return facts
