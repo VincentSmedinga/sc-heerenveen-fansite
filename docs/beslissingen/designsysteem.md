@@ -3989,7 +3989,7 @@
 ## Rasters en rijen van cijfers, vragen, spelers en uitslagen wisselen op de breedte van hun eigen kolom
 
 - **Datum:** 19 november 2026
-- **Besluit:** `KeyFigures` (52 rem), `QuestionCard.Grid` (40 rem), `PlayerList` (52 rem) en `OutcomeLine` (40 rem) wisselen met een container query en een eigen naam, en de `@media`-regels op breedte zijn uit hun bestanden.
+- **Besluit:** `KeyFigures`, `QuestionCard.Grid`, `PlayerList` en `OutcomeLine`, die op 52 rem, 40 rem, 52 rem en 40 rem van het venster wisselden, wisselen met een container query en een eigen naam, en de `@media`-regels op breedte zijn uit hun bestanden.
   Een element kan niet naar zijn eigen breedte vragen, dus de container is steeds een ander element:
   - **`KeyFigures` en `QuestionCard.Grid`:** de lijst zelf is de container (`hf-key-figures`, `hf-question-grid`) en de kaarten vragen het hem.
     De lijst is daarom een `flex` met een basis per kaart in plaats van een raster, want een raster kan zijn eigen kolommen niet laten wisselen.
