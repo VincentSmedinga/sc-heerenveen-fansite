@@ -169,7 +169,6 @@ export type {
 } from './components/match-timeline/MatchTimeline'
 export { Match, matchStatuses } from './components/match/Match'
 export type { MatchGoal, MatchProps, MatchStatus } from './components/match/Match'
-export { MoreRows } from './components/more-rows/MoreRows'
 export { Navigation } from './components/navigation/Navigation'
 export type { NavigationItem, NavigationProps, NavigationSubitem } from './components/navigation/Navigation'
 export { NavigationBar } from './components/navigation/NavigationBar'

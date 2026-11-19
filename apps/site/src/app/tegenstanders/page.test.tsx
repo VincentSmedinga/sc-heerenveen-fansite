@@ -302,9 +302,11 @@ describe('the page /tegenstanders', () => {
     expect(sidebarOf(html)).toContain('Gemiddeld aantal punten per wedstrijd')
     expect(sidebarOf(html)).toContain('Sinds 2022/23, tegen clubs met minstens 5 gespeelde wedstrijden')
     expect(sidebarOf(html)).toContain(
-      '<caption class="hf-visually-hidden">De eerste 5 clubs waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt, van hoog naar laag</caption>',
+      '<caption class="hf-visually-hidden">De eerste 10 clubs waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt, van hoog naar laag</caption>',
     )
     expect(sidebarOf(html)).not.toContain('Toon 5 meer')
+    // The two cards of the sidebar show ten places each.
+    expect(placesOf(html)).toHaveLength(20)
     // Without JavaScript the buttons would do nothing, so there are none.
     expect(sidebarOf(html)).not.toContain('<button')
   })

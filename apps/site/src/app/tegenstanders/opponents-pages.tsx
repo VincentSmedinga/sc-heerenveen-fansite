@@ -60,11 +60,10 @@ import {
   ClubSummaryCard,
   ClubTimelineCard,
   ClubTopScorersCard,
-  HardestCard,
   LastWinCard,
   OpponentsCredit,
+  RankingCard,
   StadiumsCard,
-  TopPointsCard,
 } from '#src/OpponentViews'
 import { pageAreas } from '#src/page-areas'
 import { getMatchPages } from '#src/report-data'
@@ -173,12 +172,11 @@ export async function clubListMetadata(): Promise<Metadata> {
  * and the switch is the one of Cijfers. A club we only met in the cup is not in the list
  * with the choice Eredivisie. The switch is only there when a cup tie was played. A value of
  * the choice that is not known is the page "niet gevonden". The list is the main column, on the
- * white surface. The sidebar has the cards Het makkelijkst (`TopPointsCard`) and Het moeilijkst
- * (`HardestCard`), the best and the worst ten of the average points per match, which count the
- * same matches as the list and let a visitor choose Alle, Thuis or Uit, the card Laatste
- * overwinning (`LastWinCard`) with the clubs of the
- * Eredivisie, and the credit under it. On a phone it follows the
- * list.
+ * white surface. The sidebar has the cards Het makkelijkst and Het moeilijkst (`RankingCard`),
+ * the best and the worst ten of the average points per match, which count the same matches as
+ * the list and let a visitor choose Alle, Thuis or Uit, the card Laatste overwinning
+ * (`LastWinCard`) with the clubs of the Eredivisie, and the credit under it. On a phone it
+ * follows the list.
  */
 export async function ClubListPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const { competitie } = await searchParams
@@ -231,16 +229,17 @@ export async function ClubListPage({ searchParams }: { searchParams: Promise<Sea
           />
         </Page.Cell>
         <Page.Section area="side" aria-label="Het makkelijkst, het moeilijkst en de bron">
-          <TopPointsCard
+          <RankingCard
             address={opponentsPath}
             choice={competition}
             query={competitionQuery(competition)}
             records={venueRecords}
             since={since}
           />
-          <HardestCard
+          <RankingCard
             address={opponentsPath}
             choice={competition}
+            low
             query={competitionQuery(competition)}
             records={venueRecords}
             since={since}
