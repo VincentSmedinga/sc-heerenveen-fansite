@@ -6749,3 +6749,12 @@
 - **Waarom:** korte labels breken niet af op een telefoon, en een link naar een kaart die er niet is, brengt een bezoeker nergens heen.
   De balk van de pagina van een club doet hetzelfde.
 - **Alternatieven:** de volledige koptekst van elke kaart (bijvoorbeeld Loopbaan bij sc Heerenveen); elke link altijd tonen.
+
+### De kop van de Voorbeschouwing toont de scheidsrechter na het stadion
+
+- **Datum:** 18 november 2026
+- **Besluit:** de kop van de Voorbeschouwing toont de scheidsrechter (`matches.referee`) als feit "Scheidsrechter" direct na het stadion, en alleen als hij er is (#1408).
+  Een wedstrijd zonder scheidsrechter laat niets zien: geen streepje en geen "onbekend".
+- **Waarom:** de gegevens zijn er al, en de lijsten tonen hem onder de clubs, dus de bezoeker verwacht hem ook in de kop.
+  Het feit staat als tekst in dezelfde lijst als het stadion, net als op de pagina van een gespeelde wedstrijd.
+- **Alternatieven:** een eigen regel, die op een telefoon meer ruimte geeft aan één naam.

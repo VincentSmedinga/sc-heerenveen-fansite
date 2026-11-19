@@ -171,6 +171,16 @@ describe('the Voorbeschouwing of a match that has not begun', () => {
     expect(text).not.toMatch(/Eindstand|Tussenstand/u)
   })
 
+  it('shows the referee after the stadium when the match has one, and nothing when it has not', async () => {
+    vi.mocked(getPreviewMatch).mockResolvedValue(scheduled({ referee: 'Pieter Maquette' }))
+
+    expect(plain(await render())).toContain('Stadion Stadion Proeflaan Scheidsrechter Pieter Maquette')
+
+    vi.mocked(getPreviewMatch).mockResolvedValue(scheduled({ referee: null }))
+
+    expect(plain(await render())).not.toContain('Scheidsrechter')
+  })
+
   it('says "aftrap volgt" for a match without a kick-off, and leaves out an unknown stadium', async () => {
     vi.mocked(getPreviewMatch).mockResolvedValue(scheduled({ kickoffAt: null, stadium: null }))
 
