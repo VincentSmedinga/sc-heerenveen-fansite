@@ -1732,8 +1732,11 @@ await withEmptyDatabase((database) =>
       opponentsHtml,
       /tegen clubs met minstens 5 gespeelde wedstrijden|Nog geen 10 clubs met minstens 5 gespeelde wedstrijden\./,
     )
-    // Without JavaScript the choice Alle, Thuis and Uit has no buttons that would do nothing.
+    // Without JavaScript the choice Alle, Thuis and Uit has no buttons that would do nothing,
+    // and nor has the table of a card: it has its first five places and no button for more.
     assert.doesNotMatch(opponentsHtml, /aria-pressed/)
+    assert.doesNotMatch(opponentsHtml, /Toon \d+ meer/)
+    assert.doesNotMatch(opponentsHtml, /Herstel naar top 5/)
     // The card Laatste overwinning needs the table of the newest season, so the made-up data
     // may or may not have it; if so, it has its own heading and caption, before the credit.
     if (opponentsHtml.includes('id="laatste-overwinning"')) {

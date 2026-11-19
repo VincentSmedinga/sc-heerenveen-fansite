@@ -3168,3 +3168,27 @@
   Een `Disclosure` houdt de knop voor vijf meer bruikbaar zonder JavaScript, en de keuze in de browser houdt het adres zonder parameter.
 - **Alternatieven:** één keuze voor beide kaarten (een plek boven de zijkolom en een gedeelde client-component); links met een parameter (elke keuze een adres, maar de pagina laadt opnieuw en de parameter botst met de competitie); het minimum op het totaal houden (een club met één of twee thuiswedstrijden kan dan bovenaan staan); een alias voor het oude anker (er is niets dat ernaar verwijst).
 - **Later:** zie _Tegenstanders heeft een zijkolom met de kaart Gemiddeld resultaat, en "Alle tegenstanders" is wit_ (4 november 2026) in `site.md`: de kaart heet sinds deze beslissing "Het makkelijkst".
+- **Later:** zie _De kaarten Het makkelijkst en Het moeilijkst tonen vijf clubs per druk, tot 25, en gaan dan terug naar de top 5_ (19 november 2026): "Toon 5 meer" is geen `Disclosure` meer maar een knop die vijf rijen toevoegt.
+
+## De kaarten Het makkelijkst en Het moeilijkst tonen vijf clubs per druk, tot 25, en gaan dan terug naar de top 5
+
+- **Datum:** 19 november 2026
+- **Besluit:** de lijst van elke kaart heeft hoogstens 25 clubs (`topPointsPlaces` en `hardestPlaces`), en één tabel groeit met vijf rijen per druk op "Toon 5 meer" (#1426).
+  - **De knop:** hij heet "Toon 5 meer", "Toon N meer" als er minder dan vijf over zijn, en aan het einde "Herstel naar top 5", dat de tabel terugzet.
+    Een kaart met vijf rijen of minder heeft geen knop.
+    Zijn er minder dan 25 clubs, dan loopt de lijst tot de laatste.
+  - **Het onderdeel:** `MoreRows` in het designsysteem, naast `DataTable.More`, dat kolommen verbergt en geen rijen toevoegt.
+    De server stuurt alle rijen mee, zodat er geen verzoek bij komt.
+  - **Zonder JavaScript:** de top 5 en geen knop, want een knop die niets doet is erger dan een kortere lijst.
+    De plaatsen 6 en verder zijn zonder script niet te zien.
+  - **Na een druk:** de focus blijft op de knop, die op zijn plaats blijft.
+    Een meldingsgebied (`aria-live="polite"`) zegt "5 clubs meer getoond, nu 10" of "Terug naar de top 5".
+    De knop heeft een naam die met de zichtbare tekst begint en de kaart noemt: "Toon 5 meer, Het makkelijkst".
+  - **Het bijschrift:** "De eerste 10 clubs waartegen …", en het verandert mee.
+    De kaart begint weer bij de top 5 als de bezoeker de keuze Alle, Thuis of Uit verandert, want elke keuze heeft een eigen paneel.
+  - **Het minimum:** een kaart verschijnt bij minstens 10 clubs (`topPointsClubs`), met minstens 5 wedstrijden per club.
+    Dat staat los van de 25 van de lijst.
+- **Waarom:** de bezoeker bepaalt zelf hoe ver hij leest, en één tabel blijft één lijst voor een schermlezer.
+  De lijst eindigt op 25 en de knop zet de kaart terug, zodat de zijkolom beheersbaar blijft en de knop op dezelfde plek staat.
+- **Alternatieven:** de `Disclosure` houden, die alleen alles of niets toont; zonder script de hele lijst tonen (een lange kaart in de zijkolom); de knop na de laatste rij laten verdwijnen; de focus naar de eerste nieuwe rij zetten (de knop gaat onder de vingers weg).
+- **Later:** vervangt in _De kaarten Het makkelijkst en Het moeilijkst hebben een keuze Alle, Thuis en Uit en een top 5_ (19 november 2026) de top 5 met "Toon 5 meer" als `Disclosure` met de plaatsen 6 tot en met 10 in een tweede tabel.
