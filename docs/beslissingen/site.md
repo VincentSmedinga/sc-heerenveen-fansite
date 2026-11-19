@@ -1794,6 +1794,8 @@
 - **Alternatieven:** een eigen kaart voor de komende wedstrijden, erboven of in de zijkolom; de keuze voor de competitie negeren, zoals de kaart Stadion doet; alleen de eerstvolgende wedstrijd tonen; een zin "we spelen niet meer tegen deze club" als er niets komt (fout als het programma nog niet gepubliceerd is); `ShortMatch` als regel, zoals de gespeelde wedstrijden; twee onderkoppen, "Komende wedstrijden" en "Gespeelde wedstrijden", en een zin onder de tweede voor een club die we nog niet speelden (de projecteigenaar wilde geen koppen; het ontbreken van een uitslag zegt genoeg).
 - **Later:** zie _`Match` is voor een volledige lijst, `ShortMatch` voor een selectie_ (4 november 2026): `ShortMatch` voor de gespeelde wedstrijden is vervallen.
   De kaart Wedstrijden heeft sindsdien één soort regel, `Match`, voor de komende en de gespeelde wedstrijden; een komende wedstrijd valt nog altijd op omdat hij geen uitslag heeft.
+- **Later:** de volgorde van de wedstrijden die nog komen is op de kaart Wedstrijden van een club omgekeerd (zie _De kaart Wedstrijden van een club heeft een keuze Alle, Thuis en Uit en toont de wedstrijden die nog komen van ver naar dichtbij_, 19 november 2026): de verst weg eerst, de eerstvolgende laatst.
+  Programma houdt de eerstvolgende bovenaan, en `upcomingOf` geeft hem nog zo; de kaart draait hem om.
 
 ## De balk van Statistieken komt uit een slot van de layout en houdt het seizoen en de keuze vast
 
@@ -6685,3 +6687,29 @@
 - **Waarom:** een supporter wil weten wanneer we een club voor het laatst thuis of uit versloegen, en wie zonder keuze kijkt, ziet wat hij gewend is.
 - **Alternatieven:** alleen Thuis en Uit; links met een parameter (`SegmentedLinks`), die zonder JavaScript werken maar een adres per keuze geven; de volgorde van Alle voor elke keuze.
 - **Later:** wijzigt het besluit van 9 november 2026 (#989): de kaart telde thuis en uit samen en had geen keuze.
+
+## De kaart Wedstrijden van een club heeft een keuze Alle, Thuis en Uit en toont de wedstrijden die nog komen van ver naar dichtbij
+
+- **Datum:** 19 november 2026
+- **Besluit:** de kaart Wedstrijden op de pagina van een club (`/tegenstanders/<club>`) heeft onder de kop een keuze Alle, Thuis of Uit (#1427).
+  - **De keuze is `SegmentedLinks` met de parameter `waar`** (`thuis` of `uit`, zonder parameter is het Alle), geen `VenueSwitch`.
+    De lijst is gepagineerd met links, dus een keuze in de browser zou de wedstrijden van alle drie de keuzes in de pagina moeten zetten.
+    Met links werkt de kaart ook zonder JavaScript, en kan een keuze gedeeld worden.
+    Dit wijkt af van de kaart Laatste overwinning (#1415), die niet pagineert en de `SegmentedControl` houdt.
+    De labels en de look zijn dezelfde: Alle, Thuis en Uit, klein.
+  - **De keuze geldt voor de hele kaart:** de wedstrijden die nog komen, de gespeelde wedstrijden, de paginering, de rij Laatste wedstrijden (de laatste vijf van de keuze, weg bij minder dan vijf) en de legenda.
+    De andere kaarten van de pagina, zoals het overzicht, tellen nog alle wedstrijden.
+    Onder de keuze staat een regel, "Alleen de thuiswedstrijden" of "Alleen de uitwedstrijden", zodat een schermlezer weet wat de lijst toont.
+  - **De keuze staat er alleen als de club in de gekozen competitie een thuiswedstrijd en een uitwedstrijd heeft**, gespeeld of nog te spelen (`hasBothVenues`), want anders doet ze niets.
+    Een onbekende waarde, en een keuze die er niet is, tellen als Alle (`parseVenue`): zo'n adres geeft geen "niet gevonden".
+  - **Het adres** is `clubQuery`: de competitie, dan `waar`, dan `pagina`.
+    Een link naar een keuze houdt de competitie vast en gaat naar pagina 1.
+    De link van de competitie houdt `waar` niet vast.
+  - **De wedstrijden die nog komen** staan op de eerste pagina van ver naar dichtbij, direct boven de nieuwste gespeelde wedstrijd, zodat de data van boven naar onder van later naar eerder lopen.
+    Alleen op deze kaart: `upcomingOf` en Programma houden de eerstvolgende bovenaan, en de kaart draait de lijst om.
+  - **De metaregels van `Match` veranderen niet:** de dag van een wedstrijd die nog komt blijft in de onderste regel, en die van een gespeelde wedstrijd in de bovenste.
+    Eén kaart die afwijkt, breekt de regel voor wedstrijdinformatie; wil de projecteigenaar de dag elders, dan is dat een wijziging van `Match` op alle kaarten.
+- **Waarom:** een supporter wil alleen de thuiswedstrijden of de uitwedstrijden tegen een club zien, zoals de kaart Laatste overwinning dat laat zien.
+  Een lijst die van later naar eerder loopt, leest van boven naar onder in één richting.
+- **Alternatieven:** `VenueSwitch` hergebruiken en de paginering in de browser doen; alleen de lijst filteren en de rij en de legenda laten staan (de kaart zou dan dingen laten zien die niet bij de keuze horen); de volgorde van Programma houden; de dag op deze kaart anders zetten.
+- **Later:** vult _De pagina van een club toont ook de wedstrijden die nog komen, bovenaan de kaart Wedstrijden_ (3 november 2026) aan met de keuze en de omgekeerde volgorde.

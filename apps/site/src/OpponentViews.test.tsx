@@ -463,6 +463,67 @@ describe('ClubMeetingsCard', () => {
 
     expect(container.querySelector('a.hf-match-link')).toBeNull()
   })
+
+  describe('the choice Alle, Thuis or Uit', () => {
+    const now = new Date('2026-11-16T12:00:00Z')
+    const planned = (round: string, matchDate: string) => ({
+      ...meetings[0]!,
+      goalsAgainst: null,
+      goalsFor: null,
+      id: round.length + 1000,
+      matchDate,
+      round,
+      status: 'scheduled' as const,
+    })
+    const hrefs = { all: '/x', away: '/x?waar=uit', home: '/x?waar=thuis' }
+
+    it('has the three choices as links, with the chosen one marked, when it is given addresses', () => {
+      render(<ClubMeetingsCard meetings={meetings} now={now} upcoming={[]} venue="home" venueHrefs={hrefs} />)
+
+      const group = screen.getByRole('group', { name: 'Waar we speelden' })
+      const links = within(group).getAllByRole('link')
+
+      expect(links.map((link) => [link.textContent, link.getAttribute('href')])).toEqual([
+        ['Alle', '/x'],
+        ['Thuis', '/x?waar=thuis'],
+        ['Uit', '/x?waar=uit'],
+      ])
+      expect(links[1]?.getAttribute('aria-current')).toBe('page')
+      expect(screen.getByText('Alleen de thuiswedstrijden')).toBeTruthy()
+    })
+
+    it('says which choice the list shows for Uit, and says nothing extra for Alle', () => {
+      const { rerender } = render(
+        <ClubMeetingsCard meetings={meetings} now={now} upcoming={[]} venue="away" venueHrefs={hrefs} />,
+      )
+
+      expect(screen.getByText('Alleen de uitwedstrijden')).toBeTruthy()
+
+      rerender(<ClubMeetingsCard meetings={meetings} now={now} upcoming={[]} venue="all" venueHrefs={hrefs} />)
+
+      expect(screen.queryByText(/^Alleen de/u)).toBeNull()
+    })
+
+    it('has no choice without addresses', () => {
+      render(<ClubMeetingsCard meetings={meetings} now={now} upcoming={[]} />)
+
+      expect(screen.queryByRole('group', { name: 'Waar we speelden' })).toBeNull()
+    })
+
+    it('puts the matches to come with the one furthest away first, above the played matches', () => {
+      const { container } = render(
+        <ClubMeetingsCard
+          meetings={meetings}
+          now={now}
+          upcoming={[planned('Eerstvolgende', '2026-11-20'), planned('Ver weg', '2027-03-01')]}
+        />,
+      )
+      const text = container.textContent ?? ''
+
+      expect(text.indexOf('Ver weg')).toBeGreaterThan(-1)
+      expect(text.indexOf('Ver weg')).toBeLessThan(text.indexOf('Eerstvolgende'))
+    })
+  })
 })
 
 describe('ClubScoreCountsCard', () => {

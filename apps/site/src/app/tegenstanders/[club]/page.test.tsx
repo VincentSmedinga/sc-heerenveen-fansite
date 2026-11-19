@@ -509,6 +509,59 @@ describe('the page of a club', () => {
     expect(await render()).not.toContain('Welke wedstrijden')
   })
 
+  describe('the choice Alle, Thuis and Uit on the card Wedstrijden', () => {
+    it('has the three choices under the heading, Alle current, as links that work without JavaScript', async () => {
+      const html = await render()
+      const card = html.slice(html.indexOf('id="wedstrijden"'))
+
+      expect(card).toContain('aria-label="Waar we speelden"')
+      expect(card).toMatch(/<a aria-current="page"[^>]*href="\/tegenstanders\/testclub"[^>]*><span[^>]*>Alle</)
+      expect(card).toContain('href="/tegenstanders/testclub?waar=thuis"')
+      expect(card).toContain('href="/tegenstanders/testclub?waar=uit"')
+    })
+
+    it('shows only the matches at home with ?waar=thuis, and says so above the list', async () => {
+      const html = await render('testclub', { waar: 'thuis' })
+
+      expect(meetingsOf(html)).toHaveLength(2)
+      expect(meetingsOf(html).every((line) => line.includes('sc Heerenveen') && !line.startsWith('KNVB'))).toBe(true)
+      expect(html).toContain('Alleen de thuiswedstrijden')
+    })
+
+    it('shows only the matches away with ?waar=uit', async () => {
+      const html = await render('testclub', { waar: 'uit' })
+
+      expect(meetingsOf(html)).toHaveLength(3)
+      expect(html).toContain('Alleen de uitwedstrijden')
+    })
+
+    it('counts an unknown value as Alle', async () => {
+      const html = await render('testclub', { waar: 'onzin' })
+
+      expect(meetingsOf(html)).toHaveLength(5)
+      expect(html).not.toContain('Alleen de thuiswedstrijden')
+    })
+
+    it('keeps the competition in the links of a choice, and goes back to the first page', async () => {
+      const html = await render('testclub', { competitie: 'eredivisie' })
+
+      expect(html).toContain('href="/tegenstanders/testclub?competitie=eredivisie&amp;waar=thuis"')
+      expect(html).toContain('href="/tegenstanders/testclub?competitie=eredivisie"')
+    })
+
+    it('has the row Laatste wedstrijden of the choice, and none when the choice has fewer than five matches', async () => {
+      expect(lettersOf(await render())).toBe('WWGWV')
+      expect(lastMatchesOf(await render('testclub', { waar: 'thuis' }))).toBeUndefined()
+    })
+
+    it('has no choice for a club with matches on one side only, and shows all of them', async () => {
+      const html = await render('nieuw-promovendus', { waar: 'thuis' })
+
+      expect(html).not.toContain('Waar we speelden')
+      expect(html).toContain('Speelronde 20')
+    })
+  })
+
   it('credits the pages of the seasons of the meetings only', async () => {
     const html = await render()
 
@@ -916,16 +969,17 @@ describe('the matches that are still to come on the page of a club', () => {
       .filter((item) => /hf-match-(versus|postponed|cancelled)/.test(item))
       .map(plain)
 
-  it('lists them first in the list of the card, the next one first, as Match with the competition in the line', async () => {
+  it('lists them first in the list of the card, the furthest away first, as Match with the competition in the line', async () => {
     const html = await render('komend-fc')
     const lines = linesOf(html)
 
     expect(lines).toHaveLength(3)
-    // Called off: the day is not known, so the line says so instead of a time.
-    expect(lines[0]).toContain('Uitgesteld')
-    expect(lines[0]).toContain('Eredivisie · Speelronde 11')
+    // The days run from later to earlier down the list: the next match is the last one to come.
+    expect(lines[0]).toMatch(/Eredivisie · Speelronde 15.*Komend FC.*za 5 dec 20:30/)
     expect(lines[1]).toMatch(/KNVB Beker · Achtste finale.*Komend FC.*wo 18 nov 20:45/)
-    expect(lines[2]).toMatch(/Eredivisie · Speelronde 15.*Komend FC.*za 5 dec 20:30/)
+    // Called off: the day is not known, so the line says so instead of a time.
+    expect(lines[2]).toContain('Uitgesteld')
+    expect(lines[2]).toContain('Eredivisie · Speelronde 11')
     expect(html).toContain('<time dateTime="2026-12-05T19:30:00.000Z"')
   })
 

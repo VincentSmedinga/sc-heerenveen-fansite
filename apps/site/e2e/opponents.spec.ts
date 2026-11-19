@@ -397,6 +397,34 @@ test.describe('the page of a club', () => {
     }
   })
 
+  test('has the choice Alle, Thuis and Uit on Wedstrijden for a club met at home and away, and none for others', async ({
+    page,
+  }) => {
+    // Testdorp FC has an away win five years ago (see older-meetings.ts) next to home matches.
+    await page.goto('/tegenstanders/testdorp-fc')
+
+    const card = page.getByRole('region', { name: 'Wedstrijden' })
+    const group = card.getByRole('group', { name: 'Waar we speelden' })
+
+    await expect(group.getByRole('link', { name: 'Alle' })).toHaveAttribute('aria-current', 'page')
+    await expect(card.locator('.hf-match')).toHaveCount(6)
+
+    await group.getByRole('link', { name: 'Uit' }).click()
+
+    await expect(page).toHaveURL(/\/tegenstanders\/testdorp-fc\?waar=uit$/u)
+    await expect(group.getByRole('link', { name: 'Uit' })).toHaveAttribute('aria-current', 'page')
+    await expect(card.getByText('Alleen de uitwedstrijden')).toBeVisible()
+    await expect(card.locator('.hf-match')).toHaveCount(1)
+    await expect(card.locator('.hf-mark-row')).toHaveCount(0)
+
+    for (const club of ['voorbeeld-united', 'fc-maquette']) {
+      await page.goto(`/tegenstanders/${club}`)
+
+      await expect(page.getByRole('heading', { level: 2, name: 'Wedstrijden' })).toBeVisible()
+      await expect(page.getByRole('group', { name: 'Waar we speelden' })).toHaveCount(0)
+    }
+  })
+
   test('has the card Doelpuntenmakers for a club with five matches, in both choices, and none for fewer', async ({
     page,
   }) => {

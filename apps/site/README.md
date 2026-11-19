@@ -615,7 +615,8 @@ Een gespeelde wedstrijd toont wat hij bij Uitslagen toont: de doelpuntenmakers w
 Een regel met het seizoen boven de wedstrijd is er niet meer.
 De regel noemt de club zoals Wikipedia hem in die wedstrijd schreef, en onder de lijst staat de legenda van de afkortingen die erin voorkomen (`MatchLegend`).
 De scorers komen uit dezelfde bron als bij Uitslagen: `listClubMatches` leest ze met dezelfde hulpfunctie als `listSeasonMatches`.
-Staat er een wedstrijd in het programma, dan komt die eerst in dezelfde lijst, de eerstvolgende bovenaan, en daarna de gespeelde wedstrijden; er zijn geen onderkoppen, want een wedstrijd zonder uitslag spreekt voor zich.
+Staat er een wedstrijd in het programma, dan komt die eerst in dezelfde lijst, de verst weg bovenaan en de eerstvolgende direct boven de gespeelde wedstrijden, zodat de data van boven naar onder van later naar eerder lopen; er zijn geen onderkoppen, want een wedstrijd zonder uitslag spreekt voor zich.
+Onder de kop staat de keuze Alle, Thuis en Uit (`?waar=thuis` of `?waar=uit`, `SegmentedLinks`), alleen als de club in de gekozen competitie zowel thuis als uit een wedstrijd heeft; ze geldt voor de hele kaart (`parseVenue` en `venueMatchesOf` in `src/opponents.ts`).
 Wat komt, bepaalt `programmeOf` in `src/matches.ts`, dezelfde regel als Programma (`upcomingOf` in `src/opponents.ts`), en de keuze voor de competitie telt mee.
 Een club die we nog niet speelden maar die een wedstrijd heeft die komt, heeft alleen die wedstrijden in de kaart, geen zijkolom met uitslagen, en alleen de bronvermelding in de zijkolom.
 De gespeelde wedstrijden staan tien per pagina, met `Pagination` en `?pagina=` (`meetingsPerPage` in `src/opponents.ts`); de keuze Eredivisie gaat voor `pagina` in het adres.

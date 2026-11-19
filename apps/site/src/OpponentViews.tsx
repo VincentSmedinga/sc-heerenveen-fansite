@@ -70,6 +70,7 @@ import {
   venues,
 } from './opponents'
 import { placeInLeague } from './SeasonBySeasonCard'
+import { SwitchLinks } from './SwitchLinks'
 import { figureCell } from './table-values'
 import { VenueSwitch } from './VenueSwitch'
 
@@ -125,11 +126,12 @@ const goalDifference = (record: { goalsAgainst: number; goalsFor: number }) => r
 /**
  * The card of the page of a club with every match against it, in one list of `Match` lines,
  * the same line as Programma and Uitslagen use (`MatchLine`). The matches that are still to
- * come stand first, next one first, as Programma has them. The matches that were played
- * follow, the newest first, with the row Laatste wedstrijden above the list when there are
- * five or more (see `lastResultsOf`). The played matches come ten to a page with `Pagination`
- * (see `meetingsPerPage`); the matches to come and the row Laatste wedstrijden are on the
- * first page only. `pageHref` gives the address of a page.
+ * come stand first, the one furthest away first and the next one last, so the days run from
+ * later to earlier down the whole list (Programma has the next one first). The matches that
+ * were played follow, the newest first, with the row Laatste wedstrijden above the list when
+ * there are five or more (see `lastResultsOf`). The played matches come ten to a page with
+ * `Pagination` (see `meetingsPerPage`); the matches to come and the row Laatste wedstrijden are
+ * on the first page only. `pageHref` gives the address of a page.
  *
  * A line has the day with its year, so a match of an earlier season can be told from one of
  * this season, the competition and the round, the name as Wikipedia wrote the club in that
@@ -148,6 +150,8 @@ export function ClubMeetingsCard({
   pageHref = () => '',
   pages,
   upcoming,
+  venue = 'all',
+  venueHrefs,
 }: {
   meetings: Meeting[]
   now: Date
@@ -155,17 +159,41 @@ export function ClubMeetingsCard({
   pageHref?: (page: number) => string
   /** The pages of the matches that have one (see `getMatchPages`): the lines link to them. */
   pages?: ReadonlyMap<string, MatchPage> | undefined
+  /** The matches to come, the next one first: the card turns them round. */
   upcoming: PublicClubMatch[]
+  /** The choice Alle, Thuis or Uit, which `meetings` and `upcoming` already follow. */
+  venue?: Venue
+  /** The address of each choice; without it the card has no choice. */
+  venueHrefs?: Record<Venue, string> | undefined
 }) {
   const pageCount = meetingPageCount(meetings)
   const last = page === 1 ? lastResultsOf(meetings) : undefined
-  const shown = [...(page === 1 ? upcoming : []), ...meetingsOnPage(meetings, page)]
+  const shown = [...(page === 1 ? upcoming.toReversed() : []), ...meetingsOnPage(meetings, page)]
 
   return (
     <Card aria-labelledby="wedstrijden">
       <Heading id="wedstrijden" level={2}>
         Wedstrijden
       </Heading>
+      {venueHrefs !== undefined && (
+        <>
+          <SwitchLinks
+            label="Waar we speelden"
+            options={[
+              { href: venueHrefs.all, label: 'Alle', value: 'all' },
+              { href: venueHrefs.home, label: 'Thuis', value: 'home' },
+              { href: venueHrefs.away, label: 'Uit', value: 'away' },
+            ]}
+            size="small"
+            value={venue}
+          />
+          {venue !== 'all' && (
+            <Text appearance="meta">
+              {venue === 'home' ? 'Alleen de thuiswedstrijden' : 'Alleen de uitwedstrijden'}
+            </Text>
+          )}
+        </>
+      )}
       {last !== undefined && <MarkRow marks={last.map((result) => markOf[result])} title="Laatste wedstrijden" />}
       <List role="list">
         {shown.map((match) => (

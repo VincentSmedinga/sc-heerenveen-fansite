@@ -14,15 +14,18 @@ import {
   clubNamesOf,
   clubNameViewsOf,
   clubPlacesOf,
+  clubQuery,
   clubScorersMinimum,
   daysBetween,
   earlierNames,
   hardestOf,
+  hasBothVenues,
   hasClubScorers,
   hasTimeline,
   lastResultsOf,
   lastWinsOf,
   meetingsOf,
+  parseVenue,
   pointsOf,
   seasonsOf,
   stadiumsOf,
@@ -32,6 +35,7 @@ import {
   timelineOf,
   topPointsOf,
   upcomingOf,
+  venueMatchesOf,
 } from './opponents'
 
 let id = 0
@@ -1274,5 +1278,41 @@ describe('daysBetween', () => {
     expect(daysBetween('2026-03-28', '2026-03-30')).toBe(2)
     expect(daysBetween('2026-10-24', '2026-10-26')).toBe(2)
     expect(daysBetween('2026-11-12', '2026-11-12')).toBe(0)
+  })
+})
+
+describe('the choice Alle, Thuis or Uit on the page of a club', () => {
+  it('reads ?waar= as thuis, uit or anything else, which is Alle', () => {
+    expect(parseVenue('thuis')).toBe('home')
+    expect(parseVenue('uit')).toBe('away')
+    expect(parseVenue(undefined)).toBe('all')
+    expect(parseVenue('Thuis')).toBe('all')
+    expect(parseVenue('onzin')).toBe('all')
+    expect(parseVenue(['thuis', 'uit'])).toBe('all')
+  })
+
+  it('keeps the matches at home, the matches away or all of them, in the order given', () => {
+    const matches = [match(1, 0, { home: true }), match(0, 2, { home: false }), match(3, 3, { home: true })]
+
+    expect(venueMatchesOf(matches, 'all')).toEqual(matches)
+    expect(venueMatchesOf(matches, 'home').map(({ id: key }) => key)).toEqual([matches[0]!.id, matches[2]!.id])
+    expect(venueMatchesOf(matches, 'away').map(({ id: key }) => key)).toEqual([matches[1]!.id])
+  })
+
+  it('has a choice only when there is a match at home and one away, played or not', () => {
+    const planned = match(null, null, { home: false, status: 'scheduled' })
+
+    expect(hasBothVenues([match(1, 0, { home: true }), planned])).toBe(true)
+    expect(hasBothVenues([match(1, 0, { home: true }), match(2, 2, { home: true })])).toBe(false)
+    expect(hasBothVenues([planned])).toBe(false)
+    expect(hasBothVenues([])).toBe(false)
+  })
+
+  it('writes the address of a choice with the competition, the venue and the page, in that order', () => {
+    expect(clubQuery('all', 'all', 1)).toBe('')
+    expect(clubQuery('all', 'home', 1)).toBe('waar=thuis')
+    expect(clubQuery('league', 'away', 1)).toBe('competitie=eredivisie&waar=uit')
+    expect(clubQuery('cup', 'home', 3)).toBe('competitie=beker&waar=thuis&pagina=3')
+    expect(clubQuery('league', 'all', 2)).toBe('competitie=eredivisie&pagina=2')
   })
 })

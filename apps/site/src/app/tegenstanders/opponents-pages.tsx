@@ -8,7 +8,6 @@ import type { CompetitionChoice } from '#src/competition'
 import type { SearchParams } from '#src/season-page'
 
 import {
-  competitionFields,
   competitionParam,
   competitionQuery,
   competitionWords,
@@ -19,7 +18,7 @@ import {
 import { CompetitionLinks } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
-import { filterHref, filterQuery, parseFilterQuery } from '#src/filter-query'
+import { filterHref, parseFilterQuery } from '#src/filter-query'
 import { sourceName, sourceOf } from '#src/match-sources'
 import { getEditedMatches, getMatchSeasons, getMatchSource } from '#src/matches'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
@@ -27,6 +26,7 @@ import { dutchDay } from '#src/noteworthy'
 import {
   clubAttendanceOf,
   clubNameViewsOf,
+  clubQuery,
   earlierNames,
   getClubNews,
   getClubPage,
@@ -34,15 +34,20 @@ import {
   getClubRecords,
   getLastWinPlaces,
   getSourcePages,
+  hasBothVenues,
   hasClubScorers,
   meetingPageCount,
   meetingsOf,
   meetingsOnPage,
   opponentsPath,
+  parseVenue,
   seasonsOf,
   stadiumViewsOf,
   summaryOf,
   upcomingOf,
+  type Venue,
+  venueMatchesOf,
+  venueParam,
 } from '#src/opponents'
 import {
   ClubAttendanceCard,
@@ -306,18 +311,26 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
   const meetings = meetingsOf(matches, competition)
   const upcoming = upcomingOf(matches, competition, now)
 
+  // The choice Alle, Thuis or Uit is only on the card when the club has a match both at home
+  // and away in this competition; with only one side a link to a choice falls back to Alle.
+  const hasVenueChoice = hasBothVenues([...meetings, ...upcoming])
+  const venue = hasVenueChoice ? parseVenue(params[venueParam]) : 'all'
+  const cardMeetings = venueMatchesOf(meetings, venue)
+  const cardUpcoming = venueMatchesOf(upcoming, venue)
+
   // A page after the last one is "niet gevonden"; a club with no match played has one page.
-  if (query.page > meetingPageCount(meetings)) {
+  if (query.page > meetingPageCount(cardMeetings)) {
     notFound()
   }
 
   // The lines on this page of the list link to the pages of their matches, where there are any.
-  const pages = await getMatchPages([...(query.page === 1 ? upcoming : []), ...meetingsOnPage(meetings, query.page)])
-  const pageHref = (page: number) =>
-    filterHref(
-      `${opponentsPath}/${slug}`,
-      filterQuery(competitionParam, Object.values(competitionFields(competition)), page),
-    )
+  const pages = await getMatchPages([
+    ...(query.page === 1 ? cardUpcoming : []),
+    ...meetingsOnPage(cardMeetings, query.page),
+  ])
+  const clubAddress = (choice: CompetitionChoice, choiceVenue: Venue, page = 1) =>
+    filterHref(`${opponentsPath}/${slug}`, clubQuery(choice, choiceVenue, page))
+  const pageHref = (page: number) => clubAddress(competition, venue, page)
   const options = optionsOf(
     (['league', 'playoffs', 'cup', 'europe'] as const).filter(
       (choice) =>
@@ -378,12 +391,22 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
             <Text>{noneYet}</Text>
           ) : (
             <ClubMeetingsCard
-              meetings={meetings}
+              meetings={cardMeetings}
               now={now}
               page={query.page}
               pageHref={pageHref}
               pages={pages}
-              upcoming={upcoming}
+              upcoming={cardUpcoming}
+              venue={venue}
+              venueHrefs={
+                hasVenueChoice
+                  ? {
+                      all: clubAddress(competition, 'all'),
+                      away: clubAddress(competition, 'away'),
+                      home: clubAddress(competition, 'home'),
+                    }
+                  : undefined
+              }
             />
           )}
         </Page.Cell>
