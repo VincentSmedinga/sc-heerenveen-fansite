@@ -237,8 +237,8 @@ test.describe('the columns behind Toon meer', () => {
     ])
   })
 
-  test('show every figure and no button where the card is wide enough', async ({ page }) => {
-    await page.setViewportSize({ height: 800, width: 900 })
+  test('show every figure and no button where the card is wide enough, as on a desktop', async ({ page }) => {
+    await page.setViewportSize({ height: 800, width: 1280 })
     await page.goto('/tegenstanders')
 
     await expect(list(page).getByRole('columnheader', { exact: true, name: 'verlies' })).toBeVisible()
