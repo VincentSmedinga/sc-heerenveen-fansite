@@ -102,4 +102,21 @@ describe('donut-chart.css', () => {
     expect(typography).toMatch(/--hf-figure-large-font-size: [\d.]+rem;/u)
     expect(declarationsOf('.hf-donut-chart-name')).toMatch(/font-size: var\(--hf-meta-font-size\)/u)
   })
+
+  it('sizes the ring of a scaled group by its own scale and puts the titles and the centres on one line', () => {
+    expect(declarationsOf('.hf-donut-chart-group-scaled > .hf-donut-chart')).toMatch(
+      /grid-row: span 2;\s*grid-template-rows: subgrid/u,
+    )
+    expect(declarationsOf('.hf-donut-chart-group-scaled > .hf-donut-chart > .hf-donut-chart-title')).toMatch(
+      /grid-row: 1/u,
+    )
+
+    const plot = declarationsOf('.hf-donut-chart-group-scaled > .hf-donut-chart > .hf-donut-chart-plot')
+
+    expect(plot).toMatch(/grid-row: 2/u)
+    expect(plot).toMatch(/inline-size: calc\(var\(--hf-donut-scale, 1\) \* 100%\)/u)
+    expect(plot).toMatch(/place-self: center/u)
+    // The columns are those of any group: the scale changes the ring, not the column.
+    expect(css).not.toMatch(/\.hf-donut-chart-group-scaled \{[^}]*grid-template-columns/u)
+  })
 })

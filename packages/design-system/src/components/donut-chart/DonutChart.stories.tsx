@@ -52,7 +52,7 @@ const meta = preview.meta({
           'Een donutdiagram laat zien hoe een totaal over een paar delen is verdeeld, zoals de aanmeldingen over de maanden van een half jaar. Het totaal staat in het gat, en bij elke plak staan de naam en de waarde als tekst.',
           'De plakken zijn groen voor iets positiefs, rood voor iets negatiefs en grijs voor gelijk, zoals de uitkomst van een wedstrijd. De pagina bepaalt welke getallen positief zijn: het onderdeel kent de betekenis niet.',
           'Met `ranked` gaan de plakken van goed naar slecht en krijgen de uitersten de sterkste kleur. Een `DonutChart.Swatch` geeft een rij van een tabel precies de kleur van de plak.',
-          'Meer diagrammen naast elkaar zet je in een `DonutChart.Group`.',
+          'Meer diagrammen naast elkaar zet je in een `DonutChart.Group`. Tellen de diagrammen hetzelfde, zoals de doelpunten voor en tegen, kies dan `scaled`: elke ring is zo groot als zijn totaal, zodat je het verschil in één blik ziet.',
           'Het diagram is een plaatje van getallen en daarom verborgen voor een schermlezer: zet dezelfde getallen in een `DataTable` ernaast, want het diagram is nooit de enige plek voor de getallen.',
         ].join('\n'),
       },
@@ -271,4 +271,29 @@ const pair = (maxInlineSize: string) => () => (
 export const SmallNextToLarge = meta.story({
   name: 'Een klein diagram naast een groter, elk midden in zijn eigen kolom',
   render: pair('24rem'),
+})
+
+const scaledCard = (positive: number[], negative: number[], maxInlineSize: string) => () => (
+  <Card style={{ maxInlineSize }} surface="warm">
+    <Heading level={2}>Doelpunten per kwartier</Heading>
+    <DonutChart.Group scaled>
+      <DonutChart slices={slicesOf(positive)} title="Voor" tone="positive" />
+      <DonutChart slices={slicesOf(negative)} title="Tegen" tone="negative" />
+    </DonutChart.Group>
+  </Card>
+)
+
+export const Scaled = meta.story({
+  name: 'Twee diagrammen met een verschillend totaal, de ring van het grootste totaal is de grootste',
+  render: scaledCard([6, 8, 7, 9, 5, 10], [2, 3, 1, 4, 2, 1], '40rem'),
+})
+
+export const ScaledEmpty = meta.story({
+  name: 'Een diagram zonder totaal houdt een ring die nog te lezen is',
+  render: scaledCard([6, 8, 7, 9, 5, 10], [0, 0, 0, 0, 0, 0], '40rem'),
+})
+
+export const ScaledNarrow = meta.story({
+  name: 'Onder elkaar op een smalle plek houdt elke ring zijn grootte naar verhouding',
+  render: scaledCard([6, 8, 7, 9, 5, 10], [2, 3, 1, 4, 2, 1], '20rem'),
 })

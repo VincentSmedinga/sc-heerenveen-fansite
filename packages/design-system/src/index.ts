@@ -64,7 +64,12 @@ export type { DisclosureProps } from './components/disclosure/Disclosure'
 export { DiscussionItem } from './components/discussion-item/DiscussionItem'
 export type { DiscussionItemProps } from './components/discussion-item/DiscussionItem'
 export { DonutChart, donutChartTones } from './components/donut-chart/DonutChart'
-export type { DonutChartProps, DonutChartSlice, DonutChartTone } from './components/donut-chart/DonutChart'
+export type {
+  DonutChartGroupProps,
+  DonutChartProps,
+  DonutChartSlice,
+  DonutChartTone,
+} from './components/donut-chart/DonutChart'
 export { Emphasis } from './components/emphasis/Emphasis'
 export { ErrorSummary } from './components/error-summary/ErrorSummary'
 export type { ErrorSummaryError, ErrorSummaryProps } from './components/error-summary/ErrorSummary'

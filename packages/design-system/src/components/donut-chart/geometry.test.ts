@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { pointAt, slicePath, slicesOf, spreadAngles } from './geometry'
+import { pointAt, scaleFloor, scalesOf, slicePath, slicesOf, spreadAngles } from './geometry'
 
 describe('slicesOf', () => {
   it('gives each value a slice as wide as its share of 360 degrees, from the top and clockwise', () => {
@@ -93,5 +93,33 @@ describe('spreadAngles', () => {
   it('takes one angle or none as they are', () => {
     expect(spreadAngles([], 40)).toEqual([])
     expect(spreadAngles([10], 40)).toEqual([10])
+  })
+})
+
+describe('scalesOf', () => {
+  it('gives the largest total the full size and the others a diameter by the root of their share', () => {
+    expect(scalesOf([100, 50])).toEqual([1, Math.sqrt(0.5)])
+    expect(scalesOf([100, 50])[1]).toBeCloseTo(0.707, 3)
+    expect(scalesOf([4, 9])[0]).toBeCloseTo(2 / 3, 10)
+  })
+
+  it('gives equal totals equal rings', () => {
+    expect(scalesOf([12, 12])).toEqual([1, 1])
+  })
+
+  it('never goes under half the largest ring, for a much smaller total or for none', () => {
+    expect(scalesOf([100, 10])).toEqual([1, scaleFloor])
+    expect(scalesOf([100, 0])).toEqual([1, 0.5])
+    expect(scalesOf([0, 100])).toEqual([0.5, 1])
+    expect(scalesOf([100, -5])).toEqual([1, 0.5])
+  })
+
+  it('gives every ring the same size when no ring has a total', () => {
+    expect(scalesOf([0, 0])).toEqual([1, 1])
+    expect(scalesOf([])).toEqual([])
+  })
+
+  it('scales more than two rings against the largest', () => {
+    expect(scalesOf([16, 4, 16])).toEqual([1, 0.5, 1])
   })
 })
