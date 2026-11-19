@@ -32,6 +32,7 @@ describe('DataTable.More', () => {
   it('sends the whole table without JavaScript: no data-ready, so the CSS hides nothing', () => {
     const html = renderToStaticMarkup(table)
 
+    expect(html).not.toContain('<button')
     expect(html).not.toContain('data-ready')
     expect(html).not.toContain('data-open')
     expect(html).toContain('hf-more-column')

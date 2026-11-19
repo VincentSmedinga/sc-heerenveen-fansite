@@ -1,5 +1,6 @@
-const legend = /<span class="hf-table-legend[^"]*">((?:<span class="hf-table-legend-item">[\s\S]*?<\/span>)+)<\/span>/gu
-const item = /<span class="hf-table-legend-item">([\s\S]*?)<\/span>/gu
+const legend =
+  /<span class="hf-table-legend[^"]*">((?:<span class="hf-table-legend-item[^"]*">[\s\S]*?<\/span>)+)<\/span>/gu
+const item = /<span class="hf-table-legend-item[^"]*">([\s\S]*?)<\/span>/gu
 
 /**
  * The legends under the tables in some HTML, each as the words of its columns in order, such

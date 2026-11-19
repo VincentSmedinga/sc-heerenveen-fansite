@@ -11,11 +11,11 @@ import { classNames } from '../classNames'
  * behind the button, and the legend that goes with them (`tableLegend` gives a `more` column an
  * item that goes with it). It is written as `DataTable.More`.
  *
- * Where the room is, the columns are always there and so is nothing of the button. The room is
- * that of the block itself, not of the screen, as with the columns that fold (see
- * data-table.css), so it is right in a narrow column on a wide screen too. Without JavaScript
- * every column is there and the button is not, because a button that does nothing is worse than
- * a table that is a little too tight: the CSS only hides the columns once the script has run.
+ * Where the room is, the columns are always there and the button is hidden. The room is that of
+ * the block itself, not of the screen, as with the columns that fold (see data-table.css), so
+ * it is right in a narrow column on a wide screen too. Without JavaScript every column is there
+ * and so is no button: the server sends none, because a button that does nothing is worse than
+ * a table that is a little too tight, and the CSS only hides columns once the script has run.
  * The button says whether the columns are shown with `aria-expanded`, and the hidden columns
  * are gone for a screen reader as well, so the table reads as the table that is shown.
  */
@@ -49,16 +49,18 @@ export const MoreColumns = ({
       data-open={open ? '' : undefined}
       data-ready={ready ? '' : undefined}
     >
-      <Button
-        appearance="soft"
-        aria-expanded={open}
-        className="hf-data-table-more-button"
-        onClick={() => setOpen((value) => !value)}
-        size="small"
-        type="button"
-      >
-        {open ? less : more}
-      </Button>
+      {ready && (
+        <Button
+          appearance="soft"
+          aria-expanded={open}
+          className="hf-data-table-more-button"
+          onClick={() => setOpen((value) => !value)}
+          size="small"
+          type="button"
+        >
+          {open ? less : more}
+        </Button>
+      )}
       {children}
     </div>
   )
