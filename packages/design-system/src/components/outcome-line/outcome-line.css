@@ -1,10 +1,12 @@
 /*
- * The line of the results: a thin bar next to the text: the whole width on a narrow screen,
- * with the text under it, and a fixed width on a wide one. The bar is the `OutcomeBar` with a lower height.
+ * The line of the results: a thin bar next to the text: the whole width in a narrow column,
+ * with the text under it, and a fixed width in a wide one. The line is the container; the bar asks it. The bar is the `OutcomeBar` with a lower height.
  */
 
 @layer hf.components {
   .hf-outcome-line {
+    container-name: hf-outcome-line;
+    container-type: inline-size;
     align-items: center;
     gap: var(--hf-space-s) var(--hf-space-m);
     display: flex;
@@ -16,8 +18,11 @@
     block-size: 0.625rem;
     flex: none;
     inline-size: 100%;
+  }
 
-    @media (width >= 40rem) {
+  /* The bar of 10rem and a short text side by side need 40rem. */
+  @container hf-outcome-line (inline-size >= 40rem) {
+    .hf-outcome-line-bar {
       inline-size: 10rem;
     }
   }

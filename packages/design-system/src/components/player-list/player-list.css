@@ -1,9 +1,15 @@
 /*
  * A list of players: the name, and under it a quiet line with the years. A row never breaks
- * across the two columns of a wide screen.
+ * across the two columns of a wide column. The block around the list is the container, as a list
+ * can't ask for the width it lays out its own columns in.
  */
 
 @layer hf.components {
+  .hf-player-list-container {
+    container-name: hf-player-list;
+    container-type: inline-size;
+  }
+
   .hf-player-list {
     list-style: none;
     margin: 0;
@@ -25,7 +31,8 @@
     font-size: var(--hf-meta-font-size);
   }
 
-  @media (width >= 52rem) {
+  /* Two names of about 13rem and a gap of 2rem need 28rem; 32rem leaves room for a long name. */
+  @container hf-player-list (inline-size >= 32rem) {
     .hf-player-list {
       column-gap: var(--hf-space-xl);
       columns: 2;
