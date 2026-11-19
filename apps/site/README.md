@@ -498,6 +498,7 @@ De nul gehouden toont één zin, met het aantal keren dikgedrukt, die ook de laa
 Elke kaart eindigt met een link naar haar grote kaart voor hetzelfde seizoen: `#doelpuntenmakers`, `#assists` en `#minuten` op `/spelers/cijfers`, en `#de-nul-gehouden` op `/wedstrijden/cijfers`.
 Een kaart zonder gegevens staat er niet; Assists en Minuten alleen in een seizoen met een verslag dat klaar is, en een verslag dat niet te lezen is, laat alleen die twee kaarten weg.
 `/spelers` heeft één kaart en dus geen balk "Op deze pagina:": het slot `app/@shortcuts/spelers` is leeg.
+De pagina van een speler heeft die balk wel (`playerShortcutsOf` in `src/player-shortcuts.ts`, `app/@shortcuts/spelers/[seizoen]`): korte links naar Per seizoen, Loopbaan, de grafiek per seizoen, Wanneer hij scoort en Record, voor de kaarten die er voor deze speler zijn; met minder dan twee links is er geen balk.
 
 De cijfers van de spelers staan op `/spelers/cijfers` (#1218), met `/spelers/cijfers/<seizoen>` en de route `app/spelers/cijfers/kies`, via `playerFiguresPath` in `src/season-page.ts`.
 `cijfers` is een gereserveerd adres onder `/spelers` (`reservedPlayerSlugs`), net als `kies`, `overzicht` en `zoeken`.
@@ -578,6 +579,7 @@ Het is een tabel met elke club waartegen sc Heerenveen speelde, van A tot Z, met
 Elke clubnaam is een link naar `/tegenstanders/<club>`, waar `<club>` de `slug` van de club is (zie de README van `packages/db`).
 De server stuurt de tabel in de volgorde van A tot Z zonder knoppen om te sorteren, en deze lijst heeft geen paginering.
 Met JavaScript is elke kolom sorteerbaar, zoals elke lijst op de site; de kolom met het doelsaldo sorteert op het doelsaldo, dus de club waartegen het best ging, komt bovenaan.
+Op een telefoon staat onder de kop de balk "Op deze pagina:" met vier links, naar Alle tegenstanders, Het makkelijkst, Het moeilijkst en Laatste overwinning als die kaart er is (`opponentsShortcutsOf` in `src/opponents.ts`, `app/@shortcuts/tegenstanders`).
 Een derde klik op dezelfde kolom zet de lijst terug in A tot Z.
 De zes cijferkolommen hebben een pictogram met het hele woord voor een schermlezer, en een regel onder de tabel legt ze uit.
 De punten (3 per winst, 1 per gelijkspel) en het doelsaldo (met een teken: `+18`, `−2`, `0`) staan bij beide keuzes, en tellen alle wedstrijden die de lijst telt, de beker ook (`pointsOf` in `src/opponents.ts`).

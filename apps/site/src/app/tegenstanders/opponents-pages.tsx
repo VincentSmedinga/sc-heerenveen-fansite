@@ -40,6 +40,7 @@ import {
   meetingsOf,
   meetingsOnPage,
   opponentsPath,
+  opponentsShortcutsOf,
   parseVenue,
   seasonsOf,
   stadiumViewsOf,
@@ -461,6 +462,28 @@ export async function ClubPage({ searchParams, slug }: { searchParams: Promise<S
       </Page.Main>
     </>
   )
+}
+
+/**
+ * The bar of the page Tegenstanders (see `opponentsShortcutsOf`). A choice that the page
+ * doesn't know is the page "niet gevonden", and a page that can't read its data shows the
+ * error page: neither has cards to jump to, so there is no bar. The readings are the page's
+ * own, cached, so this costs no query. The links stay on the page, so they keep the choice.
+ */
+export async function opponentsShortcuts({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const competition = parseCompetition((await searchParams)[competitionParam])
+
+  if (competition === undefined) {
+    return null
+  }
+
+  const [loaded, venueLoaded] = await Promise.all([loadClubList(), loadVenueRecords(competition)])
+
+  if (loaded.kind === 'error' || venueLoaded.kind === 'error') {
+    return null
+  }
+
+  return <Page.Shortcuts items={opponentsShortcutsOf(loaded.lastWins !== undefined)} label="Op deze pagina:" />
 }
 
 /** The label of a sidebar from the names of its cards: "Het nieuws, het stadion en de bron". */

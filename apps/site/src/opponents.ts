@@ -155,6 +155,21 @@ export function clubShortcutsOf({
   ]
 }
 
+/**
+ * The links in the bar "Op deze pagina:" of the page Tegenstanders, in the order of the cards
+ * on a phone: the list, the two rankings, and Laatste overwinning when the page has the card
+ * (it needs the clubs of the Eredivisie, see `LastWinCard`). The ids are those of the headings
+ * in `OpponentViews.tsx` (a test checks it).
+ */
+export function opponentsShortcutsOf(hasLastWin: boolean): PageShortcutsItem[] {
+  return [
+    { href: '#alle-tegenstanders', label: 'Alle tegenstanders' },
+    { href: '#het-makkelijkst', label: 'Het makkelijkst' },
+    { href: '#het-moeilijkst', label: 'Het moeilijkst' },
+    ...(hasLastWin ? [{ href: '#laatste-overwinning', label: 'Laatste overwinning' }] : []),
+  ]
+}
+
 /** The id of the card "Toeschouwers tegen <club>", for the bar "Op deze pagina". */
 export const clubAttendanceId = 'toeschouwers'
 

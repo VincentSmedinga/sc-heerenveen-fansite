@@ -6732,3 +6732,20 @@
   Een rij die overal van oud naar nieuw loopt, leest overal hetzelfde.
 - **Alternatieven:** de rij van nieuw naar oud, passend bij de lijst maar anders dan Vorm en de rij op de pagina van een club; een korte titel zoals "Daar", die niet zegt hoeveel wedstrijden het zijn.
 - **Later:** vervangt in _De Voorbeschouwing toont de onderlinge wedstrijden in een kaart die de plaats van het veld noemt_ (16 november 2026) de kop "De laatste vijf daar" boven de laatste wedstrijden.
+
+## De pagina Tegenstanders en de pagina van een speler hebben een balk met links naar hun kaarten
+
+- **Datum:** 19 november 2026
+- **Besluit:** de balk "Op deze pagina:" op Tegenstanders heeft vier links, in de volgorde van de kaarten op een telefoon: Alle tegenstanders, Het makkelijkst, Het moeilijkst, Laatste overwinning (#1439).
+  Alle tegenstanders krijgt ook een link, al staat de tabel bovenaan.
+  De link naar Laatste overwinning valt weg als de pagina die kaart niet heeft.
+- **Waarom:** de balk dekt dan elke kaart van de pagina en geeft een weg terug naar de lange tabel.
+- **Alternatieven:** alleen de drie kaarten onder de tabel.
+
+- **Datum:** 19 november 2026
+- **Besluit:** de balk op de pagina van een speler gebruikt korte labels, in de volgorde van de kaarten op een telefoon: Per seizoen, Loopbaan, de titel van de grafiek per seizoen, Wanneer hij scoort, Record.
+  Een kaart die er voor deze speler niet is, laat zijn link weg.
+  Blijven er minder dan twee links over, dan is er geen balk.
+- **Waarom:** korte labels breken niet af op een telefoon, en een link naar een kaart die er niet is, brengt een bezoeker nergens heen.
+  De balk van de pagina van een club doet hetzelfde.
+- **Alternatieven:** de volledige koptekst van elke kaart (bijvoorbeeld Loopbaan bij sc Heerenveen); elke link altijd tonen.
