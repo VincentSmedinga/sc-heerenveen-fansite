@@ -107,6 +107,30 @@
     max-inline-size: calc(var(--hf-donut-small-size, 7) * 1rem);
   }
 
+  /*
+   * A scaled group has the rings as large as their totals (the component sets the size of each
+   * as --hf-donut-scale, a share of the largest ring). Each chart is two rows of the group:
+   * the title and the ring. So the titles stand on one line, the rings in a row share one
+   * height, and a smaller ring sits in the middle of it, on the same line of centres. The
+   * columns and the gaps are those of any group: only the ring changes size, not the column.
+   */
+  .hf-donut-chart-group-scaled > .hf-donut-chart {
+    grid-row: span 2;
+    grid-template-rows: subgrid;
+    row-gap: var(--hf-space-xs);
+  }
+
+  .hf-donut-chart-group-scaled > .hf-donut-chart > .hf-donut-chart-title {
+    align-self: end;
+    grid-row: 1;
+  }
+
+  .hf-donut-chart-group-scaled > .hf-donut-chart > .hf-donut-chart-plot {
+    grid-row: 2;
+    inline-size: calc(var(--hf-donut-scale, 1) * 100%);
+    place-self: center;
+  }
+
   .hf-donut-chart-drawing {
     block-size: 100%;
     inline-size: 100%;

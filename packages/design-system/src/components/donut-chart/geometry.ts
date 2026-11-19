@@ -134,3 +134,20 @@ export function spreadAngles(angles: readonly number[], gap: number): number[] {
 
   return result
 }
+
+/** The smallest a ring of a scaled group is, as a share of the diameter of the largest. */
+export const scaleFloor = 0.5
+
+/**
+ * The size of each ring of a scaled group, as a share of the diameter of the largest ring,
+ * from the totals of the rings. The area of a ring follows its total, so the diameter is the
+ * square root of the share of the largest total: half the total is a ring of about 71% of the
+ * width. No ring is smaller than `scaleFloor`, so the names round it and the total in its hole
+ * stay readable, also for a total of zero. Without a total at all every ring is as large as the
+ * others.
+ */
+export function scalesOf(totals: readonly number[]): number[] {
+  const largest = Math.max(0, ...totals)
+
+  return totals.map((total) => (largest === 0 ? 1 : Math.max(scaleFloor, Math.sqrt(Math.max(0, total) / largest))))
+}

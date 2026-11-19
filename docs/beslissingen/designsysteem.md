@@ -1070,6 +1070,7 @@
   De lijn tussen de plakken is niet meer de kleur van het vlak maar een eigen rol, `--hf-colour-border-chart-slice`; de rest blijft.
 - **Later:** zie _Een donutdiagram heeft een plak per uitslag, en de tabel is de legenda_ (2 november 2026).
   Elke plak kan een eigen kleur hebben, ook het grijs van een gelijkspel, en de tekst rond de ring kan ontbreken; de tekst bij elke plak geldt nu alleen voor een diagram met `labels`, dat de standaard blijft.
+- **Later:** zie _Twee donutdiagrammen in één groep zijn zo groot als hun totaal, met de prop `scaled`_ (19 november 2026): de diagrammen van een groep zijn niet meer altijd even groot.
 
 ## Een pagina in Storybook is kort, met het voorbeeld en een story per variant
 
@@ -4027,3 +4028,27 @@
   Dat besluit noemt de kaart als voorbeeld, maar vraagt ook eerst of een element zijn eigen breedte nodig heeft: een kaart kan dat niet zonder zijn opbouw te veranderen.
 - **Alternatieven:** de wrapper (raakt elke pagina en `hf-flow`); de ouder als container (verkeerde breedte); `cqi` of een percentage voor de opvulling (ook die verwijzen naar de ouder, niet naar de kaart).
 - **Later:** maakt in _Een regel over de ruimte van het component is een container query, een regel over het scherm een media query_ de kaart met minder binnenruimte tot een uitzondering: die regel blijft een media query tot een kaart zijn eigen breedte kan vragen.
+
+## Twee donutdiagrammen in één groep zijn zo groot als hun totaal, met de prop `scaled`
+
+- **Datum:** 19 november 2026
+- **Besluit:** `DonutChart.Group` krijgt de prop `scaled`: de diagrammen in de groep zijn dan zo groot als hun totaal (#1428).
+  De groep rekent de grootte uit de plakken van zijn diagrammen (`scalesOf` in `geometry.ts`); de pagina rekent niets.
+  - **Naar oppervlak:** de diameter van een ring is de wortel van de verhouding tussen zijn totaal en het grootste totaal.
+    Het diagram met het grootste totaal is zo breed als anders, en bij het halve totaal is de ring ongeveer 71% zo breed.
+  - **Een ondergrens van de helft** van de diameter van het grootste diagram (`scaleFloor`), ook bij een totaal van nul, zodat de namen rond de ring en het totaal in het gat leesbaar blijven.
+    Bij twee gelijke totalen, of bij twee totalen van nul, zijn de ringen even groot.
+  - **De groep geeft elk diagram de eigenschap `--hf-donut-scale`**, een deel van de grootste ring, en `donut-chart.css` maakt het blok met de ring zo breed (`inline-size: calc(var(--hf-donut-scale, 1) * 100%)`).
+    De kolommen en de ruimte ertussen en eronder zijn die van elke groep: alleen de ring verandert, niet de kolom.
+  - **De middelpunten staan op één lijn en de titels op één regel erboven.**
+    Elk diagram is twee rijen van de groep (`grid-template-rows: subgrid`), de titel en de ring, zodat de rijen gedeeld worden; een kleinere ring staat midden in de ruimte van zijn rij.
+    Staan de diagrammen onder elkaar, dan houdt elke ring zijn grootte naar verhouding.
+  - **De diagrammen blijven `aria-hidden`** en de tabel blijft de weergave voor de schermlezer: de grootte is niet het enige wat iets zegt, want de totalen staan in het gat en in de tabel (1.4.1, 1.3.1).
+  - **Eerste gebruik:** de kaart Doelpunten per kwartier (de doelpunten voor en tegen).
+    De kaart Hoe vaak welke uitslag verandert niet: een diagram naast een klein diagram met het doelsaldo zijn twee soorten getallen, en een groep met een `small`-diagram is geen groep om te schalen.
+- **Waarom:** twee ringen van één grootte laten het verschil in totaal alleen in de cijfers zien.
+  Schalen naar oppervlak is eerlijk: dubbel zoveel doelpunten laat een ring met twee keer zoveel oppervlak zien, niet vier keer.
+  De ondergrens houdt de tekst rond de ring leesbaar, die niet meeschaalt.
+  De regel in de groep houdt elke kaart gelijk en laat de pagina's niets uitrekenen.
+- **Alternatieven:** schalen naar diameter (twee keer zoveel doelpunten lijkt vier keer zoveel); geen ondergrens (een kleine ring krijgt geen ruimte voor zijn namen); de onderkanten op één lijn (de titels komen dan op verschillende hoogtes); de regel in de kaart zelf (elke kaart rekent zelf).
+- **Later:** vult _Een donutdiagram is een eigen onderdeel in SVG, met een positieve en een negatieve kleur_ (26 oktober 2026) aan: een groep met `scaled` heeft diagrammen van verschillende grootte.

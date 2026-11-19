@@ -1,9 +1,20 @@
-import type { ComponentPropsWithoutRef, CSSProperties } from 'react'
+import { Children, cloneElement, type ComponentPropsWithoutRef, type CSSProperties, isValidElement } from 'react'
 
 import type { ChartTone } from '../chart/tones'
 
 import { classNames } from '../classNames'
-import { bare, drawing, labelDistance, labelGap, pointAt, ring, slicePath, slicesOf, spreadAngles } from './geometry'
+import {
+  bare,
+  drawing,
+  labelDistance,
+  labelGap,
+  pointAt,
+  ring,
+  scalesOf,
+  slicePath,
+  slicesOf,
+  spreadAngles,
+} from './geometry'
 
 /** The tones a donut chart can have: a positive one and a negative one. */
 export const donutChartTones = ['positive', 'negative'] as const
@@ -255,14 +266,48 @@ const Swatch = ({
 // The name in React's developer tools and in the code examples in Storybook.
 Swatch.displayName = 'DonutChart.Swatch'
 
+/** The total of a chart: the sum of its slices; a value of zero or less adds nothing. */
+const totalOf = (slices: readonly DonutChartSlice[]) => slices.reduce((sum, slice) => sum + Math.max(0, slice.value), 0)
+
+export type DonutChartGroupProps = ComponentPropsWithoutRef<'div'> & {
+  /**
+   * Makes each ring as large as its total, so charts of two or more totals can be compared at a
+   * glance: the ring of the largest total is the largest, and the area of the others follows
+   * their total, down to a ring that is still large enough to read. The group works the sizes
+   * out from the slices of its charts, so a page gives nothing more. The centres of the rings
+   * are on one line and the titles stand on one line above them. Choose it for charts that
+   * count the same thing, such as the goals for and against; leave it out for charts of
+   * numbers that cannot be compared, such as scores and goals, which is a group with a small
+   * chart.
+   */
+  scaled?: boolean
+}
+
 /**
  * Charts next to each other when there is room, and under each other when there is not: a
  * phone shows them under each other. It only works around DonutChart elements, so it is written
  * as DonutChart.Group.
  */
-const Group = ({ className, ...props }: ComponentPropsWithoutRef<'div'>) => (
-  <div {...props} className={classNames('hf-donut-chart-group', className)} />
-)
+const Group = ({ children, className, scaled = false, ...props }: DonutChartGroupProps) => {
+  const charts = Children.toArray(children)
+  const scales = scaled
+    ? scalesOf(charts.map((chart) => (isValidElement<DonutChartProps>(chart) ? totalOf(chart.props.slices) : 0)))
+    : []
+
+  return (
+    <div {...props} className={classNames('hf-donut-chart-group', scaled && 'hf-donut-chart-group-scaled', className)}>
+      {scaled
+        ? charts.map((chart, index) =>
+            isValidElement<DonutChartProps>(chart)
+              ? cloneElement(chart, {
+                  style: { ...chart.props.style, '--hf-donut-scale': scales[index] } as CSSProperties,
+                })
+              : chart,
+          )
+        : children}
+    </div>
+  )
+}
 
 // The name in React's developer tools and in the code examples in Storybook.
 Group.displayName = 'DonutChart.Group'

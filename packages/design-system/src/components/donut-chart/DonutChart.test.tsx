@@ -372,3 +372,81 @@ describe('DonutChart.Group', () => {
     expect(container.querySelectorAll('.hf-donut-chart')).toHaveLength(1)
   })
 })
+
+describe('DonutChart.Group scaled', () => {
+  const chart = (values: number[], title: string) => (
+    <DonutChart slices={values.map((value, index) => ({ label: `s${index}`, value }))} title={title} tone="positive" />
+  )
+  const scaleOf = (element: Element) => (element as HTMLElement).style.getPropertyValue('--hf-donut-scale')
+
+  it('gives each chart its size from its own slices, the largest total the full size', () => {
+    const { container } = render(
+      <DonutChart.Group scaled>
+        {chart([10, 10], 'Voor')}
+        {chart([5, 5], 'Tegen')}
+      </DonutChart.Group>,
+    )
+    const [first, second] = [...container.querySelectorAll('.hf-donut-chart')]
+
+    expect(container.firstElementChild?.className).toBe('hf-donut-chart-group hf-donut-chart-group-scaled')
+    expect(Number(scaleOf(first!))).toBe(1)
+    expect(Number(scaleOf(second!))).toBeCloseTo(Math.SQRT1_2, 10)
+  })
+
+  it('gives equal totals the same size', () => {
+    const { container } = render(
+      <DonutChart.Group scaled>
+        {chart([3, 4], 'Voor')}
+        {chart([7], 'Tegen')}
+      </DonutChart.Group>,
+    )
+
+    expect([...container.querySelectorAll('.hf-donut-chart')].map(scaleOf)).toEqual(['1', '1'])
+  })
+
+  it('gives a chart with no total the floor and, with two empty charts, the same size', () => {
+    const empty = render(
+      <DonutChart.Group scaled>
+        {chart([8], 'Voor')}
+        {chart([0, 0], 'Tegen')}
+      </DonutChart.Group>,
+    )
+
+    expect([...empty.container.querySelectorAll('.hf-donut-chart')].map(scaleOf)).toEqual(['1', '0.5'])
+
+    const none = render(
+      <DonutChart.Group scaled>
+        {chart([0], 'Voor')}
+        {chart([0], 'Tegen')}
+      </DonutChart.Group>,
+    )
+
+    expect([...none.container.querySelectorAll('.hf-donut-chart')].map(scaleOf)).toEqual(['1', '1'])
+  })
+
+  it('keeps the style a chart has, and leaves the charts hidden from a screen reader', () => {
+    const { container } = render(
+      <DonutChart.Group scaled>
+        <DonutChart slices={[{ label: 'a', value: 2 }]} style={{ marginBlockStart: '1rem' }} />
+        {chart([8], 'Tegen')}
+      </DonutChart.Group>,
+    )
+    const first = container.querySelector('.hf-donut-chart') as HTMLElement
+
+    expect(first.style.marginBlockStart).toBe('1rem')
+    expect(first.getAttribute('aria-hidden')).toBe('true')
+    expect(first.style.getPropertyValue('--hf-donut-scale')).toBe('0.5')
+  })
+
+  it('sets no size without the prop, so a group is as it was', () => {
+    const { container } = render(
+      <DonutChart.Group>
+        {chart([10], 'Voor')}
+        {chart([5], 'Tegen')}
+      </DonutChart.Group>,
+    )
+
+    expect(container.firstElementChild?.className).toBe('hf-donut-chart-group')
+    expect(container.querySelector('.hf-donut-chart[style]')).toBeNull()
+  })
+})

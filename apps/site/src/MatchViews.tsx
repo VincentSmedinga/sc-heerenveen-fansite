@@ -369,7 +369,7 @@ export function GoalsPerQuarterCard({
         <Text>We hebben nog geen doelpunten met een minuut van dit seizoen. Kijk straks nog eens.</Text>
       ) : (
         <>
-          <DonutChart.Group>
+          <DonutChart.Group scaled>
             <DonutChart slices={slices(scored)} title="Voor" tone="positive" />
             <DonutChart slices={slices(conceded)} title="Tegen" tone="negative" />
           </DonutChart.Group>
