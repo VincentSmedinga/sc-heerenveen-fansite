@@ -1,4 +1,5 @@
 import type { StandingsCompetition } from '@fansite/db/schema'
+import type { CSSProperties } from 'react'
 
 import { BarChart, Card, DataTable, Disclosure, Heading, tableColumns, tableLegend, Text } from '@fansite/design-system'
 
@@ -19,23 +20,30 @@ const tickPlaces = [1, 5, 10, 15, 18] as const
 
 /**
  * The line of the chart. The chart grows upwards, and place 1 is the top, so a place is turned
- * into a height: place 1 is the highest (`max`) and place 18 the lowest (1). A season without a
- * row is a gap (`null`). A table with more clubs than 18 stretches the scale. A season in
- * another league than the Eredivisie is not on the line (`values` has a gap there): it is a
- * place of its own on the same scale (`apart`), so it is not read as a place in the Eredivisie.
+ * into a height: place 1 is the highest (`max`) and place 18 the lowest of the Eredivisie. A
+ * season without a row is a gap (`null`). A table with more clubs than 18 stretches the scale.
+ * A season in another league than the Eredivisie goes in a band under the Eredivisie, after a
+ * gap of one place, with its own places from the top: it is not read as a place in the
+ * Eredivisie, and the line drops into it. Those seasons are `apart`, a dotted stretch of the
+ * line, and the lowest place the band needs gets a number at the side (`below` places high).
+ * `textOf` is the number at the side for a height, in the league the height is in.
  */
 export function lineOf(places: readonly FinalPlace[]) {
-  const inEredivisie = (row: FinalPlace['row']) => (row?.competition === 'Eredivisie' ? row.position : null)
-  const elsewhere = (row: FinalPlace['row']) =>
-    row === undefined || row.competition === 'Eredivisie' ? null : row.position
-  const line = lineOfPositions(places.map(({ row }) => row?.position ?? null))
-  const height = (position: null | number) => (position === null ? null : line.max + 1 - position)
+  const outside = places.map(({ row }) => (row === undefined || row.competition === 'Eredivisie' ? null : row.position))
+  const below = Math.max(0, ...outside.map((position) => position ?? 0))
+  const gap = below === 0 ? 0 : 1
+  const top = Math.max(clubsInTable, ...places.map(({ row }) => (row?.competition === 'Eredivisie' ? row.position : 0)))
+  const max = below + gap + top
+  const eredivisie = (position: number) => max + 1 - position
+  const eerste = (position: number) => below + 1 - position
 
   return {
-    apart: places.map(({ row }) => height(elsewhere(row))),
-    max: line.max,
-    ticks: line.ticks,
-    values: places.map(({ row }) => height(inEredivisie(row))),
+    apart: outside.map((position) => (position === null ? null : eerste(position))),
+    below,
+    max,
+    textOf: (height: number) => String(height > below + gap ? max + 1 - height : below + 1 - height),
+    ticks: [...tickPlaces.filter((place) => place <= top).map(eredivisie), ...(below === 0 ? [] : [eerste(below)])],
+    values: places.map(({ row }) => (row?.competition === 'Eredivisie' ? eredivisie(row.position) : null)),
   }
 }
 
@@ -58,9 +66,6 @@ export function lineOfPositions(positions: readonly (null | number)[]) {
   }
 }
 
-/** The text of a height on the axis: the place it stands for. */
-const placeOfHeight = (max: number) => (height: number) => String(max + 1 - height)
-
 /** The label of a season on the axis: `10/11` for `2010/11`. */
 const shortSeason = (season: string) => season.slice(2)
 
@@ -79,12 +84,12 @@ const legend = tableLegend([...figureColumns.slice(0, 3), { ...tableColumns.goal
  * Disclosure, which works without JavaScript, shows the rest. A season is a link to its
  * matches. The season going on is marked "nu". The place is that of the league we played in
  * whatever the choice: the Eredivisie, and for a season in the Eerste divisie the table says
- * so ("3 (Eerste divisie)"), the chart shows it as a hollow dot off the line, and a line under
- * the table names those seasons. We know the place from the first season with a table
- * (`places`); a season without one has a dash and "geen stand" for a screen reader, and a line
- * says since when we know it. The figures follow the choice of competition (`tallies`, see
- * `seasonTalliesOf`). `seasons` are the seasons with matches, the newest first. Without a
- * season there is no card.
+ * so ("3 (Eerste divisie)"), the chart shows it as a dotted stretch of the line in a band
+ * under the 18, and a line under the table names those seasons. We know the place from the
+ * first season with a table (`places`); a season without one has a dash and "geen stand" for a
+ * screen reader, and a line says since when we know it. The figures follow the choice of
+ * competition (`tallies`, see `seasonTalliesOf`). `seasons` are the seasons with matches, the
+ * newest first. Without a season there is no card.
  */
 export function SeasonBySeasonCard({
   choice,
@@ -127,7 +132,7 @@ export function SeasonBySeasonCard({
     `${what} van sc Heerenveen: de plek in de competitie waarin we speelden, de wedstrijden gewonnen, gelijk en verloren en de doelpunten voor en tegen${choice === 'all' ? '' : `, in ${competitionWords(choice)}`}`
   const recent = seasons.slice(0, shownSeasons)
   const rest = seasons.slice(shownSeasons)
-  const { apart, max, ticks, values } = lineOf(places)
+  const { apart, below, max, textOf, ticks, values } = lineOf(places)
   const elsewhere = places.flatMap(({ row, season }) =>
     row === undefined || row.competition === 'Eredivisie' ? [] : [{ competition: row.competition, season }],
   )
@@ -150,8 +155,10 @@ export function SeasonBySeasonCard({
           axis={{ labelOf: (slot) => shortSeason(places[slot]?.season ?? ''), title: 'Seizoen' }}
           bars={places.map(() => null)}
           max={max}
+          // The band of the Eerste divisie under the Eredivisie needs more height.
+          style={below === 0 ? {} : ({ '--hf-bar-chart-height': '9rem' } as CSSProperties)}
           ticks={ticks}
-          tickText={placeOfHeight(max)}
+          tickText={textOf}
         >
           <BarChart.Trend apart={apart} labels={labels} values={values} />
         </BarChart>
@@ -182,7 +189,7 @@ export function SeasonBySeasonCard({
       ))}
       {elsewhere.length === 0 ? null : (
         <Text appearance="meta">
-          {`In ${seasonsText(elsewhere.map(({ season }) => season))} speelden we in de ${[...new Set(elsewhere.map(({ competition }) => competition))].join(' en de ')}. In de grafiek is zo'n seizoen een holle stip, buiten de lijn.`}
+          {`In ${seasonsText(elsewhere.map(({ season }) => season))} speelden we in de ${[...new Set(elsewhere.map(({ competition }) => competition))].join(' en de ')}. In de grafiek loopt de lijn dan gestippeld onder de 18, waar de plekken van die competitie staan.`}
         </Text>
       )}
       <Text appearance="meta">

@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react'
+
 import { userEvent } from 'storybook/test'
 
 import preview from '#.storybook/preview'
@@ -238,14 +240,62 @@ export const PlaceSeasonInProgress = meta.story({
   render: () => <PlaceLine rounds={[...places.slice(0, 12), ...Array.from({ length: 22 }, () => null)]} />,
 })
 
+/**
+ * Made-up places per season, like the card "Seizoen voor seizoen": the Eredivisie on top from
+ * place 1 to 18, and under it, after a gap, the places of the Eerste divisie, so a season in it
+ * makes the line drop. The dotted sand stretch is those seasons.
+ */
+const seasons = [
+  7, 3, 2, 6, 5, 8, 4, 6, 9, 5, 7, 8, 6, 5, 9, 7, 6, 8, 10, 7, 6, 4, 5, 6, 3, 2, 4, 6, 5, 7, 9, 7, 6,
+].map((place, index) => ({ league: index === 1 || index === 2 ? 'Eerste divisie' : 'Eredivisie', place }))
+
+const SeasonLine = () => {
+  const all = seasons
+  const below = 3
+  const gap = 1
+  const max = below + gap + 18
+  const eredivisie = (place: number) => max + 1 - place
+  const eerste = (place: number) => below + 1 - place
+  const heights = all.map(({ league, place }) => (league === 'Eredivisie' ? eredivisie(place) : eerste(place)))
+  const values = all.map(({ league }, index) => (league === 'Eredivisie' ? (heights[index] ?? null) : null))
+  const apart = all.map(({ league }, index) => (league === 'Eredivisie' ? null : (heights[index] ?? null)))
+
+  return (
+    <div style={{ maxInlineSize: '36rem' }}>
+      <Card aria-labelledby="seizoen-kop">
+        <Heading id="seizoen-kop" level={2}>
+          Seizoen voor seizoen
+        </Heading>
+        <BarChart
+          axis={{
+            labelOf: (slot) => String(90 + slot).slice(-2) + '/' + String(91 + slot).slice(-2),
+            title: 'Seizoen',
+          }}
+          bars={all.map(() => null)}
+          max={max}
+          style={{ '--hf-bar-chart-height': '9rem' } as CSSProperties}
+          ticks={[eredivisie(18), eredivisie(15), eredivisie(10), eredivisie(5), eredivisie(1), eerste(3)]}
+          tickText={(height) => String(height > below + gap ? max + 1 - height : below + 1 - height)}
+        >
+          <BarChart.Trend
+            apart={apart}
+            labels={all.map(({ league, place }, index) => (
+              <>
+                {90 + index}/{String(91 + index).slice(-2)}: <Strong>plek {place}</Strong>
+                {league === 'Eredivisie' ? '' : ` in de ${league}`}
+              </>
+            ))}
+            values={values}
+          />
+        </BarChart>
+      </Card>
+    </div>
+  )
+}
+
 export const PlaceApart = meta.story({
-  name: 'Lijn met omgekeerde as: twee plekken die er los van staan, als holle stip',
-  render: () => (
-    <PlaceLine
-      apart={places.map((place, index) => (index === 12 || index === 13 ? place : null))}
-      rounds={places.map((place, index) => (index === 12 || index === 13 ? null : place))}
-    />
-  ),
+  name: 'Lijn met omgekeerde as: seizoenen in een andere competitie, onder de schaal en gestippeld in zand',
+  render: () => <SeasonLine />,
 })
 
 export const PlaceOpenPlace = meta.story({

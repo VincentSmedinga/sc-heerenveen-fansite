@@ -75,16 +75,28 @@ describe('lineOf', () => {
     expect(ticks[0]).toBe(max)
   })
 
-  it('keeps a season in the Eerste divisie off the line, as a place of its own on the same scale', () => {
-    const { apart, values } = lineOf([
+  it('puts a season in the Eerste divisie in a band under the 18, and makes the line drop into it', () => {
+    const { apart, max, textOf, ticks, values } = lineOf([
       { now: false, row: row(7), season: '1990/91' },
       { now: false, row: row(3, 0, 5, 'Eerste divisie'), season: '1991/92' },
       { now: false, row: row(2, 0, 5, 'Eerste divisie'), season: '1992/93' },
       { now: false, row: row(5), season: '1993/94' },
     ])
 
-    expect(values).toEqual([12, null, null, 14])
-    expect(apart).toEqual([null, 16, 17, null])
+    // Three places of the band, a gap of one, and the 18 places of the Eredivisie.
+    expect(max).toBe(22)
+    expect(values).toEqual([16, null, null, 18])
+    expect(apart).toEqual([null, 1, 2, null])
+    expect(ticks).toEqual([22, 18, 13, 8, 5, 1])
+    expect(ticks.map(textOf)).toEqual(['1', '5', '10', '15', '18', '3'])
+  })
+
+  it('has no band without a season in another league', () => {
+    const { apart, max, ticks } = lineOf(places)
+
+    expect(max).toBe(18)
+    expect(apart.every((height) => height === null)).toBe(true)
+    expect(ticks).toHaveLength(5)
   })
 
   it('stretches the scale for a table of more than 18 clubs', () => {
@@ -109,15 +121,15 @@ describe('SeasonBySeasonCard with a season in the Eerste divisie', () => {
     expect(html).not.toContain('1 (')
   })
 
-  it('names those seasons under the card and says what the hollow dot is', () => {
+  it('names those seasons under the card and says what the dotted line is', () => {
     const html = render({ places: mixed })
 
     expect(html).toContain('In 2023/24 en 2024/25 speelden we in de Eerste divisie.')
-    expect(html).toContain('holle stip')
+    expect(html).toContain('gestippeld')
   })
 
   it('has no such line when every season is in the Eredivisie', () => {
-    expect(render()).not.toContain('holle stip')
+    expect(render()).not.toContain('gestippeld')
   })
 })
 

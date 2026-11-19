@@ -102,9 +102,10 @@ export type BarChartProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & 
 
 export type BarChartTrendProps = {
   /**
-   * Points that are not part of the line, one per place and on the same scale: a hollow dot at
-   * that place, with no line to the places around it. `null` is no dot. Use it for a place that
-   * is of another kind than the rest, so it is not read as part of the line.
+   * A stretch of the line that is of another kind than the rest, one value per place on the
+   * same scale, such as the seasons in another league: it is drawn dotted and in sand, and
+   * joins the places before and after it, so the line goes down and up with it. `null` is a
+   * place that is not part of it. Give what it means as text next to the chart.
    */
   apart?: readonly (null | number)[]
   /** `smooth` (the default) never goes past its values, `straight` has straight stretches. */
@@ -144,11 +145,28 @@ const percentOf = (value: number, max: number) => Math.round(Math.min(1, Math.ma
 const Trend = ({ apart, curve = 'smooth', edge = true, endDot = true, labels, max, values }: BarChartTrendProps) => {
   const scale = max ?? Math.max(1, ...values.map((value) => value ?? 0), ...(apart ?? []).map((value) => value ?? 0))
   const path = monotonePath(values, scale, curve)
+  // The dotted stretch joins the places on both sides of it, so the line does not break.
+  const apartPath = monotonePath(
+    values.map((value, index) => {
+      const own = apart?.[index] ?? null
+
+      return own !== null ||
+        (value !== null && ((apart?.[index - 1] ?? null) !== null || (apart?.[index + 1] ?? null) !== null))
+        ? (own ?? value)
+        : null
+    }),
+    scale,
+    curve,
+  )
   const last = values.findLastIndex((value) => value !== null)
   const lastValue = values[last] ?? null
   // A value between two gaps has no line, so it gets a dot of its own.
   const lone = values.flatMap((value, index) =>
-    value !== null && (values[index - 1] ?? null) === null && (values[index + 1] ?? null) === null && index !== last
+    value !== null &&
+    [values[index - 1], values[index + 1], apart?.[index - 1], apart?.[index + 1]].every(
+      (next) => (next ?? null) === null,
+    ) &&
+    index !== last
       ? [index]
       : [],
   )
@@ -178,7 +196,9 @@ const Trend = ({ apart, curve = 'smooth', edge = true, endDot = true, labels, ma
         viewBox={`0 0 ${Math.max(1, values.length)} 100`}
       >
         {edge && <path className="hf-bar-chart-trend-edge" d={path} />}
+        {edge && apartPath !== '' && <path className="hf-bar-chart-trend-edge" d={apartPath} />}
         <path className="hf-bar-chart-trend-line" d={path} />
+        {apartPath !== '' && <path className="hf-bar-chart-trend-apart" d={apartPath} />}
       </svg>
       {endDot && lastValue !== null && (
         <span
@@ -194,15 +214,6 @@ const Trend = ({ apart, curve = 'smooth', edge = true, endDot = true, labels, ma
       {lone.map((index) => (
         <span className="hf-bar-chart-trend-dot" key={`lone-${index}`} style={dotStyle(index, values[index] ?? 0)} />
       ))}
-      {apart?.map((value, index) =>
-        value === null ? null : (
-          <span
-            className="hf-bar-chart-trend-dot hf-bar-chart-trend-dot-apart"
-            key={`apart-${index}`}
-            style={dotStyle(index, value)}
-          />
-        ),
-      )}
       {points && <TrendPointer points={points} />}
     </>
   )

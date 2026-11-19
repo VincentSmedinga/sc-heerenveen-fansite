@@ -295,20 +295,31 @@ describe('BarChart.Trend', () => {
     expect(dot.style.getPropertyValue('--hf-bar-chart-at')).toBe('100')
   })
 
-  it('draws a hollow dot for a point that is apart, and keeps the line from running through it', () => {
+  it('draws a dotted stretch for the places that are apart, joined to the line on both sides', () => {
     const { container } = render(
-      <BarChart bars={bars} max={3}>
-        <BarChart.Trend apart={[null, 2, 3, null, null, null]} endDot={false} values={[1, null, null, 3, 2, 1]} />
+      <BarChart bars={bars} max={4}>
+        <BarChart.Trend apart={[null, 1, 2, null, null, null]} endDot={false} values={[4, null, null, 4, 3, 2]} />
       </BarChart>,
     )
-    const dots = [...container.querySelectorAll<HTMLElement>('.hf-bar-chart-trend-dot-apart')]
+    const apart = container.querySelector('.hf-bar-chart-trend-apart')!.getAttribute('d')!
+    const line = container.querySelector('.hf-bar-chart-trend-line')!.getAttribute('d')!
 
-    expect(dots).toHaveLength(2)
-    expect(dots[0]!.style.getPropertyValue('--hf-bar-chart-at')).toBe('66.67')
-    expect(Number(dots[0]!.style.getPropertyValue('--hf-bar-chart-across'))).toBeCloseTo((1.5 / 6) * 100, 1)
-    // The first value has gaps on both sides, so it is a dot of its own and not a line.
-    expect(container.querySelectorAll('.hf-bar-chart-trend-dot:not(.hf-bar-chart-trend-dot-apart)')).toHaveLength(1)
-    expect(container.querySelector('.hf-bar-chart-trend-line')!.getAttribute('d')).not.toMatch(/M0\.5/u)
+    // The dotted path starts on the first place and ends on the fourth, which are on the line.
+    expect(apart).toMatch(/^M0\.5 /u)
+    expect(apart).toMatch(/3\.5 [\d.]+$/u)
+    // The line itself has a gap where the dotted stretch is: it has no curve from place 1.
+    expect(line).not.toMatch(/^M0\.5 [\d.]+ C/u)
+  })
+
+  it('has no dotted stretch without places that are apart, and a value between gaps gets a dot', () => {
+    const { container } = render(
+      <BarChart bars={bars} max={3}>
+        <BarChart.Trend endDot={false} values={[1, null, 2, 3, null, null]} />
+      </BarChart>,
+    )
+
+    expect(container.querySelector('.hf-bar-chart-trend-apart')).toBeNull()
+    expect(container.querySelectorAll('.hf-bar-chart-trend-dot')).toHaveLength(1)
   })
 
   it('has no dot when asked, and none without values', () => {
