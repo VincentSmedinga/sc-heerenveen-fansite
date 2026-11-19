@@ -743,7 +743,8 @@ Lezen de import de echte wedstrijden, dan verdwijnen de verzonnen wedstrijden ma
 
 Vier queries in `queries.ts` zijn voor de pagina's van de tegenstanders:
 
-- `listClubRecords(db, { competition })` geeft de clubs met minstens één wedstrijd, van A tot Z op naam, met het aantal gespeelde, gewonnen, gelijkgespeelde en verloren wedstrijden en de doelpunten voor en tegen, en het land van de club als code (`country`, leeg voor een club zonder land).
+- `listClubRecords(db, { competition, venue })` geeft de clubs met minstens één wedstrijd, van A tot Z op naam, met het aantal gespeelde, gewonnen, gelijkgespeelde en verloren wedstrijden en de doelpunten voor en tegen, en het land van de club als code (`country`, leeg voor een club zonder land).
+  Met `venue` `home` of `away` tellen alleen de thuis- of de uitwedstrijden.
   Een wedstrijd telt als gewonnen, gelijk of verloren op de strafschoppen als die er waren, en anders op de doelpunten zoals Wikipedia ze geeft, dus een bekerwedstrijd die op strafschoppen is beslist, is gewonnen of verloren.
   De doelpunten voor en tegen blijven die van de stand na de verlenging.
   Zonder `competition` tellen alle wedstrijden, met `competition: 'Eredivisie'` alleen die van de competitie, en een club die we alleen in de beker troffen staat er dan niet in.
@@ -1139,7 +1140,7 @@ De exports zijn TypeScript-bronnen, zoals bij de andere packages:
   `listArchivePage(db, { limit, offset, source, until })` geeft dezelfde berichten als `listRecentItems`, maar vanaf `offset` en zonder grens in leeftijd, voor het nieuwsarchief op `/nieuws`; `countArchiveItems` geeft het totaal, en `listArchiveSources` de bronnen met een `slug` en minstens één bericht voor het filter; `source` is de `slug` van één bron;
   `findPublishedArticle(db, slug, until)`, `findNewestArticle(db, until)` en `listPublishedArticles(db, until)` geven de gepubliceerde artikelen van de redactie (zie _De tabel `articles`_);
   `listSeasonPlayerStats(db, season)` geeft de optredens, doelpunten en assists van de spelers van een seizoen, een rij per speler en competitie (zie _De wedstrijden en de stand_);
-  `listClubRecords(db, { competition })`, `findClubBySlug(db, slug)` en `listClubMatches(db, clubId, { competition })` geven de clubs met hun cijfers, één club en de wedstrijden tegen een club (zie _De tabellen `clubs` en `club_names`_);
+  `listClubRecords(db, { competition, venue })`, `findClubBySlug(db, slug)` en `listClubMatches(db, clubId, { competition })` geven de clubs met hun cijfers, één club en de wedstrijden tegen een club (zie _De tabellen `clubs` en `club_names`_);
   `listSeasonMatches(db, season)`, `listSeasonStandings(db, season)` en `listWikipediaPages(db, season)` geven de wedstrijden op volgorde van spelen, de stand van boven naar beneden en de pagina's van Wikipedia die de import las, voor één seizoen, met alleen de velden die een pagina toont;
   `listPodcasts(db)` geeft de podcasts met een `slug` en minstens één aflevering, voor het filter, en `findPodcast(db, slug)` geeft de naam, de beschrijving en de adressen bij Apple Podcasts en Spotify van één podcast;
 - `@fansite/db/test-database`: `createTestDatabase()` maakt een eigen database met de migraties erop, voor tests in andere packages (zie _Tests_);

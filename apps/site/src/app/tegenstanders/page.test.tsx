@@ -9,21 +9,23 @@ import { withoutIcons } from '#src/without-icons'
 
 import OpponentsPage, { generateMetadata } from './page'
 
-/** A club with five played matches, five wins, for the tests that need a club in the top 10. */
-const fiveMatchRecords = [
-  {
-    country: null,
-    drawn: 0,
-    goalsAgainst: 1,
-    goalsFor: 10,
-    id: 99,
-    lost: 0,
-    name: 'Vijf Winst',
-    played: 5,
-    slug: 'vijf-winst',
-    won: 5,
-  },
-]
+/**
+ * Ten clubs of five played matches, for the tests that need the cards Het makkelijkst and Het
+ * moeilijkst to have places: Club 5 won all, Club 0 and Club 6 none, and Club 3 and Club 9 are
+ * level.
+ */
+const tenRecords = Array.from({ length: 10 }, (_, index) => ({
+  country: null,
+  drawn: 0,
+  goalsAgainst: 0,
+  goalsFor: 0,
+  id: 100 + index,
+  lost: 5 - (index % 6),
+  name: `Club ${index}`,
+  played: 5,
+  slug: `club-${index}`,
+  won: index % 6,
+}))
 
 vi.mock('#src/matches', async (importOriginal) => ({
   ...(await importOriginal<object>()),
@@ -90,13 +92,14 @@ const rowsOf = (html: string) =>
   ])
 
 describe('the page /tegenstanders', () => {
-  it('has one h1, Tegenstanders, and two h2s: the card Alle tegenstanders and the top 10', async () => {
+  it('has one h1, Tegenstanders, and three h2s: the card Alle tegenstanders, Het makkelijkst and Het moeilijkst', async () => {
     const html = await render()
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)?.map((heading) => heading.replaceAll(/<[^>]*>/g, ''))).toEqual([
       'Tegenstanders',
       'Alle tegenstanders',
-      'Gemiddeld resultaat',
+      'Het makkelijkst',
+      'Het moeilijkst',
     ])
   })
 
@@ -108,7 +111,7 @@ describe('the page /tegenstanders', () => {
 
     const html = await render({ competitie: 'eredivisie' })
 
-    expect(html.indexOf('id="gemiddeld-resultaat"')).toBeLessThan(html.indexOf('id="laatste-overwinning"'))
+    expect(html.indexOf('id="het-makkelijkst"')).toBeLessThan(html.indexOf('id="laatste-overwinning"'))
     expect(html.indexOf('id="laatste-overwinning"')).toBeLessThan(html.indexOf('Wikipedia'))
     expect(html).toContain('href="/tegenstanders/fc-twente?competitie=eredivisie"')
     expect(html).toContain('Nog nooit gewonnen')
@@ -128,6 +131,8 @@ describe('the page /tegenstanders', () => {
   })
 
   it('is a table with a caption, column headers with scope, and a line that explains the abbreviations', async () => {
+    vi.mocked(getClubRecords).mockResolvedValue([...allRecords, ...tenRecords])
+
     const html = await render()
 
     expect(html).toContain('<caption class="hf-visually-hidden">De tegenstanders van sc Heerenveen, van A tot Z')
@@ -135,6 +140,7 @@ describe('the page /tegenstanders', () => {
     expect(html).toContain('<span class="hf-visually-hidden">winst</span>')
     expect(legendsOf(html)).toEqual([
       'gespeeld, winst, gelijk, verlies, punten (3 per winst, 1 per gelijkspel), doelsaldo',
+      'punten per wedstrijd, gespeeld',
       'punten per wedstrijd, gespeeld',
     ])
   })
@@ -264,46 +270,83 @@ describe('the page /tegenstanders', () => {
     )
     expect(mainOf(html)).not.toContain('hf-card-soft')
     expect(sidebarOf(html)).toMatch(
-      /class="hf-card hf-card-soft[^"]*"[^>]*aria-labelledby="gemiddeld-resultaat"|aria-labelledby="gemiddeld-resultaat"[^>]*class="hf-card hf-card-soft/,
+      /class="hf-card hf-card-soft[^"]*"[^>]*aria-labelledby="het-makkelijkst"|aria-labelledby="het-makkelijkst"[^>]*class="hf-card hf-card-soft/,
     )
   })
 
   it('has a side section with a name, the top 10 first and the credit after it', async () => {
     const sidebar = sidebarOf(await render())
 
-    expect(sidebar).toContain('aria-label="Het gemiddelde resultaat en de bron"')
-    expect(sidebar.indexOf('id="gemiddeld-resultaat"')).toBeLessThan(sidebar.indexOf('Bron: Wikipedia'))
+    expect(sidebar).toContain('aria-label="Het makkelijkst, het moeilijkst en de bron"')
+    expect(sidebar.indexOf('id="het-makkelijkst"')).toBeLessThan(sidebar.indexOf('Bron: Wikipedia'))
     expect(mainOf(await render())).not.toContain('Bron: Wikipedia')
   })
 
   it('ranks the clubs with five played matches on the average points, with the minimum and the matches it counts', async () => {
+    vi.mocked(getClubRecords).mockResolvedValue([...allRecords, ...tenRecords])
+
     const html = await render()
 
     // Beker United (1 match) and FC Voorbeeld (3) are under the minimum; Testclub has 11 in 5.
-    expect(placesOf(html)).toEqual([['1', 'Testclub', '/tegenstanders/testclub', '2,20', '5']])
+    // The first five places of Het makkelijkst: Club 5, Club 4, Testclub, then the level Club 3
+    // and Club 9.
+    expect(placesOf(html).slice(0, 5)).toEqual([
+      ['1', 'Club 5', '/tegenstanders/club-5', '3,00', '5'],
+      ['2', 'Club 4', '/tegenstanders/club-4', '2,40', '5'],
+      ['3', 'Testclub', '/tegenstanders/testclub', '2,20', '5'],
+      ['4', 'Club 3', '/tegenstanders/club-3', '1,80', '5'],
+      ['5', 'Club 9', '/tegenstanders/club-9', '1,80', '5'],
+    ])
+    expect(sidebarOf(html)).toContain('Gemiddeld aantal punten per wedstrijd')
     expect(sidebarOf(html)).toContain('Sinds 2022/23, tegen clubs met minstens 5 gespeelde wedstrijden')
     expect(sidebarOf(html)).toContain(
-      '<caption class="hf-visually-hidden">De tien clubs waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt, van hoog naar laag</caption>',
+      '<caption class="hf-visually-hidden">De vijf clubs waartegen sc Heerenveen gemiddeld de meeste punten per wedstrijd haalt, van hoog naar laag</caption>',
     )
+    expect(sidebarOf(html)).toContain('Toon 5 meer')
+    // Without JavaScript the buttons would do nothing, so there are none.
     expect(sidebarOf(html)).not.toContain('<button')
   })
 
   it('follows the choice: with ?competitie=eredivisie no club has five matches, so there is a sentence and no table', async () => {
     const html = await render({ competitie: 'eredivisie' })
 
-    expect(sidebarOf(html)).toContain('Nog geen club met minstens 5 gespeelde wedstrijden.')
+    expect(sidebarOf(html)).toContain('Nog geen 10 clubs met minstens 5 gespeelde wedstrijden.')
     expect(sidebarOf(html)).not.toContain('<table')
-    expect(html).toContain('id="gemiddeld-resultaat"')
+    expect(html).toContain('id="het-makkelijkst"')
+    expect(html).toContain('id="het-moeilijkst"')
   })
 
   it('keeps the choice in the links of the top 10', async () => {
-    vi.mocked(getClubRecords).mockResolvedValue([...leagueRecords, ...fiveMatchRecords])
+    vi.mocked(getClubRecords).mockResolvedValue([...leagueRecords, ...tenRecords])
 
     const html = await render({ competitie: 'eredivisie' })
 
-    expect(placesOf(html).map(([, name, href]) => [name, href])).toEqual([
-      ['Vijf Winst', '/tegenstanders/vijf-winst?competitie=eredivisie'],
+    expect(
+      placesOf(html)
+        .slice(0, 2)
+        .map(([, name, href]) => [name, href]),
+    ).toEqual([
+      ['Club 5', '/tegenstanders/club-5?competitie=eredivisie'],
+      ['Club 4', '/tegenstanders/club-4?competitie=eredivisie'],
     ])
+  })
+
+  it('reads the matches at home and away for the choice of the page, for the switch of the cards', async () => {
+    await render({ competitie: 'eredivisie' })
+
+    expect(getClubRecords).toHaveBeenCalledWith('league', 'home')
+    expect(getClubRecords).toHaveBeenCalledWith('league', 'away')
+  })
+
+  it('shows the error page, and says why in the log, when only the matches at home cannot be read', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    vi.mocked(getClubRecords).mockImplementation((_choice, venue) =>
+      venue === 'home' ? Promise.reject(new Error('no home')) : Promise.resolve(allRecords),
+    )
+
+    expect(await render()).toContain('Er ging iets mis')
+    expect(error).toHaveBeenCalledWith('Could not read the opponents at home and away for /tegenstanders: no home')
   })
 
   it('keeps the top 10 when there is no club at all', async () => {
@@ -311,7 +354,7 @@ describe('the page /tegenstanders', () => {
 
     const html = await render()
 
-    expect(sidebarOf(html)).toContain('Nog geen club met minstens 5 gespeelde wedstrijden.')
+    expect(sidebarOf(html)).toContain('Nog geen 10 clubs met minstens 5 gespeelde wedstrijden.')
   })
 
   it('says so, and has no table, while there is no club', async () => {

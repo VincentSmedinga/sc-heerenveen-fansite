@@ -585,12 +585,15 @@ De pictogrammen en woorden komen uit `tableColumns` van het designsysteem, zoals
 De rijkop is een link dankzij `href` op een rij van `DataTable`.
 Een club met alleen wedstrijden die nog niet zijn gespeeld, staat erin met nullen.
 De lijst staat in de hoofdkolom, op het witte vlak.
-De zijkolom heeft de zachte kaart "Gemiddeld resultaat" (`TopPointsCard`), met de top 10, en de bronvermelding.
-De kaart toont de tien clubs waartegen we gemiddeld de meeste punten per wedstrijd haalden, van de clubs met minstens 5 gespeelde wedstrijden (`topPointsOf` in `src/opponents.ts`).
+De zijkolom heeft de zachte kaart "Het makkelijkst" (`TopPointsCard`) en de bronvermelding.
+De kaart toont de clubs waartegen we gemiddeld de meeste punten per wedstrijd haalden, van de clubs met minstens 5 gespeelde wedstrijden (`topPointsOf` in `src/opponents.ts`): eerst de top 5 en achter "Toon 5 meer", een `Disclosure`, de plaatsen 6 tot en met 10.
 Hij telt dezelfde wedstrijden als de lijst en volgt dus de schakelaar.
 Het is een `DataTable` met `sortable={false}`: de plaats komt uit `position` van een rij en het gemiddelde is de `key`-kolom, het kerngetal van de tabel.
-Daaronder staat de zachte kaart "Het moeilijkst" (`HardestCard`) met de vijf clubs waartegen we gemiddeld de minste punten per wedstrijd haalden (`hardestOf` in `src/opponents.ts`).
-Ze heeft dezelfde tabel, legenda en regel over het aantal wedstrijden als de top 10, van laag naar hoog, en staat er alleen als minstens 10 clubs 5 gespeelde wedstrijden hebben.
+Onder de kop staat "Gemiddeld aantal punten per wedstrijd" en een keuze Alle, Thuis en Uit (`VenueSwitch`, een `SegmentedControl` in de browser).
+De server bouwt de drie panelen, ook de records van thuis en uit (`getClubRecords(choice, venue)`), en zonder JavaScript staat Alle er zonder knoppen.
+Een club telt bij een keuze mee met minstens 5 gespeelde wedstrijden in die keuze, en een keuze toont een lijst als minstens 10 clubs meetellen; anders staat er een zin.
+Daaronder staat de zachte kaart "Het moeilijkst" (`HardestCard`) met de clubs waartegen we gemiddeld de minste punten per wedstrijd haalden (`hardestOf` in `src/opponents.ts`).
+Ze heeft dezelfde opzet als "Het makkelijkst": dezelfde uitleg, keuze, tabel, legenda en regel over het aantal wedstrijden, van laag naar hoog.
 Daaronder staat de zachte kaart "Laatste overwinning" (`LastWinCard`) met de clubs van het nieuwste seizoen in de stand, zonder sc Heerenveen, van de langste tijd sinds onze laatste overwinning in de Eredivisie tot de kortste (`lastWinsOf` in `src/opponents.ts`).
 De kaart volgt de schakelaar niet, maar haar links houden de keuze, en een zin onder de kop zegt dat alleen wedstrijden in de Eredivisie tellen.
 Het is een `DataTable` met tekst en twee kolommen: de club en "Dagen geleden", een kolom met `bar: true`.

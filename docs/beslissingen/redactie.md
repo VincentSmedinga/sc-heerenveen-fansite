@@ -2826,6 +2826,7 @@
 - **Alternatieven:** het gemiddelde van de tegenstander (leest als "de lastigste tegenstanders" en kan met deze kaart verward worden); geen minimum (de lijst bestaat dan uit clubs die we één keer troffen); een minimum van 3 (de aantallen blijven klein); altijd de Eredivisie (de kaart zou bij de keuze "alles" afwijken van de tabel ernaast); sorteren op het afgeronde gemiddelde (twee clubs met "2,38" staan dan op toeval).
 - **Later:** zie _Statistieken komen als kaarten op Wedstrijden, voor de Eredivisie, met "Gebaseerd op"_ (#397): deze kaart telt in "Gebaseerd op" alleen de wedstrijden van de clubs die meedoen, en volgt de schakelaar in plaats van altijd de Eredivisie te tellen.
 - **Later:** zie _De kaart Het moeilijkst toont de vijf clubs met de minste punten, vanaf 10 clubs_ (9 november 2026): onder deze kaart staat sindsdien een tweede kaart met de andere kant van dezelfde lijst, en die komt er alleen als minstens 10 clubs aan het minimum voldoen.
+- **Later:** zie _De kaarten Het makkelijkst en Het moeilijkst hebben een keuze Alle, Thuis en Uit en een top 5_ (19 november 2026): de kaart heet "Het makkelijkst", toont eerst vijf plaatsen met "Toon 5 meer" voor de rest, heeft een keuze Alle, Thuis en Uit, en toont ook met minder dan 10 clubs een zin in plaats van een tabel.
 
 ## De pagina van een club heeft een kaart met doelpuntenmakers, vanaf 5 wedstrijden
 
@@ -2937,6 +2938,7 @@
   De zijkolom wordt langer, en op een telefoon staat hij onder de top 10.
   Met 10 tot en met 14 clubs staat een club nog in allebei de lijsten (bij 10 clubs staan alle tien in de top 10); pas vanaf 15 clubs zijn de lijsten gescheiden.
 - **Alternatieven:** beide lijsten in één kaart (twee tabellen, twee bijschriften, één "Gebaseerd op" die voor beide niet klopt); drie clubs (dun naast tien); de kaart ook tonen met minder dan 10 clubs; "Lastigste tegenstanders" als kop (leest als het gemiddelde van de tegenstander).
+- **Later:** zie _De kaarten Het makkelijkst en Het moeilijkst hebben een keuze Alle, Thuis en Uit en een top 5_ (19 november 2026): de kaart toont tien plaatsen in plaats van vijf, eerst vijf met "Toon 5 meer" voor de rest, heeft een keuze Alle, Thuis en Uit, en blijft met minder dan 10 clubs bestaan als zin.
 
 ## De zin onder een kaart met cijfers zegt alleen waarop de telling rust
 
@@ -3144,3 +3146,25 @@
   Samen missen we niets.
   De algemene feed heeft ook berichten over andere sporten (1 over NBA en 1 over NFL), maar het filter kijkt naar de kop en laat ze niet door.
 - **Alternatieven:** alleen de algemene feed (mist de vier berichten die alleen in de voetbalfeed staan); een regel die links buiten `/voetbal/` weglaat (extra code zonder gemeten winst).
+
+## De kaarten Het makkelijkst en Het moeilijkst hebben een keuze Alle, Thuis en Uit en een top 5
+
+- **Datum:** 19 november 2026
+- **Besluit:** de kaart "Gemiddeld resultaat" op Tegenstanders heet "Het makkelijkst", en zij en "Het moeilijkst" hebben dezelfde opzet (#1416).
+  - **De kop en het anker:** "Het makkelijkst", met het anker `het-makkelijkst`.
+    Het oude anker `gemiddeld-resultaat` blijft niet bestaan: een anker volgt de kop, en niets verwijst ernaar.
+  - **De uitleg:** onder de kop staat "Gemiddeld aantal punten per wedstrijd".
+  - **De keuze:** elke kaart heeft een eigen `SegmentedControl` met Alle, Thuis en Uit, die in de browser werkt en niet in het adres komt (`VenueSwitch`).
+    De server zet de panelen voor alle drie de keuzes klaar, de browser toont er één.
+    Zonder JavaScript staat Alle er en zijn er geen knoppen.
+    De keuze telt binnen de competitie van de pagina.
+    Een wedstrijd is thuis of uit zoals hij is vastgelegd: `matches.home` heeft geen derde waarde, dus een neutraal veld heeft geen regel.
+  - **De top 5:** de tabel toont de eerste vijf plaatsen, en "Toon 5 meer" (een `Disclosure`, dus zonder JavaScript te gebruiken) de plaatsen 6 tot en met 10 in een tweede tabel met een eigen bijschrift.
+  - **Het minimum:** een club telt bij een keuze mee met minstens 5 gespeelde wedstrijden in die keuze, en een keuze toont een lijst als minstens 10 clubs meetellen.
+    Anders staat er een zin ("Nog geen 10 clubs met minstens 5 gespeelde uitwedstrijden.") en blijft de kaart.
+    Het geldt voor beide kaarten.
+- **Waarom:** de twee kaarten horen bij elkaar en moeten dezelfde vragen beantwoorden: tegen wie gaat het goed of slecht, en is dat thuis of uit anders?
+  Thuis en uit hebben ongeveer de helft van de wedstrijden, dus het minimum telt per keuze: anders zou een club met twee thuiswedstrijden bovenaan kunnen staan.
+  Een `Disclosure` houdt de knop voor vijf meer bruikbaar zonder JavaScript, en de keuze in de browser houdt het adres zonder parameter.
+- **Alternatieven:** één keuze voor beide kaarten (een plek boven de zijkolom en een gedeelde client-component); links met een parameter (elke keuze een adres, maar de pagina laadt opnieuw en de parameter botst met de competitie); het minimum op het totaal houden (een club met één of twee thuiswedstrijden kan dan bovenaan staan); een alias voor het oude anker (er is niets dat ernaar verwijst).
+- **Later:** zie _Tegenstanders heeft een zijkolom met de kaart Gemiddeld resultaat, en "Alle tegenstanders" is wit_ (4 november 2026) in `site.md`: de kaart heet sinds deze beslissing "Het makkelijkst".

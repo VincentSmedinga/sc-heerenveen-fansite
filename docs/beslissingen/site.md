@@ -2327,6 +2327,7 @@
 - **Later:** zie _De vier vlakken van een kaart hebben een betekenis, en elke kaart volgt de eerste regel die past_ (1 november 2026) in `designsysteem.md`: "Alle tegenstanders" volgt regel 1, de top 10 regel 4.
 - **Later:** zie _In een tabel is vet voor het kerngetal, niet voor onze club of een achternaam_ in `designsysteem.md`.
   De punten per wedstrijd zijn de `key`-kolom en staan in het zwaarste gewicht, niet in het halfvette.
+- **Later:** zie _De kaarten Het makkelijkst en Het moeilijkst hebben een keuze Alle, Thuis en Uit en een top 5_ (19 november 2026) in `redactie.md`: de kaart "Gemiddeld resultaat" heet sindsdien "Het makkelijkst" en heeft een keuze Alle, Thuis en Uit.
 
 ## Een stadion toont seizoenen, en een dag alleen als het beheer die kent
 
