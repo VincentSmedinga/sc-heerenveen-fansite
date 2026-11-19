@@ -4006,3 +4006,24 @@
   Reflow (WCAG 1.4.10) blijft goed: inzoomen maakt de kolom in rem smaller, dus de rijen worden één kolom.
 - **Alternatieven:** de media queries houden (klopt niet in een zijbalk); één vaste grens voor alle vier (de vier hebben andere kolombreedtes); een `div` om elke lijst (alleen bij `PlayerList`, waar `columns` het niet anders toelaat).
 - **Later:** vervangt de grenzen van het venster (52 rem en 40 rem) die `KeyFigures`, `QuestionCard.Grid`, `PlayerList` en `OutcomeLine` volgens eerdere besluiten hadden, en maakt van `across` "vanaf 42 rem van de kolom" in plaats van "vanaf de breedte van een brede pagina".
+
+## De binnenruimte van een kaart blijft een media query
+
+- **Datum:** 19 november 2026
+- **Besluit:** de binnenruimte van `Card` (24 pixels vanaf 40 rem, anders 16) blijft wisselen op de breedte van het venster, met een `@media`-regel in `card.css`.
+  We hebben drie manieren geprobeerd en geen werkt zonder een zichtbare wijziging:
+  - **De kaart als container voor zijn eigen binnenruimte:** de query pakt niet.
+    Een element kan niet naar zijn eigen breedte vragen.
+    We zetten een kaart van 346 pixels met `container: self / inline-size` en `@container self (width < 40rem)` in een raster, en de opvulling bleef 24 pixels.
+  - **De ouder als container:** de breedte van de ouder is niet die van de kaart.
+    In een raster met twee kolommen is de ouder 700 pixels breed en de kaart 346, dus de query kijkt naar de verkeerde breedte.
+    Het werkt alleen als elke kaart een ouder heeft die precies zo breed is, en dat is niet zo in `Page.Cell`, `KeyFigures`, `QuestionCard.Grid` en de zijbalk.
+    Bovendien laat `container-type: inline-size` een ouder niet meer meegroeien met zijn inhoud, en `KeyFigures`, `QuestionCard.Grid` en `PlayerList` vragen hun eigen lijst al als container.
+  - **Een wrapper rond elke kaart, met de binnenruimte op een binnenste element:** de kaart krijgt dan een kind dat alle inhoud omvat.
+    Dat haalt de directe kinderen weg waar `hf-flow` en regels als `.hf-card-shareable > :first-child` op rekenen, het verandert de HTML van elke kaart op elke pagina, en de afstand tussen de inhoud en de rand moet dan op twee plaatsen kloppen (kaart en wrapper).
+    Het risico zit niet in het getal, maar in de opbouw die elke kaart raakt, en de winst is klein: een kaart in een smalle kolom op een breed venster heeft 24 pixels binnenruimte, wat de inhoud goed aankan.
+    Op een telefoon, waar het gaat om reflow (WCAG 1.4.10), is het venster smal en dus de binnenruimte ook.
+- **Waarom:** zie _Een regel over de ruimte van het component is een container query, een regel over het scherm een media query_.
+  Dat besluit noemt de kaart als voorbeeld, maar vraagt ook eerst of een element zijn eigen breedte nodig heeft: een kaart kan dat niet zonder zijn opbouw te veranderen.
+- **Alternatieven:** de wrapper (raakt elke pagina en `hf-flow`); de ouder als container (verkeerde breedte); `cqi` of een percentage voor de opvulling (ook die verwijzen naar de ouder, niet naar de kaart).
+- **Later:** maakt in _Een regel over de ruimte van het component is een container query, een regel over het scherm een media query_ de kaart met minder binnenruimte tot een uitzondering: die regel blijft een media query tot een kaart zijn eigen breedte kan vragen.
