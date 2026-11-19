@@ -168,7 +168,7 @@
     transform: translate(-50%, 50%);
   }
 
-  /* A place that is not part of the line: a ring in the colour of the line, open in the middle. */
+  /* A place off the line: a ring in the colour of the line, open in the middle. */
   .hf-bar-chart-trend-dot-apart {
     background-color: var(--hf-colour-chart-line-edge);
     border-color: var(--hf-colour-chart-line);
