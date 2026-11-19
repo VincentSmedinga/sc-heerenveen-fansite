@@ -610,10 +610,9 @@ export function listClubRecords(
 /**
  * The row of one club in the league table of every season, the oldest season first: the place,
  * the league the table is of, the points (after a deduction), the goal difference and the
- * points lost to a deduction. A
- * season in which the club is not in the table (or has no table) gives no row. The club is
- * written as the table writes it (`sc Heerenveen`). The table of the current season is not
- * final, so the caller decides how to show it.
+ * points lost to a deduction. A season in which the club is not in the table (or has no table)
+ * gives no row. The club is written as the table writes it (`sc Heerenveen`). The table of the
+ * current season is not final, so the caller decides how to show it.
  */
 export function listClubStandings(db: Database, club: string) {
   return db
@@ -1218,9 +1217,8 @@ export async function listStaffInSeason(db: Database, role: StaffRole, season: s
 /**
  * The place of every club in the league table of every season, the oldest season first and
  * within a season from the top: the season, the league, the club as the table writes it and
- * the place. The
- * page of a club reads its own place from it (the names of a club are tied to it by
- * `club_names` and `club_name_periods`, which the caller does), next to ours from
+ * the place. The page of a club reads its own place from it (the names of a club are tied to
+ * it by `club_names` and `club_name_periods`, which the caller does), next to ours from
  * `listClubStandings`. A season without a table gives no rows.
  */
 export function listStandingsPlaces(db: Database) {

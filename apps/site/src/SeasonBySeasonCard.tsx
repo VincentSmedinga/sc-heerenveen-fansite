@@ -73,18 +73,18 @@ const legend = tableLegend([...figureColumns.slice(0, 3), { ...tableColumns.goal
 
 /**
  * The card "Seizoen voor seizoen": every season we have matches of, the newest first, with our
- * place in the Eredivisie, the matches won, drawn and lost, and the goals for and against. On
- * top is our place through the years as a line, with place 1 at the top (hidden from a screen
- * reader, which has the table). The table shows the latest five seasons; a Disclosure, which
- * works without JavaScript, shows the rest. A season is a link to its matches. The season going
- * on is marked "nu". The place is that of the league we played in whatever the choice: the
- * Eredivisie, and for a season in the Eerste divisie the table says so ("3 (Eerste divisie)"),
- * the chart shows it as a hollow dot off the line, and a line under the table names those
- * seasons. We know the place from the first season with a table (`places`); a season without
- * one has a dash and "geen stand" for a screen reader, and a line says since when we know it.
- * The
- * figures follow the choice of competition (`tallies`, see `seasonTalliesOf`). `seasons` are
- * the seasons with matches, the newest first. Without a season there is no card.
+ * place in the league we played in, the matches won, drawn and lost, and the goals for and
+ * against. On top is our place through the years as a line, with place 1 at the top (hidden
+ * from a screen reader, which has the table). The table shows the latest five seasons; a
+ * Disclosure, which works without JavaScript, shows the rest. A season is a link to its
+ * matches. The season going on is marked "nu". The place is that of the league we played in
+ * whatever the choice: the Eredivisie, and for a season in the Eerste divisie the table says
+ * so ("3 (Eerste divisie)"), the chart shows it as a hollow dot off the line, and a line under
+ * the table names those seasons. We know the place from the first season with a table
+ * (`places`); a season without one has a dash and "geen stand" for a screen reader, and a line
+ * says since when we know it. The figures follow the choice of competition (`tallies`, see
+ * `seasonTalliesOf`). `seasons` are the seasons with matches, the newest first. Without a
+ * season there is no card.
  */
 export function SeasonBySeasonCard({
   choice,
