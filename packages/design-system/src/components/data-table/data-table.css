@@ -305,3 +305,34 @@
     }
   }
 }
+
+@layer hf.components {
+  /*
+   * Columns behind a button (`more` on a column, `DataTable.More` round the table). The room is
+   * that of the block, so it is right in a narrow column on a wide screen too. Where the block
+   * is under 24rem, which is what the six figures and a name like Go Ahead Eagles need (the
+   * card of a phone is about 20rem, the card beside the sidebar of a desktop about 28rem), the
+   * columns are hidden and the button is there, but only once the script has run
+   * (`data-ready`): without it every column stays and the button does not exist. A hidden
+   * column is gone for a screen reader as well (`display: none`), so the table reads as shown.
+   */
+  .hf-data-table-more {
+    container-type: inline-size;
+  }
+
+  /* The small height of the button, with the text of running text (the small size has less). */
+  .hf-data-table-more .hf-data-table-more-button {
+    display: none;
+    font-size: var(--hf-body-font-size);
+  }
+
+  @container (inline-size < 24rem) {
+    .hf-data-table-more[data-ready] .hf-data-table-more-button {
+      display: inline-block;
+    }
+
+    .hf-data-table-more[data-ready]:not([data-open]) .hf-more-column {
+      display: none;
+    }
+  }
+}
