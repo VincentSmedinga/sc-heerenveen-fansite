@@ -3973,11 +3973,11 @@
   Een tabel staat dus in een blok dat `hf-table` heet (`.hf-table-container` in `base/table.css`).
   `DataTable` zet dat blok om elke tabel, en een tabel met inklapbare kolommen of korte koppen heeft het al in `hf-data-table-fold`, dat de naam er ook bij krijgt.
   De tabellen met een balk (stand, topscorers, records en spelers) staan al in `hf-bar-place`, en dat heeft de naam er nu ook bij (`container-name: hf-bar-place hf-table`), dus hun HTML verandert niet.
-  Dat zijn de kolommen met cijfers van elke tabel en die van een tabel die sorteert (`data-table.css`), allebei bij 24 rem.
+  Zo wisselen de kolommen met cijfers van elke tabel en die van een tabel die sorteert (`data-table.css`), allebei bij 24 rem van dat blok.
   De cijfers van de spelers (`player-figures.css`) volgen de container van hun plek, `hf-bar-place`, bij dezelfde 24 rem.
   `Pagination` heeft een binnenste `div` (`hf-pagination-row`) met het raster, omdat een raster niet naar zijn eigen breedte kan vragen: de `nav` is de container (`hf-pagination`) en zet de tekst boven de links bij 24 rem of smaller.
   De getallen blijven gelijk.
-  De containers die nog geen naam hadden en die een tabel omsluit (`hf-data-table-fold`, `hf-data-table-more` en `hf-input-table`) hebben er nu een, want een naamloze query pakt de dichtstbijzijnde container, en dat is nu de tabel zelf.
+  De containers die nog geen naam hadden en die een tabel omsluit (`hf-data-table-fold`, `hf-data-table-more` en `hf-input-table`) hebben er nu een, want een naamloze query pakt de dichtstbijzijnde container, en dat kan nu het blok van een tabel zijn.
   Een tabel in een kaart op een telefoon van 390 pixels is ongeveer 20 rem breed en krijgt zo de smalle opvulling, ook als het venster breder is dan 24 rem: dat is de bedoeling.
   `table-css.test.ts` en `pagination-css.test.ts` houden de namen en de getallen vast.
 - **Waarom:** zie _Een regel over de ruimte van het component is een container query, een regel over het scherm een media query_: een tabel moet wisselen als hij niet past, niet als het venster smal is.
