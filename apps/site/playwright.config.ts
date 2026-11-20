@@ -10,6 +10,16 @@ const origin = `http://127.0.0.1:${port}`
 // A second copy of the site, without a database, for the error page (e2e/error-page.spec.ts).
 // Nothing listens on port 1 of this computer, so the connection is refused at once.
 const withoutDatabasePort = process.env['E2E_WITHOUT_DATABASE_PORT'] ?? '3125'
+// Every part of the chapter Fans is on in the checks (see .env.example). The host starts
+// production with the settings missing, which means off.
+const fans = {
+  FANS_ACCOUNTS: 'on',
+  FANS_FANTEST: 'on',
+  FANS_PROGNOSE: 'on',
+  FANS_UITBLINKER: 'on',
+  FANS_VIER: 'on',
+}
+
 // Acceptance doesn't start without the settings of the mail server. The contact form sends
 // mail, so they point at a mail server of our own that keeps the mails in a folder
 // (scripts/fake-smtp.js), and the sites trust its certificate.
@@ -86,7 +96,7 @@ export default defineConfig({
       command: assembleAndStartServer,
       // HOSTNAME is the name of the machine in many shells, and the server would listen on
       // that.
-      env: { ...smtp, HOSTNAME: '127.0.0.1', PORT: port, SITE_ENV: 'acceptance' },
+      env: { ...fans, ...smtp, HOSTNAME: '127.0.0.1', PORT: port, SITE_ENV: 'acceptance' },
       timeout: 60_000,
       // Not the homepage: it keeps its headlines for five minutes, and a request before
       // global-setup.ts has put the made-up headlines in would keep an empty list for the whole
@@ -96,6 +106,7 @@ export default defineConfig({
     {
       command: startServer,
       env: {
+        ...fans,
         ...smtp,
         DATABASE_URL: 'mysql://root@127.0.0.1:1/fansite',
         HOSTNAME: '127.0.0.1',

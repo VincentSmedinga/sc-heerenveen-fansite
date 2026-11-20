@@ -1490,6 +1490,17 @@ De afbeelding bij het delen van links is `public/share-image.png`, het schild va
 
 Hoe de acceptatieomgeving op de hosting staat, staat in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md).
 
+## Onderdelen van Fans aan of uit
+
+Elk onderdeel van het hoofdstuk Fans heeft een eigen instelling: `FANS_ACCOUNTS`, `FANS_PROGNOSE`, `FANS_UITBLINKER`, `FANS_VIER` en `FANS_FANTEST`, met `on` of `off`.
+Een ontbrekende regel betekent uit.
+`readFans()` en de hulpfuncties in `packages/shared/src/fans-env.ts` zijn de enige plek die dat zegt; pagina's, menu's, kaarten, acties en mail lezen de omgeving niet zelf.
+Gebruik `requireFansPart(part, notFound)` bovenaan een pagina of actie, `fansMenuItems()` voor het menu, `fansCard()` voor een kaart en `sendFansMail()` voor een mail.
+De importer en de opdrachten van cron gebruiken `runFansJob()`.
+De spellen staan uit zolang accounts uit staan.
+Zoals `SITE_ENV` leest de site ze als de server draait, dus de pagina's die ze gebruiken rekenen per verzoek (`dynamic = 'force-dynamic'`) en niet tijdens de build.
+De rooktest en de e2e-tests starten de site met alles aan; de rooktest start hem ook met alles uit en verwacht dan "niet gevonden" op `/fans`, en zodra die pagina er is ook een 200 als de onderdelen aan staan.
+
 ## Icoon en manifest
 
 De site is installeerbaar: een bezoeker kan hem als app op een computer zetten of op het beginscherm van een telefoon.

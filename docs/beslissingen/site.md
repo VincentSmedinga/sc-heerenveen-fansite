@@ -6760,6 +6760,22 @@
   Het feit staat als tekst in dezelfde lijst als het stadion, net als op de pagina van een gespeelde wedstrijd.
 - **Alternatieven:** een eigen regel, die op een telefoon meer ruimte geeft aan één naam.
 
+## Elk onderdeel van Fans staat per omgeving aan of uit
+
+- **Datum:** 20 november 2026
+- **Besluit:** elk issue van Fans gaat naar `main`, achter één instelling per onderdeel die de site leest als de server draait: `FANS_ACCOUNTS`, `FANS_PROGNOSE`, `FANS_UITBLINKER`, `FANS_VIER` en `FANS_FANTEST`, met `on` en `off` (#1443).
+  Een ontbrekende regel is uit.
+  Uit betekent: geen menu-item, de pagina's antwoorden "niet gevonden", geen kaarten op de pagina's van wedstrijden en spelers, en geen mail.
+  De vier spellen staan uit zolang accounts uit staan.
+  Gaan accounts uit terwijl iemand ingelogd is, dan antwoordt alles onder `/fans` "niet gevonden" en blijven de sessies staan.
+  Acceptatie en de controles hebben alles aan, productie alles uit tot de projecteigenaar een regel in de omgeving van de host verandert.
+  De plek die het zegt staat in `packages/shared`, zodat de importer en cron dezelfde instellingen lezen.
+- **Waarom:** zo kiest de projecteigenaar zelf het moment waarop een onderdeel live gaat, en zet hij het met dezelfde regel weer uit.
+  Acceptatie toont alleen `main`, dus daar is alles te testen op de echte host.
+- **Alternatieven:** een lange branch `fans` met een branch per onderdeel.
+  Die viel af: de migraties staan genummerd in één lijst en zouden botsen met elke migratie op `main`, acceptatie toont alleen `main`, en de controles, de releases en het opruimen gaan allemaal uit van `main`.
+  \=======
+
 ## Supporters krijgen een eigen account op de site, los van het forum
 
 - **Datum:** 20 november 2026

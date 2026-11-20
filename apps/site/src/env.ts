@@ -1,5 +1,6 @@
 import { databaseEnvSchema } from '@fansite/db/env'
 import { parseEnv } from '@fansite/shared/env'
+import { fansEnvSchema } from '@fansite/shared/fans-env'
 import { mailEnvSchema, requireSmtpOutsideLocal } from '@fansite/shared/mail-env'
 import { siteEnvSchema, siteOrigins } from '@fansite/shared/site-env'
 import * as z from 'zod'
@@ -10,6 +11,7 @@ export { readMailEnv } from '@fansite/shared/mail-env'
 const schema = databaseEnvSchema
   .extend(siteEnvSchema.shape)
   .extend(mailEnvSchema.shape)
+  .extend(fansEnvSchema.shape)
   .superRefine(requireSmtpOutsideLocal)
 
 // Set by `pnpm review` (see scripts/review.js), and nowhere else. Optional, and not part of the

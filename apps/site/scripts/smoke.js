@@ -40,6 +40,9 @@ if (databaseUrl === undefined) {
 
 const port = process.env['SMOKE_PORT'] ?? '3123'
 const origin = `http://127.0.0.1:${port}`
+// The settings of the parts of the chapter Fans, which withServer() sets or leaves out.
+const fansSettings = ['FANS_ACCOUNTS', 'FANS_PROGNOSE', 'FANS_UITBLINKER', 'FANS_VIER', 'FANS_FANTEST']
+
 // Made-up settings of the mail server, for the servers that need them to start. Nothing here
 // sends mail.
 const smtpSettings = {
@@ -798,9 +801,20 @@ async function withEmptyDatabase(checks) {
  * made-up mail settings, runs the checks and always stops the server again. The checks get the
  * server and a function that returns what the server has written to its log so far.
  */
-async function withServer({ database, siteEnv, smtp = true }, checks) {
+async function withServer({ database, fans = 'on', siteEnv, smtp = true }, checks) {
   const env = { ...process.env, DATABASE_URL: database, HOSTNAME: '127.0.0.1', PORT: port }
   delete env['SITE_ENV']
+
+  // The checks run with every part of Fans on, like CI and .env.example.
+  // `fans: 'off'` leaves the settings out, which is how the host starts production
+  // (see docs/acceptatieomgeving.md).
+  for (const name of fansSettings) {
+    delete env[name]
+
+    if (fans === 'on') {
+      env[name] = 'on'
+    }
+  }
 
   // Acceptance and production don't start without the settings of the mail server.
   for (const name of Object.keys(smtpSettings)) {
@@ -2098,6 +2112,28 @@ await withServer({ database: unreachable.href, siteEnv: 'acceptance' }, async (s
   assert.match(log(), /Could not read the sources for \/bronnen: .*ECONNREFUSED/)
   assert.equal(server.exitCode, null, 'the server must keep running')
 })
+
+// With every part of Fans off, which is production until the owner changes a line, the chapter
+// isn't there: /fans answers "not found" and the rest of the site works. Once the page exists
+// (#1444) this checks the other side too, so that it can't pass just because nothing is built:
+// the same page must be there when its part is on.
+const fansPageExists = existsSync(new URL('../src/app/fans/page.tsx', import.meta.url))
+await withEmptyDatabase((database) =>
+  withServer({ database, fans: 'off', siteEnv: 'acceptance' }, async (server) => {
+    await waitUntilUp(server)
+    assert.equal((await fetch(`${origin}/fans`)).status, 404, '/fans must be "not found" with every part off')
+    assert.equal((await fetch(origin)).status, 200)
+  }),
+)
+
+if (fansPageExists) {
+  await withEmptyDatabase((database) =>
+    withServer({ database, fans: 'on', siteEnv: 'acceptance' }, async (server) => {
+      await waitUntilUp(server)
+      assert.equal((await fetch(`${origin}/fans`)).status, 200, '/fans must be there with the parts on')
+    }),
+  )
+}
 
 await withServer({ database: databaseUrl, siteEnv: undefined }, async (server) => {
   const [code] = await Promise.race([once(server, 'exit'), sleep(30_000).then(() => [undefined])])
