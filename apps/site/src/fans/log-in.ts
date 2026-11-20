@@ -6,7 +6,7 @@ import { setTimeout as sleep } from 'node:timers/promises'
 import { normaliseEmail } from '../beheer/accounts'
 import { checkAttempt, issueLoginLink } from '../login/request'
 import { removeEnded } from '../login/sessions'
-import { hashOf, newToken } from '../login/tokens'
+import { codeHashOf, hashOf, newToken } from '../login/tokens'
 import { returnParameter } from './log-in-form'
 import { supporterKind } from './supporter-login'
 
@@ -202,6 +202,25 @@ export function returnPathOf(value: unknown): string | undefined {
   return `${url.pathname}${url.search}`
 }
 
+/**
+ * A row for the request of an address without an account, so a wrong code counts down on "Kijk
+ * in je mail" exactly as for an address with one. It can never be used: nobody gets its token,
+ * and its code hash is of a value that is not 6 digits, which no code matches. It keeps no
+ * address and no screen name, and goes after 15 minutes like any link. It is a row without an
+ * account, which the table only allows with an address and a name, so those are empty.
+ */
+async function addDecoy(db: Database, ref: string, now: Date) {
+  await db.insert(supporterKind.tables.links).values({
+    codeHash: codeHashOf(ref, 'none'),
+    email: '',
+    expiresAt: new Date(now.getTime() + supporterKind.linkLifetime),
+    refHash: hashOf(ref),
+    screenName: '',
+    screenNameKey: '',
+    tokenHash: hashOf(newToken()),
+  })
+}
+
 async function decide(db: Database, value: string, returnTo: string | undefined, now: Date, origin: string) {
   const email = normaliseEmail(value)
 
@@ -230,6 +249,8 @@ async function decide(db: Database, value: string, returnTo: string | undefined,
   const ref = newToken()
 
   if (account === undefined) {
+    await addDecoy(db, ref, now)
+
     return { answer: 'sent' as const, ref }
   }
 

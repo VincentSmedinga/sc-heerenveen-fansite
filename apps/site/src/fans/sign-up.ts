@@ -336,7 +336,8 @@ async function finish(db: Database, link: Link | undefined, now: Date): Promise<
     return session(db, link.userId, now, false)
   }
 
-  if (link.email === null || link.screenName === null || link.screenNameKey === null) {
+  // A row without an address is the decoy of a login for an unknown address (see log-in.ts).
+  if (!isFilled(link.email) || !isFilled(link.screenName) || !isFilled(link.screenNameKey)) {
     return { answer: 'gone' }
   }
 
@@ -376,6 +377,10 @@ function isDuplicate(error: unknown): boolean {
   const { cause, code, errno } = error as { cause?: unknown; code?: unknown; errno?: unknown }
 
   return code === 'ER_DUP_ENTRY' || errno === 1062 || isDuplicate(cause)
+}
+
+function isFilled(value: null | string): value is string {
+  return value !== null && value !== ''
 }
 
 async function session(db: Database, supporterId: number, now: Date, created: boolean): Promise<ConfirmResult> {

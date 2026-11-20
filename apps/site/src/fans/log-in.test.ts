@@ -8,8 +8,7 @@ import type { LogInMail } from './log-in'
 
 import { findSession } from '../login/sessions'
 import { handleLogIn, landingOf, logInLinkState, mailsPerQuarter, noteMail, returnPathOf } from './log-in'
-import { handleSignUp } from './sign-up'
-import { confirmWithCode, confirmWithLink } from './sign-up'
+import { codeTriesLeft, confirmWithCode, confirmWithLink, handleSignUp } from './sign-up'
 import { logInMailText } from './sign-up-mail'
 import { supporterKind } from './supporter-login'
 
@@ -94,6 +93,33 @@ describe('a request to log in', () => {
     expect(unknown.waits).toEqual(known.waits)
     expect(unknown.waits).toEqual([supporterKind.minimumAnswerMilliseconds])
     expect(unknown.mails).toEqual([])
+  })
+
+  it('counts down a wrong code for an address without an account the same as for one with', async () => {
+    const known = await logIn('tjalle@example.org')
+    const unknown = await logIn('sietske@example.org')
+    const refOf = (result: typeof known.result) => (result.answer === 'sent' ? result.ref : '')
+
+    for (const { ref, tries } of [
+      { ref: refOf(known.result), tries: 4 },
+      { ref: refOf(unknown.result), tries: 4 },
+    ]) {
+      expect(await codeTriesLeft(database.db, ref, later(1))).toBe(5)
+      expect(await confirmWithCode(database.db, ref, '000000', later(1))).toEqual({ answer: 'gone' })
+      expect(await codeTriesLeft(database.db, ref, later(1))).toBe(tries)
+    }
+
+    // The row of the unknown address keeps no address and never logs in, whatever the code.
+    const decoy = (await database.db.select().from(supporterLoginLinks)).find((link) => link.userId === null)
+
+    expect(decoy).toMatchObject({ email: '', screenName: '', screenNameKey: '' })
+
+    for (let code = 0; code < 4; code++) {
+      await confirmWithCode(database.db, refOf(unknown.result), String(code).padStart(6, '0'), later(2))
+    }
+
+    expect(await codeTriesLeft(database.db, refOf(unknown.result), later(2))).toBe(0)
+    expect(await database.db.select().from(supporters)).toHaveLength(1)
   })
 
   it('mails a blocked account too, which can log in', async () => {

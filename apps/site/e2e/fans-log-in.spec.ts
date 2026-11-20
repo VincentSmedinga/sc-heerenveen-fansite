@@ -97,7 +97,7 @@ test.describe('without JavaScript', () => {
 test('logs out on every device', async ({ baseURL, browser, page }) => {
   const { address } = await account(page)
   // A second device: a context of its own, with cookies of its own.
-  const device = await browser.newContext({ baseURL })
+  const device = await browser.newContext(baseURL === undefined ? {} : { baseURL })
   const other = await device.newPage()
 
   for (const [tab, count] of [
