@@ -4,10 +4,12 @@ import { cookies } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 
 import { getDatabase } from '../database'
-import { absoluteLifetime, findSession } from './sessions'
+import { cookieOptionsOf } from '../login/account-kind'
+import { adminKind } from './admin-login'
+import { findSession } from './sessions'
 
 /** The name of the cookie of the admin. It is the only cookie the site sets. */
-export const sessionCookieName = 'beheer-sessie'
+export const sessionCookieName = adminKind.cookie.name
 
 /** The address of the login page, where somebody without a session goes. */
 export const loginPath = '/beheer/inloggen'
@@ -23,13 +25,7 @@ export const loginPath = '/beheer/inloggen'
  * `Host` header or the protocol of the request, which the sender picks. A built site, on
  * acceptance, in production and in the checks, always sets `Secure`.
  */
-export const sessionCookieOptions = {
-  httpOnly: true,
-  maxAge: absoluteLifetime / 1000,
-  path: '/beheer',
-  sameSite: 'lax',
-  secure: process.env.NODE_ENV !== 'development',
-} as const
+export const sessionCookieOptions = cookieOptionsOf(adminKind)
 
 /** The account that is logged in. */
 export type AdminContext = { email: string; firstName: string; role: AdminRole; userId: number }
