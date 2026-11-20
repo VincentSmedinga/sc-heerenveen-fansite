@@ -33,7 +33,9 @@ export type ExportRule =
  * Every table of the schema, with what the export does with it.
  *
  * `structure`: the five tables the nightly dump leaves empty too (see `structureOnlyTables` in
- * backup.ts) and `admin_login_attempts`, which holds the hash of an address for 15 minutes.
+ * backup.ts) and `admin_login_attempts`, which holds the hash of an address for 15 minutes. The
+ * four tables of the accounts of supporters (issue 1446) too, for now: what of them the copy
+ * may hold is for issue 1462.
  *
  * `admin_users`: the address and the first name are what in the database says who an account
  * is. The first name becomes "Account" and the number. The number, the role, the choice for the
@@ -102,6 +104,10 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
   stadiums: 'copy',
   staff: 'copy',
   standings: 'copy',
+  supporter_login_attempts: 'structure',
+  supporter_login_links: 'structure',
+  supporter_sessions: 'structure',
+  supporters: 'structure',
   unavailable_marks: 'copy',
   visitor_hashes: 'structure',
   visitor_salts: 'structure',

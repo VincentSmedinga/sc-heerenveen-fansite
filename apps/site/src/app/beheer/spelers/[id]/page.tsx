@@ -28,12 +28,12 @@ import { findAdminPlayer, mostPersonChoices, playerValuesOf, searchPersons } fro
 import { requireRole } from '#src/beheer/require-role'
 import { SaveButtons } from '#src/beheer/SaveButtons'
 import { getDatabase } from '#src/database'
+import { FocusOnLoad } from '#src/FocusOnLoad'
 import { describeShowDelay } from '#src/matches'
 
 import { submitPlayer, submitRemovePlayer } from '../actions'
 import { listPath, mergePagePath, playerPath } from '../paths'
 import { PlayerForm } from '../PlayerForm'
-import { FocusOnLoad } from './FocusOnLoad'
 
 // Render on each request: the player changes with every save and every import.
 export const dynamic = 'force-dynamic'

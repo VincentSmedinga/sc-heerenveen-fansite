@@ -1,9 +1,20 @@
-import type { adminLoginAttempts, adminLoginLinks, adminSessions, adminUsers } from '@fansite/db/schema'
+import type {
+  adminLoginAttempts,
+  adminLoginLinks,
+  adminSessions,
+  adminUsers,
+  supporterLoginAttempts,
+  supporterLoginLinks,
+  supporters,
+  supporterSessions,
+} from '@fansite/db/schema'
 
-// The tables of a kind of account all have the shape of the tables of the admin: an account
+// The tables of a kind of account all have the columns of the tables of the admin: an account
 // with an address and a switch for turning it off, the login links with their codes, the
 // sessions and the requests for the rate limit. The module makes no tables and knows nothing
-// of what else an account has, such as a role.
+// of what else an account has, such as a role or a screen name. The tables of supporters have
+// more: a link without an account (a sign-up) and a request without an address (for the
+// ceiling of sign-ups). The module leaves those rows alone.
 
 /**
  * Everything that differs between one kind of account and another (the admin, or later the
@@ -14,6 +25,11 @@ export type AccountKind = {
   absoluteLifetime: number
   /** How many wrong codes a login code takes; the next try, right or wrong, is refused. */
   codeAttempts: number
+  /**
+   * Whether the last wrong code that `codeAttempts` takes ends the link of the mail too, so
+   * neither works after it. The admin keeps its link working.
+   */
+  codeFailuresEndLink: boolean
   cookie: {
     /** How long the browser keeps the cookie, in seconds. */
     maxAge: number
@@ -33,13 +49,23 @@ export type AccountKind = {
   tables: AccountTables
 }
 
-/** What the module needs of the tables of one kind of account. */
-export type AccountTables = {
-  attempts: typeof adminLoginAttempts
-  links: typeof adminLoginLinks
-  sessions: typeof adminSessions
-  users: typeof adminUsers
-}
+/** An account of a kind, as its table holds it. */
+export type AccountOf<Kind extends AccountKind> = Kind['tables']['users']['$inferSelect']
+
+/** What the module needs of the tables of a kind of account: of the admin or of supporters. */
+export type AccountTables =
+  | {
+      attempts: typeof adminLoginAttempts
+      links: typeof adminLoginLinks
+      sessions: typeof adminSessions
+      users: typeof adminUsers
+    }
+  | {
+      attempts: typeof supporterLoginAttempts
+      links: typeof supporterLoginLinks
+      sessions: typeof supporterSessions
+      users: typeof supporters
+    }
 
 /** The rate limit: so many login links per address, and for the whole site, in one window. */
 export type LoginLimits = { perAddress: number; perSite: number; windowMilliseconds: number }

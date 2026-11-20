@@ -645,6 +645,13 @@
       "when": 1795044486479,
       "tag": "0091_add_standings_competition",
       "breakpoints": true
+    },
+    {
+      "idx": 92,
+      "version": "5",
+      "when": 1795210880841,
+      "tag": "0092_add_supporter_accounts",
+      "breakpoints": true
     }
   ]
 }

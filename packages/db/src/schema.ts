@@ -434,6 +434,106 @@ export const adminLoginAttempts = mysqlTable(
   ],
 )
 
+/** The most characters of a screen name of a supporter (issue 1446). */
+export const screenNameMaxLength = 20
+
+/** The most characters of the reason why the editors blocked the account of a supporter. */
+export const blockReasonMaxLength = 500
+
+/**
+ * The accounts of supporters, for the chapter Fans (issue 1446). They are apart from the
+ * accounts of the admin: a supporter is never in `admin_users` and never reaches /beheer. An
+ * account exists only after its address was confirmed with the link or the code in the mail.
+ * `screen_name` is what other supporters see, `screen_name_key` its normalised form (see
+ * screen-name.ts in the site), unique, so two names that look the same can't both exist.
+ * `email` is lowercase and is never shown to anyone else. `in_rankings` is whether the name is
+ * in the tables of the games. `last_visit_on` is a day, not a time. `disabled_at` and
+ * `disabled_reason` are whether and why the editors blocked the account; the shared code of the
+ * login calls that turned off. The site keeps no IP address, browser, real name, birth date or
+ * place. Times are UTC.
+ */
+export const supporters = mysqlTable('supporters', {
+  id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+  screenName: varchar('screen_name', { length: screenNameMaxLength }).notNull(),
+  screenNameKey: varchar('screen_name_key', { length: 40 }).notNull().unique(),
+  email: varchar('email', { length: 254 }).notNull().unique(),
+  inRankings: boolean('in_rankings').notNull().default(true),
+  createdAt: datetime('created_at')
+    .notNull()
+    .default(sql`(UTC_TIMESTAMP())`),
+  lastVisitOn: date('last_visit_on', { mode: 'string' }),
+  screenNameChangedAt: datetime('screen_name_changed_at'),
+  disabledAt: datetime('disabled_at'),
+  disabledReason: varchar('disabled_reason', { length: blockReasonMaxLength }),
+})
+
+export type Supporter = typeof supporters.$inferSelect
+
+/**
+ * The links and codes that were mailed to supporters, until they are used or expire, like
+ * `admin_login_links`. A row is one of two things. A login link has `supporter_id`. A sign-up
+ * has no account yet: it holds the address, the screen name and its normalised form that were
+ * asked for, and the account is made only when the link or the code is used. So a sign-up that
+ * is never confirmed leaves nothing behind once the row is removed, 15 minutes later, and its
+ * screen name is not taken in the meantime. The table keeps the SHA-256 of the token and of the
+ * code, never the token or the code. Times are UTC.
+ */
+export const supporterLoginLinks = mysqlTable(
+  'supporter_login_links',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    tokenHash: varchar('token_hash', { length: 64 }).notNull().unique(),
+    userId: int('supporter_id', { unsigned: true }).references(() => supporters.id, { onDelete: 'cascade' }),
+    expiresAt: datetime('expires_at').notNull(),
+    refHash: varchar('ref_hash', { length: 64 }).unique(),
+    codeHash: varchar('code_hash', { length: 64 }),
+    failedAttempts: int('failed_attempts', { unsigned: true }).notNull().default(0),
+    email: varchar('email', { length: 254 }),
+    screenName: varchar('screen_name', { length: screenNameMaxLength }),
+    screenNameKey: varchar('screen_name_key', { length: 40 }),
+  },
+  (table) => [
+    check(
+      'supporter_login_links_login_or_sign_up',
+      sql`(${table.userId} IS NOT NULL AND ${table.email} IS NULL AND ${table.screenName} IS NULL AND ${table.screenNameKey} IS NULL) OR (${table.userId} IS NULL AND ${table.email} IS NOT NULL AND ${table.screenName} IS NOT NULL AND ${table.screenNameKey} IS NOT NULL)`,
+    ),
+  ],
+)
+
+/**
+ * The sessions of supporters, on the server, like `admin_sessions`. The cookie `fans-sessie`
+ * holds a random token and nothing else; the table keeps its SHA-256. Times are UTC.
+ */
+export const supporterSessions = mysqlTable('supporter_sessions', {
+  id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+  tokenHash: varchar('token_hash', { length: 64 }).notNull().unique(),
+  userId: int('supporter_id', { unsigned: true })
+    .notNull()
+    .references(() => supporters.id, { onDelete: 'cascade' }),
+  createdAt: datetime('created_at').notNull(),
+  lastSeenAt: datetime('last_seen_at').notNull(),
+})
+
+/**
+ * The requests of supporters for a mail, for the limits, like `admin_login_attempts`. A row
+ * with `address_hash` is a request for one address, signing up and logging in together; it is
+ * removed after 15 minutes. A row without one is a sign-up for the ceiling of the whole site,
+ * which counts per hour, and is removed after an hour: it holds a time and nothing else. No IP
+ * address. Times are UTC.
+ */
+export const supporterLoginAttempts = mysqlTable(
+  'supporter_login_attempts',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    addressHash: varchar('address_hash', { length: 64 }),
+    attemptedAt: datetime('attempted_at').notNull(),
+  },
+  (table) => [
+    index('supporter_login_attempts_address_hash_attempted_at_idx').on(table.addressHash, table.attemptedAt),
+    index('supporter_login_attempts_attempted_at_idx').on(table.attemptedAt),
+  ],
+)
+
 export const auditActions = [
   'item.hide',
   'item.show',

@@ -1502,6 +1502,15 @@ Zoals `SITE_ENV` leest de site ze als de server draait, dus de pagina's die ze g
 De rooktest en de e2e-tests starten de site met alles aan; de rooktest start hem ook met alles uit en verwacht dan "niet gevonden" op `/fans`, en een 200 als de onderdelen aan staan.
 Het hoofdmenu en de balk met de spellen komen uit `fansMenu()` in `src/fans.ts`, dat de lay-out bij elk verzoek aanroept.
 
+## Een account voor supporters
+
+Een supporter maakt een account op `/fans/aanmelden`, met een schermnaam en een e-mailadres, en bevestigt het adres met de link of de code uit de mail.
+Lokaal, zonder mailserver, staat de mail met de link en de code in het logboek van `pnpm dev`.
+De code staat in `src/fans`: de regels van de schermnaam in `screen-name.ts`, het aanmelden en de limieten in `sign-up.ts`, de instelling voor de gedeelde code van het inloggen in `supporter-login.ts`, en `requireSupporter()` in `require-supporter.ts`.
+Elke persoonlijke pagina en actie onder `/fans` begint met `requireSupporter()`; `src/fans/routes.test.ts` faalt voor een die dat niet doet.
+De tabellen zijn `supporters`, `supporter_login_links`, `supporter_sessions` en `supporter_login_attempts`, los van die van het beheer.
+Het cookie heet `fans-sessie` en gaat alleen mee naar de pagina's onder `/fans`.
+
 ## Icoon en manifest
 
 De site is installeerbaar: een bezoeker kan hem als app op een computer zetten of op het beginscherm van een telefoon.
