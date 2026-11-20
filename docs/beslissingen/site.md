@@ -6771,4 +6771,5 @@
   De plek die het zegt staat in `packages/shared`, zodat de importer en cron dezelfde instellingen lezen.
 - **Waarom:** zo kiest de projecteigenaar zelf het moment waarop een onderdeel live gaat, en zet hij het met dezelfde regel weer uit.
   Acceptatie toont alleen `main`, dus daar is alles te testen op de echte host.
-- **Alternatieven:** een lange branch `fans` met een branch per onderdeel. Die viel af: de migraties staan genummerd in één lijst en zouden botsen met elke migratie op `main`, acceptatie toont alleen `main`, en de controles, de releases en het opruimen gaan allemaal uit van `main`.
+- **Alternatieven:** een lange branch `fans` met een branch per onderdeel.
+  Die viel af: de migraties staan genummerd in één lijst en zouden botsen met elke migratie op `main`, acceptatie toont alleen `main`, en de controles, de releases en het opruimen gaan allemaal uit van `main`.
