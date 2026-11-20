@@ -11,6 +11,7 @@
     "./continents": "./src/continents.ts",
     "./countries": "./src/countries.ts",
     "./env": "./src/env.ts",
+    "./fans-env": "./src/fans-env.ts",
     "./mail": "./src/mail.ts",
     "./mail-env": "./src/mail-env.ts",
     "./match-report": "./src/match-report.ts",

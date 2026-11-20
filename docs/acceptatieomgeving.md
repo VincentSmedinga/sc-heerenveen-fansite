@@ -43,6 +43,15 @@ Dan krijgt elk antwoord de header `X-Robots-Tag: noindex, nofollow`, en weigert 
 `DATABASE_URL` wijst naar de database van acceptatie (stap 3 hieronder), en de mailvariabelen naar de brievenbus van de redactie (stap 11).
 Zonder een van deze start de site niet.
 
+Een tweede groep variabelen zet de onderdelen van het hoofdstuk Fans aan of uit: `FANS_ACCOUNTS`, `FANS_PROGNOSE`, `FANS_UITBLINKER`, `FANS_VIER` en `FANS_FANTEST`, elk met de waarde `on` of `off`.
+Een ontbrekende regel betekent uit, en een andere waarde stopt de site bij het opstarten.
+De site leest ze als de server draait, dus een andere waarde en een herstart van de app zijn genoeg, zonder nieuwe build.
+De vier spellen staan uit zolang `FANS_ACCOUNTS` uit staat, wat hun eigen regel ook zegt.
+Op acceptatie staan alle vijf aan: zet de vijf regels in `~/fansite-acceptatie.env` en bij de omgevingsvariabelen van de app.
+Op productie zet je niets tot de projecteigenaar een onderdeel live wil hebben; dan komt alleen de regel van dat onderdeel erbij, met `on`, en de regel van `FANS_ACCOUNTS` voor de spellen.
+Uit betekent: geen menu-item, geen kaart, `/fans` en alles eronder antwoorden "niet gevonden", en er gaat geen mail uit.
+De tabellen bestaan altijd, want de migraties draaien ook als een onderdeel uit staat.
+
 ## Het schema en de bronnen
 
 De site zet de database zelf klaar als de host hem start.
@@ -289,6 +298,11 @@ Zo zet je het aan:
    ```sh
    ALERT_MAIL_TO=eigenaar@voorbeeld.nl
    SITE_ENV=acceptance
+   FANS_ACCOUNTS=on
+   FANS_PROGNOSE=on
+   FANS_UITBLINKER=on
+   FANS_VIER=on
+   FANS_FANTEST=on
    SMTP_HOST=...
    SMTP_PORT=...
    SMTP_USER=...
@@ -744,4 +758,5 @@ De eerste deploy, op 21 oktober 2026, en de eerste run van de importer, op 23 ok
 
 Productie komt met #33, met een eigen omgeving in GitHub en een eigen app op de hosting.
 Die app krijgt `SITE_ENV=production`; zonder die waarde blijft de site uit de zoekmachines.
+De regels van `FANS_` laat hij weg, zodat het hoofdstuk Fans uit staat tot de projecteigenaar een regel zet.
 De back-ups van productie gaan zoals in [`back-ups.md`](back-ups.md), met een eigen bestand met instellingen en een eigen map.

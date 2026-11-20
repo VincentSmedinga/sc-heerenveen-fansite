@@ -1480,6 +1480,17 @@ Het beheer (`/beheer`) krijgt die header op elke omgeving, ook op `production`, 
 De site leest `SITE_ENV` als de server draait, dus dezelfde build kan naar elke omgeving.
 Zonder geldige `SITE_ENV` start de server niet.
 
+## Onderdelen van Fans aan of uit
+
+Elk onderdeel van het hoofdstuk Fans heeft een eigen instelling: `FANS_ACCOUNTS`, `FANS_PROGNOSE`, `FANS_UITBLINKER`, `FANS_VIER` en `FANS_FANTEST`, met `on` of `off`.
+Een ontbrekende regel betekent uit.
+`readFans()` en de hulpfuncties in `packages/shared/src/fans-env.ts` zijn de enige plek die dat zegt; pagina's, menu's, kaarten, acties en mail lezen de omgeving niet zelf.
+Gebruik `requireFansPart(part, notFound)` bovenaan een pagina of actie, `fansMenuItems()` voor het menu, `fansCard()` voor een kaart en `sendFansMail()` voor een mail.
+De importer en de opdrachten van cron gebruiken `runFansJob()`.
+De spellen staan uit zolang accounts uit staan.
+Zoals `SITE_ENV` leest de site ze als de server draait, dus de pagina's die ze gebruiken rekenen per verzoek (`dynamic = 'force-dynamic'`) en niet tijdens de build.
+De rooktest en de e2e-tests starten de site met alles aan; de rooktest start hem ook met alles uit en verwacht dan "niet gevonden" op `/fans`, en zodra die pagina er is ook een 200 als de onderdelen aan staan.
+
 Op `production` verwijst `/robots.txt` naar `/sitemap.xml`.
 De sitemap, de canonieke URL's en de Open Graph-tags beginnen met het adres van de omgeving (`originOf()` in `src/env.ts`).
 Elke pagina staat met zijn beschrijving in `src/pages.ts`, en haalt zijn metadata uit `pageMetadata()` in `src/metadata.ts`.
