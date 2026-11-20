@@ -1,6 +1,6 @@
 import type { Database } from '@fansite/db/client'
 
-import { and, count, eq, gt, lt } from 'drizzle-orm'
+import { and, count, eq, gt, isNotNull, lt } from 'drizzle-orm'
 import { setTimeout as sleep } from 'node:timers/promises'
 
 import type { AccountKind } from './account-kind'
@@ -72,6 +72,40 @@ export async function handleLoginRequest(
 }
 
 /**
+ * Makes a login link for an account, with its code bound to `ref`, and gives what goes in the
+ * mail: the code and the address of `page` with the token. One code at a time: an earlier link
+ * keeps working, but its code doesn't, so asking again doesn't give somebody more tries at a
+ * code.
+ */
+export async function issueLoginLink(
+  db: Database,
+  kind: AccountKind,
+  userId: number,
+  ref: string,
+  now: Date,
+  page: URL,
+) {
+  const { links } = kind.tables
+  const token = newToken()
+  const code = newCode()
+
+  await db.update(links).set({ codeHash: null, refHash: null }).where(eq(links.userId, userId))
+  await db.insert(links).values({
+    codeHash: codeHashOf(ref, code),
+    expiresAt: new Date(now.getTime() + kind.linkLifetime),
+    refHash: hashOf(ref),
+    tokenHash: hashOf(token),
+    userId,
+  })
+
+  const url = new URL(page)
+
+  url.searchParams.set('token', token)
+
+  return { code, url: url.href }
+}
+
+/**
  * Notes one request for a login link in the rate limit, and says whether it is within the
  * limits: not when this address has had too many links in the window, or the whole site. The
  * request counts for every address, with an account or not. A request over the limit is
@@ -84,14 +118,19 @@ export async function noteAttempt(db: Database, kind: AccountKind, email: string
   const since = new Date(now.getTime() - limits.windowMilliseconds)
   const addressHash = hashOf(email)
 
-  await db.delete(attempts).where(lt(attempts.attemptedAt, since))
+  // A row without an address is not of this limit (the ceiling of sign-ups of supporters), so
+  // it is left alone and not counted.
+  await db.delete(attempts).where(and(isNotNull(attempts.addressHash), lt(attempts.attemptedAt, since)))
 
   const [inserted] = await db.insert(attempts).values({ addressHash, attemptedAt: now })
   const [forAddress] = await db
     .select({ total: count() })
     .from(attempts)
     .where(and(eq(attempts.addressHash, addressHash), gt(attempts.attemptedAt, since)))
-  const [forSite] = await db.select({ total: count() }).from(attempts).where(gt(attempts.attemptedAt, since))
+  const [forSite] = await db
+    .select({ total: count() })
+    .from(attempts)
+    .where(and(isNotNull(attempts.addressHash), gt(attempts.attemptedAt, since)))
 
   if ((forAddress?.total ?? 0) > limits.perAddress || (forSite?.total ?? 0) > limits.perSite) {
     await db.delete(attempts).where(eq(attempts.id, inserted.insertId))
@@ -110,7 +149,7 @@ async function decide(
   origin: string,
   rules: { normalise: (value: string) => string | undefined; path: string },
 ) {
-  const { links, users } = kind.tables
+  const { users } = kind.tables
   const email = rules.normalise(value)
 
   if (email === undefined) {
@@ -131,23 +170,7 @@ async function decide(
     return { answer: 'sent' as const, ref }
   }
 
-  const token = newToken()
-  const code = newCode()
+  const mail = await issueLoginLink(db, kind, account.id, ref, now, new URL(rules.path, origin))
 
-  // One code at a time: an earlier link keeps working, but its code doesn't, so asking again
-  // doesn't give somebody more tries at a code.
-  await db.update(links).set({ codeHash: null, refHash: null }).where(eq(links.userId, account.id))
-  await db.insert(links).values({
-    codeHash: codeHashOf(ref, code),
-    expiresAt: new Date(now.getTime() + kind.linkLifetime),
-    refHash: hashOf(ref),
-    tokenHash: hashOf(token),
-    userId: account.id,
-  })
-
-  const url = new URL(rules.path, origin)
-
-  url.searchParams.set('token', token)
-
-  return { answer: 'sent' as const, mail: { code, to: email, url: url.href }, ref }
+  return { answer: 'sent' as const, mail: { ...mail, to: email }, ref }
 }

@@ -20,6 +20,7 @@ const start = new Date('2026-10-26T10:00:00Z')
 const other = {
   absoluteLifetime: 120 * minute,
   codeAttempts: 2,
+  codeFailuresEndLink: false,
   cookie: { maxAge: 7200, name: 'other-session', path: '/other' },
   idleLifetime: 30 * minute,
   limits: { perAddress: 1, perSite: 2, windowMilliseconds: 5 * minute },

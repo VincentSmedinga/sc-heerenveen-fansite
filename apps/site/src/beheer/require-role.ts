@@ -8,7 +8,7 @@ import { cookieOptionsOf } from '../login/account-kind'
 import { adminKind } from './admin-login'
 import { findSession } from './sessions'
 
-/** The name of the cookie of the admin. It is the only cookie the site sets. */
+/** The name of the cookie of the admin. The only other cookie is that of supporters (/fans). */
 export const sessionCookieName = adminKind.cookie.name
 
 /** The address of the login page, where somebody without a session goes. */

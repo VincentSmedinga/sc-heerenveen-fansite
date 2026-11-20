@@ -41,8 +41,9 @@ const src = path.resolve(import.meta.dirname, '..')
 const admin = path.join(src, 'app/beheer')
 
 /**
- * The pages and actions that anybody may call: the way in to the admin, and the contact form of
- * the site. Every other page, route and action needs requireRole, wherever it is: a new action
+ * The pages and actions that anybody may call: the way in to the admin, the contact form of
+ * the site and the actions of signing up as a supporter (src/fans/routes.test.ts goes through
+ * /fans). Every other page, route and action needs requireRole, wherever it is: a new action
  * outside /beheer must be named here, on purpose.
  */
 const open = [
@@ -51,6 +52,7 @@ const open = [
   'app/beheer/inloggen/page.tsx',
   'app/beheer/inloggen/verstuurd/page.tsx',
   'app/contact/actions.ts',
+  'app/fans/aanmelden/actions.ts',
 ]
 
 /** Every file under a folder, as paths relative to src with forward slashes. */
@@ -120,7 +122,10 @@ describe('the admin', () => {
 
   it('names as open only files that exist, and no file that a visitor without a session should not reach', () => {
     expect([...routes, ...actionFiles].filter((file) => open.includes(file)).toSorted()).toEqual(open)
-    expect(open.filter((file) => !file.startsWith('app/beheer/inloggen/'))).toEqual(['app/contact/actions.ts'])
+    expect(open.filter((file) => !file.startsWith('app/beheer/inloggen/'))).toEqual([
+      'app/contact/actions.ts',
+      'app/fans/aanmelden/actions.ts',
+    ])
   })
 
   it('calls requireRole in every page, route and action that is not open', () => {
