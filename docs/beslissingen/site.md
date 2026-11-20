@@ -538,6 +538,8 @@
 - **Alternatieven:** de token zelf bewaren (een gelekte database logt dan in); een ondertekend cookie met een einddatum (niet in te trekken zonder lijst op de server).
 - **Later:** zie _Alleen de ontwikkelserver zet het cookie van het beheer zonder Secure_ (1 november 2026): `Secure` geldt niet meer onder `NODE_ENV=development`, omdat Safari het cookie anders niet bewaart op `http://localhost`.
   De rest van deze beslissing blijft.
+- **Later:** sinds _Een supporter maakt een account met een schermnaam en een e-mailadres_ (20 november 2026) is `beheer-sessie` niet meer het enige cookie.
+  Een supporter met een account krijgt `fans-sessie`, alleen voor de pagina's onder `/fans`.
 - **Later:** zie _Het hoofdmenu toont Beheer voor wie ingelogd is, met een teken in `localStorage`_ (2 november 2026): het cookie blijft het enige cookie en gaat nog steeds alleen naar `/beheer`, maar de browser bewaart daarnaast een teken in `localStorage` dat alleen het menu verandert.
 - **Later:** zie _Een sessie duurt 9 dagen zonder gebruik en 14 dagen hoe dan ook_ (8 november 2026): de 12 uur en 7 dagen, en het `Max-Age` van 7 dagen, zijn 9 en 14 dagen geworden.
   De rest van deze beslissing blijft.
@@ -6825,3 +6827,63 @@
 - **Waarom:** twee kopieën van dezelfde beveiligingscode lopen uit elkaar, en een fout die in de ene wordt hersteld, blijft in de andere staan.
   Een eigen pull request houdt de review klein: er verandert alleen bestaande code, en het beheer moet precies hetzelfde blijven doen.
 - **Alternatieven:** de code kopiëren voor supporters; het delen in dezelfde pull request doen als het aanmelden (te groot voor één review).
+- **Later:** #1446 geeft de module de tabellen van supporters erbij (zie _Een supporter maakt een account met een schermnaam en een e-mailadres_).
+  `AccountTables` is nu de tabellen van het beheer of die van supporters.
+  Twee dingen kwamen erbij, met voor het beheer dezelfde werking als ervoor: `codeFailuresEndLink`, en rijen zonder adres in de tabel van de pogingen, die de module laat staan.
+
+## Een supporter maakt een account met een schermnaam en een e-mailadres
+
+- **Datum:** 20 november 2026
+- **Besluit:** aanmelden vraagt alleen een schermnaam en een e-mailadres (#1446).
+  Het adres wordt bewezen met een link en een code per e-mail.
+- **Waarom:** de oude Fansite bewees een adres ook met een gemailde code, en vroeg daarna een wachtwoord en persoonlijke gegevens.
+  Die laatste twee hebben we niet nodig.
+  De code helpt op een telefoon waar de mail in een andere app opent.
+- **Alternatieven:** ook een naam, woonplaats of geboortedatum vragen (gegevens zonder doel); alleen een link zonder code (lastig als de mail op een ander apparaat binnenkomt).
+
+- **Datum:** 20 november 2026
+- **Besluit:** één account per bevestigd e-mailadres, zonder verdere controle op dubbele accounts.
+  De site bewaart geen IP-adressen.
+- **Waarom:** zonder prijzen levert een tweede account weinig op.
+  Drie goedkope drempels zijn genoeg: limieten op aanmelden, de regel dat een cijfer alleen telt van een account dat voor de aftrap bestond (bij de Uitblinker), en een redactie die nieuwe accounts ziet.
+- **Alternatieven:** IP-adressen of kenmerken van de browser bewaren (past niet bij de belofte dat we bezoekers met rust laten).
+
+- **Datum:** 20 november 2026
+- **Besluit:** de tabellen van supporters staan los van die van het beheer: `supporters`, `supporter_login_links`, `supporter_sessions` en `supporter_login_attempts`.
+  De code van het inloggen is gedeeld (#1486), met de instelling `supporterKind` in `apps/site/src/fans/supporter-login.ts`.
+  `requireSupporter` in `apps/site/src/fans/require-supporter.ts` is de ene controle voor een ingelogde supporter, en `src/fans/routes.test.ts` loopt elke pagina en actie onder `/fans` langs.
+- **Waarom:** een supporter mag nooit per ongeluk bij het beheer komen, en twee kopieën van dezelfde beveiligingscode lopen uit elkaar.
+- **Alternatieven:** één tabel met een rol "supporter" (één fout in een controle geeft toegang tot het beheer); de code kopiëren.
+
+- **Datum:** 20 november 2026
+- **Besluit:** een aanmelding die nog niet is bevestigd, is een rij in `supporter_login_links` zonder account, met het adres, de schermnaam en de genormaliseerde vorm.
+  Het account komt pas in `supporters` bij de knop achter de link of bij de juiste code.
+  Na 15 minuten haalt het volgende verzoek de rij weg.
+  Een schermnaam is uniek in `supporters`, niet bij de aanmeldingen: wie als tweede bevestigt, hoort dat de naam intussen bezet is en kiest een andere.
+- **Waarom:** zo laat een aanmelding zonder bevestiging niets achter, en houdt niemand een naam vast met een adres dat hij niet heeft.
+  De link en de code werken dan precies als bij het inloggen, met dezelfde code.
+- **Alternatieven:** het account meteen maken met een vlag "onbevestigd" (laat een rij achter en houdt de naam vast); een vijfde tabel voor aanmeldingen (het issue vraagt vier tabellen, en de rij lijkt op een inloglink).
+
+- **Datum:** 20 november 2026
+- **Besluit:** meldt een adres zich aan dat al een account heeft, dan krijgt het de mail om in te loggen, met een link naar dezelfde bevestigingspagina.
+  Die pagina toont dan Inloggen in plaats van Bijna klaar.
+  De schermnaam van het formulier telt dan niet.
+- **Waarom:** het formulier zegt zo niet wie een account heeft, en wie zich vergist, komt toch binnen.
+  De pagina voor het inloggen komt pas met #1448.
+- **Alternatieven:** niets mailen (de supporter wacht dan op een mail die niet komt); een eigen pagina voor het inloggen in dit issue (dat is #1448).
+
+- **Datum:** 20 november 2026
+- **Besluit:** de genormaliseerde vorm van een schermnaam is in kleine letters, zonder accenten, zonder spaties, `-` en `_`, met tekens die op elkaar lijken als één teken: 0 als o, 1 en i als l, 3 als e, 4 als a, 5 als s, 7 als t, rn als m en vv als w.
+  Letters als ø, ß en æ worden o, ss en ae.
+  Een schermnaam heeft alleen letters uit het Latijnse alfabet (Latin-1 en Latin Extended-A, met Ș en Ț), cijfers, enkele spaties, `-` en `_`.
+- **Waarom:** "Tjalle99", "tjálle 99" en "TJALLE_99" zien er in een ranglijst hetzelfde uit, en "Heer3nveen" leest als de club.
+  Dezelfde vorm vergelijkt ook met de lijst van geweigerde namen.
+- **Alternatieven:** alleen hoofdletters en accenten gelijk maken (een nul voor een o gaat er dan door); de tabel met verwarrende tekens van Unicode (groot, en voor Latijnse letters alleen is een korte lijst genoeg).
+
+- **Datum:** 20 november 2026
+- **Besluit:** het plafond van 30 aanmeldingen geldt per uur van de klok, voor de hele site, en telt ook een aanmelding van een bekend adres.
+  Elke aanmelding is een rij in `supporter_login_attempts` zonder adres, met alleen de tijd, die na dat uur weggaat.
+  De eerste aanmelding boven het plafond houdt haar rij, als teken dat de redactie dat uur haar ene mail al kreeg.
+- **Waarom:** een uur van de klok maakt "tot het uur om is" eenduidig, en een rij zonder adres bewaart niets over een persoon.
+  Een bekend adres telt mee, zodat het plafond niet verraadt wie een account heeft.
+- **Alternatieven:** een schuivend uur (dan komt de mail aan de redactie bij een lange golf meer dan één keer); de rijen met adres een uur bewaren (het issue zegt 15 minuten).
