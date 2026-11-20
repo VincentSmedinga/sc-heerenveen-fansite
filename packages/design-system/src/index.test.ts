@@ -7,6 +7,7 @@ import * as designSystem from './index'
 const root = join(import.meta.dirname, '..')
 
 const components = [
+  'AccountButton',
   'Article',
   'ArticleCard',
   'BarChart',
@@ -50,6 +51,7 @@ const components = [
   'PitchPlayer',
   'RecordTable',
   'Root',
+  'RoundButton',
   'Select',
   'SideBySide',
   'StandingsTable',

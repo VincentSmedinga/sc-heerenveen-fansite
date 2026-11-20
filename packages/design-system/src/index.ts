@@ -3,6 +3,9 @@
  * styles are in index.css, which the site imports as well.
  */
 
+export { AccountButton, accountButtonTargets } from './components/account-button/AccountButton'
+export type { AccountButtonProps } from './components/account-button/AccountButton'
+export { screenNameInitials } from './components/account-button/initials'
 export { ArticleCard } from './components/article-card/ArticleCard'
 export type { ArticleCardProps } from './components/article-card/ArticleCard'
 export { Article } from './components/article/Article'
@@ -220,6 +223,8 @@ export { RecordTable } from './components/record-table/RecordTable'
 export type { RecordTableProps, RecordTableRow } from './components/record-table/RecordTable'
 export { Root } from './components/root/Root'
 export type { RootProps } from './components/root/Root'
+export { RoundButton, roundButtonSurfaces } from './components/round-button/RoundButton'
+export type { RoundButtonProps, RoundButtonSurface } from './components/round-button/RoundButton'
 export { choosesByKey, SeasonPicker } from './components/season-picker/SeasonPicker'
 export type { SeasonPickerOption, SeasonPickerProps } from './components/season-picker/SeasonPicker'
 export { SegmentedControl } from './components/segmented-control/SegmentedControl'

@@ -1,0 +1,116 @@
+/*
+ * The round button (RoundButton): a button or a link with only an icon, round, 44 by 44 pixels,
+ * with an icon of 26 pixels. The ThemeButton, the Page.TopLink and the AccountButton are built on
+ * it, so the three look the same.
+ *
+ * At rest it is quiet: only the icon, without a rim or a fill. Under the mouse, pressed and with
+ * the keyboard (:focus-visible) it comes forward: the icon in a stronger colour, with a rim and a
+ * fill. The surface sets the colours:
+ *
+ * - on the page (hf-round-button-page) they are those of links: the blue of a link
+ *   (--hf-colour-text-link) and under the mouse the blue of a link under the mouse
+ *   (--hf-colour-text-link-hover). The rim and the fill are tints of the colour of the icon
+ *   (currentcolor), 55% and 14%, so no colour of their own comes in;
+ * - on the header (hf-round-button-header) they are the tokens for the dark blue of the header,
+ *   which is the same in both themes: the quiet icon (--hf-colour-icon-on-header-quiet), and
+ *   forward the text of the header, with the rim and the fill of the header. Those are the same
+ *   tints of blue-200, see colour.css.
+ *
+ * The small size (hf-size-small) is 36 by 36 pixels, with an icon of 22 pixels.
+ *
+ * The rim is there at rest as well, but see-through, so the button does not change size when it
+ * comes forward, and a browser in forced colours keeps an outline: the colour of a button or of
+ * a link, after what it is. The base styles of a button fill it, and those of a link colour it
+ * under the mouse, also on a touch screen after a tap; this comes later in the cascade, so it is
+ * not left lit. Hover is only for devices with a mouse (hover: hover), so nothing stays lit after
+ * a tap on a phone; pressing (:active) counts on touch as well. The change takes the short motion
+ * duration (0,2 seconds), and none with reduced motion. The focus ring is the one of the page, or
+ * of the header, drawn around the rim.
+ */
+
+@layer hf.components {
+  .hf-round-button {
+    align-items: center;
+    background-color: transparent;
+    block-size: 2.75rem;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    box-sizing: border-box;
+    color: var(--hf-round-button-colour);
+    display: inline-flex;
+    inline-size: 2.75rem;
+    justify-content: center;
+    padding: 0;
+    text-decoration: none;
+    transition:
+      background-color var(--hf-motion-duration-short) var(--hf-motion-ease-change),
+      border-color var(--hf-motion-duration-short) var(--hf-motion-ease-change),
+      color var(--hf-motion-duration-short) var(--hf-motion-ease-change);
+
+    /* The icon is 26 pixels, and has no space beside it, as in a button with text. */
+    > svg {
+      block-size: 26px;
+      flex: none;
+      inline-size: 26px;
+      margin: 0;
+      vertical-align: baseline;
+    }
+
+    > .hf-icon {
+      --hf-icon-size: 1;
+    }
+
+    /* The small size: 36 by 36 pixels, with an icon of 22 pixels. */
+    &.hf-size-small {
+      block-size: var(--hf-size-control-small);
+      inline-size: var(--hf-size-control-small);
+
+      /* The small size of a button sets a padding, and this button has none. */
+      padding: 0;
+
+      > svg {
+        block-size: 22px;
+        inline-size: 22px;
+      }
+    }
+
+    &:active,
+    &:focus-visible {
+      background-color: var(--hf-round-button-fill);
+      border-color: var(--hf-round-button-rim);
+      color: var(--hf-round-button-colour-forward);
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        background-color: var(--hf-round-button-fill);
+        border-color: var(--hf-round-button-rim);
+        color: var(--hf-round-button-colour-forward);
+      }
+    }
+
+    @media (forced-colors: active) {
+      border-color: ButtonText;
+
+      &:is(a) {
+        border-color: LinkText;
+      }
+    }
+  }
+
+  /* The colours on the page: those of links. currentcolor is the colour of the icon at that moment. */
+  .hf-round-button-page {
+    --hf-round-button-colour: var(--hf-colour-text-link);
+    --hf-round-button-colour-forward: var(--hf-colour-text-link-hover);
+    --hf-round-button-fill: color-mix(in srgb, currentcolor 14%, transparent);
+    --hf-round-button-rim: color-mix(in srgb, currentcolor 55%, transparent);
+  }
+
+  /* The colours on the dark blue of the header. */
+  .hf-round-button-header {
+    --hf-round-button-colour: var(--hf-colour-icon-on-header-quiet);
+    --hf-round-button-colour-forward: var(--hf-colour-text-on-header);
+    --hf-round-button-fill: var(--hf-colour-background-on-header-hover);
+    --hf-round-button-rim: var(--hf-colour-border-on-header-strong);
+  }
+}

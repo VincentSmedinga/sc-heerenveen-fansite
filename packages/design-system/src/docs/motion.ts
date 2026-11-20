@@ -141,10 +141,17 @@ export const motionChanges: MotionChange[] = [
     why: 'Muis, focus, bezocht',
   },
   {
-    component: 'ThemeButton, kleur',
+    component: 'RoundButton (ThemeButton, Page.TopLink, AccountButton), kleur',
     group: 'aanwijzen',
-    now: 'Kleur, rand en vulling in 0,2 seconde (#366).',
+    now: 'Kleur, rand en vulling in 0,2 seconde (#366, #1490).',
     what: 'Kleur, rand en vulling',
+    why: 'Muis, focus',
+  },
+  {
+    component: 'AccountButton, sjaal',
+    group: 'aanwijzen',
+    now: 'De armen en de sjaal komen omhoog in 0,4 seconde, en zwaaien daarna twee keer, elke keer in 1 seconde (#1490).',
+    what: 'Plaats van de armen en de sjaal',
     why: 'Muis, focus',
   },
   {
@@ -176,7 +183,7 @@ export const motionChanges: MotionChange[] = [
     why: 'Geselecteerd (`aria-pressed`)',
   },
   {
-    component: 'ThemeButton, ingedrukt',
+    component: 'RoundButton (ThemeButton, Page.TopLink, AccountButton), ingedrukt',
     group: 'selecteren',
     now: 'Kleur, rand en vulling in 0,2 seconde (#366).',
     what: 'Kleur, rand en vulling',

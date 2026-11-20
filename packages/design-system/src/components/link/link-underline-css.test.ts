@@ -63,7 +63,7 @@ describe('the links that are navigation', () => {
     ['../page/shortcuts.css', 'the shortcuts'],
     ['../segmented-control/segmented-control.css', 'the switch links'],
     ['../chip/chip.css', 'the filter chips'],
-    ['../page/top-link.css', 'the round link to the top'],
+    ['../round-button/round-button.css', 'the round buttons, such as the link to the top'],
     ['../heading/heading.css', 'the anchor link at a heading'],
   ])('keeps its own line in %s, for %s', (path) => {
     expect(read(path)).toMatch(/text-decoration(-line)?: none/u)

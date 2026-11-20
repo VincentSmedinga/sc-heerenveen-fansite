@@ -1678,6 +1678,7 @@
   Alle bedieningselementen kleiner maken (een formulier op een telefoon heeft de 44 pixels nodig).
 - **Later:** zie _Dichtheid is een klasse die tokens verandert, los van het kleurthema_ (2 november 2026): de standaardhoogte is nu ook een token, `--hf-size-control`, en in het compacte thema zijn de standaardmaat en de kleine maat 36 en 32 pixels hoog.
   Zonder de klasse blijft alles zoals hier staat.
+- **Later:** zie _De knop voor licht en donker, de knop naar boven en de supporterknop delen één ronde knop, `RoundButton`_ (20 november 2026): de kleine maat van de ronde themaknop staat nu in `round-button.css`, en elke `RoundButton` kan hem krijgen.
 
 ## Een tabel sorteert op een kolom met knoppen in de koppen, die er alleen met JavaScript zijn
 
@@ -4052,3 +4053,41 @@
   De regel in de groep houdt elke kaart gelijk en laat de pagina's niets uitrekenen.
 - **Alternatieven:** schalen naar diameter (twee keer zoveel doelpunten lijkt vier keer zoveel); geen ondergrens (een kleine ring krijgt geen ruimte voor zijn namen); de onderkanten op één lijn (de titels komen dan op verschillende hoogtes); de regel in de kaart zelf (elke kaart rekent zelf).
 - **Later:** vult _Een donutdiagram is een eigen onderdeel in SVG, met een positieve en een negatieve kleur_ (26 oktober 2026) aan: een groep met `scaled` heeft diagrammen van verschillende grootte.
+
+## De knop voor licht en donker, de knop naar boven en de supporterknop delen één ronde knop, `RoundButton`
+
+- **Datum:** 20 november 2026
+- **Besluit:** `ThemeButton`, `Page.TopLink` en de nieuwe `AccountButton` zijn gebouwd op één component, `RoundButton` (#1490).
+  - `RoundButton` is een knop, of met `href` een link, met alleen een pictogram en een naam in `label`.
+  - De eigenschap `surface` kiest de kleuren: `page` die van een link, `header` die van het donkerblauw van de header.
+    `ThemeButton` en `AccountButton` staan op de header, `Page.TopLink` op de pagina.
+  - `round-button.css` heeft de maat, de vorm, de kleuren, de rand en de vulling, en de kleine maat.
+    `theme-button.css` houdt alleen de wissel van de zon en de maan, `top-link.css` alleen wanneer de knop er is.
+  - Op het oog verandert er niets aan `ThemeButton` en `Page.TopLink`: hun schermafbeeldingen in licht en donker, in rust, onder de muis, met focus en ingedrukt, zijn voor en na gelijk tot op de pixel.
+- **Waarom:** drie knoppen die er hetzelfde uitzien, zijn één onderdeel.
+  Anders loopt de opmaak uit elkaar.
+- **Alternatieven:** de supporterknop een eigen opmaak geven (drie plekken om gelijk te houden).
+
+## De header toont de supporterknop, een supporter met een sjaal
+
+- **Datum:** 20 november 2026
+- **Besluit:** de header toont de supporterknop (`AccountButton`) als een ronde knop met een supporter met een sjaal, zonder schermnaam als tekst (#1490).
+  - Uitgelogd hangen de armen langs het lijf en zit de sjaal om de nek; de knop is de link Inloggen, naar `/fans/inloggen`.
+  - Onder de muis en bij focus komen de armen omhoog en zwaait de supporter twee keer met de sjaal.
+  - Ingelogd houdt hij de sjaal omhoog, met één of twee initialen op de borst; de knop is een link naar `/fans/mijn-account`.
+  - De sjaal om de nek en de initialen zijn uit het lijf gesneden met een masker, zodat de kleur achter de knop erdoor komt, ook in geforceerde kleuren.
+  - De beweging neemt de tokens: met minder beweging staan de armen er meteen en zwaait er niets.
+- **Waarom:** de header is op een telefoon vol, en een ronde knop past bij de twee andere.
+  De sjaal past bij de toon van het hoofdstuk Fans.
+- **Alternatieven:** de schermnaam als tekst; een tekstlink Inloggen.
+
+## De naam van de supporterknop noemt ook de initialen, en de regel voor de initialen staat in het designsysteem
+
+- **Datum:** 21 november 2026
+- **Besluit:** ingelogd heet de supporterknop "Mijn account", gevolgd door de initialen die op de borst staan: "Mijn account, BS" (#1490).
+  Zonder initialen, bij een naam zonder letter, is de naam alleen "Mijn account".
+  De regel voor de initialen is `screenNameInitials` in het designsysteem, met tests: de eerste letter van het eerste en van het laatste deel van de naam, gesplitst op spatie, koppelteken en laag streepje, zonder cijfers.
+- **Waarom:** de initialen zijn tekst die een bezoeker ziet.
+  Wie de computer met zijn stem bedient, zegt wat hij ziet, en dat moet in de naam staan (WCAG 2.5.3, label in naam); axe keurt de knop met twee initialen anders af.
+  De site heeft de regel alleen via de knop nodig, dus `@fansite/shared` hoeft hem niet te hebben.
+- **Alternatieven:** de naam alleen "Mijn account" (voldoet niet aan 2.5.3 bij twee letters); de initialen als getekende vormen in plaats van tekst (een tekening per letter); de regel in `@fansite/shared` (niemand anders gebruikt hem).
