@@ -40,10 +40,11 @@ if (databaseUrl === undefined) {
 
 const port = process.env['SMOKE_PORT'] ?? '3123'
 const origin = `http://127.0.0.1:${port}`
-// Made-up settings of the mail server, for the servers that need them to start. Nothing here
-// sends mail.
+// The settings of the parts of the chapter Fans, which withServer() sets or leaves out.
 const fansSettings = ['FANS_ACCOUNTS', 'FANS_PROGNOSE', 'FANS_UITBLINKER', 'FANS_VIER', 'FANS_FANTEST']
 
+// Made-up settings of the mail server, for the servers that need them to start. Nothing here
+// sends mail.
 const smtpSettings = {
   MAIL_FROM: 'Smoke <smoke@example.org>',
   SMTP_HOST: 'localhost',

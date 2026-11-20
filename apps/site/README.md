@@ -1480,6 +1480,16 @@ Het beheer (`/beheer`) krijgt die header op elke omgeving, ook op `production`, 
 De site leest `SITE_ENV` als de server draait, dus dezelfde build kan naar elke omgeving.
 Zonder geldige `SITE_ENV` start de server niet.
 
+Op `production` verwijst `/robots.txt` naar `/sitemap.xml`.
+De sitemap, de canonieke URL's en de Open Graph-tags beginnen met het adres van de omgeving (`originOf()` in `src/env.ts`).
+Elke pagina staat met zijn beschrijving in `src/pages.ts`, en haalt zijn metadata uit `pageMetadata()` in `src/metadata.ts`.
+Zo'n pagina rendert bij elk verzoek (`dynamic = 'force-dynamic'`), omdat een statische pagina het adres van de build zou bewaren.
+Een nieuwe pagina komt in de lijst, of in de uitzonderingen van `src/app/sitemap.test.ts`: die test faalt anders.
+De afbeelding bij het delen van links is `public/share-image.png`, het schild van de site.
+`pnpm --filter site share-image` maakt hem opnieuw met Playwright; we doen dat alleen als het logo verandert.
+
+Hoe de acceptatieomgeving op de hosting staat, staat in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md).
+
 ## Onderdelen van Fans aan of uit
 
 Elk onderdeel van het hoofdstuk Fans heeft een eigen instelling: `FANS_ACCOUNTS`, `FANS_PROGNOSE`, `FANS_UITBLINKER`, `FANS_VIER` en `FANS_FANTEST`, met `on` of `off`.
@@ -1490,16 +1500,6 @@ De importer en de opdrachten van cron gebruiken `runFansJob()`.
 De spellen staan uit zolang accounts uit staan.
 Zoals `SITE_ENV` leest de site ze als de server draait, dus de pagina's die ze gebruiken rekenen per verzoek (`dynamic = 'force-dynamic'`) en niet tijdens de build.
 De rooktest en de e2e-tests starten de site met alles aan; de rooktest start hem ook met alles uit en verwacht dan "niet gevonden" op `/fans`, en zodra die pagina er is ook een 200 als de onderdelen aan staan.
-
-Op `production` verwijst `/robots.txt` naar `/sitemap.xml`.
-De sitemap, de canonieke URL's en de Open Graph-tags beginnen met het adres van de omgeving (`originOf()` in `src/env.ts`).
-Elke pagina staat met zijn beschrijving in `src/pages.ts`, en haalt zijn metadata uit `pageMetadata()` in `src/metadata.ts`.
-Zo'n pagina rendert bij elk verzoek (`dynamic = 'force-dynamic'`), omdat een statische pagina het adres van de build zou bewaren.
-Een nieuwe pagina komt in de lijst, of in de uitzonderingen van `src/app/sitemap.test.ts`: die test faalt anders.
-De afbeelding bij het delen van links is `public/share-image.png`, het schild van de site.
-`pnpm --filter site share-image` maakt hem opnieuw met Playwright; we doen dat alleen als het logo verandert.
-
-Hoe de acceptatieomgeving op de hosting staat, staat in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md).
 
 ## Icoon en manifest
 
