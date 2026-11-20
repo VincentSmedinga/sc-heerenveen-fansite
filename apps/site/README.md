@@ -1504,8 +1504,9 @@ De rooktest en de e2e-tests starten de site met alles aan; de rooktest start hem
 ## Een account voor supporters
 
 Een supporter maakt een account op `/fans/aanmelden`, met een schermnaam en een e-mailadres, en bevestigt het adres met de link of de code uit de mail.
+Daarna logt hij in op `/fans/inloggen`, ook met een link of een code uit de mail, en blijft hij 90 dagen na zijn laatste bezoek ingelogd, hoogstens een jaar.
 Lokaal, zonder mailserver, staat de mail met de link en de code in het logboek van `pnpm dev`.
-De code staat in `src/fans`: de regels van de schermnaam in `screen-name.ts`, het aanmelden en de limieten in `sign-up.ts`, de instelling voor de gedeelde code van het inloggen in `supporter-login.ts`, en `requireSupporter()` in `require-supporter.ts`.
+De code staat in `src/fans`: de regels van de schermnaam in `screen-name.ts`, het aanmelden in `sign-up.ts`, het inloggen, het plafond van de mails en het adres om naar terug te gaan in `log-in.ts`, de instelling voor de gedeelde code van het inloggen in `supporter-login.ts`, en `requireSupporter()` in `require-supporter.ts`.
 Elke persoonlijke pagina en actie onder `/fans` begint met `requireSupporter()`; `src/fans/routes.test.ts` faalt voor een die dat niet doet.
 De tabellen zijn `supporters`, `supporter_login_links`, `supporter_sessions` en `supporter_login_attempts`, los van die van het beheer.
 Het cookie heet `fans-sessie` en gaat alleen mee naar de pagina's onder `/fans`.

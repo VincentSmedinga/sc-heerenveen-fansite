@@ -241,15 +241,22 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/privacy', status: 200 },
   { path: '/toegankelijkheid', status: 200 },
   { path: '/updates', status: 200 },
-  // Signing up as a supporter, with a name taken in the meantime, with a code that doesn't
-  // work, and a link that doesn't. Mijn account without a session goes to signing up;
-  // fans-sign-up.spec.ts checks it with an account.
+  // Signing up and logging in as a supporter, with a name taken in the meantime, with a code
+  // that doesn't work, and a link that doesn't. Mijn account and the page of a blocked account
+  // without a session go to logging in; fans-sign-up.spec.ts and fans-log-in.spec.ts check them
+  // with an account.
   { path: '/fans/aanmelden', status: 200 },
   { path: '/fans/aanmelden?fout=naam-bezet', status: 200 },
   { path: '/fans/aanmelden/verstuurd?ref=onbekend', status: 200 },
   { path: '/fans/aanmelden/verstuurd?ref=onbekend&fout=code', status: 200 },
   { path: '/fans/aanmelden/bevestigen?token=onbekend', status: 200 },
+  { path: '/fans/inloggen', status: 200 },
+  { path: '/fans/inloggen?terug=%2Ffans%2Fmijn-account', status: 200 },
+  { path: '/fans/inloggen/verstuurd?ref=onbekend', status: 200 },
+  { path: '/fans/inloggen/verstuurd?ref=onbekend&fout=code', status: 200 },
+  { path: '/fans/inloggen/bevestigen?token=onbekend', status: 200 },
   { path: '/fans/mijn-account', status: 200 },
+  { path: '/fans/geblokkeerd', status: 200 },
   // The way in to the admin. The admin itself is no page for a visitor without a session: it
   // goes to the login page.
   { path: '/beheer/inloggen', status: 200 },

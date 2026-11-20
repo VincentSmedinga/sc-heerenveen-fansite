@@ -46,7 +46,18 @@ export type AccountKind = {
    * account can't be told from one without by how long the answer takes.
    */
   minimumAnswerMilliseconds: number
+  /**
+   * A session counts a request only when the last one it counted is at least this long ago,
+   * so a busy session doesn't write to the database at every page. 0 counts every request.
+   */
+  renewAfter: number
   tables: AccountTables
+  /**
+   * Whether an account that is turned off can still log in and keep its session. The admin
+   * can't. A blocked supporter can, to see and close the account; the site decides what else
+   * it may do.
+   */
+  turnedOffLogsIn: boolean
 }
 
 /** An account of a kind, as its table holds it. */
@@ -67,8 +78,11 @@ export type AccountTables =
       users: typeof supporters
     }
 
-/** The rate limit: so many login links per address, and for the whole site, in one window. */
-export type LoginLimits = { perAddress: number; perSite: number; windowMilliseconds: number }
+/**
+ * The rate limit: so many login links per address, and for the whole site, in one window.
+ * Without `perSite` the kind keeps a ceiling for the whole site of its own.
+ */
+export type LoginLimits = { perAddress: number; perSite?: number; windowMilliseconds: number }
 
 /**
  * What the cookie of a kind of account is made of. It holds the token of the session and

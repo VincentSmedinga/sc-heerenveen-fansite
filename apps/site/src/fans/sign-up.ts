@@ -8,9 +8,10 @@ import { setTimeout as sleep } from 'node:timers/promises'
 import type { ScreenNameProblem } from './screen-name'
 
 import { normaliseEmail } from '../beheer/accounts'
-import { issueLoginLink, noteAttempt } from '../login/request'
+import { issueLoginLink } from '../login/request'
 import { removeEnded, startSession, startSessionIfOn, takeLink, takeLinkWithCode } from '../login/sessions'
 import { codeHashOf, hashOf, newCode, newToken } from '../login/tokens'
+import { logInPaths, noteMail } from './log-in'
 import { checkScreenName } from './screen-name'
 import { supporterKind } from './supporter-login'
 
@@ -52,6 +53,8 @@ export type SignUpDeps = {
   deliver: (mail: SignUpMail) => Promise<void>
   /** Mails the editors that the ceiling of sign-ups was reached, once an hour. */
   notifyCeiling: () => Promise<void>
+  /** Mails the editors that the ceiling of mails was reached, once a quarter of an hour. */
+  notifyMailCeiling: () => Promise<void>
   now?: () => Date
   /** The address of the site in this environment. */
   origin: string
@@ -114,7 +117,16 @@ export async function handleSignUp(
   values: { email: string; screenName: string },
   deps: SignUpDeps,
 ): Promise<SignUpResult> {
-  const { clock = Date.now, defer, deliver, notifyCeiling, now = () => new Date(), origin, wait = sleep } = deps
+  const {
+    clock = Date.now,
+    defer,
+    deliver,
+    notifyCeiling,
+    notifyMailCeiling,
+    now = () => new Date(),
+    origin,
+    wait = sleep,
+  } = deps
   const started = clock()
   const at = now()
   const result = await decide(db, values, at, origin)
@@ -126,6 +138,16 @@ export async function handleSignUp(
         await notifyCeiling()
       } catch (error) {
         console.error(`Could not mail the editors about the sign-ups (${errorName(error)}).`)
+      }
+    })
+  }
+
+  if (result.answer === 'mail-ceiling' && result.first) {
+    defer(async () => {
+      try {
+        await notifyMailCeiling()
+      } catch (error) {
+        console.error(`Could not mail the editors about the mails to log in (${errorName(error)}).`)
       }
     })
   }
@@ -149,7 +171,7 @@ export async function handleSignUp(
     ? { answer: 'sent', ref: result.ref }
     : result.answer === 'invalid'
       ? { answer: 'invalid', errors: result.errors }
-      : { answer: result.answer }
+      : { answer: result.answer === 'mail-ceiling' ? 'ceiling' : result.answer }
 }
 
 /**
@@ -186,11 +208,10 @@ export async function noteSignUp(db: Database, now: Date): Promise<{ first: bool
 
 /** What a link of the mail is now, without using it up: for the page the link opens. */
 export async function signUpLinkState(db: Database, token: string, now = new Date()) {
-  const { links, users } = supporterKind.tables
+  const { links } = supporterKind.tables
   const [link] = await db
-    .select({ disabledAt: users.disabledAt, screenName: links.screenName, userId: links.userId })
+    .select({ screenName: links.screenName, userId: links.userId })
     .from(links)
-    .leftJoin(users, eq(links.userId, users.id))
     .where(and(eq(links.tokenHash, hashOf(token)), gt(links.expiresAt, now)))
 
   if (link === undefined) {
@@ -201,7 +222,9 @@ export async function signUpLinkState(db: Database, token: string, now = new Dat
     return { screenName: link.screenName ?? '', state: 'sign-up' as const }
   }
 
-  return link.disabledAt === null ? { state: 'log-in' as const } : { state: 'gone' as const }
+  // A link to log in, which a sign-up mails to an address with an account: blocked or not, it
+  // goes on to the page of logging in.
+  return { state: 'log-in' as const }
 }
 
 async function decide(db: Database, values: { email: string; screenName: string }, now: Date, origin: string) {
@@ -215,10 +238,16 @@ async function decide(db: Database, values: { email: string; screenName: string 
 
   await removeEnded(db, supporterKind, now)
 
-  if (!(await noteAttempt(db, supporterKind, email, now))) {
+  const noted = await noteMail(db, email, now)
+
+  if (noted.answer === 'address') {
     console.info('A sign-up reached the limit of mails for one address.')
 
     return { answer: 'limited' as const }
+  }
+
+  if (noted.answer === 'ceiling') {
+    return { answer: 'mail-ceiling' as const, first: noted.first }
   }
 
   const ceiling = await noteSignUp(db, now)
@@ -229,22 +258,13 @@ async function decide(db: Database, values: { email: string; screenName: string 
 
   const ref = newToken()
   const { links } = supporterKind.tables
-  const [account] = await db
-    .select({ disabledAt: supporters.disabledAt, id: supporters.id })
-    .from(supporters)
-    .where(eq(supporters.email, email))
+  const [account] = await db.select({ id: supporters.id }).from(supporters).where(eq(supporters.email, email))
 
   if (account !== undefined) {
     console.info(`A sign-up came for the address of supporter ${account.id}; it gets the mail to log in.`)
 
-    const mail = await issueLoginLink(db, supporterKind, account.id, ref, now, new URL(signUpPaths.confirm, origin))
-
-    // A blocked account gets no mail. Its link is made all the same, so the page "Kijk in je
-    // mail" counts down the tries of a wrong code like for any other address, and doesn't tell
-    // that this one is blocked. Nobody has its token or its code, and it can't log in anyway.
-    if (account.disabledAt !== null) {
-      return { answer: 'sent' as const, ref }
-    }
+    // A blocked account gets the mail too: it can log in, to see that it is blocked (#1448).
+    const mail = await issueLoginLink(db, supporterKind, account.id, ref, now, new URL(logInPaths.confirm, origin))
 
     return { answer: 'sent' as const, mail: { ...mail, kind: 'log-in' as const, to: email }, ref }
   }
@@ -361,5 +381,11 @@ function isDuplicate(error: unknown): boolean {
 async function session(db: Database, supporterId: number, now: Date, created: boolean): Promise<ConfirmResult> {
   const token = await startSessionIfOn(db, supporterKind, supporterId, now)
 
-  return token === undefined ? { answer: 'gone' } : { answer: 'session', created, supporterId, token }
+  if (token === undefined) {
+    return { answer: 'gone' }
+  }
+
+  console.info(`Supporter ${supporterId} logged in.`)
+
+  return { answer: 'session', created, supporterId, token }
 }

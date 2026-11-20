@@ -6830,6 +6830,10 @@
 - **Later:** #1446 geeft de module de tabellen van supporters erbij (zie _Een supporter maakt een account met een schermnaam en een e-mailadres_).
   `AccountTables` is nu de tabellen van het beheer of die van supporters.
   Twee dingen kwamen erbij, met voor het beheer dezelfde werking als ervoor: `codeFailuresEndLink`, en rijen zonder adres in de tabel van de pogingen, die de module laat staan.
+- **Later:** #1448 geeft de instelling nog drie dingen, weer met voor het beheer dezelfde werking als ervoor.
+  `turnedOffLogsIn` zegt of een account dat uit staat nog kan inloggen (het beheer niet, een geblokkeerde supporter wel).
+  `renewAfter` zegt hoe vaak een sessie een bezoek wegschrijft (het beheer bij elk verzoek, een supporter één keer per dag).
+  `perSite` mag ontbreken, voor een soort account met een eigen plafond voor de hele site.
 
 ## Een supporter maakt een account met een schermnaam en een e-mailadres
 
@@ -6871,6 +6875,9 @@
 - **Waarom:** het formulier zegt zo niet wie een account heeft, en wie zich vergist, komt toch binnen.
   De pagina voor het inloggen komt pas met #1448.
 - **Alternatieven:** niets mailen (de supporter wacht dan op een mail die niet komt); een eigen pagina voor het inloggen in dit issue (dat is #1448).
+- **Later:** sinds #1448 gaat de link in die mail naar `/fans/inloggen/bevestigen`, de pagina van het inloggen, met Bijna klaar en de schermnaam.
+  Een oudere link naar de bevestigingspagina van het aanmelden stuurt daarheen door.
+  Een geblokkeerd account krijgt die mail nu ook, want het kan inloggen.
 
 - **Datum:** 20 november 2026
 - **Besluit:** de genormaliseerde vorm van een schermnaam is in kleine letters, zonder accenten, zonder spaties, `-` en `_`, met tekens die op elkaar lijken als één teken: 0 als o, 1 en i als l, 3 als e, 4 als a, 5 als s, 7 als t, rn als m en vv als w.
@@ -6894,3 +6901,52 @@
   Een fout in een veld staat in de ErrorSummary en bij het veld, met dezelfde tekst.
 - **Waarom:** het ontwerp van het hoofdstuk Fans gebruikt één rustige soort melding, en de Notice heeft `role="status"`, zodat een schermlezer de melding van een limiet hoort.
 - **Alternatieven:** een groen vlak voor wat lukte en een rood vlak voor een limiet (meer kleur dan het ontwerp wil, en een limiet is geen fout van de supporter).
+
+## Een supporter logt in met een link of een code, en blijft ingelogd
+
+- **Datum:** 20 november 2026
+- **Besluit:** een sessie van een supporter duurt 90 dagen na het laatste bezoek en hoogstens een jaar.
+  Het beheer houdt zijn kortere sessie.
+- **Waarom:** een gemailde link is de enige drempel van dit ontwerp, en mail kan op een wedstrijddag traag zijn.
+  Met een lange sessie komt die drempel zelden terug.
+  Een account van een supporter geeft toegang tot weinig: zijn eigen voorspellingen en cijfers.
+- **Alternatieven:** de duur van het beheer (9 dagen; dan logt een supporter bijna elke wedstrijd opnieuw in); een sessie zonder einde (een vergeten apparaat blijft voor altijd ingelogd).
+
+- **Datum:** 21 november 2026
+- **Besluit:** een sessie van een supporter schrijft een bezoek hoogstens één keer per 24 uur weg (`renewAfter` in `supporterKind`).
+  Het account krijgt dan ook de dag van het laatste bezoek, als datum zonder tijd, hoogstens één keer per dag van de klok (`currentSupporter` in `apps/site/src/fans/require-supporter.ts`).
+- **Waarom:** bij een sessie van 90 dagen maakt een dag niets uit, en zo schrijft niet elke pagina naar de database.
+  Een dag zegt genoeg voor de redactie en voor het opruimen van ongebruikte accounts (#1460).
+- **Alternatieven:** bij elk verzoek wegschrijven, zoals het beheer (veel schrijfwerk voor niets); het tijdstip van het laatste bezoek bewaren (meer dan we nodig hebben).
+
+- **Datum:** 21 november 2026
+- **Besluit:** het plafond van 60 mails per 15 minuten voor de hele site telt per kwartier van de klok, en telt elke mail met een link en een code: om in te loggen en om een account te maken.
+  Wordt het geraakt, dan gaat er tot het einde van dat kwartier geen mail meer weg.
+  De eerste aanvraag boven het plafond houdt haar rij, als teken dat de redactie haar ene mail voor dat kwartier al kreeg.
+  De limiet van 3 mails per adres blijft een schuivend venster van 15 minuten.
+- **Waarom:** een kwartier van de klok maakt "tot het einde van die 15 minuten" eenduidig, net als het uur bij het plafond van de aanmeldingen.
+  Het plafond is er voor de limiet van de host, en die telt elke mail.
+- **Alternatieven:** een schuivend venster (dan gaat de site weer open zodra de oudste mail uit het venster valt, en komt de mail aan de redactie vaker); alleen de mails van het inloggen tellen (de mails van het aanmelden gaan dan langs het plafond).
+
+- **Datum:** 21 november 2026
+- **Besluit:** een geblokkeerd account kan inloggen en houdt zijn sessie.
+  `requireSupporter` stuurt het naar `/fans/geblokkeerd`, behalve op een pagina die het toelaat, zoals Mijn account.
+  Na het inloggen komt het meteen op die pagina.
+- **Waarom:** het issue en #1458 vragen dat een geblokkeerd account zijn gegevens kan zien en zijn account kan opheffen.
+  Eén controle in `requireSupporter` houdt het buiten elk spel dat later komt, zonder dat elk spel het zelf moet doen.
+- **Alternatieven:** het inloggen weigeren, zoals het beheer (dan kan de supporter niet zien waarom en zijn account niet opheffen); elke pagina zelf laten controleren (een nieuwe pagina vergeet het).
+
+- **Datum:** 21 november 2026
+- **Besluit:** wie inlogt vanaf een persoonlijke pagina, komt daarna op die pagina terug.
+  Het adres gaat mee als `terug` in het adres van de pagina, in het formulier en in de link in de mail.
+  `returnPathOf` in `apps/site/src/fans/log-in.ts` volgt alleen een pad onder `/fans`, en niet het aanmelden of het inloggen zelf; al het andere wordt `/fans`.
+  Elke actie controleert het opnieuw voordat ze het volgt.
+- **Waarom:** een adres uit een formulier of een link kan iedereen veranderen, en de site mag een supporter nooit naar een andere site sturen.
+- **Alternatieven:** het adres in een cookie bewaren (nog een cookie, en het werkt niet als de mail op een ander apparaat opent); altijd naar `/fans` gaan (het issue vraagt terugkomen).
+
+- **Datum:** 21 november 2026
+- **Besluit:** "Uitloggen op alle apparaten" is een zachte knop in een eigen formulier, onder de knop Uitloggen, en geen link.
+- **Waarom:** uitloggen verandert iets, dus het is een POST, en die werkt zonder JavaScript alleen met een knop.
+  Een link die uitlogt, kan een voorvertoning of een andere site per ongeluk volgen.
+  Een knop die eruitziet als een link heeft het designsysteem nog niet.
+- **Alternatieven:** een link naar een pagina die uitlogt (een GET die iets verandert); een link met JavaScript (werkt niet zonder JavaScript).

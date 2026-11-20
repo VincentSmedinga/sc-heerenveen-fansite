@@ -68,6 +68,7 @@ async function signUp(screenName: string, email: string, now = start) {
 
         return Promise.resolve()
       },
+      notifyMailCeiling: () => Promise.resolve(),
       now: () => now,
       origin: 'https://example.org',
       wait: (milliseconds) => {
@@ -255,6 +256,8 @@ describe('signing up with an address that has an account', () => {
     expect(result.answer).toBe('sent')
     expect(waits).toEqual([supporterKind.minimumAnswerMilliseconds])
     expect(mail).toMatchObject({ kind: 'log-in', to: 'tjalle@example.org' })
+    // The link goes to the page of logging in.
+    expect(new URL(mail?.url ?? '').pathname).toBe('/fans/inloggen/bevestigen')
     expect(await signUpLinkState(database.db, tokenOf(mail), later(2))).toEqual({ state: 'log-in' })
     expect(await confirmWithCode(database.db, ref, mail?.code ?? '', later(3))).toMatchObject({
       answer: 'session',
@@ -277,17 +280,15 @@ describe('signing up with an address that has an account', () => {
     expect(await database.db.select().from(supporters)).toHaveLength(1)
   })
 
-  it('mails nothing for a blocked account, and still answers the same', async () => {
+  it('mails a blocked account the link to log in too, since it can log in (#1448)', async () => {
     await account()
     await database.db.update(supporters).set({ disabledAt: start, disabledReason: 'Test' })
 
-    const { mails, ref, result } = await signUp('Andere Naam', 'tjalle@example.org', later(2))
+    const { mail, ref, result } = await signUp('Andere Naam', 'tjalle@example.org', later(2))
 
     expect(result.answer).toBe('sent')
-    expect(mails).toEqual([])
-    // A wrong code counts down like for any other address, so the page doesn't tell it apart.
-    expect(await confirmWithCode(database.db, ref, '000000', later(3))).toEqual({ answer: 'gone' })
-    expect(await codeTriesLeft(database.db, ref, later(3))).toBe(4)
+    expect(mail).toMatchObject({ kind: 'log-in', to: 'tjalle@example.org' })
+    expect(await confirmWithCode(database.db, ref, mail?.code ?? '', later(3))).toMatchObject({ answer: 'session' })
   })
 
   it('counts down for an address without an account the same as for one with', async () => {

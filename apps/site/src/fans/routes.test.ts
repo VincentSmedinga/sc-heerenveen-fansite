@@ -46,6 +46,10 @@ const open = [
   'app/fans/aanmelden/bevestigen/page.tsx',
   'app/fans/aanmelden/page.tsx',
   'app/fans/aanmelden/verstuurd/page.tsx',
+  'app/fans/inloggen/actions.ts',
+  'app/fans/inloggen/bevestigen/page.tsx',
+  'app/fans/inloggen/page.tsx',
+  'app/fans/inloggen/verstuurd/page.tsx',
 ]
 
 function filesUnder(folder: string) {
@@ -108,7 +112,13 @@ describe('the pages of Fans', () => {
     expect(routes).toEqual(
       expect.arrayContaining([...open.filter((file) => file.endsWith('page.tsx')), 'app/fans/mijn-account/page.tsx']),
     )
-    expect(actionFiles).toContain('app/fans/aanmelden/actions.ts')
+    expect(actionFiles).toEqual(
+      expect.arrayContaining([
+        'app/fans/aanmelden/actions.ts',
+        'app/fans/inloggen/actions.ts',
+        'app/fans/mijn-account/actions.ts',
+      ]),
+    )
   })
 
   it('name as open only files that exist', () => {
@@ -129,7 +139,10 @@ describe('the pages of Fans', () => {
     'refuse a call without a session to %s',
     async (file) => {
       for (const { error, name } of await callAll(file)) {
-        expect(error, `${file} ${name}`).toMatchObject({ url: '/fans/aanmelden' })
+        // To the page to log in, with or without the page to come back to.
+        expect(error, `${file} ${name}`).toMatchObject({
+          url: expect.stringMatching(/^\/fans\/inloggen(?:\?terug=|$)/),
+        })
       }
     },
   )

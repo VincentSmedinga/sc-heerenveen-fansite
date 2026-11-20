@@ -21,5 +21,7 @@ export const adminKind = {
   limits: { perAddress: 5, perSite: 30, windowMilliseconds: 15 * minute },
   linkLifetime: 15 * minute,
   minimumAnswerMilliseconds: 400,
+  renewAfter: 0,
   tables: { attempts: adminLoginAttempts, links: adminLoginLinks, sessions: adminSessions, users: adminUsers },
+  turnedOffLogsIn: false,
 } as const satisfies AccountKind

@@ -1,21 +1,25 @@
 import type { Metadata } from 'next'
 
-import { Card, DescriptionList, Heading, Notice, Page, Text } from '@fansite/design-system'
+import { Button, Card, DescriptionList, Form, Heading, Notice, Page, Text } from '@fansite/design-system'
 
 import { requireSupporter } from '#src/fans/require-supporter'
+import { signUpPaths } from '#src/fans/sign-up'
+
+import { logOut, logOutEverywhere } from './actions'
 
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Mijn account' }
 
 // The account of the supporter who is logged in. For now it shows the screen name and the
-// address; changing and closing the account come later.
+// address, and the card to log out; changing and closing the account come later. A blocked
+// supporter sees it too.
 export default async function MyAccountPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
-  const supporter = await requireSupporter()
+  const supporter = await requireSupporter({ blocked: 'allow', from: signUpPaths.account })
   const { welkom } = await searchParams
 
   return (
@@ -34,6 +38,22 @@ export default async function MyAccountPage({
             <DescriptionList.Item term="E-mailadres">{supporter.email}</DescriptionList.Item>
           </DescriptionList>
           <Text>Je e-mailadres ziet niemand anders.</Text>
+        </Card>
+        <Card aria-labelledby="uitloggen-kop" surface="soft">
+          <Heading id="uitloggen-kop" level={2}>
+            Uitloggen
+          </Heading>
+          <Text>Je blijft 90 dagen ingelogd na je laatste bezoek.</Text>
+          <Form action={logOut}>
+            <Button appearance="soft" type="submit">
+              Uitloggen
+            </Button>
+          </Form>
+          <Form action={logOutEverywhere}>
+            <Button appearance="soft" type="submit">
+              Uitloggen op alle apparaten
+            </Button>
+          </Form>
         </Card>
       </Page.Cell>
     </Page.Main>
