@@ -1,4 +1,4 @@
-import type { LoginMail } from './login'
+import type { LoginMail } from '../login/request'
 
 import { sendMail } from '../mail'
 import { linkLifetime } from './sessions'
