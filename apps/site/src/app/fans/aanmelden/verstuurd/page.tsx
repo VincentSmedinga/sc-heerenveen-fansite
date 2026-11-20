@@ -4,9 +4,9 @@ import { Button, ErrorSummary, Field, Form, Heading, Input, Link, Notice, Page, 
 import { requireFansPart } from '@fansite/shared/fans-env'
 import { notFound, redirect } from 'next/navigation'
 
-import { FocusOnLoad } from '#src/app/beheer/spelers/[id]/FocusOnLoad'
 import { getDatabase } from '#src/database'
 import { codeTriesLeft, signUpPaths } from '#src/fans/sign-up'
+import { FocusOnLoad } from '#src/FocusOnLoad'
 
 import { confirmCode } from '../actions'
 

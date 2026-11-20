@@ -11,20 +11,17 @@ import { confirm } from '../actions'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Account bevestigen' }
+const titles = { gone: 'Deze link werkt niet meer', 'log-in': 'Inloggen', 'sign-up': 'Bijna klaar' } as const
+
+type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
 // The page the link in the mail opens. It makes nothing by itself: a mail scanner or a preview
 // opens the link before the person does and would use it up. The button makes the account, or
 // logs in for an address that had an account already.
-export default async function ConfirmPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
-}) {
+export default async function ConfirmPage({ searchParams }: Props) {
   requireFansPart('accounts', notFound)
 
-  const { token } = await searchParams
-  const link = typeof token === 'string' ? await signUpLinkState(getDatabase().db, token) : { state: 'gone' as const }
+  const { link, token } = await stateOf(searchParams)
 
   return (
     <Page.Main>
@@ -62,4 +59,22 @@ export default async function ConfirmPage({
       </Page.Cell>
     </Page.Main>
   )
+}
+
+// The title follows the heading of the page, so a tab and a screen reader name what it says.
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  requireFansPart('accounts', notFound)
+
+  const { link } = await stateOf(searchParams)
+
+  return { robots: { follow: false, index: false }, title: titles[link.state] }
+}
+
+/** The state of the link in the address, which the title and the page both follow. */
+async function stateOf(searchParams: Props['searchParams']) {
+  const { token } = await searchParams
+
+  return typeof token === 'string'
+    ? { link: await signUpLinkState(getDatabase().db, token), token }
+    : { link: { state: 'gone' as const }, token: undefined }
 }
