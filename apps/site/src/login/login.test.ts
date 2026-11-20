@@ -152,8 +152,11 @@ describe('a login link', () => {
     const { mails, result } = await request('sanne@example.org')
     const ref = 'ref' in result ? result.ref : ''
 
-    expect(await redeemLoginCode(database.db, other, ref, '12345', start)).toBeUndefined()
-    expect(await redeemLoginCode(database.db, other, ref, mails[0]?.code ?? '', start)).toBeDefined()
+    const code = mails[0]?.code ?? ''
+    const wrong = code === '000000' ? '111111' : '000000'
+
+    expect(await redeemLoginCode(database.db, other, ref, wrong, start)).toBeUndefined()
+    expect(await redeemLoginCode(database.db, other, ref, code, start)).toBeDefined()
   })
 })
 
