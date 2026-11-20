@@ -94,9 +94,11 @@ test.describe('without JavaScript', () => {
   })
 })
 
-test('logs out on every device', async ({ browser, page }) => {
+test('logs out on every device', async ({ baseURL, browser, page }) => {
   const { address } = await account(page)
-  const other = await browser.newPage()
+  // A second device: a context of its own, with cookies of its own.
+  const device = await browser.newContext({ baseURL })
+  const other = await device.newPage()
 
   for (const [tab, count] of [
     [page, 2],
@@ -119,5 +121,5 @@ test('logs out on every device', async ({ browser, page }) => {
 
   await other.goto('/fans/mijn-account')
   await expect(other).toHaveURL(/\/fans\/inloggen/)
-  await other.close()
+  await device.close()
 })
