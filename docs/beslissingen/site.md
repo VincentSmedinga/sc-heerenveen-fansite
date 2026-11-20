@@ -518,6 +518,7 @@
   Er is dus geen nieuwe omgevingsvariabele.
 - **Alternatieven:** Better Auth met veel eigen code eromheen, die de plug-in vooral overschrijft.
   Auth.js of Lucia: ook een bibliotheek voor een handvol accounts, en een rate limiting per e-mailadres is daar ook eigen werk.
+- **Later:** zie _De code van het inloggen is gedeeld, met een instelling per soort account_ (20 november 2026): de bouwstenen staan niet meer in `apps/site/src/beheer` maar in `apps/site/src/login`.
 
 ## Een link en een sessie bewaren we als SHA-256, in de database
 
@@ -6793,3 +6794,18 @@
   Halen we ze weg, dan veranderen gemiddelden die al gepubliceerd zijn.
   Wie alles weg wil hebben, vraagt het de redactie.
 - **Alternatieven:** alles van de supporter verwijderen (verandert gepubliceerde cijfers achteraf).
+
+## De code van het inloggen is gedeeld, met een instelling per soort account
+
+- **Datum:** 20 november 2026
+- **Besluit:** de code van het inloggen is gedeeld tussen het beheer en de supporters, met een instelling per soort account (#1486).
+  De bouwstenen staan in `apps/site/src/login`: het token en zijn SHA-256, de link, de code van zes cijfers die aan zijn eigen verzoek is gebonden, het tellen van foute codes, de limieten, het vaste minimum voor de antwoordtijd en de sessie.
+  Een instelling (`AccountKind` in `account-kind.ts`) heeft de tabellen, de naam, het pad en de houdbaarheid van het cookie, de duur van een link en van een sessie, het aantal foute codes en de limieten.
+  Het beheer geeft zijn instelling mee in `apps/site/src/beheer/admin-login.ts`, met precies de waarden van voor deze wijziging, en houdt alleen wat van het beheer is: de rollen, `requireRole` en de tekst van de mail.
+  De functies in `beheer/sessions.ts` en `beheer/login.ts` zijn dunne omhulsels om de gedeelde code met die instelling.
+  De module weet niets van rollen en maakt geen tabellen.
+  Een tweede instelling bestaat alleen in de tests van de module, zodat blijkt dat de duur van de sessie, het aantal foute codes, de limieten, het pad van het cookie en het pad van de link uit de instelling komen.
+  De tabellen van die tweede instelling zijn die van het beheer; #1446 test met eigen tabellen.
+- **Waarom:** twee kopieën van dezelfde beveiligingscode lopen uit elkaar, en een fout die in de ene wordt hersteld, blijft in de andere staan.
+  Een eigen pull request houdt de review klein: er verandert alleen bestaande code, en het beheer moet precies hetzelfde blijven doen.
+- **Alternatieven:** de code kopiëren voor supporters; het delen in dezelfde pull request doen als het aanmelden (te groot voor één review).
