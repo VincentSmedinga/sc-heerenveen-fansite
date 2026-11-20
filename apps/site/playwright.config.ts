@@ -10,9 +10,6 @@ const origin = `http://127.0.0.1:${port}`
 // A second copy of the site, without a database, for the error page (e2e/error-page.spec.ts).
 // Nothing listens on port 1 of this computer, so the connection is refused at once.
 const withoutDatabasePort = process.env['E2E_WITHOUT_DATABASE_PORT'] ?? '3125'
-// Acceptance doesn't start without the settings of the mail server. The contact form sends
-// mail, so they point at a mail server of our own that keeps the mails in a folder
-// (scripts/fake-smtp.js), and the sites trust its certificate.
 // Every part of the chapter Fans is on in the checks (see .env.example). The host starts
 // production with the settings missing, which means off.
 const fans = {
@@ -23,6 +20,9 @@ const fans = {
   FANS_VIER: 'on',
 }
 
+// Acceptance doesn't start without the settings of the mail server. The contact form sends
+// mail, so they point at a mail server of our own that keeps the mails in a folder
+// (scripts/fake-smtp.js), and the sites trust its certificate.
 const smtp = {
   MAIL_FROM: 'Test <test@example.org>',
   NODE_EXTRA_CA_CERTS: `${fakeMailFolder}/cert.pem`,
