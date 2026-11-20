@@ -4,6 +4,8 @@ import { usePathname } from 'next/navigation'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 
+import type { FansMenu } from './fans'
+
 import { currentOf, hrefOf, seasonOfPath, SiteNavigation } from './SiteNavigation'
 
 vi.mock('next/navigation', () => ({ usePathname: vi.fn() }))
@@ -27,10 +29,10 @@ function linksWith(html: string, value: 'page' | 'true') {
   ].map(([, label]) => label)
 }
 
-function render(pathname: string, matchesBar?: ReactNode) {
+function render(pathname: string, matchesBar?: ReactNode, fans?: FansMenu) {
   vi.mocked(usePathname).mockReturnValue(pathname)
 
-  return renderToStaticMarkup(<SiteNavigation matchesBar={matchesBar} />)
+  return renderToStaticMarkup(<SiteNavigation fans={fans} matchesBar={matchesBar} />)
 }
 
 describe('SiteNavigation', () => {
@@ -382,6 +384,29 @@ describe('hrefOf', () => {
   it('leaves the other items alone, also on the page of a season', () => {
     expect(hrefOf('/nieuws', '/wedstrijden/2023-24')).toBe('/nieuws')
     expect(hrefOf('https://forum.heerenveen.org', '/wedstrijden/2023-24')).toBe('https://forum.heerenveen.org')
+  })
+})
+
+describe('Fans in the menu', () => {
+  const games = { subitems: [{ href: '/fans/prognose', label: 'Prognose' }] }
+
+  it('has no item without accounts', () => {
+    expect(render('/')).not.toContain('Fans')
+  })
+
+  it('puts Fans between Spelers and Forum, and marks it on /fans without a bar when no game is on', () => {
+    const html = render('/fans', undefined, { subitems: [] })
+
+    expect(html.indexOf('>Spelers<')).toBeLessThan(html.indexOf('>Fans<'))
+    expect(html.indexOf('>Fans<')).toBeLessThan(html.indexOf('>Forum<'))
+    expect(currentLinks(html)).toEqual(['Fans'])
+    expect(html).not.toContain('hf-navigation-bar')
+  })
+
+  it('has a bar with the games that are on, without the page Fans itself, and marks the game', () => {
+    expect(barLinks(render('/fans', undefined, games))).toEqual([['/fans/prognose', 'Prognose']])
+    expect(currentLinks(render('/fans/prognose', undefined, games))).toEqual(['Prognose'])
+    expect(currentOf('/fans/aanmelden')).toEqual({ item: '/fans' })
   })
 })
 

@@ -1,7 +1,7 @@
 import { type NextFetchEvent, NextRequest } from 'next/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { config, contentSecurityPolicy, isAdminPath, proxy as proxyOf } from './proxy'
+import { config, contentSecurityPolicy, isAdminPath, isFansPath, proxy as proxyOf } from './proxy'
 
 /** The proxy's answer to a request for a path of the site. */
 const proxy = (path = '/') => proxyOf(new NextRequest(new URL(path, 'http://localhost:3000')))
@@ -100,6 +100,24 @@ describe('proxy', () => {
       }
     },
   )
+
+  it.each(['/fans', '/fans/', '/fans/aanmelden', '/fans/prognose'])(
+    'keeps %s out of every cache and sends a referrer only to our own pages, and leaves it open to search engines',
+    (path) => {
+      vi.stubEnv('SITE_ENV', 'production')
+      const { headers } = proxy(path)
+
+      expect(headers.get('Cache-Control')).toBe('no-store')
+      expect(headers.get('Referrer-Policy')).toBe('same-origin')
+      expect(headers.get('X-Robots-Tag')).toBeNull()
+    },
+  )
+
+  it('does not treat /fansite as part of Fans', () => {
+    vi.stubEnv('SITE_ENV', 'production')
+    expect(isFansPath('/fansite')).toBe(false)
+    expect(proxy('/fansite').headers.get('Cache-Control')).toBeNull()
+  })
 
   it('leaves the rest of the site on production without those headers', () => {
     vi.stubEnv('SITE_ENV', 'production')

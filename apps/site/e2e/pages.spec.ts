@@ -239,6 +239,8 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/contact', status: 200 },
   { path: '/contact/verstuurd', status: 200 },
   { path: '/privacy', status: 200 },
+  // The chapter Fans, which the e2e server starts with accounts on.
+  { path: '/fans', status: 200 },
   { path: '/toegankelijkheid', status: 200 },
   { path: '/updates', status: 200 },
   // The way in to the admin. The admin itself is no page for a visitor without a session: it

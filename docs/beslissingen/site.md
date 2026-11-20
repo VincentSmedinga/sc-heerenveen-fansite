@@ -6825,3 +6825,16 @@
 - **Waarom:** twee kopieën van dezelfde beveiligingscode lopen uit elkaar, en een fout die in de ene wordt hersteld, blijft in de andere staan.
   Een eigen pull request houdt de review klein: er verandert alleen bestaande code, en het beheer moet precies hetzelfde blijven doen.
 - **Alternatieven:** de code kopiëren voor supporters; het delen in dezelfde pull request doen als het aanmelden (te groot voor één review).
+
+## Fans staat in het hoofdmenu zodra accounts aan staan, en alles onder `/fans` komt nooit in een cache
+
+- **Datum:** 20 november 2026
+- **Besluit:** het hoofdstuk heet Fans en staat in het hoofdmenu tussen Spelers en Forum, zodra `FANS_ACCOUNTS` aan staat, ook als er nog geen spel is (#1444).
+  De balk met subpagina's heeft de spellen die aan staan (Prognose, Uitblinker, Fjouwer, Fantest) en ontbreekt als er geen is; de pagina `/fans` zelf staat niet in de balk.
+  `/fans` zegt zolang er geen spel is wat er komt, met een kaart om alvast een account te maken, en staat in de sitemap.
+  Alles wat persoonlijk is, staat onder `/fans`.
+  Het proxy zet daar `Cache-Control: no-store` en `Referrer-Policy: same-origin` op, en `robots.txt` weigert `/fans/` maar niet `/fans`.
+  Het hoofdmenu hoort bij de lay-out, die de instellingen leest als de server draait (`connection()`), zodat ook een pagina die vooraf is gebouwd, zoals "niet gevonden", het item goed toont.
+- **Waarom:** zo test de projecteigenaar het aanmelden op acceptatie voordat een spel ervan afhangt.
+  Een pagina met persoonlijke inhoud mag nergens blijven hangen, en de openbare pagina's blijven voor iedereen gelijk en goed te cachen.
+- **Alternatieven:** het item verbergen tot er een spel is (aanmelden is dan niet te testen); de instellingen bij de bouw lezen (dan kent een pagina "niet gevonden" het item niet).

@@ -48,11 +48,18 @@ test.describe('the item Beheer in the main menu', () => {
 
     await page.goto(publicPage)
     await expect(item(page)).toBeVisible()
-    await expect(menu(page).getByRole('link')).toHaveText(['Nieuws', 'Wedstrijden', 'Spelers', 'Beheer', 'Forum'])
+    await expect(menu(page).getByRole('link')).toHaveText([
+      'Nieuws',
+      'Wedstrijden',
+      'Spelers',
+      'Fans',
+      'Beheer',
+      'Forum',
+    ])
     await expect(item(page)).not.toHaveAttribute('aria-current')
 
-    // The focus goes from Spelers to Beheer and on to Forum, like between the other items.
-    await menu(page).getByRole('link', { name: 'Spelers' }).focus()
+    // The focus goes from Fans to Beheer and on to Forum, like between the other items.
+    await menu(page).getByRole('link', { name: 'Fans' }).focus()
     await page.keyboard.press('Tab')
     await expect(item(page)).toBeFocused()
     await page.keyboard.press('Tab')
