@@ -2,7 +2,7 @@ import type { Database } from '@fansite/db/client'
 import type { supporterLoginLinks } from '@fansite/db/schema'
 
 import { supporters } from '@fansite/db/schema'
-import { and, count, eq, gt, gte, isNull, lt } from 'drizzle-orm'
+import { and, count, eq, gt, gte, isNotNull, isNull, lt } from 'drizzle-orm'
 import { setTimeout as sleep } from 'node:timers/promises'
 
 import type { ScreenNameProblem } from './screen-name'
@@ -77,6 +77,20 @@ export type SignUpResult =
   { answer: 'ceiling' | 'limited' } | { answer: 'invalid'; errors: SignUpErrors } | { answer: 'sent'; ref: string }
 
 type Link = typeof supporterLoginLinks.$inferSelect
+
+/**
+ * How many tries the code of the request with `ref` has left: 0 when it is used, has expired or
+ * was tried too often, and for a reference nobody asked for.
+ */
+export async function codeTriesLeft(db: Database, ref: string, now = new Date()) {
+  const { links } = supporterKind.tables
+  const [link] = await db
+    .select({ failedAttempts: links.failedAttempts })
+    .from(links)
+    .where(and(eq(links.refHash, hashOf(ref)), gt(links.expiresAt, now), isNotNull(links.codeHash)))
+
+  return link === undefined ? 0 : Math.max(0, supporterKind.codeAttempts - link.failedAttempts)
+}
 
 /** Uses the code of the mail up, for the request with `ref`, like `confirmWithLink`. */
 export async function confirmWithCode(db: Database, ref: string, code: string, now = new Date()) {

@@ -42,14 +42,12 @@ export default async function SignUpPage({
       <Page.Cell>
         <Heading level={1}>Account maken</Heading>
         <Text appearance="intro">
-          Met een account doe je mee aan de spellen van Fans. Je hebt alleen een schermnaam en een e-mailadres nodig, en
-          geen wachtwoord: we mailen je een link en een code.
-        </Text>
-        <Text>
-          Je schermnaam komt in de standen. Je e-mailadres ziet niemand anders. Wat we bewaren, lees je bij{' '}
-          <Link href="/privacy">Privacy</Link>.
+          Met een account doe je mee aan de Prognose, de Uitblinker en Fjouwer. Je hebt geen wachtwoord nodig.
         </Text>
         <SignUpForm initial={initial} />
+        <Text>
+          We bewaren je schermnaam, je e-mailadres en wat je speelt. <Link href="/privacy">Wat we bewaren</Link>
+        </Text>
       </Page.Cell>
     </Page.Main>
   )

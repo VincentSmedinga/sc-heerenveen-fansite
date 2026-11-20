@@ -19,13 +19,10 @@ export const emptySignUpState: SignUpState = { errors: {}, values: { email: '', 
 
 export const screenNameHint = `${screenNameMinLength} tot ${screenNameMaxLength} tekens: letters, cijfers, spatie, - en _. Andere supporters zien hem in de standen.`
 
-export const emailHint = 'Hierheen mailen we een link en een code. Niemand anders ziet het.'
+export const emailHint = 'Hierheen mailen we een link en een code om in te loggen. Niemand anders ziet het.'
 
-/** The words of a failure that is not about one field. */
-export const failureMessages = {
-  ceiling: 'Het lukt nu even niet. Probeer het over een uur opnieuw.',
-  limited: 'Je vroeg al 3 keer om een mail. Probeer het over een kwartier opnieuw, of gebruik de laatste mail.',
-} as const
+/** The words of a limit, the same for the limit of an address and the ceiling of the site. */
+export const failureMessage = 'Het lukt nu even niet. Probeer het over een kwartier opnieuw.'
 
 /** The message of a screen name that another supporter confirmed while this one waited. */
 export const takenMeanwhileMessage = 'Een ander koos die schermnaam net eerder. Kies een andere.'

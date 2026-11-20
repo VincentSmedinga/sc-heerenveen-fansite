@@ -1,9 +1,9 @@
 'use client'
 
-import { Button, Card, ErrorSummary, Field, Form, Heading, Input, Text } from '@fansite/design-system'
+import { Button, ErrorSummary, Field, Form, Input, Notice } from '@fansite/design-system'
 import { useActionState, useEffect } from 'react'
 
-import { emailHint, failureMessages, screenNameHint, signUpFields, type SignUpState } from '#src/fans/sign-up-form'
+import { emailHint, failureMessage, screenNameHint, signUpFields, type SignUpState } from '#src/fans/sign-up-form'
 
 import { signUp } from './actions'
 
@@ -22,7 +22,7 @@ export function SignUpForm({ initial }: { initial: SignUpState }) {
   })
 
   // After a submit the visitor must hear what is wrong: the focus goes to the summary, or to
-  // the block of a failure that is not about a field.
+  // the notice of a limit, which is in the page from the start, so it is announced.
   useEffect(() => {
     if (state.errors.screenName !== undefined || state.errors.email !== undefined) {
       document.getElementById(summaryId)?.focus()
@@ -40,14 +40,9 @@ export function SignUpForm({ initial }: { initial: SignUpState }) {
         tabIndex={-1}
         title={summary.length === 1 ? 'Kijk nog even naar 1 ding' : `Kijk nog even naar ${summary.length} dingen`}
       />
-      {failure === undefined ? null : (
-        <Card aria-labelledby={`${failureId}-kop`} id={failureId} surface="soft" tabIndex={-1}>
-          <Heading id={`${failureId}-kop`} level={2}>
-            Even niet
-          </Heading>
-          <Text>{failureMessages[failure]}</Text>
-        </Card>
-      )}
+      <Notice id={failureId} tabIndex={-1}>
+        {failure === undefined ? null : failureMessage}
+      </Notice>
       <Form action={action}>
         <Field error={errors.screenName} hint={screenNameHint} id={signUpFields.screenName} label="Schermnaam">
           <Input

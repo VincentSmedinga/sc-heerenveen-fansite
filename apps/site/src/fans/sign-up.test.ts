@@ -14,7 +14,15 @@ import type { SignUpMail } from './sign-up'
 
 import { findSession } from '../login/sessions'
 import { hashOf } from '../login/tokens'
-import { confirmWithCode, confirmWithLink, handleSignUp, noteSignUp, signUpLinkState, signUpsPerHour } from './sign-up'
+import {
+  codeTriesLeft,
+  confirmWithCode,
+  confirmWithLink,
+  handleSignUp,
+  noteSignUp,
+  signUpLinkState,
+  signUpsPerHour,
+} from './sign-up'
 import { signUpMailText } from './sign-up-mail'
 import { supporterKind } from './supporter-login'
 
@@ -157,6 +165,19 @@ describe('signing up', () => {
     expect(await confirmWithCode(database.db, ref, mail?.code ?? '', later(1))).toEqual({ answer: 'gone' })
     expect(await confirmWithLink(database.db, tokenOf(mail), later(1))).toEqual({ answer: 'gone' })
     expect(await database.db.select().from(supporters)).toEqual([])
+  })
+
+  it('counts down the tries the code has left', async () => {
+    const { mail, ref } = await signUp('Tjalle99', 'tjalle@example.org')
+
+    expect(await codeTriesLeft(database.db, ref, later(1))).toBe(5)
+
+    await confirmWithCode(database.db, ref, wrongCode(mail?.code), later(1))
+    await confirmWithCode(database.db, ref, wrongCode(mail?.code), later(1))
+
+    expect(await codeTriesLeft(database.db, ref, later(1))).toBe(3)
+    expect(await codeTriesLeft(database.db, ref, later(15))).toBe(0)
+    expect(await codeTriesLeft(database.db, 'another', later(1))).toBe(0)
   })
 
   it('takes a right code after 4 wrong ones', async () => {
