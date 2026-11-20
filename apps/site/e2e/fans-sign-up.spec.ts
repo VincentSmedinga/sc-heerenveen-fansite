@@ -17,7 +17,8 @@ async function mailTo(address: string) {
 
   return {
     code: /^(\d{6})$/m.exec(mail)?.[1] ?? '',
-    url: /^(https?:\/\/\S+\/fans\/aanmelden\/bevestigen\?token=\S+)$/m.exec(mail)?.[1] ?? '',
+    // The mail has the address of acceptance (SITE_ENV), so the test opens the path on its own.
+    url: /^https?:\/\/\S+?(\/fans\/aanmelden\/bevestigen\?token=\S+)$/m.exec(mail)?.[1] ?? '',
   }
 }
 
@@ -30,7 +31,6 @@ test.describe('without JavaScript', () => {
     const name = `Fan ${id}`.slice(0, 20)
 
     await page.goto('/fans/aanmelden')
-    await checkPage(page)
     await page.getByLabel('Schermnaam').fill(name)
     await page.getByLabel('E-mailadres').fill(address)
     await page.getByRole('button', { name: 'Account maken' }).click()
@@ -47,7 +47,6 @@ test.describe('without JavaScript', () => {
     await expect(page.getByText(`Welkom, ${name}.`)).toBeVisible()
     await expect(page.getByRole('definition').first()).toHaveText(name)
     await expect(page.getByText(address)).toBeVisible()
-    await checkPage(page)
 
     const cookie = (await page.context().cookies()).find(({ name: cookieName }) => cookieName === 'fans-sessie')
 
@@ -67,7 +66,6 @@ test.describe('without JavaScript', () => {
       'Dit e-mailadres klopt niet. Kijk of er een @ in staat.',
     ])
     await expect(page.getByLabel('Schermnaam')).toHaveValue('Redactie')
-    await checkPage(page)
   })
 })
 
@@ -77,10 +75,12 @@ test('makes an account with the button behind the link', async ({ page }) => {
   const name = `Link_${id}`.slice(0, 20)
 
   await page.goto('/fans/aanmelden')
+  await checkPage(page)
   await page.getByLabel('Schermnaam').fill(name)
   await page.getByLabel('E-mailadres').fill(address)
   await page.getByRole('button', { name: 'Account maken' }).click()
   await expect(page).toHaveURL(/\/fans\/aanmelden\/verstuurd\?ref=/)
+  await checkPage(page)
 
   const { url } = await mailTo(address)
 
@@ -92,6 +92,7 @@ test('makes an account with the button behind the link', async ({ page }) => {
 
   await expect(page).toHaveURL(/\/fans\/mijn-account\?welkom=1$/)
   await expect(page.getByText(`Welkom, ${name}.`)).toBeVisible()
+  await checkPage(page)
 
   // The link works once.
   await page.goto(url)
