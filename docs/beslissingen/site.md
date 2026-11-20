@@ -6773,3 +6773,41 @@
   Acceptatie toont alleen `main`, dus daar is alles te testen op de echte host.
 - **Alternatieven:** een lange branch `fans` met een branch per onderdeel.
   Die viel af: de migraties staan genummerd in één lijst en zouden botsen met elke migratie op `main`, acceptatie toont alleen `main`, en de controles, de releases en het opruimen gaan allemaal uit van `main`.
+  \=======
+
+## Supporters krijgen een eigen account op de site, los van het forum
+
+- **Datum:** 20 november 2026
+- **Besluit:** supporters krijgen een eigen account op de site, met een schermnaam en een e-mailadres, los van het forum (#1442).
+  Dit draait de beslissing van 2 november 2026 terug dat de site van een supporter alleen het nummer en de schermnaam van het forumaccount bewaart en geen e-mailadres.
+  Die beslissing stond alleen in #36 en niet in dit bestand; ze vervalt hiermee.
+  De beslissing van 2 november 2026 dat het beheer een eigen login houdt, en dat een supporter een ander soort account is zonder toegang tot `/beheer`, blijft gelden.
+- **Waarom:** er is geen onderhouden extensie waarmee het forum een OAuth-server wordt, en een eigen extensie is PHP in het forum die bij een update stuk kan gaan.
+  De spellen hebben toch een e-mailadres nodig om zonder forum in te loggen, en de site kan zelf mailen vanaf de eigen host.
+  Een supporter zonder forumaccount kan zo ook meedoen.
+- **Alternatieven:** het forum als OAuth- of OpenID-server met een bestaande extensie (die is er niet); een eigen extensie voor het forum (onderhoud bij elke update); inloggen met een code in het forumprofiel (elke supporter heeft dan een forumaccount nodig).
+  Een forumaccount koppelen aan een account van de site kan later nog (#1464).
+
+- **Datum:** 20 november 2026
+- **Besluit:** een supporter logt in met een link en een code per e-mail, zonder wachtwoord.
+  Een sessie duurt 90 dagen na het laatste bezoek en hoogstens een jaar.
+- **Waarom:** de supporter hoeft niets te onthouden, en de site bewaart geen wachtwoord dat kan uitlekken.
+  Een vergeten wachtwoord haal je ook per e-mail op, dus de mail is in beide ontwerpen de echte sleutel.
+  Door de lange sessie logt wie elke week speelt bijna nooit opnieuw in.
+  Het beheer logt al zo in, dus de bouwstenen bestaan.
+- **Alternatieven:** een wachtwoord naast de link (meer code, meer tests, en een hash die mensen elders hergebruiken); dat kan later als keuze erbij (#1463).
+
+- **Datum:** 20 november 2026
+- **Besluit:** de spellen van Fans hebben geen prijzen.
+- **Waarom:** zonder prijzen levert een tweede account weinig op, en hoeven we geen IP-adressen, leeftijden of adressen te bewaren om vals spelen te bestrijden.
+- **Alternatieven:** prijzen per seizoen (vraagt strengere controle op dubbele accounts en meer persoonsgegevens).
+
+- **Datum:** 20 november 2026
+- **Besluit:** wie zijn account opheft, verdwijnt met schermnaam en e-mailadres.
+  De voorspellingen, cijfers, antwoorden en keuzes blijven staan zonder verband met een persoon.
+- **Waarom:** een cijfer is één stem in een gemiddelde en een voorspelling één telling in een groep.
+  Halen we ze weg, dan veranderen gemiddelden die al gepubliceerd zijn.
+  Wie alles weg wil hebben, vraagt het de redactie.
+- **Alternatieven:** alles van de supporter verwijderen (verandert gepubliceerde cijfers achteraf).
+
+> > > > > > > e68c97dc0a0891ace08ff04f66227010861d7a4b
