@@ -66,4 +66,15 @@ export const releaseNotes: ReleaseNotes = {
     'Op home: de laatste wedstrijd, en bij de volgende de vorige ontmoeting, de vorm en de scheidsrechter.',
     'Op de pagina van een club: het nieuws over die club, hun plek naast de onze en de toeschouwers bij onze thuiswedstrijden tegen hen.',
   ],
+  '0.7.0': [
+    'Nieuw: een voorbeschouwing op de pagina van elke wedstrijd die nog komt, met de vorm van beide clubs, de stand, onze eerdere duels en wie onze scorers zijn.',
+    'Op Tegenstanders: kies Alle, Thuis of Uit, en spring met de balk Op deze pagina naar waar je wilt zijn. Ook op de pagina van een speler.',
+    'Op Het makkelijkst en Het moeilijkst: de clubs thuis en uit, met meer clubs per keer. Een smalle kaart toont de rest achter Toon meer.',
+    'In de tabellen: sorteer op elke kolom. De kolommen hebben nu een plaatje in plaats van een letter.',
+    'Op de pagina van een wedstrijd: de stand na elk doelpunt, het stadion van die dag en de scheidsrechter. De clubs zijn een link naar hun pagina.',
+    'Op home: de wedstrijden van de week zien er uit als op Wedstrijden, met de uitslagen boven de stand.',
+    'Op Spelers: de top van het seizoen in vier kleine kaarten, en wie er is gewisseld in de tabel Alle spelers.',
+    'Nieuws: nieuwe bronnen. De regionale kranten van DPG Media en Mediahuis, De Flevopost, het Nederlands Dagblad en ESPN. Van de Leeuwarder Courant ook het sportnieuws.',
+    'Over ons: zo zet je de site op het beginscherm van je telefoon.',
+  ],
 }
