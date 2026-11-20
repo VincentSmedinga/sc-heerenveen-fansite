@@ -1,11 +1,11 @@
 /*
  * The round button (RoundButton): a button or a link with only an icon, round, 44 by 44 pixels,
- * with an icon of 26 pixels. The ThemeButton, the Page.TopLink and the AccountButton are built on
- * it, so the three look the same.
+ * with an icon of 26 pixels. The ThemeButton, the Page.TopLink and the AccountButton are built
+ * on it, so the three look the same.
  *
- * At rest it is quiet: only the icon, without a rim or a fill. Under the mouse, pressed and with
- * the keyboard (:focus-visible) it comes forward: the icon in a stronger colour, with a rim and a
- * fill. The surface sets the colours:
+ * At rest it is quiet: only the icon, without a rim or a fill. Under the mouse, pressed and
+ * with the keyboard (:focus-visible) it comes forward: the icon in a stronger colour, with a
+ * rim and a fill. The surface sets the colours:
  *
  * - on the page (hf-round-button-page) they are those of links: the blue of a link
  *   (--hf-colour-text-link) and under the mouse the blue of a link under the mouse
@@ -21,11 +21,11 @@
  * The rim is there at rest as well, but see-through, so the button does not change size when it
  * comes forward, and a browser in forced colours keeps an outline: the colour of a button or of
  * a link, after what it is. The base styles of a button fill it, and those of a link colour it
- * under the mouse, also on a touch screen after a tap; this comes later in the cascade, so it is
- * not left lit. Hover is only for devices with a mouse (hover: hover), so nothing stays lit after
- * a tap on a phone; pressing (:active) counts on touch as well. The change takes the short motion
- * duration (0,2 seconds), and none with reduced motion. The focus ring is the one of the page, or
- * of the header, drawn around the rim.
+ * under the mouse, also on a touch screen after a tap; this comes later in the cascade, so it
+ * is not left lit. Hover is only for devices with a mouse (hover: hover), so nothing stays lit
+ * after a tap on a phone; pressing (:active) counts on touch as well. The change takes the
+ * short motion duration (0,2 seconds), and none with reduced motion. The focus ring is the one
+ * of the page, or of the header, drawn around the rim.
  */
 
 @layer hf.components {
@@ -98,7 +98,10 @@
     }
   }
 
-  /* The colours on the page: those of links. currentcolor is the colour of the icon at that moment. */
+  /*
+   * The colours on the page: those of links. currentcolor is the colour of the icon at that
+   * moment.
+   */
   .hf-round-button-page {
     --hf-round-button-colour: var(--hf-colour-text-link);
     --hf-round-button-colour-forward: var(--hf-colour-text-link-hover);

@@ -1,19 +1,22 @@
 /*
- * The account button of the header (AccountButton): a RoundButton on the header (round-button.css) with a
- * supporter of 32 pixels, larger than the icon of the other round buttons, because it has more detail.
+ * The account button of the header (AccountButton): a RoundButton on the header
+ * (round-button.css) with a supporter of 32 pixels, larger than the icon of the other round
+ * buttons, because it has more detail.
  *
- * Logged out the arms and the scarf above the head are away: folded down into the shoulders and see-through,
- * and the scarf hangs around the neck. Under the mouse (only on a device with a mouse) and with the keyboard
- * (:focus-visible) the arms come up out of the shoulders, the scarf around the neck goes, and once the arms
- * are up they wave the scarf from side to side twice. Logged in (data-signed-in) the arms and the scarf are
- * up already; under the mouse and with the keyboard they wave.
+ * Logged out the arms and the scarf above the head are away: folded down into the shoulders and
+ * see-through, and the scarf hangs around the neck. Under the mouse (only on a device with a
+ * mouse) and with the keyboard (:focus-visible) the arms come up out of the shoulders, the
+ * scarf around the neck goes, and once the arms are up they wave the scarf from side to side
+ * twice. Logged in (data-signed-in) the arms and the scarf are up already; under the mouse and
+ * with the keyboard they wave.
  *
- * Coming up takes the medium duration (0,4 seconds). The wave takes two and a half times as long, twice,
- * and starts after the short duration, when the arms are nearly up. With reduced motion every duration is
- * 0s, so the arms are simply there and the wave has no time to move: nothing moves.
+ * Coming up takes the medium duration (0,4 seconds). The wave takes two and a half times as
+ * long, twice, and starts after the short duration, when the arms are nearly up. With reduced
+ * motion every duration is 0s, so the arms are simply there and the wave has no time to move:
+ * nothing moves.
  *
- * The arms come up with `translate` and `scale` and wave with `rotate`, three properties that add up, so the
- * wave does not undo the way up.
+ * The arms come up with `translate` and `scale` and wave with `rotate`, three properties that
+ * add up, so the wave does not undo the way up.
  */
 
 @layer hf.components {

@@ -62,13 +62,14 @@ export const RoundButton = (props: RoundButtonProps) => {
     )
   }
 
-  const { children, className, label, size = 'default', surface = 'page', ...rest } = props
+  const { children, className, href, label, size = 'default', surface = 'page', ...rest } = props
 
   return (
     <a
       {...rest}
       aria-label={label}
       className={classNames('hf-round-button', `hf-round-button-${surface}`, sizeClassName(size), className)}
+      href={href}
     >
       {children}
     </a>

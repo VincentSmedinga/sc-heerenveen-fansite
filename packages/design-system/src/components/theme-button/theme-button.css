@@ -1,19 +1,19 @@
 /*
- * The theme button of the header. It is a RoundButton on the header (round-button.css), which gives it its size, its
- * colours and how it comes forward under the mouse, pressed and with the keyboard. This file adds the change of the
- * icon.
+ * The theme button of the header. It is a RoundButton on the header (round-button.css), which
+ * gives it its size, its colours and how it comes forward under the mouse, pressed and with the
+ * keyboard. This file adds the change of the icon.
  *
- * Under the mouse and with the keyboard (:focus-visible) the icon turns into that of the
- * other theme, so the button shows what a click chooses: the sun becomes the moon, the
- * moon the sun. After a click the component sets data-settled, and the icon of the new
- * theme stays until the pointer or the focus leaves, so it does not jump back at once.
- * Pressing (:active) alone, as on a touch screen, leaves the icon as it is.
+ * Under the mouse and with the keyboard (:focus-visible) the icon turns into that of the other
+ * theme, so the button shows what a click chooses: the sun becomes the moon, the moon the sun.
+ * After a click the component sets data-settled, and the icon of the new theme stays until the
+ * pointer or the focus leaves, so it does not jump back at once. Pressing (:active) alone, as
+ * on a touch screen, leaves the icon as it is.
  *
- * The icon is a disc that grows into the moon while a second disc, in a mask, slides in
- * and cuts the dent out of it. The rays of the sun dissolve outwards into the button, and
- * come out of the disc again. Everything follows one number, --hf-theme-button-moon (0 is
- * the sun, 1 is the moon), with transforms only, so every browser draws the same. With
- * reduced motion the icon changes without a transition.
+ * The icon is a disc that grows into the moon while a second disc, in a mask, slides in and
+ * cuts the dent out of it. The rays of the sun dissolve outwards into the button, and come out
+ * of the disc again. Everything follows one number, --hf-theme-button-moon (0 is the sun, 1 is
+ * the moon), with transforms only, so every browser draws the same. With reduced motion the
+ * icon changes without a transition.
  */
 
 @layer hf.components {
