@@ -281,10 +281,21 @@ describe('signing up with an address that has an account', () => {
     await account()
     await database.db.update(supporters).set({ disabledAt: start, disabledReason: 'Test' })
 
-    const { mails, result } = await signUp('Andere Naam', 'tjalle@example.org', later(2))
+    const { mails, ref, result } = await signUp('Andere Naam', 'tjalle@example.org', later(2))
 
     expect(result.answer).toBe('sent')
     expect(mails).toEqual([])
+    // A wrong code counts down like for any other address, so the page doesn't tell it apart.
+    expect(await confirmWithCode(database.db, ref, '000000', later(3))).toEqual({ answer: 'gone' })
+    expect(await codeTriesLeft(database.db, ref, later(3))).toBe(4)
+  })
+
+  it('counts down for an address without an account the same as for one with', async () => {
+    const unknown = await signUp('Sietske', 'sietske@example.org')
+
+    await confirmWithCode(database.db, unknown.ref, wrongCode(unknown.mail?.code), later(1))
+
+    expect(await codeTriesLeft(database.db, unknown.ref, later(1))).toBe(4)
   })
 })
 

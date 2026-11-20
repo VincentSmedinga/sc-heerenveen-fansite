@@ -237,11 +237,14 @@ async function decide(db: Database, values: { email: string; screenName: string 
   if (account !== undefined) {
     console.info(`A sign-up came for the address of supporter ${account.id}; it gets the mail to log in.`)
 
+    const mail = await issueLoginLink(db, supporterKind, account.id, ref, now, new URL(signUpPaths.confirm, origin))
+
+    // A blocked account gets no mail. Its link is made all the same, so the page "Kijk in je
+    // mail" counts down the tries of a wrong code like for any other address, and doesn't tell
+    // that this one is blocked. Nobody has its token or its code, and it can't log in anyway.
     if (account.disabledAt !== null) {
       return { answer: 'sent' as const, ref }
     }
-
-    const mail = await issueLoginLink(db, supporterKind, account.id, ref, now, new URL(signUpPaths.confirm, origin))
 
     return { answer: 'sent' as const, mail: { ...mail, kind: 'log-in' as const, to: email }, ref }
   }

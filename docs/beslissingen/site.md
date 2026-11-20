@@ -6887,3 +6887,10 @@
 - **Waarom:** een uur van de klok maakt "tot het uur om is" eenduidig, en een rij zonder adres bewaart niets over een persoon.
   Een bekend adres telt mee, zodat het plafond niet verraadt wie een account heeft.
 - **Alternatieven:** een schuivend uur (dan komt de mail aan de redactie bij een lange golf meer dan één keer); de rijen met adres een uur bewaren (het issue zegt 15 minuten).
+
+- **Datum:** 20 november 2026
+- **Besluit:** alle meldingen op de pagina's van het aanmelden zijn de Notice van het designsysteem: de melding van een limiet, het welkom na de bevestiging en "Geen mail?".
+  Er zijn geen groene of rode meldingsvlakken.
+  Een fout in een veld staat in de ErrorSummary en bij het veld, met dezelfde tekst.
+- **Waarom:** het ontwerp van het hoofdstuk Fans gebruikt één rustige soort melding, en de Notice heeft `role="status"`, zodat een schermlezer de melding van een limiet hoort.
+- **Alternatieven:** een groen vlak voor wat lukte en een rood vlak voor een limiet (meer kleur dan het ontwerp wil, en een limiet is geen fout van de supporter).

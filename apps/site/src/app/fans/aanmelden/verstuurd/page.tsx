@@ -4,6 +4,7 @@ import { Button, ErrorSummary, Field, Form, Heading, Input, Link, Notice, Page, 
 import { requireFansPart } from '@fansite/shared/fans-env'
 import { notFound, redirect } from 'next/navigation'
 
+import { FocusOnLoad } from '#src/app/beheer/spelers/[id]/FocusOnLoad'
 import { getDatabase } from '#src/database'
 import { codeTriesLeft, signUpPaths } from '#src/fans/sign-up'
 
@@ -11,9 +12,9 @@ import { confirmCode } from '../actions'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Kijk in je mail' }
+const summaryId = 'fouten'
 
-const codeError = 'Die code klopt niet. Kijk of je de 6 cijfers uit de laatste mail hebt.'
+export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Kijk in je mail' }
 
 // What every sign-up leads to, whether the address has an account or not. The `ref` in the
 // address is a random reference of this request, not the address: it binds the code to the
@@ -34,7 +35,8 @@ export default async function SentPage({
     redirect(`${signUpPaths.confirm}?fout=link`)
   }
 
-  const error = fout === 'code' ? codeError : undefined
+  // The same words in the summary and at the field.
+  const error = fout === 'code' ? `Die code klopt niet. Je kunt het nog ${triesLeft} keer proberen.` : undefined
 
   return (
     <Page.Main>
@@ -45,12 +47,14 @@ export default async function SentPage({
         {reference === undefined ? null : (
           <>
             <ErrorSummary
-              errors={
-                error === undefined ? [] : [{ id: 'code', message: `Je kunt het nog ${triesLeft} keer proberen.` }]
-              }
+              errors={error === undefined ? [] : [{ id: 'code', message: error }]}
+              id={summaryId}
               level={2}
+              tabIndex={-1}
               title="Die code klopt niet"
             />
+            {/* After a wrong code the page loads again, and the focus goes to the summary. */}
+            {error === undefined ? null : <FocusOnLoad id={summaryId} />}
             <Form action={confirmCode.bind(null, reference)}>
               <Field
                 error={error}
