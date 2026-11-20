@@ -24,7 +24,7 @@ export const notVisitors =
  * search, which is no page for a search engine but is for a visitor. The path has no query, so
  * what was searched for is not part of the count. An
  * article is counted by `articlePath`, and the page of a club by `clubPath`, once the database
- * says it exists. The admin, the files,
+ * says it exists. The admin, the pages of the accounts of supporters, the files,
  * `/_next` and the addresses for machines (feeds, robots.txt, sitemap.xml, the manifest) are
  * on no list, so they are not counted. A path that is on no list, such as one that doesn't
  * exist, is not counted either.

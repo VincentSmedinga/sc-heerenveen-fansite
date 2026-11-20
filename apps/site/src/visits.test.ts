@@ -303,10 +303,15 @@ describe('visitOf', () => {
     // which the database confirms, the page of a season, which counts as /wedstrijden,
     // /wedstrijden/cijfers
     // or /spelers, and the page of a match, which counts as /wedstrijden. A slot of the layout
-    // (@shortcuts) is not a page of its own.
+    // (@shortcuts) is not a page of its own. The pages of the accounts of supporters are not
+    // counted, like the admin.
     const withoutCount = [
       '/beheer',
       '/beheer/[...]',
+      '/fans/aanmelden',
+      '/fans/aanmelden/bevestigen',
+      '/fans/aanmelden/verstuurd',
+      '/fans/mijn-account',
       '/redactie/[slug]',
       '/wedstrijden/cijfers/[seizoen]',
       '/spelers/[seizoen]',
