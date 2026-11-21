@@ -112,6 +112,8 @@ function pagePaths() {
 }
 
 beforeEach(() => {
+  // The tests below count the page Fans, which is listed when accounts are on.
+  vi.stubEnv('FANS_ACCOUNTS', 'on')
   getPublishedArticles.mockReset()
   getPublishedArticles.mockResolvedValue([])
   getClubRecords.mockReset()
@@ -136,6 +138,15 @@ describe('sitemap', () => {
     vi.stubEnv('SITE_ENV', siteEnv)
 
     expect(await sitemap()).toEqual(pages.map(({ path }) => ({ url: `${origin}${path}` })))
+  })
+
+  it('leaves the page Fans out while accounts are off', async () => {
+    vi.stubEnv('SITE_ENV', 'production')
+    vi.stubEnv('FANS_ACCOUNTS', 'off')
+
+    expect(await sitemap()).toEqual(
+      pages.filter(({ path }) => path !== '/fans').map(({ path }) => ({ url: `https://sc.heerenveen.org${path}` })),
+    )
   })
 
   it('has no address with a query, such as `/nieuws?pagina=2`', async () => {

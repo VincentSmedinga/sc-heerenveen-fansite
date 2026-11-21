@@ -106,7 +106,16 @@ test.describe('the menu and the bar of Wedstrijden with JavaScript', () => {
 
     const names = () => menu(page).getByRole('link').allTextContents()
 
-    expect(await names()).toEqual(['Nieuws', 'Wedstrijden', 'Cijfers', 'Tegenstanders', 'Zoeken', 'Spelers', 'Forum'])
+    expect(await names()).toEqual([
+      'Nieuws',
+      'Wedstrijden',
+      'Cijfers',
+      'Tegenstanders',
+      'Zoeken',
+      'Spelers',
+      'Fans',
+      'Forum',
+    ])
 
     // The bar sits under Wedstrijden, so the keyboard goes from Wedstrijden to Cijfers and on
     // to Tegenstanders and Zoeken.
@@ -125,7 +134,16 @@ test.describe('the menu and the bar of Wedstrijden with JavaScript', () => {
     await expect(page).toHaveURL(/\/tegenstanders$/)
     await expect(bar(page, 'Tegenstanders')).toHaveAttribute('aria-current', 'page')
 
-    expect(await names()).toEqual(['Nieuws', 'Wedstrijden', 'Cijfers', 'Tegenstanders', 'Zoeken', 'Spelers', 'Forum'])
+    expect(await names()).toEqual([
+      'Nieuws',
+      'Wedstrijden',
+      'Cijfers',
+      'Tegenstanders',
+      'Zoeken',
+      'Spelers',
+      'Fans',
+      'Forum',
+    ])
 
     await page.keyboard.press('Tab')
     await expect(page.getByRole('link', { name: /^sc Heerenveen Fansite/ })).toBeFocused()

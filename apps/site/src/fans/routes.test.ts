@@ -46,6 +46,8 @@ const open = [
   'app/fans/aanmelden/bevestigen/page.tsx',
   'app/fans/aanmelden/page.tsx',
   'app/fans/aanmelden/verstuurd/page.tsx',
+  // The page that says what is coming, for everybody; it has nothing personal.
+  'app/fans/page.tsx',
 ]
 
 function filesUnder(folder: string) {

@@ -6831,6 +6831,23 @@
   `AccountTables` is nu de tabellen van het beheer of die van supporters.
   Twee dingen kwamen erbij, met voor het beheer dezelfde werking als ervoor: `codeFailuresEndLink`, en rijen zonder adres in de tabel van de pogingen, die de module laat staan.
 
+## Fans staat in het hoofdmenu zodra accounts aan staan, en alles onder `/fans` komt nooit in een cache
+
+- **Datum:** 20 november 2026
+- **Besluit:** het hoofdstuk heet Fans en staat in het hoofdmenu tussen Spelers en Forum, zodra `FANS_ACCOUNTS` aan staat, ook als er nog geen spel is (#1444).
+  De balk met subpagina's heeft de spellen die aan staan (Prognose, Uitblinker, Fjouwer, Fantest) en ontbreekt als er geen is; de pagina `/fans` zelf staat niet in de balk.
+  `/fans` zegt zolang er geen spel is wat er komt, met een kaart om alvast een account te maken, en staat in de sitemap.
+  Alles wat persoonlijk is, staat onder `/fans`.
+  Het proxy zet daar `Cache-Control: no-store` en `Referrer-Policy: same-origin` op, en `robots.txt` weigert `/fans/` maar niet `/fans`.
+  Het hoofdmenu hoort bij de lay-out, die de instellingen leest als de server draait (`connection()`), zodat ook een pagina die vooraf is gebouwd, zoals "niet gevonden", het item goed toont.
+  De lay-out leest de instellingen bij elk verzoek (`connection()`), dus elke pagina is dynamisch.
+  Dat kost geen cache: 114 pagina's waren al `force-dynamic`, en van de pagina's die vooraf werden gebouwd bleven alleen `/contact/verstuurd` en de pagina "niet gevonden" over, die geen eigen cache hadden.
+  De openbare pagina's blijven voor iedereen gelijk, dus een cache ervoor blijft mogelijk.
+- **Waarom:** zo test de projecteigenaar het aanmelden op acceptatie voordat een spel ervan afhangt.
+  Een pagina met persoonlijke inhoud mag nergens blijven hangen, en de openbare pagina's blijven voor iedereen gelijk en goed te cachen.
+- **Alternatieven:** het item verbergen tot er een spel is (aanmelden is dan niet te testen); de instellingen bij de bouw lezen (dan kent een pagina "niet gevonden" het item niet).
+- **Later:** zie _De links in het hoofdmenu staan op een telefoon dichter bij elkaar_ in `designsysteem.md` (21 november 2026): daar staat hoe breed het menu op een telefoon is.
+
 ## Een supporter maakt een account met een schermnaam en een e-mailadres
 
 - **Datum:** 20 november 2026

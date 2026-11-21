@@ -4052,3 +4052,12 @@
   De regel in de groep houdt elke kaart gelijk en laat de pagina's niets uitrekenen.
 - **Alternatieven:** schalen naar diameter (twee keer zoveel doelpunten lijkt vier keer zoveel); geen ondergrens (een kleine ring krijgt geen ruimte voor zijn namen); de onderkanten op één lijn (de titels komen dan op verschillende hoogtes); de regel in de kaart zelf (elke kaart rekent zelf).
 - **Later:** vult _Een donutdiagram is een eigen onderdeel in SVG, met een positieve en een negatieve kleur_ (26 oktober 2026) aan: een groep met `scaled` heeft diagrammen van verschillende grootte.
+
+## De links in het hoofdmenu staan op een telefoon dichter bij elkaar
+
+- **Datum:** 21 november 2026
+- **Besluit:** de links in het hoofdmenu staan onder 30rem 0,5rem uit elkaar in plaats van 1rem, zodat Nieuws, Wedstrijden, Spelers, Fans en Forum op een telefoon van 360 en 390 pixels op één regel staan (#1444).
+  Er is geen Meer in het menu: het ontwerp liet Fans op 360 pixels onder Meer vallen, maar de regel van `NavigationMore` geldt pas vanaf zes items en met een `moreLabel`, en de site geeft er geen.
+  Met Beheer erbij zijn het zes items en mag Forum naar een tweede regel.
+- **Waarom:** de projecteigenaar wil de vijf items naast elkaar op elke gangbare telefoon, en Meer nog niet.
+- **Alternatieven:** Fans op 360 pixels onder Meer zetten (dan valt Fans weg uit de balk, en de regel vouwt dan ook Wedstrijden en Spelers weg); Forum op een tweede regel laten staan.

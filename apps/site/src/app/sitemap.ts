@@ -1,7 +1,10 @@
 import type { MetadataRoute } from 'next'
 
+import { readFans } from '@fansite/shared/fans-env'
+
 import { getPublishedArticles } from '../articles'
 import { reasonOf } from '../errors'
+import { fansPath } from '../fans-paths'
 import { urlOf } from '../metadata'
 import { getClubRecords, opponentsPath } from '../opponents'
 import { pages } from '../pages'
@@ -20,7 +23,11 @@ export const dynamic = 'force-dynamic'
  * doesn't drop them, but a sitemap that fails could be read as a site that is gone.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const entries: MetadataRoute.Sitemap = pages.map(({ path }) => ({ url: urlOf(path) }))
+  // The page Fans is there only when accounts are on.
+  const accounts = readFans().accounts
+  const entries: MetadataRoute.Sitemap = pages
+    .filter(({ path }) => path !== fansPath || accounts)
+    .map(({ path }) => ({ url: urlOf(path) }))
 
   try {
     for (const { slug } of await getPublishedArticles()) {

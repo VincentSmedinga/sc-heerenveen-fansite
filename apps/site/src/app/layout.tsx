@@ -5,10 +5,12 @@ import type { ReactNode } from 'react'
 
 import { Body, Head, Link, Logo, Navigation, Page, PullToRefresh, Root, Text } from '@fansite/design-system'
 import { preloadedFonts } from '@fansite/design-system/fonts'
+import { connection } from 'next/server'
 import { preload } from 'react-dom'
 
 import { headerColour } from '../colours'
 import { reviewBranch } from '../env'
+import { fansMenu } from '../fans'
 import { SiteNavigation } from '../SiteNavigation'
 import { ThemeToggle } from '../ThemeToggle'
 import { withBranch } from '../title'
@@ -87,7 +89,7 @@ export const viewport: Viewport = {
 // page and a slot can read on the server and a layout cannot. Only the pages of Wedstrijden and
 // Tegenstanders have a route in the slot, and they already render on each request; every other
 // page gets an empty slot, which is static (see SiteNavigation for why not `useSearchParams`).
-export default function RootLayout({
+export default async function RootLayout({
   children,
   shortcuts,
   subnav,
@@ -96,6 +98,11 @@ export default function RootLayout({
   shortcuts: ReactNode
   subnav: ReactNode
 }) {
+  // The menu has Fans only when accounts are on, a setting the server reads when it runs (see
+  // fans-env). Without this the pages that are built in advance, such as the page "niet
+  // gevonden", would keep the setting of the build.
+  await connection()
+
   // The two fonts above the fold are asked for in the head, before the stylesheet has told the
   // browser it needs them, so they are in before the first paint (see preloadedFonts). A font
   // needs `crossOrigin`, also from our own domain, or the browser fetches it twice.
@@ -115,7 +122,7 @@ export default function RootLayout({
             </Link>
             <ThemeToggle />
           </Page.Header>
-          <SiteNavigation matchesBar={subnav} />
+          <SiteNavigation fans={fansMenu()} matchesBar={subnav} />
           {shortcuts}
           <Page.Body>{children}</Page.Body>
           <Page.Footer>
