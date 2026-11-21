@@ -10,6 +10,7 @@ import { parseItemId } from '#src/beheer/items'
 import { requireRole } from '#src/beheer/require-role'
 import { findSupporter } from '#src/beheer/supporter-management'
 import { getDatabase } from '#src/database'
+import { FocusOnLoad } from '#src/FocusOnLoad'
 
 import { blockAccount, renameAccount, unblockAccount } from '../actions'
 import { supportersPath } from '../paths'
@@ -71,7 +72,12 @@ export default async function SupporterPage({ params, searchParams }: Props) {
         </Text>
       </Page.Cell>
       <Page.Cell area="main">
-        {notice === undefined ? null : <Notice>{`${notice.title}. ${notice.text}`}</Notice>}
+        {notice === undefined ? null : (
+          <>
+            <Notice id="gedaan" tabIndex={-1}>{`${notice.title}. ${notice.text}`}</Notice>
+            <FocusOnLoad id="gedaan" />
+          </>
+        )}
         <Card aria-labelledby="gegevens-kop">
           <Heading id="gegevens-kop" level={2}>
             Gegevens

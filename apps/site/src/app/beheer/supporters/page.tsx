@@ -22,6 +22,7 @@ import { compact } from '#src/beheer/density'
 import { requireRole } from '#src/beheer/require-role'
 import { listSupporters } from '#src/beheer/supporter-management'
 import { getDatabase } from '#src/database'
+import { FocusOnLoad } from '#src/FocusOnLoad'
 
 import { forgetAddress } from './adressen/actions'
 import { listPath, supporterPath, supportersPath } from './paths'
@@ -64,7 +65,14 @@ export default async function SupportersPage({ searchParams }: { searchParams: P
         </Text>
       </Page.Cell>
       <Page.Cell area="main">
-        {fout === 'weg' ? <Notice>Dit account bestaat niet meer. Er is niets veranderd.</Notice> : null}
+        {fout === 'weg' ? (
+          <>
+            <Notice id="weg" tabIndex={-1}>
+              Dit account bestaat niet meer. Er is niets veranderd.
+            </Notice>
+            <FocusOnLoad id="weg" />
+          </>
+        ) : null}
         <Form action={supportersPath} method="get">
           <Field
             hint="Een deel van de naam is genoeg. Hoofdletters en accenten tellen niet."
@@ -101,7 +109,7 @@ export default async function SupportersPage({ searchParams }: { searchParams: P
                   row.lastVisitOn === null
                     ? 'Nog niet bezocht'
                     : `Laatste bezoek ${dayFormat.format(new Date(row.lastVisitOn))}`,
-                  row.blocked ? { content: <Tag tone="highlight">Geblokkeerd</Tag>, sortValue: 0 } : 'Actief',
+                  row.blocked ? <Tag tone="highlight">Geblokkeerd</Tag> : 'Actief',
                 ],
                 header: row.screenName,
                 href: supporterPath(row.id),
