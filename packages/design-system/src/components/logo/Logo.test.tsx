@@ -92,8 +92,11 @@ describe('Logo', () => {
       expect(css).toMatch(/\.hf-logo-tagline \{[^}]*@media \(width < 37\.5rem\) \{\s*display: block;/s)
     })
 
-    it('never forbids the wordmark to wrap, so a zoomed text reflows and is not cut off', () => {
-      expect(strip('logo.css')).not.toMatch(/\.hf-logo-wordmark \{[^}]*white-space: nowrap/s)
+    it('keeps the wordmark in one box that may wrap by word, so a zoomed text reflows and is not cut off', () => {
+      const css = strip('logo.css')
+
+      expect(css).toMatch(/\.hf-logo-wordmark \{[^}]*display: inline-block;[^}]*max-inline-size: 100%;/s)
+      expect(css).not.toMatch(/\.hf-logo-wordmark \{[^}]*white-space: nowrap/s)
     })
   })
 })

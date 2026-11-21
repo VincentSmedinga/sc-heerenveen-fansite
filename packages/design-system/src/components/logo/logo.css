@@ -31,11 +31,10 @@
   }
 
   /*
-   * The wordmark and the tagline run on in one line of text. The wordmark is fluid (--hf-wordmark-font-size) and stays on one
-   * line; only a text zoomed far beyond the screen makes it wrap, by word, so nothing is cut off. Under 600px the tagline
-   * is under it (see below). Where the wordmark wraps, the tagline
-   * stays behind its last word if it fits and goes to a line of its own if not. The space between them is a space in the
-   * text, made as wide as 0.25rem more; the wordmark and the tagline set their own word spacing back.
+   * The wordmark and the tagline run on in one line of text. The wordmark is fluid (--hf-wordmark-font-size) and stays on
+   * one line. Under 600px the tagline is under it (see below); from 600px it is beside it, and goes under it when there
+   * is no room. The space between them is a space in the text, made as wide as 0.25rem more; the wordmark and the tagline
+   * set their own word spacing back.
    */
   .hf-logo-text {
     word-spacing: 0.25rem;
@@ -48,6 +47,13 @@
 
   .hf-logo-wordmark {
     color: var(--hf-colour-text-heading);
+
+    /*
+     * One box, as wide as the wordmark and no wider than the line. The tagline beside it goes under it when there is no
+     * room, and the wordmark itself only wraps, by word, when the text is zoomed so far that it is wider than the line.
+     */
+    display: inline-block;
+    max-inline-size: 100%;
     word-spacing: normal;
   }
 
