@@ -1,0 +1,81 @@
+/*
+ * The watermark of a game card: a large, very light drawing of the game in the bottom right corner, cut off by the
+ * edges of the card. It is a pseudo-element, so it is not in the accessibility tree, takes no focus and no clicks, and
+ * sits under the content of the card. The drawings are masks in SVG in this file, painted in the tint of the surface
+ * (--hf-colour-watermark-surface-*), so no request to another address is needed.
+ * It is tilted a little and sized as a share of the width of the card, so it never makes the card wider; the card clips
+ * what sticks out. In forced colours it is gone: a mask would be painted in the text colour there.
+ */
+
+@layer hf.components {
+  .hf-card-game {
+    /* A stacking context of its own, so the watermark can sit under the content and over the background. */
+    isolation: isolate;
+    overflow: clip;
+
+    --hf-card-watermark-colour: var(--hf-colour-watermark-surface);
+    --hf-card-watermark-x: 24%;
+    --hf-card-watermark-y: 24%;
+
+    &::before {
+      aspect-ratio: 1;
+      background-color: var(--hf-card-watermark-colour);
+      content: '';
+      inset-block-end: 0;
+      inset-inline-end: 0;
+      mask-image: var(--hf-card-watermark-image);
+      mask-repeat: no-repeat;
+      mask-size: contain;
+      pointer-events: none;
+      position: absolute;
+      transform: translate(var(--hf-card-watermark-x), var(--hf-card-watermark-y)) rotate(-10deg);
+      inline-size: 80%;
+      z-index: -1;
+
+      @media (forced-colors: active) {
+        display: none;
+      }
+    }
+
+    &:dir(rtl)::before {
+      transform: translate(calc(var(--hf-card-watermark-x) * -1), var(--hf-card-watermark-y)) rotate(10deg);
+    }
+  }
+
+  .hf-card-game.hf-card-strong {
+    --hf-card-watermark-colour: var(--hf-colour-watermark-surface-strong);
+  }
+
+  .hf-card-game.hf-card-soft {
+    --hf-card-watermark-colour: var(--hf-colour-watermark-surface-soft);
+  }
+
+  .hf-card-game.hf-card-warm {
+    --hf-card-watermark-colour: var(--hf-colour-watermark-surface-warm);
+  }
+
+  /* A card without a surface has nothing to tint: the watermark is for a card you see. */
+  .hf-card-game.hf-card-transparent::before {
+    display: none;
+  }
+
+  .hf-card-game-prognose {
+    --hf-card-watermark-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Cdefs%3E%3Cmask id=%22b%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22white%22/%3E%3Cpath d=%22M27 34a24 24 0 0 1 17-15%22 stroke=%22black%22 stroke-width=%225%22 stroke-linecap=%22round%22 fill=%22none%22/%3E%3Cpath d=%22M60 40l2.6 7 7 2.6-7 2.6-2.6 7-2.6-7-7-2.6 7-2.6zM42 52l1.6 4.2 4.2 1.6-4.2 1.6-1.6 4.2-1.6-4.2-4.2-1.6 4.2-1.6z%22 fill=%22black%22/%3E%3C/mask%3E%3C/defs%3E%3Ccircle cx=%2250%22 cy=%2240%22 r=%2230%22 mask=%22url(%23b)%22/%3E%3Cpath d=%22M33 68h34c3 0 4 2 3 4l-3 7H33l-3-7c-1-2 0-4 3-4z%22/%3E%3Crect x=%2224%22 y=%2282%22 width=%2252%22 height=%228%22 rx=%224%22/%3E%3C/svg%3E');
+    --hf-card-watermark-x: 20%;
+    --hf-card-watermark-y: 6%;
+  }
+
+  .hf-card-game-uitblinker {
+    --hf-card-watermark-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Cpath d=%22M50 4l13.5 29 31.5 3.6-23.5 21.5 6.6 31.2L50 73.6 21.9 89.3l6.6-31.2L5 36.6 36.5 33z%22/%3E%3C/svg%3E');
+  }
+
+  .hf-card-game-fjouwer {
+    --hf-card-watermark-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect x=%226%22 y=%224%22 width=%2288%22 height=%2292%22 rx=%226%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%225%22/%3E%3Cpath d=%22M6 50h88%22 stroke=%22%23000%22 stroke-width=%223%22/%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2212%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%223%22/%3E%3Cpath d=%22M30 4v14h40V4M30 96V82h40v14%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%223%22/%3E%3Cg fill=%22none%22 stroke=%22%23000%22 stroke-width=%223%22%3E%3Ccircle cx=%2250%22 cy=%2288%22 r=%224%22/%3E%3Ccircle cx=%2222%22 cy=%2272%22 r=%224%22/%3E%3Ccircle cx=%2278%22 cy=%2272%22 r=%224%22/%3E%3Ccircle cx=%2264%22 cy=%2264%22 r=%224%22/%3E%3Ccircle cx=%2220%22 cy=%2238%22 r=%224%22/%3E%3Ccircle cx=%2280%22 cy=%2238%22 r=%224%22/%3E%3Ccircle cx=%2250%22 cy=%2216%22 r=%224%22/%3E%3C/g%3E%3Ccircle cx=%2236%22 cy=%2264%22 r=%229%22/%3E%3Ccircle cx=%2250%22 cy=%2240%22 r=%229%22/%3E%3Ccircle cx=%2234%22 cy=%2226%22 r=%229%22/%3E%3Ccircle cx=%2266%22 cy=%2224%22 r=%229%22/%3E%3C/svg%3E');
+  }
+
+  .hf-card-game-fantest {
+    --hf-card-watermark-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Cdefs%3E%3Cmask id=%22q%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22white%22/%3E%3Cg fill=%22none%22 stroke=%22black%22 stroke-width=%224.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M20 42l9-22 9 22M23 34h12%22/%3E%3Cpath d=%22M63 20v22h6.5a5.5 5.5 0 0 0 0-11H63h5.5a5.5 5.5 0 0 0 0-11z%22/%3E%3Cpath d=%22M36 66a9.5 9.5 0 1 0 0 12%22/%3E%3Cpath d=%22M60 72l7 7 14-15%22 stroke-width=%226%22/%3E%3C/g%3E%3C/mask%3E%3C/defs%3E%3Cg mask=%22url(%23q)%22%3E%3Crect x=%228%22 y=%2210%22 width=%2242%22 height=%2240%22 rx=%228%22/%3E%3Crect x=%2254%22 y=%2210%22 width=%2242%22 height=%2240%22 rx=%228%22/%3E%3Crect x=%228%22 y=%2254%22 width=%2242%22 height=%2240%22 rx=%228%22/%3E%3Crect x=%2254%22 y=%2254%22 width=%2242%22 height=%2240%22 rx=%228%22/%3E%3C/g%3E%3C/svg%3E');
+    --hf-card-watermark-x: 22%;
+    --hf-card-watermark-y: 14%;
+  }
+}

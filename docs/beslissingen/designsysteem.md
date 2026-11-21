@@ -4106,3 +4106,22 @@
   Lijnen tekenen ook overal hetzelfde, zonder lettertype in een masker.
   De site heeft de regel alleen via de knop nodig, dus `@fansite/shared` hoeft hem niet te hebben.
 - **Alternatieven:** de initialen als tekst en de naam "Mijn account, BS" (de eigenaar wil de naam van het issue); de regel van axe uitzetten (dat verzwakt een test); de regel in `@fansite/shared` (niemand anders gebruikt hem).
+
+## Alleen kaarten van een spel krijgen een groot watermerk van dat spel
+
+- **Datum:** 20 november 2026
+- **Besluit:** een `Card` met de prop `game` (`prognose`, `uitblinker`, `fjouwer` of `fantest`) draagt een groot, zacht watermerk van dat spel (#1492).
+  - Het watermerk is een pseudo-element met een masker van SVG in `card-watermark.css`, dus zonder verzoek naar een ander adres.
+    Het staat rechtsonder, is 80 procent van de breedte van de kaart, ongeveer 10 graden gekanteld en wordt afgesneden door de randen van de kaart (`overflow: clip`).
+    Het neemt geen klik en geen focus, staat onder de inhoud, staat niet in de toegankelijkheidsboom en verdwijnt in geforceerde kleuren.
+  - Het kleurt in een tint van het vlak waar het op staat, uit vier tokens: `--hf-colour-watermark-surface` met `-strong`, `-soft` en `-warm`.
+    In licht is het een vleugje zand op wit en een iets dieper blauw op zacht en sterk.
+    In donker is het een stap lichter dan de kaart.
+    Een test controleert dat de tekst, de kop, de secundaire tekst en een link er 4,5:1 houden, in licht en in donker.
+  - Alleen kaarten van een spel krijgen het: de kaarten van de spellen op `/fans`, op de wedstrijdpagina en op de spelerspagina.
+    Kaarten voor een account, "Doe mee", "Wat komt er", de kaart Fans op de voorpagina en de vragen van de Fantest krijgen het niet.
+    Een doorzichtige kaart toont het niet.
+- **Waarom:** het hoofdstuk Fans mag speelser zijn dan de rest van de site, maar alleen waar het een spel is.
+  Een kaart voor een account is een taak, geen spel.
+  Een masker laat het icoon de kleur van het vlak volgen, in licht en in donker, zonder een tekening per thema.
+- **Alternatieven:** een watermerk op elke kaart; een illustratie naast de kop; een `<svg>` als kind van de kaart (dat verandert de opbouw van de kaart met een knop voor een afbeelding, en moet apart verborgen worden voor hulptechnologie).
