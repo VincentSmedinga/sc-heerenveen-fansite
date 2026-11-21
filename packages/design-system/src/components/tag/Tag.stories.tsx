@@ -25,7 +25,8 @@ const meta = preview.meta({
         component: [
           'Een label met een paar woorden, zoals "Uitslag ontbreekt", voor wat aandacht vraagt in een lijst of een tabel.',
           'De tekst zegt altijd wat er aan de hand is; de kleur komt erbij en draagt niets alleen.',
-          'Kies `attention` voor wat ontbreekt of nog moet, `highlight` voor wat is aangepast, en `neutral` voor een feit.',
+          'Kies `attention` voor wat ontbreekt, `highlight` voor wat is aangepast en `neutral` voor een feit.',
+          'Voor de toestand van een spel zijn er drie tonen: `open` (groen), `todo` (amber, wat je nog moet doen) en `closed` (grijs).',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -49,7 +50,7 @@ const surfaceLabels = {
 } as const
 
 export const Tones = meta.story({
-  name: 'Drie tonen op elk vlak',
+  name: 'Zes tonen op elk vlak',
   render: () => (
     <div style={{ display: 'grid', gap: '1rem', maxInlineSize: '40rem' }}>
       {cardSurfaces.map((surface) => (
@@ -58,6 +59,9 @@ export const Tones = meta.story({
             <Tag tone="attention">Uitslag ontbreekt</Tag>
             <Tag tone="highlight">Aangepast</Tag>
             <Tag>Gepland</Tag>
+            <Tag tone="open">Open tot za 16.45</Tag>
+            <Tag tone="todo">Nog te doen</Tag>
+            <Tag tone="closed">Gesloten</Tag>
           </div>
         </Card>
       ))}

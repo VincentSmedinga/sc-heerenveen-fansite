@@ -58,8 +58,12 @@
     --hf-colour-green-800: #0a5627;
     --hf-colour-green-900: #06411b;
     --hf-colour-green-950: #032d11;
+    --hf-colour-yellow-100: #fdf0c0;
+    --hf-colour-yellow-200: #fbe27a;
     --hf-colour-yellow-300: #f5cd2e;
     --hf-colour-yellow-400: #f2c200;
+    --hf-colour-yellow-800: #5e4400;
+    --hf-colour-yellow-900: #3a2b00;
     --hf-colour-grey-50: #faf8f4;
     --hf-colour-grey-100: #f1eee7;
     --hf-colour-grey-200: #e3dfd7;
@@ -405,6 +409,17 @@
      * fill in light and 4,16:1 in dark, and 3:1 and more on the four surfaces.
      */
     --hf-colour-border-highlight: light-dark(var(--hf-colour-blue-500), var(--hf-colour-blue-400));
+
+    /*
+     * The fill and the text of the three tones of a Tag that say how a game stands: open (green), still to do (amber) and
+     * closed (grey). The rim is in the colour of the text. Each text reaches 4,5:1 against its own fill, in light and in dark.
+     */
+    --hf-colour-background-tag-open: light-dark(var(--hf-colour-green-100), var(--hf-colour-green-900));
+    --hf-colour-text-tag-open: light-dark(var(--hf-colour-green-800), var(--hf-colour-green-200));
+    --hf-colour-background-tag-todo: light-dark(var(--hf-colour-yellow-100), var(--hf-colour-yellow-900));
+    --hf-colour-text-tag-todo: light-dark(var(--hf-colour-yellow-800), var(--hf-colour-yellow-200));
+    --hf-colour-background-tag-closed: light-dark(var(--hf-colour-grey-100), var(--hf-colour-grey-800));
+    --hf-colour-text-tag-closed: light-dark(var(--hf-colour-grey-700), var(--hf-colour-grey-200));
     /* stylelint-enable plugin/use-baseline */
   }
 
@@ -514,6 +529,12 @@
       --hf-colour-border-input: var(--hf-colour-grey-500);
       --hf-colour-border-button-soft: var(--hf-colour-blue-500);
       --hf-colour-border-highlight: var(--hf-colour-blue-500);
+      --hf-colour-background-tag-open: var(--hf-colour-green-100);
+      --hf-colour-text-tag-open: var(--hf-colour-green-800);
+      --hf-colour-background-tag-todo: var(--hf-colour-yellow-100);
+      --hf-colour-text-tag-todo: var(--hf-colour-yellow-800);
+      --hf-colour-background-tag-closed: var(--hf-colour-grey-100);
+      --hf-colour-text-tag-closed: var(--hf-colour-grey-700);
       --hf-colour-focus: var(--hf-colour-blue-500);
     }
   }
