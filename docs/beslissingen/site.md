@@ -7357,3 +7357,54 @@
   De plekken in de stand en bij een wedstrijd (de twee andere kerncijfers) en de link "Spelregels" komen met #1451 en #1455.
 - **Waarom:** het ontwerp wil de lijst kort en de punten in één blik; de plekken hebben een ranglijst nodig die er nog niet is.
 - **Alternatieven:** de hele lijst altijd tonen (lang na een seizoen); een aparte pagina voor de lijst (twee plekken die uit elkaar lopen).
+- **Later:** sinds _De ranglijst van de Prognose is er per seizoen en per wedstrijd_ (21 november 2026) staan de plekken in de kaart "Je punten" en staat de kaart "Stand" in de smalle kolom.
+
+## De ranglijst van de Prognose is er per seizoen en per wedstrijd
+
+- **Datum:** 21 november 2026
+- **Besluit:** de Prognose heeft een ranglijst per seizoen en per wedstrijd, op `/fans/prognose/stand`, met een keuze tussen "Seizoen" en "Per wedstrijd".
+  Een weergave zoals "laatste vijf wedstrijden" kan later.
+  Een seizoen telt alleen wedstrijden met een uitslag, en een wedstrijd zonder voorspellingen toont één regel tekst.
+- **Waarom:** de oude Fansite had er ook twee, en een ranglijst die midden in het seizoen begint, bevoordeelt niemand.
+- **Alternatieven:** een doorlopende ranglijst over alle seizoenen.
+
+- **Datum:** 21 november 2026
+- **Besluit:** gerangschikt wordt op punten.
+  Bij gelijke punten gaat degene met de meeste precieze eindstanden voor, dan degene met de meeste precieze ruststanden, anders delen ze een plaats en wordt het volgende nummer overgeslagen.
+- **Waarom:** het beloont wie het vaakst het hele resultaat goed had.
+  De oude Fansite zette degene met minder voorspellingen voorop; dat laat wie weinig meedoet hoger eindigen.
+- **Alternatieven:** de oude regel (minder voorspellingen eerst).
+
+- **Datum:** 21 november 2026
+- **Besluit:** een geblokkeerd account telt nergens meer mee, ook niet in de groepscijfers van een wedstrijd.
+  Een supporter die zijn schermnaam niet toont (de schakelaar "Naam in de standen") heeft geen rij maar telt wel mee in het aantal ("9e van 54") en in de groepscijfers.
+  Een opgeheven account heeft geen naam en dus geen rij, maar zijn voorspelling telt mee in het aantal.
+  Die regel staat op één plek, `countsInPrognose` en `hasRankingRow` in `apps/site/src/fans/prediction-results.ts`, zodat de stand, de plekken en de groepscijfers van de wedstrijdpagina hetzelfde beslissen.
+- **Waarom:** zo zijn de cijfers eerlijk, en het volgt de Uitblinker, waar de cijfers van een geblokkeerd account ook niet meer meetellen.
+- **Alternatieven:** een geblokkeerd account in de groepscijfers laten, zonder rij.
+
+- **Datum:** 21 november 2026
+- **Besluit:** de plaatsen gaan over de rijen die te zien zijn: wie zijn naam verbergt, neemt geen plaats in.
+  Het getal achter "van" is wel iedereen die meetelt.
+- **Waarom:** de tabel heeft zo geen gaten in de nummers die verraden dat iemand zijn naam verborg.
+- **Alternatieven:** de plaats onder iedereen die meetelt berekenen, met gaten in de tabel.
+
+- **Datum:** 21 november 2026
+- **Besluit:** er is geen minimumaantal wedstrijden.
+  De kolom V laat zien hoeveel voorspellingen een totaal waard is.
+- **Waarom:** een drempel schrikt nieuwe supporters af en vraagt om een uitleg.
+- **Alternatieven:** een minimum van enkele wedstrijden.
+
+- **Datum:** 21 november 2026
+- **Besluit:** de ranglijst wordt per seizoen en per wedstrijd vijf minuten gecachet met `cacheForKey`, en de lijsten van seizoenen en wedstrijden ook.
+  Een adres met een seizoen of wedstrijd die geen voorspellingen heeft, leest de cache niet: de sleutels komen alleen uit die lijsten.
+  De keuze werkt zonder JavaScript: de wedstrijd kiest een gewoon formulier met de knop "Toon", het seizoen de SeasonPicker, en de keuze tussen "Seizoen" en "Per wedstrijd" is zonder script twee gewone links.
+  Het adres van een seizoen is `?seizoen=2026-27`, zoals bij de andere pagina's met een seizoen.
+- **Waarom:** een bezoeker kan elk adres verzinnen, en een sleutel per adres vult het geheugen van de server.
+- **Alternatieven:** de ranglijst bij elk bezoek berekenen (zwaar na een seizoen met veel voorspellingen).
+
+- **Datum:** 21 november 2026
+- **Besluit:** kaarten in de smalle kolom naast een hoofdkaart gebruiken het zachte oppervlak van Card.
+  De stand is daarop de uitzondering en gebruikt het sterke oppervlak, met de rij van de supporter in een diepere blauwe tint en "Jij" achter de schermnaam.
+- **Waarom:** de stand is de kaart waar het oog heen moet, en de andere kaarten zijn bijzaak.
+- **Alternatieven:** alle kaarten in de smalle kolom wit of zand.

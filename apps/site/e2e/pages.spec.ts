@@ -251,6 +251,9 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   // The game Prognose is open to a visitor, with the way in; fans-prediction.spec.ts checks the
   // form with an account.
   { path: '/fans/prognose', status: 200 },
+  // The ranking is public; without predictions it says so in one line.
+  { path: '/fans/prognose/stand', status: 200 },
+  { path: '/fans/prognose/stand?wedstrijd=1', status: 200 },
   // The page of the link in a reminder: without a good code it says the link does not work.
   { path: '/fans/herinnering/uitzetten', status: 200 },
   { path: '/fans/herinnering/uitzetten?klaar=1', status: 200 },

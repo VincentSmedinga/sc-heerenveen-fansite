@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { seasonOf } from '@fansite/db/season'
 import { Heading, Page, Text } from '@fansite/design-system'
 import { requireFansPart } from '@fansite/shared/fans-env'
 import { notFound, redirect } from 'next/navigation'
@@ -7,12 +8,14 @@ import { notFound, redirect } from 'next/navigation'
 import { getDatabase } from '#src/database'
 import { logInPaths } from '#src/fans/log-in'
 import { findPrediction, predictionMatches } from '#src/fans/prediction'
+import { matchRanking, placeFigure, seasonRanking } from '#src/fans/prediction-ranking'
 import { crowdFigures, scoredPredictions } from '#src/fans/prediction-results'
 import { currentSupporter } from '#src/fans/require-supporter'
 import { pageAreas } from '#src/page-areas'
 
 import { CrowdCard, PointsCard, ScoringCard, YourPredictionsCard } from './PointsCards'
 import { ClosedCard, NoMatchCard, OpenCard } from './PredictionCards'
+import { StandCard } from './StandCards'
 
 // The cards with the match and the points stand in the wide column, the cards with the scoring
 // and the figures of everybody in the narrow one; on a phone the narrow column comes last.
@@ -61,6 +64,16 @@ export default async function PredictionPage({
   // The card of the last match that has a result, with the points and how everybody did.
   const lastPlayed = mine.find((item) => item.match.state === 'played')
   const crowd = lastPlayed === undefined ? undefined : await crowdFigures(lastPlayed.match.id)
+  // Your place at that match and in the ranking of its season, by the rules of the ranking.
+  const places =
+    lastPlayed === undefined || supporterId === undefined
+      ? undefined
+      : [
+          placeFigure(await matchRanking(lastPlayed.match.id), supporterId, 'bij deze wedstrijd'),
+          placeFigure(await seasonRanking(lastPlayed.match.season), supporterId, 'in de stand'),
+        ]
+  const season = seasonOf(now)
+  const ranking = await seasonRanking(season)
 
   return (
     <Page.Main areas={areas}>
@@ -113,9 +126,12 @@ export default async function PredictionPage({
         {loggedIn ? <YourPredictionsCard all={alle === 'ja'} items={mine} now={now} /> : null}
       </Page.Cell>
       <Page.Cell area="points">
-        {lastPlayed === undefined ? null : <PointsCard item={lastPlayed} now={now} />}
+        {lastPlayed === undefined ? null : (
+          <PointsCard item={lastPlayed} now={now} {...(places === undefined ? {} : { places })} />
+        )}
       </Page.Cell>
       <Page.Section area="side" aria-label="De telling en hoe iedereen het deed">
+        <StandCard ranking={ranking} season={season} supporterId={supporterId} />
         {crowd === undefined ? null : <CrowdCard figures={crowd} />}
         <ScoringCard />
       </Page.Section>

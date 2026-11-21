@@ -326,6 +326,7 @@ describe('visitOf', () => {
       '/fans/mijn-account/opheffen/zeker',
       '/fans/mijn-account/schermnaam',
       '/fans/prognose',
+      '/fans/prognose/stand',
       '/redactie/[slug]',
       '/wedstrijden/cijfers/[seizoen]',
       '/spelers/[seizoen]',

@@ -2130,6 +2130,11 @@ await withEmptyDatabase((database) =>
       404,
       '/fans/prognose must be "not found" with Prognose off',
     )
+    assert.equal(
+      (await fetch(`${origin}/fans/prognose/stand`)).status,
+      404,
+      '/fans/prognose/stand must be "not found" with Prognose off',
+    )
   }),
 )
 
@@ -2154,6 +2159,14 @@ await withEmptyDatabase((database) =>
     // The scoring is for everybody, and a visitor has no list of predictions.
     assert.match(predictionHtml, /De telling van de oude Fansite\. Hoogstens 30 punten per wedstrijd\./)
     assert.doesNotMatch(predictionHtml, /Jouw voorspellingen/)
+    // The card Stand with the way to the whole ranking, which says nothing was predicted yet.
+    assert.match(predictionHtml, /<h2[^>]*>Stand<\/h2>/)
+    assert.match(predictionHtml, /<a [^>]*href="\/fans\/prognose\/stand"[^>]*>Hele stand<\/a>/)
+
+    const ranking = await fetch(`${origin}/fans/prognose/stand`)
+
+    assert.equal(ranking.status, 200, '/fans/prognose/stand must be there with Prognose on')
+    assert.match(await ranking.text(), /<h1[^>]*>Stand Prognose<\/h1>/)
     assert.equal(prediction.headers.get('cache-control'), 'no-store')
     assert.equal(prediction.headers.get('x-robots-tag'), 'noindex, nofollow')
   }),
