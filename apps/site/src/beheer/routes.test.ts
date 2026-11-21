@@ -56,6 +56,7 @@ const open = [
   'app/fans/aanmelden/actions.ts',
   'app/fans/inloggen/actions.ts',
   'app/fans/mijn-account/actions.ts',
+  'app/fans/prognose/actions.ts',
 ]
 
 /** Every file under a folder, as paths relative to src with forward slashes. */
@@ -130,6 +131,7 @@ describe('the admin', () => {
       'app/fans/aanmelden/actions.ts',
       'app/fans/inloggen/actions.ts',
       'app/fans/mijn-account/actions.ts',
+      'app/fans/prognose/actions.ts',
     ])
   })
 

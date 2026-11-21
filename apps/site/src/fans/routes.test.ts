@@ -54,6 +54,9 @@ const open = [
   'app/fans/mijn-account/opgeheven/page.tsx',
   // The page that says what is coming, for everybody; it has nothing personal.
   'app/fans/page.tsx',
+  // The page of the game Prognose: a visitor sees the match and the way in, and a supporter's
+  // prediction is read only with a session. Its action calls requireSupporter.
+  'app/fans/prognose/page.tsx',
 ]
 
 function filesUnder(folder: string) {
@@ -105,6 +108,7 @@ async function exportedFunctions(file: string) {
 
 beforeEach(() => {
   vi.stubEnv('FANS_ACCOUNTS', 'on')
+  vi.stubEnv('FANS_PROGNOSE', 'on')
 })
 
 afterEach(() => {
@@ -158,4 +162,15 @@ describe('the pages of Fans', () => {
       expect(error, `${file} ${name}`).toEqual(new Error('not found'))
     }
   })
+
+  it.each(routes.concat(actionFiles).filter((file) => file.startsWith('app/fans/prognose/')))(
+    'answer not found in %s while the game is off and accounts are on',
+    async (file) => {
+      vi.stubEnv('FANS_PROGNOSE', 'off')
+
+      for (const { error, name } of await callAll(file)) {
+        expect(error, `${file} ${name}`).toEqual(new Error('not found'))
+      }
+    },
+  )
 })

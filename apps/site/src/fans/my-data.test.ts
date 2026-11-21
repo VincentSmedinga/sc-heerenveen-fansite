@@ -1,5 +1,6 @@
 import * as schema from '@fansite/db/schema'
 import { supporters } from '@fansite/db/schema'
+import { createTestDatabase } from '@fansite/db/test-database'
 import { getTableConfig, MySqlTable } from 'drizzle-orm/mysql-core'
 import { describe, expect, it } from 'vitest'
 
@@ -70,12 +71,20 @@ describe('the places of the games', () => {
     )
   })
 
-  it('list only the games that are on', async () => {
-    const db = {} as never
+  it('list only the games that are on, with nothing for a supporter who played nothing', async () => {
+    const database = await createTestDatabase()
 
-    expect(await playedGames(db, 1, {})).toEqual([])
-    expect(await playedGames(db, 1, { FANS_ACCOUNTS: 'on', FANS_PROGNOSE: 'on' })).toEqual([
-      { data: undefined, href: '/fans/prognose', label: 'Prognose' },
-    ])
+    try {
+      expect(await playedGames(database.db, 1, {})).toEqual([])
+      expect(await playedGames(database.db, 1, { FANS_ACCOUNTS: 'on', FANS_PROGNOSE: 'on' })).toEqual([
+        { data: undefined, href: '/fans/prognose', label: 'Prognose' },
+      ])
+    } finally {
+      await database.drop()
+    }
+  })
+
+  it('keep the predictions in the table predictions', () => {
+    expect(gamePlaces.find(({ part }) => part === 'prognose')?.tables).toEqual(['predictions'])
   })
 })

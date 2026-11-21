@@ -7215,6 +7215,59 @@
   Zonder JavaScript blijft er geen knop die niets doet.
 - **Alternatieven:** de knop werkend op de server tonen (dan staat er een knop zonder JavaScript die niets doet); een lege doos met een vaste maat (het ontwerpsysteem wil een component, en de maat staat dan op twee plekken); de test een wachttijd geven (verbergt de verschuiving, de bezoeker houdt hem).
 
+## Een supporter voorspelt de rust- en eindstand van de volgende wedstrijd
+
+- **Datum:** 20 november 2026
+- **Besluit:** de eindstand van een voorspelling is de stand na 90 minuten plus blessuretijd, ook in de beker en de play-offs.
+  De database heeft die stand al voor wedstrijden met verlenging (`after_ninety_for` en `after_ninety_against`).
+- **Waarom:** zo voorspelt iedereen hetzelfde en gelden voor competitie en beker dezelfde regels.
+  De oude Fansite telde de eindstand die de redactie invulde, dus voor de beker lag het daar niet vast.
+- **Alternatieven:** de stand na verlenging.
+
+- **Datum:** 20 november 2026
+- **Besluit:** er is altijd precies één wedstrijd om te voorspellen: de eerstvolgende officiële wedstrijd van het eerste elftal, en wijzigen mag tot de aftrap.
+  De volgende wedstrijd opent bij de aftrap van de vorige, niet bij het eindsignaal, en de play-offs tellen mee.
+- **Waarom:** zo deed de oude Fansite het, en het houdt het spel klein en duidelijk.
+- **Alternatieven:** meerdere wedstrijden vooruit voorspellen; de volgende wedstrijd pas openen als de vorige is afgelopen.
+
+- **Datum:** 21 november 2026
+- **Besluit:** `predictionMatches` in `apps/site/src/fans/prediction.ts` kiest de wedstrijd.
+  Alle wedstrijden in `matches` tellen mee, want de tabel kent geen oefenwedstrijden: de competitie, de beker, de play-offs, Europa en de Johan Cruijff Schaal.
+  Een afgelaste wedstrijd en een uitgestelde zonder nieuwe datum doen niet mee, dus het formulier schuift door.
+  Een uitgestelde wedstrijd met een nieuwe datum is dezelfde wedstrijd, dus de voorspellingen blijven en de deadline schuift mee.
+  De eerstvolgende is de eerste die nog niet begon; een wedstrijd zonder bekende aftraptijd telt tot het einde van zijn dag, en zijn formulier blijft dicht met een uitleg.
+- **Waarom:** zo hoeft niemand een wedstrijd aan te wijzen, en een nieuwe datum van de importer werkt vanzelf door.
+- **Alternatieven:** een eigen lijst van wedstrijden voor het spel (twee bronnen die uit elkaar lopen); de wedstrijd zonder aftraptijd overslaan (het formulier springt dan naar een wedstrijd verderop, en een supporter mist hem).
+
+- **Datum:** 21 november 2026
+- **Besluit:** de deadline is de aftrap volgens de klok van de server en de aftraptijd in de database.
+  De serveractie controleert hem, en de schrijfopdracht controleert hem nog eens met de klok van de database (`INSERT … SELECT … WHERE kickoff_at > UTC_TIMESTAMP() ON DUPLICATE KEY UPDATE`).
+  Schrijft die niets en past die niets aan, dan zegt de pagina dat het formulier dicht is.
+- **Waarom:** een trage aanvraag die voor de aftrap begon, mag er na de aftrap niet meer in.
+  Eén opdracht is atomair, dus er is geen moment tussen de controle en het schrijven.
+- **Alternatieven:** alleen de controle in de serveractie (een trage aanvraag komt er dan nog door).
+
+- **Datum:** 21 november 2026
+- **Besluit:** de kaart van een wedstrijd die is begonnen, blijft vier uur staan met de Tag Gesloten (`closedCardHours`), daarna alleen nog de kaart van de volgende wedstrijd.
+  De punten van die wedstrijd komen op de kaart "Jouw voorspellingen" (#1449).
+- **Waarom:** een wedstrijd met verlenging en strafschoppen duurt ongeveer drie uur, en na afloop zegt "De wedstrijd is begonnen" niets meer.
+- **Alternatieven:** de kaart laten staan tot de volgende aftrap (een week lang een zin die niet klopt); hem weghalen zodra de uitslag er is (de supporter ziet zijn voorspelling dan niet meer naast de uitslag).
+
+- **Datum:** 21 november 2026
+- **Besluit:** `/fans/prognose` is een openbare pagina die voor iedereen hetzelfde is, behalve het formulier en de voorspelling, die alleen met een sessie komen.
+  Hij komt niet in een cache en niet in een index (`Cache-Control: no-store` onder `/fans`, en `X-Robots-Tag` in `proxy.ts`).
+  De serveractie roept `requireSupporter` aan, zodat een bezoeker zonder sessie naar het inloggen gaat en een geblokkeerd account niet kan voorspellen.
+- **Waarom:** een bezoeker moet zien wat het spel is voordat hij een account maakt.
+- **Alternatieven:** de pagina alleen met een sessie tonen (de bezoeker ziet het spel niet).
+
+- **Datum:** 21 november 2026
+- **Besluit:** de deadline staat als "Open tot za 16.45", met een punt tussen uren en minuten, zoals het issue vraagt (`kickoffText` in `apps/site/src/fans/prediction.ts`).
+  Een wedstrijd erboven toont zijn aftrap met een dubbele punt ("za 21 nov 14:06"), zoals Match dat doet.
+- **Waarom:** het ontwerp en het issue schrijven de tijd van de Tag met een punt, en de schrijfwijzer van de redactie noemt een tijd met een dubbele punt, "14:05".
+  De Tag is daar een bewuste uitzondering op, die de schrijfwijzer niet noemt.
+  Het verschil staat op één kaart, dus een volgend issue kan het gelijktrekken met één wijziging in `kickoffText`.
+- **Alternatieven:** de dubbele punt in de Tag (wijkt af van het ontwerp); de punt in Match (raakt elke pagina met een wedstrijd).
+
 ## De privacyverklaring zegt wat een account bewaart en welk cookie je krijgt
 
 - **Datum:** 21 november 2026

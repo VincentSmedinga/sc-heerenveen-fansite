@@ -1275,3 +1275,16 @@
   De accounts zelf moeten terug kunnen komen.
   Het logboek van een opheffing bewaart geen nummer van het account (#1454), dus alleen de redactie kan de opheffingen terugvinden; een terugzetting is zeldzaam.
 - **Alternatieven:** ook `supporters` leeg laten (een terugzetting verliest dan elk account); het nummer van een opgeheven account in het logboek bewaren (dat is een gegeven over een persoon die weg wil).
+
+## De voorspellingen staan in `predictions`, en een cijfer is één teken van 0 tot 9
+
+- **Datum:** 21 november 2026
+- **Besluit:** de migratie `0099_add_predictions` maakt de tabel `predictions` met een supporter (leeg te maken met `ON DELETE SET NULL`), een wedstrijd (`ON DELETE CASCADE`), de ruststand en de eindstand als goals van de thuis- en de uitclub, en `created_at` en `updated_at` in UTC.
+  Een supporter heeft één rij per wedstrijd (`UNIQUE (supporter_id, match_id)`), en een `CHECK` houdt elk getal op 9 of lager (#1447).
+  De kolommen volgen de volgorde op de regel (thuis, uit), niet sc Heerenveen.
+- **Waarom:** de volgorde van de regel is de volgorde van het formulier en van de uitslag, dus een omrekening naar "voor" en "tegen" is niet nodig.
+  Na het opheffen van een account blijft wat is voorspeld staan zonder naam, zoals bij elke tabel van een spel (zie _Een supporter ziet al zijn gegevens en heft zijn account op_).
+  MariaDB telt een lege waarde in een unieke sleutel niet als dubbel, dus de rijen zonder supporter botsen niet.
+  De wedstrijd verwijst met `ON DELETE CASCADE`: haalt de importer een wedstrijd weg die van Wikipedia verdween, dan gaan de voorspellingen ervoor mee (`predictions-migration.test.ts` controleert het).
+  De kopie van acceptatie op de computer van de eigenaar neemt de voorspellingen mee, met `supporter_id` als `NULL` (`exportPlan`), zodat ze bij niemand horen.
+- **Alternatieven:** goals "voor" en "tegen" van sc Heerenveen (een omrekening bij elke weergave); de rijen met het account laten verdwijnen (de ranglijsten verliezen dan hun geschiedenis).

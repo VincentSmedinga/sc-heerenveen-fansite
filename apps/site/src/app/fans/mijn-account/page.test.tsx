@@ -23,22 +23,27 @@ const edited = { value: false }
 const updates: unknown[] = []
 const query = {
   from: () => query,
+  innerJoin: () => query,
+  // The list of predictions goes on with `orderBy`: this supporter predicted nothing.
   where: () =>
-    Promise.resolve([
-      {
-        blockedAt: blocked.value ? new Date('2026-12-10T10:00:00Z') : null,
-        blockedReason: blocked.value ? 'ongepaste schermnaam' : null,
-        changedAt: changedAt.value,
-        createdAt: new Date('2026-12-03T10:00:00Z'),
-        editedByEditors: edited.value,
-        email: 'tjalle@example.org',
-        inRankings: false,
-        lastVisitOn: '2026-12-19',
-        remindByEmail: false,
-        screenName: 'Tjalle99',
-        screenNameChangedAt: null,
-      },
-    ]),
+    Object.assign(
+      Promise.resolve([
+        {
+          blockedAt: blocked.value ? new Date('2026-12-10T10:00:00Z') : null,
+          blockedReason: blocked.value ? 'ongepaste schermnaam' : null,
+          changedAt: changedAt.value,
+          createdAt: new Date('2026-12-03T10:00:00Z'),
+          editedByEditors: edited.value,
+          email: 'tjalle@example.org',
+          inRankings: false,
+          lastVisitOn: '2026-12-19',
+          remindByEmail: false,
+          screenName: 'Tjalle99',
+          screenNameChangedAt: null,
+        },
+      ]),
+      { orderBy: () => Promise.resolve([]) },
+    ),
 }
 
 vi.mock('#src/fans/require-supporter', () => ({ requireSupporter, supporterToken: () => Promise.resolve('sessie') }))

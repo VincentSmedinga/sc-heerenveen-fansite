@@ -73,6 +73,13 @@ describe('ScoreGrid', () => {
     expect(field('Ruststand', 'sc Heerenveen').name).toBe('rust-thuis')
   })
 
+  it('gives a field the id that the page gives, so a link can focus it', () => {
+    renderGrid({ ids: { fullTimeAway: 'eind-uit' } })
+
+    expect(field('Eindstand', 'FC Twente').id).toBe('eind-uit')
+    expect(field('Ruststand', 'FC Twente').id).toBe('')
+  })
+
   it('reports a change of a field when the page keeps the values', () => {
     const onValueChange = vi.fn()
 

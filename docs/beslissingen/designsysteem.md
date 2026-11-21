@@ -4189,3 +4189,10 @@
 - **Waarom:** vier cijfers invullen gaat sneller dan vier keuzelijsten openen, de rij en de kolom maken de naam van elk veld duidelijk, en het raster past ook op een telefoon.
   Een spel heeft een toestand die een bezoeker in één oogopslag wil zien, en kleur alleen is niet genoeg.
 - **Alternatieven:** twee keer twee keuzelijsten van 0 tot 9, zoals op de oude Fansite; een eigen onderdeel voor de toestand van een spel; alleen tekst zonder tint.
+
+- **Datum:** 21 november 2026
+- **Besluit:** de `ScoreGrid` krijgt een prop `ids`, de `id` van elk veld (#1447).
+  Een veld zonder `id` heeft er geen.
+- **Waarom:** de ErrorSummary van een formulier linkt naar het veld met een fout, en zonder `id` kan de link de focus niet op het veld zetten.
+  De pagina geeft de `id`'s, want twee rasters op één pagina mogen niet dezelfde hebben.
+- **Alternatieven:** een vaste `id` per veld uit de naam (twee rasters botsen); de `id` van `useId` (de samenvatting kent hem niet).

@@ -694,6 +694,13 @@
       "when": 1795278151700,
       "tag": "0098_add_supporter_unused_mail",
       "breakpoints": true
+    },
+    {
+      "idx": 99,
+      "version": "5",
+      "when": 1795281500016,
+      "tag": "0099_add_predictions",
+      "breakpoints": true
     }
   ]
 }
