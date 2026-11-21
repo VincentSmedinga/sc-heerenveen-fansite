@@ -1865,7 +1865,8 @@
   De tekst haalt 4,5:1 of meer: `attention` 8,21:1 in licht en 6,18:1 in donker op het slechtste vlak, `neutral` 5,31:1 en 8,38:1, en `highlight` 10,26:1 en 11,40:1.
   Een test (`tag-css.test.ts`) houdt deze getallen vast.
 - **Alternatieven:** één onderdeel `Badge` met een kleurprop (de naam zegt niets over wanneer je het kiest); de rand van de zachte knop hergebruiken (een knoprol voor een label); een label met alleen kleur of een pictogram (de kleur zou dan alles dragen).
-- **Later:** op 21 november 2026 kreeg de Tag er drie tonen bij, `open`, `todo` en `closed` (#1499). Zie _De ScoreGrid en drie tonen voor de Tag_.
+- **Later:** op 21 november 2026 kreeg de Tag er drie tonen bij, `open`, `todo` en `closed` (#1499).
+  Zie _De ScoreGrid is een raster van velden voor één cijfer, en de Tag krijgt drie tonen voor de toestand van een spel_.
 
 ## De gevaarlijke knop is rood en gevuld, alleen voor wat je weghaalt
 
@@ -4168,7 +4169,8 @@
 ## De ScoreGrid is een raster van velden voor één cijfer, en de Tag krijgt drie tonen voor de toestand van een spel
 
 - **Datum:** 21 november 2026
-- **Besluit:** een score tikt een supporter in een `ScoreGrid` (#1499): een raster van grote velden voor één cijfer, met de clubnamen als kolomkop en Ruststand en Eindstand als rij. Een voorspelling is geen keuzelijst.
+- **Besluit:** een score tikt een supporter in een `ScoreGrid` (#1499): een raster van grote velden voor één cijfer, met de clubnamen als kolomkop en Ruststand en Eindstand als rij.
+  Een voorspelling is geen keuzelijst.
   - Het raster is één `fieldset` met een legende die de pagina meegeeft, en vier kolommen (het label, thuis, een streepje en uit) en drie rijen.
     De clubnamen staan in de volgorde thuis-uit.
     Het blijft op een telefoon vier kolommen: een lange clubnaam breekt over twee regels in plaats van de velden uit het beeld te duwen.

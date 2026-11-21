@@ -3,8 +3,8 @@
  * colour alone, because its text says it. The attention tone is the colour of text that says
  * data is missing, the highlight tone is the highlighted row with a rim of its own, and the
  * neutral tone is secondary text. The open, todo and closed tones are a pale fill with text and
- * a rim in one colour: green, amber and grey. Each tone reaches 4.5:1 for the text and 3:1 for the rim,
- * on the page and on the four surfaces, in light and in dark.
+ * a rim in one colour: green, amber and grey. Each tone reaches 4.5:1 for the text and 3:1 for
+ * the rim, on the page and on the four surfaces, in light and in dark.
  */
 
 @layer hf.components {
