@@ -1,3 +1,5 @@
+import type { ReactElement } from 'react'
+
 import { usePathname } from 'next/navigation'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -6,10 +8,15 @@ import { headerColour } from '../colours'
 import RootLayout, { metadata, viewport } from './layout'
 
 vi.mock('next/navigation', () => ({ usePathname: vi.fn(() => '/') }))
+vi.mock('next/server', () => ({ connection: vi.fn(async () => undefined) }))
+
+/** Renders the layout, which is an async component, to markup. */
+const render = async (element: ReactElement<Parameters<typeof RootLayout>[0]>) =>
+  renderToStaticMarkup(await RootLayout(element.props))
 
 describe('RootLayout', () => {
-  it('puts the page in a Page.Body, which is a div, between the main menu and the footer, so the page brings the main', () => {
-    const html = renderToStaticMarkup(
+  it('puts the page in a Page.Body, which is a div, between the main menu and the footer, so the page brings the main', async () => {
+    const html = await render(
       <RootLayout shortcuts={null} subnav={null}>
         Inhoud
       </RootLayout>,
@@ -19,8 +26,8 @@ describe('RootLayout', () => {
     expect(html).not.toContain('<main')
   })
 
-  it('puts the strip for the status bar first on the page, and nothing in the layout takes it off', () => {
-    const html = renderToStaticMarkup(
+  it('puts the strip for the status bar first on the page, and nothing in the layout takes it off', async () => {
+    const html = await render(
       <RootLayout shortcuts={null} subnav={null}>
         Inhoud
       </RootLayout>,
@@ -30,8 +37,8 @@ describe('RootLayout', () => {
     expect(html).not.toMatch(/hf-page-top-edge[^>]*hidden=/)
   })
 
-  it('puts the main menu in its own nav right after the header, outside the banner, in the order of the focus', () => {
-    const html = renderToStaticMarkup(
+  it('puts the main menu in its own nav right after the header, outside the banner, in the order of the focus', async () => {
+    const html = await render(
       <RootLayout shortcuts={<nav aria-label="Balk">Links</nav>} subnav={null}>
         Inhoud
       </RootLayout>,
@@ -46,13 +53,13 @@ describe('RootLayout', () => {
     expect(html.indexOf('aria-label="Balk"')).toBeLessThan(html.indexOf('hf-page-body'))
   })
 
-  it('puts the slot for a bar between the main menu and the Page.Body, outside the main, and nothing there without one', () => {
-    const html = renderToStaticMarkup(
+  it('puts the slot for a bar between the main menu and the Page.Body, outside the main, and nothing there without one', async () => {
+    const html = await render(
       <RootLayout shortcuts={<nav aria-label="Balk">Links</nav>} subnav={null}>
         Inhoud
       </RootLayout>,
     )
-    const without = renderToStaticMarkup(
+    const without = await render(
       <RootLayout shortcuts={null} subnav={null}>
         Inhoud
       </RootLayout>,
@@ -62,9 +69,9 @@ describe('RootLayout', () => {
     expect(without).not.toContain('aria-label="Balk"')
   })
 
-  it('hands the slot for the bar of Wedstrijden to the main menu, which draws it inside its own nav', () => {
+  it('hands the slot for the bar of Wedstrijden to the main menu, which draws it inside its own nav', async () => {
     vi.mocked(usePathname).mockReturnValue('/wedstrijden')
-    const html = renderToStaticMarkup(
+    const html = await render(
       <RootLayout shortcuts={null} subnav={<div className="hf-navigation-bar">Balk van de slot</div>}>
         Inhoud
       </RootLayout>,
@@ -75,9 +82,9 @@ describe('RootLayout', () => {
     expect(html.match(/<nav aria-label="Hoofdmenu"/g)).toHaveLength(1)
   })
 
-  it('draws the fixed bar of Nieuws on /nieuws, whatever the slot holds', () => {
+  it('draws the fixed bar of Nieuws on /nieuws, whatever the slot holds', async () => {
     vi.mocked(usePathname).mockReturnValue('/nieuws')
-    const html = renderToStaticMarkup(
+    const html = await render(
       <RootLayout shortcuts={null} subnav={<div className="hf-navigation-bar">Balk van de slot</div>}>
         Inhoud
       </RootLayout>,
@@ -87,9 +94,9 @@ describe('RootLayout', () => {
     expect(html).toContain('href="/nieuws/podcasts"')
   })
 
-  it('draws no bar on the home page, and links the logo to it', () => {
+  it('draws no bar on the home page, and links the logo to it', async () => {
     vi.mocked(usePathname).mockReturnValue('/')
-    const html = renderToStaticMarkup(
+    const html = await render(
       <RootLayout shortcuts={null} subnav={null}>
         Inhoud
       </RootLayout>,
@@ -100,8 +107,28 @@ describe('RootLayout', () => {
     expect(html).toMatch(/<header class="hf-page-header"><a href="\/">/)
   })
 
-  it('puts the two sentences of the footer in a paragraph each, before the links', () => {
-    const html = renderToStaticMarkup(
+  it('has the item Fans between Spelers and Forum when accounts are on, and not when they are off', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    const on = await render(
+      <RootLayout shortcuts={null} subnav={null}>
+        Inhoud
+      </RootLayout>,
+    )
+
+    expect(on).toMatch(/Spelers<\/a>.*<a [^>]*href="\/fans"[^>]*>Fans<\/a>.*Forum/)
+
+    vi.stubEnv('FANS_ACCOUNTS', 'off')
+    const off = await render(
+      <RootLayout shortcuts={null} subnav={null}>
+        Inhoud
+      </RootLayout>,
+    )
+
+    expect(off).not.toContain('href="/fans"')
+  })
+
+  it('puts the two sentences of the footer in a paragraph each, before the links', async () => {
+    const html = await render(
       <RootLayout shortcuts={null} subnav={null}>
         Inhoud
       </RootLayout>,
@@ -112,8 +139,8 @@ describe('RootLayout', () => {
     )
   })
 
-  it('links to Over ons, Contact, Bronnen, Privacy, Toegankelijkheid, Updates and Beheer in the footer, in a navigation named Over de site', () => {
-    const html = renderToStaticMarkup(
+  it('links to Over ons, Contact, Bronnen, Privacy, Toegankelijkheid, Updates and Beheer in the footer, in a navigation named Over de site', async () => {
+    const html = await render(
       <RootLayout shortcuts={null} subnav={null}>
         Inhoud
       </RootLayout>,
@@ -136,8 +163,8 @@ describe('RootLayout', () => {
 })
 
 describe('the link to the top in the footer', () => {
-  it('comes last in the footer, after the links, and goes to the top of the page', () => {
-    const html = renderToStaticMarkup(
+  it('comes last in the footer, after the links, and goes to the top of the page', async () => {
+    const html = await render(
       <RootLayout shortcuts={null} subnav={null}>
         Inhoud
       </RootLayout>,

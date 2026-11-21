@@ -2114,26 +2114,32 @@ await withServer({ database: unreachable.href, siteEnv: 'acceptance' }, async (s
 })
 
 // With every part of Fans off, which is production until the owner changes a line, the chapter
-// isn't there: /fans answers "not found" and the rest of the site works. Once the page exists
-// (#1444) this checks the other side too, so that it can't pass just because nothing is built:
-// the same page must be there when its part is on.
-const fansPageExists = existsSync(new URL('../src/app/fans/page.tsx', import.meta.url))
+// isn't there: /fans answers "not found" and the rest of the site works. The other side is
+// checked too, so that it can't pass just because nothing is built: the same page must be there
+// when accounts are on, and the menu then has Fans.
 await withEmptyDatabase((database) =>
   withServer({ database, fans: 'off', siteEnv: 'acceptance' }, async (server) => {
     await waitUntilUp(server)
     assert.equal((await fetch(`${origin}/fans`)).status, 404, '/fans must be "not found" with every part off')
-    assert.equal((await fetch(origin)).status, 200)
+    const home = await fetch(origin)
+
+    assert.equal(home.status, 200)
+    assert.doesNotMatch(await home.text(), /href="\/fans"/, 'the main menu must not have Fans with every part off')
   }),
 )
 
-if (fansPageExists) {
-  await withEmptyDatabase((database) =>
-    withServer({ database, fans: 'on', siteEnv: 'acceptance' }, async (server) => {
-      await waitUntilUp(server)
-      assert.equal((await fetch(`${origin}/fans`)).status, 200, '/fans must be there with the parts on')
-    }),
-  )
-}
+await withEmptyDatabase((database) =>
+  withServer({ database, fans: 'on', siteEnv: 'acceptance' }, async (server) => {
+    await waitUntilUp(server)
+    const response = await fetch(`${origin}/fans`)
+    const html = await response.text()
+
+    assert.equal(response.status, 200, '/fans must be there with the parts on')
+    assert.match(html, /<h1[^>]*>Fans<\/h1>/)
+    assert.match(html, /<a [^>]*href="\/fans"[^>]*>Fans<\/a>/, 'the main menu must have Fans')
+    assert.equal(response.headers.get('cache-control'), 'no-store')
+  }),
+)
 
 await withServer({ database: databaseUrl, siteEnv: undefined }, async (server) => {
   const [code] = await Promise.race([once(server, 'exit'), sleep(30_000).then(() => [undefined])])

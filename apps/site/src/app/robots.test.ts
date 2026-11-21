@@ -17,7 +17,7 @@ describe('robots', () => {
     vi.stubEnv('SITE_ENV', 'production')
 
     expect(robots()).toEqual({
-      rules: { allow: '/', disallow: '/beheer', userAgent: '*' },
+      rules: { allow: '/', disallow: ['/beheer', '/fans/'], userAgent: '*' },
       sitemap: 'https://sc.heerenveen.org/sitemap.xml',
     })
   })
