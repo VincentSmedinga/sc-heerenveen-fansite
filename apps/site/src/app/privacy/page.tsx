@@ -116,12 +116,12 @@ export default function PrivacyPage() {
           apparaat. Wij zien dat niet. Wis de gegevens van de site in je browser om hem weg te halen.
         </Text>
         <Text>
-          Alleen een redacteur die inlogt in het beheer krijgt een cookie. Het bevat een nummer voor die sessie, niets
-          over jou, en het werkt hooguit 14 dagen, en 9 dagen zonder gebruik. Daarnaast bewaart de browser van die
-          redacteur een teken dat zegt: hier is iemand ingelogd. Het hoofdmenu toont dan een koppeling naar het beheer.
-          Het teken bevat geen gegevens, gaat nergens heen en verandert alleen dat menu, net als de themakeuze. Wie een
-          verslag invult, bewaart ook de invoer van dat formulier op dit apparaat, tot het verslag is opgeslagen, hij
-          uitlogt of er dertig dagen voorbij zijn. Die invoer gaat nergens heen.
+          {accounts ? 'Een' : 'Alleen een'} redacteur die inlogt in het beheer krijgt een cookie. Het bevat een nummer
+          voor die sessie, niets over jou, en het werkt hooguit 14 dagen, en 9 dagen zonder gebruik. Daarnaast bewaart
+          de browser van die redacteur een teken dat zegt: hier is iemand ingelogd. Het hoofdmenu toont dan een
+          koppeling naar het beheer. Het teken bevat geen gegevens, gaat nergens heen en verandert alleen dat menu, net
+          als de themakeuze. Wie een verslag invult, bewaart ook de invoer van dat formulier op dit apparaat, tot het
+          verslag is opgeslagen, hij uitlogt of er dertig dagen voorbij zijn. Die invoer gaat nergens heen.
         </Text>
         {accounts ? (
           <Text>

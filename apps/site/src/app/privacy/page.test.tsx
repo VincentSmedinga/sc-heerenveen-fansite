@@ -281,6 +281,13 @@ describe('the page Privacy with accounts on', () => {
     expect(text).toContain('één keer als je account twee jaar niet is gebruikt')
   })
 
+  it('no longer says that only an editor gets a cookie', () => {
+    const { text } = withAccounts()
+
+    expect(text).toContain('Een redacteur die inlogt in het beheer krijgt een cookie.')
+    expect(text).not.toContain('Alleen een redacteur')
+  })
+
   it('links to Mijn account', () => {
     expect(withAccounts().plain).toContain('<a href="/fans/mijn-account">Mijn account</a>')
   })
