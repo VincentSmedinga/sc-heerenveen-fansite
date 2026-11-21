@@ -435,7 +435,17 @@ describe('exportDump', () => {
     // The dump does hold rows, so the search below means something.
     expect(text()).toContain('INSERT INTO `__drizzle_migrations`')
 
-    for (const secret of ['example.org', 'Tjalle', 'tjalle', 'Sietske', 'sletske', 'session-hash', 'link-hash']) {
+    for (const secret of [
+      'example.org',
+      'Tjalle',
+      'tjalle',
+      'Sietske',
+      'sletske',
+      'session-hash',
+      'link-hash',
+      'change-hash',
+      'address-hash',
+    ]) {
       expect(text(), secret).not.toContain(secret)
     }
   })

@@ -1,7 +1,7 @@
 # Back-ups
 
 De database heeft een back-up die we echt kunnen terugzetten.
-Elke nacht maakt cron op de host een dump van de database, een bestand met alle tabellen en de rijen van alle tabellen op vijf na.
+Elke nacht maakt cron op de host een dump van de database, een bestand met alle tabellen en de rijen van alle tabellen op negen na.
 Dit bestand zegt wat dat doet, hoe de eigenaar het instelt, hoe je een dump terugzet en wat de dumps aan opslag kosten.
 Het zegt ook hoe de projecteigenaar een kopie van de database van acceptatie op zijn eigen computer zet, zonder persoonsgegevens.
 
