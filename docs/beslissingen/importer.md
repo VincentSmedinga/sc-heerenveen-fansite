@@ -4522,3 +4522,13 @@
   Een run die crasht voordat hij bij de accounts kwam, laat ze ook tot de volgende dag.
   Een adres dat de mailserver blijft weigeren, blijft elke dag tussen de eerste 20 staan; met 20 zulke accounts krijgt de rest geen mail.
   Dat vraagt een tweede poging met een teller, en past niet bij zo weinig accounts.
+
+## De import stuurt de herinnering voor de Prognose in elke run
+
+- **Datum:** 21 november 2026
+- **Besluit:** `runImport` roept `sendReminders` (`packages/db/src/send-reminders.ts`) bij elke run aan, onder de lock van de import, dus elk kwartier, in tegenstelling tot de opruimstap van de accounts die één keer per dag de accounts doet.
+  Een fout of een ontbrekend `FANS_REMINDER_SECRET` is een waarschuwing in het logboek, geen mislukte import, en het logboek noemt alleen aantallen.
+  De regel welke wedstrijd voorspeld kan worden (`predictionMatches`, `isOpen`) staat in `packages/db/src/prediction-matches.ts`, zodat de pagina en de stap dezelfde vraag stellen.
+- **Waarom:** een aftrap is een moment, en de limiet per run schuift de rest naar een volgende run.
+  De rijen in `supporter_reminders` houden de runs eerlijk: een run die niets te doen heeft, doet één query en stuurt niets.
+- **Alternatieven:** de stap één keer per dag draaien (mist een wedstrijd om 12.30 of 20.45); de regel van de pagina in de importer herhalen (twee plekken die uit elkaar lopen).

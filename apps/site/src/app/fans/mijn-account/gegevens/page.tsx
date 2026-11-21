@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { Card, DataTable, DescriptionList, Heading, Link, Page, Text } from '@fansite/design-system'
+import { isFansPartOn } from '@fansite/shared/fans-env'
 import { notFound } from 'next/navigation'
 
 import { getDatabase } from '#src/database'
@@ -59,6 +60,13 @@ export default async function MyDataPage() {
             <DescriptionList.Item term="Herinnering per e-mail">
               {account.remindByEmail ? 'Ja' : 'Nee'}
             </DescriptionList.Item>
+            {account.remindersSent === 0 && !isFansPartOn('prognose') ? null : (
+              <DescriptionList.Item term="Herinneringen verstuurd">
+                {account.remindersSent === 0
+                  ? 'Nog geen'
+                  : `Voor ${account.remindersSent} ${account.remindersSent === 1 ? 'wedstrijd' : 'wedstrijden'}`}
+              </DescriptionList.Item>
+            )}
             <DescriptionList.Item term="Naam gewijzigd">
               {account.screenNameChangedAt === null ? 'Nooit' : dateFormat.format(account.screenNameChangedAt)}
             </DescriptionList.Item>

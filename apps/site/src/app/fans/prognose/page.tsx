@@ -56,6 +56,7 @@ export default async function PredictionPage({
   const savedOf = async (match: undefined | { id: number }) =>
     supporterId === undefined || match === undefined ? undefined : findPrediction(db, supporterId, match.id)
   const loggedIn = supporterId !== undefined
+  const remindByEmail = supporter?.remindByEmail ?? false
   const mine = supporterId === undefined ? [] : await scoredPredictions(db, supporterId, now)
   // The card of the last match that has a result, with the points and how everybody did.
   const lastPlayed = mine.find((item) => item.match.state === 'played')
@@ -78,6 +79,7 @@ export default async function PredictionPage({
               loggedIn={loggedIn}
               match={next}
               now={now}
+              remindByEmail={remindByEmail}
               saved={await savedOf(next)}
             />
           )
@@ -100,6 +102,7 @@ export default async function PredictionPage({
                 loggedIn={loggedIn}
                 match={next}
                 now={now}
+                remindByEmail={remindByEmail}
                 saved={await savedOf(next)}
               />
             )}

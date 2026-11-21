@@ -1,9 +1,9 @@
 import type { Database } from '@fansite/db/client'
 import type { FansPart } from '@fansite/shared/fans-env'
 
-import { supporters } from '@fansite/db/schema'
+import { supporterReminders, supporters } from '@fansite/db/schema'
 import { isFansPartOn } from '@fansite/shared/fans-env'
-import { eq } from 'drizzle-orm'
+import { count, eq } from 'drizzle-orm'
 
 import { fansGames } from '../fans-paths'
 import { predictionData } from './prediction-results'
@@ -18,10 +18,16 @@ export const myDataPath = '/fans/mijn-account/gegevens'
 
 /**
  * The tables that belong to the account itself and go with it when it is closed
- * (`ON DELETE CASCADE`): the sessions, the links and codes, and the requests for a new address.
- * The page doesn't show them: they are there for a few minutes, or are the session itself.
+ * (`ON DELETE CASCADE`): the sessions, the links and codes, the requests for a new address and
+ * the record of the reminders that were sent. The page shows only the last one, as a count of
+ * matches; the others are there for a few minutes or are the session itself.
  */
-export const accountTables = ['supporter_email_changes', 'supporter_login_links', 'supporter_sessions'] as const
+export const accountTables = [
+  'supporter_reminders',
+  'supporter_email_changes',
+  'supporter_login_links',
+  'supporter_sessions',
+] as const
 
 /** What a game shows of a supporter: a summary for Mijn account and a table for the page. */
 export type GameData = {
@@ -70,6 +76,8 @@ export type AccountData = {
   inRankings: boolean
   lastVisitOn: null | string
   remindByEmail: boolean
+  /** For how many matches a reminder by e-mail was sent. */
+  remindersSent: number
   screenName: string
   screenNameChangedAt: Date | null
 }
@@ -94,7 +102,16 @@ export async function accountData(db: Database, supporterId: number): Promise<Ac
     .from(supporters)
     .where(eq(supporters.id, supporterId))
 
-  return account
+  if (account === undefined) {
+    return undefined
+  }
+
+  const [sent] = await db
+    .select({ count: count() })
+    .from(supporterReminders)
+    .where(eq(supporterReminders.supporterId, supporterId))
+
+  return { ...account, remindersSent: sent?.count ?? 0 }
 }
 
 /** The games that are on, each with what the supporter filled in. */

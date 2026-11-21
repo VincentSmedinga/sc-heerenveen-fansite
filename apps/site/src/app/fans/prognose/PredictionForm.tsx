@@ -2,9 +2,10 @@
 
 import type { ScoreField } from '@fansite/design-system'
 
-import { Button, Disclosure, ErrorSummary, Form, Notice, ScoreGrid, Text } from '@fansite/design-system'
+import { Button, Disclosure, ErrorSummary, Form, Link, Notice, ScoreGrid, Text } from '@fansite/design-system'
 import { useActionState, useEffect } from 'react'
 
+import { accountPath } from '#src/fans/account-form'
 import {
   closedMessage,
   fieldId,
@@ -27,6 +28,7 @@ export function PredictionForm({
   behindButton = false,
   homeName,
   matchId,
+  remindByEmail,
   saved,
 }: {
   awayName: string
@@ -37,6 +39,8 @@ export function PredictionForm({
   behindButton?: boolean
   homeName: string
   matchId: number
+  /** Whether the supporter has the reminder by e-mail on. */
+  remindByEmail: boolean
   /** What the supporter predicted before, or nothing. */
   saved: PredictionValues | undefined
 }) {
@@ -77,6 +81,11 @@ export function PredictionForm({
       <Notice id={noticeId} tabIndex={-1}>
         {notice}
       </Notice>
+      {state.saved !== undefined && !remindByEmail ? (
+        <Text>
+          Een herinnering per e-mail? <Link href={`${accountPath}#herinnering`}>Instellen</Link>
+        </Text>
+      ) : null}
       <Form action={action}>
         <ScoreGrid
           awayName={awayName}

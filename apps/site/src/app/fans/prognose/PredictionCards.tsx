@@ -138,6 +138,7 @@ export function OpenCard({
   loggedIn,
   match,
   now,
+  remindByEmail = false,
   saved,
 }: {
   heading: string
@@ -146,6 +147,8 @@ export function OpenCard({
   loggedIn: boolean
   match: PredictionMatch
   now: Date
+  /** Whether the supporter has the reminder by e-mail on. */
+  remindByEmail?: boolean
   saved: PredictionValues | undefined
 }) {
   const open = isOpen(match, now)
@@ -170,6 +173,7 @@ export function OpenCard({
         behindButton={inDisclosure}
         homeName={clubs.home}
         matchId={match.id}
+        remindByEmail={remindByEmail}
         saved={saved}
       />
     )

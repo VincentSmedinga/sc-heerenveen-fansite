@@ -46,6 +46,10 @@ const open = [
   'app/fans/aanmelden/bevestigen/page.tsx',
   'app/fans/aanmelden/page.tsx',
   'app/fans/aanmelden/verstuurd/page.tsx',
+  // The page and the action of the link in a reminder: the signed code in the link says whose
+  // reminder it is, so they need no session (issue 1461).
+  'app/fans/herinnering/uitzetten/actions.ts',
+  'app/fans/herinnering/uitzetten/page.tsx',
   'app/fans/inloggen/actions.ts',
   'app/fans/inloggen/bevestigen/page.tsx',
   'app/fans/inloggen/page.tsx',

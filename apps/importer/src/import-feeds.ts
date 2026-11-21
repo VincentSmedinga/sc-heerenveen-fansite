@@ -11,6 +11,7 @@ import { mailConflicts } from '@fansite/db/match-conflict-mail'
 import { updatePlayerAddresses } from '@fansite/db/person-slugs'
 import { discussions, feeds, importRuns, items, leagueResults, matches, sources } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
+import { describeReminders, sendReminders } from '@fansite/db/send-reminders'
 import { removeVisitorData } from '@fansite/db/visits'
 import { and, asc, eq, gte, inArray, isNull, like, ne, sql } from 'drizzle-orm'
 
@@ -383,6 +384,14 @@ export async function runImport(
         `Supporter accounts: warning, not cleaned up: ${describeError(error)}`,
       ])
 
+      // The reminders for the game Prognose (#1461), every run: a kick-off is a moment, so the
+      // day before it can be any run. Nothing goes twice (see sendReminders). A failure is a
+      // warning, not a failed import.
+      const reminderLines = await sendReminders(db, clock(), supporterOptions).then(
+        describeReminders,
+        (error: unknown) => [`Reminders: warning, not sent: ${describeError(error)}`],
+      )
+
       // Before any season is read: the clubs are right whether or not a season can be read. A
       // failure is a warning and no reason to stop.
       const fetcher = makeFetcher(robotsStoreFor(db, clock))
@@ -427,7 +436,7 @@ export async function runImport(
       await finishRun(db, runId, clock())
 
       return {
-        clubLines: [...supporterLines, ...clubLines],
+        clubLines: [...supporterLines, ...reminderLines, ...clubLines],
         personLines: [...personLines, ...addresses, ...stadiumLines],
         reports,
         wikipedia,

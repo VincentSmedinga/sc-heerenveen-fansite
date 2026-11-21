@@ -19,7 +19,7 @@ const EmailLink = () => (
 )
 
 /** The part about accounts of supporters (#1456). */
-const AccountSection = () => (
+const AccountSection = ({ reminder }: { reminder: boolean }) => (
   <>
     <Heading anchor id="account" level={2}>
       Als je een account maakt
@@ -63,6 +63,14 @@ const AccountSection = () => (
       We mailen je alleen om in te loggen, bij een wijziging van je account, één keer als je account twee jaar niet is
       gebruikt, en voor wat je zelf aanzet.
     </Text>
+    {reminder ? (
+      <Text>
+        Dat laatste is de herinnering voor de Prognose. Zet je die aan op Mijn account, dan mailen we je de dag voor een
+        wedstrijd, als je nog niet hebt voorspeld. In elk bericht staat een link om de herinnering zonder inloggen uit
+        te zetten. Om te zorgen dat er niets dubbel gaat, bewaren we per wedstrijd dat we je het bericht stuurden. Daar
+        staat geen adres bij. Het verdwijnt met je account, en een maand na de wedstrijd.
+      </Text>
+    ) : null}
   </>
 )
 
@@ -132,7 +140,7 @@ export default function PrivacyPage() {
             is nodig voor iets waar je zelf om vraagt, en het volgt niemand.
           </Text>
         ) : null}
-        {accounts ? <AccountSection /> : null}
+        {accounts ? <AccountSection reminder={isFansPartOn('prognose')} /> : null}
         <Heading anchor id="berichten" level={2}>
           Als je ons een bericht stuurt
         </Heading>

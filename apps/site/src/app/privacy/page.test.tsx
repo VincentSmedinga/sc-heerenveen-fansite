@@ -1,4 +1,5 @@
 import { graceDays, unusedMonths } from '@fansite/db/clean-up-supporters'
+import { keepRecordDays } from '@fansite/db/send-reminders'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -286,6 +287,22 @@ describe('the page Privacy with accounts on', () => {
 
     expect(text).toContain('Een redacteur die inlogt in het beheer krijgt een cookie.')
     expect(text).not.toContain('Alleen een redacteur')
+  })
+
+  it('says what the reminder is, how it is turned off and what we keep for it, only while Prognose is on', () => {
+    vi.stubEnv('FANS_PROGNOSE', 'on')
+
+    const { text } = withAccounts()
+
+    expect(text).toContain('Dat laatste is de herinnering voor de Prognose.')
+    expect(text).toContain('de dag voor een wedstrijd, als je nog niet hebt voorspeld')
+    expect(text).toContain('een link om de herinnering zonder inloggen uit te zetten')
+    expect(text).toContain('Daar staat geen adres bij. Het verdwijnt met je account, en een maand na de wedstrijd.')
+    expect(keepRecordDays).toBe(30)
+
+    vi.stubEnv('FANS_PROGNOSE', 'off')
+
+    expect(withAccounts().text).not.toContain('herinnering voor de Prognose')
   })
 
   it('links to Mijn account', () => {

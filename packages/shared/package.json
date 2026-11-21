@@ -13,6 +13,7 @@
     "./env": "./src/env.ts",
     "./fans-env": "./src/fans-env.ts",
     "./mail": "./src/mail.ts",
+    "./reminder-code": "./src/reminder-code.ts",
     "./mail-env": "./src/mail-env.ts",
     "./match-report": "./src/match-report.ts",
     "./prediction-points": "./src/prediction-points.ts",
