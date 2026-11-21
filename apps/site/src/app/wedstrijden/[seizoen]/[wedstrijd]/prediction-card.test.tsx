@@ -76,7 +76,7 @@ const preview = (values = {}) => ({
   },
 })
 
-const spread = {
+const spread: NonNullable<MatchCrowd['spread']> = {
   actual: { outcome: 'win', score: '2–1' },
   draws: 13,
   losses: 8,
@@ -86,7 +86,7 @@ const spread = {
     { count: 6, label: '1–0' },
   ],
   wins: 33,
-} as const
+}
 
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] })
@@ -166,7 +166,10 @@ describe('the card Prognose on the Voorbeschouwing', () => {
 
   it('has no link once the match has begun, and the figures with the h3 under the h2', async () => {
     vi.setSystemTime(new Date('2026-11-21T19:30:00Z'))
-    vi.mocked(matchCrowd).mockResolvedValue({ count: 54, spread: { ...spread, actual: undefined } } as MatchCrowd)
+    vi.mocked(matchCrowd).mockResolvedValue({
+      count: 54,
+      spread: { draws: 13, losses: 8, other: 4, scores: spread.scores, wins: 33 },
+    })
 
     const html = await render()
     const text = plain(html)

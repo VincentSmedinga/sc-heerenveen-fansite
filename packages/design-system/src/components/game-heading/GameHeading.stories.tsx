@@ -6,7 +6,6 @@ import { Text } from '../text/Text'
 import { GameHeading } from './GameHeading'
 
 const meta = preview.meta({
-  args: { children: 'Prognose', id: 'kop', level: 2, meta: 'Van supporters' },
   argTypes: {
     children: { description: 'De naam van het spel.' },
     id: { description: 'De `id` van de kop, voor de `aria-labelledby` van de kaart.' },
@@ -15,8 +14,8 @@ const meta = preview.meta({
   },
   component: GameHeading,
   decorators: [
-    (Story, { args }) => (
-      <Card aria-labelledby={args.id} game="prognose">
+    (Story) => (
+      <Card aria-labelledby="kop" game="prognose">
         <Story />
         <Text>48 supporters voorspelden deze wedstrijd.</Text>
       </Card>
@@ -37,4 +36,7 @@ const meta = preview.meta({
   title: 'Componenten/Weergave/GameHeading',
 })
 
-export const Default = meta.story({ name: 'Naam met kleine tekst' })
+export const Default = meta.story({
+  args: { children: 'Prognose', id: 'kop', level: 2, meta: 'Van supporters' },
+  name: 'Naam met kleine tekst',
+})
