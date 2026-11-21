@@ -1,9 +1,8 @@
 import type { Database } from '@fansite/db/client'
 
+import { blockedAddressHash } from '@fansite/db/close-account'
 import { supporterBlockedAddresses } from '@fansite/db/schema'
 import { eq, lt } from 'drizzle-orm'
-
-import { hashOf } from '../login/tokens'
 
 // The addresses of blocked accounts that were closed (issue 1458). Only the SHA-256 of the
 // address and the moment are kept, so a blocked supporter can't sign up again with the same
@@ -12,10 +11,7 @@ import { hashOf } from '../login/tokens'
 /** How many months a hash is kept. */
 export const monthsKept = 12
 
-/** The hash that is kept for a normalised address. */
-export function blockedAddressHash(email: string) {
-  return hashOf(email)
-}
+export { blockedAddressHash }
 
 /**
  * Whether a normalised address belongs to a blocked account that was closed less than 12 months

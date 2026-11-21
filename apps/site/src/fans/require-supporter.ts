@@ -45,7 +45,9 @@ export async function currentSupporter(now = new Date()) {
   if (supporter !== undefined && supporter.lastVisitOn !== today) {
     const { users } = supporterKind.tables
 
-    await db.update(users).set({ lastVisitOn: today }).where(eq(users.id, supporter.id))
+    // A visit also takes back the mail about an unused account (#1460): the next term of 24
+    // months starts here.
+    await db.update(users).set({ lastVisitOn: today, unusedMailSentAt: null }).where(eq(users.id, supporter.id))
   }
 
   return supporter

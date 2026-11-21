@@ -6884,6 +6884,7 @@
 - **Waarom:** zo laat een aanmelding zonder bevestiging niets achter, en houdt niemand een naam vast met een adres dat hij niet heeft.
   De link en de code werken dan precies als bij het inloggen, met dezelfde code.
 - **Alternatieven:** het account meteen maken met een vlag "onbevestigd" (laat een rij achter en houdt de naam vast); een vijfde tabel voor aanmeldingen (het issue vraagt vier tabellen, en de rij lijkt op een inloglink).
+- **Later:** sinds _De import ruimt ongebruikte accounts van supporters op_ (21 november 2026) haalt ook de import een verlopen onbevestigde aanmelding weg, bij elke run, zodat het adres er niet blijft staan tot er een volgend verzoek komt.
 
 - **Datum:** 20 november 2026
 - **Besluit:** meldt een adres zich aan dat al een account heeft, dan krijgt het de mail om in te loggen, met een link naar dezelfde bevestigingspagina.
@@ -7083,6 +7084,7 @@
   Wie iets moet bewaren, zoals de hash van het adres van een geblokkeerd account, doet dat voordat hij hem aanroept.
 - **Waarom:** één plek die zegt wat weggaat, zodat een later issue niets kan vergeten.
 - **Alternatieven:** het verwijderen per aanroeper schrijven (drie kopieën die uit elkaar lopen).
+- **Later:** sinds _De import ruimt ongebruikte accounts van supporters op_ (21 november 2026, `docs/beslissingen/importer.md`) staat `closeAccount` in `packages/db/src/close-account.ts`, zodat de importer hem kan aanroepen; `apps/site/src/fans/close-account.ts` geeft hem door.
 - **Later:** sinds _De redactie beheert de accounts van supporters_ (21 november 2026) bewaart `closeAccount` zelf de hash van het adres van een geblokkeerd account, in dezelfde transactie; een aanroeper hoeft er niets voor te doen.
 
 - **Datum:** 21 november 2026
