@@ -1514,8 +1514,9 @@ Een supporter maakt een account op `/fans/aanmelden`, met een schermnaam en een 
 Daarna logt hij in op `/fans/inloggen`, ook met een link of een code uit de mail, en blijft hij 90 dagen na zijn laatste bezoek ingelogd, hoogstens een jaar.
 Op `/fans/mijn-account` wijzigt hij zijn schermnaam (hoogstens één keer per 30 dagen) en zijn e-mailadres, en kiest hij of zijn naam in de standen staat.
 Een nieuw adres geldt pas als de supporter de link of de code gebruikt die naar dat adres ging, in een sessie van hetzelfde account.
+Op `/fans/mijn-account/gegevens` ziet hij alles wat de site van hem bewaart, en op `/fans/mijn-account/opheffen` heft hij zijn account op, met één bevestiging.
 Lokaal, zonder mailserver, staat de mail met de link en de code in het logboek van `pnpm dev`.
-De code staat in `src/fans`: de regels van de schermnaam in `screen-name.ts`, het aanmelden in `sign-up.ts`, het inloggen, het plafond van de mails en het adres om naar terug te gaan in `log-in.ts`, het wijzigen in `change-name.ts` en `change-email.ts`, de keuze voor de standen in `rankings.ts`, de instelling voor de gedeelde code van het inloggen in `supporter-login.ts`, en `requireSupporter()` in `require-supporter.ts`.
+De code staat in `src/fans`: de regels van de schermnaam in `screen-name.ts`, het aanmelden in `sign-up.ts`, het inloggen, het plafond van de mails en het adres om naar terug te gaan in `log-in.ts`, het wijzigen in `change-name.ts` en `change-email.ts`, de gegevens per spel in `my-data.ts`, het opheffen in `close-account.ts`, de keuze voor de standen in `rankings.ts`, de instelling voor de gedeelde code van het inloggen in `supporter-login.ts`, en `requireSupporter()` in `require-supporter.ts`.
 Elke persoonlijke pagina en actie onder `/fans` begint met `requireSupporter()`; `src/fans/routes.test.ts` faalt voor een die dat niet doet.
 De tabellen zijn `supporters`, `supporter_login_links`, `supporter_email_changes`, `supporter_sessions` en `supporter_login_attempts`, los van die van het beheer.
 Het cookie heet `fans-sessie` en gaat alleen mee naar de pagina's onder `/fans`.

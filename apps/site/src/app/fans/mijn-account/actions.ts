@@ -21,6 +21,7 @@ import {
   handleChangeEmail,
 } from '#src/fans/change-email'
 import { changeScreenName } from '#src/fans/change-name'
+import { closeAccount, closePaths, isFreshConfirmation } from '#src/fans/close-account'
 import { logInPaths } from '#src/fans/log-in'
 import { setInRankings } from '#src/fans/rankings'
 import { requireSupporter, supporterCookieName, supporterToken } from '#src/fans/require-supporter'
@@ -31,8 +32,8 @@ import { supporterKind } from '#src/fans/supporter-login'
 import { endSession, endSessionsOf } from '#src/login/sessions'
 
 // The actions of Mijn account. Each one checks the session first, with requireSupporter, and
-// works only on the account of that session. A blocked supporter can log out, but changes
-// nothing else.
+// works only on the account of that session. A blocked supporter can log out and close the
+// account, but changes nothing else.
 
 const loggedOut = `${logInPaths.home}?uitgelogd=1`
 const goneLink = `${changeEmailPaths.confirm}?fout=link`
@@ -55,6 +56,26 @@ export async function changeName(_previous: AccountFormState, formData: FormData
   }
 
   redirect(result.answer === 'changed' ? `${signUpPaths.account}?melding=schermnaam` : signUpPaths.account)
+}
+
+/**
+ * Closes the account, from the page "Weet je het zeker?": only with a proof of that page from
+ * this session that is at most 10 minutes old, so the session alone is not enough. It removes
+ * the cookie and goes to the page that says the account is gone. Without a fresh proof it goes
+ * back to the first page of closing.
+ */
+export async function closeMyAccount(formData: FormData) {
+  const { supporterId } = await requireSupporter({ blocked: 'allow', from: closePaths.form })
+  const token = await supporterToken()
+  const issuedAt = Number(textOf(formData, 'gemaakt'))
+
+  if (token === undefined || !isFreshConfirmation(token, issuedAt, textOf(formData, 'bewijs'))) {
+    redirect(`${closePaths.form}?melding=verlopen`)
+  }
+
+  await closeAccount(getDatabase().db, supporterId)
+  ;(await cookies()).delete({ name: supporterCookieName, path: supporterKind.cookie.path })
+  redirect(closePaths.closed)
 }
 
 /** Changes the address with the code from the mail, on "Kijk in je mail", which binds `ref`. */

@@ -264,6 +264,10 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/fans/mijn-account/e-mailadres', status: 200 },
   { path: '/fans/mijn-account/e-mailadres/verstuurd?ref=onbekend', status: 200 },
   { path: '/fans/mijn-account/e-mailadres/bevestigen?token=onbekend', status: 200 },
+  { path: '/fans/mijn-account/gegevens', status: 200 },
+  { path: '/fans/mijn-account/opheffen', status: 200 },
+  { path: '/fans/mijn-account/opheffen/zeker', status: 200 },
+  { path: '/fans/mijn-account/opgeheven', status: 200 },
   { path: '/fans/geblokkeerd', status: 200 },
   // The way in to the admin. The admin itself is no page for a visitor without a session: it
   // goes to the login page.
