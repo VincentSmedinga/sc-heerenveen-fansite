@@ -7125,7 +7125,7 @@
 ## De knop voor licht en donker houdt zijn plek vóór het laden
 
 - **Datum:** 21 november 2026
-- **Besluit:** de server stuurt op de plek van de knop Donker een verborgen, inerte kopie van de knop, die zijn plek houdt.
+- **Besluit:** de server stuurt op de plek van de knop Donker een verborgen, inerte ronde knop van dezelfde maat (`RoundButton`), die zijn plek houdt.
   Na het laden komt de knop erin.
   Een e2e-test (`apps/site/e2e/top-link.spec.ts`) vergelijkt de hoogte van de kop met die van de pagina zonder JavaScript.
 - **Waarom:** de knop kwam eerst na het laden, nam 52 pixels van het logo, het woordmerk brak op een telefoon van 390 pixels in twee regels en de kop werd 12,8 pixels hoger.

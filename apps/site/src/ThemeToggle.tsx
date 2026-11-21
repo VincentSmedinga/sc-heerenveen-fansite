@@ -1,6 +1,6 @@
 'use client'
 
-import { ThemeButton } from '@fansite/design-system'
+import { RoundButton, ThemeButton } from '@fansite/design-system'
 import { useEffect, useState, useSyncExternalStore } from 'react'
 
 import type { Theme, ThemePreference } from './theme'
@@ -43,9 +43,9 @@ const systemIsDark = () => matchMedia(darkQuery).matches
  *
  * On the server and while hydrating there is no working button, so without JavaScript the page
  * has no button that does nothing, and the server's HTML is the same for everyone. A hidden,
- * inert copy of the button keeps its room in the header: without it the button comes in after
- * hydrating, takes room from the logo, the wordmark wraps and the header grows under a visitor
- * who is already scrolling. The copy is out of the tab order and the accessibility tree.
+ * inert round button of the same size keeps its room in the header: without it the button comes
+ * in after hydrating, takes room from the logo, the wordmark wraps and the header grows under a
+ * visitor who is already scrolling. It is out of the tab order and the accessibility tree.
  * The server knows nothing of the choice: public/theme.js puts it on the page.
  */
 export const ThemeToggle = () => {
@@ -64,14 +64,16 @@ export const ThemeToggle = () => {
 
   if (!mounted) {
     return (
-      <ThemeButton
+      <RoundButton
         aria-hidden="true"
-        dark={false}
         inert
         label="Donker"
         style={{ visibility: 'hidden' }}
+        surface="header"
         tabIndex={-1}
-      />
+      >
+        {null}
+      </RoundButton>
     )
   }
 
