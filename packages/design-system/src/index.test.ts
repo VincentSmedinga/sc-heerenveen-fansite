@@ -16,6 +16,7 @@ const components = [
   'Card',
   'CardColumns',
   'CardGroup',
+  'CodeInput',
   'DataTable',
   'Disclosure',
   'DiscussionItem',
