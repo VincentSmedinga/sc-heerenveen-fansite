@@ -8,6 +8,7 @@ import {
   fieldPlayers,
   formationChoices,
   formationProblem,
+  halfTimeScore,
   minutesPlayed,
   playedMatch,
 } from './match-report.ts'
@@ -1165,5 +1166,57 @@ describe('a red card or a yellow-red card without a minute', () => {
     })
 
     expect(minutesPlayed(report, match, 105)).toBe(90)
+  })
+})
+
+describe('halfTimeScore', () => {
+  const goal = (minute: null | number, extra: Partial<MatchReport['goals'][number]> = {}) => ({
+    appearanceId: null,
+    assistId: null,
+    minute,
+    ours: true,
+    ownGoal: false,
+    penalty: false,
+    stoppageMinutes: null,
+    ...extra,
+  })
+  const finished = (goals: MatchReport['goals'], status: MatchReport['status'] = 'klaar') => ({ goals, status })
+
+  it('counts the goals up to and including minute 45, for each team', () => {
+    expect(halfTimeScore(finished([goal(12), goal(45), goal(30, { ours: false }), goal(46), goal(80)]))).toEqual({
+      against: 1,
+      for: 2,
+    })
+  })
+
+  it('counts a goal in the added time of the first half', () => {
+    expect(halfTimeScore(finished([goal(45, { stoppageMinutes: 2 }), goal(90, { stoppageMinutes: 3 })]))).toEqual({
+      against: 0,
+      for: 1,
+    })
+  })
+
+  it('gives an own goal to the team that benefits, which `ours` says', () => {
+    expect(halfTimeScore(finished([goal(20, { ours: false, ownGoal: true })]))).toEqual({ against: 1, for: 0 })
+  })
+
+  it('counts a penalty like any other goal', () => {
+    expect(halfTimeScore(finished([goal(40, { penalty: true })]))).toEqual({ against: 0, for: 1 })
+  })
+
+  it('is 0-0 for a finished match without goals', () => {
+    expect(halfTimeScore(finished([]))).toEqual({ against: 0, for: 0 })
+  })
+
+  it('leaves out the goals of extra time', () => {
+    expect(halfTimeScore(finished([goal(10), goal(105), goal(118, { ours: false })]))).toEqual({ against: 0, for: 1 })
+  })
+
+  it('is empty for a report that is not finished', () => {
+    expect(halfTimeScore(finished([goal(10)], 'bezig'))).toBeNull()
+  })
+
+  it('is empty when a goal has no minute', () => {
+    expect(halfTimeScore(finished([goal(10), goal(null)]))).toBeNull()
   })
 })

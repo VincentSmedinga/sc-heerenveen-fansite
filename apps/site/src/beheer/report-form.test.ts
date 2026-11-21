@@ -6,6 +6,8 @@ import { checkReportForm, errorOrder, type ReportMatch } from './report-form'
 
 const squad = squadOf(100)
 const match: ReportMatch = {
+  afterNinetyAgainst: null,
+  afterNinetyFor: null,
   extraTime: false,
   goalsAgainst: 1,
   goalsFor: 2,
@@ -19,6 +21,77 @@ const context = { match, squad }
 const report = (overrides: Parameters<typeof baseReport>[1] = {}) => baseReport(squad, overrides)
 
 const sub = substitution
+
+describe('the score at half-time in the form', () => {
+  const typed = (wij: string, zij: string) => ({ ...report(), ruststand: { wij, zij } })
+
+  it('stores a score at half-time that is within the result, home or away', () => {
+    expect(checkReportForm(typed('1', '0'), context).plan?.halfTime).toEqual({ against: 0, for: 1 })
+    expect(checkReportForm(typed('2', '1'), context).plan?.halfTime).toEqual({ against: 1, for: 2 })
+  })
+
+  it('stores none when both fields are empty', () => {
+    expect(checkReportForm(typed('', ''), context).plan?.halfTime).toBeNull()
+  })
+
+  it('wants both fields or none, at the field that is empty', () => {
+    const checked = checkReportForm(typed('1', ''), context)
+
+    expect(checked.errors['ruststand-zij']).toContain('Vul ook de ruststand van de tegenstander in')
+    expect(checked.errors['ruststand-wij']).toBeUndefined()
+    expect(checked.plan).toBeUndefined()
+  })
+
+  it('wants whole numbers, each with its own error', () => {
+    const checked = checkReportForm(typed('-1', 'x'), context)
+
+    expect(checked.errors['ruststand-wij']).toContain('schrijf een heel getal')
+    expect(checked.errors['ruststand-zij']).toContain('schrijf een heel getal')
+  })
+
+  it('refuses a score at half-time above the final score, for each side', () => {
+    const checked = checkReportForm(typed('3', '2'), context)
+
+    expect(checked.errors['ruststand-wij']).toContain('hoger dan de eindstand (2)')
+    expect(checked.errors['ruststand-zij']).toContain('hoger dan de eindstand (1)')
+    expect(checked.plan).toBeUndefined()
+  })
+
+  it('counts against the score after 90 minutes when there was extra time', () => {
+    const extra = { ...match, afterNinetyAgainst: 1, afterNinetyFor: 1, extraTime: true, goalsFor: 2 }
+
+    expect(checkReportForm(typed('1', '1'), { match: extra, squad }).errors['ruststand-wij']).toBeUndefined()
+    expect(checkReportForm(typed('2', '0'), { match: extra, squad }).errors['ruststand-wij']).toContain(
+      'hoger dan de stand na 90 minuten (1)',
+    )
+  })
+
+  it('refuses a score at half-time for a match that is not played yet', () => {
+    const live = { ...match, goalsAgainst: null, goalsFor: null, status: 'scheduled' as const }
+
+    expect(checkReportForm(typed('0', '0'), { match: live, squad }).errors['ruststand-wij']).toContain(
+      'pas worden ingevuld als de wedstrijd is gespeeld',
+    )
+  })
+
+  it('puts its fields in the order of the form: after the status, home first, before the opponent', () => {
+    const home = errorOrder(report())
+    const away = errorOrder(report(), false)
+
+    expect(home.slice(home.indexOf('status'), home.indexOf('tegenstander') + 1)).toEqual([
+      'status',
+      'ruststand-wij',
+      'ruststand-zij',
+      'tegenstander',
+    ])
+    expect(away.slice(away.indexOf('status'), away.indexOf('tegenstander') + 1)).toEqual([
+      'status',
+      'ruststand-zij',
+      'ruststand-wij',
+      'tegenstander',
+    ])
+  })
+})
 
 describe('checkReportForm', () => {
   it('stores a report that is right as it is typed, with the events in the order of the clock', () => {
@@ -305,7 +378,14 @@ describe('checkReportForm', () => {
     it('puts the errors of the form of a report in the order of the form', () => {
       const values = report({ wij: { wissel: [sub({ minuut: '0' })] } })
 
-      expect(errorOrder(values).slice(0, 4)).toEqual(['verslag', 'bron', 'status', 'tegenstander'])
+      expect(errorOrder(values).slice(0, 6)).toEqual([
+        'verslag',
+        'bron',
+        'status',
+        'ruststand-wij',
+        'ruststand-zij',
+        'tegenstander',
+      ])
       expect(errorOrder(values).indexOf('wissel-wij-1-eruit')).toBeGreaterThan(
         errorOrder(values).indexOf('speler-wij-14-rol'),
       )

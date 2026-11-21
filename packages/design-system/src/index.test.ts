@@ -53,6 +53,7 @@ const components = [
   'RecordTable',
   'Root',
   'RoundButton',
+  'ScoreGrid',
   'Select',
   'SideBySide',
   'StandingsTable',
@@ -109,7 +110,7 @@ describe('the JavaScript entry of the package', () => {
     expect(designSystem.inputTypes).toContain('email')
     expect(designSystem.listElements).toEqual(['ul', 'ol'])
     expect(designSystem.matchStatuses).toEqual(['scheduled', 'played', 'postponed', 'cancelled'])
-    expect(designSystem.tagTones).toEqual(['attention', 'highlight', 'neutral'])
+    expect(designSystem.tagTones).toEqual(['attention', 'highlight', 'neutral', 'open', 'todo', 'closed'])
     expect(designSystem.textElements).toEqual(['p', 'span'])
   })
 

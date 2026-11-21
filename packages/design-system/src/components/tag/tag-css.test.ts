@@ -16,6 +16,9 @@ const tones = [
   { ground: surfaces, text: 'text-missing' },
   { ground: surfaces, text: 'text-secondary' },
   { ground: ['highlight'], text: 'text-highlight' },
+  { ground: ['tag-open'], text: 'text-tag-open' },
+  { ground: ['tag-todo'], text: 'text-tag-todo' },
+  { ground: ['tag-closed'], text: 'text-tag-closed' },
 ]
 
 describe('the tones of a tag', () => {
@@ -24,6 +27,10 @@ describe('the tones of a tag', () => {
     expect(css).toContain('background-color: var(--hf-colour-background-highlight);')
     expect(css).toContain('border-color: var(--hf-colour-border-highlight);')
     expect(css).toContain('color: var(--hf-colour-text-highlight);')
+    for (const tone of ['open', 'todo', 'closed']) {
+      expect(css).toContain(`background-color: var(--hf-colour-background-tag-${tone});`)
+      expect(css).toContain(`color: var(--hf-colour-text-tag-${tone});`)
+    }
     expect(css).not.toMatch(/var\(--hf-colour-(?:blue|grey|red|steel|sand)-/)
   })
 
@@ -56,5 +63,14 @@ describe('the tones of a tag', () => {
 
   it('keeps a visible rim in forced colours', () => {
     expect(css).toMatch(/@media \(forced-colors: active\) \{\s*border-color: CanvasText;/)
+  })
+
+  it('gives the open, todo and closed tones a rim in the colour of their text', () => {
+    // Only highlight sets a border colour, so the others keep the rim in currentColor.
+    for (const tone of ['open', 'todo', 'closed']) {
+      const rule = css.match(new RegExp(`\\.hf-tag-${tone} \\{[^}]*\\}`, 's'))?.[0] ?? ''
+
+      expect(rule, tone).not.toMatch(/^\s*border-color: var/m)
+    }
   })
 })

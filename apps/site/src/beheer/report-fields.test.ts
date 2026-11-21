@@ -33,6 +33,7 @@ const squad = [
 const values = (overrides: Partial<ReportValues> = {}): ReportValues => ({
   bron: '',
   formatie: { wij: noFormation(), zij: noFormation() },
+  ruststand: { wij: '', zij: '' },
   status: 'bezig',
   tegenstander: 'nee',
   wij: emptySide(),

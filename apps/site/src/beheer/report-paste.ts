@@ -129,11 +129,13 @@ export function describeStored(report: {
 export function readPastedReport(
   text: string,
   squad: readonly ReportSquadPlayer[],
-  previous: { bron: string } = { bron: '' },
+  previous: { bron: string; ruststand?: ReportValues['ruststand'] } = { bron: '' },
 ): PasteResult {
   const values: ReportValues = {
     bron: previous.bron,
     formatie: { wij: noFormation(), zij: noFormation() },
+    // The text has no score at half-time, so what is stored stays.
+    ruststand: previous.ruststand ?? { wij: '', zij: '' },
     status: 'bezig',
     tegenstander: 'nee',
     wij: emptySide(),

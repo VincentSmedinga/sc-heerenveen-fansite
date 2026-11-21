@@ -900,6 +900,8 @@ describe('submitMatch for a match with a report', () => {
 
     const plan = checkReportForm(reportOf(choices), {
       match: {
+        afterNinetyAgainst: null,
+        afterNinetyFor: null,
         extraTime: false,
         goalsAgainst: 1,
         goalsFor: 2,

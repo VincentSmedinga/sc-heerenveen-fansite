@@ -150,6 +150,28 @@ describe('decideChange', () => {
     ])
   })
 
+  it('empties a score at half-time that does not fit the result Wikipedia gives', async () => {
+    const { changeId, matchId } = await heldChange()
+    const [row] = await database.db.select().from(matches).where(eq(matches.id, matchId))
+
+    await database.pool.query(
+      "UPDATE matches SET half_time_for = 2, half_time_against = 0, half_time_source = 'redactie' WHERE id = ?",
+      [matchId],
+    )
+    await database.db
+      .update(matchChanges)
+      .set({ proposal: encodeProposal({ clubId: row!.clubId, goals: [goal], match: { ...read, goalsFor: 1 } }) })
+      .where(eq(matchChanges.id, changeId))
+
+    expect(await decideChange(database.db, changeId, decision('take-over'), now)).toBe('done')
+    expect((await database.db.select().from(matches).where(eq(matches.id, matchId)))[0]).toMatchObject({
+      goalsFor: 1,
+      halfTimeAgainst: null,
+      halfTimeFor: null,
+      halfTimeSource: null,
+    })
+  })
+
   it('deletes the match when Wikipedia does not name it any more', async () => {
     const { changeId, matchId } = await heldChange(null)
 

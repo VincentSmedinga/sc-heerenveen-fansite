@@ -169,6 +169,24 @@ describe('removeEntry', () => {
     expect(await database.db.select().from(matchEdits)).toEqual([])
   })
 
+  it('empties a score at half-time that does not fit the result it puts back', async () => {
+    const { edit, id } = await entered({ result: true })
+
+    // The entry made it 1-0, so 1-0 at half-time fits; the result before it was not played.
+    await database.pool.query(
+      "UPDATE matches SET half_time_for = 1, half_time_against = 0, half_time_source = 'redactie' WHERE id = ?",
+      [id],
+    )
+    await removeEntry(database.db, edit)
+
+    expect((await database.db.select().from(matches).where(eq(matches.id, id)))[0]).toMatchObject({
+      halfTimeAgainst: null,
+      halfTimeFor: null,
+      halfTimeSource: null,
+      status: 'scheduled',
+    })
+  })
+
   it('puts back only the parts that are still marked, so what Wikipedia took over stays', async () => {
     const { edit, id } = await entered({ result: true })
 

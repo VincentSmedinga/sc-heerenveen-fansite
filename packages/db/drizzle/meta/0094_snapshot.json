@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "6ff348d6-93d6-4fa6-be84-a132aa99425c",
+  "id": "158f0eeb-dcbd-48d1-b737-901eeadaf9ad",
   "prevId": "a870c34d-a4e5-49f4-97d8-6acd9092ace8",
   "tables": {
     "admin_login_attempts": {
@@ -592,7 +592,7 @@
         },
         "action": {
           "name": "action",
-          "type": "enum('item.hide','item.show','item.approve','item.unapprove','article.create','article.update','article.publish','article.unpublish','match.edit','match.undo','match.caught-up','match.differs','match.take-over','match.keep','match.add','match.delete','stadium.save','stadium.reset','club-name.save','club-name.reset','player.stats-differ','player.stats-take-over','player.stats-keep','player.add','player.edit','player.remove','player.field-take-over','player.field-keep','person.edit','person.merge','account.create','account.edit','account.disable','account.enable','club.edit','ground.create','ground.edit','ground-name.save','home-ground.save','gap.mark','gap.renew','gap.unmark','club.merge','supporter.rename','supporter.block','supporter.unblock','supporter.forget-address')",
+          "type": "enum('item.hide','item.show','item.approve','item.unapprove','article.create','article.update','article.publish','article.unpublish','match.edit','match.undo','match.caught-up','match.differs','match.take-over','match.keep','match.add','match.delete','stadium.save','stadium.reset','club-name.save','club-name.reset','player.stats-differ','player.stats-take-over','player.stats-keep','player.add','player.edit','player.remove','player.field-take-over','player.field-keep','person.edit','person.merge','account.create','account.edit','account.disable','account.enable','club.edit','ground.create','ground.edit','ground-name.save','home-ground.save','gap.mark','gap.renew','gap.unmark','club.merge')",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -3663,6 +3663,20 @@
           "notNull": false,
           "autoincrement": false
         },
+        "half_time_for": {
+          "name": "half_time_for",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "half_time_against": {
+          "name": "half_time_against",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "match_date": {
           "name": "match_date",
           "type": "date",
@@ -3812,6 +3826,14 @@
         "matches_after_ninety_within_extra_time": {
           "name": "matches_after_ninety_within_extra_time",
           "value": "`matches`.`after_ninety_for` is null or (`matches`.`extra_time` = 1 and `matches`.`after_ninety_for` <= `matches`.`goals_for` and `matches`.`after_ninety_against` <= `matches`.`goals_against`)"
+        },
+        "matches_half_time_in_a_pair": {
+          "name": "matches_half_time_in_a_pair",
+          "value": "(`matches`.`half_time_for` is null and `matches`.`half_time_against` is null) or (`matches`.`half_time_for` is not null and `matches`.`half_time_against` is not null)"
+        },
+        "matches_half_time_within_the_result": {
+          "name": "matches_half_time_within_the_result",
+          "value": "`matches`.`half_time_for` is null or (`matches`.`status` = 'played' and `matches`.`half_time_for` <= coalesce(`matches`.`after_ninety_for`, `matches`.`goals_for`) and `matches`.`half_time_against` <= coalesce(`matches`.`after_ninety_against`, `matches`.`goals_against`))"
         },
         "matches_attendance_in_range_when_played": {
           "name": "matches_attendance_in_range_when_played",
@@ -5882,59 +5904,6 @@
       },
       "checkConstraint": {}
     },
-    "supporter_blocked_addresses": {
-      "name": "supporter_blocked_addresses",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "address_hash": {
-          "name": "address_hash",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "blocked_at": {
-          "name": "blocked_at",
-          "type": "datetime",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "supporter_blocked_addresses_blocked_at_idx": {
-          "name": "supporter_blocked_addresses_blocked_at_idx",
-          "columns": [
-            "blocked_at"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "supporter_blocked_addresses_id": {
-          "name": "supporter_blocked_addresses_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {
-        "supporter_blocked_addresses_address_hash_unique": {
-          "name": "supporter_blocked_addresses_address_hash_unique",
-          "columns": [
-            "address_hash"
-          ]
-        }
-      },
-      "checkConstraint": {}
-    },
     "supporter_email_changes": {
       "name": "supporter_email_changes",
       "columns": {
@@ -6357,14 +6326,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "screen_name_edited_by_editors": {
-          "name": "screen_name_edited_by_editors",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
         }
       },
       "indexes": {},

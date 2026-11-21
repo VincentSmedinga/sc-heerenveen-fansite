@@ -1,0 +1,6 @@
+-- Gives a match the score at half-time of the regular playing time (#1445). Both columns are empty or both filled, only a played match has one, and it never exceeds the score after the regular playing time.
+-- The statements can run again: MariaDB cannot undo DDL, so a migration that stopped halfway finishes on the next start.
+ALTER TABLE `matches` ADD COLUMN IF NOT EXISTS `half_time_for` int unsigned;--> statement-breakpoint
+ALTER TABLE `matches` ADD COLUMN IF NOT EXISTS `half_time_against` int unsigned;--> statement-breakpoint
+ALTER TABLE `matches` ADD CONSTRAINT IF NOT EXISTS `matches_half_time_in_a_pair` CHECK ((`matches`.`half_time_for` is null and `matches`.`half_time_against` is null) or (`matches`.`half_time_for` is not null and `matches`.`half_time_against` is not null));--> statement-breakpoint
+ALTER TABLE `matches` ADD CONSTRAINT IF NOT EXISTS `matches_half_time_within_the_result` CHECK (`matches`.`half_time_for` is null or (`matches`.`status` = 'played' and `matches`.`half_time_for` <= coalesce(`matches`.`after_ninety_for`, `matches`.`goals_for`) and `matches`.`half_time_against` <= coalesce(`matches`.`after_ninety_against`, `matches`.`goals_against`)));

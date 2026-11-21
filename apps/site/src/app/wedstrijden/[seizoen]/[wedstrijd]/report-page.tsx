@@ -18,7 +18,7 @@ import { MatchPageCards, MatchPageHeader } from '#src/MatchPageView'
 import { EditorSources, SourceCredit } from '#src/MatchViews'
 import { seasonPageMetadata } from '#src/metadata'
 import { pageAreas } from '#src/page-areas'
-import { getPublicReport, isCompleteReport, reportAddress } from '#src/report-data'
+import { getPublicReport, halfTimeOf, isCompleteReport, reportAddress } from '#src/report-data'
 import { matchPageDataOf, ourClub } from '#src/report-view'
 import { matchesPath } from '#src/season-page'
 import { seasonAddress, seasonFromSlug } from '#src/seasons'
@@ -201,7 +201,8 @@ const liveDuration = 4 * 60 * 60 * 1000
  * The facts under the result: the competition and round, the day, the stadium, and what is
  * known.
  */
-function factsOf({ match }: ReportedMatch, now: Date, phase: ReturnType<typeof phaseOf>): MatchHeaderFact[] {
+function factsOf(reported: ReportedMatch, now: Date, phase: ReturnType<typeof phaseOf>): MatchHeaderFact[] {
+  const { match } = reported
   // A match that is being played shows its kick-off; one that was played, its day alone.
   const day = matchMoment(phase === undefined ? { ...match, status: 'played' } : match, now, { withYear: true })
   const facts: MatchHeaderFact[] = [
@@ -209,6 +210,15 @@ function factsOf({ match }: ReportedMatch, now: Date, phase: ReturnType<typeof p
     { label: 'Ronde', value: match.round },
     { label: 'Datum', value: <Time dateTime={day.dateTime}>{day.time}</Time> },
   ]
+  const halfTime = halfTimeOf(reported)
+
+  // Not a second score but a fact, written home first like the result.
+  if (halfTime !== null) {
+    facts.push({
+      label: 'Ruststand',
+      value: match.home ? `${halfTime.for}–${halfTime.against}` : `${halfTime.against}–${halfTime.for}`,
+    })
+  }
 
   if (match.stadium !== null) {
     facts.push({ label: 'Stadion', value: match.stadium })
