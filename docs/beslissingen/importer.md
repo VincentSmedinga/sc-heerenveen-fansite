@@ -4503,7 +4503,7 @@
 ## De import ruimt ongebruikte accounts van supporters op
 
 - **Datum:** 21 november 2026
-- **Besluit:** een stap in elke run van de import (`cleanUpSupporters` in `packages/db/src/clean-up-supporters.ts`, aangeroepen vanuit `runImport`, onder de lock van de import) mailt een account dat 24 maanden niet is bezocht en sluit het 30 dagen later met `closeAccount`.
+- **Besluit:** een stap in elke run van de import (`cleanUpSupporters` in `packages/db/src/clean-up-supporters.ts`, aangeroepen vanuit `runImport`, onder de lock van de import) doet de accounts één keer per dag, in de eerste run van de dag (UTC) die de lock nam: hij mailt een account dat 24 maanden niet is bezocht en sluit het 30 dagen later met `closeAccount`.
   Het mailt hoogstens 20 accounts per dag, de langst ongebruikte eerst; het aantal van vandaag volgt uit de kolom `supporters.unused_mail_sent_at`, dus de stap onthoudt niets anders.
   Een account is ongebruikt als de dag van het laatste bezoek, of bij een account dat nooit terugkwam de dag van aanmelden, meer dan 24 maanden geleden is.
   Een bezoek aan een pagina onder `/fans` maakt de kolom weer leeg (`currentSupporter`), en de volgende termijn begint bij dat bezoek.
@@ -4518,6 +4518,7 @@
   Een kwartier is ruim genoeg voor de dagelijkse dump van 03:17, dus die bevat geen verlopen aanmelding meer; de dump laat de tabel met links trouwens leeg.
   `closeAccount` en `sendMail` staan in `packages/db` en `packages/shared`, zodat de site en de importer dezelfde code gebruiken.
 - **Alternatieven:** een eigen opdracht voor cron (een tweede cronjob en een tweede lock); het aantal per dag in een eigen tabel bewaren (een tabel en een migratie voor iets dat de kolom al zegt); de volgende run bij een mislukte mail overslaan tot de volgende dag (een tijdelijke storing kost dan een dag).
-- **Let op:** de stap draait bij elke run, dus een mail die mislukt wordt elk kwartier opnieuw geprobeerd, tot 96 keer per dag.
-  Een adres dat de mailserver blijft weigeren, blijft bij elke run tussen de eerste 20 staan; met 20 zulke accounts krijgt de rest geen mail.
+- **Let op:** een mail die mislukt, wordt de volgende dag opnieuw geprobeerd.
+  Een run die crasht voordat hij bij de accounts kwam, laat ze ook tot de volgende dag.
+  Een adres dat de mailserver blijft weigeren, blijft elke dag tussen de eerste 20 staan; met 20 zulke accounts krijgt de rest geen mail.
   Dat vraagt een tweede poging met een teller, en past niet bij zo weinig accounts.

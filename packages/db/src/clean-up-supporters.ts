@@ -26,6 +26,11 @@ export const graceDays = 30
 export const mailsPerDay = 20
 
 export type CleanUpOptions = {
+  /**
+   * Whether this is the run of the day that handles the accounts: the mails and the closing.
+   * The sign-ups nobody confirmed go with every run. Default: yes.
+   */
+  accounts?: boolean
   /** The environment variables: the FANS_ settings, SITE_ENV and the mailbox settings. */
   env?: Record<string, string | undefined>
   /** Sends a mail. A test gives a fake one, so nothing real is sent. */
@@ -53,9 +58,13 @@ export type CleanUpReport = {
 export async function cleanUpSupporters(
   db: Database,
   now: Date,
-  { env = process.env, send = (mail) => sendMail(mail, env) }: CleanUpOptions = {},
+  { accounts = true, env = process.env, send = (mail) => sendMail(mail, env) }: CleanUpOptions = {},
 ): Promise<CleanUpReport> {
   const report: CleanUpReport = { closed: 0, failed: 0, mailed: 0, signUpsRemoved: await removeExpiredSignUps(db, now) }
+
+  if (!accounts) {
+    return report
+  }
 
   if (!isFansPartOn('accounts', env)) {
     // A mail that went out before accounts were switched off no longer counts: nobody could

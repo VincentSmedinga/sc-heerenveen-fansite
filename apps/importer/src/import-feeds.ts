@@ -9,10 +9,10 @@ import { connect } from '@fansite/db/client'
 import { lockNameFor, withLock } from '@fansite/db/lock'
 import { mailConflicts } from '@fansite/db/match-conflict-mail'
 import { updatePlayerAddresses } from '@fansite/db/person-slugs'
-import { discussions, feeds, items, leagueResults, matches, sources } from '@fansite/db/schema'
+import { discussions, feeds, importRuns, items, leagueResults, matches, sources } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { removeVisitorData } from '@fansite/db/visits'
-import { and, asc, eq, inArray, isNull, like, sql } from 'drizzle-orm'
+import { and, asc, eq, gte, inArray, isNull, like, ne, sql } from 'drizzle-orm'
 
 import type { Fetcher, RobotsStore } from './fetcher.ts'
 import type { HealthReport } from './import-matches.ts'
@@ -376,10 +376,12 @@ export async function runImport(
       // Accounts of supporters that were not used for two years, and sign-ups nobody confirmed
       // (#1460). Before the dump of the night, so the address of a sign-up is gone from it. A
       // failure is a warning, not a failed import.
-      const supporterLines = await cleanUpSupporters(db, clock(), supporterOptions).then(
-        describeCleanUp,
-        (error: unknown) => [`Supporter accounts: warning, not cleaned up: ${describeError(error)}`],
-      )
+      const supporterLines = await cleanUpSupporters(db, clock(), {
+        ...supporterOptions,
+        accounts: await isFirstRunOfDay(db, runId, clock()),
+      }).then(describeCleanUp, (error: unknown) => [
+        `Supporter accounts: warning, not cleaned up: ${describeError(error)}`,
+      ])
 
       // Before any season is read: the clubs are right whether or not a season can be read. A
       // failure is a warning and no reason to stop.
@@ -720,6 +722,24 @@ async function importWikipedia(
   })
 
   return lines
+}
+
+/**
+ * Whether no other run that took the lock started yet today (UTC): the accounts of supporters
+ * are handled once a day (#1460), by the first run of the day. A run that crashed before it got
+ * there leaves the account part to the next day.
+ */
+async function isFirstRunOfDay(db: Database, runId: number, now: Date) {
+  const startOfDay = new Date(now)
+
+  startOfDay.setUTCHours(0, 0, 0, 0)
+
+  const [row] = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(importRuns)
+    .where(and(gte(importRuns.startedAt, startOfDay), eq(importRuns.lockTaken, false), ne(importRuns.id, runId)))
+
+  return Number(row?.count ?? 0) === 0
 }
 
 /**

@@ -2667,10 +2667,10 @@ Op acceptatie start je de opdracht in GitHub met de workflow _Import old site_, 
 
 ## Ongebruikte accounts van supporters
 
-Elke run van de import ruimt ook de accounts van supporters op (`cleanUpSupporters`, onder dezelfde lock).
+De import ruimt ook de accounts van supporters op (`cleanUpSupporters`, onder dezelfde lock), één keer per dag: de eerste run van de dag doet de accounts, en een mail die mislukt, wordt de volgende dag opnieuw geprobeerd.
 Een account dat 24 maanden niet is bezocht, krijgt één mail en wordt 30 dagen later gesloten met `closeAccount`, tenzij de supporter inlogt.
 De stap mailt hoogstens 20 accounts per dag, en doet niets met accounts zolang `FANS_ACCOUNTS` uit staat.
-Ze haalt ook de verlopen onbevestigde aanmeldingen weg.
+Elke run haalt ook de verlopen onbevestigde aanmeldingen weg.
 Het logboek noemt alleen aantallen: `Supporter accounts: 1 mailed about being unused, 0 closed, 0 mails failed; 1 unconfirmed sign-ups removed`.
 De mail gebruikt dezelfde `SMTP_*` en `MAIL_FROM` als de alerts; `SITE_ENV` bepaalt het adres in de mail.
 
