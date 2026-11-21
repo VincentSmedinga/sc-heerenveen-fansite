@@ -25,15 +25,23 @@ const day = 24 * 60 * 60 * 1000
  * - `discussions`: the screen name of the last commenter, which the importer replaces at every
  *   run (see the Redactie chapter in Storybook);
  * - `admin_sessions` and `admin_login_links`: a restore would bring back a session or a link
- *   that was revoked after the dump.
+ *   that was revoked after the dump;
+ * - the same for supporters (issue 1462): `supporter_sessions`, `supporter_login_links` (also
+ *   a sign-up that was never confirmed, with its address) and `supporter_email_changes` (a new
+ *   address that was never confirmed), and `supporter_login_attempts`, which holds the hash of
+ *   an address for 15 minutes. The accounts themselves, `supporters`, are in the dump.
  *
- * The importer fills the discussions again within a quarter of an hour, and signing in again
+ * The importer fills the discussions again within a quarter of an hour, and logging in again
  * makes a session.
  */
 export const structureOnlyTables = [
   'admin_login_links',
   'admin_sessions',
   'discussions',
+  'supporter_email_changes',
+  'supporter_login_attempts',
+  'supporter_login_links',
+  'supporter_sessions',
   'visitor_hashes',
   'visitor_salts',
 ] as const
