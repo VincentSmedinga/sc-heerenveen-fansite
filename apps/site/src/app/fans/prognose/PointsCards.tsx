@@ -46,7 +46,9 @@ export function CrowdCard({ figures }: { figures: CrowdFigures }) {
  * The card of a match that has a result, with the points of the supporter: the match with its
  * score, the points, and the table "Hoe je punten tellen" with a line under each row that says
  * why. A match that is still being played shows only the half-time row, if it has points, with
- * the line that the points of the final score come after the match.
+ * the line that the points of the final score come after the match. The page does not pass such
+ * a match yet: the database holds a half-time score only with the result (#1445), so that
+ * branch waits for the rule to change.
  */
 export function PointsCard({ item, now }: { item: ScoredPrediction; now: Date }) {
   const { match, points, result } = item
@@ -172,7 +174,7 @@ export function YourPredictionsCard({
           />
           {items.length > shown.length ? (
             <Text>
-              <Link href={allPredictionsAddress}>{`Alle ${items.length} voorspellingen`}</Link>
+              <Link href={allPredictionsAddress}>{`Alle ${count} voorspellingen`}</Link>
             </Text>
           ) : null}
         </>
