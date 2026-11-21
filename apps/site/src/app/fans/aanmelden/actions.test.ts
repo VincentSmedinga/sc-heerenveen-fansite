@@ -63,8 +63,10 @@ describe('newCode', () => {
     vi.stubEnv('FANS_ACCOUNTS', 'on')
     getDatabase.mockReturnValueOnce({ db: {} } as never)
     handleNewCode.mockResolvedValueOnce({ answer: 'gone' })
+    vi.mocked(redirect).mockClear()
     await newCode('ref')
 
-    expect(redirect).toHaveBeenLastCalledWith('/fans/aanmelden/bevestigen?fout=link')
+    // The real redirect stops the action, the mock doesn't: the first call is the answer.
+    expect(vi.mocked(redirect).mock.calls[0]).toEqual(['/fans/aanmelden/bevestigen?fout=link'])
   })
 })
