@@ -16,6 +16,7 @@
     "./reminder-code": "./src/reminder-code.ts",
     "./mail-env": "./src/mail-env.ts",
     "./match-report": "./src/match-report.ts",
+    "./prediction-points": "./src/prediction-points.ts",
     "./site-env": "./src/site-env.ts"
   },
   "scripts": {

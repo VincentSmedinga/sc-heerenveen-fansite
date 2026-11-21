@@ -10,7 +10,7 @@ import { clubs, matches } from './schema.ts'
 
 /**
  * How long after the kick-off a match that has begun stays on the page as "Gesloten": a match
- * with extra time and a shoot-out takes about three hours, and the points come with #1449.
+ * with extra time and a shoot-out takes about three hours.
  */
 export const closedCardHours = 4
 

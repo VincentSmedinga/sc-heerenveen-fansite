@@ -7315,3 +7315,43 @@
   Een mislukt bericht telt niet als verstuurd en wordt bij de volgende run opnieuw geprobeerd.
   Een run die crasht tussen de rij en het bericht, stuurt niets: liever een bericht te weinig dan een dubbel bericht.
 - **Alternatieven:** de rij pas na het versturen maken (een crash daartussen stuurt het bericht dubbel); alleen een tijdvenster zonder bewaren (een herstart stuurt dan dubbel).
+
+## De punten van de Prognose zijn die van de oude Fansite en worden bij het lezen berekend
+
+- **Datum:** 21 november 2026
+- **Besluit:** de telling is die van de oude Fansite, ongewijzigd, en staat in één pure functie, `predictionPoints` in `packages/shared/src/prediction-points.ts`.
+  De ruststand en de eindstand tellen apart.
+  Voor de eindstand: precies goed 20; anders de uitkomst goed 10; daarbovenop 5 als precies één van de twee doelpuntentallen goed is.
+  Voor de ruststand de helft naar beneden: 10, 5 en 2.
+  Het doelsaldo levert niets op.
+  De kaart "Punten" en de uitleg bij een wedstrijd lezen dezelfde constanten (`pointsPerPart`), zodat de tabel en de som niet uit elkaar kunnen lopen.
+- **Waarom:** de bewaarde punten van de oude voorspellingen kloppen met deze telling, en de site kan zeggen "de telling van de oude Fansite".
+- **Alternatieven:** een eigen telling met punten voor het doelsaldo.
+
+- **Datum:** 21 november 2026
+- **Besluit:** voor de uitslag telt de stand na 90 minuten plus blessuretijd (`after_ninety_*` als die er is, anders `goals_*`), ook bij een wedstrijd met verlenging.
+  De ruststand telt uit elke bron (`redactie`, `goals`, `oude-fansite`) zodra hij bekend is.
+  Een afgelaste of uitgestelde wedstrijd geeft geen punten en telt niet mee in het aantal en het totaal.
+  Een wedstrijd zonder bekende ruststand geeft alleen eindpunten: de ruststandpunten zijn dan nog niet bekend, en dat is niet nul.
+- **Waarom:** de voorspelling gaat over de eindstand van de reguliere tijd, en een supporter die 1–1 voorspelt, wil geen punten missen omdat er verlenging was.
+- **Alternatieven:** de stand na verlenging tellen (een gelijkspel na 90 minuten wordt dan een uitslag die niemand voorspelde).
+
+- **Datum:** 21 november 2026
+- **Besluit:** punten worden nooit opgeslagen, ook niet in de tabel `predictions`.
+  De lijst van een supporter wordt bij elk bezoek gelezen, zodat een voorspelling die net is opgeslagen er meteen in staat.
+  Wat voor iedereen geldt en zwaar is, de cijfers van "Zo deed iedereen het", wordt per wedstrijd vijf minuten gecachet met `cacheForKey`, zodat een gecorrigeerde uitslag ze binnen die tijd corrigeert.
+  Een geblokkeerd account telt in die cijfers niet mee, een opgeheven account wel (zijn voorspelling is gedaan).
+  Bij minder dan vijf voorspellingen staat alleen het aantal, geen gemiddelde.
+- **Waarom:** een gecorrigeerde uitslag corrigeert zo de punten van iedereen zonder herberekening, en een supporter ziet zijn eigen wijziging niet vijf minuten te laat.
+- **Alternatieven:** punten bewaren bij de voorspelling en bij een correctie herberekenen; ook de lijst van een supporter cachen (een net opgeslagen voorspelling ontbreekt dan tot vijf minuten).
+- **Let op:** de database laat een ruststand alleen toe bij een gespeelde wedstrijd (`matches_half_time_within_the_result`, #1445).
+  De ruststandpunten kunnen dus pas verschijnen met de uitslag.
+  De functie en de kaart kennen een wedstrijd met alleen een ruststand al; de ruststand eerder invoeren vraagt een wijziging van die regel in een eigen issue.
+
+- **Datum:** 21 november 2026
+- **Besluit:** de pagina `/fans/prognose` toont onder de kaart "Volgende wedstrijd" de kaart "Jouw voorspellingen": de laatste vijf wedstrijden, met de link "Alle 13 voorspellingen" naar dezelfde pagina met `?alle=ja`.
+  Eronder staat de kaart "Je punten" van de laatste wedstrijd met een uitslag.
+  In de smalle kolom staan "Zo deed iedereen het" en "Punten".
+  De plekken in de stand en bij een wedstrijd (de twee andere kerncijfers) en de link "Spelregels" komen met #1451 en #1455.
+- **Waarom:** het ontwerp wil de lijst kort en de punten in één blik; de plekken hebben een ranglijst nodig die er nog niet is.
+- **Alternatieven:** de hele lijst altijd tonen (lang na een seizoen); een aparte pagina voor de lijst (twee plekken die uit elkaar lopen).

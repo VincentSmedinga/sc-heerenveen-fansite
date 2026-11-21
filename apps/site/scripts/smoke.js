@@ -2151,6 +2151,9 @@ await withEmptyDatabase((database) =>
     assert.equal(prediction.status, 200, '/fans/prognose must be there with Prognose on')
     assert.match(predictionHtml, /<h1[^>]*>Prognose<\/h1>/)
     assert.match(predictionHtml, /<h2[^>]*>Volgende wedstrijd<\/h2>/)
+    // The scoring is for everybody, and a visitor has no list of predictions.
+    assert.match(predictionHtml, /De telling van de oude Fansite\. Hoogstens 30 punten per wedstrijd\./)
+    assert.doesNotMatch(predictionHtml, /Jouw voorspellingen/)
     assert.equal(prediction.headers.get('cache-control'), 'no-store')
     assert.equal(prediction.headers.get('x-robots-tag'), 'noindex, nofollow')
   }),

@@ -2,10 +2,8 @@ import type { Database } from '@fansite/db/client'
 import type { ScoreField } from '@fansite/design-system'
 
 import { isOpen, type PredictionMatch, predictionMatches } from '@fansite/db/prediction-matches'
-import { matches, predictionMaxGoals, predictions } from '@fansite/db/schema'
-import { and, desc, eq, sql } from 'drizzle-orm'
-
-import type { GameData } from './my-data'
+import { predictionMaxGoals, predictions } from '@fansite/db/schema'
+import { and, eq, sql } from 'drizzle-orm'
 
 // The game Prognose (issue 1447): which match a supporter can predict, the checks of the four
 // numbers, and the write that keeps the deadline. The page and the action only call these. The
@@ -190,44 +188,3 @@ export const standsText = (values: PredictionValues) =>
 /** The words of the notice above a form that was stored. */
 export const savedMessage = (values: PredictionValues, changed: boolean) =>
   `${changed ? 'Je voorspelling is gewijzigd' : 'Je voorspelling staat'}. ${standsText(values)}. Je kunt hem wijzigen tot de aftrap.`
-
-const dateFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'short', timeZone, year: 'numeric' })
-
-/**
- * What a supporter predicted, for Mijn account and the page "Alles wat we van je bewaren": one
- * row per match, the newest first, with the match and the two scores in the order of the clubs
- * on the line. `undefined` when the supporter predicted nothing.
- */
-export async function predictionData(db: Database, supporterId: number) {
-  const found = await db
-    .select({
-      fullTimeAway: predictions.fullTimeAway,
-      fullTimeHome: predictions.fullTimeHome,
-      halftimeAway: predictions.halftimeAway,
-      halftimeHome: predictions.halftimeHome,
-      home: matches.home,
-      matchDate: matches.matchDate,
-      opponent: matches.opponent,
-    })
-    .from(predictions)
-    .innerJoin(matches, eq(matches.id, predictions.matchId))
-    .where(eq(predictions.supporterId, supporterId))
-    .orderBy(desc(matches.matchDate), desc(matches.id))
-
-  if (found.length === 0) {
-    return undefined
-  }
-
-  return {
-    columns: ['Wedstrijd', 'Rust', 'Eind'],
-    rows: found.map((row) => {
-      const clubs = clubsOf(row)
-
-      return {
-        cells: [`${row.halftimeHome}–${row.halftimeAway}`, `${row.fullTimeHome}–${row.fullTimeAway}`],
-        header: `${clubs.home} – ${clubs.away}, ${dateFormat.format(new Date(`${row.matchDate}T12:00:00Z`))}`,
-      }
-    }),
-    summary: found.length === 1 ? '1 voorspelling' : `${found.length} voorspellingen`,
-  } satisfies GameData
-}
