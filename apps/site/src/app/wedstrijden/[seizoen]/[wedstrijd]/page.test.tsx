@@ -144,6 +144,7 @@ describe('the page of a match', () => {
 
       reported.match.halfTimeAgainst = 1
       reported.match.halfTimeFor = 2
+      reported.match.halfTimeSource = 'redactie'
       vi.mocked(getPublicReport).mockResolvedValue(reported)
 
       const html = await render()
@@ -175,9 +176,33 @@ describe('the page of a match', () => {
 
       reported.match.halfTimeAgainst = 0
       reported.match.halfTimeFor = 0
+      reported.match.halfTimeSource = 'redactie'
       vi.mocked(getPublicReport).mockResolvedValue(reported)
 
       expect(factsOf(await render())).toContain('Ruststand 0–0')
+    })
+
+    it('prefers the goals of a complete report to a score of the old fansite', async () => {
+      const reported = reportedMatch()
+
+      reported.match.halfTimeAgainst = 0
+      reported.match.halfTimeFor = 0
+      reported.match.halfTimeSource = 'oude-fansite'
+      vi.mocked(getPublicReport).mockResolvedValue(reported)
+
+      expect(factsOf(await render())).toContain('Ruststand 1–1')
+    })
+
+    it('shows the score of the old fansite when the report cannot give one', async () => {
+      const reported = reportedMatch()
+
+      reported.match.halfTimeAgainst = 0
+      reported.match.halfTimeFor = 1
+      reported.match.halfTimeSource = 'oude-fansite'
+      reported.stored.report.status = 'bezig'
+      vi.mocked(getPublicReport).mockResolvedValue(reported)
+
+      expect(factsOf(await render())).toContain('Ruststand 1–0')
     })
 
     it('shows nothing, not even the label, when it is not known', async () => {

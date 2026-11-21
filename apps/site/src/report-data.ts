@@ -39,7 +39,8 @@ export const reportAddress = (season: string, matchDate: string, clubSlug: strin
  * The score at half-time of a match that was played, from the side of sc Heerenveen, or `null`
  * when it is not known. What the editors filled in, or the old fansite gave, wins; without it
  * the goals of a complete report decide (see `halfTimeScore`). A match that is still being
- * played has none: its goals are not the whole first half yet. The decision is in
+ * played has none: its goals are not the whole first half yet. The editors' score wins over
+ * the goals, and the goals win over the old fansite (`half_time_source`). The decision is in
  * docs/beslissingen/hosting-en-data.md, under _De ruststand heeft drie bronnen_.
  */
 export function halfTimeOf(reported: ReportedMatch): HalfTimeScore | null {
@@ -49,11 +50,17 @@ export function halfTimeOf(reported: ReportedMatch): HalfTimeScore | null {
     return null
   }
 
-  if (match.halfTimeFor !== null && match.halfTimeAgainst !== null) {
-    return { against: match.halfTimeAgainst, for: match.halfTimeFor }
+  const stored =
+    match.halfTimeFor !== null && match.halfTimeAgainst !== null
+      ? { against: match.halfTimeAgainst, for: match.halfTimeFor }
+      : null
+
+  if (stored !== null && match.halfTimeSource === 'redactie') {
+    return stored
   }
 
-  return isCompleteReport(reported) ? halfTimeScore(reportForRules(reported.stored)) : null
+  // The goals of a complete report win over the old fansite, which only fills the rest.
+  return (isCompleteReport(reported) ? halfTimeScore(reportForRules(reported.stored)) : null) ?? stored
 }
 
 /** Whether the report of a match is `klaar` and the rules find no error in it. */

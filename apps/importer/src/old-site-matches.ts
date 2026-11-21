@@ -249,6 +249,7 @@ function deriveOne(match: OldSiteMatch, number: number, groupSize: number): Deri
       goalsFor,
       halfTimeAgainst: halfTime?.against ?? null,
       halfTimeFor: halfTime?.for ?? null,
+      halfTimeSource: halfTime === null ? null : 'oude-fansite',
       home,
       kickoffAt: unknownTime ? null : amsterdamToUtc({ day, month, year }, { hours, minutes }),
       matchDate: date,
@@ -430,6 +431,7 @@ export async function importOldSiteMatches(
           if (fitsResult(values, { ...lookup.match, ...fill })) {
             fill.halfTimeAgainst = values.halfTimeAgainst
             fill.halfTimeFor = values.halfTimeFor
+            fill.halfTimeSource = 'oude-fansite'
           } else {
             report.lines.push(
               `${label}: the score at half-time is higher than the result that match ${lookup.match.id} keeps, so it is left out`,
@@ -499,7 +501,11 @@ export async function importOldSiteMatches(
       // The result of this row may stay as it is (the editors took it over), so it is the
       // result that stays that the score at half-time has to fit.
       if (fitsResult(values, { ...before, ...change })) {
-        Object.assign(change, { halfTimeAgainst: values.halfTimeAgainst, halfTimeFor: values.halfTimeFor })
+        Object.assign(change, {
+          halfTimeAgainst: values.halfTimeAgainst,
+          halfTimeFor: values.halfTimeFor,
+          halfTimeSource: 'oude-fansite',
+        })
       } else {
         report.lines.push(`${label}: the score at half-time is higher than the result of the row, so it is left out`)
       }

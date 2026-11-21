@@ -220,20 +220,20 @@ describe('saveReport', () => {
     const halfTime = async () => {
       const [row] = await database.db.select().from(matches).where(eq(matches.id, matchId))
 
-      return [row?.halfTimeFor, row?.halfTimeAgainst]
+      return [row?.halfTimeFor, row?.halfTimeAgainst, row?.halfTimeSource]
     }
 
     expect(await save(withHalfTime('1', '0'))).toEqual({ status: 'saved' })
-    expect(await halfTime()).toEqual([1, 0])
+    expect(await halfTime()).toEqual([1, 0, 'redactie'])
     expect(await save(withHalfTime('1', '0'))).toEqual({ status: 'unchanged' })
 
     // Only the score at half-time differs: the rest of the report is the same.
     expect(await save(withHalfTime('2', '1'))).toEqual({ status: 'saved' })
-    expect(await halfTime()).toEqual([2, 1])
+    expect(await halfTime()).toEqual([2, 1, 'redactie'])
     expect((await log()).at(-1)?.detail).toContain('ruststand 2-1')
 
     expect(await save(withHalfTime('', ''))).toEqual({ status: 'saved' })
-    expect(await halfTime()).toEqual([null, null])
+    expect(await halfTime()).toEqual([null, null, null])
   })
 
   it('stores the report, its players and events, and the goals with the players they point to, in one go', async () => {

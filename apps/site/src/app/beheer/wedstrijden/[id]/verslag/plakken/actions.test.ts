@@ -402,7 +402,10 @@ describe('submitPaste for a match that has a report', () => {
   })
 
   it('keeps the score at half-time that is stored with the match, which the text does not have', async () => {
-    await database.pool.query('UPDATE matches SET half_time_for = 1, half_time_against = 0 WHERE id = ?', [matchId])
+    await database.pool.query(
+      "UPDATE matches SET half_time_for = 1, half_time_against = 0, half_time_source = 'redactie' WHERE id = ?",
+      [matchId],
+    )
 
     const result = await paste({ tekst: text, vervangen: 'ja' })
 

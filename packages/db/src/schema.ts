@@ -1490,6 +1490,11 @@ export type ClubNamePeriod = typeof clubNamePeriods.$inferSelect
 
 export type NewClubNamePeriod = typeof clubNamePeriods.$inferInsert
 
+/** Where a stored score at half-time comes from (see `matches.half_time_source`). */
+export const halfTimeSources = ['redactie', 'oude-fansite'] as const
+
+export type HalfTimeSource = (typeof halfTimeSources)[number]
+
 /**
  * The matches of sc Heerenveen 1 (men), from the Dutch Wikipedia: the Eredivisie, the KNVB
  * Beker and the play-offs for the Conference League or the Europa League. A season starts on
@@ -1568,6 +1573,8 @@ export const matches = mysqlTable(
     // The score at half-time of the regular playing time (#1445), empty while it isn't known.
     halfTimeFor: int('half_time_for', { unsigned: true }),
     halfTimeAgainst: int('half_time_against', { unsigned: true }),
+    // Who gave it: the editors win over the goals of a report, and those over the old fansite.
+    halfTimeSource: mysqlEnum('half_time_source', halfTimeSources),
     matchDate: date('match_date', { mode: 'string' }).notNull(),
     kickoffAt: datetime('kickoff_at'),
     dateText: varchar('date_text', { length: matchLimits.dateText }),
@@ -1612,6 +1619,10 @@ export const matches = mysqlTable(
     check(
       'matches_half_time_in_a_pair',
       sql`(${table.halfTimeFor} is null and ${table.halfTimeAgainst} is null) or (${table.halfTimeFor} is not null and ${table.halfTimeAgainst} is not null)`,
+    ),
+    check(
+      'matches_half_time_source_with_the_score',
+      sql`(${table.halfTimeFor} is null) = (${table.halfTimeSource} is null)`,
     ),
     check(
       'matches_half_time_within_the_result',

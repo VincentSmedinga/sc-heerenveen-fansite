@@ -123,7 +123,10 @@ describe('saveEntry and the score at half-time', () => {
   const withHalfTime = async () => {
     const id = await addMatch({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
 
-    await database.pool.query('UPDATE matches SET half_time_for = 2, half_time_against = 1 WHERE id = ?', [id])
+    await database.pool.query(
+      "UPDATE matches SET half_time_for = 2, half_time_against = 1, half_time_source = 'redactie' WHERE id = ?",
+      [id],
+    )
 
     return id
   }

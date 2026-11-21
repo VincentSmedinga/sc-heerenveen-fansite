@@ -313,7 +313,7 @@ describe('the score at half-time', () => {
     const [home] = deriveOldSiteMatches([oldMatch()])
     const [away] = deriveOldSiteMatches([oldMatch({ code: 'nec.uit' })])
 
-    expect(home?.values).toMatchObject({ halfTimeAgainst: 0, halfTimeFor: 1 })
+    expect(home?.values).toMatchObject({ halfTimeAgainst: 0, halfTimeFor: 1, halfTimeSource: 'oude-fansite' })
     expect(away?.values).toMatchObject({ halfTimeAgainst: 1, halfTimeFor: 0 })
   })
 
@@ -573,20 +573,24 @@ describe('the step matches', () => {
 
   it('makes the row with the score at half-time, and leaves what the editors filled in as it is', async () => {
     await run([oldMatch()])
-    expect(await rows()).toMatchObject([{ halfTimeAgainst: 0, halfTimeFor: 1 }])
+    expect(await rows()).toMatchObject([{ halfTimeAgainst: 0, halfTimeFor: 1, halfTimeSource: 'oude-fansite' }])
 
     // An editor corrects it; a new run of the same file doesn't undo that.
-    await database.pool.query('UPDATE matches SET half_time_for = 2, half_time_against = 1')
+    await database.pool.query(
+      "UPDATE matches SET half_time_for = 2, half_time_against = 1, half_time_source = 'redactie'",
+    )
 
     const report = await run([oldMatch()])
 
     expect(report).toMatchObject({ changed: 0, unchanged: 1 })
-    expect(await rows()).toMatchObject([{ halfTimeAgainst: 1, halfTimeFor: 2 }])
+    expect(await rows()).toMatchObject([{ halfTimeAgainst: 1, halfTimeFor: 2, halfTimeSource: 'redactie' }])
   })
 
   it('fills an empty score at half-time of its own row, which an older run left empty', async () => {
     await run([oldMatch()])
-    await database.pool.query('UPDATE matches SET half_time_for = NULL, half_time_against = NULL')
+    await database.pool.query(
+      'UPDATE matches SET half_time_for = NULL, half_time_against = NULL, half_time_source = NULL',
+    )
     await run([oldMatch()])
 
     expect(await rows()).toMatchObject([{ halfTimeAgainst: 0, halfTimeFor: 1 }])
@@ -597,7 +601,9 @@ describe('the step matches', () => {
     await run([oldMatch()])
     expect(await rows()).toMatchObject([{ dataSource: 'wikipedia', halfTimeAgainst: 0, halfTimeFor: 1 }])
 
-    await database.pool.query('UPDATE matches SET half_time_for = 2, half_time_against = 1')
+    await database.pool.query(
+      "UPDATE matches SET half_time_for = 2, half_time_against = 1, half_time_source = 'redactie'",
+    )
 
     const report = await run([oldMatch()])
 
@@ -624,7 +630,7 @@ describe('the step matches', () => {
       oldMatch({ result: { awayFullTime: 1, awayHalfTime: 0, homeFullTime: 2, homeHalfTime: 0, note: null } }),
     ])
     await database.pool.query(
-      'UPDATE matches SET goals_for = 1, goals_against = 0, half_time_for = NULL, half_time_against = NULL',
+      'UPDATE matches SET goals_for = 1, goals_against = 0, half_time_for = NULL, half_time_against = NULL, half_time_source = NULL',
     )
     await database.pool.query(
       "INSERT INTO match_edits (match_id, before_goals, before_match, edited_at, edited_by, result_edited, reason) SELECT id, '[]', '{}', NOW(), ?, 1, 'Anders' FROM matches",

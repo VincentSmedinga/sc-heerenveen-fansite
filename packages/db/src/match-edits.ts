@@ -223,7 +223,7 @@ export type EditMarkers = Pick<MatchEdit, 'factsEdited' | 'goalsEdited' | 'kicko
 export function dropHalfTimeThatNoLongerFits(
   current: Pick<Match, 'halfTimeAgainst' | 'halfTimeFor'>,
   next: Pick<Match, 'afterNinetyAgainst' | 'afterNinetyFor' | 'goalsAgainst' | 'goalsFor' | 'status'>,
-): Record<never, never> | { halfTimeAgainst: null; halfTimeFor: null } {
+): Record<never, never> | { halfTimeAgainst: null; halfTimeFor: null; halfTimeSource: null } {
   if (current.halfTimeFor === null || current.halfTimeAgainst === null) {
     return {}
   }
@@ -235,7 +235,7 @@ export function dropHalfTimeThatNoLongerFits(
     current.halfTimeFor <= (next.afterNinetyFor ?? next.goalsFor) &&
     current.halfTimeAgainst <= (next.afterNinetyAgainst ?? next.goalsAgainst)
 
-  return fits ? {} : { halfTimeAgainst: null, halfTimeFor: null }
+  return fits ? {} : { halfTimeAgainst: null, halfTimeFor: null, halfTimeSource: null }
 }
 
 /** The goals as `before_goals` keeps them, in the order they are shown. */

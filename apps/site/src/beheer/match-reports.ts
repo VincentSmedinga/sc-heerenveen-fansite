@@ -587,7 +587,10 @@ export async function saveReport(
     }
 
     if (halfTimeChanged) {
-      await transaction.update(matches).set({ halfTimeAgainst, halfTimeFor }).where(eq(matches.id, id))
+      await transaction
+        .update(matches)
+        .set({ halfTimeAgainst, halfTimeFor, halfTimeSource: plan.halfTime === null ? null : 'redactie' })
+        .where(eq(matches.id, id))
     }
 
     if (stored === undefined) {

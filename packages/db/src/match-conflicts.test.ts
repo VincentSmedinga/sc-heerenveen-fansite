@@ -184,6 +184,28 @@ describe('decideConflict', () => {
     ])
   })
 
+  it('empties a score at half-time that does not fit the result Wikipedia gives', async () => {
+    const id = await difference()
+    const change = await changeOf('result')
+
+    await database.pool.query(
+      "UPDATE matches SET half_time_for = 2, half_time_against = 0, half_time_source = 'redactie' WHERE id = ?",
+      [id],
+    )
+    await database.db
+      .update(matchChanges)
+      .set({ proposal: encodePartProposal('result', { goals: [], match: { ...wikipedia, goalsFor: 1 } }) })
+      .where(eq(matchChanges.id, change.id))
+
+    expect(await decideConflict(database.db, change.id, takeOver(), now)).toBe('done')
+    expect((await database.db.select().from(matches).where(eq(matches.id, id)))[0]).toMatchObject({
+      goalsFor: 1,
+      halfTimeAgainst: null,
+      halfTimeFor: null,
+      halfTimeSource: null,
+    })
+  })
+
   it('takes the goals over and removes the row of the entry when no part is left', async () => {
     const id = await difference()
 
