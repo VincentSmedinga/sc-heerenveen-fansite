@@ -212,6 +212,8 @@ export type { PlayerListItem, PlayerListProps } from './components/player-list/P
 export { countryName } from './components/player-name/flags'
 export { PlayerName } from './components/player-name/PlayerName'
 export type { PlayerNameProps } from './components/player-name/PlayerName'
+export { PredictionList } from './components/prediction-list/PredictionList'
+export type { PredictionListItem, PredictionListProps } from './components/prediction-list/PredictionList'
 export { PullIndicator } from './components/pull-to-refresh/PullIndicator'
 export type { PullIndicatorProps } from './components/pull-to-refresh/PullIndicator'
 export { PullToRefresh } from './components/pull-to-refresh/PullToRefresh'

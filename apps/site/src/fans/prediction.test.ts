@@ -341,17 +341,27 @@ describe('what is kept for the supporter', () => {
   it('lists the predictions with the newest match first, in the order of the clubs on the line', async () => {
     const home = await addMatch(new Date('2026-11-28T15:45:00Z'))
     const away = await addMatch(new Date('2026-12-05T15:45:00Z'), { home: false })
+    const played = await addMatch(new Date('2026-11-07T15:45:00Z'), {
+      goalsAgainst: 1,
+      goalsFor: 2,
+      halfTimeAgainst: 0,
+      halfTimeFor: 1,
+      halfTimeSource: 'redactie',
+      status: 'played',
+    })
 
     await database.db.insert(predictions).values({ ...goals, matchId: home, supporterId })
     await database.db.insert(predictions).values({ ...goals, fullTimeAway: 1, matchId: away, supporterId })
+    await database.db.insert(predictions).values({ ...goals, matchId: played, supporterId })
 
     expect(await predictionData(database.db, supporterId)).toEqual({
-      columns: ['Wedstrijd', 'Rust', 'Eind'],
+      columns: ['Wedstrijd', 'Rust', 'Eind', 'P'],
       rows: [
-        { cells: ['1–0', '2–1'], header: 'FC Twente – sc Heerenveen, 5 dec 2026' },
-        { cells: ['1–0', '2–1'], header: 'sc Heerenveen – FC Twente, 28 nov 2026' },
+        { cells: ['1–0', '2–1', '–'], header: 'FC Twente – sc Heerenveen, 5 dec 2026' },
+        { cells: ['1–0', '2–1', '–'], header: 'sc Heerenveen – FC Twente, 28 nov 2026' },
+        { cells: ['1–0', '2–1', '30'], header: 'sc Heerenveen – FC Twente, 7 nov 2026' },
       ],
-      summary: '2 voorspellingen',
+      summary: '3 voorspellingen, 30 punten',
     })
   })
 

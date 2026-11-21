@@ -1,0 +1,84 @@
+/*
+ * The list of what a supporter predicted: a row for each match, the text on the left and the
+ * points in a column of their own on the right. A row has a thin line above it, as the short
+ * lines have. The score never breaks: the clubs are one flex line in which the names can shrink
+ * and are cut with an ellipsis, and the score keeps its width.
+ */
+
+@layer hf.components {
+  .hf-prediction-list {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+
+  .hf-prediction-list-item {
+    align-items: center;
+    border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
+    column-gap: var(--hf-space-m);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    padding-block: var(--hf-space-s);
+  }
+
+  .hf-prediction-list-item:first-child {
+    border-block-start: 0;
+    padding-block-start: 0;
+  }
+
+  .hf-prediction-list-item:last-child {
+    padding-block-end: 0;
+  }
+
+  .hf-prediction-list-text {
+    display: grid;
+    gap: var(--hf-space-xs);
+    min-inline-size: 0;
+  }
+
+  .hf-prediction-list-date,
+  .hf-prediction-list-prediction {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+  }
+
+  .hf-prediction-list-clubs {
+    align-items: baseline;
+    column-gap: var(--hf-space-xs);
+    display: flex;
+    font-weight: var(--hf-headline-font-weight);
+    min-inline-size: 0;
+  }
+
+  .hf-prediction-list-club {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* The score keeps its width and never breaks over two lines. */
+  .hf-prediction-list-score {
+    flex: none;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .hf-prediction-list-points {
+    display: grid;
+    justify-items: end;
+    text-align: end;
+  }
+
+  .hf-prediction-list-number {
+    font-size: var(--hf-figure-font-size);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-strong-font-weight);
+    line-height: 1.1;
+  }
+
+  .hf-prediction-list-unit,
+  .hf-prediction-list-status {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+  }
+}

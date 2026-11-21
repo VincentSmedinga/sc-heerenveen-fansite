@@ -4196,3 +4196,14 @@
 - **Waarom:** de ErrorSummary van een formulier linkt naar het veld met een fout, en zonder `id` kan de link de focus niet op het veld zetten.
   De pagina geeft de `id`'s, want twee rasters op één pagina mogen niet dezelfde hebben.
 - **Alternatieven:** een vaste `id` per veld uit de naam (twee rasters botsen); de `id` van `useId` (de samenvatting kent hem niet).
+
+## PredictionList is een lijst met de punten in een eigen kolom
+
+- **Datum:** 21 november 2026
+- **Besluit:** de lijst van wat een supporter voorspelde is een component, `PredictionList` (`Componenten/Weergave`), geen tabel en geen `ShortLine`.
+  Een rij heeft drie regels: de dag klein, de twee clubs met de uitslag en wat de supporter voorspelde.
+  De punten staan rechts, als getal met "punten" eronder, of de stand van de wedstrijd ("Nog niet gespeeld", "Bezig", "Afgelast") als er geen punten zijn.
+  De uitslag breekt nooit af: de clubnamen krimpen en worden ingekort, de uitslag houdt zijn breedte.
+- **Waarom:** een rij leest als één zin, en de punten moeten ook op een telefoon in één blik te vinden zijn.
+  Een tabel met vier kolommen past niet naast twee clubnamen op 390 pixels.
+- **Alternatieven:** een `DataTable` (de clubnamen krijgen een kolom met te weinig ruimte); een `ShortLine` (heeft geen kolom voor de punten).

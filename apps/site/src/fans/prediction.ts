@@ -2,9 +2,11 @@ import type { Database } from '@fansite/db/client'
 import type { ScoreField } from '@fansite/design-system'
 
 import { clubs, matches, predictionMaxGoals, predictions } from '@fansite/db/schema'
-import { and, desc, eq, gt, inArray, isNull, or, sql } from 'drizzle-orm'
+import { and, eq, gt, inArray, isNull, or, sql } from 'drizzle-orm'
 
 import type { GameData } from './my-data'
+
+import { scoredPredictions, totalsOf } from './prediction-results'
 
 // The game Prognose (issue 1447): which match a supporter can predict, the checks of the four
 // numbers, and the write that keeps the deadline. The page and the action only call these.
@@ -23,7 +25,7 @@ export const ourClub = 'sc Heerenveen'
 
 /**
  * How long after the kick-off a match that has begun stays on the page as "Gesloten": a match
- * with extra time and a shoot-out takes about three hours, and the points come with #1449.
+ * with extra time and a shoot-out takes about three hours.
  */
 export const closedCardHours = 4
 
@@ -274,39 +276,35 @@ const dateFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'sh
 
 /**
  * What a supporter predicted, for Mijn account and the page "Alles wat we van je bewaren": one
- * row per match, the newest first, with the match and the two scores in the order of the clubs
- * on the line. `undefined` when the supporter predicted nothing.
+ * row per match, the newest first, with the match, the two scores in the order of the clubs on
+ * the line and the points (P) of a match that has any. The summary says how many matches and
+ * how many points: "13 voorspellingen, 371 punten". `undefined` for a supporter who predicted
+ * nothing.
  */
 export async function predictionData(db: Database, supporterId: number) {
-  const found = await db
-    .select({
-      fullTimeAway: predictions.fullTimeAway,
-      fullTimeHome: predictions.fullTimeHome,
-      halftimeAway: predictions.halftimeAway,
-      halftimeHome: predictions.halftimeHome,
-      home: matches.home,
-      matchDate: matches.matchDate,
-      opponent: matches.opponent,
-    })
-    .from(predictions)
-    .innerJoin(matches, eq(matches.id, predictions.matchId))
-    .where(eq(predictions.supporterId, supporterId))
-    .orderBy(desc(matches.matchDate), desc(matches.id))
+  const found = await scoredPredictions(db, supporterId)
 
   if (found.length === 0) {
     return undefined
   }
 
+  const { count, points } = totalsOf(found)
+
   return {
-    columns: ['Wedstrijd', 'Rust', 'Eind'],
-    rows: found.map((row) => {
-      const clubs = clubsOf(row)
+    columns: ['Wedstrijd', 'Rust', 'Eind', 'P'],
+    rows: found.map((item) => {
+      const clubs = clubsOf(item.match)
+      const { guess } = item
 
       return {
-        cells: [`${row.halftimeHome}–${row.halftimeAway}`, `${row.fullTimeHome}–${row.fullTimeAway}`],
-        header: `${clubs.home} – ${clubs.away}, ${dateFormat.format(new Date(`${row.matchDate}T12:00:00Z`))}`,
+        cells: [
+          `${guess.halfTime.home}–${guess.halfTime.away}`,
+          `${guess.fullTime.home}–${guess.fullTime.away}`,
+          item.match.state === 'played' ? String(item.points.total) : '–',
+        ],
+        header: `${clubs.home} – ${clubs.away}, ${dateFormat.format(new Date(`${item.match.matchDate}T12:00:00Z`))}`,
       }
     }),
-    summary: found.length === 1 ? '1 voorspelling' : `${found.length} voorspellingen`,
+    summary: `${count === 1 ? '1 voorspelling' : `${count} voorspellingen`}, ${points === 1 ? '1 punt' : `${points} punten`}`,
   } satisfies GameData
 }
