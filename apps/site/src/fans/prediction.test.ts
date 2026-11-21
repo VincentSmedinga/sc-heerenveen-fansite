@@ -23,6 +23,11 @@ const now = new Date('2026-11-20T10:00:00Z')
 const hour = 60 * 60 * 1000
 const at = (hours: number) => new Date(now.getTime() + hours * hour)
 
+// Writing checks the deadline with the clock of the database too, so the tests that write
+// take the real time as now, and only the tests of the words keep the fixed day.
+const live = new Date()
+const atLive = (hours: number) => new Date(live.getTime() + hours * hour)
+
 let database: TestDatabase
 let clubId: number
 let supporterId: number
@@ -209,9 +214,9 @@ describe('the numbers of the form', () => {
 
 describe('storing a prediction', () => {
   it('stores it and gives it back', async () => {
-    const matchId = await addMatch(at(30))
+    const matchId = await addMatch(atLive(30))
 
-    expect(await savePrediction(database.db, { goals, matchId, supporterId }, now)).toEqual({
+    expect(await savePrediction(database.db, { goals, matchId, supporterId }, live)).toEqual({
       answer: 'saved',
       changed: false,
     })
@@ -224,14 +229,14 @@ describe('storing a prediction', () => {
   })
 
   it('replaces an earlier prediction, also with the same numbers', async () => {
-    const matchId = await addMatch(at(30))
+    const matchId = await addMatch(atLive(30))
 
-    await savePrediction(database.db, { goals, matchId, supporterId }, now)
+    await savePrediction(database.db, { goals, matchId, supporterId }, live)
 
     expect(
-      await savePrediction(database.db, { goals: { ...goals, fullTimeHome: 3 }, matchId, supporterId }, now),
+      await savePrediction(database.db, { goals: { ...goals, fullTimeHome: 3 }, matchId, supporterId }, live),
     ).toEqual({ answer: 'saved', changed: true })
-    expect(await savePrediction(database.db, { goals, matchId, supporterId }, now)).toEqual({
+    expect(await savePrediction(database.db, { goals, matchId, supporterId }, live)).toEqual({
       answer: 'saved',
       changed: true,
     })
@@ -240,12 +245,12 @@ describe('storing a prediction', () => {
   })
 
   it('stores 0 as 0 and 9 as 9', async () => {
-    const matchId = await addMatch(at(30))
+    const matchId = await addMatch(atLive(30))
 
     await savePrediction(
       database.db,
       { goals: { fullTimeAway: 9, fullTimeHome: 0, halftimeAway: 0, halftimeHome: 0 }, matchId, supporterId },
-      now,
+      live,
     )
 
     expect(await findPrediction(database.db, supporterId, matchId)).toEqual({
@@ -257,27 +262,31 @@ describe('storing a prediction', () => {
   })
 
   it('refuses after the kick-off, and on it', async () => {
-    const matchId = await addMatch(at(30))
+    const matchId = await addMatch(atLive(30))
 
-    expect(await savePrediction(database.db, { goals, matchId, supporterId }, at(30))).toEqual({ answer: 'closed' })
-    expect(await savePrediction(database.db, { goals, matchId, supporterId }, at(31))).toEqual({ answer: 'closed' })
+    expect(await savePrediction(database.db, { goals, matchId, supporterId }, atLive(30))).toEqual({ answer: 'closed' })
+    expect(await savePrediction(database.db, { goals, matchId, supporterId }, atLive(31))).toEqual({ answer: 'closed' })
     expect(await database.db.select().from(predictions)).toEqual([])
   })
 
   it('refuses a match that is not the one to predict', async () => {
-    await addMatch(at(30))
+    await addMatch(atLive(30))
 
-    const later = await addMatch(at(200))
-    const begun = await addMatch(at(-1), { round: 'Speelronde 0' })
+    const later = await addMatch(atLive(200))
+    const begun = await addMatch(atLive(-1), { round: 'Speelronde 0' })
 
-    expect(await savePrediction(database.db, { goals, matchId: later, supporterId }, now)).toEqual({ answer: 'closed' })
-    expect(await savePrediction(database.db, { goals, matchId: begun, supporterId }, now)).toEqual({ answer: 'closed' })
+    expect(await savePrediction(database.db, { goals, matchId: later, supporterId }, live)).toEqual({
+      answer: 'closed',
+    })
+    expect(await savePrediction(database.db, { goals, matchId: begun, supporterId }, live)).toEqual({
+      answer: 'closed',
+    })
   })
 
   it('refuses a match without a known time', async () => {
     const matchId = await addMatch(null)
 
-    expect(await savePrediction(database.db, { goals, matchId, supporterId }, now)).toEqual({ answer: 'closed' })
+    expect(await savePrediction(database.db, { goals, matchId, supporterId }, live)).toEqual({ answer: 'closed' })
   })
 
   it('refuses when the kick-off passed after the page was read, by the clock of the database', async () => {
@@ -290,24 +299,26 @@ describe('storing a prediction', () => {
   })
 
   it('keeps the prediction when the kick-off moves, and follows the new deadline', async () => {
-    const matchId = await addMatch(at(30))
+    const matchId = await addMatch(atLive(30))
 
-    await savePrediction(database.db, { goals, matchId, supporterId }, now)
+    await savePrediction(database.db, { goals, matchId, supporterId }, live)
     await database.db
       .update(matches)
-      .set({ kickoffAt: at(100), matchDate: '2026-11-24' })
+      .set({ kickoffAt: atLive(100), matchDate: '2026-11-24' })
       .where(eq(matches.id, matchId))
 
     expect(await findPrediction(database.db, supporterId, matchId)).toBeDefined()
-    expect(await savePrediction(database.db, { goals, matchId, supporterId }, at(50))).toEqual({
+    expect(await savePrediction(database.db, { goals, matchId, supporterId }, atLive(50))).toEqual({
       answer: 'saved',
       changed: true,
     })
-    expect(await savePrediction(database.db, { goals, matchId, supporterId }, at(101))).toEqual({ answer: 'closed' })
+    expect(await savePrediction(database.db, { goals, matchId, supporterId }, atLive(101))).toEqual({
+      answer: 'closed',
+    })
   })
 
   it('keeps one supporter apart from another', async () => {
-    const matchId = await addMatch(at(30))
+    const matchId = await addMatch(atLive(30))
 
     await database.db
       .insert(supporters)
@@ -316,7 +327,7 @@ describe('storing a prediction', () => {
     const other =
       (await database.db.select().from(supporters).where(eq(supporters.screenName, 'Pompebled')))[0]?.id ?? 0
 
-    await savePrediction(database.db, { goals, matchId, supporterId }, now)
+    await savePrediction(database.db, { goals, matchId, supporterId }, live)
 
     expect(await findPrediction(database.db, other, matchId)).toBeUndefined()
   })
@@ -331,7 +342,7 @@ describe('what is kept for the supporter', () => {
     const home = await addMatch(new Date('2026-11-28T15:45:00Z'))
     const away = await addMatch(new Date('2026-12-05T15:45:00Z'), { home: false })
 
-    await savePrediction(database.db, { goals, matchId: home, supporterId }, now)
+    await database.db.insert(predictions).values({ ...goals, matchId: home, supporterId })
     await database.db.insert(predictions).values({ ...goals, fullTimeAway: 1, matchId: away, supporterId })
 
     expect(await predictionData(database.db, supporterId)).toEqual({
@@ -345,9 +356,9 @@ describe('what is kept for the supporter', () => {
   })
 
   it('lets go of the supporter when the account is closed, and keeps what was predicted', async () => {
-    const matchId = await addMatch(at(30))
+    const matchId = await addMatch(atLive(30))
 
-    await savePrediction(database.db, { goals, matchId, supporterId }, now)
+    await savePrediction(database.db, { goals, matchId, supporterId }, live)
     await database.db.delete(supporters).where(eq(supporters.id, supporterId))
 
     expect(await database.db.select().from(predictions)).toMatchObject([{ matchId, supporterId: null }])

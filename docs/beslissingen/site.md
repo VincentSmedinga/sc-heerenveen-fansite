@@ -7181,6 +7181,7 @@
 - **Datum:** 21 november 2026
 - **Besluit:** de deadline staat als "Open tot za 16.45", met een punt tussen uren en minuten, zoals het issue vraagt (`kickoffText` in `apps/site/src/fans/prediction.ts`).
   Een wedstrijd erboven toont zijn aftrap met een dubbele punt ("za 21 nov 14:06"), zoals Match dat doet.
-- **Waarom:** het ontwerp en het issue schrijven de tijd van de Tag met een punt, en de Nederlandse schrijfwijze van de redactie kent beide.
+- **Waarom:** het ontwerp en het issue schrijven de tijd van de Tag met een punt, en de schrijfwijzer van de redactie noemt een tijd met een dubbele punt, "14:05".
+  De Tag is daar een bewuste uitzondering op, die de schrijfwijzer niet noemt.
   Het verschil staat op één kaart, dus een volgend issue kan het gelijktrekken met één wijziging in `kickoffText`.
 - **Alternatieven:** de dubbele punt in de Tag (wijkt af van het ontwerp); de punt in Match (raakt elke pagina met een wedstrijd).
