@@ -6,7 +6,7 @@ import { isFansPartOn } from '@fansite/shared/fans-env'
 import { eq } from 'drizzle-orm'
 
 import { fansGames } from '../fans-paths'
-import { predictionData } from './prediction'
+import { predictionData } from './prediction-results'
 
 // Everything the site keeps of a supporter, for the page "Alles wat we van je bewaren" and the
 // card "Wat je speelde" on Mijn account (issue 1454). Each game has a fixed place here; the

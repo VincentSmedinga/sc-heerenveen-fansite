@@ -50,6 +50,7 @@ const components = [
   'Page',
   'Pagination',
   'PitchPlayer',
+  'PredictionList',
   'RecordTable',
   'Root',
   'RoundButton',

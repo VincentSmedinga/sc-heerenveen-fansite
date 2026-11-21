@@ -1,6 +1,16 @@
 import { connect } from '@fansite/db/client'
 import { readDatabaseEnv } from '@fansite/db/env'
-import { adminSessions, adminUsers, feeds, items, sources, supporters } from '@fansite/db/schema'
+import {
+  adminSessions,
+  adminUsers,
+  clubs,
+  feeds,
+  items,
+  matches,
+  predictions,
+  sources,
+  supporters,
+} from '@fansite/db/schema'
 import { eq } from 'drizzle-orm'
 import path from 'node:path'
 
@@ -164,6 +174,55 @@ export async function addAdminSession(host: string, role: E2eRole = 'editor') {
   }
 }
 
+/**
+ * A match that was played, with the prediction of the supporter with this address, for the
+ * checks of the points (issue 1449). The editors enter a result in the admin, which has its own
+ * checks, so this puts the result in the database as the admin does. The match is in a season
+ * of its own and goes again with `removePlayedPrediction`. It returns the number of the match.
+ */
+export async function addPlayedPrediction(email: string, round: string) {
+  const { close, db } = connect(localDatabaseUrl())
+
+  try {
+    const [supporter] = await db.select({ id: supporters.id }).from(supporters).where(eq(supporters.email, email))
+    const [club] = await db.select({ id: clubs.id }).from(clubs).limit(1)
+
+    if (supporter === undefined || club === undefined) {
+      throw new Error('The supporter or a club is not there.')
+    }
+
+    const [match] = await db.insert(matches).values({
+      clubId: club.id,
+      competition: 'Eredivisie',
+      goalsAgainst: 1,
+      goalsFor: 2,
+      halfTimeAgainst: 0,
+      halfTimeFor: 1,
+      halfTimeSource: 'redactie',
+      home: true,
+      kickoffAt: new Date('1999-11-14T19:45:00Z'),
+      matchDate: '1999-11-14',
+      opponent: 'Puntenploeg',
+      round,
+      season: '1999/00',
+      status: 'played',
+    })
+
+    await db.insert(predictions).values({
+      fullTimeAway: 1,
+      fullTimeHome: 3,
+      halftimeAway: 1,
+      halftimeHome: 1,
+      matchId: match.insertId,
+      supporterId: supporter.id,
+    })
+
+    return match.insertId
+  } finally {
+    await close()
+  }
+}
+
 /** The number of the account of the check with this role, for the address of its form. */
 export async function adminAccountId(role: E2eRole) {
   const { close, db } = connect(localDatabaseUrl())
@@ -207,6 +266,17 @@ export function adminCookie(host: string, role: E2eRole = 'editor') {
   }
 }
 
+/** The editors correct a result: the goals of sc Heerenveen and of the opponent. */
+export async function correctPlayedResult(matchId: number, goalsFor: number, goalsAgainst: number) {
+  const { close, db } = connect(localDatabaseUrl())
+
+  try {
+    await db.update(matches).set({ goalsAgainst, goalsFor }).where(eq(matches.id, matchId))
+  } finally {
+    await close()
+  }
+}
+
 /**
  * The number of a made-up supporter, which it adds when it isn't there, for the address of the
  * page of one account of the supporters in the admin (issue 1458). Two workers may add it at
@@ -241,6 +311,17 @@ export async function madeUpSupporterId() {
 
       return found.id
     }
+  } finally {
+    await close()
+  }
+}
+
+/** Takes the match of `addPlayedPrediction` away, with its predictions. */
+export async function removePlayedPrediction(matchId: number) {
+  const { close, db } = connect(localDatabaseUrl())
+
+  try {
+    await db.delete(matches).where(eq(matches.id, matchId))
   } finally {
     await close()
   }
