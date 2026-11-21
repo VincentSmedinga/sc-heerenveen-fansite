@@ -41,10 +41,11 @@ const src = path.resolve(import.meta.dirname, '..')
 const admin = path.join(src, 'app/beheer')
 
 /**
- * The pages and actions that anybody may call: the way in to the admin, the contact form of
- * the site and the actions of signing up as a supporter (src/fans/routes.test.ts goes through
- * /fans). Every other page, route and action needs requireRole, wherever it is: a new action
- * outside /beheer must be named here, on purpose.
+ * The pages and actions that anybody may call: the way in to the admin, the contact form of the
+ * site and the actions of supporters: signing up, logging in, and logging out, which
+ * requireSupporter guards (src/fans/routes.test.ts goes through /fans). Every other page, route
+ * and action needs requireRole, wherever it is: a new action outside /beheer must be named
+ * here, on purpose.
  */
 const open = [
   'app/beheer/inloggen/actions.ts',
@@ -53,6 +54,8 @@ const open = [
   'app/beheer/inloggen/verstuurd/page.tsx',
   'app/contact/actions.ts',
   'app/fans/aanmelden/actions.ts',
+  'app/fans/inloggen/actions.ts',
+  'app/fans/mijn-account/actions.ts',
 ]
 
 /** Every file under a folder, as paths relative to src with forward slashes. */
@@ -125,6 +128,8 @@ describe('the admin', () => {
     expect(open.filter((file) => !file.startsWith('app/beheer/inloggen/'))).toEqual([
       'app/contact/actions.ts',
       'app/fans/aanmelden/actions.ts',
+      'app/fans/inloggen/actions.ts',
+      'app/fans/mijn-account/actions.ts',
     ])
   })
 

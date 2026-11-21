@@ -34,6 +34,50 @@ export type LoginRequestDeps = {
 export type LoginRequestResult = { answer: 'invalid' | 'limited' } | { answer: 'sent'; ref: string }
 
 /**
+ * Notes one request for a login link in the rate limit, and says which limit it is over: too
+ * many links for this address in the window, or for the whole site. A request within the
+ * limits gives the number of its row. The request counts for every address, with an account or
+ * not. A request over the limit is not kept, so a flood doesn't keep the window shut. It writes
+ * the row first and counts after, so two requests at the same time can't both slip under the
+ * limit.
+ */
+export async function checkAttempt(
+  db: Database,
+  kind: AccountKind,
+  email: string,
+  now: Date,
+): Promise<{ answer: 'address' | 'site' } | { answer: 'within'; id: number }> {
+  const { attempts } = kind.tables
+  const { limits } = kind
+  const since = new Date(now.getTime() - limits.windowMilliseconds)
+  const addressHash = hashOf(email)
+
+  // A row without an address is not of this limit (the ceiling of sign-ups of supporters), so
+  // it is left alone and not counted.
+  await db.delete(attempts).where(and(isNotNull(attempts.addressHash), lt(attempts.attemptedAt, since)))
+
+  const [inserted] = await db.insert(attempts).values({ addressHash, attemptedAt: now })
+  const [forAddress] = await db
+    .select({ total: count() })
+    .from(attempts)
+    .where(and(eq(attempts.addressHash, addressHash), gt(attempts.attemptedAt, since)))
+  const over =
+    (forAddress?.total ?? 0) > limits.perAddress
+      ? ('address' as const)
+      : limits.perSite !== undefined && (await siteTotal(db, kind, since)) > limits.perSite
+        ? ('site' as const)
+        : undefined
+
+  if (over !== undefined) {
+    await db.delete(attempts).where(eq(attempts.id, inserted.insertId))
+
+    return { answer: over }
+  }
+
+  return { answer: 'within', id: inserted.insertId }
+}
+
+/**
  * Handles a request for a login link: checks the address, the rate limit, and whether the
  * address has an account that is on. Only then it makes a link and hands it to `defer`, to mail
  * after the answer. The answer is `sent` for an address without an account too, takes at least
@@ -107,38 +151,11 @@ export async function issueLoginLink(
 
 /**
  * Notes one request for a login link in the rate limit, and says whether it is within the
- * limits: not when this address has had too many links in the window, or the whole site. The
- * request counts for every address, with an account or not. A request over the limit is
- * not kept, so a flood doesn't keep the window shut. It writes the row first and counts after,
- * so two requests at the same time can't both slip under the limit.
+ * limits: not when this address has had too many links in the window, or the whole site (see
+ * `checkAttempt`).
  */
 export async function noteAttempt(db: Database, kind: AccountKind, email: string, now: Date) {
-  const { attempts } = kind.tables
-  const { limits } = kind
-  const since = new Date(now.getTime() - limits.windowMilliseconds)
-  const addressHash = hashOf(email)
-
-  // A row without an address is not of this limit (the ceiling of sign-ups of supporters), so
-  // it is left alone and not counted.
-  await db.delete(attempts).where(and(isNotNull(attempts.addressHash), lt(attempts.attemptedAt, since)))
-
-  const [inserted] = await db.insert(attempts).values({ addressHash, attemptedAt: now })
-  const [forAddress] = await db
-    .select({ total: count() })
-    .from(attempts)
-    .where(and(eq(attempts.addressHash, addressHash), gt(attempts.attemptedAt, since)))
-  const [forSite] = await db
-    .select({ total: count() })
-    .from(attempts)
-    .where(and(isNotNull(attempts.addressHash), gt(attempts.attemptedAt, since)))
-
-  if ((forAddress?.total ?? 0) > limits.perAddress || (forSite?.total ?? 0) > limits.perSite) {
-    await db.delete(attempts).where(eq(attempts.id, inserted.insertId))
-
-    return false
-  }
-
-  return true
+  return (await checkAttempt(db, kind, email, now)).answer === 'within'
 }
 
 async function decide(
@@ -166,11 +183,21 @@ async function decide(
 
   const ref = newToken()
 
-  if (account === undefined || account.disabledAt !== null) {
+  if (account === undefined || (account.disabledAt !== null && !kind.turnedOffLogsIn)) {
     return { answer: 'sent' as const, ref }
   }
 
   const mail = await issueLoginLink(db, kind, account.id, ref, now, new URL(rules.path, origin))
 
   return { answer: 'sent' as const, mail: { ...mail, to: email }, ref }
+}
+
+async function siteTotal(db: Database, kind: AccountKind, since: Date) {
+  const { attempts } = kind.tables
+  const [forSite] = await db
+    .select({ total: count() })
+    .from(attempts)
+    .where(and(isNotNull(attempts.addressHash), gt(attempts.attemptedAt, since)))
+
+  return forSite?.total ?? 0
 }

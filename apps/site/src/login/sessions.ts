@@ -21,12 +21,18 @@ export async function endSession(db: Database, kind: AccountKind, token: string)
   await db.delete(kind.tables.sessions).where(eq(kind.tables.sessions.tokenHash, hashOf(token)))
 }
 
+/** Ends every session of an account, on every device. */
+export async function endSessionsOf(db: Database, kind: AccountKind, userId: number) {
+  await db.delete(kind.tables.sessions).where(eq(kind.tables.sessions.userId, userId))
+}
+
 /**
  * The account behind a session token, or `undefined` when the token is unknown, the session has
- * ended (too long without a request, or too long since it began) or the account is turned off.
- * A valid session counts as a request, so it stays open another idle period, but never past the
- * absolute one: `createdAt` is never moved, so renewing can't stretch a session, and a stolen
- * token can't keep it alive for ever. An ended session is removed.
+ * ended (too long without a request, or too long since it began) or the account is turned off
+ * (unless the kind lets such an account log in). A valid session counts as a request, at most
+ * once per `renewAfter`, so it stays open another idle period, but never past the absolute one:
+ * `createdAt` is never moved, so renewing can't stretch a session, and a stolen token can't
+ * keep it alive for ever. An ended session is removed.
  */
 export async function findSession<Kind extends AccountKind>(
   db: Database,
@@ -55,13 +61,15 @@ export async function findSession<Kind extends AccountKind>(
     now.getTime() - row.createdAt.getTime() >= kind.absoluteLifetime ||
     now.getTime() - row.lastSeenAt.getTime() >= kind.idleLifetime
 
-  if (ended || row.user.disabledAt !== null) {
+  if (ended || (row.user.disabledAt !== null && !kind.turnedOffLogsIn)) {
     await db.delete(sessions).where(eq(sessions.id, row.id))
 
     return undefined
   }
 
-  await db.update(sessions).set({ lastSeenAt: now }).where(eq(sessions.id, row.id))
+  if (now.getTime() - row.lastSeenAt.getTime() >= kind.renewAfter) {
+    await db.update(sessions).set({ lastSeenAt: now }).where(eq(sessions.id, row.id))
+  }
 
   return row.user as AccountOf<Kind>
 }
@@ -77,7 +85,13 @@ export async function loginLinkWorks(db: Database, kind: AccountKind, token: str
     .select({ id: links.id })
     .from(links)
     .innerJoin(users, eq(links.userId, users.id))
-    .where(and(eq(links.tokenHash, hashOf(token)), gt(links.expiresAt, now), isNull(users.disabledAt)))
+    .where(
+      and(
+        eq(links.tokenHash, hashOf(token)),
+        gt(links.expiresAt, now),
+        kind.turnedOffLogsIn ? undefined : isNull(users.disabledAt),
+      ),
+    )
 
   return row !== undefined
 }
@@ -134,13 +148,15 @@ export async function startSession(db: Database, kind: AccountKind, userId: numb
 
 /**
  * Starts a session for an account that is on: the token for the cookie, or `undefined` for an
- * account that is turned off or gone.
+ * account that is gone, or turned off when the kind doesn't let such an account log in.
  */
 export async function startSessionIfOn(db: Database, kind: AccountKind, userId: number, now: Date) {
   const { users } = kind.tables
   const [account] = await db.select({ disabledAt: users.disabledAt }).from(users).where(eq(users.id, userId))
 
-  return account === undefined || account.disabledAt !== null ? undefined : startSession(db, kind, userId, now)
+  return account === undefined || (account.disabledAt !== null && !kind.turnedOffLogsIn)
+    ? undefined
+    : startSession(db, kind, userId, now)
 }
 
 /**

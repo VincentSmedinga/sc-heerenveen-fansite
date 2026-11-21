@@ -1,7 +1,6 @@
 'use server'
 
 import { requireFansPart } from '@fansite/shared/fans-env'
-import { cookies } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 import { after } from 'next/server'
 
@@ -9,20 +8,26 @@ import type { SignUpState } from '#src/fans/sign-up-form'
 
 import { getDatabase } from '#src/database'
 import { originOf } from '#src/env'
-import { supporterCookieName, supporterCookieOptions } from '#src/fans/require-supporter'
+import { land } from '#src/fans/land'
 import { type ConfirmResult, confirmWithCode, confirmWithLink, handleSignUp, signUpPaths } from '#src/fans/sign-up'
 import { errorMessages } from '#src/fans/sign-up-form'
-import { sendCeilingMail, sendSignUpMail } from '#src/fans/sign-up-mail'
+import { sendCeilingMail, sendMailCeilingMail, sendSignUpMail } from '#src/fans/sign-up-mail'
 
 // The actions of signing up, which a visitor without a session may call. routes.test.ts names
 // this file as open. Each one does nothing while accounts are off: it answers "not found"
 // before it reads anything.
 
+const goneLink = `${signUpPaths.confirm}?fout=link`
+
 /** Confirms with the link: the page of the link binds its token to the action. */
 export async function confirm(token: string) {
   requireFansPart('accounts', notFound)
 
-  await land(typeof token === 'string' ? await confirmWithLink(getDatabase().db, token) : { answer: 'gone' })
+  await land(
+    typeof token === 'string' ? await confirmWithLink(getDatabase().db, token) : { answer: 'gone' },
+    undefined,
+    goneLink,
+  )
 }
 
 /** Confirms with the code from the mail, on the page "Kijk in je mail", which binds `ref`. */
@@ -39,7 +44,7 @@ export async function confirmCode(ref: string, formData: FormData) {
     redirect(`${signUpPaths.sent}?${new URLSearchParams({ fout: 'code', ref: String(ref) }).toString()}`)
   }
 
-  await land(result)
+  await land(result, undefined, goneLink)
 }
 
 /**
@@ -59,6 +64,7 @@ export async function signUp(_previous: SignUpState, formData: FormData): Promis
     defer: after,
     deliver: sendSignUpMail,
     notifyCeiling: sendCeilingMail,
+    notifyMailCeiling: sendMailCeilingMail,
     origin: originOf(),
   })
 
@@ -71,19 +77,4 @@ export async function signUp(_previous: SignUpState, formData: FormData): Promis
     case 'sent':
       redirect(`${signUpPaths.sent}?${new URLSearchParams({ ref: result.ref }).toString()}`)
   }
-}
-
-/** Puts the session in the cookie and goes on, or back to the form for a taken name. */
-async function land(result: ConfirmResult) {
-  if (result.answer === 'taken') {
-    redirect(`${signUpPaths.form}?fout=naam-bezet`)
-  }
-
-  if (result.answer === 'gone') {
-    redirect(`${signUpPaths.confirm}?fout=link`)
-  }
-
-  ;(await cookies()).set(supporterCookieName, result.token, supporterCookieOptions)
-
-  redirect(result.created ? `${signUpPaths.account}?welkom=1` : signUpPaths.account)
 }

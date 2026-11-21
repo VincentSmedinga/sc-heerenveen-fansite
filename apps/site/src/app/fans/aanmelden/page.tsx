@@ -4,12 +4,10 @@ import { Heading, Link, Page, Text } from '@fansite/design-system'
 import { requireFansPart } from '@fansite/shared/fans-env'
 import { notFound, redirect } from 'next/navigation'
 
-import { getDatabase } from '#src/database'
-import { supporterToken } from '#src/fans/require-supporter'
+import { logInPaths } from '#src/fans/log-in'
+import { currentSupporter } from '#src/fans/require-supporter'
 import { signUpPaths } from '#src/fans/sign-up'
 import { emptySignUpState, takenMeanwhileMessage } from '#src/fans/sign-up-form'
-import { supporterKind } from '#src/fans/supporter-login'
-import { findSession } from '#src/login/sessions'
 
 import { SignUpForm } from './SignUpForm'
 
@@ -27,9 +25,7 @@ export default async function SignUpPage({
 }) {
   requireFansPart('accounts', notFound)
 
-  const token = await supporterToken()
-
-  if (token !== undefined && (await findSession(getDatabase().db, supporterKind, token)) !== undefined) {
+  if ((await currentSupporter()) !== undefined) {
     redirect(signUpPaths.account)
   }
 
@@ -47,6 +43,9 @@ export default async function SignUpPage({
         <SignUpForm initial={initial} />
         <Text>
           We bewaren je schermnaam, je e-mailadres en wat je speelt. <Link href="/privacy">Wat we bewaren</Link>
+        </Text>
+        <Text>
+          Heb je al een account? <Link href={logInPaths.form}>Inloggen</Link>
         </Text>
       </Page.Cell>
     </Page.Main>
