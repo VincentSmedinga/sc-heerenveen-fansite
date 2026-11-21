@@ -6840,17 +6840,13 @@
   Alles wat persoonlijk is, staat onder `/fans`.
   Het proxy zet daar `Cache-Control: no-store` en `Referrer-Policy: same-origin` op, en `robots.txt` weigert `/fans/` maar niet `/fans`.
   Het hoofdmenu hoort bij de lay-out, die de instellingen leest als de server draait (`connection()`), zodat ook een pagina die vooraf is gebouwd, zoals "niet gevonden", het item goed toont.
+  De lay-out leest de instellingen bij elk verzoek (`connection()`), dus elke pagina is dynamisch.
+  Dat kost geen cache: 114 pagina's waren al `force-dynamic`, en van de pagina's die vooraf werden gebouwd bleven alleen `/contact/verstuurd` en de pagina "niet gevonden" over, die geen eigen cache hadden.
+  De openbare pagina's blijven voor iedereen gelijk, dus een cache ervoor blijft mogelijk.
 - **Waarom:** zo test de projecteigenaar het aanmelden op acceptatie voordat een spel ervan afhangt.
   Een pagina met persoonlijke inhoud mag nergens blijven hangen, en de openbare pagina's blijven voor iedereen gelijk en goed te cachen.
 - **Alternatieven:** het item verbergen tot er een spel is (aanmelden is dan niet te testen); de instellingen bij de bouw lezen (dan kent een pagina "niet gevonden" het item niet).
-  De lay-out leest de instellingen bij elk verzoek, dus elke pagina van de site is dynamisch en kan niet vooraf worden gebouwd; de meeste pagina's waren dat al (`force-dynamic`), en een cache van de openbare pagina's blijft kunnen, want de pagina's zijn voor iedereen gelijk.
-
-- **Datum:** 21 november 2026
-- **Besluit:** de links in het hoofdmenu staan onder 30rem 0,5rem uit elkaar in plaats van 1rem, zodat Nieuws, Wedstrijden, Spelers, Fans en Forum op een telefoon van 360 en 390 pixels op één regel staan (#1444).
-  Er is geen Meer in het menu: het ontwerp liet Fans op 360 pixels onder Meer vallen, maar de regel van `NavigationMore` geldt pas vanaf zes items en met een `moreLabel`, en de site geeft er geen.
-  Met Beheer erbij zijn het zes items en mag Forum naar een tweede regel.
-- **Waarom:** de projecteigenaar wil de vijf items naast elkaar op elke gangbare telefoon, en Meer nog niet.
-- **Alternatieven:** Fans op 360 pixels onder Meer zetten (dan valt Fans weg uit de balk, en de regel vouwt dan ook Wedstrijden en Spelers weg); Forum op een tweede regel laten staan.
+- **Later:** zie _De links in het hoofdmenu staan op een telefoon dichter bij elkaar_ in `designsysteem.md` (21 november 2026): daar staat hoe breed het menu op een telefoon is.
 
 ## Een supporter maakt een account met een schermnaam en een e-mailadres
 
