@@ -9,7 +9,7 @@ import { useSyncExternalStore } from 'react'
 import type { FansMenu } from './fans'
 
 import { readAdminMarker, subscribeToAdminMarker } from './admin-marker'
-import { fansGames, fansPath } from './fans-paths'
+import { fansGames, fansPath, isAccountPath } from './fans-paths'
 import { allSeasonsAddress, seasonFromSlug, seasonSlug } from './seasons'
 
 // The sub-pages of Nieuws, in the bar under the menu: the podcasts, the editors and the
@@ -248,21 +248,23 @@ export function SiteNavigation({ fans, matchesBar }: { fans?: FansMenu | undefin
   return (
     <Navigation
       appearance="header"
-      items={withFans(loggedIn ? itemsWithAdmin : items, fans).map((item) => ({
-        ...item,
-        href: hrefOf(item.href, pathname),
-        ...(item.href === matchesPath && matchesBar !== undefined && { bar: matchesBar }),
-        current: item.href === here.item && here.subitem === undefined,
-        ...(item.subitems && {
-          subitems: item.subitems.map((subitem) => ({
-            ...subitem,
-            current: subitem.href === here.subitem,
-            // Only the figures of the players keep the season of the page; the bar of
-            // Wedstrijden is drawn by its own slot, and the other sub-pages have no season.
-            href: subitem.href === playerFiguresPath ? hrefOf(subitem.href, pathname) : subitem.href,
-          })),
+      items={withFans(loggedIn ? itemsWithAdmin : items, fans && isAccountPath(pathname) ? { subitems: [] } : fans).map(
+        (item) => ({
+          ...item,
+          href: hrefOf(item.href, pathname),
+          ...(item.href === matchesPath && matchesBar !== undefined && { bar: matchesBar }),
+          current: item.href === here.item && here.subitem === undefined,
+          ...(item.subitems && {
+            subitems: item.subitems.map((subitem) => ({
+              ...subitem,
+              current: subitem.href === here.subitem,
+              // Only the figures of the players keep the season of the page; the bar of
+              // Wedstrijden is drawn by its own slot, and the other sub-pages have no season.
+              href: subitem.href === playerFiguresPath ? hrefOf(subitem.href, pathname) : subitem.href,
+            })),
+          }),
         }),
-      }))}
+      )}
       label="Hoofdmenu"
     />
   )

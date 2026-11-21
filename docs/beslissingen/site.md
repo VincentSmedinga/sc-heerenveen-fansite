@@ -7009,3 +7009,9 @@
   Een korte tijd na het maken is dichtbij genoeg bij "één keer, direct na het bevestigen".
 - **Alternatieven:** een cookie die de pagina leest (nog een cookie, en de pagina kan hem niet zelf weghalen); alleen `welkom=1` (de melding komt bij elke herlaadbeurt terug).
 - **Later:** het welkom stond eerst op `/fans/mijn-account?welkom=1` (#1446).
+
+- **Datum:** 21 november 2026
+- **Besluit:** de pagina's van het aanmelden en van het inloggen (alles onder `/fans/aanmelden` en `/fans/inloggen`) hebben geen balk met de spellen onder het hoofdmenu (`isAccountPath` in `apps/site/src/fans-paths.ts`).
+  Het item Fans blijft in het menu en is gemarkeerd.
+- **Waarom:** deze pagina's zijn één smalle kolom met één taak, zoals de inlogpagina van het beheer, en een balk met spellen leidt daar van de taak af.
+- **Alternatieven:** de balk laten staan (het ontwerp wil hem weg); alleen het aanmelden (het inloggen is dezelfde soort pagina en zou er anders naast afwijken).
