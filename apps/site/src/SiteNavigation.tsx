@@ -6,7 +6,10 @@ import { Navigation } from '@fansite/design-system'
 import { usePathname } from 'next/navigation'
 import { useSyncExternalStore } from 'react'
 
+import type { FansMenu } from './fans'
+
 import { readAdminMarker, subscribeToAdminMarker } from './admin-marker'
+import { fansGames, fansPath } from './fans-paths'
 import { allSeasonsAddress, seasonFromSlug, seasonSlug } from './seasons'
 
 // The sub-pages of Nieuws, in the bar under the menu: the podcasts, the editors and the
@@ -136,6 +139,16 @@ export function currentOf(pathname: string): { item?: string; subitem?: string }
     return { item: playersPath }
   }
 
+  if (pathname === fansPath) {
+    return { item: fansPath }
+  }
+
+  if (pathname.startsWith(`${fansPath}/`)) {
+    const game = fansGames.map((game) => game.href).find((path) => pathname === path || pathname.startsWith(`${path}/`))
+
+    return game === undefined ? { item: fansPath } : { item: fansPath, subitem: game }
+  }
+
   if (pathname === opponentsPath || pathname.startsWith(`${opponentsPath}/`)) {
     return { item: matchesPath, subitem: opponentsPath }
   }
@@ -158,6 +171,25 @@ export function hrefOf(href: string, pathname: string): string {
   const season = seasonPages.includes(href) ? seasonOfPath(pathname) : undefined
 
   return season === undefined ? href : `${href}/${seasonSlug(season)}`
+}
+
+/**
+ * The menu with Fans between Spelers and Forum, when accounts are on (`fans` is then given, see
+ * layout.tsx). The bar of sub-pages has the games that are on, and none when no game is.
+ */
+function withFans(menu: MenuItem[], fans: FansMenu | undefined): MenuItem[] {
+  if (fans === undefined) {
+    return menu
+  }
+
+  const fansItem: MenuItem = {
+    href: fansPath,
+    label: 'Fans',
+    ...(fans.subitems.length > 0 && { subitems: fans.subitems }),
+  }
+  const players = menu.findIndex((item) => item.href === playersPath)
+
+  return [...menu.slice(0, players + 1), fansItem, ...menu.slice(players + 1)]
 }
 
 /**
@@ -206,7 +238,7 @@ export function seasonOfPath(pathname: string): string | undefined {
  * system gives it `aria-current="true"` then); only on /nieuws and on an article of the
  * editors, and on /wedstrijden and the page of a season below it, is it.
  */
-export function SiteNavigation({ matchesBar }: { matchesBar?: ReactNode }) {
+export function SiteNavigation({ fans, matchesBar }: { fans?: FansMenu | undefined; matchesBar?: ReactNode }) {
   const pathname = usePathname()
   const here = currentOf(pathname)
   // The server and the first render in the browser have no item: the HTML is the same for
@@ -216,7 +248,7 @@ export function SiteNavigation({ matchesBar }: { matchesBar?: ReactNode }) {
   return (
     <Navigation
       appearance="header"
-      items={(loggedIn ? itemsWithAdmin : items).map((item) => ({
+      items={withFans(loggedIn ? itemsWithAdmin : items, fans).map((item) => ({
         ...item,
         href: hrefOf(item.href, pathname),
         ...(item.href === matchesPath && matchesBar !== undefined && { bar: matchesBar }),

@@ -85,6 +85,11 @@ export const pages = [
     path: '/over-ons',
   },
   {
+    description:
+      'Het hoofdstuk voor supporters: de spellen die komen, zoals een voorspelling van de uitslag en een cijfer voor de spelers, en alvast een account.',
+    path: '/fans',
+  },
+  {
     description: 'Wat we met gegevens doen: geen cookies, niemand volgen en niets van een ander domein.',
     path: '/privacy',
   },

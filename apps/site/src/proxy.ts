@@ -31,6 +31,11 @@ export function isAdminPath(pathname: string) {
   return pathname === '/beheer' || pathname.startsWith('/beheer/')
 }
 
+/** Whether a path is the chapter Fans or under it. `/fansite` is not. */
+export function isFansPath(pathname: string) {
+  return pathname === '/fans' || pathname.startsWith('/fans/')
+}
+
 // Runs for every request, including the files in /_next/static, so every response carries the
 // headers. Every response also keeps itself out of frames for the browsers that don't know
 // `frame-ancestors` (`X-Frame-Options`), and out of the group of windows of other sites
@@ -53,6 +58,13 @@ export function proxy(request: NextRequest, event?: NextFetchEvent) {
   response.headers.set('Content-Security-Policy', contentSecurityPolicy)
   response.headers.set('X-Frame-Options', 'DENY')
   response.headers.set('Cross-Origin-Opener-Policy', 'same-origin')
+
+  if (isFansPath(request.nextUrl.pathname)) {
+    // Personal pages may never be kept, and the page of a supporter sends a referrer only to
+    // our own pages. Whether a search engine may index one is for the page to say.
+    response.headers.set('Cache-Control', 'no-store')
+    response.headers.set('Referrer-Policy', 'same-origin')
+  }
 
   if (isAdminPath(request.nextUrl.pathname)) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow')
