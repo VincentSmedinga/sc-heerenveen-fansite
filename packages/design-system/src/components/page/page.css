@@ -87,7 +87,9 @@
     color: var(--hf-colour-text-default);
     display: grid;
     gap: 0 var(--hf-space-s);
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-auto-columns: auto;
+    grid-auto-flow: column;
+    grid-template-columns: minmax(0, 1fr);
     padding-block: max(var(--hf-space-m), env(safe-area-inset-top, 0px)) var(--hf-space-xs);
     padding-inline: max(var(--hf-page-inset), env(safe-area-inset-left, 0px))
       max(var(--hf-page-inset), env(safe-area-inset-right, 0px));
@@ -101,9 +103,7 @@
       vertical-align: top;
     }
 
-    > .hf-theme-button {
-      justify-self: end;
-    }
+    /* Round buttons after the logo sit side by side at the end, each in a column of its own. */
 
     @media (width >= 74rem) {
       > :is(.hf-logo, :has(> .hf-logo)):first-child {

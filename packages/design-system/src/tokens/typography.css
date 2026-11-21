@@ -18,8 +18,8 @@
     --hf-font-family-text: 'Atkinson Hyperlegible Next', 'Atkinson Fallback', system-ui, sans-serif;
     --hf-font-family-code: ui-monospace, menlo, consolas, monospace;
 
-    /* Woordmerk */
-    --hf-wordmark-font-size: 2.25rem;
+    /* Woordmerk: 18px at 360px, 20px at 390px, 36px from about 630px; floor and offset in rem */
+    --hf-wordmark-font-size: clamp(1.125rem, 6.667vw - 0.375rem, 2.25rem);
     --hf-wordmark-font-stretch: 125%;
     --hf-wordmark-font-weight: 900;
     --hf-wordmark-letter-spacing: 0.02em;
@@ -155,11 +155,5 @@
 
     /* The tooltip of a chart: a short figure on a dark box, a little heavier than the text */
     --hf-tooltip-font-weight: 500;
-  }
-
-  @media (width < 40em) {
-    :root {
-      --hf-wordmark-font-size: 1.75rem;
-    }
   }
 }

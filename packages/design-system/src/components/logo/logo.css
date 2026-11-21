@@ -31,22 +31,23 @@
   }
 
   /*
-   * The wordmark and the tagline run on in one line of text, so on a narrow screen, where the wordmark wraps, the tagline
-   * stays behind its last word if it fits and goes to a line of its own if not. The space between them is a space in the
-   * text, made as wide as 0.25rem more; the wordmark and the tagline set their own word spacing back.
+   * The wordmark and the tagline are two boxes in a row that wraps. The wordmark is fluid (--hf-wordmark-font-size) and
+   * stays on one line. Under 600px the tagline is under it (see below); from 600px it is beside it, and goes under it when
+   * there is no room. The height of each box is its line height and not a line of text with a strut, so it does not change
+   * when the font of the wordmark has loaded and the page does not jump under a visitor who is already scrolling.
    */
   .hf-logo-text {
-    word-spacing: 0.25rem;
-
-    /* A browser that doesn't know it breaks the lines as it did. */
-    @supports (text-wrap: balance) {
-      text-wrap: balance;
-    }
+    align-items: baseline;
+    column-gap: var(--hf-space-s);
+    display: flex;
+    flex-wrap: wrap;
+    min-inline-size: 0;
   }
 
+  /* The wordmark may be narrower than its text only when the text is zoomed so far that it is wider than the line. */
   .hf-logo-wordmark {
     color: var(--hf-colour-text-heading);
-    word-spacing: normal;
+    min-inline-size: 0;
   }
 
   .hf-logo-tagline {
@@ -54,6 +55,10 @@
     font-size: var(--hf-label-font-size);
     line-height: var(--hf-label-line-height);
     white-space: nowrap;
-    word-spacing: normal;
+
+    /* Under 600px the wordmark takes the whole line, so "sinds 1997" goes under it. This is the one place for that. */
+    @media (width < 37.5rem) {
+      flex-basis: 100%;
+    }
   }
 }

@@ -94,6 +94,7 @@
 - **Alternatieven:** alles met `clamp()`.
 - **Later:** zie _Elke tekststijl een stap groter_ en _Kleinere koppen en vaste tekstmaten_.
   De maten zijn een stap groter; de nieuwskop springt op een smal scherm nu naar 19 pixels.
+  Voor het woordmerk geldt nu _Het woordmerk is vloeiend en blijft op één regel_ (21 november 2026): het springt niet meer onder 40 em, maar schaalt met `clamp()`.
 
 ## Voorlopige kleurtokens
 
@@ -4106,6 +4107,29 @@
   Lijnen tekenen ook overal hetzelfde, zonder lettertype in een masker.
   De site heeft de regel alleen via de knop nodig, dus `@fansite/shared` hoeft hem niet te hebben.
 - **Alternatieven:** de initialen als tekst en de naam "Mijn account, BS" (de eigenaar wil de naam van het issue); de regel van axe uitzetten (dat verzwakt een test); de regel in `@fansite/shared` (niemand anders gebruikt hem).
+
+## Het woordmerk is vloeiend en blijft op één regel
+
+- **Datum:** 21 november 2026
+- **Besluit:** het woordmerk schaalt vloeiend met de breedte van het scherm en blijft op één regel (#1491).
+  - De lettergrootte is `clamp(1.125rem, 6.667vw - 0.375rem, 2.25rem)` in `--hf-wordmark-font-size`: 18 pixels op 360, 20 op 390 en 36 vanaf ongeveer 630 pixels.
+    De ondergrens en de verschuiving zijn in rem, dus een grotere tekstgrootte tilt ze mee en het woordmerk wordt nooit kleiner dan 18 pixels.
+  - Het woordmerk mag niet afbreken door een `nowrap`.
+    Bij een tekst die veel groter is dan het scherm loopt het woord voor woord door, zodat er niets wordt afgekapt.
+  - Het woordmerk en "sinds 1997" zijn twee vakken in een rij die afbreekt (`flex-wrap`), geen tekst met een regelhoogte.
+    De hoogte van de kop hangt dan niet af van het lettertype, en de pagina springt niet als dat laadt (de test van de link naar boven zag dat op de runner van CI).
+  - Onder 600 pixels staat "sinds 1997" onder het woordmerk, vanaf 600 pixels ernaast.
+    De regel staat op één plek, in `logo.css`.
+  - De kop is een raster met een kolom voor het logo en een kolom per knop erna, zodat een tweede ronde knop past.
+  - Daarmee vervalt `text-wrap: balance` op de tekst van het logo.
+    Het deed alleen iets als het woordmerk op een smal scherm afbrak: dan bleef "sinds 1997" achter het laatste woord staan.
+    Nu staat "sinds 1997" onder het woordmerk of ernaast, en bij een tekst die zo groot is dat het woordmerk afbreekt, staat het eronder.
+    Dat is bewust: de oude plek achter het laatste woord was een gevolg van het afbreken, niet iets wat een bezoeker nodig heeft.
+- **Waarom:** op één regel met "sinds 1997" zou het woordmerk op 390 pixels maar ongeveer 14 pixels groot zijn.
+  Het woordmerk is ongeveer 10,9 keer zijn lettergrootte breed.
+  Zo blijft het leesbaar naast de ronde knoppen.
+- **Later:** vervangt de oude regel dat het woordmerk onder 40em vast 28 pixels is en op twee regels mag staan.
+- **Alternatieven:** het woordmerk laten afbreken op twee regels; een kleiner vast woordmerk; "sinds 1997" weglaten op een telefoon.
 
 ## Alleen kaarten van een spel krijgen een groot watermerk van dat spel
 

@@ -121,7 +121,8 @@ describe('the row of the header in page.css', () => {
 
   it('is a grid with the logo and the theme button in one row, and has no place for the menu', () => {
     expect(header).toContain('display: grid;')
-    expect(header).toContain('grid-template-columns: minmax(0, 1fr) auto;')
+    expect(header).toContain('grid-template-columns: minmax(0, 1fr);')
+    expect(header).toContain('grid-auto-flow: column;')
     expect(header).not.toContain('flex-wrap')
     expect(header).not.toContain('.hf-navigation')
     expect(header).not.toContain('grid-column')
@@ -140,8 +141,9 @@ describe('the row of the header in page.css', () => {
     expect(header).not.toMatch(/> :has\(> \.hf-logo\) \{[^}]*display: flex;/)
   })
 
-  it('puts the theme button on the right', () => {
-    expect(header).toMatch(/> \.hf-theme-button \{[^}]*justify-self: end;/)
+  it('gives the logo the rest of the row and each button after it a column of its own, at the end', () => {
+    expect(header).toContain('grid-auto-columns: auto;')
+    expect(header).not.toContain('justify-self')
   })
 })
 
