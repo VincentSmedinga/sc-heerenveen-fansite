@@ -12,6 +12,9 @@ import type { GameData } from './my-data'
 /** The address of the page of the game. */
 export const predictionPath = '/fans/prognose'
 
+/** The name of the button that saves the form: its value is the number of the match. */
+export const matchField = 'wedstrijd'
+
 /** The four numbers of a prediction, in the order of the form: row by row. */
 export const predictionFields: readonly ScoreField[] = ['halftimeHome', 'halftimeAway', 'fullTimeHome', 'fullTimeAway']
 

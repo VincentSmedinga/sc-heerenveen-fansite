@@ -2,12 +2,13 @@
 
 import type { ScoreField } from '@fansite/design-system'
 
-import { Button, ErrorSummary, Form, Notice, ScoreGrid, Text } from '@fansite/design-system'
+import { Button, Disclosure, ErrorSummary, Form, Notice, ScoreGrid, Text } from '@fansite/design-system'
 import { useActionState, useEffect } from 'react'
 
 import {
   closedMessage,
   fieldId,
+  matchField,
   predictionFields,
   type PredictionState,
   type PredictionValues,
@@ -23,17 +24,23 @@ import { savePredictionAction } from './actions'
 // the summary, whose links bring it to the fields.
 export function PredictionForm({
   awayName,
+  behindButton = false,
   homeName,
   matchId,
   saved,
 }: {
   awayName: string
+  /**
+   * Puts the form behind the button Voorspellen, for the match under one that has begun.
+   * After a submit the answer must show, also without JavaScript, so the fold is open then.
+   */
+  behindButton?: boolean
   homeName: string
   matchId: number
   /** What the supporter predicted before, or nothing. */
   saved: PredictionValues | undefined
 }) {
-  const [state, action] = useActionState<PredictionState, FormData>(savePredictionAction.bind(null, matchId), {
+  const [state, action] = useActionState<PredictionState, FormData>(savePredictionAction, {
     errors: {},
     values: saved ?? {},
   })
@@ -63,7 +70,8 @@ export function PredictionForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state])
 
-  return (
+  const answered = summary.length > 0 || state.saved !== undefined || state.failure !== undefined
+  const form = (
     <>
       <ErrorSummary errors={summary} id={summaryId} level={3} tabIndex={-1} title="Er ontbreekt nog iets" />
       <Notice id={noticeId} tabIndex={-1}>
@@ -79,8 +87,18 @@ export function PredictionForm({
           legend="Jouw voorspelling"
         />
         <Text>Na 90 minuten plus blessuretijd, ook in de beker.</Text>
-        <Button type="submit">{hasPrediction ? 'Wijziging opslaan' : 'Voorspelling opslaan'}</Button>
+        <Button name={matchField} type="submit" value={matchId}>
+          {hasPrediction ? 'Wijziging opslaan' : 'Voorspelling opslaan'}
+        </Button>
       </Form>
     </>
+  )
+
+  return behindButton ? (
+    <Disclosure open={answered || undefined} summary="Voorspellen">
+      {form}
+    </Disclosure>
+  ) : (
+    form
   )
 }

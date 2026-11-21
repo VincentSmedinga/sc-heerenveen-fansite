@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 import { getDatabase } from '#src/database'
 import {
   clubsOf,
+  matchField,
   parsePrediction,
   predictionFields,
   predictionMatches,
@@ -16,21 +17,19 @@ import {
 import { requireSupporter } from '#src/fans/require-supporter'
 
 /**
- * Stores the prediction of the supporter who is logged in for a match, which the form binds as
- * `matchId`. It answers "not found" while the game is off, sends a visitor without a session to
- * log in and a blocked account to its page (`requireSupporter`), and writes only for the match
- * that can be predicted now, and only before its kick-off. It returns what the form shows: the
- * errors per field, the values that were typed, and whether it stored them.
+ * Stores the prediction of the supporter who is logged in for a match, whose number is the
+ * value of the button that sent the form (`matchField`). It answers "not found" while the
+ * game is off, sends a visitor without a session to log in and a blocked account to its page
+ * (`requireSupporter`), and writes only for the match that can be predicted now, and only
+ * before its kick-off. It returns what the form shows: the errors per field, the values that
+ * were typed, and whether it stored them.
  */
-export async function savePredictionAction(
-  matchId: number,
-  _previous: PredictionState,
-  formData: FormData,
-): Promise<PredictionState> {
+export async function savePredictionAction(_previous: PredictionState, formData: FormData): Promise<PredictionState> {
   requireFansPart('prognose', notFound)
 
   const { supporterId } = await requireSupporter({ from: predictionPath })
   const { db } = getDatabase()
+  const matchId = Number(formData.get(matchField))
   const { next } = await predictionMatches(db)
   const entries = Object.fromEntries(predictionFields.map((field) => [field, formData.get(field)]))
 

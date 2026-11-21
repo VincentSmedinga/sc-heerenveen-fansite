@@ -31,8 +31,12 @@ let database: TestDatabase
 let matchId: number
 let supporterId: number
 
-const form = (entries: Record<string, string>) => {
+const form = (entries: Record<string, string>, matchId: number | undefined = undefined) => {
   const data = new FormData()
+
+  if (matchId !== undefined) {
+    data.set('wedstrijd', String(matchId))
+  }
 
   for (const [name, value] of Object.entries(entries)) {
     data.set(name, value)
@@ -99,24 +103,24 @@ describe('the action of the prediction', () => {
     vi.stubEnv('FANS_PROGNOSE', 'off')
     requireSupporter.mockClear()
 
-    await expect(savePredictionAction(matchId, empty, form(filled))).rejects.toThrow('NEXT_NOT_FOUND')
+    await expect(savePredictionAction(empty, form(filled, matchId))).rejects.toThrow('NEXT_NOT_FOUND')
     expect(requireSupporter).not.toHaveBeenCalled()
   })
 
   it('answers "not found" while accounts are off', async () => {
     vi.stubEnv('FANS_ACCOUNTS', 'off')
 
-    await expect(savePredictionAction(matchId, empty, form(filled))).rejects.toThrow('NEXT_NOT_FOUND')
+    await expect(savePredictionAction(empty, form(filled, matchId))).rejects.toThrow('NEXT_NOT_FOUND')
   })
 
   it('asks for the session of a supporter, with this page to come back to', async () => {
-    await savePredictionAction(matchId, empty, form(filled))
+    await savePredictionAction(empty, form(filled, matchId))
 
     expect(requireSupporter).toHaveBeenCalledWith({ from: '/fans/prognose' })
   })
 
   it('stores the prediction and says so', async () => {
-    expect(await savePredictionAction(matchId, empty, form(filled))).toEqual({
+    expect(await savePredictionAction(empty, form(filled, matchId))).toEqual({
       errors: {},
       saved: { changed: false },
       values: filled,
@@ -127,9 +131,9 @@ describe('the action of the prediction', () => {
   })
 
   it('says it changed an earlier prediction', async () => {
-    await savePredictionAction(matchId, empty, form(filled))
+    await savePredictionAction(empty, form(filled, matchId))
 
-    expect(await savePredictionAction(matchId, empty, form({ ...filled, fullTimeHome: '3' }))).toMatchObject({
+    expect(await savePredictionAction(empty, form({ ...filled, fullTimeHome: '3' }, matchId))).toMatchObject({
       saved: { changed: true },
       values: { fullTimeHome: '3' },
     })
@@ -137,7 +141,7 @@ describe('the action of the prediction', () => {
   })
 
   it('stores nothing and names the field for a number that is missing, and keeps the rest', async () => {
-    const result = await savePredictionAction(matchId, empty, form({ ...filled, fullTimeAway: '' }))
+    const result = await savePredictionAction(empty, form({ ...filled, fullTimeAway: '' }, matchId))
 
     expect(result).toEqual({
       errors: { fullTimeAway: 'Vul de goals van FC Twente bij de eindstand in.' },
@@ -147,22 +151,26 @@ describe('the action of the prediction', () => {
   })
 
   it('stores nothing for a number above 9, and for a form without fields', async () => {
-    expect(await savePredictionAction(matchId, empty, form({ ...filled, halftimeHome: '10' }))).toHaveProperty(
+    expect(await savePredictionAction(empty, form({ ...filled, halftimeHome: '10' }, matchId))).toHaveProperty(
       'errors.halftimeHome',
     )
-    expect(await savePredictionAction(matchId, empty, form({}))).toHaveProperty('errors.fullTimeHome')
+    expect(await savePredictionAction(empty, form({}, matchId))).toHaveProperty('errors.fullTimeHome')
     expect(await database.db.select().from(predictions)).toEqual([])
   })
 
+  it('refuses a form without the number of a match', async () => {
+    expect(await savePredictionAction(empty, form(filled))).toMatchObject({ failure: 'closed' })
+  })
+
   it('refuses a match that is not the one to predict', async () => {
-    expect(await savePredictionAction(matchId + 100, empty, form(filled))).toMatchObject({ failure: 'closed' })
+    expect(await savePredictionAction(empty, form(filled, matchId + 100))).toMatchObject({ failure: 'closed' })
     expect(await database.db.select().from(predictions)).toEqual([])
   })
 
   it('refuses after the kick-off', async () => {
     await database.db.update(matches).set({ kickoffAt: new Date(Date.now() - 60 * 1000) })
 
-    expect(await savePredictionAction(matchId, empty, form(filled))).toMatchObject({ failure: 'closed' })
+    expect(await savePredictionAction(empty, form(filled, matchId))).toMatchObject({ failure: 'closed' })
     expect(await database.db.select().from(predictions)).toEqual([])
   })
 })

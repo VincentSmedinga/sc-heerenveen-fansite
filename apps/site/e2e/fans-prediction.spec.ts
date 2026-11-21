@@ -36,7 +36,8 @@ async function signUp(page: Page) {
   await expect(page).toHaveURL(/\/fans\?welkom=1$/)
 }
 
-const field = (page: Page, row: 'Eindstand' | 'Ruststand', club: string) => page.getByLabel(`${row} ${club}`)
+const field = (page: Page, row: 'Eindstand' | 'Ruststand', club: string) =>
+  page.getByRole('textbox', { name: `${row} ${club}` })
 
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false })
@@ -87,12 +88,12 @@ test.describe('without JavaScript', () => {
 
 test('asks a visitor to log in, and comes back to the page after logging in', async ({ page }) => {
   await page.goto('/fans/prognose')
-  await expect(
-    page.getByText('Log in om te voorspellen. Nog geen account? Dat maak je in een minuut.').first(),
-  ).toBeVisible()
+  // The match that began is closed; the way in stands behind the button of the next match.
+  await page.getByText('Voorspellen', { exact: true }).click()
+  await expect(page.getByText('Log in om te voorspellen. Nog geen account? Dat maak je in een minuut.')).toBeVisible()
   await expect(page.getByRole('heading', { level: 2, name: 'Volgende wedstrijd' })).toBeVisible()
   await expect(page.getByText('Gesloten')).toBeVisible()
-  await expect(page.getByLabel('Ruststand sc Heerenveen')).toHaveCount(0)
+  await expect(page.getByRole('textbox', { name: 'Ruststand sc Heerenveen' })).toHaveCount(0)
   await checkPage(page)
 })
 

@@ -165,9 +165,15 @@ export function OpenCard({
       <LogInNotice />
     )
   } else {
-    const form = <PredictionForm awayName={clubs.away} homeName={clubs.home} matchId={match.id} saved={saved} />
-
-    body = inDisclosure ? <Disclosure summary="Voorspellen">{form}</Disclosure> : form
+    body = (
+      <PredictionForm
+        awayName={clubs.away}
+        behindButton={inDisclosure}
+        homeName={clubs.home}
+        matchId={match.id}
+        saved={saved}
+      />
+    )
   }
 
   return (
