@@ -4121,6 +4121,10 @@
   - Onder 600 pixels staat "sinds 1997" onder het woordmerk, vanaf 600 pixels ernaast.
     De regel staat op één plek, in `logo.css`.
   - De kop is een raster met een kolom voor het logo en een kolom per knop erna, zodat een tweede ronde knop past.
+  - Daarmee vervalt `text-wrap: balance` op de tekst van het logo.
+    Het deed alleen iets als het woordmerk op een smal scherm afbrak: dan bleef "sinds 1997" achter het laatste woord staan.
+    Nu staat "sinds 1997" onder het woordmerk of ernaast, en bij een tekst die zo groot is dat het woordmerk afbreekt, staat het eronder.
+    Dat is bewust: de oude plek achter het laatste woord was een gevolg van het afbreken, niet iets wat een bezoeker nodig heeft.
 - **Waarom:** op één regel met "sinds 1997" zou het woordmerk op 390 pixels maar ongeveer 14 pixels groot zijn.
   Het woordmerk is ongeveer 10,9 keer zijn lettergrootte breed.
   Zo blijft het leesbaar naast de ronde knoppen.
