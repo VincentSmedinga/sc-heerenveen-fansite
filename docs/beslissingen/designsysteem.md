@@ -94,6 +94,7 @@
 - **Alternatieven:** alles met `clamp()`.
 - **Later:** zie _Elke tekststijl een stap groter_ en _Kleinere koppen en vaste tekstmaten_.
   De maten zijn een stap groter; de nieuwskop springt op een smal scherm nu naar 19 pixels.
+  Voor het woordmerk geldt nu _Het woordmerk is vloeiend en blijft op één regel_ (21 november 2026): het springt niet meer onder 40 em, maar schaalt met `clamp()`.
 
 ## Voorlopige kleurtokens
 
