@@ -1,7 +1,7 @@
 # Back-ups
 
 De database heeft een back-up die we echt kunnen terugzetten.
-Elke nacht maakt cron op de host een dump van de database, een bestand met alle tabellen en de rijen van alle tabellen op vijf na.
+Elke nacht maakt cron op de host een dump van de database, een bestand met alle tabellen en de rijen van alle tabellen op negen na.
 Dit bestand zegt wat dat doet, hoe de eigenaar het instelt, hoe je een dump terugzet en wat de dumps aan opslag kosten.
 Het zegt ook hoe de projecteigenaar een kopie van de database van acceptatie op zijn eigen computer zet, zonder persoonsgegevens.
 
@@ -35,14 +35,18 @@ De opdracht `backup`:
    Hij verandert de rechten van een bestaande map niet zelf: dat kan de thuismap zijn.
    Ligt de map in `public_html`, dan weigert hij ook.
 2. Draait `mysqldump` met `--single-transaction`, zodat de site tijdens de dump gewoon werkt en er niets vergrendeld wordt.
-   Hij draait het twee keer, achter elkaar in hetzelfde bestand: eerst alle tabellen met hun rijen, behalve de vijf hieronder, en dan alleen de structuur van die vijf.
+   Hij draait het twee keer, achter elkaar in hetzelfde bestand: eerst alle tabellen met hun rijen, behalve de tabellen hieronder, en dan alleen de structuur van die tabellen.
    - `visitor_salts` en `visitor_hashes`: het zout en de kenmerken van de bezoekers van de dag gooit de site aan het eind van de dag weg (zie _We tellen paginaweergaven en unieke bezoekers per dag_ in `beslissingen/redactie.md`).
      Met het zout reken je de kenmerken terug naar adressen.
    - `discussions`: de schermnaam van de laatste reageerder vervangt de importer bij elke run (zie het hoofdstuk Redactie in Storybook).
    - `admin_sessions` en `admin_login_links`: een teruggezette sessie of inloglink zou een toegang herstellen die na de dump is ingetrokken.
+   - `supporter_sessions`, `supporter_login_links` en `supporter_email_changes`: hetzelfde voor supporters.
+     Een inloglink kan ook een aanmelding zijn die niemand bevestigde, met het adres erin, en een adreswijziging bewaart het nieuwe adres tot de bevestiging.
+   - `supporter_login_attempts`: de hash van een adres voor de limiet, die de site na 15 minuten weggooit.
 
    Ze zouden anders 14 dagen in de dumps blijven staan.
-   Een teruggezette database krijgt de vijf tabellen wel, maar leeg.
+   De accounts van supporters zelf, `supporters`, staan wel in de dump.
+   Een teruggezette database krijgt de tabellen hierboven wel, maar leeg.
    De importer vult de discussies binnen een kwartier opnieuw, en een sessie maak je door opnieuw in te loggen.
 
 3. Comprimeert de uitvoer met gzip en schrijft hem naar `<database>-<datum>T<tijd>Z.sql.gz`, in UTC, zoals `fansite_acc-2026-10-26T031507Z.sql.gz`.
@@ -193,6 +197,12 @@ Zet een dump terug in dezelfde database, dus nadat een migratie of een actie de 
 6. **Controleer de site.**
    Open `/bronnen` en de homepage, en kijk of de nieuwste artikelen in `/beheer/artikelen` er zijn.
    Draai daarna `rm ~/fansite-terugzetten.env`, want het bevat een wachtwoord.
+7. **Ga de opgeheven accounts na.**
+   Een dump van vóór een opheffing bevat dat account van een supporter nog, met de schermnaam en het e-mailadres.
+   De redactie gaat de opheffingen sinds de dump na en heft die accounts opnieuw op.
+   Dat kan alleen met de hand: het logboek van een opheffing bewaart geen nummer van het account (#1454), dus geen opdracht vindt ze terug.
+   De redactie gaat af op wat ze weet, zoals de mails van supporters die om een opheffing vroegen.
+   Dat accepteren we, want een dump terugzetten is zeldzaam.
 
 Op je eigen computer zet je een dump terug met `pnpm db:restore <bestand>`, in een lege database: maak er een met `docker compose exec mariadb mariadb -e 'CREATE DATABASE terugzetten'` en zet `DATABASE_URL` daarop.
 
@@ -215,13 +225,19 @@ Agents bevragen de kopie alleen (zie _The copy of the acceptance database_ in `A
 
 `packages/db/src/export-plan.ts` zegt van elke tabel van het schema wat de export ermee doet.
 
-| Tabellen                                                                                                          | Wat de kopie krijgt                                                                                                                                       |
-| ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `visitor_salts`, `visitor_hashes`, `discussions`, `admin_sessions`, `admin_login_links` en `admin_login_attempts` | Alleen de structuur, zonder rijen                                                                                                                         |
-| `admin_users`                                                                                                     | Elk account met het adres `beheerder-<id>@example.invalid` en de voornaam `Account <id>`, en het echte nummer, de rol, de keuze voor de mail en de tijden |
-| Alle andere tabellen, en `__drizzle_migrations`                                                                   | Alle rijen                                                                                                                                                |
-| `acceptance_copy`, een tabel die alleen in de kopie bestaat                                                       | Eén rij met `dumped_at`, de tijd van de dump op de host, en `loaded_at`, de tijd van het laden, in UTC                                                    |
+| Tabellen                                                                                                             | Wat de kopie krijgt                                                                                                                                       |
+| -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `visitor_salts`, `visitor_hashes`, `discussions`, `admin_sessions`, `admin_login_links` en `admin_login_attempts`    | Alleen de structuur, zonder rijen                                                                                                                         |
+| `supporters`, `supporter_sessions`, `supporter_login_links`, `supporter_login_attempts` en `supporter_email_changes` | Alleen de structuur, zonder rijen: geen account van een supporter, ook niet met een verzonnen adres                                                       |
+| `admin_users`                                                                                                        | Elk account met het adres `beheerder-<id>@example.invalid` en de voornaam `Account <id>`, en het echte nummer, de rol, de keuze voor de mail en de tijden |
+| Alle andere tabellen, en `__drizzle_migrations`                                                                      | Alle rijen                                                                                                                                                |
+| `acceptance_copy`, een tabel die alleen in de kopie bestaat                                                          | Eén rij met `dumped_at`, de tijd van de dump op de host, en `loaded_at`, de tijd van het laden, in UTC                                                    |
 
+De kopie krijgt geen account van een supporter, omdat een schermnaam van een echte persoon is en vaak herkenbaar.
+De tabellen staan er wel, dus op de kopie maak je lokaal een nieuw account door je aan te melden.
+De regel voor de tabellen van de spellen die nog komen: zo'n tabel komt mee, maar de kolom die naar een supporter verwijst wordt leeg (`NULL`).
+Zo zijn de cijfers en de voorspellingen te bekijken, maar horen ze bij niemand.
+Een test in `packages/db/src/export.test.ts` faalt voor een tabel die een verwijzing naar een supporter meeneemt, en voor een nieuwe tabel van een account die niet leeg blijft.
 De export leest het echte adres en de echte voornaam van een account niet: de query vraagt de database om de verzonnen waarden.
 Wie wat deed, staat in `audit_log`, `articles`, `article_versions`, `match_edits` en `match_reports` als het nummer van een account, en dat nummer blijft kloppen.
 De export vraagt `mysqldump` om elke tabel bij naam.

@@ -990,6 +990,12 @@ Daarom bewaart de browser van wie het beheer opent een teken in `localStorage`, 
   Wie het zelf maakt, ziet een koppeling naar `/beheer` en komt bij de inlogpagina uit.
 - De rooktest controleert dat het HTML van geen enkele publieke pagina naar het beheer verwijst.
 
+De kop toont de supporterknop op dezelfde manier, voor supporters met een account (alleen als accounts aan staan).
+De server stuurt op elke pagina de link Inloggen, voor iedereen gelijk.
+`src/app/fans/layout.tsx` geeft de sessie onder `/fans` aan `SupporterMarker`, dat de schermnaam bewaart in `localStorage` onder de sleutel `fansite-fans` of de sleutel weghaalt (`src/supporter-marker.ts`).
+`SupporterButton` leest het teken met `useSyncExternalStore` en toont de initialen en de link naar Mijn account.
+Het teken geeft geen toegang, en `src/public-pages.test.ts` bewaakt dat geen publieke pagina de sessie of het cookie van een supporter noemt.
+
 Het formulier van een wedstrijdverslag bewaart zijn invoer ook in `localStorage`, onder de sleutel `fansite-verslag-<id van de wedstrijd>` (`src/beheer/report-draft.ts`), zodat een opslag die mislukt niets kost.
 Bij het verlaten van een veld staan de waarden van het formulier en het moment van bewaren erin, en niets meer.
 De sleutel gaat weg na een geslaagde opslag (`ReportDraftNotice`, op de pagina met `?gedaan=`, één keer per opslag dankzij `fansite-verslag-<id>-opgeslagen`), bij uitloggen (`AdminMarker` met `loggedOut`, op de inlogpagina na `?uitgelogd=1`) en na dertig dagen.
