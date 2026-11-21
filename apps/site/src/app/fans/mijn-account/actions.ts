@@ -1,7 +1,8 @@
 'use server'
 
+import { isFansPartOn } from '@fansite/shared/fans-env'
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { after } from 'next/server'
 
 import { getDatabase } from '#src/database'
@@ -24,6 +25,7 @@ import { changeScreenName } from '#src/fans/change-name'
 import { closeAccount, closePaths, isFreshConfirmation } from '#src/fans/close-account'
 import { logInPaths } from '#src/fans/log-in'
 import { setInRankings } from '#src/fans/rankings'
+import { setReminder } from '#src/fans/reminder'
 import { requireSupporter, supporterCookieName, supporterToken } from '#src/fans/require-supporter'
 import { signUpPaths } from '#src/fans/sign-up'
 import { errorMessages } from '#src/fans/sign-up-form'
@@ -170,6 +172,24 @@ export async function saveRankings(_previous: RankingsState, formData: FormData)
   await setInRankings(getDatabase().db, supporterId, on)
 
   return { on, saved: true }
+}
+
+/**
+ * Saves the switch "Herinnering per e-mail" and goes back to Mijn account with a notice. It
+ * exists only while the Prognose is on. A form without JavaScript sends the box only when it is
+ * on, so a missing box is off.
+ */
+export async function saveReminder(formData: FormData) {
+  const { supporterId } = await requireSupporter({ from: signUpPaths.account })
+
+  if (!isFansPartOn('prognose')) {
+    notFound()
+  }
+
+  const on = formData.get(accountFields.remindByEmail) === 'aan'
+
+  await setReminder(getDatabase().db, supporterId, on)
+  redirect(`${signUpPaths.account}?melding=${on ? 'herinnering-aan' : 'herinnering-uit'}`)
 }
 
 /** After a change of address: the message to the old address, and back to Mijn account. */

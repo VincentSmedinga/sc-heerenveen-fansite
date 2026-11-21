@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { Button, Card, DescriptionList, Form, Heading, Link, Notice, Page, Text } from '@fansite/design-system'
+import { isFansPartOn } from '@fansite/shared/fans-env'
 import { eq } from 'drizzle-orm'
 
 import { getDatabase } from '#src/database'
@@ -17,6 +18,7 @@ import { pageAreas } from '#src/page-areas'
 
 import { logOut, logOutEverywhere } from './actions'
 import { RankingsSwitch } from './RankingsSwitch'
+import { ReminderSwitch } from './ReminderSwitch'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,7 +42,7 @@ export default async function MyAccountPage({
   const supporter = await requireSupporter({ blocked: 'allow', from: signUpPaths.account })
   const { users } = supporterKind.tables
   const [account] = await getDatabase()
-    .db.select({ inRankings: users.inRankings })
+    .db.select({ inRankings: users.inRankings, remindByEmail: users.remindByEmail })
     .from(users)
     .where(eq(users.id, supporter.supporterId))
   const games = await playedGames(getDatabase().db, supporter.supporterId)
@@ -86,6 +88,9 @@ export default async function MyAccountPage({
             </DescriptionList.Item>
           </DescriptionList>
           {supporter.blocked ? null : <RankingsSwitch on={account?.inRankings ?? true} />}
+          {supporter.blocked || !isFansPartOn('prognose') ? null : (
+            <ReminderSwitch on={account?.remindByEmail ?? false} />
+          )}
         </Card>
       </Page.Cell>
       <Page.Cell area="played">
