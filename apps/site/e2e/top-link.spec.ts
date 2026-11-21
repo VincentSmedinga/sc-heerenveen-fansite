@@ -82,6 +82,28 @@ test.describe('the link to the top in the footer', () => {
     const topLink = page.locator('.hf-page-top-link')
 
     await scrollTo(page, windowHeight - 1)
+    console.log(
+      'DEBUG1491',
+      JSON.stringify(
+        await page.evaluate(() => ({
+          ch: document.documentElement.clientHeight,
+          cw: document.documentElement.clientWidth,
+          ih: window.innerHeight,
+          sh: document.documentElement.scrollHeight,
+          svh: (() => {
+            const d = document.createElement('div')
+            d.style.height = '100svh'
+            document.body.append(d)
+            const h = d.getBoundingClientRect().height
+            d.remove()
+            return h
+          })(),
+          sw: document.documentElement.scrollWidth,
+          vis: getComputedStyle(document.querySelector('.hf-page-top-link')!).visibility,
+          y: window.scrollY,
+        })),
+      ),
+    )
     await expect(topLink).toHaveCSS('visibility', 'hidden')
     await scrollTo(page, windowHeight)
     await expect(topLink).toHaveCSS('visibility', 'hidden')
