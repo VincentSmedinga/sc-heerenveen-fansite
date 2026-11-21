@@ -14,13 +14,19 @@ describe('the screens of the admin', () => {
   })
 
   const work = ['Beheer', 'Berichten', 'Artikelen', 'Wedstrijden', 'Spelers', 'Stadions', 'Clubs', 'Bezoek']
+  const withSupporters = [...work, 'Supporters']
 
   it('shows an editor every screen but the accounts', () => {
-    expect(screensFor('editor').map(({ label }) => label)).toEqual([...work, 'Mijn account'])
+    expect(screensFor('editor').map(({ label }) => label)).toEqual([...withSupporters, 'Mijn account'])
+  })
+
+  it('hides the supporters while the accounts are off', () => {
+    expect(screensFor('editor', false).map(({ label }) => label)).toEqual([...work, 'Mijn account'])
+    expect(screensFor('owner', false).map(({ label }) => label)).toEqual([...work, 'Accounts', 'Mijn account'])
   })
 
   it('shows the owner every screen, the accounts too', () => {
-    expect(screensFor('owner').map(({ label }) => label)).toEqual([...work, 'Accounts', 'Mijn account'])
+    expect(screensFor('owner').map(({ label }) => label)).toEqual([...withSupporters, 'Accounts', 'Mijn account'])
   })
 
   it('has every address once, below /beheer', () => {
@@ -39,6 +45,7 @@ describe('the screens of the admin', () => {
     ['/beheer/clubs/kwaliteit', '/beheer/clubs'],
     ['/beheer/clubs/sv-proefdorp', '/beheer/clubs'],
     ['/beheer/bezoek', '/beheer/bezoek'],
+    ['/beheer/supporters/4', '/beheer/supporters'],
     ['/beheer/accounts/4', '/beheer/accounts'],
     ['/beheer/mijn-account', '/beheer/mijn-account'],
   ])('puts %s under %s', (pathname, href) => {

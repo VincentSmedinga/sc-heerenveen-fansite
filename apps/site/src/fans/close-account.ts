@@ -1,13 +1,20 @@
 import type { Database } from '@fansite/db/client'
 
-import { supporterEmailChanges, supporterLoginLinks, supporters, supporterSessions } from '@fansite/db/schema'
+import {
+  supporterBlockedAddresses,
+  supporterEmailChanges,
+  supporterLoginLinks,
+  supporters,
+  supporterSessions,
+} from '@fansite/db/schema'
 import { eq } from 'drizzle-orm'
 
 import { hashOf } from '../login/tokens'
+import { blockedAddressHash } from './blocked-addresses'
 
 // Closing the account of a supporter (issue 1454). The one function that removes an account:
-// the supporter closes it on Mijn account, and later the editors (#1458) and the clean-up of
-// unused accounts (#1460) call it too.
+// the supporter closes it on Mijn account, and the clean-up of unused accounts (#1460) calls it
+// too.
 
 /** The three pages of closing: the consequences, the confirmation, and after. */
 export const closePaths = {
@@ -26,13 +33,27 @@ export const confirmationLifetime = 10 * 60 * 1000
  * tables of the games refer to the account with `ON DELETE SET NULL` (see my-data.ts). The
  * requests of the limits hold only a hash, and go after 15 minutes by themselves.
  *
- * It keeps nothing of the account. A caller that must keep something, such as the hash of the
- * address of a blocked account (#1458), does that before it calls this. It writes one line in
- * the log, without the number, the name or the address. It gives whether there was an account
- * to remove.
+ * It keeps nothing of the account, with one exception (issue 1458): of a blocked account it
+ * keeps the SHA-256 of the address and the moment, in the same transaction, so the supporter
+ * can't sign up again with it for 12 months. A caller doesn't have to do anything for that. It
+ * writes one line in the log, without the number, the name or the address. It gives whether
+ * there was an account to remove.
  */
-export async function closeAccount(db: Database, supporterId: number): Promise<boolean> {
+export async function closeAccount(db: Database, supporterId: number, now = new Date()): Promise<boolean> {
   const removed = await db.transaction(async (tx) => {
+    const [account] = await tx
+      .select({ disabledAt: supporters.disabledAt, email: supporters.email })
+      .from(supporters)
+      .where(eq(supporters.id, supporterId))
+      .for('update')
+
+    if (account !== undefined && account.disabledAt !== null) {
+      await tx
+        .insert(supporterBlockedAddresses)
+        .values({ addressHash: blockedAddressHash(account.email), blockedAt: now })
+        .onDuplicateKeyUpdate({ set: { blockedAt: now } })
+    }
+
     await tx.delete(supporterEmailChanges).where(eq(supporterEmailChanges.supporterId, supporterId))
     await tx.delete(supporterLoginLinks).where(eq(supporterLoginLinks.userId, supporterId))
     await tx.delete(supporterSessions).where(eq(supporterSessions.userId, supporterId))

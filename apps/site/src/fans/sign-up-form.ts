@@ -32,18 +32,7 @@ export function errorMessages(errors: SignUpErrors): SignUpState['errors'] {
   return { email: emailMessage(errors.email), screenName: screenNameMessage(errors.screenName) }
 }
 
-function emailMessage(error: SignUpErrors['email']) {
-  switch (error) {
-    case 'empty':
-      return 'Vul je e-mailadres in.'
-    case 'invalid':
-      return 'Dit e-mailadres klopt niet. Kijk of er een @ in staat.'
-    case undefined:
-      return undefined
-  }
-}
-
-function screenNameMessage(error: SignUpErrors['screenName']) {
+export function screenNameMessage(error: SignUpErrors['screenName']) {
   switch (error?.problem) {
     case 'character':
       return `Gebruik alleen letters, cijfers, een spatie, - of _. Dit teken kan niet: ${error.character}`
@@ -59,6 +48,17 @@ function screenNameMessage(error: SignUpErrors['screenName']) {
       return 'Zet niet twee spaties achter elkaar.'
     case 'taken':
       return 'Die schermnaam is al bezet. Kies een andere.'
+    case undefined:
+      return undefined
+  }
+}
+
+function emailMessage(error: SignUpErrors['email']) {
+  switch (error) {
+    case 'empty':
+      return 'Vul je e-mailadres in.'
+    case 'invalid':
+      return 'Dit e-mailadres klopt niet. Kijk of er een @ in staat.'
     case undefined:
       return undefined
   }

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-import { adminCookie } from './admin'
+import { adminCookie, madeUpSupporterId } from './admin'
 import { articleIdOf, testArticles } from './articles'
 import { clubPair } from './club-pair'
 import { earlierSeasonSlug } from './earlier-season'
@@ -60,6 +60,8 @@ const screens = [
   '/beheer/spelers/kwaliteit/plaatsen',
   '/beheer/spelers/kwaliteit/plaatsen/vragen',
   '/beheer/bezoek',
+  '/beheer/supporters',
+  '/beheer/supporters/{supporter}',
   '/beheer/accounts',
   '/beheer/accounts/nieuw',
   '/beheer/mijn-account',
@@ -77,6 +79,7 @@ async function withNumbers(path: string) {
     .replace('{person}', path.includes('{person}') ? String((await mergePair()).person) : '')
     .replace('{otherPerson}', path.includes('{otherPerson}') ? String((await mergePair()).other) : '')
     .replace('{club}', path.includes('{club}') ? String((await clubPair()).club) : '')
+    .replace('{supporter}', path.includes('{supporter}') ? String(await madeUpSupporterId()) : '')
     .replace('{otherClub}', path.includes('{otherClub}') ? String((await clubPair()).other) : '')
 }
 

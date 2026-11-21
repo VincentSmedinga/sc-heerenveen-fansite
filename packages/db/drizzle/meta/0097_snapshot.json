@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "1ffa9c5e-a945-4ba3-8453-c8bb284e5e98",
+  "id": "a1384b10-27dc-4456-ab63-4b1e6795cd6d",
   "prevId": "379d4da1-39d5-4bfe-b040-b7ea5c94e06e",
   "tables": {
     "admin_login_attempts": {
@@ -592,7 +592,7 @@
         },
         "action": {
           "name": "action",
-          "type": "enum('item.hide','item.show','item.approve','item.unapprove','article.create','article.update','article.publish','article.unpublish','match.edit','match.undo','match.caught-up','match.differs','match.take-over','match.keep','match.add','match.delete','stadium.save','stadium.reset','club-name.save','club-name.reset','player.stats-differ','player.stats-take-over','player.stats-keep','player.add','player.edit','player.remove','player.field-take-over','player.field-keep','person.edit','person.merge','account.create','account.edit','account.disable','account.enable','club.edit','ground.create','ground.edit','ground-name.save','home-ground.save','gap.mark','gap.renew','gap.unmark','club.merge')",
+          "type": "enum('item.hide','item.show','item.approve','item.unapprove','article.create','article.update','article.publish','article.unpublish','match.edit','match.undo','match.caught-up','match.differs','match.take-over','match.keep','match.add','match.delete','stadium.save','stadium.reset','club-name.save','club-name.reset','player.stats-differ','player.stats-take-over','player.stats-keep','player.add','player.edit','player.remove','player.field-take-over','player.field-keep','person.edit','person.merge','account.create','account.edit','account.disable','account.enable','club.edit','ground.create','ground.edit','ground-name.save','home-ground.save','gap.mark','gap.renew','gap.unmark','club.merge','supporter.rename','supporter.block','supporter.unblock','supporter.forget-address')",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -5039,136 +5039,6 @@
         }
       }
     },
-    "predictions": {
-      "name": "predictions",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "supporter_id": {
-          "name": "supporter_id",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "match_id": {
-          "name": "match_id",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "halftime_home": {
-          "name": "halftime_home",
-          "type": "smallint unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "halftime_away": {
-          "name": "halftime_away",
-          "type": "smallint unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "full_time_home": {
-          "name": "full_time_home",
-          "type": "smallint unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "full_time_away": {
-          "name": "full_time_away",
-          "type": "smallint unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "datetime",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(UTC_TIMESTAMP())"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "datetime",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(UTC_TIMESTAMP())"
-        }
-      },
-      "indexes": {
-        "predictions_match_id_idx": {
-          "name": "predictions_match_id_idx",
-          "columns": [
-            "match_id"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "predictions_supporter_id_supporters_id_fk": {
-          "name": "predictions_supporter_id_supporters_id_fk",
-          "tableFrom": "predictions",
-          "tableTo": "supporters",
-          "columnsFrom": [
-            "supporter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "predictions_match_id_matches_id_fk": {
-          "name": "predictions_match_id_matches_id_fk",
-          "tableFrom": "predictions",
-          "tableTo": "matches",
-          "columnsFrom": [
-            "match_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "predictions_id": {
-          "name": "predictions_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {
-        "predictions_supporter_id_match_id_unique": {
-          "name": "predictions_supporter_id_match_id_unique",
-          "columns": [
-            "supporter_id",
-            "match_id"
-          ]
-        }
-      },
-      "checkConstraint": {
-        "predictions_goals_in_range": {
-          "name": "predictions_goals_in_range",
-          "value": "`predictions`.`halftime_home` <= 9 and `predictions`.`halftime_away` <= 9 and `predictions`.`full_time_home` <= 9 and `predictions`.`full_time_away` <= 9"
-        }
-      }
-    },
     "robots_txt": {
       "name": "robots_txt",
       "columns": {
@@ -6045,6 +5915,59 @@
       },
       "checkConstraint": {}
     },
+    "supporter_blocked_addresses": {
+      "name": "supporter_blocked_addresses",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "address_hash": {
+          "name": "address_hash",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "blocked_at": {
+          "name": "blocked_at",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "supporter_blocked_addresses_blocked_at_idx": {
+          "name": "supporter_blocked_addresses_blocked_at_idx",
+          "columns": [
+            "blocked_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "supporter_blocked_addresses_id": {
+          "name": "supporter_blocked_addresses_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "supporter_blocked_addresses_address_hash_unique": {
+          "name": "supporter_blocked_addresses_address_hash_unique",
+          "columns": [
+            "address_hash"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    },
     "supporter_email_changes": {
       "name": "supporter_email_changes",
       "columns": {
@@ -6475,6 +6398,14 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "screen_name_edited_by_editors": {
+          "name": "screen_name_edited_by_editors",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
         }
       },
       "indexes": {},

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-import { adminAccountId, adminCookie, type E2eRole } from './admin'
+import { adminAccountId, adminCookie, type E2eRole, madeUpSupporterId } from './admin'
 import { articleIdOf, testArticles } from './articles'
 import { checkPage } from './check-page'
 import { clubPair } from './club-pair'
@@ -321,6 +321,17 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'author', path: '/beheer/artikelen/{published}', status: 404 },
   { admin: 'author', path: '/beheer/artikelen/{published}/voorbeeld', status: 404 },
   { admin: 'author', path: '/beheer/artikelen/{published}/versies/1', status: 404 },
+  // The supporters are for the owner and the editors (issue 1458); an author gets 404.
+  { admin: 'owner', path: '/beheer/supporters', status: 200 },
+  { admin: 'owner', path: '/beheer/supporters?zoek=proef', status: 200 },
+  { admin: 'owner', path: '/beheer/supporters?fout=weg', status: 200 },
+  { admin: 'owner', path: '/beheer/supporters/{supporter}', status: 200 },
+  { admin: 'owner', path: '/beheer/supporters/{supporter}?gedaan=naam', status: 200 },
+  { admin: 'owner', path: '/beheer/supporters/999999', status: 404 },
+  { admin: 'editor', path: '/beheer/supporters', status: 200 },
+  { admin: 'editor', path: '/beheer/supporters/{supporter}', status: 200 },
+  { admin: 'author', path: '/beheer/supporters', status: 404 },
+  { admin: 'author', path: '/beheer/supporters/{supporter}', status: 404 },
   // The accounts are for the owner (issue 1156): the list, the form for a new one and the form
   // of an account. An editor and an author get "niet gevonden". Mijn account is for every role.
   { admin: 'owner', path: '/beheer/accounts', status: 200 },
@@ -550,6 +561,7 @@ async function withNumbers(path: string) {
     ? path
         .replace('{draft}', String(await articleIdOf(testArticles.draft.slug)))
         .replace('{account}', path.includes('{account}') ? String(await adminAccountId('editor')) : '{account}')
+        .replace('{supporter}', path.includes('{supporter}') ? String(await madeUpSupporterId()) : '{supporter}')
         .replace('{published}', String(await articleIdOf(testArticles.published.slug)))
         .replace('{match}', path.includes('{match}') ? String(await matchId()) : '{match}')
         .replace('{held}', path.includes('{held}') ? String(await heldMatchId()) : '{held}')
