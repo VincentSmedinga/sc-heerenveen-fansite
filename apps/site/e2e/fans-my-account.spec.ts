@@ -50,11 +50,11 @@ test.describe('without JavaScript', () => {
 
     // An error shows in the summary and at the field.
     await page.getByLabel('Nieuwe schermnaam').fill('Fansite_Redactie')
-    await page.getByRole('button', { name: 'Opslaan' }).click()
+    await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
     await expect(page.getByRole('link', { name: 'Die naam lijkt op de club, de site of de redactie.' })).toBeVisible()
 
     await page.getByLabel('Nieuwe schermnaam').fill(name)
-    await page.getByRole('button', { name: 'Opslaan' }).click()
+    await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
     await expect(page).toHaveURL(/\/fans\/mijn-account\?melding=schermnaam$/)
     await expect(page.getByText('Je schermnaam is gewijzigd.')).toBeVisible()
     await expect(page.getByRole('definition').first()).toContainText(name)
@@ -63,7 +63,7 @@ test.describe('without JavaScript', () => {
     await expect(
       page.getByText(/^Je wijzigde je naam op \d+ \w+\. Vanaf \d+ \w+ kun je hem weer wijzigen\.$/),
     ).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Opslaan' })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /^Opslaan/ })).toHaveCount(0)
   })
 
   test('changes the address with the code from the mail, and tells the old address', async ({ page }) => {
@@ -114,7 +114,7 @@ test.describe('without JavaScript', () => {
 
     await expect(toggle).toBeChecked()
     await toggle.uncheck()
-    await page.getByRole('button', { name: 'Opslaan' }).click()
+    await page.getByRole('button', { exact: true, name: 'Opslaan naam in de standen' }).click()
     await expect(page.getByText('Je naam staat niet meer in de standen.')).toBeVisible()
     await expect(page.getByRole('switch', { name: 'Naam in de standen' })).not.toBeChecked()
 
@@ -123,10 +123,45 @@ test.describe('without JavaScript', () => {
   })
 })
 
+test('turns the reminder on and off, and keeps the choice, without JavaScript', async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false })
+  const page = await context.newPage()
+
+  await account(page)
+  await page.goto('/fans/mijn-account')
+
+  const toggle = page.getByRole('switch', { name: 'Herinnering per e-mail' })
+
+  await expect(toggle).not.toBeChecked()
+  await toggle.check()
+  await page.getByRole('button', { name: 'Opslaan herinnering' }).click()
+  await expect(page.getByText('De herinnering staat aan.')).toBeVisible()
+  await expect(page.getByRole('switch', { name: 'Herinnering per e-mail' })).toBeChecked()
+  await page.goto('/fans/mijn-account/gegevens')
+  await expect(page.getByText('Herinnering per e-mail').locator('xpath=following-sibling::dd')).toHaveText('Ja')
+  await page.goto('/fans/mijn-account')
+  await page.getByRole('switch', { name: 'Herinnering per e-mail' }).uncheck()
+  await page.getByRole('button', { name: 'Opslaan herinnering' }).click()
+  await expect(page.getByText('De herinnering staat uit.')).toBeVisible()
+  await expect(page.getByRole('switch', { name: 'Herinnering per e-mail' })).not.toBeChecked()
+  await context.close()
+})
+
+test('saves the reminder at once with JavaScript and keeps it', async ({ page }) => {
+  await account(page)
+  await page.goto('/fans/mijn-account')
+  await page.getByRole('switch', { name: 'Herinnering per e-mail' }).check()
+  await expect(page.getByText('De herinnering staat aan.')).toBeVisible()
+  await expect(page.getByRole('switch', { name: 'Herinnering per e-mail' })).toBeChecked()
+  await checkPage(page)
+  await page.reload()
+  await expect(page.getByRole('switch', { name: 'Herinnering per e-mail' })).toBeChecked()
+})
+
 test('saves the switch at once with JavaScript', async ({ page }) => {
   await account(page)
   await page.goto('/fans/mijn-account')
-  await expect(page.getByRole('button', { name: 'Opslaan' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /^Opslaan/ })).toHaveCount(0)
   await page.getByRole('switch', { name: 'Naam in de standen' }).uncheck()
   await expect(page.getByText('Je naam staat niet meer in de standen.')).toBeVisible()
   await page.reload()
@@ -152,11 +187,11 @@ test('checks the pages of Mijn account with axe, with an error and with the wait
   await page.goto('/fans/mijn-account/schermnaam')
   await checkPage(page)
   await page.getByLabel('Nieuwe schermnaam').fill('a@b')
-  await page.getByRole('button', { name: 'Opslaan' }).click()
+  await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
   await expect(page.locator('#fouten')).toBeFocused()
   await checkPage(page)
   await page.getByLabel('Nieuwe schermnaam').fill(`Axe ${id}`.slice(0, 20))
-  await page.getByRole('button', { name: 'Opslaan' }).click()
+  await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
   await expect(page).toHaveURL(/\/fans\/mijn-account\?melding=schermnaam$/)
   await expect(page.locator('#melding')).toBeFocused()
   await checkPage(page)

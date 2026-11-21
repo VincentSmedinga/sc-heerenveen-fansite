@@ -34,6 +34,7 @@ const query = {
         email: 'tjalle@example.org',
         inRankings: false,
         lastVisitOn: '2026-12-19',
+        remindByEmail: false,
         screenName: 'Tjalle99',
         screenNameChangedAt: null,
       },
@@ -65,6 +66,7 @@ vi.mock('./actions', () => ({
   logOutEverywhere: vi.fn(),
   requestEmailChange: vi.fn(),
   saveRankings: vi.fn(),
+  saveReminder: vi.fn(),
 }))
 
 beforeEach(() => {
@@ -98,7 +100,7 @@ describe('Mijn account', () => {
     expect(html).toMatch(/<input[^>]*role="switch"/)
     expect(html).not.toMatch(/<input[^>]*role="switch"[^>]*checked/)
     expect(html).toContain('Uit: je speelt mee, maar je naam staat niet in de standen.')
-    expect(html).toContain('>Opslaan</button>')
+    expect(html).toContain('>Opslaan<span class="hf-visually-hidden"> naam in de standen</span></button>')
     expect(html).toMatch(/<section[^>]*aria-label="Uitloggen en je account"[\s\S]*hf-card-soft/)
   })
 
@@ -230,6 +232,33 @@ describe('Mijn account, with the cards of #1454', () => {
   })
 })
 
+describe('the reminder by e-mail on Mijn account', () => {
+  it('is a switch with its explanation, off, and the notice at the top says what was saved', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    vi.stubEnv('FANS_PROGNOSE', 'on')
+
+    const html = await render('herinnering-aan')
+
+    expect(html).toMatch(/<input[^>]*id="herinnering"[^>]*role="switch"/)
+    expect(html).not.toMatch(/<input[^>]*id="herinnering"[^>]*checked/)
+    expect(html).toContain('Herinnering per e-mail')
+    expect(html).toContain(
+      'Eén bericht de dag voor een wedstrijd, alleen als je dan nog niet hebt voorspeld. In het bericht staat een link om het uit te zetten.',
+    )
+    expect(html).toContain('De herinnering staat aan.')
+    expect(await render('herinnering-uit')).toContain('De herinnering staat uit.')
+  })
+
+  it('is not there while the Prognose is off', async () => {
+    vi.stubEnv('FANS_PROGNOSE', 'off')
+
+    const html = await render()
+
+    expect(html).not.toContain('Herinnering per e-mail')
+    expect(html).toMatch(/<input[^>]*role="switch"/)
+  })
+})
+
 describe('the page of all the data', () => {
   it('shows everything the account holds, what others see, and nothing played yet', async () => {
     vi.stubEnv('FANS_ACCOUNTS', 'on')
@@ -246,6 +275,7 @@ describe('the page of all the data', () => {
       ['Gemaakt op', '3 december 2026'],
       ['Laatste bezoek', '19 december 2026'],
       ['In de standen', 'Nee'],
+      ['Herinnering per e-mail', 'Nee'],
       ['Naam gewijzigd', 'Nooit'],
     ]) {
       expect(html).toContain(`<dt>${term}</dt><dd>${value}</dd>`)

@@ -28,7 +28,7 @@ async function rows(sql: string, values: unknown[] = []) {
   return result
 }
 
-describe('the migration 0096_add_supporter_blocking', () => {
+describe('the migration 0097_add_supporter_blocking', () => {
   it('makes the table for the hashes in utf8mb4, empty, with a unique hash', async () => {
     expect(await rows('SELECT COUNT(*) AS total FROM supporter_blocked_addresses')).toEqual([{ total: 0 }])
     expect(

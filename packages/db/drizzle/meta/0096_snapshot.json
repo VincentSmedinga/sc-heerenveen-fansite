@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "d840ae8d-acf9-4474-a89c-22ba71a2517d",
+  "id": "379d4da1-39d5-4bfe-b040-b7ea5c94e06e",
   "prevId": "99623e74-a2a9-4c6c-8654-bb9700f2910c",
   "tables": {
     "admin_login_attempts": {
@@ -592,7 +592,7 @@
         },
         "action": {
           "name": "action",
-          "type": "enum('item.hide','item.show','item.approve','item.unapprove','article.create','article.update','article.publish','article.unpublish','match.edit','match.undo','match.caught-up','match.differs','match.take-over','match.keep','match.add','match.delete','stadium.save','stadium.reset','club-name.save','club-name.reset','player.stats-differ','player.stats-take-over','player.stats-keep','player.add','player.edit','player.remove','player.field-take-over','player.field-keep','person.edit','person.merge','account.create','account.edit','account.disable','account.enable','club.edit','ground.create','ground.edit','ground-name.save','home-ground.save','gap.mark','gap.renew','gap.unmark','club.merge','supporter.rename','supporter.block','supporter.unblock','supporter.forget-address')",
+          "type": "enum('item.hide','item.show','item.approve','item.unapprove','article.create','article.update','article.publish','article.unpublish','match.edit','match.undo','match.caught-up','match.differs','match.take-over','match.keep','match.add','match.delete','stadium.save','stadium.reset','club-name.save','club-name.reset','player.stats-differ','player.stats-take-over','player.stats-keep','player.add','player.edit','player.remove','player.field-take-over','player.field-keep','person.edit','person.merge','account.create','account.edit','account.disable','account.enable','club.edit','ground.create','ground.edit','ground-name.save','home-ground.save','gap.mark','gap.renew','gap.unmark','club.merge')",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -5915,59 +5915,6 @@
       },
       "checkConstraint": {}
     },
-    "supporter_blocked_addresses": {
-      "name": "supporter_blocked_addresses",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "address_hash": {
-          "name": "address_hash",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "blocked_at": {
-          "name": "blocked_at",
-          "type": "datetime",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "supporter_blocked_addresses_blocked_at_idx": {
-          "name": "supporter_blocked_addresses_blocked_at_idx",
-          "columns": [
-            "blocked_at"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {
-        "supporter_blocked_addresses_id": {
-          "name": "supporter_blocked_addresses_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {
-        "supporter_blocked_addresses_address_hash_unique": {
-          "name": "supporter_blocked_addresses_address_hash_unique",
-          "columns": [
-            "address_hash"
-          ]
-        }
-      },
-      "checkConstraint": {}
-    },
     "supporter_email_changes": {
       "name": "supporter_email_changes",
       "columns": {
@@ -6355,6 +6302,14 @@
           "autoincrement": false,
           "default": true
         },
+        "remind_by_email": {
+          "name": "remind_by_email",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "datetime",
@@ -6390,14 +6345,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "screen_name_edited_by_editors": {
-          "name": "screen_name_edited_by_editors",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
         }
       },
       "indexes": {},

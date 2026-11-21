@@ -7123,6 +7123,27 @@
 - **Waarom:** één import in een openbare pagina of in de layout maakt die pagina per persoon, en dat zie je niet aan de pagina.
 - **Alternatieven:** alleen de HTML van de layout testen (een pagina die zelf het cookie leest, valt er dan buiten).
 
+## De herinnering per e-mail staat standaard uit
+
+- **Datum:** 20 november 2026
+- **Besluit:** de herinnering per e-mail (`supporters.remind_by_email`) is er vanaf het begin, maar een supporter zet hem zelf aan.
+  De site vraagt er niet naar bij het aanmaken van een account, zodat de aanmelding kort blijft.
+- **Waarom:** het is de eerste e-mail die geen inlogbericht is, en de site mailt alleen wat een supporter zelf aanzet.
+- **Alternatieven:** standaard aan met een afmeldlink.
+
+- **Datum:** 21 november 2026
+- **Besluit:** de Switch "Herinnering per e-mail" staat in de kaart "Jouw gegevens" onder "Naam in de standen", en is er alleen als de Prognose aan staat.
+  De serveractie `saveReminder` weigert met "niet gevonden" als de Prognose uit staat.
+  Anders dan "Naam in de standen" bevestigt hij met een Notice bovenaan de pagina (`?melding=herinnering-aan` of `herinnering-uit`), die de focus krijgt, en niet in het formulier zelf.
+- **Waarom:** de herinnering hoort bij een spel, dus zonder Prognose heeft de keuze geen zin.
+  De pagina laadt na het opslaan opnieuw, en een Notice bovenaan werkt hetzelfde met en zonder JavaScript.
+- **Alternatieven:** de bevestiging in het formulier, zoals bij "Naam in de standen" (de bevestiging staat dan ver van de kop van de pagina).
+
+- **Datum:** 21 november 2026
+- **Besluit:** de keuze staat als rij "Herinnering per e-mail" op de pagina "Alles wat we van je bewaren", ook als de Prognose uit staat; dan staat er "Nee".
+- **Waarom:** de pagina toont alles wat de site van het account bewaart, en de kolom bestaat altijd.
+- **Alternatieven:** de rij weglaten zolang de Prognose uit staat (de pagina toont dan minder dan er bewaard is).
+
 ## De redactie beheert de accounts van supporters
 
 - **Datum:** 21 november 2026

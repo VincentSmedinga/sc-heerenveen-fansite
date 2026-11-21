@@ -55,6 +55,9 @@ export default async function MyDataPage() {
               {account.lastVisitOn === null ? 'Nog niet' : dayFormat.format(new Date(account.lastVisitOn))}
             </DescriptionList.Item>
             <DescriptionList.Item term="In de standen">{account.inRankings ? 'Ja' : 'Nee'}</DescriptionList.Item>
+            <DescriptionList.Item term="Herinnering per e-mail">
+              {account.remindByEmail ? 'Ja' : 'Nee'}
+            </DescriptionList.Item>
             <DescriptionList.Item term="Naam gewijzigd">
               {account.screenNameChangedAt === null ? 'Nooit' : dateFormat.format(account.screenNameChangedAt)}
             </DescriptionList.Item>

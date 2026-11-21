@@ -41,6 +41,9 @@ export function RankingsSwitch({ on }: { on: boolean }) {
       {hydrated ? null : (
         <Button appearance="soft" type="submit">
           Opslaan
+          <Text as="span" className="hf-visually-hidden">
+            {' naam in de standen'}
+          </Text>
         </Button>
       )}
       <Notice>{state.saved === true ? rankingsMessage(state.on) : null}</Notice>
