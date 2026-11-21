@@ -4509,7 +4509,7 @@
   Een bezoek aan een pagina onder `/fans` maakt de kolom weer leeg (`currentSupporter`), en de volgende termijn begint bij dat bezoek.
   De mail telt pas als verstuurd als de mailserver hem aannam; een mislukte mail wordt bij de volgende run opnieuw geprobeerd.
   Een account gaat alleen weg als zijn mail 30 dagen oud is en er geen bezoek na die dag is.
-  Met `FANS_ACCOUNTS` uit doet de stap niets met accounts, en omdat de mail dan ook niet uitgaat, begint de termijn van 30 dagen pas bij een mail die na het weer aanzetten uitgaat.
+  Met `FANS_ACCOUNTS` uit doet de stap niets met accounts, behalve dat hij de kolom van een eerder verstuurde mail leegmaakt: niemand kon intussen inloggen, dus de termijn van 30 dagen begint pas bij een mail die na het weer aanzetten uitgaat.
   Een geblokkeerd account volgt dezelfde regels, en `closeAccount` bewaart de hash van het adres.
   De stap haalt bij elke run ook de verlopen onbevestigde aanmeldingen weg uit `supporter_login_links`, ook met accounts uit, zodat zo'n adres er hoogstens een dag staat.
   Het logboek noemt alleen aantallen.
@@ -4518,5 +4518,6 @@
   Een kwartier is ruim genoeg voor de dagelijkse dump van 03:17, dus die bevat geen verlopen aanmelding meer; de dump laat de tabel met links trouwens leeg.
   `closeAccount` en `sendMail` staan in `packages/db` en `packages/shared`, zodat de site en de importer dezelfde code gebruiken.
 - **Alternatieven:** een eigen opdracht voor cron (een tweede cronjob en een tweede lock); het aantal per dag in een eigen tabel bewaren (een tabel en een migratie voor iets dat de kolom al zegt); de volgende run bij een mislukte mail overslaan tot de volgende dag (een tijdelijke storing kost dan een dag).
-- **Let op:** een adres dat de mailserver blijft weigeren, blijft bij elke run tussen de eerste 20 staan; met 20 zulke accounts krijgt de rest geen mail.
+- **Let op:** de stap draait bij elke run, dus een mail die mislukt wordt elk kwartier opnieuw geprobeerd, tot 96 keer per dag.
+  Een adres dat de mailserver blijft weigeren, blijft bij elke run tussen de eerste 20 staan; met 20 zulke accounts krijgt de rest geen mail.
   Dat vraagt een tweede poging met een teller, en past niet bij zo weinig accounts.

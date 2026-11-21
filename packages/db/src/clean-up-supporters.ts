@@ -58,6 +58,10 @@ export async function cleanUpSupporters(
   const report: CleanUpReport = { closed: 0, failed: 0, mailed: 0, signUpsRemoved: await removeExpiredSignUps(db, now) }
 
   if (!isFansPartOn('accounts', env)) {
+    // A mail that went out before accounts were switched off no longer counts: nobody could
+    // log in to keep the account meanwhile, so the 30 days start again with a new mail.
+    await db.update(supporters).set({ unusedMailSentAt: null }).where(isNotNull(supporters.unusedMailSentAt))
+
     return report
   }
 
@@ -155,9 +159,9 @@ export async function removeExpiredSignUps(db: Database, now: Date) {
 export function unusedMailText(origin: string) {
   return [
     'Je account bij Fans op de sc Heerenveen Fansite is twee jaar niet gebruikt.',
-    'Over 30 dagen verdwijnt hij.',
+    'Over 30 dagen verdwijnt het.',
     '',
-    `Wil je hem houden? Log dan één keer in: ${origin}/fans/inloggen`,
+    `Wil je het houden? Log dan één keer in: ${origin}/fans/inloggen`,
     '',
     'Dan blijft je account en begint er een nieuwe termijn van twee jaar.',
     '',

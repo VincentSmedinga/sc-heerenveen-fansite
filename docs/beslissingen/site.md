@@ -6884,6 +6884,7 @@
 - **Waarom:** zo laat een aanmelding zonder bevestiging niets achter, en houdt niemand een naam vast met een adres dat hij niet heeft.
   De link en de code werken dan precies als bij het inloggen, met dezelfde code.
 - **Alternatieven:** het account meteen maken met een vlag "onbevestigd" (laat een rij achter en houdt de naam vast); een vijfde tabel voor aanmeldingen (het issue vraagt vier tabellen, en de rij lijkt op een inloglink).
+- **Later:** sinds _De import ruimt ongebruikte accounts van supporters op_ (21 november 2026) haalt ook de import een verlopen onbevestigde aanmelding weg, bij elke run, zodat het adres er niet blijft staan tot er een volgend verzoek komt.
 
 - **Datum:** 20 november 2026
 - **Besluit:** meldt een adres zich aan dat al een account heeft, dan krijgt het de mail om in te loggen, met een link naar dezelfde bevestigingspagina.

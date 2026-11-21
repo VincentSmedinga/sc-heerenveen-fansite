@@ -205,6 +205,20 @@ describe('the clean-up of unused accounts', () => {
     expect(await remaining()).toEqual(['Oud'])
   })
 
+  it('forgets a mail that went out before accounts were switched off, so a new mail starts the term', async () => {
+    await add('Oud', { lastVisitOn: '2024-01-01' })
+    await run()
+
+    const off = { ...env, FANS_ACCOUNTS: 'off' }
+    const back = new Date(now.getTime() + 60 * day)
+
+    await run(new Date(now.getTime() + 20 * day), off)
+
+    expect(await run(back)).toMatchObject({ closed: 0, mailed: 1 })
+    expect(await remaining()).toEqual(['Oud'])
+    expect(mails).toHaveLength(2)
+  })
+
   it('removes a sign-up nobody confirmed once it has expired, and keeps one that is still open', async () => {
     const base = { screenName: 'Nieuw', screenNameKey: 'nieuw' }
 
