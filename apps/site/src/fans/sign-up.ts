@@ -11,6 +11,7 @@ import { normaliseEmail } from '../beheer/accounts'
 import { issueLoginLink } from '../login/request'
 import { removeEnded, startSession, startSessionIfOn, takeLink, takeLinkWithCode } from '../login/sessions'
 import { codeHashOf, hashOf, newCode, newToken } from '../login/tokens'
+import { isBlockedAddress } from './blocked-addresses'
 import { endEarlierCodes, logInPaths, noteMail, removeEndedChanges } from './log-in'
 import { checkScreenName } from './screen-name'
 import { supporterKind } from './supporter-login'
@@ -281,6 +282,15 @@ async function decide(db: Database, values: { email: string; screenName: string 
     return { answer: 'sent' as const, mail: { ...mail, kind: 'log-in' as const, to: email }, ref }
   }
 
+  // The address of a blocked account that was closed: the page says what it says for every
+  // address, but no account is made and no mail goes out (issue 1458). The log says nothing of
+  // the address.
+  if (await isBlockedAddress(db, email, now)) {
+    console.info('A sign-up came for an address that is blocked; no account is made and no mail goes out.')
+
+    return { answer: 'sent' as const, mail: undefined, ref }
+  }
+
   const token = newToken()
   const code = newCode()
 
@@ -347,6 +357,11 @@ async function finish(db: Database, link: Link | undefined, now: Date): Promise<
 
   // A row without an address is the decoy of a login for an unknown address (see log-in.ts).
   if (!isFilled(link.email) || !isFilled(link.screenName) || !isFilled(link.screenNameKey)) {
+    return { answer: 'gone' }
+  }
+
+  // A sign-up that was asked for before the address was blocked can't make an account either.
+  if (await isBlockedAddress(db, link.email, now)) {
     return { answer: 'gone' }
   }
 

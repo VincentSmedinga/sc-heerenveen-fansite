@@ -53,6 +53,9 @@ export const gamePlaces: readonly GamePlace[] = fansGames.flatMap(({ label, part
 
 /** What the account itself holds, for the first card of the page. */
 export type AccountData = {
+  /** When the editors blocked the account, and why, or `null` for an account that isn't. */
+  blockedAt: Date | null
+  blockedReason: null | string
   createdAt: Date
   email: string
   inRankings: boolean
@@ -68,6 +71,8 @@ export type PlayedGame = { data: GameData | undefined; href: string; label: stri
 export async function accountData(db: Database, supporterId: number): Promise<AccountData | undefined> {
   const [account] = await db
     .select({
+      blockedAt: supporters.disabledAt,
+      blockedReason: supporters.disabledReason,
       createdAt: supporters.createdAt,
       email: supporters.email,
       inRankings: supporters.inRankings,

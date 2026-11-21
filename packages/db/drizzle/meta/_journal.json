@@ -659,6 +659,13 @@
       "when": 1795245374122,
       "tag": "0093_add_supporter_email_changes",
       "breakpoints": true
+    },
+    {
+      "idx": 94,
+      "version": "5",
+      "when": 1795260846326,
+      "tag": "0094_add_supporter_blocking",
+      "breakpoints": true
     }
   ]
 }

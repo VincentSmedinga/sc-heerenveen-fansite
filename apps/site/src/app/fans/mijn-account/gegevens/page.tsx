@@ -58,6 +58,12 @@ export default async function MyDataPage() {
             <DescriptionList.Item term="Naam gewijzigd">
               {account.screenNameChangedAt === null ? 'Nooit' : dateFormat.format(account.screenNameChangedAt)}
             </DescriptionList.Item>
+            {account.blockedAt === null ? null : (
+              <DescriptionList.Item term="Geblokkeerd">
+                {`Sinds ${dateFormat.format(account.blockedAt)}`}
+                {account.blockedReason === null ? '' : `: ${account.blockedReason}`}
+              </DescriptionList.Item>
+            )}
           </DescriptionList>
         </Card>
         {played.length === 0 ? (

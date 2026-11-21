@@ -1,7 +1,9 @@
 import type { Database } from '@fansite/db/client'
 
 import { supporters } from '@fansite/db/schema'
-import { and, eq, isNull } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
+
+import { mayTakePartCondition } from './take-part'
 
 // The choice "Naam in de standen" of a supporter (issue 1452). Off means: the supporter plays
 // and counts in the figures of all supporters together, but has no row in a ranking. The
@@ -13,7 +15,7 @@ import { and, eq, isNull } from 'drizzle-orm'
  * it to its `where`. The figures of all supporters together leave it out.
  */
 export function inRankings() {
-  return and(eq(supporters.inRankings, true), isNull(supporters.disabledAt))
+  return and(eq(supporters.inRankings, true), mayTakePartCondition)
 }
 
 /** Puts the name of a supporter in the rankings, or takes it out; at once, both ways. */

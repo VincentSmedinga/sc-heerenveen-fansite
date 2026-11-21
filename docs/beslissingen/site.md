@@ -7083,6 +7083,7 @@
   Wie iets moet bewaren, zoals de hash van het adres van een geblokkeerd account, doet dat voordat hij hem aanroept.
 - **Waarom:** één plek die zegt wat weggaat, zodat een later issue niets kan vergeten.
 - **Alternatieven:** het verwijderen per aanroeper schrijven (drie kopieën die uit elkaar lopen).
+- **Later:** sinds _De redactie beheert de accounts van supporters_ (21 november 2026) bewaart `closeAccount` zelf de hash van het adres van een geblokkeerd account, in dezelfde transactie; een aanroeper hoeft er niets voor te doen.
 
 - **Datum:** 21 november 2026
 - **Besluit:** de knop "Ja, hef mijn account op" werkt alleen met een bewijs van de pagina "Weet je het zeker?" uit dezelfde sessie, hoogstens 10 minuten oud.
@@ -7121,3 +7122,60 @@
 - **Besluit:** een test bewaakt dat geen bestand buiten `app/fans`, `fans`, `login` en het beheer de sessie van een supporter of het cookie noemt (`apps/site/src/public-pages.test.ts`).
 - **Waarom:** één import in een openbare pagina of in de layout maakt die pagina per persoon, en dat zie je niet aan de pagina.
 - **Alternatieven:** alleen de HTML van de layout testen (een pagina die zelf het cookie leest, valt er dan buiten).
+
+## De redactie beheert de accounts van supporters
+
+- **Datum:** 21 november 2026
+- **Besluit:** `/beheer/supporters` is een scherm voor de rollen eigenaar en redacteur, in het menu van het beheer.
+  Staan accounts uit, dan ontbreekt het item in het menu en antwoordt elke pagina en actie "niet gevonden".
+  De lijst toont de nieuwste accounts eerst, 25 per pagina, met de schermnaam, de datum van aanmaken, het laatste bezoek en of het account geblokkeerd is.
+  Het zoekveld zoekt op een deel van de schermnaam met dezelfde normalisatie als het aanmelden (`screenNameKey`), dus zonder te letten op hoofdletters, accenten, spaties en tekens die op elkaar lijken.
+- **Waarom:** de redactie moet een naam die kwetst of misleidt kunnen weghalen, en een account dat misbruik maakt kunnen blokkeren.
+  Dezelfde normalisatie als bij het aanmelden vindt ook de naam waarmee iemand iemand anders nadoet.
+- **Alternatieven:** zoeken op het begin van de naam (mist "xX_Tjalle_Xx"); een eigen vorm van zoeken (twee regels voor wat dezelfde naam is).
+
+- **Datum:** 21 november 2026
+- **Besluit:** het e-mailadres staat nergens in de lijst, en op de pagina van één account alleen voor de eigenaar.
+  De pagina leest het adres alleen als de rol eigenaar is, dus bij een redacteur zit het niet in de HTML.
+- **Waarom:** de redactie hoeft het adres niet te kennen om een naam aan te passen of te blokkeren, en hoe minder mensen het zien, hoe beter.
+- **Alternatieven:** het adres lezen en bij een redacteur verbergen (een fout in de weergave zou het tonen); het adres voor alle rollen.
+
+- **Datum:** 21 november 2026
+- **Besluit:** een redacteur past een schermnaam aan met de regels, de lijst van geweigerde namen en de controle op uniek zijn van het aanmelden.
+  Het telt niet als de eigen wijziging van de supporter per 30 dagen.
+  Op Mijn account ziet de supporter één keer "De redactie heeft je schermnaam aangepast.": de kolom `supporters.screen_name_edited_by_editors` onthoudt het tot de pagina is getoond.
+  Er gaat geen mail uit.
+- **Waarom:** de supporter moet weten waarom zijn naam anders is, zonder dat de redactie een mail moet sturen.
+- **Alternatieven:** een mail (het adres is niet voor de redactie bedoeld, en de melding is genoeg); een vaste melding die blijft staan.
+
+- **Datum:** 21 november 2026
+- **Besluit:** een eigenaar of redacteur blokkeert een account met een verplichte reden uit vier: "ongepaste schermnaam", "doet zich voor als een ander", "misbruik van een spel" en "anders", en bij "anders" is een toelichting van hoogstens 300 tekens verplicht.
+  De reden staat in `supporters.disabled_reason` (bij "anders" als "anders: <toelichting>"), in het logboek en op de pagina "Alles wat we van je bewaren".
+  Een geblokkeerd account kan inloggen, zijn gegevens zien en zijn account opheffen; de pagina's van de wijzigingen sturen het naar de pagina van de blokkade.
+  De supporter krijgt geen mail.
+- **Waarom:** een reden maakt een blokkade achteraf te controleren, en wie geblokkeerd is, mag zien waarom en weg kunnen gaan.
+- **Alternatieven:** een vrij tekstveld (geen vaste lijst om op te letten); een geblokkeerd account uitloggen (het ziet dan niet waarom).
+
+- **Datum:** 21 november 2026
+- **Besluit:** `maySupporterTakePart` en de voorwaarde `mayTakePartCondition` in `apps/site/src/fans/take-part.ts` zijn de enige plek die zegt of een account mag meedoen.
+  `inRankings` gebruikt ze al; de spellen gebruiken ze ook.
+  Wat een blokkade met eerdere cijfers doet, beslist de Uitblinker.
+- **Waarom:** als elk spel zelf bepaalt wat een blokkade betekent, loopt dat uit elkaar.
+- **Alternatieven:** elk spel zijn eigen controle op `disabled_at`.
+
+- **Datum:** 21 november 2026
+- **Besluit:** de tabel `supporter_blocked_addresses` bewaart de SHA-256 van het adres van een geblokkeerd account dat verdwijnt, en het moment, en niets anders.
+  `closeAccount` schrijft de rij in dezelfde transactie als het verwijderen, ook als de supporter zelf opheft.
+  Het aanmelden weigert zo'n adres: de pagina zegt hetzelfde als anders, er komt geen account en er gaat geen mail uit, en de regel in het logboek noemt het adres niet.
+  Een rij van meer dan 12 maanden oud gaat weg bij het eerstvolgende aanmelden, zonder aparte taak.
+  De eigenaar haalt een hash eerder weg door het adres in te vullen, met een regel `supporter.forget-address` in het logboek.
+  De tabel staat in de dump, en in de kopie van acceptatie als tabel zonder rijen.
+- **Waarom:** een blokkade is anders te ontlopen door op te heffen en opnieuw aan te melden.
+  Een hash vertelt niet wie het was, en 12 maanden is lang genoeg om misbruik te ontmoedigen en kort genoeg om niet te blijven staan.
+- **Alternatieven:** het adres zelf bewaren (een lijst van mensen die we niet willen); een aparte taak die oude rijen opruimt (een taak meer om te laten draaien, voor een tabel die zelden een rij heeft); de naam bewaren (dezelfde naam is voor een ander weer vrij).
+
+- **Datum:** 21 november 2026
+- **Besluit:** elke aanpassing, blokkade, opheffing van een blokkade en het weghalen van een hash komt in het logboek van het beheer als `supporter.rename`, `supporter.block`, `supporter.unblock` of `supporter.forget-address`, met wie het deed, het nummer van het account en bij een blokkade de reden.
+  De oude en de nieuwe schermnaam en het adres staan er nooit in, en de regels in het logboek van de site noemen geen naam, nummer of adres.
+- **Waarom:** het logboek is voor wie het deed en waarom, en de redactie leest het zonder iets over de supporter te leren wat ze niet nodig heeft.
+- **Alternatieven:** de naam voor en na in het logboek (een naam die kwetst blijft zo in het logboek staan).

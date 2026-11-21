@@ -18,13 +18,19 @@ const { changedAt, requireSupporter } = vi.hoisted(() => ({
 
 // One row of the account, whatever is asked: the choice for the rankings and the last change of
 // the name.
+const blocked = { value: false }
+const edited = { value: false }
+const updates: unknown[] = []
 const query = {
   from: () => query,
   where: () =>
     Promise.resolve([
       {
+        blockedAt: blocked.value ? new Date('2026-12-10T10:00:00Z') : null,
+        blockedReason: blocked.value ? 'ongepaste schermnaam' : null,
         changedAt: changedAt.value,
         createdAt: new Date('2026-12-03T10:00:00Z'),
+        editedByEditors: edited.value,
         email: 'tjalle@example.org',
         inRankings: false,
         lastVisitOn: '2026-12-19',
@@ -36,7 +42,22 @@ const query = {
 
 vi.mock('#src/fans/require-supporter', () => ({ requireSupporter, supporterToken: () => Promise.resolve('sessie') }))
 vi.mock('#src/app/fans/mijn-account/actions', () => ({ closeMyAccount: vi.fn() }))
-vi.mock('#src/database', () => ({ getDatabase: () => ({ db: { select: () => query } }) }))
+vi.mock('#src/database', () => ({
+  getDatabase: () => ({
+    db: {
+      select: () => query,
+      update: () => ({
+        set: (values: unknown) => ({
+          where: () => {
+            updates.push(values)
+
+            return Promise.resolve()
+          },
+        }),
+      }),
+    },
+  }),
+}))
 vi.mock('./actions', () => ({
   changeName: vi.fn(),
   closeMyAccount: vi.fn(),
@@ -48,6 +69,9 @@ vi.mock('./actions', () => ({
 
 beforeEach(() => {
   changedAt.value = null
+  blocked.value = false
+  edited.value = false
+  updates.length = 0
   vi.useFakeTimers({ now: new Date('2026-12-20T12:00:00Z'), toFake: ['Date'] })
 })
 
@@ -172,6 +196,38 @@ describe('Mijn account, with the cards of #1454', () => {
     expect(html).toContain('href="/fans/mijn-account/gegevens"')
     expect(html).toContain('href="/fans/mijn-account/opheffen"')
   })
+
+  it('says that a blocked account is blocked, and refers to Contact', async () => {
+    requireSupporter.mockResolvedValueOnce({
+      blocked: true,
+      email: 'tjalle@example.org',
+      screenName: 'Tjalle99',
+      supporterId: 1,
+    })
+
+    const html = await render()
+
+    expect(html).toContain('Je account is geblokkeerd.')
+    expect(html).toContain('<a href="/contact">Contact</a>')
+    // A blocked account can't change its name, and has no switch for the rankings.
+    expect(html).not.toContain('href="/fans/mijn-account/schermnaam"')
+    expect(await render()).not.toContain('Je account is geblokkeerd.')
+  })
+
+  it('tells once that the editors changed the screen name', async () => {
+    edited.value = true
+
+    const html = await render()
+
+    expect(html).toContain('De redactie heeft je schermnaam aangepast.')
+    expect(updates).toEqual([{ screenNameEditedByEditors: false }])
+
+    edited.value = false
+    updates.length = 0
+
+    expect(await render()).not.toContain('De redactie heeft je schermnaam aangepast.')
+    expect(updates).toEqual([])
+  })
 })
 
 describe('the page of all the data', () => {
@@ -196,8 +252,19 @@ describe('the page of all the data', () => {
     }
 
     expect(html).toMatch(/Nog niets\. <a href="\/fans\/prognose">Doe mee aan de Prognose<\/a>/)
+    expect(html).not.toContain('Geblokkeerd')
     expect(html).toContain('Geen IP-adres, geen browser, geen echte naam: die bewaren we niet.')
     expect(html).toContain('href="/privacy"')
+  })
+})
+
+describe('the page of all the data of a blocked account', () => {
+  it('has the row Geblokkeerd, with the date and the reason', async () => {
+    blocked.value = true
+
+    const html = renderToStaticMarkup(await MyDataPage())
+
+    expect(html).toContain('<dt>Geblokkeerd</dt><dd>Sinds 10 december 2026: ongepaste schermnaam</dd>')
   })
 })
 

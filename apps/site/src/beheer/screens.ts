@@ -14,7 +14,13 @@ export const workRoles: readonly AdminRole[] = ['owner', 'editor']
 export const myAccountHref = '/beheer/mijn-account'
 
 /** A screen of the admin, as the bar under the main menu lists it. */
-export type Screen = { href: string; label: string; roles: readonly AdminRole[] }
+export type Screen = {
+  href: string
+  label: string
+  /** Whether the screen is for the accounts of supporters: it is hidden while they are off. */
+  needsAccounts?: boolean
+  roles: readonly AdminRole[]
+}
 
 /**
  * Every screen of the admin, in the order the bar shows them, and the roles that may see it.
@@ -30,6 +36,7 @@ export const screens: readonly Screen[] = [
   { href: '/beheer/stadions', label: 'Stadions', roles: workRoles },
   { href: '/beheer/clubs', label: 'Clubs', roles: workRoles },
   { href: '/beheer/bezoek', label: 'Bezoek', roles: workRoles },
+  { href: '/beheer/supporters', label: 'Supporters', needsAccounts: true, roles: workRoles },
   { href: '/beheer/accounts', label: 'Accounts', roles: ['owner'] },
   { href: myAccountHref, label: 'Mijn account', roles: allRoles },
 ]
@@ -54,9 +61,12 @@ export function isLoginPage(pathname: string): boolean {
   return isAtOrBelow(pathname, '/beheer/inloggen')
 }
 
-/** The screens a role may see. */
-export function screensFor(role: AdminRole): Screen[] {
-  return screens.filter((screen) => screen.roles.includes(role))
+/**
+ * The screens a role may see. `accountsOn` is whether the accounts of supporters are on (the
+ * server knows, the browser does not); while they are off, their screen is not in the bar.
+ */
+export function screensFor(role: AdminRole, accountsOn = true): Screen[] {
+  return screens.filter((screen) => screen.roles.includes(role) && (accountsOn || screen.needsAccounts !== true))
 }
 
 function isAtOrBelow(pathname: string, href: string) {

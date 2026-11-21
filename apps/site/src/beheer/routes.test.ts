@@ -163,6 +163,7 @@ describe('the admin', () => {
       'app/beheer/accounts/actions.ts',
       'app/beheer/accounts/nieuw/page.tsx',
       'app/beheer/accounts/page.tsx',
+      'app/beheer/supporters/adressen/actions.ts',
     ]
     const roles = (file: string) =>
       [...text(file).matchAll(/\brequireRole\(([^)]*)\)/g)].map(([, args]) => args?.trim())

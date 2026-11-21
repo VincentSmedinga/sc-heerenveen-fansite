@@ -1518,6 +1518,10 @@ Op `/fans/mijn-account/gegevens` ziet hij alles wat de site van hem bewaart, en 
 Lokaal, zonder mailserver, staat de mail met de link en de code in het logboek van `pnpm dev`.
 De code staat in `src/fans`: de regels van de schermnaam in `screen-name.ts`, het aanmelden in `sign-up.ts`, het inloggen, het plafond van de mails en het adres om naar terug te gaan in `log-in.ts`, het wijzigen in `change-name.ts` en `change-email.ts`, de gegevens per spel in `my-data.ts`, het opheffen in `close-account.ts`, de keuze voor de standen in `rankings.ts`, de instelling voor de gedeelde code van het inloggen in `supporter-login.ts`, en `requireSupporter()` in `require-supporter.ts`.
 Elke persoonlijke pagina en actie onder `/fans` begint met `requireSupporter()`; `src/fans/routes.test.ts` faalt voor een die dat niet doet.
+De redactie beheert de accounts op `/beheer/supporters` (alleen eigenaar en redacteur, en alleen als accounts aan staan): zoeken op schermnaam, een naam aanpassen, een account blokkeren of de blokkade opheffen.
+De code staat in `src/beheer/supporter-management.ts`; het adres van een supporter ziet alleen de eigenaar, op de pagina van één account.
+Van een geblokkeerd account dat verdwijnt, bewaart `supporter_blocked_addresses` 12 maanden de hash van het adres, en `src/fans/take-part.ts` zegt of een account mag meedoen.
+De tabel `supporter_blocked_addresses` hoort bij de tabellen hierboven.
 De tabellen zijn `supporters`, `supporter_login_links`, `supporter_email_changes`, `supporter_sessions` en `supporter_login_attempts`, los van die van het beheer.
 Het cookie heet `fans-sessie` en gaat alleen mee naar de pagina's onder `/fans`.
 De proxy geeft Mijn account en zijn pagina's de header `X-Robots-Tag: noindex, nofollow`, op elke omgeving.

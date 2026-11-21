@@ -449,8 +449,9 @@ export const blockReasonMaxLength = 500
  * `email` is lowercase and is never shown to anyone else. `in_rankings` is whether the name is
  * in the tables of the games. `last_visit_on` is a day, not a time. `disabled_at` and
  * `disabled_reason` are whether and why the editors blocked the account; the shared code of the
- * login calls that turned off. The site keeps no IP address, browser, real name, birth date or
- * place. Times are UTC.
+ * login calls that turned off. `screen_name_edited_by_editors` is set when the editors changed
+ * the screen name (issue 1458), until Mijn account has told the supporter once. The site keeps
+ * no IP address, browser, real name, birth date or place. Times are UTC.
  */
 export const supporters = mysqlTable('supporters', {
   id: int('id', { unsigned: true }).autoincrement().primaryKey(),
@@ -465,9 +466,28 @@ export const supporters = mysqlTable('supporters', {
   screenNameChangedAt: datetime('screen_name_changed_at'),
   disabledAt: datetime('disabled_at'),
   disabledReason: varchar('disabled_reason', { length: blockReasonMaxLength }),
+  screenNameEditedByEditors: boolean('screen_name_edited_by_editors').notNull().default(false),
 })
 
 export type Supporter = typeof supporters.$inferSelect
+
+/**
+ * The SHA-256 of the address of a blocked account that was closed, and the moment (issue
+ * 1458), so a blocked supporter can't sign up again with the same address. It holds nothing
+ * else: no name, no number and no reason. A row older than 12 months is removed at the next
+ * sign-up; the owner can remove one earlier. It has no key to `supporters`: the account is
+ * gone.
+ * Times are UTC.
+ */
+export const supporterBlockedAddresses = mysqlTable(
+  'supporter_blocked_addresses',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    addressHash: varchar('address_hash', { length: 64 }).notNull().unique(),
+    blockedAt: datetime('blocked_at').notNull(),
+  },
+  (table) => [index('supporter_blocked_addresses_blocked_at_idx').on(table.blockedAt)],
+)
 
 /**
  * The links and codes that were mailed to supporters, until they are used or expire, like
@@ -602,6 +622,10 @@ export const auditActions = [
   'gap.renew',
   'gap.unmark',
   'club.merge',
+  'supporter.rename',
+  'supporter.block',
+  'supporter.unblock',
+  'supporter.forget-address',
 ] as const
 
 export type AuditAction = (typeof auditActions)[number]
@@ -649,7 +673,11 @@ export const auditDetailMaxLength = 1000
  * `item_id`; the import writes `gap.unmark` too, without an account, when it finds the fact.
  * `club.merge` is two clubs the editors made one in the admin (issue 1345), with the club that
  * stays in `item_id`; `detail` names both clubs and what moved, so the merge can be undone by
- * hand.
+ * hand. `supporter.rename`, `supporter.block` and `supporter.unblock` are the editors changing
+ * the screen name of a supporter, blocking the account or lifting the block (issue 1458), with
+ * the number of the account in `item_id` and, for a block, the reason in `reason`; the old and
+ * the new name and the address are never in the log. `supporter.forget-address` is the owner
+ * removing the hash of an address that was blocked, with the number of that row in `item_id`.
  */
 export const auditLog = mysqlTable(
   'audit_log',
