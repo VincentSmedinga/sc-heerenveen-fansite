@@ -7142,3 +7142,14 @@
 - **Besluit:** de keuze staat als rij "Herinnering per e-mail" op de pagina "Alles wat we van je bewaren", ook als de Prognose uit staat; dan staat er "Nee".
 - **Waarom:** de pagina toont alles wat de site van het account bewaart, en de kolom bestaat altijd.
 - **Alternatieven:** de rij weglaten zolang de Prognose uit staat (de pagina toont dan minder dan er bewaard is).
+
+## De knop voor licht en donker houdt zijn plek vóór het laden
+
+- **Datum:** 21 november 2026
+- **Besluit:** de server stuurt op de plek van de knop Donker een verborgen, inerte ronde knop van dezelfde maat (`RoundButton`), die zijn plek houdt.
+  Na het laden komt de knop erin.
+  Een e2e-test (`apps/site/e2e/top-link.spec.ts`) vergelijkt de hoogte van de kop met die van de pagina zonder JavaScript.
+- **Waarom:** de knop kwam eerst na het laden, nam 52 pixels van het logo, het woordmerk brak op een telefoon van 390 pixels in twee regels en de kop werd 12,8 pixels hoger.
+  Dat schoof de pagina onder een bezoeker die al scrolde, en de test van de link naar boven faalde af en toe in CI.
+  Zonder JavaScript blijft er geen knop die niets doet.
+- **Alternatieven:** de knop werkend op de server tonen (dan staat er een knop zonder JavaScript die niets doet); een lege doos met een vaste maat (het ontwerpsysteem wil een component, en de maat staat dan op twee plekken); de test een wachttijd geven (verbergt de verschuiving, de bezoeker houdt hem).
