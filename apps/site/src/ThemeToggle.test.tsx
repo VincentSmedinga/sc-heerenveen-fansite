@@ -51,8 +51,14 @@ describe('ThemeToggle', () => {
     vi.unstubAllGlobals()
   })
 
-  it('shows nothing on the server, so a page without JavaScript has no button that does nothing', () => {
-    expect(renderToStaticMarkup(<ThemeToggle />)).toBe('')
+  it('shows a hidden, inert round button on the server, which keeps its room in the header', () => {
+    const html = renderToStaticMarkup(<ThemeToggle />)
+
+    expect(html).toContain('aria-hidden="true"')
+    expect(html).toContain('inert=""')
+    expect(html).toContain('visibility:hidden')
+    expect(html).toContain('tabindex="-1"')
+    expect(html).not.toContain('aria-pressed')
   })
 
   it('is one button named Donker, with no visible text, and pressed on a dark system without a choice', () => {
