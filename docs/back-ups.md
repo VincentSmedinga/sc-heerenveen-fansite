@@ -45,7 +45,8 @@ De opdracht `backup`:
    - `supporter_login_attempts`: de hash van een adres voor de limiet, die de site na 15 minuten weggooit.
 
    Ze zouden anders 14 dagen in de dumps blijven staan.
-   De accounts van supporters zelf, `supporters`, staan wel in de dump.
+   De accounts van supporters zelf, `supporters`, staan wel in de dump, en ook `supporter_blocked_addresses`: de hash van het adres van een geblokkeerd account dat verdween, die de site na 12 maanden weggooit.
+   Een terugzetting moet die blokkade niet kwijtraken.
    Een teruggezette database krijgt de tabellen hierboven wel, maar leeg.
    De importer vult de discussies binnen een kwartier opnieuw, en een sessie maak je door opnieuw in te loggen.
 
@@ -225,13 +226,13 @@ Agents bevragen de kopie alleen (zie _The copy of the acceptance database_ in `A
 
 `packages/db/src/export-plan.ts` zegt van elke tabel van het schema wat de export ermee doet.
 
-| Tabellen                                                                                                             | Wat de kopie krijgt                                                                                                                                       |
-| -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `visitor_salts`, `visitor_hashes`, `discussions`, `admin_sessions`, `admin_login_links` en `admin_login_attempts`    | Alleen de structuur, zonder rijen                                                                                                                         |
-| `supporters`, `supporter_sessions`, `supporter_login_links`, `supporter_login_attempts` en `supporter_email_changes` | Alleen de structuur, zonder rijen: geen account van een supporter, ook niet met een verzonnen adres                                                       |
-| `admin_users`                                                                                                        | Elk account met het adres `beheerder-<id>@example.invalid` en de voornaam `Account <id>`, en het echte nummer, de rol, de keuze voor de mail en de tijden |
-| Alle andere tabellen, en `__drizzle_migrations`                                                                      | Alle rijen                                                                                                                                                |
-| `acceptance_copy`, een tabel die alleen in de kopie bestaat                                                          | Eén rij met `dumped_at`, de tijd van de dump op de host, en `loaded_at`, de tijd van het laden, in UTC                                                    |
+| Tabellen                                                                                                                                            | Wat de kopie krijgt                                                                                                                                       |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `visitor_salts`, `visitor_hashes`, `discussions`, `admin_sessions`, `admin_login_links` en `admin_login_attempts`                                   | Alleen de structuur, zonder rijen                                                                                                                         |
+| `supporters`, `supporter_sessions`, `supporter_login_links`, `supporter_login_attempts`, `supporter_email_changes` en `supporter_blocked_addresses` | Alleen de structuur, zonder rijen: geen account van een supporter, ook niet met een verzonnen adres                                                       |
+| `admin_users`                                                                                                                                       | Elk account met het adres `beheerder-<id>@example.invalid` en de voornaam `Account <id>`, en het echte nummer, de rol, de keuze voor de mail en de tijden |
+| Alle andere tabellen, en `__drizzle_migrations`                                                                                                     | Alle rijen                                                                                                                                                |
+| `acceptance_copy`, een tabel die alleen in de kopie bestaat                                                                                         | Eén rij met `dumped_at`, de tijd van de dump op de host, en `loaded_at`, de tijd van het laden, in UTC                                                    |
 
 De kopie krijgt geen account van een supporter, omdat een schermnaam van een echte persoon is en vaak herkenbaar.
 De tabellen staan er wel, dus op de kopie maak je lokaal een nieuw account door je aan te melden.

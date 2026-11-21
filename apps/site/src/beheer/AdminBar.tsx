@@ -1,3 +1,5 @@
+import { isFansPartOn } from '@fansite/shared/fans-env'
+
 import { sessionToken } from '#src/beheer/require-role'
 import { findSession } from '#src/beheer/sessions'
 import { getDatabase } from '#src/database'
@@ -18,5 +20,5 @@ export async function AdminBar() {
     return null
   }
 
-  return <AdminScreens firstName={session.firstName} role={session.role} />
+  return <AdminScreens accountsOn={isFansPartOn('accounts')} firstName={session.firstName} role={session.role} />
 }

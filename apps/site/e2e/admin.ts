@@ -1,6 +1,6 @@
 import { connect } from '@fansite/db/client'
 import { readDatabaseEnv } from '@fansite/db/env'
-import { adminSessions, adminUsers, feeds, items, sources } from '@fansite/db/schema'
+import { adminSessions, adminUsers, feeds, items, sources, supporters } from '@fansite/db/schema'
 import { eq } from 'drizzle-orm'
 import path from 'node:path'
 
@@ -204,6 +204,45 @@ export function adminCookie(host: string, role: E2eRole = 'editor') {
     sameSite: 'Lax' as const,
     secure: true,
     value,
+  }
+}
+
+/**
+ * The number of a made-up supporter, which it adds when it isn't there, for the address of the
+ * page of one account of the supporters in the admin (issue 1458). Two workers may add it at
+ * once: the second finds it after the database refuses the duplicate.
+ */
+export async function madeUpSupporterId() {
+  const { close, db } = connect(localDatabaseUrl())
+  const find = () =>
+    db.select({ id: supporters.id }).from(supporters).where(eq(supporters.email, 'proefsupporter@example.test'))
+
+  try {
+    const [existing] = await find()
+
+    if (existing !== undefined) {
+      return existing.id
+    }
+
+    try {
+      const [inserted] = await db.insert(supporters).values({
+        email: 'proefsupporter@example.test',
+        screenName: 'Proefsupporter',
+        screenNameKey: 'proefsupporter',
+      })
+
+      return inserted.insertId
+    } catch {
+      const [found] = await find()
+
+      if (found === undefined) {
+        throw new Error('The made-up supporter could not be added.')
+      }
+
+      return found.id
+    }
+  } finally {
+    await close()
   }
 }
 

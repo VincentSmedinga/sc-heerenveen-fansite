@@ -18,7 +18,15 @@ import { currentScreen, isLoginPage, myAccountHref, screensFor } from './screens
  * the bar says who is logged in and the link still says where it goes; an account without a
  * first name has "Mijn account" alone.
  */
-export function AdminScreens({ firstName, role }: { firstName: string; role: AdminRole }) {
+export function AdminScreens({
+  accountsOn,
+  firstName,
+  role,
+}: {
+  accountsOn: boolean
+  firstName: string
+  role: AdminRole
+}) {
   const pathname = usePathname()
 
   if (isLoginPage(pathname)) {
@@ -31,7 +39,7 @@ export function AdminScreens({ firstName, role }: { firstName: string; role: Adm
     <NavigationBar
       end={{ action: logOut, label: 'Uitloggen' }}
       label="Beheer"
-      subitems={screensFor(role).map(({ href, label }) => ({
+      subitems={screensFor(role, accountsOn).map(({ href, label }) => ({
         current: href === current,
         href,
         label: href === myAccountHref && firstName !== '' ? `${label} (${firstName})` : label,

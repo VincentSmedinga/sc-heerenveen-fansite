@@ -31,10 +31,12 @@ export type ExportRule =
 
 /**
  * The tables that hold the accounts of supporters and what belongs to one account: its
- * sessions, its links and codes, a change of address and the requests for a mail. The copy
- * takes none of their rows.
+ * sessions, its links and codes, a change of address and the requests for a mail, and the
+ * hashes of the addresses of blocked accounts that were closed (issue 1458). The copy takes
+ * none of their rows.
  */
 export const supporterTables = [
+  'supporter_blocked_addresses',
   'supporter_email_changes',
   'supporter_login_attempts',
   'supporter_login_links',
@@ -126,6 +128,7 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
   stadiums: 'copy',
   staff: 'copy',
   standings: 'copy',
+  supporter_blocked_addresses: 'structure',
   supporter_email_changes: 'structure',
   supporter_login_attempts: 'structure',
   supporter_login_links: 'structure',

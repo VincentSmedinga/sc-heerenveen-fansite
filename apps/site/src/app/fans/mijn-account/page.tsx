@@ -42,9 +42,22 @@ export default async function MyAccountPage({
   const supporter = await requireSupporter({ blocked: 'allow', from: signUpPaths.account })
   const { users } = supporterKind.tables
   const [account] = await getDatabase()
-    .db.select({ inRankings: users.inRankings, remindByEmail: users.remindByEmail })
+    .db.select({
+      editedByEditors: users.screenNameEditedByEditors,
+      inRankings: users.inRankings,
+      remindByEmail: users.remindByEmail,
+    })
     .from(users)
     .where(eq(users.id, supporter.supporterId))
+
+  // The editors changed the screen name: the supporter is told once, here, and not again.
+  if (account?.editedByEditors === true) {
+    await getDatabase()
+      .db.update(users)
+      .set({ screenNameEditedByEditors: false })
+      .where(eq(users.id, supporter.supporterId))
+  }
+
   const games = await playedGames(getDatabase().db, supporter.supporterId)
   const { melding } = await searchParams
   const message = accountMessageOf(melding)
@@ -64,6 +77,13 @@ export default async function MyAccountPage({
     <Page.Main areas={areas}>
       <Page.Cell area="head">
         <Heading level={1}>Mijn account</Heading>
+        {supporter.blocked ? (
+          <Notice>
+            Je account is geblokkeerd. Je doet niet meer mee aan de spellen. Denk je dat dit niet klopt? Neem contact op
+            met de redactie via <Link href="/contact">Contact</Link>.
+          </Notice>
+        ) : null}
+        {account?.editedByEditors === true ? <Notice>De redactie heeft je schermnaam aangepast.</Notice> : null}
         {/* Always in the page, so a screen reader reads a message that changes.*/}
         <Notice id={noticeId} tabIndex={moved ? undefined : -1}>
           {message}

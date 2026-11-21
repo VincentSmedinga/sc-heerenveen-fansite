@@ -680,6 +680,13 @@
       "when": 1795275728592,
       "tag": "0096_add_supporter_reminder",
       "breakpoints": true
+    },
+    {
+      "idx": 97,
+      "version": "5",
+      "when": 1795277153637,
+      "tag": "0097_add_supporter_blocking",
+      "breakpoints": true
     }
   ]
 }

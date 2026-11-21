@@ -158,6 +158,10 @@ describe('recordAction', () => {
       'gap.renew',
       'gap.unmark',
       'club.merge',
+      'supporter.rename',
+      'supporter.block',
+      'supporter.unblock',
+      'supporter.forget-address',
     ])
   })
 
