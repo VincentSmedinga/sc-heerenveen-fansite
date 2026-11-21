@@ -18,6 +18,7 @@ import {
   changeWithLink,
   handleChangeEmail,
 } from './change-email'
+import { handleLogIn } from './log-in'
 import { changeEmailMailText, emailChangedMailText } from './sign-up-mail'
 import { supporterKind } from './supporter-login'
 
@@ -148,6 +149,39 @@ describe('a request to change the address', () => {
 
     expect((await request('nog-een@example.org', later(5))).result).toEqual({ answer: 'limited' })
     expect((await request('nog-een@example.org', later(16))).result.answer).toBe('sent')
+  })
+
+  it('keeps counting a request after five wrong codes, whose link and code stop', async () => {
+    const here = await startSession(database.db, supporterKind, supporterId, start)
+    const first = await request('nieuw0@example.org')
+
+    for (let index = 0; index < supporterKind.codeAttempts; index += 1) {
+      await changeWithCode(database.db, supporterId, here, refOf(first.result), '000000', later(1))
+    }
+
+    expect(await changeCodeTriesLeft(database.db, supporterId, refOf(first.result), later(1))).toBe(0)
+    expect(await changeWithLink(database.db, supporterId, here, tokenOf(first.mail), later(1))).toEqual({
+      answer: 'gone',
+    })
+    expect((await request('nieuw1@example.org', later(2))).result.answer).toBe('sent')
+    expect((await request('nieuw2@example.org', later(3))).result.answer).toBe('sent')
+    expect((await request('nieuw3@example.org', later(4))).result).toEqual({ answer: 'limited' })
+    expect(await emailOf()).toBe('tjalle@example.org')
+  })
+
+  it('leaves nothing of an expired request once a supporter asks to log in', async () => {
+    await request('nieuw@example.org')
+    await handleLogIn(database.db, 'sietske@example.org', undefined, {
+      clock: () => 1000,
+      defer: () => undefined,
+      deliver: () => Promise.resolve(),
+      notifyCeiling: () => Promise.resolve(),
+      now: () => later(15),
+      origin: 'https://example.org',
+      wait: () => Promise.resolve(),
+    })
+
+    expect(await database.db.select().from(supporterEmailChanges)).toEqual([])
   })
 
   it('logs the request without an address', async () => {

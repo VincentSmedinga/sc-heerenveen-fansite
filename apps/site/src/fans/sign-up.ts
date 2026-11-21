@@ -11,7 +11,7 @@ import { normaliseEmail } from '../beheer/accounts'
 import { issueLoginLink } from '../login/request'
 import { removeEnded, startSession, startSessionIfOn, takeLink, takeLinkWithCode } from '../login/sessions'
 import { codeHashOf, hashOf, newCode, newToken } from '../login/tokens'
-import { endEarlierCodes, logInPaths, noteMail } from './log-in'
+import { endEarlierCodes, logInPaths, noteMail, removeEndedChanges } from './log-in'
 import { checkScreenName } from './screen-name'
 import { supporterKind } from './supporter-login'
 
@@ -248,6 +248,7 @@ async function decide(db: Database, values: { email: string; screenName: string 
   }
 
   await removeEnded(db, supporterKind, now)
+  await removeEndedChanges(db, now)
 
   const noted = await noteMail(db, email, now)
 

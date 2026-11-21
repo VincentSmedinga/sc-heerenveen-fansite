@@ -49,7 +49,12 @@ describe('the name in the rankings', () => {
   })
 
   it('goes off and on again at once, for the own account only', async () => {
+    const log = vi.spyOn(console, 'info').mockImplementation(() => undefined)
+
     await setInRankings(database.db, tjalle, false)
+
+    // The log says what changed, not the new value.
+    expect(log).toHaveBeenLastCalledWith(`Supporter ${tjalle} changed the choice for the rankings.`)
 
     expect(await ranked()).toEqual(['Sietske'])
 

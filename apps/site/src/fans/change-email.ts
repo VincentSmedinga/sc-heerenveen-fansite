@@ -1,13 +1,13 @@
 import type { Database } from '@fansite/db/client'
 
 import { supporterEmailChanges, supporterLoginLinks, supporters, supporterSessions } from '@fansite/db/schema'
-import { and, count, eq, gt, isNotNull, lte, ne } from 'drizzle-orm'
+import { and, count, eq, gt, gte, isNotNull, ne } from 'drizzle-orm'
 import { setTimeout as sleep } from 'node:timers/promises'
 
 import { normaliseEmail } from '../beheer/accounts'
 import { takeCode } from '../login/sessions'
 import { codeHashOf, hashOf, newCode, newToken } from '../login/tokens'
-import { noteMail } from './log-in'
+import { noteMail, removeEndedChanges } from './log-in'
 import { isDuplicate } from './sign-up'
 import { supporterKind } from './supporter-login'
 
@@ -43,6 +43,9 @@ export type ChangeEmailDeps = {
   /** Waits; only a test passes another one. */
   wait?: (milliseconds: number) => Promise<unknown>
 }
+
+/** The settings of the login of supporters, but a wrong code never removes a request. */
+const keepRequestsKind = { ...supporterKind, codeFailuresEndLink: false }
 
 /** What a request mails to the new address: the link and the code. */
 export type ChangeEmailMail = { code: string; to: string; url: string }
@@ -117,7 +120,22 @@ export async function changeWithCode(
 ): Promise<ChangeResult> {
   await removeEndedChanges(db, now)
 
-  const request = await takeCode(db, supporterKind, supporterEmailChanges, ref, code, now)
+  // The last wrong code doesn't remove the request, as it does for a login: the row stays until
+  // it expires, so it still counts in the limit of requests of the supporter. Its link and its
+  // code stop instead.
+  const request = await takeCode(db, keepRequestsKind, supporterEmailChanges, ref, code, now)
+
+  if (request === undefined) {
+    await db
+      .update(supporterEmailChanges)
+      .set({ codeHash: null, refHash: null, tokenHash: hashOf(newToken()) })
+      .where(
+        and(
+          eq(supporterEmailChanges.refHash, hashOf(ref)),
+          gte(supporterEmailChanges.failedAttempts, supporterKind.codeAttempts),
+        ),
+      )
+  }
 
   return finish(db, request, supporterId, sessionToken)
 }
@@ -193,11 +211,6 @@ export async function handleChangeEmail(
     case 'sent':
       return { answer: 'sent', ref: result.ref }
   }
-}
-
-/** Removes the requests that have expired, so a request that nobody uses leaves nothing. */
-export async function removeEndedChanges(db: Database, now: Date) {
-  await db.delete(supporterEmailChanges).where(lte(supporterEmailChanges.expiresAt, now))
 }
 
 async function decide(db: Database, supporterId: number, value: string, now: Date, origin: string) {

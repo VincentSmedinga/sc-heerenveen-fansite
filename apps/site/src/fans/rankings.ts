@@ -19,5 +19,5 @@ export function inRankings() {
 /** Puts the name of a supporter in the rankings, or takes it out; at once, both ways. */
 export async function setInRankings(db: Database, supporterId: number, on: boolean) {
   await db.update(supporters).set({ inRankings: on }).where(eq(supporters.id, supporterId))
-  console.info(`Supporter ${supporterId} turned the name in the rankings ${on ? 'on' : 'off'}.`)
+  console.info(`Supporter ${supporterId} changed the choice for the rankings.`)
 }

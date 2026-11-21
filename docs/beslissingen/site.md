@@ -7055,6 +7055,7 @@
 - **Datum:** 21 november 2026
 - **Besluit:** een aanvraag voor een adres dat al een account heeft, krijgt dezelfde pagina "Kijk in je mail", met een code die nooit werkt, en er gaat geen mail naar dat adres.
   Een aanvraag telt mee voor de 3 mails per adres in 15 minuten en het plafond van de site, en een supporter doet hoogstens 3 aanvragen in 15 minuten.
+  Een aanvraag blijft tellen tot hij verloopt, ook na 5 foute codes: dan stoppen alleen de link en de code.
 - **Waarom:** zo verraadt het formulier niet wie een account heeft, ook niet door het aantal pogingen of de tijd van het antwoord.
   Een mail aan de eigenaar van dat adres zou iemand lastigvallen met een aanvraag die hij niet deed.
 - **Alternatieven:** een foutmelding "dat adres heeft al een account" (verraadt het); de eigenaar van het adres mailen, zoals het aanmelden doet (geeft hem een mail over iets wat hem niet aangaat).
