@@ -26,6 +26,7 @@
     --hf-colour-black: #000;
     --hf-colour-blue-50: #eff6ff;
     --hf-colour-blue-100: #dcebfe;
+    --hf-colour-blue-150: #cce1fa;
     --hf-colour-blue-200: #bbd7f8;
     --hf-colour-blue-300: #8fbbf0;
     --hf-colour-blue-400: #6098de;
@@ -75,7 +76,9 @@
     --hf-colour-steel-400: #83a5d2;
     --hf-colour-steel-500: #5d7ea8;
     --hf-colour-steel-600: #416088;
+    --hf-colour-sand-50: #faf6ef;
     --hf-colour-sand-100: #f3e8d3;
+    --hf-colour-sand-200: #e8dbc2;
     --hf-colour-sand-300: #d6c7ab;
     --hf-colour-sand-400: #afa185;
     --hf-colour-sand-500: #877a5f;
@@ -104,6 +107,16 @@
     --hf-colour-background-header: light-dark(var(--hf-colour-blue-900), var(--hf-colour-blue-800));
     --hf-colour-background-footer: light-dark(var(--hf-colour-grey-200), var(--hf-colour-blue-900));
     --hf-colour-background-band: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-900));
+
+    /*
+     * The watermark of a game card (card-watermark.css): a very light tint of the surface it is on. In light it is a
+     * step deeper than the surface, as faint sand on white; in dark it is a step lighter. The text on the card keeps
+     * 4,5:1 against it (card-watermark-css.test.ts).
+     */
+    --hf-colour-watermark-surface: light-dark(var(--hf-colour-sand-50), var(--hf-colour-blue-800));
+    --hf-colour-watermark-surface-strong: light-dark(var(--hf-colour-blue-150), var(--hf-colour-blue-700));
+    --hf-colour-watermark-surface-soft: light-dark(var(--hf-colour-blue-100), var(--hf-colour-blue-800));
+    --hf-colour-watermark-surface-warm: light-dark(var(--hf-colour-sand-200), var(--hf-colour-blue-700));
     --hf-colour-background-button: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-300));
     --hf-colour-background-button-hover: light-dark(var(--hf-colour-blue-900), var(--hf-colour-blue-200));
     --hf-colour-background-button-soft: light-dark(var(--hf-colour-blue-100), var(--hf-colour-blue-700));
@@ -421,6 +434,10 @@
       --hf-colour-background-surface-strong: var(--hf-colour-blue-100);
       --hf-colour-background-surface-soft: var(--hf-colour-blue-50);
       --hf-colour-background-surface-warm: var(--hf-colour-sand-100);
+      --hf-colour-watermark-surface: var(--hf-colour-sand-50);
+      --hf-colour-watermark-surface-strong: var(--hf-colour-blue-150);
+      --hf-colour-watermark-surface-soft: var(--hf-colour-blue-100);
+      --hf-colour-watermark-surface-warm: var(--hf-colour-sand-200);
       --hf-colour-background-header: var(--hf-colour-blue-900);
       --hf-colour-background-footer: var(--hf-colour-grey-200);
       --hf-colour-background-band: var(--hf-colour-blue-800);

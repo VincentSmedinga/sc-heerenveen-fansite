@@ -16,7 +16,7 @@ import { Page } from '../page/Page'
 import { StandingsTable } from '../standings-table/StandingsTable'
 import { Text } from '../text/Text'
 import { WikipediaCredit } from '../wikipedia-credit/WikipediaCredit'
-import { Card, cardElements, type CardSurface, cardSurfaces } from './Card'
+import { Card, cardElements, type CardGame, cardGames, type CardSurface, cardSurfaces } from './Card'
 
 // The type of the props as the table of controls shows it: the compiler gives `unknown[number]`
 // for the lists.
@@ -29,6 +29,12 @@ const meta = preview.meta({
       description: 'Het element van de kaart.',
       options: cardElements,
       table: union(cardElements),
+    },
+    game: {
+      control: 'select',
+      description: 'Het spel waar de kaart bij hoort. De kaart krijgt dan een groot, zacht watermerk van dat spel.',
+      options: [undefined, ...cardGames],
+      table: union(cardGames),
     },
     shareable: {
       description:
@@ -51,6 +57,7 @@ const meta = preview.meta({
           'Het vlak zegt wat voor blok het is: wit voor de hoofdinhoud, sterk voor de mensen en organisaties achter de inhoud, zacht voor lijsten en records die erbij horen, warm voor iets opmerkelijks of een uitnodiging, en transparant voor een bronvermelding.',
           'Op een zoekpagina is wat filters of een zoekveld bevat warm, en zijn de andere kaarten wit, zacht of sterk.',
           'Buurkaarten mogen dezelfde kleur hebben, en kleur is nooit het enige teken: in donker zijn zacht en wit gelijk, en warm en sterk ook.',
+          'Een kaart van een spel (Prognose, Uitblinker, Fjouwer of Fantest) krijgt met `game` een groot, zacht watermerk van dat spel in de rechteronderhoek; kies het alleen voor kaarten die bij een spel horen, en niet voor kaarten voor een account, een uitnodiging of een vraag van de Fantest.',
           'Met `shareable` krijgt de kaart een knop die er een afbeelding van maakt, met het logo, het adres van de site, de datum en de bron; gebruik hem alleen voor cijfers en feiten, nooit voor het werk van journalisten.',
         ].join('\n'),
       },
@@ -320,4 +327,91 @@ const renderTransparent = () => (
 export const Transparent = meta.story({
   name: 'Doorzichtig vlak naast een gewone kaart',
   render: renderTransparent,
+})
+
+const games: { game: CardGame; label: string }[] = [
+  { game: 'prognose', label: 'Prognose' },
+  { game: 'uitblinker', label: 'Uitblinker' },
+  { game: 'fjouwer', label: 'Fjouwer' },
+  { game: 'fantest', label: 'Fantest' },
+]
+
+const gameSurfaces: { label: string; surface: CardSurface }[] = [
+  { label: 'wit', surface: 'default' },
+  { label: 'zacht', surface: 'soft' },
+  { label: 'sterk', surface: 'strong' },
+]
+
+// A game card on each of the three surfaces with content that runs over the drawing, and one
+// with only a heading, where the drawing shows in full.
+const renderGame = ({ game, label }: { game: CardGame; label: string }) => (
+  <Page.Body>
+    <Page.Main>
+      {gameSurfaces.map(({ label: surfaceLabel, surface }) => (
+        <Card aria-labelledby={`${game}-${surface}`} game={game} key={surface} surface={surface}>
+          <Heading appearance={3} id={`${game}-${surface}`} level={2}>
+            {label}, {surfaceLabel} vlak
+          </Heading>
+          <Text>De tekst staat boven het watermerk en blijft goed te lezen.</Text>
+          {newsItems}
+        </Card>
+      ))}
+      <Card aria-labelledby={`${game}-short`} game={game}>
+        <Heading appearance={3} id={`${game}-short`} level={2}>
+          {label}, zonder inhoud eronder
+        </Heading>
+      </Card>
+    </Page.Main>
+  </Page.Body>
+)
+
+export const WatermarkPrognose = meta.story({
+  name: 'Watermerk van Prognose',
+  render: () => renderGame(games[0] as { game: CardGame; label: string }),
+})
+
+export const WatermarkUitblinker = meta.story({
+  name: 'Watermerk van Uitblinker',
+  render: () => renderGame(games[1] as { game: CardGame; label: string }),
+})
+
+export const WatermarkFjouwer = meta.story({
+  name: 'Watermerk van Fjouwer',
+  render: () => renderGame(games[2] as { game: CardGame; label: string }),
+})
+
+export const WatermarkFantest = meta.story({
+  name: 'Watermerk van Fantest',
+  render: () => renderGame(games[3] as { game: CardGame; label: string }),
+})
+
+export const WatermarksDark = meta.story({
+  globals: { theme: 'dark' },
+  name: 'Watermerken in donker',
+  render: () => (
+    <Page.Body>
+      <Page.Main>
+        {games.map(({ game, label }, index) => (
+          <Card
+            aria-labelledby={`dark-${game}`}
+            game={game}
+            key={game}
+            surface={gameSurfaces[index % gameSurfaces.length]?.surface ?? 'default'}
+          >
+            <Heading appearance={3} id={`dark-${game}`} level={2}>
+              {label}
+            </Heading>
+            <Text>In donker is het watermerk een stap lichter dan de kaart.</Text>
+            {newsItems}
+          </Card>
+        ))}
+        <Card aria-labelledby="dark-strong" game="uitblinker" surface="strong">
+          <Heading appearance={3} id="dark-strong" level={2}>
+            Uitblinker, sterk vlak
+          </Heading>
+          <Text>De tekst blijft goed te lezen.</Text>
+        </Card>
+      </Page.Main>
+    </Page.Body>
+  ),
 })

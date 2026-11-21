@@ -14,12 +14,28 @@ export type CardElement = (typeof cardElements)[number]
  */
 export const cardSurfaces = ['default', 'strong', 'soft', 'warm', 'transparent'] as const
 
+/**
+ * The games a card can carry the watermark of: Prognose, Uitblinker, Fjouwer and Fantest.
+ * Only a card that belongs to a game gets one.
+ */
+export const cardGames = ['prognose', 'uitblinker', 'fjouwer', 'fantest'] as const
+
+export type CardGame = (typeof cardGames)[number]
+
 export type CardProps = ComponentPropsWithoutRef<'section'> & {
   /**
    * `section` (default), `div`, `article` or `aside`. A `section` takes its name from its
    * heading with `aria-labelledby`.
    */
   as?: CardElement
+  /**
+   * The game this card belongs to. The card then carries a large, very light drawing of
+   * that game in its bottom right corner, cut off by the edges: a crystal ball for `prognose`,
+   * a star for `uitblinker`, a tactics board for `fjouwer` and answer tiles for `fantest`.
+   * It is only decoration and sits under the content. A card that doesn't belong to a game
+   * leaves it out and is as it was.
+   */
+  game?: CardGame
   /**
    * Gives the card a round button at the top right that makes an image of it, with the logo,
    * the address of the site, the day and `source` under it, and shares or downloads it.
@@ -52,6 +68,7 @@ export const Card = ({
   as: Element = 'section',
   children,
   className,
+  game,
   shareable,
   surface = 'default',
   ...props
@@ -64,6 +81,7 @@ export const Card = ({
       className={classNames(
         'hf-card',
         surface !== 'default' && `hf-card-${surface}`,
+        game && `hf-card-game hf-card-game-${game}`,
         shareable && 'hf-card-shareable',
         className,
       )}
