@@ -12,3 +12,12 @@ export const fansGames = [
   { href: `${fansPath}/fjouwer`, label: 'Fjouwer', part: 'vier' },
   { href: `${fansPath}/fantest`, label: 'Fantest', part: 'fantest' },
 ] as const
+
+/**
+ * Whether the path is a page of signing up or logging in: one narrow column with one task, with
+ * no bar of games under the menu, like the login of the admin.
+ */
+export const isAccountPath = (pathname: string) =>
+  ['aanmelden', 'inloggen'].some(
+    (page) => pathname === `${fansPath}/${page}` || pathname.startsWith(`${fansPath}/${page}/`),
+  )

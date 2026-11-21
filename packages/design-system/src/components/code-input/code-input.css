@@ -1,0 +1,66 @@
+/*
+ * The field for a code, drawn as six boxes. One input sits over six boxes that only draw: the
+ * digits of the input are spaced so that each one lands in the middle of a box. The box that is
+ * next is marked (data-current, set by the component). An error shows in every box, with a
+ * thicker border, and the text of the error is in the Field: the colour is never the only sign.
+ */
+
+@layer hf.components {
+  .hf-code-input {
+    --hf-code-box: clamp(2.5rem, 11.5vw, 2.75rem);
+    --hf-code-gap: var(--hf-space-s);
+
+    display: inline-block;
+    inline-size: calc(6 * var(--hf-code-box) + 5 * var(--hf-code-gap));
+    justify-self: start;
+    max-inline-size: 100%;
+    position: relative;
+
+    > input {
+      background: transparent;
+      block-size: 3.375rem;
+      border: 0;
+      box-sizing: border-box;
+      color: var(--hf-colour-text-heading);
+      display: block;
+      font-size: var(--hf-heading-2-font-size);
+      font-variant-numeric: tabular-nums;
+      font-weight: var(--hf-figure-font-weight);
+      inline-size: 100%;
+      letter-spacing: calc(var(--hf-code-box) + var(--hf-code-gap) - 1ch);
+      padding-block: 0;
+      padding-inline: calc((var(--hf-code-box) - 1ch) / 2) 0;
+      position: relative;
+    }
+
+    /* The ring goes around all six boxes, which is what the field is. */
+    > input:focus-visible {
+      outline-offset: 0.25rem;
+    }
+  }
+
+  .hf-code-input-boxes {
+    column-gap: var(--hf-code-gap);
+    display: grid;
+    grid-template-columns: repeat(6, var(--hf-code-box));
+    inset: 0;
+    position: absolute;
+  }
+
+  .hf-code-input-box {
+    background-color: var(--hf-colour-background-surface);
+    border: 0.125rem solid var(--hf-colour-border-input);
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+
+    &[data-current] {
+      border-color: var(--hf-colour-focus);
+      border-width: 0.25rem;
+    }
+  }
+
+  .hf-code-input:has(> input[aria-invalid='true']) .hf-code-input-box {
+    border-color: var(--hf-colour-text-accent);
+    border-width: 0.25rem;
+  }
+}

@@ -403,6 +403,15 @@ describe('Fans in the menu', () => {
     expect(html).not.toContain('hf-navigation-bar')
   })
 
+  it('has no bar on the pages of signing up and logging in, which are one narrow column', () => {
+    for (const path of ['/fans/aanmelden', '/fans/aanmelden/verstuurd', '/fans/inloggen/bevestigen']) {
+      expect(barLinks(render(path, undefined, games))).toEqual([])
+      expect(currentLinks(render(path, undefined, games))).toEqual(['Fans'])
+    }
+
+    expect(barLinks(render('/fans/aanmelden-nu', undefined, games))).toEqual([['/fans/prognose', 'Prognose']])
+  })
+
   it('has a bar with the games that are on, without the page Fans itself, and marks the game', () => {
     expect(barLinks(render('/fans', undefined, games))).toEqual([['/fans/prognose', 'Prognose']])
     expect(currentLinks(render('/fans/prognose', undefined, games))).toEqual(['Prognose'])

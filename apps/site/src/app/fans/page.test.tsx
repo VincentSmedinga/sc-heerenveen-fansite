@@ -3,7 +3,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import FansPage from './page'
 
-const { currentSupporter } = vi.hoisted(() => ({ currentSupporter: vi.fn(() => Promise.resolve(undefined)) }))
+const { currentSupporter } = vi.hoisted(() => ({
+  currentSupporter: vi.fn((): Promise<undefined | { createdAt: Date; screenName: string }> =>
+    Promise.resolve(undefined),
+  ),
+}))
 
 vi.mock('#src/fans/require-supporter', () => ({ currentSupporter }))
 vi.mock('next/navigation', () => ({
@@ -62,6 +66,45 @@ describe('FansPage', () => {
     expect(html).toContain('Je bent uitgelogd.')
     expect(html.indexOf('Je bent uitgelogd.')).toBeLessThan(html.indexOf('Maak alvast een account'))
     expect(await render()).not.toContain('uitgelogd')
+  })
+})
+
+describe('FansPage, after confirming a new account', () => {
+  const welcome = 'Welkom, Tjalle99. Je account is klaar en je blijft op dit apparaat ingelogd.'
+  const supporter = (createdAt: Date) => ({ createdAt, screenName: 'Tjalle99' })
+  const minutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60 * 1000)
+
+  afterEach(() => currentSupporter.mockResolvedValue(undefined))
+
+  it('welcomes the supporter by the screen name of the session, above the cards', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    currentSupporter.mockResolvedValue(supporter(minutesAgo(1)))
+    const html = await render({ welkom: '1' })
+
+    expect(html).toContain(welcome)
+    expect(html.indexOf(welcome)).toBeLessThan(html.indexOf('Maak alvast een account'))
+  })
+
+  it('takes the name from the session and never from the address', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    currentSupporter.mockResolvedValue(supporter(minutesAgo(1)))
+
+    expect(await render({ naam: 'Anders', welkom: '1' })).not.toContain('Anders')
+  })
+
+  it('shows nothing without the mark, without a session, or long after the account was made', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    currentSupporter.mockResolvedValue(supporter(minutesAgo(1)))
+
+    expect(await render()).not.toContain('Welkom,')
+
+    currentSupporter.mockResolvedValue(undefined)
+
+    expect(await render({ welkom: '1' })).not.toContain('Welkom,')
+
+    currentSupporter.mockResolvedValue(supporter(minutesAgo(60)))
+
+    expect(await render({ welkom: '1' })).not.toContain('Welkom,')
   })
 })
 

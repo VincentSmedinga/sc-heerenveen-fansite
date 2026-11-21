@@ -6977,3 +6977,41 @@
   Zo verried één foute code of een adres een account heeft (de review van #1448).
   Zonder de hash van het adres bleef het verschil na een tweede aanvraag (de tweede review).
 - **Alternatieven:** het aantal pogingen niet tonen (het ontwerp vraagt het); de pogingen ergens anders tellen (een tweede plek voor hetzelfde, en een nieuwe kolom of tabel).
+
+## Het aanmelden is af: het adres, een nieuwe code en het welkom
+
+- **Datum:** 20 november 2026
+- **Besluit:** "Kijk in je mail" toont het adres door het op te zoeken bij de `ref` in de adresbalk, zonder cookie en zonder het adres in de URL (`signUpAddress` in `apps/site/src/fans/new-code.ts`).
+  Is de aanmelding weg, verlopen of onbekend, of heeft de rij geen adres (de rij voor een login van een onbekend adres), dan zegt de pagina "het adres dat je invulde", zoals eerder.
+  Een adres met een account toont zijn adres uit `supporters`, dus de pagina is voor elk adres gelijk.
+- **Waarom:** de aanmelding bestaat 15 minuten en bevat het adres al.
+  Een cookie met een adres is een extra gegeven dat de privacyverklaring zou moeten noemen, en een adres in de URL komt in logboeken en in de geschiedenis van de browser.
+  De pagina is dynamisch, dus de server geeft haar geen cache mee.
+- **Alternatieven:** een kortlevend cookie met het adres; het adres in de URL.
+
+- **Datum:** 20 november 2026
+- **Besluit:** een nieuwe code vervangt de vorige en kan na een minuut (`handleNewCode` in `apps/site/src/fans/new-code.ts`).
+  De server haalt de rij van de vorige mail weg en maakt een nieuwe met dezelfde `ref`, dezelfde schermnaam en een nieuw token en een nieuwe code, dus de pagina houdt haar adres.
+  De minuut volgt uit de rij zelf: het moment van de mail is het einde van de rij min 15 minuten, dus er komt geen kolom bij.
+  Een verzoek binnen een minuut stuurt niets en telt niet mee.
+  Een nieuwe mail telt wel mee voor de 3 mails per adres in 15 minuten en voor het plafond voor de hele site, en de melding van een limiet is die van het aanmelden.
+  De pagina van een verlopen link heeft de knop "Stuur een nieuwe", die naar het aanmeldformulier gaat, omdat een verlopen aanmelding niets achterlaat.
+- **Waarom:** twee geldige codes naast elkaar maken raden makkelijker, en een bewaard adres na verlopen tijd past niet bij de belofte dat we weinig bewaren.
+  De minuut staat op de server, want een pagina zonder JavaScript of een rechtstreeks verzoek slaat de knop over.
+- **Alternatieven:** de oude code laten staan tot hij verloopt; de verlopen aanmelding langer bewaren om opnieuw te kunnen mailen; de minuut alleen in de pagina bewaren.
+
+- **Datum:** 21 november 2026
+- **Besluit:** na het bevestigen van een nieuw account komt de supporter op `/fans?welkom=1`, met een Notice "Welkom, <schermnaam>." boven de kaarten.
+  De schermnaam komt uit de sessie.
+  De Notice verschijnt alleen als het account minder dan 10 minuten geleden is gemaakt, zodat het adres met `welkom=1` in de geschiedenis of een bladwijzer hem later niet opnieuw toont.
+  Mijn account heeft het welkom niet meer.
+- **Waarom:** een melding die één keer verschijnt, heeft een plek nodig die de server niet voor de pagina kan onthouden zonder cookie.
+  Een korte tijd na het maken is dichtbij genoeg bij "één keer, direct na het bevestigen".
+- **Alternatieven:** een cookie die de pagina leest (nog een cookie, en de pagina kan hem niet zelf weghalen); alleen `welkom=1` (de melding komt bij elke herlaadbeurt terug).
+- **Later:** het welkom stond eerst op `/fans/mijn-account?welkom=1` (#1446).
+
+- **Datum:** 21 november 2026
+- **Besluit:** de pagina's van het aanmelden en van het inloggen (alles onder `/fans/aanmelden` en `/fans/inloggen`) hebben geen balk met de spellen onder het hoofdmenu (`isAccountPath` in `apps/site/src/fans-paths.ts`).
+  Het item Fans blijft in het menu en is gemarkeerd.
+- **Waarom:** deze pagina's zijn één smalle kolom met één taak, zoals de inlogpagina van het beheer, en een balk met spellen leidt daar van de taak af.
+- **Alternatieven:** de balk laten staan (het ontwerp wil hem weg); alleen het aanmelden (het inloggen is dezelfde soort pagina en zou er anders naast afwijken).
