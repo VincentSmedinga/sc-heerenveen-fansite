@@ -35,10 +35,11 @@ describe('FansPage', () => {
     expect(html.match(/komt eraan/g)).toHaveLength(3)
   })
 
-  it('has no card with a watermark and no link to a page that does not exist yet', () => {
+  it('has the button Account maken, to the sign-up, and no link to a page that does not exist yet', () => {
     vi.stubEnv('FANS_ACCOUNTS', 'on')
     const html = renderToStaticMarkup(<FansPage />)
 
+    expect(html).toMatch(/<form[^>]*action="\/fans\/aanmelden"[^>]*><button[^>]*>Account maken<\/button><\/form>/)
     expect(html).not.toMatch(/<a /)
   })
 })

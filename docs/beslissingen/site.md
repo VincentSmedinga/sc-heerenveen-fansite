@@ -6827,6 +6827,9 @@
 - **Waarom:** twee kopieën van dezelfde beveiligingscode lopen uit elkaar, en een fout die in de ene wordt hersteld, blijft in de andere staan.
   Een eigen pull request houdt de review klein: er verandert alleen bestaande code, en het beheer moet precies hetzelfde blijven doen.
 - **Alternatieven:** de code kopiëren voor supporters; het delen in dezelfde pull request doen als het aanmelden (te groot voor één review).
+- **Later:** #1446 geeft de module de tabellen van supporters erbij (zie _Een supporter maakt een account met een schermnaam en een e-mailadres_).
+  `AccountTables` is nu de tabellen van het beheer of die van supporters.
+  Twee dingen kwamen erbij, met voor het beheer dezelfde werking als ervoor: `codeFailuresEndLink`, en rijen zonder adres in de tabel van de pogingen, die de module laat staan.
 
 ## Fans staat in het hoofdmenu zodra accounts aan staan, en alles onder `/fans` komt nooit in een cache
 
@@ -6840,10 +6843,6 @@
 - **Waarom:** zo test de projecteigenaar het aanmelden op acceptatie voordat een spel ervan afhangt.
   Een pagina met persoonlijke inhoud mag nergens blijven hangen, en de openbare pagina's blijven voor iedereen gelijk en goed te cachen.
 - **Alternatieven:** het item verbergen tot er een spel is (aanmelden is dan niet te testen); de instellingen bij de bouw lezen (dan kent een pagina "niet gevonden" het item niet).
-
-- **Later:** #1446 geeft de module de tabellen van supporters erbij (zie _Een supporter maakt een account met een schermnaam en een e-mailadres_).
-  `AccountTables` is nu de tabellen van het beheer of die van supporters.
-  Twee dingen kwamen erbij, met voor het beheer dezelfde werking als ervoor: `codeFailuresEndLink`, en rijen zonder adres in de tabel van de pogingen, die de module laat staan.
 
 ## Een supporter maakt een account met een schermnaam en een e-mailadres
 

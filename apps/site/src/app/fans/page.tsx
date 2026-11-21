@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
 
-import { Card, Heading, List, Page, Tag, Text } from '@fansite/design-system'
+import { Button, Card, Form, Heading, List, Page, Tag, Text } from '@fansite/design-system'
 import { isFansPartOn, requireFansPart } from '@fansite/shared/fans-env'
 import { notFound } from 'next/navigation'
 
-import { fansGames } from '#src/fans-paths'
+import { fansGames, fansPath } from '#src/fans-paths'
 import { pageMetadata } from '#src/metadata'
 
 // Render on each request: the canonical URL comes from SITE_ENV and the parts of Fans from
@@ -27,9 +27,9 @@ const coming = [
 
 /**
  * The page Fans, as long as no game exists: what is coming, and a card to make an account
- * already. The buttons Account maken and Inloggen come with the pages they lead to (#1446 and
- * #1448); until then the card says what you need and has no button. A game that is on has no
- * link yet either: its own issue gives it one.
+ * already. The button Account maken leads to the sign-up (#1446). Inloggen comes with its
+ * page (#1448), and has no button until then. A game that is on has no link yet either: its own
+ * issue gives it one.
  */
 export default function FansPage() {
   requireFansPart('accounts', notFound)
@@ -50,6 +50,10 @@ export default function FansPage() {
             Dan ben je klaar als het eerste spel begint. Je hebt alleen een schermnaam en een e-mailadres nodig, geen
             wachtwoord. Alleen je schermnaam is voor anderen te zien.
           </Text>
+          {/* A form that only goes to the page: the design system has no link as a button. */}
+          <Form action={`${fansPath}/aanmelden`}>
+            <Button type="submit">Account maken</Button>
+          </Form>
         </Card>
         <Card aria-labelledby="wat-komt-er">
           <Heading id="wat-komt-er" level={2}>
