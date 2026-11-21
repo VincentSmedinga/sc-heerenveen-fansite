@@ -80,6 +80,10 @@ const notInSitemap: string[] = [
   '/fans/mijn-account/e-mailadres',
   '/fans/mijn-account/e-mailadres/bevestigen',
   '/fans/mijn-account/e-mailadres/verstuurd',
+  '/fans/mijn-account/gegevens',
+  '/fans/mijn-account/opgeheven',
+  '/fans/mijn-account/opheffen',
+  '/fans/mijn-account/opheffen/zeker',
   '/fans/mijn-account/schermnaam',
   // A page of results has no use in a search engine, and says noindex.
   '/nieuws/zoeken',

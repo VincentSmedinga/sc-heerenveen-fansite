@@ -50,6 +50,8 @@ const open = [
   'app/fans/inloggen/bevestigen/page.tsx',
   'app/fans/inloggen/page.tsx',
   'app/fans/inloggen/verstuurd/page.tsx',
+  // The page after closing the account, when there is no session any more; nothing personal.
+  'app/fans/mijn-account/opgeheven/page.tsx',
   // The page that says what is coming, for everybody; it has nothing personal.
   'app/fans/page.tsx',
 ]
