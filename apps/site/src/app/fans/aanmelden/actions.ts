@@ -9,7 +9,15 @@ import type { SignUpState } from '#src/fans/sign-up-form'
 import { getDatabase } from '#src/database'
 import { originOf } from '#src/env'
 import { land } from '#src/fans/land'
-import { type ConfirmResult, confirmWithCode, confirmWithLink, handleSignUp, signUpPaths } from '#src/fans/sign-up'
+import { handleNewCode } from '#src/fans/new-code'
+import {
+  type ConfirmResult,
+  confirmWithCode,
+  confirmWithLink,
+  handleSignUp,
+  type SignUpDeps,
+  signUpPaths,
+} from '#src/fans/sign-up'
 import { errorMessages } from '#src/fans/sign-up-form'
 import { sendCeilingMail, sendMailCeilingMail, sendSignUpMail } from '#src/fans/sign-up-mail'
 
@@ -18,6 +26,15 @@ import { sendCeilingMail, sendMailCeilingMail, sendSignUpMail } from '#src/fans/
 // before it reads anything.
 
 const goneLink = `${signUpPaths.confirm}?fout=link`
+
+/** What a mail of signing up needs: how it is sent after the answer, and the site's address. */
+const mailDeps = (): SignUpDeps => ({
+  defer: after,
+  deliver: sendSignUpMail,
+  notifyCeiling: sendCeilingMail,
+  notifyMailCeiling: sendMailCeilingMail,
+  origin: originOf(),
+})
 
 /** Confirms with the link: the page of the link binds its token to the action. */
 export async function confirm(token: string) {
@@ -48,6 +65,23 @@ export async function confirmCode(ref: string, formData: FormData) {
 }
 
 /**
+ * Mails a new link and code, on the page "Kijk in je mail", which binds `ref`. The page shows
+ * what came of it: a new mail, the wait of a minute, or a limit. A request that is gone leads
+ * to the page of a link that doesn't work.
+ */
+export async function newCode(ref: string) {
+  requireFansPart('accounts', notFound)
+
+  const result = typeof ref === 'string' ? await handleNewCode(getDatabase().db, ref, mailDeps()) : { answer: 'gone' }
+
+  if (result.answer === 'gone') {
+    redirect(goneLink)
+  }
+
+  redirect(`${signUpPaths.sent}?${new URLSearchParams({ melding: result.answer, ref }).toString()}`)
+}
+
+/**
  * Handles the form of signing up. It returns the state the form shows when a field is wrong or
  * a limit is reached, and sends the visitor to "Kijk in je mail" otherwise, for every address.
  */
@@ -60,13 +94,7 @@ export async function signUp(_previous: SignUpState, formData: FormData): Promis
     return typeof value === 'string' ? value : ''
   }
   const values = { email: text('e-mail'), screenName: text('schermnaam') }
-  const result = await handleSignUp(getDatabase().db, values, {
-    defer: after,
-    deliver: sendSignUpMail,
-    notifyCeiling: sendCeilingMail,
-    notifyMailCeiling: sendMailCeilingMail,
-    origin: originOf(),
-  })
+  const result = await handleSignUp(getDatabase().db, values, mailDeps())
 
   switch (result.answer) {
     case 'ceiling':

@@ -251,6 +251,7 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/fans/aanmelden?fout=naam-bezet', status: 200 },
   { path: '/fans/aanmelden/verstuurd?ref=onbekend', status: 200 },
   { path: '/fans/aanmelden/verstuurd?ref=onbekend&fout=code', status: 200 },
+  { path: '/fans/aanmelden/verstuurd?ref=onbekend&melding=wacht', status: 200 },
   { path: '/fans/aanmelden/bevestigen?token=onbekend', status: 200 },
   { path: '/fans/inloggen', status: 200 },
   { path: '/fans/inloggen?terug=%2Ffans%2Fmijn-account', status: 200 },
