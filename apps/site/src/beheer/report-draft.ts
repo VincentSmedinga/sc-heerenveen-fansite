@@ -41,6 +41,7 @@ export function canonicalValues(values: ReportValues): string {
     values.bron,
     values.status,
     values.tegenstander,
+    sides.map((of) => values.ruststand[of]),
     sides.map((of) => [values.formatie[of].keuze, values.formatie[of].eigen]),
     sides.map(side),
   ])
@@ -111,7 +112,7 @@ export function parseDraft(text: null | string): ReportDraft | undefined {
   }
 
   try {
-    const parsed: unknown = JSON.parse(text)
+    const parsed: unknown = withHalfTime(JSON.parse(text))
 
     if (
       typeof parsed === 'object' &&
@@ -208,8 +209,9 @@ function isValues(value: unknown): value is ReportValues {
   }
 
   const formation = get(value, 'formatie')
+  const halfTime = get(value, 'ruststand')
 
-  if (!record(formation)) {
+  if (!record(formation) || !record(halfTime) || !isText(get(halfTime, 'wij')) || !isText(get(halfTime, 'zij'))) {
     return false
   }
 
@@ -232,4 +234,20 @@ function isValues(value: unknown): value is ReportValues {
       })
     )
   })
+}
+
+/**
+ * A draft that the browser kept before the form had the score at half-time has no `ruststand`:
+ * it gets two empty fields, so the form still opens with what was typed.
+ */
+function withHalfTime(parsed: unknown): unknown {
+  if (typeof parsed === 'object' && parsed !== null && 'values' in parsed) {
+    const { values } = parsed
+
+    if (typeof values === 'object' && values !== null && !('ruststand' in values)) {
+      return { ...parsed, values: { ...values, ruststand: { wij: '', zij: '' } } }
+    }
+  }
+
+  return parsed
 }

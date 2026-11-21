@@ -124,6 +124,8 @@ async function store(overrides: Parameters<typeof baseReport>[1] = {}, status = 
     { ...baseReport(squad, overrides), status },
     {
       match: {
+        afterNinetyAgainst: null,
+        afterNinetyFor: null,
         extraTime: false,
         goalsAgainst: 1,
         goalsFor: 2,
@@ -519,6 +521,8 @@ describe('the report screen and the button for the line-up of the previous match
       { ...baseReport(squad, {}), status: 'bezig' },
       {
         match: {
+          afterNinetyAgainst: null,
+          afterNinetyFor: null,
           extraTime: false,
           goalsAgainst: 1,
           goalsFor: 2,

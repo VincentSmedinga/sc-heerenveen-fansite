@@ -4,16 +4,19 @@ import { classNames } from '../classNames'
 
 /**
  * The tones a Tag can have: `attention` for what is missing, `highlight` for what the reader
- * should look at, and `neutral` for the rest.
+ * should look at, and `neutral` for the rest. `open`, `todo` and `closed` say how a game
+ * stands.
  */
-export const tagTones = ['attention', 'highlight', 'neutral'] as const
+export const tagTones = ['attention', 'highlight', 'neutral', 'open', 'todo', 'closed'] as const
 
 export type TagProps = Omit<ComponentPropsWithoutRef<'span'>, 'children'> & {
   /** The text of the label. It says what is going on by itself: the tone only adds to it. */
   children: string
   /**
    * `attention` is red, for what is missing or has to be done. `highlight` is blue with a pale
-   * fill, for what has changed or deserves a look. `neutral` is quiet, for a fact.
+   * fill, for what has changed or deserves a look. `neutral` is quiet, for a fact. `open` is
+   * green, for what is open ("Open tot za 16.45"), `todo` is amber, for what the reader still
+   * has to do ("Nog te doen"), and `closed` is grey, for what is over ("Gesloten").
    */
   tone?: (typeof tagTones)[number]
 }

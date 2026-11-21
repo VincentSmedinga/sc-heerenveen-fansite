@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "c3baafe3-6824-470b-b618-ba37324a1c52",
+  "id": "158f0eeb-dcbd-48d1-b737-901eeadaf9ad",
   "prevId": "a870c34d-a4e5-49f4-97d8-6acd9092ace8",
   "tables": {
     "admin_login_attempts": {
@@ -3663,6 +3663,20 @@
           "notNull": false,
           "autoincrement": false
         },
+        "half_time_for": {
+          "name": "half_time_for",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "half_time_against": {
+          "name": "half_time_against",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "match_date": {
           "name": "match_date",
           "type": "date",
@@ -3812,6 +3826,14 @@
         "matches_after_ninety_within_extra_time": {
           "name": "matches_after_ninety_within_extra_time",
           "value": "`matches`.`after_ninety_for` is null or (`matches`.`extra_time` = 1 and `matches`.`after_ninety_for` <= `matches`.`goals_for` and `matches`.`after_ninety_against` <= `matches`.`goals_against`)"
+        },
+        "matches_half_time_in_a_pair": {
+          "name": "matches_half_time_in_a_pair",
+          "value": "(`matches`.`half_time_for` is null and `matches`.`half_time_against` is null) or (`matches`.`half_time_for` is not null and `matches`.`half_time_against` is not null)"
+        },
+        "matches_half_time_within_the_result": {
+          "name": "matches_half_time_within_the_result",
+          "value": "`matches`.`half_time_for` is null or (`matches`.`status` = 'played' and `matches`.`half_time_for` <= coalesce(`matches`.`after_ninety_for`, `matches`.`goals_for`) and `matches`.`half_time_against` <= coalesce(`matches`.`after_ninety_against`, `matches`.`goals_against`))"
         },
         "matches_attendance_in_range_when_played": {
           "name": "matches_attendance_in_range_when_played",
@@ -6268,14 +6290,6 @@
           "notNull": true,
           "autoincrement": false,
           "default": true
-        },
-        "remind_by_email": {
-          "name": "remind_by_email",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
         },
         "created_at": {
           "name": "created_at",

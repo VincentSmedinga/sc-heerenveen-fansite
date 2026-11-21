@@ -1865,6 +1865,8 @@
   De tekst haalt 4,5:1 of meer: `attention` 8,21:1 in licht en 6,18:1 in donker op het slechtste vlak, `neutral` 5,31:1 en 8,38:1, en `highlight` 10,26:1 en 11,40:1.
   Een test (`tag-css.test.ts`) houdt deze getallen vast.
 - **Alternatieven:** één onderdeel `Badge` met een kleurprop (de naam zegt niets over wanneer je het kiest); de rand van de zachte knop hergebruiken (een knoprol voor een label); een label met alleen kleur of een pictogram (de kleur zou dan alles dragen).
+- **Later:** op 21 november 2026 kreeg de Tag er drie tonen bij, `open`, `todo` en `closed` (#1499).
+  Zie _De ScoreGrid is een raster van velden voor één cijfer, en de Tag krijgt drie tonen voor de toestand van een spel_.
 
 ## De gevaarlijke knop is rood en gevuld, alleen voor wat je weghaalt
 
@@ -4163,3 +4165,27 @@
     De foutmelding zelf staat in het Field, dus kleur is nooit het enige teken.
 - **Waarom:** een screenreader hoort één veld, plakken en de code die het toetsenbord voorstelt werken, en het werkt zonder JavaScript.
 - **Alternatieven:** zes losse velden (breekt plakken en autofill en leest slecht voor); één gewoon tekstveld zonder vakjes (werkt, maar is minder duidelijk over het aantal cijfers).
+
+## De ScoreGrid is een raster van velden voor één cijfer, en de Tag krijgt drie tonen voor de toestand van een spel
+
+- **Datum:** 21 november 2026
+- **Besluit:** een score tikt een supporter in een `ScoreGrid` (#1499): een raster van grote velden voor één cijfer, met de clubnamen als kolomkop en Ruststand en Eindstand als rij.
+  Een voorspelling is geen keuzelijst.
+  - Het raster is één `fieldset` met een legende die de pagina meegeeft, en vier kolommen (het label, thuis, een streepje en uit) en drie rijen.
+    De clubnamen staan in de volgorde thuis-uit.
+    Het blijft op een telefoon vier kolommen: een lange clubnaam breekt over twee regels in plaats van de velden uit het beeld te duwen.
+  - Elk veld is een gewoon tekstveld voor één cijfer (`maxlength="1"`, `pattern="[0-9]"`, `inputmode="numeric"`), dus zonder JavaScript werkt het in een gewoon formulier, en een leeg veld wordt leeg verstuurd, nooit als 0.
+    De naam van een veld komt via `aria-labelledby` uit de zichtbare labels van zijn rij en kolom, niet uit een tweede tekst.
+    De volgorde bij het tabben is rij na rij, thuis voor uit.
+  - Een fout per veld en een fout voor het hele raster staan in tekst boven het raster, met "Fout:" voor een schermlezer.
+    Een veld met een fout krijgt het foutuiterlijk van de andere velden, via `aria-invalid`.
+  - `readOnly` toont dezelfde vier cijfers met dezelfde labels zonder velden; een ontbrekend cijfer is een streepje, geen 0.
+  - Een kaart, een pagina of een formulier houdt de waarden zelf bij: `defaultValues` laat de browser ze houden, `values` met `onValueChange` de pagina.
+- **Besluit:** de Tag krijgt de tonen `open` (groen), `todo` (amber) en `closed` (grijs), naast `attention`, `highlight` en `neutral`.
+  - De tekst zegt altijd zelf wat er speelt ("Open tot za 16.45", "Nog te doen", "Gesloten"): de tint voegt alleen kleur toe.
+  - Elke toon is een lichte vulling met tekst en een rand in dezelfde kleur, uit zes nieuwe rollen: `--hf-colour-background-tag-*` en `--hf-colour-text-tag-*`.
+    Voor het amber kwamen vier stappen bij de gele schaal (100, 200, 800 en 900).
+    Elke tekst haalt 4,5:1 tegen zijn vulling in licht en donker, en een test controleert dat.
+- **Waarom:** vier cijfers invullen gaat sneller dan vier keuzelijsten openen, de rij en de kolom maken de naam van elk veld duidelijk, en het raster past ook op een telefoon.
+  Een spel heeft een toestand die een bezoeker in één oogopslag wil zien, en kleur alleen is niet genoeg.
+- **Alternatieven:** twee keer twee keuzelijsten van 0 tot 9, zoals op de oude Fansite; een eigen onderdeel voor de toestand van een spel; alleen tekst zonder tint.

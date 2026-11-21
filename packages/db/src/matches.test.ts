@@ -208,6 +208,52 @@ describe('the extra time and the shoot-out of a match', () => {
       'matches_after_ninety_within_extra_time',
       { afterNinetyAgainst: 2, afterNinetyFor: 1, extraTime: true },
     ],
+    ['half a score at half-time', 'matches_half_time_in_a_pair', { halfTimeFor: 1, halfTimeSource: 'redactie' }],
+    [
+      'a score at half-time without its source',
+      'matches_half_time_source_with_the_score',
+      { halfTimeAgainst: 0, halfTimeFor: 0 },
+    ],
+    [
+      'a source without a score at half-time',
+      'matches_half_time_source_with_the_score',
+      { halfTimeSource: 'redactie' },
+    ],
+    [
+      'a half-time score above the result of our side',
+      'matches_half_time_within_the_result',
+      { goalsFor: 1, halfTimeAgainst: 0, halfTimeFor: 2, halfTimeSource: 'redactie' },
+    ],
+    [
+      'a half-time score above the result of the opponent',
+      'matches_half_time_within_the_result',
+      { goalsAgainst: 1, halfTimeAgainst: 2, halfTimeFor: 0, halfTimeSource: 'redactie' },
+    ],
+    [
+      'a half-time score above the score after 90 minutes',
+      'matches_half_time_within_the_result',
+      {
+        afterNinetyAgainst: 1,
+        afterNinetyFor: 1,
+        extraTime: true,
+        goalsFor: 2,
+        halfTimeAgainst: 0,
+        halfTimeFor: 2,
+        halfTimeSource: 'redactie',
+      },
+    ],
+    [
+      'a half-time score before the match is played',
+      'matches_half_time_within_the_result',
+      {
+        goalsAgainst: null,
+        goalsFor: null,
+        halfTimeAgainst: 0,
+        halfTimeFor: 0,
+        halfTimeSource: 'redactie',
+        status: 'scheduled',
+      },
+    ],
   ] satisfies [string, string, Partial<NewMatch>][])('refuses %s', async (_name, constraint, change) => {
     const failure = await database.db
       .insert(matches)
@@ -219,6 +265,42 @@ describe('the extra time and the shoot-out of a match', () => {
 
     // Drizzle wraps the error of the database, which names the constraint.
     expect(String((failure as Error | undefined)?.cause)).toContain(constraint)
+  })
+})
+
+describe('the half-time score of a match', () => {
+  it('is empty unless it is known, and keeps a score within the result, also after extra time', async () => {
+    await database.db.insert(matches).values(await clubbed(cupMatch))
+    await database.db.insert(matches).values(
+      await clubbed({
+        ...cupMatch,
+        halfTimeAgainst: 1,
+        halfTimeFor: 0,
+        halfTimeSource: 'redactie',
+        round: 'Derde ronde',
+      }),
+    )
+    await database.db.insert(matches).values(
+      await clubbed({
+        ...cupMatch,
+        afterNinetyAgainst: 1,
+        afterNinetyFor: 1,
+        extraTime: true,
+        goalsFor: 3,
+        halfTimeAgainst: 1,
+        halfTimeFor: 1,
+        halfTimeSource: 'oude-fansite',
+        round: 'Vierde ronde',
+      }),
+    )
+
+    const rows = await database.db.select().from(matches).orderBy(matches.id)
+
+    expect(rows.map((row) => [row.halfTimeFor, row.halfTimeAgainst])).toEqual([
+      [null, null],
+      [0, 1],
+      [1, 1],
+    ])
   })
 })
 

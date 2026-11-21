@@ -91,7 +91,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
   const notice = typeof gedaan === 'string' ? notices[gedaan] : undefined
   const clubs = match.home ? `sc Heerenveen - ${match.opponent}` : `${match.opponent} - sc Heerenveen`
   const title = `${match.round} (${match.competition}): ${clubs}`
-  const values = valuesOfReport(report, goals, squad)
+  const values = valuesOfReport(report, goals, squad, match)
   const previousLineUp = await findPreviousLineUp(getDatabase().db, match, squad)
   // A report that is stored is judged again, so what is wrong shows. A new one has nothing
   // to say yet.
@@ -103,6 +103,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
     <ReportFormProvider
       action={submitReport.bind(null, match.id, reportBasis(report))}
       choices={{
+        home: match.home,
         matchHref: matchPath(match.id),
         matchId: match.id,
         opponent: match.opponent,

@@ -36,6 +36,7 @@ const meta = preview.meta({
           'De kop van de pagina van een wedstrijd: de twee clubs met de uitslag, de uitkomst in een pil en onder elke club zijn doelpuntenmakers.',
           'Kies hem alleen voor de pagina van één wedstrijd; een regel in een lijst is een `Match`. Na een verlenging of strafschoppen staat dat in woorden onder de uitslag, een wedstrijd die nog wordt gespeeld zegt "Live" (`phase`), en een wedstrijd die nog niet begon heeft streepjes in plaats van een stand.',
           'De uitslag heeft de kleur van de uitkomst voor sc Heerenveen, en het woord in de pil is het teken: een schermlezer hoort "6 tegen 0". De `h1` van de pagina hoort er niet bij.',
+          'De ruststand is een feit en geen tweede uitslag: hij staat als "Ruststand" in de lijst met feiten, met de thuisclub vooraan, en ontbreekt als niemand hem kent.',
           'Hij is gebouwd uit `DescriptionList` voor de feiten en de uitkomst die ook `Match` gebruikt.',
         ].join('\n'),
       },
@@ -71,6 +72,16 @@ export const Default = meta.story({
     ],
   },
   name: 'Een wedstrijd van 90 minuten',
+})
+
+// The score at half-time is a fact like the stadium, not a second score: written home first,
+// and left out when nobody knows it (as in the story above).
+export const WithHalfTimeScore = meta.story({
+  args: {
+    ...Default.input.args,
+    facts: [...facts.slice(0, 3), { label: 'Ruststand', value: '2–0' }, ...facts.slice(3)],
+  },
+  name: 'Met de ruststand',
 })
 
 const scorersWithPages = {

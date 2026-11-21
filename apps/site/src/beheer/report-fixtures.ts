@@ -72,6 +72,7 @@ export function report(
   return {
     bron: 'wedstrijdformulier',
     formatie: { wij: noFormation(), zij: noFormation() },
+    ruststand: { wij: '', zij: '' },
     status: 'klaar',
     tegenstander: 'nee',
     wij: {

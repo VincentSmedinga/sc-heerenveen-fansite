@@ -34,6 +34,7 @@ const player = (keuze: string, rol = 'basis'): Row => ({ ...emptyRow('speler'), 
 const values: ReportValues = {
   bron: '',
   formatie: { wij: { eigen: '', keuze: '4-3-3' }, zij: noFormation() },
+  ruststand: { wij: '', zij: '' },
   status: 'bezig',
   tegenstander: 'nee',
   wij: {
@@ -57,6 +58,7 @@ const provider = (withPreview = true, match: ReportPreviewMatch = preview) => (
   <ReportFormProvider
     action={() => Promise.resolve(initial)}
     choices={{
+      home: true,
       matchHref: '/beheer/wedstrijden/7',
       opponent: 'Testclub',
       ...(withPreview ? { preview: match } : {}),
@@ -239,6 +241,7 @@ describe('the tabs after an answer of the server', () => {
       <ReportFormProvider
         action={() => Promise.resolve(answered)}
         choices={{
+          home: true,
           matchHref: '/beheer/wedstrijden/7',
           opponent: 'Testclub',
           preview,

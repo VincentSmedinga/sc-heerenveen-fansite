@@ -1,0 +1,76 @@
+/*
+ * The grid for the half-time and the full-time score: four columns (the label, the home club, the
+ * dash and the away club) and three rows (the club names, Ruststand and Eindstand). The cells sit
+ * straight in one grid, so a field is never further from its row than from its column. The grid
+ * keeps four columns on the narrowest phone: the fields are as wide as they are high, and a long
+ * club name breaks over two lines above its field instead of pushing the fields out of sight.
+ * A field with an error gets the look of any invalid field (see components/input/input.css).
+ */
+
+@layer hf.components {
+  .hf-score-grid {
+    border: 0;
+    margin-inline: 0;
+    min-inline-size: 0;
+    padding: 0;
+  }
+
+  .hf-score-grid-legend {
+    font-weight: var(--hf-strong-font-weight);
+    padding: 0;
+    padding-block-end: var(--hf-space-s);
+  }
+
+  .hf-score-grid-errors {
+    display: grid;
+    gap: 0.125rem;
+    padding-block-end: var(--hf-space-s);
+  }
+
+  .hf-score-grid-grid {
+    align-items: center;
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr) 1rem minmax(0, 1fr);
+    gap: var(--hf-space-s);
+  }
+
+  .hf-score-grid-club {
+    font-weight: var(--hf-strong-font-weight);
+    hyphens: auto;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+
+  .hf-score-grid-label {
+    font-weight: var(--hf-name-font-weight);
+  }
+
+  .hf-score-grid-dash {
+    color: var(--hf-colour-text-secondary);
+    text-align: center;
+  }
+
+  /* One digit, big enough for a thumb: a square a little more than the height of a control. */
+  .hf-score-grid-field.hf-score-grid-field {
+    block-size: 3.5rem;
+    font-size: var(--hf-heading-2-font-size);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-figure-font-weight);
+    inline-size: 3.5rem;
+    justify-self: center;
+    padding-inline: 0;
+    text-align: center;
+  }
+
+  .hf-score-grid-value {
+    font-size: var(--hf-heading-2-font-size);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-figure-font-weight);
+    justify-self: center;
+  }
+
+  .hf-score-grid-value[data-empty] {
+    color: var(--hf-colour-text-secondary);
+  }
+}
