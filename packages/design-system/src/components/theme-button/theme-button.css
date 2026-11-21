@@ -1,29 +1,19 @@
 /*
- * The theme button of the header: round, 44 by 44 pixels, with a filled sun or moon of 26 pixels. At rest it is
- * quiet, only the icon in a dim blue, without a rim or a fill. Under the mouse, pressed and with the keyboard
- * (:focus-visible) it comes forward: the icon in the lightest blue of the header, with a rim and a fill. It is made
- * for the dark blue of the header, so its colours are the tokens for the header and not the roles of the page.
+ * The theme button of the header. It is a RoundButton on the header (round-button.css), which
+ * gives it its size, its colours and how it comes forward under the mouse, pressed and with the
+ * keyboard. This file adds the change of the icon.
  *
- * The small size (hf-size-small) is 36 by 36 pixels, with an icon of 22 pixels.
+ * Under the mouse and with the keyboard (:focus-visible) the icon turns into that of the other
+ * theme, so the button shows what a click chooses: the sun becomes the moon, the moon the sun.
+ * After a click the component sets data-settled, and the icon of the new theme stays until the
+ * pointer or the focus leaves, so it does not jump back at once. Pressing (:active) alone, as
+ * on a touch screen, leaves the icon as it is.
  *
- * The rim is there at rest as well, but see-through, so the button does not change size when it comes forward, and a
- * browser in forced colours keeps an outline. The base styles of a button fill it; this comes later in the cascade, so
- * a button that is under the mouse on a touch screen (where the browser leaves it so after a tap) is not filled.
- * Hover is only for devices with a mouse (hover: hover), so nothing stays lit after a tap on a phone; pressing
- * (:active) counts on touch as well. The change takes the short motion duration (0,2 seconds),
- * and none with reduced motion.
- *
- * Under the mouse and with the keyboard (:focus-visible) the icon turns into that of the
- * other theme, so the button shows what a click chooses: the sun becomes the moon, the
- * moon the sun. After a click the component sets data-settled, and the icon of the new
- * theme stays until the pointer or the focus leaves, so it does not jump back at once.
- * Pressing (:active) alone, as on a touch screen, leaves the icon as it is.
- *
- * The icon is a disc that grows into the moon while a second disc, in a mask, slides in
- * and cuts the dent out of it. The rays of the sun dissolve outwards into the button, and
- * come out of the disc again. Everything follows one number, --hf-theme-button-moon (0 is
- * the sun, 1 is the moon), with transforms only, so every browser draws the same. With
- * reduced motion the icon changes without a transition.
+ * The icon is a disc that grows into the moon while a second disc, in a mask, slides in and
+ * cuts the dent out of it. The rays of the sun dissolve outwards into the button, and come out
+ * of the disc again. Everything follows one number, --hf-theme-button-moon (0 is the sun, 1 is
+ * the moon), with transforms only, so every browser draws the same. With reduced motion the
+ * icon changes without a transition.
  */
 
 @layer hf.components {
@@ -34,50 +24,9 @@
     /* The icon that is shown now: 0 is the sun and 1 is the moon. The states below set it. */
     --hf-theme-button-moon: 0;
 
-    align-items: center;
-    background-color: transparent;
-    block-size: 2.75rem;
-    border: 1px solid transparent;
-    border-radius: 50%;
-    box-sizing: border-box;
-    color: var(--hf-colour-icon-on-header-quiet);
-    display: inline-flex;
-    inline-size: 2.75rem;
-    justify-content: center;
-    padding: 0;
-
-    /* The icon is 26 pixels, and has no space beside it, as in a button with text. */
-    .hf-icon {
-      --hf-icon-size: 1;
-
-      block-size: 26px;
-      inline-size: 26px;
-      margin: 0;
-
-      /* The rays go outwards, past the edge of the icon. */
+    /* The rays go outwards, past the edge of the icon. */
+    > .hf-icon {
       overflow: visible;
-      vertical-align: baseline;
-    }
-
-    /* The small size: 36 by 36 pixels, with an icon of 22 pixels. */
-    &.hf-size-small {
-      block-size: var(--hf-size-control-small);
-      inline-size: var(--hf-size-control-small);
-
-      /* The small size of a button sets a padding, and this button has none. */
-      padding: 0;
-
-      .hf-icon {
-        block-size: 22px;
-        inline-size: 22px;
-      }
-    }
-
-    &:active,
-    &:focus-visible {
-      background-color: var(--hf-colour-background-on-header-hover);
-      border-color: var(--hf-colour-border-on-header-strong);
-      color: var(--hf-colour-text-on-header);
     }
 
     /* The page is dark: the moon. Under the mouse and with the keyboard the other way round. */
@@ -94,12 +43,6 @@
     }
 
     @media (hover: hover) {
-      &:hover {
-        background-color: var(--hf-colour-background-on-header-hover);
-        border-color: var(--hf-colour-border-on-header-strong);
-        color: var(--hf-colour-text-on-header);
-      }
-
       &[aria-pressed='false']:hover:not([data-settled]) {
         --hf-theme-button-moon: 1;
       }
@@ -148,16 +91,6 @@
         scale calc(var(--hf-theme-button-moon) * var(--hf-theme-button-morph)) var(--hf-motion-ease-enter),
         transform calc((1 - var(--hf-theme-button-moon)) * var(--hf-theme-button-morph)) var(--hf-motion-ease-enter)
           calc(var(--hf-theme-button-moon) * var(--hf-theme-button-morph));
-    }
-
-    /* The durations are motion tokens: 0s with reduced motion, so the icon changes at once. */
-    transition:
-      background-color var(--hf-motion-duration-short) var(--hf-motion-ease-change),
-      border-color var(--hf-motion-duration-short) var(--hf-motion-ease-change),
-      color var(--hf-motion-duration-short) var(--hf-motion-ease-change);
-
-    @media (forced-colors: active) {
-      border-color: ButtonText;
     }
   }
 }

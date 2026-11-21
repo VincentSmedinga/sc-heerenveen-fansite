@@ -274,7 +274,7 @@ describe('Page.TopLink', () => {
 
     expect(link.tagName).toBe('A')
     expect(link.getAttribute('href')).toBe('#top')
-    expect(link.className).toBe('hf-page-top-link')
+    expect(link.className).toBe('hf-round-button hf-round-button-page hf-page-top-link')
     expect(link.textContent).toBe('')
   })
 
@@ -291,7 +291,7 @@ describe('Page.TopLink', () => {
     render(<Page.TopLink className="extra" id="boven" label="Naar boven" />)
     const link = screen.getByRole('link')
 
-    expect(link.className).toBe('hf-page-top-link extra')
+    expect(link.className).toBe('hf-round-button hf-round-button-page hf-page-top-link extra')
     expect(link.id).toBe('boven')
     expect(link.getAttribute('href')).toBe('#top')
   })

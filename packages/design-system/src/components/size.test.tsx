@@ -45,7 +45,9 @@ describe('the sizes', () => {
     expect(screen.getByRole('textbox').hasAttribute('class')).toBe(false)
     expect(screen.getByRole('combobox').hasAttribute('class')).toBe(false)
     expect(screen.getByRole('navigation').className).toBe('hf-pagination')
-    expect(screen.getByRole('button', { name: 'Donker' }).className).toBe('hf-theme-button')
+    expect(screen.getByRole('button', { name: 'Donker' }).className).toBe(
+      'hf-round-button hf-round-button-header hf-theme-button',
+    )
     expect(screen.getByRole('group', { name: 'Thema' }).className).toBe('hf-segmented-control')
     expect(screen.getByRole('group', { name: 'Welke' }).className).toBe('hf-segmented-control')
   })
@@ -80,7 +82,9 @@ describe('the sizes', () => {
     expect(screen.getByRole('textbox').className).toBe('hf-size-small extra')
     expect(screen.getByRole('combobox').className).toBe('hf-size-small')
     expect(screen.getByRole('navigation').className).toBe('hf-pagination hf-size-small')
-    expect(screen.getByRole('button', { name: 'Donker' }).className).toBe('hf-theme-button hf-size-small')
+    expect(screen.getByRole('button', { name: 'Donker' }).className).toBe(
+      'hf-round-button hf-round-button-header hf-size-small hf-theme-button',
+    )
     expect(screen.getByRole('group', { name: 'Thema' }).className).toBe('hf-segmented-control hf-size-small')
     expect(screen.getByRole('group', { name: 'Welke' }).className).toBe('hf-segmented-control hf-size-small')
   })
@@ -111,7 +115,7 @@ describe('the small size in CSS', () => {
     'base/forms.css',
     'components/select/select.css',
     'components/pagination/pagination.css',
-    'components/theme-button/theme-button.css',
+    'components/round-button/round-button.css',
     'components/segmented-control/segmented-control.css',
   ])('sets the height from the token in %s, and no height of its own', (file) => {
     const css = read(file)
@@ -122,7 +126,7 @@ describe('the small size in CSS', () => {
   })
 
   it('keeps the round button without padding, which the small size of a button would give it', () => {
-    const css = read('components/theme-button/theme-button.css')
+    const css = read('components/round-button/round-button.css')
 
     expect(css.slice(css.indexOf('&.hf-size-small'))).toMatch(/&\.hf-size-small \{[^}]*padding: 0;/)
   })

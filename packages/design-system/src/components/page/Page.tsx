@@ -3,6 +3,7 @@ import { type ComponentPropsWithoutRef, type CSSProperties, useId } from 'react'
 import { classNames } from '../classNames'
 import { Icon } from '../icon/Icon'
 import { Link } from '../link/Link'
+import { RoundButton } from '../round-button/RoundButton'
 import { ShortcutsRow } from './ShortcutsRow'
 
 /**
@@ -260,8 +261,9 @@ const Footer = ({ className, ...props }: PageFooterProps) => (
 
 /**
  * A round button in the Page.Footer that takes the visitor back to the top of the page: a link
- * to `#top`, the top of the document, so it works without script. It looks like the ThemeButton
- * of the header, with an arrow pointing up, in the blue of the links in the footer. The
+ * to `#top`, the top of the document, so it works without script. It is a RoundButton on the
+ * page, like the ThemeButton of the header, with an arrow pointing up, in the blue of the links
+ * in the footer. The
  * `label` is its name, and there is no visible text.
  *
  * It is only there where it helps: when the page can scroll further than the height of the
@@ -277,9 +279,9 @@ const Footer = ({ className, ...props }: PageFooterProps) => (
  * boven, link".
  */
 const TopLink = ({ className, label, ...props }: PageTopLinkProps) => (
-  <a {...props} aria-label={label} className={classNames('hf-page-top-link', className)} href="#top">
+  <RoundButton {...props} className={classNames('hf-page-top-link', className)} href="#top" label={label}>
     <Icon name="arrow-up" />
-  </a>
+  </RoundButton>
 )
 
 // The names in React's developer tools and in the code examples in Storybook.

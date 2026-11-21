@@ -14,7 +14,7 @@ describe('ThemeButton', () => {
 
     expect(button.tagName).toBe('BUTTON')
     expect(button.textContent).toBe('')
-    expect(button.className).toBe('hf-theme-button')
+    expect(button.className).toBe('hf-round-button hf-round-button-header hf-theme-button')
   })
 
   it('is a button that does not send a form', () => {
@@ -74,8 +74,9 @@ describe('ThemeButton', () => {
     expect(screen.getByRole('button').getAttribute('aria-pressed')).toBe('false')
   })
 
-  it('is round, in theme-button.css', () => {
-    expect(css()).toContain('border-radius: 50%;')
+  it('is a RoundButton on the header, which gives it its look, so theme-button.css has none of its own', () => {
+    expect(css()).not.toContain('border-radius')
+    expect(css()).not.toMatch(/(?:^|\s)(?:color|background-color|border-color):/)
   })
 
   it('remembers a click, to keep the icon of the chosen theme, until the pointer or the focus leaves', () => {
@@ -122,7 +123,7 @@ describe('ThemeButton', () => {
   it('adds a class and passes other attributes on', () => {
     render(<ThemeButton className="extra" dark={false} id="thema" label="Donker" />)
 
-    expect(screen.getByRole('button').className).toBe('hf-theme-button extra')
+    expect(screen.getByRole('button').className).toBe('hf-round-button hf-round-button-header hf-theme-button extra')
     expect(screen.getByRole('button').id).toBe('thema')
   })
 
@@ -148,11 +149,10 @@ describe('ThemeButton', () => {
       throw new Error(`No end of ${start} in theme-button.css`)
     }
 
-    it('takes the duration of the morph and of the colour from the motion tokens', () => {
+    it('takes the duration of the morph from the motion tokens', () => {
       expect(css().match(/--hf-theme-button-morph: [^;]+;/g)).toEqual([
         '--hf-theme-button-morph: var(--hf-motion-duration-medium);',
       ])
-      expect(css()).toContain('background-color var(--hf-motion-duration-short) var(--hf-motion-ease-change),')
     })
 
     it('shows the other icon only under hover: hover and with :focus-visible, and not when the button was clicked', () => {

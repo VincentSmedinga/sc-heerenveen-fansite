@@ -2,8 +2,10 @@
 
 import { type ComponentPropsWithoutRef, useId, useState } from 'react'
 
+import type { Size } from '../size'
+
 import { classNames } from '../classNames'
-import { type Size, sizeClassName } from '../size'
+import { RoundButton } from '../round-button/RoundButton'
 
 export type ThemeButtonProps = Omit<
   ComponentPropsWithoutRef<'button'>,
@@ -31,7 +33,8 @@ export type ThemeButtonProps = Omit<
  * here, because Icon draws only one icon and does not change. It holds no theme: the page gives
  * it `dark` and handles the click, and the button only remembers that it was clicked
  * (`data-settled`).
- * theme-button.css gives it its look, which is made for the dark blue of the header.
+ * It is a RoundButton on the header, so it looks like the other round buttons there;
+ * theme-button.css adds the change of the icon.
  */
 export const ThemeButton = ({
   className,
@@ -47,12 +50,12 @@ export const ThemeButton = ({
   const maskId = useId()
 
   return (
-    <button
+    <RoundButton
       {...props}
-      aria-label={label}
       aria-pressed={dark}
-      className={classNames('hf-theme-button', sizeClassName(size), className)}
+      className={classNames('hf-theme-button', className)}
       data-settled={settled ? '' : undefined}
+      label={label}
       onBlur={(event) => {
         setSettled(false)
         onBlur?.(event)
@@ -65,7 +68,8 @@ export const ThemeButton = ({
         setSettled(false)
         onPointerLeave?.(event)
       }}
-      type="button"
+      size={size}
+      surface="header"
     >
       <svg
         aria-hidden="true"
@@ -98,6 +102,6 @@ export const ThemeButton = ({
           <circle className="hf-theme-button-body" cx="8" cy="8" r="6.25" stroke="none" />
         </g>
       </svg>
-    </button>
+    </RoundButton>
   )
 }

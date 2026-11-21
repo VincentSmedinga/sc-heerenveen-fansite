@@ -52,43 +52,19 @@ describe('the rule that shows the link to the top in top-link.css', () => {
 })
 
 describe('the look of the link to the top in top-link.css', () => {
-  it('is round and 44 by 44 pixels, like the theme button', () => {
-    expect(own).toContain('block-size: 2.75rem;')
-    expect(own).toContain('inline-size: 2.75rem;')
-    expect(own).toContain('border-radius: 50%;')
-    expect(css).toContain('block-size: 26px;')
-  })
-
-  it('takes its colours from the roles of links in the footer, and has no colour of its own', () => {
-    expect(css).not.toMatch(/#[0-9a-f]{3,8}\b|rgb\(|hsl\(|oklch\(/i)
-    expect(css).not.toMatch(/--hf-colour-(blue|red|grey|sand|steel)-\d+/)
-    expect(new Set(css.match(/var\(--hf-colour-[a-z-]+\)/g))).toEqual(
-      new Set(['var(--hf-colour-text-link)', 'var(--hf-colour-text-link-hover)']),
-    )
-  })
-
-  it('comes forward under the mouse only on a device with a mouse, and when pressed and with the keyboard', () => {
-    expect(css).toMatch(/&:active,\s*&:focus-visible \{[^}]*color: var\(--hf-colour-text-link-hover\);/)
-    expect(css).toMatch(/@media \(hover: hover\) \{\s*&:hover \{[^}]*color: var\(--hf-colour-text-link-hover\);/)
-    expect(own).not.toContain(':hover')
-  })
-
-  it('has a rim at rest, see-through, so the link does not change size', () => {
-    expect(own).toContain('border: 1px solid transparent;')
-  })
-
-  it('moves with the motion tokens, so there is none with reduced motion', () => {
-    expect(own).toContain('var(--hf-motion-duration-short)')
-    expect(own).toContain('var(--hf-motion-ease-change)')
-  })
-
-  it('keeps an outline in forced colours, with a system colour', () => {
-    expect(css).toMatch(/@media \(forced-colors: active\) \{\s*border-color: LinkText;/)
+  it('has no look of its own: it is a RoundButton on the page, and round-button.css gives it its look', () => {
+    expect(own).not.toMatch(/(?:^|\s)(?:color|background-color|border|block-size|inline-size|border-radius):/)
+    expect(css).not.toContain(':hover')
+    expect(css).not.toContain('forced-colors')
   })
 })
 
 describe('the link to the top in index.css', () => {
   it('is imported after page.css, so its rules come after those of the footer', () => {
     expect(index.indexOf('top-link.css')).toBeGreaterThan(index.indexOf('page.css'))
+  })
+
+  it('is imported after round-button.css, so it hides the link in print over the display of the round button', () => {
+    expect(index.indexOf('top-link.css')).toBeGreaterThan(index.indexOf('round-button.css'))
   })
 })

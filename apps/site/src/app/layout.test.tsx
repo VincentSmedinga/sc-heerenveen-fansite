@@ -171,7 +171,7 @@ describe('the link to the top in the footer', () => {
     )
 
     expect(html).toMatch(
-      /<\/nav><a [^>]*aria-label="Naar boven"[^>]*class="hf-page-top-link"[^>]*href="#top"[^>]*>.*<\/a><\/footer>/s,
+      /<\/nav><a [^>]*aria-label="Naar boven"[^>]*class="hf-round-button hf-round-button-page hf-page-top-link"[^>]*href="#top"[^>]*>.*<\/a><\/footer>/s,
     )
   })
 })

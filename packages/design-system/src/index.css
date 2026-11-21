@@ -32,6 +32,7 @@
 @import url('./base/focus.css');
 @import url('./components/page/page.css');
 @import url('./components/page/shortcuts.css');
+@import url('./components/round-button/round-button.css');
 @import url('./components/page/top-link.css');
 @import url('./components/card/card.css');
 @import url('./components/tag/tag.css');
@@ -54,6 +55,7 @@
 @import url('./components/segmented-control/segmented-control.css');
 @import url('./components/season-picker/season-picker.css');
 @import url('./components/theme-button/theme-button.css');
+@import url('./components/account-button/account-button.css');
 @import url('./components/logo/logo.css');
 @import url('./components/heading/heading.css');
 @import url('./components/text/text.css');
