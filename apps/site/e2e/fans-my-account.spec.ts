@@ -50,11 +50,11 @@ test.describe('without JavaScript', () => {
 
     // An error shows in the summary and at the field.
     await page.getByLabel('Nieuwe schermnaam').fill('Fansite_Redactie')
-    await page.getByRole('button', { exact: true, name: 'Opslaan naam in de standen' }).click()
+    await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
     await expect(page.getByRole('link', { name: 'Die naam lijkt op de club, de site of de redactie.' })).toBeVisible()
 
     await page.getByLabel('Nieuwe schermnaam').fill(name)
-    await page.getByRole('button', { exact: true, name: 'Opslaan naam in de standen' }).click()
+    await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
     await expect(page).toHaveURL(/\/fans\/mijn-account\?melding=schermnaam$/)
     await expect(page.getByText('Je schermnaam is gewijzigd.')).toBeVisible()
     await expect(page.getByRole('definition').first()).toContainText(name)
@@ -187,11 +187,11 @@ test('checks the pages of Mijn account with axe, with an error and with the wait
   await page.goto('/fans/mijn-account/schermnaam')
   await checkPage(page)
   await page.getByLabel('Nieuwe schermnaam').fill('a@b')
-  await page.getByRole('button', { exact: true, name: 'Opslaan naam in de standen' }).click()
+  await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
   await expect(page.locator('#fouten')).toBeFocused()
   await checkPage(page)
   await page.getByLabel('Nieuwe schermnaam').fill(`Axe ${id}`.slice(0, 20))
-  await page.getByRole('button', { exact: true, name: 'Opslaan naam in de standen' }).click()
+  await page.getByRole('button', { exact: true, name: 'Opslaan' }).click()
   await expect(page).toHaveURL(/\/fans\/mijn-account\?melding=schermnaam$/)
   await expect(page.locator('#melding')).toBeFocused()
   await checkPage(page)
