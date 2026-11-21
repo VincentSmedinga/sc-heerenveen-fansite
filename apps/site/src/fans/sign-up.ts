@@ -11,7 +11,7 @@ import { normaliseEmail } from '../beheer/accounts'
 import { issueLoginLink } from '../login/request'
 import { removeEnded, startSession, startSessionIfOn, takeLink, takeLinkWithCode } from '../login/sessions'
 import { codeHashOf, hashOf, newCode, newToken } from '../login/tokens'
-import { logInPaths, noteMail } from './log-in'
+import { endEarlierCodes, logInPaths, noteMail } from './log-in'
 import { checkScreenName } from './screen-name'
 import { supporterKind } from './supporter-login'
 
@@ -272,12 +272,9 @@ async function decide(db: Database, values: { email: string; screenName: string 
   const token = newToken()
   const code = newCode()
 
-  // One code at a time, like a login link: an earlier sign-up of this address keeps its link,
-  // but its code stops.
-  await db
-    .update(links)
-    .set({ codeHash: null, refHash: null })
-    .where(and(isNull(links.userId), eq(links.email, email)))
+  // One code at a time, like a login link: an earlier sign-up or login of this address keeps
+  // its link, but its code stops.
+  await endEarlierCodes(db, email)
   await db.insert(links).values({
     codeHash: codeHashOf(ref, code),
     email,

@@ -1,6 +1,6 @@
 import type { Database } from '@fansite/db/client'
 
-import { and, count, eq, gt, gte, isNotNull } from 'drizzle-orm'
+import { and, count, eq, gt, gte, inArray, isNotNull, isNull } from 'drizzle-orm'
 import { setTimeout as sleep } from 'node:timers/promises'
 
 import { normaliseEmail } from '../beheer/accounts'
@@ -59,6 +59,20 @@ export type LogInResult =
   | { answer: 'ceiling' | 'limited' }
   | { answer: 'invalid'; error: 'empty' | 'invalid' }
   | { answer: 'sent'; ref: string }
+
+/**
+ * One code at a time for an address without an account, like `issueLoginLink` does for one with
+ * an account: a new request stops the codes of the earlier ones, of signing up and of logging
+ * in. A sign-up keeps the address itself, a decoy its SHA-256.
+ */
+export async function endEarlierCodes(db: Database, email: string) {
+  const { links } = supporterKind.tables
+
+  await db
+    .update(links)
+    .set({ codeHash: null, refHash: null })
+    .where(and(isNull(links.userId), inArray(links.email, [email, hashOf(email)])))
+}
 
 /**
  * Handles the form of logging in: checks the address, the limit of the address and the ceiling
@@ -204,15 +218,17 @@ export function returnPathOf(value: unknown): string | undefined {
 
 /**
  * A row for the request of an address without an account, so a wrong code counts down on "Kijk
- * in je mail" exactly as for an address with one. It can never be used: nobody gets its token,
- * and its code hash is of a value that is not 6 digits, which no code matches. It keeps no
- * address and no screen name, and goes after 15 minutes like any link. It is a row without an
- * account, which the table only allows with an address and a name, so those are empty.
+ * in je mail" exactly as for an address with one, also after a second request. It can never be
+ * used: nobody gets its token, and its code hash is of a value that is not 6 digits, which no
+ * code matches. It keeps the SHA-256 of the address, so a later request stops its code, and no
+ * screen name, and goes after 15 minutes like any link. The table only allows a row without an
+ * account with an address and a name, so the name is empty.
  */
-async function addDecoy(db: Database, ref: string, now: Date) {
+async function addDecoy(db: Database, email: string, ref: string, now: Date) {
+  await endEarlierCodes(db, email)
   await db.insert(supporterKind.tables.links).values({
     codeHash: codeHashOf(ref, 'none'),
-    email: '',
+    email: hashOf(email),
     expiresAt: new Date(now.getTime() + supporterKind.linkLifetime),
     refHash: hashOf(ref),
     screenName: '',
@@ -249,7 +265,7 @@ async function decide(db: Database, value: string, returnTo: string | undefined,
   const ref = newToken()
 
   if (account === undefined) {
-    await addDecoy(db, ref, now)
+    await addDecoy(db, email, ref, now)
 
     return { answer: 'sent' as const, ref }
   }

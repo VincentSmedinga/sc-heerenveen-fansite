@@ -475,10 +475,10 @@ export type Supporter = typeof supporters.$inferSelect
  * has no account yet: it holds the address, the screen name and its normalised form that were
  * asked for, and the account is made only when the link or the code is used. So a sign-up that
  * is never confirmed leaves nothing behind once the row is removed, 15 minutes later, and its
- * screen name is not taken in the meantime. A row without an account and with an empty address
- * and name is the decoy of a login for an address without an account, so a wrong code counts
- * down the same (see log-in.ts in the site); it can never be used. The table keeps the SHA-256
- * of the token and of the code, never the token or the code. Times are UTC.
+ * screen name is not taken in the meantime. A row without an account, with the SHA-256 of an
+ * address and an empty name, is the decoy of a login for an address without an account, so a
+ * wrong code counts down the same (see log-in.ts in the site); it can never be used. The table
+ * keeps the SHA-256 of the token and of the code, never the token or the code. Times are UTC.
  */
 export const supporterLoginLinks = mysqlTable(
   'supporter_login_links',

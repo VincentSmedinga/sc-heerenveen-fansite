@@ -6969,9 +6969,11 @@
 - **Alternatieven:** een link naar een pagina die uitlogt (een GET die iets verandert); een link met JavaScript (werkt niet zonder JavaScript).
 
 - **Datum:** 21 november 2026
-- **Besluit:** vraagt een adres zonder account om in te loggen, dan maakt de site toch een rij in `supporter_login_links`: zonder account, met een leeg adres en een lege schermnaam, en met de hash van een code die nooit past.
+- **Besluit:** vraagt een adres zonder account om in te loggen, dan maakt de site toch een rij in `supporter_login_links`: zonder account, met de SHA-256 van het adres, een lege schermnaam en de hash van een code die nooit past.
   Een foute code telt dan voor elk adres op dezelfde manier af.
-  Niemand krijgt het token, de rij bewaart geen adres en gaat na 15 minuten weg.
+  Een nieuwe aanvraag van hetzelfde adres, om in te loggen of een account te maken, laat de code van de vorige stoppen, net als bij een adres met een account.
+  Niemand krijgt het token, de rij bewaart het adres zelf niet en gaat na 15 minuten weg.
 - **Waarom:** zonder rij ging een onbekend adres na één foute code meteen naar "Deze link werkt niet meer", en zag een bekend adres "Je kunt het nog 4 keer proberen".
   Zo verried één foute code of een adres een account heeft (de review van #1448).
+  Zonder de hash van het adres bleef het verschil na een tweede aanvraag (de tweede review).
 - **Alternatieven:** het aantal pogingen niet tonen (het ontwerp vraagt het); de pogingen ergens anders tellen (een tweede plek voor hetzelfde, en een nieuwe kolom of tabel).

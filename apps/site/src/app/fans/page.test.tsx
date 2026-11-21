@@ -3,6 +3,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import FansPage from './page'
 
+const { currentSupporter } = vi.hoisted(() => ({ currentSupporter: vi.fn(() => Promise.resolve(undefined)) }))
+
+vi.mock('#src/fans/require-supporter', () => ({ currentSupporter }))
 vi.mock('next/navigation', () => ({
   notFound: vi.fn(() => {
     throw new Error('NEXT_NOT_FOUND')
@@ -42,6 +45,14 @@ describe('FansPage', () => {
     expect(html).toMatch(/<form[^>]*action="\/fans\/aanmelden"[^>]*><button[^>]*>Account maken<\/button><\/form>/)
     expect(html).toMatch(/<form[^>]*action="\/fans\/inloggen"[^>]*><button[^>]*>Inloggen<\/button><\/form>/)
     expect(html).not.toMatch(/<a /)
+  })
+
+  it('counts the visit of a supporter who is logged in', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    currentSupporter.mockClear()
+    await render()
+
+    expect(currentSupporter).toHaveBeenCalledOnce()
   })
 
   it('says "Je bent uitgelogd." above the cards after logging out, and not otherwise', async () => {

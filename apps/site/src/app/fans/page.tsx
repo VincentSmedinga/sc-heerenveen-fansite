@@ -5,6 +5,7 @@ import { isFansPartOn, requireFansPart } from '@fansite/shared/fans-env'
 import { notFound } from 'next/navigation'
 
 import { fansGames, fansPath } from '#src/fans-paths'
+import { currentSupporter } from '#src/fans/require-supporter'
 import { pageMetadata } from '#src/metadata'
 
 // Render on each request: the canonical URL comes from SITE_ENV and the parts of Fans from
@@ -37,6 +38,10 @@ export default async function FansPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   requireFansPart('accounts', notFound)
+
+  // A visit of a supporter who is logged in counts: the session stays open another 90 days, and
+  // the account keeps the day of the visit. The page itself is the same for everybody.
+  await currentSupporter()
 
   const { uitgelogd } = await searchParams
 

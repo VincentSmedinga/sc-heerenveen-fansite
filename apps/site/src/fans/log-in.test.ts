@@ -7,6 +7,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, type MockInstanc
 import type { LogInMail } from './log-in'
 
 import { findSession } from '../login/sessions'
+import { hashOf } from '../login/tokens'
 import { handleLogIn, landingOf, logInLinkState, mailsPerQuarter, noteMail, returnPathOf } from './log-in'
 import { codeTriesLeft, confirmWithCode, confirmWithLink, handleSignUp } from './sign-up'
 import { logInMailText } from './sign-up-mail'
@@ -112,7 +113,7 @@ describe('a request to log in', () => {
     // The row of the unknown address keeps no address and never logs in, whatever the code.
     const decoy = (await database.db.select().from(supporterLoginLinks)).find((link) => link.userId === null)
 
-    expect(decoy).toMatchObject({ email: '', screenName: '', screenNameKey: '' })
+    expect(decoy).toMatchObject({ email: hashOf('sietske@example.org'), screenName: '', screenNameKey: '' })
 
     for (let code = 0; code < 4; code++) {
       await confirmWithCode(database.db, refOf(unknown.result), String(code).padStart(6, '0'), later(2))
@@ -120,6 +121,44 @@ describe('a request to log in', () => {
 
     expect(await codeTriesLeft(database.db, refOf(unknown.result), later(2))).toBe(0)
     expect(await database.db.select().from(supporters)).toHaveLength(1)
+  })
+
+  it('stops the code of an earlier request the same for an address without an account', async () => {
+    const refOf = (result: Awaited<ReturnType<typeof logIn>>['result']) => (result.answer === 'sent' ? result.ref : '')
+
+    for (const address of ['tjalle@example.org', 'sietske@example.org']) {
+      const first = await logIn(address)
+
+      await logIn(address, later(1))
+
+      expect(await codeTriesLeft(database.db, refOf(first.result), later(2)), address).toBe(0)
+      expect(await confirmWithCode(database.db, refOf(first.result), '000000', later(2))).toEqual({ answer: 'gone' })
+    }
+  })
+
+  it('stops the code of a sign-up of an unknown address when it asks to log in, and the other way round', async () => {
+    const deps = {
+      clock: () => 0,
+      defer: () => undefined,
+      deliver: () => Promise.resolve(),
+      notifyCeiling: () => Promise.resolve(),
+      notifyMailCeiling: () => Promise.resolve(),
+      now: () => start,
+      origin: 'https://example.org',
+      wait: () => Promise.resolve(),
+    }
+    const signUp = await handleSignUp(database.db, { email: 'sietske@example.org', screenName: 'Sietske' }, deps)
+    const login = await logIn('sietske@example.org', later(1))
+
+    expect(await codeTriesLeft(database.db, signUp.answer === 'sent' ? signUp.ref : '', later(1))).toBe(0)
+
+    await handleSignUp(
+      database.db,
+      { email: 'sietske@example.org', screenName: 'Sietske' },
+      { ...deps, now: () => later(2) },
+    )
+
+    expect(await codeTriesLeft(database.db, login.result.answer === 'sent' ? login.result.ref : '', later(2))).toBe(0)
   })
 
   it('mails a blocked account too, which can log in', async () => {
