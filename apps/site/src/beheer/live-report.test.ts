@@ -346,7 +346,7 @@ describe('the overview', () => {
     // What the lists of a substitution follow: the substitutions and cards with their clock.
     expect(view.moves.substitutions).toHaveLength(1)
     expect(view.moves.substitutions[0]).toMatchObject({ at: 60 })
-    expect(view.players.filter((player) => player.starter)).toHaveLength(22)
+    expect(view.players.filter((player) => player.starter)).toHaveLength(11)
 
     expect(view.events.map((row) => row.text)).toEqual([
       "Doelpunt 77' Speler 10",
