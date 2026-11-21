@@ -195,6 +195,22 @@ function deriveOne(match: OldSiteMatch, number: number, groupSize: number): Deri
     }
   }
 
+  // The score at half-time (#1445) is the one of the regular playing time, so it can't exceed
+  // the score after 90 minutes, or the final score when there was no extra time.
+  let halfTime: null | { against: number; for: number } = {
+    against: theirs(result.homeHalfTime, result.awayHalfTime),
+    for: ours(result.homeHalfTime, result.awayHalfTime),
+  }
+  const regularFor = afterNinety?.for ?? goalsFor
+  const regularAgainst = afterNinety?.against ?? goalsAgainst
+
+  if (halfTime.for > regularFor || halfTime.against > regularAgainst) {
+    lines.push(
+      `${label}: the score at half-time ${halfTime.for}-${halfTime.against} is higher than the score of the regular playing time ${regularFor}-${regularAgainst}, so it is left out`,
+    )
+    halfTime = null
+  }
+
   const stats = match.statistics
   const hasStatistics = Object.values(stats).some((value) => value > 0)
   let referee = (match.referee ?? '').trim() === '' ? null : (match.referee ?? '').trim()
@@ -231,6 +247,8 @@ function deriveOne(match: OldSiteMatch, number: number, groupSize: number): Deri
       extraTime,
       goalsAgainst,
       goalsFor,
+      halfTimeAgainst: halfTime?.against ?? null,
+      halfTimeFor: halfTime?.for ?? null,
       home,
       kickoffAt: unknownTime ? null : amsterdamToUtc({ day, month, year }, { hours, minutes }),
       matchDate: date,
@@ -391,7 +409,20 @@ export async function importOldSiteMatches(
         // A difference waits for the editors as a change, once (#974). The match keeps the
         // value of its own source until they decide.
         // A match the editors added is theirs: it is compared and never filled.
-        const fill = lookup.match.dataSource === 'redactie' ? {} : compared.fill
+        const fill: Partial<Match> = lookup.match.dataSource === 'redactie' ? {} : { ...compared.fill }
+
+        // The score at half-time only fills an empty place: what the editors filled in, or
+        // another source gave, wins, and a difference is not a change for the editors.
+        if (
+          lookup.match.dataSource !== 'redactie' &&
+          lookup.match.halfTimeFor === null &&
+          values.halfTimeFor !== null &&
+          values.halfTimeAgainst !== null
+        ) {
+          fill.halfTimeAgainst = values.halfTimeAgainst
+          fill.halfTimeFor = values.halfTimeFor
+        }
+
         const kept = await keepSourceDifferences(
           db,
           lookup.match,
@@ -447,6 +478,11 @@ export async function importOldSiteMatches(
       if (!sameValue(before[field], values[field])) {
         change[field] = values[field]
       }
+    }
+
+    // The score at half-time only fills an empty place: the editors may have filled it in.
+    if (before.halfTimeFor === null && values.halfTimeFor !== null) {
+      Object.assign(change, { halfTimeAgainst: values.halfTimeAgainst, halfTimeFor: values.halfTimeFor })
     }
 
     const oldStatistics = statistics.get(before.id)
