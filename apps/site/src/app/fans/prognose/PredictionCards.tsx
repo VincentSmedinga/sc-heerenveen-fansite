@@ -31,9 +31,10 @@ import { reportAddress } from '#src/report-data'
 import { PredictionForm } from './PredictionForm'
 
 /** The logged-out visitor's way in: a notice and the two buttons, as on Fans. */
-function LogInNotice() {
+function LogInNotice({ withScoring = false }: { withScoring?: boolean }) {
   return (
     <>
+      {withScoring ? <Text>{scoringLine}</Text> : null}
       <Notice>Log in om te voorspellen. Nog geen account? Dat maak je in een minuut.</Notice>
       {/* Forms that only go to a page: the design system has no link as a button. */}
       <Form action={logInPaths.form} method="get">
@@ -153,13 +154,11 @@ export function OpenCard({
   let body: ReactNode
 
   if (!open || match.kickoffAt === null) {
-    body = (
-      <Text>De aanvangstijd van deze wedstrijd is nog niet bekend. Zodra die vaststaat, kun je hier voorspellen.</Text>
-    )
+    body = <Text>Zodra de aftrap bekend is, kun je hier voorspellen.</Text>
   } else if (!loggedIn) {
     body = inDisclosure ? (
       <Disclosure summary="Voorspellen">
-        <LogInNotice />
+        <LogInNotice withScoring />
       </Disclosure>
     ) : (
       <LogInNotice />
@@ -185,7 +184,7 @@ export function OpenCard({
         {open && match.kickoffAt !== null ? (
           <Tag tone="open">{deadlineText(match.kickoffAt, now)}</Tag>
         ) : (
-          <Tag>Aanvangstijd nog niet bekend</Tag>
+          <Tag>Aftrap nog niet bekend</Tag>
         )}
       </Text>
       <MatchLine match={match} now={now} />

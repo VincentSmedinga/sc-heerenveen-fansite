@@ -77,10 +77,18 @@ test.describe('without JavaScript', () => {
     await field(page, 'Eindstand', 'sc Heerenveen').fill('2')
     await page.getByRole('button', { name: 'Voorspelling opslaan' }).click()
 
+    // The three numbers that were filled in are still in the form, which stays open.
+    await expect(field(page, 'Ruststand', 'sc Heerenveen')).toHaveValue('1')
+    await expect(field(page, 'Ruststand', 'Proefstad SV')).toHaveValue('0')
+    await expect(field(page, 'Eindstand', 'sc Heerenveen')).toHaveValue('2')
+    await expect(field(page, 'Eindstand', 'Proefstad SV')).toHaveValue('')
+
     const summary = page.getByRole('region', { name: 'Er ontbreekt nog iets' })
 
     await expect(summary.getByRole('link')).toHaveText(['Vul de goals van Proefstad SV bij de eindstand in.'])
     await expect(page.getByText('Je voorspelling staat.')).toHaveCount(0)
+
+    // Nothing was stored: a new visit has an empty form.
     await openForm(page)
     await expect(field(page, 'Eindstand', 'sc Heerenveen')).toHaveValue('')
   })

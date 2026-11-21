@@ -7177,3 +7177,10 @@
   De serveractie roept `requireSupporter` aan, zodat een bezoeker zonder sessie naar het inloggen gaat en een geblokkeerd account niet kan voorspellen.
 - **Waarom:** een bezoeker moet zien wat het spel is voordat hij een account maakt.
 - **Alternatieven:** de pagina alleen met een sessie tonen (de bezoeker ziet het spel niet).
+
+- **Datum:** 21 november 2026
+- **Besluit:** de deadline staat als "Open tot za 16.45", met een punt tussen uren en minuten, zoals het issue vraagt (`kickoffText` in `apps/site/src/fans/prediction.ts`).
+  Een wedstrijd erboven toont zijn aftrap met een dubbele punt ("za 21 nov 14:06"), zoals Match dat doet.
+- **Waarom:** het ontwerp en het issue schrijven de tijd van de Tag met een punt, en de Nederlandse schrijfwijze van de redactie kent beide.
+  Het verschil staat op één kaart, dus een volgend issue kan het gelijktrekken met één wijziging in `kickoffText`.
+- **Alternatieven:** de dubbele punt in de Tag (wijkt af van het ontwerp); de punt in Match (raakt elke pagina met een wedstrijd).

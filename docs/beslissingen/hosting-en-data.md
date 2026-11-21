@@ -1253,5 +1253,6 @@
 - **Waarom:** de volgorde van de regel is de volgorde van het formulier en van de uitslag, dus een omrekening naar "voor" en "tegen" is niet nodig.
   Na het opheffen van een account blijft wat is voorspeld staan zonder naam, zoals bij elke tabel van een spel (zie _Een supporter ziet al zijn gegevens en heft zijn account op_).
   MariaDB telt een lege waarde in een unieke sleutel niet als dubbel, dus de rijen zonder supporter botsen niet.
+  De wedstrijd verwijst met `ON DELETE CASCADE`: haalt de importer een wedstrijd weg die van Wikipedia verdween, dan gaan de voorspellingen ervoor mee (`predictions-migration.test.ts` controleert het).
   De kopie van acceptatie op de computer van de eigenaar neemt de voorspellingen mee, met `supporter_id` als `NULL` (`exportPlan`), zodat ze bij niemand horen.
 - **Alternatieven:** goals "voor" en "tegen" van sc Heerenveen (een omrekening bij elke weergave); de rijen met het account laten verdwijnen (de ranglijsten verliezen dan hun geschiedenis).

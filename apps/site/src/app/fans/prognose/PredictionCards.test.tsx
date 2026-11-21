@@ -81,8 +81,8 @@ describe('the card of the match to predict', () => {
   it('keeps the form closed with a line why when the time of the kick-off is not known', () => {
     const html = open({ match: { ...match, kickoffAt: null } })
 
-    expect(html).toContain('De aanvangstijd van deze wedstrijd is nog niet bekend.')
-    expect(html).toContain('Aanvangstijd nog niet bekend')
+    expect(html).toContain('Zodra de aftrap bekend is, kun je hier voorspellen.')
+    expect(html).toContain('Aftrap nog niet bekend')
     expect(html).not.toContain('Ruststand')
     expect(html).not.toContain('hf-tag-open')
   })
@@ -97,6 +97,7 @@ describe('the card of the match to predict', () => {
     const html = open({ inDisclosure: true, loggedIn: false })
 
     expect(html).toMatch(/<details[^>]*><summary[^>]*>[^]*Voorspellen[^]*<\/summary>[^]*Log in om te voorspellen/)
+    expect(html).toContain('Hoogstens 30 punten per wedstrijd.')
   })
 })
 
