@@ -25,12 +25,12 @@ const AccountSection = () => (
       Als je een account maakt
     </Heading>
     <Text>
-      Met een account bewaren we je schermnaam, je e-mailadres, de dag waarop je het account maakte, de dag van je
-      laatste bezoek en wat je in de spellen invult. Ook je keuzes staan erbij: of je naam in de standen staat, of je
-      een herinnering per e-mail wilt, en wanneer je je schermnaam voor het laatst veranderde. Je schermnaam is voor de
-      standen. Je e-mailadres is om in te loggen. Alleen de eigenaar van de site kan het zien, en we gebruiken het
-      nergens anders voor dan voor de berichten hieronder. De dag van je laatste bezoek gebruiken we om accounts te
-      vinden die niemand meer gebruikt.
+      Met een account bewaren we je schermnaam, je e-mailadres en wat je in de spellen invult. Ook bewaren we de dag
+      waarop je het account maakte en de dag van je laatste bezoek. Je keuzes staan erbij: of je naam in de standen
+      staat, of je een herinnering per e-mail wilt, en wanneer je je schermnaam voor het laatst veranderde. Je
+      schermnaam is voor de standen. Je e-mailadres is om in te loggen. Alleen de eigenaar van de site kan het zien, en
+      we gebruiken het nergens anders voor dan voor de berichten hieronder. De dag van je laatste bezoek gebruiken we om
+      accounts te vinden die niemand meer gebruikt.
     </Text>
     <Text>
       We bewaren geen IP-adres, geen gegevens over je browser, geen echte naam, geboortedatum of woonplaats, en geen
