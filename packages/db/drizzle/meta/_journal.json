@@ -673,6 +673,13 @@
       "when": 1795263060037,
       "tag": "0095_add_match_half_time_source",
       "breakpoints": true
+    },
+    {
+      "idx": 96,
+      "version": "5",
+      "when": 1795275728592,
+      "tag": "0096_add_supporter_reminder",
+      "breakpoints": true
     }
   ]
 }

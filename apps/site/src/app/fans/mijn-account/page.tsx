@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 import { Button, Card, DescriptionList, Form, Heading, Link, Notice, Page, Text } from '@fansite/design-system'
+import { isFansPartOn } from '@fansite/shared/fans-env'
 import { eq } from 'drizzle-orm'
 
 import { getDatabase } from '#src/database'
@@ -17,6 +18,7 @@ import { pageAreas } from '#src/page-areas'
 
 import { logOut, logOutEverywhere } from './actions'
 import { RankingsSwitch } from './RankingsSwitch'
+import { ReminderSwitch } from './ReminderSwitch'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,12 +42,15 @@ export default async function MyAccountPage({
   const supporter = await requireSupporter({ blocked: 'allow', from: signUpPaths.account })
   const { users } = supporterKind.tables
   const [account] = await getDatabase()
-    .db.select({ inRankings: users.inRankings })
+    .db.select({ inRankings: users.inRankings, remindByEmail: users.remindByEmail })
     .from(users)
     .where(eq(users.id, supporter.supporterId))
   const games = await playedGames(getDatabase().db, supporter.supporterId)
   const { melding } = await searchParams
   const message = accountMessageOf(melding)
+  // The switch of the reminder saves as soon as it changes: the focus stays on it, and the
+  // notice only says what was saved.
+  const moved = typeof melding === 'string' && melding.startsWith('herinnering')
   const change = (href: string, what: string) =>
     supporter.blocked ? null : (
       <Text>
@@ -59,14 +64,11 @@ export default async function MyAccountPage({
     <Page.Main areas={areas}>
       <Page.Cell area="head">
         <Heading level={1}>Mijn account</Heading>
-        {message === undefined ? null : (
-          <>
-            <Notice id={noticeId} tabIndex={-1}>
-              {message}
-            </Notice>
-            <FocusOnLoad id={noticeId} />
-          </>
-        )}
+        {/* Always in the page, so a screen reader reads a message that changes.*/}
+        <Notice id={noticeId} tabIndex={moved ? undefined : -1}>
+          {message}
+        </Notice>
+        {message === undefined || moved ? null : <FocusOnLoad id={noticeId} key={message} />}
       </Page.Cell>
       <Page.Cell area="main">
         <Card aria-labelledby="gegevens-kop">
@@ -86,6 +88,9 @@ export default async function MyAccountPage({
             </DescriptionList.Item>
           </DescriptionList>
           {supporter.blocked ? null : <RankingsSwitch on={account?.inRankings ?? true} />}
+          {supporter.blocked || !isFansPartOn('prognose') ? null : (
+            <ReminderSwitch on={account?.remindByEmail ?? false} />
+          )}
         </Card>
       </Page.Cell>
       <Page.Cell area="played">

@@ -9,6 +9,7 @@ import {
   logOutEverywhere,
   requestEmailChange,
   saveRankings,
+  saveReminder,
 } from './actions'
 
 const { getDatabase, sendChangeEmailMail, sendEmailChangedMail } = vi.hoisted(() => ({
@@ -57,6 +58,7 @@ describe('the actions of Mijn account, with accounts off', () => {
     ['logOutEverywhere', () => logOutEverywhere()],
     ['requestEmailChange', () => requestEmailChange({ value: '' }, form())],
     ['saveRankings', () => saveRankings({ on: true }, form())],
+    ['saveReminder', () => saveReminder(form())],
   ])('answer "not found" from %s, read nothing and mail nothing', async (_name, action) => {
     vi.stubEnv('FANS_ACCOUNTS', 'off')
 
@@ -64,5 +66,21 @@ describe('the actions of Mijn account, with accounts off', () => {
     expect(getDatabase).not.toHaveBeenCalled()
     expect(sendChangeEmailMail).not.toHaveBeenCalled()
     expect(sendEmailChangedMail).not.toHaveBeenCalled()
+  })
+})
+
+describe('the action of the reminder, with the Prognose off', () => {
+  it('answers "not found" and saves nothing', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    vi.stubEnv('FANS_PROGNOSE', 'off')
+    vi.doMock('#src/fans/require-supporter', () => ({
+      requireSupporter: () => Promise.resolve({ supporterId: 1 }),
+    }))
+    vi.resetModules()
+
+    const { saveReminder: save } = await import('./actions')
+
+    await expect(save(new FormData())).rejects.toThrow('NEXT_NOT_FOUND')
+    expect(getDatabase).not.toHaveBeenCalled()
   })
 })
