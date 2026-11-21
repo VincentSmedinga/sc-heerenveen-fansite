@@ -4,7 +4,7 @@
 // them is made up.
 import type { RowDataPacket } from 'mysql2/promise'
 
-import { getTableConfig, MySqlTable } from 'drizzle-orm/mysql-core'
+import { getTableConfig, int, MySqlTable, mysqlTable } from 'drizzle-orm/mysql-core'
 import {
   chmodSync,
   existsSync,
@@ -20,6 +20,7 @@ import path from 'node:path'
 import { Writable } from 'node:stream'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import type { ExportRule } from './export-plan.ts'
 import type { TestDatabase } from './test-database.ts'
 
 import { exportCompletionMarker, exportDump, runBackupCommand, structureOnlyTables } from './backup.ts'
@@ -30,7 +31,9 @@ import {
   madeUpAddress,
   personalColumnPattern,
   reviewedColumns,
+  supporterTables,
 } from './export-plan.ts'
+import { writeRowDump } from './row-dump.ts'
 import * as schema from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
@@ -38,6 +41,35 @@ const now = new Date('2026-11-10T09:30:07.123Z')
 const tables = (Object.values(schema) as unknown[])
   .filter((value) => value instanceof MySqlTable)
   .map((table) => getTableConfig(table))
+
+/**
+ * The columns that refer to a supporter and that the export would copy as they are: a foreign
+ * key to `supporters`, or a column whose name says supporter. A table of `supporterTables` is
+ * left out here, as it is `structure` (see the test of that).
+ */
+function copiedSupporterReferences(
+  configs: readonly ReturnType<typeof getTableConfig>[],
+  plan: Readonly<Record<string, ExportRule>>,
+) {
+  return configs.flatMap(({ columns, foreignKeys, name }) => {
+    if ((supporterTables as readonly string[]).includes(name)) {
+      return []
+    }
+
+    const rule = plan[name]
+    const referring = new Set([
+      ...foreignKeys
+        .map((key) => key.reference())
+        .filter((reference) => getTableConfig(reference.foreignTable).name === 'supporters')
+        .flatMap((reference) => reference.columns.map((column) => column.name)),
+      ...columns.map((column) => column.name).filter((column) => /(^|_)supporters?(_|$)/.test(column)),
+    ])
+
+    return [...referring]
+      .filter((column) => rule !== 'structure' && (typeof rule !== 'object' || rule.replace[column] !== 'NULL'))
+      .map((column) => `${name}.${column}`)
+  })
+}
 
 describe('exportPlan', () => {
   it('names every table of the schema, so a new table is never exported without a look', () => {
@@ -68,6 +100,48 @@ describe('exportPlan', () => {
       replace: { email: "CONCAT('beheerder-', `id`, '@example.invalid')", first_name: "CONCAT('Account ', `id`)" },
     })
     expect(madeUpAddress(7)).toBe('beheerder-7@example.invalid')
+  })
+
+  it('takes the tables of the accounts of supporters without their rows', () => {
+    for (const table of supporterTables) {
+      expect(exportPlan[table], table).toBe('structure')
+    }
+
+    // A new table of an account is one of them, so it can't be copied by mistake.
+    expect(tables.map(({ name }) => name).filter((name) => /^supporter/.test(name))).toEqual(
+      expect.arrayContaining([...supporterTables]),
+    )
+    expect(
+      tables
+        .map(({ name }) => name)
+        .filter((name) => /^supporter/.test(name) && !supporterTables.includes(name as never)),
+    ).toEqual([])
+  })
+
+  it('copies no reference to a supporter: a table of a game takes that column as NULL', () => {
+    expect(copiedSupporterReferences(tables, exportPlan)).toEqual([])
+  })
+
+  it('finds a table of a game that would copy the reference to a supporter', () => {
+    const votes = getTableConfig(
+      mysqlTable('game_votes', {
+        id: int('id'),
+        mark: int('mark'),
+        supporterId: int('supporter_id').references(() => schema.supporters.id),
+      }),
+    )
+    const named = getTableConfig(mysqlTable('game_answers', { id: int('id'), supporterId: int('supporter_id') }))
+
+    expect(copiedSupporterReferences([votes, named], { game_answers: 'copy', game_votes: 'copy' })).toEqual([
+      'game_votes.supporter_id',
+      'game_answers.supporter_id',
+    ])
+    expect(
+      copiedSupporterReferences([votes], { game_votes: { keep: ['id', 'mark', 'supporter_id'], replace: {} } }),
+    ).toEqual(['game_votes.supporter_id'])
+    expect(
+      copiedSupporterReferences([votes], { game_votes: { keep: ['id', 'mark'], replace: { supporter_id: 'NULL' } } }),
+    ).toEqual([])
   })
 
   it('copies no column whose name sounds like something about a person, unless someone looked at it', () => {
@@ -320,6 +394,50 @@ describe('exportDump', () => {
       expect(await runBackupCommand(['export', 'file.sql'], { DATABASE_URL: database.url }, now)).toBe(2)
       expect(String(error.mock.calls[0]?.[0])).toContain('export            writes a dump without personal data')
     })
+  })
+
+  it('writes no row of a supporter, and the address and the screen name nowhere', async () => {
+    const other = await createTestDatabase()
+    const { out, text } = collector()
+
+    try {
+      await other.pool.query(
+        "INSERT INTO supporters (id, screen_name, screen_name_key, email) VALUES (5, 'Tjalle99', 'tjalle99', 'tjalle@example.org')",
+      )
+      await other.pool.query(
+        "INSERT INTO supporter_sessions (token_hash, supporter_id, created_at, last_seen_at) VALUES ('session-hash', 5, '2026-11-10 08:00:00', '2026-11-10 08:00:00')",
+      )
+      await other.pool.query(
+        "INSERT INTO supporter_login_links (token_hash, supporter_id, expires_at) VALUES ('link-hash', 5, '2026-11-10 08:15:00')",
+      )
+      await other.pool.query(
+        "INSERT INTO supporter_login_links (token_hash, expires_at, email, screen_name, screen_name_key) VALUES ('sign-up-hash', '2026-11-10 08:15:00', 'sietske@example.org', 'Sietske_H', 'sletskeh')",
+      )
+      await other.pool.query(
+        "INSERT INTO supporter_email_changes (supporter_id, email, token_hash, expires_at) VALUES (5, 'nieuw@example.org', 'change-hash', '2026-11-10 08:15:00')",
+      )
+      await other.pool.query(
+        "INSERT INTO supporter_login_attempts (address_hash, attempted_at) VALUES ('address-hash', '2026-11-10 08:00:00')",
+      )
+
+      process.env['ROW_DUMP_URL'] = other.url
+      await exportDump({ DATABASE_URL: other.url, MYSQLDUMP_COMMAND: writeRowDump(work) }, out, now)
+    } finally {
+      delete process.env['ROW_DUMP_URL']
+      await other.drop()
+    }
+
+    for (const table of supporterTables) {
+      expect(text(), table).toContain(`CREATE TABLE \`${table}\``)
+      expect(text(), table).not.toContain(`INSERT INTO \`${table}\``)
+    }
+
+    // The dump does hold rows, so the search below means something.
+    expect(text()).toContain('INSERT INTO `__drizzle_migrations`')
+
+    for (const secret of ['example.org', 'Tjalle', 'tjalle', 'Sietske', 'sletske', 'session-hash', 'link-hash']) {
+      expect(text(), secret).not.toContain(secret)
+    }
   })
 
   it('has a table for its times that is not in the schema of the site', async () => {

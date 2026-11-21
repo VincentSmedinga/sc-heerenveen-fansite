@@ -30,12 +30,34 @@ export type ExportRule =
   | { keep: readonly string[]; replace: Readonly<Record<string, string>> }
 
 /**
+ * The tables that hold the accounts of supporters and what belongs to one account: its
+ * sessions, its links and codes, a change of address and the requests for a mail. The copy
+ * takes none of their rows.
+ */
+export const supporterTables = [
+  'supporter_email_changes',
+  'supporter_login_attempts',
+  'supporter_login_links',
+  'supporter_sessions',
+  'supporters',
+] as const
+
+/**
  * Every table of the schema, with what the export does with it.
  *
- * `structure`: the five tables the nightly dump leaves empty too (see `structureOnlyTables` in
- * backup.ts) and `admin_login_attempts`, which holds the hash of an address for 15 minutes. The
- * four tables of the accounts of supporters (issue 1446) too, for now: what of them the copy
- * may hold is for issue 1462.
+ * `structure`: the tables the nightly dump leaves empty too (see `structureOnlyTables` in
+ * backup.ts) and `admin_login_attempts`, which holds the hash of an address for 15 minutes.
+ *
+ * The tables of the accounts of supporters (`supporterTables`) are `structure` too (issue
+ * 1462): the copy gets no account of a supporter, not even with a made-up address, because a
+ * screen name is chosen by a real person and is often easy to recognise. Unlike `admin_users`,
+ * no other table needs their numbers to make sense. The tables are there, so signing up on the
+ * owner's computer makes a new account in the copy.
+ *
+ * The rule for the tables of the games that are still to come: a table that refers to a
+ * supporter comes along, but without that reference. The column becomes `NULL` in `replace`, so
+ * the predictions and the marks can be looked at, and belong to nobody. export.test.ts fails
+ * for a column that refers to `supporters` and is copied as it is.
  *
  * `admin_users`: the address and the first name are what in the database says who an account
  * is. The first name becomes "Account" and the number. The number, the role, the choice for the
