@@ -26,7 +26,9 @@ const other = {
   limits: { perAddress: 1, perSite: 2, windowMilliseconds: 5 * minute },
   linkLifetime: 3 * minute,
   minimumAnswerMilliseconds: 50,
+  renewAfter: 0,
   tables: { attempts: adminLoginAttempts, links: adminLoginLinks, sessions: adminSessions, users: adminUsers },
+  turnedOffLogsIn: false,
 } as const satisfies AccountKind
 
 const rules = { normalise: (value: string) => value.trim().toLowerCase() || undefined, path: '/other/confirm' }

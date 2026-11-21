@@ -1,13 +1,20 @@
 import { sendFansMail } from '@fansite/shared/fans-env'
 
+import type { LogInMail } from './log-in'
 import type { SignUpMail } from './sign-up'
 
 import { email as editorsEmail } from '../contact'
 import { sendMail } from '../mail'
+import { mailsPerQuarter } from './log-in'
 import { signUpsPerHour } from './sign-up'
 import { supporterKind } from './supporter-login'
 
 const minutes = supporterKind.linkLifetime / 60_000
+
+/** The text of the mail with the link and the code to log in. */
+export function logInMailText({ code, url }: Pick<LogInMail, 'code' | 'url'>) {
+  return mailText('Je wilt inloggen bij Fans op de sc Heerenveen Fansite. Open deze link om in te loggen:', url, code)
+}
 
 /** The one mail an hour to the editors when the ceiling of sign-ups is reached. */
 export async function sendCeilingMail() {
@@ -18,6 +25,29 @@ export async function sendCeilingMail() {
         `Er kwamen dit uur meer dan ${signUpsPerHour} aanmeldingen voor een account bij Fans.`,
         'De site neemt tot het eind van het uur geen nieuwe aanmeldingen aan.',
         'Kijk in het beheer of de nieuwe accounts kloppen.',
+        '',
+      ].join('\n'),
+      to: editorsEmail,
+    }),
+  )
+}
+
+/** Mails the link and the code to log in, only while accounts are on (see `sendSignUpMail`). */
+export async function sendLogInMail(mail: LogInMail) {
+  await sendFansMail('accounts', () =>
+    sendMail({ subject: 'Inloggen bij de sc Heerenveen Fansite', text: logInMailText(mail), to: mail.to }),
+  )
+}
+
+/** The one mail a quarter of an hour to the editors when the ceiling of mails is reached. */
+export async function sendMailCeilingMail() {
+  await sendFansMail('accounts', () =>
+    sendMail({
+      subject: 'Veel inlogmails bij Fans',
+      text: [
+        `Supporters vroegen dit kwartier meer dan ${mailsPerQuarter} mails om in te loggen of een account te maken.`,
+        'De site stuurt tot het eind van het kwartier geen nieuwe.',
+        'Kijk in het logboek of er iets mis is.',
         '',
       ].join('\n'),
       to: editorsEmail,
@@ -44,10 +74,19 @@ export async function sendSignUpMail(mail: SignUpMail) {
 
 /** The text of the mail with the link and the code, for a sign-up or to log in. */
 export function signUpMailText({ code, kind, url }: Pick<SignUpMail, 'code' | 'kind' | 'url'>) {
-  return [
+  return mailText(
     kind === 'sign-up'
       ? 'Je maakt een account bij Fans op de sc Heerenveen Fansite. Open deze link om je e-mailadres te bevestigen:'
       : 'Je wilde een account maken bij Fans op de sc Heerenveen Fansite, maar dit e-mailadres heeft er al een. Open deze link om in te loggen:',
+    url,
+    code,
+  )
+}
+
+/** A mail with a link and a code: the first line, the link, the code and how long they work. */
+function mailText(opening: string, url: string, code: string) {
+  return [
+    opening,
     '',
     url,
     '',
