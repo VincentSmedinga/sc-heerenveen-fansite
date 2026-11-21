@@ -9,7 +9,7 @@ import type { SignUpState } from '#src/fans/sign-up-form'
 import { getDatabase } from '#src/database'
 import { originOf } from '#src/env'
 import { land } from '#src/fans/land'
-import { handleNewCode } from '#src/fans/new-code'
+import { handleNewCode, type NewCodeResult } from '#src/fans/new-code'
 import {
   type ConfirmResult,
   confirmWithCode,
@@ -72,13 +72,17 @@ export async function confirmCode(ref: string, formData: FormData) {
 export async function newCode(ref: string) {
   requireFansPart('accounts', notFound)
 
-  const result = typeof ref === 'string' ? await handleNewCode(getDatabase().db, ref, mailDeps()) : { answer: 'gone' }
+  const result: NewCodeResult =
+    typeof ref === 'string' ? await handleNewCode(getDatabase().db, ref, mailDeps()) : { answer: 'gone' }
 
   if (result.answer === 'gone') {
     redirect(goneLink)
   }
 
-  redirect(`${signUpPaths.sent}?${new URLSearchParams({ melding: result.answer, ref }).toString()}`)
+  // The words of the address of the page are the keys of `newCodeMessages`.
+  const melding = { limited: 'limiet', sent: 'nieuw', wait: 'wacht' }[result.answer]
+
+  redirect(`${signUpPaths.sent}?${new URLSearchParams({ melding, ref }).toString()}`)
 }
 
 /**

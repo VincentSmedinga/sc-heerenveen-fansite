@@ -22,7 +22,7 @@ async function account(page: Page) {
   await expect(page).toHaveURL(/\/fans\/aanmelden\/verstuurd\?ref=/)
   await page.getByLabel('Code uit de mail').fill(await codeTo(address, 1))
   await page.getByRole('button', { name: 'Doorgaan' }).click()
-  await expect(page).toHaveURL(/\/fans\/mijn-account/)
+  await expect(page).toHaveURL(/\/fans\?welkom=1$/)
   await page.context().clearCookies()
 
   return { address, name }
