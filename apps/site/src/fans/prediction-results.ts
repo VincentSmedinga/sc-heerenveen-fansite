@@ -62,12 +62,27 @@ export type ScoredPrediction = {
   result: PredictionResult
 }
 
+/**
+ * Who counts in the figures of the game Prognose (issue 1451): everybody but a blocked account.
+ * An account that was closed has no supporter any more and stays, because its prediction was
+ * made. The rankings and the figures of a match (`loadCrowdFigures`) both use this one rule.
+ */
+export const countsInPrognose = (supporter: null | { disabledAt: Date | null }) =>
+  supporter === null || supporter.disabledAt === null
+
+/**
+ * Whether a supporter has a row in a ranking: they count, and they did not choose to leave
+ * their screen name out of the standings. Someone without a row still counts in the figures.
+ */
+export const hasRankingRow = (supporter: null | { disabledAt: Date | null; inRankings: boolean }) =>
+  supporter !== null && countsInPrognose(supporter) && supporter.inRankings
+
 /** Under this number of predictions the card says only how many there were. */
 export const crowdMinimum = 5
 
 const fiveMinutes = 5 * 60 * 1000
 
-type Row = {
+export type Row = {
   afterNinetyAgainst: null | number
   afterNinetyFor: null | number
   clubSlug: string
@@ -134,7 +149,7 @@ export function resultOf(row: Pick<Row, Exclude<keyof Row, 'id'>>): PredictionRe
   }
 }
 
-const columns = {
+export const columns = {
   afterNinetyAgainst: matches.afterNinetyAgainst,
   afterNinetyFor: matches.afterNinetyFor,
   clubSlug: clubs.slug,
@@ -167,9 +182,7 @@ export async function loadCrowdFigures(db: Database, matchId: number): Promise<C
     .innerJoin(matches, eq(matches.id, predictions.matchId))
     .innerJoin(clubs, eq(clubs.id, matches.clubId))
     .where(eq(predictions.matchId, matchId))
-  // A blocked account is left out, as it is from the rankings; an account that was closed has
-  // no supporter any more and stays, because its prediction was made.
-  const open = rows.filter((row) => row.disabledAt === null)
+  const open = rows.filter((row) => countsInPrognose(row))
 
   if (open.length === 0) {
     return undefined
@@ -186,32 +199,7 @@ export async function loadCrowdFigures(db: Database, matchId: number): Promise<C
   }
 }
 
-/**
- * The predictions of a supporter with their points, the newest match first. It is read each
- * time and not cached, so a prediction that was just saved is in the list: it is the rows of
- * one supporter, found by the index on the supporter and the match. What all supporters share
- * and is heavy, such as the figures of a match, is cached (see `crowdFigures`).
- */
-export async function scoredPredictions(db: Database, supporterId: number, now = new Date()) {
-  const rows = await db
-    .select(columns)
-    .from(predictions)
-    .innerJoin(matches, eq(matches.id, predictions.matchId))
-    .innerJoin(clubs, eq(clubs.id, matches.clubId))
-    .where(eq(predictions.supporterId, supporterId))
-    .orderBy(desc(matches.matchDate), desc(matches.kickoffAt), desc(matches.id))
-
-  return rows.map((row) => scored(row, now))
-}
-
-/** What the supporter scored over the matches that have points: their number and the sum. */
-export function totalsOf(list: readonly ScoredPrediction[]) {
-  const counted = list.filter((item) => item.match.state !== 'cancelled' && item.match.state !== 'postponed')
-
-  return { count: counted.length, points: counted.reduce((sum, item) => sum + item.points.total, 0) }
-}
-
-function scored(row: Row, now: Date): ScoredPrediction {
+export function scored(row: Row, now: Date): ScoredPrediction {
   const guess = {
     fullTime: { away: row.fullTimeAway, home: row.fullTimeHome },
     halfTime: { away: row.halftimeAway, home: row.halftimeHome },
@@ -238,6 +226,31 @@ function scored(row: Row, now: Date): ScoredPrediction {
     points: predictionPoints(guess, result),
     result,
   }
+}
+
+/**
+ * The predictions of a supporter with their points, the newest match first. It is read each
+ * time and not cached, so a prediction that was just saved is in the list: it is the rows of
+ * one supporter, found by the index on the supporter and the match. What all supporters share
+ * and is heavy, such as the figures of a match, is cached (see `crowdFigures`).
+ */
+export async function scoredPredictions(db: Database, supporterId: number, now = new Date()) {
+  const rows = await db
+    .select(columns)
+    .from(predictions)
+    .innerJoin(matches, eq(matches.id, predictions.matchId))
+    .innerJoin(clubs, eq(clubs.id, matches.clubId))
+    .where(eq(predictions.supporterId, supporterId))
+    .orderBy(desc(matches.matchDate), desc(matches.kickoffAt), desc(matches.id))
+
+  return rows.map((row) => scored(row, now))
+}
+
+/** What the supporter scored over the matches that have points: their number and the sum. */
+export function totalsOf(list: readonly ScoredPrediction[]) {
+  const counted = list.filter((item) => item.match.state !== 'cancelled' && item.match.state !== 'postponed')
+
+  return { count: counted.length, points: counted.reduce((sum, item) => sum + item.points.total, 0) }
 }
 
 const getCrowdFigures = cacheForKey(fiveMinutes, (key) => loadCrowdFigures(getDatabase().db, Number(key)))

@@ -1,12 +1,12 @@
 import type { Database } from '@fansite/db/client'
 
 import { matches, predictions, supporters } from '@fansite/db/schema'
-import { and, eq, isNull, or } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 
 import { cacheForKey } from '#src/cache'
 import { getDatabase } from '#src/database'
 
-import { crowdMinimum } from './prediction-results'
+import { countsInPrognose, crowdMinimum } from './prediction-results'
 
 // What supporters predicted for one match, as figures for a group and never for a person
 // (issue 1453): the card Prognose on the page of a match. The distribution comes only from the
@@ -51,20 +51,24 @@ const oneMinute = 60 * 1000
 const scoreText = (home: number, away: number) => `${home}–${away}`
 
 /**
- * The predictions that count for the figures of a match: those of accounts that are not
- * blocked. A closed account has no supporter any more, so its row has no `disabledAt` and
- * counts as an anonymous number, because the prediction was made. The one place that knows who
- * counts; the ranking of issue 1451 decides the same rule, and then this is the place to swap.
+ * The predictions that count for the figures of a match, by the rule of the game
+ * (`countsInPrognose` in prediction-results.ts): a blocked account is left out and a closed
+ * account counts as an anonymous number. The rankings and the figures of "Zo deed iedereen het"
+ * use the same rule.
  */
 export async function countedPredictions(db: Database, matchId: number) {
-  return db
+  const rows = await db
     .select({
+      disabledAt: supporters.disabledAt,
       fullTimeAway: predictions.fullTimeAway,
       fullTimeHome: predictions.fullTimeHome,
+      known: supporters.id,
     })
     .from(predictions)
     .leftJoin(supporters, eq(supporters.id, predictions.supporterId))
-    .where(and(eq(predictions.matchId, matchId), or(isNull(supporters.id), isNull(supporters.disabledAt))))
+    .where(eq(predictions.matchId, matchId))
+
+  return rows.filter((row) => countsInPrognose(row.known === null ? null : { disabledAt: row.disabledAt }))
 }
 
 const sign = (home: number, away: number) => Math.sign(home - away)
