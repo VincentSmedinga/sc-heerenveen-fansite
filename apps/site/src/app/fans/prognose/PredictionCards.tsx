@@ -9,6 +9,7 @@ import {
   Link,
   Match,
   Notice,
+  PredictionCrowd,
   ScoreGrid,
   Tag,
   Text,
@@ -26,6 +27,7 @@ import {
 } from '#src/fans/prediction'
 import { signUpPaths } from '#src/fans/sign-up'
 import { matchMoment } from '#src/match-format'
+import { crowdProps, type PredictionCrowdData } from '#src/PredictionCrowdCard'
 import { reportAddress } from '#src/report-data'
 
 import { PredictionForm } from './PredictionForm'
@@ -74,12 +76,15 @@ const scoringLine = 'Hoogstens 30 punten per wedstrijd.'
  * supporter without fields (or that there was none), and the link to the match.
  */
 export function ClosedCard({
+  crowd,
   id,
   loggedIn,
   match,
   now,
   saved,
 }: {
+  /** What supporters predicted, the same as on the page of the match, or `undefined`. */
+  crowd?: PredictionCrowdData | undefined
   id: string
   loggedIn: boolean
   match: PredictionMatch
@@ -105,6 +110,7 @@ export function ClosedCard({
           <ScoreGrid awayName={clubs.away} homeName={clubs.home} legend="Jouw voorspelling" readOnly values={saved} />
         )
       ) : null}
+      {crowd === undefined ? null : <PredictionCrowd {...crowdProps(crowd)} headingLevel={3} />}
       <Text>
         <Link href={reportAddress(match.season, match.matchDate, match.clubSlug)}>Naar de wedstrijd</Link>
       </Text>

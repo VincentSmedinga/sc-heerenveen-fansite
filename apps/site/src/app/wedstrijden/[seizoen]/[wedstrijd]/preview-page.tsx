@@ -22,6 +22,7 @@ import { SourceCredit } from '#src/MatchViews'
 import { seasonPageMetadata } from '#src/metadata'
 import { getClubNews, getClubPage, getSquadPersonIds, getStadiumPlace } from '#src/opponents'
 import { pageAreas } from '#src/page-areas'
+import { PredictionCrowdCard, readPredictionCrowd } from '#src/PredictionCrowdCard'
 import { headToHeadOf } from '#src/preview-head-to-head'
 import { scorersOf } from '#src/preview-scorers'
 import { formsOf, standingSentenceOf, standingSliceOf } from '#src/preview-standing'
@@ -154,6 +155,7 @@ export async function PreviewPage({ season: seizoen, slug }: { season: string; s
   const { data, forms, found, headlines, headToHead, pages, place, scorers, season, slice } = loaded
   const { match } = found
   const now = new Date()
+  const prediction = await readPredictionCrowd(match)
   const [first, second] = clubsOf(match)
   const news = headlines.length > 0
   const standing = slice !== undefined && standingSentenceOf(data.standings, match.opponent) !== undefined
@@ -162,7 +164,12 @@ export async function PreviewPage({ season: seizoen, slug }: { season: string; s
   const shooters = scorers !== undefined
   // On a phone the cards stand in this order: Stand, Vorm, Onderling, Onze schutters, Nieuws,
   // Bron. On a wide screen Onderling and Nieuws have the wide column and the others the narrow.
-  const before = [...(standing ? ['standing'] : []), ...(form ? ['form'] : []), ...(shooters ? ['scorers'] : [])]
+  const before = [
+    ...(standing ? ['standing'] : []),
+    ...(form ? ['form'] : []),
+    ...(shooters ? ['scorers'] : []),
+    ...(prediction === undefined ? [] : ['prediction']),
+  ]
   const main = [...(together ? ['headToHead'] : []), ...(news ? ['news'] : [])]
   const areas =
     main.length > 0 ? pageAreas({ after: ['source'], before, main }) : pageAreas({ before, main: ['source'] })
@@ -173,6 +180,7 @@ export async function PreviewPage({ season: seizoen, slug }: { season: string; s
     ...(form ? ['form'] : []),
     ...(together ? ['headToHead'] : []),
     ...(shooters ? ['scorers'] : []),
+    ...(prediction === undefined ? [] : ['prediction']),
     ...(news ? ['news'] : []),
     'source',
   ]
@@ -218,6 +226,11 @@ export async function PreviewPage({ season: seizoen, slug }: { season: string; s
       {shooters && (
         <Page.Cell area="scorers">
           <PreviewScorersCard home={match.home} name={match.opponent} place={place} scorers={scorers} />
+        </Page.Cell>
+      )}
+      {prediction === undefined ? null : (
+        <Page.Cell area="prediction">
+          <PredictionCrowdCard data={prediction} matchId={match.id} played={false} />
         </Page.Cell>
       )}
       {news && (

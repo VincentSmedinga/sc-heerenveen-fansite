@@ -138,6 +138,29 @@ describe('the card of a match that has begun', () => {
     expect(html).not.toContain('Ruststand')
   })
 
+  it('shows the figures of everybody under the prediction, the same as on the page of the match', () => {
+    const html = closed({
+      crowd: {
+        crowd: {
+          count: 54,
+          spread: { draws: 13, losses: 8, other: 0, scores: [{ count: 14, label: '2–1' }], wins: 33 },
+        },
+        formOpen: false,
+        reveal: true,
+      },
+    })
+
+    expect(html).toContain('54 supporters voorspelden deze wedstrijd.')
+    expect(html).toContain('Winst 33 · Gelijk 13 · Verlies 8')
+    expect(html).toContain('Meest voorspelde eindstanden')
+    expect(html.indexOf('Ruststand')).toBeLessThan(html.indexOf('Winst 33'))
+    expect(html.indexOf('Winst 33')).toBeLessThan(html.indexOf('Naar de wedstrijd'))
+  })
+
+  it('has no figures without a reading', () => {
+    expect(closed()).not.toContain('voorspelden deze wedstrijd')
+  })
+
   it('shows nothing about a prediction to a visitor', () => {
     const html = closed({ loggedIn: false })
 

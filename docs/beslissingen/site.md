@@ -7357,3 +7357,32 @@
   De plekken in de stand en bij een wedstrijd (de twee andere kerncijfers) en de link "Spelregels" komen met #1451 en #1455.
 - **Waarom:** het ontwerp wil de lijst kort en de punten in één blik; de plekken hebben een ranglijst nodig die er nog niet is.
 - **Alternatieven:** de hele lijst altijd tonen (lang na een seizoen); een aparte pagina voor de lijst (twee plekken die uit elkaar lopen).
+
+- **Datum:** 20 november 2026
+- **Besluit:** voor de aftrap toont de wedstrijdpagina alleen het aantal voorspellingen van de Prognose.
+  De verdeling komt vanaf de aftrap.
+- **Waarom:** zo blijft elke voorspelling van de supporter zelf, en niemand kan de menigte kopiëren.
+- **Alternatieven:** de verdeling voor de aftrap tonen, zoals de oude Fansite deed.
+
+- **Datum:** 20 november 2026
+- **Besluit:** op bestaande pagina's verschijnen alleen groepscijfers van de Prognose, nooit een persoonlijk beeld of een schermnaam.
+- **Waarom:** zo blijft elke publieke pagina voor iedereen gelijk en cachebaar, en blijft alles wat persoonlijk is onder `/fans`.
+- **Alternatieven:** een persoonlijke kaart op de wedstrijdpagina zelf.
+
+- **Datum:** 21 november 2026
+- **Besluit:** elk spel heeft zijn eigen kaart op de wedstrijdpagina, met het spel als kop en "Van supporters" erboven of eronder, in de volgorde Uitblinker, Prognose, Fjouwer.
+  Er is geen gezamenlijke kaart Fans.
+  Op de pagina van een wedstrijd met verslag staat de kaart Prognose in de smalle kolom, boven de bronvermelding; op de voorbeschouwing staat hij onder "Onze schutters" en boven "Nieuws".
+- **Waarom:** een spel dat uit staat of niets te tonen heeft, laat zo geen gat, en elk issue bouwt zijn eigen kaart zonder die van een ander aan te raken.
+- **Alternatieven:** één kaart Fans met een regel per spel.
+
+- **Datum:** 21 november 2026
+- **Besluit:** de cijfers van de kaart Prognose komen uit één lezing per wedstrijd (`matchCrowd`), een minuut gecachet voor elk van de twee standen: voor de aftrap en vanaf de aftrap.
+  De lezing voor de aftrap bevat alleen het aantal, zodat wat supporters voorspelden dan ook niet in het geheugen van de server staat.
+  Bij minder dan vijf voorspellingen staat ook na de wedstrijd alleen het aantal.
+  Een eindstand die minder dan drie keer is voorspeld, valt onder "anders".
+  Een geblokkeerd account telt niet mee en een opgeheven account wel, volgens de regel van "Zo deed iedereen het"; die regel staat voor de kaart op één plek (`countedPredictions`).
+  Of het formulier open staat, bepaalt de pagina zelf bij elk bezoek, omdat het van de klok afhangt en voor iedereen gelijk is.
+  De opmaak van de cijfers is het component `PredictionCrowd` in het designsysteem, zodat de gesloten kaart op `/fans/prognose` en de kaart op de oude wedstrijden (#1457) dezelfde tekst en grafieken gebruiken.
+- **Waarom:** de pagina van een wedstrijd blijft voor elke bezoeker gelijk en vraagt de database weinig; een minuut houdt de cijfers na de uitslag vers.
+- **Alternatieven:** de cijfers bij elk bezoek berekenen (zwaar bij een drukke wedstrijd); vijf minuten cachen (de verdeling staat dan te lang achter de aftrap aan).
