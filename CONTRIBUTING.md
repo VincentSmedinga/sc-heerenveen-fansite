@@ -18,6 +18,7 @@ GitHub laat je kiezen tussen een formulier voor een fout en een formulier voor e
 Zeg wat je ziet of wilt, en waarom.
 Bij een fout helpt het als je schrijft wat je deed en wat er gebeurde.
 Een issue is openbaar: zet er geen wachtwoorden of persoonsgegevens in.
+Een kwetsbaarheid hoort daar niet thuis: meld die zoals [`SECURITY.md`](SECURITY.md) uitlegt.
 Een vraag of een gesprek hoort op het [forum](https://forum.heerenveen.org).
 
 Een issue is klaar om te bouwen als het acceptatiecriteria heeft, in één pull request past, geen open vragen heeft en de projecteigenaar het heeft goedgekeurd.
