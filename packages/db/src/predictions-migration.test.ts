@@ -12,7 +12,7 @@ import { createTestDatabase } from './test-database.ts'
 
 const migrationsFolder = fileURLToPath(new URL('../drizzle', import.meta.url))
 
-const migration = '0098_add_predictions'
+const migration = '0099_add_predictions'
 
 let database: TestDatabase
 

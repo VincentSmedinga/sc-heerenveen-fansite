@@ -4499,3 +4499,26 @@
   Een tabel die niet klopt is erger dan geen tabel: de bezoeker leest de uitslagen als waar.
 - **Alternatieven:** de pagina's raden uit het seizoen (de titels verschillen: `UEFA Cup 2004/05`, `UEFA Champions League 2000/01`, `UEFA Intertoto Cup 1995`); een eigen opdracht voor de groepsfases (de bestaande werkstroom `Import season` leest dan niets); de Engelse Wikipedia (de Nederlandse pagina's hebben de tabellen al).
 - **Let op:** voor seizoenen van vóór 2010/11 geeft het deel van `import:season` met de wedstrijden nu nog een waarschuwing en exitcode 1, omdat de pagina's van de Eredivisie van die seizoenen niet bestaan (het vervolg op #1402 verandert dat); de groepstabel wordt dan wel gelezen en bewaard.
+
+## De import ruimt ongebruikte accounts van supporters op
+
+- **Datum:** 21 november 2026
+- **Besluit:** een stap in elke run van de import (`cleanUpSupporters` in `packages/db/src/clean-up-supporters.ts`, aangeroepen vanuit `runImport`, onder de lock van de import) doet de accounts één keer per dag, in de eerste run van de dag (UTC) die de lock nam: hij mailt een account dat 24 maanden niet is bezocht en sluit het 30 dagen later met `closeAccount`.
+  Het mailt hoogstens 20 accounts per dag, de langst ongebruikte eerst; het aantal van vandaag volgt uit de kolom `supporters.unused_mail_sent_at`, dus de stap onthoudt niets anders.
+  Een account is ongebruikt als de dag van het laatste bezoek, of bij een account dat nooit terugkwam de dag van aanmelden, meer dan 24 maanden geleden is.
+  Een bezoek aan een pagina onder `/fans` maakt de kolom weer leeg (`currentSupporter`), en de volgende termijn begint bij dat bezoek.
+  De mail telt pas als verstuurd als de mailserver hem aannam; een mislukte mail wordt de volgende dag opnieuw geprobeerd.
+  Een account gaat alleen weg als zijn mail 30 dagen oud is en er geen bezoek na die dag is.
+  Met `FANS_ACCOUNTS` uit doet de stap niets met accounts, behalve dat hij de kolom van een eerder verstuurde mail leegmaakt: niemand kon intussen inloggen, dus de termijn van 30 dagen begint pas bij een mail die na het weer aanzetten uitgaat.
+  Een geblokkeerd account volgt dezelfde regels, en `closeAccount` bewaart de hash van het adres.
+  De stap haalt bij elke run ook de verlopen onbevestigde aanmeldingen weg uit `supporter_login_links`, ook met accounts uit, zodat zo'n adres er hoogstens een dag staat.
+  Het logboek noemt alleen aantallen.
+- **Waarom:** we bewaren een e-mailadres alleen zolang het een doel heeft.
+  De import draait al elk kwartier met de lock en de mailinstellingen; een tweede opdracht voor cron kost de eigenaar een extra cronjob.
+  Een kwartier is ruim genoeg voor de dagelijkse dump van 03:17, dus die bevat geen verlopen aanmelding meer; de dump laat de tabel met links trouwens leeg.
+  `closeAccount` en `sendMail` staan in `packages/db` en `packages/shared`, zodat de site en de importer dezelfde code gebruiken.
+- **Alternatieven:** een eigen opdracht voor cron (een tweede cronjob en een tweede lock); het aantal per dag in een eigen tabel bewaren (een tabel en een migratie voor iets dat de kolom al zegt); een mislukte mail bij elke run opnieuw proberen (dan wordt een adres dat de server weigert tot 96 keer per dag geprobeerd, terwijl het issue één keer per dag zegt).
+- **Let op:** een mail die mislukt, wordt de volgende dag opnieuw geprobeerd.
+  Een run die crasht voordat hij bij de accounts kwam, laat ze ook tot de volgende dag.
+  Een adres dat de mailserver blijft weigeren, blijft elke dag tussen de eerste 20 staan; met 20 zulke accounts krijgt de rest geen mail.
+  Dat vraagt een tweede poging met een teller, en past niet bij zo weinig accounts.

@@ -198,6 +198,21 @@ describe('the length of a session of a supporter', () => {
     expect(row?.lastVisitOn).toBe('2026-11-22')
   })
 
+  it('takes back the mail about an unused account, so a new term of 24 months starts', async () => {
+    await database.db
+      .update(supporters)
+      .set({ lastVisitOn: '2024-01-01', unusedMailSentAt: new Date('2026-11-01T10:00:00Z') })
+      .where(eq(supporters.id, supporterId))
+    jar.set(supporterCookieName, await startSession(database.db, supporterKind, supporterId, start))
+
+    await currentSupporter(new Date('2026-11-22T10:00:00Z'))
+
+    const [row] = await database.db.select().from(supporters).where(eq(supporters.id, supporterId))
+
+    expect(row?.unusedMailSentAt).toBeNull()
+    expect(row?.lastVisitOn).toBe('2026-11-22')
+  })
+
   it('is removed with the sessions that ended, at a later request', async () => {
     await startSession(database.db, supporterKind, supporterId, start)
     await removeEnded(database.db, supporterKind, onDay(91))
