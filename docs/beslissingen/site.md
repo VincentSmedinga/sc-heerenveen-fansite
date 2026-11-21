@@ -7066,3 +7066,25 @@
 - **Waarom:** de pagina van de blokkade zegt al dat voorspellingen en cijfers niet meer meetellen.
   Een nieuwe naam of adres zou een blokkade kunnen omzeilen.
 - **Alternatieven:** een geblokkeerd account alles laten wijzigen.
+
+## De kop toont of je bent ingelogd
+
+- **Datum:** 20 november 2026
+- **Besluit:** de kop leest een teken in de opslag van de browser (`localStorage`, de sleutel `fansite-fans`) om te weten of een supporter is ingelogd, zoals de link naar het beheer (`apps/site/src/supporter-marker.ts`).
+  De pagina's onder `/fans` zetten het teken met de schermnaam bij een geldige sessie en halen het weg als er geen is (`apps/site/src/app/fans/layout.tsx`).
+  De server stuurt op elke pagina de link Inloggen, voor iedereen gelijk; na het laden toont de knop de initialen en gaat hij naar Mijn account.
+- **Waarom:** zo blijft elke openbare pagina voor alle bezoekers dezelfde en goed te cachen, en hoeft het cookie van de sessie niet buiten `/fans` te komen.
+  Het teken geeft geen toegang: wie het zelf zet, ziet initialen op een knop die naar het inloggen leidt.
+- **Alternatieven:** het cookie op elke pagina lezen en de pagina per persoon opbouwen (geen cache meer, en het cookie reist overal mee).
+
+- **Datum:** 20 november 2026
+- **Besluit:** de kop toont een ronde supporterknop op elke pagina, links van licht en donker, en geen schermnaam als tekst.
+  Inloggen en Mijn account zijn dezelfde knop.
+  Staan accounts uit, dan staat de knop er niet, ook niet als het teken in de browser staat.
+- **Waarom:** de kop is op een telefoon al vol; een naam van 20 tekens past er niet, en een ronde knop past bij de twee andere.
+- **Alternatieven:** de schermnaam als tekst in het menu (breekt op een telefoon); Inloggen als eigen item in het hoofdmenu of bij Fans.
+
+- **Datum:** 21 november 2026
+- **Besluit:** een test bewaakt dat geen bestand buiten `app/fans`, `fans`, `login` en het beheer de sessie van een supporter of het cookie noemt (`apps/site/src/public-pages.test.ts`).
+- **Waarom:** één import in een openbare pagina of in de layout maakt die pagina per persoon, en dat zie je niet aan de pagina.
+- **Alternatieven:** alleen de HTML van de layout testen (een pagina die zelf het cookie leest, valt er dan buiten).

@@ -403,6 +403,7 @@
   De importer vult de discussies binnen een kwartier opnieuw, en een sessie maak je door opnieuw in te loggen.
   Een map die we zelf niet maakten, zoals de thuismap, kan de site breken als we haar rechten wijzigen.
 - **Alternatieven:** `--ignore-table-data`, dat alleen de `mysqldump` van MariaDB kent; alles dumpen en deze tabellen leeg laten bij het terugzetten (de gegevens zouden dan wel in het bestand staan); de rechten van een bestaande map zelf zetten.
+- **Later:** sinds _De dump laat sessies en links van supporters leeg, en houdt hun accounts_ (21 november 2026) laat de dump ook `supporter_sessions`, `supporter_login_links`, `supporter_email_changes` en `supporter_login_attempts` leeg.
 
 ## Een dump gaat alleen terug in een lege database
 
@@ -978,6 +979,7 @@
 - **Alternatieven:** de laatste nachtelijke dump downloaden, laden, de adressen lokaal vervangen en het bestand weghalen.
   Dat is eenvoudiger, maar de echte adressen staan dan even op de schijf.
   Of een lijst van wat niet mee mag, zoals bij de nachtelijke dump (een nieuwe tabel met persoonsgegevens gaat dan mee tot iemand eraan denkt).
+- **Later:** sinds _De kopie van acceptatie bevat geen accounts van supporters_ (20 november 2026) komen ook `supporters`, `supporter_sessions`, `supporter_login_links`, `supporter_login_attempts` en `supporter_email_changes` zonder rijen in de kopie.
 
 ## Alleen de projecteigenaar haalt de kopie op
 
@@ -1240,3 +1242,35 @@
     Een oud verslag heeft zelden minuten bij de doelpunten, dus dat verschil is klein.
 - **Waarom:** de redactie kent het verslag het best, de doelpunten zijn er voor elke nieuwe wedstrijd, en de oude gegevens vullen alleen het verleden aan.
 - **Alternatieven:** alleen invullen door de redactie, wat de oude wedstrijden leeg laat; de afgeleide ruststand bewaren in de kolommen (dan blijft een oude waarde staan na een gecorrigeerd doelpunt, en is niet meer te zien wat de redactie zelf invulde).
+
+## De kopie van acceptatie bevat geen accounts van supporters
+
+- **Datum:** 20 november 2026
+- **Besluit:** de kopie van acceptatie bevat geen accounts van supporters (#1462).
+  De tabellen `supporters`, `supporter_sessions`, `supporter_login_links`, `supporter_login_attempts` en `supporter_email_changes` komen leeg mee (`supporterTables` in `packages/db/src/export-plan.ts`).
+  De tabellen van de spellen komen mee zonder verwijzing naar een supporter: die kolom wordt `NULL`.
+- **Waarom:** de kopie staat op een computer waar agents in lezen.
+  Schermnamen en adressen van echte supporters horen daar niet.
+  De naamloze cijfers zijn wel nuttig om een pagina na te kijken.
+- **Alternatieven:** de adressen vervangen door verzonnen adressen en de schermnamen houden, zoals bij de beheerders (een schermnaam is van een echte persoon en vaak herkenbaar); ook de tabellen van de spellen leeg laten (dan is op de kopie niets van Fans te controleren).
+
+## Een test houdt verwijzingen naar supporters uit de kopie
+
+- **Datum:** 21 november 2026
+- **Besluit:** een test in `packages/db/src/export.test.ts` dwingt de regel af.
+  Hij faalt voor een kolom die naar `supporters` verwijst en die de export meeneemt: een foreign key, of een kolom met `supporter` in de naam.
+  Hij faalt ook voor een nieuwe tabel waarvan de naam met `supporter` begint en die niet in `supporterTables` staat.
+- **Waarom:** de spellen komen in eigen issues, en elk brengt eigen tabellen.
+  Een test valt in CI op; een regel in de documentatie vergeet iemand.
+- **Alternatieven:** alleen de regel in het commentaar van het plan (niemand controleert hem); elke tabel met een kolom `supporter_id` helemaal leeg laten (dan is op de kopie niets van de spellen te zien).
+
+## De dump laat sessies en links van supporters leeg, en houdt hun accounts
+
+- **Datum:** 21 november 2026
+- **Besluit:** de dagelijkse dump laat `supporter_sessions`, `supporter_login_links`, `supporter_email_changes` en `supporter_login_attempts` leeg, en neemt `supporters` wel mee.
+  Na het terugzetten van een dump gaat de redactie met de hand de opheffingen sinds die dump na (`docs/back-ups.md`, _Terugzetten_).
+- **Waarom:** een teruggezette sessie of link zou een toegang herstellen die na de dump is ingetrokken, net als bij het beheer.
+  Een inloglink kan een aanmelding zijn die niemand bevestigde, en een adreswijziging bewaart het nieuwe adres tot de bevestiging: allebei horen na 15 minuten weg te zijn.
+  De accounts zelf moeten terug kunnen komen.
+  Het logboek van een opheffing bewaart geen nummer van het account (#1454), dus alleen de redactie kan de opheffingen terugvinden; een terugzetting is zeldzaam.
+- **Alternatieven:** ook `supporters` leeg laten (een terugzetting verliest dan elk account); het nummer van een opgeheven account in het logboek bewaren (dat is een gegeven over een persoon die weg wil).
