@@ -5,9 +5,7 @@ import type { ComponentProps } from 'react'
 import { Button, ErrorSummary, Field, Form, Input, Link, Notice, Text } from '@fansite/design-system'
 import { useActionState, useEffect } from 'react'
 
-import type { AccountFormState as State } from '#src/fans/account-form'
-
-import { signUpPaths } from '#src/fans/sign-up'
+import { accountPath, type AccountFormState as State } from '#src/fans/account-form'
 
 const summaryId = 'fouten'
 const failureId = 'mislukt'
@@ -70,7 +68,7 @@ export function AccountForm({
         </Field>
         <Button type="submit">{submit}</Button>
         <Text>
-          <Link href={signUpPaths.account}>Annuleren</Link>
+          <Link href={accountPath}>Annuleren</Link>
         </Text>
       </Form>
     </>

@@ -6,6 +6,9 @@ import { screenNameMaxLength, screenNameMinLength } from './screen-name'
 // What the pages of Mijn account show: the state of their forms and the words of their
 // messages (issue 1452). The design of the chapter Fans gives the words.
 
+/** The page Mijn account, where the forms of a change go back to. */
+export const accountPath = '/fans/mijn-account'
+
 /** The names of the fields, which are also their `id`: an error links to the field with it. */
 export const accountFields = { email: 'e-mail', inRankings: 'in-de-standen', screenName: 'schermnaam' } as const
 
