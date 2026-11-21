@@ -53,7 +53,8 @@ export type CleanUpReport = {
  * nothing while accounts are off: no mail and no closing, and the 30 days of an account start
  * at its mail, which only goes out while accounts are on. It never closes an account without a
  * mail that was sent 30 days before, and it counts a mail as sent only after the mail server
- * took it, so a failed mail is tried again by the next run. It gives only counts.
+ * took it, so a failed mail is tried again by the first run of the next day. It gives only
+ * counts.
  */
 export async function cleanUpSupporters(
   db: Database,

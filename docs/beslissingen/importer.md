@@ -4507,7 +4507,7 @@
   Het mailt hoogstens 20 accounts per dag, de langst ongebruikte eerst; het aantal van vandaag volgt uit de kolom `supporters.unused_mail_sent_at`, dus de stap onthoudt niets anders.
   Een account is ongebruikt als de dag van het laatste bezoek, of bij een account dat nooit terugkwam de dag van aanmelden, meer dan 24 maanden geleden is.
   Een bezoek aan een pagina onder `/fans` maakt de kolom weer leeg (`currentSupporter`), en de volgende termijn begint bij dat bezoek.
-  De mail telt pas als verstuurd als de mailserver hem aannam; een mislukte mail wordt bij de volgende run opnieuw geprobeerd.
+  De mail telt pas als verstuurd als de mailserver hem aannam; een mislukte mail wordt de volgende dag opnieuw geprobeerd.
   Een account gaat alleen weg als zijn mail 30 dagen oud is en er geen bezoek na die dag is.
   Met `FANS_ACCOUNTS` uit doet de stap niets met accounts, behalve dat hij de kolom van een eerder verstuurde mail leegmaakt: niemand kon intussen inloggen, dus de termijn van 30 dagen begint pas bij een mail die na het weer aanzetten uitgaat.
   Een geblokkeerd account volgt dezelfde regels, en `closeAccount` bewaart de hash van het adres.
@@ -4517,7 +4517,7 @@
   De import draait al elk kwartier met de lock en de mailinstellingen; een tweede opdracht voor cron kost de eigenaar een extra cronjob.
   Een kwartier is ruim genoeg voor de dagelijkse dump van 03:17, dus die bevat geen verlopen aanmelding meer; de dump laat de tabel met links trouwens leeg.
   `closeAccount` en `sendMail` staan in `packages/db` en `packages/shared`, zodat de site en de importer dezelfde code gebruiken.
-- **Alternatieven:** een eigen opdracht voor cron (een tweede cronjob en een tweede lock); het aantal per dag in een eigen tabel bewaren (een tabel en een migratie voor iets dat de kolom al zegt); de volgende run bij een mislukte mail overslaan tot de volgende dag (een tijdelijke storing kost dan een dag).
+- **Alternatieven:** een eigen opdracht voor cron (een tweede cronjob en een tweede lock); het aantal per dag in een eigen tabel bewaren (een tabel en een migratie voor iets dat de kolom al zegt); een mislukte mail bij elke run opnieuw proberen (dan wordt een adres dat de server weigert tot 96 keer per dag geprobeerd, terwijl het issue één keer per dag zegt).
 - **Let op:** een mail die mislukt, wordt de volgende dag opnieuw geprobeerd.
   Een run die crasht voordat hij bij de accounts kwam, laat ze ook tot de volgende dag.
   Een adres dat de mailserver blijft weigeren, blijft elke dag tussen de eerste 20 staan; met 20 zulke accounts krijgt de rest geen mail.
