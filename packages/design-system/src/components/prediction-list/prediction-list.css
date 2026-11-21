@@ -81,4 +81,9 @@
     color: var(--hf-colour-text-secondary);
     font-size: var(--hf-meta-font-size);
   }
+
+  /* A state such as "Nog niet gespeeld" wraps over two lines, so the clubs keep their room. */
+  .hf-prediction-list-status {
+    inline-size: 5.5rem;
+  }
 }
