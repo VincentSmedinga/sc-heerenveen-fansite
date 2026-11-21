@@ -4116,6 +4116,8 @@
     De ondergrens en de verschuiving zijn in rem, dus een grotere tekstgrootte tilt ze mee en het woordmerk wordt nooit kleiner dan 18 pixels.
   - Het woordmerk mag niet afbreken door een `nowrap`.
     Bij een tekst die veel groter is dan het scherm loopt het woord voor woord door, zodat er niets wordt afgekapt.
+  - Het woordmerk en "sinds 1997" zijn twee vakken in een rij die afbreekt (`flex-wrap`), geen tekst met een regelhoogte.
+    De hoogte van de kop hangt dan niet af van het lettertype, en de pagina springt niet als dat laadt (de test van de link naar boven zag dat op de runner van CI).
   - Onder 600 pixels staat "sinds 1997" onder het woordmerk, vanaf 600 pixels ernaast.
     De regel staat op één plek, in `logo.css`.
   - De kop is een raster met een kolom voor het logo en een kolom per knop erna, zodat een tweede ronde knop past.

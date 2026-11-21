@@ -69,12 +69,6 @@ describe('Logo', () => {
     expect(screen.queryByRole('img', { name: 'Iets anders' })).toBeNull()
   })
 
-  it('balances the lines of its text where the browser can, so the tagline stays next to the last word of the name', () => {
-    const css = readFileSync(join(import.meta.dirname, 'logo.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
-
-    expect(css).toMatch(/\.hf-logo-text \{[^}]*@supports \(text-wrap: balance\) \{\s*text-wrap: balance;/s)
-  })
-
   describe('the fluid wordmark', () => {
     const strip = (name: string) => readFileSync(join(import.meta.dirname, name), 'utf8').replace(/\/\*.*?\*\//gs, '')
 
@@ -89,13 +83,13 @@ describe('Logo', () => {
       const css = strip('logo.css')
 
       expect(css.match(/@media \(width < 37\.5rem\)/g)).toHaveLength(1)
-      expect(css).toMatch(/\.hf-logo-tagline \{[^}]*@media \(width < 37\.5rem\) \{\s*display: block;/s)
+      expect(css).toMatch(/\.hf-logo-tagline \{[^}]*@media \(width < 37\.5rem\) \{\s*flex-basis: 100%;/s)
     })
 
     it('keeps the wordmark in one box that may wrap by word, so a zoomed text reflows and is not cut off', () => {
       const css = strip('logo.css')
 
-      expect(css).toMatch(/\.hf-logo-wordmark \{[^}]*display: inline-block;[^}]*max-inline-size: 100%;/s)
+      expect(css).toMatch(/\.hf-logo-text \{[^}]*display: flex;[^}]*flex-wrap: wrap;/s)
       expect(css).not.toMatch(/\.hf-logo-wordmark \{[^}]*white-space: nowrap/s)
     })
   })
