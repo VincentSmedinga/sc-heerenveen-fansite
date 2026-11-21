@@ -45,7 +45,7 @@ export default async function ConfirmPage({ searchParams }: Props) {
             <Text>Deze knop staat er zodat een virusscanner in je mail de link niet voor je gebruikt.</Text>
           </>
         ) : (
-          <LinkGone again={{ href: signUpPaths.form, label: 'Meld je opnieuw aan' }} />
+          <LinkGone again={{ href: signUpPaths.form, label: 'Stuur een nieuwe' }} />
         )}
       </Page.Cell>
     </Page.Main>

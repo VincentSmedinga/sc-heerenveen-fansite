@@ -4125,3 +4125,17 @@
   Een kaart voor een account is een taak, geen spel.
   Een masker laat het icoon de kleur van het vlak volgen, in licht en in donker, zonder een tekening per thema.
 - **Alternatieven:** een watermerk op elke kaart; een illustratie naast de kop; een `<svg>` als kind van de kaart (dat verandert de opbouw van de kaart met een knop voor een afbeelding, en moet apart verborgen worden voor hulptechnologie).
+
+## De code uit de mail is één veld dat als zes vakjes is getekend
+
+- **Datum:** 20 november 2026
+- **Besluit:** CodeInput is één invoerveld dat als zes vakjes is getekend, geen zes aparte velden (#1496).
+  - Het veld heeft `autocomplete="one-time-code"` en `inputmode="numeric"`.
+    Met JavaScript houdt het alleen de cijfers, hoogstens zes.
+    Wie de code ontvangt, accepteert ook spaties, want zonder JavaScript blijft een ingetikte spatie staan.
+  - De vakjes zijn tekening: ze staan achter het veld, en de cijfers van het veld staan zo ver uit elkaar dat elk in het midden van een vakje valt.
+    Het vakje dat aan de beurt is, is gemarkeerd.
+  - Bij een fout staan alle zes de vakjes in de foutkleur met een dikkere rand.
+    De foutmelding zelf staat in het Field, dus kleur is nooit het enige teken.
+- **Waarom:** een screenreader hoort één veld, plakken en de code die het toetsenbord voorstelt werken, en het werkt zonder JavaScript.
+- **Alternatieven:** zes losse velden (breekt plakken en autofill en leest slecht voor); één gewoon tekstveld zonder vakjes (werkt, maar is minder duidelijk over het aantal cijfers).
