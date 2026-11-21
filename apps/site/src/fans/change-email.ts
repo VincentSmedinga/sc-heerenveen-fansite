@@ -1,7 +1,7 @@
 import type { Database } from '@fansite/db/client'
 
 import { supporterEmailChanges, supporterLoginLinks, supporters, supporterSessions } from '@fansite/db/schema'
-import { and, count, eq, gt, gte, isNotNull, ne } from 'drizzle-orm'
+import { and, count, eq, gt, gte, isNotNull, ne, sql } from 'drizzle-orm'
 import { setTimeout as sleep } from 'node:timers/promises'
 
 import { normaliseEmail } from '../beheer/accounts'
@@ -65,7 +65,7 @@ export type ChangeEmailResult =
 export type ChangeResult = { answer: 'changed'; oldEmail: string } | { answer: 'gone' }
 
 /** A request, as the pages of changing the address need it. */
-type Request = { email: string; id: number; supporterId: number }
+type Request = { email: string; expiresAt: Date; id: number; supporterId: number }
 
 /**
  * The new address of the request with `ref`, of this supporter, for the page that says where
@@ -298,6 +298,7 @@ async function findRequest(
   const [request] = await db
     .select({
       email: supporterEmailChanges.email,
+      expiresAt: supporterEmailChanges.expiresAt,
       id: supporterEmailChanges.id,
       supporterId: supporterEmailChanges.supporterId,
     })
@@ -309,9 +310,9 @@ async function findRequest(
 
 /**
  * Changes the address of a request that was just used up. Only a request of the supporter who
- * is logged in counts. The other requests of the account go, and so do its login links and its
- * sessions, apart from `sessionToken`: links to the old address no longer log in, and a session
- * elsewhere has to log in again.
+ * is logged in counts. The other requests of the account stop, and so do its login links and
+ * its sessions, apart from `sessionToken`: links to the old address no longer log in, and a
+ * session elsewhere has to log in again.
  */
 async function finish(
   db: Database,
@@ -340,7 +341,19 @@ async function finish(
     throw error
   }
 
-  await db.delete(supporterEmailChanges).where(eq(supporterEmailChanges.supporterId, supporterId))
+  // The requests stay until they expire, so they keep counting in the limit of the supporter,
+  // but none of their links and codes works any more. The one that was used comes back as such
+  // a row. A token hash of `used-` and the number is no SHA-256, so no token matches it.
+  await db
+    .update(supporterEmailChanges)
+    .set({ codeHash: null, refHash: null, tokenHash: sql`CONCAT('used-', ${supporterEmailChanges.id})` })
+    .where(eq(supporterEmailChanges.supporterId, supporterId))
+  await db.insert(supporterEmailChanges).values({
+    email: request.email,
+    expiresAt: request.expiresAt,
+    supporterId,
+    tokenHash: hashOf(newToken()),
+  })
   await db.delete(supporterLoginLinks).where(eq(supporterLoginLinks.userId, supporterId))
   await db
     .delete(supporterSessions)

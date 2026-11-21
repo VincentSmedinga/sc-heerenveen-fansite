@@ -234,7 +234,26 @@ describe('using the link or the code', () => {
     })
     expect(await emailOf()).toBe('nieuw@example.org')
     expect(await database.db.select().from(supporterLoginLinks)).toEqual([])
-    expect(await database.db.select().from(supporterEmailChanges)).toEqual([])
+    // The request stays until it expires, without a code, so it still counts.
+    expect(await database.db.select({ codeHash: supporterEmailChanges.codeHash }).from(supporterEmailChanges)).toEqual([
+      { codeHash: null },
+    ])
+  })
+
+  it('keeps counting the requests after a change, so a fourth in 15 minutes is refused', async () => {
+    const here = await startSession(database.db, supporterKind, supporterId, start)
+    const first = await request('nieuw0@example.org')
+    const second = await request('nieuw1@example.org', later(1))
+
+    expect(await changeWithLink(database.db, supporterId, here, tokenOf(first.mail), later(2))).toMatchObject({
+      answer: 'changed',
+    })
+    // The other request stopped working with the change.
+    expect(await changeWithLink(database.db, supporterId, here, tokenOf(second.mail), later(2))).toEqual({
+      answer: 'gone',
+    })
+    expect((await request('nieuw2@example.org', later(3))).result.answer).toBe('sent')
+    expect((await request('nieuw3@example.org', later(4))).result).toEqual({ answer: 'limited' })
   })
 
   it('does nothing with a link of another supporter', async () => {

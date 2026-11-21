@@ -18,7 +18,8 @@ export function sentMails() {
   return (
     readdirSync(fakeMailFolder)
       .filter((name) => name.endsWith('.eml'))
-      // In the order they came: mail-10.eml after mail-9.eml, which an order by name gets wrong.
+      // In the order they came: mail-10.eml after mail-9.eml, which an order by the name gets
+      // wrong.
       .toSorted((a, b) => numberOf(a) - numberOf(b))
       .map((name) => decode(readFileSync(path.join(fakeMailFolder, name), 'latin1')))
   )
