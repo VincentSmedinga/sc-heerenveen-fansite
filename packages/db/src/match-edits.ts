@@ -215,6 +215,29 @@ const resultKeys = [
 /** The markers of a row of `match_edits`. */
 export type EditMarkers = Pick<MatchEdit, 'factsEdited' | 'goalsEdited' | 'kickoffEdited' | 'resultEdited'>
 
+/**
+ * What to add to the update of a result so the score at half-time never ends up above it
+ * (`matches_half_time_within_the_result`): the score at half-time is emptied when the new
+ * result is no longer played, or lower than it. Nothing changes while it fits.
+ */
+export function dropHalfTimeThatNoLongerFits(
+  current: Pick<Match, 'halfTimeAgainst' | 'halfTimeFor'>,
+  next: Pick<Match, 'afterNinetyAgainst' | 'afterNinetyFor' | 'goalsAgainst' | 'goalsFor' | 'status'>,
+): Record<never, never> | { halfTimeAgainst: null; halfTimeFor: null } {
+  if (current.halfTimeFor === null || current.halfTimeAgainst === null) {
+    return {}
+  }
+
+  const fits =
+    next.status === 'played' &&
+    next.goalsFor !== null &&
+    next.goalsAgainst !== null &&
+    current.halfTimeFor <= (next.afterNinetyFor ?? next.goalsFor) &&
+    current.halfTimeAgainst <= (next.afterNinetyAgainst ?? next.goalsAgainst)
+
+  return fits ? {} : { halfTimeAgainst: null, halfTimeFor: null }
+}
+
 /** The goals as `before_goals` keeps them, in the order they are shown. */
 export function encodeGoals(goals: MatchGoal[]): string {
   return JSON.stringify(
@@ -379,11 +402,18 @@ export async function removeEntry(db: Writer, edit: MatchEdit) {
   }
 
   if (parts.includes('kickoff') || parts.includes('result')) {
+    const [current] = await db
+      .select({ halfTimeAgainst: matches.halfTimeAgainst, halfTimeFor: matches.halfTimeFor })
+      .from(matches)
+      .where(eq(matches.id, edit.matchId))
+
     await db
       .update(matches)
       .set({
         ...(parts.includes('kickoff') ? kickoff : {}),
-        ...(parts.includes('result') ? result : {}),
+        ...(parts.includes('result')
+          ? { ...result, ...(current === undefined ? {} : dropHalfTimeThatNoLongerFits(current, result)) }
+          : {}),
         // Only a played match has spectators (`matches_attendance_in_range_when_played`).
         ...(parts.includes('result') && before.status !== 'played' ? { attendance: null } : {}),
       })

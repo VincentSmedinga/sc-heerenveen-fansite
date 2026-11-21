@@ -607,6 +607,38 @@ describe('the step matches', () => {
     expect(await database.db.select().from(matchChanges)).toHaveLength(0)
   })
 
+  it('leaves the score at half-time out of a match of another source whose result is lower, and says so', async () => {
+    // Wikipedia has 1-0; the old fansite has 2-1 at half-time, which does not fit that.
+    await wikipediaMatch({ goalsAgainst: 0, goalsFor: 1 })
+
+    const report = await run([
+      oldMatch({ result: { awayFullTime: 1, awayHalfTime: 0, homeFullTime: 2, homeHalfTime: 2, note: null } }),
+    ])
+
+    expect(await rows()).toMatchObject([{ goalsFor: 1, halfTimeAgainst: null, halfTimeFor: null }])
+    expect(report.lines.join('\n')).toContain('higher than the result that match')
+  })
+
+  it('leaves the score at half-time out of its own row whose result the editors keep, and does not fail', async () => {
+    await run([
+      oldMatch({ result: { awayFullTime: 1, awayHalfTime: 0, homeFullTime: 2, homeHalfTime: 0, note: null } }),
+    ])
+    await database.pool.query(
+      'UPDATE matches SET goals_for = 1, goals_against = 0, half_time_for = NULL, half_time_against = NULL',
+    )
+    await database.pool.query(
+      "INSERT INTO match_edits (match_id, before_goals, before_match, edited_at, edited_by, result_edited, reason) SELECT id, '[]', '{}', NOW(), ?, 1, 'Anders' FROM matches",
+      [adminId],
+    )
+
+    const report = await run([
+      oldMatch({ result: { awayFullTime: 1, awayHalfTime: 0, homeFullTime: 2, homeHalfTime: 2, note: null } }),
+    ])
+
+    expect(await rows()).toMatchObject([{ goalsFor: 1, halfTimeFor: null }])
+    expect(report.lines.join('\n')).toContain('higher than the result of the row')
+  })
+
   it('keeps a field that differs from the other source as a change that waits, once, and leaves the match', async () => {
     await wikipediaMatch({ goalsFor: 3 })
 

@@ -151,8 +151,8 @@ const ReportFormContext = createContext<ReportFormContext | undefined>(undefined
 
 /** The list of the errors of the last save, which gets the focus when there are any. */
 export function ReportErrorSummary() {
-  const { current, state, title } = useReportForm()
-  const summary = errorOrder(current).flatMap((id) => {
+  const { choices, current, state, title } = useReportForm()
+  const summary = errorOrder(current, choices.home).flatMap((id) => {
     const message = state.errors[id]
 
     return message === undefined ? [] : [{ id, message }]

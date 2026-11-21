@@ -11,7 +11,7 @@ import type { FactsFields, GoalSnapshot, KickoffFields, ResultFields } from './m
 import type { Match, MatchChange, MatchDataSource, MatchPart } from './schema.ts'
 
 import { recordAction } from './audit-log.ts'
-import { clearParts, insertGoals } from './match-edits.ts'
+import { clearParts, dropHalfTimeThatNoLongerFits, insertGoals } from './match-edits.ts'
 import { matchChanges, matchEdits, matches, matchGoals, matchReports } from './schema.ts'
 import { seasonOf } from './season.ts'
 import { linkMatchToStadium } from './stadiums.ts'
@@ -353,9 +353,15 @@ async function writePart(db: Writer, matchId: number, proposal: PartProposal, no
     return
   }
 
+  const [held] = await db
+    .select({ halfTimeAgainst: matches.halfTimeAgainst, halfTimeFor: matches.halfTimeFor })
+    .from(matches)
+    .where(eq(matches.id, matchId))
+
   await db
     .update(matches)
     .set({
+      ...(held === undefined ? {} : dropHalfTimeThatNoLongerFits(held, proposal)),
       afterNinetyAgainst: proposal.afterNinetyAgainst,
       afterNinetyFor: proposal.afterNinetyFor,
       extraTime: proposal.extraTime,

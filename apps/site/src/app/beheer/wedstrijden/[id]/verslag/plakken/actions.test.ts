@@ -401,6 +401,18 @@ describe('submitPaste for a match that has a report', () => {
     expect(await rowCounts()).toEqual(before)
   })
 
+  it('keeps the score at half-time that is stored with the match, which the text does not have', async () => {
+    await database.pool.query('UPDATE matches SET half_time_for = 1, half_time_against = 0 WHERE id = ?', [matchId])
+
+    const result = await paste({ tekst: text, vervangen: 'ja' })
+
+    if ('redirect' in result || result.kind !== 'read') {
+      throw new Error('not read')
+    }
+
+    expect(result.form.values.ruststand).toEqual({ wij: '1', zij: '0' })
+  })
+
   it('keeps the source of the report it replaces in the form', async () => {
     const result = await paste({ tekst: text, vervangen: 'ja' })
 

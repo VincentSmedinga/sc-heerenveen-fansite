@@ -1,6 +1,6 @@
 import type { Competition, Match, MatchEdit, NewMatchStatistics } from '@fansite/db/schema'
 
-import { lockedFields } from '@fansite/db/match-edits'
+import { dropHalfTimeThatNoLongerFits, lockedFields } from '@fansite/db/match-edits'
 import { compareClaim, findMatchByDate } from '@fansite/db/match-lookup'
 import { matchEdits, matches, matchLimits, matchStatistics } from '@fansite/db/schema'
 import { keepSourceDifferences, readTakenOverParts } from '@fansite/db/source-differences'
@@ -267,6 +267,14 @@ function deriveOne(match: OldSiteMatch, number: number, groupSize: number): Deri
   }
 }
 
+/** Whether a score at half-time fits the result a row will have (see `matches_half_time_*`). */
+function fitsResult(
+  claim: Pick<Match, 'halfTimeAgainst' | 'halfTimeFor'>,
+  row: Pick<Match, 'afterNinetyAgainst' | 'afterNinetyFor' | 'goalsAgainst' | 'goalsFor' | 'status'>,
+) {
+  return Object.keys(dropHalfTimeThatNoLongerFits(claim, row)).length === 0
+}
+
 /**
  * The score after 90 minutes when the goals of the match prove it: the list has as many goals
  * for each side as the final score, each with a minute, and none is an own goal (the file does
@@ -419,8 +427,14 @@ export async function importOldSiteMatches(
           values.halfTimeFor !== null &&
           values.halfTimeAgainst !== null
         ) {
-          fill.halfTimeAgainst = values.halfTimeAgainst
-          fill.halfTimeFor = values.halfTimeFor
+          if (fitsResult(values, { ...lookup.match, ...fill })) {
+            fill.halfTimeAgainst = values.halfTimeAgainst
+            fill.halfTimeFor = values.halfTimeFor
+          } else {
+            report.lines.push(
+              `${label}: the score at half-time is higher than the result that match ${lookup.match.id} keeps, so it is left out`,
+            )
+          }
         }
 
         const kept = await keepSourceDifferences(
@@ -482,7 +496,13 @@ export async function importOldSiteMatches(
 
     // The score at half-time only fills an empty place: the editors may have filled it in.
     if (before.halfTimeFor === null && values.halfTimeFor !== null) {
-      Object.assign(change, { halfTimeAgainst: values.halfTimeAgainst, halfTimeFor: values.halfTimeFor })
+      // The result of this row may stay as it is (the editors took it over), so it is the
+      // result that stays that the score at half-time has to fit.
+      if (fitsResult(values, { ...before, ...change })) {
+        Object.assign(change, { halfTimeAgainst: values.halfTimeAgainst, halfTimeFor: values.halfTimeFor })
+      } else {
+        report.lines.push(`${label}: the score at half-time is higher than the result of the row, so it is left out`)
+      }
     }
 
     const oldStatistics = statistics.get(before.id)

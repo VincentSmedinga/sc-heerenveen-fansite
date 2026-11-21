@@ -8,6 +8,7 @@ import {
   describeEntryGoals,
   describeEntryKickoff,
   describeEntryResult,
+  dropHalfTimeThatNoLongerFits,
   encodeGoals,
   encodeMatch,
   markedParts,
@@ -346,6 +347,7 @@ export async function saveEntry(
           ...(parts.includes('result')
             ? {
                 ...result,
+                ...dropHalfTimeThatNoLongerFits(match, result),
                 // Only a played match has spectators.
                 ...(result.status === 'played' ? {} : { attendance: null }),
                 resultSetAt: result.status === 'played' ? now : null,

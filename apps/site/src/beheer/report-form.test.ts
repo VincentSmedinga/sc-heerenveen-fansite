@@ -74,11 +74,22 @@ describe('the score at half-time in the form', () => {
     )
   })
 
-  it('puts its fields in the order of the form, after the status and the opponent', () => {
-    const order = errorOrder(report())
+  it('puts its fields in the order of the form: after the status, home first, before the opponent', () => {
+    const home = errorOrder(report())
+    const away = errorOrder(report(), false)
 
-    expect(order.indexOf('ruststand-wij')).toBeGreaterThan(order.indexOf('tegenstander'))
-    expect(order.indexOf('ruststand-zij')).toBeLessThan(order.indexOf('formatie-wij'))
+    expect(home.slice(home.indexOf('status'), home.indexOf('tegenstander') + 1)).toEqual([
+      'status',
+      'ruststand-wij',
+      'ruststand-zij',
+      'tegenstander',
+    ])
+    expect(away.slice(away.indexOf('status'), away.indexOf('tegenstander') + 1)).toEqual([
+      'status',
+      'ruststand-zij',
+      'ruststand-wij',
+      'tegenstander',
+    ])
   })
 })
 
@@ -367,7 +378,14 @@ describe('checkReportForm', () => {
     it('puts the errors of the form of a report in the order of the form', () => {
       const values = report({ wij: { wissel: [sub({ minuut: '0' })] } })
 
-      expect(errorOrder(values).slice(0, 4)).toEqual(['verslag', 'bron', 'status', 'tegenstander'])
+      expect(errorOrder(values).slice(0, 6)).toEqual([
+        'verslag',
+        'bron',
+        'status',
+        'ruststand-wij',
+        'ruststand-zij',
+        'tegenstander',
+      ])
       expect(errorOrder(values).indexOf('wissel-wij-1-eruit')).toBeGreaterThan(
         errorOrder(values).indexOf('speler-wij-14-rol'),
       )

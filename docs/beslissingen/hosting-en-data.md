@@ -1236,8 +1236,9 @@
     Het geeft niets terug voor een verslag dat niet `klaar` is en voor een doelpunt zonder minuut.
     `halfTimeOf` in `apps/site/src/report-data.ts` kiest de bron bij het lezen, dus er wordt niets afgeleids bewaard: een gecorrigeerd doelpunt geeft meteen een gecorrigeerde ruststand.
   - **De oude Fansite:** de stap `matches` van de import van de oude gegevens zet `result.homeHalfTime` en `result.awayHalfTime` in de kolommen, vanuit de kant van sc Heerenveen gezien.
-    Een ruststand die hoger is dan de stand na de reguliere speeltijd komt in het logboek en wordt niet overgenomen.
+    Een ruststand die hoger is dan de stand na de reguliere speeltijd komt in het logboek en wordt niet overgenomen, en dat geldt ook voor de stand die in de rij blijft staan.
     De stap vult een lege ruststand en overschrijft er geen, ook niet bij een wedstrijd van een andere bron, en een verschil is geen wijziging die op de redactie wacht.
+  - **Een uitslag die verandert:** een nieuwe of herstelde uitslag, ook uit Wikipedia of na een beslissing over een verschil, maakt de ruststand leeg als hij daar niet meer in past (`dropHalfTimeThatNoLongerFits` in `@fansite/db/match-edits`), want de database weigert een ruststand boven de stand.
   - **Nadeel:** een ruststand uit de oude database staat in dezelfde kolommen als wat de redactie invulde, dus hij wint van de doelpunten van een verslag.
     Een oud verslag heeft zelden minuten bij de doelpunten, dus dat verschil is klein.
 - **Waarom:** de redactie kent het verslag het best, de doelpunten zijn er voor elke nieuwe wedstrijd, en de oude gegevens vullen alleen het verleden aan.

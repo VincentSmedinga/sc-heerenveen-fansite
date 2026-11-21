@@ -745,13 +745,14 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
 }
 
 /** The order of the fields and lists on the page, for the list of errors. */
-export function errorOrder(values: ReportValues): string[] {
+export function errorOrder(values: ReportValues, home = true): string[] {
   return [
     'verslag',
     'bron',
     'status',
+    // The fields of the score at half-time are in the order of the match, home first.
+    ...(home ? sides : [...sides].reverse()).map(halfTimeId),
     'tegenstander',
-    ...sides.map(halfTimeId),
     ...sides.flatMap((side) => [
       formationId(side),
       formationOwnId(side),
