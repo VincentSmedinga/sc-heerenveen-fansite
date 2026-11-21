@@ -1,4 +1,14 @@
-import { Card, DataTable, Heading, KeyFigures, Link, Match, PredictionList, Text } from '@fansite/design-system'
+import {
+  Card,
+  DataTable,
+  Heading,
+  type KeyFigure,
+  KeyFigures,
+  Link,
+  Match,
+  PredictionList,
+  Text,
+} from '@fansite/design-system'
 import { maxPredictionPoints, pointsPerPart } from '@fansite/shared/prediction-points'
 
 import { clubsOf, predictionPath } from '#src/fans/prediction'
@@ -50,7 +60,16 @@ export function CrowdCard({ figures }: { figures: CrowdFigures }) {
  * a match yet: the database holds a half-time score only with the result (#1445), so that
  * branch waits for the rule to change.
  */
-export function PointsCard({ item, now }: { item: ScoredPrediction; now: Date }) {
+export function PointsCard({
+  item,
+  now,
+  places,
+}: {
+  item: ScoredPrediction
+  now: Date
+  /** Your place at this match and in the ranking of its season, as key figures. */
+  places?: readonly KeyFigure[]
+}) {
   const { match, points, result } = item
   const clubs = clubsOf(match)
   const played = match.state === 'played'
@@ -100,7 +119,9 @@ export function PointsCard({ item, now }: { item: ScoredPrediction; now: Date })
       )}
       <Text>{guessText(item)}</Text>
       {played ? (
-        <KeyFigures figures={[{ figure: String(points.total), label: 'punten', note: 'voor deze wedstrijd' }]} />
+        <KeyFigures
+          figures={[{ figure: String(points.total), label: 'punten', note: 'voor deze wedstrijd' }, ...(places ?? [])]}
+        />
       ) : null}
       {rows.length === 0 ? null : (
         <DataTable

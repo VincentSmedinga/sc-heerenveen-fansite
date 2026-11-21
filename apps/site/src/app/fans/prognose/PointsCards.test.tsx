@@ -133,3 +133,26 @@ describe('the card "Punten"', () => {
     expect(html).toContain('hf-card-soft')
   })
 })
+
+describe('the places on the card "Je punten"', () => {
+  it('has the points and the two places as key figures', () => {
+    const html = renderToStaticMarkup(
+      <PointsCard
+        item={item(1)}
+        now={now}
+        places={[
+          { figure: '9e', label: 'plek', note: 'van 54 bij deze wedstrijd' },
+          { figure: '–', label: 'plek', note: 'niet in de stand, 20 doen mee in de stand' },
+        ]}
+      />,
+    )
+
+    expect(html).toContain('9e')
+    expect(html).toContain('van 54 bij deze wedstrijd')
+    expect(html).toContain('niet in de stand')
+  })
+
+  it('has only the points without the places', () => {
+    expect(renderToStaticMarkup(<PointsCard item={item(1)} now={now} />)).not.toContain('plek')
+  })
+})
