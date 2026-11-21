@@ -4081,13 +4081,19 @@
   De sjaal past bij de toon van het hoofdstuk Fans.
 - **Alternatieven:** de schermnaam als tekst; een tekstlink Inloggen.
 
-## De naam van de supporterknop noemt ook de initialen, en de regel voor de initialen staat in het designsysteem
+## De initialen van de supporterknop zijn een tekening, geen tekst
 
 - **Datum:** 21 november 2026
-- **Besluit:** ingelogd heet de supporterknop "Mijn account", gevolgd door de initialen die op de borst staan: "Mijn account, BS" (#1490).
-  Zonder initialen, bij een naam zonder letter, is de naam alleen "Mijn account".
-  De regel voor de initialen is `screenNameInitials` in het designsysteem, met tests: de eerste letter van het eerste en van het laatste deel van de naam, gesplitst op spatie, koppelteken en laag streepje, zonder cijfers.
-- **Waarom:** de initialen zijn tekst die een bezoeker ziet.
-  Wie de computer met zijn stem bedient, zegt wat hij ziet, en dat moet in de naam staan (WCAG 2.5.3, label in naam); axe keurt de knop met twee initialen anders af.
+- **Besluit:** de initialen op de borst van de supporterknop zijn lijnen in de tekening, geen tekst (#1490).
+  - Elke hoofdletter van A tot Z is een lijn met ronde uiteinden, in een vak van 4 bij 5, zoals de rest van de supporter (`glyphs.ts`).
+    Een letter met een accent krijgt de letter zonder accent: É wordt E.
+    Voor een letter uit een ander schrift is er geen tekening, en dan staat er niets op de borst.
+  - De naam van de knop blijft "Mijn account", zoals het issue zegt.
+    De tekening, met de initialen, is verborgen voor hulptechnologie.
+  - De regel voor de initialen is `screenNameInitials` in het designsysteem, met tests: de eerste letter van het eerste en van het laatste deel van de naam, gesplitst op spatie, koppelteken en laag streepje, zonder cijfers.
+- **Waarom:** als tekst zijn twee initialen zichtbare tekst in de link, en dan eist axe dat ze in de naam staan (`label-content-name-mismatch`, WCAG 2.5.3).
+  De projecteigenaar wil de naam "Mijn account" houden.
+  Als lijnen horen de initialen bij het plaatje, zoals de sjaal, en zijn ze geen label.
+  Lijnen tekenen ook overal hetzelfde, zonder lettertype in een masker.
   De site heeft de regel alleen via de knop nodig, dus `@fansite/shared` hoeft hem niet te hebben.
-- **Alternatieven:** de naam alleen "Mijn account" (voldoet niet aan 2.5.3 bij twee letters); de initialen als getekende vormen in plaats van tekst (een tekening per letter); de regel in `@fansite/shared` (niemand anders gebruikt hem).
+- **Alternatieven:** de initialen als tekst en de naam "Mijn account, BS" (de eigenaar wil de naam van het issue); de regel van axe uitzetten (dat verzwakt een test); de regel in `@fansite/shared` (niemand anders gebruikt hem).

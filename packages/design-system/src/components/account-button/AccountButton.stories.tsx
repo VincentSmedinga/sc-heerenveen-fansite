@@ -21,7 +21,7 @@ const meta = preview.meta({
       description: {
         component: [
           'De supporterknop van de header: een ronde knop met een supporter met een sjaal. Wie niet is ingelogd, gaat ermee naar Inloggen; wie is ingelogd, naar Mijn account. Je kiest hem voor de header, naast de knop voor licht en donker.',
-          'Uitgelogd hangen de armen langs het lijf en zit de sjaal om de nek. Onder de muis en bij focus gaan de armen omhoog en zwaait de supporter twee keer met de sjaal. Ingelogd houdt hij de sjaal omhoog, met de initialen op de borst. Een schermlezer hoort waar de link heen gaat, met de initialen als die er staan; de supporter zelf is verborgen.',
+          'Uitgelogd hangen de armen langs het lijf en zit de sjaal om de nek. Onder de muis en bij focus gaan de armen omhoog en zwaait de supporter twee keer met de sjaal. Ingelogd houdt hij de sjaal omhoog, met de initialen op de borst. Een schermlezer hoort waar de link heen gaat; de supporter zelf, met de initialen, is een tekening die verborgen is.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -74,7 +74,7 @@ export const OneInitial = meta.story({
   args: { screenName: 'Testfan99' },
   name: 'Ingelogd, één initiaal',
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('link', { name: 'Mijn account, T' })).toHaveAttribute('href', '/fans/mijn-account')
+    await expect(canvas.getByRole('link', { name: 'Mijn account' })).toHaveAttribute('href', '/fans/mijn-account')
   },
   render: inHeader,
 })
@@ -83,7 +83,7 @@ export const TwoInitials = meta.story({
   args: { screenName: 'Blauwwit_Testfan' },
   name: 'Ingelogd, twee initialen',
   play: async ({ canvas }) => {
-    await expect(canvas.getByRole('link', { name: 'Mijn account, BT' })).toHaveAttribute('href', '/fans/mijn-account')
+    await expect(canvas.getByRole('link', { name: 'Mijn account' })).toHaveAttribute('href', '/fans/mijn-account')
   },
   render: inHeader,
 })

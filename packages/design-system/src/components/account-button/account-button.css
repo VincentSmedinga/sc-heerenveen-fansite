@@ -44,11 +44,6 @@
       transition: opacity var(--hf-motion-duration-short) var(--hf-motion-ease-change);
     }
 
-    .hf-account-button-initials {
-      font-family: var(--hf-font-family-text);
-      font-weight: var(--hf-strong-font-weight);
-    }
-
     &[data-signed-in],
     &:focus-visible {
       .hf-account-button-wave {

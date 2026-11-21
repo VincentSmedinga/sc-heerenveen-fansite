@@ -2,6 +2,7 @@ import { type ComponentPropsWithoutRef, useId } from 'react'
 
 import { classNames } from '../classNames'
 import { RoundButton } from '../round-button/RoundButton'
+import { glyphOf } from './glyphs'
 import { screenNameInitials } from './initials'
 
 export type AccountButtonProps = Omit<ComponentPropsWithoutRef<'a'>, 'aria-label' | 'children' | 'href'> & {
@@ -24,17 +25,19 @@ export const accountButtonTargets = {
  * Inloggen, with the arms down and the scarf around the neck; with one to Mijn account, with
  * the arms up holding the scarf above the head and the initials on the chest. Under the mouse
  * and with the keyboard the arms come up and wave the scarf. The name of the link says where it
- * goes, followed by the initials when they show ("Mijn account, BS"): they are text that a
- * visitor sees, so a visitor who speaks to the computer can say them (WCAG 2.5.3, label in
- * name). The supporter is hidden from assistive technology. It has no state and no script, so
- * it works without JavaScript. account-button.css moves it.
+ * goes, "Inloggen" or "Mijn account". The supporter, initials included, is a drawing hidden
+ * from assistive technology: the initials are lines (glyphs.ts), not text, so they are part of
+ * the picture and not a label of the link. It has no state and no script, so it works without
+ * JavaScript. account-button.css moves it.
  *
  * The shapes are cut out of the body with a mask, the scarf around the neck and the initials,
  * so they show the colour behind the button, also in forced colours.
  */
 export const AccountButton = ({ className, screenName, ...props }: AccountButtonProps) => {
   const id = useId()
-  const initials = screenName === undefined ? '' : screenNameInitials(screenName)
+  const initials = [...(screenName === undefined ? '' : screenNameInitials(screenName))]
+    .map((letter) => glyphOf(letter))
+    .filter((glyph): glyph is string => glyph !== undefined)
   const signedIn = screenName !== undefined
   const target = signedIn ? accountButtonTargets.signedIn : accountButtonTargets.signedOut
   const bodyMask = `${id}-body`
@@ -46,7 +49,7 @@ export const AccountButton = ({ className, screenName, ...props }: AccountButton
       className={classNames('hf-account-button', className)}
       data-signed-in={signedIn ? '' : undefined}
       href={target.href}
-      label={initials === '' ? target.label : `${target.label}, ${initials}`}
+      label={target.label}
       surface="header"
     >
       <svg
@@ -71,18 +74,23 @@ export const AccountButton = ({ className, screenName, ...props }: AccountButton
               <path d="M12.7 21.4c2 1.4 4.6 1.4 6.6 0" />
               <path d="M13.5 22.7v5.4l2 .3M18.5 22.7v5.4l-2 .3" />
             </g>
-            {initials === '' ? null : (
-              <text
-                className="hf-account-button-initials"
-                fill="black"
-                fontSize="7"
-                textAnchor="middle"
-                x="16"
-                y="29.5"
-              >
-                {initials}
-              </text>
-            )}
+            {/* The initials on the chest: letters of 4 by 5, 1.2 apart. */}
+            <g
+              className="hf-account-button-initials"
+              fill="none"
+              stroke="black"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="1.1"
+            >
+              {initials.map((glyph, index) => (
+                <path
+                  d={glyph}
+                  key={index}
+                  transform={`translate(${16 - (initials.length * 5.2 - 1.2) / 2 + index * 5.2} 24.6)`}
+                />
+              ))}
+            </g>
           </mask>
           <mask height="32" id={scarfMask} maskUnits="userSpaceOnUse" width="32" x="0" y="0">
             <rect fill="white" height="32" width="32" />

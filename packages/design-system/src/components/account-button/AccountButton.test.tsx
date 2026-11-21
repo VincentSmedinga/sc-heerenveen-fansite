@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { AccountButton } from './AccountButton'
+import { glyphs } from './glyphs'
 
 // Without the comments, which describe the rules in words.
 const css = readFileSync(join(import.meta.dirname, 'account-button.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
@@ -21,26 +22,37 @@ describe('AccountButton', () => {
 
   it('is the link Mijn account with a screen name, with the initials on the chest', () => {
     render(<AccountButton screenName="Blauwwit_Sjoerd" />)
-    const link = screen.getByRole('link', { name: 'Mijn account, BS' })
+    const link = screen.getByRole('link', { name: 'Mijn account' })
 
     expect(link.getAttribute('href')).toBe('/fans/mijn-account')
     expect(link.hasAttribute('data-signed-in')).toBe(true)
-    expect(link.querySelector('mask text')?.textContent).toBe('BS')
+    expect(
+      [...link.querySelectorAll('mask .hf-account-button-initials path')].map((path) => path.getAttribute('d')),
+    ).toEqual([glyphs['B'], glyphs['S']])
   })
 
-  it('takes its name from the link and not from the drawing, which is hidden, with the initials that show', () => {
-    render(<AccountButton screenName="Tjalle99" />)
-    const link = screen.getByRole('link', { name: 'Mijn account, T' })
+  it('takes its name from the link and not from the drawing: the initials are lines, not text', () => {
+    render(<AccountButton screenName="Blauwwit_Sjoerd" />)
+    const link = screen.getByRole('link', { name: 'Mijn account' })
 
     expect(link.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true')
     expect(link.querySelector('svg')?.getAttribute('focusable')).toBe('false')
-    expect(link.getAttribute('aria-label')).toBe('Mijn account, T')
+    expect(link.getAttribute('aria-label')).toBe('Mijn account')
+    expect(link.querySelector('text')).toBeNull()
+    expect(link.textContent).toBe('')
   })
 
-  it('is called Mijn account alone when the name has no letter, so there are no initials', () => {
-    render(<AccountButton screenName="1234" />)
+  it('puts one initial in the middle of the chest, and draws none for a name without a letter', () => {
+    const { rerender } = render(<AccountButton screenName="Tjalle99" />)
+    const paths = () => [...document.querySelectorAll('.hf-account-button-initials path')]
 
-    expect(screen.getByRole('link', { name: 'Mijn account' }).querySelector('text')).toBeNull()
+    expect(paths()).toHaveLength(1)
+    expect(paths()[0]?.getAttribute('transform')).toBe('translate(14 24.6)')
+
+    rerender(<AccountButton screenName="1234" />)
+
+    expect(paths()).toHaveLength(0)
+    expect(screen.getByRole('link', { name: 'Mijn account' })).toBeTruthy()
   })
 
   it('is a RoundButton on the header', () => {
