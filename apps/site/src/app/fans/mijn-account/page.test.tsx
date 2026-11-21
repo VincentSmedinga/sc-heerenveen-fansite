@@ -50,8 +50,8 @@ describe('Mijn account', () => {
     expect(html).toContain('Tjalle99')
     expect(html).toContain('Je kunt hem één keer per 30 dagen wijzigen.')
     expect(html).toContain('Alleen om in te loggen. Niemand anders ziet het.')
-    expect(html).toMatch(/href="\/fans\/mijn-account\/schermnaam">Wijzigen<span[^>]*>, schermnaam<\/span>/)
-    expect(html).toMatch(/href="\/fans\/mijn-account\/e-mailadres">Wijzigen<span[^>]*>, e-mailadres<\/span>/)
+    expect(html).toMatch(/href="\/fans\/mijn-account\/schermnaam">Wijzigen<span[^>]*> schermnaam<\/span>/)
+    expect(html).toMatch(/href="\/fans\/mijn-account\/e-mailadres">Wijzigen<span[^>]*> e-mailadres<\/span>/)
     // The choice of the account, off here, and a button to save without JavaScript.
     expect(html).toMatch(/<input[^>]*role="switch"/)
     expect(html).not.toMatch(/<input[^>]*role="switch"[^>]*checked/)

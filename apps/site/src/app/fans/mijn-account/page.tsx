@@ -47,7 +47,7 @@ export default async function MyAccountPage({
     supporter.blocked ? null : (
       <Text>
         <Link href={href}>
-          Wijzigen<Text as="span" className="hf-visually-hidden">{`, ${what}`}</Text>
+          Wijzigen<Text as="span" className="hf-visually-hidden">{` ${what}`}</Text>
         </Link>
       </Text>
     )

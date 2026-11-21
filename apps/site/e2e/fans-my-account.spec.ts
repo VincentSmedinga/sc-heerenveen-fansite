@@ -45,16 +45,13 @@ test.describe('without JavaScript', () => {
     const name = `Nieuw ${id}`.slice(0, 20)
 
     await page.goto('/fans/mijn-account')
-    await checkPage(page)
-    await page.getByRole('link', { name: 'Wijzigen, schermnaam' }).click()
+    await page.getByRole('link', { name: /^Wijzigen\s+schermnaam$/ }).click()
     await expect(page).toHaveTitle(/^Schermnaam wijzigen/)
-    await checkPage(page)
 
     // An error shows in the summary and at the field.
     await page.getByLabel('Nieuwe schermnaam').fill('Fansite_Redactie')
     await page.getByRole('button', { name: 'Opslaan' }).click()
     await expect(page.getByRole('link', { name: 'Die naam lijkt op de club, de site of de redactie.' })).toBeVisible()
-    await checkPage(page)
 
     await page.getByLabel('Nieuwe schermnaam').fill(name)
     await page.getByRole('button', { name: 'Opslaan' }).click()
@@ -67,7 +64,6 @@ test.describe('without JavaScript', () => {
       page.getByText(/^Je wijzigde je naam op \d+ \w+\. Vanaf \d+ \w+ kun je hem weer wijzigen\.$/),
     ).toBeVisible()
     await expect(page.getByRole('button', { name: 'Opslaan' })).toHaveCount(0)
-    await checkPage(page)
   })
 
   test('changes the address with the code from the mail, and tells the old address', async ({ page }) => {
@@ -75,12 +71,10 @@ test.describe('without JavaScript', () => {
     const next = `nieuw-${id}@example.org`
 
     await page.goto('/fans/mijn-account/e-mailadres')
-    await checkPage(page)
     await page.getByLabel('Nieuw e-mailadres').fill(next)
     await page.getByRole('button', { name: 'Stuur de link' }).click()
     await expect(page).toHaveURL(/\/fans\/mijn-account\/e-mailadres\/verstuurd\?ref=/)
     await expect(page.getByText(`We hebben een link en een code gemaild naar ${next}.`)).toBeVisible()
-    await checkPage(page)
 
     // Until the code is used, the old address is the address of the account.
     await page.goto('/fans/mijn-account')
@@ -137,4 +131,35 @@ test('saves the switch at once with JavaScript', async ({ page }) => {
   await expect(page.getByText('Je naam staat niet meer in de standen.')).toBeVisible()
   await page.reload()
   await expect(page.getByRole('switch', { name: 'Naam in de standen' })).not.toBeChecked()
+})
+
+test('checks the pages of Mijn account with axe, with an error and with the wait', async ({ page }) => {
+  const { id } = await account(page)
+
+  await page.goto('/fans/mijn-account')
+  await checkPage(page)
+  await page.goto('/fans/mijn-account/e-mailadres')
+  await checkPage(page)
+  await page.getByLabel('Nieuw e-mailadres').fill('geen-adres')
+  await page.getByRole('button', { name: 'Stuur de link' }).click()
+  await expect(page.locator('#fouten')).toBeFocused()
+  await checkPage(page)
+  await page.getByLabel('Nieuw e-mailadres').fill(`axe-${id}@example.org`)
+  await page.getByRole('button', { name: 'Stuur de link' }).click()
+  await expect(page).toHaveURL(/\/fans\/mijn-account\/e-mailadres\/verstuurd\?ref=/)
+  await checkPage(page)
+
+  await page.goto('/fans/mijn-account/schermnaam')
+  await checkPage(page)
+  await page.getByLabel('Nieuwe schermnaam').fill('a@b')
+  await page.getByRole('button', { name: 'Opslaan' }).click()
+  await expect(page.locator('#fouten')).toBeFocused()
+  await checkPage(page)
+  await page.getByLabel('Nieuwe schermnaam').fill(`Axe ${id}`.slice(0, 20))
+  await page.getByRole('button', { name: 'Opslaan' }).click()
+  await expect(page).toHaveURL(/\/fans\/mijn-account\?melding=schermnaam$/)
+  await expect(page.locator('#melding')).toBeFocused()
+  await checkPage(page)
+  await page.goto('/fans/mijn-account/schermnaam')
+  await checkPage(page)
 })
