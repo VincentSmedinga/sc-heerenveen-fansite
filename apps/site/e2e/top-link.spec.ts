@@ -179,6 +179,29 @@ test.describe('the link to the top in the footer', () => {
     await context.close()
   })
 
+  test('does not move when the page has hydrated: the header is as high as the one the server sends', async ({
+    browser,
+    page,
+  }) => {
+    // The buttons in the header that need JavaScript keep their room in the server's HTML.
+    // If one came in later, it would take room from the logo, the wordmark would wrap and the
+    // page would move under a visitor who is already scrolling, which moves the point where the
+    // link appears.
+    const context = await browser.newContext({ javaScriptEnabled: false, viewport: { height: 500, width: 390 } })
+    const withoutScript = await context.newPage()
+    const headerHeight = (target: Page) =>
+      target.evaluate(() => document.querySelector('header')?.getBoundingClientRect().height)
+
+    await withoutScript.goto(longPage)
+    const expected = await headerHeight(withoutScript)
+    await context.close()
+
+    await page.setViewportSize({ height: 500, width: 390 })
+    await page.goto(longPage)
+    await expect(page.getByRole('button', { name: 'Donker' })).toBeVisible()
+    expect(await headerHeight(page)).toBe(expected)
+  })
+
   test('scrolls at once with less motion, and smoothly otherwise', async ({ page }) => {
     await page.setViewportSize({ height: 500, width: 390 })
     await page.emulateMedia({ reducedMotion: 'reduce' })
