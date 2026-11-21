@@ -72,6 +72,7 @@ test.describe('without JavaScript', () => {
 
     await page.getByRole('button', { exact: true, name: 'Uitloggen' }).click()
     await expect(page).toHaveURL(/\/fans\?uitgelogd=1$/)
+    await expect(page.getByText('Je bent uitgelogd.')).toBeVisible()
     expect((await page.context().cookies()).some(({ name: cookieName }) => cookieName === 'fans-sessie')).toBe(false)
 
     await page.goto('/fans/mijn-account')
