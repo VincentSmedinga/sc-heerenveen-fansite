@@ -93,6 +93,8 @@ export type ReportValues = {
   bron: string
   /** The formation of each team. */
   formatie: Record<Side, FormationValue>
+  /** The score at half-time of each side, or both empty. */
+  ruststand: HalfTimeValues
   status: string
   /** `ja` when the side of the opponent is complete too. */
   tegenstander: string
@@ -157,6 +159,20 @@ export const otherFormation = 'anders'
  */
 export const formationId = (side: Side) => `formatie-${side}`
 export const formationOwnId = (side: Side) => `formatie-${side}-eigen`
+
+/** The `id` of the field for the score at half-time of a side. */
+export const halfTimeId = (side: Side) => `ruststand-${side}`
+
+/** The score at half-time as the editors typed it, by side: both empty when it isn't known. */
+export type HalfTimeValues = Record<Side, string>
+
+/** The values of the form for the score at half-time stored with a match. */
+export function halfTimeValuesOf(match: undefined | { halfTimeAgainst: null | number; halfTimeFor: null | number }) {
+  return {
+    wij: match?.halfTimeFor === null || match?.halfTimeFor === undefined ? '' : String(match.halfTimeFor),
+    zij: match?.halfTimeAgainst === null || match?.halfTimeAgainst === undefined ? '' : String(match.halfTimeAgainst),
+  } satisfies HalfTimeValues
+}
 
 /** A formation that was not filled in. */
 export const noFormation = (): FormationValue => ({ eigen: '', keuze: '' })
@@ -566,6 +582,7 @@ export function readReportValues(formData: FormData): ReportValues {
       wij: { eigen: text(formationOwnId('wij')), keuze: text(formationId('wij')) },
       zij: { eigen: text(formationOwnId('zij')), keuze: text(formationId('zij')) },
     },
+    ruststand: { wij: text(halfTimeId('wij')), zij: text(halfTimeId('zij')) },
     status: text('status'),
     tegenstander: text('tegenstander'),
     wij: read('wij'),

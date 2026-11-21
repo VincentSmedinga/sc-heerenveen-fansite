@@ -136,6 +136,60 @@ describe('the page of a match', () => {
     expect(html.indexOf('aria-label="Vorige en volgende wedstrijd"')).toBeGreaterThan(html.indexOf('id="verloop"'))
   })
 
+  describe('the score at half-time', () => {
+    const factsOf = (html: string) => plain(html.slice(html.indexOf('<dl')))
+
+    it('shows what the editors or the old fansite stored as a fact, home first', async () => {
+      const reported = reportedMatch()
+
+      reported.match.halfTimeAgainst = 1
+      reported.match.halfTimeFor = 2
+      vi.mocked(getPublicReport).mockResolvedValue(reported)
+
+      const html = await render()
+
+      expect(factsOf(html)).toContain('Ruststand 2–1')
+      // A fact and not a second score: the result of the header is the same as before.
+      expect(plain(html)).toContain('Eindstand: 2 tegen 1')
+    })
+
+    it('writes the score of an away match with the opponent first', async () => {
+      const reported = reportedMatch()
+
+      reported.match.home = false
+      reported.match.halfTimeAgainst = 1
+      reported.match.halfTimeFor = 0
+      vi.mocked(getPublicReport).mockResolvedValue(reported)
+
+      expect(factsOf(await render())).toContain('Ruststand 1–0')
+    })
+
+    it('follows from the goals of a complete report when nothing is stored', async () => {
+      // Our goal in minute 12 and the penalty of the opponent in minute 40; the own goal of the
+      // opponent in minute 78 comes after half-time.
+      expect(factsOf(await render())).toContain('Ruststand 1–1')
+    })
+
+    it('prefers what is stored to what follows from the goals', async () => {
+      const reported = reportedMatch()
+
+      reported.match.halfTimeAgainst = 0
+      reported.match.halfTimeFor = 0
+      vi.mocked(getPublicReport).mockResolvedValue(reported)
+
+      expect(factsOf(await render())).toContain('Ruststand 0–0')
+    })
+
+    it('shows nothing, not even the label, when it is not known', async () => {
+      const reported = reportedMatch()
+
+      reported.stored.report.status = 'bezig'
+      vi.mocked(getPublicReport).mockResolvedValue(reported)
+
+      expect(plain(await render())).not.toContain('Ruststand')
+    })
+  })
+
   it('leaves out the facts that are not known', async () => {
     const reported = reportedMatch()
 

@@ -46,6 +46,7 @@ export default async function PasteReportPage({ params }: Props) {
       action={submitPaste.bind(null, match.id, reportBasis(report))}
       cancelHref={reportPath(match.id)}
       choices={{
+        home: match.home,
         matchHref: matchPath(match.id),
         opponent: match.opponent,
         series: seriesOf(match),

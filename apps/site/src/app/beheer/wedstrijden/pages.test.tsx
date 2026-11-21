@@ -1254,6 +1254,8 @@ describe('the report in the list and on the match', () => {
     }))
     const checked = checkReportForm(reportOf(squad), {
       match: {
+        afterNinetyAgainst: null,
+        afterNinetyFor: null,
         extraTime: false,
         goalsAgainst: 1,
         goalsFor: 2,

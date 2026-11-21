@@ -20,6 +20,8 @@ const match: Match = {
   extraTime: false,
   goalsAgainst: 1,
   goalsFor: 2,
+  halfTimeAgainst: null,
+  halfTimeFor: null,
   home: true,
   id: 7,
   kickoffAt: new Date('2026-10-24T14:30:00Z'),

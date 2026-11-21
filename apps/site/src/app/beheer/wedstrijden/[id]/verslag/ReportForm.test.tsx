@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { formationChoices } from '@fansite/shared/match-report'
-import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -29,6 +29,7 @@ const row = (keuze: string, rol = 'basis'): Row => ({ ...emptyRow('speler'), keu
 const values: ReportValues = {
   bron: '',
   formatie: { wij: noFormation(), zij: noFormation() },
+  ruststand: { wij: '', zij: '' },
   status: 'bezig',
   tegenstander: 'nee',
   wij: { ...emptySide(), speler: [row('1'), row('2'), row('3', 'bank'), row('', 'bank')] },
@@ -41,6 +42,7 @@ const show = () =>
     <ReportFormProvider
       action={() => Promise.resolve(initial)}
       choices={{
+        home: true,
         matchHref: '/beheer/wedstrijden/7',
         opponent: 'Testclub',
         series: null,
@@ -57,6 +59,67 @@ const show = () =>
 const select = (id: string) => document.getElementById(id) as HTMLSelectElement
 const optionsOf = (id: string) => [...select(id).options].map((option) => option.value)
 const choose = (id: string, value: string) => fireEvent.change(select(id), { target: { value } })
+
+describe('the score at half-time in the form of a report', () => {
+  const input = (label: string) => screen.getByRole('textbox', { name: new RegExp(`^${label}`) }) as HTMLInputElement
+
+  it('has a field with a label for each team, home first, and the stored score in them', () => {
+    const stored: ReportFormState = { ...initial, values: { ...values, ruststand: { wij: '2', zij: '1' } } }
+
+    render(
+      <ReportFormProvider
+        action={() => Promise.resolve(stored)}
+        choices={{
+          home: false,
+          matchHref: '/beheer/wedstrijden/7',
+          opponent: 'Testclub',
+          series: null,
+          showDelay: 'binnen vijf minuten',
+          squad,
+        }}
+        initial={stored}
+        title="Dit is nog niet af"
+      >
+        <ReportFields />
+      </ReportFormProvider>,
+    )
+
+    const fields = [...document.querySelectorAll('input[name^="ruststand-"]')] as HTMLInputElement[]
+
+    expect(fields.map((field) => field.name)).toEqual(['ruststand-zij', 'ruststand-wij'])
+    expect(input('Testclub').value).toBe('1')
+    expect(input('sc Heerenveen').value).toBe('2')
+    expect(screen.getByRole('group', { name: /Ruststand/ })).toBeTruthy()
+  })
+
+  it('shows the error of a team at its own field', () => {
+    const wrong: ReportFormState = {
+      ...initial,
+      errors: { 'ruststand-wij': 'Ruststand van sc Heerenveen: hoger dan de eindstand (2).' },
+    }
+
+    render(
+      <ReportFormProvider
+        action={() => Promise.resolve(wrong)}
+        choices={{
+          home: true,
+          matchHref: '/beheer/wedstrijden/7',
+          opponent: 'Testclub',
+          series: null,
+          showDelay: 'binnen vijf minuten',
+          squad,
+        }}
+        initial={wrong}
+        title="Dit is nog niet af"
+      >
+        <ReportFields />
+      </ReportFormProvider>,
+    )
+
+    expect(input('sc Heerenveen').getAttribute('aria-invalid')).toBe('true')
+    expect(input('Testclub').getAttribute('aria-invalid')).not.toBe('true')
+  })
+})
 
 describe('the buttons that move a player in the form of a report', () => {
   const valueOf = (value: string) => document.querySelector(`button[value="${value}"]`)
@@ -90,6 +153,7 @@ describe('the buttons that move a player in the form of a report', () => {
       <ReportFormProvider
         action={() => Promise.resolve(initial)}
         choices={{
+          home: true,
           matchHref: '/beheer/wedstrijden/7',
           opponent: 'Testclub',
           series: null,
@@ -177,6 +241,7 @@ describe('the formation in the form of a report', () => {
       <ReportFormProvider
         action={() => Promise.resolve(state)}
         choices={{
+          home: true,
           matchHref: '/beheer/wedstrijden/7',
           opponent: 'Testclub',
           series: null,
@@ -245,6 +310,7 @@ describe('the formation in the form of a report', () => {
       <ReportFormProvider
         action={() => Promise.resolve(initial)}
         choices={{
+          home: true,
           matchHref: '/beheer/wedstrijden/7',
           opponent: 'Testclub',
           series: null,
@@ -443,6 +509,7 @@ describe('the shoot-out in the form of a report', () => {
       <ReportFormProvider
         action={() => Promise.resolve(state)}
         choices={{
+          home: true,
           matchHref: '/beheer/wedstrijden/7',
           opponent: 'Testclub',
           series,
@@ -526,6 +593,7 @@ describe('the shoot-out in the form of a report', () => {
       <ReportFormProvider
         action={() => Promise.resolve(state)}
         choices={{
+          home: true,
           matchHref: '/beheer/wedstrijden/7',
           opponent: 'Testclub',
           series: null,
@@ -571,6 +639,7 @@ describe('the notice at a shirt number that is not the one of the day (#1122)', 
       <ReportFormProvider
         action={() => Promise.resolve(answer)}
         choices={{
+          home: true,
           matchHref: '/beheer/wedstrijden/7',
           opponent: 'Testclub',
           series: null,
@@ -652,6 +721,7 @@ describe('the notice at a shirt number that is not the one of the day (#1122)', 
       <ReportFormProvider
         action={() => Promise.resolve(initial)}
         choices={{
+          home: true,
           matchHref: '/beheer/wedstrijden/7',
           matchId: 7,
           opponent: 'Testclub',
@@ -830,6 +900,8 @@ describe('the choices of the substitutions and the roles in the form of a report
 
 describe('the input that the browser keeps for the form of a report', () => {
   const withoutMatch = {
+    home: true,
+    home: true,
     matchHref: '/beheer/wedstrijden/7',
     opponent: 'Testclub',
     series: null,
@@ -1008,6 +1080,8 @@ describe('the input that the browser keeps for the form of a report', () => {
 
 describe('the button for the line-up of the previous match in the form of a report', () => {
   const choices = {
+    home: true,
+    home: true,
     matchHref: '/beheer/wedstrijden/7',
     matchId: 7,
     opponent: 'Testclub',

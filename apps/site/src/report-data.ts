@@ -8,7 +8,7 @@ import {
   type ScheduledMatch,
 } from '@fansite/db/match-reports'
 import { seasonOf } from '@fansite/db/season'
-import { checkMatchReport } from '@fansite/shared/match-report'
+import { checkMatchReport, type HalfTimeScore, halfTimeScore } from '@fansite/shared/match-report'
 
 import { cacheForKey } from './cache'
 import { getDatabase } from './database'
@@ -34,6 +34,27 @@ const matchesPath = '/wedstrijden'
 /** The address of the page of a match: the season, the day and the slug of the opponent. */
 export const reportAddress = (season: string, matchDate: string, clubSlug: string) =>
   `${matchesPath}/${seasonSlug(season)}/${matchDate}-${clubSlug}`
+
+/**
+ * The score at half-time of a match that was played, from the side of sc Heerenveen, or `null`
+ * when it is not known. What the editors filled in, or the old fansite gave, wins; without it
+ * the goals of a complete report decide (see `halfTimeScore`). A match that is still being
+ * played has none: its goals are not the whole first half yet. The decision is in
+ * docs/beslissingen/hosting-en-data.md, under _De ruststand heeft drie bronnen_.
+ */
+export function halfTimeOf(reported: ReportedMatch): HalfTimeScore | null {
+  const { match } = reported
+
+  if (match.status !== 'played') {
+    return null
+  }
+
+  if (match.halfTimeFor !== null && match.halfTimeAgainst !== null) {
+    return { against: match.halfTimeAgainst, for: match.halfTimeFor }
+  }
+
+  return isCompleteReport(reported) ? halfTimeScore(reportForRules(reported.stored)) : null
+}
 
 /** Whether the report of a match is `klaar` and the rules find no error in it. */
 export function isCompleteReport(reported: ReportedMatch) {

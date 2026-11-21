@@ -47,6 +47,7 @@ const blockedStorage = new Proxy({} as Storage, {
 const server: ReportValues = {
   bron: '',
   formatie: { wij: noFormation(), zij: noFormation() },
+  ruststand: { wij: '', zij: '' },
   status: 'bezig',
   tegenstander: 'nee',
   wij: { ...emptySide(), speler: [{ ...emptyRow('speler'), keuze: '1' }] },

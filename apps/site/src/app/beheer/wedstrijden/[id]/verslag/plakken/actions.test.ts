@@ -364,6 +364,8 @@ describe('submitPaste for a match that has a report', () => {
   beforeEach(async () => {
     const checked = checkReportForm(baseReport(squad), {
       match: {
+        afterNinetyAgainst: null,
+        afterNinetyFor: null,
         extraTime: false,
         goalsAgainst: 1,
         goalsFor: 2,

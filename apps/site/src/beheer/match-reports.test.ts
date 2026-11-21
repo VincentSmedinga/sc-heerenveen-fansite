@@ -215,6 +215,27 @@ function series() {
 }
 
 describe('saveReport', () => {
+  it('stores the score at half-time with the match, changes it alone, and takes it away when it is emptied', async () => {
+    const withHalfTime = (wij: string, zij: string) => ({ ...report(), ruststand: { wij, zij } })
+    const halfTime = async () => {
+      const [row] = await database.db.select().from(matches).where(eq(matches.id, matchId))
+
+      return [row?.halfTimeFor, row?.halfTimeAgainst]
+    }
+
+    expect(await save(withHalfTime('1', '0'))).toEqual({ status: 'saved' })
+    expect(await halfTime()).toEqual([1, 0])
+    expect(await save(withHalfTime('1', '0'))).toEqual({ status: 'unchanged' })
+
+    // Only the score at half-time differs: the rest of the report is the same.
+    expect(await save(withHalfTime('2', '1'))).toEqual({ status: 'saved' })
+    expect(await halfTime()).toEqual([2, 1])
+    expect((await log()).at(-1)?.detail).toContain('ruststand 2-1')
+
+    expect(await save(withHalfTime('', ''))).toEqual({ status: 'saved' })
+    expect(await halfTime()).toEqual([null, null])
+  })
+
   it('stores the report, its players and events, and the goals with the players they point to, in one go', async () => {
     await wikipediaGoals()
 
@@ -1110,6 +1131,7 @@ describe('findPreviousLineUp', () => {
     const values: ReportValues = {
       bron: '',
       formatie: { wij: { eigen: '', keuze: formation }, zij: noFormation() },
+      ruststand: { wij: '', zij: '' },
       status: 'bezig',
       tegenstander: 'nee',
       wij: { ...emptySide(), speler },
