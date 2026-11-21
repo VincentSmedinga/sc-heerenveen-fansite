@@ -26,11 +26,19 @@ const coming = [
   { part: 'vier', sentence: 'Kies vier spelers die punten scoren.' },
 ] as const
 
+/** How long after making the account the welcome can still show. */
+const welcomeMinutes = 10
+
+/** Whether the account was made a moment ago: the welcome is for the first visit after it. */
+const justCreated = (createdAt: Date) => Date.now() - createdAt.getTime() < welcomeMinutes * 60 * 1000
+
 /**
  * The page Fans, as long as no game exists: what is coming, and a card to make an account
  * already. The buttons lead to the sign-up (#1446) and to logging in (#1448). After logging out
- * (`?uitgelogd=1`) a Notice says so. A game that is on has no link yet: its own issue gives it
- * one.
+ * (`?uitgelogd=1`) a Notice says so. After confirming a new account (`?welkom=1`) another
+ * welcomes the supporter by the screen name of the session, and only in the minutes after the
+ * account was made, so the address of the page doesn't show it again later. A game that is on
+ * has no link yet: its own issue gives it one.
  */
 export default async function FansPage({
   searchParams,
@@ -41,9 +49,9 @@ export default async function FansPage({
 
   // A visit of a supporter who is logged in counts: the session stays open another 90 days, and
   // the account keeps the day of the visit. The page itself is the same for everybody.
-  await currentSupporter()
+  const supporter = await currentSupporter()
 
-  const { uitgelogd } = await searchParams
+  const { uitgelogd, welkom } = await searchParams
 
   return (
     <Page.Main>
@@ -54,6 +62,9 @@ export default async function FansPage({
           Zonder prijzen en zonder reclame.
         </Text>
         {uitgelogd === '1' ? <Notice>Je bent uitgelogd.</Notice> : null}
+        {welkom === '1' && supporter !== undefined && justCreated(supporter.createdAt) ? (
+          <Notice>Welkom, {supporter.screenName}. Je account is klaar en je blijft op dit apparaat ingelogd.</Notice>
+        ) : null}
         <Card aria-labelledby="alvast-een-account" surface="strong">
           <Heading id="alvast-een-account" level={2}>
             Maak alvast een account

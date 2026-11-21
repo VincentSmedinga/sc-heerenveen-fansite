@@ -43,8 +43,11 @@ test.describe('without JavaScript', () => {
     await page.getByLabel('Code uit de mail').fill(`${code.slice(0, 3)} ${code.slice(3)}`)
     await page.getByRole('button', { name: 'Doorgaan' }).click()
 
-    await expect(page).toHaveURL(/\/fans\/mijn-account\?welkom=1$/)
+    // The welcome is on Fans, and Mijn account shows the data.
+    await expect(page).toHaveURL(/\/fans\?welkom=1$/)
     await expect(page.getByText(`Welkom, ${name}.`)).toBeVisible()
+    await page.goto('/fans/mijn-account')
+    await expect(page.getByText('Welkom,')).toHaveCount(0)
     await expect(page.getByRole('definition').first()).toHaveText(name)
     await expect(page.getByText(address)).toBeVisible()
 
@@ -90,11 +93,49 @@ test('makes an account with the button behind the link', async ({ page }) => {
   await checkPage(page)
   await page.getByRole('button', { name: 'Account bevestigen' }).click()
 
-  await expect(page).toHaveURL(/\/fans\/mijn-account\?welkom=1$/)
+  await expect(page).toHaveURL(/\/fans\?welkom=1$/)
   await expect(page.getByText(`Welkom, ${name}.`)).toBeVisible()
   await checkPage(page)
 
   // The link works once.
   await page.goto(url)
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Deze link werkt niet meer')
+})
+
+test('shows the address, keeps the digits of a pasted code, and asks for a new code only after a minute', async ({
+  page,
+}) => {
+  const id = unique()
+  const address = `code-${id}@example.org`
+  const name = `Code_${id}`.slice(0, 20)
+
+  await page.goto('/fans/aanmelden')
+  await page.getByLabel('Schermnaam').fill(name)
+  await page.getByLabel('E-mailadres').fill(address)
+  await page.getByRole('button', { name: 'Account maken' }).click()
+  await expect(page).toHaveURL(/\/fans\/aanmelden\/verstuurd\?ref=/)
+
+  // The address is on the page and not in its address.
+  await expect(page.getByText(address)).toBeVisible()
+  expect(page.url()).not.toContain(encodeURIComponent(address))
+  expect(page.url()).not.toContain('example.org')
+
+  const { code } = await mailTo(address)
+  const field = page.getByLabel('Code uit de mail')
+
+  await field.fill(`${code.slice(0, 3)} ${code.slice(3)}`)
+  await expect(field).toHaveValue(code)
+
+  // A minute has not passed, so no second mail goes, and the page says so.
+  await page.getByRole('button', { name: 'Stuur een nieuwe code (kan over 1 minuut)' }).click()
+  await expect(page.getByText('Wacht nog even. Je kunt over een minuut een nieuwe code vragen.')).toBeVisible()
+  await expect(page.getByText(address)).toBeVisible()
+  expect(sentMails().filter((mail) => mail.includes(`To: ${address}`))).toHaveLength(1)
+  await checkPage(page)
+
+  await page.getByLabel('Code uit de mail').fill(code)
+  await page.getByRole('button', { name: 'Doorgaan' }).click()
+  await expect(page).toHaveURL(/\/fans\?welkom=1$/)
+  await expect(page.getByText(`Welkom, ${name}.`)).toBeVisible()
+  await checkPage(page)
 })

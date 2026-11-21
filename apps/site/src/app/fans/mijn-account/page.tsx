@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Button, Card, DescriptionList, Form, Heading, Notice, Page, Text } from '@fansite/design-system'
+import { Button, Card, DescriptionList, Form, Heading, Page, Text } from '@fansite/design-system'
 
 import { requireSupporter } from '#src/fans/require-supporter'
 import { signUpPaths } from '#src/fans/sign-up'
@@ -14,21 +14,13 @@ export const metadata: Metadata = { robots: { follow: false, index: false }, tit
 // The account of the supporter who is logged in. For now it shows the screen name and the
 // address, and the card to log out; changing and closing the account come later. A blocked
 // supporter sees it too.
-export default async function MyAccountPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
-}) {
+export default async function MyAccountPage() {
   const supporter = await requireSupporter({ blocked: 'allow', from: signUpPaths.account })
-  const { welkom } = await searchParams
 
   return (
     <Page.Main>
       <Page.Cell>
         <Heading level={1}>Mijn account</Heading>
-        {welkom === '1' ? (
-          <Notice>Welkom, {supporter.screenName}. Je account is klaar en je blijft op dit apparaat ingelogd.</Notice>
-        ) : null}
         <Card aria-labelledby="gegevens-kop">
           <Heading id="gegevens-kop" level={2}>
             Je account
