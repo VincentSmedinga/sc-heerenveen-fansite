@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "bbec9721-5504-49fd-b426-f0c7473361e2",
+  "id": "379d4da1-39d5-4bfe-b040-b7ea5c94e06e",
   "prevId": "99623e74-a2a9-4c6c-8654-bb9700f2910c",
   "tables": {
     "admin_login_attempts": {
@@ -5039,136 +5039,6 @@
         }
       }
     },
-    "predictions": {
-      "name": "predictions",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "supporter_id": {
-          "name": "supporter_id",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "match_id": {
-          "name": "match_id",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "halftime_home": {
-          "name": "halftime_home",
-          "type": "smallint unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "halftime_away": {
-          "name": "halftime_away",
-          "type": "smallint unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "full_time_home": {
-          "name": "full_time_home",
-          "type": "smallint unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "full_time_away": {
-          "name": "full_time_away",
-          "type": "smallint unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "datetime",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(UTC_TIMESTAMP())"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "datetime",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(UTC_TIMESTAMP())"
-        }
-      },
-      "indexes": {
-        "predictions_match_id_idx": {
-          "name": "predictions_match_id_idx",
-          "columns": [
-            "match_id"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "predictions_supporter_id_supporters_id_fk": {
-          "name": "predictions_supporter_id_supporters_id_fk",
-          "tableFrom": "predictions",
-          "tableTo": "supporters",
-          "columnsFrom": [
-            "supporter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "predictions_match_id_matches_id_fk": {
-          "name": "predictions_match_id_matches_id_fk",
-          "tableFrom": "predictions",
-          "tableTo": "matches",
-          "columnsFrom": [
-            "match_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "predictions_id": {
-          "name": "predictions_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {
-        "predictions_supporter_id_match_id_unique": {
-          "name": "predictions_supporter_id_match_id_unique",
-          "columns": [
-            "supporter_id",
-            "match_id"
-          ]
-        }
-      },
-      "checkConstraint": {
-        "predictions_goals_in_range": {
-          "name": "predictions_goals_in_range",
-          "value": "`predictions`.`halftime_home` <= 9 and `predictions`.`halftime_away` <= 9 and `predictions`.`full_time_home` <= 9 and `predictions`.`full_time_away` <= 9"
-        }
-      }
-    },
     "robots_txt": {
       "name": "robots_txt",
       "columns": {
@@ -6431,6 +6301,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": true
+        },
+        "remind_by_email": {
+          "name": "remind_by_email",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
         },
         "created_at": {
           "name": "created_at",

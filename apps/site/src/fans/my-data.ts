@@ -66,6 +66,7 @@ export type AccountData = {
   email: string
   inRankings: boolean
   lastVisitOn: null | string
+  remindByEmail: boolean
   screenName: string
   screenNameChangedAt: Date | null
 }
@@ -81,6 +82,7 @@ export async function accountData(db: Database, supporterId: number): Promise<Ac
       email: supporters.email,
       inRankings: supporters.inRankings,
       lastVisitOn: supporters.lastVisitOn,
+      remindByEmail: supporters.remindByEmail,
       screenName: supporters.screenName,
       screenNameChangedAt: supporters.screenNameChangedAt,
     })

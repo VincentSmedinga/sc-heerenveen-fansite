@@ -1279,7 +1279,7 @@
 ## De voorspellingen staan in `predictions`, en een cijfer is één teken van 0 tot 9
 
 - **Datum:** 21 november 2026
-- **Besluit:** de migratie `0096_add_predictions` maakt de tabel `predictions` met een supporter (leeg te maken met `ON DELETE SET NULL`), een wedstrijd (`ON DELETE CASCADE`), de ruststand en de eindstand als goals van de thuis- en de uitclub, en `created_at` en `updated_at` in UTC.
+- **Besluit:** de migratie `0097_add_predictions` maakt de tabel `predictions` met een supporter (leeg te maken met `ON DELETE SET NULL`), een wedstrijd (`ON DELETE CASCADE`), de ruststand en de eindstand als goals van de thuis- en de uitclub, en `created_at` en `updated_at` in UTC.
   Een supporter heeft één rij per wedstrijd (`UNIQUE (supporter_id, match_id)`), en een `CHECK` houdt elk getal op 9 of lager (#1447).
   De kolommen volgen de volgorde op de regel (thuis, uit), niet sc Heerenveen.
 - **Waarom:** de volgorde van de regel is de volgorde van het formulier en van de uitslag, dus een omrekening naar "voor" en "tegen" is niet nodig.

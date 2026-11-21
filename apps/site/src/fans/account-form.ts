@@ -10,7 +10,12 @@ import { screenNameMaxLength, screenNameMinLength } from './screen-name'
 export const accountPath = '/fans/mijn-account'
 
 /** The names of the fields, which are also their `id`: an error links to the field with it. */
-export const accountFields = { email: 'e-mail', inRankings: 'in-de-standen', screenName: 'schermnaam' } as const
+export const accountFields = {
+  email: 'e-mail',
+  inRankings: 'in-de-standen',
+  remindByEmail: 'herinnering',
+  screenName: 'schermnaam',
+} as const
 
 /**
  * What a form of one field on Mijn account shows after a submit: the value, the error of the
@@ -36,6 +41,8 @@ export const changeEmailLimitedMessage = 'Het lukt nu even niet. Probeer het ove
 /** The notices on Mijn account after a change, by the word in the address of the page. */
 export const accountMessages = {
   'e-mailadres': 'Je e-mailadres is gewijzigd. Je logt voortaan in met het nieuwe adres.',
+  'herinnering-aan': 'De herinnering staat aan.',
+  'herinnering-uit': 'De herinnering staat uit.',
   schermnaam: 'Je schermnaam is gewijzigd.',
 } as const
 

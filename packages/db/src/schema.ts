@@ -447,10 +447,11 @@ export const blockReasonMaxLength = 500
  * `screen_name` is what other supporters see, `screen_name_key` its normalised form (see
  * screen-name.ts in the site), unique, so two names that look the same can't both exist.
  * `email` is lowercase and is never shown to anyone else. `in_rankings` is whether the name is
- * in the tables of the games. `last_visit_on` is a day, not a time. `disabled_at` and
- * `disabled_reason` are whether and why the editors blocked the account; the shared code of the
- * login calls that turned off. The site keeps no IP address, browser, real name, birth date or
- * place. Times are UTC.
+ * in the tables of the games. `remind_by_email` is whether the supporter chose a reminder by
+ * e-mail the day before a match (off until the supporter turns it on, issue 1459).
+ * `last_visit_on` is a day, not a time. `disabled_at` and `disabled_reason` are whether and why
+ * the editors blocked the account; the shared code of the login calls that turned off. The site
+ * keeps no IP address, browser, real name, birth date or place. Times are UTC.
  */
 export const supporters = mysqlTable('supporters', {
   id: int('id', { unsigned: true }).autoincrement().primaryKey(),
@@ -458,6 +459,7 @@ export const supporters = mysqlTable('supporters', {
   screenNameKey: varchar('screen_name_key', { length: 40 }).notNull().unique(),
   email: varchar('email', { length: 254 }).notNull().unique(),
   inRankings: boolean('in_rankings').notNull().default(true),
+  remindByEmail: boolean('remind_by_email').notNull().default(false),
   createdAt: datetime('created_at')
     .notNull()
     .default(sql`(UTC_TIMESTAMP())`),
