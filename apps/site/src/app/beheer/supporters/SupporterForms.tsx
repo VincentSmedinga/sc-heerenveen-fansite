@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, ErrorSummary, Field, Form, Input, RadioGroup, Text, Textarea } from '@fansite/design-system'
+import { Button, ErrorSummary, Field, Form, Input, Notice, Select, Textarea } from '@fansite/design-system'
 import { useActionState, useEffect } from 'react'
 
 import {
@@ -36,16 +36,21 @@ export function BlockForm({
   return (
     <Form action={formAction}>
       <ErrorSummary errors={summary} id="block-fouten" level={3} tabIndex={-1} />
-      <RadioGroup
+      <Field
         error={errors.reden}
         hint="De reden staat in het logboek en op de pagina met alle gegevens van de supporter."
         id="reden"
-        key={`reden-${values.reden}`}
-        legend="Reden"
-        name="reden"
-        options={blockReasons.map((reason) => ({ label: reason.label, value: reason.value }))}
-        value={values.reden}
-      />
+        label="Reden"
+      >
+        <Select defaultValue={values.reden} key={`reden-${values.reden}`} name="reden">
+          <Select.Option value="">Kies een reden</Select.Option>
+          {blockReasons.map((reason) => (
+            <Select.Option key={reason.value} value={reason.value}>
+              {reason.label}
+            </Select.Option>
+          ))}
+        </Select>
+      </Field>
       <Field
         error={errors.toelichting}
         hint={`Alleen bij de reden "Anders", en dan verplicht. Hoogstens ${noteMaxLength} tekens.`}
@@ -82,10 +87,14 @@ export function ForgetAddressForm({
   return (
     <Form action={formAction}>
       <ErrorSummary errors={summary} id="adres-fouten" level={3} tabIndex={-1} />
-      {state.done === 'removed' ? <Text role="status">Het adres kan weer aanmelden.</Text> : null}
-      {state.done === 'none' ? (
-        <Text role="status">Dit adres stond niet in de lijst. Er is niets veranderd.</Text>
-      ) : null}
+      {/* The notice is in the page before the action, so a screen reader reads it. */}
+      <Notice>
+        {state.done === 'removed'
+          ? 'Het adres kan weer aanmelden.'
+          : state.done === 'none'
+            ? 'Dit adres stond niet in de lijst. Er is niets veranderd.'
+            : null}
+      </Notice>
       <Field
         error={state.error}
         hint="Het adres wordt niet bewaard: de site zoekt de hash ervan op en haalt die weg."

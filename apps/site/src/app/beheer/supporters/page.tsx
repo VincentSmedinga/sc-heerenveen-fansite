@@ -97,17 +97,17 @@ export default async function SupportersPage({ searchParams }: { searchParams: P
               ]}
               rows={result.rows.map((row) => ({
                 cells: [
-                  { content: `Aangemaakt op ${dateFormat.format(row.createdAt)}`, sortValue: row.createdAt.getTime() },
+                  `Aangemaakt op ${dateFormat.format(row.createdAt)}`,
                   row.lastVisitOn === null
                     ? 'Nog niet bezocht'
                     : `Laatste bezoek ${dayFormat.format(new Date(row.lastVisitOn))}`,
-                  row.blocked
-                    ? { content: <Tag tone="highlight">Geblokkeerd</Tag>, sortValue: 'Geblokkeerd' }
-                    : 'Actief',
+                  row.blocked ? { content: <Tag tone="highlight">Geblokkeerd</Tag>, sortValue: 0 } : 'Actief',
                 ],
                 header: row.screenName,
                 href: supporterPath(row.id),
               }))}
+              // The list is in pages and the server puts the newest first: sorting would only
+              // reorder the 25 rows of one page.
               sortable={false}
             />
           )}

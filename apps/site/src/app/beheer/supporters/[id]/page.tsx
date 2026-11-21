@@ -120,7 +120,7 @@ export default async function SupporterPage({ params, searchParams }: Props) {
             <>
               <Text>De supporter kan dan weer meedoen aan de spellen.</Text>
               <Form action={unblockAccount.bind(null, supporter.id)}>
-                <Button type="submit">Heft de blokkade van {supporter.screenName} op</Button>
+                <Button type="submit">Hef de blokkade van {supporter.screenName} op</Button>
               </Form>
             </>
           ) : (

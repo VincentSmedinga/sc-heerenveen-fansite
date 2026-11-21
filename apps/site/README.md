@@ -1521,8 +1521,7 @@ Elke persoonlijke pagina en actie onder `/fans` begint met `requireSupporter()`;
 De redactie beheert de accounts op `/beheer/supporters` (alleen eigenaar en redacteur, en alleen als accounts aan staan): zoeken op schermnaam, een naam aanpassen, een account blokkeren of de blokkade opheffen.
 De code staat in `src/beheer/supporter-management.ts`; het adres van een supporter ziet alleen de eigenaar, op de pagina van één account.
 Van een geblokkeerd account dat verdwijnt, bewaart `supporter_blocked_addresses` 12 maanden de hash van het adres, en `src/fans/take-part.ts` zegt of een account mag meedoen.
-De tabel `supporter_blocked_addresses` hoort bij de tabellen hierboven.
-De tabellen zijn `supporters`, `supporter_login_links`, `supporter_email_changes`, `supporter_sessions` en `supporter_login_attempts`, los van die van het beheer.
+De tabellen zijn `supporters`, `supporter_login_links`, `supporter_email_changes`, `supporter_sessions`, `supporter_login_attempts` en `supporter_blocked_addresses`, los van die van het beheer.
 Het cookie heet `fans-sessie` en gaat alleen mee naar de pagina's onder `/fans`.
 De proxy geeft Mijn account en zijn pagina's de header `X-Robots-Tag: noindex, nofollow`, op elke omgeving.
 

@@ -148,11 +148,11 @@ describe('the page of one account', () => {
 
     expect(html).toContain('Pas de naam van &lt;b&gt;Rotzak&lt;/b&gt; aan')
     expect(html).toContain('Blokkeer &lt;b&gt;Rotzak&lt;/b&gt;')
-    expect(html).toContain('Ongepaste schermnaam')
-    expect(html).toContain('Doet zich voor als een ander')
-    expect(html).toContain('Misbruik van een spel')
+    expect(html).toContain('>Ongepaste schermnaam<')
+    expect(html).toContain('>Doet zich voor als een ander<')
+    expect(html).toContain('>Misbruik van een spel<')
     expect(html).toMatch(/>Anders</)
-    expect(html).not.toContain('Heft de blokkade')
+    expect(html).not.toContain('Hef de blokkade')
   })
 
   it('offers to lift the block of a blocked account, and says why it is blocked', async () => {
@@ -162,7 +162,7 @@ describe('the page of one account', () => {
 
     const html = await one()
 
-    expect(html).toContain('Heft de blokkade van &lt;b&gt;Rotzak&lt;/b&gt; op')
+    expect(html).toContain('Hef de blokkade van &lt;b&gt;Rotzak&lt;/b&gt; op')
     expect(html).toContain('sinds 21 november 2026: misbruik van een spel')
     expect(html).not.toContain('Blokkeer &lt;b&gt;')
   })
