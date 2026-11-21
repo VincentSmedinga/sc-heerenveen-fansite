@@ -38,6 +38,7 @@ import {
   emptyRow,
   emptySide,
   formationValueOf,
+  halfTimeValuesOf,
   otherPlayer,
   playerOf,
   type ReportSquadPlayer,
@@ -560,7 +561,13 @@ export async function saveReport(
     if (basis !== undefined && basis !== reportBasis(stored)) {
       return { status: 'stale' } as const
     }
-    if (stored !== undefined && planSignature(plan, known) === storedSignature(stored)) {
+    // The score at half-time is stored with the match, so it is compared here and not in the
+    // signature of the report.
+    const halfTimeFor = plan.halfTime?.for ?? null
+    const halfTimeAgainst = plan.halfTime?.against ?? null
+    const halfTimeChanged = match.halfTimeFor !== halfTimeFor || match.halfTimeAgainst !== halfTimeAgainst
+
+    if (stored !== undefined && !halfTimeChanged && planSignature(plan, known) === storedSignature(stored)) {
       return { status: 'unchanged' } as const
     }
 
@@ -577,6 +584,13 @@ export async function saveReport(
       savedBy: userId,
       source: plan.source,
       status: plan.status,
+    }
+
+    if (halfTimeChanged) {
+      await transaction
+        .update(matches)
+        .set({ halfTimeAgainst, halfTimeFor, halfTimeSource: plan.halfTime === null ? null : 'redactie' })
+        .where(eq(matches.id, id))
     }
 
     if (stored === undefined) {
@@ -767,6 +781,7 @@ export function valuesOfReport(
   stored: StoredMatchReport | undefined,
   goals: readonly MatchGoal[],
   squad: readonly ReportSquadPlayer[],
+  match?: { halfTimeAgainst: null | number; halfTimeFor: null | number },
 ): ReportValues {
   const values: ReportValues = {
     bron: stored?.report.source ?? '',
@@ -774,6 +789,7 @@ export function valuesOfReport(
       wij: formationValueOf(stored?.report.formationOurs ?? null),
       zij: formationValueOf(stored?.report.formationOpponent ?? null),
     },
+    ruststand: halfTimeValuesOf(match),
     status: stored?.report.status ?? 'bezig',
     tegenstander: stored?.report.opponentComplete === true ? 'ja' : 'nee',
     wij: emptySide(),
@@ -859,6 +875,7 @@ function describeReport(plan: ReportPlan) {
     count(plan.cards.length, 'kaart', 'kaarten'),
     count(plan.incidents.length, 'strafschop', 'strafschoppen'),
     ...(plan.shootout.length === 0 ? [] : [count(plan.shootout.length, 'schot in de serie', 'schoten in de serie')]),
+    ...(plan.halfTime === null ? [] : [`ruststand ${plan.halfTime.for}-${plan.halfTime.against}`]),
   ].join(', ')
 }
 

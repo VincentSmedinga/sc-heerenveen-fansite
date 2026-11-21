@@ -1,6 +1,6 @@
 import type { Competition, Match, MatchEdit, NewMatchStatistics } from '@fansite/db/schema'
 
-import { lockedFields } from '@fansite/db/match-edits'
+import { dropHalfTimeThatNoLongerFits, lockedFields } from '@fansite/db/match-edits'
 import { compareClaim, findMatchByDate } from '@fansite/db/match-lookup'
 import { matchEdits, matches, matchLimits, matchStatistics } from '@fansite/db/schema'
 import { keepSourceDifferences, readTakenOverParts } from '@fansite/db/source-differences'
@@ -195,6 +195,22 @@ function deriveOne(match: OldSiteMatch, number: number, groupSize: number): Deri
     }
   }
 
+  // The score at half-time (#1445) is the one of the regular playing time, so it can't exceed
+  // the score after 90 minutes, or the final score when there was no extra time.
+  let halfTime: null | { against: number; for: number } = {
+    against: theirs(result.homeHalfTime, result.awayHalfTime),
+    for: ours(result.homeHalfTime, result.awayHalfTime),
+  }
+  const regularFor = afterNinety?.for ?? goalsFor
+  const regularAgainst = afterNinety?.against ?? goalsAgainst
+
+  if (halfTime.for > regularFor || halfTime.against > regularAgainst) {
+    lines.push(
+      `${label}: the score at half-time ${halfTime.for}-${halfTime.against} is higher than the score of the regular playing time ${regularFor}-${regularAgainst}, so it is left out`,
+    )
+    halfTime = null
+  }
+
   const stats = match.statistics
   const hasStatistics = Object.values(stats).some((value) => value > 0)
   let referee = (match.referee ?? '').trim() === '' ? null : (match.referee ?? '').trim()
@@ -231,6 +247,9 @@ function deriveOne(match: OldSiteMatch, number: number, groupSize: number): Deri
       extraTime,
       goalsAgainst,
       goalsFor,
+      halfTimeAgainst: halfTime?.against ?? null,
+      halfTimeFor: halfTime?.for ?? null,
+      halfTimeSource: halfTime === null ? null : 'oude-fansite',
       home,
       kickoffAt: unknownTime ? null : amsterdamToUtc({ day, month, year }, { hours, minutes }),
       matchDate: date,
@@ -247,6 +266,14 @@ function deriveOne(match: OldSiteMatch, number: number, groupSize: number): Deri
       status: 'played',
     },
   }
+}
+
+/** Whether a score at half-time fits the result a row will have (see `matches_half_time_*`). */
+function fitsResult(
+  claim: Pick<Match, 'halfTimeAgainst' | 'halfTimeFor'>,
+  row: Pick<Match, 'afterNinetyAgainst' | 'afterNinetyFor' | 'goalsAgainst' | 'goalsFor' | 'status'>,
+) {
+  return Object.keys(dropHalfTimeThatNoLongerFits(claim, row)).length === 0
 }
 
 /**
@@ -391,7 +418,27 @@ export async function importOldSiteMatches(
         // A difference waits for the editors as a change, once (#974). The match keeps the
         // value of its own source until they decide.
         // A match the editors added is theirs: it is compared and never filled.
-        const fill = lookup.match.dataSource === 'redactie' ? {} : compared.fill
+        const fill: Partial<Match> = lookup.match.dataSource === 'redactie' ? {} : { ...compared.fill }
+
+        // The score at half-time only fills an empty place: what the editors filled in, or
+        // another source gave, wins, and a difference is not a change for the editors.
+        if (
+          lookup.match.dataSource !== 'redactie' &&
+          lookup.match.halfTimeFor === null &&
+          values.halfTimeFor !== null &&
+          values.halfTimeAgainst !== null
+        ) {
+          if (fitsResult(values, { ...lookup.match, ...fill })) {
+            fill.halfTimeAgainst = values.halfTimeAgainst
+            fill.halfTimeFor = values.halfTimeFor
+            fill.halfTimeSource = 'oude-fansite'
+          } else {
+            report.lines.push(
+              `${label}: the score at half-time is higher than the result that match ${lookup.match.id} keeps, so it is left out`,
+            )
+          }
+        }
+
         const kept = await keepSourceDifferences(
           db,
           lookup.match,
@@ -446,6 +493,21 @@ export async function importOldSiteMatches(
     for (const field of fields) {
       if (!sameValue(before[field], values[field])) {
         change[field] = values[field]
+      }
+    }
+
+    // The score at half-time only fills an empty place: the editors may have filled it in.
+    if (before.halfTimeFor === null && values.halfTimeFor !== null) {
+      // The result of this row may stay as it is (the editors took it over), so it is the
+      // result that stays that the score at half-time has to fit.
+      if (fitsResult(values, { ...before, ...change })) {
+        Object.assign(change, {
+          halfTimeAgainst: values.halfTimeAgainst,
+          halfTimeFor: values.halfTimeFor,
+          halfTimeSource: 'oude-fansite',
+        })
+      } else {
+        report.lines.push(`${label}: the score at half-time is higher than the result of the row, so it is left out`)
       }
     }
 

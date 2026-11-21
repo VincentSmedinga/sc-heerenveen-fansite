@@ -1212,6 +1212,38 @@
   Een kolom op `persons` voor elke markering zou voor wedstrijden niet passen, en #1295 verandert nog wat er overblijft.
 - **Alternatieven:** een kolom op `persons` voor elke markering (past niet bij een wedstrijd); een tabel per soort onderwerp (twee tabellen voor hetzelfde idee).
 
+## De ruststand staat niet achter de schakelaar van de Prognose
+
+- **Datum:** 20 november 2026
+- **Besluit:** de ruststand van een gespeelde wedstrijd is een gewoon wedstrijdfeit en blijft zichtbaar, ook als het onderdeel Prognose uit staat (#1445).
+  Hij staat op de wedstrijdpagina in de lijst met feiten onder de uitslag, als "Ruststand" met de thuisclub vooraan (`1–0`), en niet naast de clubnamen: het is geen tweede score.
+  Zonder ruststand staat er niets, geen streepje en geen leeg label.
+  Een wedstrijd die nog niet is gespeeld, een wedstrijd die nog wordt gespeeld en de voorbeschouwing tonen hem niet.
+- **Waarom:** het is geen spelgegeven maar een feit uit het verslag, en de bezoeker heeft er ook zonder spel iets aan.
+- **Alternatieven:** de ruststand pas tonen als de Prognose aan staat.
+
+## De ruststand heeft drie bronnen in vaste volgorde
+
+- **Datum:** 20 november 2026
+- **Besluit:** wat de redactie invult wint van wat uit de doelpunten volgt, en dat wint van de oude database van de Fansite (alleen voor 1990 tot 2007).
+  - **Opslag:** `matches.half_time_for`, `matches.half_time_against` en `matches.half_time_source` (`redactie` of `oude-fansite`; migraties `0094_add_match_half_time` en `0095_add_match_half_time_source`), leeg als de ruststand niet bekend is.
+    Ze zijn allemaal leeg of allemaal gevuld, alleen een gespeelde wedstrijd heeft ze, en ze zijn nooit hoger dan de stand na de reguliere speeltijd: de eindstand, of bij verlenging de stand na 90 minuten.
+    Bij een wedstrijd met verlenging blijft het de ruststand van de eerste helft van de reguliere speeltijd.
+  - **De redactie:** twee velden "Ruststand" op het formulier van het wedstrijdverslag, met een eigen foutmelding per veld.
+    `checkReportForm` weigert een ruststand die hoger is dan de stand, en `saveReport` bewaart hem bij de wedstrijd, in dezelfde transactie als het verslag.
+    `saveReport` zet de bron op `redactie`, en op leeg als de velden leeg zijn. De plakpagina laat een bewaarde ruststand staan, want de tekst van een verslag heeft er geen.
+  - **De doelpunten:** `halfTimeScore` (`@fansite/shared/match-report`) telt de doelpunten tot en met minuut 45, met de blessuretijd van de eerste helft (45+2 telt mee, 46 niet), en een eigen doelpunt bij de partij die ervan profiteert.
+    Het geeft niets terug voor een verslag dat niet `klaar` is en voor een doelpunt zonder minuut.
+    `halfTimeOf` in `apps/site/src/report-data.ts` kiest de bron bij het lezen, dus er wordt niets afgeleids bewaard: een gecorrigeerd doelpunt geeft meteen een gecorrigeerde ruststand.
+    Staat er een ruststand van de redactie (`half_time_source` is `redactie`), dan telt die. Anders telt de ruststand uit de doelpunten van een volledig verslag, en alleen als die er niet is, de ruststand die de import van de oude Fansite bewaarde.
+    Een verslag dat later minuten bij de doelpunten krijgt, wint dus vanzelf van de oude waarde, want de keuze wordt bij elk lezen gemaakt.
+  - **De oude Fansite:** de stap `matches` van de import van de oude gegevens zet `result.homeHalfTime` en `result.awayHalfTime` in de kolommen, vanuit de kant van sc Heerenveen gezien.
+    Een ruststand die hoger is dan de stand na de reguliere speeltijd komt in het logboek en wordt niet overgenomen, en dat geldt ook voor de stand die in de rij blijft staan.
+    De stap zet `half_time_source` op `oude-fansite`, vult een lege ruststand en overschrijft er geen, ook niet bij een wedstrijd van een andere bron, en een verschil is geen wijziging die op de redactie wacht.
+  - **Een uitslag die verandert:** een nieuwe of herstelde uitslag, ook uit Wikipedia of na een beslissing over een verschil, maakt de ruststand leeg als hij daar niet meer in past (`dropHalfTimeThatNoLongerFits` in `@fansite/db/match-edits`), want de database weigert een ruststand boven de stand. De bron gaat dan ook weg.
+- **Waarom:** de redactie kent het verslag het best, de doelpunten zijn er voor elke nieuwe wedstrijd, en de oude gegevens vullen alleen het verleden aan.
+- **Alternatieven:** alleen invullen door de redactie, wat de oude wedstrijden leeg laat; de afgeleide ruststand bewaren in de kolommen (dan blijft een oude waarde staan na een gecorrigeerd doelpunt, en is niet meer te zien wat de redactie zelf invulde).
+
 ## De kopie van acceptatie bevat geen accounts van supporters
 
 - **Datum:** 20 november 2026

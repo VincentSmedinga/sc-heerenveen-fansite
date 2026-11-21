@@ -10,6 +10,7 @@ import type { ConflictOutcome } from './match-conflicts.ts'
 import type { Competition, Match, MatchChange, MatchStatus, NewMatchGoal } from './schema.ts'
 
 import { recordAction } from './audit-log.ts'
+import { dropHalfTimeThatNoLongerFits } from './match-edits.ts'
 import { matchChanges, matches, matchGoals } from './schema.ts'
 import { linkMatchToStadium } from './stadiums.ts'
 
@@ -259,7 +260,10 @@ export async function storeGoals(db: Pick<Database, 'insert'>, matchId: number, 
  */
 export async function updateMatch(
   db: Pick<Database, 'delete' | 'insert' | 'select' | 'update'>,
-  before: Pick<Match, 'goalsAgainst' | 'goalsFor' | 'id' | 'resultSetAt' | 'status'>,
+  before: Pick<
+    Match,
+    'goalsAgainst' | 'goalsFor' | 'halfTimeAgainst' | 'halfTimeFor' | 'id' | 'resultSetAt' | 'status'
+  >,
   proposal: Proposal,
   goalsChanged: boolean,
   now: Date,
@@ -272,6 +276,7 @@ export async function updateMatch(
     .update(matches)
     .set({
       ...match,
+      ...dropHalfTimeThatNoLongerFits(before, match),
       clubId,
       resultSetAt: sameResult ? before.resultSetAt : match.status === 'played' ? now : null,
     })

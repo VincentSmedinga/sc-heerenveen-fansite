@@ -5,6 +5,7 @@ import {
   Card,
   ErrorSummary,
   Field,
+  FieldGroup,
   Form,
   Heading,
   Input,
@@ -47,6 +48,7 @@ import {
   formationId,
   formationOwnId,
   goalKindChoices,
+  halfTimeId,
   incidentKindChoices,
   isEmptyLineUp,
   listId,
@@ -90,6 +92,8 @@ const formId = reportFormId
 
 /** What the form needs to know of the match to word its choices. */
 export type ReportChoices = {
+  /** Whether sc Heerenveen plays at home: the score at half-time is written home first. */
+  home: boolean
   /** The address of the form of the match, where the result of the shoot-out is filled in. */
   matchHref: string
   /**
@@ -147,8 +151,8 @@ const ReportFormContext = createContext<ReportFormContext | undefined>(undefined
 
 /** The list of the errors of the last save, which gets the focus when there are any. */
 export function ReportErrorSummary() {
-  const { current, state, title } = useReportForm()
-  const summary = errorOrder(current).flatMap((id) => {
+  const { choices, current, state, title } = useReportForm()
+  const summary = errorOrder(current, choices.home).flatMap((id) => {
     const message = state.errors[id]
 
     return message === undefined ? [] : [{ id, message }]
@@ -798,6 +802,30 @@ export function ReportFields() {
             {fixed(statusChoices)}
           </Select>
         </Field>
+        <FieldGroup
+          hint="Voor allebei de teams of voor geen van beide. De stand na de eerste helft van de reguliere speeltijd; zonder ruststand volgt hij uit de doelpunten van een afgerond verslag."
+          legend="Ruststand"
+          separator="-"
+        >
+          {(choices.home ? sides : [...sides].reverse()).map((side) => (
+            <Field
+              error={errors[halfTimeId(side)]}
+              hideOptional
+              id={halfTimeId(side)}
+              key={side}
+              label={club(side)}
+              required={false}
+            >
+              <Input
+                autoComplete="off"
+                defaultValue={current.ruststand[side]}
+                inputMode="numeric"
+                name={halfTimeId(side)}
+                width="narrow"
+              />
+            </Field>
+          ))}
+        </FieldGroup>
         <RadioGroup
           error={errors.tegenstander}
           hint={`Dan telt alles van ${choices.opponent} mee: elf spelers, de bank en wie scoorde.`}

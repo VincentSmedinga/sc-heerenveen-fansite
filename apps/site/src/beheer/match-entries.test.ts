@@ -119,6 +119,45 @@ const goalsOf = (id: number) =>
 const edit = async (id: number) => (await database.db.select().from(matchEdits).where(eq(matchEdits.matchId, id)))[0]
 const log = () => database.db.select().from(auditLog).orderBy(asc(auditLog.id))
 
+describe('saveEntry and the score at half-time', () => {
+  const withHalfTime = async () => {
+    const id = await addMatch({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+
+    await database.pool.query(
+      "UPDATE matches SET half_time_for = 2, half_time_against = 1, half_time_source = 'redactie' WHERE id = ?",
+      [id],
+    )
+
+    return id
+  }
+
+  it('keeps it while the new result still fits', async () => {
+    const id = await withHalfTime()
+
+    await saveEntry(database.db, userId, id, entry(), 'Wikipedia is achter', t0)
+
+    expect(await stored(id)).toMatchObject({ halfTimeAgainst: 1, halfTimeFor: 2 })
+  })
+
+  it('empties it, and does not fail, when the new result is lower than it', async () => {
+    const id = await withHalfTime()
+    const lower = entry({ result: { ...entry().result, goalsAgainst: 0, goalsFor: 1 } })
+
+    expect(await saveEntry(database.db, userId, id, lower, 'Eerder fout', t0)).toMatchObject({ status: 'saved' })
+    expect(await stored(id)).toMatchObject({ goalsFor: 1, halfTimeAgainst: null, halfTimeFor: null })
+  })
+
+  it('empties it when the match is no longer played', async () => {
+    const id = await withHalfTime()
+    const postponed = entry({
+      result: { ...entry().result, goalsAgainst: null, goalsFor: null, status: 'postponed' },
+    })
+
+    expect(await saveEntry(database.db, userId, id, postponed, 'Uitgesteld', t0)).toMatchObject({ status: 'saved' })
+    expect(await stored(id)).toMatchObject({ halfTimeAgainst: null, halfTimeFor: null, status: 'postponed' })
+  })
+})
+
 describe('saveEntry', () => {
   it('stores the result and the goals in the tables, marks the parts and keeps the match as it was', async () => {
     const id = await addMatch()

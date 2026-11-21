@@ -659,6 +659,20 @@
       "when": 1795245374122,
       "tag": "0093_add_supporter_email_changes",
       "breakpoints": true
+    },
+    {
+      "idx": 94,
+      "version": "5",
+      "when": 1795258180685,
+      "tag": "0094_add_match_half_time",
+      "breakpoints": true
+    },
+    {
+      "idx": 95,
+      "version": "5",
+      "when": 1795263060037,
+      "tag": "0095_add_match_half_time_source",
+      "breakpoints": true
     }
   ]
 }
