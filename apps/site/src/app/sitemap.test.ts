@@ -77,6 +77,10 @@ const notInSitemap: string[] = [
   '/fans/inloggen/bevestigen',
   '/fans/inloggen/verstuurd',
   '/fans/mijn-account',
+  '/fans/mijn-account/e-mailadres',
+  '/fans/mijn-account/e-mailadres/bevestigen',
+  '/fans/mijn-account/e-mailadres/verstuurd',
+  '/fans/mijn-account/schermnaam',
   // A page of results has no use in a search engine, and says noindex.
   '/nieuws/zoeken',
   // The same for the search for a player.
