@@ -31,7 +31,9 @@
   }
 
   /*
-   * The wordmark and the tagline run on in one line of text, so on a narrow screen, where the wordmark wraps, the tagline
+   * The wordmark and the tagline run on in one line of text. The wordmark is fluid (--hf-wordmark-font-size) and stays on one
+   * line; only a text zoomed far beyond the screen makes it wrap, by word, so nothing is cut off. Under 600px the tagline
+   * is under it (see below). Where the wordmark wraps, the tagline
    * stays behind its last word if it fits and goes to a line of its own if not. The space between them is a space in the
    * text, made as wide as 0.25rem more; the wordmark and the tagline set their own word spacing back.
    */
@@ -55,5 +57,10 @@
     line-height: var(--hf-label-line-height);
     white-space: nowrap;
     word-spacing: normal;
+
+    /* Under 600px the wordmark takes the whole line, so "sinds 1997" goes under it. This is the one place for that. */
+    @media (width < 37.5rem) {
+      display: block;
+    }
   }
 }

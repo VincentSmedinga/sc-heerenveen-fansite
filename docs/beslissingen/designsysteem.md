@@ -4106,3 +4106,20 @@
   Lijnen tekenen ook overal hetzelfde, zonder lettertype in een masker.
   De site heeft de regel alleen via de knop nodig, dus `@fansite/shared` hoeft hem niet te hebben.
 - **Alternatieven:** de initialen als tekst en de naam "Mijn account, BS" (de eigenaar wil de naam van het issue); de regel van axe uitzetten (dat verzwakt een test); de regel in `@fansite/shared` (niemand anders gebruikt hem).
+
+## Het woordmerk is vloeiend en blijft op één regel
+
+- **Datum:** 21 november 2026
+- **Besluit:** het woordmerk schaalt vloeiend met de breedte van het scherm en blijft op één regel (#1491).
+  - De lettergrootte is `clamp(1.125rem, 6.667vw - 0.375rem, 2.25rem)` in `--hf-wordmark-font-size`: 18 pixels op 360, 20 op 390 en 36 vanaf ongeveer 630 pixels.
+    De ondergrens en de verschuiving zijn in rem, dus een grotere tekstgrootte tilt ze mee en het woordmerk wordt nooit kleiner dan 18 pixels.
+  - Het woordmerk mag niet afbreken door een `nowrap`.
+    Bij een tekst die veel groter is dan het scherm loopt het woord voor woord door, zodat er niets wordt afgekapt.
+  - Onder 600 pixels staat "sinds 1997" onder het woordmerk, vanaf 600 pixels ernaast.
+    De regel staat op één plek, in `logo.css`.
+  - De kop is een raster met een kolom voor het logo en een kolom per knop erna, zodat een tweede ronde knop past.
+- **Waarom:** op één regel met "sinds 1997" zou het woordmerk op 390 pixels maar ongeveer 14 pixels groot zijn.
+  Het woordmerk is ongeveer 10,9 keer zijn lettergrootte breed.
+  Zo blijft het leesbaar naast de ronde knoppen.
+- **Later:** vervangt de oude regel dat het woordmerk onder 40em vast 28 pixels is en op twee regels mag staan.
+- **Alternatieven:** het woordmerk laten afbreken op twee regels; een kleiner vast woordmerk; "sinds 1997" weglaten op een telefoon.
