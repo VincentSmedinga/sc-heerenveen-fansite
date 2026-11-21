@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 
 import { Body, Head, Link, Logo, Navigation, Page, PullToRefresh, Root, Text } from '@fansite/design-system'
 import { preloadedFonts } from '@fansite/design-system/fonts'
+import { isFansPartOn } from '@fansite/shared/fans-env'
 import { connection } from 'next/server'
 import { preload } from 'react-dom'
 
@@ -12,6 +13,7 @@ import { headerColour } from '../colours'
 import { reviewBranch } from '../env'
 import { fansMenu } from '../fans'
 import { SiteNavigation } from '../SiteNavigation'
+import { SupporterButton } from '../SupporterButton'
 import { ThemeToggle } from '../ThemeToggle'
 import { withBranch } from '../title'
 import { updatesPath, updatesTitle } from '../updates'
@@ -120,6 +122,7 @@ export default async function RootLayout({
             <Link href="/">
               <Logo />
             </Link>
+            {isFansPartOn('accounts') ? <SupporterButton /> : null}
             <ThemeToggle />
           </Page.Header>
           <SiteNavigation fans={fansMenu()} matchesBar={subnav} />

@@ -127,6 +127,46 @@ describe('RootLayout', () => {
     expect(off).not.toContain('href="/fans"')
   })
 
+  it('has the account button, the link Inloggen, in the header when accounts are on', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    const html = await render(
+      <RootLayout shortcuts={null} subnav={null}>
+        Inhoud
+      </RootLayout>,
+    )
+    const header = /<header class="hf-page-header">.*?<\/header>/s.exec(html)?.[0] ?? ''
+
+    expect(header).toContain('aria-label="Inloggen"')
+    expect(header).toContain('href="/fans/inloggen"')
+    expect(header).not.toContain('Mijn account')
+  })
+
+  it('has no account button when accounts are off', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'off')
+    const html = await render(
+      <RootLayout shortcuts={null} subnav={null}>
+        Inhoud
+      </RootLayout>,
+    )
+
+    expect(html).not.toContain('Inloggen')
+    expect(html).not.toContain('/fans/inloggen')
+    expect(html).not.toContain('hf-account-button')
+  })
+
+  it('draws the same header for everybody: nothing in the layout depends on who is logged in', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+
+    const html = async () =>
+      render(
+        <RootLayout shortcuts={null} subnav={null}>
+          Inhoud
+        </RootLayout>,
+      )
+
+    expect(await html()).toBe(await html())
+  })
+
   it('puts the two sentences of the footer in a paragraph each, before the links', async () => {
     const html = await render(
       <RootLayout shortcuts={null} subnav={null}>

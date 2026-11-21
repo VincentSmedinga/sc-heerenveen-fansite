@@ -24,6 +24,7 @@ import {
   runBackupCommand,
   structureOnlyTables,
 } from './backup.ts'
+import { writeRowDump } from './row-dump.ts'
 import { createTestDatabase } from './test-database.ts'
 
 const password = 'p@ss"w\\ord#1;x'
@@ -216,21 +217,65 @@ describe('backUp', () => {
     const rows = readFileSync(path.join(record, 'args-0'), 'utf8').trim().split('\n')
     const structure = readFileSync(path.join(record, 'args-1'), 'utf8').trim().split('\n')
 
-    for (const table of ['admin_login_links', 'admin_sessions', 'discussions', 'visitor_hashes', 'visitor_salts']) {
-      expect(rows).toContain(`--ignore-table=fansite_acc.${table}`)
-    }
-    expect(rows.at(-1)).toBe('fansite_acc')
-    expect(rows).not.toContain('--no-data')
-    expect(structure).toContain('--no-data')
-    expect(structure.slice(-6)).toEqual([
-      'fansite_acc',
+    const empty = [
       'admin_login_links',
       'admin_sessions',
       'discussions',
+      'supporter_email_changes',
+      'supporter_login_attempts',
+      'supporter_login_links',
+      'supporter_sessions',
       'visitor_hashes',
       'visitor_salts',
-    ])
+    ]
+
+    for (const table of empty) {
+      expect(rows).toContain(`--ignore-table=fansite_acc.${table}`)
+    }
+    expect(rows).not.toContain('--ignore-table=fansite_acc.supporters')
+    expect(rows.at(-1)).toBe('fansite_acc')
+    expect(rows).not.toContain('--no-data')
+    expect(structure).toContain('--no-data')
+    expect(structure.slice(-(empty.length + 1))).toEqual(['fansite_acc', ...empty])
     expect(readdirSync(process.env['FAKE_RECORD'] ?? '').filter((name) => name.startsWith('args-'))).toHaveLength(2)
+  })
+
+  it('keeps the accounts of supporters, and none of their sessions, links or changes of address', async () => {
+    const database = await createTestDatabase()
+
+    try {
+      await database.pool.query(
+        "INSERT INTO supporters (id, screen_name, screen_name_key, email) VALUES (5, 'Tjalle99', 'tjalle99', 'tjalle@example.org')",
+      )
+      await database.pool.query(
+        "INSERT INTO supporter_sessions (token_hash, supporter_id, created_at, last_seen_at) VALUES ('session-hash', 5, '2026-10-26 03:00:00', '2026-10-26 03:00:00')",
+      )
+      await database.pool.query(
+        "INSERT INTO supporter_login_links (token_hash, supporter_id, expires_at) VALUES ('link-hash', 5, '2026-10-26 03:15:00')",
+      )
+      await database.pool.query(
+        "INSERT INTO supporter_email_changes (supporter_id, email, token_hash, expires_at) VALUES (5, 'nieuw@example.org', 'change-hash', '2026-10-26 03:15:00')",
+      )
+      process.env['ROW_DUMP_URL'] = database.url
+
+      const { file } = await backUp(env({ DATABASE_URL: database.url, MYSQLDUMP_COMMAND: writeRowDump(work) }), now)
+      const text = gunzipSync(readFileSync(file)).toString()
+
+      expect(text).toContain('INSERT INTO `supporters`')
+      expect(text).toContain('tjalle@example.org')
+
+      for (const table of ['supporter_email_changes', 'supporter_login_links', 'supporter_sessions']) {
+        expect(text, table).toContain(`CREATE TABLE \`${table}\``)
+        expect(text, table).not.toContain(`INSERT INTO \`${table}\``)
+      }
+
+      for (const secret of ['session-hash', 'link-hash', 'change-hash', 'nieuw@example.org']) {
+        expect(text, secret).not.toContain(secret)
+      }
+    } finally {
+      delete process.env['ROW_DUMP_URL']
+      await database.drop()
+    }
   })
 
   it('takes the table with the names of the stadiums along with its rows, as it holds the work of the editors', async () => {

@@ -54,9 +54,16 @@ test.describe('the choice for light or dark', () => {
     await page.goto(path)
     await expect(page.getByRole('banner').getByRole('button', { name: 'Donker' })).toHaveCount(1)
     await expect(page.getByRole('contentinfo').getByRole('button')).toHaveCount(0)
-    // The focus goes from the logo to the theme button and then to the menu.
+    // The focus goes from the logo to the account button, the round button left of the theme
+    // button (when accounts are on), then to the theme button and then to the menu.
     await page.getByRole('banner').getByRole('link').first().focus()
     await page.keyboard.press('Tab')
+
+    if ((await page.getByRole('banner').getByRole('link', { name: 'Inloggen' }).count()) > 0) {
+      await expect(page.getByRole('banner').getByRole('link', { name: 'Inloggen' })).toBeFocused()
+      await page.keyboard.press('Tab')
+    }
+
     await expect(page.getByRole('button', { name: 'Donker' })).toBeFocused()
     await page.keyboard.press('Tab')
     await expect(page.getByRole('navigation', { name: 'Hoofdmenu' }).getByRole('link').first()).toBeFocused()
