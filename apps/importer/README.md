@@ -2665,6 +2665,15 @@ Voor de kruistabellen vraagt het de Nederlandse Wikipedia om één pagina per se
 De bestanden zitten niet in `import.mjs`: `pnpm --filter site assemble` zet ze in `apps/importer/data/oude-fansite/` naast het bestand, en de deploy kopieert ze mee.
 Op acceptatie start je de opdracht in GitHub met de workflow _Import old site_, zonder SSH, met de keuze `import`, `report` of `status` (zie _De wedstrijden van de oude fansite importeren_ in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md)).
 
+## Ongebruikte accounts van supporters
+
+Elke run van de import ruimt ook de accounts van supporters op (`cleanUpSupporters`, onder dezelfde lock).
+Een account dat 24 maanden niet is bezocht, krijgt één mail en wordt 30 dagen later gesloten met `closeAccount`, tenzij de supporter inlogt.
+De stap mailt hoogstens 20 accounts per dag, en doet niets met accounts zolang `FANS_ACCOUNTS` uit staat.
+Ze haalt ook de verlopen onbevestigde aanmeldingen weg.
+Het logboek noemt alleen aantallen: `Supporter accounts: 1 mailed about being unused, 0 closed, 0 mails failed; 1 unconfirmed sign-ups removed`.
+De mail gebruikt dezelfde `SMTP_*` en `MAIL_FROM` als de alerts; `SITE_ENV` bepaalt het adres in de mail.
+
 ## De import op acceptatie
 
 - `pnpm --filter site assemble <nieuwe map>` bundelt de importer met `esbuild` tot één bestand, `apps/importer/import.mjs` in de map voor de host ([`src/bundle.ts`](src/bundle.ts)).

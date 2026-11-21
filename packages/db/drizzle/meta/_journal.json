@@ -687,6 +687,13 @@
       "when": 1795277153637,
       "tag": "0097_add_supporter_blocking",
       "breakpoints": true
+    },
+    {
+      "idx": 98,
+      "version": "5",
+      "when": 1795278151700,
+      "tag": "0098_add_supporter_unused_mail",
+      "breakpoints": true
     }
   ]
 }

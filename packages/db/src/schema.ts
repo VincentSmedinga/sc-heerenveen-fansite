@@ -449,8 +449,10 @@ export const blockReasonMaxLength = 500
  * `email` is lowercase and is never shown to anyone else. `in_rankings` is whether the name is
  * in the tables of the games. `remind_by_email` is whether the supporter chose a reminder by
  * e-mail the day before a match (off until the supporter turns it on, issue 1459).
- * `last_visit_on` is a day, not a time. `disabled_at` and `disabled_reason` are whether and why
- * the editors blocked the account; the shared code of the login calls that turned off.
+ * `last_visit_on` is a day, not a time. `unused_mail_sent_at` is when the one mail went out
+ * that says the account was not used for two years and goes in 30 days (issue 1460); a visit
+ * empties it. `disabled_at` and `disabled_reason` are whether and why the editors blocked the
+ * account; the shared code of the login calls that turned off.
  * `screen_name_edited_by_editors` is set when the editors changed the screen name (issue 1458),
  * until Mijn account has told the supporter once. The site keeps no IP address, browser, real
  * name, birth date or place. Times are UTC.
@@ -466,6 +468,7 @@ export const supporters = mysqlTable('supporters', {
     .notNull()
     .default(sql`(UTC_TIMESTAMP())`),
   lastVisitOn: date('last_visit_on', { mode: 'string' }),
+  unusedMailSentAt: datetime('unused_mail_sent_at'),
   screenNameChangedAt: datetime('screen_name_changed_at'),
   disabledAt: datetime('disabled_at'),
   disabledReason: varchar('disabled_reason', { length: blockReasonMaxLength }),

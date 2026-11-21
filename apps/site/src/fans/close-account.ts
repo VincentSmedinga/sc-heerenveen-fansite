@@ -1,20 +1,10 @@
-import type { Database } from '@fansite/db/client'
-
-import {
-  supporterBlockedAddresses,
-  supporterEmailChanges,
-  supporterLoginLinks,
-  supporters,
-  supporterSessions,
-} from '@fansite/db/schema'
-import { eq } from 'drizzle-orm'
-
 import { hashOf } from '../login/tokens'
-import { blockedAddressHash } from './blocked-addresses'
 
-// Closing the account of a supporter (issue 1454). The one function that removes an account:
-// the supporter closes it on Mijn account, and the clean-up of unused accounts (#1460) calls it
-// too.
+// Closing the account of a supporter (issue 1454). The one function that removes an account
+// lives in `@fansite/db/close-account`, so the importer can call it too: the supporter closes
+// the account on Mijn account, and the clean-up of unused accounts (#1460) closes it after a
+// mail.
+export { closeAccount } from '@fansite/db/close-account'
 
 /** The three pages of closing: the consequences, the confirmation, and after. */
 export const closePaths = {
@@ -25,50 +15,6 @@ export const closePaths = {
 
 /** How long the page "Weet je het zeker?" may be open before its button no longer works. */
 export const confirmationLifetime = 10 * 60 * 1000
-
-/**
- * Removes the account of a supporter, in one transaction: the row with the screen name and the
- * address, every session, every link and code that is still open, and every request for a new
- * address. What the supporter filled in for the games stays, without a link to a person: the
- * tables of the games refer to the account with `ON DELETE SET NULL` (see my-data.ts). The
- * requests of the limits hold only a hash, and go after 15 minutes by themselves.
- *
- * It keeps nothing of the account, with one exception (issue 1458): of a blocked account it
- * keeps the SHA-256 of the address and the moment, in the same transaction, so the supporter
- * can't sign up again with it for 12 months. A caller doesn't have to do anything for that. It
- * writes one line in the log, without the number, the name or the address. It gives whether
- * there was an account to remove.
- */
-export async function closeAccount(db: Database, supporterId: number, now = new Date()): Promise<boolean> {
-  const removed = await db.transaction(async (tx) => {
-    const [account] = await tx
-      .select({ disabledAt: supporters.disabledAt, email: supporters.email })
-      .from(supporters)
-      .where(eq(supporters.id, supporterId))
-      .for('update')
-
-    if (account !== undefined && account.disabledAt !== null) {
-      await tx
-        .insert(supporterBlockedAddresses)
-        .values({ addressHash: blockedAddressHash(account.email), blockedAt: now })
-        .onDuplicateKeyUpdate({ set: { blockedAt: now } })
-    }
-
-    await tx.delete(supporterEmailChanges).where(eq(supporterEmailChanges.supporterId, supporterId))
-    await tx.delete(supporterLoginLinks).where(eq(supporterLoginLinks.userId, supporterId))
-    await tx.delete(supporterSessions).where(eq(supporterSessions.userId, supporterId))
-
-    const [deleted] = await tx.delete(supporters).where(eq(supporters.id, supporterId))
-
-    return deleted.affectedRows === 1
-  })
-
-  if (removed) {
-    console.info('A supporter account was closed.')
-  }
-
-  return removed
-}
 
 /**
  * The proof that the page "Weet je het zeker?" was opened in this session, at `issuedAt`: the

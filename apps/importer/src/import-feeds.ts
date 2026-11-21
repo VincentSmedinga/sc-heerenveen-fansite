@@ -4,6 +4,7 @@ import type { Feed, ItemRelevance } from '@fansite/db/schema'
 import type { AnyMySqlColumn } from 'drizzle-orm/mysql-core'
 
 import { recordRun } from '@fansite/db/alerts'
+import { type CleanUpOptions, cleanUpSupporters, describeCleanUp } from '@fansite/db/clean-up-supporters'
 import { connect } from '@fansite/db/client'
 import { lockNameFor, withLock } from '@fansite/db/lock'
 import { mailConflicts } from '@fansite/db/match-conflict-mail'
@@ -119,6 +120,8 @@ export type ImportOptions = {
   makeFetcher?: (robots: RobotsStore) => Fetcher
   /** The wait between two requests of the persons step in milliseconds. A test gives 0. */
   personDataPause?: number
+  /** The environment and the mailer of the supporter clean-up (#1460). A test gives its own. */
+  supporters?: CleanUpOptions
   /**
    * The address of Wikidata, where the run reads the persons (#898). Without it, a run reads
    * Wikidata only when it reads the real Wikipedia, so a test with its own Wikipedia reaches
@@ -350,6 +353,7 @@ export async function runImport(
     englishOrigin,
     makeFetcher = (robots) => createFetcher({ robots }),
     personDataPause,
+    supporters: supporterOptions = {},
     wikidataOrigin: wikidata,
     wikipediaOrigin: origin = wikipediaOrigin,
     write = console.log,
@@ -367,6 +371,14 @@ export async function runImport(
       // failed import.
       await removeVisitorData(db, clock()).catch((error: unknown) =>
         write(`Visitor data: warning, not removed: ${describeError(error)}`),
+      )
+
+      // Accounts of supporters that were not used for two years, and sign-ups nobody confirmed
+      // (#1460). Before the dump of the night, so the address of a sign-up is gone from it. A
+      // failure is a warning, not a failed import.
+      const supporterLines = await cleanUpSupporters(db, clock(), supporterOptions).then(
+        describeCleanUp,
+        (error: unknown) => [`Supporter accounts: warning, not cleaned up: ${describeError(error)}`],
       )
 
       // Before any season is read: the clubs are right whether or not a season can be read. A
@@ -412,7 +424,12 @@ export async function runImport(
 
       await finishRun(db, runId, clock())
 
-      return { clubLines, personLines: [...personLines, ...addresses, ...stadiumLines], reports, wikipedia }
+      return {
+        clubLines: [...supporterLines, ...clubLines],
+        personLines: [...personLines, ...addresses, ...stadiumLines],
+        reports,
+        wikipedia,
+      }
     })
 
     if (!run.ran) {

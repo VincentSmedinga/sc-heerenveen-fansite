@@ -7083,6 +7083,7 @@
   Wie iets moet bewaren, zoals de hash van het adres van een geblokkeerd account, doet dat voordat hij hem aanroept.
 - **Waarom:** één plek die zegt wat weggaat, zodat een later issue niets kan vergeten.
 - **Alternatieven:** het verwijderen per aanroeper schrijven (drie kopieën die uit elkaar lopen).
+- **Later:** sinds _De import ruimt ongebruikte accounts van supporters op_ (21 november 2026, `docs/beslissingen/importer.md`) staat `closeAccount` in `packages/db/src/close-account.ts`, zodat de importer hem kan aanroepen; `apps/site/src/fans/close-account.ts` geeft hem door.
 - **Later:** sinds _De redactie beheert de accounts van supporters_ (21 november 2026) bewaart `closeAccount` zelf de hash van het adres van een geblokkeerd account, in dezelfde transactie; een aanroeper hoeft er niets voor te doen.
 
 - **Datum:** 21 november 2026
