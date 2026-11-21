@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 
 import { Heading } from '../heading/Heading'
 import { Page } from '../page/Page'
-import { Card, cardElements, cardSurfaces } from './Card'
+import { Card, cardElements, cardGames, cardSurfaces } from './Card'
 
 describe('Card', () => {
   it('is a section with the white surface by default', () => {
@@ -22,6 +22,25 @@ describe('Card', () => {
     expect(container.firstElementChild?.tagName.toLowerCase()).toBe(element)
     expect(container.firstElementChild?.className).toBe('hf-card')
     expect(container.firstElementChild?.hasAttribute('as')).toBe(false)
+  })
+
+  it.each(cardGames)('carries the watermark of %s when the card belongs to that game', (game) => {
+    const { container } = render(
+      <Card game={game} surface="soft">
+        Inhoud
+      </Card>,
+    )
+
+    expect(container.firstElementChild?.className).toBe(`hf-card hf-card-soft hf-card-game hf-card-game-${game}`)
+    expect(container.firstElementChild?.hasAttribute('game')).toBe(false)
+    expect(container.firstElementChild?.textContent).toBe('Inhoud')
+  })
+
+  it('has no watermark without a game, and adds nothing to the content for it', () => {
+    const { container } = render(<Card>Inhoud</Card>)
+
+    expect(container.firstElementChild?.className).toBe('hf-card')
+    expect(container.firstElementChild?.children).toHaveLength(0)
   })
 
   it('has the white surface when it is asked for', () => {
