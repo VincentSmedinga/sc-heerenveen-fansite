@@ -2,7 +2,8 @@
  * A tag: a small label with a rim in the colour of its text. It never carries meaning by
  * colour alone, because its text says it. The attention tone is the colour of text that says
  * data is missing, the highlight tone is the highlighted row with a rim of its own, and the
- * neutral tone is secondary text. Each tone reaches 4.5:1 for the text and 3:1 for the rim,
+ * neutral tone is secondary text. The open, todo and closed tones are a pale fill with text and
+ * a rim in one colour: green, amber and grey. Each tone reaches 4.5:1 for the text and 3:1 for the rim,
  * on the page and on the four surfaces, in light and in dark.
  */
 
@@ -28,6 +29,36 @@
     background-color: var(--hf-colour-background-highlight);
     border-color: var(--hf-colour-border-highlight);
     color: var(--hf-colour-text-highlight);
+
+    /* A fill is not painted in forced colours, so the rim is the system's text colour there. */
+    @media (forced-colors: active) {
+      border-color: CanvasText;
+    }
+  }
+
+  .hf-tag-open {
+    background-color: var(--hf-colour-background-tag-open);
+    color: var(--hf-colour-text-tag-open);
+
+    /* A fill is not painted in forced colours, so the rim is the system's text colour there. */
+    @media (forced-colors: active) {
+      border-color: CanvasText;
+    }
+  }
+
+  .hf-tag-todo {
+    background-color: var(--hf-colour-background-tag-todo);
+    color: var(--hf-colour-text-tag-todo);
+
+    /* A fill is not painted in forced colours, so the rim is the system's text colour there. */
+    @media (forced-colors: active) {
+      border-color: CanvasText;
+    }
+  }
+
+  .hf-tag-closed {
+    background-color: var(--hf-colour-background-tag-closed);
+    color: var(--hf-colour-text-tag-closed);
 
     /* A fill is not painted in forced colours, so the rim is the system's text colour there. */
     @media (forced-colors: active) {
