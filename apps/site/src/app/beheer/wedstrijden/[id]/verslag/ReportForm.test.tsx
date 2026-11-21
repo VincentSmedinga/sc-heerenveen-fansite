@@ -385,6 +385,7 @@ describe('the list Erin of a substitution in the form of a report', () => {
   }
   const props = {
     choices: {
+      home: true,
       matchHref: '/beheer/wedstrijden/7',
       opponent: 'Testclub',
       series: null,
@@ -751,6 +752,7 @@ describe('the choices of the substitutions and the roles in the form of a report
     values: { ...values, wij: { ...values.wij, speler, ...wij } },
   })
   const choices = {
+    home: true,
     matchHref: '/beheer/wedstrijden/7',
     opponent: 'Testclub',
     series: null,
@@ -900,7 +902,6 @@ describe('the choices of the substitutions and the roles in the form of a report
 
 describe('the input that the browser keeps for the form of a report', () => {
   const withoutMatch = {
-    home: true,
     home: true,
     matchHref: '/beheer/wedstrijden/7',
     opponent: 'Testclub',
@@ -1080,7 +1081,6 @@ describe('the input that the browser keeps for the form of a report', () => {
 
 describe('the button for the line-up of the previous match in the form of a report', () => {
   const choices = {
-    home: true,
     home: true,
     matchHref: '/beheer/wedstrijden/7',
     matchId: 7,
