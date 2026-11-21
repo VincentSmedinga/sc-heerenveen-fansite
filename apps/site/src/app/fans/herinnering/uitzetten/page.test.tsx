@@ -2,7 +2,7 @@ import { makeReminderCode } from '@fansite/shared/reminder-code'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import TurnOffReminderPage, { metadata } from './page'
+import TurnOffReminderPage, { generateMetadata } from './page'
 
 vi.mock('next/navigation', () => ({
   notFound: () => {
@@ -32,7 +32,7 @@ describe('the page of the link in a reminder', () => {
     expect(html.match(/<h1/g)).toHaveLength(1)
     expect(html).toContain('Herinnering uitzetten</h1>')
     expect(html).toContain(
-      'Met de knop zet je de herinnering uit. Je krijgt dan geen bericht meer de dag voor een wedstrijd.',
+      'Met de knop zet je de herinnering uit: je krijgt dan geen bericht meer de dag voor een wedstrijd.',
     )
     expect(html).toMatch(/<button[^>]*>Herinnering uitzetten<\/button>/)
     expect(html).toMatch(/<input[^>]*type="hidden"[^>]*name="code"|<input[^>]*name="code"[^>]*type="hidden"/)
@@ -66,8 +66,15 @@ describe('the page of the link in a reminder', () => {
     }
   })
 
-  it('is not indexed and does not send the address on', () => {
-    expect(metadata).toMatchObject({ referrer: 'no-referrer', robots: { follow: false, index: false } })
+  it('is not indexed, does not send the address on, and has a title for each state', async () => {
+    expect(await generateMetadata({ searchParams: Promise.resolve({}) })).toMatchObject({
+      referrer: 'no-referrer',
+      robots: { follow: false, index: false },
+      title: 'Herinnering uitzetten',
+    })
+    expect(await generateMetadata({ searchParams: Promise.resolve({ klaar: '1' }) })).toMatchObject({
+      title: 'Herinnering uitgezet',
+    })
   })
 
   it('is "not found" while Prognose is off, or accounts are off', async () => {

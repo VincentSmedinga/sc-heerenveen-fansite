@@ -19,8 +19,8 @@ export const myDataPath = '/fans/mijn-account/gegevens'
 /**
  * The tables that belong to the account itself and go with it when it is closed
  * (`ON DELETE CASCADE`): the sessions, the links and codes, the requests for a new address and
- * the record of the reminders that were sent. The page doesn't show them: they are there for a
- * few minutes, are the session itself, or hold only the number of a match.
+ * the record of the reminders that were sent. The page shows only the last one, as a count of
+ * matches; the others are there for a few minutes or are the session itself.
  */
 export const accountTables = [
   'supporter_reminders',

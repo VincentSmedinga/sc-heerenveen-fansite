@@ -14,10 +14,19 @@ export const dynamic = 'force-dynamic'
 
 // The code is in the address, so the page must never be indexed and never tell another site
 // where the visitor came from.
-export const metadata: Metadata = {
-  referrer: 'no-referrer',
-  robots: { follow: false, index: false },
-  title: 'Herinnering uitzetten',
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}): Promise<Metadata> {
+  // The title changes after the button, so a screen reader hears that something happened.
+  const { klaar } = await searchParams
+
+  return {
+    referrer: 'no-referrer',
+    robots: { follow: false, index: false },
+    title: klaar === '1' ? 'Herinnering uitgezet' : 'Herinnering uitzetten',
+  }
 }
 
 /**
@@ -48,7 +57,7 @@ export default async function TurnOffReminderPage({
         ) : valid && typeof code === 'string' ? (
           <>
             <Text appearance="intro">
-              Met de knop zet je de herinnering uit. Je krijgt dan geen bericht meer de dag voor een wedstrijd.
+              Met de knop zet je de herinnering uit: je krijgt dan geen bericht meer de dag voor een wedstrijd.
             </Text>
             <Form action={turnOffReminder}>
               <Input name="code" type="hidden" value={code} />

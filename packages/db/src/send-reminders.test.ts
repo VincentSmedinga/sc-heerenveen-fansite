@@ -283,12 +283,27 @@ describe('a mail server that does not answer', () => {
     failFor = names.map((name) => `${name}@example.org`)
 
     expect(failuresInARow).toBe(3)
-    expect(await run()).toMatchObject({ failed: 3, sent: 0 })
+    expect(await run()).toMatchObject({ failed: 3, limited: false, sent: 0 })
     expect(await database.db.select().from(supporterReminders)).toEqual([])
 
     failFor = []
 
     expect((await run(new Date(now.getTime() + 15 * 60 * 1000))).sent).toBe(6)
+  })
+
+  it('does not mail the editors about the limit when the run stopped', async () => {
+    await addMatch(kickoff)
+
+    const names = ['A', 'B', 'C', 'D', 'E', 'F']
+
+    for (const name of names) {
+      await addSupporter(name)
+    }
+
+    failFor = names.map((name) => `${name}@example.org`)
+
+    expect(await run(now, { ...env, FANS_REMINDER_LIMIT: '5' })).toMatchObject({ failed: 3, limited: true })
+    expect(mails).toEqual([])
   })
 
   it('goes on after one failed mail', async () => {

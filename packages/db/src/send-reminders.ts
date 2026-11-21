@@ -217,7 +217,7 @@ export async function sendReminders(
 
   // One mail to the editors, from the run that begins the reminders of this match, so it
   // doesn't come every quarter of an hour.
-  if (report.limited && (already?.count ?? 0) === 0) {
+  if (report.limited && streak < failuresInARow && (already?.count ?? 0) === 0) {
     await send(limitMail(limit)).catch(() => undefined)
   }
 
