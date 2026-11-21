@@ -1,5 +1,6 @@
 import { sendFansMail } from '@fansite/shared/fans-env'
 
+import type { ChangeEmailMail } from './change-email'
 import type { LogInMail } from './log-in'
 import type { SignUpMail } from './sign-up'
 
@@ -10,6 +11,29 @@ import { signUpsPerHour } from './sign-up'
 import { supporterKind } from './supporter-login'
 
 const minutes = supporterKind.linkLifetime / 60_000
+
+/** The text of the mail to the new address, with the link and the code to confirm it. */
+export function changeEmailMailText({ code, url }: Pick<ChangeEmailMail, 'code' | 'url'>) {
+  return mailText(
+    'Je wilt dit adres gebruiken voor je account bij Fans op de sc Heerenveen Fansite. Open deze link om het te bevestigen:',
+    url,
+    code,
+  )
+}
+
+/**
+ * The text of the message to the old address after a change. It doesn't name the new address:
+ * whoever reads the old one may no longer be the supporter.
+ */
+export function emailChangedMailText() {
+  return [
+    'Het e-mailadres van je account bij Fans op de sc Heerenveen Fansite is gewijzigd.',
+    'Vanaf nu log je in met het nieuwe adres. Dit adres gebruiken we niet meer.',
+    '',
+    `Deed je dit niet zelf? Mail dan meteen de redactie: ${editorsEmail}.`,
+    '',
+  ].join('\n')
+}
 
 /** The text of the mail with the link and the code to log in. */
 export function logInMailText({ code, url }: Pick<LogInMail, 'code' | 'url'>) {
@@ -29,6 +53,24 @@ export async function sendCeilingMail() {
       ].join('\n'),
       to: editorsEmail,
     }),
+  )
+}
+
+/** Mails the link and the code to the new address, only while accounts are on. */
+export async function sendChangeEmailMail(mail: ChangeEmailMail) {
+  await sendFansMail('accounts', () =>
+    sendMail({
+      subject: 'Bevestig je nieuwe e-mailadres bij de sc Heerenveen Fansite',
+      text: changeEmailMailText(mail),
+      to: mail.to,
+    }),
+  )
+}
+
+/** Tells the old address that the address of the account changed, while accounts are on. */
+export async function sendEmailChangedMail(to: string) {
+  await sendFansMail('accounts', () =>
+    sendMail({ subject: 'Je e-mailadres bij de sc Heerenveen Fansite is gewijzigd', text: emailChangedMailText(), to }),
   )
 }
 

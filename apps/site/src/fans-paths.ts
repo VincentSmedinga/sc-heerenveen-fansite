@@ -14,10 +14,10 @@ export const fansGames = [
 ] as const
 
 /**
- * Whether the path is a page of signing up or logging in: one narrow column with one task, with
- * no bar of games under the menu, like the login of the admin.
+ * Whether the path is a page of the account: signing up, logging in, or Mijn account and its
+ * pages. They have no bar of games under the menu, like the login of the admin.
  */
 export const isAccountPath = (pathname: string) =>
-  ['aanmelden', 'inloggen'].some(
+  ['aanmelden', 'inloggen', 'mijn-account'].some(
     (page) => pathname === `${fansPath}/${page}` || pathname.startsWith(`${fansPath}/${page}/`),
   )

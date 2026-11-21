@@ -1,6 +1,7 @@
 import type { Database } from '@fansite/db/client'
 
-import { and, count, eq, gt, gte, inArray, isNotNull, isNull } from 'drizzle-orm'
+import { supporterEmailChanges } from '@fansite/db/schema'
+import { and, count, eq, gt, gte, inArray, isNotNull, isNull, lte } from 'drizzle-orm'
 import { setTimeout as sleep } from 'node:timers/promises'
 
 import { normaliseEmail } from '../beheer/accounts'
@@ -189,6 +190,15 @@ export async function noteMail(
 }
 
 /**
+ * Removes the requests to change an address that have expired (see change-email.ts), so a
+ * request that nobody uses leaves nothing behind. Every request of a supporter for a mail calls
+ * it, like `removeEnded`.
+ */
+export async function removeEndedChanges(db: Database, now: Date) {
+  await db.delete(supporterEmailChanges).where(lte(supporterEmailChanges.expiresAt, now))
+}
+
+/**
  * The page to go back to after logging in, from the value in a form or an address: only a path
  * under /fans, not the way in itself, and `undefined` for anything else, so the site never
  * sends a supporter to another site or outside Fans.
@@ -245,6 +255,7 @@ async function decide(db: Database, value: string, returnTo: string | undefined,
   }
 
   await removeEnded(db, supporterKind, now)
+  await removeEndedChanges(db, now)
 
   const { users } = supporterKind.tables
   const [account] = await db.select({ id: users.id }).from(users).where(eq(users.email, email))

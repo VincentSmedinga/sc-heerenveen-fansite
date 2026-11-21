@@ -61,13 +61,17 @@ export function proxy(request: NextRequest, event?: NextFetchEvent) {
 
   if (isFansPath(request.nextUrl.pathname)) {
     // Personal pages may never be kept, and the page of a supporter sends a referrer only to
-    // our own pages. Whether a search engine may index one is for the page to say.
+    // our own pages. Whether a search engine may index one is for the page to say; Mijn account
+    // and its pages say it in a header too, on every environment.
     response.headers.set('Cache-Control', 'no-store')
     response.headers.set('Referrer-Policy', 'same-origin')
   }
 
-  if (isAdminPath(request.nextUrl.pathname)) {
+  if (isAdminPath(request.nextUrl.pathname) || isMyAccountPath(request.nextUrl.pathname)) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+  }
+
+  if (isAdminPath(request.nextUrl.pathname)) {
     response.headers.set('Cache-Control', 'no-store')
     response.headers.set('Referrer-Policy', 'same-origin')
   } else if (!isIndexable()) {
@@ -75,6 +79,11 @@ export function proxy(request: NextRequest, event?: NextFetchEvent) {
   }
 
   return response
+}
+
+/** Whether the path is Mijn account of a supporter, or one of its pages. */
+function isMyAccountPath(pathname: string) {
+  return pathname === '/fans/mijn-account' || pathname.startsWith('/fans/mijn-account/')
 }
 
 export const config = {

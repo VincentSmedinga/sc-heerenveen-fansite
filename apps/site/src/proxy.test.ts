@@ -113,6 +113,17 @@ describe('proxy', () => {
     },
   )
 
+  it.each(['/fans/mijn-account', '/fans/mijn-account/schermnaam', '/fans/mijn-account/e-mailadres/verstuurd'])(
+    'keeps %s out of search engines on production too',
+    (path) => {
+      vi.stubEnv('SITE_ENV', 'production')
+      const { headers } = proxy(path)
+
+      expect(headers.get('X-Robots-Tag')).toBe('noindex, nofollow')
+      expect(headers.get('Cache-Control')).toBe('no-store')
+    },
+  )
+
   it('does not treat /fansite as part of Fans', () => {
     vi.stubEnv('SITE_ENV', 'production')
     expect(isFansPath('/fansite')).toBe(false)

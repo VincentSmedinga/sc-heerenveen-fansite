@@ -1506,11 +1506,14 @@ Het hoofdmenu en de balk met de spellen komen uit `fansMenu()` in `src/fans.ts`,
 
 Een supporter maakt een account op `/fans/aanmelden`, met een schermnaam en een e-mailadres, en bevestigt het adres met de link of de code uit de mail.
 Daarna logt hij in op `/fans/inloggen`, ook met een link of een code uit de mail, en blijft hij 90 dagen na zijn laatste bezoek ingelogd, hoogstens een jaar.
+Op `/fans/mijn-account` wijzigt hij zijn schermnaam (hoogstens één keer per 30 dagen) en zijn e-mailadres, en kiest hij of zijn naam in de standen staat.
+Een nieuw adres geldt pas als de supporter de link of de code gebruikt die naar dat adres ging, in een sessie van hetzelfde account.
 Lokaal, zonder mailserver, staat de mail met de link en de code in het logboek van `pnpm dev`.
-De code staat in `src/fans`: de regels van de schermnaam in `screen-name.ts`, het aanmelden in `sign-up.ts`, het inloggen, het plafond van de mails en het adres om naar terug te gaan in `log-in.ts`, de instelling voor de gedeelde code van het inloggen in `supporter-login.ts`, en `requireSupporter()` in `require-supporter.ts`.
+De code staat in `src/fans`: de regels van de schermnaam in `screen-name.ts`, het aanmelden in `sign-up.ts`, het inloggen, het plafond van de mails en het adres om naar terug te gaan in `log-in.ts`, het wijzigen in `change-name.ts` en `change-email.ts`, de keuze voor de standen in `rankings.ts`, de instelling voor de gedeelde code van het inloggen in `supporter-login.ts`, en `requireSupporter()` in `require-supporter.ts`.
 Elke persoonlijke pagina en actie onder `/fans` begint met `requireSupporter()`; `src/fans/routes.test.ts` faalt voor een die dat niet doet.
-De tabellen zijn `supporters`, `supporter_login_links`, `supporter_sessions` en `supporter_login_attempts`, los van die van het beheer.
+De tabellen zijn `supporters`, `supporter_login_links`, `supporter_email_changes`, `supporter_sessions` en `supporter_login_attempts`, los van die van het beheer.
 Het cookie heet `fans-sessie` en gaat alleen mee naar de pagina's onder `/fans`.
+De proxy geeft Mijn account en zijn pagina's de header `X-Robots-Tag: noindex, nofollow`, op elke omgeving.
 
 ## Icoon en manifest
 

@@ -104,6 +104,7 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
   stadiums: 'copy',
   staff: 'copy',
   standings: 'copy',
+  supporter_email_changes: 'structure',
   supporter_login_attempts: 'structure',
   supporter_login_links: 'structure',
   supporter_sessions: 'structure',

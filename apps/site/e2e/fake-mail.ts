@@ -15,9 +15,14 @@ export const fakeMailPort = process.env['FAKE_MAIL_PORT'] ?? '2525'
  * decoded, so a test can search for the words in it.
  */
 export function sentMails() {
-  return readdirSync(fakeMailFolder)
-    .filter((name) => name.endsWith('.eml'))
-    .map((name) => decode(readFileSync(path.join(fakeMailFolder, name), 'latin1')))
+  return (
+    readdirSync(fakeMailFolder)
+      .filter((name) => name.endsWith('.eml'))
+      // In the order they came: mail-10.eml after mail-9.eml, which an order by the name gets
+      // wrong.
+      .toSorted((a, b) => numberOf(a) - numberOf(b))
+      .map((name) => decode(readFileSync(path.join(fakeMailFolder, name), 'latin1')))
+  )
 }
 
 function decode(mail: string) {
@@ -40,4 +45,9 @@ function decode(mail: string) {
   }
 
   return mail
+}
+
+/** The number of the mail in its file name, `mail-12.eml`. */
+function numberOf(name: string) {
+  return Number(/\d+/.exec(name)?.[0] ?? 0)
 }

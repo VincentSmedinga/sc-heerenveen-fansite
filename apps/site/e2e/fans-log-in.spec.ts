@@ -57,7 +57,7 @@ test.describe('without JavaScript', () => {
     await page.getByRole('button', { name: 'Doorgaan' }).click()
 
     await expect(page).toHaveURL(/\/fans\/mijn-account$/)
-    await expect(page.getByRole('definition').first()).toHaveText(name)
+    await expect(page.getByRole('definition').first()).toContainText(name)
 
     // The cookie lasts past a restart of the browser.
     const cookie = (await page.context().cookies()).find(({ name: cookieName }) => cookieName === 'fans-sessie')

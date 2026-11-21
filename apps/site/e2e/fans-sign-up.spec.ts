@@ -48,7 +48,7 @@ test.describe('without JavaScript', () => {
     await expect(page.getByText(`Welkom, ${name}.`)).toBeVisible()
     await page.goto('/fans/mijn-account')
     await expect(page.getByText('Welkom,')).toHaveCount(0)
-    await expect(page.getByRole('definition').first()).toHaveText(name)
+    await expect(page.getByRole('definition').first()).toContainText(name)
     await expect(page.getByText(address)).toBeVisible()
 
     const cookie = (await page.context().cookies()).find(({ name: cookieName }) => cookieName === 'fans-sessie')
