@@ -1,6 +1,9 @@
+import { graceDays, unusedMonths } from '@fansite/db/clean-up-supporters'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { monthsKept } from '#src/fans/blocked-addresses'
+import { supporterKind } from '#src/fans/supporter-login'
 import { headingAnchors, withoutHeadingLinks, withoutIcons } from '#src/without-icons'
 
 import PrivacyPage, { generateMetadata } from './page'
@@ -194,5 +197,91 @@ describe('the page Privacy', () => {
       ['mailto:fansite@heerenveen.org', 'fansite@heerenveen.org'],
       ['https://www.autoriteitpersoonsgegevens.nl', 'Autoriteit Persoonsgegevens'],
     ])
+  })
+})
+
+describe('the page Privacy with accounts on', () => {
+  const day = 24 * 60 * 60 * 1000
+
+  function withAccounts() {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+
+    const on = renderToStaticMarkup(<PrivacyPage />)
+
+    return { on, plain: withoutHeadingLinks(on), text: withoutIcons(withoutHeadingLinks(on)) }
+  }
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it('reads as before with accounts off: no part about accounts and no cookie of supporters', () => {
+    expect(html).not.toContain('Als je een account maakt')
+    expect(html).not.toContain('Een supporter die inlogt')
+    expect(html).not.toContain('tenzij je inlogt')
+  })
+
+  it('says in the first sentence that the site sets no cookies unless you log in', () => {
+    expect(withAccounts().on).toContain('De site zet geen cookies, tenzij je inlogt, volgt niemand en laadt niets')
+  })
+
+  it('has the part about accounts after the cookies and before the messages, with the anchor account', () => {
+    const { plain: page } = withAccounts()
+
+    expect(page.match(/<h2[^>]*id="([^"]*)"/g)?.map((tag) => tag.match(/id="([^"]*)"/)?.[1])).toEqual([
+      'tellen',
+      'hosting',
+      'cookies',
+      'account',
+      'berichten',
+      'andere-sites',
+      'vragen',
+    ])
+    expect(headingAnchors(withAccounts().on)).toContainEqual(['account', 'Als je een account maakt'])
+  })
+
+  it('describes the cookie of supporters, its path, the sign in the browser and why there is no cookie notice', () => {
+    const { text } = withAccounts()
+
+    expect(supporterKind.cookie).toMatchObject({ name: 'fans-sessie', path: '/fans' })
+    expect(text).toContain(
+      'Een supporter die inlogt, krijgt ook een cookie. Het bevat een nummer voor die sessie, niets over jou.',
+    )
+    expect(text).toContain('alleen naar pagina&#x27;s onder /fans')
+    expect(text).toContain('een teken met je schermnaam')
+    expect(text).toContain('Een cookiemelding vragen we niet: dit cookie is nodig voor iets waar je zelf om vraagt')
+  })
+
+  it('gives the numbers of the code: 90 days idle, a year at most, 15 minutes, 24 months, 30 days, 12 months', () => {
+    const { text } = withAccounts()
+
+    expect(supporterKind.idleLifetime / day).toBe(90)
+    expect(text).toContain('tot 90 dagen na je laatste bezoek, en hoogstens een jaar na het inloggen')
+    expect(supporterKind.absoluteLifetime / day).toBe(365)
+    expect(supporterKind.linkLifetime / 60_000).toBe(15)
+    expect(text).toContain('Een link of een code uit een mail werkt 15 minuten.')
+    expect(unusedMonths).toBe(24)
+    expect(text).toContain('Gebruik je het twee jaar niet')
+    expect(graceDays).toBe(30)
+    expect(text).toContain('het account verdwijnt 30 dagen later')
+    expect(monthsKept).toBe(12)
+    expect(text).toContain('bewaren we 12 maanden een code van het e-mailadres')
+  })
+
+  it('says what we keep, what we do not keep, what others see and what closing does', () => {
+    const { text } = withAccounts()
+
+    expect(text).toContain('Met een account bewaren we je schermnaam, je e-mailadres')
+    expect(text).toContain('We bewaren geen IP-adres, geen gegevens over je browser, geen echte naam')
+    expect(text).toContain('Andere supporters zien je schermnaam en je punten in de standen, tenzij je dat uitzet.')
+    expect(text).toContain('Een account is een profiel dat je zelf maakt.')
+    expect(text).toContain('Dan verdwijnen je schermnaam en je e-mailadres')
+    expect(text).toContain('vraag het dan de redactie voordat je opheft')
+    expect(text).toContain('Het adres zelf bewaren we niet.')
+    expect(text).toContain('één keer als je account twee jaar niet is gebruikt')
+  })
+
+  it('links to Mijn account', () => {
+    expect(withAccounts().plain).toContain('<a href="/fans/mijn-account">Mijn account</a>')
   })
 })

@@ -41,7 +41,8 @@ export default async function MyDataPage() {
         <BackToAccount />
         <Heading level={1}>Alles wat we van je bewaren</Heading>
         <Text appearance="intro">
-          Andere supporters zien alleen je schermnaam en je punten in de standen. <Link href="/privacy">Privacy</Link>
+          Andere supporters zien alleen je schermnaam en je punten in de standen.{' '}
+          <Link href="/privacy#account">Privacy</Link>
         </Text>
         <Card aria-labelledby="account-kop">
           <Heading id="account-kop" level={2}>
@@ -105,7 +106,8 @@ export default async function MyDataPage() {
           ))
         )}
         <Text appearance="meta">
-          Geen IP-adres, geen browser, geen echte naam: die bewaren we niet. <Link href="/privacy">Privacy</Link>
+          Geen IP-adres, geen browser, geen echte naam: die bewaren we niet.{' '}
+          <Link href="/privacy#account">Privacy</Link>
         </Text>
       </Page.Cell>
     </Page.Main>
