@@ -9,7 +9,7 @@
 // `wissel-wij-2-minuut`. An event points to a player of the report by the number of his row in
 // the list of players of the same side (`3`); a goal points to its scorer and assist by the
 // side and the number (`wij-3`), since a scorer of an own goal is of the other side.
-import { formationChoices } from '@fansite/shared/match-report'
+import { formationChoices, type Squad, squadAt } from '@fansite/shared/match-report'
 
 export const sides = ['wij', 'zij'] as const
 
@@ -449,58 +449,9 @@ export function playerOf(
   return name === '' ? undefined : { name, shirtNumber: typed ?? chosen?.shirtNumber ?? null }
 }
 
-/**
- * The rows of the players of a side that are on the pitch when substitution `index` (from 0)
- * takes place: the line-up (Basis and Basis en aanvoerder), plus who came on in an earlier
- * substitution, minus who went off in one and who has a red or a yellow-red card by then. This
- * is the same play as `play` in `@fansite/shared/match-report`: the clock decides, a tie goes
- * in the order of the rows with the substitutions first, and a row without a minute comes after
- * the others. Cards without a minute leave nobody off.
- */
+/** The rows of the players of a side on the pitch when substitution `index` takes place. */
 export function playersOnPitch(values: ReportValues, side: Side, index: number): Set<string> {
-  const rows = values[side]
-  const onPitch = new Set(
-    rows.speler.flatMap((row, place) => (row.rol === 'basis' || row.rol === 'aanvoerder' ? [String(place + 1)] : [])),
-  )
-  const own = rows.wissel[index]
-
-  if (own === undefined) {
-    return onPitch
-  }
-
-  type Step = { at: number; kind: 0 | 1; order: number; row: Row }
-
-  const before = (step: Step) => {
-    const at = clockOfRow(own)
-
-    return step.at !== at ? step.at < at : step.kind !== 0 ? false : step.order < index
-  }
-  const steps: Step[] = [
-    ...rows.wissel.flatMap((row, order) =>
-      order === index ? [] : [{ at: clockOfRow(row), kind: 0 as const, order, row }],
-    ),
-    ...rows.kaart.flatMap((row, order) =>
-      (row.soort === 'rood' || row.soort === 'geel-rood') && Number.isFinite(clockOfRow(row))
-        ? [{ at: clockOfRow(row), kind: 1 as const, order, row }]
-        : [],
-    ),
-  ]
-    .filter(before)
-    .toSorted((a, b) => (a.at === b.at ? a.kind - b.kind || a.order - b.order : a.at - b.at))
-
-  for (const { kind, row } of steps) {
-    if (kind === 1) {
-      onPitch.delete(row.speler ?? '')
-    } else {
-      onPitch.delete(row.eruit ?? '')
-
-      if ((row.erin ?? '') !== '') {
-        onPitch.add(row.erin ?? '')
-      }
-    }
-  }
-
-  return onPitch
+  return squadOnRows(values, side, index).onPitch
 }
 
 /** Which button of the form was pressed: save, or add or remove a row. */
@@ -631,6 +582,41 @@ export function squadChoicesForRow(
   )
 
   return squad.filter((player) => !taken.has(String(player.id)) || String(player.id) === own?.keuze)
+}
+
+/**
+ * The rows of the players of a side that are on the pitch and on the bench when substitution
+ * `index` (from 0) takes place. It is the rule of the server, `squadAt` in
+ * `@fansite/shared/match-report`, on the rows of the form: the line-up (Basis and Basis en
+ * aanvoerder) is on the pitch and the role Bank is on the bench, substitutions and red or
+ * yellow-red cards move them. A row without a minute comes after the others, and a card without
+ * a minute leaves nobody off. A substitution that is not there yet (`index` beyond the rows)
+ * counts everything entered.
+ */
+export function squadOnRows(values: ReportValues, side: Side, index: number) {
+  const rows = values[side]
+  const own = rows.wissel[index]
+  const place = (row: Row) => ((row.speler ?? '') === '' ? undefined : row.speler)
+  const squad: Squad<string> = {
+    bench: rows.speler.flatMap((row, at) => (row.rol === 'bank' ? [String(at + 1)] : [])),
+    cards: rows.kaart.flatMap((row) =>
+      (row.soort === 'rood' || row.soort === 'geel-rood') &&
+      Number.isFinite(clockOfRow(row)) &&
+      place(row) !== undefined
+        ? [{ at: clockOfRow(row), player: row.speler ?? '' }]
+        : [],
+    ),
+    starters: rows.speler.flatMap((row, at) =>
+      row.rol === 'basis' || row.rol === 'aanvoerder' ? [String(at + 1)] : [],
+    ),
+    substitutions: rows.wissel.map((row) => ({
+      at: clockOfRow(row),
+      in: (row.erin ?? '') === '' ? undefined : row.erin,
+      out: (row.eruit ?? '') === '' ? undefined : row.eruit,
+    })),
+  }
+
+  return squadAt(squad, { at: own === undefined ? Infinity : clockOfRow(own), index })
 }
 
 /** The place on the clock of a row: minute and added time, or `Infinity` with no minute. */

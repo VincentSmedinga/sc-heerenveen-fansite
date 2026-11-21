@@ -59,7 +59,6 @@ import {
   playerChoices,
   playerLabel,
   playerOf,
-  playersOnPitch,
   previousLineUpButtonValue,
   readReportValues,
   removeButtonValue,
@@ -76,6 +75,7 @@ import {
   type Side,
   sides,
   squadChoicesForRow,
+  squadOnRows,
   statusChoices,
 } from '#src/beheer/report-fields'
 import { errorOrder } from '#src/beheer/report-form'
@@ -575,14 +575,17 @@ export function ReportFields() {
           ) : null}
           <Text appearance="meta" id={outHintId(side)}>
             {live
-              ? 'Eruit: alleen spelers die op dat moment op het veld staan.'
+              ? 'Erin: alleen spelers van de bank die niet al in een andere wissel erin komen. Eruit: alleen spelers die op dat moment op het veld staan.'
               : 'Eruit: alle spelers staan in de lijst. Bij het opslaan controleert de site of de speler op het veld stond.'}
           </Text>
           {table('wissel', side, [...minutes, { line: 2, name: 'Erin' }, { line: 2, name: 'Eruit' }], (row, number) => {
             // With JavaScript the list holds who is on the pitch at the moment of this row. The
             // player the row has now stays, with a note, so nothing disappears quietly.
-            const pitch = live ? playersOnPitch(current, side, number - 1) : undefined
-            const leaving = pitch === undefined ? mine : mine.filter((player) => pitch.has(player.value))
+            const squad = live ? squadOnRows(current, side, number - 1) : undefined
+            const leaving = squad === undefined ? mine : mine.filter((player) => squad.onPitch.has(player.value))
+            // Erin: who is on the bench, comes on nowhere else and was not sent off by then.
+            const entering = squad === undefined ? bench : bench.filter((player) => squad.bench.has(player.value))
+            const benched = mine.find((player) => player.value === row.erin)
             const chosen = mine.find((player) => player.value === row.eruit)
 
             return [
@@ -594,11 +597,13 @@ export function ReportFields() {
                 'erin',
                 row,
                 playerOptions(
-                  bench,
+                  entering,
                   row.erin,
-                  mine.find((player) => player.value === row.erin)?.label,
+                  benched === undefined ? undefined : `${benched.label} (zit dan niet op de bank)`,
                   bench.length === 0 ? 'Niemand op de bank' : undefined,
                 ),
+                'default',
+                outHintId(side),
               ),
               choice(
                 'wissel',

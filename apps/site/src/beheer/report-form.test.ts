@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { emptyRow, playersOnPitch, type ReportValues, type Row } from './report-fields'
+import { emptyRow, playersOnPitch, type ReportValues, type Row, squadOnRows } from './report-fields'
 import { report as baseReport, goal, squadOf, substitution } from './report-fixtures'
 import { checkReportForm, errorOrder, type ReportMatch } from './report-form'
 
@@ -490,6 +490,56 @@ describe('checkReportForm', () => {
           const refused = message.includes('niet op het veld') || message.includes('twee keer eruit')
 
           expect(playersOnPitch(values, 'wij', index).has(row.eruit ?? ''), `${name}, row ${index + 1}`).toBe(!refused)
+        })
+      }
+    })
+
+    it('says the same as the list Erin about who is on the bench, also after a red card and for one who goes off again', () => {
+      const red = (minuut: string) => ({ ...emptyRow('kaart'), minuut, soort: 'rood', speler: '12' })
+      const cases: [string, ReportValues][] = [
+        ['a player from the bench', report({ wij: { wissel: [sub({ erin: '12', eruit: '5', minuut: '60' })] } })],
+        ['a starter', report({ wij: { wissel: [sub({ erin: '2', eruit: '5', minuut: '60' })] } })],
+        [
+          'a player who comes on twice',
+          report({
+            wij: {
+              wissel: [sub({ erin: '12', eruit: '5', minuut: '60' }), sub({ erin: '12', eruit: '6', minuut: '70' })],
+            },
+          }),
+        ],
+        [
+          'a red card before',
+          report({ wij: { kaart: [red('50')], wissel: [sub({ erin: '12', eruit: '5', minuut: '60' })] } }),
+        ],
+        [
+          'a red card after',
+          report({ wij: { kaart: [red('70')], wissel: [sub({ erin: '12', eruit: '5', minuut: '60' })] } }),
+        ],
+        [
+          'a player who came on and goes off again',
+          report({
+            wij: {
+              wissel: [sub({ erin: '12', eruit: '5', minuut: '60' }), sub({ erin: '13', eruit: '12', minuut: '70' })],
+            },
+          }),
+        ],
+      ]
+
+      for (const [name, values] of cases) {
+        const checked = checkReportForm(values, context)
+
+        values.wij.wissel.forEach((row, index) => {
+          const message = checked.errors[`wissel-wij-${index + 1}-erin`] ?? ''
+          const refused = message.includes('niet op de bank') || message.includes('twee keer binnen')
+          const listed = squadOnRows(values, 'wij', index).bench.has(row.erin ?? '')
+
+          // What the list offers, the server accepts. The first of two rows with the same
+          // player coming on is hidden by the list and not refused: that is the only gap.
+          if (listed) {
+            expect(refused, `${name}, row ${index + 1}`).toBe(false)
+          } else if (!refused) {
+            expect(name, `${name}, row ${index + 1}`).toBe('a player who comes on twice')
+          }
         })
       }
     })

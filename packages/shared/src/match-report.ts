@@ -218,6 +218,17 @@ const sideName = (ours: boolean) => (ours ? 'sc Heerenveen' : 'de tegenstander')
 /** The score at half-time, from the side of sc Heerenveen. */
 export type HalfTimeScore = { against: number; for: number }
 
+/** The players of a team and what happens to them, as `squadAt` reads it. */
+export type Squad<Id> = {
+  /** The players who start on the bench: the ones a substitution can bring on. */
+  bench: readonly Id[]
+  /** The red and yellow-red cards with a minute, by their place on the clock. */
+  cards: readonly { at: number; player: Id }[]
+  starters: readonly Id[]
+  /** The substitutions in list order, with their place on the clock (`Infinity` without). */
+  substitutions: readonly { at: number; in?: Id | undefined; out?: Id | undefined }[]
+}
+
 /**
  * Where each player stands on the clock: `on` is the moment he comes on (0 for the line-up,
  * `undefined` when he never does) and `off` the moment he goes off or is sent off (`undefined`
@@ -687,6 +698,59 @@ export function playedMatch(report: MatchReport, appearanceId: number) {
   return presence.get(appearanceId)?.on !== undefined
 }
 
+/**
+ * Who is on the pitch and who is on the bench for the substitution at `index` of the list (a
+ * new one when `index` is left out), at a place on the clock (`Infinity` for a minute that is
+ * not known yet: everything entered counts). This is the one rule behind the lists of the forms
+ * and the check of the server. The pitch holds the starters, plus who comes on in another
+ * substitution before that moment, minus who goes off in one and who has a red or a yellow-red
+ * card by then. The bench holds who starts there, minus who comes on in any other substitution
+ * and who was sent off before. A tie in the clock goes in the order of the lists, with the
+ * substitutions before the cards.
+ */
+export function squadAt<Id>(squad: Squad<Id>, moment: { at: number; index?: number }) {
+  const index = moment.index ?? squad.substitutions.length
+  type Step = { at: number; card: boolean; in?: Id | undefined; order: number; player?: Id | undefined }
+  const steps: Step[] = [
+    ...squad.substitutions.flatMap((substitution, order) =>
+      order === index
+        ? []
+        : [{ at: substitution.at, card: false, in: substitution.in, order, player: substitution.out }],
+    ),
+    ...squad.cards.map((card, order) => ({ at: card.at, card: true, order, player: card.player })),
+  ]
+    .filter((step) => (step.at === moment.at ? !step.card && step.order < index : step.at < moment.at))
+    .toSorted((a, b) => a.at - b.at || Number(a.card) - Number(b.card) || a.order - b.order)
+  const onPitch = new Set(squad.starters)
+  const sentOff = new Set<Id>()
+
+  for (const step of steps) {
+    if (step.player !== undefined) {
+      onPitch.delete(step.player)
+    }
+    if (step.card && step.player !== undefined) {
+      sentOff.add(step.player)
+    }
+    if (step.in !== undefined) {
+      onPitch.add(step.in)
+    }
+  }
+
+  const comingOn = new Set<Id>()
+
+  for (const [order, other] of squad.substitutions.entries()) {
+    if (order !== index && other.in !== undefined) {
+      comingOn.add(other.in)
+    }
+  }
+
+  return {
+    bench: new Set(squad.bench.filter((player) => !comingOn.has(player) && !sentOff.has(player))),
+    onPitch,
+    sentOff,
+  }
+}
+
 /** Whether a number is a whole number between two numbers, both included. */
 function between(value: number, low: number, high: number) {
   return Number.isInteger(value) && value >= low && value <= high
@@ -938,10 +1002,20 @@ function play(report: MatchReport, issues: ReportIssue[]) {
     ]),
   )
   const byId = new Map(report.appearances.map((player) => [player.id, player]))
-  const onPitch = new Set(report.appearances.filter((player) => player.starter).map((player) => player.id))
+  const squad: Squad<number> = {
+    bench: report.appearances.filter((player) => !player.starter).map((player) => player.id),
+    cards: report.cards.flatMap((card) =>
+      card.kind !== 'geel' && hasMinute(card) ? [{ at: clock(card), player: card.appearanceId }] : [],
+    ),
+    starters: report.appearances.filter((player) => player.starter).map((player) => player.id),
+    substitutions: report.substitutions.map((substitution) => ({
+      at: clock(substitution),
+      in: substitution.inId,
+      out: substitution.outId,
+    })),
+  }
   const wentOn = new Set<number>()
   const wentOff = new Set<number>()
-  const sentOff = new Set<number>()
 
   const steps = [
     ...report.substitutions.map((substitution, index) => ({ index, substitution, time: substitution })),
@@ -962,14 +1036,14 @@ function play(report: MatchReport, issues: ReportIssue[]) {
       if (found !== undefined && found.off === undefined) {
         found.off = clock(step.time)
         found.offMinute = step.time.minute
-        onPitch.delete(step.card.appearanceId)
-        sentOff.add(step.card.appearanceId)
       }
 
       continue
     }
 
     const { inId, outId } = step.substitution
+    // The same rule the lists of the forms use: who is on the pitch at this minute.
+    const { onPitch, sentOff } = squadAt(squad, { at: clock(step.time), index: step.index })
     const place = { index: step.index, part: 'substitutions' } as const
     const outPlayer = byId.get(outId)
     const inPlayer = byId.get(inId)
@@ -1032,9 +1106,6 @@ function play(report: MatchReport, issues: ReportIssue[]) {
       entering.on = clock(step.time)
       entering.onMinute = step.time.minute
     }
-
-    onPitch.delete(outId)
-    onPitch.add(inId)
   }
 
   return presence

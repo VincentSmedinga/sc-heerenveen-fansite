@@ -793,6 +793,38 @@ describe('the choices of the substitutions and the roles in the form of a report
     expect(optionsOf('wissel-wij-2-eruit')).toEqual(['', '3', '4'])
   })
 
+  it('lists in Erin only who is on the bench and comes on nowhere else and was not sent off by then', () => {
+    const speler = [row('1'), row('2'), row('3', 'bank'), row('4', 'bank'), row('5', 'bank')]
+
+    showState(
+      stateOf(
+        {
+          kaart: [card('rood', '20', '5')],
+          wissel: [moment('30', { erin: '3', eruit: '1' }), moment('60'), moment('10')],
+        },
+        speler,
+      ),
+    )
+
+    // 3 comes on in row 1, and 5 was sent off at 20: row 2 offers 4 only.
+    // At 10 the card is later.
+    expect(optionsOf('wissel-wij-2-erin')).toEqual(['', '4'])
+    expect(optionsOf('wissel-wij-3-erin')).toEqual(['', '4', '5'])
+  })
+
+  it('keeps the player the row has in Erin, with a note, when he does not sit on the bench then', () => {
+    showState(
+      stateOf({ wissel: [moment('30', { erin: '3', eruit: '1' }), moment('60', { erin: '3', eruit: '2' })] }, [
+        row('1'),
+        row('2'),
+        row('3', 'bank'),
+      ]),
+    )
+
+    expect(optionsOf('wissel-wij-2-erin')).toEqual(['', '3'])
+    expect(labelsOf('wissel-wij-2-erin').at(-1)).toBe('3 Speler 3 (zit dan niet op de bank)')
+  })
+
   it('leaves the list Eruit as it is while the minute is empty, in the order of the rows', () => {
     showState(
       stateOf({ wissel: [moment('', { erin: '3', eruit: '1' }), moment('')] }, [row('1'), row('2'), row('3', 'bank')]),
@@ -885,6 +917,7 @@ describe('the choices of the substitutions and the roles in the form of a report
       expect(document.getElementById(hint)?.textContent).not.toBe('')
     }
 
+    expect(select('wissel-wij-1-erin').getAttribute('aria-describedby')).toBe('eruit-hint-wij')
     expect(document.getElementById('eruit-hint-wij')?.textContent).toContain('op dat moment op het veld')
   })
 
