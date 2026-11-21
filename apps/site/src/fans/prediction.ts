@@ -4,10 +4,6 @@ import type { ScoreField } from '@fansite/design-system'
 import { clubs, matches, predictionMaxGoals, predictions } from '@fansite/db/schema'
 import { and, eq, gt, inArray, isNull, or, sql } from 'drizzle-orm'
 
-import type { GameData } from './my-data'
-
-import { scoredPredictions, totalsOf } from './prediction-results'
-
 // The game Prognose (issue 1447): which match a supporter can predict, the checks of the four
 // numbers, and the write that keeps the deadline. The page and the action only call these.
 
@@ -271,40 +267,3 @@ export const standsText = (values: PredictionValues) =>
 /** The words of the notice above a form that was stored. */
 export const savedMessage = (values: PredictionValues, changed: boolean) =>
   `${changed ? 'Je voorspelling is gewijzigd' : 'Je voorspelling staat'}. ${standsText(values)}. Je kunt hem wijzigen tot de aftrap.`
-
-const dateFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'short', timeZone, year: 'numeric' })
-
-/**
- * What a supporter predicted, for Mijn account and the page "Alles wat we van je bewaren": one
- * row per match, the newest first, with the match, the two scores in the order of the clubs on
- * the line and the points (P) of a match that has any. The summary says how many matches and
- * how many points: "13 voorspellingen, 371 punten". `undefined` for a supporter who predicted
- * nothing.
- */
-export async function predictionData(db: Database, supporterId: number) {
-  const found = await scoredPredictions(db, supporterId)
-
-  if (found.length === 0) {
-    return undefined
-  }
-
-  const { count, points } = totalsOf(found)
-
-  return {
-    columns: ['Wedstrijd', 'Rust', 'Eind', 'P'],
-    rows: found.map((item) => {
-      const clubs = clubsOf(item.match)
-      const { guess } = item
-
-      return {
-        cells: [
-          `${guess.halfTime.home}–${guess.halfTime.away}`,
-          `${guess.fullTime.home}–${guess.fullTime.away}`,
-          item.match.state === 'played' ? String(item.points.total) : '–',
-        ],
-        header: `${clubs.home} – ${clubs.away}, ${dateFormat.format(new Date(`${item.match.matchDate}T12:00:00Z`))}`,
-      }
-    }),
-    summary: `${count === 1 ? '1 voorspelling' : `${count} voorspellingen`}, ${points === 1 ? '1 punt' : `${points} punten`}`,
-  } satisfies GameData
-}

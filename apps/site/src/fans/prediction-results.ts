@@ -13,6 +13,10 @@ import { desc, eq } from 'drizzle-orm'
 import { cacheForKey } from '#src/cache'
 import { getDatabase } from '#src/database'
 
+import type { GameData } from './my-data'
+
+import { clubsOf } from './prediction'
+
 // The points of the game Prognose (issue 1449): what a supporter predicted for each match, what
 // was played, and the points that follow from the two. The points are never stored. They are
 // worked out here each time they are read, by `predictionPoints` of `@fansite/shared`, so a
@@ -244,3 +248,41 @@ const getCrowdFigures = cacheForKey(fiveMinutes, (key) => loadCrowdFigures(getDa
  * the match of a prediction of the supporter, so the keys are matches that exist.
  */
 export const crowdFigures = (matchId: number) => getCrowdFigures(String(matchId))
+
+const timeZone = 'Europe/Amsterdam'
+const dateFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'short', timeZone, year: 'numeric' })
+
+/**
+ * What a supporter predicted, for Mijn account and the page "Alles wat we van je bewaren": one
+ * row per match, the newest first, with the match, the two scores in the order of the clubs on
+ * the line and the points (P) of a match that has any. The summary says how many matches and
+ * how many points: "13 voorspellingen, 371 punten". `undefined` for a supporter who predicted
+ * nothing.
+ */
+export async function predictionData(db: Database, supporterId: number) {
+  const found = await scoredPredictions(db, supporterId)
+
+  if (found.length === 0) {
+    return undefined
+  }
+
+  const { count, points } = totalsOf(found)
+
+  return {
+    columns: ['Wedstrijd', 'Rust', 'Eind', 'P'],
+    rows: found.map((item) => {
+      const clubs = clubsOf(item.match)
+      const { guess } = item
+
+      return {
+        cells: [
+          `${guess.halfTime.home}–${guess.halfTime.away}`,
+          `${guess.fullTime.home}–${guess.fullTime.away}`,
+          item.match.state === 'played' ? String(item.points.total) : '–',
+        ],
+        header: `${clubs.home} – ${clubs.away}, ${dateFormat.format(new Date(`${item.match.matchDate}T12:00:00Z`))}`,
+      }
+    }),
+    summary: `${count === 1 ? '1 voorspelling' : `${count} voorspellingen`}, ${points === 1 ? '1 punt' : `${points} punten`}`,
+  } satisfies GameData
+}

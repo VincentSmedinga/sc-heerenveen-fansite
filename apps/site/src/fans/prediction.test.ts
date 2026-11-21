@@ -12,11 +12,11 @@ import {
   isOpen,
   kickoffText,
   parsePrediction,
-  predictionData,
   predictionMatches,
   savedMessage,
   savePrediction,
 } from './prediction'
+import { predictionData } from './prediction-results'
 
 // Read with the morning of Friday 20 November 2026 (Dutch time) as now.
 const now = new Date('2026-11-20T10:00:00Z')
