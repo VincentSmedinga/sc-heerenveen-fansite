@@ -44,6 +44,7 @@ export default async function PredictionPage() {
   const savedOf = async (match: undefined | { id: number }) =>
     supporterId === undefined || match === undefined ? undefined : findPrediction(db, supporterId, match.id)
   const loggedIn = supporterId !== undefined
+  const remindByEmail = supporter?.remindByEmail ?? false
 
   return (
     <Page.Main>
@@ -60,6 +61,7 @@ export default async function PredictionPage() {
               loggedIn={loggedIn}
               match={next}
               now={now}
+              remindByEmail={remindByEmail}
               saved={await savedOf(next)}
             />
           )
@@ -82,6 +84,7 @@ export default async function PredictionPage() {
                 loggedIn={loggedIn}
                 match={next}
                 now={now}
+                remindByEmail={remindByEmail}
                 saved={await savedOf(next)}
               />
             )}

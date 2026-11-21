@@ -23,7 +23,8 @@ Wij zien deze dingen als een kwetsbaarheid:
 
 - toegang tot een account of tot de beheerpagina's zonder in te loggen;
 - gegevens van anderen kunnen inzien;
-- geheimen die in de code of in het logboek staan.
+- geheimen die in de code of in het logboek staan;
+- de herinnering van een ander uitzetten of een link voor een ander account maken: de link in een herinnering heeft een code met een ondertekening van de server (`FANS_REMINDER_SECRET`).
 
 ## Wat we beloven
 

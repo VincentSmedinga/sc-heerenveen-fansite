@@ -1722,6 +1722,34 @@ export const predictions = mysqlTable(
 export type Prediction = typeof predictions.$inferSelect
 
 /**
+ * The reminders by e-mail that were sent for the game Prognose (issue 1461): one row for each
+ * supporter and match, so a second run or a restart sends nothing twice, also when the kick-off
+ * moves. The row is made just before the mail goes out and removed again when the mail fails,
+ * so a mail that did not go out does not count as sent. It goes with the supporter and with
+ * the match, and the step removes the rows of matches older than 30 days. It holds no address
+ * and no name. Times are UTC.
+ */
+export const supporterReminders = mysqlTable(
+  'supporter_reminders',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    supporterId: int('supporter_id', { unsigned: true })
+      .notNull()
+      .references(() => supporters.id, { onDelete: 'cascade' }),
+    matchId: int('match_id', { unsigned: true })
+      .notNull()
+      .references(() => matches.id, { onDelete: 'cascade' }),
+    sentAt: datetime('sent_at')
+      .notNull()
+      .default(sql`(UTC_TIMESTAMP())`),
+  },
+  (table) => [
+    unique('supporter_reminders_supporter_id_match_id_unique').on(table.supporterId, table.matchId),
+    index('supporter_reminders_match_id_idx').on(table.matchId),
+  ],
+)
+
+/**
  * The corners, offsides and fouls of a played match, from the old fansite: one row for each
  * match, and only when at least one of the six numbers is above 0, because 0-0-0 meant "not
  * known" there. All numbers are from the side of sc Heerenveen, like `goals_for` and

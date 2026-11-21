@@ -18,10 +18,16 @@ export const myDataPath = '/fans/mijn-account/gegevens'
 
 /**
  * The tables that belong to the account itself and go with it when it is closed
- * (`ON DELETE CASCADE`): the sessions, the links and codes, and the requests for a new address.
- * The page doesn't show them: they are there for a few minutes, or are the session itself.
+ * (`ON DELETE CASCADE`): the sessions, the links and codes, the requests for a new address and
+ * the record of the reminders that were sent. The page doesn't show them: they are there for a
+ * few minutes, are the session itself, or hold only the number of a match.
  */
-export const accountTables = ['supporter_email_changes', 'supporter_login_links', 'supporter_sessions'] as const
+export const accountTables = [
+  'supporter_reminders',
+  'supporter_email_changes',
+  'supporter_login_links',
+  'supporter_sessions',
+] as const
 
 /** What a game shows of a supporter: a summary for Mijn account and a table for the page. */
 export type GameData = {

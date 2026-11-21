@@ -1,6 +1,6 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { importRuns, supporterLoginLinks, supporters } from '@fansite/db/schema'
+import { clubs, importRuns, matches, supporterLoginLinks, supporterReminders, supporters } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
@@ -116,6 +116,70 @@ describe('the clean-up of supporter accounts in the import', () => {
       .values({ email: 'oud@example.org', lastVisitOn: '2024-01-01', screenName: 'Oud', screenNameKey: 'oud' })
 
     await run({ ...env, FANS_ACCOUNTS: 'off' })
+
+    expect(sent).toEqual([])
+  })
+})
+
+describe('the reminders for the Prognose in the import', () => {
+  const secret = 'een-geheim-van-minstens-tweeendertig-tekens'
+  // Friday 20 November 2026, 11:00 Dutch time; the match is on Saturday 21 November.
+  const friday = new Date('2026-11-20T10:00:00Z')
+
+  async function setUp() {
+    await database.db.delete(supporterReminders)
+    await database.db.delete(matches)
+    await database.db
+      .insert(clubs)
+      .values({ name: 'FC Twente', slug: 'fc-twente' })
+      .onDuplicateKeyUpdate({ set: { name: 'FC Twente' } })
+
+    const [club] = await database.db.select().from(clubs)
+
+    await database.db.insert(matches).values({
+      clubId: club?.id ?? 0,
+      competition: 'Eredivisie',
+      home: true,
+      kickoffAt: new Date('2026-11-21T15:45:00Z'),
+      matchDate: '2026-11-21',
+      opponent: 'FC Twente',
+      round: 'Speelronde 14',
+      season: '2026/27',
+      status: 'scheduled',
+    })
+    await database.db
+      .insert(supporters)
+      .values({ email: 'aan@example.org', remindByEmail: true, screenName: 'Aan', screenNameKey: 'aan' })
+  }
+
+  it('mails a supporter with the reminder on, once, and logs counts only', async () => {
+    await setUp()
+
+    const settings = { ...env, FANS_PROGNOSE: 'on', FANS_REMINDER_SECRET: secret }
+
+    await run(settings, friday)
+    await run(settings, new Date(friday.getTime() + 15 * 60 * 1000))
+
+    expect(sent).toEqual(['aan@example.org'])
+    expect(lines).toContain('Reminders: 1 sent, 0 failed')
+    expect(lines.join('\n')).not.toMatch(/example\.org|Aan/u)
+  })
+
+  it('says in the log, as a warning, that nothing was sent without the secret, and the import goes on', async () => {
+    await setUp()
+
+    const code = await run({ ...env, FANS_PROGNOSE: 'on' }, friday)
+
+    expect(sent).toEqual([])
+    expect(
+      lines.some((line) => line.startsWith('Reminders: warning, not sent:') && line.includes('FANS_REMINDER_SECRET')),
+    ).toBe(true)
+    expect(code).toBe(0)
+  })
+
+  it('sends nothing while Prognose is off', async () => {
+    await setUp()
+    await run({ ...env, FANS_PROGNOSE: 'off', FANS_REMINDER_SECRET: secret }, friday)
 
     expect(sent).toEqual([])
   })

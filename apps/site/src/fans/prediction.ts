@@ -1,13 +1,24 @@
 import type { Database } from '@fansite/db/client'
 import type { ScoreField } from '@fansite/design-system'
 
-import { clubs, matches, predictionMaxGoals, predictions } from '@fansite/db/schema'
-import { and, desc, eq, gt, inArray, isNull, or, sql } from 'drizzle-orm'
+import { isOpen, type PredictionMatch, predictionMatches } from '@fansite/db/prediction-matches'
+import { matches, predictionMaxGoals, predictions } from '@fansite/db/schema'
+import { and, desc, eq, sql } from 'drizzle-orm'
 
 import type { GameData } from './my-data'
 
 // The game Prognose (issue 1447): which match a supporter can predict, the checks of the four
-// numbers, and the write that keeps the deadline. The page and the action only call these.
+// numbers, and the write that keeps the deadline. The page and the action only call these. The
+// rule of which match can be predicted is in `@fansite/db/prediction-matches`, so the importer
+// can use it for the reminder (issue 1461).
+
+export {
+  closedCardHours,
+  isOpen,
+  type PredictionMatch,
+  type PredictionMatches,
+  predictionMatches,
+} from '@fansite/db/prediction-matches'
 
 /** The address of the page of the game. */
 export const predictionPath = '/fans/prognose'
@@ -21,103 +32,12 @@ export const predictionFields: readonly ScoreField[] = ['halftimeHome', 'halftim
 /** The name of sc Heerenveen in the words of the page. */
 export const ourClub = 'sc Heerenveen'
 
-/**
- * How long after the kick-off a match that has begun stays on the page as "Gesloten": a match
- * with extra time and a shoot-out takes about three hours, and the points come with #1449.
- */
-export const closedCardHours = 4
-
-/** The match of a card: what the page shows of it and what the deadline needs. */
-export type PredictionMatch = {
-  clubSlug: string
-  competition: string
-  dateText: null | string
-  home: boolean
-  id: number
-  kickoffAt: Date | null
-  matchDate: string
-  opponent: string
-  round: string
-  season: string
-  status: 'cancelled' | 'played' | 'postponed' | 'scheduled'
-}
-
-/**
- * The matches of the page: `next` is the one match that can be predicted now, and `started` is
- * the match that began less than `closedCardHours` ago, shown as closed above it.
- */
-export type PredictionMatches = { next?: PredictionMatch; started?: PredictionMatch }
-
-/** What a supporter predicted: the four numbers as the form shows them. */
-export type PredictionValues = Partial<Record<ScoreField, string>>
-
 /** The clubs of a match in the order of the line, the home club first. */
 export const clubsOf = (match: Pick<PredictionMatch, 'home' | 'opponent'>) =>
   match.home ? { away: match.opponent, home: ourClub } : { away: ourClub, home: match.opponent }
 
-const columns = {
-  clubSlug: clubs.slug,
-  competition: matches.competition,
-  dateText: matches.dateText,
-  home: matches.home,
-  id: matches.id,
-  kickoffAt: matches.kickoffAt,
-  matchDate: matches.matchDate,
-  opponent: matches.opponent,
-  round: matches.round,
-  season: matches.season,
-  status: matches.status,
-}
-
-const hour = 60 * 60 * 1000
-
-/**
- * The first moment of a match, to put the matches in order: the kick-off, or the start of the
- * day while the time is not known, so a match without a time stands after the ones of its day
- * that have one.
- */
-const orderOf = (match: PredictionMatch) =>
-  `${match.matchDate} ${match.kickoffAt === null ? '99:99' : match.kickoffAt.toISOString().slice(11, 16)}`
-
-/**
- * Which match the form is for. All matches of the first team count: the league, the cup, the
- * play-offs and Europe. A match that is cancelled, or postponed without a new date, doesn't
- * count, so the form moves on to the next one. A match that was postponed and got a new date
- * is the same match, so what was predicted stays. The next match is the first one that has not
- * begun; one without a known time counts while its day is not over. The deadline is the
- * kick-off by the clock of the server (`now`).
- */
-export async function predictionMatches(db: Database, now = new Date()): Promise<PredictionMatches> {
-  const since = new Date(now.getTime() - closedCardHours * hour)
-  const today = now.toISOString().slice(0, 10)
-  const found = await db
-    .select(columns)
-    .from(matches)
-    .innerJoin(clubs, eq(clubs.id, matches.clubId))
-    .where(
-      and(
-        inArray(matches.status, ['scheduled', 'played']),
-        or(
-          and(sql`${matches.kickoffAt} is not null`, gt(matches.kickoffAt, since)),
-          and(isNull(matches.kickoffAt), eq(matches.status, 'scheduled'), sql`${matches.matchDate} >= ${today}`),
-        ),
-      ),
-    )
-  const sorted = found.toSorted((a, b) => orderOf(a).localeCompare(orderOf(b)))
-  const next = sorted.find(
-    (match) => match.status === 'scheduled' && (match.kickoffAt === null || match.kickoffAt.getTime() > now.getTime()),
-  )
-  const started = sorted.findLast((match) => match.kickoffAt !== null && match.kickoffAt.getTime() <= now.getTime())
-
-  return {
-    ...(next === undefined ? {} : { next }),
-    ...(started === undefined ? {} : { started }),
-  }
-}
-
-/** Whether the form of the match is open: its kick-off is known and has not come. */
-export const isOpen = (match: Pick<PredictionMatch, 'kickoffAt'>, now = new Date()) =>
-  match.kickoffAt !== null && match.kickoffAt.getTime() > now.getTime()
+/** What a supporter predicted: the four numbers as the form shows them. */
+export type PredictionValues = Partial<Record<ScoreField, string>>
 
 /** What a supporter predicted for a match, as the form shows it, or `undefined`. */
 export async function findPrediction(
@@ -246,6 +166,7 @@ const timeZone = 'Europe/Amsterdam'
 const weekdayFormat = new Intl.DateTimeFormat('nl-NL', { timeZone, weekday: 'short' })
 const dayFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'short', timeZone, weekday: 'short' })
 const timeFormat = new Intl.DateTimeFormat('nl-NL', { hour: '2-digit', hourCycle: 'h23', minute: '2-digit', timeZone })
+const hour = 60 * 60 * 1000
 const days = 24 * hour
 
 /**
