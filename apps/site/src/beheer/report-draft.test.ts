@@ -47,6 +47,7 @@ const blockedStorage = new Proxy({} as Storage, {
 const server: ReportValues = {
   bron: '',
   formatie: { wij: noFormation(), zij: noFormation() },
+  ruststand: { wij: '', zij: '' },
   status: 'bezig',
   tegenstander: 'nee',
   wij: { ...emptySide(), speler: [{ ...emptyRow('speler'), keuze: '1' }] },
@@ -107,6 +108,32 @@ describe('saveDraft', () => {
 
   it('does nothing, and does not throw, when the storage is blocked', () => {
     expect(() => saveDraft(7, typed, server, now, blockedStorage)).not.toThrow()
+  })
+})
+
+describe('the score at half-time in a draft', () => {
+  it('is part of what makes values differ, so a score typed alone is kept as a draft', () => {
+    const storage = memoryStorage()
+    const withScore = { ...server, ruststand: { wij: '1', zij: '0' } }
+
+    saveDraft(7, withScore, server, now, storage)
+
+    expect(canonicalValues(withScore)).not.toBe(canonicalValues(server))
+    expect(parseDraft(readDraftText(7, now, storage))?.values.ruststand).toEqual({ wij: '1', zij: '0' })
+  })
+
+  it('is empty in a draft that was kept before the form had it, so the form still opens', () => {
+    const old: Record<string, unknown> = { ...typed }
+
+    delete old['ruststand']
+
+    const text = JSON.stringify({ savedAt: now, values: old })
+
+    expect(parseDraft(text)?.values.ruststand).toEqual({ wij: '', zij: '' })
+  })
+
+  it('refuses a draft whose score at half-time is not two texts', () => {
+    expect(parseDraft(JSON.stringify({ savedAt: now, values: { ...typed, ruststand: { wij: 1 } } }))).toBeUndefined()
   })
 })
 

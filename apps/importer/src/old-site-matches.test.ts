@@ -308,6 +308,47 @@ describe('extra time and penalties', () => {
   })
 })
 
+describe('the score at half-time', () => {
+  it('gives the score at half-time from the side of sc Heerenveen', () => {
+    const [home] = deriveOldSiteMatches([oldMatch()])
+    const [away] = deriveOldSiteMatches([oldMatch({ code: 'nec.uit' })])
+
+    expect(home?.values).toMatchObject({ halfTimeAgainst: 0, halfTimeFor: 1, halfTimeSource: 'oude-fansite' })
+    expect(away?.values).toMatchObject({ halfTimeAgainst: 1, halfTimeFor: 0 })
+  })
+
+  it('keeps 0-0 at half-time, which is a score and not an unknown', () => {
+    const [zero] = deriveOldSiteMatches([
+      oldMatch({ result: { awayFullTime: 1, awayHalfTime: 0, homeFullTime: 2, homeHalfTime: 0, note: null } }),
+    ])
+
+    expect(zero?.values).toMatchObject({ halfTimeAgainst: 0, halfTimeFor: 0 })
+  })
+
+  it('does not take a score above the final score, says so, and keeps the match', () => {
+    const [odd] = deriveOldSiteMatches([
+      oldMatch({ result: { awayFullTime: 1, awayHalfTime: 0, homeFullTime: 2, homeHalfTime: 3, note: null } }),
+    ])
+
+    expect(odd?.values).toMatchObject({ goalsFor: 2, halfTimeAgainst: null, halfTimeFor: null })
+    expect(odd?.lines.join('\n')).toContain('half-time 3-0 is higher than the score of the regular playing time 2-1')
+  })
+
+  it('counts against the score after 90 minutes when there was extra time', () => {
+    const extra = (homeHalfTime: number) =>
+      deriveOldSiteMatches([
+        oldMatch({
+          competition: 2,
+          events: [goal(10, true), goal(80, false), goal(100, true)],
+          result: { awayFullTime: 1, awayHalfTime: 0, homeFullTime: 2, homeHalfTime, note: 'n.v.' },
+        }),
+      ])[0]
+
+    expect(extra(1)?.values).toMatchObject({ afterNinetyFor: 1, halfTimeFor: 1 })
+    expect(extra(2)?.values).toMatchObject({ halfTimeFor: null })
+  })
+})
+
 describe('the kick-off', () => {
   const at = (dateTime: string) => deriveOldSiteMatches([oldMatch({ dateTime })])[0]!.values!
 
@@ -528,6 +569,80 @@ describe('the step matches', () => {
 
     expect(report).toMatchObject({ changed: 1, created: 0, skipped: 0 })
     expect(await rows()).toMatchObject([{ dataSource: 'wikipedia', referee: 'Piet Fluit', round: 'Eerste ronde' }])
+  })
+
+  it('makes the row with the score at half-time, and leaves what the editors filled in as it is', async () => {
+    await run([oldMatch()])
+    expect(await rows()).toMatchObject([{ halfTimeAgainst: 0, halfTimeFor: 1, halfTimeSource: 'oude-fansite' }])
+
+    // An editor corrects it; a new run of the same file doesn't undo that.
+    await database.pool.query(
+      "UPDATE matches SET half_time_for = 2, half_time_against = 1, half_time_source = 'redactie'",
+    )
+
+    const report = await run([oldMatch()])
+
+    expect(report).toMatchObject({ changed: 0, unchanged: 1 })
+    expect(await rows()).toMatchObject([{ halfTimeAgainst: 1, halfTimeFor: 2, halfTimeSource: 'redactie' }])
+  })
+
+  it('fills an empty score at half-time of its own row, which an older run left empty', async () => {
+    await run([oldMatch()])
+    await database.pool.query(
+      'UPDATE matches SET half_time_for = NULL, half_time_against = NULL, half_time_source = NULL',
+    )
+    await run([oldMatch()])
+
+    expect(await rows()).toMatchObject([{ halfTimeAgainst: 0, halfTimeFor: 1 }])
+  })
+
+  it('fills an empty score at half-time of a match of another source, and never changes one that is filled', async () => {
+    await wikipediaMatch()
+    await run([oldMatch()])
+    expect(await rows()).toMatchObject([{ dataSource: 'wikipedia', halfTimeAgainst: 0, halfTimeFor: 1 }])
+
+    await database.pool.query(
+      "UPDATE matches SET half_time_for = 2, half_time_against = 1, half_time_source = 'redactie'",
+    )
+
+    const report = await run([oldMatch()])
+
+    expect(await rows()).toMatchObject([{ halfTimeAgainst: 1, halfTimeFor: 2 }])
+    // A different score at half-time is not a change that waits for the editors.
+    expect(report.lines.join('\n')).not.toContain('differs')
+    expect(await database.db.select().from(matchChanges)).toHaveLength(0)
+  })
+
+  it('leaves the score at half-time out of a match of another source whose result is lower, and says so', async () => {
+    // Wikipedia has 1-0; the old fansite has 2-1 at half-time, which does not fit that.
+    await wikipediaMatch({ goalsAgainst: 0, goalsFor: 1 })
+
+    const report = await run([
+      oldMatch({ result: { awayFullTime: 1, awayHalfTime: 0, homeFullTime: 2, homeHalfTime: 2, note: null } }),
+    ])
+
+    expect(await rows()).toMatchObject([{ goalsFor: 1, halfTimeAgainst: null, halfTimeFor: null }])
+    expect(report.lines.join('\n')).toContain('higher than the result that match')
+  })
+
+  it('leaves the score at half-time out of its own row whose result the editors keep, and does not fail', async () => {
+    await run([
+      oldMatch({ result: { awayFullTime: 1, awayHalfTime: 0, homeFullTime: 2, homeHalfTime: 0, note: null } }),
+    ])
+    await database.pool.query(
+      'UPDATE matches SET goals_for = 1, goals_against = 0, half_time_for = NULL, half_time_against = NULL, half_time_source = NULL',
+    )
+    await database.pool.query(
+      "INSERT INTO match_edits (match_id, before_goals, before_match, edited_at, edited_by, result_edited, reason) SELECT id, '[]', '{}', NOW(), ?, 1, 'Anders' FROM matches",
+      [adminId],
+    )
+
+    const report = await run([
+      oldMatch({ result: { awayFullTime: 1, awayHalfTime: 0, homeFullTime: 2, homeHalfTime: 2, note: null } }),
+    ])
+
+    expect(await rows()).toMatchObject([{ goalsFor: 1, halfTimeFor: null }])
+    expect(report.lines.join('\n')).toContain('higher than the result of the row')
   })
 
   it('keeps a field that differs from the other source as a change that waits, once, and leaves the match', async () => {

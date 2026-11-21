@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "47740d6e-f11a-471f-a23d-fcbce041729a",
+  "id": "158f0eeb-dcbd-48d1-b737-901eeadaf9ad",
   "prevId": "a870c34d-a4e5-49f4-97d8-6acd9092ace8",
   "tables": {
     "admin_login_attempts": {
@@ -3663,6 +3663,20 @@
           "notNull": false,
           "autoincrement": false
         },
+        "half_time_for": {
+          "name": "half_time_for",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "half_time_against": {
+          "name": "half_time_against",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "match_date": {
           "name": "match_date",
           "type": "date",
@@ -3812,6 +3826,14 @@
         "matches_after_ninety_within_extra_time": {
           "name": "matches_after_ninety_within_extra_time",
           "value": "`matches`.`after_ninety_for` is null or (`matches`.`extra_time` = 1 and `matches`.`after_ninety_for` <= `matches`.`goals_for` and `matches`.`after_ninety_against` <= `matches`.`goals_against`)"
+        },
+        "matches_half_time_in_a_pair": {
+          "name": "matches_half_time_in_a_pair",
+          "value": "(`matches`.`half_time_for` is null and `matches`.`half_time_against` is null) or (`matches`.`half_time_for` is not null and `matches`.`half_time_against` is not null)"
+        },
+        "matches_half_time_within_the_result": {
+          "name": "matches_half_time_within_the_result",
+          "value": "`matches`.`half_time_for` is null or (`matches`.`status` = 'played' and `matches`.`half_time_for` <= coalesce(`matches`.`after_ninety_for`, `matches`.`goals_for`) and `matches`.`half_time_against` <= coalesce(`matches`.`after_ninety_against`, `matches`.`goals_against`))"
         },
         "matches_attendance_in_range_when_played": {
           "name": "matches_attendance_in_range_when_played",
@@ -5003,136 +5025,6 @@
         "players_shirt_number_change_complete": {
           "name": "players_shirt_number_change_complete",
           "value": "(`players`.`previous_shirt_number` is null) = (`players`.`shirt_number_from` is null)"
-        }
-      }
-    },
-    "predictions": {
-      "name": "predictions",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "supporter_id": {
-          "name": "supporter_id",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "match_id": {
-          "name": "match_id",
-          "type": "int unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "halftime_home": {
-          "name": "halftime_home",
-          "type": "smallint unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "halftime_away": {
-          "name": "halftime_away",
-          "type": "smallint unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "full_time_home": {
-          "name": "full_time_home",
-          "type": "smallint unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "full_time_away": {
-          "name": "full_time_away",
-          "type": "smallint unsigned",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "datetime",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(UTC_TIMESTAMP())"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "datetime",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(UTC_TIMESTAMP())"
-        }
-      },
-      "indexes": {
-        "predictions_match_id_idx": {
-          "name": "predictions_match_id_idx",
-          "columns": [
-            "match_id"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "predictions_supporter_id_supporters_id_fk": {
-          "name": "predictions_supporter_id_supporters_id_fk",
-          "tableFrom": "predictions",
-          "tableTo": "supporters",
-          "columnsFrom": [
-            "supporter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "predictions_match_id_matches_id_fk": {
-          "name": "predictions_match_id_matches_id_fk",
-          "tableFrom": "predictions",
-          "tableTo": "matches",
-          "columnsFrom": [
-            "match_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "predictions_id": {
-          "name": "predictions_id",
-          "columns": [
-            "id"
-          ]
-        }
-      },
-      "uniqueConstraints": {
-        "predictions_supporter_id_match_id_unique": {
-          "name": "predictions_supporter_id_match_id_unique",
-          "columns": [
-            "supporter_id",
-            "match_id"
-          ]
-        }
-      },
-      "checkConstraint": {
-        "predictions_goals_in_range": {
-          "name": "predictions_goals_in_range",
-          "value": "`predictions`.`halftime_home` <= 9 and `predictions`.`halftime_away` <= 9 and `predictions`.`full_time_home` <= 9 and `predictions`.`full_time_away` <= 9"
         }
       }
     },

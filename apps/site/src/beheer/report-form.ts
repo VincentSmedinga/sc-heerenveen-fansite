@@ -18,6 +18,7 @@ import {
   formationId,
   formationOwnId,
   goalKindChoices,
+  halfTimeId,
   incidentKindChoices,
   isUntouchedRow,
   listId,
@@ -75,7 +76,16 @@ export type ReportContext = {
 /** The match, as far as the checks need it. */
 export type ReportMatch = Pick<
   Match,
-  'extraTime' | 'goalsAgainst' | 'goalsFor' | 'matchDate' | 'opponent' | 'penaltiesAgainst' | 'penaltiesFor' | 'status'
+  | 'afterNinetyAgainst'
+  | 'afterNinetyFor'
+  | 'extraTime'
+  | 'goalsAgainst'
+  | 'goalsFor'
+  | 'matchDate'
+  | 'opponent'
+  | 'penaltiesAgainst'
+  | 'penaltiesFor'
+  | 'status'
 >
 
 /**
@@ -95,6 +105,8 @@ export type ReportPlan = {
     ownGoal: boolean
     penalty: boolean
   })[]
+  /** The score at half-time of the regular playing time, or none when it isn't filled in. */
+  halfTime: null | { against: number; for: number }
   incidents: (Moment & { appearance: number; kind: IncidentKind; ours: boolean })[]
   opponentComplete: boolean
   /**
@@ -210,6 +222,53 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
   if (values.bron.length > matchReportLimits.source) {
     parseFailed = true
     fail('bron', `Schrijf hoogstens ${matchReportLimits.source} tekens.`)
+  }
+
+  // The score at half-time: both numbers or none, and never above the score at the end of the
+  // regular playing time.
+  let halfTime: ReportPlan['halfTime'] = null
+
+  if (sides.some((side) => values.ruststand[side] !== '')) {
+    const { match } = context
+    const end =
+      match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null
+        ? {
+            against: match.afterNinetyAgainst ?? match.goalsAgainst,
+            for: match.afterNinetyFor ?? match.goalsFor,
+            words: match.afterNinetyFor === null ? 'de eindstand' : 'de stand na 90 minuten',
+          }
+        : undefined
+    const numbers: Record<Side, number> = { wij: 0, zij: 0 }
+
+    for (const side of sides) {
+      const typed = values.ruststand[side]
+      const team = side === 'wij' ? 'sc Heerenveen' : opponent
+
+      if (typed === '') {
+        parseFailed = true
+        fail(halfTimeId(side), `Vul ook de ruststand van ${team} in, of laat beide velden leeg.`)
+      } else if (!/^\d{1,2}$/u.test(typed)) {
+        parseFailed = true
+        fail(halfTimeId(side), `Ruststand van ${team}: schrijf een heel getal, zoals 1.`)
+      } else if (end === undefined) {
+        parseFailed = true
+        fail(halfTimeId(side), 'De ruststand kan pas worden ingevuld als de wedstrijd is gespeeld.')
+      } else {
+        numbers[side] = Number(typed)
+
+        if (numbers[side] > (side === 'wij' ? end.for : end.against)) {
+          parseFailed = true
+          fail(
+            halfTimeId(side),
+            `Ruststand van ${team}: hoger dan ${end.words} (${side === 'wij' ? end.for : end.against}).`,
+          )
+        }
+      }
+    }
+
+    if (!parseFailed) {
+      halfTime = { against: numbers.zij, for: numbers.wij }
+    }
   }
 
   // The formation of each team: a choice from the list, or one of his own that the rule judges.
@@ -362,6 +421,7 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
     cards: [],
     formations,
     goals: [],
+    halfTime,
     incidents: [],
     opponentComplete: values.tegenstander === 'ja',
     shootout: [],
@@ -685,11 +745,13 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
 }
 
 /** The order of the fields and lists on the page, for the list of errors. */
-export function errorOrder(values: ReportValues): string[] {
+export function errorOrder(values: ReportValues, home = true): string[] {
   return [
     'verslag',
     'bron',
     'status',
+    // The fields of the score at half-time are in the order of the match, home first.
+    ...(home ? sides : [...sides].reverse()).map(halfTimeId),
     'tegenstander',
     ...sides.flatMap((side) => [
       formationId(side),

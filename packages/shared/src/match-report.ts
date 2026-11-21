@@ -215,6 +215,9 @@ export function formationProblem(value: string): string | undefined {
 /** The team of the players, in the sentences. */
 const sideName = (ours: boolean) => (ours ? 'sc Heerenveen' : 'de tegenstander')
 
+/** The score at half-time, from the side of sc Heerenveen. */
+export type HalfTimeScore = { against: number; for: number }
+
 /**
  * Where each player stands on the clock: `on` is the moment he comes on (0 for the line-up,
  * `undefined` when he never does) and `off` the moment he goes off or is sent off (`undefined`
@@ -624,6 +627,31 @@ export function checkMatchReport(report: MatchReport, match: ReportMatch): Repor
 /** The clock of a moment as a sentence part: `45+2` or `67`. */
 export function formatReportTime(time: ReportTime) {
   return time.stoppageMinutes === null ? String(time.minute) : `${time.minute}+${time.stoppageMinutes}`
+}
+
+/**
+ * The score at half-time of the regular playing time, worked out from the goals of a finished
+ * report: the goals up to and including minute 45, with the added time of the first half
+ * (45+2 counts, 46 doesn't). An own goal counts for the team that benefits, which `ours`
+ * already says. Goals in the second half and in extra time stay out.
+ *
+ * It is empty (`null`) when the half-time score can't be known: the report isn't finished, or a
+ * goal has no minute, as in the reports of the old fansite.
+ */
+export function halfTimeScore(report: Pick<MatchReport, 'goals' | 'status'>): HalfTimeScore | null {
+  if (report.status !== 'klaar' || report.goals.some((goal) => goal.minute === null)) {
+    return null
+  }
+
+  const score = { against: 0, for: 0 }
+
+  for (const goal of report.goals) {
+    if (goal.minute !== null && goal.minute <= 45) {
+      score[goal.ours ? 'for' : 'against'] += 1
+    }
+  }
+
+  return score
 }
 
 /**

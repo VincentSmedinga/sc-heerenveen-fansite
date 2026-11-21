@@ -32,6 +32,7 @@ const values = (
 ): ReportValues => ({
   bron: '',
   formatie: { wij: { eigen: '', keuze: '4-3-3' }, zij: noFormation() },
+  ruststand: { wij: '', zij: '' },
   status: 'bezig',
   tegenstander: 'ja',
   wij: {

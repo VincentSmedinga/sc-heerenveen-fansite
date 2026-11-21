@@ -1,0 +1,4 @@
+-- Says who gave the score at half-time of a match (#1445): the editors or the old fansite, so the goals of a report can win over the old fansite and lose to the editors. Every score at half-time that was stored before this has the source of the importer of the old fansite or the editors' form, and there is none yet on acceptance or in production, so the column starts empty and the check holds.
+-- The statements can run again: MariaDB cannot undo DDL, so a migration that stopped halfway finishes on the next start.
+ALTER TABLE `matches` ADD COLUMN IF NOT EXISTS `half_time_source` enum('redactie','oude-fansite');--> statement-breakpoint
+ALTER TABLE `matches` ADD CONSTRAINT IF NOT EXISTS `matches_half_time_source_with_the_score` CHECK ((`matches`.`half_time_for` is null) = (`matches`.`half_time_source` is null));
