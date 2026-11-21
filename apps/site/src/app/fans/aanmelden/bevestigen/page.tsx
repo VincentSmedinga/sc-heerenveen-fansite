@@ -1,27 +1,34 @@
 import type { Metadata } from 'next'
 
-import { Button, Form, Heading, Link, Page, Strong, Text } from '@fansite/design-system'
+import { Button, Form, Heading, Page, Strong, Text } from '@fansite/design-system'
 import { requireFansPart } from '@fansite/shared/fans-env'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 
 import { getDatabase } from '#src/database'
+import { LinkGone } from '#src/fans/CheckMail'
+import { logInPaths } from '#src/fans/log-in'
 import { signUpLinkState, signUpPaths } from '#src/fans/sign-up'
 
 import { confirm } from '../actions'
 
 export const dynamic = 'force-dynamic'
 
-const titles = { gone: 'Deze link werkt niet meer', 'log-in': 'Inloggen', 'sign-up': 'Bijna klaar' } as const
+const titles = { gone: 'Deze link werkt niet meer', 'log-in': 'Bijna klaar', 'sign-up': 'Bijna klaar' } as const
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> }
 
 // The page the link in the mail opens. It makes nothing by itself: a mail scanner or a preview
-// opens the link before the person does and would use it up. The button makes the account, or
-// logs in for an address that had an account already.
+// opens the link before the person does and would use it up. The button makes the account. A
+// link to log in from before #1448, for an address that had an account already, goes on to the
+// page of logging in.
 export default async function ConfirmPage({ searchParams }: Props) {
   requireFansPart('accounts', notFound)
 
   const { link, token } = await stateOf(searchParams)
+
+  if (typeof token === 'string' && link.state === 'log-in') {
+    redirect(`${logInPaths.confirm}?${new URLSearchParams({ token }).toString()}`)
+  }
 
   return (
     <Page.Main>
@@ -37,24 +44,8 @@ export default async function ConfirmPage({ searchParams }: Props) {
             </Form>
             <Text>Deze knop staat er zodat een virusscanner in je mail de link niet voor je gebruikt.</Text>
           </>
-        ) : typeof token === 'string' && link.state === 'log-in' ? (
-          <>
-            <Heading level={1}>Inloggen</Heading>
-            <Text appearance="intro">Dit e-mailadres heeft al een account. Kies Inloggen om binnen te komen.</Text>
-            <Form action={confirm.bind(null, token)}>
-              <Button type="submit">Inloggen</Button>
-            </Form>
-          </>
         ) : (
-          <>
-            <Heading level={1}>Deze link werkt niet meer</Heading>
-            <Text appearance="intro">
-              Een link en een code werken 15 minuten en één keer. Na 5 foute codes werken ze ook niet meer.
-            </Text>
-            <Text>
-              <Link href={signUpPaths.form}>Meld je opnieuw aan</Link>
-            </Text>
-          </>
+          <LinkGone again={{ href: signUpPaths.form, label: 'Meld je opnieuw aan' }} />
         )}
       </Page.Cell>
     </Page.Main>

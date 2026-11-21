@@ -2,13 +2,20 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { adminSessions, adminUsers, supporters, supporterSessions } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
+import { eq } from 'drizzle-orm'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { adminKind } from '../beheer/admin-login'
 import { requireRole, sessionCookieName } from '../beheer/require-role'
 import { cookieOptionsOf } from '../login/account-kind'
-import { findSession, startSession } from '../login/sessions'
-import { requireSupporter, supporterCookieName, supporterCookieOptions, supporterLoginPath } from './require-supporter'
+import { findSession, removeEnded, startSession } from '../login/sessions'
+import {
+  currentSupporter,
+  requireSupporter,
+  supporterCookieName,
+  supporterCookieOptions,
+  supporterLoginPath,
+} from './require-supporter'
 import { supporterKind } from './supporter-login'
 
 // The settings of supporters in the shared code of the login, and the wall between them and the
@@ -121,6 +128,7 @@ describe('a session of a supporter', () => {
 
     jar.set(supporterCookieName, token)
     await expect(requireSupporter()).resolves.toEqual({
+      blocked: false,
       email: 'tjalle@example.org',
       screenName: 'Tjalle99',
       supporterId,
@@ -135,5 +143,91 @@ describe('a session of a supporter', () => {
     jar.set(supporterCookieName, await startSession(database.db, supporterKind, supporterId))
 
     await expect(requireSupporter()).rejects.toThrow('not found')
+  })
+})
+
+describe('the length of a session of a supporter', () => {
+  const day = 24 * 60 * 60 * 1000
+  const start = new Date('2026-11-21T10:00:00Z')
+  const onDay = (days: number) => new Date(start.getTime() + days * day)
+
+  it('still works on day 89 without a visit, and no longer on day 91', async () => {
+    const token = await startSession(database.db, supporterKind, supporterId, start)
+
+    expect(await findSession(database.db, supporterKind, token, onDay(89))).toBeDefined()
+
+    const other = await startSession(database.db, supporterKind, supporterId, start)
+
+    expect(await findSession(database.db, supporterKind, other, onDay(91))).toBeUndefined()
+  })
+
+  it('moves the 90 days on with each visit, but ends a year after logging in', async () => {
+    const token = await startSession(database.db, supporterKind, supporterId, start)
+
+    for (let days = 60; days < 365; days += 60) {
+      expect(await findSession(database.db, supporterKind, token, onDay(days))).toBeDefined()
+    }
+
+    expect(await findSession(database.db, supporterKind, token, onDay(364))).toBeDefined()
+    expect(await findSession(database.db, supporterKind, token, onDay(365))).toBeUndefined()
+  })
+
+  it('writes the visit at most once a day', async () => {
+    const token = await startSession(database.db, supporterKind, supporterId, start)
+
+    await findSession(database.db, supporterKind, token, new Date(start.getTime() + 23 * 60 * 60 * 1000))
+
+    const [same] = await database.db.select().from(supporterSessions)
+
+    expect(same?.lastSeenAt).toEqual(start)
+
+    await findSession(database.db, supporterKind, token, onDay(1))
+
+    const [next] = await database.db.select().from(supporterSessions)
+
+    expect(next?.lastSeenAt).toEqual(onDay(1))
+  })
+
+  it('keeps the day of the last visit of the account, and not the time', async () => {
+    jar.set(supporterCookieName, await startSession(database.db, supporterKind, supporterId, start))
+
+    await currentSupporter(new Date('2026-11-22T23:30:00Z'))
+
+    const [row] = await database.db.select().from(supporters).where(eq(supporters.id, supporterId))
+
+    expect(row?.lastVisitOn).toBe('2026-11-22')
+  })
+
+  it('is removed with the sessions that ended, at a later request', async () => {
+    await startSession(database.db, supporterKind, supporterId, start)
+    await removeEnded(database.db, supporterKind, onDay(91))
+
+    expect(await database.db.select().from(supporterSessions)).toEqual([])
+  })
+})
+
+describe('a blocked supporter', () => {
+  beforeEach(async () => {
+    await database.db.update(supporters).set({ disabledAt: new Date(), disabledReason: 'Test' })
+    jar.set(supporterCookieName, await startSession(database.db, supporterKind, supporterId))
+  })
+
+  it('keeps the session, and is sent to the page of the block', async () => {
+    await expect(requireSupporter()).rejects.toMatchObject({ url: '/fans/geblokkeerd' })
+  })
+
+  it('reaches a page that allows it, such as Mijn account', async () => {
+    await expect(requireSupporter({ blocked: 'allow' })).resolves.toMatchObject({ blocked: true, supporterId })
+  })
+})
+
+describe('a page that needs an account', () => {
+  it('sends a visitor without a session to log in, with the page to come back to', async () => {
+    await expect(requireSupporter({ from: '/fans/mijn-account' })).rejects.toMatchObject({
+      url: '/fans/inloggen?terug=%2Ffans%2Fmijn-account',
+    })
+    await expect(requireSupporter({ from: 'https://example.com/fans' })).rejects.toMatchObject({
+      url: '/fans/inloggen',
+    })
   })
 })
