@@ -7,6 +7,8 @@ import { getDatabase } from '#src/database'
 import { accountMessageOf } from '#src/fans/account-form'
 import { changeEmailPaths } from '#src/fans/change-email'
 import { changeNamePath } from '#src/fans/change-name'
+import { closePaths } from '#src/fans/close-account'
+import { myDataPath, playedGames, slugOf } from '#src/fans/my-data'
 import { requireSupporter } from '#src/fans/require-supporter'
 import { signUpPaths } from '#src/fans/sign-up'
 import { supporterKind } from '#src/fans/supporter-login'
@@ -23,13 +25,13 @@ export const metadata: Metadata = { robots: { follow: false, index: false }, tit
 const noticeId = 'melding'
 
 // The cards with the data stand in the wide column, the soft cards in the narrow one; on a
-// phone the narrow column comes after the wide one. #1454 adds the cards "Wat je speelde" and
-// "Account opheffen".
-const areas = pageAreas({ after: ['side'] })
+// phone the narrow column comes after the wide one.
+const areas = pageAreas({ after: ['side'], main: ['main', 'played'] })
 
 // The account of the supporter who is logged in: the screen name, the address and the choice
-// for the rankings, each with the way to change it, and the card to log out. A blocked
-// supporter sees it too, but can only log out.
+// for the rankings, each with the way to change it, what the supporter played, and the cards to
+// log out and to close the account. A blocked supporter sees it too, but changes nothing: it
+// can only see its data, log out and close the account.
 export default async function MyAccountPage({
   searchParams,
 }: {
@@ -41,6 +43,7 @@ export default async function MyAccountPage({
     .db.select({ inRankings: users.inRankings })
     .from(users)
     .where(eq(users.id, supporter.supporterId))
+  const games = await playedGames(getDatabase().db, supporter.supporterId)
   const { melding } = await searchParams
   const message = accountMessageOf(melding)
   const change = (href: string, what: string) =>
@@ -85,6 +88,34 @@ export default async function MyAccountPage({
           {supporter.blocked ? null : <RankingsSwitch on={account?.inRankings ?? true} />}
         </Card>
       </Page.Cell>
+      <Page.Cell area="played">
+        <Card aria-labelledby="gespeeld-kop">
+          <Heading id="gespeeld-kop" level={2}>
+            Wat je speelde
+          </Heading>
+          {games.length === 0 ? (
+            <Text>Er is nog geen spel. Zodra er een is, zie je hier wat je speelde.</Text>
+          ) : (
+            <DescriptionList stacked>
+              {games.map((game) => (
+                <DescriptionList.Item key={game.label} term={game.label}>
+                  <Text>{game.data?.summary ?? 'Nog niets.'}</Text>
+                  {game.data === undefined ? null : (
+                    <Text>
+                      <Link href={`${myDataPath}#${slugOf(game.label)}`}>
+                        Bekijken<Text as="span" className="hf-visually-hidden">{` ${game.label}`}</Text>
+                      </Link>
+                    </Text>
+                  )}
+                </DescriptionList.Item>
+              ))}
+            </DescriptionList>
+          )}
+          <Text>
+            <Link href={myDataPath}>Alles wat we van je bewaren</Link>
+          </Text>
+        </Card>
+      </Page.Cell>
       <Page.Section area="side" aria-label="Uitloggen en je account">
         <Card aria-labelledby="uitloggen-kop" surface="soft">
           <Heading id="uitloggen-kop" level={2}>
@@ -101,6 +132,15 @@ export default async function MyAccountPage({
               Uitloggen op alle apparaten
             </Button>
           </Form>
+        </Card>
+        <Card aria-labelledby="opheffen-kop" surface="soft">
+          <Heading id="opheffen-kop" level={2}>
+            Account opheffen
+          </Heading>
+          <Text>Je naam en je e-mailadres gaan weg. Wat je speelde, blijft zonder naam in de cijfers.</Text>
+          <Text>
+            <Link href={closePaths.form}>Account opheffen</Link>
+          </Text>
         </Card>
       </Page.Section>
     </Page.Main>

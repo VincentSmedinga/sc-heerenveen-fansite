@@ -7066,6 +7066,39 @@
 - **Waarom:** de pagina van de blokkade zegt al dat voorspellingen en cijfers niet meer meetellen.
   Een nieuwe naam of adres zou een blokkade kunnen omzeilen.
 - **Alternatieven:** een geblokkeerd account alles laten wijzigen.
+- **Later:** sinds #1454 ziet een geblokkeerd account op Mijn account ook wat het speelde, en kan het zijn gegevens zien en zijn account opheffen.
+
+## Een supporter ziet al zijn gegevens en heft zijn account op
+
+- **Datum:** 20 november 2026
+- **Besluit:** opheffen vraagt één knop en één bevestiging, zonder mail.
+- **Waarom:** weggaan moet net zo makkelijk zijn als komen.
+  De supporter is ingelogd, dus hij heeft zijn adres al bewezen.
+- **Alternatieven:** een bevestiging per e-mail (een extra drempel om weg te gaan); een wachttijd van een paar dagen waarin je kunt terugkomen (de gegevens blijven dan langer staan dan nodig).
+
+- **Datum:** 21 november 2026
+- **Besluit:** `closeAccount` in `apps/site/src/fans/close-account.ts` is de enige functie die een account van een supporter weghaalt.
+  Hij verwijdert in één transactie de rij van het account, de sessies, de links en codes en de aanvragen voor een nieuw adres, en schrijft één regel in het logboek zonder nummer, naam of adres.
+  Het opheffen door de supporter, de blokkade (#1458) en het opruimen van ongebruikte accounts (#1460) roepen hem aan.
+  Wie iets moet bewaren, zoals de hash van het adres van een geblokkeerd account, doet dat voordat hij hem aanroept.
+- **Waarom:** één plek die zegt wat weggaat, zodat een later issue niets kan vergeten.
+- **Alternatieven:** het verwijderen per aanroeper schrijven (drie kopieën die uit elkaar lopen).
+
+- **Datum:** 21 november 2026
+- **Besluit:** de knop "Ja, hef mijn account op" werkt alleen met een bewijs van de pagina "Weet je het zeker?" uit dezelfde sessie, hoogstens 10 minuten oud.
+  Het bewijs is de SHA-256 van het token van de sessie en het moment waarop de pagina werd gemaakt; het formulier draagt beide mee.
+  Zonder geldig bewijs gaat de supporter terug naar de eerste stap, en een melding zegt dat het te lang duurde.
+- **Waarom:** opheffen kan niet worden teruggedraaid, dus een sessie alleen is niet genoeg.
+  Een andere site kent het token niet en kan het bewijs niet maken, en een oud tabblad werkt niet meer.
+- **Alternatieven:** alleen de sessie (één klik vanuit een oud tabblad heft op); de schermnaam laten intypen (een extra drempel om weg te gaan, en het ontwerp vraagt het niet); een tabel voor de bevestiging (meer opslag voor één klik).
+
+- **Datum:** 21 november 2026
+- **Besluit:** elke tabel die naar een supporter verwijst, heeft een plek in `apps/site/src/fans/my-data.ts`.
+  Een tabel van het account zelf staat in `accountTables` en gaat mee met het account (`ON DELETE CASCADE`).
+  Een tabel van een spel staat bij de plek van dat spel in `gamePlaces`, en verwijst met `ON DELETE SET NULL`, zodat wat is ingevuld blijft zonder naam.
+  `my-data.test.ts` faalt voor een tabel zonder plek of met de verkeerde regel.
+- **Waarom:** de pagina "Alles wat we van je bewaren" moet alles tonen, ook van spellen die later komen.
+- **Alternatieven:** een lijst in de documentatie (niemand merkt het als een spel hem vergeet).
 
 ## De kop toont of je bent ingelogd
 
@@ -7088,3 +7121,14 @@
 - **Besluit:** een test bewaakt dat geen bestand buiten `app/fans`, `fans`, `login` en het beheer de sessie van een supporter of het cookie noemt (`apps/site/src/public-pages.test.ts`).
 - **Waarom:** één import in een openbare pagina of in de layout maakt die pagina per persoon, en dat zie je niet aan de pagina.
 - **Alternatieven:** alleen de HTML van de layout testen (een pagina die zelf het cookie leest, valt er dan buiten).
+
+## De knop voor licht en donker houdt zijn plek vóór het laden
+
+- **Datum:** 21 november 2026
+- **Besluit:** de server stuurt op de plek van de knop Donker een verborgen, inerte ronde knop van dezelfde maat (`RoundButton`), die zijn plek houdt.
+  Na het laden komt de knop erin.
+  Een e2e-test (`apps/site/e2e/top-link.spec.ts`) vergelijkt de hoogte van de kop met die van de pagina zonder JavaScript.
+- **Waarom:** de knop kwam eerst na het laden, nam 52 pixels van het logo, het woordmerk brak op een telefoon van 390 pixels in twee regels en de kop werd 12,8 pixels hoger.
+  Dat schoof de pagina onder een bezoeker die al scrolde, en de test van de link naar boven faalde af en toe in CI.
+  Zonder JavaScript blijft er geen knop die niets doet.
+- **Alternatieven:** de knop werkend op de server tonen (dan staat er een knop zonder JavaScript die niets doet); een lege doos met een vaste maat (het ontwerpsysteem wil een component, en de maat staat dan op twee plekken); de test een wachttijd geven (verbergt de verschuiving, de bezoeker houdt hem).

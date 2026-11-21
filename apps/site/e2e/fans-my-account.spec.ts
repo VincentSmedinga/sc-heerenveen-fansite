@@ -163,3 +163,65 @@ test('checks the pages of Mijn account with axe, with an error and with the wait
   await page.goto('/fans/mijn-account/schermnaam')
   await checkPage(page)
 })
+
+test.describe('closing without JavaScript', () => {
+  test.use({ javaScriptEnabled: false })
+
+  test('signs up, logs in, sees all the data and closes the account', async ({ page }) => {
+    const { address, name } = await account(page)
+
+    await page.context().clearCookies()
+    await page.goto('/fans/inloggen')
+    await page.getByLabel('E-mailadres').fill(address)
+    await page.getByRole('button', { name: 'Stuur me een link' }).click()
+    await expect(page).toHaveURL(/\/fans\/inloggen\/verstuurd\?ref=/)
+    await expect.poll(() => mailsTo(address).length).toBe(2)
+    await page.getByLabel('Code uit de mail').fill(await codeTo(address))
+    await page.getByRole('button', { name: 'Doorgaan' }).click()
+    await expect(page).toHaveURL(/\/fans/)
+
+    await page.goto('/fans/mijn-account')
+    await page.getByRole('link', { name: 'Alles wat we van je bewaren' }).click()
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Alles wat we van je bewaren')
+    await expect(page.getByText(address)).toBeVisible()
+
+    await page.goto('/fans/mijn-account')
+    await page.getByRole('link', { name: 'Account opheffen' }).click()
+    await page.getByRole('button', { name: 'Account opheffen' }).click()
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Weet je het zeker?')
+    await expect(page.getByText(name)).toBeVisible()
+    await page.getByRole('button', { name: 'Ja, hef mijn account op' }).click()
+
+    await expect(page).toHaveURL(/\/fans\/mijn-account\/opgeheven$/)
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Je account is opgeheven')
+    expect((await page.context().cookies()).some(({ name: cookie }) => cookie === 'fans-sessie')).toBe(false)
+
+    // The account is gone: Mijn account asks to log in, and the address can sign up again.
+    await page.goto('/fans/mijn-account')
+    await expect(page).toHaveURL(/\/fans\/inloggen/)
+    await page.goto('/fans/aanmelden')
+    await page.getByLabel('Schermnaam').fill(name)
+    await page.getByLabel('E-mailadres').fill(address)
+    await page.getByRole('button', { name: 'Account maken' }).click()
+    await expect(page).toHaveURL(/\/fans\/aanmelden\/verstuurd\?ref=/)
+    await expect.poll(() => mailsTo(address).at(-1) ?? '').toContain('Je maakt een account')
+  })
+})
+
+test('checks the pages of all the data and of closing with axe', async ({ page }) => {
+  await account(page)
+
+  for (const path of [
+    '/fans/mijn-account/gegevens',
+    '/fans/mijn-account/opheffen',
+    '/fans/mijn-account/opheffen/zeker',
+  ]) {
+    await page.goto(path)
+    await checkPage(page)
+  }
+
+  await page.getByRole('button', { name: 'Ja, hef mijn account op' }).click()
+  await expect(page).toHaveURL(/\/fans\/mijn-account\/opgeheven$/)
+  await expect(page.getByRole('heading', { level: 1 })).toBeFocused()
+  await checkPage(page)
+})
