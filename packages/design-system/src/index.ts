@@ -96,6 +96,8 @@ export { FormTimeline } from './components/form-timeline/FormTimeline'
 export type { FormTimelineProps } from './components/form-timeline/FormTimeline'
 export { Form } from './components/form/Form'
 export type { FormProps } from './components/form/Form'
+export { GameHeading } from './components/game-heading/GameHeading'
+export type { GameHeadingProps } from './components/game-heading/GameHeading'
 export { Head } from './components/head/Head'
 export type { HeadProps } from './components/head/Head'
 export { anchorIdMaxLength, isAnchorId, isOldAnchorId } from './components/heading/anchor'
@@ -212,6 +214,12 @@ export type { PlayerListItem, PlayerListProps } from './components/player-list/P
 export { countryName } from './components/player-name/flags'
 export { PlayerName } from './components/player-name/PlayerName'
 export type { PlayerNameProps } from './components/player-name/PlayerName'
+export { PredictionCrowd } from './components/prediction-crowd/PredictionCrowd'
+export type {
+  PredictionCrowdOutcomes,
+  PredictionCrowdProps,
+  PredictionCrowdScore,
+} from './components/prediction-crowd/PredictionCrowd'
 export { PredictionList } from './components/prediction-list/PredictionList'
 export type { PredictionListItem, PredictionListProps } from './components/prediction-list/PredictionList'
 export { PullIndicator } from './components/pull-to-refresh/PullIndicator'

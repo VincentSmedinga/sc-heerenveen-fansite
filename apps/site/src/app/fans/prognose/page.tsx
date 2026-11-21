@@ -12,6 +12,7 @@ import { matchRanking, placeFigure, seasonRanking } from '#src/fans/prediction-r
 import { crowdFigures, scoredPredictions } from '#src/fans/prediction-results'
 import { currentSupporter } from '#src/fans/require-supporter'
 import { pageAreas } from '#src/page-areas'
+import { readPredictionCrowd } from '#src/PredictionCrowdCard'
 
 import { CrowdCard, PointsCard, ScoringCard, YourPredictionsCard } from './PointsCards'
 import { ClosedCard, NoMatchCard, OpenCard } from './PredictionCards'
@@ -99,6 +100,7 @@ export default async function PredictionPage({
         ) : (
           <>
             <ClosedCard
+              crowd={await readPredictionCrowd(started, now)}
               id="volgende-wedstrijd"
               loggedIn={loggedIn}
               match={started}

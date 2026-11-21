@@ -18,6 +18,7 @@ import { MatchPageCards, MatchPageHeader } from '#src/MatchPageView'
 import { EditorSources, SourceCredit } from '#src/MatchViews'
 import { seasonPageMetadata } from '#src/metadata'
 import { pageAreas } from '#src/page-areas'
+import { PredictionCrowdCard, readPredictionCrowd } from '#src/PredictionCrowdCard'
 import { getPublicReport, halfTimeOf, isCompleteReport, reportAddress } from '#src/report-data'
 import { matchPageDataOf, ourClub } from '#src/report-view'
 import { matchesPath } from '#src/season-page'
@@ -155,11 +156,18 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
   const { data, editorSources, neighbours, reported, season } = loaded
   const now = new Date()
   const phase = phaseOf(reported.match, now)
+  // The card Prognose, in the narrow column under the line-ups; it has no cell without figures.
+  const prediction = await readPredictionCrowd(reported.match)
   const page = matchPageDataOf(reported, factsOf(reported, now, phase), isCompleteReport(reported), phase)
 
   return (
     <>
-      <Page.Main areas={pageAreas({ after: ['source'], main: ['cards', 'neighbours'] })}>
+      <Page.Main
+        areas={pageAreas({
+          after: [...(prediction === undefined ? [] : ['prediction']), 'source'],
+          main: ['cards', 'neighbours'],
+        })}
+      >
         <Page.Cell area="head">
           <Text>
             <Link href={seasonAddress(matchesPath, season, seasonOf(now))} icon="arrow-left">
@@ -186,6 +194,15 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
         <Page.Cell area="neighbours">
           <MatchNeighbours next={neighbours.next} previous={neighbours.previous} />
         </Page.Cell>
+        {prediction === undefined ? null : (
+          <Page.Cell area="prediction">
+            <PredictionCrowdCard
+              data={prediction}
+              matchId={reported.match.id}
+              played={reported.match.status === 'played'}
+            />
+          </Page.Cell>
+        )}
         <Page.Section area="source" aria-label="De bron">
           <ReportCredit data={data} editorSources={editorSources} reported={reported} />
         </Page.Section>

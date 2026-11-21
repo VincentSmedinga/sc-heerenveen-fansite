@@ -1,0 +1,14 @@
+/*
+ * The head of the card of a game: the heading and a small text on one line, the small text at
+ * the end, on the baseline of the heading. When they don't fit, the text wraps under the name.
+ */
+
+@layer hf.components {
+  .hf-game-heading {
+    align-items: baseline;
+    column-gap: var(--hf-space-s);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+}
