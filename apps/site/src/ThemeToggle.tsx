@@ -1,6 +1,6 @@
 'use client'
 
-import { ThemeButton } from '@fansite/design-system'
+import { RoundButton, ThemeButton } from '@fansite/design-system'
 import { useEffect, useState, useSyncExternalStore } from 'react'
 
 import type { Theme, ThemePreference } from './theme'
@@ -41,9 +41,12 @@ const systemIsDark = () => matchMedia(darkQuery).matches
  * choice on the device; if that is what the system gives anyway, the choice is forgotten and
  * the page follows the system again (chooseTheme), so there is no button for "Systeem".
  *
- * There is nothing on the server and while hydrating, so without JavaScript the page has no
- * button that does nothing, and the server's HTML is the same for everyone. The server knows
- * nothing of the choice: public/theme.js puts it on the page.
+ * On the server and while hydrating there is no working button, so without JavaScript the page
+ * has no button that does nothing, and the server's HTML is the same for everyone. A hidden,
+ * inert round button of the same size keeps its room in the header: without it the button comes
+ * in after hydrating, takes room from the logo, the wordmark wraps and the header grows under a
+ * visitor who is already scrolling. It is out of the tab order and the accessibility tree.
+ * The server knows nothing of the choice: public/theme.js puts it on the page.
  */
 export const ThemeToggle = () => {
   const mounted = useSyncExternalStore(
@@ -60,7 +63,18 @@ export const ThemeToggle = () => {
   }, [preference, mounted])
 
   if (!mounted) {
-    return null
+    return (
+      <RoundButton
+        aria-hidden="true"
+        inert
+        label="Donker"
+        style={{ visibility: 'hidden' }}
+        surface="header"
+        tabIndex={-1}
+      >
+        {null}
+      </RoundButton>
+    )
   }
 
   const choose = (wanted: Theme) => {
