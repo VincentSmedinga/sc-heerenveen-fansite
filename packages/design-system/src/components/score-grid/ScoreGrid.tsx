@@ -21,6 +21,11 @@ export type ScoreGridProps = {
   /** The name of the home club, the head of the left column. The home club comes first. */
   homeName: string
   /**
+   * The `id` of each field, so a link in an ErrorSummary can bring the focus to it. A field
+   * left out has none.
+   */
+  ids?: ScoreGridValues
+  /**
    * The text of the legend of the fieldset, such as "Jouw voorspelling". The page gives it, so
    * it says what the grid is for.
    */
@@ -61,6 +66,7 @@ export const ScoreGrid = ({
   error,
   errors = {},
   homeName,
+  ids = {},
   legend,
   names = {},
   onValueChange,
@@ -132,6 +138,7 @@ export const ScoreGrid = ({
                 autoComplete="off"
                 className="hf-score-grid-field"
                 defaultValue={values ? undefined : defaultValues?.[field]}
+                id={ids[field]}
                 inputMode="numeric"
                 maxLength={1}
                 name={nameOf(field)}

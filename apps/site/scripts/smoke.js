@@ -2125,6 +2125,11 @@ await withEmptyDatabase((database) =>
 
     assert.equal(home.status, 200)
     assert.doesNotMatch(await home.text(), /href="\/fans"/, 'the main menu must not have Fans with every part off')
+    assert.equal(
+      (await fetch(`${origin}/fans/prognose`)).status,
+      404,
+      '/fans/prognose must be "not found" with Prognose off',
+    )
   }),
 )
 
@@ -2138,6 +2143,17 @@ await withEmptyDatabase((database) =>
     assert.match(html, /<h1[^>]*>Fans<\/h1>/)
     assert.match(html, /<a [^>]*href="\/fans"[^>]*>Fans<\/a>/, 'the main menu must have Fans')
     assert.equal(response.headers.get('cache-control'), 'no-store')
+
+    // The game Prognose, with no match in the empty database: the page says so, and no search
+    // engine may index it.
+    const prediction = await fetch(`${origin}/fans/prognose`)
+    const predictionHtml = await prediction.text()
+
+    assert.equal(prediction.status, 200, '/fans/prognose must be there with Prognose on')
+    assert.match(predictionHtml, /<h1[^>]*>Prognose<\/h1>/)
+    assert.match(predictionHtml, /De volgende wedstrijd is nog niet bekend\./)
+    assert.equal(prediction.headers.get('cache-control'), 'no-store')
+    assert.equal(prediction.headers.get('x-robots-tag'), 'noindex, nofollow')
   }),
 )
 

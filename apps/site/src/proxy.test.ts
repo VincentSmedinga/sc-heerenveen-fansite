@@ -101,7 +101,7 @@ describe('proxy', () => {
     },
   )
 
-  it.each(['/fans', '/fans/', '/fans/aanmelden', '/fans/prognose'])(
+  it.each(['/fans', '/fans/', '/fans/aanmelden', '/fans/uitblinker'])(
     'keeps %s out of every cache and sends a referrer only to our own pages, and leaves it open to search engines',
     (path) => {
       vi.stubEnv('SITE_ENV', 'production')
@@ -113,16 +113,18 @@ describe('proxy', () => {
     },
   )
 
-  it.each(['/fans/mijn-account', '/fans/mijn-account/schermnaam', '/fans/mijn-account/e-mailadres/verstuurd'])(
-    'keeps %s out of search engines on production too',
-    (path) => {
-      vi.stubEnv('SITE_ENV', 'production')
-      const { headers } = proxy(path)
+  it.each([
+    '/fans/mijn-account',
+    '/fans/mijn-account/schermnaam',
+    '/fans/mijn-account/e-mailadres/verstuurd',
+    '/fans/prognose',
+  ])('keeps %s out of search engines on production too', (path) => {
+    vi.stubEnv('SITE_ENV', 'production')
+    const { headers } = proxy(path)
 
-      expect(headers.get('X-Robots-Tag')).toBe('noindex, nofollow')
-      expect(headers.get('Cache-Control')).toBe('no-store')
-    },
-  )
+    expect(headers.get('X-Robots-Tag')).toBe('noindex, nofollow')
+    expect(headers.get('Cache-Control')).toBe('no-store')
+  })
 
   it('does not treat /fansite as part of Fans', () => {
     vi.stubEnv('SITE_ENV', 'production')

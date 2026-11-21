@@ -1622,6 +1622,49 @@ export type Match = typeof matches.$inferSelect
 
 export type NewMatch = typeof matches.$inferInsert
 
+/** The most goals a supporter can predict for one side, at half-time or full time (#1447). */
+export const predictionMaxGoals = 9
+
+/**
+ * The predictions of supporters for the game Prognose (issue 1447): the half-time and the
+ * full-time score of one match, as the goals of the home and the away club. The home club is
+ * the club that plays at home in the match, so the columns follow the order on the line, not
+ * sc Heerenveen. The full-time score is the score after 90 minutes plus stoppage time. A
+ * supporter has one row per match, which they can change until the kick-off. `supporter_id`
+ * is emptied when the account is closed (`ON DELETE SET NULL`), so what was predicted stays
+ * without a link to a person (see `gamePlaces` in the site). Times are UTC.
+ */
+export const predictions = mysqlTable(
+  'predictions',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    supporterId: int('supporter_id', { unsigned: true }).references(() => supporters.id, { onDelete: 'set null' }),
+    matchId: int('match_id', { unsigned: true })
+      .notNull()
+      .references(() => matches.id, { onDelete: 'cascade' }),
+    halftimeHome: smallint('halftime_home', { unsigned: true }).notNull(),
+    halftimeAway: smallint('halftime_away', { unsigned: true }).notNull(),
+    fullTimeHome: smallint('full_time_home', { unsigned: true }).notNull(),
+    fullTimeAway: smallint('full_time_away', { unsigned: true }).notNull(),
+    createdAt: datetime('created_at')
+      .notNull()
+      .default(sql`(UTC_TIMESTAMP())`),
+    updatedAt: datetime('updated_at')
+      .notNull()
+      .default(sql`(UTC_TIMESTAMP())`),
+  },
+  (table) => [
+    unique('predictions_supporter_id_match_id_unique').on(table.supporterId, table.matchId),
+    index('predictions_match_id_idx').on(table.matchId),
+    check(
+      'predictions_goals_in_range',
+      sql`${table.halftimeHome} <= ${sql.raw(String(predictionMaxGoals))} and ${table.halftimeAway} <= ${sql.raw(String(predictionMaxGoals))} and ${table.fullTimeHome} <= ${sql.raw(String(predictionMaxGoals))} and ${table.fullTimeAway} <= ${sql.raw(String(predictionMaxGoals))}`,
+    ),
+  ],
+)
+
+export type Prediction = typeof predictions.$inferSelect
+
 /**
  * The corners, offsides and fouls of a played match, from the old fansite: one row for each
  * match, and only when at least one of the six numbers is above 0, because 0-0-0 meant "not

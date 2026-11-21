@@ -6,6 +6,7 @@ import { isFansPartOn } from '@fansite/shared/fans-env'
 import { eq } from 'drizzle-orm'
 
 import { fansGames } from '../fans-paths'
+import { predictionData } from './prediction'
 
 // Everything the site keeps of a supporter, for the page "Alles wat we van je bewaren" and the
 // card "Wat je speelde" on Mijn account (issue 1454). Each game has a fixed place here; the
@@ -46,9 +47,17 @@ export type GamePlace = {
   tables: readonly string[]
 }
 
-/** The places of the games, in the order of the bar of games. None keeps anything yet. */
+/**
+ * What each game keeps of a supporter: the table and how to read it. A game that keeps nothing
+ * yet has no entry; the issue that builds it adds one.
+ */
+const kept: Partial<Record<GamePlace['part'], Pick<GamePlace, 'load' | 'tables'>>> = {
+  prognose: { load: predictionData, tables: ['predictions'] },
+}
+
+/** The places of the games, in the order of the bar of games. */
 export const gamePlaces: readonly GamePlace[] = fansGames.flatMap(({ label, part }) =>
-  part === 'fantest' ? [] : [{ label, load: () => Promise.resolve(undefined), part, tables: [] }],
+  part === 'fantest' ? [] : [{ label, load: () => Promise.resolve(undefined), part, tables: [], ...kept[part] }],
 )
 
 /** What the account itself holds, for the first card of the page. */
