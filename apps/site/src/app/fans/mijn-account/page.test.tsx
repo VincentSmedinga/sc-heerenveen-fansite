@@ -289,7 +289,7 @@ describe('the page of all the data', () => {
     expect(html).toMatch(/Nog niets\. <a href="\/fans\/prognose">Doe mee aan de Prognose<\/a>/)
     expect(html).not.toContain('Geblokkeerd')
     expect(html).toContain('Geen IP-adres, geen browser, geen echte naam: die bewaren we niet.')
-    expect(html).toContain('href="/privacy"')
+    expect(html).toContain('href="/privacy#account"')
   })
 })
 

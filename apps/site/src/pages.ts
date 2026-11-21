@@ -90,7 +90,7 @@ export const pages = [
     path: '/fans',
   },
   {
-    description: 'Wat we met gegevens doen: geen cookies, niemand volgen en niets van een ander domein.',
+    description: 'Wat we met gegevens doen: niemand volgen en niets van een ander domein.',
     path: '/privacy',
   },
   {

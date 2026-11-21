@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Button, Card, Form, Heading, List, Notice, Page, Tag, Text } from '@fansite/design-system'
+import { Button, Card, Form, Heading, Link, List, Notice, Page, Tag, Text } from '@fansite/design-system'
 import { isFansPartOn, requireFansPart } from '@fansite/shared/fans-env'
 import { notFound } from 'next/navigation'
 
@@ -101,6 +101,9 @@ export default async function FansPage({
             })}
           </List>
         </Card>
+        <Text appearance="meta">
+          <Link href="/privacy#account">Wat we bewaren als je een account hebt</Link>
+        </Text>
       </Page.Cell>
     </Page.Main>
   )
