@@ -160,6 +160,7 @@ describe('the page of a match', () => {
       reported.match.home = false
       reported.match.halfTimeAgainst = 1
       reported.match.halfTimeFor = 0
+      reported.match.halfTimeSource = 'redactie'
       vi.mocked(getPublicReport).mockResolvedValue(reported)
 
       expect(factsOf(await render())).toContain('Ruststand 1–0')
