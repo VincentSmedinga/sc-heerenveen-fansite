@@ -1513,6 +1513,7 @@ De code staat in `src/fans`: de regels van de schermnaam in `screen-name.ts`, he
 Elke persoonlijke pagina en actie onder `/fans` begint met `requireSupporter()`; `src/fans/routes.test.ts` faalt voor een die dat niet doet.
 De tabellen zijn `supporters`, `supporter_login_links`, `supporter_email_changes`, `supporter_sessions` en `supporter_login_attempts`, los van die van het beheer.
 Het cookie heet `fans-sessie` en gaat alleen mee naar de pagina's onder `/fans`.
+De proxy geeft Mijn account en zijn pagina's de header `X-Robots-Tag: noindex, nofollow`, op elke omgeving.
 
 ## Icoon en manifest
 
