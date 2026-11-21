@@ -42,12 +42,12 @@ const fans = path.join(src, 'app/fans')
 
 /** The pages and actions that a visitor without a session may call: the way in. */
 const open = [
-  // The page that says what is coming, for everybody; it has nothing personal.
-  'app/fans/page.tsx',
   'app/fans/aanmelden/actions.ts',
   'app/fans/aanmelden/bevestigen/page.tsx',
   'app/fans/aanmelden/page.tsx',
   'app/fans/aanmelden/verstuurd/page.tsx',
+  // The page that says what is coming, for everybody; it has nothing personal.
+  'app/fans/page.tsx',
 ]
 
 function filesUnder(folder: string) {
