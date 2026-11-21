@@ -14,10 +14,11 @@ export const fansGames = [
 ] as const
 
 /**
- * Whether the path is a page of the account: signing up, logging in, or Mijn account and its
- * pages. They have no bar of games under the menu, like the login of the admin.
+ * Whether the path is a page of the account: signing up, logging in, Mijn account and its
+ * pages, or the page of the link in a reminder. They have no bar of games under the menu, like
+ * the login of the admin.
  */
 export const isAccountPath = (pathname: string) =>
-  ['aanmelden', 'inloggen', 'mijn-account'].some(
+  ['aanmelden', 'herinnering', 'inloggen', 'mijn-account'].some(
     (page) => pathname === `${fansPath}/${page}` || pathname.startsWith(`${fansPath}/${page}/`),
   )

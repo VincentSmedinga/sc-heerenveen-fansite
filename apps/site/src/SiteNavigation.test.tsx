@@ -403,10 +403,11 @@ describe('Fans in the menu', () => {
     expect(html).not.toContain('hf-navigation-bar')
   })
 
-  it('has no bar on the pages of signing up, logging in and the account', () => {
+  it('has no bar on the pages of signing up, logging in, the account and the link of a reminder', () => {
     for (const path of [
       '/fans/aanmelden',
       '/fans/aanmelden/verstuurd',
+      '/fans/herinnering/uitzetten',
       '/fans/inloggen/bevestigen',
       '/fans/mijn-account',
       '/fans/mijn-account/schermnaam',
