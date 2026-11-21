@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
   changeName,
+  closeMyAccount,
   confirmEmailCode,
   confirmEmailLink,
   logOut,
@@ -49,6 +50,7 @@ describe('the actions of Mijn account, with accounts off', () => {
 
   it.each([
     ['changeName', () => changeName({ value: '' }, form())],
+    ['closeMyAccount', () => closeMyAccount(form())],
     ['confirmEmailCode', () => confirmEmailCode('ref', form())],
     ['confirmEmailLink', () => confirmEmailLink('token')],
     ['logOut', () => logOut()],

@@ -7066,3 +7066,36 @@
 - **Waarom:** de pagina van de blokkade zegt al dat voorspellingen en cijfers niet meer meetellen.
   Een nieuwe naam of adres zou een blokkade kunnen omzeilen.
 - **Alternatieven:** een geblokkeerd account alles laten wijzigen.
+- **Later:** sinds #1454 ziet een geblokkeerd account op Mijn account ook wat het speelde, en kan het zijn gegevens zien en zijn account opheffen.
+
+## Een supporter ziet al zijn gegevens en heft zijn account op
+
+- **Datum:** 20 november 2026
+- **Besluit:** opheffen vraagt één knop en één bevestiging, zonder mail.
+- **Waarom:** weggaan moet net zo makkelijk zijn als komen.
+  De supporter is ingelogd, dus hij heeft zijn adres al bewezen.
+- **Alternatieven:** een bevestiging per e-mail (een extra drempel om weg te gaan); een wachttijd van een paar dagen waarin je kunt terugkomen (de gegevens blijven dan langer staan dan nodig).
+
+- **Datum:** 21 november 2026
+- **Besluit:** `closeAccount` in `apps/site/src/fans/close-account.ts` is de enige functie die een account van een supporter weghaalt.
+  Hij verwijdert in één transactie de rij van het account, de sessies, de links en codes en de aanvragen voor een nieuw adres, en schrijft één regel in het logboek zonder nummer, naam of adres.
+  Het opheffen door de supporter, de blokkade (#1458) en het opruimen van ongebruikte accounts (#1460) roepen hem aan.
+  Wie iets moet bewaren, zoals de hash van het adres van een geblokkeerd account, doet dat voordat hij hem aanroept.
+- **Waarom:** één plek die zegt wat weggaat, zodat een later issue niets kan vergeten.
+- **Alternatieven:** het verwijderen per aanroeper schrijven (drie kopieën die uit elkaar lopen).
+
+- **Datum:** 21 november 2026
+- **Besluit:** de knop "Ja, hef mijn account op" werkt alleen met een bewijs van de pagina "Weet je het zeker?" uit dezelfde sessie, hoogstens 10 minuten oud.
+  Het bewijs is de SHA-256 van het token van de sessie en het moment waarop de pagina werd gemaakt; het formulier draagt beide mee.
+  Zonder geldig bewijs gaat de supporter terug naar de eerste stap.
+- **Waarom:** opheffen kan niet worden teruggedraaid, dus een sessie alleen is niet genoeg.
+  Een andere site kent het token niet en kan het bewijs niet maken, en een oud tabblad werkt niet meer.
+- **Alternatieven:** alleen de sessie (één klik vanuit een oud tabblad heft op); de schermnaam laten intypen (een extra drempel om weg te gaan, en het ontwerp vraagt het niet); een tabel voor de bevestiging (meer opslag voor één klik).
+
+- **Datum:** 21 november 2026
+- **Besluit:** elke tabel die naar een supporter verwijst, heeft een plek in `apps/site/src/fans/my-data.ts`.
+  Een tabel van het account zelf staat in `accountTables` en gaat mee met het account (`ON DELETE CASCADE`).
+  Een tabel van een spel staat bij de plek van dat spel in `gamePlaces`, en verwijst met `ON DELETE SET NULL`, zodat wat is ingevuld blijft zonder naam.
+  `my-data.test.ts` faalt voor een tabel zonder plek of met de verkeerde regel.
+- **Waarom:** de pagina "Alles wat we van je bewaren" moet alles tonen, ook van spellen die later komen.
+- **Alternatieven:** een lijst in de documentatie (niemand merkt het als een spel hem vergeet).
