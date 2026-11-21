@@ -7087,7 +7087,7 @@
 - **Datum:** 21 november 2026
 - **Besluit:** de knop "Ja, hef mijn account op" werkt alleen met een bewijs van de pagina "Weet je het zeker?" uit dezelfde sessie, hoogstens 10 minuten oud.
   Het bewijs is de SHA-256 van het token van de sessie en het moment waarop de pagina werd gemaakt; het formulier draagt beide mee.
-  Zonder geldig bewijs gaat de supporter terug naar de eerste stap.
+  Zonder geldig bewijs gaat de supporter terug naar de eerste stap, en een melding zegt dat het te lang duurde.
 - **Waarom:** opheffen kan niet worden teruggedraaid, dus een sessie alleen is niet genoeg.
   Een andere site kent het token niet en kan het bewijs niet maken, en een oud tabblad werkt niet meer.
 - **Alternatieven:** alleen de sessie (één klik vanuit een oud tabblad heft op); de schermnaam laten intypen (een extra drempel om weg te gaan, en het ontwerp vraagt het niet); een tabel voor de bevestiging (meer opslag voor één klik).

@@ -203,9 +203,10 @@ describe('the page of all the data', () => {
 
 describe('closing the account', () => {
   it('says what goes and what stays, before a red button that only goes on', async () => {
-    const html = renderToStaticMarkup(await CloseAccountPage())
+    const html = renderToStaticMarkup(await CloseAccountPage({ searchParams: Promise.resolve({}) }))
 
     expect(html).toMatch(/<h1[^>]*>Account opheffen<\/h1>/)
+    expect(html).not.toContain('Dat duurde te lang')
     expect(html).toMatch(/<h2[^>]*>Dit gaat weg<\/h2>/)
     expect(html).toMatch(/<h2[^>]*>Dit blijft, zonder naam<\/h2>/)
     expect(html).toContain('Mail de redactie</a> voordat je opheft.')
@@ -215,6 +216,16 @@ describe('closing the account', () => {
     expect(html).toContain('>Annuleren</a>')
     // The consequences stand before the button.
     expect(html.indexOf('Dit gaat weg')).toBeLessThan(html.indexOf('hf-button-danger'))
+  })
+
+  it('says so when the confirmation took too long, with the focus on the notice', async () => {
+    const html = renderToStaticMarkup(
+      await CloseAccountPage({ searchParams: Promise.resolve({ melding: 'verlopen' }) }),
+    )
+
+    expect(html).toMatch(/id="melding"[^>]*tabindex="-1"/)
+    expect(html).toContain('Dat duurde te lang. Je account bestaat nog. Probeer het opnieuw.')
+    expect(html.indexOf('Dat duurde te lang')).toBeLessThan(html.indexOf('Dit gaat weg'))
   })
 
   it('asks for the confirmation with the name, a red button with a proof, and a way back', async () => {

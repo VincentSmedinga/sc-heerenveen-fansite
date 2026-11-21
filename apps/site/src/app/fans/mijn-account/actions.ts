@@ -70,7 +70,7 @@ export async function closeMyAccount(formData: FormData) {
   const issuedAt = Number(textOf(formData, 'gemaakt'))
 
   if (token === undefined || !isFreshConfirmation(token, issuedAt, textOf(formData, 'bewijs'))) {
-    redirect(closePaths.form)
+    redirect(`${closePaths.form}?melding=verlopen`)
   }
 
   await closeAccount(getDatabase().db, supporterId)

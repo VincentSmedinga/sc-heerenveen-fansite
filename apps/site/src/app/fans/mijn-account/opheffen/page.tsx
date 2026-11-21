@@ -1,28 +1,45 @@
 import type { Metadata } from 'next'
 
-import { Button, Card, Form, Heading, Link, List, Page, Text } from '@fansite/design-system'
+import { Button, Card, Form, Heading, Link, List, Notice, Page, Text } from '@fansite/design-system'
 
 import { email as editorsEmail } from '#src/contact'
 import { closePaths } from '#src/fans/close-account'
 import { requireSupporter } from '#src/fans/require-supporter'
 import { signUpPaths } from '#src/fans/sign-up'
+import { FocusOnLoad } from '#src/FocusOnLoad'
 
 import { BackToAccount } from '../BackToAccount'
 
 export const dynamic = 'force-dynamic'
 
+const noticeId = 'melding'
+
 export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Account opheffen' }
 
 // The first step of closing the account: what goes and what stays. The red button only goes on
 // to the confirmation; nothing is removed here. A blocked supporter can close the account too.
-export default async function CloseAccountPage() {
+// After a confirmation that was too old (`?melding=verlopen`), a notice says so.
+export default async function CloseAccountPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
   await requireSupporter({ blocked: 'allow', from: closePaths.form })
+  const { melding } = await searchParams
 
   return (
     <Page.Main>
       <Page.Cell>
         <BackToAccount />
         <Heading level={1}>Account opheffen</Heading>
+        {melding === 'verlopen' ? (
+          <>
+            <Notice id={noticeId} tabIndex={-1}>
+              Dat duurde te lang. Je account bestaat nog. Probeer het opnieuw.
+            </Notice>
+            <FocusOnLoad id={noticeId} />
+          </>
+        ) : null}
         <Card aria-labelledby="weg-kop">
           <Heading id="weg-kop" level={2}>
             Dit gaat weg

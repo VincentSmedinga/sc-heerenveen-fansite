@@ -66,7 +66,9 @@ describe('closeMyAccount', () => {
     ['with the proof of another session', () => toFields(newConfirmation('andere'))],
     ['with a page older than 10 minutes', () => toFields(newConfirmation('sessie', Date.now() - 10 * 60 * 1000))],
   ])('closes nothing %s, and goes back to the first page', async (_name, fields) => {
-    await expect(closeMyAccount(formOf(fields()))).rejects.toThrow('redirect /fans/mijn-account/opheffen')
+    await expect(closeMyAccount(formOf(fields()))).rejects.toThrow(
+      'redirect /fans/mijn-account/opheffen?melding=verlopen',
+    )
     expect(closeAccount).not.toHaveBeenCalled()
     expect(cookieDelete).not.toHaveBeenCalled()
   })
