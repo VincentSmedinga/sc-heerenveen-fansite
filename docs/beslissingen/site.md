@@ -7296,7 +7296,7 @@
   Het onderwerp is "Voorspel sc Heerenveen – FC Twente", met de thuisclub eerst.
   De link opent `/fans/herinnering/uitzetten` met een code in het adres: het nummer van de supporter, het moment waarop de code verloopt (60 dagen) en een HMAC-SHA-256 met `FANS_REMINDER_SECRET`.
   Een pagina met een knop zet de herinnering uit, zodat een mailscanner de link niet verbruikt; een ongeldige of verlopen code verandert niets en zegt dat de link niet werkt.
-  Onder de bevestiging van een opgeslagen voorspelling staat "Een herinnering per e-mail? Instellen" zolang de herinnering uit staat.
+  Onder de bevestiging van een opgeslagen voorspelling staat de regel "Een herinnering per e-mail" met de link "Instellen", zolang de herinnering uit staat.
   De privacyverklaring noemt de herinnering, en `SECURITY.md` de code.
 - **Waarom:** een aftrap is een moment, dus een herinnering de dag ervoor kan in elke run vallen; één keer per dag zou een wedstrijd missen.
   Vanaf het uur in plaats van alleen in dat uur, omdat de limiet per run de rest naar latere runs schuift, en omdat wie de herinnering om 15.00 aanzet het bericht ook nog wil.
