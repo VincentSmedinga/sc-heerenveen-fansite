@@ -60,6 +60,7 @@ const screens = [
   '/beheer/spelers/kwaliteit/plaatsen',
   '/beheer/spelers/kwaliteit/plaatsen/vragen',
   '/beheer/bezoek',
+  '/beheer/supporters',
   '/beheer/accounts',
   '/beheer/accounts/nieuw',
   '/beheer/mijn-account',
