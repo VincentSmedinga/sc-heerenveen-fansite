@@ -1,10 +1,14 @@
 import type { Database } from '@fansite/db/client'
+import type { supporterEmailChanges } from '@fansite/db/schema'
 
 import { and, eq, gt, gte, isNull, lt, lte, or, sql } from 'drizzle-orm'
 
 import type { AccountKind, AccountOf } from './account-kind'
 
 import { codeHashOf, hashOf, newToken } from './tokens'
+
+/** A table of rows that a code of a mail uses up. */
+type CodeTable = AccountKind['tables']['links'] | typeof supporterEmailChanges
 
 /** A row of the login links of a kind. */
 type LinkOf<Kind extends AccountKind> = Kind['tables']['links']['$inferSelect']
@@ -160,6 +164,57 @@ export async function startSessionIfOn(db: Database, kind: AccountKind, userId: 
 }
 
 /**
+ * Uses a code up like `takeLinkWithCode`, in `table`, which has the columns of a login link
+ * that a code needs: the login links of the kind, or the requests to change the address of a
+ * supporter (see change-email.ts in fans). The tries and their limit are those of the kind.
+ */
+export async function takeCode<Table extends CodeTable>(
+  db: Database,
+  kind: AccountKind,
+  table: Table,
+  ref: string,
+  value: string,
+  now = new Date(),
+): Promise<Table['$inferSelect'] | undefined> {
+  const links = table as CodeTable
+  const code = value.replaceAll(/\s/g, '')
+
+  if (!/^\d{6}$/.test(code) || ref === '') {
+    return undefined
+  }
+
+  const [link] = await db
+    .select()
+    .from(links)
+    .where(and(eq(links.refHash, hashOf(ref)), gt(links.expiresAt, now)))
+
+  if (link?.codeHash === undefined || link.codeHash === null) {
+    return undefined
+  }
+
+  const [counted] = await db
+    .update(links)
+    .set({ failedAttempts: sql`${links.failedAttempts} + 1` })
+    .where(and(eq(links.id, link.id), lt(links.failedAttempts, kind.codeAttempts)))
+
+  if (counted.affectedRows !== 1) {
+    return undefined
+  }
+
+  if (link.codeHash !== codeHashOf(ref, code)) {
+    if (kind.codeFailuresEndLink) {
+      await db.delete(links).where(and(eq(links.id, link.id), gte(links.failedAttempts, kind.codeAttempts)))
+    }
+
+    return undefined
+  }
+
+  const [deleted] = await db.delete(links).where(eq(links.id, link.id))
+
+  return deleted.affectedRows === 1 ? (link as Table['$inferSelect']) : undefined
+}
+
+/**
  * Uses a link of the mail up, without looking at its account: its row, or `undefined` when the
  * token is unknown or the link has expired. It deletes the row first and only gives it when it
  * deleted exactly one, so two requests with the same link can't both use it. A link of a
@@ -195,40 +250,7 @@ export async function takeLinkWithCode<Kind extends AccountKind>(
   value: string,
   now = new Date(),
 ): Promise<LinkOf<Kind> | undefined> {
-  const { links } = kind.tables
-  const code = value.replaceAll(/\s/g, '')
-
-  if (!/^\d{6}$/.test(code) || ref === '') {
-    return undefined
-  }
-
-  const [link] = await db
-    .select()
-    .from(links)
-    .where(and(eq(links.refHash, hashOf(ref)), gt(links.expiresAt, now)))
-
-  if (link?.codeHash === undefined || link.codeHash === null) {
-    return undefined
-  }
-
-  const [counted] = await db
-    .update(links)
-    .set({ failedAttempts: sql`${links.failedAttempts} + 1` })
-    .where(and(eq(links.id, link.id), lt(links.failedAttempts, kind.codeAttempts)))
-
-  if (counted.affectedRows !== 1) {
-    return undefined
-  }
-
-  if (link.codeHash !== codeHashOf(ref, code)) {
-    if (kind.codeFailuresEndLink) {
-      await db.delete(links).where(and(eq(links.id, link.id), gte(links.failedAttempts, kind.codeAttempts)))
-    }
-
-    return undefined
-  }
-
-  return deleteOnce(db, kind, link) as Promise<LinkOf<Kind> | undefined>
+  return takeCode(db, kind, kind.tables.links, ref, value, now) as Promise<LinkOf<Kind> | undefined>
 }
 
 /** Deletes the row of a link, and gives it back only when this call deleted it. */

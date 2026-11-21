@@ -503,6 +503,28 @@ export const supporterLoginLinks = mysqlTable(
 )
 
 /**
+ * The requests of supporters to change the address of their account (issue 1452), until the
+ * link or the code that went to the new address is used, or expires 15 minutes later. The
+ * address of the account changes only when that happens, so `email` is the new address that
+ * was asked for. A request for an address that has an account already is a row too, with a
+ * code hash that no code matches and a token that nobody gets, so the page and the tries of a
+ * code are the same as for any other address; no mail goes out for it. The table keeps the
+ * SHA-256 of the token and of the code, never the token or the code. Times are UTC.
+ */
+export const supporterEmailChanges = mysqlTable('supporter_email_changes', {
+  id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+  supporterId: int('supporter_id', { unsigned: true })
+    .notNull()
+    .references(() => supporters.id, { onDelete: 'cascade' }),
+  email: varchar('email', { length: 254 }).notNull(),
+  tokenHash: varchar('token_hash', { length: 64 }).notNull().unique(),
+  refHash: varchar('ref_hash', { length: 64 }).unique(),
+  codeHash: varchar('code_hash', { length: 64 }),
+  failedAttempts: int('failed_attempts', { unsigned: true }).notNull().default(0),
+  expiresAt: datetime('expires_at').notNull(),
+})
+
+/**
  * The sessions of supporters, on the server, like `admin_sessions`. The cookie `fans-sessie`
  * holds a random token and nothing else; the table keeps its SHA-256. Times are UTC.
  */

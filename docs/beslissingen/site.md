@@ -7015,3 +7015,53 @@
   Het item Fans blijft in het menu en is gemarkeerd.
 - **Waarom:** deze pagina's zijn één smalle kolom met één taak, zoals de inlogpagina van het beheer, en een balk met spellen leidt daar van de taak af.
 - **Alternatieven:** de balk laten staan (het ontwerp wil hem weg); alleen het aanmelden (het inloggen is dezelfde soort pagina en zou er anders naast afwijken).
+- **Later:** sinds 21 november 2026 hoort Mijn account met zijn pagina's er ook bij (#1452).
+
+## Een supporter wijzigt zijn schermnaam en zijn e-mailadres
+
+- **Datum:** 20 november 2026
+- **Besluit:** een supporter wijzigt zijn schermnaam hoogstens één keer per 30 dagen.
+- **Waarom:** een ranglijst is alleen leuk als je de namen herkent.
+  Wie elke week anders heet, is niet te volgen.
+- **Alternatieven:** vrij wijzigen (onherkenbare ranglijsten); nooit wijzigen (wie zich vergist, zit eraan vast).
+
+- **Datum:** 20 november 2026
+- **Besluit:** een nieuw e-mailadres geldt pas na een bevestiging via dat adres, en het oude adres krijgt een bericht.
+- **Waarom:** het adres is de sleutel van het account.
+  Een tikfout mag niemand buitensluiten, en wie een open sessie van een ander vindt, mag het account niet stil overnemen.
+- **Alternatieven:** meteen wijzigen zonder bevestiging; ook het oude adres laten bevestigen (wie zijn oude adres kwijt is, kan dan niet meer wijzigen).
+
+- **Datum:** 20 november 2026
+- **Besluit:** de Switch "Naam in de standen" hoort bij de wijzigingen van Mijn account (#1452), omdat dat issue de instelling levert.
+- **Waarom:** de pagina Mijn account groeit zo issue voor issue; elke instelling hoort bij het issue dat haar levert.
+- **Alternatieven:** de Switch bij het bekijken en opheffen van het account bouwen (#1454; het gedrag zit dan in een ander issue dan de knop).
+
+- **Datum:** 21 november 2026
+- **Besluit:** de 30 dagen zijn dagen van de kalender in Nederland (`nameWait` in `apps/site/src/fans/change-name.ts`).
+  Wie zijn naam op 4 december wijzigde, kan hem vanaf 3 januari weer wijzigen, op elk uur van die dag.
+  Dezelfde naam opslaan wijzigt niets en telt niet; alleen andere hoofdletters, accenten of spaties telt wel.
+- **Waarom:** de pagina noemt een datum, en dan moet die hele dag kloppen.
+- **Alternatieven:** 30 keer 24 uur (dan zegt de pagina "vanaf 3 januari" en weigert de server toch tot de avond).
+
+- **Datum:** 21 november 2026
+- **Besluit:** een aanvraag voor een nieuw adres staat in een eigen tabel, `supporter_email_changes`, en niet bij de links om in te loggen.
+  Het adres van het account wijzigt pas met de link of de code, in een sessie van hetzelfde account.
+  Opent de supporter de link zonder sessie, dan logt hij eerst in met het oude adres en komt hij terug op de knop.
+  Na de wijziging eindigen de andere sessies en de links om in te loggen die nog naar het oude adres onderweg zijn.
+- **Waarom:** in een eigen tabel kan een link om het adres te wijzigen nooit per ongeluk als link om in te loggen werken.
+  Met de eis van een sessie werkt een aanvraag alleen voor het account dat hem deed, ook als iemand anders de mail opent.
+- **Alternatieven:** een nieuw soort rij in `supporter_login_links` (dan moet elke plek van het inloggen die rij overslaan); de link zonder sessie laten werken en dan inloggen (dan logt de link in voor wie de nieuwe mailbox leest).
+
+- **Datum:** 21 november 2026
+- **Besluit:** een aanvraag voor een adres dat al een account heeft, krijgt dezelfde pagina "Kijk in je mail", met een code die nooit werkt, en er gaat geen mail naar dat adres.
+  Een aanvraag telt mee voor de 3 mails per adres in 15 minuten en het plafond van de site, en een supporter doet hoogstens 3 aanvragen in 15 minuten.
+- **Waarom:** zo verraadt het formulier niet wie een account heeft, ook niet door het aantal pogingen of de tijd van het antwoord.
+  Een mail aan de eigenaar van dat adres zou iemand lastigvallen met een aanvraag die hij niet deed.
+- **Alternatieven:** een foutmelding "dat adres heeft al een account" (verraadt het); de eigenaar van het adres mailen, zoals het aanmelden doet (geeft hem een mail over iets wat hem niet aangaat).
+
+- **Datum:** 21 november 2026
+- **Besluit:** een geblokkeerd account wijzigt niets op Mijn account: de links Wijzigen en de Switch staan er niet, en de pagina's van de wijzigingen sturen naar de pagina van de blokkade.
+  `inRankings` in `apps/site/src/fans/rankings.ts` laat een geblokkeerd account ook uit de ranglijsten.
+- **Waarom:** de pagina van de blokkade zegt al dat voorspellingen en cijfers niet meer meetellen.
+  Een nieuwe naam of adres zou een blokkade kunnen omzeilen.
+- **Alternatieven:** een geblokkeerd account alles laten wijzigen.

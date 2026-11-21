@@ -174,6 +174,17 @@ export async function handleSignUp(
       : { answer: result.answer === 'mail-ceiling' ? 'ceiling' : result.answer }
 }
 
+/** Whether the error is the database refusing a second row with the same unique value. */
+export function isDuplicate(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null) {
+    return false
+  }
+
+  const { cause, code, errno } = error as { cause?: unknown; code?: unknown; errno?: unknown }
+
+  return code === 'ER_DUP_ENTRY' || errno === 1062 || isDuplicate(cause)
+}
+
 /**
  * Notes one sign-up for the ceiling of the whole site, and says whether it is within it: at
  * most `signUpsPerHour` in one hour of the clock. The row holds a time and no address, and goes
@@ -363,17 +374,6 @@ async function finish(db: Database, link: Link | undefined, now: Date): Promise<
   const [account] = await db.select({ id: supporters.id }).from(supporters).where(eq(supporters.email, link.email))
 
   return account === undefined ? { answer: 'taken', screenName: link.screenName } : session(db, account.id, now, false)
-}
-
-/** Whether the error is the database refusing a second row with the same unique value. */
-function isDuplicate(error: unknown): boolean {
-  if (typeof error !== 'object' || error === null) {
-    return false
-  }
-
-  const { cause, code, errno } = error as { cause?: unknown; code?: unknown; errno?: unknown }
-
-  return code === 'ER_DUP_ENTRY' || errno === 1062 || isDuplicate(cause)
 }
 
 function isFilled(value: null | string): value is string {
