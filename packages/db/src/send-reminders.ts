@@ -6,7 +6,7 @@ import { isFansPartOn, readReminderSecret, readReminderSettings } from '@fansite
 import { sendMail } from '@fansite/shared/mail'
 import { makeReminderCode } from '@fansite/shared/reminder-code'
 import { siteEnvSchema, siteOrigins } from '@fansite/shared/site-env'
-import { and, count, eq, inArray, isNotNull, isNull, lt } from 'drizzle-orm'
+import { and, count, eq, inArray, isNull, lt } from 'drizzle-orm'
 
 import type { Database } from './client.ts'
 import type { PredictionMatch } from './prediction-matches.ts'
@@ -21,6 +21,9 @@ import { matches, predictions, supporterReminders, supporters } from './schema.t
 
 const timeZone = 'Europe/Amsterdam'
 const day = 24 * 60 * 60 * 1000
+
+/** After this many failed mails in a row a run stops sending: the mail server is silent. */
+export const failuresInARow = 3
 
 /** How long the record of a sent reminder is kept after the kick-off of its match. */
 export const keepRecordDays = 30
@@ -121,23 +124,23 @@ export async function sendReminders(
 ): Promise<RemindersReport> {
   const report: RemindersReport = { failed: 0, limited: false, sent: 0 }
 
-  if (!isFansPartOn('prognose', env)) {
-    return report
-  }
-
-  const { hour, limit } = readReminderSettings(env)
-
+  // Also while the game is off: the privacy statement promises that a record goes a month after
+  // the match. A match without a known kick-off counts by its date.
   await db.delete(supporterReminders).where(
     inArray(
       supporterReminders.matchId,
       db
         .select({ id: matches.id })
         .from(matches)
-        .where(
-          and(isNotNull(matches.kickoffAt), lt(matches.kickoffAt, new Date(now.getTime() - keepRecordDays * day))),
-        ),
+        .where(lt(matches.matchDate, new Date(now.getTime() - keepRecordDays * day).toISOString().slice(0, 10))),
     ),
   )
+
+  if (!isFansPartOn('prognose', env)) {
+    return report
+  }
+
+  const { hour, limit } = readReminderSettings(env)
 
   const { next } = await predictionMatches(db, now)
   const time = amsterdamTime(now)
@@ -186,7 +189,13 @@ export async function sendReminders(
 
   const origin = siteOrigins[parseEnv(siteEnvSchema, env).SITE_ENV]
 
+  let streak = 0
+
   for (const { email, id } of due.slice(0, limit)) {
+    if (streak >= failuresInARow) {
+      break
+    }
+
     const [claimed] = await db.insert(supporterReminders).ignore().values({ matchId: next.id, supporterId: id })
 
     if (claimed.affectedRows === 0) {
@@ -196,11 +205,13 @@ export async function sendReminders(
     try {
       await send(reminderMail(next, email, origin, makeReminderCode(id, secret, now)))
       report.sent += 1
+      streak = 0
     } catch {
       await db
         .delete(supporterReminders)
         .where(and(eq(supporterReminders.supporterId, id), eq(supporterReminders.matchId, next.id)))
       report.failed += 1
+      streak += 1
     }
   }
 

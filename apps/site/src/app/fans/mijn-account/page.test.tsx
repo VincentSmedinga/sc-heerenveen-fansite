@@ -20,6 +20,7 @@ const { changedAt, requireSupporter } = vi.hoisted(() => ({
 // the name.
 const blocked = { value: false }
 const edited = { value: false }
+const sent = { value: 0 }
 const updates: unknown[] = []
 const query = {
   from: () => query,
@@ -32,6 +33,7 @@ const query = {
           blockedAt: blocked.value ? new Date('2026-12-10T10:00:00Z') : null,
           blockedReason: blocked.value ? 'ongepaste schermnaam' : null,
           changedAt: changedAt.value,
+          count: sent.value,
           createdAt: new Date('2026-12-03T10:00:00Z'),
           editedByEditors: edited.value,
           email: 'tjalle@example.org',
@@ -281,12 +283,19 @@ describe('the page of all the data', () => {
       ['Laatste bezoek', '19 december 2026'],
       ['In de standen', 'Nee'],
       ['Herinnering per e-mail', 'Nee'],
+      ['Herinneringen verstuurd', 'Nog geen'],
       ['Naam gewijzigd', 'Nooit'],
     ]) {
       expect(html).toContain(`<dt>${term}</dt><dd>${value}</dd>`)
     }
 
     expect(html).toMatch(/Nog niets\. <a href="\/fans\/prognose">Doe mee aan de Prognose<\/a>/)
+
+    sent.value = 2
+    expect(renderToStaticMarkup(await MyDataPage())).toContain(
+      '<dt>Herinneringen verstuurd</dt><dd>Voor 2 wedstrijden</dd>',
+    )
+    sent.value = 0
     expect(html).not.toContain('Geblokkeerd')
     expect(html).toContain('Geen IP-adres, geen browser, geen echte naam: die bewaren we niet.')
     expect(html).toContain('href="/privacy#account"')

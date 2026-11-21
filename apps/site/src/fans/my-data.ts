@@ -1,9 +1,9 @@
 import type { Database } from '@fansite/db/client'
 import type { FansPart } from '@fansite/shared/fans-env'
 
-import { supporters } from '@fansite/db/schema'
+import { supporterReminders, supporters } from '@fansite/db/schema'
 import { isFansPartOn } from '@fansite/shared/fans-env'
-import { eq } from 'drizzle-orm'
+import { count, eq } from 'drizzle-orm'
 
 import { fansGames } from '../fans-paths'
 import { predictionData } from './prediction-results'
@@ -76,6 +76,8 @@ export type AccountData = {
   inRankings: boolean
   lastVisitOn: null | string
   remindByEmail: boolean
+  /** For how many matches a reminder by e-mail was sent. */
+  remindersSent: number
   screenName: string
   screenNameChangedAt: Date | null
 }
@@ -100,7 +102,16 @@ export async function accountData(db: Database, supporterId: number): Promise<Ac
     .from(supporters)
     .where(eq(supporters.id, supporterId))
 
-  return account
+  if (account === undefined) {
+    return undefined
+  }
+
+  const [sent] = await db
+    .select({ count: count() })
+    .from(supporterReminders)
+    .where(eq(supporterReminders.supporterId, supporterId))
+
+  return { ...account, remindersSent: sent?.count ?? 0 }
 }
 
 /** The games that are on, each with what the supporter filled in. */

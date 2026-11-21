@@ -39,7 +39,7 @@ export default async function TurnOffReminderPage({
   return (
     <Page.Main>
       <Page.Cell>
-        <Heading level={1}>Herinnering uitzetten</Heading>
+        <Heading level={1}>{klaar === '1' ? 'Herinnering uitgezet' : 'Herinnering uitzetten'}</Heading>
         {klaar === '1' ? (
           <Notice>
             De herinnering staat uit. Je kunt hem aanzetten op{' '}
@@ -47,7 +47,9 @@ export default async function TurnOffReminderPage({
           </Notice>
         ) : valid && typeof code === 'string' ? (
           <>
-            <Text appearance="intro">Je krijgt geen herinnering meer de dag voor een wedstrijd.</Text>
+            <Text appearance="intro">
+              Met de knop zet je de herinnering uit. Je krijgt dan geen bericht meer de dag voor een wedstrijd.
+            </Text>
             <Form action={turnOffReminder}>
               <Input name="code" type="hidden" value={code} />
               <Button type="submit">Herinnering uitzetten</Button>

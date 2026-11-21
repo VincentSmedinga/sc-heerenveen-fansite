@@ -8,7 +8,7 @@ import type { TestDatabase } from './test-database.ts'
 
 import { closeAccount } from './close-account.ts'
 import { clubs, matches, predictions, supporterReminders, supporters } from './schema.ts'
-import { describeReminders, kickoffWords, sendReminders } from './send-reminders.ts'
+import { describeReminders, failuresInARow, kickoffWords, sendReminders } from './send-reminders.ts'
 import { createTestDatabase } from './test-database.ts'
 
 // Friday 20 November 2026, 11:00 Dutch time. The match of the tests is on Saturday 21 November,
@@ -270,6 +270,40 @@ describe('never twice, and a failed mail does not count', () => {
   })
 })
 
+describe('a mail server that does not answer', () => {
+  it('stops the run after three failed mails in a row, and the next run tries again', async () => {
+    await addMatch(kickoff)
+
+    const names = ['A', 'B', 'C', 'D', 'E', 'F']
+
+    for (const name of names) {
+      await addSupporter(name)
+    }
+
+    failFor = names.map((name) => `${name}@example.org`)
+
+    expect(failuresInARow).toBe(3)
+    expect(await run()).toMatchObject({ failed: 3, sent: 0 })
+    expect(await database.db.select().from(supporterReminders)).toEqual([])
+
+    failFor = []
+
+    expect((await run(new Date(now.getTime() + 15 * 60 * 1000))).sent).toBe(6)
+  })
+
+  it('goes on after one failed mail', async () => {
+    await addMatch(kickoff)
+
+    for (const name of ['A', 'B', 'C']) {
+      await addSupporter(name)
+    }
+
+    failFor = ['A@example.org']
+
+    expect(await run()).toMatchObject({ failed: 1, sent: 2 })
+  })
+})
+
 describe('the limit of a run', () => {
   it('sends at most the limit, the rest at the next runs, and tells the editors once', async () => {
     await addMatch(kickoff)
@@ -327,6 +361,16 @@ describe('the record of the sent reminders', () => {
     await run()
     expect(await database.db.select().from(supporterReminders)).toHaveLength(1)
     await closeAccount(database.db, id)
+    expect(await database.db.select().from(supporterReminders)).toEqual([])
+  })
+
+  it('is removed also while the game is off, and for a match without a known kick-off', async () => {
+    const old = await addMatch(null, { matchDate: '2026-10-01' })
+    const id = await addSupporter('Aan')
+
+    await database.db.insert(supporterReminders).values({ matchId: old, supporterId: id })
+    await run(now, { ...env, FANS_PROGNOSE: 'off' })
+
     expect(await database.db.select().from(supporterReminders)).toEqual([])
   })
 

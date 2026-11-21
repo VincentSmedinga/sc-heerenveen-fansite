@@ -7290,7 +7290,7 @@
 
 - **Datum:** 21 november 2026
 - **Besluit:** een stap van de import (`sendReminders`) mailt supporters met de herinnering aan, de dag voor de aftrap van de wedstrijd waarvoor het formulier nu open staat.
-  Het bericht gaat uit vanaf het Nederlandse uur `FANS_REMINDER_HOUR` (standaard 9) tot de aftrap, en hoogstens `FANS_REMINDER_LIMIT` per run (standaard 100); bij de limiet krijgt de redactie één mail.
+  Het bericht gaat uit op de dag voor de aftrap, vanaf het Nederlandse uur `FANS_REMINDER_HOUR` (standaard 9) tot middernacht, en hoogstens `FANS_REMINDER_LIMIT` per run (standaard 100); bij de limiet krijgt de redactie één mail.
   Wie al voorspelde, de herinnering uit heeft, geblokkeerd is of voor wie de aftrap onbekend is, krijgt niets, en een afgelaste wedstrijd telt niet mee.
   Het bericht is platte tekst: de aftrap in gewone woorden, één zin, de link naar `/fans/prognose` en onderaan de afmeldlink.
   Het onderwerp is "Voorspel sc Heerenveen – FC Twente", met de thuisclub eerst.
@@ -7309,11 +7309,13 @@
 - **Datum:** 21 november 2026
 - **Besluit:** `supporter_reminders` bewaart per supporter en wedstrijd dat het bericht is verstuurd (`UNIQUE(supporter_id, match_id)`), zonder adres of naam.
   De stap maakt de rij vlak voor het bericht uitgaat en haalt hem weg als het versturen mislukt.
-  De rij verdwijnt met het account (`ON DELETE CASCADE`) en met de wedstrijd, en de stap haalt de rijen van wedstrijden van meer dan 30 dagen geleden weg.
+  De rij verdwijnt met het account (`ON DELETE CASCADE`) en met de wedstrijd, en de stap haalt de rijen van wedstrijden van meer dan 30 dagen geleden weg, ook als de Prognose uit staat.
+  De pagina "Alles wat we van je bewaren" toont voor hoeveel wedstrijden we een herinnering stuurden.
   De tabel hoort bij de tabellen van het account: de kopie van acceptatie en de dump nemen geen rijen mee.
 - **Waarom:** per supporter en wedstrijd hooguit één bericht, ook bij een tweede run, een herstart of een aftrap die naar een andere dag schuift.
   Een mislukt bericht telt niet als verstuurd en wordt bij de volgende run opnieuw geprobeerd.
   Een run die crasht tussen de rij en het bericht, stuurt niets: liever een bericht te weinig dan een dubbel bericht.
+  Na drie mislukte berichten achter elkaar stopt de run met versturen, zodat een mailserver die niet antwoordt de import niet ophoudt; de volgende run probeert het opnieuw.
 - **Alternatieven:** de rij pas na het versturen maken (een crash daartussen stuurt het bericht dubbel); alleen een tijdvenster zonder bewaren (een herstart stuurt dan dubbel).
 
 ## De punten van de Prognose zijn die van de oude Fansite en worden bij het lezen berekend

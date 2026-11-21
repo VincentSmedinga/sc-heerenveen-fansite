@@ -31,7 +31,9 @@ describe('the page of the link in a reminder', () => {
 
     expect(html.match(/<h1/g)).toHaveLength(1)
     expect(html).toContain('Herinnering uitzetten</h1>')
-    expect(html).toContain('Je krijgt geen herinnering meer de dag voor een wedstrijd.')
+    expect(html).toContain(
+      'Met de knop zet je de herinnering uit. Je krijgt dan geen bericht meer de dag voor een wedstrijd.',
+    )
     expect(html).toMatch(/<button[^>]*>Herinnering uitzetten<\/button>/)
     expect(html).toMatch(/<input[^>]*type="hidden"[^>]*name="code"|<input[^>]*name="code"[^>]*type="hidden"/)
     expect(html).not.toContain('hf-card')
@@ -45,6 +47,7 @@ describe('the page of the link in a reminder', () => {
   it('says after the button that the reminder is off, with the way to turn it on', async () => {
     const html = await render({ klaar: '1' })
 
+    expect(html).toContain('Herinnering uitgezet</h1>')
     expect(html).toContain('De herinnering staat uit. Je kunt hem aanzetten op')
     expect(html).toContain('href="/fans/mijn-account#herinnering"')
     expect(html).not.toContain('<button')

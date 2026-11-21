@@ -1504,6 +1504,11 @@ Een ontbrekende regel betekent uit.
 Gebruik `requireFansPart(part, notFound)` bovenaan een pagina of actie, `fansMenuItems()` voor het menu, `fansCard()` voor een kaart en `sendFansMail()` voor een mail.
 De importer en de opdrachten van cron gebruiken `runFansJob()`.
 
+De spellen staan uit zolang accounts uit staan.
+Zoals `SITE_ENV` leest de site ze als de server draait, dus de pagina's die ze gebruiken rekenen per verzoek (`dynamic = 'force-dynamic'`) en niet tijdens de build.
+De rooktest en de e2e-tests starten de site met alles aan; de rooktest start hem ook met alles uit en verwacht dan "niet gevonden" op `/fans`, en een 200 als de onderdelen aan staan.
+Het hoofdmenu en de balk met de spellen komen uit `fansMenu()` in `src/fans.ts`, dat de lay-out bij elk verzoek aanroept.
+
 ### De herinnering voor de Prognose
 
 Een stap van de import (`sendReminders` in `packages/db/src/send-reminders.ts`) mailt elke run, dus elk kwartier, supporters met de herinnering aan.
@@ -1513,10 +1518,6 @@ Bij de limiet krijgt de redactie één mail, en de rest volgt bij de volgende ru
 De link opent `/fans/herinnering/uitzetten`, een pagina met een knop die de herinnering uitzet zonder in te loggen.
 `supporter_reminders` bewaart per supporter en wedstrijd dat het bericht is verstuurd, zonder adres of naam.
 De stap maakt de rij vlak voor het bericht uitgaat en haalt hem weg als het versturen mislukt, zodat een mislukt bericht bij de volgende run opnieuw wordt geprobeerd.
-De spellen staan uit zolang accounts uit staan.
-Zoals `SITE_ENV` leest de site ze als de server draait, dus de pagina's die ze gebruiken rekenen per verzoek (`dynamic = 'force-dynamic'`) en niet tijdens de build.
-De rooktest en de e2e-tests starten de site met alles aan; de rooktest start hem ook met alles uit en verwacht dan "niet gevonden" op `/fans`, en een 200 als de onderdelen aan staan.
-Het hoofdmenu en de balk met de spellen komen uit `fansMenu()` in `src/fans.ts`, dat de lay-out bij elk verzoek aanroept.
 
 ## Een account voor supporters
 

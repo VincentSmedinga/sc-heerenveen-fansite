@@ -6,7 +6,6 @@ import { clubs, matches } from './schema.ts'
 
 // Which match the game Prognose is about (issue 1447). It lives here, next to the schema, so
 // the importer asks the same question for the reminder by e-mail (issue 1461) as the page does.
-// importer can ask the same question for the reminder by e-mail (issue 1461) as the page does.
 
 /**
  * How long after the kick-off a match that has begun stays on the page as "Gesloten": a match
