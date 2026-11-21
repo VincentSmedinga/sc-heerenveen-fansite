@@ -114,6 +114,7 @@ describe('proxy', () => {
   )
 
   it.each([
+    '/fans/herinnering/uitzetten',
     '/fans/mijn-account',
     '/fans/mijn-account/schermnaam',
     '/fans/mijn-account/e-mailadres/verstuurd',

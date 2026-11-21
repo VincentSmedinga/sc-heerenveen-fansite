@@ -75,6 +75,7 @@ const notInSitemap: string[] = [
   '/fans/aanmelden/bevestigen',
   '/fans/aanmelden/verstuurd',
   '/fans/geblokkeerd',
+  '/fans/herinnering/uitzetten',
   '/fans/inloggen',
   '/fans/inloggen/bevestigen',
   '/fans/inloggen/verstuurd',

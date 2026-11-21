@@ -1503,6 +1503,16 @@ Een ontbrekende regel betekent uit.
 `readFans()` en de hulpfuncties in `packages/shared/src/fans-env.ts` zijn de enige plek die dat zegt; pagina's, menu's, kaarten, acties en mail lezen de omgeving niet zelf.
 Gebruik `requireFansPart(part, notFound)` bovenaan een pagina of actie, `fansMenuItems()` voor het menu, `fansCard()` voor een kaart en `sendFansMail()` voor een mail.
 De importer en de opdrachten van cron gebruiken `runFansJob()`.
+
+### De herinnering voor de Prognose
+
+Een stap van de import (`sendReminders` in `packages/db/src/send-reminders.ts`) mailt elke run, dus elk kwartier, supporters met de herinnering aan.
+Hij stuurt alleen de dag voor de aftrap van de wedstrijd waarvoor het formulier nu open staat, vanaf het Nederlandse uur `FANS_REMINDER_HOUR` (standaard 9), en hoogstens `FANS_REMINDER_LIMIT` berichten per run (standaard 100).
+Bij de limiet krijgt de redactie één mail, en de rest volgt bij de volgende runs.
+`FANS_REMINDER_SECRET` (minstens 32 tekens, voor elke omgeving een andere) ondertekent de link in het bericht; zonder die variabele stuurt de stap niets en zegt het logboek het.
+De link opent `/fans/herinnering/uitzetten`, een pagina met een knop die de herinnering uitzet zonder in te loggen.
+`supporter_reminders` bewaart per supporter en wedstrijd dat het bericht is verstuurd, zonder adres of naam.
+De stap maakt de rij vlak voor het bericht uitgaat en haalt hem weg als het versturen mislukt, zodat een mislukt bericht bij de volgende run opnieuw wordt geprobeerd.
 De spellen staan uit zolang accounts uit staan.
 Zoals `SITE_ENV` leest de site ze als de server draait, dus de pagina's die ze gebruiken rekenen per verzoek (`dynamic = 'force-dynamic'`) en niet tijdens de build.
 De rooktest en de e2e-tests starten de site met alles aan; de rooktest start hem ook met alles uit en verwacht dan "niet gevonden" op `/fans`, en een 200 als de onderdelen aan staan.
@@ -1521,7 +1531,7 @@ Elke persoonlijke pagina en actie onder `/fans` begint met `requireSupporter()`;
 De redactie beheert de accounts op `/beheer/supporters` (alleen eigenaar en redacteur, en alleen als accounts aan staan): zoeken op schermnaam, een naam aanpassen, een account blokkeren of de blokkade opheffen.
 De code staat in `src/beheer/supporter-management.ts`; het adres van een supporter ziet alleen de eigenaar, op de pagina van één account.
 Van een geblokkeerd account dat verdwijnt, bewaart `supporter_blocked_addresses` 12 maanden de hash van het adres, en `src/fans/take-part.ts` zegt of een account mag meedoen.
-De tabellen zijn `supporters`, `supporter_login_links`, `supporter_email_changes`, `supporter_sessions`, `supporter_login_attempts` en `supporter_blocked_addresses`, los van die van het beheer.
+De tabellen zijn `supporters`, `supporter_login_links`, `supporter_email_changes`, `supporter_sessions`, `supporter_login_attempts`, `supporter_blocked_addresses` en `supporter_reminders`, los van die van het beheer.
 Het cookie heet `fans-sessie` en gaat alleen mee naar de pagina's onder `/fans`.
 De proxy geeft Mijn account en zijn pagina's de header `X-Robots-Tag: noindex, nofollow`, op elke omgeving.
 

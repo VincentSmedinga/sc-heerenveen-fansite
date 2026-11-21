@@ -48,6 +48,8 @@ Een ontbrekende regel betekent uit, en een andere waarde stopt de site bij het o
 De site leest ze als de server draait, dus een andere waarde en een herstart van de app zijn genoeg, zonder nieuwe build.
 De vier spellen staan uit zolang `FANS_ACCOUNTS` uit staat, wat hun eigen regel ook zegt.
 Op acceptatie staan alle vijf aan: zet de vijf regels in `~/fansite-acceptatie.env` en bij de omgevingsvariabelen van de app.
+Voor de herinnering van de Prognose komt daar `FANS_REMINDER_SECRET` bij, minstens 32 willekeurige tekens, ook in het bestand van de cronrun: zonder die variabele stuurt de import geen herinnering.
+`FANS_REMINDER_HOUR` (standaard 9) en `FANS_REMINDER_LIMIT` (standaard 100 per run) zijn optioneel; kijk eerst naar de zendlimiet per uur van de hosting voordat je de limiet verhoogt.
 Op productie zet je niets tot de projecteigenaar een onderdeel live wil hebben; dan komt alleen de regel van dat onderdeel erbij, met `on`, en de regel van `FANS_ACCOUNTS` voor de spellen.
 Uit betekent: geen menu-item, geen kaart, `/fans` en alles eronder antwoorden "niet gevonden", en er gaat geen mail uit.
 De tabellen bestaan altijd, want de migraties draaien ook als een onderdeel uit staat.
@@ -303,6 +305,7 @@ Zo zet je het aan:
    FANS_UITBLINKER=on
    FANS_VIER=on
    FANS_FANTEST=on
+   FANS_REMINDER_SECRET=...
    SMTP_HOST=...
    SMTP_PORT=...
    SMTP_USER=...

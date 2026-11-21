@@ -104,3 +104,29 @@ export async function sendFansMail(
 
   return true
 }
+
+/**
+ * The settings of the reminder by e-mail for the game Prognose (issue 1461). The hour is the
+ * Dutch hour from which the reminder of the day before a match may go out, the limit the most
+ * mails one run of the importer sends, and the secret signs the link to turn the reminder off.
+ */
+export const reminderEnvSchema = z.object({
+  FANS_REMINDER_HOUR: z.coerce.number().int().min(0).max(23).default(9),
+  FANS_REMINDER_LIMIT: z.coerce.number().int().min(1).max(1000).default(100),
+  FANS_REMINDER_SECRET: z.string().min(32),
+})
+
+/** The secret that signs the link to turn the reminder off. It throws when it is missing. */
+export function readReminderSecret(source: EnvSource = process.env): string {
+  return parseEnv(reminderEnvSchema.pick({ FANS_REMINDER_SECRET: true }), source).FANS_REMINDER_SECRET
+}
+
+/** The hour and the limit, with their defaults. They need no secret. */
+export function readReminderSettings(source: EnvSource = process.env) {
+  const { FANS_REMINDER_HOUR: hour, FANS_REMINDER_LIMIT: limit } = parseEnv(
+    reminderEnvSchema.omit({ FANS_REMINDER_SECRET: true }),
+    source,
+  )
+
+  return { hour, limit }
+}
