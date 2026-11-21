@@ -66,7 +66,7 @@ export default async function MyAccountPage({
             <Notice id={noticeId} tabIndex={-1}>
               {message}
             </Notice>
-            <FocusOnLoad id={noticeId} />
+            <FocusOnLoad id={noticeId} key={message} />
           </>
         )}
       </Page.Cell>

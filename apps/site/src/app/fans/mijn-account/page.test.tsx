@@ -76,7 +76,7 @@ describe('Mijn account', () => {
     expect(html).toMatch(/<input[^>]*role="switch"/)
     expect(html).not.toMatch(/<input[^>]*role="switch"[^>]*checked/)
     expect(html).toContain('Uit: je speelt mee, maar je naam staat niet in de standen.')
-    expect(html).toContain('>Opslaan</button>')
+    expect(html).toContain('>Opslaan<span class="hf-visually-hidden"> naam in de standen</span></button>')
     expect(html).toMatch(/<section[^>]*aria-label="Uitloggen en je account"[\s\S]*hf-card-soft/)
   })
 
