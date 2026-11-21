@@ -42,7 +42,7 @@ describe('the watermark of a game card in card-watermark.css', () => {
   it.each(cardGames)('draws %s as a mask in SVG in the file, without a request to another address', (game) => {
     const body = css.match(new RegExp(String.raw`\.hf-card-game-${game} \{([^{}]*)\}`))?.[1] ?? ''
 
-    expect(body).toMatch(/--hf-card-watermark-image: url\("data:image\/svg\+xml,/)
+    expect(body).toMatch(/--hf-card-watermark-image: url\(['"]data:image\/svg\+xml,/)
     // The only address is the namespace of SVG, which is a name and no request.
     expect(body.replace('http://www.w3.org/2000/svg', '')).not.toMatch(/https?:/)
   })
