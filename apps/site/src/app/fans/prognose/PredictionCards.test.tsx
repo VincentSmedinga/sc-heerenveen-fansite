@@ -73,7 +73,7 @@ describe('the card of the match to predict', () => {
     expect(html).toContain('Hoogstens 30 punten per wedstrijd.')
     expect(html).toContain('Log in om te voorspellen. Nog geen account? Dat maak je in een minuut.')
     expect(html).toMatch(/action="\/fans\/inloggen"/)
-    expect(html).toContain('name="terug" value="/fans/prognose"')
+    expect(html).toMatch(/name="terug"[^>]*value="\/fans\/prognose"|value="\/fans\/prognose"[^>]*name="terug"/)
     expect(html).toMatch(/action="\/fans\/aanmelden"/)
     expect(html).not.toContain('Ruststand')
   })
