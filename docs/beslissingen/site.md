@@ -644,6 +644,7 @@
 - **Waarom:** de eerste zin klopt voor bezoekers, en de rest zegt wat voor de redactie anders is.
   De alinea staat bij de andere dingen die we moeten noemen, en het cookie is geen tracking.
 - **Alternatieven:** de eerste zin veranderen in "De site zet geen cookies voor bezoekers"; die zin is al waar, en de intro hoeft niet te veranderen.
+- **Later:** sinds _De privacyverklaring zegt wat een account bewaart en welk cookie je krijgt_ (21 november 2026) zegt de eerste zin bij ingeschakelde accounts "De site zet geen cookies, tenzij je inlogt", en noemt de pagina ook het cookie van supporters.
 
 ## Een bericht verbergen zet drie kolommen op `items`, en elke query die berichten toont sluit het uit
 
@@ -7213,3 +7214,20 @@
   Dat schoof de pagina onder een bezoeker die al scrolde, en de test van de link naar boven faalde af en toe in CI.
   Zonder JavaScript blijft er geen knop die niets doet.
 - **Alternatieven:** de knop werkend op de server tonen (dan staat er een knop zonder JavaScript die niets doet); een lege doos met een vaste maat (het ontwerpsysteem wil een component, en de maat staat dan op twee plekken); de test een wachttijd geven (verbergt de verschuiving, de bezoeker houdt hem).
+
+## De privacyverklaring zegt wat een account bewaart en welk cookie je krijgt
+
+- **Datum:** 21 november 2026
+- **Besluit:** met `FANS_ACCOUNTS` aan zegt `/privacy` bovenaan "De site zet geen cookies, tenzij je inlogt".
+  De pagina noemt het cookie `fans-sessie`: een nummer voor de sessie, alleen naar `/fans`, tot 90 dagen na het laatste bezoek en hoogstens een jaar na het inloggen.
+  Ze noemt ook het teken in `localStorage` met de schermnaam, waarmee de kop de initialen toont.
+  Er komt een deel "Als je een account maakt" (anker `account`) met wat een account bewaart, wat niet, wat anderen zien, hoe lang, wat opheffen doet, wat er met een geblokkeerd account gebeurt en welke mails er komen.
+  De getallen (90 dagen, een jaar, 15 minuten, 24 maanden, 30 dagen, 12 maanden) komen in de test uit dezelfde constanten als de code.
+  Met accounts uit leest de pagina zoals voorheen.
+  De formulieren van Account maken, de pagina Fans en de pagina "Alles wat we van je bewaren" linken naar `/privacy#account`.
+- **Waarom:** een supporter moet voor het aanmelden kunnen lezen wat een account bewaart.
+  Het cookie is strikt nodig voor een dienst waar de supporter zelf om vraagt en volgt niemand, dus er komt geen cookiemelding en geen aparte cookiepagina.
+  De tekst staat alleen bij ingeschakelde accounts, zodat een bezoeker niets leest over een onderdeel dat er niet is.
+- **Alternatieven:** een cookiemelding met toestemming (niet nodig voor een noodzakelijk cookie, en ze hindert iedereen); een aparte pagina voor accounts (twee plekken die uit elkaar lopen).
+- **Let op:** de hash van het adres van een geblokkeerd account telt na 12 maanden niet meer, maar de rij verdwijnt pas bij de volgende aanmelding of controle van de redactie (`removeOldBlocks`).
+  De tekst zegt dat zo.

@@ -42,7 +42,7 @@ export default async function SignUpPage({
         </Text>
         <SignUpForm initial={initial} />
         <Text>
-          We bewaren je schermnaam, je e-mailadres en wat je speelt. <Link href="/privacy">Wat we bewaren</Link>
+          We bewaren je schermnaam, je e-mailadres en wat je speelt. <Link href="/privacy#account">Wat we bewaren</Link>
         </Text>
         <Text>
           Heb je al een account? <Link href={logInPaths.form}>Inloggen</Link>

@@ -26,7 +26,7 @@ export const matchPageAnchors: readonly string[] = ['verloop', 'opstelling']
 export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   '/bronnen': ['nieuws', 'podcasts', 'forum', 'wedstrijden-en-spelers', 'voorstellen', 'uitgever', 'nieuwsbrief-lc'],
   '/over-ons': ['wie-we-zijn', 'hoe-we-werken', 'gegevens', 'als-app'],
-  '/privacy': ['tellen', 'hosting', 'cookies', 'berichten', 'andere-sites', 'vragen'],
+  '/privacy': ['tellen', 'hosting', 'cookies', 'account', 'berichten', 'andere-sites', 'vragen'],
   // The card Selectie is the only card of the page Spelers (#1218). The cards Doelpuntenmakers,
   // Bijzondere doelpunten, Alle spelers, Assists and Minuten moved to /spelers/cijfers with
   // their anchors, without a redirect: a link to them on /spelers breaks. The card Sinds
