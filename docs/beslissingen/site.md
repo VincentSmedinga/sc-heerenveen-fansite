@@ -7522,7 +7522,8 @@
 - **Datum:** 20 november 2026
 - **Besluit:** de wedstrijdpagina krijgt een kaart per spel van supporters (Uitblinker, Prognose, Fjouwer), elk met als meta "Van supporters", en geen kaart "Fans" voor alles samen.
   De kaarten staan in de smalle kolom na de opstellingen en vóór Nieuws, in die volgorde.
-- **Waarom:** een bezoeker zoekt het spel, en niet het hoofdstuk. Een spel dat uit staat of niets te tonen heeft, laat dan geen lege kaart achter.
+- **Waarom:** een bezoeker zoekt het spel, en niet het hoofdstuk.
+  Een spel dat uit staat of niets te tonen heeft, laat dan geen lege kaart achter.
 - **Alternatieven:** één kaart Fans met drie delen.
 
 - **Datum:** 22 november 2026
