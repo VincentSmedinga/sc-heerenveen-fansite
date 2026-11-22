@@ -1,0 +1,103 @@
+/*
+ * A grade from 1 to 10 as ten buttons: a fieldset without the border and the padding the base
+ * styles give it, because the group sits in a card that has its own. The legend is the name of
+ * the one who is graded, and the line under it is small. The buttons are radio buttons: the
+ * input covers the whole button, so a tap or a click lands on it, and it is invisible, so the
+ * button around it shows the state. Each button is as high and as wide as a control
+ * (--hf-size-control). The buttons are in two rows of five while the card is narrow, and in one
+ * row once the card is wide enough: a container query on the box around them, so it follows the
+ * width of the card and not of the screen. A group with an error has red borders, and the error
+ * itself is text under the legend, so the colour is never the only sign. The chosen button has
+ * a thicker border besides its fill, so it shows without colour too.
+ */
+
+@layer hf.components {
+  .hf-rating-scale {
+    border: 0;
+    display: grid;
+    gap: var(--hf-space-xs);
+    grid-template-columns: minmax(0, 1fr);
+    margin-inline: 0;
+    min-inline-size: 0;
+    padding: 0;
+
+    > legend {
+      color: var(--hf-colour-text-heading);
+      font-weight: var(--hf-strong-font-weight);
+      /* stylelint-disable-next-line declaration-property-value-allowed-list -- A gap does not reach the legend of a fieldset, so the space under the legend is a margin. */
+      margin-block-end: 0.125rem;
+      padding: 0;
+    }
+  }
+
+  .hf-rating-scale-box {
+    container-name: hf-rating-scale;
+    container-type: inline-size;
+  }
+
+  .hf-rating-scale-grades {
+    display: grid;
+    gap: var(--hf-space-xs);
+    grid-template-columns: repeat(5, minmax(var(--hf-size-control), 4rem));
+  }
+
+  @container hf-rating-scale (inline-size >= 37.5rem) {
+    .hf-rating-scale-grades {
+      grid-template-columns: repeat(10, minmax(var(--hf-size-control), 1fr));
+    }
+  }
+
+  .hf-rating-scale-grade {
+    cursor: pointer;
+    display: grid;
+    min-block-size: var(--hf-size-control);
+    min-inline-size: var(--hf-size-control);
+    position: relative;
+
+    > input {
+      block-size: 100%;
+      cursor: pointer;
+      inline-size: 100%;
+      inset: 0;
+      margin: 0;
+      opacity: 0;
+      position: absolute;
+    }
+
+    > span {
+      background-color: var(--hf-colour-background-surface);
+      border: 0.125rem solid var(--hf-colour-border-input);
+      border-radius: 0.375rem;
+      color: var(--hf-colour-text-highlight);
+      display: grid;
+      font-variant-numeric: tabular-nums;
+      font-weight: var(--hf-figure-font-weight);
+      place-items: center;
+      pointer-events: none;
+    }
+
+    > input:checked + span {
+      background-color: var(--hf-colour-background-button);
+      border-color: var(--hf-colour-background-button);
+
+      /* The thicker border shows the choice without colour too. */
+      border-width: 0.25rem;
+      color: var(--hf-colour-text-on-button);
+    }
+
+    > input:focus-visible + span {
+      outline: 0.1875rem solid var(--hf-colour-focus);
+      outline-offset: 0.125rem;
+    }
+
+    @media (hover: hover) {
+      &:hover > input:not(:checked) + span {
+        background-color: var(--hf-colour-background-button-soft);
+      }
+    }
+  }
+
+  .hf-rating-scale[data-invalid] .hf-rating-scale-grade > input:not(:checked) + span {
+    border-color: var(--hf-colour-text-accent);
+  }
+}
