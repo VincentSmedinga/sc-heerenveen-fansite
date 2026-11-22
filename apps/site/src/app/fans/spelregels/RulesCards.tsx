@@ -1,10 +1,21 @@
 import { Card, DataTable, Heading, Link, List, Text } from '@fansite/design-system'
+import {
+  cardExamples,
+  exampleFacts,
+  type FantasyExample,
+  fullMatchExample,
+  minutesExamples,
+} from '@fansite/shared/fantasy-examples'
+import { fantasyPoints } from '@fansite/shared/fantasy-points'
 import { maxPredictionPoints } from '@fansite/shared/prediction-points'
 
 import { fansPath } from '#src/fans-paths'
+import { pointsText } from '#src/fans/fjouwer-form'
+import { maxPerLine, maxUsesPerSeason, picksPerMatch } from '#src/fans/fjouwer-rules'
 import { examplePoints, exampleResult } from '#src/fans/prediction-rules'
 import { scoreText } from '#src/fans/prediction-words'
 
+import { scoringRows } from '../fjouwer/PointsCards'
 import { ScoringTable } from '../prognose/PointsCards'
 
 // The cards of the page with the rules of the games (issue 1455), one for each game and one
@@ -33,6 +44,77 @@ export function AccountRulesCard() {
       </List>
       <Text>
         Wat we bewaren, lees je bij <Link href="/privacy#account">Privacy</Link>.
+      </Text>
+    </Card>
+  )
+}
+
+/** The card of the game Fjouwer, with its watermark. */
+export function FjouwerRulesCard() {
+  return (
+    <Card aria-labelledby="fjouwer" game="fjouwer">
+      <Heading anchor id="fjouwer" level={2}>
+        Fjouwer
+      </Heading>
+      <Text>Kies vier spelers van sc Heerenveen 1. Wat zij in de wedstrijd doen, levert punten op.</Text>
+      <Heading level={3}>Zo kies je</Heading>
+      <List role="list">
+        <List.Item>
+          {`Je kiest ${picksPerMatch} spelers uit de selectie, hoogstens ${maxPerLine} per linie: doelman, verdediger, middenvelder en aanvaller.`}
+        </List.Item>
+        <List.Item>
+          Je kunt je keuze wijzigen tot de aftrap. Is de aanvangstijd nog niet bekend, dan sluit het kiezen om 00.00 uur
+          op de dag van de wedstrijd.
+        </List.Item>
+        <List.Item>Kies je niets, dan houd je de vier van de vorige wedstrijd.</List.Item>
+        <List.Item>
+          {`Een speler mag in hoogstens ${maxUsesPerSeason} wedstrijden per seizoen meespelen in jouw vier. Daarna scoort hij voor jou niets meer.`}
+        </List.Item>
+        <List.Item>Een speler die niet speelt, scoort niets. Je krijgt geen vervanger.</List.Item>
+      </List>
+      <Heading level={3}>Zo tellen de punten</Heading>
+      <DataTable
+        caption="Wat een speler oplevert"
+        columns={['Onderdeel', 'Punten']}
+        rows={scoringRows.map((row) => ({ cells: [pointsText(row.points)], header: row.header }))}
+        sortable={false}
+      />
+      <Text>Het totaal van je vier is de som van de punten van de vier spelers. Dat kan negatief zijn.</Text>
+      <Heading level={3}>Wat niet telt, en wat opvalt</Heading>
+      <List role="list">
+        <List.Item>Een strafschop in een beslissende reeks telt niet, ook niet als assist.</List.Item>
+        <List.Item>De verlenging telt wel mee, voor doelpunten en voor minuten.</List.Item>
+        <List.Item>
+          Blessuretijd telt niet als minuten: een wedstrijd duurt voor de minuten 90, met verlenging 120.
+        </List.Item>
+        <List.Item>
+          Een rode kaart na twee gele kaarten geeft −8 en niet −11: de rode kaart komt in de plaats van de gele.
+        </List.Item>
+        <List.Item>
+          &quot;Geen tegendoelpunt&quot; kijkt naar de hele wedstrijd, ook als je speler al was gewisseld. Een eigen
+          doelpunt van onze club telt als tegendoelpunt.
+        </List.Item>
+      </List>
+      <Heading level={3}>Het verslag beslist</Heading>
+      <Text>
+        De punten komen uit het verslag van de wedstrijd dat de redactie maakt. Een assist is het oordeel van de bron
+        die zij gebruikt. De punten verschijnen als het verslag klaar is, en een correctie in het verslag corrigeert ook
+        je punten.
+      </Text>
+      <Heading level={3}>Voorbeelden</Heading>
+      <Text>Een hele wedstrijd: vier spelers die samen 40 punten halen.</Text>
+      <ExampleTable caption="Voorbeeld: een hele wedstrijd" examples={fullMatchExample} total />
+      <Text>Kaarten: een rode kaart vervangt de gele, en het totaal van een speler kan onder nul komen.</Text>
+      <ExampleTable caption="Voorbeeld: kaarten" examples={cardExamples} />
+      <Text>
+        Minuten en tegendoelpunten: de grens van 60 minuten telt, en een invaller die niet speelt krijgt niets.
+      </Text>
+      <ExampleTable caption="Voorbeeld: minuten en tegendoelpunten" examples={minutesExamples} />
+      <Heading level={3}>De stand</Heading>
+      <Text>
+        De <Link href={`${fansPath}/fjouwer/stand`}>stand</Link> telt per seizoen en alleen de wedstrijden met een klaar
+        verslag. Gelijk aantal punten? Dan delen jullie een plaats. Je naam staat alleen in een stand als je dat wilt:
+        dat zet je aan of uit op <Link href={`${fansPath}/mijn-account`}>Mijn account</Link>.
       </Text>
     </Card>
   )
@@ -109,5 +191,44 @@ export function RatingRulesCard() {
         </List.Item>
       </List>
     </Card>
+  )
+}
+
+/** The table of one worked example of Fjouwer: each player with what counted, and the total. */
+function ExampleTable({
+  caption,
+  examples,
+  total,
+}: {
+  caption: string
+  examples: readonly FantasyExample[]
+  total?: boolean
+}) {
+  const worked = examples.map((example) => {
+    const points = fantasyPoints(exampleFacts(example.facts))
+
+    return {
+      example,
+      reasons: points?.lines.map((line) => `${line.reason} (${pointsText(line.points)})`).join(', ') || 'Niets',
+      total: points?.total ?? 0,
+    }
+  })
+
+  return (
+    <DataTable
+      caption={caption}
+      columns={['Speler', 'Punten']}
+      rows={[
+        ...worked.map(({ example, reasons, total: points }) => ({
+          cells: [pointsText(points)],
+          header: example.name,
+          secondary: reasons,
+        })),
+        ...(total
+          ? [{ cells: [pointsText(worked.reduce((sum, row) => sum + row.total, 0))], header: 'Samen', total: true }]
+          : []),
+      ]}
+      sortable={false}
+    />
   )
 }

@@ -1,23 +1,14 @@
-import type { PredictionListItem } from '@fansite/design-system'
+import type { MatchProps, PredictionListGuess, PredictionListItem } from '@fansite/design-system'
 
 import { type PartPoints, pointsPerPart } from '@fansite/shared/prediction-points'
 
 import { matchMoment } from '#src/match-format'
+import { reportAddress } from '#src/report-data'
 
 import type { PredictionState, ScoredMatch, ScoredPrediction } from './prediction-results'
 
-import { clubsOf } from './prediction'
-
 // The words of the points of the game Prognose (issue 1449): the rows of the list, and the line
 // that says why a part gave the points it gave.
-
-/** The words of a match that gives no points: where it stands. */
-export const stateText: Record<Exclude<PredictionState, 'played'>, string> = {
-  cancelled: 'Afgelast',
-  live: 'Bezig',
-  postponed: 'Uitgesteld',
-  upcoming: 'Nog niet gespeeld',
-}
 
 /** Why a part gave its points: "Goede uitslag 10, goals van FC Twente goed 5". */
 export function reasonText(part: PartPoints, which: 'fullTime' | 'halfTime', clubs: { away: string; home: string }) {
@@ -43,25 +34,27 @@ export function reasonText(part: PartPoints, which: 'fullTime' | 'halfTime', clu
 /** A score as it is written on the line: "2–1". */
 export const scoreText = (score: { away: number; home: number }) => `${score.home}–${score.away}`
 
-/** What the supporter predicted, in the words of the list: "Jij: 0–0 bij rust, 1–2 eind". */
+/** What the fan predicted, on the card of a match: "Jij: 0–0 bij rust, 1–2 eind". */
 export const guessText = ({ guess }: Pick<ScoredPrediction, 'guess'>) =>
   `Jij: ${scoreText(guess.halfTime)} bij rust, ${scoreText(guess.fullTime)} eind`
 
 /** A row of the list "Jouw voorspellingen". */
-export function listItemOf(item: ScoredPrediction, now: Date): PredictionListItem {
+export function listItemOf(
+  item: ScoredPrediction,
+  now: Date,
+): PredictionListItem & { prediction: PredictionListGuess } {
   const { match } = item
-  const clubs = clubsOf(match)
-  const score = match.state === 'played' ? playedScore(match) : undefined
-  // The list shows the day alone, also for a match that has not begun.
-  const moment = matchMoment({ ...match, status: 'played' }, now)
+  const played = match.state === 'played'
+  // Only a match that was played has parts that are right or wrong: it gives its points.
+  const rightOf = (part: undefined | { points: number }) => (played && part !== undefined ? part.points > 0 : undefined)
 
   return {
-    ...clubs,
-    date: moment.time,
-    dateTime: moment.dateTime,
-    prediction: guessText(item),
-    ...(match.state === 'played' ? { points: item.points.total } : { status: stateText[match.state] }),
-    ...(score === undefined ? {} : { score: scoreText(score) }),
+    match: rowMatchOf(match, match.state, now),
+    prediction: {
+      fullTime: { right: rightOf(item.points.fullTime), score: scoreText(item.guess.fullTime) },
+      halfTime: { right: rightOf(item.points.halfTime), score: scoreText(item.guess.halfTime) },
+    },
+    ...(played ? { points: item.points.total } : {}),
   }
 }
 
@@ -74,4 +67,31 @@ export function playedScore(match: Pick<ScoredMatch, 'goalsAgainst' | 'goalsFor'
   return match.home
     ? { away: match.goalsAgainst, home: match.goalsFor }
     : { away: match.goalsFor, home: match.goalsAgainst }
+}
+
+/**
+ * The match of a row of a list, as the `Match` takes it: played with its result and the link to
+ * the report, called off or postponed, still to be played, or being played, which says "Bezig".
+ * The list shows the day alone, also for a match that has not begun.
+ */
+export function rowMatchOf(match: Omit<ScoredMatch, 'state'>, state: PredictionState, now: Date): MatchProps {
+  const { goalsAgainst, goalsFor } = match
+  const base = { competition: match.competition, home: match.home, opponent: match.opponent, round: match.round }
+
+  if (state === 'cancelled' || state === 'postponed') {
+    return { ...base, status: state }
+  }
+
+  const moment = matchMoment({ ...match, status: 'played' }, now)
+
+  return state === 'played' && goalsFor !== null && goalsAgainst !== null
+    ? {
+        ...base,
+        ...moment,
+        goalsAgainst,
+        goalsFor,
+        reportHref: reportAddress(match.season, match.matchDate, match.clubSlug),
+        status: 'played',
+      }
+    : { ...base, ...moment, ...(state === 'live' ? { note: 'Bezig' } : {}), status: 'scheduled' }
 }

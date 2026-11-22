@@ -18,7 +18,7 @@ import { RulesLink } from '#src/fans/RulesLink'
 import { matchMoment } from '#src/match-format'
 import { reportAddress } from '#src/report-data'
 
-// The cards of the points of the game Prognose (issue 1449): what a supporter predicted, the
+// The cards of the points of the game Prognose (issue 1449): what a fan predicted, the
 // points of a match, how everybody did, and the scoring itself.
 
 /** How many matches the list "Jouw voorspellingen" shows before the link to all of them. */
@@ -54,7 +54,7 @@ export function CrowdCard({ figures }: { figures: CrowdFigures }) {
 }
 
 /**
- * The card of a match that has a result, with the points of the supporter: the match with its
+ * The card of a match that has a result, with the points of the fan: the match with its
  * score, the points, and the table "Hoe je punten tellen" with a line under each row that says
  * why. A match that is still being played shows only the half-time row, if it has points, with
  * the line that the points of the final score come after the match. The page does not pass such
@@ -176,9 +176,10 @@ export function ScoringTable({ caption }: { caption: string }) {
 }
 
 /**
- * The card "Jouw voorspellingen": a row for each match, the newest first, with the number of
- * predictions and the points in its head. It shows the last five, and `all` shows every one. A
- * supporter without predictions gets one line instead of the list.
+ * The card "Jouw voorspellingen": a row for each match, the newest first, with the points in
+ * its head and the number of predictions small behind them. It shows the last five, and `all`
+ * shows every one. A fan without predictions gets one line instead of the list. The words
+ * "Jouw voorspellingen" stay in the head for a screen reader, and name the card and the list.
  */
 export function YourPredictionsCard({
   all,
@@ -195,13 +196,27 @@ export function YourPredictionsCard({
   return (
     <Card aria-labelledby="jouw-voorspellingen-kop" game="prognose" id="jouw-voorspellingen">
       <Heading id="jouw-voorspellingen-kop" level={2}>
-        Jouw voorspellingen
+        {items.length === 0 ? (
+          'Jouw voorspellingen'
+        ) : (
+          <>
+            <Text as="span" className="hf-visually-hidden">
+              Jouw voorspellingen:{' '}
+            </Text>
+            {plural(points, 'punt', 'punten')}
+            <Text as="span" className="hf-visually-hidden">
+              ,
+            </Text>{' '}
+            <Text appearance="meta" as="span">
+              {plural(count, 'voorspelling', 'voorspellingen')}
+            </Text>
+          </>
+        )}
       </Heading>
       {items.length === 0 ? (
         <Text>Nog niets. Doe mee aan de Prognose.</Text>
       ) : (
         <>
-          <Text appearance="meta">{`${plural(count, 'voorspelling', 'voorspellingen')} · ${plural(points, 'punt', 'punten')}`}</Text>
           <PredictionList
             aria-labelledby="jouw-voorspellingen-kop"
             items={shown.map((item) => listItemOf(item, now))}

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { MatchReport, ReportGoal } from './match-report.ts'
 
+import { cardExamples, exampleFacts, fullMatchExample, fullMatchTotal, minutesExamples } from './fantasy-examples.ts'
 import {
   type FantasyFacts,
   fantasyFacts,
@@ -95,35 +96,23 @@ describe('the rows of the table', () => {
   })
 })
 
-describe('the examples of the issue', () => {
-  it.each([
-    ['a goalkeeper with a goal against', { cleanSheet: false, line: 'doelman' }, 5],
-    ['a goalkeeper without a goal against', { cleanSheet: true, line: 'doelman' }, 13],
-    ['a defender with an own goal and a goal against', { line: 'verdediger', ownGoals: 1 }, 0],
-    ['a defender of 55 minutes with a goal', { goals: 1, line: 'verdediger', minutes: 55 }, 17],
-    ['a midfielder of 72 minutes with an assist', { assists: 1, line: 'middenvelder', minutes: 72 }, 13],
-    ['a midfielder of 30 minutes with a direct red card', { line: 'middenvelder', minutes: 30, red: true }, -6],
-    ['an attacker with two goals and a yellow card', { goals: 2, line: 'aanvaller', yellow: true }, 22],
-    [
-      'an attacker of 70 minutes sent off after two yellows',
-      { line: 'aanvaller', minutes: 70, red: true, yellow: true },
-      -3,
-    ],
-    ['a substitute who did not come on', { line: 'aanvaller', minutes: 0 }, 0],
-  ] as [string, Partial<FantasyFacts> & { line: FantasyLine }, number][])('%s', (_name, more, expected) => {
-    expect(total(more)).toBe(expected)
+describe('the examples of the rules page', () => {
+  const all = [...fullMatchExample, ...cardExamples, ...minutesExamples]
+
+  it.each(all.map((example) => [example.name, example] as const))('%s', (_name, example) => {
+    expect(fantasyPoints(exampleFacts(example.facts))?.total).toBe(example.points)
   })
 
-  it('adds up to 40 for the four of the example', () => {
-    const four = [
-      total({ line: 'doelman' }),
-      total({ line: 'verdediger', ownGoals: 1 }),
-      total({ assists: 1, line: 'middenvelder', minutes: 72 }),
-      total({ goals: 2, line: 'aanvaller', yellow: true }),
-    ]
+  it('also has the examples of the issue: 17 for a defender of 55 minutes, -6 and -3 for the cards', () => {
+    expect(all.map((example) => example.points)).toEqual(expect.arrayContaining([17, -6, -3, -11, 0]))
+  })
+
+  it('adds up to 40 for the four of the whole match', () => {
+    const four = fullMatchExample.map((example) => fantasyPoints(exampleFacts(example.facts))?.total)
 
     expect(four).toEqual([5, 0, 13, 22])
-    expect(four.reduce<number>((sum, points) => sum + (points ?? 0), 0)).toBe(40)
+    expect(four.reduce<number>((sum, points) => sum + (points ?? 0), 0)).toBe(fullMatchTotal)
+    expect(fullMatchTotal).toBe(40)
   })
 })
 

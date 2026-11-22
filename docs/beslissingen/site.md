@@ -7357,6 +7357,7 @@
   De plekken in de stand en bij een wedstrijd (de twee andere kerncijfers) en de link "Spelregels" komen met #1451 en #1455.
 - **Waarom:** het ontwerp wil de lijst kort en de punten in één blik; de plekken hebben een ranglijst nodig die er nog niet is.
 - **Alternatieven:** de hele lijst altijd tonen (lang na een seizoen); een aparte pagina voor de lijst (twee plekken die uit elkaar lopen).
+- **Later:** de kop van de kaart is op 22 november 2026 veranderd (#1559): "X punten" met "Y voorspellingen" klein erachter, en de regel eronder vervalt (zie _De kop van de kaart Jouw voorspellingen is het totaal_).
 
 - **Datum:** 20 november 2026
 - **Besluit:** voor de aftrap toont de wedstrijdpagina alleen het aantal voorspellingen van de Prognose.
@@ -7853,6 +7854,17 @@
   Pas vanaf de aftrap tonen houdt de eigen keuze een eigen keuze.
 - **Alternatieven:** de aantallen ook vóór de aftrap tonen (iedereen kiest dan hetzelfde als de massa); de geërfde vier niet meetellen (dan telt een fan die niet opnieuw koos niet mee, terwijl zijn vier bij de aftrap stond).
 
+## De kop van de kaart Jouw voorspellingen is het totaal
+
+- **Datum:** 22 november 2026
+- **Besluit:** de kop van de kaart "Jouw voorspellingen" is "X punten", het totaal van de fan, met "Y voorspellingen" in de `Meta`-stijl direct erachter (#1559).
+  Bij 1 staat er "1 punt" en "1 voorspelling".
+  De regel "1 voorspelling · 0 punten" onder de kop vervalt.
+  De kop is nog een `h2`, en de woorden "Jouw voorspellingen" staan als verborgen tekst voor het getal, zodat de kaart (`aria-labelledby`) en de lijst een naam houden: de kop leest als "Jouw voorspellingen: 4 punten, 3 voorspellingen".
+  Een fan zonder voorspellingen ziet de kop "Jouw voorspellingen" met de regel "Nog niets. Doe mee aan de Prognose.".
+- **Waarom:** het totaal is het getal waar het om gaat, en een kaart zonder naam is voor een schermlezer niet te vinden.
+- **Alternatieven:** een losse `aria-label` op de kaart (de kop leest dan als een los getal in de lijst met koppen); de regel onder de kop houden.
+
 ## De punten van Fjouwer worden bij het lezen berekend uit het verslag, en een minuut bewaard in het geheugen
 
 - **Datum:** 22 november 2026
@@ -7875,3 +7887,36 @@
 - **Alternatieven:** de punten bewaren in een tabel met het teken van het verslag (een migratie, en `saved_at` is daarvoor niet betrouwbaar); een taak die de punten na afloop vastlegt (een correctie vraagt dan een nieuwe berekening); de punten bij elke bezoeker opnieuw uitrekenen zonder geheugen.
 - **Let op:** de issue sprak van "bewaard met het teken van het verslag", en `saved_at` bleek daarvoor niet te volstaan.
   Het geheugen is er per serverproces: op gedeelde hosting kan elk proces zijn eigen minuut hebben, wat voor een correctie niet uitmaakt.
+
+## De stand van Fjouwer telt per seizoen de punten van alle klare wedstrijden, en een opgeheven account blijft staan zonder naam
+
+- **Datum:** 22 november 2026
+- **Besluit:** de stand van een seizoen staat in `apps/site/src/fans/fjouwer-ranking.ts`.
+  Hij telt voor elke wedstrijd met een verslag dat "klaar" is de punten van de vier van elke fan (opgeslagen of geërfd, met `fourOf`, `usesBefore` en `pointsOfFour` van de punten) bij elkaar.
+  Een fan zonder een vier die meetelt staat er niet in.
+  Gelijke punten delen een plaats en het volgende nummer valt weg; binnen een plaats gaat het op schermnaam.
+  Een geblokkeerd account staat er niet in en telt niet mee voor de plaatsen van anderen.
+  Een fan die zijn naam niet in standen wil (`inRankings`), staat niet in de lijst, maar ziet zijn eigen regel met de plaats die hij zou krijgen: het aantal rijen in de lijst met meer punten, plus één.
+  Een opgeheven account heeft geen fan meer (`fantasy_picks.supporter_id` is dan leeg), en elke bewaarde vier ervan staat als een eigen regel "Voormalige supporter" in de lijst.
+  De stand staat vijf minuten in het geheugen (`seasonRanking`, `rankedSeasons`), boven de minuut van de punten zelf, en niets staat in de database.
+  De pagina `/fans/fjouwer/stand` en de kaart Stand op `/fans/fjouwer` bouwen op dezelfde gegevens.
+- **Waarom:** een gecorrigeerd verslag werkt zo door zonder taak of migratie, zoals bij de punten.
+  Een opgeheven account houdt zijn punten, zodat de plaatsen van anderen niet verspringen.
+- **Alternatieven:** een stand over alle seizoenen (een nieuwe fan komt er nooit meer bij); een opgeheven account weglaten (de plaatsen verspringen); de punten per fan bewaren in een tabel (een migratie, en een correctie moet dan overal doorwerken).
+- **Let op:** de vieren van één opgeheven account zijn niet meer aan elkaar te koppelen en een geërfde vier is er niet meer.
+  Zo telt zo'n account met meerdere wedstrijden als meerdere regels van één wedstrijd.
+  Wil de stand ze samenvoegen, dan moet het opheffen eerst een nummer bewaren dat niet naar de fan terug te leiden is.
+
+## De spelregels van Fjouwer staan als kaart op `/fans/spelregels`, met voorbeelden uit de code van de telling
+
+- **Datum:** 22 november 2026
+- **Besluit:** `/fans/spelregels` heeft een kaart Fjouwer (`FjouwerRulesCard`, anker `fjouwer`, met het watermerk van het spel) na Uitblinker en voor Account.
+  De kaart en zijn link in de balk "Op deze pagina" staan er alleen als `FANS_VIER` aan staat.
+  De kaart "Punten" op `/fans/fjouwer` linkt ernaar met "Spelregels" (`fjouwerRulesAddress`).
+  De tabel met punten leest uit dezelfde `scoringRows` als die kaart, en dus uit `fantasyScoring`.
+  De voorbeelden staan in `packages/shared/src/fantasy-examples.ts`: een hele wedstrijd van vier spelers die samen 40 punten halen, drie kaarten, en vier gevallen van minuten en tegendoelpunten.
+  De pagina rekent de punten van elk voorbeeld uit met `fantasyPoints`, en de tests van de telling lezen hetzelfde bestand en eisen dat elk voorbeeld op zijn eigen getal uitkomt.
+- **Waarom:** een regel of een voorbeeld op de pagina kan zo niet ouder worden dan de telling.
+  Een voorbeeld dat in een test staat en niet op de pagina, of andersom, loopt vroeg of laat uiteen.
+- **Alternatieven:** de voorbeelden in de testbestanden laten en de pagina met de hand overtypen (loopt uiteen); een eigen pagina per spel (meer plekken om bij te houden).
+- **Let op:** de kaart linkt naar de stand (#1473), en de pagina van de stand linkt terug met "Spelregels".

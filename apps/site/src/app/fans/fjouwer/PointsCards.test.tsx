@@ -162,6 +162,12 @@ describe('the card Punten', () => {
     expect(html).toContain('Het verslag van de redactie beslist wat een speler deed.')
   })
 
+  it('links to the rules of Fjouwer with the name Spelregels', () => {
+    const html = renderToStaticMarkup(<ScoringCard />)
+
+    expect(html).toMatch(/href="\/fans\/spelregels#fjouwer"><span[^>]*>Spelregels/)
+  })
+
   it('writes a real minus sign', () => {
     expect(pointsText(-5)).toBe('−5')
     expect(pointsText(0)).toBe('0')
