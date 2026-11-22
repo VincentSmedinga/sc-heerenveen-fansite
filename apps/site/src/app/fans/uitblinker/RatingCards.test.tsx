@@ -135,7 +135,7 @@ describe('the other cards', () => {
     expect(html).toMatch(/<h2[^>]*>Zo werkt het<\/h2>/)
     expect(html).toContain('zeven dagen')
     expect(html).toContain('wijzigen')
-    expect(html).toContain('zien alle supporters de uitslag')
+    expect(html).toContain('zien alle fans de uitslag')
     expect(html).toContain('<a href="/fans/spelregels#uitblinker">Spelregels</a>')
   })
 })
@@ -214,7 +214,7 @@ describe('the result of a closed window', () => {
     expect(html).toMatch(/<h2[^>]*>Uitslag van de laatste wedstrijd<\/h2>/)
     expect(html).toContain('Uitblinker van de wedstrijd')
     expect(html).toContain('<table')
-    expect(html).toContain('31 supporters gaven cijfers.')
+    expect(html).toContain('31 fans gaven cijfers.')
     expect(html).toContain('nog te weinig cijfers')
   })
 
@@ -227,7 +227,7 @@ describe('the result of a closed window', () => {
       />,
     )
 
-    expect(html).toContain('3 supporters gaven cijfers.')
+    expect(html).toContain('3 fans gaven cijfers.')
     expect(html).not.toContain('<table')
     expect(html).not.toContain('hf-winner')
   })

@@ -9,7 +9,7 @@ export const playerRatingsCardId = 'cijfers-van-supporters'
 const dash = '–'
 
 /**
- * The card "Cijfers van supporters" on the page of a player (issue 1466): the table Per
+ * The card "Cijfers van de fans" on the page of a player (issue 1466): the table Per
  * seizoen, the table De laatste wedstrijden, a legend and, for numbers of the old fansite, the
  * source. The page of a match is linked where the address is known. The card has the
  * watermark of the Uitblinker (see `Card`).
@@ -29,11 +29,11 @@ export function PlayerRatingsCard({
   return (
     <Card aria-labelledby={playerRatingsCardId} game="uitblinker">
       <Heading id={playerRatingsCardId} level={2}>
-        Cijfers van supporters
+        Cijfers van de fans
       </Heading>
       <Heading level={3}>Per seizoen</Heading>
       <DataTable
-        caption={`De cijfers die supporters ${name} per seizoen gaven, het nieuwste seizoen eerst`}
+        caption={`De cijfers die fans ${name} per seizoen gaven, het nieuwste seizoen eerst`}
         columns={[
           'Seizoen',
           { abbreviation: 'W', name: 'Wedstrijden met cijfers' },
@@ -52,7 +52,7 @@ export function PlayerRatingsCard({
           <Heading level={3}>De laatste wedstrijden</Heading>
           <DataTable
             appearance="text"
-            caption={`De laatste wedstrijden waarin ${name} een cijfer van supporters kreeg, de nieuwste eerst`}
+            caption={`De laatste wedstrijden waarin ${name} een cijfer van de fans kreeg, de nieuwste eerst`}
             columns={[
               'Wedstrijd',
               { abbreviation: 'Gem', name: 'Gemiddeld cijfer' },

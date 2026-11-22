@@ -38,7 +38,7 @@ export function BlockForm({
       <ErrorSummary errors={summary} id="block-fouten" level={3} tabIndex={-1} />
       <Field
         error={errors.reden}
-        hint="De reden staat in het logboek en op de pagina met alle gegevens van de supporter."
+        hint="De reden staat in het logboek en op de pagina met alle gegevens van de fan."
         id="reden"
         label="Reden"
       >
@@ -135,7 +135,7 @@ export function RenameForm({
       <ErrorSummary errors={summary} id="rename-fouten" level={3} tabIndex={-1} />
       <Field
         error={state.error}
-        hint="Dezelfde regels als bij het aanmelden. De supporter ziet op Mijn account één keer dat de redactie de naam heeft aangepast."
+        hint="Dezelfde regels als bij het aanmelden. De fan ziet op Mijn account één keer dat de redactie de naam heeft aangepast."
         id="schermnaam"
         label="Nieuwe schermnaam"
       >

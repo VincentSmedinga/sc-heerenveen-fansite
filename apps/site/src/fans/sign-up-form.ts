@@ -17,7 +17,7 @@ export type SignUpState = {
 
 export const emptySignUpState: SignUpState = { errors: {}, values: { email: '', screenName: '' } }
 
-export const screenNameHint = `${screenNameMinLength} tot ${screenNameMaxLength} tekens: letters, cijfers, spatie, - en _. Andere supporters zien hem in de standen.`
+export const screenNameHint = `${screenNameMinLength} tot ${screenNameMaxLength} tekens: letters, cijfers, spatie, - en _. Andere fans zien hem in de standen.`
 
 export const emailHint = 'Hierheen mailen we een link en een code om in te loggen. Niemand anders ziet het.'
 

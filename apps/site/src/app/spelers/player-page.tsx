@@ -84,7 +84,7 @@ export async function playerMetadata(slug: string): Promise<Metadata> {
  * career (#1084), the charts (#1085) and the credit. An old address leads to the address of
  * now (308), and an address of nobody, or of a player of an opponent, is "niet gevonden". The
  * blocks of #1082 to #1085 come between the seasons and the end of the column. The side column
- * (#1086) has more figures and, at the bottom, the credit. The card Cijfers van supporters
+ * (#1086) has more figures and, at the bottom, the credit. The card Cijfers van de fans
  * (#1466) stands after the seasons, when the Uitblinker is on and he has ratings to show.
  */
 export async function PlayerPageView({ searchParams, slug }: { searchParams: Promise<SearchParams>; slug: string }) {

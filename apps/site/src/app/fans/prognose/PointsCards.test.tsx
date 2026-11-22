@@ -106,8 +106,8 @@ describe('the card "Zo deed iedereen het"', () => {
   it('has the exact scores, the outcomes and the average from five predictions', () => {
     const html = renderToStaticMarkup(<CrowdCard figures={{ average: 18.4, count: 54, exact: 6, outcome: 31 }} />)
 
-    expect(html).toContain('6 supporters hadden de eindstand precies goed.')
-    expect(html).toContain('31 supporters hadden de uitslag goed.')
+    expect(html).toContain('6 fans hadden de eindstand precies goed.')
+    expect(html).toContain('31 fans hadden de uitslag goed.')
     expect(html).toContain('Gemiddeld 18,4 punten, van 54 voorspellingen.')
     expect(html).toContain('hf-card-soft')
   })
@@ -115,7 +115,7 @@ describe('the card "Zo deed iedereen het"', () => {
   it('says only how many under five, and no average', () => {
     const html = renderToStaticMarkup(<CrowdCard figures={{ average: undefined, count: 3, exact: 1, outcome: 2 }} />)
 
-    expect(html).toContain('3 supporters voorspelden deze wedstrijd.')
+    expect(html).toContain('3 fans voorspelden deze wedstrijd.')
     expect(html).not.toContain('Gemiddeld')
     expect(html).not.toContain('precies goed')
   })

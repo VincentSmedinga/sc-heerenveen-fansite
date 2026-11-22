@@ -33,8 +33,7 @@ export default function AboutPage() {
             Wie we zijn
           </Heading>
           <Text appearance="intro">
-            De sc Heerenveen Fansite is een site van supporters, voor supporters, met de koppen over sc Heerenveen op
-            één plek.
+            De sc Heerenveen Fansite is een site van fans, voor fans, met de koppen over sc Heerenveen op één plek.
           </Text>
           <Text>
             We schrijven niks over en we passen niks aan. We hebben geen advertenties, geen abonnementen en geen
@@ -42,7 +41,7 @@ export default function AboutPage() {
             <Link href="https://forum.heerenveen.org" icon="external-link">
               ons forum
             </Link>
-            , waar supporters met elkaar praten.
+            , waar fans met elkaar praten.
           </Text>
           <Text>
             Vincent Smedinga begon de site in 1997. In die jaren hielpen veel mensen mee, aan de site en aan het forum,

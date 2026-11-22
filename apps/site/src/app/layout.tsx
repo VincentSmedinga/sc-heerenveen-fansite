@@ -130,7 +130,7 @@ export default async function RootLayout({
           <Page.Body>{children}</Page.Body>
           <Page.Footer>
             <Text appearance="meta">Alles over onze club op één plek.</Text>
-            <Text appearance="meta">Voor supporters door supporters.</Text>
+            <Text appearance="meta">Voor fans door fans.</Text>
             <Navigation items={footerItems} label="Over de site" />
             <Page.TopLink label="Naar boven" />
           </Page.Footer>

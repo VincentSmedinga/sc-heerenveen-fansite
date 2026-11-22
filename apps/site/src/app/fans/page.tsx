@@ -61,8 +61,8 @@ export default async function FansPage({
       <Page.Cell>
         <Heading level={1}>Fans</Heading>
         <Text appearance="intro">
-          Hier komen de spellen voor supporters: voorspel de uitslag, geef de spelers een cijfer en kies je eigen vier.
-          Zonder prijzen en zonder reclame.
+          Hier komen de spellen voor fans: voorspel de uitslag, geef de spelers een cijfer en kies je eigen vier. Zonder
+          prijzen en zonder reclame.
         </Text>
         {uitgelogd === '1' ? <Notice>Je bent uitgelogd.</Notice> : null}
         {welkom === '1' && supporter !== undefined && justCreated(supporter.createdAt) ? (

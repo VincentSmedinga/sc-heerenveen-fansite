@@ -5,7 +5,7 @@ De fansite over sc Heerenveen – sinds 1997.
 ## Wat is dit?
 
 De sc Heerenveen Fansite draaide van 1997 tot 2006.
-Nu komt hij terug als nieuwssite van supporters.
+Nu komt hij terug als nieuwssite van fans.
 We laten koppen en links zien van media die over sc Heerenveen schrijven, en sturen lezers zo naar de journalistiek zelf.
 Van elk item tonen we standaard alleen de kop, de link en de naam van de bron.
 Een intro of een foto tonen we alleen als de bron daar toestemming voor geeft.

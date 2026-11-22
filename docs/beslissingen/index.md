@@ -13,6 +13,6 @@ Het staat in een bestand per onderdeel, zodat je alleen leest wat je nodig hebt:
 - [Designsysteem](designsysteem.md): de componenten, de tokens en Storybook (119 beslissingen)
 - [Site](site.md): de pagina's van de site en het beheer (113 beslissingen)
 - [Importer](importer.md): de bronnen, de fetcher, het filter en de wedstrijdgegevens (201 beslissingen)
-- [Redactie](redactie.md): wat bezoekers lezen en zien, en de regels voor bronnen (150 beslissingen)
+- [Redactie](redactie.md): wat bezoekers lezen en zien, en de regels voor bronnen (151 beslissingen)
 
 Een titel vind je met `git grep -n '^## <titel>' docs/beslissingen/`.

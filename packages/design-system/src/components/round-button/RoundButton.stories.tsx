@@ -26,7 +26,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Een ronde knop of link met alleen een pictogram, voor de header en voor de pagina. De knop voor licht en donker, de knop naar boven en de supporterknop zijn er allemaal een, zodat ze er hetzelfde uitzien. Je kiest hem voor een handeling die iedereen aan het pictogram herkent, op een plek waar weinig ruimte is.',
+          'Een ronde knop of link met alleen een pictogram, voor de header en voor de pagina. De knop voor licht en donker, de knop naar boven en de knop voor je account zijn er allemaal een, zodat ze er hetzelfde uitzien. Je kiest hem voor een handeling die iedereen aan het pictogram herkent, op een plek waar weinig ruimte is.',
           'In rust is alleen het pictogram te zien, in een rustig blauw. Onder de muis, ingedrukt en bij focus komt de knop naar voren, met een lichte vulling en een rand. Een schermlezer hoort de naam, dus het pictogram is nooit het enige teken.',
         ].join('\n'),
       },

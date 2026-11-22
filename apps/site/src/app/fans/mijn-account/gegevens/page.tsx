@@ -42,8 +42,7 @@ export default async function MyDataPage() {
         <BackToAccount />
         <Heading level={1}>Alles wat we van je bewaren</Heading>
         <Text appearance="intro">
-          Andere supporters zien alleen je schermnaam en je punten in de standen.{' '}
-          <Link href="/privacy#account">Privacy</Link>
+          Andere fans zien alleen je schermnaam en je punten in de standen. <Link href="/privacy#account">Privacy</Link>
         </Text>
         <Card aria-labelledby="account-kop">
           <Heading id="account-kop" level={2}>

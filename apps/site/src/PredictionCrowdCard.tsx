@@ -28,7 +28,7 @@ export type PredictionCrowdData = {
 }
 
 const people = (count: number) =>
-  count === 1 ? '1 supporter voorspelde deze wedstrijd.' : `${count} supporters voorspelden deze wedstrijd.`
+  count === 1 ? '1 fan voorspelde deze wedstrijd.' : `${count} fans voorspelden deze wedstrijd.`
 
 /** The properties of `PredictionCrowd` for the figures of a match. */
 export function crowdProps({ crowd, reveal }: Pick<PredictionCrowdData, 'crowd' | 'reveal'>): PredictionCrowdProps {
@@ -108,11 +108,11 @@ export async function loadPredictionCrowd(
 export function OldPredictionCrowdCard({ crowd }: { crowd: MatchCrowd }) {
   return (
     <Card aria-labelledby="prognose-supporters" game="prognose">
-      <GameHeading id="prognose-supporters" level={2} meta="Van supporters">
+      <GameHeading id="prognose-supporters" level={2} meta="Van de fans">
         Prognose
       </GameHeading>
       <Heading appearance={3} level={3}>
-        Wat supporters toen voorspelden
+        Wat fans toen voorspelden
       </Heading>
       <PredictionCrowd {...crowdProps({ crowd, reveal: true })} headingLevel={3} />
       <Text appearance="meta">Voorspellingen van bezoekers van de Fansite, 2001 tot 2007.</Text>
@@ -121,7 +121,7 @@ export function OldPredictionCrowdCard({ crowd }: { crowd: MatchCrowd }) {
 }
 
 /**
- * The card Prognose: the heading with "Van supporters" beside it, and the figures. The link
+ * The card Prognose: the heading with "Van de fans" beside it, and the figures. The link
  * "Voorspel ook" stands there while the form of this match is open; "Stand Prognose" after the
  * match goes to the ranking of this match.
  */
@@ -136,7 +136,7 @@ export function PredictionCrowdCard({
 }) {
   return (
     <Card aria-labelledby="prognose-supporters" game="prognose">
-      <GameHeading id="prognose-supporters" level={2} meta="Van supporters">
+      <GameHeading id="prognose-supporters" level={2} meta="Van de fans">
         Prognose
       </GameHeading>
       <PredictionCrowd {...crowdProps(data)} />

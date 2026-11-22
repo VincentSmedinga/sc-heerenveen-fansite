@@ -119,7 +119,7 @@ describe('the card of the Uitblinker on Fans', () => {
     expect(html).toContain('Uitblinker vorige wedstrijd')
     expect(html).toContain('Dylan Vente')
     expect(html).toContain('Thuis tegen Sparta Rotterdam, 3–1')
-    expect(html).toContain('31 supporters gaven cijfers.')
+    expect(html).toContain('31 fans gaven cijfers.')
   })
 
   it('has the number but no seal when nobody had five grades, and nothing when there is no result', () => {
@@ -129,9 +129,9 @@ describe('the card of the Uitblinker on Fans', () => {
     )
 
     expect(none).not.toContain('hf-winner')
-    expect(none).not.toContain('supporters gaven')
+    expect(none).not.toContain('fans gaven')
     expect(thin).not.toContain('hf-winner')
-    expect(thin).toContain('3 supporters gaven cijfers.')
+    expect(thin).toContain('3 fans gaven cijfers.')
   })
 })
 

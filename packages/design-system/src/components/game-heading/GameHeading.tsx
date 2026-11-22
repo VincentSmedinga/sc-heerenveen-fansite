@@ -10,7 +10,7 @@ export type GameHeadingProps = {
   id: string
   /** The level of the heading. */
   level: Exclude<HeadingLevel, 1>
-  /** What comes next to the name, such as `Van supporters`. */
+  /** What comes next to the name, such as `Van de fans`. */
   meta: string
 }
 

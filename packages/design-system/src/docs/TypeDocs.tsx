@@ -70,7 +70,7 @@ export const typeStyles: TypeStyle[] = [
     className: 'hf-body',
     name: 'Tekst',
     sample:
-      'Gemaakt door supporters, zonder advertenties en zonder winstoogmerk. We tonen de kop en linken naar het bericht van de journalist.',
+      'Gemaakt door fans, zonder advertenties en zonder winstoogmerk. We tonen de kop en linken naar het bericht van de journalist.',
     spec: 'Atkinson Hyperlegible Next 400 · één maat · 1,5',
     use: 'Lopende tekst.',
   },

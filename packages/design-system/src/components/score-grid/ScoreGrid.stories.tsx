@@ -18,7 +18,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Het raster waarin een supporter de ruststand en de eindstand van een wedstrijd intikt: een veld voor één cijfer per club, met de clubnamen als kolomkop en Ruststand en Eindstand als rij.',
+          'Het raster waarin een fan de ruststand en de eindstand van een wedstrijd intikt: een veld voor één cijfer per club, met de clubnamen als kolomkop en Ruststand en Eindstand als rij.',
           'Kies het voor een voorspelling, waar vier keuzelijsten trager zijn. Het werkt zonder JavaScript in een gewoon formulier, en een leeg veld blijft leeg, nooit 0. De pagina geeft de legenda, de namen en de foutmeldingen.',
         ].join('\n'),
       },

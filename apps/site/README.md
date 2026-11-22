@@ -990,11 +990,11 @@ Daarom bewaart de browser van wie het beheer opent een teken in `localStorage`, 
   Wie het zelf maakt, ziet een koppeling naar `/beheer` en komt bij de inlogpagina uit.
 - De rooktest controleert dat het HTML van geen enkele publieke pagina naar het beheer verwijst.
 
-De kop toont de supporterknop op dezelfde manier, voor supporters met een account (alleen als accounts aan staan).
+De kop toont de knop voor je account op dezelfde manier, voor fans met een account (alleen als accounts aan staan).
 De server stuurt op elke pagina de link Inloggen, voor iedereen gelijk.
 `src/app/fans/layout.tsx` geeft de sessie onder `/fans` aan `SupporterMarker`, dat de schermnaam bewaart in `localStorage` onder de sleutel `fansite-fans` of de sleutel weghaalt (`src/supporter-marker.ts`).
 `SupporterButton` leest het teken met `useSyncExternalStore` en toont de initialen en de link naar Mijn account.
-Het teken geeft geen toegang, en `src/public-pages.test.ts` bewaakt dat geen publieke pagina de sessie of het cookie van een supporter noemt.
+Het teken geeft geen toegang, en `src/public-pages.test.ts` bewaakt dat geen publieke pagina de sessie of het cookie van een fan noemt.
 
 Het formulier van een wedstrijdverslag bewaart zijn invoer ook in `localStorage`, onder de sleutel `fansite-verslag-<id van de wedstrijd>` (`src/beheer/report-draft.ts`), zodat een opslag die mislukt niets kost.
 Bij het verlaten van een veld staan de waarden van het formulier en het moment van bewaren erin, en niets meer.
@@ -1516,15 +1516,15 @@ Hij stuurt alleen de dag voor de aftrap van de wedstrijd waarvoor het formulier 
 Bij de limiet krijgt de redactie één mail, en de rest volgt bij de volgende runs.
 `FANS_REMINDER_SECRET` (minstens 32 tekens, voor elke omgeving een andere) ondertekent de link in het bericht; zonder die variabele stuurt de stap niets en zegt het logboek het.
 De link opent `/fans/herinnering/uitzetten`, een pagina met een knop die de herinnering uitzet zonder in te loggen.
-`supporter_reminders` bewaart per supporter en wedstrijd dat het bericht is verstuurd, zonder adres of naam.
+`supporter_reminders` bewaart per fan en wedstrijd dat het bericht is verstuurd, zonder adres of naam.
 De stap maakt de rij vlak voor het bericht uitgaat en haalt hem weg als het versturen mislukt, zodat een mislukt bericht bij de volgende run opnieuw wordt geprobeerd.
 
 ### De Uitblinker
 
-`/fans/uitblinker` (`app/fans/uitblinker`) laat een supporter de spelers en de trainer van de laatste wedstrijd een cijfer van 1 tot 10 geven.
+`/fans/uitblinker` (`app/fans/uitblinker`) laat een fan de spelers en de trainer van de laatste wedstrijd een cijfer van 1 tot 10 geven.
 De regels van het venster staan op één plek, `packages/db/src/rating-window.ts`: welke wedstrijd, wie in de lijst staat (minstens 30 minuten volgens het verslag, `ratingMinimumMinutes`), wanneer het venster sluit en het opslaan, dat het sluitmoment in de `INSERT` nog eens met de klok van de database controleert.
 De pagina en de actie roepen alleen `src/fans/rating.ts` aan, en het formulier (`RatingForm.tsx`) is een gewone `POST` die zonder JavaScript werkt.
-De cijfers staan in `player_ratings`, per supporter en verschijning in het verslag.
+De cijfers staan in `player_ratings`, per fan en verschijning in het verslag.
 De hoofdtrainer van de wedstrijd (`findRatingCoach`, uit `staff`) krijgt als laatste groep ook een cijfer, in `coach_ratings`, en alleen als één persoon de dag zeker had.
 Een stap van de import (`closeRatingWindows`) zet de gemiddelden na het sluiten in `match_player_ratings` en `match_coach_ratings` met de bron `fans`.
 De cijfers van een geblokkeerd account tellen niet mee in de gemiddelden van de spelers en de trainer.
@@ -1542,18 +1542,18 @@ De telling en het voorbeeld van de Prognose komen uit `pointsPerPart` en `predic
 De link "Spelregels" naar `#prognose` staat onder het formulier, op de kaarten met de punten en de voorspellingen, onder de stand en op `/fans` als "Spelregels van alle spellen" (`RulesLink`).
 Een nieuw spel voegt zijn eigen kaart toe in `RulesCards.tsx`, een regel in `rulesShortcuts` en zijn anker in `src/anchors.ts`.
 
-## Een account voor supporters
+## Een account voor fans
 
-Een supporter maakt een account op `/fans/aanmelden`, met een schermnaam en een e-mailadres, en bevestigt het adres met de link of de code uit de mail.
+Een fan maakt een account op `/fans/aanmelden`, met een schermnaam en een e-mailadres, en bevestigt het adres met de link of de code uit de mail.
 Daarna logt hij in op `/fans/inloggen`, ook met een link of een code uit de mail, en blijft hij 90 dagen na zijn laatste bezoek ingelogd, hoogstens een jaar.
 Op `/fans/mijn-account` wijzigt hij zijn schermnaam (hoogstens één keer per 30 dagen) en zijn e-mailadres, en kiest hij of zijn naam in de standen staat.
-Een nieuw adres geldt pas als de supporter de link of de code gebruikt die naar dat adres ging, in een sessie van hetzelfde account.
+Een nieuw adres geldt pas als de fan de link of de code gebruikt die naar dat adres ging, in een sessie van hetzelfde account.
 Op `/fans/mijn-account/gegevens` ziet hij alles wat de site van hem bewaart, en op `/fans/mijn-account/opheffen` heft hij zijn account op, met één bevestiging.
 Lokaal, zonder mailserver, staat de mail met de link en de code in het logboek van `pnpm dev`.
 De code staat in `src/fans`: de regels van de schermnaam in `screen-name.ts`, het aanmelden in `sign-up.ts`, het inloggen, het plafond van de mails en het adres om naar terug te gaan in `log-in.ts`, het wijzigen in `change-name.ts` en `change-email.ts`, de gegevens per spel in `my-data.ts`, het opheffen in `close-account.ts`, de keuze voor de standen in `rankings.ts`, de instelling voor de gedeelde code van het inloggen in `supporter-login.ts`, en `requireSupporter()` in `require-supporter.ts`.
 Elke persoonlijke pagina en actie onder `/fans` begint met `requireSupporter()`; `src/fans/routes.test.ts` faalt voor een die dat niet doet.
 De redactie beheert de accounts op `/beheer/supporters` (alleen eigenaar en redacteur, en alleen als accounts aan staan): zoeken op schermnaam, een naam aanpassen, een account blokkeren of de blokkade opheffen.
-De code staat in `src/beheer/supporter-management.ts`; het adres van een supporter ziet alleen de eigenaar, op de pagina van één account.
+De code staat in `src/beheer/supporter-management.ts`; het adres van een fan ziet alleen de eigenaar, op de pagina van één account.
 Van een geblokkeerd account dat verdwijnt, bewaart `supporter_blocked_addresses` 12 maanden de hash van het adres, en `src/fans/take-part.ts` zegt of een account mag meedoen.
 De tabellen zijn `supporters`, `supporter_login_links`, `supporter_email_changes`, `supporter_sessions`, `supporter_login_attempts`, `supporter_blocked_addresses` en `supporter_reminders`, los van die van het beheer.
 Het cookie heet `fans-sessie` en gaat alleen mee naar de pagina's onder `/fans`.

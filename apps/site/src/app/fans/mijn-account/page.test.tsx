@@ -274,7 +274,7 @@ describe('the page of all the data', () => {
     const html = renderToStaticMarkup(await MyDataPage())
 
     expect(html).toMatch(/<h1[^>]*>Alles wat we van je bewaren<\/h1>/)
-    expect(html).toContain('Andere supporters zien alleen je schermnaam en je punten in de standen.')
+    expect(html).toContain('Andere fans zien alleen je schermnaam en je punten in de standen.')
 
     for (const [term, value] of [
       ['Schermnaam', 'Tjalle99'],

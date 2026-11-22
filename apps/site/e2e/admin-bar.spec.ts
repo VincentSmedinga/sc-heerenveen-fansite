@@ -40,7 +40,7 @@ test('gives the owner every screen and marks the one below which the page is', a
     'Stadions',
     'Clubs',
     'Bezoek',
-    'Supporters',
+    'Fans',
     'Accounts',
     'Mijn account (Eigenaar)',
   ])

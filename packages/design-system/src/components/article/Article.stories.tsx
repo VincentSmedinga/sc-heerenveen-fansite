@@ -41,8 +41,8 @@ const render = (args: ArticleProps) => (
     <Page.Main>
       <Article {...args}>
         <Text>
-          We zijn supporters, geen journalisten. We schrijven <Strong>niet</Strong> over wat anderen al schreven, maar
-          we <Emphasis>wijzen</Emphasis> je de weg naar hun verhaal.
+          We zijn fans, geen journalisten. We schrijven <Strong>niet</Strong> over wat anderen al schreven, maar we{' '}
+          <Emphasis>wijzen</Emphasis> je de weg naar hun verhaal.
         </Text>
         <Heading level={2}>Wat we doen</Heading>
         <Text>

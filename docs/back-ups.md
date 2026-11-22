@@ -40,12 +40,12 @@ De opdracht `backup`:
      Met het zout reken je de kenmerken terug naar adressen.
    - `discussions`: de schermnaam van de laatste reageerder vervangt de importer bij elke run (zie het hoofdstuk Redactie in Storybook).
    - `admin_sessions` en `admin_login_links`: een teruggezette sessie of inloglink zou een toegang herstellen die na de dump is ingetrokken.
-   - `supporter_sessions`, `supporter_login_links` en `supporter_email_changes`: hetzelfde voor supporters.
+   - `supporter_sessions`, `supporter_login_links` en `supporter_email_changes`: hetzelfde voor fans.
      Een inloglink kan ook een aanmelding zijn die niemand bevestigde, met het adres erin, en een adreswijziging bewaart het nieuwe adres tot de bevestiging.
    - `supporter_login_attempts`: de hash van een adres voor de limiet, die de site na 15 minuten weggooit.
 
    Ze zouden anders 14 dagen in de dumps blijven staan.
-   De accounts van supporters zelf, `supporters`, staan wel in de dump, en ook `supporter_blocked_addresses`: de hash van het adres van een geblokkeerd account dat verdween, die de site na 12 maanden weggooit.
+   De accounts van fans zelf, `supporters`, staan wel in de dump, en ook `supporter_blocked_addresses`: de hash van het adres van een geblokkeerd account dat verdween, die de site na 12 maanden weggooit.
    Een terugzetting moet die blokkade niet kwijtraken.
    Een teruggezette database krijgt de tabellen hierboven wel, maar leeg.
    De importer vult de discussies binnen een kwartier opnieuw, en een sessie maak je door opnieuw in te loggen.
@@ -199,10 +199,10 @@ Zet een dump terug in dezelfde database, dus nadat een migratie of een actie de 
    Open `/bronnen` en de homepage, en kijk of de nieuwste artikelen in `/beheer/artikelen` er zijn.
    Draai daarna `rm ~/fansite-terugzetten.env`, want het bevat een wachtwoord.
 7. **Ga de opgeheven accounts na.**
-   Een dump van vóór een opheffing bevat dat account van een supporter nog, met de schermnaam en het e-mailadres.
+   Een dump van vóór een opheffing bevat dat account van een fan nog, met de schermnaam en het e-mailadres.
    De redactie gaat de opheffingen sinds de dump na en heft die accounts opnieuw op.
    Dat kan alleen met de hand: het logboek van een opheffing bewaart geen nummer van het account (#1454), dus geen opdracht vindt ze terug.
-   De redactie gaat af op wat ze weet, zoals de mails van supporters die om een opheffing vroegen.
+   De redactie gaat af op wat ze weet, zoals de mails van de fans die om een opheffing vroegen.
    Dat accepteren we, want een dump terugzetten is zeldzaam.
 
 Op je eigen computer zet je een dump terug met `pnpm db:restore <bestand>`, in een lege database: maak er een met `docker compose exec mariadb mariadb -e 'CREATE DATABASE terugzetten'` en zet `DATABASE_URL` daarop.
@@ -229,16 +229,16 @@ Agents bevragen de kopie alleen (zie _The copy of the acceptance database_ in `A
 | Tabellen                                                                                                                                                                   | Wat de kopie krijgt                                                                                                                                       |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `visitor_salts`, `visitor_hashes`, `discussions`, `admin_sessions`, `admin_login_links` en `admin_login_attempts`                                                          | Alleen de structuur, zonder rijen                                                                                                                         |
-| `supporters`, `supporter_sessions`, `supporter_login_links`, `supporter_login_attempts`, `supporter_email_changes`, `supporter_blocked_addresses` en `supporter_reminders` | Alleen de structuur, zonder rijen: geen account van een supporter, ook niet met een verzonnen adres                                                       |
+| `supporters`, `supporter_sessions`, `supporter_login_links`, `supporter_login_attempts`, `supporter_email_changes`, `supporter_blocked_addresses` en `supporter_reminders` | Alleen de structuur, zonder rijen: geen account van een fan, ook niet met een verzonnen adres                                                             |
 | `admin_users`                                                                                                                                                              | Elk account met het adres `beheerder-<id>@example.invalid` en de voornaam `Account <id>`, en het echte nummer, de rol, de keuze voor de mail en de tijden |
 | Alle andere tabellen, en `__drizzle_migrations`                                                                                                                            | Alle rijen                                                                                                                                                |
 | `acceptance_copy`, een tabel die alleen in de kopie bestaat                                                                                                                | Eén rij met `dumped_at`, de tijd van de dump op de host, en `loaded_at`, de tijd van het laden, in UTC                                                    |
 
-De kopie krijgt geen account van een supporter, omdat een schermnaam van een echte persoon is en vaak herkenbaar.
+De kopie krijgt geen account van een fan, omdat een schermnaam van een echte persoon is en vaak herkenbaar.
 De tabellen staan er wel, dus op de kopie maak je lokaal een nieuw account door je aan te melden.
-De regel voor de tabellen van de spellen die nog komen: zo'n tabel komt mee, maar de kolom die naar een supporter verwijst wordt leeg (`NULL`).
+De regel voor de tabellen van de spellen die nog komen: zo'n tabel komt mee, maar de kolom die naar een fan verwijst wordt leeg (`NULL`).
 Zo zijn de cijfers en de voorspellingen te bekijken, maar horen ze bij niemand.
-Een test in `packages/db/src/export.test.ts` faalt voor een tabel die een verwijzing naar een supporter meeneemt, en voor een nieuwe tabel van een account die niet leeg blijft.
+Een test in `packages/db/src/export.test.ts` faalt voor een tabel die een verwijzing naar een fan meeneemt, en voor een nieuwe tabel van een account die niet leeg blijft.
 De export leest het echte adres en de echte voornaam van een account niet: de query vraagt de database om de verzonnen waarden.
 Wie wat deed, staat in `audit_log`, `articles`, `article_versions`, `match_edits` en `match_reports` als het nummer van een account, en dat nummer blijft kloppen.
 De export vraagt `mysqldump` om elke tabel bij naam.

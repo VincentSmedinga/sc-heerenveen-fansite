@@ -47,7 +47,7 @@ const meta = preview.meta({
           'Voor een schermlezer en bij kopiëren is het één naam in één tekst; het gewicht is alleen voor het oog.',
           'Het gewicht staat op het component zelf, dus de naam ziet er overal hetzelfde uit.',
           'Met een rugnummer staat het nummer in een kolom voor de naam, en met een regel achter de naam staat daar meer over de speler.',
-          'Met een land staat er een klein vlagje tussen het nummer en de naam, of de landcode als we geen vlag hebben: een supporter ziet in één blik waar een speler vandaan komt, en een schermlezer leest de landnaam voor.',
+          'Met een land staat er een klein vlagje tussen het nummer en de naam, of de landcode als we geen vlag hebben: een fan ziet in één blik waar een speler vandaan komt, en een schermlezer leest de landnaam voor.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

@@ -186,7 +186,7 @@ async function loadFigures(season: string, competition: CompetitionChoice) {
 }
 
 /**
- * The card "Cijfers van supporters" (issue 1474), or undefined when the Uitblinker is switched
+ * The card "Cijfers van de fans" (issue 1474), or undefined when the Uitblinker is switched
  * off or the figures could not be read (the error is logged). The card is an extra: the page is
  * as it was without it. The card follows the season of the page, and `?seizoen=` on the address
  * of the page chooses another one, which may be a season from before the matches in the

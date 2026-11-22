@@ -12,7 +12,7 @@ const meta = preview.meta({
   argTypes: {
     screenName: {
       control: 'text',
-      description: 'De schermnaam van de supporter die is ingelogd. Zonder naam is niemand ingelogd.',
+      description: 'De schermnaam van de fan die is ingelogd. Zonder naam is niemand ingelogd.',
     },
   },
   component: AccountButton,
@@ -20,8 +20,8 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De supporterknop van de header: een ronde knop met een supporter met een sjaal. Wie niet is ingelogd, gaat ermee naar Inloggen; wie is ingelogd, naar Mijn account. Je kiest hem voor de header, naast de knop voor licht en donker.',
-          'Uitgelogd hangen de armen langs het lijf en zit de sjaal om de nek. Onder de muis en bij focus gaan de armen omhoog en zwaait de supporter twee keer met de sjaal. Ingelogd houdt hij de sjaal omhoog, met de initialen op de borst. Een schermlezer hoort waar de link heen gaat; de supporter zelf, met de initialen, is een tekening die verborgen is.',
+          'De knop voor je account in de header: een ronde knop met een fan met een sjaal. Wie niet is ingelogd, gaat ermee naar Inloggen; wie is ingelogd, naar Mijn account. Je kiest hem voor de header, naast de knop voor licht en donker.',
+          'Uitgelogd hangen de armen langs het lijf en zit de sjaal om de nek. Onder de muis en bij focus gaan de armen omhoog en zwaait de fan twee keer met de sjaal. Ingelogd houdt hij de sjaal omhoog, met de initialen op de borst. Een schermlezer hoort waar de link heen gaat; de fan zelf, met de initialen, is een tekening die verborgen is.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -53,7 +53,7 @@ export const Hover = meta.story({
     docs: {
       description: {
         story:
-          'De armen gaan omhoog en de supporter zwaait twee keer met de sjaal. De muis is nagebootst met de add-on Pseudo States; met de muis zie je de echte beweging.',
+          'De armen gaan omhoog en de fan zwaait twee keer met de sjaal. De muis is nagebootst met de add-on Pseudo States; met de muis zie je de echte beweging.',
       },
     },
     pseudo: { hover: ['.hf-account-button'] },

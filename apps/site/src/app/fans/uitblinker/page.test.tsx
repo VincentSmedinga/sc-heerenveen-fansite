@@ -347,7 +347,7 @@ describe('the result of a closed window', () => {
 
     expect(html.indexOf('Volgende wedstrijd')).toBeLessThan(html.indexOf('Uitslag van de laatste wedstrijd'))
     expect(html).toContain('Uitblinker van de wedstrijd')
-    expect(html).toContain('12 supporters gaven cijfers.')
+    expect(html).toContain('12 fans gaven cijfers.')
     expect(currentSupporter).toHaveBeenCalled()
   })
 

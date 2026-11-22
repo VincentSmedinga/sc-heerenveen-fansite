@@ -175,7 +175,7 @@ describe('RootLayout', () => {
     )
 
     expect(html).toContain(
-      '<footer class="hf-page-footer"><p class="hf-meta">Alles over onze club op één plek.</p><p class="hf-meta">Voor supporters door supporters.</p><nav',
+      '<footer class="hf-page-footer"><p class="hf-meta">Alles over onze club op één plek.</p><p class="hf-meta">Voor fans door fans.</p><nav',
     )
   })
 

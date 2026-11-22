@@ -193,7 +193,7 @@ Schrijf zo dat iedereen het de eerste keer begrijpt.
   "Tekst haalt 4,5:1", niet "voldoende contrast".
 - **Nederlandse notatie:** datums als "3 november 2026" en een decimale komma: "4,5:1".
 
-De toon van de site zelf, van supporter tot supporter, en de schrijfwijze van spelers, datums en bronnen staan in het hoofdstuk [Redactie](https://ds.heerenveen.org/?path=/docs/redactie--documentatie) van Storybook.
+De toon van de site zelf, van fan tot fan, en de schrijfwijze van spelers, datums en bronnen staan in het hoofdstuk [Redactie](https://ds.heerenveen.org/?path=/docs/redactie--documentatie) van Storybook.
 
 ## Reviews
 

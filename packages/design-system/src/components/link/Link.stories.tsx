@@ -68,7 +68,7 @@ export const Icons = meta.story({
         <Link href="https://forum.heerenveen.org" icon="external-link">
           ons forum
         </Link>
-        , waar supporters met elkaar praten.
+        , waar fans met elkaar praten.
       </Text>
       <Text>
         Mis je een bron? Mail ons via{' '}

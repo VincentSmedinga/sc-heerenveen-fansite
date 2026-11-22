@@ -5,9 +5,9 @@ import { PredictionCrowd } from './PredictionCrowd'
 
 describe('PredictionCrowd', () => {
   it('says only how many predicted when there is nothing else', () => {
-    const { container } = render(<PredictionCrowd>48 supporters voorspelden deze wedstrijd.</PredictionCrowd>)
+    const { container } = render(<PredictionCrowd>48 fans voorspelden deze wedstrijd.</PredictionCrowd>)
 
-    expect(screen.getByText('48 supporters voorspelden deze wedstrijd.')).toBeTruthy()
+    expect(screen.getByText('48 fans voorspelden deze wedstrijd.')).toBeTruthy()
     expect(container.querySelector('.hf-outcome-bar')).toBeNull()
     expect(screen.queryByRole('list')).toBeNull()
     expect(screen.queryByRole('heading')).toBeNull()
@@ -16,7 +16,7 @@ describe('PredictionCrowd', () => {
   it('writes the outcomes in words next to the bar', () => {
     const { container } = render(
       <PredictionCrowd outcomes={{ draws: 13, losses: 8, wins: 33 }}>
-        54 supporters voorspelden deze wedstrijd.
+        54 fans voorspelden deze wedstrijd.
       </PredictionCrowd>,
     )
 
@@ -34,7 +34,7 @@ describe('PredictionCrowd', () => {
           { count: 5, label: 'anders' },
         ]}
       >
-        54 supporters voorspelden deze wedstrijd.
+        54 fans voorspelden deze wedstrijd.
       </PredictionCrowd>,
     )
 
@@ -55,7 +55,7 @@ describe('PredictionCrowd', () => {
         headingLevel={4}
         scores={[{ count: 14, label: '2–1' }]}
       >
-        54 supporters voorspelden deze wedstrijd.
+        54 fans voorspelden deze wedstrijd.
       </PredictionCrowd>,
     )
 

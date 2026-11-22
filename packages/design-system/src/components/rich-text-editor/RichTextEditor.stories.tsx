@@ -71,7 +71,7 @@ const article: RichTextValue = {
   type: 'doc',
 }
 
-const hint = 'Schrijf voor supporters. Een kop is niveau 2, de titel van het artikel staat er al boven.'
+const hint = 'Schrijf voor fans. Een kop is niveau 2, de titel van het artikel staat er al boven.'
 
 export const Default = meta.story({
   args: { defaultValue: article, hint, id: 'tekst', label: 'Tekst', name: 'tekst' },

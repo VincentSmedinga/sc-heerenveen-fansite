@@ -10,7 +10,7 @@ import { getDatabase } from '#src/database'
 import { minimumMatches, minimumRatings } from '#src/player-ratings'
 
 // The ranking of the season ratings that supporters gave the players (issue 1474): the card
-// "Cijfers van supporters" on Spelers › Cijfers and the page "Uitblinker van het jaar". It
+// "Cijfers van de fans" on Spelers › Cijfers and the page "Uitblinker van het jaar". It
 // works the figures out from the averages that the import keeps, never from one rating. The
 // season rating is the average of every rating of the season, as on the page of a player (see
 // `playerRatingsOf`), so a match with few ratings weighs as little as it should.

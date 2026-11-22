@@ -27,7 +27,7 @@ const card = (props: Partial<Parameters<typeof SeasonRankingCard>[0]> = {}) =>
     />,
   )
 
-describe('the card Cijfers van supporters', () => {
+describe('the card Cijfers van de fans', () => {
   it('is a table with a caption, the places, the matches and the rating with a comma', () => {
     const html = card()
 

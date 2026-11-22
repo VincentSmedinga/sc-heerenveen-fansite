@@ -41,11 +41,11 @@ export function CrowdCard({ figures }: { figures: CrowdFigures }) {
         Zo deed iedereen het
       </Heading>
       {figures.average === undefined ? (
-        <Text>{`${plural(figures.count, 'supporter voorspelde', 'supporters voorspelden')} deze wedstrijd.`}</Text>
+        <Text>{`${plural(figures.count, 'fan voorspelde', 'fans voorspelden')} deze wedstrijd.`}</Text>
       ) : (
         <>
-          <Text>{`${plural(figures.exact, 'supporter had', 'supporters hadden')} de eindstand precies goed.`}</Text>
-          <Text>{`${plural(figures.outcome, 'supporter had', 'supporters hadden')} de uitslag goed.`}</Text>
+          <Text>{`${plural(figures.exact, 'fan had', 'fans hadden')} de eindstand precies goed.`}</Text>
+          <Text>{`${plural(figures.outcome, 'fan had', 'fans hadden')} de uitslag goed.`}</Text>
           <Text>{`Gemiddeld ${figures.average.toFixed(1).replace('.', ',')} punten, van ${plural(figures.count, 'voorspelling', 'voorspellingen')}.`}</Text>
         </>
       )}

@@ -18,7 +18,7 @@ Dan kan iedereen haar lezen voordat we haar hebben verholpen.
 Dit beleid geldt voor wat op de site draait: de actuele `main`, zoals die op heerenveen.org staat, en de code ervan in deze repository.
 Oudere versies en forks vallen erbuiten, evenals het forum, dat een eigen repository heeft.
 
-We horen het liefst van kwetsbaarheden in de twee inlogs, die van het beheer en die van de supporters.
+We horen het liefst van kwetsbaarheden in de twee inlogs, die van het beheer en die van de fans.
 Wij zien deze dingen als een kwetsbaarheid:
 
 - toegang tot een account of tot de beheerpagina's zonder in te loggen;

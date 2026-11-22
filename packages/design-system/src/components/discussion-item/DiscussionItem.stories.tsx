@@ -122,7 +122,7 @@ const renderLong = () => (
           <DiscussionItem
             dateTime="2026-10-23T11:28:21Z"
             href="#lang"
-            lastPostedBy="Een supporter met een erg lange schermnaam zonder spaties: Tribunetijger_van_het_noorden"
+            lastPostedBy="Een fan met een erg lange schermnaam zonder spaties: Tribunetijger_van_het_noorden"
             replies={1234}
             time="13:28"
             title="Een discussie met een heel lange titel over de wedstrijd van zondag, de opstelling, de wissels en alles wat daarna gebeurde in de kantine"

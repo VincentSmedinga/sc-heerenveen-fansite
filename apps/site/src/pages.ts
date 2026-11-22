@@ -9,7 +9,7 @@ export const siteName = 'sc Heerenveen Fansite'
 
 export const pages = [
   {
-    description: 'Alles over sc Heerenveen op één plek – voor supporters door supporters.',
+    description: 'Alles over sc Heerenveen op één plek: koppen, wedstrijden en spelers, voor fans door fans.',
     path: '/',
   },
   {
@@ -81,17 +81,18 @@ export const pages = [
     path: '/contact',
   },
   {
-    description: 'Wie we zijn en hoe we werken. Een site van supporters, voor supporters.',
+    description:
+      'Wie we zijn en hoe we werken. Een site van fans, voor fans, zonder advertenties en zonder winstoogmerk.',
     path: '/over-ons',
   },
   {
     description:
-      'Het hoofdstuk voor supporters: de spellen die komen, zoals een voorspelling van de uitslag en een cijfer voor de spelers, en alvast een account.',
+      'Het hoofdstuk voor fans: de spellen die komen, zoals een voorspelling van de uitslag en een cijfer voor de spelers, en alvast een account.',
     path: '/fans',
   },
   {
     description:
-      'De regels van de spellen voor supporters, met voorbeelden: hoe de punten van de Prognose tellen en wie de uitblinker is.',
+      'De regels van de spellen voor fans, met voorbeelden: hoe de punten van de Prognose tellen en wie de uitblinker is.',
     path: '/fans/spelregels',
   },
   {

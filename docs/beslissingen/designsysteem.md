@@ -278,6 +278,7 @@
 - **Later:** zie _De footer zegt wat je op de site vindt_.
   "sinds 1997" staat sindsdien alleen nog in het logo.
   Het motto staat sinds 27 oktober 2026 zonder komma, zoals de site het al had: zie _De footer zegt waar de site over gaat, met het motto eronder_.
+  Het motto is sinds 22 november 2026 "Voor fans door fans.": zie _In teksten schrijven we "fan" en "fans", niet "supporter"_ in `redactie.md`.
 
 ## Storybook toont de code van het voorbeeld
 
