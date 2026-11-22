@@ -21,6 +21,7 @@ import { logInPaths } from '#src/fans/log-in'
 import { returnParameter } from '#src/fans/log-in-form'
 import {
   type MatchRatings,
+  type RatedCoach,
   type RatedPlayer,
   ratingMinimum,
   resultLine,
@@ -193,6 +194,7 @@ export function SavedView({
   grades,
   players,
   running,
+  runningCoach,
 }: {
   closesAt: Date
   /** The head coach of the match, or `null` for a match without one. */
@@ -204,6 +206,8 @@ export function SavedView({
   players: readonly RatingPlayer[]
   /** The averages so far, for each player with ratings. */
   running: readonly RatedPlayer[]
+  /** The average so far of the head coach, when he has ratings. */
+  runningCoach?: RatedCoach | undefined
 }) {
   const byAppearance = new Map(running.map((player) => [player.appearanceId, player]))
   const winner = uitblinkerOf(running)
@@ -238,8 +242,21 @@ export function SavedView({
                 : {}),
             }
           }),
-          // The coach is the last row, after a heavier line. His average shows with #1479.
-          ...(coach === null ? [] : [{ cells: [coachGrade ?? 0, '–'], header: coachRow(coach.name), total: true }]),
+          // The coach is the last row, after a heavier line, on the same threshold as players.
+          ...(coach === null
+            ? []
+            : [
+                {
+                  cells: [
+                    coachGrade ?? 0,
+                    runningCoach !== undefined && runningCoach.count >= ratingMinimum
+                      ? gradeText(runningCoach.average)
+                      : 'nog te weinig cijfers',
+                  ],
+                  header: coachRow(coach.name),
+                  total: true,
+                },
+              ]),
         ]}
         sortable={false}
       />

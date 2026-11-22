@@ -743,4 +743,90 @@ describe('the head coach in the Uitblinker', () => {
     expect(await database.db.select().from(matchPlayerRatings)).toHaveLength(0)
     expect(await closeRatingWindows(database.db, now, on)).toEqual({ closed: 0 })
   })
+
+  describe('when an account is blocked or released (issue 1479)', () => {
+    const block = (id: number) =>
+      database.db.update(supporters).set({ disabledAt: new Date() }).where(eq(supporters.id, id))
+    const release = (id: number) =>
+      database.db.update(supporters).set({ disabledAt: null }).where(eq(supporters.id, id))
+    const averages = async () =>
+      (await database.db.select().from(matchCoachRatings)).map((row) => [row.average, row.ratingCount])
+
+    async function closedWithCoach() {
+      const now = new Date('2026-11-30T12:00:00Z')
+      const { matchId } = await playedAndNext({ ago: 9 * day, nextIn: null, now })
+      const staffId = await coach('Robin Veldman', '2020-01-01')
+
+      return { matchId, now, staffId }
+    }
+
+    it('drops the grades of a blocked account from the average of the coach, and brings them back on release', async () => {
+      const { matchId, now, staffId } = await closedWithCoach()
+      const fine = await supporter()
+      const other = await supporter()
+
+      await database.db.insert(coachRatings).values([
+        { grade: 6, matchId, staffId, supporterId: fine },
+        { grade: 2, matchId, staffId, supporterId: other },
+      ])
+      await closeRatingWindows(database.db, now, on)
+      expect(await averages()).toEqual([['4.00', 2]])
+
+      await block(other)
+      expect(await recountRatingsOf(database.db, other, now, on)).toBe(1)
+      expect(await averages()).toEqual([['6.00', 1]])
+
+      await release(other)
+      await recountRatingsOf(database.db, other, now, on)
+      expect(await averages()).toEqual([['4.00', 2]])
+    })
+
+    it('removes the average of the coach when every grade drops out, and leaves an open window to the closing step', async () => {
+      const { matchId, now, staffId } = await closedWithCoach()
+      const only = await supporter()
+
+      await database.db.insert(coachRatings).values({ grade: 7, matchId, staffId, supporterId: only })
+      await block(only)
+      expect(await recountRatingsOf(database.db, only, new Date(now.getTime() - 5 * day), on)).toBe(0)
+      expect(await averages()).toEqual([])
+
+      await release(only)
+      await closeRatingWindows(database.db, now, on)
+      await block(only)
+      await recountRatingsOf(database.db, only, now, on)
+      expect(await averages()).toEqual([])
+      expect(await recountRatingsOf(database.db, only, now, { ...on, FANS_UITBLINKER: 'off' })).toBe(0)
+    })
+
+    it('keeps the mark of a blocked account that was closed, and not of one that was released first', async () => {
+      const { matchId, now, staffId } = await closedWithCoach()
+      const blocked = await supporter()
+      const fine = await supporter()
+      const released = await supporter()
+
+      await database.db.insert(coachRatings).values([
+        { grade: 1, matchId, staffId, supporterId: blocked },
+        { grade: 7, matchId, staffId, supporterId: fine },
+        { grade: 9, matchId, staffId, supporterId: released },
+      ])
+      await block(blocked)
+      await block(released)
+      await release(released)
+      await closeAccount(database.db, blocked)
+      await closeAccount(database.db, fine)
+      await closeAccount(database.db, released)
+
+      expect(
+        (await database.db.select().from(coachRatings))
+          .map((row) => [row.supporterId, row.blocked, row.grade])
+          .toSorted(),
+      ).toEqual([
+        [null, false, 7],
+        [null, false, 9],
+        [null, true, 1],
+      ])
+      await closeRatingWindows(database.db, now, on)
+      expect(await averages()).toEqual([['8.00', 2]])
+    })
+  })
 })

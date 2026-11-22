@@ -178,15 +178,7 @@ export async function closeRatingWindows(
       continue
     }
 
-    await db.execute(sql`
-      INSERT INTO match_coach_ratings (match_id, staff_id, source, average, rating_count, spread)
-      SELECT r.match_id, r.staff_id, 'fans', ROUND(AVG(r.grade), 2), COUNT(*), ROUND(COALESCE(STDDEV_POP(r.grade), 0), 2)
-      FROM coach_ratings r
-      LEFT JOIN supporters s ON s.id = r.supporter_id
-      WHERE r.match_id = ${match.id} AND r.staff_id = ${match.staffId} AND (r.supporter_id IS NULL OR s.disabled_at IS NULL)
-      GROUP BY r.match_id, r.staff_id
-      ON DUPLICATE KEY UPDATE average = VALUES(average), rating_count = VALUES(rating_count), spread = VALUES(spread)
-    `)
+    await writeCoachAverages(db, match.id, match.staffId)
     closed++
   }
 
@@ -367,9 +359,13 @@ export async function recountRatingsOf(
     .from(playerRatings)
     .innerJoin(matchAppearances, eq(matchAppearances.id, playerRatings.appearanceId))
     .where(eq(playerRatings.supporterId, supporterId))
+  const ratedCoach = await db
+    .selectDistinct({ matchId: coachRatings.matchId, staffId: coachRatings.staffId })
+    .from(coachRatings)
+    .where(eq(coachRatings.supporterId, supporterId))
   let counted = 0
 
-  for (const { matchId } of rated) {
+  for (const matchId of new Set([...rated, ...ratedCoach].map((row) => row.matchId))) {
     const [match] = await db
       .select(columns)
       .from(matches)
@@ -380,21 +376,30 @@ export async function recountRatingsOf(
       continue
     }
 
-    const [stored] = await db
-      .select({ id: matchPlayerRatings.id })
-      .from(matchPlayerRatings)
-      .where(and(eq(matchPlayerRatings.matchId, matchId), eq(matchPlayerRatings.source, 'fans')))
-      .limit(1)
-    const later = stored === undefined ? await scheduledAfter(db, match) : []
+    const later = await scheduledAfter(db, match)
     const over =
-      stored !== undefined ||
       closesAt(
         match,
         later.flatMap((candidate) => (candidate.kickoffAt === null ? [] : [candidate.kickoffAt])),
       ).getTime() <= now.getTime()
+    let recounted = false
 
-    if (over) {
+    if (
+      rated.some((row) => row.matchId === matchId) &&
+      (over || (await hasAverages(db, matchPlayerRatings, matchId)))
+    ) {
       await writeAverages(db, matchId)
+      recounted = true
+    }
+
+    for (const { staffId } of ratedCoach.filter((row) => row.matchId === matchId)) {
+      if (over || (await hasAverages(db, matchCoachRatings, matchId))) {
+        await writeCoachAverages(db, matchId, staffId)
+        recounted = true
+      }
+    }
+
+    if (recounted) {
       counted++
     }
   }
@@ -504,6 +509,17 @@ export async function saveRatings(
   return written ? { answer: 'saved', changed: earlier.size > 0 || earlierCoach !== undefined } : { answer: 'closed' }
 }
 
+/** Whether the averages with the source `fans` of a match are written already. */
+async function hasAverages(db: Database, table: typeof matchCoachRatings | typeof matchPlayerRatings, matchId: number) {
+  const [stored] = await db
+    .select({ id: table.id })
+    .from(table)
+    .where(and(eq(table.matchId, matchId), eq(table.source, 'fans')))
+    .limit(1)
+
+  return stored !== undefined
+}
+
 /** The scheduled matches after a match, the first first, whether or not they have a time. */
 async function scheduledAfter(db: Database, match: Pick<RatingMatch, 'kickoffAt' | 'matchDate'>) {
   const found = await db
@@ -536,6 +552,28 @@ async function writeAverages(db: Database, matchId: number) {
       LEFT JOIN supporters s ON s.id = r.supporter_id
       WHERE a.match_id = ${matchId} AND a.player_id IS NOT NULL AND r.blocked = 0 AND (r.supporter_id IS NULL OR s.disabled_at IS NULL)
       GROUP BY a.match_id, a.player_id
+    `)
+  })
+}
+
+/**
+ * Writes the average with the source `fans` of the head coach of one match, as `writeAverages`
+ * does for the players (issues 1478 and 1479): grades of a blocked account, and of an account
+ * that was blocked when it closed, do not count, and the old row goes first, so a coach whose
+ * grades all dropped out has no average left.
+ */
+async function writeCoachAverages(db: Database, matchId: number, staffId: number) {
+  await db.transaction(async (tx) => {
+    await tx
+      .delete(matchCoachRatings)
+      .where(and(eq(matchCoachRatings.matchId, matchId), eq(matchCoachRatings.source, 'fans')))
+    await tx.execute(sql`
+      INSERT INTO match_coach_ratings (match_id, staff_id, source, average, rating_count, spread)
+      SELECT r.match_id, r.staff_id, 'fans', ROUND(AVG(r.grade), 2), COUNT(*), ROUND(COALESCE(STDDEV_POP(r.grade), 0), 2)
+      FROM coach_ratings r
+      LEFT JOIN supporters s ON s.id = r.supporter_id
+      WHERE r.match_id = ${matchId} AND r.staff_id = ${staffId} AND r.blocked = 0 AND (r.supporter_id IS NULL OR s.disabled_at IS NULL)
+      GROUP BY r.match_id, r.staff_id
     `)
   })
 }
