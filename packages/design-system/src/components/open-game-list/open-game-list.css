@@ -1,0 +1,34 @@
+/*
+ * The games that are open now: a row for each game, the text on the left and the link in a
+ * column of its own on the right. A row has a thin line above it, as the short lines have.
+ */
+
+@layer hf.components {
+  .hf-open-game-list {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+
+  .hf-open-game-list-item {
+    align-items: start;
+    border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
+    column-gap: var(--hf-space-m);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    padding-block: var(--hf-space-s);
+  }
+
+  .hf-open-game-list-item:first-child {
+    border-block-start: 0;
+    padding-block-start: 0;
+  }
+
+  .hf-open-game-list-item:last-child {
+    padding-block-end: 0;
+  }
+
+  .hf-open-game-list-sentence {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+  }
+}
