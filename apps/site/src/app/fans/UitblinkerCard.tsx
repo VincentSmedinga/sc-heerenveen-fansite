@@ -6,6 +6,7 @@ import { reasonOf } from '#src/errors'
 import {
   closingText,
   deadlineTag,
+  findOwnCoachRating,
   findOwnRatings,
   findRatingWindow,
   ratingPath,
@@ -41,7 +42,8 @@ export async function readUitblinkerCard(
     const grades =
       supporter === undefined || window.state !== 'open'
         ? 0
-        : (await findOwnRatings(db, supporter.id, window.match.id)).size
+        : (await findOwnRatings(db, supporter.id, window.match.id)).size +
+          (window.coach !== null && (await findOwnCoachRating(db, supporter.id, window.match.id)) !== undefined ? 1 : 0)
 
     return uitblinkerCardData(
       window,
@@ -94,7 +96,7 @@ export function uitblinkerCardData(
     return {
       button: false,
       tag: { text: 'Gesloten', tone: 'closed' },
-      text: 'Geef de spelers na elke wedstrijd een cijfer. Het venster van de laatste wedstrijd is dicht.',
+      text: 'Geef de spelers en de trainer na elke wedstrijd een cijfer. Het venster van de laatste wedstrijd is dicht.',
     }
   }
 
@@ -106,18 +108,24 @@ export function uitblinkerCardData(
     }
   }
 
+  // The head coach counts as one more to rate, whenever the match has one.
   const players = window.players.length
+  const toRate = players + (window.coach === null ? 0 : 1)
   const takesPart = supporter !== undefined && supporter.createdAt.getTime() < window.startsAt.getTime()
-  const done = takesPart && supporter.grades >= players
+  const done = takesPart && supporter.grades >= toRate
   const open = { text: deadlineTag(window.closesAt, now), tone: 'open' } as const
 
   if (!takesPart) {
-    return { button: false, tag: open, text: 'Geef de spelers van de laatste wedstrijd een cijfer.' }
+    return {
+      button: false,
+      tag: open,
+      text: `Geef de spelers${window.coach === null ? '' : ' en de trainer'} van de laatste wedstrijd een cijfer.`,
+    }
   }
 
   return {
     button: true,
     tag: done ? open : { text: 'Nog te doen', tone: 'todo' },
-    text: `Geef ${players} spelers een cijfer. Kan tot ${closingText(window.closesAt)}.`,
+    text: `Geef ${players} spelers${window.coach === null ? '' : ' en de trainer'} een cijfer. Kan tot ${closingText(window.closesAt)}.`,
   }
 }

@@ -7,7 +7,7 @@ import { notFound, redirect } from 'next/navigation'
 
 import { getDatabase } from '#src/database'
 import { logInPaths } from '#src/fans/log-in'
-import { findOwnRatings, findRatingWindow } from '#src/fans/rating'
+import { findOwnCoachRating, findOwnRatings, findRatingWindow } from '#src/fans/rating'
 import { currentSupporter } from '#src/fans/require-supporter'
 import { pageAreas } from '#src/page-areas'
 
@@ -63,7 +63,7 @@ export default async function RatingPage({
   } else if (supporter === undefined) {
     card = (
       <>
-        <OpenCard closesAt={window.closesAt} match={window.match} now={now}>
+        <OpenCard closesAt={window.closesAt} match={window.match} now={now} withCoach={window.coach !== null}>
           {null}
         </OpenCard>
         <JoinCard />
@@ -71,13 +71,16 @@ export default async function RatingPage({
     )
   } else if (supporter.createdAt.getTime() >= window.startsAt.getTime()) {
     card = (
-      <OpenCard closesAt={window.closesAt} match={window.match} now={now}>
+      <OpenCard closesAt={window.closesAt} match={window.match} now={now} withCoach={window.coach !== null}>
         <LateNotice />
       </OpenCard>
     )
   } else {
     const grades = await findOwnRatings(db, supporter.id, window.match.id)
-    const complete = window.players.every((player) => grades.has(player.appearanceId))
+    const coachGrade = window.coach === null ? undefined : await findOwnCoachRating(db, supporter.id, window.match.id)
+    const complete =
+      window.players.every((player) => grades.has(player.appearanceId)) &&
+      (window.coach === null || coachGrade !== undefined)
 
     const saved = complete && wijzigen !== '1'
 
@@ -87,11 +90,20 @@ export default async function RatingPage({
         heading={saved ? 'Je cijfers staan' : 'Geef je cijfers'}
         match={window.match}
         now={now}
+        withCoach={window.coach !== null}
       >
         {saved ? (
-          <SavedView closesAt={window.closesAt} grades={grades} players={window.players} />
+          <SavedView
+            closesAt={window.closesAt}
+            coach={window.coach}
+            {...(coachGrade === undefined ? {} : { coachGrade })}
+            grades={grades}
+            players={window.players}
+          />
         ) : (
           <RatingForm
+            coach={window.coach}
+            {...(coachGrade === undefined ? {} : { coachSaved: String(coachGrade) })}
             matchId={window.match.id}
             players={window.players}
             saved={Object.fromEntries([...grades].map(([appearanceId, grade]) => [appearanceId, String(grade)]))}
@@ -105,7 +117,9 @@ export default async function RatingPage({
     <Page.Main areas={areas}>
       <Page.Cell area="head">
         <Heading level={1}>Uitblinker</Heading>
-        <Text appearance="intro">Geef de spelers van de laatste wedstrijd van sc Heerenveen een cijfer.</Text>
+        <Text appearance="intro">
+          Geef de spelers en de trainer van de laatste wedstrijd van sc Heerenveen een cijfer.
+        </Text>
       </Page.Cell>
       <Page.Cell area="rate">{card}</Page.Cell>
       <Page.Section area="side" aria-label="Uitleg van het spel">

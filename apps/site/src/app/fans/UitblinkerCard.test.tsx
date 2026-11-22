@@ -8,13 +8,14 @@ import { UitblinkerCard, uitblinkerCardData } from './UitblinkerCard'
 const now = new Date('2026-11-22T12:00:00Z')
 const match = { id: 1 } as RatingMatch
 const players = Array.from({ length: 14 }, (_, index) => ({ appearanceId: index + 1 }) as RatingPlayer)
-const open: RatingWindow = {
+const open = {
   closesAt: new Date('2026-11-26T19:00:00Z'),
+  coach: null,
   match,
   players,
   startsAt: new Date('2026-11-21T15:45:00Z'),
   state: 'open',
-}
+} as const satisfies RatingWindow
 const before = new Date('2026-10-01T00:00:00Z')
 
 describe('the card of the Uitblinker on Fans', () => {
@@ -31,6 +32,19 @@ describe('the card of the Uitblinker on Fans', () => {
     expect(data.tag).toEqual({ text: 'Nog te doen', tone: 'todo' })
     expect(data.text).toBe('Geef 14 spelers een cijfer. Kan tot donderdag 26 november, 20.00 uur.')
     expect(data.button).toBe(true)
+  })
+
+  it('counts the head coach as one more to rate, and is green only when he has a grade too', () => {
+    const withCoach = { ...open, coach: { name: 'Robin Veldman', staffId: 1 } }
+
+    expect(uitblinkerCardData(withCoach, { createdAt: before, grades: 0 }, now).text).toBe(
+      'Geef 14 spelers en de trainer een cijfer. Kan tot donderdag 26 november, 20.00 uur.',
+    )
+    expect(uitblinkerCardData(withCoach, { createdAt: before, grades: 14 }, now).tag.tone).toBe('todo')
+    expect(uitblinkerCardData(withCoach, { createdAt: before, grades: 15 }, now).tag.tone).toBe('open')
+    expect(uitblinkerCardData(withCoach, undefined, now).text).toBe(
+      'Geef de spelers en de trainer van de laatste wedstrijd een cijfer.',
+    )
   })
 
   it('is green again for a supporter who graded every player', () => {

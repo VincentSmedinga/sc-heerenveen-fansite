@@ -60,7 +60,7 @@ export type GamePlace = {
  */
 const kept: Partial<Record<GamePlace['part'], Pick<GamePlace, 'load' | 'tables'>>> = {
   prognose: { load: predictionData, tables: ['predictions'] },
-  uitblinker: { load: ratingData, tables: ['player_ratings'] },
+  uitblinker: { load: ratingData, tables: ['coach_ratings', 'player_ratings'] },
 }
 
 /** The places of the games, in the order of the bar of games. */

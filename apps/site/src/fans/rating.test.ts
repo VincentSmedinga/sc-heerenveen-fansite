@@ -115,4 +115,34 @@ describe('the words of the page', () => {
     )
     expect(nextDayText({ kickoffAt: null, matchDate: '2026-11-28' })).toBe('zaterdag 28 november')
   })
+
+  it('reads the grade of the head coach with those of the players, and makes a gap of him like one of a player', () => {
+    const entries = new Map<number, unknown>(players.map((player) => [player.appearanceId, '5']))
+    const given = parseRatings(entries, players, { entry: ' 8 ', name: 'Robin Veldman' })
+
+    expect(given.errors).toBeUndefined()
+    expect(given.coachGrade).toBe(8)
+    expect(given.coachValue).toBe('8')
+
+    const missing = parseRatings(entries, players, { entry: null, name: 'Robin Veldman' })
+
+    expect(missing.grades).toBeUndefined()
+    expect(missing.coachError).toBe('Geef Robin Veldman een cijfer.')
+    expect(missing.values).toEqual({ 11: '5', 12: '5', 13: '5' })
+
+    for (const entry of ['0', '11', '5.5', 'tien']) {
+      expect(parseRatings(entries, players, { entry, name: 'Robin Veldman' }).coachError).toBeDefined()
+    }
+  })
+
+  it('keeps the grade of the coach when a player has a gap, and asks nothing of a match without a coach', () => {
+    const gap = parseRatings(new Map<number, unknown>([[11, '5']]), players, { entry: '9', name: 'Robin Veldman' })
+
+    expect(gap.errors).toBeDefined()
+    expect(gap.coachValue).toBe('9')
+    expect(gap.coachError).toBeUndefined()
+    expect(parseRatings(new Map<number, unknown>(players.map((p) => [p.appearanceId, '5'])), players).coachGrade).toBe(
+      undefined,
+    )
+  })
 })

@@ -19,8 +19,18 @@ const players: RatingPlayer[] = [
 ]
 const before: RatingState = { errors: {}, values: {} }
 
-const render = (saved: Record<number, string> = {}) =>
-  renderToStaticMarkup(<RatingForm matchId={7} players={players} saved={saved} />)
+const coach = { name: 'Robin Veldman', staffId: 3 }
+
+const render = (saved: Record<number, string> = {}, withCoach: null | typeof coach = null, coachSaved?: string) =>
+  renderToStaticMarkup(
+    <RatingForm
+      coach={withCoach}
+      {...(coachSaved === undefined ? {} : { coachSaved })}
+      matchId={7}
+      players={players}
+      saved={saved}
+    />,
+  )
 
 beforeEach(() => {
   useActionState.mockReset()
@@ -84,6 +94,44 @@ describe('the form of the grades', () => {
     expect(html.match(/checked/g)).toHaveLength(1)
     // The first button of a group has the id the link goes to.
     expect(html).toContain('id="cijfer-11"')
+  })
+
+  it('has no group for a coach when the match has none', () => {
+    expect(render()).not.toContain('Trainer')
+    expect(render().match(/<fieldset/g)).toHaveLength(3)
+  })
+
+  it('has the head coach as the last group, named after him, with "Trainer" under his name', () => {
+    const html = render({}, coach)
+
+    expect(html.match(/<fieldset/g)).toHaveLength(4)
+    expect(html.match(/type="radio"/g)).toHaveLength(40)
+    expect(html).toContain('<legend>Robin Veldman</legend>')
+    expect(html).toContain('aria-label="Cijfer voor trainer Robin Veldman"')
+    expect(html).toContain('Trainer')
+    expect(html.indexOf('Rik Back')).toBeLessThan(html.indexOf('Robin Veldman'))
+    expect(html.indexOf('Robin Veldman')).toBeLessThan(html.indexOf('Cijfers opslaan'))
+    expect(html).toContain('name="cijfer-trainer"')
+  })
+
+  it('shows the grade that was stored for the coach', () => {
+    useActionState.mockReturnValue([{ coachValue: '7', errors: {}, values: {} }, vi.fn()])
+
+    expect(render({}, coach, '7').match(/checked/g)).toHaveLength(1)
+  })
+
+  it('names the coach without a grade in the summary, like a player, with the same red buttons', () => {
+    useActionState.mockReturnValue([
+      { coachError: 'Geef Robin Veldman een cijfer.', errors: { 11: 'Geef Luca Oyen een cijfer.' }, values: {} },
+      vi.fn(),
+    ])
+
+    const html = render({}, coach)
+
+    expect(html).toMatch(/<h3[^>]*>Nog 2 cijfers<\/h3>/)
+    expect(html).toContain('<a href="#cijfer-trainer">Geef Robin Veldman een cijfer.</a>')
+    expect(html.match(/data-invalid/g)).toHaveLength(2)
+    expect(html).toContain('id="cijfer-trainer"')
   })
 
   it('has the summary only when there is a gap, and a notice that is empty before', () => {

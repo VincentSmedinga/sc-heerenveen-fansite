@@ -3109,6 +3109,46 @@ export const playerRatings = mysqlTable(
 
 export type PlayerRating = typeof playerRatings.$inferSelect
 
+/**
+ * The rating that a supporter gives the head coach of the last match in the game Uitblinker
+ * (issue 1478): one grade from 1 to 10 for one match, by one supporter. `staff_id` is the head
+ * coach of that match when the grade was given. A supporter has one row for each match, which
+ * they can change until the window closes. `supporter_id` is emptied when the account is closed
+ * (`ON DELETE SET NULL`), so the grade stays as an anonymous grade. When the window closes, the
+ * average goes to `match_coach_ratings` with the source `fans`. Times are UTC.
+ */
+export const coachRatings = mysqlTable(
+  'coach_ratings',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    supporterId: int('supporter_id', { unsigned: true }).references(() => supporters.id, { onDelete: 'set null' }),
+    matchId: int('match_id', { unsigned: true })
+      .notNull()
+      .references(() => matches.id, { onDelete: 'cascade' }),
+    staffId: int('staff_id', { unsigned: true })
+      .notNull()
+      .references(() => staff.id, { onDelete: 'cascade' }),
+    grade: tinyint('grade', { unsigned: true }).notNull(),
+    createdAt: datetime('created_at')
+      .notNull()
+      .default(sql`(UTC_TIMESTAMP())`),
+    updatedAt: datetime('updated_at')
+      .notNull()
+      .default(sql`(UTC_TIMESTAMP())`),
+  },
+  (table) => [
+    unique('coach_ratings_supporter_id_match_id_unique').on(table.supporterId, table.matchId),
+    index('coach_ratings_match_id_idx').on(table.matchId),
+    index('coach_ratings_staff_id_idx').on(table.staffId),
+    check(
+      'coach_ratings_grade_in_range',
+      sql`${table.grade} between ${sql.raw(String(ratingLimits.minGrade))} and ${sql.raw(String(ratingLimits.maxGrade))}`,
+    ),
+  ],
+)
+
+export type CoachRating = typeof coachRatings.$inferSelect
+
 /** Where the counts of predictions come from: the old fansite, 2001 to 2007 (issue 1457). */
 export const predictionCountSources = ['oude-fansite'] as const
 

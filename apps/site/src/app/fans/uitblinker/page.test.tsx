@@ -7,8 +7,9 @@ import type { RatingMatch, RatingPlayer, RatingWindow } from '#src/fans/rating'
 
 import RatingPage from './page'
 
-const { currentSupporter, findOwnRatings, findRatingWindow, useActionState } = vi.hoisted(() => ({
+const { currentSupporter, findOwnCoachRating, findOwnRatings, findRatingWindow, useActionState } = vi.hoisted(() => ({
   currentSupporter: vi.fn(),
+  findOwnCoachRating: vi.fn(),
   findOwnRatings: vi.fn(),
   findRatingWindow: vi.fn(),
   useActionState: vi.fn(),
@@ -20,6 +21,7 @@ vi.mock('#src/database', () => ({ getDatabase: () => ({ db: {} }) }))
 vi.mock('#src/fans/require-supporter', () => ({ currentSupporter }))
 vi.mock('#src/fans/rating', async (importOriginal) => ({
   ...(await importOriginal<object>()),
+  findOwnCoachRating,
   findOwnRatings,
   findRatingWindow,
 }))
@@ -68,7 +70,8 @@ const base = {
   next,
   startsAt: match.kickoffAt as Date,
 }
-const open: RatingWindow = { ...base, players, state: 'open' }
+const open: RatingWindow = { ...base, coach: null, players, state: 'open' }
+const coach = { name: 'Robin Veldman', staffId: 3 }
 const supporter = { createdAt: new Date('2026-10-01T00:00:00Z'), disabledAt: null, id: 5 }
 
 async function render(search: Record<string, string> = {}) {
@@ -80,6 +83,7 @@ beforeEach(() => {
   vi.stubEnv('FANS_UITBLINKER', 'on')
   currentSupporter.mockResolvedValue(undefined)
   findOwnRatings.mockResolvedValue(new Map())
+  findOwnCoachRating.mockResolvedValue(undefined)
   findRatingWindow.mockResolvedValue(open)
   useActionState.mockImplementation((_action: unknown, state: unknown) => [state, vi.fn()])
 })
@@ -179,6 +183,41 @@ describe('the page of the Uitblinker', () => {
     expect(html).not.toContain('Jouw cijfers')
   })
 
+  it('adds the coach to the form, and shows the saved view only once he has a grade too', async () => {
+    currentSupporter.mockResolvedValue(supporter)
+    findRatingWindow.mockResolvedValue({ ...open, coach })
+    findOwnRatings.mockResolvedValue(
+      new Map([
+        [11, 6],
+        [12, 8],
+      ]),
+    )
+
+    const form = await render()
+
+    expect(form.match(/type="radio"/g)).toHaveLength(30)
+    expect(form).toContain('Robin Veldman')
+    expect(form).toContain('Cijfers opslaan')
+    expect(form).toContain('en de trainer')
+
+    findOwnCoachRating.mockResolvedValue(9)
+
+    const saved = await render()
+
+    expect(saved).toContain('Robin Veldman (trainer)')
+    expect(saved).toContain('Je cijfers staan')
+    expect(saved).not.toContain('type="radio"')
+  })
+
+  it('has no group for a coach when the match has none', async () => {
+    currentSupporter.mockResolvedValue(supporter)
+
+    const html = await render()
+
+    expect(html).not.toContain('Trainer')
+    expect(findOwnCoachRating).not.toHaveBeenCalled()
+  })
+
   it('has no form and the tag "Nog niet open" while the report is not finished', async () => {
     currentSupporter.mockResolvedValue(supporter)
     findRatingWindow.mockResolvedValue({ ...base, state: 'waiting' })
@@ -192,7 +231,7 @@ describe('the page of the Uitblinker', () => {
 
   it('has no form and the card "Volgende wedstrijd" when the window is closed', async () => {
     currentSupporter.mockResolvedValue(supporter)
-    findRatingWindow.mockResolvedValue({ ...base, players, state: 'closed' })
+    findRatingWindow.mockResolvedValue({ ...base, coach: null, players, state: 'closed' })
 
     const html = await render()
 
