@@ -10,6 +10,8 @@ import type {
   MatchTimelineScore,
 } from '@fansite/design-system'
 
+import { type MatchReport, minutesPlayed } from '@fansite/shared/match-report'
+
 // What the page of a match shows, worked out from plain data: the data of the report with the
 // names of the players, and nothing of the database. The page of a match builds it from a
 // stored report (`matchPageDataOf` in report-view.ts), and the preview in the admin (#851)
@@ -330,18 +332,39 @@ const added = (stoppageMinutes: null | number) => (stoppageMinutes === null ? un
  * played, his goals and his heaviest card, and the substitutes who came on.
  */
 function teamOf(data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlayer>, ours: boolean) {
-  const length = data.extraTime ? 120 : 90
   const players = data.players.filter((player) => player.ours === ours)
-  const minutesOf = (player: MatchPagePlayer) => {
-    const entered = data.substitutions.find((substitution) => substitution.inId === player.id)
-    const off = data.substitutions.find((substitution) => substitution.outId === player.id)
-    const sentOff = data.cards.find((card) => card.playerId === player.id && card.kind !== 'geel')
-    const from = player.starter ? 0 : (entered?.minute ?? length)
-    const to = Math.min(off?.minute ?? length, sentOff?.minute ?? length)
-
-    // Somebody who came on in added time of the last minute still played a minute.
-    return { from, off: off?.minute, played: Math.max(1, to - from) }
+  // The minutes follow the rules of the report form, in `@fansite/shared`. A page shows the
+  // minutes of a report that is not finished too, so only the lists of the page go in.
+  const report: MatchReport = {
+    appearances: data.players.map((player) => ({
+      captain: player.captain,
+      id: player.id,
+      name: player.name.surname,
+      ours: player.ours,
+      shirtNumber: player.shirtNumber,
+      starter: player.starter,
+    })),
+    cards: data.cards.map((card) => ({
+      appearanceId: card.playerId,
+      kind: card.kind,
+      minute: card.minute,
+      stoppageMinutes: card.stoppageMinutes,
+    })),
+    goals: [],
+    incidents: [],
+    opponentComplete: data.opponentComplete,
+    status: data.complete ? 'klaar' : 'bezig',
+    substitutions: data.substitutions.map((substitution) => ({
+      inId: substitution.inId,
+      minute: substitution.minute,
+      outId: substitution.outId,
+      stoppageMinutes: substitution.stoppageMinutes,
+    })),
   }
+  const minutesOf = (player: MatchPagePlayer) => ({
+    off: data.substitutions.find((substitution) => substitution.outId === player.id)?.minute,
+    played: Math.max(1, minutesPlayed(report, data, player.id)),
+  })
   const goalsOf = (player: MatchPagePlayer) =>
     data.goals
       .filter((goal) => goal.playerId === player.id)

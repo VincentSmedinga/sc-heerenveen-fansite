@@ -472,3 +472,49 @@ describe('a goal and a yellow card without a minute', () => {
     expect(theirs.find((one) => one.card?.kind === 'red-card')?.card?.minute).toBe(90)
   })
 })
+
+describe('the minutes of a player', () => {
+  // The way the page worked out the minutes before it used the rules of the report form.
+  const oldMinutes = (page: MatchPageData, id: number) => {
+    const length = page.extraTime ? 120 : 90
+    const starter = page.players.find((one) => one.id === id)?.starter === true
+    const entered = page.substitutions.find((substitution) => substitution.inId === id)
+    const off = page.substitutions.find((substitution) => substitution.outId === id)
+    const sentOff = page.cards.find((card) => card.playerId === id && card.kind !== 'geel')
+
+    return Math.max(
+      1,
+      Math.min(off?.minute ?? length, sentOff?.minute ?? length) - (starter ? 0 : (entered?.minute ?? length)),
+    )
+  }
+  const lineUp = (page: MatchPageData) => {
+    const result = buildMatchPage(page)
+    const shown = [...result.pitch.ours.players, ...(result.pitch.opponent?.players ?? [])]
+
+    return [...shown.map((one) => one.minutesPlayed), ...result.substitutes.ours.map((one) => one.minutesPlayed)]
+  }
+  const expected = (page: MatchPageData) =>
+    [
+      ...page.players.filter((one) => one.starter),
+      ...page.substitutions.flatMap((one) => page.players.filter((other) => other.id === one.inId && other.ours)),
+    ].map((one) => oldMinutes(page, one.id))
+
+  it('stays the same as before for a handful of matches', () => {
+    const base = cup()
+    const matches: MatchPageData[] = [
+      data(),
+      base,
+      { ...base, extraTime: false, substitutions: [{ inId: 3, minute: 80, outId: 2, stoppageMinutes: null }] },
+      {
+        ...base,
+        cards: [{ kind: 'rood', minute: 70, playerId: 1, stoppageMinutes: null }],
+        substitutions: [{ inId: 3, minute: 45, outId: 2, stoppageMinutes: 2 }],
+      },
+      { ...base, substitutions: [{ inId: 3, minute: 90, outId: 2, stoppageMinutes: 3 }] },
+    ]
+
+    for (const page of matches) {
+      expect(lineUp(page).toSorted()).toEqual(expected(page).toSorted())
+    }
+  })
+})
