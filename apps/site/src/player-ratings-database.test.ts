@@ -96,6 +96,32 @@ describe('reading the ratings of a person', () => {
     ])
   })
 
+  it('gives the Uitblinker to the player with more ratings when the averages are equal', async () => {
+    const him = await person('Verzonnen Linksbuiten', ['2026/27'])
+    const other = await person('Verzonnen Rechtsback', ['2026/27'])
+    const fewer = await match('2026/27', 11)
+    const more = await match('2026/27', 12)
+    // A season shows from three matches.
+    const alone = await match('2026/27', 13)
+
+    // Equal averages: he has fewer ratings in the first match and more in the second.
+    await rate(fewer, him.ids['2026/27']!, '7.50', 10)
+    await rate(fewer, other.ids['2026/27']!, '7.50', 20)
+    await rate(more, him.ids['2026/27']!, '7.50', 20)
+    await rate(more, other.ids['2026/27']!, '7.50', 10)
+    await rate(alone, him.ids['2026/27']!, '7.00', 10)
+
+    const ratings = await readPlayerRatings(him.personId)
+
+    expect(ratings?.last.map(({ id, winner }) => [id, winner]).toSorted((a, b) => Number(a[0]) - Number(b[0]))).toEqual(
+      [
+        [fewer, false],
+        [more, true],
+        [alone, true],
+      ],
+    )
+  })
+
   it('finds the season ratings of the old seasons and nothing for a player without any', async () => {
     const him = await person('Verzonnen Oud', ['2000/01'])
     const nobody = await person('Verzonnen Niemand', ['2026/27'])

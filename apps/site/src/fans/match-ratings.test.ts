@@ -24,6 +24,7 @@ import {
   loadRunningCoachRating,
   loadRunningRatings,
   loadSeasonWinners,
+  orderRatings,
   type RatedPlayer,
   resultLine,
   supportersIn,
@@ -111,8 +112,12 @@ describe('the Uitblinker of a match', () => {
     expect(uitblinkerOf([rated('A', 7.1, 20), rated('B', 8.4, 12), rated('C', 9.5, 4)])?.name).toBe('B')
   })
 
-  it('goes to the player with fewer ratings when the average is equal', () => {
-    expect(uitblinkerOf([rated('A', 7.5, 30), rated('B', 7.5, 12), rated('C', 7.5, 18)])?.name).toBe('B')
+  it('goes to the player with more ratings when the average is equal', () => {
+    expect(uitblinkerOf([rated('A', 7.5, 12), rated('B', 7.5, 30), rated('C', 7.5, 18)])?.name).toBe('B')
+  })
+
+  it('goes to the first of the line-up when the average and the count are equal', () => {
+    expect(uitblinkerOf([rated('A', 7.5, 12), rated('B', 7.5, 12)])?.name).toBe('A')
   })
 
   it('is nobody when no player has five ratings', () => {
@@ -124,12 +129,48 @@ describe('the Uitblinker of a match', () => {
   })
 })
 
+describe('the order of the table of a match', () => {
+  const names = (list: readonly RatedPlayer[]) => orderRatings(list).map((player) => player.name)
+
+  it('puts the highest average first, whatever the order of the line-up', () => {
+    expect(names([rated('A', 6.4, 20), rated('B', 8.2, 20), rated('C', 7.1, 20)])).toEqual(['B', 'C', 'A'])
+  })
+
+  it('puts the player with more ratings first when the average is equal, and then keeps the line-up', () => {
+    expect(names([rated('A', 7, 12), rated('B', 7, 30), rated('C', 7, 12), rated('D', 7, 30)])).toEqual([
+      'B',
+      'D',
+      'A',
+      'C',
+    ])
+  })
+
+  it('compares the averages to two decimals', () => {
+    expect(names([rated('A', 7.001, 12), rated('B', 7.004, 30)])).toEqual(['B', 'A'])
+  })
+
+  it('puts the players with fewer than five ratings under the others, in the order of the line-up', () => {
+    expect(names([rated('A', 9.5, 4), rated('B', 6, 20), rated('C', 9, 1), rated('D', 7, 20)])).toEqual([
+      'D',
+      'B',
+      'A',
+      'C',
+    ])
+  })
+
+  it('has the Uitblinker as its first player', () => {
+    const list = [rated('A', 6, 40), rated('B', 8, 9), rated('C', 8, 25)]
+
+    expect(orderRatings(list)[0]).toBe(uitblinkerOf(list))
+  })
+})
+
 describe('the ratings of an old match', () => {
   it('has none for a match without ratings', async () => {
     expect(await loadOldMatchRatings(database.db, matchId)).toBeUndefined()
   })
 
-  it('lists the players in the order of the line-up, with the Uitblinker', async () => {
+  it('lists the players by average, the highest first, with the Uitblinker', async () => {
     const first = await addPlayer('Ruben Zwart', { inLineUp: true })
     const second = await addPlayer('Anton Beets', { inLineUp: true })
 
@@ -139,18 +180,41 @@ describe('the ratings of an old match', () => {
     const result = await loadOldMatchRatings(database.db, matchId)
 
     expect(result?.players.map((player) => [player.name, player.average, player.count])).toEqual([
-      ['Ruben Zwart', 6.5, 40],
       ['Anton Beets', 8.2, 31],
+      ['Ruben Zwart', 6.5, 40],
     ])
     expect(result?.winner?.name).toBe('Anton Beets')
+    expect(result?.players[0]).toBe(result?.winner)
   })
 
-  it('keeps a player who is no longer in the squad, after those in the line-up', async () => {
+  it('puts equal averages in the order of the count and then of the line-up, and thin players last', async () => {
+    const first = await addPlayer('Ruben Zwart', { inLineUp: true })
+    const second = await addPlayer('Anton Beets', { inLineUp: true })
+    const third = await addPlayer('Mark Visser', { inLineUp: true })
+    const fourth = await addPlayer('Piet Dijk', { inLineUp: true })
+
+    await rate(first, '7.00', 12)
+    await rate(second, '7.00', 12)
+    await rate(third, '7.00', 30)
+    await rate(fourth, '9.50', 3)
+
+    const result = await loadOldMatchRatings(database.db, matchId)
+
+    expect(result?.players.map((player) => player.name)).toEqual([
+      'Mark Visser',
+      'Ruben Zwart',
+      'Anton Beets',
+      'Piet Dijk',
+    ])
+    expect(result?.winner?.name).toBe('Mark Visser')
+  })
+
+  it('keeps a player who is no longer in the squad after those in the line-up when they are equal', async () => {
     const away = await addPlayer('Vera Oud', { inLineUp: false, inSquad: false })
     const here = await addPlayer('Ruben Zwart', { inLineUp: true })
 
     await rate(away, '7.00', 9)
-    await rate(here, '6.00', 9)
+    await rate(here, '7.00', 9)
 
     const result = await loadOldMatchRatings(database.db, matchId)
 
@@ -178,7 +242,7 @@ describe('the ratings of supporters', () => {
     expect(await loadMatchRatings(database.db, matchId, 'fans')).toBeUndefined()
   })
 
-  it('lists the averages of the source fans in the order of the line-up, with the count of supporters', async () => {
+  it('lists the averages of the source fans by average, with the count of supporters', async () => {
     const first = await addPlayer('Ruben Zwart', { inLineUp: true })
     const second = await addPlayer('Anton Beets', { inLineUp: true })
 
@@ -189,8 +253,8 @@ describe('the ratings of supporters', () => {
     const result = await loadMatchRatings(database.db, matchId, 'fans')
 
     expect(result?.players.map((player) => [player.name, player.average, player.count])).toEqual([
-      ['Ruben Zwart', 6.5, 31],
       ['Anton Beets', 8.2, 29],
+      ['Ruben Zwart', 6.5, 31],
     ])
     expect(result?.supporters).toBe(31)
     expect(result?.winner?.name).toBe('Anton Beets')
@@ -316,7 +380,7 @@ describe('the Uitblinkers of a season', () => {
     const winners = await loadSeasonWinners(database.db, '2026/27')
 
     expect(winners.map((winner) => [winner.name, winner.average])).toEqual([
-      ['Andries Noppert', 7.8],
+      ['Dylan Vente', 7.8],
       ['Dirk Proper', 7.1],
     ])
   })

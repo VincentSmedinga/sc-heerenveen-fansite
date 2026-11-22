@@ -7518,6 +7518,7 @@
   Bij gelijk gemiddelde wint de speler met minder cijfers.
 - **Waarom:** dit is de regel van de oude Fansite, en een uitblinker op twee cijfers zegt niets.
 - **Alternatieven:** bij gelijk gemiddelde twee uitblinkers; een andere drempel.
+- **Later:** zie _De tabel van de Uitblinker staat op gemiddelde, de beste bovenaan_ (22 november 2026): bij een gelijk gemiddelde wint de speler met meer cijfers, en de tabel staat op gemiddelde in plaats van in de volgorde van de opstelling.
 
 - **Datum:** 20 november 2026
 - **Besluit:** de wedstrijdpagina krijgt een kaart per spel van supporters (Uitblinker, Prognose, Fjouwer), elk met als meta "Van supporters", en geen kaart "Fans" voor alles samen.
@@ -7617,7 +7618,7 @@
   Zolang het venster openstaat, zegt de kaart hoeveel supporters al cijfers gaven en wanneer de uitslag komt ("De uitslag staat hier vanaf donderdag 26 november, 20.00 uur").
   Er staat een link "Geef je cijfers", en er zijn geen gemiddelden en geen zegel.
   Zonder cijfers is er geen kaart.
-  Is het venster dicht, dan staat er de zegel "Uitblinker van de wedstrijd", dezelfde tabel als bij een oude wedstrijd (Speler, Gem, Cijfers, de regels van vijf cijfers en minder cijfers bij een gelijk gemiddelde) en "31 supporters gaven cijfers.".
+  Is het venster dicht, dan staat er de zegel "Uitblinker van de wedstrijd", dezelfde tabel als bij een oude wedstrijd (Speler, Gem, Cijfers, de regels van vijf cijfers en van het aantal cijfers bij een gelijk gemiddelde; sinds 22 november 2026 meer cijfers eerst, zie _De tabel van de Uitblinker staat op gemiddelde, de beste bovenaan_) en "31 supporters gaven cijfers.".
   Gaven er minder dan vijf supporters cijfers, dan staat alleen het aantal.
   Een nieuwe wedstrijd heeft geen bronregel: de cijfers zijn die van onze eigen supporters.
   De kaart leest de gemiddelden van de bron `fans` uit `match_player_ratings`, die de import schrijft als het venster sluit, en het aantal van het venster één keer per minuut; nooit losse cijfers.
@@ -7638,7 +7639,8 @@
 - **Besluit:** de kaart "Cijfers van supporters" staat op Spelers › Cijfers onder de kaarten die er al zijn, in de brede kolom, met een eigen seizoenkeuze die `?seizoen=` op dezelfde pagina gebruikt.
   Die keuze loopt over de seizoenen met cijfers en het lopende seizoen, ook voor seizoenen van vóór de wedstrijden in de database, en volgt het seizoen van de pagina zolang je niets kiest.
   De tabel heeft de kolommen #, Speler, W en Gem van hoog naar laag op seizoencijfer, met dezelfde regel als op de spelerspagina: het gemiddelde van alle cijfers van het seizoen, vanaf drie wedstrijden met minstens vijf cijfers.
-  Bij een gelijk gemiddelde gaat de speler met minder cijfers voor, zoals bij de uitblinker van een wedstrijd, en gelijke spelers delen een plaats.
+  Bij een gelijk gemiddelde gaat de speler met minder cijfers voor, en gelijke spelers delen een plaats.
+  Dat is de regel van de ranglijst, die ook na de beslissing van 22 november 2026 over de uitblinker van een wedstrijd (meer cijfers eerst) zo blijft.
   De seizoenen 1998/99 tot 2000/01 staan er met hun seizoencijfer en een streepje in W, ook zonder de drempel.
   Heeft het gekozen seizoen geen speler die telt, dan staat er "Dit seizoen zijn er nog geen cijfers." in plaats van de tabel.
   Onder de tabel staat de bron van de oude Fansite bij een oud seizoen, en altijd de link "Uitblinker van het jaar" naar `/fans/uitblinker/van-het-jaar`, ook vanaf de zachte kaart "Uitblinkers 2026/27" op `/fans/uitblinker`.
@@ -7733,3 +7735,20 @@
 - **Waarom:** zo krijgt de trainer dezelfde behandeling als de spelers, zonder dat de prijs voor de uitblinker bij hem terechtkomt, en de blokkade houdt het gemiddelde schoon voor wie ook de trainer een cijfer gaf.
 - **Alternatieven:** een eigen kaart voor de trainer; de trainer bij de spelers in de tabel zetten.
 - **Let op:** het seizoencijfer van de trainer en een ranglijst van trainers zijn er niet; daar is geen ontwerp voor.
+
+## De tabel van de Uitblinker staat op gemiddelde, de beste bovenaan
+
+- **Datum:** 22 november 2026
+- **Besluit:** de tabel met gemiddelden staat op gemiddelde, het hoogste eerst.
+  Bij een gelijk gemiddelde gaat de speler met meer cijfers voor, ook bij het kiezen van de uitblinker.
+  Spelers met minder dan vijf cijfers staan onder de anderen in de volgorde van de opstelling, en de trainer blijft de laatste regel.
+  Dezelfde volgorde geldt voor de tussenstand na het opslaan.
+- **Waarom:** een bezoeker zoekt de beste spelers en leest de tabel van boven naar beneden.
+  Een gemiddelde met meer cijfers heeft meer steun.
+  Zo staat de uitblinker altijd bovenaan.
+- **Alternatieven:** de volgorde van de opstelling houden; bij een gelijk gemiddelde de speler met minder cijfers voorrang geven (de regel uit #1467, de oude regel van de Fansite); de tussenstand in de volgorde van de opstelling laten.
+- **Let op:** `orderRatings` en `uitblinkerOf` in `apps/site/src/fans/match-ratings.ts` zijn de enige plek van deze regel.
+  De tabel op de wedstrijdpagina (oud en nieuw), de gesloten wedstrijd en de tussenstand op `/fans/uitblinker`, de lijst met uitblinkers van het seizoen en het label "Uitblinker" bij de laatste wedstrijden op de pagina van een speler gebruiken ze.
+  Een gelijk gemiddelde met een gelijk aantal cijfers beslist de volgorde van de opstelling, en op de pagina van een speler dezelfde volgorde.
+  Het formulier blijft alfabetisch, en de ranglijst van het seizoen en de uitblinker van het jaar houden hun eigen regel.
+  De gemiddelden in de database veranderen niet, alleen de uitblinker bij een gelijk gemiddelde met een verschillend aantal cijfers.
