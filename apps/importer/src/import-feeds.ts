@@ -9,6 +9,7 @@ import { connect } from '@fansite/db/client'
 import { lockNameFor, withLock } from '@fansite/db/lock'
 import { mailConflicts } from '@fansite/db/match-conflict-mail'
 import { updatePlayerAddresses } from '@fansite/db/person-slugs'
+import { closeRatingWindows, describeClosedWindows } from '@fansite/db/rating-window'
 import { discussions, feeds, importRuns, items, leagueResults, matches, sources } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { describeReminders, sendReminders } from '@fansite/db/send-reminders'
@@ -392,6 +393,14 @@ export async function runImport(
         (error: unknown) => [`Reminders: warning, not sent: ${describeError(error)}`],
       )
 
+      // The window of the game Uitblinker (#1470): when it is over, the averages of the ratings
+      // go to the table the pages read. Every run, since the window closes at a kick-off. A
+      // failure is a warning, not a failed import.
+      const ratingLines = await closeRatingWindows(db, clock(), supporterOptions.env).then(
+        describeClosedWindows,
+        (error: unknown) => [`Uitblinker: warning, windows not closed: ${describeError(error)}`],
+      )
+
       // Before any season is read: the clubs are right whether or not a season can be read. A
       // failure is a warning and no reason to stop.
       const fetcher = makeFetcher(robotsStoreFor(db, clock))
@@ -436,7 +445,7 @@ export async function runImport(
       await finishRun(db, runId, clock())
 
       return {
-        clubLines: [...supporterLines, ...reminderLines, ...clubLines],
+        clubLines: [...supporterLines, ...reminderLines, ...ratingLines, ...clubLines],
         personLines: [...personLines, ...addresses, ...stadiumLines],
         reports,
         wikipedia,

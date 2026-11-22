@@ -1,6 +1,18 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { clubs, importRuns, matches, supporterLoginLinks, supporterReminders, supporters } from '@fansite/db/schema'
+import {
+  clubs,
+  importRuns,
+  matchAppearances,
+  matches,
+  matchPlayerRatings,
+  matchReports,
+  playerRatings,
+  players,
+  supporterLoginLinks,
+  supporterReminders,
+  supporters,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
@@ -182,5 +194,73 @@ describe('the reminders for the Prognose in the import', () => {
     await run({ ...env, FANS_PROGNOSE: 'off', FANS_REMINDER_SECRET: secret }, friday)
 
     expect(sent).toEqual([])
+  })
+})
+
+describe('the closing of the window of the Uitblinker in the import', () => {
+  // The match was on Saturday 21 November 2026; its window is over after seven days.
+  async function setUp() {
+    await database.db.delete(matches)
+    await database.db.delete(players)
+    await database.db
+      .insert(clubs)
+      .values({ name: 'FC Twente', slug: 'fc-twente' })
+      .onDuplicateKeyUpdate({ set: { name: 'FC Twente' } })
+
+    const [club] = await database.db.select().from(clubs)
+    const [match] = await database.db
+      .insert(matches)
+      .values({
+        clubId: club?.id ?? 0,
+        competition: 'Eredivisie',
+        goalsAgainst: 0,
+        goalsFor: 1,
+        home: true,
+        kickoffAt: new Date('2026-11-21T15:45:00Z'),
+        matchDate: '2026-11-21',
+        opponent: 'FC Twente',
+        round: 'Speelronde 14',
+        season: '2026/27',
+        status: 'played',
+      })
+      .$returningId()
+    const [player] = await database.db
+      .insert(players)
+      .values({ name: 'Test Speler', searchTerm: 'Speler', season: '2026/27', source: 'selectie' })
+      .$returningId()
+
+    await database.db.insert(matchReports).values({ matchId: match?.id ?? 0, status: 'klaar' })
+
+    const [appearance] = await database.db
+      .insert(matchAppearances)
+      .values({ matchId: match?.id ?? 0, name: 'Test Speler', ours: true, playerId: player?.id ?? 0, starter: true })
+      .$returningId()
+    const [fan] = await database.db
+      .insert(supporters)
+      .values({ email: 'aan@example.org', screenName: 'Aan', screenNameKey: 'aan' })
+      .$returningId()
+
+    await database.db
+      .insert(playerRatings)
+      .values({ appearanceId: appearance?.id ?? 0, grade: 8, supporterId: fan?.id ?? 0 })
+  }
+
+  it('stores the averages once the window is over, and logs a count only', async () => {
+    await setUp()
+    await run({ ...env, FANS_UITBLINKER: 'on' }, new Date('2026-11-29T10:00:00Z'))
+
+    const stored = await database.db.select().from(matchPlayerRatings)
+
+    expect(stored.map((row) => [row.source, row.average, row.ratingCount])).toEqual([['fans', '8.00', 1]])
+    expect(lines).toContain('Uitblinker: 1 window closed, averages stored')
+    expect(lines.join('\n')).not.toMatch(/example\.org|Aan/u)
+  })
+
+  it('keeps the window open before that, and stores nothing while the game is off', async () => {
+    await setUp()
+    await run({ ...env, FANS_UITBLINKER: 'on' }, new Date('2026-11-25T10:00:00Z'))
+    await run({ ...env, FANS_UITBLINKER: 'off' }, new Date('2026-11-29T10:00:00Z'))
+
+    expect(await database.db.select().from(matchPlayerRatings)).toEqual([])
   })
 })

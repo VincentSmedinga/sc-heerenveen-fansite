@@ -2136,6 +2136,11 @@ await withEmptyDatabase((database) =>
       '/fans/prognose/stand must be "not found" with Prognose off',
     )
     assert.equal(
+      (await fetch(`${origin}/fans/uitblinker`)).status,
+      404,
+      '/fans/uitblinker must be "not found" with Uitblinker off',
+    )
+    assert.equal(
       (await fetch(`${origin}/fans/spelregels`)).status,
       404,
       '/fans/spelregels must be "not found" with every part off',
@@ -2174,6 +2179,21 @@ await withEmptyDatabase((database) =>
     assert.match(await ranking.text(), /<h1[^>]*>Stand Prognose<\/h1>/)
     assert.equal(prediction.headers.get('cache-control'), 'no-store')
     assert.equal(prediction.headers.get('x-robots-tag'), 'noindex, nofollow')
+
+    // The game Uitblinker: a visitor sees the page with the way in, and no search engine may
+    // index it. The empty database has no match, so there is no form.
+    const rating = await fetch(`${origin}/fans/uitblinker`)
+    const ratingHtml = await rating.text()
+
+    assert.equal(rating.status, 200, '/fans/uitblinker must be there with Uitblinker on')
+    assert.match(ratingHtml, /<h1[^>]*>Uitblinker<\/h1>/)
+    assert.match(ratingHtml, /<h2[^>]*>Zo werkt het<\/h2>/)
+    assert.doesNotMatch(ratingHtml, /type="radio"/)
+    assert.equal(rating.headers.get('cache-control'), 'no-store')
+    assert.equal(rating.headers.get('x-robots-tag'), 'noindex, nofollow')
+    // The card of the game on Fans, with its way to the page.
+    assert.match(html, /<h2[^>]*>Uitblinker<\/h2>/)
+    assert.match(html, /<a [^>]*href="\/fans\/uitblinker"[^>]*>Naar de Uitblinker<\/a>/)
 
     // The rules of all games: a card for each game that is on, for everybody.
     const rules = await fetch(`${origin}/fans/spelregels`)

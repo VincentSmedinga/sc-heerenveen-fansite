@@ -28,6 +28,7 @@
     "./player-field-differences": "./src/player-field-differences.ts",
     "./player-stat-differences": "./src/player-stat-differences.ts",
     "./prediction-matches": "./src/prediction-matches.ts",
+    "./rating-window": "./src/rating-window.ts",
     "./prepare": "./src/prepare.ts",
     "./send-reminders": "./src/send-reminders.ts",
     "./club-merge": "./src/club-merge.ts",

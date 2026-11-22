@@ -84,7 +84,8 @@ describe('the places of the games', () => {
     }
   })
 
-  it('keep the predictions in the table predictions', () => {
+  it('keep the predictions in the table predictions, and the grades in player_ratings', () => {
     expect(gamePlaces.find(({ part }) => part === 'prognose')?.tables).toEqual(['predictions'])
+    expect(gamePlaces.find(({ part }) => part === 'uitblinker')?.tables).toEqual(['player_ratings'])
   })
 })

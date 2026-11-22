@@ -729,6 +729,13 @@
       "when": 1795312968787,
       "tag": "0103_add_match_prediction_counts",
       "breakpoints": true
+    },
+    {
+      "idx": 104,
+      "version": "5",
+      "when": 1795336041611,
+      "tag": "0104_add_player_ratings",
+      "breakpoints": true
     }
   ]
 }

@@ -101,7 +101,7 @@ describe('proxy', () => {
     },
   )
 
-  it.each(['/fans', '/fans/', '/fans/aanmelden', '/fans/uitblinker'])(
+  it.each(['/fans', '/fans/', '/fans/aanmelden'])(
     'keeps %s out of every cache and sends a referrer only to our own pages, and leaves it open to search engines',
     (path) => {
       vi.stubEnv('SITE_ENV', 'production')
@@ -119,6 +119,7 @@ describe('proxy', () => {
     '/fans/mijn-account/schermnaam',
     '/fans/mijn-account/e-mailadres/verstuurd',
     '/fans/prognose',
+    '/fans/uitblinker',
   ])('keeps %s out of search engines on production too', (path) => {
     vi.stubEnv('SITE_ENV', 'production')
     const { headers } = proxy(path)

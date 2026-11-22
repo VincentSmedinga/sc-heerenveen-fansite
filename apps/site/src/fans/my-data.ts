@@ -7,6 +7,7 @@ import { count, eq } from 'drizzle-orm'
 
 import { fansGames } from '../fans-paths'
 import { predictionData } from './prediction-results'
+import { ratingData } from './rating-data'
 
 // Everything the site keeps of a supporter, for the page "Alles wat we van je bewaren" and the
 // card "Wat je speelde" on Mijn account (issue 1454). Each game has a fixed place here; the
@@ -59,6 +60,7 @@ export type GamePlace = {
  */
 const kept: Partial<Record<GamePlace['part'], Pick<GamePlace, 'load' | 'tables'>>> = {
   prognose: { load: predictionData, tables: ['predictions'] },
+  uitblinker: { load: ratingData, tables: ['player_ratings'] },
 }
 
 /** The places of the games, in the order of the bar of games. */
