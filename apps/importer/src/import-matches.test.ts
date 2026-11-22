@@ -2619,7 +2619,10 @@ describe('the import command', () => {
 
     expect(code).toBe(0)
     expect(
-      lines.flatMap((line) => line.split('\n')).filter((line) => !/: (new (club|name) |persons: )/u.test(line)),
+      lines
+        .flatMap((line) => line.split('\n'))
+        // The articles of the made-up clubs have no selection: a line each (#1541).
+        .filter((line) => !/: (new (club|name) |persons: )|^Club squads: warning, /u.test(line)),
     ).toEqual([
       expect.stringContaining('1 new, 0 updated, 0 unchanged, 0 skipped'),
       'Matches 2026/27: 35 new, 0 updated, 0 unchanged, 0 removed; table of 18 clubs for 2026-10-24',

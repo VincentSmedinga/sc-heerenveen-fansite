@@ -31,7 +31,7 @@ describe('the migration of the squads of the clubs (#1541)', () => {
 
   it('keeps one row for a name in a club', async () => {
     const [indexes] = await database.pool.query<RowDataPacket[]>(
-      "SELECT index_name AS name FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'club_squad_players' AND non_unique = 0 AND index_name <> 'PRIMARY'",
+      "SELECT DISTINCT index_name AS name FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'club_squad_players' AND non_unique = 0 AND index_name <> 'PRIMARY'",
     )
 
     expect(indexes).toEqual([{ name: 'club_squad_players_club_name_unique' }])

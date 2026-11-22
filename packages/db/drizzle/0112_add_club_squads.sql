@@ -9,7 +9,7 @@ CREATE TABLE `club_squad_imports` (
 	`last_warning_at` datetime,
 	`retry_at` datetime,
 	CONSTRAINT `club_squad_imports_club_id` PRIMARY KEY(`club_id`)
-);
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 --> statement-breakpoint
 CREATE TABLE `club_squad_players` (
 	`id` int unsigned AUTO_INCREMENT NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE `club_squad_players` (
 	`read_at` datetime NOT NULL,
 	CONSTRAINT `club_squad_players_id` PRIMARY KEY(`id`),
 	CONSTRAINT `club_squad_players_club_name_unique` UNIQUE(`club_id`,`name`)
-);
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 --> statement-breakpoint
 ALTER TABLE `club_squad_imports` ADD CONSTRAINT `club_squad_imports_club_id_clubs_id_fk` FOREIGN KEY (`club_id`) REFERENCES `clubs`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `club_squad_players` ADD CONSTRAINT `club_squad_players_club_id_clubs_id_fk` FOREIGN KEY (`club_id`) REFERENCES `clubs`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

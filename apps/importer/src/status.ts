@@ -175,6 +175,10 @@ async function showClubSquadStatus(db: Database, now: Date, write: (line: string
     .orderBy(asc(clubs.name))
   const unhealthy = rows.filter((row) => isUnhealthy(row.health))
 
+  if (rows.length === 0) {
+    return
+  }
+
   write('')
   write(`Club squads: ${rows.length} ${rows.length === 1 ? 'club' : 'clubs'} read, ${unhealthy.length} unhealthy`)
 
