@@ -7628,3 +7628,27 @@
 - **Alternatieven:** de gemiddelden tijdens het venster tonen (de cijfers worden dan beïnvloed); ze op de wedstrijdpagina tonen voor wie is ingelogd (een pagina die per persoon verschilt).
 - **Let op:** een venster dat gesloten is, maar waarvan de import de gemiddelden nog niet schreef (hoogstens een kwartier), toont geen kaart op de wedstrijdpagina.
   De trainer staat er niet in; die komt met #1479.
+
+## Spelers › Cijfers rangschikt de seizoencijfers, en de Uitblinker van het jaar heeft een eigen pagina
+
+- **Datum:** 22 november 2026
+- **Besluit:** de kaart "Cijfers van supporters" staat op Spelers › Cijfers onder de kaarten die er al zijn, in de brede kolom, met een eigen seizoenkeuze die `?seizoen=` op dezelfde pagina gebruikt.
+  Die keuze loopt over de seizoenen met cijfers en het lopende seizoen, ook voor seizoenen van vóór de wedstrijden in de database, en volgt het seizoen van de pagina zolang je niets kiest.
+  De tabel heeft de kolommen #, Speler, W en Gem van hoog naar laag op seizoencijfer, met dezelfde regel als op de spelerspagina: het gemiddelde van alle cijfers van het seizoen, vanaf drie wedstrijden met minstens vijf cijfers.
+  Bij een gelijk gemiddelde gaat de speler met minder cijfers voor, zoals bij de uitblinker van een wedstrijd, en gelijke spelers delen een plaats.
+  De seizoenen 1998/99 tot 2000/01 staan er met hun seizoencijfer en een streepje in W, ook zonder de drempel.
+  Heeft het gekozen seizoen geen speler die telt, dan staat er "Dit seizoen zijn er nog geen cijfers." in plaats van de tabel.
+  Onder de tabel staat de bron van de oude Fansite bij een oud seizoen, en altijd de link "Uitblinker van het jaar" naar `/fans/uitblinker/van-het-jaar`, ook vanaf de zachte kaart "Uitblinkers 2026/27" op `/fans/uitblinker`.
+  Die pagina heeft één kaart met een tabel Seizoen, Speler en Gem, het nieuwste seizoen eerst.
+  De acht uitblinkers van 1998/99 tot 2005/06 komen uit `old_season_winners` (#1465), met hun seizoencijfer erbij waar we dat hebben.
+  Vanaf 2006/07 is het de speler met het hoogste seizoencijfer onder de spelers met minstens zes wedstrijden met minstens vijf cijfers, en bij een gelijk gemiddelde gaat de speler met minder cijfers voor.
+  Een seizoen krijgt zijn uitblinker pas als het voorbij is: alle wedstrijden zijn gespeeld en het venster van de laatste is gesloten, zeven dagen na het begin ervan.
+  Tot dan, en voor het lopende seizoen, staat er "Na het seizoen".
+  Staat de lijst met de acht namen nog leeg, dan leidt de pagina niemand af uit de hoogste gemiddelden van die jaren: zij toont alleen het lopende seizoen.
+  Zet de instelling van de Uitblinker uit, dan is de kaart weg en antwoordt de pagina "niet gevonden".
+- **Waarom:** zo lopen oud en nieuw door elkaar, zoals de oude Fansite beloofde, en houdt een eigen pagina Spelers › Cijfers kort.
+  Een eigen seizoenkeuze in de kaart laat de oude seizoenen zien zonder dat de hele pagina daarvoor een adres per seizoen nodig heeft, en een speler moet voor de titel meer wedstrijden hebben dan voor een seizoencijfer, zodat de titel iets waard is.
+- **Alternatieven:** de kaart het seizoen van de pagina laten volgen zonder eigen keuze (de seizoenen vóór de wedstrijden in de database ontbreken dan); een eigen puntentelling per speler; de uitblinker meteen na de laatste wedstrijd kiezen; de lijst onder de ranglijst.
+- **Let op:** `apps/site/src/fans/season-ratings.ts` rekent alles uit de gemiddelden en tellingen in `match_player_ratings`, `old_season_ratings` en `old_season_winners` uit, nooit uit losse cijfers, en de gegevens worden één keer per minuut gelezen.
+  De pagina's blijven daardoor te cachen.
+  De trainer staat er niet in en wordt nooit de uitblinker; zijn cijfer hoort bij #1479.

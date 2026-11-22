@@ -16,7 +16,7 @@ import {
   WinnerList,
 } from '@fansite/design-system'
 
-import { rulesPath } from '#src/fans-paths'
+import { rulesPath, yearWinnersPath } from '#src/fans-paths'
 import { logInPaths } from '#src/fans/log-in'
 import { returnParameter } from '#src/fans/log-in-form'
 import {
@@ -249,6 +249,9 @@ export function SeasonWinnersCard({ season, winners }: { season: string; winners
       />
       <Text>
         <Link href={seasonAddress(matchesPath, season, seasonOf(new Date()))}>Alle wedstrijden</Link>
+      </Text>
+      <Text>
+        <Link href={yearWinnersPath}>Uitblinker van het jaar</Link>
       </Text>
     </Card>
   )
