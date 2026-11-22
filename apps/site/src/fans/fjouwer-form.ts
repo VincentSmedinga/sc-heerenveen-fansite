@@ -43,9 +43,12 @@ export const unknownHourMessage =
 /** The line for an inherited four of which every player still counts. */
 export const inheritedOkMessage = 'Dit zijn je vier van vorige keer. Je kunt ze wijzigen tot de aftrap.'
 
-/** The line behind a name: "31 punten · nog 3 keer". */
+/** A number of points with a real minus sign: "13", "−3". */
+export const pointsText = (points: number) => (points < 0 ? `−${-points}` : String(points))
+
+/** The line behind a name: "31 punten · nog 3 keer", and "−3 punten" for a negative total. */
 export const playerLine = (points: number, usesLeft: number) =>
-  `${points} ${points === 1 ? 'punt' : 'punten'} · nog ${usesLeft} keer`
+  `${pointsText(points)} ${points === 1 ? 'punt' : 'punten'} · nog ${usesLeft} keer`
 
 /** The groups of the form with the players in them, as the page gives them to the form. */
 export type FormPlayer = {

@@ -17,6 +17,7 @@ import { fantasyScoring } from '@fansite/shared/fantasy-points'
 
 import type { FourPoints, MatchStanding, PointsMatch } from '#src/fans/fjouwer-points'
 
+import { pointsText } from '#src/fans/fjouwer-form'
 import { clubsOf } from '#src/fans/prediction'
 import { matchMoment } from '#src/match-format'
 import { reportAddress } from '#src/report-data'
@@ -26,9 +27,6 @@ import { reportAddress } from '#src/report-data'
 
 /** How many earlier matches stand open before the rest goes behind the fold. */
 export const shownEarlier = 5
-
-/** A number of points with a real minus sign: "13", "−3". */
-export const pointsText = (points: number) => (points < 0 ? `−${-points}` : String(points))
 
 const playedScore = (match: PointsMatch) =>
   match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null

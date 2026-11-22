@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vitest'
 
 import type { FourPoints, MatchStanding, PointsMatch } from '#src/fans/fjouwer-points'
 
-import { EarlierMatchesCard, LastMatchCard, pointsText, ScoringCard, scoringRows } from './PointsCards'
+import { pointsText } from '#src/fans/fjouwer-form'
+
+import { EarlierMatchesCard, LastMatchCard, ScoringCard, scoringRows } from './PointsCards'
 
 // Read with the morning of Monday 23 November 2026 (Dutch time) as now.
 const now = new Date('2026-11-23T10:00:00Z')
