@@ -1,6 +1,6 @@
 import type { Database } from '@fansite/db/client'
 
-import { matchAppearances, matches, playerRatings } from '@fansite/db/schema'
+import { coachRatings, matchAppearances, matches, playerRatings, staff } from '@fansite/db/schema'
 import { desc, eq } from 'drizzle-orm'
 
 import type { GameData } from './my-data'
@@ -18,8 +18,9 @@ const dateFormat = new Intl.DateTimeFormat('nl-NL', {
 })
 
 /**
- * The grades of a supporter, one row for each player: the match, the player and the grade, the
- * newest match first. The summary says how many grades in how many matches: "15 cijfers voor 1
+ * The grades of a supporter, one row for each player and for the head coach of a match (issue
+ * 1478, as "Naam (trainer)", after the players): the match, the name and the grade, the newest
+ * match first. The summary says how many grades in how many matches: "15 cijfers voor 1
  * wedstrijd". `undefined` for a supporter who gave none.
  */
 export async function ratingData(db: Database, supporterId: number): Promise<GameData | undefined> {
@@ -38,15 +39,39 @@ export async function ratingData(db: Database, supporterId: number): Promise<Gam
     .where(eq(playerRatings.supporterId, supporterId))
     .orderBy(desc(matches.matchDate), desc(matches.id), matchAppearances.name)
 
-  if (found.length === 0) {
+  const coaches = await db
+    .select({
+      grade: coachRatings.grade,
+      home: matches.home,
+      matchDate: matches.matchDate,
+      matchId: matches.id,
+      name: staff.name,
+      opponent: matches.opponent,
+    })
+    .from(coachRatings)
+    .innerJoin(matches, eq(matches.id, coachRatings.matchId))
+    .innerJoin(staff, eq(staff.id, coachRatings.staffId))
+    .where(eq(coachRatings.supporterId, supporterId))
+
+  if (found.length === 0 && coaches.length === 0) {
     return undefined
   }
 
-  const matchCount = new Set(found.map((row) => row.matchId)).size
+  const rows = [
+    ...found.map((row) => ({ ...row, trainer: false })),
+    ...coaches.map((row) => ({ ...row, name: `${row.name} (trainer)`, trainer: true })),
+  ].toSorted(
+    (a, b) =>
+      b.matchDate.localeCompare(a.matchDate) ||
+      b.matchId - a.matchId ||
+      Number(a.trainer) - Number(b.trainer) ||
+      a.name.localeCompare(b.name, 'nl'),
+  )
+  const matchCount = new Set(rows.map((row) => row.matchId)).size
 
   return {
     columns: ['Wedstrijd', 'Speler', 'Cijfer'],
-    rows: found.map((row) => {
+    rows: rows.map((row) => {
       const sides = clubsOf(row)
 
       return {
@@ -54,6 +79,6 @@ export async function ratingData(db: Database, supporterId: number): Promise<Gam
         header: `${sides.home} – ${sides.away}, ${dateFormat.format(new Date(`${row.matchDate}T12:00:00Z`))}`,
       }
     }),
-    summary: `${found.length === 1 ? '1 cijfer' : `${found.length} cijfers`} voor ${matchCount === 1 ? '1 wedstrijd' : `${matchCount} wedstrijden`}`,
+    summary: `${rows.length === 1 ? '1 cijfer' : `${rows.length} cijfers`} voor ${matchCount === 1 ? '1 wedstrijd' : `${matchCount} wedstrijden`}`,
   }
 }

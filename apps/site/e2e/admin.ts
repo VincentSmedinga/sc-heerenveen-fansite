@@ -13,6 +13,7 @@ import {
   players,
   predictions,
   sources,
+  staff,
   supporters,
 } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
@@ -231,15 +232,24 @@ export async function addPlayedPrediction(email: string, round: string) {
 /** The three made-up players of the match of `addRatingMatch`, in the order of the page. */
 export const ratingPlayers = ['Cijfer Aanvaller', 'Cijfer Keeper', 'Cijfer Verdediger'] as const
 
+/** The head coach of the seed of acceptance, who holds the day of these matches (#1478). */
+export const ratingCoach = 'Robin Veldman'
+
+/** A made-up second coach: with two on the same day the match has no coach (issue 1478). */
+const otherCoach = 'Cijfer Interim'
+
 /**
  * A match that was played ten minutes ago, with a finished report of three players of ours who
  * played 90 minutes, for the checks of the game Uitblinker (issue 1470). It is the last match
  * played and the one after it (the made-up match in three days) is far enough away to keep the
  * window open. The account with this address is made older than the match, because the
  * browser makes it a moment ago and only an account that was there before the match can rate.
- * It returns what takes the match away again.
+ * The seed of acceptance, which the checks run with, has a head coach for today, so the form
+ * has a group for him (issue 1478). Without `coach`, a second coach of the same day is added,
+ * so the match has none and the form has players only. It returns what takes the match away
+ * again.
  */
-export async function addRatingMatch(email: string) {
+export async function addRatingMatch(email: string, { coach = false }: { coach?: boolean } = {}) {
   const { close, db } = connect(localDatabaseUrl())
 
   try {
@@ -249,6 +259,13 @@ export async function addRatingMatch(email: string) {
     // What a check that stopped halfway left behind, so a second run starts clean.
     await db.delete(matches).where(and(eq(matches.opponent, 'Cijferploeg'), eq(matches.round, 'Cijfer-controle')))
     await db.delete(players).where(inArray(players.name, [...ratingPlayers]))
+    await db.delete(staff).where(eq(staff.name, otherCoach))
+
+    if (!coach) {
+      await db
+        .insert(staff)
+        .values({ interim: true, name: otherCoach, role: 'coach', startDate: '2000-01-01', startPrecision: 'day' })
+    }
 
     await db
       .update(supporters)
@@ -291,6 +308,7 @@ export async function addRatingMatch(email: string) {
         // The report, its players and their grades go with the match.
         await connection.db.delete(matches).where(eq(matches.id, matchId))
         await connection.db.delete(players).where(inArray(players.name, [...ratingPlayers]))
+        await connection.db.delete(staff).where(eq(staff.name, otherCoach))
         await connection.db.delete(clubs).where(eq(clubs.id, row?.clubId ?? 0))
       } finally {
         await connection.close()

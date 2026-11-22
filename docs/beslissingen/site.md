@@ -7581,6 +7581,7 @@
   De tweede controle in de `INSERT` is de enige die niet voorbij te lopen is met een trage aanvraag, zoals bij de Prognose.
 - **Alternatieven:** het venster aan de klok van de applicatie binden (een trage aanvraag glipt erdoorheen); een eigen kolom met het sluitmoment (die kan van de wedstrijden afwijken als een aanvang verschuift).
 - **Let op:** het formulier heeft nog geen cijfer voor de trainer (#1478), dus de teller en de teksten tellen alleen spelers.
+- **Later:** zie _De hoofdtrainer krijgt in de Uitblinker een cijfer, als laatste groep van het formulier_ (22 november 2026): het formulier, de teller en de teksten tellen de trainer nu mee.
 
 ## De import sluit het venster en zet de gemiddelden in `match_player_ratings`
 
@@ -7652,3 +7653,23 @@
 - **Let op:** `apps/site/src/fans/season-ratings.ts` rekent alles uit de gemiddelden en tellingen in `match_player_ratings`, `old_season_ratings` en `old_season_winners` uit, nooit uit losse cijfers, en de gegevens worden één keer per minuut gelezen.
   De pagina's blijven daardoor te cachen.
   De trainer staat er niet in en wordt nooit de uitblinker; zijn cijfer hoort bij #1479.
+
+## De hoofdtrainer krijgt in de Uitblinker een cijfer, als laatste groep van het formulier
+
+- **Datum:** 22 november 2026
+- **Besluit:** een supporter geeft na een wedstrijd ook de hoofdtrainer een cijfer, als laatste groep van het formulier, na de spelers (#1478).
+  De trainer is de ene persoon van `staff` met de rol `coach` die de dag van de wedstrijd zeker had (`findRatingCoach`, die `staffOnDay` gebruikt).
+  Ligt de dag in een gat, of hebben twee mensen hem zeker of mogelijk, zoals bij een interim, dan heeft de wedstrijd geen trainer, geen groep en geen verplicht cijfer.
+  Het verslag noemt geen trainer, dus een dag met twee kandidaten kiest niemand.
+  De groep heeft de naam "Cijfer voor trainer `<naam>`" met "Trainer" als kleine regel onder de naam, dezelfde schaal van 1 tot 10 en dezelfde fout als bij een speler.
+  Het cijfer is verplicht, en de teller, de ErrorSummary, de kaart op `/fans` ("Geef 14 spelers en de trainer een cijfer.") en de inleiding tellen hem mee.
+  In de tabel "Jouw cijfers en de tussenstand" staat hij als laatste regel, na een zwaardere lijn, als "Robin Veldman (trainer)", met zijn eigen cijfer en een streepje bij de tussenstand, want zijn gemiddelde komt met #1479.
+  Het cijfer staat in een eigen tabel, `coach_ratings` (migratie 0105), met de wedstrijd, de persoon van `staff` en de supporter, uniek per supporter en wedstrijd.
+  Een opgeheven account laat het cijfer anoniem staan (`ON DELETE SET NULL`), en de tabel komt in het exportplan met `supporter_id` als `NULL`.
+  De cijfers van spelers en trainer worden in één transactie geschreven, met dezelfde controle van het venster, zodat het ene niet zonder het andere wordt bewaard.
+  Als het venster sluit, zet dezelfde stap van de import de gemiddelden van de trainer in `match_coach_ratings` met de bron `fans`; de trainer komt nooit in `match_player_ratings` en is dus nooit de uitblinker.
+  Het tonen van die gemiddelden komt met #1479.
+- **Waarom:** de oude Fansite deed dat ook, de staf staat al in de database, en een prijs voor de beste speler hoort niet naar de trainer te gaan.
+  Een eigen tabel houdt de trainer uit de gemiddelden van de spelers, zonder dat elke vraag naar de uitblinker hem eruit moet filteren.
+  Een dag met twee kandidaten laat de groep weg, zodat er geen cijfer komt voor een persoon die we niet kennen.
+- **Alternatieven:** de trainer als speler in `player_ratings` (de uitblinker moet hem dan weglaten); de trainer alleen per seizoen beoordelen; een trainer kiezen bij twee kandidaten (een cijfer voor iemand die misschien niet coachte).

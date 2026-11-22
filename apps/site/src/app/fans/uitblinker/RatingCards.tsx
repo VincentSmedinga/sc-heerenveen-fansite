@@ -30,9 +30,11 @@ import {
 import { clubsOf } from '#src/fans/prediction'
 import {
   closingText,
+  coachRow,
   deadlineTag,
   lateMessage,
   nextDayText,
+  type RatingCoach,
   type RatingMatch,
   ratingPath,
   type RatingPlayer,
@@ -73,7 +75,9 @@ export function HowItWorksCard() {
         Zo werkt het
       </Heading>
       <List>
-        <List.Item>Elke supporter met een account geeft de spelers van de laatste wedstrijd een cijfer.</List.Item>
+        <List.Item>
+          Elke supporter met een account geeft de spelers en de trainer van de laatste wedstrijd een cijfer.
+        </List.Item>
         <List.Item>
           Het venster sluit als de volgende wedstrijd begint, en uiterlijk zeven dagen na de wedstrijd.
         </List.Item>
@@ -147,6 +151,7 @@ export function OpenCard({
   heading = 'Geef je cijfers',
   match,
   now,
+  withCoach = false,
 }: {
   children: ReactNode
   closesAt: Date
@@ -154,6 +159,8 @@ export function OpenCard({
   heading?: string
   match: RatingMatch
   now: Date
+  /** The match has a head coach, who gets a grade too. */
+  withCoach?: boolean
 }) {
   return (
     <Card aria-labelledby="geef-je-cijfers" game="uitblinker">
@@ -165,8 +172,8 @@ export function OpenCard({
       </Text>
       <MatchLine match={match} now={now} />
       <Text>
-        Geef elke speler die 30 minuten of langer speelde een cijfer van 1 tot 10. Je kunt ze wijzigen tot{' '}
-        {closingText(closesAt)}.
+        Geef elke speler die 30 minuten of langer speelde een cijfer van 1 tot 10{withCoach ? ', en de trainer' : ''}.
+        Je kunt ze wijzigen tot {closingText(closesAt)}.
       </Text>
       {children}
     </Card>
@@ -181,11 +188,17 @@ export function OpenCard({
  */
 export function SavedView({
   closesAt,
+  coach,
+  coachGrade,
   grades,
   players,
   running,
 }: {
   closesAt: Date
+  /** The head coach of the match, or `null` for a match without one. */
+  coach: null | RatingCoach
+  /** The grade of the supporter for the coach. */
+  coachGrade?: number
   /** The grades of the supporter, by the number of the appearance. */
   grades: ReadonlyMap<number, number>
   players: readonly RatingPlayer[]
@@ -207,19 +220,27 @@ export function SavedView({
       <DataTable
         caption="Jouw cijfers en de tussenstand"
         columns={['Speler', 'Jij', { key: true, name: 'Gem' }]}
-        rows={players.map((player) => {
-          const found = byAppearance.get(player.appearanceId)
+        rows={[
+          ...players.map((player) => {
+            const found = byAppearance.get(player.appearanceId)
 
-          return {
-            cells: [
-              grades.get(player.appearanceId) ?? 0,
-              found !== undefined && found.count >= ratingMinimum ? gradeText(found.average) : 'nog te weinig cijfers',
-            ],
-            header: player.name,
-            // In words, on a line of its own: a label in the cell is too wide for the column.
-            ...(winner !== undefined && winner.appearanceId === player.appearanceId ? { secondary: 'Uitblinker' } : {}),
-          }
-        })}
+            return {
+              cells: [
+                grades.get(player.appearanceId) ?? 0,
+                found !== undefined && found.count >= ratingMinimum
+                  ? gradeText(found.average)
+                  : 'nog te weinig cijfers',
+              ],
+              header: player.name,
+              // In words, on a line of its own: a label in the cell is too wide for the column.
+              ...(winner !== undefined && winner.appearanceId === player.appearanceId
+                ? { secondary: 'Uitblinker' }
+                : {}),
+            }
+          }),
+          // The coach is the last row, after a heavier line. His average shows with #1479.
+          ...(coach === null ? [] : [{ cells: [coachGrade ?? 0, '–'], header: coachRow(coach.name), total: true }]),
+        ]}
         sortable={false}
       />
     </>

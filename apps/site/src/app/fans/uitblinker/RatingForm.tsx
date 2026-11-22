@@ -5,11 +5,15 @@ import { type ChangeEvent, useActionState, useEffect, useState, useSyncExternalS
 
 import {
   closedMessage,
+  coachField,
+  coachLabel,
+  coachLine,
   counterText,
   gradeField,
   keptText,
   lateMessage,
   playerLine,
+  type RatingCoach,
   ratingMatchField,
   type RatingPlayer,
   type RatingState,
@@ -25,16 +29,23 @@ import { saveRatingsAction } from './actions'
 // summary, whose links bring it to the scales. The notice is in the page from the start,
 // empty, so a screen reader announces it when it fills.
 export function RatingForm({
+  coach,
+  coachSaved,
   matchId,
   players,
   saved,
 }: {
+  /** The head coach of the match, who is rated too, or `null` for a match without one. */
+  coach: null | RatingCoach
+  /** The grade the supporter gave the coach before. */
+  coachSaved?: string
   matchId: number
   players: readonly RatingPlayer[]
   /** The grades the supporter gave before, by the number of the appearance. */
   saved: Readonly<Record<number, string>>
 }) {
   const [state, action] = useActionState<RatingState, FormData>(saveRatingsAction, {
+    ...(coachSaved === undefined ? {} : { coachValue: coachSaved }),
     errors: {},
     values: saved,
   })
@@ -46,16 +57,22 @@ export function RatingForm({
     () => true,
     () => false,
   )
-  const left = counted?.state === state ? counted.left : players.length - Object.keys(state.values).length
+  const total = players.length + (coach === null ? 0 : 1)
+  const left =
+    counted?.state === state
+      ? counted.left
+      : total - Object.keys(state.values).length - (state.coachValue === undefined ? 0 : 1)
   const summary = players.flatMap((player) => {
     const message = state.errors[player.appearanceId]
 
     return message === undefined ? [] : [{ id: scaleId(player.appearanceId), message }]
   })
+  const coachErrors = state.coachError === undefined ? [] : [{ id: coachField, message: state.coachError }]
+  const errors = [...summary, ...coachErrors]
   const notice = state.failure === 'closed' ? closedMessage : state.failure === 'late' ? lateMessage : undefined
 
   useEffect(() => {
-    if (summary.length > 0) {
+    if (errors.length > 0) {
       document.getElementById('cijfers-fouten')?.focus()
     } else if (state.failure !== undefined) {
       document.getElementById('cijfers-melding')?.focus()
@@ -65,15 +82,17 @@ export function RatingForm({
   }, [state])
 
   const choose = (event: ChangeEvent<HTMLFormElement>) => {
-    const answered = new Set([...new FormData(event.currentTarget).keys()].filter((name) => /^cijfer-\d+$/.test(name)))
+    const answered = new Set(
+      [...new FormData(event.currentTarget).keys()].filter((name) => /^cijfer-(?:\d+|trainer)$/.test(name)),
+    )
 
-    setCounted({ left: players.length - answered.size, state })
+    setCounted({ left: total - answered.size, state })
   }
 
   return (
     <>
-      <ErrorSummary errors={summary} id="cijfers-fouten" level={3} tabIndex={-1} title={summaryTitle(summary.length)} />
-      {summary.length > 0 ? <Text>{keptText}</Text> : null}
+      <ErrorSummary errors={errors} id="cijfers-fouten" level={3} tabIndex={-1} title={summaryTitle(errors.length)} />
+      {errors.length > 0 ? <Text>{keptText}</Text> : null}
       <Notice id="cijfers-melding" tabIndex={-1}>
         {notice}
       </Notice>
@@ -91,12 +110,24 @@ export function RatingForm({
             value={state.values[player.appearanceId]}
           />
         ))}
+        {coach === null ? null : (
+          <RatingScale
+            aria-label={coachLabel(coach.name)}
+            error={state.coachError}
+            id={coachField}
+            legend={coach.name}
+            line={coachLine}
+            name={coachField}
+            required={false}
+            value={state.coachValue}
+          />
+        )}
         <Button name={ratingMatchField} type="submit" value={matchId}>
           Cijfers opslaan
         </Button>
         {enhanced ? (
           <Text appearance="meta" role="status">
-            {counterText(left, players.length)}
+            {counterText(left, total)}
           </Text>
         ) : null}
       </Form>

@@ -1,6 +1,6 @@
 import { expect, type Page, test } from '@playwright/test'
 
-import { addRatingMatch, ratingPlayers } from './admin'
+import { addRatingMatch, ratingCoach, ratingPlayers } from './admin'
 import { checkPage } from './check-page'
 import { sentMails } from './fake-mail'
 
@@ -95,6 +95,37 @@ test.describe('without JavaScript', () => {
       await remove()
     }
   })
+})
+
+test('also rates the head coach of the match, who is the last group and a row after the players', async ({ page }) => {
+  const address = await signUp(page)
+  const remove = await addRatingMatch(address, { coach: true })
+
+  try {
+    await page.goto('/fans/uitblinker')
+    await expect(page.getByText('Nog 4 van 4 te gaan')).toBeVisible()
+    await expect(scale(page, `trainer ${ratingCoach}`).getByText('Trainer', { exact: true })).toBeVisible()
+    await give(page, ratingPlayers[0], 6)
+    await give(page, ratingPlayers[1], 7)
+    await give(page, ratingPlayers[2], 8)
+    await expect(page.getByText('Nog 1 van 4 te gaan')).toBeVisible()
+    await page.getByRole('button', { name: 'Cijfers opslaan' }).click()
+
+    const summary = page.getByRole('region', { name: 'Nog 1 cijfer' })
+
+    await expect(summary.getByRole('link')).toHaveText([`Geef ${ratingCoach} een cijfer.`])
+    await checkPage(page)
+    await give(page, `trainer ${ratingCoach}`, 5)
+    await page.getByRole('button', { name: 'Cijfers opslaan' }).click()
+
+    const rows = page.getByRole('table', { name: 'Jouw cijfers' }).getByRole('row')
+
+    await expect(rows.last()).toContainText(`${ratingCoach} (trainer)`)
+    await expect(rows.last()).toContainText('5')
+    await checkPage(page)
+  } finally {
+    await remove()
+  }
 })
 
 test('shows a visitor the way in and no form', async ({ page }) => {

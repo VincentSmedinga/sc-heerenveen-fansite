@@ -238,6 +238,7 @@ const newMatchOf = (id: number): RatingMatch => ({
 
 const openWindow = (matchId: number): RatingWindow => ({
   closesAt: new Date('2026-11-26T19:00:00Z'),
+  coach: null,
   match: newMatchOf(matchId),
   players: [],
   startsAt: new Date('2026-10-24T18:45:00Z'),

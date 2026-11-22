@@ -10,8 +10,14 @@ import { kickoffText } from '#src/fans/prediction'
 // words of the page. Which match can be rated, who is in the list and the write that keeps the
 // window are in `@fansite/db/rating-window`; the page and the action only call these.
 
-export { findOwnRatings, findRatingWindow, ratingMinimumMinutes, saveRatings } from '@fansite/db/rating-window'
-export type { RatingMatch, RatingPlayer, RatingWindow } from '@fansite/db/rating-window'
+export {
+  findOwnCoachRating,
+  findOwnRatings,
+  findRatingWindow,
+  ratingMinimumMinutes,
+  saveRatings,
+} from '@fansite/db/rating-window'
+export type { RatingCoach, RatingMatch, RatingPlayer, RatingWindow } from '@fansite/db/rating-window'
 
 /** The address of the page of the game. */
 export const ratingPath = '/fans/uitblinker'
@@ -25,8 +31,27 @@ export const gradeField = (appearanceId: number) => `cijfer-${appearanceId}`
 /** The `id` of the rating scale of a player, which the summary of the errors links to. */
 export const scaleId = (appearanceId: number) => `cijfer-${appearanceId}`
 
+/**
+ * The name of the form field of the head coach, and the `id` of his rating scale (issue 1478).
+ * It has no number of an appearance, so it can't be taken for a player.
+ */
+export const coachField = 'cijfer-trainer'
+
+/** The name of the group of the head coach: "Cijfer voor trainer Robin Veldman". */
+export const coachLabel = (name: string) => `Cijfer voor trainer ${name}`
+
+/** The line under the name of the head coach. */
+export const coachLine = 'Trainer'
+
+/** The row of the head coach in the table of the grades: "Robin Veldman (trainer)". */
+export const coachRow = (name: string) => `${name} (trainer)`
+
 /** What the form shows after a submit: the grades, the errors, and what came of it. */
 export type RatingState = {
+  /** The error of the head coach when he has no grade. */
+  coachError?: string
+  /** The grade of the head coach as it was chosen. */
+  coachValue?: string
   /** The error of each player without a grade, by the number of the appearance. */
   errors: Record<number, string>
   failure?: 'closed' | 'late'
@@ -97,19 +122,35 @@ export const nextDayText = (match: Pick<PredictionMatch, 'kickoffAt' | 'matchDat
 
 /** What reading the form gives: the grades, or an error for each player who has none. */
 export type ParsedRatings =
-  | { errors: Record<number, string>; grades?: never; values: Record<number, string> }
-  | { errors?: never; grades: Map<number, number>; values: Record<number, string> }
+  | {
+      coachError?: never
+      coachGrade?: number
+      coachValue?: string
+      errors?: never
+      grades: Map<number, number>
+      values: Record<number, string>
+    }
+  | {
+      coachError?: string
+      coachGrade?: never
+      coachValue?: string
+      errors: Record<number, string>
+      grades?: never
+      values: Record<number, string>
+    }
 
 const gradePattern = new RegExp(`^(?:[${ratingLimits.minGrade}-9]|${ratingLimits.maxGrade})$`)
 
 /**
- * Reads the grades of the form for the players of the list. Each one is a whole number from 1
- * to 10: a player without one, or with anything else, is a gap, and the other grades are
- * kept. Nothing is stored while there is a gap.
+ * Reads the grades of the form for the players of the list, and for the head coach when the
+ * match has one (`coach`). Each one is a whole number from 1 to 10: a player or coach without
+ * one, or with anything else, is a gap, and the other grades are kept. Nothing is stored while
+ * there is a gap.
  */
 export function parseRatings(
   entries: ReadonlyMap<number, unknown>,
   players: readonly { appearanceId: number; name: string }[],
+  coach?: { entry: unknown; name: string },
 ): ParsedRatings {
   const values: Record<number, string> = {}
   const errors: Record<number, string> = {}
@@ -127,5 +168,15 @@ export function parseRatings(
     }
   }
 
-  return Object.keys(errors).length > 0 ? { errors, values } : { grades, values }
+  const coachText = coach === undefined ? '' : typeof coach.entry === 'string' ? coach.entry.trim() : ''
+  const coachGiven = gradePattern.test(coachText)
+  const coachValue = coachGiven ? { coachValue: coachText } : {}
+
+  if (coach !== undefined && !coachGiven) {
+    return { coachError: errorMessage(coach.name), errors, values }
+  }
+
+  return Object.keys(errors).length > 0
+    ? { errors, values, ...coachValue }
+    : { grades, values, ...coachValue, ...(coachGiven ? { coachGrade: Number(coachText) } : {}) }
 }

@@ -1521,13 +1521,14 @@ De stap maakt de rij vlak voor het bericht uitgaat en haalt hem weg als het vers
 
 ### De Uitblinker
 
-`/fans/uitblinker` (`app/fans/uitblinker`) laat een supporter de spelers van de laatste wedstrijd een cijfer van 1 tot 10 geven.
+`/fans/uitblinker` (`app/fans/uitblinker`) laat een supporter de spelers en de trainer van de laatste wedstrijd een cijfer van 1 tot 10 geven.
 De regels van het venster staan op één plek, `packages/db/src/rating-window.ts`: welke wedstrijd, wie in de lijst staat (minstens 30 minuten volgens het verslag, `ratingMinimumMinutes`), wanneer het venster sluit en het opslaan, dat het sluitmoment in de `INSERT` nog eens met de klok van de database controleert.
 De pagina en de actie roepen alleen `src/fans/rating.ts` aan, en het formulier (`RatingForm.tsx`) is een gewone `POST` die zonder JavaScript werkt.
 De cijfers staan in `player_ratings`, per supporter en verschijning in het verslag.
-Een stap van de import (`closeRatingWindows`) zet de gemiddelden na het sluiten in `match_player_ratings` met de bron `fans`.
+De hoofdtrainer van de wedstrijd (`findRatingCoach`, uit `staff`) krijgt als laatste groep ook een cijfer, in `coach_ratings`, en alleen als één persoon de dag zeker had.
+Een stap van de import (`closeRatingWindows`) zet de gemiddelden na het sluiten in `match_player_ratings` en `match_coach_ratings` met de bron `fans`.
 Op `/fans` staat een kaart van het spel (`app/fans/UitblinkerCard.tsx`) en onder "Alles wat we van je bewaren" de eigen cijfers (`src/fans/rating-data.ts`).
-`e2e/fans-rating.spec.ts` zet met `addRatingMatch` (`e2e/admin.ts`) een gespeelde wedstrijd met verslag in de database, omdat de verzonnen gegevens er geen hebben.
+`e2e/fans-rating.spec.ts` zet met `addRatingMatch` (`e2e/admin.ts`) een gespeelde wedstrijd met verslag in de database, omdat de verzonnen gegevens er geen hebben, en met `coach: true` ook een hoofdtrainer.
 
 ## De spelregels
 
