@@ -7542,3 +7542,66 @@
 - **Waarom:** het zijn gegevens van hetzelfde spel, dus ze komen samen met het spel online.
   De kolom Cijfers laat zien waarom een speler geen gemiddelde heeft.
 - **Alternatieven:** alleen de uitblinker tonen, zonder tabel; de cijfers op de kaart van de Prognose zetten.
+
+## Een supporter geeft elke speler van de laatste wedstrijd die 30 minuten of langer speelde een cijfer
+
+- **Datum:** 20 november 2026
+- **Besluit:** een supporter beoordeelt elke speler die 30 minuten of langer speelde, met een geheel cijfer van 1 tot 10.
+  Alle spelers in de lijst moeten een cijfer krijgen, en de cijfers zijn te wijzigen tot het venster sluit.
+  Het venster loopt tot de volgende aanvang, en duurt zeven dagen als langste.
+- **Waarom:** zo krijgt elke speler evenveel cijfers in een wedstrijd en zijn de gemiddelden eerlijk te vergelijken.
+  Een invaller van vijf minuten is niet te beoordelen.
+  Zeven dagen houdt de zomer niet maanden open.
+  #38 stelde 48 uur voor; dat is te kort voor wie de wedstrijd pas later terugkijkt.
+- **Alternatieven:** een cijfer voor een deel van de spelers (ongelijke aantallen cijfers); geen wijzigen (zoals vroeger); 48 uur.
+
+## De kaarten naast het hoofdvlak van een spel hebben het zachte oppervlak, en meldingen zijn altijd de Notice
+
+- **Datum:** 20 november 2026
+- **Besluit:** de kaarten naast het hoofdvlak van de spellen gebruiken het zachte oppervlak, en alleen een stand gebruikt het sterke.
+  Meldingen zijn altijd de Notice, ook bij succes en bij een limiet, zonder groene of rode vlakken.
+  Fouten staan in een ErrorSummary.
+- **Waarom:** de hele site gebruikt een kaart voor één onderwerp en een Notice voor een mededeling.
+  Een eigen kleur voor goed en fout zou de site rommelig maken, en kleur alleen is geen teken.
+- **Alternatieven:** witte of zandkleurige kaarten in de smalle kolom; groene en rode meldingen.
+
+## Het venster van de Uitblinker sluit op de eerstvolgende bekende aanvang of na zeven dagen, en de server beslist twee keer
+
+- **Datum:** 22 november 2026
+- **Besluit:** de laatste gespeelde wedstrijd is de wedstrijd van het venster.
+  Het venster opent als het verslag af is (`playerMinutes` geeft dan minuten) en sluit op de eerste bekende aanvang van een latere wedstrijd die nog niet is gespeeld, of zeven dagen na de aanvang van de wedstrijd zelf, wat het eerst komt.
+  Is de aanvang niet bekend, dan telt het begin van de dag (UTC).
+  De regel staat op één plek, `packages/db/src/rating-window.ts`, zodat de site en de import dezelfde vraag stellen.
+  De server beslist in de actie, en nogmaals in de `INSERT`: die selecteert alleen rijen als `UTC_TIMESTAMP()` voor het sluitmoment ligt, de wedstrijd gespeeld is, de speler van ons is en het account vóór de aanvang bestond en niet geblokkeerd is.
+  Een trage aanvraag komt er zo niet na het sluiten doorheen.
+  De lijst bevat de spelers van ons uit het verslag met minstens 30 minuten (`ratingMinimumMinutes`), op naam gesorteerd; een cijfer hoort bij de verschijning in het verslag (`player_ratings.appearance_id`).
+  De cijfers van een opgeheven account blijven anoniem staan (`ON DELETE SET NULL`), die van een geblokkeerd account tellen niet mee in de gemiddelden.
+- **Waarom:** de aanvang van de volgende wedstrijd is wat een supporter zelf verwacht, en zeven dagen vangt een wedstrijd zonder bekende vervolgwedstrijd op.
+  De tweede controle in de `INSERT` is de enige die niet voorbij te lopen is met een trage aanvraag, zoals bij de Prognose.
+- **Alternatieven:** het venster aan de klok van de applicatie binden (een trage aanvraag glipt erdoorheen); een eigen kolom met het sluitmoment (die kan van de wedstrijden afwijken als een aanvang verschuift).
+- **Let op:** het formulier heeft nog geen cijfer voor de trainer (#1478), dus de teller en de teksten tellen alleen spelers.
+
+## De import sluit het venster en zet de gemiddelden in `match_player_ratings`
+
+- **Datum:** 22 november 2026
+- **Besluit:** een stap van elke run van de import (`closeRatingWindows`) schrijft voor elke wedstrijd met cijfers van supporters, waarvan het venster dicht is en die nog geen gemiddelden met de bron `fans` heeft, het gemiddelde, het aantal en de spreiding per speler naar `match_player_ratings`.
+  De stap doet niets als `FANS_UITBLINKER` of `FANS_ACCOUNTS` uit staat, en een tweede keer draaien verandert niets.
+  Een fout in de stap is een waarschuwing in het logboek en geen mislukte import.
+  Er is geen tweede tabel voor de gemiddelden: `match_player_ratings` heeft de bron `fans` al sinds #1465.
+- **Waarom:** de pagina's lezen zo één kleine tabel, voor oude en nieuwe cijfers samen, zoals #1465 het bedoelde.
+  De run draait elk kwartier, en het venster sluit op een aanvang.
+- **Alternatieven:** een eigen cron-taak naast de import (nog een proces om te bewaken); de gemiddelden elke keer uit `player_ratings` uitrekenen.
+
+## De pagina van de Uitblinker bewaart niets halverwege en laat na het opslaan alleen de eigen cijfers zien
+
+- **Datum:** 22 november 2026
+- **Besluit:** het formulier is een gewone `POST` met een serveractie.
+  Met een gat in de cijfers bewaart de server niets en geeft de ingevulde cijfers en een fout per speler terug; de pagina toont een ErrorSummary "Nog 2 cijfers" met een link naar elke schaal.
+  Na het opslaan stuurt de actie de supporter door naar de pagina, die de Notice met het sluitmoment, de knop "Wijzigen" en een tabel met alleen de eigen cijfers toont.
+  "Wijzigen" is een formulier met `GET` en `wijzigen=1`, dat werkt zonder JavaScript.
+  De teller "Nog 9 van 15 te gaan" komt alleen met JavaScript en is een status.
+  Een schaal heeft de naam "Cijfer voor `<speler>`" en geen `required`, zodat de eigen fouten van de server tonen en niet die van de browser.
+  Een cijfer van de supporter staat ook op "Alles wat we van je bewaren" (`ratingData`), en `player_ratings` komt in het exportplan met `supporter_id` als `NULL`.
+  De pagina krijgt `noindex`, zoals de Prognose.
+- **Waarom:** zo werkt alles zonder JavaScript, en blijven de gemiddelden en de cijfers van anderen uit beeld tot het venster dicht is (de tussenstand komt met #1472).
+- **Alternatieven:** een cijfer direct bij het kiezen opslaan (halve formulieren, ongelijke aantallen cijfers); de ingevulde cijfers na een fout wissen.

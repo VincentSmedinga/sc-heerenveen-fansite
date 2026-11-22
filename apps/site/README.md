@@ -1519,6 +1519,16 @@ De link opent `/fans/herinnering/uitzetten`, een pagina met een knop die de heri
 `supporter_reminders` bewaart per supporter en wedstrijd dat het bericht is verstuurd, zonder adres of naam.
 De stap maakt de rij vlak voor het bericht uitgaat en haalt hem weg als het versturen mislukt, zodat een mislukt bericht bij de volgende run opnieuw wordt geprobeerd.
 
+### De Uitblinker
+
+`/fans/uitblinker` (`app/fans/uitblinker`) laat een supporter de spelers van de laatste wedstrijd een cijfer van 1 tot 10 geven.
+De regels van het venster staan op één plek, `packages/db/src/rating-window.ts`: welke wedstrijd, wie in de lijst staat (minstens 30 minuten volgens het verslag, `ratingMinimumMinutes`), wanneer het venster sluit en het opslaan, dat het sluitmoment in de `INSERT` nog eens met de klok van de database controleert.
+De pagina en de actie roepen alleen `src/fans/rating.ts` aan, en het formulier (`RatingForm.tsx`) is een gewone `POST` die zonder JavaScript werkt.
+De cijfers staan in `player_ratings`, per supporter en verschijning in het verslag.
+Een stap van de import (`closeRatingWindows`) zet de gemiddelden na het sluiten in `match_player_ratings` met de bron `fans`.
+Op `/fans` staat een kaart van het spel (`app/fans/UitblinkerCard.tsx`) en onder "Alles wat we van je bewaren" de eigen cijfers (`src/fans/rating-data.ts`).
+`e2e/fans-rating.spec.ts` zet met `addRatingMatch` (`e2e/admin.ts`) een gespeelde wedstrijd met verslag in de database, omdat de verzonnen gegevens er geen hebben.
+
 ## De spelregels
 
 `/fans/spelregels` heeft de regels van alle spellen op één pagina, een kaart per spel en een kaart Account (`app/fans/spelregels`).

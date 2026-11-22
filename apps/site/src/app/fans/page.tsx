@@ -8,6 +8,8 @@ import { fansGames, fansPath, rulesPath } from '#src/fans-paths'
 import { currentSupporter } from '#src/fans/require-supporter'
 import { pageMetadata } from '#src/metadata'
 
+import { readUitblinkerCard, UitblinkerCard } from './UitblinkerCard'
+
 // Render on each request: the canonical URL comes from SITE_ENV and the parts of Fans from
 // their own settings, which the build doesn't know.
 export const dynamic = 'force-dynamic'
@@ -52,6 +54,7 @@ export default async function FansPage({
   const supporter = await currentSupporter()
 
   const { uitgelogd, welkom } = await searchParams
+  const uitblinker = await readUitblinkerCard(supporter)
 
   return (
     <Page.Main>
@@ -83,6 +86,7 @@ export default async function FansPage({
             </Button>
           </Form>
         </Card>
+        {uitblinker === undefined ? null : <UitblinkerCard {...uitblinker} />}
         <Card aria-labelledby="wat-komt-er">
           <Heading id="wat-komt-er" level={2}>
             Wat komt er

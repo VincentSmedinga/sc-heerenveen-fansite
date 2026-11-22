@@ -18,6 +18,7 @@ import {
   primaryKey,
   smallint,
   text,
+  tinyint,
   unique,
   varchar,
 } from 'drizzle-orm/mysql-core'
@@ -3070,6 +3071,43 @@ export const matchCoachRatings = mysqlTable(
 )
 
 export type MatchCoachRating = typeof matchCoachRatings.$inferSelect
+
+/**
+ * The ratings that supporters give the players of the last match in the game Uitblinker (issue
+ * 1470): one grade from 1 to 10 for one player of the report of a match, by one supporter. The
+ * player is the appearance in the match (`match_appearances`), so a rating goes with the match
+ * and its report. A supporter has one row for each appearance, which they can change until the
+ * window closes. `supporter_id` is emptied when the account is closed (`ON DELETE SET NULL`),
+ * so the grade stays as an anonymous grade, without a link to a person. When the window closes,
+ * the averages go to `match_player_ratings` with the source `fans`. Times are UTC.
+ */
+export const playerRatings = mysqlTable(
+  'player_ratings',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    supporterId: int('supporter_id', { unsigned: true }).references(() => supporters.id, { onDelete: 'set null' }),
+    appearanceId: int('appearance_id', { unsigned: true })
+      .notNull()
+      .references(() => matchAppearances.id, { onDelete: 'cascade' }),
+    grade: tinyint('grade', { unsigned: true }).notNull(),
+    createdAt: datetime('created_at')
+      .notNull()
+      .default(sql`(UTC_TIMESTAMP())`),
+    updatedAt: datetime('updated_at')
+      .notNull()
+      .default(sql`(UTC_TIMESTAMP())`),
+  },
+  (table) => [
+    unique('player_ratings_supporter_id_appearance_id_unique').on(table.supporterId, table.appearanceId),
+    index('player_ratings_appearance_id_idx').on(table.appearanceId),
+    check(
+      'player_ratings_grade_in_range',
+      sql`${table.grade} between ${sql.raw(String(ratingLimits.minGrade))} and ${sql.raw(String(ratingLimits.maxGrade))}`,
+    ),
+  ],
+)
+
+export type PlayerRating = typeof playerRatings.$inferSelect
 
 /** Where the counts of predictions come from: the old fansite, 2001 to 2007 (issue 1457). */
 export const predictionCountSources = ['oude-fansite'] as const

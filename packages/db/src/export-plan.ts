@@ -122,6 +122,10 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
   persons: 'copy',
   player_field_differences: 'copy',
   player_list_titles: 'copy',
+  player_ratings: {
+    keep: ['id', 'appearance_id', 'grade', 'created_at', 'updated_at'],
+    replace: { supporter_id: 'NULL' },
+  },
   player_season_stats: 'copy',
   player_stat_differences: 'copy',
   players: 'copy',

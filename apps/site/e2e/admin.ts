@@ -1,4 +1,5 @@
 import { connect } from '@fansite/db/client'
+import { withClubs } from '@fansite/db/clubs'
 import { readDatabaseEnv } from '@fansite/db/env'
 import {
   adminSessions,
@@ -6,12 +7,16 @@ import {
   clubs,
   feeds,
   items,
+  matchAppearances,
   matches,
+  matchReports,
+  players,
   predictions,
   sources,
   supporters,
 } from '@fansite/db/schema'
-import { eq } from 'drizzle-orm'
+import { seasonOf } from '@fansite/db/season'
+import { and, eq, inArray } from 'drizzle-orm'
 import path from 'node:path'
 
 import { hashOf, newToken } from '../src/beheer/sessions'
@@ -218,6 +223,79 @@ export async function addPlayedPrediction(email: string, round: string) {
     })
 
     return match.insertId
+  } finally {
+    await close()
+  }
+}
+
+/** The three made-up players of the match of `addRatingMatch`, in the order of the page. */
+export const ratingPlayers = ['Cijfer Aanvaller', 'Cijfer Keeper', 'Cijfer Verdediger'] as const
+
+/**
+ * A match that was played ten minutes ago, with a finished report of three players of ours who
+ * played 90 minutes, for the checks of the game Uitblinker (issue 1470). It is the last match
+ * played and the one after it (the made-up match in three days) is far enough away to keep the
+ * window open. The account with this address is made older than the match, because the
+ * browser makes it a moment ago and only an account that was there before the match can rate.
+ * It returns what takes the match away again.
+ */
+export async function addRatingMatch(email: string) {
+  const { close, db } = connect(localDatabaseUrl())
+
+  try {
+    const kickoffAt = new Date(Math.floor(Date.now() / 1000) * 1000 - 10 * 60 * 1000)
+    const season = seasonOf(kickoffAt)
+
+    // What a check that stopped halfway left behind, so a second run starts clean.
+    await db.delete(matches).where(and(eq(matches.opponent, 'Cijferploeg'), eq(matches.round, 'Cijfer-controle')))
+    await db.delete(players).where(inArray(players.name, [...ratingPlayers]))
+
+    await db
+      .update(supporters)
+      .set({ createdAt: new Date(kickoffAt.getTime() - 30 * 24 * 60 * 60 * 1000) })
+      .where(eq(supporters.email, email))
+
+    // The opponent is a club of its own, so no other check sees one more match against a club.
+    const [row] = await withClubs(db, [
+      {
+        competition: 'Eredivisie',
+        goalsAgainst: 0,
+        goalsFor: 1,
+        home: true,
+        kickoffAt,
+        matchDate: kickoffAt.toISOString().slice(0, 10),
+        opponent: 'Cijferploeg',
+        round: 'Cijfer-controle',
+        season,
+        status: 'played',
+      },
+    ])
+    const [match] = await db.insert(matches).values(row!)
+
+    const matchId = match.insertId
+
+    await db.insert(matchReports).values({ matchId, opponentComplete: false, status: 'klaar' })
+
+    for (const [index, name] of ratingPlayers.entries()) {
+      const [player] = await db.insert(players).values({ name, searchTerm: name, season, source: 'selectie' })
+
+      await db
+        .insert(matchAppearances)
+        .values({ matchId, name, ours: true, playerId: player.insertId, shirtNumber: index + 1, starter: true })
+    }
+
+    return async () => {
+      const connection = connect(localDatabaseUrl())
+
+      try {
+        // The report, its players and their grades go with the match.
+        await connection.db.delete(matches).where(eq(matches.id, matchId))
+        await connection.db.delete(players).where(inArray(players.name, [...ratingPlayers]))
+        await connection.db.delete(clubs).where(eq(clubs.id, row?.clubId ?? 0))
+      } finally {
+        await connection.close()
+      }
+    }
   } finally {
     await close()
   }

@@ -66,6 +66,9 @@ const open = [
   'app/fans/prognose/stand/page.tsx',
   // The rules of the games are public and hold nothing personal (issue 1455).
   'app/fans/spelregels/page.tsx',
+  // The page of the game Uitblinker: a visitor sees the match and the way in, and a supporter's
+  // grades are read only with a session. Its action calls requireSupporter.
+  'app/fans/uitblinker/page.tsx',
 ]
 
 function filesUnder(folder: string) {
@@ -118,6 +121,7 @@ async function exportedFunctions(file: string) {
 beforeEach(() => {
   vi.stubEnv('FANS_ACCOUNTS', 'on')
   vi.stubEnv('FANS_PROGNOSE', 'on')
+  vi.stubEnv('FANS_UITBLINKER', 'on')
 })
 
 afterEach(() => {
@@ -172,14 +176,21 @@ describe('the pages of Fans', () => {
     }
   })
 
-  it.each(routes.concat(actionFiles).filter((file) => file.startsWith('app/fans/prognose/')))(
-    'answer not found in %s while the game is off and accounts are on',
-    async (file) => {
-      vi.stubEnv('FANS_PROGNOSE', 'off')
+  it.each(
+    routes
+      .concat(actionFiles)
+      .flatMap((file) =>
+        file.startsWith('app/fans/prognose/')
+          ? [[file, 'FANS_PROGNOSE']]
+          : file.startsWith('app/fans/uitblinker/')
+            ? [[file, 'FANS_UITBLINKER']]
+            : [],
+      ),
+  )('answer not found in %s while its game is off (%s) and accounts are on', async (file, setting) => {
+    vi.stubEnv(setting ?? '', 'off')
 
-      for (const { error, name } of await callAll(file)) {
-        expect(error, `${file} ${name}`).toEqual(new Error('not found'))
-      }
-    },
-  )
+    for (const { error, name } of await callAll(file ?? '')) {
+      expect(error, `${file} ${name}`).toEqual(new Error('not found'))
+    }
+  })
 })
