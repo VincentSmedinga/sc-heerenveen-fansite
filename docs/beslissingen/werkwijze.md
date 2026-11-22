@@ -524,7 +524,6 @@
   De laptop liep warm (belasting boven de 20 bij vijf sessies, plus de Docker-VM), en eigen poorten maken sessies niet zuiniger.
   Dat is het werk van de Coordinator en geen onderdeel van deze beslissing.
   De MCP-server van Storybook in `.mcp.json` blijft op poort 6006: die is van de checkout met de standaardpoorten.
-- **Later:** zie _De Coördinator plant Builders op de belasting van de computer_ (22 november 2026): de grens van twee Builders is vervangen door een regel op de belasting.
   De Storybook van een worktree draait op zijn eigen poort, en `pnpm worktree:env` zegt welke.
   De database `fansite` en de databases die sessies al met de hand maakten, blijven ongemoeid.
 - **Alternatieven:** een eigen MariaDB-server per werkmap; dat scheidt alles, maar kost een Docker-container en geheugen per sessie, op een computer die al warm loopt.
@@ -533,6 +532,7 @@
   Of niets doen en sessies laten wachten; dat is wat misging.
 - **Later:** een eigen server per werkmap, als de botsingen blijven; of de poorten laten kiezen door een bestand in de werkmap als twee namen vaak hetzelfde blok krijgen.
 - **Later:** sinds 10 november 2026 weigert het script een werkmap die op `fansite_acc` zou uitkomen: die database heeft de kopie van acceptatie; zie _De kopie heet `fansite_acc`, en geen werkmap mag die naam krijgen_ in `hosting-en-data.md`.
+- **Later:** zie _De Coördinator plant Builders op de belasting van de computer_ (22 november 2026): de grens van twee Builders is vervangen door een regel op de belasting.
 
 ## De zware controles delen de machine
 
