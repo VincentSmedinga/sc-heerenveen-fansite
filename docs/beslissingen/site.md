@@ -7480,3 +7480,16 @@
   De regel voor gelijke punten is dezelfde als die van de stand.
 - **Waarom:** de pagina kan zo niet anders zeggen dan het spel doet.
 - **Alternatieven:** de bedragen in de tekst typen.
+
+## De kaart "Wat supporters toen voorspelden" staat bij de oude wedstrijden, achter de schakelaar van de Prognose
+
+- **Datum:** 22 november 2026
+- **Besluit:** de pagina van een wedstrijd van de oude Fansite (`dataSource` is `oude-fansite`) toont de kaart Prognose met de aantallen van toen, op de plek van de kaart van de Prognose van nu: in de smalle kolom na de opstellingen en vóór Nieuws.
+  Onder de kop "Prognose" staat "Wat supporters toen voorspelden", dan het aantal, de balk met winst, gelijk en verlies voor sc Heerenveen, de lijst "Meest voorspelde eindstanden" en de bronregel "Voorspellingen van bezoekers van de Fansite, 2001 tot 2007." in kleine letters.
+  De kaart gebruikt `PredictionCrowd`, met dezelfde drempels als de kaart van nu (onder vijf voorspellingen alleen het aantal, een stand met minder dan drie voorspellingen onder "anders"), en zonder de kerncijfers over punten en gemiddelde.
+  Hij staat achter de schakelaar van de Prognose: staat het onderdeel uit, dan is er geen kaart en vraagt de pagina de aantallen niet op.
+  Een wedstrijd zonder oude voorspellingen heeft geen kaart.
+  De aantallen komen één keer per minuut per wedstrijd uit de database (`oldMatchCrowd`), zoals bij de kaart van nu.
+- **Waarom:** het zijn gegevens van hetzelfde spel, dus ze komen samen met het spel online.
+  Een oude wedstrijd heeft geen formulier en geen stand meer, dus de kaart toont alleen wat supporters toen voorspelden.
+- **Alternatieven:** de oude aantallen altijd tonen; ze op de nieuwe kaart zetten met de punten (de oude punten komen niet terug).

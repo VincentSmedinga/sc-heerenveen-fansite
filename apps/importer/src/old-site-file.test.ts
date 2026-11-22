@@ -19,6 +19,7 @@ const allowedFieldNames = new Set([
   'assist',
   'attendance',
   'average',
+  'away',
   'awayCorners',
   'awayFouls',
   'awayFullTime',
@@ -35,6 +36,9 @@ const allowedFieldNames = new Set([
   'event',
   'events',
   'firstName',
+  'fullTime',
+  'halfTime',
+  'home',
   'homeCorners',
   'homeFouls',
   'homeFullTime',
@@ -56,6 +60,7 @@ const allowedFieldNames = new Set([
   'playerCode',
   'playerName',
   'players',
+  'predictions',
   'ratings',
   'referee',
   'result',
@@ -195,6 +200,76 @@ describe('parseOldSiteFile', () => {
     expect(() =>
       parseOldSiteFile(JSON.stringify({ matches: [match], season: '9091', version: 3 }), 'matches-9091.json'),
     ).toThrow('matches-9091.json does not match')
+  })
+})
+
+describe('the predictions in the repository (#1457)', () => {
+  const total = (list: { count: number }[]) => list.reduce((sum, score) => sum + score.count, 0)
+
+  it('count 17,119 predictions in 254 matches, the same in full-time and half-time scores', async () => {
+    const { predictions } = await readOldSiteData()
+
+    expect(predictions).toHaveLength(254)
+    expect(predictions.reduce((sum, one) => sum + total(one.fullTime), 0)).toBe(17_119)
+    for (const one of predictions) {
+      expect(total(one.halfTime)).toBe(total(one.fullTime))
+    }
+  })
+
+  it('have the known counts of a handful of matches, checked against the old database', async () => {
+    const { predictions } = await readOldSiteData()
+    const of = (season: string, code: string) =>
+      predictions.find((one) => one.season === season && one.matchCode === code)
+
+    // Visitors with an account and, in 2001/02, those from before the accounts.
+    expect(total(of('0102', 'ajax.thuis')?.fullTime ?? [])).toBe(76)
+    expect(total(of('0102', 'ajax.uit')?.fullTime ?? [])).toBe(86)
+    expect(total(of('0304', 'liersesk.thuis')?.fullTime ?? [])).toBe(60)
+    expect(total(of('0607', 'willemii.uit')?.fullTime ?? [])).toBe(9)
+    expect(of('0102', 'ajax.uit')?.fullTime).toContainEqual({ away: 1, count: 9, home: 0 })
+    expect(of('0102', 'ajax.uit')?.fullTime).toContainEqual({ away: 1, count: 11, home: 1 })
+  })
+})
+
+describe('the files with the predictions (#1457)', () => {
+  const prediction = {
+    fullTime: [
+      { away: 0, count: 14, home: 2 },
+      { away: 1, count: 8, home: 1 },
+    ],
+    halfTime: [{ away: 0, count: 22, home: 1 }],
+    matchCode: 'psv.thuis',
+  }
+  const file = { predictions: [prediction], season: '0102', version: 3 }
+
+  it('read a file with the counts per score', () => {
+    expect(parseOldSiteFile(JSON.stringify(file))).toEqual(file)
+  })
+
+  it('refuse a field with a name, an address, a time or a visitor, and a count of zero', () => {
+    for (const extra of [
+      { name: 'Jan' },
+      { email: 'jan@example.com' },
+      { dateTime: '2001-09-01 20:00:00' },
+      { visitor: 'x' },
+    ]) {
+      expect(() => parseOldSiteFile(JSON.stringify({ ...file, predictions: [{ ...prediction, ...extra }] }))).toThrow(
+        'does not match',
+      )
+      expect(() =>
+        parseOldSiteFile(
+          JSON.stringify({
+            ...file,
+            predictions: [{ ...prediction, fullTime: [{ away: 0, count: 1, home: 1, ...extra }] }],
+          }),
+        ),
+      ).toThrow('does not match')
+    }
+    expect(() =>
+      parseOldSiteFile(
+        JSON.stringify({ ...file, predictions: [{ ...prediction, fullTime: [{ away: 0, count: 0, home: 1 }] }] }),
+      ),
+    ).toThrow('does not match')
   })
 })
 

@@ -3071,6 +3071,43 @@ export const matchCoachRatings = mysqlTable(
 
 export type MatchCoachRating = typeof matchCoachRatings.$inferSelect
 
+/** Where the counts of predictions come from: the old fansite, 2001 to 2007 (issue 1457). */
+export const predictionCountSources = ['oude-fansite'] as const
+
+export type PredictionCountSource = (typeof predictionCountSources)[number]
+
+/** The two scores a supporter predicted: the half-time score and the full-time score. */
+export const predictionCountKinds = ['half_time', 'full_time'] as const
+
+export type PredictionCountKind = (typeof predictionCountKinds)[number]
+
+/**
+ * How many supporters of the old fansite predicted one score in one match (issue 1457): one row
+ * for each match, kind of score (half-time or full-time) and score, home first. It holds counts
+ * only: who predicted is not kept, and not when. The number of predictions of a match is the
+ * sum of its full-time rows. It goes with the match.
+ */
+export const matchPredictionCounts = mysqlTable(
+  'match_prediction_counts',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    matchId: int('match_id', { unsigned: true })
+      .notNull()
+      .references(() => matches.id, { onDelete: 'cascade' }),
+    source: mysqlEnum('source', predictionCountSources).notNull(),
+    kind: mysqlEnum('kind', predictionCountKinds).notNull(),
+    home: smallint('home', { unsigned: true }).notNull(),
+    away: smallint('away', { unsigned: true }).notNull(),
+    predictionCount: int('prediction_count', { unsigned: true }).notNull(),
+  },
+  (table) => [
+    unique('match_prediction_counts_score_unique').on(table.matchId, table.source, table.kind, table.home, table.away),
+    check('match_prediction_counts_count_positive', sql`${table.predictionCount} > 0`),
+  ],
+)
+
+export type MatchPredictionCount = typeof matchPredictionCounts.$inferSelect
+
 /**
  * The season ratings of 1998/99 to 2000/01 (issue 1465): the old fansite kept an average for a
  * player per season then, without matches and without the number of ratings, so they cannot be

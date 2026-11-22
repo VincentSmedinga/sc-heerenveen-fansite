@@ -121,6 +121,7 @@ const dataOf = (list: OldSiteMatch[]): OldSiteData => ({
   coachRatings: [],
   matches: list,
   players: [],
+  predictions: [],
   ratings: [],
   seasonRatings: [],
   winners: [],

@@ -152,6 +152,32 @@ export const oldSiteRatingsFileSchema = z.strictObject({
   version: z.literal(oldSiteFileVersion),
 })
 
+/** How many visitors predicted one score: home first, as the old database has it. */
+export const oldSitePredictionScoreSchema = z.strictObject({
+  away: count.max(99),
+  count: z.number().int().min(1),
+  home: count.max(99),
+})
+
+/**
+ * What visitors of the old fansite predicted for one match (#1457): how many predicted each
+ * full-time score and each half-time score. The file has these counts and nothing else: no
+ * name, no address, no time and no number for a person. A visitor who predicted a match twice
+ * counts once, and the predictions of before the first accounts count as a number only.
+ */
+export const oldSitePredictionSchema = z.strictObject({
+  fullTime: z.array(oldSitePredictionScoreSchema).min(1),
+  halfTime: z.array(oldSitePredictionScoreSchema),
+  matchCode: z.string().min(1),
+})
+
+/** The predictions of the matches of one season, in `predictions-<season>.json`. */
+export const oldSitePredictionsFileSchema = z.strictObject({
+  predictions: z.array(oldSitePredictionSchema),
+  season: z.string().regex(/^\d{4}$/),
+  version: z.literal(oldSiteFileVersion),
+})
+
 /** The season rating the old fansite kept for a player in 1998/99 to 2000/01: an average. */
 export const oldSiteSeasonRatingSchema = z.strictObject({
   average: z.number().min(1).max(10),
@@ -180,6 +206,7 @@ export const oldSiteFileSchema = z.union([
   oldSitePlayersFileSchema,
   oldSiteMatchesFileSchema,
   oldSiteRatingsFileSchema,
+  oldSitePredictionsFileSchema,
   oldSiteSeasonRatingsFileSchema,
 ])
 
@@ -193,6 +220,8 @@ export type OldSiteData = {
   coachRatings: OldSiteCoachRatingOfSeason[]
   matches: OldSiteMatch[]
   players: OldSitePlayer[]
+  /** The counts of predictions per match, each with the season of its file. */
+  predictions: OldSitePredictionOfSeason[]
   /** The averages per match and player, each with the season of its file. */
   ratings: OldSiteRatingOfSeason[]
   seasonRatings: OldSiteSeasonRating[]
@@ -203,6 +232,9 @@ export type OldSiteFile = z.output<typeof oldSiteFileSchema>
 export type OldSiteLineupEntry = z.output<typeof oldSiteLineupSchema>
 export type OldSiteMatch = z.output<typeof oldSiteMatchSchema>
 export type OldSitePlayer = z.output<typeof oldSitePlayerSchema>
+export type OldSitePrediction = z.output<typeof oldSitePredictionSchema>
+export type OldSitePredictionOfSeason = OldSitePrediction & { season: string }
+export type OldSitePredictionScore = z.output<typeof oldSitePredictionScoreSchema>
 export type OldSiteRating = z.output<typeof oldSiteRatingSchema>
 export type OldSiteRatingOfSeason = OldSiteRating & { season: string }
 export type OldSiteSeasonRating = z.output<typeof oldSiteSeasonRatingSchema>
@@ -246,6 +278,7 @@ export async function readOldSiteData(folder: string | URL = oldSiteDataFolder):
     coachRatings: [],
     matches: [],
     players: [],
+    predictions: [],
     ratings: [],
     seasonRatings: [],
     winners: [],
@@ -263,6 +296,8 @@ export async function readOldSiteData(folder: string | URL = oldSiteDataFolder):
     } else if ('players' in file) {
       playerFiles += 1
       data.players.push(...file.players)
+    } else if ('predictions' in file) {
+      data.predictions.push(...file.predictions.map((prediction) => ({ ...prediction, season: file.season })))
     } else if ('ratings' in file) {
       data.ratings.push(...file.ratings.map((rating) => ({ ...rating, season: file.season })))
       data.coachRatings.push(...file.coachRatings.map((rating) => ({ ...rating, season: file.season })))
@@ -311,6 +346,20 @@ export async function readOldSiteData(folder: string | URL = oldSiteDataFolder):
       throw new Error(`The rating of ${rating.playerCode} in the match ${key} is in the files twice.`)
     }
     ratingKeys.add(`${key}/${rating.playerCode}`)
+  }
+
+  const predictionKeys = new Set<string>()
+
+  for (const prediction of data.predictions) {
+    const key = `${prediction.season}/${prediction.matchCode}`
+
+    if (!keys.has(key)) {
+      throw new Error(`The predictions hold the match ${key}, which is not in the match files.`)
+    }
+    if (predictionKeys.has(key)) {
+      throw new Error(`The predictions of the match ${key} are in the files twice.`)
+    }
+    predictionKeys.add(key)
   }
 
   const coachKeys = new Set<string>()

@@ -105,6 +105,7 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
   match_imports: 'copy',
   match_incidents: 'copy',
   match_player_ratings: 'copy',
+  match_prediction_counts: 'copy',
   match_reports: 'copy',
   match_shootout_kicks: 'copy',
   match_statistics: 'copy',

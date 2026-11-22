@@ -1,10 +1,18 @@
-import { Card, GameHeading, Link, PredictionCrowd, type PredictionCrowdProps, Text } from '@fansite/design-system'
+import {
+  Card,
+  GameHeading,
+  Heading,
+  Link,
+  PredictionCrowd,
+  type PredictionCrowdProps,
+  Text,
+} from '@fansite/design-system'
 import { isFansPartOn } from '@fansite/shared/fans-env'
 
 import { getDatabase } from '#src/database'
 import { reasonOf } from '#src/errors'
 import { isOpen, predictionMatches, predictionPath } from '#src/fans/prediction'
-import { type MatchCrowd, matchCrowd, shareText } from '#src/fans/prediction-crowd'
+import { type MatchCrowd, matchCrowd, oldMatchCrowd, shareText } from '#src/fans/prediction-crowd'
 
 // The card Prognose on the page of a match (issue 1453): what supporters predicted, as figures
 // for a group and never a name. The page is the same for every visitor, so the card reads
@@ -61,6 +69,16 @@ export function crowdProps({ crowd, reveal }: Pick<PredictionCrowdData, 'crowd' 
 }
 
 /**
+ * The card for an old match (issue 1457): what visitors of the old fansite predicted, from the
+ * counts of the import. It is the card of `PredictionCrowdCard` after the match, without the
+ * figures about points and the average, and with the source under it. It has no card without
+ * counts, and none while the game is off.
+ */
+export async function loadOldPredictionCrowd(match: { id: number }): Promise<MatchCrowd | undefined> {
+  return isFansPartOn('prognose') ? oldMatchCrowd(match.id) : undefined
+}
+
+/**
  * What the card shows for a match: nothing when the game is off or nobody predicted. Before
  * the kick-off it is the count; from the kick-off the figures too. The match is the one of the
  * page, so the cache gets keys of matches that exist.
@@ -85,6 +103,21 @@ export async function loadPredictionCrowd(
     !reveal && isOpen(match, now) && (await predictionMatches(getDatabase().db, now)).next?.id === match.id
 
   return { crowd, formOpen, reveal }
+}
+
+export function OldPredictionCrowdCard({ crowd }: { crowd: MatchCrowd }) {
+  return (
+    <Card aria-labelledby="prognose-supporters" game="prognose">
+      <GameHeading id="prognose-supporters" level={2} meta="Van supporters">
+        Prognose
+      </GameHeading>
+      <Heading appearance={3} level={3}>
+        Wat supporters toen voorspelden
+      </Heading>
+      <PredictionCrowd {...crowdProps({ crowd, reveal: true })} headingLevel={3} />
+      <Text appearance="meta">Voorspellingen van bezoekers van de Fansite, 2001 tot 2007.</Text>
+    </Card>
+  )
 }
 
 /**
@@ -119,6 +152,17 @@ export function PredictionCrowdCard({
       ) : null}
     </Card>
   )
+}
+
+/** The counts for an old match. A failed reading leaves the card out and logs it. */
+export async function readOldPredictionCrowd(match: { id: number }) {
+  try {
+    return await loadOldPredictionCrowd(match)
+  } catch (error) {
+    console.error(`Could not read what supporters predicted for old match ${match.id}: ${reasonOf(error)}`)
+
+    return undefined
+  }
 }
 
 /**

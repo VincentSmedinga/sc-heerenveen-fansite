@@ -4570,3 +4570,21 @@
 - **Alternatieven:** de cijfers voor de trainers weglaten; ze in `match_player_ratings` zetten met een nepspeler (breekt de koppeling met `players`); ze zonder koppeling bewaren.
 - **Let op:** de melding voor een trainer zonder koppeling staat in het logboek van de import en niet in een lijst in `docs/`, want het exportscript kent de staf niet: die staat alleen in de database.
   Na de merge draait de eigenaar op acceptatie `import.mjs --old-site`; de stap `trainercijfers` doet de rest.
+
+## Van de oude voorspellingen komen alleen aantallen per stand over
+
+- **Datum:** 22 november 2026
+- **Besluit:** het exportscript van de oude site (`pnpm export:old-site`) telt de voorspellingen van `prognose_inz` en `prognose_oud` per wedstrijd, per voorspelde eindstand en per voorspelde ruststand, en schrijft die aantallen naar `predictions-<seizoen>.json`.
+  Het script schrijft nooit een naam, een e-mailadres, een tijd of een aantal per bezoeker, en de strikte schematoets weigert zulke velden.
+  De stap `voorspellingen` van de import zet de aantallen in de nieuwe tabel `match_prediction_counts`, met de bron `oude-fansite`: een rij per wedstrijd, soort stand (rust of eind) en stand.
+  Een bezoeker die dezelfde wedstrijd twee keer voorspelde, telt één keer, met de laatste voorspelling.
+  De 883 voorspellingen van juli tot december 2001, van vóór de accounts, tellen mee als aantal; de naam en het e-mailadres die erbij horen, leest het script niet.
+  Een voorspelling voor een wedstrijdcode die niet meer bestaat, valt weg, en de melding van het script noemt per wedstrijd hoeveel (77 stuks, in drie codes, waarvan één met een tikfout in de code en 24 zonder code).
+  De oude ranglijsten en de punten komen niet terug.
+- **Waarom:** de oude ranglijsten hebben namen van echte leden nodig, en de privacybelofte van de site laat dat niet toe.
+  De aantallen zijn genoeg voor een kaart bij de oude wedstrijd, en wie voorspelde is een persoonsgegeven zonder nut voor de site.
+  De import leest alleen de bestanden, want productie kan de oude database niet bereiken.
+- **Alternatieven:** de oude ranglijsten tonen met de schermnamen van toen; de losse voorspellingen importeren (houdt persoonsgegevens bij); alleen de eindstanden tellen (de ruststanden zijn er dan niet als een kaart ze later wil tonen).
+- **Let op:** de tabel heeft geen verwijzing naar `predictions` (de voorspellingen van nu): die hebben een supporter, en deze tellen een groep.
+  Het aantal voorspellingen van een wedstrijd is de som van haar rijen met de eindstand.
+  Na de merge draait de eigenaar op acceptatie `import.mjs --old-site`; de stap `voorspellingen` doet de rest.

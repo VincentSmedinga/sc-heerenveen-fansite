@@ -1,0 +1,1314 @@
+{
+  "predictions": [
+    {
+      "fullTime": [
+        {"away": 0, "count": 2, "home": 0},
+        {"away": 0, "count": 8, "home": 1},
+        {"away": 1, "count": 1, "home": 1},
+        {"away": 0, "count": 11, "home": 2},
+        {"away": 1, "count": 21, "home": 2},
+        {"away": 2, "count": 1, "home": 2},
+        {"away": 0, "count": 6, "home": 3},
+        {"away": 1, "count": 11, "home": 3},
+        {"away": 2, "count": 2, "home": 3},
+        {"away": 1, "count": 3, "home": 4},
+        {"away": 2, "count": 1, "home": 4},
+        {"away": 2, "count": 1, "home": 5}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 15, "home": 0},
+        {"away": 1, "count": 2, "home": 0},
+        {"away": 0, "count": 34, "home": 1},
+        {"away": 1, "count": 7, "home": 1},
+        {"away": 0, "count": 8, "home": 2},
+        {"away": 1, "count": 2, "home": 2}
+      ],
+      "matchCode": "adodenhaag.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 1, "count": 2, "home": 0},
+        {"away": 2, "count": 9, "home": 0},
+        {"away": 3, "count": 6, "home": 0},
+        {"away": 4, "count": 2, "home": 0},
+        {"away": 5, "count": 1, "home": 0},
+        {"away": 1, "count": 1, "home": 1},
+        {"away": 2, "count": 15, "home": 1},
+        {"away": 3, "count": 26, "home": 1},
+        {"away": 4, "count": 2, "home": 1},
+        {"away": 2, "count": 3, "home": 2},
+        {"away": 3, "count": 5, "home": 2},
+        {"away": 4, "count": 3, "home": 2},
+        {"away": 0, "count": 1, "home": 3},
+        {"away": 4, "count": 1, "home": 3}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 3, "home": 0},
+        {"away": 1, "count": 30, "home": 0},
+        {"away": 2, "count": 12, "home": 0},
+        {"away": 3, "count": 1, "home": 0},
+        {"away": 0, "count": 10, "home": 1},
+        {"away": 1, "count": 18, "home": 1},
+        {"away": 2, "count": 3, "home": 1},
+        {"away": 1, "count": 1, "home": 2}
+      ],
+      "matchCode": "adodenhaag.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 1, "count": 1, "home": 0},
+        {"away": 3, "count": 2, "home": 0},
+        {"away": 0, "count": 7, "home": 1},
+        {"away": 1, "count": 4, "home": 1},
+        {"away": 2, "count": 6, "home": 1},
+        {"away": 3, "count": 6, "home": 1},
+        {"away": 0, "count": 2, "home": 2},
+        {"away": 1, "count": 22, "home": 2},
+        {"away": 2, "count": 2, "home": 2},
+        {"away": 3, "count": 1, "home": 2},
+        {"away": 1, "count": 6, "home": 3},
+        {"away": 2, "count": 6, "home": 3},
+        {"away": 0, "count": 2, "home": 6}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 15, "home": 0},
+        {"away": 1, "count": 9, "home": 0},
+        {"away": 2, "count": 2, "home": 0},
+        {"away": 0, "count": 22, "home": 1},
+        {"away": 1, "count": 16, "home": 1},
+        {"away": 0, "count": 3, "home": 2},
+        {"away": 1, "count": 1, "home": 2}
+      ],
+      "matchCode": "ajax.bekerthuis"
+    },
+    {
+      "fullTime": [
+        {"away": 4, "count": 1, "home": 0},
+        {"away": 0, "count": 2, "home": 1},
+        {"away": 1, "count": 6, "home": 1},
+        {"away": 2, "count": 1, "home": 1},
+        {"away": 4, "count": 1, "home": 1},
+        {"away": 0, "count": 2, "home": 2},
+        {"away": 1, "count": 17, "home": 2},
+        {"away": 2, "count": 4, "home": 2},
+        {"away": 3, "count": 1, "home": 2},
+        {"away": 1, "count": 11, "home": 3},
+        {"away": 2, "count": 16, "home": 3},
+        {"away": 2, "count": 4, "home": 4},
+        {"away": 0, "count": 1, "home": 5}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 7, "home": 0},
+        {"away": 1, "count": 11, "home": 0},
+        {"away": 2, "count": 2, "home": 0},
+        {"away": 0, "count": 16, "home": 1},
+        {"away": 1, "count": 22, "home": 1},
+        {"away": 2, "count": 3, "home": 1},
+        {"away": 0, "count": 4, "home": 2},
+        {"away": 1, "count": 2, "home": 2}
+      ],
+      "matchCode": "ajax.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 1, "count": 5, "home": 0},
+        {"away": 2, "count": 1, "home": 0},
+        {"away": 3, "count": 1, "home": 0},
+        {"away": 0, "count": 2, "home": 1},
+        {"away": 1, "count": 7, "home": 1},
+        {"away": 2, "count": 14, "home": 1},
+        {"away": 3, "count": 4, "home": 1},
+        {"away": 0, "count": 2, "home": 2},
+        {"away": 1, "count": 8, "home": 2},
+        {"away": 2, "count": 11, "home": 2},
+        {"away": 3, "count": 1, "home": 2},
+        {"away": 4, "count": 1, "home": 2},
+        {"away": 1, "count": 5, "home": 3},
+        {"away": 2, "count": 5, "home": 3},
+        {"away": 1, "count": 1, "home": 4},
+        {"away": 2, "count": 1, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 11, "home": 0},
+        {"away": 1, "count": 9, "home": 0},
+        {"away": 0, "count": 26, "home": 1},
+        {"away": 1, "count": 16, "home": 1},
+        {"away": 2, "count": 1, "home": 1},
+        {"away": 0, "count": 3, "home": 2},
+        {"away": 1, "count": 3, "home": 2}
+      ],
+      "matchCode": "ajax.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 1, "count": 1, "home": 0},
+        {"away": 2, "count": 1, "home": 0},
+        {"away": 3, "count": 1, "home": 0},
+        {"away": 0, "count": 3, "home": 1},
+        {"away": 1, "count": 7, "home": 1},
+        {"away": 2, "count": 7, "home": 1},
+        {"away": 3, "count": 7, "home": 1},
+        {"away": 4, "count": 1, "home": 1},
+        {"away": 1, "count": 11, "home": 2},
+        {"away": 2, "count": 9, "home": 2},
+        {"away": 3, "count": 2, "home": 2},
+        {"away": 4, "count": 1, "home": 2},
+        {"away": 1, "count": 1, "home": 3},
+        {"away": 2, "count": 2, "home": 3},
+        {"away": 3, "count": 1, "home": 3},
+        {"away": 1, "count": 1, "home": 4},
+        {"away": 2, "count": 2, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 6, "home": 0},
+        {"away": 1, "count": 14, "home": 0},
+        {"away": 2, "count": 3, "home": 0},
+        {"away": 0, "count": 11, "home": 1},
+        {"away": 1, "count": 19, "home": 1},
+        {"away": 2, "count": 3, "home": 1},
+        {"away": 1, "count": 2, "home": 2}
+      ],
+      "matchCode": "az.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 3, "home": 0},
+        {"away": 1, "count": 5, "home": 0},
+        {"away": 3, "count": 1, "home": 0},
+        {"away": 0, "count": 2, "home": 1},
+        {"away": 1, "count": 12, "home": 1},
+        {"away": 2, "count": 8, "home": 1},
+        {"away": 0, "count": 1, "home": 2},
+        {"away": 1, "count": 9, "home": 2},
+        {"away": 2, "count": 12, "home": 2},
+        {"away": 3, "count": 5, "home": 2},
+        {"away": 1, "count": 8, "home": 3},
+        {"away": 2, "count": 6, "home": 3},
+        {"away": 3, "count": 1, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 13, "home": 0},
+        {"away": 1, "count": 8, "home": 0},
+        {"away": 0, "count": 25, "home": 1},
+        {"away": 1, "count": 18, "home": 1},
+        {"away": 2, "count": 2, "home": 1},
+        {"away": 0, "count": 3, "home": 2},
+        {"away": 1, "count": 3, "home": 2},
+        {"away": 2, "count": 1, "home": 2}
+      ],
+      "matchCode": "az.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 2, "home": 0},
+        {"away": 1, "count": 3, "home": 0},
+        {"away": 2, "count": 2, "home": 0},
+        {"away": 0, "count": 13, "home": 1},
+        {"away": 1, "count": 12, "home": 1},
+        {"away": 2, "count": 6, "home": 1},
+        {"away": 3, "count": 4, "home": 1},
+        {"away": 4, "count": 1, "home": 1},
+        {"away": 0, "count": 2, "home": 2},
+        {"away": 1, "count": 19, "home": 2},
+        {"away": 2, "count": 2, "home": 2},
+        {"away": 3, "count": 1, "home": 2},
+        {"away": 0, "count": 1, "home": 3},
+        {"away": 1, "count": 2, "home": 3},
+        {"away": 3, "count": 1, "home": 3}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 23, "home": 0},
+        {"away": 1, "count": 16, "home": 0},
+        {"away": 2, "count": 3, "home": 0},
+        {"away": 0, "count": 16, "home": 1},
+        {"away": 1, "count": 12, "home": 1},
+        {"away": 2, "count": 1, "home": 1}
+      ],
+      "matchCode": "cskamoskva.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 2, "count": 1, "home": 0},
+        {"away": 0, "count": 1, "home": 1},
+        {"away": 1, "count": 1, "home": 1},
+        {"away": 2, "count": 2, "home": 1},
+        {"away": 3, "count": 1, "home": 1},
+        {"away": 0, "count": 10, "home": 2},
+        {"away": 1, "count": 8, "home": 2},
+        {"away": 0, "count": 16, "home": 3},
+        {"away": 1, "count": 7, "home": 3},
+        {"away": 0, "count": 4, "home": 4},
+        {"away": 1, "count": 15, "home": 4},
+        {"away": 2, "count": 1, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 5, "home": 0},
+        {"away": 1, "count": 3, "home": 0},
+        {"away": 0, "count": 32, "home": 1},
+        {"away": 1, "count": 6, "home": 1},
+        {"away": 0, "count": 16, "home": 2},
+        {"away": 1, "count": 5, "home": 2}
+      ],
+      "matchCode": "fcbanikostrava.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 1, "count": 1, "home": 0},
+        {"away": 2, "count": 2, "home": 0},
+        {"away": 3, "count": 1, "home": 0},
+        {"away": 0, "count": 4, "home": 1},
+        {"away": 1, "count": 19, "home": 1},
+        {"away": 2, "count": 11, "home": 1},
+        {"away": 3, "count": 2, "home": 1},
+        {"away": 0, "count": 1, "home": 2},
+        {"away": 1, "count": 5, "home": 2},
+        {"away": 2, "count": 7, "home": 2},
+        {"away": 3, "count": 2, "home": 2},
+        {"away": 1, "count": 4, "home": 3},
+        {"away": 2, "count": 1, "home": 3},
+        {"away": 1, "count": 1, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 19, "home": 0},
+        {"away": 1, "count": 9, "home": 0},
+        {"away": 0, "count": 20, "home": 1},
+        {"away": 1, "count": 11, "home": 1},
+        {"away": 0, "count": 3, "home": 2}
+      ],
+      "matchCode": "fcbanikostrava.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 2, "count": 1, "home": 0},
+        {"away": 3, "count": 2, "home": 0},
+        {"away": 0, "count": 2, "home": 1},
+        {"away": 1, "count": 15, "home": 1},
+        {"away": 2, "count": 11, "home": 1},
+        {"away": 3, "count": 8, "home": 1},
+        {"away": 1, "count": 7, "home": 2},
+        {"away": 2, "count": 12, "home": 2},
+        {"away": 3, "count": 2, "home": 2},
+        {"away": 1, "count": 3, "home": 3},
+        {"away": 2, "count": 2, "home": 3},
+        {"away": 1, "count": 1, "home": 4},
+        {"away": 1, "count": 1, "home": 5}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 13, "home": 0},
+        {"away": 1, "count": 12, "home": 0},
+        {"away": 2, "count": 1, "home": 0},
+        {"away": 0, "count": 20, "home": 1},
+        {"away": 1, "count": 17, "home": 1},
+        {"away": 0, "count": 3, "home": 2},
+        {"away": 1, "count": 1, "home": 2},
+        {"away": 0, "count": 1, "home": 3}
+      ],
+      "matchCode": "fcdinamobucuresti.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 1, "count": 1, "home": 0},
+        {"away": 0, "count": 9, "home": 1},
+        {"away": 1, "count": 5, "home": 1},
+        {"away": 2, "count": 1, "home": 1},
+        {"away": 0, "count": 9, "home": 2},
+        {"away": 1, "count": 11, "home": 2},
+        {"away": 2, "count": 3, "home": 2},
+        {"away": 0, "count": 7, "home": 3},
+        {"away": 1, "count": 17, "home": 3},
+        {"away": 2, "count": 3, "home": 3},
+        {"away": 0, "count": 1, "home": 4},
+        {"away": 1, "count": 1, "home": 4},
+        {"away": 2, "count": 1, "home": 4},
+        {"away": 3, "count": 1, "home": 5},
+        {"away": 1, "count": 1, "home": 6}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 15, "home": 0},
+        {"away": 1, "count": 3, "home": 0},
+        {"away": 0, "count": 34, "home": 1},
+        {"away": 1, "count": 7, "home": 1},
+        {"away": 0, "count": 9, "home": 2},
+        {"away": 1, "count": 2, "home": 2},
+        {"away": 2, "count": 1, "home": 3}
+      ],
+      "matchCode": "fcgroningen.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 3, "home": 0},
+        {"away": 1, "count": 2, "home": 0},
+        {"away": 2, "count": 1, "home": 0},
+        {"away": 3, "count": 2, "home": 0},
+        {"away": 1, "count": 9, "home": 1},
+        {"away": 2, "count": 24, "home": 1},
+        {"away": 3, "count": 9, "home": 1},
+        {"away": 4, "count": 1, "home": 1},
+        {"away": 5, "count": 1, "home": 1},
+        {"away": 6, "count": 1, "home": 1},
+        {"away": 0, "count": 1, "home": 2},
+        {"away": 1, "count": 6, "home": 2},
+        {"away": 2, "count": 13, "home": 2},
+        {"away": 3, "count": 4, "home": 2},
+        {"away": 1, "count": 2, "home": 3},
+        {"away": 2, "count": 1, "home": 3}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 9, "home": 0},
+        {"away": 1, "count": 15, "home": 0},
+        {"away": 2, "count": 5, "home": 0},
+        {"away": 0, "count": 20, "home": 1},
+        {"away": 1, "count": 30, "home": 1},
+        {"away": 0, "count": 1, "home": 2}
+      ],
+      "matchCode": "fcgroningen.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 0, "count": 11, "home": 1},
+        {"away": 1, "count": 8, "home": 1},
+        {"away": 2, "count": 2, "home": 1},
+        {"away": 3, "count": 1, "home": 1},
+        {"away": 0, "count": 3, "home": 2},
+        {"away": 1, "count": 12, "home": 2},
+        {"away": 1, "count": 6, "home": 3},
+        {"away": 2, "count": 1, "home": 3}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 16, "home": 0},
+        {"away": 1, "count": 4, "home": 0},
+        {"away": 2, "count": 1, "home": 0},
+        {"away": 0, "count": 18, "home": 1},
+        {"away": 1, "count": 6, "home": 1}
+      ],
+      "matchCode": "fctwente.playoffthuis"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 3, "home": 0},
+        {"away": 1, "count": 6, "home": 0},
+        {"away": 2, "count": 1, "home": 0},
+        {"away": 0, "count": 3, "home": 1},
+        {"away": 1, "count": 9, "home": 1},
+        {"away": 2, "count": 4, "home": 1},
+        {"away": 0, "count": 3, "home": 2},
+        {"away": 1, "count": 17, "home": 2},
+        {"away": 2, "count": 4, "home": 2},
+        {"away": 0, "count": 1, "home": 3},
+        {"away": 1, "count": 4, "home": 3}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 14, "home": 0},
+        {"away": 1, "count": 5, "home": 0},
+        {"away": 0, "count": 24, "home": 1},
+        {"away": 1, "count": 9, "home": 1},
+        {"away": 0, "count": 3, "home": 2}
+      ],
+      "matchCode": "fctwente.playoffuit"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 0, "count": 3, "home": 1},
+        {"away": 1, "count": 3, "home": 1},
+        {"away": 2, "count": 2, "home": 1},
+        {"away": 0, "count": 8, "home": 2},
+        {"away": 1, "count": 20, "home": 2},
+        {"away": 2, "count": 2, "home": 2},
+        {"away": 0, "count": 3, "home": 3},
+        {"away": 1, "count": 18, "home": 3},
+        {"away": 2, "count": 6, "home": 3},
+        {"away": 0, "count": 1, "home": 4},
+        {"away": 2, "count": 1, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 9, "home": 0},
+        {"away": 1, "count": 4, "home": 0},
+        {"away": 0, "count": 36, "home": 1},
+        {"away": 1, "count": 12, "home": 1},
+        {"away": 0, "count": 5, "home": 2},
+        {"away": 1, "count": 2, "home": 2}
+      ],
+      "matchCode": "fctwente.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 3, "home": 0},
+        {"away": 1, "count": 6, "home": 0},
+        {"away": 2, "count": 2, "home": 0},
+        {"away": 0, "count": 2, "home": 1},
+        {"away": 1, "count": 9, "home": 1},
+        {"away": 2, "count": 17, "home": 1},
+        {"away": 3, "count": 4, "home": 1},
+        {"away": 0, "count": 3, "home": 2},
+        {"away": 1, "count": 5, "home": 2},
+        {"away": 2, "count": 12, "home": 2},
+        {"away": 3, "count": 4, "home": 2},
+        {"away": 1, "count": 2, "home": 3},
+        {"away": 3, "count": 1, "home": 3},
+        {"away": 5, "count": 1, "home": 3},
+        {"away": 1, "count": 1, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 16, "home": 0},
+        {"away": 1, "count": 10, "home": 0},
+        {"away": 0, "count": 22, "home": 1},
+        {"away": 1, "count": 17, "home": 1},
+        {"away": 2, "count": 1, "home": 1},
+        {"away": 0, "count": 2, "home": 2},
+        {"away": 1, "count": 4, "home": 2}
+      ],
+      "matchCode": "fctwente.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 3, "home": 1},
+        {"away": 3, "count": 1, "home": 1},
+        {"away": 0, "count": 4, "home": 2},
+        {"away": 1, "count": 22, "home": 2},
+        {"away": 2, "count": 1, "home": 2},
+        {"away": 3, "count": 1, "home": 2},
+        {"away": 0, "count": 6, "home": 3},
+        {"away": 1, "count": 16, "home": 3},
+        {"away": 2, "count": 4, "home": 3},
+        {"away": 1, "count": 4, "home": 4},
+        {"away": 2, "count": 3, "home": 4},
+        {"away": 1, "count": 1, "home": 5}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 1, "count": 2, "home": 0},
+        {"away": 0, "count": 29, "home": 1},
+        {"away": 1, "count": 15, "home": 1},
+        {"away": 0, "count": 14, "home": 2},
+        {"away": 1, "count": 5, "home": 2}
+      ],
+      "matchCode": "fcutrecht.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 1, "count": 4, "home": 0},
+        {"away": 2, "count": 3, "home": 0},
+        {"away": 1, "count": 7, "home": 1},
+        {"away": 2, "count": 23, "home": 1},
+        {"away": 3, "count": 3, "home": 1},
+        {"away": 4, "count": 2, "home": 1},
+        {"away": 1, "count": 9, "home": 2},
+        {"away": 2, "count": 10, "home": 2},
+        {"away": 3, "count": 4, "home": 2},
+        {"away": 4, "count": 2, "home": 2},
+        {"away": 1, "count": 2, "home": 3},
+        {"away": 2, "count": 1, "home": 3},
+        {"away": 4, "count": 1, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 9, "home": 0},
+        {"away": 1, "count": 14, "home": 0},
+        {"away": 2, "count": 2, "home": 0},
+        {"away": 0, "count": 18, "home": 1},
+        {"away": 1, "count": 23, "home": 1},
+        {"away": 2, "count": 4, "home": 1},
+        {"away": 0, "count": 1, "home": 2}
+      ],
+      "matchCode": "fcutrecht.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 2, "count": 1, "home": 0},
+        {"away": 5, "count": 1, "home": 0},
+        {"away": 0, "count": 2, "home": 1},
+        {"away": 1, "count": 4, "home": 1},
+        {"away": 2, "count": 1, "home": 1},
+        {"away": 3, "count": 6, "home": 1},
+        {"away": 4, "count": 1, "home": 1},
+        {"away": 0, "count": 1, "home": 2},
+        {"away": 1, "count": 18, "home": 2},
+        {"away": 2, "count": 6, "home": 2},
+        {"away": 3, "count": 2, "home": 2},
+        {"away": 0, "count": 1, "home": 3},
+        {"away": 1, "count": 6, "home": 3},
+        {"away": 2, "count": 10, "home": 3},
+        {"away": 3, "count": 1, "home": 3},
+        {"away": 3, "count": 3, "home": 4},
+        {"away": 3, "count": 1, "home": 5}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 2, "home": 0},
+        {"away": 1, "count": 14, "home": 0},
+        {"away": 2, "count": 5, "home": 0},
+        {"away": 0, "count": 12, "home": 1},
+        {"away": 1, "count": 25, "home": 1},
+        {"away": 2, "count": 3, "home": 1},
+        {"away": 0, "count": 2, "home": 2},
+        {"away": 1, "count": 1, "home": 2},
+        {"away": 2, "count": 1, "home": 2}
+      ],
+      "matchCode": "feyenoord.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 3, "count": 1, "home": 0},
+        {"away": 1, "count": 4, "home": 1},
+        {"away": 2, "count": 4, "home": 1},
+        {"away": 0, "count": 4, "home": 2},
+        {"away": 1, "count": 10, "home": 2},
+        {"away": 2, "count": 5, "home": 2},
+        {"away": 3, "count": 1, "home": 2},
+        {"away": 0, "count": 6, "home": 3},
+        {"away": 1, "count": 15, "home": 3},
+        {"away": 2, "count": 1, "home": 3},
+        {"away": 0, "count": 2, "home": 4},
+        {"away": 1, "count": 3, "home": 4},
+        {"away": 2, "count": 1, "home": 4},
+        {"away": 1, "count": 2, "home": 5},
+        {"away": 2, "count": 1, "home": 5}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 5, "home": 0},
+        {"away": 1, "count": 2, "home": 0},
+        {"away": 0, "count": 25, "home": 1},
+        {"away": 1, "count": 7, "home": 1},
+        {"away": 0, "count": 20, "home": 2},
+        {"away": 0, "count": 1, "home": 3}
+      ],
+      "matchCode": "feyenoord.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 1, "home": 1},
+        {"away": 3, "count": 3, "home": 1},
+        {"away": 0, "count": 4, "home": 2},
+        {"away": 1, "count": 9, "home": 2},
+        {"away": 2, "count": 3, "home": 2},
+        {"away": 0, "count": 5, "home": 3},
+        {"away": 1, "count": 31, "home": 3},
+        {"away": 2, "count": 3, "home": 3},
+        {"away": 0, "count": 8, "home": 4},
+        {"away": 1, "count": 9, "home": 4},
+        {"away": 2, "count": 4, "home": 4},
+        {"away": 3, "count": 1, "home": 4},
+        {"away": 1, "count": 3, "home": 5}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 3, "home": 0},
+        {"away": 1, "count": 2, "home": 0},
+        {"away": 0, "count": 37, "home": 1},
+        {"away": 1, "count": 12, "home": 1},
+        {"away": 2, "count": 1, "home": 1},
+        {"away": 0, "count": 23, "home": 2},
+        {"away": 1, "count": 5, "home": 2},
+        {"away": 2, "count": 1, "home": 2}
+      ],
+      "matchCode": "heraclesalmelo.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 1, "count": 4, "home": 0},
+        {"away": 2, "count": 7, "home": 0},
+        {"away": 3, "count": 3, "home": 0},
+        {"away": 4, "count": 3, "home": 0},
+        {"away": 1, "count": 3, "home": 1},
+        {"away": 2, "count": 16, "home": 1},
+        {"away": 3, "count": 17, "home": 1},
+        {"away": 4, "count": 3, "home": 1},
+        {"away": 2, "count": 3, "home": 2},
+        {"away": 3, "count": 2, "home": 2},
+        {"away": 2, "count": 1, "home": 3},
+        {"away": 0, "count": 1, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 6, "home": 0},
+        {"away": 1, "count": 26, "home": 0},
+        {"away": 2, "count": 9, "home": 0},
+        {"away": 0, "count": 4, "home": 1},
+        {"away": 1, "count": 13, "home": 1},
+        {"away": 2, "count": 3, "home": 1},
+        {"away": 0, "count": 1, "home": 2},
+        {"away": 1, "count": 1, "home": 2}
+      ],
+      "matchCode": "heraclesalmelo.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 1, "count": 1, "home": 0},
+        {"away": 0, "count": 3, "home": 1},
+        {"away": 2, "count": 3, "home": 1},
+        {"away": 3, "count": 2, "home": 1},
+        {"away": 0, "count": 12, "home": 2},
+        {"away": 1, "count": 24, "home": 2},
+        {"away": 0, "count": 5, "home": 3},
+        {"away": 1, "count": 9, "home": 3},
+        {"away": 2, "count": 1, "home": 3},
+        {"away": 0, "count": 1, "home": 4},
+        {"away": 1, "count": 1, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 12, "home": 0},
+        {"away": 1, "count": 5, "home": 0},
+        {"away": 0, "count": 29, "home": 1},
+        {"away": 1, "count": 10, "home": 1},
+        {"away": 0, "count": 5, "home": 2},
+        {"away": 1, "count": 2, "home": 2}
+      ],
+      "matchCode": "levskisofia.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 10, "home": 2},
+        {"away": 1, "count": 12, "home": 2},
+        {"away": 2, "count": 2, "home": 2},
+        {"away": 3, "count": 1, "home": 2},
+        {"away": 0, "count": 6, "home": 3},
+        {"away": 1, "count": 22, "home": 3},
+        {"away": 2, "count": 1, "home": 3},
+        {"away": 0, "count": 1, "home": 4},
+        {"away": 1, "count": 2, "home": 4},
+        {"away": 2, "count": 1, "home": 4},
+        {"away": 0, "count": 1, "home": 5},
+        {"away": 1, "count": 1, "home": 5},
+        {"away": 3, "count": 1, "home": 5}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 3, "home": 0},
+        {"away": 1, "count": 2, "home": 0},
+        {"away": 0, "count": 34, "home": 1},
+        {"away": 1, "count": 6, "home": 1},
+        {"away": 0, "count": 13, "home": 2},
+        {"away": 1, "count": 3, "home": 2}
+      ],
+      "matchCode": "nac.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 1, "count": 6, "home": 0},
+        {"away": 2, "count": 1, "home": 0},
+        {"away": 3, "count": 2, "home": 0},
+        {"away": 1, "count": 2, "home": 1},
+        {"away": 2, "count": 15, "home": 1},
+        {"away": 3, "count": 7, "home": 1},
+        {"away": 1, "count": 8, "home": 2},
+        {"away": 2, "count": 7, "home": 2},
+        {"away": 3, "count": 11, "home": 2},
+        {"away": 4, "count": 3, "home": 2},
+        {"away": 0, "count": 1, "home": 3},
+        {"away": 1, "count": 2, "home": 3},
+        {"away": 2, "count": 2, "home": 3},
+        {"away": 3, "count": 1, "home": 3},
+        {"away": 4, "count": 1, "home": 3}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 11, "home": 0},
+        {"away": 1, "count": 11, "home": 0},
+        {"away": 2, "count": 1, "home": 0},
+        {"away": 0, "count": 17, "home": 1},
+        {"away": 1, "count": 19, "home": 1},
+        {"away": 2, "count": 7, "home": 1},
+        {"away": 0, "count": 2, "home": 2},
+        {"away": 1, "count": 1, "home": 2}
+      ],
+      "matchCode": "nac.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 4, "count": 1, "home": 0},
+        {"away": 0, "count": 3, "home": 1},
+        {"away": 1, "count": 5, "home": 1},
+        {"away": 3, "count": 1, "home": 1},
+        {"away": 0, "count": 7, "home": 2},
+        {"away": 1, "count": 23, "home": 2},
+        {"away": 2, "count": 3, "home": 2},
+        {"away": 3, "count": 1, "home": 2},
+        {"away": 0, "count": 5, "home": 3},
+        {"away": 1, "count": 16, "home": 3},
+        {"away": 2, "count": 5, "home": 3}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 10, "home": 0},
+        {"away": 1, "count": 7, "home": 0},
+        {"away": 0, "count": 39, "home": 1},
+        {"away": 1, "count": 8, "home": 1},
+        {"away": 2, "count": 1, "home": 1},
+        {"away": 0, "count": 3, "home": 2},
+        {"away": 1, "count": 3, "home": 2}
+      ],
+      "matchCode": "nec.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 1, "count": 3, "home": 0},
+        {"away": 2, "count": 8, "home": 0},
+        {"away": 1, "count": 5, "home": 1},
+        {"away": 2, "count": 20, "home": 1},
+        {"away": 3, "count": 17, "home": 1},
+        {"away": 1, "count": 3, "home": 2},
+        {"away": 2, "count": 4, "home": 2},
+        {"away": 3, "count": 1, "home": 2},
+        {"away": 4, "count": 1, "home": 2},
+        {"away": 2, "count": 1, "home": 3}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 11, "home": 0},
+        {"away": 1, "count": 22, "home": 0},
+        {"away": 2, "count": 3, "home": 0},
+        {"away": 0, "count": 7, "home": 1},
+        {"away": 1, "count": 20, "home": 1},
+        {"away": 1, "count": 1, "home": 2}
+      ],
+      "matchCode": "nec.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 5, "home": 0},
+        {"away": 1, "count": 5, "home": 0},
+        {"away": 2, "count": 1, "home": 0},
+        {"away": 3, "count": 1, "home": 0},
+        {"away": 1, "count": 10, "home": 1},
+        {"away": 2, "count": 2, "home": 1},
+        {"away": 3, "count": 3, "home": 1},
+        {"away": 0, "count": 8, "home": 2},
+        {"away": 1, "count": 13, "home": 2},
+        {"away": 2, "count": 4, "home": 2},
+        {"away": 3, "count": 1, "home": 2},
+        {"away": 0, "count": 2, "home": 3},
+        {"away": 1, "count": 12, "home": 3},
+        {"away": 2, "count": 2, "home": 3},
+        {"away": 3, "count": 1, "home": 3},
+        {"away": 1, "count": 3, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 19, "home": 0},
+        {"away": 1, "count": 4, "home": 0},
+        {"away": 2, "count": 1, "home": 0},
+        {"away": 0, "count": 32, "home": 1},
+        {"away": 1, "count": 3, "home": 1},
+        {"away": 0, "count": 11, "home": 2},
+        {"away": 1, "count": 3, "home": 2}
+      ],
+      "matchCode": "olympiquedemarseille.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 2, "count": 1, "home": 0},
+        {"away": 0, "count": 5, "home": 1},
+        {"away": 1, "count": 8, "home": 1},
+        {"away": 2, "count": 8, "home": 1},
+        {"away": 3, "count": 6, "home": 1},
+        {"away": 0, "count": 2, "home": 2},
+        {"away": 1, "count": 15, "home": 2},
+        {"away": 2, "count": 10, "home": 2},
+        {"away": 3, "count": 2, "home": 2},
+        {"away": 0, "count": 1, "home": 3},
+        {"away": 1, "count": 6, "home": 3},
+        {"away": 2, "count": 3, "home": 3},
+        {"away": 2, "count": 1, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 18, "home": 0},
+        {"away": 1, "count": 10, "home": 0},
+        {"away": 2, "count": 2, "home": 0},
+        {"away": 0, "count": 20, "home": 1},
+        {"away": 1, "count": 17, "home": 1},
+        {"away": 1, "count": 1, "home": 2},
+        {"away": 2, "count": 1, "home": 2}
+      ],
+      "matchCode": "psv.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 1, "count": 5, "home": 0},
+        {"away": 2, "count": 1, "home": 0},
+        {"away": 1, "count": 5, "home": 1},
+        {"away": 2, "count": 5, "home": 1},
+        {"away": 0, "count": 5, "home": 2},
+        {"away": 1, "count": 15, "home": 2},
+        {"away": 2, "count": 3, "home": 2},
+        {"away": 3, "count": 2, "home": 2},
+        {"away": 4, "count": 1, "home": 2},
+        {"away": 0, "count": 5, "home": 3},
+        {"away": 1, "count": 15, "home": 3},
+        {"away": 2, "count": 1, "home": 3},
+        {"away": 3, "count": 2, "home": 3},
+        {"away": 4, "count": 1, "home": 3},
+        {"away": 1, "count": 3, "home": 4},
+        {"away": 2, "count": 1, "home": 5}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 10, "home": 0},
+        {"away": 1, "count": 5, "home": 0},
+        {"away": 0, "count": 28, "home": 1},
+        {"away": 1, "count": 7, "home": 1},
+        {"away": 2, "count": 2, "home": 1},
+        {"away": 0, "count": 12, "home": 2},
+        {"away": 1, "count": 5, "home": 2},
+        {"away": 1, "count": 1, "home": 3}
+      ],
+      "matchCode": "psv.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 1, "count": 1, "home": 1},
+        {"away": 0, "count": 4, "home": 2},
+        {"away": 1, "count": 2, "home": 2},
+        {"away": 0, "count": 19, "home": 3},
+        {"away": 1, "count": 6, "home": 3},
+        {"away": 0, "count": 15, "home": 4},
+        {"away": 1, "count": 8, "home": 4},
+        {"away": 2, "count": 2, "home": 4},
+        {"away": 0, "count": 2, "home": 5},
+        {"away": 1, "count": 4, "home": 5},
+        {"away": 0, "count": 1, "home": 6},
+        {"away": 0, "count": 1, "home": 8}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 0, "count": 17, "home": 1},
+        {"away": 0, "count": 37, "home": 2},
+        {"away": 1, "count": 5, "home": 2},
+        {"away": 0, "count": 3, "home": 3},
+        {"away": 1, "count": 1, "home": 3},
+        {"away": 0, "count": 1, "home": 5}
+      ],
+      "matchCode": "rbcroosendaal.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 1, "count": 10, "home": 0},
+        {"away": 2, "count": 7, "home": 0},
+        {"away": 3, "count": 8, "home": 0},
+        {"away": 7, "count": 1, "home": 0},
+        {"away": 0, "count": 1, "home": 1},
+        {"away": 1, "count": 3, "home": 1},
+        {"away": 2, "count": 12, "home": 1},
+        {"away": 3, "count": 13, "home": 1},
+        {"away": 4, "count": 1, "home": 1},
+        {"away": 5, "count": 1, "home": 1},
+        {"away": 0, "count": 2, "home": 2},
+        {"away": 1, "count": 3, "home": 2},
+        {"away": 2, "count": 5, "home": 2},
+        {"away": 3, "count": 1, "home": 2}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 16, "home": 0},
+        {"away": 1, "count": 26, "home": 0},
+        {"away": 2, "count": 6, "home": 0},
+        {"away": 3, "count": 1, "home": 0},
+        {"away": 0, "count": 11, "home": 1},
+        {"away": 1, "count": 6, "home": 1},
+        {"away": 2, "count": 1, "home": 1},
+        {"away": 3, "count": 1, "home": 1},
+        {"away": 0, "count": 1, "home": 2}
+      ],
+      "matchCode": "rbcroosendaal.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 2, "home": 0},
+        {"away": 0, "count": 7, "home": 1},
+        {"away": 1, "count": 4, "home": 1},
+        {"away": 2, "count": 2, "home": 1},
+        {"away": 0, "count": 10, "home": 2},
+        {"away": 1, "count": 21, "home": 2},
+        {"away": 2, "count": 1, "home": 2},
+        {"away": 0, "count": 4, "home": 3},
+        {"away": 1, "count": 12, "home": 3},
+        {"away": 2, "count": 5, "home": 3},
+        {"away": 0, "count": 1, "home": 4},
+        {"away": 1, "count": 1, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 12, "home": 0},
+        {"away": 1, "count": 3, "home": 0},
+        {"away": 0, "count": 34, "home": 1},
+        {"away": 1, "count": 10, "home": 1},
+        {"away": 0, "count": 7, "home": 2},
+        {"away": 1, "count": 3, "home": 2},
+        {"away": 0, "count": 1, "home": 3}
+      ],
+      "matchCode": "rkcwaalwijk.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 1, "count": 6, "home": 0},
+        {"away": 2, "count": 2, "home": 0},
+        {"away": 3, "count": 1, "home": 0},
+        {"away": 0, "count": 1, "home": 1},
+        {"away": 1, "count": 3, "home": 1},
+        {"away": 2, "count": 29, "home": 1},
+        {"away": 3, "count": 10, "home": 1},
+        {"away": 4, "count": 2, "home": 1},
+        {"away": 1, "count": 2, "home": 2},
+        {"away": 2, "count": 6, "home": 2},
+        {"away": 3, "count": 2, "home": 2},
+        {"away": 4, "count": 1, "home": 2},
+        {"away": 1, "count": 1, "home": 3}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 14, "home": 0},
+        {"away": 1, "count": 18, "home": 0},
+        {"away": 2, "count": 3, "home": 0},
+        {"away": 0, "count": 11, "home": 1},
+        {"away": 1, "count": 19, "home": 1},
+        {"away": 2, "count": 1, "home": 1},
+        {"away": 1, "count": 1, "home": 2}
+      ],
+      "matchCode": "rkcwaalwijk.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 2, "home": 0},
+        {"away": 1, "count": 1, "home": 0},
+        {"away": 3, "count": 1, "home": 0},
+        {"away": 0, "count": 6, "home": 1},
+        {"away": 1, "count": 1, "home": 1},
+        {"away": 2, "count": 2, "home": 1},
+        {"away": 3, "count": 1, "home": 1},
+        {"away": 0, "count": 7, "home": 2},
+        {"away": 1, "count": 22, "home": 2},
+        {"away": 3, "count": 1, "home": 2},
+        {"away": 1, "count": 6, "home": 3},
+        {"away": 2, "count": 3, "home": 3},
+        {"away": 3, "count": 1, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 11, "home": 0},
+        {"away": 1, "count": 5, "home": 0},
+        {"away": 2, "count": 1, "home": 0},
+        {"away": 0, "count": 23, "home": 1},
+        {"away": 1, "count": 9, "home": 1},
+        {"away": 2, "count": 1, "home": 1},
+        {"away": 0, "count": 2, "home": 2},
+        {"away": 1, "count": 2, "home": 2}
+      ],
+      "matchCode": "rodajc.playoffthuis"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 1, "count": 1, "home": 0},
+        {"away": 2, "count": 1, "home": 0},
+        {"away": 1, "count": 10, "home": 1},
+        {"away": 2, "count": 5, "home": 1},
+        {"away": 3, "count": 1, "home": 1},
+        {"away": 0, "count": 2, "home": 2},
+        {"away": 1, "count": 12, "home": 2},
+        {"away": 2, "count": 5, "home": 2},
+        {"away": 3, "count": 1, "home": 2},
+        {"away": 1, "count": 10, "home": 3},
+        {"away": 2, "count": 1, "home": 3},
+        {"away": 4, "count": 1, "home": 3},
+        {"away": 1, "count": 1, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 7, "home": 0},
+        {"away": 1, "count": 3, "home": 0},
+        {"away": 0, "count": 24, "home": 1},
+        {"away": 1, "count": 8, "home": 1},
+        {"away": 0, "count": 6, "home": 2},
+        {"away": 1, "count": 3, "home": 2},
+        {"away": 0, "count": 1, "home": 3}
+      ],
+      "matchCode": "rodajc.playoffuit"
+    },
+    {
+      "fullTime": [
+        {"away": 2, "count": 1, "home": 1},
+        {"away": 4, "count": 1, "home": 1},
+        {"away": 0, "count": 3, "home": 2},
+        {"away": 1, "count": 26, "home": 2},
+        {"away": 2, "count": 5, "home": 2},
+        {"away": 0, "count": 2, "home": 3},
+        {"away": 1, "count": 22, "home": 3},
+        {"away": 2, "count": 10, "home": 3},
+        {"away": 3, "count": 1, "home": 3},
+        {"away": 2, "count": 2, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 4, "home": 0},
+        {"away": 1, "count": 4, "home": 0},
+        {"away": 0, "count": 30, "home": 1},
+        {"away": 1, "count": 28, "home": 1},
+        {"away": 2, "count": 1, "home": 1},
+        {"away": 0, "count": 3, "home": 2},
+        {"away": 1, "count": 3, "home": 2}
+      ],
+      "matchCode": "rodajc.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 1, "count": 5, "home": 0},
+        {"away": 3, "count": 1, "home": 0},
+        {"away": 0, "count": 1, "home": 1},
+        {"away": 1, "count": 6, "home": 1},
+        {"away": 2, "count": 16, "home": 1},
+        {"away": 3, "count": 6, "home": 1},
+        {"away": 1, "count": 6, "home": 2},
+        {"away": 2, "count": 6, "home": 2},
+        {"away": 3, "count": 7, "home": 2},
+        {"away": 5, "count": 1, "home": 2},
+        {"away": 1, "count": 2, "home": 3},
+        {"away": 2, "count": 1, "home": 3},
+        {"away": 3, "count": 1, "home": 3}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 9, "home": 0},
+        {"away": 1, "count": 13, "home": 0},
+        {"away": 0, "count": 10, "home": 1},
+        {"away": 1, "count": 19, "home": 1},
+        {"away": 2, "count": 3, "home": 1},
+        {"away": 3, "count": 1, "home": 1},
+        {"away": 0, "count": 3, "home": 2},
+        {"away": 1, "count": 1, "home": 2}
+      ],
+      "matchCode": "rodajc.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 6, "home": 1},
+        {"away": 0, "count": 8, "home": 2},
+        {"away": 1, "count": 17, "home": 2},
+        {"away": 2, "count": 1, "home": 2},
+        {"away": 3, "count": 1, "home": 2},
+        {"away": 0, "count": 4, "home": 3},
+        {"away": 1, "count": 17, "home": 3},
+        {"away": 2, "count": 2, "home": 3},
+        {"away": 0, "count": 6, "home": 4},
+        {"away": 1, "count": 3, "home": 4},
+        {"away": 2, "count": 1, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 11, "home": 0},
+        {"away": 1, "count": 2, "home": 0},
+        {"away": 0, "count": 26, "home": 1},
+        {"away": 1, "count": 6, "home": 1},
+        {"away": 0, "count": 19, "home": 2},
+        {"away": 1, "count": 2, "home": 2}
+      ],
+      "matchCode": "sparta.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 1, "count": 1, "home": 0},
+        {"away": 2, "count": 9, "home": 0},
+        {"away": 3, "count": 11, "home": 0},
+        {"away": 4, "count": 3, "home": 0},
+        {"away": 2, "count": 7, "home": 1},
+        {"away": 3, "count": 26, "home": 1},
+        {"away": 4, "count": 6, "home": 1},
+        {"away": 2, "count": 1, "home": 2},
+        {"away": 3, "count": 2, "home": 2},
+        {"away": 4, "count": 2, "home": 2},
+        {"away": 0, "count": 1, "home": 3},
+        {"away": 1, "count": 1, "home": 3},
+        {"away": 1, "count": 1, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 3, "home": 0},
+        {"away": 1, "count": 39, "home": 0},
+        {"away": 2, "count": 14, "home": 0},
+        {"away": 0, "count": 3, "home": 1},
+        {"away": 1, "count": 8, "home": 1},
+        {"away": 2, "count": 4, "home": 1}
+      ],
+      "matchCode": "sparta.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 2, "home": 0},
+        {"away": 1, "count": 2, "home": 0},
+        {"away": 2, "count": 2, "home": 0},
+        {"away": 0, "count": 13, "home": 1},
+        {"away": 1, "count": 11, "home": 1},
+        {"away": 2, "count": 3, "home": 1},
+        {"away": 4, "count": 1, "home": 1},
+        {"away": 0, "count": 10, "home": 2},
+        {"away": 1, "count": 14, "home": 2},
+        {"away": 2, "count": 2, "home": 2},
+        {"away": 3, "count": 1, "home": 2},
+        {"away": 0, "count": 2, "home": 3},
+        {"away": 1, "count": 2, "home": 3},
+        {"away": 2, "count": 3, "home": 3},
+        {"away": 0, "count": 1, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 23, "home": 0},
+        {"away": 1, "count": 9, "home": 0},
+        {"away": 2, "count": 1, "home": 0},
+        {"away": 0, "count": 18, "home": 1},
+        {"away": 1, "count": 15, "home": 1},
+        {"away": 0, "count": 2, "home": 2},
+        {"away": 1, "count": 1, "home": 2}
+      ],
+      "matchCode": "steauabucuresti.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 1, "count": 4, "home": 0},
+        {"away": 3, "count": 3, "home": 0},
+        {"away": 1, "count": 1, "home": 1},
+        {"away": 3, "count": 2, "home": 1},
+        {"away": 4, "count": 1, "home": 1},
+        {"away": 0, "count": 6, "home": 2},
+        {"away": 1, "count": 8, "home": 2},
+        {"away": 2, "count": 1, "home": 2},
+        {"away": 0, "count": 11, "home": 3},
+        {"away": 1, "count": 9, "home": 3},
+        {"away": 2, "count": 1, "home": 3},
+        {"away": 0, "count": 3, "home": 4},
+        {"away": 1, "count": 2, "home": 4}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 5, "home": 0},
+        {"away": 1, "count": 4, "home": 0},
+        {"away": 2, "count": 1, "home": 0},
+        {"away": 0, "count": 21, "home": 1},
+        {"away": 1, "count": 6, "home": 1},
+        {"away": 0, "count": 13, "home": 2},
+        {"away": 1, "count": 1, "home": 2},
+        {"away": 0, "count": 1, "home": 3}
+      ],
+      "matchCode": "steauabucuresti.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 0, "count": 5, "home": 1},
+        {"away": 1, "count": 2, "home": 1},
+        {"away": 2, "count": 1, "home": 1},
+        {"away": 0, "count": 6, "home": 2},
+        {"away": 1, "count": 23, "home": 2},
+        {"away": 2, "count": 5, "home": 2},
+        {"away": 0, "count": 1, "home": 3},
+        {"away": 1, "count": 10, "home": 3},
+        {"away": 2, "count": 5, "home": 3},
+        {"away": 0, "count": 1, "home": 4},
+        {"away": 1, "count": 1, "home": 4},
+        {"away": 2, "count": 1, "home": 4},
+        {"away": 1, "count": 1, "home": 5}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 10, "home": 0},
+        {"away": 1, "count": 3, "home": 0},
+        {"away": 2, "count": 2, "home": 0},
+        {"away": 0, "count": 32, "home": 1},
+        {"away": 1, "count": 12, "home": 1},
+        {"away": 0, "count": 4, "home": 2}
+      ],
+      "matchCode": "vitesse.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 2, "count": 4, "home": 0},
+        {"away": 3, "count": 1, "home": 0},
+        {"away": 0, "count": 2, "home": 1},
+        {"away": 1, "count": 11, "home": 1},
+        {"away": 2, "count": 25, "home": 1},
+        {"away": 3, "count": 9, "home": 1},
+        {"away": 1, "count": 2, "home": 2},
+        {"away": 2, "count": 5, "home": 2},
+        {"away": 3, "count": 3, "home": 2},
+        {"away": 4, "count": 1, "home": 2}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 15, "home": 0},
+        {"away": 1, "count": 14, "home": 0},
+        {"away": 2, "count": 2, "home": 0},
+        {"away": 0, "count": 15, "home": 1},
+        {"away": 1, "count": 17, "home": 1},
+        {"away": 2, "count": 1, "home": 1}
+      ],
+      "matchCode": "vitesse.uit"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 2, "home": 1},
+        {"away": 0, "count": 10, "home": 2},
+        {"away": 1, "count": 3, "home": 2},
+        {"away": 2, "count": 1, "home": 2},
+        {"away": 0, "count": 7, "home": 3},
+        {"away": 1, "count": 11, "home": 3},
+        {"away": 2, "count": 1, "home": 3},
+        {"away": 0, "count": 6, "home": 4},
+        {"away": 1, "count": 13, "home": 4},
+        {"away": 2, "count": 1, "home": 4},
+        {"away": 0, "count": 3, "home": 5},
+        {"away": 1, "count": 1, "home": 5},
+        {"away": 0, "count": 1, "home": 6}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 0, "count": 22, "home": 1},
+        {"away": 1, "count": 3, "home": 1},
+        {"away": 0, "count": 30, "home": 2},
+        {"away": 1, "count": 1, "home": 2},
+        {"away": 0, "count": 3, "home": 3}
+      ],
+      "matchCode": "vvv.bekerthuis"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 0, "count": 1, "home": 1},
+        {"away": 0, "count": 14, "home": 2},
+        {"away": 1, "count": 5, "home": 2},
+        {"away": 2, "count": 1, "home": 2},
+        {"away": 0, "count": 16, "home": 3},
+        {"away": 1, "count": 18, "home": 3},
+        {"away": 0, "count": 5, "home": 4},
+        {"away": 1, "count": 10, "home": 4},
+        {"away": 2, "count": 1, "home": 4},
+        {"away": 0, "count": 2, "home": 6}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 4, "home": 0},
+        {"away": 0, "count": 38, "home": 1},
+        {"away": 1, "count": 4, "home": 1},
+        {"away": 0, "count": 22, "home": 2},
+        {"away": 1, "count": 4, "home": 2},
+        {"away": 0, "count": 1, "home": 3},
+        {"away": 0, "count": 1, "home": 4}
+      ],
+      "matchCode": "willemii.thuis"
+    },
+    {
+      "fullTime": [
+        {"away": 0, "count": 1, "home": 0},
+        {"away": 2, "count": 3, "home": 0},
+        {"away": 3, "count": 5, "home": 0},
+        {"away": 4, "count": 1, "home": 0},
+        {"away": 5, "count": 1, "home": 0},
+        {"away": 1, "count": 1, "home": 1},
+        {"away": 2, "count": 18, "home": 1},
+        {"away": 3, "count": 17, "home": 1},
+        {"away": 4, "count": 3, "home": 1},
+        {"away": 1, "count": 2, "home": 2},
+        {"away": 2, "count": 3, "home": 2},
+        {"away": 3, "count": 5, "home": 2},
+        {"away": 4, "count": 1, "home": 2}
+      ],
+      "halfTime": [
+        {"away": 0, "count": 4, "home": 0},
+        {"away": 1, "count": 31, "home": 0},
+        {"away": 2, "count": 3, "home": 0},
+        {"away": 3, "count": 1, "home": 0},
+        {"away": 0, "count": 8, "home": 1},
+        {"away": 1, "count": 12, "home": 1},
+        {"away": 2, "count": 2, "home": 1}
+      ],
+      "matchCode": "willemii.uit"
+    }
+  ],
+  "season": "0506",
+  "version": 3
+}
