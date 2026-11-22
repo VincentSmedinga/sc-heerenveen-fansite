@@ -3,6 +3,7 @@
 import {
   Button,
   Card,
+  CardLink,
   CheckboxGroup,
   ErrorSummary,
   Field,
@@ -114,11 +115,7 @@ export function PersonForm({
           />
           {unavailable('wikipedia', 'Wikipedia-pagina: niet te vinden?')}
           {/* The way on from a page of another person: the page that merges the two. */}
-          {merge === undefined ? null : (
-            <Text>
-              <Link href={merge.href}>{merge.label}</Link>
-            </Text>
-          )}
+          {merge === undefined ? null : <CardLink href={merge.href}>{merge.label}</CardLink>}
         </Card>
       ) : null}
       {shows('leven') ? (

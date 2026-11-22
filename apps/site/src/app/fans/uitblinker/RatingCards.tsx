@@ -4,10 +4,10 @@ import { seasonOf } from '@fansite/db/season'
 import {
   Button,
   Card,
+  CardLink,
   DataTable,
   Form,
   Heading,
-  Link,
   List,
   Match,
   Notice,
@@ -86,9 +86,7 @@ export function HowItWorksCard() {
         <List.Item>Tot dan kun je je cijfers wijzigen.</List.Item>
         <List.Item>Als het venster dicht is, zien alle fans de uitslag.</List.Item>
       </List>
-      <Text>
-        <Link href={ratingRulesPath}>Spelregels</Link>
-      </Text>
+      <CardLink href={ratingRulesPath}>Spelregels</CardLink>
     </Card>
   )
 }
@@ -297,12 +295,8 @@ export function SeasonWinnersCard({ season, winners }: { season: string; winners
           name: winner.name,
         }))}
       />
-      <Text>
-        <Link href={seasonAddress(matchesPath, season, seasonOf(new Date()))}>Alle wedstrijden</Link>
-      </Text>
-      <Text>
-        <Link href={yearWinnersPath}>Uitblinker van het jaar</Link>
-      </Text>
+      <CardLink href={seasonAddress(matchesPath, season, seasonOf(new Date()))}>Alle wedstrijden</CardLink>
+      <CardLink href={yearWinnersPath}>Uitblinker van het jaar</CardLink>
     </Card>
   )
 }

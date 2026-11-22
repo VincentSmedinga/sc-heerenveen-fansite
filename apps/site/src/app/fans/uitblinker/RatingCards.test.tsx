@@ -136,7 +136,7 @@ describe('the other cards', () => {
     expect(html).toContain('zeven dagen')
     expect(html).toContain('wijzigen')
     expect(html).toContain('zien alle fans de uitslag')
-    expect(html).toContain('<a href="/fans/spelregels#uitblinker">Spelregels</a>')
+    expect(html).toContain('<a href="/fans/spelregels#uitblinker"><span class="hf-icon-tail">Spelregels<svg')
   })
 })
 
@@ -321,8 +321,10 @@ describe('the card Uitblinkers of the season', () => {
     expect(html).toContain('7,8')
     expect(html).toContain('Thuis tegen Sparta Rotterdam, 3–1')
     expect(html).toContain('Uit tegen Ajax, 2–2')
-    expect(html).toContain('>Alle wedstrijden</a>')
-    expect(html).toContain('href="/fans/uitblinker/van-het-jaar">Uitblinker van het jaar</a>')
+    expect(html).toContain('>Alle <span class="hf-icon-tail">wedstrijden<svg')
+    expect(html).toContain(
+      'href="/fans/uitblinker/van-het-jaar">Uitblinker van het <span class="hf-icon-tail">jaar<svg',
+    )
     expect(html.indexOf('Dylan Vente')).toBeLessThan(html.indexOf('Andries Noppert'))
   })
 

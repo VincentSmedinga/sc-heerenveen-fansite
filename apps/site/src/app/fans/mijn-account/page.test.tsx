@@ -175,10 +175,12 @@ describe('Mijn account, with the cards of #1454', () => {
 
     expect(html).toMatch(/<h2[^>]*>Wat je speelde<\/h2>/)
     expect(html).toContain('Er is nog geen spel.')
-    expect(html).toMatch(/href="\/fans\/mijn-account\/gegevens">Alles wat we van je bewaren</)
+    expect(html).toMatch(
+      /href="\/fans\/mijn-account\/gegevens">Alles wat we van je <span class="hf-icon-tail">bewaren</,
+    )
     expect(html).toMatch(/<h2[^>]*>Account opheffen<\/h2>/)
     expect(html).toContain('Je naam en je e-mailadres gaan weg. Wat je speelde, blijft zonder naam in de cijfers.')
-    expect(html).toMatch(/href="\/fans\/mijn-account\/opheffen">Account opheffen</)
+    expect(html).toMatch(/href="\/fans\/mijn-account\/opheffen">Account <span class="hf-icon-tail">opheffen</)
   })
 
   it('has a row for each game that is on, which says when nothing was played', async () => {

@@ -1,6 +1,15 @@
 import type { ReportedPlayerName } from '@fansite/db/match-reports'
 
-import { Card, DataTable, type DataTableRow, GameHeading, Link, PlayerName, Text, Winner } from '@fansite/design-system'
+import {
+  Card,
+  CardLink,
+  DataTable,
+  type DataTableRow,
+  GameHeading,
+  PlayerName,
+  Text,
+  Winner,
+} from '@fansite/design-system'
 import { isFansPartOn } from '@fansite/shared/fans-env'
 
 import { cacheFor, cacheForKey } from '#src/cache'
@@ -84,9 +93,7 @@ export function NewMatchRatingsCard({
           <Text>
             {supportersText(data.supporters, true)}. De uitslag staat hier vanaf {closingText(data.closesAt)}.
           </Text>
-          <Text>
-            <Link href={ratingPath}>Geef je cijfers</Link>
-          </Text>
+          <CardLink href={ratingPath}>Geef je cijfers</CardLink>
         </>
       ) : (
         <>

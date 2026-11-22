@@ -69,7 +69,7 @@ describe('the card Stand', () => {
     expect(html).toContain('supporter30')
     expect(html).toContain('Jij')
     expect(html).toContain('href="/fans/prognose/stand"')
-    expect(html).toContain('Hele stand')
+    expect(html).toContain('Hele <span class="hf-icon-tail">stand')
     expect(html).toContain('hf-card-strong')
   })
 
@@ -87,6 +87,6 @@ describe('the link "Spelregels" under the table of the ranking (issue 1455)', ()
   it('goes to the part of the Prognose on the page with the rules', () => {
     const html = renderToStaticMarkup(<StandTable caption="Stand" ranking={ranking} supporterId={undefined} />)
 
-    expect(html).toContain('<a href="/fans/spelregels#prognose">Spelregels</a>')
+    expect(html).toContain('<a href="/fans/spelregels#prognose"><span class="hf-icon-tail">Spelregels<svg')
   })
 })

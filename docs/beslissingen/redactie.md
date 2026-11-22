@@ -610,6 +610,7 @@
   Een bezoeker moet overal kunnen zien dat een link de site verlaat.
 - **Alternatieven:** alleen in het nieuws en het menu (zoals daarvoor, maar een link naar een bron of een platform verlaat de site dan zonder waarschuwing).
   Het afleiden uit het adres (`https://`); dat is minder expliciet dan een optie, en `Link` kiest zijn pictogram dus met de prop `icon`, net als `Navigation` met `external`.
+- **Later:** zie _De link onderaan een kaart is `CardLink`, en een controle laat een kale kaartlink niet terugkomen_ in `designsysteem.md`; een link op een regel onderaan een kaart is `CardLink`, die zijn pictogram wel afleidt uit het adres, en zegt met een verborgen " (externe site)" ook in tekst dat hij de site verlaat.
 - **Later:** zie _Een link naar ons e-mailadres krijgt een envelop vóór de tekst_; een `mailto:`-link krijgt wel een pictogram, de envelop, en dat is niet het pictogram voor een externe link.
 
 ## Eén component Icon, gekozen met een naam, en de plaats volgt uit het component dat het tekent
@@ -648,6 +649,7 @@
   Het pictogram heeft geen eigen kleur en geen beweging, dus er is niets anders te regelen.
 - **Alternatieven:** een onzichtbaar teken ertussen (een woordverbinder); dat komt in de naam van de link, in een kopie van de tekst en in de test van de naam.
   Het hele label niet laten afbreken; dat laat een lange link over de rand van een smal scherm lopen.
+- **Later:** zie _De link onderaan een kaart is `CardLink`, en een controle laat een kale kaartlink niet terugkomen_ in `designsysteem.md`; `CardLink` gebruikt `attachIcon` voor zijn pictogram, en een kaartlink kiest dat pictogram zelf.
 
 ## Een link naar ons e-mailadres krijgt een envelop vóór de tekst
 

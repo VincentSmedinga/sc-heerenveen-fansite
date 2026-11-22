@@ -56,7 +56,7 @@ describe('the card "Jouw voorspellingen"', () => {
     const html = list(items)
 
     expect(html.match(/hf-prediction-list-item/g)).toHaveLength(5)
-    expect(html).toContain('Alle 7 voorspellingen')
+    expect(html).toContain('Alle 7 <span class="hf-icon-tail">voorspellingen')
     expect(html).toContain('href="/fans/prognose?alle=ja#jouw-voorspellingen"')
     expect(list(items, true).match(/hf-prediction-list-item/g)).toHaveLength(7)
     expect(list(items, true)).not.toContain('Alle 7 voorspellingen')
@@ -158,7 +158,7 @@ describe('the places on the card "Je punten"', () => {
 })
 
 describe('the link "Spelregels" (issue 1455)', () => {
-  const link = '<a href="/fans/spelregels#prognose">Spelregels</a>'
+  const link = '<a href="/fans/spelregels#prognose"><span class="hf-icon-tail">Spelregels<svg'
 
   it('is on the card "Punten", the card with the points and the list of predictions', () => {
     expect(renderToStaticMarkup(<ScoringCard />)).toContain(link)

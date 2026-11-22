@@ -1,8 +1,8 @@
 import {
   Card,
+  CardLink,
   GameHeading,
   Heading,
-  Link,
   PredictionCrowd,
   type PredictionCrowdProps,
   Text,
@@ -140,15 +140,9 @@ export function PredictionCrowdCard({
         Prognose
       </GameHeading>
       <PredictionCrowd {...crowdProps(data)} />
-      {data.formOpen ? (
-        <Text>
-          <Link href={predictionPath}>Voorspel ook</Link>
-        </Text>
-      ) : null}
+      {data.formOpen ? <CardLink href={predictionPath}>Voorspel ook</CardLink> : null}
       {played && data.crowd.after !== undefined ? (
-        <Text>
-          <Link href={`${predictionPath}/stand?wedstrijd=${matchId}`}>Stand Prognose</Link>
-        </Text>
+        <CardLink href={`${predictionPath}/stand?wedstrijd=${matchId}`}>Stand Prognose</CardLink>
       ) : null}
     </Card>
   )
