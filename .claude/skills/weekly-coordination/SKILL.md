@@ -35,8 +35,9 @@ The limits are in _Working efficiently_ in `AGENTS.md`; these are the habits tha
   A late monitor line, a "checks running" or a repeat of what you already told the owner gets one line at most, or nothing.
 - **Batch.**
   One message to the owner with everything that waits for them, each item with a recommendation, instead of one message per note.
-- **Two Builders, never three.**
+- **Plan Builders on the load, at most four.**
   Count a Builder while it builds or its Reviewer runs.
+  Run `uptime` before you start one: start it when the load over 5 minutes is below 6, wait at 8 or more, and brief the next one when the previous has started its checks or opened its pull request (see _Planning Builders on the load_ in `AGENTS.md`).
   Before a new wave, run `get_usage`; at more than 20% of the week a day, work with one Builder and let the queue wait, low priority first, and tell the owner.
 - **Short briefs.**
   A brief to a Builder is the issue number, what is special about it, the pitfalls, and "follow `builder-workflow`".
@@ -132,7 +133,7 @@ The brief for the Builder carries what went wrong before:
   The Builder must say at once if it can't read the design.
   Without it, a Builder builds from the words alone and the work needs a second pass (`KeyFigures`, #1080).
 
-You start at most two issues at a time, each with its own Builder.
+You start issues as the load allows (see _Planning Builders on the load_ in `AGENTS.md`), each with its own Builder.
 When you patch an issue, read the body just before you write it: Builders tick boxes in the same body, and an old copy overwrites theirs.
 
 ## An issue closes

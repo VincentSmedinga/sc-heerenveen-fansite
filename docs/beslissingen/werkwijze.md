@@ -538,6 +538,7 @@
   Of niets doen en sessies laten wachten; dat is wat misging.
 - **Later:** een eigen server per werkmap, als de botsingen blijven; of de poorten laten kiezen door een bestand in de werkmap als twee namen vaak hetzelfde blok krijgen.
 - **Later:** sinds 10 november 2026 weigert het script een werkmap die op `fansite_acc` zou uitkomen: die database heeft de kopie van acceptatie; zie _De kopie heet `fansite_acc`, en geen werkmap mag die naam krijgen_ in `hosting-en-data.md`.
+- **Later:** zie _De Coördinator plant Builders op de belasting van de computer_ (22 november 2026): de grens van twee Builders is vervangen door een regel op de belasting.
 
 ## De zware controles delen de machine
 
@@ -600,6 +601,7 @@
   Een vast aantal Builders van één (te langzaam voor de week).
   Een Coordinator-sessie per dag (een natuurlijk breekpunt is beter dan een kloktijd).
 - **Later:** zie _Elk nieuw issue start meteen een Specifier, die zichzelf archiveert_ (2 november 2026): de grens voor het specificeren is hooguit twee rondes, in de sessie van de Specifier.
+- **Later:** zie _De Coördinator plant Builders op de belasting van de computer_ (22 november 2026): de grens van twee Builders tegelijk is vervangen door een regel op de belasting, met hoogstens vier.
 - **Herzien:** als de grenzen te strak blijken voor de snelheid die we willen, of als het plafond niet meer knelt.
 
 ## Een Specifier voor een lang gesprek, en de Action List voor de status
@@ -874,3 +876,21 @@
 - **Alternatieven:** verplichte actuele branches in de regels voor `main`, wat per samenvoeging een rebase en een nieuwe run kost zodra een andere pull request eerder klaar was.
   Een geplande nachtelijke run als vangnet, die machinetijd kost voor een gat dat we niet hebben gezien.
   Het artifact van de pull request hergebruiken in de deploys; dat vraagt een download tussen workflows in een gevoelige deploy en is nog steeds fout als de bomen verschillen.
+
+## De Coördinator plant Builders op de belasting van de computer
+
+- **Datum:** 22 november 2026
+- **Besluit:** het vaste aantal van twee Builders tegelijk wordt een regel op de belasting van de computer, met hoogstens vier Builders aan het werk (`AGENTS.md`, _Planning Builders on the load_).
+  De Coördinator leest `uptime` voordat hij nog een Builder start, start hem als de belasting over 5 minuten onder 6 ligt en wacht bij 8 of hoger.
+  De getallen gelden voor de computer met 10 kernen.
+  Een Builder telt alleen zwaar terwijl hij controles draait, en de Coördinator brieft een volgende Builder pas als de vorige aan zijn controles is begonnen of zijn pull request heeft geopend.
+  Afhankelijkheden en gedeelde bestanden beslissen eerst, er is één migratie tegelijk onderweg, de zware controles delen één slot, en het tempo van het weekgebruik gaat voor.
+- **Waarom:** op 22 november 2026 is 261 minuten lang elke minuut gemeten terwijl een tot vier Builders tien issues bouwden.
+  Het vrije geheugen bleef tussen 49% en 67%, en lezen en schrijven belasten de computer niet.
+  Zonder Builder in de controles was de belasting gemiddeld 4,1, met één worktree in de controles 5,8, met twee 7,1 en met drie 7,4 (hoogste waarde 14,4).
+  Vier tegelijk kwam twee minuten voor, met gemiddeld 10,1.
+  De belasting was 54 minuten 8 of hoger en 10 minuten 10 of hoger, bijna altijd met twee of meer worktrees in de controles.
+  Wat de run ophield was niet de computer, maar de afhankelijkheden tussen issues, één migratie tegelijk en het ene bestand met beslissingen waarin elke pull request een blok toevoegt.
+- **Alternatieven:** twee Builders houden (laat de computer vaak half leeg terwijl de rij wacht); een hoger vast getal (een vast getal houdt geen rekening met wat een Builder net doet).
+- **Let op:** de grens van vier is voorlopig, want vier tegelijk is maar twee minuten gemeten.
+  Na de volgende mijlpaal kijken we opnieuw, met metingen die Vitest, de build en de browser apart tellen.
