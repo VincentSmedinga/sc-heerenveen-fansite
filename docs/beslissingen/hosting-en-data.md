@@ -1318,3 +1318,19 @@
 - **Alternatieven:** de linie in elke rij van `fantasy_picks` bewaren (vier extra kolommen, en dezelfde speler kan in twee rijen een andere linie hebben); de linie altijd uit `players.position` lezen (herschrijft de geschiedenis).
 - **Let op:** het issue noemde alleen `fantasy_picks`; de tweede tabel is nodig voor de regel dat de linie vastligt.
   De tests van `apps/site/src/fans/fjouwer.test.ts` draaien op beide tabellen.
+
+## Een quiz en zijn vragen staan in twee tabellen, ook voor een quiz van de redactie later
+
+- **Datum:** 22 november 2026
+- **Besluit:** migratie 0110 maakt `quizzes` en `quiz_questions` (#1480).
+  - Een quiz is één maand: `year`, `month`, een bron (`oude-fansite` of `redactie`), een status (`draft` of `published`) en voor een oude quiz de som van toen: `participants` en `average_score_tenths`, de gemiddelde score in tienden (41 is 4,1).
+    Een maand heeft hoogstens één quiz, ook als de bron verschilt (`quizzes_year_month_unique`).
+  - Een vraag heeft een plaats (`position`, 1 tot en met 10, met gaten als een vraag ontbreekt), de tekst, vier antwoorden en het goede antwoord (`correct_answer`, 1 tot en met 4).
+    Voor een oude vraag staan de percentages per antwoord erbij (`percentages`), anders is dat veld leeg.
+    De antwoorden en de percentages staan in een `json`-kolom, en een controle eist er vier.
+  - De vragen gaan weg met hun quiz (`on delete cascade`).
+  - De tabellen bevatten niets van een bezoeker: geen antwoord, geen score en geen naam.
+- **Waarom:** een nieuwe quiz van de redactie (#1481 en #1482, nog niet goedgekeurd) gebruikt dezelfde tabellen en hoeft ze niet te veranderen.
+  Vier vaste antwoorden in één kolom houden de tabel klein, en de controles bewaken de grenzen.
+- **Alternatieven:** een derde tabel voor de antwoorden (een join voor elke vraag, en de plaats van het goede antwoord is dan een verwijzing); een kolom per antwoord en per percentage (twaalf kolommen zonder winst).
+- **Let op:** `quizzes.source` ziet erop toe dat de import van de oude Fansite alleen zijn eigen quizzen verandert of weghaalt.
