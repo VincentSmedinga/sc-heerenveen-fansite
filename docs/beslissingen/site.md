@@ -7801,3 +7801,20 @@
 - **Alternatieven:** een rij per fan voor elke wedstrijd, door een taak gemaakt; de erfenis over het seizoen heen laten lopen (de spelers hebben per seizoen een eigen rij, dus daar is geen koppeling voor).
 - **Let op:** `fantasy_picks.supporter_id` wordt leeg bij het opheffen van het account (`ON DELETE SET NULL`), zoals bij `predictions`; de pagina "Alles wat we van je bewaren" toont de gekozen vier (`fjouwerData`).
   Dit issue bewaart geen punten: die van #1471 komen uit de verslagen en worden nooit opgeslagen.
+
+## De kaart Fjouwer op de wedstrijdpagina toont de meest gekozen spelers, pas vanaf de aftrap
+
+- **Datum:** 22 november 2026
+- **Besluit:** de wedstrijdpagina heeft vanaf de aftrap een kaart Fjouwer (`FjouwerCrowdCard`) met de spelers die fans het vaakst in hun vier hadden, als percentage van de fans met een vier.
+  Vóór de aftrap staat er niets, ook geen aantal, en de pagina leest dan niets: wie nog kan wijzigen, ziet niet wat de rest kiest.
+  `loadFjouwerCrowd` in `apps/site/src/fans/fjouwer-crowd.ts` rekent per fan de vier van de wedstrijd uit met `fourOf`, dus een geërfde vier telt mee.
+  Een geërfde speler die zijn tien al heeft, telt niet mee, zoals in het formulier.
+  Een geblokkeerd account telt niet mee en een opgeheven account telt voor de wedstrijd waarvoor het koos.
+  De kaart toont de vijf meest gekozen spelers en meer bij gelijke aantallen op de vijfde plaats, op achternaam, met de hele naam bij twee spelers met dezelfde achternaam.
+  Bij minder dan vijf fans (`crowdMinimum`, net als de Prognose) staat er alleen het aantal met een zin dat er te weinig fans meededen.
+  Het getal komt uit een query die een minuut wordt bewaard per wedstrijd, niet uit het account van de bezoeker, zodat de pagina voor iedereen gelijk blijft.
+  Een wedstrijd zonder vier, zoals een van vóór het spel, en een spel dat uit staat (`FANS_VIER`), hebben geen kaart.
+  `BarList` kreeg een `unit` voor het procentteken.
+- **Waarom:** een kaart met alleen getallen laat zien op wie de fans rekenden, zonder dat een keuze van een persoon te herleiden is.
+  Pas vanaf de aftrap tonen houdt de eigen keuze een eigen keuze.
+- **Alternatieven:** de aantallen ook vóór de aftrap tonen (iedereen kiest dan hetzelfde als de massa); de geërfde vier niet meetellen (dan telt een fan die niet opnieuw koos niet mee, terwijl zijn vier bij de aftrap stond).

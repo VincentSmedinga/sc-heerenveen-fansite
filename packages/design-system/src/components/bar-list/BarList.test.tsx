@@ -47,4 +47,23 @@ describe('BarList', () => {
       '4',
     )
   })
+
+  it('puts the unit after each number and keeps the bars as long as the numbers', () => {
+    const { container } = render(
+      <BarList
+        rows={[
+          { label: 'a', value: 80 },
+          { label: 'b', value: 40 },
+        ]}
+        unit="%"
+      />,
+    )
+    const fills = [...container.querySelectorAll<HTMLElement>('.hf-bar-list-fill')]
+
+    expect(container.textContent).toBe('a80%' + 'b40%')
+    expect(fills.map((fill) => fill.style.getPropertyValue('--hf-bar-list-share'))).toEqual(['100', '50'])
+    expect(container.querySelector<HTMLElement>('.hf-bar-list')?.style.getPropertyValue('--hf-bar-list-digits')).toBe(
+      '3',
+    )
+  })
 })
