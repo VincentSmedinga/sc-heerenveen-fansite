@@ -1,6 +1,16 @@
 import type { Database } from '@fansite/db/client'
 
-import { matchAppearances, matches, matchPlayerRatings, playerRatings, players, supporters } from '@fansite/db/schema'
+import {
+  coachRatings,
+  matchAppearances,
+  matchCoachRatings,
+  matches,
+  matchPlayerRatings,
+  playerRatings,
+  players,
+  staff,
+  supporters,
+} from '@fansite/db/schema'
 import { and, asc, desc, eq, isNull, sql } from 'drizzle-orm'
 
 import { cacheFor, cacheForKey } from '#src/cache'
@@ -15,11 +25,20 @@ export const ratingMinimum = 5
 
 /** The ratings of one match, in the order of the line-up. */
 export type MatchRatings = {
+  /** The head coach, with the average of his ratings, or nothing when nobody rated him. */
+  coach?: RatedCoach
   players: RatedPlayer[]
   /** How many supporters rated the match: the most ratings any player has. */
   supporters: number
   /** The Uitblinker, or nothing when no player has `ratingMinimum` ratings. */
   winner?: RatedPlayer
+}
+
+/** The head coach of a match with the average of his ratings (1479), never the Uitblinker. */
+export type RatedCoach = {
+  average: number
+  count: number
+  name: string
 }
 
 /** One player of a match with the average of his ratings. */
@@ -83,12 +102,37 @@ export async function loadMatchRatings(
     ...rows.filter((row) => row.appearanceId === null),
   ].map((row) => ({ ...row, average: Number(row.average) }))
   const winner = uitblinkerOf(rated)
+  const coach = await loadCoachRatings(db, matchId, source)
 
   return {
+    ...(coach === undefined ? {} : { coach }),
     players: rated,
     supporters: Math.max(...rated.map((player) => player.count)),
     ...(winner === undefined ? {} : { winner }),
   }
+}
+
+/**
+ * The ratings of the head coach that are coming in while a window is open, as
+ * `loadRunningRatings` does for the players: ratings of a blocked account do not count.
+ */
+export async function loadRunningCoachRating(db: Database, matchId: number): Promise<RatedCoach | undefined> {
+  const [row] = await db
+    .select({
+      average: sql<string>`avg(${coachRatings.grade})`,
+      count: sql<number>`count(*)`,
+      name: staff.name,
+    })
+    .from(coachRatings)
+    .innerJoin(staff, eq(staff.id, coachRatings.staffId))
+    .leftJoin(supporters, eq(supporters.id, coachRatings.supporterId))
+    .where(and(eq(coachRatings.matchId, matchId), eq(coachRatings.blocked, false), isNull(supporters.disabledAt)))
+    .groupBy(coachRatings.staffId, staff.name)
+    .limit(1)
+
+  return row === undefined || Number(row.count) === 0
+    ? undefined
+    : { average: Number(row.average), count: Number(row.count), name: row.name }
 }
 
 /**
@@ -136,6 +180,18 @@ export function uitblinkerOf(rated: readonly RatedPlayer[]): RatedPlayer | undef
   return rated
     .filter((player) => player.count >= ratingMinimum)
     .toSorted((a, b) => hundredths(b.average) - hundredths(a.average) || a.count - b.count)[0]
+}
+
+/** The average of the head coach of one match, from the averages that are kept for a source. */
+async function loadCoachRatings(db: Database, matchId: number, source: 'fans' | 'oude-fansite') {
+  const [row] = await db
+    .select({ average: matchCoachRatings.average, count: matchCoachRatings.ratingCount, name: staff.name })
+    .from(matchCoachRatings)
+    .innerJoin(staff, eq(staff.id, matchCoachRatings.staffId))
+    .where(and(eq(matchCoachRatings.matchId, matchId), eq(matchCoachRatings.source, source)))
+    .limit(1)
+
+  return row === undefined ? undefined : { average: Number(row.average), count: row.count, name: row.name }
 }
 
 /** The number of supporters who rated a match so far: each one rates every player. */

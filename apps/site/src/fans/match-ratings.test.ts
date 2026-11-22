@@ -2,12 +2,15 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import {
   clubs,
+  coachRatings,
   matchAppearances,
+  matchCoachRatings,
   matches,
   matchPlayerRatings,
   matchReports,
   playerRatings,
   players,
+  staff,
   supporters,
 } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
@@ -18,6 +21,7 @@ import {
   loadLatestResult,
   loadMatchRatings,
   loadOldMatchRatings,
+  loadRunningCoachRating,
   loadRunningRatings,
   loadSeasonWinners,
   type RatedPlayer,
@@ -40,6 +44,9 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await database.db.delete(playerRatings)
+  await database.db.delete(coachRatings)
+  await database.db.delete(matchCoachRatings)
+  await database.db.delete(staff)
   await database.db.delete(supporters)
   await database.db.delete(matchPlayerRatings)
   await database.db.delete(matchAppearances)
@@ -348,5 +355,69 @@ describe('the line under a winner', () => {
 
   it('leaves the score out when the match has none', () => {
     expect(resultLine({ goalsAgainst: null, goalsFor: null, home: true, opponent: 'NEC' })).toBe('Thuis tegen NEC')
+  })
+})
+
+describe('the head coach in the ratings of a match (issue 1479)', () => {
+  const addCoach = async () => {
+    const [result] = await database.db
+      .insert(staff)
+      .values({ name: 'Robin Veldman', role: 'coach', startDate: '2020-01-01', startPrecision: 'day' })
+
+    return result.insertId
+  }
+
+  it('comes with the averages of the same source, and is not the Uitblinker', async () => {
+    const staffId = await addCoach()
+    const keeper = await addPlayer('Zeno Keeper', { inLineUp: true })
+
+    await rate(keeper, '6.00', 8)
+    await database.db.insert(matchCoachRatings).values([
+      { average: '9.50', matchId, ratingCount: 30, source: 'oude-fansite', spread: '0.50', staffId },
+      { average: '4.00', matchId, ratingCount: 6, source: 'fans', spread: '1.00', staffId },
+    ])
+
+    expect((await loadOldMatchRatings(database.db, matchId))?.coach).toEqual({
+      average: 9.5,
+      count: 30,
+      name: 'Robin Veldman',
+    })
+    expect((await loadOldMatchRatings(database.db, matchId))?.winner?.name).toBe('Zeno Keeper')
+    expect(await loadMatchRatings(database.db, matchId, 'fans')).toBeUndefined()
+  })
+
+  it('is left out when the match has no ratings for the coach', async () => {
+    await addCoach()
+    await rate(await addPlayer('Zeno Keeper', { inLineUp: true }), '6.00', 8)
+
+    expect((await loadOldMatchRatings(database.db, matchId))?.coach).toBeUndefined()
+  })
+
+  it('has a running average that leaves out blocked and marked grades', async () => {
+    const staffId = await addCoach()
+    const supporter = (name: string, disabledAt: Date | null) =>
+      database.db
+        .insert(supporters)
+        .values({
+          createdAt: new Date('2026-01-01T10:00:00Z'),
+          disabledAt,
+          email: `${name}@example.test`,
+          screenName: name,
+          screenNameKey: name.toLowerCase(),
+        })
+        .then(([result]) => result.insertId)
+    const fine = await supporter('Netjes', null)
+    const blocked = await supporter('Rotzak99', new Date())
+
+    await database.db.insert(coachRatings).values([
+      { grade: 8, matchId, staffId, supporterId: fine },
+      { grade: 2, matchId, staffId, supporterId: blocked },
+      { blocked: true, grade: 1, matchId, staffId, supporterId: null },
+      { grade: 6, matchId, staffId, supporterId: null },
+    ])
+
+    expect(await loadRunningCoachRating(database.db, matchId)).toEqual({ average: 7, count: 2, name: 'Robin Veldman' })
+    await database.db.delete(coachRatings)
+    expect(await loadRunningCoachRating(database.db, matchId)).toBeUndefined()
   })
 })

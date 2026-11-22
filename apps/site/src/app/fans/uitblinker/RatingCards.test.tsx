@@ -289,4 +289,52 @@ describe('the head coach in what is shown after saving', () => {
     expect(withCoach).toContain('hf-data-table-total')
     expect(withCoach).toContain('>6<')
   })
+
+  it('shows the running average of the coach in the last row, and says "nog te weinig cijfers" under five', () => {
+    const render = (count: number) =>
+      renderToStaticMarkup(
+        <SavedView
+          closesAt={closesAt}
+          coach={{ name: 'Robin Veldman', staffId: 3 }}
+          coachGrade={6}
+          grades={
+            new Map([
+              [11, 7],
+              [12, 9],
+            ])
+          }
+          players={players}
+          running={[]}
+          runningCoach={{ average: 6.5, count, name: 'Robin Veldman' }}
+        />,
+      )
+
+    expect(render(12)).toContain('6,5')
+    expect(render(4)).not.toContain('6,5')
+    expect(render(4).slice(render(4).indexOf('Robin Veldman'))).toContain('nog te weinig cijfers')
+  })
+})
+
+describe('the head coach in the table of a closed match', () => {
+  it('stands last in the table of the result, after the players, without the seal', () => {
+    const html = renderToStaticMarkup(
+      <ClosedResultCard
+        match={match}
+        now={now}
+        ratings={{
+          coach: { average: 7.1, count: 12, name: 'Robin Veldman' },
+          players: [
+            { appearanceId: 11, average: 7.8, count: 12, name: 'Pim Spits', playerId: 1 },
+            { appearanceId: 12, average: 6.2, count: 12, name: 'Teun Kuil', playerId: 2 },
+          ],
+          supporters: 12,
+          winner: { appearanceId: 11, average: 7.8, count: 12, name: 'Pim Spits', playerId: 1 },
+        }}
+      />,
+    )
+
+    expect(html.indexOf('Teun Kuil')).toBeLessThan(html.indexOf('Robin Veldman (trainer)'))
+    expect(html).toContain('hf-data-table-total')
+    expect(html.match(/>Uitblinker</g)).toHaveLength(1)
+  })
 })

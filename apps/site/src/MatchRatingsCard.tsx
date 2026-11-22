@@ -15,7 +15,7 @@ import {
   ratingMinimum,
   supportersIn,
 } from '#src/fans/match-ratings'
-import { closingText, findRatingWindow, ratingPath } from '#src/fans/rating'
+import { closingText, coachRow, findRatingWindow, ratingPath } from '#src/fans/rating'
 import { nameOfPlayer } from '#src/report-view'
 
 // The card Uitblinker on the page of a match: for an old match (issue 1467) the ratings that
@@ -111,7 +111,7 @@ export function RatingsTable({
   names?: ReadonlyMap<number, ReportedPlayerName> | undefined
   ratings: MatchRatings
 }) {
-  const { players, winner } = ratings
+  const { coach, players, winner } = ratings
 
   return (
     <>
@@ -126,7 +126,22 @@ export function RatingsTable({
       <DataTable
         caption="Cijfers van supporters per speler"
         columns={['Speler', { key: true, name: 'Gem' }, { name: 'Cijfers' }]}
-        rows={players.map((player) => rowOf(player, winner, names))}
+        rows={[
+          ...players.map((player) => rowOf(player, winner, names)),
+          // The head coach is the last row, after a heavier line, and never has the seal.
+          ...(coach === undefined
+            ? []
+            : [
+                {
+                  cells: [
+                    coach.count >= ratingMinimum ? gradeText(coach.average) : 'nog te weinig cijfers',
+                    coach.count,
+                  ],
+                  header: coachRow(coach.name),
+                  total: true,
+                },
+              ]),
+        ]}
         sortable={false}
       />
     </>

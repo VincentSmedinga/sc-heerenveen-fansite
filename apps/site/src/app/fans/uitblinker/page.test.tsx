@@ -13,6 +13,7 @@ const {
   findOwnCoachRating,
   findOwnRatings,
   findRatingWindow,
+  loadRunningCoachRating,
   loadRunningRatings,
   seasonWinners,
   useActionState,
@@ -22,6 +23,7 @@ const {
   findOwnCoachRating: vi.fn(),
   findOwnRatings: vi.fn(),
   findRatingWindow: vi.fn(),
+  loadRunningCoachRating: vi.fn(),
   loadRunningRatings: vi.fn(),
   seasonWinners: vi.fn(),
   useActionState: vi.fn(),
@@ -33,6 +35,7 @@ vi.mock('#src/database', () => ({ getDatabase: () => ({ db: {} }) }))
 vi.mock('#src/fans/match-ratings', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   fansMatchRatings,
+  loadRunningCoachRating,
   loadRunningRatings,
   seasonWinners,
 }))
@@ -105,6 +108,7 @@ beforeEach(() => {
   findOwnCoachRating.mockResolvedValue(undefined)
   findRatingWindow.mockResolvedValue(open)
   loadRunningRatings.mockResolvedValue([])
+  loadRunningCoachRating.mockResolvedValue(undefined)
   seasonWinners.mockResolvedValue([])
   useActionState.mockImplementation((_action: unknown, state: unknown) => [state, vi.fn()])
 })
