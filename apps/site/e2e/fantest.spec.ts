@@ -39,7 +39,10 @@ for (const javaScriptEnabled of [false, true]) {
       )
       await expect(question(page, 5).getByText('Kies een antwoord bij vraag 5.')).toBeVisible()
       await expect(question(page, 1).getByRole('radio', { name: 'Testantwoord B' })).toBeChecked()
-      expect(await checkPage(page)).toEqual([])
+      // axe needs JavaScript in the page; the pages are checked with it in pages.spec.ts too.
+      if (javaScriptEnabled) {
+        expect(await checkPage(page)).toEqual([])
+      }
 
       // Now all ten. Question 1 has the right answer 2 (position 1 gives place 2), question 2
       // gives place 3, and so on: the made-up right answer is (position % 4) + 1.
@@ -51,7 +54,10 @@ for (const javaScriptEnabled of [false, true]) {
       await expect(page.getByText('Goed.').first()).toBeVisible()
       await expect(page.getByText(/Fout\. Het goede antwoord is/).first()).toBeVisible()
       await expect(page.getByText('60%').first()).toBeVisible()
-      expect(await checkPage(page)).toEqual([])
+      // axe needs JavaScript in the page; the pages are checked with it in pages.spec.ts too.
+      if (javaScriptEnabled) {
+        expect(await checkPage(page)).toEqual([])
+      }
 
       // Nothing is kept: no cookie, and the link "Opnieuw" gives the empty quiz again.
       expect(await context.cookies()).toEqual([])
