@@ -1,6 +1,7 @@
 import type { ComponentPropsWithoutRef } from 'react'
 
 import { classNames } from '../classNames'
+import { Match, type MatchProps } from '../match/Match'
 
 /** What the fan predicted: the full-time score and the half-time score. */
 export type PredictionListGuess = {
@@ -10,27 +11,15 @@ export type PredictionListGuess = {
 
 /** One row of the list: one match with what the fan predicted and the points. */
 export type PredictionListItem = {
-  /** The name of the away club. */
-  away: string
-  /** The name of the competition, such as `Eredivisie`. */
-  competition: string
-  /** The day of the match in words, such as `za 21 nov`. */
-  date: string
-  /** The day as a machine-readable date, such as `2026-11-21`. */
-  dateTime: string
-  /** The name of the home club. */
-  home: string
+  /** The match, as the `Match` shows it: the day, the clubs with the result, and the rest. */
+  match: MatchProps
   /** The points, when the match has any. */
   points?: number | undefined
   /**
    * What the fan predicted: the scores of a match, or a line of words for a choice that has no
-   * score, such as the four players of Fjouwer. Words stand under the clubs, small.
+   * score, such as the four players of Fjouwer. Words stand under the match, small.
    */
   prediction: PredictionListGuess | string
-  /** The score as it is shown, such as `2–1`, or none for a match that has no result. */
-  score?: string | undefined
-  /** What the meta line says between the day and the competition: `Bezig` or `Afgelast`. */
-  status?: string | undefined
 }
 
 /** One part of a prediction: its score, and whether it earned points. */
@@ -52,29 +41,23 @@ const guessWords = ({ fullTime, halfTime }: PredictionListGuess) =>
   `Jouw voorspelling: eind ${fullTime.score}${verdict(fullTime.right)}, rust ${halfTime.score}${verdict(halfTime.right)}`
 
 /**
- * The list of what a fan predicted: a row for each match, with the day and the competition
- * small above, the two clubs with the score, and on the right the points and the prediction. A
- * match without points shows only the prediction, in larger type. A part of the prediction that
- * earned points is green with a tick, and a part that did not is red with a cross. The score
- * never breaks: a long club name wraps over more lines, and nothing is ever cut short. It is a
- * list and not a table, because a row is one line of text that reads as one sentence.
+ * The list of what a fan predicted: a row for each match, with the match on the left as the
+ * `Match` shows it, with the colour of the result, and on the right the points and the
+ * prediction. A match without points shows only the prediction, in larger type. A part of the
+ * prediction that earned points is green with a tick, and a part that did not is red with a
+ * cross. Text is never cut short: a long club name wraps. It is a list and not a table, because
+ * a row reads as one sentence.
  */
 export function PredictionList({ className, items, ...props }: PredictionListProps) {
   return (
     <ul className={classNames('hf-prediction-list', className)} {...props}>
       {items.map((item) => (
-        <li className="hf-prediction-list-item" key={`${item.dateTime}-${item.home}-${item.away}`}>
+        <li
+          className="hf-prediction-list-item"
+          key={`${item.match.dateTime ?? item.match.status}-${item.match.opponent}-${item.match.round}`}
+        >
           <div className="hf-prediction-list-text">
-            <div className="hf-prediction-list-meta">
-              <time dateTime={item.dateTime}>{item.date}</time>
-              {item.status === undefined ? null : <span>{item.status}</span>}
-              <span>{item.competition}</span>
-            </div>
-            <div className="hf-prediction-list-clubs">
-              <span className="hf-prediction-list-club">{item.home}</span>
-              <span className="hf-prediction-list-score">{item.score ?? '–'}</span>
-              <span className="hf-prediction-list-club">{item.away}</span>
-            </div>
+            <Match {...item.match} />
             {typeof item.prediction === 'string' ? (
               <div className="hf-prediction-list-prediction">{item.prediction}</div>
             ) : null}

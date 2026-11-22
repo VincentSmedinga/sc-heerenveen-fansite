@@ -1,8 +1,7 @@
 /*
- * The list of what a fan predicted: a row for each match, the text on the left and the points
- * and the prediction on the right. A row has a thin line above it, as the short
- * lines have. The score never breaks: the clubs and the score are running text, so a long name
- * wraps over more lines, and the score keeps its width. Nothing is ever cut short.
+ * The list of what a fan predicted: a row for each match, the Match on the left and the points
+ * and the prediction on the right. A row has a thin line above it, as the short lines have.
+ * Nothing is ever cut short: a long club name wraps, as it does in a Match.
  */
 
 @layer hf.components {
@@ -35,31 +34,9 @@
     min-inline-size: 0;
   }
 
-  .hf-prediction-list-meta {
-    color: var(--hf-colour-text-secondary);
-    column-gap: 0.35em;
-    display: flex;
-    flex-wrap: wrap;
-    font-size: var(--hf-meta-font-size);
-  }
-
-  .hf-prediction-list-meta > * + *::before {
-    content: '·';
-    margin-inline-end: 0.35em;
-  }
-
-  /* The clubs and the score are running text, so a long name wraps like any other words. */
-  .hf-prediction-list-clubs {
-    font-weight: var(--hf-headline-font-weight);
-    min-inline-size: 0;
-    overflow-wrap: anywhere;
-  }
-
-  /* The score keeps its width and never breaks over two lines. */
-  .hf-prediction-list-score {
-    font-variant-numeric: tabular-nums;
-    margin-inline: var(--hf-space-xs);
-    white-space: nowrap;
+  /* The Match brings the space of a list of its own; a row of this list has its own. */
+  .hf-prediction-list-text .hf-match {
+    padding-block: 0;
   }
 
   /* The points and the prediction, on the right. Nothing in it breaks over two lines. */

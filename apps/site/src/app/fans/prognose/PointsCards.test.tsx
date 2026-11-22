@@ -50,7 +50,6 @@ describe('the card "Jouw voorspellingen"', () => {
     expect(html).toContain(
       '<span class="hf-visually-hidden">Jouw voorspellingen: </span>34 punten<span class="hf-visually-hidden">,</span> <span class="hf-meta">2 voorspellingen</span>',
     )
-    expect(html).not.toContain('·')
     expect(html.match(/hf-prediction-list-item/g)).toHaveLength(2)
     expect(html).not.toContain('Alle ')
   })
@@ -73,7 +72,7 @@ describe('the card "Jouw voorspellingen"', () => {
     expect(html).toContain(
       '17 punten<span class="hf-visually-hidden">,</span> <span class="hf-meta">1 voorspelling</span>',
     )
-    expect(html).toContain('Afgelast')
+    expect(html).toContain('Geannuleerd')
   })
 })
 

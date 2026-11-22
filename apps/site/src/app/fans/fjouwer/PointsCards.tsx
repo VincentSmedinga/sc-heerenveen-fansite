@@ -19,6 +19,7 @@ import type { FourPoints, MatchStanding, PointsMatch } from '#src/fans/fjouwer-p
 
 import { pointsText } from '#src/fans/fjouwer-form'
 import { clubsOf } from '#src/fans/prediction'
+import { rowMatchOf } from '#src/fans/prediction-words'
 import { matchMoment } from '#src/match-format'
 import { reportAddress } from '#src/report-data'
 
@@ -32,17 +33,6 @@ const playedScore = (match: PointsMatch) =>
   match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null
     ? { goalsAgainst: match.goalsAgainst, goalsFor: match.goalsFor }
     : undefined
-
-/** The score as it is written on the line: home–away. */
-const scoreText = (match: PointsMatch) => {
-  const score = playedScore(match)
-
-  if (score === undefined) {
-    return undefined
-  }
-
-  return match.home ? `${score.goalsFor}–${score.goalsAgainst}` : `${score.goalsAgainst}–${score.goalsFor}`
-}
 
 /**
  * The card of the last match of which the supporter had a four: the match with its score, the
@@ -131,21 +121,11 @@ export function placeFigure(standing: MatchStanding | undefined, supporterId: nu
     : { figure: `${entry.place}e`, label: 'plek', note: `van ${standing.counted} bij deze wedstrijd` }
 }
 
-const listItemOf = (item: FourPoints, now: Date): PredictionListItem => {
-  const { match } = item
-  const clubs = clubsOf(match)
-  const moment = matchMoment({ ...match, status: 'played' }, now)
-
-  return {
-    ...clubs,
-    competition: match.competition,
-    date: moment.time,
-    dateTime: moment.dateTime,
-    points: item.total,
-    prediction: item.names.join(', '),
-    score: scoreText(match),
-  }
-}
+const listItemOf = (item: FourPoints, now: Date): PredictionListItem => ({
+  match: rowMatchOf(item.match, item.match.status === 'scheduled' ? 'upcoming' : item.match.status, now),
+  points: item.total,
+  prediction: item.names.join(', '),
+})
 
 /**
  * The card "Eerdere wedstrijden": a row for each earlier match with a four and a finished

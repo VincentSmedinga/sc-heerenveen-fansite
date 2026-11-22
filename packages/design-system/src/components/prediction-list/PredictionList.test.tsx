@@ -7,22 +7,31 @@ import { contrast, fallback, role } from '../../tokens/colourRoles'
 import { PredictionList, type PredictionListItem } from './PredictionList'
 
 const played: PredictionListItem = {
-  away: 'FC Twente',
-  competition: 'Eredivisie',
-  date: 'za 21 nov',
-  dateTime: '2026-11-21',
-  home: 'sc Heerenveen',
+  match: {
+    competition: 'Eredivisie',
+    dateTime: '2026-11-21',
+    goalsAgainst: 1,
+    goalsFor: 2,
+    home: true,
+    opponent: 'FC Twente',
+    round: 'Speelronde 12',
+    status: 'played',
+    time: 'za 21 nov',
+  },
   points: 17,
   prediction: { fullTime: { right: true, score: '3–1' }, halfTime: { right: false, score: '1–0' } },
-  score: '2–1',
 }
 
 const waiting: PredictionListItem = {
-  away: 'Ajax',
-  competition: 'Eredivisie',
-  date: 'zo 29 nov',
-  dateTime: '2026-11-29',
-  home: 'sc Heerenveen',
+  match: {
+    competition: 'Eredivisie',
+    dateTime: '2026-11-29',
+    home: true,
+    opponent: 'Ajax',
+    round: 'Speelronde 14',
+    status: 'scheduled',
+    time: 'zo 29 nov',
+  },
   prediction: { fullTime: { score: '1–1' }, halfTime: { score: '0–0' } },
 }
 
@@ -39,7 +48,9 @@ describe('PredictionList', () => {
 
     expect(within(row).getByText('za 21 nov').getAttribute('datetime')).toBe('2026-11-21')
     expect(within(row).getByText('Eredivisie')).toBeTruthy()
-    expect(row.textContent).toContain('sc Heerenveen2–1FC Twente')
+    expect(row.querySelector('.hf-match-clubs')?.textContent).toContain('sc Heerenveen')
+    expect(row.querySelector('.hf-match-score [aria-hidden]')?.textContent).toBe('2–1')
+    expect(row.querySelector('.hf-match-clubs')?.textContent).toContain('FC Twente')
     expect(within(row).getByText('17')).toBeTruthy()
     expect(within(row).getByText('punten')).toBeTruthy()
     expect(row.querySelector('.hf-prediction-list-guess')?.textContent).toBe('✓3–1 (✗1–0)')
@@ -54,7 +65,7 @@ describe('PredictionList', () => {
   it('reads the prediction in words for a screen reader and hides the written one from it', () => {
     const { container } = render(<PredictionList items={[played]} />)
 
-    expect(container.querySelector('.hf-visually-hidden')?.textContent).toBe(
+    expect(container.querySelector('.hf-prediction-list-side .hf-visually-hidden')?.textContent).toBe(
       'Jouw voorspelling: eind 3–1, goed, rust 1–0, fout',
     )
     expect(container.querySelector('.hf-prediction-list-guess')?.getAttribute('aria-hidden')).toBe('true')
@@ -75,13 +86,38 @@ describe('PredictionList', () => {
     expect(container.querySelector('.hf-prediction-list-right')).toBeNull()
     expect(container.querySelector('.hf-prediction-list-wrong')).toBeNull()
     expect(container.querySelector('.hf-prediction-list-guess-large')?.textContent).toBe('1–1 (0–0)')
-    expect(container.querySelector('.hf-visually-hidden')?.textContent).toBe('Jouw voorspelling: eind 1–1, rust 0–0')
+    expect(container.querySelector('.hf-prediction-list-side .hf-visually-hidden')?.textContent).toBe(
+      'Jouw voorspelling: eind 1–1, rust 0–0',
+    )
   })
 
-  it('puts the state between the day and the competition', () => {
-    const { container } = render(<PredictionList items={[{ ...waiting, status: 'Afgelast' }]} />)
+  it('shows the result of the match in the colour of the outcome, as a Match does', () => {
+    const { container } = render(<PredictionList items={[played]} />)
 
-    expect(container.querySelector('.hf-prediction-list-meta')?.textContent).toBe('zo 29 novAfgelastEredivisie')
+    expect(container.querySelector('.hf-match-win')?.textContent).toContain('2–1')
+  })
+
+  it('says Bezig for a match that is being played, and Geannuleerd for one that is called off', () => {
+    const { container } = render(
+      <PredictionList
+        items={[
+          { ...waiting, match: { ...waiting.match, note: 'Bezig' } },
+          {
+            ...waiting,
+            match: {
+              competition: 'KNVB Beker',
+              home: false,
+              opponent: 'Utrecht',
+              round: 'Tweede ronde',
+              status: 'cancelled',
+            },
+          },
+        ]}
+      />,
+    )
+
+    expect(container.textContent).toContain('Bezig')
+    expect(container.textContent).toContain('Geannuleerd')
   })
 })
 
@@ -93,7 +129,7 @@ describe('a prediction in words', () => {
       'Ben, Jan, Piet en Klaas',
     )
     expect(container.querySelector('.hf-prediction-list-guess')).toBeNull()
-    expect(container.querySelector('.hf-visually-hidden')).toBeNull()
+    expect(container.querySelector('.hf-prediction-list-side .hf-visually-hidden')).toBeNull()
     expect(screen.getByText('17')).toBeTruthy()
   })
 })
@@ -101,11 +137,10 @@ describe('a prediction in words', () => {
 describe('the look of the list', () => {
   const css = readFileSync(join(import.meta.dirname, 'prediction-list.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
 
-  it('wraps a long club name and never cuts text short, and keeps the score whole', () => {
-    expect(css).toMatch(/\.hf-prediction-list-clubs \{[^}]*overflow-wrap: anywhere;/s)
+  it('never cuts text short, and takes the space of the Match out of the row', () => {
     expect(css).not.toContain('text-overflow')
     expect(css).not.toContain('overflow: hidden')
-    expect(css).toMatch(/\.hf-prediction-list-score \{[^}]*white-space: nowrap;/s)
+    expect(css).toMatch(/\.hf-prediction-list-text \.hf-match \{[^}]*padding-block: 0;/s)
   })
 
   it('puts the points and the prediction in a column of their own that never breaks', () => {
