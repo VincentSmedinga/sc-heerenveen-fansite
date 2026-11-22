@@ -216,14 +216,15 @@ function ExampleTable({
   return (
     <DataTable
       caption={caption}
-      columns={['Speler', 'Wat telde', 'Punten']}
+      columns={['Speler', 'Punten']}
       rows={[
         ...worked.map(({ example, reasons, total: points }) => ({
-          cells: [reasons, pointsText(points)],
+          cells: [pointsText(points)],
           header: example.name,
+          secondary: reasons,
         })),
         ...(total
-          ? [{ cells: ['', pointsText(worked.reduce((sum, row) => sum + row.total, 0))], header: 'Samen', total: true }]
+          ? [{ cells: [pointsText(worked.reduce((sum, row) => sum + row.total, 0))], header: 'Samen', total: true }]
           : []),
       ]}
       sortable={false}

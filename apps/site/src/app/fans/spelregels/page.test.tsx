@@ -234,7 +234,7 @@ describe('the part Fjouwer', () => {
     ] as const) {
       const table = tableOf(caption)
       const cells = [...table.matchAll(/<td[^>]*>([^<]*)<\/td>/g)].map((match) => match[1])
-      const points = cells.filter((_cell, index) => index % 2 === 1)
+      const points = cells
       const expected = examples.map((example) => {
         const total = fantasyPoints(exampleFacts(example.facts))?.total ?? 0
 
