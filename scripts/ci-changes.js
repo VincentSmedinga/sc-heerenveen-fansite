@@ -167,8 +167,7 @@ export const gateCheckName = 'Lint, typecheck, test and build'
 /**
  * Puts the decisions together: `site`, `stories` and `tested`, and the lines for the log. A
  * push to main whose code was tested skips all of them; otherwise `tested` is false and the
- * other two
- * stay as `decide` and `decideStories` said.
+ * other two stay as `decide` and `decideStories` said.
  */
 export function decideRun({ event, files, forced = false, ...tested }) {
   const result = decideTested({ event, ...tested })
@@ -189,19 +188,37 @@ export function decideRun({ event, files, forced = false, ...tested }) {
 }
 
 /**
+ * Gives the decision for what `gather` returns, and for a `gather` that throws (the GitHub API
+ * fails, git fails) the answer that checks the most: everything runs.
+ */
+export async function decideSafely(gather) {
+  try {
+    return decideRun(await gather())
+  } catch (error) {
+    return {
+      reasons: [`Alle controles gedraaid: de beslissing mislukte (${error.message})`],
+      site: true,
+      stories: true,
+      tested: false,
+    }
+  }
+}
+
+/**
  * Decides whether the code of a push to main was already tested by its pull request, so that
  * the run on main doesn't repeat the checks. It gives `tested` and the line for the log.
  *
  * `pullRequests` are the pull requests GitHub lists for the commit, `mainTree` the tree of the
  * commit on main, `headTree` the tree of the head commit of the pull request and `checkRuns`
- * the
- * check runs of that head commit. Anything that is null, missing or odd runs everything:
+ * the check runs of that head commit. Anything that is null, missing or odd runs everything:
  *
  * 1. Only a push. A manual run and a pull request run everything.
  * 2. The commit has exactly one pull request, merged into main, whose squash commit is this
  *    commit.
  * 3. The tree of the commit equals the tree of the head commit of that pull request. If the
- *    branch was behind main, the trees differ, and nobody tested what is now on main.
+ *    branch was behind main, the trees differ, and nobody tested what is now on main. One rare
+ *    case slips through: a later commit on main that undoes what the pull request merged with
+ *    makes the trees equal although the run tested another merge.
  * 4. The check "Lint, typecheck, test and build" of GitHub Actions on that head commit passed.
  */
 export function decideTested({ checkRuns, event, headTree, mainTree, pullRequests, sha }) {
@@ -357,27 +374,14 @@ function listRules(rules) {
 }
 
 async function main(env) {
-  let decision
-
-  try {
-    const event = env.GITHUB_EVENT_NAME
-    const isPullRequest = event === 'pull_request'
-
-    decision = decideRun({
-      event,
-      files: isPullRequest ? changedFiles() : [],
-      forced: isPullRequest ? await hasForceLabel(env) : false,
-      ...(event === 'push' ? await gatherTested(env) : {}),
-    })
-  } catch (error) {
-    // Whatever goes wrong, the answer is the one that checks the most.
-    decision = {
-      reasons: [`Alle controles gedraaid: de beslissing mislukte (${error.message})`],
-      site: true,
-      stories: true,
-      tested: false,
-    }
-  }
+  const event = env.GITHUB_EVENT_NAME
+  const isPullRequest = event === 'pull_request'
+  const decision = await decideSafely(async () => ({
+    event,
+    files: isPullRequest ? changedFiles() : [],
+    forced: isPullRequest ? await hasForceLabel(env) : false,
+    ...(event === 'push' ? await gatherTested(env) : {}),
+  }))
 
   for (const reason of decision.reasons) {
     console.log(reason)

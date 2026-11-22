@@ -858,9 +858,11 @@
   - de commit heeft precies één pull request, in `main` samengevoegd, en de squash-commit is deze commit;
   - de bomen zijn gelijk;
   - de check van GitHub Actions op de head-commit is geslaagd.
-    Elke twijfel draait alles: geen of meer dan één pull request, een ontbrekende of rode check, een fout van de API, een onbekend pad.
-    `scripts/ci-gate.js` laat lint, typecheck, de build en de tests overgeslagen zijn als `tested` waar is, en blijft rood als ze zonder die uitvoer zijn overgeslagen.
-    De job _Decide which checks to run_ krijgt alleen `checks: read`, `contents: read` en `pull-requests: read`; de rest van de workflow houdt `contents: read`.
+
+  Elke twijfel draait alles: geen of meer dan één pull request, een ontbrekende of rode check, een fout van de API, een onbekend pad.
+  `scripts/ci-gate.js` laat lint, typecheck, de build en de tests overgeslagen zijn als `tested` waar is, en blijft rood als ze zonder die uitvoer zijn overgeslagen.
+  De job _Decide which checks to run_ krijgt alleen `checks: read`, `contents: read` en `pull-requests: read`; de rest van de workflow houdt `contents: read`.
+
 - **Waarom:** bij pull request 1564 (squash-commit `f042e362`) liep de branch gelijk met `main`, dus de commit had precies de boom die de pull request had getoetst.
   Toch draaiden alle controles opnieuw en vonden niets; alleen de twee deploys waren nieuw.
   Een run op `main` duurt ongeveer 11 minuten en neemt de machinetijd van een volledige run.

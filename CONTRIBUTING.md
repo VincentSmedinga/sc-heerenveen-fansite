@@ -138,6 +138,9 @@ De controles van de site draaien ook in deze gevallen:
 - de pull request wijzigt een `package.json` of een `tsconfig`;
 - het is een handmatige run.
 
+Wil je ze toch, zet dan het label `volledige controle` op de pull request en start de opdracht opnieuw.
+Het log zegt in een regel wat CI besloot en waarom.
+
 Een push naar `main` draait alles, behalve als de code al is getoetst.
 Dat is zo als de commit precies één pull request heeft, samengevoegd met squash, en de boom van de commit gelijk is aan de boom van de head-commit van die pull request.
 Ook moet de check _Lint, typecheck, test and build_ op die head-commit zijn geslaagd.
@@ -146,8 +149,6 @@ Liep de branch achter op `main`, dan verschilt de boom en draait alles.
 Elke twijfel draait ook alles: geen pull request, meer dan één, een rode of ontbrekende check of een fout van de API.
 De deploys naar acceptatie en naar ds.heerenveen.org zijn aparte workflows en veranderen niet.
 
-Wil je ze toch, zet dan het label `volledige controle` op de pull request en start de opdracht opnieuw.
-Het log zegt in een regel wat CI besloot en waarom.
 De regels staan in `scripts/ci-changes.js`.
 De opdrachten hierboven veranderen niet: lokaal draai je alles.
 

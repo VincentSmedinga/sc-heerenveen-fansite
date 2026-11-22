@@ -282,7 +282,8 @@ jobs:
 
   # The check that the rules for main require. It runs whatever the other jobs did, because GitHub counts a skipped job
   # as a pass and skips a job whose predecessor failed. scripts/ci-gate.js has the rules: every job must have passed,
-  # and the jobs of the site and the stories must have passed or have been skipped on purpose by the job changes. A part
+  # and the other jobs must have passed or have been skipped on purpose by the job changes (the site and the stories on a
+  # pull request, and everything on a push to main whose code was tested). A part
   # of the e2e tests that failed or didn't run fails the job site, and so this one. The name is the one in the rules for
   # main, so rename it there too.
   check:

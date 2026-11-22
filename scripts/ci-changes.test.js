@@ -4,7 +4,16 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 
-import { decide, decideRun, decideStories, decideTested, forceLabel, gateCheckName, parseNames } from './ci-changes.js'
+import {
+  decide,
+  decideRun,
+  decideSafely,
+  decideStories,
+  decideTested,
+  forceLabel,
+  gateCheckName,
+  parseNames,
+} from './ci-changes.js'
 
 const pullRequest = (files, forced = false) => decide({ event: 'pull_request', files, forced })
 const storiesFor = (files, forced = false) => decideStories({ event: 'pull_request', files, forced })
@@ -170,7 +179,7 @@ function workflowJobs() {
   return { jobs, workflow }
 }
 
-test('the workflow switches only the checks of the site and the stories with ci-changes.js, and has no paths filter', () => {
+test('the workflow switches the checks with the outputs of ci-changes.js, and has no paths filter', () => {
   const { jobs, workflow } = workflowJobs()
   const site = "needs.changes.outputs.site != 'false'"
   const switched = (output) =>
@@ -387,4 +396,32 @@ test('decideRun leaves a pull request to the rules by files, and never sets test
 
   assert.equal(labelled.site, true)
   assert.equal(labelled.tested, false)
+})
+
+test('decideSafely runs everything when gathering fails, and says why', async () => {
+  for (const event of ['push', 'pull_request']) {
+    const result = await decideSafely(async () => {
+      throw new Error('GitHub antwoordde 502')
+    })
+
+    assert.deepEqual(
+      { site: result.site, stories: result.stories, tested: result.tested },
+      { site: true, stories: true, tested: false },
+      event,
+    )
+    assert.match(result.reasons[0], /GitHub antwoordde 502/)
+  }
+
+  // Also an error that is not thrown inside an async function.
+  const sync = await decideSafely(() => {
+    throw new Error('git faalde')
+  })
+
+  assert.equal(sync.tested, false)
+  assert.equal(sync.site, true)
+})
+
+test('decideSafely gives the decision for what gathering returns', async () => {
+  assert.equal((await decideSafely(async () => ({ ...pushed(), files: [] }))).tested, true)
+  assert.equal((await decideSafely(async () => ({ event: 'pull_request', files: ['docs/a.md'] }))).site, false)
 })

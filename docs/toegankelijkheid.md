@@ -26,7 +26,8 @@ Controleer daarom op de gerenderde pagina, in licht en donker:
   De homepage toetst hij met verzonnen koppen en een verzonnen artikel, die de test zelf in de database zet en daarna weghaalt.
   Lokaal draai je dit met `pnpm test:a11y`; wat eerst moet draaien, staat in de [README van de site](../apps/site/README.md).
   CI slaat deze controle over bij een pull request die alleen documentatie, het gereedschap voor agents, de importer of de MCP-server van het designsysteem wijzigt (zie _De controles_ in de [bijdragegids](../CONTRIBUTING.md)).
-  Een wijziging in de site, het designsysteem, de database of de gedeelde code draait hem altijd, en `main` ook.
+  Een wijziging in de site, het designsysteem, de database of de gedeelde code draait hem altijd.
+  Een push naar `main` draait hem alleen niet als de pull request dezelfde code al toetste (zie _De controles_ in de bijdragegids).
 - **De stories:** CI draait `pnpm test:stories`: de Vitest-addon van Storybook opent elke story in Chrome en toetst hem met axe, één keer in licht en één keer in donker.
   Elke schending laat de controle falen.
   Een story waarvan de staat een momentopname is, zoals een label dat half vervaagd is, zet één regel uit, met de reden in de story.

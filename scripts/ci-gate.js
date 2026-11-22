@@ -17,7 +17,7 @@
 // What decides something is a function without side effects, exported for the tests.
 import { realpathSync } from 'node:fs'
 
-/** The jobs that always run, and the jobs that an output of the job `changes` switches. */
+/** The job that always runs, and the jobs that an output of the job `changes` switches. */
 export const always = ['changes']
 export const decided = [
   { job: 'lint', output: 'tested', skippedWhen: 'true' },
