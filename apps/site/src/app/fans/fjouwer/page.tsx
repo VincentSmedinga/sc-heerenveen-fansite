@@ -18,8 +18,8 @@ import { type FjouwerChoice, JouwVierCard, NoMatchCard } from './FjouwerCards'
 import { EarlierMatchesCard, LastMatchCard, ScoringCard } from './PointsCards'
 import { StandCard } from './StandCards'
 
-// The cards with the four and its points stand in the wide column, the card with the scoring in
-// the narrow one; on a phone the narrow column comes last. The ranking (issue 1473) joins it.
+// The cards with the four and its points stand in the wide column, the cards with the ranking
+// (issue 1473) and the scoring in the narrow one; on a phone the narrow column comes last.
 const areas = pageAreas({ after: ['side'], main: ['four', 'last', 'earlier'] })
 
 // Render on each request: what is open, the deadline and the session are not known at build
