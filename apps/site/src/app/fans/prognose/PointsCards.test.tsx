@@ -156,3 +156,17 @@ describe('the places on the card "Je punten"', () => {
     expect(renderToStaticMarkup(<PointsCard item={item(1)} now={now} />)).not.toContain('plek')
   })
 })
+
+describe('the link "Spelregels" (issue 1455)', () => {
+  const link = '<a href="/fans/spelregels#prognose">Spelregels</a>'
+
+  it('is on the card "Punten", the card with the points and the list of predictions', () => {
+    expect(renderToStaticMarkup(<ScoringCard />)).toContain(link)
+    expect(renderToStaticMarkup(<PointsCard item={item(1)} now={now} />)).toContain(link)
+    expect(list([item(1)])).toContain(link)
+  })
+
+  it('is not on the list of a supporter without predictions', () => {
+    expect(list([])).not.toContain(link)
+  })
+})
