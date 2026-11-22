@@ -234,6 +234,16 @@ describe('the staff on a day', () => {
     expect(await findStaffOn(database.db, 'coach', '1992-11-01')).toMatchObject({ member: { name: 'Foppe de Haan' } })
   })
 
+  it('has Foppe de Haan as the coach for certain on every day of 2003/04, and Verbeek from 1 July 2004', async () => {
+    // His first spell ends in "2004" on Wikipedia: we take the last day of the season (#1546).
+    for (const day of ['2004-01-24', '2004-05-16', '2004-06-30']) {
+      expect(await findStaffOn(database.db, 'coach', day), day).toMatchObject({ member: { name: 'Foppe de Haan' } })
+    }
+    expect(await findStaffOn(database.db, 'coach', '2004-07-01')).toMatchObject({
+      member: { name: 'Gertjan Verbeek' },
+    })
+  })
+
   it('is uncertain in a year a date is known to, and certain once the year is over', async () => {
     // Olde Riekerink began "in 2018", and Streppel ended on 13 May 2018.
     expect(await findStaffOn(database.db, 'coach', '2018-05-13')).toMatchObject({ member: { name: 'Jurgen Streppel' } })
