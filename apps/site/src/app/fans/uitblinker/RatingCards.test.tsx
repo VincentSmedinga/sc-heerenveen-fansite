@@ -1,9 +1,19 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
+import type { MatchRatings, RatedPlayer, SeasonWinner } from '#src/fans/match-ratings'
 import type { RatingMatch, RatingPlayer } from '#src/fans/rating'
 
-import { HowItWorksCard, JoinCard, NextMatchCard, OpenCard, SavedView, WaitingCard } from './RatingCards'
+import {
+  ClosedResultCard,
+  HowItWorksCard,
+  JoinCard,
+  NextMatchCard,
+  OpenCard,
+  SavedView,
+  SeasonWinnersCard,
+  WaitingCard,
+} from './RatingCards'
 
 const now = new Date('2026-11-22T12:00:00Z')
 const closesAt = new Date('2026-11-26T19:00:00Z')
@@ -114,6 +124,14 @@ describe('the other cards', () => {
   })
 })
 
+const running = (appearanceId: number, name: string, average: number, count: number): RatedPlayer => ({
+  appearanceId,
+  average,
+  count,
+  name,
+  playerId: appearanceId,
+})
+
 describe('what is shown after saving', () => {
   const html = renderToStaticMarkup(
     <SavedView
@@ -125,8 +143,15 @@ describe('what is shown after saving', () => {
         ])
       }
       players={players}
+      running={[running(11, 'Luca Oyen', 7.24, 12), running(12, 'Pim Spits', 8.5, 3)]}
     />,
   )
+  const rows = html.match(/<tr[\s\S]*?<\/tr>/g) ?? []
+  const text = (row: string) =>
+    row
+      .replaceAll(/<[^>]*>/g, ' ')
+      .replaceAll(/\s+/g, ' ')
+      .trim()
 
   it('has the notice with the moment, and the button Wijzigen that goes to the form', () => {
     expect(html).toMatch(/<p[^>]*role="status"[^>]*>Je kunt ze wijzigen tot donderdag 26 november, 20.00 uur.<\/p>/)
@@ -134,15 +159,91 @@ describe('what is shown after saving', () => {
     expect(html).toMatch(/<button[^>]*value="1" name="wijzigen">Wijzigen<\/button>/)
   })
 
-  it('says why the supporter sees the intermediate result, and shows only their own grades', () => {
+  it('says why the supporter sees the standing so far', () => {
     expect(html).toContain(
       'Omdat je zelf cijfers gaf, zie je de tussenstand al. De rest ziet hem als het venster dicht is.',
     )
-    expect(html).toContain('Speler')
-    expect(html).toContain('Jij')
-    expect(html).not.toContain('Gem')
-    expect(html).toContain('Luca Oyen')
-    expect(html).toContain('>7<')
-    expect(html).toContain('>9<')
+  })
+
+  it('has the columns Speler, Jij and Gem, with the own grade and the average of everyone', () => {
+    expect(text(rows[0] ?? '')).toBe('Speler Jij Gem')
+    expect(text(rows[1] ?? '')).toContain('Luca Oyen')
+    expect(text(rows[1] ?? '')).toContain('7 7,2')
+  })
+
+  it('marks the Uitblinker in words in his row, and only his', () => {
+    expect(html.match(/>Uitblinker</g)).toHaveLength(1)
+    expect(text(rows[1] ?? '')).toContain('Uitblinker')
+    expect(text(rows[2] ?? '')).not.toContain('Uitblinker')
+  })
+
+  it('says "nog te weinig cijfers" for a player under five ratings, without an average', () => {
+    expect(text(rows[2] ?? '')).toContain('9 nog te weinig cijfers')
+    expect(html).not.toContain('8,5')
+  })
+})
+
+describe('the result of a closed window', () => {
+  const brandsma = running(11, 'Luca Oyen', 7.8, 31)
+  const ratings: MatchRatings = {
+    players: [brandsma, running(12, 'Pim Spits', 8.9, 3)],
+    supporters: 31,
+    winner: brandsma,
+  }
+
+  it('shows the match, the seal, the table and the number of supporters', () => {
+    const html = renderToStaticMarkup(<ClosedResultCard match={match} now={now} ratings={ratings} />)
+
+    expect(html).toMatch(/<h2[^>]*>Uitslag van de laatste wedstrijd<\/h2>/)
+    expect(html).toContain('Uitblinker van de wedstrijd')
+    expect(html).toContain('<table')
+    expect(html).toContain('31 supporters gaven cijfers.')
+    expect(html).toContain('nog te weinig cijfers')
+  })
+
+  it('has only the number when fewer than five supporters rated', () => {
+    const html = renderToStaticMarkup(
+      <ClosedResultCard
+        match={match}
+        now={now}
+        ratings={{ players: [running(12, 'Pim Spits', 8.9, 3)], supporters: 3 }}
+      />,
+    )
+
+    expect(html).toContain('3 supporters gaven cijfers.')
+    expect(html).not.toContain('<table')
+    expect(html).not.toContain('hf-winner')
+  })
+})
+
+describe('the card Uitblinkers of the season', () => {
+  const winners: SeasonWinner[] = [
+    {
+      average: 7.8,
+      goalsAgainst: 1,
+      goalsFor: 3,
+      home: true,
+      matchId: 2,
+      name: 'Dylan Vente',
+      opponent: 'Sparta Rotterdam',
+    },
+    { average: 7.4, goalsAgainst: 2, goalsFor: 2, home: false, matchId: 1, name: 'Andries Noppert', opponent: 'Ajax' },
+  ]
+
+  it('is a soft card with a name, an average and the match for each Uitblinker, and the link to the matches', () => {
+    const html = renderToStaticMarkup(<SeasonWinnersCard season="2026/27" winners={winners} />)
+
+    expect(html).toContain('hf-card-soft')
+    expect(html).toMatch(/<h2[^>]*>Uitblinkers 2026\/27<\/h2>/)
+    expect(html).toContain('Dylan Vente')
+    expect(html).toContain('7,8')
+    expect(html).toContain('Thuis tegen Sparta Rotterdam, 3–1')
+    expect(html).toContain('Uit tegen Ajax, 2–2')
+    expect(html).toContain('>Alle wedstrijden</a>')
+    expect(html.indexOf('Dylan Vente')).toBeLessThan(html.indexOf('Andries Noppert'))
+  })
+
+  it('is not there for a season without an Uitblinker', () => {
+    expect(renderToStaticMarkup(<SeasonWinnersCard season="2026/27" winners={[]} />)).toBe('')
   })
 })
