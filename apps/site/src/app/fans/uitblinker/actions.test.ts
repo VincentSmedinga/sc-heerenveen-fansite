@@ -1,6 +1,16 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { clubs, matchAppearances, matches, matchReports, playerRatings, players, supporters } from '@fansite/db/schema'
+import {
+  clubs,
+  coachRatings,
+  matchAppearances,
+  matches,
+  matchReports,
+  playerRatings,
+  players,
+  staff,
+  supporters,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -79,6 +89,8 @@ beforeEach(async () => {
   vi.stubEnv('FANS_ACCOUNTS', 'on')
   vi.stubEnv('FANS_UITBLINKER', 'on')
   await database.db.delete(playerRatings)
+  await database.db.delete(coachRatings)
+  await database.db.delete(staff)
   await database.db.delete(matches)
   await database.db.delete(players)
   await database.db.delete(supporters)
@@ -268,5 +280,72 @@ describe('the action of the grades', () => {
     await database.db.update(matchReports).set({ status: 'bezig' })
 
     expect(await saveRatingsAction(empty, form(all('7')))).toMatchObject({ failure: 'closed' })
+  })
+
+  describe('with a head coach', () => {
+    const withCoach = (grades: Record<number, string>, coach?: string) => {
+      const data = form(grades)
+
+      if (coach !== undefined) {
+        data.set('cijfer-trainer', coach)
+      }
+
+      return data
+    }
+
+    beforeEach(async () => {
+      await database.db
+        .insert(staff)
+        .values({ name: 'Robin Veldman', role: 'coach', startDate: '2020-01-01', startPrecision: 'day' })
+    })
+
+    it('stores the grade of the coach with those of the players, and replaces it', async () => {
+      await saveRatingsAction(empty, withCoach(all('8'), '6')).catch(() => undefined)
+      await saveRatingsAction(empty, withCoach(all('8'), '9')).catch(() => undefined)
+
+      expect(await database.db.select().from(playerRatings)).toHaveLength(3)
+      expect(await database.db.select().from(coachRatings)).toMatchObject([{ grade: 9, matchId }])
+    })
+
+    it('stores nothing without a grade for the coach, names him, and keeps the other grades', async () => {
+      const result = await saveRatingsAction(empty, withCoach(all('8')))
+
+      expect(result).toEqual({
+        coachError: 'Geef Robin Veldman een cijfer.',
+        errors: {},
+        values: all('8'),
+      })
+      expect(await database.db.select().from(playerRatings)).toEqual([])
+      expect(await database.db.select().from(coachRatings)).toEqual([])
+    })
+
+    it('stores nothing for a grade of 0 or 11 for the coach', async () => {
+      expect(await saveRatingsAction(empty, withCoach(all('8'), '11'))).toHaveProperty('coachError')
+      expect(await saveRatingsAction(empty, withCoach(all('8'), '0'))).toHaveProperty('coachError')
+      expect(await database.db.select().from(coachRatings)).toEqual([])
+    })
+
+    it('keeps the grade of the coach in the form when the grades of the players have a gap or the window is closed', async () => {
+      const [first] = appearances
+
+      expect(await saveRatingsAction(empty, withCoach({ [first ?? 0]: '6' }, '7'))).toMatchObject({
+        coachValue: '7',
+        errors: expect.any(Object) as unknown,
+      })
+      const other = withCoach(all('7'), '5')
+
+      other.set('wedstrijd', String(matchId + 100))
+
+      expect(await saveRatingsAction(empty, other)).toMatchObject({ coachValue: '5', failure: 'closed' })
+    })
+
+    it('shows the grade in the table of what is kept of a supporter, after the players', async () => {
+      await saveRatingsAction(empty, withCoach(all('8'), '6')).catch(() => undefined)
+
+      const data = await ratingData(database.db, supporterId)
+
+      expect(data?.summary).toBe('4 cijfers voor 1 wedstrijd')
+      expect(data?.rows.at(-1)?.cells).toEqual(['Robin Veldman (trainer)', '6'])
+    })
   })
 })

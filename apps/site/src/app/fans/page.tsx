@@ -24,7 +24,7 @@ export const generateMetadata = (): Metadata => {
 // an archive of old quizzes, without an account, and comes with an issue of its own.
 const coming = [
   { part: 'prognose', sentence: 'Voorspel de rust- en eindstand van de volgende wedstrijd.' },
-  { part: 'uitblinker', sentence: 'Geef de spelers na elke wedstrijd een cijfer.' },
+  { part: 'uitblinker', sentence: 'Geef de spelers en de trainer na elke wedstrijd een cijfer.' },
   { part: 'vier', sentence: 'Kies vier spelers die punten scoren.' },
 ] as const
 

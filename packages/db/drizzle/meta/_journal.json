@@ -736,6 +736,13 @@
       "when": 1795336041611,
       "tag": "0104_add_player_ratings",
       "breakpoints": true
+    },
+    {
+      "idx": 105,
+      "version": "5",
+      "when": 1795340960619,
+      "tag": "0105_add_coach_ratings",
+      "breakpoints": true
     }
   ]
 }

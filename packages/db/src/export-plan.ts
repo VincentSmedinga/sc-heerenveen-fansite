@@ -86,6 +86,10 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
   club_names: 'copy',
   club_pages: 'copy',
   clubs: 'copy',
+  coach_ratings: {
+    keep: ['id', 'match_id', 'staff_id', 'grade', 'created_at', 'updated_at'],
+    replace: { supporter_id: 'NULL' },
+  },
   daily_visitors: 'copy',
   discussions: 'structure',
   feeds: 'copy',
