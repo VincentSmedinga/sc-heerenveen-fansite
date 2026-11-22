@@ -1,5 +1,6 @@
 import type { Database } from '@fansite/db/client'
 
+import { recountRatingsOf } from '@fansite/db/rating-window'
 import { supporterBlockedAddresses, supporters } from '@fansite/db/schema'
 import { and, count, desc, eq, like, ne, sql } from 'drizzle-orm'
 
@@ -60,7 +61,7 @@ export async function blockSupporter(
   reason: string,
   now = new Date(),
 ): Promise<BlockResult> {
-  return db.transaction(async (tx) => {
+  const result = await db.transaction(async (tx) => {
     const [account] = await tx
       .select({ disabledAt: supporters.disabledAt })
       .from(supporters)
@@ -77,9 +78,15 @@ export async function blockSupporter(
 
     await tx.update(supporters).set({ disabledAt: now, disabledReason: reason }).where(eq(supporters.id, supporterId))
     await recordAction(tx, { action: 'supporter.block', itemId: supporterId, reason, userId }, now)
-
     return 'blocked'
   })
+
+  // The grades of the account stop counting in the averages that were already worked out.
+  if (result === 'blocked') {
+    await recountRatingsOf(db, supporterId, now)
+  }
+
+  return result
 }
 
 /** What the form to block must have, checked: the reason as it is stored, or the errors. */
@@ -284,7 +291,7 @@ export async function unblockSupporter(
   supporterId: number,
   now = new Date(),
 ): Promise<'missing' | 'not-blocked' | 'unblocked'> {
-  return db.transaction(async (tx) => {
+  const result = await db.transaction(async (tx) => {
     const [account] = await tx
       .select({ disabledAt: supporters.disabledAt })
       .from(supporters)
@@ -301,9 +308,15 @@ export async function unblockSupporter(
 
     await tx.update(supporters).set({ disabledAt: null, disabledReason: null }).where(eq(supporters.id, supporterId))
     await recordAction(tx, { action: 'supporter.unblock', itemId: supporterId, userId }, now)
-
     return 'unblocked'
   })
+
+  // The grades count again.
+  if (result === 'unblocked') {
+    await recountRatingsOf(db, supporterId, now)
+  }
+
+  return result
 }
 
 /** The `LIKE` pattern for a part of a key: the characters that mean something are escaped. */

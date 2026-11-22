@@ -3078,7 +3078,9 @@ export type MatchCoachRating = typeof matchCoachRatings.$inferSelect
  * player is the appearance in the match (`match_appearances`), so a rating goes with the match
  * and its report. A supporter has one row for each appearance, which they can change until the
  * window closes. `supporter_id` is emptied when the account is closed (`ON DELETE SET NULL`),
- * so the grade stays as an anonymous grade, without a link to a person. When the window closes,
+ * so the grade stays as an anonymous grade, without a link to a person. `blocked` is set when
+ * the account is closed while the editors had blocked it (issue 1476), so the grade keeps not
+ * counting; it is a mark without a person. When the window closes,
  * the averages go to `match_player_ratings` with the source `fans`. Times are UTC.
  */
 export const playerRatings = mysqlTable(
@@ -3090,6 +3092,7 @@ export const playerRatings = mysqlTable(
       .notNull()
       .references(() => matchAppearances.id, { onDelete: 'cascade' }),
     grade: tinyint('grade', { unsigned: true }).notNull(),
+    blocked: boolean('blocked').notNull().default(false),
     createdAt: datetime('created_at')
       .notNull()
       .default(sql`(UTC_TIMESTAMP())`),

@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto'
 import type { Database } from './client.ts'
 
 import {
+  playerRatings,
   supporterBlockedAddresses,
   supporterEmailChanges,
   supporterLoginLinks,
@@ -25,9 +26,10 @@ export function blockedAddressHash(email: string) {
  *
  * It keeps nothing of the account, with one exception (issue 1458): of a blocked account it
  * keeps the SHA-256 of the address and the moment, in the same transaction, so the supporter
- * can't sign up again with it for 12 months. A caller doesn't have to do anything for that. It
- * writes one line in the log, without the number, the name or the address. It gives whether
- * there was an account to remove.
+ * can't sign up again with it for 12 months, and it marks the grades of the account as
+ * blocked, without a person, so they keep not counting (issue 1476). A caller doesn't have to
+ * do anything for that. It writes one line in the log, without the number, the name or the
+ * address. It gives whether there was an account to remove.
  */
 export async function closeAccount(db: Database, supporterId: number, now = new Date()): Promise<boolean> {
   const removed = await db.transaction(async (tx) => {
@@ -42,6 +44,8 @@ export async function closeAccount(db: Database, supporterId: number, now = new 
         .insert(supporterBlockedAddresses)
         .values({ addressHash: blockedAddressHash(account.email), blockedAt: now })
         .onDuplicateKeyUpdate({ set: { blockedAt: now } })
+      // The grades stay without a person, and keep not counting (issue 1476).
+      await tx.update(playerRatings).set({ blocked: true }).where(eq(playerRatings.supporterId, supporterId))
     }
 
     await tx.delete(supporterEmailChanges).where(eq(supporterEmailChanges.supporterId, supporterId))

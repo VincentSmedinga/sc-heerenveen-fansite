@@ -154,16 +154,7 @@ export async function closeRatingWindows(
       continue
     }
 
-    await db.execute(sql`
-      INSERT INTO match_player_ratings (match_id, player_id, source, average, rating_count, spread)
-      SELECT a.match_id, a.player_id, 'fans', ROUND(AVG(r.grade), 2), COUNT(*), ROUND(COALESCE(STDDEV_POP(r.grade), 0), 2)
-      FROM player_ratings r
-      JOIN match_appearances a ON a.id = r.appearance_id
-      LEFT JOIN supporters s ON s.id = r.supporter_id
-      WHERE a.match_id = ${match.id} AND a.player_id IS NOT NULL AND (r.supporter_id IS NULL OR s.disabled_at IS NULL)
-      GROUP BY a.match_id, a.player_id
-      ON DUPLICATE KEY UPDATE average = VALUES(average), rating_count = VALUES(rating_count), spread = VALUES(spread)
-    `)
+    await writeAverages(db, match.id)
     closed++
   }
 
@@ -354,6 +345,64 @@ export async function ratingWindowOf(db: Database, match: RatingMatch, now = new
 }
 
 /**
+ * Works the averages out again after the editors blocked or released an account (issue 1476),
+ * for each match in any season where that account gave a grade and the window is over. A
+ * window that is still open has no averages yet, so it is left to the closing step. The
+ * Uitblinker and the threshold of five grades follow from the new averages, because the pages
+ * work them out from the rows. It does nothing while the game, or accounts, are off. It gives
+ * the number of matches it counted again.
+ */
+export async function recountRatingsOf(
+  db: Database,
+  supporterId: number,
+  now = new Date(),
+  env: Record<string, string | undefined> = process.env,
+): Promise<number> {
+  if (!isFansPartOn('uitblinker', env)) {
+    return 0
+  }
+
+  const rated = await db
+    .selectDistinct({ matchId: matchAppearances.matchId })
+    .from(playerRatings)
+    .innerJoin(matchAppearances, eq(matchAppearances.id, playerRatings.appearanceId))
+    .where(eq(playerRatings.supporterId, supporterId))
+  let counted = 0
+
+  for (const { matchId } of rated) {
+    const [match] = await db
+      .select(columns)
+      .from(matches)
+      .innerJoin(clubs, eq(clubs.id, matches.clubId))
+      .where(eq(matches.id, matchId))
+
+    if (match === undefined) {
+      continue
+    }
+
+    const [stored] = await db
+      .select({ id: matchPlayerRatings.id })
+      .from(matchPlayerRatings)
+      .where(and(eq(matchPlayerRatings.matchId, matchId), eq(matchPlayerRatings.source, 'fans')))
+      .limit(1)
+    const later = stored === undefined ? await scheduledAfter(db, match) : []
+    const over =
+      stored !== undefined ||
+      closesAt(
+        match,
+        later.flatMap((candidate) => (candidate.kickoffAt === null ? [] : [candidate.kickoffAt])),
+      ).getTime() <= now.getTime()
+
+    if (over) {
+      await writeAverages(db, matchId)
+      counted++
+    }
+  }
+
+  return counted
+}
+
+/**
  * Stores the grades of a supporter for the players of the match, and replaces earlier ones. It
  * writes only while the window of the last match is open and only for a player of its list, and
  * the write checks the window once more with the clock of the database (`UTC_TIMESTAMP()`), so
@@ -465,6 +514,30 @@ async function scheduledAfter(db: Database, match: Pick<RatingMatch, 'kickoffAt'
     .orderBy(asc(matches.matchDate), sql`${matches.kickoffAt} is null`, asc(matches.kickoffAt), asc(matches.id))
 
   return found.filter((candidate) => startOf(candidate).getTime() > startOf(match).getTime())
+}
+
+/**
+ * Writes the averages with the source `fans` of one match from the grades as they are now:
+ * grades of a blocked account, and of an account that was blocked when it closed, do not
+ * count. The old rows of the match go first, so a player whose grades all dropped out has no
+ * average left. It is the one place that works the averages out, for the closing of a window
+ * and for the recount when an account is blocked or released.
+ */
+async function writeAverages(db: Database, matchId: number) {
+  await db.transaction(async (tx) => {
+    await tx
+      .delete(matchPlayerRatings)
+      .where(and(eq(matchPlayerRatings.matchId, matchId), eq(matchPlayerRatings.source, 'fans')))
+    await tx.execute(sql`
+      INSERT INTO match_player_ratings (match_id, player_id, source, average, rating_count, spread)
+      SELECT a.match_id, a.player_id, 'fans', ROUND(AVG(r.grade), 2), COUNT(*), ROUND(COALESCE(STDDEV_POP(r.grade), 0), 2)
+      FROM player_ratings r
+      JOIN match_appearances a ON a.id = r.appearance_id
+      LEFT JOIN supporters s ON s.id = r.supporter_id
+      WHERE a.match_id = ${matchId} AND a.player_id IS NOT NULL AND r.blocked = 0 AND (r.supporter_id IS NULL OR s.disabled_at IS NULL)
+      GROUP BY a.match_id, a.player_id
+    `)
+  })
 }
 
 /** The line for the log of the run: a count, no names. */
