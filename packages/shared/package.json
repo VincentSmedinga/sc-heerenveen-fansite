@@ -17,6 +17,7 @@
     "./mail-env": "./src/mail-env.ts",
     "./match-report": "./src/match-report.ts",
     "./prediction-points": "./src/prediction-points.ts",
+    "./quiz-score": "./src/quiz-score.ts",
     "./site-env": "./src/site-env.ts"
   },
   "scripts": {

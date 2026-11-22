@@ -22,6 +22,7 @@ import { buildOldSiteCheck, formatOldSiteCheck } from './old-site-check.ts'
 import { importOldSiteClubs, oldSiteClubIds } from './old-site-clubs.ts'
 import { importOldSiteCompleteness } from './old-site-completeness.ts'
 import { compareCrossTables, crossTableSeasonsOf, fetchCrossTables } from './old-site-cross-tables.ts'
+import { importOldSiteFantest } from './old-site-fantest.ts'
 import { oldSiteDataFolder, readOldSiteData } from './old-site-file.ts'
 import { importOldSiteGoals } from './old-site-goals.ts'
 import { importOldSiteLineups } from './old-site-lineups.ts'
@@ -61,6 +62,7 @@ export const oldSiteSteps: readonly OldSiteStep[] = [
   { name: 'cijfers', run: (db, data) => importOldSiteRatings(db, data) },
   { name: 'trainercijfers', run: (db, data) => importOldSiteCoachRatings(db, data) },
   { name: 'voorspellingen', run: (db, data) => importOldSitePredictions(db, data) },
+  { name: 'fantest', run: (db, data) => importOldSiteFantest(db, data.fantest) },
   { name: 'seizoencijfers', run: (db, data) => importOldSiteSeasonRatings(db, data) },
   { name: 'selecties', run: (db) => importOldSiteCompleteness(db, new Date()) },
 ]

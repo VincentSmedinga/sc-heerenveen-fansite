@@ -1,0 +1,142 @@
+/*
+ * One question of a quiz, in a card. The parts of the card stand under each other with the
+ * space of a card between them (the card sets it, see utilities/flow.css). The question is a
+ * fieldset without the border and the padding the base styles give it, because the card has
+ * its own, and its legend looks like a heading. The four answers are large rows under each
+ * other over the full width, and the whole row can be chosen: the radio button is in the row,
+ * and the row shows the choice with a thicker border besides its fill, so it shows without
+ * colour. After the check the answers are rows too, but not to choose: the right one is bold
+ * and green, a wrong choice of the player is red, and each row has its percentage on the right
+ * and the words "Jouw keuze" next to the answer, so colour is never the only sign. A question
+ * with an error has red borders, and the error itself is text under the question.
+ */
+
+@layer hf.components {
+  .hf-quiz-question {
+    display: grid;
+    gap: var(--hf-space-m);
+  }
+
+  .hf-quiz-question-group {
+    border: 0;
+    display: grid;
+    gap: var(--hf-space-s);
+    grid-template-columns: minmax(0, 1fr);
+    margin-inline: 0;
+    min-inline-size: 0;
+    padding: 0;
+  }
+
+  /*
+   * The question is a sentence, so it keeps the body type and is only bold: the uppercase of the
+   * headings would be hard to read. It sets this for the heading of a checked question too.
+   */
+  .hf-quiz-question-text {
+    color: var(--hf-colour-text-heading);
+    font-family: inherit;
+    font-size: var(--hf-body-font-size);
+    font-stretch: inherit;
+    font-weight: var(--hf-strong-font-weight);
+    letter-spacing: normal;
+    line-height: var(--hf-body-line-height);
+    margin: 0;
+    overflow-wrap: anywhere;
+    padding: 0;
+    text-transform: none;
+  }
+
+  .hf-quiz-question-answers {
+    display: grid;
+    gap: var(--hf-space-xs);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .hf-quiz-question-answer {
+    align-items: center;
+    background-color: var(--hf-colour-background-surface);
+    border: 0.125rem solid var(--hf-colour-border-input);
+    border-radius: 0.375rem;
+    display: flex;
+    gap: var(--hf-space-s);
+    min-block-size: var(--hf-size-control);
+    padding: var(--hf-space-xs) var(--hf-space-s);
+
+    > input {
+      flex: none;
+      margin: 0;
+    }
+
+    > span {
+      overflow-wrap: anywhere;
+    }
+  }
+
+  label.hf-quiz-question-answer {
+    cursor: pointer;
+
+    &:has(> input:checked) {
+      background-color: var(--hf-colour-background-button-soft);
+      border-color: var(--hf-colour-background-button);
+      border-width: 0.25rem;
+
+      /* The thicker border takes the room of the padding, so the row does not grow. */
+      padding: calc(var(--hf-space-xs) - 0.125rem) calc(var(--hf-space-s) - 0.125rem);
+    }
+
+    &:has(> input:focus-visible) {
+      outline: 0.1875rem solid var(--hf-colour-focus);
+      outline-offset: 0.125rem;
+    }
+
+    @media (hover: hover) {
+      &:hover:not(:has(> input:checked)) {
+        background-color: var(--hf-colour-background-button-soft);
+      }
+    }
+  }
+
+  .hf-quiz-question-group[data-invalid] label.hf-quiz-question-answer:not(:has(> input:checked)) {
+    border-color: var(--hf-colour-text-accent);
+  }
+
+  .hf-quiz-question-checked {
+    justify-content: space-between;
+  }
+
+  .hf-quiz-question-answer-text {
+    flex: 1;
+  }
+
+  .hf-quiz-question-percentage {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .hf-quiz-question-correct {
+    border-color: var(--hf-colour-text-correct);
+    font-weight: var(--hf-strong-font-weight);
+  }
+
+  .hf-quiz-question-correct .hf-quiz-question-answer-text,
+  .hf-quiz-question-correct .hf-quiz-question-percentage {
+    color: var(--hf-colour-text-correct);
+  }
+
+  .hf-quiz-question-wrong {
+    border-color: var(--hf-colour-text-accent);
+  }
+
+  .hf-quiz-question-wrong .hf-quiz-question-answer-text,
+  .hf-quiz-question-wrong .hf-quiz-question-percentage {
+    color: var(--hf-colour-text-accent);
+  }
+
+  .hf-quiz-question-mark {
+    font-size: var(--hf-meta-font-size);
+    font-weight: var(--hf-body-font-weight);
+    margin-inline-start: var(--hf-space-xs);
+    white-space: nowrap;
+  }
+}

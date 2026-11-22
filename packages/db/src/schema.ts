@@ -3217,3 +3217,69 @@ export const oldSeasonRatings = mysqlTable(
 )
 
 export type OldSeasonRating = typeof oldSeasonRatings.$inferSelect
+
+/** Where a quiz of the Fantest comes from: the archive of the old fansite or the editors. */
+export const quizSources = ['oude-fansite', 'redactie'] as const
+
+export type QuizSource = (typeof quizSources)[number]
+
+/** Whether a quiz is shown (`published`) or still being made (`draft`). */
+export const quizStatuses = ['draft', 'published'] as const
+
+export type QuizStatus = (typeof quizStatuses)[number]
+
+/**
+ * A quiz of the Fantest (issue 1480): one month with its questions. The archive of the old
+ * fansite fills it with `oude-fansite` quizzes; a monthly quiz of the editors (1481 and 1482)
+ * would use `redactie`. For an old quiz it keeps the sum of what visitors did then: how many
+ * took part and their average score over the questions that are in the archive, in tenths (41
+ * is 4,1). It keeps nothing of a person, and nothing of a visitor of this site.
+ */
+export const quizzes = mysqlTable(
+  'quizzes',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    year: smallint('year', { unsigned: true }).notNull(),
+    month: tinyint('month', { unsigned: true }).notNull(),
+    source: mysqlEnum('source', quizSources).notNull(),
+    status: mysqlEnum('status', quizStatuses).notNull(),
+    participants: int('participants', { unsigned: true }),
+    averageScoreTenths: smallint('average_score_tenths', { unsigned: true }),
+  },
+  (table) => [
+    unique('quizzes_year_month_unique').on(table.year, table.month),
+    check('quizzes_month_in_range', sql`${table.month} between 1 and 12`),
+    check('quizzes_average_in_range', sql`${table.averageScoreTenths} is null or ${table.averageScoreTenths} <= 100`),
+  ],
+)
+
+export type Quiz = typeof quizzes.$inferSelect
+
+/**
+ * A question of a quiz: its place in the quiz (the old quiz had ten, and a question that is
+ * left out leaves a gap), the text, four answers, the place of the right one (1 to 4) and, for
+ * an old question, the percentage of visitors who chose each answer. Without visitors the
+ * percentages are null.
+ */
+export const quizQuestions = mysqlTable(
+  'quiz_questions',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    quizId: int('quiz_id', { unsigned: true })
+      .notNull()
+      .references(() => quizzes.id, { onDelete: 'cascade' }),
+    position: tinyint('position', { unsigned: true }).notNull(),
+    text: varchar('text', { length: 1000 }).notNull(),
+    answers: json('answers').$type<[string, string, string, string]>().notNull(),
+    correctAnswer: tinyint('correct_answer', { unsigned: true }).notNull(),
+    percentages: json('percentages').$type<[number, number, number, number] | null>(),
+  },
+  (table) => [
+    unique('quiz_questions_position_unique').on(table.quizId, table.position),
+    check('quiz_questions_position_in_range', sql`${table.position} between 1 and 10`),
+    check('quiz_questions_correct_in_range', sql`${table.correctAnswer} between 1 and 4`),
+    check('quiz_questions_four_answers', sql`json_length(${table.answers}) = 4`),
+  ],
+)
+
+export type QuizQuestion = typeof quizQuestions.$inferSelect
