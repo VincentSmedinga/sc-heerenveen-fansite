@@ -703,6 +703,7 @@
 - **Later:** vult de beslissing _Een rij in `players` blijft een speler in een seizoen, met een bron en soms zonder positie_ aan: `playerSources` heeft nu `verslag` als laatste bron.
 - **Later:** sinds 10 november 2026 staat `redactie` achter `verslag` in `playerSources`; zie _Een persoon van de redactie mag zonder Wikipedia-pagina, en `redactie` is de laatste bron van een speler_.
 - **Later:** `verslag` wint nog steeds nooit van een echte lijst, maar is sinds 9 november 2026 wel de beste bron van een seizoen zonder andere lijst: de import van de oude site bewaart dan een rij in `squad_completeness`, en de kaart Selectie toont die spelers met de zin dat ze uit de verslagen komen (#935); zie _De importer bewaart ook de volledigheid van een seizoen met alleen spelers uit verslagen_ in `importer.md`.
+- **Later:** sinds 22 november 2026 kan de rij van een speler van de tegenstander een persoon hebben (`match_appearances.person_id`, #1544): hij krijgt nog steeds geen rij in `players`, maar wel een rij in `persons` als zijn naam bij precies één persoon past; zie _Een regel van de tegenstander in een verslag kan een persoon hebben_.
 
 ## Wikipedia houdt de uitslag, het verslag houdt de rest
 
@@ -1334,3 +1335,43 @@
   Vier vaste antwoorden in één kolom houden de tabel klein, en de controles bewaken de grenzen.
 - **Alternatieven:** een derde tabel voor de antwoorden (een join voor elke vraag, en de plaats van het goede antwoord is dan een verwijzing); een kolom per antwoord en per percentage (twaalf kolommen zonder winst).
 - **Let op:** `quizzes.source` ziet erop toe dat de import van de oude Fansite alleen zijn eigen quizzen verandert of weghaalt.
+
+## Een regel van de tegenstander in een verslag kan een persoon hebben
+
+- **Datum:** 22 november 2026
+- **Besluit:** migratie 0111 zet `match_appearances.person_id` neer (#1544): leeg toegestaan, verwijzend naar `persons` met `ON DELETE SET NULL`, met een index.
+  Een regel van ons houdt de kolom leeg, want onze spelers hebben hun persoon al via `player_id`.
+  Een speler van de tegenstander krijgt nog steeds geen rij in `players`.
+  De database kan dat niet controleren: MariaDB staat geen check toe op een kolom die een verwijderde persoon op leeg zet (fout 1901, net als bij `player_id`).
+  `linkOpponentPersons` geeft daarom alleen een persoon aan een regel die niet van ons is.
+- **Waarom:** een naam is geen identiteit.
+  Zonder persoon kunnen we niet zien dat dezelfde man in meer wedstrijden speelde, of dat een speler van ons eerder tegen ons speelde (zie #1540).
+- **Alternatieven:** een rij in `players` voor elke tegenstander (die tabel is van ons en per seizoen); een eigen tabel met speler-id's voor tegenstanders; alles op de naam laten.
+
+## Een tegenstander krijgt zijn persoon via een doelpunt of via de volledige naam bij precies één persoon
+
+- **Datum:** 22 november 2026
+- **Besluit:** `linkOpponentPersons` in `packages/db/src/opponent-persons.ts` geeft de regels van de tegenstander van een wedstrijd hun persoon (#1544).
+  Eerst telt een doelpunt van dezelfde wedstrijd dat met `appearance_id` naar de regel wijst en een `person_id` heeft.
+  Anders telt de volledige naam, zonder letter- of accentverschil, die gelijk is aan `persons.name` van precies één persoon.
+  Past de naam bij geen of bij twee of meer personen, dan blijft de regel leeg.
+  Een regel die al een persoon heeft, verandert de functie nooit.
+  - **Een uitzonderingslijst** (`opponentPersonExceptions` in `packages/db/src/persons.ts`, paren van naam en club, nu leeg) houdt een naamgenoot tegen bij de regel van de naam.
+    Een doelpunt blijft gelden, want dat wijst naar de pagina van de man zelf.
+    Een koppeling die al is gelegd, blijft staan; de lijst stopt alleen nieuwe.
+  - **Wanneer:** bij het opslaan van een verslag in het beheer, voor de regels van de tegenstander van die wedstrijd, en in de uurlijkse import voor alle regels zonder persoon (`importOpponentPersons`).
+    Een verslag opnieuw opslaan maakt de regels opnieuw en koppelt ze opnieuw, dus de personen blijven.
+    De import schrijft in het logboek hoeveel regels via een doelpunt, via de naam, niet (de naam past bij niemand) en niet (de naam past bij meer dan één persoon) een persoon kregen.
+- **Waarom:** de projecteigenaar koos voor de ruime regel boven de voorzichtige, zodat zo veel mogelijk regels meteen een persoon hebben.
+  Het risico is een naamgenoot: in de kopie van acceptatie zijn 169 namen van tegenstanders gelijk aan een persoon en 92 aan een speler van ons.
+  De uitzonderingslijst en het logboek van de import vangen dat op.
+- **Alternatieven:** alleen koppelen bij zekerheid (een doelpunt, of een naam die maar bij één persoon van die club past) met een controlelijst; alleen koppelen wat de redactie kiest.
+- **Let op:** een foute koppeling verhelpt de redactie voorlopig via de uitzonderingslijst; een scherm om te ontkoppelen is er niet.
+
+## Personen van tegenstanders komen alleen uit Wikipedia en Wikidata
+
+- **Datum:** 22 november 2026
+- **Besluit:** een persoon van een tegenstander komt alleen uit Wikipedia en Wikidata (#1544).
+  Een speler zonder artikel blijft een naam, en de import maakt geen persoon voor een naam zonder artikel.
+- **Waarom:** de gegevens komen alleen van Wikipedia, met naamsvermelding (CC BY-SA), en een verzonnen persoon zonder bron zegt niets over wie hij is.
+- **Alternatieven:** een persoon voor elke naam in een verslag (geen bron, geen controle).

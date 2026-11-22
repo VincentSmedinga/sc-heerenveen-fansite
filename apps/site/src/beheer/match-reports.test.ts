@@ -370,6 +370,30 @@ describe('saveReport', () => {
     expect((await goalsOf()).every((row) => row.appearanceId !== null || row.player === 'Sibbing')).toBe(true)
   })
 
+  it('gives a player of the opponent his person when the report is saved, and keeps it when the report is saved again (#1544)', async () => {
+    const [person] = await database.db.insert(persons).values({ name: 'Rik Tegenstander' }).$returningId()
+    const withOpponent = (extra: string) =>
+      report({
+        zij: {
+          doelpunt: [goal({ minuut: '40', naam: 'Sibbing' })],
+          speler: [{ ...emptyRow('speler'), naam: 'Rik Tegenstander', rol: extra }],
+        },
+      })
+
+    await save(withOpponent('basis'))
+
+    const personOf = async () =>
+      (await database.db.select().from(matchAppearances).where(eq(matchAppearances.name, 'Rik Tegenstander'))).map(
+        (row) => row.personId,
+      )
+
+    expect(await personOf()).toEqual([person?.id])
+
+    await save(withOpponent('bank'), t1)
+
+    expect(await personOf()).toEqual([person?.id])
+  })
+
   it('saves the kicks of the shoot-out with the report, in rounds for each team, and sees a changed kick as a change', async () => {
     const cup = await cupReport(series())
 

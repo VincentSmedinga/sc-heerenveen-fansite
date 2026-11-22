@@ -141,6 +141,19 @@ export const personsWhoDiffer: readonly (readonly string[])[] = [
 export const opponentGoalNamesakes: readonly string[] = []
 
 /**
+ * Opponents' players who are a namesake of a person in `persons` (#1544). The rule of
+ * `linkOpponentPersons` gives a player of the opponent the one person whose name is exactly
+ * his; a pair of name and club in this list is never linked by name, so the namesake of
+ * another club does not get the person. A link that was laid stays until the editors remove
+ * it; the list only stops new ones. The owner reads the counts in the log of the import and
+ * adds a pair here when the man in a report is another man. `club` is the name of the
+ * opponent's club as `clubs.name` has it; capitals and accents don't count.
+ *
+ * Example: `{ club: 'FC Twente', name: 'Jan Jansen' }`.
+ */
+export const opponentPersonExceptions: readonly { club: string; name: string }[] = []
+
+/**
  * Two or more titles of Wikipedia that are one person while no redirect says so, each with the
  * title that stays and the other titles. The importer looks a title up here before it asks
  * Wikipedia: an other title is the person of the title that stays, and costs no request.
