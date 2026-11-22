@@ -1,0 +1,26 @@
+'''FC Voorbeeld''' is een verzonnen voetbalclub voor een test.
+
+== Geschiedenis ==
+Verzonnen tekst.
+
+== Selectie ==
+{| class="wikitable"
+! Nr.
+! Land
+! Naam
+! Positie
+|-
+| 1 || {{Vlag|Nederland}} || [[Karel Doelman]] || Doelman
+|-
+| 4 || {{Vlag|België}} || [[Jonas Stopper (voetballer, 1998)|Jonas Stopper]] || Verdediger
+|-
+| 8 || {{Vlag|Duitsland}} || Max Zonderartikel || Middenvelder
+|-
+| - || {{Vlag|Nederland}} || [[Aron Aanvaller]] || Aanvaller
+|}
+
+=== Technische staf ===
+Verzonnen tekst.
+
+== Stadion ==
+Verzonnen tekst.

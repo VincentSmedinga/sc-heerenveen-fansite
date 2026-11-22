@@ -2927,6 +2927,56 @@ export const squadImports = mysqlTable('squad_imports', {
 
 export type SquadImport = typeof squadImports.$inferSelect
 
+/**
+ * The current squad of a club we meet this season (#1541), as its article on the Dutch
+ * Wikipedia lists it: one row per player. `person_id` is empty for a player without an
+ * article. `shirt_number` and `position` are empty when the table has none. `read_at` is the
+ * last time the article was read and the row was in it. A player who is no longer in the table
+ * is removed, so the rows are the squad as it stands. Nothing shows the rows yet.
+ */
+export const clubSquadPlayers = mysqlTable(
+  'club_squad_players',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    clubId: int('club_id', { unsigned: true })
+      .notNull()
+      .references(() => clubs.id, { onDelete: 'cascade' }),
+    name: varchar('name', { length: playerNameMaxLength }).notNull(),
+    personId: int('person_id', { unsigned: true }).references(() => persons.id, { onDelete: 'set null' }),
+    shirtNumber: int('shirt_number', { unsigned: true }),
+    position: mysqlEnum('position', playerPositions),
+    readAt: datetime('read_at').notNull(),
+  },
+  (table) => [
+    unique('club_squad_players_club_name_unique').on(table.clubId, table.name),
+    index('club_squad_players_person_id_idx').on(table.personId),
+  ],
+)
+
+export type ClubSquadPlayer = typeof clubSquadPlayers.$inferSelect
+
+/**
+ * The health of the import of the squad of a club (#1541), one row per club, like
+ * `squad_imports` has one per season: the last success, the last outcome, the failed reads in
+ * a row, the last error and warning, and `retry_at`, when the import may ask for the article
+ * again. Times are UTC.
+ */
+export const clubSquadImports = mysqlTable('club_squad_imports', {
+  clubId: int('club_id', { unsigned: true })
+    .primaryKey()
+    .references(() => clubs.id, { onDelete: 'cascade' }),
+  lastSuccessAt: datetime('last_success_at'),
+  lastOutcome: mysqlEnum('last_outcome', matchImportOutcomes).notNull(),
+  failuresInARow: int('failures_in_a_row', { unsigned: true }).notNull().default(0),
+  lastError: varchar('last_error', { length: reasonMaxLength }),
+  lastErrorAt: datetime('last_error_at'),
+  lastWarning: varchar('last_warning', { length: reasonMaxLength }),
+  lastWarningAt: datetime('last_warning_at'),
+  retryAt: datetime('retry_at'),
+})
+
+export type ClubSquadImport = typeof clubSquadImports.$inferSelect
+
 /** The levels of the chance that the list of players of a season is the whole squad (#745). */
 export const squadCompletenessLevels = ['onbekend', 'weinig', 'deels', 'bijna', 'compleet'] as const
 

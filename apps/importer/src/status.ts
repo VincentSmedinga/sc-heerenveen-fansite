@@ -5,6 +5,8 @@ import type { SeasonCoverage } from '@fansite/db/season-coverage'
 import { connect } from '@fansite/db/client'
 import { countPersonData, countPersonNames, playerListReadAt, playerListReport } from '@fansite/db/persons'
 import {
+  clubs,
+  clubSquadImports,
   feeds,
   importRuns,
   matchAppearances,
@@ -141,6 +143,7 @@ export async function showStatus(
     const matchesUnhealthy = await showMatchStatus(db, now, write)
     const squadUnhealthy = await showSquadStatus(db, now, write)
 
+    await showClubSquadStatus(db, now, write)
     await showCompleteness(db, now, write)
     await showSimilarPersons(db, write)
     await showPlayerList(db, write)
@@ -155,6 +158,28 @@ export async function showStatus(
     return matchesUnhealthy || squadUnhealthy || unhealthy > 0 ? 1 : 0
   } finally {
     await close()
+  }
+}
+
+/**
+ * Shows the health of the import of the squads of the clubs we meet (#1541): one line with the
+ * number of clubs, and the usual lines for each club that is unhealthy, so a club that keeps
+ * failing stands out. It is information and no failure of the status: an article without a
+ * selection is common.
+ */
+async function showClubSquadStatus(db: Database, now: Date, write: (line: string) => void): Promise<void> {
+  const rows = await db
+    .select({ health: clubSquadImports, name: clubs.name })
+    .from(clubSquadImports)
+    .innerJoin(clubs, eq(clubs.id, clubSquadImports.clubId))
+    .orderBy(asc(clubs.name))
+  const unhealthy = rows.filter((row) => isUnhealthy(row.health))
+
+  write('')
+  write(`Club squads: ${rows.length} ${rows.length === 1 ? 'club' : 'clubs'} read, ${unhealthy.length} unhealthy`)
+
+  for (const row of unhealthy) {
+    showImportStatus(`Club squad ${printable(row.name)} (Wikipedia)`, { ...row.health, season: '' }, [], now, write)
   }
 }
 
