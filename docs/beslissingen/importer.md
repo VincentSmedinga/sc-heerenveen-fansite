@@ -4617,7 +4617,7 @@
     Drie maanden die klaar stonden met lege vragen en zonder deelnemers (oktober 2003, juni 2004 en september 2005) gaan ook niet mee.
   - De tekst van de vragen staat in de oude database als latin1 in een `blob`.
     Het script leest hem als latin1, zodat een `é` een `é` blijft.
-  - Aan de bewaarde maanden valt niets te rekenen over deelnemers uit meerdere bronnen: de som per maand staat in het bestand, ook bij minder dan vijf deelnemers, en de site beslist wat ze toont (`quizMinimum`).
+  - De som per maand staat in het bestand, ook bij minder dan vijf deelnemers, en de site beslist wat ze toont (`quizMinimum`).
 - **Waarom:** de vragen zijn het werk van de oude redactie, en een bezoeker kan ze nu naspelen.
   De deelnemers waren leden met een naam en een adres, en de site neemt niets van hen over.
   De import leest alleen de bestanden, want productie kan de oude database niet bereiken.
