@@ -4268,8 +4268,6 @@
   De `CheckboxGroup` heeft geen teller, geen regel per vakje, geen reden en geen fout, en de rijen zien er anders uit.
 - **Alternatieven:** de `CheckboxGroup` uitbreiden (elke wijziging raakt de bronnenfilter, dat een gewone reeks vakjes is); de vakjes op de pagina zelf opbouwen; vier keuzelijsten (je ziet de selectie niet in één keer).
 
-<<<<<<< HEAD
-
 ## QuizQuestion voor een vraag van de Fantest
 
 - **Datum:** 22 november 2026
@@ -4289,7 +4287,6 @@
 - **Waarom:** elke vraag heeft zo een eigen foutmelding en een eigen goed of fout, en een nieuwe quiz heeft dezelfde onderdelen nodig.
 - **Alternatieven:** alle vragen in één lange lijst met één `RadioGroup` per vraag (geen eigen kaart en geen eigen nummer); de `RatingScale` hergebruiken (die is voor een cijfer); de vraag als echte kop (`h3`) in de legenda.
 - **Let op:** de nieuwe rol staat ook in de tabel van de tokens (`src/docs/tokens.ts`) met de contrastparen.
-  \=======
 
 ## De rijkop van een DataTable stort niet meer in tot één letter
 
@@ -4301,5 +4298,3 @@
   Een lang woord als "doelpuntental" breekt op een lettergreep, want de rijkop heeft ook `hyphens: auto`.
 - **Waarom:** bij `anywhere` telt elke letter als een plek om af te breken, dus een tabel waarvan de andere kolommen niet afbreken drukte de eerste kolom samen tot één letter (de kaart "Punten", #1561).
 - **Alternatief:** de regel laten staan en alleen die ene tabel aanpassen.
-
-> > > > > > > origin/main

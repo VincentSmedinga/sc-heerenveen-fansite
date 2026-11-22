@@ -136,7 +136,8 @@ export function QuizForm({
           {questions.length === quizSize ? 'Tien vragen' : `${questions.length} vragen`}
         </Heading>
         <Text>
-          Kies bij elke vraag één antwoord. Daarna zie je meteen hoe je het deed, en hoe fans het in {year} deden.
+          Kies bij elke vraag één antwoord. Daarna zie je meteen hoe je het deed
+          {participants === undefined ? '.' : `, en hoe fans het in ${year} deden.`}
         </Text>
       </Card>
       <Form action={action}>

@@ -207,6 +207,22 @@ describe('the page of a month of the Fantest', () => {
     await expect(generateMetadata(params('2003-05'))).rejects.toThrow('NEXT_NOT_FOUND')
   })
 
+  it('says in the description how many questions there are', async () => {
+    loadQuiz.mockResolvedValue(quiz(9, { questions: questionsOf(9) }))
+    vi.stubEnv('SITE_ENV', 'production')
+
+    expect((await generateMetadata(params('2003-05'))).description).toContain('9 vragen')
+  })
+
+  it('promises the figures of then only for a month that has them', async () => {
+    expect(await render()).toContain('en hoe fans het in 2003 deden.')
+    loadQuiz.mockResolvedValue(quiz(10, { averageTenths: undefined, participants: undefined }))
+    const html = await render()
+
+    expect(html).not.toContain('hoe fans het in')
+    expect(html).toContain('hoe je het deed.')
+  })
+
   it('may be indexed and names its own address, with the title of the month', async () => {
     vi.stubEnv('SITE_ENV', 'production')
     const metadata = await generateMetadata(params('2003-05'))

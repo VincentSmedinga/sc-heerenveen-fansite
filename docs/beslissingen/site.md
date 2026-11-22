@@ -7777,8 +7777,6 @@
 - **Let op:** de pagina's zijn `force-dynamic`, omdat de instelling en de vragen pas bij een verzoek bekend zijn.
   `/fans/` blijft in `robots.txt` geweigerd voor al het andere.
   #1481 en verder (een nieuwe quiz elke maand) zijn niet goedgekeurd en zitten er niet in.
-  \
-  =======
 
 ## De tabel van de telling heeft de uitkomsten als rijen
 

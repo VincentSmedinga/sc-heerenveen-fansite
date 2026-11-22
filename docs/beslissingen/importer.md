@@ -4622,6 +4622,8 @@
   De deelnemers waren leden met een naam en een adres, en de site neemt niets van hen over.
   De import leest alleen de bestanden, want productie kan de oude database niet bereiken.
 - **Alternatieven:** ook de ranglijsten van toen tonen (vraagt namen van echte mensen); de antwoorden van elke bezoeker bewaren en de percentages op de site uitrekenen (persoonsgegevens in de repository of de database); de vragen met een plaatje toch tonen zonder plaatje (de vraag is dan vaak niet te beantwoorden).
+- **Let op:** de tekst van een vraag blijft letterlijk zoals de oude redactie hem schreef, dus een vraag noemt de club soms "SC Heerenveen", terwijl onze eigen tekst "sc Heerenveen" schrijft.
+  Een zin van de oude redactie is hun werk en we passen hem niet aan.
 - **Let op:** het bestand heeft 42 maanden met 418 vragen, van december 2001 tot oktober 2005 zonder juli en augustus 2003.
   Twee vragen ontbreken, allebei in mei 2002.
   Na de merge draait de eigenaar op acceptatie `import.mjs --old-site`; de stap `fantest` doet de rest.

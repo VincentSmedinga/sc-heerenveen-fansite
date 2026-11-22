@@ -64,7 +64,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   // The page is the same for everyone and holds nothing personal, so it may be indexed.
   return {
     alternates: { canonical: urlOf(monthPath(quiz.year, quiz.month)) },
-    description: `${title}: tien vragen over sc Heerenveen uit het archief van de oude Fansite. Speel ze na.`,
+    description: `${title}: ${quiz.questions.length === 10 ? 'tien' : quiz.questions.length} vragen over sc Heerenveen uit het archief van de oude Fansite. Speel ze na.`,
     title,
   }
 }
