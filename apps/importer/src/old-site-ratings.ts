@@ -1,4 +1,12 @@
-import { matches, matchPlayerRatings, oldSeasonRatings, oldSeasonWinners } from '@fansite/db/schema'
+import {
+  matchCoachRatings,
+  matches,
+  matchPlayerRatings,
+  oldSeasonRatings,
+  oldSeasonWinners,
+  staff,
+} from '@fansite/db/schema'
+import { staffOnDay } from '@fansite/db/staff'
 import { eq } from 'drizzle-orm'
 
 import type { OldSiteData, OldSitePlayer } from './old-site-file.ts'
@@ -7,6 +15,7 @@ import type { OldSiteDatabase, OldSiteStepReport } from './old-site-step.ts'
 import { deriveOldSiteMatches, matchKey, oldSiteSeason, oldSiteSource } from './old-site-matches.ts'
 import { cleanOldSiteName } from './old-site-names.ts'
 import { oldSitePlayerIds, oldSitePlayerKey, resolveOldSiteCode } from './old-site-players.ts'
+import { ratedCoaches } from './old-site-ratings-export.ts'
 import { nameKey } from './read-squad.ts'
 
 /** The source of the ratings this file writes, as `rating_sources` of the database has it. */
@@ -59,6 +68,117 @@ export function computedWinners(data: Pick<OldSiteData, 'players' | 'ratings'>) 
   }
 
   return winners
+}
+
+/**
+ * The step `trainercijfers` (#1502): the average, the number of ratings and the spread that
+ * visitors of the old fansite gave the head coach in a match, in `match_coach_ratings` with
+ * the source `oude-fansite`. The match is found as in the step `cijfers`. The coach is the
+ * person of `staff` who surely held the role of head coach on the day of the match
+ * (`staffOnDay`), and only when the name is the one of the coach that the rating is for. A
+ * rating that cannot be linked is not stored and gets a line in the report, one for each
+ * match. A second run changes nothing, and a row that the files no longer have is removed.
+ */
+export async function importOldSiteCoachRatings(db: OldSiteDatabase, data: OldSiteData): Promise<OldSiteStepReport> {
+  const report = empty()
+  const derived = new Map(
+    deriveOldSiteMatches(data.matches).map((one) => [`${one.match.season}/${one.match.code}`, one]),
+  )
+  const stored = new Map<string, number>()
+
+  for (const row of await db.select().from(matches).where(eq(matches.dataSource, oldSiteSource))) {
+    stored.set(matchKey(row), row.id)
+  }
+
+  const coaches = (await db.select().from(staff)).filter((row) => row.role === 'coach')
+  const wanted = new Map<string, { matchId: number; staffId: number; values: Values }>()
+
+  for (const rating of data.coachRatings) {
+    const one = derived.get(`${rating.season}/${rating.matchCode}`)
+    const label = `${oldSiteSeason(rating.season)} ${rating.matchCode}`
+    const values = one?.values ?? null
+    const matchId = values === null ? undefined : stored.get(matchKey(values))
+
+    if (matchId === undefined || values === null) {
+      report.skipped += 1
+      report.lines.push(
+        `skipped the rating of the coach in ${label}: the match is not in the database as a match of the old fansite`,
+      )
+      continue
+    }
+
+    const found = staffOnDay(coaches, values.matchDate)
+    const name = ratedCoaches.get(rating.coachCode)
+
+    if (found.kind !== 'certain' || name === undefined || found.member.name !== name) {
+      report.skipped += 1
+      report.lines.push(
+        `skipped the rating of ${rating.coachCode} in ${label}: the staff does not have him as the head coach on ${values.matchDate}`,
+      )
+      continue
+    }
+
+    wanted.set(`${matchId}|${found.member.id}`, {
+      matchId,
+      staffId: found.member.id,
+      values: { average: rating.average, count: rating.count, spread: rating.spread },
+    })
+  }
+
+  const have = new Map<string, typeof matchCoachRatings.$inferSelect>()
+
+  for (const row of await db
+    .select()
+    .from(matchCoachRatings)
+    .where(eq(matchCoachRatings.source, oldSiteRatingSource))) {
+    have.set(`${row.matchId}|${row.staffId}`, row)
+  }
+
+  const fresh: (typeof matchCoachRatings.$inferInsert)[] = []
+
+  for (const [key, { matchId, staffId, values }] of wanted) {
+    const row = have.get(key)
+
+    have.delete(key)
+
+    if (row === undefined) {
+      fresh.push({
+        average: values.average.toFixed(2),
+        matchId,
+        ratingCount: values.count,
+        source: oldSiteRatingSource,
+        spread: values.spread.toFixed(2),
+        staffId,
+      })
+    } else if (
+      Number(row.average) !== values.average ||
+      row.ratingCount !== values.count ||
+      Number(row.spread) !== values.spread
+    ) {
+      await db
+        .update(matchCoachRatings)
+        .set({ average: values.average.toFixed(2), ratingCount: values.count, spread: values.spread.toFixed(2) })
+        .where(eq(matchCoachRatings.id, row.id))
+      report.changed += 1
+    } else {
+      report.unchanged += 1
+    }
+  }
+
+  for (let start = 0; start < fresh.length; start += 500) {
+    await db.insert(matchCoachRatings).values(fresh.slice(start, start + 500))
+  }
+  report.created = fresh.length
+
+  for (const row of have.values()) {
+    await db.delete(matchCoachRatings).where(eq(matchCoachRatings.id, row.id))
+    report.changed += 1
+    report.lines.push(
+      `removed a coach rating that the files no longer have (match ${row.matchId}, staff ${row.staffId})`,
+    )
+  }
+
+  return report
 }
 
 /**

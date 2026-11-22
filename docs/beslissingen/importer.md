@@ -4552,4 +4552,21 @@
 - **Let op:** de spreiding is de standaardafwijking van de hele groep cijfers, niet van een steekproef, in twee decimalen.
   Een rij heeft de speler van het seizoen van de wedstrijd (`players` heeft een rij per seizoen), en `match_player_ratings` heeft de bron als kolom, zodat de cijfers van nu (#1470) en die van de trainers (#1502) dezelfde tabel kunnen gebruiken.
   De uitblinkers van het jaar hebben een eigen tabel, `old_season_winners`, omdat een seizoen vanaf 2001/02 geen seizoencijfer in `old_season_ratings` heeft: dat rekenen de pagina's uit de cijfers per wedstrijd.
-  De twee hoofdtrainers staan in dezelfde oude tabel; het script laat hun cijfers liggen voor #1502.
+  De twee hoofdtrainers staan in dezelfde oude tabel; hun cijfers komen mee in #1502 (zie _De oude cijfers voor de twee hoofdtrainers staan in een eigen tabel_).
+- **Later:** de cijfers van de trainers staan niet in `match_player_ratings` maar in `match_coach_ratings`; zie _De oude cijfers voor de twee hoofdtrainers staan in een eigen tabel_.
+
+## De oude cijfers voor de twee hoofdtrainers staan in een eigen tabel
+
+- **Datum:** 22 november 2026
+- **Besluit:** het exportscript rekent de cijfers van `foppe.dehaan` en `gertjan.verbeek` in `uitblinker_inz` op dezelfde manier uit als die van de spelers (een cijfer dat een bezoeker dubbel gaf telt één keer, het laatste; een cijfer voor een wedstrijdcode die niet meer bestaat valt weg, met een melding) en schrijft ze als `coachRatings` in `ratings-<seizoen>.json`, naast `ratings`.
+  Een veld meer in dat bestand, zoals een naam, laat de strikte schematoets falen.
+  De stap `trainercijfers` van de import vult de nieuwe tabel `match_coach_ratings` (de bron `oude-fansite`, het gemiddelde, het aantal cijfers en de spreiding, met de wedstrijd en de persoon in `staff`).
+  Ze koppelt de trainer aan de persoon die op de datum van de wedstrijd zeker de hoofdtrainer was (`staffOnDay`), en alleen als de naam die van de trainer is waarvoor het cijfer was.
+  Een trainer die niet te koppelen is, komt niet in de database, en het logboek van de import meldt dat per wedstrijd.
+  De pagina's tonen niets, en de tabel vult zich ook als de instelling van de Uitblinker uit staat.
+- **Waarom:** zonder de trainers mist 8 procent van alle cijfers, en een cijfer zonder bekende persoon heeft geen plek in de database.
+  Een eigen tabel is nodig omdat `match_player_ratings` naar `players` wijst, een rij per seizoen, en een trainer een persoon van `staff` is.
+  De kolommen zijn dezelfde, zodat de trainer van nu (#1478) dezelfde tabel met de bron `fans` kan gebruiken.
+- **Alternatieven:** de cijfers voor de trainers weglaten; ze in `match_player_ratings` zetten met een nepspeler (breekt de koppeling met `players`); ze zonder koppeling bewaren.
+- **Let op:** de melding voor een trainer zonder koppeling staat in het logboek van de import en niet in een lijst in `docs/`, want het exportscript kent de staf niet: die staat alleen in de database.
+  Na de merge draait de eigenaar op acceptatie `import.mjs --old-site`; de stap `trainercijfers` doet de rest.

@@ -388,8 +388,13 @@ export function buildOldSiteExport(rows: OldSiteRows): OldSiteExport {
     new Set(rows.matches.map((match) => keyOf(match.code, match.seizoen))),
   )
 
-  for (const [season, list] of [...ratings.bySeason].sort(([a], [b]) => a.localeCompare(b))) {
-    write(`ratings-${season}.json`, { ratings: list, season, version: oldSiteFileVersion })
+  for (const season of [...new Set([...ratings.bySeason.keys(), ...ratings.coachBySeason.keys()])].sort()) {
+    write(`ratings-${season}.json`, {
+      coachRatings: ratings.coachBySeason.get(season) ?? [],
+      ratings: ratings.bySeason.get(season) ?? [],
+      season,
+      version: oldSiteFileVersion,
+    })
   }
   write('season-ratings.json', {
     seasonRatings: ratings.seasonRatings,
@@ -398,7 +403,7 @@ export function buildOldSiteExport(rows: OldSiteRows): OldSiteExport {
   })
 
   const report = [
-    `${matches.length} matches in ${files.size - 2 - ratings.bySeason.size - 1} files, ${clubs.length} clubs and ${players.length} players`,
+    `${matches.length} matches in ${[...files.keys()].filter((name) => name.startsWith('matches-')).length} files, ${clubs.length} clubs and ${players.length} players`,
     `${matches.reduce((sum, match) => sum + match.events.length, 0)} goals and cards, ${matches.reduce((sum, match) => sum + match.lineup.length, 0)} line-up rows`,
     `friendlies left out of the data: ${rows.matches.filter((match) => match.competitie === friendlyCompetition).length}`,
     `matches before ${firstDay} left out: ${rows.matches.filter((match) => match.competitie !== friendlyCompetition && match.dt.slice(0, 10) < firstDay).length}`,

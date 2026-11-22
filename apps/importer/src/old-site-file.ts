@@ -132,8 +132,21 @@ export const oldSiteRatingSchema = z.strictObject({
   spread: z.number().min(0).max(9),
 })
 
+/**
+ * What supporters of the old fansite gave the head coach in one match (1502): the same three
+ * numbers as a player has, and the code of the coach instead of the code of a player.
+ */
+export const oldSiteCoachRatingSchema = z.strictObject({
+  average: z.number().min(1).max(10),
+  coachCode: z.string().min(1),
+  count: z.number().int().min(1),
+  matchCode: z.string().min(1),
+  spread: z.number().min(0).max(9),
+})
+
 /** The ratings of the matches of one season, in `ratings-<season>.json`. */
 export const oldSiteRatingsFileSchema = z.strictObject({
+  coachRatings: z.array(oldSiteCoachRatingSchema),
   ratings: z.array(oldSiteRatingSchema),
   season: z.string().regex(/^\d{4}$/),
   version: z.literal(oldSiteFileVersion),
@@ -171,9 +184,13 @@ export const oldSiteFileSchema = z.union([
 ])
 
 export type OldSiteClub = z.output<typeof oldSiteClubSchema>
+export type OldSiteCoachRating = z.output<typeof oldSiteCoachRatingSchema>
+export type OldSiteCoachRatingOfSeason = OldSiteCoachRating & { season: string }
 /** All the facts of the old site, as the import reads them. */
 export type OldSiteData = {
   clubs: OldSiteClub[]
+  /** The averages per match and head coach, each with the season of its file. */
+  coachRatings: OldSiteCoachRatingOfSeason[]
   matches: OldSiteMatch[]
   players: OldSitePlayer[]
   /** The averages per match and player, each with the season of its file. */
@@ -224,7 +241,15 @@ export function parseOldSiteFile(text: string, name = 'file'): OldSiteFile {
 export async function readOldSiteData(folder: string | URL = oldSiteDataFolder): Promise<OldSiteData> {
   const directory = typeof folder === 'string' ? folder : fileURLToPath(folder)
   const names = (await readdir(directory)).filter((name) => name.endsWith('.json')).sort()
-  const data: OldSiteData = { clubs: [], matches: [], players: [], ratings: [], seasonRatings: [], winners: [] }
+  const data: OldSiteData = {
+    clubs: [],
+    coachRatings: [],
+    matches: [],
+    players: [],
+    ratings: [],
+    seasonRatings: [],
+    winners: [],
+  }
   let clubFiles = 0
   let playerFiles = 0
   let seasonRatingFiles = 0
@@ -240,6 +265,7 @@ export async function readOldSiteData(folder: string | URL = oldSiteDataFolder):
       data.players.push(...file.players)
     } else if ('ratings' in file) {
       data.ratings.push(...file.ratings.map((rating) => ({ ...rating, season: file.season })))
+      data.coachRatings.push(...file.coachRatings.map((rating) => ({ ...rating, season: file.season })))
     } else if ('seasonRatings' in file) {
       seasonRatingFiles += 1
       data.seasonRatings.push(...file.seasonRatings)
@@ -285,6 +311,20 @@ export async function readOldSiteData(folder: string | URL = oldSiteDataFolder):
       throw new Error(`The rating of ${rating.playerCode} in the match ${key} is in the files twice.`)
     }
     ratingKeys.add(`${key}/${rating.playerCode}`)
+  }
+
+  const coachKeys = new Set<string>()
+
+  for (const rating of data.coachRatings) {
+    const key = `${rating.season}/${rating.matchCode}`
+
+    if (!keys.has(key)) {
+      throw new Error(`The coach ratings hold the match ${key}, which is not in the match files.`)
+    }
+    if (coachKeys.has(`${key}/${rating.coachCode}`)) {
+      throw new Error(`The rating of ${rating.coachCode} in the match ${key} is in the files twice.`)
+    }
+    coachKeys.add(`${key}/${rating.coachCode}`)
   }
 
   data.matches.sort((a, b) => a.dateTime.localeCompare(b.dateTime) || a.code.localeCompare(b.code))
