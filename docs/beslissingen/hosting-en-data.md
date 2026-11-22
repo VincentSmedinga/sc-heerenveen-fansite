@@ -1303,3 +1303,18 @@
 - **Waarom:** de minuten staan niet in de gegevens van Wikipedia, wel in ons eigen verslag.
   Eén functie voorkomt dat de pagina, het formulier van de Uitblinker (#1470) en de spellen verschillende getallen geven.
 - **Alternatieven:** de minuten opslaan (raakt achterop bij een gecorrigeerd verslag); de berekening per onderdeel herhalen.
+
+## De linie van een speler voor Fjouwer staat vast per seizoen, in `fantasy_player_lines`
+
+- **Datum:** 22 november 2026
+- **Besluit:** de migratie `0109_add_fantasy_picks` maakt twee tabellen: `fantasy_picks` (de vier van een fan voor een wedstrijd, uniek op fan en wedstrijd) en `fantasy_player_lines` (de linie van een speler in het spel, een rij per speler).
+  De linie komt uit de positie van de speler (`players.position`, anders de linie van de persoon) en wordt bewaard bij het eerste gebruik van de speler in een seizoen.
+  Daarna verandert ze niet meer, ook niet als de positie halverwege het seizoen verandert.
+  Een speler is een rij van één seizoen, dus de linie is vast per seizoen.
+  Een speler die nog niemand koos, heeft nog geen rij: de pagina neemt dan de positie van nu.
+  `fantasy_picks` verwijst naar de fan met `ON DELETE SET NULL` en naar de wedstrijd en de spelers met `ON DELETE CASCADE`; `fantasy_player_lines` gaat met zijn speler.
+- **Waarom:** een wijziging van de positie van een speler mag de punten van eerdere wedstrijden niet herschrijven (de punten komen uit #1471).
+  Een eigen tabel is eenvoudiger dan een kolom die voor de vier plaatsen van elke rij moet kloppen.
+- **Alternatieven:** de linie in elke rij van `fantasy_picks` bewaren (vier extra kolommen, en dezelfde speler kan in twee rijen een andere linie hebben); de linie altijd uit `players.position` lezen (herschrijft de geschiedenis).
+- **Let op:** het issue noemde alleen `fantasy_picks`; de tweede tabel is nodig voor de regel dat de linie vastligt.
+  De tests van `apps/site/src/fans/fjouwer.test.ts` draaien op beide tabellen.

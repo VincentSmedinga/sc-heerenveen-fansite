@@ -7752,3 +7752,52 @@
   Een gelijk gemiddelde met een gelijk aantal cijfers beslist de volgorde van de opstelling, en op de pagina van een speler dezelfde volgorde.
   Het formulier blijft alfabetisch, en de ranglijst van het seizoen en de uitblinker van het jaar houden hun eigen regel.
   De gemiddelden in de database veranderen niet, alleen de uitblinker bij een gelijk gemiddelde met een verschillend aantal cijfers.
+
+## Het spel heet Fjouwer, en een fan kiest vier spelers door ze aan te vinken
+
+- **Datum:** 20 november 2026
+- **Besluit:** het spel heet Fjouwer (Fries voor vier), met het adres `/fans/fjouwer`.
+  Een fan kiest vier spelers door ze aan te vinken in de selectie, per linie gegroepeerd, met hoogstens twee uit dezelfde linie, tot de aftrap vrij te wijzigen.
+  Wie niets doet, houdt de vier van de vorige wedstrijd.
+  Elke speler mag per seizoen in hoogstens tien wedstrijden worden ingezet.
+  Kaarten in de smalle kolom van een spel hebben het zachte oppervlak van Card, en een stand daar het sterke.
+- **Waarom:** de projecteigenaar koos de naam in de ontwerpsessie van het hoofdstuk Fans.
+  Aanvinken in de selectie laat zien wie er is, wie al vaak is gekozen en hoeveel plaatsen een linie nog heeft, en dat past op een telefoon.
+  Twee per linie houdt het spel open zonder dat iedereen vier aanvallers kiest.
+  De grens van tien maakt het spel tot een keuze wanneer je de ster inzet.
+  Een erfenis in de query voorkomt dat een fan die een keer niet kijkt, een nul krijgt, en vraagt geen taak.
+  De smalle kolom hoort rustig te zijn naast de kaart met het formulier.
+- **Alternatieven:** de werktitel Vier yn it rûn; vier keuzelijsten; één speler per linie; geen grens per speler; een rij per wedstrijd die een taak aanmaakt voor wie niets koos; witte of zandkleurige kaarten in de smalle kolom.
+
+## Fjouwer sluit bij de aftrap, en om 00.00 uur op de dag van de wedstrijd als het uur nog niet bekend is
+
+- **Datum:** 22 november 2026
+- **Besluit:** de keuze voor een wedstrijd sluit bij de aftrap.
+  Is het uur niet bekend, dan sluit ze om 00.00 uur Nederlandse tijd op de dag van de wedstrijd, en zegt de pagina dat.
+  De kaart gaat over de eerste wedstrijd van het eerste elftal die nog niet is gesloten, in alle competities.
+  Een afgelaste wedstrijd, of een uitgestelde zonder nieuwe datum, telt niet (de status is niet `scheduled`).
+  Een uitgestelde wedstrijd met een nieuwe datum is dezelfde wedstrijd: de keuzes blijven staan en de deadline schuift mee.
+  `fjouwerMatch` in `apps/site/src/fans/fjouwer.ts` kiest de wedstrijd en `closesAt` in `fjouwer-rules.ts` geeft het moment.
+  `saveFjouwer` controleert de deadline bij het opslaan nog een keer, met de klok van de database voor een bekende aftrap.
+- **Waarom:** een fan moet de vier niet meer kunnen veranderen als de wedstrijd begint.
+  Bij een onbekend uur is het eerlijkst om vóór de dag zelf te sluiten, want dan kan niemand met kennis van de opstelling nog kiezen.
+- **Alternatieven:** sluiten aan het eind van de dag van de wedstrijd, zoals de Prognose doet (te laat als de opstelling bekend is); een vaste tijd als 12.00 uur.
+- **Let op:** de Prognose houdt een wedstrijd zonder uur open tot de dag voorbij is.
+  Dat blijft zo; de twee spelen hebben elk hun eigen regel.
+
+## De vier van een fan staan in `fantasy_picks`, en de erfenis wordt in de query uitgerekend
+
+- **Datum:** 22 november 2026
+- **Besluit:** de vier staan per fan en wedstrijd in één rij van `fantasy_picks`, met de vier spelers in `player_1_id` tot `player_4_id` in de volgorde van het formulier.
+  Een fan zonder rij voor een wedstrijd heeft de vier van de laatste eerdere wedstrijd van hetzelfde seizoen waar hij een rij voor heeft.
+  Dat rekent `fourOf` uit, uit de rijen die er al zijn, zonder taak en zonder extra rijen.
+  Een fan die nog nooit koos, heeft geen vier en scoort niets.
+  Een speler is een rij van één seizoen, dus in een nieuw seizoen begint iedereen zonder vier.
+  Een speler telt voor de grens van tien als hij bij de aftrap in de vier staat, ook als de vier is geërfd (`usesBefore`).
+  Een geërfde speler die daardoor al zijn tien heeft, telt in die wedstrijd niet mee: de pagina zet hem uit het formulier, streept zijn tegel door en zegt het in tekst.
+  De server weigert een speler met zijn tien, een speler die er niet is, een speler die twee keer wordt gestuurd, meer dan twee uit één linie, en alles behalve vier.
+- **Waarom:** een erfenis in de query voorkomt een nul voor wie een keer niet kijkt, en kost geen taak.
+  De tien tellen ook de geërfde wedstrijden, anders zou een fan een speler eindeloos kunnen laten staan.
+- **Alternatieven:** een rij per fan voor elke wedstrijd, door een taak gemaakt; de erfenis over het seizoen heen laten lopen (de spelers hebben per seizoen een eigen rij, dus daar is geen koppeling voor).
+- **Let op:** `fantasy_picks.supporter_id` wordt leeg bij het opheffen van het account (`ON DELETE SET NULL`), zoals bij `predictions`; de pagina "Alles wat we van je bewaren" toont de gekozen vier (`fjouwerData`).
+  Dit issue bewaart geen punten: die van #1471 komen uit de verslagen en worden nooit opgeslagen.
