@@ -757,6 +757,13 @@
       "when": 1795350311578,
       "tag": "0107_add_coach_rating_blocked_mark",
       "breakpoints": true
+    },
+    {
+      "idx": 108,
+      "version": "5",
+      "when": 1795352969396,
+      "tag": "0108_drop_old_season_winners",
+      "breakpoints": true
     }
   ]
 }

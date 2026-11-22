@@ -121,7 +121,6 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
   match_substitutions: 'copy',
   matches: 'copy',
   old_season_ratings: 'copy',
-  old_season_winners: 'copy',
   page_views: 'copy',
   person_nationalities: 'copy',
   person_pages: 'copy',
