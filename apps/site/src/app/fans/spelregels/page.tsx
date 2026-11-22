@@ -7,7 +7,7 @@ import { notFound } from 'next/navigation'
 import { rulesPath } from '#src/fans-paths'
 import { pageMetadata } from '#src/metadata'
 
-import { AccountRulesCard, PredictionRulesCard, RatingRulesCard } from './RulesCards'
+import { AccountRulesCard, FjouwerRulesCard, PredictionRulesCard, RatingRulesCard } from './RulesCards'
 
 // Render on each request: the canonical URL comes from SITE_ENV and the parts of Fans from
 // their own settings, which the build doesn't know.
@@ -38,6 +38,7 @@ export default function RulesPage() {
       <Page.Cell area="main">
         {isFansPartOn('prognose') ? <PredictionRulesCard /> : null}
         {isFansPartOn('uitblinker') ? <RatingRulesCard /> : null}
+        {isFansPartOn('vier') ? <FjouwerRulesCard /> : null}
         <AccountRulesCard />
       </Page.Cell>
     </Page.Main>

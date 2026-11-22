@@ -7851,3 +7851,17 @@
 - **Alternatieven:** de punten bewaren in een tabel met het teken van het verslag (een migratie, en `saved_at` is daarvoor niet betrouwbaar); een taak die de punten na afloop vastlegt (een correctie vraagt dan een nieuwe berekening); de punten bij elke bezoeker opnieuw uitrekenen zonder geheugen.
 - **Let op:** de issue sprak van "bewaard met het teken van het verslag", en `saved_at` bleek daarvoor niet te volstaan.
   Het geheugen is er per serverproces: op gedeelde hosting kan elk proces zijn eigen minuut hebben, wat voor een correctie niet uitmaakt.
+
+## De spelregels van Fjouwer staan als kaart op `/fans/spelregels`, met voorbeelden uit de code van de telling
+
+- **Datum:** 22 november 2026
+- **Besluit:** `/fans/spelregels` heeft een kaart Fjouwer (`FjouwerRulesCard`, anker `fjouwer`, met het watermerk van het spel) na Uitblinker en voor Account.
+  De kaart en zijn link in de balk "Op deze pagina" staan er alleen als `FANS_VIER` aan staat.
+  De kaart "Punten" op `/fans/fjouwer` linkt ernaar met "Spelregels" (`fjouwerRulesAddress`).
+  De tabel met punten leest uit dezelfde `scoringRows` als die kaart, en dus uit `fantasyScoring`.
+  De voorbeelden staan in `packages/shared/src/fantasy-examples.ts`: een hele wedstrijd van vier spelers die samen 40 punten halen, drie kaarten, en vier gevallen van minuten en tegendoelpunten.
+  De pagina rekent de punten van elk voorbeeld uit met `fantasyPoints`, en de tests van de telling lezen hetzelfde bestand en eisen dat elk voorbeeld op zijn eigen getal uitkomt.
+- **Waarom:** een regel of een voorbeeld op de pagina kan zo niet ouder worden dan de telling.
+  Een voorbeeld dat in een test staat en niet op de pagina, of andersom, loopt vroeg of laat uiteen.
+- **Alternatieven:** de voorbeelden in de testbestanden laten en de pagina met de hand overtypen (loopt uiteen); een eigen pagina per spel (meer plekken om bij te houden).
+- **Let op:** de kaart noemt de stand alleen in woorden, zonder link: die pagina komt met #1473.

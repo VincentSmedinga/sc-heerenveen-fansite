@@ -5,9 +5,10 @@ import { isFansPartOn } from '@fansite/shared/fans-env'
  * game that is on, in the order of the cards, and the card Account. The ids are those of the
  * headings in app/fans/spelregels/RulesCards.tsx (a test checks it).
  */
-export const rulesShortcuts = (isOn: (part: 'prognose' | 'uitblinker') => boolean = isFansPartOn) =>
+export const rulesShortcuts = (isOn: (part: 'prognose' | 'uitblinker' | 'vier') => boolean = isFansPartOn) =>
   [
     ...(isOn('prognose') ? [{ href: '#prognose', label: 'Prognose' }] : []),
     ...(isOn('uitblinker') ? [{ href: '#uitblinker', label: 'Uitblinker' }] : []),
+    ...(isOn('vier') ? [{ href: '#fjouwer', label: 'Fjouwer' }] : []),
     { href: '#account', label: 'Account' },
   ] as const
