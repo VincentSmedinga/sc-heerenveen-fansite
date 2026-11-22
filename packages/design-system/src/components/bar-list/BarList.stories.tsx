@@ -17,6 +17,7 @@ const meta = preview.meta({
         component: [
           'Een lijst met liggende balken, één regel per naam, zoals de doelpunten van een speler per seizoen.',
           'De naam en het getal zijn de tekst van de lijst; de balk is versiering die een schermlezer overslaat. Zet de lijst in een `Card` onder een kop van niveau 2 die zegt wat de balken tellen.',
+          'Staat er een eenheid achter het getal, zoals een procent, geef die dan mee met `unit`; de balken blijven even lang als de getallen.',
           'Hij is gebouwd uit `Bar`.',
         ].join('\n'),
       },
@@ -63,6 +64,29 @@ export const OnSoftCard = meta.story({
       <Card aria-labelledby="balken-zacht" surface="soft">
         <Heading id="balken-zacht" level={2}>
           Doelpunten per seizoen
+        </Heading>
+        <BarList {...args} />
+      </Card>
+    </div>
+  ),
+})
+
+export const Percentages = meta.story({
+  args: {
+    rows: [
+      { label: 'Vente', value: 71 },
+      { label: 'Noppert', value: 44 },
+      { label: 'Proper', value: 39 },
+    ],
+    unit: '%',
+    wide: true,
+  },
+  name: 'Met een eenheid achter het getal',
+  render: (args) => (
+    <div style={{ maxInlineSize: '24rem' }}>
+      <Card aria-labelledby="balken-procent">
+        <Heading id="balken-procent" level={2}>
+          Het vaakst gekozen
         </Heading>
         <BarList {...args} />
       </Card>
