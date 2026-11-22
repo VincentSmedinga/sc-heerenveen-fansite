@@ -1,5 +1,6 @@
 import {
   Card,
+  CardLink,
   DataTable,
   Disclosure,
   Heading,
@@ -17,6 +18,7 @@ import { fantasyScoring } from '@fansite/shared/fantasy-points'
 
 import type { FourPoints, MatchStanding, PointsMatch } from '#src/fans/fjouwer-points'
 
+import { fjouwerRulesAddress } from '#src/fans-paths'
 import { pointsText } from '#src/fans/fjouwer-form'
 import { clubsOf } from '#src/fans/prediction'
 import { rowMatchOf } from '#src/fans/prediction-words'
@@ -185,6 +187,7 @@ export function ScoringCard() {
         sortable={false}
       />
       <Text>Het verslag van de redactie beslist wat een speler deed.</Text>
+      <CardLink href={fjouwerRulesAddress}>Spelregels</CardLink>
     </Card>
   )
 }

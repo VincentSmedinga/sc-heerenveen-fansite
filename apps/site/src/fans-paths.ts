@@ -8,6 +8,7 @@ export const fansPath = '/fans'
 /** The page with the rules of all games, and the part about the game Prognose on it. */
 export const rulesPath = `${fansPath}/spelregels`
 export const predictionRulesAddress = `${rulesPath}#prognose`
+export const fjouwerRulesAddress = `${rulesPath}#fjouwer`
 
 /** The page with the Uitblinker of each season (issue 1474). */
 export const yearWinnersPath = `${fansPath}/uitblinker/van-het-jaar`
