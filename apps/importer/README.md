@@ -1396,6 +1396,16 @@ De regels zijn: `Stadiums of matches: N filled from the home grounds, M left wit
 Draai het pas als de thuisvelden van de clubs er zijn (`import:stadiums`, #1298).
 Het is veilig om twee keer te draaien: een tweede keer vindt niets meer en schrijft `Stadiums of matches: nothing to fill.`, of alleen de wedstrijden die het oversloeg.
 
+### Een speler van de tegenstander krijgt een persoon
+
+De gewone import geeft de regels van de tegenstander in de verslagen hun persoon (`match_appearances.person_id`, #1544), na de stappen die personen maken.
+De regels staan in `linkOpponentPersons` in `packages/db/src/opponent-persons.ts`: eerst een doelpunt van dezelfde wedstrijd dat naar de regel wijst en een persoon heeft, anders de volledige naam die gelijk is aan de naam van precies één persoon.
+Past de naam bij niemand of bij meer dan één persoon, dan blijft de regel leeg.
+Een regel die al een persoon heeft, verandert niet, en een regel van ons komt er niet in.
+Een naamgenoot houdt de redactie tegen met `opponentPersonExceptions` in `packages/db/src/persons.ts` (naam en club).
+De stap staat in `src/link-opponent-persons.ts`, en het logboek zegt hoeveel regels via een doelpunt, via de naam, niet (de naam past bij niemand) en niet (de naam past bij meer dan één persoon) een persoon kregen: `Opponents' players: N got a person through a goal, M through the name, …`.
+Een tweede run wijzigt niets en zegt alleen hoeveel regels leeg bleven.
+
 ### Een doorverwijzing is hetzelfde artikel
 
 Op de Nederlandse Wikipedia is `AZ Alkmaar` een doorverwijzing naar `AZ (voetbalclub)`, en `SBV Excelsior` een naar `Excelsior Rotterdam`.

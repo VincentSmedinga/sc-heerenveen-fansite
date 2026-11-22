@@ -14,6 +14,7 @@ import {
   refreshSnapshot,
 } from '@fansite/db/match-edits'
 import { mayHaveReport, readMatchReport } from '@fansite/db/match-reports'
+import { linkOpponentPersons } from '@fansite/db/opponent-persons'
 import { compareReportGoals } from '@fansite/db/player-stat-differences'
 import {
   matchAppearances,
@@ -730,6 +731,9 @@ export async function saveReport(
       )
     }
 
+    // The rows of the opponent were made again, so they get their person again (#1544): by
+    // the goal of the report, or by the name.
+    await linkOpponentPersons(transaction, { matchId: id })
     await markGoalsEdited(transaction, match, oldGoals, userId, now)
     await rejectPending(transaction, id, now, ['goals'])
     await recordAction(
