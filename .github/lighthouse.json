@@ -16,17 +16,17 @@
     "thirdPartyRequests": 0,
     "sizeMarginPercent": 5,
     "baselineKiB": {
-      "/": { "weight": 415.0, "javascript": 146.5, "fonts": 218.5 },
-      "/nieuws": { "weight": 421.5, "javascript": 151.8, "fonts": 218.7 },
-      "/redactie/we-zijn-terug": { "weight": 410.5, "javascript": 151.8, "fonts": 218.7 },
-      "/spelers": { "weight": 434.5, "javascript": 152.6, "fonts": 237.1 },
-      "/nieuws?pagina=2": { "weight": 420.7, "javascript": 151.9, "fonts": 218.4 },
-      "/bronnen": { "weight": 412.2, "javascript": 151.9, "fonts": 218.7 }
+      "/": { "weight": 303.5, "javascript": 150.6, "fonts": 100.0 },
+      "/nieuws": { "weight": 304.5, "javascript": 145.9, "fonts": 100.0 },
+      "/redactie/we-zijn-terug": { "weight": 290.9, "javascript": 143.3, "fonts": 100.0 },
+      "/spelers": { "weight": 324.4, "javascript": 151.4, "fonts": 118.7 },
+      "/nieuws?pagina=2": { "weight": 304.6, "javascript": 145.9, "fonts": 100.0 },
+      "/bronnen": { "weight": 296.4, "javascript": 145.9, "fonts": 100.0 }
     }
   },
   "timing": {
     "enforce": false,
-    "decideOn": "2026-11-23",
+    "decideOn": "2026-12-07",
     "budgets": {
       "mobile": { "performanceMin": 90, "lcpMs": 1100, "tbtMs": 200, "cls": 0.1, "ttfbMs": 150 },
       "desktop": { "performanceMin": 90, "lcpMs": 400, "tbtMs": 150, "cls": 0.05, "ttfbMs": 150 }
