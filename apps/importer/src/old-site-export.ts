@@ -7,6 +7,12 @@ import type {
   OldSitePlayer,
 } from './old-site-file.ts'
 
+import {
+  buildOldSiteFantest,
+  type FantestAnswerRow,
+  type FantestKeyRow,
+  type FantestQuestionRow,
+} from './old-site-fantest-export.ts'
 import { oldSiteFileVersion, parseOldSiteFile } from './old-site-file.ts'
 import { buildOldSitePredictions, type EarlyPredictionRow, type PredictionRow } from './old-site-predictions-export.ts'
 import {
@@ -62,6 +68,10 @@ export type MatchRow = {
 export type OldSiteRows = {
   clubs: ClubRow[]
   events: EventRow[]
+  /** The Fantest (#1480): the keys, the questions and the strings of answers, no names. */
+  fantestAnswers: FantestAnswerRow[]
+  fantestKeys: FantestKeyRow[]
+  fantestQuestions: FantestQuestionRow[]
   lineups: LineupRow[]
   matches: MatchRow[]
   players: PlayerRow[]
@@ -410,6 +420,10 @@ export function buildOldSiteExport(rows: OldSiteRows): OldSiteExport {
   for (const [season, list] of [...predictions.bySeason].sort(([a], [b]) => (a < b ? -1 : 1))) {
     write(`predictions-${season}.json`, { predictions: list, season, version: oldSiteFileVersion })
   }
+
+  const fantest = buildOldSiteFantest(rows.fantestKeys, rows.fantestQuestions, rows.fantestAnswers)
+
+  write('fantest.json', { months: fantest.months, version: oldSiteFileVersion })
   write('season-ratings.json', {
     seasonRatings: ratings.seasonRatings,
     version: oldSiteFileVersion,
@@ -424,6 +438,7 @@ export function buildOldSiteExport(rows: OldSiteRows): OldSiteExport {
     ...checkRows(rows, exported),
     ...ratings.report,
     ...predictions.report,
+    ...fantest.report,
   ]
 
   return {

@@ -83,6 +83,7 @@ const predictions = [
 const dataOf = (overrides: Partial<OldSiteData> = {}): OldSiteData => ({
   clubs: oldClubs,
   coachRatings: [],
+  fantest: [],
   matches: matchList,
   players: [],
   predictions,

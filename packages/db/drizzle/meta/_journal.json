@@ -771,6 +771,13 @@
       "when": 1795364067454,
       "tag": "0109_add_fantasy_picks",
       "breakpoints": true
+    },
+    {
+      "idx": 110,
+      "version": "5",
+      "when": 1795367824609,
+      "tag": "0110_add_quizzes",
+      "breakpoints": true
     }
   ]
 }

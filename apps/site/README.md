@@ -1533,6 +1533,16 @@ Het gemiddelde van de trainer staat als laatste regel in de tabel met gemiddelde
 Op `/fans` staat een kaart van het spel (`app/fans/UitblinkerCard.tsx`) en onder "Alles wat we van je bewaren" de eigen cijfers (`src/fans/rating-data.ts`).
 `e2e/fans-rating.spec.ts` zet met `addRatingMatch` (`e2e/admin.ts`) een gespeelde wedstrijd met verslag in de database, omdat de verzonnen gegevens er geen hebben, en met `coach: true` ook een hoofdtrainer.
 
+### De Fantest van toen
+
+`/fans/fantest` (`app/fans/fantest`) is het archief van de quizzen van de oude Fansite, en `/fans/fantest/<jaar>-<maand>` (`app/fans/fantest/[maand]`) speelt één maand.
+De pagina's lezen alleen `src/fans/fantest.ts`: de lijst (`loadArchive`), een quiz (`loadQuiz`) en het nakijken (`checkQuiz`, met `scoreQuiz` uit `packages/shared`).
+Het formulier (`QuizForm.tsx`) is een gewone `POST` die zonder JavaScript werkt, en de actie (`actions.ts`) bewaart niets: geen antwoord, geen score en geen cookie.
+Daarom is het archief het enige onderdeel van Fans dat niet noindex is: de pagina's zijn voor iedereen gelijk, staan in de sitemap, en `robots.txt` staat `/fans/fantest` toe onder het geweigerde `/fans/`.
+Percentages en "gemiddeld" staan er alleen bij minstens vijf deelnemers (`quizMinimum`).
+De vragen komen uit `fantest.json` van de oude Fansite, via de stap `fantest` van `import.mjs --old-site` (zie de README van de importer).
+`e2e/fantest.ts` zet twee verzonnen quizzen in de database, voor `e2e/pages.spec.ts` en `e2e/fantest.spec.ts`.
+
 ## De spelregels
 
 `/fans/spelregels` heeft de regels van alle spellen op één pagina, een kaart per spel en een kaart Account (`app/fans/spelregels`).

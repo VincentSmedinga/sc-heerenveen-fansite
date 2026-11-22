@@ -191,7 +191,52 @@ export const oldSiteSeasonRatingsFileSchema = z.strictObject({
   version: z.literal(oldSiteFileVersion),
 })
 
+const fantestAnswers = z.tuple([z.string().min(1), z.string().min(1), z.string().min(1), z.string().min(1)])
+
+/**
+ * One question of the Fantest of the old fansite (#1480): the text, the four answers, the
+ * place of the right one (0 to 3) and, when the month had enough participants, how many
+ * percent chose each answer. The file has no name and no answer of a person.
+ */
+export const oldSiteFantestQuestionSchema = z.strictObject({
+  answers: fantestAnswers,
+  correct: z.number().int().min(0).max(3),
+  /** The place in the old quiz (1 to 10), also when an earlier question is left out. */
+  order: z.number().int().min(1).max(10),
+  /** Whole percentages in the order of the answers, or null when nobody took part. */
+  percentages: z
+    .tuple([
+      z.number().int().min(0).max(100),
+      z.number().int().min(0).max(100),
+      z.number().int().min(0).max(100),
+      z.number().int().min(0).max(100),
+    ])
+    .nullable(),
+  text: z.string().min(1),
+})
+
+/**
+ * One month of the Fantest: the questions that can be shown, how many were left out (a question
+ * with a picture), how many visitors took part and their average score over the questions that
+ * are in the file, as one number with one decimal (null when nobody took part).
+ */
+export const oldSiteFantestMonthSchema = z.strictObject({
+  average: z.number().min(0).max(10).nullable(),
+  month: z.number().int().min(1).max(12),
+  omitted: z.number().int().min(0).max(10),
+  participants: count,
+  questions: z.array(oldSiteFantestQuestionSchema).min(1).max(10),
+  year: z.number().int().min(2001).max(2005),
+})
+
+/** The months of the Fantest, in `fantest.json`. */
+export const oldSiteFantestFileSchema = z.strictObject({
+  months: z.array(oldSiteFantestMonthSchema),
+  version: z.literal(oldSiteFileVersion),
+})
+
 export const oldSiteFileSchema = z.union([
+  oldSiteFantestFileSchema,
   oldSiteClubsFileSchema,
   oldSitePlayersFileSchema,
   oldSiteMatchesFileSchema,
@@ -208,6 +253,8 @@ export type OldSiteData = {
   clubs: OldSiteClub[]
   /** The averages per match and head coach, each with the season of its file. */
   coachRatings: OldSiteCoachRatingOfSeason[]
+  /** The months of the Fantest of the old fansite (#1480). */
+  fantest: OldSiteFantestMonth[]
   matches: OldSiteMatch[]
   players: OldSitePlayer[]
   /** The counts of predictions per match, each with the season of its file. */
@@ -217,6 +264,8 @@ export type OldSiteData = {
   seasonRatings: OldSiteSeasonRating[]
 }
 export type OldSiteEvent = z.output<typeof oldSiteEventSchema>
+export type OldSiteFantestMonth = z.output<typeof oldSiteFantestMonthSchema>
+export type OldSiteFantestQuestion = z.output<typeof oldSiteFantestQuestionSchema>
 export type OldSiteFile = z.output<typeof oldSiteFileSchema>
 export type OldSiteLineupEntry = z.output<typeof oldSiteLineupSchema>
 export type OldSiteMatch = z.output<typeof oldSiteMatchSchema>
@@ -263,6 +312,7 @@ export async function readOldSiteData(folder: string | URL = oldSiteDataFolder):
   const data: OldSiteData = {
     clubs: [],
     coachRatings: [],
+    fantest: [],
     matches: [],
     players: [],
     predictions: [],
@@ -270,13 +320,17 @@ export async function readOldSiteData(folder: string | URL = oldSiteDataFolder):
     seasonRatings: [],
   }
   let clubFiles = 0
+  let fantestFiles = 0
   let playerFiles = 0
   let seasonRatingFiles = 0
 
   for (const name of names) {
     const file = await readOldSiteFile(path.join(directory, name))
 
-    if ('clubs' in file) {
+    if ('months' in file) {
+      fantestFiles += 1
+      data.fantest.push(...file.months)
+    } else if ('clubs' in file) {
       clubFiles += 1
       data.clubs.push(...file.clubs)
     } else if ('players' in file) {
@@ -306,6 +360,21 @@ export async function readOldSiteData(folder: string | URL = oldSiteDataFolder):
 
   if (seasonRatingFiles > 1) {
     throw new Error(`${directory} has ${seasonRatingFiles} season ratings files, and one is the most it may have.`)
+  }
+
+  if (fantestFiles > 1) {
+    throw new Error(`${directory} has ${fantestFiles} Fantest files, and one is the most it may have.`)
+  }
+
+  const fantestKeys = new Set<string>()
+
+  for (const { month, year } of data.fantest) {
+    const key = `${year}-${String(month).padStart(2, '0')}`
+
+    if (fantestKeys.has(key)) {
+      throw new Error(`The Fantest of ${key} is in the files twice.`)
+    }
+    fantestKeys.add(key)
   }
 
   const keys = new Set<string>()

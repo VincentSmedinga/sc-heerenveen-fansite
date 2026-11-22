@@ -2439,6 +2439,7 @@ Het schrijft:
 - de bestanden in [`data/oude-fansite/`](data/oude-fansite/): `clubs.json`, `players.json` en een bestand per seizoen, `matches-<seizoen>.json` (het seizoen `9091` is 1990/91);
 - de cijfers van de fans van de oude Fansite (#1465): `ratings-<seizoen>.json` per seizoen van 2001/02 tot 2006/07, met per wedstrijd en speler het gemiddelde, het aantal cijfers en de spreiding, en `season-ratings.json` met de seizoencijfers van 1998/99 tot 2000/01 en de uitblinkers van het jaar;
 - de voorspellingen van de fans van de oude Fansite (#1457): `predictions-<seizoen>.json` per seizoen van 2001/02 tot 2006/07, met per wedstrijd hoeveel bezoekers elke eindstand en elke ruststand voorspelden;
+- de Fantest van de oude Fansite (#1480): `fantest.json`, met per maand de vragen, de vier antwoorden, het goede antwoord en het percentage bezoekers dat elk antwoord koos, het aantal deelnemers en de gemiddelde score;
 - [`docs/oefenwedstrijden-2002-03.md`](../../docs/oefenwedstrijden-2002-03.md): de negen oefenwedstrijden van de zomer van 2002, met de uitslag en de doelpuntenmakers van sc Heerenveen;
 - [`docs/cijfers-buiten-opstelling.md`](../../docs/cijfers-buiten-opstelling.md): de cijfers voor spelers die niet in de opstelling van die wedstrijd staan, per wedstrijd, voor de redactie.
 
@@ -2454,6 +2455,9 @@ Daarbij de tegenstanders (code, naam, land) en de spelers van ons die erin voork
 Van de verslagen leest het script alleen `scheidsrechter` en `toeschouwers`.
 Er staan geen teksten van verslagen of voorbeschouwingen in, niets van leden, e-mail of de nieuwsbrief, en van een speler geen geboortedatum, biografie, contract, lengte, gewicht of foto.
 Bij de cijfers staan alleen gemiddelden, aantallen en spreidingen, nooit wie een cijfer gaf, en bij de voorspellingen alleen aantallen per stand, nooit wie voorspelde.
+Bij de Fantest staan alleen de vragen met de percentages per antwoord, nooit de antwoorden van een bezoeker.
+Van de Fantest gaan de inleiding en het slot van een maand niet mee, en ook geen vraag met een plaatje.
+De import zet het bestand met de stap `fantest` in de tabellen `quizzes` en `quiz_questions`.
 
 De bestanden leggen niets uit.
 `home` is de kant die de oude database `t` noemt, een `0` bij hoekschoppen, buitenspel of overtredingen is "onbekend", en een minuut `0` bij een doelpunt of gele kaart ook.

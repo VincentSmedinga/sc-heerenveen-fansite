@@ -1,0 +1,3309 @@
+{
+  "months": [
+    {
+      "average": 4.3,
+      "month": 12,
+      "omitted": 0,
+      "participants": 92,
+      "questions": [
+        {
+          "answers": ["Ioan Andone", "Arnold Oosterveer", "Stanley MacDonald", "Jerry de Jong"],
+          "correct": 1,
+          "order": 1,
+          "percentages": [8, 75, 8, 10],
+          "text": "Een verdediger uit het verleden van SC Heerenveen speelde tevens voor drie verschillende Franse clubs. Wie was dit?"
+        },
+        {
+          "answers": ["Broer de Boer", "Kick Geudeker", "Gerard Vreken", "Tiemen Veenstra"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [24, 16, 23, 37],
+          "text": "Welke Heerenveen-speler werd in 1944 door de Duitsers naar concentratiekamp Vught gestuurd?"
+        },
+        {
+          "answers": ["Wio Joustra", "Yme Kuiper", "Matty Verkamman", "Albert van Keimpema"],
+          "correct": 3,
+          "order": 3,
+          "percentages": [13, 34, 8, 46],
+          "text": "Van wiens hand is het in 2000 verschenen voetbalhistorische werk 'Abe in Oranje'?"
+        },
+        {
+          "answers": ["Koko Hoekstra", "Hiddo Reys", "Gerard Marsman", "Jetze de Boer"],
+          "correct": 1,
+          "order": 4,
+          "percentages": [23, 27, 32, 18],
+          "text": "Wie ging in de zomer van 1982 van SC Heerenveen naar Veendam?"
+        },
+        {
+          "answers": ["Maarten de Jong", "Pieter Bijl", "Winnie Haatrecht", "Klaas Schaap"],
+          "correct": 0,
+          "order": 5,
+          "percentages": [91, 3, 2, 3],
+          "text": "Welke oud-speler ontwierp naar verluidt het beroemde Champions League t-shirt met de tekst 'Hjir wenje wy. Wy komme d'r oan'?"
+        },
+        {
+          "answers": ["Hendrie Krüzen", "Bert van Marwijk", "Ype Anema", "Hennie Meijer"],
+          "correct": 0,
+          "order": 6,
+          "percentages": [18, 38, 8, 36],
+          "text": "Midden februari 1984 stond Heerenveen-aanvaller John van den Wildenberg met acht goals hoog op de topscorerslijst van de eerste divisie. Hoewel niet als allerhoogste, wie hield hij daarmee wél onder zich?"
+        },
+        {
+          "answers": ["chronische knieblessure", "werkweigering", "te weinig kwaliteit", "financieel geschil"],
+          "correct": 1,
+          "order": 7,
+          "percentages": [27, 18, 30, 24],
+          "text": "Waarom moest Jeffrey Kooistra indertijd bij SC Heerenveen vertrekken?"
+        },
+        {
+          "answers": ["1", "3", "5", "12"],
+          "correct": 3,
+          "order": 8,
+          "percentages": [4, 27, 39, 29],
+          "text": "Welke eindpositie behaalden de A-junioren op het Euro-voetbaltoernooi van 2000, nadat zij een jaargang eerder de finale hadden bereikt?"
+        },
+        {
+          "answers": ["Laurent Blanc", "Zinedine Zidane", "Christophe Dugarry", "Bixente Lizarazu"],
+          "correct": 0,
+          "order": 9,
+          "percentages": [21, 45, 26, 9],
+          "text": "Welke Franse topper trad niet namens Bordeaux aan tegen SC Heerenveen in het befaamde Intertoto-duel?"
+        },
+        {
+          "answers": ["Santi Kolk", "Dennis de Nooijer", "Gérard de Nooijer", "Ronnie Venema"],
+          "correct": 1,
+          "order": 10,
+          "percentages": [8, 84, 2, 7],
+          "text": "Vijf Heerenveners lieten in het bekerduel tegen Willem II dit seizoen zien dat strafschoppen helemaal niet zo'n moeilijk klusje vormen. Welke van onderstaande spelers hoefde in de bewuste serie niet aan de bak?"
+        }
+      ],
+      "year": 2001
+    },
+    {
+      "average": 4,
+      "month": 1,
+      "omitted": 0,
+      "participants": 94,
+      "questions": [
+        {
+          "answers": ["\"Ophalen die geit!\"", "\"Ophalen die meid!\"", "\"Ophalen die Gijp!\"", "\"Ophalen die vlijt!\""],
+          "correct": 0,
+          "order": 1,
+          "percentages": [52, 10, 38, 0],
+          "text": "Met welke woorden - die hij in zichzelf sprak - haalde trainer Fritz Korbach in 1991 René van der Gijp naar Heerenveen?"
+        },
+        {
+          "answers": ["een struisvogel", "een haan", "Kikki de Kikker", "een hond met drie poten"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [20, 39, 3, 37],
+          "text": "Met welk beest kwam huisband Blauhúster Dakkapel op de proppen nadat het meenemen van viervoeters door de KNVB verboden was?"
+        },
+        {
+          "answers": ["Aldo Swager", "Johan Tukker", "Wiebren van Stralen", "Stoffer Groote"],
+          "correct": 3,
+          "order": 3,
+          "percentages": [1, 36, 9, 54],
+          "text": "Wie was geen doelman bij SC Heerenveen?"
+        },
+        {
+          "answers": ["Anthony Lurling", "Marcus Allbäck", "Romano Denneboom", "Daniel Jensen"],
+          "correct": 1,
+          "order": 4,
+          "percentages": [28, 54, 6, 12],
+          "text": "Wie was samen met Martin Max (TSV München 1860), Pape Thiaw(Lausanne), Nicolas Goussé (Troyes) en Nolberto Solano (Newcastle United) over-all topscorer van het Intertoto toernooi 2001 met 4 goals?"
+        },
+        {
+          "answers": ["RBC Roosendaal", "FC Groningen", "Telstar", "Heracles"],
+          "correct": 0,
+          "order": 5,
+          "percentages": [10, 11, 48, 32],
+          "text": "Assistent Henk de Jong zat bij zijn vorige werkgever zelfs één keer op de bank als verantwoordelijk coach. Tegen welke tegenstander was dat?"
+        },
+        {
+          "answers": ["0", "6", "9", "12"],
+          "correct": 3,
+          "order": 6,
+          "percentages": [3, 30, 45, 22],
+          "text": "Hoeveel doelpunten scoorde SC Heerenveen in de zes duels van de nacompetitie van 88/89, waaraan ook NEC, Go Ahead Eagles en Excelsior deelnamen?"
+        },
+        {
+          "answers": ["Be Quick", "GVAV Rapiditas", "GRC", "Groen Geel"],
+          "correct": 1,
+          "order": 7,
+          "percentages": [36, 55, 7, 1],
+          "text": "Met welke Groningse amateurclub sloot SC Heerenveen in maart 1999 in het diepste geheim een samenwerkingsverband?"
+        },
+        {
+          "answers": ["de scouting", "Pieter Bijl", "de jeugd", "de sponsoring"],
+          "correct": 2,
+          "order": 8,
+          "percentages": [9, 13, 43, 36],
+          "text": "Na zijn beroerde eerste jaar zei trainer Henk van Brussel destijds in Voetbal International: \"Met ... gaat het voortreffelijk. En dat is momenteel het belangrijkste voor Heerenveen\". Vul je keuze in:"
+        },
+        {
+          "answers": ["Hoogeveen", "ter Apel", "Zwolle", "IJlst"],
+          "correct": 0,
+          "order": 9,
+          "percentages": [41, 17, 35, 6],
+          "text": "Waarheen vertrok Peter Pot nadat hij bij Heerenveen uitgerangeerd was?"
+        },
+        {
+          "answers": ["Go Ahead Eagles", "RKC Waalwijk", "Borussia Dortmund", "Telstar"],
+          "correct": 0,
+          "order": 10,
+          "percentages": [47, 20, 12, 21],
+          "text": "Vul aan: Elinkwijk, FC Utrecht, FC Wageningen, PEC Zwolle, FC Volendam, FC Twente, SC Cambuur, ..."
+        }
+      ],
+      "year": 2002
+    },
+    {
+      "average": 4.3,
+      "month": 2,
+      "omitted": 0,
+      "participants": 85,
+      "questions": [
+        {
+          "answers": ["Tilburg", "Den Bosch", "Maastricht", "Gorinchem"],
+          "correct": 1,
+          "order": 1,
+          "percentages": [4, 92, 1, 4],
+          "text": "In welke stad groeide Anthony Lurling op?"
+        },
+        {
+          "answers": ["Go Ahead", "RCH", "EBOH", "Helmond"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [20, 19, 21, 40],
+          "text": "De grootste thuisoverwinning ooit van SC Heerenveen in de eerste divisie was maar liefst 10-1 en dateert alweer van een paar decennia geleden. Wie was de arme tegenstander?"
+        },
+        {
+          "answers": ["Bryan Baloyi", "Doctor Khumalo", "Bennett Mnguni", "John Tlale"],
+          "correct": 3,
+          "order": 3,
+          "percentages": [36, 8, 33, 22],
+          "text": "Welke keeper werd door Carlos Queiroz voor één dag opgeroepen toen het er even op leek dat Hans Vonk niet door SC Heerenveen zou worden vrijgegeven voor de African Nations Cup?"
+        },
+        {
+          "answers": ["5", "4", "3", "2"],
+          "correct": 0,
+          "order": 4,
+          "percentages": [15, 33, 42, 9],
+          "text": "Hoeveel spelers traden in alle dertig duels voor Heerenveen aan in 1982/1983?"
+        },
+        {
+          "answers": ["Westerlo", "Sint-Truiden", "Antwerpen", "Mechelen"],
+          "correct": 1,
+          "order": 5,
+          "percentages": [15, 67, 5, 13],
+          "text": "Waar kwam Ian Claes ook weer vandaan?"
+        },
+        {
+          "answers": ["Frankrijk", "Duitsland", "Hongarije", "\"Tssk, hij speelde nooit in Jong Oranje!\""],
+          "correct": 0,
+          "order": 6,
+          "percentages": [11, 6, 31, 53],
+          "text": "Tegen welk land debuteerde Pieter Bijl in Jong Oranje?"
+        },
+        {
+          "answers": ["Marcus Allbäck", "Børre Meinseth", "Mika Väyrynen", "Jon Dahl Tomasson"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [64, 15, 15, 6],
+          "text": "Welke speler is onlosmakelijk verbonden met ÖIS?"
+        },
+        {
+          "answers": ["Jan Ploegh", "Henny Jonkman", "Anton Dalhuysen", "Jan Lenstra"],
+          "correct": 1,
+          "order": 8,
+          "percentages": [12, 62, 22, 4],
+          "text": "Wie stond jarenlang na Abe op de tweede plaats van de Heerenveense topscorerslijst?"
+        },
+        {
+          "answers": ["FC Twente", "FC Groningen", "Sparta", "NAC"],
+          "correct": 2,
+          "order": 9,
+          "percentages": [53, 18, 24, 6],
+          "text": "In 95/96 wist SC Heerenveen voor het eerst in het linkerrijtje van de eredivisie te eindigen. Welke van onderstaande clubs wist het daarmee desondanks niet onder zich te houden?"
+        },
+        {
+          "answers": ["VVD", "Groen Links", "CDA", "PvdA"],
+          "correct": 3,
+          "order": 10,
+          "percentages": [19, 7, 19, 55],
+          "text": "Op welke partij stemt Foppe de Haan doorgaans?"
+        }
+      ],
+      "year": 2002
+    },
+    {
+      "average": 3,
+      "month": 3,
+      "omitted": 0,
+      "participants": 77,
+      "questions": [
+        {
+          "answers": ["0", "1", "ook 2", "3"],
+          "correct": 2,
+          "order": 1,
+          "percentages": [29, 52, 17, 3],
+          "text": "Johan Cruijff werd tweemaal verkozen tot Sportman van het Jaar in Nederland. Hoe vaak viel Abe Lenstra die eer ten deel?"
+        },
+        {
+          "answers": ["Gérard de Nooijer", "Anthony Lurling", "Fritz Korbach", "Foppe de Haan"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [40, 13, 31, 16],
+          "text": "Wie haalde vorig jaar met deze woorden de pers: \"Ik heb het niet zo op de analisten van Studio Sport. Het niveau is niet echt hoog. Als ik die Hans Kraay dan hoor roepen dat Shoukov die kans niet mag missen. Ja, daar zitten we dus niet op te wachten. Half Nederland ziet ook wel dat hij die kans niet mag missen\"."
+        },
+        {
+          "answers": ["Liesdek", "Swan", "Poell", "Holshuysen"],
+          "correct": 1,
+          "order": 3,
+          "percentages": [23, 31, 16, 30],
+          "text": "Wie van onderstaande voetballers stond ooit in de defensie van Heerenveen?"
+        },
+        {
+          "answers": ["Ronald Koeman", "Mario Been", "Gerald Vanenburg", "Erik Gerets"],
+          "correct": 3,
+          "order": 4,
+          "percentages": [18, 25, 32, 25],
+          "text": "Met wie vergeleek Pieter Bijl zich in het begin van zijn carrière toen hij zei: \"Ik wil zo goed worden als ... ; getreiterd worden en je eigen sterke spel blijven spelen\"."
+        },
+        {
+          "answers": ["Aart Kuyt", "Hendrik Bokma", "Jan de Ruiter", "Tjepke Taconis"],
+          "correct": 3,
+          "order": 5,
+          "percentages": [13, 22, 35, 30],
+          "text": "Welke naam hoort niet bij het vroegere clubblad Rood-Wit?"
+        },
+        {
+          "answers": ["Nikola Golijanin", "Ginus Meijerink", "Reitse Withaar", "Sikke Venema"],
+          "correct": 2,
+          "order": 6,
+          "percentages": [18, 17, 31, 34],
+          "text": "Wie van deze voormalige Heerenveen-spelers was geen spits?"
+        },
+        {
+          "answers": ["Terry Hendriks", "Thomas Prager", "Leeroy Echteld", "Mika Pulkkinen"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [43, 9, 10, 38],
+          "text": "Welke (oud-)Heerenvener heeft van dit onderstaande kwartet het minst met Oostenrijk te maken?"
+        },
+        {
+          "answers": ["KuPS", "HJK", "FC Jokerit", "FC Haka"],
+          "correct": 0,
+          "order": 8,
+          "percentages": [40, 8, 29, 23],
+          "text": "Vorig jaar had SC Heerenveen enige tijd de 25-jarige Finse verdediger Jani Hartikainen op proef. Van welke club was de voormalige timmerman afkomstig?"
+        },
+        {
+          "answers": ["Deens", "Noors", "Roemeens", "Russisch"],
+          "correct": 2,
+          "order": 9,
+          "percentages": [9, 42, 19, 30],
+          "text": "In 1997 won SC Heerenveen simpel van Helmond Sport in het bekertoernooi. Het werd 5-0, waarbij de doelpuntenmakers zeer internationaal getint waren. Welke nationaliteit bevond zich niet onder de scorers?"
+        },
+        {
+          "answers": ["De Boer", "De Vries", "Dolstra", "Heijne"],
+          "correct": 0,
+          "order": 10,
+          "percentages": [23, 23, 34, 19],
+          "text": "Door wie werd doelman De Boer in het seizoen 1982-83 driemaal vervangen?"
+        }
+      ],
+      "year": 2002
+    },
+    {
+      "average": 4.3,
+      "month": 4,
+      "omitted": 0,
+      "participants": 57,
+      "questions": [
+        {
+          "answers": ["René Groen", "Wiebren van Stralen", "Emmanuel Ebiede", "Rodion Camataru"],
+          "correct": 3,
+          "order": 1,
+          "percentages": [7, 9, 47, 37],
+          "text": "Welke oud-Heerenvener voelde zich miserabel in het Belgische Charleroi?"
+        },
+        {
+          "answers": ["Vitesse", "Zwolle", "NEC", "Cambuur"],
+          "correct": 1,
+          "order": 2,
+          "percentages": [11, 60, 18, 12],
+          "text": "Een nederlaag tegen welke tegenstander kostte trainer Fritz Korbach de kop?"
+        },
+        {
+          "answers": ["terreinknecht", "portier", "perschef", "technicus"],
+          "correct": 2,
+          "order": 3,
+          "percentages": [37, 14, 37, 12],
+          "text": "Welk stempel past bij Jan Willem van Sytzema?"
+        },
+        {
+          "answers": ["PSV", "Ajax", "Feyenoord", "Cambuur"],
+          "correct": 0,
+          "order": 4,
+          "percentages": [70, 9, 12, 9],
+          "text": "Tegen wie scoorde Marco Roelofsen in de verlenging wellicht de goal van zijn leven?"
+        },
+        {
+          "answers": ["Collega in Twente", "Opvolger in Drachten", "Leerling in Utrecht", "Opponent in Grou"],
+          "correct": 1,
+          "order": 5,
+          "percentages": [11, 21, 21, 47],
+          "text": "Wat is Foppe de Haan van Wiep Fabriek?"
+        },
+        {
+          "answers": ["1965", "1971", "1977", "1983"],
+          "correct": 2,
+          "order": 6,
+          "percentages": [5, 23, 49, 23],
+          "text": "In welk jaar kreeg Abe Lenstra een hersenbloeding waardoor hij in een roelstoel belandde?"
+        },
+        {
+          "answers": ["26", "28", "30", "34"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [32, 19, 28, 21],
+          "text": "In de Eerste Klas A van 1951-1952 was Heerenveen de meest scorende ploeg, mede dankzij topscorer Abe Lenstra die 28 keer scoorde. Hoeveel competitieduels speelde Heerenveen dat seizoen?"
+        },
+        {
+          "answers": ["Douwe Egberts", "Sonnema", "Boerenleenbank", "Friesland Bank"],
+          "correct": 0,
+          "order": 8,
+          "percentages": [67, 16, 12, 5],
+          "text": "Behalve de schaatswereld heeft ook Heerenveen ooit een Jan Bos gekend. Bij welk noordelijk bedrijf werkte de vrijwilliger, die ooit voor de koffie en thee op de club zorgde?"
+        },
+        {
+          "answers": ["gratis", "fl. 5.000", "fl. 10.000", "fl. 20.000"],
+          "correct": 3,
+          "order": 9,
+          "percentages": [23, 46, 25, 7],
+          "text": "Heerenveen-spelers Cees Groot en Corrie Blaauw vertrokken in de jaren vijftig voor hetzelfde bedrag naar respectievelijk Stormvogels en Alkmaar. Hoeveel bedroeg de transfersom voor ieder van deze spelers?"
+        },
+        {
+          "answers": ["Bondsridder namens SC Heerenveen", "Erelid KNVB Friesland", "Lid van Verdienste", "Heer van Heerenveen"],
+          "correct": 3,
+          "order": 10,
+          "percentages": [9, 4, 40, 47],
+          "text": "Hoe mogen Hans van der Horst, Lippe Lap, Klaas de Jonge, Herman Reinders en Pieter Brouwer zich noemen?"
+        }
+      ],
+      "year": 2002
+    },
+    {
+      "average": 3.2,
+      "month": 5,
+      "omitted": 2,
+      "participants": 54,
+      "questions": [
+        {
+          "answers": ["Kjær Dahl Tomasson", "Mads Jørgensen", "Kim Källström", "Lasse Schøne"],
+          "correct": 3,
+          "order": 2,
+          "percentages": [13, 31, 43, 13],
+          "text": "Voor welke 15-jarige speler van Lyngby toonde SC Heerenveen onlangs uitgebreide belangstelling?"
+        },
+        {
+          "answers": ["Ian Claes", "Romano Denneboom", "Arjan Ebbinge", "Godfrey Nwankpa"],
+          "correct": 3,
+          "order": 3,
+          "percentages": [6, 19, 48, 28],
+          "text": "Wie was bekend onder rugnummer 15 in het Champions League avontuur van SC Heerenveen?"
+        },
+        {
+          "answers": ["Youp van 't Hek", "Theo Maassen", "Viggo Waas", "Freek de Jonge"],
+          "correct": 3,
+          "order": 4,
+          "percentages": [4, 6, 9, 81],
+          "text": "Van welke cabaretier zijn de volgende woorden: \"Ik heb mijn hart aan 't spel verpand; Van de taktiek begrijp ik geen syllabe; Noch heb ik van techniek verstand; Doch tijdens elke voetbalmatch; Denk ik wel één keer: Abe.\""
+        },
+        {
+          "answers": ["Dat Abe zo zuinig was", "Dat Abe zo'n egoïst was", "Dat hij het vuile werk moest opknappen", "Dat Abe een Fries was"],
+          "correct": 2,
+          "order": 5,
+          "percentages": [15, 20, 43, 22],
+          "text": "Wat nam Gerrit Voges zijn Enschedese mede-speler Abe Lenstra meermaals kwalijk?"
+        },
+        {
+          "answers": ["Vledderveen", "Groen-Geel", "Rood-Zwart", "Be Quick"],
+          "correct": 3,
+          "order": 6,
+          "percentages": [7, 9, 35, 48],
+          "text": "Bij welke club speelde Riemer van der Velde voordat hij in Bakkeveen terugkeerde?"
+        },
+        {
+          "answers": ["0", "1", "2", "3"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [30, 19, 37, 15],
+          "text": "Hoeveel rode kaarten verzamelde de selectie van SC Heerenveen in de competitie van 1982-1983?"
+        },
+        {
+          "answers": ["RC Lens", "AS Monaco", "Paris St. Germain", "Girondins de Bordeaux"],
+          "correct": 2,
+          "order": 9,
+          "percentages": [41, 11, 24, 24],
+          "text": "Bij welke Franse club speelde voormalig midvoor van SC Heerenveen Kees Kist?"
+        },
+        {
+          "answers": ["rechterknie", "linkerknie", "rechterenkel", "linkerenkel"],
+          "correct": 0,
+          "order": 10,
+          "percentages": [52, 24, 17, 7],
+          "text": "Welk gewricht brengt Jeffrey Talans verdere voetbalcarrière in gevaar?"
+        }
+      ],
+      "year": 2002
+    },
+    {
+      "average": 5.1,
+      "month": 6,
+      "omitted": 0,
+      "participants": 40,
+      "questions": [
+        {
+          "answers": ["Hennie Meijer", "Erik Tammer", "Harrie Decheiver", "Marco Roelofsen"],
+          "correct": 1,
+          "order": 1,
+          "percentages": [5, 65, 23, 8],
+          "text": "Welke Heerenvener overwoog in november 1995 een contract te tekenen bij Go Ahead Eagles na een proefwedstrijd bij het Franse Guingamp?"
+        },
+        {
+          "answers": ["Tony Alberda", "Roberto Straal", "Rodion Camataru", "Harris Huizingh"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [60, 20, 15, 5],
+          "text": "Een van de wedstrijden op basis waarvan Dick Jol beschuldigd werd van het bekende gokschandaal was FC Groningen  SC Heerenveen eind 1993. Een doelpunt van SC Heerenveen zou ten onrechte door Jol zijn goedgekeurd. Wie maakte deze goal, die overigens volgens het beeldmateriaal overduidelijk geldig was?"
+        },
+        {
+          "answers": ["jaren 40", "jaren 50", "jaren 60", "jaren 70"],
+          "correct": 2,
+          "order": 3,
+          "percentages": [3, 20, 53, 25],
+          "text": "In welk decennium speelden Ido Bunnig, Sjouke van der Heide en Henk Zoetendal samen in het eerste elftal?"
+        },
+        {
+          "answers": ["Cor Elzinga", "Terry Hendriks", "John van den Wildenberg", "Eddy Bosman"],
+          "correct": 3,
+          "order": 4,
+          "percentages": [28, 10, 20, 43],
+          "text": "Wie speelde door verdedigende problemen onder Henk van Brussel een tijd lang libero zodat Pieter Bijl zijn geliefde stek centraal op het middenveld kon innemen?"
+        },
+        {
+          "answers": ["Siem Plooyer", "Gilles Veenstra", "Sjoerd Veenstra", "Cees Groot"],
+          "correct": 3,
+          "order": 5,
+          "percentages": [18, 20, 23, 40],
+          "text": "Welke amateurinternational en topscorer wist Heerenveen met succes in te lijven in de jaren vijftig?"
+        },
+        {
+          "answers": ["Stanley MacDonald en Danny Hesp", "Johnny Jansen en Lesmond Prinsen", "Marc van Eijk en Jerry de Jong", "Ole Tobiasen en Jon Dahl Tomasson"],
+          "correct": 3,
+          "order": 6,
+          "percentages": [30, 23, 13, 35],
+          "text": "Welke van onderstaande duo's heeft de geboorteplaats niet gemeen?"
+        },
+        {
+          "answers": ["Wiske", "Metteke", "Nettie", "Anneke"],
+          "correct": 1,
+          "order": 7,
+          "percentages": [8, 28, 28, 38],
+          "text": "Hoe heet de oudste dochter van Abe en Hil Lenstra?"
+        },
+        {
+          "answers": ["Martin Koeman", "Azing Griever", "Ted Immers", "Hans Ooft"],
+          "correct": 2,
+          "order": 8,
+          "percentages": [28, 15, 40, 18],
+          "text": "Onderstaand kwartet werd na hun voetbalcarrière teruggezien in verschillende voetbalfuncties. Wie van hen speelde in de jaren zeventig niet in het eerste elftal van Heerenveen?"
+        },
+        {
+          "answers": ["Berry", "Boy", "Maickel", "Dick"],
+          "correct": 1,
+          "order": 9,
+          "percentages": [28, 53, 5, 15],
+          "text": "Nog een speler uit de oude doos: Nijgh. Wat was zijn voornaam?"
+        },
+        {
+          "answers": ["FC Den Bosch", "SC Heerenveen", "Feyenoord", "Ajax"],
+          "correct": 2,
+          "order": 10,
+          "percentages": [3, 5, 93, 0],
+          "text": "Welke club heeft volgens Anthony Lurling in de aflevering van Hard Gras juni 2001 het mooiste stadion van Nederland?"
+        }
+      ],
+      "year": 2002
+    },
+    {
+      "average": 4.7,
+      "month": 7,
+      "omitted": 0,
+      "participants": 38,
+      "questions": [
+        {
+          "answers": ["geen", "trainingskamp", "logo", "gras"],
+          "correct": 1,
+          "order": 1,
+          "percentages": [13, 76, 3, 8],
+          "text": "Wat is de link tussen SC Heerenveen en Torremolinos?"
+        },
+        {
+          "answers": ["1924", "1925", "1926", "1927"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [18, 18, 37, 26],
+          "text": "In welk jaar werd Heerenveen voor het eerst kampioen van de derde klasse NVB?"
+        },
+        {
+          "answers": ["Willem II", "Cambuur", "PEC Zwolle", "Go Ahead Eagles"],
+          "correct": 3,
+          "order": 3,
+          "percentages": [11, 5, 16, 68],
+          "text": "Van welke club plukte SC Heerenveen Arno Hofstede weg?"
+        },
+        {
+          "answers": ["Beide spreken uitstekend Spaans", "Salto na een doelpunt", "Look-alikes", "Beiden een sigarenwinkel"],
+          "correct": 1,
+          "order": 4,
+          "percentages": [3, 68, 21, 8],
+          "text": "In welk opzicht deed Maarten de Jong van Heerenveen aan Hugo Sanchez van Real Madrid denken?"
+        },
+        {
+          "answers": ["71", "61", "66", "76"],
+          "correct": 2,
+          "order": 5,
+          "percentages": [24, 8, 53, 16],
+          "text": "In seizoen 95/96 scoorden Ajax en PSV 97 goals. Op een gedeelde derde plaats qua produktie kwamen Feyenoord en SC Heerenveen. Hoeveel doelpunten scoorden deze clubs dat jaar?"
+        },
+        {
+          "answers": ["Sneek", "Leeuwarden", "Franeker", "Dokkum"],
+          "correct": 0,
+          "order": 6,
+          "percentages": [45, 55, 0, 0],
+          "text": "In de oorlogscompetitie van 41/42 werd Heerenveen voor het eerst kampioen in de noordelijke hoogste klasse. Twee clubs uit dezelfde Friese stad eindigden in diezelfde competitie onderaan. Over welke Friese plaats hebben we het hier?"
+        },
+        {
+          "answers": ["Sjaak Storm", "Carlo LAmi", "Theo Migchelsen", "Aldo Swager"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [53, 5, 24, 18],
+          "text": "Wie van deze doelmannen is het oudst?"
+        },
+        {
+          "answers": ["0", "1", "2", "3"],
+          "correct": 2,
+          "order": 8,
+          "percentages": [11, 42, 34, 13],
+          "text": "Hoeveel duels speelden Abe Lenstra en Germ Hofma samen in Oranje?"
+        },
+        {
+          "answers": ["0", "2", "4", "8"],
+          "correct": 0,
+          "order": 9,
+          "percentages": [42, 26, 21, 11],
+          "text": "Hoe vaak scoorde Marcus Allbäck in de zestien duels die hij voor het Italiaanse Bari speelde?"
+        },
+        {
+          "answers": ["0", "1", "2", "3"],
+          "correct": 0,
+          "order": 10,
+          "percentages": [8, 24, 50, 18],
+          "text": "Hoeveel spelers scoorden in de competitie van 89-90 drie goals in één duel?"
+        }
+      ],
+      "year": 2002
+    },
+    {
+      "average": 5.1,
+      "month": 8,
+      "omitted": 0,
+      "participants": 92,
+      "questions": [
+        {
+          "answers": ["Gert-Jan Verbeek", "Fritz Korbach", "Sef Vergoossen", "Hans Westerhof"],
+          "correct": 3,
+          "order": 1,
+          "percentages": [10, 4, 0, 86],
+          "text": "Welke trainer is volgens Foppes eigen zeggen zijn beste vriend in het voetbal?"
+        },
+        {
+          "answers": ["promoveerde de club", "werd Erik Tammer topscorer", "vond De Haan dat een wereldprestatie", "kwam Anthony Lurling daarop naar de club"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [62, 12, 20, 7],
+          "text": "SC Heerenveen eindigde als zestiende in de competitie en toch...?"
+        },
+        {
+          "answers": ["Oostenrijk", "Finland", "Zweden", "Cyprus"],
+          "correct": 0,
+          "order": 3,
+          "percentages": [53, 30, 8, 9],
+          "text": "Naar welk land vertrok de Fin Mika Pulkkinen toen hij bij SC Heerenveen niet aan de bak kwam?"
+        },
+        {
+          "answers": ["Richard Zeelen", "Sake de Boer", "Wiebe Brandsma", "Erik ten Voorde"],
+          "correct": 1,
+          "order": 4,
+          "percentages": [8, 41, 25, 26],
+          "text": "Wijs een elftalleider van het tweede aan:"
+        },
+        {
+          "answers": ["Ronnie Venema", "Gerard Wiekens", "Fabian Wilnis", "Armand MacAndrew"],
+          "correct": 2,
+          "order": 5,
+          "percentages": [33, 15, 43, 9],
+          "text": "Met wie vormde Arjan Ebbinge bij Veendam nooit samen het centrale verdedigingsduo?"
+        },
+        {
+          "answers": ["AGOVV (Apeldoorn)", "BVV (Den Bosch)", "SVV (Schiedam)", "VSV (Velsen)"],
+          "correct": 3,
+          "order": 6,
+          "percentages": [28, 14, 24, 34],
+          "text": "In 48/49 werd Heerenveen vierde in de landelijke playoff-competitie. Welke van onderstaande clubs wisten de Friezen onder zich te houden?"
+        },
+        {
+          "answers": ["NEC", "SVV", "FC Den Haag", "MVV"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [21, 41, 13, 25],
+          "text": "De eerste eredivisie-eindstand waarin SC Heerenveen voorkomt, is die van seizoen 90/91. Slechts een club kon de Friese ploeg onder zich houden. Wie?"
+        },
+        {
+          "answers": ["Bennie Vissers", "Martin van der Meulen", "Richard Zeelen", "Saïd Boutahar"],
+          "correct": 3,
+          "order": 8,
+          "percentages": [13, 17, 4, 65],
+          "text": "Welke speler heeft niet in het tweede elftal van SC Heerenveen gespeeld?"
+        },
+        {
+          "answers": ["Melchior Schoenmakers", "Geert Jelle de Vries", "Meindert Postma", "Sandor van der Heide"],
+          "correct": 1,
+          "order": 9,
+          "percentages": [5, 54, 25, 15],
+          "text": "Van welke voormalige Heerenveen-speler stond de wieg in Scharnegoutum?"
+        },
+        {
+          "answers": ["Zwartemeer", "Tubantia", "FC Zaanstreek", "SC Gooiland"],
+          "correct": 1,
+          "order": 10,
+          "percentages": [17, 53, 15, 14],
+          "text": "In 1966 eindigde Heerenveen op een keurige negende plaats in de tweede divisie, vlak onder Wageningen en vlak boven...?"
+        }
+      ],
+      "year": 2002
+    },
+    {
+      "average": 3.5,
+      "month": 9,
+      "omitted": 0,
+      "participants": 66,
+      "questions": [
+        {
+          "answers": ["Speelde competitievoetbal in China", "Is nog nooit in Singapore geweest", "Heeft een hekel aan FC Groningen", "Begon zijn carrière bij Feyenoord"],
+          "correct": 0,
+          "order": 1,
+          "percentages": [56, 18, 6, 20],
+          "text": "Welke uitspraak over Ignacio Tuhuteru is waar?"
+        },
+        {
+          "answers": ["Henk de Jong", "Jan de Jonge", "Fritz Korbach", "Marco Roelofsen"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [53, 32, 12, 3],
+          "text": "Wie zei ooit: \"Ik kon ook bij Heracles blijven, maar toen Heerenveen interesse toonde heb ik meteen ja gezegd. Ik ben een echte Fries en Heerenveen staat synoniem voor Friesland\"."
+        },
+        {
+          "answers": ["Dinamo Kiev en Rosenborg", "Barcelona en Manchester United", "Anderlecht en Bayern München", "Feyenoord en PSV"],
+          "correct": 0,
+          "order": 3,
+          "percentages": [32, 53, 9, 6],
+          "text": "Toen de Champions League loting SC Heerenveen naar Piraeus, Lyon en Valencia zond, verzuchtte Foppe de Haan dat de club daarmee in ieder geval twee lastige tegenstanders ontliep. Welke twee clubs noemde hij toen?"
+        },
+        {
+          "answers": ["16", "21", "26", "31"],
+          "correct": 3,
+          "order": 4,
+          "percentages": [35, 38, 18, 9],
+          "text": "Op welke leeftijd debuteerde Kees Kist voor Heerenveen?"
+        },
+        {
+          "answers": ["Koko Hoekstra", "Wim Spindelaar", "Wiebe Wiebenga", "Piet Jasper"],
+          "correct": 0,
+          "order": 5,
+          "percentages": [50, 17, 27, 6],
+          "text": "Welke spits van Heerenveen werd assistent-trainer bij Cambuur?"
+        },
+        {
+          "answers": ["Groningen", "Amsterdam", "Dokkum", "Leeuwarden"],
+          "correct": 3,
+          "order": 6,
+          "percentages": [20, 32, 20, 29],
+          "text": "Uit welke stad kwam de roemruchte trainer Anton Dalhuysen oorspronkelijk?"
+        },
+        {
+          "answers": ["ADO", "Ajax", "De Kooi", "Wageningen"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [33, 11, 8, 48],
+          "text": "In een zeldzaam geval van ijver assisteerde Abe Lenstra ooit zijn defensie in de slotfase, waarbij hij bij een 1-2 voorsprong de bal met de hand uit het doel probeerde te slaan. De bal ging over, Abe raakte de lat en kreeg al bloedend toch een penalty tegen (die werd gered door keeper Veenstra). Wie was de tegenstander?"
+        },
+        {
+          "answers": ["NAC", "SC Joure", "Velox", "FC Groningen"],
+          "correct": 0,
+          "order": 8,
+          "percentages": [35, 11, 39, 15],
+          "text": "Door welke club werd Heerenveen uitgeschakeld in het bekertoernooi in het jaar dat Yme Boersma met acht doelpunten clubtopscorer werd?"
+        },
+        {
+          "answers": ["Mark Jan Fledderus en René van der Weij", "Romano Denneboom en Allan Bak Jensen", "Mark van Eijk en Bennie Vissers", "Johan Hansma (2)"],
+          "correct": 2,
+          "order": 9,
+          "percentages": [36, 24, 36, 3],
+          "text": "In februari van dit jaar boekten de beloftes van SC Heerenveen een verdienstelijke 1-2 overwinning op AZ in Alkmaar. Wie scoorden de doelpunten voor de Friezen?"
+        },
+        {
+          "answers": ["Karadzic", "Karremans", "Witteveen", "Stuurman"],
+          "correct": 0,
+          "order": 10,
+          "percentages": [17, 18, 30, 35],
+          "text": "Reys; Jansen, Boskma, Visser, Postma; Middelkoop, Segers, Dolstra; Rorije, Bruinsma, [...]. Welke elfde naam ontbreekt in dit team dat op 3 oktober 1976 met 1-0 van FC Groningen verloor?"
+        }
+      ],
+      "year": 2002
+    },
+    {
+      "average": 4.7,
+      "month": 10,
+      "omitted": 0,
+      "participants": 64,
+      "questions": [
+        {
+          "answers": ["Lagos", "Monrovia", "Porto-Novo", "N'Djamena"],
+          "correct": 0,
+          "order": 1,
+          "percentages": [66, 9, 13, 13],
+          "text": "In welke Afrikaanse hoofdstad stond de geboortewieg van Godfrey Nwankpa?"
+        },
+        {
+          "answers": ["Ajax", "Feyenoord", "PSV", "Anderlecht"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [70, 9, 9, 11],
+          "text": "Van welke topclub trok Jeffrey Kooistra als klein jongetje het shirt aan?"
+        },
+        {
+          "answers": ["Tieme Klompe", "Hans Vonk", "Johan Hansma", "Ronnie Venema"],
+          "correct": 1,
+          "order": 3,
+          "percentages": [3, 53, 25, 19],
+          "text": "De naam van welke selectie-speler is verbonden met de amateurclub VV Woudrichem?"
+        },
+        {
+          "answers": ["Menken", "Piets", "Schmidt", "Katwijk"],
+          "correct": 0,
+          "order": 4,
+          "percentages": [61, 6, 20, 13],
+          "text": "Hoe heette de chirurg die Tieme Klompe's achillespees vakkundig opereerde vorig seizoen?"
+        },
+        {
+          "answers": ["chronische knieblessure", "baan in Amsterdam", "onder mysterieuze omstandigheden ontslagen", "auto-ongeluk"],
+          "correct": 3,
+          "order": 5,
+          "percentages": [38, 17, 6, 39],
+          "text": "Wat bepaalde de bijna legendarische keeper Tieme Veenstra's loopbaan-einde in 1951?"
+        },
+        {
+          "answers": ["1965", "1970", "1975", "1980"],
+          "correct": 1,
+          "order": 6,
+          "percentages": [9, 31, 38, 22],
+          "text": "In welk jaar keerde Foppe de Haan vanuit het oosten des lands weer terug in het oude vertrouwde Akkrum?"
+        },
+        {
+          "answers": ["lange reis", "rust roest", "ruwe tegenstander", "partijdige en geblesseerde scheids"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [36, 11, 14, 39],
+          "text": "Na de winterstop van 1920-21 verloor Heerenveen (toen nog Athleta geheten) de eerste wedstrijd tegen SSC uit Steenwijk. Welke reden werd níet genoemd als verklaring voor de nederlaag?"
+        },
+        {
+          "answers": ["Ludolf Rasterhof", "John van Wensveen", "Thomas Haan", "Dirk Visser"],
+          "correct": 2,
+          "order": 8,
+          "percentages": [8, 30, 38, 25],
+          "text": "Wie stond als aanvallende middenvelder ook wel in de spits van Heerenveen?"
+        },
+        {
+          "answers": ["hattrick-specialist", "De Tank", "teamgenoot van Abe Lenstra", "verzekeringsinspecteur"],
+          "correct": 3,
+          "order": 9,
+          "percentages": [31, 13, 27, 30],
+          "text": "Wat was Marten Brandma níet?"
+        },
+        {
+          "answers": ["Azing Griever", "Mario Been", "Abel Braga", "Jan Schulting"],
+          "correct": 1,
+          "order": 10,
+          "percentages": [22, 47, 16, 16],
+          "text": "Welke huidige trainer vertrok vanuit Heerenveen naar een Oostenrijkse club om daar zijn carrière voort te zetten?"
+        }
+      ],
+      "year": 2002
+    },
+    {
+      "average": 5.6,
+      "month": 11,
+      "omitted": 0,
+      "participants": 64,
+      "questions": [
+        {
+          "answers": ["Breda", "Maastricht", "Roosendaal", "Eindhoven"],
+          "correct": 0,
+          "order": 1,
+          "percentages": [95, 0, 3, 2],
+          "text": "Na zijn tijd bij Feyenoord kon voormalig Heerenveen-lieveling Igor Korneev geen nieuwe club vinden. In welke zuidelijke stad balt hij nu als amateur?"
+        },
+        {
+          "answers": ["Feyenoord", "Sparta", "SVV", "Excelsior"],
+          "correct": 2,
+          "order": 2,
+          "percentages": [3, 11, 75, 11],
+          "text": "Een belangrijke stimulans voor de populariteit van Heerenveen in het hele land was het degradatieduel in De Kuip in 1991. Wie was de tegenstander in die wedstrijd die 5.000 Friezen live bijwoonden?"
+        },
+        {
+          "answers": ["Jon Dahl Tomasson", "Jan de Visser", "Mika Väyrynen", "Florin Constantinovici"],
+          "correct": 0,
+          "order": 3,
+          "percentages": [53, 36, 8, 3],
+          "text": "Over wie sprak Foppe de Haan: \"Ik ken weinig voetballers die zich zo leeg kunnen spelen en er dan de volgende keer weer staan. Net als Johan Neeskens vroeger kan hij 'over de spitsen heenklappen'. Zijn drijfveren komen van binnenuit. Hij wil winnen\"."
+        },
+        {
+          "answers": ["Speelde een tijdje op schoenen van rendierenleer", "Zonder hem verloor Nederland met 8-2 van Engeland", "In zijn gehele loopbaan geen knieblessure gehad", "Werd voorwaardelijk geschorst voor het maken van reclame"],
+          "correct": 2,
+          "order": 4,
+          "percentages": [19, 17, 34, 30],
+          "text": "Welk weetje over Abe Lenstra is niet waar?"
+        },
+        {
+          "answers": ["David Damman", "Tieme Klompe", "Jeffrey Talan", "Max Houttuin"],
+          "correct": 3,
+          "order": 5,
+          "percentages": [9, 2, 5, 84],
+          "text": "Wie had tijdens het seizoen 1999-2000 te maken met blessures, een conflict met Foppe de Haan, en een auto-ongeluk?"
+        },
+        {
+          "answers": ["FC Vlaardingen", "FC Wageningen", "SC Amersfoort", "FC Amsterdam"],
+          "correct": 0,
+          "order": 6,
+          "percentages": [28, 50, 11, 11],
+          "text": "In het seizoen 1980-1981 verloor Heerenveen triest genoeg met 2-0 van een club die bijna failliet was, waar spelers dreigden met een staking en slechts onder protest speelden. Welke club was dat?"
+        },
+        {
+          "answers": ["Ajax", "Feyenoord", "Xerxes", "Go Ahead"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [34, 36, 9, 20],
+          "text": "Het eerste bekerduel van trainer Evert Mur bij Heerenveen was direct tegen een topclub. Ondanks de uitstekende vorm van de doelman werd na verlenging verloren. Wie was de tegenstander?"
+        },
+        {
+          "answers": ["Oosterhof", "Brzjec", "Hansson", "Djurov"],
+          "correct": 1,
+          "order": 8,
+          "percentages": [11, 44, 22, 23],
+          "text": "Hoe heette de gastspeler die in mei tegen DIO Oosterwolde (eindstand 9-0) eenmaal scoorde voor Heerenveen?"
+        },
+        {
+          "answers": ["0", "4", "8", "16"],
+          "correct": 0,
+          "order": 9,
+          "percentages": [22, 20, 44, 14],
+          "text": "Hoeveel punten behaalde Heerenveen in de acht duels tellende kampioenscompetitie van 1951?"
+        },
+        {
+          "answers": ["Hansson en Denneboom", "Barsom en Nurmela", "Selakovic en Samardzic", "Ebbinge en Jensen"],
+          "correct": 0,
+          "order": 10,
+          "percentages": [88, 6, 6, 0],
+          "text": "Wie scoorden in het Europese thuisduel tegen National Boekarest?"
+        }
+      ],
+      "year": 2002
+    },
+    {
+      "average": 5.8,
+      "month": 12,
+      "omitted": 0,
+      "participants": 58,
+      "questions": [
+        {
+          "answers": ["Edwin Zoetebier", "Ivica Vukov", "René Binken", "Wim Jonk"],
+          "correct": 3,
+          "order": 1,
+          "percentages": [10, 10, 10, 69],
+          "text": "Met welke van onderstaande spelers speelde Radoslav Samardzic niet samen in het begin van zijn carrière in Nederland?"
+        },
+        {
+          "answers": ["Freek de Jonge", "Dolf Jansen", "Bert Visscher", "Jochem Myer"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [90, 5, 5, 0],
+          "text": "Welke cabaretier opende de Pronkkeamer in 1997?"
+        },
+        {
+          "answers": ["Weekblad De Katholieke Illustratie", "Leeuwarder Courant", "Friesch Dagblad", "Het Akkrumse Sufferdje"],
+          "correct": 0,
+          "order": 3,
+          "percentages": [10, 38, 48, 3],
+          "text": "Welke journalistieke uitgave kopte \"Liever Friese koek dan Italiaanse spaghetti\" toen Abe Lenstra een aanbod van Fiorentina weigerde?"
+        },
+        {
+          "answers": ["Gezondheidsboulevard", "Friesland College", "Congrescentrum", "Bejaardentehuis"],
+          "correct": 3,
+          "order": 4,
+          "percentages": [2, 2, 3, 93],
+          "text": "Wat is geen onderdeel in de plannen voor Sportstad Heerenveen?"
+        },
+        {
+          "answers": ["Rodion Camataru", "Pieter Keur", "Dennis de Nooijer", "Jan de Jonge"],
+          "correct": 1,
+          "order": 5,
+          "percentages": [29, 57, 3, 10],
+          "text": "De eerste Friese derby op het hoogste niveau werd beslist door twee goals van een supersub. Hoe luidde zijn naam?"
+        },
+        {
+          "answers": ["Mile Krstev", "Rafael Pires Viera", "Harris Huizingh", "Romano Denneboom"],
+          "correct": 2,
+          "order": 6,
+          "percentages": [2, 2, 81, 16],
+          "text": "Roda JC - SC Heerenveen 3-1. Wie ontbreekt in deze beginopstelling: Hans Vonk, Ronnie Venema, Arjan Ebbinge, Johan Hansma, Gérard de Nooijer, Jeffrey Talan, Sander van Gessel, Mika Nurmela, Daniel Jensen, (...), Anthony Lurling"
+        },
+        {
+          "answers": ["'t Gooi", "Sittardia", "DHC", "Blauw-Wit"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [22, 26, 26, 26],
+          "text": "In 1960-1961 speelde Heerenveen in de Eerste Divisie B en eindigde als zevende. Welke van onderstaande ploegen wisten de Friezen daarmee onder zich te houden?"
+        },
+        {
+          "answers": ["0", "1", "3", "5"],
+          "correct": 2,
+          "order": 8,
+          "percentages": [7, 47, 45, 2],
+          "text": "Hoeveel oud-spelers van Heerenveen slaagden in mei 2001 voor de cursus Trainer-Coach I?"
+        },
+        {
+          "answers": ["5-1", "7-4", "10-5", "13-2"],
+          "correct": 3,
+          "order": 9,
+          "percentages": [7, 22, 22, 48],
+          "text": "De Intertoto van 1995: met welk doelsaldo wist SC Heerenveen UD Leiria, Næstved IF, Bekescsabai EFC en Ton Pentre FC achter zich te houden?"
+        },
+        {
+          "answers": ["Go Ahead Eagles", "Cambuur", "Heracles", "FC Zwolle"],
+          "correct": 0,
+          "order": 10,
+          "percentages": [62, 16, 16, 7],
+          "text": "Pieter Bijl speelde professioneel voetbal voor Utrecht, Heerenveen en een derde club. Welke?"
+        }
+      ],
+      "year": 2002
+    },
+    {
+      "average": 5.1,
+      "month": 1,
+      "omitted": 0,
+      "participants": 55,
+      "questions": [
+        {
+          "answers": ["Den Haag", "Eindhoven", "Rotterdam", "Groningen"],
+          "correct": 0,
+          "order": 1,
+          "percentages": [96, 0, 2, 2],
+          "text": "In welke stad begonnen Jeffrey Talan en Santi Kolk hun professionele voetballoopbaan?"
+        },
+        {
+          "answers": ["Nigel de Jong", "Ignacio Tuhuteru", "Andy van der Meyde", "Richard Knopper"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [91, 2, 5, 2],
+          "text": "Welke Ajax-speler heeft een vader met een Heerenveen-verleden?"
+        },
+        {
+          "answers": ["Kees", "Barry", "Thomas", "Mark"],
+          "correct": 0,
+          "order": 3,
+          "percentages": [51, 22, 15, 13],
+          "text": "Aan welke voornaam moet je bij VV Kraggenburg denken?"
+        },
+        {
+          "answers": ["perschef", "spelersbegeleider", "eerste voorzitter Aktie '67", "speaker"],
+          "correct": 1,
+          "order": 4,
+          "percentages": [16, 40, 18, 25],
+          "text": "Wat was Jan-Willem van Sytzama niet?"
+        },
+        {
+          "answers": ["Wim de Ron", "Hans Vonk", "Hiddo Reys", "Oscar Zijlstra"],
+          "correct": 3,
+          "order": 5,
+          "percentages": [35, 27, 18, 20],
+          "text": "Welke doelman blunderde - ook naar eigen zeggen - ontzettend in zijn eerste Friese derby?"
+        },
+        {
+          "answers": ["Janke Suierveld", "W. Slagter", "Henry Louwdijk", "Luxemburg 6-2"],
+          "correct": 2,
+          "order": 6,
+          "percentages": [11, 29, 47, 13],
+          "text": "Wie of wat heeft niets met Abe Lenstra te maken?"
+        },
+        {
+          "answers": ["Abe werd als trainer opgevolgd door Bonsema", "Boltendal beledigde de club", "Zmiric kwam mede dankzij Aktie '67", "In de jaren '80 speelde de club tweemaal achtereen nacompetitie"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [60, 4, 15, 22],
+          "text": "Wat is niet waar?"
+        },
+        {
+          "answers": ["Joop den Uyl en Karel Appel", "Rinus Michels en Ard Schenk", "Annie MG Schmidt en Marten Toonder", "Anthony Fokker en koningin Beatrix"],
+          "correct": 0,
+          "order": 8,
+          "percentages": [15, 49, 27, 9],
+          "text": "De Volkskrant publiceerde vanaf 4 oktober 1997 wekelijks een portret van een Nederlander die een prominente rol had gespeeld in de twintigste eeuw. Op 71 van deze top 100 stond zowaar Abe Lenstra. Tussen welke helden stond hij in?"
+        },
+        {
+          "answers": ["20", "30", "40", "50"],
+          "correct": 0,
+          "order": 9,
+          "percentages": [44, 7, 27, 22],
+          "text": "Hoe oud is Dragan Sladakovic nu?"
+        },
+        {
+          "answers": ["Polen", "Kroatië", "Roemenië", "Wit-Rusland"],
+          "correct": 2,
+          "order": 10,
+          "percentages": [9, 29, 49, 13],
+          "text": "In welk land speelde SC Heerenveen tegen Vintila, Curt, Marin, Keca en Olah?"
+        }
+      ],
+      "year": 2003
+    },
+    {
+      "average": 4.7,
+      "month": 2,
+      "omitted": 0,
+      "participants": 53,
+      "questions": [
+        {
+          "answers": ["Daniel Jensen", "Mika Nurmela", "Hans Vonk", "Barry Ditewig"],
+          "correct": 0,
+          "order": 1,
+          "percentages": [77, 4, 9, 9],
+          "text": "Wie speelde op het Eurovoetbaltoernooi voor SC Heerenveen?"
+        },
+        {
+          "answers": ["Evert Teunissen", "Eddy Bosman", "Henk van Brussel", "Thijs Sluijter"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [25, 19, 30, 26],
+          "text": "Wie kwam van De Graafschap en ging via Heerenveen naar Heracles?"
+        },
+        {
+          "answers": ["Talan", "Sturing", "van den Dungen", "Bos"],
+          "correct": 0,
+          "order": 3,
+          "percentages": [26, 34, 23, 17],
+          "text": "In het voorjaar van 1986 kreeg Heerenveen ongenadig klop in Arnhem: 5-1. Welke Vitesse-speler scoorde driemaal?"
+        },
+        {
+          "answers": ["George", "Leen", "Stevie", "Eddy"],
+          "correct": 3,
+          "order": 4,
+          "percentages": [9, 11, 6, 74],
+          "text": "Maar weer eens een speler uit de oude doos: Bakker. Wat was zijn voornaam?"
+        },
+        {
+          "answers": ["Eddy Bosman", "Koko Hoekstra", "Ype Anema", "Hans Erkelens"],
+          "correct": 1,
+          "order": 5,
+          "percentages": [38, 45, 9, 8],
+          "text": "De transfer van welke speler naar Heerenveen hield in 1981 in heel Friesland de gemoederen bezig?"
+        },
+        {
+          "answers": ["Ian", "Allan", "Jesper", "Thomas"],
+          "correct": 1,
+          "order": 6,
+          "percentages": [30, 25, 13, 32],
+          "text": "Welke voornaam verbind je als het goed is aan de naam Kolding?"
+        },
+        {
+          "answers": ["de 7e", "de 8e", "de 9e", "de 10e"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [25, 53, 21, 2],
+          "text": "Aan welke aflevering van de Champions League nam SC Heerenveen deel?"
+        },
+        {
+          "answers": ["Santi Kolk", "Anthony Lurling", "Jon Dahl Tomasson", "Tony Alberda"],
+          "correct": 3,
+          "order": 8,
+          "percentages": [0, 4, 19, 77],
+          "text": "Wie van onderstaande spelers is de oudste?"
+        },
+        {
+          "answers": ["Hij kostte twee miljoen Engelse Ponden", "Hij werd direct een vaste basisspeler", "Hij kwam vrijwel tegelijk met Gilles De Bilde", "Hij werd clubtopscorer in zijn tweede seizoen"],
+          "correct": 1,
+          "order": 9,
+          "percentages": [11, 42, 38, 9],
+          "text": "Wat is niet waar over Gerald Sibon's periode in Sheffield?"
+        },
+        {
+          "answers": ["ruim 35", "ruim 37", "ruim 39", "ruim 41"],
+          "correct": 0,
+          "order": 10,
+          "percentages": [51, 34, 13, 2],
+          "text": "West-Duitsland-Nederland, Düsseldorf maart 1956. 40.000 toeschouwers. Abe Lenstra was teruggeroepen voor Oranje. Hoe oud was hij inmiddels?"
+        }
+      ],
+      "year": 2003
+    },
+    {
+      "average": 5.2,
+      "month": 3,
+      "omitted": 0,
+      "participants": 37,
+      "questions": [
+        {
+          "answers": ["Finland", "Zweden", "Noorwegen", "Denemarken"],
+          "correct": 0,
+          "order": 1,
+          "percentages": [92, 5, 3, 0],
+          "text": "Voor welk land debuteerde Mika Väyrynen onlangs?"
+        },
+        {
+          "answers": ["Jack de Gier", "Fred Grim", "Michael Mols", "Hennie Meijer"],
+          "correct": 3,
+          "order": 2,
+          "percentages": [14, 5, 41, 41],
+          "text": "In 1992/1993 was Cambuur de eerste tegenstander in de beker. Heerenveen was veel te sterk met 0-3. Wie stond bij de Leeuwarders niet in het veld?"
+        },
+        {
+          "answers": ["Siem Plooyer", "Volgert Ris", "Jan Kompaen", "Frans Wuyts"],
+          "correct": 1,
+          "order": 3,
+          "percentages": [32, 24, 19, 24],
+          "text": "In 1955/1956 moest Heerenveen verder zonder Abe Lenstra die naar Enschede verhuisde. Wie was trainer van Heerenveen in dat nieuwe seizoen?"
+        },
+        {
+          "answers": ["Leroy Echteld", "Gerald Sibon", "Dennis de Nooijer", "Georgios Samaras"],
+          "correct": 1,
+          "order": 4,
+          "percentages": [32, 51, 3, 14],
+          "text": "Welke speler kreeg volgens Voetbal International de bijnaam De Blanke Kanu?"
+        },
+        {
+          "answers": ["Rafael van der Vaart", "Nikos Machlas", "John OBrien", "Nordin Wooter"],
+          "correct": 0,
+          "order": 5,
+          "percentages": [73, 22, 0, 5],
+          "text": "Welke Ajacied scoorde als enige in de 5-1 van oktober 2001?"
+        },
+        {
+          "answers": ["Daniel Jensen", "Mika Nurmela", "Johan Hansma", "Hans Vonk"],
+          "correct": 1,
+          "order": 6,
+          "percentages": [19, 73, 5, 3],
+          "text": "Wie moet Hannu Haarala straks opvolgen?"
+        },
+        {
+          "answers": ["0", "1", "2", "3"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [41, 46, 14, 0],
+          "text": "Hoeveel Intertoto-doelpunten scoorde Melchior Schoenmakers voor SC Heerenveen?"
+        },
+        {
+          "answers": ["Abe Lenstra", "Aaldrik Engels", "Piet Zwerver", "Germ Hofma"],
+          "correct": 3,
+          "order": 8,
+          "percentages": [41, 3, 8, 49],
+          "text": "Volgens recent onderzoek van de Volkskrant was Wim Molenaar mogelijk de eerste speler die in de Nederlandse eredivisie scoorde uit bij Elinkwijk in 1954. Uit een assist van welke speler scoorde de Heerenvener dat doelpunt?"
+        },
+        {
+          "answers": ["Cambuur Leeuwarden", "VVV", "Telstar", "Helmond Sport"],
+          "correct": 1,
+          "order": 9,
+          "percentages": [0, 32, 46, 22],
+          "text": "Ardon de Waard stond ooit onder contract in Heerenveen. Welke club in de eerste divisie geniet nu van zijn diensten?"
+        },
+        {
+          "answers": ["Urk", "DOS/Kampen", "AFC", "Nesselande"],
+          "correct": 2,
+          "order": 10,
+          "percentages": [22, 30, 43, 5],
+          "text": "Bij welke amateurclub werd Guido Smits gescout?"
+        }
+      ],
+      "year": 2003
+    },
+    {
+      "average": 3.7,
+      "month": 4,
+      "omitted": 0,
+      "participants": 48,
+      "questions": [
+        {
+          "answers": ["Allan Bak Jensen", "Mika Väyrynen", "Rodion Camataru", "Roberto Straal"],
+          "correct": 0,
+          "order": 1,
+          "percentages": [75, 0, 8, 17],
+          "text": "Wie bezocht München voor een slepende rugblessure?"
+        },
+        {
+          "answers": ["Oosterhof", "Schulting", "Willemsen", "Kamphuis"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [25, 40, 19, 17],
+          "text": "Drie spelers vertrokken in de zomer van 1983 naar de amateurs van Dijka Steenwijk. Wie hoorde daar niet bij?"
+        },
+        {
+          "answers": ["Anthony Lurling", "Romano Denneboom", "Santi Kolk", "Mario Been"],
+          "correct": 1,
+          "order": 3,
+          "percentages": [10, 69, 10, 10],
+          "text": "Wie scoorde twee keer tegen De Graafschap en werd nog in dezelfde week in Oranje-shirt uit het veld gestuurd?"
+        },
+        {
+          "answers": ["Smit", "Hendriksen", "Bakker", "Braber"],
+          "correct": 0,
+          "order": 4,
+          "percentages": [31, 15, 35, 19],
+          "text": "Een van de meest verdienstelijke resultaten uit Foppe de Haans beginperiode was een 3-3 thuis tegen SC Veendam. Welke Fries legde de drie goals achter de Groninger doelman Reys?"
+        },
+        {
+          "answers": ["Arek Radomski", "Johan Hansma", "Florin Constantinovici", "Gérard de Nooijer"],
+          "correct": 3,
+          "order": 5,
+          "percentages": [25, 13, 46, 17],
+          "text": "Vul de juiste naam in: \"De thuisclub wist zich voor rust geen raad met de flair van Heerenveen, dat regelmatig met vier man ten aanval trok. Achter de weinig beweeglijke spits Gusatu had Samardzic een vrije rol. Dat kostte (...) zijn plaats als verdedigende middenvelder. \"Waar hij moest versnellen, remde hij het spel. Hij heeft volwassen op mijn beslissing gereageerd\", aldus De Haan, die voorlopig wil doorgaan met de wat meer rendabel lijkende tactiek van gisteren.\""
+        },
+        {
+          "answers": ["voor een half jaar", "voor één jaar", "voor twee jaar", "voor onbepaalde tijd"],
+          "correct": 1,
+          "order": 6,
+          "percentages": [54, 29, 13, 4],
+          "text": "Voor welke periode tekende trainer Henk van Brussel zijn eerste contract in Heerenveen?"
+        },
+        {
+          "answers": ["voor zijn vrouw", "voor een zwembad", "voor een sigarenwinkel", "voor een fysiopraktijk"],
+          "correct": 1,
+          "order": 7,
+          "percentages": [13, 8, 15, 65],
+          "text": "Waarvoor verliet Antoon Kuil SC Heerenveen?"
+        },
+        {
+          "answers": ["Ali Elkhattabi", "Robert van der Berg", "Simon Karkov", "Tom Sier"],
+          "correct": 3,
+          "order": 8,
+          "percentages": [21, 29, 15, 35],
+          "text": "Welke van onderstaande spelers scoorde níet in het bekerduel tegen Sneek (3-6) in 1996?"
+        },
+        {
+          "answers": ["de Schotse", "de Belgische", "de Griekse", "de Georgische"],
+          "correct": 0,
+          "order": 9,
+          "percentages": [40, 17, 33, 10],
+          "text": "Het liefst vergeten we de openingswedstrijd van SC Heerenveen in de Champions League. Weet jij nog welke nationaliteit de scheidsrechter in dat duel had?"
+        },
+        {
+          "answers": ["lui en passief", "arrogant en onbegrepen", "uit vorm en te dik", "de beste voetballer van Nederland"],
+          "correct": 0,
+          "order": 10,
+          "percentages": [44, 21, 15, 21],
+          "text": "Tot slot een krantenkop over Abe Lenstra. Vul de ontbrekende tekst in: \"Lenstra, (...), terecht voor nationale ploeg gepasseerd\"."
+        }
+      ],
+      "year": 2003
+    },
+    {
+      "average": 5.4,
+      "month": 5,
+      "omitted": 0,
+      "participants": 48,
+      "questions": [
+        {
+          "answers": ["Finland", "Luxemburg", "Wales", "Noord-Ierland"],
+          "correct": 1,
+          "order": 1,
+          "percentages": [8, 71, 10, 10],
+          "text": "We starten met een citaat uit een biografie van Abe Lenstra. Vul het ontbrekende land in: \"Op 31 maart 1940 debuteerde hij in het Nederlands elftal, met een overigens teleurstellende 4-5 nederlaag tegen het in voetbalkringen onbetekenende (...).\""
+        },
+        {
+          "answers": ["scheidsrechtersbal", "vrije trap", "hoekschop", "aftrap"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [63, 17, 6, 15],
+          "text": "Wat ging vlak aan de openingsgoal van De Graafschap - SC Heerenveen door Arvid Smit van dit seizoen vooraf?"
+        },
+        {
+          "answers": ["MVV", "Roda JC", "Excelsior", "AZ"],
+          "correct": 3,
+          "order": 3,
+          "percentages": [2, 2, 15, 81],
+          "text": "Bij welke club speelde Mark Nygaard niet?"
+        },
+        {
+          "answers": ["HJK Helsinki", "FC Jazz", "Gaziantepspor", "Antalyaspor"],
+          "correct": 3,
+          "order": 4,
+          "percentages": [10, 23, 48, 19],
+          "text": "Wat past niet in het rijtje?"
+        },
+        {
+          "answers": ["Antoon", "Reinder", "Robert", "Gerrie"],
+          "correct": 1,
+          "order": 5,
+          "percentages": [10, 46, 21, 23],
+          "text": "Welke SC Heerenveen-speler werd geboren in Eesveen?"
+        },
+        {
+          "answers": ["Bert Zuurman", "André van Tuinen", "Ignacio Tuhuteru", "Jerry de Jong"],
+          "correct": 3,
+          "order": 6,
+          "percentages": [8, 25, 27, 40],
+          "text": "Welke speler past niet in dit rijtje?"
+        },
+        {
+          "answers": ["RCH", "Balk", "Dronrijp", "Friese Boys"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [52, 17, 6, 25],
+          "text": "Welke amateurclub dwong een replay af in het bekertoernooi tegen SC Heerenveen onder trainer Piet Buter?"
+        },
+        {
+          "answers": ["Yan Tax", "Bouke Oldenhof", "Jos Thie", "Ton Thie"],
+          "correct": 1,
+          "order": 8,
+          "percentages": [4, 40, 42, 15],
+          "text": "Door welke voormalige jeugdspeler werd het 'theater'-spektakel Abe! geschreven?"
+        },
+        {
+          "answers": ["Abe", "Kees Kist", "Piet Keur", "Henny Jonkman"],
+          "correct": 0,
+          "order": 9,
+          "percentages": [65, 6, 29, 0],
+          "text": "Hoe ziet Foppe de Haan het liefst een speler juichen na een doelpunt? \"Zoals (...). Die deed één hand omhoog, wuifde naar het publiek en liep terug naar de middellijn. Eenvoudig, dus. Het gaat om het moment dat je beseft dat je een goal kunt maken en dat de bal daadwerkelijk tegen de touwen gaat. Daar zit ongeveer een seconde tussen. Dát is de euforie.\""
+        },
+        {
+          "answers": ["Gert Jan Verbeek en Marten Dijk", "André de Jong en Lubbe van Dijk", "Stanley McDonald en René Groen", "Richard Goulooze en Pieter Bijl"],
+          "correct": 0,
+          "order": 10,
+          "percentages": [60, 10, 6, 23],
+          "text": "Wie poetsten de schade aangericht door Rudy Metz weer weg?"
+        }
+      ],
+      "year": 2003
+    },
+    {
+      "average": 3.9,
+      "month": 6,
+      "omitted": 0,
+      "participants": 33,
+      "questions": [
+        {
+          "answers": ["Thomas Haan", "Jaap de Blaauw", "Cor Woudstra", "Bert Hollander"],
+          "correct": 2,
+          "order": 1,
+          "percentages": [27, 6, 39, 27],
+          "text": "Wie is het buitenbeentje in dit rijtje overlopers?"
+        },
+        {
+          "answers": ["Wim Molenaar", "Jan Ploegh", "Jisk Liemburg", "Frans Wuyts"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [70, 18, 3, 9],
+          "text": "Welke slagersjongen uit Wolvega zei ooit: \"Dik Trom was een bijzonder kind. Nou, Abe was het ook.\""
+        },
+        {
+          "answers": ["Mario Vuskovic", "Paja Dolezar", "Nikola Golijanin", "Ronald Lepez"],
+          "correct": 1,
+          "order": 3,
+          "percentages": [45, 27, 21, 6],
+          "text": "Hoe heette de eerste full-prof van Heerenveen?"
+        },
+        {
+          "answers": ["4294", "4706", "5529", "3294"],
+          "correct": 0,
+          "order": 4,
+          "percentages": [24, 21, 15, 39],
+          "text": "Hoeveel toeschouwers trok Heerenveen gemiddeld in de competitie van 1982/83?"
+        },
+        {
+          "answers": ["een zakelijke verplichting", "een huwelijk", "een uit de hand gelopen hobby", "een passie voor het leven"],
+          "correct": 1,
+          "order": 5,
+          "percentages": [3, 45, 27, 24],
+          "text": "Vul Foppe de Haans uitspraak aan: \"Ik vergelijk mijn dienstverband met Heerenveen met ...\""
+        },
+        {
+          "answers": ["Rafael", "Theo Kussendrager", "Charly Kenter", "Gérard de Nooijer"],
+          "correct": 3,
+          "order": 6,
+          "percentages": [39, 6, 42, 12],
+          "text": "Aan welke oud-speler hoort de echte fan te denken bij de naam Yanilio?"
+        },
+        {
+          "answers": ["Lemmer", "Groningen", "Den Helder", "Rozenburg"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [30, 45, 12, 12],
+          "text": "Aan welke plaats behoor je te denken bij de namen Iraklis en Aberdeen?"
+        },
+        {
+          "answers": ["1979", "1983", "1987", "1991"],
+          "correct": 0,
+          "order": 8,
+          "percentages": [48, 33, 12, 6],
+          "text": "In april werd Jan Landman verheven tot Heer van Heerenveen vanwege zijn verdiensten voor de club. Sinds wanneer is hij voorzitter van Aktie '67?"
+        },
+        {
+          "answers": ["Marcus Allbäck", "Foppe de Haan", "Dennis de Nooijer", "Riemer van der Velde"],
+          "correct": 3,
+          "order": 9,
+          "percentages": [18, 27, 6, 48],
+          "text": "Over wie zegt Kees 't Hart in de Heerenveen-special van Hard Gras uit 2001: \"Hij is een ster temidden van de sterren, geeft iedereen het gevoel een ster te zijn, maar bepaalt wel zelf langs welke lijnen alles verloopt, hij windt mensen om zijn vinger.\""
+        },
+        {
+          "answers": ["0", "1", "2", "3"],
+          "correct": 2,
+          "order": 10,
+          "percentages": [12, 39, 42, 6],
+          "text": "Hoeveel nationale Fair Play Awards won SC Heerenveen in de jaren negentig van de vorige eeuw?"
+        }
+      ],
+      "year": 2003
+    },
+    {
+      "average": 4.1,
+      "month": 9,
+      "omitted": 0,
+      "participants": 59,
+      "questions": [
+        {
+          "answers": ["0", "1", "2", "3"],
+          "correct": 0,
+          "order": 1,
+          "percentages": [64, 20, 12, 3],
+          "text": "Met Hans Vonk en Antonio Correia telt de selectie twee Afrikanen dit jaar. Hoeveel niet-Europeanen spelen er naast het duo bij de club?"
+        },
+        {
+          "answers": ["FC Zwolle", "FC Groningen", "FC Den Bosch", "Emmen"],
+          "correct": 1,
+          "order": 2,
+          "percentages": [39, 34, 8, 19],
+          "text": "Maak het volgende rijtje af: SV Omhoog, SVZW, SC Emmeloord, SC Heerenveen, ..."
+        },
+        {
+          "answers": ["Kees Kist scoorde uit een penalty", "Na een fout van scheidsrechter Thomas scoorde Cambuur de gelijkmaker", "René Groen zat op de bank", "Er was dat jaar helemaal geen Friese derby"],
+          "correct": 2,
+          "order": 3,
+          "percentages": [14, 15, 22, 49],
+          "text": "Wat is niet waar over de Friese derby in Leeuwarden van eind 1986?"
+        },
+        {
+          "answers": ["voorzitter", "assistent-trainer", "jeugdtrainer", "clubarts"],
+          "correct": 3,
+          "order": 4,
+          "percentages": [7, 10, 20, 63],
+          "text": "Wat was een zekere Wiersma in de jaren tachtig bij Heerenveen?"
+        },
+        {
+          "answers": ["meer dan 150", "tussen 125 en 150", "tussen 100 en 125", "minder dan 100"],
+          "correct": 3,
+          "order": 5,
+          "percentages": [10, 15, 32, 42],
+          "text": "Hoeveel competitiegoals op het hoogste niveau scoorden de huidige selectiespelers samen voor buitenlandse clubs?"
+        },
+        {
+          "answers": ["Marcus Allback", "Gérard de Nooijer", "Niels Kokmeijer", "Romano Denneboom"],
+          "correct": 3,
+          "order": 6,
+          "percentages": [8, 41, 14, 37],
+          "text": "\"... wil andere trainer\", kopte Voetbal International op 3 april 2003. Welke speler stond op de puntjes?"
+        },
+        {
+          "answers": ["ruim 3", "ruim 2", "ruim 4", "ruim 1"],
+          "correct": 3,
+          "order": 7,
+          "percentages": [19, 54, 17, 10],
+          "text": "Hoeveel jaar in leeftijd scheelden de spelers die voor respectievelijk Niort en Yomiuri speelden en vervolgens samen bij Heerenveen belandden?"
+        },
+        {
+          "answers": ["1950", "1955", "1959", "1939"],
+          "correct": 0,
+          "order": 8,
+          "percentages": [27, 36, 36, 2],
+          "text": "In welk jaar speelden drie Friezen in het Nederlands elftal tegen Engeland B?"
+        },
+        {
+          "answers": ["Hennie Meijer", "Ruud Gullit", "Anthony Lurling", "Ruud van Nistelrooij"],
+          "correct": 1,
+          "order": 9,
+          "percentages": [34, 42, 5, 19],
+          "text": "Welke latere voetbal-ster scoorde namens de koploper en latere kampioen tweemaal tegen Heerenveen en zorgde er daarmee voor dat de Friezen de derde periode misliepen?"
+        },
+        {
+          "answers": ["Reinder Dolstra", "Rini Jurna", "Gert Jan Verbeek", "Gerard Wielaert"],
+          "correct": 2,
+          "order": 10,
+          "percentages": [19, 3, 69, 8],
+          "text": "Wie kreeg ooit drie keer geel tijdens het paasweekend?"
+        }
+      ],
+      "year": 2003
+    },
+    {
+      "average": 4.3,
+      "month": 11,
+      "omitted": 0,
+      "participants": 58,
+      "questions": [
+        {
+          "answers": ["Gerald Sibon", "Tom Sier", "Richard Knopper", "Ole Tobiasen"],
+          "correct": 0,
+          "order": 1,
+          "percentages": [38, 7, 50, 5],
+          "text": "Ajax won in oktober 1998 in Europees verband thuis met 2-1 van FC Porto. De winnende goal viel uit een penalty van Jari Litmanen. Op welke invaller was de voorafgaande overtreding gemaakt?"
+        },
+        {
+          "answers": ["Finland", "Zweden", "Denemarken", "Noorwegen"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [97, 3, 0, 0],
+          "text": "Voor welk land speelt Mika Väyrynen interlands?"
+        },
+        {
+          "answers": ["Aaldrik Engels", "Germ Hofma", "Abe Lenstra", "Piet Zwerver"],
+          "correct": 1,
+          "order": 3,
+          "percentages": [0, 36, 48, 16],
+          "text": "Volgens recent onderzoek van de Volkskrant was Wim Molenaar mogelijk de eerste speler die in de Nederlandse eredivisie scoorde uit bij Elinkwijk in 1954. Uit een assist van welke speler scoorde de Heerenvener dat doelpunt?"
+        },
+        {
+          "answers": ["Jan Kompaen", "Frans Wuyts", "Siem Plooyer", "Volgert Ris"],
+          "correct": 3,
+          "order": 4,
+          "percentages": [22, 21, 41, 16],
+          "text": "In 1955/1956 moest Heerenveen verder zonder Abe Lenstra die naar Enschede verhuisde. Wie was trainer van Heerenveen in dat nieuwe seizoen?"
+        },
+        {
+          "answers": ["Rafael van der Vaart", "Nikos Machlas", "John OBrien", "Nordin Wooter"],
+          "correct": 0,
+          "order": 5,
+          "percentages": [60, 29, 5, 5],
+          "text": "Welke Ajacied scoorde als enige in de 5-1 van oktober 2001?"
+        },
+        {
+          "answers": ["0", "1", "2", "3"],
+          "correct": 0,
+          "order": 6,
+          "percentages": [41, 41, 16, 2],
+          "text": "Hoeveel Intertoto-doelpunten scoorde Melchior Schoenmakers voor SC Heerenveen?"
+        },
+        {
+          "answers": ["DOS/Kampen", "Urk", "AFC", "Nesselande"],
+          "correct": 2,
+          "order": 7,
+          "percentages": [38, 19, 40, 3],
+          "text": "Bij welke amateurclub werd Guido Smits gescout?"
+        },
+        {
+          "answers": ["Jack de Gier", "Fred Grim", "Michael Mols", "Hennie Meijer"],
+          "correct": 3,
+          "order": 8,
+          "percentages": [14, 9, 34, 43],
+          "text": "In 1992/1993 was Cambuur de eerste tegenstander in de beker. Heerenveen was veel te sterk met 0-3. Wie stond bij de Leeuwarders niet in het veld?"
+        },
+        {
+          "answers": ["auto-ongeluk", "ziekte", "ouderdom", "trein-ongeluk"],
+          "correct": 1,
+          "order": 9,
+          "percentages": [40, 29, 17, 14],
+          "text": "Waardoor overleed de legendarische trainer Anton Dalhuysen?"
+        },
+        {
+          "answers": ["Simon Tichelaar", "Mindert Lenstra", "Anne Post", "Anne Piet Schaap"],
+          "correct": 3,
+          "order": 10,
+          "percentages": [17, 26, 26, 31],
+          "text": "Welke van onderstaande namen kwam nooit in het Heerenveen-bestuur voor?"
+        }
+      ],
+      "year": 2003
+    },
+    {
+      "average": 3.4,
+      "month": 12,
+      "omitted": 0,
+      "participants": 49,
+      "questions": [
+        {
+          "answers": ["Harris Huizingh en Sander van Gessel", "Daniel Jensen en Simon Karkov", "Wilco Hellinga en Jan Veenhof", "Gérard en Dennis de Nooijer"],
+          "correct": 0,
+          "order": 1,
+          "percentages": [63, 8, 20, 8],
+          "text": "Welke gecombineerde transfer van twee spelers naar SC Heerenveen werd teniet gedaan door een ernstige blessure?"
+        },
+        {
+          "answers": ["Allan Jepsen", "Børre Meinseth", "Mika Pulkkinen", "Daniel Berg Hestad"],
+          "correct": 3,
+          "order": 2,
+          "percentages": [14, 51, 22, 12],
+          "text": "Welke Scandinaviër nam eventjes afscheid van prof-voetbal om voor zijn zieke zoontje te zorgen?"
+        },
+        {
+          "answers": ["Niemand bij de club was blij voor hem", "De kille ontvangst door de Oranje-spelers", "Er werd gescholden in het veld", "Hij dacht het niveau niet aan te kunnen"],
+          "correct": 0,
+          "order": 3,
+          "percentages": [22, 33, 27, 18],
+          "text": "Wat vond Germ Hofma destijds vreselijk aan zijn uitnodiging voor Oranje?"
+        },
+        {
+          "answers": ["Daniel Jensen", "Dumitru Mitrita", "Harry Decheiver", "Rafael Viera Pires"],
+          "correct": 0,
+          "order": 4,
+          "percentages": [41, 12, 16, 31],
+          "text": "Met wie verbind jij Juanma, Juanmi en Juan Esnaider?"
+        },
+        {
+          "answers": ["Wim Molenaar", "Jelle van der Knoop", "Theo Eikenaar", "Jaap Hielkema"],
+          "correct": 0,
+          "order": 5,
+          "percentages": [49, 14, 12, 24],
+          "text": "Wie leerde zijn vrouw Clara kennen terwijl hij bij Abe Lenstra in de kost was?"
+        },
+        {
+          "answers": ["Klaas Oenema", "Marten van der Tuin", "Gozen Hartkamp", "Hans van der Horst"],
+          "correct": 3,
+          "order": 6,
+          "percentages": [24, 29, 16, 31],
+          "text": "Wij roepen AA-Drink en u denkt...?"
+        },
+        {
+          "answers": ["Trabzonspor", "Iraklis", "Osasuna", "Ipswich Town"],
+          "correct": 1,
+          "order": 7,
+          "percentages": [49, 12, 20, 18],
+          "text": "Tegen welke oefentegenstander liep SC Heerenveen de grootste averij op?"
+        },
+        {
+          "answers": ["Leeroy Echteld", "Ger Schaap", "Roberto Straal", "Maarten de Jong"],
+          "correct": 3,
+          "order": 8,
+          "percentages": [22, 18, 10, 49],
+          "text": "Welke speler ontbreekt in deze basis-opstelling, van een duel dat na verlenging door SC Heerenveen werd gewonnen: Aldo Swager, Geert Huitema, René Groen, Michel Doesburg, \r\nGuido Smits, (...), Marco Roelofsen, Jan de Visser, Erik Tammer, Tony Alberda, Erik Regtop."
+        },
+        {
+          "answers": ["jaren '60", "jaren '70", "jaren '80", "jaren '90"],
+          "correct": 3,
+          "order": 9,
+          "percentages": [10, 57, 18, 14],
+          "text": "In welk decennium speelde Eelke van der Heide voor Heerenveen?"
+        },
+        {
+          "answers": ["1951", "1952", "1953", "1954"],
+          "correct": 1,
+          "order": 10,
+          "percentages": [20, 43, 27, 10],
+          "text": "Wat was het geboortejaar van de man die zei: \"Ik stond bij Oranje natuurlijk in de schaduw van Johan Cruijff\" en \"Mensen zeiden wel dat ik op Gerd Müller leek. Maar dat is onzin. Ik was veel beweeglijker.\""
+        }
+      ],
+      "year": 2003
+    },
+    {
+      "average": 3.9,
+      "month": 1,
+      "omitted": 0,
+      "participants": 42,
+      "questions": [
+        {
+          "answers": ["Foppe de Haan", "Riemer van der Velde", "Gert Jan Verbeek", "Henk Hoekstra"],
+          "correct": 3,
+          "order": 1,
+          "percentages": [12, 67, 5, 17],
+          "text": "Wie sprak bij de komst van Petter Hansson naar Heerenveen de volgende woorden: \"We are certain that Petter will make an impact and I wouldn't be surprised if he soon played for the Swedish national side again\""
+        },
+        {
+          "answers": ["Piet Keur", "Johan Zuidema", "Harry Decheiver", "Boudewijn Pahlplatz"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [29, 17, 17, 38],
+          "text": "Welke aanvaller met een Heerenveen-verleden is tevens de enige FC Twente-speler die ooit vijf doelpunten in één duel maakte?"
+        },
+        {
+          "answers": ["Ed de Goey", "Carlo l'Ami", "John Karelse", "Ruud Hesp"],
+          "correct": 0,
+          "order": 3,
+          "percentages": [36, 36, 12, 17],
+          "text": "Welke doelman zorgde hoogst persoonlijk voor de uitschakeling van SC Heerenveen in het bekertoernooi van 1994/1995?"
+        },
+        {
+          "answers": ["Alex Pastoor", "Aldo Swager", "André van Tuinen", "Arjan Ebbinge"],
+          "correct": 1,
+          "order": 4,
+          "percentages": [12, 52, 17, 19],
+          "text": "Dat Roden ons Tieme Klompe bracht, weten we allemaal. Maar welke oud-voetballer werd ook in deze plaats geboren?"
+        },
+        {
+          "answers": ["Vitesse, FC Den Haag en NEC", "De Graafschap, RKC en NAC", "Volendam, Willem II en DS '79", "Heracles, FC VVV en PEC Zwolle"],
+          "correct": 0,
+          "order": 5,
+          "percentages": [50, 33, 10, 7],
+          "text": "In 1990 promoveerde SC Heerenveen met SVV naar de eredivisie. Het jaar ervoor hadden drie clubs de grote sprong gemaakt. Welke?"
+        },
+        {
+          "answers": ["108", "154", "200", "225"],
+          "correct": 3,
+          "order": 6,
+          "percentages": [5, 62, 12, 21],
+          "text": "In de oorlogsjaren '42, '43 en '44 behaalde Heerenveen met Abe Lenstra driemaal het kampioenschap in de Eerste Klasse Noord. Hoeveel doelpunten maakten de Friezen in die 54 duels?"
+        },
+        {
+          "answers": ["Opnieuw Luxemburg", "Saar", "België", "West-Duitsland"],
+          "correct": 2,
+          "order": 7,
+          "percentages": [17, 2, 60, 21],
+          "text": "Al tijdens zijn debuut tegen Luxemburg scoorde Abe Lenstra zijn eerste interland-goal. Maar het duurde even voordat hij in één duel vaker dan eenmaal scoorde. Tegen wie gebeurde dat?"
+        },
+        {
+          "answers": ["Be Quick en Hoogezand", "Sneek en Friesland", "Leeuwarden en GVAV", "Achilles en FVC"],
+          "correct": 0,
+          "order": 8,
+          "percentages": [43, 17, 19, 21],
+          "text": "\"9.  Heerenveen  18   4  4 10  12  34-58\" luidde de eerste prestatie van de club op het niveau van de Eerste Klasse Noord. Welke clubs eindigden in die jaargang als eerste en laatste van de tien deelnemers?"
+        },
+        {
+          "answers": ["De crack van Victoria", "De koppige linksbinnen: om het bruine monster", "Hiep hiep hoera voor Abe", "Hoe pootige Abe beroepsvoetballer werd"],
+          "correct": 0,
+          "order": 9,
+          "percentages": [26, 43, 14, 17],
+          "text": "Hoe heette het boek waarmee de Friese auteur Fenno L. Schoustra een ode aan Abe Lenstra wilde geven?"
+        },
+        {
+          "answers": ["0", "1", "2", "4"],
+          "correct": 3,
+          "order": 10,
+          "percentages": [7, 2, 31, 60],
+          "text": "Hoeveel doelpunten scoorde Ali Elkhattabi in de drie bekerduels die hij voor SC Heerenveen speelde tegen Sneek, Drachtster Boys en FC Twente?"
+        }
+      ],
+      "year": 2004
+    },
+    {
+      "average": 4.3,
+      "month": 2,
+      "omitted": 0,
+      "participants": 40,
+      "questions": [
+        {
+          "answers": ["Tieme Klompe", "Marco Roelofsen", "Klaas Justus de Vries", "Karst de Ruiter"],
+          "correct": 0,
+          "order": 1,
+          "percentages": [85, 10, 3, 3],
+          "text": "Wie heeft Bedrijfskunde gestudeerd aan de Rijksuniversiteit van Groningen?"
+        },
+        {
+          "answers": ["Gerald Sibon", "Piet Keur", "Brutil Hosé", "Jószef Kiprich"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [48, 8, 30, 15],
+          "text": "In 1998/99 stond SC Heerenveen tijdelijk op de tweede plaats, toen Dennis de Nooijer met een blessure wegviel. Welke bankzitter wilde Foppe als vervanger aantrekken?"
+        },
+        {
+          "answers": ["Arp Hiemstra", "Ido Bunnig", "Tonny Lupker", "Gerben Voolstra"],
+          "correct": 3,
+          "order": 3,
+          "percentages": [20, 25, 20, 35],
+          "text": "Wie speelde niet in de jaren zestig voor Heerenveen?"
+        },
+        {
+          "answers": ["Emmanuel Ebiede", "Tony Alberda", "Fré Adema", "Dorin Mitrita"],
+          "correct": 3,
+          "order": 4,
+          "percentages": [38, 20, 5, 38],
+          "text": "Over wie zei Foppe de Haan in de biografie van Eppie Dam: \"Och man, het was soms net een dood vogeltje\"?"
+        },
+        {
+          "answers": ["Maurits", "Theole", "Zwartemeer", "Be Quick"],
+          "correct": 0,
+          "order": 5,
+          "percentages": [8, 5, 33, 55],
+          "text": "Tegen welke illustere club scoorde Heerenveen nooit meer dan vijfmaal in het begin van de jaren vijftig?"
+        },
+        {
+          "answers": ["Germ Hofma", "Jan Bosscha", "Marten Brandsma", "Gé Brandsma"],
+          "correct": 0,
+          "order": 6,
+          "percentages": [40, 13, 33, 15],
+          "text": "Van wie is de volgende uitspraak: \"Ons elftal bestond uit tien werkers. Eén man deed niks, Abe. Zijn slimheid was: als ik niet te veel loop ben ik altijd fit voor dé actie. Welk had hij een goede linksbuiten nodig en dat was ik. Wat heeft hij mij ook laten lopen!\""
+        },
+        {
+          "answers": ["De midvoor van Heerenveen", "De vader van Kick Wilstra", "De burgemeester van Heerenveen", "De voorzitter van Heerenveen"],
+          "correct": 1,
+          "order": 7,
+          "percentages": [15, 57, 10, 18],
+          "text": "Wie was Fabe Wilstra?"
+        },
+        {
+          "answers": ["Spijkenisse", "Capelle", "Cadier en Keer", "Delft"],
+          "correct": 0,
+          "order": 8,
+          "percentages": [45, 33, 20, 3],
+          "text": "Voor de bekerfinale tegen Roda JC bereidde de Friese selectie zich voor in een sfeerloos hotel. In welke plaats stond dit onderkomen?"
+        },
+        {
+          "answers": ["PSV", "Feyenoord", "Den Bosch", "Fortuna Sittard"],
+          "correct": 2,
+          "order": 9,
+          "percentages": [23, 13, 50, 15],
+          "text": "Ook in 1993 had Heerenveen al de bekerfinale gehaald, waarin Ajax met 6-2 te sterk was. Wie was in de halve finale verslagen?"
+        },
+        {
+          "answers": ["Italië", "Griekenland", "Luxemburg", "Portugal"],
+          "correct": 0,
+          "order": 10,
+          "percentages": [28, 57, 5, 10],
+          "text": "Nog niet zo lang geleden won SC Heerenveen met 4-1 van Lierse SK. Uit welk land kwam de scheidsrechter ook weer?"
+        }
+      ],
+      "year": 2004
+    },
+    {
+      "average": 3.9,
+      "month": 3,
+      "omitted": 0,
+      "participants": 40,
+      "questions": [
+        {
+          "answers": ["FC Vlaardingen", "SC Amersfoort", "Volendam", "Telstar"],
+          "correct": 3,
+          "order": 1,
+          "percentages": [18, 18, 23, 43],
+          "text": "Reinder Dolstra stond niet bekend als een technische voetballer. 'Dollie' ging meestal als een dolle tekeer. Maar eenmaal scoorde hij na een prachtige solo, waarna Heerenveen met 6-0 won en de nacompetitie bereikte. Wie was de tegenstander?"
+        },
+        {
+          "answers": ["Daniel Jensen", "Mika Nurmela", "Harris Huizingh", "Anthony Lurling"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [70, 10, 8, 13],
+          "text": "Onvergetelijk was de overwinning van SC Heerenveen thuis op Olympiakos Piraeus in de Champions League. Wie scoorde het enige doelpunt van dat duel?"
+        },
+        {
+          "answers": ["Clavan", "Kuneman", "Wilkes", "Michels"],
+          "correct": 0,
+          "order": 3,
+          "percentages": [20, 13, 48, 20],
+          "text": "Een van Abe's meest gedenkwaardige interlands was het 6-7 verlies tegen België in november '51. Wie mist in deze opstelling? Kraak, Odenthal, Schijvenaar, Wiertz, Terlouw, Biesbrouck, Van den Bogert, Lenstra, van Melis, Bennaars, ..."
+        },
+        {
+          "answers": ["Rikkert Lacrois", "Cees Kist", "Teun Kist", "Kees Kist"],
+          "correct": 2,
+          "order": 4,
+          "percentages": [0, 13, 43, 45],
+          "text": "Wie schoot ooit in de topper tegen Haarlem een penalty verwoestend hard dwars door het doelnet?"
+        },
+        {
+          "answers": ["Bouma", "Bosman", "Fabriek", "de Boer"],
+          "correct": 0,
+          "order": 5,
+          "percentages": [28, 30, 20, 23],
+          "text": "Toen Foppe de Haan bij Heerenveen binnenkwam, trainde hij de B- en A-jeugd. Wie volgde hij in die hoedanigheid op?"
+        },
+        {
+          "answers": ["Denneboom, Talan en Klompe", "Jepsen, Heldens en Holm", "Håkansson, Lurling en Tzvetkov", "Kolk, Tuhuteru en Ebbinge"],
+          "correct": 2,
+          "order": 6,
+          "percentages": [8, 15, 30, 48],
+          "text": "In 1999-2000 verloor SC Heerenveen thuis van NEC om de beker, ondanks de vroege openingsgoal van Romano Denneboom. Hoe heetten de drie invallers in dat duel?"
+        },
+        {
+          "answers": ["De eerste wedstrijd in de eredivisie", "De eerste bekerfinale", "De promotiewedstrijd in de nacompetitie", "De laatste wedstrijd in de eerste divisie"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [48, 5, 30, 18],
+          "text": "Van welke wedstrijd is dit de opstelling: Aldo Swager, Richard Goulooze, René Groen, Arno Hofstede, Joop Gall, André de Jong, Maarten de Jong, Ger Schaap, Harry Decheiver, Lubbe van Dijk, Gertjan Verbeek."
+        },
+        {
+          "answers": ["geen enkele", "Kees Kist", "Jan van Beveren", "Pleun Strik"],
+          "correct": 0,
+          "order": 8,
+          "percentages": [30, 65, 3, 3],
+          "text": "In 1979 speelde Oranje een FIFA jubileumduel tegen Argentinië. Na 0-0 wonnen de Zuid-Amerikanen via penalties. Welke speler met een Heerenveen-verleden speelde mee?"
+        },
+        {
+          "answers": ["Ajax", "PSV", "Feyenoord", "Cambuur"],
+          "correct": 1,
+          "order": 9,
+          "percentages": [15, 33, 15, 38],
+          "text": "Max Houttuin scoorde in zijn ruim zestig duels in blauw en wit slechts driemaal. Tegen Sneek, AZ en... ?"
+        },
+        {
+          "answers": ["Frank Rijkaard (eigen doel)", "Gertjan Verbeek", "Edwin Huizinga", "Tom Sier"],
+          "correct": 1,
+          "order": 10,
+          "percentages": [18, 43, 5, 35],
+          "text": "In de competitie van 93/94 verloor SC Heerenveen het laatste uitduel eervol bij Ajax: 2-1. Wie maakte in de slotfase het Friese doelpunt?"
+        }
+      ],
+      "year": 2004
+    },
+    {
+      "average": 4,
+      "month": 4,
+      "omitted": 0,
+      "participants": 37,
+      "questions": [
+        {
+          "answers": ["2", "4", "6", "8"],
+          "correct": 1,
+          "order": 1,
+          "percentages": [8, 76, 16, 0],
+          "text": "Hoeveel jaar speelde Erik Regtop bij SC Heerenveen?"
+        },
+        {
+          "answers": ["Voolstra", "Veenstra", "Vaatstra", "Vlietstra"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [24, 57, 14, 5],
+          "text": "Wie was de doelman van Heerenveen in de befaamde 6-5 tegen Ajax?"
+        },
+        {
+          "answers": ["Maarten de Jong", "René van der Gijp", "Kees Kist", "Harry Decheiver"],
+          "correct": 0,
+          "order": 3,
+          "percentages": [43, 24, 14, 19],
+          "text": "Wie werd wel de Hugo Sanchez van Nederland genoemd?"
+        },
+        {
+          "answers": ["Zjordanja", "Polley", "Andone", "Nygaard"],
+          "correct": 2,
+          "order": 4,
+          "percentages": [11, 8, 62, 19],
+          "text": "Welke aanwinst plukte SC Heerenveen destijds uit Spanje vandaan?"
+        },
+        {
+          "answers": ["Tony Alberda", "Erik Tammer", "Jan de Jonge", "Jan Schulting"],
+          "correct": 0,
+          "order": 5,
+          "percentages": [62, 30, 5, 3],
+          "text": "Wie scoorde drie keer tegen Ajax in het met 8-3 verloren bekerduel?"
+        },
+        {
+          "answers": ["Brazilië", "Roemenië", "Spanje", "Friesland"],
+          "correct": 3,
+          "order": 6,
+          "percentages": [19, 49, 3, 30],
+          "text": "Waar scoutte de staf van SC Heerenveen Magu?"
+        },
+        {
+          "answers": ["De Wijkers", "De Mosveld-baby's", "De Kraaien", "De Tanks"],
+          "correct": 1,
+          "order": 7,
+          "percentages": [38, 14, 27, 22],
+          "text": "In het oorlogsjaar 1944 verloor Heerenveen met 4-1 en 1-5 van de latere kampioen. Welke bijnaam had deze roemruchte club?"
+        },
+        {
+          "answers": ["1959", "1964", "1969", "1974"],
+          "correct": 2,
+          "order": 8,
+          "percentages": [5, 32, 54, 8],
+          "text": "Welk geboortejaar verbind je aan de speler die in dienst speelde van Cannes, Austria Lustenau en Omniworld?"
+        },
+        {
+          "answers": ["Elkhattabi en Korneev", "Pahlplatz en Echteld", "Talan en Tomasson", "Sier en Nygaard"],
+          "correct": 0,
+          "order": 9,
+          "percentages": [24, 16, 46, 14],
+          "text": "Via Giovanni van Bronckhorst, Ronald Koeman, Pablo Sánchez en Gaston Taument kwam de thuisploeg op voorsprong. Wie maakten de score nog enigszins dragelijk voor SC Heerenveen?"
+        },
+        {
+          "answers": ["5", "4", "3", "2"],
+          "correct": 3,
+          "order": 10,
+          "percentages": [46, 24, 16, 14],
+          "text": "In 1948 speelde Abe Lenstra vijf interlands. In hoeveel van die duels scoorde hij?"
+        }
+      ],
+      "year": 2004
+    },
+    {
+      "average": 4.2,
+      "month": 5,
+      "omitted": 0,
+      "participants": 32,
+      "questions": [
+        {
+          "answers": ["Ivan Tzvetkov", "Mika Väyrynen", "Hannu Haarala", "Stefan Selakovic"],
+          "correct": 3,
+          "order": 1,
+          "percentages": [9, 13, 9, 69],
+          "text": "Wie werd in zijn laatste seizoen bij zijn oude club, voordat hij naar Heerenveen kwam, topscorer van zijn land?"
+        },
+        {
+          "answers": ["Valencia", "Heraklion", "Antalya", "Rabat"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [38, 38, 19, 6],
+          "text": "Het laatste officiële duel dat Tieme Klompe in het blauw-wit van 't eerste speelde, ging met 1-2 verloren. In welke Mediterrane stad werd de doelpuntenmaker van de enige Friese treffer geboren?"
+        },
+        {
+          "answers": ["Rintje Ritsma", "Hilbert van der Duim", "Ids Postma", "Gerard Kemkers"],
+          "correct": 2,
+          "order": 3,
+          "percentages": [56, 6, 34, 3],
+          "text": "Foppe de Haan speelde een rol in Friese film over de jeugdboekenserie De Kameleon. Welke bekende Nederlander komt er ook even langs bij de smid om zijn schaatsen te laten slijpen?"
+        },
+        {
+          "answers": ["Schippers en Huizinga", "Doesburg en Hellinga", "Groen en De Jong", "Pot en Meyninger"],
+          "correct": 0,
+          "order": 4,
+          "percentages": [47, 16, 3, 34],
+          "text": "Een van de meest doelpuntrijke duels die SC Heerenveen in de eredivisie afwerkte, was de uitwedstrijd bij FC Twente in 1994/1995: 4-3. Welke twee, nu anonieme, invallers verschenen destijds op het wedstrijdformulier?"
+        },
+        {
+          "answers": ["0", "1", "2", "4"],
+          "correct": 3,
+          "order": 5,
+          "percentages": [0, 31, 47, 22],
+          "text": "In hoeveel kalenderjaren gebeurde het dat Abe Lenstra in alle interland-duels van dat jaar scoorde waarin hijzelf speelde?"
+        },
+        {
+          "answers": ["0", "1", "2", "4"],
+          "correct": 0,
+          "order": 6,
+          "percentages": [88, 6, 3, 3],
+          "text": "In het seizoen 2000/2001 was Anthony Lurling clubtopscorer met 12 competitiegoals en 3 in de beker. Hoeveel scoorde hij er eigenlijk in de Champions League?"
+        },
+        {
+          "answers": ["AC Milan", "Herfølge", "Real Murcia", "Veendam"],
+          "correct": 1,
+          "order": 7,
+          "percentages": [44, 9, 19, 28],
+          "text": "Sneek-Heerenveen 3-6, behalve Elkhattabi scoorde nog iemand tweemaal voor de Heerenveners. Bij welke club speelt dat voormalige talent nu?"
+        },
+        {
+          "answers": ["afstandschot", "kopbal", "vrije trap, uit overtreding na solo", "penalty"],
+          "correct": 3,
+          "order": 8,
+          "percentages": [16, 25, 31, 28],
+          "text": "Op 27 oktober 1951 speelde het nietige Oranje een interland tegen Finland. Het werd 4-4, mede dankzij Abe Lenstra die in de 34e minuut de 1-1 op het bord bracht. Hoe?"
+        },
+        {
+          "answers": ["Winston Bogarde", "André Ooijer", "Ed de Goeij", "Jerrel Hasselbaink"],
+          "correct": 2,
+          "order": 9,
+          "percentages": [9, 19, 34, 38],
+          "text": "Jeffrey Talan behoorde tot de voorlopige 26-koppige Oranje-selectie voor Euro 2000, maar was de eerste afvaller door een blessure. Hieronder staan de overige drie afvallers. Wie hoort er niet tussen?"
+        },
+        {
+          "answers": ["1-2-3", "2-3-1", "3-2-1", "3-1-2"],
+          "correct": 3,
+          "order": 10,
+          "percentages": [28, 19, 6, 47],
+          "text": "Plaats in de juiste chronologische volgorde:\r\n1. Heerenveen wordt officieel SC Heerenveen.\r\n2. Abgar Barsom wordt geboren.\r\n3. Thuisduel tegen FC Groningen wordt 1-1 via goals van Seegers en Van Dijk."
+        }
+      ],
+      "year": 2004
+    },
+    {
+      "average": 4.5,
+      "month": 7,
+      "omitted": 0,
+      "participants": 24,
+      "questions": [
+        {
+          "answers": ["Griekenland", "China", "Australië", "Brazilië"],
+          "correct": 1,
+          "order": 1,
+          "percentages": [4, 83, 8, 4],
+          "text": "Foppe de Haan gaat in zijn nieuwe baan jonge Oranje-gasten naar de Olympische Spelen van 2008 loodsen. Waar zijn die Spelen eigenlijk?"
+        },
+        {
+          "answers": ["Youssouf Hersi", "Danny Hesp", "Anthony Lurling", "Ole Tobiasen"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [83, 8, 4, 4],
+          "text": "Wie greep in maart Jesper Håkansson bij de keel en werd daarvoor naderhand door de KNVB geschorst?"
+        },
+        {
+          "answers": ["Hij speelde bij FC Sloterplas en FC Hilversum", "Hij is geboren in Amsterdam in 1966", "Hij speelde samen met Gertjan Verbeek", "Hij stond van 1987 tot 1990 onder contract bij Heerenveen"],
+          "correct": 3,
+          "order": 3,
+          "percentages": [17, 29, 17, 38],
+          "text": "Wat is niet waar over Stanley MacDonald?"
+        },
+        {
+          "answers": ["Janke Suierveld", "Hiltje Wisman", "Chrisje Kruisinga", "Willeke Vaessens"],
+          "correct": 0,
+          "order": 4,
+          "percentages": [46, 25, 17, 13],
+          "text": "Hoe heette Abe's moeder eigenlijk?"
+        },
+        {
+          "answers": ["FC Groningen", "Cambuur Leeuwarden", "FC Zwolle", "Emmen"],
+          "correct": 0,
+          "order": 5,
+          "percentages": [63, 17, 8, 13],
+          "text": "Stormvogels/Telstar wilde na afgelopen seizoen niet door met huurling Mark-Jan Fledderus. Eén club wilde hem wel op amateurbasis overnemen van SC Heerenveen. Welke?"
+        },
+        {
+          "answers": ["Bremen", "Groningen", "Hannover", "Hamburg"],
+          "correct": 2,
+          "order": 6,
+          "percentages": [29, 29, 29, 13],
+          "text": "Al na het seizoen 1936/1937 werd Abe Lenstra uitgenodigd voor zijn eerste internationale duel. Noord-Nederland trad aan tegen Noord-Duitsland. Waar?"
+        },
+        {
+          "answers": ["Daniel Jensen", "Jesper Håkansson", "Purrel Fränkel, René Bot en Marcus Allbäck", "Daniel Jensen en Marcus Allbäck"],
+          "correct": 1,
+          "order": 7,
+          "percentages": [8, 17, 4, 71],
+          "text": "Wie scoorde(n) in het laatste gewonnen competitieduel dat Jeffrey Talan speelde?"
+        },
+        {
+          "answers": ["0", "1", "2", "3"],
+          "correct": 2,
+          "order": 8,
+          "percentages": [8, 38, 50, 4],
+          "text": "Hoeveel spelers met een Grieks voetbalverleden stonden in de basis bij het Amstel Cup duel tussen SC Heerenveen en NEC afgelopen seizoen?"
+        },
+        {
+          "answers": ["geen", "5,7", "6,3", "7,0"],
+          "correct": 1,
+          "order": 9,
+          "percentages": [8, 21, 67, 4],
+          "text": "Drie duels speelde Erik Edman op het afgelopen EK voor Zweden. Welke gemiddelde beoordelingen kreeg hij daarvoor van Voetbal International?"
+        },
+        {
+          "answers": ["Haagsche Post", "Trouw (Amsterdamse editie)", "Hengelo's Dagblad", "Nieuwe Rotterdamsche Courant"],
+          "correct": 0,
+          "order": 10,
+          "percentages": [17, 33, 33, 17],
+          "text": "\"Een ander sjouwde, ik liet de bal het werk doen\", zei Abe Lenstra in 1964 in een Nederlandse krant. Welke?"
+        }
+      ],
+      "year": 2004
+    },
+    {
+      "average": 3.6,
+      "month": 8,
+      "omitted": 0,
+      "participants": 48,
+      "questions": [
+        {
+          "answers": ["Georgios Samaras", "Youssouf Hersi", "Oguzhan Türk", "Thomas Prager"],
+          "correct": 0,
+          "order": 1,
+          "percentages": [40, 19, 25, 17],
+          "text": "Welke speler heeft het langst lopende contract in de huidige selectie?"
+        },
+        {
+          "answers": ["0", "2", "4", "7"],
+          "correct": 3,
+          "order": 2,
+          "percentages": [29, 27, 27, 17],
+          "text": "Hoeveel competitieduels speelde die verdediger geboren in Schoonebeek in totaal voor SC Heerenveen van 2001 tot 2003?"
+        },
+        {
+          "answers": ["Johan Cruijff", "Leo Beenhakker", "Fritz Korbach", "Rob Jacobs"],
+          "correct": 1,
+          "order": 3,
+          "percentages": [6, 44, 50, 0],
+          "text": "Een bekende voetbaltrainer noemde de uitwedstrijd in Heerenveen eens \"een dagje naar Riemer en Annie\". Wie was die trainer?"
+        },
+        {
+          "answers": ["Jacob de Vries", "René van der Weij", "Antonio Correia", "Maceo Rigters"],
+          "correct": 3,
+          "order": 4,
+          "percentages": [13, 42, 10, 35],
+          "text": "Welke afdanker van vorig seizoen speelde eind juli op proef mee bij Mansfield Town tegen Wolverhampton Wanderers?"
+        },
+        {
+          "answers": ["1960", "1963", "1967", "1970"],
+          "correct": 3,
+          "order": 5,
+          "percentages": [8, 46, 21, 25],
+          "text": "In november 1990 verloor SC Heerenveen met 1-4 van Ajax. In welk jaar werd de speler geboren die ontbreekt in deze opstelling: Aldo Swager, Richard Goulooze, René Groen, Arno Hofstede, Joop Gall, (...), Harry Decheiver, Maarten de Jong, André de Jong, Lubbe van Dijk en Gertjan Verbeek."
+        },
+        {
+          "answers": ["Regillio Nooitmeer", "Hugo Roepel", "Lionel Lord", "Romeo Wouden"],
+          "correct": 2,
+          "order": 6,
+          "percentages": [4, 6, 50, 40],
+          "text": "Zoals bekend spelen Dennis en Gérard komend seizoen voor FC Dordrecht. Welke Zeeuw met een Heerenveen-verleden is daar zojuist vertrokken?"
+        },
+        {
+          "answers": ["Udinese", "Bayern München", "FC Porto", "Celtic"],
+          "correct": 1,
+          "order": 7,
+          "percentages": [15, 42, 23, 21],
+          "text": "Nadat Bordeaux in 1995 SC Heerenveen uitschakelde in de Intertoto Cup, kwalificeerden de Fransen zich voor de UEFA Cup waarin ze zelfs de finale haalden. Welke club was daarin te sterk voor Zidane en consorten?"
+        },
+        {
+          "answers": ["9", "13", "17", "21"],
+          "correct": 1,
+          "order": 8,
+          "percentages": [27, 48, 23, 2],
+          "text": "Hoeveel competitiegoals scoorde die voormalige pupil van Nooitgedacht eigenlijk voor Heerenveen?"
+        },
+        {
+          "answers": ["Mario Been", "Prince Polley", "David Damman", "Radoslav Samardzic"],
+          "correct": 0,
+          "order": 9,
+          "percentages": [17, 27, 31, 25],
+          "text": "In tegenstelling tot SC Heerenveen moesten Valencia en Olympique Lyon in 2000 kwalificatieduels spelen om tot de Champions League door te dringen. De Spanjaarden schakelden in de 3e voorronde een club uit waar een oud-speler van SC Heerenveen nog voetbalde. Over welke speler hebben we het hier?"
+        },
+        {
+          "answers": ["Die waarin hij negen keer noordelijk kampioen werd", "Die in Oranje, behalve de eerste paar", "Die onder trainer Syd Castle", "Die in Enschede"],
+          "correct": 0,
+          "order": 10,
+          "percentages": [44, 6, 21, 29],
+          "text": "Wat was volgens eega Hil de mooiste voetbaltijd van Abe Lenstra?"
+        }
+      ],
+      "year": 2004
+    },
+    {
+      "average": 3.4,
+      "month": 9,
+      "omitted": 0,
+      "participants": 40,
+      "questions": [
+        {
+          "answers": ["België", "Slovenië", "Spanje", "Nederland"],
+          "correct": 3,
+          "order": 1,
+          "percentages": [28, 18, 13, 43],
+          "text": "In welk land behaalde SC Heerenveen vorig seizoen de laatste Intertoto-overwinning?"
+        },
+        {
+          "answers": ["Anthony Lurling", "Dorin Mitrita", "Joop Gall", "Marcus Allbäck"],
+          "correct": 1,
+          "order": 2,
+          "percentages": [18, 57, 20, 5],
+          "text": "Wie zei ooit: \"Mijn lengte is een groot nadeel. Als ik wat groter zou zijn, zou ik nog meer uit mijn loopbaan kunnen halen\""
+        },
+        {
+          "answers": ["Tieme Klompe", "Johan Hansma", "Arek Radomski", "Petter Hansson"],
+          "correct": 0,
+          "order": 3,
+          "percentages": [53, 28, 8, 13],
+          "text": "Wie maakte hands voorafgaand aan Ilie's penalty?"
+        },
+        {
+          "answers": ["Ernst Happel", "Rinus Michels", "Jan Zwartkruis", "Frantisek Fadrhonc"],
+          "correct": 0,
+          "order": 4,
+          "percentages": [40, 23, 33, 5],
+          "text": "In werkelijkheid debuteerde Kees Kist in Oranje onder George Knobel, maar wie dacht Kist later zelf dat hem voor het eerst voor het Nederlands Elftal had geselecteerd?"
+        },
+        {
+          "answers": ["Harry Decheiver", "Gertjan Verbeek", "Arno Hofstede", "Lubbe van Dijk"],
+          "correct": 0,
+          "order": 5,
+          "percentages": [15, 63, 15, 8],
+          "text": "Winand van Loon kreeg rood toen hij de doorgebroken Lubbe van Dijk neerhaalde. Wie werd aan Friese zijde uit het veld gestuurd door scheidsrechter Uilenberg?"
+        },
+        {
+          "answers": ["Hij speelde drie verschillende periodes voor Haarlem", "Hij speelde nul interlands", "Hij scoorde meer dan tien keer in zijn Feyenoord-periode", "Hij scoorde nooit meer dan één keer tegen FC Utrecht"],
+          "correct": 3,
+          "order": 6,
+          "percentages": [8, 33, 25, 35],
+          "text": "Wat is niet waar over Piet Keur?"
+        },
+        {
+          "answers": ["0-0", "0-1", "4-0", "4-1"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [10, 65, 20, 5],
+          "text": "In 1999 won SC Heerenveen met 4-1 van RKC, met een uitblinkende Anthony Lurling. De Friezen hadden één keer eerder in de eredivisiehistorie met die cijfers van de Waalwijkers gewonnen. Wat was toen de ruststand?"
+        },
+        {
+          "answers": ["Hammarby IF", "Ajax", "Feyenoord", "West Ham United"],
+          "correct": 1,
+          "order": 8,
+          "percentages": [20, 25, 20, 35],
+          "text": "Tegen wie speelde Allan Jepsen niet?"
+        },
+        {
+          "answers": ["Heerenveen natuurlijk", "Leeuwarden", "Enschede", "Gorredijk"],
+          "correct": 0,
+          "order": 9,
+          "percentages": [48, 5, 13, 35],
+          "text": "In welke plaats werd Abe Lenstra eigenlijk geboren?"
+        },
+        {
+          "answers": ["5-0", "6-0", "7-0", "8-0"],
+          "correct": 0,
+          "order": 10,
+          "percentages": [13, 48, 30, 10],
+          "text": "Met welke cijfers verloor Boy Nijgh op 9 juni 2001?"
+        }
+      ],
+      "year": 2004
+    },
+    {
+      "average": 4.4,
+      "month": 10,
+      "omitted": 0,
+      "participants": 47,
+      "questions": [
+        {
+          "answers": ["Nottingham Forest", "Watford", "Wolverhampton Wanderers", "Crystal Palace"],
+          "correct": 0,
+          "order": 1,
+          "percentages": [83, 2, 13, 2],
+          "text": "Jesper Håkansson is nu verhuurd aan RBC Roosendaal, maar welke Engelse club toonde eerder deze zomer belangstelling voor de Deen?"
+        },
+        {
+          "answers": ["1950", "1951", "1952", "1953"],
+          "correct": 1,
+          "order": 2,
+          "percentages": [6, 36, 47, 11],
+          "text": "In welk jaar liet Abe Lenstra een belangrijke wedstrijd lopen omdat de Friese held, zo verklaarde hij tegenover een journalist, \"voetbalmoe\" was?"
+        },
+        {
+          "answers": ["Hiddo Reijs", "Kees Kist", "Henny Jonkman", "Reinder Dolstra"],
+          "correct": 0,
+          "order": 3,
+          "percentages": [32, 45, 9, 15],
+          "text": "Welke voormalige Heerenveen-speler was trainer van HODO?"
+        },
+        {
+          "answers": ["Hermes DVS en De Volewijckers", "Blauw Wit en Elinkwijk", "SC Gooiland en SC Drente", "Wageningen en Velox"],
+          "correct": 3,
+          "order": 4,
+          "percentages": [17, 26, 11, 47],
+          "text": "Welke al lang niet meer bestaande profclubs eindigden als tweede en derde in het jaar dat Heerenveen kampioen werd van de Tweede Divisie?"
+        },
+        {
+          "answers": ["Heerenveen", "Woudenberg", "'t Lage der Weg", "Dronten"],
+          "correct": 1,
+          "order": 5,
+          "percentages": [17, 40, 15, 28],
+          "text": "Voormalig trainer Siem Plooyer overleed enkele jaren geleden in zijn woonplaats. Welke plaats was dat?"
+        },
+        {
+          "answers": ["Ajax", "Feyenoord", "PSV", "IJsselmeervogels"],
+          "correct": 3,
+          "order": 6,
+          "percentages": [11, 17, 19, 53],
+          "text": "Van wie verloor Heerenveen in de eerste ronde van het bekertoernooi van 1977 - 1978?"
+        },
+        {
+          "answers": ["Cambuur Leeuwarden", "Willem II", "Ajax", "RKC"],
+          "correct": 1,
+          "order": 7,
+          "percentages": [28, 38, 21, 13],
+          "text": "Tegen welke club debuteerde Marc van Eijk in de eredivisie?"
+        },
+        {
+          "answers": ["Radu Gusatu", "Radoslav Samardzic", "Boudewijn Pahlplatz", "Jeffrey Talan"],
+          "correct": 2,
+          "order": 8,
+          "percentages": [9, 32, 34, 26],
+          "text": "Op een glad veld speelde SC Heerenveen met 2-2 gelijk tegen Ajax. Sunday Oliseh was zo vriendelijk om de openingstreffer voor de Friezen te scoren. Welke Heerenvener maakte tien minuten voor tijd uiteindelijk de gelijkmaker?"
+        },
+        {
+          "answers": ["Fortuna Sittard", "Feyenoord", "AGOVV", "NEC"],
+          "correct": 0,
+          "order": 9,
+          "percentages": [38, 28, 2, 32],
+          "text": "Welke club won liefst tweemaal na strafschoppen in het bekertoernooi van Heerenveen?"
+        },
+        {
+          "answers": ["Juliana", "BVV", "De Spechten", "Baronie"],
+          "correct": 1,
+          "order": 10,
+          "percentages": [11, 36, 9, 45],
+          "text": "Het doelpuntenverloop was: 1-0 Van de Langenberg, 2-0 Van Overbeek, 2-1 Jonkman, 3-1 Van Overbeek. Welke zuidelijke club was de tegenstander?"
+        }
+      ],
+      "year": 2004
+    },
+    {
+      "average": 4,
+      "month": 11,
+      "omitted": 0,
+      "participants": 29,
+      "questions": [
+        {
+          "answers": ["1990", "1991", "1992", "1993"],
+          "correct": 0,
+          "order": 1,
+          "percentages": [45, 31, 17, 7],
+          "text": "In welk jaar kwam Arno Hofstede naar Heerenveen?"
+        },
+        {
+          "answers": ["15 december 1992", "8 november 1991", "3 april 1990", "25 augustus 1990"],
+          "correct": 3,
+          "order": 2,
+          "percentages": [10, 14, 28, 48],
+          "text": "Op welke van onderstaande dagen speelden Jeffrey Kooistra en Alex Pastoor tégen SC Heerenveen?"
+        },
+        {
+          "answers": ["niemand", "RCH", "HVC", "Tubantia"],
+          "correct": 1,
+          "order": 3,
+          "percentages": [31, 31, 17, 21],
+          "text": "Wie eindigde één plekje hoger dan Heerenveen in het jaar dat dat de Friezen afsloten met 37 punten en een doelsaldo van 53-39?"
+        },
+        {
+          "answers": ["Radu Gusatu", "Jeffrey Talan", "Ruud van Nistelrooij", "Romano Denneboom"],
+          "correct": 1,
+          "order": 4,
+          "percentages": [21, 38, 10, 31],
+          "text": "Sparta-Heerenveen 2-4. Welke invaller maakte het laatste doelpunt?"
+        },
+        {
+          "answers": ["1-4", "1-5", "1-6", "ook 1-7"],
+          "correct": 0,
+          "order": 5,
+          "percentages": [45, 14, 14, 28],
+          "text": "In de beker speelde SC Heerenveen ooit eens in een poule met Cambuur, HZVV en DOSK. Van de laatste club wonnen de Leeuwarders met 1-7. Met welke cijfers won Heerenveen van DOSK?"
+        },
+        {
+          "answers": ["tweede ronde", "kwartfinale", "halve finale", "finale"],
+          "correct": 2,
+          "order": 6,
+          "percentages": [17, 24, 34, 24],
+          "text": "Welk stadium bereikte Heerenveen eigenlijk in de beker in het seizoen waarover in de vorige vraag werd gesproken?"
+        },
+        {
+          "answers": ["Frens van der Veen", "Steve Mokone", "Bertus Freese", "Folkert Velten"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [17, 48, 10, 24],
+          "text": "\"Hij was beter dan Abe, vond Abe Lenstra zelf\", schreef dagblad Tubantia over een Heracles-held uit de oude doos. Over wie ging het?"
+        },
+        {
+          "answers": ["0", "1", "2", "4"],
+          "correct": 0,
+          "order": 8,
+          "percentages": [55, 41, 3, 0],
+          "text": "Hoeveel spelers die in de bekerfinale van 8 mei 1997 speelden, behoren momenteel tot de selectie van SC Heerenveen?"
+        },
+        {
+          "answers": ["Mika Väyrynen", "Hans Vonk", "Arek Radomski", "Petter Hansson"],
+          "correct": 2,
+          "order": 9,
+          "percentages": [41, 17, 41, 0],
+          "text": "Welke van onderstaande spelers werkte niet de volledige 360 minuten af van de vier duels die SC Heerenveen vorig jaar in de beker speelde?"
+        },
+        {
+          "answers": ["Romano Denneboom", "Radoslav Samardzic", "Ronnie Pander", "Max Houttuin"],
+          "correct": 0,
+          "order": 10,
+          "percentages": [41, 21, 7, 31],
+          "text": "In het seizoen 1998/1999 kreeg precies één speler van SC Heerenveen een rode kaart. Wie?"
+        }
+      ],
+      "year": 2004
+    },
+    {
+      "average": 5.8,
+      "month": 12,
+      "omitted": 0,
+      "participants": 22,
+      "questions": [
+        {
+          "answers": ["0", "1", "4", "8"],
+          "correct": 0,
+          "order": 1,
+          "percentages": [77, 14, 9, 0],
+          "text": "Hoeveel competitieduels speelde Tieme Klompe tot en met november voor zijn nieuwe club RKC Waalwijk?"
+        },
+        {
+          "answers": ["Jan de Visser", "Johan Hansma", "Marcus Allbäck", "Meindert Postma"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [68, 14, 18, 0],
+          "text": "Radoslav Samardzic scoorde een rasechte hattrick in die bekerwedstrijd, maar wie maakte het belangrijkse openingsdoelpunt uit een penalty?"
+        },
+        {
+          "answers": ["Johan Cruijff", "Bep Bakhuys", "Marco van Basten", "Kees Kist"],
+          "correct": 0,
+          "order": 3,
+          "percentages": [50, 14, 14, 23],
+          "text": "Abe Lenstra staat achter Kluivert, Bergkamp en Wilkes als nummer vier op de topscorerlijst aller tijden van Oranje. Het is wel een gedeelde vierde plaats. Met wie?"
+        },
+        {
+          "answers": ["David Beckham", "Arsène Wenger", "Edgar Davids", "Patrick Vieira"],
+          "correct": 1,
+          "order": 4,
+          "percentages": [5, 91, 0, 5],
+          "text": "Wie zei over onze bekendste oud-speler van het moment het volgende: \"We weten allemaal hoe Van Nistelrooy zich gedraagt. Het enige wat hij kan is mensen bedriegen. Dat weten we allemaal.\""
+        },
+        {
+          "answers": ["Venlo", "Emmen", "Veendam", "Dordrecht"],
+          "correct": 3,
+          "order": 5,
+          "percentages": [5, 5, 14, 77],
+          "text": "In november 2003 verloren de reserves van SC Heerenveen thuis vrij kansloos van Ajax. De twee spitsen, waaronder Giorgios Samaras, waren machteloos. Waar speelt de andere spits, die momenteel boven verwachting presteert in de eerste divisie?"
+        },
+        {
+          "answers": ["in Nederland", "in Spanje", "in Duitsland", "in België"],
+          "correct": 1,
+          "order": 6,
+          "percentages": [5, 55, 41, 0],
+          "text": "SC Heerenveen wist in de Champions League niet te winnen in Mestalla. Een oud-speler lukte dat onlangs wel, in een heetgebakerd duel. Waar stond hij vorig jaar onder contract?"
+        },
+        {
+          "answers": ["Jeffrey Talan", "Arek Radomski", "Ugur Yildirim", "Pieter Bijl"],
+          "correct": 1,
+          "order": 7,
+          "percentages": [59, 23, 14, 5],
+          "text": "Wie zei over zichzelf: \"Als voetballer lijk ik net een Braziliaan\"?"
+        },
+        {
+          "answers": ["Rostov", "Roosendaal", "Volendam", "Santander"],
+          "correct": 1,
+          "order": 8,
+          "percentages": [0, 50, 27, 23],
+          "text": "In welke plaats speelde Igor Korneev zijn allerlaatste competitiewedstrijd?"
+        },
+        {
+          "answers": ["0", "1", "4", "8"],
+          "correct": 0,
+          "order": 9,
+          "percentages": [45, 18, 32, 5],
+          "text": "Hoeveel UEFA-Cup doelpunten maakte Marcus Allbäck voor SC Heerenveen?"
+        },
+        {
+          "answers": ["Ronaldo", "Romario", "Magno", "Sergio"],
+          "correct": 2,
+          "order": 10,
+          "percentages": [27, 5, 45, 23],
+          "text": "Welke Braziliaan was de enige die ooit Khalid Sinouh passeerde in diens eredivisiecarrière voor SC Heerenveen?"
+        }
+      ],
+      "year": 2004
+    },
+    {
+      "average": 4,
+      "month": 1,
+      "omitted": 0,
+      "participants": 36,
+      "questions": [
+        {
+          "answers": ["Elfsborg IF", "IFK Göteborg", "Helsingborg", "Halmstads BK"],
+          "correct": 0,
+          "order": 1,
+          "percentages": [83, 6, 3, 8],
+          "text": "Van welke club is onze kersverse aanwinst Nilsson afkomstig?"
+        },
+        {
+          "answers": ["Thailand", "China", "Singapore", "Indonesië"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [33, 36, 25, 6],
+          "text": "Stefan Selakovic scoorde tijdens zijn debuut voor het Zweedse elftal. In en tegen welk Aziatisch land deed de voormalige Heerenveen-aanvaller dat?"
+        },
+        {
+          "answers": ["nooit", "1 keer", "12 keer", "24 keer"],
+          "correct": 1,
+          "order": 3,
+          "percentages": [33, 44, 19, 3],
+          "text": "Hoe vaak startte aanvaller Meindert Postma in de basis tijdens competitieduels van SC Heerenveen?"
+        },
+        {
+          "answers": ["Frankrijk", "Engeland", "Zweden", "Japan"],
+          "correct": 0,
+          "order": 4,
+          "percentages": [42, 33, 22, 3],
+          "text": "Jarenlang had SC Heerenveen serieuze interesse in het Zweedse supertalent Kim Källström. Het lukte de club niet hem aan te trekken. Waar speelt de international momenteel?"
+        },
+        {
+          "answers": ["Voor tegenstander FC Twente was het een gedenkwaardig duel", "Van Nistelrooij startte op de bank", "Gelegenheidsrechtsback Mile Krstev scoorde een doelpunt", "Van Nistelrooij kreeg rood omdat hij Karnebeek sloeg"],
+          "correct": 2,
+          "order": 5,
+          "percentages": [8, 25, 33, 33],
+          "text": "Tijdens zijn periode in Heerenveen liep Ruud van Nistelrooij tegen één rode kaart op. Wat is niet waar over het betreffende competitieduel?"
+        },
+        {
+          "answers": ["1999/2000", "2000/2001", "2001/2002", "2002/2003"],
+          "correct": 0,
+          "order": 6,
+          "percentages": [19, 44, 36, 0],
+          "text": "Middenvelder Arek Radomski staat niet bekend om zijn doelpuntenproductie. In welk seizoen scoorde hij opvallend veel voor zijn doen, en sindsdien niet meer?"
+        },
+        {
+          "answers": ["Dragan Sladakovic", "Peter Pot", "Roberto Straal", "Tony Alberda"],
+          "correct": 2,
+          "order": 7,
+          "percentages": [22, 11, 44, 22],
+          "text": "Welke oud-voetballer van SC Heerenveen scoorde tijdens het top-amateurduel Rheden - Be Quick in 2003 twee keer?"
+        },
+        {
+          "answers": ["Erik Regtop", "Leeroy Echteld", "Prince Polley", "Dorin Mitrita"],
+          "correct": 2,
+          "order": 8,
+          "percentages": [42, 8, 31, 19],
+          "text": "We speelden in Eindhoven tegen PSV. Uit een vroege vrije trap van Hansma nam hij de bal aan en kegelde hem keihard in de kruising: 0-1. Over wie gaat dit?"
+        },
+        {
+          "answers": ["1931-1932", "1936-1937", "1941-1942", "1946-1947"],
+          "correct": 2,
+          "order": 9,
+          "percentages": [11, 19, 36, 33],
+          "text": "Noem het juiste jaartal bij deze eindstand:\r\n1. ADO                  8-10  16-11 \r\n2. Eindhoven            8-9  10- 8\r\n3. AGOVV                8-8  14-16\r\n4. Blauw Wit            8-7  14-13\r\n5. Heerenveen           8-6   9-15"
+        },
+        {
+          "answers": ["Denemarken", "Curaçao", "Saarland", "Oostenrijk"],
+          "correct": 1,
+          "order": 10,
+          "percentages": [11, 36, 17, 36],
+          "text": "De grootste interlandzege van Abe Lenstra was 8-1, waarbij de Fries twee doelpunten voor eigen rekening nam. Wie was de arme tegenstander in het oefenduel waarvan 50.000 toeschouwers in de Kuip getuige waren?"
+        }
+      ],
+      "year": 2005
+    },
+    {
+      "average": 3.5,
+      "month": 2,
+      "omitted": 0,
+      "participants": 38,
+      "questions": [
+        {
+          "answers": ["0", "2", "4", "6"],
+          "correct": 2,
+          "order": 1,
+          "percentages": [3, 26, 53, 18],
+          "text": "Hoeveel bekerdoelpunten scoorde Tony Alberda eigenlijk voor Heerenveen in het seizoen dat hij in De Meer het net drie keer liet bollen?"
+        },
+        {
+          "answers": ["0", "1", "2", "3"],
+          "correct": 1,
+          "order": 2,
+          "percentages": [55, 37, 5, 3],
+          "text": "FC Twente - SC Heerenveen, zaterdag 24 september 1994. Hoeveel spelers betraden het veld die momenteel in Heerenveen tot de selectie behoren?"
+        },
+        {
+          "answers": ["Austria Lustenau", "Cannes", "Real Murcia", "SK Beveren"],
+          "correct": 0,
+          "order": 3,
+          "percentages": [37, 8, 29, 26],
+          "text": "Wat volgt er na Bradford City, Sankt Gallen, Olympique Nice?"
+        },
+        {
+          "answers": ["0", "5", "15", "38"],
+          "correct": 1,
+          "order": 4,
+          "percentages": [8, 68, 21, 3],
+          "text": "Hoeveel competitieduels speelde Radoslav Samardzic in zijn tweede periode bij SC Heerenveen?"
+        },
+        {
+          "answers": ["Marc Hegeman", "Mika Nurmela", "Roy Stroeve", "Martin Drent"],
+          "correct": 3,
+          "order": 5,
+          "percentages": [16, 53, 13, 18],
+          "text": "Op een donkere decemberdag in 1998 verloor SC Heerenveen het bekerduel bij Emmen. Wie maakte in de laatste minuut de beslissende?"
+        },
+        {
+          "answers": ["zes", "zeven", "acht", "alle tien"],
+          "correct": 0,
+          "order": 6,
+          "percentages": [18, 21, 29, 32],
+          "text": "Tijdens hoeveel van Jesse Carver's tien duels als bondscoach van Oranje betrad Abe Lenstra als international de mat?"
+        },
+        {
+          "answers": ["Roy Wesseling", "Martin Jol", "Dick de Boer", "Wim Dusseldorp"],
+          "correct": 3,
+          "order": 7,
+          "percentages": [5, 58, 11, 26],
+          "text": "Welke trainer zei: \"Als je de mensen naar hun mening vraagt over SC Heerenveen zal je merken dat het door iedereen beschouwd wordt als de troetelclub van Nederland.\""
+        },
+        {
+          "answers": ["0-0", "1-0", "1-2", "1-3"],
+          "correct": 3,
+          "order": 8,
+          "percentages": [3, 13, 3, 82],
+          "text": "SC Heerenveen won ooit op een koude avond in Polen met 0-1 van Amica Wronki. Wat zette AZ recentelijk eigenlijk tegen die ploeg op het scorebord?"
+        },
+        {
+          "answers": ["in Rotterdam natuurlijk, grapjas", "in Amsterdam", "in Heerenveen", "in Gouda"],
+          "correct": 1,
+          "order": 9,
+          "percentages": [39, 3, 16, 42],
+          "text": "In 1942-1943 eindigden de playoffs als volgt:\r\n1. ADO\r\n2. Feyenoord\r\n3. Willem II\r\n4. SC Enschede\r\n5. Heerenveen\r\n\r\nIn welke stad speelde Feyenoord zijn thuisduels meestal in deze oorlogsjaren?"
+        },
+        {
+          "answers": ["Het Friese volkslied", "Hand in hand, kameraden", "Bronsgroen Eikenhout", "You'll never walk alone"],
+          "correct": 1,
+          "order": 10,
+          "percentages": [71, 11, 18, 0],
+          "text": "Op juni 1958 speelde Abe Lenstra met SC Enschede tegen DOS uit Utrecht een beslissingswedstrijd om de nationale titel. In het neutrale Nijmegen verloor Lenstra in de verlenging met 1-0. Hij had echter stiekem rekening gehouden met een overwinning, die dan niet ongemerkt voorbij mocht gaan. In de omroepkamer van het stadion lag daarom de grammofoonplaat al klaar. Die dus nooit is gedraaid in Nijmegen, want Lenstra won niet.\"\r\n\r\nOver welk bekende lied gaat dit?"
+        }
+      ],
+      "year": 2005
+    },
+    {
+      "average": 4.8,
+      "month": 3,
+      "omitted": 0,
+      "participants": 44,
+      "questions": [
+        {
+          "answers": ["Kroatië", "Bosnië-Herzegowina", "Macedonië", "geen enkel"],
+          "correct": 2,
+          "order": 1,
+          "percentages": [5, 2, 86, 7],
+          "text": "Voor welk nationaal team speelt oud-Heerenvener Mile Krstev interlands?"
+        },
+        {
+          "answers": ["Ronnie Pander", "Roberto Straal", "Radoslav Samardzic", "Jeffrey Talan"],
+          "correct": 2,
+          "order": 2,
+          "percentages": [0, 0, 32, 68],
+          "text": "In slechts één competitieduel scoorde Ruud van Nistelrooij twee doelpunten voor SC Heerenveen. Toch was hij volgens de beoordelaar van VI niet de beste man aan Friese zijde. Wie kreeg wél het hoogste cijfer?"
+        },
+        {
+          "answers": ["Klaas Jan Huntelaar", "Said Bakkati", "Boy Waterman", "Jerrel Wolfgang"],
+          "correct": 1,
+          "order": 3,
+          "percentages": [14, 82, 2, 2],
+          "text": "Tijdens de eerste zege van Foppe de Haan als coach van Jong Oranje speelden drie afgevaardigden uit Heerenveen mee. Wie was er niet bij?"
+        },
+        {
+          "answers": ["0 goals, 0 assists", "1 goal, 1 assist", "2 goals, 2 assists", "5 goals, 5 assists"],
+          "correct": 2,
+          "order": 4,
+          "percentages": [0, 18, 68, 14],
+          "text": "In maart 2001 verloor Heracles Almelo thuis met liefst 1-4 van BV Veendam. Hoeveel goals en hoeveel assists kwamen op naam van spelers met een verleden in Heerenveen?"
+        },
+        {
+          "answers": ["0-0", "1-1", "4-4", "5-5"],
+          "correct": 0,
+          "order": 5,
+          "percentages": [16, 30, 48, 7],
+          "text": "Abe Lenstra's befaamde duel met SC Enschede tegen DOS om het kampioenschap stond ook na twee verlengingen nog gelijk, waarna in de derde extra periode DOS uiteindelijk de titel greep dankzij Tonny van der Linden. Maar wat was de stand eigenlijk na negentig minuten?"
+        },
+        {
+          "answers": ["een Intertoto-duel", "een bekerduel", "een UEFA-Cup duel", "een oefenduel"],
+          "correct": 2,
+          "order": 6,
+          "percentages": [34, 18, 36, 11],
+          "text": "\"Ik ben nu vier jaar trainer en dit is 't beste team waar ik ooit tegen heb gespeeld. Ik kan niets anders zeggen dan: bravo Heerenveen.\"\r\n\r\nDit werd gezegd na..."
+        },
+        {
+          "answers": ["Cerro Porteño", "Étoile Sahel", "Kråkevingen", "Al Jazeera"],
+          "correct": 3,
+          "order": 7,
+          "percentages": [14, 16, 41, 30],
+          "text": "Bij welke geenszins alledaagse club liep vorig jaar opeens een oud-staflid van Heerenveen rond?"
+        },
+        {
+          "answers": ["Pieter Bijl", "Harvey Wijngaarde", "Johnny Jansen", "Lionel Lord"],
+          "correct": 1,
+          "order": 8,
+          "percentages": [32, 23, 30, 16],
+          "text": "Nota bene in Harkema verloor het Nederlandse amateurelftal van de Ierse evenknie met 0-1. Welke oud-Heerenvener bleek te opereren als de spelverdeler van de Hollanders?"
+        },
+        {
+          "answers": ["De Jong", "De Visser", "Ten Voorde", "Groen"],
+          "correct": 0,
+          "order": 9,
+          "percentages": [61, 16, 14, 9],
+          "text": "Wie stond er bekend als de veelscorende mid-mid van Gorredijk 7?"
+        },
+        {
+          "answers": ["Aantal wedstrijden in de Intertoto", "Aantal invalbeurten in alle duels", "Aantal doelpunten in de beker", "Aantal assists in de competitie"],
+          "correct": 3,
+          "order": 10,
+          "percentages": [11, 16, 32, 41],
+          "text": "Stefan Selakovic \r\nMika Nurmela \r\nRomano Denneboom \r\nJohn de Jong \r\nMika Väyrynen\r\n\r\nWaarvan was bovenstaande de club-top 5 in het seizoen 2002-03?"
+        }
+      ],
+      "year": 2005
+    },
+    {
+      "average": 4.8,
+      "month": 4,
+      "omitted": 0,
+      "participants": 43,
+      "questions": [
+        {
+          "answers": ["Klaas Jan Huntelaar", "Ugur Yildirim", "Georgios Samaras", "Stefan Selakovic"],
+          "correct": 0,
+          "order": 1,
+          "percentages": [79, 2, 9, 9],
+          "text": "Elf minuten voor tijd stond FC Den Bosch nog met 2-1 voor, maar toch wist SC Heerenveen eerder dit seizoen met 2-4 te winnen in Brabant. Wie scoorde twee goals in deze belangrijke zege?"
+        },
+        {
+          "answers": ["Tijdens zijn debuut, al na 10 minuten", "Tijdens zijn debuut, vlak voor tijd", "In zijn tweede interland", "In zijn derde interland"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [49, 16, 26, 9],
+          "text": "Wanneer scoorde Abe Lenstra zijn eerste goal voor het Nederlands Elftal?"
+        },
+        {
+          "answers": ["Roberto Straal", "Jeffrey Talan", "Mario Been", "Abe Lenstra"],
+          "correct": 1,
+          "order": 3,
+          "percentages": [5, 84, 9, 2],
+          "text": "Wie zei ooit \"De knie wil niet meer\", toen hem werd gevraagd waarom hij zijn voetbalcarrière beëindigde?"
+        },
+        {
+          "answers": ["0", "1", "2", "3"],
+          "correct": 0,
+          "order": 4,
+          "percentages": [65, 26, 7, 2],
+          "text": "Marco van Basten kreeg recentelijk veel kritiek toen hij zijn voormalige jong Ajax-pupil Hedwiges Maduro selecteerde voor Oranje. Toch deed Foppe de Haan in september in feite hetzelfde met Jerrel Wolfgang. Hoeveel competitieduels had de jonge verdediger immers afgewerkt in het eerste van Heerenveen toen hij voor Jong Oranje mocht uitkomen?"
+        },
+        {
+          "answers": ["PSV", "FC Twente", "Roda JC", "Ajax"],
+          "correct": 3,
+          "order": 5,
+          "percentages": [5, 19, 23, 53],
+          "text": "In de allerlaatste minuut van zijn Friese carrière scoorde Rodion Camataru zijn allerlaatste doelpunt. Wie was de tegenstander?"
+        },
+        {
+          "answers": ["0", "1", "2", "4"],
+          "correct": 1,
+          "order": 6,
+          "percentages": [16, 33, 40, 12],
+          "text": "In het laatste interlandweekend van maart 2005 scoorden landenteams met een (oud-)Heerenveen-speler in totaal liefst 19 goals. Hoeveel doelpunten werden daadwerkelijk gemaakt door een speler die voor SC Heerenveen uitkwam?"
+        },
+        {
+          "answers": ["Mateja Kezman", "Peter van Vossen", "Wesley Sonck", "Arjen Robben"],
+          "correct": 3,
+          "order": 7,
+          "percentages": [60, 21, 5, 14],
+          "text": "In zijn loopbaan kreeg Tieme Klompe één keer een directe rode kaart. Op wie maakte hij de betreffende overtreding?"
+        },
+        {
+          "answers": ["René Bakhuis", "Ronald Goossensen", "André de Jong", "Jan-Harm Schippers"],
+          "correct": 1,
+          "order": 8,
+          "percentages": [28, 19, 35, 19],
+          "text": "\"Hij stond er niet als trainer. Door gebrek aan ervaring nam de spelersgroep van Drachtster Boys een loopje met hem, met als gevolg een gebrek aan discipline.\" Over welke voormalige selectiespeler van SC Heerenveen werd dit gezegd na zijn ontslag als trainer van de Drachtster amateurs?"
+        },
+        {
+          "answers": ["André de Jong", "Said Bakkati", "Maarten de Jong", "Ronnie Venema"],
+          "correct": 2,
+          "order": 9,
+          "percentages": [7, 9, 37, 47],
+          "text": "Wie was ooit zo ongelukkig om al in de eerste minuut van het duel tegen Feyenoord in eigen doel te scoren?"
+        },
+        {
+          "answers": ["nergens, is gestopt", "Stabæk", "Molde", "Vålerengen"],
+          "correct": 3,
+          "order": 10,
+          "percentages": [7, 9, 40, 44],
+          "text": "In welke voetbalstad vinden we Thomas Holm tegenwoordig terug?"
+        }
+      ],
+      "year": 2005
+    },
+    {
+      "average": 5.2,
+      "month": 5,
+      "omitted": 0,
+      "participants": 43,
+      "questions": [
+        {
+          "answers": ["Olympiakos Piraeus", "Valencia", "Olympique Lyon", "Benfica"],
+          "correct": 2,
+          "order": 1,
+          "percentages": [5, 16, 70, 9],
+          "text": "Bij welke Europese tegenstander speelde de Braziliaan Sonny Anderson ook weer?"
+        },
+        {
+          "answers": ["Odense BK", "Werder Bremen", "Villarreal", "FC Midtjylland"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [53, 19, 12, 16],
+          "text": "Wat volgt er op FC Haarlem, Norwich City en West Bromwich Albion?"
+        },
+        {
+          "answers": ["Correia", "Gotink", "Sibon", "Selakovic"],
+          "correct": 3,
+          "order": 3,
+          "percentages": [2, 9, 28, 60],
+          "text": "Onderstaande vier spelers scoorden ooit in een bekerduel tegen AZ. Welke van het kwartet deed dat uit een penalty?"
+        },
+        {
+          "answers": ["2-0", "3-0", "5-1", "8-1"],
+          "correct": 3,
+          "order": 4,
+          "percentages": [5, 12, 51, 33],
+          "text": "Met welke cijfers won SC Heerenveen over twee duels gezien van Vitesse in het competitieseizoen 1980-81?"
+        },
+        {
+          "answers": ["Ajax", "Feyenoord", "PSV", "FC Twente"],
+          "correct": 1,
+          "order": 5,
+          "percentages": [16, 63, 16, 5],
+          "text": "In het seizoen 1973-1974 verloor het nietige Heerenveen pas na strafschoppen in de beker van een grote club. Wie was de tegenstander?"
+        },
+        {
+          "answers": ["Progresul Strehaia", "CFR Cluj", "FC Bihor Oradea", "Steaua Boekarest"],
+          "correct": 1,
+          "order": 6,
+          "percentages": [19, 19, 28, 35],
+          "text": "Tegen welke club debuteerde de jonge Rodion Camataru voor Universitatea Craiova in de Roemeense competitie?"
+        },
+        {
+          "answers": ["Richard Witschge", "Aron Winter", "Ronald Koeman", "Ole Tobiasen"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [65, 19, 7, 9],
+          "text": "Welke Ajacied nam afscheid in de slotfase van de Ajax-SC Heerenveen die in 3-0 eindigde, met onder meer twee goals van Viktor Sikora?"
+        },
+        {
+          "answers": ["Paul Bosvelt", "Jon Dahl Tomasson", "Tomasz Razsa", "Gérard de Nooijer"],
+          "correct": 3,
+          "order": 8,
+          "percentages": [2, 16, 12, 70],
+          "text": "Wie speelde niet in de befaamde UEFA-Cup finale van Feyenoord, die met 3-2 van Borussia Dortmund werd gewonnen?"
+        },
+        {
+          "answers": ["Gertjan Verbeek", "Foppe de Haan", "Richard Goulooze", "Erik ten Voorde"],
+          "correct": 0,
+          "order": 9,
+          "percentages": [49, 30, 14, 7],
+          "text": "Henk van Brussel stond bekend als een trainer die spectaculair voetbal speelde met Heerenveen, maar wie zei later over de trainingen van de beste man: \"Dat was alleen maar lopen\"?"
+        },
+        {
+          "answers": ["augustus 1939", "augustus 1944", "augustus 1945", "augustus 1946"],
+          "correct": 1,
+          "order": 10,
+          "percentages": [14, 40, 12, 35],
+          "text": "Wanneer trouwde Abe met zijn Hiltje?"
+        }
+      ],
+      "year": 2005
+    },
+    {
+      "average": 4.7,
+      "month": 6,
+      "omitted": 0,
+      "participants": 20,
+      "questions": [
+        {
+          "answers": ["Henrico Drost", "Jeroen Drost", "Klaas Jan Huntelaar", "Boy Waterman"],
+          "correct": 1,
+          "order": 1,
+          "percentages": [0, 100, 0, 0],
+          "text": "Welke jonge Heerenvener speelt momenteel mee met het Nederlands Elftal bij het WK onder 20 jaar?"
+        },
+        {
+          "answers": ["Gaizka Mendieta", "Santiago Cañizares", "Didier Deschamps", "Rubén Baraja"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [40, 10, 40, 10],
+          "text": "Wie gaf de assist bij het doelpunt dat Kily Gonzalez maakte in het Abe Lenstrastadion?"
+        },
+        {
+          "answers": ["Frank Rijkaard", "Patrick Kluivert", "Jari Litmanen", "John van den Brom"],
+          "correct": 3,
+          "order": 3,
+          "percentages": [40, 10, 25, 25],
+          "text": "Op 26 oktober 1994 verloor SC Heerenveen met maar liefst 5-1 in Amsterdam. Wie scoorde die dag niet voor de Ajacieden?"
+        },
+        {
+          "answers": ["SC Heerenveen", "AZ", "Haarlem", "NAC"],
+          "correct": 2,
+          "order": 4,
+          "percentages": [40, 20, 20, 20],
+          "text": "Voor welke club speelde Michel Doesburg vier seizoenen achtereen in de eredivisie?"
+        },
+        {
+          "answers": ["MVV", "Fortuna Sittard", "Roda JC", "VVV Venlo"],
+          "correct": 1,
+          "order": 5,
+          "percentages": [15, 60, 25, 0],
+          "text": "Welke Limburgse club was de tegenstander in het competitieduel dat het volgende scoreverloop kende:\r\n18'  0-1  Leeroy Echteld\r\n73'  0-2  Jon Dahl Tomasson\r\n86'  1-2  Marco Roelofsen (eigen doelpunt)"
+        },
+        {
+          "answers": ["Kampioenschapsduel", "WK-kwalificatieduel", "Promotieduel", "Afscheidsduel"],
+          "correct": 1,
+          "order": 6,
+          "percentages": [25, 55, 10, 10],
+          "text": "Over een van de grootste gemiste kansen in zijn carrière zei Abe Lenstra: \"'t Was een van de somberste ervaringen uit mijn loopbaan. Nooit zal ik dat moment van de 25e september '57 meer vergeten.\" Over wat voor duel ging dit?"
+        },
+        {
+          "answers": ["2x", "3x", "4x", "5x"],
+          "correct": 1,
+          "order": 7,
+          "percentages": [25, 65, 10, 0],
+          "text": "Met prachtige duels in de Champions League beleefde Harris Huizingh een mooie herfst van zijn loopbaan, maar dat laat niet onverlet dat de spits ook een aantal keer degradeerde in zijn lange profcarrière. Hoe vaak precies?"
+        },
+        {
+          "answers": ["Radu Gusatu", "Thomas Prager", "Bart Wekking", "Marcus José Rodriguez"],
+          "correct": 0,
+          "order": 8,
+          "percentages": [5, 65, 20, 10],
+          "text": "Wie verbind je aan DSV Leöben?"
+        },
+        {
+          "answers": ["Jan de Visser", "Jon Dahl Tomasson", "Radoslav Samardzic", "Igor Korneev"],
+          "correct": 3,
+          "order": 9,
+          "percentages": [10, 20, 5, 65],
+          "text": "In de Champions League van '97-'98 verloor Feyenoord thuis met 1-3 van Manchester United, dankzij een officieuze hattrick van Andy Cole. Welke oud-Heerenvener redde vlak voor tijd de Rotterdamse eer?"
+        },
+        {
+          "answers": ["Erik Edman", "Said Bakkati", "Marcel Seip", "Petter Hansson"],
+          "correct": 0,
+          "order": 10,
+          "percentages": [30, 55, 5, 10],
+          "text": "In de competitie van 2003-2004 was er slechts één speler van SC Heerenveen die rood zag (en dat was nog twee keer geel ook). Om welke verdediger gaat het?"
+        }
+      ],
+      "year": 2005
+    },
+    {
+      "average": 4.3,
+      "month": 7,
+      "omitted": 0,
+      "participants": 26,
+      "questions": [
+        {
+          "answers": ["Nijmegen", "Groningen", "Roosendaal", "Breda"],
+          "correct": 3,
+          "order": 1,
+          "percentages": [15, 8, 38, 38],
+          "text": "In welke stad scoorde Paul de Lange zijn enige officiële treffer voor Heerenveen?"
+        },
+        {
+          "answers": ["Johan Hansma", "Marc Hegeman", "André Hanssen", "Max Houttuin"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [58, 19, 12, 12],
+          "text": "Welke H is de langste?"
+        },
+        {
+          "answers": ["Geert Huitema", "André de Jong", "Robert Herder", "René Groen"],
+          "correct": 1,
+          "order": 3,
+          "percentages": [19, 15, 19, 46],
+          "text": "De Waalwijkers wonnen ondanks een benutte penalty van Decheiver met 5-2. Wie maakte het andere Friese doelpunt?"
+        },
+        {
+          "answers": ["1-1", "2-1 winst", "3-1 winst", "3-3"],
+          "correct": 0,
+          "order": 4,
+          "percentages": [46, 38, 8, 8],
+          "text": "Op 18 juni 1990 stond latere Heerenvener Ioan Andone op het WK tegenover verdedigend wereldkampioen Argentinië. Welk mooie resultaat behaalden de Roemenen in Napels tegen Maradona en consorten?"
+        },
+        {
+          "answers": ["Huub Stevens", "Martin Jol", "Sef Vergoossen", "Eddy Achterberg"],
+          "correct": 1,
+          "order": 5,
+          "percentages": [19, 65, 12, 4],
+          "text": "Wie was de trainer van het Roda-team dat Heerenveen in de bekerfinale versloeg?"
+        },
+        {
+          "answers": ["Ajax", "Feyenoord", "Spartak Moskou", "Solrød"],
+          "correct": 1,
+          "order": 6,
+          "percentages": [15, 23, 42, 19],
+          "text": "Bij welke club begon de Heerenveen-speler die later zei over zijn optreden op een WK: \"Ik kreeg 'm een metertje of tien over de middenlijn. Toen begon ik aan een slalom, langs een stuk of vijf, zes verdedigers. En toen een stiftje over de keeper. Het was best een aardig goaltje.\""
+        },
+        {
+          "answers": ["0", "1", "4", "9"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [27, 27, 38, 8],
+          "text": "Hoeveel interlandgoals scoorde Abe Lenstra in totaal tegen Spanje?"
+        },
+        {
+          "answers": ["0", "1", "2", "3"],
+          "correct": 1,
+          "order": 8,
+          "percentages": [15, 31, 46, 8],
+          "text": "In november 1951 zetten Nederland en België een historische uitslag van 6-7 neer. Abe Lenstra scoorde net zoals de Belg Anoul Pol drie keer. Hoeveel van Abe's goals kwamen uit een strafschop?"
+        },
+        {
+          "answers": ["Roberto Straal", "Jan de Visser", "Tom Sier", "Tieme Klompe"],
+          "correct": 2,
+          "order": 9,
+          "percentages": [38, 8, 35, 19],
+          "text": "Wie was kampioen gele kaarten in het seizoen 1996/1997?"
+        },
+        {
+          "answers": ["2-0", "2-1", "3-2", "4-2"],
+          "correct": 3,
+          "order": 10,
+          "percentages": [0, 8, 0, 92],
+          "text": "Met welke cijfers verloor SC Heerenveen afgelopen seizoen ook weer van Benfica?"
+        }
+      ],
+      "year": 2005
+    },
+    {
+      "average": 5.1,
+      "month": 8,
+      "omitted": 0,
+      "participants": 52,
+      "questions": [
+        {
+          "answers": ["0", "7", "14", "21"],
+          "correct": 1,
+          "order": 1,
+          "percentages": [2, 92, 4, 2],
+          "text": "Boy Waterman begint dus het komende seizoen als eerste keeper. Hoeveel competitieduels speelde hij de vorige seizoenen in totaal voor Heerenveen?"
+        },
+        {
+          "answers": ["1x", "2x", "3x", "4x"],
+          "correct": 0,
+          "order": 2,
+          "percentages": [21, 58, 19, 2],
+          "text": "Een van de spelers die de openingswedstrijd van het Diekman Stadion opfleurden, was Abe Lenstra. Hij scoorde zelfs in dat duel voor SC Enschede. Weet jij hoe vaak?"
+        },
+        {
+          "answers": ["0", "1", "2", "14"],
+          "correct": 2,
+          "order": 3,
+          "percentages": [15, 13, 62, 10],
+          "text": "Hoeveel competitiedoelpunten maakte Ivan Tzvetkov eigenlijk voor SC Heerenveen?"
+        },
+        {
+          "answers": ["Athene", "Amsterdam", "Leeuwarden", "Boekarest"],
+          "correct": 0,
+          "order": 4,
+          "percentages": [29, 25, 35, 12],
+          "text": "In welke hoofdstad speelde Max Houttuin zijn allerlaatste duel in het eerste elftal van SC Heerenveen?"
+        },
+        {
+          "answers": ["0", "1", "3", "5"],
+          "correct": 2,
+          "order": 5,
+          "percentages": [12, 35, 50, 4],
+          "text": "In de eerste divisie speelt een Zeeuw die ooit 17 competitiegoals maakte voor Heerenveen. Hoeveel van zijn huidige selectiegenoten hebben ook een Heerenveens verleden, hetzij in het eerste, hetzij in de jeugd?"
+        },
+        {
+          "answers": ["9", "14", "17", "21"],
+          "correct": 0,
+          "order": 6,
+          "percentages": [75, 13, 4, 8],
+          "text": "Bij PSV spelen komend jaar drie spelers die ooit in het blauw-wit van SC Heerenveen te bewonderen waren. Hoeveel doelpunten maakte de speler die van hen in totaal het minst productief was voor de Friezen?"
+        },
+        {
+          "answers": ["1997", "1998", "1999", "2000"],
+          "correct": 1,
+          "order": 7,
+          "percentages": [40, 40, 12, 8],
+          "text": "Als wij Król en McDermott zeggen, aan welk jaar denkt u dan?"
+        },
+        {
+          "answers": ["maart", "april", "oktober", "november"],
+          "correct": 3,
+          "order": 8,
+          "percentages": [6, 44, 27, 23],
+          "text": "In welke maand scoorden Lubbe van Dijk (2x), Stefan Petterson, Jan Wouters en Menno Willems allen in één duel?"
+        },
+        {
+          "answers": ["Veendam", "Zwolle", "Oss", "Leeuwarden"],
+          "correct": 2,
+          "order": 9,
+          "percentages": [29, 13, 46, 12],
+          "text": "Waar speelt de veteraan nu die het volgende rijtje clubs afwerkte: FC Groningen, SC Heracles, SC Heerenveen, BV Veendam, SC Heerenveen, BV Veendam, Eindhoven, Emmen, FC Zwolle."
+        },
+        {
+          "answers": ["19", "29", "33", "34"],
+          "correct": 1,
+          "order": 10,
+          "percentages": [6, 69, 21, 4],
+          "text": "Zeer onverwachts kwam Hans Vonk bij Ajax afgelopen seizoen toch nog aan 19 optredens in de competitie. Wat was eigenlijk zijn minimum duels in een eredivisieseizoen in acht jaar SC Heerenveen?"
+        }
+      ],
+      "year": 2005
+    },
+    {
+      "average": 4.8,
+      "month": 10,
+      "omitted": 0,
+      "participants": 28,
+      "questions": [
+        {
+          "answers": ["3-0", "4-0", "5-0", "7-1"],
+          "correct": 3,
+          "order": 1,
+          "percentages": [0, 18, 11, 71],
+          "text": "Ook tegen RBC Roosendaal scoorde Huntelaar eens drie keer. Wat was destijds de eindstand in het Abe Lenstrastadion?"
+        },
+        {
+          "answers": ["Niemand", "Ruud van Nistelrooij", "Arnold Bruggink", "Boudewijn Pahlplatz"],
+          "correct": 1,
+          "order": 2,
+          "percentages": [21, 36, 21, 21],
+          "text": "Wie scoorde er na Zeljko Petrovic (20e), Luc Nilis (48e) en Ovidiu Stinga (83e)?"
+        },
+        {
+          "answers": ["De Kuip", "De ArenA", "Nieuw Galgenwaard", "het Fujifilm Stadion"],
+          "correct": 0,
+          "order": 3,
+          "percentages": [32, 18, 39, 11],
+          "text": "Brian Tevreden kreeg rood in...?"
+        },
+        {
+          "answers": ["Emmanuel Ebiede", "Henry Onwuzuruike", "Oladiputo Martins", "Godfrey Nwankpa"],
+          "correct": 0,
+          "order": 4,
+          "percentages": [43, 29, 4, 25],
+          "text": "Wij roepen Sport Ashdod en u roept een Nigeriaanse naam. Maar welke?"
+        },
+        {
+          "answers": ["Stoke City en Huddersfield Town", "Tranmere Rovers en Port Vale", "West Bromwich Albion en Norwich City", "Chesterfield en Swindon Town"],
+          "correct": 2,
+          "order": 5,
+          "percentages": [21, 7, 68, 4],
+          "text": "Bij welke clubs in Engeland speelde Fernando Derveld?"
+        },
+        {
+          "answers": ["Bert van Marwijk", "Louis van Gaal", "Leo Beenhakker", "Arie Haan"],
+          "correct": 3,
+          "order": 6,
+          "percentages": [0, 64, 4, 32],
+          "text": "Door welke coach Jan de Visser nooit getraind?"
+        },
+        {
+          "answers": ["Da's een keeper", "Da's een verzorger", "Da's de spits van de B-jeugd", "Die komt in de winterstop over uit Zweden"],
+          "correct": 0,
+          "order": 7,
+          "percentages": [82, 0, 7, 11],
+          "text": "Sven Taberima?"
+        },
+        {
+          "answers": ["Ruud Gullit", "Rob de Wit", "Simon Tahamata", "Marco van Basten"],
+          "correct": 1,
+          "order": 8,
+          "percentages": [18, 50, 18, 14],
+          "text": "De interland Nederland-Bulgarije die in een grijs verleden in Heerenveen werd afgewerkt, eindigde in 1-0. Wie scoorde eigenlijk dat enige doelpunt?"
+        },
+        {
+          "answers": ["Jan Thomée en Gejus van der Meulen", "Leen Vente en Kees Rijvers", "Faas Wilkes en Puck van Heel", "Bep Bakhuijs en Kick Smit"],
+          "correct": 3,
+          "order": 9,
+          "percentages": [4, 14, 54, 29],
+          "text": "Over de eerste vijftig interlands van Oranje gerekend, stond Abe Lenstra derde op de ranglijst van doelpuntenmakers met 19 goals. Welk duo was 1 en 2 op die lijst?"
+        },
+        {
+          "answers": ["nooit", "90-93", "93-94", "94-97"],
+          "correct": 2,
+          "order": 10,
+          "percentages": [21, 36, 39, 4],
+          "text": "In welke jaren kwam Florin Constantinovici uit voor Dinamo Boekarest?"
+        }
+      ],
+      "year": 2005
+    }
+  ],
+  "version": 3
+}

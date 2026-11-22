@@ -160,6 +160,8 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
     ],
     replace: { supporter_id: 'NULL' },
   },
+  quiz_questions: 'copy',
+  quizzes: 'copy',
   robots_txt: 'copy',
   source_clubs: 'copy',
   sources: 'copy',
