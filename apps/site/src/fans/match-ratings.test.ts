@@ -1,11 +1,30 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { clubs, matchAppearances, matches, matchPlayerRatings, matchReports, players } from '@fansite/db/schema'
+import {
+  clubs,
+  matchAppearances,
+  matches,
+  matchPlayerRatings,
+  matchReports,
+  playerRatings,
+  players,
+  supporters,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import { loadOldMatchRatings, type RatedPlayer, uitblinkerOf } from './match-ratings'
+import {
+  loadLatestResult,
+  loadMatchRatings,
+  loadOldMatchRatings,
+  loadRunningRatings,
+  loadSeasonWinners,
+  type RatedPlayer,
+  resultLine,
+  supportersIn,
+  uitblinkerOf,
+} from './match-ratings'
 
 let database: TestDatabase
 let matchId: number
@@ -20,6 +39,8 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
+  await database.db.delete(playerRatings)
+  await database.db.delete(supporters)
   await database.db.delete(matchPlayerRatings)
   await database.db.delete(matchAppearances)
   await database.db.delete(matchReports)
@@ -142,5 +163,190 @@ describe('the ratings of an old match', () => {
     await rate(await addPlayer('Ruben Zwart', { inLineUp: true }), '9.00', 12, 'fans')
 
     expect(await loadOldMatchRatings(database.db, matchId)).toBeUndefined()
+  })
+})
+
+describe('the ratings of supporters', () => {
+  it('has none for a match whose window did not close', async () => {
+    expect(await loadMatchRatings(database.db, matchId, 'fans')).toBeUndefined()
+  })
+
+  it('lists the averages of the source fans in the order of the line-up, with the count of supporters', async () => {
+    const first = await addPlayer('Ruben Zwart', { inLineUp: true })
+    const second = await addPlayer('Anton Beets', { inLineUp: true })
+
+    await rate(first, '6.50', 31, 'fans')
+    await rate(second, '8.20', 29, 'fans')
+    await rate(second, '9.90', 40)
+
+    const result = await loadMatchRatings(database.db, matchId, 'fans')
+
+    expect(result?.players.map((player) => [player.name, player.average, player.count])).toEqual([
+      ['Ruben Zwart', 6.5, 31],
+      ['Anton Beets', 8.2, 29],
+    ])
+    expect(result?.supporters).toBe(31)
+    expect(result?.winner?.name).toBe('Anton Beets')
+  })
+
+  it('holds averages and counts only, and nothing about a person who rated', async () => {
+    await rate(await addPlayer('Ruben Zwart', { inLineUp: true }), '6.50', 31, 'fans')
+
+    const result = await loadMatchRatings(database.db, matchId, 'fans')
+
+    expect(Object.keys(result?.players[0] ?? {}).toSorted()).toEqual([
+      'appearanceId',
+      'average',
+      'count',
+      'name',
+      'playerId',
+    ])
+  })
+})
+
+describe('the ratings that come in while a window is open', () => {
+  async function give(supporterId: number, appearanceId: number, grade: number) {
+    await database.db.insert(playerRatings).values({ appearanceId, grade, supporterId })
+  }
+
+  let accounts = 0
+
+  async function account(disabled = false) {
+    accounts++
+
+    const [row] = await database.db
+      .insert(supporters)
+      .values({
+        createdAt: new Date('2003-01-01T00:00:00Z'),
+        disabledAt: disabled ? new Date() : null,
+        email: `fan${accounts}@example.test`,
+        screenName: `Fan${accounts}`,
+        screenNameKey: `fan${accounts}`,
+      })
+      .$returningId()
+
+    return row!.id
+  }
+
+  it('works out an average and a count for each player, and counts the supporters', async () => {
+    await addPlayer('Ruben Zwart', { inLineUp: true })
+
+    const [appearance] = await database.db.select().from(matchAppearances).where(eq(matchAppearances.matchId, matchId))
+    const one = await account()
+    const two = await account()
+
+    await give(one, appearance!.id, 6)
+    await give(two, appearance!.id, 9)
+
+    const running = await loadRunningRatings(database.db, matchId)
+
+    expect(running).toEqual([
+      { appearanceId: appearance!.id, average: 7.5, count: 2, name: 'Ruben Zwart', playerId: appearance!.playerId },
+    ])
+    expect(supportersIn(running)).toBe(2)
+  })
+
+  it('leaves out the grades of a blocked account, and counts those of a closed account', async () => {
+    await addPlayer('Ruben Zwart', { inLineUp: true })
+
+    const [appearance] = await database.db.select().from(matchAppearances).where(eq(matchAppearances.matchId, matchId))
+
+    await give(await account(true), appearance!.id, 1)
+    await database.db.insert(playerRatings).values({ appearanceId: appearance!.id, grade: 8, supporterId: null })
+
+    const running = await loadRunningRatings(database.db, matchId)
+
+    expect(running.map((player) => [player.average, player.count])).toEqual([[8, 1]])
+  })
+
+  it('has nothing for a match nobody rated', async () => {
+    expect(await loadRunningRatings(database.db, matchId)).toEqual([])
+    expect(supportersIn([])).toBe(0)
+  })
+})
+
+describe('the Uitblinkers of a season', () => {
+  async function newMatch(date: string, opponent: string, goals: [number, number], home = true) {
+    const [club] = await database.db.select().from(clubs).where(eq(clubs.slug, 'fc-twente'))
+    const [result] = await database.db.insert(matches).values({
+      clubId: club?.id ?? 0,
+      competition: 'Eredivisie',
+      goalsAgainst: goals[1],
+      goalsFor: goals[0],
+      home,
+      kickoffAt: new Date(`${date}T19:00:00Z`),
+      matchDate: date,
+      opponent,
+      round: `Speelronde ${date}`,
+      season: '2026/27',
+      status: 'played',
+    })
+
+    return result.insertId
+  }
+
+  async function ratePlayer(forMatch: number, name: string, average: string, count: number) {
+    const [player] = await database.db
+      .insert(players)
+      .values({ inSquad: true, name, searchTerm: name, season: '2026/27' })
+      .$returningId()
+
+    await database.db
+      .insert(matchPlayerRatings)
+      .values({ average, matchId: forMatch, playerId: player!.id, ratingCount: count, source: 'fans', spread: '1.00' })
+  }
+
+  it('has one for each match, the newest first, and none for a match without five ratings', async () => {
+    const older = await newMatch('2026-11-01', 'NEC', [2, 0])
+    const newer = await newMatch('2026-11-21', 'Sparta Rotterdam', [3, 1])
+    const thin = await newMatch('2026-11-28', 'FC Twente', [0, 0])
+
+    await ratePlayer(older, 'Dirk Proper', '7.10', 20)
+    await ratePlayer(newer, 'Dylan Vente', '7.80', 31)
+    await ratePlayer(newer, 'Andries Noppert', '7.80', 25)
+    await ratePlayer(thin, 'Lars Jansen', '9.00', 3)
+
+    const winners = await loadSeasonWinners(database.db, '2026/27')
+
+    expect(winners.map((winner) => [winner.name, winner.average])).toEqual([
+      ['Andries Noppert', 7.8],
+      ['Dirk Proper', 7.1],
+    ])
+  })
+
+  it('has none for a season without ratings of supporters', async () => {
+    expect(await loadSeasonWinners(database.db, '2026/27')).toEqual([])
+  })
+
+  it('finds the newest match with a result, with its ratings', async () => {
+    const older = await newMatch('2026-11-01', 'NEC', [2, 0])
+    const newer = await newMatch('2026-11-21', 'Sparta Rotterdam', [3, 1])
+
+    await ratePlayer(older, 'Dirk Proper', '7.10', 20)
+    await ratePlayer(newer, 'Dylan Vente', '7.80', 31)
+
+    const latest = await loadLatestResult(database.db)
+
+    expect(latest?.match.id).toBe(newer)
+    expect(latest?.ratings.winner?.name).toBe('Dylan Vente')
+    expect(latest?.ratings.supporters).toBe(31)
+  })
+
+  it('has no latest result while no window closed', async () => {
+    expect(await loadLatestResult(database.db)).toBeUndefined()
+  })
+})
+
+describe('the line under a winner', () => {
+  it('puts the home club first: at home the goals of sc Heerenveen first, away last', () => {
+    expect(resultLine({ goalsAgainst: 1, goalsFor: 3, home: true, opponent: 'Sparta Rotterdam' })).toBe(
+      'Thuis tegen Sparta Rotterdam, 3–1',
+    )
+    expect(resultLine({ goalsAgainst: 2, goalsFor: 2, home: false, opponent: 'Ajax' })).toBe('Uit tegen Ajax, 2–2')
+    expect(resultLine({ goalsAgainst: 3, goalsFor: 1, home: false, opponent: 'Ajax' })).toBe('Uit tegen Ajax, 3–1')
+  })
+
+  it('leaves the score out when the match has none', () => {
+    expect(resultLine({ goalsAgainst: null, goalsFor: null, home: true, opponent: 'NEC' })).toBe('Thuis tegen NEC')
   })
 })
