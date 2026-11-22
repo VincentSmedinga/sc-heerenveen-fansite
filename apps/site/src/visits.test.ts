@@ -311,6 +311,7 @@ describe('visitOf', () => {
       '/fans/aanmelden',
       '/fans/aanmelden/bevestigen',
       '/fans/aanmelden/verstuurd',
+      '/fans/fjouwer',
       '/fans/geblokkeerd',
       '/fans/herinnering/uitzetten',
       '/fans/inloggen',

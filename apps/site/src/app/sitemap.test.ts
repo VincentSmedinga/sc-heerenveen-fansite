@@ -91,6 +91,7 @@ const notInSitemap: string[] = [
   '/fans/mijn-account/opheffen',
   '/fans/mijn-account/opheffen/zeker',
   '/fans/mijn-account/schermnaam',
+  '/fans/fjouwer',
   '/fans/prognose',
   '/fans/prognose/stand',
   '/fans/uitblinker',

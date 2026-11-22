@@ -764,6 +764,13 @@
       "when": 1795352969396,
       "tag": "0108_drop_old_season_winners",
       "breakpoints": true
+    },
+    {
+      "idx": 109,
+      "version": "5",
+      "when": 1795364067454,
+      "tag": "0109_add_fantasy_picks",
+      "breakpoints": true
     }
   ]
 }

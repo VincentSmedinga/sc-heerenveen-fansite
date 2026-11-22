@@ -250,6 +250,9 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   // the address, and the page of a blocked account without a session go to logging in;
   // fans-sign-up.spec.ts, fans-log-in.spec.ts and fans-my-account.spec.ts check them with an
   // account.
+  // The game Fjouwer is open to a visitor, with the way in; fans-fjouwer.spec.ts checks the
+  // form with an account.
+  { path: '/fans/fjouwer', status: 200 },
   // The game Prognose is open to a visitor, with the way in; fans-prediction.spec.ts checks the
   // form with an account.
   { path: '/fans/prognose', status: 200 },

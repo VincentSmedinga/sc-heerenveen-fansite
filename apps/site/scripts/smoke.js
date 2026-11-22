@@ -2156,6 +2156,11 @@ await withEmptyDatabase((database) =>
       'a month of the Fantest must be "not found" with Fantest off',
     )
     assert.equal(
+      (await fetch(`${origin}/fans/fjouwer`)).status,
+      404,
+      '/fans/fjouwer must be "not found" with Fjouwer off',
+    )
+    assert.equal(
       (await fetch(`${origin}/fans/spelregels`)).status,
       404,
       '/fans/spelregels must be "not found" with every part off',
@@ -2228,6 +2233,20 @@ await withEmptyDatabase((database) =>
     // The card of the game on Fans, with its way to the page.
     assert.match(html, /<h2[^>]*>Uitblinker<\/h2>/)
     assert.match(html, /<a [^>]*href="\/fans\/uitblinker"[^>]*>Naar de <span class="hf-icon-tail">Uitblinker</)
+
+    // The game Fjouwer: a visitor sees the card with the next match and the way in, no list of
+    // players, and no search engine may index it. Fans names it, with a link.
+    const four = await fetch(`${origin}/fans/fjouwer`)
+    const fourHtml = await four.text()
+
+    assert.equal(four.status, 200, '/fans/fjouwer must be there with Fjouwer on')
+    assert.match(fourHtml, /<h1[^>]*>Fjouwer<\/h1>/)
+    assert.match(fourHtml, /<h2[^>]*>Jouw vier<\/h2>/)
+    assert.match(fourHtml, /Log in om je vier te kiezen/)
+    assert.doesNotMatch(fourHtml, /type="checkbox"/)
+    assert.equal(four.headers.get('cache-control'), 'no-store')
+    assert.equal(four.headers.get('x-robots-tag'), 'noindex, nofollow')
+    assert.match(html, /<a [^>]*href="\/fans\/fjouwer"[^>]*>Naar Fjouwer<\/a>/)
 
     // The rules of all games: a card for each game that is on, for everybody.
     const rules = await fetch(`${origin}/fans/spelregels`)
