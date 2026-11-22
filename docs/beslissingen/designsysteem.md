@@ -4271,7 +4271,7 @@
 ## De rijkop van een DataTable stort niet meer in tot één letter
 
 - **Datum:** 22 november 2026
-- **Besluit:** de rijkop en de kop van de eerste kolom van een `DataTable` houden `overflow-wrap: anywhere` maar krijgen een minimale breedte van `8em`.
+- **Besluit:** de rijkop en de kop van de eerste kolom van een `DataTable` houden `overflow-wrap: anywhere` maar krijgen een minimale breedte van `2em`.
   Woorden breken eerst op spaties, en alleen een woord dat langer is dan de kolom, zoals een pad, breekt midden in het woord.
 - **Waarom:** bij `anywhere` telt elke letter als een plek om af te breken, dus een tabel waarvan de andere kolommen niet afbreken drukte de eerste kolom samen tot één letter (de kaart "Punten", #1561).
 - **Alternatief:** de regel laten staan en alleen die ene tabel aanpassen.

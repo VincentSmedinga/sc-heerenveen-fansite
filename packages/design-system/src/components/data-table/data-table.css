@@ -14,7 +14,7 @@
    */
   .hf-data-table tbody th,
   .hf-data-table thead th:first-child {
-    min-inline-size: 8em;
+    min-inline-size: 2em;
     overflow-wrap: anywhere;
   }
 }

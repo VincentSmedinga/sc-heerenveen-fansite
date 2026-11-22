@@ -18,7 +18,7 @@ describe('data-table.css', () => {
   it('keeps the column of the row headers from shrinking to one letter in a narrow table', () => {
     const start = css.indexOf('.hf-data-table tbody th,')
 
-    expect(css.slice(start, css.indexOf('}', start))).toMatch(/min-inline-size: 8em/u)
+    expect(css.slice(start, css.indexOf('}', start))).toMatch(/min-inline-size: 2em/u)
   })
 
   it('gives the second line of a row header secondary text in both kinds of table', () => {
