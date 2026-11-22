@@ -4,7 +4,14 @@ import { Fragment } from 'react'
 import { againstLabel, type AgainstMatch, type PlayerAgainst } from './player-against'
 
 /** The id of the heading of the card, which the bar "Op deze pagina" links to. */
-export const playerAgainstCardId = 'tegen-ons'
+export const playerAgainstCardId = 'wedstrijden-tegen-ons'
+
+/**
+ * The name of the card for a screen reader. The heading says "Tegen ons", as the issue wants,
+ * but the card Vaakst raak tegen in the side column already has a card with that heading, and
+ * two landmarks need two names.
+ */
+const cardName = 'Wedstrijden tegen ons'
 
 /** The line under the card: the card has only what the reports of the opponent show. */
 export const againstNote = 'Alleen wedstrijden waarvan we de opstelling van de tegenstander kennen.'
@@ -43,7 +50,7 @@ export function PlayerAgainstCard({
   ].filter(({ matches }) => matches.length > 0)
 
   return (
-    <Card aria-labelledby={playerAgainstCardId}>
+    <Card aria-label={cardName}>
       <Heading id={playerAgainstCardId} level={2}>
         Tegen ons
       </Heading>
