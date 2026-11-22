@@ -524,6 +524,7 @@
   De laptop liep warm (belasting boven de 20 bij vijf sessies, plus de Docker-VM), en eigen poorten maken sessies niet zuiniger.
   Dat is het werk van de Coordinator en geen onderdeel van deze beslissing.
   De MCP-server van Storybook in `.mcp.json` blijft op poort 6006: die is van de checkout met de standaardpoorten.
+- **Later:** zie _De Coördinator plant Builders op de belasting van de computer_ (22 november 2026): de grens van twee Builders is vervangen door een regel op de belasting.
   De Storybook van een worktree draait op zijn eigen poort, en `pnpm worktree:env` zegt welke.
   De database `fansite` en de databases die sessies al met de hand maakten, blijven ongemoeid.
 - **Alternatieven:** een eigen MariaDB-server per werkmap; dat scheidt alles, maar kost een Docker-container en geheugen per sessie, op een computer die al warm loopt.
@@ -594,6 +595,7 @@
   Een vast aantal Builders van één (te langzaam voor de week).
   Een Coordinator-sessie per dag (een natuurlijk breekpunt is beter dan een kloktijd).
 - **Later:** zie _Elk nieuw issue start meteen een Specifier, die zichzelf archiveert_ (2 november 2026): de grens voor het specificeren is hooguit twee rondes, in de sessie van de Specifier.
+- **Later:** zie _De Coördinator plant Builders op de belasting van de computer_ (22 november 2026): de grens van twee Builders tegelijk is vervangen door een regel op de belasting, met hoogstens vier.
 - **Herzien:** als de grenzen te strak blijken voor de snelheid die we willen, of als het plafond niet meer knelt.
 
 ## Een Specifier voor een lang gesprek, en de Action List voor de status
@@ -840,3 +842,21 @@
 - **Waarom:** de naam van de database volgt de mapnaam (`scripts/worktree-env.js`), dus zonder map heeft niemand de database nog nodig.
   Op een computer stonden ruim honderd van die testdatabases over.
 - **Alternatieven:** ze op leeftijd verwijderen; dat raakt een database van een map die nog bestaat.
+
+## De Coördinator plant Builders op de belasting van de computer
+
+- **Datum:** 22 november 2026
+- **Besluit:** het vaste aantal van twee Builders tegelijk wordt een regel op de belasting van de computer, met hoogstens vier Builders aan het werk (`AGENTS.md`, _Planning Builders on the load_).
+  De Coördinator leest `uptime` voordat hij nog een Builder start, start hem als de belasting over 5 minuten onder 6 ligt en wacht bij 8 of hoger.
+  De getallen gelden voor de computer met 10 kernen.
+  Een Builder telt alleen zwaar terwijl hij controles draait, en de Coördinator brieft een volgende Builder pas als de vorige aan zijn controles is begonnen of zijn pull request heeft geopend.
+  Afhankelijkheden en gedeelde bestanden beslissen eerst, er is één migratie tegelijk onderweg, de zware controles delen één slot, en het tempo van het weekgebruik gaat voor.
+- **Waarom:** op 22 november 2026 is 261 minuten lang elke minuut gemeten terwijl een tot vier Builders tien issues bouwden.
+  Het vrije geheugen bleef tussen 49% en 67%, en lezen en schrijven belasten de computer niet.
+  Zonder Builder in de controles was de belasting gemiddeld 4,1, met één worktree in de controles 5,8, met twee 7,1 en met drie 7,4 (hoogste waarde 14,4).
+  Vier tegelijk kwam twee minuten voor, met gemiddeld 10,1.
+  De belasting was 54 minuten 8 of hoger en 10 minuten 10 of hoger, bijna altijd met twee of meer worktrees in de controles.
+  Wat de run ophield was niet de computer, maar de afhankelijkheden tussen issues, één migratie tegelijk en het ene bestand met beslissingen waarin elke pull request een blok toevoegt.
+- **Alternatieven:** twee Builders houden (laat de computer vaak half leeg terwijl de rij wacht); een hoger vast getal (een vast getal houdt geen rekening met wat een Builder net doet).
+- **Let op:** de grens van vier is voorlopig, want vier tegelijk is maar twee minuten gemeten.
+  Na de volgende mijlpaal kijken we opnieuw, met metingen die Vitest, de build en de browser apart tellen.

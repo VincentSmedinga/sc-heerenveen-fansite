@@ -73,7 +73,7 @@ A queue, a deadline or a free slot is no reason to pass them.
 
 | What                                | Limit                                                                                                                                                                                                                                                                                                                |
 | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Builders building at once           | 2. A Builder counts while it builds or its Reviewer runs, not while it waits for the owner's go-ahead or merge. Never a third one.                                                                                                                                                                                   |
+| Builders building at once           | Planned on the load of the computer, at most 4 at work (see _Planning Builders on the load_). A Builder counts while it builds or its Reviewer runs, not while it waits for the owner's go-ahead or merge.                                                                                                           |
 | Review rounds per pull request      | 2                                                                                                                                                                                                                                                                                                                    |
 | Coordinator session                 | A fresh session at about 300k tokens of context, or after a wave of merges, with a handoff note in memory (see `weekly-coordination`).                                                                                                                                                                               |
 | Specifying an issue                 | At most four questions per round, each with a recommendation: at most two rounds, in the Specifier's session. Then the issue is written.                                                                                                                                                                             |
@@ -81,18 +81,31 @@ A queue, a deadline or a free slot is no reason to pass them.
 | Fable                               | The Coordinator may use it (see _Models_). A Reviewer only for a pull request that touches the database, the importer, security, workflows or dependencies, and only after the owner agrees. A Builder or Specifier gets a stronger model only for an issue that asks for a lot of judgment, and the brief names it. |
 | Weekly usage pace                   | About 14% a day. Above 20% a day: one Builder, and the queue waits.                                                                                                                                                                                                                                                  |
 
+### Planning Builders on the load
+
+The number of Builders follows the load of the computer, not a fixed count: a Builder that reads and edits costs nothing, and the load comes from the checks.
+The numbers are for the owner's computer with 10 cores.
+
+- **Measure:** run `uptime` before you start another Builder.
+  Start it when the load over 5 minutes is below 6; wait at 8 or more.
+- **Heavy only in the checks:** a Builder weighs only while it runs checks.
+  Brief the next Builder when the previous one has started its checks or opened its pull request, so they don't reach the checks together.
+- **At most four** Builders at work, for now.
+  Four at once was measured for only two minutes; we look again after the next milestone.
+- **First, as before:** dependencies and shared files decide who can start, one migration is in flight at a time, the heavy checks share one slot, and the weekly pace (about 14% a day, above 20% one Builder) goes first.
+
 ### The workflow at a glance
 
-| Step | Who         | In                           | Ends when                                                                                     |
-| ---- | ----------- | ---------------------------- | --------------------------------------------------------------------------------------------- |
-| 1    | Owner       | Any session                  | The wish is said; the Coordinator starts a Specifier for it at once.                          |
-| 2    | Specifier   | Its own session              | The owner approves the issue: "Goedgekeurd door de projecteigenaar op …".                     |
-| 3    | Coordinator | The Coordinator's session    | A Builder is started with a short brief, the board is updated. At most two Builders.          |
-| 4    | Builder     | Its own worktree and session | The final check is done, and the Builder asks for the go-ahead once.                          |
-| 5    | Owner       | The Builder's session        | The go-ahead is given: one push and the pull request it opens.                                |
-| 6    | Reviewer    | A fresh subagent             | The report is posted; at most two rounds.                                                     |
-| 7    | Owner       | GitHub                       | The pull request is merged.                                                                   |
-| 8    | Coordinator | The Coordinator's session    | The issue is closed, the worktree and branch are gone, an import has run if the data changed. |
+| Step | Who         | In                           | Ends when                                                                                         |
+| ---- | ----------- | ---------------------------- | ------------------------------------------------------------------------------------------------- |
+| 1    | Owner       | Any session                  | The wish is said; the Coordinator starts a Specifier for it at once.                              |
+| 2    | Specifier   | Its own session              | The owner approves the issue: "Goedgekeurd door de projecteigenaar op …".                         |
+| 3    | Coordinator | The Coordinator's session    | A Builder is started with a short brief, the board is updated. At most four, planned on the load. |
+| 4    | Builder     | Its own worktree and session | The final check is done, and the Builder asks for the go-ahead once.                              |
+| 5    | Owner       | The Builder's session        | The go-ahead is given: one push and the pull request it opens.                                    |
+| 6    | Reviewer    | A fresh subagent             | The report is posted; at most two rounds.                                                         |
+| 7    | Owner       | GitHub                       | The pull request is merged.                                                                       |
+| 8    | Coordinator | The Coordinator's session    | The issue is closed, the worktree and branch are gone, an import has run if the data changed.     |
 
 ## Roles
 
@@ -120,7 +133,7 @@ The skills `weekly-coordination`, `specify` and `release-notes` hold its steps.
   The Coordinator doesn't write the issue in its own session, because its context is carried by every later turn.
   It writes an issue itself only when the owner says to just write it.
   When the Specifier ends, the Coordinator puts the approval on the Action List and carries on.
-- Has at most two Builders building at a time, each with its own issue (see _Limits_), and reads the usage before it starts a wave.
+- Plans Builders on the load of the computer, each with its own issue (see _Planning Builders on the load_), and reads the usage before it starts a wave.
 - Keeps the Action List true: a private page (an Artifact with its own database, the address is in memory) with what waits for the owner in priority order, what is being built and what is queued.
   At the start of a session it shows this page in a side pane without being asked, and it compares the rows with the linked sessions and GitHub.
   After that it changes a session's row whenever the session starts, changes state or ends (see `weekly-coordination`).
