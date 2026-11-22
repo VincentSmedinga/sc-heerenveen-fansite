@@ -29,6 +29,7 @@ const player = (id: number, line: FormPlayer['line'], name: string, usesLeft = 1
   id,
   line,
   name,
+  points: 31,
   surname: name.split(' ').at(-1) ?? name,
   usesLeft,
 })
@@ -79,7 +80,7 @@ describe('the card Jouw vier', () => {
     expect(html.indexOf('Verdedigers')).toBeLessThan(html.indexOf('Middenvelders'))
     expect(html.indexOf('Middenvelders')).toBeLessThan(html.indexOf('Aanvallers'))
     expect(html).toContain('0 van 2')
-    expect(html).toContain('nog 3 keer')
+    expect(html).toContain('31 punten · nog 3 keer')
     expect(html).toContain('Al 10 keer gekozen')
     expect(html).toMatch(/<input[^>]*disabled[^>]*value="3"/)
     expect(html).toContain(

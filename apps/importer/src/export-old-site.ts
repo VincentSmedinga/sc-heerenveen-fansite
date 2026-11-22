@@ -1,8 +1,9 @@
 // The export of the old fansite, `pnpm export:old-site`. It reads the database of the old site
 // once, from a copy on your own computer, and writes the match facts, the ratings (averages
-// only, 1465) and the predictions (counts only, 1457) to `apps/importer/data/oude-fansite/`,
-// the friendlies to `docs/oefenwedstrijden-2002-03.md` and the ratings for players outside a
-// line-up to `docs/cijfers-buiten-opstelling.md`.
+// only, 1465), the predictions (counts only, 1457) and the Fantest (the questions and the
+// percentages per answer, no names, 1480) to `apps/importer/data/oude-fansite/`, the friendlies
+// to `docs/oefenwedstrijden-2002-03.md` and the ratings for players outside a line-up to
+// `docs/cijfers-buiten-opstelling.md`.
 // The import reads those files and never the old database (see the README of the importer).
 // The command only reads: the connection is read-only and the queries are selects.
 import { parseEnv } from '@fansite/shared/env'
@@ -73,6 +74,11 @@ async function readRows(url: string): Promise<OldSiteRows> {
       clubs: await select('SELECT code, land, naam FROM club ORDER BY code'),
       events: await select(
         'SELECT id, wsd_code, wsd_seizoen, spr_code, spr_naam, gebeurtenis, minuut, assist, soort FROM wedstrijd_krk ORDER BY id',
+      ),
+      fantestAnswers: await select('SELECT dt_y, dt_m, antwoorden FROM fantest_inz ORDER BY dt_y, dt_m'),
+      fantestKeys: await select('SELECT dt_y, dt_m, sleutel FROM fantest ORDER BY dt_y, dt_m'),
+      fantestQuestions: await select(
+        'SELECT dt_y, dt_m, qst_id, qst_txt, qst_img, opties FROM fantest_qst ORDER BY dt_y, dt_m, qst_id',
       ),
       lineups: await select(
         'SELECT id, ops_id, wsd_code, wsd_seizoen, spr_code, spr_naam, mi, mu FROM wedstrijd_ops ORDER BY id',

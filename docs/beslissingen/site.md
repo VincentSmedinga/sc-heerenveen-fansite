@@ -7387,7 +7387,6 @@
   De opmaak van de cijfers is het component `PredictionCrowd` in het designsysteem, zodat de gesloten kaart op `/fans/prognose` en de kaart op de oude wedstrijden (#1457) dezelfde tekst en grafieken gebruiken.
 - **Waarom:** de pagina van een wedstrijd blijft voor elke bezoeker gelijk en vraagt de database weinig; een minuut houdt de cijfers na de uitslag vers.
 - **Alternatieven:** de cijfers bij elk bezoek berekenen (zwaar bij een drukke wedstrijd); vijf minuten cachen (de verdeling staat dan te lang achter de aftrap aan).
-  \=======
 - **Later:** sinds _De ranglijst van de Prognose is er per seizoen en per wedstrijd_ (21 november 2026) staan de plekken in de kaart "Je punten" en staat de kaart "Stand" in de smalle kolom.
 
 ## De ranglijst van de Prognose is er per seizoen en per wedstrijd
@@ -7754,6 +7753,31 @@
   Het formulier blijft alfabetisch, en de ranglijst van het seizoen en de uitblinker van het jaar houden hun eigen regel.
   De gemiddelden in de database veranderen niet, alleen de uitblinker bij een gelijk gemiddelde met een verschillend aantal cijfers.
 
+## De Fantest van toen is een archief dat niets bewaart, en zijn pagina's staan open voor iedereen
+
+- **Datum:** 22 november 2026
+- **Besluit:** `/fans/fantest` toont de quizzen van de oude Fansite per jaar, en `/fans/fantest/<jaar>-<maand>` is de pagina van één maand.
+  Een bezoeker kiest bij elke vraag één antwoord, een formulier zonder JavaScript stuurt de antwoorden naar de server, en de server rekent de score uit en antwoordt met dezelfde pagina.
+  Een vraag zonder antwoord geeft bij die vraag een eigen foutmelding, en de samenvatting bovenaan krijgt het focus.
+  De site bewaart niets: geen antwoord, geen score, geen cookie, en geen telling van wat iemand speelde.
+  Het archief heeft daarom geen account nodig en telt in geen enkele ranglijst.
+  - De pagina's zijn voor iedereen gelijk en bevatten niets persoonlijks, dus ze mogen in zoekmachines en staan in de sitemap, ook elke maandpagina.
+    `robots.txt` staat `/fans/fantest` toe onder het geweigerde `/fans/`, en `proxy.ts` zet er geen `noindex` op, zoals bij de andere spellen.
+  - Het archief hangt aan de instelling van de Fantest (#1443): met de Fantest of de accounts uit zijn de lijst, elke maandpagina en de actie "niet gevonden", staat het menu-item er niet en staan de pagina's niet in de sitemap.
+  - De score is het aantal goede antwoorden (`scoreQuiz` in `packages/shared`).
+    Een maand toont de percentages per antwoord, "gemiddeld" en het aantal deelnemers van toen alleen bij minstens vijf deelnemers (`quizMinimum`), zoals de andere gegroepeerde cijfers op de site.
+    Bij minder zijn de vragen nog te spelen, en de score staat dan zonder die cijfers.
+  - Een maand waarvan een vraag ontbreekt, zegt dat in een melding boven de vragen, nummert de kaarten "Vraag 1 van 9" en toont de score als "6 van 9".
+    De kaarten zijn genummerd van 1 tot en met het aantal dat er is, ook als de vraag die ontbreekt in het midden zit.
+  - De pagina zegt in één regel dat de vragen uit het archief van de oude Fansite komen, gemaakt door de toenmalige redactie, zonder namen.
+  - De knop "Opnieuw" is een gewone link naar dezelfde pagina, dus het formulier is daarna leeg: er is niets bewaard om te wissen.
+- **Waarom:** de goede antwoorden staan er meteen bij, dus er valt niets te winnen, en dan is er geen reden om iets van de bezoeker te bewaren.
+  Zonder account en zonder gegevens heeft het archief geen plek in de privacyverklaring nodig, en kan elke pagina voor iedereen gelijk zijn en in zoekmachines staan.
+- **Alternatieven:** de scores bewaren per account (meer gegevens en geen eerlijke ranglijst); de gespeelde maanden bijhouden voor een regel op Fans of Mijn account; de antwoorden in de browser onthouden.
+- **Let op:** de pagina's zijn `force-dynamic`, omdat de instelling en de vragen pas bij een verzoek bekend zijn.
+  `/fans/` blijft in `robots.txt` geweigerd voor al het andere.
+  #1481 en verder (een nieuwe quiz elke maand) zijn niet goedgekeurd en zitten er niet in.
+
 ## De tabel van de telling heeft de uitkomsten als rijen
 
 - **Datum:** 22 november 2026
@@ -7840,3 +7864,26 @@
   Een fan zonder voorspellingen ziet de kop "Jouw voorspellingen" met de regel "Nog niets. Doe mee aan de Prognose.".
 - **Waarom:** het totaal is het getal waar het om gaat, en een kaart zonder naam is voor een schermlezer niet te vinden.
 - **Alternatieven:** een losse `aria-label` op de kaart (de kop leest dan als een los getal in de lijst met koppen); de regel onder de kop houden.
+
+## De punten van Fjouwer worden bij het lezen berekend uit het verslag, en een minuut bewaard in het geheugen
+
+- **Datum:** 22 november 2026
+- **Besluit:** de punten van een speler in een wedstrijd komen uit `fantasyPoints` in `packages/shared/src/fantasy-points.ts`, dat de feiten van het verslag (`fantasyFacts`) omzet in een totaal met de reden per onderdeel.
+  De getallen staan in `fantasyScoring`, en de tabel op de pagina en de telling lezen daaruit, dus ze lopen niet uiteen.
+  Een speler die niet speelt krijgt 0 en geen regels.
+  Het totaal heeft geen ondergrens.
+  Een strafschop telt als gewoon doelpunt, een strafschop in een beslissende reeks telt niet, ook niet als assist, en de verlenging telt mee voor doelpunten en minuten.
+  "Geen tegendoelpunt" kijkt naar de hele wedstrijd, ook voor een speler die al was gewisseld, en een eigen doelpunt van onze club telt als tegendoelpunt.
+  Een rode kaart, direct of na twee gele, geeft samen -8 in plaats van de gele.
+  De linie is die van `fantasy_player_lines` (of anders zijn positie), niet de positie van dat moment.
+  Een speler die al tien keer was gekozen krijgt 0 en staat in de tabel met "Telde niet mee: al 10 keer gekozen".
+  Zolang het verslag niet "klaar" is, of een rode kaart zijn minuut mist, geeft `fantasyPoints` niets (`undefined`) en zegt de pagina dat de punten nog komen.
+  Een wedstrijd, een speler en de plek van een fan staan een minuut in het geheugen van de server (`cachedResults`, `cachedStanding`); niets staat in de database.
+  De plek rangschikt alle fans met een vier voor die wedstrijd, ook een geërfde, zonder geblokkeerde accounts en zonder opgeheven accounts; gelijke punten delen een plaats.
+- **Waarom:** een gecorrigeerd verslag werkt zo binnen een minuut door voor iedereen, zonder taak en zonder dat een tabel daarmee gelijk moet blijven.
+  `match_reports.saved_at` zegt niet dat een doelpunt of kaart is veranderd: de importer en de tabel `match_goals` schrijven zonder dat veld te veranderen.
+  Een bewaarde som met dat teken kan dus verouderd zijn, en een kolom die bij elke wijziging verandert, kost een migratie en elke schrijver een extra regel.
+  Berekenen kost per wedstrijd een handvol kleine zoekopdrachten, en het geheugen houdt dat tot één keer per minuut per wedstrijd.
+- **Alternatieven:** de punten bewaren in een tabel met het teken van het verslag (een migratie, en `saved_at` is daarvoor niet betrouwbaar); een taak die de punten na afloop vastlegt (een correctie vraagt dan een nieuwe berekening); de punten bij elke bezoeker opnieuw uitrekenen zonder geheugen.
+- **Let op:** de issue sprak van "bewaard met het teken van het verslag", en `saved_at` bleek daarvoor niet te volstaan.
+  Het geheugen is er per serverproces: op gedeelde hosting kan elk proces zijn eigen minuut hebben, wat voor een correctie niet uitmaakt.

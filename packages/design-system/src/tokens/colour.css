@@ -188,6 +188,9 @@
     --hf-colour-text-link-visited: light-dark(var(--hf-colour-grey-600), var(--hf-colour-grey-400));
     --hf-colour-text-accent: light-dark(var(--hf-colour-red-700), var(--hf-colour-red-300));
 
+    /* Says that an answer is right (QuizQuestion): green text, 4,5:1 on every surface. */
+    --hf-colour-text-correct: light-dark(var(--hf-colour-green-800), var(--hf-colour-green-300));
+
     /*
      * Says that data is missing: a step darker than the accent in light, where the accent is too
      * bright, and the same in dark.
@@ -485,6 +488,7 @@
       --hf-colour-text-link-hover: var(--hf-colour-blue-800);
       --hf-colour-text-link-visited: var(--hf-colour-grey-600);
       --hf-colour-text-accent: var(--hf-colour-red-700);
+      --hf-colour-text-correct: var(--hf-colour-green-800);
       --hf-colour-text-missing: var(--hf-colour-red-800);
       --hf-colour-text-positive: var(--hf-colour-green-800);
       --hf-colour-text-negative: var(--hf-colour-red-800);
