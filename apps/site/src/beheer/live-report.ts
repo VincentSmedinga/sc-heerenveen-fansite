@@ -193,7 +193,11 @@ export async function addLiveEvent(
 
       const checked = checkReportForm(next, contextOf({ match, squad }))
 
-      if (checked.plan === undefined) {
+      const ownErrors = liveErrorsOf(checked.errors, kind, side, number, false)
+
+      // A substitution the lists do not offer is refused too, with the error at the field, so
+      // the screen works without JavaScript as it does with it (#1525).
+      if (checked.plan === undefined || (kind === 'wissel' && Object.keys(ownErrors).length > 0)) {
         return { errors: liveErrorsOf(checked.errors, kind, side, number), status: 'refused' }
       }
 
@@ -357,6 +361,16 @@ const cardNames: Record<string, string> = { geel: 'Gele kaart', 'geel-rood': 'Ge
 /** One event of the overview, with what "Haal weg" needs to find it again. */
 export type LiveEventRow = { id: number; kind: LiveKind; text: string }
 
+/**
+ * What the lists of a substitution need to follow the minute: the red and yellow-red cards and
+ * the substitutions with their place on the clock, in the order they were entered. They go to
+ * `squadAt` in `@fansite/shared/match-report`, the rule the server uses.
+ */
+export type LiveMoves = {
+  cards: { at: number; player: number }[]
+  substitutions: { at: number; in: number; out: number }[]
+}
+
 /** A player of the report as the live screen offers him in a list. */
 export type LivePlayer = {
   /** On the bench and not on the pitch yet: the players a substitution brings on. */
@@ -366,11 +380,14 @@ export type LivePlayer = {
   /** On the pitch: in the line-up or come on, and not gone off. */
   onPitch: boolean
   ours: boolean
+  /** In the line-up: on the pitch at the start. */
+  starter: boolean
 }
 
 /** What the live screen shows of a stored report: the players for the lists and the events. */
 export type LiveView = {
   events: LiveEventRow[]
+  moves: LiveMoves
   players: LivePlayer[]
   /** The goals of each team, as the report has them. */
   score: { opponent: number; ours: number }
@@ -448,12 +465,27 @@ export function liveViewOf(stored: StoredMatchReport, goals: readonly MatchGoal[
 
   return {
     events: rows.toSorted((a, b) => b.at - a.at).map((entry) => entry.row),
+    moves: {
+      cards: stored.cards.flatMap((card) =>
+        card.kind !== 'geel' && card.minute !== null
+          ? [{ at: card.minute + (card.stoppageMinutes ?? 0) / 100, player: card.appearanceId }]
+          : [],
+      ),
+      substitutions: stored.substitutions
+        .toSorted((a, b) => a.id - b.id)
+        .map((substitution) => ({
+          at: (substitution.minute ?? Infinity) + (substitution.stoppageMinutes ?? 0) / 100,
+          in: substitution.appearanceInId,
+          out: substitution.appearanceOutId,
+        })),
+    },
     players: stored.appearances.map((appearance) => ({
       bench: !appearance.starter && !cameOn.has(appearance.id),
       id: appearance.id,
       label: appearance.shirtNumber === null ? appearance.name : `${appearance.shirtNumber} ${appearance.name}`,
       onPitch: (appearance.starter || cameOn.has(appearance.id)) && !wentOff.has(appearance.id),
       ours: appearance.ours,
+      starter: appearance.starter,
     })),
     score: {
       // A goal counts for the team that is credited with it, as the page of the match has it.
@@ -489,7 +521,7 @@ function clockOf(moment: { minute: null | number; stoppageMinutes: null | number
  * of the live form. An error of another row, or of a list, is not the editor's to put right
  * here: it comes as one error for the whole report.
  */
-function liveErrorsOf(errors: ReportErrors, kind: LiveKind, side: Side, number: number): ReportErrors {
+function liveErrorsOf(errors: ReportErrors, kind: LiveKind, side: Side, number: number, fallback = true): ReportErrors {
   const found: ReportErrors = {}
 
   for (const field of fieldsOfKind[kind]) {
@@ -500,7 +532,7 @@ function liveErrorsOf(errors: ReportErrors, kind: LiveKind, side: Side, number: 
     }
   }
 
-  if (Object.keys(found).length === 0) {
+  if (fallback && Object.keys(found).length === 0) {
     found[liveFieldId(kind, 'minuut')] =
       'De gebeurtenis kan niet worden opgeslagen. Kijk of de minuut en de spelers kloppen.'
   }

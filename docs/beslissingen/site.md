@@ -7439,6 +7439,19 @@
 - **Waarom:** de stand is de kaart waar het oog heen moet, en de andere kaarten zijn bijzaak.
 - **Alternatieven:** alle kaarten in de smalle kolom wit of zand.
 
+- **Datum:** 21 november 2026
+- **Besluit:** de lijsten Eruit en Erin van een wissel volgen de gekozen kant en de minuut, en één regel zegt wie er op een minuut op het veld staat of op de bank zit: `squadAt` in `packages/shared/src/match-report.ts`.
+  De server (`play`), het volledige formulier (`squadOnRows` in `apps/site/src/beheer/report-fields.ts`, waar `playersOnPitch` nu op leunt) en het scherm Bijhouden gebruiken die ene functie.
+  Met JavaScript toont Bijhouden alleen spelers van het gekozen team, zonder teamnaam, en het volledige formulier laat in Erin ook weg wie al in een andere wissel erin komt of van het veld is gestuurd.
+  Een speler die niet meer past blijft met een toelichting in de lijst; een andere kant maakt de gekozen spelers leeg, met een regel met `role="status"`.
+  Zonder JavaScript blijft alles zoals het was, en de server weigert nu ook op het scherm Bijhouden een wissel die niet kan, met de fout bij Eruit of Erin.
+- **Waarom:** een lijst van beide teams met de teamnaam in elke keuze is lang en traag te lezen, en een wissel die niet kan merkt de redacteur anders pas na het opslaan.
+  Eén regel voorkomt dat de lijst en de server van mening verschillen.
+- **Later:** het scherm Bijhouden bewaarde tot nu toe een wissel die een regel afkeurde (zoals een speler die eruit gaat zonder op het veld te staan) en vroeg om controle in het volledige formulier.
+  Voor een wissel geldt dat niet meer: die wordt geweigerd.
+  Een doelpunt en een kaart blijven bewaard.
+- **Alternatieven:** de keuzes niet beperken en alleen de server laten weigeren; zonder JavaScript een tweede stap voor de kant en de minuut; een gekozen speler die niet meer past stilletjes uit de lijst halen; de gekozen spelers behouden bij een andere kant.
+
 - **Datum:** 22 november 2026
 - **Besluit:** de voorpagina heeft één kaart Fans, met een rij per spel dat aan staat en nu open is.
   De kaart is openbaar en voor elke bezoeker gelijk: er staat niets persoonlijks in, ook niet of de bezoeker al heeft voorspeld.

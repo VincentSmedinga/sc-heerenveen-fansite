@@ -207,15 +207,33 @@ describe('addLiveEvent for a card and a substitution', () => {
     expect(await database.db.select().from(matchSubstitutions)).toHaveLength(1)
   })
 
-  it('stores a substitution that a rule objects to, and takes a klaar report back to bezig', async () => {
-    // Someone from the bench goes off, who is not on the pitch.
+  it('refuses a substitution of a player who is not on the pitch, at the field Eruit', async () => {
+    // Someone from the bench goes off.
     expect(
       await add('wissel', { erin: await appearanceOf(13), eruit: await appearanceOf(12), minuut: '60' }),
     ).toMatchObject({
-      status: 'saved',
+      errors: { [liveFieldId('wissel', 'eruit')]: expect.any(String) as string },
+      status: 'refused',
+    })
+    expect(await database.db.select().from(matchSubstitutions)).toEqual([])
+  })
+
+  it('refuses a substitute who does not sit on the bench, at the field Erin', async () => {
+    // A starter comes on; and a player who comes on twice.
+    expect(
+      await add('wissel', { erin: await appearanceOf(8), eruit: await appearanceOf(9), minuut: '60' }),
+    ).toMatchObject({
+      errors: { [liveFieldId('wissel', 'erin')]: expect.any(String) as string },
+      status: 'refused',
+    })
+    await add('wissel', { erin: await appearanceOf(12), eruit: await appearanceOf(9), minuut: '60' })
+    expect(
+      await add('wissel', { erin: await appearanceOf(12), eruit: await appearanceOf(8), minuut: '70' }),
+    ).toMatchObject({
+      errors: { [liveFieldId('wissel', 'erin')]: expect.any(String) as string },
+      status: 'refused',
     })
     expect(await database.db.select().from(matchSubstitutions)).toHaveLength(1)
-    expect((await database.db.select().from(matchReports))[0]?.status).toBe('bezig')
   })
 
   it('stores a card for a player who left the pitch, and the report needs a look', async () => {
@@ -324,6 +342,11 @@ describe('the overview', () => {
     const stored = (await readMatchReport(database.db, matchId))!
     const goals = await database.db.select().from(matchGoals).orderBy(asc(matchGoals.id))
     const view = liveViewOf(stored, goals)
+
+    // What the lists of a substitution follow: the substitutions and cards with their clock.
+    expect(view.moves.substitutions).toHaveLength(1)
+    expect(view.moves.substitutions[0]).toMatchObject({ at: 60 })
+    expect(view.players.filter((player) => player.starter)).toHaveLength(11)
 
     expect(view.events.map((row) => row.text)).toEqual([
       "Doelpunt 77' Speler 10",

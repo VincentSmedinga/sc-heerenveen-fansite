@@ -15,6 +15,7 @@ import {
   Select,
   Text,
 } from '@fansite/design-system'
+import { squadAt } from '@fansite/shared/match-report'
 import {
   createContext,
   type ReactNode,
@@ -26,7 +27,7 @@ import {
   useSyncExternalStore,
 } from 'react'
 
-import type { LiveEventInput, LiveEventRow, LiveKind, LivePlayer } from '#src/beheer/live-report'
+import type { LiveEventInput, LiveEventRow, LiveKind, LiveMoves, LivePlayer } from '#src/beheer/live-report'
 
 import { cardKindChoices, goalKindChoices } from '#src/beheer/report-fields'
 
@@ -49,12 +50,15 @@ const fieldId = (kind: LiveKind, field: string) => `live-${kind}-${field}`
 export function LiveEventForm({
   action,
   kind,
+  moves = { cards: [], substitutions: [] },
   opponent,
   players,
   title,
 }: {
   action: (previous: LiveFormState, formData: FormData) => Promise<LiveFormState>
   kind: LiveKind
+  /** The substitutions and cards so far, for the lists of a substitution. */
+  moves?: LiveMoves
   opponent: string
   players: readonly LivePlayer[]
   title: string
@@ -62,6 +66,25 @@ export function LiveEventForm({
   const [state, formAction, pending] = useActionState(action, emptyState)
   const errors = state.errors ?? {}
   const values = state.values ?? {}
+  const scripted = useScripted()
+  // The side, the minute and the two players of a substitution are kept here, so the lists can
+  // follow them. After a save, or an error, they start again from what the server sent back.
+  const [seen, setSeen] = useState(state.version)
+  const [side, setSide] = useState(values.kant ?? '')
+  const [minute, setMinute] = useState(values.minuut ?? '')
+  const [extra, setExtra] = useState(values.extra ?? '')
+  const [out, setOut] = useState(values.eruit ?? '')
+  const [entering, setEntering] = useState(values.erin ?? '')
+  const [cleared, setCleared] = useState('')
+  if (seen !== state.version) {
+    setSeen(state.version)
+    setSide(values.kant ?? '')
+    setMinute(values.minuut ?? '')
+    setExtra(values.extra ?? '')
+    setOut(values.eruit ?? '')
+    setEntering(values.erin ?? '')
+    setCleared('')
+  }
   const summaryId = `live-${kind}-fouten`
   const headingId = `live-${kind}-kop`
   const order = ['kant', 'speler', 'naam', 'assist', 'soort', 'eruit', 'erin', 'minuut', 'extra'] as const
@@ -84,6 +107,11 @@ export function LiveEventForm({
   }, [kind, state, summaryId])
 
   const both = new Set(players.map((player) => player.ours)).size > 1
+  const option = (player: LivePlayer, plain: boolean) => (
+    <Select.Option key={player.id} value={String(player.id)}>
+      {both && !plain ? `${player.ours ? 'sc Heerenveen' : opponent}: ${player.label}` : player.label}
+    </Select.Option>
+  )
   const choose = (id: string, label: string, list: readonly LivePlayer[], hint?: string, required = true) => (
     <Field
       error={errors[fieldId(kind, id)]}
@@ -94,17 +122,87 @@ export function LiveEventForm({
     >
       <Select defaultValue={values[id as keyof LiveEventInput] ?? ''} name={id}>
         <Select.Option value="">{required ? 'Kies een speler' : 'Geen'}</Select.Option>
-        {list.map((player) => (
-          <Select.Option key={player.id} value={String(player.id)}>
-            {both ? `${player.ours ? 'sc Heerenveen' : opponent}: ${player.label}` : player.label}
-          </Select.Option>
-        ))}
+        {list.map((player) => option(player, false))}
       </Select>
     </Field>
   )
 
-  const onPitch = players.filter((player) => player.onPitch)
-  const bench = players.filter((player) => player.bench)
+  // The lists of a substitution. Without JavaScript every player of both teams is in them and
+  // the server refuses what cannot be. With JavaScript they hold the players of the chosen team
+  // who can go off or come on at this minute (the rule of the server, `squadAt`). A player who
+  // is chosen and no longer fits stays, with a note, so nothing disappears quietly.
+  const teamName = side === 'wij' ? 'sc Heerenveen' : opponent
+  const team = side === '' ? [] : players.filter((player) => player.ours === (side === 'wij'))
+  const minuteNumber = /^\d{1,3}$/u.test(minute.trim()) ? Number(minute.trim()) : Infinity
+  const extraNumber = stoppageMinutes.has(minuteNumber) && /^\d{1,2}$/u.test(extra.trim()) ? Number(extra.trim()) : 0
+  const squad = squadAt(
+    {
+      bench: team.filter((player) => !player.starter).map((player) => player.id),
+      cards: moves.cards,
+      starters: team.filter((player) => player.starter).map((player) => player.id),
+      substitutions: moves.substitutions,
+    },
+    { at: minuteNumber + extraNumber / 100 },
+  )
+  const wissel = (
+    id: 'erin' | 'eruit',
+    label: string,
+    fits: ReadonlySet<number>,
+    note: string,
+    hint: string,
+    chosen: string,
+    choose: (value: string) => void,
+  ) => {
+    const list = team.filter((player) => fits.has(player.id))
+    const stays = team.find((player) => String(player.id) === chosen && !fits.has(player.id))
+    const empty = !scripted
+      ? undefined
+      : side === ''
+        ? 'Kies eerst voor wie'
+        : team.length === 0
+          ? `Niemand van ${teamName} in het verslag`
+          : undefined
+
+    return (
+      <Field
+        error={errors[fieldId(kind, id)]}
+        hint={
+          scripted
+            ? hint
+            : 'Alle spelers van beide teams staan in de lijst. Bij het opslaan controleert de site of de wissel kan.'
+        }
+        id={fieldId(kind, id)}
+        label={label}
+      >
+        {scripted ? (
+          <Select
+            name={id}
+            onChange={(event) => {
+              choose(event.currentTarget.value)
+              // A new choice ends the line about the players that were cleared.
+              setCleared('')
+            }}
+            value={chosen}
+          >
+            <Select.Option value="">{empty ?? 'Kies een speler'}</Select.Option>
+            {list.map((player) => option(player, true))}
+            {stays === undefined ? null : (
+              <Select.Option value={String(stays.id)}>
+                {stays.label} ({note})
+              </Select.Option>
+            )}
+          </Select>
+        ) : (
+          <Select defaultValue={values[id] ?? ''} name={id}>
+            <Select.Option value="">Kies een speler</Select.Option>
+            {players
+              .filter((player) => (id === 'eruit' ? player.onPitch : player.bench))
+              .map((player) => option(player, false))}
+          </Select>
+        )}
+      </Field>
+    )
+  }
 
   return (
     <>
@@ -115,7 +213,7 @@ export function LiveEventForm({
         </Heading>
         {/* Outside the form, which is made anew after a save, so a screen reader hears it. */}
         <Text appearance="meta" role="status">
-          {state.saved ?? ''}
+          {cleared || (state.saved ?? '')}
         </Text>
         <Form action={formAction} key={state.version}>
           <RadioGroup
@@ -123,6 +221,20 @@ export function LiveEventForm({
             id={fieldId(kind, 'kant')}
             legend="Voor wie"
             name="kant"
+            onChange={(event) => {
+              const next = event.target instanceof HTMLInputElement ? event.target.value : side
+
+              if (kind === 'wissel' && next !== side) {
+                if (out !== '' || entering !== '') {
+                  setCleared('Spelers gewist: je koos een andere kant.')
+                } else {
+                  setCleared('')
+                }
+                setOut('')
+                setEntering('')
+              }
+              setSide(next)
+            }}
             options={[
               { label: 'sc Heerenveen', value: 'wij' },
               { label: opponent, value: 'zij' },
@@ -130,12 +242,14 @@ export function LiveEventForm({
             {...(values.kant === undefined ? {} : { value: values.kant })}
           />
           <MomentFields
+            extra={extra}
             extraError={errors[fieldId(kind, 'extra')]}
             extraId={fieldId(kind, 'extra')}
-            extraValue={values.extra ?? ''}
+            minute={minute}
             minuteError={errors[fieldId(kind, 'minuut')]}
             minuteId={fieldId(kind, 'minuut')}
-            minuteValue={values.minuut ?? ''}
+            setExtra={setExtra}
+            setMinute={setMinute}
           />
           {kind === 'doelpunt' ? (
             <>
@@ -175,8 +289,24 @@ export function LiveEventForm({
             </>
           ) : (
             <>
-              {choose('eruit', 'Speler die eruit gaat', onPitch)}
-              {choose('erin', 'Speler die erin komt', bench)}
+              {wissel(
+                'eruit',
+                'Speler die eruit gaat',
+                squad.onPitch,
+                'staat dan niet op het veld',
+                `Alleen spelers van ${side === '' ? 'het gekozen team' : teamName} die op deze minuut op het veld staan.`,
+                out,
+                setOut,
+              )}
+              {wissel(
+                'erin',
+                'Speler die erin komt',
+                squad.bench,
+                'zit dan niet op de bank',
+                `Alleen spelers van ${side === '' ? 'het gekozen team' : teamName} die op de bank zitten en niet al erin komen.`,
+                entering,
+                setEntering,
+              )}
             </>
           )}
           <Button disabled={pending} icon="save" type="submit">
@@ -291,21 +421,24 @@ function LiveEvent({
  * sent and has lost its value. Without JavaScript, and with an error on it, it is always there.
  */
 function MomentFields({
+  extra,
   extraError,
   extraId,
-  extraValue,
+  minute,
   minuteError,
   minuteId,
-  minuteValue,
+  setExtra,
+  setMinute,
 }: {
+  extra: string
   extraError: string | undefined
   extraId: string
-  extraValue: string
+  minute: string
   minuteError: string | undefined
   minuteId: string
-  minuteValue: string
+  setExtra: (value: string) => void
+  setMinute: (value: string) => void
 }) {
-  const [minute, setMinute] = useState(minuteValue)
   const scripted = useScripted()
   const showExtra = !scripted || extraError !== undefined || stoppageMinutes.has(Number(minute.trim() || Number.NaN))
 
@@ -317,7 +450,13 @@ function MomentFields({
           inputMode="numeric"
           name="minuut"
           onChange={(event) => {
-            setMinute(event.currentTarget.value)
+            const next = event.currentTarget.value
+
+            setMinute(next)
+            // The added time of a minute that has none is gone, and has lost its value.
+            if (!stoppageMinutes.has(Number(next.trim() || Number.NaN))) {
+              setExtra('')
+            }
           }}
           value={minute}
           width="narrow"
@@ -325,7 +464,16 @@ function MomentFields({
       </Field>
       {showExtra ? (
         <Field error={extraError} id={extraId} label="Blessuretijd" required={false}>
-          <Input autoComplete="off" defaultValue={extraValue} inputMode="numeric" name="extra" width="narrow" />
+          <Input
+            autoComplete="off"
+            inputMode="numeric"
+            name="extra"
+            onChange={(event) => {
+              setExtra(event.currentTarget.value)
+            }}
+            value={extra}
+            width="narrow"
+          />
         </Field>
       ) : null}
     </FieldGroup>

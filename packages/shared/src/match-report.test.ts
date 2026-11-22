@@ -11,6 +11,7 @@ import {
   halfTimeScore,
   minutesPlayed,
   playedMatch,
+  squadAt,
 } from './match-report.ts'
 
 // Our players have the ids 1 to 16 (the first eleven are in the line-up, 12 to 16 on the bench)
@@ -1218,5 +1219,95 @@ describe('halfTimeScore', () => {
 
   it('is empty when a goal has no minute', () => {
     expect(halfTimeScore(finished([goal(10), goal(null)]))).toBeNull()
+  })
+})
+
+describe('squadAt', () => {
+  const byNumber = (a: number, b: number) => a - b
+  const squad = {
+    bench: [12, 13, 14],
+    cards: [{ at: 50, player: 14 }],
+    starters: [1, 2, 3],
+    substitutions: [
+      { at: 60, in: 12, out: 1 },
+      { at: 60, in: 13, out: 12 },
+    ],
+  }
+
+  it('counts everything that was entered when the minute is not known', () => {
+    const { bench, onPitch } = squadAt(squad, { at: Infinity })
+
+    expect([...onPitch].toSorted(byNumber)).toEqual([2, 3, 13])
+    expect([...bench]).toEqual([])
+  })
+
+  it('takes the substitutions of the same minute in the order of the list', () => {
+    expect([...squadAt(squad, { at: 60, index: 0 }).onPitch].toSorted(byNumber)).toEqual([1, 2, 3])
+    // The second one comes after the first: 12 is on the pitch and can go off.
+    expect([...squadAt(squad, { at: 60, index: 1 }).onPitch].toSorted(byNumber)).toEqual([2, 3, 12])
+  })
+
+  it('lets nobody come on twice and takes a red card off the bench', () => {
+    const { bench } = squadAt(squad, { at: 70 })
+
+    expect([...bench]).toEqual([])
+    expect([...squadAt({ ...squad, substitutions: [] }, { at: 49 }).bench].toSorted(byNumber)).toEqual([12, 13, 14])
+    expect([...squadAt({ ...squad, substitutions: [] }, { at: 51 }).bench].toSorted(byNumber)).toEqual([12, 13])
+  })
+
+  it('says the same as the check of the report for each substitution it allows', () => {
+    // The substitution at the end is allowed by the lists exactly when the check lets it pass.
+    const cases = [
+      { cards: [], in: 15, minute: 60, out: 1 },
+      { cards: [], in: 15, minute: 60, out: 12 },
+      { cards: [], in: 10, minute: 60, out: 1 },
+      {
+        cards: [{ appearanceId: 16, kind: 'rood' as const, minute: 50, stoppageMinutes: null }],
+        in: 16,
+        minute: 75,
+        out: 1,
+      },
+      {
+        cards: [{ appearanceId: 16, kind: 'rood' as const, minute: 80, stoppageMinutes: null }],
+        in: 16,
+        minute: 75,
+        out: 1,
+      },
+      {
+        cards: [{ appearanceId: 2, kind: 'rood' as const, minute: 60, stoppageMinutes: null }],
+        in: 16,
+        minute: 60,
+        out: 2,
+      },
+      {
+        cards: [{ appearanceId: 2, kind: 'rood' as const, minute: 59, stoppageMinutes: null }],
+        in: 16,
+        minute: 60,
+        out: 2,
+      },
+      { cards: [], in: 15, minute: 60, out: 11 },
+    ]
+
+    for (const [position, found] of cases.entries()) {
+      const report = changed((r) => {
+        r.cards = found.cards
+        r.goals = []
+        r.incidents = []
+        r.substitutions = [{ inId: 12, minute: 60, outId: 11, stoppageMinutes: null }]
+        r.substitutions.push({ inId: found.in, minute: found.minute, outId: found.out, stoppageMinutes: null })
+      })
+      const refused = codes(report).filter((code) => code.startsWith('substitution-'))
+      const squadOfReport = {
+        bench: [12, 13, 14, 15, 16],
+        cards: found.cards.map((card) => ({ at: card.minute, player: card.appearanceId })),
+        starters: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+        substitutions: report.substitutions.map((s) => ({ at: s.minute, in: s.inId, out: s.outId })),
+      }
+      const lists = squadAt(squadOfReport, { at: found.minute, index: 1 })
+      const outOk = lists.onPitch.has(found.out)
+      const inOk = lists.bench.has(found.in)
+
+      expect(refused.length === 0, `case ${position}`).toBe(outOk && inOk)
+    }
   })
 })

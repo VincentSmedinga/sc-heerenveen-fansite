@@ -114,6 +114,7 @@ export default async function LiveReportPage({ params }: Props) {
             <LiveEventForm
               action={submitLiveEvent.bind(null, id, 'wissel')}
               kind="wissel"
+              moves={view.moves}
               opponent={match.opponent}
               players={view.players}
               title="Wissel"
