@@ -7511,6 +7511,38 @@
   Een oude wedstrijd heeft geen formulier en geen stand meer, dus de kaart toont alleen wat supporters toen voorspelden.
 - **Alternatieven:** de oude aantallen altijd tonen; ze op de nieuwe kaart zetten met de punten (de oude punten komen niet terug).
 
+## De kaart Uitblinker staat bij de oude wedstrijden, achter de schakelaar van de Uitblinker
+
+- **Datum:** 20 november 2026
+- **Besluit:** de uitblinker van een wedstrijd is de speler met het hoogste gemiddelde bij minstens vijf cijfers.
+  Bij gelijk gemiddelde wint de speler met minder cijfers.
+- **Waarom:** dit is de regel van de oude Fansite, en een uitblinker op twee cijfers zegt niets.
+- **Alternatieven:** bij gelijk gemiddelde twee uitblinkers; een andere drempel.
+
+- **Datum:** 20 november 2026
+- **Besluit:** de wedstrijdpagina krijgt een kaart per spel van supporters (Uitblinker, Prognose, Fjouwer), elk met als meta "Van supporters", en geen kaart "Fans" voor alles samen.
+  De kaarten staan in de smalle kolom na de opstellingen en vóór Nieuws, in die volgorde.
+- **Waarom:** een bezoeker zoekt het spel, en niet het hoofdstuk.
+  Een spel dat uit staat of niets te tonen heeft, laat dan geen lege kaart achter.
+- **Alternatieven:** één kaart Fans met drie delen.
+
+- **Datum:** 22 november 2026
+- **Besluit:** de pagina van een wedstrijd van de oude Fansite (`dataSource` is `oude-fansite`) toont de kaart Uitblinker met de cijfers van toen, vóór de kaart Prognose.
+  Bovenaan staat de zegel Winner met het label "Uitblinker van de wedstrijd", de naam en "Gemiddelde van 31 cijfers".
+  Heeft geen enkele speler vijf cijfers, dan is er geen zegel en staat er alleen de tabel.
+  Daaronder staat een tabel met een bijschrift en de kolommen Speler, Gem en Cijfers, in de volgorde van de opstelling uit het verslag.
+  De uitblinker heeft in zijn regel het label "Uitblinker" in tekst.
+  Een speler met minder dan vijf cijfers heeft in Gem de tekst "nog te weinig cijfers" en geen gemiddelde.
+  Een speler die niet in de opstelling van het verslag staat, bijvoorbeeld omdat hij niet meer in de selectie zit, komt achteraan, op naam.
+  Onder de tabel staat "Cijfers van bezoekers van de Fansite, 2001 tot 2007." in kleine letters.
+  De kaart staat achter de schakelaar van de Uitblinker (`FANS_UITBLINKER`): staat het onderdeel uit, dan is er geen kaart en vraagt de pagina de cijfers niet op.
+  Een wedstrijd zonder cijfers heeft geen kaart.
+  De gemiddelden en de aantallen komen één keer per minuut per wedstrijd uit `match_player_ratings` (`oldMatchRatings`), alleen die van de oude Fansite; de nieuwe cijfers komen met #1472.
+  De trainer staat er nog niet in: zijn cijfer komt met #1479.
+- **Waarom:** het zijn gegevens van hetzelfde spel, dus ze komen samen met het spel online.
+  De kolom Cijfers laat zien waarom een speler geen gemiddelde heeft.
+- **Alternatieven:** alleen de uitblinker tonen, zonder tabel; de cijfers op de kaart van de Prognose zetten.
+
 ## Een supporter geeft elke speler van de laatste wedstrijd die 30 minuten of langer speelde een cijfer
 
 - **Datum:** 20 november 2026
