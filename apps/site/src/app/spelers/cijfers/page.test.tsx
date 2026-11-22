@@ -3,6 +3,7 @@ import type { PublicMatch } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { ratingFigures, type RatingFigures } from '#src/fans/season-ratings'
 import { getMatchData, getMatchSeasons, getPersonTraits } from '#src/matches'
 import { getSeasonPlayerStats } from '#src/season-player-stats'
 import { getSeasonReportFigures } from '#src/season-report-figures'
@@ -25,6 +26,12 @@ vi.mock('#src/matches', async (importOriginal) => ({
 
 // The figures of the match reports are made up too, and by default there are none.
 vi.mock('#src/season-report-figures', () => ({ getSeasonReportFigures: vi.fn(), seasonHasReports: vi.fn() }))
+
+// The ratings of supporters are made up too: the card reads them from the database.
+vi.mock('#src/fans/season-ratings', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  ratingFigures: vi.fn(),
+}))
 
 // The squad is made up too: the page reads it from the database.
 
@@ -650,6 +657,110 @@ describe('the column doelpunten per wedstrijd on the card Doelpuntenmakers', () 
     const html = await render()
 
     expect(html).not.toContain('doelpunten per wedstrijd')
+    expect(html).toContain('id="doelpuntenmakers"')
+    expect(console.error).toHaveBeenCalledOnce()
+  })
+})
+
+describe('the card Cijfers van supporters on the page /spelers/cijfers', () => {
+  const figure = (
+    season: string,
+    playerId: number,
+    name: string,
+    counting: number,
+    ratings: number,
+    average: number,
+  ) => ({
+    counting,
+    name,
+    old: season < '2007/08',
+    playerId,
+    ratings,
+    season,
+    total: average * ratings,
+  })
+  const figures: RatingFigures = {
+    figures: [
+      figure('2026/27', 1, 'Speler A', 9, 200, 7.25),
+      figure('2026/27', 2, 'Speler B', 4, 90, 7.5),
+      figure('2026/27', 3, 'Speler C', 2, 90, 9),
+      figure('2005/06', 4, 'Speler D', 20, 400, 6.9),
+    ],
+    oldRatings: [{ average: 6.8, name: 'Speler E', playerId: null, season: '1999/00' }],
+    oldWinners: [],
+    overSeasons: new Set(),
+  }
+  const renderWith = async (query: Record<string, string> = {}) =>
+    withoutIcons(renderToStaticMarkup(await PlayersPage({ searchParams: Promise.resolve(query) })))
+
+  beforeEach(() => {
+    vi.mocked(ratingFigures).mockReset()
+    vi.mocked(ratingFigures).mockResolvedValue(figures)
+  })
+
+  it('is not there, and the database is not read, while the Uitblinker is switched off', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    vi.stubEnv('FANS_UITBLINKER', 'off')
+
+    expect(await renderWith()).not.toContain('Cijfers van supporters')
+    expect(ratingFigures).not.toHaveBeenCalled()
+  })
+
+  it('stands in the main column with the ranking of the season of the page, highest season rating first', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    vi.stubEnv('FANS_UITBLINKER', 'on')
+    const html = await renderWith()
+    const card = html.slice(html.indexOf('id="cijfers-van-supporters"'))
+
+    expect(html.indexOf('id="doelpuntenmakers"')).toBeLessThan(html.indexOf('id="cijfers-van-supporters"'))
+    expect(card).toContain('Seizoen 2026/27')
+    // Speler B has four matches, Speler C two: C is under the threshold of three.
+    expect(card.indexOf('Speler B')).toBeLessThan(card.indexOf('Speler A'))
+    expect(card).not.toContain('Speler C')
+    expect(card).not.toContain('Speler D')
+    expect(card).toContain('href="/fans/uitblinker/van-het-jaar"')
+    expect(html).toContain('aria-label="Seizoen van de cijfers kiezen"')
+  })
+
+  it('shows another season for ?seizoen=, with the source line of the old fansite', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    vi.stubEnv('FANS_UITBLINKER', 'on')
+    const html = await renderWith({ seizoen: '2005-06' })
+
+    expect(html).toContain('Seizoen 2005/06')
+    expect(html).toContain('Speler D')
+    expect(html).toContain('Cijfers van bezoekers van de Fansite, 2001 tot 2007.')
+  })
+
+  it('shows a season with only season ratings with a dash and the line that says so', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    vi.stubEnv('FANS_UITBLINKER', 'on')
+    const html = await renderWith({ seizoen: '1999-00' })
+
+    expect(html).toContain('Speler E')
+    expect(html).toContain('van dat seizoen is alleen het seizoencijfer bekend')
+  })
+
+  it('says there are no ratings for a season that has none, and falls back to the season of the page for an unknown one', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    vi.stubEnv('FANS_UITBLINKER', 'on')
+    vi.mocked(ratingFigures).mockResolvedValue({ ...figures, figures: [], oldRatings: [] })
+
+    expect(await renderWith()).toContain('Dit seizoen zijn er nog geen cijfers.')
+    expect(await renderWith({ seizoen: 'onzin' })).toContain('Dit seizoen zijn er nog geen cijfers.')
+    // Figures exist for the season of the page, so an unknown choice shows that one.
+    vi.mocked(ratingFigures).mockResolvedValue(figures)
+    expect(await renderWith({ seizoen: 'onzin' })).toContain('Seizoen 2026/27')
+  })
+
+  it('is left out, and the page stays, when the ratings could not be read', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    vi.stubEnv('FANS_UITBLINKER', 'on')
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    vi.mocked(ratingFigures).mockRejectedValue(new Error('no database'))
+    const html = await renderWith()
+
+    expect(html).not.toContain('Cijfers van supporters')
     expect(html).toContain('id="doelpuntenmakers"')
     expect(console.error).toHaveBeenCalledOnce()
   })

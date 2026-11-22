@@ -259,6 +259,8 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   // The game Uitblinker is open to a visitor, with the way in; fans-rating.spec.ts checks
   // the rest.
   { path: '/fans/uitblinker', status: 200 },
+  // The Uitblinkers of the year: a card with the running season, whatever the database holds.
+  { path: '/fans/uitblinker/van-het-jaar', status: 200 },
   // The page of the link in a reminder: without a good code it says the link does not work.
   { path: '/fans/herinnering/uitzetten', status: 200 },
   { path: '/fans/herinnering/uitzetten?klaar=1', status: 200 },

@@ -109,7 +109,7 @@ export async function loadRunningRatings(db: Database, matchId: number): Promise
     .from(playerRatings)
     .innerJoin(matchAppearances, eq(matchAppearances.id, playerRatings.appearanceId))
     .leftJoin(supporters, eq(supporters.id, playerRatings.supporterId))
-    .where(and(eq(matchAppearances.matchId, matchId), isNull(supporters.disabledAt)))
+    .where(and(eq(matchAppearances.matchId, matchId), eq(playerRatings.blocked, false), isNull(supporters.disabledAt)))
     .groupBy(matchAppearances.id, matchAppearances.name, matchAppearances.playerId)
 
   return rows.flatMap((row) =>
