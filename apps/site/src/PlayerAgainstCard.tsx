@@ -1,4 +1,4 @@
-import { Card, DataTable, Heading, Text } from '@fansite/design-system'
+import { Card, DataTable, Heading, tableColumns, Text } from '@fansite/design-system'
 import { Fragment } from 'react'
 
 import { againstLabel, type AgainstMatch, type PlayerAgainst } from './player-against'
@@ -58,8 +58,8 @@ export function PlayerAgainstCard({
               'Wedstrijd',
               { fold: true, name: 'Club' },
               { fold: true, name: 'Uitslag' },
-              { abbreviation: 'Min', name: 'Gespeelde minuten' },
-              { abbreviation: 'Doelp', name: 'Doelpunten' },
+              tableColumns.minutes,
+              tableColumns.goals,
             ]}
             rows={matches.map((match) => {
               const href = matchHref(match)
