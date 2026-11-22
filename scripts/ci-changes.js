@@ -9,8 +9,9 @@
 //   node scripts/ci-changes.js
 //
 // The rules, from the safest:
-// 1. Only a pull request can skip them. A push to main and a manual run always run
-//    everything, so main never has a gap.
+// 1. A pull request can skip them by what it changes. A push to main skips them only when its
+//    code is the code of a green pull request (`decideTested`); a manual run always runs
+//    everything.
 // 2. A pull request with the label "volledige controle" runs everything.
 // 3. If the changed files can't be found, or there are none, everything runs.
 // 4. The checks are skipped only if every changed file is one that they can't touch (see
@@ -20,12 +21,16 @@
 // 5. A package.json or a tsconfig, wherever it is, runs them too: a dependency or a compiler
 //    option can change what the site builds, also from inside a skippable folder.
 //
+// A push to main gets one more decision, `decideTested`: if the code on main is the code that
+// the pull request already tested, the checks are not repeated (see the rules there).
+//
 // The axe check of the stories of the design system (`pnpm test:stories`, 80 seconds in CI) is
 // decided here too, by `decideStories`, as the output `stories`. It follows the same first
 // three rules, then runs only if a file that can change a story changed (see `storiesRules`).
 //
-// Lint, typecheck, `pnpm test` and the build are not decided here. They always run, and so do
-// the tests of the importer and the packages.
+// Lint, typecheck, `pnpm test` and the build always run for a pull request, and so do the tests
+// of the importer and the packages. Only `decideTested` can skip them, on a push to main, as
+// the output `tested`.
 //
 // What decides something is a function without side effects, exported for the tests. What
 // touches the computer (git, the GitHub API, the files CI hands over) is below that, and only
@@ -156,6 +161,119 @@ export function decideStories({ event, files, forced = false }) {
   return { reason: 'Controle van de stories overgeslagen: de bestanden raken ze niet', stories: false }
 }
 
+/** The check of the gate job that a pull request must have passed, as the API names it. */
+export const gateCheckName = 'Lint, typecheck, test and build'
+
+/**
+ * Puts the decisions together: `site`, `stories` and `tested`, and the lines for the log. A
+ * push to main whose code was tested skips all of them; otherwise `tested` is false and the
+ * other two
+ * stay as `decide` and `decideStories` said.
+ */
+export function decideRun({ event, files, forced = false, ...tested }) {
+  const result = decideTested({ event, ...tested })
+
+  if (result.tested) {
+    return { reasons: [result.reason], site: false, stories: false, tested: true }
+  }
+
+  const site = decide({ event, files, forced })
+  const stories = decideStories({ event, files, forced })
+
+  return {
+    reasons: [...(event === 'push' ? [result.reason] : []), site.reason, stories.reason],
+    site: site.site,
+    stories: stories.stories,
+    tested: false,
+  }
+}
+
+/**
+ * Decides whether the code of a push to main was already tested by its pull request, so that
+ * the run on main doesn't repeat the checks. It gives `tested` and the line for the log.
+ *
+ * `pullRequests` are the pull requests GitHub lists for the commit, `mainTree` the tree of the
+ * commit on main, `headTree` the tree of the head commit of the pull request and `checkRuns`
+ * the
+ * check runs of that head commit. Anything that is null, missing or odd runs everything:
+ *
+ * 1. Only a push. A manual run and a pull request run everything.
+ * 2. The commit has exactly one pull request, merged into main, whose squash commit is this
+ *    commit.
+ * 3. The tree of the commit equals the tree of the head commit of that pull request. If the
+ *    branch was behind main, the trees differ, and nobody tested what is now on main.
+ * 4. The check "Lint, typecheck, test and build" of GitHub Actions on that head commit passed.
+ */
+export function decideTested({ checkRuns, event, headTree, mainTree, pullRequests, sha }) {
+  const run = (why) => ({ reason: `Alle controles gedraaid: ${why}`, tested: false })
+
+  if (event !== 'push') {
+    return run(`${event ?? 'onbekende gebeurtenis'}, geen push naar main`)
+  }
+
+  if (!Array.isArray(pullRequests)) {
+    return run('de pull request van de commit is niet te vinden')
+  }
+
+  if (pullRequests.length === 0) {
+    return run('de commit heeft geen pull request')
+  }
+
+  if (pullRequests.length > 1) {
+    return run(`de commit heeft ${pullRequests.length} pull requests`)
+  }
+
+  const pullRequest = pullRequests[0]
+  const number = pullRequest?.number
+  const headSha = pullRequest?.head?.sha
+
+  if (
+    !Number.isInteger(number) ||
+    typeof sha !== 'string' ||
+    sha === '' ||
+    pullRequest.merge_commit_sha !== sha ||
+    pullRequest.base?.ref !== 'main' ||
+    !pullRequest.merged_at ||
+    typeof headSha !== 'string' ||
+    headSha === ''
+  ) {
+    return run('de commit is niet de samenvoeging van een pull request in main')
+  }
+
+  if (typeof mainTree !== 'string' || mainTree === '' || typeof headTree !== 'string' || headTree === '') {
+    return run(`de bomen van pull request ${number} zijn niet te bepalen`)
+  }
+
+  if (mainTree !== headTree) {
+    return run(
+      `de boom van main (${mainTree}) verschilt van die van pull request ${number} (${headTree}), de branch liep achter`,
+    )
+  }
+
+  if (!Array.isArray(checkRuns)) {
+    return run(`de checks van pull request ${number} zijn niet te vinden`)
+  }
+
+  const gate = checkRuns.filter(
+    (checkRun) => checkRun?.name === gateCheckName && checkRun.app?.slug === 'github-actions',
+  )
+
+  if (gate.length === 0) {
+    return run(`pull request ${number} heeft geen check "${gateCheckName}"`)
+  }
+
+  if (!gate.every((checkRun) => checkRun.status === 'completed' && checkRun.conclusion === 'success')) {
+    return run(`de check "${gateCheckName}" van pull request ${number} was niet groen`)
+  }
+
+  return {
+    reason:
+      `Controles overgeslagen: pull request ${number} is samengevoegd met een boom die gelijk is aan die van ` +
+      `zijn head-commit (main ${mainTree}, pull request ${headTree}), en de check "${gateCheckName}" was groen`,
+    tested: true,
+  }
+}
+
 /** Gives the names that `git diff --name-only -z` printed. */
 export function parseNames(output) {
   return output.split('\0').filter((name) => name !== '')
@@ -181,26 +299,56 @@ function changedFiles() {
   )
 }
 
+/**
+ * Gathers what `decideTested` needs for a push to main. It stops asking as soon as the answer
+ * is settled, so a push without a single pull request makes one call.
+ */
+async function gatherTested(env) {
+  const sha = env.GITHUB_SHA
+  const pullRequests = await github(env, `commits/${sha}/pulls?per_page=100`)
+  const input = { pullRequests, sha }
+
+  if (pullRequests.length !== 1 || pullRequests[0]?.merge_commit_sha !== sha) {
+    return input
+  }
+
+  const headSha = pullRequests[0].head?.sha
+
+  if (typeof headSha !== 'string' || !/^[0-9a-f]{40}$/.test(headSha)) {
+    return input
+  }
+
+  input.mainTree = execFileSync('git', ['rev-parse', `${sha}^{tree}`], { encoding: 'utf8' }).trim()
+  input.headTree = (await github(env, `git/commits/${headSha}`)).tree?.sha
+  input.checkRuns = (await github(env, `commits/${headSha}/check-runs?filter=latest&per_page=100`)).check_runs
+
+  return input
+}
+
+/** Asks the GitHub API for a path and gives the JSON, or throws if GitHub says no. */
+async function github(env, path) {
+  const response = await fetch(`https://api.github.com/repos/${env.GITHUB_REPOSITORY}/${path}`, {
+    headers: {
+      Accept: 'application/vnd.github+json',
+      Authorization: `Bearer ${env.GITHUB_TOKEN}`,
+      'X-GitHub-Api-Version': '2022-11-28',
+    },
+    signal: AbortSignal.timeout(20_000),
+  })
+
+  if (!response.ok) {
+    throw new Error(`GitHub antwoordde ${response.status} op ${path.split('?')[0].replace(/[0-9a-f]{40}/g, '<sha>')}`)
+  }
+
+  return response.json()
+}
+
 /** Asks GitHub for the labels now, so a label set after the run started counts on a re-run. */
 async function hasForceLabel(env) {
   const event = JSON.parse(readFileSync(env.GITHUB_EVENT_PATH, 'utf8'))
-  const response = await fetch(
-    `https://api.github.com/repos/${env.GITHUB_REPOSITORY}/issues/${event.pull_request.number}/labels?per_page=100`,
-    {
-      headers: {
-        Accept: 'application/vnd.github+json',
-        Authorization: `Bearer ${env.GITHUB_TOKEN}`,
-        'X-GitHub-Api-Version': '2022-11-28',
-      },
-      signal: AbortSignal.timeout(20_000),
-    },
-  )
+  const labels = await github(env, `issues/${event.pull_request.number}/labels?per_page=100`)
 
-  if (!response.ok) {
-    throw new Error(`GitHub antwoordde ${response.status} op de vraag naar de labels`)
-  }
-
-  return (await response.json()).some((label) => label.name === forceLabel)
+  return labels.some((label) => label.name === forceLabel)
 }
 
 /** Names the rules in one phrase for the log: "docs/", "docs/ en AGENTS.md", "a, b en c". */
@@ -210,33 +358,33 @@ function listRules(rules) {
 
 async function main(env) {
   let decision
-  let storiesDecision
 
   try {
     const event = env.GITHUB_EVENT_NAME
     const isPullRequest = event === 'pull_request'
-    const input = {
+
+    decision = decideRun({
       event,
       files: isPullRequest ? changedFiles() : [],
       forced: isPullRequest ? await hasForceLabel(env) : false,
-    }
-
-    decision = decide(input)
-    storiesDecision = decideStories(input)
+      ...(event === 'push' ? await gatherTested(env) : {}),
+    })
   } catch (error) {
     // Whatever goes wrong, the answer is the one that checks the most.
-    decision = { reason: `Controles van de site gedraaid: de beslissing mislukte (${error.message})`, site: true }
-    storiesDecision = {
-      reason: `Controle van de stories gedraaid: de beslissing mislukte (${error.message})`,
+    decision = {
+      reasons: [`Alle controles gedraaid: de beslissing mislukte (${error.message})`],
+      site: true,
       stories: true,
+      tested: false,
     }
   }
 
-  console.log(decision.reason)
-  console.log(storiesDecision.reason)
+  for (const reason of decision.reasons) {
+    console.log(reason)
+  }
 
   if (env.GITHUB_OUTPUT !== undefined) {
-    appendFileSync(env.GITHUB_OUTPUT, `site=${decision.site}\nstories=${storiesDecision.stories}\n`)
+    appendFileSync(env.GITHUB_OUTPUT, `site=${decision.site}\nstories=${decision.stories}\ntested=${decision.tested}\n`)
   }
 }
 

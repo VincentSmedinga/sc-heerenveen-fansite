@@ -117,7 +117,7 @@ CI draait die controles in jobs naast elkaar, zodat een run niet langer duurt da
   Het vierde draait de tests die een artikel schrijven, samen met de rooktest;
 - _Lint, typecheck, test and build_ wacht op alle andere en is de controle die de regels voor `main` eisen.
   Hij slaagt alleen als elke job is geslaagd.
-  Alleen de jobs van de site en van de stories mogen zijn overgeslagen.
+  Alleen de jobs van de site en van de stories mogen zijn overgeslagen, en op `main` ook lint, typecheck en build en de tests.
   Dat mag alleen als _Decide which checks to run_ dat zei.
   Hij wordt rood door drie dingen:
   een job die niet draaide terwijl hij had moeten draaien, een deel dat geen test draaide en een run die is afgebroken.
@@ -129,14 +129,22 @@ Draai je `pnpm test:a11y` lokaal, dan draait alles in een keer; de verdeling in 
 
 CI slaat de rooktest en `pnpm test:a11y` over bij een pull request die alleen `docs/`, `.claude/`, `AGENTS.md`, `CONTRIBUTING.md`, `README.md`, `apps/importer/` of `apps/design-system-mcp/` wijzigt.
 Die controles raken zulke wijzigingen niet, en ze zijn het grootste deel van de machinetijd van een run.
-Lint, typecheck, `pnpm test`, de build en de controle van de titel draaien altijd.
+Lint, typecheck, `pnpm test`, de build en de controle van de titel draaien bij een pull request altijd.
 `pnpm test:stories` draait alleen bij een wijziging die een story kan raken: in `packages/design-system/`, in het lockfile, in `pnpm-workspace.yaml` of in de workflow zelf.
-Een push naar `main`, een handmatige run en het label draaien hem ook.
+Een handmatige run en het label draaien hem ook.
 De controles van de site draaien ook in deze gevallen:
 
 - de pull request wijzigt een bestand dat niet in die lijst staat;
 - de pull request wijzigt een `package.json` of een `tsconfig`;
-- het is een push naar `main` of een handmatige run.
+- het is een handmatige run.
+
+Een push naar `main` draait alles, behalve als de code al is getoetst.
+Dat is zo als de commit precies één pull request heeft, samengevoegd met squash, en de boom van de commit gelijk is aan de boom van de head-commit van die pull request.
+Ook moet de check _Lint, typecheck, test and build_ op die head-commit zijn geslaagd.
+Dan slaat CI lint, typecheck, de tests, de build, de stories en de controles van de site over, en zegt het log in een regel waarom.
+Liep de branch achter op `main`, dan verschilt de boom en draait alles.
+Elke twijfel draait ook alles: geen pull request, meer dan één, een rode of ontbrekende check of een fout van de API.
+De deploys naar acceptatie en naar ds.heerenveen.org zijn aparte workflows en veranderen niet.
 
 Wil je ze toch, zet dan het label `volledige controle` op de pull request en start de opdracht opnieuw.
 Het log zegt in een regel wat CI besloot en waarom.
