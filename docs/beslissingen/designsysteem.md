@@ -4268,6 +4268,8 @@
   De `CheckboxGroup` heeft geen teller, geen regel per vakje, geen reden en geen fout, en de rijen zien er anders uit.
 - **Alternatieven:** de `CheckboxGroup` uitbreiden (elke wijziging raakt de bronnenfilter, dat een gewone reeks vakjes is); de vakjes op de pagina zelf opbouwen; vier keuzelijsten (je ziet de selectie niet in één keer).
 
+<<<<<<< HEAD
+
 ## QuizQuestion voor een vraag van de Fantest
 
 - **Datum:** 22 november 2026
@@ -4279,10 +4281,25 @@
   - Een vraag met een fout toont de tekst onder de vraag, met "Fout:" voor een schermlezer, en de groep wijst er met `aria-describedby` naar.
     Het component controleert niets: de pagina geeft de nummers, de fout en het gekozen antwoord.
   - Met `result` toont dezelfde kaart de vraag na het nakijken, zonder keuzerondjes: een lijst met de antwoorden, het goede antwoord vet en groen, een fout antwoord van de bezoeker rood, en bij elk antwoord het percentage.
-    De bezoeker ziet "Jouw keuze" bij zijn antwoord, en onder de lijst staat "Goed." of "Fout. Het goede antwoord is …".
+    De bezoeker ziet "Jouw keuze" bij zijn antwoord.
+    Onder de lijst staat "Goed." of "Fout. Het goede antwoord is …".
     Kleur is nooit het enige teken: de woorden, het vet en het percentage zeggen hetzelfde, en een schermlezer hoort "goed antwoord" en "fout antwoord".
   - Het groen is een nieuwe kleurrol, `--hf-colour-text-correct`, die op elk vlak 4,5:1 haalt in licht en donker.
     Het rood is `--hf-colour-text-accent`.
 - **Waarom:** elke vraag heeft zo een eigen foutmelding en een eigen goed of fout, en een nieuwe quiz heeft dezelfde onderdelen nodig.
 - **Alternatieven:** alle vragen in één lange lijst met één `RadioGroup` per vraag (geen eigen kaart en geen eigen nummer); de `RatingScale` hergebruiken (die is voor een cijfer); de vraag als echte kop (`h3`) in de legenda.
 - **Let op:** de nieuwe rol staat ook in de tabel van de tokens (`src/docs/tokens.ts`) met de contrastparen.
+  \=======
+
+## De rijkop van een DataTable stort niet meer in tot één letter
+
+- **Datum:** 22 november 2026
+- **Besluit:** de rijkop en de kop van de eerste kolom van een `DataTable` houden `overflow-wrap: anywhere` en krijgen `hyphens: auto` en een minimale breedte van `2em`.
+  Woorden breken eerst op spaties, en alleen een woord dat langer is dan de kolom, zoals een pad, breekt midden in het woord.
+  De `2em` is een ondergrens, geen doel: bij een grotere waarde scrolden andere tabellen (zoals /wedstrijden/cijfers) bij 320 pixels zijwaarts.
+  Of een tabel leesbaar blijft, hangt aan zijn kolommen: bij de telling zijn dat er drie met één woord in de kop, en de e2e-test meet dat de rijkop er niet meer dan vier regels voor nodig heeft.
+  Een lang woord als "doelpuntental" breekt op een lettergreep, want de rijkop heeft ook `hyphens: auto`.
+- **Waarom:** bij `anywhere` telt elke letter als een plek om af te breken, dus een tabel waarvan de andere kolommen niet afbreken drukte de eerste kolom samen tot één letter (de kaart "Punten", #1561).
+- **Alternatief:** de regel laten staan en alleen die ene tabel aanpassen.
+
+> > > > > > > origin/main

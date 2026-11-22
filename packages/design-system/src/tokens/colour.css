@@ -188,7 +188,7 @@
     --hf-colour-text-link-visited: light-dark(var(--hf-colour-grey-600), var(--hf-colour-grey-400));
     --hf-colour-text-accent: light-dark(var(--hf-colour-red-700), var(--hf-colour-red-300));
 
-    /* Says that an answer is right (QuizQuestion): green text that reaches 4,5:1 on every surface. */
+    /* Says that an answer is right (QuizQuestion): green text, 4,5:1 on every surface. */
     --hf-colour-text-correct: light-dark(var(--hf-colour-green-800), var(--hf-colour-green-300));
 
     /*

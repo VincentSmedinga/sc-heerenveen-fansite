@@ -28,8 +28,8 @@
   }
 
   /*
-   * The question is a sentence, so it keeps the body type and is only bold: the uppercase of the
-   * headings would be hard to read. It sets this for the heading of a checked question too.
+   * The question is a sentence, so it keeps the body type and is only bold: the uppercase of
+   * the headings would be hard to read. It sets this for the heading of a checked question too.
    */
   .hf-quiz-question-text {
     color: var(--hf-colour-text-heading);
