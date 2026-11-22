@@ -5,13 +5,13 @@ import { Card, Heading, Page, SeasonPicker, Text } from '@fansite/design-system'
 import { requireFansPart } from '@fansite/shared/fans-env'
 import { notFound, redirect } from 'next/navigation'
 
-import { rankedSeasons, seasonRanking } from '#src/fans/fjouwer-ranking'
+import { rankedSeasons, seasonRanking, shownRows } from '#src/fans/fjouwer-ranking'
 import { logInPaths } from '#src/fans/log-in'
 import { currentSupporter } from '#src/fans/require-supporter'
 import { pageAreas } from '#src/page-areas'
 import { seasonChoices, seasonFromSlug, seasonSlug } from '#src/seasons'
 
-import { standPath, StandTable } from '../StandCards'
+import { standPath, StandTable, visibleRows } from '../StandCards'
 
 const areas = pageAreas({ main: ['stand'] })
 
@@ -68,7 +68,7 @@ export default async function StandPage({
               value={season === undefined ? '' : seasonSlug(season)}
             />
           ) : null}
-          {ranking === undefined || (ranking.rows.length === 0 && ranking.hidden.size === 0) ? (
+          {ranking === undefined || visibleRows(ranking, supporter?.id, shownRows, true).length === 0 ? (
             <Text>Dit seizoen is er nog niets te tonen.</Text>
           ) : (
             <StandTable ranking={ranking} supporterId={supporter?.id} />

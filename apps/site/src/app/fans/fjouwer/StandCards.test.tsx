@@ -71,4 +71,12 @@ describe('the card Stand', () => {
     expect(html).toContain('Schuw')
     expect(html).not.toContain('Nog geen stand')
   })
+
+  it('says there is no ranking yet to somebody else when only hidden names have points', () => {
+    const alone = rankingOf([{ matches: 1, name: 'Schuw', supporterId: 7, total: 20, visible: false }], 1)
+    const html = renderToStaticMarkup(<StandCard ranking={alone} season="2026/27" supporterId={8} />)
+
+    expect(html).toContain('Nog geen stand dit seizoen.')
+    expect(html).not.toContain('<table')
+  })
 })
