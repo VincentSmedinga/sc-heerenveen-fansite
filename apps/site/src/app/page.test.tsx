@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getNewestArticle } from '../articles'
 import { getDiscussions } from '../discussions'
+import { predictionMatches } from '../fans/prediction'
 import { getHeadlines } from '../headlines'
 import { getMatchData, type MatchData, overviewOf } from '../matches'
 import { MatchLines } from '../MatchViews'
@@ -13,6 +14,22 @@ import { getLiveReports, getPreviewAddresses, getReportAddresses } from '../repo
 import { matchData } from '../test-matches'
 import { withoutIcons } from '../without-icons'
 import HomePage, { generateMetadata } from './page'
+
+// The card Fans asks which match the Prognose is open for. The home page must not read the
+// cookies: the cookie of a supporter would make the page personal and so not cacheable.
+vi.mock('next/headers', () => ({
+  cookies: () => {
+    throw new Error('The homepage must not read the cookies of the visitor')
+  },
+  headers: () => {
+    throw new Error('The homepage must not read the headers of the visitor')
+  },
+}))
+vi.mock('../database', () => ({ getDatabase: () => ({ db: {} }) }))
+vi.mock('../fans/prediction', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  predictionMatches: vi.fn(),
+}))
 
 // Only the query is replaced: the check of the number in the address is the real one.
 vi.mock('../headlines', async (importOriginal) => ({ ...(await importOriginal<object>()), getHeadlines: vi.fn() }))
@@ -1318,5 +1335,54 @@ describe('the line under the table in the sidebar of the homepage', () => {
     })
 
     expect(await renderStandingsCard()).not.toContain('Gegevens nog niet bijgewerkt')
+  })
+})
+
+describe('the card Fans on the homepage', () => {
+  beforeEach(() => {
+    vi.mocked(getHeadlines).mockResolvedValue(headlines)
+    vi.mocked(predictionMatches).mockReset()
+    vi.mocked(predictionMatches).mockResolvedValue({
+      next: {
+        clubSlug: 'fc-twente',
+        competition: 'Eredivisie',
+        dateText: null,
+        home: true,
+        id: 1,
+        kickoffAt: new Date('2026-10-24T14:45:00Z'),
+        matchDate: '2026-10-24',
+        opponent: 'FC Twente',
+        round: '10',
+        season: '2026/27',
+        status: 'scheduled',
+      },
+    })
+  })
+
+  it('puts the card in the sidebar between the table and the forum, without reading the visitor', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    vi.stubEnv('FANS_PROGNOSE', 'on')
+
+    const html = withoutIcons(await renderSidebar())
+
+    expect(html).toContain('<h2 class="hf-heading-2" id="fans-heading">Fans</h2>')
+    expect(html).toContain('Voorspel sc Heerenveen – FC Twente. Kan tot zaterdag 16.45 uur.')
+    expect(html.indexOf('standings-heading')).toBeLessThan(html.indexOf('fans-heading'))
+    expect(html.indexOf('fans-heading')).toBeLessThan(html.indexOf('discussions-heading'))
+    // Called again, it gives the same page: nothing in it depends on who asks.
+    expect(withoutIcons(await renderSidebar())).toBe(html)
+  })
+
+  it('has no card while the Prognose is off, and no h2 for it', async () => {
+    expect(await renderSidebar()).not.toContain('fans-heading')
+    expect(predictionMatches).not.toHaveBeenCalled()
+  })
+
+  it('has no card and no empty place when no match is open', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    vi.stubEnv('FANS_PROGNOSE', 'on')
+    vi.mocked(predictionMatches).mockResolvedValue({})
+
+    expect(await renderSidebar()).not.toContain('fans-heading')
   })
 })

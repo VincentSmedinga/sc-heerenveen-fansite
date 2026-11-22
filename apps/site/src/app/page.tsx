@@ -6,6 +6,7 @@ import { cache } from 'react'
 import { getDiscussions } from '../discussions'
 import { reviewBranch } from '../env'
 import { reasonOf } from '../errors'
+import { FansCard, loadOpenGames } from '../FansCard'
 import { getHeadlines, headlineCount, headlinesOfTheWindow } from '../headlines'
 import { getMatchData, type MatchData } from '../matches'
 import { MatchesCard, StandingsCard } from '../MatchViews'
@@ -71,17 +72,18 @@ async function loadMatchLinks(data: MatchData | undefined) {
  */
 const loadContent = cache(async () => {
   try {
-    const [headlines, discussions, episodes, article, matches] = await Promise.all([
+    const [headlines, discussions, episodes, article, matches, openGames] = await Promise.all([
       getHeadlines(),
       getDiscussions(),
       getLatestEpisodes(),
       loadArticle('the homepage'),
       loadMatches(),
+      loadOpenGames(),
     ])
 
     const matchLinks = await loadMatchLinks(matches)
 
-    return { article, discussions, episodes, headlines, matches, matchLinks }
+    return { article, discussions, episodes, headlines, matches, matchLinks, openGames }
   } catch (error) {
     console.error(`Could not read the headlines, discussions and episodes for the homepage: ${reasonOf(error)}`)
 
@@ -105,7 +107,7 @@ export default async function HomePage() {
     return <ServerError retryHref="/" />
   }
 
-  const { article, discussions, episodes, headlines, matches, matchLinks } = content
+  const { article, discussions, episodes, headlines, matches, matchLinks, openGames } = content
   const now = new Date()
   const news = headlinesOfTheWindow(headlines, now)
 
@@ -185,6 +187,7 @@ export default async function HomePage() {
               <StandingsCard data={matches} now={now} />
             </>
           )}
+          <FansCard items={openGames} />
           <DiscussionsCard discussions={discussions} now={now} />
           <EpisodesCard episodes={episodes} heading="Nieuwste podcasts" now={now} />
         </Page.Section>

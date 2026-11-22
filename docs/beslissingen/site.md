@@ -7451,3 +7451,15 @@
   Voor een wissel geldt dat niet meer: die wordt geweigerd.
   Een doelpunt en een kaart blijven bewaard.
 - **Alternatieven:** de keuzes niet beperken en alleen de server laten weigeren; zonder JavaScript een tweede stap voor de kant en de minuut; een gekozen speler die niet meer past stilletjes uit de lijst halen; de gekozen spelers behouden bij een andere kant.
+
+- **Datum:** 22 november 2026
+- **Besluit:** de voorpagina heeft één kaart Fans, met een rij per spel dat aan staat en nu open is.
+  De kaart is openbaar en voor elke bezoeker gelijk: er staat niets persoonlijks in, ook niet of de bezoeker al heeft voorspeld.
+  De kaart staat in de smalle kolom, onder de wedstrijden en de stand en boven het forum, op het zachte oppervlak en zonder watermerk, want het is geen kaart van een spel.
+  De rij van de Prognose komt uit dezelfde regel als het formulier (`predictionMatches`) en heeft geen eigen regel.
+  De kaart leest de wedstrijd in de lezing die de voorpagina al doet, en leest geen cookie: zo blijft de pagina voor iedereen gelijk.
+  Staan accounts of het spel uit, is er geen open wedstrijd of is de aftraptijd onbekend, dan is er geen rij, en zonder rij ook geen kaart.
+  De rij komt uit het component OpenGameList: de naam van het spel, een gedachtestreepje, één zin, en de link aan het eind.
+- **Waarom:** de voorpagina blijft zo cachebaar, en een bezoeker ziet in één oogopslag wat er te doen is.
+  Persoonlijke gegevens horen onder `/fans`.
+- **Alternatieven:** een kaart per spel op de voorpagina; een persoonlijke kaart voor wie is ingelogd.
