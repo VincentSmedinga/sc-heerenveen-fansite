@@ -1,4 +1,4 @@
-import { Link, Text } from '@fansite/design-system'
+import { CardLink } from '@fansite/design-system'
 
 import { predictionRulesAddress } from '#src/fans-paths'
 
@@ -7,9 +7,5 @@ import { predictionRulesAddress } from '#src/fans-paths'
  * list of predictions and the ranking all show (issue 1455).
  */
 export function RulesLink() {
-  return (
-    <Text>
-      <Link href={predictionRulesAddress}>Spelregels</Link>
-    </Text>
-  )
+  return <CardLink href={predictionRulesAddress}>Spelregels</CardLink>
 }

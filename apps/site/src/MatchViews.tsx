@@ -13,6 +13,7 @@ import {
   BarChart,
   Button,
   Card,
+  CardLink,
   DataTable,
   DescriptionList,
   Disclosure,
@@ -22,7 +23,6 @@ import {
   FormChart,
   Heading,
   Input,
-  Link,
   List,
   MarkRow,
   Match,
@@ -708,11 +708,7 @@ export function MatchesCard({
           reportAddresses={reportAddresses}
         />
       )}
-      <Text>
-        <Link href="/wedstrijden" icon="arrow-right">
-          Alle wedstrijden
-        </Link>
-      </Text>
+      <CardLink href="/wedstrijden">Alle wedstrijden</CardLink>
     </Card>
   )
 }
@@ -1344,11 +1340,7 @@ export function StandingsCard({ data, now }: { data: MatchData; now: Date }) {
         />
       )}
       {data.standings.length > 0 && <StandingsBehind matches={data.matches} now={now} />}
-      <Text>
-        <Link href="/wedstrijden#stand" icon="arrow-right">
-          De volledige stand
-        </Link>
-      </Text>
+      <CardLink href="/wedstrijden#stand">De volledige stand</CardLink>
       {(data.standings.length > 0 || data.matches.length > 0) && (
         <WikipediaCredit compact lead="Wedstrijden en stand:" />
       )}

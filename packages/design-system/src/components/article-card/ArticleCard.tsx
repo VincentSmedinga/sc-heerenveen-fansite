@@ -2,6 +2,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 
 import { useId } from 'react'
 
+import { CardLink } from '../card-link/CardLink'
 import { Card } from '../card/Card'
 import { classNames } from '../classNames'
 import { Heading } from '../heading/Heading'
@@ -48,11 +49,9 @@ export const ArticleCard = ({ className, date, dateTime, href, intro, title, ...
         <Time dateTime={dateTime}>{date}</Time>
       </Text>
       <Text>{intro}</Text>
-      <Text>
-        <Link aria-label={`Lees verder over ${title}`} href={href} icon="arrow-right">
-          Lees verder
-        </Link>
-      </Text>
+      <CardLink aria-label={`Lees verder over ${title}`} href={href}>
+        Lees verder
+      </CardLink>
     </Card>
   )
 }

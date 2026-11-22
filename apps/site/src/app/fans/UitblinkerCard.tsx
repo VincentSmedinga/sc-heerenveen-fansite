@@ -1,4 +1,4 @@
-import { Button, Card, Form, Heading, Link, Tag, Text, Winner } from '@fansite/design-system'
+import { Button, Card, CardLink, Form, Heading, Tag, Text, Winner } from '@fansite/design-system'
 import { isFansPartOn } from '@fansite/shared/fans-env'
 
 import { getDatabase } from '#src/database'
@@ -118,9 +118,7 @@ export function UitblinkerCard({ button, result, tag, text }: UitblinkerCardData
           <Button type="submit">Cijfers geven</Button>
         </Form>
       ) : (
-        <Text>
-          <Link href={ratingPath}>Naar de Uitblinker</Link>
-        </Text>
+        <CardLink href={ratingPath}>Naar de Uitblinker</CardLink>
       )}
     </Card>
   )

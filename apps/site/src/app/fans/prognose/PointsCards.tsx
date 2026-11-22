@@ -1,10 +1,10 @@
 import {
   Card,
+  CardLink,
   DataTable,
   Heading,
   type KeyFigure,
   KeyFigures,
-  Link,
   Match,
   PredictionList,
   Text,
@@ -214,9 +214,7 @@ export function YourPredictionsCard({
             items={shown.map((item) => listItemOf(item, now))}
           />
           {items.length > shown.length ? (
-            <Text>
-              <Link href={allPredictionsAddress}>{`Alle ${count} voorspellingen`}</Link>
-            </Text>
+            <CardLink href={allPredictionsAddress}>{`Alle ${count} voorspellingen`}</CardLink>
           ) : null}
           <RulesLink />
         </>

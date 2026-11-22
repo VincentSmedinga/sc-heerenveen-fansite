@@ -2,7 +2,7 @@ import type { PublicLeagueResult } from '@fansite/db/queries'
 import type { Metadata } from 'next'
 
 import { seasonOf } from '@fansite/db/season'
-import { Card, Cup, Heading, Link, Page, SeasonPicker, StandingsTable, Text } from '@fansite/design-system'
+import { Card, CardLink, Cup, Heading, Page, SeasonPicker, StandingsTable, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
 import { cupOutcomeOf } from '#src/cup-outcome'
@@ -167,11 +167,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
             />
             {/* An Eindstand no longer changes, so only this season can be behind. */}
             {current && <StandingsBehind matches={data.matches} now={now} />}
-            <Text>
-              <Link href={statistics()} icon="arrow-right">
-                Onze plek in de competitie
-              </Link>
-            </Text>
+            <CardLink href={statistics()}>Onze plek in de competitie</CardLink>
           </>
         )}
       </Card>
@@ -330,11 +326,5 @@ async function reportAddressesOf(season: string) {
 
 /** The link under the results to the card with the course of the season, on Cijfers. */
 function SeasonCourseLink({ href }: { href: string }) {
-  return (
-    <Text>
-      <Link href={href} icon="arrow-right">
-        Het verloop van het seizoen
-      </Link>
-    </Text>
-  )
+  return <CardLink href={href}>Het verloop van het seizoen</CardLink>
 }

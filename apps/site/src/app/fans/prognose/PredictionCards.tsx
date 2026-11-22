@@ -3,10 +3,10 @@ import type { ReactNode } from 'react'
 import {
   Button,
   Card,
+  CardLink,
   Disclosure,
   Form,
   Heading,
-  Link,
   Match,
   Notice,
   PredictionCrowd,
@@ -111,9 +111,7 @@ export function ClosedCard({
         )
       ) : null}
       {crowd === undefined ? null : <PredictionCrowd {...crowdProps(crowd)} headingLevel={3} />}
-      <Text>
-        <Link href={reportAddress(match.season, match.matchDate, match.clubSlug)}>Naar de wedstrijd</Link>
-      </Text>
+      <CardLink href={reportAddress(match.season, match.matchDate, match.clubSlug)}>Naar de wedstrijd</CardLink>
     </Card>
   )
 }

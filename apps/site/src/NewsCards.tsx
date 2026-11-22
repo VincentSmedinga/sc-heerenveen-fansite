@@ -1,4 +1,4 @@
-import { Card, DiscussionItem, Heading, Link, List, NewsItem, Text } from '@fansite/design-system'
+import { Card, CardLink, DiscussionItem, Heading, List, NewsItem, Text } from '@fansite/design-system'
 
 import type { getDiscussions } from './discussions'
 
@@ -39,11 +39,7 @@ export function DiscussionsCard({
           ))}
         </List>
       )}
-      <Text>
-        <Link href={forumUrl} icon="external-link">
-          Naar het forum
-        </Link>
-      </Text>
+      <CardLink href={forumUrl}>Naar het forum</CardLink>
     </Card>
   )
 }
@@ -77,11 +73,7 @@ export function EditorsCard({
           />
         </List.Item>
       </List>
-      <Text>
-        <Link href="/redactie" icon="arrow-right">
-          Alle artikelen
-        </Link>
-      </Text>
+      <CardLink href="/redactie">Alle artikelen</CardLink>
     </Card>
   )
 }
@@ -129,11 +121,7 @@ export function EpisodesCard({
           ))}
         </List>
       )}
-      <Text>
-        <Link href="/nieuws/podcasts" icon="arrow-right">
-          Alle podcasts
-        </Link>
-      </Text>
+      <CardLink href="/nieuws/podcasts">Alle podcasts</CardLink>
     </Card>
   )
 }

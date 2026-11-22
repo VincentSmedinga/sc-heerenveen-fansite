@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { ArticleCard, Card, Heading, Link, List, NewsItem, Page, Text } from '@fansite/design-system'
+import { ArticleCard, Card, CardLink, Heading, List, NewsItem, Page, Text } from '@fansite/design-system'
 import { cache } from 'react'
 
 import { getDiscussions } from '../discussions'
@@ -167,11 +167,7 @@ export default async function HomePage() {
                 </List>
               </>
             )}
-            <Text>
-              <Link href="/nieuws" icon="arrow-right">
-                Al het nieuws
-              </Link>
-            </Text>
+            <CardLink href="/nieuws">Al het nieuws</CardLink>
           </Card>
         </Page.Cell>
         <Page.Section area="side" aria-label="De wedstrijden, de stand, het forum en de podcasts">

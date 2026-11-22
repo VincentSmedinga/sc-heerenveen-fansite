@@ -63,7 +63,7 @@ describe('the card Cijfers van de fans', () => {
 
     expect(html).toContain('Seizoen van de cijfers kiezen')
     expect(html).toContain(`href="${yearWinnersPath}"`)
-    expect(html).toContain('Uitblinker van het jaar')
+    expect(html).toContain('Uitblinker van het <span class="hf-icon-tail">jaar')
   })
 
   it('says there are no ratings, instead of an empty table, for a season without a player', () => {

@@ -63,7 +63,7 @@ describe('the link "Spelregels" under the ScoreGrid (issue 1455)', () => {
 
     const html = render(false)
 
-    expect(html).toContain('<a href="/fans/spelregels#prognose">Spelregels</a>')
+    expect(html).toContain('<a href="/fans/spelregels#prognose"><span class="hf-icon-tail">Spelregels<svg')
     expect(html.indexOf('Na 90 minuten')).toBeLessThan(html.indexOf('Spelregels'))
   })
 })

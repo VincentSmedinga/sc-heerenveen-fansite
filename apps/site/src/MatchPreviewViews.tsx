@@ -3,11 +3,11 @@ import type { ReactNode } from 'react'
 
 import {
   Card,
+  CardLink,
   DataTable,
   type DataTableRow,
   DescriptionList,
   Heading,
-  Link,
   List,
   MarkRow,
   MatchHeader,
@@ -207,19 +207,10 @@ export function PreviewHeadToHeadCard({
           ))}
         </DescriptionList>
       )}
-      <Text>
-        <Link
-          href={`${matchSearchPath}?tegen=${encodeURIComponent(slug)}&waar=${home ? 'thuis' : 'uit'}`}
-          icon="arrow-right"
-        >
-          {tally.played === 1 ? `De wedstrijd ${where}` : `Alle ${tally.played} wedstrijden ${where}`}
-        </Link>
-      </Text>
-      <Text>
-        <Link href={`${opponentsPath}/${slug}`} icon="arrow-right">
-          {`Alles over ${name}`}
-        </Link>
-      </Text>
+      <CardLink href={`${matchSearchPath}?tegen=${encodeURIComponent(slug)}&waar=${home ? 'thuis' : 'uit'}`}>
+        {tally.played === 1 ? `De wedstrijd ${where}` : `Alle ${tally.played} wedstrijden ${where}`}
+      </CardLink>
+      <CardLink href={`${opponentsPath}/${slug}`}>{`Alles over ${name}`}</CardLink>
     </Card>
   )
 }
@@ -261,11 +252,7 @@ export function PreviewNewsCard({
           </List.Item>
         ))}
       </List>
-      <Text>
-        <Link href={`/nieuws/zoeken?q=${encodeURIComponent(name)}`} icon="arrow-right">
-          {`Meer nieuws over ${name}`}
-        </Link>
-      </Text>
+      <CardLink href={`/nieuws/zoeken?q=${encodeURIComponent(name)}`}>{`Meer nieuws over ${name}`}</CardLink>
     </Card>
   )
 }
@@ -367,11 +354,7 @@ export function PreviewStandingCard({
         sortable={false}
       />
       <Text>{sentence}</Text>
-      <Text>
-        <Link href="/wedstrijden#stand" icon="arrow-right">
-          De hele stand
-        </Link>
-      </Text>
+      <CardLink href="/wedstrijden#stand">De hele stand</CardLink>
     </Card>
   )
 }

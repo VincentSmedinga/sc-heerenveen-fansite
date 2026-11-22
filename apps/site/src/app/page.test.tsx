@@ -611,7 +611,7 @@ describe('the discussions in the sidebar of the homepage', () => {
     expect(html.match(/<section class="hf-page-section"/g)).toHaveLength(1)
     expect(html.indexOf('media-heading')).toBeLessThan(html.indexOf(sidebarStart))
     expect(withoutIcons(await renderSidebar())).toMatch(
-      /^<section class="hf-page-section" style="grid-area:side" aria-label="De wedstrijden, de stand, het forum en de podcasts"><section class="hf-card hf-card-soft" aria-labelledby="matches-heading">.*<\/section><section class="hf-card hf-card-soft" aria-labelledby="standings-heading">.*<\/section><section class="hf-card" aria-labelledby="discussions-heading"><h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies<\/h2><ul role="list">.*<\/ul><p><a href="https:\/\/forum.heerenveen.org">Naar het forum<\/a><\/p><\/section><section class="hf-card" aria-labelledby="episodes-heading">.*<\/section><\/section><\/main>$/,
+      /^<section class="hf-page-section" style="grid-area:side" aria-label="De wedstrijden, de stand, het forum en de podcasts"><section class="hf-card hf-card-soft" aria-labelledby="matches-heading">.*<\/section><section class="hf-card hf-card-soft" aria-labelledby="standings-heading">.*<\/section><section class="hf-card" aria-labelledby="discussions-heading"><h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies<\/h2><ul role="list">.*<\/ul><p><a href="https:\/\/forum.heerenveen.org">Naar het forum <span class="hf-visually-hidden">\(externe site\)<\/span><\/a><\/p><\/section><section class="hf-card" aria-labelledby="episodes-heading">.*<\/section><\/section><\/main>$/,
     )
   })
 
@@ -666,7 +666,7 @@ describe('the discussions in the sidebar of the homepage', () => {
       /^<a href="[^"]*">Naar het <span class="hf-icon-tail">forum<svg aria-hidden="true" class="hf-icon"/,
     )
     expect(link).toContain('<path d="M9.5 2.5h4v4"></path>')
-    expect(link.replace(/<[^>]*>/g, '')).toBe('Naar het forum')
+    expect(link.replace(/<[^>]*>/g, '')).toBe('Naar het forum (externe site)')
     expect(html.match(/<svg /g)).toHaveLength(1)
   })
 
@@ -693,7 +693,9 @@ describe('the discussions in the sidebar of the homepage', () => {
     expect(html).toContain('<p>We hebben nog geen discussies van het forum.</p>')
     expect(html).not.toContain('<ul')
     expect(html.indexOf('nog geen discussies')).toBeLessThan(html.indexOf('Naar het forum'))
-    expect(html).toContain('<a href="https://forum.heerenveen.org">Naar het forum</a>')
+    expect(html).toContain(
+      '<a href="https://forum.heerenveen.org">Naar het forum <span class="hf-visually-hidden">(externe site)</span></a>',
+    )
   })
 
   it('shows the discussions when there is no news', async () => {
@@ -748,7 +750,7 @@ describe('the card with the newest article of the editors', () => {
     expect(html).toContain('<time dateTime="2026-10-25">25 oktober 2026</time>')
     expect(html).toContain('Wij zijn de redactie van de Fansite &amp; &lt;b&gt;dit&lt;/b&gt; is wie we zijn.')
     expect(html).toContain(
-      '<a aria-label="Lees verder over Dit zijn wij &lt;i&gt;allemaal&lt;/i&gt;" href="/redactie/dit-zijn-wij">Lees verder</a>',
+      '<a href="/redactie/dit-zijn-wij" aria-label="Lees verder over Dit zijn wij &lt;i&gt;allemaal&lt;/i&gt;">Lees verder</a>',
     )
   })
 
