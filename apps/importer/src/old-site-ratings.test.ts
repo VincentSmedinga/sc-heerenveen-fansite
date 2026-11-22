@@ -356,6 +356,31 @@ describe('the step seizoencijfers', () => {
     expect(result.lines).toEqual(['Jan Onbekend (2000/01) has a season rating and is not in the database as a player'])
   })
 
+  it('links the codes of Rafael Piresvieira and Radoslav Samarzic to the players of their seasons', async () => {
+    await database.db.insert(players).values([
+      { name: 'Rafael Pires Vieira', searchTerm: 'Pires Vieira', season: '2000/01', source: 'verslag' },
+      { name: 'Radoslav Samardžić', searchTerm: 'Samardžić', season: '1998/99', source: 'verslag' },
+    ])
+
+    const result = await importOldSiteSeasonRatings(
+      database.db,
+      dataOf({
+        seasonRatings: [
+          { average: 6.3, playerCode: 'rafael.piresvieira', season: '0001' },
+          { average: 6.3, playerCode: 'radoslav.samarzic', season: '9899' },
+        ],
+      }),
+    )
+    const rows = await database.db.select().from(oldSeasonRatings).orderBy(asc(oldSeasonRatings.id))
+    const names = new Map((await database.db.select().from(players)).map((row) => [row.id, row.name]))
+
+    expect(result.lines).toEqual([])
+    expect(rows.map((row) => [row.season, row.name, names.get(row.playerId ?? 0)])).toEqual([
+      ['2000/01', 'Rafael Pires Vieira', 'Rafael Pires Vieira'],
+      ['1998/99', 'Radoslav Samardžić', 'Radoslav Samardžić'],
+    ])
+  })
+
   it('changes nothing in a second run', async () => {
     const data = dataOf({ seasonRatings, winners: [{ name: 'Hans Vonk', season: '0001' }] })
 
