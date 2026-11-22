@@ -1,13 +1,6 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import {
-  matchCoachRatings,
-  matchPlayerRatings,
-  oldSeasonRatings,
-  oldSeasonWinners,
-  players,
-  staff,
-} from '@fansite/db/schema'
+import { matchCoachRatings, matchPlayerRatings, oldSeasonRatings, players, staff } from '@fansite/db/schema'
 import { seedStaff } from '@fansite/db/staff-seed'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc } from 'drizzle-orm'
@@ -18,12 +11,7 @@ import type { OldSiteData, OldSiteMatch, OldSiteRatingOfSeason } from './old-sit
 import { importOldSiteClubs, oldSiteClubIds } from './old-site-clubs.ts'
 import { importOldSiteMatches } from './old-site-matches.ts'
 import { importOldSitePlayers } from './old-site-players.ts'
-import {
-  computedWinners,
-  importOldSiteCoachRatings,
-  importOldSiteRatings,
-  importOldSiteSeasonRatings,
-} from './old-site-ratings.ts'
+import { importOldSiteCoachRatings, importOldSiteRatings, importOldSiteSeasonRatings } from './old-site-ratings.ts'
 
 let database: TestDatabase
 
@@ -94,7 +82,6 @@ function dataOf(overrides: Partial<OldSiteData> = {}): OldSiteData {
     predictions: [],
     ratings: [],
     seasonRatings: [],
-    winners: [],
     ...overrides,
   }
 }
@@ -111,7 +98,6 @@ beforeEach(async () => {
     'match_player_ratings',
     'staff',
     'old_season_ratings',
-    'old_season_winners',
     'match_edits',
     'match_statistics',
     'matches',
@@ -400,89 +386,14 @@ describe('the step seizoencijfers', () => {
   })
 
   it('changes nothing in a second run', async () => {
-    const data = dataOf({ seasonRatings, winners: [{ name: 'Hans Vonk', season: '0001' }] })
+    const data = dataOf({ seasonRatings })
 
     await importOldSiteSeasonRatings(database.db, data)
 
     const rows = await database.db.select().from(oldSeasonRatings).orderBy(asc(oldSeasonRatings.id))
     const second = await importOldSiteSeasonRatings(database.db, data)
 
-    expect(second).toMatchObject({ changed: 0, created: 0, unchanged: 3 })
+    expect(second).toMatchObject({ changed: 0, created: 0, unchanged: 2 })
     expect(await database.db.select().from(oldSeasonRatings).orderBy(asc(oldSeasonRatings.id))).toEqual(rows)
-  })
-
-  it('stores the winners of the year, one for each season, linked to the player when he is known', async () => {
-    const data = dataOf({ winners: [{ name: 'Hans Vonk', season: '0102' }] })
-
-    await prepare(data)
-    await importOldSiteSeasonRatings(database.db, data)
-
-    const [winner] = await database.db.select().from(oldSeasonWinners)
-
-    expect(winner).toMatchObject({ name: 'Hans Vonk', season: '2001/02' })
-    expect(winner?.playerId).not.toBeNull()
-  })
-
-  it('says when a winner from 2001/02 on differs from the ratings, and still stores him', async () => {
-    const many = Array.from({ length: 6 }, (_, index) => rating(`m${index}.thuis`, 'erik.edman', 9, 10, 0.5))
-    const more = Array.from({ length: 6 }, (_, index) => rating(`m${index}.thuis`, 'hans.vonk', 7, 10, 0.5))
-    const data = dataOf({ ratings: [...many, ...more], winners: [{ name: 'Hans Vonk', season: '0102' }] })
-    const result = await importOldSiteSeasonRatings(database.db, data)
-
-    expect(result.lines).toEqual([
-      'the Uitblinker of 2001/02 is Hans Vonk on the old page, and Erik Edman on the ratings (9.00)',
-    ])
-    expect(await database.db.select().from(oldSeasonWinners)).toHaveLength(1)
-  })
-
-  it('passes with no winners to compare, as long as the list of the old page is empty', async () => {
-    const many = Array.from({ length: 6 }, (_, index) => rating(`m${index}.thuis`, 'erik.edman', 9, 10, 0.5))
-    const result = await importOldSiteSeasonRatings(database.db, dataOf({ ratings: many, winners: [] }))
-
-    expect(result).toMatchObject({ changed: 0, created: 0, skipped: 0, unchanged: 0 })
-    expect(result.lines).toEqual([])
-    expect(await database.db.select().from(oldSeasonWinners)).toEqual([])
-  })
-
-  it('says nothing when the winner is the one the ratings give', async () => {
-    const many = Array.from({ length: 6 }, (_, index) => rating(`m${index}.thuis`, 'erik.edman', 9, 10, 0.5))
-    const result = await importOldSiteSeasonRatings(
-      database.db,
-      dataOf({ ratings: many, winners: [{ name: 'Erik Edman', season: '0102' }] }),
-    )
-
-    expect(result.lines).toEqual([])
-  })
-})
-
-describe('computedWinners', () => {
-  it('takes all ratings of the season together, on at least six matches of five ratings', () => {
-    const list = (code: string, grades: [number, number][]) =>
-      grades.map(([average, count], index) => rating(`m${index}.thuis`, code, average, count, 1))
-    // 'a' has 9.5 over 6 matches; 'b' has 10 over only 5 matches; 'c' and 'd' tie on the 8,
-    // the one with fewer ratings goes first.
-    const winners = computedWinners({
-      players: [],
-      ratings: [
-        ...list('a.speler', Array<[number, number]>(6).fill([9.5, 5])),
-        ...list('b.speler', Array<[number, number]>(5).fill([10, 20])),
-        ...list('c.speler', Array<[number, number]>(6).fill([8, 7])),
-        ...list('d.speler', Array<[number, number]>(6).fill([8, 5])),
-      ],
-    })
-
-    expect(winners.get('0102')).toMatchObject({ average: 9.5, count: 30, name: 'A Speler' })
-  })
-
-  it('lets the player with fewer ratings win a tie', () => {
-    const winners = computedWinners({
-      players: [],
-      ratings: [
-        ...Array.from({ length: 6 }, (_, index) => rating(`m${index}.thuis`, 'c.speler', 8, 7, 1)),
-        ...Array.from({ length: 6 }, (_, index) => rating(`m${index}.thuis`, 'd.speler', 8, 5, 1)),
-      ],
-    })
-
-    expect(winners.get('0102')?.name).toBe('D Speler')
   })
 })

@@ -3217,20 +3217,3 @@ export const oldSeasonRatings = mysqlTable(
 )
 
 export type OldSeasonRating = typeof oldSeasonRatings.$inferSelect
-
-/**
- * The Uitblinker of the year of the seasons 1998/99 to 2005/06 (issue 1465): typed over from
- * the old page, one for each season. From 2006/07 the winner is worked out from the ratings.
- */
-export const oldSeasonWinners = mysqlTable(
-  'old_season_winners',
-  {
-    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
-    season: varchar('season', { length: matchLimits.season }).notNull(),
-    playerId: int('player_id', { unsigned: true }).references(() => players.id, { onDelete: 'set null' }),
-    name: varchar('name', { length: playerNameMaxLength }).notNull(),
-  },
-  (table) => [unique('old_season_winners_season_unique').on(table.season)],
-)
-
-export type OldSeasonWinner = typeof oldSeasonWinners.$inferSelect

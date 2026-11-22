@@ -13,7 +13,6 @@ import {
   buildOldSiteRatings,
   type RatingRow,
   type SeasonRatingRow,
-  uitblinkersOfTheYear,
   writeRatingsOutsideLineup,
 } from './old-site-ratings-export.ts'
 
@@ -414,7 +413,6 @@ export function buildOldSiteExport(rows: OldSiteRows): OldSiteExport {
   write('season-ratings.json', {
     seasonRatings: ratings.seasonRatings,
     version: oldSiteFileVersion,
-    winners: uitblinkersOfTheYear,
   })
 
   const report = [

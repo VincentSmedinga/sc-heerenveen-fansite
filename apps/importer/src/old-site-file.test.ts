@@ -70,7 +70,6 @@ const allowedFieldNames = new Set([
   'spread',
   'statistics',
   'version',
-  'winners',
 ])
 
 function collectNames(value: unknown, names = new Set<string>()) {
@@ -280,7 +279,6 @@ describe('the files with the ratings (#1465)', () => {
   const seasons = {
     seasonRatings: [{ average: 7.1, playerCode: 'hans.vonk', season: '9899' }],
     version: 3,
-    winners: [{ name: 'Hans Vonk', season: '9899' }],
   }
 
   it('read a file with the averages and a file with the season ratings', () => {
@@ -303,6 +301,8 @@ describe('the files with the ratings (#1465)', () => {
     expect(() =>
       parseOldSiteFile(JSON.stringify({ ...seasons, seasonRatings: [{ ...seasons.seasonRatings[0], votes: 3 }] })),
     ).toThrow(/does not match the format/)
+    // The site works out the Uitblinker of the year: a list of names is not part of the file.
+    expect(() => parseOldSiteFile(JSON.stringify({ ...seasons, winners: [] }))).toThrow(/does not match the format/)
   })
 
   it('refuse a grade outside 1 to 10, a count of zero and a negative spread', () => {

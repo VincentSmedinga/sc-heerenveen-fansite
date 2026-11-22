@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  firstWorkedOutSeason,
   isOldSeason,
   rankSeason,
   type RatingFigures,
@@ -34,7 +33,6 @@ const figure = (
 const data = (parts: Partial<RatingFigures> = {}): RatingFigures => ({
   figures: [],
   oldRatings: [],
-  oldWinners: [],
   overSeasons: new Set(),
   ...parts,
 })
@@ -139,84 +137,106 @@ describe('the ranking of a season', () => {
 
 describe('the Uitblinkers of the year', () => {
   const now = new Date('2026-11-22T12:00:00Z')
+  const over = (...seasons: string[]) => new Set(seasons)
 
-  it('shows nothing but the running season while no name has been typed over', () => {
-    expect(yearWinners(data(), now)).toEqual([{ average: undefined, name: undefined, season: '2026/27' }])
+  it('shows nothing but the running season while there are no ratings', () => {
+    expect(yearWinners(data(), now)).toEqual([{ average: undefined, names: [], season: '2026/27' }])
   })
 
-  it('lists the typed-over winners with their season rating, the newest first, and never works one out for them', () => {
-    const speler = figure('2005/06', 'Speler A', 20, 400, 7.1)
-    const winners = yearWinners(
-      data({
-        // A player with a higher rating who was not typed over must not become the winner.
-        figures: [speler, figure('2005/06', 'Speler B', 25, 500, 8)],
-        oldWinners: [
-          { name: 'Speler A', playerId: speler.playerId, season: '2005/06' },
-          { name: 'Speler Z', playerId: null, season: '1998/99' },
-        ],
-      }),
-      now,
-    )
-
-    expect(winners.map((winner) => [winner.season, winner.name])).toEqual([
-      ['2026/27', undefined],
-      ['2005/06', 'Speler A'],
-      ['1998/99', 'Speler Z'],
-    ])
-    expect(winners[1]?.average).toBeCloseTo(7.1, 5)
-    expect(winners[2]?.average).toBeUndefined()
-  })
-
-  it('works the winner out from 2006/07, with six matches that count and the highest season rating', () => {
+  it('is the player with the highest season rating of a season that is over, the newest season first', () => {
     const winners = yearWinners(
       data({
         figures: [
-          figure(firstWorkedOutSeason, 'Speler A', 6, 150, 7),
-          figure(firstWorkedOutSeason, 'Speler B', 5, 150, 9),
-          figure(firstWorkedOutSeason, 'Speler C', 12, 300, 6.5),
+          figure('2004/05', 'Speler A', 20, 400, 7.1),
+          figure('2004/05', 'Speler B', 25, 500, 6.8),
+          figure('2005/06', 'Speler C', 4, 100, 6.5),
         ],
-        overSeasons: new Set([firstWorkedOutSeason]),
+        overSeasons: over('2004/05', '2005/06'),
       }),
       now,
     )
 
-    expect(winners.find((winner) => winner.season === firstWorkedOutSeason)?.name).toBe('Speler A')
+    expect(winners.map((winner) => [winner.season, winner.names])).toEqual([
+      ['2026/27', []],
+      ['2005/06', ['Speler C']],
+      ['2004/05', ['Speler A']],
+    ])
+    expect(winners[2]?.average).toBeCloseTo(7.1, 5)
   })
 
-  it('takes the player with fewer ratings when the season ratings are equal', () => {
+  it('counts a player from three matches with five ratings or more, not before', () => {
     const winners = yearWinners(
       data({
-        figures: [figure('2025/26', 'Speler A', 7, 300, 7.4), figure('2025/26', 'Speler B', 7, 200, 7.4)],
-        overSeasons: new Set(['2025/26']),
+        figures: [figure('2003/04', 'Speler A', 2, 200, 9), figure('2003/04', 'Speler B', 3, 90, 6)],
+        overSeasons: over('2003/04'),
       }),
       now,
     )
 
-    expect(winners.find((winner) => winner.season === '2025/26')?.name).toBe('Speler B')
+    expect(winners.find((winner) => winner.season === '2003/04')?.names).toEqual(['Speler B'])
+  })
+
+  it('lets the stored season rating decide for 1998/99 to 2000/01', () => {
+    const winners = yearWinners(
+      data({
+        oldRatings: [
+          { average: 6.9, name: 'Speler X', playerId: null, season: '1998/99' },
+          { average: 7.1, name: 'Speler Y', playerId: 40, season: '1998/99' },
+        ],
+        overSeasons: over('1998/99'),
+      }),
+      now,
+    )
+
+    expect(winners.find((winner) => winner.season === '1998/99')).toEqual({
+      average: 7.1,
+      names: ['Speler Y'],
+      season: '1998/99',
+    })
+  })
+
+  it('shows both players on an equal season rating, whatever their number of ratings', () => {
+    const winners = yearWinners(
+      data({
+        figures: [
+          figure('2025/26', 'Speler A', 7, 300, 7.4),
+          figure('2025/26', 'Speler B', 7, 200, 7.4),
+          figure('2025/26', 'Speler C', 7, 200, 7.3),
+        ],
+        overSeasons: over('2025/26'),
+      }),
+      now,
+    )
+
+    expect(winners.find((winner) => winner.season === '2025/26')?.names).toEqual(['Speler B', 'Speler A'])
   })
 
   it('gives a season that is not over no winner, only "Na het seizoen" for the running one', () => {
     const winners = yearWinners(data({ figures: [figure('2026/27', 'Speler A', 9, 300, 8)] }), now)
 
-    expect(winners).toEqual([{ average: undefined, name: undefined, season: '2026/27' }])
+    expect(winners).toEqual([{ average: undefined, names: [], season: '2026/27' }])
   })
 
   it('names the winner of the current season once it is over, and has no row without a winner for it', () => {
     const winners = yearWinners(
-      data({ figures: [figure('2026/27', 'Speler A', 9, 300, 8)], overSeasons: new Set(['2026/27']) }),
+      data({ figures: [figure('2026/27', 'Speler A', 9, 300, 8)], overSeasons: over('2026/27') }),
       new Date('2027-06-15T12:00:00Z'),
     )
 
-    expect(winners.map((winner) => [winner.season, winner.name])).toEqual([['2026/27', 'Speler A']])
+    expect(winners.map((winner) => [winner.season, winner.names])).toEqual([['2026/27', ['Speler A']]])
   })
 
-  it('leaves out a season from 2006/07 that is over but has no player with six matches', () => {
+  it('leaves out a season that is over but has no player that counts', () => {
     const winners = yearWinners(
-      data({ figures: [figure('2025/26', 'Speler A', 5, 300, 8)], overSeasons: new Set(['2025/26']) }),
+      data({ figures: [figure('2025/26', 'Speler A', 2, 300, 8)], overSeasons: over('2025/26') }),
       now,
     )
 
     expect(winners.map((winner) => winner.season)).toEqual(['2026/27'])
+  })
+
+  it('has no row at all for the running season when it is over and nobody counts', () => {
+    expect(yearWinners(data({ overSeasons: over('2026/27') }), new Date('2027-06-15T12:00:00Z'))).toEqual([])
   })
 })
 

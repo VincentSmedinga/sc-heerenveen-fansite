@@ -1,9 +1,9 @@
 import type { Database } from '@fansite/db/client'
 
 import { startOf } from '@fansite/db/rating-window'
-import { matches, matchPlayerRatings, oldSeasonRatings, oldSeasonWinners, players } from '@fansite/db/schema'
+import { matches, matchPlayerRatings, oldSeasonRatings, players } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
-import { gte, sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 
 import { cacheFor } from '#src/cache'
 import { getDatabase } from '#src/database'
@@ -15,20 +15,11 @@ import { minimumMatches, minimumRatings } from '#src/player-ratings'
 // season rating is the average of every rating of the season, as on the page of a player (see
 // `playerRatingsOf`), so a match with few ratings weighs as little as it should.
 
-/** A player is Uitblinker of the year with at least this many matches with enough ratings. */
-export const winnerMinimumMatches = 6
-
-/** The first season whose Uitblinker of the year is worked out; earlier ones are typed over. */
-export const firstWorkedOutSeason = '2006/07'
-
 /** The days after the last match of a season that its window can still be open. */
 const windowDays = 7
 
 /** A season rating of 1998/99 to 2000/01, which has no matches and no count. */
 export type OldRating = { average: number; name: string; playerId: null | number; season: string }
-
-/** The Uitblinker of the year of 1998/99 to 2005/06, as it was typed over. */
-export type OldWinner = { name: string; playerId: null | number; season: string }
 
 /** One row of the ranking of a season. */
 export type RankedPlayer = {
@@ -48,8 +39,7 @@ export type RankedPlayer = {
 export type RatingFigures = {
   figures: readonly SeasonFigure[]
   oldRatings: readonly OldRating[]
-  oldWinners: readonly OldWinner[]
-  /** The seasons from `firstWorkedOutSeason` that are over, which may have a winner now. */
+  /** The seasons that are over, which have an Uitblinker of the year now. */
   overSeasons: ReadonlySet<string>
 }
 
@@ -70,10 +60,10 @@ export type SeasonFigure = {
 
 /** One row of the list of Uitblinkers of the year. */
 export type YearWinner = {
-  /** The season rating of the winner, or `undefined` when we do not have it. */
+  /** The season rating of the winner, or `undefined` for a season that is not over. */
   average: number | undefined
-  /** The name, or `undefined` for a season that is not over. */
-  name: string | undefined
+  /** The winner, or both players on an equal rating; none for a season that is not over. */
+  names: string[]
   season: string
 }
 
@@ -148,9 +138,9 @@ export const isOldSeason = (data: RatingFigures, season: string) =>
 /** The text of a count: one match, two matches. */
 export const matchesText = (count: number) => (count === 1 ? '1 wedstrijd' : `${count} wedstrijden`)
 
-/** What is read: the figures of every season, the old season ratings and the old winners. */
+/** What is read: the figures of every season and the old season ratings. */
 export async function readRatingFigures(db: Database, now = new Date()): Promise<RatingFigures> {
-  const [figures, oldRatings, oldWinners, matchRows] = await Promise.all([
+  const [figures, oldRatings, matchRows] = await Promise.all([
     db
       .select({
         counting: sql<number>`sum(${matchPlayerRatings.ratingCount} >= ${minimumRatings})`,
@@ -166,7 +156,6 @@ export async function readRatingFigures(db: Database, now = new Date()): Promise
       .innerJoin(players, sql`${players.id} = ${matchPlayerRatings.playerId}`)
       .groupBy(matches.season, matchPlayerRatings.playerId, players.name),
     db.select().from(oldSeasonRatings),
-    db.select().from(oldSeasonWinners),
     db
       .select({
         kickoffAt: matches.kickoffAt,
@@ -174,11 +163,19 @@ export async function readRatingFigures(db: Database, now = new Date()): Promise
         season: matches.season,
         status: matches.status,
       })
-      .from(matches)
-      .where(gte(matches.season, firstWorkedOutSeason)),
+      .from(matches),
   ])
 
   const over = seasonsOver(matchRows, now)
+  const current = seasonOf(now)
+  const withMatches = new Set(matchRows.map((row) => row.season))
+
+  // A season of old season ratings that has no match in the table is over once it is past.
+  for (const { season } of oldRatings) {
+    if (!withMatches.has(season) && season < current) {
+      over.add(season)
+    }
+  }
 
   return {
     figures: figures.map((row) => ({
@@ -196,7 +193,6 @@ export async function readRatingFigures(db: Database, now = new Date()): Promise
       playerId: row.playerId,
       season: row.season,
     })),
-    oldWinners: oldWinners.map((row) => ({ name: row.name, playerId: row.playerId, season: row.season })),
     overSeasons: over,
   }
 }
@@ -232,54 +228,36 @@ export function seasonsOver(
 }
 
 /**
- * The Uitblinkers of the year, the newest season first. The seasons before 2006/07 come from
- * the names that were typed over, and a season without a name has no row. From 2006/07 the
- * winner is the player with the highest season rating among those with at least six matches
- * that count; with an equal rating the one with fewer ratings goes first. A season gets its
- * winner only when it is over. The current season always has a row, with no name until then.
- * Nobody is derived from a top that was not typed over: a list without names stays short.
+ * The Uitblinkers of the year, the newest season first (issue 1465). The winner of a season is
+ * the player with the highest season rating, as in the ranking: from 2001/02 only a player with
+ * at least three matches that count is in it, and for 1998/99 to 2000/01 the stored season
+ * rating decides. On an equal rating (to two decimals) both players are the winner. A season
+ * gets its winner only when it is over, and the running season has a row with no name until
+ * then. A season without a player that counts has no row.
  */
 export function yearWinners(data: RatingFigures, now: Date): YearWinner[] {
   const current = seasonOf(now)
-  const rows = new Map<string, YearWinner>()
+  const rows: YearWinner[] = []
 
-  for (const winner of data.oldWinners) {
-    rows.set(winner.season, {
-      average: ratingOf(data, winner.season, winner),
-      name: winner.name,
-      season: winner.season,
-    })
-  }
-
-  const workedOut = new Set(data.figures.map((figure) => figure.season).filter((s) => s >= firstWorkedOutSeason))
-
-  for (const season of workedOut) {
+  for (const season of ratedSeasons(data)) {
     if (!data.overSeasons.has(season)) {
       continue
     }
 
-    const [top] = data.figures
-      .filter((figure) => figure.season === season && figure.counting >= winnerMinimumMatches)
-      .map((figure) => ({ average: figure.total / figure.ratings, name: figure.name, ratings: figure.ratings }))
-      .toSorted(byRating)
+    const [top, ...others] = rankSeason(data, season)
 
     if (top !== undefined) {
-      rows.set(season, { average: top.average, name: top.name, season })
+      const tied = others.filter((row) => hundredths(row.average) === hundredths(top.average))
+
+      rows.push({ average: top.average, names: [top, ...tied].map((row) => row.name), season })
     }
   }
 
-  if (!data.overSeasons.has(current) && !rows.has(current)) {
-    rows.set(current, { average: undefined, name: undefined, season: current })
+  if (!data.overSeasons.has(current)) {
+    rows.push({ average: undefined, names: [], season: current })
   }
 
-  return [...rows.values()].toSorted((a, b) => b.season.localeCompare(a.season))
-}
-
-/** The season rating of a player in one season, from the ranking, or `undefined`. */
-function ratingOf(data: RatingFigures, season: string, who: { name: string; playerId: null | number }) {
-  return rankSeason(data, season).find((row) =>
-    who.playerId === null ? row.name === who.name : row.playerId === who.playerId,
-  )?.average
+  return rows.toSorted((a, b) => b.season.localeCompare(a.season))
 }
 
 /** The figures, read once a minute: the pages that show them stay cacheable. */

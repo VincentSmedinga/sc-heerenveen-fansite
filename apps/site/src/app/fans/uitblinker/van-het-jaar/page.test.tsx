@@ -18,9 +18,8 @@ beforeEach(() => {
   ratingFigures.mockReset()
   ratingFigures.mockResolvedValue({
     figures: [],
-    oldRatings: [],
-    oldWinners: [{ name: 'Speler A', playerId: null, season: '2005/06' }],
-    overSeasons: new Set(),
+    oldRatings: [{ average: 7.1, name: 'Speler A', playerId: null, season: '2000/01' }],
+    overSeasons: new Set(['2000/01']),
   })
 })
 
@@ -38,7 +37,7 @@ describe('the page Uitblinker van het jaar', () => {
     expect(ratingFigures).not.toHaveBeenCalled()
   })
 
-  it('has one h1 and a table with the running season and the winners that were typed over', async () => {
+  it('has one h1 and a table with the running season and the winner that the season rating gives', async () => {
     vi.stubEnv('FANS_ACCOUNTS', 'on')
     vi.stubEnv('FANS_UITBLINKER', 'on')
     const html = renderToStaticMarkup(await YearWinnersPage())
@@ -46,17 +45,17 @@ describe('the page Uitblinker van het jaar', () => {
     expect(html.match(/<h1/g)).toHaveLength(1)
     expect(html).toContain('Na het seizoen')
     expect(html).toContain('Speler A')
-    expect(html.indexOf('2026/27')).toBeLessThan(html.indexOf('2005/06'))
+    expect(html.indexOf('2026/27')).toBeLessThan(html.indexOf('2000/01'))
   })
 
-  it('shows nothing but the running season when the list of names is empty', async () => {
+  it('shows nothing but the running season while no season has ratings', async () => {
     vi.stubEnv('FANS_ACCOUNTS', 'on')
     vi.stubEnv('FANS_UITBLINKER', 'on')
-    ratingFigures.mockResolvedValue({ figures: [], oldRatings: [], oldWinners: [], overSeasons: new Set() })
+    ratingFigures.mockResolvedValue({ figures: [], oldRatings: [], overSeasons: new Set() })
     const html = renderToStaticMarkup(await YearWinnersPage())
 
     expect(html).toContain('Na het seizoen')
-    expect(html).not.toContain('2005/06')
+    expect(html).not.toContain('2000/01')
   })
 
   it('is not indexed', () => {

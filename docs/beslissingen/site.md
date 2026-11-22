@@ -7655,6 +7655,7 @@
 - **Let op:** `apps/site/src/fans/season-ratings.ts` rekent alles uit de gemiddelden en tellingen in `match_player_ratings`, `old_season_ratings` en `old_season_winners` uit, nooit uit losse cijfers, en de gegevens worden één keer per minuut gelezen.
   De pagina's blijven daardoor te cachen.
   De trainer staat er niet in en wordt nooit de uitblinker; zijn cijfer hoort bij #1479.
+- **Later:** zie _De Uitblinker van het jaar is de speler met het hoogste seizoencijfer, ook voor de oude seizoenen_ (22 november 2026): de acht uitblinkers komen niet meer uit `old_season_winners`, de drempel van zes wedstrijden is die van drie, en bij een gelijk seizoencijfer staan beide spelers er.
 
 ## De hoofdtrainer krijgt in de Uitblinker een cijfer, als laatste groep van het formulier
 
@@ -7696,6 +7697,24 @@
 - **Let op:** de cijfers van de trainer (#1478) hebben dezelfde regel nodig; die komt bij dat issue of bij #1479.
   Mislukt de herberekening na het blokkeren of vrijgeven, dan klopt het gemiddelde tot de volgende import niet, want de herberekening staat na de transactie van de redactie en `closeRatingWindows` schrijft een gesloten venster niet opnieuw.
 - **Later:** zie _De trainer staat als laatste regel in de tabel met gemiddelden_ (22 november 2026): de cijfers van de trainer volgen dezelfde regel.
+
+## De Uitblinker van het jaar is de speler met het hoogste seizoencijfer, ook voor de oude seizoenen
+
+- **Datum:** 22 november 2026
+- **Besluit:** de winnaar van een seizoen is de speler met het hoogste seizoencijfer, volgens dezelfde regel als de ranglijst op Spelers › Cijfers: het gemiddelde van alle cijfers van het seizoen.
+  Vanaf 2001/02 telt een speler alleen mee met minstens drie wedstrijden met minstens vijf cijfers, de drempel van de spelerspagina (#1466).
+  Voor 1998/99 tot 2000/01 beslist het bewaarde seizoencijfer.
+  Bij een gelijk seizoencijfer, op twee decimalen, staan beide spelers in dezelfde rij, met "en" ertussen.
+  Een seizoen krijgt zijn winnaar pas als het voorbij is, zoals eerder.
+  Het lopende seizoen houdt "Na het seizoen", en een voorbij seizoen waarin geen speler meetelt, heeft geen rij.
+  De namen van de acht uitblinkers worden niet meer overgetypt van de oude pagina: de lijst in de code, het veld `winners` in `season-ratings.json` en de stap van de import die ze opsloeg en toetste zijn weg.
+  De naam "Uitblinker van het jaar" en het adres `/fans/uitblinker/van-het-jaar` blijven.
+- **Waarom:** zo hoeft niemand namen over te typen en volgen oude en nieuwe seizoenen één regel.
+  Een telling in de bestanden van de oude site laat zien dat elk seizoen van 1998/99 tot en met 2006/07 zo precies één winnaar krijgt, zonder gelijke stand.
+  In 2006/07 hebben twaalf spelers genoeg wedstrijden met cijfers, ook al heeft de oude site maar zeven wedstrijden van dat seizoen.
+- **Alternatieven:** de acht namen overtypen van de oude pagina (kost handwerk en kan afwijken van de cijfers); een drempel van zes wedstrijden voor de titel (strenger dan een seizoencijfer, en de oude seizoenen hebben soms minder wedstrijden met cijfers); bij een gelijke stand de speler met minder cijfers kiezen.
+- **Let op:** migratie 0108 haalt de tabel `old_season_winners` weg.
+  Zij was altijd leeg, want de namen zijn nooit overgetypt.
 
 ## De trainer staat als laatste regel in de tabel met gemiddelden
 

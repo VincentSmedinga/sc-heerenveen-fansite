@@ -50,8 +50,8 @@ const rate = (matchId: number, playerId: number, average: number, count = 10, so
   )
 
 describe(`the migration ${migration}`, () => {
-  it('makes the three tables in utf8mb4, empty', async () => {
-    for (const table of ['match_player_ratings', 'old_season_ratings', 'old_season_winners']) {
+  it('makes the tables in utf8mb4, empty', async () => {
+    for (const table of ['match_player_ratings', 'old_season_ratings']) {
       expect(await rows(`SELECT COUNT(*) AS total FROM ${table}`)).toEqual([{ total: 0 }])
       expect(
         await rows(
@@ -103,20 +103,16 @@ describe(`the migration ${migration}`, () => {
       "INSERT INTO old_season_ratings (season, player_id, name, average) VALUES ('2000/01', ?, 'Hans Vonk', 6.8)",
       [playerId],
     )
-    await database.pool.query(
-      "INSERT INTO old_season_winners (season, player_id, name) VALUES ('2000/01', ?, 'Hans Vonk')",
-      [playerId],
-    )
     await database.pool.query('DELETE FROM players WHERE id = ?', [playerId])
 
     expect(await rows('SELECT name, player_id FROM old_season_ratings')).toEqual([
       { name: 'Hans Vonk', player_id: null },
     ])
-    expect(await rows('SELECT name, player_id FROM old_season_winners')).toEqual([
-      { name: 'Hans Vonk', player_id: null },
-    ])
-    await expect(
-      database.pool.query("INSERT INTO old_season_winners (season, name) VALUES ('2000/01', 'Een ander')"),
-    ).rejects.toThrow(/Duplicate entry/)
+    // The table for the Uitblinker of the year is gone again (#1465, migration 0108).
+    expect(
+      await rows(
+        "SELECT COUNT(*) AS total FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'old_season_winners'",
+      ),
+    ).toEqual([{ total: 0 }])
   })
 })

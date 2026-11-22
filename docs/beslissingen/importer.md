@@ -4554,6 +4554,8 @@
   De uitblinkers van het jaar hebben een eigen tabel, `old_season_winners`, omdat een seizoen vanaf 2001/02 geen seizoencijfer in `old_season_ratings` heeft: dat rekenen de pagina's uit de cijfers per wedstrijd.
   De twee hoofdtrainers staan in dezelfde oude tabel; hun cijfers komen mee in #1502 (zie _De oude cijfers voor de twee hoofdtrainers staan in een eigen tabel_).
 - **Later:** de cijfers van de trainers staan niet in `match_player_ratings` maar in `match_coach_ratings`; zie _De oude cijfers voor de twee hoofdtrainers staan in een eigen tabel_.
+- **Later:** zie _De Uitblinker van het jaar is de speler met het hoogste seizoencijfer, ook voor de oude seizoenen_ (22 november 2026): de uitblinkers van het jaar staan niet meer in `season-ratings.json` en de import schrijft en toetst ze niet meer.
+  De tabel `old_season_winners` is weg: migratie 0108 haalt haar weg.
 
 ## De oude cijfers voor de twee hoofdtrainers staan in een eigen tabel
 

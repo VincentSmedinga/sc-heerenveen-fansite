@@ -124,7 +124,6 @@ const dataOf = (list: OldSiteMatch[]): OldSiteData => ({
   predictions: [],
   ratings: [],
   seasonRatings: [],
-  winners: [],
 })
 
 /** Runs every step of the import on the data, in their order. */
