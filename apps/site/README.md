@@ -1526,6 +1526,8 @@ De regels van het venster staan op één plek, `packages/db/src/rating-window.ts
 De pagina en de actie roepen alleen `src/fans/rating.ts` aan, en het formulier (`RatingForm.tsx`) is een gewone `POST` die zonder JavaScript werkt.
 De cijfers staan in `player_ratings`, per supporter en verschijning in het verslag.
 Een stap van de import (`closeRatingWindows`) zet de gemiddelden na het sluiten in `match_player_ratings` met de bron `fans`.
+De cijfers van een geblokkeerd account tellen niet mee.
+Blokkeren en vrijgeven rekenen de gemiddelden van de gesloten vensters opnieuw uit (`recountRatingsOf`), en `closeAccount` bewaart de markering `blocked` bij de cijfers van een geblokkeerd account dat wordt opgeheven.
 Op `/fans` staat een kaart van het spel (`app/fans/UitblinkerCard.tsx`) en onder "Alles wat we van je bewaren" de eigen cijfers (`src/fans/rating-data.ts`).
 `e2e/fans-rating.spec.ts` zet met `addRatingMatch` (`e2e/admin.ts`) een gespeelde wedstrijd met verslag in de database, omdat de verzonnen gegevens er geen hebben.
 

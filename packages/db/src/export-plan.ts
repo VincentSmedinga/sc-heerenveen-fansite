@@ -124,7 +124,12 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
   player_list_titles: 'copy',
   player_ratings: {
     keep: ['id', 'appearance_id', 'grade', 'created_at', 'updated_at'],
-    replace: { supporter_id: 'NULL' },
+    // A grade of a blocked account stays out of the averages in the copy (issue 1476).
+    replace: {
+      blocked:
+        'IF(`blocked` OR EXISTS (SELECT 1 FROM `supporters` WHERE `supporters`.`id` = `supporter_id` AND `supporters`.`disabled_at` IS NOT NULL), 1, 0)',
+      supporter_id: 'NULL',
+    },
   },
   player_season_stats: 'copy',
   player_stat_differences: 'copy',

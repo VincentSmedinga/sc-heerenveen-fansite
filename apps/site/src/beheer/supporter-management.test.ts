@@ -1,9 +1,21 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { adminUsers, auditLog, supporterBlockedAddresses, supporters } from '@fansite/db/schema'
+import { withClubs } from '@fansite/db/clubs'
+import {
+  adminUsers,
+  auditLog,
+  matchAppearances,
+  matches,
+  matchPlayerRatings,
+  matchReports,
+  playerRatings,
+  players,
+  supporterBlockedAddresses,
+  supporters,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { blockedAddressHash } from '../fans/blocked-addresses'
 import { changeScreenName } from '../fans/change-name'
@@ -36,6 +48,8 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await database.pool.query('DELETE FROM audit_log')
+  await database.pool.query('DELETE FROM matches')
+  await database.pool.query('DELETE FROM players')
   await database.db.delete(supporterBlockedAddresses)
   await database.db.delete(supporters)
   await database.db.delete(adminUsers)
@@ -199,6 +213,75 @@ describe('blocking', () => {
       { action: 'supporter.unblock', itemId: id, reason: null, userId: editor },
     ])
     expect(JSON.stringify(lines)).not.toMatch(/rotzak/iu)
+  })
+})
+
+describe('the grades of a blocked account (issue 1476)', () => {
+  it('stop counting in the average of a match whose window was over, and count again when the block is lifted', async () => {
+    const [row] = await withClubs(database.db, [
+      {
+        competition: 'Eredivisie',
+        goalsAgainst: 0,
+        goalsFor: 1,
+        home: true,
+        kickoffAt: new Date('2026-11-01T18:00:00Z'),
+        matchDate: '2026-11-01',
+        opponent: 'Testdorp FC',
+        round: 'Speelronde 1',
+        season: '2026/27',
+        status: 'played',
+      },
+    ])
+    const [match] = await database.db.insert(matches).values(row!).$returningId()
+    await database.db.insert(matchReports).values({ matchId: match!.id, opponentComplete: true, status: 'klaar' })
+
+    const [player] = await database.db
+      .insert(players)
+      .values({
+        name: 'Zeno Keeper',
+        position: 'doelman',
+        searchTerm: 'Zeno Keeper',
+        season: '2026/27',
+        source: 'selectie',
+      })
+      .$returningId()
+    const [appearance] = await database.db
+      .insert(matchAppearances)
+      .values({
+        matchId: match!.id,
+        name: 'Zeno Keeper',
+        ours: true,
+        playerId: player!.id,
+        shirtNumber: 1,
+        starter: true,
+      })
+      .$returningId()
+    const fine = await add('Netjes', 'netjes@example.test', new Date('2026-10-01T10:00:00Z'))
+    const rotzak = await add('Rotzak99', 'rotzak@example.test', new Date('2026-10-01T10:00:00Z'))
+
+    await database.db.insert(playerRatings).values([
+      { appearanceId: appearance!.id, grade: 8, supporterId: fine },
+      { appearanceId: appearance!.id, grade: 2, supporterId: rotzak },
+    ])
+    await database.db.insert(matchPlayerRatings).values({
+      average: '5.00',
+      matchId: match!.id,
+      playerId: player!.id,
+      ratingCount: 2,
+      source: 'fans',
+      spread: '3.00',
+    })
+
+    const averages = async () =>
+      (await database.db.select().from(matchPlayerRatings)).map((rating) => [rating.average, rating.ratingCount])
+
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    vi.stubEnv('FANS_UITBLINKER', 'on')
+    await blockSupporter(database.db, editor, rotzak, 'misbruik van een spel', start)
+    expect(await averages()).toEqual([['8.00', 1]])
+    await unblockSupporter(database.db, editor, rotzak, start)
+    expect(await averages()).toEqual([['5.00', 2]])
+    vi.unstubAllEnvs()
   })
 })
 

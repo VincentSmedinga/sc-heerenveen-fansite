@@ -7628,3 +7628,21 @@
 - **Alternatieven:** de gemiddelden tijdens het venster tonen (de cijfers worden dan beïnvloed); ze op de wedstrijdpagina tonen voor wie is ingelogd (een pagina die per persoon verschilt).
 - **Let op:** een venster dat gesloten is, maar waarvan de import de gemiddelden nog niet schreef (hoogstens een kwartier), toont geen kaart op de wedstrijdpagina.
   De trainer staat er niet in; die komt met #1479.
+
+## De cijfers van een geblokkeerd account tellen niet meer mee
+
+- **Datum:** 22 november 2026
+- **Besluit:** de cijfers van een geblokkeerd account tellen niet mee in de gemiddelden en de ranglijsten, en ze blijven bewaard, zodat vrijgeven ze terugbrengt.
+  Blokkeert of geeft de redactie een account vrij, dan rekent de site de gemiddelden van de wedstrijden waarin dat account cijfers gaf opnieuw uit, voor alle seizoenen, in dezelfde actie (`recountRatingsOf` in `packages/db/src/rating-window.ts`).
+  Een wedstrijd waarvan het venster nog openstaat, blijft aan de stap van de import, die het gemiddelde schrijft als het venster sluit.
+  `closeRatingWindows` en de herberekening gebruiken dezelfde functie, `writeAverages`, die de rijen van de bron `fans` van de wedstrijd weghaalt en opnieuw schrijft.
+  Een speler zonder cijfers over heeft dan geen rij meer.
+  De uitblinker en de drempel van vijf cijfers volgen uit de nieuwe rijen, want de pagina's rekenen ze uit die rijen uit.
+  Staat de instelling van de Uitblinker uit, dan doet de herberekening niets.
+  `closeAccount` zet bij een geblokkeerd account `player_ratings.blocked` op waar, een markering zonder naam of adres, zodat de cijfers na het opheffen blijven wegblijven.
+  Een account dat eerder was vrijgegeven, geeft zijn cijfers geen markering.
+  Het exportplan zet `blocked` ook op waar voor het cijfer van een account dat nu geblokkeerd is, zodat de kopie van acceptatie dezelfde gemiddelden geeft.
+- **Waarom:** een blokkade bij misbruik moet de gemiddelden schoonhouden, en een vergissing moet te herstellen zijn zonder dat de redactie iets doet.
+  Zonder de markering was opheffen een manier om een blokkade te ontlopen.
+- **Alternatieven:** de cijfers verwijderen (niet terug te draaien); ze laten meetellen en alleen nieuwe cijfers weigeren; de herberekening aan de volgende import overlaten (het gemiddelde klopt dan een kwartier niet).
+- **Let op:** de cijfers van de trainer (#1478) hebben dezelfde regel nodig; die komt bij dat issue of bij #1479.

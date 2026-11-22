@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NewMatch } from './schema.ts'
@@ -12,6 +13,7 @@ import {
   findOwnRatings,
   findRatingWindow,
   ratingWindowDays,
+  recountRatingsOf,
   saveRatings,
 } from './rating-window.ts'
 import {
@@ -500,5 +502,127 @@ describe('closing the window', () => {
     expect(await closeRatingWindows(database.db, now, on)).toEqual({ closed: 1 })
     expect(await closeRatingWindows(database.db, now, on)).toEqual({ closed: 0 })
     expect(await database.db.select().from(matchPlayerRatings)).toHaveLength(1)
+  })
+})
+
+describe('recounting when an account is blocked or released (issue 1476)', () => {
+  async function closedWithAverages() {
+    const now = new Date('2026-11-30T12:00:00Z')
+    const { matchId } = await playedAndNext({ ago: 9 * day, nextIn: null, now })
+    const ids = await lineUp(matchId)
+
+    return { ...ids, matchId, now }
+  }
+
+  const rate = (appearanceId: number, supporterId: null | number, grade: number) =>
+    database.db.insert(playerRatings).values({ appearanceId, grade, supporterId })
+  const block = (id: number) =>
+    database.db.update(supporters).set({ disabledAt: new Date() }).where(eq(supporters.id, id))
+  const release = (id: number) => database.db.update(supporters).set({ disabledAt: null }).where(eq(supporters.id, id))
+  const averages = async () =>
+    (await database.db.select().from(matchPlayerRatings)).map((row) => [row.average, row.ratingCount])
+
+  it('drops the grades of a blocked account from a closed window, and brings them back on release', async () => {
+    const { keeper, now } = await closedWithAverages()
+    const fine = await supporter()
+    const other = await supporter()
+
+    await rate(keeper, fine, 6)
+    await rate(keeper, other, 2)
+    await closeRatingWindows(database.db, now, on)
+    expect(await averages()).toEqual([['4.00', 2]])
+
+    await block(other)
+    expect(await recountRatingsOf(database.db, other, now, on)).toBe(1)
+    expect(await averages()).toEqual([['6.00', 1]])
+
+    await release(other)
+    await recountRatingsOf(database.db, other, now, on)
+    expect(await averages()).toEqual([['4.00', 2]])
+  })
+
+  it('removes the average of a player when every grade drops out, and brings it back', async () => {
+    const { keeper, now } = await closedWithAverages()
+    const only = await supporter()
+
+    await rate(keeper, only, 7)
+    await closeRatingWindows(database.db, now, on)
+    await block(only)
+    await recountRatingsOf(database.db, only, now, on)
+    expect(await averages()).toEqual([])
+
+    await release(only)
+    await recountRatingsOf(database.db, only, now, on)
+    expect(await averages()).toEqual([['7.00', 1]])
+  })
+
+  it('can take a player under the threshold of five grades', async () => {
+    const { keeper, now } = await closedWithAverages()
+    const accounts = await Promise.all([1, 2, 3, 4, 5].map(() => supporter()))
+
+    for (const [index, id] of accounts.entries()) {
+      await rate(keeper, id, 5 + (index % 2))
+    }
+
+    await closeRatingWindows(database.db, now, on)
+    expect((await averages())[0]?.[1]).toBe(5)
+    await block(accounts[0] as number)
+    await recountRatingsOf(database.db, accounts[0] as number, now, on)
+    expect((await averages())[0]?.[1]).toBe(4)
+  })
+
+  it('leaves a window that is still open to the closing step, and does nothing while the game is off', async () => {
+    const { keeper, now } = await closedWithAverages()
+    const fine = await supporter()
+    const other = await supporter()
+
+    await rate(keeper, fine, 6)
+    await rate(keeper, other, 2)
+
+    await block(other)
+    expect(await recountRatingsOf(database.db, other, new Date(now.getTime() - 5 * day), on)).toBe(0)
+    expect(await averages()).toEqual([])
+
+    await closeRatingWindows(database.db, now, on)
+    await release(other)
+    expect(await recountRatingsOf(database.db, other, now, { ...on, FANS_UITBLINKER: 'off' })).toBe(0)
+    expect(await averages()).toEqual([['6.00', 1]])
+  })
+
+  it('keeps the mark of a blocked account that was closed, and not of one that was released first', async () => {
+    const { keeper, mid, now } = await closedWithAverages()
+    const blocked = await supporter()
+    const fine = await supporter()
+
+    await rate(keeper, blocked, 1)
+    await rate(keeper, fine, 7)
+    await rate(mid, fine, 8)
+    await block(blocked)
+    await closeAccount(database.db, blocked)
+    await closeAccount(database.db, fine)
+
+    const stored = await database.db.select().from(playerRatings)
+
+    expect(stored.map((row) => [row.supporterId, row.blocked, row.grade]).toSorted()).toEqual([
+      [null, false, 7],
+      [null, false, 8],
+      [null, true, 1],
+    ])
+    await closeRatingWindows(database.db, now, on)
+    expect((await averages()).toSorted()).toEqual([
+      ['7.00', 1],
+      ['8.00', 1],
+    ])
+  })
+
+  it('does not mark the grades of an account that was blocked and released before it closed', async () => {
+    const { keeper } = await closedWithAverages()
+    const fan = await supporter()
+
+    await rate(keeper, fan, 4)
+    await block(fan)
+    await release(fan)
+    await closeAccount(database.db, fan)
+    expect((await database.db.select().from(playerRatings)).map((row) => row.blocked)).toEqual([false])
   })
 })
