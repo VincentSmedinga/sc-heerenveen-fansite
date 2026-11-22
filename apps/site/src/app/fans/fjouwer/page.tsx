@@ -6,17 +6,18 @@ import { notFound, redirect } from 'next/navigation'
 
 import { getDatabase } from '#src/database'
 import { fjouwerMatch, fjouwerSquad, fjouwerState } from '#src/fans/fjouwer'
+import { cachedStanding, seasonPoints, supporterFours } from '#src/fans/fjouwer-points'
 import { usesLeft } from '#src/fans/fjouwer-rules'
 import { logInPaths } from '#src/fans/log-in'
 import { currentSupporter } from '#src/fans/require-supporter'
 import { pageAreas } from '#src/page-areas'
 
 import { type FjouwerChoice, JouwVierCard, NoMatchCard } from './FjouwerCards'
+import { EarlierMatchesCard, LastMatchCard, ScoringCard } from './PointsCards'
 
-// The card "Jouw vier" stands in the wide column. The cards of the narrow column come with the
-// points (issue 1471) and the ranking (issue 1473), and until then the wide column fills the
-// page.
-const areas = pageAreas({ main: ['four'] })
+// The cards with the four and its points stand in the wide column, the card with the scoring in
+// the narrow one; on a phone the narrow column comes last. The ranking (issue 1473) joins it.
+const areas = pageAreas({ after: ['side'], main: ['four', 'last', 'earlier'] })
 
 // Render on each request: what is open, the deadline and the session are not known at build
 // time, and the page must never be cached or indexed.
@@ -50,7 +51,11 @@ export default async function FjouwerPage() {
   let choice: FjouwerChoice | undefined
 
   if (match !== undefined && supporter !== undefined) {
-    const [squad, state] = await Promise.all([fjouwerSquad(db, match), fjouwerState(db, supporter.id, match)])
+    const [squad, state, points] = await Promise.all([
+      fjouwerSquad(db, match),
+      fjouwerState(db, supporter.id, match),
+      seasonPoints(db, match.season),
+    ])
 
     choice = {
       four: state.four,
@@ -60,12 +65,18 @@ export default async function FjouwerPage() {
         id: player.id,
         line: player.line,
         name: player.name,
+        points: points.get(player.id) ?? 0,
         surname: player.surname,
         usesLeft: usesLeft(state.uses, player.id),
       })),
       saved: state.saved,
     }
   }
+
+  // The points of the four of the supporter: the last match with a four, and the ones before.
+  const fours = supporter === undefined ? [] : await supporterFours(db, supporter.id, now)
+  const [last, ...before] = fours
+  const standing = last?.ready ? await cachedStanding(last.match.id) : undefined
 
   return (
     <Page.Main areas={areas}>
@@ -76,6 +87,17 @@ export default async function FjouwerPage() {
       <Page.Cell area="four">
         {match === undefined ? <NoMatchCard /> : <JouwVierCard choice={choice} match={match} now={now} />}
       </Page.Cell>
+      <Page.Cell area="last">
+        {supporter === undefined || last === undefined ? null : (
+          <LastMatchCard item={last} now={now} standing={standing} supporterId={supporter.id} />
+        )}
+      </Page.Cell>
+      <Page.Cell area="earlier">
+        <EarlierMatchesCard items={before} now={now} />
+      </Page.Cell>
+      <Page.Section area="side" aria-label="De telling">
+        <ScoringCard />
+      </Page.Section>
     </Page.Main>
   )
 }

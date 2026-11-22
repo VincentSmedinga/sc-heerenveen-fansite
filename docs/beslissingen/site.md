@@ -7801,3 +7801,26 @@
 - **Alternatieven:** een rij per fan voor elke wedstrijd, door een taak gemaakt; de erfenis over het seizoen heen laten lopen (de spelers hebben per seizoen een eigen rij, dus daar is geen koppeling voor).
 - **Let op:** `fantasy_picks.supporter_id` wordt leeg bij het opheffen van het account (`ON DELETE SET NULL`), zoals bij `predictions`; de pagina "Alles wat we van je bewaren" toont de gekozen vier (`fjouwerData`).
   Dit issue bewaart geen punten: die van #1471 komen uit de verslagen en worden nooit opgeslagen.
+
+## De punten van Fjouwer worden bij het lezen berekend uit het verslag, en een minuut bewaard in het geheugen
+
+- **Datum:** 22 november 2026
+- **Besluit:** de punten van een speler in een wedstrijd komen uit `fantasyPoints` in `packages/shared/src/fantasy-points.ts`, dat de feiten van het verslag (`fantasyFacts`) omzet in een totaal met de reden per onderdeel.
+  De getallen staan in `fantasyScoring`, en de tabel op de pagina en de telling lezen daaruit, dus ze lopen niet uiteen.
+  Een speler die niet speelt krijgt 0 en geen regels.
+  Het totaal heeft geen ondergrens.
+  Een strafschop telt als gewoon doelpunt, een strafschop in een beslissende reeks telt niet, ook niet als assist, en de verlenging telt mee voor doelpunten en minuten.
+  "Geen tegendoelpunt" kijkt naar de hele wedstrijd, ook voor een speler die al was gewisseld, en een eigen doelpunt van onze club telt als tegendoelpunt.
+  Een rode kaart, direct of na twee gele, geeft samen -8 in plaats van de gele.
+  De linie is die van `fantasy_player_lines` (of anders zijn positie), niet de positie van dat moment.
+  Een speler die al tien keer was gekozen krijgt 0 en staat in de tabel met "Telde niet mee: al 10 keer gekozen".
+  Zolang het verslag niet "klaar" is, of een rode kaart zijn minuut mist, geeft `fantasyPoints` niets (`undefined`) en zegt de pagina dat de punten nog komen.
+  Een wedstrijd, een speler en de plek van een fan staan een minuut in het geheugen van de server (`cachedResults`, `cachedStanding`); niets staat in de database.
+  De plek rangschikt alle fans met een vier voor die wedstrijd, ook een geërfde, zonder geblokkeerde accounts en zonder opgeheven accounts; gelijke punten delen een plaats.
+- **Waarom:** een gecorrigeerd verslag werkt zo binnen een minuut door voor iedereen, zonder taak en zonder dat een tabel daarmee gelijk moet blijven.
+  `match_reports.saved_at` zegt niet dat een doelpunt of kaart is veranderd: de importer en de tabel `match_goals` schrijven zonder dat veld te veranderen.
+  Een bewaarde som met dat teken kan dus verouderd zijn, en een kolom die bij elke wijziging verandert, kost een migratie en elke schrijver een extra regel.
+  Berekenen kost per wedstrijd een handvol kleine zoekopdrachten, en het geheugen houdt dat tot één keer per minuut per wedstrijd.
+- **Alternatieven:** de punten bewaren in een tabel met het teken van het verslag (een migratie, en `saved_at` is daarvoor niet betrouwbaar); een taak die de punten na afloop vastlegt (een correctie vraagt dan een nieuwe berekening); de punten bij elke bezoeker opnieuw uitrekenen zonder geheugen.
+- **Let op:** de issue sprak van "bewaard met het teken van het verslag", en `saved_at` bleek daarvoor niet te volstaan.
+  Het geheugen is er per serverproces: op gedeelde hosting kan elk proces zijn eigen minuut hebben, wat voor een correctie niet uitmaakt.

@@ -43,11 +43,17 @@ export const unknownHourMessage =
 /** The line for an inherited four of which every player still counts. */
 export const inheritedOkMessage = 'Dit zijn je vier van vorige keer. Je kunt ze wijzigen tot de aftrap.'
 
+/** The line behind a name: "31 punten · nog 3 keer". */
+export const playerLine = (points: number, usesLeft: number) =>
+  `${points} ${points === 1 ? 'punt' : 'punten'} · nog ${usesLeft} keer`
+
 /** The groups of the form with the players in them, as the page gives them to the form. */
 export type FormPlayer = {
   id: number
   line: FjouwerLine
   name: string
+  /** What he scored this season in all matches with a finished report, for everybody alike. */
+  points: number
   surname: string
   /** How many times the supporter can still use him this season (0 to 10). */
   usesLeft: number
