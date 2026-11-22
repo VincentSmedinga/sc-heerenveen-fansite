@@ -34,7 +34,8 @@ export async function saveRatingsAction(_previous: RatingState, formData: FormDa
   const window = await findRatingWindow(db)
 
   if (window.state !== 'open' || window.match.id !== matchId) {
-    return { errors: {}, failure: 'closed', values: {} }
+    // The grades that were chosen stay in the form, so the supporter sees what was not saved.
+    return { errors: {}, failure: 'closed', values: chosenIn(formData) }
   }
 
   const entries = new Map(
@@ -53,4 +54,19 @@ export async function saveRatingsAction(_previous: RatingState, formData: FormDa
   }
 
   return { errors: {}, failure: result.answer, values: parsed.values }
+}
+
+/** The grades in a form, by the number of the appearance, without the list of players. */
+function chosenIn(formData: FormData) {
+  const chosen: Record<number, string> = {}
+
+  for (const [name, value] of formData.entries()) {
+    const found = /^cijfer-(\d+)$/.exec(name)
+
+    if (found?.[1] !== undefined && typeof value === 'string') {
+      chosen[Number(found[1])] = value.trim()
+    }
+  }
+
+  return chosen
 }

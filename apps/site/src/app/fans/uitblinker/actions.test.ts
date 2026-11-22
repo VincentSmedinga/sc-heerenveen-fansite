@@ -238,7 +238,10 @@ describe('the action of the grades', () => {
   })
 
   it('refuses a form without the number of a match, and another match', async () => {
-    expect(await saveRatingsAction(empty, form(all('7'), null))).toMatchObject({ failure: 'closed' })
+    expect(await saveRatingsAction(empty, form(all('7'), null))).toMatchObject({
+      failure: 'closed',
+      values: all('7'),
+    })
     expect(await saveRatingsAction(empty, form(all('7'), matchId + 100))).toMatchObject({ failure: 'closed' })
     expect(await database.db.select().from(playerRatings)).toEqual([])
   })
