@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { seasonOf } from '@fansite/db/season'
 import { Heading, Page, Text } from '@fansite/design-system'
 import { requireFansPart } from '@fansite/shared/fans-env'
 import { notFound, redirect } from 'next/navigation'
@@ -7,6 +8,7 @@ import { notFound, redirect } from 'next/navigation'
 import { getDatabase } from '#src/database'
 import { fjouwerMatch, fjouwerSquad, fjouwerState } from '#src/fans/fjouwer'
 import { cachedStanding, seasonPoints, supporterFours } from '#src/fans/fjouwer-points'
+import { emptyRanking, rankedSeasons, seasonRanking } from '#src/fans/fjouwer-ranking'
 import { usesLeft } from '#src/fans/fjouwer-rules'
 import { logInPaths } from '#src/fans/log-in'
 import { currentSupporter } from '#src/fans/require-supporter'
@@ -14,6 +16,7 @@ import { pageAreas } from '#src/page-areas'
 
 import { type FjouwerChoice, JouwVierCard, NoMatchCard } from './FjouwerCards'
 import { EarlierMatchesCard, LastMatchCard, ScoringCard } from './PointsCards'
+import { StandCard } from './StandCards'
 
 // The cards with the four and its points stand in the wide column, the card with the scoring in
 // the narrow one; on a phone the narrow column comes last. The ranking (issue 1473) joins it.
@@ -78,6 +81,9 @@ export default async function FjouwerPage() {
   const [last, ...before] = fours
   const standing = last?.ready ? await cachedStanding(last.match.id) : undefined
 
+  const season = seasonOf(now)
+  const ranking = (await rankedSeasons()).includes(season) ? await seasonRanking(season) : undefined
+
   return (
     <Page.Main areas={areas}>
       <Page.Cell area="head">
@@ -96,6 +102,7 @@ export default async function FjouwerPage() {
         <EarlierMatchesCard items={before} now={now} />
       </Page.Cell>
       <Page.Section area="side" aria-label="De telling">
+        <StandCard ranking={ranking ?? emptyRanking} season={season} supporterId={supporter?.id} />
         <ScoringCard />
       </Page.Section>
     </Page.Main>

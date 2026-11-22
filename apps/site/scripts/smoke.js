@@ -2151,6 +2151,11 @@ await withEmptyDatabase((database) =>
       '/fans/fjouwer must be "not found" with Fjouwer off',
     )
     assert.equal(
+      (await fetch(`${origin}/fans/fjouwer/stand`)).status,
+      404,
+      '/fans/fjouwer/stand must be "not found" with Fjouwer off',
+    )
+    assert.equal(
       (await fetch(`${origin}/fans/spelregels`)).status,
       404,
       '/fans/spelregels must be "not found" with every part off',
@@ -2223,6 +2228,12 @@ await withEmptyDatabase((database) =>
     assert.match(fourHtml, /<h2[^>]*>Jouw vier<\/h2>/)
     assert.match(fourHtml, /Log in om je vier te kiezen/)
     assert.doesNotMatch(fourHtml, /type="checkbox"/)
+    assert.match(fourHtml, /<h2[^>]*>Stand<\/h2>/)
+
+    const fourRanking = await fetch(`${origin}/fans/fjouwer/stand`)
+
+    assert.equal(fourRanking.status, 200, '/fans/fjouwer/stand must be there with Fjouwer on')
+    assert.match(await fourRanking.text(), /<h1[^>]*>Stand Fjouwer<\/h1>/)
     // The scoring is public and the same for everybody; the points of a four are not there.
     assert.match(fourHtml, /<h2[^>]*>Punten<\/h2>/)
     assert.match(fourHtml, /Het verslag van de redactie beslist wat een speler deed\./)

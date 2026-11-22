@@ -253,6 +253,8 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   // The game Fjouwer is open to a visitor, with the way in; fans-fjouwer.spec.ts checks the
   // form with an account.
   { path: '/fans/fjouwer', status: 200 },
+  // The ranking of Fjouwer is public; without points it says so in one line.
+  { path: '/fans/fjouwer/stand', status: 200 },
   // The game Prognose is open to a visitor, with the way in; fans-prediction.spec.ts checks the
   // form with an account.
   { path: '/fans/prognose', status: 200 },
