@@ -1,4 +1,4 @@
-import { Card, CardLink, DataTable, type DataTableRow, Heading, Text } from '@fansite/design-system'
+import { Card, CardLink, DataTable, type DataTableRow, Heading, tableColumns, Text } from '@fansite/design-system'
 
 import { type FourRanking, type RankedFour, rowOf, shownRows, topRows } from '#src/fans/fjouwer-ranking'
 
@@ -40,7 +40,7 @@ export function StandCard({
       ) : (
         <DataTable
           caption={`Stand ${season}`}
-          columns={['Fan', { abbreviation: 'P', key: true, name: 'punten' }]}
+          columns={['Fan', { ...tableColumns.points, key: true }]}
           rows={visibleRows(ranking, supporterId, topRows, false)}
           sortable={false}
         />
@@ -56,7 +56,7 @@ export function StandTable({ ranking, supporterId }: { ranking: FourRanking; sup
     <>
       <DataTable
         caption={standCaption(ranking.matchCount)}
-        columns={['Fan', { abbreviation: 'W', name: 'wedstrijden' }, { abbreviation: 'P', key: true, name: 'punten' }]}
+        columns={['Fan', { abbreviation: 'W', name: 'wedstrijden' }, { ...tableColumns.points, key: true }]}
         rows={visibleRows(ranking, supporterId, shownRows, true)}
         sortable={false}
       />

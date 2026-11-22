@@ -22,7 +22,7 @@ describe('the table of the ranking', () => {
     expect(html).toContain('<table')
     expect(html).toContain('Stand na 13 wedstrijden')
     expect(html).toContain('>W<')
-    expect(html).toContain('>P<')
+    expect(html).toContain('title="Punten"')
     expect(html).toContain(standLegend)
   })
 
