@@ -1,9 +1,23 @@
 import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { RatingMatch, RatingPlayer, RatingWindow } from '#src/fans/rating'
 
-import { UitblinkerCard, uitblinkerCardData } from './UitblinkerCard'
+import { readUitblinkerCard, UitblinkerCard, uitblinkerCardData } from './UitblinkerCard'
+
+const { findOwnRatings, findRatingWindow, latestResult } = vi.hoisted(() => ({
+  findOwnRatings: vi.fn(),
+  findRatingWindow: vi.fn(),
+  latestResult: vi.fn(),
+}))
+
+vi.mock('#src/database', () => ({ getDatabase: () => ({ db: {} }) }))
+vi.mock('#src/fans/match-ratings', async (importOriginal) => ({ ...(await importOriginal<object>()), latestResult }))
+vi.mock('#src/fans/rating', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  findOwnRatings,
+  findRatingWindow,
+}))
 
 const now = new Date('2026-11-22T12:00:00Z')
 const match = { id: 1 } as RatingMatch
@@ -89,5 +103,94 @@ describe('the card of the Uitblinker on Fans', () => {
 
     expect(html).toContain('<a href="/fans/uitblinker">Naar de Uitblinker</a>')
     expect(html).not.toContain('<button')
+  })
+
+  it('shows the seal of the last Uitblinker and the number of supporters, for everyone', () => {
+    const html = renderToStaticMarkup(
+      <UitblinkerCard
+        {...uitblinkerCardData(open, undefined, now)}
+        result={{
+          supporters: 31,
+          winner: { average: '7,8', line: 'Thuis tegen Sparta Rotterdam, 3–1', name: 'Dylan Vente' },
+        }}
+      />,
+    )
+
+    expect(html).toContain('Uitblinker vorige wedstrijd')
+    expect(html).toContain('Dylan Vente')
+    expect(html).toContain('Thuis tegen Sparta Rotterdam, 3–1')
+    expect(html).toContain('31 supporters gaven cijfers.')
+  })
+
+  it('has the number but no seal when nobody had five grades, and nothing when there is no result', () => {
+    const none = renderToStaticMarkup(<UitblinkerCard {...uitblinkerCardData(open, undefined, now)} />)
+    const thin = renderToStaticMarkup(
+      <UitblinkerCard {...uitblinkerCardData(open, undefined, now)} result={{ supporters: 3 }} />,
+    )
+
+    expect(none).not.toContain('hf-winner')
+    expect(none).not.toContain('supporters gaven')
+    expect(thin).not.toContain('hf-winner')
+    expect(thin).toContain('3 supporters gaven cijfers.')
+  })
+})
+
+describe('reading the card of the Uitblinker for Fans', () => {
+  const latest = {
+    match: { goalsAgainst: 1, goalsFor: 3, home: true, id: 1, opponent: 'Sparta Rotterdam' },
+    ratings: {
+      players: [],
+      supporters: 31,
+      winner: { appearanceId: null, average: 7.8, count: 31, name: 'Dylan Vente', playerId: 1 },
+    },
+  }
+
+  beforeEach(() => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    vi.stubEnv('FANS_UITBLINKER', 'on')
+    findRatingWindow.mockResolvedValue(open)
+    findOwnRatings.mockResolvedValue(new Map())
+    latestResult.mockResolvedValue(latest)
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    vi.resetAllMocks()
+  })
+
+  it('adds the Uitblinker of the last match with a result, the same for a visitor and a supporter', async () => {
+    const expected = {
+      supporters: 31,
+      winner: { average: '7,8', line: 'Thuis tegen Sparta Rotterdam, 3–1', name: 'Dylan Vente' },
+    }
+
+    expect((await readUitblinkerCard(undefined, now))?.result).toEqual(expected)
+    expect((await readUitblinkerCard({ createdAt: before, id: 5 }, now))?.result).toEqual(expected)
+  })
+
+  it('has no result, and so no seal, while no window has closed', async () => {
+    latestResult.mockResolvedValue(undefined)
+
+    expect((await readUitblinkerCard(undefined, now))?.result).toBeUndefined()
+  })
+
+  it('has no seal but the number when nobody had five grades', async () => {
+    latestResult.mockResolvedValue({ ...latest, ratings: { players: [], supporters: 3 } })
+
+    expect((await readUitblinkerCard(undefined, now))?.result).toEqual({ supporters: 3 })
+  })
+
+  it('has no card while the game is off, and reads nothing', async () => {
+    vi.stubEnv('FANS_UITBLINKER', 'off')
+
+    expect(await readUitblinkerCard(undefined, now)).toBeUndefined()
+    expect(latestResult).not.toHaveBeenCalled()
+  })
+
+  it('leaves the card out and logs when the reading fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    latestResult.mockRejectedValue(new Error('database down'))
+
+    expect(await readUitblinkerCard(undefined, now)).toBeUndefined()
   })
 })

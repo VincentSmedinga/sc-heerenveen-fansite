@@ -75,11 +75,12 @@ test.describe('without JavaScript', () => {
       await give(page, ratingPlayers[1], 10)
       await page.getByRole('button', { name: 'Cijfers opslaan' }).click()
 
-      // After the save only the supporter's own grades show, and the form is gone.
+      // After the save the supporter sees the own grades and the standing so far, not the form.
       await expect(page.getByRole('status').filter({ hasText: 'Je kunt ze wijzigen tot' })).toBeVisible()
       await expect(page.getByRole('table', { name: 'Jouw cijfers' })).toBeVisible()
       await expect(page.getByRole('columnheader', { name: 'Jij' })).toBeVisible()
-      await expect(page.getByRole('columnheader', { name: 'Gem' })).toHaveCount(0)
+      await expect(page.getByRole('columnheader', { name: 'Gem' })).toBeVisible()
+      await expect(page.getByText('nog te weinig cijfers').first()).toBeVisible()
       await expect(page.getByRole('radio')).toHaveCount(0)
 
       // Wijzigen shows the form with the grades that were stored.

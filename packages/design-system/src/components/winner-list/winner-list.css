@@ -1,0 +1,58 @@
+/*
+ * The players who were best of their match: a row for each, the name large with a small line
+ * under it, and the average large in a column of its own on the right. A row has a thin line
+ * above it, as the rows of the open games have.
+ */
+
+@layer hf.components {
+  .hf-winner-list {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+
+  .hf-winner-list-item {
+    align-items: start;
+    border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
+    column-gap: var(--hf-space-m);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    padding-block: var(--hf-space-s);
+  }
+
+  .hf-winner-list-item:first-child {
+    border-block-start: 0;
+    padding-block-start: 0;
+  }
+
+  .hf-winner-list-item:last-child {
+    padding-block-end: 0;
+  }
+
+  .hf-winner-list-text {
+    display: grid;
+    min-inline-size: 0;
+  }
+
+  .hf-winner-list-name,
+  .hf-winner-list-average {
+    color: var(--hf-colour-text-heading);
+    font-size: var(--hf-heading-3-font-size);
+    font-weight: var(--hf-figure-font-weight);
+    line-height: 1.2;
+  }
+
+  .hf-winner-list-name {
+    overflow-wrap: anywhere;
+  }
+
+  .hf-winner-list-average {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .hf-winner-list-line {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+    line-height: var(--hf-meta-line-height);
+  }
+}

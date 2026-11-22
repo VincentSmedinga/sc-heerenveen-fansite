@@ -1,10 +1,32 @@
 import type { ReactNode } from 'react'
 
-import { Button, Card, DataTable, Form, Heading, Link, List, Match, Notice, Tag, Text } from '@fansite/design-system'
+import { seasonOf } from '@fansite/db/season'
+import {
+  Button,
+  Card,
+  DataTable,
+  Form,
+  Heading,
+  Link,
+  List,
+  Match,
+  Notice,
+  Tag,
+  Text,
+  WinnerList,
+} from '@fansite/design-system'
 
 import { rulesPath } from '#src/fans-paths'
 import { logInPaths } from '#src/fans/log-in'
 import { returnParameter } from '#src/fans/log-in-form'
+import {
+  type MatchRatings,
+  type RatedPlayer,
+  ratingMinimum,
+  resultLine,
+  type SeasonWinner,
+  uitblinkerOf,
+} from '#src/fans/match-ratings'
 import { clubsOf } from '#src/fans/prediction'
 import {
   closingText,
@@ -20,10 +42,30 @@ import {
 } from '#src/fans/rating'
 import { signUpPaths } from '#src/fans/sign-up'
 import { matchMoment } from '#src/match-format'
+import { gradeText, RatingsTable, supportersText } from '#src/MatchRatingsCard'
 import { reportAddress } from '#src/report-data'
+import { matchesPath } from '#src/season-page'
+import { seasonAddress } from '#src/seasons'
 
 // The cards of the page of the game Uitblinker (issue 1470). Each one is a server component
 // that gets what it shows; the form is a client component of its own (RatingForm).
+
+/**
+ * The card of a match whose window is closed, for everyone: the seal, the averages and the
+ * number of supporters. It has nothing for a match that no supporter rated.
+ */
+export function ClosedResultCard({ match, now, ratings }: { match: RatingMatch; now: Date; ratings: MatchRatings }) {
+  return (
+    <Card aria-labelledby="uitslag" game="uitblinker">
+      <Heading id="uitslag" level={2}>
+        Uitslag van de laatste wedstrijd
+      </Heading>
+      <MatchLine match={match} now={now} />
+      {ratings.supporters < ratingMinimum ? null : <RatingsTable ratings={ratings} />}
+      <Text appearance="meta">{supportersText(ratings.supporters)}.</Text>
+    </Card>
+  )
+}
 
 /** The side card that says how the game works, in a few short lines. */
 export function HowItWorksCard() {
@@ -140,8 +182,9 @@ export function OpenCard({
 
 /**
  * What a supporter sees after giving the grades: a notice with the moment the window closes and
- * the button to change them, and the table with their own grades. Nobody else's grades show
- * yet: the averages come when the window is closed.
+ * the button to change them, and the table with their own grades and the standing so far. The
+ * standing is for this supporter only, as a reward: the page of the match stays the same for
+ * everyone until the window is closed.
  */
 export function SavedView({
   closesAt,
@@ -149,6 +192,7 @@ export function SavedView({
   coachGrade,
   grades,
   players,
+  running,
 }: {
   closesAt: Date
   /** The head coach of the match, or `null` for a match without one. */
@@ -158,7 +202,12 @@ export function SavedView({
   /** The grades of the supporter, by the number of the appearance. */
   grades: ReadonlyMap<number, number>
   players: readonly RatingPlayer[]
+  /** The averages so far, for each player with ratings. */
+  running: readonly RatedPlayer[]
 }) {
+  const byAppearance = new Map(running.map((player) => [player.appearanceId, player]))
+  const winner = uitblinkerOf(running)
+
   return (
     <>
       <Notice>Je kunt ze wijzigen tot {closingText(closesAt)}.</Notice>
@@ -169,16 +218,60 @@ export function SavedView({
       </Form>
       <Text>Omdat je zelf cijfers gaf, zie je de tussenstand al. De rest ziet hem als het venster dicht is.</Text>
       <DataTable
-        caption="Jouw cijfers"
-        columns={['Speler', 'Jij']}
+        caption="Jouw cijfers en de tussenstand"
+        columns={['Speler', 'Jij', { key: true, name: 'Gem' }]}
         rows={[
-          ...players.map((player) => ({ cells: [grades.get(player.appearanceId) ?? 0], header: player.name })),
-          // The coach is the last row, after a heavier line.
-          ...(coach === null ? [] : [{ cells: [coachGrade ?? 0], header: coachRow(coach.name), total: true }]),
+          ...players.map((player) => {
+            const found = byAppearance.get(player.appearanceId)
+
+            return {
+              cells: [
+                grades.get(player.appearanceId) ?? 0,
+                found !== undefined && found.count >= ratingMinimum
+                  ? gradeText(found.average)
+                  : 'nog te weinig cijfers',
+              ],
+              header: player.name,
+              // In words, on a line of its own: a label in the cell is too wide for the column.
+              ...(winner !== undefined && winner.appearanceId === player.appearanceId
+                ? { secondary: 'Uitblinker' }
+                : {}),
+            }
+          }),
+          // The coach is the last row, after a heavier line. His average shows with #1479.
+          ...(coach === null ? [] : [{ cells: [coachGrade ?? 0, '–'], header: coachRow(coach.name), total: true }]),
         ]}
         sortable={false}
       />
     </>
+  )
+}
+
+/**
+ * The side card with the Uitblinker of each match of the season, the newest first, and the
+ * link to the matches. A season without an Uitblinker has no card.
+ */
+export function SeasonWinnersCard({ season, winners }: { season: string; winners: readonly SeasonWinner[] }) {
+  if (winners.length === 0) {
+    return null
+  }
+
+  return (
+    <Card aria-labelledby="uitblinkers-seizoen" surface="soft">
+      <Heading id="uitblinkers-seizoen" level={2}>
+        Uitblinkers {season}
+      </Heading>
+      <WinnerList
+        items={winners.map((winner) => ({
+          average: gradeText(winner.average),
+          line: resultLine(winner),
+          name: winner.name,
+        }))}
+      />
+      <Text>
+        <Link href={seasonAddress(matchesPath, season, seasonOf(new Date()))}>Alle wedstrijden</Link>
+      </Text>
+    </Card>
   )
 }
 

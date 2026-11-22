@@ -7,17 +7,35 @@ import type { RatingMatch, RatingPlayer, RatingWindow } from '#src/fans/rating'
 
 import RatingPage from './page'
 
-const { currentSupporter, findOwnCoachRating, findOwnRatings, findRatingWindow, useActionState } = vi.hoisted(() => ({
+const {
+  currentSupporter,
+  fansMatchRatings,
+  findOwnCoachRating,
+  findOwnRatings,
+  findRatingWindow,
+  loadRunningRatings,
+  seasonWinners,
+  useActionState,
+} = vi.hoisted(() => ({
   currentSupporter: vi.fn(),
+  fansMatchRatings: vi.fn(),
   findOwnCoachRating: vi.fn(),
   findOwnRatings: vi.fn(),
   findRatingWindow: vi.fn(),
+  loadRunningRatings: vi.fn(),
+  seasonWinners: vi.fn(),
   useActionState: vi.fn(),
 }))
 
 vi.mock('react', async (importOriginal) => ({ ...(await importOriginal<typeof React>()), useActionState }))
 vi.mock('./actions', () => ({ saveRatingsAction: vi.fn() }))
 vi.mock('#src/database', () => ({ getDatabase: () => ({ db: {} }) }))
+vi.mock('#src/fans/match-ratings', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  fansMatchRatings,
+  loadRunningRatings,
+  seasonWinners,
+}))
 vi.mock('#src/fans/require-supporter', () => ({ currentSupporter }))
 vi.mock('#src/fans/rating', async (importOriginal) => ({
   ...(await importOriginal<object>()),
@@ -82,9 +100,12 @@ beforeEach(() => {
   vi.stubEnv('FANS_ACCOUNTS', 'on')
   vi.stubEnv('FANS_UITBLINKER', 'on')
   currentSupporter.mockResolvedValue(undefined)
+  fansMatchRatings.mockResolvedValue(undefined)
   findOwnRatings.mockResolvedValue(new Map())
   findOwnCoachRating.mockResolvedValue(undefined)
   findRatingWindow.mockResolvedValue(open)
+  loadRunningRatings.mockResolvedValue([])
+  seasonWinners.mockResolvedValue([])
   useActionState.mockImplementation((_action: unknown, state: unknown) => [state, vi.fn()])
 })
 
@@ -246,5 +267,139 @@ describe('the page of the Uitblinker', () => {
     const html = await render()
 
     expect(html).toContain('De volgende wedstrijd is nog niet bekend.')
+  })
+})
+
+const running = (appearanceId: number, name: string, average: number, count: number) => ({
+  appearanceId,
+  average,
+  count,
+  name,
+  playerId: appearanceId,
+})
+
+describe('the standing so far', () => {
+  const grades = new Map([
+    [11, 6],
+    [12, 8],
+  ])
+
+  beforeEach(() => {
+    loadRunningRatings.mockResolvedValue([running(11, 'Luca Oyen', 7.3, 12), running(12, 'Pim Spits', 8.5, 3)])
+  })
+
+  it('shows a supporter who gave every grade the column Gem, with the Uitblinker marked', async () => {
+    currentSupporter.mockResolvedValue(supporter)
+    findOwnRatings.mockResolvedValue(grades)
+
+    const html = await render()
+
+    expect(html).toContain('Jouw cijfers en de tussenstand')
+    expect(html).toContain('7,3')
+    expect(html).toContain('nog te weinig cijfers')
+    expect((html.match(/<table[\s\S]*?<\/table>/)?.[0] ?? '').match(/>Uitblinker</g)).toHaveLength(1)
+    expect(loadRunningRatings).toHaveBeenCalledOnce()
+  })
+
+  it('shows nothing of it to a supporter who has not given every grade, or to a visitor', async () => {
+    currentSupporter.mockResolvedValue(supporter)
+    findOwnRatings.mockResolvedValue(new Map([[11, 6]]))
+
+    const partly = await render()
+
+    currentSupporter.mockResolvedValue(undefined)
+
+    const visitor = await render()
+
+    for (const html of [partly, visitor]) {
+      expect(html).not.toContain('7,3')
+      expect(html).not.toContain('nog te weinig cijfers')
+    }
+
+    expect(loadRunningRatings).not.toHaveBeenCalled()
+  })
+
+  it('shows nothing of it while the supporter changes the grades', async () => {
+    currentSupporter.mockResolvedValue(supporter)
+    findOwnRatings.mockResolvedValue(grades)
+
+    expect(await render({ wijzigen: '1' })).not.toContain('7,3')
+  })
+})
+
+describe('the result of a closed window', () => {
+  const closed: RatingWindow = { ...base, coach: null, players, state: 'closed' }
+  const result = {
+    players: [running(11, 'Luca Oyen', 7.3, 12), running(12, 'Pim Spits', 8.5, 3)],
+    supporters: 12,
+    winner: running(11, 'Luca Oyen', 7.3, 12),
+  }
+
+  it('shows everyone the seal and the table under the card for the next match', async () => {
+    findRatingWindow.mockResolvedValue(closed)
+    fansMatchRatings.mockResolvedValue(result)
+
+    const html = await render()
+
+    expect(html.indexOf('Volgende wedstrijd')).toBeLessThan(html.indexOf('Uitslag van de laatste wedstrijd'))
+    expect(html).toContain('Uitblinker van de wedstrijd')
+    expect(html).toContain('12 supporters gaven cijfers.')
+    expect(currentSupporter).toHaveBeenCalled()
+  })
+
+  it('has no result card when nobody rated, or while the window is open', async () => {
+    findRatingWindow.mockResolvedValue(closed)
+
+    expect(await render()).not.toContain('Uitslag van de laatste wedstrijd')
+
+    findRatingWindow.mockResolvedValue(open)
+    fansMatchRatings.mockResolvedValue(result)
+
+    expect(await render()).not.toContain('Uitslag van de laatste wedstrijd')
+  })
+})
+
+describe('the card Uitblinkers of the season', () => {
+  const winners = [
+    {
+      average: 7.8,
+      goalsAgainst: 1,
+      goalsFor: 3,
+      home: true,
+      matchId: 1,
+      name: 'Dylan Vente',
+      opponent: 'Sparta Rotterdam',
+    },
+  ]
+
+  it('stands in the narrow column before "Zo werkt het", for everyone', async () => {
+    seasonWinners.mockResolvedValue(winners)
+
+    const html = await render()
+
+    expect(html).toMatch(/<h2[^>]*>Uitblinkers 2026\/27<\/h2>/)
+    expect(html.indexOf('Uitblinkers 2026/27')).toBeLessThan(html.indexOf('Zo werkt het'))
+    expect(seasonWinners).toHaveBeenCalledWith('2026/27')
+  })
+
+  it('is not there for a season without an Uitblinker, or before any match was played', async () => {
+    expect(await render()).not.toContain('Uitblinkers 2026/27')
+
+    findRatingWindow.mockResolvedValue({ state: 'none' })
+
+    expect(await render()).not.toContain('Uitblinkers')
+    expect(seasonWinners).not.toHaveBeenCalledWith(undefined)
+  })
+
+  it('is the same for a supporter and a visitor', async () => {
+    seasonWinners.mockResolvedValue(winners)
+    currentSupporter.mockResolvedValue(supporter)
+
+    const own = await render()
+
+    currentSupporter.mockResolvedValue(undefined)
+
+    expect(await render()).toContain('Dylan Vente')
+    expect(own).toContain('Dylan Vente')
   })
 })

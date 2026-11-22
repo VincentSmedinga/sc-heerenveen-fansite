@@ -7,11 +7,22 @@ import { notFound, redirect } from 'next/navigation'
 
 import { getDatabase } from '#src/database'
 import { logInPaths } from '#src/fans/log-in'
+import { fansMatchRatings, loadRunningRatings, seasonWinners } from '#src/fans/match-ratings'
 import { findOwnCoachRating, findOwnRatings, findRatingWindow } from '#src/fans/rating'
 import { currentSupporter } from '#src/fans/require-supporter'
 import { pageAreas } from '#src/page-areas'
 
-import { HowItWorksCard, JoinCard, LateNotice, NextMatchCard, OpenCard, SavedView, WaitingCard } from './RatingCards'
+import {
+  ClosedResultCard,
+  HowItWorksCard,
+  JoinCard,
+  LateNotice,
+  NextMatchCard,
+  OpenCard,
+  SavedView,
+  SeasonWinnersCard,
+  WaitingCard,
+} from './RatingCards'
 import { RatingForm } from './RatingForm'
 
 // The card with the form stands in the wide column, the card that says how it works in the
@@ -33,8 +44,9 @@ export const generateMetadata = (): Metadata => {
  * in and may take part, and the way in for a visitor. Without a finished report there is no
  * form, and when the window is closed there is a card for the next match. The page is the same
  * for a visitor, so it names no personal data; the grades of a supporter are read only with a
- * session. A blocked account goes to the page that says so. The averages and the result come
- * with issue 1472.
+ * session. A blocked account goes to the page that says so. Once the window is closed the page
+ * shows its result and the Uitblinkers of the season to everyone, and a supporter who gave all
+ * the grades sees the standing so far while it is open (issue 1472).
  */
 export default async function RatingPage({
   searchParams,
@@ -57,7 +69,17 @@ export default async function RatingPage({
   let card: ReactNode
 
   if (window.state === 'none' || window.state === 'closed') {
-    card = <NextMatchCard next={window.next} />
+    // A window that closed shows its result to everyone, under the card for the next match.
+    const result = window.state === 'closed' ? await fansMatchRatings(window.match.id) : undefined
+
+    card = (
+      <>
+        <NextMatchCard next={window.next} />
+        {result === undefined || window.state !== 'closed' ? null : (
+          <ClosedResultCard match={window.match} now={now} ratings={result} />
+        )}
+      </>
+    )
   } else if (window.state === 'waiting') {
     card = <WaitingCard match={window.match} now={now} />
   } else if (supporter === undefined) {
@@ -83,6 +105,8 @@ export default async function RatingPage({
       (window.coach === null || coachGrade !== undefined)
 
     const saved = complete && wijzigen !== '1'
+    // The standing so far is for a supporter who gave all the grades, on the saved view only.
+    const running = saved ? await loadRunningRatings(db, window.match.id) : []
 
     card = (
       <OpenCard
@@ -99,6 +123,7 @@ export default async function RatingPage({
             {...(coachGrade === undefined ? {} : { coachGrade })}
             grades={grades}
             players={window.players}
+            running={running}
           />
         ) : (
           <RatingForm
@@ -113,6 +138,9 @@ export default async function RatingPage({
     )
   }
 
+  // The Uitblinkers of the season stand beside the card, for everyone.
+  const winners = window.state === 'none' ? [] : await seasonWinners(window.match.season)
+
   return (
     <Page.Main areas={areas}>
       <Page.Cell area="head">
@@ -123,6 +151,7 @@ export default async function RatingPage({
       </Page.Cell>
       <Page.Cell area="rate">{card}</Page.Cell>
       <Page.Section area="side" aria-label="Uitleg van het spel">
+        {window.state === 'none' ? null : <SeasonWinnersCard season={window.match.season} winners={winners} />}
         <HowItWorksCard />
       </Page.Section>
     </Page.Main>

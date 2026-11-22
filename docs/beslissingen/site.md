@@ -7542,6 +7542,7 @@
 - **Waarom:** het zijn gegevens van hetzelfde spel, dus ze komen samen met het spel online.
   De kolom Cijfers laat zien waarom een speler geen gemiddelde heeft.
 - **Alternatieven:** alleen de uitblinker tonen, zonder tabel; de cijfers op de kaart van de Prognose zetten.
+- **Later:** sinds _De wedstrijdpagina toont de nieuwe cijfers pas als het venster sluit_ (22 november 2026) heeft ook een nieuwe wedstrijd deze kaart, zonder bronregel, en lezen beide dezelfde tabel en dezelfde tabelweergave.
 
 ## Een supporter geeft elke speler van de laatste wedstrijd die 30 minuten of langer speelde een cijfer
 
@@ -7606,6 +7607,28 @@
   De pagina krijgt `noindex`, zoals de Prognose.
 - **Waarom:** zo werkt alles zonder JavaScript, en blijven de gemiddelden en de cijfers van anderen uit beeld tot het venster dicht is (de tussenstand komt met #1472).
 - **Alternatieven:** een cijfer direct bij het kiezen opslaan (halve formulieren, ongelijke aantallen cijfers); de ingevulde cijfers na een fout wissen.
+- **Later:** sinds _De wedstrijdpagina toont de nieuwe cijfers pas als het venster sluit_ (22 november 2026) toont de tabel na het opslaan ook de kolom Gem met de tussenstand, en heet het bijschrift "Jouw cijfers en de tussenstand".
+
+## De wedstrijdpagina toont de nieuwe cijfers pas als het venster sluit
+
+- **Datum:** 22 november 2026
+- **Besluit:** de kaart Uitblinker op de pagina van een nieuwe wedstrijd is voor iedereen gelijk.
+  Zolang het venster openstaat, zegt de kaart hoeveel supporters al cijfers gaven en wanneer de uitslag komt ("De uitslag staat hier vanaf donderdag 26 november, 20.00 uur").
+  Er staat een link "Geef je cijfers", en er zijn geen gemiddelden en geen zegel.
+  Zonder cijfers is er geen kaart.
+  Is het venster dicht, dan staat er de zegel "Uitblinker van de wedstrijd", dezelfde tabel als bij een oude wedstrijd (Speler, Gem, Cijfers, de regels van vijf cijfers en minder cijfers bij een gelijk gemiddelde) en "31 supporters gaven cijfers.".
+  Gaven er minder dan vijf supporters cijfers, dan staat alleen het aantal.
+  Een nieuwe wedstrijd heeft geen bronregel: de cijfers zijn die van onze eigen supporters.
+  De kaart leest de gemiddelden van de bron `fans` uit `match_player_ratings`, die de import schrijft als het venster sluit, en het aantal van het venster één keer per minuut; nooit losse cijfers.
+  De schakelaar van de Uitblinker zet de kaart uit, voor nieuwe en voor oude wedstrijden.
+  Op `/fans/uitblinker` ziet een supporter die alle cijfers gaf de tussenstand in de kolom Gem (Speler, Jij, Gem), met de uitblinker in tekst gemarkeerd; een speler met minder dan vijf cijfers heeft "nog te weinig cijfers".
+  Is het venster dicht, dan staat onder de kaart "Volgende wedstrijd" de uitslag voor iedereen, en in de smalle kolom de zachte kaart "Uitblinkers 2026/27" met een regel per wedstrijd (component `WinnerList`).
+  Op `/fans` toont de kaart van de Uitblinker de zegel "Uitblinker vorige wedstrijd" van de laatste wedstrijd met een uitslag.
+- **Waarom:** de pagina van een wedstrijd blijft zo voor iedereen gelijk en te cachen, en wie meedoet, krijgt zijn beloning op een pagina die niet gecachet wordt.
+  De gemiddelden verschijnen pas als het venster sluit, anders sturen ze de cijfers die nog komen.
+- **Alternatieven:** de gemiddelden tijdens het venster tonen (de cijfers worden dan beïnvloed); ze op de wedstrijdpagina tonen voor wie is ingelogd (een pagina die per persoon verschilt).
+- **Let op:** een venster dat gesloten is, maar waarvan de import de gemiddelden nog niet schreef (hoogstens een kwartier), toont geen kaart op de wedstrijdpagina.
+  De trainer staat er niet in; die komt met #1479.
 
 ## De hoofdtrainer krijgt in de Uitblinker een cijfer, als laatste groep van het formulier
 
@@ -7616,7 +7639,7 @@
   Het verslag noemt geen trainer, dus een dag met twee kandidaten kiest niemand.
   De groep heeft de naam "Cijfer voor trainer `<naam>`" met "Trainer" als kleine regel onder de naam, dezelfde schaal van 1 tot 10 en dezelfde fout als bij een speler.
   Het cijfer is verplicht, en de teller, de ErrorSummary, de kaart op `/fans` ("Geef 14 spelers en de trainer een cijfer.") en de inleiding tellen hem mee.
-  In de tabel "Jouw cijfers" staat hij als laatste regel, na een zwaardere lijn, als "Robin Veldman (trainer)".
+  In de tabel "Jouw cijfers en de tussenstand" staat hij als laatste regel, na een zwaardere lijn, als "Robin Veldman (trainer)", met zijn eigen cijfer en een streepje bij de tussenstand, want zijn gemiddelde komt met #1479.
   Het cijfer staat in een eigen tabel, `coach_ratings` (migratie 0105), met de wedstrijd, de persoon van `staff` en de supporter, uniek per supporter en wedstrijd.
   Een opgeheven account laat het cijfer anoniem staan (`ON DELETE SET NULL`), en de tabel komt in het exportplan met `supporter_id` als `NULL`.
   De cijfers van spelers en trainer worden in één transactie geschreven, met dezelfde controle van het venster, zodat het ene niet zonder het andere wordt bewaard.
