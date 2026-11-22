@@ -1,6 +1,6 @@
 import type { ReportedPlayerName } from '@fansite/db/match-reports'
 
-import { Card, DataTable, type DataTableRow, GameHeading, PlayerName, Tag, Text, Winner } from '@fansite/design-system'
+import { Card, DataTable, type DataTableRow, GameHeading, PlayerName, Text, Winner } from '@fansite/design-system'
 import { isFansPartOn } from '@fansite/shared/fans-env'
 
 import { reasonOf } from '#src/errors'
@@ -77,17 +77,9 @@ function rowOf(
 
   return {
     cells: [player.count >= ratingMinimum ? gradeText(player.average) : 'nog te weinig cijfers', player.count],
-    display: (
-      <>
-        <PlayerName {...name} />
-        {winner?.playerId === player.playerId ? (
-          <>
-            {' '}
-            <Tag tone="highlight">Uitblinker</Tag>
-          </>
-        ) : null}
-      </>
-    ),
+    display: <PlayerName {...name} />,
     header: player.name,
+    // In words and on a line of its own: a label in the cell is too wide for the narrow column.
+    ...(winner?.playerId === player.playerId ? { secondary: 'Uitblinker' } : {}),
   }
 }
