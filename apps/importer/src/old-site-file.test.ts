@@ -18,6 +18,7 @@ import {
 const allowedFieldNames = new Set([
   'assist',
   'attendance',
+  'average',
   'awayCorners',
   'awayFouls',
   'awayFullTime',
@@ -26,6 +27,7 @@ const allowedFieldNames = new Set([
   'clubs',
   'code',
   'competition',
+  'count',
   'country',
   'dateTime',
   'event',
@@ -41,6 +43,7 @@ const allowedFieldNames = new Set([
   'lastName',
   'line',
   'lineup',
+  'matchCode',
   'matches',
   'minute',
   'minuteIn',
@@ -51,12 +54,16 @@ const allowedFieldNames = new Set([
   'playerCode',
   'playerName',
   'players',
+  'ratings',
   'referee',
   'result',
   'round',
   'season',
+  'seasonRatings',
+  'spread',
   'statistics',
   'version',
+  'winners',
 ])
 
 function collectNames(value: unknown, names = new Set<string>()) {
@@ -186,5 +193,53 @@ describe('parseOldSiteFile', () => {
     expect(() =>
       parseOldSiteFile(JSON.stringify({ matches: [match], season: '9091', version: 3 }), 'matches-9091.json'),
     ).toThrow('matches-9091.json does not match')
+  })
+})
+
+describe('the files with the ratings (#1465)', () => {
+  const rating = { average: 7.4, count: 5, matchCode: 'psv.thuis', playerCode: 'hans.vonk', spread: 1.02 }
+  const ratings = { ratings: [rating], season: '0102', version: 3 }
+  const seasons = {
+    seasonRatings: [{ average: 7.1, playerCode: 'hans.vonk', season: '9899' }],
+    version: 3,
+    winners: [{ name: 'Hans Vonk', season: '9899' }],
+  }
+
+  it('read a file with the averages and a file with the season ratings', () => {
+    expect(parseOldSiteFile(JSON.stringify(ratings))).toEqual(ratings)
+    expect(parseOldSiteFile(JSON.stringify(seasons))).toEqual(seasons)
+  })
+
+  it('refuse a rating with a field more, such as a name, a time or a visitor', () => {
+    for (const extra of [{ visitor: 'Olaf' }, { name: 'Olaf' }, { dateTime: '2001-11-15 01:05:34' }, { user: 1 }]) {
+      expect(() => parseOldSiteFile(JSON.stringify({ ...ratings, ratings: [{ ...rating, ...extra }] }))).toThrow(
+        /does not match the format/,
+      )
+    }
+    expect(() => parseOldSiteFile(JSON.stringify({ ...ratings, visitors: [] }))).toThrow(/does not match the format/)
+    expect(() =>
+      parseOldSiteFile(JSON.stringify({ ...seasons, seasonRatings: [{ ...seasons.seasonRatings[0], votes: 3 }] })),
+    ).toThrow(/does not match the format/)
+  })
+
+  it('refuse a grade outside 1 to 10, a count of zero and a negative spread', () => {
+    for (const wrong of [{ average: 0.5 }, { average: 10.5 }, { count: 0 }, { spread: -1 }]) {
+      expect(() => parseOldSiteFile(JSON.stringify({ ...ratings, ratings: [{ ...rating, ...wrong }] }))).toThrow(
+        /does not match the format/,
+      )
+    }
+  })
+
+  it('are read with the data, each rating with the season of its file', async () => {
+    const data = await readOldSiteData()
+    const keys = new Set(data.matches.map((match) => `${match.season}/${match.code}`))
+
+    expect(data.ratings.length).toBeGreaterThan(2000)
+    expect(data.ratings.every((one) => keys.has(`${one.season}/${one.matchCode}`))).toBe(true)
+    expect(data.seasonRatings.map((one) => one.season).filter((season, i, all) => all.indexOf(season) === i)).toEqual([
+      '0001',
+      '9899',
+      '9900',
+    ])
   })
 })
