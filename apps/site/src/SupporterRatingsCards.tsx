@@ -1,4 +1,4 @@
-import { Card, DataTable, Heading, Link, SeasonPicker, Text } from '@fansite/design-system'
+import { Card, CardLink, DataTable, Heading, SeasonPicker, Text } from '@fansite/design-system'
 
 import { yearWinnersPath } from './fans-paths'
 import { type RankedPlayer, type YearWinner } from './fans/season-ratings'
@@ -67,9 +67,7 @@ export function SeasonRankingCard({
         </>
       )}
       {oldSource ? <Text appearance="meta">{oldSourceLine}</Text> : null}
-      <Text>
-        <Link href={yearWinnersPath}>Uitblinker van het jaar</Link>
-      </Text>
+      <CardLink href={yearWinnersPath}>Uitblinker van het jaar</CardLink>
     </Card>
   )
 }

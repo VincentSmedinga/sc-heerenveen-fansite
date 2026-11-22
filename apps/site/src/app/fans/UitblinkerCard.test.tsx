@@ -101,7 +101,7 @@ describe('the card of the Uitblinker on Fans', () => {
   it('links to the page of the game when there is no button', () => {
     const html = renderToStaticMarkup(<UitblinkerCard {...uitblinkerCardData(open, undefined, now)} />)
 
-    expect(html).toContain('<a href="/fans/uitblinker">Naar de Uitblinker</a>')
+    expect(html).toContain('<a href="/fans/uitblinker">Naar de <span class="hf-icon-tail">Uitblinker<svg')
     expect(html).not.toContain('<button')
   })
 

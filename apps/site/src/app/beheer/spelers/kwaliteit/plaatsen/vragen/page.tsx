@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 import { persons } from '@fansite/db/schema'
-import { Button, Card, Form, Heading, Link, Notice, Page, Text } from '@fansite/design-system'
+import { Button, Card, CardLink, Form, Heading, Link, Notice, Page, Text } from '@fansite/design-system'
 import { eq } from 'drizzle-orm'
 
 import { adminAreas } from '#src/beheer/areas'
@@ -73,11 +73,15 @@ export default async function SideQuizPage({
                 ? 'Alle spelers hebben een kant.'
                 : 'Je hebt alle spelers gehad die nog een kant nodig hebben.'}
             </QuestionHeading>
-            <Text>
-              <Link href={skipped.length === 0 ? usualSlotsPath : sideQuizPath}>
-                {skipped.length === 0 ? 'Terug naar de vaste plaatsen' : 'Begin opnieuw met de overgeslagen spelers'}
-              </Link>
-            </Text>
+            {skipped.length === 0 ? (
+              <Text>
+                <Link href={usualSlotsPath} icon="arrow-left">
+                  Terug naar de vaste plaatsen
+                </Link>
+              </Text>
+            ) : (
+              <CardLink href={sideQuizPath}>Begin opnieuw met de overgeslagen spelers</CardLink>
+            )}
           </Card>
         ) : (
           <Card aria-labelledby="vraag-kop">

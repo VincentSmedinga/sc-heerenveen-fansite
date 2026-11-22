@@ -1,4 +1,4 @@
-import { Card, DataTable, type DataTableRow, Heading, Link, Text } from '@fansite/design-system'
+import { Card, CardLink, DataTable, type DataTableRow, Heading, Text } from '@fansite/design-system'
 
 import { type RankedRow, type Ranking, rowOf, shownRows, topRows } from '#src/fans/prediction-ranking'
 import { RulesLink } from '#src/fans/RulesLink'
@@ -46,9 +46,7 @@ export function StandCard({
           sortable={false}
         />
       )}
-      <Text>
-        <Link href={standPath}>Hele stand</Link>
-      </Text>
+      <CardLink href={standPath}>Hele stand</CardLink>
     </Card>
   )
 }

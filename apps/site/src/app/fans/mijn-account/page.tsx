@@ -1,6 +1,17 @@
 import type { Metadata } from 'next'
 
-import { Button, Card, DescriptionList, Form, Heading, Link, Notice, Page, Text } from '@fansite/design-system'
+import {
+  Button,
+  Card,
+  CardLink,
+  DescriptionList,
+  Form,
+  Heading,
+  Link,
+  Notice,
+  Page,
+  Text,
+} from '@fansite/design-system'
 import { isFansPartOn } from '@fansite/shared/fans-env'
 import { eq } from 'drizzle-orm'
 
@@ -136,9 +147,7 @@ export default async function MyAccountPage({
               ))}
             </DescriptionList>
           )}
-          <Text>
-            <Link href={myDataPath}>Alles wat we van je bewaren</Link>
-          </Text>
+          <CardLink href={myDataPath}>Alles wat we van je bewaren</CardLink>
         </Card>
       </Page.Cell>
       <Page.Section area="side" aria-label="Uitloggen en je account">
@@ -163,9 +172,7 @@ export default async function MyAccountPage({
             Account opheffen
           </Heading>
           <Text>Je naam en je e-mailadres gaan weg. Wat je speelde, blijft zonder naam in de cijfers.</Text>
-          <Text>
-            <Link href={closePaths.form}>Account opheffen</Link>
-          </Text>
+          <CardLink href={closePaths.form}>Account opheffen</CardLink>
         </Card>
       </Page.Section>
     </Page.Main>

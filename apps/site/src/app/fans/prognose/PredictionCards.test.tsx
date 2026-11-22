@@ -120,7 +120,7 @@ describe('the card of a match that has begun', () => {
     expect(html).toMatch(/hf-tag-closed[^>]*>Gesloten</)
     expect(html).toContain('De wedstrijd is begonnen. Na de rust zie je je eerste punten.')
     expect(html).toContain('href="/wedstrijden/2026-27/2026-11-21-fc-twente"')
-    expect(html).toContain('Naar de wedstrijd')
+    expect(html).toContain('Naar de <span class="hf-icon-tail">wedstrijd')
   })
 
   it('shows the prediction as it was, without fields', () => {
@@ -154,7 +154,7 @@ describe('the card of a match that has begun', () => {
     expect(html).toContain('Winst 33 · Gelijk 13 · Verlies 8')
     expect(html).toContain('Meest voorspelde eindstanden')
     expect(html.indexOf('Ruststand')).toBeLessThan(html.indexOf('Winst 33'))
-    expect(html.indexOf('Winst 33')).toBeLessThan(html.indexOf('Naar de wedstrijd'))
+    expect(html.indexOf('Winst 33')).toBeLessThan(html.indexOf('Naar de <span class="hf-icon-tail">wedstrijd'))
   })
 
   it('has no figures without a reading', () => {

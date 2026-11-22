@@ -4230,6 +4230,24 @@
   Beide onderdelen werken in een gewoon formulier en op een gewone pagina zonder JavaScript, zodat het formulier (#1470) en de wedstrijdpagina (#1467) ze alleen hoeven te gebruiken.
 - **Alternatieven:** een keuzelijst per speler; een schuifbalk; de zegel als plaatje (dan staat het gemiddelde niet als tekst); de knoppen in twee rijen volgens het scherm in plaats van de kaart.
 
+## De link onderaan een kaart is `CardLink`, en een controle laat een kale kaartlink niet terugkomen
+
+- **Datum:** 22 november 2026
+- **Besluit:** de link die alleen op een regel onderaan een kaart (of onderaan een blok in een kaart) staat, is een eigen onderdeel, `CardLink` (#1560), dat het pictogram zelf kiest.
+  - Een adres dat met `http://` of `https://` begint, verlaat de site en krijgt `external-link`; elk ander adres, ook een pad op onze eigen site, krijgt `arrow-right`.
+    Er is geen eigenschap om het pictogram weg te laten of te veranderen, zodat een kaart het niet kan vergeten.
+  - Het pictogram is versiering: het is voor schermlezers verborgen en de link heet door zijn tekst.
+    Een externe kaartlink zegt dat ook in tekst, met een verborgen " (externe site)" achter zijn naam, zodat een fan met een schermlezer weet dat hij de site verlaat.
+    Het pictogram blijft bij het laatste woord van de tekst, zoals bij `Link`.
+  - Een link in een lopende zin, een link terug (`arrow-left`), een link in de navigatie en een link in een formulier (zoals Annuleren) zijn geen kaartlink en blijven een `Link`.
+    Dat geldt ook voor de links met een verborgen tekst in hun naam, zoals "Wijzigen" en "Bekijken" bij de gegevens van een fan, en de links in het beheer die geen kaart afsluiten.
+  - Een test, `apps/site/src/card-links.test.ts`, laat een `<Link>` zonder `icon` die het enige in een `<Text>` onderaan een `Card` is falen, met een melding die `CardLink` noemt.
+    Hij leest de code van de site en van het designsysteem.
+- **Waarom:** een eigenschap die je moet onthouden werd op de helft van de kaarten vergeten: dezelfde soort link had op de ene kaart een pijltje en op de andere niet.
+  Een afspraak zonder controle werd al vergeten.
+- **Alternatieven:** `Link` altijd een pictogram geven (raakt elke link in de tekst en de navigatie); een regel in de README zonder controle (de oude toestand); de keuze van het pictogram uitsluitend aan de aanroeper laten.
+- **Later:** zie _Elke link naar een andere site toont het pictogram voor een externe link_ in `redactie.md`: voor een kaartlink leidt `CardLink` het pictogram wel af uit het adres.
+
 ## PickList voor Fjouwer
 
 - **Datum:** 22 november 2026
