@@ -23,7 +23,11 @@ import { getDatabase } from '#src/database'
 /** A player counts for the Uitblinker of a match with at least this many ratings. */
 export const ratingMinimum = 5
 
-/** The ratings of one match, in the order of the line-up. */
+/**
+ * The ratings of one match, in the order of `orderRatings`: the highest average first, then the
+ * players without an average (fewer than `ratingMinimum` ratings), each group in the order of
+ * the line-up.
+ */
 export type MatchRatings = {
   /** The head coach, with the average of his ratings, or nothing when nobody rated him. */
   coach?: RatedCoach
@@ -56,11 +60,20 @@ const hundredths = (average: number) => Math.round(average * 100)
 /**
  * The ratings that visitors of the old fansite gave in one match, 2001 to 2007, from the
  * averages that the import keeps. A match without ratings has none (`undefined`). The players
- * stand in the order of the line-up of the report; a player the report does not have, such as
- * one who is no longer in the squad of the season, stands last, by name. The name is the one of
- * the table of players, which keeps a player who left the squad.
+ * stand in the order of `orderRatings`; where that leaves them equal, they stand in the order
+ * of the line-up of the report, and a player the report does not have, such as one who is no
+ * longer in the squad of the season, stands last, by name. The name is the one of the table of
+ * players, which keeps a player who left the squad.
  */
 export const loadOldMatchRatings = (db: Database, matchId: number) => loadMatchRatings(db, matchId, 'oude-fansite')
+
+/**
+ * Puts the rows of a match in the order of the line-up: the players the report has, by their
+ * place in it, and then the others as they came, which is by name.
+ */
+export function inLineUpOrder<T extends { appearanceId: null | number }>(rows: readonly T[]): T[] {
+  return [...rows.filter((row) => row.appearanceId !== null), ...rows.filter((row) => row.appearanceId === null)]
+}
 
 /**
  * The averages that the import keeps for one match and one source: `oude-fansite` for the
@@ -97,10 +110,7 @@ export async function loadMatchRatings(
     return undefined
   }
 
-  const rated = [
-    ...rows.filter((row) => row.appearanceId !== null),
-    ...rows.filter((row) => row.appearanceId === null),
-  ].map((row) => ({ ...row, average: Number(row.average) }))
+  const rated = orderRatings(inLineUpOrder(rows).map((row) => ({ ...row, average: Number(row.average) })))
   const winner = uitblinkerOf(rated)
   const coach = await loadCoachRatings(db, matchId, source)
 
@@ -172,14 +182,29 @@ export async function loadRunningRatings(db: Database, matchId: number): Promise
 }
 
 /**
- * The Uitblinker of a match: the player with the highest average among those with at least
- * `ratingMinimum` ratings. With an equal average the player with fewer ratings goes first, as
- * on the old fansite, and with those equal too the one who stands first in the line-up.
+ * The order of the table of a match, for every table of averages of a match: the players with
+ * at least `ratingMinimum` ratings first, the highest average first, and with an equal average
+ * (to two decimals) the player with more ratings. Players that are still equal, and the players
+ * with too few ratings, keep the order they came in, which is the order of the line-up. The
+ * Uitblinker is the first of the list when he has enough ratings, so the order and the winner
+ * are one rule.
  */
-export function uitblinkerOf(rated: readonly RatedPlayer[]): RatedPlayer | undefined {
-  return rated
-    .filter((player) => player.count >= ratingMinimum)
-    .toSorted((a, b) => hundredths(b.average) - hundredths(a.average) || a.count - b.count)[0]
+export function orderRatings<T extends { average: number; count: number }>(rated: readonly T[]): T[] {
+  const enough = rated.filter((player) => player.count >= ratingMinimum)
+  const others = rated.filter((player) => player.count < ratingMinimum)
+
+  return [...enough.toSorted((a, b) => hundredths(b.average) - hundredths(a.average) || b.count - a.count), ...others]
+}
+
+/**
+ * The Uitblinker of a match: the first of `orderRatings`, when he has at least `ratingMinimum`
+ * ratings: the highest average, and with an equal average the player with more ratings, as in
+ * issue 1558. With those equal too, the one who comes first in `rated`, the line-up.
+ */
+export function uitblinkerOf<T extends { average: number; count: number }>(rated: readonly T[]): T | undefined {
+  const [first] = orderRatings(rated)
+
+  return first !== undefined && first.count >= ratingMinimum ? first : undefined
 }
 
 /** The average of the head coach of one match, from the averages that are kept for a source. */

@@ -1,11 +1,12 @@
 import type { Competition, RatingSource } from '@fansite/db/schema'
 
-import { clubs, matches, matchPlayerRatings, oldSeasonRatings, players } from '@fansite/db/schema'
+import { clubs, matchAppearances, matches, matchPlayerRatings, oldSeasonRatings, players } from '@fansite/db/schema'
 import { isFansPartOn } from '@fansite/shared/fans-env'
-import { and, eq, gte, inArray, max } from 'drizzle-orm'
+import { and, asc, eq, gte, inArray } from 'drizzle-orm'
 import { cache } from 'react'
 
 import { getDatabase } from './database'
+import { inLineUpOrder, uitblinkerOf } from './fans/match-ratings'
 
 // The ratings that supporters gave a player, for the card on his page (issue 1466). The
 // numbers of a match come from `match_player_ratings`, the season ratings of 1998/99 to
@@ -90,13 +91,14 @@ const matchLabel = (row: Pick<RatingRow, 'goalsAgainst' | 'goalsFor' | 'home' | 
  * every rating of the season, so a match with few ratings weighs as little as it should and
  * the average of the match averages is never used. A season shows from three matches with five
  * ratings or more, whether it is old or new. A season of 1998/99 to 2000/01 has only its
- * season rating, with no matches and no count. The top of a match (`tops`, by match) is the
- * highest average among the players with five ratings or more.
+ * season rating, with no matches and no count. `uitblinker` holds the matches in which he was
+ * the Uitblinker, by the rule of `uitblinkerOf`: the highest average among the players with
+ * five ratings or more, and with an equal average the player with more ratings.
  */
 export function playerRatingsOf(
   rows: readonly RatingRow[],
   oldSeasons: readonly OldSeasonRow[],
-  tops: ReadonlyMap<number, number>,
+  uitblinker: ReadonlySet<number>,
 ): PlayerRatings | undefined {
   const bySeason = new Map<string, RatingRow[]>()
 
@@ -149,7 +151,7 @@ export function playerRatingsOf(
       label: matchLabel(row),
       round: row.round,
       season: row.season,
-      winner: row.average >= (tops.get(row.matchId) ?? Number.POSITIVE_INFINITY),
+      winner: uitblinker.has(row.matchId),
     })),
     oldSource: seasons.some((season) => season.oldSource) || last.some(isOld),
     seasonOnly: seasons.some((season) => season.matches === undefined),
@@ -168,8 +170,8 @@ const isOld = (row: Pick<RatingRow, 'source'>) => row.source === 'oude-fansite'
 export const oldSourceLine = 'Cijfers van bezoekers van de Fansite, 2001 tot 2007.'
 
 /**
- * What is read for a person: the averages of his matches, his season ratings and the top of
- * each match he is listed for. It throws when the database fails, and the block that asks
+ * What is read for a person: the averages of his matches, his season ratings and the matches
+ * in which he was the Uitblinker. It throws when the database fails, and the block that asks
  * logs it and leaves itself out.
  */
 export async function readPlayerRatings(personId: number): Promise<PlayerRatings | undefined> {
@@ -218,28 +220,66 @@ export async function readPlayerRatings(personId: number): Promise<PlayerRatings
     .filter((row) => row.ratingCount >= minimumRatings)
     .toSorted((a, b) => b.matchDate.localeCompare(a.matchDate) || b.matchId - a.matchId)
     .slice(0, lastMatchesShown)
-  const tops =
+  const uitblinker =
     shown.length === 0
-      ? []
-      : await db
-          .select({ id: matchPlayerRatings.matchId, top: max(matchPlayerRatings.average) })
-          .from(matchPlayerRatings)
-          .where(
-            and(
-              inArray(
-                matchPlayerRatings.matchId,
-                shown.map((row) => row.matchId),
-              ),
-              gte(matchPlayerRatings.ratingCount, minimumRatings),
-            ),
-          )
-          .groupBy(matchPlayerRatings.matchId)
+      ? new Set<number>()
+      : await uitblinkerMatches(
+          db,
+          shown.map((row) => row.matchId),
+          new Set(ids),
+        )
 
   return playerRatingsOf(
     rows,
     old.map((row) => ({ average: Number(row.average), season: row.season })),
-    new Map(tops.map(({ id, top }) => [id, Number(top)])),
+    uitblinker,
   )
+}
+
+/**
+ * The matches of `matchIds` whose Uitblinker is one of the players `ids`. It reads every player
+ * with five ratings or more in those matches, in the order of the line-up, and leaves the rule
+ * to `uitblinkerOf`, so this card agrees with the table of the match.
+ */
+async function uitblinkerMatches(
+  db: ReturnType<typeof getDatabase>['db'],
+  matchIds: readonly number[],
+  ids: ReadonlySet<number>,
+) {
+  const rows = await db
+    .select({
+      appearanceId: matchAppearances.id,
+      average: matchPlayerRatings.average,
+      count: matchPlayerRatings.ratingCount,
+      matchId: matchPlayerRatings.matchId,
+      playerId: matchPlayerRatings.playerId,
+    })
+    .from(matchPlayerRatings)
+    .leftJoin(
+      matchAppearances,
+      and(
+        eq(matchAppearances.matchId, matchPlayerRatings.matchId),
+        eq(matchAppearances.playerId, matchPlayerRatings.playerId),
+        eq(matchAppearances.ours, true),
+      ),
+    )
+    .where(and(inArray(matchPlayerRatings.matchId, [...matchIds]), gte(matchPlayerRatings.ratingCount, minimumRatings)))
+    .orderBy(asc(matchAppearances.id))
+  const found = new Set<number>()
+
+  for (const matchId of matchIds) {
+    const ofMatch = inLineUpOrder(rows.filter((row) => row.matchId === matchId)).map((row) => ({
+      ...row,
+      average: Number(row.average),
+    }))
+    const winner = uitblinkerOf(ofMatch)
+
+    if (winner !== undefined && ids.has(winner.playerId)) {
+      found.add(matchId)
+    }
+  }
+
+  return found
 }
 
 /**

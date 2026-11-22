@@ -39,7 +39,7 @@ describe('the ratings of a player', () => {
         row('2026/27', '2026-08-22', 3, 3),
       ],
       [],
-      new Map(),
+      new Set(),
     )
 
     // (45 + 30 + 30 + 9) / 18 = 6,33 and not the average of 9, 6, 6 and 3.
@@ -57,15 +57,15 @@ describe('the ratings of a player', () => {
         row('2004/05', '2004-09-15', 7, 20, { source: 'oude-fansite' }),
       ],
       [],
-      new Map(),
+      new Set(),
     )
 
     expect(ratings?.seasons.map(({ season }) => season)).toEqual(['2004/05'])
   })
 
   it('shows nothing for a player without enough ratings', () => {
-    expect(playerRatingsOf([], [], new Map())).toBeUndefined()
-    expect(playerRatingsOf([row('2026/27', '2026-08-01', 7, 9)], [], new Map())).toBeUndefined()
+    expect(playerRatingsOf([], [], new Set())).toBeUndefined()
+    expect(playerRatingsOf([row('2026/27', '2026-08-01', 7, 9)], [], new Set())).toBeUndefined()
   })
 
   it('has old and new seasons with the newest first, the source line only for the old numbers', () => {
@@ -74,9 +74,9 @@ describe('the ratings of a player', () => {
     const both = playerRatingsOf(
       [...matches('2005/06', 2005, 'oude-fansite'), ...matches('2026/27', 2026, 'fans')],
       [],
-      new Map(),
+      new Set(),
     )
-    const current = playerRatingsOf(matches('2026/27', 2026, 'fans'), [], new Map())
+    const current = playerRatingsOf(matches('2026/27', 2026, 'fans'), [], new Set())
 
     expect(both?.seasons.map(({ season }) => season)).toEqual(['2026/27', '2005/06'])
     expect(both?.oldSource).toBe(true)
@@ -90,7 +90,7 @@ describe('the ratings of a player', () => {
         { average: 6.8, season: '2000/01' },
         { average: 7.1, season: '1999/00' },
       ],
-      new Map(),
+      new Set(),
     )
 
     expect(ratings?.seasons).toEqual([
@@ -111,7 +111,7 @@ describe('the ratings of a player', () => {
       row('2026/27', '2026-09-05', 6.5, 8),
       row('2026/27', '2026-09-12', 6.5, 8),
     ]
-    const ratings = playerRatingsOf(rows, [], new Map([[rows[2]!.matchId, 7.8]]))
+    const ratings = playerRatingsOf(rows, [], new Set([rows[2]!.matchId]))
 
     expect(ratings?.last.map(({ average }) => average)).toEqual(['6,5', '6,5', '6,5', '7,8', '7,0'])
     expect(ratings?.last.map(({ winner }) => winner)).toEqual([false, false, false, true, false])

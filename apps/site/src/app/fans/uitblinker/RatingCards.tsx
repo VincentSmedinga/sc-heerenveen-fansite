@@ -21,6 +21,7 @@ import { logInPaths } from '#src/fans/log-in'
 import { returnParameter } from '#src/fans/log-in-form'
 import {
   type MatchRatings,
+  orderRatings,
   type RatedCoach,
   type RatedPlayer,
   ratingMinimum,
@@ -210,7 +211,18 @@ export function SavedView({
   runningCoach?: RatedCoach | undefined
 }) {
   const byAppearance = new Map(running.map((player) => [player.appearanceId, player]))
-  const winner = uitblinkerOf(running)
+  // The same order as the table of a closed match (`orderRatings`): the form lists the players
+  // by name, and the line-up is the order of their appearances, so equal players keep that.
+  const ordered = orderRatings(
+    players
+      .toSorted((a, b) => a.appearanceId - b.appearanceId)
+      .map((player) => {
+        const found = byAppearance.get(player.appearanceId)
+
+        return { average: found?.average ?? 0, count: found?.count ?? 0, player }
+      }),
+  )
+  const winner = uitblinkerOf(ordered)
 
   return (
     <>
@@ -225,7 +237,7 @@ export function SavedView({
         caption="Jouw cijfers en de tussenstand"
         columns={['Speler', 'Jij', { key: true, name: 'Gem' }]}
         rows={[
-          ...players.map((player) => {
+          ...ordered.map(({ player }) => {
             const found = byAppearance.get(player.appearanceId)
 
             return {
@@ -237,7 +249,7 @@ export function SavedView({
               ],
               header: player.name,
               // In words, on a line of its own: a label in the cell is too wide for the column.
-              ...(winner !== undefined && winner.appearanceId === player.appearanceId
+              ...(winner !== undefined && winner.player.appearanceId === player.appearanceId
                 ? { secondary: 'Uitblinker' }
                 : {}),
             }
