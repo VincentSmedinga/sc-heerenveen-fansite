@@ -2176,7 +2176,7 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(predictionHtml, /Jouw voorspellingen/)
     // The card Stand with the way to the whole ranking, which says nothing was predicted yet.
     assert.match(predictionHtml, /<h2[^>]*>Stand<\/h2>/)
-    assert.match(predictionHtml, /<a [^>]*href="\/fans\/prognose\/stand"[^>]*>Hele stand<\/a>/)
+    assert.match(predictionHtml, /<a [^>]*href="\/fans\/prognose\/stand"[^>]*>Hele <span class="hf-icon-tail">stand</)
 
     const ranking = await fetch(`${origin}/fans/prognose/stand`)
 
@@ -2206,7 +2206,7 @@ await withEmptyDatabase((database) =>
     assert.equal(yearWinners.headers.get('x-robots-tag'), 'noindex, nofollow')
     // The card of the game on Fans, with its way to the page.
     assert.match(html, /<h2[^>]*>Uitblinker<\/h2>/)
-    assert.match(html, /<a [^>]*href="\/fans\/uitblinker"[^>]*>Naar de Uitblinker<\/a>/)
+    assert.match(html, /<a [^>]*href="\/fans\/uitblinker"[^>]*>Naar de <span class="hf-icon-tail">Uitblinker</)
 
     // The rules of all games: a card for each game that is on, for everybody.
     const rules = await fetch(`${origin}/fans/spelregels`)
@@ -2216,7 +2216,10 @@ await withEmptyDatabase((database) =>
     assert.match(rulesHtml, /<h1[^>]*>Spelregels<\/h1>/)
     assert.match(rulesHtml, /<h2[^>]*id="prognose"/)
     assert.match(rulesHtml, /<h2[^>]*id="account"/)
-    assert.match(predictionHtml, /<a [^>]*href="\/fans\/spelregels#prognose"[^>]*>Spelregels<\/a>/)
+    assert.match(
+      predictionHtml,
+      /<a [^>]*href="\/fans\/spelregels#prognose"[^>]*><span class="hf-icon-tail">Spelregels</,
+    )
   }),
 )
 
