@@ -1,5 +1,6 @@
 import { Card, CardLink, DataTable, type DataTableRow, Heading, tableColumns, Text } from '@fansite/design-system'
 
+import { fjouwerRulesAddress } from '#src/fans-paths'
 import { type FourRanking, type RankedFour, rowOf, shownRows, topRows } from '#src/fans/fjouwer-ranking'
 
 // The ranking of the game Fjouwer (issue 1473): the card with the top five on the page of the
@@ -61,6 +62,7 @@ export function StandTable({ ranking, supporterId }: { ranking: FourRanking; sup
         sortable={false}
       />
       <Text appearance="meta">{standLegend}</Text>
+      <CardLink href={fjouwerRulesAddress}>Spelregels</CardLink>
     </>
   )
 }

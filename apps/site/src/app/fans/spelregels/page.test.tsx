@@ -220,7 +220,8 @@ describe('the part Fjouwer', () => {
     fjouwerOn()
     const html = render()
 
-    expect(html).toContain('De stand telt per seizoen en alleen de wedstrijden met een klaar verslag.')
+    expect(html).toContain('telt per seizoen en alleen de wedstrijden met een klaar verslag.')
+    expect(html).toContain('href="/fans/fjouwer/stand"')
     expect(html).toContain('Je naam staat alleen in een stand als je dat wilt')
   })
 

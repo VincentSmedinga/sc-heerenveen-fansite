@@ -80,3 +80,11 @@ describe('the card Stand', () => {
     expect(html).not.toContain('<table')
   })
 })
+
+describe('the link "Spelregels" under the table of the ranking (issue 1477)', () => {
+  it('goes to the part of Fjouwer on the page with the rules', () => {
+    const html = renderToStaticMarkup(<StandTable ranking={ranking} supporterId={undefined} />)
+
+    expect(html).toContain('<a href="/fans/spelregels#fjouwer"><span class="hf-icon-tail">Spelregels<svg')
+  })
+})

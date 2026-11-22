@@ -7919,4 +7919,4 @@
 - **Waarom:** een regel of een voorbeeld op de pagina kan zo niet ouder worden dan de telling.
   Een voorbeeld dat in een test staat en niet op de pagina, of andersom, loopt vroeg of laat uiteen.
 - **Alternatieven:** de voorbeelden in de testbestanden laten en de pagina met de hand overtypen (loopt uiteen); een eigen pagina per spel (meer plekken om bij te houden).
-- **Let op:** de kaart noemt de stand alleen in woorden, zonder link: die pagina komt met #1473.
+- **Let op:** de kaart linkt naar de stand (#1473), en de pagina van de stand linkt terug met "Spelregels".

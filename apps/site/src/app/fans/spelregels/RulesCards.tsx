@@ -112,8 +112,9 @@ export function FjouwerRulesCard() {
       <ExampleTable caption="Voorbeeld: minuten en tegendoelpunten" examples={minutesExamples} />
       <Heading level={3}>De stand</Heading>
       <Text>
-        De stand telt per seizoen en alleen de wedstrijden met een klaar verslag. Je naam staat alleen in een stand als
-        je dat wilt: dat zet je aan of uit op <Link href={`${fansPath}/mijn-account`}>Mijn account</Link>.
+        De <Link href={`${fansPath}/fjouwer/stand`}>stand</Link> telt per seizoen en alleen de wedstrijden met een klaar
+        verslag. Gelijk aantal punten? Dan delen jullie een plaats. Je naam staat alleen in een stand als je dat wilt:
+        dat zet je aan of uit op <Link href={`${fansPath}/mijn-account`}>Mijn account</Link>.
       </Text>
     </Card>
   )
