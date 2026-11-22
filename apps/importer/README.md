@@ -2437,9 +2437,11 @@ De verbinding staat op alleen lezen en het script voert alleen `SELECT` uit.
 Het schrijft:
 
 - de bestanden in [`data/oude-fansite/`](data/oude-fansite/): `clubs.json`, `players.json` en een bestand per seizoen, `matches-<seizoen>.json` (het seizoen `9091` is 1990/91);
-- [`docs/oefenwedstrijden-2002-03.md`](../../docs/oefenwedstrijden-2002-03.md): de negen oefenwedstrijden van de zomer van 2002, met de uitslag en de doelpuntenmakers van sc Heerenveen.
+- de cijfers van de oude supporters (#1465): `ratings-<seizoen>.json` per seizoen van 2001/02 tot 2006/07, met per wedstrijd en speler het gemiddelde, het aantal cijfers en de spreiding, en `season-ratings.json` met de seizoencijfers van 1998/99 tot 2000/01 en de uitblinkers van het jaar;
+- [`docs/oefenwedstrijden-2002-03.md`](../../docs/oefenwedstrijden-2002-03.md): de negen oefenwedstrijden van de zomer van 2002, met de uitslag en de doelpuntenmakers van sc Heerenveen;
+- [`docs/cijfers-buiten-opstelling.md`](../../docs/cijfers-buiten-opstelling.md): de cijfers voor spelers die niet in de opstelling van die wedstrijd staan, per wedstrijd, voor de redactie.
 
-Een tweede run geeft dezelfde bytes: de bestanden zijn gesorteerd, hebben vaste sleutels en een versienummer (`version`), en zijn samen ongeveer 2,2 MB.
+Een tweede run geeft dezelfde bytes: de bestanden zijn gesorteerd, hebben vaste sleutels en een versienummer (`version`), en zijn samen ongeveer 2,6 MB.
 Na afloop meldt het script wat niet aan elkaar hangt: wedstrijden zonder uitslag, wedstrijden met een tegenstander die niet in `club` staat, rijen met doelpunten, kaarten, opstellingen, uitslagen of verslagen zonder wedstrijd, en codes van spelers zonder rij in `speler`.
 Het stopt daar niet op.
 Nu is dat één verslagregel zonder wedstrijd (`nec.bekeruit` in 1997/98) en de codes `foppe.dehaan` en `ivan.tzvekov`.
@@ -2450,10 +2452,33 @@ Alleen feiten: per wedstrijd de code, het seizoen, de datum en tijd zoals de oud
 Daarbij de tegenstanders (code, naam, land) en de spelers van ons die erin voorkomen (code, voornaam, tussenvoegsel, achternaam).
 Van de verslagen leest het script alleen `scheidsrechter` en `toeschouwers`.
 Er staan geen teksten van verslagen of voorbeschouwingen in, niets van leden, e-mail of de nieuwsbrief, en van een speler geen geboortedatum, biografie, contract, lengte, gewicht of foto.
+Bij de cijfers staan alleen gemiddelden, aantallen en spreidingen, nooit wie een cijfer gaf.
 
 De bestanden leggen niets uit.
 `home` is de kant die de oude database `t` noemt, een `0` bij hoekschoppen, buitenspel of overtredingen is "onbekend", en een minuut `0` bij een doelpunt of gele kaart ook.
 Welke code een speler van ons is, wat een opmerking `n.v.` betekent en wat het seizoen `9091` is, staat in de import.
+
+### De cijfers van de oude supporters
+
+De oude tabel `uitblinker_inz` heeft 58.866 cijfers van bezoekers.
+Het script rekent ze uit tot gemiddelden en schrijft alleen die (zie `src/old-site-ratings-export.ts`):
+
+- Een bezoeker die dezelfde speler in dezelfde wedstrijd twee keer een cijfer gaf, telt één keer, met het laatste cijfer.
+  Het script leest daarvoor de naam van de bezoeker en het nummer van de rij, en schrijft ze nooit weg: in de bestanden staan alleen getallen en codes.
+- De spreiding is de standaardafwijking van de cijfers van die speler in die wedstrijd, in twee decimalen.
+- Een cijfer voor een wedstrijdcode die niet meer bestaat, valt weg, en de melding noemt hoeveel (nu 139, voor `0102/fc.basel.thuis`).
+- Een cijfer voor een speler die niet in de opstelling van die wedstrijd staat, komt niet in de bestanden en niet in de database.
+  Het staat per wedstrijd in `docs/cijfers-buiten-opstelling.md`, zodat de redactie kan beoordelen of de opstelling of het cijfer niet klopt.
+- De twee hoofdtrainers (`foppe.dehaan` en `gertjan.verbeek`) staan in dezelfde tabel.
+  Het script telt hun cijfers (4.869 na het weglaten van dubbele) en laat ze liggen voor #1502, dat `ratedCoachCodes` en `buildOldSiteRatings` hergebruikt.
+- De seizoencijfers van 1998/99 tot 2000/01 komen uit `uitblinker_oud`, zonder wedstrijden en zonder aantal cijfers, want de oude site bewaarde die niet.
+- De acht uitblinkers van het jaar staan in `uitblinkersOfTheYear` in `src/old-site-ratings-export.ts`, overgetypt van de oude pagina: de oude database heeft ze niet.
+
+De stappen `cijfers` en `seizoencijfers` van de import zetten dit in `match_player_ratings`, `old_season_ratings` en `old_season_winners`.
+De wedstrijd en de speler worden gevonden zoals de andere stappen dat doen, met dezelfde naamcorrecties.
+Een cijfer van een wedstrijd of speler die niet in de database staat, slaat de stap over met een regel in het logboek.
+Alle gemiddelden komen mee, ook die op minder dan vijf cijfers: de pagina's passen de drempel toe.
+De stap `seizoencijfers` toetst de uitblinkers van 2001/02 tot 2005/06 aan de cijfers van de wedstrijden en meldt een verschil, zonder iets te veranderen.
 
 ### De bestanden lezen
 
@@ -2467,7 +2492,7 @@ Beide weigeren een bestand met een ander versienummer, een veld dat niet in de v
 `pnpm import:old-site` (op de host `import.mjs --old-site`) leest de bestanden van hierboven en schrijft ze naar de database.
 Hij raakt de oude database nooit, want productie kan die niet bereiken.
 Hij draait de stappen één voor één, in een vaste volgorde, omdat een wedstrijd een club nodig heeft en een doelpunt een wedstrijd.
-Nu zijn er negen stappen: `clubs`, `matches`, `spelers`, `doelpunten`, `opstellingen`, `personen`, `doelpunten tegen ons`, `linie en land` en `selecties`.
+Nu zijn er elf stappen: `clubs`, `matches`, `spelers`, `doelpunten`, `opstellingen`, `personen`, `doelpunten tegen ons`, `linie en land`, `cijfers`, `seizoencijfers` en `selecties`.
 
 ```sh
 pnpm import:old-site --dry-run

@@ -119,7 +119,56 @@ export const oldSiteMatchesFileSchema = z.strictObject({
   version: z.literal(oldSiteFileVersion),
 })
 
-export const oldSiteFileSchema = z.union([oldSiteClubsFileSchema, oldSitePlayersFileSchema, oldSiteMatchesFileSchema])
+/**
+ * What supporters of the old fansite gave one player in one match (1465): the average, the
+ * number of ratings and their spread (the standard deviation, in grades), worked out by the
+ * export. The file has no name, no time and no one who gave a rating, only these three numbers.
+ */
+export const oldSiteRatingSchema = z.strictObject({
+  average: z.number().min(1).max(10),
+  count: z.number().int().min(1),
+  matchCode: z.string().min(1),
+  playerCode: z.string().min(1),
+  spread: z.number().min(0).max(9),
+})
+
+/** The ratings of the matches of one season, in `ratings-<season>.json`. */
+export const oldSiteRatingsFileSchema = z.strictObject({
+  ratings: z.array(oldSiteRatingSchema),
+  season: z.string().regex(/^\d{4}$/),
+  version: z.literal(oldSiteFileVersion),
+})
+
+/** The season rating the old fansite kept for a player in 1998/99 to 2000/01: an average. */
+export const oldSiteSeasonRatingSchema = z.strictObject({
+  average: z.number().min(1).max(10),
+  playerCode: z.string().min(1),
+  season: z.string().regex(/^\d{4}$/),
+})
+
+/**
+ * The Uitblinker of the year, typed over from the old page (the old database does not have
+ * it). It is a name, as the page wrote it, and the import links it to a player.
+ */
+export const oldSiteWinnerSchema = z.strictObject({
+  name: z.string().min(1),
+  season: z.string().regex(/^\d{4}$/),
+})
+
+/** The season ratings before 2001 and the winners of the year, in `season-ratings.json`. */
+export const oldSiteSeasonRatingsFileSchema = z.strictObject({
+  seasonRatings: z.array(oldSiteSeasonRatingSchema),
+  version: z.literal(oldSiteFileVersion),
+  winners: z.array(oldSiteWinnerSchema),
+})
+
+export const oldSiteFileSchema = z.union([
+  oldSiteClubsFileSchema,
+  oldSitePlayersFileSchema,
+  oldSiteMatchesFileSchema,
+  oldSiteRatingsFileSchema,
+  oldSiteSeasonRatingsFileSchema,
+])
 
 export type OldSiteClub = z.output<typeof oldSiteClubSchema>
 /** All the facts of the old site, as the import reads them. */
@@ -127,13 +176,21 @@ export type OldSiteData = {
   clubs: OldSiteClub[]
   matches: OldSiteMatch[]
   players: OldSitePlayer[]
+  /** The averages per match and player, each with the season of its file. */
+  ratings: OldSiteRatingOfSeason[]
+  seasonRatings: OldSiteSeasonRating[]
+  winners: OldSiteWinner[]
 }
 export type OldSiteEvent = z.output<typeof oldSiteEventSchema>
 export type OldSiteFile = z.output<typeof oldSiteFileSchema>
 export type OldSiteLineupEntry = z.output<typeof oldSiteLineupSchema>
 export type OldSiteMatch = z.output<typeof oldSiteMatchSchema>
-
 export type OldSitePlayer = z.output<typeof oldSitePlayerSchema>
+export type OldSiteRating = z.output<typeof oldSiteRatingSchema>
+export type OldSiteRatingOfSeason = OldSiteRating & { season: string }
+export type OldSiteSeasonRating = z.output<typeof oldSiteSeasonRatingSchema>
+
+export type OldSiteWinner = z.output<typeof oldSiteWinnerSchema>
 
 /**
  * Parses the text of one file. It throws when the text isn't JSON, has another version or has a
@@ -167,9 +224,10 @@ export function parseOldSiteFile(text: string, name = 'file'): OldSiteFile {
 export async function readOldSiteData(folder: string | URL = oldSiteDataFolder): Promise<OldSiteData> {
   const directory = typeof folder === 'string' ? folder : fileURLToPath(folder)
   const names = (await readdir(directory)).filter((name) => name.endsWith('.json')).sort()
-  const data: OldSiteData = { clubs: [], matches: [], players: [] }
+  const data: OldSiteData = { clubs: [], matches: [], players: [], ratings: [], seasonRatings: [], winners: [] }
   let clubFiles = 0
   let playerFiles = 0
+  let seasonRatingFiles = 0
 
   for (const name of names) {
     const file = await readOldSiteFile(path.join(directory, name))
@@ -180,6 +238,12 @@ export async function readOldSiteData(folder: string | URL = oldSiteDataFolder):
     } else if ('players' in file) {
       playerFiles += 1
       data.players.push(...file.players)
+    } else if ('ratings' in file) {
+      data.ratings.push(...file.ratings.map((rating) => ({ ...rating, season: file.season })))
+    } else if ('seasonRatings' in file) {
+      seasonRatingFiles += 1
+      data.seasonRatings.push(...file.seasonRatings)
+      data.winners.push(...file.winners)
     } else {
       for (const match of file.matches) {
         if (match.season !== file.season) {
@@ -194,6 +258,10 @@ export async function readOldSiteData(folder: string | URL = oldSiteDataFolder):
     throw new Error(`${directory} needs one clubs file and one players file, and has ${clubFiles} and ${playerFiles}.`)
   }
 
+  if (seasonRatingFiles > 1) {
+    throw new Error(`${directory} has ${seasonRatingFiles} season ratings files, and one is the most it may have.`)
+  }
+
   const keys = new Set<string>()
 
   for (const match of data.matches) {
@@ -203,6 +271,20 @@ export async function readOldSiteData(folder: string | URL = oldSiteDataFolder):
       throw new Error(`The match ${key} is in the files twice.`)
     }
     keys.add(key)
+  }
+
+  const ratingKeys = new Set<string>()
+
+  for (const rating of data.ratings) {
+    const key = `${rating.season}/${rating.matchCode}`
+
+    if (!keys.has(key)) {
+      throw new Error(`The ratings hold the match ${key}, which is not in the match files.`)
+    }
+    if (ratingKeys.has(`${key}/${rating.playerCode}`)) {
+      throw new Error(`The rating of ${rating.playerCode} in the match ${key} is in the files twice.`)
+    }
+    ratingKeys.add(`${key}/${rating.playerCode}`)
   }
 
   data.matches.sort((a, b) => a.dateTime.localeCompare(b.dateTime) || a.code.localeCompare(b.code))

@@ -4532,3 +4532,24 @@
 - **Waarom:** een aftrap is een moment, en de limiet per run schuift de rest naar een volgende run.
   De rijen in `supporter_reminders` houden de runs eerlijk: een run die niets te doen heeft, doet één query en stuurt niets.
 - **Alternatieven:** de stap één keer per dag draaien (mist een wedstrijd om 12.30 of 20.45); de regel van de pagina in de importer herhalen (twee plekken die uit elkaar lopen).
+
+## De cijfers van de oude Fansite komen als gemiddelden in de database
+
+- **Datum:** 22 november 2026
+- **Besluit:** het exportscript van de oude site (`pnpm export:old-site`) rekent de cijfers van `uitblinker_inz` uit tot een gemiddelde, een aantal en een spreiding per wedstrijd en speler, en schrijft die naar `ratings-<seizoen>.json`.
+  Het script schrijft nooit wie een cijfer gaf, en nooit een tijd.
+  De stappen `cijfers` en `seizoencijfers` van de import lezen die bestanden en vullen `match_player_ratings` (met de bron `oude-fansite`), `old_season_ratings` en `old_season_winners`.
+  Een cijfer dat een bezoeker twee keer gaf voor dezelfde speler in dezelfde wedstrijd telt één keer, het laatste, en een cijfer voor een wedstrijdcode die niet meer bestaat valt weg, met een melding.
+  Een cijfer voor een speler die niet in de opstelling staat, komt in `docs/cijfers-buiten-opstelling.md` voor de redactie en niet in de database.
+  De import bewaart alle gemiddelden, ook die op minder dan vijf cijfers, en de pagina's passen de drempel toe.
+  De cijfers van 1 juli 2001 komen mee.
+  De seizoencijfers van 1998/99 tot 2000/01 staan apart, zonder wedstrijden en zonder aantal.
+  De uitblinkers van het jaar van 1998/99 tot 2005/06 staan in `season-ratings.json`, overgetypt van de oude pagina; de import toetst de vijf vanaf 2001/02 aan de cijfers en meldt een verschil.
+- **Waarom:** de gemiddelden hebben we nodig om ze naast de nieuwe te tonen (#1466, #1467, #1474).
+  Wie een cijfer gaf, is een persoonsgegeven zonder nut voor de site, dus dat komt nooit in een bestand.
+  De import leest alleen de bestanden, want productie kan de oude database niet bereiken.
+- **Alternatieven:** de losse cijfers importeren (houdt persoonsgegevens bij); alleen seizoencijfers importeren (dan ontbreekt de wedstrijd).
+- **Let op:** de spreiding is de standaardafwijking van de hele groep cijfers, niet van een steekproef, in twee decimalen.
+  Een rij heeft de speler van het seizoen van de wedstrijd (`players` heeft een rij per seizoen), en `match_player_ratings` heeft de bron als kolom, zodat de cijfers van nu (#1470) en die van de trainers (#1502) dezelfde tabel kunnen gebruiken.
+  De uitblinkers van het jaar hebben een eigen tabel, `old_season_winners`, omdat een seizoen vanaf 2001/02 geen seizoencijfer in `old_season_ratings` heeft: dat rekenen de pagina's uit de cijfers per wedstrijd.
+  De twee hoofdtrainers staan in dezelfde oude tabel; het script laat hun cijfers liggen voor #1502.

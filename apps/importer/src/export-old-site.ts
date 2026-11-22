@@ -1,6 +1,8 @@
 // The export of the old fansite, `pnpm export:old-site`. It reads the database of the old site
-// once, from a copy on your own computer, and writes the match facts to
-// `apps/importer/data/oude-fansite/` and the friendlies to `docs/oefenwedstrijden-2002-03.md`.
+// once, from a copy on your own computer, and writes the match facts and
+// the ratings (averages only, 1465) to `apps/importer/data/oude-fansite/`, the friendlies to
+// `docs/oefenwedstrijden-2002-03.md` and the ratings for players outside a line-up to
+// `docs/cijfers-buiten-opstelling.md`.
 // The import reads those files and never the old database (see the README of the importer).
 // The command only reads: the connection is read-only and the queries are selects.
 import { parseEnv } from '@fansite/shared/env'
@@ -21,6 +23,7 @@ const oldDatabaseEnvSchema = z.object({
 })
 
 const friendliesFile = new URL('../../../docs/oefenwedstrijden-2002-03.md', import.meta.url)
+const ratingsOutsideLineupFile = new URL('../../../docs/cijfers-buiten-opstelling.md', import.meta.url)
 
 async function main() {
   const { OLD_DATABASE_URL } = parseEnv(oldDatabaseEnvSchema, process.env)
@@ -42,6 +45,13 @@ async function main() {
   const filepath = fileURLToPath(friendliesFile)
 
   await writeFile(filepath, await format(result.friendliesMarkdown, { ...(await resolveConfig(filepath)), filepath }))
+
+  const outsidePath = fileURLToPath(ratingsOutsideLineupFile)
+
+  await writeFile(
+    outsidePath,
+    await format(result.ratingsOutsideLineupMarkdown, { ...(await resolveConfig(outsidePath)), filepath: outsidePath }),
+  )
 
   console.log(result.report.join('\n'))
 }
@@ -73,12 +83,16 @@ async function readRows(url: string): Promise<OldSiteRows> {
       players: await select(
         'SELECT voornaam, tussenvoegsel, achternaam, code, linie, nationaliteit FROM speler ORDER BY code',
       ),
+      ratings: await select(
+        'SELECT id, inz_gn, wsd_code, wsd_seizoen, spr_code, cijfer FROM uitblinker_inz ORDER BY id',
+      ),
       reports: await select(
         'SELECT wsd_code, wsd_seizoen, scheidsrechter, toeschouwers FROM wedstrijd_vsg ORDER BY id',
       ),
       results: await select(
         'SELECT wsd_code, wsd_seizoen, rt, ru, et, eu, ht, hu, bt, bu, ot, ou, opmerking FROM wedstrijd_res ORDER BY id',
       ),
+      seasonRatings: await select('SELECT spr_code, jaargang, gemiddelde FROM uitblinker_oud ORDER BY id'),
     }
   } finally {
     await connection.end()
