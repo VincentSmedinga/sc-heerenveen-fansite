@@ -233,7 +233,12 @@ export type {
   PredictionCrowdScore,
 } from './components/prediction-crowd/PredictionCrowd'
 export { PredictionList } from './components/prediction-list/PredictionList'
-export type { PredictionListItem, PredictionListProps } from './components/prediction-list/PredictionList'
+export type {
+  PredictionListGuess,
+  PredictionListItem,
+  PredictionListPart,
+  PredictionListProps,
+} from './components/prediction-list/PredictionList'
 export { PullIndicator } from './components/pull-to-refresh/PullIndicator'
 export type { PullIndicatorProps } from './components/pull-to-refresh/PullIndicator'
 export { PullToRefresh } from './components/pull-to-refresh/PullToRefresh'

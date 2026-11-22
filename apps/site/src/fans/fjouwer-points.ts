@@ -228,6 +228,17 @@ export type MatchStanding = {
   places: ReadonlyMap<number, { place: number; points: number }>
 }
 
+/** The matches of a season that count for the game, in the order they close. */
+export async function closingOrder(db: Database, season: string): Promise<PointsMatch[]> {
+  const found = await db
+    .select(matchColumns)
+    .from(matches)
+    .innerJoin(clubs, eq(clubs.id, matches.clubId))
+    .where(and(eq(matches.season, season), inArray(matches.status, ['scheduled', 'played'])))
+
+  return found.toSorted((a, b) => closesAt(a).getTime() - closesAt(b).getTime() || a.id - b.id)
+}
+
 /**
  * The ranking of a match: everybody who had a four for it (saved or inherited) and whose
  * account is not blocked, ranked on the points of their four. A closed account has no
@@ -312,6 +323,33 @@ export function pointsOfFour(
   return { rows, total: rows.reduce((sum, row) => sum + row.points.total, 0) }
 }
 
+/** The fours a supporter saved in the matches of a season, by match. */
+export async function savedFoursOf(db: Database, supporterIds: readonly number[], matchIds: readonly number[]) {
+  const bySupporter = new Map<number, Map<number, Four>>()
+
+  if (supporterIds.length === 0 || matchIds.length === 0) {
+    return bySupporter
+  }
+
+  const rows = await db
+    .select()
+    .from(fantasyPicks)
+    .where(and(inArray(fantasyPicks.supporterId, [...supporterIds]), inArray(fantasyPicks.matchId, [...matchIds])))
+
+  for (const row of rows) {
+    if (row.supporterId === null) {
+      continue
+    }
+
+    const own = bySupporter.get(row.supporterId) ?? new Map<number, Four>()
+
+    own.set(row.matchId, [row.player1Id, row.player2Id, row.player3Id, row.player4Id])
+    bySupporter.set(row.supporterId, own)
+  }
+
+  return bySupporter
+}
+
 /**
  * What a supporter's fours came to: a row for each match that has closed and for which the
  * supporter had a four (saved or inherited), the newest first, in every season they chose in.
@@ -374,17 +412,6 @@ export async function supporterFours(
   )
 }
 
-/** The matches of a season that count for the game, in the order they close. */
-async function closingOrder(db: Database, season: string): Promise<PointsMatch[]> {
-  const found = await db
-    .select(matchColumns)
-    .from(matches)
-    .innerJoin(clubs, eq(clubs.id, matches.clubId))
-    .where(and(eq(matches.season, season), inArray(matches.status, ['scheduled', 'played'])))
-
-  return found.toSorted((a, b) => closesAt(a).getTime() - closesAt(b).getTime() || a.id - b.id)
-}
-
 /** The name and the surname of players, by id. */
 async function namesOf(db: Database, playerIds: readonly number[]) {
   if (playerIds.length === 0) {
@@ -414,33 +441,6 @@ async function namesOf(db: Database, playerIds: readonly number[]) {
       return [row.id, { name: row.name, surname: parts?.surname || splitPersonName(row.name).surname }] as const
     }),
   )
-}
-
-/** The fours a supporter saved in the matches of a season, by match. */
-async function savedFoursOf(db: Database, supporterIds: readonly number[], matchIds: readonly number[]) {
-  const bySupporter = new Map<number, Map<number, Four>>()
-
-  if (supporterIds.length === 0 || matchIds.length === 0) {
-    return bySupporter
-  }
-
-  const rows = await db
-    .select()
-    .from(fantasyPicks)
-    .where(and(inArray(fantasyPicks.supporterId, [...supporterIds]), inArray(fantasyPicks.matchId, [...matchIds])))
-
-  for (const row of rows) {
-    if (row.supporterId === null) {
-      continue
-    }
-
-    const own = bySupporter.get(row.supporterId) ?? new Map<number, Four>()
-
-    own.set(row.matchId, [row.player1Id, row.player2Id, row.player3Id, row.player4Id])
-    bySupporter.set(row.supporterId, own)
-  }
-
-  return bySupporter
 }
 
 const readStanding = cacheForKey(minute, (key) => matchStanding(getDatabase().db, Number(key)))

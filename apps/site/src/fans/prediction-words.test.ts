@@ -67,35 +67,68 @@ describe('a row of the list', () => {
 
   it('has the clubs, the score, the prediction and the points of a match that was played', () => {
     expect(listItemOf(item(), now)).toMatchObject({
-      ...clubs,
+      match: {
+        competition: 'Eredivisie',
+        goalsAgainst: 1,
+        goalsFor: 2,
+        home: true,
+        opponent: 'FC Twente',
+        status: 'played',
+      },
       points: 17,
-      prediction: 'Jij: 1–1 bij rust, 3–1 eind',
-      score: '2–1',
+      prediction: { fullTime: { right: true, score: '3–1' }, halfTime: { right: true, score: '1–1' } },
     })
   })
 
-  it('writes the score in the order of the clubs on the line, for a match away', () => {
-    expect(listItemOf(item({ goalsAgainst: 3, goalsFor: 0, home: false }), now)).toMatchObject({
-      away: 'sc Heerenveen',
-      home: 'FC Twente',
-      score: '3–0',
+  it('marks the part that gave nothing as wrong, and the part that gave points as right', () => {
+    const row = listItemOf({ ...item(), points: pointsOf([1, 1], [0, 2]) }, now)
+
+    expect(row.prediction.halfTime.right).toBe(true)
+    expect(row.prediction.fullTime.right).toBe(false)
+  })
+
+  it('gives no colour to a match that was not played', () => {
+    const row = listItemOf(item({ goalsAgainst: null, goalsFor: null, state: 'live' }), now)
+
+    expect(row.prediction.fullTime.right).toBeUndefined()
+    expect(row.prediction.halfTime.right).toBeUndefined()
+  })
+
+  it('gives the match as seen from our side, with the link to its report, for a match away', () => {
+    expect(listItemOf(item({ goalsAgainst: 3, goalsFor: 0, home: false }), now).match).toMatchObject({
+      goalsAgainst: 3,
+      goalsFor: 0,
+      home: false,
+      reportHref: expect.stringContaining('/wedstrijden/'),
     })
   })
 
-  it.each([
-    { state: 'live', text: 'Bezig' },
-    { state: 'upcoming', text: 'Nog niet gespeeld' },
-    { state: 'cancelled', text: 'Afgelast' },
-    { state: 'postponed', text: 'Uitgesteld' },
-  ] as const)('says $text and gives no points for a match that is $state', ({ state, text }) => {
-    const row = listItemOf(item({ goalsAgainst: null, goalsFor: null, state }), now)
+  it.each([{ state: 'cancelled' }, { state: 'postponed' }] as const)(
+    'is called off, with no time and no points, for a match that is $state',
+    ({ state }) => {
+      const row = listItemOf(item({ goalsAgainst: null, goalsFor: null, state }), now)
 
-    expect(row.status).toBe(text)
+      expect(row.match.status).toBe(state)
+      expect(row.points).toBeUndefined()
+    },
+  )
+
+  it('says Bezig and gives no points for a match that is being played', () => {
+    const row = listItemOf(item({ goalsAgainst: null, goalsFor: null, state: 'live' }), now)
+
+    expect(row.match).toMatchObject({ note: 'Bezig', status: 'scheduled' })
     expect(row.points).toBeUndefined()
-    expect(row.score).toBeUndefined()
   })
 
-  it('says what the supporter predicted', () => {
+  it('has no state to say for a match that has not been played yet', () => {
+    const row = listItemOf(item({ goalsAgainst: null, goalsFor: null, state: 'upcoming' }), now)
+
+    expect(row.match).toMatchObject({ status: 'scheduled' })
+    expect(row.match).not.toHaveProperty('note')
+    expect(row.points).toBeUndefined()
+  })
+
+  it('says what the fan predicted', () => {
     expect(guessText(item())).toBe('Jij: 1–1 bij rust, 3–1 eind')
   })
 })

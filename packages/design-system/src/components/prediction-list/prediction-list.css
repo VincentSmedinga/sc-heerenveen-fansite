@@ -1,8 +1,7 @@
 /*
- * The list of what a supporter predicted: a row for each match, the text on the left and the
- * points in a column of their own on the right. A row has a thin line above it, as the short
- * lines have. The score never breaks: the clubs are one flex line in which the names can shrink
- * and are cut with an ellipsis, and the score keeps its width.
+ * The list of what a fan predicted: a row for each match, the Match on the left and the points
+ * and the prediction on the right. A row has a thin line above it, as the short lines have.
+ * Nothing is ever cut short: a long club name wraps, as it does in a Match.
  */
 
 @layer hf.components {
@@ -35,55 +34,58 @@
     min-inline-size: 0;
   }
 
-  .hf-prediction-list-date,
-  .hf-prediction-list-prediction {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
+  /* The Match brings the space of a list of its own; a row of this list has its own. */
+  .hf-prediction-list-text .hf-match {
+    padding-block: 0;
   }
 
-  .hf-prediction-list-clubs {
-    align-items: baseline;
-    column-gap: var(--hf-space-xs);
-    display: flex;
-    font-weight: var(--hf-headline-font-weight);
-    min-inline-size: 0;
-  }
-
-  .hf-prediction-list-club {
-    min-inline-size: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  /* The score keeps its width and never breaks over two lines. */
-  .hf-prediction-list-score {
-    flex: none;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-  }
-
-  .hf-prediction-list-points {
+  /* The points and the prediction, on the right. Nothing in it breaks over two lines. */
+  .hf-prediction-list-side {
     display: grid;
     justify-items: end;
     text-align: end;
+    white-space: nowrap;
   }
 
   .hf-prediction-list-number {
-    font-size: var(--hf-figure-font-size);
+    font-size: var(--hf-figure-large-font-size);
     font-variant-numeric: tabular-nums;
     font-weight: var(--hf-strong-font-weight);
     line-height: 1.1;
   }
 
-  .hf-prediction-list-unit,
-  .hf-prediction-list-status {
+  .hf-prediction-list-prediction {
     color: var(--hf-colour-text-secondary);
     font-size: var(--hf-meta-font-size);
+    overflow-wrap: anywhere;
   }
 
-  /* A state such as "Nog niet gespeeld" wraps over two lines, so the clubs keep their room. */
-  .hf-prediction-list-status {
-    inline-size: 5.5rem;
+  .hf-prediction-list-unit,
+  .hf-prediction-list-guess {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Without points the prediction is what the row has on the right, so it is larger. */
+  .hf-prediction-list-guess-large {
+    color: inherit;
+    font-size: var(--hf-heading-2-font-size);
+  }
+
+  .hf-prediction-list-guess-large .hf-prediction-list-part:first-child {
+    font-weight: var(--hf-strong-font-weight);
+  }
+
+  .hf-prediction-list-right {
+    color: var(--hf-colour-text-positive);
+  }
+
+  .hf-prediction-list-wrong {
+    color: var(--hf-colour-text-negative);
+  }
+
+  .hf-prediction-list-sign {
+    margin-inline-end: 0.15em;
   }
 }

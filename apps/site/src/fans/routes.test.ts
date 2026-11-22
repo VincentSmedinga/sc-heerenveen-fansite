@@ -54,6 +54,9 @@ const open = [
   // The page of the game Fjouwer: a visitor sees the match and the way in, and a supporter's
   // four is read only with a session. Its action calls requireSupporter.
   'app/fans/fjouwer/page.tsx',
+  // The ranking of Fjouwer is public like that of the Prognose: screen names that chose to be
+  // in the standings, and the row of the fan is marked only with a session (issue 1473).
+  'app/fans/fjouwer/stand/page.tsx',
   // The page and the action of the link in a reminder: the signed code in the link says whose
   // reminder it is, so they need no session (issue 1461).
   'app/fans/herinnering/uitzetten/actions.ts',
