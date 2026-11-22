@@ -15,14 +15,30 @@ for (const path of ['/fans/prognose', '/fans/spelregels']) {
       await expect(table.getByRole('rowheader', { name: 'Eén doelpuntental goed' })).toBeVisible()
 
       const fits = await table.evaluate((element) => {
-        const card = element.closest('.hf-card') ?? element.parentElement
+        const card = element.closest('.hf-card')
+
+        if (card === null) {
+          return null
+        }
+
         const tableBox = element.getBoundingClientRect()
-        const cardBox = (card as HTMLElement).getBoundingClientRect()
+        const cardBox = card.getBoundingClientRect()
 
         return tableBox.left >= cardBox.left - 1 && tableBox.right <= cardBox.right + 1
       })
 
-      expect(fits).toBe(true)
+      expect(fits, 'the table sits in a card, and inside it').toBe(true)
+
+      // The row header breaks at spaces, and a long word at a syllable. "Eén doelpuntental
+      // goed" takes two lines in the side column and at most four on a phone, never one per
+      // letter.
+      const lines = await table.getByRole('rowheader', { name: 'Eén doelpuntental goed' }).evaluate((cell) => {
+        const lineHeight = Number.parseFloat(getComputedStyle(cell).lineHeight)
+
+        return Math.round(cell.getBoundingClientRect().height / lineHeight)
+      })
+
+      expect(lines).toBeLessThanOrEqual(4)
       expect(
         await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
       ).toBe(true)

@@ -15,6 +15,7 @@
   .hf-data-table tbody th,
   .hf-data-table thead th:first-child {
     min-inline-size: 2em;
+    hyphens: auto;
     overflow-wrap: anywhere;
   }
 }
