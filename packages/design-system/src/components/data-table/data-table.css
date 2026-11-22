@@ -7,10 +7,14 @@
   /*
    * A row header can be a path or another word without spaces. It breaks anywhere when it has
    * to, so a narrow screen shows all of it and the page does not scroll sideways. The same goes
-   * for the header of that column, such as Scheidsrechter beside five columns of figures.
+   * for the header of that column, such as Scheidsrechter beside five columns of figures. Where
+   * a table is squeezed, "anywhere" would count every letter as a place to break and shrink
+   * the column to one letter, so the column keeps a width of its own: words break at spaces
+   * first, and only a word longer than that breaks in the middle.
    */
   .hf-data-table tbody th,
   .hf-data-table thead th:first-child {
+    min-inline-size: 8em;
     overflow-wrap: anywhere;
   }
 }

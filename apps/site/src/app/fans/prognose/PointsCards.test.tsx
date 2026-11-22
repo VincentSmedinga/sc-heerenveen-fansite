@@ -129,6 +129,11 @@ describe('the card "Punten"', () => {
       expect(html).toContain(`>${number}<`)
     }
 
+    expect(html).toContain('Precies goed')
+    expect(html).toContain('Uitslag goed')
+    expect(html).toContain('Eén doelpuntental goed')
+    expect(html).not.toContain('<abbr')
+    expect(html.match(/<th[^>]*scope="col"/g)).toHaveLength(3)
     expect(html).toContain('De telling van de oude Fansite. Hoogstens 30 punten per wedstrijd.')
     expect(html).toContain('hf-card-soft')
   })

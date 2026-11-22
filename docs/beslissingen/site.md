@@ -7752,3 +7752,13 @@
   Een gelijk gemiddelde met een gelijk aantal cijfers beslist de volgorde van de opstelling, en op de pagina van een speler dezelfde volgorde.
   Het formulier blijft alfabetisch, en de ranglijst van het seizoen en de uitblinker van het jaar houden hun eigen regel.
   De gemiddelden in de database veranderen niet, alleen de uitblinker bij een gelijk gemiddelde met een verschillend aantal cijfers.
+
+## De tabel van de telling heeft de uitkomsten als rijen
+
+- **Datum:** 22 november 2026
+- **Besluit:** de tabel van de telling (`ScoringTable`, #1561) heeft de uitkomsten Precies goed, Uitslag goed en Eén doelpuntental goed als rijen en Rust en Eind als kolommen, op de kaart "Punten" van de Prognose en op de pagina met de spelregels.
+  `ScoringTable` verliest de eigenschap `short`, de afkortingen en de uitleg eronder op `/fans/spelregels`.
+- **Waarom:** de kaart "Punten" stond in een smalle kolom en brak: vier kolommen met lange koppen pasten niet.
+  Drie kolommen met één woord in de kop passen in een smalle kolom en op 320 pixels, zonder dat een fan een uitleg van afkortingen moet lezen.
+- **Alternatieven:** de vier kolommen houden met korte koppen en een uitleg eronder; een scrollgebied (we scrollen niet zijwaarts).
+- **Later:** dit vervangt de korte koppen (`short`) die #1455 op de pagina met de spelregels invoerde.

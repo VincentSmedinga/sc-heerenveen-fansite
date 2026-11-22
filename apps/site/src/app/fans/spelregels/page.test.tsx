@@ -93,12 +93,14 @@ describe('the page with the rules', () => {
     expect(html).toContain('Een perfecte voorspelling is 30 punten waard.')
   })
 
-  it('shows the table of the scoring with 10, 5, 2 and 20, 10, 5', () => {
+  it('shows the table of the scoring with the outcomes as rows and Rust and Eind as columns', () => {
     stub({ FANS_PROGNOSE: 'on' })
     const table = tableOf('Punten per onderdeel')
     const numbers = [...table.matchAll(/<td[^>]*>(\d+)<\/td>/g)].map((match) => Number(match[1]))
 
-    expect(numbers).toEqual([10, 5, 2, 20, 10, 5])
+    expect(numbers).toEqual([10, 20, 5, 10, 2, 5])
+    expect(table).toContain('Eén doelpuntental goed')
+    expect(table).not.toContain('abbr')
   })
 
   it('shows the example as a table with a caption, and the points 30, 17, 12, 5 and 5', () => {
