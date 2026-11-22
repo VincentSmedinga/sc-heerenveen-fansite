@@ -89,7 +89,9 @@ describe('the work list of clubs without a country', () => {
     await waitFor(() =>
       expect(within(card).getByText('Kies een land uit de lijst.', { selector: 'li a' })).toBeTruthy(),
     )
-    expect(document.activeElement?.id).toBe('club-thuisclub-fouten')
+    // The error is in the page before the effect that moves the focus has run, so the focus is
+    // waited for too, with the same check.
+    await waitFor(() => expect(document.activeElement?.id).toBe('club-thuisclub-fouten'))
     expect(names()).toEqual(['Europese Club', 'Thuisclub', 'Derde FC'])
   })
 
