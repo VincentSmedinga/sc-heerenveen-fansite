@@ -217,6 +217,26 @@ export const LongRowHeader = meta.story({
   render: renderPages('20rem'),
 })
 
+const scoring: DataTableRow[] = [
+  { cells: [10, 20], header: 'Precies goed' },
+  { cells: [5, 10], header: 'Uitslag goed' },
+  { cells: [2, 5], header: 'Eén doelpuntental goed' },
+]
+
+export const NarrowColumn = meta.story({
+  name: 'Een smalle kolom breekt de rijkop op spaties',
+  render: () => (
+    <div style={{ maxInlineSize: '16rem' }}>
+      <DataTable
+        caption="Wat een voorspelling oplevert"
+        columns={['Onderdeel', 'Rust', 'Eind']}
+        rows={scoring}
+        sortable={false}
+      />
+    </div>
+  ),
+})
+
 export const Links = meta.story({
   name: 'Rijen met een link',
   render: () => (
