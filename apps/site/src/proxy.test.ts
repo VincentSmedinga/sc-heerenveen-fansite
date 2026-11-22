@@ -101,7 +101,7 @@ describe('proxy', () => {
     },
   )
 
-  it.each(['/fans', '/fans/', '/fans/aanmelden'])(
+  it.each(['/fans', '/fans/', '/fans/aanmelden', '/fans/fantest', '/fans/fantest/2003-05'])(
     'keeps %s out of every cache and sends a referrer only to our own pages, and leaves it open to search engines',
     (path) => {
       vi.stubEnv('SITE_ENV', 'production')

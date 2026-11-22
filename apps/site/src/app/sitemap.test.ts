@@ -4,14 +4,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { pages } from '../pages'
 import sitemap from './sitemap'
 
-const { getAllReportAddresses, getClubRecords, getPlayerSlugs, getPublishedArticles } = vi.hoisted(() => ({
+const { getAllReportAddresses, getClubRecords, getPlayerSlugs, getPublishedArticles, loadArchive } = vi.hoisted(() => ({
   getAllReportAddresses: vi.fn(),
   getClubRecords: vi.fn(),
   getPlayerSlugs: vi.fn(),
   getPublishedArticles: vi.fn(),
+  loadArchive: vi.fn(),
 }))
 
 vi.mock('../articles', () => ({ getPublishedArticles }))
+vi.mock('../database', () => ({ getDatabase: () => ({ db: {} }) }))
+vi.mock('../fans/fantest', async (importOriginal) => ({ ...(await importOriginal<object>()), loadArchive }))
 vi.mock('../opponents', () => ({ getClubRecords, opponentsPath: '/tegenstanders' }))
 vi.mock('../report-data', () => ({ getAllReportAddresses }))
 vi.mock('../player-page', () => ({ getPlayerSlugs, playerAddress: (slug: string) => `/spelers/${slug}` }))
@@ -93,6 +96,8 @@ const notInSitemap: string[] = [
   '/fans/prognose/stand',
   '/fans/uitblinker',
   '/fans/uitblinker/van-het-jaar',
+  // One page for every month of the Fantest: the sitemap lists them from the database.
+  '/fans/fantest/[maand]',
   // A page of results has no use in a search engine, and says noindex.
   '/nieuws/zoeken',
   // The same for the search for a player.
@@ -134,6 +139,9 @@ function pagePaths() {
 beforeEach(() => {
   // The tests below count the page Fans, which is listed when accounts are on.
   vi.stubEnv('FANS_ACCOUNTS', 'on')
+  vi.stubEnv('FANS_FANTEST', 'on')
+  loadArchive.mockReset()
+  loadArchive.mockResolvedValue([])
   getPublishedArticles.mockReset()
   getPublishedArticles.mockResolvedValue([])
   getClubRecords.mockReset()
@@ -176,6 +184,38 @@ describe('sitemap', () => {
         .filter(({ path }) => !path.startsWith('/fans'))
         .map(({ path }) => ({ url: `https://sc.heerenveen.org${path}` })),
     )
+  })
+
+  it('lists the archive of the Fantest and each of its months, and leaves them out while it is off', async () => {
+    vi.stubEnv('SITE_ENV', 'production')
+    loadArchive.mockResolvedValue([
+      { month: 5, year: 2003 },
+      { month: 12, year: 2001 },
+    ])
+
+    const urls = (await sitemap()).map(({ url }) => url)
+
+    expect(urls).toContain('https://sc.heerenveen.org/fans/fantest')
+    expect(urls.slice(-2)).toEqual([
+      'https://sc.heerenveen.org/fans/fantest/2003-05',
+      'https://sc.heerenveen.org/fans/fantest/2001-12',
+    ])
+
+    vi.stubEnv('FANS_FANTEST', 'off')
+
+    const off = (await sitemap()).map(({ url }) => url)
+
+    expect(off.filter((url) => url.includes('/fans/fantest'))).toEqual([])
+    expect(off).toContain('https://sc.heerenveen.org/fans/spelregels')
+  })
+
+  it('still lists the pages, and says why in the log, when the database cannot give the Fantest', async () => {
+    vi.stubEnv('SITE_ENV', 'production')
+    loadArchive.mockRejectedValue(new Error('no database'))
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    expect(await sitemap()).toEqual(pages.map(({ path }) => ({ url: `https://sc.heerenveen.org${path}` })))
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('Could not read the Fantest for the sitemap'))
   })
 
   it('has no address with a query, such as `/nieuws?pagina=2`', async () => {

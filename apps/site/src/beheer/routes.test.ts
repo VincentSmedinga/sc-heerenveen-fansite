@@ -54,6 +54,7 @@ const open = [
   'app/beheer/inloggen/verstuurd/page.tsx',
   'app/contact/actions.ts',
   'app/fans/aanmelden/actions.ts',
+  'app/fans/fantest/[maand]/actions.ts',
   'app/fans/fjouwer/actions.ts',
   'app/fans/herinnering/uitzetten/actions.ts',
   'app/fans/inloggen/actions.ts',
@@ -132,6 +133,7 @@ describe('the admin', () => {
     expect(open.filter((file) => !file.startsWith('app/beheer/inloggen/'))).toEqual([
       'app/contact/actions.ts',
       'app/fans/aanmelden/actions.ts',
+      'app/fans/fantest/[maand]/actions.ts',
       'app/fans/fjouwer/actions.ts',
       'app/fans/herinnering/uitzetten/actions.ts',
       'app/fans/inloggen/actions.ts',

@@ -77,6 +77,7 @@ function dataOf(overrides: Partial<OldSiteData> = {}): OldSiteData {
   return {
     clubs: oldClubs,
     coachRatings: [],
+    fantest: [],
     matches: matchList,
     players: [],
     predictions: [],

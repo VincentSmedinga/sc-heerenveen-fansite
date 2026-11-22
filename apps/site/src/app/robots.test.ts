@@ -22,6 +22,18 @@ describe('robots', () => {
     })
   })
 
+  it('allows the archive of the Fantest under the refused /fans/ on production, while the Fantest is on', () => {
+    vi.stubEnv('SITE_ENV', 'production')
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    vi.stubEnv('FANS_FANTEST', 'on')
+
+    expect(robots().rules).toEqual({
+      allow: ['/', '/fans/fantest'],
+      disallow: ['/beheer', '/fans/'],
+      userAgent: '*',
+    })
+  })
+
   it.each(['local', 'acceptance', 'production'])('refuses /beheer on %s', (siteEnv) => {
     vi.stubEnv('SITE_ENV', siteEnv)
 

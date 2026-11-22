@@ -16,6 +16,7 @@ import {
 // that it is no personal data: no birth date, e-mail, biography, contract, height, weight,
 // photo or text of a report.
 const allowedFieldNames = new Set([
+  'answers',
   'assist',
   'attendance',
   'average',
@@ -30,6 +31,7 @@ const allowedFieldNames = new Set([
   'coachRatings',
   'code',
   'competition',
+  'correct',
   'count',
   'country',
   'dateTime',
@@ -54,13 +56,19 @@ const allowedFieldNames = new Set([
   'minute',
   'minuteIn',
   'minuteOut',
+  'month',
+  'months',
   'name',
   'note',
+  'omitted',
   'order',
+  'participants',
+  'percentages',
   'playerCode',
   'playerName',
   'players',
   'predictions',
+  'questions',
   'ratings',
   'referee',
   'result',
@@ -69,7 +77,9 @@ const allowedFieldNames = new Set([
   'seasonRatings',
   'spread',
   'statistics',
+  'text',
   'version',
+  'year',
 ])
 
 function collectNames(value: unknown, names = new Set<string>()) {
@@ -327,5 +337,53 @@ describe('the files with the ratings (#1465)', () => {
       '9899',
       '9900',
     ])
+  })
+})
+
+describe('the file with the Fantest (#1480)', () => {
+  const question = {
+    answers: ['Ajax', 'Feyenoord', 'Sunderland', 'Newcastle United'],
+    correct: 2,
+    order: 1,
+    percentages: [10, 20, 60, 10],
+    text: 'Naar welke club vertrok Jon Dahl Tomasson?',
+  }
+  const month = { average: 4.1, month: 5, omitted: 0, participants: 38, questions: [question], year: 2003 }
+  const file = (extra: Record<string, unknown> = {}, questionExtra: Record<string, unknown> = {}) =>
+    JSON.stringify({
+      months: [{ ...month, ...extra, questions: [{ ...question, ...questionExtra }] }],
+      version: 3,
+    })
+
+  it('reads a month with its questions and the percentages per answer', () => {
+    expect(parseOldSiteFile(file(), 'fantest.json')).toEqual({ months: [month], version: 3 })
+  })
+
+  it('refuses a field with a name, an address, a time or the answers of a visitor', () => {
+    for (const extra of [
+      { name: 'Tjalle99' },
+      { email: 'a@b.nl' },
+      { dateTime: '2003-05-01 20:00:00' },
+      { scores: [3] },
+    ]) {
+      expect(() => parseOldSiteFile(file(extra), 'fantest.json')).toThrow('fantest.json does not match')
+    }
+    for (const extra of [{ answeredBy: 'Tjalle99' }, { introduction: 'Welkom' }]) {
+      expect(() => parseOldSiteFile(file({}, extra), 'fantest.json')).toThrow('fantest.json does not match')
+    }
+  })
+
+  it('refuses a question without four answers or with a right answer outside them', () => {
+    expect(() => parseOldSiteFile(file({}, { answers: ['a', 'b', 'c'] }), 'fantest.json')).toThrow('does not match')
+    expect(() => parseOldSiteFile(file({}, { correct: 4 }), 'fantest.json')).toThrow('does not match')
+  })
+
+  it('has 42 months with 418 questions in the repository, and none in 2001 before December', async () => {
+    const { fantest } = await readOldSiteData()
+
+    expect(fantest).toHaveLength(42)
+    expect(fantest.reduce((sum, one) => sum + one.questions.length, 0)).toBe(418)
+    expect(fantest[0]).toMatchObject({ month: 12, year: 2001 })
+    expect(fantest.some((one) => one.year === 2003 && (one.month === 7 || one.month === 8))).toBe(false)
   })
 })

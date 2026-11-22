@@ -96,6 +96,11 @@ export const pages = [
     path: '/fans/spelregels',
   },
   {
+    description:
+      'De Fantest van toen: de quizzen van de oude Fansite, elke maand van december 2001 tot oktober 2005. Speel ze na, zonder dat we je score bewaren.',
+    path: '/fans/fantest',
+  },
+  {
     description: 'Wat we met gegevens doen: niemand volgen en niets van een ander domein.',
     path: '/privacy',
   },
