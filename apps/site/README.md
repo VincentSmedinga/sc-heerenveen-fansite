@@ -1519,6 +1519,15 @@ De link opent `/fans/herinnering/uitzetten`, een pagina met een knop die de heri
 `supporter_reminders` bewaart per supporter en wedstrijd dat het bericht is verstuurd, zonder adres of naam.
 De stap maakt de rij vlak voor het bericht uitgaat en haalt hem weg als het versturen mislukt, zodat een mislukt bericht bij de volgende run opnieuw wordt geprobeerd.
 
+## De spelregels
+
+`/fans/spelregels` heeft de regels van alle spellen op één pagina, een kaart per spel en een kaart Account (`app/fans/spelregels`).
+De kaart van een spel staat er alleen als het onderdeel aan staat, en de balk "Op deze pagina" (`app/@shortcuts/fans/spelregels`, de links in `src/fans/rules-shortcuts.ts`) volgt dat.
+De pagina is er zodra accounts aan staan, openbaar, indexeerbaar en in de sitemap, en staat niet in de balk met de spellen.
+De telling en het voorbeeld van de Prognose komen uit `pointsPerPart` en `predictionPoints`, via `src/fans/prediction-rules.ts`, zodat de pagina niet anders kan zeggen dan het spel.
+De link "Spelregels" naar `#prognose` staat onder het formulier, op de kaarten met de punten en de voorspellingen, onder de stand en op `/fans` als "Spelregels van alle spellen" (`RulesLink`).
+Een nieuw spel voegt zijn eigen kaart toe in `RulesCards.tsx`, een regel in `rulesShortcuts` en zijn anker in `src/anchors.ts`.
+
 ## Een account voor supporters
 
 Een supporter maakt een account op `/fans/aanmelden`, met een schermnaam en een e-mailadres, en bevestigt het adres met de link of de code uit de mail.

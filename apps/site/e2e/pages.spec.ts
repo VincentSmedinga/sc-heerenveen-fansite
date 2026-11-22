@@ -241,6 +241,8 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/privacy', status: 200 },
   // The chapter Fans, which the e2e server starts with accounts on.
   { path: '/fans', status: 200 },
+  // The rules of all games, public and the same for everybody.
+  { path: '/fans/spelregels', status: 200 },
   { path: '/toegankelijkheid', status: 200 },
   { path: '/updates', status: 200 },
   // Signing up and logging in as a supporter, with a name taken in the meantime, with a code

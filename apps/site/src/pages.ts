@@ -90,6 +90,11 @@ export const pages = [
     path: '/fans',
   },
   {
+    description:
+      'De regels van de spellen voor supporters, met voorbeelden: hoe de punten van de Prognose tellen en wie de uitblinker is.',
+    path: '/fans/spelregels',
+  },
+  {
     description: 'Wat we met gegevens doen: niemand volgen en niets van een ander domein.',
     path: '/privacy',
   },

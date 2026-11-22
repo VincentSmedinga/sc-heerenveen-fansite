@@ -157,12 +157,21 @@ describe('sitemap', () => {
     expect(await sitemap()).toEqual(pages.map(({ path }) => ({ url: `${origin}${path}` })))
   })
 
-  it('leaves the page Fans out while accounts are off', async () => {
+  it('has the page with the rules of the games while accounts are on', async () => {
+    vi.stubEnv('SITE_ENV', 'production')
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+
+    expect(await sitemap()).toContainEqual({ url: 'https://sc.heerenveen.org/fans/spelregels' })
+  })
+
+  it('leaves the page Fans and its rules out while accounts are off', async () => {
     vi.stubEnv('SITE_ENV', 'production')
     vi.stubEnv('FANS_ACCOUNTS', 'off')
 
     expect(await sitemap()).toEqual(
-      pages.filter(({ path }) => path !== '/fans').map(({ path }) => ({ url: `https://sc.heerenveen.org${path}` })),
+      pages
+        .filter(({ path }) => !path.startsWith('/fans'))
+        .map(({ path }) => ({ url: `https://sc.heerenveen.org${path}` })),
     )
   })
 

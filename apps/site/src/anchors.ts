@@ -25,6 +25,8 @@ export const matchPageAnchors: readonly string[] = ['verloop', 'opstelling']
 /** The anchors per page, as the address of the page without the part after the hash. */
 export const publishedAnchors: Readonly<Record<string, readonly string[]>> = {
   '/bronnen': ['nieuws', 'podcasts', 'forum', 'wedstrijden-en-spelers', 'voorstellen', 'uitgever', 'nieuwsbrief-lc'],
+  // The rules of the games (#1455), with every part on, as the smoke test starts the site.
+  '/fans/spelregels': ['prognose', 'uitblinker', 'account'],
   '/over-ons': ['wie-we-zijn', 'hoe-we-werken', 'gegevens', 'als-app'],
   '/privacy': ['tellen', 'hosting', 'cookies', 'account', 'berichten', 'andere-sites', 'vragen'],
   // The card Selectie is the only card of the page Spelers (#1218). The cards Doelpuntenmakers,

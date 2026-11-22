@@ -2135,6 +2135,11 @@ await withEmptyDatabase((database) =>
       404,
       '/fans/prognose/stand must be "not found" with Prognose off',
     )
+    assert.equal(
+      (await fetch(`${origin}/fans/spelregels`)).status,
+      404,
+      '/fans/spelregels must be "not found" with every part off',
+    )
   }),
 )
 
@@ -2169,6 +2174,17 @@ await withEmptyDatabase((database) =>
     assert.match(await ranking.text(), /<h1[^>]*>Stand Prognose<\/h1>/)
     assert.equal(prediction.headers.get('cache-control'), 'no-store')
     assert.equal(prediction.headers.get('x-robots-tag'), 'noindex, nofollow')
+
+    // The rules of all games: a card for each game that is on, public and indexable.
+    const rules = await fetch(`${origin}/fans/spelregels`)
+    const rulesHtml = await rules.text()
+
+    assert.equal(rules.status, 200, '/fans/spelregels must be there with the parts on')
+    assert.match(rulesHtml, /<h1[^>]*>Spelregels<\/h1>/)
+    assert.match(rulesHtml, /<h2[^>]*id="prognose"/)
+    assert.match(rulesHtml, /<h2[^>]*id="account"/)
+    assert.notEqual(rules.headers.get('x-robots-tag'), 'noindex, nofollow')
+    assert.match(predictionHtml, /<a [^>]*href="\/fans\/spelregels#prognose"[^>]*>Spelregels<\/a>/)
   }),
 )
 
