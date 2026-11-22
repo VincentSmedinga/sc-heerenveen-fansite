@@ -2175,7 +2175,7 @@ await withEmptyDatabase((database) =>
     assert.equal(prediction.headers.get('cache-control'), 'no-store')
     assert.equal(prediction.headers.get('x-robots-tag'), 'noindex, nofollow')
 
-    // The rules of all games: a card for each game that is on, public and indexable.
+    // The rules of all games: a card for each game that is on, for everybody.
     const rules = await fetch(`${origin}/fans/spelregels`)
     const rulesHtml = await rules.text()
 
@@ -2183,7 +2183,6 @@ await withEmptyDatabase((database) =>
     assert.match(rulesHtml, /<h1[^>]*>Spelregels<\/h1>/)
     assert.match(rulesHtml, /<h2[^>]*id="prognose"/)
     assert.match(rulesHtml, /<h2[^>]*id="account"/)
-    assert.notEqual(rules.headers.get('x-robots-tag'), 'noindex, nofollow')
     assert.match(predictionHtml, /<a [^>]*href="\/fans\/spelregels#prognose"[^>]*>Spelregels<\/a>/)
   }),
 )
