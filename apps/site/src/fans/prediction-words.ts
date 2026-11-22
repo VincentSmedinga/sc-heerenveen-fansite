@@ -1,4 +1,4 @@
-import type { PredictionListItem } from '@fansite/design-system'
+import type { PredictionListGuess, PredictionListItem } from '@fansite/design-system'
 
 import { type PartPoints, pointsPerPart } from '@fansite/shared/prediction-points'
 
@@ -50,7 +50,10 @@ export const guessText = ({ guess }: Pick<ScoredPrediction, 'guess'>) =>
   `Jij: ${scoreText(guess.halfTime)} bij rust, ${scoreText(guess.fullTime)} eind`
 
 /** A row of the list "Jouw voorspellingen". */
-export function listItemOf(item: ScoredPrediction, now: Date): PredictionListItem {
+export function listItemOf(
+  item: ScoredPrediction,
+  now: Date,
+): PredictionListItem & { prediction: PredictionListGuess } {
   const { match } = item
   const clubs = clubsOf(match)
   const played = match.state === 'played'

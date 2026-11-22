@@ -77,6 +77,12 @@
     line-height: 1.1;
   }
 
+  .hf-prediction-list-prediction {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+    overflow-wrap: anywhere;
+  }
+
   .hf-prediction-list-unit,
   .hf-prediction-list-guess {
     color: var(--hf-colour-text-secondary);

@@ -85,6 +85,19 @@ describe('PredictionList', () => {
   })
 })
 
+describe('a prediction in words', () => {
+  it('stands under the clubs as text, with no written score and no hidden words', () => {
+    const { container } = render(<PredictionList items={[{ ...played, prediction: 'Ben, Jan, Piet en Klaas' }]} />)
+
+    expect(container.querySelector('.hf-prediction-list-text .hf-prediction-list-prediction')?.textContent).toBe(
+      'Ben, Jan, Piet en Klaas',
+    )
+    expect(container.querySelector('.hf-prediction-list-guess')).toBeNull()
+    expect(container.querySelector('.hf-visually-hidden')).toBeNull()
+    expect(screen.getByText('17')).toBeTruthy()
+  })
+})
+
 describe('the look of the list', () => {
   const css = readFileSync(join(import.meta.dirname, 'prediction-list.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
 

@@ -138,6 +138,7 @@ const listItemOf = (item: FourPoints, now: Date): PredictionListItem => {
 
   return {
     ...clubs,
+    competition: match.competition,
     date: moment.time,
     dateTime: moment.dateTime,
     points: item.total,

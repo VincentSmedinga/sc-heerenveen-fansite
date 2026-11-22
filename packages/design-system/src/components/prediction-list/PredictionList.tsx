@@ -22,8 +22,11 @@ export type PredictionListItem = {
   home: string
   /** The points, when the match has any. */
   points?: number | undefined
-  /** What the fan predicted. */
-  prediction: PredictionListGuess
+  /**
+   * What the fan predicted: the scores of a match, or a line of words for a choice that has no
+   * score, such as the four players of Fjouwer. Words stand under the clubs, small.
+   */
+  prediction: PredictionListGuess | string
   /** The score as it is shown, such as `2–1`, or none for a match that has no result. */
   score?: string | undefined
   /** What the meta line says between the day and the competition: `Bezig` or `Afgelast`. */
@@ -72,24 +75,31 @@ export function PredictionList({ className, items, ...props }: PredictionListPro
               <span className="hf-prediction-list-score">{item.score ?? '–'}</span>
               <span className="hf-prediction-list-club">{item.away}</span>
             </div>
+            {typeof item.prediction === 'string' ? (
+              <div className="hf-prediction-list-prediction">{item.prediction}</div>
+            ) : null}
           </div>
           <div className="hf-prediction-list-side">
-            <span className="hf-visually-hidden">{guessWords(item.prediction)}</span>
+            {typeof item.prediction === 'string' ? null : (
+              <span className="hf-visually-hidden">{guessWords(item.prediction)}</span>
+            )}
             {item.points === undefined ? null : (
               <span className="hf-prediction-list-points">
                 <span className="hf-prediction-list-number">{item.points}</span>{' '}
                 <span className="hf-prediction-list-unit">{item.points === 1 ? 'punt' : 'punten'}</span>
               </span>
             )}
-            <span
-              aria-hidden="true"
-              className={classNames(
-                'hf-prediction-list-guess',
-                item.points === undefined && 'hf-prediction-list-guess-large',
-              )}
-            >
-              <Part part={item.prediction.fullTime} /> (<Part part={item.prediction.halfTime} />)
-            </span>
+            {typeof item.prediction === 'string' ? null : (
+              <span
+                aria-hidden="true"
+                className={classNames(
+                  'hf-prediction-list-guess',
+                  item.points === undefined && 'hf-prediction-list-guess-large',
+                )}
+              >
+                <Part part={item.prediction.fullTime} /> (<Part part={item.prediction.halfTime} />)
+              </span>
+            )}
           </div>
         </li>
       ))}

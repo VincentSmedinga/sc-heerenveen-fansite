@@ -4310,6 +4310,7 @@
   - Rechts staat bij een gespeelde wedstrijd het aantal punten als getal in `--hf-figure-large-font-size` met "punt" of "punten" erachter, en daaronder de voorspelling als "3–4 (1–2)" in kleine tekst.
     Zonder punten staat alleen de voorspelling rechts, in de maat van een kop van een kaart, met de eindstand zwaarder dan de ruststand.
     Niets rechts breekt over twee regels.
+  - Een keuze zonder score, zoals de vier spelers van Fjouwer, is een regel tekst (`prediction` als tekst): die staat klein onder de clubs en heeft geen kleuren.
   - De clubnamen worden nooit ingekort: een lange naam breekt over meer regels, op elke plek als het moet, en de uitslag blijft heel.
   - Bij een gespeelde wedstrijd is het deel van de voorspelling dat punten opleverde groen en het deel dat niets opleverde rood, eind en rust apart, met een vinkje of een kruisje voor het oog.
     De kleuren zijn twee nieuwe tokens, `--hf-colour-text-positive` en `--hf-colour-text-negative` (stap 800 in licht, stap 300 in donker), die 4,5:1 halen op de vlakken.
