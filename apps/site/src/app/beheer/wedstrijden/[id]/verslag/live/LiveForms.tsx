@@ -164,12 +164,23 @@ export function LiveEventForm({
           : undefined
 
     return (
-      <Field error={errors[fieldId(kind, id)]} hint={hint} id={fieldId(kind, id)} label={label}>
+      <Field
+        error={errors[fieldId(kind, id)]}
+        hint={
+          scripted
+            ? hint
+            : 'Alle spelers van beide teams staan in de lijst. Bij het opslaan controleert de site of de wissel kan.'
+        }
+        id={fieldId(kind, id)}
+        label={label}
+      >
         {scripted ? (
           <Select
             name={id}
             onChange={(event) => {
               choose(event.currentTarget.value)
+              // A new choice ends the line about the players that were cleared.
+              setCleared('')
             }}
             value={chosen}
           >

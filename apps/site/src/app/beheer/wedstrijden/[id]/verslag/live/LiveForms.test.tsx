@@ -155,6 +155,21 @@ describe('the lists of a substitution', () => {
     expect(screen.getByRole('status').textContent).toBe('Spelers gewist: je koos een andere kant.')
   })
 
+  it('ends the line about cleared players at the next choice, and says what the lists hold without JavaScript', () => {
+    render(substitution)
+    side('sc Heerenveen')
+    fireEvent.change(screen.getByLabelText('Speler die eruit gaat'), { target: { value: '2' } })
+    side('N.E.C.')
+    expect(screen.getByRole('status').textContent).toBe('Spelers gewist: je koos een andere kant.')
+    fireEvent.change(screen.getByLabelText('Speler die eruit gaat'), { target: { value: '11' } })
+    expect(screen.getByRole('status').textContent).toBe('')
+
+    const html = renderToStaticMarkup(substitution)
+
+    expect(html).toContain('Alle spelers van beide teams staan in de lijst')
+    expect(html).not.toContain('Alleen spelers van het gekozen team')
+  })
+
   it('tells what the lists show, tied to the fields', () => {
     render(substitution)
     side('sc Heerenveen')
