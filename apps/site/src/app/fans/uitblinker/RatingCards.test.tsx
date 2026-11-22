@@ -56,6 +56,22 @@ describe('the card with the form', () => {
     </OpenCard>,
   )
 
+  it('says the trainer is rated too only for a match with a coach', () => {
+    const plain = renderToStaticMarkup(
+      <OpenCard closesAt={closesAt} match={match} now={now}>
+        {null}
+      </OpenCard>,
+    )
+    const withCoach = renderToStaticMarkup(
+      <OpenCard closesAt={closesAt} match={match} now={now} withCoach>
+        {null}
+      </OpenCard>,
+    )
+
+    expect(plain).not.toContain('de trainer')
+    expect(withCoach).toContain('een cijfer van 1 tot 10, en de trainer.')
+  })
+
   it('is a card of the game with a heading of level 2, the green tag and the match', () => {
     expect(html).toContain('hf-card-game-uitblinker')
     expect(html).toMatch(/<h2[^>]*>Geef je cijfers<\/h2>/)
@@ -136,6 +152,7 @@ describe('what is shown after saving', () => {
   const html = renderToStaticMarkup(
     <SavedView
       closesAt={closesAt}
+      coach={null}
       grades={
         new Map([
           [11, 7],
@@ -245,5 +262,30 @@ describe('the card Uitblinkers of the season', () => {
 
   it('is not there for a season without an Uitblinker', () => {
     expect(renderToStaticMarkup(<SeasonWinnersCard season="2026/27" winners={[]} />)).toBe('')
+  })
+})
+
+describe('the head coach in what is shown after saving', () => {
+  const withCoach = renderToStaticMarkup(
+    <SavedView
+      closesAt={closesAt}
+      coach={{ name: 'Robin Veldman', staffId: 3 }}
+      coachGrade={6}
+      grades={
+        new Map([
+          [11, 7],
+          [12, 9],
+        ])
+      }
+      players={players}
+      running={[]}
+    />,
+  )
+
+  it('puts the head coach last, after a heavier line, as "Naam (trainer)", with his own grade', () => {
+    expect(withCoach).toContain('Robin Veldman (trainer)')
+    expect(withCoach.indexOf('Pim Spits')).toBeLessThan(withCoach.indexOf('Robin Veldman (trainer)'))
+    expect(withCoach).toContain('hf-data-table-total')
+    expect(withCoach).toContain('>6<')
   })
 })

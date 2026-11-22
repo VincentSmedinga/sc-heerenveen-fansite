@@ -6,7 +6,19 @@ import type { Database } from './client.ts'
 import type { PlayerPosition } from './schema.ts'
 
 import { readMatchReport, reportForRules } from './match-reports.ts'
-import { clubs, matchAppearances, matches, matchPlayerRatings, playerRatings, players, supporters } from './schema.ts'
+import {
+  clubs,
+  coachRatings,
+  matchAppearances,
+  matchCoachRatings,
+  matches,
+  matchPlayerRatings,
+  playerRatings,
+  players,
+  staff,
+  supporters,
+} from './schema.ts'
+import { staffOnDay } from './staff.ts'
 
 // The window of the game Uitblinker (issue 1470): which match supporters can rate, who they can
 // rate, until when, and what happens when the window closes. It lives here, next to the schema,
@@ -19,6 +31,13 @@ export const ratingMinimumMinutes = 30
 export const ratingWindowDays = 7
 
 const day = 24 * 60 * 60 * 1000
+
+/**
+ * The head coach of a match, who the supporters also rate (issue 1478). He is the one person of
+ * the staff with the role `coach` who surely held the day of the match; where two people might
+ * have (an interim), or the day lies in a gap, the match has no coach and no grade for one.
+ */
+export type RatingCoach = { name: string; staffId: number }
 
 /** The match of a window: what the page shows of it and what the rules need. */
 export type RatingMatch = {
@@ -58,6 +77,7 @@ export type RatingWindow =
   | { closesAt: Date; match: RatingMatch; next?: RatingMatch; startsAt: Date; state: 'waiting' }
   | {
       closesAt: Date
+      coach: null | RatingCoach
       match: RatingMatch
       next?: RatingMatch
       players: RatingPlayer[]
@@ -98,10 +118,10 @@ export type SaveRatingsResult = { answer: 'closed' } | { answer: 'late' } | { an
 
 /**
  * Closes the windows that are over: for each played match that has grades of supporters and no
- * averages with the source `fans` yet, it writes the averages to `match_player_ratings`, with
- * the number of grades and the spread. Grades of a blocked account do not count; grades of a
- * closed account (without a link) do. It does nothing while the game, or accounts, are off.
- * Running it again changes nothing.
+ * averages with the source `fans` yet, it writes the averages to `match_player_ratings`, and
+ * those of the head coach to `match_coach_ratings`, with the number of grades and the spread.
+ * Grades of a blocked account do not count; grades of a closed account (without a link) do.
+ * It does nothing while the game, or accounts, are off. Running it again changes nothing.
  */
 export async function closeRatingWindows(
   db: Database,
@@ -138,6 +158,38 @@ export async function closeRatingWindows(
     closed++
   }
 
+  const coachMatches = await db
+    .selectDistinct({ ...columns, staffId: coachRatings.staffId })
+    .from(coachRatings)
+    .innerJoin(matches, eq(matches.id, coachRatings.matchId))
+    .innerJoin(clubs, eq(clubs.id, matches.clubId))
+    .where(
+      sql`not exists (select 1 from ${matchCoachRatings} where ${matchCoachRatings.matchId} = ${matches.id} and ${matchCoachRatings.source} = 'fans')`,
+    )
+
+  for (const match of coachMatches) {
+    const later = await scheduledAfter(db, match)
+    const closing = closesAt(
+      match,
+      later.flatMap((candidate) => (candidate.kickoffAt === null ? [] : [candidate.kickoffAt])),
+    )
+
+    if (closing.getTime() > now.getTime()) {
+      continue
+    }
+
+    await db.execute(sql`
+      INSERT INTO match_coach_ratings (match_id, staff_id, source, average, rating_count, spread)
+      SELECT r.match_id, r.staff_id, 'fans', ROUND(AVG(r.grade), 2), COUNT(*), ROUND(COALESCE(STDDEV_POP(r.grade), 0), 2)
+      FROM coach_ratings r
+      LEFT JOIN supporters s ON s.id = r.supporter_id
+      WHERE r.match_id = ${match.id} AND r.staff_id = ${match.staffId} AND (r.supporter_id IS NULL OR s.disabled_at IS NULL)
+      GROUP BY r.match_id, r.staff_id
+      ON DUPLICATE KEY UPDATE average = VALUES(average), rating_count = VALUES(rating_count), spread = VALUES(spread)
+    `)
+    closed++
+  }
+
   return { closed }
 }
 
@@ -153,8 +205,18 @@ export function closesAt(match: Pick<RatingMatch, 'kickoffAt' | 'matchDate'>, la
   return new Date(Math.min(latest, ...next))
 }
 
+/** The grade a supporter gave the head coach of a match, or `undefined` when they gave none. */
+export async function findOwnCoachRating(db: Pick<Database, 'select'>, supporterId: number, matchId: number) {
+  const [row] = await db
+    .select({ grade: coachRatings.grade })
+    .from(coachRatings)
+    .where(and(eq(coachRatings.supporterId, supporterId), eq(coachRatings.matchId, matchId)))
+
+  return row?.grade
+}
+
 /** The grades a supporter gave for a match, by the number of the appearance. */
-export async function findOwnRatings(db: Database, supporterId: number, matchId: number) {
+export async function findOwnRatings(db: Pick<Database, 'select'>, supporterId: number, matchId: number) {
   const rows = await db
     .select({ appearanceId: playerRatings.appearanceId, grade: playerRatings.grade })
     .from(playerRatings)
@@ -162,6 +224,28 @@ export async function findOwnRatings(db: Database, supporterId: number, matchId:
     .where(and(eq(playerRatings.supporterId, supporterId), eq(matchAppearances.matchId, matchId)))
 
   return new Map(rows.map((row) => [row.appearanceId, row.grade]))
+}
+
+/**
+ * The head coach of a match: the person of the staff who surely held the day of the match. It
+ * is `null` for a day in a gap and for a day that two people might have held (see
+ * `staffOnDay`).
+ */
+export async function findRatingCoach(db: Database, matchDate: string): Promise<null | RatingCoach> {
+  const rows = await db
+    .select({
+      endDate: staff.endDate,
+      endPrecision: staff.endPrecision,
+      name: staff.name,
+      staffId: staff.id,
+      startDate: staff.startDate,
+      startPrecision: staff.startPrecision,
+    })
+    .from(staff)
+    .where(eq(staff.role, 'coach'))
+  const answer = staffOnDay(rows, matchDate)
+
+  return answer.kind === 'certain' ? { name: answer.member.name, staffId: answer.member.staffId } : null
 }
 
 /** The window of the last played match, or `none` when no match was played yet. */
@@ -252,7 +336,12 @@ export async function ratingWindowOf(db: Database, match: RatingMatch, now = new
     })
     .toSorted((a, b) => a.name.localeCompare(b.name, 'nl') || a.appearanceId - b.appearanceId)
 
-  return { ...base, players: list, state: closing.getTime() > now.getTime() ? 'open' : 'closed' }
+  return {
+    ...base,
+    coach: await findRatingCoach(db, match.matchDate),
+    players: list,
+    state: closing.getTime() > now.getTime() ? 'open' : 'closed',
+  }
 }
 
 /**
@@ -319,10 +408,12 @@ export async function recountRatingsOf(
  * the write checks the window once more with the clock of the database (`UTC_TIMESTAMP()`), so
  * a slow request that began before the window closed can't get in after it. An account that
  * was made after the start of the match (`late`), a blocked one and a gone one write nothing.
+ * A match with a head coach (`window.coach`) needs a grade for him too, and one without a coach
+ * takes none: the grades of the players and the coach are written together or not at all.
  */
 export async function saveRatings(
   db: Database,
-  input: { grades: ReadonlyMap<number, number>; matchId: number; supporterId: number },
+  input: { coachGrade?: number; grades: ReadonlyMap<number, number>; matchId: number; supporterId: number },
   now = new Date(),
 ): Promise<SaveRatingsResult> {
   const window = await findRatingWindow(db, now)
@@ -335,6 +426,10 @@ export async function saveRatings(
   const grades = [...input.grades].filter(([appearanceId]) => listed.has(appearanceId))
 
   if (grades.length === 0 || grades.length !== input.grades.size) {
+    return { answer: 'closed' }
+  }
+
+  if ((window.coach === null) !== (input.coachGrade === undefined)) {
     return { answer: 'closed' }
   }
 
@@ -352,6 +447,9 @@ export async function saveRatings(
   }
 
   const earlier = await findOwnRatings(db, input.supporterId, input.matchId)
+  const earlierCoach = await findOwnCoachRating(db, input.supporterId, input.matchId)
+  const coach = window.coach
+  const coachGrade = input.coachGrade
   const values = sql.join(
     grades.map(([appearanceId, grade], index) =>
       index === 0
@@ -362,28 +460,48 @@ export async function saveRatings(
   )
   const start = sql`COALESCE(m.kickoff_at, TIMESTAMP(m.match_date))`
 
-  await db.execute(sql`
-    INSERT INTO player_ratings (supporter_id, appearance_id, grade, created_at, updated_at)
-    SELECT s.id, v.appearance_id, v.grade, UTC_TIMESTAMP(), UTC_TIMESTAMP()
-    FROM (${values}) v
-    JOIN match_appearances a ON a.id = v.appearance_id AND a.match_id = ${input.matchId} AND a.ours = 1
-    JOIN matches m ON m.id = a.match_id AND m.status = 'played'
-    JOIN supporters s ON s.id = ${input.supporterId} AND s.disabled_at IS NULL AND s.created_at < ${start}
-    WHERE UTC_TIMESTAMP() < LEAST(
+  const open = sql`UTC_TIMESTAMP() < LEAST(
       DATE_ADD(${start}, INTERVAL ${ratingWindowDays} DAY),
       COALESCE(
         (SELECT MIN(n.kickoff_at) FROM matches n WHERE n.status = 'scheduled' AND n.kickoff_at > ${start}),
         '9999-12-31 00:00:00'
       )
+    )`
+
+  const written = await db.transaction(async (tx) => {
+    await tx.execute(sql`
+      INSERT INTO player_ratings (supporter_id, appearance_id, grade, created_at, updated_at)
+      SELECT s.id, v.appearance_id, v.grade, UTC_TIMESTAMP(), UTC_TIMESTAMP()
+      FROM (${values}) v
+      JOIN match_appearances a ON a.id = v.appearance_id AND a.match_id = ${input.matchId} AND a.ours = 1
+      JOIN matches m ON m.id = a.match_id AND m.status = 'played'
+      JOIN supporters s ON s.id = ${input.supporterId} AND s.disabled_at IS NULL AND s.created_at < ${start}
+      WHERE ${open}
+      ON DUPLICATE KEY UPDATE grade = VALUES(grade), updated_at = UTC_TIMESTAMP()
+    `)
+
+    if (coach !== null && coachGrade !== undefined) {
+      await tx.execute(sql`
+        INSERT INTO coach_ratings (supporter_id, match_id, staff_id, grade, created_at, updated_at)
+        SELECT s.id, m.id, ${coach.staffId}, ${coachGrade}, UTC_TIMESTAMP(), UTC_TIMESTAMP()
+        FROM matches m
+        JOIN supporters s ON s.id = ${input.supporterId} AND s.disabled_at IS NULL AND s.created_at < ${start}
+        WHERE m.id = ${input.matchId} AND m.status = 'played' AND ${open}
+        ON DUPLICATE KEY UPDATE staff_id = VALUES(staff_id), grade = VALUES(grade), updated_at = UTC_TIMESTAMP()
+      `)
+    }
+
+    // With nothing selected, because the window had closed, nothing was written.
+    const stored = await findOwnRatings(tx, input.supporterId, input.matchId)
+    const storedCoach = await findOwnCoachRating(tx, input.supporterId, input.matchId)
+
+    return (
+      grades.every(([appearanceId, grade]) => stored.get(appearanceId) === grade) &&
+      (coach === null || storedCoach === coachGrade)
     )
-    ON DUPLICATE KEY UPDATE grade = VALUES(grade), updated_at = UTC_TIMESTAMP()
-  `)
+  })
 
-  // With nothing selected, because the window had closed, nothing was written.
-  const stored = await findOwnRatings(db, input.supporterId, input.matchId)
-  const written = grades.every(([appearanceId, grade]) => stored.get(appearanceId) === grade)
-
-  return written ? { answer: 'saved', changed: earlier.size > 0 } : { answer: 'closed' }
+  return written ? { answer: 'saved', changed: earlier.size > 0 || earlierCoach !== undefined } : { answer: 'closed' }
 }
 
 /** The scheduled matches after a match, the first first, whether or not they have a time. */

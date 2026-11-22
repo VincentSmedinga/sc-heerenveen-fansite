@@ -10,6 +10,7 @@ import {
   closeRatingWindows,
   closesAt,
   describeClosedWindows,
+  findOwnCoachRating,
   findOwnRatings,
   findRatingWindow,
   ratingWindowDays,
@@ -17,7 +18,9 @@ import {
   saveRatings,
 } from './rating-window.ts'
 import {
+  coachRatings,
   matchAppearances,
+  matchCoachRatings,
   matches,
   matchGoals,
   matchPlayerRatings,
@@ -25,6 +28,7 @@ import {
   matchSubstitutions,
   playerRatings,
   players,
+  staff,
   supporters,
 } from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
@@ -44,6 +48,7 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM matches')
   await database.pool.query('DELETE FROM players')
   await database.pool.query('DELETE FROM supporters')
+  await database.pool.query('DELETE FROM staff')
   await database.pool.query('DELETE FROM standings')
   await database.pool.query('DELETE FROM league_results')
 })
@@ -624,5 +629,118 @@ describe('recounting when an account is blocked or released (issue 1476)', () =>
     await release(fan)
     await closeAccount(database.db, fan)
     expect((await database.db.select().from(playerRatings)).map((row) => row.blocked)).toEqual([false])
+  })
+})
+
+describe('the head coach in the Uitblinker', () => {
+  const coach = (name: string, startDate: string, values: Partial<typeof staff.$inferInsert> = {}) =>
+    database.db
+      .insert(staff)
+      .values({ name, role: 'coach', startDate, startPrecision: 'day', ...values })
+      .$returningId()
+      .then(([row]) => row!.id)
+
+  async function openWindow() {
+    const { matchId } = await playedAndNext()
+    const ids = await lineUp(matchId)
+    const staffId = await coach('Robin Veldman', '2020-01-01')
+
+    return { ...ids, matchId, staffId }
+  }
+
+  it('is the head coach of the day of the match, and nobody for a day in a gap', async () => {
+    const { staffId } = await openWindow()
+    const window = await findRatingWindow(database.db)
+
+    expect(window).toMatchObject({ coach: { name: 'Robin Veldman', staffId }, state: 'open' })
+
+    await database.pool.query('DELETE FROM staff')
+    await coach('Iemand Eerder', '2000-01-01', { endDate: '2010-01-01', endPrecision: 'day' })
+
+    expect(await findRatingWindow(database.db)).toMatchObject({ coach: null, state: 'open' })
+  })
+
+  it('is nobody when two coaches surely hold the day, as with an interim, because the report does not name one', async () => {
+    await openWindow()
+    await coach('Interim Trainer', '2020-06-01', { interim: true })
+
+    expect(await findRatingWindow(database.db)).toMatchObject({ coach: null, state: 'open' })
+  })
+
+  it('stores the grade of the coach with those of the players, replaces it, and needs it', async () => {
+    const { keeper, matchId, mid, on, staffId } = await openWindow()
+    const fan = await supporter()
+    const grades = new Map([
+      [keeper, 7],
+      [mid, 8],
+      [on, 6],
+    ])
+
+    expect(await saveRatings(database.db, { grades, matchId, supporterId: fan })).toEqual({ answer: 'closed' })
+    expect(await findOwnRatings(database.db, fan, matchId)).toEqual(new Map())
+    expect(await saveRatings(database.db, { coachGrade: 6, grades, matchId, supporterId: fan })).toEqual({
+      answer: 'saved',
+      changed: false,
+    })
+    expect(await findOwnCoachRating(database.db, fan, matchId)).toBe(6)
+    expect(await database.db.select().from(coachRatings)).toMatchObject([{ grade: 6, matchId, staffId }])
+    expect(await saveRatings(database.db, { coachGrade: 9, grades, matchId, supporterId: fan })).toEqual({
+      answer: 'saved',
+      changed: true,
+    })
+    expect(await findOwnCoachRating(database.db, fan, matchId)).toBe(9)
+    expect(await database.db.select().from(coachRatings)).toHaveLength(1)
+  })
+
+  it('takes no grade for a coach when the match has none', async () => {
+    const { matchId } = await playedAndNext()
+    const { keeper } = await lineUp(matchId)
+    const fan = await supporter()
+
+    expect(
+      await saveRatings(database.db, { coachGrade: 5, grades: new Map([[keeper, 7]]), matchId, supporterId: fan }),
+    ).toEqual({ answer: 'closed' })
+    expect(await saveRatings(database.db, { grades: new Map([[keeper, 7]]), matchId, supporterId: fan })).toMatchObject(
+      {
+        answer: 'saved',
+      },
+    )
+    expect(await database.db.select().from(coachRatings)).toHaveLength(0)
+  })
+
+  it('writes nothing, not even the grades of the players, once the window is over', async () => {
+    const now = new Date('2026-11-30T12:00:00Z')
+    const { matchId } = await playedAndNext({ ago: 9 * day, nextIn: null, now })
+    const { keeper } = await lineUp(matchId)
+    const fan = await supporter(new Date('2026-01-01T00:00:00Z'))
+
+    await coach('Robin Veldman', '2020-01-01')
+
+    expect(
+      await saveRatings(database.db, { coachGrade: 5, grades: new Map([[keeper, 7]]), matchId, supporterId: fan }, now),
+    ).toEqual({ answer: 'closed' })
+    expect(await database.db.select().from(playerRatings)).toHaveLength(0)
+    expect(await database.db.select().from(coachRatings)).toHaveLength(0)
+  })
+
+  it('stores the average of the coach, and keeps him out of the averages of the players', async () => {
+    const now = new Date('2026-11-30T12:00:00Z')
+    const { matchId } = await playedAndNext({ ago: 9 * day, nextIn: null, now })
+    const staffId = await coach('Robin Veldman', '2020-01-01')
+    const first = await supporter()
+    const blocked = await supporter(undefined, { disabledAt: new Date() })
+
+    await database.db.insert(coachRatings).values([
+      { grade: 6, matchId, staffId, supporterId: first },
+      { grade: 8, matchId, staffId, supporterId: null },
+      { grade: 1, matchId, staffId, supporterId: blocked },
+    ])
+
+    expect(await closeRatingWindows(database.db, now, on)).toEqual({ closed: 1 })
+    expect(await database.db.select().from(matchCoachRatings)).toMatchObject([
+      { average: '7.00', matchId, ratingCount: 2, source: 'fans', spread: '1.00', staffId },
+    ])
+    expect(await database.db.select().from(matchPlayerRatings)).toHaveLength(0)
+    expect(await closeRatingWindows(database.db, now, on)).toEqual({ closed: 0 })
   })
 })

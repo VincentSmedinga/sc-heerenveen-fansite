@@ -1,0 +1,1 @@
+ALTER TABLE `player_ratings` ADD `blocked` boolean DEFAULT false NOT NULL;
