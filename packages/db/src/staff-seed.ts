@@ -27,10 +27,10 @@ export const headCoaches = [
     wikipediaPage: 'Fritz Korbach',
   },
   {
-    endDate: '2004-01-01',
-    endPrecision: 'year',
+    endDate: '2004-06-30',
+    endPrecision: 'day',
     name: 'Foppe de Haan',
-    note: 'Kondigde op 22 juli 2003 aan na 2003/04 te vertrekken. Zijn laatste thuiswedstrijd was op 10 mei 2004. Wikipedia geeft alleen het jaar van het einde.',
+    note: 'Kondigde op 22 juli 2003 aan na 2003/04 te vertrekken. Zijn laatste thuiswedstrijd was op 10 mei 2004. Wikipedia geeft alleen het jaar van het einde, dus we nemen de laatste dag van het seizoen, de dag voor het begin van Gertjan Verbeek.',
     startDate: '1992-10-01',
     startPrecision: 'month',
     wikipediaPage: 'Foppe de Haan',
