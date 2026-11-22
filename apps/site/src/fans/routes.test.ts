@@ -46,6 +46,9 @@ const open = [
   'app/fans/aanmelden/bevestigen/page.tsx',
   'app/fans/aanmelden/page.tsx',
   'app/fans/aanmelden/verstuurd/page.tsx',
+  // The page of the game Fjouwer: a visitor sees the match and the way in, and a supporter's
+  // four is read only with a session. Its action calls requireSupporter.
+  'app/fans/fjouwer/page.tsx',
   // The page and the action of the link in a reminder: the signed code in the link says whose
   // reminder it is, so they need no session (issue 1461).
   'app/fans/herinnering/uitzetten/actions.ts',
@@ -124,6 +127,7 @@ async function exportedFunctions(file: string) {
 beforeEach(() => {
   vi.stubEnv('FANS_ACCOUNTS', 'on')
   vi.stubEnv('FANS_PROGNOSE', 'on')
+  vi.stubEnv('FANS_VIER', 'on')
   vi.stubEnv('FANS_UITBLINKER', 'on')
 })
 
@@ -183,11 +187,13 @@ describe('the pages of Fans', () => {
     routes
       .concat(actionFiles)
       .flatMap((file) =>
-        file.startsWith('app/fans/prognose/')
-          ? [[file, 'FANS_PROGNOSE']]
-          : file.startsWith('app/fans/uitblinker/')
-            ? [[file, 'FANS_UITBLINKER']]
-            : [],
+        file.startsWith('app/fans/fjouwer/')
+          ? [[file, 'FANS_VIER']]
+          : file.startsWith('app/fans/prognose/')
+            ? [[file, 'FANS_PROGNOSE']]
+            : file.startsWith('app/fans/uitblinker/')
+              ? [[file, 'FANS_UITBLINKER']]
+              : [],
       ),
   )('answer not found in %s while its game is off (%s) and accounts are on', async (file, setting) => {
     vi.stubEnv(setting ?? '', 'off')

@@ -42,6 +42,18 @@ describe('FansPage', () => {
     expect(html.match(/komt eraan/g)).toHaveLength(3)
   })
 
+  it('names Fjouwer with a link only when the game is on', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    expect(await render()).not.toContain('href="/fans/fjouwer"')
+
+    vi.stubEnv('FANS_VIER', 'on')
+
+    const html = await render()
+
+    expect(html).toContain('<a href="/fans/fjouwer">Naar Fjouwer</a>')
+    expect(html.match(/komt eraan/g)).toHaveLength(2)
+  })
+
   it('has the buttons Account maken and Inloggen, to their pages, and the links to the rules and to what we keep', async () => {
     vi.stubEnv('FANS_ACCOUNTS', 'on')
     const html = await render()

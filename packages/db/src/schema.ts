@@ -1723,6 +1723,68 @@ export const predictions = mysqlTable(
 export type Prediction = typeof predictions.$inferSelect
 
 /**
+ * The four players a supporter chose for a match in the game Fjouwer (issue 1469): one row per
+ * supporter and match, with the four players in `player_1_id` to `player_4_id`, in the order
+ * the supporter ticked them in the form (the order of the squad). The supporter can change the
+ * row until the kick-off, and `updated_at` is the moment of the last save. A supporter without
+ * a row for a match has the four of their previous match in that season: that is worked out in
+ * the query and writes no row. A player is a row of the season (`players`), so a new season
+ * starts with no four. `supporter_id` is emptied when the account is closed, as in
+ * `predictions`. Times are UTC.
+ */
+export const fantasyPicks = mysqlTable(
+  'fantasy_picks',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    supporterId: int('supporter_id', { unsigned: true }).references(() => supporters.id, { onDelete: 'set null' }),
+    matchId: int('match_id', { unsigned: true })
+      .notNull()
+      .references(() => matches.id, { onDelete: 'cascade' }),
+    player1Id: int('player_1_id', { unsigned: true })
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    player2Id: int('player_2_id', { unsigned: true })
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    player3Id: int('player_3_id', { unsigned: true })
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    player4Id: int('player_4_id', { unsigned: true })
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    createdAt: datetime('created_at')
+      .notNull()
+      .default(sql`(UTC_TIMESTAMP())`),
+    updatedAt: datetime('updated_at')
+      .notNull()
+      .default(sql`(UTC_TIMESTAMP())`),
+  },
+  (table) => [
+    unique('fantasy_picks_supporter_id_match_id_unique').on(table.supporterId, table.matchId),
+    index('fantasy_picks_match_id_idx').on(table.matchId),
+  ],
+)
+
+export type FantasyPick = typeof fantasyPicks.$inferSelect
+
+/**
+ * The line a player has in the game Fjouwer (issue 1469): goalkeeper, defender, midfielder or
+ * attacker, kept at the first use of the player in his season and never changed after that, so
+ * a change of his position halfway the season does not rewrite the points. A player is a row of
+ * one season, so the line is fixed per season. It is made from the position of the player
+ * (`players.position`, else the line of the person) at that moment. Times are UTC.
+ */
+export const fantasyPlayerLines = mysqlTable('fantasy_player_lines', {
+  playerId: int('player_id', { unsigned: true })
+    .primaryKey()
+    .references(() => players.id, { onDelete: 'cascade' }),
+  line: mysqlEnum('line', playerPositions).notNull(),
+  createdAt: datetime('created_at')
+    .notNull()
+    .default(sql`(UTC_TIMESTAMP())`),
+})
+
+/**
  * The reminders by e-mail that were sent for the game Prognose (issue 1461): one row for each
  * supporter and match, so a second run or a restart sends nothing twice, also when the kick-off
  * moves. The row is made just before the mail goes out and removed again when the mail fails,

@@ -99,6 +99,11 @@ export default async function FansPage({
                 <List.Item key={part}>
                   <Heading level={3}>{game?.label}</Heading>
                   <Text>{sentence}</Text>
+                  {part === 'vier' && isFansPartOn(part) && game !== undefined ? (
+                    <Text>
+                      <Link href={game.href}>Naar {game.label}</Link>
+                    </Text>
+                  ) : null}
                   {!isFansPartOn(part) && <Tag>komt eraan</Tag>}
                 </List.Item>
               )

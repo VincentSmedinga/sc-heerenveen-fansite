@@ -6,6 +6,7 @@ import { isFansPartOn } from '@fansite/shared/fans-env'
 import { count, eq } from 'drizzle-orm'
 
 import { fansGames } from '../fans-paths'
+import { fjouwerData } from './fjouwer'
 import { predictionData } from './prediction-results'
 import { ratingData } from './rating-data'
 
@@ -61,6 +62,7 @@ export type GamePlace = {
 const kept: Partial<Record<GamePlace['part'], Pick<GamePlace, 'load' | 'tables'>>> = {
   prognose: { load: predictionData, tables: ['predictions'] },
   uitblinker: { load: ratingData, tables: ['coach_ratings', 'player_ratings'] },
+  vier: { load: fjouwerData, tables: ['fantasy_picks'] },
 }
 
 /** The places of the games, in the order of the bar of games. */
