@@ -7897,7 +7897,7 @@
   Gelijke punten delen een plaats en het volgende nummer valt weg; binnen een plaats gaat het op schermnaam.
   Een geblokkeerd account staat er niet in en telt niet mee voor de plaatsen van anderen.
   Een fan die zijn naam niet in standen wil (`inRankings`), staat niet in de lijst, maar ziet zijn eigen regel met de plaats die hij zou krijgen: het aantal rijen in de lijst met meer punten, plus één.
-  Een opgeheven account heeft geen fan meer (`fantasy_picks.supporter_id` is dan leeg), en elke bewaarde vier ervan staat als een eigen regel "Voormalige supporter" in de lijst.
+  Een opgeheven account heeft geen fan meer (`fantasy_picks.supporter_id` is dan leeg), en elke bewaarde vier ervan staat als een eigen regel "Voormalige fan" in de lijst.
   De stand staat vijf minuten in het geheugen (`seasonRanking`, `rankedSeasons`), boven de minuut van de punten zelf, en niets staat in de database.
   De pagina `/fans/fjouwer/stand` en de kaart Stand op `/fans/fjouwer` bouwen op dezelfde gegevens.
 - **Waarom:** een gecorrigeerd verslag werkt zo door zonder taak of migratie, zoals bij de punten.
@@ -7906,6 +7906,7 @@
 - **Let op:** de vieren van één opgeheven account zijn niet meer aan elkaar te koppelen en een geërfde vier is er niet meer.
   Zo telt zo'n account met meerdere wedstrijden als meerdere regels van één wedstrijd.
   Wil de stand ze samenvoegen, dan moet het opheffen eerst een nummer bewaren dat niet naar de fan terug te leiden is.
+- **Later:** op 22 november 2026 is de naam van een opgeheven account veranderd van "Voormalige supporter" in "Voormalige fan", omdat bezoekers in het hoofdstuk Redactie "fan" lezen en nooit "supporter".
 
 ## De spelregels van Fjouwer staan als kaart op `/fans/spelregels`, met voorbeelden uit de code van de telling
 
