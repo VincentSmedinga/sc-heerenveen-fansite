@@ -7712,7 +7712,8 @@
   Een telling in de bestanden van de oude site laat zien dat elk seizoen van 1998/99 tot en met 2006/07 zo precies één winnaar krijgt, zonder gelijke stand.
   In 2006/07 hebben twaalf spelers genoeg wedstrijden met cijfers, ook al heeft de oude site maar zeven wedstrijden van dat seizoen.
 - **Alternatieven:** de acht namen overtypen van de oude pagina (kost handwerk en kan afwijken van de cijfers); een drempel van zes wedstrijden voor de titel (strenger dan een seizoencijfer, en de oude seizoenen hebben soms minder wedstrijden met cijfers); bij een gelijke stand de speler met minder cijfers kiezen.
-- **Let op:** migratie 0108 haalt de tabel `old_season_winners` weg. Zij was altijd leeg, want de namen zijn nooit overgetypt.
+- **Let op:** migratie 0108 haalt de tabel `old_season_winners` weg.
+  Zij was altijd leeg, want de namen zijn nooit overgetypt.
 
 - **Later:** zie _De trainer staat als laatste regel in de tabel met gemiddelden_ (22 november 2026): de cijfers van de trainer volgen dezelfde regel.
 
