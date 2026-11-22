@@ -2213,14 +2213,15 @@ await withEmptyDatabase((database) =>
     assert.match(html, /<h2[^>]*>Uitblinker<\/h2>/)
     assert.match(html, /<a [^>]*href="\/fans\/uitblinker"[^>]*>Naar de Uitblinker<\/a>/)
 
-    // The game Fjouwer: a visitor sees the page, and no search engine may index it. The empty
-    // database has no match, so there is no form. Fans names it, with a link.
+    // The game Fjouwer: a visitor sees the card with the next match and the way in, no list of
+    // players, and no search engine may index it. Fans names it, with a link.
     const four = await fetch(`${origin}/fans/fjouwer`)
     const fourHtml = await four.text()
 
     assert.equal(four.status, 200, '/fans/fjouwer must be there with Fjouwer on')
     assert.match(fourHtml, /<h1[^>]*>Fjouwer<\/h1>/)
-    assert.match(fourHtml, /Er is geen komende wedstrijd meer/)
+    assert.match(fourHtml, /<h2[^>]*>Jouw vier<\/h2>/)
+    assert.match(fourHtml, /Log in om je vier te kiezen/)
     assert.doesNotMatch(fourHtml, /type="checkbox"/)
     assert.equal(four.headers.get('cache-control'), 'no-store')
     assert.equal(four.headers.get('x-robots-tag'), 'noindex, nofollow')

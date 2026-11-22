@@ -101,7 +101,7 @@ export default async function FansPage({
                   <Text>{sentence}</Text>
                   {part === 'vier' && isFansPartOn(part) && game !== undefined ? (
                     <Text>
-                      <Link href={game.href}>Naar {game.label}</Link>
+                      <Link href={game.href}>{`Naar ${game.label}`}</Link>
                     </Text>
                   ) : null}
                   {!isFansPartOn(part) && <Tag>komt eraan</Tag>}
