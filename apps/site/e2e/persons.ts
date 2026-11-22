@@ -1,7 +1,16 @@
 import { connect } from '@fansite/db/client'
 import { readDatabaseEnv } from '@fansite/db/env'
 import { updatePlayerAddresses } from '@fansite/db/person-slugs'
-import { matches, matchGoals, persons, personSlugs, players, playerSeasonStats } from '@fansite/db/schema'
+import {
+  matchAppearances,
+  matches,
+  matchGoals,
+  matchReports,
+  persons,
+  personSlugs,
+  players,
+  playerSeasonStats,
+} from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { and, asc, eq, inArray } from 'drizzle-orm'
 import path from 'node:path'
@@ -51,6 +60,7 @@ export async function addPersons() {
       const names = people.map(({ name }) => name)
 
       await db.delete(matchGoals).where(eq(matchGoals.player, forwardGoalName))
+      await db.delete(matchAppearances).where(eq(matchAppearances.name, forwardOpponentName))
       await db.delete(players).where(inArray(players.name, names))
       await db.delete(persons).where(inArray(persons.name, names))
     } finally {
@@ -107,6 +117,7 @@ export async function addPersons() {
 
     await addFigures(db)
     await addGoals(db)
+    await addAgainst(db)
     // The site gives the addresses when it starts, before these persons were there.
     await updatePlayerAddresses(db)
   } finally {
@@ -201,6 +212,38 @@ async function addGoals(db: ReturnType<typeof connect>['db']) {
       .slice(0, 4)
       .map((match, index) => goal(match.id, [8, 52, 61, 88][index] ?? 45, true)),
   ])
+}
+
+/** The name of the made-up row of the forward as a player of the opponent. */
+const forwardOpponentName = 'Verzonnen Aanvaller (tegenstander)'
+
+/**
+ * A row of the opponent with the person of the forward in a match of this season that has a
+ * finished report, so his page has the card Tegen ons (#1545) to check, in the group after his
+ * time with us (his last season is the one before this one). Nothing is added when no such
+ * match exists, as in a development database without made-up reports.
+ */
+async function addAgainst(db: ReturnType<typeof connect>['db']) {
+  const [report] = await db
+    .select({ matchId: matches.id })
+    .from(matches)
+    .innerJoin(matchReports, eq(matchReports.matchId, matches.id))
+    .where(and(eq(matches.season, seasonOf(new Date())), eq(matchReports.status, 'klaar')))
+    .orderBy(asc(matches.id))
+  const [person] = await db.select({ id: persons.id }).from(persons).where(eq(persons.name, 'Verzonnen Aanvaller'))
+
+  if (report === undefined || person === undefined) {
+    return
+  }
+
+  await db.insert(matchAppearances).values({
+    matchId: report.matchId,
+    name: forwardOpponentName,
+    ours: false,
+    personId: person.id,
+    shirtNumber: 97,
+    starter: true,
+  })
 }
 
 /**
