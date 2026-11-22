@@ -154,15 +154,25 @@ export function ScoringCard() {
 
 /**
  * The table of the scoring, from the same numbers that `predictionPoints` uses, so the table
- * and the sum cannot differ. The card "Punten" and the page with the rules show it.
+ * and the sum cannot differ. The card "Punten" and the page with the rules show it. `short`
+ * gives short headers, for a phone: the caption then says what they mean.
  */
-export function ScoringTable({ caption }: { caption: string }) {
+export function ScoringTable({ caption, short = false }: { caption: string; short?: boolean }) {
   const { fullTime, halfTime } = pointsPerPart
 
   return (
     <DataTable
       caption={caption}
-      columns={['Onderdeel', 'Precies goed', 'Uitslag goed', 'Eén doelpuntental goed']}
+      columns={
+        short
+          ? [
+              'Deel',
+              { abbreviation: 'Precies', name: 'precies goed' },
+              { abbreviation: 'Uitslag', name: 'uitslag goed' },
+              { abbreviation: 'Eén', name: 'één doelpuntental goed' },
+            ]
+          : ['Onderdeel', 'Precies goed', 'Uitslag goed', 'Eén doelpuntental goed']
+      }
       rows={[
         { cells: [halfTime.exact, halfTime.outcome, halfTime.goals], header: 'Rust' },
         { cells: [fullTime.exact, fullTime.outcome, fullTime.goals], header: 'Eind' },

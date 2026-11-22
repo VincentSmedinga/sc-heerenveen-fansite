@@ -58,11 +58,15 @@ export function PredictionRulesCard() {
         <List.Item>Er zijn geen prijzen. Bij een onenigheid beslist de redactie.</List.Item>
       </List>
       <Heading level={3}>Zo tellen de punten</Heading>
-      <ScoringTable caption="Punten per onderdeel" />
+      <ScoringTable caption="Punten per onderdeel" short />
+      <Text appearance="meta">
+        Precies: de stand precies goed. Uitslag: thuiswinst, gelijkspel of uitwinst goed. Eén: precies één van de twee
+        doelpuntentallen goed.
+      </Text>
       <Text>{`Een perfecte voorspelling is ${maxPredictionPoints} punten waard. Het doelsaldo levert niets op.`}</Text>
       <Heading level={3}>Een voorbeeld</Heading>
       <DataTable
-        caption={`Voorbeeld: de ruststand was ${scoreText(exampleResult.halfTime)} en de eindstand ${scoreText(exampleResult.fullTime)}. Jij is je voorspelling, rust en eind. R zijn de punten voor de rust, E die voor de eindstand en P het totaal.`}
+        caption={`Voorbeeld: de ruststand was ${scoreText(exampleResult.halfTime)} en de eindstand ${scoreText(exampleResult.fullTime)}`}
         columns={[
           'Jij',
           { abbreviation: 'R', name: 'punten voor de ruststand' },
@@ -75,6 +79,9 @@ export function PredictionRulesCard() {
         }))}
         sortable={false}
       />
+      <Text appearance="meta">
+        Jij: je voorspelling, rust en eind. R: punten voor de rust. E: punten voor de eind. P: totaal.
+      </Text>
       <Heading level={3}>De stand</Heading>
       <Text>
         De <Link href={`${fansPath}/prognose/stand`}>stand</Link> is er per seizoen en per wedstrijd. {tieRule}
