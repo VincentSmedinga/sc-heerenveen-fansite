@@ -1,4 +1,5 @@
 import { Card, DataTable, Heading, Text } from '@fansite/design-system'
+import { Fragment } from 'react'
 
 import { againstLabel, type AgainstMatch, type PlayerAgainst } from './player-against'
 
