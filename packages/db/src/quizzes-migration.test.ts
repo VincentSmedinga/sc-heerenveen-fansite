@@ -85,7 +85,7 @@ describe('the migration of the quizzes (#1480)', () => {
 
     const [rows] = await database.pool.query<RowDataPacket[]>('SELECT COUNT(*) AS total FROM quiz_questions')
 
-    expect(rows[0]?.total).toBe(0)
+    expect(rows[0]?.['total']).toBe(0)
     await expect(addQuestion(999_999)).rejects.toThrow()
   })
 })

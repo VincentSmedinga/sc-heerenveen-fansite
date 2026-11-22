@@ -11,7 +11,7 @@ CREATE TABLE `quiz_questions` (
 	CONSTRAINT `quiz_questions_position_in_range` CHECK(`quiz_questions`.`position` between 1 and 10),
 	CONSTRAINT `quiz_questions_correct_in_range` CHECK(`quiz_questions`.`correct_answer` between 1 and 4),
 	CONSTRAINT `quiz_questions_four_answers` CHECK(json_length(`quiz_questions`.`answers`) = 4)
-);
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 --> statement-breakpoint
 CREATE TABLE `quizzes` (
 	`id` int unsigned AUTO_INCREMENT NOT NULL,
@@ -25,6 +25,6 @@ CREATE TABLE `quizzes` (
 	CONSTRAINT `quizzes_year_month_unique` UNIQUE(`year`,`month`),
 	CONSTRAINT `quizzes_month_in_range` CHECK(`quizzes`.`month` between 1 and 12),
 	CONSTRAINT `quizzes_average_in_range` CHECK(`quizzes`.`average_score_tenths` is null or `quizzes`.`average_score_tenths` <= 100)
-);
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 --> statement-breakpoint
 ALTER TABLE `quiz_questions` ADD CONSTRAINT `quiz_questions_quiz_id_quizzes_id_fk` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes`(`id`) ON DELETE cascade ON UPDATE no action;
