@@ -6777,7 +6777,6 @@
   Acceptatie toont alleen `main`, dus daar is alles te testen op de echte host.
 - **Alternatieven:** een lange branch `fans` met een branch per onderdeel.
   Die viel af: de migraties staan genummerd in één lijst en zouden botsen met elke migratie op `main`, acceptatie toont alleen `main`, en de controles, de releases en het opruimen gaan allemaal uit van `main`.
-  \
 
 ## Supporters krijgen een eigen account op de site, los van het forum
 
