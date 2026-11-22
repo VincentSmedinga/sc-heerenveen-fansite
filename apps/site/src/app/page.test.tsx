@@ -750,7 +750,7 @@ describe('the card with the newest article of the editors', () => {
     expect(html).toContain('<time dateTime="2026-10-25">25 oktober 2026</time>')
     expect(html).toContain('Wij zijn de redactie van de Fansite &amp; &lt;b&gt;dit&lt;/b&gt; is wie we zijn.')
     expect(html).toContain(
-      '<a href="/redactie/dit-zijn-wij" aria-label="Lees verder over Dit zijn wij &lt;i&gt;allemaal&lt;/i&gt;">Lees verder</a>',
+      '<a aria-label="Lees verder over Dit zijn wij &lt;i&gt;allemaal&lt;/i&gt;" href="/redactie/dit-zijn-wij">Lees verder</a>',
     )
   })
 
