@@ -79,9 +79,9 @@ describe('the card Uitblinkers van het jaar', () => {
   const html = renderToStaticMarkup(
     <YearWinnersCard
       winners={[
-        { average: undefined, name: undefined, season: '2026/27' },
-        { average: 7.1, name: 'Speler A', season: '2005/06' },
-        { average: undefined, name: 'Speler B', season: '1998/99' },
+        { average: undefined, names: [], season: '2026/27' },
+        { average: 7.1, names: ['Speler A', 'Speler D'], season: '2005/06' },
+        { average: 6.9, names: ['Speler B'], season: '1998/99' },
       ]}
     />,
   )
@@ -93,11 +93,24 @@ describe('the card Uitblinkers van het jaar', () => {
     expect(html).toContain('7,1')
   })
 
+  it('names both players of an equal rating in one row', () => {
+    expect(html).toContain('Speler A en Speler D')
+  })
+
   it('says "Na het seizoen" for the season that has no winner yet', () => {
     expect(html).toContain('Na het seizoen')
   })
 
   it('says where the old numbers come from', () => {
     expect(html).toContain('Tot 2006/07: cijfers van bezoekers van de oude Fansite.')
+  })
+})
+
+describe('the card Uitblinkers van het jaar without a season', () => {
+  it('says there is none instead of an empty table', () => {
+    const html = renderToStaticMarkup(<YearWinnersCard winners={[]} />)
+
+    expect(html).toContain('Nog geen uitblinkers.')
+    expect(html).not.toContain('<table')
   })
 })

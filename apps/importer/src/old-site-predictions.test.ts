@@ -88,7 +88,6 @@ const dataOf = (overrides: Partial<OldSiteData> = {}): OldSiteData => ({
   predictions,
   ratings: [],
   seasonRatings: [],
-  winners: [],
   ...overrides,
 })
 

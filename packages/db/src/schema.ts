@@ -3216,8 +3216,10 @@ export const oldSeasonRatings = mysqlTable(
 export type OldSeasonRating = typeof oldSeasonRatings.$inferSelect
 
 /**
- * The Uitblinker of the year of the seasons 1998/99 to 2005/06 (issue 1465): typed over from
- * the old page, one for each season. From 2006/07 the winner is worked out from the ratings.
+ * The Uitblinker of the year of the seasons 1998/99 to 2005/06 (issue 1465), as it was meant to
+ * be typed over from the old page. Nothing writes or reads it any more: the site works the
+ * winner of every season out from the season ratings. The table waits for a migration that
+ * drops it.
  */
 export const oldSeasonWinners = mysqlTable(
   'old_season_winners',

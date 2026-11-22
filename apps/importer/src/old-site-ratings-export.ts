@@ -1,10 +1,4 @@
-import type {
-  OldSiteCoachRating,
-  OldSiteMatch,
-  OldSiteRating,
-  OldSiteSeasonRating,
-  OldSiteWinner,
-} from './old-site-file.ts'
+import type { OldSiteCoachRating, OldSiteMatch, OldSiteRating, OldSiteSeasonRating } from './old-site-file.ts'
 
 /**
  * The part of `pnpm export:old-site` that works out the ratings (#1465): it turns the rows of
@@ -70,6 +64,12 @@ export type RatingOutsideLineup = {
   matchCode: string
   playerCode: string
   season: string
+}
+
+/** The names the Markdown file needs: the clubs and the players of the old database. */
+type NameRows = {
+  clubs: readonly { code: string; naam: string }[]
+  players: readonly { achternaam: string; code: string; tussenvoegsel: null | string; voornaam: string }[]
 }
 
 /**
@@ -219,25 +219,6 @@ export function round(value: number): number {
   return Math.round((value + Number.EPSILON) * 100) / 100
 }
 
-function splitOnce(text: string, separator: string): [string, string] {
-  const at = text.indexOf(separator)
-
-  return at < 0 ? [text, ''] : [text.slice(0, at), text.slice(at + separator.length)]
-}
-
-/**
- * The Uitblinker of the year of 1998/99 to 2005/06, typed over from the old page: the old
- * database does not have them. The export writes them to `season-ratings.json`, and the import
- * checks the five from 2001/02 against the ratings. One for each season, named as the page did.
- */
-export const uitblinkersOfTheYear: readonly OldSiteWinner[] = []
-
-/** The names the Markdown file needs: the clubs and the players of the old database. */
-type NameRows = {
-  clubs: readonly { code: string; naam: string }[]
-  players: readonly { achternaam: string; code: string; tussenvoegsel: null | string; voornaam: string }[]
-}
-
 /**
  * The Markdown file for the editors (#1465): per match, the ratings that visitors gave a player
  * who is not in the line-up of that match, to judge by hand. They are not in the database. It
@@ -286,4 +267,10 @@ export function writeRatingsOutsideLineup(
     ...lines,
     '',
   ].join('\n')
+}
+
+function splitOnce(text: string, separator: string): [string, string] {
+  const at = text.indexOf(separator)
+
+  return at < 0 ? [text, ''] : [text.slice(0, at), text.slice(at + separator.length)]
 }

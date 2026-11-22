@@ -185,20 +185,10 @@ export const oldSiteSeasonRatingSchema = z.strictObject({
   season: z.string().regex(/^\d{4}$/),
 })
 
-/**
- * The Uitblinker of the year, typed over from the old page (the old database does not have
- * it). It is a name, as the page wrote it, and the import links it to a player.
- */
-export const oldSiteWinnerSchema = z.strictObject({
-  name: z.string().min(1),
-  season: z.string().regex(/^\d{4}$/),
-})
-
-/** The season ratings before 2001 and the winners of the year, in `season-ratings.json`. */
+/** The season ratings before 2001, in `season-ratings.json`. */
 export const oldSiteSeasonRatingsFileSchema = z.strictObject({
   seasonRatings: z.array(oldSiteSeasonRatingSchema),
   version: z.literal(oldSiteFileVersion),
-  winners: z.array(oldSiteWinnerSchema),
 })
 
 export const oldSiteFileSchema = z.union([
@@ -225,7 +215,6 @@ export type OldSiteData = {
   /** The averages per match and player, each with the season of its file. */
   ratings: OldSiteRatingOfSeason[]
   seasonRatings: OldSiteSeasonRating[]
-  winners: OldSiteWinner[]
 }
 export type OldSiteEvent = z.output<typeof oldSiteEventSchema>
 export type OldSiteFile = z.output<typeof oldSiteFileSchema>
@@ -238,8 +227,6 @@ export type OldSitePredictionScore = z.output<typeof oldSitePredictionScoreSchem
 export type OldSiteRating = z.output<typeof oldSiteRatingSchema>
 export type OldSiteRatingOfSeason = OldSiteRating & { season: string }
 export type OldSiteSeasonRating = z.output<typeof oldSiteSeasonRatingSchema>
-
-export type OldSiteWinner = z.output<typeof oldSiteWinnerSchema>
 
 /**
  * Parses the text of one file. It throws when the text isn't JSON, has another version or has a
@@ -281,7 +268,6 @@ export async function readOldSiteData(folder: string | URL = oldSiteDataFolder):
     predictions: [],
     ratings: [],
     seasonRatings: [],
-    winners: [],
   }
   let clubFiles = 0
   let playerFiles = 0
@@ -304,7 +290,6 @@ export async function readOldSiteData(folder: string | URL = oldSiteDataFolder):
     } else if ('seasonRatings' in file) {
       seasonRatingFiles += 1
       data.seasonRatings.push(...file.seasonRatings)
-      data.winners.push(...file.winners)
     } else {
       for (const match of file.matches) {
         if (match.season !== file.season) {

@@ -1,6 +1,6 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { clubs, matches, matchPlayerRatings, oldSeasonRatings, oldSeasonWinners, players } from '@fansite/db/schema'
+import { clubs, matches, matchPlayerRatings, oldSeasonRatings, players } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
@@ -21,7 +21,6 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
-  await database.db.delete(oldSeasonWinners)
   await database.db.delete(oldSeasonRatings)
   await database.db.delete(matchPlayerRatings)
   await database.db.delete(matches)
@@ -99,21 +98,39 @@ describe('the figures of the season ratings', () => {
     expect(rows.map((row) => [row.name, row.matches])).toEqual([['Speler A', 3]])
   })
 
-  it('reads the season ratings and the winners of the old fansite', async () => {
+  it('reads the season ratings of the old fansite, and a past season of them has its winner', async () => {
     const player = await addPlayer('Speler A')
 
     await database.db
       .insert(oldSeasonRatings)
       .values({ average: '6.80', name: 'Speler A', playerId: player, season: '1999/00' })
-    await database.db.insert(oldSeasonWinners).values({ name: 'Speler A', playerId: player, season: '1999/00' })
     const found = await readRatingFigures(database.db, new Date('2026-11-22T12:00:00Z'))
 
     expect(found.oldRatings).toEqual([{ average: 6.8, name: 'Speler A', playerId: player, season: '1999/00' }])
     expect(
-      yearWinners(found, new Date('2026-11-22T12:00:00Z')).map((row) => [row.season, row.name, row.average]),
+      yearWinners(found, new Date('2026-11-22T12:00:00Z')).map((row) => [row.season, row.names, row.average]),
     ).toEqual([
-      ['2026/27', undefined, undefined],
-      ['1999/00', 'Speler A', 6.8],
+      ['2026/27', [], undefined],
+      ['1999/00', ['Speler A'], 6.8],
+    ])
+  })
+
+  it('names the winner of a season that is over from the ratings of its matches', async () => {
+    const [one, two] = [await addPlayer('Speler A'), await addPlayer('Speler B')]
+
+    for (let match = 0; match < 3; match++) {
+      const id = await addMatch('2004/05')
+
+      await rate(id, one, '6.50', 20, 'oude-fansite')
+      await rate(id, two, '7.25', 20, 'oude-fansite')
+    }
+
+    const now = new Date('2026-11-22T12:00:00Z')
+    const found = await readRatingFigures(database.db, now)
+
+    expect(yearWinners(found, now).map((row) => [row.season, row.names])).toEqual([
+      ['2026/27', []],
+      ['2004/05', ['Speler B']],
     ])
   })
 

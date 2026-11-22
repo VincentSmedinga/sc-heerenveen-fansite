@@ -1,19 +1,11 @@
-import {
-  matchCoachRatings,
-  matches,
-  matchPlayerRatings,
-  oldSeasonRatings,
-  oldSeasonWinners,
-  staff,
-} from '@fansite/db/schema'
+import { matchCoachRatings, matches, matchPlayerRatings, oldSeasonRatings, staff } from '@fansite/db/schema'
 import { staffOnDay } from '@fansite/db/staff'
 import { eq } from 'drizzle-orm'
 
-import type { OldSiteData, OldSitePlayer } from './old-site-file.ts'
+import type { OldSiteData } from './old-site-file.ts'
 import type { OldSiteDatabase, OldSiteStepReport } from './old-site-step.ts'
 
 import { deriveOldSiteMatches, matchKey, oldSiteSeason, oldSiteSource } from './old-site-matches.ts'
-import { cleanOldSiteName } from './old-site-names.ts'
 import { oldSitePlayerIds, oldSitePlayerKey, resolveOldSiteCode } from './old-site-players.ts'
 import { ratedCoaches } from './old-site-ratings-export.ts'
 import { nameKey } from './read-squad.ts'
@@ -21,54 +13,9 @@ import { nameKey } from './read-squad.ts'
 /** The source of the ratings this file writes, as `rating_sources` of the database has it. */
 export const oldSiteRatingSource = 'oude-fansite'
 
-/** A match counts for the Uitblinker of the year with at least this many ratings of a player */
-const minimumRatings = 5
-
-/** A player counts for the Uitblinker of the year with at least this many such matches. */
-const minimumMatches = 6
-
 const empty = (): OldSiteStepReport => ({ changed: 0, created: 0, lines: [], skipped: 0, unchanged: 0 })
 
 type Values = { average: number; count: number; spread: number }
-
-/**
- * The player with the highest season rating of each season of the ratings per match: all the
- * ratings of the season together, not the average of the averages, and on a tie the player with
- * fewer ratings.
- */
-export function computedWinners(data: Pick<OldSiteData, 'players' | 'ratings'>) {
-  const byCode = new Map<string, OldSitePlayer>(data.players.map((player) => [player.code, player]))
-  const sums = new Map<string, { count: number; matches: number; sum: number }>()
-
-  for (const rating of data.ratings) {
-    const key = `${rating.season}|${rating.playerCode}`
-    const one = sums.get(key) ?? { count: 0, matches: 0, sum: 0 }
-
-    one.count += rating.count
-    one.sum += rating.average * rating.count
-    one.matches += rating.count >= minimumRatings ? 1 : 0
-    sums.set(key, one)
-  }
-
-  const winners = new Map<string, { average: number; count: number; name: string }>()
-
-  for (const [key, one] of sums) {
-    const [season = '', code = ''] = key.split('|')
-    const average = one.sum / one.count
-    const best = winners.get(season)
-
-    if (one.matches < minimumMatches) {
-      continue
-    }
-    if (best === undefined || average > best.average || (average === best.average && one.count < best.count)) {
-      const ref = resolveOldSiteCode(code, byCode, oldSiteSeason(season))
-
-      winners.set(season, { average, count: one.count, name: ref?.name ?? code })
-    }
-  }
-
-  return winners
-}
 
 /**
  * The step `trainercijfers` (#1502): the average, the number of ratings and the spread that
@@ -291,19 +238,15 @@ export async function importOldSiteRatings(db: OldSiteDatabase, data: OldSiteDat
 
 /**
  * The step `seizoencijfers` (#1465): the season ratings of 1998/99 to 2000/01 in
- * `old_season_ratings`, and the Uitblinker of the year of 1998/99 to 2005/06 in
- * `old_season_winners`. A rating is kept by name, linked to the player of that season when the
- * database has him. The winners of 2001/02 to 2005/06 are checked against the ratings of the
- * matches: the player with the highest season rating, on at least six matches with at least
- * five ratings, with fewer ratings first on a tie. A difference is a line in the log and
- * changes nothing. A second run changes nothing.
+ * `old_season_ratings`. A rating is kept by name, linked to the player of that season when the
+ * database has him.
+ * The Uitblinker of the year is not stored: the site works it out from the ratings (#1465).
+ * A second run changes nothing.
  */
 export async function importOldSiteSeasonRatings(db: OldSiteDatabase, data: OldSiteData): Promise<OldSiteStepReport> {
   const report = empty()
   const byCode = new Map(data.players.map((player) => [player.code, player]))
-  const seasons = [
-    ...new Set([...data.seasonRatings.map((one) => one.season), ...data.winners.map((one) => one.season)]),
-  ]
+  const seasons = [...new Set(data.seasonRatings.map((one) => one.season))]
   const playerIds = await oldSitePlayerIds(
     db,
     seasons.map((season) => oldSiteSeason(season)),
@@ -361,49 +304,5 @@ export async function importOldSiteSeasonRatings(db: OldSiteDatabase, data: OldS
     report.changed += 1
   }
 
-  await storeWinners(db, data, playerIds, report)
-
   return report
-}
-
-/** Writes the winners of the year and checks the five that the ratings can check. */
-async function storeWinners(
-  db: OldSiteDatabase,
-  data: OldSiteData,
-  playerIds: ReadonlyMap<string, number>,
-  report: OldSiteStepReport,
-) {
-  const computed = computedWinners(data)
-  const have = new Map((await db.select().from(oldSeasonWinners)).map((row) => [row.season, row] as const))
-
-  for (const winner of data.winners) {
-    const season = oldSiteSeason(winner.season)
-    const name = cleanOldSiteName(winner.name)
-    const playerId = playerIds.get(oldSitePlayerKey(season, name)) ?? null
-    const row = have.get(season)
-
-    have.delete(season)
-
-    if (row === undefined) {
-      await db.insert(oldSeasonWinners).values({ name, playerId, season })
-      report.created += 1
-    } else if (row.name !== name || row.playerId !== playerId) {
-      await db.update(oldSeasonWinners).set({ name, playerId }).where(eq(oldSeasonWinners.id, row.id))
-      report.changed += 1
-    } else {
-      report.unchanged += 1
-    }
-
-    const calculated = computed.get(winner.season)
-
-    if (calculated !== undefined && nameKey(calculated.name) !== nameKey(name)) {
-      report.lines.push(
-        `the Uitblinker of ${season} is ${name} on the old page, and ${calculated.name} on the ratings (${calculated.average.toFixed(2)})`,
-      )
-    }
-  }
-  for (const row of have.values()) {
-    await db.delete(oldSeasonWinners).where(eq(oldSeasonWinners.id, row.id))
-    report.changed += 1
-  }
 }

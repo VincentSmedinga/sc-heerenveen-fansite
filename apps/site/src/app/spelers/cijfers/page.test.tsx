@@ -687,7 +687,6 @@ describe('the card Cijfers van supporters on the page /spelers/cijfers', () => {
       figure('2005/06', 4, 'Speler D', 20, 400, 6.9),
     ],
     oldRatings: [{ average: 6.8, name: 'Speler E', playerId: null, season: '1999/00' }],
-    oldWinners: [],
     overSeasons: new Set(),
   }
   const renderWith = async (query: Record<string, string> = {}) =>
