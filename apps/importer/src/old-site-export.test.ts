@@ -53,6 +53,9 @@ const rows: OldSiteRows = {
     event(4, 'amateurs.uit', '0203', 'romano.denneboom'),
     event(5, 'amateurs.uit', '0203', '', 'Henk Herder', 'eigen doelpunt'),
   ],
+  fantestAnswers: [],
+  fantestKeys: [],
+  fantestQuestions: [],
   lineups: [
     {
       id: 11,
@@ -119,8 +122,14 @@ const rows: OldSiteRows = {
 describe('buildOldSiteExport', () => {
   const built = buildOldSiteExport(rows)
 
-  it('writes a file for the clubs, one for the players and one for each season', () => {
-    expect([...built.files.keys()]).toEqual(['clubs.json', 'players.json', 'matches-9091.json', 'season-ratings.json'])
+  it('writes a file for the clubs, one for the players and one for each season and one for the Fantest', () => {
+    expect([...built.files.keys()]).toEqual([
+      'clubs.json',
+      'players.json',
+      'matches-9091.json',
+      'fantest.json',
+      'season-ratings.json',
+    ])
   })
 
   it('leaves out the friendlies and the matches before 1 July 1990', () => {
