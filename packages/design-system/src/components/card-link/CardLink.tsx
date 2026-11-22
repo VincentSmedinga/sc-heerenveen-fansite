@@ -25,12 +25,15 @@ export const leavesTheSite = (href: string): boolean => /^https?:\/\//i.test(hre
  * name. A link in a sentence, a link back and a link in the navigation are not card links: they
  * stay a `Link`.
  */
-export const CardLink = ({ children, href, ...props }: CardLinkProps) => {
+export const CardLink = ({ 'aria-label': label, children, href, ...props }: CardLinkProps) => {
   const external = leavesTheSite(href)
+  // A label replaces the name the text gives, so a link that leaves the site says so in the
+  // label too.
+  const name = label !== undefined && external ? `${label} (externe site)` : label
 
   return (
     <Text>
-      <a href={href} {...props}>
+      <a aria-label={name} href={href} {...props}>
         {attachIcon(children, <Icon name={external ? 'external-link' : 'arrow-right'} />, 'after')}
         {external ? (
           <>

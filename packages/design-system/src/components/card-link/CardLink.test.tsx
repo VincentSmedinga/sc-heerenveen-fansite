@@ -33,6 +33,16 @@ describe('CardLink', () => {
     expect(screen.getByRole('link').querySelector('.hf-visually-hidden')).toBeNull()
   })
 
+  it('keeps "(externe site)" in the name of an external link that has a label', () => {
+    render(
+      <CardLink aria-label="Lees verder over de winst" href="https://example.org/winst">
+        Lees verder
+      </CardLink>,
+    )
+
+    expect(screen.getByRole('link', { name: 'Lees verder over de winst (externe site)' })).toBeTruthy()
+  })
+
   it('keeps the other attributes of a link', () => {
     render(
       <CardLink aria-label="Lees verder over de winst" href="/redactie/winst">
