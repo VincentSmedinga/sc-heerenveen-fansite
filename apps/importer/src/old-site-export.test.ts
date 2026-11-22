@@ -100,6 +100,7 @@ const rows: OldSiteRows = {
       voornaam: 'René',
     },
   ],
+  ratings: [],
   reports: [
     { scheidsrechter: 'Eric Braamhaar', toeschouwers: 4251, wsd_code: 'psv.thuis', wsd_seizoen: '9091' },
     { scheidsrechter: '', toeschouwers: 0, wsd_code: 'nec.bekeruit', wsd_seizoen: '9798' },
@@ -110,13 +111,14 @@ const rows: OldSiteRows = {
     result('ajax.uit', '9091', 0, 0),
     result('ajax.thuis', '9091', 1, 1),
   ],
+  seasonRatings: [],
 }
 
 describe('buildOldSiteExport', () => {
   const built = buildOldSiteExport(rows)
 
   it('writes a file for the clubs, one for the players and one for each season', () => {
-    expect([...built.files.keys()]).toEqual(['clubs.json', 'players.json', 'matches-9091.json'])
+    expect([...built.files.keys()]).toEqual(['clubs.json', 'players.json', 'matches-9091.json', 'season-ratings.json'])
   })
 
   it('leaves out the friendlies and the matches before 1 July 1990', () => {

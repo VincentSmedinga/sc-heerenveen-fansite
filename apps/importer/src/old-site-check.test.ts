@@ -116,7 +116,14 @@ const matchesOfTheSeason = [
   }),
 ]
 
-const dataOf = (list: OldSiteMatch[]): OldSiteData => ({ clubs: oldClubs, matches: list, players: [] })
+const dataOf = (list: OldSiteMatch[]): OldSiteData => ({
+  clubs: oldClubs,
+  matches: list,
+  players: [],
+  ratings: [],
+  seasonRatings: [],
+  winners: [],
+})
 
 /** Runs every step of the import on the data, in their order. */
 async function importAll(data: OldSiteData) {

@@ -2988,3 +2988,93 @@ export const unavailableMarks = mysqlTable(
     unique('unavailable_marks_subject_subject_id_field_unique').on(table.subject, table.subjectId, table.field),
   ],
 )
+
+/**
+ * Where the ratings of a player come from: `oude-fansite` are the ratings that visitors of the
+ * old fansite gave from 2001 to 2007 (issue 1465), `fans` the ratings of the Uitblinker of
+ * today (issue 1470).
+ */
+export const ratingSources = ['oude-fansite', 'fans'] as const
+
+export type RatingSource = (typeof ratingSources)[number]
+
+/** The lowest and the highest grade a supporter can give. */
+export const ratingLimits = { maxGrade: 10, minGrade: 1 } as const
+
+/**
+ * The average of the ratings that supporters gave one of our players in one match (issues 1465
+ * and 1470), with the number of ratings and their spread (the standard deviation, in grades).
+ * It holds averages and counts only: who gave a rating is not kept. An average on fewer than
+ * five ratings is kept too, and the pages apply the threshold. It goes with the match and with
+ * the player.
+ */
+export const matchPlayerRatings = mysqlTable(
+  'match_player_ratings',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    matchId: int('match_id', { unsigned: true })
+      .notNull()
+      .references(() => matches.id, { onDelete: 'cascade' }),
+    playerId: int('player_id', { unsigned: true })
+      .notNull()
+      .references(() => players.id, { onDelete: 'cascade' }),
+    source: mysqlEnum('source', ratingSources).notNull(),
+    average: decimal('average', { precision: 4, scale: 2 }).notNull(),
+    ratingCount: int('rating_count', { unsigned: true }).notNull(),
+    spread: decimal('spread', { precision: 4, scale: 2 }).notNull(),
+  },
+  (table) => [
+    unique('match_player_ratings_match_player_source_unique').on(table.matchId, table.playerId, table.source),
+    index('match_player_ratings_player_id_idx').on(table.playerId),
+    check('match_player_ratings_count_positive', sql`${table.ratingCount} > 0`),
+    check(
+      'match_player_ratings_average_in_range',
+      sql`${table.average} between ${sql.raw(String(ratingLimits.minGrade))} and ${sql.raw(String(ratingLimits.maxGrade))}`,
+    ),
+  ],
+)
+
+export type MatchPlayerRating = typeof matchPlayerRatings.$inferSelect
+
+/**
+ * The season ratings of 1998/99 to 2000/01 (issue 1465): the old fansite kept an average for a
+ * player per season then, without matches and without the number of ratings, so they cannot be
+ * worked out from `match_player_ratings`. The name is kept next to the player, because a
+ * player of those seasons is not always in `players`.
+ */
+export const oldSeasonRatings = mysqlTable(
+  'old_season_ratings',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    season: varchar('season', { length: matchLimits.season }).notNull(),
+    playerId: int('player_id', { unsigned: true }).references(() => players.id, { onDelete: 'set null' }),
+    name: varchar('name', { length: playerNameMaxLength }).notNull(),
+    average: decimal('average', { precision: 4, scale: 2 }).notNull(),
+  },
+  (table) => [
+    unique('old_season_ratings_season_name_unique').on(table.season, table.name),
+    check(
+      'old_season_ratings_average_in_range',
+      sql`${table.average} between ${sql.raw(String(ratingLimits.minGrade))} and ${sql.raw(String(ratingLimits.maxGrade))}`,
+    ),
+  ],
+)
+
+export type OldSeasonRating = typeof oldSeasonRatings.$inferSelect
+
+/**
+ * The Uitblinker of the year of the seasons 1998/99 to 2005/06 (issue 1465): typed over from
+ * the old page, one for each season. From 2006/07 the winner is worked out from the ratings.
+ */
+export const oldSeasonWinners = mysqlTable(
+  'old_season_winners',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    season: varchar('season', { length: matchLimits.season }).notNull(),
+    playerId: int('player_id', { unsigned: true }).references(() => players.id, { onDelete: 'set null' }),
+    name: varchar('name', { length: playerNameMaxLength }).notNull(),
+  },
+  (table) => [unique('old_season_winners_season_unique').on(table.season)],
+)
+
+export type OldSeasonWinner = typeof oldSeasonWinners.$inferSelect

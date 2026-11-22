@@ -708,6 +708,13 @@
       "when": 1795286242551,
       "tag": "0100_add_supporter_reminders",
       "breakpoints": true
+    },
+    {
+      "idx": 101,
+      "version": "5",
+      "when": 1795307543749,
+      "tag": "0101_add_supporter_ratings",
+      "breakpoints": true
     }
   ]
 }

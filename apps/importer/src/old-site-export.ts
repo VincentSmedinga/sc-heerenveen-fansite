@@ -8,6 +8,13 @@ import type {
 } from './old-site-file.ts'
 
 import { oldSiteFileVersion, parseOldSiteFile } from './old-site-file.ts'
+import {
+  buildOldSiteRatings,
+  type RatingRow,
+  type SeasonRatingRow,
+  uitblinkersOfTheYear,
+  writeRatingsOutsideLineup,
+} from './old-site-ratings-export.ts'
 
 /**
  * The part of `pnpm export:old-site` that needs no database: it turns the rows of the old
@@ -58,8 +65,10 @@ export type OldSiteRows = {
   lineups: LineupRow[]
   matches: MatchRow[]
   players: PlayerRow[]
+  ratings: RatingRow[]
   reports: ReportRow[]
   results: ResultRow[]
+  seasonRatings: SeasonRatingRow[]
 }
 
 export type PlayerRow = {
@@ -109,6 +118,8 @@ export type OldSiteExport = {
   files: Map<string, string>
   /** The Markdown of the friendlies, for `docs/oefenwedstrijden-2002-03.md`. */
   friendliesMarkdown: string
+  /** The Markdown of the ratings for players outside the line-up, for the editors (#1465). */
+  ratingsOutsideLineupMarkdown: string
   /** Lines for the person who runs the export: counts, and what didn't hang together. */
   report: string[]
 }
@@ -370,16 +381,38 @@ export function buildOldSiteExport(rows: OldSiteRows): OldSiteExport {
     write(`matches-${season}.json`, { matches: seasonMatches, season, version: oldSiteFileVersion })
   }
 
+  const ratings = buildOldSiteRatings(
+    rows.ratings,
+    rows.seasonRatings,
+    matches,
+    new Set(rows.matches.map((match) => keyOf(match.code, match.seizoen))),
+  )
+
+  for (const [season, list] of [...ratings.bySeason].sort(([a], [b]) => a.localeCompare(b))) {
+    write(`ratings-${season}.json`, { ratings: list, season, version: oldSiteFileVersion })
+  }
+  write('season-ratings.json', {
+    seasonRatings: ratings.seasonRatings,
+    version: oldSiteFileVersion,
+    winners: uitblinkersOfTheYear,
+  })
+
   const report = [
-    `${matches.length} matches in ${files.size - 2} files, ${clubs.length} clubs and ${players.length} players`,
+    `${matches.length} matches in ${files.size - 2 - ratings.bySeason.size - 1} files, ${clubs.length} clubs and ${players.length} players`,
     `${matches.reduce((sum, match) => sum + match.events.length, 0)} goals and cards, ${matches.reduce((sum, match) => sum + match.lineup.length, 0)} line-up rows`,
     `friendlies left out of the data: ${rows.matches.filter((match) => match.competitie === friendlyCompetition).length}`,
     `matches before ${firstDay} left out: ${rows.matches.filter((match) => match.competitie !== friendlyCompetition && match.dt.slice(0, 10) < firstDay).length}`,
     `players in goals and line-ups without a row in speler: ${withoutRow.length === 0 ? 'none' : withoutRow.join(', ')}`,
     ...checkRows(rows, exported),
+    ...ratings.report,
   ]
 
-  return { files, friendliesMarkdown: writeFriendlies(rows), report }
+  return {
+    files,
+    friendliesMarkdown: writeFriendlies(rows),
+    ratingsOutsideLineupMarkdown: writeRatingsOutsideLineup(ratings.outsideLineup, matches, rows),
+    report,
+  }
 }
 
 /**
