@@ -699,6 +699,26 @@ export function playedMatch(report: MatchReport, appearanceId: number) {
 }
 
 /**
+ * The minutes a player played, or `undefined` while the report is not finished: a form that
+ * asks for a rating waits for the report then. The minutes are those of `minutesPlayed`, so the
+ * minute the editors typed counts as it is: 45 for a substitution in the added time of the
+ * first half.
+ */
+export function playerMinutes(report: MatchReport, match: Pick<ReportMatch, 'extraTime'>, appearanceId: number) {
+  return reportFinished(report) ? minutesPlayed(report, match, appearanceId) : undefined
+}
+
+/**
+ * Whether the report is finished, so the minutes of its players can be trusted: its status is
+ * `klaar` (the admin only keeps that status for a report without an error of the rules), and
+ * every red or yellow-red card has the minute it needs. A report that is not finished has no
+ * minutes (`playerMinutes`).
+ */
+export function reportFinished(report: Pick<MatchReport, 'cards' | 'status'>) {
+  return report.status === 'klaar' && report.cards.every((card) => card.kind === 'geel' || card.minute !== null)
+}
+
+/**
  * Who is on the pitch and who is on the bench for the substitution at `index` of the list (a
  * new one when `index` is left out), at a place on the clock (`Infinity` for a minute that is
  * not known yet: everything entered counts). This is the one rule behind the lists of the forms

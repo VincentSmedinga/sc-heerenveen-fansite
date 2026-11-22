@@ -687,6 +687,7 @@
     Een eigen doelpunt telt niet als doelpunt van de speler, en een speler die niet meer in `players` staat heeft geen totaal, want zijn rijen wijzen niet meer naar hem.
 - **Waarom:** de echte duur van de blessuretijd slaan we niet op, en een cijfer in hele minuten dat iedereen kan narekenen is beter dan een schatting die precies lijkt.
 - **Alternatieven:** de blessuretijd meetellen (we kennen het einde niet); wie invalt in de 90e minuut 0 minuten geven (hij staat dan wel in het verslag, maar niet in de optredens).
+- **Later:** zie _Gespeelde minuten komen uit één functie in `packages/shared`, en een verslag dat niet af is heeft er geen_ (22 november 2026): `playerMinutes` geeft de minuten alleen voor een verslag dat af is, en de pagina van een wedstrijd gebruikt `minutesPlayed` in plaats van een eigen berekening.
 
 ## Een speler van ons mist soms in `players`, een speler van de tegenstander is alleen een naam
 
@@ -1288,3 +1289,17 @@
   De wedstrijd verwijst met `ON DELETE CASCADE`: haalt de importer een wedstrijd weg die van Wikipedia verdween, dan gaan de voorspellingen ervoor mee (`predictions-migration.test.ts` controleert het).
   De kopie van acceptatie op de computer van de eigenaar neemt de voorspellingen mee, met `supporter_id` als `NULL` (`exportPlan`), zodat ze bij niemand horen.
 - **Alternatieven:** goals "voor" en "tegen" van sc Heerenveen (een omrekening bij elke weergave); de rijen met het account laten verdwijnen (de ranglijsten verliezen dan hun geschiedenis).
+
+## Gespeelde minuten komen uit één functie in `packages/shared`, en een verslag dat niet af is heeft er geen
+
+- **Datum:** 20 november 2026
+- **Besluit:** gespeelde minuten worden uit het verslag berekend door één functie in `packages/shared`, en een wedstrijd zonder compleet verslag heeft geen minuten (#1468).
+  `minutesPlayed` blijft die berekening.
+  `reportFinished` zegt of een verslag af is: de status is `klaar` en elke rode of geel-rode kaart heeft zijn minuut.
+  `playerMinutes` geeft de minuten van `minutesPlayed` voor een verslag dat af is, en `undefined` voor een verslag dat niet af is.
+  De pagina van een wedstrijd rekent niet meer zelf, maar bouwt een verslag uit haar lijsten en gebruikt `minutesPlayed`.
+  - **De minuut die de redactie typt telt zoals ze is:** een wissel in de blessuretijd van de eerste helft is minuut 45, en de functie rekent niet met blessuretijd.
+  - **De status `klaar` is genoeg als teken van een verslag zonder fouten,** want het beheer zet een verslag met fouten terug naar `bezig` (`demote` in `apps/site/src/beheer/live-report.ts`, en de controle bij het opslaan in `actions.ts`).
+- **Waarom:** de minuten staan niet in de gegevens van Wikipedia, wel in ons eigen verslag.
+  Eén functie voorkomt dat de pagina, het formulier van de Uitblinker (#1470) en de spellen verschillende getallen geven.
+- **Alternatieven:** de minuten opslaan (raakt achterop bij een gecorrigeerd verslag); de berekening per onderdeel herhalen.

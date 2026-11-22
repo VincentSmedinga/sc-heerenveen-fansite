@@ -11,6 +11,8 @@ import {
   halfTimeScore,
   minutesPlayed,
   playedMatch,
+  playerMinutes,
+  reportFinished,
   squadAt,
 } from './match-report.ts'
 
@@ -1309,5 +1311,75 @@ describe('squadAt', () => {
 
       expect(refused.length === 0, `case ${position}`).toBe(outOk && inOk)
     }
+  })
+})
+
+describe('playerMinutes', () => {
+  const finished = (): MatchReport => ({
+    appearances: team(true, 1),
+    cards: [],
+    goals: [],
+    incidents: [],
+    opponentComplete: false,
+    status: 'klaar',
+    substitutions: [],
+  })
+
+  it('gives the minutes of minutesPlayed for a finished report', () => {
+    const report = finished()
+
+    report.substitutions.push({ inId: 12, minute: 60, outId: 1, stoppageMinutes: null })
+    report.substitutions.push({ inId: 13, minute: 75, outId: 12, stoppageMinutes: null })
+    report.cards.push({ appearanceId: 13, kind: 'geel-rood', minute: 88, stoppageMinutes: null })
+
+    expect(reportFinished(report)).toBe(true)
+    expect(playerMinutes(report, match, 1)).toBe(60)
+    expect(playerMinutes(report, match, 12)).toBe(15)
+    expect(playerMinutes(report, match, 13)).toBe(13)
+    expect(playerMinutes(report, match, 14)).toBe(0)
+  })
+
+  it('takes the minute as it was typed, 45 for added time of the first half', () => {
+    const report = finished()
+
+    report.substitutions.push({ inId: 12, minute: 45, outId: 1, stoppageMinutes: 3 })
+
+    expect(playerMinutes(report, match, 1)).toBe(45)
+    expect(playerMinutes(report, match, 12)).toBe(45)
+  })
+
+  it('counts extra time', () => {
+    const report = finished()
+
+    report.substitutions.push({ inId: 12, minute: 105, outId: 1, stoppageMinutes: null })
+
+    expect(playerMinutes(report, { extraTime: true }, 1)).toBe(105)
+    expect(playerMinutes(report, { extraTime: true }, 12)).toBe(15)
+    expect(playerMinutes(report, { extraTime: true }, 2)).toBe(120)
+  })
+
+  it('gives no minutes while the report is not finished', () => {
+    const report = { ...finished(), status: 'bezig' } satisfies MatchReport
+
+    expect(reportFinished(report)).toBe(false)
+    expect(playerMinutes(report, match, 1)).toBeUndefined()
+  })
+
+  it('gives no minutes when a red card has no minute', () => {
+    const report = finished()
+
+    report.cards.push({ appearanceId: 2, kind: 'rood', minute: null, stoppageMinutes: null })
+    report.cards.push({ appearanceId: 3, kind: 'geel', minute: null, stoppageMinutes: null })
+
+    expect(reportFinished(report)).toBe(false)
+    expect(playerMinutes(report, match, 1)).toBeUndefined()
+  })
+
+  it('does not mind a yellow card without a minute', () => {
+    const report = finished()
+
+    report.cards.push({ appearanceId: 3, kind: 'geel', minute: null, stoppageMinutes: null })
+
+    expect(playerMinutes(report, match, 3)).toBe(90)
   })
 })
