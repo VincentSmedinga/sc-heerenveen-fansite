@@ -2,7 +2,7 @@
  * The list of what a fan predicted: a row for each match, the text on the left and the points
  * and the prediction on the right. A row has a thin line above it, as the short
  * lines have. The score never breaks: the clubs are one flex line in which the names can shrink
- * and are cut with an ellipsis, and the score keeps its width.
+ * and wrap over more lines, and the score keeps its width. Nothing is ever cut short.
  */
 
 @layer hf.components {
@@ -58,9 +58,7 @@
 
   .hf-prediction-list-club {
     min-inline-size: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
   }
 
   /* The score keeps its width and never breaks over two lines. */

@@ -88,8 +88,10 @@ describe('PredictionList', () => {
 describe('the look of the list', () => {
   const css = readFileSync(join(import.meta.dirname, 'prediction-list.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
 
-  it('cuts a club name short and keeps the score whole', () => {
-    expect(css).toContain('text-overflow: ellipsis;')
+  it('wraps a long club name and never cuts text short, and keeps the score whole', () => {
+    expect(css).toMatch(/\.hf-prediction-list-club \{[^}]*overflow-wrap: anywhere;/s)
+    expect(css).not.toContain('text-overflow')
+    expect(css).not.toContain('overflow: hidden')
     expect(css).toMatch(/\.hf-prediction-list-score \{[^}]*flex: none;[^}]*white-space: nowrap;/s)
   })
 

@@ -53,8 +53,8 @@ const guessWords = ({ fullTime, halfTime }: PredictionListGuess) =>
  * small above, the two clubs with the score, and on the right the points and the prediction. A
  * match without points shows only the prediction, in larger type. A part of the prediction that
  * earned points is green with a tick, and a part that did not is red with a cross. The score
- * never breaks: a long club name is cut short first. It is a list and not a table, because a
- * row is one line of text that reads as one sentence.
+ * never breaks: a long club name wraps over more lines, and nothing is ever cut short. It is a
+ * list and not a table, because a row is one line of text that reads as one sentence.
  */
 export function PredictionList({ className, items, ...props }: PredictionListProps) {
   return (

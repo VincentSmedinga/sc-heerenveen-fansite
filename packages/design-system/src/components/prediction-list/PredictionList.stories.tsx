@@ -56,7 +56,7 @@ const meta = preview.meta({
       description: {
         component: [
           'De lijst met wat een fan voorspelde: een rij per wedstrijd met de dag en de competitie, de clubs met de uitslag, en rechts de punten met de voorspelling.',
-          'Kies hem voor een korte lijst op een kaart. Het is een lijst en geen tabel, want een rij leest als één zin. De uitslag breekt nooit af: een lange clubnaam wordt ingekort.',
+          'Kies hem voor een korte lijst op een kaart. Het is een lijst en geen tabel, want een rij leest als één zin. De uitslag breekt nooit af: een lange clubnaam gaat over een tweede regel door. Er wordt niets ingekort.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
