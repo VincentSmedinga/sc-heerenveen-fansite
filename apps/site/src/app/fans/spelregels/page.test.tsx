@@ -234,7 +234,7 @@ describe('the part Fjouwer', () => {
     ] as const) {
       const table = tableOf(caption)
       const cells = [...table.matchAll(/<td[^>]*>([^<]*)<\/td>/g)].map((match) => match[1])
-      const points = cells
+
       const expected = examples.map((example) => {
         const total = fantasyPoints(exampleFacts(example.facts))?.total ?? 0
 
@@ -242,13 +242,13 @@ describe('the part Fjouwer', () => {
       })
 
       expect(table).toContain('<th')
-      expect(points.slice(0, examples.length)).toEqual(expected)
+      expect(cells.slice(0, examples.length)).toEqual(expected)
       expect(examples.map((example) => example.points)).toEqual(
         examples.map((example) => fantasyPoints(exampleFacts(example.facts))?.total),
       )
 
       if (extra !== undefined) {
-        expect(points.at(-1)).toBe(String(extra))
+        expect(cells.at(-1)).toBe(String(extra))
       }
     }
   })
