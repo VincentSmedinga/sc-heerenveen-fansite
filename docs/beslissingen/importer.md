@@ -2889,6 +2889,7 @@
   Wat de eigenaar niet zeker weet, wordt niet gegokt.
 - **Alternatieven:** de bestanden opnieuw maken met de juiste namen (de bestanden zijn een kopie van de oude database en horen dat te blijven); namen automatisch samenvoegen (twee mensen met bijna dezelfde naam, zoals Michel Vonk en Michel Vorm, worden dan één); een tabel in de database met speler-id's voor de tegenstanders (veel meer werk dan een korte lijst).
 - **Later:** zie _De lijst met schrijfwijzen van de oude fansite volgt de Wikipedia-schrijfwijze_ (8 november 2026): de lijst bevat nu ook de schrijfwijze van Wikipedia, niet alleen wat de projecteigenaar per groep koos.
+- **Later:** de afwijzing van een tabel met speler-id's voor tegenstanders geldt nog; sinds 22 november 2026 kan de regel van een tegenstander in een verslag wel een persoon hebben (`match_appearances.person_id`, #1544), maar dat is een verwijzing naar `persons` en geen tabel van die id's; zie _Een regel van de tegenstander in een verslag kan een persoon hebben_ in `hosting-en-data.md`.
 
 ## De lijst met schrijfwijzen van de oude fansite volgt de Wikipedia-schrijfwijze
 

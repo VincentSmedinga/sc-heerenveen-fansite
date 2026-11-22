@@ -487,7 +487,7 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
     Log in met SSH (`ssh -p 26 <gebruiker>@<host>`) en draai op één regel, met het adres, de rol en de voornaam erachter:
 
     ```sh
-    /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=/home/<gebruiker>/fansite-acceptatie.env /home/<gebruiker>/domains/acc.sc.heerenveen.org/app/apps/site/admin.mjs create <e-mailadres> owner <voornaam>
+    /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=$HOME/fansite-acceptatie.env $HOME/domains/acc.sc.heerenveen.org/app/apps/site/admin.mjs create <e-mailadres> owner <voornaam>
     ```
 
     Gebruik dezelfde paden als in de cronjob (stap 9 en 10).
@@ -502,7 +502,7 @@ Log daarvoor in met SSH: `ssh -p 26 <gebruiker>@<host>`.
     Een account uitzetten, en zijn sessies meteen beëindigen, doe je met `revoke`:
 
     ```sh
-    /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=/home/<gebruiker>/fansite-acceptatie.env /home/<gebruiker>/domains/acc.sc.heerenveen.org/app/apps/site/admin.mjs revoke <e-mailadres>
+    /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=$HOME/fansite-acceptatie.env $HOME/domains/acc.sc.heerenveen.org/app/apps/site/admin.mjs revoke <e-mailadres>
     ```
 
     Hij zegt `Turned off the account for <adres> and ended <n> sessions.`
@@ -581,7 +581,7 @@ Zo kan niemand nagaan wie een account heeft.
   Draai hetzelfde bestand als de cronjob, met `--status` erachter, op één regel:
 
   ```sh
-  /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=/home/<gebruiker>/fansite-acceptatie.env /home/<gebruiker>/domains/acc.sc.heerenveen.org/app/apps/importer/import.mjs --status
+  /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=$HOME/fansite-acceptatie.env $HOME/domains/acc.sc.heerenveen.org/app/apps/importer/import.mjs --status
   ```
 
   Gebruik dezelfde paden als in de cronjob (stap 9 en 10).
@@ -595,7 +595,7 @@ Zo kan niemand nagaan wie een account heeft.
   Wil je het toch met SSH, draai dan hetzelfde bestand met `--season` en het seizoen erachter, op één regel:
 
   ```sh
-  /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=/home/<gebruiker>/fansite-acceptatie.env /home/<gebruiker>/domains/acc.sc.heerenveen.org/app/apps/importer/import.mjs --season 2025/26
+  /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=$HOME/fansite-acceptatie.env $HOME/domains/acc.sc.heerenveen.org/app/apps/importer/import.mjs --season 2025/26
   ```
 
   Het seizoen moet voorbij zijn: het lopende seizoen weigert de opdracht, want dat leest de cronjob elk uur.
@@ -636,7 +636,7 @@ Zo kan niemand nagaan wie een account heeft.
   Draai op één regel, met je eigen adres erachter:
 
   ```sh
-  /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=/home/<gebruiker>/fansite-acceptatie.env /home/<gebruiker>/domains/acc.sc.heerenveen.org/app/apps/site/send-test-mail.mjs <jouw adres>
+  /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=$HOME/fansite-acceptatie.env $HOME/domains/acc.sc.heerenveen.org/app/apps/site/send-test-mail.mjs <jouw adres>
   ```
 
   Gebruik dezelfde paden als in de cronjob (stap 9 en 10).
@@ -710,7 +710,7 @@ Zo kan niemand nagaan wie een account heeft.
   | `Table '…' doesn't exist`, zoals `…feeds` of `…import_runs` | De database heeft de tabellen nog niet. De site maakt ze als de host haar start: open <https://acc.sc.heerenveen.org> en wacht op de volgende run.                   |
   | Een regel met `failed,` achter het adres van een feed       | De importer startte, maar las die feed niet. De reden staat erachter; de volgende run probeert het opnieuw.                                                          |
   | Een regel met `runs in a row; next try from`                | De feed is ongezond, en de import probeert hem eens per uur. De reden van de fouten staat in het overzicht (`--status`) en in eerdere regels van het logbestand.     |
-  | `Another import is still running` bij elke run              | Een run blijft hangen en houdt de lock vast. Zoek het proces met `ps -u <gebruiker> -f`, de regel met `import.mjs`, en stop het met `kill` en het nummer ervan.      |
+  | `Another import is still running` bij elke run              | Een run blijft hangen en houdt de lock vast. Zoek het proces met `ps -u "$USER" -f`, de regel met `import.mjs`, en stop het met `kill` en het nummer ervan.          |
 
 ## Bezoekers tellen
 

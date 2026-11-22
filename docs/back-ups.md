@@ -100,8 +100,8 @@ Productie (#33) krijgt zijn eigen bestand met instellingen en zijn eigen map.
    Draai de opdracht van de cronjob (stap 4), zonder het deel vanaf `>>`, en kijk wat er gebeurt:
 
    ```sh
-   /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=/home/<gebruiker>/fansite-acceptatie.env /home/<gebruiker>/domains/acc.sc.heerenveen.org/app/packages/db/backup.mjs backup
-   ls -l /home/<gebruiker>/fansite-back-ups
+   /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=$HOME/fansite-acceptatie.env $HOME/domains/acc.sc.heerenveen.org/app/packages/db/backup.mjs backup
+   ls -l $HOME/fansite-back-ups
    ```
 
    Hij zegt `Dumped <database> to <bestand> (<grootte>). Removed 0 dumps older than 14 days.` en stopt met code 0.
@@ -145,7 +145,7 @@ De opdracht is dezelfde als die van cron.
 Log in met SSH en draai hem, zonder het deel vanaf `>>`:
 
 ```sh
-/opt/alt/alt-nodejs24/root/usr/bin/node --env-file=/home/<gebruiker>/fansite-acceptatie.env /home/<gebruiker>/domains/acc.sc.heerenveen.org/app/packages/db/backup.mjs backup
+/opt/alt/alt-nodejs24/root/usr/bin/node --env-file=$HOME/fansite-acceptatie.env $HOME/domains/acc.sc.heerenveen.org/app/packages/db/backup.mjs backup
 ```
 
 Hij stopt met code 0 als de dump er is, met 1 als hij mislukte, en met 2 als de opdracht niet klopt.
@@ -184,8 +184,10 @@ Zet een dump terug in dezelfde database, dus nadat een migratie of een actie de 
    Zet er rechten van alleen het account op (`chmod 600`) en open het met een editor, niet met `echo`.
 4. **Zet de dump terug.**
 
+   Vervang `<bestand>` door de naam van de dump uit `ls -l $HOME/fansite-back-ups`, zonder de punthaken.
+
    ```sh
-   /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=/home/<gebruiker>/fansite-terugzetten.env /home/<gebruiker>/domains/acc.sc.heerenveen.org/app/packages/db/backup.mjs restore /home/<gebruiker>/fansite-back-ups/<bestand>.sql.gz
+   /opt/alt/alt-nodejs24/root/usr/bin/node --env-file=$HOME/fansite-terugzetten.env $HOME/domains/acc.sc.heerenveen.org/app/packages/db/backup.mjs restore $HOME/fansite-back-ups/<bestand>.sql.gz
    ```
 
    Hij zegt `Restored <aantal> tables from <bestand> into <database>.` en stopt met code 0.

@@ -1185,8 +1185,9 @@ export type WikidataItem = typeof wikidataItems.$inferSelect
  * brackets when it has one (`Johnny Jansen (1975)`), so two titles that redirect to the same
  * article are one person. A title without an article (a red link) is a person too, under the
  * title as it stands. `person_pages` keeps every title that leads to the person, and the
- * `person_id` of `match_goals` and `players` points here. A person who is deleted leaves them
- * without a person; the importer finds the person again by the title.
+ * `person_id` of `match_goals`, `match_appearances` (a player of the opponent) and `players`
+ * points here. A person who is deleted leaves them without a person; the importer finds the
+ * person again by the title.
  *
  * A person the editors made in the admin for a player without an article has no
  * `wikipedia_page` (issue 1020): his name, with the source `redactie`, is all there is. He has
@@ -2670,10 +2671,11 @@ export type NewMatchReport = typeof matchReports.$inferInsert
 /**
  * A player in the line-up or on the bench of a match report, for both teams: one row for each.
  * `ours` is true for a player of sc Heerenveen. `player_id` is that player in `players` (of the
- * season of the match) and is empty for a player of the opponent, who has a name and nothing
- * else. The database cannot check that, since MariaDB does not allow a check on a column that a
- * deleted player sets to empty, so the rules of a report do. `name` is always filled, so a
- * deleted player stays in the report with his name.
+ * season of the match) and is empty for a player of the opponent, who has a name and, when the
+ * name fits exactly one person, a `person_id` (#1544). The database cannot check that, since
+ * MariaDB does not allow a check on a column that a deleted player sets to empty, so the rules
+ * of a report do. `name` is always filled, so a deleted player stays in the report with his
+ * name.
  * `shirt_number` is one for each team in a match, or empty for a player without one (the old
  * line-ups have none): MariaDB does not count empty values as equal in the unique key, so
  * several players of a team can be without a number. `starter` is true for the line-up and
@@ -2689,6 +2691,12 @@ export const matchAppearances = mysqlTable(
       .references(() => matchReports.matchId, { onDelete: 'cascade' }),
     ours: boolean('ours').notNull(),
     playerId: int('player_id', { unsigned: true }).references(() => players.id, { onDelete: 'set null' }),
+    // The person of a player of the opponent (#1544), when his name fits exactly one person
+    // (see `linkOpponentPersons`). Empty for a row of ours, who has his person through
+    // `player_id`, and for an opponent whose name fits nobody or more than one. MariaDB does
+    // not allow a check on this column, since a deleted person sets it to empty, so
+    // `linkOpponentPersons` only gives a person to a row that is not ours.
+    personId: int('person_id', { unsigned: true }).references(() => persons.id, { onDelete: 'set null' }),
     name: varchar('name', { length: playerNameMaxLength }).notNull(),
     shirtNumber: int('shirt_number', { unsigned: true }),
     starter: boolean('starter').notNull(),
@@ -2701,6 +2709,7 @@ export const matchAppearances = mysqlTable(
     // of another match or of the other team.
     unique('match_appearances_id_match_side_unique').on(table.id, table.matchId, table.ours),
     index('match_appearances_player_id_idx').on(table.playerId),
+    index('match_appearances_person_id_idx').on(table.personId),
     check('match_appearances_name_not_empty', sql`char_length(${table.name}) > 0`),
     check('match_appearances_shirt_number_range', sql`${table.shirtNumber} between 1 and 99`),
   ],

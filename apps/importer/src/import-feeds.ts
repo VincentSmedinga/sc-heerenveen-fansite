@@ -39,6 +39,7 @@ import {
 import { describePersonData, readPersonData, wikidataOrigin } from './import-person-data.ts'
 import { formatSquadReport, importSquad } from './import-squad.ts'
 import { withOpponentPreviousDay } from './league-results.ts'
+import { importOpponentPersons } from './link-opponent-persons.ts'
 import { importPlayerList } from './player-list.ts'
 import {
   paywallCategoryFor,
@@ -428,6 +429,10 @@ export async function runImport(
         wikidata: wikidata === undefined ? (origin === wikipediaOrigin ? wikidataOrigin : null) : wikidata,
       })
 
+      // After the steps that make persons: the players of the opponent get the person their
+      // goal or their name points to (#1544).
+      const opponentLines = await importOpponentPersons(db)
+
       // After every step that makes or renames a person: the addresses of the players' pages
       // follow (#1079). A failure is a warning, not a failed import.
       const addresses = await updatePlayerAddresses(db).then(
@@ -446,7 +451,7 @@ export async function runImport(
 
       return {
         clubLines: [...supporterLines, ...reminderLines, ...ratingLines, ...clubLines],
-        personLines: [...personLines, ...addresses, ...stadiumLines],
+        personLines: [...personLines, ...opponentLines, ...addresses, ...stadiumLines],
         reports,
         wikipedia,
       }
