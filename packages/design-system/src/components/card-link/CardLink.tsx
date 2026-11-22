@@ -7,7 +7,10 @@ import { Text } from '../text/Text'
 export type CardLinkProps = Omit<ComponentPropsWithoutRef<'a'>, 'children'> & {
   /** What the link says. It ends with text, so the icon can stay with its last word. */
   children: string
-  /** Where the link goes. An address on our own site is a path; a full `http(s)://` address leaves the site. */
+  /**
+   * Where the link goes. An address on our own site is a path; a full `http(s)://` address
+   * leaves the site.
+   */
   href: string
 }
 
