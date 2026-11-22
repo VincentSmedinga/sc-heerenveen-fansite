@@ -7875,3 +7875,22 @@
 - **Alternatieven:** de punten bewaren in een tabel met het teken van het verslag (een migratie, en `saved_at` is daarvoor niet betrouwbaar); een taak die de punten na afloop vastlegt (een correctie vraagt dan een nieuwe berekening); de punten bij elke bezoeker opnieuw uitrekenen zonder geheugen.
 - **Let op:** de issue sprak van "bewaard met het teken van het verslag", en `saved_at` bleek daarvoor niet te volstaan.
   Het geheugen is er per serverproces: op gedeelde hosting kan elk proces zijn eigen minuut hebben, wat voor een correctie niet uitmaakt.
+
+## De stand van Fjouwer telt per seizoen de punten van alle klare wedstrijden, en een opgeheven account blijft staan zonder naam
+
+- **Datum:** 22 november 2026
+- **Besluit:** de stand van een seizoen staat in `apps/site/src/fans/fjouwer-ranking.ts`.
+  Hij telt voor elke wedstrijd met een verslag dat "klaar" is de punten van de vier van elke fan (opgeslagen of geërfd, met `fourOf`, `usesBefore` en `pointsOfFour` van de punten) bij elkaar.
+  Een fan zonder een vier die meetelt staat er niet in.
+  Gelijke punten delen een plaats en het volgende nummer valt weg; binnen een plaats gaat het op schermnaam.
+  Een geblokkeerd account staat er niet in en telt niet mee voor de plaatsen van anderen.
+  Een fan die zijn naam niet in standen wil (`inRankings`), staat niet in de lijst, maar ziet zijn eigen regel met de plaats die hij zou krijgen: het aantal rijen in de lijst met meer punten, plus één.
+  Een opgeheven account heeft geen fan meer (`fantasy_picks.supporter_id` is dan leeg), en elke bewaarde vier ervan staat als een eigen regel "Voormalige supporter" in de lijst.
+  De stand staat vijf minuten in het geheugen (`seasonRanking`, `rankedSeasons`), boven de minuut van de punten zelf, en niets staat in de database.
+  De pagina `/fans/fjouwer/stand` en de kaart Stand op `/fans/fjouwer` bouwen op dezelfde gegevens.
+- **Waarom:** een gecorrigeerd verslag werkt zo door zonder taak of migratie, zoals bij de punten.
+  Een opgeheven account houdt zijn punten, zodat de plaatsen van anderen niet verspringen.
+- **Alternatieven:** een stand over alle seizoenen (een nieuwe fan komt er nooit meer bij); een opgeheven account weglaten (de plaatsen verspringen); de punten per fan bewaren in een tabel (een migratie, en een correctie moet dan overal doorwerken).
+- **Let op:** de vieren van één opgeheven account zijn niet meer aan elkaar te koppelen en een geërfde vier is er niet meer.
+  Zo telt zo'n account met meerdere wedstrijden als meerdere regels van één wedstrijd.
+  Wil de stand ze samenvoegen, dan moet het opheffen eerst een nummer bewaren dat niet naar de fan terug te leiden is.
