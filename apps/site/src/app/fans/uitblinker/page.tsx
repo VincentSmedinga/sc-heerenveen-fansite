@@ -79,9 +79,16 @@ export default async function RatingPage({
     const grades = await findOwnRatings(db, supporter.id, window.match.id)
     const complete = window.players.every((player) => grades.has(player.appearanceId))
 
+    const saved = complete && wijzigen !== '1'
+
     card = (
-      <OpenCard closesAt={window.closesAt} match={window.match} now={now}>
-        {complete && wijzigen !== '1' ? (
+      <OpenCard
+        closesAt={window.closesAt}
+        heading={saved ? 'Je cijfers staan' : 'Geef je cijfers'}
+        match={window.match}
+        now={now}
+      >
+        {saved ? (
           <SavedView closesAt={window.closesAt} grades={grades} players={window.players} />
         ) : (
           <RatingForm
@@ -101,7 +108,7 @@ export default async function RatingPage({
         <Text appearance="intro">Geef de spelers van de laatste wedstrijd van sc Heerenveen een cijfer.</Text>
       </Page.Cell>
       <Page.Cell area="rate">{card}</Page.Cell>
-      <Page.Section area="side" aria-label="Zo werkt het">
+      <Page.Section area="side" aria-label="Uitleg van het spel">
         <HowItWorksCard />
       </Page.Section>
     </Page.Main>

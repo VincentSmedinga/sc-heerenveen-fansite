@@ -146,6 +146,7 @@ describe('the page of the Uitblinker', () => {
     const html = await render({ opgeslagen: '1' })
 
     expect(html).toContain('Wijzigen</button>')
+    expect(html).toMatch(/<h2[^>]*>Je cijfers staan<\/h2>/)
     expect(html).toContain('Jouw cijfers')
     expect(html).not.toContain('type="radio"')
   })
@@ -163,6 +164,7 @@ describe('the page of the Uitblinker', () => {
     const html = await render({ wijzigen: '1' })
 
     expect(html.match(/type="radio"/g)).toHaveLength(20)
+    expect(html).toMatch(/<h2[^>]*>Geef je cijfers<\/h2>/)
     expect(html.match(/checked/g)).toHaveLength(2)
     expect(html).toContain('Cijfers opslaan')
   })

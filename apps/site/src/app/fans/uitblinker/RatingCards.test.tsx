@@ -110,6 +110,7 @@ describe('the other cards', () => {
     expect(html).toContain('zeven dagen')
     expect(html).toContain('wijzigen')
     expect(html).toContain('zien alle supporters de uitslag')
+    expect(html).toContain('<a href="/fans/spelregels#uitblinker">Spelregels</a>')
   })
 })
 

@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
 
-import { Button, Card, DataTable, Form, Heading, List, Match, Notice, Tag, Text } from '@fansite/design-system'
+import { Button, Card, DataTable, Form, Heading, Link, List, Match, Notice, Tag, Text } from '@fansite/design-system'
 
+import { rulesPath } from '#src/fans-paths'
 import { logInPaths } from '#src/fans/log-in'
 import { returnParameter } from '#src/fans/log-in-form'
 import { clubsOf } from '#src/fans/prediction'
@@ -37,6 +38,9 @@ export function HowItWorksCard() {
         <List.Item>Tot dan kun je je cijfers wijzigen.</List.Item>
         <List.Item>Als het venster dicht is, zien alle supporters de uitslag.</List.Item>
       </List>
+      <Text>
+        <Link href={ratingRulesPath}>Spelregels</Link>
+      </Text>
     </Card>
   )
 }
@@ -98,18 +102,21 @@ export function NextMatchCard({ next }: { next: RatingMatch | undefined }) {
 export function OpenCard({
   children,
   closesAt,
+  heading = 'Geef je cijfers',
   match,
   now,
 }: {
   children: ReactNode
   closesAt: Date
+  /** The heading: "Je cijfers staan" once the supporter has given them all. */
+  heading?: string
   match: RatingMatch
   now: Date
 }) {
   return (
     <Card aria-labelledby="geef-je-cijfers" game="uitblinker">
       <Heading id="geef-je-cijfers" level={2}>
-        Geef je cijfers
+        {heading}
       </Heading>
       <Text>
         <Tag tone="open">{deadlineTag(closesAt, now)}</Tag>
@@ -173,6 +180,9 @@ export function WaitingCard({ match, now }: { match: RatingMatch; now: Date }) {
     </Card>
   )
 }
+
+/** The part of the rules page about this game. */
+const ratingRulesPath = `${rulesPath}#uitblinker`
 
 /** The match of a card, in the look of the lists: the day and the competition small above. */
 function MatchLine({ match, now }: { match: RatingMatch; now: Date }) {

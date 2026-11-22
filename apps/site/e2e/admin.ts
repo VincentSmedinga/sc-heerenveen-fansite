@@ -1,4 +1,5 @@
 import { connect } from '@fansite/db/client'
+import { withClubs } from '@fansite/db/clubs'
 import { readDatabaseEnv } from '@fansite/db/env'
 import {
   adminSessions,
@@ -15,7 +16,7 @@ import {
   supporters,
 } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
-import { eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import path from 'node:path'
 
 import { hashOf, newToken } from '../src/beheer/sessions'
@@ -242,32 +243,35 @@ export async function addRatingMatch(email: string) {
   const { close, db } = connect(localDatabaseUrl())
 
   try {
-    const [club] = await db.select({ id: clubs.id }).from(clubs).limit(1)
     const kickoffAt = new Date(Math.floor(Date.now() / 1000) * 1000 - 10 * 60 * 1000)
     const season = seasonOf(kickoffAt)
 
-    if (club === undefined) {
-      throw new Error('A club is not there.')
-    }
+    // What a check that stopped halfway left behind, so a second run starts clean.
+    await db.delete(matches).where(and(eq(matches.opponent, 'Cijferploeg'), eq(matches.round, 'Cijfer-controle')))
+    await db.delete(players).where(inArray(players.name, [...ratingPlayers]))
 
     await db
       .update(supporters)
       .set({ createdAt: new Date(kickoffAt.getTime() - 30 * 24 * 60 * 60 * 1000) })
       .where(eq(supporters.email, email))
 
-    const [match] = await db.insert(matches).values({
-      clubId: club.id,
-      competition: 'Eredivisie',
-      goalsAgainst: 0,
-      goalsFor: 1,
-      home: true,
-      kickoffAt,
-      matchDate: kickoffAt.toISOString().slice(0, 10),
-      opponent: 'Cijferploeg',
-      round: 'Cijfer-controle',
-      season,
-      status: 'played',
-    })
+    // The opponent is a club of its own, so no other check sees one more match against a club.
+    const [row] = await withClubs(db, [
+      {
+        competition: 'Eredivisie',
+        goalsAgainst: 0,
+        goalsFor: 1,
+        home: true,
+        kickoffAt,
+        matchDate: kickoffAt.toISOString().slice(0, 10),
+        opponent: 'Cijferploeg',
+        round: 'Cijfer-controle',
+        season,
+        status: 'played',
+      },
+    ])
+    const [match] = await db.insert(matches).values(row!)
+
     const matchId = match.insertId
 
     await db.insert(matchReports).values({ matchId, opponentComplete: false, status: 'klaar' })
@@ -287,6 +291,7 @@ export async function addRatingMatch(email: string) {
         // The report, its players and their grades go with the match.
         await connection.db.delete(matches).where(eq(matches.id, matchId))
         await connection.db.delete(players).where(inArray(players.name, [...ratingPlayers]))
+        await connection.db.delete(clubs).where(eq(clubs.id, row?.clubId ?? 0))
       } finally {
         await connection.close()
       }

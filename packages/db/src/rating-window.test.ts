@@ -208,19 +208,24 @@ describe('the window of the Uitblinker', () => {
 
   it('counts a player of exactly 30 minutes and not one of 29', async () => {
     const { matchId } = await playedAndNext()
-    const starter = await appearance(matchId, 'Ed Eerste', 5)
-    const late = await appearance(matchId, 'Fer Later', 6, false)
-    const later = await appearance(matchId, 'Gijs Laatst', 7, false)
+    const first = await appearance(matchId, 'Ed Eerste', 5)
+    const thirty = await appearance(matchId, 'Fer Dertig', 6, false)
+    const second = await appearance(matchId, 'Gijs Tweede', 7)
+    const twentyNine = await appearance(matchId, 'Hans Negenentwintig', 8, false)
 
     await database.db.insert(matchSubstitutions).values([
-      { appearanceInId: late, appearanceOutId: starter, matchId, minute: 60, ours: true },
-      { appearanceInId: later, appearanceOutId: late, matchId, minute: 61, ours: true },
+      { appearanceInId: thirty, appearanceOutId: first, matchId, minute: 60, ours: true },
+      { appearanceInId: twentyNine, appearanceOutId: second, matchId, minute: 61, ours: true },
     ])
 
     const window = await findRatingWindow(database.db)
 
-    // Ed played 60, Fer 1 (60 to 61) and Gijs 29 (61 to 90).
-    expect(window.state === 'open' && window.players.map(({ name }) => name)).toEqual(['Ed Eerste'])
+    // Ed and Gijs played 60 and 61 minutes, Fer 30 (60 to 90) and Hans 29 (61 to 90).
+    expect(window.state === 'open' && window.players.map(({ minutes, name }) => [name, minutes])).toEqual([
+      ['Ed Eerste', 60],
+      ['Fer Dertig', 30],
+      ['Gijs Tweede', 61],
+    ])
   })
 
   it('closes at the start of the next match, and after seven days at the latest', () => {

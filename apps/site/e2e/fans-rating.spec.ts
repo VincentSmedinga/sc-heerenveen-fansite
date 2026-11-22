@@ -9,6 +9,10 @@ import { sentMails } from './fake-mail'
 // match that is the last one. The account is made older than the match by the same helper.
 // Each test makes an account of its own.
 
+// The last match played is one for the whole database, so the tests of this file run one after
+// the other, in one worker.
+test.describe.configure({ mode: 'serial' })
+
 const unique = () => `${Date.now().toString(36)}${Math.floor(Math.random() * 1000)}`
 
 /** Makes an account with the code from the fake mail server, and stays logged in. */
@@ -34,8 +38,12 @@ async function signUp(page: Page) {
 
 const scale = (page: Page, player: string) => page.getByRole('group', { name: `Cijfer voor ${player}` })
 
+// The radio button covers its whole button and is invisible, so the check goes to it and not to
+// the number on it.
 const give = (page: Page, player: string, grade: number) =>
-  scale(page, player).getByText(String(grade), { exact: true }).click()
+  scale(page, player)
+    .getByRole('radio', { exact: true, name: String(grade) })
+    .check()
 
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false })
