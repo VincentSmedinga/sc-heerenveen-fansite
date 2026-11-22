@@ -48,11 +48,11 @@ export const coachRow = (name: string) => `${name} (trainer)`
 
 /** What the form shows after a submit: the grades, the errors, and what came of it. */
 export type RatingState = {
-  /** The error of each player without a grade, by the number of the appearance. */
   /** The error of the head coach when he has no grade. */
   coachError?: string
   /** The grade of the head coach as it was chosen. */
   coachValue?: string
+  /** The error of each player without a grade, by the number of the appearance. */
   errors: Record<number, string>
   failure?: 'closed' | 'late'
   /** The grades as they were chosen, by the number of the appearance. */
