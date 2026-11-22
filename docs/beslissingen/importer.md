@@ -4588,3 +4588,11 @@
 - **Let op:** de tabel heeft geen verwijzing naar `predictions` (de voorspellingen van nu): die hebben een supporter, en deze tellen een groep.
   Het aantal voorspellingen van een wedstrijd is de som van haar rijen met de eindstand.
   Na de merge draait de eigenaar op acceptatie `import.mjs --old-site`; de stap `voorspellingen` doet de rest.
+
+## De spelling van twee codes van de oude seizoencijfers gaat in de lijst van naamcorrecties
+
+- **Datum:** 22 november 2026
+- **Besluit:** `oldSiteNameCorrections` (`apps/importer/src/old-site-names.ts`) kent nu ook `Rafael Piresvieira`, dat `Rafael Pires Vieira` wordt, en `Radoslav Samarzic`, dat `Radoslav Samardžić` wordt (#1547).
+  De stap `seizoencijfers` maakt van de codes `rafael.piresvieira` en `radoslav.samarzic` van de oude site zo de spelling die al in `players` staat, en koppelt de seizoencijfers van 2000/01 en 1998/99 aan hun speler.
+- **Waarom:** de lijst is er voor precies dit, en de spelers bestaan al onder die naam.
+- **Alternatieven:** een aparte lijst van codes (meer code voor twee regels), of de spelers hernoemen (de spelling in de database is de goede).

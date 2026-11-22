@@ -36,6 +36,9 @@ describe('the spellings of Wikipedia', () => {
     ['Radoslav Samardzic', 'Radoslav Samardžić'],
     ['Jan-Harm Schippers', 'Jan Harm Schippers'],
     ['Robert van der Berg', 'Robert van den Berg'],
+    // The two codes of the old season ratings (issue 1547).
+    ['Radoslav Samarzic', 'Radoslav Samardžić'],
+    ['Rafael Piresvieira', 'Rafael Pires Vieira'],
   ])('turns %s into %s', (typed, article) => {
     expect(cleanOldSiteName(typed)).toBe(article)
   })
@@ -79,8 +82,8 @@ describe('the spellings of Wikipedia', () => {
     }
   })
 
-  it('has 167 corrections, so a removed pair fails here', () => {
-    expect(oldSiteNameCorrections.size).toBe(167)
+  it('has 169 corrections, so a removed pair fails here', () => {
+    expect(oldSiteNameCorrections.size).toBe(169)
   })
 
   it('has no chain: no correction leads to a spelling that is corrected again', () => {
