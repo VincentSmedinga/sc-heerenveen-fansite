@@ -35,7 +35,7 @@ export function StandCard({
       <Heading id="stand-kop" level={2}>
         Stand
       </Heading>
-      {ranking.rows.length === 0 ? (
+      {ranking.rows.length === 0 && ranking.hidden.size === 0 ? (
         <Text>Nog geen stand dit seizoen.</Text>
       ) : (
         <DataTable
