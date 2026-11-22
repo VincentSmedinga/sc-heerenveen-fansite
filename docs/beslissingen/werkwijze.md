@@ -403,6 +403,9 @@
   Niets doen; elke documentatiewijziging wacht dan ruim vier minuten.
 - **Later:** CI is sinds 31 oktober 2026 opgesplitst in jobs naast elkaar; zie _CI draait in parallelle jobs, met één afsluitende controle_.
   De stap _Check the site_ en de stories zijn nu jobs met een `if` op de uitvoer van _Decide which checks to run_, en de regels van het script zijn gelijk gebleven.
+- **Later:** sinds 22 november 2026 draait `main` niet meer altijd alles.
+  Een push naar `main` slaat de controles over als de boom van de squash-commit gelijk is aan die van de groene head-commit van zijn pull request; zie _CI op `main` slaat controles over die de pull request al deed_.
+  Een handmatige run draait nog altijd alles.
 
 ## CI toetst de stories alleen bij wijzigingen die ze raken
 
@@ -417,6 +420,7 @@
 - **Chrome:** de controle gebruikt in CI het Google Chrome van de runner (`channel: 'chrome'`) en lokaal het Chromium van Playwright, zoals de controle van de site.
   Zo hoeft CI geen browser te installeren.
 - **Alternatieven:** de stap altijd draaien (eenvoudiger, maar elke pull request betaalt ervoor); de regel van de site hergebruiken (dan draait hij ook bij elke wijziging in de site, die de stories niet raakt).
+- **Later:** sinds 22 november 2026 draait een push naar `main` hem niet als de code al is getoetst door zijn pull request; zie _CI op `main` slaat controles over die de pull request al deed_.
 
 ## CI draait in parallelle jobs, met één afsluitende controle
 
@@ -497,6 +501,8 @@
 - **Alternatieven:** de job laten zoals hij was (de wachttijd blijft elf minuten); alleen de stappen van de site naar een eigen job verplaatsen (de klok wordt 450 seconden); twee delen (even veel minuten, langere klok); de e2e-tests zelf sneller maken, wat buiten dit issue valt (#507).
 - **Later:** de beslissingen _Controles: snel bij de commit, volledig in CI_, _De toegankelijkheidscontroles draaien op de gebouwde site, in de bestaande CI-job_ en _CI slaat de controles van de site over bij wijzigingen die ze niet raken_ spreken over één job met stappen.
   Dat zijn nu jobs; de keuzes zelf, wat CI draait en wat het overslaat, zijn gelijk gebleven.
+- **Later:** sinds 22 november 2026 draait `main` niet altijd alles: bij een push naar `main` mogen ook lint, typecheck, de tests en de build zijn overgeslagen, als de code al is getoetst door zijn pull request (uitvoer `tested`).
+  De afsluitende controle accepteert dat alleen als die uitvoer het zegt; zie _CI op `main` slaat controles over die de pull request al deed_.
 
 ## Elke werkmap heeft een eigen database en eigen poorten
 
@@ -840,3 +846,31 @@
 - **Waarom:** de naam van de database volgt de mapnaam (`scripts/worktree-env.js`), dus zonder map heeft niemand de database nog nodig.
   Op een computer stonden ruim honderd van die testdatabases over.
 - **Alternatieven:** ze op leeftijd verwijderen; dat raakt een database van een map die nog bestaat.
+
+## CI op `main` slaat controles over die de pull request al deed
+
+- **Datum:** 22 november 2026
+- **Besluit:** de run op `main` vergelijkt de boom van de squash-commit met de boom van de head-commit van de pull request, en slaat lint, typecheck, de build, de tests, de stories en de controles van de site over als die gelijk zijn en de check _Lint, typecheck, test and build_ van die head-commit groen was.
+  `scripts/ci-changes.js` beslist, in de functie `decideTested`, en zet de uitvoer `tested`.
+  Het log noemt in een regel de pull request en de twee bomen.
+  Overslaan mag alleen als alles klopt:
+  - het is een push, geen handmatige run en geen pull request;
+  - de commit heeft precies één pull request, in `main` samengevoegd, en de squash-commit is deze commit;
+  - de bomen zijn gelijk;
+  - de check van GitHub Actions op de head-commit is geslaagd.
+
+  Elke twijfel draait alles: geen of meer dan één pull request, een ontbrekende of rode check, een fout van de API, een onbekend pad.
+  `scripts/ci-gate.js` laat lint, typecheck, de build en de tests overgeslagen zijn als `tested` waar is, en blijft rood als ze zonder die uitvoer zijn overgeslagen.
+  De job _Decide which checks to run_ krijgt alleen `checks: read`, `contents: read` en `pull-requests: read`; de rest van de workflow houdt `contents: read`.
+
+- **Waarom:** bij pull request 1564 (squash-commit `f042e362`) liep de branch gelijk met `main`, dus de commit had precies de boom die de pull request had getoetst.
+  Toch draaiden alle controles opnieuw en vonden niets; alleen de twee deploys waren nieuw.
+  Een run op `main` duurt ongeveer 11 minuten en neemt de machinetijd van een volledige run.
+  Een gelijke boom betekent dat de code die op `main` komt dezelfde is als de getoetste.
+  Verschilt de boom, dan is er iets nieuws en draait alles, zoals de regels voor `main` het nodig maken: ze eisen geen actuele branch.
+  Eén zeldzaam geval glipt erdoor: een latere commit op `main` die terugdraait waarmee de pull request was samengevoegd, maakt de bomen gelijk terwijl de run een andere samenvoeging toetste.
+- **Handmatige run en deploys:** een handmatige run draait altijd alles, en het label `volledige controle` geldt alleen voor pull requests.
+  De deploys naar acceptatie (`acceptance.yml`) en naar ds.heerenveen.org (`storybook.yml`) zijn aparte workflows die zelf bouwen en toetsen wat ze uitleveren, en ze zijn niet gewijzigd.
+- **Alternatieven:** verplichte actuele branches in de regels voor `main`, wat per samenvoeging een rebase en een nieuwe run kost zodra een andere pull request eerder klaar was.
+  Een geplande nachtelijke run als vangnet, die machinetijd kost voor een gat dat we niet hebben gezien.
+  Het artifact van de pull request hergebruiken in de deploys; dat vraagt een download tussen workflows in een gevoelige deploy en is nog steeds fout als de bomen verschillen.

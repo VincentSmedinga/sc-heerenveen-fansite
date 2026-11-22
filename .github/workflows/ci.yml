@@ -3,7 +3,8 @@
 # request with a type error or a failing test can't be merged. docs/beslissingen/werkwijze.md (CI draait in
 # parallelle jobs) says why it is built this way.
 #
-#   changes         decides which checks of the site and the stories run (scripts/ci-changes.js)
+#   changes         decides which checks run (scripts/ci-changes.js): those of the site and the stories on a pull
+#                   request, and all of them on a push to main whose code its pull request already tested
 #   lint            lint
 #   test            the migrations and the seed on an empty database, and pnpm test
 #   stories         every story in Chrome with axe
@@ -36,16 +37,24 @@ jobs:
   # Decides whether the checks of the site and the check of the stories have to run, and says why in one line each. A pull
   # request that only changes documentation, the tooling for agents, the importer or the MCP server of the design system
   # skips the checks of the site, and nothing else does; the stories are checked when the design system or the tools that
-  # test it change. A push to main, a manual run, a pull request with the label "volledige controle" and anything the
-  # script doesn't know run everything. The jobs that depend on it are skipped with `if`, not the workflow with `paths`:
-  # a required check that never reports blocks the merge. scripts/ci-changes.js has the rules, and the job "check"
-  # fails when a job was skipped that should have run.
+  # test it change. A push to main skips lint, typecheck, the tests, the build, the stories and the site when its pull
+  # request was merged with the same code (the same tree) as its head commit and passed the check "Lint, typecheck, test
+  # and build" there; the deploys are other workflows and are not affected. A manual run, a pull request with the label
+  # "volledige controle" and anything the script doesn't know run everything. The jobs that depend on it are skipped
+  # with `if`, not the workflow with `paths`: a required check that never reports blocks the merge. scripts/ci-changes.js
+  # has the rules, and the job "check" fails when a job was skipped that should have run.
   changes:
     name: Decide which checks to run
     outputs:
       site: ${{ steps.changes.outputs.site }}
       stories: ${{ steps.changes.outputs.stories }}
+      tested: ${{ steps.changes.outputs.tested }}
     runs-on: ubuntu-latest
+    # The script reads the pull requests and the checks of the commit on a push to main, and nothing else.
+    permissions:
+      checks: read
+      contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -64,7 +73,9 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
   lint:
+    if: needs.changes.outputs.tested != 'true'
     name: Lint
+    needs: changes
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -84,7 +95,9 @@ jobs:
       - run: pnpm lint
 
   test:
+    if: needs.changes.outputs.tested != 'true'
     name: Migrate, seed and test
+    needs: changes
     env:
       # The database below. The tests make a database of their own on this server and drop it afterwards.
       DATABASE_URL: mysql://root@127.0.0.1:3306/fansite
@@ -154,6 +167,7 @@ jobs:
   # site and finds it done. When the checks of the site run, the job also makes the folder that the host runs
   # (`assemble`) and hands it to the job site, so the site is built once.
   build:
+    if: needs.changes.outputs.tested != 'true'
     name: Typecheck and build
     needs: changes
     runs-on: ubuntu-latest
@@ -268,7 +282,8 @@ jobs:
 
   # The check that the rules for main require. It runs whatever the other jobs did, because GitHub counts a skipped job
   # as a pass and skips a job whose predecessor failed. scripts/ci-gate.js has the rules: every job must have passed,
-  # and the jobs of the site and the stories must have passed or have been skipped on purpose by the job changes. A part
+  # and the other jobs must have passed or have been skipped on purpose by the job changes (the site and the stories on a
+  # pull request, and everything on a push to main whose code was tested). A part
   # of the e2e tests that failed or didn't run fails the job site, and so this one. The name is the one in the rules for
   # main, so rename it there too.
   check:

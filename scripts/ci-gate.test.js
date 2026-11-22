@@ -84,3 +84,37 @@ test('a failed changes job skips the rest, and the check fails on changes', () =
 
   assert.ok(check(failed).includes('changes: failure, verwacht success'))
 })
+
+const tested = {
+  ...everythingRan,
+  build: { result: 'skipped' },
+  changes: { outputs: { site: 'false', stories: 'false', tested: 'true' }, result: 'success' },
+  lint: { result: 'skipped' },
+  site: { result: 'skipped' },
+  stories: { result: 'skipped' },
+  test: { result: 'skipped' },
+}
+
+test('a push whose code was tested skips every job, and passes then', () => {
+  assert.deepEqual(check(tested), [])
+})
+
+test('a job that ran although the code was tested is a surprise and fails', () => {
+  for (const job of ['lint', 'test', 'build']) {
+    assert.deepEqual(check({ ...tested, [job]: { result: 'success' } }), [`${job}: success, verwacht skipped`], job)
+  }
+})
+
+test('a failed changes job never lets the skipped jobs pass', () => {
+  assert.ok(check({ ...tested, changes: { outputs: { tested: 'true' }, result: 'failure' } }).length > 0)
+})
+
+test('lint, test and build skipped without the output tested fail', () => {
+  for (const outputs of [{}, { site: 'false', stories: 'false' }, { tested: 'false' }, { tested: '' }]) {
+    const problems = check({ ...tested, changes: { outputs, result: 'success' } })
+
+    assert.ok(problems.includes('lint: skipped, verwacht success'), JSON.stringify(outputs))
+    assert.ok(problems.includes('test: skipped, verwacht success'), JSON.stringify(outputs))
+    assert.ok(problems.includes('build: skipped, verwacht success'), JSON.stringify(outputs))
+  }
+})

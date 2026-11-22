@@ -6,20 +6,25 @@
 //   NEEDS='<toJSON(needs)>' node scripts/ci-gate.js
 //
 // The rules:
-// 1. Every job must have succeeded, except the two that scripts/ci-changes.js can switch off:
-//    "stories" and "site" (the smoke test and the e2e tests).
-// 2. Those must have succeeded when ci-changes.js said to run them (its output is not "false",
-//    so a missing output runs them too), and must have been skipped when it said not to.
-// 3. A result we don't know, such as "cancelled" or a job that isn't there, is a failure.
+// 1. The job "changes" must have succeeded.
+// 2. Every other job can be switched off by an output of ci-changes.js: "stories" and "site"
+//    (the smoke test and the e2e tests) by their own output, and "lint", "test" and "build" by
+//    the output "tested": the push to main has the code of a green pull request.
+// 3. A job must have succeeded when ci-changes.js said to run it (its output is not "false" or
+//    "true", so a missing output runs it too), and must have been skipped when it said not to.
+// 4. A result we don't know, such as "cancelled" or a job that isn't there, is a failure.
 //
 // What decides something is a function without side effects, exported for the tests.
 import { realpathSync } from 'node:fs'
 
-/** The jobs that always run, and the jobs that an output of the job `changes` switches. */
-export const always = ['changes', 'lint', 'test', 'build']
+/** The job that always runs, and the jobs that an output of the job `changes` switches. */
+export const always = ['changes']
 export const decided = [
-  { job: 'stories', output: 'stories' },
-  { job: 'site', output: 'site' },
+  { job: 'lint', output: 'tested', skippedWhen: 'true' },
+  { job: 'test', output: 'tested', skippedWhen: 'true' },
+  { job: 'build', output: 'tested', skippedWhen: 'true' },
+  { job: 'stories', output: 'stories', skippedWhen: 'false' },
+  { job: 'site', output: 'site', skippedWhen: 'false' },
 ]
 
 /**
@@ -38,9 +43,9 @@ export function check(needs) {
     }
   }
 
-  for (const { job, output } of decided) {
+  for (const { job, output, skippedWhen } of decided) {
     const result = needs?.[job]?.result
-    const expected = outputs[output] === 'false' ? 'skipped' : 'success'
+    const expected = outputs[output] === skippedWhen ? 'skipped' : 'success'
 
     if (result !== expected) {
       problems.push(`${job}: ${result ?? 'ontbreekt'}, verwacht ${expected}`)
