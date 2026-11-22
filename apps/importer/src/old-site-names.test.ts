@@ -82,7 +82,7 @@ describe('the spellings of Wikipedia', () => {
     }
   })
 
-  it('has 167 corrections, so a removed pair fails here', () => {
+  it('has 169 corrections, so a removed pair fails here', () => {
     expect(oldSiteNameCorrections.size).toBe(169)
   })
 
