@@ -138,7 +138,8 @@ describe('the page of a month of the Fantest', () => {
       expect(html).toContain('van 10')
       expect(html).toContain('>4,1<')
       expect(html).toContain('>38<')
-      expect(html).toContain('deden mee')
+      expect(html).toContain('deden toen mee')
+      expect(html).toContain('toen gemiddeld')
       expect(html).toContain('Bij elke vraag: hoe fans het toen deden.')
     })
 

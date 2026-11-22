@@ -86,7 +86,7 @@ test('lists the months by year with a link to each, and leaves out a month witho
     page.getByText('Vragen uit het archief van de oude Fansite, gemaakt door de toenmalige redactie.'),
   ).toBeVisible()
   await expect(page.getByRole('heading', { level: 2, name: '2003' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'juni' })).toHaveAttribute('href', '/fans/fantest/2003-06')
-  await expect(page.getByRole('link', { name: 'juli' })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: 'Juni 2003' })).toHaveAttribute('href', '/fans/fantest/2003-06')
+  await expect(page.getByRole('link', { name: 'Juli 2003' })).toHaveCount(0)
   await expect(page.getByRole('link', { name: 'Fantest' })).toBeVisible()
 })

@@ -95,18 +95,16 @@ export function QuizForm({
               </Strong>
             </Text>
           ) : (
-            <>
-              <KeyFigures
-                figures={[
-                  { figure: String(score), label: `van ${questions.length}`, note: 'jouw score' },
-                  { figure: averageText(averageTenths), label: 'gemiddeld', note: 'de fans van toen' },
-                  { figure: String(participants), label: 'deden mee', note: `in ${when}` },
-                ]}
-              />
-              <Text>Bij elke vraag: hoe fans het toen deden.</Text>
-            </>
+            <KeyFigures
+              figures={[
+                { figure: String(score), label: `van ${questions.length}`, note: 'jouw score' },
+                { figure: averageText(averageTenths), label: 'toen gemiddeld', note: `van ${questions.length}` },
+                { figure: String(participants), label: 'deden toen mee', note: `in ${when}` },
+              ]}
+            />
           )}
         </Card>
+        {participants === undefined ? null : <Text appearance="meta">Bij elke vraag: hoe fans het toen deden.</Text>}
         {intro}
         {questions.map((question, index) => (
           <QuizQuestion

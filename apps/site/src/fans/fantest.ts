@@ -52,6 +52,9 @@ export const monthName = (month: number) => monthNames[month - 1] ?? ''
 /** "mei 2003". */
 export const monthTitle = (year: number, month: number) => `${monthName(month)} ${year}`
 
+/** "Mei 2003", for a link: the title with a capital. */
+export const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
+
 /** The average as a fan reads it: tenths in, "4,1" out. */
 export const averageText = (tenths: number) => (tenths / 10).toFixed(1).replace('.', ',')
 

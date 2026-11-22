@@ -9,10 +9,11 @@ import {
   archiveCredit,
   type ArchiveMonth,
   averageText,
+  capital,
   fantestPath,
   loadArchive,
-  monthName,
   monthPath,
+  monthTitle,
 } from '#src/fans/fantest'
 import { pageMetadata } from '#src/metadata'
 import { pageAreas } from '#src/page-areas'
@@ -45,7 +46,8 @@ export default async function FantestPage() {
       <Page.Cell area="head">
         <Heading level={1}>Fantest van toen</Heading>
         <Text appearance="intro">
-          Van december 2001 tot oktober 2005 was er elke maand een quiz. Speel ze na. Je score bewaren we niet.
+          Van december 2001 tot oktober 2005 had de Fansite elke maand een Fantest: tien vragen over de club. Speel ze
+          na. Je score bewaren we niet.
         </Text>
         <Text appearance="meta">{archiveCredit}</Text>
       </Page.Cell>
@@ -58,7 +60,7 @@ export default async function FantestPage() {
             <List>
               {months.map((month) => (
                 <List.Item key={month.month}>
-                  <Link href={monthPath(month.year, month.month)}>{monthName(month.month)}</Link>
+                  <Link href={monthPath(month.year, month.month)}>{capital(monthTitle(month.year, month.month))}</Link>
                   {month.averageTenths === undefined ? null : (
                     <Text appearance="meta">
                       Toen gemiddeld {averageText(month.averageTenths)} van {month.questions}
@@ -74,7 +76,7 @@ export default async function FantestPage() {
   )
 }
 
-/** The months by year: the newest year first, and each year in the order of the calendar. */
+/** The months by year: the newest first, in the years and in each year. */
 function byYear(months: readonly ArchiveMonth[]) {
   const years = new Map<number, ArchiveMonth[]>()
 
@@ -84,5 +86,5 @@ function byYear(months: readonly ArchiveMonth[]) {
 
   return [...years]
     .sort(([a], [b]) => b - a)
-    .map(([year, list]) => ({ months: list.sort((a, b) => a.month - b.month), year }))
+    .map(([year, list]) => ({ months: list.sort((a, b) => b.month - a.month), year }))
 }

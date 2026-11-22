@@ -34,17 +34,17 @@ describe('the archive of the Fantest', () => {
 
     expect(html.match(/<h1/g)).toHaveLength(1)
     expect(html).toContain('Fantest van toen')
-    expect(html).toContain('Van december 2001 tot oktober 2005 was er elke maand een quiz.')
+    expect(html).toContain('Van december 2001 tot oktober 2005 had de Fansite elke maand een Fantest')
     expect(html).toContain('Speel ze na. Je score bewaren we niet.')
     expect(html).toContain('Vragen uit het archief van de oude Fansite, gemaakt door de toenmalige redactie.')
   })
 
-  it('has a card for each year, the newest first, and the months in the order of the calendar', async () => {
+  it('has a card for each year, the newest first, and the months of a year the newest first too', async () => {
     const html = renderToStaticMarkup(await FantestPage())
 
     expect(html.indexOf('>2003<')).toBeLessThan(html.indexOf('>2002<'))
-    expect(html.indexOf('>januari<')).toBeLessThan(html.indexOf('>mei<'))
-    expect(html.indexOf('>mei<')).toBeLessThan(html.indexOf('>december<'))
+    expect(html.indexOf('>December 2003<')).toBeLessThan(html.indexOf('>Mei 2003<'))
+    expect(html.indexOf('>Mei 2003<')).toBeLessThan(html.indexOf('>Januari 2003<'))
     expect(html).toContain('href="/fans/fantest/2003-05"')
     expect(html).toContain('href="/fans/fantest/2002-12"')
   })
