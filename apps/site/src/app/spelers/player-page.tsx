@@ -28,6 +28,7 @@ import { type CareerMomentChoice, careerMoments } from '#src/player-career'
 import { goalQuartersOf, playerRecordOf, seasonBarsOf } from '#src/player-charts'
 import { playerKeyFigures } from '#src/player-key-figures'
 import { lastArchiveSeason, loadPlayerPage, periodsOf, playerAddress, type PlayerPage } from '#src/player-page'
+import { loadPlayerRatings, type PlayerRatings } from '#src/player-ratings'
 import {
   loadPlayerSeasonFacts,
   loadPlayerSeasons,
@@ -39,6 +40,7 @@ import { playerShortcutsOf } from '#src/player-shortcuts'
 import { PlayerAside as PlayerAsideColumn } from '#src/PlayerAside'
 import { PlayerCareerCard } from '#src/PlayerCareerCard'
 import { PlayerQuartersCard, PlayerRecordCard, PlayerSeasonBarsCard } from '#src/PlayerChartsCards'
+import { PlayerRatingsCard } from '#src/PlayerRatingsCard'
 import { PlayerSeasonsCard } from '#src/PlayerSeasonsCard'
 import { getReportAddresses } from '#src/report-data'
 import { playersPath, type SearchParams } from '#src/season-page'
@@ -82,7 +84,8 @@ export async function playerMetadata(slug: string): Promise<Metadata> {
  * career (#1084), the charts (#1085) and the credit. An old address leads to the address of
  * now (308), and an address of nobody, or of a player of an opponent, is "niet gevonden". The
  * blocks of #1082 to #1085 come between the seasons and the end of the column. The side column
- * (#1086) has more figures and, at the bottom, the credit.
+ * (#1086) has more figures and, at the bottom, the credit. The card Cijfers van supporters
+ * (#1466) stands after the seasons, when the Uitblinker is on and he has ratings to show.
  */
 export async function PlayerPageView({ searchParams, slug }: { searchParams: Promise<SearchParams>; slug: string }) {
   const competition = parseCompetition((await searchParams)[competitionParam])
@@ -116,6 +119,8 @@ export async function PlayerPageView({ searchParams, slug }: { searchParams: Pro
   const keyFigures = seasons === undefined ? [] : playerKeyFigures(seasons, page.line)
   const current = seasonOf(new Date())
   const career = seasons === undefined ? undefined : await readCareer(seasons, current)
+  const ratings = seasons === undefined ? undefined : await readRatings(page)
+  const ratingAddresses = await readMatchAddresses(ratings?.last.map(({ season }) => season) ?? [])
   const aside = playerAsideOf(seasons ?? [], facts ?? {}, page.line === 'doelman')
   const asideAddresses = await readMatchAddresses(asideSeasons(aside))
 
@@ -135,6 +140,7 @@ export async function PlayerPageView({ searchParams, slug }: { searchParams: Pro
           main: [
             ...(keyFigures.length === 0 ? [] : ['figures']),
             ...(seasons === undefined ? [] : ['seasons']),
+            ...(ratings === undefined ? [] : ['ratings']),
             ...(seasons === undefined || career === undefined ? [] : ['career']),
           ],
           toolbar: switchAddress !== undefined,
@@ -183,6 +189,17 @@ export async function PlayerPageView({ searchParams, slug }: { searchParams: Pro
             />
           </Page.Cell>
         )}
+        {ratings === undefined ? null : (
+          <Page.Cell area="ratings">
+            <PlayerRatingsCard
+              matchHref={({ competition, round, season }) =>
+                ratingAddresses.get(season)?.get(`${competition}|${round}`)
+              }
+              name={page.name}
+              ratings={ratings}
+            />
+          </Page.Cell>
+        )}
         {seasons === undefined || career === undefined ? null : (
           <Page.Cell area="career">
             <PlayerCareerCard options={career} seasons={seasons} />
@@ -228,7 +245,8 @@ export async function playerShortcuts({ searchParams, slug }: { searchParams: Pr
   }
 
   const seasons = await readSeasons(loaded.page)
-  const items = seasons === undefined ? [] : playerShortcutsOf(seasons, loaded.page.line)
+  const ratings = seasons === undefined ? undefined : await readRatings(loaded.page)
+  const items = seasons === undefined ? [] : playerShortcutsOf(seasons, loaded.page.line, ratings !== undefined)
 
   return items.length === 0 ? null : <Page.Shortcuts items={items} label="Op deze pagina:" />
 }
@@ -403,6 +421,21 @@ async function readMatchAddresses(seasons: Iterable<string>) {
   )
 
   return addresses
+}
+
+/**
+ * The ratings of supporters of the page (#1466), or undefined when there are none to show, the
+ * Uitblinker is off or they could not be read (the error is logged, and the page goes on
+ * without the card).
+ */
+async function readRatings(page: PlayerPage): Promise<PlayerRatings | undefined> {
+  try {
+    return await loadPlayerRatings(page.personId)
+  } catch (error) {
+    console.error(`Could not read the ratings of a player for ${playerAddress(page.slug)}: ${reasonOf(error)}`)
+
+    return undefined
+  }
 }
 
 /** The figures per season, or undefined when they could not be read (the error is logged). */
