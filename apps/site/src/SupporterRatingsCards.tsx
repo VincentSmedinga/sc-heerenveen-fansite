@@ -40,7 +40,7 @@ export function SeasonRankingCard({
       <Heading id="cijfers-van-supporters" level={2}>
         Cijfers van supporters
       </Heading>
-      <SeasonPicker action={action} fields={fields} options={options} value={value} />
+      <SeasonPicker action={action} fields={fields} label={seasonPickerLabel} options={options} value={value} />
       {rows.length === 0 ? (
         <Text>Dit seizoen zijn er nog geen cijfers.</Text>
       ) : (
@@ -74,6 +74,9 @@ export function SeasonRankingCard({
   )
 }
 
+/** What the season picker of the card is called: the page has another picker of its own. */
+export const seasonPickerLabel = 'Seizoen van de cijfers'
+
 /** The text that stands for a season that has no Uitblinker of the year yet. */
 export const afterTheSeason = 'Na het seizoen'
 
@@ -96,7 +99,7 @@ export function YearWinnersCard({ winners }: { winners: readonly YearWinner[] })
         caption="De Uitblinker van elk seizoen, het nieuwste seizoen eerst"
         columns={['Seizoen', 'Speler', { name: 'Gem' }]}
         rows={winners.map((winner) => ({
-          cells: [winner.name ?? afterTheSeason, winner.average === undefined ? '' : gradeText(winner.average)],
+          cells: [winner.name ?? afterTheSeason, winner.average === undefined ? dash : gradeText(winner.average)],
           header: winner.season,
         }))}
         // The seasons stand in their own order, the newest first.

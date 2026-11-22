@@ -61,7 +61,7 @@ describe('the card Cijfers van supporters', () => {
   it('has the season picker and the link to the Uitblinkers of the year', () => {
     const html = card()
 
-    expect(html).toContain('Seizoen kiezen')
+    expect(html).toContain('Seizoen van de cijfers kiezen')
     expect(html).toContain(`href="${yearWinnersPath}"`)
     expect(html).toContain('Uitblinker van het jaar')
   })

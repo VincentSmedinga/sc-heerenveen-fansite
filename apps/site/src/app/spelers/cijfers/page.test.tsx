@@ -719,7 +719,7 @@ describe('the card Cijfers van supporters on the page /spelers/cijfers', () => {
     expect(card).not.toContain('Speler C')
     expect(card).not.toContain('Speler D')
     expect(card).toContain('href="/fans/uitblinker/van-het-jaar"')
-    expect(html).toContain('Seizoen kiezen')
+    expect(html).toContain('aria-label="Seizoen van de cijfers kiezen"')
   })
 
   it('shows another season for ?seizoen=, with the source line of the old fansite', async () => {

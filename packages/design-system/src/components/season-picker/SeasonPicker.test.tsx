@@ -45,6 +45,13 @@ describe('SeasonPicker', () => {
     expect(form.getAttribute('action')).toBe('/wedstrijden/kies')
   })
 
+  it('names the form and the list after the label that it is given, for a second picker on a page', () => {
+    render(<SeasonPicker action="/spelers/cijfers" label="Seizoen van de cijfers" options={options} value="2025-26" />)
+
+    expect(screen.getByRole('form', { name: 'Seizoen van de cijfers kiezen' })).toBeTruthy()
+    expect(screen.getByRole('combobox', { name: 'Seizoen van de cijfers' })).toBeTruthy()
+  })
+
   it('does not let the browser fill the list from an earlier visit, so it always shows the season of the page', () => {
     render(<SeasonPicker action="/wedstrijden/kies" options={options} value="2025-26" />)
 
