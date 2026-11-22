@@ -4,7 +4,16 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 
-import { decide, decideStories, forceLabel, parseNames } from './ci-changes.js'
+import {
+  decide,
+  decideRun,
+  decideSafely,
+  decideStories,
+  decideTested,
+  forceLabel,
+  gateCheckName,
+  parseNames,
+} from './ci-changes.js'
 
 const pullRequest = (files, forced = false) => decide({ event: 'pull_request', files, forced })
 const storiesFor = (files, forced = false) => decideStories({ event: 'pull_request', files, forced })
@@ -170,7 +179,7 @@ function workflowJobs() {
   return { jobs, workflow }
 }
 
-test('the workflow switches only the checks of the site and the stories with ci-changes.js, and has no paths filter', () => {
+test('the workflow switches the checks with the outputs of ci-changes.js, and has no paths filter', () => {
   const { jobs, workflow } = workflowJobs()
   const site = "needs.changes.outputs.site != 'false'"
   const switched = (output) =>
@@ -184,14 +193,27 @@ test('the workflow switches only the checks of the site and the stories with ci-
   assert.match(jobs.changes, /site: \$\{\{ steps\.changes\.outputs\.site \}\}/)
   assert.match(jobs.changes, /stories: \$\{\{ steps\.changes\.outputs\.stories \}\}/)
 
-  // The build always runs. Only the two steps that hand the folder to the site checks wait.
-  assert.doesNotMatch(jobs.build, /^ {4}if:/m)
+  // The build waits for `tested`; the two steps that hand over the folder wait for `site`.
   assert.equal(jobs.build.split(site).length - 1, 2)
 
-  // The jobs that always run have no condition at all, so nothing but a failure can skip them.
-  for (const id of ['lint', 'test']) {
-    assert.doesNotMatch(jobs[id], /^ {4}if:/m, id)
+  // Lint, the tests and the build are skipped only by `tested`, set only for a push to main.
+  const tested = (id) => new RegExp(`^ {4}if: needs\\.changes\\.outputs\\.tested != 'true'$`, 'm').test(jobs[id])
+
+  for (const id of ['lint', 'test', 'build']) {
+    assert.ok(tested(id), id)
+    assert.match(jobs[id], /^ {4}needs: (changes|\[changes\])$/m, id)
   }
+
+  assert.match(jobs.changes, /tested: \$\{\{ steps\.changes\.outputs\.tested \}\}/)
+
+  // The job that asks GitHub gets the least rights it needs, and no other job sets any.
+  assert.match(jobs.changes, /^ {4}permissions:\n {6}checks: read\n {6}contents: read\n {6}pull-requests: read$/m)
+
+  for (const id of Object.keys(jobs).filter((job) => job !== 'changes')) {
+    assert.doesNotMatch(jobs[id], /^ {4}permissions:/m, id)
+  }
+
+  assert.match(workflow, /^permissions:\n {2}contents: read$/m)
 
   assert.match(jobs.stories, /run: pnpm test:stories/)
   // A required check that never reports blocks the merge. A skipped job doesn't.
@@ -242,4 +264,161 @@ test('the e2e tests run in parts that together hold every test, and each part is
   assert.doesNotMatch(jobs.site, /\s--retries/)
   // A part that ran nothing is green in Playwright. The report must show tests that passed.
   assert.match(jobs.site, /node scripts\/ci-e2e-report\.js "\$PLAYWRIGHT_JSON_OUTPUT_NAME"/)
+})
+
+// --- A push to main whose code a pull request already tested ---
+
+const sha = 'a'.repeat(40)
+const headSha = 'b'.repeat(40)
+const goodCheck = { app: { slug: 'github-actions' }, conclusion: 'success', name: gateCheckName, status: 'completed' }
+const merged = {
+  base: { ref: 'main' },
+  head: { sha: headSha },
+  merge_commit_sha: sha,
+  merged_at: '2026-11-22T10:00:00Z',
+  number: 1564,
+}
+const tree = 't'.repeat(40)
+const pushed = (changes = {}) => ({
+  checkRuns: [goodCheck],
+  event: 'push',
+  headTree: tree,
+  mainTree: tree,
+  pullRequests: [merged],
+  sha,
+  ...changes,
+})
+
+test('skips every check for a push whose tree equals the tree of a green pull request, and says why', () => {
+  const result = decideTested(pushed())
+
+  assert.equal(result.tested, true)
+  assert.match(result.reason, /pull request 1564/)
+  assert.equal(result.reason.split(tree).length - 1, 2)
+})
+
+test('runs everything when the trees differ', () => {
+  const result = decideTested(pushed({ mainTree: 'c'.repeat(40) }))
+
+  assert.equal(result.tested, false)
+  assert.match(result.reason, /liep achter/)
+})
+
+test('runs everything when the pull request is missing, or there is more than one', () => {
+  for (const pullRequests of [null, undefined, 'x', [], [merged, { ...merged, number: 2 }]]) {
+    assert.equal(decideTested(pushed({ pullRequests })).tested, false, JSON.stringify(pullRequests))
+  }
+})
+
+test('runs everything when the pull request is not the merge of this commit into main', () => {
+  for (const change of [
+    { merge_commit_sha: 'd'.repeat(40) },
+    { merge_commit_sha: undefined },
+    { base: { ref: 'other' } },
+    { base: undefined },
+    { merged_at: null },
+    { head: {} },
+    { head: undefined },
+    { number: undefined },
+  ]) {
+    assert.equal(
+      decideTested(pushed({ pullRequests: [{ ...merged, ...change }] })).tested,
+      false,
+      JSON.stringify(change),
+    )
+  }
+
+  assert.equal(decideTested(pushed({ sha: undefined })).tested, false)
+  assert.equal(decideTested(pushed({ pullRequests: [null] })).tested, false)
+})
+
+test('runs everything when a tree is unknown', () => {
+  for (const change of [{ headTree: undefined }, { mainTree: undefined }, { headTree: '' }, { mainTree: null }]) {
+    assert.equal(decideTested(pushed(change)).tested, false, JSON.stringify(change))
+  }
+})
+
+test('runs everything when the check is red, pending, missing or not from GitHub Actions', () => {
+  const bad = [
+    [{ ...goodCheck, conclusion: 'failure' }],
+    [{ ...goodCheck, conclusion: 'cancelled' }],
+    [{ ...goodCheck, conclusion: null, status: 'in_progress' }],
+    [{ ...goodCheck, conclusion: 'skipped' }],
+    [{ ...goodCheck, name: 'Lint' }],
+    [{ ...goodCheck, app: { slug: 'someone-else' } }],
+    [{ ...goodCheck, app: undefined }],
+    [goodCheck, { ...goodCheck, conclusion: 'failure' }],
+    [],
+    null,
+    undefined,
+  ]
+
+  for (const checkRuns of bad) {
+    assert.equal(decideTested(pushed({ checkRuns })).tested, false, JSON.stringify(checkRuns))
+  }
+})
+
+test('runs everything for a manual run, a pull request and an unknown event, even with equal trees', () => {
+  for (const event of ['workflow_dispatch', 'pull_request', 'schedule', undefined]) {
+    assert.equal(decideTested(pushed({ event })).tested, false, String(event))
+  }
+})
+
+test('decideRun skips the site, the stories and the rest together for a tested push', () => {
+  const result = decideRun({ ...pushed(), files: [] })
+
+  assert.deepEqual(
+    { ...result, reasons: result.reasons.length },
+    { reasons: 1, site: false, stories: false, tested: true },
+  )
+})
+
+test('decideRun runs everything for a push that was not tested, and for a manual run with equal trees', () => {
+  for (const input of [pushed({ mainTree: 'c'.repeat(40) }), pushed({ event: 'workflow_dispatch' })]) {
+    const result = decideRun({ ...input, files: [] })
+
+    assert.deepEqual(
+      { site: result.site, stories: result.stories, tested: result.tested },
+      { site: true, stories: true, tested: false },
+    )
+  }
+})
+
+test('decideRun leaves a pull request to the rules by files, and never sets tested', () => {
+  const documentation = decideRun({ ...pushed(), event: 'pull_request', files: ['docs/a.md'] })
+
+  assert.deepEqual(
+    { site: documentation.site, stories: documentation.stories, tested: documentation.tested },
+    { site: false, stories: false, tested: false },
+  )
+
+  const labelled = decideRun({ event: 'pull_request', files: ['docs/a.md'], forced: true })
+
+  assert.equal(labelled.site, true)
+  assert.equal(labelled.tested, false)
+})
+
+test('decideSafely runs everything when gathering fails, and says why', async () => {
+  const result = await decideSafely(async () => {
+    throw new Error('GitHub antwoordde 502')
+  })
+
+  assert.deepEqual(
+    { site: result.site, stories: result.stories, tested: result.tested },
+    { site: true, stories: true, tested: false },
+  )
+  assert.match(result.reasons[0], /GitHub antwoordde 502/)
+
+  // Also an error that is not thrown inside an async function.
+  const sync = await decideSafely(() => {
+    throw new Error('git faalde')
+  })
+
+  assert.equal(sync.tested, false)
+  assert.equal(sync.site, true)
+})
+
+test('decideSafely gives the decision for what gathering returns', async () => {
+  assert.equal((await decideSafely(async () => ({ ...pushed(), files: [] }))).tested, true)
+  assert.equal((await decideSafely(async () => ({ event: 'pull_request', files: ['docs/a.md'] }))).site, false)
 })
