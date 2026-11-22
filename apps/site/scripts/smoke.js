@@ -2146,6 +2146,16 @@ await withEmptyDatabase((database) =>
       '/fans/uitblinker/van-het-jaar must be "not found" with Uitblinker off',
     )
     assert.equal(
+      (await fetch(`${origin}/fans/fantest`)).status,
+      404,
+      '/fans/fantest must be "not found" with Fantest off',
+    )
+    assert.equal(
+      (await fetch(`${origin}/fans/fantest/2003-05`)).status,
+      404,
+      'a month of the Fantest must be "not found" with Fantest off',
+    )
+    assert.equal(
       (await fetch(`${origin}/fans/spelregels`)).status,
       404,
       '/fans/spelregels must be "not found" with every part off',
@@ -2204,6 +2214,17 @@ await withEmptyDatabase((database) =>
     assert.match(yearWinnersHtml, /<h1[^>]*>Uitblinker van het jaar<\/h1>/)
     assert.match(yearWinnersHtml, /Na het seizoen/)
     assert.equal(yearWinners.headers.get('x-robots-tag'), 'noindex, nofollow')
+    // The archive of the Fantest is the same for everybody; the empty database has no quiz, so
+    // no month is there.
+    const fantest = await fetch(`${origin}/fans/fantest`)
+
+    assert.equal(fantest.status, 200, '/fans/fantest must be there with Fantest on')
+    assert.match(await fantest.text(), /<h1[^>]*>Fantest van toen<\/h1>/)
+    assert.equal(
+      (await fetch(`${origin}/fans/fantest/2003-05`)).status,
+      404,
+      'a month without a quiz must be "not found"',
+    )
     // The card of the game on Fans, with its way to the page.
     assert.match(html, /<h2[^>]*>Uitblinker<\/h2>/)
     assert.match(html, /<a [^>]*href="\/fans\/uitblinker"[^>]*>Naar de <span class="hf-icon-tail">Uitblinker</)
