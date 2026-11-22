@@ -1,6 +1,7 @@
 import { Card, DataTable, type DataTableRow, Heading, Link, Text } from '@fansite/design-system'
 
 import { type RankedRow, type Ranking, rowOf, shownRows, topRows } from '#src/fans/prediction-ranking'
+import { RulesLink } from '#src/fans/RulesLink'
 
 // The ranking of the game Prognose (issue 1451): the card with the top five on the page of the
 // game, and the table of the page "Stand Prognose".
@@ -76,6 +77,7 @@ export function StandTable({
         sortable={false}
       />
       <Text appearance="meta">{standLegend}</Text>
+      <RulesLink />
     </>
   )
 }

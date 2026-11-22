@@ -42,13 +42,14 @@ describe('FansPage', () => {
     expect(html.match(/komt eraan/g)).toHaveLength(3)
   })
 
-  it('has the buttons Account maken and Inloggen, to their pages, and one link, to what we keep', async () => {
+  it('has the buttons Account maken and Inloggen, to their pages, and the links to the rules and to what we keep', async () => {
     vi.stubEnv('FANS_ACCOUNTS', 'on')
     const html = await render()
 
     expect(html).toMatch(/<form[^>]*action="\/fans\/aanmelden"[^>]*><button[^>]*>Account maken<\/button><\/form>/)
     expect(html).toMatch(/<form[^>]*action="\/fans\/inloggen"[^>]*><button[^>]*>Inloggen<\/button><\/form>/)
-    expect(html.match(/<a /g)).toHaveLength(1)
+    expect(html.match(/<a /g)).toHaveLength(2)
+    expect(html).toContain('<a href="/fans/spelregels">Spelregels van alle spellen</a>')
     expect(html).toContain('<a href="/privacy#account">Wat we bewaren als je een account hebt</a>')
   })
 

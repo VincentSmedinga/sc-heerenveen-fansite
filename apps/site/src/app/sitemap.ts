@@ -26,7 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // The page Fans is there only when accounts are on.
   const accounts = readFans().accounts
   const entries: MetadataRoute.Sitemap = pages
-    .filter(({ path }) => path !== fansPath || accounts)
+    .filter(({ path }) => !path.startsWith(fansPath) || accounts)
     .map(({ path }) => ({ url: urlOf(path) }))
 
   try {

@@ -4,7 +4,7 @@ import { Button, Card, Form, Heading, Link, List, Notice, Page, Tag, Text } from
 import { isFansPartOn, requireFansPart } from '@fansite/shared/fans-env'
 import { notFound } from 'next/navigation'
 
-import { fansGames, fansPath } from '#src/fans-paths'
+import { fansGames, fansPath, rulesPath } from '#src/fans-paths'
 import { currentSupporter } from '#src/fans/require-supporter'
 import { pageMetadata } from '#src/metadata'
 
@@ -102,6 +102,7 @@ export default async function FansPage({
           </List>
         </Card>
         <Text appearance="meta">
+          <Link href={rulesPath}>Spelregels van alle spellen</Link> ·{' '}
           <Link href="/privacy#account">Wat we bewaren als je een account hebt</Link>
         </Text>
       </Page.Cell>

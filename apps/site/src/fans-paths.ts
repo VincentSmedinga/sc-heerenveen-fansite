@@ -5,6 +5,10 @@
 
 export const fansPath = '/fans'
 
+/** The page with the rules of all games, and the part about the game Prognose on it. */
+export const rulesPath = `${fansPath}/spelregels`
+export const predictionRulesAddress = `${rulesPath}#prognose`
+
 /** The games, in the order of the bar under the menu. Fantest is an archive, but a part too. */
 export const fansGames = [
   { href: `${fansPath}/prognose`, label: 'Prognose', part: 'prognose' },

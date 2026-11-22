@@ -7463,3 +7463,20 @@
 - **Waarom:** de voorpagina blijft zo cachebaar, en een bezoeker ziet in één oogopslag wat er te doen is.
   Persoonlijke gegevens horen onder `/fans`.
 - **Alternatieven:** een kaart per spel op de voorpagina; een persoonlijke kaart voor wie is ingelogd.
+
+## De regels van alle spellen staan op één pagina
+
+- **Datum:** 20 november 2026
+- **Besluit:** de regels van alle spellen staan op `/fans/spelregels`, elk onderdeel in een eigen kaart met een anker (`#prognose`, `#uitblinker`, `#account`).
+  Een kaart verschijnt alleen als het onderdeel aan staat, en dan staat hij ook in de balk "Op deze pagina".
+  De pagina is er zodra accounts aan staan, ook als geen spel aan staat, en is openbaar en indexeerbaar.
+  Ze staat niet in de balk met spellen van Fans, maar is te bereiken met "Spelregels van alle spellen" op `/fans`, met "Spelregels" onder het formulier van de Prognose, op de kaarten met de punten en de voorspellingen, en onder de stand.
+- **Waarom:** een supporter zoekt de regels op één plek, en een onderdeel dat uit staat, hoort er niet te staan.
+- **Alternatieven:** een regelpagina per spel.
+
+- **Datum:** 22 november 2026
+- **Besluit:** de telling en het voorbeeld op de pagina komen uit dezelfde getallen als de punten zelf: de tabel uit `pointsPerPart` en de vijf voorbeeldvoorspellingen uit `predictionPoints` (`apps/site/src/fans/prediction-rules.ts`).
+  Een test controleert dat het voorbeeld 30, 17, 12, 5 en 5 punten geeft.
+  De regel voor gelijke punten is dezelfde als die van de stand.
+- **Waarom:** de pagina kan zo niet anders zeggen dan het spel doet.
+- **Alternatieven:** de bedragen in de tekst typen.

@@ -56,3 +56,14 @@ describe('the line about the reminder under the confirmation', () => {
     expect(render(false)).not.toContain('Een herinnering per e-mail?')
   })
 })
+
+describe('the link "Spelregels" under the ScoreGrid (issue 1455)', () => {
+  it('goes to the part of the Prognose on the page with the rules, after the line about 90 minutes', () => {
+    useActionState.mockReturnValue([before, vi.fn()])
+
+    const html = render(false)
+
+    expect(html).toContain('<a href="/fans/spelregels#prognose">Spelregels</a>')
+    expect(html.indexOf('Na 90 minuten')).toBeLessThan(html.indexOf('Spelregels'))
+  })
+})

@@ -64,6 +64,8 @@ const open = [
   // The ranking of the game is public: it shows screen names that chose to be in the standings,
   // and the row of the supporter is marked only when there is a session (issue 1451).
   'app/fans/prognose/stand/page.tsx',
+  // The rules of the games are public and hold nothing personal (issue 1455).
+  'app/fans/spelregels/page.tsx',
 ]
 
 function filesUnder(folder: string) {

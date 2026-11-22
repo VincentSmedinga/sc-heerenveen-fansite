@@ -14,6 +14,7 @@ import { maxPredictionPoints, pointsPerPart } from '@fansite/shared/prediction-p
 import { clubsOf, predictionPath } from '#src/fans/prediction'
 import { type CrowdFigures, type ScoredPrediction, totalsOf } from '#src/fans/prediction-results'
 import { guessText, listItemOf, playedScore, reasonText, scoreText } from '#src/fans/prediction-words'
+import { RulesLink } from '#src/fans/RulesLink'
 import { matchMoment } from '#src/match-format'
 import { reportAddress } from '#src/report-data'
 
@@ -132,33 +133,52 @@ export function PointsCard({
         />
       )}
       {played ? null : <Text>De punten voor de eindstand komen na de wedstrijd.</Text>}
+      <RulesLink />
     </Card>
   )
 }
 
-/**
- * The soft card "Punten": the scoring as a table, from the same numbers that `predictionPoints`
- * uses, so the table and the sum cannot differ.
- */
+/** The soft card "Punten": the scoring as a table, with the link to the rules. */
 export function ScoringCard() {
-  const { fullTime, halfTime } = pointsPerPart
-
   return (
     <Card aria-labelledby="punten-telling" game="prognose" surface="soft">
       <Heading id="punten-telling" level={2}>
         Punten
       </Heading>
-      <DataTable
-        caption="Wat een voorspelling oplevert"
-        columns={['Onderdeel', 'Precies goed', 'Uitslag goed', 'Eén doelpuntental goed']}
-        rows={[
-          { cells: [halfTime.exact, halfTime.outcome, halfTime.goals], header: 'Rust' },
-          { cells: [fullTime.exact, fullTime.outcome, fullTime.goals], header: 'Eind' },
-        ]}
-        sortable={false}
-      />
+      <ScoringTable caption="Wat een voorspelling oplevert" />
       <Text>{`De telling van de oude Fansite. Hoogstens ${maxPredictionPoints} punten per wedstrijd.`}</Text>
+      <RulesLink />
     </Card>
+  )
+}
+
+/**
+ * The table of the scoring, from the same numbers that `predictionPoints` uses, so the table
+ * and the sum cannot differ. The card "Punten" and the page with the rules show it. `short`
+ * gives short headers, for a phone: the caption then says what they mean.
+ */
+export function ScoringTable({ caption, short = false }: { caption: string; short?: boolean }) {
+  const { fullTime, halfTime } = pointsPerPart
+
+  return (
+    <DataTable
+      caption={caption}
+      columns={
+        short
+          ? [
+              'Deel',
+              { abbreviation: 'Precies', name: 'precies goed' },
+              { abbreviation: 'Uitslag', name: 'uitslag goed' },
+              { abbreviation: 'Eén', name: 'één doelpuntental goed' },
+            ]
+          : ['Onderdeel', 'Precies goed', 'Uitslag goed', 'Eén doelpuntental goed']
+      }
+      rows={[
+        { cells: [halfTime.exact, halfTime.outcome, halfTime.goals], header: 'Rust' },
+        { cells: [fullTime.exact, fullTime.outcome, fullTime.goals], header: 'Eind' },
+      ]}
+      sortable={false}
+    />
   )
 }
 
@@ -198,6 +218,7 @@ export function YourPredictionsCard({
               <Link href={allPredictionsAddress}>{`Alle ${count} voorspellingen`}</Link>
             </Text>
           ) : null}
+          <RulesLink />
         </>
       )}
     </Card>

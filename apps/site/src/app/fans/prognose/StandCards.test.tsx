@@ -82,3 +82,11 @@ describe('the card Stand', () => {
     expect(html).not.toContain('<table')
   })
 })
+
+describe('the link "Spelregels" under the table of the ranking (issue 1455)', () => {
+  it('goes to the part of the Prognose on the page with the rules', () => {
+    const html = renderToStaticMarkup(<StandTable caption="Stand" ranking={ranking} supporterId={undefined} />)
+
+    expect(html).toContain('<a href="/fans/spelregels#prognose">Spelregels</a>')
+  })
+})

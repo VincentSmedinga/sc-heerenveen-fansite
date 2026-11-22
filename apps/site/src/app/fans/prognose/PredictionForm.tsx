@@ -15,6 +15,7 @@ import {
   type PredictionValues,
   savedMessage,
 } from '#src/fans/prediction'
+import { RulesLink } from '#src/fans/RulesLink'
 
 import { savePredictionAction } from './actions'
 
@@ -96,6 +97,7 @@ export function PredictionForm({
           legend="Jouw voorspelling"
         />
         <Text>Na 90 minuten plus blessuretijd, ook in de beker.</Text>
+        <RulesLink />
         <Button name={matchField} type="submit" value={matchId}>
           {hasPrediction ? 'Wijziging opslaan' : 'Voorspelling opslaan'}
         </Button>
