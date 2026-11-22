@@ -25,6 +25,8 @@ const allowedFieldNames = new Set([
   'awayHalfTime',
   'awayOffside',
   'clubs',
+  'coachCode',
+  'coachRatings',
   'code',
   'competition',
   'count',
@@ -198,7 +200,8 @@ describe('parseOldSiteFile', () => {
 
 describe('the files with the ratings (#1465)', () => {
   const rating = { average: 7.4, count: 5, matchCode: 'psv.thuis', playerCode: 'hans.vonk', spread: 1.02 }
-  const ratings = { ratings: [rating], season: '0102', version: 3 }
+  const coachRating = { average: 6.8, coachCode: 'foppe.dehaan', count: 40, matchCode: 'psv.thuis', spread: 1.3 }
+  const ratings = { coachRatings: [coachRating], ratings: [rating], season: '0102', version: 3 }
   const seasons = {
     seasonRatings: [{ average: 7.1, playerCode: 'hans.vonk', season: '9899' }],
     version: 3,
@@ -217,6 +220,11 @@ describe('the files with the ratings (#1465)', () => {
       )
     }
     expect(() => parseOldSiteFile(JSON.stringify({ ...ratings, visitors: [] }))).toThrow(/does not match the format/)
+    for (const extra of [{ visitor: 'Olaf' }, { name: 'Foppe de Haan' }, { dateTime: '2001-11-15 01:05:34' }]) {
+      expect(() =>
+        parseOldSiteFile(JSON.stringify({ ...ratings, coachRatings: [{ ...coachRating, ...extra }] })),
+      ).toThrow(/does not match the format/)
+    }
     expect(() =>
       parseOldSiteFile(JSON.stringify({ ...seasons, seasonRatings: [{ ...seasons.seasonRatings[0], votes: 3 }] })),
     ).toThrow(/does not match the format/)
@@ -236,6 +244,9 @@ describe('the files with the ratings (#1465)', () => {
 
     expect(data.ratings.length).toBeGreaterThan(2000)
     expect(data.ratings.every((one) => keys.has(`${one.season}/${one.matchCode}`))).toBe(true)
+    expect(data.coachRatings.length).toBeGreaterThan(200)
+    expect(data.coachRatings.every((one) => keys.has(`${one.season}/${one.matchCode}`))).toBe(true)
+    expect(new Set(data.coachRatings.map((one) => one.coachCode))).toEqual(new Set(['foppe.dehaan', 'gertjan.verbeek']))
     expect(data.seasonRatings.map((one) => one.season).filter((season, i, all) => all.indexOf(season) === i)).toEqual([
       '0001',
       '9899',

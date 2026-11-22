@@ -1,6 +1,13 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { matchPlayerRatings, oldSeasonRatings, oldSeasonWinners, players } from '@fansite/db/schema'
+import {
+  matchCoachRatings,
+  matchPlayerRatings,
+  oldSeasonRatings,
+  oldSeasonWinners,
+  players,
+  staff,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -10,7 +17,12 @@ import type { OldSiteData, OldSiteMatch, OldSiteRatingOfSeason } from './old-sit
 import { importOldSiteClubs, oldSiteClubIds } from './old-site-clubs.ts'
 import { importOldSiteMatches } from './old-site-matches.ts'
 import { importOldSitePlayers } from './old-site-players.ts'
-import { computedWinners, importOldSiteRatings, importOldSiteSeasonRatings } from './old-site-ratings.ts'
+import {
+  computedWinners,
+  importOldSiteCoachRatings,
+  importOldSiteRatings,
+  importOldSiteSeasonRatings,
+} from './old-site-ratings.ts'
 
 let database: TestDatabase
 
@@ -73,7 +85,16 @@ const rating = (matchCode: string, playerCode: string, average: number, count: n
 })
 
 function dataOf(overrides: Partial<OldSiteData> = {}): OldSiteData {
-  return { clubs: oldClubs, matches: matchList, players: [], ratings: [], seasonRatings: [], winners: [], ...overrides }
+  return {
+    clubs: oldClubs,
+    coachRatings: [],
+    matches: matchList,
+    players: [],
+    ratings: [],
+    seasonRatings: [],
+    winners: [],
+    ...overrides,
+  }
 }
 
 const ratings: OldSiteRatingOfSeason[] = [
@@ -84,7 +105,9 @@ const ratings: OldSiteRatingOfSeason[] = [
 
 beforeEach(async () => {
   for (const table of [
+    'match_coach_ratings',
     'match_player_ratings',
+    'staff',
     'old_season_ratings',
     'old_season_winners',
     'match_edits',
@@ -185,6 +208,124 @@ describe('the step cijfers', () => {
     expect(result.lines).toEqual([
       'skipped the rating of iemand.anders in 2001/02 ajax.uit: the player is not in the database',
       'skipped a rating in 2001/02 weg.thuis: the match is not in the database as a match of the old fansite',
+    ])
+  })
+})
+
+const coachRating = (matchCode: string, coachCode: string, average: number, count: number, spread: number) => ({
+  average,
+  coachCode,
+  count,
+  matchCode,
+  season: '0102',
+  spread,
+})
+
+const coachRatings = [
+  coachRating('nec.thuis', 'foppe.dehaan', 6.8, 40, 1.3),
+  coachRating('ajax.uit', 'foppe.dehaan', 7.1, 3, 0.6),
+]
+
+/** Foppe de Haan until the end of June 2002, and Gertjan Verbeek after it, for the staff. */
+async function addStaff() {
+  await database.db.insert(staff).values([
+    {
+      endDate: '2002-06-30',
+      endPrecision: 'day',
+      name: 'Foppe de Haan',
+      role: 'coach',
+      startDate: '1992-10-01',
+      startPrecision: 'month',
+    },
+    {
+      endDate: '2008-06-30',
+      endPrecision: 'day',
+      name: 'Gertjan Verbeek',
+      role: 'coach',
+      startDate: '2002-07-01',
+      startPrecision: 'day',
+    },
+  ])
+}
+
+const storedCoach = () => database.db.select().from(matchCoachRatings).orderBy(asc(matchCoachRatings.id))
+
+describe('the step trainercijfers', () => {
+  it('links each head coach to his person in the staff on the day of the match, and writes his numbers as oude-fansite', async () => {
+    const data = dataOf({ coachRatings })
+
+    await prepare(data)
+    await addStaff()
+
+    const result = await importOldSiteCoachRatings(database.db, data)
+    const rows = await storedCoach()
+    const names = new Map((await database.db.select().from(staff)).map((row) => [row.id, row.name]))
+
+    expect(result).toMatchObject({ changed: 0, created: 2, skipped: 0, unchanged: 0 })
+    expect(rows.map((row) => [row.source, row.average, row.ratingCount, row.spread])).toEqual([
+      ['oude-fansite', '6.80', 40, '1.30'],
+      ['oude-fansite', '7.10', 3, '0.60'],
+    ])
+    expect(rows.map((row) => names.get(row.staffId))).toEqual(['Foppe de Haan', 'Foppe de Haan'])
+  })
+
+  it('does not store a coach the staff cannot link on that day, and says which match', async () => {
+    const data = dataOf({
+      coachRatings: [
+        // Verbeek was not the head coach yet in 2001/02, and the staff has no third coach.
+        coachRating('nec.thuis', 'gertjan.verbeek', 5, 9, 1),
+        coachRating('ajax.uit', 'iemand.anders', 5, 9, 1),
+        coachRating('weg.thuis', 'foppe.dehaan', 7, 5, 1),
+        coachRating('ajax.uit', 'foppe.dehaan', 7.1, 3, 0.6),
+      ],
+    })
+
+    await prepare(data)
+    await addStaff()
+
+    const result = await importOldSiteCoachRatings(database.db, data)
+
+    expect(result).toMatchObject({ created: 1, skipped: 3 })
+    expect(result.lines).toEqual([
+      'skipped the rating of gertjan.verbeek in 2001/02 nec.thuis: the staff does not have him as the head coach on 2001-09-01',
+      'skipped the rating of iemand.anders in 2001/02 ajax.uit: the staff does not have him as the head coach on 2001-09-15',
+      'skipped the rating of the coach in 2001/02 weg.thuis: the match is not in the database as a match of the old fansite',
+    ])
+    expect(await storedCoach()).toHaveLength(1)
+  })
+
+  it('stores nothing without a staff, and changes nothing in a second run', async () => {
+    const data = dataOf({ coachRatings })
+
+    await prepare(data)
+    expect(await importOldSiteCoachRatings(database.db, data)).toMatchObject({ created: 0, skipped: 2 })
+    expect(await storedCoach()).toEqual([])
+
+    await addStaff()
+    await importOldSiteCoachRatings(database.db, data)
+
+    const before = await storedCoach()
+    const second = await importOldSiteCoachRatings(database.db, data)
+
+    expect(second).toMatchObject({ changed: 0, created: 0, skipped: 0, unchanged: 2 })
+    expect(await storedCoach()).toEqual(before)
+  })
+
+  it('changes a row whose numbers differ and removes a row the files no longer have', async () => {
+    const data = dataOf({ coachRatings })
+
+    await prepare(data)
+    await addStaff()
+    await importOldSiteCoachRatings(database.db, data)
+
+    const second = await importOldSiteCoachRatings(
+      database.db,
+      dataOf({ coachRatings: [coachRating('nec.thuis', 'foppe.dehaan', 6.9, 41, 1.4)] }),
+    )
+
+    expect(second).toMatchObject({ changed: 2, created: 0, unchanged: 0 })
+    expect((await storedCoach()).map((row) => [row.average, row.ratingCount, row.spread])).toEqual([
+      ['6.90', 41, '1.40'],
     ])
   })
 })

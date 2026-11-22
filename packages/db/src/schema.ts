@@ -3037,6 +3037,41 @@ export const matchPlayerRatings = mysqlTable(
 export type MatchPlayerRating = typeof matchPlayerRatings.$inferSelect
 
 /**
+ * The average of the ratings that supporters gave the head coach in one match (issues 1502
+ * and 1478), with the number of ratings and their spread (the standard deviation, in grades).
+ * It has the same columns as `match_player_ratings` and the same source, but it points to a
+ * person of `staff` and not to a player. It holds averages and counts only: who gave a rating
+ * is not kept.
+ */
+export const matchCoachRatings = mysqlTable(
+  'match_coach_ratings',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    matchId: int('match_id', { unsigned: true })
+      .notNull()
+      .references(() => matches.id, { onDelete: 'cascade' }),
+    staffId: int('staff_id', { unsigned: true })
+      .notNull()
+      .references(() => staff.id, { onDelete: 'cascade' }),
+    source: mysqlEnum('source', ratingSources).notNull(),
+    average: decimal('average', { precision: 4, scale: 2 }).notNull(),
+    ratingCount: int('rating_count', { unsigned: true }).notNull(),
+    spread: decimal('spread', { precision: 4, scale: 2 }).notNull(),
+  },
+  (table) => [
+    unique('match_coach_ratings_match_staff_source_unique').on(table.matchId, table.staffId, table.source),
+    index('match_coach_ratings_staff_id_idx').on(table.staffId),
+    check('match_coach_ratings_count_positive', sql`${table.ratingCount} > 0`),
+    check(
+      'match_coach_ratings_average_in_range',
+      sql`${table.average} between ${sql.raw(String(ratingLimits.minGrade))} and ${sql.raw(String(ratingLimits.maxGrade))}`,
+    ),
+  ],
+)
+
+export type MatchCoachRating = typeof matchCoachRatings.$inferSelect
+
+/**
  * The season ratings of 1998/99 to 2000/01 (issue 1465): the old fansite kept an average for a
  * player per season then, without matches and without the number of ratings, so they cannot be
  * worked out from `match_player_ratings`. The name is kept next to the player, because a

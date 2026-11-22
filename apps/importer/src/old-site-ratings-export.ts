@@ -1,4 +1,10 @@
-import type { OldSiteMatch, OldSiteRating, OldSiteSeasonRating, OldSiteWinner } from './old-site-file.ts'
+import type {
+  OldSiteCoachRating,
+  OldSiteMatch,
+  OldSiteRating,
+  OldSiteSeasonRating,
+  OldSiteWinner,
+} from './old-site-file.ts'
 
 /**
  * The part of `pnpm export:old-site` that works out the ratings (#1465): it turns the rows of
@@ -8,8 +14,9 @@ import type { OldSiteMatch, OldSiteRating, OldSiteSeasonRating, OldSiteWinner } 
  * second rating for the same player in the same match, and the time of the rating not at all
  * (the last one is the one with the highest `id`). Neither leaves this function: what it
  * returns holds numbers and codes of players and matches only. The coaches are in the same
- * table; their ratings are for #1502 and are counted here, not exported. The spread is the
- * standard deviation of the ratings of a player in a match (the whole group, not a sample).
+ * table; their ratings are worked out the same way (#1502) and go in their own list per match.
+ * The spread is the standard deviation of the ratings of a player in a match (the whole
+ * group, not a sample).
  */
 
 /** One rating of one visitor, as the old table has it. Only these columns are read. */
@@ -29,8 +36,17 @@ export type SeasonRatingRow = {
   spr_code: string
 }
 
-/** The two head coaches of 2001 to 2007: their ratings are for #1502, not for the players. */
-export const ratedCoachCodes: ReadonlySet<string> = new Set(['foppe.dehaan', 'gertjan.verbeek'])
+/**
+ * The two head coaches of 2001 to 2007, by the code of the old database and the name in
+ * `staff`.
+ * Their ratings are kept apart from those of the players.
+ */
+export const ratedCoaches: ReadonlyMap<string, string> = new Map([
+  ['foppe.dehaan', 'Foppe de Haan'],
+  ['gertjan.verbeek', 'Gertjan Verbeek'],
+])
+
+export const ratedCoachCodes: ReadonlySet<string> = new Set(ratedCoaches.keys())
 
 /** The seasons that have a season rating in the old table and no ratings per match. */
 export const oldSeasonRatingSeasons: ReadonlySet<string> = new Set(['0001', '9899', '9900'])
@@ -38,6 +54,8 @@ export const oldSeasonRatingSeasons: ReadonlySet<string> = new Set(['0001', '989
 export type OldSiteRatings = {
   /** The ratings per match and player, by season (the code of the old database). */
   bySeason: Map<string, OldSiteRating[]>
+  /** The ratings per match and head coach, by season. */
+  coachBySeason: Map<string, OldSiteCoachRating[]>
   /** The ratings of players who are not in the line-up of the match, per match. */
   outsideLineup: RatingOutsideLineup[]
   /** Lines for the person who runs the export. */
@@ -88,16 +106,13 @@ export function buildOldSiteRatings(
   }
 
   const grades = new Map<string, number[]>()
+  const coachGrades = new Map<string, number[]>()
   const counts = { coaches: 0, gone: 0, notInFiles: 0, outside: 0 }
   const gone = new Set<string>()
 
   for (const row of last.values()) {
     const matchKey = `${row.wsd_seizoen}/${row.wsd_code}`
 
-    if (ratedCoachCodes.has(row.spr_code)) {
-      counts.coaches += 1
-      continue
-    }
     if (!knownMatches.has(matchKey)) {
       counts.gone += 1
       gone.add(matchKey)
@@ -112,14 +127,17 @@ export function buildOldSiteRatings(
     }
 
     const key = `${matchKey}|${row.spr_code}`
-    const list = grades.get(key)
+    const isCoach = ratedCoachCodes.has(row.spr_code)
+    const list = (isCoach ? coachGrades : grades).get(key)
 
     if (list) {
       list.push(row.cijfer)
     } else {
-      grades.set(key, [row.cijfer])
+      ;(isCoach ? coachGrades : grades).set(key, [row.cijfer])
     }
-    if (!lineup.has(row.spr_code)) {
+    if (isCoach) {
+      counts.coaches += 1
+    } else if (!lineup.has(row.spr_code)) {
       counts.outside += 1
     }
   }
@@ -143,6 +161,17 @@ export function buildOldSiteRatings(
     bySeason.set(season, ratings)
   }
 
+  const coachBySeason = new Map<string, OldSiteCoachRating[]>()
+
+  for (const [key, list] of [...coachGrades].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) {
+    const [matchKey = '', coachCode = ''] = key.split('|')
+    const [season = '', matchCode = ''] = splitOnce(matchKey, '/')
+    const ratings = coachBySeason.get(season) ?? []
+
+    ratings.push({ ...describeGrades(list), coachCode, matchCode })
+    coachBySeason.set(season, ratings)
+  }
+
   const seasonRatings: OldSiteSeasonRating[] = seasonRatingRows
     .filter((row) => oldSeasonRatingSeasons.has(row.jaargang) && row.gemiddelde >= 1)
     .map((row) => ({ average: round(row.gemiddelde), playerCode: row.spr_code, season: row.jaargang }))
@@ -155,8 +184,11 @@ export function buildOldSiteRatings(
     [...bySeason].flatMap(([season, list]) => list.map((r) => `${season}/${r.matchCode}`)),
   )
 
+  const coachExported = [...coachBySeason.values()].reduce((sum, list) => sum + list.length, 0)
+
   return {
     bySeason,
+    coachBySeason,
     outsideLineup,
     report: [
       `${exported} ratings per match and player, in ${matchesWithRatings.size} matches, from ${ratingRows.length} ratings of visitors`,
@@ -164,7 +196,7 @@ export function buildOldSiteRatings(
       `ratings for a match code that no longer exists, left out: ${counts.gone}${gone.size === 0 ? '' : ` (${[...gone].sort().join(', ')})`}`,
       `ratings for a match that is not in the files, left out: ${counts.notInFiles}`,
       `ratings for a player who is not in the line-up of the match, left out and listed for the editors: ${counts.outside} (${outsideLineup.length} players in ${new Set(outsideLineup.map((one) => `${one.season}/${one.matchCode}`)).size} matches)`,
-      `ratings for the two head coaches, left for #1502: ${counts.coaches}`,
+      `ratings per match and head coach: ${coachExported}, from ${counts.coaches} ratings of visitors (only the last of a visitor counts)`,
       `season ratings before 2001: ${seasonRatings.length}`,
     ],
     seasonRatings,

@@ -2470,7 +2470,7 @@ Het script rekent ze uit tot gemiddelden en schrijft alleen die (zie `src/old-si
 - Een cijfer voor een speler die niet in de opstelling van die wedstrijd staat, komt niet in de bestanden en niet in de database.
   Het staat per wedstrijd in `docs/cijfers-buiten-opstelling.md`, zodat de redactie kan beoordelen of de opstelling of het cijfer niet klopt.
 - De twee hoofdtrainers (`foppe.dehaan` en `gertjan.verbeek`) staan in dezelfde tabel.
-  Het script telt hun cijfers (4.869 na het weglaten van dubbele) en laat ze liggen voor #1502, dat `ratedCoachCodes` en `buildOldSiteRatings` hergebruikt.
+  Het script rekent hun cijfers op dezelfde manier uit (#1502, 246 gemiddelden uit 4.859 cijfers na het weglaten van dubbele en van een wedstrijdcode die niet meer bestaat) en schrijft ze als `coachRatings` in dezelfde `ratings-<seizoen>.json`, met de code van de trainer in plaats van die van een speler.
 - De seizoencijfers van 1998/99 tot 2000/01 komen uit `uitblinker_oud`, zonder wedstrijden en zonder aantal cijfers, want de oude site bewaarde die niet.
 - De acht uitblinkers van het jaar staan in `uitblinkersOfTheYear` in `src/old-site-ratings-export.ts`, overgetypt van de oude pagina: de oude database heeft ze niet.
 
@@ -2478,6 +2478,9 @@ De stappen `cijfers` en `seizoencijfers` van de import zetten dit in `match_play
 De wedstrijd en de speler worden gevonden zoals de andere stappen dat doen, met dezelfde naamcorrecties.
 Een cijfer van een wedstrijd of speler die niet in de database staat, slaat de stap over met een regel in het logboek.
 Alle gemiddelden komen mee, ook die op minder dan vijf cijfers: de pagina's passen de drempel toe.
+De stap `trainercijfers` zet de cijfers van de twee hoofdtrainers in `match_coach_ratings`, met de bron `oude-fansite`.
+Ze koppelt de trainer aan zijn persoon in `staff` op de datum van de wedstrijd, en alleen als de staf hem zeker als hoofdtrainer heeft.
+Een trainer die niet te koppelen is, komt niet in de database, en het logboek noemt de wedstrijd.
 De stap `seizoencijfers` toetst de uitblinkers van 2001/02 tot 2005/06 aan de cijfers van de wedstrijden en meldt een verschil, zonder iets te veranderen.
 
 ### De bestanden lezen
@@ -2492,7 +2495,7 @@ Beide weigeren een bestand met een ander versienummer, een veld dat niet in de v
 `pnpm import:old-site` (op de host `import.mjs --old-site`) leest de bestanden van hierboven en schrijft ze naar de database.
 Hij raakt de oude database nooit, want productie kan die niet bereiken.
 Hij draait de stappen één voor één, in een vaste volgorde, omdat een wedstrijd een club nodig heeft en een doelpunt een wedstrijd.
-Nu zijn er elf stappen: `clubs`, `matches`, `spelers`, `doelpunten`, `opstellingen`, `personen`, `doelpunten tegen ons`, `linie en land`, `cijfers`, `seizoencijfers` en `selecties`.
+Nu zijn er twaalf stappen: `clubs`, `matches`, `spelers`, `doelpunten`, `opstellingen`, `personen`, `doelpunten tegen ons`, `linie en land`, `cijfers`, `trainercijfers`, `seizoencijfers` en `selecties`.
 
 ```sh
 pnpm import:old-site --dry-run
