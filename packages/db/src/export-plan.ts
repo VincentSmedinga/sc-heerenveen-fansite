@@ -97,6 +97,11 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
   },
   daily_visitors: 'copy',
   discussions: 'structure',
+  fantasy_picks: {
+    keep: ['id', 'match_id', 'player_1_id', 'player_2_id', 'player_3_id', 'player_4_id', 'created_at', 'updated_at'],
+    replace: { supporter_id: 'NULL' },
+  },
+  fantasy_player_lines: 'copy',
   feeds: 'copy',
   group_standings: 'copy',
   import_alerts: 'copy',
