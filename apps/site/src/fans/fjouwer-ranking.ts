@@ -14,7 +14,7 @@ import { fourOf, usesBefore } from './fjouwer-rules'
 // so a corrected report corrects the ranking within the five minutes it is kept.
 
 /** The name shown for an account that was closed: the figures stay, the name is gone. */
-export const formerSupporter = 'Voormalige supporter'
+export const formerSupporter = 'Voormalige fan'
 
 /**
  * A ranking of a season. `rows` are the supporters who have a row, in order. `hidden` are the
@@ -69,7 +69,7 @@ export async function loadRankedSeasons(db: Database): Promise<string[]> {
  * The ranking of a season, read without the cache: for every match with a finished report, the
  * points of the four each supporter had (saved or inherited), added up. A blocked account is
  * not in it. A closed account keeps its saved fours without a name: each of them is a row of
- * "Voormalige supporter", because the fours of one closed account can't be told apart.
+ * "Voormalige fan", because the fours of one closed account can't be told apart.
  */
 export async function loadSeasonRanking(
   db: Database,
