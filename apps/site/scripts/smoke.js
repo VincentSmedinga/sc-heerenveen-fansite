@@ -2223,6 +2223,10 @@ await withEmptyDatabase((database) =>
     assert.match(fourHtml, /<h2[^>]*>Jouw vier<\/h2>/)
     assert.match(fourHtml, /Log in om je vier te kiezen/)
     assert.doesNotMatch(fourHtml, /type="checkbox"/)
+    // The scoring is public and the same for everybody; the points of a four are not there.
+    assert.match(fourHtml, /<h2[^>]*>Punten<\/h2>/)
+    assert.match(fourHtml, /Het verslag van de redactie beslist wat een speler deed\./)
+    assert.doesNotMatch(fourHtml, /Eerdere wedstrijden/)
     assert.equal(four.headers.get('cache-control'), 'no-store')
     assert.equal(four.headers.get('x-robots-tag'), 'noindex, nofollow')
     assert.match(html, /<a [^>]*href="\/fans\/fjouwer"[^>]*>Naar Fjouwer<\/a>/)

@@ -11,6 +11,7 @@
     "./continents": "./src/continents.ts",
     "./countries": "./src/countries.ts",
     "./env": "./src/env.ts",
+    "./fantasy-points": "./src/fantasy-points.ts",
     "./fans-env": "./src/fans-env.ts",
     "./mail": "./src/mail.ts",
     "./reminder-code": "./src/reminder-code.ts",

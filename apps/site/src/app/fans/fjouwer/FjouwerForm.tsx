@@ -11,6 +11,7 @@ import {
   groupId,
   matchField,
   playerField,
+  playerLine,
   savedMessage,
 } from '#src/fans/fjouwer-form'
 import { fjouwerLines, lineWords, maxPerLine, maxUsesPerSeason, picksPerMatch } from '#src/fans/fjouwer-rules'
@@ -129,7 +130,7 @@ export function FjouwerForm({
               options: inLine.map((player) => ({
                 disabled: player.usesLeft === 0,
                 label: player.name,
-                line: `nog ${player.usesLeft} keer`,
+                line: playerLine(player.points, player.usesLeft),
                 reason: player.usesLeft === 0 ? `Al ${maxUsesPerSeason} keer gekozen` : undefined,
                 value: String(player.id),
               })),
