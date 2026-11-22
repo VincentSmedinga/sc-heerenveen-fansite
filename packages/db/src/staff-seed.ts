@@ -13,8 +13,9 @@ import { staff } from './schema.ts'
  * took and why. A date that comes from another source than Wikipedia, such as the end of Robin
  * van Persie, which is from the announcement of the club, says so in a comment and in the note.
  *
- * A change to a row that is already in a database is a migration: the seed finds a row by its
- * role, name and begin date, and a row with another begin date is a new row.
+ * The seed finds a row by its role, name and begin date and updates it, at every start of the
+ * site, so a changed end date or note reaches a database that already has the row. A row with
+ * another begin date is a new row, so a change to a begin date is a migration.
  */
 export const headCoaches = [
   {
