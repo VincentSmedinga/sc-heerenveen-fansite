@@ -3,6 +3,7 @@ import type { Person } from '@fansite/db/schema'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { type AgainstMatch, loadAgainstMatches } from '#src/player-against'
 import { loadPlayerPage, periodsOf, type PlayerPage, playerPageOf } from '#src/player-page'
 import { loadPlayerRatings, type PlayerRatings } from '#src/player-ratings'
 import { loadPlayerSeasonFacts, loadPlayerSeasons, type PlayerSeason } from '#src/player-seasons'
@@ -14,6 +15,11 @@ import { playerMetadata, PlayerPageView, playerShortcuts } from './player-page'
 vi.mock('#src/player-page', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   loadPlayerPage: vi.fn(),
+}))
+
+vi.mock('#src/player-against', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  loadAgainstMatches: vi.fn(),
 }))
 
 vi.mock('#src/player-seasons', async (importOriginal) => ({
@@ -84,6 +90,7 @@ const digestOf = async (promise: Promise<unknown>) =>
   )
 
 beforeEach(() => {
+  vi.mocked(loadAgainstMatches).mockResolvedValue([])
   vi.mocked(loadPlayerRatings).mockResolvedValue(undefined)
   vi.mocked(loadPlayerSeasons).mockResolvedValue([madeUpSeason])
   vi.mocked(loadPlayerSeasonFacts).mockResolvedValue({
@@ -639,6 +646,64 @@ describe('the card Cijfers van de fans on the page of a player', () => {
     const html = await render()
 
     expect(html).not.toContain('Cijfers van de fans')
+    expect(html).toContain('Per seizoen')
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('connect ECONNREFUSED'))
+    error.mockRestore()
+  })
+})
+
+describe('the card Tegen ons (#1545)', () => {
+  const against = (id: number, season: string, day: string): AgainstMatch => ({
+    club: 'Oefenstad',
+    competition: 'Eredivisie',
+    day,
+    goals: 1,
+    goalsAgainst: 1,
+    goalsFor: 3,
+    home: true,
+    id,
+    minutes: 90,
+    round: String(id),
+    season,
+  })
+
+  it('stands after the career, with a link to the match, and is in the bar Op deze pagina', async () => {
+    vi.mocked(loadAgainstMatches).mockResolvedValue([against(1, '2000/01', '2000-10-13')])
+    vi.mocked(getReportAddresses).mockResolvedValue(
+      new Map([['Eredivisie|1', '/wedstrijden/2000-01/2000-10-13-oefenstad']]),
+    )
+    vi.mocked(loadPlayerPage).mockResolvedValue({ kind: 'found', page: player })
+
+    const html = await render()
+    const bar = withoutIcons(
+      renderToStaticMarkup(await playerShortcuts({ searchParams: Promise.resolve({}), slug: 'jan-de-vries' })),
+    )
+
+    expect(html).toMatch(/<h2[^>]*>Tegen ons<\/h2>/)
+    expect(html.indexOf('>Loopbaan bij sc Heerenveen<')).toBeLessThan(html.indexOf('>Tegen ons<'))
+    expect(html).toContain('href="/wedstrijden/2000-01/2000-10-13-oefenstad"')
+    expect(html).toContain('Voor zijn tijd bij sc Heerenveen')
+    expect(bar).toContain('href="#tegen-ons"')
+  })
+
+  it('is not on the page, and not in the bar, for a player who never played against us', async () => {
+    const html = await render()
+    const bar = withoutIcons(
+      renderToStaticMarkup(await playerShortcuts({ searchParams: Promise.resolve({}), slug: 'jan-de-vries' })),
+    )
+
+    expect(html).not.toContain('Tegen ons')
+    expect(bar).not.toContain('Tegen ons')
+  })
+
+  it('leaves the card out and logs it when the matches cannot be read, and the page goes on', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    vi.mocked(loadAgainstMatches).mockRejectedValue(new Error('connect ECONNREFUSED'))
+
+    const html = await render()
+
+    expect(html).not.toContain('Tegen ons')
     expect(html).toContain('Per seizoen')
     expect(error).toHaveBeenCalledWith(expect.stringContaining('connect ECONNREFUSED'))
     error.mockRestore()

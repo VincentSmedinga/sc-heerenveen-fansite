@@ -7920,3 +7920,21 @@
   Een voorbeeld dat in een test staat en niet op de pagina, of andersom, loopt vroeg of laat uiteen.
 - **Alternatieven:** de voorbeelden in de testbestanden laten en de pagina met de hand overtypen (loopt uiteen); een eigen pagina per spel (meer plekken om bij te houden).
 - **Let op:** de kaart linkt naar de stand (#1473), en de pagina van de stand linkt terug met "Spelregels".
+
+## De spelerspagina toont wat een speler deed tegen ons, uit onze eigen verslagen
+
+- **Datum:** 22 november 2026
+- **Besluit:** "wat een speler deed voor en na zijn tijd bij ons" zijn de wedstrijden die hij als tegenstander tegen ons speelde, uit onze eigen verslagen.
+  Zijn loopbaan bij andere clubs, uit Wikidata, hoort er niet bij.
+  De pagina van een speler heeft daarvoor de kaart "Tegen ons", na de kaart Loopbaan en met een link in de balk "Op deze pagina".
+  De kaart staat er alleen als een regel van de tegenstander zijn persoon heeft (#1544), de wedstrijd gespeeld is en het verslag klaar is (`reportFinished`).
+  Een wedstrijd waarin hij op de bank bleef, telt niet mee: hij heeft er niet gespeeld.
+  De wedstrijden staan in drie groepen, de nieuwste eerst: "Voor zijn tijd bij sc Heerenveen" (seizoenen vóór zijn eerste seizoen bij ons), "Na zijn tijd bij sc Heerenveen" (na zijn laatste) en "Tussendoor" (van zijn eerste tot en met zijn laatste seizoen, zodat een overgang midden in een seizoen niet wegvalt).
+  Elke groep heeft zijn eigen tabel en een regel met het aantal wedstrijden en doelpunten.
+  Een eigen doelpunt telt niet als doelpunt van hem.
+  De kaart leest alleen onze eigen verslagen (`apps/site/src/player-against.ts`): geen nieuw verzoek, geen geboortedatum en geen nieuwe bron.
+- **Waarom:** de gegevens die we al hebben of krijgen zijn genoeg voor een eerste, eerlijke kaart.
+  Een loopbaan is een nieuwe import en een toets van de regels van Wikimedia, en een eigen issue als de projecteigenaar hem wil.
+- **Alternatieven:** de volledige loopbaan uit Wikidata (een nieuwe import, en niet alleen wedstrijden tegen ons); beide in één issue (te groot voor één pull request).
+- **Let op:** de kaart is er pas bij spelers van wie de opstelling van de tegenstander in een verslag staat.
+  Hij groeit met de verslagen, en met de koppeling van #1544.
