@@ -36,7 +36,7 @@ export async function loadOldMatchRatings(match: { id: number }): Promise<MatchR
 }
 
 /**
- * The card Uitblinker of an old match: the heading with "Van supporters" beside it, the seal of
+ * The card Uitblinker of an old match: the heading with "Van de fans" beside it, the seal of
  * the Uitblinker of the match (not when nobody has enough ratings), the table of the players by
  * average (`orderRatings`), and the source.
  */
@@ -49,7 +49,7 @@ export function OldMatchRatingsCard({
 }) {
   return (
     <Card aria-labelledby="uitblinker-supporters" game="uitblinker">
-      <GameHeading id="uitblinker-supporters" level={2} meta="Van supporters">
+      <GameHeading id="uitblinker-supporters" level={2} meta="Van de fans">
         Uitblinker
       </GameHeading>
       <RatingsTable names={names} ratings={ratings} />
@@ -58,9 +58,9 @@ export function OldMatchRatingsCard({
   )
 }
 
-/** The number of supporters who rated, without a full stop: "31 supporters gaven cijfers". */
+/** The number of supporters who rated, without a full stop: "31 fans gaven cijfers". */
 export const supportersText = (count: number, already = false) =>
-  `${count === 1 ? '1 supporter gaf' : `${count} supporters gaven`}${already ? ' al' : ''} cijfers`
+  `${count === 1 ? '1 fan gaf' : `${count} fans gaven`}${already ? ' al' : ''} cijfers`
 
 /**
  * The card Uitblinker of a new match. Once the window is closed: the seal, the table and the
@@ -76,7 +76,7 @@ export function NewMatchRatingsCard({
 }) {
   return (
     <Card aria-labelledby="uitblinker-supporters" game="uitblinker">
-      <GameHeading id="uitblinker-supporters" level={2} meta="Van supporters">
+      <GameHeading id="uitblinker-supporters" level={2} meta="Van de fans">
         Uitblinker
       </GameHeading>
       {data.state === 'open' ? (
@@ -124,7 +124,7 @@ export function RatingsTable({
         />
       )}
       <DataTable
-        caption="Cijfers van supporters per speler"
+        caption="Cijfers van de fans per speler"
         columns={['Speler', { key: true, name: 'Gem' }, { name: 'Cijfers' }]}
         rows={[
           ...players.map((player) => rowOf(player, winner, names)),

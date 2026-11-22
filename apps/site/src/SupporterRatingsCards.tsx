@@ -8,7 +8,7 @@ import { gradeText, minimumMatches, minimumRatings, oldSourceLine } from './play
 const dash = '–'
 
 /**
- * The card "Cijfers van supporters" on Spelers › Cijfers (issue 1474): the players of a season
+ * The card "Cijfers van de fans" on Spelers › Cijfers (issue 1474): the players of a season
  * from the highest season rating down, with the link to the Uitblinkers of the year. The card
  * has the watermark of the Uitblinker (see `Card`). A season without a player that counts
  * says so instead of showing an empty table.
@@ -38,7 +38,7 @@ export function SeasonRankingCard({
   return (
     <Card aria-labelledby="cijfers-van-supporters" game="uitblinker">
       <Heading id="cijfers-van-supporters" level={2}>
-        Cijfers van supporters
+        Cijfers van de fans
       </Heading>
       <SeasonPicker action={action} fields={fields} label={seasonPickerLabel} options={options} value={value} />
       {rows.length === 0 ? (

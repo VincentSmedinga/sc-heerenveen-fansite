@@ -32,7 +32,7 @@ import { ForgetAddressForm } from './SupporterForms'
 // is built.
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Supporters' }
+export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Fans' }
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -58,10 +58,10 @@ export default async function SupportersPage({ searchParams }: { searchParams: P
   return (
     <Page.Main areas={adminAreas} className={compact}>
       <Page.Cell area="head">
-        <Heading level={1}>Supporters</Heading>
+        <Heading level={1}>Fans</Heading>
         <Text appearance="intro">
-          Zoek een supporter op zijn schermnaam, pas een naam aan die niet kan, of blokkeer een account dat misbruik
-          maakt. Supporters melden zo&apos;n naam via Contact.
+          Zoek een fan op de schermnaam, pas een naam aan die niet kan, of blokkeer een account dat misbruik maakt. Fans
+          melden zo&apos;n naam via Contact.
         </Text>
       </Page.Cell>
       <Page.Cell area="main">
@@ -96,7 +96,7 @@ export default async function SupportersPage({ searchParams }: { searchParams: P
           ) : (
             <DataTable
               appearance="text"
-              caption="Accounts van supporters, de nieuwste eerst"
+              caption="Accounts van fans, de nieuwste eerst"
               columns={[
                 'Schermnaam',
                 { fold: true, name: 'Aangemaakt' },

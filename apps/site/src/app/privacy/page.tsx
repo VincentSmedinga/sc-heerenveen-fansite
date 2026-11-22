@@ -38,9 +38,9 @@ const AccountSection = ({ reminder }: { reminder: boolean }) => (
       onthouden we een kwartier lang een code van je adres. Het adres zelf zit er niet in.
     </Text>
     <Text>
-      Andere supporters zien je schermnaam en je punten in de standen, tenzij je dat uitzet. Verder tonen we alleen
-      cijfers van alle supporters samen, zonder namen. Een account is een profiel dat je zelf maakt. Wij bouwen er geen
-      over je en voegen het met niets samen.
+      Andere fans zien je schermnaam en je punten in de standen, tenzij je dat uitzet. Verder tonen we alleen cijfers
+      van alle fans samen, zonder namen. Een account is een profiel dat je zelf maakt. Wij bouwen er geen over je en
+      voegen het met niets samen.
     </Text>
     <Text>
       We bewaren je account tot je het opheft. Gebruik je het twee jaar niet, dan sturen we één bericht, en het account
@@ -51,8 +51,8 @@ const AccountSection = ({ reminder }: { reminder: boolean }) => (
     <Text>
       Op <Link href="/fans/mijn-account">Mijn account</Link> zie je alles wat we van je bewaren, en kun je het account
       opheffen. Dan verdwijnen je schermnaam en je e-mailadres, en je sessies en links. Wat je in de spellen invulde,
-      blijft zonder naam meetellen in de cijfers van alle supporters. Wil je ook dat niet, vraag het dan de redactie
-      voordat je opheft.
+      blijft zonder naam meetellen in de cijfers van alle fans. Wil je ook dat niet, vraag het dan de redactie voordat
+      je opheft.
     </Text>
     <Text>
       Blokkeert de redactie een account, dan zie je dat op Mijn account, met de reden. Verdwijnt zo'n account, dan
@@ -133,11 +133,11 @@ export default function PrivacyPage() {
         </Text>
         {accounts ? (
           <Text>
-            Een supporter die inlogt, krijgt ook een cookie. Het bevat een nummer voor die sessie, niets over jou. Je
-            browser stuurt het alleen naar pagina&apos;s onder /fans. Het werkt tot 90 dagen na je laatste bezoek, en
-            hoogstens een jaar na het inloggen. Daarnaast bewaart je browser een teken met je schermnaam, zodat de kop
-            op elke pagina je initialen toont. Dat teken gaat nergens heen. Een cookiemelding vragen we niet: dit cookie
-            is nodig voor iets waar je zelf om vraagt, en het volgt niemand.
+            Een fan die inlogt, krijgt ook een cookie. Het bevat een nummer voor die sessie, niets over jou. Je browser
+            stuurt het alleen naar pagina&apos;s onder /fans. Het werkt tot 90 dagen na je laatste bezoek, en hoogstens
+            een jaar na het inloggen. Daarnaast bewaart je browser een teken met je schermnaam, zodat de kop op elke
+            pagina je initialen toont. Dat teken gaat nergens heen. Een cookiemelding vragen we niet: dit cookie is
+            nodig voor iets waar je zelf om vraagt, en het volgt niemand.
           </Text>
         ) : null}
         {accounts ? <AccountSection reminder={isFansPartOn('prognose')} /> : null}

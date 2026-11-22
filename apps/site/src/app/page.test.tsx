@@ -383,7 +383,7 @@ describe('the homepage', () => {
 
     expect(metadata).toMatchObject({
       alternates: { canonical: 'https://acc.sc.heerenveen.org/' },
-      description: 'Alles over sc Heerenveen op één plek – voor supporters door supporters.',
+      description: 'Alles over sc Heerenveen op één plek: koppen, wedstrijden en spelers, voor fans door fans.',
       openGraph: { title: 'sc Heerenveen Fansite', url: 'https://acc.sc.heerenveen.org/' },
     })
     expect(metadata).not.toHaveProperty('title')

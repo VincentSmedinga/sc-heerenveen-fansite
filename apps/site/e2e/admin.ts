@@ -381,7 +381,7 @@ export async function correctPlayedResult(matchId: number, goalsFor: number, goa
 export async function madeUpSupporterId() {
   const { close, db } = connect(localDatabaseUrl())
   const find = () =>
-    db.select({ id: supporters.id }).from(supporters).where(eq(supporters.email, 'proefsupporter@example.test'))
+    db.select({ id: supporters.id }).from(supporters).where(eq(supporters.email, 'proefaccount@example.test'))
 
   try {
     const [existing] = await find()
@@ -392,9 +392,9 @@ export async function madeUpSupporterId() {
 
     try {
       const [inserted] = await db.insert(supporters).values({
-        email: 'proefsupporter@example.test',
-        screenName: 'Proefsupporter',
-        screenNameKey: 'proefsupporter',
+        email: 'proefaccount@example.test',
+        screenName: 'Proefaccount',
+        screenNameKey: 'proefaccount',
       })
 
       return inserted.insertId

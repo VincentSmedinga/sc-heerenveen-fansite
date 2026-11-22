@@ -2437,8 +2437,8 @@ De verbinding staat op alleen lezen en het script voert alleen `SELECT` uit.
 Het schrijft:
 
 - de bestanden in [`data/oude-fansite/`](data/oude-fansite/): `clubs.json`, `players.json` en een bestand per seizoen, `matches-<seizoen>.json` (het seizoen `9091` is 1990/91);
-- de cijfers van de oude supporters (#1465): `ratings-<seizoen>.json` per seizoen van 2001/02 tot 2006/07, met per wedstrijd en speler het gemiddelde, het aantal cijfers en de spreiding, en `season-ratings.json` met de seizoencijfers van 1998/99 tot 2000/01 en de uitblinkers van het jaar;
-- de voorspellingen van de oude supporters (#1457): `predictions-<seizoen>.json` per seizoen van 2001/02 tot 2006/07, met per wedstrijd hoeveel bezoekers elke eindstand en elke ruststand voorspelden;
+- de cijfers van de fans van de oude Fansite (#1465): `ratings-<seizoen>.json` per seizoen van 2001/02 tot 2006/07, met per wedstrijd en speler het gemiddelde, het aantal cijfers en de spreiding, en `season-ratings.json` met de seizoencijfers van 1998/99 tot 2000/01 en de uitblinkers van het jaar;
+- de voorspellingen van de fans van de oude Fansite (#1457): `predictions-<seizoen>.json` per seizoen van 2001/02 tot 2006/07, met per wedstrijd hoeveel bezoekers elke eindstand en elke ruststand voorspelden;
 - [`docs/oefenwedstrijden-2002-03.md`](../../docs/oefenwedstrijden-2002-03.md): de negen oefenwedstrijden van de zomer van 2002, met de uitslag en de doelpuntenmakers van sc Heerenveen;
 - [`docs/cijfers-buiten-opstelling.md`](../../docs/cijfers-buiten-opstelling.md): de cijfers voor spelers die niet in de opstelling van die wedstrijd staan, per wedstrijd, voor de redactie.
 
@@ -2459,7 +2459,7 @@ De bestanden leggen niets uit.
 `home` is de kant die de oude database `t` noemt, een `0` bij hoekschoppen, buitenspel of overtredingen is "onbekend", en een minuut `0` bij een doelpunt of gele kaart ook.
 Welke code een speler van ons is, wat een opmerking `n.v.` betekent en wat het seizoen `9091` is, staat in de import.
 
-### De cijfers van de oude supporters
+### De cijfers van de fans van de oude Fansite
 
 De oude tabel `uitblinker_inz` heeft 58.866 cijfers van bezoekers.
 Het script rekent ze uit tot gemiddelden en schrijft alleen die (zie `src/old-site-ratings-export.ts`):
@@ -2483,7 +2483,7 @@ De stap `trainercijfers` zet de cijfers van de twee hoofdtrainers in `match_coac
 Ze koppelt de trainer aan zijn persoon in `staff` op de datum van de wedstrijd, en alleen als de staf hem zeker als hoofdtrainer heeft.
 Een trainer die niet te koppelen is, komt niet in de database, en het logboek noemt de wedstrijd.
 
-### De voorspellingen van de oude supporters
+### De voorspellingen van de fans van de oude Fansite
 
 De oude tabellen `prognose_inz` (bezoekers met een account) en `prognose_oud` (juli tot december 2001, van vóór de accounts) hebben samen 17.197 voorspellingen.
 Het script telt ze per wedstrijd, per voorspelde eindstand en per voorspelde ruststand, en schrijft alleen die aantallen (zie `src/old-site-predictions-export.ts`):
@@ -2710,10 +2710,10 @@ Voor de kruistabellen vraagt het de Nederlandse Wikipedia om één pagina per se
 De bestanden zitten niet in `import.mjs`: `pnpm --filter site assemble` zet ze in `apps/importer/data/oude-fansite/` naast het bestand, en de deploy kopieert ze mee.
 Op acceptatie start je de opdracht in GitHub met de workflow _Import old site_, zonder SSH, met de keuze `import`, `report` of `status` (zie _De wedstrijden van de oude fansite importeren_ in [`docs/acceptatieomgeving.md`](../../docs/acceptatieomgeving.md)).
 
-## Ongebruikte accounts van supporters
+## Ongebruikte accounts van fans
 
-De import ruimt ook de accounts van supporters op (`cleanUpSupporters`, onder dezelfde lock), één keer per dag: de eerste run van de dag doet de accounts, en een mail die mislukt, wordt de volgende dag opnieuw geprobeerd.
-Een account dat 24 maanden niet is bezocht, krijgt één mail en wordt 30 dagen later gesloten met `closeAccount`, tenzij de supporter inlogt.
+De import ruimt ook de accounts van fans op (`cleanUpSupporters`, onder dezelfde lock), één keer per dag: de eerste run van de dag doet de accounts, en een mail die mislukt, wordt de volgende dag opnieuw geprobeerd.
+Een account dat 24 maanden niet is bezocht, krijgt één mail en wordt 30 dagen later gesloten met `closeAccount`, tenzij de fan inlogt.
 De stap mailt hoogstens 20 accounts per dag, en doet niets met accounts zolang `FANS_ACCOUNTS` uit staat.
 Elke run haalt ook de verlopen onbevestigde aanmeldingen weg.
 Het logboek noemt alleen aantallen: `Supporter accounts: 1 mailed about being unused, 0 closed, 0 mails failed; 1 unconfirmed sign-ups removed`.

@@ -123,8 +123,8 @@ describe('the card Prognose on the Voorbeschouwing', () => {
     const text = plain(html)
 
     expect(headings(html)).toContain('Prognose')
-    expect(text).toContain('Van supporters')
-    expect(text).toContain('48 supporters voorspelden deze wedstrijd. Wat ze voorspelden, zie je bij de aftrap.')
+    expect(text).toContain('Van de fans')
+    expect(text).toContain('48 fans voorspelden deze wedstrijd. Wat ze voorspelden, zie je bij de aftrap.')
     expect(html).toMatch(/<a[^>]*href="\/fans\/prognose"[^>]*>Voorspel ook<\/a>/)
     expect(matchCrowd).toHaveBeenCalledWith(1, false)
     expect(html).not.toContain('hf-outcome-bar')
@@ -136,7 +136,7 @@ describe('the card Prognose on the Voorbeschouwing', () => {
 
     const text = plain(await render())
 
-    expect(text).toContain('1 supporter voorspelde deze wedstrijd.')
+    expect(text).toContain('1 fan voorspelde deze wedstrijd.')
     expect(text).not.toContain('Voorspel ook')
   })
 
@@ -224,7 +224,7 @@ describe('the card Prognose on the page of a match with a report', () => {
 
     const html = await render('2026-27', '2026-10-24-testdorp-fc')
 
-    expect(plain(html)).toContain('4 supporters voorspelden deze wedstrijd.')
+    expect(plain(html)).toContain('4 fans voorspelden deze wedstrijd.')
     expect(html).not.toContain('Stand Prognose')
     expect(html).not.toContain('hf-outcome-bar')
   })
@@ -260,8 +260,8 @@ describe('the card Prognose on the page of an old match (issue 1457)', () => {
     const html = await render('2026-27', '2026-10-24-testdorp-fc')
     const text = plain(html)
 
-    expect(headings(html)).toContain('Wat supporters toen voorspelden')
-    expect(text).toContain('212 supporters voorspelden deze wedstrijd.')
+    expect(headings(html)).toContain('Wat fans toen voorspelden')
+    expect(text).toContain('212 fans voorspelden deze wedstrijd.')
     expect(text).toContain('Winst 33 · Gelijk 13 · Verlies 8')
     expect(text).toContain('Meest voorspelde eindstanden')
     expect(text).toContain('anders')
@@ -287,7 +287,7 @@ describe('the card Prognose on the page of an old match (issue 1457)', () => {
 
     const html = await render('2026-27', '2026-10-24-testdorp-fc')
 
-    expect(plain(html)).toContain('4 supporters voorspelden deze wedstrijd.')
+    expect(plain(html)).toContain('4 fans voorspelden deze wedstrijd.')
     expect(html).not.toContain('hf-outcome-bar')
   })
 

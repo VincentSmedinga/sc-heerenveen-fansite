@@ -14,7 +14,7 @@ describe('the screens of the admin', () => {
   })
 
   const work = ['Beheer', 'Berichten', 'Artikelen', 'Wedstrijden', 'Spelers', 'Stadions', 'Clubs', 'Bezoek']
-  const withSupporters = [...work, 'Supporters']
+  const withSupporters = [...work, 'Fans']
 
   it('shows an editor every screen but the accounts', () => {
     expect(screensFor('editor').map(({ label }) => label)).toEqual([...withSupporters, 'Mijn account'])

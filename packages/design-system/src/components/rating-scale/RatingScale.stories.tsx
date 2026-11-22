@@ -31,7 +31,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De cijferschaal waarmee een supporter één speler, of de trainer, een cijfer van 1 tot 10 geeft: tien knoppen in één groep, onder de naam van de speler.',
+          'De cijferschaal waarmee een fan één speler, of de trainer, een cijfer van 1 tot 10 geeft: tien knoppen in één groep, onder de naam van de speler.',
           'Kies hem waar je een geheel cijfer per persoon vraagt; een keuzelijst is langzamer en een schuifbalk geeft geen geheel cijfer. Hij werkt zonder JavaScript en met het toetsenbord: de pijltjes lopen langs de cijfers, en het formulier verstuurt het gekozen cijfer. De pagina geeft de naam, de regel en de foutmelding.',
         ].join('\n'),
       },

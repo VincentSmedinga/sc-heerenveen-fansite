@@ -1,6 +1,6 @@
 ---
 name: release-notes
-description: Write the release notes for a version, in Dutch, in a supporter's voice, for the owner to approve before a small pull request puts them in apps/site/src/release-notes.ts. Use as the Coordinator when a release pull request is open or about to be.
+description: Write the release notes for a version, in Dutch, in a fan's voice, for the owner to approve before a small pull request puts them in apps/site/src/release-notes.ts. Use as the Coordinator when a release pull request is open or about to be.
 argument-hint: <version, such as 0.3.0>
 ---
 
@@ -25,7 +25,7 @@ About five to eight lines, one per thing a visitor can find or do, related facts
 - **The place first, then a colon**, when a line is about one page or part of the site: "Op home: het nieuws over onze club van de afgelopen week."
   A line that carries on from the one before needs no place.
 - **A condition as a question with a short answer:** "Alleen voor abonnees? Staat erbij."
-- **A supporter's words:** "home", "onze club", and abbreviations supporters know, such as LC and VI.
+- **A fan's words:** "home", "onze club", and abbreviations fans know, such as LC and VI.
 - **Not in the notes:** the look (colours, cards, type, layout), error pages or other edge cases, and anything obvious such as "nieuwste bovenaan".
   Light and dark is something a visitor can use, so it may have a line.
 - The club is "sc Heerenveen".
@@ -48,4 +48,4 @@ Give it to a session of its own (see _Starting other sessions_ in the app) or ha
 ## 5. Check afterwards
 
 After the release merges, `pnpm --filter site smoke` checks that `/updates` shows the versions that have lines, and the feed links point to the right host (see _De controles_ in `CONTRIBUTING.md`).
-Look at `/updates` on the acceptance environment, and read the lines once more as a supporter.
+Look at `/updates` on the acceptance environment, and read the lines once more as a fan.

@@ -218,7 +218,7 @@ describe('the page Privacy with accounts on', () => {
 
   it('reads as before with accounts off: no part about accounts and no cookie of supporters', () => {
     expect(html).not.toContain('Als je een account maakt')
-    expect(html).not.toContain('Een supporter die inlogt')
+    expect(html).not.toContain('Een fan die inlogt')
     expect(html).not.toContain('tenzij je inlogt')
   })
 
@@ -246,7 +246,7 @@ describe('the page Privacy with accounts on', () => {
 
     expect(supporterKind.cookie).toMatchObject({ name: 'fans-sessie', path: '/fans' })
     expect(text).toContain(
-      'Een supporter die inlogt, krijgt ook een cookie. Het bevat een nummer voor die sessie, niets over jou.',
+      'Een fan die inlogt, krijgt ook een cookie. Het bevat een nummer voor die sessie, niets over jou.',
     )
     expect(text).toContain('alleen naar pagina&#x27;s onder /fans')
     expect(text).toContain('een teken met je schermnaam')
@@ -274,7 +274,7 @@ describe('the page Privacy with accounts on', () => {
 
     expect(text).toContain('Met een account bewaren we je schermnaam, je e-mailadres')
     expect(text).toContain('We bewaren geen IP-adres, geen gegevens over je browser, geen echte naam')
-    expect(text).toContain('Andere supporters zien je schermnaam en je punten in de standen, tenzij je dat uitzet.')
+    expect(text).toContain('Andere fans zien je schermnaam en je punten in de standen, tenzij je dat uitzet.')
     expect(text).toContain('Een account is een profiel dat je zelf maakt.')
     expect(text).toContain('Dan verdwijnen je schermnaam en je e-mailadres')
     expect(text).toContain('vraag het dan de redactie voordat je opheft')

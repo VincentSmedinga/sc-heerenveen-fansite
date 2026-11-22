@@ -114,20 +114,14 @@ describe('RichTextEditor', () => {
   })
 
   it('ties the hint and the error to the editor, and marks it invalid with an error', async () => {
-    const { editable, rerender } = renderEditor({ hint: 'Schrijf voor supporters.' })
+    const { editable, rerender } = renderEditor({ hint: 'Schrijf voor fans.' })
     const textbox = await editable()
 
     expect(textbox.getAttribute('aria-describedby')).toBe('tekst-hint')
     expect(textbox.hasAttribute('aria-invalid')).toBe(false)
 
     rerender(
-      <RichTextEditor
-        error="Schrijf een tekst."
-        hint="Schrijf voor supporters."
-        id="tekst"
-        label="Tekst"
-        name="body"
-      />,
+      <RichTextEditor error="Schrijf een tekst." hint="Schrijf voor fans." id="tekst" label="Tekst" name="body" />,
     )
 
     await waitFor(() => {

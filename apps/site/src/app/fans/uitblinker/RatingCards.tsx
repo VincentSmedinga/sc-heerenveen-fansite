@@ -78,13 +78,13 @@ export function HowItWorksCard() {
       </Heading>
       <List>
         <List.Item>
-          Elke supporter met een account geeft de spelers en de trainer van de laatste wedstrijd een cijfer.
+          Elke fan met een account geeft de spelers en de trainer van de laatste wedstrijd een cijfer.
         </List.Item>
         <List.Item>
           Het venster sluit als de volgende wedstrijd begint, en uiterlijk zeven dagen na de wedstrijd.
         </List.Item>
         <List.Item>Tot dan kun je je cijfers wijzigen.</List.Item>
-        <List.Item>Als het venster dicht is, zien alle supporters de uitslag.</List.Item>
+        <List.Item>Als het venster dicht is, zien alle fans de uitslag.</List.Item>
       </List>
       <Text>
         <Link href={ratingRulesPath}>Spelregels</Link>

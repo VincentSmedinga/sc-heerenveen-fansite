@@ -36,7 +36,7 @@ export default async function YearWinnersPage() {
       <Page.Cell area="head">
         <Heading level={1}>Uitblinker van het jaar</Heading>
         <Text appearance="intro">
-          De speler met het hoogste seizoencijfer van supporters, zodra het seizoen voorbij is.
+          De speler met het hoogste seizoencijfer van de fans, zodra het seizoen voorbij is.
         </Text>
       </Page.Cell>
       <Page.Cell area="winners">

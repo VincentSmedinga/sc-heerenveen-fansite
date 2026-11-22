@@ -150,7 +150,7 @@ describe('the card of a match that has begun', () => {
       },
     })
 
-    expect(html).toContain('54 supporters voorspelden deze wedstrijd.')
+    expect(html).toContain('54 fans voorspelden deze wedstrijd.')
     expect(html).toContain('Winst 33 · Gelijk 13 · Verlies 8')
     expect(html).toContain('Meest voorspelde eindstanden')
     expect(html.indexOf('Ruststand')).toBeLessThan(html.indexOf('Winst 33'))

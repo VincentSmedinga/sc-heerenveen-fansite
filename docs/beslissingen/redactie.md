@@ -2060,6 +2060,7 @@
   Een stijlgids in een eigen bestand zou een tweede plek zijn naast de principes.
 - **Alternatieven:** een eigen stijlgids in `docs/`; dan staan de redactieregels op twee plekken.
   Of de toon in `CONTRIBUTING.md`; dat is voor wie meewerkt aan de code, niet voor wie voor bezoekers schrijft.
+- **Later:** de toon is sinds 22 november 2026 van fan tot fan, niet van supporter tot supporter: zie _In teksten schrijven we "fan" en "fans", niet "supporter"_.
 
 ## Fries voor namen en een knipoog, nooit in wat een bezoeker nodig heeft
 
@@ -3224,3 +3225,20 @@
   Bij zijn derde termijn deden we hetzelfde: het einde van 2015/16 wordt de laatste dag van het seizoen.
 - **Alternatieven:** 16 mei 2004, de dag van zijn laatste wedstrijd (laat 17 mei tot en met 30 juni zonder trainer); de import de onzekere dag laten raden (we raden nooit).
 - **Let op:** na het uitrollen draait de eigenaar op acceptatie `import.mjs --old-site` opnieuw; de stap `trainercijfers` slaat dan de 18 cijfers op.
+
+## In teksten schrijven we "fan" en "fans", niet "supporter"
+
+- **Datum:** 22 november 2026
+- **Besluit:** alle tekst die een bezoeker, een beheerder of een schermlezer te zien of te horen krijgt, zegt "fan" of "fans", ook de pagina's van Fans en het beheer, de verhalen en de documentatie.
+  De tagline in de footer is "Voor fans door fans.", en de toon van de site is van fan tot fan.
+  De vervanging is niet letterlijk: een groep staat met een lidwoord waar dat natuurlijk klinkt ("Van de fans" rechtsboven op een kaart, "Cijfers van de fans"), en vaste zinnen houden "fans" zonder lidwoord ("Voor fans door fans", "Andere fans zien je schermnaam").
+  Samenstellingen schrijven we om: "de supporterknop" wordt "de knop voor je account", en een proefaccount heet zo.
+  Code, tabellen, kolommen, omgevingsvariabelen, routes en Engelse commentaren houden hun namen, en er komt geen migratie.
+  Koppen uit de media en de woorden van een bron over zichzelf laten we staan.
+- **Waarom:** "fan" is korter en past bij de naam van de site, sc Heerenveen Fansite.
+  Een hernoeming van `supporters` en `supporter_id` is een groot risico zonder dat een bezoeker er iets van merkt.
+- **Alternatieven:** "supporter" houden en alleen de pagina's van Fans veranderen, of alleen de openbare site; beide laten dezelfde zaak op twee manieren schrijven.
+  Alles hernoemen, met een migratie.
+  Overal "fan" voor het woord zetten ("fanknop" leest onnatuurlijk).
+  Een test die het woord weert: de regel staat in het hoofdstuk Redactie en in de checklist van de reviewer, en een lijst met uitzonderingen kost meer onderhoud dan hij oplevert.
+- **Later:** vervangt de toon "van supporter tot supporter" uit _De toon en de schrijfwijzer staan in het hoofdstuk Redactie_ (29 oktober 2026) en het motto "Voor supporters, door supporters" uit _Geen disclaimer, wel "Voor supporters, door supporters"_ (22 oktober 2026).

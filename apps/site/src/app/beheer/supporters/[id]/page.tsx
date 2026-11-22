@@ -19,7 +19,7 @@ import { BlockForm, RenameForm } from '../SupporterForms'
 // Render on each request: the account changes with every action.
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Supporter' }
+export const metadata: Metadata = { robots: { follow: false, index: false }, title: 'Fan' }
 
 type Props = {
   params: Promise<{ id: string }>
@@ -33,7 +33,7 @@ const dayFormat = new Intl.DateTimeFormat('nl-NL', { day: 'numeric', month: 'lon
 const notices: Readonly<Record<string, { text: string; title: string }>> = {
   geblokkeerd: { text: 'De blokkade staat in het logboek.', title: 'Account geblokkeerd' },
   naam: {
-    text: 'De supporter ziet op Mijn account één keer dat de redactie de naam heeft aangepast.',
+    text: 'De fan ziet op Mijn account één keer dat de redactie de naam heeft aangepast.',
     title: 'Naam aangepast',
   },
   ongewijzigd: { text: 'Er is niets veranderd.', title: 'Niets veranderd' },
@@ -64,11 +64,11 @@ export default async function SupporterPage({ params, searchParams }: Props) {
       <Page.Cell area="head">
         <Heading level={1}>{supporter.screenName}</Heading>
         <Text appearance="intro">
-          Een supporter, aangemaakt op {dateFormat.format(supporter.createdAt)}.
+          Een fan, aangemaakt op {dateFormat.format(supporter.createdAt)}.
           {supporter.blocked ? ' Het account is geblokkeerd.' : ''}
         </Text>
         <Text>
-          <Link href={supportersPath}>Terug naar de supporters</Link>
+          <Link href={supportersPath}>Terug naar de fans</Link>
         </Text>
       </Page.Cell>
       <Page.Cell area="main">
@@ -109,8 +109,8 @@ export default async function SupporterPage({ params, searchParams }: Props) {
             Schermnaam aanpassen
           </Heading>
           <Text>
-            Voor een naam die kwetst of misleidt. Dit telt niet als de eigen wijziging van de supporter, die één keer
-            per 30 dagen mag.
+            Voor een naam die kwetst of misleidt. Dit telt niet als de eigen wijziging van de fan, die één keer per 30
+            dagen mag.
           </Text>
           <RenameForm
             action={renameAccount.bind(null, supporter.id)}
@@ -124,7 +124,7 @@ export default async function SupporterPage({ params, searchParams }: Props) {
           </Heading>
           {supporter.blocked ? (
             <>
-              <Text>De supporter kan dan weer meedoen aan de spellen.</Text>
+              <Text>De fan kan dan weer meedoen aan de spellen.</Text>
               <Form action={unblockAccount.bind(null, supporter.id)}>
                 <Button type="submit">Hef de blokkade van {supporter.screenName} op</Button>
               </Form>
@@ -133,8 +133,7 @@ export default async function SupporterPage({ params, searchParams }: Props) {
             <>
               <Text>
                 Een geblokkeerd account kan nog inloggen, zijn gegevens zien en zijn account opheffen. Het kan niet
-                meedoen aan een spel, zijn naam niet wijzigen en staat in geen enkele stand. De supporter krijgt geen
-                mail.
+                meedoen aan een spel, zijn naam niet wijzigen en staat in geen enkele stand. De fan krijgt geen mail.
               </Text>
               <BlockForm
                 action={blockAccount.bind(null, supporter.id)}

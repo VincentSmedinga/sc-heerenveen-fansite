@@ -257,7 +257,7 @@ describe('Page.Footer', () => {
     expect(within(footer).queryByRole('group', { name: 'Thema' })).toBeNull()
     expect(Array.from(footer.querySelectorAll('p')).map((paragraph) => paragraph.textContent)).toEqual([
       'Alles over onze club op één plek.',
-      'Voor supporters door supporters.',
+      'Voor fans door fans.',
     ])
     expect(within(footer).getByRole('navigation', { name: 'Over de site' })).toBe(footer.lastElementChild)
   })

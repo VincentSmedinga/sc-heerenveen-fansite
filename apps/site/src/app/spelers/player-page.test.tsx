@@ -564,7 +564,7 @@ describe('playerPageOf', () => {
   })
 })
 
-describe('the card Cijfers van supporters on the page of a player', () => {
+describe('the card Cijfers van de fans on the page of a player', () => {
   // Made-up ratings: a season with matches, an old season with a season rating only, a match.
   const ratings: PlayerRatings = {
     last: [
@@ -594,9 +594,9 @@ describe('the card Cijfers van supporters on the page of a player', () => {
 
     const html = await render()
 
-    expect(html).toMatch(/<h2[^>]*>Cijfers van supporters<\/h2>/)
-    expect(html.indexOf('>Per seizoen<')).toBeLessThan(html.indexOf('>Cijfers van supporters<'))
-    expect(html.indexOf('>Cijfers van supporters<')).toBeLessThan(html.indexOf('>Loopbaan bij sc Heerenveen<'))
+    expect(html).toMatch(/<h2[^>]*>Cijfers van de fans<\/h2>/)
+    expect(html.indexOf('>Per seizoen<')).toBeLessThan(html.indexOf('>Cijfers van de fans<'))
+    expect(html.indexOf('>Cijfers van de fans<')).toBeLessThan(html.indexOf('>Loopbaan bij sc Heerenveen<'))
     expect(html).toContain('hf-card-game-uitblinker')
     expect(html).toContain('href="/wedstrijden/2003-04/2003-10-13-oefenstad"')
     expect(html).toContain('>Uitblinker</span>')
@@ -614,8 +614,8 @@ describe('the card Cijfers van supporters on the page of a player', () => {
     )
 
     expect(bar).toContain('href="#cijfers-van-supporters"')
-    expect(bar.indexOf('Per seizoen')).toBeLessThan(bar.indexOf('Cijfers van supporters'))
-    expect(bar.indexOf('Cijfers van supporters')).toBeLessThan(bar.indexOf('Loopbaan'))
+    expect(bar.indexOf('Per seizoen')).toBeLessThan(bar.indexOf('Cijfers van de fans'))
+    expect(bar.indexOf('Cijfers van de fans')).toBeLessThan(bar.indexOf('Loopbaan'))
   })
 
   it('is not on the page, and not in the bar, for a player without ratings or while the Uitblinker is off', async () => {
@@ -626,8 +626,8 @@ describe('the card Cijfers van supporters on the page of a player', () => {
       renderToStaticMarkup(await playerShortcuts({ searchParams: Promise.resolve({}), slug: 'jan-de-vries' })),
     )
 
-    expect(html).not.toContain('Cijfers van supporters')
-    expect(bar).not.toContain('Cijfers van supporters')
+    expect(html).not.toContain('Cijfers van de fans')
+    expect(bar).not.toContain('Cijfers van de fans')
     expect(html).toContain('Per seizoen')
   })
 
@@ -638,7 +638,7 @@ describe('the card Cijfers van supporters on the page of a player', () => {
 
     const html = await render()
 
-    expect(html).not.toContain('Cijfers van supporters')
+    expect(html).not.toContain('Cijfers van de fans')
     expect(html).toContain('Per seizoen')
     expect(error).toHaveBeenCalledWith(expect.stringContaining('connect ECONNREFUSED'))
     error.mockRestore()

@@ -662,7 +662,7 @@ describe('the column doelpunten per wedstrijd on the card Doelpuntenmakers', () 
   })
 })
 
-describe('the card Cijfers van supporters on the page /spelers/cijfers', () => {
+describe('the card Cijfers van de fans on the page /spelers/cijfers', () => {
   const figure = (
     season: string,
     playerId: number,
@@ -701,7 +701,7 @@ describe('the card Cijfers van supporters on the page /spelers/cijfers', () => {
     vi.stubEnv('FANS_ACCOUNTS', 'on')
     vi.stubEnv('FANS_UITBLINKER', 'off')
 
-    expect(await renderWith()).not.toContain('Cijfers van supporters')
+    expect(await renderWith()).not.toContain('Cijfers van de fans')
     expect(ratingFigures).not.toHaveBeenCalled()
   })
 
@@ -759,7 +759,7 @@ describe('the card Cijfers van supporters on the page /spelers/cijfers', () => {
     vi.mocked(ratingFigures).mockRejectedValue(new Error('no database'))
     const html = await renderWith()
 
-    expect(html).not.toContain('Cijfers van supporters')
+    expect(html).not.toContain('Cijfers van de fans')
     expect(html).toContain('id="doelpuntenmakers"')
     expect(console.error).toHaveBeenCalledOnce()
   })

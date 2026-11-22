@@ -122,14 +122,14 @@ export const exampleFooterMenu = [
 ]
 
 /**
- * The footer with "Alles over onze club op één plek." and "Voor supporters door supporters.", a
+ * The footer with "Alles over onze club op één plek." and "Voor fans door fans.", a
  * paragraph each, and the links about the site, as on the site. With `topLink` it ends with the
  * link to the top of the page, which is only there on a page that can scroll far enough.
  */
 export const ExampleFooter = ({ topLink = false }: { topLink?: boolean }) => (
   <Page.Footer>
     <Text appearance="meta">Alles over onze club op één plek.</Text>
-    <Text appearance="meta">Voor supporters door supporters.</Text>
+    <Text appearance="meta">Voor fans door fans.</Text>
     <Navigation items={exampleFooterMenu} label="Over de site" />
     {topLink ? <Page.TopLink label="Naar boven" /> : null}
   </Page.Footer>

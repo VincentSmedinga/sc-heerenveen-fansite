@@ -47,7 +47,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De lijst met wat een supporter voorspelde: een rij per wedstrijd met de dag, de clubs met de uitslag, de voorspelling en de punten in een eigen kolom.',
+          'De lijst met wat een fan voorspelde: een rij per wedstrijd met de dag, de clubs met de uitslag, de voorspelling en de punten in een eigen kolom.',
           'Kies hem voor een korte lijst op een kaart. Het is een lijst en geen tabel, want een rij leest als één zin. De uitslag breekt nooit af: een lange clubnaam wordt ingekort.',
         ].join('\n'),
       },

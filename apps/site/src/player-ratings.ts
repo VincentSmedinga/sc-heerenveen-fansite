@@ -11,7 +11,7 @@ import { inLineUpOrder, uitblinkerOf } from './fans/match-ratings'
 // The ratings that supporters gave a player, for the card on his page (issue 1466). The
 // numbers of a match come from `match_player_ratings`, the season ratings of 1998/99 to
 // 2000/01 from `old_season_ratings`. This module is the one place that works the figures out,
-// so the card only shows them (see _De spelerspagina toont de cijfers van supporters, per
+// so the card only shows them (see _De spelerspagina toont de cijfers van de fans, per
 // seizoen en per wedstrijd_ in docs/beslissingen/site.md).
 
 /** A match counts for the card from this number of ratings. */

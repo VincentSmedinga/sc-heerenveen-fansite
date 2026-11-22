@@ -195,7 +195,7 @@ describe('the card Uitblinker on the page of an old match', () => {
     const text = plain(html)
 
     expect(headings(html)).toContain('Uitblinker')
-    expect(text).toContain('Van supporters')
+    expect(text).toContain('Van de fans')
     expect(text).toContain('Uitblinker van de wedstrijd')
     expect(text).toContain('Gemiddelde van 31 cijfers')
     expect(html).toMatch(/hf-winner-average">7,8</)
@@ -207,7 +207,7 @@ describe('the card Uitblinker on the page of an old match', () => {
     const table = html.match(/<table[\s\S]*?<\/table>/g)?.find((found) => found.includes('Gem')) ?? ''
 
     expect(table).toContain('<caption')
-    expect(table).toContain('Cijfers van supporters per speler')
+    expect(table).toContain('Cijfers van de fans per speler')
     expect(table).toMatch(/<th[^>]*scope="col"/)
     expect(plain(table)).toContain('Speler')
     expect(plain(table)).toContain('Cijfers')
@@ -319,11 +319,11 @@ describe('the card Uitblinker on the page of a new match', () => {
     const text = plain(html)
 
     expect(headings(html)).toContain('Uitblinker')
-    expect(text).toContain('Van supporters')
+    expect(text).toContain('Van de fans')
     expect(text).toContain('Uitblinker van de wedstrijd')
     expect(html).toMatch(/hf-winner-average">7,8</)
-    expect(html).toContain('Cijfers van supporters per speler')
-    expect(text).toContain('31 supporters gaven cijfers.')
+    expect(html).toContain('Cijfers van de fans per speler')
+    expect(text).toContain('31 fans gaven cijfers.')
     expect(text).not.toContain('Cijfers van bezoekers van de Fansite')
     expect(oldMatchRatings).not.toHaveBeenCalled()
   })
@@ -341,9 +341,9 @@ describe('the card Uitblinker on the page of a new match', () => {
 
     const html = await render()
 
-    expect(plain(html)).toContain('3 supporters gaven cijfers.')
+    expect(plain(html)).toContain('3 fans gaven cijfers.')
     expect(html).not.toContain('hf-winner')
-    expect(html).not.toContain('Cijfers van supporters per speler')
+    expect(html).not.toContain('Cijfers van de fans per speler')
   })
 
   it('shows the count, the moment of the result and the way in while the window is open, and no averages', async () => {
@@ -353,7 +353,7 @@ describe('the card Uitblinker on the page of a new match', () => {
     const html = await render()
 
     expect(plain(html)).toContain(
-      '31 supporters gaven al cijfers. De uitslag staat hier vanaf donderdag 26 november, 20.00 uur.',
+      '31 fans gaven al cijfers. De uitslag staat hier vanaf donderdag 26 november, 20.00 uur.',
     )
     expect(html).toMatch(/<a[^>]*href="\/fans\/uitblinker"[^>]*>Geef je cijfers<\/a>/)
     expect(html).not.toContain('hf-winner')

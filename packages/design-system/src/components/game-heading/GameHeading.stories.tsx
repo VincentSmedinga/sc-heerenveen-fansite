@@ -17,7 +17,7 @@ const meta = preview.meta({
     (Story) => (
       <Card aria-labelledby="kop" game="prognose">
         <Story />
-        <Text>48 supporters voorspelden deze wedstrijd.</Text>
+        <Text>48 fans voorspelden deze wedstrijd.</Text>
       </Card>
     ),
   ],
@@ -25,7 +25,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De kop van de kaart van een spel, op een pagina die niet de pagina van het spel zelf is, zoals de pagina van een wedstrijd: de naam van het spel met "Van supporters" ernaast.',
+          'De kop van de kaart van een spel, op een pagina die niet de pagina van het spel zelf is, zoals de pagina van een wedstrijd: de naam van het spel met "Van de fans" ernaast.',
           'Op een smalle kaart komt de kleine tekst onder de naam.',
         ].join('\n'),
       },
@@ -37,6 +37,6 @@ const meta = preview.meta({
 })
 
 export const Default = meta.story({
-  args: { children: 'Prognose', id: 'kop', level: 2, meta: 'Van supporters' },
+  args: { children: 'Prognose', id: 'kop', level: 2, meta: 'Van de fans' },
   name: 'Naam met kleine tekst',
 })

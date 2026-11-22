@@ -36,7 +36,7 @@ export const screens: readonly Screen[] = [
   { href: '/beheer/stadions', label: 'Stadions', roles: workRoles },
   { href: '/beheer/clubs', label: 'Clubs', roles: workRoles },
   { href: '/beheer/bezoek', label: 'Bezoek', roles: workRoles },
-  { href: '/beheer/supporters', label: 'Supporters', needsAccounts: true, roles: workRoles },
+  { href: '/beheer/supporters', label: 'Fans', needsAccounts: true, roles: workRoles },
   { href: '/beheer/accounts', label: 'Accounts', roles: ['owner'] },
   { href: myAccountHref, label: 'Mijn account', roles: allRoles },
 ]

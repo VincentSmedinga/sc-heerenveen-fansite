@@ -78,7 +78,7 @@ export const headlines: { madeUp: Row[]; notForVisitors: Row[] } = {
       hoursAgo: 72,
       source: 'Testkrant',
       title:
-        'Een lange kop over een wedstrijd vol wendingen, blessures en een doelpunt in de laatste minuut, met reacties van beide trainers, de spelers en de supporters op de tribune',
+        'Een lange kop over een wedstrijd vol wendingen, blessures en een doelpunt in de laatste minuut, met reacties van beide trainers, de spelers en de fans op de tribune',
     },
     {
       clubs: [testdorp],

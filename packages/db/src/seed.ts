@@ -86,7 +86,7 @@ export const testSources = [
     consentDate: '2026-02-03',
     consentNote: 'Verzonnen: alleen insluiten van afleveringen.',
     consentStatus: 'given',
-    description: 'Een verzonnen podcast waarin supporters na elke wedstrijd napraten.',
+    description: 'Een verzonnen podcast waarin fans na elke wedstrijd napraten.',
     domain: 'testpodcast.test',
     kind: 'podcast',
     name: 'Testpodcast',
@@ -401,7 +401,7 @@ export const realSources = [
   },
   {
     description:
-      'Het forum van onze eigen gemeenschap, waar supporters praten over wedstrijden, spelers en transfers. We tonen alleen de titels van de nieuwste discussies, hoeveel reacties er zijn en wie het laatst reageerde.',
+      'Het forum van onze eigen gemeenschap, waar fans praten over wedstrijden, spelers en transfers. We tonen alleen de titels van de nieuwste discussies, hoeveel reacties er zijn en wie het laatst reageerde.',
     domain: 'forum.heerenveen.org',
     feeds: [
       'https://forum.heerenveen.org/api/discussions?sort=-lastPostedAt&page[limit]=30&include=lastPostedUser,tags',

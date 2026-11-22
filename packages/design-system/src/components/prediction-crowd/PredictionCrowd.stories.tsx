@@ -8,18 +8,18 @@ import { Text } from '../text/Text'
 import { PredictionCrowd } from './PredictionCrowd'
 
 const meta = preview.meta({
-  args: { children: '54 supporters voorspelden deze wedstrijd.' },
+  args: { children: '54 fans voorspelden deze wedstrijd.' },
   argTypes: {
-    children: { description: 'De regel die zegt hoeveel supporters voorspelden.' },
+    children: { description: 'De regel die zegt hoeveel fans voorspelden.' },
     figures: { description: 'Kerngetallen over de wedstrijd die is gespeeld. Twee tot vier.' },
-    outcomes: { description: 'Hoeveel supporters winst, gelijkspel en verlies voorspelden, voor sc Heerenveen.' },
+    outcomes: { description: 'Hoeveel fans winst, gelijkspel en verlies voorspelden, voor sc Heerenveen.' },
     scores: { description: 'De meest voorspelde eindstanden, thuis eerst, de meest voorspelde bovenaan.' },
   },
   component: PredictionCrowd,
   decorators: [
     (Story) => (
       <Card aria-labelledby="prognose-kop" game="prognose">
-        <GameHeading id="prognose-kop" level={2} meta="Van supporters">
+        <GameHeading id="prognose-kop" level={2} meta="Van de fans">
           Prognose
         </GameHeading>
         <Story />
@@ -30,7 +30,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Wat een groep supporters voorspelde voor één wedstrijd, zonder een naam: hoeveel het er waren en, vanaf de aftrap, de verdeling over winst, gelijk en verlies en de meest voorspelde eindstanden.',
+          'Wat een groep fans voorspelde voor één wedstrijd, zonder een naam: hoeveel het er waren en, vanaf de aftrap, de verdeling over winst, gelijk en verlies en de meest voorspelde eindstanden.',
           'Kies hem in de kaart van een spel, op de pagina van een wedstrijd. De uitslag staat in woorden bij de verdeling, niet alleen in kleur. Hij heeft geen kaart of kop van zichzelf.',
         ].join('\n'),
       },
@@ -42,7 +42,7 @@ const meta = preview.meta({
 })
 
 export const BeforeKickoff = meta.story({
-  args: { children: '48 supporters voorspelden deze wedstrijd. Wat ze voorspelden, zie je bij de aftrap.' },
+  args: { children: '48 fans voorspelden deze wedstrijd. Wat ze voorspelden, zie je bij de aftrap.' },
   name: 'Voor de aftrap',
   render: (args) => (
     <>

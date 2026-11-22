@@ -41,7 +41,7 @@ export function StandCard({
       ) : (
         <DataTable
           caption={`Stand ${season}`}
-          columns={['Supporter', { abbreviation: 'P', key: true, name: 'totaal punten' }]}
+          columns={['Fan', { abbreviation: 'P', key: true, name: 'totaal punten' }]}
           rows={visibleRows(ranking, supporterId, topRows, false)}
           sortable={false}
         />
@@ -68,7 +68,7 @@ export function StandTable({
       <DataTable
         caption={caption}
         columns={[
-          'Supporter',
+          'Fan',
           { abbreviation: 'V', name: 'voorspellingen' },
           { abbreviation: 'Gem', name: 'gemiddelde punten per voorspelling' },
           { abbreviation: 'P', key: true, name: 'totaal punten' },
@@ -95,7 +95,7 @@ export function visibleRows(ranking: Ranking, supporterId: number | undefined, l
     ...shown.map((row) => tableRow(row, supporterId, withFigures)),
     ...(below
       ? [
-          { cells: withFigures ? ['', '', ''] : [''], gap: true, header: 'andere supporters' },
+          { cells: withFigures ? ['', '', ''] : [''], gap: true, header: 'andere fans' },
           tableRow(own, supporterId, withFigures),
         ]
       : []),

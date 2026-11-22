@@ -123,7 +123,7 @@ export const Loose = meta.story({
         </List.Item>
         <List.Item>
           <Link href="#testpodcast">Testpodcast</Link>
-          <Text>Een verzonnen podcast waarin supporters na elke wedstrijd napraten.</Text>
+          <Text>Een verzonnen podcast waarin fans na elke wedstrijd napraten.</Text>
         </List.Item>
       </List>
       <Text>Onder de lijst staat evenveel ruimte als onder een gewone lijst.</Text>
