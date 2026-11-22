@@ -7612,7 +7612,8 @@
 
 - **Datum:** 22 november 2026
 - **Besluit:** de kaart Uitblinker op de pagina van een nieuwe wedstrijd is voor iedereen gelijk.
-  Zolang het venster openstaat, zegt de kaart "31 supporters gaven al cijfers. De uitslag staat hier vanaf donderdag 26 november, 20.00 uur." met de link "Geef je cijfers", en staan er geen gemiddelden en geen zegel.
+  Zolang het venster openstaat, zegt de kaart hoeveel supporters al cijfers gaven en wanneer de uitslag komt ("De uitslag staat hier vanaf donderdag 26 november, 20.00 uur").
+  Er staat een link "Geef je cijfers", en er zijn geen gemiddelden en geen zegel.
   Zonder cijfers is er geen kaart.
   Is het venster dicht, dan staat er de zegel "Uitblinker van de wedstrijd", dezelfde tabel als bij een oude wedstrijd (Speler, Gem, Cijfers, de regels van vijf cijfers en minder cijfers bij een gelijk gemiddelde) en "31 supporters gaven cijfers.".
   Gaven er minder dan vijf supporters cijfers, dan staat alleen het aantal.
