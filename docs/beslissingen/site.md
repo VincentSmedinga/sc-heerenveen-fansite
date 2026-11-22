@@ -7480,3 +7480,20 @@
   De regel voor gelijke punten is dezelfde als die van de stand.
 - **Waarom:** de pagina kan zo niet anders zeggen dan het spel doet.
 - **Alternatieven:** de bedragen in de tekst typen.
+
+## De spelerspagina toont de cijfers van supporters, per seizoen en per wedstrijd
+
+- **Datum:** 22 november 2026
+- **Besluit:** het seizoencijfer is het gemiddelde van alle cijfers die de speler dat seizoen kreeg, zoals op de oude Fansite, en niet het gemiddelde van de gemiddelden van de wedstrijden.
+  Een seizoen staat er vanaf drie wedstrijden met minstens vijf cijfers, een wedstrijd in de lijst vanaf vijf cijfers.
+  Dit geldt voor oude en nieuwe cijfers.
+  W telt de wedstrijden met minstens vijf cijfers en C alle cijfers van het seizoen.
+  De seizoenen 1998/99 tot 2000/01 hebben alleen een seizoencijfer, met een streepje in W en C, en vallen niet onder de drempel.
+  De kaart "Cijfers van supporters" staat na "Per seizoen" en voor de loopbaan, met het watermerk van de Uitblinker, en alleen als de instelling van de Uitblinker aan staat en de speler minstens één seizoen heeft om te tonen.
+  De lijst "De laatste wedstrijden" heeft de laatste vijf wedstrijden met minstens vijf cijfers, en het label "Uitblinker" waar zijn gemiddelde het hoogste was van de spelers met minstens vijf cijfers in die wedstrijd.
+  Onder de tabellen staat de bron "Cijfers van bezoekers van de Fansite, 2001 tot 2007." zodra een getal van de oude Fansite komt.
+- **Waarom:** zo vergelijk je een seizoen van nu met een van 2003, en de drempels voorkomen dat een gemiddelde van twee cijfers voor waar doorgaat.
+  Een speler met te weinig cijfers krijgt geen kaart, want een lege kaart zegt niets.
+- **Alternatieven:** het gemiddelde van de wedstrijdgemiddelden (een wedstrijd met weinig cijfers weegt dan even zwaar); geen drempel; de kaart tonen met een lijst wedstrijden maar zonder seizoen.
+- **Let op:** het getal komt uit `match_player_ratings` en `old_season_ratings` (#1465) en wordt in `apps/site/src/player-ratings.ts` berekend, op één plek, zodat de ranglijst (#1474) en de wedstrijdpagina (#1467) hetzelfde kunnen gebruiken.
+  De pagina leest de cijfers van een speler via al zijn rijen in `players`, zodat een speler met meer dan één seizoen één lijst krijgt.

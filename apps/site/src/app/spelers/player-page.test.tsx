@@ -4,11 +4,12 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { loadPlayerPage, periodsOf, type PlayerPage, playerPageOf } from '#src/player-page'
+import { loadPlayerRatings, type PlayerRatings } from '#src/player-ratings'
 import { loadPlayerSeasonFacts, loadPlayerSeasons, type PlayerSeason } from '#src/player-seasons'
 import { getReportAddresses } from '#src/report-data'
 import { withoutIcons } from '#src/without-icons'
 
-import { playerMetadata, PlayerPageView } from './player-page'
+import { playerMetadata, PlayerPageView, playerShortcuts } from './player-page'
 
 vi.mock('#src/player-page', async (importOriginal) => ({
   ...(await importOriginal<object>()),
@@ -19,6 +20,11 @@ vi.mock('#src/player-seasons', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   loadPlayerSeasonFacts: vi.fn(),
   loadPlayerSeasons: vi.fn(),
+}))
+
+vi.mock('#src/player-ratings', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  loadPlayerRatings: vi.fn(),
 }))
 
 vi.mock('#src/report-data', () => ({ getReportAddresses: vi.fn() }))
@@ -78,6 +84,7 @@ const digestOf = async (promise: Promise<unknown>) =>
   )
 
 beforeEach(() => {
+  vi.mocked(loadPlayerRatings).mockResolvedValue(undefined)
   vi.mocked(loadPlayerSeasons).mockResolvedValue([madeUpSeason])
   vi.mocked(loadPlayerSeasonFacts).mockResolvedValue({
     appearances: [],
@@ -554,5 +561,86 @@ describe('playerPageOf', () => {
 
     expect(page.name).toBe('Jan Vries')
     expect(page.seasons).toEqual(['2004/05', '2005/06'])
+  })
+})
+
+describe('the card Cijfers van supporters on the page of a player', () => {
+  // Made-up ratings: a season with matches, an old season with a season rating only, a match.
+  const ratings: PlayerRatings = {
+    last: [
+      {
+        average: '7,8',
+        competition: 'Eredivisie',
+        id: 3,
+        label: 'sc Heerenveen – Oefenstad 3–1',
+        round: '3',
+        season: '2003/04',
+        winner: true,
+      },
+    ],
+    oldSource: true,
+    seasonOnly: true,
+    seasons: [
+      { average: '7,2', count: 241, matches: 9, season: '2003/04' },
+      { average: '6,8', count: undefined, matches: undefined, season: '2000/01' },
+    ],
+  }
+
+  it('stands between the seasons and the career, with a link to the match, the tag and the source line', async () => {
+    vi.mocked(loadPlayerRatings).mockResolvedValue(ratings)
+    vi.mocked(getReportAddresses).mockResolvedValue(
+      new Map([['Eredivisie|3', '/wedstrijden/2003-04/2003-10-13-oefenstad']]),
+    )
+
+    const html = await render()
+
+    expect(html).toMatch(/<h2[^>]*>Cijfers van supporters<\/h2>/)
+    expect(html.indexOf('>Per seizoen<')).toBeLessThan(html.indexOf('>Cijfers van supporters<'))
+    expect(html.indexOf('>Cijfers van supporters<')).toBeLessThan(html.indexOf('>Loopbaan bij sc Heerenveen<'))
+    expect(html).toContain('hf-card-game-uitblinker')
+    expect(html).toContain('href="/wedstrijden/2003-04/2003-10-13-oefenstad"')
+    expect(html).toContain('>Uitblinker</span>')
+    expect(html).toContain('Cijfers van bezoekers van de Fansite, 2001 tot 2007.')
+    expect(html).toContain('Een seizoen staat er vanaf 3 wedstrijden.')
+    expect(html).toContain('Wedstrijden met cijfers')
+  })
+
+  it('is in the bar Op deze pagina between Per seizoen and Loopbaan', async () => {
+    vi.mocked(loadPlayerRatings).mockResolvedValue(ratings)
+    vi.mocked(loadPlayerPage).mockResolvedValue({ kind: 'found', page: player })
+
+    const bar = withoutIcons(
+      renderToStaticMarkup(await playerShortcuts({ searchParams: Promise.resolve({}), slug: 'jan-de-vries' })),
+    )
+
+    expect(bar).toContain('href="#cijfers-van-supporters"')
+    expect(bar.indexOf('Per seizoen')).toBeLessThan(bar.indexOf('Cijfers van supporters'))
+    expect(bar.indexOf('Cijfers van supporters')).toBeLessThan(bar.indexOf('Loopbaan'))
+  })
+
+  it('is not on the page, and not in the bar, for a player without ratings or while the Uitblinker is off', async () => {
+    vi.mocked(loadPlayerPage).mockResolvedValue({ kind: 'found', page: player })
+
+    const html = await render()
+    const bar = withoutIcons(
+      renderToStaticMarkup(await playerShortcuts({ searchParams: Promise.resolve({}), slug: 'jan-de-vries' })),
+    )
+
+    expect(html).not.toContain('Cijfers van supporters')
+    expect(bar).not.toContain('Cijfers van supporters')
+    expect(html).toContain('Per seizoen')
+  })
+
+  it('leaves the card out and logs it when the ratings cannot be read, and the page goes on', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    vi.mocked(loadPlayerRatings).mockRejectedValue(new Error('connect ECONNREFUSED'))
+
+    const html = await render()
+
+    expect(html).not.toContain('Cijfers van supporters')
+    expect(html).toContain('Per seizoen')
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('connect ECONNREFUSED'))
+    error.mockRestore()
   })
 })
