@@ -46,6 +46,11 @@ const open = [
   'app/fans/aanmelden/bevestigen/page.tsx',
   'app/fans/aanmelden/page.tsx',
   'app/fans/aanmelden/verstuurd/page.tsx',
+  // The archive of the Fantest is the same for everybody and keeps nothing of a visitor, so its
+  // pages and its action need no session (issue 1480).
+  'app/fans/fantest/[maand]/actions.ts',
+  'app/fans/fantest/[maand]/page.tsx',
+  'app/fans/fantest/page.tsx',
   // The page of the game Fjouwer: a visitor sees the match and the way in, and a supporter's
   // four is read only with a session. Its action calls requireSupporter.
   'app/fans/fjouwer/page.tsx',

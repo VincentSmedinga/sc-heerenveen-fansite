@@ -119,6 +119,7 @@ const matchesOfTheSeason = [
 const dataOf = (list: OldSiteMatch[]): OldSiteData => ({
   clubs: oldClubs,
   coachRatings: [],
+  fantest: [],
   matches: list,
   players: [],
   predictions: [],
