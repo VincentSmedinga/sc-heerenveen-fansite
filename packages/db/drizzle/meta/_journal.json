@@ -722,6 +722,13 @@
       "when": 1795310467246,
       "tag": "0102_add_coach_ratings",
       "breakpoints": true
+    },
+    {
+      "idx": 103,
+      "version": "5",
+      "when": 1795312968787,
+      "tag": "0103_add_match_prediction_counts",
+      "breakpoints": true
     }
   ]
 }

@@ -90,6 +90,7 @@ function dataOf(overrides: Partial<OldSiteData> = {}): OldSiteData {
     coachRatings: [],
     matches: matchList,
     players: [],
+    predictions: [],
     ratings: [],
     seasonRatings: [],
     winners: [],

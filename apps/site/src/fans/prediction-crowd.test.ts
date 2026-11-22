@@ -1,11 +1,11 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { clubs, matches, predictions, supporters } from '@fansite/db/schema'
+import { clubs, matches, matchPredictionCounts, predictions, supporters } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import { loadMatchCrowd, shareText } from './prediction-crowd'
+import { loadMatchCrowd, loadOldMatchCrowd, shareText } from './prediction-crowd'
 
 let database: TestDatabase
 let clubId: number
@@ -22,6 +22,7 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
+  await database.db.delete(matchPredictionCounts)
   await database.db.delete(predictions)
   await database.db.delete(matches)
   await database.db.delete(supporters)
@@ -188,5 +189,75 @@ describe('the figures of a match', () => {
 describe('the share text', () => {
   it('rounds to whole percents', () => {
     expect(shareText(14, 54)).toBe('26 procent')
+  })
+})
+
+describe('loadOldMatchCrowd (issue 1457)', () => {
+  const count = (
+    matchId: number,
+    home: number,
+    away: number,
+    predictionCount: number,
+    kind: 'full_time' | 'half_time' = 'full_time',
+  ) => ({ away, home, kind, matchId, predictionCount, source: 'oude-fansite' as const })
+
+  it('adds the counts up and tells win, draw and loss for sc Heerenveen at home', async () => {
+    const matchId = await addMatch({ home: true })
+
+    await database.db.insert(matchPredictionCounts).values([
+      count(matchId, 2, 1, 14),
+      count(matchId, 1, 0, 19),
+      count(matchId, 1, 1, 13),
+      count(matchId, 0, 1, 8),
+      count(matchId, 0, 3, 2),
+      // The half-time scores are not part of the card.
+      count(matchId, 0, 0, 40, 'half_time'),
+    ])
+
+    expect(await loadOldMatchCrowd(database.db, matchId)).toEqual({
+      count: 56,
+      spread: {
+        draws: 13,
+        losses: 10,
+        other: 2,
+        scores: [
+          { count: 19, label: '1–0' },
+          { count: 14, label: '2–1' },
+          { count: 13, label: '1–1' },
+          { count: 8, label: '0–1' },
+        ],
+        wins: 33,
+      },
+    })
+  })
+
+  it('reads win and loss from the side of sc Heerenveen when it plays away', async () => {
+    const matchId = await addMatch({ home: false })
+
+    await database.db.insert(matchPredictionCounts).values([count(matchId, 2, 1, 6), count(matchId, 0, 1, 4)])
+
+    expect(await loadOldMatchCrowd(database.db, matchId)).toMatchObject({
+      count: 10,
+      spread: { losses: 6, wins: 4 },
+    })
+  })
+
+  it('puts a score under "other" under three predictions, and shows only the count under five', async () => {
+    const matchId = await addMatch()
+    const fewId = await addMatch()
+
+    await database.db
+      .insert(matchPredictionCounts)
+      .values([count(matchId, 1, 0, 3), count(matchId, 2, 0, 2), count(fewId, 1, 0, 3), count(fewId, 0, 0, 1)])
+
+    expect((await loadOldMatchCrowd(database.db, matchId))?.spread).toMatchObject({
+      other: 2,
+      scores: [{ count: 3, label: '1–0' }],
+    })
+    expect(await loadOldMatchCrowd(database.db, fewId)).toEqual({ count: 4 })
+  })
+
+  it('has no figures for a match without counts', async () => {
+    expect(await loadOldMatchCrowd(database.db, await addMatch())).toBeUndefined()
   })
 })

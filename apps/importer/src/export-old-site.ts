@@ -1,8 +1,8 @@
 // The export of the old fansite, `pnpm export:old-site`. It reads the database of the old site
-// once, from a copy on your own computer, and writes the match facts and
-// the ratings (averages only, 1465) to `apps/importer/data/oude-fansite/`, the friendlies to
-// `docs/oefenwedstrijden-2002-03.md` and the ratings for players outside a line-up to
-// `docs/cijfers-buiten-opstelling.md`.
+// once, from a copy on your own computer, and writes the match facts, the ratings (averages
+// only, 1465) and the predictions (counts only, 1457) to `apps/importer/data/oude-fansite/`,
+// the friendlies to `docs/oefenwedstrijden-2002-03.md` and the ratings for players outside a
+// line-up to `docs/cijfers-buiten-opstelling.md`.
 // The import reads those files and never the old database (see the README of the importer).
 // The command only reads: the connection is read-only and the queries are selects.
 import { parseEnv } from '@fansite/shared/env'
@@ -83,6 +83,10 @@ async function readRows(url: string): Promise<OldSiteRows> {
       players: await select(
         'SELECT voornaam, tussenvoegsel, achternaam, code, linie, nationaliteit FROM speler ORDER BY code',
       ),
+      predictions: await select(
+        'SELECT id, inz_gn, wsd_code, wsd_seizoen, rt, ru, et, eu FROM prognose_inz ORDER BY id',
+      ),
+      predictionsEarly: await select('SELECT wsd_code, wsd_seizoen, rt, ru, et, eu FROM prognose_oud ORDER BY id'),
       ratings: await select(
         'SELECT id, inz_gn, wsd_code, wsd_seizoen, spr_code, cijfer FROM uitblinker_inz ORDER BY id',
       ),

@@ -8,6 +8,7 @@ import type {
 } from './old-site-file.ts'
 
 import { oldSiteFileVersion, parseOldSiteFile } from './old-site-file.ts'
+import { buildOldSitePredictions, type EarlyPredictionRow, type PredictionRow } from './old-site-predictions-export.ts'
 import {
   buildOldSiteRatings,
   type RatingRow,
@@ -65,6 +66,9 @@ export type OldSiteRows = {
   lineups: LineupRow[]
   matches: MatchRow[]
   players: PlayerRow[]
+  /** The predictions of visitors with an account, and those from before the accounts. */
+  predictions: PredictionRow[]
+  predictionsEarly: EarlyPredictionRow[]
   ratings: RatingRow[]
   reports: ReportRow[]
   results: ResultRow[]
@@ -396,6 +400,17 @@ export function buildOldSiteExport(rows: OldSiteRows): OldSiteExport {
       version: oldSiteFileVersion,
     })
   }
+
+  const predictions = buildOldSitePredictions(
+    rows.predictions,
+    rows.predictionsEarly,
+    matches,
+    new Set(rows.matches.map((match) => keyOf(match.code, match.seizoen))),
+  )
+
+  for (const [season, list] of [...predictions.bySeason].sort(([a], [b]) => (a < b ? -1 : 1))) {
+    write(`predictions-${season}.json`, { predictions: list, season, version: oldSiteFileVersion })
+  }
   write('season-ratings.json', {
     seasonRatings: ratings.seasonRatings,
     version: oldSiteFileVersion,
@@ -410,6 +425,7 @@ export function buildOldSiteExport(rows: OldSiteRows): OldSiteExport {
     `players in goals and line-ups without a row in speler: ${withoutRow.length === 0 ? 'none' : withoutRow.join(', ')}`,
     ...checkRows(rows, exported),
     ...ratings.report,
+    ...predictions.report,
   ]
 
   return {

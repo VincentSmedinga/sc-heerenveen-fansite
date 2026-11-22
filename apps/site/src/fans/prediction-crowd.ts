@@ -1,7 +1,7 @@
 import type { Database } from '@fansite/db/client'
 
-import { matches, predictions, supporters } from '@fansite/db/schema'
-import { eq } from 'drizzle-orm'
+import { matches, matchPredictionCounts, predictions, supporters } from '@fansite/db/schema'
+import { and, eq } from 'drizzle-orm'
 
 import { cacheForKey } from '#src/cache'
 import { getDatabase } from '#src/database'
@@ -162,6 +162,62 @@ export async function loadMatchCrowd(db: Database, matchId: number, reveal: bool
   return figures
 }
 
+/**
+ * The figures of an old match (issue 1457): what visitors of the old fansite predicted, from
+ * the counts that the import keeps. The match is long over, so the figures are the ones from
+ * the kick-off, without the result and without what a prediction scored. A match without
+ * counts has no figures (`undefined`); under `crowdMinimum` predictions there is the count
+ * alone.
+ */
+export async function loadOldMatchCrowd(db: Database, matchId: number): Promise<MatchCrowd | undefined> {
+  const [rows, [match]] = await Promise.all([
+    db
+      .select({
+        away: matchPredictionCounts.away,
+        count: matchPredictionCounts.predictionCount,
+        home: matchPredictionCounts.home,
+      })
+      .from(matchPredictionCounts)
+      .where(
+        and(
+          eq(matchPredictionCounts.matchId, matchId),
+          eq(matchPredictionCounts.source, 'oude-fansite'),
+          eq(matchPredictionCounts.kind, 'full_time'),
+        ),
+      ),
+    db.select({ home: matches.home }).from(matches).where(eq(matches.id, matchId)),
+  ])
+  const count = rows.reduce((sum, row) => sum + row.count, 0)
+
+  if (count === 0 || match === undefined) {
+    return undefined
+  }
+  if (count < crowdMinimum) {
+    return { count }
+  }
+
+  // Win and loss are always about sc Heerenveen, whichever side it plays.
+  const ours = (row: { away: number; home: number }) =>
+    match.home ? sign(row.home, row.away) : sign(row.away, row.home)
+  const total = (keep: (row: { away: number; home: number }) => boolean) =>
+    rows.filter(keep).reduce((sum, row) => sum + row.count, 0)
+  const listed = rows
+    .filter((row) => row.count >= scoreMinimum)
+    .map((row) => ({ count: row.count, label: scoreText(row.home, row.away) }))
+    .toSorted((a, b) => b.count - a.count || a.label.localeCompare(b.label, 'nl'))
+
+  return {
+    count,
+    spread: {
+      draws: total((row) => ours(row) === 0),
+      losses: total((row) => ours(row) < 0),
+      other: rows.filter((row) => row.count < scoreMinimum).reduce((sum, row) => sum + row.count, 0),
+      scores: listed,
+      wins: total((row) => ours(row) > 0),
+    },
+  }
+}
+
 /** How the card shows a share of the supporters: `26 procent`. */
 export const shareText = (count: number, total: number) => `${Math.round((count / total) * 100)} procent`
 
@@ -170,6 +226,11 @@ const getMatchCrowd = cacheForKey(oneMinute, (key) => {
 
   return loadMatchCrowd(getDatabase().db, Number(id), reveal === 'ja')
 })
+
+const getOldMatchCrowd = cacheForKey(oneMinute, (key) => loadOldMatchCrowd(getDatabase().db, Number(key)))
+
+/** The figures of an old match, read once a minute for each match, like `matchCrowd`. */
+export const oldMatchCrowd = (matchId: number) => getOldMatchCrowd(String(matchId))
 
 /**
  * The figures of one match, read once a minute for each match and for each state (before and
