@@ -9,6 +9,7 @@ import { cache, type ReactNode } from 'react'
 
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
+import { FjouwerCrowdCard, readFjouwerCard } from '#src/FjouwerCrowdCard'
 import { LiveRefresh, LiveState } from '#src/LiveRefresh'
 import { matchMoment } from '#src/match-format'
 import { getMatchNeighbours } from '#src/match-neighbours'
@@ -171,6 +172,7 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
   // An old match has the counts of the old fansite instead (see `OldPredictionCrowdCard`).
   const oldMatch = reported.match.dataSource === 'oude-fansite'
   const prediction = oldMatch ? undefined : await readPredictionCrowd(reported.match)
+  const fjouwer = oldMatch ? undefined : await readFjouwerCard(reported.match)
   const oldPrediction = oldMatch ? await readOldPredictionCrowd(reported.match) : undefined
   // The card Uitblinker comes first of the cards of the games. An old match has the ratings of
   // the old fansite (see `OldMatchRatingsCard`). A new one has the count of supporters and,
@@ -186,6 +188,7 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
           after: [
             ...(oldRatings === undefined && newRatings === undefined ? [] : ['uitblinker']),
             ...(prediction === undefined && oldPrediction === undefined ? [] : ['prediction']),
+            ...(fjouwer === undefined ? [] : ['fjouwer']),
             'source',
           ],
           main: ['cards', 'neighbours'],
@@ -239,6 +242,11 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
         {oldPrediction === undefined ? null : (
           <Page.Cell area="prediction">
             <OldPredictionCrowdCard crowd={oldPrediction} />
+          </Page.Cell>
+        )}
+        {fjouwer === undefined ? null : (
+          <Page.Cell area="fjouwer">
+            <FjouwerCrowdCard crowd={fjouwer} />
           </Page.Cell>
         )}
         <Page.Section area="source" aria-label="De bron">

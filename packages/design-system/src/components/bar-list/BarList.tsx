@@ -6,6 +6,8 @@ import { classNames } from '../classNames'
 export type BarListProps = Omit<ComponentPropsWithoutRef<'ul'>, 'children'> & {
   /** The rows, the first on top: a bar is as long as the share of its number in the largest. */
   rows: readonly BarListRow[]
+  /** What follows each number in the text of a row, such as `%`; the bars stay as long. */
+  unit?: string
   /** Room for a name in words, such as a country, instead of a season. */
   wide?: boolean
 }
@@ -27,10 +29,10 @@ export type BarListRow = {
  * the largest number, from the same start, so the rows can be compared. bar-list.css gives the
  * look. The number column is as wide as the longest number, with room for two digits at least.
  */
-export const BarList = ({ className, rows, wide = false, ...props }: BarListProps) => {
+export const BarList = ({ className, rows, unit = '', wide = false, ...props }: BarListProps) => {
   const shares = sharesOf(rows.map(({ value }) => value))
   // The number column is as wide as the longest number, so four digits (minutes) don't spill.
-  const digits = Math.max(0, ...rows.map(({ value }) => String(value).length))
+  const digits = Math.max(0, ...rows.map(({ value }) => String(value).length + unit.length))
 
   return (
     <ul
@@ -48,7 +50,7 @@ export const BarList = ({ className, rows, wide = false, ...props }: BarListProp
               style={{ '--hf-bar-list-share': shares?.[index] ?? 0 } as CSSProperties}
             />
           </span>
-          <span className="hf-bar-list-value">{value}</span>
+          <span className="hf-bar-list-value">{`${value}${unit}`}</span>
         </li>
       ))}
     </ul>
