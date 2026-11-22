@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { predictionMatches } from '#src/fans/prediction'
-import { type MatchCrowd, matchCrowd } from '#src/fans/prediction-crowd'
+import { type MatchCrowd, matchCrowd, oldMatchCrowd } from '#src/fans/prediction-crowd'
 import { getMatchNeighbours } from '#src/match-neighbours'
 import { getLeagueResults, getMatchData } from '#src/matches'
 import { getClubNews, getClubPage, getSquadPersonIds, getStadiumPlace } from '#src/opponents'
@@ -19,6 +19,7 @@ vi.mock('#src/database', () => ({ getDatabase: () => ({ db: {} }) }))
 vi.mock('#src/fans/prediction-crowd', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   matchCrowd: vi.fn(),
+  oldMatchCrowd: vi.fn(),
 }))
 vi.mock('#src/fans/prediction', async (importOriginal) => ({
   ...(await importOriginal<object>()),
@@ -105,6 +106,7 @@ beforeEach(() => {
   vi.mocked(getPreviewMatch).mockResolvedValue(preview())
   vi.mocked(predictionMatches).mockResolvedValue({ next: { id: 1 } } as never)
   vi.mocked(matchCrowd).mockReset()
+  vi.mocked(oldMatchCrowd).mockReset()
 })
 
 afterEach(() => {
@@ -232,5 +234,73 @@ describe('the card Prognose on the page of a match with a report', () => {
 
     expect(headings(await render('2026-27', '2026-10-24-testdorp-fc'))).not.toContain('Prognose')
     expect(matchCrowd).not.toHaveBeenCalled()
+  })
+})
+
+describe('the card Prognose on the page of an old match (issue 1457)', () => {
+  const old = () => {
+    const reported = reportedMatch()
+
+    return { ...reported, match: { ...reported.match, dataSource: 'oude-fansite' as const } }
+  }
+  // The old counts know no result: nothing is marked "uitslag".
+  const crowd: MatchCrowd = {
+    count: 212,
+    spread: { draws: 13, losses: 8, other: 4, scores: spread.scores, wins: 33 },
+  }
+
+  beforeEach(() => {
+    vi.mocked(getPublicReport).mockImplementation((season, slug) =>
+      Promise.resolve(season === '2026/27' && slug === '2026-10-24-testdorp-fc' ? old() : undefined),
+    )
+    vi.mocked(oldMatchCrowd).mockResolvedValue(crowd)
+  })
+
+  it('shows what supporters predicted then, with the count, the bar, the scores and the source line', async () => {
+    const html = await render('2026-27', '2026-10-24-testdorp-fc')
+    const text = plain(html)
+
+    expect(headings(html)).toContain('Wat supporters toen voorspelden')
+    expect(text).toContain('212 supporters voorspelden deze wedstrijd.')
+    expect(text).toContain('Winst 33 · Gelijk 13 · Verlies 8')
+    expect(text).toContain('Meest voorspelde eindstanden')
+    expect(text).toContain('anders')
+    expect(text).not.toContain('uitslag')
+    expect(text).toContain('Voorspellingen van bezoekers van de Fansite, 2001 tot 2007.')
+    // No points, no average, no ranking and no link to predict: the match is long over.
+    expect(text).not.toContain('gemiddeld voorspeld')
+    expect(html).not.toContain('Stand Prognose')
+    expect(html).not.toContain('Voorspel ook')
+    // The new game is not asked for an old match.
+    expect(matchCrowd).not.toHaveBeenCalled()
+  })
+
+  it('stands after the line-ups and before the credit, once', async () => {
+    const found = headings(await render('2026-27', '2026-10-24-testdorp-fc')) ?? []
+
+    expect(found.indexOf('Prognose')).toBeGreaterThan(found.indexOf('Verloop'))
+    expect(found.filter((heading) => heading === 'Prognose')).toHaveLength(1)
+  })
+
+  it('shows only the count under five predictions', async () => {
+    vi.mocked(oldMatchCrowd).mockResolvedValue({ count: 4 })
+
+    const html = await render('2026-27', '2026-10-24-testdorp-fc')
+
+    expect(plain(html)).toContain('4 supporters voorspelden deze wedstrijd.')
+    expect(html).not.toContain('hf-outcome-bar')
+  })
+
+  it('has no card for an old match without counts', async () => {
+    vi.mocked(oldMatchCrowd).mockResolvedValue(undefined)
+
+    expect(headings(await render('2026-27', '2026-10-24-testdorp-fc'))).not.toContain('Prognose')
+  })
+
+  it('has no card, and asks for no counts, when the game is off', async () => {
+    vi.stubEnv('FANS_PROGNOSE', 'off')
+
+    expect(headings(await render('2026-27', '2026-10-24-testdorp-fc'))).not.toContain('Prognose')
+    expect(oldMatchCrowd).not.toHaveBeenCalled()
   })
 })

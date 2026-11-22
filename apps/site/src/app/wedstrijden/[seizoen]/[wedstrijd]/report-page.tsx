@@ -18,7 +18,12 @@ import { MatchPageCards, MatchPageHeader } from '#src/MatchPageView'
 import { EditorSources, SourceCredit } from '#src/MatchViews'
 import { seasonPageMetadata } from '#src/metadata'
 import { pageAreas } from '#src/page-areas'
-import { PredictionCrowdCard, readPredictionCrowd } from '#src/PredictionCrowdCard'
+import {
+  OldPredictionCrowdCard,
+  PredictionCrowdCard,
+  readOldPredictionCrowd,
+  readPredictionCrowd,
+} from '#src/PredictionCrowdCard'
 import { getPublicReport, halfTimeOf, isCompleteReport, reportAddress } from '#src/report-data'
 import { matchPageDataOf, ourClub } from '#src/report-view'
 import { matchesPath } from '#src/season-page'
@@ -157,14 +162,17 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
   const now = new Date()
   const phase = phaseOf(reported.match, now)
   // The card Prognose, in the narrow column under the line-ups; it has no cell without figures.
-  const prediction = await readPredictionCrowd(reported.match)
+  // An old match has the counts of the old fansite instead (see `OldPredictionCrowdCard`).
+  const oldMatch = reported.match.dataSource === 'oude-fansite'
+  const prediction = oldMatch ? undefined : await readPredictionCrowd(reported.match)
+  const oldPrediction = oldMatch ? await readOldPredictionCrowd(reported.match) : undefined
   const page = matchPageDataOf(reported, factsOf(reported, now, phase), isCompleteReport(reported), phase)
 
   return (
     <>
       <Page.Main
         areas={pageAreas({
-          after: [...(prediction === undefined ? [] : ['prediction']), 'source'],
+          after: [...(prediction === undefined && oldPrediction === undefined ? [] : ['prediction']), 'source'],
           main: ['cards', 'neighbours'],
         })}
       >
@@ -201,6 +209,11 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
               matchId={reported.match.id}
               played={reported.match.status === 'played'}
             />
+          </Page.Cell>
+        )}
+        {oldPrediction === undefined ? null : (
+          <Page.Cell area="prediction">
+            <OldPredictionCrowdCard crowd={oldPrediction} />
           </Page.Cell>
         )}
         <Page.Section area="source" aria-label="De bron">

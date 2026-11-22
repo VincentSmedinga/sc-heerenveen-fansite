@@ -1,0 +1,128 @@
+/*
+ * The seal for the best-graded player of a match: a seal of twelve points in the colour of a
+ * button with the average on it, and next to it a label, the name and a line. The seal is
+ * decoration drawn with CSS (a clipped background and a thin ring), so it has no image and the
+ * average stays text. It uses the colours of a button, so the white number keeps its contrast in
+ * dark too, where the seal is light and the number dark. In forced colours the clipped fill goes
+ * and the ring and the number remain. Where the box is narrow, the text goes under the seal: a
+ * container query, so it follows the width of the card and not of the screen.
+ */
+
+@layer hf.components {
+  .hf-winner {
+    container-name: hf-winner;
+    container-type: inline-size;
+  }
+
+  .hf-winner-body {
+    align-items: center;
+    display: flex;
+    gap: var(--hf-space-m);
+  }
+
+  @container hf-winner (inline-size < 17rem) {
+    .hf-winner-body {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+
+  .hf-winner-seal {
+    --hf-winner-seal-size: 4.25rem;
+
+    block-size: var(--hf-winner-seal-size);
+    color: var(--hf-colour-text-on-button);
+    display: grid;
+    flex: none;
+    font-size: var(--hf-heading-3-font-size);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-figure-font-weight);
+    inline-size: var(--hf-winner-seal-size);
+    place-items: center;
+    position: relative;
+
+    /* The twelve points. */
+    &::before {
+      background-color: var(--hf-colour-background-button);
+      clip-path: polygon(
+        50% 0%,
+        60.6% 10.4%,
+        75% 6.7%,
+        79% 21%,
+        93.3% 25%,
+        89.6% 39.4%,
+        100% 50%,
+        89.6% 60.6%,
+        93.3% 75%,
+        79% 79%,
+        75% 93.3%,
+        60.6% 89.6%,
+        50% 100%,
+        39.4% 89.6%,
+        25% 93.3%,
+        21% 79%,
+        6.7% 75%,
+        10.4% 60.6%,
+        0% 50%,
+        10.4% 39.4%,
+        6.7% 25%,
+        21% 21%,
+        25% 6.7%,
+        39.4% 10.4%
+      );
+      content: '';
+      inset: 0;
+      position: absolute;
+    }
+
+    /* The thin ring inside the points. */
+    &::after {
+      border: 0.09rem solid color-mix(in srgb, currentcolor 55%, transparent);
+      border-radius: 50%;
+      content: '';
+      inset: 0.5625rem;
+      position: absolute;
+    }
+  }
+
+  .hf-winner-average {
+    position: relative;
+  }
+
+  .hf-winner-text {
+    display: grid;
+    gap: 0.125rem;
+    min-inline-size: 0;
+  }
+
+  .hf-winner-label {
+    color: var(--hf-colour-text-accent);
+    font-family: var(--hf-font-family-display);
+    font-size: var(--hf-label-font-size);
+    font-stretch: var(--hf-label-font-stretch);
+    font-weight: var(--hf-label-font-weight);
+    letter-spacing: var(--hf-label-letter-spacing);
+    line-height: var(--hf-label-line-height);
+    text-transform: uppercase;
+  }
+
+  .hf-winner-name {
+    color: var(--hf-colour-text-heading);
+    font-size: var(--hf-heading-2-font-size);
+    font-weight: var(--hf-figure-font-weight);
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  .hf-winner-line {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+    line-height: var(--hf-meta-line-height);
+  }
+
+  @media (forced-colors: active) {
+    .hf-winner-seal {
+      color: CanvasText;
+    }
+  }
+}

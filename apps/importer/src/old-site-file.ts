@@ -132,9 +132,48 @@ export const oldSiteRatingSchema = z.strictObject({
   spread: z.number().min(0).max(9),
 })
 
+/**
+ * What supporters of the old fansite gave the head coach in one match (1502): the same three
+ * numbers as a player has, and the code of the coach instead of the code of a player.
+ */
+export const oldSiteCoachRatingSchema = z.strictObject({
+  average: z.number().min(1).max(10),
+  coachCode: z.string().min(1),
+  count: z.number().int().min(1),
+  matchCode: z.string().min(1),
+  spread: z.number().min(0).max(9),
+})
+
 /** The ratings of the matches of one season, in `ratings-<season>.json`. */
 export const oldSiteRatingsFileSchema = z.strictObject({
+  coachRatings: z.array(oldSiteCoachRatingSchema),
   ratings: z.array(oldSiteRatingSchema),
+  season: z.string().regex(/^\d{4}$/),
+  version: z.literal(oldSiteFileVersion),
+})
+
+/** How many visitors predicted one score: home first, as the old database has it. */
+export const oldSitePredictionScoreSchema = z.strictObject({
+  away: count.max(99),
+  count: z.number().int().min(1),
+  home: count.max(99),
+})
+
+/**
+ * What visitors of the old fansite predicted for one match (#1457): how many predicted each
+ * full-time score and each half-time score. The file has these counts and nothing else: no
+ * name, no address, no time and no number for a person. A visitor who predicted a match twice
+ * counts once, and the predictions of before the first accounts count as a number only.
+ */
+export const oldSitePredictionSchema = z.strictObject({
+  fullTime: z.array(oldSitePredictionScoreSchema).min(1),
+  halfTime: z.array(oldSitePredictionScoreSchema),
+  matchCode: z.string().min(1),
+})
+
+/** The predictions of the matches of one season, in `predictions-<season>.json`. */
+export const oldSitePredictionsFileSchema = z.strictObject({
+  predictions: z.array(oldSitePredictionSchema),
   season: z.string().regex(/^\d{4}$/),
   version: z.literal(oldSiteFileVersion),
 })
@@ -167,15 +206,22 @@ export const oldSiteFileSchema = z.union([
   oldSitePlayersFileSchema,
   oldSiteMatchesFileSchema,
   oldSiteRatingsFileSchema,
+  oldSitePredictionsFileSchema,
   oldSiteSeasonRatingsFileSchema,
 ])
 
 export type OldSiteClub = z.output<typeof oldSiteClubSchema>
+export type OldSiteCoachRating = z.output<typeof oldSiteCoachRatingSchema>
+export type OldSiteCoachRatingOfSeason = OldSiteCoachRating & { season: string }
 /** All the facts of the old site, as the import reads them. */
 export type OldSiteData = {
   clubs: OldSiteClub[]
+  /** The averages per match and head coach, each with the season of its file. */
+  coachRatings: OldSiteCoachRatingOfSeason[]
   matches: OldSiteMatch[]
   players: OldSitePlayer[]
+  /** The counts of predictions per match, each with the season of its file. */
+  predictions: OldSitePredictionOfSeason[]
   /** The averages per match and player, each with the season of its file. */
   ratings: OldSiteRatingOfSeason[]
   seasonRatings: OldSiteSeasonRating[]
@@ -186,6 +232,9 @@ export type OldSiteFile = z.output<typeof oldSiteFileSchema>
 export type OldSiteLineupEntry = z.output<typeof oldSiteLineupSchema>
 export type OldSiteMatch = z.output<typeof oldSiteMatchSchema>
 export type OldSitePlayer = z.output<typeof oldSitePlayerSchema>
+export type OldSitePrediction = z.output<typeof oldSitePredictionSchema>
+export type OldSitePredictionOfSeason = OldSitePrediction & { season: string }
+export type OldSitePredictionScore = z.output<typeof oldSitePredictionScoreSchema>
 export type OldSiteRating = z.output<typeof oldSiteRatingSchema>
 export type OldSiteRatingOfSeason = OldSiteRating & { season: string }
 export type OldSiteSeasonRating = z.output<typeof oldSiteSeasonRatingSchema>
@@ -224,7 +273,16 @@ export function parseOldSiteFile(text: string, name = 'file'): OldSiteFile {
 export async function readOldSiteData(folder: string | URL = oldSiteDataFolder): Promise<OldSiteData> {
   const directory = typeof folder === 'string' ? folder : fileURLToPath(folder)
   const names = (await readdir(directory)).filter((name) => name.endsWith('.json')).sort()
-  const data: OldSiteData = { clubs: [], matches: [], players: [], ratings: [], seasonRatings: [], winners: [] }
+  const data: OldSiteData = {
+    clubs: [],
+    coachRatings: [],
+    matches: [],
+    players: [],
+    predictions: [],
+    ratings: [],
+    seasonRatings: [],
+    winners: [],
+  }
   let clubFiles = 0
   let playerFiles = 0
   let seasonRatingFiles = 0
@@ -238,8 +296,11 @@ export async function readOldSiteData(folder: string | URL = oldSiteDataFolder):
     } else if ('players' in file) {
       playerFiles += 1
       data.players.push(...file.players)
+    } else if ('predictions' in file) {
+      data.predictions.push(...file.predictions.map((prediction) => ({ ...prediction, season: file.season })))
     } else if ('ratings' in file) {
       data.ratings.push(...file.ratings.map((rating) => ({ ...rating, season: file.season })))
+      data.coachRatings.push(...file.coachRatings.map((rating) => ({ ...rating, season: file.season })))
     } else if ('seasonRatings' in file) {
       seasonRatingFiles += 1
       data.seasonRatings.push(...file.seasonRatings)
@@ -285,6 +346,34 @@ export async function readOldSiteData(folder: string | URL = oldSiteDataFolder):
       throw new Error(`The rating of ${rating.playerCode} in the match ${key} is in the files twice.`)
     }
     ratingKeys.add(`${key}/${rating.playerCode}`)
+  }
+
+  const predictionKeys = new Set<string>()
+
+  for (const prediction of data.predictions) {
+    const key = `${prediction.season}/${prediction.matchCode}`
+
+    if (!keys.has(key)) {
+      throw new Error(`The predictions hold the match ${key}, which is not in the match files.`)
+    }
+    if (predictionKeys.has(key)) {
+      throw new Error(`The predictions of the match ${key} are in the files twice.`)
+    }
+    predictionKeys.add(key)
+  }
+
+  const coachKeys = new Set<string>()
+
+  for (const rating of data.coachRatings) {
+    const key = `${rating.season}/${rating.matchCode}`
+
+    if (!keys.has(key)) {
+      throw new Error(`The coach ratings hold the match ${key}, which is not in the match files.`)
+    }
+    if (coachKeys.has(`${key}/${rating.coachCode}`)) {
+      throw new Error(`The rating of ${rating.coachCode} in the match ${key} is in the files twice.`)
+    }
+    coachKeys.add(`${key}/${rating.coachCode}`)
   }
 
   data.matches.sort((a, b) => a.dateTime.localeCompare(b.dateTime) || a.code.localeCompare(b.code))

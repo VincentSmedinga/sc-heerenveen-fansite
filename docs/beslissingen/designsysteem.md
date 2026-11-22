@@ -4207,3 +4207,24 @@
 - **Waarom:** een rij leest als één zin, en de punten moeten ook op een telefoon in één blik te vinden zijn.
   Een tabel met vier kolommen past niet naast twee clubnamen op 390 pixels.
 - **Alternatieven:** een `DataTable` (de clubnamen krijgen een kolom met te weinig ruimte); een `ShortLine` (heeft geen kolom voor de punten).
+
+## RatingScale en Winner voor de Uitblinker
+
+- **Datum:** 22 november 2026
+- **Besluit:** een cijfer geeft een supporter met de `RatingScale` (#1500), en de uitblinker van een wedstrijd krijgt de zegel `Winner`.
+  - De `RatingScale` (`Componenten/Formulier`) is één `fieldset` met de naam van de speler als legenda en tien keuzerondjes die als knoppen zijn getekend, met de cijfers 1 tot en met 10.
+    De regel eronder ("Keeper · 90 min") en de fout staan buiten de legenda, zodat de naam van de groep alleen de speler is, en de groep wijst er met `aria-describedby` naar.
+    De fout is tekst met "Fout:" voor een schermlezer; de rode randen zijn er alleen bij.
+  - Het keuzerondje is onzichtbaar maar beslaat de hele knop, dus elke knop is een aanraakdoel van minstens `--hf-size-control`, en de toetsenbordbediening is die van elke groep keuzerondjes.
+    Er is geen standaardkeuze.
+    De gekozen knop is gevuld in de kleur van een knop, met een dikkere rand, zodat hij ook zonder kleur te zien is.
+  - Het aantal rijen volgt de breedte van de kaart (een containerquery op een element in de fieldset), niet van het scherm: twee rijen van vijf zolang de kaart krap is, één rij van tien zodra hij breed genoeg is.
+    Een `fieldset` zelf is geen container, dus de containerquery staat op een `div` erin.
+  - `value` is het cijfer dat de server teruggeeft, als getal of als tekst, en `id` is de `id` van het eerste keuzerondje, zoals bij de `RadioGroup`.
+  - De `Winner` (`Componenten/Weergave`) is een zegel van twaalf punten met het gemiddelde erin, en ernaast een rood label in hoofdletters, de naam en één kleine regel.
+    De zegel is met CSS getekend en heeft geen plaatje, en het gemiddelde is gewone tekst met "Gemiddeld cijfer" voor een schermlezer.
+    De zegel heeft de kleuren van een knop, zodat het cijfer in donker leesbaar blijft: dan is de zegel licht en het cijfer donker.
+    Is de ruimte krap, dan staat de tekst onder de zegel, ook weer volgens de breedte van de kaart.
+- **Waarom:** tien knoppen zijn sneller dan een keuzelijst, en een schuifbalk geeft geen geheel cijfer en is moeilijk met een toetsenbord.
+  Beide onderdelen werken in een gewoon formulier en op een gewone pagina zonder JavaScript, zodat het formulier (#1470) en de wedstrijdpagina (#1467) ze alleen hoeven te gebruiken.
+- **Alternatieven:** een keuzelijst per speler; een schuifbalk; de zegel als plaatje (dan staat het gemiddelde niet als tekst); de knoppen in twee rijen volgens het scherm in plaats van de kaart.

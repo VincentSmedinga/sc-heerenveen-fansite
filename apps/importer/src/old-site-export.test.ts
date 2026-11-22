@@ -100,6 +100,8 @@ const rows: OldSiteRows = {
       voornaam: 'René',
     },
   ],
+  predictions: [],
+  predictionsEarly: [],
   ratings: [],
   reports: [
     { scheidsrechter: 'Eric Braamhaar', toeschouwers: 4251, wsd_code: 'psv.thuis', wsd_seizoen: '9091' },

@@ -30,7 +30,8 @@ import { importOldSiteOpponentGoals } from './old-site-opponent-goals.ts'
 import { importOldSitePersonFacts } from './old-site-person-facts.ts'
 import { importOldSitePersons, type TitleLookup, wikipediaTitleLookup } from './old-site-persons.ts'
 import { importOldSitePlayers } from './old-site-players.ts'
-import { importOldSiteRatings, importOldSiteSeasonRatings } from './old-site-ratings.ts'
+import { importOldSitePredictions } from './old-site-predictions.ts'
+import { importOldSiteCoachRatings, importOldSiteRatings, importOldSiteSeasonRatings } from './old-site-ratings.ts'
 import { robotsStoreFor } from './robots-store.ts'
 import { describeError } from './text.ts'
 
@@ -58,6 +59,8 @@ export const oldSiteSteps: readonly OldSiteStep[] = [
   { name: 'doelpunten tegen ons', run: (db) => importOldSiteOpponentGoals(db) },
   { name: 'linie en land', run: (db, data) => importOldSitePersonFacts(db, data.matches, data.players) },
   { name: 'cijfers', run: (db, data) => importOldSiteRatings(db, data) },
+  { name: 'trainercijfers', run: (db, data) => importOldSiteCoachRatings(db, data) },
+  { name: 'voorspellingen', run: (db, data) => importOldSitePredictions(db, data) },
   { name: 'seizoencijfers', run: (db, data) => importOldSiteSeasonRatings(db, data) },
   { name: 'selecties', run: (db) => importOldSiteCompleteness(db, new Date()) },
 ]
