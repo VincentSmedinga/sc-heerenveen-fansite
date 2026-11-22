@@ -2,12 +2,14 @@ import type { Metadata } from 'next'
 
 import { seasonOf } from '@fansite/db/season'
 import { Heading, Page, SeasonPicker } from '@fansite/design-system'
+import { isFansPartOn } from '@fansite/shared/fans-env'
 import { notFound } from 'next/navigation'
 
 import { type CompetitionChoice, competitionFields, parseCompetition } from '#src/competition'
 import { CompetitionSwitch } from '#src/CompetitionSwitch'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
+import { isOldSeason, rankSeason, ratedSeasons, ratingFigures } from '#src/fans/season-ratings'
 import { goalsByLineOf, type PersonTraits } from '#src/goal-groups'
 import { GoalsPerLineCard } from '#src/GoalGroupsCards'
 import { seasonSourceOf, sourceName, sourceOf } from '#src/match-sources'
@@ -19,9 +21,10 @@ import { AllPlayersCard, RankingCard } from '#src/ReportFiguresCards'
 import { loadSeasonPage, pickerPathOf, playerFiguresPath, type SearchParams } from '#src/season-page'
 import { getSeasonPlayerStats } from '#src/season-player-stats'
 import { getSeasonReportFigures } from '#src/season-report-figures'
-import { seasonAddress, seasonChoicesWithAll, seasonSlug } from '#src/seasons'
+import { seasonAddress, seasonChoices, seasonChoicesWithAll, seasonFromSlug, seasonSlug } from '#src/seasons'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { SpecialGoalsCard } from '#src/SpecialGoalsCard'
+import { SeasonRankingCard } from '#src/SupporterRatingsCards'
 import { withBranch } from '#src/title'
 
 /** The route that sends the season picker on to its season (app/spelers/cijfers/kies). */
@@ -72,7 +75,7 @@ export async function PlayerFiguresPage({
   searchParams: Promise<SearchParams>
   season: string
 }) {
-  const { competitie } = await searchParams
+  const { competitie, seizoen } = await searchParams
   const chosen = parseCompetition(competitie)
   const loaded = await loadSeasonPage(season, playerFiguresPath)
 
@@ -88,6 +91,7 @@ export async function PlayerFiguresPage({
   const stats = await loadStats(season)
   const figures = await loadFigures(season, competition)
   const traits = await loadTraits()
+  const ratings = await loadRatings(season, seizoen)
   const { data, seasons } = loaded
   const onImage = season === seasonOf(new Date()) ? undefined : season
 
@@ -121,6 +125,13 @@ export async function PlayerFiguresPage({
         />
         {figures?.seasonHasReports === true && (
           <AllPlayersCard competition={competition} figures={figures} season={season} seasonOnImage={onImage} />
+        )}
+        {ratings === undefined ? null : (
+          <SeasonRankingCard
+            {...ratings}
+            action={seasonAddress(playerFiguresPath, season, seasonOf(new Date()))}
+            fields={competitionFields(competition)}
+          />
         )}
       </Page.Section>
       <Page.Section area="side" aria-label="Meer cijfers over de spelers">
@@ -169,6 +180,41 @@ async function loadFigures(season: string, competition: CompetitionChoice) {
     return await getSeasonReportFigures(season, competition)
   } catch (error) {
     console.error(`Could not read the match reports for ${playerFiguresPath}: ${reasonOf(error)}`)
+
+    return undefined
+  }
+}
+
+/**
+ * The card "Cijfers van supporters" (issue 1474), or undefined when the Uitblinker is switched
+ * off or the figures could not be read (the error is logged). The card is an extra: the page is
+ * as it was without it. The card follows the season of the page, and `?seizoen=` on the address
+ * of the page chooses another one, which may be a season from before the matches in the
+ * database. A season that has no ratings is not offered, except the current one.
+ */
+async function loadRatings(season: string, asked: string | string[] | undefined) {
+  if (!isFansPartOn('uitblinker')) {
+    return undefined
+  }
+
+  try {
+    const data = await ratingFigures()
+    const current = seasonOf(new Date())
+    const seasons = [...new Set([current, ...ratedSeasons(data)])].toSorted((a, b) => b.localeCompare(a))
+    const wanted = seasonFromSlug((Array.isArray(asked) ? asked[0] : asked)?.replace('/', '-'))
+    const chosen = [wanted, season].find((one) => one !== undefined && seasons.includes(one)) ?? current
+    const rows = rankSeason(data, chosen)
+
+    return {
+      oldSource: isOldSeason(data, chosen),
+      options: seasonChoices(seasons),
+      rows,
+      season: chosen,
+      seasonOnly: rows.some((row) => row.matches === undefined),
+      value: seasonSlug(chosen),
+    }
+  } catch (error) {
+    console.error(`Could not read the ratings of supporters for ${playerFiguresPath}: ${reasonOf(error)}`)
 
     return undefined
   }

@@ -35,6 +35,12 @@ export type SeasonPickerProps = Omit<
    * them.
    */
   fields?: Readonly<Record<string, string>>
+  /**
+   * What the list is called, which is also the name of the form: `Seizoen` gives the form
+   * "Seizoen kiezen". A page with a second picker gives each its own name, such as
+   * `Seizoen van de cijfers`, so a screen reader says which list belongs to what.
+   */
+  label?: string
   /** The seasons to choose from, in the order shown. With fewer than two there is no picker. */
   options: readonly SeasonPickerOption[]
   /** `default` is the standard size. `small` is lower, for a picker in a toolbar. */
@@ -82,6 +88,7 @@ export const SeasonPicker = ({
   action,
   className,
   fields = {},
+  label = 'Seizoen',
   options,
   size = 'default',
   value,
@@ -129,7 +136,7 @@ export const SeasonPicker = ({
       <form
         {...props}
         action={action}
-        aria-label="Seizoen kiezen"
+        aria-label={`${label} kiezen`}
         autoComplete="off"
         className={classNames('hf-season-picker', className)}
         method="get"
@@ -140,7 +147,7 @@ export const SeasonPicker = ({
         <div className="hf-season-picker-row">
           <div className="hf-season-picker-field">
             <label className={scripted ? 'hf-visually-hidden' : undefined} htmlFor={id}>
-              Seizoen
+              {label}
             </label>
             <Select
               aria-describedby={scripted ? hintId : undefined}

@@ -328,6 +328,7 @@ describe('visitOf', () => {
       '/fans/prognose',
       '/fans/prognose/stand',
       '/fans/uitblinker',
+      '/fans/uitblinker/van-het-jaar',
       '/redactie/[slug]',
       '/wedstrijden/cijfers/[seizoen]',
       '/spelers/[seizoen]',
