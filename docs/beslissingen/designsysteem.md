@@ -4229,3 +4229,23 @@
 - **Waarom:** tien knoppen zijn sneller dan een keuzelijst, en een schuifbalk geeft geen geheel cijfer en is moeilijk met een toetsenbord.
   Beide onderdelen werken in een gewoon formulier en op een gewone pagina zonder JavaScript, zodat het formulier (#1470) en de wedstrijdpagina (#1467) ze alleen hoeven te gebruiken.
 - **Alternatieven:** een keuzelijst per speler; een schuifbalk; de zegel als plaatje (dan staat het gemiddelde niet als tekst); de knoppen in twee rijen volgens het scherm in plaats van de kaart.
+
+## PickList voor Fjouwer
+
+- **Datum:** 22 november 2026
+- **Besluit:** spelers aanvinken in Fjouwer gebeurt met de `PickList` (#1501), een eigen component in `Componenten/Formulier`, geen variant van de `CheckboxGroup`.
+  - De `PickList` is een reeks groepen, elk een `fieldset` met de linie als legenda en achter de legenda een teller als "1 van 2".
+    De teller is tekst in de legenda, dus een schermlezer zegt "Middenvelders, 1 van 2".
+    Het component telt en controleert niets: de pagina geeft het aantal gekozen, het toegestane aantal, de tekst achter elke speler en de fout.
+  - Elke speler is een rij met een rand, een selectievakje, de naam en daaronder een kleine regel ("31 punten · nog 3 keer").
+    De hele rij is aan te raken en minstens zo hoog als een bedieningselement.
+    Een speler die niet te kiezen is, is grijs en heeft een uitgeschakeld vakje, en de reden staat op de plaats van de regel, met `aria-describedby` aan het vakje gekoppeld.
+  - Een groep met een fout toont de tekst onder de legenda, met "Fout:" voor een schermlezer, en de groep wijst er met `aria-describedby` naar.
+    De teller krijgt dan de kleur van fouten; de kleur is nooit het enige teken.
+  - Het component blokkeert niets: het zijn gewone selectievakjes in een formulier, en de server beslist.
+  - `PickList.Strip` toont de gekozen spelers als vier donkerblauwe tegels naast elkaar, ook op een telefoon, in de kleur van de band, met het nummer en de achternaam.
+    Een lege plek toont alleen het nummer.
+    Een speler die niet meetelt, heeft een doorgestreepte naam en een tekst (`note`), zodat de doorhaling niet het enige teken is.
+- **Waarom:** de koppeling van vakje, reden en fout staat zo op één plek, en een andere pagina die iets aanvinkt kan hem later gebruiken.
+  De `CheckboxGroup` heeft geen teller, geen regel per vakje, geen reden en geen fout, en de rijen zien er anders uit.
+- **Alternatieven:** de `CheckboxGroup` uitbreiden (elke wijziging raakt de bronnenfilter, dat een gewone reeks vakjes is); de vakjes op de pagina zelf opbouwen; vier keuzelijsten (je ziet de selectie niet in één keer).
