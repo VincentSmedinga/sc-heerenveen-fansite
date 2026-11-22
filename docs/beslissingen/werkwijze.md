@@ -868,6 +868,7 @@
   Een run op `main` duurt ongeveer 11 minuten en neemt de machinetijd van een volledige run.
   Een gelijke boom betekent dat de code die op `main` komt dezelfde is als de getoetste.
   Verschilt de boom, dan is er iets nieuws en draait alles, zoals de regels voor `main` het nodig maken: ze eisen geen actuele branch.
+  Eén zeldzaam geval glipt erdoor: een latere commit op `main` die terugdraait waarmee de pull request was samengevoegd, maakt de bomen gelijk terwijl de run een andere samenvoeging toetste.
 - **Handmatige run en deploys:** een handmatige run draait altijd alles, en het label `volledige controle` geldt alleen voor pull requests.
   De deploys naar acceptatie (`acceptance.yml`) en naar ds.heerenveen.org (`storybook.yml`) zijn aparte workflows die zelf bouwen en toetsen wat ze uitleveren, en ze zijn niet gewijzigd.
 - **Alternatieven:** verplichte actuele branches in de regels voor `main`, wat per samenvoeging een rebase en een nieuwe run kost zodra een andere pull request eerder klaar was.

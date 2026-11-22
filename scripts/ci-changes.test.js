@@ -399,18 +399,15 @@ test('decideRun leaves a pull request to the rules by files, and never sets test
 })
 
 test('decideSafely runs everything when gathering fails, and says why', async () => {
-  for (const event of ['push', 'pull_request']) {
-    const result = await decideSafely(async () => {
-      throw new Error('GitHub antwoordde 502')
-    })
+  const result = await decideSafely(async () => {
+    throw new Error('GitHub antwoordde 502')
+  })
 
-    assert.deepEqual(
-      { site: result.site, stories: result.stories, tested: result.tested },
-      { site: true, stories: true, tested: false },
-      event,
-    )
-    assert.match(result.reasons[0], /GitHub antwoordde 502/)
-  }
+  assert.deepEqual(
+    { site: result.site, stories: result.stories, tested: result.tested },
+    { site: true, stories: true, tested: false },
+  )
+  assert.match(result.reasons[0], /GitHub antwoordde 502/)
 
   // Also an error that is not thrown inside an async function.
   const sync = await decideSafely(() => {
