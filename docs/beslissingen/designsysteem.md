@@ -4267,3 +4267,22 @@
 - **Waarom:** de koppeling van vakje, reden en fout staat zo op één plek, en een andere pagina die iets aanvinkt kan hem later gebruiken.
   De `CheckboxGroup` heeft geen teller, geen regel per vakje, geen reden en geen fout, en de rijen zien er anders uit.
 - **Alternatieven:** de `CheckboxGroup` uitbreiden (elke wijziging raakt de bronnenfilter, dat een gewone reeks vakjes is); de vakjes op de pagina zelf opbouwen; vier keuzelijsten (je ziet de selectie niet in één keer).
+
+## QuizQuestion voor een vraag van de Fantest
+
+- **Datum:** 22 november 2026
+- **Besluit:** een vraag van een quiz is de `QuizQuestion` (#1480), een eigen component in `Componenten/Formulier`, in een eigen kaart.
+  - De kaart begint met een kleine regel "Vraag 3 van 10", dan de vraag en vier antwoorden als grote rijen onder elkaar over de volle breedte.
+    De hele rij is aan te raken en minstens zo hoog als een bedieningselement.
+    De vraag is de legenda van een `fieldset` met vier keuzerondjes, dus het werkt zonder JavaScript en met de pijltjes.
+    De vraag staat in de lopende tekst, vet en niet in hoofdletters: een zin in de kop van het designsysteem is moeilijk te lezen.
+  - Een vraag met een fout toont de tekst onder de vraag, met "Fout:" voor een schermlezer, en de groep wijst er met `aria-describedby` naar.
+    Het component controleert niets: de pagina geeft de nummers, de fout en het gekozen antwoord.
+  - Met `result` toont dezelfde kaart de vraag na het nakijken, zonder keuzerondjes: een lijst met de antwoorden, het goede antwoord vet en groen, een fout antwoord van de bezoeker rood, en bij elk antwoord het percentage.
+    De bezoeker ziet "Jouw keuze" bij zijn antwoord, en onder de lijst staat "Goed." of "Fout. Het goede antwoord is …".
+    Kleur is nooit het enige teken: de woorden, het vet en het percentage zeggen hetzelfde, en een schermlezer hoort "goed antwoord" en "fout antwoord".
+  - Het groen is een nieuwe kleurrol, `--hf-colour-text-correct`, die op elk vlak 4,5:1 haalt in licht en donker.
+    Het rood is `--hf-colour-text-accent`.
+- **Waarom:** elke vraag heeft zo een eigen foutmelding en een eigen goed of fout, en een nieuwe quiz heeft dezelfde onderdelen nodig.
+- **Alternatieven:** alle vragen in één lange lijst met één `RadioGroup` per vraag (geen eigen kaart en geen eigen nummer); de `RatingScale` hergebruiken (die is voor een cijfer); de vraag als echte kop (`h3`) in de legenda.
+- **Let op:** de nieuwe rol staat ook in de tabel van de tokens (`src/docs/tokens.ts`) met de contrastparen.

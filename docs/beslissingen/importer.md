@@ -4598,3 +4598,30 @@
   De stap `seizoencijfers` maakt van de codes `rafael.piresvieira` en `radoslav.samarzic` van de oude site zo de spelling die al in `players` staat, en koppelt de seizoencijfers van 2000/01 en 1998/99 aan hun speler.
 - **Waarom:** de lijst is er voor precies dit, en de spelers bestaan al onder die naam.
 - **Alternatieven:** een aparte lijst van codes (meer code voor twee regels), of de spelers hernoemen (de spelling in de database is de goede).
+
+## Van de oude Fantest komen de vragen, de antwoorden en de som per maand over
+
+- **Datum:** 22 november 2026
+- **Besluit:** het exportscript van de oude site (`pnpm export:old-site`) schrijft de Fantest naar `fantest.json`: per maand het jaar, de maand, het aantal deelnemers, de gemiddelde score met één decimaal en de vragen.
+  Per vraag staan de volgorde, de tekst, de vier antwoorden, het goede antwoord en het percentage bezoekers dat elk antwoord koos, in hele getallen.
+  De stap `fantest` van de import zet dat in `quizzes` en `quiz_questions`, met de bron `oude-fansite` en de status `published`.
+  Een tweede run verandert niets, een maand die niet meer in het bestand staat, verdwijnt, en met `FANS_FANTEST` of de accounts uit doet de stap niets.
+  - Het script leest van `fantest_inz` alleen de rij met de antwoorden van elke bezoeker.
+    Het leest geen naam, geen tijd en geen score, en de rij verlaat de functie niet: het bestand heeft alleen de percentages en het gemiddelde.
+    Het schema is strikt, dus een veld met een naam, een adres of een tijd maakt het bestand onleesbaar, en een test weigert zo'n veld.
+  - De inleiding en het slot van een maand (`txt_bef` en `txt_aft`) gaan niet mee.
+  - Een vraag met een plaatje gaat niet mee: dat is een vraag met een bestand in `qst_img` of een `[image` in de tekst.
+    De maand toont de andere vragen en telt hoeveel er ontbreken (`omitted`).
+    Het gemiddelde is dan het gemiddelde over de vragen die er zijn.
+  - Een maand zonder sleutel (`fantest.sleutel`, het goede antwoord per vraag) gaat niet mee, want zonder die letters valt er niets na te kijken: de testmaand van december 1999 en mei tot en met november 2001.
+    Drie maanden die klaar stonden met lege vragen en zonder deelnemers (oktober 2003, juni 2004 en september 2005) gaan ook niet mee.
+  - De tekst van de vragen staat in de oude database als latin1 in een `blob`.
+    Het script leest hem als latin1, zodat een `é` een `é` blijft.
+  - Aan de bewaarde maanden valt niets te rekenen over deelnemers uit meerdere bronnen: de som per maand staat in het bestand, ook bij minder dan vijf deelnemers, en de site beslist wat ze toont (`quizMinimum`).
+- **Waarom:** de vragen zijn het werk van de oude redactie, en een bezoeker kan ze nu naspelen.
+  De deelnemers waren leden met een naam en een adres, en de site neemt niets van hen over.
+  De import leest alleen de bestanden, want productie kan de oude database niet bereiken.
+- **Alternatieven:** ook de ranglijsten van toen tonen (vraagt namen van echte mensen); de antwoorden van elke bezoeker bewaren en de percentages op de site uitrekenen (persoonsgegevens in de repository of de database); de vragen met een plaatje toch tonen zonder plaatje (de vraag is dan vaak niet te beantwoorden).
+- **Let op:** het bestand heeft 42 maanden met 418 vragen, van december 2001 tot oktober 2005 zonder juli en augustus 2003.
+  Twee vragen ontbreken, allebei in mei 2002.
+  Na de merge draait de eigenaar op acceptatie `import.mjs --old-site`; de stap `fantest` doet de rest.
