@@ -69,6 +69,9 @@ const open = [
   // The page of the game Uitblinker: a visitor sees the match and the way in, and a supporter's
   // grades are read only with a session. Its action calls requireSupporter.
   'app/fans/uitblinker/page.tsx',
+  // The Uitblinker of each season is public: it holds names of players and averages of groups
+  // only (issue 1474).
+  'app/fans/uitblinker/van-het-jaar/page.tsx',
 ]
 
 function filesUnder(folder: string) {

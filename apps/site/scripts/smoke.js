@@ -2141,6 +2141,11 @@ await withEmptyDatabase((database) =>
       '/fans/uitblinker must be "not found" with Uitblinker off',
     )
     assert.equal(
+      (await fetch(`${origin}/fans/uitblinker/van-het-jaar`)).status,
+      404,
+      '/fans/uitblinker/van-het-jaar must be "not found" with Uitblinker off',
+    )
+    assert.equal(
       (await fetch(`${origin}/fans/spelregels`)).status,
       404,
       '/fans/spelregels must be "not found" with every part off',
@@ -2191,6 +2196,14 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(ratingHtml, /type="radio"/)
     assert.equal(rating.headers.get('cache-control'), 'no-store')
     assert.equal(rating.headers.get('x-robots-tag'), 'noindex, nofollow')
+    // The Uitblinkers of the year, with the running season that has no name yet.
+    const yearWinners = await fetch(`${origin}/fans/uitblinker/van-het-jaar`)
+    const yearWinnersHtml = await yearWinners.text()
+
+    assert.equal(yearWinners.status, 200, '/fans/uitblinker/van-het-jaar must be there with Uitblinker on')
+    assert.match(yearWinnersHtml, /<h1[^>]*>Uitblinker van het jaar<\/h1>/)
+    assert.match(yearWinnersHtml, /Na het seizoen/)
+    assert.equal(yearWinners.headers.get('x-robots-tag'), 'noindex, nofollow')
     // The card of the game on Fans, with its way to the page.
     assert.match(html, /<h2[^>]*>Uitblinker<\/h2>/)
     assert.match(html, /<a [^>]*href="\/fans\/uitblinker"[^>]*>Naar de Uitblinker<\/a>/)

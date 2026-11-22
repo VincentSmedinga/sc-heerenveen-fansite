@@ -9,6 +9,9 @@ export const fansPath = '/fans'
 export const rulesPath = `${fansPath}/spelregels`
 export const predictionRulesAddress = `${rulesPath}#prognose`
 
+/** The page with the Uitblinker of each season (issue 1474). */
+export const yearWinnersPath = `${fansPath}/uitblinker/van-het-jaar`
+
 /** The games, in the order of the bar under the menu. Fantest is an archive, but a part too. */
 export const fansGames = [
   { href: `${fansPath}/prognose`, label: 'Prognose', part: 'prognose' },
