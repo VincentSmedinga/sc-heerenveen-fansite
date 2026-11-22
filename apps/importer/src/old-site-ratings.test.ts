@@ -250,6 +250,15 @@ describe('the step seizoencijfers', () => {
     expect(await database.db.select().from(oldSeasonWinners)).toHaveLength(1)
   })
 
+  it('passes with no winners to compare, as long as the list of the old page is empty', async () => {
+    const many = Array.from({ length: 6 }, (_, index) => rating(`m${index}.thuis`, 'erik.edman', 9, 10, 0.5))
+    const result = await importOldSiteSeasonRatings(database.db, dataOf({ ratings: many, winners: [] }))
+
+    expect(result).toMatchObject({ changed: 0, created: 0, skipped: 0, unchanged: 0 })
+    expect(result.lines).toEqual([])
+    expect(await database.db.select().from(oldSeasonWinners)).toEqual([])
+  })
+
   it('says nothing when the winner is the one the ratings give', async () => {
     const many = Array.from({ length: 6 }, (_, index) => rating(`m${index}.thuis`, 'erik.edman', 9, 10, 0.5))
     const result = await importOldSiteSeasonRatings(
