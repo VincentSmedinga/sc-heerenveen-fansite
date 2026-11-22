@@ -7696,6 +7696,7 @@
 - **Alternatieven:** de cijfers verwijderen (niet terug te draaien); ze laten meetellen en alleen nieuwe cijfers weigeren; de herberekening aan de volgende import overlaten (het gemiddelde klopt dan een kwartier niet).
 - **Let op:** de cijfers van de trainer (#1478) hebben dezelfde regel nodig; die komt bij dat issue of bij #1479.
   Mislukt de herberekening na het blokkeren of vrijgeven, dan klopt het gemiddelde tot de volgende import niet, want de herberekening staat na de transactie van de redactie en `closeRatingWindows` schrijft een gesloten venster niet opnieuw.
+- **Later:** zie _De trainer staat als laatste regel in de tabel met gemiddelden_ (22 november 2026): de cijfers van de trainer volgen dezelfde regel.
 
 ## De Uitblinker van het jaar is de speler met het hoogste seizoencijfer, ook voor de oude seizoenen
 
@@ -7714,8 +7715,6 @@
 - **Alternatieven:** de acht namen overtypen van de oude pagina (kost handwerk en kan afwijken van de cijfers); een drempel van zes wedstrijden voor de titel (strenger dan een seizoencijfer, en de oude seizoenen hebben soms minder wedstrijden met cijfers); bij een gelijke stand de speler met minder cijfers kiezen.
 - **Let op:** migratie 0108 haalt de tabel `old_season_winners` weg.
   Zij was altijd leeg, want de namen zijn nooit overgetypt.
-
-- **Later:** zie _De trainer staat als laatste regel in de tabel met gemiddelden_ (22 november 2026): de cijfers van de trainer volgen dezelfde regel.
 
 ## De trainer staat als laatste regel in de tabel met gemiddelden
 
