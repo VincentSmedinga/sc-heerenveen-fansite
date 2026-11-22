@@ -4208,6 +4208,7 @@
 - **Waarom:** een rij leest als één zin, en de punten moeten ook op een telefoon in één blik te vinden zijn.
   Een tabel met vier kolommen past niet naast twee clubnamen op 390 pixels.
 - **Alternatieven:** een `DataTable` (de clubnamen krijgen een kolom met te weinig ruimte); een `ShortLine` (heeft geen kolom voor de punten).
+- **Later:** de rij is op 22 november 2026 veranderd (#1559): de competitie staat achter de dag op de metaregel, "Nog niet gespeeld" vervalt, en rechts staan de punten met je voorspelling "3–4 (1–2)" (zie _De rij van PredictionList zet de punten en de voorspelling rechts_).
 
 ## RatingScale en Winner voor de Uitblinker
 
@@ -4278,3 +4279,20 @@
   Een lang woord als "doelpuntental" breekt op een lettergreep, want de rijkop heeft ook `hyphens: auto`.
 - **Waarom:** bij `anywhere` telt elke letter als een plek om af te breken, dus een tabel waarvan de andere kolommen niet afbreken drukte de eerste kolom samen tot één letter (de kaart "Punten", #1561).
 - **Alternatief:** de regel laten staan en alleen die ene tabel aanpassen.
+
+## De rij van PredictionList zet de punten en de voorspelling rechts
+
+- **Datum:** 22 november 2026
+- **Besluit:** een rij van `PredictionList` heeft twee regels links en een kolom rechts (#1559).
+  - Links staat de metaregel met de dag, een eventuele stand ("Bezig", "Afgelast", "Uitgesteld") en de competitie, met een punt ertussen, en daaronder de clubs met de uitslag.
+    "Nog niet gespeeld" vervalt, want een rij zonder punten zegt dat al.
+  - Rechts staat bij een gespeelde wedstrijd het aantal punten als getal in `--hf-figure-large-font-size` met "punt" of "punten" erachter, en daaronder de voorspelling als "3–4 (1–2)" in kleine tekst.
+    Zonder punten staat alleen de voorspelling rechts, in de maat van een kop van een kaart, met de eindstand zwaarder dan de ruststand.
+    Niets rechts breekt over twee regels.
+  - Bij een gespeelde wedstrijd is het deel van de voorspelling dat punten opleverde groen en het deel dat niets opleverde rood, eind en rust apart, met een vinkje of een kruisje voor het oog.
+    De kleuren zijn twee nieuwe tokens, `--hf-colour-text-positive` en `--hf-colour-text-negative` (stap 800 in licht, stap 300 in donker), die 4,5:1 halen op de vlakken.
+  - Een schermlezer hoort "Jouw voorspelling: eind 3–4, goed, rust 1–2, fout" in verborgen tekst, en de zichtbare "3–4 (1–2)" is voor schermlezers verborgen.
+    De punten zijn gewone tekst met hun eenheid.
+- **Waarom:** het getal is wat een fan zoekt, en de status brak rechts over twee regels en nam de plek van wat belangrijk is.
+  Kleur is nooit het enige teken (docs/toegankelijkheid.md), en de haakjes lezen een schermlezer niet als ruststand.
+- **Alternatieven:** de punten op de metaregel en alleen de voorspelling rechts; de status rechts laten staan; een `aria-label` op een gewone `span` voor de voorspelling (wordt niet overal voorgelezen); een eigen pictogram voor het vinkje en het kruisje (een teken in de tekst volstaat, en het is voor schermlezers verborgen).

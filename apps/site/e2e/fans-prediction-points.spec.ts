@@ -42,8 +42,8 @@ test('shows the points of a played match, and corrects them when the result is c
     // The list: the prediction, and the points in the head of the card.
     const list = page.getByRole('region', { name: 'Jouw voorspellingen' })
 
-    await expect(list.getByText('1 voorspelling · 17 punten')).toBeVisible()
-    await expect(list.getByText('Jij: 1–1 bij rust, 3–1 eind')).toBeVisible()
+    await expect(list.getByRole('heading', { name: 'Jouw voorspellingen: 17 punten, 1 voorspelling' })).toBeVisible()
+    await expect(list.getByText('Jouw voorspelling: eind 3–1, goed, rust 1–1, goed')).toBeAttached()
 
     // The card of the match: why each part gave its points, and the total.
     const points = page.getByRole('region', { name: 'Je punten' })
@@ -56,7 +56,7 @@ test('shows the points of a played match, and corrects them when the result is c
     // A corrected score corrects the points at once: 3–1 against 2–2 gives nothing.
     await correctPlayedResult(matchId, 2, 2)
     await page.goto('/fans/prognose')
-    await expect(list.getByText('1 voorspelling · 2 punten')).toBeVisible()
+    await expect(list.getByRole('heading', { name: 'Jouw voorspellingen: 2 punten, 1 voorspelling' })).toBeVisible()
   } finally {
     await removePlayedPrediction(matchId)
   }

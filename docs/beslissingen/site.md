@@ -7357,6 +7357,7 @@
   De plekken in de stand en bij een wedstrijd (de twee andere kerncijfers) en de link "Spelregels" komen met #1451 en #1455.
 - **Waarom:** het ontwerp wil de lijst kort en de punten in één blik; de plekken hebben een ranglijst nodig die er nog niet is.
 - **Alternatieven:** de hele lijst altijd tonen (lang na een seizoen); een aparte pagina voor de lijst (twee plekken die uit elkaar lopen).
+- **Later:** de kop van de kaart is op 22 november 2026 veranderd (#1559): "X punten" met "Y voorspellingen" klein erachter, en de regel eronder vervalt (zie _De kop van de kaart Jouw voorspellingen is het totaal_).
 
 - **Datum:** 20 november 2026
 - **Besluit:** voor de aftrap toont de wedstrijdpagina alleen het aantal voorspellingen van de Prognose.
@@ -7828,3 +7829,14 @@
 - **Waarom:** een kaart met alleen getallen laat zien op wie de fans rekenden, zonder dat een keuze van een persoon te herleiden is.
   Pas vanaf de aftrap tonen houdt de eigen keuze een eigen keuze.
 - **Alternatieven:** de aantallen ook vóór de aftrap tonen (iedereen kiest dan hetzelfde als de massa); de geërfde vier niet meetellen (dan telt een fan die niet opnieuw koos niet mee, terwijl zijn vier bij de aftrap stond).
+
+## De kop van de kaart Jouw voorspellingen is het totaal
+
+- **Datum:** 22 november 2026
+- **Besluit:** de kop van de kaart "Jouw voorspellingen" is "X punten", het totaal van de fan, met "Y voorspellingen" in de `Meta`-stijl direct erachter (#1559).
+  Bij 1 staat er "1 punt" en "1 voorspelling".
+  De regel "1 voorspelling · 0 punten" onder de kop vervalt.
+  De kop is nog een `h2`, en de woorden "Jouw voorspellingen" staan als verborgen tekst voor het getal, zodat de kaart (`aria-labelledby`) en de lijst een naam houden: de kop leest als "Jouw voorspellingen: 4 punten, 3 voorspellingen".
+  Een fan zonder voorspellingen ziet de kop "Jouw voorspellingen" met de regel "Nog niets. Doe mee aan de Prognose.".
+- **Waarom:** het totaal is het getal waar het om gaat, en een kaart zonder naam is voor een schermlezer niet te vinden.
+- **Alternatieven:** een losse `aria-label` op de kaart (de kop leest dan als een los getal in de lijst met koppen); de regel onder de kop houden.

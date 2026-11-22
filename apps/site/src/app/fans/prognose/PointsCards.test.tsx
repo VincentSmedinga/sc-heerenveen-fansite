@@ -40,13 +40,17 @@ describe('the card "Jouw voorspellingen"', () => {
     const html = list([])
 
     expect(html).toContain('Nog niets. Doe mee aan de Prognose.')
+    expect(html).toContain('>Jouw voorspellingen</h2>')
     expect(html).not.toContain('<ul')
   })
 
-  it('has the number of predictions and the points in its head, and a row for each', () => {
+  it('has the points and the number of predictions in its head, with the name for a screen reader, and a row for each', () => {
     const html = list([item(2), item(1)])
 
-    expect(html).toContain('2 voorspellingen · 34 punten')
+    expect(html).toContain(
+      '<span class="hf-visually-hidden">Jouw voorspellingen: </span>34 punten<span class="hf-visually-hidden">,</span> <span class="hf-meta">2 voorspellingen</span>',
+    )
+    expect(html).not.toContain('·')
     expect(html.match(/hf-prediction-list-item/g)).toHaveLength(2)
     expect(html).not.toContain('Alle ')
   })
@@ -66,7 +70,9 @@ describe('the card "Jouw voorspellingen"', () => {
     const off = item(3, { goalsAgainst: null, goalsFor: null, state: 'cancelled' })
     const html = list([off, item(1)])
 
-    expect(html).toContain('1 voorspelling · 17 punten')
+    expect(html).toContain(
+      '17 punten<span class="hf-visually-hidden">,</span> <span class="hf-meta">1 voorspelling</span>',
+    )
     expect(html).toContain('Afgelast')
   })
 })

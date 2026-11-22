@@ -68,10 +68,25 @@ describe('a row of the list', () => {
   it('has the clubs, the score, the prediction and the points of a match that was played', () => {
     expect(listItemOf(item(), now)).toMatchObject({
       ...clubs,
+      competition: 'Eredivisie',
       points: 17,
-      prediction: 'Jij: 1–1 bij rust, 3–1 eind',
+      prediction: { fullTime: { right: true, score: '3–1' }, halfTime: { right: true, score: '1–1' } },
       score: '2–1',
     })
+  })
+
+  it('marks the part that gave nothing as wrong, and the part that gave points as right', () => {
+    const row = listItemOf({ ...item(), points: pointsOf([1, 1], [0, 2]) }, now)
+
+    expect(row.prediction.halfTime.right).toBe(true)
+    expect(row.prediction.fullTime.right).toBe(false)
+  })
+
+  it('gives no colour to a match that was not played', () => {
+    const row = listItemOf(item({ goalsAgainst: null, goalsFor: null, state: 'live' }), now)
+
+    expect(row.prediction.fullTime.right).toBeUndefined()
+    expect(row.prediction.halfTime.right).toBeUndefined()
   })
 
   it('writes the score in the order of the clubs on the line, for a match away', () => {
@@ -84,7 +99,6 @@ describe('a row of the list', () => {
 
   it.each([
     { state: 'live', text: 'Bezig' },
-    { state: 'upcoming', text: 'Nog niet gespeeld' },
     { state: 'cancelled', text: 'Afgelast' },
     { state: 'postponed', text: 'Uitgesteld' },
   ] as const)('says $text and gives no points for a match that is $state', ({ state, text }) => {
@@ -95,7 +109,14 @@ describe('a row of the list', () => {
     expect(row.score).toBeUndefined()
   })
 
-  it('says what the supporter predicted', () => {
+  it('says nothing about the state of a match that has not been played yet', () => {
+    const row = listItemOf(item({ goalsAgainst: null, goalsFor: null, state: 'upcoming' }), now)
+
+    expect(row.status).toBeUndefined()
+    expect(row.points).toBeUndefined()
+  })
+
+  it('says what the fan predicted', () => {
     expect(guessText(item())).toBe('Jij: 1–1 bij rust, 3–1 eind')
   })
 })

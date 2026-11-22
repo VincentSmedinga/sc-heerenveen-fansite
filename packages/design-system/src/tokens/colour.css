@@ -194,6 +194,14 @@
      */
     --hf-colour-text-missing: light-dark(var(--hf-colour-red-800), var(--hf-colour-red-300));
 
+    /*
+     * Says that a part of a prediction was right (positive) or wrong (negative): green and red,
+     * a step darker than the accents in light so that both reach 4.5:1 on the surfaces. A sign
+     * always goes with them, because colour alone says nothing to everybody.
+     */
+    --hf-colour-text-positive: light-dark(var(--hf-colour-green-800), var(--hf-colour-green-300));
+    --hf-colour-text-negative: light-dark(var(--hf-colour-red-800), var(--hf-colour-red-300));
+
     /* The fill of the sign that says something is missing (DataTable.Mark). */
     --hf-colour-background-missing: light-dark(var(--hf-colour-red-100), var(--hf-colour-red-900));
     --hf-colour-text-highlight: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-50));
@@ -478,6 +486,8 @@
       --hf-colour-text-link-visited: var(--hf-colour-grey-600);
       --hf-colour-text-accent: var(--hf-colour-red-700);
       --hf-colour-text-missing: var(--hf-colour-red-800);
+      --hf-colour-text-positive: var(--hf-colour-green-800);
+      --hf-colour-text-negative: var(--hf-colour-red-800);
       --hf-colour-background-missing: var(--hf-colour-red-100);
       --hf-colour-text-highlight: var(--hf-colour-blue-800);
       --hf-colour-text-on-button: var(--hf-colour-white);
