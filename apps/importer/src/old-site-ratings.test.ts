@@ -1,6 +1,7 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { matchCoachRatings, matchPlayerRatings, oldSeasonRatings, players, staff } from '@fansite/db/schema'
+import { seedStaff } from '@fansite/db/staff-seed'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -279,6 +280,23 @@ describe('the step trainercijfers', () => {
       'skipped the rating of the coach in 2001/02 weg.thuis: the match is not in the database as a match of the old fansite',
     ])
     expect(await storedCoach()).toHaveLength(1)
+  })
+
+  it('stores the rating of Foppe de Haan after 1 January 2004, with the staff of the seed (#1546)', async () => {
+    const lateMatch = { ...oldMatch('nec.thuis', '2004-03-13 20:00:00', 25, ['hans.vonk']), season: '0304' }
+    const data = dataOf({
+      coachRatings: [{ ...coachRating('nec.thuis', 'foppe.dehaan', 7.2, 31, 1.1), season: '0304' }],
+      matches: [lateMatch],
+    })
+
+    await prepare(data)
+    await seedStaff(database.db)
+
+    const result = await importOldSiteCoachRatings(database.db, data)
+
+    expect(result).toMatchObject({ created: 1, skipped: 0 })
+    expect(result.lines).toEqual([])
+    expect(await storedCoach()).toMatchObject([{ average: '7.20', ratingCount: 31, spread: '1.10' }])
   })
 
   it('stores nothing without a staff, and changes nothing in a second run', async () => {

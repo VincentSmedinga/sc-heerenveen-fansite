@@ -750,6 +750,13 @@
       "when": 1795347276860,
       "tag": "0106_add_rating_blocked_mark",
       "breakpoints": true
+    },
+    {
+      "idx": 107,
+      "version": "5",
+      "when": 1795350311578,
+      "tag": "0107_add_coach_rating_blocked_mark",
+      "breakpoints": true
     }
   ]
 }

@@ -7,7 +7,7 @@ import { notFound, redirect } from 'next/navigation'
 
 import { getDatabase } from '#src/database'
 import { logInPaths } from '#src/fans/log-in'
-import { fansMatchRatings, loadRunningRatings, seasonWinners } from '#src/fans/match-ratings'
+import { fansMatchRatings, loadRunningCoachRating, loadRunningRatings, seasonWinners } from '#src/fans/match-ratings'
 import { findOwnCoachRating, findOwnRatings, findRatingWindow } from '#src/fans/rating'
 import { currentSupporter } from '#src/fans/require-supporter'
 import { pageAreas } from '#src/page-areas'
@@ -107,6 +107,7 @@ export default async function RatingPage({
     const saved = complete && wijzigen !== '1'
     // The standing so far is for a supporter who gave all the grades, on the saved view only.
     const running = saved ? await loadRunningRatings(db, window.match.id) : []
+    const runningCoach = saved && window.coach !== null ? await loadRunningCoachRating(db, window.match.id) : undefined
 
     card = (
       <OpenCard
@@ -124,6 +125,7 @@ export default async function RatingPage({
             grades={grades}
             players={window.players}
             running={running}
+            runningCoach={runningCoach}
           />
         ) : (
           <RatingForm

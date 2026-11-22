@@ -2420,6 +2420,7 @@
 - **Alternatieven:** de seed alle rijen van de rol `coach` laten vervangen (wist later wat het beheer toevoegt).
   Jansen in twee rijen splitsen, op 3 juni 2019 (de pagina's zeggen niet wat er die dag gebeurde).
   Het gat tussen Jansen en Tobiassen dichten (we zouden een datum verzinnen).
+- **Later:** de eerste termijn van Foppe de Haan eindigt sinds 22 november 2026 (#1546) op 30 juni 2004 met de precisie `day`, en niet op 1 januari 2004 met de precisie `year`; zie _De eerste termijn van Foppe de Haan eindigt op de laatste dag van 2003/04_.
 
 ## De statistieken tellen standaard alle wedstrijden, met een schakelaar naar alleen de Eredivisie
 
@@ -3211,3 +3212,15 @@
   Eén onderdeel haalt de herhaling tussen de twee kaarten weg.
 - **Alternatieven:** terug naar een top 5 met de plaatsen 6 tot en met 10 achter een `Disclosure` (de opzet van #1416); `MoreRows` houden voor een volgende kaart; één kaart die beide lijsten toont (zichtbaar anders, met nieuwe koppen en ankers); twee onderdelen houden.
 - **Later:** vervangt _De kaarten Het makkelijkst en Het moeilijkst tonen vijf clubs per druk, tot 25, en gaan dan terug naar de top 5_ (19 november 2026) en de top 5 uit _De kaarten Het makkelijkst en Het moeilijkst hebben een keuze Alle, Thuis en Uit en een top 5_ (19 november 2026).
+
+## De eerste termijn van Foppe de Haan eindigt op de laatste dag van 2003/04
+
+- **Datum:** 22 november 2026
+- **Besluit:** de eerste termijn van Foppe de Haan in `headCoaches` eindigt op 30 juni 2004, met de precisie `day`, de laatste dag van 2003/04.
+  De notitie zegt dat Wikipedia alleen het jaar geeft en waarom we de laatste dag van het seizoen nemen.
+  Er komt geen migratie bij: de seed vindt de rij op rol, naam en begindatum, die gelijk blijven, en werkt hem bij bij de eerste start van elke omgeving (`seedStaff` in `prepare.ts`).
+- **Waarom:** met het einde "2004" op de precisie `year` wist `staffOnDay` voor een dag na 1 januari 2004 niet zeker of hij nog trainer was, en sloeg de stap `trainercijfers` van de import van de oude fansite 18 cijfers over (24 januari tot en met 16 mei 2004).
+  Zijn laatste wedstrijd was op 16 mei 2004 en Gertjan Verbeek begint op 1 juli 2004, dus 30 juni sluit aan zonder gat of overlap.
+  Bij zijn derde termijn deden we hetzelfde: het einde van 2015/16 wordt de laatste dag van het seizoen.
+- **Alternatieven:** 16 mei 2004, de dag van zijn laatste wedstrijd (laat 17 mei tot en met 30 juni zonder trainer); de import de onzekere dag laten raden (we raden nooit).
+- **Let op:** na het uitrollen draait de eigenaar op acceptatie `import.mjs --old-site` opnieuw; de stap `trainercijfers` slaat dan de 18 cijfers op.

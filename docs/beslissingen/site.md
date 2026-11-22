@@ -7543,6 +7543,7 @@
   De kolom Cijfers laat zien waarom een speler geen gemiddelde heeft.
 - **Alternatieven:** alleen de uitblinker tonen, zonder tabel; de cijfers op de kaart van de Prognose zetten.
 - **Later:** sinds _De wedstrijdpagina toont de nieuwe cijfers pas als het venster sluit_ (22 november 2026) heeft ook een nieuwe wedstrijd deze kaart, zonder bronregel, en lezen beide dezelfde tabel en dezelfde tabelweergave.
+- **Later:** zie _De trainer staat als laatste regel in de tabel met gemiddelden_ (22 november 2026): de trainer staat nu als laatste regel in de tabel van de kaart, met de cijfers van toen en dezelfde bronregel.
 
 ## Een supporter geeft elke speler van de laatste wedstrijd die 30 minuten of langer speelde een cijfer
 
@@ -7629,6 +7630,7 @@
 - **Alternatieven:** de gemiddelden tijdens het venster tonen (de cijfers worden dan beïnvloed); ze op de wedstrijdpagina tonen voor wie is ingelogd (een pagina die per persoon verschilt).
 - **Let op:** een venster dat gesloten is, maar waarvan de import de gemiddelden nog niet schreef (hoogstens een kwartier), toont geen kaart op de wedstrijdpagina.
   De trainer staat er niet in; die komt met #1479.
+- **Later:** zie _De trainer staat als laatste regel in de tabel met gemiddelden_ (22 november 2026): de trainer staat nu als laatste regel in de tabel met gemiddelden, op de wedstrijdpagina en op `/fans/uitblinker`.
 
 ## Spelers › Cijfers rangschikt de seizoencijfers, en de Uitblinker van het jaar heeft een eigen pagina
 
@@ -7674,6 +7676,7 @@
   Een eigen tabel houdt de trainer uit de gemiddelden van de spelers, zonder dat elke vraag naar de uitblinker hem eruit moet filteren.
   Een dag met twee kandidaten laat de groep weg, zodat er geen cijfer komt voor een persoon die we niet kennen.
 - **Alternatieven:** de trainer als speler in `player_ratings` (de uitblinker moet hem dan weglaten); de trainer alleen per seizoen beoordelen; een trainer kiezen bij twee kandidaten (een cijfer voor iemand die misschien niet coachte).
+- **Later:** zie _De trainer staat als laatste regel in de tabel met gemiddelden_ (22 november 2026): de trainer staat nu als laatste regel in de tabel, ook in je eigen tabel met de tussenstand, waar de plek van zijn gemiddelde niet meer een streepje is.
 
 ## De cijfers van een geblokkeerd account tellen niet meer mee
 
@@ -7710,3 +7713,23 @@
   In 2006/07 hebben twaalf spelers genoeg wedstrijden met cijfers, ook al heeft de oude site maar zeven wedstrijden van dat seizoen.
 - **Alternatieven:** de acht namen overtypen van de oude pagina (kost handwerk en kan afwijken van de cijfers); een drempel van zes wedstrijden voor de titel (strenger dan een seizoencijfer, en de oude seizoenen hebben soms minder wedstrijden met cijfers); bij een gelijke stand de speler met minder cijfers kiezen.
 - **Let op:** de tabel `old_season_winners` blijft ongebruikt staan; een latere migratie haalt haar weg.
+
+- **Later:** zie _De trainer staat als laatste regel in de tabel met gemiddelden_ (22 november 2026): de cijfers van de trainer volgen dezelfde regel.
+
+## De trainer staat als laatste regel in de tabel met gemiddelden
+
+- **Datum:** 22 november 2026
+- **Besluit:** het gemiddelde van de hoofdtrainer staat als laatste regel van de tabel met gemiddelden, na een zwaardere lijn, als "Robin Veldman (trainer)", met dezelfde kolommen als de spelers (#1479).
+  Dat geldt voor de kaart Uitblinker op de wedstrijdpagina, voor de uitslag op `/fans/uitblinker`, en voor de tussenstand in de tabel "Jouw cijfers en de tussenstand", waar zijn regel nu zijn gemiddelde heeft in plaats van een streepje.
+  De drempel is die van de spelers: onder vijf cijfers staat "nog te weinig cijfers".
+  De trainer is nooit de uitblinker en krijgt nooit de zegel; die blijft bij de beste speler.
+  Een wedstrijd zonder gemiddelde voor de trainer heeft geen regel voor hem, en dat geldt ook voor een dag met twee mogelijke hoofdtrainers, want daar is niemand om een cijfer te geven.
+  Voor een oude wedstrijd komt het gemiddelde uit `match_coach_ratings` met de bron `oude-fansite` (#1502), onder dezelfde bronregel als de spelers; voor een nieuwe uit dezelfde tabel met de bron `fans`.
+  De regel staat alleen op een kaart die er al is: een wedstrijd met minder dan vijf supporters toont alleen het aantal, en een wedstrijd zonder rijen voor spelers toont geen tabel.
+  Staat de instelling van de Uitblinker uit, dan staat het cijfer voor de trainer nergens, ook niet bij oude wedstrijden, want alles loopt langs dezelfde controle.
+  De cijfers van een geblokkeerd account tellen ook voor de trainer niet mee, zoals bij de spelers (#1476): `coach_ratings` krijgt een kolom `blocked` (migratie 0107), `closeAccount` zet die bij een geblokkeerd account, en het exportplan zet haar ook voor een account dat nu geblokkeerd is.
+  `recountRatingsOf` rekent bij blokkeren en vrijgeven ook het gemiddelde van de trainer opnieuw uit, met `writeCoachAverages`, die net als `writeAverages` de rij van de bron `fans` van de wedstrijd weghaalt en opnieuw schrijft; `closeRatingWindows` gebruikt dezelfde functie.
+  Een trainer wiens cijfers allemaal wegvallen, heeft geen rij meer.
+- **Waarom:** zo krijgt de trainer dezelfde behandeling als de spelers, zonder dat de prijs voor de uitblinker bij hem terechtkomt, en de blokkade houdt het gemiddelde schoon voor wie ook de trainer een cijfer gaf.
+- **Alternatieven:** een eigen kaart voor de trainer; de trainer bij de spelers in de tabel zetten.
+- **Let op:** het seizoencijfer van de trainer en een ranglijst van trainers zijn er niet; daar is geen ontwerp voor.

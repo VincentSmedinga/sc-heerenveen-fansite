@@ -129,6 +129,66 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
+const coachTable = (html: string) =>
+  html.match(/<table[\s\S]*?<\/table>/g)?.find((found) => found.includes('Robin Veldman')) ?? ''
+
+describe('the head coach in the card Uitblinker (issue 1479)', () => {
+  const withCoach = (count: number) => ratings({ coach: { average: 6.4, count, name: 'Robin Veldman' } })
+
+  it('is the last row of an old match, after a heavier line, with the same columns and no seal', async () => {
+    vi.mocked(oldMatchRatings).mockResolvedValue(withCoach(27))
+
+    const html = await render()
+    const table = coachTable(html)
+    const row = table.slice(table.indexOf('Robin Veldman'))
+
+    expect(table).toContain('Robin Veldman (trainer)')
+    expect(table.indexOf('Speler 3')).toBeLessThan(table.indexOf('Robin Veldman'))
+    expect(table.lastIndexOf('<tr')).toBe(table.lastIndexOf('<tr', table.indexOf('Robin Veldman')))
+    expect(table).toContain('hf-data-table-total')
+    expect(plain(row)).toContain('6,4')
+    expect(plain(row)).toContain('27')
+    expect(table.match(/>Uitblinker</g)).toHaveLength(1)
+    expect(html.match(/hf-winner-average/g)).toHaveLength(1)
+    expect(plain(html)).toContain('Cijfers van bezoekers van de Fansite, 2001 tot 2007.')
+  })
+
+  it('has the same threshold as the players: under five ratings it says "nog te weinig cijfers"', async () => {
+    vi.mocked(oldMatchRatings).mockResolvedValue(withCoach(4))
+
+    const row = coachTable(await render())
+
+    expect(plain(row.slice(row.indexOf('Robin Veldman')))).toContain('nog te weinig cijfers')
+    expect(row.slice(row.indexOf('Robin Veldman'))).not.toContain('6,4')
+  })
+
+  it('has no row for a match without ratings for the coach', async () => {
+    expect(coachTable(await render())).toBe('')
+    expect(plain(await render())).not.toContain('(trainer)')
+  })
+
+  it('is in the table of a new match whose window closed, and is nowhere when the game is off', async () => {
+    vi.mocked(getPublicReport).mockResolvedValue(reportedMatch())
+    vi.mocked(fansMatchRatings).mockResolvedValue(withCoach(31))
+
+    expect(plain(coachTable(await render()))).toContain('Robin Veldman (trainer) 6,4 31')
+
+    vi.stubEnv('FANS_UITBLINKER', 'off')
+    expect(plain(await render())).not.toContain('Robin Veldman')
+  })
+
+  it('stays out of the table of a new match with fewer than five supporters, which has only the number', async () => {
+    vi.mocked(getPublicReport).mockResolvedValue(reportedMatch())
+    vi.mocked(fansMatchRatings).mockResolvedValue({
+      coach: { average: 9, count: 3, name: 'Robin Veldman' },
+      players: [player(3, 'Speler 3', 8.9, 3)],
+      supporters: 3,
+    })
+
+    expect(plain(await render())).not.toContain('Robin Veldman')
+  })
+})
+
 describe('the card Uitblinker on the page of an old match', () => {
   it('shows the seal with the average, the name and the count, and the source line', async () => {
     const html = await render()
