@@ -37,8 +37,8 @@ export async function loadOldMatchRatings(match: { id: number }): Promise<MatchR
 
 /**
  * The card Uitblinker of an old match: the heading with "Van supporters" beside it, the seal of
- * the Uitblinker of the match (not when nobody has enough ratings), the table of the players in
- * the order of the line-up, and the source.
+ * the Uitblinker of the match (not when nobody has enough ratings), the table of the players by
+ * average (`orderRatings`), and the source.
  */
 export function OldMatchRatingsCard({
   names,

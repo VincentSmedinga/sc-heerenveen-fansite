@@ -200,6 +200,71 @@ describe('what is shown after saving', () => {
   })
 })
 
+describe('the order of the table after saving', () => {
+  const four: RatingPlayer[] = ['Dirk Proper', 'Anton Beets', 'Mark Visser', 'Piet Dijk'].map((name, index) => ({
+    appearanceId: 21 + index,
+    assist: false,
+    goal: false,
+    minutes: 90,
+    name,
+    position: 'middenvelder',
+  }))
+  const order = (running: RatedPlayer[], coach = false) => {
+    const html = renderToStaticMarkup(
+      <SavedView
+        closesAt={closesAt}
+        coach={coach ? { name: 'Robin Veldman', staffId: 3 } : null}
+        grades={new Map(four.map((player) => [player.appearanceId, 7]))}
+        // The form lists the players by name, and the table must not follow that order.
+        players={four.toSorted((a, b) => a.name.localeCompare(b.name))}
+        running={running}
+        runningCoach={coach ? { average: 9.9, count: 30, name: 'Robin Veldman' } : undefined}
+      />,
+    )
+
+    return [...html.matchAll(/(Dirk Proper|Anton Beets|Mark Visser|Piet Dijk|Robin Veldman \(trainer\))/g)].map(
+      (found) => found[0],
+    )
+  }
+
+  it('has the highest average first, with more ratings first when equal, then the line-up', () => {
+    expect(
+      order([
+        running(21, 'Dirk Proper', 6.5, 12),
+        running(22, 'Anton Beets', 8, 12),
+        running(23, 'Mark Visser', 8, 30),
+        running(24, 'Piet Dijk', 9.5, 2),
+      ]),
+    ).toEqual(['Mark Visser', 'Anton Beets', 'Dirk Proper', 'Piet Dijk'])
+  })
+
+  it('puts players without ratings under the others in the order of the line-up, and the coach last', () => {
+    expect(order([running(24, 'Piet Dijk', 7, 9)], true)).toEqual([
+      'Piet Dijk',
+      'Dirk Proper',
+      'Anton Beets',
+      'Mark Visser',
+      'Robin Veldman (trainer)',
+    ])
+  })
+
+  it('has the Uitblinker in the first row', () => {
+    const html = renderToStaticMarkup(
+      <SavedView
+        closesAt={closesAt}
+        coach={null}
+        grades={new Map(four.map((player) => [player.appearanceId, 7]))}
+        players={four}
+        running={[running(21, 'Dirk Proper', 6.5, 12), running(23, 'Mark Visser', 8, 30)]}
+      />,
+    )
+    const rows = html.match(/<tr[\s\S]*?<\/tr>/g) ?? []
+
+    expect(rows[1]).toContain('Mark Visser')
+    expect(rows[1]).toContain('Uitblinker')
+  })
+})
+
 describe('the result of a closed window', () => {
   const brandsma = running(11, 'Luca Oyen', 7.8, 31)
   const ratings: MatchRatings = {
