@@ -15,6 +15,7 @@ import { getMatchNeighbours } from '#src/match-neighbours'
 import { sourceOf } from '#src/match-sources'
 import { getEditorSources, getMatchData, type MatchData } from '#src/matches'
 import { MatchPageCards, MatchPageHeader } from '#src/MatchPageView'
+import { OldMatchRatingsCard, readOldMatchRatings } from '#src/MatchRatingsCard'
 import { EditorSources, SourceCredit } from '#src/MatchViews'
 import { seasonPageMetadata } from '#src/metadata'
 import { pageAreas } from '#src/page-areas'
@@ -166,13 +167,20 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
   const oldMatch = reported.match.dataSource === 'oude-fansite'
   const prediction = oldMatch ? undefined : await readPredictionCrowd(reported.match)
   const oldPrediction = oldMatch ? await readOldPredictionCrowd(reported.match) : undefined
+  // The card Uitblinker comes first of the cards of the games, and only an old match has the
+  // ratings of the old fansite (see `OldMatchRatingsCard`).
+  const oldRatings = oldMatch ? await readOldMatchRatings(reported.match) : undefined
   const page = matchPageDataOf(reported, factsOf(reported, now, phase), isCompleteReport(reported), phase)
 
   return (
     <>
       <Page.Main
         areas={pageAreas({
-          after: [...(prediction === undefined && oldPrediction === undefined ? [] : ['prediction']), 'source'],
+          after: [
+            ...(oldRatings === undefined ? [] : ['uitblinker']),
+            ...(prediction === undefined && oldPrediction === undefined ? [] : ['prediction']),
+            'source',
+          ],
           main: ['cards', 'neighbours'],
         })}
       >
@@ -202,6 +210,11 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
         <Page.Cell area="neighbours">
           <MatchNeighbours next={neighbours.next} previous={neighbours.previous} />
         </Page.Cell>
+        {oldRatings === undefined ? null : (
+          <Page.Cell area="uitblinker">
+            <OldMatchRatingsCard names={reported.names} ratings={oldRatings} />
+          </Page.Cell>
+        )}
         {prediction === undefined ? null : (
           <Page.Cell area="prediction">
             <PredictionCrowdCard
