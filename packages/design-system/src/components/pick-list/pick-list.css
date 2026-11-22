@@ -1,0 +1,147 @@
+/*
+ * The groups of a PickList: a fieldset for each group, without the border and the padding the
+ * base styles give it, because the list sits in a card that has its own. A line separates the
+ * groups. The legend is the name of the group with the counter at the end of the line, in
+ * small secondary text; a group with an error has the counter in the colour of errors, and the
+ * text of the error stands under the legend, so the colour is never alone. Each player is a row
+ * with a border, as high as a control (--hf-size-control) and tappable in its whole width: the
+ * label is the row. A checked row has a border and a tint; a player who cannot be chosen is
+ * grey. The strip of the chosen four is four dark tiles side by side, also on a phone.
+ */
+
+@layer hf.components {
+  .hf-pick-list {
+    display: grid;
+    gap: var(--hf-space-l);
+  }
+
+  .hf-pick-list-group {
+    border: 0;
+    border-block-start: 0.0625rem solid var(--hf-colour-border-default);
+    display: grid;
+    gap: var(--hf-space-xs);
+    grid-template-columns: minmax(0, 1fr);
+    margin-inline: 0;
+    min-inline-size: 0;
+    padding: 0;
+    padding-block-start: var(--hf-space-m);
+
+    > legend {
+      color: var(--hf-colour-text-heading);
+      display: flex;
+      font-weight: var(--hf-strong-font-weight);
+      gap: var(--hf-space-m);
+      inline-size: 100%;
+      justify-content: space-between;
+      /* stylelint-disable-next-line declaration-property-value-allowed-list -- A gap does not reach the legend of a fieldset, so the space under the legend is a margin. */
+      margin-block-end: var(--hf-space-xs);
+      padding: 0;
+    }
+  }
+
+  .hf-pick-list-count {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-body-font-weight);
+  }
+
+  .hf-pick-list-group[data-invalid] .hf-pick-list-count {
+    color: var(--hf-colour-text-accent);
+    font-weight: var(--hf-strong-font-weight);
+  }
+
+  .hf-pick-list-rows {
+    display: grid;
+    gap: var(--hf-space-xs);
+  }
+
+  .hf-pick-list-row {
+    align-items: center;
+    background-color: var(--hf-colour-background-surface);
+    border: 0.0625rem solid var(--hf-colour-border-default);
+    border-radius: 0.375rem;
+    cursor: pointer;
+    display: flex;
+    gap: var(--hf-space-m);
+    min-block-size: var(--hf-size-control);
+    padding-block: var(--hf-space-xs);
+    padding-inline: var(--hf-space-m);
+
+    > input {
+      flex: none;
+      margin: 0;
+    }
+
+    &:has(> input:checked) {
+      background-color: var(--hf-colour-background-surface-soft);
+      border-color: var(--hf-colour-border-highlight);
+    }
+
+    &:has(> input:focus-visible) {
+      outline: 0.1875rem solid var(--hf-colour-focus);
+      outline-offset: 0.125rem;
+    }
+
+    &[data-disabled] {
+      background-color: transparent;
+      color: var(--hf-colour-text-secondary);
+      cursor: default;
+    }
+  }
+
+  .hf-pick-list-text {
+    display: grid;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .hf-pick-list-name {
+    font-weight: var(--hf-strong-font-weight);
+  }
+
+  .hf-pick-list-line {
+    color: var(--hf-colour-text-secondary);
+    font-size: var(--hf-meta-font-size);
+  }
+
+  .hf-pick-list-strip {
+    display: grid;
+    gap: var(--hf-space-xs);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    > li {
+      background-color: var(--hf-colour-background-band);
+      align-content: start;
+      border-radius: 0.375rem;
+      color: var(--hf-colour-text-on-band);
+      display: grid;
+      gap: 0.125rem;
+      min-inline-size: 0;
+      overflow-wrap: anywhere;
+      padding-block: var(--hf-space-xs);
+      padding-inline: var(--hf-space-xs);
+      text-align: center;
+    }
+  }
+
+  .hf-pick-list-strip-number {
+    font-size: var(--hf-meta-font-size);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hf-pick-list-strip-name {
+    font-weight: var(--hf-strong-font-weight);
+
+    &[data-struck] {
+      text-decoration: line-through;
+    }
+  }
+
+  .hf-pick-list-strip-note {
+    font-size: var(--hf-meta-font-size);
+  }
+}

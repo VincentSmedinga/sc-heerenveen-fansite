@@ -209,6 +209,14 @@ export type {
 } from './components/page/Page'
 export { Pagination } from './components/pagination/Pagination'
 export type { PaginationProps } from './components/pagination/Pagination'
+export { PickList } from './components/pick-list/PickList'
+export type {
+  PickListGroup,
+  PickListOption,
+  PickListProps,
+  PickListStripPlace,
+  PickListStripProps,
+} from './components/pick-list/PickList'
 export { PlaceCell, sharedPlaces } from './components/place-cell/PlaceCell'
 export type { PlaceCellProps } from './components/place-cell/PlaceCell'
 export { PlayerFiguresTable } from './components/player-figures-table/PlayerFiguresTable'
