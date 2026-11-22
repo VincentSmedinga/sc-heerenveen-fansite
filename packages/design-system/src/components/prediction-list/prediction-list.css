@@ -1,8 +1,8 @@
 /*
  * The list of what a fan predicted: a row for each match, the text on the left and the points
  * and the prediction on the right. A row has a thin line above it, as the short
- * lines have. The score never breaks: the clubs are one flex line in which the names can shrink
- * and wrap over more lines, and the score keeps its width. Nothing is ever cut short.
+ * lines have. The score never breaks: the clubs and the score are running text, so a long name
+ * wraps over more lines, and the score keeps its width. Nothing is ever cut short.
  */
 
 @layer hf.components {
@@ -48,23 +48,17 @@
     margin-inline-end: 0.35em;
   }
 
+  /* The clubs and the score are running text, so a long name wraps like any other words. */
   .hf-prediction-list-clubs {
-    align-items: baseline;
-    column-gap: var(--hf-space-xs);
-    display: flex;
     font-weight: var(--hf-headline-font-weight);
-    min-inline-size: 0;
-  }
-
-  .hf-prediction-list-club {
     min-inline-size: 0;
     overflow-wrap: anywhere;
   }
 
   /* The score keeps its width and never breaks over two lines. */
   .hf-prediction-list-score {
-    flex: none;
     font-variant-numeric: tabular-nums;
+    margin-inline: var(--hf-space-xs);
     white-space: nowrap;
   }
 
