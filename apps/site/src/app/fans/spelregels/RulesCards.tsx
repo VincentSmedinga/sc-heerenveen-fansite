@@ -58,11 +58,7 @@ export function PredictionRulesCard() {
         <List.Item>Er zijn geen prijzen. Bij een onenigheid beslist de redactie.</List.Item>
       </List>
       <Heading level={3}>Zo tellen de punten</Heading>
-      <ScoringTable caption="Punten per onderdeel" short />
-      <Text appearance="meta">
-        Precies: de stand precies goed. Uitslag: thuiswinst, gelijkspel of uitwinst goed. Eén: precies één van de twee
-        doelpuntentallen goed.
-      </Text>
+      <ScoringTable caption="Punten per onderdeel" />
       <Text>{`Een perfecte voorspelling is ${maxPredictionPoints} punten waard. Het doelsaldo levert niets op.`}</Text>
       <Heading level={3}>Een voorbeeld</Heading>
       <DataTable

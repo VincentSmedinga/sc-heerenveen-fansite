@@ -154,28 +154,21 @@ export function ScoringCard() {
 
 /**
  * The table of the scoring, from the same numbers that `predictionPoints` uses, so the table
- * and the sum cannot differ. The card "Punten" and the page with the rules show it. `short`
- * gives short headers, for a phone: the caption then says what they mean.
+ * and the sum cannot differ. The outcomes are the rows and the two parts the columns: three
+ * short columns fit a narrow column and a phone without abbreviations. The card "Punten" and
+ * the page with the rules show it.
  */
-export function ScoringTable({ caption, short = false }: { caption: string; short?: boolean }) {
+export function ScoringTable({ caption }: { caption: string }) {
   const { fullTime, halfTime } = pointsPerPart
 
   return (
     <DataTable
       caption={caption}
-      columns={
-        short
-          ? [
-              'Deel',
-              { abbreviation: 'Precies', name: 'precies goed' },
-              { abbreviation: 'Uitslag', name: 'uitslag goed' },
-              { abbreviation: 'Eén', name: 'één doelpuntental goed' },
-            ]
-          : ['Onderdeel', 'Precies goed', 'Uitslag goed', 'Eén doelpuntental goed']
-      }
+      columns={['Onderdeel', 'Rust', 'Eind']}
       rows={[
-        { cells: [halfTime.exact, halfTime.outcome, halfTime.goals], header: 'Rust' },
-        { cells: [fullTime.exact, fullTime.outcome, fullTime.goals], header: 'Eind' },
+        { cells: [halfTime.exact, fullTime.exact], header: 'Precies goed' },
+        { cells: [halfTime.outcome, fullTime.outcome], header: 'Uitslag goed' },
+        { cells: [halfTime.goals, fullTime.goals], header: 'Eén doelpuntental goed' },
       ]}
       sortable={false}
     />

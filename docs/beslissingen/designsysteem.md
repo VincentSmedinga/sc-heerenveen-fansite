@@ -4267,3 +4267,14 @@
 - **Waarom:** de koppeling van vakje, reden en fout staat zo op één plek, en een andere pagina die iets aanvinkt kan hem later gebruiken.
   De `CheckboxGroup` heeft geen teller, geen regel per vakje, geen reden en geen fout, en de rijen zien er anders uit.
 - **Alternatieven:** de `CheckboxGroup` uitbreiden (elke wijziging raakt de bronnenfilter, dat een gewone reeks vakjes is); de vakjes op de pagina zelf opbouwen; vier keuzelijsten (je ziet de selectie niet in één keer).
+
+## De rijkop van een DataTable stort niet meer in tot één letter
+
+- **Datum:** 22 november 2026
+- **Besluit:** de rijkop en de kop van de eerste kolom van een `DataTable` houden `overflow-wrap: anywhere` en krijgen `hyphens: auto` en een minimale breedte van `2em`.
+  Woorden breken eerst op spaties, en alleen een woord dat langer is dan de kolom, zoals een pad, breekt midden in het woord.
+  De `2em` is een ondergrens, geen doel: bij een grotere waarde scrolden andere tabellen (zoals /wedstrijden/cijfers) bij 320 pixels zijwaarts.
+  Of een tabel leesbaar blijft, hangt aan zijn kolommen: bij de telling zijn dat er drie met één woord in de kop, en de e2e-test meet dat de rijkop er niet meer dan vier regels voor nodig heeft.
+  Een lang woord als "doelpuntental" breekt op een lettergreep, want de rijkop heeft ook `hyphens: auto`.
+- **Waarom:** bij `anywhere` telt elke letter als een plek om af te breken, dus een tabel waarvan de andere kolommen niet afbreken drukte de eerste kolom samen tot één letter (de kaart "Punten", #1561).
+- **Alternatief:** de regel laten staan en alleen die ene tabel aanpassen.
