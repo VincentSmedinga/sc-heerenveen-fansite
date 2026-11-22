@@ -6777,6 +6777,7 @@
   Acceptatie toont alleen `main`, dus daar is alles te testen op de echte host.
 - **Alternatieven:** een lange branch `fans` met een branch per onderdeel.
   Die viel af: de migraties staan genummerd in één lijst en zouden botsen met elke migratie op `main`, acceptatie toont alleen `main`, en de controles, de releases en het opruimen gaan allemaal uit van `main`.
+  \
 
 ## Supporters krijgen een eigen account op de site, los van het forum
 
@@ -7385,7 +7386,6 @@
   De opmaak van de cijfers is het component `PredictionCrowd` in het designsysteem, zodat de gesloten kaart op `/fans/prognose` en de kaart op de oude wedstrijden (#1457) dezelfde tekst en grafieken gebruiken.
 - **Waarom:** de pagina van een wedstrijd blijft voor elke bezoeker gelijk en vraagt de database weinig; een minuut houdt de cijfers na de uitslag vers.
 - **Alternatieven:** de cijfers bij elk bezoek berekenen (zwaar bij een drukke wedstrijd); vijf minuten cachen (de verdeling staat dan te lang achter de aftrap aan).
-  \
 - **Later:** sinds _De ranglijst van de Prognose is er per seizoen en per wedstrijd_ (21 november 2026) staan de plekken in de kaart "Je punten" en staat de kaart "Stand" in de smalle kolom.
 
 ## De ranglijst van de Prognose is er per seizoen en per wedstrijd
