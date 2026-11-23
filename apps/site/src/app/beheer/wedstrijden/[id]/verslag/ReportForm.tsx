@@ -61,6 +61,7 @@ import {
   playerLabel,
   playerOf,
   previousLineUpButtonValue,
+  previousOpponentLineUpButtonValue,
   readReportValues,
   removeButtonValue,
   type ReportFormState,
@@ -124,6 +125,11 @@ export type ReportChoices = {
    * Leave it out when there is none, and the button is not there.
    */
   previousLineUp?: string | undefined
+  /**
+   * The same for the line-up of the opponent (#1543): the previous meeting with the club whose
+   * line-up the button can take over, as `Opponent, 3 november 2025`.
+   */
+  previousOpponentLineUp?: string | undefined
   /**
    * The result of the shoot-out of the match, from the form of the match: `null` when it has
    * none. The kicks of the series are only asked for with a result.
@@ -531,6 +537,19 @@ export function ReportFields() {
               {choices.previousLineUp !== undefined && isEmptyLineUp(current) ? (
                 <Button appearance="soft" name="knop" type="submit" value={previousLineUpButtonValue}>
                   Opstelling van de vorige wedstrijd overnemen
+                </Button>
+              ) : null}
+            </>
+          ) : null}
+          {!own ? (
+            <>
+              {/* Empty until the line-up was taken over, then it names the match. */}
+              <Notice>
+                {state.takenFromOpponent === undefined ? '' : `Opstelling overgenomen van ${state.takenFromOpponent}.`}
+              </Notice>
+              {choices.previousOpponentLineUp !== undefined && isEmptyLineUp(current, 'zij') ? (
+                <Button appearance="soft" name="knop" type="submit" value={previousOpponentLineUpButtonValue}>
+                  Opstelling van de vorige ontmoeting overnemen
                 </Button>
               ) : null}
             </>
