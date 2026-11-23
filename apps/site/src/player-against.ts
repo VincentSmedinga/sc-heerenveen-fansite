@@ -30,38 +30,31 @@ export type AgainstMatch = {
   season: string
 }
 
-/** The three groups of the card, each with its matches, the newest first. */
-export type PlayerAgainst = {
-  after: AgainstMatch[]
-  before: AgainstMatch[]
-  between: AgainstMatch[]
-}
-
 /** The match from our side, with the day: `sc Heerenveen – Ajax, 3 november 2007`. */
 export const againstLabel = (match: Pick<AgainstMatch, 'club' | 'day' | 'home'>) =>
   `${match.home ? `sc Heerenveen – ${match.club}` : `${match.club} – sc Heerenveen`}, ${dayText(match.day)}`
 
 /**
- * Sorts the matches into the groups of the card by the seasons he played for us (`seasons`,
- * such as `2004/05`). A season before his first is "voor", one after his last is "na", and a
- * season from his first to his last, both included, is "tussendoor": he can have played for
- * us and against us in one season, and that match must show somewhere. Without a season of ours
- * there is nothing to compare with, so the result is `undefined`, as it is without matches.
+ * Orders the matches for the table of the card: grouped by the club he played for, the club
+ * with the most matches first (a tie goes to the club with the newest match, then to its name),
+ * and the newest match first within a club. Without matches the result is `undefined`, so
+ * there is no card.
  */
-export function playerAgainstOf(found: readonly AgainstMatch[], seasons: readonly string[]): PlayerAgainst | undefined {
-  if (found.length === 0 || seasons.length === 0) {
+export function againstByClub(found: readonly AgainstMatch[]): AgainstMatch[] | undefined {
+  if (found.length === 0) {
     return undefined
   }
 
-  const first = seasons.reduce((a, b) => (a < b ? a : b))
-  const last = seasons.reduce((a, b) => (a > b ? a : b))
   const newestFirst = (a: AgainstMatch, b: AgainstMatch) => b.day.localeCompare(a.day) || b.id - a.id
+  const clubs = new Map<string, AgainstMatch[]>()
 
-  return {
-    after: found.filter(({ season }) => season > last).toSorted(newestFirst),
-    before: found.filter(({ season }) => season < first).toSorted(newestFirst),
-    between: found.filter(({ season }) => season >= first && season <= last).toSorted(newestFirst),
+  for (const match of found.toSorted(newestFirst)) {
+    clubs.set(match.club, [...(clubs.get(match.club) ?? []), match])
   }
+
+  return [...clubs.values()]
+    .toSorted((a, b) => b.length - a.length || newestFirst(a[0] as AgainstMatch, b[0] as AgainstMatch) || 0)
+    .flat()
 }
 
 /**

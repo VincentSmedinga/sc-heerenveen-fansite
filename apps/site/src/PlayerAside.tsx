@@ -1,4 +1,4 @@
-import { Card, DescriptionList, FigureList, Heading, Link, Page, Text } from '@fansite/design-system'
+import { Card, DescriptionList, FigureList, Heading, Link, Page } from '@fansite/design-system'
 import { type ReactNode } from 'react'
 
 import type { PlayerAside as PlayerAsideData } from './player-aside'
@@ -6,11 +6,10 @@ import type { CareerMatch } from './player-seasons'
 
 import { opponentsPath } from './opponents'
 import { playerHref } from './player-address'
-import { dayText, matchTitle, minuteText } from './player-career'
+import { dayText } from './player-career'
 
 /** The ids of the headings that name the cards of the side column. */
 export const playerAsideIds = {
-  against: 'tegen-ons',
   competitions: 'per-competitie',
   facts: 'meer-cijfers',
   opponents: 'vaakst-raak-tegen',
@@ -18,9 +17,10 @@ export const playerAsideIds = {
 
 /**
  * The side column of the page of a player (#1086): the goals or matches by competition, the
- * three charts (#1117), the clubs he scored against most, more figures, the goals against us,
- * and the credit at the bottom. A card with nothing to show is left out. `matchHref` gives the
- * page of a match, or `undefined` for a match that has none, which is then plain text.
+ * three charts (#1117), the clubs he scored against most, more figures and the credit at the
+ * bottom. The goals against us are in the card Tegen ons of the main column (#1545). A card
+ * with nothing to show is left out. `matchHref` gives the page of a match, or `undefined` for a
+ * match that has none, which is then plain text.
  */
 export function PlayerAside({
   aside,
@@ -34,7 +34,7 @@ export function PlayerAside({
   credit: ReactNode
   matchHref: (match: CareerMatch) => string | undefined
 }) {
-  const { against, assistGiver, competitions, europe, firstGoal, opponents } = aside
+  const { assistGiver, competitions, europe, firstGoal, opponents } = aside
   const assistGiverHref = playerHref(assistGiver?.slug)
   const firstHref = firstGoal === undefined ? undefined : matchHref(firstGoal.match)
   const facts = [firstGoal, assistGiver, europe].some((fact) => fact !== undefined)
@@ -104,30 +104,6 @@ export function PlayerAside({
               </DescriptionList.Item>
             )}
           </DescriptionList>
-        </Card>
-      )}
-      {against === undefined ? null : (
-        <Card aria-labelledby={playerAsideIds.against} surface="soft">
-          <Heading id={playerAsideIds.against} level={2}>
-            Tegen ons
-          </Heading>
-          <Text>{against.intro}</Text>
-          <FigureList>
-            {against.goals.map((goal) => {
-              const href = matchHref(goal.match)
-              const title = matchTitle(goal.match, true)
-
-              return (
-                <FigureList.Item
-                  figure={minuteText(goal) ?? ''}
-                  key={`${goal.match.id}-${goal.minute ?? 'x'}`}
-                  note={dayText(goal.match.matchDate)}
-                >
-                  {href === undefined ? title : <Link href={href}>{title}</Link>}
-                </FigureList.Item>
-              )
-            })}
-          </FigureList>
         </Card>
       )}
       {credit}

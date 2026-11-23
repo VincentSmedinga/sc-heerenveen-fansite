@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
-import { againstLabel, type AgainstMatch, playerAgainstOf } from './player-against'
+import { againstByClub, againstLabel, type AgainstMatch } from './player-against'
 
-const match = (id: number, season: string, day: string): AgainstMatch => ({
-  club: 'Oefenstad',
+const match = (id: number, club: string, day: string): AgainstMatch => ({
+  club,
   competition: 'Eredivisie',
   day,
   goals: 0,
@@ -13,51 +13,35 @@ const match = (id: number, season: string, day: string): AgainstMatch => ({
   id,
   minutes: 90,
   round: String(id),
-  season,
+  season: '2001/02',
 })
 
-describe('playerAgainstOf', () => {
-  const seasons = ['2003/04', '2004/05', '2007/08']
+describe('againstByClub', () => {
+  it('puts the club with the most matches first, and the newest match first within a club', () => {
+    const result = againstByClub([
+      match(1, 'Ajax', '2001-10-13'),
+      match(2, 'Vitesse', '2003-03-02'),
+      match(3, 'Ajax', '2005-04-09'),
+      match(4, 'Ajax', '2003-01-01'),
+      match(5, 'Vitesse', '2004-05-06'),
+    ])
 
-  it('puts a season before his first in "voor", one after his last in "na", and the rest "tussendoor"', () => {
-    const found = [
-      match(1, '2001/02', '2001-10-13'),
-      match(2, '2005/06', '2005-10-13'),
-      match(3, '2010/11', '2010-10-13'),
-      match(4, '2003/04', '2003-10-13'),
-      match(5, '2007/08', '2007-10-13'),
-    ]
-    const result = playerAgainstOf(found, seasons)
-
-    expect(result?.before.map(({ id }) => id)).toEqual([1])
-    expect(result?.after.map(({ id }) => id)).toEqual([3])
-    // His first and last season count as "tussendoor": he played for us and against us then.
-    expect(result?.between.map(({ id }) => id)).toEqual([5, 2, 4])
+    expect(result?.map(({ id }) => id)).toEqual([3, 4, 1, 5, 2])
   })
 
-  it('has the newest match first in every group, a match of the same day by its id', () => {
-    const result = playerAgainstOf(
-      [match(1, '2001/02', '2001-10-13'), match(2, '2001/02', '2002-03-02'), match(3, '2001/02', '2002-03-02')],
-      seasons,
-    )
+  it('gives a tie to the club with the newest match, a match of the same day by its id', () => {
+    const result = againstByClub([
+      match(1, 'Ajax', '2001-10-13'),
+      match(2, 'Vitesse', '2002-03-02'),
+      match(3, 'Vitesse', '2002-03-02'),
+      match(4, 'Ajax', '2002-03-02'),
+    ])
 
-    expect(result?.before.map(({ id }) => id)).toEqual([3, 2, 1])
+    expect(result?.map(({ id }) => id)).toEqual([4, 1, 3, 2])
   })
 
-  it('treats a player with one season as one with a first and a last season that are the same', () => {
-    const result = playerAgainstOf(
-      [match(1, '2001/02', '2001-10-13'), match(2, '2004/05', '2004-10-13'), match(3, '2009/10', '2009-10-13')],
-      ['2004/05'],
-    )
-
-    expect(result?.before.map(({ id }) => id)).toEqual([1])
-    expect(result?.between.map(({ id }) => id)).toEqual([2])
-    expect(result?.after.map(({ id }) => id)).toEqual([3])
-  })
-
-  it('has no card without matches, or without a season of his own', () => {
-    expect(playerAgainstOf([], seasons)).toBeUndefined()
-    expect(playerAgainstOf([match(1, '2001/02', '2001-10-13')], [])).toBeUndefined()
+  it('has no card without matches', () => {
+    expect(againstByClub([])).toBeUndefined()
   })
 })
 

@@ -1,22 +1,18 @@
-import { Card, DataTable, Heading, tableColumns, Text } from '@fansite/design-system'
-import { Fragment } from 'react'
+import { Card, DataTable, Disclosure, FigureList, Heading, Link, tableColumns, Text } from '@fansite/design-system'
 
-import { againstLabel, type AgainstMatch, type PlayerAgainst } from './player-against'
+import type { AsideGoal } from './player-aside'
+import type { CareerMatch } from './player-seasons'
+
+import { againstLabel, type AgainstMatch } from './player-against'
+import { dayText, matchTitle, minuteText } from './player-career'
 
 /** The id of the heading of the card, which the bar "Op deze pagina" links to. */
-export const playerAgainstCardId = 'wedstrijden-tegen-ons'
+export const playerAgainstCardId = 'tegen-ons'
 
-/**
- * The name of the card for a screen reader. The heading says "Tegen ons", as the issue wants,
- * but the card Vaakst raak tegen in the side column already has a card with that heading, and
- * two landmarks need two names.
- */
-const cardName = 'Wedstrijden tegen ons'
-
-/** The line under the card: the card has only what the reports of the opponent show. */
+/** The line under the table: the table has only what the reports of the opponent show. */
 export const againstNote = 'Alleen wedstrijden waarvan we de opstelling van de tegenstander kennen.'
 
-/** "3 wedstrijden, 1 doelpunt": the figures of a group. */
+/** "3 wedstrijden, 1 doelpunt": the figures of the matches. */
 export function againstSummary(matches: readonly AgainstMatch[]) {
   const goals = matches.reduce((total, { goals: scored }) => total + scored, 0)
 
@@ -28,61 +24,84 @@ const scoreText = ({ goalsAgainst, goalsFor, home }: AgainstMatch) =>
   `${home ? 'thuis' : 'uit'} ${home ? `${goalsFor}–${goalsAgainst}` : `${goalsAgainst}–${goalsFor}`}`
 
 /**
- * The card "Tegen ons" on the page of a player (issue 1545): the matches he played against us,
- * in the groups before, between and after his time with sc Heerenveen, each with its own table
- * and a line with the matches and goals. The group "Tussendoor" is only there when it has a
- * match. The page of a match is linked where the address is known.
+ * The card "Tegen ons" on the page of a player (issues 1545 and 1086): what he did against us.
+ * It has on top the goals he scored against us (`goals`, from the goals of the seasons) and,
+ * under them, one line with the matches and goals of the matches we know from the reports of
+ * the opponent (`matches`, in the order of `againstByClub`) with the table of those matches
+ * behind a Disclosure. Either part can be missing; the page has no card when both are. The page
+ * of a match is linked where the address is known.
  */
 export function PlayerAgainstCard({
-  against,
+  goalHref,
+  goals,
+  matches,
   matchHref,
   name,
 }: {
-  against: PlayerAgainst
+  /** The address of the page of the match of a goal, or `undefined` when it has none. */
+  goalHref: (match: CareerMatch) => string | undefined
+  goals: undefined | { goals: readonly AsideGoal[]; intro: string }
+  matches: readonly AgainstMatch[] | undefined
   /** The address of the page of a match, or `undefined` when it has none. */
   matchHref: (match: AgainstMatch) => string | undefined
   name: string
 }) {
-  const groups = [
-    { matches: against.before, title: 'Voor zijn tijd bij sc Heerenveen' },
-    { matches: against.between, title: 'Tussendoor' },
-    { matches: against.after, title: 'Na zijn tijd bij sc Heerenveen' },
-  ].filter(({ matches }) => matches.length > 0)
-
   return (
-    <Card aria-label={cardName}>
+    <Card aria-labelledby={playerAgainstCardId}>
       <Heading id={playerAgainstCardId} level={2}>
         Tegen ons
       </Heading>
-      {groups.map(({ matches, title }) => (
-        <Fragment key={title}>
-          <Heading level={3}>{title}</Heading>
-          <Text appearance="meta">{againstSummary(matches)}</Text>
-          <DataTable
-            appearance="text"
-            caption={`De wedstrijden van ${name} tegen sc Heerenveen, ${title.toLowerCase()}, de nieuwste eerst`}
-            columns={[
-              'Wedstrijd',
-              { fold: true, name: 'Club' },
-              { fold: true, name: 'Uitslag' },
-              tableColumns.minutes,
-              tableColumns.goals,
-            ]}
-            rows={matches.map((match) => {
-              const href = matchHref(match)
+      {goals === undefined ? null : (
+        <>
+          <Text>{goals.intro}</Text>
+          <FigureList>
+            {goals.goals.map((goal) => {
+              const href = goalHref(goal.match)
+              const title = matchTitle(goal.match, true)
 
-              return {
-                cells: [match.club, scoreText(match), match.minutes, match.goals],
-                header: againstLabel(match),
-                ...(href === undefined ? {} : { href }),
-              }
+              return (
+                <FigureList.Item
+                  figure={minuteText(goal) ?? ''}
+                  key={`${goal.match.id}-${goal.minute ?? 'x'}`}
+                  note={dayText(goal.match.matchDate)}
+                >
+                  {href === undefined ? title : <Link href={href}>{title}</Link>}
+                </FigureList.Item>
+              )
             })}
-            // The matches stand in the order of the day, the newest first.
-            sortable={false}
-          />
-        </Fragment>
-      ))}
-      <Text appearance="meta">{againstNote}</Text>
+          </FigureList>
+        </>
+      )}
+      {matches === undefined ? null : (
+        <>
+          <Text>{`${name} speelde ${againstSummary(matches)} tegen ons.`}</Text>
+          <Disclosure summary="Alle wedstrijden tegen ons">
+            <DataTable
+              appearance="text"
+              caption={`De wedstrijden van ${name} tegen sc Heerenveen, per club, de nieuwste eerst`}
+              columns={[
+                'Wedstrijd',
+                { fold: true, name: 'Club' },
+                { fold: true, name: 'Uitslag' },
+                tableColumns.minutes,
+                tableColumns.goals,
+              ]}
+              rows={matches.map((match) => {
+                const href = matchHref(match)
+
+                return {
+                  cells: [match.club, scoreText(match), match.minutes, match.goals],
+                  header: againstLabel(match),
+                  ...(href === undefined ? {} : { href }),
+                }
+              })}
+              // The matches stand per club, and in a club the newest first.
+              sortable={false}
+            />
+            <Text appearance="meta">{againstNote}</Text>
+          </Disclosure>
+        </>
+      )}
     </Card>
   )
 }

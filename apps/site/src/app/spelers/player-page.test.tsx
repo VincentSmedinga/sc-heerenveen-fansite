@@ -682,8 +682,9 @@ describe('the card Tegen ons (#1545)', () => {
     expect(html).toMatch(/<h2[^>]*>Tegen ons<\/h2>/)
     expect(html.indexOf('>Loopbaan bij sc Heerenveen<')).toBeLessThan(html.indexOf('>Tegen ons<'))
     expect(html).toContain('href="/wedstrijden/2000-01/2000-10-13-oefenstad"')
-    expect(html).toContain('Voor zijn tijd bij sc Heerenveen')
-    expect(bar).toContain('href="#wedstrijden-tegen-ons"')
+    expect(html).toContain('Alle wedstrijden tegen ons')
+    expect(html.match(/<h2[^>]*>Tegen ons<\/h2>/g)).toHaveLength(1)
+    expect(bar).toContain('href="#tegen-ons"')
   })
 
   it('is not on the page, and not in the bar, for a player who never played against us', async () => {

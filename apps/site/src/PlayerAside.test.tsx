@@ -31,16 +31,7 @@ const empty: PlayerAsideData = {
 }
 
 const full: PlayerAsideData = {
-  against: {
-    goals: [
-      {
-        match: match(2, { home: true, matchDate: '1997-05-08', opponent: 'Roda Test', season: '1996/97' }),
-        minute: 5,
-        stoppage: undefined,
-      },
-    ],
-    intro: 'Voor hij hier kwam, scoorde hij één keer tegen sc Heerenveen.',
-  },
+  against: undefined,
   assistGiver: { assists: 3, name: 'Ad Maat', slug: 'ad-maat' },
   competitions: {
     rows: [
@@ -70,13 +61,9 @@ describe('the side column of a player', () => {
     const html = render(full)
 
     expect(html).toMatch(/^<section[^>]*aria-label="Meer cijfers over deze speler"/)
-    const order = [
-      '>Doelpunten per competitie<',
-      '>Vaakst raak tegen<',
-      '>Meer cijfers<',
-      '>Tegen ons<',
-      'Bron: de bron',
-    ].map((text) => html.indexOf(text))
+    const order = ['>Doelpunten per competitie<', '>Vaakst raak tegen<', '>Meer cijfers<', 'Bron: de bron'].map(
+      (text) => html.indexOf(text),
+    )
 
     expect(order.every((at) => at >= 0)).toBe(true)
     expect(order).toEqual([...order].sort((a, b) => a - b))
@@ -100,14 +87,6 @@ describe('the side column of a player', () => {
     )
     expect(html).toContain('<a href="/spelers/ad-maat">Ad Maat</a>, 3 assists')
     expect(html).toContain('5, waarvan 2 in de Champions League (volgens de opstellingen die we hebben)')
-  })
-
-  it('shows a goal against us with the date, the match and the minute, as plain text without a page', () => {
-    expect(render(full)).toContain(
-      '8 mei 1997</span><a href="/wedstrijden/2002-03/wedstrijd-2">sc Heerenveen – Roda Test 1–3</a>',
-    )
-    expect(render(full, false)).toContain('8 mei 1997</span>sc Heerenveen – Roda Test 1–3')
-    expect(render(full)).toContain('5′')
   })
 
   it('leaves out a card that has nothing, and has no "Meer cijfers" without a fact', () => {
