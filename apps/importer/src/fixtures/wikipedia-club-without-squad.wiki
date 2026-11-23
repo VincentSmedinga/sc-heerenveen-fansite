@@ -1,0 +1,4 @@
+'''FC Voorbeeld''' is een verzonnen voetbalclub voor een test.
+
+== Geschiedenis ==
+Verzonnen tekst, zonder een selectie.

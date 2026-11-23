@@ -1406,6 +1406,31 @@ Een naamgenoot houdt de redactie tegen met `opponentPersonExceptions` in `packag
 De stap staat in `src/link-opponent-persons.ts`, en het logboek zegt hoeveel regels via een doelpunt, via de naam, niet (de naam past bij niemand) en niet (de naam past bij meer dan één persoon) een persoon kregen: `Opponents' players: N got a person through a goal, M through the name, …`.
 Een tweede run wijzigt niets en zegt alleen hoeveel regels leeg bleven.
 
+### De selectie van de clubs die we treffen
+
+De gewone import leest de huidige selectie van elke club waartegen we dit seizoen spelen, in de competitie of in de beker (#1541).
+Het is één verzoek per club, voor het artikel van de club (`clubs.wikipedia_page`), via de fetcher met zijn regels, en een club hoogstens eens per 7 dagen.
+Een club zonder artikel wordt niet gelezen, en een club die we dit seizoen niet treffen ook niet.
+De stap staat in `src/import-club-squads.ts`, na de stap voor de wedstrijden en vóór de gegevens uit Wikidata, en vóór de koppeling van de spelers van de tegenstander (zie hierboven), zodat die regels in dezelfde run hun persoon krijgen.
+
+`src/read-club-squad.ts` leest de tabellen onder het kopje Selectie, Huidige selectie of Spelerskern, tot het volgende kopje van hetzelfde niveau.
+Het gebruikt de cellen, de namen en de kopjes van de lezer van onze eigen selectie.
+Heeft de tabel kolomkoppen, dan vindt het de kolommen Nr., Naam en Positie daaraan.
+Heeft ze die niet, dan heeft ze de vorm van onze tabel: rugnummer, vlag, naam, en de positie uit het kopje van de groep.
+Een artikel zonder dat kopje of zonder tabel, en een tabel zonder leesbare rij, geeft één regel in het logboek (`Club squads: warning, <club>: the article has no section Selectie, the rows stay`) en laat de rijen van de club staan.
+
+`club_squad_players` bewaart per club de spelers van de selectie: de naam, het rugnummer en de positie als de tabel ze heeft, de persoon, en wanneer de selectie voor het laatst werd gelezen.
+Een speler met een link naar een artikel is een persoon (`persons.wikipedia_page`), zoals bij onze selectie; een speler zonder artikel blijft een naam.
+Wie uit de tabel verdwijnt, verdwijnt uit de rijen van de club.
+Een tweede run binnen 7 dagen vraagt niets, en na 7 dagen worden de rijen bijgewerkt en niet verdubbeld.
+Heeft een speler met een artikel nog geen persoon, omdat Wikipedia de titel niet beantwoordde, dan wacht de club één dag in plaats van zeven.
+
+`club_squad_imports` heeft per club de gezondheid, met de velden van `squad_imports`.
+`pnpm run import:status` toont een regel met het aantal clubs, en de gebruikelijke regels voor elke club die niet gezond is, zodat een club die steeds faalt opvalt.
+Het maakt de uitkomst van `import:status` niet rood: een artikel zonder selectie komt vaak voor.
+Het wachten is `retry_at`: 7 dagen na een lezing die een antwoord kreeg, een uur na een verzoek dat faalde.
+Geen pagina van de site toont de selectie, en de site vraagt Wikipedia niets.
+
 ### Een doorverwijzing is hetzelfde artikel
 
 Op de Nederlandse Wikipedia is `AZ Alkmaar` een doorverwijzing naar `AZ (voetbalclub)`, en `SBV Excelsior` een naar `Excelsior Rotterdam`.
