@@ -318,6 +318,9 @@ function measure() {
 /** Runs per path of the response time: enough for a median, and done in a minute or two. */
 export const responseTimeRuns = 10
 
+/** The measurement stops after this long, so a silent host shows in the summary. */
+export const responseTimeDeadlineMs = 150_000
+
 /** The small file first, then the pages of the measurement, each once, in file order. */
 export function responseTimePaths(config) {
   return [smallFile, ...new Set(config.pages.map((page) => page.path))]
@@ -353,19 +356,32 @@ async function responseTime() {
   const runs = responseTimeRuns
   let summary
 
+  let timer
+
   try {
     const results = []
+    const deadline = new Promise((_, reject) => {
+      timer = setTimeout(
+        () => reject(new Error(`geen antwoord binnen ${responseTimeDeadlineMs / 1000} seconden`)),
+        responseTimeDeadlineMs,
+      )
+    })
+    const measuring = (async () => {
+      for (const path of responseTimePaths(config)) {
+        results.push(await measurePath(config.address, path, runs))
+      }
+    })()
 
-    for (const path of responseTimePaths(config)) {
-      results.push(await measurePath(config.address, path, runs))
-    }
-
+    measuring.catch(() => {})
+    await Promise.race([measuring, deadline])
     summary = responseTimeSummaryOf({ address: config.address, results, runs })
   } catch (error) {
     const problem = error instanceof Error ? error.message || error.code || String(error) : String(error)
 
     console.log(`::warning::De antwoordtijd is niet gemeten: ${problem}`)
     summary = responseTimeSummaryOf({ address: config.address, problem, runs })
+  } finally {
+    clearTimeout(timer)
   }
 
   if (process.env.GITHUB_STEP_SUMMARY) {
@@ -447,6 +463,8 @@ if (process.argv[1] !== undefined && realpathSync(process.argv[1]) === import.me
   } else if (mode === 'response-time') {
     // Whatever goes wrong inside is reported in the summary and never fails the run.
     await responseTime().catch((error) => console.log(`::warning::${error}`))
+    // A request that is still waiting must not keep the step open after the summary is written.
+    process.exit(0)
   } else {
     console.error('Gebruik: node scripts/lighthouse.js run|summary|response-time')
     process.exit(1)

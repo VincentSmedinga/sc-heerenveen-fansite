@@ -15,6 +15,7 @@ import {
   medianRun,
   metricsOf,
   recentRuns,
+  responseTimeDeadlineMs,
   responseTimePaths,
   responseTimeSummaryOf,
   rowsOf,
@@ -342,6 +343,13 @@ test('the response time is measured from the same runner, from the address in th
   assert.match(step, /timeout-minutes: 5/)
   assert.match(step, /run: node scripts\/lighthouse\.js response-time\n/)
   assert.doesNotMatch(step, /continue-on-error|https?:/)
+})
+
+test('the measurement of the response time stops well before the timeout of its step', () => {
+  const step = workflow.split('- name: Measure the response time of the host')[1].split('- name:')[0]
+  const minutes = Number(step.match(/timeout-minutes: (\d+)/)[1])
+
+  assert.ok(responseTimeDeadlineMs < minutes * 60_000 - 60_000)
 })
 
 test('the paths of the response time are the small file and the pages of the measurement, each once', () => {
