@@ -1166,6 +1166,77 @@ describe('the input that the browser keeps for the form of a report', () => {
   })
 })
 
+describe('the button for the line-up of the opponent of the previous meeting (#1543)', () => {
+  const choices = {
+    home: true,
+    matchHref: '/beheer/wedstrijden/7',
+    matchId: 7,
+    opponent: 'Testclub',
+    previousOpponentLineUp: 'Testclub, 3 november 2025',
+    series: null,
+    showDelay: 'binnen vijf minuten',
+    squad,
+  }
+  const blank: ReportFormState = {
+    errors: {},
+    values: { ...values, zij: { ...values.zij, speler: [] } },
+    version: 0,
+    warnings: {},
+  }
+  const open = (state: ReportFormState, more: { previousOpponentLineUp?: string | undefined } = {}) =>
+    render(
+      <ReportFormProvider
+        action={() => Promise.resolve(state)}
+        choices={{ ...choices, ...more }}
+        initial={state}
+        title="Titel"
+      >
+        <ReportFields />
+      </ReportFormProvider>,
+    )
+  const takeOver = () =>
+    [...document.querySelectorAll('button')].find((button) => button.value === 'opstelling-vorige-tegenstander')
+
+  it('is a submit button of the form with its own value, there while the line-up of the opponent is empty', () => {
+    open(blank)
+
+    expect(takeOver()?.textContent).toBe('Opstelling van de vorige ontmoeting overnemen')
+    expect(takeOver()?.getAttribute('name')).toBe('knop')
+    expect(takeOver()?.getAttribute('type')).toBe('submit')
+    expect(takeOver()?.closest('form')?.id).toBe('verslag')
+    // Not the button of our own line-up.
+    expect([...document.querySelectorAll('button')].some((button) => button.value === 'opstelling-vorige')).toBe(false)
+  })
+
+  it('is not there without a previous meeting, or when the opponent has a player or a formation', () => {
+    open(blank, { previousOpponentLineUp: undefined })
+
+    expect(takeOver()).toBeUndefined()
+    cleanup()
+
+    open({
+      ...blank,
+      values: { ...blank.values, zij: { ...blank.values.zij, speler: [{ ...emptyRow('speler'), naam: 'Gast' }] } },
+    })
+
+    expect(takeOver()).toBeUndefined()
+    cleanup()
+
+    open({
+      ...blank,
+      values: { ...blank.values, formatie: { ...blank.values.formatie, zij: { eigen: '', keuze: '4-4-2' } } },
+    })
+
+    expect(takeOver()).toBeUndefined()
+  })
+
+  it('says from which meeting the line-up was taken', () => {
+    open({ ...blank, takenFromOpponent: 'Testclub, 3 november 2025' })
+
+    expect(document.body.textContent).toContain('Opstelling overgenomen van Testclub, 3 november 2025.')
+  })
+})
+
 describe('the button for the line-up of the previous match in the form of a report', () => {
   const choices = {
     home: true,

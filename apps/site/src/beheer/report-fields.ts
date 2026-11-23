@@ -64,6 +64,11 @@ export type ReportFormState = {
    * button that does that. The next answer of the server has none.
    */
   takenFrom?: string
+  /**
+   * The same for the line-up of the opponent (#1543): the match it was taken from, as
+   * `Opponent, 3 november 2025`.
+   */
+  takenFromOpponent?: string
   values: ReportValues
   /** Changes with every answer of the server, so the form is made anew and shows the values. */
   version: number
@@ -185,11 +190,15 @@ export type ReportButton =
   | { direction: MoveDirection; kind: 'move'; number: number; row: RowKind; side: Side }
   | { kind: 'add'; row: RowKind; side: Side }
   | { kind: 'previous' }
+  | { kind: 'previous-opponent' }
   | { kind: 'remove'; number: number; row: RowKind; side: Side }
   | { kind: 'save' }
 
 /** The value of the button that takes over the line-up of the previous match. */
 export const previousLineUpButtonValue = 'opstelling-vorige'
+
+/** The value of the button that takes over the line-up of the opponent, of the last meeting. */
+export const previousOpponentLineUpButtonValue = 'opstelling-vorige-tegenstander'
 
 /** The `id` of the button that adds a row to a list. */
 export function addButtonValue(kind: RowKind, side: Side) {
@@ -245,16 +254,17 @@ export function formationValueOf(stored: null | string): FormationValue {
 }
 
 /**
- * Whether the line-up of ours is still empty: no row with anything in it, and no formation.
- * Only then the button for the previous match is there, so it never writes over anything.
+ * Whether the line-up of a side is still empty (ours unless `side` says the opponent): no row
+ * with anything in it, and no formation. Only then the button for the previous match is there,
+ * so it never writes over anything.
  */
-export function isEmptyLineUp(values: ReportValues): boolean {
-  const formation = values.formatie.wij
+export function isEmptyLineUp(values: ReportValues, side: Side = 'wij'): boolean {
+  const formation = values.formatie[side]
 
   return (
     formation.keuze === '' &&
     formation.eigen === '' &&
-    values.wij.speler.every((row, index) => isUntouchedRow('speler', row, index))
+    values[side].speler.every((row, index) => isUntouchedRow('speler', row, index))
   )
 }
 
@@ -307,7 +317,7 @@ export const rowNames: Record<RowKind, string> = {
  */
 export function applyReportButton(
   values: ReportValues,
-  button: Exclude<ReportButton, { kind: 'previous' } | { kind: 'save' }>,
+  button: Exclude<ReportButton, { kind: 'previous' } | { kind: 'previous-opponent' } | { kind: 'save' }>,
 ): { focus: string; moved?: { side: Side; text: string }; values: ReportValues } {
   const next: ReportValues = { ...values, wij: { ...values.wij }, zij: { ...values.zij } }
   const { row, side } = button
@@ -464,6 +474,10 @@ export function readReportButton(formData: FormData): ReportButton {
 
   if (knop === previousLineUpButtonValue) {
     return { kind: 'previous' }
+  }
+
+  if (knop === previousOpponentLineUpButtonValue) {
+    return { kind: 'previous-opponent' }
   }
 
   const moving = /^speler-(wij|zij)-(omhoog|omlaag)-(\d{1,3})$/u.exec(knop)

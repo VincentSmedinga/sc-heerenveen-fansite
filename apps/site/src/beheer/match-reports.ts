@@ -17,6 +17,7 @@ import { mayHaveReport, readMatchReport } from '@fansite/db/match-reports'
 import { linkOpponentPersons } from '@fansite/db/opponent-persons'
 import { compareReportGoals } from '@fansite/db/player-stat-differences'
 import {
+  clubSquadPlayers,
   matchAppearances,
   matchCards,
   matchChanges,
@@ -29,7 +30,7 @@ import {
   matchSubstitutions,
   players,
 } from '@fansite/db/schema'
-import { and, asc, desc, eq, inArray, isNotNull, isNull, lt, or } from 'drizzle-orm'
+import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, lt, or } from 'drizzle-orm'
 import { createHash } from 'node:crypto'
 
 import type { ReportContext, ReportPlan } from './report-form'
@@ -182,6 +183,93 @@ export async function findPreviousLineUp(
   })
 
   return { formatie: values.formatie.wij, label: `${previous.opponent}, ${date}`, speler }
+}
+
+/**
+ * The first season whose meetings still count for the line-up of the opponent: two seasons
+ * before the one of the match, as `2024/25` for `2026/27`. `undefined` for a season that is
+ * not written as a season.
+ */
+function firstSeasonOfPrediction(season: string): string | undefined {
+  const found = /^(\d{4})\/\d{2}$/u.exec(season)
+
+  if (found === null) {
+    return undefined
+  }
+
+  const start = Number(found[1]) - 2
+
+  return `${start}/${String((start + 1) % 100).padStart(2, '0')}`
+}
+
+/** A name as the squad and the report write it, for comparing: no capitals, one space. */
+const nameKey = (name: string) => name.trim().replace(/\s+/gu, ' ').toLocaleLowerCase('nl')
+
+/**
+ * The line-up of the opponent in the previous meeting with this club, for the button that takes
+ * it over (#1543): the most recent earlier match against the club, in any competition, that has
+ * a report with players of the opponent, and not more than two seasons before the season of
+ * this match. `undefined` when there is none. Where the squad of the club is known (#1541), a
+ * player who is not in it any more leaves his place empty, and the place keeps its role as a
+ * starter or a substitute, so the editors fill it in. `label` is as in `findPreviousLineUp`.
+ */
+export async function findPreviousOpponentLineUp(
+  db: Pick<Database, 'select'>,
+  match: Pick<Match, 'clubId' | 'id' | 'kickoffAt' | 'matchDate' | 'season'>,
+): Promise<undefined | { formatie: ReportValues['formatie']['zij']; label: string; speler: Row[] }> {
+  const first = firstSeasonOfPrediction(match.season)
+
+  if (match.clubId === null || first === undefined) {
+    return undefined
+  }
+
+  const earlier = or(
+    lt(matches.matchDate, match.matchDate),
+    match.kickoffAt === null
+      ? undefined
+      : and(
+          eq(matches.matchDate, match.matchDate),
+          isNotNull(matches.kickoffAt),
+          lt(matches.kickoffAt, match.kickoffAt),
+        ),
+  )
+  const [previous] = await db
+    .select({ id: matches.id, matchDate: matches.matchDate, opponent: matches.opponent })
+    .from(matches)
+    .innerJoin(matchReports, eq(matchReports.matchId, matches.id))
+    .where(
+      and(
+        eq(matches.clubId, match.clubId),
+        gte(matches.season, first),
+        earlier,
+        inArray(
+          matches.id,
+          db.select({ id: matchAppearances.matchId }).from(matchAppearances).where(eq(matchAppearances.ours, false)),
+        ),
+      ),
+    )
+    .orderBy(desc(matches.matchDate), desc(matches.kickoffAt), desc(matches.id))
+    .limit(1)
+
+  const stored = previous === undefined ? undefined : await readMatchReport(db, previous.id)
+
+  if (previous === undefined || stored === undefined) {
+    return undefined
+  }
+
+  const values = valuesOfReport(stored, [], [])
+  const known = await db
+    .select({ name: clubSquadPlayers.name })
+    .from(clubSquadPlayers)
+    .where(eq(clubSquadPlayers.clubId, match.clubId))
+  const inSquad = new Set(known.map((player) => nameKey(player.name)))
+  const speler = values.zij.speler.map((row) =>
+    inSquad.size === 0 || inSquad.has(nameKey(row.naam ?? ''))
+      ? row
+      : { ...emptyRow('speler'), rol: row.rol === 'bank' ? 'bank' : 'basis' },
+  )
+
+  return { formatie: values.formatie.zij, label: `${previous.opponent}, ${dayInWords(previous.matchDate)}`, speler }
 }
 
 /**

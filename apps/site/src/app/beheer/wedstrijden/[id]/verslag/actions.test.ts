@@ -22,6 +22,7 @@ import { findReportScreen, reportBasis } from '#src/beheer/match-reports'
 import {
   emptyRow,
   previousLineUpButtonValue,
+  previousOpponentLineUpButtonValue,
   type ReportFormState,
   type ReportValues,
   type Row,
@@ -606,5 +607,86 @@ describe('submitReport with the button for the line-up of the previous match', (
 
     expect(answer.takenFrom).toBeUndefined()
     expect(answer.values.wij.speler).toEqual(empty().wij.speler)
+  })
+})
+
+describe('submitReport with the button for the line-up of the opponent of the previous meeting (#1543)', () => {
+  /** A match a week before against the same club, with a report that has opponent players. */
+  async function previousMeeting() {
+    const [values] = await withClubs(database.db, [
+      { ...played, kickoffAt: new Date('2026-10-24T17:45:00Z'), matchDate: '2026-10-24', round: 'Speelronde 10' },
+    ])
+    const [inserted] = await database.db.insert(matches).values(values!).$returningId()
+    const id = inserted?.id ?? 0
+    const base = report({
+      zij: {
+        speler: Array.from({ length: 12 }, (_nothing, index) => ({
+          ...emptyRow('speler', index),
+          naam: `Gast ${index + 1}`,
+          rol: index === 0 ? 'aanvoerder' : index < 11 ? 'basis' : 'bank',
+          rugnummer: String(index + 1),
+        })),
+      },
+    })
+    const typed = { ...base, formatie: { ...base.formatie, zij: { eigen: '', keuze: '4-2-3-1' } } }
+
+    expect(await submit(id, typed)).toEqual({ redirect: `/beheer/wedstrijden/${id}/verslag?gedaan=klaar` })
+  }
+
+  const empty = (): ReportValues => {
+    const values = report()
+
+    return {
+      ...values,
+      formatie: { ...values.formatie, zij: { eigen: '', keuze: '' } },
+      zij: { ...values.zij, speler: [] },
+    }
+  }
+  const press = (values: ReportValues) =>
+    submit(matchId, values, previousOpponentLineUpButtonValue) as Promise<ReportFormState>
+
+  it('fills the formation and the rows of the opponent, says from which meeting, and writes nothing', async () => {
+    await previousMeeting()
+
+    const answer = await press(empty())
+
+    expect(answer.takenFromOpponent).toBe('N.E.C., 24 oktober 2026')
+    expect(answer.takenFrom).toBeUndefined()
+    expect(answer.focus).toBe('speler-zij')
+    expect(answer.values.formatie.zij.keuze).toBe('4-2-3-1')
+    expect(answer.values.zij.speler.map((row) => row.naam)).toEqual(
+      Array.from({ length: 12 }, (_nothing, index) => `Gast ${index + 1}`),
+    )
+    expect(answer.values.zij.speler[0]?.rol).toBe('aanvoerder')
+    expect(answer.values.zij.speler[11]?.rol).toBe('bank')
+    // Our side and the rest stay as typed.
+    expect(answer.values.wij).toEqual(empty().wij)
+    expect(answer.version).toBe(1)
+    expect(await database.db.select().from(matchReports).where(eq(matchReports.matchId, matchId))).toHaveLength(0)
+  })
+
+  it('writes over nothing: with a player or a formation of the opponent the form comes back as it was', async () => {
+    await previousMeeting()
+
+    const typed = empty()
+    const withPlayer = await press({
+      ...typed,
+      zij: { ...typed.zij, speler: [{ ...emptyRow('speler'), naam: 'Eigen' }] },
+    })
+
+    expect(withPlayer.takenFromOpponent).toBeUndefined()
+    expect(withPlayer.values.zij.speler[0]?.naam).toBe('Eigen')
+
+    const withFormation = await press({ ...typed, formatie: { ...typed.formatie, zij: { eigen: '', keuze: '4-3-3' } } })
+
+    expect(withFormation.takenFromOpponent).toBeUndefined()
+    expect(withFormation.values.formatie.zij.keuze).toBe('4-3-3')
+  })
+
+  it('does nothing without an earlier meeting', async () => {
+    const answer = await press(empty())
+
+    expect(answer.takenFromOpponent).toBeUndefined()
+    expect(answer.values.zij.speler).toEqual([])
   })
 })

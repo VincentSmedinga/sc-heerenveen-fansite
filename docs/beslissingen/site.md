@@ -7936,3 +7936,20 @@
 - **Alternatieven:** een zoekopdracht per toets naar de server (een verzoek per letter en JavaScript nodig); een eigen keuzeveld dat we zelf bouwen (meer code, en de toegankelijkheid van een eigen component).
 - **Let op:** de browser bepaalt hoe een `<datalist>` zoekt en toont: de meeste zoeken op het begin of op een deel van de naam, en een screenreader leest de opties verschillend voor.
   Een lijst die tijdens het typen wordt bijgewerkt, of het veld van het snelle scherm, hoort niet bij dit besluit.
+
+## De opstelling van de tegenstander komt van de vorige ontmoeting met die club
+
+- **Datum:** 22 november 2026
+- **Besluit:** het verslagformulier heeft bij de tegenstander een knop "Opstelling van de vorige ontmoeting overnemen" (#1543), zolang de opstelling van de tegenstander leeg is: geen speler met iets erin en geen formatie.
+  De knop is een knop van het formulier, dus de server vult hem in en hij werkt zonder JavaScript.
+  Hij schrijft niets weg: het formulier komt terug met de overgenomen opstelling en de redactie bewaart zelf.
+  De opstelling is die van de laatste ontmoeting met dezelfde club, in elke competitie, met een verslag dat spelers van de tegenstander heeft (`findPreviousOpponentLineUp` in `apps/site/src/beheer/match-reports.ts`).
+  Een ontmoeting uit een seizoen dat meer dan twee seizoenen voor dat van deze wedstrijd ligt, telt niet: dan is er geen knop.
+  De knop neemt de namen, de rugnummers, de rollen en de formatie over.
+  Is de selectie van de club bekend (#1541), dan blijft de plaats van een speler die er niet meer in staat leeg, met de rol van die plaats (aanvoerder wordt basis), en vult de redactie hem in met de namen van #1542.
+  Zonder bekende selectie blijft elke speler staan.
+- **Waarom:** onze verslagen zijn de enige opstellingen die we van een tegenstander hebben.
+  Voor een oudere opstelling zijn te veel spelers weg, en een voorspelling uit meer wedstrijden bestaat niet.
+- **Alternatieven:** de laatste ontmoeting van elk seizoen, hoe oud ook (een opstelling vol spelers die al jaren weg zijn); de selectie van Wikipedia als opstelling (een selectie is geen elftal).
+- **Let op:** het seizoen bepaalt de grens, niet de datum: bij een wedstrijd in 2026/27 telt 2024/25 nog en 2023/24 niet.
+  De knop voor onze eigen opstelling blijft zoals hij was, zie _De vorige wedstrijd is de meest recente eerdere wedstrijd, over seizoenen heen, en de knop vult alleen een lege opstelling_ hierboven.
