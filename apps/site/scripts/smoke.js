@@ -447,7 +447,8 @@ async function checkCounting(database) {
   await get('/', visitor('203.0.113.9', { 'sec-gpc': '1' }))
   await get('/', visitor('203.0.113.9', { 'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1)' }))
   await get('/', visitor('203.0.113.9', { 'sec-purpose': 'prefetch' }))
-  await get('/', { accept: 'text/html', 'user-agent': browser, 'x-forwarded-for': '203.0.113.9' })
+  // Node.js sends `Accept-Language: *` unless the header is set, so set it empty.
+  await get('/', visitor('203.0.113.9', { 'accept-language': '' }))
   await get('/', { 'x-forwarded-for': '203.0.113.9' })
   await get('/beheer', visitor('203.0.113.9'))
   await get('/beheer/inloggen', visitor('203.0.113.9'))
