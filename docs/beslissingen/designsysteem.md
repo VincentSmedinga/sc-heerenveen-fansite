@@ -4343,7 +4343,8 @@
   - **Achternaam:** `PlayerList` met de achternaam eerst (nu een `span` in plaats van een `strong`) en `PickList` volgen `PlayerName`, `PitchPlayer` en de tabellen.
   - **Getal:** `FigureList`, `DescriptionList` met de term links en `OnThisDay` volgen `BarList`, `WinnerList` en de tabellen.
     Twee uitzonderingen: een antwoord in een gestapelde `DescriptionList` is een waarde en geen getal aan het eind van een rij, en een rij met kerngetallen (`KeyFigures`) houdt zijn eigen gewicht.
-- **Waarom:** het besluit van 4 november regelde dit alleen voor tabellen. Dezelfde naam was daardoor op de ene pagina zwaarder dan op de andere, en hetzelfde getal had vijf gewichten.
+- **Waarom:** het besluit van 4 november regelde dit alleen voor tabellen.
+  Dezelfde naam was daardoor op de ene pagina zwaarder dan op de andere, en hetzelfde getal had vijf gewichten.
   Eén regel is makkelijker te onthouden.
 - **Later:** zie _In een tabel is vet voor het kerngetal, niet voor onze club of een achternaam_, dat dit uitbreidt naar lijsten.
 - **Alternatieven:** 700 voor een achternaam (dan wordt hij zwaarder dan een rijkop); geen uitzonderingen (de gestapelde antwoorden worden zwaar op elke kaart); alleen lijsten die op een tabel lijken (laat 500 en 600 op twee plekken staan).
