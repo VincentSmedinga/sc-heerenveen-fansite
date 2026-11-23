@@ -28,16 +28,16 @@
   "devDependencies": {
     "@types/node": "24.19.2",
     "esbuild": "0.28.2",
-    "prettier": "3.9.10",
-    "vitest": "5.1.0"
+    "prettier": "3.10.1",
+    "vitest": "5.1.1"
   },
   "dependencies": {
     "@fansite/db": "workspace:*",
     "@fansite/shared": "workspace:*",
     "drizzle-orm": "0.45.4",
     "entities": "9.0.0",
-    "fast-xml-parser": "5.12.0",
-    "feedsmith": "3.0.1",
+    "fast-xml-parser": "5.12.1",
+    "feedsmith": "3.1.0",
     "mysql2": "3.24.6",
     "undici": "8.12.4",
     "zod": "4.6.7"

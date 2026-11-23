@@ -656,7 +656,7 @@
   - **Vaste controles laten de run falen:** nul verzoeken naar derden, toegankelijkheid 100, best practices 100, en gewicht, JavaScript en lettertypes per pagina niet meer dan de nulmeting plus 5%.
     De nulmeting is die van `docs/prestaties.md`, dus 151,8 KiB JavaScript op de homepage en niet de 106 KiB uit de tekst van #802.
     Een pagina zonder basiswaarde laat de run falen.
-  - **Tijdcontroles melden alleen:** prestaties, LCP, TBT, CLS en TTFB melden tot de eigenaar `enforce` zet, op zijn vroegst op 23 november 2026 (`decideOn`, twee weken na de eerste run).
+  - **Tijdcontroles melden alleen:** prestaties, LCP, TBT, CLS en TTFB melden tot de eigenaar `enforce` zet, op zijn vroegst op 23 november 2026 (`decideOn`, twee weken na de eerste run; zie **Later:** hieronder).
     Dan wordt elk budget de slechtste waarde van die weken plus ongeveer 10%, met als doel 1 tot 5 foute runs per maand.
     De voorlopige waarden in het bestand zijn de nulmeting plus een ruime marge.
     Na elke verbetering uit deze mijlpaal gaat het budget omlaag, in dezelfde pull request.
@@ -669,6 +669,10 @@
   Het gewicht en het aantal verzoeken naar derden zijn precies, dus die falen meteen.
   Zelf draaien kost niets en geeft geen gegevens aan een dienst.
 - **Alternatieven:** een dienst als SpeedCurve of Calibre (kosten en een derde partij); Lighthouse CI met een eigen server (te veel beheer voor deze site); alle controles meteen laten falen (te veel vals alarm); de runs herkenbaar maken met een eigen browsertekst in plaats van `DNT: 1` (verandert de meting, en de pagina's zien dan een andere browser dan Lighthouse zelf meet).
+- **Later:** op 22 november 2026 is het budget voor de LCP op mobiel gebleven op 1100 ms en blijft `enforce` uit, en de beslissing schuift van 23 november naar 7 december 2026 (`decideOn`).
+  De LCP op mobiel is 1031 tot 1234 ms (mediaan van de laatste zeven geldige runs), en een budget dat naar de meting wordt verhoogd houdt de vertraging vast.
+  Het alternatief was het budget verhogen tot ongeveer 1350 ms en `enforce` aanzetten; dat is verworpen, omdat de eigenaar eerst de pagina wil verbeteren.
+  De gewichten in `fixed.baselineKiB` zijn dezelfde dag ververst met de mediaan van die runs, plus 18,7 KiB lettertypes op elke pagina, omdat een teken uit het latin-ext-bereik dat lettertype op elke pagina kan laden en de controle anders op zo'n dag faalt (zie _Waar de LCP op mobiel vandaan komt_ in `docs/prestaties.md`).
 
 ## De Coördinator coördineert alleen en zet werk strikt door naar een eigen sessie
 
