@@ -79,7 +79,7 @@ export async function measurePath(address, path, runs, { pauseMs = defaultPauseM
     warm.push(await measure(address, path, agent))
     agent.destroy()
 
-    if (pauseMs > 0 && run < runs - 1) {
+    if (pauseMs > 0) {
       await new Promise((resolve) => setTimeout(resolve, pauseMs))
     }
   }
