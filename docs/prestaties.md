@@ -382,16 +382,16 @@ Dat is een schatting: hij is niet te splitsen in de pagina zelf en de database, 
 
 Gemeten op 23 november 2026 op <https://acc.sc.heerenveen.org>, 30 runs per pad, de mediaan, vanuit Nederland op een thuisverbinding.
 De pagina's draaiden warm: de server had net verzoeken gehad, en elke run deed eerst een koud en dan een warm verzoek.
-De tijden zijn in milliseconden, en het IPv4-adres is gebruikt (zie hieronder):
+De tijden zijn in milliseconden, en de verbinding was snel (zie hieronder voor het IPv6-adres):
 
-| Pad                         | DNS | TCP | TLS | Wachten (koud) | Eerste byte (koud) | Hoogste | Wachten (warm) | Pagina maken |
-| --------------------------- | --- | --- | --- | -------------- | ------------------ | ------- | -------------- | ------------ |
-| `/theme.js` (klein bestand) | 3   | 20  | 29  | 25             | 79                 | 96      | 28             |              |
-| `/`                         | 3   | 20  | 30  | 40             | 95                 | 114     | 45             | 16           |
-| `/nieuws`                   | 3   | 22  | 30  | 39             | 93                 | 118     | 42             | 14           |
-| `/redactie/we-zijn-terug`   | 3   | 22  | 30  | 31             | 87                 | 105     | 37             | 9            |
-| `/spelers`                  | 3   | 22  | 30  | 37             | 93                 | 122     | 39             | 11           |
-| `/bronnen` (10 runs)        | 3   | 23  | 30  | 34             | 87                 | 87      | 38             | 10           |
+| Pad                         | Status | DNS | TCP | TLS | Wachten (koud) | Eerste byte (koud) | Hoogste | Wachten (warm) | Pagina maken |
+| --------------------------- | ------ | --- | --- | --- | -------------- | ------------------ | ------- | -------------- | ------------ |
+| `/theme.js` (klein bestand) | 200    | 3   | 20  | 29  | 25             | 79                 | 96      | 28             |              |
+| `/`                         | 200    | 3   | 20  | 30  | 40             | 95                 | 114     | 45             | 16           |
+| `/nieuws`                   | 200    | 3   | 22  | 30  | 39             | 93                 | 118     | 42             | 14           |
+| `/redactie/we-zijn-terug`   | 200    | 3   | 22  | 30  | 31             | 87                 | 105     | 37             | 9            |
+| `/spelers`                  | 200    | 3   | 22  | 30  | 37             | 93                 | 122     | 39             | 11           |
+| `/bronnen` (10 runs)        | 200    | 3   | 23  | 30  | 34             | 87                 | 87      | 38             | 10           |
 
 De rij van `/bronnen` komt uit een eerdere meting van dezelfde dag met 10 runs: bij de meting met 30 runs duurde de TCP-verbinding 273 ms, om de reden hieronder, en dat zegt niets over die pagina.
 
@@ -417,7 +417,7 @@ De rij van `/bronnen` komt uit een eerdere meting van dezelfde dag met 10 runs: 
 Op 23 november 2026 antwoordde het IPv6-adres een kwartier lang van deze computer niet (100% pakketverlies met ping, en `curl -6` komt niet aan), terwijl IPv4 in 20 ms verbond.
 Node probeerde eerst IPv6 en viel na 250 ms terug op IPv4, en dat gaf een TCP-tijd van 273 ms in een meting.
 De eerste metingen van die dag verbonden wel in 20 ms, dus het adres kan tijdelijk wel hebben geantwoord.
-De projecteigenaar probeerde `curl -6 -m 8 -sI https://acc.sc.heerenveen.org/theme.js` en kreeg na 8 seconden geen antwoord.
+`curl -6 -m 8 -sI https://acc.sc.heerenveen.org/theme.js` kreeg ook van een tweede opdrachtregel na 8 seconden geen antwoord.
 IPv6 werkt op die computer wel: `https://ipv6.google.com` verbond in 70 ms.
 Het ligt dus aan het adres of aan de weg ernaartoe, niet aan IPv6 op die computer.
 Een bezoeker met IPv6 die niet verbindt, valt na een korte tijd terug op IPv4, maar wacht eerst.
