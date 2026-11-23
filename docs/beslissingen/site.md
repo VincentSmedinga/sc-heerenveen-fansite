@@ -7943,3 +7943,38 @@
 - **Later:** de projecteigenaar liet op 23 november 2026 de drie groepen vallen en voegde de kaart samen met die uit de zijkolom, achter een uitklapper en in één tabel per club; er is ook geen verhaal in Storybook, want de kaart staat in `apps/site`.
 - **Let op:** de kaart is er pas bij spelers van wie de opstelling van de tegenstander in een verslag staat.
   Hij groeit met de verslagen, en met de koppeling van #1544.
+  \=======
+
+## De naamvelden van de tegenstander bieden de namen van de club aan
+
+- **Datum:** 23 november 2026
+- **Besluit:** het naamveld van een speler van de tegenstander in het verslagformulier (opstelling en bank, en de naam bij een doelpunt van die club) en het veld Andere speler van een doelpunt in het formulier van de wedstrijd bieden de namen van de club aan (#1542).
+  De namen staan als `<datalist>` in de pagina, één per pagina met de namen van de club van de wedstrijd (`readOpponentNames` in `packages/db/src/opponent-names.ts`): eerst de selectie van de club (#1541, op rugnummer en dan naam), daarna de namen van spelers van die club uit eerdere verslagen, ook zonder persoon, elke naam één keer.
+  Een naam die niet in de lijst staat, mag gewoon.
+  Een korte hint bij het veld zegt dat je kunt beginnen te typen voor een naam van de club.
+  Het component daarvoor is `InputSuggestions` in het designsysteem, want de sjablonen van de site bevatten geen HTML-elementen.
+  Bij het opslaan geeft de koppeling van #1544 eerst de persoon uit de selectie van de club, zie _Een regel van de tegenstander in een verslag kan een persoon hebben_ in `hosting-en-data.md`.
+- **Waarom:** de lijst van een club is ongeveer vijftig namen, dus meesturen kost niets.
+  Een `<datalist>` werkt zonder JavaScript en met het toetsenbord, en de beheerformulieren moeten ook zonder JavaScript werken.
+- **Alternatieven:** een zoekopdracht per toets naar de server (een verzoek per letter en JavaScript nodig); een eigen keuzeveld dat we zelf bouwen (meer code, en de toegankelijkheid van een eigen component).
+- **Let op:** de browser bepaalt hoe een `<datalist>` zoekt en toont: de meeste zoeken op het begin of op een deel van de naam, en een screenreader leest de opties verschillend voor.
+  Een lijst die tijdens het typen wordt bijgewerkt, of het veld van het snelle scherm, hoort niet bij dit besluit.
+
+## De opstelling van de tegenstander komt van de vorige ontmoeting met die club
+
+- **Datum:** 22 november 2026
+- **Besluit:** het verslagformulier heeft bij de tegenstander een knop "Opstelling van de vorige ontmoeting overnemen" (#1543), zolang de opstelling van de tegenstander leeg is: geen speler met iets erin en geen formatie.
+  De knop is een knop van het formulier, dus de server vult hem in en hij werkt zonder JavaScript.
+  Hij schrijft niets weg: het formulier komt terug met de overgenomen opstelling en de redactie bewaart zelf.
+  De opstelling is die van de laatste ontmoeting met dezelfde club, in elke competitie, met een verslag dat spelers van de tegenstander heeft (`findPreviousOpponentLineUp` in `apps/site/src/beheer/match-reports.ts`).
+  Een ontmoeting uit een seizoen dat meer dan twee seizoenen voor dat van deze wedstrijd ligt, telt niet: dan is er geen knop.
+  De knop neemt de namen, de rugnummers, de rollen en de formatie over.
+  Is de selectie van de club bekend (#1541), dan blijft de plaats van een speler die er niet meer in staat leeg, met de rol van die plaats (aanvoerder wordt basis), en vult de redactie hem in met de namen van #1542.
+  Zonder bekende selectie blijft elke speler staan.
+- **Waarom:** onze verslagen zijn de enige opstellingen die we van een tegenstander hebben.
+  Voor een oudere opstelling zijn te veel spelers weg, en een voorspelling uit meer wedstrijden bestaat niet.
+- **Alternatieven:** de laatste ontmoeting van elk seizoen, hoe oud ook (een opstelling vol spelers die al jaren weg zijn); de selectie van Wikipedia als opstelling (een selectie is geen elftal).
+- **Let op:** het seizoen bepaalt de grens, niet de datum: bij een wedstrijd in 2026/27 telt 2024/25 nog en 2023/24 niet.
+  De knop voor onze eigen opstelling blijft zoals hij was, zie _De vorige wedstrijd is de meest recente eerdere wedstrijd, over seizoenen heen, en de knop vult alleen een lege opstelling_ hierboven.
+
+> > > > > > > origin/main

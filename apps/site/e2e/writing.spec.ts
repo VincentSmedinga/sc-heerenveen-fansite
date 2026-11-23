@@ -6,7 +6,7 @@ import { checkPage } from './check-page'
 import { earlierSeasonSlug } from './earlier-season'
 import { liveReportMatchId } from './live-report'
 import { matchId, playedMatchId } from './matches'
-import { addPreviousLineUp, lineUpNames, previousLabel } from './previous-lineup'
+import { addPreviousLineUp, lineUpNames, opponentNames, previousLabel } from './previous-lineup'
 
 // Writes an article in the admin from start to end, with the text editor, as the editor of the
 // global setup: a draft that errors can't lose, the preview, publishing, saving a change, and
@@ -784,6 +784,54 @@ test.describe('the button for the line-up of the previous match', () => {
         await expect(page.locator('#speler-wij-1-naam')).toHaveValue(lineUpNames[0] ?? '')
         await expect(page.getByRole('status').filter({ hasText: previousLabel })).toBeVisible()
         await expect(page.getByRole('button', { name: 'Opstelling van de vorige wedstrijd overnemen' })).toHaveCount(0)
+      } finally {
+        await remove()
+      }
+    })
+  })
+})
+
+test.describe('the button for the line-up of the opponent of the previous meeting', () => {
+  const takeOverName = 'Opstelling van de vorige ontmoeting overnemen'
+
+  test('fills the line-up of the opponent, says from which match, and leaves ours alone', async ({ page }) => {
+    const { later, remove } = await addPreviousLineUp()
+
+    try {
+      const takeOver = page.getByRole('button', { name: takeOverName })
+
+      await page.goto(`/beheer/wedstrijden/${later}/verslag`)
+      await expect(takeOver).toBeVisible()
+      await takeOver.click()
+
+      await expect(page.locator('#speler-zij-1-naam')).toHaveValue(opponentNames[0] ?? '')
+      await expect(page.locator('#speler-zij-12-naam')).toHaveValue(opponentNames[11] ?? '')
+      await expect(page.locator('#speler-zij-12-rol')).toHaveValue('bank')
+      await expect(page.locator('#formatie-zij')).toHaveValue('4-4-2')
+      await expect(page.locator('#speler-wij-1-naam')).toHaveValue('')
+      await expect(page.locator('#speler-zij')).toBeFocused()
+      await expect(
+        page.getByRole('status').filter({ hasText: `Opstelling overgenomen van ${previousLabel}.` }),
+      ).toBeVisible()
+      await expect(takeOver).toHaveCount(0)
+    } finally {
+      await remove()
+    }
+  })
+
+  test.describe('without JavaScript', () => {
+    test.use({ javaScriptEnabled: false })
+
+    test('is a button of the form: the server fills the line-up and the form comes back with it', async ({ page }) => {
+      const { later, remove } = await addPreviousLineUp()
+
+      try {
+        await page.goto(`/beheer/wedstrijden/${later}/verslag`)
+        await page.getByRole('button', { name: takeOverName }).click()
+
+        await expect(page.locator('#speler-zij-1-naam')).toHaveValue(opponentNames[0] ?? '')
+        await expect(page.getByRole('status').filter({ hasText: previousLabel })).toBeVisible()
+        await expect(page.getByRole('button', { name: takeOverName })).toHaveCount(0)
       } finally {
         await remove()
       }

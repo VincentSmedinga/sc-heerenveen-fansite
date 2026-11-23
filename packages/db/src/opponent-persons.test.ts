@@ -5,7 +5,16 @@ import type { TestDatabase } from './test-database.ts'
 
 import { linkOpponentPersons } from './opponent-persons.ts'
 import * as personsModule from './persons.ts'
-import { clubs, matchAppearances, matches, matchGoals, matchReports, persons, players } from './schema.ts'
+import {
+  clubs,
+  clubSquadPlayers,
+  matchAppearances,
+  matches,
+  matchGoals,
+  matchReports,
+  persons,
+  players,
+} from './schema.ts'
 import { createTestDatabase } from './test-database.ts'
 
 let database: TestDatabase
@@ -21,7 +30,16 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
-  for (const table of ['match_goals', 'match_appearances', 'match_reports', 'matches', 'players', 'persons', 'clubs']) {
+  for (const table of [
+    'club_squad_players',
+    'match_goals',
+    'match_appearances',
+    'match_reports',
+    'matches',
+    'players',
+    'persons',
+    'clubs',
+  ]) {
     await database.pool.query(`DELETE FROM ${table}`)
   }
 
@@ -93,12 +111,46 @@ describe('linkOpponentPersons (#1544)', () => {
     expect(await personOf(row)).toBe(person)
   })
 
+  it('gives him the person of the squad of the club, also when two persons carry his name (#1542)', async () => {
+    const wanted = await addPerson('Jan Jansen')
+
+    await addPerson('Jan Jansen')
+    await database.db
+      .insert(clubSquadPlayers)
+      .values({ clubId, name: 'Jan Jansen', personId: wanted, readAt: new Date('2026-11-20T10:00:00Z') })
+
+    const row = await addAppearance('Jan Jansen')
+
+    expect(await linkOpponentPersons(database.db)).toMatchObject({ name: 0, several: 0, squad: 1 })
+    expect(await personOf(row)).toBe(wanted)
+  })
+
+  it('does not use the squad of another club, or a squad player without a person', async () => {
+    const person = await addPerson('Jan Jansen')
+    const [other] = await database.db.insert(clubs).values({ name: 'Ajax', slug: 'ajax' }).$returningId()
+    const readAt = new Date('2026-11-20T10:00:00Z')
+
+    await database.db
+      .insert(clubSquadPlayers)
+      .values({ clubId: other?.id ?? 0, name: 'Jan Jansen', personId: person, readAt })
+    await database.db.insert(clubSquadPlayers).values({ clubId, name: 'Piet Bakker', personId: null, readAt })
+    await addPerson('Piet Bakker')
+    await addPerson('Piet Bakker')
+
+    const jan = await addAppearance('Jan Jansen')
+    const piet = await addAppearance('Piet Bakker')
+
+    expect(await linkOpponentPersons(database.db)).toMatchObject({ several: 1, squad: 0 })
+    expect(await personOf(jan)).toBe(person)
+    expect(await personOf(piet)).toBeNull()
+  })
+
   it('leaves him without a person when his name fits nobody', async () => {
     await addPerson('Piet Jansen')
 
     const row = await addAppearance('Klaas Bakker')
 
-    expect(await linkOpponentPersons(database.db)).toMatchObject({ name: 0, nobody: 1, several: 0 })
+    expect(await linkOpponentPersons(database.db)).toMatchObject({ name: 0, nobody: 1, several: 0, squad: 0 })
     expect(await personOf(row)).toBeNull()
   })
 
@@ -121,7 +173,14 @@ describe('linkOpponentPersons (#1544)', () => {
       .$returningId()
     const row = await addAppearance('Jan de Vries', { ours: true, playerId: player?.id ?? 0 })
 
-    expect(await linkOpponentPersons(database.db)).toEqual({ excepted: 0, goal: 0, name: 0, nobody: 0, several: 0 })
+    expect(await linkOpponentPersons(database.db)).toEqual({
+      excepted: 0,
+      goal: 0,
+      name: 0,
+      nobody: 0,
+      several: 0,
+      squad: 0,
+    })
     expect(await personOf(row)).toBeNull()
   })
 
@@ -132,7 +191,14 @@ describe('linkOpponentPersons (#1544)', () => {
 
     const row = await addAppearance('Jan de Vries', { personId: kept })
 
-    expect(await linkOpponentPersons(database.db)).toEqual({ excepted: 0, goal: 0, name: 0, nobody: 0, several: 0 })
+    expect(await linkOpponentPersons(database.db)).toEqual({
+      excepted: 0,
+      goal: 0,
+      name: 0,
+      nobody: 0,
+      several: 0,
+      squad: 0,
+    })
     expect(await personOf(row)).toBe(kept)
   })
 
@@ -186,7 +252,14 @@ describe('linkOpponentPersons (#1544)', () => {
     expect(await personOf(first)).toBe(person)
     expect(await personOf(second)).toBeNull()
     expect(await linkOpponentPersons(database.db)).toMatchObject({ name: 1 })
-    expect(await linkOpponentPersons(database.db)).toEqual({ excepted: 0, goal: 0, name: 0, nobody: 0, several: 0 })
+    expect(await linkOpponentPersons(database.db)).toEqual({
+      excepted: 0,
+      goal: 0,
+      name: 0,
+      nobody: 0,
+      several: 0,
+      squad: 0,
+    })
     expect(await personOf(second)).toBe(person)
   })
 

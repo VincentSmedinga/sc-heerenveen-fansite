@@ -119,6 +119,8 @@ export type {
 } from './components/input-table/InputTable'
 export { Input, inputTypes, inputWidths } from './components/input/Input'
 export type { InputProps, InputType, InputWidth } from './components/input/Input'
+export { InputSuggestions } from './components/input/InputSuggestions'
+export type { InputSuggestionsProps } from './components/input/InputSuggestions'
 export { KeyFigures } from './components/key-figures/KeyFigures'
 export type { KeyFigure, KeyFiguresProps } from './components/key-figures/KeyFigures'
 export { Link, linkIcons } from './components/link/Link'
