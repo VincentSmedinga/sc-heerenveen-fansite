@@ -7943,7 +7943,6 @@
 - **Later:** de projecteigenaar liet op 23 november 2026 de drie groepen vallen en voegde de kaart samen met die uit de zijkolom, achter een uitklapper en in één tabel per club; er is ook geen verhaal in Storybook, want de kaart staat in `apps/site`.
 - **Let op:** de kaart is er pas bij spelers van wie de opstelling van de tegenstander in een verslag staat.
   Hij groeit met de verslagen, en met de koppeling van #1544.
-  \=======
 
 ## De naamvelden van de tegenstander bieden de namen van de club aan
 
@@ -7976,5 +7975,3 @@
 - **Alternatieven:** de laatste ontmoeting van elk seizoen, hoe oud ook (een opstelling vol spelers die al jaren weg zijn); de selectie van Wikipedia als opstelling (een selectie is geen elftal).
 - **Let op:** het seizoen bepaalt de grens, niet de datum: bij een wedstrijd in 2026/27 telt 2024/25 nog en 2023/24 niet.
   De knop voor onze eigen opstelling blijft zoals hij was, zie _De vorige wedstrijd is de meest recente eerdere wedstrijd, over seizoenen heen, en de knop vult alleen een lege opstelling_ hierboven.
-
-> > > > > > > origin/main
