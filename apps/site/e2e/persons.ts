@@ -218,32 +218,35 @@ async function addGoals(db: ReturnType<typeof connect>['db']) {
 const forwardOpponentName = 'Verzonnen Aanvaller (tegenstander)'
 
 /**
- * A row of the opponent with the person of the forward in a match of this season that has a
- * finished report, so his page has the card Tegen ons (#1545) to check, in the group after his
- * time with us (his last season is the one before this one). Nothing is added when no such
- * match exists, as in a development database without made-up reports.
+ * A row of the opponent with the person of the forward in up to six matches of this season that
+ * have a finished report, so his page has the card Tegen ons (#1545) to check, with a table of
+ * matches behind its Disclosure. Nothing is added when no such match exists, as in a
+ * development database without made-up reports.
  */
 async function addAgainst(db: ReturnType<typeof connect>['db']) {
-  const [report] = await db
+  const reports = await db
     .select({ matchId: matches.id })
     .from(matches)
     .innerJoin(matchReports, eq(matchReports.matchId, matches.id))
     .where(and(eq(matches.season, seasonOf(new Date())), eq(matchReports.status, 'klaar')))
     .orderBy(asc(matches.id))
+    .limit(6)
   const [person] = await db.select({ id: persons.id }).from(persons).where(eq(persons.name, 'Verzonnen Aanvaller'))
 
-  if (report === undefined || person === undefined) {
+  if (reports.length === 0 || person === undefined) {
     return
   }
 
-  await db.insert(matchAppearances).values({
-    matchId: report.matchId,
-    name: forwardOpponentName,
-    ours: false,
-    personId: person.id,
-    shirtNumber: 97,
-    starter: true,
-  })
+  await db.insert(matchAppearances).values(
+    reports.map(({ matchId }) => ({
+      matchId,
+      name: forwardOpponentName,
+      ours: false,
+      personId: person.id,
+      shirtNumber: 99,
+      starter: true,
+    })),
+  )
 }
 
 /**

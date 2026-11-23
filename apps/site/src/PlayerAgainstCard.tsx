@@ -74,7 +74,7 @@ export function PlayerAgainstCard({
       )}
       {matches === undefined ? null : (
         <>
-          <Text>{`${name} speelde ${againstSummary(matches)} tegen ons.`}</Text>
+          <Text>{`Hij speelde ${againstSummary(matches)} tegen ons.`}</Text>
           <Disclosure summary="Alle wedstrijden tegen ons">
             <DataTable
               appearance="text"

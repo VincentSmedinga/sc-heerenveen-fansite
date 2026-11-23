@@ -78,7 +78,7 @@ describe('the card Tegen ons', () => {
     expect(html).not.toContain('<h3')
     expect(html).toContain('Voor hij hier kwam, scoorde hij één keer tegen sc Heerenveen.')
     expect(html).toContain('sc Heerenveen – Roda Test 1–3')
-    expect(html).toContain('Test Speler speelde 2 wedstrijden, 1 doelpunt tegen ons.')
+    expect(html).toContain('Hij speelde 2 wedstrijden, 1 doelpunt tegen ons.')
     expect(html.match(/<details/g)).toHaveLength(1)
     expect(html.match(/<table/g)).toHaveLength(1)
     expect(html.indexOf('<table')).toBeGreaterThan(html.indexOf('<details'))
