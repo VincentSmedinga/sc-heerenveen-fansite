@@ -60,6 +60,60 @@ const select = (id: string) => document.getElementById(id) as HTMLSelectElement
 const optionsOf = (id: string) => [...select(id).options].map((option) => option.value)
 const choose = (id: string, value: string) => fireEvent.change(select(id), { target: { value } })
 
+describe('the names of the opponent in the form of a report (#1542)', () => {
+  const withNames = (opponentNames?: string[]) => {
+    const own: ReportValues = {
+      ...values,
+      zij: { ...emptySide(), speler: [{ ...emptyRow('speler'), naam: 'Een Eigen Naam' }] },
+    }
+    const state: ReportFormState = { errors: {}, values: own, version: 0, warnings: {} }
+
+    return render(
+      <ReportFormProvider
+        action={() => Promise.resolve(state)}
+        choices={{
+          home: true,
+          matchHref: '/beheer/wedstrijden/7',
+          opponent: 'Testclub',
+          opponentNames,
+          series: null,
+          showDelay: 'binnen vijf minuten',
+          squad,
+        }}
+        initial={state}
+        title="Dit is nog niet af"
+      >
+        <ReportFields />
+      </ReportFormProvider>,
+    )
+  }
+
+  it('offers the names of the club to the name of a player of the opponent, and not to ours', () => {
+    withNames(['Jan Jansen', 'Piet Bakker'])
+
+    const field = document.querySelector<HTMLInputElement>('input[name="speler-zij-1-naam"]')
+
+    expect(field?.getAttribute('list')).toBe('namen-tegenstander')
+    expect(field?.value).toBe('Een Eigen Naam')
+    expect(
+      [...document.querySelectorAll('datalist#namen-tegenstander option')].map((option) =>
+        option.getAttribute('value'),
+      ),
+    ).toEqual(['Jan Jansen', 'Piet Bakker'])
+    expect(document.getElementById(field?.getAttribute('aria-describedby') ?? '')?.textContent).toContain(
+      'Begin te typen voor een naam van Testclub',
+    )
+    expect(document.querySelector('input[name="speler-wij-1-rugnummer"]')?.hasAttribute('list')).toBe(false)
+  })
+
+  it('has a plain field when there are no names', () => {
+    withNames(undefined)
+
+    expect(document.querySelector('datalist')).toBeNull()
+    expect(document.querySelector('input[name="speler-zij-1-naam"]')?.hasAttribute('list')).toBe(false)
+  })
+})
+
 describe('the score at half-time in the form of a report', () => {
   const input = (label: string) => screen.getByRole('textbox', { name: new RegExp(`^${label}`) }) as HTMLInputElement
 
@@ -1109,6 +1163,77 @@ describe('the input that the browser keeps for the form of a report', () => {
     )
 
     expect(html).not.toContain('Herstel')
+  })
+})
+
+describe('the button for the line-up of the opponent of the previous meeting (#1543)', () => {
+  const choices = {
+    home: true,
+    matchHref: '/beheer/wedstrijden/7',
+    matchId: 7,
+    opponent: 'Testclub',
+    previousOpponentLineUp: 'Testclub, 3 november 2025',
+    series: null,
+    showDelay: 'binnen vijf minuten',
+    squad,
+  }
+  const blank: ReportFormState = {
+    errors: {},
+    values: { ...values, zij: { ...values.zij, speler: [] } },
+    version: 0,
+    warnings: {},
+  }
+  const open = (state: ReportFormState, more: { previousOpponentLineUp?: string | undefined } = {}) =>
+    render(
+      <ReportFormProvider
+        action={() => Promise.resolve(state)}
+        choices={{ ...choices, ...more }}
+        initial={state}
+        title="Titel"
+      >
+        <ReportFields />
+      </ReportFormProvider>,
+    )
+  const takeOver = () =>
+    [...document.querySelectorAll('button')].find((button) => button.value === 'opstelling-vorige-tegenstander')
+
+  it('is a submit button of the form with its own value, there while the line-up of the opponent is empty', () => {
+    open(blank)
+
+    expect(takeOver()?.textContent).toBe('Opstelling van de vorige ontmoeting overnemen')
+    expect(takeOver()?.getAttribute('name')).toBe('knop')
+    expect(takeOver()?.getAttribute('type')).toBe('submit')
+    expect(takeOver()?.closest('form')?.id).toBe('verslag')
+    // Not the button of our own line-up.
+    expect([...document.querySelectorAll('button')].some((button) => button.value === 'opstelling-vorige')).toBe(false)
+  })
+
+  it('is not there without a previous meeting, or when the opponent has a player or a formation', () => {
+    open(blank, { previousOpponentLineUp: undefined })
+
+    expect(takeOver()).toBeUndefined()
+    cleanup()
+
+    open({
+      ...blank,
+      values: { ...blank.values, zij: { ...blank.values.zij, speler: [{ ...emptyRow('speler'), naam: 'Gast' }] } },
+    })
+
+    expect(takeOver()).toBeUndefined()
+    cleanup()
+
+    open({
+      ...blank,
+      values: { ...blank.values, formatie: { ...blank.values.formatie, zij: { eigen: '', keuze: '4-4-2' } } },
+    })
+
+    expect(takeOver()).toBeUndefined()
+  })
+
+  it('says from which meeting the line-up was taken', () => {
+    open({ ...blank, takenFromOpponent: 'Testclub, 3 november 2025' })
+
+    expect(document.body.textContent).toContain('Opstelling overgenomen van Testclub, 3 november 2025.')
   })
 })
 

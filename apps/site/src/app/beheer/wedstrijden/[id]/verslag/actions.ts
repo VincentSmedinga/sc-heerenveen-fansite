@@ -7,6 +7,7 @@ import { parseItemId, parseReason } from '#src/beheer/items'
 import {
   contextOf,
   findPreviousLineUp,
+  findPreviousOpponentLineUp,
   findReportScreen,
   finishMatch,
   removeReport,
@@ -119,6 +120,28 @@ export async function submitReport(
         ...values,
         formatie: { ...values.formatie, wij: previous.formatie },
         wij: { ...values.wij, speler: previous.speler },
+      },
+      version,
+      warnings: {},
+    }
+  }
+
+  if (button.kind === 'previous-opponent') {
+    // The same for the opponent: only while his line-up is empty, and nothing is written.
+    const previous = isEmptyLineUp(values, 'zij') ? await findPreviousOpponentLineUp(db, screen.match) : undefined
+
+    if (previous === undefined) {
+      return { errors: {}, values, version, warnings: {} }
+    }
+
+    return {
+      errors: {},
+      focus: listId('speler', 'zij'),
+      takenFromOpponent: previous.label,
+      values: {
+        ...values,
+        formatie: { ...values.formatie, zij: previous.formatie },
+        zij: { ...values.zij, speler: previous.speler },
       },
       version,
       warnings: {},

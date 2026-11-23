@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { describeEntryKickoff } from '@fansite/db/match-edits'
 import { phaseOf } from '@fansite/db/match-reports'
+import { readOpponentNames } from '@fansite/db/opponent-names'
 import { Button, Card, Form, Heading, Link, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
@@ -13,6 +14,7 @@ import { parseItemId } from '#src/beheer/items'
 import {
   contextOf,
   findPreviousLineUp,
+  findPreviousOpponentLineUp,
   findReportScreen,
   reportBasis,
   seriesOf,
@@ -93,6 +95,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
   const title = `${match.round} (${match.competition}): ${clubs}`
   const values = valuesOfReport(report, goals, squad, match)
   const previousLineUp = await findPreviousLineUp(getDatabase().db, match, squad)
+  const previousOpponentLineUp = await findPreviousOpponentLineUp(getDatabase().db, match)
   // A report that is stored is judged again, so what is wrong shows. A new one has nothing
   // to say yet.
   const checked = report === undefined ? undefined : checkReportForm(values, contextOf(screen))
@@ -107,8 +110,10 @@ export default async function ReportPage({ params, searchParams }: Props) {
         matchHref: matchPath(match.id),
         matchId: match.id,
         opponent: match.opponent,
+        opponentNames: await readOpponentNames(getDatabase().db, match.clubId),
         preview: previewMatchOf(match, now),
         previousLineUp: previousLineUp?.label,
+        previousOpponentLineUp: previousOpponentLineUp?.label,
         series: seriesOf(match),
         showDelay: describeShowDelay(match.season),
         squad,

@@ -8,19 +8,20 @@ import type { OpponentPersonCounts } from '@fansite/db/opponent-persons'
 import { linkOpponentPersons } from '@fansite/db/opponent-persons'
 
 /**
- * The line for the log: how many rows got a person through a goal, through the name, and how
- * many stayed empty because the name fits nobody or more than one person. It says nothing when
- * there was no row without a person to look at.
+ * The line for the log: how many rows got a person through a goal, through the name and through
+ * the squad of the club, and how many stayed empty because the name fits nobody or more than
+ * one person. It says nothing when there was no row without a person to look at.
  */
 export function describeOpponentPersons(counts: OpponentPersonCounts): string[] {
-  const { excepted, goal, name, nobody, several } = counts
+  const { excepted, goal, name, nobody, several, squad } = counts
 
-  if (goal + name + nobody + several + excepted === 0) {
+  if (goal + name + nobody + several + excepted + squad === 0) {
     return []
   }
 
   return [
     `Opponents' players: ${goal} got a person through a goal, ${name} through the name, ` +
+      `${squad === 0 ? '' : `${squad} through the squad of the club, `}` +
       `${nobody} left without (the name fits nobody), ${several} left without (the name fits more than one person)` +
       `${excepted === 0 ? '' : `, ${excepted} left without (on the list of namesakes)`}.`,
   ]

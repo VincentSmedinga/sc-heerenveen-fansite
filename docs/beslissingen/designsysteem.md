@@ -4320,3 +4320,12 @@
 - **Waarom:** het getal is wat een fan zoekt, en de status brak rechts over twee regels en nam de plek van wat belangrijk is.
   Kleur is nooit het enige teken (docs/toegankelijkheid.md), en de haakjes lezen een schermlezer niet als ruststand.
 - **Alternatieven:** een eigen regel met de clubs en een ongekleurde uitslag (de projecteigenaar wil overal `Match`, dus ook de kleur van de uitslag); de clubnamen inkorten met een weglatingsteken (de projecteigenaar wil nooit afgekapte tekst); de punten op de metaregel en alleen de voorspelling rechts; de status rechts laten staan; een `aria-label` op een gewone `span` voor de voorspelling (wordt niet overal voorgelezen); een eigen pictogram voor het vinkje en het kruisje (een teken in de tekst volstaat, en het is voor schermlezers verborgen).
+
+## InputSuggestions biedt een lijst namen aan een Input aan
+
+- **Datum:** 23 november 2026
+- **Besluit:** `InputSuggestions` (`id`, `suggestions`) is een `<datalist>` met een optie per suggestie, en een `Input` noemt hem met `list`.
+  Het staat één keer in de pagina, en elk veld dat de suggesties aanbiedt verwijst ernaar.
+  Het is een deel van de pagina van Input in Storybook, als de story Met suggesties, en geen component met een eigen pagina.
+- **Waarom:** de sjablonen van de site bevatten geen HTML-elementen (zie de regel in `eslint.config.js`), en een `<datalist>` per veld zou de lijst bij elke rij van een tabel herhalen.
+- **Alternatieven:** een prop `suggestions` op `Input` die zelf de lijst rendert (de lijst komt dan bij elke rij opnieuw in de pagina); een eigen keuzeveld met JavaScript (meer code, en de toegankelijkheid van een eigen component).
