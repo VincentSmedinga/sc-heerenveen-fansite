@@ -25,13 +25,14 @@ describe('FansPage', () => {
     await expect(render()).rejects.toThrow('NEXT_NOT_FOUND')
   })
 
-  it('has one h1, a strong card to make an account, and the three games that come, without a date', async () => {
+  it('has one h1, a strong card to make an account without a session, and the three games that come, without a date', async () => {
     vi.stubEnv('FANS_ACCOUNTS', 'on')
     const html = await render()
 
     expect(html.match(/<h1/g)).toHaveLength(1)
     expect(html).toContain('hf-card-strong')
     expect(html).toContain('Maak alvast een account')
+    expect(html).not.toContain('Je bent ingelogd als')
     expect(html).toMatch(/<h2[^>]*>Wat komt er<\/h2>/)
 
     for (const game of ['Prognose', 'Uitblinker', 'Fjouwer']) {
@@ -83,6 +84,63 @@ describe('FansPage', () => {
   })
 })
 
+describe('FansPage, for a supporter who is logged in', () => {
+  const supporter = (screenName: string, blocked = false) => ({
+    blocked,
+    createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+    screenName,
+  })
+
+  afterEach(() => currentSupporter.mockResolvedValue(undefined))
+
+  it('shows no card to make an account, but the line with the screen name and the link to Mijn account', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    currentSupporter.mockResolvedValue(supporter('Tjalle99'))
+    const html = await render()
+
+    expect(html).not.toContain('Maak alvast een account')
+    expect(html).not.toContain('Account maken')
+    expect(html).not.toContain('action="/fans/inloggen"')
+    expect(html).toContain('Je bent ingelogd als Tjalle99. <a href="/fans/mijn-account">Mijn account</a>')
+    expect(html).toMatch(/<h2[^>]*>Wat komt er<\/h2>/)
+    expect(html.match(/<h1/g)).toHaveLength(1)
+  })
+
+  it('shows the line without the welcome, on a later visit', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    currentSupporter.mockResolvedValue(supporter('Tjalle99'))
+
+    expect(await render()).not.toContain('Welkom,')
+  })
+
+  it('puts the line under the notices and above the cards', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    currentSupporter.mockResolvedValue(supporter('Tjalle99'))
+    const html = await render({ uitgelogd: '1' })
+
+    expect(html.indexOf('Je bent uitgelogd.')).toBeLessThan(html.indexOf('Je bent ingelogd als'))
+    expect(html.indexOf('Je bent ingelogd als')).toBeLessThan(html.indexOf('Wat komt er'))
+  })
+
+  it('shows a blocked account no card either', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    currentSupporter.mockResolvedValue(supporter('Tjalle99', true))
+    const html = await render()
+
+    expect(html).not.toContain('Maak alvast een account')
+    expect(html).toContain('Je bent ingelogd als Tjalle99.')
+  })
+
+  it('never puts the screen name into the page as HTML', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    currentSupporter.mockResolvedValue(supporter('<b>x</b>'))
+    const html = await render()
+
+    expect(html).not.toContain('<b>x</b>')
+    expect(html).toContain('&lt;b&gt;x&lt;/b&gt;')
+  })
+})
+
 describe('FansPage, after confirming a new account', () => {
   const welcome = 'Welkom, Tjalle99. Je account is klaar en je blijft op dit apparaat ingelogd.'
   const supporter = (createdAt: Date) => ({ createdAt, screenName: 'Tjalle99' })
@@ -96,7 +154,8 @@ describe('FansPage, after confirming a new account', () => {
     const html = await render({ welkom: '1' })
 
     expect(html).toContain(welcome)
-    expect(html.indexOf(welcome)).toBeLessThan(html.indexOf('Maak alvast een account'))
+    expect(html.indexOf(welcome)).toBeLessThan(html.indexOf('Wat komt er'))
+    expect(html).not.toContain('Maak alvast een account')
   })
 
   it('takes the name from the session and never from the address', async () => {
