@@ -198,7 +198,7 @@ Op productie telt de SEO-score wel mee.
 De workflow [`lighthouse.yml`](../.github/workflows/lighthouse.yml) herhaalt deze meting elke dag en op verzoek, met de pagina's, het adres en de budgetten uit [`.github/lighthouse.json`](../.github/lighthouse.json).
 De samenvatting van elke run staat bij de run in GitHub, met de laatste zeven runs ernaast.
 De JSON-rapporten blijven 30 dagen als artifact.
-Vaste controles laten de run falen, en GitHub mailt de eigenaar: geen verzoek naar derden, toegankelijkheid en best practices 100, en gewicht, JavaScript en lettertypes niet meer dan de nulmeting hierboven plus 5%.
+Vaste controles laten de run falen, en GitHub mailt de eigenaar: geen verzoek naar derden, toegankelijkheid en best practices 100, en gewicht, JavaScript en lettertypes niet meer dan de basiswaarden in het bestand plus 5% (de nulmeting hierboven, tot #1579 ze ververste).
 De tijdcontroles melden alleen, tot de eigenaar de budgetten vaststelt (`decideOn` in het bestand).
 De beslissing en de redenen staan in `docs/beslissingen/werkwijze.md`, onder _We meten zelf, elke dag, met een vast budget voor wat kan en een melding voor tijd_.
 Een runner van GitHub meet niet vanuit Nederland en niet op dezelfde machine, dus de tijden wijken af van de nulmeting.
@@ -267,3 +267,105 @@ Met `max-age=0` vraagt een browser bij elke pagina of ze veranderd zijn, ook `th
 Nu: de pictogrammen en het plaatje voor gedeelde links een dag, en `theme.js` een uur (`apps/site/src/cache-headers.ts`).
 De rest blijft zoals hij was.
 Een pagina krijgt geen `s-maxage`, en de rooktest controleert dat, en dat het beheer `no-store` houdt.
+
+## Waar de LCP op mobiel vandaan komt (#1579)
+
+De dagelijkse controle meldt op mobiel een LCP van 1031 tot 1234 ms tegen een budget van 1100 ms.
+De nulmeting hierboven had 0,81 tot 0,97 seconde, vanuit Nederland op een thuisverbinding.
+Dit is gemeten op 22 en 23 november 2026.
+De budgetten gaan niet omhoog en `enforce` blijft uit, tot de beslissing van 7 december 2026 (`decideOn`).
+
+### De basiswaarden zijn ververst
+
+De gewichten in `fixed.baselineKiB` komen uit de mediaan van de laatste zeven geldige dagelijkse runs van de workflow Lighthouse, uit de bestanden `lighthouse-metrics`: 15, 16, 17, 18, 20, 21 en 22 november 2026.
+De run van 19 november is overgeslagen: hij faalde en mat foutpagina's van 12,8 KiB.
+Per pagina is het de mediaan van 14 waarden: zeven runs, mobiel en bureaublad.
+De vorige waarden waren de nulmeting van 6 november, voordat #800 de lettertypes van 218 naar 100 KiB bracht.
+
+Een pagina met een teken uit het latin-ext-bereik (zoals een naam met een accent erboven) haalt een derde lettertype van 18,7 KiB.
+Spelers doet dat elke dag, en op 22 november deed de homepage het ook, met een gewicht van 330,5 KiB.
+De mediaan zelf had een grens van 318,7 KiB gegeven, en dus een rode run zonder dat de site zwaarder was geworden.
+Daarom rekenen alle pagina's met het lettertype erbij: de lettertypes staan op 118,7 KiB en het gewicht is de mediaan plus 18,7 KiB.
+Bij Spelers hoefde dat niet, want de mediaan had het al.
+
+| Pagina                                 | Gewicht | JavaScript | Lettertypes |
+| -------------------------------------- | ------- | ---------- | ----------- |
+| Homepage (`/`)                         | 322,2   | 150,6      | 118,7       |
+| Archief, pagina 1 (`/nieuws`)          | 323,2   | 145,9      | 118,7       |
+| Artikel (`/redactie/we-zijn-terug`)    | 309,6   | 143,3      | 118,7       |
+| Spelers (`/spelers`)                   | 324,4   | 151,4      | 118,7       |
+| Archief, pagina 2 (`/nieuws?pagina=2`) | 323,3   | 145,9      | 118,7       |
+| Bronnen (`/bronnen`)                   | 315,1   | 145,9      | 118,7       |
+
+De grens is elke waarde plus 5%.
+
+### Wat de LCP is
+
+Op elke pagina is de LCP hetzelfde moment als de eerste verf (FCP): de eerste tekst die verschijnt.
+Er is geen afbeelding op de pagina's, en de LCP is dus altijd een stuk tekst.
+Uit de rapporten van de run van 22 november, mobiel, de middelste run:
+
+| Pagina                 | LCP-element                                        | LCP             |
+| ---------------------- | -------------------------------------------------- | --------------- |
+| Homepage               | de inleiding in de eerste kaart (`p`)              | 1218 ms         |
+| Archief, pagina 1 en 2 | de woordmerk-tekst in de kop (`.hf-logo-wordmark`) | 1197 en 1176 ms |
+| Artikel                | de inleiding van het artikel (`p.hf-intro`)        | 987 ms          |
+| Spelers                | de eerste alinea (`p`)                             | 1218 ms         |
+| Bronnen                | de woordmerk-tekst in de kop                       | 1019 ms         |
+
+### Waar de tijd naartoe gaat
+
+Lighthouse meet de LCP niet, maar rekent hem uit: het neemt de echte run op de machine van de runner en speelt hem na met een trage 4G-verbinding (150 ms rondgang, 1,6 Mbit/s) en een processor die 4 keer trager is.
+De echte run heeft een LCP van 0,66 seconde.
+De nagespeelde heeft 1,2 seconde.
+Het verschil is de verbinding die Lighthouse erbij rekent.
+
+Voor de homepage op mobiel, 22 november:
+
+- **De server:** 118 ms eerste byte, zoals de runner hem ziet.
+  De nagespeelde run telt dat een op een mee, en 4 rondgangen (DNS, TCP, TLS en het verzoek) erbij: 733 ms tot de eerste byte.
+  Dat is 60% van de LCP, en het is geen wijziging aan de pagina die dit verschuift.
+- **Wat de pagina blokkeert:** het HTML-bestand (16,5 KiB), twee stylesheets (17,4 en 8,9 KiB) en `theme.js` (0,5 KiB), die tegelijk binnenkomen.
+  Daarna ligt er nog ongeveer 490 ms tot de eerste verf.
+- **De lettertypes:** twee (Truculenta 66,7 KiB en Atkinson 33,4 KiB), vooraf aangevraagd in de head.
+  Ze zijn binnen voor de eerste verf en blokkeren niets: de tekst gebruikt eerst een vervangend lettertype met dezelfde maten (`font-display: swap`).
+- **JavaScript:** 150 KiB, met lage prioriteit en `async`.
+  Het blokkeert de eerste verf niet.
+- **Afbeeldingen:** er zijn er geen.
+
+De mediaan van de eerste byte op mobiel, over de zeven runs, is 156 tot 266 ms per pagina, en op `/nieuws` was hij op 22 november 432 ms.
+Op een lokale computer is hij 15 tot 45 ms.
+
+### Wat we probeerden, en wat het opleverde
+
+Gemeten op een lokale build met dezelfde opdracht als hierboven: Lighthouse 13.6.0, mobiel, de middelste van drie runs per pagina, achter een kleine HTTP/2-proxy met TLS, zodat de protocolkeuze lijkt op die van acceptatie.
+Zonder wijziging is de LCP 783 tot 928 ms; de server is lokaal 15 tot 45 ms.
+De LCP springt in stappen van ongeveer 120 tot 150 ms (een rondgang), en wisselt op dezelfde pagina tussen twee waarden.
+Alles hieronder valt binnen die ruis.
+De rijen over de stylesheets en de CSS in het HTML-bestand zijn zonder proxy gemeten (gewoon HTTP, waar de build zonder wijziging gemiddeld 841 ms had), de andere met:
+
+| Wat is veranderd (alleen om te meten)                            | Gemiddelde LCP van de zes pagina's                           |
+| ---------------------------------------------------------------- | ------------------------------------------------------------ |
+| Niets (de huidige build)                                         | 852 ms                                                       |
+| Alle JavaScript (150 KiB) leeggemaakt                            | 850 ms                                                       |
+| Alle lettertypes (100 KiB) leeggemaakt                           | 850 ms                                                       |
+| Het tweede stylesheet (9,6 KiB) leeggemaakt                      | geen verschil (zes pagina's, zelfde waarden)                 |
+| Het eerste stylesheet teruggebracht tot 7,5 KiB, het tweede leeg | geen verschil                                                |
+| De twee lettertypes niet meer vooraf aanvragen                   | 831 ms                                                       |
+| De CSS in het HTML-bestand zetten (`inlineCss` van Next.js)      | 1212 ms, dus slechter (+50 KiB, de CSS stond er ook nog los) |
+
+Wat hieruit volgt:
+
+- Minder bytes van JavaScript, lettertypes of CSS maakt de LCP niet korter, want ze zitten niet op het pad naar de eerste verf.
+  Een andere lettertypesubset, minder JavaScript of minder CSS komt daarom niet in aanmerking voor dit issue.
+- De LCP bestaat uit de verbinding en de eerste byte (ongeveer 60%) en één ronde stylesheets.
+  Daar kan de pagina zelf niets aan veranderen.
+- De enige post die van ons is, is de antwoordtijd van de server op de host: 100 tot 430 ms op acceptatie tegen 15 tot 45 ms op een lokale computer.
+
+### Wat er nog is
+
+De LCP is niet onder 1100 ms gekomen, en deze pull request verandert geen code die de LCP raakt, omdat geen goedkope verandering hem verschoof.
+Wat overblijft, voor een nieuw issue:
+
+- **De antwoordtijd van de server op de host** meten en verlagen: waar gaan de 100 tot 430 ms heen (de pagina maken, de database, de proxy, de host zelf), en hoeveel wint een kortere weg?
+  De nagespeelde LCP telt elke milliseconde ervan mee.

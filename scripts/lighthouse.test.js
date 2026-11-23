@@ -172,18 +172,27 @@ test('a size may be 5% over the measurement of #798, rounded up to a tenth', () 
   assert.equal(sizeLimit(151.8, 5), 159.4)
 })
 
-test('the measurement of #798 passes the fixed checks', () => {
-  assert.deepEqual(fixedProblems(row(), config.fixed), [])
+// A page that weighs what its baseline says, whatever the baseline is today.
+const baseline = config.fixed.baselineKiB['/']
+const atBaseline = (overrides = {}) =>
+  row({ fonts: baseline.fonts, javascript: baseline.javascript, weight: baseline.weight, ...overrides })
+
+test('a page at its baseline passes the fixed checks', () => {
+  assert.deepEqual(fixedProblems(atBaseline(), config.fixed), [])
 })
 
 test('a page that gets heavier than the limit fails, and one just inside it does not', () => {
-  assert.deepEqual(fixedProblems(row({ weight: 435.8 }), config.fixed), [])
-  assert.match(
-    fixedProblems(row({ weight: 436 }), config.fixed)[0],
-    /Homepage \(mobile\): gewicht 436 KiB, maximaal 435\.8 KiB/,
+  const margin = config.fixed.sizeMarginPercent
+  const weightLimit = sizeLimit(baseline.weight, margin)
+
+  assert.deepEqual(fixedProblems(atBaseline({ weight: weightLimit }), config.fixed), [])
+  assert.ok(
+    fixedProblems(atBaseline({ weight: weightLimit + 0.2 }), config.fixed)[0].includes(
+      `Homepage (mobile): gewicht ${weightLimit + 0.2} KiB, maximaal ${weightLimit} KiB`,
+    ),
   )
-  assert.match(fixedProblems(row({ javascript: 170 }), config.fixed)[0], /JavaScript 170 KiB/)
-  assert.match(fixedProblems(row({ fonts: 260 }), config.fixed)[0], /lettertypes 260 KiB/)
+  assert.match(fixedProblems(atBaseline({ javascript: 400 }), config.fixed)[0], /JavaScript 400 KiB/)
+  assert.match(fixedProblems(atBaseline({ fonts: 400 }), config.fixed)[0], /lettertypes 400 KiB/)
 })
 
 test('a request to a third party, or a score under 100 for accessibility or best practices, fails', () => {
@@ -197,7 +206,7 @@ test('a request to a third party, or a score under 100 for accessibility or best
 test('the SEO score and the performance score are not fixed checks', () => {
   const scores = { accessibility: 100, bestPractices: 100, performance: 60, seo: 30 }
 
-  assert.deepEqual(fixedProblems(row({ lcp: 9000, scores }), config.fixed), [])
+  assert.deepEqual(fixedProblems(atBaseline({ lcp: 9000, scores }), config.fixed), [])
 })
 
 test('a page without a baseline fails, so a new page cannot slip in unchecked', () => {
@@ -237,7 +246,7 @@ test('the summary shows each page, the earlier runs beside it, and what fails or
   assert.match(text, /\| Pagina \| Apparaat \| 2026-11-10 \| 2026-11-08 \|/)
   assert.match(text, /\| Homepage \| mobiel \| 100 \/ 0,90 \| 99 \/ 0,90 \|/)
   assert.match(text, /gewicht 500 KiB/)
-  assert.match(text, /melden alleen, tot de eigenaar de budgetten vaststelt op 2026-11-23/)
+  assert.ok(text.includes(`melden alleen, tot de eigenaar de budgetten vaststelt op ${config.timing.decideOn}`))
   assert.match(text, /LCP 2500 ms/)
 })
 
