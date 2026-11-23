@@ -4362,6 +4362,7 @@
   - **Waarom:** de vier gespecialiseerde tabellen tekenden hem zelf in grijs, en pagina's onder een `DataTable` zetten hem er zelf onder in donker.
   - **Alternatieven:** een los component `TableLegend`; de pagina's hem laten blijven bouwen.
 - **Het blijft op de plekken waar het geen klasse kan krijgen:** `footer` en `figcaption` in `base/elements.css` zijn elementen zonder klasse, en houden hun eigen kleur, grootte en regelhoogte (dezelfde waarden als `.hf-meta`).
+  De legenda van het veld, de streepjes van de scorebalk en de toelichting bij een gebeurtenis in `MatchTimeline` zijn deel van een grafiek of een vast raster en houden hun eigen kleur en grootte.
   `Tooltip` en `pull-to-refresh` hebben een eigen kleur op een eigen vlak.
 - **Eén pull request:** het is één regel in CSS, mechanische vervangingen en één prop, en het hoeft maar één keer in licht en donker bekeken.
   - **Alternatieven:** splitsen in kleur en gewicht, en legenda's en kolomletters.

@@ -42,10 +42,8 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* The goals are in small letters, in the colour of secondary text, and take the whole row. */
+  /* The goals are in small letters (the Meta style), and take the whole row. */
   .hf-match-header-scorers {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
     grid-column: 1 / -1;
     overflow-wrap: anywhere;
   }
