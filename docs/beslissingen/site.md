@@ -7975,3 +7975,16 @@
 - **Alternatieven:** de laatste ontmoeting van elk seizoen, hoe oud ook (een opstelling vol spelers die al jaren weg zijn); de selectie van Wikipedia als opstelling (een selectie is geen elftal).
 - **Let op:** het seizoen bepaalt de grens, niet de datum: bij een wedstrijd in 2026/27 telt 2024/25 nog en 2023/24 niet.
   De knop voor onze eigen opstelling blijft zoals hij was, zie _De vorige wedstrijd is de meest recente eerdere wedstrijd, over seizoenen heen, en de knop vult alleen een lege opstelling_ hierboven.
+
+## `/fans` toont een ingelogde supporter geen kaart om een account te maken
+
+- **Datum:** 23 november 2026
+- **Besluit:** `/fans` toont een ingelogde supporter de kaart om een account te maken niet (#1600).
+  In plaats daarvan staat er onder de Notices en boven de kaarten één regel kleine tekst, zonder kaart: "Je bent ingelogd als `<schermnaam>`. Mijn account", met een link naar `/fans/mijn-account`.
+  Dat geldt ook voor een geblokkeerd account, en de regel staat ook zonder het welkom.
+  Een bezoeker zonder sessie ziet de kaart nog, met dezelfde twee knoppen op dezelfde plek.
+- **Waarom:** wie is ingelogd, heeft een account, en twee knoppen om er een te maken of in te loggen zijn dan verwarrend.
+  Zo staat het ook in het goedgekeurde ontwerp van het hoofdstuk Fans en in #1444.
+  De kop toont alleen initialen, geen schermnaam als tekst (#1450); de regel is de plek op de pagina waar je ziet wie je bent en waar je naar je account gaat, ook als er nog geen spel is.
+- **Alternatieven:** een kaart met de schermnaam en wat je kunt doen (herhaalt de kop, is een nieuwe kaart die niemand ontwierp, en zonder spel valt er weinig te doen); alleen de kaart weghalen (de pagina zegt dan nergens wie je bent).
+- **Later:** _Fans staat in het hoofdmenu zodra accounts aan staan_ hierboven zegt dat `/fans` een kaart heeft om alvast een account te maken; die kaart is er alleen nog voor een bezoeker zonder sessie.

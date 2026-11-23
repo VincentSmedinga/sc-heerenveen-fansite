@@ -35,8 +35,10 @@ const welcomeMinutes = 10
 const justCreated = (createdAt: Date) => Date.now() - createdAt.getTime() < welcomeMinutes * 60 * 1000
 
 /**
- * The page Fans, as long as no game exists: what is coming, and a card to make an account
- * already. The buttons lead to the sign-up (#1446) and to logging in (#1448). After logging out
+ * The page Fans, as long as no game exists: what is coming, and for a visitor without a session
+ * a card to make an account already. The buttons lead to the sign-up (#1446) and to logging in
+ * (#1448). A supporter who is logged in sees no card but one line of small text with the
+ * screen name of the session and a link to Mijn account. After logging out
  * (`?uitgelogd=1`) a Notice says so. After confirming a new account (`?welkom=1`) another
  * welcomes the supporter by the screen name of the session, and only in the minutes after the
  * account was made, so the address of the page doesn't show it again later. A game that is on
@@ -50,7 +52,8 @@ export default async function FansPage({
   requireFansPart('accounts', notFound)
 
   // A visit of a supporter who is logged in counts: the session stays open another 90 days, and
-  // the account keeps the day of the visit. The page itself is the same for everybody.
+  // the account keeps the day of the visit. The session also decides what the page shows: the
+  // card to make an account for a visitor, the line with the screen name for a supporter.
   const supporter = await currentSupporter()
 
   const { uitgelogd, welkom } = await searchParams
@@ -68,24 +71,30 @@ export default async function FansPage({
         {welkom === '1' && supporter !== undefined && justCreated(supporter.createdAt) ? (
           <Notice>Welkom, {supporter.screenName}. Je account is klaar en je blijft op dit apparaat ingelogd.</Notice>
         ) : null}
-        <Card aria-labelledby="alvast-een-account" surface="strong">
-          <Heading id="alvast-een-account" level={2}>
-            Maak alvast een account
-          </Heading>
-          <Text>
-            Dan ben je klaar als het eerste spel begint. Je hebt alleen een schermnaam en een e-mailadres nodig, geen
-            wachtwoord. Alleen je schermnaam is voor anderen te zien.
+        {supporter === undefined ? (
+          <Card aria-labelledby="alvast-een-account" surface="strong">
+            <Heading id="alvast-een-account" level={2}>
+              Maak alvast een account
+            </Heading>
+            <Text>
+              Dan ben je klaar als het eerste spel begint. Je hebt alleen een schermnaam en een e-mailadres nodig, geen
+              wachtwoord. Alleen je schermnaam is voor anderen te zien.
+            </Text>
+            {/* A form that only goes to the page: the design system has no link button. */}
+            <Form action={`${fansPath}/aanmelden`}>
+              <Button type="submit">Account maken</Button>
+            </Form>
+            <Form action={`${fansPath}/inloggen`}>
+              <Button appearance="soft" type="submit">
+                Inloggen
+              </Button>
+            </Form>
+          </Card>
+        ) : (
+          <Text appearance="meta">
+            Je bent ingelogd als {supporter.screenName}. <Link href={`${fansPath}/mijn-account`}>Mijn account</Link>
           </Text>
-          {/* A form that only goes to the page: the design system has no link as a button. */}
-          <Form action={`${fansPath}/aanmelden`}>
-            <Button type="submit">Account maken</Button>
-          </Form>
-          <Form action={`${fansPath}/inloggen`}>
-            <Button appearance="soft" type="submit">
-              Inloggen
-            </Button>
-          </Form>
-        </Card>
+        )}
         {uitblinker === undefined ? null : <UitblinkerCard {...uitblinker} />}
         <Card aria-labelledby="wat-komt-er">
           <Heading id="wat-komt-er" level={2}>
