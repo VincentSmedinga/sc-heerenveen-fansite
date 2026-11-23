@@ -4729,6 +4729,7 @@
     De Champions League telt de voorrondes ervan mee.
   - **Tegen ons:** de zin zegt "voor hij hier kwam" als alle doelpunten in een seizoen voor zijn eerste bij ons vielen, "nadat hij hier wegging" als ze na zijn laatste vielen, en anders "tegen sc Heerenveen".
     Het gaat om doelpunten waarbij `match_goals.person_id` zijn persoon is en `ours` onwaar.
+    **Later:** de kaart staat sinds 23 november 2026 niet meer in de zijkolom, maar in de hoofdkolom, samengevoegd met de kaart met zijn wedstrijden tegen ons (#1545).
   - **De gegevens** komen uit dezelfde leesronde als de seizoenen: `readPlayerSeasonFacts` heeft er `assistGivers` en `againstUs` bij, en `loadPlayerSeasonFacts` deelt de lezing per verzoek.
     `apps/site/src/player-aside.ts` rekent de kaarten uit.
   - **Nieuw in het designsysteem:** `FigureList` (namen met een getal aan het eind van de regel) en `stacked` bij `DescriptionList`.
@@ -7921,6 +7922,27 @@
   Een voorbeeld dat in een test staat en niet op de pagina, of andersom, loopt vroeg of laat uiteen.
 - **Alternatieven:** de voorbeelden in de testbestanden laten en de pagina met de hand overtypen (loopt uiteen); een eigen pagina per spel (meer plekken om bij te houden).
 - **Let op:** de kaart linkt naar de stand (#1473), en de pagina van de stand linkt terug met "Spelregels".
+
+## De spelerspagina toont wat een speler deed tegen ons, uit onze eigen verslagen
+
+- **Datum:** 22 november 2026
+- **Besluit:** "wat een speler deed voor en na zijn tijd bij ons" zijn de wedstrijden die hij als tegenstander tegen ons speelde, uit onze eigen verslagen.
+  Zijn loopbaan bij andere clubs, uit Wikidata, hoort er niet bij.
+  De pagina van een speler heeft daarvoor één kaart "Tegen ons", in de hoofdkolom na de kaart Loopbaan en met een link in de balk "Op deze pagina".
+  Die kaart is ook de kaart met zijn doelpunten tegen ons uit de zijkolom (#1086): ze zijn samengevoegd, omdat een pagina met twee kaarten met dezelfde kop verwarrt.
+  Bovenaan staan zijn doelpunten tegen ons, dan één regel met zijn wedstrijden en doelpunten tegen ons, en daaronder een uitklapper (`Disclosure`) met één tabel.
+  De kaart staat er als hij doelpunten tegen ons scoorde of als een regel van de tegenstander zijn persoon heeft (#1544), de wedstrijd gespeeld is en het verslag klaar is (`reportFinished`).
+  Een wedstrijd waarin hij op de bank bleef, telt niet mee: hij heeft er niet gespeeld.
+  De tabel is gegroepeerd per club waarvoor hij tegen ons speelde: de club met de meeste wedstrijden bovenaan (bij gelijk de club met de nieuwste wedstrijd) en binnen een club de nieuwste wedstrijd eerst.
+  Een indeling in voor, tussendoor en na zijn tijd bij ons is er niet: drie koppen en drie open tabellen maken de pagina te lang, want de kaart komt bij ongeveer 92 van de 468 spelers, met gemiddeld bijna vijf en hoogstens twintig wedstrijden.
+  Een eigen doelpunt telt niet als doelpunt van hem.
+  De kaart leest alleen onze eigen verslagen (`apps/site/src/player-against.ts`): geen nieuw verzoek, geen geboortedatum en geen nieuwe bron.
+- **Waarom:** de gegevens die we al hebben of krijgen zijn genoeg voor een eerste, eerlijke kaart.
+  Een loopbaan is een nieuwe import en een toets van de regels van Wikimedia, en een eigen issue als de projecteigenaar hem wil.
+- **Alternatieven:** de volledige loopbaan uit Wikidata (een nieuwe import, en niet alleen wedstrijden tegen ons); beide in één issue (te groot voor één pull request).
+- **Later:** de projecteigenaar liet op 23 november 2026 de drie groepen vallen en voegde de kaart samen met die uit de zijkolom, achter een uitklapper en in één tabel per club; er is ook geen verhaal in Storybook, want de kaart staat in `apps/site`.
+- **Let op:** de kaart is er pas bij spelers van wie de opstelling van de tegenstander in een verslag staat.
+  Hij groeit met de verslagen, en met de koppeling van #1544.
 
 ## De naamvelden van de tegenstander bieden de namen van de club aan
 

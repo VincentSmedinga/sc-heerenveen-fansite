@@ -23,6 +23,7 @@ import { reasonOf } from '#src/errors'
 import { formatReadAt, wikipediaUrl } from '#src/match-format'
 import { seasonPageMetadata } from '#src/metadata'
 import { pageAreas } from '#src/page-areas'
+import { againstByClub, type AgainstMatch, loadAgainstMatches } from '#src/player-against'
 import { type PlayerAside, playerAsideOf } from '#src/player-aside'
 import { type CareerMomentChoice, careerMoments } from '#src/player-career'
 import { goalQuartersOf, playerRecordOf, seasonBarsOf } from '#src/player-charts'
@@ -37,6 +38,7 @@ import {
   playerSeasonsOf,
 } from '#src/player-seasons'
 import { playerShortcutsOf } from '#src/player-shortcuts'
+import { PlayerAgainstCard } from '#src/PlayerAgainstCard'
 import { PlayerAside as PlayerAsideColumn } from '#src/PlayerAside'
 import { PlayerCareerCard } from '#src/PlayerCareerCard'
 import { PlayerQuartersCard, PlayerRecordCard, PlayerSeasonBarsCard } from '#src/PlayerChartsCards'
@@ -121,6 +123,8 @@ export async function PlayerPageView({ searchParams, slug }: { searchParams: Pro
   const career = seasons === undefined ? undefined : await readCareer(seasons, current)
   const ratings = seasons === undefined ? undefined : await readRatings(page)
   const ratingAddresses = await readMatchAddresses(ratings?.last.map(({ season }) => season) ?? [])
+  const against = await readAgainst(page)
+  const againstAddresses = await readMatchAddresses(against?.map(({ season }) => season) ?? [])
   const aside = playerAsideOf(seasons ?? [], facts ?? {}, page.line === 'doelman')
   const asideAddresses = await readMatchAddresses(asideSeasons(aside))
 
@@ -142,6 +146,7 @@ export async function PlayerPageView({ searchParams, slug }: { searchParams: Pro
             ...(seasons === undefined ? [] : ['seasons']),
             ...(ratings === undefined ? [] : ['ratings']),
             ...(seasons === undefined || career === undefined ? [] : ['career']),
+            ...(against === undefined && aside.against === undefined ? [] : ['against']),
           ],
           toolbar: switchAddress !== undefined,
         })}
@@ -205,6 +210,19 @@ export async function PlayerPageView({ searchParams, slug }: { searchParams: Pro
             <PlayerCareerCard options={career} seasons={seasons} />
           </Page.Cell>
         )}
+        {against === undefined && aside.against === undefined ? null : (
+          <Page.Cell area="against">
+            <PlayerAgainstCard
+              goalHref={({ competition, round, season }) => asideAddresses.get(season)?.get(`${competition}|${round}`)}
+              goals={aside.against}
+              matches={against}
+              matchHref={({ competition, round, season }) =>
+                againstAddresses.get(season)?.get(`${competition}|${round}`)
+              }
+              name={page.name}
+            />
+          </Page.Cell>
+        )}
         <PlayerAsideColumn
           aside={aside}
           charts={
@@ -246,7 +264,13 @@ export async function playerShortcuts({ searchParams, slug }: { searchParams: Pr
 
   const seasons = await readSeasons(loaded.page)
   const ratings = seasons === undefined ? undefined : await readRatings(loaded.page)
-  const items = seasons === undefined ? [] : playerShortcutsOf(seasons, loaded.page.line, ratings !== undefined)
+  const facts = seasons === undefined ? undefined : await readFacts(loaded.page)
+  // The card Tegen ons has the goals against us, the matches from the reports, or both.
+  const against =
+    (await readAgainst(loaded.page)) !== undefined ||
+    (seasons !== undefined && playerAsideOf(seasons, facts ?? {}, loaded.page.line === 'doelman').against !== undefined)
+  const items =
+    seasons === undefined ? [] : playerShortcutsOf(seasons, loaded.page.line, ratings !== undefined, against)
 
   return items.length === 0 ? null : <Page.Shortcuts items={items} label="Op deze pagina:" />
 }
@@ -372,6 +396,22 @@ function PlayerFacts({ page }: { page: PlayerPage }) {
       ))}
     </Text>
   )
+}
+
+/**
+ * The matches he played against us (#1545), per club, or undefined when there are none or they
+ * could not be read (the error is logged, and the card goes on without them).
+ */
+async function readAgainst(page: PlayerPage): Promise<AgainstMatch[] | undefined> {
+  try {
+    return againstByClub(await loadAgainstMatches(page.personId))
+  } catch (error) {
+    console.error(
+      `Could not read the matches against us of a player for ${playerAddress(page.slug)}: ${reasonOf(error)}`,
+    )
+
+    return undefined
+  }
 }
 
 /**
