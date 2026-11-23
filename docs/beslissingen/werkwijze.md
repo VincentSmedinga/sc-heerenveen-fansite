@@ -898,3 +898,16 @@
 - **Alternatieven:** twee Builders houden (laat de computer vaak half leeg terwijl de rij wacht); een hoger vast getal (een vast getal houdt geen rekening met wat een Builder net doet).
 - **Let op:** de grens van vier is voorlopig, want vier tegelijk is maar twee minuten gemeten.
   Na de volgende mijlpaal kijken we opnieuw, met metingen die Vitest, de build en de browser apart tellen.
+
+## De antwoordtijd van de host meten we met een script van buiten, en we veranderen niets aan de site
+
+- **Datum:** 23 november 2026
+- **Besluit:** `scripts/response-time.js` splitst de antwoordtijd van de host van buiten in DNS, TCP, TLS en wachten, koud en warm, en vergelijkt de pagina's met het kleine bestand `/theme.js` (#1594).
+  Het verschil is de tijd die de site aan het maken van een pagina besteedt: 7 tot 16 ms op acceptatie op 23 november 2026.
+  Omdat geen post van ons groter is, doet deze pull request geen verandering aan de site, aan een header of aan het logboek.
+- **Waarom:** de proxy van Next.js draait voor de pagina en kan de tijd van de pagina niet meten, en een tijd in een header of het logboek zou pas na een merge en een deploy op acceptatie te lezen zijn.
+  Een script van buiten werkt meteen, kost de site niets en heeft geen toegang tot de host nodig.
+  De 156 tot 266 ms eerste byte op de runner van GitHub zijn dan niet van de site.
+- **Alternatieven:** een `Server-Timing`-header of een logregel per verzoek (verworpen: de pagina's zijn al snel, en de kosten gaan voor de baten uit); een cache met `s-maxage` voor pagina's (verworpen: er is geen CDN, en een pagina die langer blijft staan, is een andere beslissing dan dit issue).
+- **Let op:** de meting van buiten splitst de pagina zelf en de database niet.
+  Is de tijd van het maken ooit meer dan een paar tientallen milliseconden, dan hoort een meting op de server erbij.
