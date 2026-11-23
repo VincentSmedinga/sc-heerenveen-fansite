@@ -277,24 +277,27 @@ De budgetten gaan niet omhoog en `enforce` blijft uit, tot de beslissing van 7 d
 
 ### De basiswaarden zijn ververst
 
-De gewichten in `fixed.baselineKiB` zijn de mediaan van de laatste zeven geldige dagelijkse runs van de workflow Lighthouse, uit de bestanden `lighthouse-metrics`: 15, 16, 17, 18, 20, 21 en 22 november 2026.
+De gewichten in `fixed.baselineKiB` komen uit de mediaan van de laatste zeven geldige dagelijkse runs van de workflow Lighthouse, uit de bestanden `lighthouse-metrics`: 15, 16, 17, 18, 20, 21 en 22 november 2026.
 De run van 19 november is overgeslagen: hij faalde en mat foutpagina's van 12,8 KiB.
 Per pagina is het de mediaan van 14 waarden: zeven runs, mobiel en bureaublad.
 De vorige waarden waren de nulmeting van 6 november, voordat #800 de lettertypes van 218 naar 100 KiB bracht.
 
+Een pagina met een teken uit het latin-ext-bereik (zoals een naam met een accent erboven) haalt een derde lettertype van 18,7 KiB.
+Spelers doet dat elke dag, en op 22 november deed de homepage het ook, met een gewicht van 330,5 KiB.
+De mediaan zelf had een grens van 318,7 KiB gegeven, en dus een rode run zonder dat de site zwaarder was geworden.
+Daarom rekenen alle pagina's met het lettertype erbij: de lettertypes staan op 118,7 KiB en het gewicht is de mediaan plus 18,7 KiB.
+Bij Spelers hoefde dat niet, want de mediaan had het al.
+
 | Pagina                                 | Gewicht | JavaScript | Lettertypes |
 | -------------------------------------- | ------- | ---------- | ----------- |
-| Homepage (`/`)                         | 303,5   | 150,6      | 100,0       |
-| Archief, pagina 1 (`/nieuws`)          | 304,5   | 145,9      | 100,0       |
-| Artikel (`/redactie/we-zijn-terug`)    | 290,9   | 143,3      | 100,0       |
+| Homepage (`/`)                         | 322,2   | 150,6      | 118,7       |
+| Archief, pagina 1 (`/nieuws`)          | 323,2   | 145,9      | 118,7       |
+| Artikel (`/redactie/we-zijn-terug`)    | 309,6   | 143,3      | 118,7       |
 | Spelers (`/spelers`)                   | 324,4   | 151,4      | 118,7       |
-| Archief, pagina 2 (`/nieuws?pagina=2`) | 304,6   | 145,9      | 100,0       |
-| Bronnen (`/bronnen`)                   | 296,4   | 145,9      | 100,0       |
+| Archief, pagina 2 (`/nieuws?pagina=2`) | 323,3   | 145,9      | 118,7       |
+| Bronnen (`/bronnen`)                   | 315,1   | 145,9      | 118,7       |
 
-Let op de lettertypes: een pagina met een teken uit het latin-ext-bereik (zoals een naam met een accent erboven) haalt een derde lettertype van 18,7 KiB.
-Spelers doet dat elke dag.
-Op 22 november deed de homepage het ook, en toen was het gewicht 330,5 KiB: boven de grens van 318,7 KiB.
-De vaste controle kan dus op een dag met zo'n teken falen, zonder dat de site zwaarder is gemaakt.
+De grens is elke waarde plus 5%.
 
 ### Wat de LCP is
 
@@ -366,4 +369,3 @@ Wat overblijft, voor een nieuw issue:
 
 - **De antwoordtijd van de server op de host** meten en verlagen: waar gaan de 100 tot 430 ms heen (de pagina maken, de database, de proxy, de host zelf), en hoeveel wint een kortere weg?
   De nagespeelde LCP telt elke milliseconde ervan mee.
-- **De vaste controle voor lettertypes en gewicht** laten rekenen met het latin-ext-lettertype, zodat een naam met een accent op de homepage de run niet laat falen.

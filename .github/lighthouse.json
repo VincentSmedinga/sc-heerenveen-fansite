@@ -16,12 +16,12 @@
     "thirdPartyRequests": 0,
     "sizeMarginPercent": 5,
     "baselineKiB": {
-      "/": { "weight": 303.5, "javascript": 150.6, "fonts": 100.0 },
-      "/nieuws": { "weight": 304.5, "javascript": 145.9, "fonts": 100.0 },
-      "/redactie/we-zijn-terug": { "weight": 290.9, "javascript": 143.3, "fonts": 100.0 },
+      "/": { "weight": 322.2, "javascript": 150.6, "fonts": 118.7 },
+      "/nieuws": { "weight": 323.2, "javascript": 145.9, "fonts": 118.7 },
+      "/redactie/we-zijn-terug": { "weight": 309.6, "javascript": 143.3, "fonts": 118.7 },
       "/spelers": { "weight": 324.4, "javascript": 151.4, "fonts": 118.7 },
-      "/nieuws?pagina=2": { "weight": 304.6, "javascript": 145.9, "fonts": 100.0 },
-      "/bronnen": { "weight": 296.4, "javascript": 145.9, "fonts": 100.0 }
+      "/nieuws?pagina=2": { "weight": 323.3, "javascript": 145.9, "fonts": 118.7 },
+      "/bronnen": { "weight": 315.1, "javascript": 145.9, "fonts": 118.7 }
     }
   },
   "timing": {

@@ -672,7 +672,7 @@
 - **Later:** op 22 november 2026 is het budget voor de LCP op mobiel gebleven op 1100 ms en blijft `enforce` uit, en de beslissing schuift van 23 november naar 7 december 2026 (`decideOn`).
   De LCP op mobiel is 1031 tot 1234 ms (mediaan van de laatste zeven geldige runs), en een budget dat naar de meting wordt verhoogd houdt de vertraging vast.
   Het alternatief was het budget verhogen tot ongeveer 1350 ms en `enforce` aanzetten; dat is verworpen, omdat de eigenaar eerst de pagina wil verbeteren.
-  De gewichten in `fixed.baselineKiB` zijn dezelfde dag ververst met de mediaan van die runs (zie _Waar de LCP op mobiel vandaan komt_ in `docs/prestaties.md`).
+  De gewichten in `fixed.baselineKiB` zijn dezelfde dag ververst met de mediaan van die runs, plus 18,7 KiB lettertypes op elke pagina, omdat een teken uit het latin-ext-bereik dat lettertype op elke pagina kan laden en de controle anders op zo'n dag faalt (zie _Waar de LCP op mobiel vandaan komt_ in `docs/prestaties.md`).
 
 ## De Coördinator coördineert alleen en zet werk strikt door naar een eigen sessie
 
