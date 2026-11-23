@@ -416,10 +416,12 @@ De rij van `/bronnen` komt uit een eerdere meting van dezelfde dag met 10 runs: 
 `acc.sc.heerenveen.org` heeft een AAAA-record (`2a11:4881:1:9523::1`) en een A-record (`62.129.138.4`).
 Op 23 november 2026 antwoordde het IPv6-adres een kwartier lang van deze computer niet (100% pakketverlies met ping, en `curl -6` komt niet aan), terwijl IPv4 in 20 ms verbond.
 Node probeerde eerst IPv6 en viel na 250 ms terug op IPv4, en dat gaf een TCP-tijd van 273 ms in een meting.
-De eerste metingen van die dag verbonden wel in 20 ms, dus het kan aan het netwerk van deze computer liggen.
-Of het aan de host ligt, is van hier niet te zeggen, en een agent heeft geen toegang tot de host.
-De projecteigenaar kan het controleren met `curl -6 -m 8 -sI https://acc.sc.heerenveen.org/theme.js` vanaf een computer met IPv6, of in het paneel van mijn.host.
+De eerste metingen van die dag verbonden wel in 20 ms, dus het adres kan tijdelijk wel hebben geantwoord.
+De projecteigenaar probeerde `curl -6 -m 8 -sI https://acc.sc.heerenveen.org/theme.js` en kreeg na 8 seconden geen antwoord.
+IPv6 werkt op die computer wel: `https://ipv6.google.com` verbond in 70 ms.
+Het ligt dus aan het adres of aan de weg ernaartoe, niet aan IPv6 op die computer.
 Een bezoeker met IPv6 die niet verbindt, valt na een korte tijd terug op IPv4, maar wacht eerst.
+Of het IPv6-adres bij deze site hoort, is te zien in het paneel van mijn.host; hoort het er niet bij, dan kan de AAAA-record weg.
 
 ### Wat er niet is gedaan
 
