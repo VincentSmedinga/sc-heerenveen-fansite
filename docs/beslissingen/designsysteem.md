@@ -2546,6 +2546,7 @@
   Eerst alleen de regel opschrijven en de code later (de code is klein en de regel zonder test loopt weer uit elkaar).
 - **Later:** vervangt delen van drie besluiten.
   Zie de **Later:**-regels bij _Eén stel regels voor het gewicht van letters, met tokens die een bedoeling uitdrukken_ (28 oktober 2026), _Een spelersnaam is één component, met de voornaam gewoon en de achternaam vet_ (27 oktober 2026) en _De punten staan voor het doelsaldo in de standtabel_ (26 oktober 2026, in `redactie.md`).
+- **Later:** zie _Een achternaam en een getal aan het eind van een rij hebben overal hetzelfde gewicht_: de achternaam is overal het naamgewicht en het getal aan het eind van een rij overal het gewicht van een getal, ook buiten een tabel.
 
 ## Een rij van de tabel met doelpuntenmakers heeft een of meer spelers
 
@@ -3248,6 +3249,7 @@
 - **Waarom:** `PlayerName` met alleen een land is een rij van een lijst, geen woord in een zin: de regel onder de naam van een speler brak er in drie stukken door.
   Een speler met een artikel dat de importer nog niet las, of nooit leest (een Engelse titel), moet toch de link naar zijn artikel en de licentie krijgen.
 - **Alternatieven:** `PlayerName` een vorm in de regel geven (één component met twee rollen); de korte credit zonder link voor een speler zonder leestijd (dan ontbreekt de licentie).
+- **Later:** zie _Een achternaam en een getal aan het eind van een rij hebben overal hetzelfde gewicht_: de vlag is een intern onderdeel `Flag`, en `CountryName` leent geen klassen van `PlayerName` meer.
 
 ## Kerngetallen zijn een lijst met één zin per getal, en alleen het getal is groot
 
@@ -4333,3 +4335,35 @@
   Het is een deel van de pagina van Input in Storybook, als de story Met suggesties, en geen component met een eigen pagina.
 - **Waarom:** de sjablonen van de site bevatten geen HTML-elementen (zie de regel in `eslint.config.js`), en een `<datalist>` per veld zou de lijst bij elke rij van een tabel herhalen.
 - **Alternatieven:** een prop `suggestions` op `Input` die zelf de lijst rendert (de lijst komt dan bij elke rij opnieuw in de pagina); een eigen keuzeveld met JavaScript (meer code, en de toegankelijkheid van een eigen component).
+
+## Een achternaam en een getal aan het eind van een rij hebben overal hetzelfde gewicht
+
+- **Datum:** 23 november 2026
+- **Besluit:** een achternaam is overal het naamgewicht (`--hf-name-font-weight`, 600), en het getal aan het eind van een rij is overal het gewicht van een getal (`--hf-figure-font-weight`, 700) (#1607).
+  - **Achternaam:** `PlayerList` met de achternaam eerst (nu een `span` in plaats van een `strong`) en `PickList` volgen `PlayerName`, `PitchPlayer` en de tabellen.
+  - **Getal:** `FigureList`, `DescriptionList` met de term links en `OnThisDay` volgen `BarList`, `WinnerList` en de tabellen.
+    Twee uitzonderingen: een antwoord in een gestapelde `DescriptionList` is een waarde en geen getal aan het eind van een rij, en een rij met kerngetallen (`KeyFigures`) houdt zijn eigen gewicht.
+- **Waarom:** het besluit van 4 november regelde dit alleen voor tabellen. Dezelfde naam was daardoor op de ene pagina zwaarder dan op de andere, en hetzelfde getal had vijf gewichten.
+  Eén regel is makkelijker te onthouden.
+- **Later:** zie _In een tabel is vet voor het kerngetal, niet voor onze club of een achternaam_, dat dit uitbreidt naar lijsten.
+- **Alternatieven:** 700 voor een achternaam (dan wordt hij zwaarder dan een rijkop); geen uitzonderingen (de gestapelde antwoorden worden zwaar op elke kaart); alleen lijsten die op een tabel lijken (laat 500 en 600 op twee plekken staan).
+
+## De vlag is een intern onderdeel, en een stadion of een club is geen achternaam
+
+- **Datum:** 23 november 2026
+- **Besluit:** de vlag en het kader met de code zijn een intern onderdeel `Flag` (`hf-flag`, `hf-flag-code`), dat niet uit het pakket wordt geëxporteerd (#1607).
+  `PlayerName` en `CountryName` gebruiken het allebei en blijven twee onderdelen.
+  `ShortStaff` krijgt de prop `name` voor een naam in één stuk, zoals een stadion of een club, naast `givenName` en `surname` voor een persoon; de types laten niet allebei toe.
+  De klassen `hf-short-line-opponent` en `hf-short-line-where` heten nu `hf-short-line-main` en `hf-short-line-aside`.
+- **Waarom:** een stadion is geen achternaam, en `CountryName` leende de klassen van `PlayerName`.
+  De twee onderdelen blijven op grond van het besluit van 11 november 2026.
+  De oude klassenamen zeiden dat een regel over een tegenstander ging, terwijl `ShortFact` en `ShortStaff` ze voor elke regel gebruiken.
+- **Alternatieven:** een apart onderdeel voor plekken (meer code voor dezelfde regel); `CountryName` en `PlayerName` samenvoegen (draait het besluit van 11 november terug).
+
+## "Per werelddeel" is een BarList
+
+- **Datum:** 23 november 2026
+- **Besluit:** de kaart "Per werelddeel" op het overzicht van spelers is een `BarList` met de brede naamkolom, zoals "De grootste landen" (#1607).
+  De regel over spelers zonder bekend land blijft eronder staan.
+- **Waarom:** de twee kaarten staan op dezelfde pagina en tonen hetzelfde soort gegeven, dus ze horen er hetzelfde uit te zien.
+- **Alternatieven:** alleen het gewicht van het getal aanpassen (de twee kaarten blijven verschillen).

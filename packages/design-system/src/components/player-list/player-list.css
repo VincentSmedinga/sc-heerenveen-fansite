@@ -23,7 +23,7 @@
   }
 
   .hf-player-list-surname {
-    font-weight: var(--hf-strong-font-weight);
+    font-weight: var(--hf-name-font-weight);
   }
 
   .hf-player-list-facts {

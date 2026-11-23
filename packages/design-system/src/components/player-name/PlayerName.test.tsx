@@ -174,7 +174,7 @@ describe('PlayerName with a country', () => {
     expect(flag.getAttribute('src')).toMatch(/^data:image\/svg\+xml,/u)
     expect([...(container.firstElementChild?.children ?? [])].map((child) => child.className)).toEqual([
       'hf-player-name-number',
-      'hf-player-name-flag',
+      'hf-flag',
       'hf-player-name-text',
     ])
     // The number, the country and the name, one space apart, in that order.
@@ -191,7 +191,7 @@ describe('PlayerName with a country', () => {
     const { container } = render(<PlayerName country={null} givenName="Jakob" shirtNumber={9} surname="Trenskow" />)
 
     expect(screen.queryByRole('img')).toBeNull()
-    expect(container.querySelector('span.hf-player-name-flag')?.childNodes).toHaveLength(0)
+    expect(container.querySelector('span.hf-flag')?.childNodes).toHaveLength(0)
     expect(container.textContent).toBe('9 Jakob Trenskow')
   })
 
@@ -199,7 +199,7 @@ describe('PlayerName with a country', () => {
     const { container } = render(<PlayerName country="BR" shirtNumber={9} surname="Dinho" />)
 
     expect(screen.getByRole('img', { name: 'Brazilië' }).getAttribute('src')).toMatch(/^data:image\/svg\+xml,/u)
-    expect(container.querySelector('span.hf-player-name-flag')).toBeNull()
+    expect(container.querySelector('span.hf-flag')).toBeNull()
   })
 
   it('shows the code of a country without a drawing in a frame, with the name of the country as its text', () => {
@@ -207,12 +207,12 @@ describe('PlayerName with a country', () => {
     const frame = screen.getByRole('img', { name: 'Kazachstan' })
 
     expect(frame.tagName).toBe('SPAN')
-    expect(frame.className).toBe('hf-player-name-flag hf-player-name-code')
+    expect(frame.className).toBe('hf-flag hf-flag-code')
     expect(frame.textContent).toBe('KZ')
     expect(container.querySelector('img')).toBeNull()
     expect([...(container.firstElementChild?.children ?? [])].map((child) => child.className)).toEqual([
       'hf-player-name-number',
-      'hf-player-name-flag hf-player-name-code',
+      'hf-flag hf-flag-code',
       'hf-player-name-text',
     ])
   })
@@ -222,13 +222,13 @@ describe('PlayerName with a country', () => {
 
     expect(container.querySelector('img')).toBeNull()
     expect(screen.queryByRole('img')).toBeNull()
-    expect(container.querySelector('span.hf-player-name-flag')?.childNodes).toHaveLength(0)
+    expect(container.querySelector('span.hf-flag')?.childNodes).toHaveLength(0)
   })
 
   it('has no place for a flag, and the markup it had, without a country', () => {
     const { container } = render(<PlayerName givenName="Jakob" shirtNumber={9} surname="Trenskow" />)
 
-    expect(container.querySelector('.hf-player-name-flag')).toBeNull()
+    expect(container.querySelector('.hf-flag')).toBeNull()
     expect([...(container.firstElementChild?.children ?? [])].map((child) => child.className)).toEqual([
       'hf-player-name-number',
       'hf-player-name-text',

@@ -9,14 +9,14 @@ describe('ShortStaff', () => {
 
     expect(container.querySelector('.hf-short-line.hf-short-staff')).not.toBeNull()
     expect(container.querySelector('.hf-short-line-when')?.textContent).toBe('tot 14 mrt 2026')
-    expect(container.querySelector('.hf-short-line-opponent')?.textContent).toBe('Testtrainer Een')
+    expect(container.querySelector('.hf-short-line-main')?.textContent).toBe('Testtrainer Een')
   })
 
   it('shows only the name when there is no period', () => {
     const { container } = render(<ShortStaff givenName="Testtrainer" surname="Een" />)
 
     expect(container.querySelector('.hf-short-line-when')).toBeNull()
-    expect(container.querySelector('.hf-short-line-opponent')?.textContent).toBe('Testtrainer Een')
+    expect(container.querySelector('.hf-short-line-main')?.textContent).toBe('Testtrainer Een')
   })
 
   it('has the given name in the normal weight and the surname in the stronger weight, as a player has', () => {
@@ -29,26 +29,24 @@ describe('ShortStaff', () => {
   it('says "(interim)" behind the name of a person who stood in, in the quiet style of "thuis", and not behind another', () => {
     const { container, rerender } = render(<ShortStaff givenName="Testtrainer" interim surname="Twee" />)
 
-    expect(container.querySelector('.hf-short-line-opponent')?.textContent).toBe('Testtrainer Twee (interim)')
-    expect(container.querySelector('.hf-short-line-where')?.textContent).toBe('(interim)')
+    expect(container.querySelector('.hf-short-line-main')?.textContent).toBe('Testtrainer Twee (interim)')
+    expect(container.querySelector('.hf-short-line-aside')?.textContent).toBe('(interim)')
 
     rerender(<ShortStaff givenName="Testtrainer" surname="Twee" />)
 
-    expect(container.querySelector('.hf-short-line-opponent')?.textContent).toBe('Testtrainer Twee')
-    expect(container.querySelector('.hf-short-line-where')).toBeNull()
+    expect(container.querySelector('.hf-short-line-main')?.textContent).toBe('Testtrainer Twee')
+    expect(container.querySelector('.hf-short-line-aside')).toBeNull()
   })
 
   it('puts a note on a line of its own under the name, as plain text', () => {
-    const { container, rerender } = render(
-      <ShortStaff note="Tijdelijk <b>elders</b>." period="tot 2019" surname="Een" />,
-    )
+    const { container, rerender } = render(<ShortStaff name="Een" note="Tijdelijk <b>elders</b>." period="tot 2019" />)
 
     expect(container.querySelector('.hf-short-staff-note')?.textContent).toBe('Tijdelijk <b>elders</b>.')
     expect(container.querySelector('.hf-short-staff-note b')).toBeNull()
     expect(container.querySelector('.hf-short-staff-note')?.classList.contains('hf-meta')).toBe(true)
-    expect(container.querySelector('.hf-short-line-opponent')?.textContent).toBe('Een')
+    expect(container.querySelector('.hf-short-line-main')?.textContent).toBe('Een')
 
-    rerender(<ShortStaff period="tot 2019" surname="Een" />)
+    rerender(<ShortStaff name="Een" period="tot 2019" />)
 
     expect(container.querySelector('.hf-short-staff-note')).toBeNull()
   })
@@ -58,5 +56,12 @@ describe('ShortStaff', () => {
 
     expect(container.querySelector('.hf-short-line-score')).toBeNull()
     expect(container.querySelector('[class*="hf-match-"]')).toBeNull()
+  })
+
+  it('shows a name in one piece, such as a stadium, in the weight of a name without a given name', () => {
+    const { container } = render(<ShortStaff name="Eerste Stadion" period="tot 2019" />)
+
+    expect(container.querySelector('.hf-player-name-surname')?.textContent).toBe('Eerste Stadion')
+    expect(container.querySelector('.hf-player-name-given')).toBeNull()
   })
 })

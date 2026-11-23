@@ -362,7 +362,7 @@ describe('the card Bijzondere doelpunten on /spelers/cijfers', () => {
       ['Strafschoppen', '0 van de 4 doelpunten'],
       ['Eigen doelpunten', '0 door de tegenstander · 0 door ons'],
     ])
-    expect(html.match(/<span class="hf-short-line-where">Nog geen<\/span>/g)).toHaveLength(2)
+    expect(html.match(/<span class="hf-short-line-aside">Nog geen<\/span>/g)).toHaveLength(2)
   })
 
   it('lists the hattricks and the doubles with the names as one name, and how often for a repeat', async () => {
@@ -602,7 +602,7 @@ describe('the choice between all the matches and the Eredivisie on /spelers/cijf
 })
 
 /** The page without the flags: images whose address holds the drawing. */
-const withoutFlags = (html: string) => html.replace(/<img alt="[^"]*" class="hf-player-name-flag"[^>]*\/>/g, '')
+const withoutFlags = (html: string) => html.replace(/<img alt="[^"]*" class="hf-flag"[^>]*\/>/g, '')
 
 describe('the column doelpunten per wedstrijd on the card Doelpuntenmakers', () => {
   const stat = (playerId: number, appearances: number, goals: number) => ({

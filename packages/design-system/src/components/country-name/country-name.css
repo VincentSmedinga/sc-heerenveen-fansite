@@ -1,5 +1,5 @@
 /*
- * A country in a line of text: the flag of player-name.css, then the name, on one line with the
+ * A country in a line of text: the flag of flag.css, then the name, on one line with the
  * text around it. The flag keeps the look it has beside the name of a player.
  */
 
@@ -10,7 +10,7 @@
     display: inline-flex;
   }
 
-  .hf-country-name .hf-player-name-flag {
+  .hf-country-name .hf-flag {
     align-self: center;
     inset-block-start: 0;
   }

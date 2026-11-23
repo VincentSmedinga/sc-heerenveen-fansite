@@ -15,7 +15,7 @@ describe('CountryName', () => {
 
   it('shows the frame with the code, hidden from a screen reader, for a country without a drawing', () => {
     const { container } = render(<CountryName country="VE" />)
-    const frame = container.querySelector('.hf-player-name-code')
+    const frame = container.querySelector('.hf-flag-code')
 
     expect(frame?.getAttribute('aria-hidden')).toBe('true')
     expect(container.querySelector('img')).toBeNull()
@@ -26,6 +26,6 @@ describe('CountryName', () => {
     const { container } = render(<CountryName country="XX" />)
 
     expect(container.textContent).toBe('XX')
-    expect(container.querySelector('.hf-player-name-flag')).toBeNull()
+    expect(container.querySelector('.hf-flag')).toBeNull()
   })
 })

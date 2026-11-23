@@ -283,7 +283,7 @@ describe('the season picker on /spelers', () => {
 })
 
 /** The page without the flags: images whose address holds the drawing. */
-const withoutFlags = (html: string) => html.replace(/<img alt="[^"]*" class="hf-player-name-flag"[^>]*\/>/g, '')
+const withoutFlags = (html: string) => html.replace(/<img alt="[^"]*" class="hf-flag"[^>]*\/>/g, '')
 
 describe('the card Selectie on /spelers', () => {
   const card = (html: string) =>
@@ -295,9 +295,7 @@ describe('the card Selectie on /spelers', () => {
       const number = /hf-player-name-number">(\d*)</.exec(line ?? '')?.[1] ?? ''
 
       // The code in the frame of a country without a drawing is the flag, not the name.
-      const text = plain(
-        (line ?? '').replace(/<span aria-label="[^"]*" class="hf-player-name-flag [^>]*>[^<]*<\/span>/u, ''),
-      )
+      const text = plain((line ?? '').replace(/<span aria-label="[^"]*" class="hf-flag [^>]*>[^<]*<\/span>/u, ''))
 
       return [number, text.slice(number.length).replace(/\s+/g, ' ').trim()]
     })
@@ -361,10 +359,10 @@ describe('the card Selectie on /spelers', () => {
 
     // Proefman Drie is from Kazakhstan, which has no drawing in the set: the code in a frame.
     expect(html).toMatch(
-      /hf-player-name-number">8<\/span> <span aria-label="Kazachstan" class="hf-player-name-flag hf-player-name-code" role="img">KZ<\/span> <span/u,
+      /hf-player-name-number">8<\/span> <span aria-label="Kazachstan" class="hf-flag hf-flag-code" role="img">KZ<\/span> <span/u,
     )
     // Testreserve Vijf has no country, among others who have one.
-    expect(html).toMatch(/hf-player-name-number"><\/span><span class="hf-player-name-flag"><\/span><span/)
+    expect(html).toMatch(/hf-player-name-number"><\/span><span class="hf-flag"><\/span><span/)
   })
 
   it('has no place for a flag in a part where nobody has a country', async () => {
@@ -373,7 +371,7 @@ describe('the card Selectie on /spelers', () => {
       players: squadData.players.map((player) => ({ ...player, country: null })),
     })
 
-    expect(card(await render())).not.toContain('hf-player-name-flag')
+    expect(card(await render())).not.toContain('hf-flag')
   })
 
   it('has a sentence for each level of the chance, and the other sentence for a table of who played', async () => {
