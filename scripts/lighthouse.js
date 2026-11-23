@@ -7,6 +7,10 @@
 //   node scripts/lighthouse.js summary   reads them and the metrics of earlier runs from
 //                                        lighthouse-history/, writes the summary and the
 //                                        metrics of this run, and exits 1 on a fixed failure
+//   node scripts/lighthouse.js response-time
+//                                        splits the response time of the host from this
+//                                        runner (#1596), adds the table to the summary, and
+//                                        never fails the run
 //
 // What decides something is a function without side effects, exported for the tests. The
 // address and every other setting come from the configuration file, and nothing from outside
@@ -14,6 +18,8 @@
 import { spawnSync } from 'node:child_process'
 import { appendFileSync, mkdirSync, readdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+
+import { measurePath, smallFile, table } from './response-time.js'
 
 export const configFile = '.github/lighthouse.json'
 export const reportsDir = 'lighthouse-reports'
@@ -309,8 +315,80 @@ function measure() {
   console.log(`${config.pages.length * devices.length * config.runsPerPage} runs gemeten`)
 }
 
+/** Runs per path of the response time: enough for a median, and done in a minute or two. */
+export const responseTimeRuns = 10
+
+/** The measurement stops after this long, so a silent host shows in the summary. */
+export const responseTimeDeadlineMs = 150_000
+
+/** The small file first, then the pages of the measurement, each once, in file order. */
+export function responseTimePaths(config) {
+  return [smallFile, ...new Set(config.pages.map((page) => page.path))]
+}
+
+/**
+ * The part of the summary with the response time seen from this runner. `problem` is what went
+ * wrong when the measurement failed: the run then still gets a summary that says so.
+ */
+export function responseTimeSummaryOf({ address, problem, results, runs }) {
+  const lines = [
+    '',
+    '## Antwoordtijd van de host, gezien vanaf deze runner',
+    '',
+    `Gemeten op ${address}, ${runs} runs per pad, milliseconden, mediaan, vanaf dezelfde runner als Lighthouse.`,
+    'Een runner van GitHub staat niet in Nederland: een deel van het verschil met een thuisverbinding is afstand.',
+    '',
+  ]
+
+  if (problem !== undefined) {
+    return [...lines, `De meting is mislukt: ${problem}`, ''].join('\n')
+  }
+
+  return [...lines, table(results), ''].join('\n')
+}
+
 function readConfig() {
   return JSON.parse(readFileSync(configFile, 'utf8'))
+}
+
+async function responseTime() {
+  const config = readConfig()
+  const runs = responseTimeRuns
+  let summary
+
+  let timer
+
+  try {
+    const results = []
+    const deadline = new Promise((_, reject) => {
+      timer = setTimeout(
+        () => reject(new Error(`geen antwoord binnen ${responseTimeDeadlineMs / 1000} seconden`)),
+        responseTimeDeadlineMs,
+      )
+    })
+    const measuring = (async () => {
+      for (const path of responseTimePaths(config)) {
+        results.push(await measurePath(config.address, path, runs))
+      }
+    })()
+
+    measuring.catch(() => {})
+    await Promise.race([measuring, deadline])
+    summary = responseTimeSummaryOf({ address: config.address, results, runs })
+  } catch (error) {
+    const problem = error instanceof Error ? error.message || error.code || String(error) : String(error)
+
+    console.log(`::warning::De antwoordtijd is niet gemeten: ${problem}`)
+    summary = responseTimeSummaryOf({ address: config.address, problem, runs })
+  } finally {
+    clearTimeout(timer)
+  }
+
+  if (process.env.GITHUB_STEP_SUMMARY) {
+    appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${summary}\n`)
+  } else {
+    console.log(summary)
+  }
 }
 
 function summarise() {
@@ -382,8 +460,13 @@ if (process.argv[1] !== undefined && realpathSync(process.argv[1]) === import.me
     measure()
   } else if (mode === 'summary') {
     summarise()
+  } else if (mode === 'response-time') {
+    // Whatever goes wrong inside is reported in the summary and never fails the run.
+    await responseTime().catch((error) => console.log(`::warning::${error}`))
+    // A request that is still waiting must not keep the step open after the summary is written.
+    process.exit(0)
   } else {
-    console.error('Gebruik: node scripts/lighthouse.js run|summary')
+    console.error('Gebruik: node scripts/lighthouse.js run|summary|response-time')
     process.exit(1)
   }
 }

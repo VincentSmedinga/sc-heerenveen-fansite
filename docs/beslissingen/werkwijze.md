@@ -911,3 +911,14 @@
 - **Alternatieven:** een `Server-Timing`-header of een logregel per verzoek (verworpen: de pagina's zijn al snel, en de kosten gaan voor de baten uit); een cache met `s-maxage` voor pagina's (verworpen: er is geen CDN, en een pagina die langer blijft staan, is een andere beslissing dan dit issue).
 - **Let op:** de meting van buiten splitst de pagina zelf en de database niet.
   Is de tijd van het maken ooit meer dan een paar tientallen milliseconden, dan hoort een meting op de server erbij.
+
+## De antwoordtijd in delen wordt elke dag op de runner van Lighthouse gemeten
+
+- **Datum:** 23 november 2026
+- **Besluit:** de workflow Lighthouse draait na de samenvatting `scripts/lighthouse.js response-time` (#1596).
+  Dat meet de antwoordtijd in delen vanaf dezelfde runner, met het adres uit `.github/lighthouse.json`, en zet de tabel in de samenvatting.
+  Een mislukte meting laat de run niet mislukken en meldt zich in de samenvatting.
+  Het budget `lcpMs`, `enforce` en de datum van 7 december 2026 blijven zoals ze zijn, en de pull request beschrijft alleen wat de meting zegt.
+- **Waarom:** de 70 tot 340 ms tussen de runner en een thuisverbinding zijn van buiten niet te splitsen, en een meting op de plek waar het verschil ontstaat is de goedkoopste manier om dat te zien.
+  Een runner van GitHub staat niet in Nederland, dus een deel is afstand en de LCP uit de controle is een bovengrens.
+- **Alternatieven:** meteen een voorstel voor het budget doen (verworpen: de eigenaar wil eerst de cijfers); een runner in een andere regio of een andere dienst (verworpen: gratis runners laten dat niet kiezen); het IPv6-adres in dit issue oplossen (verworpen: dat is een actie van de eigenaar bij de host).
