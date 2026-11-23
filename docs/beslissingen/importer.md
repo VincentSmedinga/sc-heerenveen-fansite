@@ -4628,3 +4628,21 @@
 - **Let op:** het bestand heeft 42 maanden met 418 vragen, van december 2001 tot oktober 2005 zonder juli en augustus 2003.
   Twee vragen ontbreken, allebei in mei 2002.
   Na de merge draait de eigenaar op acceptatie `import.mjs --old-site`; de stap `fantest` doet de rest.
+
+## De selectie van de clubs die we treffen komt van Wikipedia, met een persoon per speler
+
+- **Datum:** 22 november 2026
+- **Besluit:** de import leest de huidige selectie van de clubs die we in het huidige seizoen treffen, één artikel per club en hoogstens eens per 7 dagen, en bewaart ze in `club_squad_players`, met de gezondheid per club in `club_squad_imports` (#1541).
+  Eerdere seizoenen en andere clubs worden niet gelezen.
+  Een speler met een link naar een artikel wordt een persoon met `wikipedia_page`, zoals bij onze selectie.
+  Wie uit de tabel verdwijnt, verdwijnt uit de rijen van de club.
+  De stap draait vóór de koppeling van de spelers van de tegenstander (#1544), zodat bestaande regels in dezelfde run hun persoon krijgen.
+- **Waarom:** de selectie is bedoeld om de naam van een speler van de tegenstander aan te vullen en te herkennen, en voor een club die we niet treffen is dat niet nodig.
+  Oude selecties bestaan op Wikipedia zelden.
+  Zo blijft het bij ongeveer veertig verzoeken per week.
+- **Alternatieven:** de selectie van alle clubs met een artikel (58 van de 118 clubs), met veel verzoeken voor clubs die we al jaren niet speelden; alleen de namen uit eerdere verslagen gebruiken.
+- **Let op:** een artikel waarvan de selectie niet te lezen is, geeft één regel in het logboek en laat de rijen van de club staan.
+  De lezer (`src/read-club-squad.ts`) hergebruikt de cellen, de namen en de kopjes van de lezer van onze eigen selectie en vindt de kolommen aan hun kopjes.
+  Een tabel in een andere vorm, zoals een sjabloon, is een artikel dat we niet lezen.
+  Een club waarvan een speler met een artikel nog geen persoon kreeg, omdat Wikipedia zijn titel niet beantwoordde, wacht één dag in plaats van zeven.
+  De gegevens uit Wikidata van de nieuwe personen leest de bestaande stap in de volgende runs, hoogstens 200 personen per run.

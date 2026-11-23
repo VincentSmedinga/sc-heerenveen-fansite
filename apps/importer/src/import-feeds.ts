@@ -27,6 +27,7 @@ import { createFetcher } from './fetcher.ts'
 import { fillStadiums } from './fill-stadiums.ts'
 import { describeClubData, readClubData } from './import-club-data.ts'
 import { describeClubSearch, searchClubNumbers } from './import-club-search.ts'
+import { describeClubSquads, importClubSquads } from './import-club-squads.ts'
 import { describeClubStadiums, readClubStadiums } from './import-club-stadiums.ts'
 import { importEndedSeason } from './import-ended-season.ts'
 import {
@@ -417,6 +418,15 @@ export async function runImport(
           : importWikipedia(db, fetcher, clock, { english: englishOrigin, nl: origin }, { ...alerts, clock, write }),
       ])
 
+      // After the matches, so the clubs of this season are known, and before the persons are
+      // read from Wikidata: the squads of the clubs we meet (#1541). A failure is a warning.
+      const clubSquadLines =
+        origin === null
+          ? []
+          : await importClubSquads(db, fetcher, { clock, origin }).then(describeClubSquads, (error: unknown) => [
+              `Club squads: warning, not read: ${describeError(error)}`,
+            ])
+
       // After the Wikipedia pages: the persons they made are read from Wikidata in the same
       // run.
       const personLines = await importPersonData(db, fetcher, {
@@ -451,7 +461,7 @@ export async function runImport(
 
       return {
         clubLines: [...supporterLines, ...reminderLines, ...ratingLines, ...clubLines],
-        personLines: [...personLines, ...opponentLines, ...addresses, ...stadiumLines],
+        personLines: [...clubSquadLines, ...personLines, ...opponentLines, ...addresses, ...stadiumLines],
         reports,
         wikipedia,
       }
