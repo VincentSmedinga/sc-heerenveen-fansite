@@ -429,3 +429,18 @@ Er is geen verandering aan de site gedaan.
 Geen enkele post die van ons is, is meer dan 16 ms.
 Een `Server-Timing`-header of een logregel met de tijd van het maken van de pagina is bewust niet toegevoegd: de proxy van Next.js draait voor de pagina en kan de tijd van de pagina niet meten, en 7 tot 16 ms is te klein om de moeite van een meting per verzoek te lonen.
 De LCP komt hierdoor niet onder de 1100 ms; wat er nog is, staat in het nieuwe issue (zie de pull request).
+
+## De antwoordtijd gemeten vanaf de runner (#1596)
+
+De dagelijkse Lighthouse-controle draait na de samenvatting ook `node scripts/lighthouse.js response-time`.
+Dat splitst de antwoordtijd in DNS, TCP, TLS en wachten, koud en warm, met het script van het hoofdstuk hierboven.
+Het doet dat op dezelfde runner als Lighthouse, voor het kleine bestand en de pagina's van de meting, en zet de tabel in de samenvatting van de run, onder "Antwoordtijd van de host, gezien vanaf deze runner".
+Het adres komt uit `.github/lighthouse.json`, 10 runs per pad.
+Een mislukte meting laat de run niet mislukken: de samenvatting zegt dan wat er misging.
+
+Een runner van GitHub is geen bezoeker in Nederland.
+Een deel van het verschil met de meting van een thuisverbinding is afstand, en GitHub laat niet kiezen waar een gratis runner staat.
+De LCP uit de dagelijkse controle is daardoor een bovengrens voor wat een Nederlandse fan ziet.
+
+De cijfers van de runner staan hier nog niet: ze komen na minstens drie runs van de workflow, met datum, aantal runs en de plek van de runner voor zover GitHub die laat zien, naast de tabel van thuis.
+Loopt het script op de runner vast op het IPv6-adres van acceptatie (zie hierboven), dan zie je dat aan een TCP-tijd van ongeveer 250 ms of meer.

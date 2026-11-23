@@ -5,6 +5,7 @@
 # repository has no dependency on it. scripts/lighthouse.js does the work, and its summary shows the last seven
 # runs, which it reads from the metrics that earlier runs left as an artifact. A fixed check that fails makes the
 # run fail, and GitHub mails the owner. The checks of time only report until the owner sets them in the file.
+# scripts/lighthouse.js response-time adds the response time of the host in parts (#1596).
 # A run asks only our own site for pages and nothing from anyone else, and it needs no secret.
 
 name: Lighthouse
@@ -62,6 +63,14 @@ jobs:
       # Writes the summary of the run, with the last seven runs beside it, and fails the run when a fixed check fails.
       - name: Summarise and check
         run: node scripts/lighthouse.js summary
+
+      # The response time of the host in parts (DNS, TCP, TLS, wait), from this same runner, for the pages of the
+      # measurement (#1596). It only asks our own site for pages, and a failure shows in the summary and never fails
+      # the run, so it also runs when the step above failed a fixed check.
+      - name: Measure the response time of the host
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        run: node scripts/lighthouse.js response-time
 
       - name: Keep the reports
         if: ${{ !cancelled() }}

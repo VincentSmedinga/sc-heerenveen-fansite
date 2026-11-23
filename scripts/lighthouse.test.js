@@ -15,6 +15,8 @@ import {
   medianRun,
   metricsOf,
   recentRuns,
+  responseTimePaths,
+  responseTimeSummaryOf,
   rowsOf,
   sizeLimit,
   summaryOf,
@@ -330,7 +332,49 @@ test('nothing from outside reaches a command of the workflow, except through an 
 
 test('the reports and the metrics are kept for 30 days, also when a check failed', () => {
   assert.equal(workflow.match(/retention-days: 30/g)?.length, 2)
-  assert.equal(workflow.match(/if: \$\{\{ !cancelled\(\) \}\}/g)?.length, 2)
+  assert.equal(workflow.match(/if: \$\{\{ !cancelled\(\) \}\}/g)?.length, 3)
+})
+
+test('the response time is measured from the same runner, from the address in the file, and cannot fail the run', () => {
+  const step = workflow.split('- name: Measure the response time of the host')[1].split('- name:')[0]
+
+  assert.match(step, /if: \$\{\{ !cancelled\(\) \}\}/)
+  assert.match(step, /timeout-minutes: 5/)
+  assert.match(step, /run: node scripts\/lighthouse\.js response-time\n/)
+  assert.doesNotMatch(step, /continue-on-error|https?:/)
+})
+
+test('the paths of the response time are the small file and the pages of the measurement, each once', () => {
+  assert.deepEqual(responseTimePaths(config)[0], '/theme.js')
+  assert.deepEqual(
+    responseTimePaths(config).slice(1),
+    config.pages.map((page) => page.path),
+  )
+  assert.deepEqual(responseTimePaths({ pages: [{ path: '/a' }, { path: '/a' }, { path: '/b' }] }), [
+    '/theme.js',
+    '/a',
+    '/b',
+  ])
+})
+
+test('the summary of the response time has the table, and says what went wrong when the measurement failed', () => {
+  const parts = { dns: 3, firstByte: 90, tcp: 20, tls: 30, wait: 37 }
+  const results = [
+    { cold: parts, highest: 100, path: '/theme.js', status: 200, warm: { ...parts, wait: 20 } },
+    { cold: parts, highest: 120, path: '/nieuws', status: 200, warm: { ...parts, wait: 45 } },
+  ]
+  const summary = responseTimeSummaryOf({ address, results, runs: 10 })
+
+  assert.match(summary, /## Antwoordtijd van de host, gezien vanaf deze runner/)
+  assert.ok(summary.includes(address))
+  assert.match(summary, /\| Pad \| Status \| DNS \| TCP \| TLS \|/)
+  assert.match(summary, /\| `\/nieuws` \| 200 \| 3 \| 20 \| 30 \| 37 \| 90 \| 120 \| 45 \| 25 \|/)
+  assert.match(summary, /geen bezoeker|niet in Nederland/)
+
+  const failed = responseTimeSummaryOf({ address, problem: 'connect ETIMEDOUT', runs: 10 })
+
+  assert.match(failed, /De meting is mislukt: connect ETIMEDOUT/)
+  assert.doesNotMatch(failed, /\| Pad \|/)
 })
 
 test('the workflow measures nothing but our own address from the configuration', () => {
