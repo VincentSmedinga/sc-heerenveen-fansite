@@ -382,7 +382,7 @@ Dat is een schatting: hij is niet te splitsen in de pagina zelf en de database, 
 
 Gemeten op 23 november 2026 op <https://acc.sc.heerenveen.org>, 30 runs per pad, de mediaan, vanuit Nederland op een thuisverbinding.
 De pagina's draaiden warm: de server had net verzoeken gehad, en elke run deed eerst een koud en dan een warm verzoek.
-De tijden zijn in milliseconden, en de verbinding was snel (zie hieronder voor het IPv6-adres):
+De tijden zijn in milliseconden:
 
 | Pad                         | Status | DNS | TCP | TLS | Wachten (koud) | Eerste byte (koud) | Hoogste | Wachten (warm) | Pagina maken |
 | --------------------------- | ------ | --- | --- | --- | -------------- | ------------------ | ------- | -------------- | ------------ |
@@ -393,7 +393,7 @@ De tijden zijn in milliseconden, en de verbinding was snel (zie hieronder voor h
 | `/spelers`                  | 200    | 3   | 22  | 30  | 37             | 93                 | 122     | 39             | 11           |
 | `/bronnen` (10 runs)        | 200    | 3   | 23  | 30  | 34             | 87                 | 87      | 38             | 10           |
 
-De rij van `/bronnen` komt uit een eerdere meting van dezelfde dag met 10 runs: bij de meting met 30 runs duurde de TCP-verbinding 273 ms, om de reden hieronder, en dat zegt niets over die pagina.
+De rij van `/bronnen` komt uit een eerdere meting van dezelfde dag met 10 runs: bij de meting met 30 runs duurde de TCP-verbinding 273 ms omdat het adres van de meter was geblokkeerd (zie hieronder), en dat zegt niets over die pagina.
 
 ### Wat dit zegt
 
@@ -411,17 +411,23 @@ De rij van `/bronnen` komt uit een eerdere meting van dezelfde dag met 10 runs: 
   Van buiten is dat niet verder te splitsen.
 - **Eén uitschieter per run:** de hoogste eerste byte is 96 tot 122 ms, niet meer dan 30 ms boven de mediaan, dus de server vertraagt niet af en toe.
 
-### Een IPv6-adres dat niet antwoordt
+### Een meting kan het adres van de meter laten blokkeren
 
-`acc.sc.heerenveen.org` heeft een AAAA-record (`2a11:4881:1:9523::1`) en een A-record (`62.129.138.4`).
-Op 23 november 2026 antwoordde het IPv6-adres een kwartier lang van deze computer niet (100% pakketverlies met ping, en `curl -6` komt niet aan), terwijl IPv4 in 20 ms verbond.
-Node probeerde eerst IPv6 en viel na 250 ms terug op IPv4, en dat gaf een TCP-tijd van 273 ms in een meting.
-De eerste metingen van die dag verbonden wel in 20 ms, dus het adres kan tijdelijk wel hebben geantwoord.
-`curl -6 -m 8 -sI https://acc.sc.heerenveen.org/theme.js` kreeg ook bij een tweede controle na 8 seconden geen antwoord.
-IPv6 werkt op die computer wel: `https://ipv6.google.com` verbond in 70 ms.
-Het ligt dus aan het adres of aan de weg ernaartoe, niet aan IPv6 op die computer.
-Een bezoeker met IPv6 die niet verbindt, valt na een korte tijd terug op IPv4, maar wacht eerst.
-Of het IPv6-adres bij deze site hoort, is te zien in het paneel van mijn.host; hoort het er niet bij, dan kan de AAAA-record weg.
+Op 23 november 2026 antwoordde het IPv6-adres van acceptatie (`2a11:4881:1:9523::1`) niet meer vanaf de computer van de projecteigenaar.
+`ping6` meldde 100% pakketverlies, `curl -6` kwam niet aan, en Node viel na 250 ms terug op IPv4, wat in één meting een TCP-tijd van 273 ms gaf.
+IPv4 bleef gewoon werken, en IPv6 op de computer zelf ook (`https://ipv6.google.com`).
+In het eerste verslag stond dat het adres van de host misschien niet antwoordde.
+Dat klopte niet: mijn.host meldde dat de beveiliging van de server rond 08:29 150 verbindingen binnen 30 seconden zag vanaf de thuisverbinding, tijdens deze meting, en de IPv6-reeks blokkeerde.
+De blokkade is opgeheven en die reeks staat nu op de uitzonderingslijst.
+Het IPv6-adres hoort bij het pakket, dus de AAAA-record blijft staan.
+
+Wat we hieruit houden:
+
+- Het script wacht een seconde tussen twee runs (`defaultPauseMs`), zodat het hooguit één nieuwe verbinding per seconde opent.
+  Een meting van 10 runs voor zes paden duurt daardoor ongeveer een minuut.
+- Een TCP-tijd van ongeveer 250 ms of meer is geen eigenschap van de host: het is een IPv6-verbinding die niet doorkomt en een terugval op IPv4.
+  Een meting waarin dat gebeurt, telt niet mee.
+- De metingen in de tabel hierboven zijn van vóór de blokkade (20 ms TCP).
 
 ### Wat er niet is gedaan
 
@@ -435,7 +441,7 @@ De LCP komt hierdoor niet onder de 1100 ms; wat er nog is, staat in het nieuwe i
 De dagelijkse Lighthouse-controle draait na de samenvatting ook `node scripts/lighthouse.js response-time`.
 Dat splitst de antwoordtijd in DNS, TCP, TLS en wachten, koud en warm, met het script van het hoofdstuk hierboven.
 Het doet dat op dezelfde runner als Lighthouse, voor het kleine bestand en de pagina's van de meting, en zet de tabel in de samenvatting van de run, onder "Antwoordtijd van de host, gezien vanaf deze runner".
-Het adres komt uit `.github/lighthouse.json`, 10 runs per pad.
+Het adres komt uit `.github/lighthouse.json`, 10 runs per pad, met een pauze van een seconde tussen twee runs.
 Een mislukte meting laat de run niet mislukken: de samenvatting zegt dan wat er misging.
 
 Een runner van GitHub is geen bezoeker in Nederland.
@@ -443,4 +449,4 @@ Een deel van het verschil met de meting van een thuisverbinding is afstand, en G
 De LCP uit de dagelijkse controle is daardoor een bovengrens voor wat een Nederlandse fan ziet.
 
 De cijfers van de runner staan hier nog niet: ze komen na minstens drie runs van de workflow, met datum, aantal runs en de plek van de runner voor zover GitHub die laat zien, naast de tabel van thuis.
-Loopt het script op de runner vast op het IPv6-adres van acceptatie (zie hierboven), dan zie je dat aan een TCP-tijd van ongeveer 250 ms of meer.
+Is de TCP-tijd op de runner ongeveer 250 ms of meer, dan kan de beveiliging van de host het adres van de runner hebben geblokkeerd (zie hierboven), en telt die meting niet mee.

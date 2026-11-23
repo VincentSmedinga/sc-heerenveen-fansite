@@ -10,7 +10,9 @@
 //
 // Every request asks not to be counted (`DNT: 1`, see visitOf in apps/site/src/visits.ts), so
 // a measurement does not show in /beheer/bezoek. It only reads: GET requests to the given
-// paths. What decides something is a function without side effects, exported for the tests.
+// paths, one new connection per second at most, because the firewall of a host may block an
+// address that opens many (see defaultPauseMs). What decides something is a function without
+// side effects, exported for the tests.
 import { realpathSync } from 'node:fs'
 import * as http from 'node:http'
 import * as https from 'node:https'
@@ -19,6 +21,13 @@ import * as https from 'node:https'
 export const defaultPaths = ['/theme.js', '/', '/nieuws', '/redactie/we-zijn-terug', '/spelers', '/bronnen']
 
 export const defaultRuns = 10
+
+/**
+ * The pause between two runs, which each open a new connection. The firewall of the host
+ * blocked the address of a measurement that made 150 connections in 30 seconds (23 November
+ * 2026), so a run waits, and the connections stay well under 5 per second.
+ */
+export const defaultPauseMs = 1000
 
 /** The small file the pages are compared with. */
 export const smallFile = '/theme.js'
@@ -59,7 +68,7 @@ export function measure(address, path, agent) {
  * was just used (warm: only the wait counts), for each run. `highest` is the slowest cold first
  * byte, because a page that is sometimes slow shows in the highest and not in the median.
  */
-export async function measurePath(address, path, runs) {
+export async function measurePath(address, path, runs, { pauseMs = defaultPauseMs } = {}) {
   const cold = []
   const warm = []
 
@@ -69,6 +78,10 @@ export async function measurePath(address, path, runs) {
     cold.push(await measure(address, path, agent))
     warm.push(await measure(address, path, agent))
     agent.destroy()
+
+    if (pauseMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, pauseMs))
+    }
   }
 
   return {
