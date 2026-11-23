@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { describeEntryKickoff } from '@fansite/db/match-edits'
 import { phaseOf } from '@fansite/db/match-reports'
+import { readOpponentNames } from '@fansite/db/opponent-names'
 import { Button, Card, Form, Heading, Link, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
@@ -107,6 +108,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
         matchHref: matchPath(match.id),
         matchId: match.id,
         opponent: match.opponent,
+        opponentNames: await readOpponentNames(getDatabase().db, match.clubId),
         preview: previewMatchOf(match, now),
         previousLineUp: previousLineUp?.label,
         series: seriesOf(match),

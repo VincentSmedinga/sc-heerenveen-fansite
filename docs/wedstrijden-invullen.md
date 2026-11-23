@@ -31,7 +31,7 @@ Bij een wedstrijd uit een eerder seizoen duurt dat hoogstens een uur, want de si
      Met "Doelpunt toevoegen" komt er een rij bij, en de prullenbak bij een doelpunt haalt het weg.
      Wie het doelpunt maakte, volgt uit het team en de soort.
      Maakte een speler van sc Heerenveen het doelpunt, dan kies je hem uit de selectie.
-     Maakte een speler van de tegenstander het doelpunt, dan schrijf je zijn naam zoals Wikipedia hem schrijft.
+     Maakte een speler van de tegenstander het doelpunt, dan schrijf je zijn naam zoals Wikipedia hem schrijft, en het veld biedt de namen van de club aan.
      Dat geldt ook bij een eigen doelpunt: dat maakte een speler van het andere team.
      Zonder JavaScript past het formulier zich pas aan als je een knop kiest.
 4. Schrijf bij "Reden" waarom je dit invult, als dat iets toevoegt.
@@ -200,6 +200,8 @@ Het verslag heeft een eigen scherm, `/beheer/wedstrijden/<nummer>/verslag`.
    Schrijf nooit een tekst van een verslag, en neem geen hele tabellen over van een site met statistieken.
 2. Kies voor sc Heerenveen de spelers uit de selectie, of kies "Andere speler" en schrijf zijn naam.
    Laat het rugnummer leeg als het hetzelfde is als in de selectie, of als de speler geen rugnummer had.
+   Voor de tegenstander schrijf je de naam, en de velden bieden de selectie van de club en de namen uit eerdere verslagen aan: begin te typen en kies een naam, of schrijf zelf een naam.
+   Een naam uit de selectie krijgt bij het opslaan zijn persoon.
    Een speler staat in het verslag één keer, in de basis of op de bank (de rol).
    De lijst van een plek op de bank toont de spelers die niet in de basis staan, en kies je een speler van de bank voor de basis, dan wordt zijn plek op de bank leeg.
 3. Vul de wissels, de doelpunten, de kaarten en de gemiste strafschoppen in.

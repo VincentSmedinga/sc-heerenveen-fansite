@@ -9,6 +9,7 @@ import {
   Form,
   Heading,
   Input,
+  InputSuggestions,
   InputTable,
   type InputTableColumn,
   type InputTableRow,
@@ -87,6 +88,10 @@ const summaryId = 'fouten'
 const roleHintId = (side: Side) => `rol-hint-${side}`
 const outHintId = (side: Side) => `eruit-hint-${side}`
 
+/** The `id` of the list of names of the opponent, and of the hint that says it is there. */
+const opponentNamesId = 'namen-tegenstander'
+const opponentNamesHintId = 'namen-tegenstander-hint'
+
 /** The `id` of the form, which the buttons in the toolbar name in their `form`. */
 const formId = reportFormId
 
@@ -103,6 +108,12 @@ export type ReportChoices = {
   matchId?: number
   /** The name of the opponent, as the headings have it. */
   opponent: string
+  /**
+   * The names the fields for a player of the opponent offer (#1542): the squad of the club,
+   * then the names from earlier reports. Leave it out for a screen without them, and the
+   * fields are plain fields.
+   */
+  opponentNames?: readonly string[] | undefined
   /**
    * What the preview needs of the match. Leave it out for a screen that has no preview, such as
    * the one that reads a pasted text.
@@ -291,17 +302,33 @@ export function ReportFields() {
       )}
     </>
   )
-  const text = (kind: RowKind, side: Side, number: number, field: FieldName, row: Row, narrow = false) => ({
+  const offered = choices.opponentNames !== undefined && choices.opponentNames.length > 0
+  const text = (
+    kind: RowKind,
+    side: Side,
+    number: number,
+    field: FieldName,
+    row: Row,
+    narrow = false,
+    // The name of a player of the opponent offers the names of his club (#1542).
+    opponent = false,
+  ) => ({
     control: (
       <Input
         aria-describedby={
-          warnings[rowFieldId(kind, side, number, field)] === undefined
-            ? undefined
-            : noticeId(rowFieldId(kind, side, number, field))
+          [
+            warnings[rowFieldId(kind, side, number, field)] === undefined
+              ? undefined
+              : noticeId(rowFieldId(kind, side, number, field)),
+            opponent && offered ? opponentNamesHintId : undefined,
+          ]
+            .filter(Boolean)
+            .join(' ') || undefined
         }
         autoComplete="off"
         defaultValue={row[field] ?? ''}
         inputMode={narrow ? 'numeric' : undefined}
+        list={opponent && offered ? opponentNamesId : undefined}
         name={rowFieldId(kind, side, number, field)}
       />
     ),
@@ -510,6 +537,12 @@ export function ReportFields() {
           ) : null}
           {/* Empty until a player was moved, then it says where he stands now. */}
           <Notice>{state.moved?.side === side ? state.moved.text : ''}</Notice>
+          {!own && offered ? (
+            <Text appearance="meta" id={opponentNamesHintId}>
+              Begin te typen voor een naam van {choices.opponent}, of schrijf zelf een naam. Dat geldt ook voor de naam
+              bij een doelpunt van deze club.
+            </Text>
+          ) : null}
           <Text appearance="meta" id={roleHintId(side)}>
             Een team heeft één aanvoerder. Zodra een speler Basis en aanvoerder heeft, staat die keuze niet meer bij de
             anderen van {club(side)}.
@@ -546,7 +579,7 @@ export function ReportFields() {
                     ),
                     { ...text('speler', side, number, 'naam', row), hidden: row.keuze !== otherPlayer },
                   ]
-                : [text('speler', side, number, 'naam', row)]),
+                : [text('speler', side, number, 'naam', row, false, true)]),
               choice(
                 'speler',
                 side,
@@ -676,7 +709,7 @@ export function ReportFields() {
                 row,
                 playerOptions(assistList, row.assist, named(row.assist ?? '')),
               ),
-              text('doelpunt', side, number, 'naam', row),
+              text('doelpunt', side, number, 'naam', row, false, scoring === 'zij'),
             ]
           },
         ),
@@ -779,6 +812,7 @@ export function ReportFields() {
       <Button aria-hidden="true" className="hf-visually-hidden" name="knop" tabIndex={-1} type="submit" value="opslaan">
         Opslaan
       </Button>
+      {offered ? <InputSuggestions id={opponentNamesId} suggestions={choices.opponentNames ?? []} /> : null}
       {/* A player chosen in a place leaves his other place: a screen reader is told. */}
       <Text className="hf-visually-hidden" role="status">
         {notice}

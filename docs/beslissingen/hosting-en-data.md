@@ -1367,6 +1367,9 @@
   De uitzonderingslijst en het logboek van de import vangen dat op.
 - **Alternatieven:** alleen koppelen bij zekerheid (een doelpunt, of een naam die maar bij één persoon van die club past) met een controlelijst; alleen koppelen wat de redactie kiest.
 - **Let op:** een foute koppeling verhelpt de redactie voorlopig via de uitzonderingslijst; een scherm om te ontkoppelen is er niet.
+- **Later:** sinds 23 november 2026 kijkt `linkOpponentPersons` eerst naar de selectie van de club (`club_squad_players`, #1542): een naam die daar precies staat, met een persoon, geeft die persoon, ook als meer personen die naam dragen.
+  Staan er in de selectie twee spelers met die naam en verschillende personen, dan geldt de selectie niet en gaat het verder met de regels hierboven.
+  De telling heeft er een uitkomst bij, `squad`, en de import schrijft die alleen in het logboek als ze groter is dan nul.
 
 ## Personen van tegenstanders komen alleen uit Wikipedia en Wikidata
 

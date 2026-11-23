@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { partLabels } from '@fansite/db/match-conflicts'
 import { describeEntryGoals, describeEntryKickoff, markedParts } from '@fansite/db/match-edits'
 import { mayHaveReport } from '@fansite/db/match-reports'
+import { readOpponentNames } from '@fansite/db/opponent-names'
 import { Card, Filter, Heading, Link, List, Notice, Page, Strong, Tag, Text } from '@fansite/design-system'
 import { notFound } from 'next/navigation'
 
@@ -238,6 +239,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
         incoming,
         knockout: isKnockout(match.competition),
         opponent: match.opponent,
+        opponentNames: await readOpponentNames(getDatabase().db, match.clubId),
         report: hasReport
           ? { goals: goals.map((goal) => describeEntryGoals([goal])), href: reportPath(match.id) }
           : undefined,

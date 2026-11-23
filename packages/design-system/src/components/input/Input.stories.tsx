@@ -4,6 +4,7 @@ import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Field } from '../field/Field'
 import { sizes } from '../size'
 import { Input, inputTypes, inputWidths } from './Input'
+import { InputSuggestions } from './InputSuggestions'
 
 const meta = preview.meta({
   argTypes: {
@@ -81,5 +82,25 @@ export const Natural = meta.story({
     <Field id="datum" label="Datum">
       <Input name="datum" {...args} />
     </Field>
+  ),
+})
+
+export const Suggestions = meta.story({
+  name: 'Met suggesties',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Met `InputSuggestions` biedt een veld namen aan, die ook zonder JavaScript werken. Wie wil, schrijft een eigen naam.',
+      },
+    },
+  },
+  render: (args) => (
+    <>
+      <InputSuggestions id="spelers" suggestions={['Testspeler Eén', 'Testspeler Twee']} />
+      <Field hint="Begin te typen voor een naam van Testclub." id="speler" label="Speler">
+        <Input list="spelers" name="speler" {...args} />
+      </Field>
+    </>
   ),
 })

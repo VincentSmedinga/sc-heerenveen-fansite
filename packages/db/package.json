@@ -35,6 +35,7 @@
     "./person-merge": "./src/person-merge.ts",
     "./person-slugs": "./src/person-slugs.ts",
     "./slug-letters": "./src/slug-letters.ts",
+    "./opponent-names": "./src/opponent-names.ts",
     "./opponent-persons": "./src/opponent-persons.ts",
     "./persons": "./src/persons.ts",
     "./queries": "./src/queries.ts",

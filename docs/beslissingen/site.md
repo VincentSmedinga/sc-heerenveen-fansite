@@ -7921,3 +7921,18 @@
   Een voorbeeld dat in een test staat en niet op de pagina, of andersom, loopt vroeg of laat uiteen.
 - **Alternatieven:** de voorbeelden in de testbestanden laten en de pagina met de hand overtypen (loopt uiteen); een eigen pagina per spel (meer plekken om bij te houden).
 - **Let op:** de kaart linkt naar de stand (#1473), en de pagina van de stand linkt terug met "Spelregels".
+
+## De naamvelden van de tegenstander bieden de namen van de club aan
+
+- **Datum:** 23 november 2026
+- **Besluit:** het naamveld van een speler van de tegenstander in het verslagformulier (opstelling en bank, en de naam bij een doelpunt van die club) en het veld Andere speler van een doelpunt in het formulier van de wedstrijd bieden de namen van de club aan (#1542).
+  De namen staan als `<datalist>` in de pagina, één per pagina met de namen van de club van de wedstrijd (`readOpponentNames` in `packages/db/src/opponent-names.ts`): eerst de selectie van de club (#1541, op rugnummer en dan naam), daarna de namen van spelers van die club uit eerdere verslagen, ook zonder persoon, elke naam één keer.
+  Een naam die niet in de lijst staat, mag gewoon.
+  Een korte hint bij het veld zegt dat je kunt beginnen te typen voor een naam van de club.
+  Het component daarvoor is `InputSuggestions` in het designsysteem, want de sjablonen van de site bevatten geen HTML-elementen.
+  Bij het opslaan geeft de koppeling van #1544 eerst de persoon uit de selectie van de club, zie _Een regel van de tegenstander in een verslag kan een persoon hebben_ in `hosting-en-data.md`.
+- **Waarom:** de lijst van een club is ongeveer vijftig namen, dus meesturen kost niets.
+  Een `<datalist>` werkt zonder JavaScript en met het toetsenbord, en de beheerformulieren moeten ook zonder JavaScript werken.
+- **Alternatieven:** een zoekopdracht per toets naar de server (een verzoek per letter en JavaScript nodig); een eigen keuzeveld dat we zelf bouwen (meer code, en de toegankelijkheid van een eigen component).
+- **Let op:** de browser bepaalt hoe een `<datalist>` zoekt en toont: de meeste zoeken op het begin of op een deel van de naam, en een screenreader leest de opties verschillend voor.
+  Een lijst die tijdens het typen wordt bijgewerkt, of het veld van het snelle scherm, hoort niet bij dit besluit.

@@ -19,11 +19,14 @@ afterAll(async () => {
 
 describe('describeOpponentPersons', () => {
   it('says nothing when there was no row to look at, else how each row ended', () => {
-    expect(describeOpponentPersons({ excepted: 0, goal: 0, name: 0, nobody: 0, several: 0 })).toEqual([])
-    expect(describeOpponentPersons({ excepted: 0, goal: 2, name: 3, nobody: 4, several: 1 })).toEqual([
+    expect(describeOpponentPersons({ excepted: 0, goal: 0, name: 0, nobody: 0, several: 0, squad: 0 })).toEqual([])
+    expect(describeOpponentPersons({ excepted: 0, goal: 2, name: 3, nobody: 4, several: 1, squad: 0 })).toEqual([
       "Opponents' players: 2 got a person through a goal, 3 through the name, 4 left without (the name fits nobody), 1 left without (the name fits more than one person).",
     ])
-    expect(describeOpponentPersons({ excepted: 1, goal: 0, name: 0, nobody: 0, several: 0 })[0]).toContain(
+    expect(describeOpponentPersons({ excepted: 0, goal: 0, name: 0, nobody: 0, several: 0, squad: 5 })[0]).toContain(
+      '5 through the squad of the club, ',
+    )
+    expect(describeOpponentPersons({ excepted: 1, goal: 0, name: 0, nobody: 0, several: 0, squad: 0 })[0]).toContain(
       '1 left without (on the list of namesakes)',
     )
   })
