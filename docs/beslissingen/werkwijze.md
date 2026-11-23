@@ -911,6 +911,8 @@
 - **Alternatieven:** een `Server-Timing`-header of een logregel per verzoek (verworpen: de pagina's zijn al snel, en de kosten gaan voor de baten uit); een cache met `s-maxage` voor pagina's (verworpen: er is geen CDN, en een pagina die langer blijft staan, is een andere beslissing dan dit issue).
 - **Let op:** de meting van buiten splitst de pagina zelf en de database niet.
   Is de tijd van het maken ooit meer dan een paar tientallen milliseconden, dan hoort een meting op de server erbij.
+- **Later:** op 23 november 2026 blokkeerde de beveiliging van mijn.host de IPv6-reeks van de projecteigenaar, omdat de meting van dit script 150 verbindingen in 30 seconden opende.
+  Het script wacht daarom een seconde tussen twee runs (`defaultPauseMs`), en de eerdere gedachte dat het IPv6-adres van acceptatie stuk was, klopte niet.
 
 ## De antwoordtijd in delen wordt elke dag op de runner van Lighthouse gemeten
 

@@ -7,6 +7,7 @@ import { test } from 'node:test'
 
 import {
   defaultPaths,
+  defaultPauseMs,
   measure,
   measurePath,
   median,
@@ -80,7 +81,7 @@ test('it measures a server: a status, a first byte, and no TLS or DNS time on pl
   assert.ok(once.wait >= 15, `waited ${once.wait} ms for a server that takes 20`)
   assert.ok(once.total >= once.firstByte)
 
-  const result = await measurePath(address, '/', 3)
+  const result = await measurePath(address, '/', 3, { pauseMs: 0 })
 
   assert.equal(result.status, 200)
   assert.ok(result.warm.tcp === 0 && result.warm.dns === 0, 'the second request reuses the connection')
@@ -98,4 +99,19 @@ test('the table has a row per path and the page-making time only for the pages',
   assert.equal(lines.length, 4)
   assert.match(lines[2], /^\| `\/theme\.js` \| 200 \|.*\| 28 \| {2}\|$/)
   assert.match(lines[3], /\| 45 \| 17 \|$/)
+})
+
+test('the runs wait between two connections, so a measurement stays under the limit of the firewall', async (context) => {
+  const server = createServer((request, response) => response.end('ok'))
+
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve))
+  context.after(() => server.close())
+
+  const address = `http://127.0.0.1:${server.address().port}`
+  const start = Date.now()
+
+  await measurePath(address, '/', 3, { pauseMs: 50 })
+
+  assert.ok(Date.now() - start >= 100, 'two pauses of 50 ms between three runs')
+  assert.ok(defaultPauseMs >= 1000, 'at most one new connection per second')
 })
