@@ -3,6 +3,8 @@
  * digits of the input are spaced so that each one lands in the middle of a box. The box that is
  * next is marked (data-current, set by the component). An error shows in every box, with a
  * thicker border, and the text of the error is in the Field: the colour is never the only sign.
+ * The letter spacing also follows the last digit, so the input is one box and one gap wider
+ * than the boxes and the wrapper clips it: otherwise the input scrolls after the sixth digit.
  */
 
 @layer hf.components {
@@ -14,6 +16,7 @@
     inline-size: calc(6 * var(--hf-code-box) + 5 * var(--hf-code-gap));
     justify-self: start;
     max-inline-size: 100%;
+    overflow: clip;
     position: relative;
 
     > input {
@@ -26,16 +29,24 @@
       font-size: var(--hf-heading-2-font-size);
       font-variant-numeric: tabular-nums;
       font-weight: var(--hf-figure-font-weight);
-      inline-size: 100%;
+      inline-size: calc(100% + var(--hf-code-box) + var(--hf-code-gap));
       letter-spacing: calc(var(--hf-code-box) + var(--hf-code-gap) - 1ch);
       padding-block: 0;
       padding-inline: calc((var(--hf-code-box) - 1ch) / 2) 0;
       position: relative;
     }
 
-    /* The ring goes around all six boxes, which is what the field is. */
-    > input:focus-visible {
+    /*
+     * The ring goes around all six boxes, which is what the field is. It is on the wrapper,
+     * because the input is wider than the boxes and the wrapper clips it.
+     */
+    &:has(> input:focus-visible) {
+      outline: 0.1875rem solid var(--hf-colour-focus);
       outline-offset: 0.25rem;
+    }
+
+    > input:focus-visible {
+      outline: none;
     }
   }
 

@@ -4166,6 +4166,10 @@
     De foutmelding zelf staat in het Field, dus kleur is nooit het enige teken.
 - **Waarom:** een screenreader hoort één veld, plakken en de code die het toetsenbord voorstelt werken, en het werkt zonder JavaScript.
 - **Alternatieven:** zes losse velden (breekt plakken en autofill en leest slecht voor); één gewoon tekstveld zonder vakjes (werkt, maar is minder duidelijk over het aantal cijfers).
+- **Later:** (23 november 2026, #1599) de letterafstand komt ook na het zesde cijfer, waardoor het veld na het zesde cijfer opzij scrolde en de cijfers uit hun vakjes stonden.
+  Het veld is nu één vakje en één tussenruimte breder dan de vakjes, en het element eromheen knipt dat stuk weg.
+  De focusring staat daarom om dat element, niet om het veld, en omsluit nog steeds alle zes de vakjes.
+  Het besluit zelf, één veld dat als zes vakjes is getekend, blijft.
 
 ## De ScoreGrid is een raster van velden voor één cijfer, en de Tag krijgt drie tonen voor de toestand van een spel
 
