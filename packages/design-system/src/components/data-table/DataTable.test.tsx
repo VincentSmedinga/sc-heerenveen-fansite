@@ -22,6 +22,24 @@ describe('DataTable', () => {
     expect(document.querySelector('caption')?.className).toBe('hf-visually-hidden')
   })
 
+  it('draws a legend under the table, in the style of the other legends, and describes the table with it', () => {
+    render(<DataTable {...props} legend="Dag: de dag van het meetpunt." />)
+
+    const table = screen.getByRole('table', { name: props.caption })
+    const legend = screen.getByText('Dag: de dag van het meetpunt.')
+
+    expect(legend.className).toBe('hf-meta hf-bar-legend')
+    expect(table.closest('div')?.nextElementSibling).toBe(legend)
+    expect(table.getAttribute('aria-describedby')).toBe(legend.id)
+  })
+
+  it('has no legend and no description when it is not given a legend', () => {
+    render(<DataTable {...props} />)
+
+    expect(screen.getByRole('table').hasAttribute('aria-describedby')).toBe(false)
+    expect(document.querySelector('.hf-bar-legend')).toBeNull()
+  })
+
   it('has a column header with scope for every column and a row header with scope for every row', () => {
     render(<DataTable {...props} />)
 

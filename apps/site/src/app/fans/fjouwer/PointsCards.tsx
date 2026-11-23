@@ -92,6 +92,7 @@ export function LastMatchCard({
             appearance="text"
             caption="Jouw vier"
             columns={['Speler', { fold: true, name: 'Wat er gebeurde' }, tableColumns.points]}
+            legend={legend}
             rows={[
               ...item.rows.map((row) => ({
                 cells: [row.summary, pointsText(row.points.total)],
@@ -101,7 +102,6 @@ export function LastMatchCard({
             ]}
             sortable={false}
           />
-          <Text appearance="meta">{legend}</Text>
           <Text appearance="meta">Uit het verslag van de redactie. Een gecorrigeerd verslag corrigeert je punten.</Text>
         </>
       ) : (

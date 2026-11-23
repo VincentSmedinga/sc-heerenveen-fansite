@@ -41,7 +41,7 @@ export const QuestionCard = ({ children, className, figure, href, question, ...p
       {children === undefined ? null : (
         <>
           {' '}
-          <span className="hf-question-note">{children}</span>
+          <span className="hf-meta hf-question-note">{children}</span>
         </>
       )}
     </a>

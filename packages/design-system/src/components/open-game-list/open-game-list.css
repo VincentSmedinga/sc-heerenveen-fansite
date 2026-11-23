@@ -26,9 +26,4 @@
   .hf-open-game-list-item:last-child {
     padding-block-end: 0;
   }
-
-  .hf-open-game-list-sentence {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
-  }
 }

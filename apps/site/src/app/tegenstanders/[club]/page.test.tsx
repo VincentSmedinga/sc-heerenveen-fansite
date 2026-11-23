@@ -358,8 +358,8 @@ describe('the page of a club', () => {
   it('has the biggest win and the biggest loss under the summary, as terms with a match', async () => {
     const html = await render()
 
-    expect(html).toContain('<dt>Grootste overwinning</dt><dd><div class="hf-match"')
-    expect(html).toContain('<dt>Grootste nederlaag</dt><dd><div class="hf-match"')
+    expect(html).toContain('<dt class="hf-meta">Grootste overwinning</dt><dd><div class="hf-match"')
+    expect(html).toContain('<dt class="hf-meta">Grootste nederlaag</dt><dd><div class="hf-match"')
     expect(plain(html.slice(html.indexOf('Grootste overwinning')))).toMatch(
       /^Grootste overwinning Eredivisie · Speelronde 2 · vr 24 okt 2025 sc Heerenveen 3–0 3 tegen 0 Testclub.*Grootste nederlaag/,
     )
@@ -645,7 +645,7 @@ describe('the page of a club', () => {
       expect(card).not.toContain('keer gewonnen')
       expect(card).not.toContain('sinds')
       expect(card).not.toContain('in de Eredivisie')
-      expect(card.lastIndexOf('<p class="hf-meta">')).toBeGreaterThan(card.lastIndexOf('</table>'))
+      expect(card.lastIndexOf('<p class="hf-meta hf-bar-legend"')).toBeGreaterThan(card.lastIndexOf('</table>'))
     }
   })
 

@@ -22,7 +22,6 @@ describe('the line height of meta text', () => {
   it.each([
     ['components/match/match.css', '.hf-match-goals'],
     ['components/tooltip/tooltip.css', '.hf-tooltip'],
-    ['components/match-penalty-series/match-penalty-series.css', '.hf-match-penalty-word'],
   ])('is used by %s %s', (file, selector) => {
     expect(declarationsOf(read(file), selector)).toMatch(/line-height: var\(--hf-meta-line-height\)/u)
   })

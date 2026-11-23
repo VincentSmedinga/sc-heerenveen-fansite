@@ -113,7 +113,7 @@ function Scorers({ club, scorers }: { club: string; scorers: MatchHeaderScorer[]
   }
 
   return (
-    <p className="hf-match-header-scorers">
+    <p className="hf-meta hf-match-header-scorers">
       <span className="hf-visually-hidden">Doelpunten {club}: </span>
       {scorers.map((scorer, index) => (
         // One player can score twice in a minute, so the place in the list is the key.
@@ -260,7 +260,7 @@ export const MatchHeader = ({
           ) : (
             <p className={classNames('hf-match-header-outcome', `hf-match-${outcome}`)}>{outcomeWords[outcome]}</p>
           )}
-          {how === undefined ? null : <p className="hf-match-header-how">{how}</p>}
+          {how === undefined ? null : <p className="hf-meta hf-match-header-how">{how}</p>}
         </div>
       </div>
       <DescriptionList>

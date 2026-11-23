@@ -103,7 +103,7 @@ describe('the page Kwaliteit van wedstrijden', () => {
     const html = renderToStaticMarkup(await QualityPage())
     const row = rowOf(html, '2005/06')
 
-    expect(row).toContain('<span class="hf-data-table-secondary">6 wedstrijden</span>')
+    expect(row).toContain('<span class="hf-meta hf-data-table-secondary">6 wedstrijden</span>')
     expect(signsOf(row)).toEqual(['', '6', '2', '6', '5', '6', '6', '1'])
     expect(row).toContain(
       '<a href="/beheer/wedstrijden/kwaliteit/2005-06?kolom=doelpunten" class="hf-data-table-mark">2 <span class="hf-visually-hidden">wedstrijden met een gat in Doelpunten in 2005/06</span></a>',
@@ -134,7 +134,7 @@ describe('the table of a season (#1163)', () => {
     const row = rowOf(html, '17 sep')
 
     expect(html).toContain('<h2 class="hf-heading-2" id="competitie-eredivisie">Eredivisie</h2>')
-    expect(row).toContain('<span class="hf-data-table-secondary">Nepstad Rangers (t)</span>')
+    expect(row).toContain('<span class="hf-meta hf-data-table-secondary">Nepstad Rangers (t)</span>')
     expect(signsOf(row)).toEqual(['', '?', '2', '?', '?', '2', '?', ''])
     expect(row).toContain(
       `href="/beheer/wedstrijden/${ids.unlinked}/doelpunten?terug=%2Fbeheer%2Fwedstrijden%2Fkwaliteit%2F2005-06&amp;kolom=doelpunten" class="hf-data-table-mark">2 <span class="hf-visually-hidden">doelpunten zonder speler bij Nepstad Rangers (t), 17 september 2005</span>`,

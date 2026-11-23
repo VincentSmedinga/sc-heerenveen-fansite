@@ -1,4 +1,4 @@
-import { Card, DataTable, Heading, tableColumns, tableLegend, Text } from '@fansite/design-system'
+import { Card, DataTable, Heading, tableColumns, tableLegend } from '@fansite/design-system'
 
 import { DataLine, incompleteMatches } from './DataLine'
 import { type FormationRow } from './formations'
@@ -36,12 +36,12 @@ export function FormationsCard({
       <DataTable
         caption="Hoe vaak sc Heerenveen met welke formatie speelde, en hoe die wedstrijden eindigden"
         columns={columns}
+        legend={<>{tableLegend([tableColumns.played])}. Resultaat: gewonnen–gelijk–verloren.</>}
         rows={rows.map(({ drawn, formation, lost, played: matches, won }) => ({
           cells: [matches, { sortValue: won - lost, text: `${won}–${drawn}–${lost}` }],
           header: formation,
         }))}
       />
-      <Text appearance="meta">{tableLegend([tableColumns.played])}. Resultaat: gewonnen–gelijk–verloren.</Text>
       <DataLine limits={[incompleteMatches(known, played)]} />
     </Card>
   )

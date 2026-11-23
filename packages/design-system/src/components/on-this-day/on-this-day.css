@@ -1,11 +1,6 @@
 /* The card with the matches of today's date in earlier years. */
 
 @layer hf.components {
-  .hf-on-this-day-intro {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
-  }
-
   /* A line between the matches, in the colour of the border of the card. */
   .hf-on-this-day-match {
     align-items: baseline;

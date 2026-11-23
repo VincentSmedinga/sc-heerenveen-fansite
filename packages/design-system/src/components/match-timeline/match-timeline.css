@@ -92,7 +92,7 @@
     flex: none;
     font-size: var(--hf-meta-font-size);
     font-variant-numeric: tabular-nums;
-    font-weight: var(--hf-figure-font-weight);
+    font-weight: var(--hf-name-font-weight);
     line-height: 1.35;
     min-inline-size: 3.5rem;
     padding-inline: var(--hf-space-s);

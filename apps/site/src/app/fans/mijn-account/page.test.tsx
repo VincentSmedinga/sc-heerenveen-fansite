@@ -190,7 +190,7 @@ describe('Mijn account, with the cards of #1454', () => {
 
     const html = await render()
 
-    expect(html).toMatch(/<dt>Prognose<\/dt><dd><p>Nog niets\.<\/p><\/dd>/)
+    expect(html).toMatch(/<dt class="hf-meta">Prognose<\/dt><dd><p>Nog niets\.<\/p><\/dd>/)
     expect(html).not.toContain('Fantest')
   })
 
@@ -288,14 +288,14 @@ describe('the page of all the data', () => {
       ['Herinneringen verstuurd', 'Nog geen'],
       ['Naam gewijzigd', 'Nooit'],
     ]) {
-      expect(html).toContain(`<dt>${term}</dt><dd>${value}</dd>`)
+      expect(html).toContain(`<dt class="hf-meta">${term}</dt><dd>${value}</dd>`)
     }
 
     expect(html).toMatch(/Nog niets\. <a href="\/fans\/prognose">Doe mee aan de Prognose<\/a>/)
 
     sent.value = 2
     expect(renderToStaticMarkup(await MyDataPage())).toContain(
-      '<dt>Herinneringen verstuurd</dt><dd>Voor 2 wedstrijden</dd>',
+      '<dt class="hf-meta">Herinneringen verstuurd</dt><dd>Voor 2 wedstrijden</dd>',
     )
     sent.value = 0
     expect(html).not.toContain('Geblokkeerd')
@@ -310,7 +310,7 @@ describe('the page of all the data of a blocked account', () => {
 
     const html = renderToStaticMarkup(await MyDataPage())
 
-    expect(html).toContain('<dt>Geblokkeerd</dt><dd>Sinds 10 december 2026: ongepaste schermnaam</dd>')
+    expect(html).toContain('<dt class="hf-meta">Geblokkeerd</dt><dd>Sinds 10 december 2026: ongepaste schermnaam</dd>')
   })
 })
 

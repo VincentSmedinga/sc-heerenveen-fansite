@@ -366,16 +366,16 @@ function ScorersTable({ caption, scorers }: { caption: string; scorers: readonly
       <DataTable
         caption={caption}
         columns={['Speler', 'Laatst', tableColumns.goals]}
+        // The scorers are a ranking, with the most goals first, so the table does not sort.
+        legend={tableLegend([tableColumns.goals])}
         rows={scorers.map((scorer): DataTableRow => ({
           // The year is text, as a number would get a point between the thousands.
           cells: [String(scorer.last), scorer.goals],
           display: <PlayerName givenName={scorer.givenName} href={scorer.href} surname={scorer.surname} />,
           header: scorer.name,
         }))}
-        // The scorers are a ranking, with the most goals first, so the table does not sort.
         sortable={false}
       />
-      <Text appearance="meta">{tableLegend([tableColumns.goals])}</Text>
     </>
   )
 }

@@ -1,4 +1,4 @@
-import { Card, DataTable, Heading, type TableColumn, tableColumns, tableLegend, Text } from '@fansite/design-system'
+import { Card, DataTable, Heading, type TableColumn, tableColumns, tableLegend } from '@fansite/design-system'
 
 import type { PlayerSeason } from './player-seasons'
 
@@ -129,6 +129,12 @@ export function PlayerSeasonsCard({
       <DataTable
         caption={`De cijfers van ${name} per seizoen bij sc Heerenveen, ${competition === 'all' ? '' : `alleen ${competitionWords(competition)}, `}het nieuwste seizoen eerst, met het totaal onderaan`}
         columns={['Seizoen', ...table.columns.map(({ icon, name: word }) => ({ icon, name: word }))]}
+        legend={
+          <>
+            {tableLegend(table.columns)}.{' '}
+            {playerSeasonsNotes(seasons, table, goalkeeper, competition !== 'all').join(' ')}
+          </>
+        }
         rows={table.rows.map((row) => ({
           cells: row.cells,
           ...(row.gap === true ? { gap: true } : {}),
@@ -139,9 +145,6 @@ export function PlayerSeasonsCard({
         // The total stays at the bottom and a gap where it is, so the table does not sort.
         sortable={false}
       />
-      <Text appearance="meta">
-        {tableLegend(table.columns)}. {playerSeasonsNotes(seasons, table, goalkeeper, competition !== 'all').join(' ')}
-      </Text>
     </Card>
   )
 }

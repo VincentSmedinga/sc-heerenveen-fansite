@@ -44,9 +44,8 @@ describe('donut-chart.css', () => {
     expect(declarationsOf('.hf-donut-chart-small')).toMatch(
       /max-inline-size: calc\(var\(--hf-donut-small-size, 7\) \* 1rem\)/u,
     )
-    expect(declarationsOf('.hf-donut-chart-small .hf-donut-chart-title')).toMatch(
-      /color: var\(--hf-colour-text-secondary\);\s*font-size: var\(--hf-meta-font-size\);\s*font-weight: var\(--hf-meta-font-weight\)/u,
-    )
+    // The title and the names take size, colour and weight from the Meta style.
+    expect(declarationsOf('.hf-donut-chart-small .hf-donut-chart-title')).not.toMatch(/color|font-size|font-weight/u)
     expect(declarationsOf('.hf-donut-chart-small .hf-donut-chart-total')).toMatch(
       /font-size: var\(--hf-body-font-size\);\s*font-weight: var\(--hf-name-font-weight\)/u,
     )
@@ -100,7 +99,6 @@ describe('donut-chart.css', () => {
   it('sizes the texts in rem, so they follow the size of the text of the page and not the size of the drawing', () => {
     expect(declarationsOf('.hf-donut-chart-total')).toMatch(/font-size: var\(--hf-figure-large-font-size\)/u)
     expect(typography).toMatch(/--hf-figure-large-font-size: [\d.]+rem;/u)
-    expect(declarationsOf('.hf-donut-chart-name')).toMatch(/font-size: var\(--hf-meta-font-size\)/u)
   })
 
   it('sizes the ring of a scaled group by its own scale and puts the titles and the centres on one line', () => {

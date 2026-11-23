@@ -40,7 +40,7 @@ export const MarkRow = ({ className, empty, marks, title, ...props }: MarkRowPro
         {title}
       </span>
       {marks.length === 0 ? (
-        <span className="hf-mark-row-empty">{empty}</span>
+        <span className="hf-meta hf-mark-row-empty">{empty}</span>
       ) : (
         <>
           <span aria-hidden="true" className="hf-mark-row-marks">

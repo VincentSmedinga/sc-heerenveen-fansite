@@ -147,8 +147,6 @@
   }
 
   .hf-match-pitch-note {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
     margin: 0;
   }
 

@@ -11,14 +11,9 @@
     grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
   }
 
-  .hf-description-list dt {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
-  }
-
   .hf-description-list dd {
     font-size: var(--hf-meta-font-size);
-    font-weight: var(--hf-headline-font-weight);
+    font-weight: var(--hf-name-font-weight);
     margin-inline-start: 0;
   }
 

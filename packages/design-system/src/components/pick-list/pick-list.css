@@ -40,10 +40,7 @@
   }
 
   .hf-pick-list-count {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
     font-variant-numeric: tabular-nums;
-    font-weight: var(--hf-body-font-weight);
   }
 
   .hf-pick-list-group[data-invalid] .hf-pick-list-count {
@@ -98,11 +95,6 @@
 
   .hf-pick-list-name {
     font-weight: var(--hf-strong-font-weight);
-  }
-
-  .hf-pick-list-line {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
   }
 
   .hf-pick-list-strip {

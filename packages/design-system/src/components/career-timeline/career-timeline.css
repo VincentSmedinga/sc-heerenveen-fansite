@@ -72,16 +72,6 @@
     text-transform: none;
   }
 
-  .hf-career-number,
-  .hf-career-competitions,
-  .hf-career-moment-note,
-  .hf-career-remark,
-  .hf-career-gap {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
-    line-height: var(--hf-body-line-height);
-  }
-
   .hf-career-competitions,
   .hf-career-moment,
   .hf-career-remark,

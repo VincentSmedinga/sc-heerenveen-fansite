@@ -30,7 +30,7 @@ export type DescriptionListProps = ComponentPropsWithoutRef<'dl'> & {
  */
 const Item = ({ children, term, ...props }: DescriptionListItemProps) => (
   <div {...props}>
-    <dt>{term}</dt>
+    <dt className="hf-meta">{term}</dt>
     <dd>{children}</dd>
   </div>
 )

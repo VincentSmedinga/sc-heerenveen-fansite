@@ -81,7 +81,7 @@ export const PlayerName = ({
       {children === undefined || children === null || children === false ? null : (
         <>
           {' '}
-          <span className="hf-player-name-meta">{children}</span>
+          <span className="hf-meta hf-player-name-meta">{children}</span>
         </>
       )}
     </>

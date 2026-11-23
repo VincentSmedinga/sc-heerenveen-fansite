@@ -59,7 +59,7 @@ export function PredictionList({ className, items, ...props }: PredictionListPro
           <div className="hf-prediction-list-text">
             <Match {...item.match} />
             {typeof item.prediction === 'string' ? (
-              <div className="hf-prediction-list-prediction">{item.prediction}</div>
+              <div className="hf-meta hf-prediction-list-prediction">{item.prediction}</div>
             ) : null}
           </div>
           <div className="hf-prediction-list-side">
@@ -69,13 +69,14 @@ export function PredictionList({ className, items, ...props }: PredictionListPro
             {item.points === undefined ? null : (
               <span className="hf-prediction-list-points">
                 <span className="hf-prediction-list-number">{item.points}</span>{' '}
-                <span className="hf-prediction-list-unit">{item.points === 1 ? 'punt' : 'punten'}</span>
+                <span className="hf-meta hf-prediction-list-unit">{item.points === 1 ? 'punt' : 'punten'}</span>
               </span>
             )}
             {typeof item.prediction === 'string' ? null : (
               <span
                 aria-hidden="true"
                 className={classNames(
+                  'hf-meta',
                   'hf-prediction-list-guess',
                   item.points === undefined && 'hf-prediction-list-guess-large',
                 )}

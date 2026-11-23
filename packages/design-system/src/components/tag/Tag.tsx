@@ -28,7 +28,7 @@ export type TagProps = Omit<ComponentPropsWithoutRef<'span'>, 'children'> & {
  * tone and in forced colours too. The tag has no role: it is text inside a line.
  */
 export const Tag = ({ children, className, tone = 'neutral', ...props }: TagProps) => (
-  <span className={classNames('hf-tag', tone !== 'neutral' && `hf-tag-${tone}`, className)} {...props}>
+  <span className={classNames('hf-meta', 'hf-tag', tone !== 'neutral' && `hf-tag-${tone}`, className)} {...props}>
     {children}
   </span>
 )

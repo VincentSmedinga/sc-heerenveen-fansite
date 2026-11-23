@@ -10,7 +10,7 @@ export type DataTableCell = number | string | { sortValue: DataTableSortValue; t
 
 export type DataTableColumn = {
   /**
-   * What the header shows, a short text such as `Gem.`. Without it the header shows
+   * What the header shows, a short text such as `Gem`. Without it the header shows
    * `name` itself, as it does for a column given as a string. A column of `tableColumns` has
    * an `icon` and no abbreviation.
    */
@@ -147,7 +147,7 @@ export type DataTableSortValue = null | number | string
 /** A column of a table with text, given as an object when it can fold. */
 export type DataTableTextColumn = {
   /**
-   * A short header for a table with many columns, such as `Gem.`: where the table is too narrow
+   * A short header for a table with many columns, such as `Gem`: where the table is too narrow
    * for the whole words the header shows it, and where it has room the whole `name`. A screen
    * reader always hears the `name`. Explain it in a line above the table.
    */

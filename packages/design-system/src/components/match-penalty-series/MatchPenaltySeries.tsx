@@ -56,7 +56,7 @@ const Kick = ({ kick }: { kick: MatchPenaltyKick | undefined }) =>
         <PlayerName givenName={kick.player.givenName} href={kick.player.href} surname={kick.player.surname} />
       )}
       {kick.result === 'scored' ? null : (
-        <span aria-hidden="true" className="hf-match-penalty-word">
+        <span aria-hidden="true" className="hf-meta hf-match-penalty-word">
           {' '}
           ({resultWords[kick.result].toLowerCase()})
         </span>

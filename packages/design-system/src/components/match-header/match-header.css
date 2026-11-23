@@ -74,7 +74,7 @@
     border: 1px solid currentcolor;
     border-radius: var(--hf-space-xs);
     font-size: var(--hf-meta-font-size);
-    font-weight: var(--hf-figure-font-weight);
+    font-weight: var(--hf-name-font-weight);
     line-height: 1.4;
     padding-inline: var(--hf-space-s);
   }
@@ -85,11 +85,6 @@
    */
   .hf-match-header-live {
     color: var(--hf-colour-text-accent);
-  }
-
-  .hf-match-header-how {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
   }
 
   @container hf-match-header (inline-size >= 40rem) {

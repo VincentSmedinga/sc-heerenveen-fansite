@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import { type FourRanking, rankingOf } from '#src/fans/fjouwer-ranking'
 
-import { StandCard, standLegend, StandTable } from './StandCards'
+import { StandCard, StandTable } from './StandCards'
 
 const entries = Array.from({ length: 60 }, (_, index) => ({
   matches: 13,
@@ -23,7 +23,8 @@ describe('the table of the ranking', () => {
     expect(html).toContain('Stand na 13 wedstrijden')
     expect(html).toContain('>W<')
     expect(html).toContain('title="Punten"')
-    expect(html).toContain(standLegend)
+    expect(html).toContain('W wedstrijden · ')
+    expect(html).toContain('Gelijk aantal punten? Dan delen jullie een plaats.')
   })
 
   it('shows fifty rows, and under them the real place of a fan who stands lower', () => {

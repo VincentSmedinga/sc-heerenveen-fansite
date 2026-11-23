@@ -29,11 +29,6 @@
     line-height: 1.25;
   }
 
-  .hf-mark-row-empty {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
-  }
-
   /* In forced colours the colours are replaced, and the letter still says what the mark is. */
   @media (forced-colors: active) {
     .hf-mark-row-mark {

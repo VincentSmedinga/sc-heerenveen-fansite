@@ -170,8 +170,8 @@ describe('the page /wedstrijden/cijfers', () => {
       expectInOrder(section(html, 'hoe-de-wedstrijden-verlopen'), [
         '</h3>',
         '<table',
-        'Na een voorsprong',
         'class="hf-table-legend"',
+        'Na een voorsprong',
         'Alleen de Eredivisie',
       ])
     })
@@ -591,8 +591,8 @@ describe('the page /wedstrijden/cijfers', () => {
         // The points are an icon, with the whole word for a screen reader.
         expect(card).toContain('<span class="hf-visually-hidden">punten</span>')
         // The average is shortened to fit a phone, with the whole word for a screen reader.
-        expect(card).toContain('<span aria-hidden="true">Gem.</span><span class="hf-visually-hidden">Gemiddelde</span>')
-        expect(card).toContain('Gem. is het gemiddelde aantal punten per wedstrijd over de laatste 5 wedstrijden')
+        expect(card).toContain('<span aria-hidden="true">Gem</span><span class="hf-visually-hidden">Gemiddelde</span>')
+        expect(card).toContain('Gem is het gemiddelde aantal punten per wedstrijd over de laatste 5 wedstrijden')
       })
 
       it('has no fold, and no table, when no match is played', async () => {
@@ -1121,7 +1121,7 @@ describe('the page /wedstrijden/cijfers', () => {
 
       expect(legendsOf(card)).toEqual(['gespeeld, winst, gelijk, verlies, punten'])
       expect(card.lastIndexOf('</table>')).toBeLessThan(card.indexOf('class="hf-table-legend"'))
-      expect(card.indexOf('Na een voorsprong')).toBeLessThan(card.indexOf('class="hf-table-legend"'))
+      expect(card.indexOf('class="hf-table-legend"')).toBeLessThan(card.indexOf('Na een voorsprong'))
     })
 
     it('says in how many matches sc Heerenveen won after trailing and did not win after leading', async () => {
@@ -1246,7 +1246,7 @@ describe('the page /wedstrijden/cijfers', () => {
     // round 8 (2–0, at home against Testdorp FC, goals in 34' and 45+1') and round 9 (2–2 away
     // against Voorbeeld United, our goals in 40' and 63'). The cup tie doesn't count.
     const lines = (card: string) =>
-      [...card.matchAll(/<dt>(.*?)<\/dd>/gs)].map(([, line]) =>
+      [...card.matchAll(/<dt class="hf-meta">(.*?)<\/dd>/gs)].map(([, line]) =>
         (line ?? '')
           .replaceAll(/<[^>]*>/g, ' ')
           .replaceAll(/\s+/g, ' ')
@@ -1269,11 +1269,11 @@ describe('the page /wedstrijden/cijfers', () => {
     it('puts the name in a term right before the match in its description, with a dot a screen reader skips', async () => {
       const card = section(await render(eredivisie), 'uitersten')
 
-      expect(card.match(/<div><dt>[^]*?<\/dt><dd><div class="hf-match">/g)).toHaveLength(4)
+      expect(card.match(/<div><dt class="hf-meta">[^]*?<\/dt><dd><div class="hf-match">/g)).toHaveLength(4)
       expect(card).toContain(
-        '<dt>Vroegste doelpunt <span aria-hidden="true">·</span> minuut 34 <span aria-hidden="true">·</span> Proefman</dt><dd><div class="hf-match">',
+        '<dt class="hf-meta">Vroegste doelpunt <span aria-hidden="true">·</span> minuut 34 <span aria-hidden="true">·</span> Proefman</dt><dd><div class="hf-match">',
       )
-      expect(card).toContain('<dt>Grootste overwinning</dt><dd><div class="hf-match">')
+      expect(card).toContain('<dt class="hf-meta">Grootste overwinning</dt><dd><div class="hf-match">')
     })
 
     it('leaves out a line without a match, such as the biggest loss in a season without a loss, and does not say so', async () => {

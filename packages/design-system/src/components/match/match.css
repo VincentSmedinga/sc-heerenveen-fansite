@@ -16,13 +16,6 @@
     padding-block: var(--hf-space-m);
   }
 
-  /* Small lines the page adds under the clubs: they sit close together, in the meta text. */
-  .hf-match-extra-lines {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
-    line-height: var(--hf-meta-line-height);
-  }
-
   .hf-match-extra-lines > * {
     margin-block: 0;
   }

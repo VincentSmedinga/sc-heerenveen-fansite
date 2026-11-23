@@ -110,10 +110,6 @@
 
   /* The line behind the name: small and quiet, on a line of its own, in the normal weight. */
   .hf-player-name-meta {
-    color: var(--hf-colour-text-secondary);
     display: block;
-    font-size: var(--hf-meta-font-size);
-    font-weight: var(--hf-meta-font-weight);
-    line-height: var(--hf-meta-line-height);
   }
 }

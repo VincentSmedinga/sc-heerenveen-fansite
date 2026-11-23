@@ -12,10 +12,8 @@
     border: 1px solid;
     border-radius: 62.4375rem;
     box-sizing: border-box;
-    color: var(--hf-colour-text-secondary);
     display: inline-block;
-    font-size: var(--hf-meta-font-size);
-    font-weight: var(--hf-strong-font-weight);
+    font-weight: var(--hf-name-font-weight);
     line-height: 1.25;
     padding-block: 0.125rem;
     padding-inline: var(--hf-space-s);

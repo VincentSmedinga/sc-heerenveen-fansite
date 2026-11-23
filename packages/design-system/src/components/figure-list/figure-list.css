@@ -22,9 +22,7 @@
   }
 
   .hf-figure-list-note {
-    color: var(--hf-colour-text-secondary);
     display: block;
-    font-size: var(--hf-meta-font-size);
   }
 
   .hf-figure-list-figure {

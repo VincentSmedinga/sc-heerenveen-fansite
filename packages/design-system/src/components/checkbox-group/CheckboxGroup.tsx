@@ -39,7 +39,7 @@ export const CheckboxGroup = ({ className, legend, name, options, value = [], ..
       <label className="hf-checkbox-group-label" key={option.value}>
         <input defaultChecked={value.includes(option.value)} name={name} type="checkbox" value={option.value} />
         <span>{option.label}</span>
-        {option.count === undefined ? null : <span className="hf-checkbox-group-count">{option.count}</span>}
+        {option.count === undefined ? null : <span className="hf-meta hf-checkbox-group-count">{option.count}</span>}
       </label>
     ))}
   </fieldset>

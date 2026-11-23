@@ -49,10 +49,4 @@
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
-
-  .hf-winner-list-line {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
-    line-height: var(--hf-meta-line-height);
-  }
 }

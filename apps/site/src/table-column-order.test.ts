@@ -42,7 +42,7 @@ describe('the columns of the tables of the site', () => {
       .flatMap((text) => [...text.matchAll(/abbreviation: '([^']*)',\s*(?:[a-z]+: [a-z]+,\s*)*name: '([^']*)'/gu)])
       .map(([, letter, name]) => ({ letter, name: (name ?? '').toLowerCase() }))
 
-    // What is left is for columns not in the set: `Gem.`, `#` and the admin pages.
+    // What is left is for columns not in the set: `Gem`, `#` and the admin pages.
     expect(own.filter(({ name }) => words.includes(name))).toEqual([])
   })
 })

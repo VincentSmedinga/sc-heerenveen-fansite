@@ -120,7 +120,7 @@ export const MatchSubstitutes = ({
         Wissels {team}
       </Heading>
       {ordered.length === 0 ? (
-        <p className="hf-match-substitutes-none">Geen wissels.</p>
+        <p className="hf-meta hf-match-substitutes-none">Geen wissels.</p>
       ) : (
         <ul aria-label={`Wissels ${team}`} className="hf-match-substitutes-list" role="list">
           {ordered.map((substitute, index) => (
@@ -143,7 +143,7 @@ export const MatchSubstitutes = ({
                   />
                   <span className="hf-match-substitutes-text">
                     <PlayerName givenName={substitute.name.givenName} surname={substitute.name.surname} />
-                    <span className="hf-match-substitutes-detail">
+                    <span className="hf-meta hf-match-substitutes-detail">
                       <MatchEventIcon kind="in" /> {pitchMinute(substitute.minute, substitute.stoppageMinutes)} voor{' '}
                       {fullName(substitute.playerOut)}
                       {substitute.goals?.map((goal, goalIndex) => (

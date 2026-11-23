@@ -114,12 +114,6 @@
     overflow-wrap: anywhere;
   }
 
-  .hf-winner-line {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
-    line-height: var(--hf-meta-line-height);
-  }
-
   @media (forced-colors: active) {
     .hf-winner-seal {
       color: CanvasText;

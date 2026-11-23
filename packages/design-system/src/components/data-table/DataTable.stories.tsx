@@ -172,9 +172,9 @@ const renderAbbreviations = () => (
       <DataTable
         caption="Wat er gebeurt na het eerste doelpunt"
         columns={['Eerste doelpunt', ...flowColumns]}
+        legend={tableLegend(flowColumns)}
         rows={results}
       />
-      <Text appearance="meta">{tableLegend(flowColumns)}</Text>
     </Card>
   </div>
 )
@@ -201,8 +201,12 @@ const renderStacked = () => (
         columns={['Eerste doelpunt', ...flowColumns]}
         rows={results}
       />
-      <DataTable caption="Wat er gebeurt bij de rust" columns={['Bij de rust', ...flowColumns]} rows={shortResults} />
-      <Text appearance="meta">{tableLegend(flowColumns)}</Text>
+      <DataTable
+        caption="Wat er gebeurt bij de rust"
+        columns={['Bij de rust', ...flowColumns]}
+        legend={tableLegend(flowColumns)}
+        rows={shortResults}
+      />
     </Card>
   </div>
 )
@@ -272,6 +276,7 @@ export const SeasonsWithTotal = meta.story({
         <DataTable
           caption="De cijfers van een speler per seizoen, het nieuwste seizoen eerst, met het totaal onderaan"
           columns={['Seizoen', ...seasonColumns]}
+          legend={<>{tableLegend(seasonColumns)}.</>}
           rows={[
             { aside: 'nr. 35', cells: [28, 24, 9, 4], header: '2025/26', href: '/spelers/2025-26' },
             { cells: [30, 26, 12, '–'], header: '2024/25', href: '/spelers/2024-25' },
@@ -280,7 +285,6 @@ export const SeasonsWithTotal = meta.story({
           // The total stays at the bottom, so the table does not sort.
           sortable={false}
         />
-        <Text appearance="meta">{tableLegend(seasonColumns)}.</Text>
       </Card>
     </div>
   ),
@@ -437,6 +441,7 @@ export const Ranked = meta.story({
         <DataTable
           caption="De drie clubs waartegen we gemiddeld de meeste punten per wedstrijd halen, van hoog naar laag"
           columns={['Club', { ...tableColumns.pointsPerMatch, key: true }, tableColumns.played]}
+          legend={tableLegend([tableColumns.pointsPerMatch, tableColumns.played])}
           rows={[
             { cells: ['2,43', 14], header: 'Testclub', href: '#club', position: 1 },
             { cells: ['2,10', 10], header: 'Nepclub ’s-Gravenvoorbeeld', href: '#club', position: 2 },
@@ -445,7 +450,6 @@ export const Ranked = meta.story({
           // The order is the answer of a ranking, so it does not sort.
           sortable={false}
         />
-        <Text appearance="meta">{tableLegend([tableColumns.pointsPerMatch, tableColumns.played])}</Text>
       </Card>
     </div>
   ),
@@ -473,8 +477,12 @@ const renderMore = (maxInlineSize: string, id: string, title: string) => (
         {title}
       </Heading>
       <DataTable.More>
-        <DataTable caption="De tegenstanders van sc Heerenveen" columns={moreColumns} rows={manyClubs} />
-        <Text appearance="meta">{moreLegend}</Text>
+        <DataTable
+          caption="De tegenstanders van sc Heerenveen"
+          columns={moreColumns}
+          legend={moreLegend}
+          rows={manyClubs}
+        />
       </DataTable.More>
     </Card>
   </div>

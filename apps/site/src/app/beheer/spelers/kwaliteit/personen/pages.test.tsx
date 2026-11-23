@@ -174,7 +174,7 @@ describe('the overview of the persons (#1165)', () => {
     const html = await overview()
     const row = rowOf(html, 'B')
 
-    expect(row).toContain('<span class="hf-data-table-secondary">3 personen</span>')
+    expect(row).toContain('<span class="hf-meta hf-data-table-secondary">3 personen</span>')
     expect(signsOf(row)).toEqual(['', '2', '2', '1', '1'])
     expect(row).toContain(
       '<a href="/beheer/spelers/kwaliteit/personen/b?kolom=wikipedia" class="hf-data-table-mark">2 <span class="hf-visually-hidden">personen met een gat in Wikipedia bij de letter B</span></a>',
@@ -202,7 +202,7 @@ describe('the table of a letter (#1165)', () => {
     expect([...html.matchAll(/<tr><th scope="row">/gu)]).toHaveLength(2)
     expect(html.indexOf('Bakker, Jan')).toBeLessThan(html.indexOf('Berg, Pieter van den'))
     expect(html).not.toContain('Bos, Tom')
-    expect(row).toContain('<span class="hf-data-table-secondary">2004–2007</span>')
+    expect(row).toContain('<span class="hf-meta hf-data-table-secondary">2004–2007</span>')
     expect(signsOf(row)).toEqual(['', '?', '?', '', '?'])
     expect(row).toContain(
       `href="/beheer/personen/${ids['berg']}/naam?terug=%2Fbeheer%2Fspelers%2Fkwaliteit%2Fpersonen%2Fb&amp;kolom=wikipedia" class="hf-data-table-mark">? <span class="hf-visually-hidden">Wikipedia-pagina ontbreekt bij Berg, Pieter van den</span>`,

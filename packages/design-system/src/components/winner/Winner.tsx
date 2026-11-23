@@ -33,7 +33,7 @@ export const Winner = ({ average, className, label, line, name, ...props }: Winn
       <span className="hf-winner-text">
         <span className="hf-winner-label">{label}</span>
         <span className="hf-winner-name">{name}</span>
-        {line ? <span className="hf-winner-line">{line}</span> : null}
+        {line ? <span className="hf-meta hf-winner-line">{line}</span> : null}
       </span>
     </div>
   </div>

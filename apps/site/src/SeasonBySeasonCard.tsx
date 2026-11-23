@@ -167,6 +167,7 @@ export function SeasonBySeasonCard({
       <DataTable
         caption={caption('De laatste seizoenen')}
         columns={columns}
+        legend={legend}
         rows={recent.map(rowOf)}
         sortable={false}
       />
@@ -180,7 +181,6 @@ export function SeasonBySeasonCard({
           />
         </Disclosure>
       )}
-      <Text appearance="meta">{legend}</Text>
       {deductions.map(({ points, season }) => (
         <Text
           appearance="meta"
