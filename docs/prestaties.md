@@ -369,3 +369,63 @@ Wat overblijft, voor een nieuw issue:
 
 - **De antwoordtijd van de server op de host** meten en verlagen: waar gaan de 100 tot 430 ms heen (de pagina maken, de database, de proxy, de host zelf), en hoeveel wint een kortere weg?
   De nagespeelde LCP telt elke milliseconde ervan mee.
+  Dit is in #1594 gedaan: zie het hoofdstuk hieronder.
+
+## Waar de antwoordtijd van de host naartoe gaat (#1594)
+
+De antwoordtijd is te splitsen met `node scripts/response-time.js <adres> [runs] [pad ...]`.
+Het doet gewone GET-verzoeken van buiten, zonder dependency, en vraagt met `DNT: 1` om niet geteld te worden.
+Per pad meet het de DNS, de TCP-verbinding, de TLS-handshake en het wachten op de eerste byte, op een nieuwe verbinding (koud) en op een verbinding die net is gebruikt (warm).
+Het vergelijkt de pagina's met een klein bestand dat de server ook uitdeelt, `/theme.js`: dat bestand loopt langs dezelfde host en dezelfde proxy, maar er hoeft geen pagina gemaakt te worden en er is geen database.
+Het verschil in wachttijd, warm, is de tijd die de site aan het maken van de pagina besteedt.
+Dat is een schatting: hij is niet te splitsen in de pagina zelf en de database, want dat kan van buiten niet.
+
+Gemeten op 23 november 2026 op <https://acc.sc.heerenveen.org>, 30 runs per pad, de mediaan, vanuit Nederland op een thuisverbinding.
+De pagina's draaiden warm: de server had net verzoeken gehad, en elke run deed eerst een koud en dan een warm verzoek.
+De tijden zijn in milliseconden, en de verbinding was snel (zie hieronder voor het IPv6-adres):
+
+| Pad                         | Status | DNS | TCP | TLS | Wachten (koud) | Eerste byte (koud) | Hoogste | Wachten (warm) | Pagina maken |
+| --------------------------- | ------ | --- | --- | --- | -------------- | ------------------ | ------- | -------------- | ------------ |
+| `/theme.js` (klein bestand) | 200    | 3   | 20  | 29  | 25             | 79                 | 96      | 28             |              |
+| `/`                         | 200    | 3   | 20  | 30  | 40             | 95                 | 114     | 45             | 16           |
+| `/nieuws`                   | 200    | 3   | 22  | 30  | 39             | 93                 | 118     | 42             | 14           |
+| `/redactie/we-zijn-terug`   | 200    | 3   | 22  | 30  | 31             | 87                 | 105     | 37             | 9            |
+| `/spelers`                  | 200    | 3   | 22  | 30  | 37             | 93                 | 122     | 39             | 11           |
+| `/bronnen` (10 runs)        | 200    | 3   | 23  | 30  | 34             | 87                 | 87      | 38             | 10           |
+
+De rij van `/bronnen` komt uit een eerdere meting van dezelfde dag met 10 runs: bij de meting met 30 runs duurde de TCP-verbinding 273 ms, om de reden hieronder, en dat zegt niets over die pagina.
+
+### Wat dit zegt
+
+- **De pagina maken en de database samen: 7 tot 16 ms.**
+  Dat is wat de site zelf kost, en het is de enige post die wij kunnen veranderen.
+  Het komt overeen met de 15 tot 45 ms eerste byte op een lokale computer.
+  De pagina's halen hun gegevens uit een cache in het geheugen van de server (`cacheFor`), dus een kortere weg met een cache wint hier niets meer.
+- **De host en de weg erheen: 25 tot 28 ms wachten voor een bestand van een halve kilobyte, en ongeveer 55 ms voor DNS, TCP en TLS.**
+  Dat is de verbinding van deze computer met de host, en de weg van LiteSpeed naar Node.
+  Wij kunnen die niet veranderen zonder een andere host of een CDN, en dat valt buiten dit issue.
+- **Van deze computer is de eerste byte 79 tot 95 ms, koud.**
+  De dagelijkse controle meldt 156 tot 266 ms per pagina op mobiel, gemeten op een runner van GitHub, en 432 ms op `/nieuws` op 22 november.
+  Dat verschil van 70 tot 340 ms zit dus niet in de site: ze maakt de pagina's in 7 tot 16 ms.
+  Het zit in de weg tussen de runner en de host, of in de runner zelf.
+  Van buiten is dat niet verder te splitsen.
+- **Eén uitschieter per run:** de hoogste eerste byte is 96 tot 122 ms, niet meer dan 30 ms boven de mediaan, dus de server vertraagt niet af en toe.
+
+### Een IPv6-adres dat niet antwoordt
+
+`acc.sc.heerenveen.org` heeft een AAAA-record (`2a11:4881:1:9523::1`) en een A-record (`62.129.138.4`).
+Op 23 november 2026 antwoordde het IPv6-adres een kwartier lang van deze computer niet (100% pakketverlies met ping, en `curl -6` komt niet aan), terwijl IPv4 in 20 ms verbond.
+Node probeerde eerst IPv6 en viel na 250 ms terug op IPv4, en dat gaf een TCP-tijd van 273 ms in een meting.
+De eerste metingen van die dag verbonden wel in 20 ms, dus het adres kan tijdelijk wel hebben geantwoord.
+`curl -6 -m 8 -sI https://acc.sc.heerenveen.org/theme.js` kreeg ook bij een tweede controle na 8 seconden geen antwoord.
+IPv6 werkt op die computer wel: `https://ipv6.google.com` verbond in 70 ms.
+Het ligt dus aan het adres of aan de weg ernaartoe, niet aan IPv6 op die computer.
+Een bezoeker met IPv6 die niet verbindt, valt na een korte tijd terug op IPv4, maar wacht eerst.
+Of het IPv6-adres bij deze site hoort, is te zien in het paneel van mijn.host; hoort het er niet bij, dan kan de AAAA-record weg.
+
+### Wat er niet is gedaan
+
+Er is geen verandering aan de site gedaan.
+Geen enkele post die van ons is, is meer dan 16 ms.
+Een `Server-Timing`-header of een logregel met de tijd van het maken van de pagina is bewust niet toegevoegd: de proxy van Next.js draait voor de pagina en kan de tijd van de pagina niet meten, en 7 tot 16 ms is te klein om de moeite van een meting per verzoek te lonen.
+De LCP komt hierdoor niet onder de 1100 ms; wat er nog is, staat in het nieuwe issue (zie de pull request).
