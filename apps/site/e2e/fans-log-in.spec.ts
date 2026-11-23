@@ -95,6 +95,29 @@ test.describe('without JavaScript', () => {
   })
 })
 
+test('keeps the six digits of the code in their boxes', async ({ page }) => {
+  await page.goto('/fans/inloggen/verstuurd?ref=onbekend')
+
+  const field = page.getByLabel('Code uit de mail')
+  // The field is wider than the boxes by the letter spacing after the last digit, and must not
+  // scroll, or the digits leave their boxes once the sixth is typed.
+  const scrolls = () => field.evaluate((input) => input.scrollLeft !== 0 || input.scrollWidth > input.clientWidth)
+
+  await field.click()
+  await page.keyboard.type('482190')
+  await expect(field).toHaveValue('482190')
+  expect(await scrolls()).toBe(false)
+
+  await page.keyboard.press('Backspace')
+  await page.keyboard.type('0')
+  expect(await scrolls()).toBe(false)
+
+  await field.fill('')
+  await field.fill('482 190')
+  await expect(field).toHaveValue('482190')
+  expect(await scrolls()).toBe(false)
+})
+
 test('logs out on every device', async ({ baseURL, browser, page }) => {
   const { address } = await account(page)
   // A second device: a context of its own, with cookies of its own.
