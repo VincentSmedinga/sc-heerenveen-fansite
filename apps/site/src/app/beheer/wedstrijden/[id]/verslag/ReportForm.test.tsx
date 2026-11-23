@@ -60,6 +60,60 @@ const select = (id: string) => document.getElementById(id) as HTMLSelectElement
 const optionsOf = (id: string) => [...select(id).options].map((option) => option.value)
 const choose = (id: string, value: string) => fireEvent.change(select(id), { target: { value } })
 
+describe('the names of the opponent in the form of a report (#1542)', () => {
+  const withNames = (opponentNames?: string[]) => {
+    const own: ReportValues = {
+      ...values,
+      zij: { ...emptySide(), speler: [{ ...emptyRow('speler'), naam: 'Een Eigen Naam' }] },
+    }
+    const state: ReportFormState = { errors: {}, values: own, version: 0, warnings: {} }
+
+    return render(
+      <ReportFormProvider
+        action={() => Promise.resolve(state)}
+        choices={{
+          home: true,
+          matchHref: '/beheer/wedstrijden/7',
+          opponent: 'Testclub',
+          opponentNames,
+          series: null,
+          showDelay: 'binnen vijf minuten',
+          squad,
+        }}
+        initial={state}
+        title="Dit is nog niet af"
+      >
+        <ReportFields />
+      </ReportFormProvider>,
+    )
+  }
+
+  it('offers the names of the club to the name of a player of the opponent, and not to ours', () => {
+    withNames(['Jan Jansen', 'Piet Bakker'])
+
+    const field = document.querySelector<HTMLInputElement>('input[name="speler-zij-1-naam"]')
+
+    expect(field?.getAttribute('list')).toBe('namen-tegenstander')
+    expect(field?.value).toBe('Een Eigen Naam')
+    expect(
+      [...document.querySelectorAll('datalist#namen-tegenstander option')].map((option) =>
+        option.getAttribute('value'),
+      ),
+    ).toEqual(['Jan Jansen', 'Piet Bakker'])
+    expect(document.getElementById(field?.getAttribute('aria-describedby') ?? '')?.textContent).toContain(
+      'Begin te typen voor een naam van Testclub',
+    )
+    expect(document.querySelector('input[name="speler-wij-1-rugnummer"]')?.hasAttribute('list')).toBe(false)
+  })
+
+  it('has a plain field when there are no names', () => {
+    withNames(undefined)
+
+    expect(document.querySelector('datalist')).toBeNull()
+    expect(document.querySelector('input[name="speler-zij-1-naam"]')?.hasAttribute('list')).toBe(false)
+  })
+})
+
 describe('the score at half-time in the form of a report', () => {
   const input = (label: string) => screen.getByRole('textbox', { name: new RegExp(`^${label}`) }) as HTMLInputElement
 

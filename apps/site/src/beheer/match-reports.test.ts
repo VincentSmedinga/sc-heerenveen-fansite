@@ -6,6 +6,7 @@ import { readMatchReport } from '@fansite/db/match-reports'
 import {
   adminUsers,
   auditLog,
+  clubSquadPlayers,
   matchAppearances,
   matchCards,
   matchChanges,
@@ -392,6 +393,35 @@ describe('saveReport', () => {
     await save(withOpponent('bank'), t1)
 
     expect(await personOf()).toEqual([person?.id])
+  })
+
+  it('gives a player of the opponent the person of the squad of the club, also when two persons carry his name (#1542)', async () => {
+    const [wanted] = await database.db.insert(persons).values({ name: 'Rik Tegenstander' }).$returningId()
+
+    await database.db.insert(persons).values({ name: 'Rik Tegenstander' })
+
+    const [match] = await database.db.select({ clubId: matches.clubId }).from(matches).where(eq(matches.id, matchId))
+
+    await database.db.insert(clubSquadPlayers).values({
+      clubId: match?.clubId ?? 0,
+      name: 'Rik Tegenstander',
+      personId: wanted?.id ?? null,
+      readAt: new Date('2026-11-20T10:00:00Z'),
+    })
+    await save(
+      report({
+        zij: {
+          doelpunt: [goal({ minuut: '40', naam: 'Sibbing' })],
+          speler: [{ ...emptyRow('speler'), naam: 'Rik Tegenstander', rol: 'basis' }],
+        },
+      }),
+    )
+
+    expect(
+      (await database.db.select().from(matchAppearances).where(eq(matchAppearances.name, 'Rik Tegenstander'))).map(
+        (row) => row.personId,
+      ),
+    ).toEqual([wanted?.id])
   })
 
   it('saves the kicks of the shoot-out with the report, in rounds for each team, and sees a changed kick as a change', async () => {

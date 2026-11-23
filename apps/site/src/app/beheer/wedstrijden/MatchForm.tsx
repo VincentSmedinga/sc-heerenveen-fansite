@@ -9,6 +9,7 @@ import {
   Form,
   Heading,
   Input,
+  InputSuggestions,
   InputTable,
   type InputTableRow,
   Link,
@@ -56,6 +57,10 @@ const formId = matchFormId
 
 const ours = 'sc Heerenveen'
 
+/** The `id` of the list of names of the opponent, and of the hint that says it is there. */
+const opponentNamesId = 'namen-tegenstander'
+const opponentNamesHintId = 'namen-tegenstander-hint'
+
 /** The statuses, the kinds of goal and the squad, as the form words them. */
 export type MatchFormChoices = {
   /**
@@ -74,6 +79,11 @@ export type MatchFormChoices = {
   /** Whether the competition has extra time: the cup and the play-offs. */
   knockout: boolean
   opponent: string
+  /**
+   * The names the field Andere speler offers for a player of the opponent (#1542): the squad of
+   * the club, then the names from earlier reports.
+   */
+  opponentNames?: readonly string[] | undefined
   /**
    * The match has a report, and the goals are the report's: the form shows them in words with a
    * link to the report, and has no fields for them.
@@ -167,6 +177,7 @@ export function MatchFields({ part }: { part?: FormPart | undefined }) {
   // The two sides in the order of the match, as the title has the clubs.
   const sides = choices.home ? (['wij', 'zij'] as const) : (['zij', 'wij'] as const)
   const club = (side: 'wij' | 'zij') => (side === 'wij' ? ours : choices.opponent)
+  const offered = choices.opponentNames !== undefined && choices.opponentNames.length > 0
 
   // A select that is already on the page ignores a new `defaultValue`, and React resets the
   // form after every action, so a select that keeps its own value would fall back to the first
@@ -303,7 +314,16 @@ export function MatchFields({ part }: { part?: FormPart | undefined }) {
           id: id('speler'),
         },
         {
-          control: <Input autoComplete="off" defaultValue={goal.naam} key={goal.naam} name={id('naam')} />,
+          control: (
+            <Input
+              aria-describedby={offered ? opponentNamesHintId : undefined}
+              autoComplete="off"
+              defaultValue={goal.naam}
+              key={goal.naam}
+              list={offered ? opponentNamesId : undefined}
+              name={id('naam')}
+            />
+          ),
           error: errors[id('naam')],
           hidden: scorer !== 'name',
           id: id('naam'),
@@ -532,6 +552,15 @@ export function MatchFields({ part }: { part?: FormPart | undefined }) {
               {errors.doelpunten}
             </Text>
           )}
+          {offered ? (
+            <>
+              <InputSuggestions id={opponentNamesId} suggestions={choices.opponentNames ?? []} />
+              <Text appearance="meta" id={opponentNamesHintId}>
+                Bij Andere speler van {choices.opponent} kun je beginnen te typen voor een naam van deze club, of zelf
+                een naam schrijven.
+              </Text>
+            </>
+          ) : null}
           <InputTable
             add={{ label: 'Doelpunt toevoegen', name: 'knop', value: 'doelpunt-toevoegen' }}
             caption="Doelpunten"

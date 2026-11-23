@@ -3,12 +3,13 @@ import { and, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
 import type { Database } from './client.ts'
 
 import { opponentPersonExceptions } from './persons.ts'
-import { clubs, matchAppearances, matches, matchGoals, persons } from './schema.ts'
+import { clubs, clubSquadPlayers, matchAppearances, matches, matchGoals, persons } from './schema.ts'
 
 /**
  * How the opponents' players of a run got a person, or did not: through a goal of the same
- * match, through the name, `nobody` when the name fits no person, `several` when it fits two
- * or more, and `excepted` when the list of namesakes stopped it.
+ * match, through the squad of the club (#1542), through the name, `nobody` when the name fits
+ * no person, `several` when it fits two or more, and `excepted` when the list of namesakes
+ * stopped it.
  */
 export type OpponentPersonCounts = {
   excepted: number
@@ -16,6 +17,7 @@ export type OpponentPersonCounts = {
   name: number
   nobody: number
   several: number
+  squad: number
 }
 
 /**
@@ -23,6 +25,10 @@ export type OpponentPersonCounts = {
  * changes a row that has one. `matchId` limits the run to one match: the save of a report
  * does that, the import runs without it. A row gets its person in this order:
  *
+ * 0. the name is exactly the name of a player with a person in the squad of the club (#1541),
+ *    capitals and accents aside: that person, also when more persons carry the name, since
+ *    the squad says which one the club has. A name that fits two such players of the squad
+ *    with different persons goes on to the rules below;
  * 1. a goal of the same match points to the row (`appearance_id`) and has a `person_id`: that
  *    person, since the page of the goal says who he is;
  * 2. the name of the row is exactly the `name` of one person, capitals and accents aside;
@@ -39,9 +45,14 @@ export async function linkOpponentPersons(
     matchId,
   }: { exceptions?: readonly { club: string; name: string }[]; matchId?: number } = {},
 ): Promise<OpponentPersonCounts> {
-  const counts: OpponentPersonCounts = { excepted: 0, goal: 0, name: 0, nobody: 0, several: 0 }
+  const counts: OpponentPersonCounts = { excepted: 0, goal: 0, name: 0, nobody: 0, several: 0, squad: 0 }
   const rows = await db
-    .select({ club: clubs.name, id: matchAppearances.id, name: matchAppearances.name })
+    .select({
+      club: clubs.name,
+      clubId: clubs.id,
+      id: matchAppearances.id,
+      name: matchAppearances.name,
+    })
     .from(matchAppearances)
     .innerJoin(matches, eq(matches.id, matchAppearances.matchId))
     .innerJoin(clubs, eq(clubs.id, matches.clubId))
@@ -84,14 +95,36 @@ export async function linkOpponentPersons(
     byName.set(key, [...(byName.get(key) ?? []), person.id])
   }
 
+  // The squads of the clubs in the rows: the key of a name gives its person, or `null` when the
+  // squad has two players of that name with different persons.
+  const bySquad = new Map<number, Map<string, null | number>>()
+
+  for (const part of chunks([...new Set(rows.map((row) => row.clubId))])) {
+    for (const player of await db
+      .select({ clubId: clubSquadPlayers.clubId, name: clubSquadPlayers.name, personId: clubSquadPlayers.personId })
+      .from(clubSquadPlayers)
+      .where(and(inArray(clubSquadPlayers.clubId, part), isNotNull(clubSquadPlayers.personId)))) {
+      const names = bySquad.get(player.clubId) ?? new Map<string, null | number>()
+      const key = nameKey(player.name)
+      const before = names.get(key)
+
+      names.set(key, before === undefined || before === player.personId ? player.personId : null)
+      bySquad.set(player.clubId, names)
+    }
+  }
+
   const excepted = new Set(exceptions.map((one) => `${nameKey(one.club)}|${nameKey(one.name)}`))
   const found = new Map<number, number[]>()
 
   for (const row of rows) {
     const viaGoal = byGoal.get(row.id)
+    const viaSquad = bySquad.get(row.clubId)?.get(nameKey(row.name)) ?? null
     let personId: null | number = null
 
-    if (viaGoal !== undefined) {
+    if (viaSquad !== null) {
+      personId = viaSquad
+      counts.squad += 1
+    } else if (viaGoal !== undefined) {
       personId = viaGoal
       counts.goal += 1
     } else if (excepted.has(`${nameKey(row.club)}|${nameKey(row.name)}`)) {

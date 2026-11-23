@@ -166,6 +166,42 @@ describe('the time of the form of a match', () => {
   })
 })
 
+describe('the names of the opponent in the form of a match (#1542)', () => {
+  const goal = { ...emptyGoal, kant: 'zij', naam: 'Een Eigen Naam', soort: 'gewoon' }
+
+  it('offers the names of the club to the field Andere speler, with a hint, and keeps a name that is not in the list', () => {
+    render(
+      <MatchFormProvider
+        action={() => Promise.resolve({ errors: {}, values: initial('0', '1', [goal]) })}
+        choices={{ ...choices, opponentNames: ['Jan Jansen', 'Piet Bakker'] }}
+        initial={initial('0', '1', [goal])}
+      >
+        <MatchFields />
+      </MatchFormProvider>,
+    )
+
+    const field = document.querySelector<HTMLInputElement>('input[name="doelpunt-1-naam"]')
+
+    expect(field?.getAttribute('list')).toBe('namen-tegenstander')
+    expect(field?.value).toBe('Een Eigen Naam')
+    expect(
+      [...document.querySelectorAll('datalist#namen-tegenstander option')].map((option) =>
+        option.getAttribute('value'),
+      ),
+    ).toEqual(['Jan Jansen', 'Piet Bakker'])
+    expect(document.getElementById(field?.getAttribute('aria-describedby') ?? '')?.textContent).toContain(
+      'beginnen te typen voor een naam van deze club',
+    )
+  })
+
+  it('has a plain field without names', () => {
+    show(initial('0', '1', [goal]))
+
+    expect(document.querySelector('datalist')).toBeNull()
+    expect(document.querySelector('input[name="doelpunt-1-naam"]')?.hasAttribute('list')).toBe(false)
+  })
+})
+
 describe('the goals of the form of a match', () => {
   it('has as many goals as the end result adds up to, and adds or removes them when it changes', () => {
     show(initial('1', '1', [{ ...emptyGoal, minuut: '12' }]))
