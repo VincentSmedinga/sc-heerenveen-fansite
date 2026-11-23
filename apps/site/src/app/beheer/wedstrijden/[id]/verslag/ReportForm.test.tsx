@@ -1183,7 +1183,7 @@ describe('the button for the line-up of the opponent of the previous meeting (#1
     version: 0,
     warnings: {},
   }
-  const open = (state: ReportFormState, more: Partial<typeof choices> = {}) =>
+  const open = (state: ReportFormState, more: { previousOpponentLineUp?: string | undefined } = {}) =>
     render(
       <ReportFormProvider
         action={() => Promise.resolve(state)}
