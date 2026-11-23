@@ -21,6 +21,28 @@ const dayFormat = new Intl.DateTimeFormat('nl-NL', {
   weekday: 'short',
 })
 
+/** What each reason is called in the table, and what it means in plain words. */
+const skipReasonTexts = {
+  bot: {
+    explanation:
+      'Een bot, een zoekmachine, een controle van de host of ons eigen programma, aan de browsertekst herkend.',
+    name: 'Bot of controle',
+  },
+  'geen-taal': {
+    explanation:
+      'De browser stuurde geen taalinstelling mee. Gewone browsers doen dat altijd, bots die zich als browser voordoen vaak niet.',
+    name: 'Geen taalinstelling',
+  },
+  'niet-volgen': {
+    explanation: 'De bezoeker heeft Do Not Track of Global Privacy Control aangezet.',
+    name: 'Niet gevolgd willen worden',
+  },
+  vooruitladen: {
+    explanation: 'De browser laadde de pagina vooraf, voor het geval de bezoeker hem opent.',
+    name: 'Vooraf geladen',
+  },
+} as const
+
 /** A day as `2026-10-26`, written for a reader: `ma 26 okt`. */
 const formatDay = (day: string) => dayFormat.format(new Date(`${day}T12:00:00Z`))
 
@@ -31,8 +53,9 @@ const formatDay = (day: string) => dayFormat.format(new Date(`${day}T12:00:00Z`)
 export default async function VisitPage() {
   await requireRole('owner', 'editor')
 
-  const { perDay, topPages, total, totalShort } = await visitNumbers(getDatabase().db)
+  const { perDay, skipped, topPages, total, totalShort } = await visitNumbers(getDatabase().db)
   const counted = total.views > 0 || total.visitors > 0
+  const anySkipped = skipped.some((row) => row.total > 0)
 
   return (
     <Page.Main areas={adminAreas} className={compact}>
@@ -98,6 +121,37 @@ export default async function VisitPage() {
             </Text>
           </Card>
         )}
+        <Card aria-labelledby="overgeslagen-kop">
+          <Heading id="overgeslagen-kop" level={2}>
+            Niet meegeteld
+          </Heading>
+          {anySkipped ? (
+            <>
+              <DataTable
+                caption={`Verzoeken om een pagina die niet meetelden, per reden, van de laatste ${shortDays} en ${days} dagen`}
+                columns={[`Laatste ${shortDays} dagen`, `Laatste ${days} dagen`]}
+                rows={skipped.map((row) => ({
+                  cells: [row.totalShort, row.total],
+                  header: skipReasonTexts[row.reason].name,
+                }))}
+                // One row for each reason, in the order the site tries them: a fixed series.
+                sortable={false}
+              />
+              <List role="list">
+                {skipped.map((row) => (
+                  <List.Item key={row.reason}>
+                    {skipReasonTexts[row.reason].name}: {skipReasonTexts[row.reason].explanation}
+                  </List.Item>
+                ))}
+              </List>
+            </>
+          ) : (
+            <Text>
+              Er is nog niets overgeslagen. Zodra de site een verzoek om een pagina niet meetelt, staat hier hoeveel en
+              waarom.
+            </Text>
+          )}
+        </Card>
         <Card aria-labelledby="uitleg">
           <Heading id="uitleg" level={2}>
             Wat deze cijfers zijn
@@ -114,8 +168,14 @@ export default async function VisitPage() {
             </List.Item>
             <List.Item>
               Er staan geen bots en geen zoekmachines in. Bezoekers die “Niet volgen” (Do Not Track) of Global Privacy
-              Control aanzetten, tellen niet mee. Hoeveel dat er zijn, weten we niet.
+              Control aanzetten, tellen niet mee, en een verzoek zonder taalinstelling ook niet. Hoeveel dat er zijn,
+              staat bij Niet meegeteld.
             </List.Item>
+            <List.Item>
+              Ons eigen bezoek telt mee, met elk apparaat en elke browser apart. Wie dat niet wil, kan Do Not Track of
+              Global Privacy Control in de eigen browser aanzetten.
+            </List.Item>
+            <List.Item>Alle pagina’s van seizoenen en wedstrijden onder /wedstrijden tellen als één pagina.</List.Item>
             <List.Item>
               Kent de site het adres van een bezoeker niet, dan telt de paginaweergave wel en de bezoeker niet.
             </List.Item>

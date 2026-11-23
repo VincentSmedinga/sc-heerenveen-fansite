@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server'
 
-import { createVisitCounter, type Visit } from '@fansite/db/visits'
+import { createVisitCounter, type SkipReason, type Visit } from '@fansite/db/visits'
 import { BlockList, isIP } from 'node:net'
 
 import { getArticle } from './articles'
@@ -17,7 +17,7 @@ import { seasonFromSlug } from './seasons'
  * pattern here when a bot shows up in the numbers.
  */
 export const notVisitors =
-  /bot|crawl|spider|slurp|scrape|headless|lighthouse|preview|monitor|uptime|pingdom|statuscake|site24x7|facebookexternalhit|curl\/|wget|python|java\/|go-http-client|okhttp|libwww|node|axios|whatsapp|telegram|postman|litespeed|lsnode|cpanel|plesk|scheerenveenfansite/iu
+  /bot|crawl|spider|slurp|scrape|headless|lighthouse|preview|monitor|uptime|directadmin|pingdom|statuscake|site24x7|facebookexternalhit|curl\/|wget|python|java\/|go-http-client|okhttp|libwww|node|axios|whatsapp|telegram|postman|litespeed|lsnode|cpanel|plesk|scheerenveenfansite/iu
 
 /**
  * The pages that are counted: those in `pages.ts`, the page after the contact form and the
@@ -101,6 +101,50 @@ for (const [network, prefix] of [
   privateAddresses.addSubnet(network, prefix, 'ipv6')
 }
 
+/** What the proxy makes of a request for a page: a visit, or the reason it is not counted. */
+export type PageRequest = { skipped: SkipReason } | { visit: PageVisit }
+
+/**
+ * Sorts a request for a page: a visit, or `skipped` with the first reason that fits, in the
+ * order `bot`, `geen-taal`, `niet-volgen`, `vooruitladen`. Only a request that would have been
+ * a page view is sorted: a GET that asks for HTML, for a path that is counted. Anything else is
+ * undefined, and nothing of it is kept. A request without `Accept-Language` is not a browser
+ * of a visitor: every ordinary browser sends it.
+ */
+export function requestOf(request: NextRequest): PageRequest | undefined {
+  const { headers } = request
+  const path = countedPathOf(request.nextUrl.pathname)
+  const userAgent = headers.get('user-agent') ?? ''
+  const article = articlePath.exec(path)?.[1]
+  const club = clubPath.exec(path)?.[1]
+
+  if (
+    request.method !== 'GET' ||
+    (!countedPaths.has(path) && article === undefined && club === undefined) ||
+    !(headers.get('accept') ?? '').includes('text/html')
+  ) {
+    return undefined
+  }
+
+  if (userAgent === '' || notVisitors.test(userAgent)) {
+    return { skipped: 'bot' }
+  }
+
+  if ((headers.get('accept-language') ?? '').trim() === '') {
+    return { skipped: 'geen-taal' }
+  }
+
+  if (headers.get('dnt') === '1' || headers.get('sec-gpc') === '1') {
+    return { skipped: 'niet-volgen' }
+  }
+
+  if (isPrefetch(headers)) {
+    return { skipped: 'vooruitladen' }
+  }
+
+  return { visit: { address: addressOf(headers), article, club, path, userAgent } }
+}
+
 /**
  * What to count for a request, or undefined when it isn't a visit: a request that is not a
  * GET for a page of the site that asks for HTML, a prefetch, a bot, a check of the hosting, or
@@ -111,26 +155,9 @@ for (const [network, prefix] of [
  * click on a switch is no visit.
  */
 export function visitOf(request: NextRequest): PageVisit | undefined {
-  const { headers } = request
-  const path = countedPathOf(request.nextUrl.pathname)
-  const userAgent = headers.get('user-agent') ?? ''
-  const article = articlePath.exec(path)?.[1]
-  const club = clubPath.exec(path)?.[1]
+  const result = requestOf(request)
 
-  if (
-    request.method !== 'GET' ||
-    (!countedPaths.has(path) && article === undefined && club === undefined) ||
-    !(headers.get('accept') ?? '').includes('text/html') ||
-    isPrefetch(headers) ||
-    headers.get('dnt') === '1' ||
-    headers.get('sec-gpc') === '1' ||
-    userAgent === '' ||
-    notVisitors.test(userAgent)
-  ) {
-    return undefined
-  }
-
-  return { address: addressOf(headers), article, club, path, userAgent }
+  return result !== undefined && 'visit' in result ? result.visit : undefined
 }
 
 /**
@@ -186,28 +213,40 @@ export function countVisit(
 
     return counter.record(visit)
   },
+  recordSkipped: (skipped: { now: Date; reason: SkipReason }) => Promise<void> = (skipped) => {
+    counter ??= createVisitCounter(getDatabase().db)
+
+    return counter.recordSkipped(skipped)
+  },
 ) {
   try {
-    const visit = visitOf(request)
+    const result = requestOf(request)
 
-    if (visit === undefined || waiting >= maxWaiting) {
+    if (result === undefined || waiting >= maxWaiting) {
       return
     }
+
+    const visit = 'visit' in result ? result.visit : undefined
+    const article = visit?.article ?? articlePath.exec(countedPathOf(request.nextUrl.pathname))?.[1]
+    const club = visit?.club ?? clubPath.exec(countedPathOf(request.nextUrl.pathname))?.[1]
 
     waiting += 1
 
     const counted = (async () => {
       // An article that doesn't exist, a draft and an article for later give "niet gevonden".
-      if (visit.article !== undefined && (await getArticle(visit.article)) === undefined) {
+      if (article !== undefined && (await getArticle(article)) === undefined) {
         return
       }
 
       // A club that does not exist gives "niet gevonden", so the made-up address is no page.
-      if (visit.club !== undefined && !(await isClubSlug(visit.club))) {
+      if (club !== undefined && !(await isClubSlug(club))) {
         return
       }
 
-      await record({ ...visit, now: new Date() })
+      // A skipped request is only a number for its reason: nothing of the request is kept.
+      await (visit === undefined
+        ? recordSkipped({ now: new Date(), reason: (result as { skipped: SkipReason }).skipped })
+        : record({ ...visit, now: new Date() }))
     })()
     let timer: ReturnType<typeof setTimeout> | undefined
 

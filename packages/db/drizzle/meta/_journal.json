@@ -792,6 +792,13 @@
       "when": 1795388556600,
       "tag": "0112_add_club_squads",
       "breakpoints": true
+    },
+    {
+      "idx": 113,
+      "version": "5",
+      "when": 1795473634671,
+      "tag": "0113_add_visit_exclusions",
+      "breakpoints": true
     }
   ]
 }

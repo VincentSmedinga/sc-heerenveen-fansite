@@ -718,20 +718,24 @@ De site telt per dag de paginaweergaven per pagina en het aantal unieke bezoeker
 Hij zet er geen cookie voor en laadt er geen script voor.
 Het IP-adres en de browsertekst staan nergens, ook niet in het logboek van de app.
 
-We weten nog niet of de host het adres van de bezoeker meestuurt in de header `X-Forwarded-For`.
-Controleer dat op acceptatie, in de eerste dagen na de deploy:
+De host stuurt het adres van de bezoeker mee in de header `X-Forwarded-For`, het laatste adres erin (gezien op 23 november 2026).
+Zonder dat bleef `daily_visitors` op 0.
 
-1. Open in een gewone browser, zonder blokkeerder en zonder Do Not Track, een paar pagina's van <https://acc.sc.heerenveen.org>.
+Wil je een telling naast het logboek van de host leggen, doe dat dan zo, alleen voor de huidige dag, want de host houdt geen oudere logboeken:
+
+1. Open het logboek van de dag in het beheerpaneel van de host, en tel alleen: hoeveel verschillende adressen vroegen een pagina op, en hoeveel daarvan zijn bots (de browsertekst zegt het).
+   Kopieer geen adressen en geen browserteksten, ook niet naar een issue of een notitie.
 2. Kijk op `/beheer/bezoek` (als eigenaar of redacteur), of in phpMyAdmin:
 
    ```sql
-   SELECT * FROM page_views ORDER BY day DESC, views DESC;
    SELECT * FROM daily_visitors ORDER BY day DESC;
+   SELECT * FROM visit_exclusions ORDER BY day DESC, reason;
    ```
 
-3. Stijgen `page_views` én `daily_visitors`, dan werkt het.
-   Stijgt alleen `page_views` en blijft `daily_visitors` leeg of laag, dan stuurt de host het adres niet mee, of alleen het adres van de host zelf.
-   Meld dat bij de Coordinator: de bron van het adres moet dan anders.
+3. Het aantal unieke bezoekers moet in de buurt komen van het aantal adressen dat geen bot is.
+   Een mens met twee apparaten of browsers telt als twee bezoekers, en ons eigen bezoek telt mee.
+   `visit_exclusions` laat zien hoeveel verzoeken de teller oversloeg, per reden: `bot`, `geen-taal`, `niet-volgen` en `vooruitladen`.
+   Zit er een groot verschil tussen, meld dat dan bij de Coordinator.
 
 Het zout en de kenmerken van een dag verdwijnen als de dag voorbij is.
 Je ziet ze in `visitor_salts` en `visitor_hashes`, en daar staat alleen de dag van vandaag in (Nederlandse tijd).

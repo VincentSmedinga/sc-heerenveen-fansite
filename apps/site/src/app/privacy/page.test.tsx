@@ -111,14 +111,23 @@ describe('the page Privacy', () => {
       'Bots, de controles van onze hosting en ons eigen programma dat de koppen ophaalt tellen niet mee.',
     )
     expect(paragraph).toContain('de instelling Do Not Track of Global Privacy Control')
+    expect(paragraph).toContain(
+      'ook niet als je browser geen taalinstelling meestuurt of een pagina alleen vooraf laadt',
+    )
+    expect(paragraph).toContain(
+      'Per dag tellen we hoeveel verzoeken we zo overslaan en waarom, zonder iets over wie ze deed.',
+    )
     expect(html).not.toContain('importer')
   })
 
-  it('says that the hosting keeps logs with IP addresses, that we cannot read them and do not use them', () => {
+  it('says that the hosting keeps logs with IP addresses and browser names, that the editors can see them and what we use them for', () => {
     const paragraph = html.match(/<p[^>]*>(Onze hosting.*?)<\/p>/)?.[1] ?? ''
 
-    expect(paragraph).toContain('logbestanden bij, met onder meer IP-adressen')
-    expect(paragraph).toContain('Wij kunnen daar niet bij en gebruiken ze niet.')
+    expect(paragraph).toContain('logbestanden bij, met onder meer je IP-adres en de naam van je browser')
+    expect(paragraph).toContain('De redactie kan ze zien in het beheerpaneel van de host.')
+    expect(paragraph).toContain('We gebruiken ze alleen om te controleren of de site en onze cijfers kloppen')
+    expect(paragraph).toContain('we bewaren er zelf niets van')
+    expect(paragraph).not.toContain('Wij kunnen daar niet bij')
   })
 
   it('says that the browser keeps the choice of the theme button on the device, that we do not see it, and how to remove it', () => {
@@ -161,7 +170,7 @@ describe('the page Privacy', () => {
     expect(paragraphs[2]).toContain('Van je IP-adres')
     expect(paragraphs[3]).toContain('Tot het einde van de dag')
     expect(paragraphs[4]).toContain('Bots, de controles')
-    expect(paragraphs[5]).toContain('logbestanden bij, met onder meer IP-adressen')
+    expect(paragraphs[5]).toContain('logbestanden bij, met onder meer je IP-adres')
     expect(paragraphs[6]).toContain('Kies je met de knop bovenaan een licht of donker thema')
     expect(paragraphs[7]).toContain('Alleen een redacteur')
     expect(paragraphs[8]).toContain('dan komt het in de mailbox van de redactie')

@@ -107,14 +107,17 @@ export default function PrivacyPage() {
         <Text>
           Bots, de controles van onze hosting en ons eigen programma dat de koppen ophaalt tellen niet mee. Jij ook
           niet, als je hebt ingesteld dat je niet gevolgd wilt worden (de instelling Do Not Track of Global Privacy
-          Control).
+          Control), en ook niet als je browser geen taalinstelling meestuurt of een pagina alleen vooraf laadt. Per dag
+          tellen we hoeveel verzoeken we zo overslaan en waarom, zonder iets over wie ze deed.
         </Text>
         <Heading anchor id="hosting" level={2}>
           Wat de hosting bewaart
         </Heading>
         <Text>
-          Onze hosting houdt voor de beveiliging logbestanden bij, met onder meer IP-adressen. Wij kunnen daar niet bij
-          en gebruiken ze niet.
+          Onze hosting houdt logbestanden bij, met onder meer je IP-adres en de naam van je browser. Dat doet de host
+          voor de beveiliging en om de site draaiende te houden. De redactie kan ze zien in het beheerpaneel van de
+          host. We gebruiken ze alleen om te controleren of de site en onze cijfers kloppen, en we bewaren er zelf niets
+          van.
         </Text>
         <Heading anchor id="cookies" level={2}>
           Wat je browser bewaart
