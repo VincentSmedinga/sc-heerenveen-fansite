@@ -509,6 +509,10 @@ async function checkCounting(database) {
     const [[{ hashes }]] = await pool.query('SELECT COUNT(*) AS hashes FROM visitor_hashes')
     assert.equal(hashes, 2)
 
+    // The visitors are counted by the kind of browser, system and device, and nothing more.
+    const [kinds] = await pool.query('SELECT browser, os, device, visitors FROM browser_visitors')
+    assert.deepEqual(kinds, [{ browser: 'Firefox', device: 'computer', os: 'Linux', visitors: 2 }])
+
     // Neither the address nor the browser text is in any table.
     const [tables] = await pool.query(
       'SELECT table_name AS name FROM information_schema.tables WHERE table_schema = DATABASE()',
@@ -518,7 +522,7 @@ async function checkCounting(database) {
       const [rows] = await pool.query('SELECT * FROM ??', [name])
       const content = JSON.stringify(rows)
 
-      for (const secret of ['203.0.113', '198.51.100', 'Firefox', 'Mozilla']) {
+      for (const secret of ['203.0.113', '198.51.100', 'Mozilla', 'Gecko', 'rv:130']) {
         assert.ok(!content.includes(secret), `the table ${name} holds "${secret}"`)
       }
     }
