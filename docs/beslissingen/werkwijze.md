@@ -66,8 +66,8 @@
 - **Herzien:** als Sonnet in de praktijk te veel mist, of de limiet niet meer knelt.
 - **Later:** zie _Axe draait op elke story, in licht en donker_.
   Zodra die controle draait, toetst axe ook de stories.
-- **Later:** sinds 24 november 2026 vraagt niet de Builder maar de Coördinator de projecteigenaar om Fable, bij het goedkeuren van de specificatie, en staat het antwoord in de brief (zie _De reviewer op Fable staat vooraf in de brief_).
   Een verhaal met een visuele wijziging houdt zijn Reviewer, want axe ziet geen hover, focus, alt-teksten of de redactieregels.
+- **Later:** sinds 24 november 2026 vraagt niet de Builder maar de Coördinator de projecteigenaar om Fable, bij het goedkeuren van de specificatie, en staat het antwoord in de brief (zie _De reviewer op Fable staat vooraf in de brief_).
 
 ## Een model per rol
 
