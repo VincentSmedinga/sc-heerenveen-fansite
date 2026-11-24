@@ -110,7 +110,7 @@ describe('the JavaScript entry of the package', () => {
     expect(designSystem.cardSurfaces).toEqual(['default', 'strong', 'soft', 'warm', 'transparent'])
     expect(designSystem.inputTypes).toContain('email')
     expect(designSystem.listElements).toEqual(['ul', 'ol'])
-    expect(designSystem.matchStatuses).toEqual(['scheduled', 'played', 'postponed', 'cancelled'])
+    expect(designSystem.matchStatuses).toEqual(['scheduled', 'played', 'postponed', 'cancelled', 'result_unknown'])
     expect(designSystem.tagTones).toEqual(['attention', 'highlight', 'neutral', 'open', 'todo', 'closed'])
     expect(designSystem.textElements).toEqual(['p', 'span'])
   })

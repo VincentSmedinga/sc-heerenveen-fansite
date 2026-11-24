@@ -136,7 +136,7 @@
     text-decoration-color: currentcolor;
   }
 
-  /* "Uitslag onbekend" where the result would be: plain text like the dash of a match to come. */
+  /* "Uitslag onbekend" where the result would be: plain text, like the dash to come. */
   .hf-match-unknown,
   .hf-match-versus {
     font-weight: var(--hf-body-font-weight);
