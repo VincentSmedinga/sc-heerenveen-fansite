@@ -265,6 +265,91 @@ describe('fillFromSeasonProgramme', () => {
     expect(report.lines.join('\n')).toContain('no goals stored, the running score 4-1 does not follow 3-0')
   })
 
+  describe('a result that is on the correction list', () => {
+    const correction = {
+      club: 'Ajax',
+      competition: 'Eredivisie' as const,
+      date: '2006-08-19',
+      from: { against: 1, for: 0 },
+      home: false,
+      season,
+      source: 'a made-up source',
+      to: { against: 2, for: 3 },
+    }
+    const fillWith = () =>
+      fillFromSeasonProgramme(database.db, fetcherOf(programme).fetcher, season, {
+        corrections: [correction],
+        origin,
+        pause: 0,
+      })
+    const stored = (goalsFor: number, goalsAgainst: number) =>
+      insert({
+        clubId: ajax,
+        goalsAgainst,
+        goalsFor,
+        home: false,
+        matchDate: '2006-08-19',
+        opponent: 'Ajax',
+        round: 'Speelronde 1',
+        status: 'played',
+      })
+
+    it('is put right while the match still has the wrong result, and a second run changes nothing', async () => {
+      await stored(0, 1)
+
+      const first = await fillWith()
+
+      expect(first.corrected).toBe(1)
+      expect(first.lines.join('\n')).toContain('result 0-1 corrected to 3-2')
+      expect((await rows())[0]).toMatchObject({ goalsAgainst: 2, goalsFor: 3, status: 'played' })
+
+      const before = await everything()
+      const second = await fillWith()
+
+      expect(second.corrected).toBe(0)
+      expect(await everything()).toEqual(before)
+    })
+
+    it('stays as it is when the editors entered another result, or locked the result', async () => {
+      await stored(5, 5)
+      await fillWith()
+      expect((await rows())[0]).toMatchObject({ goalsAgainst: 5, goalsFor: 5 })
+
+      await database.pool.query('DELETE FROM matches')
+      await stored(0, 1)
+
+      const [match] = await rows()
+
+      await database.db.insert(matchEdits).values({
+        beforeGoals: '[]',
+        beforeMatch: '{}',
+        editedAt: new Date('2026-11-09T10:00:00Z'),
+        editedBy: adminId,
+        matchId: match!.id,
+        resultEdited: true,
+      })
+
+      const report = await fillWith()
+
+      expect(report.corrected).toBe(0)
+      expect((await rows())[0]).toMatchObject({ goalsAgainst: 1, goalsFor: 0 })
+    })
+
+    it('is not applied to a match of another day', async () => {
+      await insert({
+        clubId: ajax,
+        goalsAgainst: 1,
+        goalsFor: 0,
+        home: false,
+        matchDate: '2006-08-20',
+        opponent: 'Ajax',
+        round: 'Speelronde 1',
+        status: 'played',
+      })
+      expect((await fillWith()).corrected).toBe(0)
+    })
+  })
+
   it('changes nothing in a second run', async () => {
     await insert({ clubId: ajax, home: false, matchDate: '2006-08-19', opponent: 'Ajax', round: 'Speelronde 1' })
     await insert({ clubId: feyenoord, matchDate: '2006-08-26', opponent: 'Feyenoord', round: 'Speelronde 2' })

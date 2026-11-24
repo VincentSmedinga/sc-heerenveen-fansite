@@ -3577,6 +3577,7 @@
 - **Alternatieven:** alles op Wikipedia verbeteren en het beheer klein houden (kan niet voor 1990 tot 2007, en de bezoeker wacht).
   Een bot die onze verbeteringen schrijft (veel werk voor een paar bewerkingen per maand).
   Alleen het beheer, zonder iets terug te geven (Wikipedia blijft dan de fout houden).
+- **Later:** zie _De programmatabel gaat vóór de kruistabel, en het archief gaat nog steeds voor_ (24 november 2026): het archief gaat nog steeds voor, en een verschil met Wikipedia blijft een regel in het logboek; voor 2006/07 komt een tweede bron, het programma van de seizoenspagina, vóór de kruistabel.
 
 ## Een doelpuntenmaker met een eigen pagina wordt een speler van het seizoen
 
@@ -4718,6 +4719,7 @@
   Wikipedia vult dan alleen een gat.
 - **Alternatieven:** Wikipedia gaat overal voor (tegen de beslissing van 10 november); alles met de hand in het beheer zetten (kan, maar het gat komt bij elke nieuwe kopie van de oude gegevens terug); de stap in `import:old-site` zetten (dat is een andere run dan de Wikipedia-import, en de redactie verwacht Wikipedia daar).
 - **Later:** zie _Een import zoekt een wedstrijd eerst op datum en club_ (9 november 2026): de zin "De uitslag en de status vult hij niet" geldt niet meer voor een wedstrijd zonder uitslag.
+- **Later:** zie _De programmatabel gaat vóór de kruistabel, en het archief gaat nog steeds voor_ (24 november 2026): voor 2006/07 vult de import eerst het programma en daarna de kruistabel, en een uitslag van de lijst met correcties blijft staan, ook als de kruistabel iets anders zegt.
 
 ## De seizoenspagina van 2006/07 vult de uitslagen en doelpunten die het archief mist
 
@@ -4740,6 +4742,7 @@
   Een lijst die niet optelt, spreekt de uitslag en de bezoeker tegen.
 - **Alternatieven:** de wedstrijd van 13 mei niet maken en melden (de redactie voegt hem toe met het formulier, trager, en de wedstrijd ontbreekt zolang niemand het doet); alle regels met een tegenstrijdigheid overslaan; de doelpunten ook aan een wedstrijd geven waarvan het archief wel iets vastlegde, wat de stap van de doelpunten bij de volgende import weer weghaalt.
 - **Later:** zie _Wikipedia vult de uitslag van een wedstrijd zonder uitslag_ (24 november 2026): deze beslissing volgt dezelfde regel, en vult ook de doelpunten.
+- **Later:** zie _Twee uitslagen gaan door een correctielijst goed, niet met de hand_ (24 november 2026): het programma zet een uitslag die de kruistabel verkeerd vulde goed, en alleen zolang de wedstrijd nog die foute uitslag heeft.
 
 ## De import van de oude fansite koppelt een wedstrijd op datum, en een datum die verandert staat in een lijst
 
@@ -4766,3 +4769,55 @@
   Een lijst is zichtbaar, controleerbaar en na de run op productie weg te halen.
   De oude datum was fout, een doorverwijzing is code in de site voor één adres, en de pagina bestaat nog maar kort.
 - **Alternatieven:** de sleutel op de ronde houden en een verschoven wedstrijd met SQL herstellen (bij elke nieuwe kopie van de gegevens opnieuw); de ronde in het bestand bewaren (het bestand kent de ronde niet); terugvallen op de oude ronde binnen dezelfde club en kant (te losjes: er zijn twee thuiswedstrijden tegen een club in een seizoen); een doorverwijzing van oud naar nieuw adres.
+- **Later:** de lijst heeft sinds 24 november 2026 een tweede regel: Heracles Almelo thuis in 2006/07, van 27 januari 2007 naar 26 januari 2007 (Nederlandse Wikipedia, #1637); het bestand `matches-0607.json` heeft de nieuwe datum.
+
+## De programmatabel gaat vóór de kruistabel, en het archief gaat nog steeds voor
+
+- **Datum:** 24 november 2026
+- **Besluit:** voor 2006/07 vult de import van een seizoen (`import:season`) eerst het programma van de seizoenspagina (`fillFromSeasonProgramme`, #1623) en daarna de kruistabel (`fillResultsFromCrossTables`, #1621) (#1637).
+  Een wedstrijd die het programma kent, is dan al gevuld en blijft voor de kruistabel buiten beeld.
+  Een uitslag die het archief van de Fansite heeft, gaat nog steeds voor, en een verschil met Wikipedia wordt nooit stil opgelost: het blijft een regel in het logboek en een melding in het controleverslag.
+- **Waarom:** de kruistabel van `Eredivisie 2006/07` heeft voor de twee wedstrijden tegen Ajax de uitslagen van de play-offs in plaats van die van de competitie.
+  Wikipedia kan dus ook ongelijk hebben, en een tweede bron vangt dat op.
+- **Alternatieven:** Wikipedia laten winnen bij een verschil (riskant om dezelfde reden); een veld dat bijhoudt waar een uitslag vandaan komt (meer dan twee wedstrijden rechtvaardigen dat niet); een vlag in het beheer.
+
+## Twee uitslagen gaan door een correctielijst goed, niet met de hand
+
+- **Datum:** 24 november 2026
+- **Besluit:** een kleine lijst in de importer (`oldSiteResultCorrections` in `old-site-result-corrections.ts`) zet de twee uitslagen tegen Ajax in 2006/07 goed, met de bron erbij (#1637): thuis op 28 oktober 2006 van 1-0 naar 0-2, en uit op 4 maart 2007 van 0-4 naar 1-0.
+  - **Alleen zolang hij fout is:** een regel geldt alleen als de wedstrijd nog de foute uitslag heeft, het programma de goede uitslag heeft en de redactie de uitslag niet zette.
+    Een uitslag van de redactie blijft dus staan, en een tweede run verandert niets.
+  - **Waar:** de regel wordt toegepast door de programmastap (`fillFromSeasonProgramme`), die de goede uitslag al leest.
+  - **`import:old-site`:** de stap `matches` maakt een uitslag van de lijst niet weer leeg, ook al heeft de kruistabel een andere (`isCorrectedResult`).
+    Zonder dat leegmaken zou elke run van `import:old-site` de twee wedstrijden terugzetten naar "Uitslag onbekend", tot de volgende import van het seizoen.
+  - **Controleverslag:** het deel van een seizoen meldt zo'n wedstrijd niet meer als verschil met de kruistabel, maar noemt hem apart, als gecorrigeerd, met de uitslag van de kruistabel erbij.
+  - Een regel kan weg als de run op productie hem heeft gemaakt.
+- **Waarom:** de lijst is zichtbaar en wordt gecontroleerd in de review, en een run op een andere database geeft hetzelfde.
+- **Alternatieven:** de redactie zet ze in het beheer goed (een latere import kan het weer fout doen); een algemene regel die een uitslag uit de kruistabel mag overschrijven (vraagt een nieuw veld).
+
+## Een seizoen van het archief zonder pagina met wedstrijden is geen mislukking
+
+- **Datum:** 24 november 2026
+- **Besluit:** voor 1990/91 tot en met 2006/07 is een 404 op de pagina met wedstrijden een regel in het logboek, geen exitcode 1 (#1637).
+  - **De regel:** `Matches <seizoen>: no matches page for this season, the matches come from the archive of the Fansite`.
+    De run eindigt met 0 als er verder niets misgaat, en de samenvatting van `import:seasons` telt het seizoen als gelezen.
+  - **Wat rood blijft:** een andere fout (geblokkeerd door `robots.txt`, een serverfout, een pagina die niet te lezen is) en een 404 voor een seizoen buiten dat bereik.
+    De rest van de run (de uitslagen, het programma en de groepsfase) gaat door, en een fout in de groepsfase geeft nog steeds exitcode 1.
+  - **Gezondheid:** de rij `match_imports` van zo'n seizoen telt het 404 nog als een mislukte run.
+    Voor een seizoen dat voorbij is, zegt `import:status` daar niets over.
+- **Waarom:** die pagina bestaat voor die seizoenen niet, en een run die altijd rood is, verbergt een echte fout.
+- **Alternatieven:** de aanvraag voor die seizoenen overslaan (een pagina die later verschijnt wordt dan nooit gelezen); de run rood laten.
+
+## `VVV` van het archief is `VVV-Venlo`, en de stap `clubs` voegt ze samen
+
+- **Datum:** 24 november 2026
+- **Besluit:** de stap `clubs` van `import:old-site` voegt de club `VVV` die de oude Fansite maakte, samen met `VVV-Venlo` van Wikipedia, als `VVV` er nog is en geen Wikipedia-pagina heeft (#1637).
+  De lijst staat in `oldSiteClubMerges` in `old-site-clubs.ts`.
+  - **Hoe:** met `mergeChosenClubs` van de redactie (`@fansite/db/club-merge`), niet met `repairClubs`: die verhuist alleen de wedstrijden en de namen, en liet de regels van de stand, de uitslagen, de lijst met namen en de thuisstadions bij een club die dan verdween.
+    De club die blijft, is `VVV-Venlo`; de naam `VVV` wordt een andere naam van die club, zodat de import van het archief hem daarna vindt.
+  - **Het logboek van het beheer:** een rij `club.merge` zonder account, dus "de import", met wat er verhuisde.
+  - **Herhaalbaar:** een tweede run vindt `VVV` niet meer.
+    Hebben beide clubs een artikel, of is de naam er niet, dan gebeurt er niets.
+- **Waarom:** de kruistabel noemt de club `VVV-Venlo`, en wedstrijd 695 (VVV uit in 1992/93) hing aan de andere club, dus de stap vond geen uitslag.
+  Een samenvoeging die alles meeneemt, kan niets verliezen wat de redactie zelf aan de club zette.
+- **Alternatieven:** `VVV` in `club-names.ts` zetten (`repairClubs` voegt dan samen, maar verhuist niet alles); de redactie voegt ze samen in het beheer (komt bij een nieuwe kopie van de gegevens terug).

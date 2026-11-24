@@ -1071,6 +1071,28 @@ describe('a match of which the old fansite recorded nothing (#1622)', () => {
     expect((await rows())[0]).toMatchObject({ goalsFor: null, status: 'result_unknown' })
   })
 
+  it('does not empty the corrected result of the list (#1637), though the cross table has another score', async () => {
+    const play = () =>
+      empty({ code: 'ajax.thuis', competition: 1, dateTime: '2006-10-28 18:30:00', round: 9, season: '0607' })
+    // The cell is the play-off result; the programme has 0-2 (`oldSiteResultCorrections`).
+    const cells = { 'sc Heerenveen-Ajax': '1 – 0' }
+
+    await run([play()], wikipedia(cells))
+    expect((await rows())[0]).toMatchObject({ goalsFor: null, status: 'result_unknown' })
+
+    await database.db.update(matches).set({ goalsAgainst: 2, goalsFor: 0, status: 'played' })
+
+    const second = await run([play()], wikipedia(cells))
+
+    expect((await rows())[0]).toMatchObject({ goalsAgainst: 2, goalsFor: 0, status: 'played' })
+    expect(second.unchanged).toBe(1)
+
+    // Any other result is not the correction's and not the cross table's, so it is emptied.
+    await database.db.update(matches).set({ goalsAgainst: 3, goalsFor: 3, status: 'played' })
+    await run([play()], wikipedia(cells))
+    expect((await rows())[0]).toMatchObject({ goalsFor: null, status: 'result_unknown' })
+  })
+
   it('keeps the 0-0 where Wikipedia could not be read, because a real 0-0 must not go', async () => {
     const list = [empty(), empty({ code: 'ajax.thuis', dateTime: '2001-09-08 20:00:00' })]
     const failed = await run(list, wikipedia({}, 'de pagina bestaat niet'))

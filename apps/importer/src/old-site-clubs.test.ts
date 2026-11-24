@@ -2,7 +2,16 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { mergeChosenClubs } from '@fansite/db/club-merge'
 import { createClubBook } from '@fansite/db/clubs'
-import { clubNames, clubPages, clubs } from '@fansite/db/schema'
+import {
+  auditLog,
+  clubNamePeriods,
+  clubNames,
+  clubPages,
+  clubs,
+  leagueResults,
+  matches,
+  standings,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -27,7 +36,9 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
-  await database.pool.query('DELETE FROM clubs')
+  for (const table of ['audit_log', 'league_results', 'matches', 'standings', 'clubs']) {
+    await database.pool.query(`DELETE FROM ${table}`)
+  }
 })
 
 const old = (code: string, name: string): OldSiteClub => ({ code, country: 'NL', name })
@@ -181,6 +192,116 @@ describe('the step clubs', () => {
     expect(report).toMatchObject({ created: 0, skipped: 0, unchanged: 1 })
     expect(await rows()).toMatchObject([{ id: stays, name: 'VVV-Venlo' }])
     expect(await oldSiteClubIds(database.db, [old('vvv', 'VVV')])).toEqual(new Map([['vvv', stays]]))
+  })
+
+  describe('the club of the old fansite that Wikipedia has under another name (#1637)', () => {
+    const match = (clubId: number, round: string) => ({
+      clubId,
+      competition: 'Eerste divisie' as const,
+      dataSource: 'oude-fansite' as const,
+      goalsAgainst: 1,
+      goalsFor: 2,
+      home: true,
+      matchDate: '1992-09-05',
+      opponent: 'VVV',
+      round,
+      season: '1992/93',
+      status: 'played' as const,
+    })
+    const stand = (club: string, season: string) => ({
+      club,
+      competition: 'Eredivisie' as const,
+      drawn: 1,
+      goalDifference: 0,
+      goalsAgainst: 1,
+      goalsFor: 1,
+      lost: 1,
+      played: 3,
+      points: 4,
+      position: 5,
+      season,
+      validOn: '1994-05-08',
+      won: 1,
+    })
+
+    /** VVV-Venlo of Wikipedia with an article, and VVV of the old fansite, with their rows. */
+    async function twoClubs() {
+      const stays = await club('VVV-Venlo', 'vvv-venlo', 'VVV-Venlo', ['V.V.V. Venlo'])
+      const goes = await club('VVV', 'vvv')
+
+      await database.db.insert(matches).values([match(stays, 'Speelronde 9'), match(goes, 'Speelronde 5')])
+      await database.db.insert(clubNamePeriods).values({ clubId: stays, name: 'VVV-Venlo', position: 0 })
+      await database.db.insert(standings).values([stand('VVV', '1993/94'), stand('VVV-Venlo', '2009/10')])
+      await database.db.insert(leagueResults).values({
+        awayClub: 'sc Heerenveen',
+        awayGoals: 1,
+        homeClub: 'VVV',
+        homeGoals: 2,
+        playedOn: '1993-09-11',
+        round: 3,
+        season: '1993/94',
+      })
+
+      return { goes, stays }
+    }
+
+    it('merges the club that has no article into the club that has, with what hangs on it', async () => {
+      const { goes, stays } = await twoClubs()
+
+      const report = await run([old('vvv', 'VVV')])
+
+      expect(report.lines).toEqual(["merged club 'VVV' into club 'VVV-Venlo': 1 matches moved"])
+      expect(report).toMatchObject({ created: 0, skipped: 0, unchanged: 1 })
+      expect(await rows()).toMatchObject([{ id: stays, name: 'VVV-Venlo', wikipediaPage: 'VVV-Venlo' }])
+      expect((await database.db.select().from(matches).orderBy(asc(matches.id))).map((row) => row.clubId)).toEqual([
+        stays,
+        stays,
+      ])
+      // The names stay: the one of Wikipedia, and the one the old fansite wrote.
+      expect((await names()).map((row) => [row.clubId, row.name]).toSorted()).toEqual([
+        [stays, 'V.V.V. Venlo'],
+        [stays, 'VVV'],
+      ])
+      expect(await database.db.select().from(clubNamePeriods)).toMatchObject([{ clubId: stays, name: 'VVV-Venlo' }])
+      expect(
+        (await database.db.select().from(standings).orderBy(asc(standings.season))).map((row) => row.club),
+      ).toEqual(['VVV-Venlo', 'VVV-Venlo'])
+      expect(await database.db.select().from(leagueResults)).toMatchObject([{ homeClub: 'VVV-Venlo' }])
+      // The merge is in the log, as an action of the import.
+      expect(await database.db.select().from(auditLog)).toMatchObject([
+        { action: 'club.merge', itemId: stays, userId: null },
+      ])
+      // The match of the old fansite now finds its club by the old name, and no club is made.
+      expect(await oldSiteClubIds(database.db, [old('vvv', 'VVV')])).toEqual(new Map([['vvv', stays]]))
+      expect(goes).not.toBe(stays)
+    })
+
+    it('changes nothing in a second run', async () => {
+      await twoClubs()
+      await run([old('vvv', 'VVV')])
+
+      const before = [await rows(), await names(), await database.db.select().from(matches)]
+      const second = await run([old('vvv', 'VVV')])
+
+      expect(second).toMatchObject({ changed: 0, created: 0, unchanged: 1 })
+      expect(second.lines).toEqual([])
+      expect([await rows(), await names(), await database.db.select().from(matches)]).toEqual(before)
+      expect(await database.db.select().from(auditLog)).toHaveLength(1)
+    })
+
+    it('leaves two clubs that have an article each, and a club without the other, alone', async () => {
+      await club('VVV-Venlo', 'vvv-venlo', 'VVV-Venlo')
+      await club('VVV', 'vvv', 'VVV (andere club)')
+
+      expect((await run([old('vvv', 'VVV')])).lines).toEqual([])
+      expect(await rows()).toHaveLength(2)
+
+      await database.pool.query('DELETE FROM clubs')
+      await club('VVV', 'vvv')
+
+      expect((await run([old('vvv', 'VVV')])).lines).toEqual([])
+      expect(await rows()).toHaveLength(1)
+    })
   })
 
   it('has only names in its list that are not listed twice, and codes that are in the files', async () => {

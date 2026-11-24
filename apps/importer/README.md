@@ -1940,6 +1940,9 @@ pnpm run import:season 2025/26
 - `pnpm run import:status` en de waarschuwingen gaan alleen over het lopende seizoen, ook al staat de rij `match_imports` van het afgelopen seizoen in de database.
   Zo telt een seizoen dat niet wordt ververst nooit als ongezond.
 - De site laat het afgelopen seizoen nog niet zien: elke vraag van de site kiest één seizoen, en dat is het lopende.
+- Voor 1990/91 tot en met 2006/07 is een pagina met wedstrijden die niet bestaat (HTTP 404) geen mislukking (#1637): de regel is `Matches 1993/94: no matches page for this season, the matches come from the archive of the Fansite` en de exitcode blijft 0.
+  Een andere fout (`robots.txt`, een serverfout, een pagina die niet te lezen is) en een 404 voor een ander seizoen blijven een mislukking met exitcode 1.
+- Voor 2006/07 komt het programma eerst (zie het volgende punt), en daarna de kruistabel (#1637): een cel van de kruistabel kan een uitslag van de play-offs zijn, en wat het programma kent, vult de kruistabel niet.
 - Voor 1990/91 tot en met 2006/07 vult ze daarna de uitslag van een wedstrijd uit het archief van de Fansite die er geen heeft, uit de kruistabel van `Eredivisie <seizoen>` of `Eerste divisie <seizoen>` (`fillResultsFromCrossTables` in [`src/fill-results-from-cross-tables.ts`](src/fill-results-from-cross-tables.ts), #1621).
   Het gaat om een wedstrijd met bron `oude-fansite`, status `scheduled` of `result_unknown` en geen doelpunten.
   Ze zoekt hem op seizoen, competitie en club (`findMatchesByClub`) en op wie thuis speelde, en zet de doelpunten en de status `played`: geen `result_set_at`, geen stand na negentig minuten en geen ruststand, want de tabel heeft ze niet.
@@ -1953,6 +1956,9 @@ pnpm run import:season 2025/26
   Een doelpunt van ons krijgt een speler van het seizoen (`playerLinker`); lukt dat niet, dan blijft het een naam en noemt het logboek het.
   De twee play-offwedstrijden tegen Ajax worden nieuwe wedstrijden met bron `wikipedia` en competitie `Play-offs Champions League`.
   Een lijst die niet optelt, en een regel die iets tegenstrijdigs zegt, geven de wedstrijd de uitslag van de kolom Uitslag, geen doelpunten en een regel in het logboek.
+  Twee uitslagen die de kruistabel eerder verkeerd vulde, zet ze goed met een lijst (`oldSiteResultCorrections` in [`src/old-site-result-corrections.ts`](src/old-site-result-corrections.ts), #1637): Ajax thuis op 28 oktober 2006 van 1-0 naar 0-2, en Ajax uit op 4 maart 2007 van 0-4 naar 1-0.
+  Een regel geldt alleen zolang de wedstrijd nog de foute uitslag heeft, en alleen als het programma de goede uitslag heeft; een uitslag van de redactie blijft staan, en een tweede run verandert niets.
+  De stap `matches` van `import:old-site` maakt zo'n uitslag niet weer leeg.
 
 Op de host draait hetzelfde bestand als de cronjob de opdracht, met `--season` en het seizoen erachter:
 
@@ -2594,6 +2600,9 @@ Voor elke club in `clubs.json` zoekt de stap de club in de database, in deze vol
 Een naam van de oude fansite die afwijkt, gaat in `club_names`, tenzij een andere club hem al heeft.
 Een club zonder pagina krijgt de pagina van Wikipedia zodra de import van Wikipedia een wedstrijd met die club leest; hij maakt geen tweede club.
 Een club die samenging of verhuisde (zoals `Dordrecht '90` en `SVV`) blijft een eigen club.
+Eén uitzondering staat in `oldSiteClubMerges` in [`src/old-site-clubs.ts`](src/old-site-clubs.ts) (#1637): `VVV` van de oude fansite is `VVV-Venlo`.
+Staan ze er allebei, en heeft `VVV` geen Wikipedia-pagina, dan voegt de stap ze samen op de manier van de redactie in het beheer (`mergeChosenClubs` in `@fansite/db/club-merge`): wedstrijden, namen, de lijst met namen, thuisstadions, de stand, de uitslagen en de koppen gaan naar `VVV-Venlo`, de naam `VVV` blijft een andere naam en de lege club gaat weg.
+De samenvoeging staat in het logboek van het beheer als een handeling van de import, en een tweede run vindt niets meer.
 `oldSiteClubIds` geeft voor de stappen erna de club bij elke clubcode.
 
 #### De stap matches
@@ -2614,6 +2623,7 @@ Hij doet dit:
   Voor een wedstrijd in de Eredivisie of de Eerste divisie van 1990/91 tot en met 2006/07 leest de stap eerst de kruistabel van Wikipedia (`readCrossTable`): staat daar 0 – 0, dan blijft het een uitslag.
   Kan de tabel niet gelezen worden, dan blijft de wedstrijd zoals hij is.
   Een uitslag die de import van een seizoen uit de kruistabel vulde (#1621), maakt ze niet weer leeg.
+  Ook een uitslag van de lijst `oldSiteResultCorrections` (#1637) maakt ze niet leeg, al staat er in de kruistabel een andere.
   De stap van de doelpunten laat een wedstrijd waarvan de bestanden niets vastlegden en die al doelpunten heeft zoals hij is (#1623).
   Een bewaarde wedstrijd die aan de regel voldoet, wordt bij de volgende import leeg gemaakt, tenzij de redactie er iets van invulde.
   Het logboek telt per seizoen hoeveel wedstrijden `result_unknown` kregen en hoeveel 0 – 0 bleef omdat Wikipedia het bevestigt.
@@ -2755,6 +2765,7 @@ Voor de kruistabellen vraagt het de Nederlandse Wikipedia om één pagina per se
   Het zoekt de wedstrijd op seizoen, competitie en club (`findMatchesByClub` in `@fansite/db/match-lookup`), en thuis en uit tellen mee.
   De club vindt het met het artikel waar de rij naar linkt of met een naam die een van de tabellen voor dat artikel toont (`clubFinder` in [`src/old-site-clubs.ts`](src/old-site-clubs.ts)).
   De datums vergelijkt het niet, want de kruistabel heeft er geen.
+  Een wedstrijd van de lijst `oldSiteResultCorrections` staat niet bij de verschillen: het deel noemt hem apart, als gecorrigeerd, met de uitslag van de kruistabel (#1637).
   Is een pagina of een tabel niet te lezen, dan staat het seizoen er met de reden.
   Het vraagt alleen de seizoenen waarvan de bestanden een competitiewedstrijd hebben, en het onthoudt robots.txt niet in de database.
 - Buiten dat hoofdstuk rekent het verslag niets zelf uit.

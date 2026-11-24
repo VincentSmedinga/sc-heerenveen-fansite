@@ -595,9 +595,15 @@ export function formatOldSiteCheck(
     if (table.unreadable !== null) {
       lines.push(`De kruistabel is niet te lezen: ${table.unreadable}.`)
     } else if (table.lines.length === 0) {
-      lines.push(`Geen verschillen in de ${table.compared} uitslagen van de tabel.`)
+      lines.push(
+        `Geen verschillen in de ${table.compared} uitslagen van de tabel${table.corrected.length === 0 ? '' : ', behalve de gecorrigeerde hieronder'}.`,
+      )
     } else {
       lines.push(...table.lines.map((line) => `- ${line}`))
+    }
+    if (table.unreadable === null && table.corrected.length > 0) {
+      lines.push('', 'Gecorrigeerd in de code, de kruistabel van Wikipedia zelf heeft een andere uitslag:', '')
+      lines.push(...table.corrected.map((line) => `- ${line}`))
     }
   }
 

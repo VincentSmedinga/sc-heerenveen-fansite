@@ -345,6 +345,7 @@ describe('the text of the report', () => {
     const table = (season: string) => ({
       compared: 34,
       competition: 'Eredivisie' as const,
+      corrected: [] as string[],
       lines: [],
       season,
       title: `Eredivisie ${season}`,
@@ -357,6 +358,10 @@ describe('the text of the report', () => {
         lines: ['Thuis tegen Testdorp FC, 1 september 1990: de database heeft 1-0, de kruistabel heeft 1-1'],
       },
       table('1993/94'),
+      {
+        ...table('2006/07'),
+        corrected: ['Thuis tegen Testdorp FC, 28 oktober 2006: gecorrigeerd, de database heeft 0-2'],
+      },
       { ...table('1994/95'), compared: 0, unreadable: 'de pagina heeft geen kopje Uitslagen' },
     ])
 
@@ -373,6 +378,9 @@ describe('the text of the report', () => {
     )
     expect(text).toMatch(
       /### 1993\/94, Eredivisie\n\nBron: .*\n\nGeen verschillen in de 34 uitslagen van de tabel\.\n/u,
+    )
+    expect(text).toMatch(
+      /### 2006\/07, Eredivisie\n\nBron: .*\n\nGeen verschillen in de 34 uitslagen van de tabel, behalve de gecorrigeerde hieronder\.\n\nGecorrigeerd in de code, de kruistabel van Wikipedia zelf heeft een andere uitslag:\n\n- Thuis tegen Testdorp FC, 28 oktober 2006: gecorrigeerd/u,
     )
     expect(text).toMatch(
       /### 1994\/95, Eredivisie\n\nBron: .*\n\nDe kruistabel is niet te lezen: de pagina heeft geen kopje Uitslagen\.\n/u,

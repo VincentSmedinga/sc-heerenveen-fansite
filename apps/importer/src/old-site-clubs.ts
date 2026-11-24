@@ -1,3 +1,4 @@
+import { type ClubMergePlan, mergeChosenClubs } from '@fansite/db/club-merge'
 import { createClubBook, normaliseClubName } from '@fansite/db/clubs'
 import { clubLimits, clubNames, clubPages, clubs } from '@fansite/db/schema'
 import { asc } from 'drizzle-orm'
@@ -29,10 +30,20 @@ export const oldSiteClubNames: Readonly<Record<string, string>> = {
   stormvogelstelstar: 'Telstar',
 }
 
+/**
+ * A club the old fansite wrote in a way that made a club of its own, while Wikipedia has the
+ * same club under another name (#1637): `VVV` is `VVV-Venlo`. The step `clubs` merges the club
+ * that the old fansite made into the club of Wikipedia, with everything that hangs on it, the
+ * way the editors merge two clubs in the admin (`mergeChosenClubs`), and the name `VVV` stays
+ * as another name of the club that stays. It does so only for a club without an article of its
+ * own: a club that has one is a club of Wikipedia, and two of them are two clubs.
+ */
+export const oldSiteClubMerges: readonly { goes: string; stays: string }[] = [{ goes: 'VVV', stays: 'VVV-Venlo' }]
+
 /** The club of an old fansite club in the database, or undefined when it has none. */
 export type FoundOldSiteClub = { club: undefined | { id: number; name: string }; old: OldSiteClub }
 
-type ClubDatabase = Pick<OldSiteDatabase, 'insert' | 'select' | 'update'>
+type ClubDatabase = Pick<OldSiteDatabase, 'delete' | 'insert' | 'select' | 'transaction' | 'update'>
 
 /** What the step knows of a club in the database. */
 type KnownClub = { id: number; name: string; names: Set<string> }
@@ -94,6 +105,8 @@ export async function importOldSiteClubs(
   oldClubs: readonly OldSiteClub[],
 ): Promise<OldSiteStepReport> {
   const report: OldSiteStepReport = { changed: 0, created: 0, lines: [], skipped: 0, unchanged: 0 }
+  report.lines.push(...(await mergeOldSiteClubs(db)))
+
   const book = await createClubBook(db, { fullNames: clubFullNames })
   let known = await knownClubs(db)
 
@@ -163,6 +176,16 @@ export async function oldSiteClubIds(db: ClubDatabase, oldClubs: readonly OldSit
   return ids
 }
 
+/** The row of the log of a merge by the import: both clubs and what moved. */
+function describeMerge(plan: ClubMergePlan): string {
+  const { itemClubs, kept, leagueResults, matches, names, other, standings } = plan
+
+  return [
+    `Samengevoegd door de import: club ${other.id} (${other.name}, adres ${other.slug}) in club ${kept.id} (${kept.name}, adres ${kept.slug}).`,
+    `Verhuisd: ${matches} wedstrijden, ${itemClubs} koppen, ${standings} regels van de stand, ${leagueResults} uitslagen, namen: ${names.length === 0 ? 'geen' : names.join(', ')}.`,
+  ].join(' ')
+}
+
 /**
  * The club of an old fansite club: the club that has its name (as its name, another name or a
  * title of an article), else the club of a name in the lists. The name of the old fansite wins,
@@ -204,6 +227,39 @@ function listedName(name: string): string | undefined {
 
   return clubFullNames.find((entry) => [entry.name, ...entry.aliases].some((one) => normaliseClubName(one) === key))
     ?.name
+}
+
+/** Merges the clubs of `oldSiteClubMerges` that are there twice, and gives the log lines. */
+async function mergeOldSiteClubs(db: ClubDatabase): Promise<string[]> {
+  const lines: string[] = []
+
+  for (const { goes, stays } of oldSiteClubMerges) {
+    const rows = await db.select().from(clubs)
+    const find = (name: string) => rows.filter((row) => normaliseClubName(row.name) === normaliseClubName(name))
+    const [other, ...extra] = find(goes)
+    const [kept] = find(stays)
+
+    // Nothing to do when one of them is not there, when a name is not one club, or when the
+    // club that goes has an article: that is a club of Wikipedia of its own.
+    if (other === undefined || kept === undefined || extra.length > 0 || other.wikipediaPage !== null) {
+      continue
+    }
+
+    const done = await mergeChosenClubs(db, {
+      describe: describeMerge,
+      keptId: kept.id,
+      otherId: other.id,
+      userId: null,
+    })
+
+    lines.push(
+      typeof done === 'string'
+        ? `club '${other.name}' not merged into club '${kept.name}': ${done}`
+        : `merged club '${other.name}' into club '${kept.name}': ${done.matches} matches moved`,
+    )
+  }
+
+  return lines
 }
 
 /**

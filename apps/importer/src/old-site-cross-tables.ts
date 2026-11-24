@@ -18,6 +18,7 @@ import { pauseBetweenRequests } from './import-person-data.ts'
 import { dutchDate } from './old-site-check.ts'
 import { clubFinder } from './old-site-clubs.ts'
 import { deriveOldSiteMatches } from './old-site-matches.ts'
+import { correctionFor, type OldSiteResultCorrection, oldSiteResultCorrections } from './old-site-result-corrections.ts'
 import { readCrossTable } from './read-cross-table.ts'
 import { linkedPage, pageUrl } from './read-wikipedia.ts'
 import { printable } from './text.ts'
@@ -38,6 +39,11 @@ export type FetchedCrossTable = CrossTableSeason & ({ kind: 'none'; reason: stri
 export type OldSiteCrossTable = CrossTableSeason & {
   /** How many scores of sc Heerenveen the table has. */
   compared: number
+  /**
+   * One line for each match whose result was put right by hand in the code (#1637), because the
+   * cell of the table is not the result of the league match, in Dutch.
+   */
+  corrected: string[]
   /** One line for each match that differs or is missing, in Dutch. */
   lines: string[]
   /** Why the table could not be read, in Dutch, or null when it was read. */
@@ -82,6 +88,7 @@ export type CrossTableScores = {
 export async function compareCrossTables(
   db: Pick<OldSiteDatabase, 'select'>,
   tables: readonly FetchedCrossTable[],
+  corrections: readonly OldSiteResultCorrection[] = oldSiteResultCorrections,
 ): Promise<OldSiteCrossTable[]> {
   if (tables.length === 0) {
     return []
@@ -108,6 +115,7 @@ export async function compareCrossTables(
     const one: OldSiteCrossTable = {
       compared: 0,
       competition,
+      corrected: [],
       lines: [],
       season,
       title,
@@ -134,6 +142,7 @@ export async function compareCrossTables(
       [cell.homePage, cell.awayPage].some((name) => name.toLowerCase() === ourPage)
     const ours = read.results.filter(isOurs)
     const lines: { day?: string; home: boolean; opponent: string; text: string }[] = []
+    const corrected: typeof lines = []
 
     if (ours.length === 0) {
       one.unreadable = 'sc Heerenveen staat niet in de tabel'
@@ -190,21 +199,30 @@ export async function compareCrossTables(
           text: `de database heeft geen uitslag, de kruistabel heeft ${theirs}`,
         })
       } else if (scoreOf(match) !== theirs) {
-        lines.push({
+        const correction = correctionFor(match, club.name, corrections)
+        const isCorrected =
+          correction !== undefined &&
+          match.goalsFor === correction.to.for &&
+          match.goalsAgainst === correction.to.against
+
+        ;(isCorrected ? corrected : lines).push({
           day: days([match]),
           home,
           opponent: club.name,
-          text: `de database heeft ${scoreOf(match)}, de kruistabel heeft ${theirs}`,
+          text: isCorrected
+            ? `gecorrigeerd, de database heeft ${scoreOf(match)} en de kruistabel van Wikipedia heeft ${theirs}: dat is de uitslag van de play-off, de programmatabel van de pagina van sc Heerenveen in het seizoen heeft ${scoreOf(match)}`
+            : `de database heeft ${scoreOf(match)}, de kruistabel heeft ${theirs}`,
         })
       }
     }
 
-    one.lines = lines
-      .toSorted((a, b) => a.opponent.localeCompare(b.opponent, 'nl') || Number(b.home) - Number(a.home))
-      .map(
-        ({ day, home, opponent, text }) =>
-          `${home ? 'Thuis tegen' : 'Uit tegen'} ${opponent}${day === undefined ? '' : `, ${day}`}: ${text}`,
-      )
+    const toLine = ({ day, home, opponent, text }: (typeof lines)[number]) =>
+      `${home ? 'Thuis tegen' : 'Uit tegen'} ${opponent}${day === undefined ? '' : `, ${day}`}: ${text}`
+    const bySort = (a: (typeof lines)[number], b: (typeof lines)[number]) =>
+      a.opponent.localeCompare(b.opponent, 'nl') || Number(b.home) - Number(a.home)
+
+    one.corrected = corrected.toSorted(bySort).map(toLine)
+    one.lines = lines.toSorted(bySort).map(toLine)
   }
 
   return compared

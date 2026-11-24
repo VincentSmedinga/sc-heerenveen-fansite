@@ -12,6 +12,7 @@ import type { OldSiteContext, OldSiteDatabase, OldSiteStepReport } from './old-s
 
 import { crossTableKey, crossTableSeasons, crossTableSeasonsOf, readCrossTableScores } from './old-site-cross-tables.ts'
 import { oldSiteDateCorrections } from './old-site-date-corrections.ts'
+import { correctionFor } from './old-site-result-corrections.ts'
 import { amsterdamToUtc } from './read-wikipedia.ts'
 
 /** The source marker of the matches this step writes. */
@@ -330,6 +331,24 @@ function inCrossTables(values: Pick<OldSiteMatchValues, 'competition' | 'season'
   )
 }
 
+/**
+ * Whether a stored match of the old fansite has the result of the correction list (#1637): the
+ * cross table has another score for it, so `isFilledFromWikipedia` does not know it, but it is
+ * the result of the programme of the season and must stay.
+ */
+function isCorrectedResult(row: Match | undefined, opponent: string): boolean {
+  const correction = row === undefined ? undefined : correctionFor(row, opponent)
+
+  return (
+    row !== undefined &&
+    correction !== undefined &&
+    row.dataSource === oldSiteSource &&
+    row.status === 'played' &&
+    row.goalsFor === correction.to.for &&
+    row.goalsAgainst === correction.to.against
+  )
+}
+
 /** Whether a stored match of the old fansite has the result Wikipedia filled in (#1621). */
 function isFilledFromWikipedia(row: Match | undefined, score: { against: number; for: number }): boolean {
   return (
@@ -530,8 +549,12 @@ export async function importOldSiteMatches(
         unchecked.push(label)
       } else if (score?.for === 0 && score.against === 0) {
         goallessBySeason.set(values.season, (goallessBySeason.get(values.season) ?? 0) + 1)
-      } else if (score !== undefined && isFilledFromWikipedia(pairs.get(one)?.row, score)) {
-        // The result is Wikipedia's (#1621): the old fansite has nothing, so it is not emptied.
+      } else if (
+        (score !== undefined && isFilledFromWikipedia(pairs.get(one)?.row, score)) ||
+        isCorrectedResult(pairs.get(one)?.row, opponent)
+      ) {
+        // The result is Wikipedia's (#1621) or the corrected one (#1637): the old fansite has
+        // nothing, so it is not emptied.
         const own = pairs.get(one)
 
         if (own !== undefined) {
