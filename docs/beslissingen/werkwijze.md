@@ -924,3 +924,15 @@
 - **Waarom:** de 70 tot 340 ms tussen de runner en een thuisverbinding zijn van buiten niet te splitsen, en een meting op de plek waar het verschil ontstaat is de goedkoopste manier om dat te zien.
   Een runner van GitHub staat niet in Nederland, dus een deel is afstand en de LCP uit de controle is een bovengrens.
 - **Alternatieven:** meteen een voorstel voor het budget doen (verworpen: de eigenaar wil eerst de cijfers); een runner in een andere regio of een andere dienst (verworpen: gratis runners laten dat niet kiezen); het IPv6-adres in dit issue oplossen (verworpen: dat is een actie van de eigenaar bij de host).
+
+## De meting vanaf de runner zegt dat het verschil met thuis afstand is, en we veranderen niets
+
+- **Datum:** 24 november 2026
+- **Besluit:** `docs/prestaties.md` beschrijft de antwoordtijd in delen vanaf de runner van Lighthouse, op grond van drie runs (de geplande run van 23 november en twee handmatige runs van 24 november 2026), naast de meting van thuis (#1596).
+  Het verschil in wachttijd tussen de runner en thuis, 65 tot 77 ms, is het verschil in rondreis (84 tot 97 ms tegen 20 tot 23 ms), dus afstand en niet de host of de site.
+  De LCP uit de dagelijkse controle is een bovengrens voor wat een Nederlandse fan ziet.
+  Het budget `lcpMs` blijft 1100, `enforce` blijft `false`, `decideOn` blijft 7 december 2026 en `fixed.baselineKiB` verandert niet.
+- **Waarom:** de pagina maken kost op de runner 9 tot 29 ms, de TCP-tijd is nergens ongeveer 250 ms of meer, en de eerste byte is koud 278 tot 321 ms, waarvan ongeveer 190 ms een nieuwe verbinding.
+  Drie runs zijn genoeg om de afstand te laten zien, en te weinig om uitschieters van 300 tot 600 ms te verklaren.
+- **Alternatieven:** meer handmatige runs doen om de uitschieters te verklaren (verworpen: de beveiliging van de host blokkeerde op 23 november een adres na te snelle metingen, en de uitschieters zijn geen reden om het budget te veranderen); een voorstel voor het budget doen (verworpen: dat hoort bij de beslissing van 7 december, met deze cijfers erbij).
+- **Let op:** de plek van de runner staat alleen in het logboek van de geplande run (`us-east-1`, AWS); bij de handmatige runs is hij leeg, en een gratis runner laat die plek niet kiezen.
