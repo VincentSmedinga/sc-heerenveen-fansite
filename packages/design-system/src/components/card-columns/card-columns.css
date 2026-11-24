@@ -1,5 +1,6 @@
 /*
- * Cards in one or two columns. The width that counts is the one of the place they stand in, not
+ * Cards in one, two or three columns (three only with `columns={3}`).
+ * The width that counts is the one of the place they stand in, not
  * of the screen: from 28rem there are two columns, each a little under half. The base is a grid
  * with a pair of cards on each row, so the order of the code is the order of reading. A browser
  * that knows grid lanes lets each card go to the shortest column, so the gaps under the shorter
@@ -33,6 +34,13 @@
       .hf-card-columns-grid {
         display: grid-lanes;
       }
+    }
+  }
+
+  /* Three columns from 52rem, two from 28rem, as for two columns. */
+  @container hf-card-columns (width >= 52rem) {
+    .hf-card-columns-three > .hf-card-columns-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 }

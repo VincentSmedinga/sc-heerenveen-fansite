@@ -4996,6 +4996,7 @@
 - **Waarom:** de projecteigenaar wil de vermelding altijd in de zijkolom.
 - **Alternatieven:** een regel onderaan de pagina, zoals het eerste issue (#1138) vroeg.
 - **Later:** vervangt de regel onderaan de pagina uit #1138.
+- **Later:** de bron staat sinds 24 november 2026 als laatste kaart in de kolommen, niet meer in een zijkolom (#1627).
 
 ## Een werelddeel komt uit een vaste tabel van landcodes
 
@@ -8037,3 +8038,17 @@
   De knop is wat het design system al biedt voor een tabel die op een telefoon te breed wordt, zonder zijwaarts scrollen.
 - **Alternatieven:** de basis op een telefoon weglaten (de kaarten zijn dan altijd zichtbaar, maar de opstellingen verdwijnen achter een knop); de tabel zijwaarts laten scrollen (nieuw in het design system en lastig met een schermlezer); rood en geel-rood als aparte kolommen (nog breder, en geen andere tabel scheidt ze); de rij Totaal zonder kaarten (het totaal is dan niet af).
 - **Later:** dit vult _De tabel Per seizoen heeft kolommen naar de linie van de speler_ aan: zes kolommen per linie in plaats van vier.
+
+## Het overzicht van alle spelers staat in drie even brede kolommen, met de bron als laatste kaart
+
+- **Datum:** 24 november 2026
+- **Besluit:** `/spelers/overzicht` en `/spelers/overzicht/land` zetten hun kaarten in drie even brede kolommen, per rij van links naar rechts, met de kaart met de bron als laatste kaart in dezelfde `CardColumns` (#1627).
+  - **Op naam:** de zijkolom en het gebied `side` vervallen; de kaarten hebben de hele breedte.
+  - **Op land:** De grootste landen, Het noorden en Per werelddeel houden plaats, breedte en uiterlijk.
+    De landkaarten en de bron staan daaronder over de volle breedte in drie kolommen.
+    De volgorde in de code is De grootste landen, Het noorden, Per werelddeel, de landkaarten en de bron; op een telefoon staan de landkaarten dus nu na Het noorden en Per werelddeel.
+  - **Smal:** drie kolommen vanaf 52 rem, twee vanaf 28 rem, één daaronder; de bron staat op elke breedte als laatste.
+- **Waarom:** de pagina is lang, en drie kolommen laten meer in beeld.
+  Per rij lezen houdt toetsenbord en schermlezer alfabetisch, en de bron aan het eind laat zien waar de gegevens vandaan komen.
+- **Alternatieven:** de kolommen van boven naar beneden vullen; een eigen onderdeel voor deze pagina; de zijkolom houden met de bron erin.
+- **Later:** dit vervangt de zijkolom met de bron van de overzichten, en op Op land de landkaarten in de hoofdkolom.

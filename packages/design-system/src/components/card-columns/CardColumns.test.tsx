@@ -20,6 +20,12 @@ describe('CardColumns', () => {
     )
   })
 
+  it('has three columns only when asked, and two by default', () => {
+    expect(renderToStaticMarkup(<CardColumns />)).not.toContain('hf-card-columns-three')
+    expect(renderToStaticMarkup(<CardColumns columns={2} />)).not.toContain('hf-card-columns-three')
+    expect(renderToStaticMarkup(<CardColumns columns={3} />)).toContain('class="hf-card-columns hf-card-columns-three"')
+  })
+
   it('passes a class and attributes to the container', () => {
     const html = renderToStaticMarkup(<CardColumns className="extra" id="x" />)
 
@@ -36,5 +42,12 @@ describe('card-columns.css', () => {
     expect(css).toContain('repeat(2, minmax(0, 1fr))')
     expect(css).toMatch(/@supports \(display: grid-lanes\) \{[^}]*display: grid-lanes;/s)
     expect(css.match(/display: grid-lanes;/g)).toHaveLength(1)
+  })
+
+  it('has three columns from 52rem, measured on the container, only for the three-column variant', () => {
+    expect(css).toMatch(
+      /@container hf-card-columns \(width >= 52rem\) \{\s*\.hf-card-columns-three > \.hf-card-columns-grid \{\s*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);/,
+    )
+    expect(css).toContain('@container hf-card-columns (width >= 28rem)')
   })
 })

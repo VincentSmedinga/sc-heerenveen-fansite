@@ -13,7 +13,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Kaarten in twee kolommen als er plaats voor is, en anders onder elkaar.',
+          'Kaarten in twee kolommen als er plaats voor is, en anders onder elkaar. Met `columns={3}` zijn het er drie op een brede plaats, twee op een middelbrede en één op een smalle.',
           'De volgorde in de code is de leesvolgorde: de eerste kaart links, de tweede rechts, de derde weer links.',
           'Hij is gebouwd uit `Card`, die hij naast elkaar zet.',
         ].join('\n'),
@@ -29,6 +29,22 @@ const lengths = [8, 2, 3, 6, 2, 4]
 const letters = ['A', 'B', 'C', 'D', 'E', 'F']
 
 export const Standaard = meta.story({
+  render: (args) => (
+    <CardColumns {...args}>
+      {letters.map((letter, index) => (
+        <Card key={letter}>
+          <Heading level={2}>{letter}</Heading>
+          {Array.from({ length: lengths[index] ?? 2 }, (_, line) => (
+            <Text key={line}>Regel {line + 1}</Text>
+          ))}
+        </Card>
+      ))}
+    </CardColumns>
+  ),
+})
+
+export const DrieKolommen = meta.story({
+  args: { columns: 3 },
   render: (args) => (
     <CardColumns {...args}>
       {letters.map((letter, index) => (
