@@ -3191,6 +3191,7 @@
   De volgorde blijft: voor 1990/91 tot en met 2006/07 gaat de oude fansite voor.
   Voor de seizoenen daarna volgt de import Wikipedia, en de redactie verbetert in het beheer wat niet klopt of ontbreekt.
 - **Later:** in een seizoen met wedstrijden van de oude fansite maakt de import van Wikipedia geen speler van een doelpuntenmaker; zie _Een doelpuntenmaker met een eigen pagina wordt een speler van het seizoen_ (10 november 2026).
+- **Later:** zie _Een wedstrijd waarvan de oude Fansite niets vastlegde, krijgt geen uitslag_ (24 november 2026): een wedstrijd van de oude fansite zonder iets vastgelegd, krijgt de status `result_unknown`, en een andere bron vult hem niet.
 
 ## Een vierde deel in `match_edits` voor de gegevens van een wedstrijd
 
@@ -4662,3 +4663,34 @@
 - **Waarom:** de oude site markeert zelf dat de rust niet bekend is, en dat is exacter dan raden uit "0 – 0, doelpunten en geen doelpuntenregels", dat ook een echte 0 – 0 wegneemt.
   De import is herhaalbaar en de enige plek met de regel, dus een migratie is niet nodig.
 - **Alternatieven:** de regel "0 – 0, uitslag met doelpunten, geen doelpuntenregels" voor alle seizoenen (haalt echte nullen weg zonder bewijs); een migratie die de rijen per seizoen leegmaakt (zet de regel dubbel neer en volgt de bestanden niet).
+- **Later:** de ruststand van een wedstrijd waarvan de oude Fansite niets vastlegde, gaat mee weg met de uitslag; zie _Een wedstrijd waarvan de oude Fansite niets vastlegde, krijgt geen uitslag_ (24 november 2026).
+
+## Een wedstrijd waarvan de oude Fansite niets vastlegde, krijgt geen uitslag
+
+- **Datum:** 24 november 2026
+- **Besluit:** de stap `matches` van `import:old-site` (#1622) geeft een wedstrijd van de oude Fansite de nieuwe status `result_unknown` ("Uitslag onbekend") als de oude Fansite er niets van vastlegde, en bewaart er geen 0 – 0 voor.
+  - **De regel:** de uitslag en de rust zijn 0 – 0, en er zijn geen doelpunten of kaarten, geen opstelling, geen scheidsrechter, geen toeschouwers, geen cijfers voor hoekschoppen, overtredingen en buitenspel, en geen opmerking bij de uitslag.
+    De wedstrijd houdt zijn datum, club en ronde, en krijgt geen uitslag, geen ruststand en geen toeschouwers.
+  - **Wikipedia controleert alleen:** voor een wedstrijd in de Eredivisie of de Eerste divisie van 1990/91 tot en met 2006/07 leest de stap de kruistabel (`readCrossTable`, #976).
+    Zegt de tabel 0 – 0, dan blijft het een gespeelde wedstrijd met 0 – 0.
+    Zegt de tabel iets anders, of heeft ze niets voor die wedstrijd, dan volgt de wedstrijd de regel.
+    Wikipedia vult de uitslag niet; dat doet een later issue.
+    Een wedstrijd buiten de twee competities heeft geen kruistabel en volgt de regel zonder controle.
+  - **Kan Wikipedia niet gelezen worden**, omdat de pagina ontbreekt of de tabel niet te lezen is, dan blijft de wedstrijd zoals hij is en staat er een regel in het logboek.
+    Zo haalt een storing nooit een echte 0 – 0 weg; de volgende import doet het opnieuw.
+  - **Leegmaken:** de import maakt een bewaarde wedstrijd van de oude Fansite die aan de regel voldoet leeg: de uitslag en de ruststand verdwijnen, `half_time_source` ook, en de status wordt `result_unknown`.
+    Een wedstrijd met bron `redactie`, een uitslag die de redactie bewerkte, toeschouwers van de redactie of een ruststand van de redactie blijft altijd staan.
+    Staat er later weer een uitslag in de bestanden, of vult de redactie hem in, dan wordt de status weer `played`.
+    Een tweede import verandert niets.
+    Een wedstrijd die een andere bron al kent, wordt niet geraakt.
+  - **Controleverslag:** het logboek noemt per seizoen hoeveel wedstrijden `result_unknown` kregen en hoeveel 0 – 0-wedstrijden bleven omdat Wikipedia ze bevestigt.
+  - **Database:** een migratie voegt de waarde toe aan de kolom `status`.
+    De controle `matches_result_only_when_played` hoefde niet te veranderen, want ze noemt alleen `played`; een wedstrijd zonder uitslag mag geen uitslag, ruststand of toeschouwers hebben, zoals `postponed` en `cancelled`.
+  - **De site** toont "Uitslag onbekend" waar de uitslag zou staan, in de lijsten, bij de club en bij de buurwedstrijden, met de datum en zonder streepje.
+    De wedstrijd telt niet mee in standen, punten, doelpunten, reeksen, statistieken of de Prognose, en is geen "volgende" of "vorige" wedstrijd.
+    Er is geen eigen pagina: een pagina bestaat alleen bij een verslag, en daar is niets van.
+    In het beheer biedt alleen het formulier van zo'n wedstrijd de status aan; een uitslag invullen en `Gespeeld` kiezen maakt er weer een uitslag van.
+- **Waarom:** de oude site had niets van deze wedstrijden, dus het zijn geen uitslagen, en een echte 0 – 0 mag niet weg.
+  De rij en de datum blijven, zodat de uitslag later uit Wikipedia kan worden ingevuld.
+  De import is herhaalbaar en zonder migratie van gegevens.
+- **Alternatieven:** de rij verwijderen (de datum gaat verloren); de status `scheduled` houden (de site noemt een wedstrijd uit 1991 dan een wedstrijd die nog komt, en de Prognose laat er op voorspellen); elke 0 – 0 zonder gegevens weghalen (haalt echte nullen weg zonder bewijs); een vaste lijst van wedstrijden (dekt nieuwe gegevens niet); een eigen pagina voor zo'n wedstrijd (er is niets om te tonen).

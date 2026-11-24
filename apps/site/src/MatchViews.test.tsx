@@ -178,6 +178,45 @@ describe('the line of a match that is being played', () => {
   })
 })
 
+describe('the line of a match without a result (#1622)', () => {
+  const now = new Date('2026-10-30T13:40:00Z')
+  const unknown: PublicMatch = {
+    afterNinetyAgainst: null,
+    afterNinetyFor: null,
+    attendance: null,
+    competition: 'Eredivisie',
+    dataSource: 'oude-fansite',
+    dateText: null,
+    extraTime: false,
+    goals: [],
+    goalsAgainst: null,
+    goalsFor: null,
+    home: true,
+    kickoffAt: null,
+    matchDate: '1992-03-08',
+    note: null,
+    opponent: 'Testdorp FC',
+    penaltiesAgainst: null,
+    penaltiesFor: null,
+    referee: null,
+    round: 'Speelronde 27',
+    stadium: null,
+    status: 'result_unknown',
+  }
+
+  it('says "Uitslag onbekend" with the day and the club, and no score, dash or message about missing data', () => {
+    const html = renderToStaticMarkup(<MatchLine match={unknown} now={now} />)
+
+    expect(html).toContain('Uitslag onbekend')
+    expect(textOf(<MatchLine match={unknown} now={now} />)).toContain('sc Heerenveen')
+    expect(textOf(<MatchLine match={unknown} now={now} />)).toContain('Testdorp FC')
+    expect(html).toContain('<time')
+    expect(html).not.toMatch(/\d–\d|0 tegen 0/u)
+    expect(html).not.toContain('Gegevens nog niet beschikbaar')
+    expect(html).not.toContain('<a')
+  })
+})
+
 describe('EditorSources', () => {
   const added = { id: 5, matchDate: '2009-05-12', opponent: 'FC Groningen', round: 'Finale' }
 

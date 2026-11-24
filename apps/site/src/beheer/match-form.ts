@@ -93,7 +93,14 @@ export const statusChoices = [
   { label: 'Gespeeld', value: 'played' },
   { label: 'Uitgesteld', value: 'postponed' },
   { label: 'Geannuleerd', value: 'cancelled' },
+  // Only for a match of the old fansite that nobody recorded a result of (#1622): the form of
+  // such a match offers it, no other form does (`statusChoicesFor`).
+  { label: 'Uitslag onbekend', value: 'result_unknown' },
 ] as const
+
+/** The statuses a form offers: `Uitslag onbekend` only where the match already has it. */
+export const statusChoicesFor = (current?: string) =>
+  statusChoices.filter((choice) => choice.value !== 'result_unknown' || current === 'result_unknown')
 
 /** The kinds of goal as the form words them. */
 export const goalKinds = [

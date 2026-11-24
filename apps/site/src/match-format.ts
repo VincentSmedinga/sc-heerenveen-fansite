@@ -173,15 +173,18 @@ export function matchMoment(
   now: Date,
   { withYear = false }: { withYear?: boolean } = {},
 ) {
-  if (match.status !== 'played' && match.kickoffAt === null) {
+  // A match without a result has been played too: its day is all that is known (#1622).
+  const dayOnly = match.status === 'played' || match.status === 'result_unknown'
+
+  if (!dayOnly && match.kickoffAt === null) {
     return { dateTime: match.matchDate, time: weekendText(match.dateText ?? match.matchDate) }
   }
 
-  const moment = match.status === 'played' || match.kickoffAt === null ? noonOf(match.matchDate) : match.kickoffAt
-  const sameYear = yearOf(moment) === yearOf(now) && !(withYear && match.status === 'played')
+  const moment = dayOnly || match.kickoffAt === null ? noonOf(match.matchDate) : match.kickoffAt
+  const sameYear = yearOf(moment) === yearOf(now) && !(withYear && dayOnly)
   const day = (sameYear ? dayFormat : dayWithYearFormat).format(moment)
 
-  return match.status === 'played'
+  return dayOnly
     ? { dateTime: match.matchDate, time: day }
     : { dateTime: moment.toISOString(), time: `${day} ${timeFormat.format(moment)}` }
 }

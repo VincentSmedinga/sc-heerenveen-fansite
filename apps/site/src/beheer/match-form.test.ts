@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import type { MatchValues } from './match-fields'
 
 import { emptyFields, emptyGoal } from './match-fields'
-import { readButton, readValues, statusChoices, validate, valuesOf } from './match-form'
+import { readButton, readValues, statusChoices, statusChoicesFor, validate, valuesOf } from './match-form'
 
 const squad = [
   { id: 11, name: 'Luca Oyen', personId: 31, wikipediaPage: 'Luca Oyen' },
@@ -202,7 +202,7 @@ describe('validate', () => {
   it('accepts a result without goals, and a scheduled, postponed or cancelled match without a result', () => {
     expect(validate(filled({ 'uitslag-wij': '0', 'uitslag-zij': '0' }), league).errors).toBeUndefined()
 
-    for (const status of ['scheduled', 'postponed', 'cancelled']) {
+    for (const status of ['scheduled', 'postponed', 'cancelled', 'result_unknown']) {
       const checked = validate(filled({ status, 'uitslag-wij': '', 'uitslag-zij': '' }), league)
 
       expect(checked.errors).toBeUndefined()
@@ -214,6 +214,16 @@ describe('validate', () => {
     expect(statusChoices).toContainEqual({ label: 'Geannuleerd', value: 'cancelled' })
     expect(
       validate(filled({ status: 'cancelled', 'uitslag-wij': '1', 'uitslag-zij': '0' }), league).errors,
+    ).toHaveProperty('uitslag-wij')
+  })
+
+  it('offers Uitslag onbekend only to a match that already has it, and asks for no goals with it (#1622)', () => {
+    expect(statusChoices).toContainEqual({ label: 'Uitslag onbekend', value: 'result_unknown' })
+    expect(statusChoicesFor().map((choice) => choice.value)).not.toContain('result_unknown')
+    expect(statusChoicesFor('played').map((choice) => choice.value)).not.toContain('result_unknown')
+    expect(statusChoicesFor('result_unknown').map((choice) => choice.value)).toContain('result_unknown')
+    expect(
+      validate(filled({ status: 'result_unknown', 'uitslag-wij': '1', 'uitslag-zij': '0' }), league).errors,
     ).toHaveProperty('uitslag-wij')
   })
 

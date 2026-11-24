@@ -2585,7 +2585,7 @@ Een club die samenging of verhuisde (zoals `Dordrecht '90` en `SVV`) blijft een 
 
 #### De stap matches
 
-De stap `matches` ([`src/old-site-matches.ts`](src/old-site-matches.ts)) maakt van elke wedstrijd in de bestanden een rij in `matches`, met `data_source = 'oude-fansite'` en `status = 'played'`, en een rij in `match_statistics` waar ten minste één van de zes cijfers boven 0 is.
+De stap `matches` ([`src/old-site-matches.ts`](src/old-site-matches.ts)) maakt van elke wedstrijd in de bestanden een rij in `matches`, met `data_source = 'oude-fansite'` en `status = 'played'` (of `result_unknown`, zie hieronder), en een rij in `match_statistics` waar ten minste één van de zes cijfers boven 0 is.
 Hij doet dit:
 
 - Het seizoen `9091` wordt `1990/91`, en de competitiecode wordt de naam (1 Eredivisie, 2 KNVB Beker, 3 Champions League, 4 Europacup II, 5 Intertoto Cup, 6 UEFA Cup, 7 Eerste divisie, 8 Play-offs UEFA Cup).
@@ -2597,6 +2597,11 @@ Hij doet dit:
 - `dt` is Amsterdamse tijd.
   Bij `00:00` blijft `kickoff_at` leeg en is het een datum zonder tijd.
 - `note` krijgt alleen de opmerkingen van de oude redactie die een feit zijn voor een bezoeker; de rest staat in de beslissing en wordt niet gekopieerd.
+- Een wedstrijd waarvan de oude fansite niets vastlegde (0 – 0 bij uitslag en rust, geen doelpunten, kaarten, opstelling, scheidsrechter, toeschouwers, cijfers of opmerking bij de uitslag), krijgt `status = 'result_unknown'` en geen uitslag, geen ruststand en geen toeschouwers (#1622).
+  Voor een wedstrijd in de Eredivisie of de Eerste divisie van 1990/91 tot en met 2006/07 leest de stap eerst de kruistabel van Wikipedia (`readCrossTable`): staat daar 0 – 0, dan blijft het een uitslag.
+  Kan de tabel niet gelezen worden, dan blijft de wedstrijd zoals hij is.
+  Een bewaarde wedstrijd die aan de regel voldoet, wordt bij de volgende import leeg gemaakt, tenzij de redactie er iets van invulde.
+  Het logboek telt per seizoen hoeveel wedstrijden `result_unknown` kregen en hoeveel 0 – 0 bleef omdat Wikipedia het bevestigt.
 - De stap raakt alleen rijen met de bron `oude-fansite`.
   Een rij met dezelfde sleutel en de bron `wikipedia` slaat hij over en meldt hij.
   De aftrap en de uitslag die de redactie invulde (`match_edits`) blijven zoals ze zijn.

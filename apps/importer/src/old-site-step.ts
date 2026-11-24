@@ -1,10 +1,16 @@
 import type { Database } from '@fansite/db/client'
 
+import type { CrossTableSeason, FetchedCrossTable } from './old-site-cross-tables.ts'
 import type { OldSiteData } from './old-site-file.ts'
 import type { TitleLookup } from './old-site-persons.ts'
 
 /** What a step may use besides the database and the files. */
 export type OldSiteContext = {
+  /**
+   * Gets the cross tables of Wikipedia of the seasons asked for (#1622). Only the step
+   * `matches` uses it, and only when a match of a league has nothing recorded.
+   */
+  crossTables?: (seasons: readonly CrossTableSeason[]) => Promise<FetchedCrossTable[]>
   /** Asks Wikipedia about a title. Only the step `personen` uses it. */
   titles: TitleLookup
 }

@@ -61,6 +61,18 @@ const problems: Readonly<Record<CrossTableProblem, string>> = {
 }
 
 /**
+ * What the cross tables say about the matches of sc Heerenveen (#1622), to check a match of the
+ * old fansite that has nothing recorded. A season is `readable` when its table was read and has
+ * sc Heerenveen in it; the score of a match in it is under `season|competition|clubId|home`
+ * (`crossTableKey`), with the goals of sc Heerenveen first. A match that the table has no score
+ * for is in neither, so the caller knows that Wikipedia says nothing about it. It only reads.
+ */
+export type CrossTableScores = {
+  readable: ReadonlySet<string>
+  scores: ReadonlyMap<string, { against: number; for: number }>
+}
+
+/**
  * Compares the scores of sc Heerenveen in each table with the matches in the database, of any
  * source. A match is found on the season, the competition and the club (`findMatchesByClub`),
  * and on who was at home. The club is found by the article its row links to, by the name the
@@ -198,6 +210,10 @@ export async function compareCrossTables(
   return compared
 }
 
+/** The key of a match in `CrossTableScores`; the key of a season is `season|competition`. */
+export const crossTableKey = (match: { clubId: number; competition: string; home: boolean; season: string }) =>
+  `${match.season}|${match.competition}|${match.clubId}|${match.home ? 'home' : 'away'}`
+
 /**
  * The seasons to ask Wikipedia about: each season from 1990/91 to 2006/07 of a league the files
  * have a usable match of, the oldest first. Files without such a match ask for nothing.
@@ -301,6 +317,60 @@ export async function fetchCrossTables(
   }
 
   return fetched
+}
+
+/** Reads the tables and finds the club of each score, like `compareCrossTables`. */
+export async function readCrossTableScores(
+  db: Pick<OldSiteDatabase, 'select'>,
+  tables: readonly FetchedCrossTable[],
+): Promise<CrossTableScores> {
+  const readable = new Set<string>()
+  const scores = new Map<string, { against: number; for: number }>()
+
+  if (tables.length === 0) {
+    return { readable, scores }
+  }
+
+  const findClub = await clubFinder(db)
+  const reads = tables.map((table) => ({ read: table.kind === 'page' ? readCrossTable(table.text) : table, table }))
+  const shownNames = new Map<string, Set<string>>()
+
+  for (const { read } of reads) {
+    for (const result of read.kind === 'read' ? read.results : []) {
+      shownNames.set(result.homePage, (shownNames.get(result.homePage) ?? new Set()).add(result.homeClub))
+    }
+  }
+
+  for (const { read, table } of reads) {
+    if (read.kind !== 'read') {
+      continue
+    }
+
+    const ours = read.results.filter((cell) =>
+      [cell.homePage, cell.awayPage].some((name) => name.toLowerCase() === ourPage),
+    )
+
+    if (ours.length === 0) {
+      continue
+    }
+
+    readable.add(`${table.season}|${table.competition}`)
+
+    for (const result of ours) {
+      const home = result.homePage.toLowerCase() === ourPage
+      const [page, shown] = home ? [result.awayPage, result.awayClub] : [result.homePage, result.homeClub]
+      const club = findClub([page, shown, ...(shownNames.get(page) ?? [])])
+
+      if (club !== undefined) {
+        scores.set(crossTableKey({ clubId: club.id, competition: table.competition, home, season: table.season }), {
+          against: home ? result.awayGoals : result.homeGoals,
+          for: home ? result.homeGoals : result.awayGoals,
+        })
+      }
+    }
+  }
+
+  return { readable, scores }
 }
 
 /**

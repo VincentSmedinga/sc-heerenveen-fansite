@@ -136,7 +136,7 @@ export type MatchDay = {
    */
   opponentPreviousDay?: null | string
   /** A match that was `postponed` or is `cancelled` has no new date and counts for nothing. */
-  status: 'cancelled' | 'played' | 'postponed' | 'scheduled'
+  status: 'cancelled' | 'played' | 'postponed' | 'result_unknown' | 'scheduled'
 }
 
 /**
@@ -157,7 +157,7 @@ export type MatchDay = {
 export function opponentsAround(publishedAt: Date, matches: readonly MatchDay[]): string[] {
   const published = dayNumber(dutchDay.format(publishedAt))
   const ourDays = matches
-    .filter((match) => match.status === 'played' || match.status === 'scheduled')
+    .filter((match) => match.status === 'played' || match.status === 'result_unknown' || match.status === 'scheduled')
     .map((match) => dayNumber(match.matchDate))
 
   return matches
