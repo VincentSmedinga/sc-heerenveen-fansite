@@ -20,6 +20,12 @@ export type PitchPlayerData = {
   card?: PitchPlayerCard | undefined
   /** His goals, in the order of the clock. A player without any leaves it out. */
   goals?: readonly PitchPlayerGoal[] | undefined
+  /**
+   * What stands before his surname under the disc, to tell him from a namesake: `J.`, or his
+   * given name. Leave it out for a player whose surname is enough. The sentence for a screen
+   * reader always has the whole name.
+   */
+  lead?: string | undefined
   /** The minute he came on. A player of the line-up leaves it out (0). */
   minutesFrom?: number | undefined
   /** The minutes he played, also when he was sent off. The ring shows them. */
@@ -135,6 +141,7 @@ export const PitchPlayer = ({
   className,
   extraTime = false,
   goals,
+  lead,
   minutesFrom,
   minutesPlayed,
   name,
@@ -155,7 +162,8 @@ export const PitchPlayer = ({
     substitutedOffAt,
   }
   const arc = pitchRingArc(player, extraTime)
-  const shownName = name.surname === '' ? (name.givenName ?? '') : name.surname
+  const surname = name.surname === '' ? (name.givenName ?? '') : name.surname
+  const shownName = name.surname === '' || lead === undefined || lead === '' ? surname : `${lead} ${surname}`
 
   return (
     <li

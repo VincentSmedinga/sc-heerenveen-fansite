@@ -133,6 +133,11 @@ export type MatchPagePlayer = {
   captain: boolean
   /** Any number that is unique in the data: the other lists point to a player by it. */
   id: number
+  /**
+   * What stands before his surname where the page shortens his name, to tell him from another
+   * of our players with the same surname: `J.`, or his given name. Empty for most players.
+   */
+  lead?: string | undefined
   name: MatchPlayerName
   /** Whether he is ours. Otherwise he plays for the opponent. */
   ours: boolean
@@ -155,6 +160,10 @@ export type MatchPageSubstitution = {
 
 /** The surname of a name, or the whole name when it has no surname: for a list of scorers. */
 const shortName = (name: MatchPlayerName) => (name.surname === '' ? (name.givenName ?? '') : name.surname)
+
+/** A short name with the lead before it (see `MatchPagePlayer.lead`), when it has one. */
+const withLead = (lead: string | undefined, short: string) =>
+  lead === undefined || lead === '' ? short : `${lead} ${short}`
 
 /** A moment as a number to sort on: 45+2 comes after 45 and before 46. */
 const clock = (moment: { minute: number; stoppageMinutes?: null | number | undefined }) =>
@@ -319,7 +328,7 @@ const scorersOf = (data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlaye
         minute: goal.minute,
         ownGoal: goal.ownGoal,
         penalty: goal.penalty,
-        player: shortName(name),
+        player: withLead(byId.get(goal.playerId)?.lead, shortName(name)),
         stoppageMinutes: goal.stoppageMinutes,
       }
     })
@@ -403,6 +412,7 @@ function teamOf(data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlayer>,
         captain: player.captain,
         card: cardOf(player),
         goals: goalsOf(player),
+        ...(player.lead === undefined || player.lead === '' ? {} : { lead: player.lead }),
         minutesPlayed: minutes.played,
         name: player.name,
         shirtNumber: player.shirtNumber,

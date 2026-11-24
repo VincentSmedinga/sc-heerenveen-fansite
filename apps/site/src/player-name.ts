@@ -48,6 +48,28 @@ const surnamePrefixes = new Set(["'t", '’t', 'da', 'de', 'den', 'der', 'di', '
 const isPrefix = (word: string) => surnamePrefixes.has(word.toLowerCase())
 
 /**
+ * What stands before the surname of a player to tell him from someone with the same surname:
+ * the first letter of his given name and a full stop (`J.`), or the whole given name when one
+ * of the others starts with the same letter too. It is empty for a player without a given name.
+ * The caller decides when there is a namesake at all.
+ */
+export function leadOfName(
+  givenName: null | string | undefined,
+  others: readonly (null | string | undefined)[],
+): string {
+  const given = (givenName ?? '').trim()
+
+  if (given === '') {
+    return ''
+  }
+
+  const initial = given.charAt(0).toUpperCase()
+  const shared = others.some((other) => (other ?? '').trim().charAt(0).toUpperCase() === initial)
+
+  return shared ? given : `${initial}.`
+}
+
+/**
  * The name of a person of whom we only have the name as text (a trainer, or a scorer without a
  * person) in the two parts `PlayerName` shows. The first word is the given name and the rest
  * the surname. When a word after the first is a prefix (`van`, `de`, `der`, ...), the surname
@@ -78,4 +100,40 @@ export function textSortName(name: string): string {
   const at = words.findIndex((word) => !isPrefix(word))
 
   return (at === -1 ? words : words.slice(at)).join(' ')
+}
+
+/** The year a season starts in: `2004/05` is 2004. */
+const startYearOfSeason = (season: string) => Number(season.slice(0, 4))
+
+/**
+ * What stands before the surname of one of our players on the page of a match: the lead (see
+ * `leadOfName`) when another person of ours with the same surname has a season at most one
+ * season from one of his, in `players`. Otherwise it is empty, such as for a player without a
+ * person, a surname or a given name. The seasons in between need not exist: one season apart
+ * is enough, so twins and a father and son in neighbouring seasons are told apart.
+ */
+export function leadOfNamesake(
+  player:
+    | undefined
+    | {
+        givenName: null | string
+        namesakes: readonly { givenName: null | string; seasons: readonly string[] }[]
+        seasons: readonly string[]
+      },
+): string {
+  if (player === undefined) {
+    return ''
+  }
+
+  const years = player.seasons.map(startYearOfSeason)
+  const close = player.namesakes.filter((other) =>
+    other.seasons.some((season) => years.some((year) => Math.abs(startYearOfSeason(season) - year) <= 1)),
+  )
+
+  return close.length === 0
+    ? ''
+    : leadOfName(
+        player.givenName,
+        close.map((other) => other.givenName),
+      )
 }
