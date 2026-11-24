@@ -4715,3 +4715,25 @@
   Wikipedia vult dan alleen een gat.
 - **Alternatieven:** Wikipedia gaat overal voor (tegen de beslissing van 10 november); alles met de hand in het beheer zetten (kan, maar het gat komt bij elke nieuwe kopie van de oude gegevens terug); de stap in `import:old-site` zetten (dat is een andere run dan de Wikipedia-import, en de redactie verwacht Wikipedia daar).
 - **Later:** zie _Een import zoekt een wedstrijd eerst op datum en club_ (9 november 2026): de zin "De uitslag en de status vult hij niet" geldt niet meer voor een wedstrijd zonder uitslag.
+
+## De seizoenspagina van 2006/07 vult de uitslagen en doelpunten die het archief mist
+
+- **Datum:** 24 november 2026
+- **Besluit:** de import van een seizoen (`pnpm import:season`, de workflow _Import season_) leest voor 2006/07 ook het programma op de pagina `Sc Heerenveen in het seizoen 2006/07` van de Nederlandse Wikipedia, na de kruistabel (#1623).
+  - **Wat:** een wedstrijd uit het archief van de Fansite in de Eredivisie zonder uitslag krijgt de uitslag en de status `played`, en doelpunten als het archief niets van de wedstrijd vastlegde (geen scheidsrechter, toeschouwers, ruststand, opmerking of verslag).
+    De wedstrijd wordt gevonden op seizoen, competitie, club, wie thuis speelde en de datum met het jaar van het seizoen.
+    De twee play-offwedstrijden tegen Ajax (9 en 13 mei 2007) worden nieuwe wedstrijden met bron `wikipedia`, competitie `Play-offs Champions League` en de ronde `Eerste ronde, wedstrijd 1/2` en `2/2`.
+    Het archief had ze niet, en de play-offs van de volgende jaren staan er onder dezelfde competitie.
+  - **Wat nooit:** een uitslag die er al is, een uitslag of doelpunten die de redactie invulde en doelpunten die een wedstrijd al heeft.
+    Verschilt de uitslag van de pagina van die in de database, dan staat dat in het logboek en blijft de wedstrijd zoals hij is.
+  - **Doelpunten:** ze worden alleen bewaard als de lijst optelt tot de uitslag.
+    Zegt een regel iets tegenstrijdigs, zoals 4-0 met een lijst die op 4-1 eindigt, dan krijgt de wedstrijd de uitslag uit de kolom Uitslag, geen doelpunten en een regel in het logboek, zodat de redactie hem kan nakijken (de regel van 7 november 2026).
+    Een doelpunt van ons wordt aan een speler van het seizoen gelinkt met `playerLinker`, die bij twee spelers met dezelfde naam niets raadt.
+    Een doelpunt zonder speler blijft een naam en komt in het logboek, en de import maakt geen speler van een doelpuntenmaker (10 november 2026).
+  - **Herhaalbaar:** een tweede run vindt niets meer te vullen.
+    `import:old-site` laat de doelpunten van zo'n wedstrijd staan: de stap van de doelpunten slaat een wedstrijd over waarvan de bestanden niets vastlegden en die al doelpunten heeft.
+    De uitslag blijft staan als hij gelijk is aan de kruistabel, en een uitslag die daar niet in staat wordt bij de volgende import weer leeggemaakt (de regel van #1622).
+- **Waarom:** de seizoenspagina is de enige bron met datums, uitslagen en minuten voor dit seizoen, en wat het archief heeft blijft van het archief.
+  Een lijst die niet optelt, spreekt de uitslag en de bezoeker tegen.
+- **Alternatieven:** de wedstrijd van 13 mei niet maken en melden (de redactie voegt hem toe met het formulier, trager, en de wedstrijd ontbreekt zolang niemand het doet); alle regels met een tegenstrijdigheid overslaan; de doelpunten ook aan een wedstrijd geven waarvan het archief wel iets vastlegde, wat de stap van de doelpunten bij de volgende import weer weghaalt.
+- **Later:** zie _Wikipedia vult de uitslag van een wedstrijd zonder uitslag_ (24 november 2026): deze beslissing volgt dezelfde regel, en vult ook de doelpunten.

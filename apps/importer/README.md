@@ -1946,6 +1946,13 @@ pnpm run import:season 2025/26
   Een uitslag die er al is, en een uitslag die de redactie invulde, blijven zoals ze zijn.
   Een wedstrijd waarvoor de tabel niets heeft, of een tabel die niet te lezen is, krijgt een regel in het logboek en verder niets.
   Een seizoen zonder zo'n wedstrijd vraagt Wikipedia niets, dus een tweede run verandert niets.
+- Voor 2006/07 leest ze daarna ook het programma op de pagina `Sc Heerenveen in het seizoen 2006/07` (`fillFromSeasonProgramme` in [`src/fill-from-season-programme.ts`](src/fill-from-season-programme.ts), `readSeasonProgramme` in [`src/read-season-programme.ts`](src/read-season-programme.ts), #1623).
+  De tabel Eredivisie geeft per rij de dag en maand (het jaar volgt uit het seizoen), thuis en uit, de uitslag en de doelpunten met minuut, blessuretijd en strafschop; de beker en de UEFA Cup blijven buiten.
+  Een wedstrijd van het archief zonder uitslag krijgt de uitslag, en als het archief niets van de wedstrijd vastlegde ook de doelpunten, mits de lijst optelt tot de uitslag.
+  Een uitslag die er al is, en uitslag of doelpunten van de redactie, blijven zoals ze zijn.
+  Een doelpunt van ons krijgt een speler van het seizoen (`playerLinker`); lukt dat niet, dan blijft het een naam en noemt het logboek het.
+  De twee play-offwedstrijden tegen Ajax worden nieuwe wedstrijden met bron `wikipedia` en competitie `Play-offs Champions League`.
+  Een lijst die niet optelt, en een regel die iets tegenstrijdigs zegt, geven de wedstrijd de uitslag van de kolom Uitslag, geen doelpunten en een regel in het logboek.
 
 Op de host draait hetzelfde bestand als de cronjob de opdracht, met `--season` en het seizoen erachter:
 
@@ -2250,7 +2257,7 @@ Een naam zonder link blijft bewaard als hij minstens twee woorden heeft en geen 
 
 De pagina's van deze seizoenen (zie `transfersPageTitle`: 2006/07 zonder "(mannen)", de andere met) hebben een lijst met transfers onder de kop "Transfers" of "Mutaties".
 `readSeasonTransfers` in [`src/read-transfers.ts`](src/read-transfers.ts) leest die lijsten in de vorm `SeasonSquad`, met de bron `transfers`.
-Voor 2006/07 leest `readSeasonScorers` in hetzelfde bestand ook de lijst onder "Doelpuntenmakers", met de bron `doelpunten`: die wedstrijden staan niet in de database.
+Voor 2006/07 leest `readSeasonScorers` in hetzelfde bestand ook de lijst onder "Doelpuntenmakers", met de bron `doelpunten`: de lijst heeft per speler het aantal doelpunten; de doelpunten per wedstrijd komen uit het programma op dezelfde pagina (#1623).
 Het zijn tekstlezers: ze doen zelf geen verzoek en schrijven niets.
 De import van #744 roept ze aan.
 
@@ -2607,6 +2614,7 @@ Hij doet dit:
   Voor een wedstrijd in de Eredivisie of de Eerste divisie van 1990/91 tot en met 2006/07 leest de stap eerst de kruistabel van Wikipedia (`readCrossTable`): staat daar 0 – 0, dan blijft het een uitslag.
   Kan de tabel niet gelezen worden, dan blijft de wedstrijd zoals hij is.
   Een uitslag die de import van een seizoen uit de kruistabel vulde (#1621), maakt ze niet weer leeg.
+  De stap van de doelpunten laat een wedstrijd waarvan de bestanden niets vastlegden en die al doelpunten heeft zoals hij is (#1623).
   Een bewaarde wedstrijd die aan de regel voldoet, wordt bij de volgende import leeg gemaakt, tenzij de redactie er iets van invulde.
   Het logboek telt per seizoen hoeveel wedstrijden `result_unknown` kregen en hoeveel 0 – 0 bleef omdat Wikipedia het bevestigt.
 - De stap raakt alleen rijen met de bron `oude-fansite`.

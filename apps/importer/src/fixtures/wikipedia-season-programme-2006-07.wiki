@@ -1,0 +1,59 @@
+'''Sc Heerenveen in het seizoen 2006/07''' is een verzonnen pagina voor de tests.
+
+==Programma==
+===[[Eredivisie 2006/07|Eredivisie]]===
+{| class="wikitable"
+! Datum
+! Thuis
+! Uit
+! Uitslag
+! Doelpuntenmakers
+! Bijzonderheden
+|-
+| 19-08 || [[AFC Ajax|Ajax]] || sc Heerenveen || 2-3 || 1-0: [[Anna Voorbeeld|Voorbeeld]] '40<br />1-1: [[Piet Proef]] '42<br />2-1: [[Kees Test|Test]] '58 (p)<br />2-2: [[Piet Proef|Proef]] '81<br />2-3: [[Fanny Onbekend|Onbekend]] '90 (+3)||
+|-
+| 26-08 || sc Heerenveen || [[Feyenoord]] || 2-0 || 1-0: [[Piet Proef|Proef]] '12 || Rood:<br />[[Kees Test|Test]] '10
+|-
+| 09-09 || [[Testdorp]] || sc Heerenveen ||0-0 ||-||
+|-
+| 17-09 || sc Heerenveen || [[AFC Ajax|Ajax]] || 1-1 ||1-0: [[Piet Proef|Proef]] '29<br />1-1: [[Kees Test|Test]] '64 ||
+|-
+| 24-09 || [[Feyenoord]] || sc Heerenveen || 1-0 ||1-0: [[Kees Test|Test]] '90 (+4, p) ||
+|-
+| 01-10 || sc Heerenveen || [[Onbekende FC]] || 3-0 ||1-0: Proef '4<br />2-0: Proef '8<br />3-0: Proef '9 ||
+|-
+| 08-10 || sc Heerenveen || [[Testdorp]] || - || ||
+|}
+
+===[[KNVB Beker 2006/07 (mannen)|KNVB beker]]===
+{| class="wikitable"
+! Datum
+! Thuis
+! Uit
+! Uitslag
+! Doelpuntenmakers
+! Bijzonderheden
+|-
+| 14-12 || sc Heerenveen || [[Testdorp]] ||1-0 ||1-0: [[Piet Proef|Proef]] '90 (+2)||
+|}
+
+===[[Play-offs Nederlands voetbal 2007|Play-offs]]===
+Play-offs voor het behalen van de derde voorronde.
+
+====Eerste Ronde====
+{| class="wikitable"
+! datum || thuis || uit || uitslag || doelpuntenmaker(s) || Bijzonderheden
+|-
+| 09-05 || sc Heerenveen || [[AFC Ajax|Ajax]] ||1-0 ||1-0: [[Piet Proef|Proef]] '18 ||
+|-
+| 13-05 || [[AFC Ajax|Ajax]] || sc Heerenveen ||4-0 ||1-0: [[Kees Test|Test]] '22<br />2-0: [[Kees Test|Test]] '23<br />3-0: [[Kees Test|Test]] '61 (p)<br />4-1: [[Piet Proef|Proef]] '86 ||Rood:<br />[[Kees Test|Test]] '59
+|}
+
+==Doelpuntenmakers==
+===[[Eredivisie 2006/07|Eredivisie]]===
+{| class="wikitable"
+! Naam
+! Doelpunten
+|-
+| [[Piet Proef]] || 5
+|}
