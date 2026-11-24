@@ -142,9 +142,9 @@ function MergePlan({ plan, reason }: { plan: ClubMergePlan; reason: string }) {
           ))}
         </List>
         <Text>
-          De naam {other.name} wordt een andere naam van {kept.name}. De import van de oude fansite vindt de club daarna
-          onder die naam en maakt hem niet opnieuw. Het adres van {other.name} (<Strong>{other.slug}</Strong>) bestaat
-          daarna niet meer.
+          De naam {other.name} wordt een andere naam van {kept.name}. De import van het archief van de Fansite vindt de
+          club daarna onder die naam en maakt hem niet opnieuw. Het adres van {other.name} (
+          <Strong>{other.slug}</Strong>) bestaat daarna niet meer.
         </Text>
       </Card>
       <ClubMergeForm

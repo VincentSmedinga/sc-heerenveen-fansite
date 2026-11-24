@@ -146,7 +146,7 @@ export function ScoringCard() {
         Punten
       </Heading>
       <ScoringTable caption="Wat een voorspelling oplevert" />
-      <Text>{`De telling van de oude Fansite. Hoogstens ${maxPredictionPoints} punten per wedstrijd.`}</Text>
+      <Text>{`De telling van de Fansite. Hoogstens ${maxPredictionPoints} punten per wedstrijd.`}</Text>
       <RulesLink />
     </Card>
   )

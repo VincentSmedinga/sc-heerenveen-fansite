@@ -3078,6 +3078,7 @@
   Drie namen ("het archief van de oude sc Heerenveen Fansite", "eigen administratie", "Oude fansite") voor dezelfde bron lazen als drie bronnen.
 - **Alternatieven:** "Archief sc Heerenveen Fansite" (zegt niet dat het onze eigen gegevens zijn); de opgeslagen waarde `Oude fansite` ook veranderen (dan moet elke bewaarde rij mee, en de import herkent zijn eigen verslagen aan die waarde).
 - **Later:** vervangt de naam "het archief van de oude sc Heerenveen Fansite" uit de beslissingen over de bronvermelding van wedstrijden en de tekst "eigen administratie" onder een verslag.
+- **Later:** "de Fansite" en "het archief van de Fansite" zijn nu de namen voor de jaren 1997 tot 2006, en de bronvermelding "sc Heerenveen Fansite" blijft (24 november 2026, _De Fansite van 1997 tot 2006 heet "de Fansite" of "het archief van de Fansite"_).
 
 ## Een pagina met gegevens van Wikipedia heeft één bronvermelding
 
@@ -3328,3 +3329,19 @@
 - **Waarom:** Matomo vraagt een PHP-programma om bij te werken, een extra database op de host en gegevens per bezoek, en geeft vooral het pad per bezoek, dat we niet willen.
 - **Alternatieven:** Matomo op een eigen subdomein, gevoed vanuit de proxy; Matomo met een script in de pagina (een script, dat we niet willen); een dienst van een ander (breekt de belofte "geen verzoeken aan derden").
 - **Later:** vervangt niets; sluit aan op _We tellen paginaweergaven en unieke bezoekers per dag, met een kenmerk dat elke dag wisselt_.
+
+## De Fansite van 1997 tot 2006 heet "de Fansite" of "het archief van de Fansite"
+
+- **Datum:** 24 november 2026
+- **Besluit:** tekst voor bezoekers en redacteurs zegt "het archief van de Fansite" voor wat daaruit is opgeslagen en getoond wordt (wedstrijden, quizzen, cijfers als gegevens) en "de Fansite" voor de mensen, de telling en de tijd.
+  Altijd met een hoofdletter F en met "de" of "het", nooit "de oude Fansite".
+  De site van nu heet alleen sc Heerenveen Fansite, "deze site" of "wij".
+  Staan beide in één zin, dan is de oude "de Fansite van toen" of krijgt hij zijn jaren, 1997 tot 2006.
+  Tekst voor bezoekers is alles wat een bezoeker of een redacteur leest: de site, Beheer, Storybook, het hoofdstuk Redactie en de pagina Updates, ook de al gepubliceerde regel van 0.6.0.
+  De opgeslagen waarde `Oude fansite` en `oude-fansite`, mapnamen en namen in de code veranderen niet.
+  Een test in `apps/site` (`no-old-fansite.test.ts`) zoekt de bronbestanden van de site en het designsysteem op "oude fansite".
+- **Waarom:** de site van nu draagt dezelfde naam, dus alleen "de Fansite" kan twee dingen betekenen.
+  "Archief" en "mensen" geven een schrijver een vraag die hij kan beantwoorden.
+  De opgeslagen waarden en mapnamen veranderen niet, want daar hangt de import aan.
+- **Alternatieven:** overal "het archief van de Fansite" (klungelig in "cijfers van bezoekers van het archief van de Fansite"); overal "de Fansite (1997–2006)" (rommelig op kleine kaarten); de regel van 0.6.0 laten staan; alle documenten en README's aanpassen; geen test, alleen de checklist van de reviewer.
+- **Later:** vult _Onze eigen gegevens heten overal sc Heerenveen Fansite_ aan: "de Fansite" en "het archief van de Fansite" zijn nu de namen voor de jaren 1997 tot 2006, en de bronvermelding "sc Heerenveen Fansite" blijft.

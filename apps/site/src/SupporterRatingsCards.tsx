@@ -82,12 +82,12 @@ export const afterTheSeason = 'Na het seizoen'
 export const noYearWinners = 'Nog geen uitblinkers.'
 
 /** The source line under the list of the Uitblinkers of the year. */
-export const yearWinnersSource = 'Tot 2006/07: cijfers van bezoekers van de oude Fansite.'
+export const yearWinnersSource = 'Tot 2006/07: cijfers van bezoekers van de Fansite.'
 
 /** The small line under a winner: the number of ratings, or the source of an old rating. */
 const ratingsLine = (ratings: number | undefined) =>
   ratings === undefined
-    ? 'Seizoencijfer van de oude Fansite'
+    ? 'Seizoencijfer van de Fansite'
     : `Gemiddelde van ${ratings} ${ratings === 1 ? 'cijfer' : 'cijfers'}`
 
 /** The id of the heading of the card of a season, so the card can name itself. */
@@ -110,7 +110,7 @@ export function BestYearWinnersCard({ best }: { best: BestYearWinners }) {
           label="Uitblinker van de Uitblinkers"
           line={
             player.ratings === undefined
-              ? `Seizoen ${player.season} · seizoencijfer van de oude Fansite`
+              ? `Seizoen ${player.season} · seizoencijfer van de Fansite`
               : `Seizoen ${player.season} · ${ratingsLine(player.ratings).toLowerCase()}`
           }
           name={player.name}

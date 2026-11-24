@@ -110,7 +110,7 @@ describe('the page Afwijkende formaties', () => {
 
     expect(html).toContain(`href="/beheer/wedstrijden/${id}/verslag"`)
     expect(html).toContain('4-4-2: Vroeg (u), 13 augustus 2005')
-    expect(html).toContain('(Oude fansite)')
+    expect(html).toContain('(het archief van de Fansite)')
     expect(html.indexOf('2006/07')).toBeLessThan(html.indexOf('2005/06'))
     expect(html).toContain('href="/beheer/wedstrijden/kwaliteit"')
   })

@@ -56,7 +56,7 @@ export const releaseNotes: ReleaseNotes = {
   ],
   '0.6.0': [
     'Nieuw: een pagina per wedstrijd, met de opstelling op het veld, de wissels, de kaarten en de doelpunten.',
-    'Wedstrijden vanaf 1990: ook de seizoenen van de oude Fansite, met de Eerste divisie, de UEFA Cup, de Intertoto Cup en de Champions League.',
+    'Wedstrijden vanaf 1990: ook de seizoenen van de Fansite, met de Eerste divisie, de UEFA Cup, de Intertoto Cup en de Champions League.',
     'Nieuw: een pagina per speler, met zijn cijfers per seizoen, zijn loopbaan bij onze club en grafieken.',
     'Spelers staat nu in het menu: de selectie van elk seizoen, alle spelers op naam of op land, en zoeken op naam.',
     'Zoeken in wedstrijden: kies een tegenstander, een competitie, een uitslag of een land, of begin met een kant-en-klare vraag. En: wat gebeurde er op deze dag?',

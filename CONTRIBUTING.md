@@ -179,6 +179,12 @@ printf '%s\n' '<titel>' | pnpm exec commitlint
   Dit geldt niet voor het sjabloon van de pull request, issues, beschrijvingen van pull requests en reacties: GitHub toont daar elk regeleinde.
 - **De club:** schrijf altijd "sc Heerenveen", met een kleine s en c, ook aan het begin van een zin en in de sitenaam, sc Heerenveen Fansite.
   Koppen uit de media houden hun eigen spelling.
+- **De Fansite van 1997 tot 2006:** in tekst voor bezoekers en redacteurs heet die "het archief van de Fansite" voor wat daaruit is opgeslagen en getoond wordt (wedstrijden, quizzen, cijfers als gegevens), en "de Fansite" voor de mensen, de telling en de tijd ("bezoekers van de Fansite", "de telling van de Fansite").
+  Altijd met een hoofdletter F en met "de" of "het", nooit "de oude Fansite".
+  De site van nu heet alleen sc Heerenveen Fansite, "deze site" of "wij".
+  Staan beide in één zin, dan is de oude "de Fansite van toen" of krijgt hij zijn jaren, 1997 tot 2006.
+  De bronvermelding "Wikipedia en sc Heerenveen Fansite" blijft zoals ze is.
+  De opgeslagen waarde `Oude fansite`, mapnamen en namen in de code blijven ook zoals ze zijn.
 - **Woorden:** zeg "import" of "importer".
   Nooit "ingestion".
 - **Beslissingen:** een echte keuze tussen alternatieven komt in het bestand van het onderdeel in [`docs/beslissingen/`](docs/beslissingen/) (`index.md` noemt ze), in het Nederlands en in het vaste formaat: datum, besluit, waarom en alternatieven.

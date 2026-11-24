@@ -110,7 +110,7 @@ describe('the cards of the Uitblinkers van het jaar', () => {
   })
 
   it('names the old Fansite where there is no number of ratings', () => {
-    expect(html).toContain('Seizoencijfer van de oude Fansite')
+    expect(html).toContain('Seizoencijfer van de Fansite')
   })
 
   it('says "Na het seizoen" for the season that has no winner yet, without a seal', () => {
@@ -146,6 +146,6 @@ describe('the card Uitblinker van de Uitblinkers', () => {
     expect(html).toContain('Uitblinker van de Uitblinkers')
     expect(html).toContain('6,7')
     expect(html).toContain('Seizoen 2005/06 · gemiddelde van 631 cijfers')
-    expect(html).toContain('Seizoen 1999/00 · seizoencijfer van de oude Fansite')
+    expect(html).toContain('Seizoen 1999/00 · seizoencijfer van de Fansite')
   })
 })

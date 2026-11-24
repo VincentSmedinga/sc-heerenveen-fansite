@@ -48,7 +48,7 @@ describe('the page Uitblinker van het jaar', () => {
     expect(html.indexOf('Uitblinker 2026/27')).toBeLessThan(html.indexOf('Uitblinker 2000/01'))
     expect(html).not.toContain('<table')
     expect(html).toContain('Uitblinker van de Uitblinkers')
-    expect(html).toContain('Tot 2006/07: cijfers van bezoekers van de oude Fansite.')
+    expect(html).toContain('Tot 2006/07: cijfers van bezoekers van de Fansite.')
     // On a phone the strong card stands before the cards of the years.
     expect(html.indexOf('Uitblinker van de Uitblinkers')).toBeLessThan(html.indexOf('Uitblinker 2026/27'))
   })

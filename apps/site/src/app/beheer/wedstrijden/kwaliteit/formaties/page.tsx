@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { oldSiteReportSource } from '@fansite/db/schema'
 import { Card, Heading, Link, List, Page, Text } from '@fansite/design-system'
 
 import { longDayOf } from '#src/app/beheer/gap-table'
@@ -16,6 +17,9 @@ import { getDatabase } from '#src/database'
 export const dynamic = 'force-dynamic'
 
 const title = 'Afwijkende formaties'
+
+// The stored value stays as it is; the editors read the name of the archive.
+const sourceLabel = (source: string) => (source === oldSiteReportSource ? 'het archief van de Fansite' : source)
 
 export const metadata: Metadata = { robots: { follow: false, index: false }, title }
 
@@ -63,7 +67,7 @@ export default async function UnusualFormationsPage() {
                       <Link href={reportPath(match.id)}>
                         {match.formation}: {match.opponent} ({match.home ? 't' : 'u'}), {longDayOf(match.matchDate)}
                       </Link>
-                      {match.source === null ? null : ` (${match.source})`}
+                      {match.source === null ? null : ` (${sourceLabel(match.source)})`}
                     </List.Item>
                   ))}
               </List>
