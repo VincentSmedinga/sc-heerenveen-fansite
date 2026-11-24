@@ -19,12 +19,22 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
-  for (const table of ['page_views', 'daily_visitors', 'visitor_salts', 'visitor_hashes', 'visit_exclusions']) {
+  for (const table of [
+    'page_views',
+    'daily_visitors',
+    'visitor_salts',
+    'visitor_hashes',
+    'visit_exclusions',
+    'page_transitions',
+    'browser_visitors',
+  ]) {
     await database.pool.query('DELETE FROM ??', [table])
   }
 })
 
 const morning = new Date('2026-10-26T08:00:00Z')
+
+const where = { kind: { browser: 'Firefox', device: 'computer', os: 'Linux' }, source: 'direct' } as const
 
 const browser = 'Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0'
 
@@ -64,11 +74,17 @@ describe('createVisitCounter', () => {
   it('counts each view of a page, and each visitor once a day', async () => {
     const counter = createVisitCounter(database.db)
 
-    await counter.record({ address: '203.0.113.7', now: morning, path: '/', userAgent: browser })
-    await counter.record({ address: '203.0.113.7', now: morning, path: '/', userAgent: browser })
-    await counter.record({ address: '203.0.113.7', now: morning, path: '/nieuws/podcasts', userAgent: browser })
-    await counter.record({ address: '203.0.113.8', now: morning, path: '/', userAgent: browser })
-    await counter.record({ address: '203.0.113.7', now: morning, path: '/', userAgent: 'Safari' })
+    await counter.record({ ...where, address: '203.0.113.7', now: morning, path: '/', userAgent: browser })
+    await counter.record({ ...where, address: '203.0.113.7', now: morning, path: '/', userAgent: browser })
+    await counter.record({
+      ...where,
+      address: '203.0.113.7',
+      now: morning,
+      path: '/nieuws/podcasts',
+      userAgent: browser,
+    })
+    await counter.record({ ...where, address: '203.0.113.8', now: morning, path: '/', userAgent: browser })
+    await counter.record({ ...where, address: '203.0.113.7', now: morning, path: '/', userAgent: 'Safari' })
 
     expect(await rows('page_views')).toEqual([
       { day: '2026-10-26', path: '/', views: 4 },
@@ -81,7 +97,7 @@ describe('createVisitCounter', () => {
 
   it('counts a visitor again on the next day, with a salt of its own', async () => {
     const counter = createVisitCounter(database.db)
-    const visit = { address: '203.0.113.7', path: '/', userAgent: browser }
+    const visit = { ...where, address: '203.0.113.7', path: '/', userAgent: browser }
 
     await counter.record({ ...visit, now: morning })
     await counter.record({ ...visit, now: new Date('2026-10-27T08:00:00Z') })
@@ -102,7 +118,7 @@ describe('createVisitCounter', () => {
   it('gives the same salt to a second process and counts the visitor once', async () => {
     const first = createVisitCounter(database.db)
     const second = createVisitCounter(database.db)
-    const visit = { address: '203.0.113.7', now: morning, path: '/', userAgent: browser }
+    const visit = { ...where, address: '203.0.113.7', now: morning, path: '/', userAgent: browser }
 
     await Promise.all([first.record(visit), second.record(visit)])
     await second.record(visit)
@@ -115,7 +131,7 @@ describe('createVisitCounter', () => {
   it('counts the view but no visitor when there is no address', async () => {
     const counter = createVisitCounter(database.db)
 
-    await counter.record({ address: undefined, now: morning, path: '/', userAgent: browser })
+    await counter.record({ ...where, address: undefined, now: morning, path: '/', userAgent: browser })
 
     expect(await rows('page_views')).toEqual([{ day: '2026-10-26', path: '/', views: 1 }])
     expect(await rows('daily_visitors')).toEqual([])
@@ -139,6 +155,38 @@ describe('createVisitCounter', () => {
     expect(await rows('daily_visitors')).toEqual([])
   })
 
+  it('counts a step from a page or an origin to a page, and not a reload', async () => {
+    const counter = createVisitCounter(database.db)
+    const visit = { ...where, address: '203.0.113.7', now: morning, userAgent: browser }
+
+    await counter.record({ ...visit, path: '/nieuws', source: '/' })
+    await counter.record({ ...visit, path: '/nieuws', source: '/' })
+    await counter.record({ ...visit, path: '/nieuws', source: 'forum' })
+    await counter.record({ ...visit, path: '/nieuws', source: '/nieuws' })
+
+    expect(await rows('page_transitions')).toEqual([
+      { day: '2026-10-26', path: '/nieuws', source: '/', views: 2 },
+      { day: '2026-10-26', path: '/nieuws', source: 'forum', views: 1 },
+    ])
+    // The reload is still a view of the page.
+    expect(await rows('page_views')).toEqual([{ day: '2026-10-26', path: '/nieuws', views: 4 }])
+  })
+
+  it('counts a visitor once a day by kind of browser, system and device', async () => {
+    const counter = createVisitCounter(database.db)
+    const phone = { browser: 'Safari', device: 'telefoon', os: 'iOS' } as const
+
+    await counter.record({ ...where, address: '203.0.113.7', now: morning, path: '/', userAgent: browser })
+    await counter.record({ ...where, address: '203.0.113.7', now: morning, path: '/nieuws', userAgent: browser })
+    await counter.record({ ...where, address: '203.0.113.8', kind: phone, now: morning, path: '/', userAgent: 'phone' })
+    await counter.record({ ...where, address: undefined, kind: phone, now: morning, path: '/', userAgent: 'phone' })
+
+    expect(await rows('browser_visitors')).toEqual([
+      { browser: 'Safari', day: '2026-10-26', device: 'telefoon', os: 'iOS', visitors: 1 },
+      { browser: 'Firefox', day: '2026-10-26', device: 'computer', os: 'Linux', visitors: 1 },
+    ])
+  })
+
   it('has only the day, the reason and the number in the table of skipped requests', async () => {
     const [columns] = await database.pool.query<RowDataPacket[]>(
       "SELECT column_name AS name FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'visit_exclusions' ORDER BY ordinal_position",
@@ -151,8 +199,8 @@ describe('createVisitCounter', () => {
     const counter = createVisitCounter(database.db)
     const address = '2001:db8:85a3::8a2e:370:7334'
 
-    await counter.record({ address, now: morning, path: '/', userAgent: browser })
-    await counter.record({ address: '198.51.100.23', now: morning, path: '/privacy', userAgent: browser })
+    await counter.record({ ...where, address, now: morning, path: '/', userAgent: browser })
+    await counter.record({ ...where, address: '198.51.100.23', now: morning, path: '/privacy', userAgent: browser })
 
     const [tables] = await database.pool.query<RowDataPacket[]>(
       'SELECT table_name AS name FROM information_schema.tables WHERE table_schema = DATABASE()',
@@ -163,7 +211,7 @@ describe('createVisitCounter', () => {
     for (const { name } of tables) {
       const content = JSON.stringify(await rows(String(name)))
 
-      for (const secret of [address, '198.51.100.23', browser, 'Firefox', 'Mozilla', '2001:db8', '198.51']) {
+      for (const secret of [address, '198.51.100.23', browser, 'Mozilla', 'Gecko', 'rv:130', '2001:db8', '198.51']) {
         expect(content, `the table ${String(name)} holds "${secret}"`).not.toContain(secret)
       }
     }
@@ -173,7 +221,7 @@ describe('createVisitCounter', () => {
 describe('removeVisitorData', () => {
   it('removes the salt and the hashes of the days before today, and keeps the counters', async () => {
     const counter = createVisitCounter(database.db)
-    const visit = { address: '203.0.113.7', path: '/', userAgent: browser }
+    const visit = { ...where, address: '203.0.113.7', path: '/', userAgent: browser }
 
     await counter.record({ ...visit, now: new Date('2026-10-25T08:00:00Z') })
     await counter.record({ ...visit, now: morning })
@@ -191,7 +239,7 @@ describe('removeVisitorData', () => {
   it('leaves nothing of yesterday when the day is over and nobody visits', async () => {
     const counter = createVisitCounter(database.db)
 
-    await counter.record({ address: '203.0.113.7', now: morning, path: '/', userAgent: browser })
+    await counter.record({ ...where, address: '203.0.113.7', now: morning, path: '/', userAgent: browser })
     await removeVisitorData(database.db, new Date('2026-10-27T00:05:00Z'))
 
     // 00:05 UTC on the 27th is 01:05 in the Netherlands: the 26th is over.
@@ -204,6 +252,7 @@ describe('removeVisitorData', () => {
     const counter = createVisitCounter(database.db)
 
     await counter.record({
+      ...where,
       address: '203.0.113.7',
       now: new Date('2026-10-26T20:00:00Z'),
       path: '/',

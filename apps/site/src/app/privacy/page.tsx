@@ -91,13 +91,17 @@ export default function PrivacyPage() {
           Wat we tellen
         </Heading>
         <Text>
-          We tellen alleen per dag hoe vaak elke pagina is bekeken en hoeveel verschillende bezoekers er ongeveer waren.
-          Dat doen we zelf, op onze eigen server.
+          We tellen per dag hoe vaak elke pagina is bekeken en hoeveel verschillende bezoekers er ongeveer waren. We
+          tellen ook van welke pagina je naar welke pagina gaat, en waar je vandaan kwam: rechtstreeks, van het forum,
+          van een zoekmachine, van sociale media of van een andere site. Van een andere site bewaren we alleen de soort,
+          nooit het adres. En we tellen welke soort browser en welk besturingssysteem bezoekers gebruiken, en of dat een
+          telefoon, een tablet of een computer is. Dat doen we zelf, op onze eigen server.
         </Text>
         <Text>
           Van je IP-adres en je browser maakt de server een code, met een willekeurig getal dat alleen voor die dag
-          bestaat. Zo tellen we jou maar één keer per dag. Het adres en de naam van je browser schrijven we nergens op,
-          ook niet in het logboek.
+          bestaat. Zo tellen we jou maar één keer per dag. Je IP-adres, de volledige naam van je browser en de pagina’s
+          die jij bekijkt schrijven we nergens op, ook niet in het logboek. We bewaren alleen totalen van alle bezoekers
+          samen, zoals hoeveel bezoekers Safari op een iPhone gebruikten.
         </Text>
         <Text>
           Tot het einde van de dag staan het getal en de codes in onze database. Daarna gooien we ze weg. We bewaren

@@ -518,3 +518,37 @@ describe('the minutes of a player', () => {
     }
   })
 })
+
+describe('a player with a namesake', () => {
+  const shared = () => {
+    const reported = reportedMatch()
+    const hove = reported.names.get(4)!
+
+    reported.names.set(4, { ...hove, namesakes: [{ givenName: 'Dirk', seasons: ['2027/28'] }], seasons: ['2026/27'] })
+
+    return buildMatchPage(matchPageDataOf(reported, [], true))
+  }
+
+  it('gets the initial before his surname on the pitch, and the rest of the players nothing', () => {
+    const { pitch } = shared()
+
+    expect(pitch.ours.players.map((one) => one.lead)).toEqual([
+      undefined,
+      undefined,
+      undefined,
+      'R.',
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    ])
+    expect(pitch.ours.players[3]?.name).toEqual({
+      givenName: 'Ruben',
+      href: '/spelers/ruben-ten-hove',
+      surname: 'ten Hove',
+    })
+  })
+})

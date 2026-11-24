@@ -11,14 +11,24 @@ describe('nameOfPlayer', () => {
         familyName: 'Hove',
         familyNamePrefix: 'ten',
         givenName: 'Ruben',
+        namesakes: [],
         searchTerm: 'ten Hove',
+        seasons: [],
         slug: null,
       }),
     ).toEqual({ givenName: 'Ruben', surname: 'ten Hove' })
   })
 
   it('takes the search term as the surname when there is no person, and the rest as the given name', () => {
-    const known = { familyName: null, familyNamePrefix: null, givenName: null, searchTerm: 'van der Kooi', slug: null }
+    const known = {
+      familyName: null,
+      familyNamePrefix: null,
+      givenName: null,
+      namesakes: [],
+      searchTerm: 'van der Kooi',
+      seasons: [],
+      slug: null,
+    }
 
     expect(nameOfPlayer('Jurre van der Kooi', known)).toEqual({ givenName: 'Jurre', surname: 'van der Kooi' })
     expect(nameOfPlayer('Dinho', { ...known, searchTerm: 'Dinho', slug: null })).toEqual({ surname: 'Dinho' })
@@ -31,7 +41,9 @@ describe('nameOfPlayer', () => {
         familyName: null,
         familyNamePrefix: null,
         givenName: null,
+        namesakes: [],
         searchTerm: 'Vos',
+        seasons: [],
         slug: null,
       }),
     ).toEqual({ givenName: 'Jan Bank', surname: '' })

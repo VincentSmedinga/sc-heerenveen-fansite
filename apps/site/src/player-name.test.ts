@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { personNameParts, personSortName, splitPersonName, textSortName } from './player-name'
+import {
+  leadOfName,
+  leadOfNamesake,
+  personNameParts,
+  personSortName,
+  splitPersonName,
+  textSortName,
+} from './player-name'
 
 const person = (given: null | string, prefix: null | string, family: null | string) => ({
   personFamilyName: family,
@@ -75,5 +82,48 @@ describe('textSortName', () => {
     expect(textSortName('Afonso Alves')).toBe('Alves')
     expect(textSortName('Joost van Aken')).toBe('Aken')
     expect(textSortName('Dinho')).toBe('Dinho')
+  })
+})
+
+describe('leadOfNamesake', () => {
+  const jeroen = { givenName: 'Jeroen', seasons: ['2004/05', '2008/09'] }
+
+  it('gives the first letter when a namesake has a season at most one season from his', () => {
+    expect(leadOfNamesake({ ...jeroen, namesakes: [{ givenName: 'Henrico', seasons: ['2009/10'] }] })).toBe('J.')
+  })
+
+  it('gives nothing for a namesake with two seasons in between', () => {
+    expect(leadOfNamesake({ ...jeroen, namesakes: [{ givenName: 'Henrico', seasons: ['2011/12'] }] })).toBe('')
+    expect(
+      leadOfNamesake({
+        givenName: 'Jan',
+        namesakes: [{ givenName: 'Jan', seasons: ['2020/21'] }],
+        seasons: ['1990/91'],
+      }),
+    ).toBe('')
+  })
+
+  it('gives the whole given name when the first letters are the same', () => {
+    expect(leadOfNamesake({ ...jeroen, namesakes: [{ givenName: 'Jan', seasons: ['2005/06'] }] })).toBe('Jeroen')
+  })
+
+  it('gives nothing without a namesake, a given name or a player', () => {
+    expect(leadOfNamesake({ ...jeroen, namesakes: [] })).toBe('')
+    expect(
+      leadOfNamesake({
+        givenName: null,
+        namesakes: [{ givenName: 'Jan', seasons: ['2005/06'] }],
+        seasons: ['2005/06'],
+      }),
+    ).toBe('')
+    expect(leadOfNamesake(undefined)).toBe('')
+  })
+})
+
+describe('leadOfName', () => {
+  it('gives the first letter in capitals with a full stop, or the whole name for the same letter', () => {
+    expect(leadOfName('gérard', ['Dennis'])).toBe('G.')
+    expect(leadOfName('Dennis', ['Daan'])).toBe('Dennis')
+    expect(leadOfName(null, ['Daan'])).toBe('')
   })
 })

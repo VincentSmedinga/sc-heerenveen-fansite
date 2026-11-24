@@ -448,5 +448,57 @@ Een runner van GitHub is geen bezoeker in Nederland.
 Een deel van het verschil met de meting van een thuisverbinding is afstand, en GitHub laat niet kiezen waar een gratis runner staat.
 De LCP uit de dagelijkse controle is daardoor een bovengrens voor wat een Nederlandse fan ziet.
 
-De cijfers van de runner staan hier nog niet: ze komen na minstens drie runs van de workflow, met datum, aantal runs en de plek van de runner voor zover GitHub die laat zien, naast de tabel van thuis.
-Is de TCP-tijd op de runner ongeveer 250 ms of meer, dan kan de beveiliging van de host het adres van de runner hebben geblokkeerd (zie hierboven), en telt die meting niet mee.
+Gemeten in drie runs van de workflow, elk met 10 runs per pad en een pauze van een seconde tussen twee runs, de mediaan, in milliseconden, op <https://acc.sc.heerenveen.org>:
+
+- de geplande run van 23 november 2026 (start 16:03 UTC);
+- een handmatige run van 24 november 2026 (start 08:27 UTC);
+- een handmatige run van 24 november 2026 (start 08:38 UTC), na afloop van de vorige.
+
+Per run wijken de pagina's weinig van elkaar af in DNS, TCP en TLS, want die horen bij de verbinding en niet bij de pagina.
+Daarom staat hieronder per post de laagste en hoogste mediaan over de zeven paden en de drie runs, naast de meting van thuis uit het hoofdstuk hierboven:
+
+| Post                          | Runner van GitHub, 3 runs | Thuisverbinding, 23 november |
+| ----------------------------- | ------------------------- | ---------------------------- |
+| DNS                           | 1 tot 2                   | 3                            |
+| TCP                           | 84 tot 97                 | 20 tot 23                    |
+| TLS                           | 88 tot 99                 | 29 tot 30                    |
+| Wachten, koud, kleine bestand | 90 tot 102                | 25                           |
+| Wachten, koud, pagina's       | 100 tot 125               | 31 tot 40                    |
+| Eerste byte, koud, pagina's   | 278 tot 321               | 87 tot 95                    |
+| Pagina maken (warm verschil)  | 9 tot 29                  | 9 tot 16                     |
+| Hoogste eerste byte, pagina's | 292 tot 479               | 87 tot 122                   |
+
+De runner stond bij de geplande run volgens het logboek van GitHub in `us-east-1` bij AWS.
+Bij de twee handmatige runs laat het logboek de regio leeg, en de samenvatting van de runs noemt nergens een plek.
+De plek van de runner is dus voor één van de drie runs bekend en niet te kiezen: een gratis runner laat dat niet toe.
+
+### Wat de runner zegt
+
+- **Bijna alles van het verschil is een verbinding over een grotere afstand.**
+  Eén rondreis kost op de runner 84 tot 97 ms (de TCP-verbinding), thuis 20 tot 23 ms.
+  De TLS-handshake kost op de runner opnieuw ongeveer een rondreis.
+  Het wachten op de eerste byte van het kleine bestand is 90 tot 102 ms, dus ook ongeveer één rondreis, en thuis 25 ms.
+  De host en de weg van LiteSpeed naar Node kosten op de runner dus niet meer dan thuis: het verschil in wachttijd, 65 tot 77 ms, is het verschil in rondreis.
+- **De pagina maken kost op de runner 9 tot 29 ms**, tegen 9 tot 16 ms thuis.
+  De site is ook vanaf de runner niet de post die groot is.
+- **De eerste byte, koud, is op de runner 278 tot 321 ms.**
+  Dat telt een nieuwe verbinding mee (DNS, TCP en TLS): ongeveer 190 ms van de 278 tot 321.
+  Het wachten zelf, de post die Lighthouse als TTFB meet, is 100 tot 125 ms op de mediaan, en Lighthouse meldt in dezelfde runs 100 tot 398 ms.
+  De mediaan van deze meting zit dus aan de onderkant van wat Lighthouse ziet.
+- **Waar de 70 tot 340 ms naartoe gaan:** de ondergrens, ongeveer 70 ms, is afstand (een extra rondreis).
+  Wat daarboven zit, tot 398 ms in een enkele Lighthouse-meting, zit niet in de mediaan van dit script.
+  Het is één verzoek dat langer duurt, en deze meting kan niet zeggen of dat de runner, de weg of de host is.
+  Het hoogste antwoord in dit script is 292 tot 479 ms voor de pagina's, en 593 en 681 ms voor het kleine bestand in twee runs.
+- **Een runner van GitHub is geen bezoeker in Nederland.**
+  Een deel van het verschil met de thuisverbinding is afstand, en de LCP uit de dagelijkse controle is daardoor een bovengrens voor wat een Nederlandse fan ziet.
+  Hoeveel lager de LCP voor een fan is, zegt deze meting niet: de afstand verklaart ongeveer 70 ms van de wachttijd.
+- **Geen van de TCP-tijden is ongeveer 250 ms of meer**, dus de beveiliging van de host heeft het adres van de runner in deze drie runs niet geblokkeerd, en alle drie tellen mee.
+
+### Wat de runner niet kan zeggen
+
+- Waar de runner stond bij de twee handmatige runs, en of de plek bij elke run dezelfde is.
+- Waarom één verzoek soms 300 tot 600 ms duurt: drie runs met elk 10 metingen per pad zijn te weinig om uitschieters te verklaren.
+- Wat een bezoeker in Nederland ziet: daarvoor is de thuisverbinding, en een verwachting op grond van de afstand, het beste wat we hebben.
+
+Het budget en de beslissing van 7 december 2026 blijven zoals ze zijn: `lcpMs` is 1100, `enforce` is `false` en `fixed.baselineKiB` is niet veranderd.
+Deze cijfers horen bij die beslissing.

@@ -86,6 +86,9 @@ export type ReportedMatch = {
   stored: StoredMatchReport
 }
 
+/** Another person of ours with the same surname as a reported player. */
+export type ReportedNamesake = { givenName: null | string; seasons: string[] }
+
 /**
  * The name of one of our players as the importer kept it, for the players of a report: the
  * parts of the name of his person, and the search term of his row in `players` (the surname the
@@ -96,7 +99,16 @@ export type ReportedPlayerName = {
   familyName: null | string
   familyNamePrefix: null | string
   givenName: null | string
+  /**
+   * The other persons of ours with the same surname (the prefix counts), each with the given
+   * name and the seasons they have in `players`, and the seasons of this person. The page tells
+   * two of them apart by an initial when their seasons are at most one apart. Empty for a
+   * player without a person or a surname.
+   */
+  namesakes: ReportedNamesake[]
   searchTerm: null | string
+  /** The seasons this person has in `players`, such as `2004/05`. */
+  seasons: string[]
   /** The address name of the person (`persons.slug`): null while he has no page. */
   slug: null | string
 }
@@ -153,6 +165,8 @@ export type StoredMatchReport = {
   shootout: MatchShootoutKick[]
   substitutions: MatchSubstitution[]
 }
+
+type FamilyMember = { familyName: string; familyNamePrefix: null | string; givenName: null | string; seasons: string[] }
 
 /** What the reading functions read through. */
 type ReportDatabase = Pick<Database, 'select'>
@@ -631,6 +645,7 @@ async function readReportedPlayerNames(db: ReportDatabase, reports: Iterable<Sto
       familyNamePrefix: persons.familyNamePrefix,
       givenName: persons.givenName,
       id: players.id,
+      personId: players.personId,
       searchTerm: players.searchTerm,
       slug: persons.slug,
     })
@@ -638,6 +653,10 @@ async function readReportedPlayerNames(db: ReportDatabase, reports: Iterable<Sto
     .leftJoin(persons, eq(persons.id, players.personId))
     .where(inArray(players.id, [...new Set(ours.map((player) => player.playerId!))]))
   const byPlayer = new Map(found.map((row) => [row.id, row]))
+  const family = await readFamilies(
+    db,
+    found.flatMap((row) => (row.familyName === null || row.familyName === '' ? [] : [row.familyName])),
+  )
 
   for (const player of ours) {
     const row = byPlayer.get(player.playerId!)
@@ -647,13 +666,66 @@ async function readReportedPlayerNames(db: ReportDatabase, reports: Iterable<Sto
         familyName: row.familyName,
         familyNamePrefix: row.familyNamePrefix,
         givenName: row.givenName,
+        namesakes: row.personId === null ? [] : namesakesOf(family, row),
         searchTerm: row.searchTerm,
+        seasons: row.personId === null ? [] : (family.byPerson.get(row.personId)?.seasons ?? []),
         slug: row.slug,
       })
     }
   }
 
   return names
+}
+
+const surnameKey = (prefix: null | string, familyName: string) => `${prefix ?? ''} ${familyName}`.trim().toLowerCase()
+
+/** The other persons with the surname of this one, with a family name of their own. */
+function namesakesOf(
+  family: { byPerson: Map<number, FamilyMember> },
+  row: { familyName: null | string; familyNamePrefix: null | string; personId: null | number },
+): ReportedNamesake[] {
+  if (row.familyName === null || row.familyName === '') {
+    return []
+  }
+
+  const key = surnameKey(row.familyNamePrefix, row.familyName)
+
+  return [...family.byPerson.entries()]
+    .filter(([id, member]) => id !== row.personId && surnameKey(member.familyNamePrefix, member.familyName) === key)
+    .map(([, member]) => ({ givenName: member.givenName, seasons: member.seasons }))
+}
+
+/** The persons with one of these family names, with the seasons they have in `players`. */
+async function readFamilies(db: ReportDatabase, familyNames: string[]) {
+  const byPerson = new Map<number, FamilyMember>()
+
+  if (familyNames.length > 0) {
+    const rows = await db
+      .select({
+        familyName: persons.familyName,
+        familyNamePrefix: persons.familyNamePrefix,
+        givenName: persons.givenName,
+        personId: persons.id,
+        season: players.season,
+      })
+      .from(persons)
+      .innerJoin(players, eq(players.personId, persons.id))
+      .where(inArray(persons.familyName, [...new Set(familyNames)]))
+
+    for (const row of rows) {
+      const member = byPerson.get(row.personId) ?? {
+        familyName: row.familyName ?? '',
+        familyNamePrefix: row.familyNamePrefix,
+        givenName: row.givenName,
+        seasons: [],
+      }
+
+      member.seasons.push(row.season)
+      byPerson.set(row.personId, member)
+    }
+  }
+
+  return { byPerson }
 }
 
 /** The report, the players and the events of several matches, read with a few queries. */
