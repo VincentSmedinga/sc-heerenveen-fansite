@@ -136,7 +136,14 @@ export function PlayerSeasonsCard({
       <DataTable.More>
         <DataTable
           caption={`De cijfers van ${name} per seizoen bij sc Heerenveen, ${competition === 'all' ? '' : `alleen ${competitionWords(competition)}, `}het nieuwste seizoen eerst, met het totaal onderaan`}
-          columns={['Seizoen', ...table.columns.map(({ icon, more, name: word }) => ({ icon, more, name: word }))]}
+          columns={[
+            'Seizoen',
+            ...table.columns.map(({ icon, more, name: word }) => ({
+              icon,
+              ...(more === true ? { more } : {}),
+              name: word,
+            })),
+          ]}
           legend={
             <>
               {tableLegend(table.columns)}.{' '}

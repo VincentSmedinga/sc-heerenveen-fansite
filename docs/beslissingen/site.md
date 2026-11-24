@@ -8036,4 +8036,4 @@
 - **Waarom:** kaarten horen bij het beeld van een speler, en een verdediger heeft ze vaker dan een doelpunt.
   De knop is wat het design system al biedt voor een tabel die op een telefoon te breed wordt, zonder zijwaarts scrollen.
 - **Alternatieven:** de basis op een telefoon weglaten (de kaarten zijn dan altijd zichtbaar, maar de opstellingen verdwijnen achter een knop); de tabel zijwaarts laten scrollen (nieuw in het design system en lastig met een schermlezer); rood en geel-rood als aparte kolommen (nog breder, en geen andere tabel scheidt ze); de rij Totaal zonder kaarten (het totaal is dan niet af).
-- **Later:** dit vult _De tabel Per seizoen heeft kolommen naar de linie van de speler_ aan.
+- **Later:** dit vult _De tabel Per seizoen heeft kolommen naar de linie van de speler_ aan: zes kolommen per linie in plaats van vier.
