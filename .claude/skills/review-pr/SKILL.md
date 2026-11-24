@@ -22,7 +22,7 @@ If there is none, stop here and follow the last point of _Push and open the pull
 Start the Reviewer once per round, with only the numbers.
 Don't start it again for a change that is not a fix for a finding, and don't start a third round (see _Limits_ in `AGENTS.md`).
 Post the report in one comment and tick the boxes in one edit.
-Send the owner one message when the report is posted, saying the verdict and what is left for them; don't message while the Reviewer runs.
+Send the Coordinator one message when the report is posted, saying the verdict and what is left for the owner (it is not a status message); don't message while the Reviewer runs.
 
 ## Before you start it
 

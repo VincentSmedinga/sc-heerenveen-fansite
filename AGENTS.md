@@ -491,7 +491,7 @@ Each point is an action, not a reminder.
 - **Committed:** `git status` shows nothing.
   The Reviewer and CI read the head of the branch, so a fix that stays in your working copy is checked by nobody.
 - **Criteria:** for each acceptance criterion of the issue, find the line of the diff that meets it.
-  If the pull request differs from the issue (a size, a name, an extra change nobody asked for), or if you can't tick a box, tell the owner now, so the Coordinator can add an "Aangevuld" line to the issue before the review.
+  If the pull request differs from the issue (a size, a name, an extra change nobody asked for), or if you can't tick a box, say so in the description of the pull request and tell the Coordinator, so it can add an "Aangevuld" line to the issue before the review.
   Tick only the boxes that are true.
 - **What you replaced:** search the whole repository for the text, name, number or log line that your change removed or renamed (`git grep`).
   Look in `docs/`, the READMEs, MDX files and stories, comments, tests, `.env.example` and the page texts in `apps/site/scripts/smoke.js`.
