@@ -373,7 +373,7 @@ describe('LastWinCard', () => {
 
     expect(cell?.className).toBe('hf-numeric')
     expect(cell?.textContent).toBe('2.762')
-    expect(cell?.lastElementChild?.className).toBe('hf-bar')
+    expect(cell?.lastElementChild?.className).toBe('hf-bar hf-chart-tone-plain')
     expect(screen.getByRole('columnheader', { name: 'Dagen geleden' }).className).toBe('hf-numeric')
     expect(screen.getAllByText('Nog nooit gewonnen')).toHaveLength(2)
     // The bar is as long as the days are of the longest wait, and a club never beaten has none.

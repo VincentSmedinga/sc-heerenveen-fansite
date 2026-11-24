@@ -20,7 +20,11 @@ export function sharesOf(values: number[]): null | number[] {
  * numbers only. bar.css gives the look, and hides it when the place is too narrow.
  */
 export const Bar = ({ share }: { share: number }) => (
-  <span aria-hidden="true" className="hf-bar" style={{ '--hf-bar-share': share } as CSSProperties} />
+  <span
+    aria-hidden="true"
+    className="hf-bar hf-chart-tone-plain"
+    style={{ '--hf-bar-share': share } as CSSProperties}
+  />
 )
 
 /**

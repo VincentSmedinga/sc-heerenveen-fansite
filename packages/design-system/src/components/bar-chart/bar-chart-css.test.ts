@@ -22,8 +22,8 @@ describe('bar-chart.css', () => {
 
   it('makes a bar as high as its share, a stub of 0.25rem, and rounds only the end', () => {
     expect(declarationsOf('.hf-bar-chart-bar')).toMatch(/block-size: calc\(var\(--hf-bar-chart-share\) \* 1%\)/u)
-    expect(declarationsOf('.hf-bar-chart-bar')).toMatch(/border-start-end-radius: 0\.125rem/u)
-    expect(declarationsOf('.hf-bar-chart-bar')).toMatch(/border-start-start-radius: 0\.125rem/u)
+    expect(declarationsOf('.hf-bar-chart-bar')).toMatch(/border-start-end-radius: var\(--hf-radius-bar\)/u)
+    expect(declarationsOf('.hf-bar-chart-bar')).toMatch(/border-start-start-radius: var\(--hf-radius-bar\)/u)
     expect(declarationsOf('.hf-bar-chart-bar')).not.toMatch(/border-end-/u)
     expect(declarationsOf('.hf-bar-chart-stub')).toMatch(/block-size: 0\.25rem/u)
   })

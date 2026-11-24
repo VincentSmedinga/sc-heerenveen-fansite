@@ -19,3 +19,30 @@ describe('the track of a bar list', () => {
     expect(soft).toContain('--hf-card-track: var(--hf-colour-background-track);')
   })
 })
+
+describe('the bars', () => {
+  it('are thick in a list and thin in a table cell, with one corner on all four sides', () => {
+    const list = read('bar-list/bar-list.css')
+
+    expect(list.match(/block-size: var\(--hf-size-bar-thick\)/g)).toHaveLength(1)
+    expect(list.match(/border-radius: var\(--hf-radius-bar\)/g)).toHaveLength(2)
+    expect(read('bar/bar.css')).toContain('block-size: var(--hf-size-bar-thin)')
+  })
+
+  it('count in the same colour in a list and a table: the tone plain, which is the green of a win at 70%', () => {
+    const tone = read('chart/chart.css').match(/\.hf-chart-tone-plain \{[^}]*\}/s)?.[0] ?? ''
+
+    expect(tone).toContain('--hf-chart-colour: var(--hf-colour-outcome-win);')
+    expect(tone).toContain('--hf-chart-strength: 70%;')
+    expect(read('bar-list/BarList.tsx')).toContain('hf-chart-tone-plain')
+    expect(read('bar/Bar.tsx')).toContain('hf-chart-tone-plain')
+  })
+
+  it('give the bars of the results the thick or the thin size and the same corner', () => {
+    expect(read('outcome-bar/outcome-bar.css')).toContain('block-size: var(--hf-size-bar-thick)')
+    expect(read('outcome-bar/outcome-bar.css')).toContain('border-radius: var(--hf-radius-bar)')
+    expect(read('outcome-line/outcome-line.css')).toContain('block-size: var(--hf-size-bar-thin)')
+    expect(read('match-score-bar/match-score-bar.css')).toContain('block-size: var(--hf-size-bar-thin)')
+    expect(read('match-score-bar/match-score-bar.css')).toContain('border-radius: var(--hf-radius-bar)')
+  })
+})

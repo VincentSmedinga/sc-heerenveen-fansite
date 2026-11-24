@@ -21,10 +21,14 @@
     --hf-chart-strength: 80%;
   }
 
-  /* A bar that only counts something: the blue of a bar, in full, as it reaches 3:1 by itself. */
+  /*
+   * A bar that counts something is the green of a win, at the same 70% as a win: this is the
+   * colour of a count, in a table, a list and a chart. Green is then a win or a count, and red
+   * and grey only a result.
+   */
   .hf-chart-tone-plain {
-    --hf-chart-colour: var(--hf-colour-chart-bar);
-    --hf-chart-strength: 100%;
+    --hf-chart-colour: var(--hf-colour-outcome-win);
+    --hf-chart-strength: 70%;
   }
 
   .hf-chart-tone-negative {

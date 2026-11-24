@@ -23,6 +23,7 @@ const meta = preview.meta({
       description: {
         component: [
           'Hoe de stand in een wedstrijd liep, als dunne balk met een stuk voor elke stand: groen als sc Heerenveen voor stond, grijs bij gelijkstand en rood bij achterstand.',
+          'De balk is dun, met dezelfde afgeronde hoeken als elke balk. Groen is hier een voorsprong; een balk die een aantal telt is ook groen, maar grijs en rood zijn alleen een uitslag.',
           'De balk is versiering; een schermlezer hoort per stuk de stand en de minuten, dus kleur is niet het enige teken.',
           'Hij is gebouwd uit `Heading` en de kleuren van een uitslag.',
         ].join('\n'),
