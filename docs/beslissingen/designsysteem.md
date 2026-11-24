@@ -4368,7 +4368,6 @@
   `Tooltip` en `pull-to-refresh` hebben een eigen kleur op een eigen vlak.
 - **Eén pull request:** het is één regel in CSS, mechanische vervangingen en één prop, en het hoeft maar één keer in licht en donker bekeken.
   - **Alternatieven:** splitsen in kleur en gewicht, en legenda's en kolomletters.
-    \=======
 
 ## Een achternaam en een getal aan het eind van een rij hebben overal hetzelfde gewicht
 
@@ -4402,5 +4401,3 @@
   De regel over spelers zonder bekend land blijft eronder staan.
 - **Waarom:** de twee kaarten staan op dezelfde pagina en tonen hetzelfde soort gegeven, dus ze horen er hetzelfde uit te zien.
 - **Alternatieven:** alleen het gewicht van het getal aanpassen (de twee kaarten blijven verschillen).
-
-> > > > > > > origin/main
