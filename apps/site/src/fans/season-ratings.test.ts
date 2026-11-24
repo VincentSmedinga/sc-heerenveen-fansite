@@ -1,15 +1,19 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  bestYearWinners,
   isOldSeason,
   rankSeason,
   type RatingFigures,
   type SeasonFigure,
   seasonsOver,
+  type YearWinner,
   yearWinners,
 } from './season-ratings'
 
 let nextPlayer = 1
+
+const namesOf = (winner: undefined | YearWinner) => winner?.players.map((player) => player.name)
 
 /** A made-up player in a season: the matches that count, the ratings and their average. */
 const figure = (
@@ -140,7 +144,7 @@ describe('the Uitblinkers of the year', () => {
   const over = (...seasons: string[]) => new Set(seasons)
 
   it('shows nothing but the running season while there are no ratings', () => {
-    expect(yearWinners(data(), now)).toEqual([{ average: undefined, names: [], season: '2026/27' }])
+    expect(yearWinners(data(), now)).toEqual([{ average: undefined, players: [], season: '2026/27' }])
   })
 
   it('is the player with the highest season rating of a season that is over, the newest season first', () => {
@@ -156,7 +160,7 @@ describe('the Uitblinkers of the year', () => {
       now,
     )
 
-    expect(winners.map((winner) => [winner.season, winner.names])).toEqual([
+    expect(winners.map((winner) => [winner.season, namesOf(winner)])).toEqual([
       ['2026/27', []],
       ['2005/06', ['Speler C']],
       ['2004/05', ['Speler A']],
@@ -173,7 +177,7 @@ describe('the Uitblinkers of the year', () => {
       now,
     )
 
-    expect(winners.find((winner) => winner.season === '2003/04')?.names).toEqual(['Speler B'])
+    expect(namesOf(winners.find((winner) => winner.season === '2003/04'))).toEqual(['Speler B'])
   })
 
   it('lets the stored season rating decide for 1998/99 to 2000/01', () => {
@@ -190,7 +194,7 @@ describe('the Uitblinkers of the year', () => {
 
     expect(winners.find((winner) => winner.season === '1998/99')).toEqual({
       average: 7.1,
-      names: ['Speler Y'],
+      players: [{ name: 'Speler Y', ratings: undefined }],
       season: '1998/99',
     })
   })
@@ -208,13 +212,13 @@ describe('the Uitblinkers of the year', () => {
       now,
     )
 
-    expect(winners.find((winner) => winner.season === '2025/26')?.names).toEqual(['Speler B', 'Speler A'])
+    expect(namesOf(winners.find((winner) => winner.season === '2025/26'))).toEqual(['Speler B', 'Speler A'])
   })
 
   it('gives a season that is not over no winner, only "Na het seizoen" for the running one', () => {
     const winners = yearWinners(data({ figures: [figure('2026/27', 'Speler A', 9, 300, 8)] }), now)
 
-    expect(winners).toEqual([{ average: undefined, names: [], season: '2026/27' }])
+    expect(winners).toEqual([{ average: undefined, players: [], season: '2026/27' }])
   })
 
   it('names the winner of the current season once it is over, and has no row without a winner for it', () => {
@@ -223,7 +227,7 @@ describe('the Uitblinkers of the year', () => {
       new Date('2027-06-15T12:00:00Z'),
     )
 
-    expect(winners.map((winner) => [winner.season, winner.names])).toEqual([['2026/27', ['Speler A']]])
+    expect(winners.map((winner) => [winner.season, namesOf(winner)])).toEqual([['2026/27', ['Speler A']]])
   })
 
   it('leaves out a season that is over but has no player that counts', () => {
@@ -237,6 +241,46 @@ describe('the Uitblinkers of the year', () => {
 
   it('has no row at all for the running season when it is over and nobody counts', () => {
     expect(yearWinners(data({ overSeasons: over('2026/27') }), new Date('2027-06-15T12:00:00Z'))).toEqual([])
+  })
+})
+
+describe('the Uitblinker of the Uitblinkers', () => {
+  const row = (season: string, average: number | undefined, ...players: [string, number | undefined][]) => ({
+    average,
+    players: players.map(([name, ratings]) => ({ name, ratings })),
+    season,
+  })
+
+  it('is the highest season rating of the seasons that are over, with its number of ratings', () => {
+    expect(
+      bestYearWinners([
+        row('2026/27', undefined),
+        row('2005/06', 6.7, ['Speler A', 631]),
+        row('2004/05', 6.1, ['Speler B', 300]),
+      ]),
+    ).toEqual({ average: 6.7, players: [{ name: 'Speler A', ratings: 631, season: '2005/06' }] })
+  })
+
+  it('has every player of an equal rating to two decimals, each with their season', () => {
+    const best = bestYearWinners([
+      row('2005/06', 6.704, ['Speler A', 631]),
+      row('2003/04', 6.7, ['Speler B', 90], ['Speler C', 120]),
+    ])
+
+    expect(best?.players).toEqual([
+      { name: 'Speler A', ratings: 631, season: '2005/06' },
+      { name: 'Speler B', ratings: 90, season: '2003/04' },
+      { name: 'Speler C', ratings: 120, season: '2003/04' },
+    ])
+  })
+
+  it('has no number of ratings for a season of the old Fansite', () => {
+    expect(bestYearWinners([row('1999/00', 7.4, ['Speler X', undefined])])?.players[0]?.ratings).toBeUndefined()
+  })
+
+  it('is none while no season is over', () => {
+    expect(bestYearWinners([row('2026/27', undefined)])).toBeUndefined()
+    expect(bestYearWinners([])).toBeUndefined()
   })
 })
 

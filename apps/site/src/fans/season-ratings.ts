@@ -18,6 +18,13 @@ import { minimumMatches, minimumRatings } from '#src/player-ratings'
 /** The days after the last match of a season that its window can still be open. */
 const windowDays = 7
 
+/** The Uitblinker of the Uitblinkers: the highest season rating of the seasons over. */
+export type BestYearWinners = {
+  average: number
+  /** The winner, or every winner of a season on an equal rating, each with their season. */
+  players: (YearWinnerPlayer & { season: string })[]
+}
+
 /** A season rating of 1998/99 to 2000/01, which has no matches and no count. */
 export type OldRating = { average: number; name: string; playerId: null | number; season: string }
 
@@ -63,8 +70,15 @@ export type YearWinner = {
   /** The season rating of the winner, or `undefined` for a season that is not over. */
   average: number | undefined
   /** The winner, or both players on an equal rating; none for a season that is not over. */
-  names: string[]
+  players: YearWinnerPlayer[]
   season: string
+}
+
+/** A player who won a season, with the number of ratings behind the season rating. */
+export type YearWinnerPlayer = {
+  name: string
+  /** The number of ratings, or `undefined` for 1998/99 to 2000/01. */
+  ratings: number | undefined
 }
 
 const hundredths = (average: number) => Math.round(average * 100)
@@ -137,6 +151,30 @@ export const isOldSeason = (data: RatingFigures, season: string) =>
 
 /** The text of a count: one match, two matches. */
 export const matchesText = (count: number) => (count === 1 ? '1 wedstrijd' : `${count} wedstrijden`)
+
+/**
+ * The Uitblinker of the Uitblinkers (issue 1613): the highest season rating of all the seasons
+ * that are over, by the same rule as the winner of a season. On an equal rating (to two
+ * decimals) every player is in it, each with their season, the newest season first. Without a
+ * season that is over there is none.
+ */
+export function bestYearWinners(winners: readonly YearWinner[]): BestYearWinners | undefined {
+  const over = winners.filter((row): row is YearWinner & { average: number } => row.average !== undefined)
+  const best = Math.max(...over.map((row) => hundredths(row.average)))
+  const top = over.filter((row) => hundredths(row.average) === best)
+  const [first] = top
+
+  if (first === undefined) {
+    return undefined
+  }
+
+  return {
+    average: first.average,
+    players: top
+      .toSorted((a, b) => b.season.localeCompare(a.season))
+      .flatMap((row) => row.players.map((player) => ({ ...player, season: row.season }))),
+  }
+}
 
 /** What is read: the figures of every season and the old season ratings. */
 export async function readRatingFigures(db: Database, now = new Date()): Promise<RatingFigures> {
@@ -249,12 +287,16 @@ export function yearWinners(data: RatingFigures, now: Date): YearWinner[] {
     if (top !== undefined) {
       const tied = others.filter((row) => hundredths(row.average) === hundredths(top.average))
 
-      rows.push({ average: top.average, names: [top, ...tied].map((row) => row.name), season })
+      rows.push({
+        average: top.average,
+        players: [top, ...tied].map((row) => ({ name: row.name, ratings: row.ratings })),
+        season,
+      })
     }
   }
 
   if (!data.overSeasons.has(current)) {
-    rows.push({ average: undefined, names: [], season: current })
+    rows.push({ average: undefined, players: [], season: current })
   }
 
   return rows.toSorted((a, b) => b.season.localeCompare(a.season))

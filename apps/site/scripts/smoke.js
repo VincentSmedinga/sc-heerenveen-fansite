@@ -2243,7 +2243,9 @@ await withEmptyDatabase((database) =>
 
     assert.equal(yearWinners.status, 200, '/fans/uitblinker/van-het-jaar must be there with Uitblinker on')
     assert.match(yearWinnersHtml, /<h1[^>]*>Uitblinker van het jaar<\/h1>/)
+    assert.match(yearWinnersHtml, /<h2[^>]*>Uitblinker \d{4}\/\d{2}<\/h2>/)
     assert.match(yearWinnersHtml, /Na het seizoen/)
+    assert.doesNotMatch(yearWinnersHtml, /<table/)
     assert.equal(yearWinners.headers.get('x-robots-tag'), 'noindex, nofollow')
     // The archive of the Fantest is the same for everybody; the empty database has no quiz, so
     // no month is there.
