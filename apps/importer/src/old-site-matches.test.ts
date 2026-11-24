@@ -325,6 +325,41 @@ describe('the score at half-time', () => {
     expect(zero?.values).toMatchObject({ halfTimeAgainst: 0, halfTimeFor: 0 })
   })
 
+  it('leaves the score at half-time empty for a `*` in 1990/91, which the old fansite filled with 0-0', () => {
+    const [unknown] = deriveOldSiteMatches([
+      oldMatch({
+        result: { awayFullTime: 1, awayHalfTime: 0, homeFullTime: 2, homeHalfTime: 0, note: '*' },
+        season: '9091',
+      }),
+    ])
+
+    expect(unknown?.values).toMatchObject({
+      goalsFor: 2,
+      halfTimeAgainst: null,
+      halfTimeFor: null,
+      halfTimeSource: null,
+    })
+    expect(unknown?.halfTimeUnknown).toBe(true)
+  })
+
+  it('keeps 0-0 at half-time when a match with a `*` ended 0-0, and reads a `*` of other seasons as before', () => {
+    const [goalless] = deriveOldSiteMatches([
+      oldMatch({
+        result: { awayFullTime: 0, awayHalfTime: 0, homeFullTime: 0, homeHalfTime: 0, note: '*' },
+        season: '9091',
+      }),
+    ])
+    const [later] = deriveOldSiteMatches([
+      oldMatch({
+        result: { awayFullTime: 1, awayHalfTime: 0, homeFullTime: 2, homeHalfTime: 0, note: '*' },
+        season: '9192',
+      }),
+    ])
+
+    expect(goalless?.values).toMatchObject({ halfTimeAgainst: 0, halfTimeFor: 0, halfTimeSource: 'oude-fansite' })
+    expect(later?.values).toMatchObject({ halfTimeAgainst: 0, halfTimeFor: 0 })
+  })
+
   it('does not take a score above the final score, says so, and keeps the match', () => {
     const [odd] = deriveOldSiteMatches([
       oldMatch({ result: { awayFullTime: 1, awayHalfTime: 0, homeFullTime: 2, homeHalfTime: 3, note: null } }),
@@ -584,6 +619,29 @@ describe('the step matches', () => {
 
     expect(report).toMatchObject({ changed: 0, unchanged: 1 })
     expect(await rows()).toMatchObject([{ halfTimeAgainst: 1, halfTimeFor: 2, halfTimeSource: 'redactie' }])
+  })
+
+  it('empties a score at half-time that the old fansite did not know, once, and leaves what the editors filled in', async () => {
+    const known = oldMatch({ season: '9091' })
+    const unknown = { ...known, result: { ...known.result, homeHalfTime: 0, note: '*' } }
+    const other = oldMatch({ code: 'ajax.thuis', dateTime: '2001-09-02 20:00:00', season: '9091' })
+    const otherUnknown = { ...other, result: { ...other.result, homeHalfTime: 0, note: '*' } }
+
+    // An older import took the 0-0 as a fact.
+    await run([known, other])
+    await database.pool.query("UPDATE matches SET half_time_for = 0, half_time_against = 0 WHERE opponent <> 'Ajax'")
+    await database.pool.query(
+      "UPDATE matches SET half_time_for = 2, half_time_against = 1, half_time_source = 'redactie' WHERE opponent = 'Ajax'",
+    )
+
+    const report = await run([unknown, otherUnknown])
+
+    expect(report.lines.join('\n')).toContain('1 scores at half-time are emptied')
+    expect(await rows()).toMatchObject([
+      { halfTimeAgainst: null, halfTimeFor: null, halfTimeSource: null },
+      { halfTimeAgainst: 1, halfTimeFor: 2, halfTimeSource: 'redactie' },
+    ])
+    expect(await run([unknown, otherUnknown])).toMatchObject({ changed: 0, unchanged: 2 })
   })
 
   it('fills an empty score at half-time of its own row, which an older run left empty', async () => {

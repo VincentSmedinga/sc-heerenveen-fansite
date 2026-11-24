@@ -1242,6 +1242,7 @@
   - **De oude Fansite:** de stap `matches` van de import van de oude gegevens zet `result.homeHalfTime` en `result.awayHalfTime` in de kolommen, vanuit de kant van sc Heerenveen gezien.
     Een ruststand die hoger is dan de stand na de reguliere speeltijd komt in het logboek en wordt niet overgenomen, en dat geldt ook voor de stand die in de rij blijft staan.
     De stap zet `half_time_source` op `oude-fansite`, vult een lege ruststand en overschrijft er geen, ook niet bij een wedstrijd van een andere bron, en een verschil is geen wijziging die op de redactie wacht.
+    **Later:** zie _Een ruststand die de oude Fansite niet kende, blijft leeg_ in `importer.md` (24 november 2026): een `*` in 1990/91 betekent "ruststand niet bekend", en de import maakt zo'n ruststand van de bron `oude-fansite` weer leeg.
   - **Een uitslag die verandert:** een nieuwe of herstelde uitslag, ook uit Wikipedia of na een beslissing over een verschil, maakt de ruststand leeg als hij daar niet meer in past (`dropHalfTimeThatNoLongerFits` in `@fansite/db/match-edits`), want de database weigert een ruststand boven de stand. De bron gaat dan ook weg.
 - **Waarom:** de redactie kent het verslag het best, de doelpunten zijn er voor elke nieuwe wedstrijd, en de oude gegevens vullen alleen het verleden aan.
 - **Alternatieven:** alleen invullen door de redactie, wat de oude wedstrijden leeg laat; de afgeleide ruststand bewaren in de kolommen (dan blijft een oude waarde staan na een gecorrigeerd doelpunt, en is niet meer te zien wat de redactie zelf invulde).

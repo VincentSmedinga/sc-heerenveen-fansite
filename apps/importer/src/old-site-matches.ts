@@ -52,6 +52,8 @@ const publicNotes: ReadonlyMap<string, string> = new Map([
 export type DerivedOldSiteMatch = {
   /** The club code of the old database, the part of the match code before the dot. */
   clubCode: string
+  /** The old fansite marked the score at half-time as not known (#1617), so it stays empty. */
+  halfTimeUnknown?: boolean
   /** Things worth a line in the log; the match is still written, unless it is skipped. */
   lines: string[]
   /** The match as it is in the file. */
@@ -204,7 +206,14 @@ function deriveOne(match: OldSiteMatch, number: number, groupSize: number): Deri
   const regularFor = afterNinety?.for ?? goalsFor
   const regularAgainst = afterNinety?.against ?? goalsAgainst
 
-  if (halfTime.for > regularFor || halfTime.against > regularAgainst) {
+  // The old fansite stored 0-0 where it did not know the score at half-time, and marked those
+  // matches of 1990/91 with a `*` (#1617). A goalless result leaves no other score possible.
+  const halfTimeUnknown =
+    match.season === '9091' && (result.note ?? '').trim() === '*' && (goalsFor > 0 || goalsAgainst > 0)
+
+  if (halfTimeUnknown) {
+    halfTime = null
+  } else if (halfTime.for > regularFor || halfTime.against > regularAgainst) {
     lines.push(
       `${label}: the score at half-time ${halfTime.for}-${halfTime.against} is higher than the score of the regular playing time ${regularFor}-${regularAgainst}, so it is left out`,
     )
@@ -227,6 +236,7 @@ function deriveOne(match: OldSiteMatch, number: number, groupSize: number): Deri
 
   return {
     ...empty,
+    halfTimeUnknown,
     statistics: hasStatistics
       ? {
           cornersAgainst: theirs(stats.homeCorners, stats.awayCorners),
@@ -368,6 +378,7 @@ export async function importOldSiteMatches(
   const derived = deriveOldSiteMatches(oldMatches)
   const keys = new Set<string>()
   let remarks = 0
+  let clearedHalfTimes = 0
 
   for (const one of derived) {
     const { match } = one
@@ -511,6 +522,13 @@ export async function importOldSiteMatches(
       }
     }
 
+    // A score at half-time that the old fansite never knew is emptied again, but only when the
+    // file itself was its source: what the editors filled in stays (#1617).
+    if (one.halfTimeUnknown === true && before.halfTimeSource === 'oude-fansite' && before.halfTimeFor !== null) {
+      Object.assign(change, { halfTimeAgainst: null, halfTimeFor: null, halfTimeSource: null })
+      clearedHalfTimes += 1
+    }
+
     const oldStatistics = statistics.get(before.id)
     const statisticsDiffer =
       one.statistics !== null &&
@@ -542,6 +560,9 @@ export async function importOldSiteMatches(
     if (row.dataSource === oldSiteSource && !keys.has(key)) {
       report.lines.push(`${row.season} ${row.round} (${row.competition}) is no longer in the files, left as it is`)
     }
+  }
+  if (clearedHalfTimes > 0) {
+    report.lines.push(`${clearedHalfTimes} scores at half-time are emptied: the old fansite did not know them`)
   }
   if (remarks > 0) {
     report.lines.push(`${remarks} remarks of the old editors are not copied to the note: they are working notes`)
