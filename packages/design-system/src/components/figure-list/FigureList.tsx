@@ -24,7 +24,7 @@ export type FigureListProps = ComponentPropsWithoutRef<'ol'> & {
 const Item = ({ children, className, figure, note, ...props }: FigureListItemProps) => (
   <li className={classNames('hf-figure-list-item', className)} {...props}>
     <span className="hf-figure-list-name">
-      {note === undefined ? null : <span className="hf-figure-list-note">{note}</span>}
+      {note === undefined ? null : <span className="hf-meta hf-figure-list-note">{note}</span>}
       {children}
     </span>
     <span className="hf-figure-list-figure">{figure}</span>

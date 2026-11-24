@@ -136,11 +136,13 @@ export const TableRows = ({
               {row.aside === undefined ? null : (
                 <>
                   {' '}
-                  <span className="hf-data-table-aside">{row.aside}</span>
+                  <span className="hf-meta hf-data-table-aside">{row.aside}</span>
                 </>
               )}
               {row.note === undefined ? null : <span className="hf-visually-hidden">{`, ${row.note}`}</span>}
-              {row.secondary === undefined ? null : <span className="hf-data-table-secondary">{row.secondary}</span>}
+              {row.secondary === undefined ? null : (
+                <span className="hf-meta hf-data-table-secondary">{row.secondary}</span>
+              )}
             </th>
             {row.cells.map((cell, index) => (
               <td
@@ -242,9 +244,11 @@ export const TextTableRows = ({
         <tr key={row.header}>
           <th scope="row">
             {row.href === undefined ? row.header : <Link href={row.href}>{row.header}</Link>}
-            {row.secondary === undefined ? null : <span className="hf-data-table-secondary">{row.secondary}</span>}
+            {row.secondary === undefined ? null : (
+              <span className="hf-meta hf-data-table-secondary">{row.secondary}</span>
+            )}
             {folded.length === 0 ? null : (
-              <span className="hf-data-table-secondary hf-data-table-folded">
+              <span className="hf-meta hf-data-table-secondary hf-data-table-folded">
                 {folded.map((cell, index) => (
                   // The cells have no names, so the position is the only key.
                   <Fragment key={index}>

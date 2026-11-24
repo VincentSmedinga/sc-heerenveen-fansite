@@ -193,14 +193,18 @@ describe('PlacePerRoundCard', () => {
   it('says one place in one pair when it never changed', () => {
     const html = render([at(1, 3), at(2, 3)])
 
-    expect(html).toContain('<dl class="hf-description-list"><div><dt>Plek</dt><dd>3, alle rondes</dd></div></dl>')
+    expect(html).toContain(
+      '<dl class="hf-description-list"><div><dt class="hf-meta">Plek</dt><dd>3, alle rondes</dd></div></dl>',
+    )
   })
 
   it('has a description list with the highest and the lowest place above the Disclosure, and no shift', () => {
     const html = render(going)
     const list = html.slice(html.indexOf('<dl'), html.indexOf('</dl>'))
 
-    expect([...list.matchAll(/<dt>(.*?)<\/dt><dd>(.*?)<\/dd>/g)].map(([, term, value]) => [term, value])).toEqual([
+    expect(
+      [...list.matchAll(/<dt class="hf-meta">(.*?)<\/dt><dd>(.*?)<\/dd>/g)].map(([, term, value]) => [term, value]),
+    ).toEqual([
       ['Hoogste', 'plek 1, ronde 2'],
       ['Laagste', 'plek 3, ronde 1'],
     ])

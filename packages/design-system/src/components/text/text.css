@@ -62,6 +62,7 @@
   }
 
   .hf-meta {
+    color: var(--hf-colour-text-secondary);
     font-family: var(--hf-font-family-text);
     font-size: var(--hf-meta-font-size);
     font-stretch: normal;

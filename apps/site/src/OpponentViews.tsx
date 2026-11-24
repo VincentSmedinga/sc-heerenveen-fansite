@@ -255,6 +255,7 @@ export function ClubsCard({
             <DataTable
               caption={`De tegenstanders van sc Heerenveen, van A tot Z, met onze uitslagen tegen elk${choice === 'all' ? '' : ` in ${competitionWords(choice)}`}`}
               columns={clubColumns}
+              legend={clubLegend}
               rows={records.map((record) => ({
                 cells: [
                   record.played,
@@ -280,7 +281,6 @@ export function ClubsCard({
                 header: record.name,
               }))}
             />
-            <Text appearance="meta">{clubLegend}</Text>
           </DataTable.More>
           <BasedOnSince choice={choice} since={since} />
         </>
@@ -392,9 +392,9 @@ export function ClubScoreCountsCard({ meetings }: { meetings: readonly Meeting[]
       <DataTable
         caption="De competities van deze wedstrijden en hoeveel wedstrijden er in elke werden gespeeld"
         columns={['Competitie', tableColumns.played]}
+        legend={tableLegend([tableColumns.played])}
         rows={competitionCounts(meetings).map(({ competition, count }) => ({ cells: [count], header: competition }))}
       />
-      <Text appearance="meta">{tableLegend([tableColumns.played])}</Text>
     </ScoreCountsView>
   )
 }
@@ -979,6 +979,7 @@ function RankingPanel({
       <DataTable
         caption={caption(`De eerste ${places.length} clubs ${lead}`)}
         columns={['Club', { ...tableColumns.pointsPerMatch, key: true }, tableColumns.played]}
+        legend={topPointsLegend}
         rows={places.map((place) => ({
           cells: [averageFormat.format(place.points / place.played), place.played],
           header: place.name,
@@ -987,7 +988,6 @@ function RankingPanel({
         }))}
         sortable={false}
       />
-      <Text appearance="meta">{topPointsLegend}</Text>
       <BasedOnSince
         choice={choice}
         condition={`tegen clubs met minstens ${topPointsMinimum} ${venueMatches[venue]}`}

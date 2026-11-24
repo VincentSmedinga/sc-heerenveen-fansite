@@ -55,7 +55,7 @@ export const KeyFigures = ({ across = false, className, figures, ...props }: Key
           </span>{' '}
           <span className="hf-key-figure-label">{label}</span>
           <span className="hf-key-figure-stop">, </span>
-          <span className="hf-key-figure-note">{note}</span>
+          <span className="hf-meta hf-key-figure-note">{note}</span>
         </div>
       </li>
     ))}

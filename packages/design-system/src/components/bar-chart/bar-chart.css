@@ -191,8 +191,6 @@
   }
 
   .hf-bar-chart-axis {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
     grid-column: -2 / -1;
     line-height: 1.25rem;
     text-align: center;
@@ -254,9 +252,7 @@
     .hf-bar-chart-scale {
       align-self: start;
       block-size: calc(100% - 0.125rem);
-      color: var(--hf-colour-text-secondary);
       display: block;
-      font-size: var(--hf-meta-font-size);
       font-variant-numeric: tabular-nums;
       grid-column: 1;
       grid-row: 1;

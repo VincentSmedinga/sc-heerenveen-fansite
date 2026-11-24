@@ -1,4 +1,4 @@
-import { Card, DataTable, Heading, PlayerName, tableColumns, tableLegend, Text } from '@fansite/design-system'
+import { Card, DataTable, Heading, PlayerName, tableColumns, tableLegend } from '@fansite/design-system'
 
 import { type CoachResult } from './coachResults'
 import { type CompetitionChoice, competitionWords } from './competition'
@@ -60,6 +60,7 @@ export function CoachResultsCard({
       <DataTable
         caption={`De resultaten van sc Heerenveen per hoofdtrainer, de nieuwste eerst${choice === 'all' ? '' : `, in ${competitionWords(choice)}`}`}
         columns={['Hoofdtrainer', ...figureColumns]}
+        legend={legend}
         rows={results.map((result) => ({
           cells: [
             result.played,
@@ -74,7 +75,6 @@ export function CoachResultsCard({
           sortHeader: textSortName(result.name),
         }))}
       />
-      <Text appearance="meta">{legend}</Text>
       <BasedOnSince choice={choice} since={since} />
     </Card>
   )

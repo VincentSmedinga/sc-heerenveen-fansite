@@ -48,7 +48,7 @@ export const Pagination = ({
           Vorige
         </Link>
       )}
-      <span className="hf-pagination-status">
+      <span className="hf-meta hf-pagination-status">
         Pagina {current} van {total}
       </span>
       {nextHref === undefined ? null : (

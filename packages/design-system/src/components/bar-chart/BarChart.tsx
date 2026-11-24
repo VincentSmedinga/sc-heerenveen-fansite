@@ -269,7 +269,7 @@ export const BarChart = ({
       style={{ ...style, '--hf-bar-chart-slots': slots } as CSSProperties}
     >
       <div className="hf-bar-chart-frame">
-        <div className="hf-bar-chart-scale">
+        <div className="hf-meta hf-bar-chart-scale">
           {ticks.map((tick) => (
             <span
               className="hf-bar-chart-scale-number"
@@ -321,7 +321,7 @@ export const BarChart = ({
           {layers}
         </div>
         {axis && (
-          <div className="hf-bar-chart-axis">
+          <div className="hf-meta hf-bar-chart-axis">
             <div className={classNames('hf-bar-chart-numbers', axis.marks === true && 'hf-bar-chart-numbers-marked')}>
               {numbers.map((number) => (
                 <span

@@ -1,4 +1,4 @@
-import { Card, DataTable, Heading, Link, List, Text } from '@fansite/design-system'
+import { Card, DataTable, Heading, Link, List, tableColumns, tableLegend, Text } from '@fansite/design-system'
 import {
   cardExamples,
   exampleFacts,
@@ -149,17 +149,20 @@ export function PredictionRulesCard() {
           'Jij',
           { abbreviation: 'R', name: 'punten voor de ruststand' },
           { abbreviation: 'E', name: 'punten voor de eindstand' },
-          { abbreviation: 'P', key: true, name: 'totaal punten' },
+          { ...tableColumns.points, key: true },
         ]}
+        legend={
+          <>
+            Jij: je voorspelling, rust en eind. R: punten voor de rust. E: punten voor de eind.{' '}
+            {tableLegend([tableColumns.points])}.
+          </>
+        }
         rows={examplePoints.map(({ fullTime, guess, halfTime, total }) => ({
           cells: [halfTime, fullTime, total],
           header: `${scoreText(guess.halfTime)}, ${scoreText(guess.fullTime)}`,
         }))}
         sortable={false}
       />
-      <Text appearance="meta">
-        Jij: je voorspelling, rust en eind. R: punten voor de rust. E: punten voor de eind. P: totaal.
-      </Text>
       <Heading level={3}>De stand</Heading>
       <Text>
         De <Link href={`${fansPath}/prognose/stand`}>stand</Link> is er per seizoen en per wedstrijd. {tieRule}

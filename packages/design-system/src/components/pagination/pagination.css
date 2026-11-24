@@ -40,10 +40,7 @@
   }
 
   .hf-pagination-status {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
     grid-column: 2;
-    line-height: var(--hf-meta-line-height);
     text-align: center;
   }
 

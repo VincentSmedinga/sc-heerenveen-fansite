@@ -55,6 +55,7 @@ export function RefereesCard({
       <DataTable
         caption="Onder welke scheidsrechter sc Heerenveen hoeveel wedstrijden speelde, met de wedstrijden gewonnen, gelijk en verloren, en de punten per wedstrijd"
         columns={columns}
+        legend={legend}
         rows={rows.map((row) => ({
           cells: [
             row.played,
@@ -67,7 +68,6 @@ export function RefereesCard({
           sortHeader: textSortName(row.name),
         }))}
       />
-      <Text appearance="meta">{legend}</Text>
       {top && (
         <Text appearance="meta">{`${numberFormat.format(referees)} scheidsrechters, de top 5 op punten per wedstrijd.`}</Text>
       )}

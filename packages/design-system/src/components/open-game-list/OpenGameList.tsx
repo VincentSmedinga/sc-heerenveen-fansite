@@ -36,7 +36,8 @@ export function OpenGameList({ className, items, ...props }: OpenGameListProps) 
         <li className="hf-open-game-list-item" key={item.href}>
           <span className="hf-open-game-list-text">
             <b>{item.name}</b>
-            <span aria-hidden="true"> —</span> <span className="hf-open-game-list-sentence">{item.sentence}</span>
+            <span aria-hidden="true"> —</span>{' '}
+            <span className="hf-meta hf-open-game-list-sentence">{item.sentence}</span>
           </span>
           <Link aria-label={item.linkName} href={item.href}>
             {item.link}

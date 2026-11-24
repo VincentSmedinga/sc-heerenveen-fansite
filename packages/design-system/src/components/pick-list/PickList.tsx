@@ -114,7 +114,7 @@ export const PickList = ({ className, groups, ...props }: PickListProps) => (
           <legend>
             {group.legend}
             <span className="hf-visually-hidden">,</span>{' '}
-            <span className="hf-pick-list-count">
+            <span className="hf-meta hf-pick-list-count">
               {group.chosen} van {group.maximum}
             </span>
           </legend>
@@ -142,11 +142,11 @@ export const PickList = ({ className, groups, ...props }: PickListProps) => (
                   <span className="hf-pick-list-text">
                     <span className="hf-pick-list-name">{option.label}</span>
                     {option.reason ? (
-                      <span className="hf-pick-list-line" id={reasonId}>
+                      <span className="hf-meta hf-pick-list-line" id={reasonId}>
                         {option.reason}
                       </span>
                     ) : option.line ? (
-                      <span className="hf-pick-list-line">{option.line}</span>
+                      <span className="hf-meta hf-pick-list-line">{option.line}</span>
                     ) : null}
                   </span>
                 </label>

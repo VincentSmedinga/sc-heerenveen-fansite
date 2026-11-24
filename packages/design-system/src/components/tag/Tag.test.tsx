@@ -15,13 +15,13 @@ describe('Tag', () => {
   it('is the neutral tone, with only the class of the tag, when it has no tone', () => {
     render(<Tag>Gepland</Tag>)
 
-    expect(screen.getByText('Gepland').className).toBe('hf-tag')
+    expect(screen.getByText('Gepland').className).toBe('hf-meta hf-tag')
   })
 
   it.each(tagTones.filter((tone) => tone !== 'neutral'))('adds the class of the tone %s', (tone) => {
     render(<Tag tone={tone}>Aangepast</Tag>)
 
-    expect(screen.getByText('Aangepast').className).toBe(`hf-tag hf-tag-${tone}`)
+    expect(screen.getByText('Aangepast').className).toBe(`hf-meta hf-tag hf-tag-${tone}`)
   })
 
   it('keeps a class of its own and the other attributes', () => {
@@ -32,7 +32,7 @@ describe('Tag', () => {
     )
     const tag = screen.getByText('Aangepast')
 
-    expect(tag.className).toBe('hf-tag hf-tag-highlight extra')
+    expect(tag.className).toBe('hf-meta hf-tag hf-tag-highlight extra')
     expect(tag.id).toBe('tag')
   })
 })

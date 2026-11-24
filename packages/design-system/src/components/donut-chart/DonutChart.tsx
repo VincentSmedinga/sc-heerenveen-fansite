@@ -166,7 +166,7 @@ export const DonutChart = ({
         className,
       )}
     >
-      {title === undefined ? null : <p className="hf-donut-chart-title">{title}</p>}
+      {title === undefined ? null : <p className="hf-meta hf-donut-chart-title">{title}</p>}
       <div className="hf-donut-chart-plot">
         <svg
           className="hf-donut-chart-drawing"
@@ -218,7 +218,7 @@ export const DonutChart = ({
                   } as CSSProperties
                 }
               >
-                <span className="hf-donut-chart-name">{slices[slice.index]!.label}</span>
+                <span className="hf-meta hf-donut-chart-name">{slices[slice.index]!.label}</span>
                 <b className="hf-donut-chart-value">{slice.value}</b>
               </span>
             )

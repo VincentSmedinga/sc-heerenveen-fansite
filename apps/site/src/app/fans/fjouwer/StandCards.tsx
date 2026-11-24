@@ -1,4 +1,13 @@
-import { Card, CardLink, DataTable, type DataTableRow, Heading, tableColumns, Text } from '@fansite/design-system'
+import {
+  Card,
+  CardLink,
+  DataTable,
+  type DataTableRow,
+  Heading,
+  tableColumns,
+  tableLegend,
+  Text,
+} from '@fansite/design-system'
 
 import { fjouwerRulesAddress } from '#src/fans-paths'
 import { type FourRanking, type RankedFour, rowOf, shownRows, topRows } from '#src/fans/fjouwer-ranking'
@@ -10,7 +19,9 @@ import { type FourRanking, type RankedFour, rowOf, shownRows, topRows } from '#s
 export const standPath = '/fans/fjouwer/stand'
 
 /** The legend under the table: what the short headers mean, and how a tie is settled. */
-export const standLegend = 'W wedstrijden · P punten. Gelijk aantal punten? Dan delen jullie een plaats.'
+export const standLegend = (
+  <>W wedstrijden · {tableLegend([tableColumns.points])}. Gelijk aantal punten? Dan delen jullie een plaats.</>
+)
 
 const youNote = 'Jij'
 
@@ -58,10 +69,10 @@ export function StandTable({ ranking, supporterId }: { ranking: FourRanking; sup
       <DataTable
         caption={standCaption(ranking.matchCount)}
         columns={['Fan', { abbreviation: 'W', name: 'wedstrijden' }, { ...tableColumns.points, key: true }]}
+        legend={standLegend}
         rows={visibleRows(ranking, supporterId, shownRows, true)}
         sortable={false}
       />
-      <Text appearance="meta">{standLegend}</Text>
       <CardLink href={fjouwerRulesAddress}>Spelregels</CardLink>
     </>
   )

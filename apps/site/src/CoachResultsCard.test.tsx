@@ -28,7 +28,7 @@ describe('CoachResultsCard', () => {
     )
 
     expect(html).toContain(
-      '<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Kees</span> <span class="hf-player-name-surname">van Wonderen</span></span><span class="hf-data-table-secondary">2015 \u2013 2016</span></th>',
+      '<th scope="row"><span class="hf-player-name"><span class="hf-player-name-given">Kees</span> <span class="hf-player-name-surname">van Wonderen</span></span><span class="hf-meta hf-data-table-secondary">2015 \u2013 2016</span></th>',
     )
   })
 
@@ -49,7 +49,7 @@ describe('CoachResultsCard', () => {
       <CoachResultsCard choice="league" results={[result({ interim: true })]} since="2010/11" />,
     )
 
-    expect(html).toContain('<span class="hf-data-table-secondary">interim \u00b7 2015 \u2013 2016</span>')
+    expect(html).toContain('<span class="hf-meta hf-data-table-secondary">interim \u00b7 2015 \u2013 2016</span>')
     expect(html).toContain('in de Eredivisie')
   })
 })

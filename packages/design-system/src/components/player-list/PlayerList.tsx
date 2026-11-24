@@ -56,7 +56,7 @@ export const PlayerList = ({ className, order = 'surname-first', players, ...pro
         return (
           <li className="hf-player-list-row" key={key}>
             {href === undefined ? name : <Link href={href}>{name}</Link>}
-            {facts === undefined || facts === '' ? null : <span className="hf-player-list-facts">{facts}</span>}
+            {facts === undefined || facts === '' ? null : <span className="hf-meta hf-player-list-facts">{facts}</span>}
           </li>
         )
       })}

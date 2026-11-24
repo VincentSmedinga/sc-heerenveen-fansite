@@ -15,8 +15,6 @@
   }
 
   .hf-match-substitutes-none {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
     margin: 0;
   }
 
@@ -72,8 +70,6 @@
 
   /* The small line under the name: the icon "erin", the minute, "voor <name>" and a goal. */
   .hf-match-substitutes-detail {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
     line-height: 1.2;
   }
 

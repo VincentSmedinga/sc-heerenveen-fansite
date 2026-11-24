@@ -42,10 +42,8 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* The goals are in small letters, in the colour of secondary text, and take the whole row. */
+  /* The goals are in small letters (the Meta style), and take the whole row. */
   .hf-match-header-scorers {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
     grid-column: 1 / -1;
     overflow-wrap: anywhere;
   }
@@ -74,7 +72,7 @@
     border: 1px solid currentcolor;
     border-radius: var(--hf-space-xs);
     font-size: var(--hf-meta-font-size);
-    font-weight: var(--hf-figure-font-weight);
+    font-weight: var(--hf-name-font-weight);
     line-height: 1.4;
     padding-inline: var(--hf-space-s);
   }
@@ -85,11 +83,6 @@
    */
   .hf-match-header-live {
     color: var(--hf-colour-text-accent);
-  }
-
-  .hf-match-header-how {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
   }
 
   @container hf-match-header (inline-size >= 40rem) {

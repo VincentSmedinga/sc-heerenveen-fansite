@@ -26,11 +26,6 @@
     font-weight: var(--hf-name-font-weight);
   }
 
-  .hf-player-list-facts {
-    color: var(--hf-colour-text-secondary);
-    font-size: var(--hf-meta-font-size);
-  }
-
   /* Two names of about 13rem and a gap of 2rem need 28rem; 32rem leaves room for long names. */
   @container hf-player-list (inline-size >= 32rem) {
     .hf-player-list {

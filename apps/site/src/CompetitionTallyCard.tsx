@@ -51,6 +51,7 @@ export function CompetitionTallyCard({
       <DataTable
         caption="De wedstrijden van sc Heerenveen per soort competitie, met de wedstrijden gewonnen, gelijk en verloren en de doelpunten voor en tegen"
         columns={columns}
+        legend={legend}
         rows={tallies.map(({ drawn, goalsAgainst, goalsFor, label, lost, played, value, won }) => {
           const link = matchLink?.(value)
 
@@ -62,7 +63,6 @@ export function CompetitionTallyCard({
           }
         })}
       />
-      <Text appearance="meta">{legend}</Text>
       {tallies.some(({ value }) => value === 'play-offs') && (
         <Text appearance="meta">De play-offs zijn de wedstrijden tegen Nederlandse clubs om een plek in Europa.</Text>
       )}

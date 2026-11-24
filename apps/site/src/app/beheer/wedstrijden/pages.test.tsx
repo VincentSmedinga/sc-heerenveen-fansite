@@ -191,7 +191,7 @@ describe('the list', () => {
       'Verslag',
     ])
     expect(html).not.toContain('hf-data-table-fold')
-    expect(html).toContain('<span class="hf-data-table-secondary">')
+    expect(html).toContain('<span class="hf-meta hf-data-table-secondary">')
     expect(html).toContain('Eredivisie, Speelronde 11')
     expect(html).toContain('hf-page-main hf-page-main-grid hf-density-compact')
   })
@@ -415,7 +415,7 @@ describe('the match', () => {
 
     expect(html).not.toContain('Kruimelpad')
     expect(html.replaceAll(/<[^>]+>/gu, '')).toContain('Terug naar Wedstrijden')
-    expect(html).toContain('<span class="hf-tag hf-tag-attention">Uitslag ontbreekt</span>')
+    expect(html).toContain('<span class="hf-meta hf-tag hf-tag-attention">Uitslag ontbreekt</span>')
     expect(html).not.toContain('Terug naar de wedstrijden')
     expect(html).toContain('hf-page-main hf-page-main-grid hf-density-compact')
     expect(html).not.toContain('Laatste invoer')
@@ -612,7 +612,7 @@ describe('the match', () => {
     const html = await form(id)
 
     expect(headings(html)).toContain('h2 Laatste invoer')
-    expect(html).toContain('<span class="hf-tag hf-tag-highlight">Aangepast: uitslag</span>')
+    expect(html).toContain('<span class="hf-meta hf-tag hf-tag-highlight">Aangepast: uitslag</span>')
     expect(html).toContain('Onderdelen: uitslag')
     expect(html).toContain('Door: sanne@example.org')
     expect(html).toContain('Reden: Wikipedia is achter')
@@ -839,7 +839,7 @@ describe('the match', () => {
 
       const html = await list({ tonen: 'alles' })
 
-      expect(html.match(/<span class="hf-tag hf-tag-attention">Wikipedia wijkt af<\/span>/g)).toHaveLength(1)
+      expect(html.match(/<span class="hf-meta hf-tag hf-tag-attention">Wikipedia wijkt af<\/span>/g)).toHaveLength(1)
     })
 
     it('tags the match "Wikipedia wijkt af" next to "Aangepast", and finds it under "Aangepast"', async () => {
@@ -850,7 +850,7 @@ describe('the match', () => {
 
       expect(html).toContain('Aangepast (1)')
       expect(html).not.toContain('hf-tag-highlight')
-      expect(html.match(/<span class="hf-tag hf-tag-attention">Wikipedia wijkt af<\/span>/g)).toHaveLength(1)
+      expect(html.match(/<span class="hf-meta hf-tag hf-tag-attention">Wikipedia wijkt af<\/span>/g)).toHaveLength(1)
       expect(html).toContain('N.E.C.')
       expect(html).not.toContain('Speelronde 12')
     })
@@ -887,7 +887,7 @@ describe('the match', () => {
       const html = await list({ seizoen: '2024-25', tonen: 'aangepast' })
 
       expect(html).toContain('N.E.C.')
-      expect(html.match(/<span class="hf-tag hf-tag-attention">Wikipedia wijkt af<\/span>/g)).toHaveLength(1)
+      expect(html.match(/<span class="hf-meta hf-tag hf-tag-attention">Wikipedia wijkt af<\/span>/g)).toHaveLength(1)
     })
 
     it('tells the editor on the list that a difference was decided already', async () => {
@@ -1103,7 +1103,7 @@ describe('the match', () => {
 
       expect(html).toContain('Wikipedia wacht (1)')
       expect(html).toContain('Alles (2)')
-      expect(html.match(/<span class="hf-tag hf-tag-attention">Wikipedia wacht<\/span>/g)).toHaveLength(1)
+      expect(html.match(/<span class="hf-meta hf-tag hf-tag-attention">Wikipedia wacht<\/span>/g)).toHaveLength(1)
       expect(html).toContain('Achtste finale')
       expect(html).not.toContain('Speelronde 12')
       expect(html).not.toContain('hf-tag-attention">Wikipedia wijkt af')

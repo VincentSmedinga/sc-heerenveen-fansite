@@ -1,4 +1,13 @@
-import { Card, CardLink, DataTable, type DataTableRow, Heading, Text } from '@fansite/design-system'
+import {
+  Card,
+  CardLink,
+  DataTable,
+  type DataTableRow,
+  Heading,
+  tableColumns,
+  tableLegend,
+  Text,
+} from '@fansite/design-system'
 
 import { type RankedRow, type Ranking, rowOf, shownRows, topRows } from '#src/fans/prediction-ranking'
 import { RulesLink } from '#src/fans/RulesLink'
@@ -10,8 +19,12 @@ import { RulesLink } from '#src/fans/RulesLink'
 export const standPath = '/fans/prognose/stand'
 
 /** The legend under the table: what the short headers mean, and how a tie is broken. */
-export const standLegend =
-  'V voorspellingen · Gem punten per voorspelling · P punten. Gelijk? Meer precieze eindstanden eerst.'
+export const standLegend = (
+  <>
+    V voorspellingen · Gem punten per voorspelling · {tableLegend([tableColumns.points])}. Gelijk? Meer precieze
+    eindstanden eerst.
+  </>
+)
 
 /** A number with a decimal comma: "12,3". */
 export const decimalText = (value: number) => value.toFixed(1).replace('.', ',')
@@ -41,7 +54,7 @@ export function StandCard({
       ) : (
         <DataTable
           caption={`Stand ${season}`}
-          columns={['Fan', { abbreviation: 'P', key: true, name: 'totaal punten' }]}
+          columns={['Fan', { ...tableColumns.points, key: true }]}
           rows={visibleRows(ranking, supporterId, topRows, false)}
           sortable={false}
         />
@@ -69,12 +82,12 @@ export function StandTable({
           'Fan',
           { abbreviation: 'V', name: 'voorspellingen' },
           { abbreviation: 'Gem', name: 'gemiddelde punten per voorspelling' },
-          { abbreviation: 'P', key: true, name: 'totaal punten' },
+          { ...tableColumns.points, key: true },
         ]}
+        legend={standLegend}
         rows={visibleRows(ranking, supporterId, shownRows, true)}
         sortable={false}
       />
-      <Text appearance="meta">{standLegend}</Text>
       <RulesLink />
     </>
   )

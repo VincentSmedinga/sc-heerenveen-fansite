@@ -43,7 +43,7 @@ export const OnThisDay = ({ children, className, intro, level = 2, matches, titl
       <Heading id={headingId} level={level}>
         {title}
       </Heading>
-      <p className="hf-on-this-day-intro">{intro}</p>
+      <p className="hf-meta hf-on-this-day-intro">{intro}</p>
       <List className="hf-on-this-day-list" plain role="list">
         {matches.map((match) => (
           <List.Item className="hf-on-this-day-match" key={`${match.year}|${match.clubs}`}>

@@ -21,7 +21,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Lopende tekst in de typestijlen van de site: Tekst voor een alinea, Inleiding voor de eerste alinea onder de paginatitel, en Meta voor het kleine werk eromheen, zoals een datum of een bronnaam.',
+          'Lopende tekst in de typestijlen van de site: Tekst voor een alinea, Inleiding voor de eerste alinea onder de paginatitel, en Meta voor het kleine werk eromheen, zoals een datum of een bronnaam. Meta is grijs en heeft gewicht 400: alleen een waarde binnen een metaregel, zoals een tag of de minuut van een doelpunt, heeft het gewicht van een naam.',
           'Een inleiding is alleen voor een `p`.',
           'Zegt een regel dat gegevens ontbreken of achterlopen, geef hem dan de klasse `hf-text-missing` naast de typestijl.',
         ].join('\n'),

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { Ranking } from '#src/fans/prediction-ranking'
 
-import { StandCard, standLegend, StandTable } from './StandCards'
+import { StandCard, StandTable } from './StandCards'
 
 const names = Array.from({ length: 60 }, (_, index) => `supporter${index + 1}`)
 const ranking: Ranking = {
@@ -30,9 +30,11 @@ describe('the table of the ranking', () => {
     expect(html).toContain('Stand na 13 wedstrijden')
     expect(html).toContain('>V<')
     expect(html).toContain('>Gem<')
-    expect(html).toContain('>P<')
+    expect(html).toContain('title="Punten"')
     expect(html).toContain('20,0')
-    expect(html).toContain(standLegend)
+    expect(html).toContain('V voorspellingen · Gem punten per voorspelling')
+    expect(html).toMatch(/<p class="hf-meta hf-bar-legend" id="[^"]+">V voorspellingen/)
+    expect(html).toMatch(/<table aria-describedby="([^"]+)"[^>]*>/)
   })
 
   it('shows fifty rows, and under them the real place of a supporter who stands lower', () => {

@@ -61,6 +61,7 @@ export function CountryTallyCard({
       <DataTable
         caption="De Europese wedstrijden van sc Heerenveen per land van de tegenstander, met de wedstrijden gewonnen, gelijk en verloren en de doelpunten voor en tegen"
         columns={columns}
+        legend={legend}
         rows={tallies.map(({ country, drawn, goalsAgainst, goalsFor, lost, played, won }) => {
           const name = country === null ? unknown : (countryName(country) ?? country)
           const link = country === null ? undefined : matchLink?.(country)
@@ -82,7 +83,6 @@ export function CountryTallyCard({
           }
         })}
       />
-      <Text appearance="meta">{legend}</Text>
       <Text appearance="meta">Het land van de club van de tegenstander, zoals die nu is.</Text>
     </Card>
   )

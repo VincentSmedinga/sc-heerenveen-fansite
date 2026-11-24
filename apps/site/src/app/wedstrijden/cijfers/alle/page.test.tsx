@@ -165,8 +165,8 @@ describe('the page /wedstrijden/cijfers/alle', () => {
     expect(records).not.toContain('Alle 5 gespeelde wedstrijden')
     // One description list, also for the lines with text, and no list of items.
     expect(records.match(/<dl /g)).toHaveLength(1)
-    expect(records).toContain('<dt>Langste reeks zonder nederlaag</dt><dd><p>')
-    expect(records).toContain('<dt>Grootste overwinning</dt><dd><div class="hf-match"')
+    expect(records).toContain('<dt class="hf-meta">Langste reeks zonder nederlaag</dt><dd><p>')
+    expect(records).toContain('<dt class="hf-meta">Grootste overwinning</dt><dd><div class="hf-match"')
   })
 
   it('has the most visitors of any season in the card Toeschouwers, and no chart', async () => {

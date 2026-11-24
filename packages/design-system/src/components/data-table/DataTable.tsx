@@ -1,4 +1,4 @@
-import { Children, type ComponentPropsWithoutRef, isValidElement } from 'react'
+import { Children, type ComponentPropsWithoutRef, isValidElement, type ReactNode, useId } from 'react'
 
 import type { DataTableColumn, DataTableRow, DataTableTextColumn, DataTableTextRow } from './dataTableTypes'
 
@@ -73,6 +73,12 @@ type DataTableBaseProps = Omit<ComponentPropsWithoutRef<'table'>, 'children'> & 
   /** A data table has no children: everything it shows comes from the props below. */
   children?: never
   /**
+   * The legend under the table, such as `tableLegend(columns)` and the sentences that go with
+   * it. It has the style of the legend under the other tables, and a screen reader hears it
+   * as the description of the table.
+   */
+  legend?: ReactNode
+  /**
    * Whether the visitor can sort the table on its columns, which is the default for a list of
    * things that can be compared. Give `false`, with the reason in a comment, for a table that
    * is in its order for a reason: a ranking, a short series in its own order, one half of a
@@ -102,7 +108,24 @@ type DataTableBaseProps = Omit<ComponentPropsWithoutRef<'table'>, 'children'> & 
  * turns round and a third gives the order of `rows` back. A table that cannot sort, or has
  * `sortable={false}`, is the same plain table as ever and sends no script.
  */
-export const DataTable = ({
+export const DataTable = ({ legend, ...props }: DataTableProps) => {
+  const legendId = useId()
+
+  if (legend === undefined) {
+    return <DataTableWithoutLegend {...props} />
+  }
+
+  return (
+    <>
+      <DataTableWithoutLegend {...props} aria-describedby={legendId} />
+      <p className="hf-meta hf-bar-legend" id={legendId}>
+        {legend}
+      </p>
+    </>
+  )
+}
+
+const DataTableWithoutLegend = ({
   appearance = 'numbers',
   caption,
   className,

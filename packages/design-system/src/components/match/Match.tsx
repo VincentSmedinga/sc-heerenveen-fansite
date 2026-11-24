@@ -440,7 +440,7 @@ export const Match = ({
           ))}
         </p>
       ) : null}
-      {extra ? <div className="hf-match-extra-lines">{extra}</div> : null}
+      {extra ? <div className="hf-meta hf-match-extra-lines">{extra}</div> : null}
       {bottom.length > 0 ? (
         <Text appearance="meta" className="hf-match-where">
           {bottom.map((part, index) => (

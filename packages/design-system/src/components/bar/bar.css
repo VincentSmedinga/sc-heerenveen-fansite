@@ -123,15 +123,15 @@
   }
 
   /*
-   * The legend under a table or a list: an icon and a word for each column, in the colour of
-   * secondary text.
+   * The legend under a table or a list: an icon and a word for each column. Add it next to the
+   * Meta style, which gives it the colour of secondary text. A number in it is a value, so it
+   * has the weight of a name.
    */
   .hf-bar-legend {
-    color: var(--hf-colour-text-secondary);
     margin-block: 0;
 
     b {
-      font-weight: var(--hf-strong-font-weight);
+      font-weight: var(--hf-name-font-weight);
     }
   }
 }

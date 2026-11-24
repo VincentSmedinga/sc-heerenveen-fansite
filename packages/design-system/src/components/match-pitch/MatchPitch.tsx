@@ -202,12 +202,12 @@ export const MatchPitch = ({
         </>
       )}
       {crowded ? (
-        <p className="hf-match-pitch-note hf-match-pitch-note-crowded">
+        <p className="hf-meta hf-match-pitch-note hf-match-pitch-note-crowded">
           Bij deze formatie passen de namen niet op een smal scherm. De lijst hieronder noemt ze.
         </p>
       ) : null}
       {withoutPitch.map((placed) => (
-        <p className="hf-match-pitch-note" key={placed.team.name}>
+        <p className="hf-meta hf-match-pitch-note" key={placed.team.name}>
           {hasFormation(placed.formation)
             ? `Voor ${placed.team.name} past de formatie niet bij de spelers; de lijst hieronder toont de opstelling.`
             : `Van ${placed.team.name} hebben we de formatie niet; de spelers staan in de lijst hieronder.`}

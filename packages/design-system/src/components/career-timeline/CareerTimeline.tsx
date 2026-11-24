@@ -77,10 +77,10 @@ export const CareerTimeline = ({ className, level, periods, ...props }: CareerTi
                 <Heading className="hf-career-season-heading" level={(level + 1) as 3 | 4}>
                   <Link href={href}>{season}</Link>
                 </Heading>
-                {number === undefined ? null : <span className="hf-career-number">rugnummer {number}</span>}
+                {number === undefined ? null : <span className="hf-meta hf-career-number">rugnummer {number}</span>}
                 {current ? <Tag tone="highlight">Dit seizoen</Tag> : null}
               </div>
-              {competitions === undefined ? null : <p className="hf-career-competitions">{competitions}</p>}
+              {competitions === undefined ? null : <p className="hf-meta hf-career-competitions">{competitions}</p>}
               {moment === undefined ? null : (
                 <p className="hf-career-moment">
                   {moment.href === undefined ? (
@@ -88,14 +88,14 @@ export const CareerTimeline = ({ className, level, periods, ...props }: CareerTi
                   ) : (
                     <Link href={moment.href}>{moment.title}</Link>
                   )}
-                  <span className="hf-career-moment-note">{moment.note}</span>
+                  <span className="hf-meta hf-career-moment-note">{moment.note}</span>
                 </p>
               )}
-              {remark === undefined ? null : <p className="hf-career-remark">{remark}</p>}
+              {remark === undefined ? null : <p className="hf-meta hf-career-remark">{remark}</p>}
             </li>
           ))}
         </ol>
-        {gap === undefined ? null : <p className="hf-career-gap">{gap}</p>}
+        {gap === undefined ? null : <p className="hf-meta hf-career-gap">{gap}</p>}
       </li>
     ))}
   </ol>

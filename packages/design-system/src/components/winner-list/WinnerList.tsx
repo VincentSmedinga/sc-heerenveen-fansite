@@ -28,7 +28,7 @@ export function WinnerList({ className, items, ...props }: WinnerListProps) {
         <li className="hf-winner-list-item" key={`${item.name}-${item.line}`}>
           <span className="hf-winner-list-text">
             <span className="hf-winner-list-name">{item.name}</span>
-            <span className="hf-winner-list-line">{item.line}</span>
+            <span className="hf-meta hf-winner-list-line">{item.line}</span>
           </span>
           <span className="hf-winner-list-average">
             <span className="hf-visually-hidden">Gemiddeld cijfer </span>

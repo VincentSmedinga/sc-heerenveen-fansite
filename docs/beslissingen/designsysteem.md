@@ -3161,6 +3161,8 @@
 - **Alleen lopende tekst gebruikt het token:** `.hf-match-goals`, `Tooltip` en `MatchPenaltySeries` gebruiken `--hf-meta-line-height`.
   Knop, datatabel, formulieren, label, tag en het veld houden hun regelhoogte, omdat een hogere regel bedienelementen en rijen hoger maakt zonder dat het leest.
   - **Alternatieven:** alle componenten van 14 pixels (hogere tabelrijen en knoppen); alleen `.hf-meta` en `.hf-match-goals`.
+  - **Later:** zie _Elke metaregel is secundair, en metatekst is 400_ (23 november 2026): ook elke regel die metatekst is in alles behalve zijn naam, neemt de regelhoogte van meta over, via de klasse `hf-meta`.
+    Een bedienelement, een tabelrij en de componenten hieronder houden de hunne.
 - **Componenten met een eigen krappe regelhoogte blijven:** grafieken, het veld, de scorebalk, `MatchHeader`, `MatchSubstitutes`, `MatchTimeline` en `MarkRow` veranderen niet.
   Ze zijn krap bedoeld en staan op een vast raster.
   - **Alternatieven:** ze ook nalopen en per component beslissen; een groter issue.
@@ -3782,7 +3784,8 @@
     Een grote badge zegt de uitkomst of het teken, een klein veld erover zegt "per wedstrijd", en een doel met iets eronder is een strafschop (de stip) of een nul.
     Kleur herhaalt altijd een vorm en vervangt hem nooit.
   - **De namen:** het pictogram heeft de naam van de sleutel in `tableColumns`.
-    `abbreviation` is uit `tableColumns` verdwenen, en `DataTableColumn` houdt `abbreviation` voor kolommen die er niet in staan, zoals `Gem.`.
+    `abbreviation` is uit `tableColumns` verdwenen, en `DataTableColumn` houdt `abbreviation` voor kolommen die er niet in staan, zoals `Gem`.
+    **Later:** zie _Elke metaregel is secundair, en metatekst is 400_ (23 november 2026): de kolom heet overal `Gem`, zonder punt, en de stand van Prognose gebruikt `tableColumns.points` in plaats van de letter `P`.
   - **De toegankelijkheid:** het pictogram is `aria-hidden`, de kop en de sorteerknop hebben het hele woord als naam, en de legenda blijft onder elke tabel.
     In geforceerde kleuren zijn de vullingen `CanvasText` of `Canvas`.
   - **De ballen:** elke bal heeft een eigen `useId` voor zijn clip, zodat twee ballen in één tabel elkaar niet storen.
@@ -4335,6 +4338,36 @@
   Het is een deel van de pagina van Input in Storybook, als de story Met suggesties, en geen component met een eigen pagina.
 - **Waarom:** de sjablonen van de site bevatten geen HTML-elementen (zie de regel in `eslint.config.js`), en een `<datalist>` per veld zou de lijst bij elke rij van een tabel herhalen.
 - **Alternatieven:** een prop `suggestions` op `Input` die zelf de lijst rendert (de lijst komt dan bij elke rij opnieuw in de pagina); een eigen keuzeveld met JavaScript (meer code, en de toegankelijkheid van een eigen component).
+
+## Elke metaregel is secundair, en metatekst is 400
+
+- **Datum:** 23 november 2026
+- **Besluit:** `.hf-meta` (`Text appearance="meta"`) zet ook de secundaire kleur, `--hf-colour-text-secondary` (#1603).
+  Een component dat de metagrootte met de secundaire kleur nabouwde, krijgt de klasse `hf-meta` en verliest zijn eigen regels voor kleur, grootte en gewicht.
+  Een regel die donker moet blijven, heeft een reden in de code: de veldadviezen en de regel "Gegevens nog niet beschikbaar" (`hf-text-missing`) houden hun eigen kleur.
+  - **Waarom:** de kleur stond op 25 plekken in componenten en ontbrak op ongeveer 155 plekken in de site.
+    Het contrast is op elk vlak minstens 5,3:1 in licht en 8,4:1 in donker.
+  - **Alternatieven:** alleen de componenten grijs laten en de site donker; elke plek per stuk beslissen; een grijs per vlak dat de kaart zelf zet (vier nieuwe tokens en elk paar opnieuw meten, voor een verschil dat nauwelijks te zien is); een doorzichtige kleur die meekleurt met wat erachter staat (het contrast hangt dan af van het vlak of de afbeelding eronder).
+- **Metatekst is 400:** alleen een waarde binnen een metaregel heeft het naamgewicht, `--hf-name-font-weight`: het antwoord bij een term in `DescriptionList`, een `Tag`, het getal in een legenda, de uitslag in `MatchHeader` en de minuut in `MatchTimeline`.
+  Wat daar 500 of 700 was zonder dat het een waarde is, is 400.
+  - **Waarom:** er was geen regel, en 400, 500 en 700 stonden door elkaar.
+    Een waarde moet naast de woorden eromheen te vinden zijn.
+  - **Alternatieven:** alles 400, ook de waarden; het gewicht per component laten kiezen.
+- **De regelhoogte:** een regel die metatekst is in alles behalve zijn naam, neemt de regelhoogte van meta over (zie _De regelhoogte van meta wordt 24/14_).
+  Grafieken, het veld, de scorebalk, `MatchHeader`, `MatchSubstitutes`, `MatchTimeline`, `MarkRow`, een bedienelement en een tabelrij houden hun eigen regel, ook als ze de klasse `hf-meta` hebben voor kleur en grootte.
+  - **Later:** vult _De regelhoogte van meta wordt 24/14_ aan voor `CareerTimeline` en `KeyFigures`, die de regelhoogte van lopende tekst hadden en nu die van meta hebben.
+- **De kolom met het gemiddelde heet "Gem":** zonder punt.
+  - **Waarom:** de meeste tabellen schrijven het zo, en de andere kolommen (W, D, V) hebben ook geen punt.
+  - **Alternatieven:** "Gem." met punt.
+- **`DataTable` heeft een prop `legend`:** de legenda staat onder de tabel in de stijl van `hf-bar-legend`, en de tabel noemt hem met `aria-describedby`, zodat een schermlezer hem bij de tabel hoort.
+  Het getal in een legenda is vet, de rest niet.
+  - **Waarom:** de vier gespecialiseerde tabellen tekenden hem zelf in grijs, en pagina's onder een `DataTable` zetten hem er zelf onder in donker.
+  - **Alternatieven:** een los component `TableLegend`; de pagina's hem laten blijven bouwen.
+- **Het blijft op de plekken waar het geen klasse kan krijgen:** `footer` en `figcaption` in `base/elements.css` zijn elementen zonder klasse, en houden hun eigen kleur, grootte en regelhoogte (dezelfde waarden als `.hf-meta`).
+  De legenda van het veld, de streepjes van de scorebalk en de toelichting bij een gebeurtenis in `MatchTimeline` zijn deel van een grafiek of een vast raster en houden hun eigen kleur en grootte.
+  `Tooltip` en `pull-to-refresh` hebben een eigen kleur op een eigen vlak.
+- **Eén pull request:** het is één regel in CSS, mechanische vervangingen en één prop, en het hoeft maar één keer in licht en donker bekeken.
+  - **Alternatieven:** splitsen in kleur en gewicht, en legenda's en kolomletters.
 
 ## Een achternaam en een getal aan het eind van een rij hebben overal hetzelfde gewicht
 

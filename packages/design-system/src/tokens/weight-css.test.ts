@@ -121,6 +121,8 @@ const weightRules = (css: string): WeightRule[] => {
 
 const token = (name: string) => `var(--hf-${name}-font-weight)`
 const header = /(^|[\s,>])th\b/
+// A number in the legend is a value in a meta line, so it has the weight of a name.
+const headerOrLegend = /(^|[\s,>])th\b|hf-bar-legend/
 const heaviest = /hf-key|hf-data-table-total|tfoot|^caption|hf-bar-legend/
 
 describe('the font weights in the CSS of tables', () => {
@@ -142,7 +144,7 @@ describe('the font weights in the CSS of tables', () => {
   it('sets the semibold weight only on headers and row headers, and nothing heavier on them', () => {
     for (const { file, selector, value } of rules) {
       if (value === token('name')) {
-        expect(selector, `${file}: ${selector} { font-weight: ${value} }`).toMatch(header)
+        expect(selector, `${file}: ${selector} { font-weight: ${value} }`).toMatch(headerOrLegend)
       }
 
       if (header.test(selector) && !heaviest.test(selector)) {
