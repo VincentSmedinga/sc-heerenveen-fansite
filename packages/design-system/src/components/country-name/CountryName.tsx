@@ -1,6 +1,7 @@
 import type { ComponentPropsWithoutRef } from 'react'
 
 import { classNames } from '../classNames'
+import { Flag } from '../flag/Flag'
 import { countryName, flagAddress, isCodeOnly } from '../player-name/flags'
 
 export type CountryNameProps = Omit<ComponentPropsWithoutRef<'span'>, 'children'> & {
@@ -31,15 +32,7 @@ export const CountryName = ({ className, country, ...props }: CountryNameProps) 
 
   return (
     <span {...props} className={classNames('hf-country-name', className)}>
-      {address === undefined ? (
-        isCodeOnly(country) && (
-          <span aria-hidden="true" className="hf-player-name-flag hf-player-name-code">
-            {country.toUpperCase()}
-          </span>
-        )
-      ) : (
-        <img alt="" className="hf-player-name-flag" height={15} src={address} width={20} />
-      )}
+      {address === undefined ? isCodeOnly(country) && <Flag code={country} /> : <Flag address={address} />}
       {name}
     </span>
   )

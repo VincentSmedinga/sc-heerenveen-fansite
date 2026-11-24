@@ -28,6 +28,6 @@
   .hf-figure-list-figure {
     flex: none;
     font-variant-numeric: tabular-nums;
-    font-weight: var(--hf-headline-font-weight);
+    font-weight: var(--hf-figure-font-weight);
   }
 }

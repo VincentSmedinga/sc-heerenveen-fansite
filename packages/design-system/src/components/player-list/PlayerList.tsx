@@ -48,7 +48,7 @@ export const PlayerList = ({ className, order = 'surname-first', players, ...pro
             <PlayerName givenName={rest} surname={surname} />
           ) : (
             <>
-              <strong className="hf-player-list-surname">{surname}</strong>
+              <span className="hf-player-list-surname">{surname}</span>
               {rest === undefined || rest === '' ? null : `, ${rest}`}
             </>
           )

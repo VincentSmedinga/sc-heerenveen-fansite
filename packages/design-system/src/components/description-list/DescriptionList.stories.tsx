@@ -12,6 +12,7 @@ const meta = preview.meta({
         component: [
           'Een beschrijvingslijst zet een paar korte feiten naast elkaar als paren van een term en een omschrijving, zoals de competitie en het stadion van een wedstrijd.',
           'Kies hem voor feiten die elk een naam hebben; een rij dingen zonder naam is een `List`, en cijfers in kolommen zijn een `DataTable`.',
+          'In de variant met de term links en de waarde rechts is de waarde een getal aan het eind van een rij, en dus op het gewicht van een getal.',
           'Elk paar is een `DescriptionList.Item`, dat alleen in een beschrijvingslijst werkt.',
         ].join('\n'),
       },

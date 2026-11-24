@@ -23,10 +23,10 @@ describe('PlayerList', () => {
     const link = screen.getByRole('link', { name: 'Aken, Joost van' })
 
     expect(link.getAttribute('href')).toBe('/spelers/joost-van-aken')
-    expect(link.querySelector('strong')?.textContent).toBe('Aken')
+    expect(link.querySelector('.hf-player-list-surname')?.textContent).toBe('Aken')
     expect(screen.getByText('Verdediger · 2013–2017')).toBeTruthy()
     expect(screen.queryByRole('link', { name: 'Dinho' })).toBeNull()
-    expect(screen.getByText('Dinho').tagName).toBe('STRONG')
+    expect(screen.getByText('Dinho').className).toBe('hf-player-list-surname')
   })
 
   it('shows the given name first, as one name, when the order is given-first', () => {
@@ -42,7 +42,7 @@ describe('PlayerList', () => {
     const link = screen.getByRole('link', { name: 'Joost van Aken' })
 
     expect(link.getAttribute('href')).toBe('/spelers/joost-van-aken')
-    expect(link.querySelector('strong')).toBeNull()
+    expect(link.querySelector('.hf-player-list-surname')).toBeNull()
     expect(screen.getByText('Doelman · 2019/20')).toBeTruthy()
   })
 })

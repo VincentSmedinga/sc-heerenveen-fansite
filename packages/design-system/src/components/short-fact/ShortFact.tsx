@@ -25,6 +25,6 @@ export type ShortFactProps = ComponentPropsWithoutRef<'div'> & {
  */
 export const ShortFact = ({ children, className, empty = false, ...props }: ShortFactProps) => (
   <div {...props} className={classNames('hf-short-line', 'hf-short-fact', className)}>
-    <span className={empty ? 'hf-short-line-where' : 'hf-short-line-opponent'}>{children}</span>
+    <span className={empty ? 'hf-short-line-aside' : 'hf-short-line-main'}>{children}</span>
   </div>
 )

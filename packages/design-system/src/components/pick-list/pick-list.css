@@ -94,7 +94,7 @@
   }
 
   .hf-pick-list-name {
-    font-weight: var(--hf-strong-font-weight);
+    font-weight: var(--hf-name-font-weight);
   }
 
   .hf-pick-list-strip {
@@ -126,7 +126,7 @@
   }
 
   .hf-pick-list-strip-name {
-    font-weight: var(--hf-strong-font-weight);
+    font-weight: var(--hf-name-font-weight);
 
     &[data-struck] {
       text-decoration: line-through;

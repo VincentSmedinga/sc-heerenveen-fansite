@@ -24,6 +24,6 @@
 
   .hf-on-this-day-score {
     font-variant-numeric: tabular-nums;
-    font-weight: var(--hf-name-font-weight);
+    font-weight: var(--hf-figure-font-weight);
   }
 }

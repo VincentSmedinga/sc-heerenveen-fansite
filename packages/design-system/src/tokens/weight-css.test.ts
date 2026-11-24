@@ -172,4 +172,28 @@ describe('the font weights in the CSS of tables', () => {
 
     expect(surname?.value).toBe(token('name'))
   })
+
+  it('sets every surname, in a list, a pick list and a name, in the weight of a name', () => {
+    for (const [file, name] of [
+      ['components/player-list/player-list.css', 'hf-player-list-surname'],
+      ['components/pick-list/pick-list.css', 'hf-pick-list-name'],
+      ['components/pick-list/pick-list.css', 'hf-pick-list-strip-name'],
+    ] as const) {
+      const rule = weightRules(read(file)).find(({ selector }) => selector.includes(name))
+
+      expect(rule?.value, `${file}: ${name}`).toBe(token('name'))
+    }
+  })
+
+  it('sets the figure at the end of a row in the weight of a figure', () => {
+    for (const [file, name] of [
+      ['components/figure-list/figure-list.css', 'hf-figure-list-figure'],
+      ['components/description-list/description-list.css', 'hf-description-list-aligned dd'],
+      ['components/on-this-day/on-this-day.css', 'hf-on-this-day-score'],
+    ] as const) {
+      const rule = weightRules(read(file)).find(({ selector }) => selector.includes(name))
+
+      expect(rule?.value, `${file}: ${name}`).toBe(token('figure'))
+    }
+  })
 })

@@ -1020,7 +1020,7 @@ await withEmptyDatabase((database) =>
     // name only.
     assert.match(
       matchesHtml,
-      /<h2[^>]*id="hoofdtrainer">.*?href="#hoofdtrainer">Hoofdtraine.*?<\/h2><ul role="list"><li><div class="hf-short-line hf-short-staff"><span class="hf-short-line-opponent"><span class="hf-player-name"><span class="hf-player-name-given">Robin<\/span> <span class="hf-player-name-surname">Veldman<\/span><\/span><\/span><\/div><\/li><\/ul><\/section>/s,
+      /<h2[^>]*id="hoofdtrainer">.*?href="#hoofdtrainer">Hoofdtraine.*?<\/h2><ul role="list"><li><div class="hf-short-line hf-short-staff"><span class="hf-short-line-main"><span class="hf-player-name"><span class="hf-player-name-given">Robin<\/span> <span class="hf-player-name-surname">Veldman<\/span><\/span><\/span><\/div><\/li><\/ul><\/section>/s,
     )
     // The main menu is its own nav right after the header, and the bar with a link to each card
     // comes after it, outside the main; none on the home.
@@ -1512,10 +1512,10 @@ await withEmptyDatabase((database) =>
     )
     assert.match(
       squadCard,
-      /hf-player-name-number">1<\/span> <img alt="Nederland" class="hf-player-name-flag"[^>]*\/> <span class="hf-player-name-text">.*?Brandsma/s,
+      /hf-player-name-number">1<\/span> <img alt="Nederland" class="hf-flag"[^>]*\/> <span class="hf-player-name-text">.*?Brandsma/s,
     )
     // A player without a country, among others who have one, has an empty place for the flag.
-    assert.match(squadCard, /<span class="hf-player-name-flag"><\/span><span class="hf-player-name-text">/)
+    assert.match(squadCard, /<span class="hf-flag"><\/span><span class="hf-player-name-text">/)
     assert.ok(playersHtml.indexOf('id="selectie"') < playersHtml.indexOf('aria-label="Meer over de spelers"'))
     // The sidebar starts with the soft card "De selectie in het kort", above the strong card.
     // The made-up squad has countries, so the card has Spelers and Landen, and no date of birth
@@ -1726,7 +1726,7 @@ await withEmptyDatabase((database) =>
     assert.match(opponentsHtml, /<caption class="hf-visually-hidden">De tegenstanders van sc Heerenveen, van A tot Z/)
     assert.match(
       opponentsHtml,
-      /<th scope="row"><span class="hf-player-name hf-player-name-numbered"><a class="hf-player-name-link" href="\/tegenstanders\/testdorp-fc"><(?:img|span) [^>]*class="hf-player-name-flag"[^>]*>(?:<\/span>)?<span class="hf-player-name-text"><span class="hf-player-name-given">Testdorp FC<\/span><\/span><\/a><\/span>(?:<span class="hf-visually-hidden">[^<]*<\/span>)?<\/th><td class="hf-numeric">\d+<\/td>/,
+      /<th scope="row"><span class="hf-player-name hf-player-name-numbered"><a class="hf-player-name-link" href="\/tegenstanders\/testdorp-fc"><(?:img|span) [^>]*class="hf-flag"[^>]*>(?:<\/span>)?<span class="hf-player-name-text"><span class="hf-player-name-given">Testdorp FC<\/span><\/span><\/a><\/span>(?:<span class="hf-visually-hidden">[^<]*<\/span>)?<\/th><td class="hf-numeric">\d+<\/td>/,
     )
     // The server sends the whole table in the given order, with plain headers: sorting is for
     // the browser, so there is no button or aria-sort yet. The columns Punten and Doelsaldo are

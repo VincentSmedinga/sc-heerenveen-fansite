@@ -23,7 +23,7 @@
   }
 
   .hf-player-list-surname {
-    font-weight: var(--hf-strong-font-weight);
+    font-weight: var(--hf-name-font-weight);
   }
 
   /* Two names of about 13rem and a gap of 2rem need 28rem; 32rem leaves room for long names. */

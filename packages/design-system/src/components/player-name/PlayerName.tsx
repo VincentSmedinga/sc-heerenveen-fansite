@@ -1,6 +1,7 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
 
 import { classNames } from '../classNames'
+import { Flag } from '../flag/Flag'
 import { countryName, flagAddress, isCodeOnly } from './flags'
 
 export type PlayerNameProps = Omit<ComponentPropsWithoutRef<'span'>, 'children'> & {
@@ -99,26 +100,20 @@ export const PlayerName = ({
   const label = country === undefined || country === null ? undefined : countryName(country)
 
   const decorative = href !== undefined
+  const text = decorative ? undefined : label
   const flag =
     country === undefined ? null : address === undefined ? (
       country !== null && label !== undefined && isCodeOnly(country) ? (
         <>
-          <span
-            aria-hidden={decorative ? true : undefined}
-            aria-label={decorative ? undefined : label}
-            className="hf-player-name-flag hf-player-name-code"
-            role={decorative ? undefined : 'img'}
-          >
-            {country.toUpperCase()}
-          </span>
+          <Flag code={country} label={text} />
           {decorative ? null : ' '}
         </>
       ) : (
-        <span className="hf-player-name-flag" />
+        <Flag />
       )
     ) : (
       <>
-        <img alt={decorative ? '' : label} className="hf-player-name-flag" height={15} src={address} width={20} />
+        <Flag address={address} label={text} />
         {decorative ? null : ' '}
       </>
     )
