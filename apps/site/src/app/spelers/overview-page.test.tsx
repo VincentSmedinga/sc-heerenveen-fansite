@@ -57,13 +57,15 @@ describe('the overview by name', () => {
     expect(html).toContain('1 speler')
   })
 
-  it('puts the letters in one grid in the order A, B, D, and the credit in the side section beside it', async () => {
+  it('puts the letters and then the credit in one grid of three columns, with no side section', async () => {
     const html = await render('naam')
     const columns = html.slice(html.indexOf('hf-card-columns-grid'), html.indexOf('</main>'))
 
+    expect(html).toContain('hf-card-columns-three')
     expect([...columns.matchAll(/<h2[^>]*id="letter-(\w)"/g)].map(([, letter]) => letter)).toEqual(['a', 'b', 'd'])
-    expect(html.indexOf('hf-card-columns-grid')).toBeLessThan(html.indexOf('Bron: Wikipedia'))
-    expect(html.slice(html.indexOf('style="grid-area:side"'))).toContain('Bron: Wikipedia')
+    expect(columns.indexOf('id="letter-d"')).toBeLessThan(columns.indexOf('Bron: Wikipedia'))
+    expect(columns.indexOf('Bron: Wikipedia')).toBeGreaterThan(columns.lastIndexOf('id="letter-'))
+    expect(html).not.toContain('grid-area:side')
   })
 
   it('links a player who has a page and shows the surname in the name weight, then the given name with the prefix', async () => {
@@ -95,6 +97,18 @@ describe('the overview by country', () => {
       'land-zweden',
     ])
     expect(html).toContain('2 spelers uit Denemarken en Zweden.')
+  })
+
+  it('reads the largest countries, the north, the continents, the countries and the credit, in that order', async () => {
+    const html = await render('land')
+    const at = (text: string) => html.indexOf(text)
+
+    expect(html).toContain('hf-card-columns-three')
+    expect(at('id="landen"')).toBeLessThan(at('id="ze-komen-uit-het-noorden"'))
+    expect(at('id="ze-komen-uit-het-noorden"')).toBeLessThan(at('id="werelddelen"'))
+    expect(at('id="werelddelen"')).toBeLessThan(at('id="land-denemarken"'))
+    expect(at('id="land-zweden"')).toBeLessThan(at('Bron: Wikipedia'))
+    expect(html.indexOf('Bron: Wikipedia')).toBe(html.lastIndexOf('Bron: Wikipedia'))
   })
 
   it('names the card of the north Ze komen uit het noorden, and the anchor follows the title', async () => {

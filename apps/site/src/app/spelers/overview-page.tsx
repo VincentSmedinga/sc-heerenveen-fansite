@@ -125,6 +125,17 @@ function Section({
   )
 }
 
+/**
+ * On a country page the largest countries stand in the main column, the north and the
+ * continents beside it, and the cards of the countries with the credit under both. The source
+ * order is the order of reading: the largest countries, the north and the continents, the
+ * countries, the credit.
+ */
+const countryAreas = {
+  narrow: ['head', 'main', 'side', 'cards'],
+  wide: ['head head', 'main side', 'cards cards'],
+}
+
 const biggest = 12
 const biggestOnPhone = 8
 
@@ -151,7 +162,7 @@ export async function OverviewPage({ view }: { view: OverviewView }) {
 
   return (
     <>
-      <Page.Main areas={pageAreas({ after: ['side'] })}>
+      <Page.Main areas={view === 'land' ? countryAreas : pageAreas({})}>
         <Page.Cell area="head">
           <Page.Title>
             <Heading level={1}>Alle spelers</Heading>
@@ -166,40 +177,47 @@ export async function OverviewPage({ view }: { view: OverviewView }) {
             value={view}
           />
         </Page.Cell>
-        <Page.Section area="main" aria-label={view === 'land' ? 'De spelers per land' : 'De spelers per letter'}>
-          {view === 'land' && <CountriesCard groups={countries} />}
-          {view === 'naam' ? (
-            <CardColumns>
-              {byLetter(players).map(({ letter, players: group }) => (
-                <Section
-                  anchor={letterAnchor(letter)}
-                  count={group.length}
-                  key={letter}
-                  title={letter === '#' ? 'Overig' : letter}
-                >
-                  <Rows current={current} players={group} />
-                </Section>
-              ))}
-            </CardColumns>
-          ) : (
-            countries.map((group) => (
-              <Section
-                anchor={countryAnchor(group)}
-                count={group.players.length}
-                key={countryAnchor(group)}
-                title={group.name}
-              >
-                <Rows current={current} players={group.players} />
-              </Section>
-            ))
-          )}
-        </Page.Section>
-        <Page.Section area="side" aria-label={view === 'land' ? 'Het noorden, de werelddelen en de bron' : 'De bron'}>
-          {view === 'land' && <NorthCard groups={countries} />}
-          {view === 'land' && <ContinentsCard players={players} />}
-          <Card as="div" surface="transparent">
-            <WikipediaCredit archive compact />
-          </Card>
+        {view === 'land' && (
+          <>
+            <Page.Section area="main" aria-label="De grootste landen">
+              <CountriesCard groups={countries} />
+            </Page.Section>
+            <Page.Section area="side" aria-label="Het noorden en de werelddelen">
+              <NorthCard groups={countries} />
+              <ContinentsCard players={players} />
+            </Page.Section>
+          </>
+        )}
+        <Page.Section
+          area={view === 'land' ? 'cards' : 'main'}
+          aria-label={view === 'land' ? 'De spelers per land' : 'De spelers per letter'}
+        >
+          <CardColumns columns={3}>
+            {view === 'naam'
+              ? byLetter(players).map(({ letter, players: group }) => (
+                  <Section
+                    anchor={letterAnchor(letter)}
+                    count={group.length}
+                    key={letter}
+                    title={letter === '#' ? 'Overig' : letter}
+                  >
+                    <Rows current={current} players={group} />
+                  </Section>
+                ))
+              : countries.map((group) => (
+                  <Section
+                    anchor={countryAnchor(group)}
+                    count={group.players.length}
+                    key={countryAnchor(group)}
+                    title={group.name}
+                  >
+                    <Rows current={current} players={group.players} />
+                  </Section>
+                ))}
+            <Card as="div" surface="transparent">
+              <WikipediaCredit archive compact />
+            </Card>
+          </CardColumns>
         </Page.Section>
       </Page.Main>
     </>

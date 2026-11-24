@@ -4438,3 +4438,16 @@
   `OutcomeBar` heeft de hoek nu op elk deel, niet alleen aan de uiteinden.
 - **Waarom:** ze tonen een uitslag of een aandeel, geen aantal, dus groen, grijs en rood blijven wat ze zeggen.
 - **Alternatieven:** alleen de hoek delen; ze helemaal laten zoals ze zijn.
+
+## `CardColumns` heeft de optie `columns`, met drie kolommen vanaf 52 rem
+
+- **Datum:** 24 november 2026
+- **Besluit:** `CardColumns` krijgt de optie `columns` met de waarden `2` en `3`, standaard `2` (#1627).
+  Met `3` staan de kaarten in drie even brede kolommen vanaf 52 rem, in twee vanaf 28 rem en daaronder in één, gemeten aan de plaats waarin ze staan.
+  - **Alleen die twee waarden:** een vrij aantal of `auto-fit` is niet gekozen, want dat zou de pagina's veranderen die `CardColumns` al gebruiken.
+  - **De volgorde:** per rij van links naar rechts, en de volgorde in de code is de volgorde van lezen en van de toets Tab.
+    Grid lanes (`display: grid-lanes`, achter `@supports`) geldt ook voor drie kolommen.
+  - **Een eigen story:** `DrieKolommen`, met kaarten van verschillende hoogte.
+- **Waarom:** een lange pagina met veel kaarten laat in drie kolommen meer in beeld dan in twee.
+- **Alternatieven:** de kolommen van boven naar beneden vullen (de volgorde van lezen volgt dan niet het scherm); een eigen onderdeel voor drie kolommen.
+- **Later:** dit vult _`CardColumns` zet kaarten in een raster met paren, en grid lanes maakt het beter_ aan: er zijn nu twee of drie kolommen.
