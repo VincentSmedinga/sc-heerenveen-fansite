@@ -2690,7 +2690,7 @@
     Een uitgestelde wedstrijd kan een ander nummer krijgen dan de officiële speelronde; het controleverslag (#880) laat de verschillen met het oude nummer zien.
     Alternatief: de oude nummers houden (botsen, en een nul is geen ronde).
   - **Verlenging en strafschoppen komen uit `wedstrijd_res.opmerking` en de minuten van de doelpunten.**
-    Een lege opmerking of `*` is niets (de `*` van 1990/91 betekent "rust niet bekend").
+    Een lege opmerking of `*` is niets (de `*` van 1990/91 betekent "rust niet bekend"; **Later:** zie _Een ruststand die de oude Fansite niet kende, blijft leeg_ (24 november 2026)).
     `n.v.` betekent dat er verlengd is en dat `et` en `eu` de stand na verlenging zijn.
     `X-Y n.v.` betekent dat er verlengd is, dat `et` en `eu` de stand na 90 minuten zijn en dat `X-Y` de stand na verlenging is, in dezelfde volgorde (thuis-uit).
     `X-Y n.s.` betekent dat het na verlenging gelijk stond (`et` en `eu`) en dat `X-Y` de strafschoppenserie is (thuis-uit).
@@ -4646,3 +4646,19 @@
   Een tabel in een andere vorm, zoals een sjabloon, is een artikel dat we niet lezen.
   Een club waarvan een speler met een artikel nog geen persoon kreeg, omdat Wikipedia zijn titel niet beantwoordde, wacht één dag in plaats van zeven.
   De gegevens uit Wikidata van de nieuwe personen leest de bestaande stap in de volgende runs, hoogstens 200 personen per run.
+
+## Een ruststand die de oude Fansite niet kende, blijft leeg
+
+- **Datum:** 24 november 2026
+- **Besluit:** de stap `matches` van `import:old-site` (#1617) leest in 1990/91 een `*` in de opmerking van de uitslag als "ruststand niet bekend".
+  - **Wat er gebeurt:** de wedstrijd krijgt geen ruststand en geen `half_time_source`, in plaats van de 0 – 0 die de oude Fansite bewaarde.
+    Heeft de wedstrijd een uitslag van 0 – 0, dan blijft de ruststand 0 – 0, want die kan niets anders zijn.
+    Een `*` in een ander seizoen en de opmerkingen voor verlenging en strafschoppen werken zoals eerst.
+  - **Leegmaken:** de import maakt een bewaarde ruststand leeg als de rij van de oude Fansite is, `half_time_source` `oude-fansite` heeft en de bestanden de ruststand nu onbekend noemen.
+    Een ruststand met bron `redactie` blijft altijd staan.
+    Een wedstrijd van een andere bron wordt niet geraakt.
+    Het logboek noemt het aantal ruststanden dat leeg is gemaakt, en een tweede run verandert niets.
+  - **Niet geraakt:** de 16 wedstrijden uit latere seizoenen met een ruststand van 0 – 0, een uitslag met doelpunten en zonder doelpuntenregels, want er is geen `*` en geen tweede bron.
+- **Waarom:** de oude site markeert zelf dat de rust niet bekend is, en dat is exacter dan raden uit "0 – 0, doelpunten en geen doelpuntenregels", dat ook een echte 0 – 0 wegneemt.
+  De import is herhaalbaar en de enige plek met de regel, dus een migratie is niet nodig.
+- **Alternatieven:** de regel "0 – 0, uitslag met doelpunten, geen doelpuntenregels" voor alle seizoenen (haalt echte nullen weg zonder bewijs); een migratie die de rijen per seizoen leegmaakt (zet de regel dubbel neer en volgt de bestanden niet).
