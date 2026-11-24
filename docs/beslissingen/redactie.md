@@ -1382,6 +1382,7 @@
   Een jurist heeft dit niet bekeken.
 - **Later:** zie _We tellen ook wat we niet meetellen, per reden_ (23 november 2026): de tabel `visit_exclusions` komt erbij, met alleen dag, reden en aantal.
   En de logbestanden van de host zijn wel te lezen, alleen niet voor ons doel: de redactie kan ze zien in het beheerpaneel van de host, en de privacyverklaring zegt dat nu.
+  En zie _We tellen van pagina naar pagina als totalen, met een herkomstsoort_ en _We tellen de soort browser, het besturingssysteem en het apparaat per bezoeker per dag_ (23 november 2026): twee tabellen komen erbij, en "alleen paginaweergaven en unieke bezoekers" klopt niet meer.
 
 ## Bots, DNT en GPC worden niet geteld
 
@@ -3286,3 +3287,44 @@
 - **Waarom:** de redactie kan ze lezen in het beheerpaneel van de host.
   "Wij kunnen daar niet bij" was onjuist.
 - **Later:** zie de **Later:**-regels bij _We tellen paginaweergaven en unieke bezoekers per dag, met een kenmerk dat elke dag wisselt_ en _Het adres van de bezoeker is het laatste adres van `X-Forwarded-For`_.
+
+## We tellen van pagina naar pagina als totalen, met een herkomstsoort
+
+- **Datum:** 23 november 2026
+- **Besluit:** de site telt per dag hoe vaak een pagina is bekeken na een andere pagina van de site, of na een herkomst van buiten (`direct`, `forum`, `zoekmachine`, `sociaal`, `overig`).
+  Het is een teller zonder bezoeker erbij, in de tabel `page_transitions` (migratie `0114_add_visit_sources_and_browsers`) met `day`, `source`, `path` en `views`.
+  Een herlaadactie (herkomst en pagina zijn hetzelfde pad) telt niet als stap.
+- **Waarom:** het antwoord op "hoe lopen mensen door de site" heeft totalen nodig, geen route per bezoek.
+  Een route per bezoek zou een kort profiel van die bezoeker zijn, en dat willen we niet.
+  Het adres van een andere site bewaren we niet, alleen de soort.
+- **Alternatieven:** een route per bezoek (A → B → C), wat een profiel van een dag zou bewaren; Matomo met de gegevens per bezoek (zie hieronder); het adres van de verwijzer bewaren (laat zien welke persoon of pagina iemand las).
+- **Let op:** de `Referer` is niet altijd aanwezig, en `direct` omvat dus ook bezoekers van wie de browser of een app hem weglaat.
+  De lijst met hosts per soort staat op één plek, in `apps/site/src/visit-origins.ts`.
+
+## De herkomst binnen de site is een pad uit een vaste lijst
+
+- **Datum:** 23 november 2026
+- **Besluit:** het pad van de verwijzende pagina telt alleen als het een pad is dat we al tellen (`pages.ts`, de pagina's van een seizoen als hun pagina), met `/redactie/*` en `/tegenstanders/*` als groep.
+  Alles anders van onze eigen site is `overig`.
+- **Waarom:** de header is te vervalsen.
+  Zonder lijst maakt een verzonnen waarde elke keer een nieuwe rij.
+- **Alternatieven:** elk pad bewaren (ongelimiteerd, en een vervalste waarde wordt een rij); een artikel en een club apart tellen (veel rijen, weinig informatie).
+
+## We tellen de soort browser, het besturingssysteem en het apparaat per bezoeker per dag
+
+- **Datum:** 23 november 2026
+- **Besluit:** de site telt bezoekers per dag per soort browser, besturingssysteem en apparaat (telefoon, tablet, computer), uit de browsertekst, zonder versienummers, in de tabel `browser_visitors`.
+  Een bezoeker telt één keer per dag, op het moment dat `visitor_hashes` zijn code voor het eerst toevoegt.
+  De lijst is kort en vast, en staat in `apps/site/src/browser-kind.ts`.
+- **Waarom:** het zegt hoeveel mensen op een telefoon kijken en of een browser achterblijft, en het is een totaal.
+  De browsertekst zelf staat nog steeds nergens.
+- **Alternatieven:** versienummers (meer kans om iemand te herkennen); schermgrootte en apparaatmodel (zijn een vingerafdruk); een externe dienst (breekt onze belofte).
+
+## Matomo is nog niet nodig
+
+- **Datum:** 23 november 2026
+- **Besluit:** we installeren geen Matomo en zetten geen programma van een ander bij de teller.
+  De eigen teller doet wat we nu nodig hebben, en we kijken opnieuw als er een vraag is die totalen niet beantwoorden.
+- **Waarom:** Matomo vraagt een PHP-programma om bij te werken, een extra database op de host en gegevens per bezoek, en geeft vooral het pad per bezoek, dat we niet willen.
+- **Alternatieven:** Matomo op een eigen subdomein, gevoed vanuit de proxy; Matomo met een script in de pagina (een script, dat we niet willen); een dienst van een ander (breekt de belofte "geen verzoeken aan derden").
+- **Later:** vervangt niets; sluit aan op _We tellen paginaweergaven en unieke bezoekers per dag, met een kenmerk dat elke dag wisselt_.

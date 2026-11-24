@@ -2,19 +2,34 @@ import { lt, sql } from 'drizzle-orm'
 import { createHmac, randomBytes } from 'node:crypto'
 
 import type { Database } from './client.ts'
-import type { SkipReason } from './schema.ts'
+import type { BrowserKind, DeviceKind, SkipReason, SystemKind } from './schema.ts'
 
-import { dailyVisitors, pageViews, visitExclusions, visitorHashes, visitorSalts } from './schema.ts'
+import {
+  browserVisitors,
+  dailyVisitors,
+  pageTransitions,
+  pageViews,
+  visitExclusions,
+  visitorHashes,
+  visitorSalts,
+} from './schema.ts'
 
 export type { SkipReason }
 
 export type Visit = {
   /** The address of the visitor, hashed and kept nowhere. Without it only the view counts. */
   address: string | undefined
+  /** The kind of browser, system and device, made from the browser text (which is not kept). */
+  kind: { browser: BrowserKind; device: DeviceKind; os: SystemKind }
   /** The moment of the request. */
   now: Date
   /** The path of the page, without a query. */
   path: string
+  /**
+   * Where the visitor came from: the path of a page that is counted, or one of `visitOrigins`.
+   * Never an address of another site.
+   */
+  source: string
   /** The browser text: hashed with the address and kept nowhere. */
   userAgent: string
 }
@@ -59,7 +74,7 @@ export function createVisitCounter(db: Database) {
   }
 
   return {
-    async record({ address, now, path, userAgent }: Visit) {
+    async record({ address, kind, now, path, source, userAgent }: Visit) {
       const day = visitDay(now)
       const salt = await saltOf(day, now)
 
@@ -67,6 +82,14 @@ export function createVisitCounter(db: Database) {
         .insert(pageViews)
         .values({ day, path, views: 1 })
         .onDuplicateKeyUpdate({ set: { views: sql`${pageViews.views} + 1` } })
+
+      // A reload (the same page as the origin) is no step from one page to another.
+      if (source !== path) {
+        await db
+          .insert(pageTransitions)
+          .values({ day, path, source, views: 1 })
+          .onDuplicateKeyUpdate({ set: { views: sql`${pageTransitions.views} + 1` } })
+      }
 
       if (address === undefined) {
         return
@@ -82,6 +105,10 @@ export function createVisitCounter(db: Database) {
           .insert(dailyVisitors)
           .values({ day, visitors: 1 })
           .onDuplicateKeyUpdate({ set: { visitors: sql`${dailyVisitors.visitors} + 1` } })
+        await db
+          .insert(browserVisitors)
+          .values({ day, ...kind, visitors: 1 })
+          .onDuplicateKeyUpdate({ set: { visitors: sql`${browserVisitors.visitors} + 1` } })
       }
     },
 

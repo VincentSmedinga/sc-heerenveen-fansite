@@ -78,9 +78,12 @@ describe('the page Privacy', () => {
   })
 
   it('says what we count: per day, how often a page was looked at and about how many visitors, on our own server', () => {
-    const paragraph = html.match(/<p[^>]*>(We tellen alleen per dag.*?)<\/p>/)?.[1] ?? ''
+    const paragraph = html.match(/<p[^>]*>(We tellen per dag.*?)<\/p>/)?.[1] ?? ''
 
     expect(paragraph).toContain('hoe vaak elke pagina is bekeken en hoeveel verschillende bezoekers er ongeveer waren')
+    expect(paragraph).toContain('van welke pagina je naar welke pagina gaat, en waar je vandaan kwam')
+    expect(paragraph).toContain('Van een andere site bewaren we alleen de soort, nooit het adres.')
+    expect(paragraph).toContain('welke soort browser en welk besturingssysteem')
     expect(paragraph).toContain('Dat doen we zelf, op onze eigen server.')
   })
 
@@ -90,7 +93,10 @@ describe('the page Privacy', () => {
     expect(paragraph).toContain('Van je IP-adres en je browser maakt de server een code')
     expect(paragraph).toContain('een willekeurig getal dat alleen voor die dag bestaat')
     expect(paragraph).toContain('Zo tellen we jou maar één keer per dag.')
-    expect(paragraph).toContain('Het adres en de naam van je browser schrijven we nergens op, ook niet in het logboek.')
+    expect(paragraph).toContain(
+      'Je IP-adres, de volledige naam van je browser en de pagina’s die jij bekijkt schrijven we nergens op, ook niet in het logboek.',
+    )
+    expect(paragraph).toContain('We bewaren alleen totalen van alle bezoekers samen')
   })
 
   it('says, in the order of time, what stays until the end of the day, what is thrown away, what is kept and for how long', () => {
@@ -166,7 +172,7 @@ describe('the page Privacy', () => {
 
     expect(html).not.toMatch(/<(ul|ol|li)[ >]/)
     expect(paragraphs).toHaveLength(11)
-    expect(paragraphs[1]).toContain('We tellen alleen per dag')
+    expect(paragraphs[1]).toContain('We tellen per dag')
     expect(paragraphs[2]).toContain('Van je IP-adres')
     expect(paragraphs[3]).toContain('Tot het einde van de dag')
     expect(paragraphs[4]).toContain('Bots, de controles')

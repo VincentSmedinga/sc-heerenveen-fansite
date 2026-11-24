@@ -715,6 +715,8 @@ Zo kan niemand nagaan wie een account heeft.
 ## Bezoekers tellen
 
 De site telt per dag de paginaweergaven per pagina en het aantal unieke bezoekers (zie _We tellen paginaweergaven en unieke bezoekers per dag_ in [`beslissingen/redactie.md`](beslissingen/redactie.md)).
+Hij telt ook van welke pagina of herkomst bezoekers komen (`page_transitions`: dag, herkomst, pagina, aantal) en welke browser, welk besturingssysteem en welk apparaat ze gebruiken (`browser_visitors`: dag, soort, aantal bezoekers).
+Het zijn totalen: er staat geen adres van een andere site in, en geen volledige browsertekst.
 Hij zet er geen cookie voor en laadt er geen script voor.
 Het IP-adres en de browsertekst staan nergens, ook niet in het logboek van de app.
 
@@ -730,6 +732,8 @@ Wil je een telling naast het logboek van de host leggen, doe dat dan zo, alleen 
    ```sql
    SELECT * FROM daily_visitors ORDER BY day DESC;
    SELECT * FROM visit_exclusions ORDER BY day DESC, reason;
+   SELECT * FROM page_transitions ORDER BY day DESC, views DESC LIMIT 20;
+   SELECT * FROM browser_visitors ORDER BY day DESC, visitors DESC LIMIT 20;
    ```
 
 3. Het aantal unieke bezoekers moet in de buurt komen van het aantal adressen dat geen bot is.

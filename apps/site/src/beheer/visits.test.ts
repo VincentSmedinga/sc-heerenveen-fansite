@@ -20,6 +20,8 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM page_views')
   await database.pool.query('DELETE FROM daily_visitors')
   await database.pool.query('DELETE FROM visit_exclusions')
+  await database.pool.query('DELETE FROM page_transitions')
+  await database.pool.query('DELETE FROM browser_visitors')
 })
 
 // Noon in the Netherlands on Monday 26 October 2026, the day the clocks went back.
@@ -43,6 +45,34 @@ describe('lastDays', () => {
 })
 
 describe('visitNumbers', () => {
+  it('gives the most common steps, every kind of origin and the browsers with their share', async () => {
+    await database.pool.query(
+      "INSERT INTO page_transitions (day, source, path, views) VALUES ('2026-10-26', '/', '/nieuws', 5), ('2026-10-25', '/', '/nieuws', 3), ('2026-10-26', 'forum', '/', 4), ('2026-10-26', 'direct', '/', 1), ('2026-09-01', 'forum', '/', 100)",
+    )
+    await database.pool.query(
+      "INSERT INTO browser_visitors (day, browser, os, device, visitors) VALUES ('2026-10-26', 'Safari', 'iOS', 'telefoon', 3), ('2026-10-25', 'Safari', 'iOS', 'telefoon', 1), ('2026-10-26', 'Firefox', 'Linux', 'computer', 4), ('2026-09-01', 'Chrome', 'Windows', 'computer', 50)",
+    )
+
+    const { browsers, origins, transitions } = await visitNumbers(database.db, now)
+
+    expect(transitions).toEqual([
+      { path: '/nieuws', source: '/', views: 8 },
+      { path: '/', source: 'forum', views: 4 },
+      { path: '/', source: 'direct', views: 1 },
+    ])
+    expect(origins).toEqual([
+      { origin: 'direct', views: 1 },
+      { origin: 'forum', views: 4 },
+      { origin: 'zoekmachine', views: 0 },
+      { origin: 'sociaal', views: 0 },
+      { origin: 'overig', views: 0 },
+    ])
+    expect(browsers).toEqual([
+      { browser: 'Safari', device: 'telefoon', os: 'iOS', share: 0.5, visitors: 4 },
+      { browser: 'Firefox', device: 'computer', os: 'Linux', share: 0.5, visitors: 4 },
+    ])
+  })
+
   it('gives the skipped requests per reason for the last 7 and 30 days, every reason, in order', async () => {
     await database.db.insert(visitExclusions).values([
       { day: '2026-10-26', reason: 'bot', requests: 5 },

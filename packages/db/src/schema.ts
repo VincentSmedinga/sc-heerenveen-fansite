@@ -2319,6 +2319,53 @@ export const dailyVisitors = mysqlTable('daily_visitors', {
   visitors: int('visitors', { unsigned: true }).notNull().default(0),
 })
 
+/** The kinds of origin a visit can have besides the path of a page of the site. */
+export const visitOrigins = ['direct', 'forum', 'zoekmachine', 'sociaal', 'overig'] as const
+
+/**
+ * How often a page was viewed after another page of the site or after an origin from outside,
+ * one row per day, origin and page: a counter with no visitor in it. `source` is the path of a
+ * page we count (see `page_views`) or one of `visitOrigins`; the address of another site is
+ * never kept. `day` is a day in the Netherlands.
+ */
+export const pageTransitions = mysqlTable(
+  'page_transitions',
+  {
+    day: date('day', { mode: 'string' }).notNull(),
+    source: varchar('source', { length: pageViewPathMaxLength }).notNull(),
+    path: varchar('path', { length: pageViewPathMaxLength }).notNull(),
+    views: int('views', { unsigned: true }).notNull().default(0),
+  },
+  (table) => [primaryKey({ columns: [table.day, table.source, table.path], name: 'page_transitions_day_source_path' })],
+)
+
+/** The browsers, systems and devices the counter tells apart: a short list, no versions. */
+export const browserKinds = ['Chrome', 'Safari', 'Firefox', 'Edge', 'Samsung Internet', 'overig'] as const
+export const systemKinds = ['Android', 'iOS', 'Windows', 'macOS', 'Linux', 'overig'] as const
+export const deviceKinds = ['telefoon', 'tablet', 'computer'] as const
+
+export type BrowserKind = (typeof browserKinds)[number]
+export type DeviceKind = (typeof deviceKinds)[number]
+export type SystemKind = (typeof systemKinds)[number]
+
+/**
+ * The visitors of a day by kind of browser, system and device: a counter. A visitor counts once
+ * a day, when `visitor_hashes` first has the code. The browser text itself is kept nowhere.
+ */
+export const browserVisitors = mysqlTable(
+  'browser_visitors',
+  {
+    day: date('day', { mode: 'string' }).notNull(),
+    browser: mysqlEnum('browser', browserKinds).notNull(),
+    os: mysqlEnum('os', systemKinds).notNull(),
+    device: mysqlEnum('device', deviceKinds).notNull(),
+    visitors: int('visitors', { unsigned: true }).notNull().default(0),
+  },
+  (table) => [
+    primaryKey({ columns: [table.day, table.browser, table.os, table.device], name: 'browser_visitors_day_kinds' }),
+  ],
+)
+
 /** Why a request for a page is not counted as a visit, in the order the site tries them. */
 export const skipReasons = ['bot', 'geen-taal', 'niet-volgen', 'vooruitladen'] as const
 
