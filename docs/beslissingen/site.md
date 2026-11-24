@@ -4604,6 +4604,7 @@
 - **Waarom:** een doelman wordt niet beoordeeld op doelpunten en assists, en een veldspeler niet op de nul.
   Zes kolommen op 320 pixels maken de tabel te breed, dus vier per linie.
 - **Alternatieven:** één tabel met alle kolommen (te breed op een telefoon); de kolommen van de tabel Alle spelers (die hebben minuten, en die hebben we niet).
+- **Later:** zie _De kaart Per seizoen toont ook de gele en rode kaarten_ (24 november 2026): zes kolommen per linie in plaats van vier, waarvan de laatste achter een knop op een telefoon.
 
 ## De naam van een speler van ons linkt naar zijn pagina, op de plekken waar hij als naam staat
 
@@ -8019,3 +8020,20 @@
   Het aantal cijfers laat zien hoeveel fans het cijfer dragen.
   De gegevens, de onderdelen en de stijl bestonden al.
 - **Alternatieven:** de meeste cijfers als maat (beloont spelen en bekendheid, en de drie oudste seizoenen hebben geen aantal); bij een gelijke stand meer cijfers laten beslissen; de tabel naast de kaarten laten staan (dubbele informatie); de sterke kaart op een telefoon onderaan zetten.
+
+## De kaart Per seizoen toont ook de gele en rode kaarten
+
+- **Datum:** 24 november 2026
+- **Besluit:** de kaart Per seizoen op de pagina van een speler krijgt geel en rood (#1624).
+  Een veldspeler heeft G, B, D, A, Y en R, en een doelman G, N, T, Y en R, in die volgorde: de kaarten staan achteraan.
+  - **Op een telefoon** staan Y en R achter de knop "Toon meer" (`DataTable.More`), want zes kolommen zijn daar te breed.
+    Een veldspeler ziet dan G, B, D en A, en een doelman G, N, T en Y; de knop voegt de kaarten toe, Y en R bij de veldspeler en R bij de doelman.
+    Waar de ruimte is, staan alle kolommen er altijd, en zonder JavaScript ook.
+  - **Wat de kolommen tellen** is wat de tabellen van de spelers elders tellen: Y telt gele en geel-rode kaarten, R telt rode en geel-rode kaarten, dus een geel-rode kaart telt als een gele en een rode.
+  - **Een seizoen zonder gegevens over kaarten** (de cijfers komen van Wikipedia, of er zijn geen opstellingen) toont een streepje en nooit een nul.
+    Een kolom zonder één cijfer in welk seizoen dan ook valt weg, zoals al het geval was.
+  - **De rij Totaal** telt de kaarten van de seizoenen met een cijfer op, en de zin onder de tabel zegt dat het totaal alleen die seizoenen telt.
+- **Waarom:** kaarten horen bij het beeld van een speler, en een verdediger heeft ze vaker dan een doelpunt.
+  De knop is wat het design system al biedt voor een tabel die op een telefoon te breed wordt, zonder zijwaarts scrollen.
+- **Alternatieven:** de basis op een telefoon weglaten (de kaarten zijn dan altijd zichtbaar, maar de opstellingen verdwijnen achter een knop); de tabel zijwaarts laten scrollen (nieuw in het design system en lastig met een schermlezer); rood en geel-rood als aparte kolommen (nog breder, en geen andere tabel scheidt ze); de rij Totaal zonder kaarten (het totaal is dan niet af).
+- **Later:** dit vult _De tabel Per seizoen heeft kolommen naar de linie van de speler_ aan.

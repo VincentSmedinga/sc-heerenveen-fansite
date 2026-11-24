@@ -39,8 +39,57 @@ const render = (seasons: PlayerSeason[], goalkeeper = false) =>
     ),
   )
 
+describe('the cards in the table Per seizoen', () => {
+  const cards = (goalkeeper: boolean, seasons: PlayerSeason[]) => playerSeasonsTable(seasons, goalkeeper)
+
+  it('puts geel and rood last, behind the button on a phone: both for a field player, rood for a goalkeeper', () => {
+    const field = cards(false, [season('2004/05')])
+    const keeper = cards(true, [season('2004/05', { cleanSheets: 3, conceded: 20 })])
+
+    expect(field.columns.map(({ id }) => id)).toEqual(['played', 'started', 'goals', 'assists', 'yellow', 'red'])
+    expect(field.columns.map(({ more }) => more === true)).toEqual([false, false, false, false, true, true])
+    expect(keeper.columns.map(({ id }) => id)).toEqual(['played', 'cleanSheets', 'conceded', 'yellow', 'red'])
+    expect(keeper.columns.map(({ more }) => more === true)).toEqual([false, false, false, false, true])
+  })
+
+  it('wraps the table in the button and shows the cards for a field player', () => {
+    const html = render([season('2004/05', { red: 1, yellow: 3 })])
+
+    expect(html).toContain('hf-data-table-more')
+    expect(html).toContain('hf-more-column')
+    expect(legendsOf(html)).toEqual(['gespeeld, basis, doelpunten, assists, geel, rood'])
+  })
+
+  it('counts a yellow-red card in both columns: the figures are those of the seasons', () => {
+    const [row] = cards(false, [season('2004/05', { red: 1, yellow: 1 })]).rows
+
+    expect(row?.cells.slice(-2)).toEqual([1, 1])
+  })
+
+  it('shows a dash, not a nought, for a season without figures, and adds up the others in the total', () => {
+    const table = cards(false, [
+      season('2004/05', { red: 1, yellow: 3 }),
+      season('2003/04', { red: undefined, source: 'wikipedia', started: undefined, yellow: undefined }),
+    ])
+
+    expect(table.rows[1]?.cells.slice(-2)).toEqual(['–', '–'])
+    expect(table.rows[2]?.cells.slice(-2)).toEqual([3, 1])
+    expect(table.complete.yellow).toBe(false)
+    expect(table.complete.red).toBe(false)
+    expect(render([season('2004/05'), season('2003/04', { red: undefined, yellow: undefined })])).toContain(
+      'Het totaal telt alleen de seizoenen met een cijfer.',
+    )
+  })
+
+  it('has no geel and rood for a player without a figure about cards in any season', () => {
+    const table = cards(false, [season('2004/05', { red: undefined, yellow: undefined })])
+
+    expect(table.columns.map(({ id }) => id)).toEqual(['played', 'started', 'goals', 'assists'])
+  })
+})
+
 describe('the table Per seizoen', () => {
-  it('has gespeeld, basis, doelpunten and assists for a player of the field, the newest season first and a row Totaal', () => {
+  it('has gespeeld, basis, doelpunten, assists, geel and rood for a player of the field, the newest season first and a row Totaal', () => {
     const html = render([season('2004/05', { shirtNumber: 35 }), season('2003/04', { goals: 6 })])
 
     expect(html).toContain('<h2')
@@ -52,13 +101,15 @@ describe('the table Per seizoen', () => {
       '<span title="Basis">',
       '<span title="Doelpunten">',
       '<span title="Assists">',
+      '<span title="Geel">',
+      '<span title="Rood">',
     ])
     expect(html.indexOf('2004/05')).toBeLessThan(html.indexOf('2003/04'))
     expect(html).toContain('<a href="/spelers/2004-05">2004/05</a>')
     expect(html).toContain('<span class="hf-meta hf-data-table-aside">nr. 35</span>')
     expect(html).toContain('<tr class="hf-data-table-total"><th scope="row">Totaal</th>')
     expect(html).toMatch(
-      /<th scope="row">Totaal<\/th><td class="hf-numeric">60<\/td><td class="hf-numeric">56<\/td><td class="hf-numeric">10<\/td><td class="hf-numeric">2<\/td>/,
+      /<th scope="row">Totaal<\/th><td class="hf-numeric">60<\/td><td class="hf-numeric">56<\/td><td class="hf-numeric">10<\/td><td class="hf-numeric">2<\/td><td class="hf-numeric hf-more-column">4<\/td><td class="hf-numeric hf-more-column">0<\/td>/,
     )
   })
 
@@ -76,7 +127,7 @@ describe('the table Per seizoen', () => {
     expect(render([season('2004/05'), season('2003/04')])).not.toContain('hf-data-table-gap')
   })
 
-  it('has gespeeld, nul, tegendoelpunten and geel for a goalkeeper, and not the matches he started or his goals', () => {
+  it('has gespeeld, nul, tegendoelpunten, geel and rood for a goalkeeper, and not the matches he started or his goals', () => {
     const keeper = { assists: undefined, cleanSheets: 9, conceded: 30, goals: 0, started: 30 }
     const html = render([season('2004/05', keeper)], true)
 
@@ -85,21 +136,24 @@ describe('the table Per seizoen', () => {
       '<span title="Nul">',
       '<span title="Tegendoelpunten">',
       '<span title="Geel">',
+      '<span title="Rood">',
     ])
-    expect(legendsOf(html)).toEqual(['gespeeld, nul, tegendoelpunten, geel'])
+    expect(legendsOf(html)).toEqual(['gespeeld, nul, tegendoelpunten, geel, rood'])
     expect(html).toContain('van begin tot eind')
   })
 
   it('leaves out a column without a figure in any season, and shows a dash, not a nought, for a season without one', () => {
     const rows = playerSeasonsTable(
       [
-        season('2004/05', { assists: undefined }),
+        season('2004/05', { assists: undefined, red: undefined, yellow: undefined }),
         season('2003/04', {
           assists: undefined,
           goals: undefined,
           played: undefined,
+          red: undefined,
           source: 'none',
           started: undefined,
+          yellow: undefined,
         }),
       ],
       false,
