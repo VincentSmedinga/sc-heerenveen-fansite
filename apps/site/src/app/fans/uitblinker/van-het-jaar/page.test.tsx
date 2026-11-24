@@ -37,7 +37,7 @@ describe('the page Uitblinker van het jaar', () => {
     expect(ratingFigures).not.toHaveBeenCalled()
   })
 
-  it('has one h1 and a table with the running season and the winner that the season rating gives', async () => {
+  it('has one h1, a card for the running season and for the winner that the season rating gives, and the strong card', async () => {
     vi.stubEnv('FANS_ACCOUNTS', 'on')
     vi.stubEnv('FANS_UITBLINKER', 'on')
     const html = renderToStaticMarkup(await YearWinnersPage())
@@ -45,7 +45,12 @@ describe('the page Uitblinker van het jaar', () => {
     expect(html.match(/<h1/g)).toHaveLength(1)
     expect(html).toContain('Na het seizoen')
     expect(html).toContain('Speler A')
-    expect(html.indexOf('2026/27')).toBeLessThan(html.indexOf('2000/01'))
+    expect(html.indexOf('Uitblinker 2026/27')).toBeLessThan(html.indexOf('Uitblinker 2000/01'))
+    expect(html).not.toContain('<table')
+    expect(html).toContain('Uitblinker van de Uitblinkers')
+    expect(html).toContain('Tot 2006/07: cijfers van bezoekers van de oude Fansite.')
+    // On a phone the strong card stands before the cards of the years.
+    expect(html.indexOf('Uitblinker van de Uitblinkers')).toBeLessThan(html.indexOf('Uitblinker 2026/27'))
   })
 
   it('shows nothing but the running season while no season has ratings', async () => {
@@ -55,7 +60,8 @@ describe('the page Uitblinker van het jaar', () => {
     const html = renderToStaticMarkup(await YearWinnersPage())
 
     expect(html).toContain('Na het seizoen')
-    expect(html).not.toContain('2000/01')
+    expect(html).not.toContain('Uitblinker 2000/01')
+    expect(html).not.toContain('Uitblinker van de Uitblinkers')
   })
 
   it('is not indexed', () => {

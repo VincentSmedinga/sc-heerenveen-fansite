@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
 import { yearWinnersPath } from './fans-paths'
-import { SeasonRankingCard, YearWinnersCard } from './SupporterRatingsCards'
+import { BestYearWinnersCard, SeasonRankingCard, YearWinnerCards } from './SupporterRatingsCards'
 
 const options = [
   { label: '2026/27', value: '2026-27' },
@@ -75,42 +75,77 @@ describe('the card Cijfers van de fans', () => {
   })
 })
 
-describe('the card Uitblinkers van het jaar', () => {
+describe('the cards of the Uitblinkers van het jaar', () => {
   const html = renderToStaticMarkup(
-    <YearWinnersCard
+    <YearWinnerCards
       winners={[
-        { average: undefined, names: [], season: '2026/27' },
-        { average: 7.1, names: ['Speler A', 'Speler D'], season: '2005/06' },
-        { average: 6.9, names: ['Speler B'], season: '1998/99' },
+        { average: undefined, players: [], season: '2026/27' },
+        {
+          average: 7.1,
+          players: [
+            { name: 'Speler A', ratings: 631 },
+            { name: 'Speler D', ratings: 1 },
+          ],
+          season: '2005/06',
+        },
+        { average: 6.9, players: [{ name: 'Speler B', ratings: undefined }], season: '1998/99' },
       ]}
     />,
   )
 
-  it('is a table of the season, the player and the rating', () => {
-    expect(html).toContain('<caption')
-    expect(html).toContain('Seizoen')
+  it('has a card with its own h2 for each season, named by it', () => {
+    expect(html.match(/<h2/g)).toHaveLength(3)
+    expect(html).toContain('Uitblinker 2005/06')
+    expect(html).toContain('aria-labelledby="uitblinker-2005-06"')
+    expect(html).not.toContain('<table')
+  })
+
+  it('has a seal for each player of an equal rating, with the rating and the number of ratings', () => {
     expect(html).toContain('Speler A')
+    expect(html).toContain('Speler D')
     expect(html).toContain('7,1')
+    expect(html).toContain('Gemiddelde van 631 cijfers')
+    expect(html).toContain('Gemiddelde van 1 cijfer<')
+    expect(html).toContain('Uitblinker van het jaar')
   })
 
-  it('names both players of an equal rating in one row', () => {
-    expect(html).toContain('Speler A en Speler D')
+  it('names the old Fansite where there is no number of ratings', () => {
+    expect(html).toContain('Seizoencijfer van de oude Fansite')
   })
 
-  it('says "Na het seizoen" for the season that has no winner yet', () => {
+  it('says "Na het seizoen" for the season that has no winner yet, without a seal', () => {
     expect(html).toContain('Na het seizoen')
-  })
-
-  it('says where the old numbers come from', () => {
-    expect(html).toContain('Tot 2006/07: cijfers van bezoekers van de oude Fansite.')
+    expect(html.match(/hf-winner-seal/g)).toHaveLength(3)
   })
 })
 
-describe('the card Uitblinkers van het jaar without a season', () => {
-  it('says there is none instead of an empty table', () => {
-    const html = renderToStaticMarkup(<YearWinnersCard winners={[]} />)
+describe('the cards of the Uitblinkers van het jaar without a season', () => {
+  it('says there is none instead of cards', () => {
+    const html = renderToStaticMarkup(<YearWinnerCards winners={[]} />)
 
     expect(html).toContain('Nog geen uitblinkers.')
-    expect(html).not.toContain('<table')
+    expect(html).not.toContain('hf-winner')
+  })
+})
+
+describe('the card Uitblinker van de Uitblinkers', () => {
+  it('is a strong card with the rating, the season and the number of ratings', () => {
+    const html = renderToStaticMarkup(
+      <BestYearWinnersCard
+        best={{
+          average: 6.7,
+          players: [
+            { name: 'Speler A', ratings: 631, season: '2005/06' },
+            { name: 'Speler X', ratings: undefined, season: '1999/00' },
+          ],
+        }}
+      />,
+    )
+
+    expect(html).toContain('hf-card-strong')
+    expect(html).toContain('Uitblinker van de Uitblinkers')
+    expect(html).toContain('6,7')
+    expect(html).toContain('Seizoen 2005/06 · gemiddelde van 631 cijfers')
+    expect(html).toContain('Seizoen 1999/00 · seizoencijfer van de oude Fansite')
   })
 })

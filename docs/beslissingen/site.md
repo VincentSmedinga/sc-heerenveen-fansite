@@ -7660,6 +7660,7 @@
   De pagina's blijven daardoor te cachen.
   De trainer staat er niet in en wordt nooit de uitblinker; zijn cijfer hoort bij #1479.
 - **Later:** zie _De Uitblinker van het jaar is de speler met het hoogste seizoencijfer, ook voor de oude seizoenen_ (22 november 2026): de acht uitblinkers komen niet meer uit `old_season_winners`, de drempel van zes wedstrijden is die van drie, en bij een gelijk seizoencijfer staan beide spelers er.
+- **Later:** zie _De pagina Uitblinker van het jaar toont een kaart per seizoen en de Uitblinker van de Uitblinkers_ (24 november 2026): de pagina heeft geen tabel meer.
 
 ## De hoofdtrainer krijgt in de Uitblinker een cijfer, als laatste groep van het formulier
 
@@ -7989,3 +7990,17 @@
   De kop toont alleen initialen, geen schermnaam als tekst (#1450); de regel is de plek op de pagina waar je ziet wie je bent en waar je naar je account gaat, ook als er nog geen spel is.
 - **Alternatieven:** een kaart met de schermnaam en wat je kunt doen (herhaalt de kop, is een nieuwe kaart die niemand ontwierp, en zonder spel valt er weinig te doen); alleen de kaart weghalen (de pagina zegt dan nergens wie je bent).
 - **Later:** _Fans staat in het hoofdmenu zodra accounts aan staan_ hierboven zegt dat `/fans` een kaart heeft om alvast een account te maken; die kaart is er alleen nog voor een bezoeker zonder sessie.
+
+## De pagina Uitblinker van het jaar toont een kaart per seizoen en de Uitblinker van de Uitblinkers
+
+- **Datum:** 24 november 2026
+- **Besluit:** de pagina `/fans/uitblinker/van-het-jaar` toont per seizoen een kaart met `Winner` in plaats van een tabel (#1613), en in de smalle kolom de sterke kaart "Uitblinker van de Uitblinkers" met de speler met het hoogste seizoencijfer van alle voorbije seizoenen.
+  Bij een gelijk cijfer, op twee decimalen, staan beide spelers erin, elk met zijn seizoen.
+  De zegel toont het seizoencijfer, de kleine regel het aantal cijfers, en voor 1998/99 tot en met 2000/01 de bron.
+  Op een telefoon staat de sterke kaart onder de kop en vóór de kaarten van de jaren, breed in de smalle kolom.
+  De kaarten van de jaren staan in `CardColumns`, het nieuwste links boven.
+  Het lopende seizoen heeft een kaart zonder zegel met "Na het seizoen".
+- **Waarom:** het volgt de regel van de uitblinker van het jaar, dus er komt geen tweede definitie van "hoogste" (`bestYearWinners` leest uit `yearWinners`).
+  Het aantal cijfers laat zien hoeveel fans het cijfer dragen.
+  De gegevens, de onderdelen en de stijl bestonden al.
+- **Alternatieven:** de meeste cijfers als maat (beloont spelen en bekendheid, en de drie oudste seizoenen hebben geen aantal); bij een gelijke stand meer cijfers laten beslissen; de tabel naast de kaarten laten staan (dubbele informatie); de sterke kaart op een telefoon onderaan zetten.
