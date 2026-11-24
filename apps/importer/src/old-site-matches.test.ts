@@ -1093,6 +1093,50 @@ describe('a match of which the old fansite recorded nothing (#1622)', () => {
     expect((await rows())[0]).toMatchObject({ goalsFor: null, status: 'result_unknown' })
   })
 
+  it('changes the date of a match with a result that stays, also within the round (#1639)', async () => {
+    const play = (dateTime: string) => empty({ code: 'ajax.thuis', competition: 1, dateTime, round: 9, season: '0607' })
+    const cells = { 'sc Heerenveen-Ajax': '1 – 0' }
+
+    await run([play('2006-10-28 18:30:00')], wikipedia(cells))
+    await database.db.update(matches).set({ goalsAgainst: 0, goalsFor: 1, status: 'played' })
+
+    const first = await run([play('2006-10-27 18:30:00')], wikipedia(cells))
+    const second = await run([play('2006-10-27 18:30:00')], wikipedia(cells))
+    const [stored] = await rows()
+
+    expect(stored).toMatchObject({ goalsAgainst: 0, goalsFor: 1, status: 'played' })
+    expect(stored?.matchDate).toBe('2006-10-27')
+    expect(first).toMatchObject({ changed: 1, unchanged: 0 })
+    expect(first.lines.join('\n')).toContain('the date changes from 2006-10-28 to 2006-10-27')
+    expect(second).toMatchObject({ changed: 0, unchanged: 1 })
+  })
+
+  it('leaves the kick-off of a match with a result that stays when the editors changed it (#1639)', async () => {
+    const play = (dateTime: string) => empty({ code: 'ajax.thuis', competition: 1, dateTime, round: 9, season: '0607' })
+    const cells = { 'sc Heerenveen-Ajax': '1 – 0' }
+
+    await run([play('2006-10-28 18:30:00')], wikipedia(cells))
+
+    const [stored] = await rows()
+
+    await database.db
+      .update(matches)
+      .set({ goalsAgainst: 0, goalsFor: 1, status: 'played' })
+      .where(eq(matches.id, stored!.id))
+    await database.db.insert(matchEdits).values({
+      beforeGoals: '[]',
+      beforeMatch: '{}',
+      editedAt: new Date(),
+      editedBy: adminId,
+      kickoffEdited: true,
+      matchId: stored!.id,
+      reason: 'De redactie wist het beter',
+    })
+    await run([play('2006-10-27 18:30:00')], wikipedia(cells))
+
+    expect((await rows())[0]?.matchDate).toBe('2006-10-28')
+  })
+
   it('keeps the 0-0 where Wikipedia could not be read, because a real 0-0 must not go', async () => {
     const list = [empty(), empty({ code: 'ajax.thuis', dateTime: '2001-09-08 20:00:00' })]
     const failed = await run(list, wikipedia({}, 'de pagina bestaat niet'))

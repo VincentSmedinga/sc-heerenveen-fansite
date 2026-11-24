@@ -2892,6 +2892,7 @@
 - **Alternatieven:** de bestanden opnieuw maken met de juiste namen (de bestanden zijn een kopie van de oude database en horen dat te blijven); namen automatisch samenvoegen (twee mensen met bijna dezelfde naam, zoals Michel Vonk en Michel Vorm, worden dan één); een tabel in de database met speler-id's voor de tegenstanders (veel meer werk dan een korte lijst).
 - **Later:** zie _De lijst met schrijfwijzen van de oude fansite volgt de Wikipedia-schrijfwijze_ (8 november 2026): de lijst bevat nu ook de schrijfwijze van Wikipedia, niet alleen wat de projecteigenaar per groep koos.
 - **Later:** de afwijzing van een tabel met speler-id's voor tegenstanders geldt nog; sinds 22 november 2026 kan de regel van een tegenstander in een verslag wel een persoon hebben (`match_appearances.person_id`, #1544), maar dat is een verwijzing naar `persons` en geen tabel van die id's; zie _Een regel van de tegenstander in een verslag kan een persoon hebben_ in `hosting-en-data.md`.
+- **Later:** zie _De importer past een datum in dezelfde ronde aan, houdt één speler per persoon en laat gekoppelde doelpunten staan_ (24 november 2026): de stap `spelers` vindt ook een rij van dezelfde persoon onder een andere spelling, en maakt daar geen tweede rij naast.
 
 ## De lijst met schrijfwijzen van de oude fansite volgt de Wikipedia-schrijfwijze
 
@@ -4040,6 +4041,7 @@
 - **Eigen keuze bij het bouwen:** de stap loopt na `personen`, zodat de personen van deze run er al zijn.
   Een doelpunt in een wedstrijd waarvan de redactie de doelpunten invulde of het verslag bewaarde, blijft zoals het is, net als bij de andere stappen.
 - **Alternatieven:** ook `wikipedia_page` invullen zoals vanaf 2007/08 (kan later, als de lijst met naamgenoten is nagekeken); alleen koppelen bij een unieke naam in beide richtingen (koppelt vrijwel niets).
+- **Later:** zie _De importer past een datum in dezelfde ronde aan, houdt één speler per persoon en laat gekoppelde doelpunten staan_ (24 november 2026): een doelpunt met een `wikipedia_page` blijft ongemoeid, ook als de naam niet precies klopt.
 
 ## De doelpunten van een wedstrijd met een verslag zijn van het verslag
 
@@ -4770,6 +4772,7 @@
   De oude datum was fout, een doorverwijzing is code in de site voor één adres, en de pagina bestaat nog maar kort.
 - **Alternatieven:** de sleutel op de ronde houden en een verschoven wedstrijd met SQL herstellen (bij elke nieuwe kopie van de gegevens opnieuw); de ronde in het bestand bewaren (het bestand kent de ronde niet); terugvallen op de oude ronde binnen dezelfde club en kant (te losjes: er zijn twee thuiswedstrijden tegen een club in een seizoen); een doorverwijzing van oud naar nieuw adres.
 - **Later:** de lijst heeft sinds 24 november 2026 een tweede regel: Heracles Almelo thuis in 2006/07, van 27 januari 2007 naar 26 januari 2007 (Nederlandse Wikipedia, #1637); het bestand `matches-0607.json` heeft de nieuwe datum.
+- **Later:** zie _De importer past een datum in dezelfde ronde aan, houdt één speler per persoon en laat gekoppelde doelpunten staan_ (24 november 2026): ook bij een wedstrijd met een bewaarde uitslag volgt de datum het bestand, binnen dezelfde ronde en daarbuiten.
 
 ## De programmatabel gaat vóór de kruistabel, en het archief gaat nog steeds voor
 
@@ -4821,3 +4824,25 @@
 - **Waarom:** de kruistabel noemt de club `VVV-Venlo`, en wedstrijd 695 (VVV uit in 1992/93) hing aan de andere club, dus de stap vond geen uitslag.
   Een samenvoeging die alles meeneemt, kan niets verliezen wat de redactie zelf aan de club zette.
 - **Alternatieven:** `VVV` in `club-names.ts` zetten (`repairClubs` voegt dan samen, maar verhuist niet alles); de redactie voegt ze samen in het beheer (komt bij een nieuwe kopie van de gegevens terug).
+
+## De importer past een datum in dezelfde ronde aan, houdt één speler per persoon en laat gekoppelde doelpunten staan
+
+- **Datum:** 24 november 2026
+- **Besluit:** drie gaten van de vijf importissues van 24 november 2026 (#1621, #1622, #1623, #1631, #1637) gaan dicht (#1639).
+  - **Datum:** de tak van `importOldSiteMatches` voor een uitslag die we bewaren (die van Wikipedia of de gecorrigeerde) schrijft `dateText`, `kickoffAt` en `matchDate` weg zodra ze verschillen, ook binnen dezelfde ronde.
+    Een wedstrijd waarvan de redactie de aftrap bewerkte of overnam (`kickoffEdited`, `takenOver`) houdt zijn aftrap.
+    Zo staat Heracles Almelo thuis in 2006/07 op 26 januari 2007, en vult het seizoensprogramma er 5-1 met doelpunten in.
+  - **Eén rij per persoon en seizoen:** de stap `spelers` zoekt de rij van een speler (`oldSitePlayerRows`) op seizoen en naam, en daarna op elke andere schrijfwijze van dezelfde rij: de gekozen schrijfwijze uit `oldSiteNameCorrections` en de namen van de persoon van die rij (uit `persons` en uit zijn andere rijen).
+    Past een schrijfwijze op meer dan één rij, dan telt hij niet.
+    De letters `ø`, `đ` en `ł` tellen als `o`, `d` en `l`, omdat de sleutel alleen accenten haalt.
+    De stappen `doelpunten`, `opstellingen` en `cijfers` vinden de rij op dezelfde manier.
+    Een rij van een eerdere run met bron `verslag`, zonder pagina, waarvan de naam een naam van precies één andere rij van het seizoen is, gaat erin op (`mergePlayerInto`), met zijn persoon als die geen artikel heeft en niet van de redactie is (`mergeEditorsPersonInto`).
+  - **Doelpunt met `wikipedia_page`:** de stap `doelpunten tegen ons` laat een doelpunt met een `wikipedia_page` met rust: geen link weg, geen nieuwe link.
+    Het seizoensprogramma geeft zo'n doelpunt zijn persoon terug als die ontbreekt: de import van 2006/07 (`import:season`) koppelt de doelpunten met een pagina aan de persoon van die pagina.
+  - **Een tweede run verandert niets, als test:** elke van de drie stappen heeft een test die twee keer draait en de tweede keer 0 nieuw en 0 bijgewerkt verwacht; voor `spelers` met een rij onder een andere spelling tussen de twee runs.
+- **Waarom:** de ronde als voorwaarde voor een datum was toeval.
+  `mergeDoublePlayers` houdt de rij van de betere bron en dezelfde persoon; de stap moet dezelfde keuze maken, anders maakt hij elke run een nieuwe rij.
+  "Een tweede run verandert niets" was drie keer een belofte en hield op acceptatie twee keer niet.
+- **Eigen keuze bij het bouwen:** de koppeling van de zeven doelpunten zit in de stap van het seizoensprogramma, omdat de doelpunten daar al een pagina hadden en de stap `doelpunten tegen ons` ze niet meer aanraakt.
+  Een rij met bron `verslag` die al onder een andere spelling bestond, krijgt de gekozen schrijfwijze (hij wordt hernoemd), in plaats van dat er een nieuwe rij komt die daarna samengevoegd wordt.
+- **Alternatieven:** de rij op acceptatie met de hand aanpassen (laat hetzelfde gat voor de volgende correctie); alleen deze ene naam in `oldSiteNameCorrections` zetten (de volgende speler met een andere spelling herhaalt het); de stap `doelpunten tegen ons` zelf op `wikipedia_page` laten koppelen (meer code, twee plekken die koppelen).

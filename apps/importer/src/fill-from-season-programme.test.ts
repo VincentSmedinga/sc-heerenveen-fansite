@@ -1,7 +1,7 @@
 import type { NewMatch } from '@fansite/db/schema'
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { adminUsers, clubs, matchEdits, matches, matchGoals, players } from '@fansite/db/schema'
+import { adminUsers, clubs, matchEdits, matches, matchGoals, personPages, persons, players } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
 import { readFileSync } from 'node:fs'
@@ -75,7 +75,16 @@ describe('fillFromSeasonProgramme', () => {
     database.db.insert(matches).values({ ...blank, ...values })
 
   beforeEach(async () => {
-    for (const table of ['match_edits', 'match_goals', 'matches', 'players', 'club_names', 'clubs', 'admin_users']) {
+    for (const table of [
+      'match_edits',
+      'match_goals',
+      'matches',
+      'players',
+      'persons',
+      'club_names',
+      'clubs',
+      'admin_users',
+    ]) {
       await database.pool.query(`DELETE FROM ${table}`)
     }
     await database.pool.query("INSERT INTO admin_users (email, role) VALUES ('redactie@example.org', 'editor')")
@@ -144,6 +153,31 @@ describe('fillFromSeasonProgramme', () => {
 
     expect((await fill()).filled).toBe(1)
     expect((await rows())[0]).toMatchObject({ goalsAgainst: 0, goalsFor: 0, status: 'played' })
+  })
+
+  it('gives a goal with a page its person back, and a second run changes nothing (#1639)', async () => {
+    await insert({ clubId: ajax, home: false, matchDate: '2006-08-19', opponent: 'Ajax', round: 'Speelronde 1' })
+    await fill()
+
+    const [match] = await rows()
+    const [{ insertId }] = await database.db
+      .insert(persons)
+      .values({ name: 'Piet Voorbeeld', wikipediaPage: 'Piet Voorbeeld' })
+
+    await database.db.insert(personPages).values({ page: 'Piet Voorbeeld', personId: insertId })
+    const [against] = (await goalsOf(match!.id)).filter((goal) => !goal.ours)
+
+    await database.db
+      .update(matchGoals)
+      .set({ personId: null, wikipediaPage: 'Piet Voorbeeld' })
+      .where(eq(matchGoals.id, against!.id))
+
+    const first = await fill()
+    const second = await fill()
+
+    expect((await goalsOf(match!.id)).find((goal) => goal.id === against!.id)).toMatchObject({ personId: insertId })
+    expect(first.lines.join('\n')).toContain('is linked to his person again')
+    expect(second.lines.join('\n')).not.toContain('is linked to his person again')
   })
 
   it('never overwrites a result or goals that are there', async () => {

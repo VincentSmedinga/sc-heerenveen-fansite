@@ -9,6 +9,7 @@ import {
   matches,
   matchGoals,
   matchReports,
+  persons,
   players,
   playerSeasonStats,
 } from '@fansite/db/schema'
@@ -326,6 +327,7 @@ describe('the steps spelers and doelpunten', () => {
       'match_statistics',
       'matches',
       'players',
+      'persons',
       'clubs',
       'admin_users',
     ]) {
@@ -605,6 +607,111 @@ describe('the steps spelers and doelpunten', () => {
     expect((await playerRows()).map((one) => one.name)).toHaveLength(4)
   })
 
+  describe('one row for each person and season (#1639)', () => {
+    const larsen = {
+      code: 'ken.ilsolarsen',
+      country: null,
+      firstName: 'Ken',
+      infix: null,
+      lastName: 'Ilso Larsen',
+      line: null,
+    }
+    const match = () =>
+      oldMatch({
+        events: [goal(10, 'ken.ilsolarsen'), goal(30, 'Piet Pietersen', null, false), goal(80, 'ken.ilsolarsen')],
+      })
+
+    async function person(name: string, wikipediaPage: null | string) {
+      const [{ insertId }] = await database.db.insert(persons).values({ name, wikipediaPage })
+
+      return insertId
+    }
+
+    async function prepare() {
+      await importOldSiteClubs(database.db, oldClubs)
+      await importOldSiteMatches(database.db, [match()], oldClubs, await oldSiteClubIds(database.db, oldClubs))
+    }
+
+    it('finds the row of the same person under another spelling, and makes no second', async () => {
+      const id = await person('Ken Ilsø Larsen', 'Ken Ilsø')
+
+      // The season has the short name, another season has the spelling of the old fansite.
+      await database.db.insert(players).values([
+        { name: 'Ken Ilsø', personId: id, searchTerm: 'Ilsø', season: '2001/02', source: 'statistieken' },
+        { name: 'Ken Ilsø Larsen', personId: id, searchTerm: 'Ilsø Larsen', season: '2002/03', source: 'transfers' },
+      ])
+      await prepare()
+
+      const first = await importOldSitePlayers(database.db, [match()], [larsen])
+      const second = await importOldSitePlayers(database.db, [match()], [larsen])
+
+      expect(first).toMatchObject({ changed: 0, created: 0, unchanged: 1 })
+      expect(second).toMatchObject({ changed: 0, created: 0, unchanged: 1 })
+      expect((await playerRows()).map((row) => `${row.season} ${row.name}`)).toEqual([
+        '2001/02 Ken Ilsø',
+        '2002/03 Ken Ilsø Larsen',
+      ])
+
+      await importOldSiteGoals(database.db, [match()], [larsen])
+      expect((await goalRows()).filter((row) => row.ours).map((row) => row.playerId)).toEqual([
+        (await playerRows())[0]!.id,
+        (await playerRows())[0]!.id,
+      ])
+    })
+
+    it('finds the row under the spelling the owner chose, for a person without a name of that spelling', async () => {
+      await database.db
+        .insert(players)
+        .values({ name: 'Ger Schaap', searchTerm: 'Schaap', season: '2001/02', source: 'statistieken' })
+      await prepare()
+
+      const schaap = {
+        code: 'gerrie.schaap',
+        country: null,
+        firstName: 'Gerrie',
+        infix: null,
+        lastName: 'Schaap',
+        line: null,
+      }
+      const one = oldMatch({ events: [goal(10, 'gerrie.schaap')] })
+
+      expect(await importOldSitePlayers(database.db, [one], [schaap])).toMatchObject({ created: 0, unchanged: 1 })
+    })
+
+    it('merges a row of an earlier run, with its person, into the row of the other spelling', async () => {
+      const kept = await person('Ken Ilsø Larsen', 'Ken Ilsø')
+      const made = await person('Ken Ilso Larsen', null)
+
+      await database.db.insert(players).values([
+        { name: 'Ken Ilsø', personId: kept, searchTerm: 'Ilsø', season: '2001/02', source: 'statistieken' },
+        { name: 'Ken Ilso Larsen', personId: made, searchTerm: 'Ilso Larsen', season: '2001/02', source: 'verslag' },
+      ])
+      await prepare()
+
+      const first = await importOldSitePlayers(database.db, [match()], [larsen])
+      const second = await importOldSitePlayers(database.db, [match()], [larsen])
+
+      expect(first.lines).toContain('Ken Ilso Larsen (2001/02) is merged into Ken Ilsø')
+      expect(second).toMatchObject({ changed: 0, created: 0 })
+      expect(await playerRows()).toMatchObject([{ name: 'Ken Ilsø', personId: kept }])
+      expect((await database.db.select().from(persons)).map((row) => row.id)).toEqual([kept])
+    })
+
+    it('does not merge a row whose person has an article of its own', async () => {
+      const kept = await person('Ken Ilsø Larsen', 'Ken Ilsø')
+      const other = await person('Ken Ilso Larsen', 'Ken Ilso Larsen')
+
+      await database.db.insert(players).values([
+        { name: 'Ken Ilsø', personId: kept, searchTerm: 'Ilsø', season: '2001/02', source: 'statistieken' },
+        { name: 'Ken Ilso Larsen', personId: other, searchTerm: 'Ilso Larsen', season: '2001/02', source: 'verslag' },
+      ])
+      await prepare()
+      await importOldSitePlayers(database.db, [match()], [larsen])
+
+      expect(await playerRows()).toHaveLength(2)
+    })
+  })
+
   it('gives the rows of an earlier run the spellings the owner chose on 10 November 2026', async () => {
     const list = [
       {
@@ -630,8 +737,9 @@ describe('the steps spelers and doelpunten', () => {
     const season = '2001/02'
 
     // The rows of an earlier run. The database calls `Samardzic` and `Samardžić` the same name
-    // (the collation ignores accents), so that row is renamed. The others are another name:
-    // the run makes the row of the chosen spelling and merges the old row into it. Robert van
+    // (the collation ignores accents), so that row is renamed. The others are another name,
+    // but the rows have the spelling the owner replaced, so they are renamed too (#1639); the
+    // run no longer makes a row of the chosen spelling to merge them into. Robert van
     // den Berg is in the squad of Wikipedia already, and the row of the squad stays.
     await database.db.insert(players).values([
       { name: 'Radoslav Samardzic', searchTerm: 'Samardzic', season, source: 'verslag' },
@@ -660,11 +768,11 @@ describe('the steps spelers and doelpunten', () => {
     const first = await importOldSitePlayers(database.db, [match], list)
     const after = await playerRows()
 
-    expect(first).toMatchObject({ changed: 4, created: 2, unchanged: 1 })
+    expect(first).toMatchObject({ changed: 4, created: 0, unchanged: 1 })
     expect(first.lines).toEqual([
       'Radoslav Samardzic (2001/02) is now Radoslav Samardžić',
-      'Ugur Yildirim (2001/02) is merged into Uğur Yıldırım',
-      'Jan-Harm Schippers (2001/02) is merged into Jan Harm Schippers',
+      'Ugur Yildirim (2001/02) is now Uğur Yıldırım',
+      'Jan-Harm Schippers (2001/02) is now Jan Harm Schippers',
       'Robert van der Berg (2001/02) is merged into Robert van den Berg',
     ])
     expect(after.map((one) => `${one.name} | ${one.searchTerm} | ${one.source}`)).toEqual([
