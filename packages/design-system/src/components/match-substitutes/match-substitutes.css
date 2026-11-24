@@ -1,6 +1,7 @@
 /*
  * The substitutes of a team: a heading and a list with a line for each player. On the left is a
- * disc with a ring, on the right his name, followed by his goals, with the substitution in small text under it. The disc is the
+ * disc with a ring, on the right his name, followed by his goals, with the substitution in small text under it.
+ * The disc is the
  * one of the pitch (pitch-player.css), a little smaller and without the quiet track under the
  * arc. The lists of two teams stand side by side from 40 rem in a group, and one under
  * the other below it.
