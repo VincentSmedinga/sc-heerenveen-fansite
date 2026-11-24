@@ -179,13 +179,13 @@ export async function OverviewPage({ view }: { view: OverviewView }) {
         </Page.Cell>
         {view === 'land' && (
           <>
-            <Page.Section area="main" aria-label="De grootste landen">
+            <Page.Cell area="main">
               <CountriesCard groups={countries} />
-            </Page.Section>
-            <Page.Section area="side" aria-label="Het noorden en de werelddelen">
+            </Page.Cell>
+            <Page.Cell area="side">
               <NorthCard groups={countries} />
               <ContinentsCard players={players} />
-            </Page.Section>
+            </Page.Cell>
           </>
         )}
         <Page.Section
