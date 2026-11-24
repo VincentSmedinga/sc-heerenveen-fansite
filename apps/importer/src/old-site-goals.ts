@@ -227,6 +227,11 @@ export async function importOldSiteGoals(
       report.lines.push(`skipped the goals of ${label}: it is not in the database as a match of the old fansite`)
       continue
     }
+    if (one.noRecord === true && (goalsOf.get(before.id) ?? []).length > 0) {
+      // The files have nothing of this match, so goals it has come from elsewhere (#1623).
+      report.unchanged += 1
+      continue
+    }
     if (editors.has(before.id)) {
       report.skipped += 1
       report.lines.push(`skipped the goals of ${label}: the editors filled them in or saved a report, so they stay`)
