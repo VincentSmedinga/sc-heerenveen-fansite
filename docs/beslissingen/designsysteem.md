@@ -3012,6 +3012,18 @@
 - **Waarom:** de lijst laat zien wie het spel veranderde, en een bank die niet inviel zegt daar niets over.
   Dezelfde stip en boog als op het veld laten de lezer één teken leren.
 - **Alternatieven:** de wissels in het veld zelf tekenen (de namen passen daar al niet altijd); een lijst met ook de spelers die niet inviellen (dat vraagt nieuwe velden in het formulier).
+- **Later:** zie _Bij een invaller staan zijn doelpunten bij zijn naam en de wissel op een eigen regel_ (24 november 2026): de doelpunten staan achter de naam en de wissel staat op een regel eronder.
+  De zin voor een schermlezer begint dus met de naam en de doelpunten en eindigt met "erin in minuut 62 voor Lars Dijkstra".
+
+## Bij een invaller staan zijn doelpunten bij zijn naam en de wissel op een eigen regel
+
+- **Datum:** 24 november 2026
+- **Besluit:** bij een invaller in `MatchSubstitutes` (#1626) staan zijn doelpunten op de regel van zijn naam, elk na een stip als pictogram met zijn minuut, en de wissel ("↑ 46' voor Lars Dijkstra") staat op een eigen, kleinere regel eronder.
+  De regel met doelpunten breekt tussen doelpunten en nooit tussen een pictogram en zijn minuut.
+  De verborgen zin volgt dezelfde volgorde: "Sven Kuipers, rugnummer 21, doelpunt in minuut 61, erin in minuut 46 voor Lars Dijkstra".
+- **Waarom:** de doelpunten stonden direct achter de naam van de vervangen speler en leken van hem te zijn, terwijl ze van de invaller zijn.
+- **Alternatieven:** de doelpunten op één regel met de wissel laten staan, maar vóór "voor" (de naam van de ander staat dan nog op dezelfde regel, en een rij met veel doelpunten wordt lang); de naam van de vervangen speler weglaten (dan zegt de lijst niet meer voor wie hij kwam, wat #849 juist wilde); de kaarten er meteen bij zetten (de lijst toont er nu geen, dat is een eigen issue).
+- **Later:** vervangt de volgorde van de kleine regel in _De wissels per team tonen alleen wie speelde, en delen de stip en de boog met het veld_ (7 november 2026).
 
 ## `SideBySide` zet twee delen van één taak naast elkaar, en `MatchTimeline` kan een regel omkaderen
 

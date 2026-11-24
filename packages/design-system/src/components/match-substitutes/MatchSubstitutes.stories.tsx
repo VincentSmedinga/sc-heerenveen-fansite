@@ -26,7 +26,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De wissels van één team: wie erin kwam, in welke minuut en voor wie, en een doelpunt als hij scoorde.',
+          'De wissels van één team: wie erin kwam, met zijn doelpunten achter zijn naam, en onder de naam in welke minuut en voor wie.',
           'Elke speler heeft een stip met het rugnummer en een boog die begint bij de minuut van invallen, zoals op het veld. De spelers op de bank die niet inviellen staan er niet bij, want het verslag legt ze niet vast.',
           'Hij is gebouwd uit `PitchPlayer`, `PlayerDisc`, `MatchEventIcon`, `PlayerName` en `Heading`.',
         ].join('\n'),
@@ -204,4 +204,24 @@ export const GoalWithoutMinute = meta.story({
     team: 'sc Heerenveen',
   },
   name: 'Een doelpunt zonder minuut: alleen het pictogram',
+})
+
+export const ThreeGoals = meta.story({
+  args: {
+    headingLevel: 3,
+    ours: true,
+    substitutes: [
+      {
+        goals: [{ minute: 61 }, { minute: 84 }, { minute: 90, stoppageMinutes: 3 }],
+        minute: 46,
+        minutesPlayed: 47,
+        name: name('Kuipers', 'Sven'),
+        playerOut: name('Dijkstra', 'Lars'),
+        shirtNumber: 21,
+        stoppageMinutes: 0,
+      },
+    ],
+    team: 'sc Heerenveen',
+  },
+  name: 'Een invaller met drie doelpunten',
 })

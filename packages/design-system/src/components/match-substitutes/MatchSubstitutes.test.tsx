@@ -27,12 +27,12 @@ describe('substituteSentence', () => {
   it('says a goal without a minute as a goal, with no minute', () => {
     const sentence = substituteSentence({ ...kuipers, goals: [{ minute: null }, { minute: null, ownGoal: true }] })
 
-    expect(sentence).toBe('Sven Kuipers, rugnummer 2, erin in minuut 62 voor Lars Dijkstra, doelpunt, eigen doelpunt')
+    expect(sentence).toBe('Sven Kuipers, rugnummer 2, doelpunt, eigen doelpunt, erin in minuut 62 voor Lars Dijkstra')
   })
 
   it('says who came on, when, for whom and what he scored', () => {
     expect(substituteSentence(kuipers)).toBe(
-      'Sven Kuipers, rugnummer 2, erin in minuut 62 voor Lars Dijkstra, doelpunt in minuut 85',
+      'Sven Kuipers, rugnummer 2, doelpunt in minuut 85, erin in minuut 62 voor Lars Dijkstra',
     )
   })
 
@@ -45,7 +45,7 @@ describe('substituteSentence', () => {
   it('has his name and no word about the number for a player without a shirt number', () => {
     const sentence = substituteSentence({ ...kuipers, shirtNumber: null })
 
-    expect(sentence).toBe('Sven Kuipers, erin in minuut 62 voor Lars Dijkstra, doelpunt in minuut 85')
+    expect(sentence).toBe('Sven Kuipers, doelpunt in minuut 85, erin in minuut 62 voor Lars Dijkstra')
     expect(sentence).not.toMatch(/rugnummer|null|leeg/)
   })
 
@@ -58,7 +58,7 @@ describe('substituteSentence', () => {
         stoppageMinutes: 2,
       }),
     ).toBe(
-      'Sven Kuipers, rugnummer 2, erin in minuut 45+2 voor Lars Dijkstra, eigen doelpunt in minuut 90+3, doelpunt in minuut 12',
+      'Sven Kuipers, rugnummer 2, eigen doelpunt in minuut 90+3, doelpunt in minuut 12, erin in minuut 45+2 voor Lars Dijkstra',
     )
   })
 })
@@ -129,16 +129,48 @@ describe('MatchSubstitutes', () => {
     expect(numbers).toEqual(['5', '4', '3'])
   })
 
-  it('shows the minute, "voor <name>" and the goal in the small line', () => {
+  it('puts the goals by his own name and the substitution on a line of its own', () => {
     const { container } = render(
-      <MatchSubstitutes headingLevel={3} ours substitutes={[kuipers]} team="sc Heerenveen" />,
+      <MatchSubstitutes
+        headingLevel={3}
+        ours
+        substitutes={[{ ...kuipers, goals: [{ minute: 61 }, { minute: 84 }, { minute: 90, stoppageMinutes: 3 }] }]}
+        team="sc Heerenveen"
+      />,
     )
+    const title = container.querySelector('.hf-match-substitutes-title')
     const detail = container.querySelector('.hf-match-substitutes-detail')
 
+    expect(title?.textContent).toContain('Kuipers')
+    expect(title?.textContent).toMatch(/· .*61' · .*84' · .*90\+3'/u)
+    expect(title?.querySelectorAll('.hf-match-substitutes-goal svg')).toHaveLength(3)
     expect(detail?.textContent).toContain("62' voor Lars Dijkstra")
-    expect(detail?.textContent).toContain('· ')
-    expect(detail?.textContent).toContain("85'")
-    expect(container.querySelectorAll('.hf-match-substitutes-detail svg')).toHaveLength(2)
+    expect(detail?.textContent).not.toMatch(/·|61'|84'/u)
+    expect(detail?.querySelectorAll('svg')).toHaveLength(1)
+  })
+
+  it('shows only the name and the substitution for a substitute without goals', () => {
+    const { container } = render(
+      <MatchSubstitutes headingLevel={3} ours substitutes={[{ ...kuipers, goals: undefined }]} team="sc Heerenveen" />,
+    )
+
+    expect(container.querySelector('.hf-match-substitutes-goal')).toBeNull()
+    expect(container.querySelector('.hf-match-substitutes-title')?.textContent).not.toContain('·')
+  })
+
+  it('gives an own goal its own icon among the goals', () => {
+    const { container } = render(
+      <MatchSubstitutes
+        headingLevel={3}
+        ours
+        substitutes={[{ ...kuipers, goals: [{ minute: 61 }, { minute: 70, ownGoal: true }] }]}
+        team="sc Heerenveen"
+      />,
+    )
+    const goals = container.querySelectorAll('.hf-match-substitutes-goal')
+
+    expect(goals).toHaveLength(2)
+    expect(goals[0]?.innerHTML).not.toBe(goals[1]?.innerHTML.replace('70', '61'))
   })
 
   it('draws the ring from the minute he came on, as on the pitch', () => {

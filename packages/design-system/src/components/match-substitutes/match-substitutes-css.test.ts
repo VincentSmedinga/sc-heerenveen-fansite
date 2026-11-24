@@ -22,4 +22,8 @@ describe('match-substitutes.css', () => {
   it('keeps the disc its size when the text is long', () => {
     expect(css).toMatch(/\.hf-pitch-player-disc \{\s*flex: none/u)
   })
+
+  it('keeps an icon with its minute and breaks the line of the name between goals', () => {
+    expect(css).toMatch(/\.hf-match-substitutes-goal \{\s*white-space: nowrap/u)
+  })
 })
