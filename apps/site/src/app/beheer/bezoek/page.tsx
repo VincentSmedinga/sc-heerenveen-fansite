@@ -175,7 +175,10 @@ export default async function VisitPage() {
               Ons eigen bezoek telt mee, met elk apparaat en elke browser apart. Wie dat niet wil, kan Do Not Track of
               Global Privacy Control in de eigen browser aanzetten.
             </List.Item>
-            <List.Item>Alle pagina’s van seizoenen en wedstrijden onder /wedstrijden tellen als één pagina.</List.Item>
+            <List.Item>
+              Alle pagina’s van seizoenen en wedstrijden onder /wedstrijden tellen mee bij /wedstrijden, of bij
+              /wedstrijden/cijfers voor de cijfers.
+            </List.Item>
             <List.Item>
               Kent de site het adres van een bezoeker niet, dan telt de paginaweergave wel en de bezoeker niet.
             </List.Item>

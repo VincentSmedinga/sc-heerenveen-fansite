@@ -389,8 +389,8 @@ Een dag is een dag in Nederland (Europe/Amsterdam).
 | `visitor_hashes`   | De HMAC-SHA-256 (hex) van het IP-adres en de browsertekst, met het zout van de dag, per dag                                         | Nee, tot de dag voorbij is |
 
 Alleen `createVisitCounter(db).record(...)` en `.recordSkipped(...)` in `src/visits.ts` schrijven in de tabellen, en `removeVisitorData(db, now)` haalt het zout en de kenmerken weg van alle dagen vóór vandaag.
-De site roept de eerste aan, in de proxy.
-De tweede draait bij het eerste verzoek van een nieuwe dag in een proces en bij elke run van de import.
+De site roept `record` en `recordSkipped` aan, in de proxy.
+`removeVisitorData` draait bij het eerste verzoek van een nieuwe dag in een proces en bij elke run van de import.
 Het IP-adres en de browsertekst staan in geen enkele tabel; `visits.test.ts` zoekt in alle tabellen naar beide.
 De klikken op links (#292) en de cijfers in het beheer (#293) bouwen hierop.
 
