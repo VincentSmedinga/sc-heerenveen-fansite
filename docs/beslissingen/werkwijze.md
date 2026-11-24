@@ -66,6 +66,7 @@
 - **Herzien:** als Sonnet in de praktijk te veel mist, of de limiet niet meer knelt.
 - **Later:** zie _Axe draait op elke story, in licht en donker_.
   Zodra die controle draait, toetst axe ook de stories.
+- **Later:** sinds 24 november 2026 vraagt niet de Builder maar de Coördinator de projecteigenaar om Fable, bij het goedkeuren van de specificatie, en staat het antwoord in de brief (zie _De reviewer op Fable staat vooraf in de brief_).
   Een verhaal met een visuele wijziging houdt zijn Reviewer, want axe ziet geen hover, focus, alt-teksten of de redactieregels.
 
 ## Een model per rol
@@ -170,6 +171,8 @@
   Of een akkoord voor elke push, ook voor herstel; dat is strenger, maar elk herstel wacht dan op de projecteigenaar.
 - **Later:** sinds 1 november 2026 draait de reviewer de zware controles niet meer zelf maar neemt hij ze uit CI over (zie _De zware controles delen de machine_).
   Hij draait nog wel lint, typecontrole en de tests van de pakketten die de pull request raakt.
+- **Later:** sinds 24 november 2026 zet de Builder Auto-fix niet meer aan, want de app laat dat niet toe op pull requests van de GitHub App.
+  Hij leest CI één keer na het verslag van de reviewer en herstelt wat rood is, met dezelfde vrijheid om te pushen zonder nieuw akkoord (zie _Auto-fix: de Builder leest CI één keer_).
 
 ## Een agent start Storybook zelf, en werkt ook zonder
 
@@ -308,6 +311,7 @@
   Het start geen server en voegt geen dependency toe.
 - **Waarom:** anders schrijft elke Builder zijn eigen wegwerptest, met elk eigen breedtes en bestandsnamen, en vergeet hij de breedte of kiest hij donker zonder reden.
 - **Alternatieven:** alleen beschrijven in `AGENTS.md`, zoals het andere project; dat is minder code, maar elke Builder bedenkt de test opnieuw.
+- **Later:** sinds 24 november 2026 vraagt de Builder voor de eerste push ook geen akkoord meer (zie _Een Builder pusht en opent de pull request zonder akkoord_); het punt Go-ahead in `AGENTS.md` heet nu _Push and merge_, en de plaatjes blijven zonder tweede toestemming.
 
 ## Een laatste controle van de Builder vóór de eerste push
 
@@ -347,6 +351,7 @@
 - **Alternatieven:** alleen een ESLint-regel (`max-len`) voor de breedte van commentaar; die ziet CSS niet, en op 120 tekens vindt hij 317 regels in de code van nu.
   Een eigen script dat de diff controleert; dat is code om te onderhouden voor iets wat twee regels doen.
   Niets doen en de reviewer deze dingen laten melden; dat kost een reviewronde per pull request, en de limiet is twee.
+- **Later:** sinds 24 november 2026 loopt de Builder de laatste controle door vlak voordat hij zelf pusht, niet voordat hij om de go-ahead vraagt (zie _Een Builder pusht en opent de pull request zonder akkoord_).
 
 ## Skills voor de stappen van de rollen, regels blijven in AGENTS.md
 
@@ -924,3 +929,37 @@
 - **Waarom:** de 70 tot 340 ms tussen de runner en een thuisverbinding zijn van buiten niet te splitsen, en een meting op de plek waar het verschil ontstaat is de goedkoopste manier om dat te zien.
   Een runner van GitHub staat niet in Nederland, dus een deel is afstand en de LCP uit de controle is een bovengrens.
 - **Alternatieven:** meteen een voorstel voor het budget doen (verworpen: de eigenaar wil eerst de cijfers); een runner in een andere regio of een andere dienst (verworpen: gratis runners laten dat niet kiezen); het IPv6-adres in dit issue oplossen (verworpen: dat is een actie van de eigenaar bij de host).
+
+## Een Builder pusht en opent de pull request zonder akkoord
+
+- **Datum:** 24 november 2026
+- **Besluit:** als de laatste controle klaar is, pusht de Builder zelf en opent de pull request.
+  Hij vraagt de projecteigenaar niet meer om een akkoord.
+  De Builder meldt één keer dat de pull request open is, en alleen daarna als de projecteigenaar of de Coördinator iets moet beslissen.
+  Wat blijft: niemand voegt een pull request samen behalve de projecteigenaar, of de Coördinator op zijn staande goedkeuring; een keuze die verandert wat bezoekers zien, gaat nog steeds eerst naar hem; een afwijking van het issue meldt de Builder in de beschrijving en aan de Coördinator.
+- **Waarom:** drie Builders wachtten tegelijk op hetzelfde akkoord, en het werk lag stil terwijl de pull request toch pas bij het samenvoegen door de projecteigenaar wordt beoordeeld.
+  De reviewer, CI en de regels voor `main` vangen wat een akkoord vooraf zou vangen.
+- **Alternatieven:** het akkoord houden, maar alleen voor een afwijking van het issue; de projecteigenaar koos ervoor ook dan te pushen en de afwijking te melden.
+  Een akkoord per push houden voor de Builders die de database of de importer raken: het blijft een wachtmoment.
+
+## Auto-fix: de Builder leest CI één keer
+
+- **Datum:** 24 november 2026
+- **Besluit:** de Builder probeert Auto-fix niet meer aan te zetten.
+  Na het verslag van de reviewer leest hij CI één keer (`gh pr checks <nummer>`) en herstelt wat rood is, met dezelfde vrijheid als nu: herstel voor een controle die faalt, een conflict met `main`, de bevindingen van de reviewer en reacties van de projecteigenaar, zonder nieuw akkoord.
+  Zet de projecteigenaar Auto-fix zelf aan, dan gelden de bestaande regels ervoor.
+  Een Builder die wakker wordt, kijkt eerst met `get_status` of de pull request al is samengevoegd.
+- **Waarom:** de app laat Auto-fix alleen toe op pull requests van het ingelogde account, en dat zijn de onze niet.
+  Een controle die één keer na het verslag wordt gelezen, kost één beurt, en de rest komt via Auto-fix als de projecteigenaar die aanzet, of via de Coördinator.
+- **Alternatieven:** alleen de projecteigenaar zet Auto-fix aan en de Builder leest CI niet; dan blijft een rode controle liggen tot iemand het ziet.
+  De pull request vanaf het account van de projecteigenaar openen; dat kan niet, want een auteur keurt zijn eigen pull request niet goed.
+  CI volgen met een lus; dat staat de app niet toe en kost elke keer een beurt.
+
+## De reviewer op Fable staat vooraf in de brief
+
+- **Datum:** 24 november 2026
+- **Besluit:** een Builder die niet meer stopt, kan niet om Fable voor de reviewer vragen.
+  Daarom beslist de Coördinator dat bij het goedkeuren van de specificatie: raakt het issue de database, de importer, beveiliging, workflows of dependencies, dan vraagt hij de projecteigenaar of de reviewer op Fable draait, en staat het antwoord in de brief.
+  Zonder die regel in de brief gebruikt de Builder Sonnet.
+- **Waarom:** de Builder had hier het enige moment om te vragen, en dat vervalt.
+- **Alternatieven:** altijd Sonnet; of voor die pull requests toch voor de push stoppen.

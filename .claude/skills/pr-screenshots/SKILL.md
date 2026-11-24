@@ -58,7 +58,7 @@ Remove the test data again if you put it in your development database: `pnpm --f
 ## 4. Put them on `pr-screenshots`
 
 Needs the pull request's number, so only after it is open.
-Pushing here needs no new go-ahead, but it is a push: use `/Volumes/Code/family/bin/as-claude` with the HTTPS override from `builder-workflow`.
+Pushing here needs no go-ahead, but it is a push: use `/Volumes/Code/family/bin/as-claude` with the HTTPS override from `builder-workflow`.
 
 ```sh
 git fetch origin pr-screenshots

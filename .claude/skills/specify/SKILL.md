@@ -129,7 +129,7 @@ If one is no, go back to the step it needs.
 
 - Write each decision from the conversation in the issue, under the heading "Beslissingen", in the format of `docs/beslissingen/`: date, decision, why and the alternatives.
   The Builder adds them to the file of their section in `docs/beslissingen/` in the pull request.
-- A decision that belongs to no single issue, such as one about the way of working, gets its own small pull request to the file of its section in `docs/beslissingen/`, with the owner's go-ahead.
+- A decision that belongs to no single issue, such as one about the way of working, gets its own small pull request to the file of its section in `docs/beslissingen/`, with the owner's go-ahead: the Specifier is not a Builder, so the Builder rule without a go-ahead doesn't apply.
 
 Finish with a short summary for the owner: the link to the issue, the Definition of Ready, the decisions, and whether a Builder can start.
 
