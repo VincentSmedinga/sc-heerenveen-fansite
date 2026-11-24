@@ -647,6 +647,49 @@ const renderCancelled = () => (
   </div>
 )
 
+// A match of long ago that was played but of which nobody kept the result: the day and the two
+// clubs stay, and "Uitslag onbekend" stands where the result would be. The clubs are made up.
+const renderResultUnknown = () => (
+  <div style={{ maxInlineSize: '24rem' }}>
+    <Card aria-labelledby="uitslagen-onbekend-kop">
+      <Heading id="uitslagen-onbekend-kop" level={2}>
+        Uitslagen
+      </Heading>
+      <List role="list">
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            dateTime="1992-03-08"
+            home
+            opponent="Voorbeeld United"
+            round="Speelronde 27"
+            status="result_unknown"
+            time="zo 8 mrt 1992"
+          />
+        </List.Item>
+        <List.Item>
+          <Match
+            competition="Eredivisie"
+            dateTime="1992-03-01"
+            goalsAgainst={0}
+            goalsFor={2}
+            home={false}
+            opponent="Proefstad SV"
+            round="Speelronde 26"
+            status="played"
+            time="zo 1 mrt 1992"
+          />
+        </List.Item>
+      </List>
+    </Card>
+  </div>
+)
+
+export const ResultUnknown = meta.story({
+  name: 'Uitslag onbekend',
+  render: renderResultUnknown,
+})
+
 export const Cancelled = meta.story({
   name: 'Geannuleerd: twee wedstrijden die nooit zijn gespeeld, onder een gespeelde',
   render: renderCancelled,

@@ -304,6 +304,26 @@ export async function listSeasonReports(db: ReportDatabase, season: string): Pro
     .orderBy(asc(matches.matchDate), asc(matches.kickoffAt), asc(matches.id))
 }
 
+/**
+ * The matches of a season that were played but have no result (`result_unknown`, #1622) and
+ * have a club, from the first to the last. They have a page of their own, without a report. A
+ * match without a club has no address, so it is not in it.
+ */
+export async function listUnknownResultMatches(db: ReportDatabase, season: string): Promise<ScheduledMatch[]> {
+  const rows = await db
+    .select({ clubSlug: clubs.slug, match: matches })
+    .from(matches)
+    .innerJoin(clubs, eq(clubs.id, matches.clubId))
+    .where(and(eq(matches.season, season), eq(matches.status, 'result_unknown')))
+    .orderBy(asc(matches.matchDate), asc(matches.kickoffAt), asc(matches.id))
+  const named = await withSeasonNames(
+    db,
+    rows.map((row) => ({ ...row.match, clubSlug: row.clubSlug })),
+  )
+
+  return named.map(({ clubSlug, ...match }) => ({ clubSlug, match }))
+}
+
 /** The match in the shape the rules read. */
 export function matchForRules(
   match: Pick<Match, 'extraTime' | 'goalsAgainst' | 'goalsFor' | 'penaltiesAgainst' | 'penaltiesFor' | 'status'>,

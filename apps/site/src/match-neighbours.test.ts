@@ -110,6 +110,16 @@ describe('neighbourOf', () => {
     expect(neighbourOf(live, undefined, now)).toMatchObject({ state: 'Live' })
   })
 
+  it('gives "Uitslag onbekend" for a match without a result, with no stand', () => {
+    const none = { goalsAgainst: null, goalsFor: null }
+
+    expect(neighbourOf(match({ ...none, status: 'result_unknown' }), undefined, now)).toEqual({
+      club: expect.any(String),
+      home: expect.any(Boolean),
+      state: 'Uitslag onbekend',
+    })
+  })
+
   it('gives a word for a postponed and for a cancelled match', () => {
     const none = { goalsAgainst: null, goalsFor: null }
 

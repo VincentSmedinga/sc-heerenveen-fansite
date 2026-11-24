@@ -48,6 +48,7 @@ vi.mock('#src/report-data', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getPreviewMatch: vi.fn(),
   getPublicReport: vi.fn(),
+  getUnknownResultMatch: vi.fn(() => Promise.resolve(undefined)),
 }))
 
 // The afternoon of Friday 20 November 2026, the day before the match of the preview.

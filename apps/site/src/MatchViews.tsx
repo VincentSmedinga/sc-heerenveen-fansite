@@ -555,13 +555,15 @@ export function AttendanceCard({
 
   // A match without a number sorts last, whichever way the column is sorted.
   const cell = ({ attendance, match }: (typeof slots)[number]): DataTableCell =>
-    match.status !== 'played'
-      ? { sortValue: null, text: 'Nog niet gespeeld' }
-      : attendance === null
-        ? { sortValue: null, text: 'Niet bekend' }
-        : attendance === 0
-          ? { sortValue: 0, text: 'Zonder publiek' }
-          : { sortValue: attendance, text: numberFormat.format(attendance) }
+    match.status === 'result_unknown'
+      ? { sortValue: null, text: 'Niet bekend' }
+      : match.status !== 'played'
+        ? { sortValue: null, text: 'Nog niet gespeeld' }
+        : attendance === null
+          ? { sortValue: null, text: 'Niet bekend' }
+          : attendance === 0
+            ? { sortValue: 0, text: 'Zonder publiek' }
+            : { sortValue: attendance, text: numberFormat.format(attendance) }
 
   return card(
     <>
@@ -1618,6 +1620,16 @@ export function MatchLine({
 
   if (match.status === 'postponed' || match.status === 'cancelled') {
     return <Match {...common} status={match.status} />
+  }
+  if (match.status === 'result_unknown') {
+    return (
+      <Match
+        {...common}
+        {...matchMoment(match, now, { withYear })}
+        {...(reportHref === undefined ? {} : { reportHref })}
+        status="result_unknown"
+      />
+    )
   }
   if (match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null) {
     const result = {

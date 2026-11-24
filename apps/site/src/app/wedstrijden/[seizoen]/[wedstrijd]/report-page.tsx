@@ -39,6 +39,7 @@ import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { withBranch } from '#src/title'
 
 import { previewMetadata, PreviewPage } from './preview-page'
+import { unknownResultMetadata, UnknownResultPage } from './unknown-result-page'
 
 /**
  * The match of the address and what the credit needs, or what went wrong. A page that throws
@@ -96,7 +97,7 @@ export async function reportMetadata(seizoen: string, wedstrijd: string): Promis
 
   // A match without a report may have the page of its Voorbeschouwing.
   if (loaded.kind === 'unknown') {
-    return previewMetadata(seizoen, wedstrijd)
+    return (await unknownResultMetadata(seizoen, wedstrijd)) ?? previewMetadata(seizoen, wedstrijd)
   }
 
   const { reported, season } = loaded
@@ -158,7 +159,7 @@ export async function ReportPage({ season: seizoen, slug }: { season: string; sl
   // A match without a report has a page when it has not begun: its Voorbeschouwing. Any other
   // address is "niet gevonden".
   if (loaded.kind === 'unknown') {
-    return PreviewPage({ season: seizoen, slug })
+    return (await UnknownResultPage({ season: seizoen, slug })) ?? PreviewPage({ season: seizoen, slug })
   }
 
   if (loaded.kind === 'error') {

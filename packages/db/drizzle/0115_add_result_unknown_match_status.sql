@@ -1,0 +1,3 @@
+-- Lets a match be `result_unknown` (#1622): played, but the old fansite recorded nothing, so there is no score. Existing rows keep their status, and the CHECK rules already hold for it, because they only single out `played`.
+-- The statement can run again: MariaDB cannot undo DDL, so a migration that stopped halfway finishes on the next start.
+ALTER TABLE `matches` MODIFY COLUMN `status` enum('scheduled','played','postponed','cancelled','result_unknown') NOT NULL;

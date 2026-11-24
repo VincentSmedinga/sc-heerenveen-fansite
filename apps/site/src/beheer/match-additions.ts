@@ -11,7 +11,7 @@ import { and, asc, eq } from 'drizzle-orm'
 
 import { type AddErrors, type AddValues, emptyAddValues, newClubChoice } from './match-add-fields'
 import { emptyFields, type MatchValues } from './match-fields'
-import { statusChoices, validate } from './match-form'
+import { statusChoicesFor, validate } from './match-form'
 
 // Adding a match in the admin (issue 970): a match that no import reads, with the source the
 // editors took it from. The checks repeat what the database enforces, so an editor gets a
@@ -223,7 +223,7 @@ export function validateAdd(
     checked.entry === undefined ||
     club === undefined ||
     competition === undefined ||
-    !statusChoices.some((choice) => choice.value === values.status)
+    !statusChoicesFor().some((choice) => choice.value === values.status)
   ) {
     return { errors }
   }

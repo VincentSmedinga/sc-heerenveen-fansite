@@ -1234,8 +1234,9 @@ export function overviewOf(matches: PublicMatch[], now: Date): MatchOverview {
 
   return {
     next: programme.find((match) => match.status !== 'postponed'),
-    // A match that is cancelled is in the results of its season, but it was never played.
-    previous: results.find((match) => match.status !== 'cancelled'),
+    // A match that is cancelled is in the results of its season, but it was never played, and
+    // one without a result has nothing to show as the previous match.
+    previous: results.find((match) => match.status !== 'cancelled' && match.status !== 'result_unknown'),
     programme,
     results,
   }
@@ -1326,7 +1327,11 @@ export function lacksResult(
   if (match.status === 'played' && match.goalsFor !== null && match.goalsAgainst !== null) {
     return false
   }
-  if (match.status === 'postponed' || match.status === 'cancelled' || !hasBegun(match, now)) {
+  // A match without a result says so itself ("Uitslag onbekend"), it is not waiting for one.
+  if (match.status === 'postponed' || match.status === 'cancelled' || match.status === 'result_unknown') {
+    return false
+  }
+  if (!hasBegun(match, now)) {
     return false
   }
 
@@ -1571,7 +1576,7 @@ export const goalHref = (goal: Pick<ScorerGoal, 'ours' | 'personSlug'>) =>
  * A match that is cancelled is over: it is in the results and never in the programme.
  */
 export function hasBegun(match: Pick<PublicMatch, 'dateText' | 'kickoffAt' | 'matchDate' | 'status'>, now: Date) {
-  if (match.status === 'played' || match.status === 'cancelled') {
+  if (match.status === 'played' || match.status === 'cancelled' || match.status === 'result_unknown') {
     return true
   }
   if (match.status === 'postponed') {
