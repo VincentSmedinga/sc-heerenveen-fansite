@@ -26,15 +26,15 @@
   }
 
   /*
-   * The main text of a line is .hf-short-line-opponent and the lighter word after it
-   * .hf-short-line-where.
+   * The main text of a line is .hf-short-line-main and the lighter word after it
+   * .hf-short-line-aside.
    */
-  .hf-short-line-opponent {
+  .hf-short-line-main {
     flex: 1 1 8rem;
     font-weight: var(--hf-headline-font-weight);
   }
 
-  .hf-short-line-where {
+  .hf-short-line-aside {
     color: var(--hf-colour-text-secondary);
     font-weight: var(--hf-body-font-weight);
   }

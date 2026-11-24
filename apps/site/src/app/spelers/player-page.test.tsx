@@ -243,7 +243,7 @@ describe('the page of a player', () => {
     const line = /<p>(Aanvaller · .*?)<\/p>/s.exec(html)?.[1] ?? ''
 
     expect(line).toMatch(
-      /^Aanvaller · <span class="hf-country-name"><img alt="" class="hf-player-name-flag" [^>]*src="data:[^"]*"[^>]*\/>Nederland<\/span> · Emmen, 1974 · 52 jaar$/s,
+      /^Aanvaller · <span class="hf-country-name"><img alt="" class="hf-flag" [^>]*src="data:[^"]*"[^>]*\/>Nederland<\/span> · Emmen, 1974 · 52 jaar$/s,
     )
   })
 

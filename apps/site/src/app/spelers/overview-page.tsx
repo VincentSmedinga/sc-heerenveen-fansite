@@ -8,11 +8,9 @@ import {
   CardColumns,
   Heading,
   Link,
-  List,
   Page,
   PlayerList,
   SegmentedLinks,
-  Strong,
   Text,
   WikipediaCredit,
 } from '@fansite/design-system'
@@ -209,8 +207,9 @@ export async function OverviewPage({ view }: { view: OverviewView }) {
 }
 
 /**
- * The card with the six continents and how many players each has, the most first. A player
- * without a known country is in no continent: a line under the list says how many there are.
+ * The card with a bar for each of the six continents and how many players each has, the most
+ * first. A player without a known country is in no continent: a line under the list says how
+ * many there are.
  */
 function ContinentsCard({ players }: { players: readonly OverviewPlayer[] }) {
   const { counts, unknown } = countByContinent(players.map((player) => player.country))
@@ -220,13 +219,7 @@ function ContinentsCard({ players }: { players: readonly OverviewPlayer[] }) {
       <Heading id="werelddelen" level={2}>
         Per werelddeel
       </Heading>
-      <List columns plain role="list">
-        {counts.map(({ continent, count, name }) => (
-          <List.Item key={continent}>
-            {name} <Strong>{count}</Strong>
-          </List.Item>
-        ))}
-      </List>
+      <BarList rows={counts.map(({ count, name }) => ({ label: name, value: count }))} wide />
       {unknown > 0 && (
         <Text appearance="meta">
           Van {unknown === 1 ? '1 speler is' : `${unknown} spelers is`} het land niet bekend.

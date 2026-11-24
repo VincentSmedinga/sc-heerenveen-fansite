@@ -10,14 +10,14 @@ describe('ShortFact', () => {
     const { container } = render(<ShortFact>1 van de 17 doelpunten</ShortFact>)
 
     expect(container.querySelector('.hf-short-line.hf-short-fact')).not.toBeNull()
-    expect(container.querySelector('.hf-short-line-opponent')?.textContent).toBe('1 van de 17 doelpunten')
+    expect(container.querySelector('.hf-short-line-main')?.textContent).toBe('1 van de 17 doelpunten')
   })
 
   it('has the quiet style of "thuis" for a line that says there is nothing', () => {
     const { container } = render(<ShortFact empty>Nog geen</ShortFact>)
 
-    expect(container.querySelector('.hf-short-line-where')?.textContent).toBe('Nog geen')
-    expect(container.querySelector('.hf-short-line-opponent')).toBeNull()
+    expect(container.querySelector('.hf-short-line-aside')?.textContent).toBe('Nog geen')
+    expect(container.querySelector('.hf-short-line-main')).toBeNull()
   })
 
   it('keeps the name above it in the same item, first, so a screen reader reads it first', () => {

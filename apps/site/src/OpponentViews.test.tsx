@@ -88,12 +88,12 @@ describe('ClubsCard', () => {
 
     expect(links.map((link) => link.textContent)).toEqual(['Sparta', 'Venlo', 'Zwolle'])
     expect(links[0]?.getAttribute('href')).toBe('/tegenstanders/sparta')
-    expect(document.querySelectorAll('tbody img.hf-player-name-flag')).toHaveLength(2)
-    expect(
-      [...document.querySelectorAll('tbody img.hf-player-name-flag')].every((img) => img.getAttribute('alt') === ''),
-    ).toBe(true)
+    expect(document.querySelectorAll('tbody img.hf-flag')).toHaveLength(2)
+    expect([...document.querySelectorAll('tbody img.hf-flag')].every((img) => img.getAttribute('alt') === '')).toBe(
+      true,
+    )
     // The club without a country has an empty place of the same width, and no picture.
-    expect(document.querySelectorAll('tbody span.hf-player-name-flag')).toHaveLength(1)
+    expect(document.querySelectorAll('tbody span.hf-flag')).toHaveLength(1)
     // The country is read once, after the link, in words for a screen reader.
     expect(screen.getAllByRole('rowheader').map((header) => header.textContent)).toEqual([
       'Sparta, Nederland',

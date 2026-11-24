@@ -66,10 +66,10 @@ describe('the overview by name', () => {
     expect(html.slice(html.indexOf('style="grid-area:side"'))).toContain('Bron: Wikipedia')
   })
 
-  it('links a player who has a page and shows the surname bold, then the given name with the prefix', async () => {
+  it('links a player who has a page and shows the surname in the name weight, then the given name with the prefix', async () => {
     const html = await render('naam')
 
-    expect(html).toMatch(/<a href="\/spelers\/jan-van-aken"><strong[^>]*>Aken<\/strong>, Jan van<\/a>/)
+    expect(html).toMatch(/<a href="\/spelers\/jan-van-aken"><span[^>]*>Aken<\/span>, Jan van<\/a>/)
     expect(html).toContain('Verdediger · 2013/14')
     expect(html).toContain('Bron: Wikipedia en sc Heerenveen Fansite')
   })
@@ -108,11 +108,13 @@ describe('the overview by country', () => {
   it('has a card with the continents under the north, most players first, with 0 for an empty one', async () => {
     const html = await render('land')
     const card = html.slice(html.indexOf('id="werelddelen"'))
-    const items = [...card.matchAll(/<li[^>]*>(.*?)<\/li>/g)].map(([, item]) => item?.replace(/<[^>]+>/g, ''))
+    const items = [...card.matchAll(/hf-bar-list-label">(.*?)<\/span>.*?hf-bar-list-value">(\d+)</g)].map(
+      ([, name, count]) => `${name} ${count}`,
+    )
 
     expect(html.indexOf('id="ze-komen-uit-het-noorden"')).toBeLessThan(html.indexOf('id="werelddelen"'))
     expect(items).toEqual(['Europa 3', 'Afrika 0', 'Azië 0', 'Noord-Amerika 0', 'Oceanië 0', 'Zuid-Amerika 0'])
-    expect(html).toContain('hf-list-columns')
+    expect(card).toContain('hf-bar-list')
     expect(html).not.toContain('niet bekend')
   })
 
@@ -122,7 +124,7 @@ describe('the overview by country', () => {
     const html = await render('land')
 
     expect(html).toContain('Van 1 speler is het land niet bekend.')
-    expect(html).toMatch(/Azië <strong>1<\/strong>/)
+    expect(html).toMatch(/hf-bar-list-label">Azië<\/span>.*?hf-bar-list-value">1</)
   })
 })
 

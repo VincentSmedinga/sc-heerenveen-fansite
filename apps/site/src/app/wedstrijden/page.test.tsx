@@ -1117,7 +1117,7 @@ describe('the head coaches of the season', () => {
 
     const { card } = await coachesCard()
 
-    expect(card).toContain('<span class="hf-short-line-where">(interim)</span>')
+    expect(card).toContain('<span class="hf-short-line-aside">(interim)</span>')
     expect(card).not.toContain('<a href="https://nl.wikipedia.org')
     expect(card).not.toContain('wikipedia')
   })

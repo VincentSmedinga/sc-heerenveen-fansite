@@ -315,7 +315,7 @@ export function ClubNamesNotes({ names }: { names: ClubNameView[] }) {
         {names.map((name, index) => (
           // A name can come back after another, so the place in the list is part of the key.
           <List.Item key={`${index}-${name.name}`}>
-            <ShortStaff note={name.note} period={name.period} surname={name.name} />
+            <ShortStaff name={name.name} note={name.note} period={name.period} />
           </List.Item>
         ))}
       </List>
@@ -854,7 +854,7 @@ export function StadiumsCard({ stadiums }: { stadiums: StadiumView[] }) {
           // The name can come back after another, so the place in the list is part of the key.
           <List.Item key={`${index}-${stadium.name}`}>
             {/* A ShortStaff is a line with the period next to a name, as this is. */}
-            <ShortStaff note={stadium.note} period={stadium.period} surname={stadium.name} />
+            <ShortStaff name={stadium.name} note={stadium.note} period={stadium.period} />
           </List.Item>
         ))}
       </List>

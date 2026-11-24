@@ -10,6 +10,10 @@ const meta = preview.meta({
   argTypes: {
     givenName: { description: 'De voornaam, in het normale gewicht. Laat hem weg bij iemand met één naam.' },
     interim: { description: 'Of de persoon tijdelijk invalde. De regel zegt dan "(interim)" achter de naam.' },
+    name: {
+      description:
+        'Een naam in één stuk, zoals een stadion of een club, in het gewicht van een naam. Voor een persoon gebruik je `givenName` en `surname`.',
+    },
     note: {
       description:
         'Een korte tekst onder de regel, zoals waarom een club een tijd elders speelde. Gewone tekst, door ons geschreven.',
@@ -18,7 +22,7 @@ const meta = preview.meta({
       description:
         'Welk deel van de tijd de regel gaat, zoals de bezoeker het leest: "tot 14 mrt 2026" of "vanaf 1 sep 2025". Laat hem weg als de naam genoeg zegt, zoals bij de enige trainer van een seizoen.',
     },
-    surname: { description: 'De achternaam, in het sterkere gewicht.' },
+    surname: { description: 'De achternaam, in het gewicht van een naam.' },
   },
   component: ShortStaff,
   parameters: {
@@ -26,7 +30,7 @@ const meta = preview.meta({
       description: {
         component: [
           'Een persoon van de staf als korte regel in een lijst: de naam, en als dat iets zegt ervoor wanneer die de functie had of kreeg.',
-          'Het is een korte regel voor een persoon, voor een lijst zoals de hoofdtrainers van een seizoen. Zet de regel in een `List.Item`, de lijst in een `Card` onder een kop van niveau 2, en geef de `List` `role="list"`.',
+          'Het is een korte regel voor een persoon, voor een lijst zoals de hoofdtrainers van een seizoen. Een stadion of een club is geen achternaam: geef die mee als `name`. Zet de regel in een `List.Item`, de lijst in een `Card` onder een kop van niveau 2, en geef de `List` `role="list"`.',
           'Hij is gebouwd uit `PlayerName` en `Text`.',
         ].join('\n'),
       },
@@ -79,17 +83,17 @@ export const WithNote = meta.story({
     inCard(
       <>
         <List.Item>
-          <ShortStaff period="tot 10 aug 2019" surname="Eerste Stadion" />
+          <ShortStaff name="Eerste Stadion" period="tot 10 aug 2019" />
         </List.Item>
         <List.Item>
           <ShortStaff
+            name="Tijdelijk Stadion"
             note="De club speelde tijdelijk in een andere stad, na de instorting van een deel van het dak."
             period="10 aug 2019 t/m 2019/20"
-            surname="Tijdelijk Stadion"
           />
         </List.Item>
         <List.Item>
-          <ShortStaff period="vanaf 2020/21" surname="Eerste Stadion" />
+          <ShortStaff name="Eerste Stadion" period="vanaf 2020/21" />
         </List.Item>
       </>,
       'Stadions',

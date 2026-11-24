@@ -46,6 +46,8 @@
   }
 
   .hf-description-list-aligned dd {
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--hf-figure-font-weight);
     text-align: end;
   }
 

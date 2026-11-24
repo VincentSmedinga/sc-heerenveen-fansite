@@ -18,7 +18,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De PickList is voor een keuze van een paar uit een lijst, verdeeld in groepen, zoals de vier spelers in Fjouwer, per linie een groep. Elke groep heeft een teller, elke speler een regel met een korte tekst, en wie niet te kiezen is, heeft een reden die bij het vakje hoort.',
+          'De PickList is voor een keuze van een paar uit een lijst, verdeeld in groepen, zoals de vier spelers in Fjouwer, per linie een groep. Elke groep heeft een teller, elke speler een regel met zijn naam op het gewicht van een naam en een korte tekst, en wie niet te kiezen is, heeft een reden die bij het vakje hoort.',
           'Kies hem waar een fan meer dan één ding aanvinkt en er een grens per groep is; voor een gewone reeks vakjes zonder grens is de CheckboxGroup genoeg. Hij werkt zonder JavaScript, want het zijn gewone selectievakjes in een formulier, en hij blokkeert niets: de server beslist. De strook toont de gekozen spelers op een rij.',
         ].join('\n'),
       },
