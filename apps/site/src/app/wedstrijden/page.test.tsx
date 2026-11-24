@@ -876,7 +876,7 @@ describe('the page /wedstrijden', () => {
     const stand = section(await render(), 'stand')
 
     // The leader (sc Heerenveen, with 6 points) has the full bar, a club with 1 point a sixth.
-    expect(stand.match(/class="hf-bar" style="--hf-bar-share:[\d.]+"/g)).toHaveLength(3)
+    expect(stand.match(/class="hf-bar hf-chart-tone-plain" style="--hf-bar-share:[\d.]+"/g)).toHaveLength(3)
     expect(stand).toContain('style="--hf-bar-share:100"')
     expect(stand).toContain('style="--hf-bar-share:16.67"')
   })

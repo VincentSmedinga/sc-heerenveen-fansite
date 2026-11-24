@@ -39,6 +39,7 @@ const meta = preview.meta({
       description: {
         component: [
           'Een staafdiagram zet een reeks waarden naast elkaar: een staafje per plek, van links naar rechts, zo hoog als de waarde bij de schaal past.',
+          'Een staafje dat alleen telt is groen, zoals de balken van een tabel en een lijst; groen is dan een aantal, en rood en grijs zijn alleen een uitslag.',
           'Een plek zonder staafje toont alleen de grond, zodat de grafiek laat zien hoe lang de reeks wordt.',
           'Het onderdeel weet niets over wat de staafjes meten: de tonen, de schaal en de nummers zijn van de pagina.',
           'Een `BarChart.Trend` tekent er een vloeiende lijn overheen, op dezelfde schaal.',
@@ -126,7 +127,7 @@ export const Default = meta.story({
 })
 
 export const Labelled = meta.story({
-  name: 'Met het getal boven elke staaf, in het blauw van een telling',
+  name: 'Met het getal boven elke staaf, in het groen van een telling',
   render: () => (
     <div style={{ maxInlineSize: '24rem' }}>
       <Card aria-labelledby="kwartier-kop">

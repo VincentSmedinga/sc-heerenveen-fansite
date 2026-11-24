@@ -1353,6 +1353,7 @@
   De letters en de tekst gebruiken de volle kleur.
 - **Waarom:** 70% is de sterkte van de tabelbalk en van het zwakste stuk van de taartgrafiek.
   Het grijs van een gelijkspel haalt op de warme kaart op 70% maar 2,93:1 en op 80% 3,51:1.
+- **Later:** zie _Een balk die een aantal toont is groen_: ook een balk die een aantal telt, heeft deze sterkte en kleur.
 - **Alternatieven:** overal 70% (het gelijkspel haalt dan 3:1 niet).
   Overal 80% (de grafiek valt uit de familie).
 
@@ -4401,3 +4402,39 @@
   De regel over spelers zonder bekend land blijft eronder staan.
 - **Waarom:** de twee kaarten staan op dezelfde pagina en tonen hetzelfde soort gegeven, dus ze horen er hetzelfde uit te zien.
 - **Alternatieven:** alleen het gewicht van het getal aanpassen (de twee kaarten blijven verschillen).
+
+## Een balk die een aantal toont is groen
+
+- **Datum:** 24 november 2026
+- **Besluit:** een balk die een aantal toont is groen: `--hf-colour-outcome-win` op 70%, de toon `plain` van `chart.css`.
+  `Bar`, `BarList` en de staven van `BarChart` gebruiken die toon, zonder een prop `tone` erbij.
+  Het token `--hf-colour-chart-bar` is vervallen (#1606).
+- **Waarom:** het groen was al de kleur van de tabelbalken, en 70% haalt op elk vlak 3:1 of meer.
+  Eén kleur voor een aantal maakt het blauw van de kaarten en het groen van de tabellen weer één regel, zonder nieuw token.
+- **Later:** zie _De grafieken van een speler_ in `site.md`, dat het blauw koos.
+- **Alternatieven:** het blauw voor alle aantallen (dan veranderen de tabelbalken); volle sterkte van het groen; een nieuw token voor een aantal naast het groen van een winst; een prop `tone`.
+
+## Een horizontale balk is dun of dik en heeft één hoek
+
+- **Datum:** 24 november 2026
+- **Besluit:** er zijn twee maten, als tokens in `size.css`: dun (`--hf-size-bar-thin`, 0,75 rem) en dik (`--hf-size-bar-thick`, 1,25 rem), en één hoek (`--hf-radius-bar`, 0,1875 rem) op alle vier de hoeken.
+  Dun zijn `Bar`, `OutcomeLine` en de stukken van `MatchScoreBar`; dik zijn `BarList` en `OutcomeBar`.
+  De staven van `BarChart` hebben dezelfde hoek aan hun bovenkant.
+- **Waarom:** een tabelcel is één regel hoog en heeft een dunne balk nodig, een lijst heeft ruimte voor een dikke.
+  Dezelfde hoek laat de balken bij elkaar horen.
+- **Alternatieven:** één hoogte voor alles; de hoek per component laten.
+
+## Een balk in een lijst heeft een spoor, een balk in een tabelcel niet
+
+- **Datum:** 24 november 2026
+- **Besluit:** `BarList` houdt zijn spoor, `Bar` in een tabelcel heeft er geen.
+- **Waarom:** in een lijst laat het spoor zien hoeveel er nog bij kan; naast een getal lees je de lengte ook zonder spoor.
+- **Alternatieven:** overal een spoor; nergens een spoor.
+
+## De uitslagbalken houden hun kleur en nemen maat en hoek over
+
+- **Datum:** 24 november 2026
+- **Besluit:** `OutcomeBar`, `OutcomeLine` en `MatchScoreBar` houden hun kleuren en sterkten (70% voor winst en verlies, 80% voor gelijkspel) en nemen alleen de maat en de hoek van de gedeelde balk over.
+  `OutcomeBar` heeft de hoek nu op elk deel, niet alleen aan de uiteinden.
+- **Waarom:** ze tonen een uitslag of een aandeel, geen aantal, dus groen, grijs en rood blijven wat ze zeggen.
+- **Alternatieven:** alleen de hoek delen; ze helemaal laten zoals ze zijn.

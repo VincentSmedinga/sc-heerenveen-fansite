@@ -89,8 +89,8 @@
   .hf-bar-chart-bar {
     background-color: color-mix(in srgb, var(--hf-chart-colour) var(--hf-chart-strength), transparent);
     block-size: calc(var(--hf-bar-chart-share) * 1%);
-    border-start-end-radius: 0.125rem;
-    border-start-start-radius: 0.125rem;
+    border-start-end-radius: var(--hf-radius-bar);
+    border-start-start-radius: var(--hf-radius-bar);
     position: relative;
   }
 

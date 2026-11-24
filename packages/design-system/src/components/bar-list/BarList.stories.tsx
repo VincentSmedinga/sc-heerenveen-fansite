@@ -18,6 +18,7 @@ const meta = preview.meta({
           'Een lijst met liggende balken, één regel per naam, zoals de doelpunten van een speler per seizoen.',
           'De naam en het getal zijn de tekst van de lijst; de balk is versiering die een schermlezer overslaat. Zet de lijst in een `Card` onder een kop van niveau 2 die zegt wat de balken tellen.',
           'Staat er een eenheid achter het getal, zoals een procent, geef die dan mee met `unit`; de balken blijven even lang als de getallen.',
+          'De balken zijn dik, groen en staan op een spoor: groen is hier een aantal, dezelfde kleur als in een tabel en een staafdiagram.',
           'Hij is gebouwd uit `Bar`.',
         ].join('\n'),
       },
