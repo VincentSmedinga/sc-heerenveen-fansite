@@ -1,7 +1,18 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { sourceDifferenceReasons } from '@fansite/db/match-conflicts'
-import { adminUsers, clubs, matchChanges, matchEdits, matches, matchStatistics } from '@fansite/db/schema'
+import {
+  adminUsers,
+  clubs,
+  matchAppearances,
+  matchCards,
+  matchChanges,
+  matchEdits,
+  matches,
+  matchGoals,
+  matchReports,
+  matchStatistics,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq, sql } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -11,6 +22,7 @@ import type { OldSiteMatch } from './old-site-file.ts'
 import type { OldSiteContext } from './old-site-step.ts'
 
 import { importOldSiteClubs, oldSiteClubIds } from './old-site-clubs.ts'
+import { oldSiteDateCorrections } from './old-site-date-corrections.ts'
 import { readOldSiteData } from './old-site-file.ts'
 import { deriveOldSiteMatches, importOldSiteMatches, oldSiteSeason, readResultNote } from './old-site-matches.ts'
 
@@ -1153,6 +1165,249 @@ describe('a match of which the old fansite recorded nothing (#1622)', () => {
       .where(eq(matches.id, stored!.id))
     await run([empty(cup)])
     expect((await rows())[0]).toMatchObject({ attendance: 9000, halfTimeFor: 1, status: 'played' })
+  })
+})
+
+describe('a date that changes (#1631)', () => {
+  const oldClubs = [
+    { code: 'nec', country: 'NL', name: 'NEC' },
+    { code: 'ajax', country: 'NL', name: 'Ajax' },
+  ]
+  const correction = {
+    clubCode: 'nec',
+    competition: 'Eredivisie' as const,
+    from: '2001-09-01',
+    home: true,
+    season: '2001/02',
+    source: 'Nederlandse Wikipedia',
+    to: '2002-01-15',
+  }
+
+  beforeEach(async () => {
+    for (const table of ['match_changes', 'match_edits', 'match_statistics', 'matches', 'clubs', 'admin_users']) {
+      await database.pool.query(`DELETE FROM ${table}`)
+    }
+  })
+
+  async function run(list: OldSiteMatch[], corrections = [correction]) {
+    await importOldSiteClubs(database.db, oldClubs)
+
+    return importOldSiteMatches(
+      database.db,
+      list,
+      oldClubs,
+      await oldSiteClubIds(database.db, oldClubs),
+      new Date(),
+      undefined,
+      corrections,
+    )
+  }
+
+  /** Three matches by date: NEC at home (the date is wrong), Ajax, NEC away. */
+  const file = (necDate: string, extra: OldSiteMatch[] = []) => [
+    oldMatch({ code: 'nec.thuis', dateTime: `${necDate} 20:00:00` }),
+    oldMatch({ code: 'ajax.thuis', dateTime: '2001-10-01 20:00:00' }),
+    oldMatch({ code: 'nec.uit', dateTime: '2001-11-01 20:00:00' }),
+    ...extra,
+  ]
+
+  /** What hangs on each stored match, by its opponent, home or away, and round. */
+  async function children() {
+    const rows = await database.db.select().from(matches).orderBy(asc(matches.id))
+    const result: Record<string, { cards: number; goals: number; lineup: number; reports: number }> = {}
+
+    for (const row of rows) {
+      const count = async (
+        table: typeof matchAppearances | typeof matchCards | typeof matchGoals | typeof matchReports,
+      ) => (await database.db.select().from(table).where(eq(table.matchId, row.id))).length
+
+      result[`${row.opponent} ${row.home ? 'thuis' : 'uit'}`] = {
+        cards: await count(matchCards),
+        goals: await count(matchGoals),
+        lineup: await count(matchAppearances),
+        reports: await count(matchReports),
+      }
+    }
+
+    return result
+  }
+
+  /** A report, line-up, goal and card for each stored match, as many goals as the id says. */
+  async function fillIn() {
+    for (const row of await database.db.select().from(matches).orderBy(asc(matches.id))) {
+      await database.db.insert(matchReports).values({ matchId: row.id, status: 'klaar' })
+      await database.db
+        .insert(matchAppearances)
+        .values({ matchId: row.id, name: `Speler ${row.id}`, ours: true, starter: true })
+
+      const [appearance] = await database.db.select().from(matchAppearances).where(eq(matchAppearances.matchId, row.id))
+
+      for (let goals = 0; goals < row.id % 3; goals++) {
+        await database.db
+          .insert(matchGoals)
+          .values({ matchId: row.id, minute: 10 + goals, ours: true, player: 'Speler' })
+      }
+      await database.db
+        .insert(matchCards)
+        .values({ appearanceId: appearance!.id, kind: 'geel', matchId: row.id, ours: true })
+    }
+  }
+
+  const byOpponent = async () =>
+    Object.fromEntries(
+      (await database.db.select().from(matches).orderBy(asc(matches.id))).map((row) => [
+        `${row.opponent} ${row.home ? 'thuis' : 'uit'}`,
+        { date: row.matchDate, id: row.id, round: row.round },
+      ]),
+    )
+
+  it('keeps the report, line-up, goals and cards with their own match when a date moves the rounds', async () => {
+    await run(file('2001-09-01'))
+    await fillIn()
+
+    const before = await byOpponent()
+    const beforeChildren = await children()
+
+    expect(before['NEC thuis']?.round).toBe('Wedstrijd 1')
+
+    const report = await run(file('2002-01-15'))
+    const after = await byOpponent()
+
+    // The same rows, with the rounds the date gives: NEC at home is the last now.
+    expect(after['NEC thuis']).toEqual({ date: '2002-01-15', id: before['NEC thuis']?.id, round: 'Wedstrijd 3' })
+    expect(after['Ajax thuis']).toEqual({ date: '2001-10-01', id: before['Ajax thuis']?.id, round: 'Wedstrijd 1' })
+    expect(after['NEC uit']).toEqual({ date: '2001-11-01', id: before['NEC uit']?.id, round: 'Wedstrijd 2' })
+    expect(await children()).toEqual(beforeChildren)
+    expect(report).toMatchObject({ changed: 3, created: 0, skipped: 0, unchanged: 0 })
+    expect(report.lines.join('\n')).toContain('1 by the list of date corrections')
+    expect(report.lines.join('\n')).toContain('the date changes from 2001-09-01 to 2002-01-15')
+    expect(report.lines.join('\n')).toContain('3 rounds changed')
+    expect(await database.db.select().from(matches)).toHaveLength(3)
+  })
+
+  it('changes nothing in a second run', async () => {
+    await run(file('2001-09-01'))
+    await run(file('2002-01-15'))
+
+    const before = await database.db.select().from(matches).orderBy(asc(matches.id))
+    const report = await run(file('2002-01-15'))
+
+    expect(report).toMatchObject({ changed: 0, created: 0, skipped: 0, unchanged: 3 })
+    expect(report.lines.join('\n')).toContain('3 matches paired by date, 0 by the list of date corrections')
+    expect(await database.db.select().from(matches).orderBy(asc(matches.id))).toEqual(before)
+  })
+
+  it('keeps the children where a round shifts and no date changes', async () => {
+    await run(file('2001-09-01'))
+    await fillIn()
+
+    const before = await byOpponent()
+    const beforeChildren = await children()
+    // A match earlier than all the others: every round after it is one higher.
+    const report = await run(file('2001-09-01', [oldMatch({ code: 'ajax.uit', dateTime: '2001-08-01 20:00:00' })]))
+    const after = await byOpponent()
+
+    expect(after['NEC thuis']).toMatchObject({ id: before['NEC thuis']?.id, round: 'Wedstrijd 2' })
+    expect(after['NEC uit']).toMatchObject({ id: before['NEC uit']?.id, round: 'Wedstrijd 4' })
+    expect(await children()).toMatchObject(beforeChildren)
+    expect(report).toMatchObject({ created: 1 })
+    expect(report.lines.join('\n')).toContain('3 matches paired by date')
+  })
+
+  it('says so when a correction finds no stored match, and falls back on the round', async () => {
+    await run(file('2001-09-01'))
+    await fillIn()
+
+    const beforeChildren = await children()
+    const report = await run(file('2002-01-15'), [{ ...correction, from: '2001-09-02' }])
+
+    expect(report.lines.join('\n')).toContain(
+      'error: the date correction of 2001/02 nec (2001-09-02 to 2002-01-15) finds 0 stored matches',
+    )
+    // Matches that need the round of one that stays are left alone: no row is lost or doubled.
+    expect(report.skipped).toBeGreaterThan(0)
+    expect(await database.db.select().from(matches)).toHaveLength(3)
+    expect(await children()).toEqual(beforeChildren)
+  })
+
+  it('leaves two matches against one club on one day to the round', async () => {
+    const twice = [
+      oldMatch({ code: 'nec.thuis', dateTime: '2001-09-01 15:00:00' }),
+      oldMatch({
+        code: 'nec.thuis',
+        dateTime: '2001-09-01 20:00:00',
+        result: { ...oldMatch().result, homeFullTime: 4 },
+      }),
+    ]
+
+    await run(twice, [])
+    await fillIn()
+
+    const before = await byOpponent()
+    const report = await run(twice, [])
+
+    expect(report).toMatchObject({ changed: 0, created: 0, unchanged: 2 })
+    expect(report.lines.join('\n')).toContain('2 by round')
+    expect(before).toBeDefined()
+    expect(await database.db.select().from(matches)).toHaveLength(2)
+  })
+
+  it('leaves a match the editors added, and what they entered, as it is while the rounds move', async () => {
+    await run(file('2001-09-01'))
+
+    const [own] = await database.db.select().from(matches).where(eq(matches.opponent, 'Ajax'))
+    const [club] = await database.db.select().from(clubs).limit(1)
+
+    await database.db.insert(matches).values({
+      clubId: club!.id,
+      competition: 'Eredivisie',
+      dataSource: 'redactie',
+      home: true,
+      matchDate: '2001-12-01',
+      opponent: 'NEC',
+      round: 'Eerste ronde',
+      season: '2001/02',
+      sourceLine: 'Krant, 1 dec 2001',
+      status: 'scheduled',
+    })
+    await database.db.update(matches).set({ referee: 'Bas Nijhuis' }).where(eq(matches.id, own!.id))
+    await database.db.insert(matchEdits).values({
+      beforeGoals: '[]',
+      beforeMatch: JSON.stringify({ referee: null }),
+      editedAt: new Date('2026-11-09T10:00:00Z'),
+      editedBy: (await database.db.insert(adminUsers).values({ email: 'redactie@example.org', role: 'editor' }))[0]
+        .insertId,
+      factsEdited: true,
+      matchId: own!.id,
+      reason: 'Beter bekend',
+    })
+
+    await run(file('2002-01-15'))
+
+    expect(await database.db.select().from(matches).where(eq(matches.id, own!.id))).toMatchObject([
+      { referee: 'Bas Nijhuis', round: 'Wedstrijd 1' },
+    ])
+    expect(await database.db.select().from(matches).where(eq(matches.dataSource, 'redactie'))).toMatchObject([
+      { matchDate: '2001-12-01', round: 'Eerste ronde' },
+    ])
+    expect(await database.db.select().from(matchEdits)).toHaveLength(1)
+  })
+
+  it('has a correction that is used by the files: its new date is in them', async () => {
+    const { matches: all } = await readOldSiteData()
+
+    for (const line of oldSiteDateCorrections) {
+      expect(
+        all.filter(
+          (match) =>
+            oldSiteSeason(match.season) === line.season &&
+            match.code === `${line.clubCode}.${line.home ? 'thuis' : 'uit'}` &&
+            match.dateTime.startsWith(line.to),
+        ),
+        `${line.season} ${line.clubCode} ${line.to}`,
+      ).toHaveLength(1)
+      expect(line.from).not.toBe(line.to)
+    }
   })
 })
 

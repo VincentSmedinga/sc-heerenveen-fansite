@@ -4,7 +4,7 @@
       "attendance": 8400,
       "code": "rbcroosendaal.thuis",
       "competition": 7,
-      "dateTime": "1992-03-28 20:00:00",
+      "dateTime": "1993-03-28 20:00:00",
       "events": [
         {"assist": null, "event": 1, "kind": null, "minute": 39, "playerCode": "marco.roelofsen", "playerName": null},
         {"assist": null, "event": 1, "kind": null, "minute": 76, "playerCode": "leeroy.echteld", "playerName": null},

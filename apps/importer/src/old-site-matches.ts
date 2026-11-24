@@ -6,10 +6,12 @@ import { matchEdits, matches, matchLimits, matchStatistics } from '@fansite/db/s
 import { keepSourceDifferences, readTakenOverParts } from '@fansite/db/source-differences'
 import { eq } from 'drizzle-orm'
 
+import type { OldSiteDateCorrection } from './old-site-date-corrections.ts'
 import type { OldSiteClub, OldSiteMatch } from './old-site-file.ts'
 import type { OldSiteContext, OldSiteDatabase, OldSiteStepReport } from './old-site-step.ts'
 
 import { crossTableKey, crossTableSeasons, crossTableSeasonsOf, readCrossTableScores } from './old-site-cross-tables.ts'
+import { oldSiteDateCorrections } from './old-site-date-corrections.ts'
 import { amsterdamToUtc } from './read-wikipedia.ts'
 
 /** The source marker of the matches this step writes. */
@@ -405,16 +407,24 @@ const resultFields = [
   'status',
 ] as const
 const factFields = ['attendance', 'note', 'referee'] as const
-const otherFields = ['clubId', 'home', 'opponent'] as const
+const otherFields = ['clubId', 'home', 'opponent', 'round'] as const
 
 const sameValue = (a: unknown, b: unknown) =>
   a instanceof Date && b instanceof Date ? a.getTime() === b.getTime() : a === b
+
+/** How a stored row was paired with a match of the files. */
+type Pairing = { how: 'correction' | 'date' | 'round'; row: StoredMatch }
+
+/** The text of a stored round that has moved out of the way while the others take its place. */
+const parkedRound = (id: number) => `Verplaatst ${id}`
 
 /**
  * The step `matches`: makes a row in `matches` for every match in the files, and a row in
  * `match_statistics` where there are numbers. It finds a match first by club and date
  * (`findMatchByDate`): one from another source only gets its empty fields filled, and a field
- * that differs is a line in the log. Else it touches only rows with the source
+ * that differs is a line in the log. Its own rows it finds by club and date, then through the
+ * list of date corrections, and only then by the round (#1631), so a changed date moves rounds
+ * without moving reports. Else it touches only rows with the source
  * `oude-fansite`, leaves the parts the editors filled in as they are (`match_edits`) and
  * never removes a row. Needs the clubs of the step before it (`clubIds`, by club code).
  */
@@ -425,6 +435,7 @@ export async function importOldSiteMatches(
   clubIds: ReadonlyMap<string, number>,
   now = new Date(),
   crossTables?: OldSiteContext['crossTables'],
+  corrections: readonly OldSiteDateCorrection[] = oldSiteDateCorrections,
 ): Promise<OldSiteStepReport> {
   const report: OldSiteStepReport = { changed: 0, created: 0, lines: [], skipped: 0, unchanged: 0 }
   const names = new Map(oldClubs.map((club) => [club.code, club.name]))
@@ -449,7 +460,22 @@ export async function importOldSiteMatches(
   )
 
   const derived = deriveOldSiteMatches(oldMatches)
-  const keys = new Set<string>()
+  const claimed = new Set<number>()
+  const { blocked, pairs } = pairStoredMatches(derived, [...stored.values()], clubIds, report.lines, corrections)
+  const pairedBy = { correction: 0, date: 0, round: 0 }
+  let roundsChanged = 0
+
+  // The rounds of the rows that move are taken away first, so that no row has to wait for the
+  // round of another (`matches_season_competition_round_unique`). A run that stops here pairs
+  // the same rows by their date the next time.
+  for (const [one, { how, row }] of pairs) {
+    if (how !== 'round' && one.values !== null && row.round !== one.values.round) {
+      await db
+        .update(matches)
+        .set({ round: parkedRound(row.id) })
+        .where(eq(matches.id, row.id))
+    }
+  }
   let remarks = 0
   let clearedHalfTimes = 0
   const withoutResultBySeason = new Map<string, number>()
@@ -477,6 +503,12 @@ export async function importOldSiteMatches(
       continue
     }
 
+    if (blocked.has(one)) {
+      report.skipped += 1
+      report.lines.push(`skipped ${label}: its round is held by a match that does not move`)
+      continue
+    }
+
     const clubId = clubIds.get(one.clubCode)
     const opponent = names.get(one.clubCode)
 
@@ -498,9 +530,21 @@ export async function importOldSiteMatches(
         unchecked.push(label)
       } else if (score?.for === 0 && score.against === 0) {
         goallessBySeason.set(values.season, (goallessBySeason.get(values.season) ?? 0) + 1)
-      } else if (score !== undefined && isFilledFromWikipedia(stored.get(matchKey(values)), score)) {
+      } else if (score !== undefined && isFilledFromWikipedia(pairs.get(one)?.row, score)) {
         // The result is Wikipedia's (#1621): the old fansite has nothing, so it is not emptied.
-        keys.add(matchKey(values))
+        const own = pairs.get(one)
+
+        if (own !== undefined) {
+          claimed.add(own.row.id)
+          pairedBy[own.how] += 1
+          if (own.row.round !== values.round) {
+            roundsChanged += 1
+            await db
+              .update(matches)
+              .set({ matchDate: values.matchDate, round: values.round })
+              .where(eq(matches.id, own.row.id))
+          }
+        }
         report.unchanged += 1
         continue
       } else {
@@ -509,10 +553,14 @@ export async function importOldSiteMatches(
       }
     }
 
+    const paired = pairs.get(one)
+    const before = paired?.row
     const key = matchKey(values)
-    const before = stored.get(key)
 
-    keys.add(key)
+    if (paired !== undefined) {
+      claimed.add(paired.row.id)
+      pairedBy[paired.how] += 1
+    }
     report.lines.push(...one.lines)
 
     if (before === undefined) {
@@ -618,6 +666,12 @@ export async function importOldSiteMatches(
         Object.assign(change, { [field]: values[field] })
       }
     }
+    if (change.round !== undefined) {
+      roundsChanged += 1
+    }
+    if (change.matchDate !== undefined) {
+      report.lines.push(`${label}: the date changes from ${before.matchDate} to ${values.matchDate}`)
+    }
 
     // The score at half-time only fills an empty place: the editors may have filled it in.
     if (before.halfTimeFor === null && values.halfTimeFor !== null) {
@@ -684,10 +738,15 @@ export async function importOldSiteMatches(
     )
   }
 
-  for (const [key, row] of stored) {
-    if (row.dataSource === oldSiteSource && !keys.has(key)) {
+  for (const row of stored.values()) {
+    if (row.dataSource === oldSiteSource && !claimed.has(row.id)) {
       report.lines.push(`${row.season} ${row.round} (${row.competition}) is no longer in the files, left as it is`)
     }
+  }
+  if (pairedBy.correction + pairedBy.date + pairedBy.round > 0) {
+    report.lines.push(
+      `${pairedBy.date} matches paired by date, ${pairedBy.correction} by the list of date corrections, ${pairedBy.round} by round; ${roundsChanged} rounds changed`,
+    )
   }
   if (clearedHalfTimes > 0) {
     report.lines.push(`${clearedHalfTimes} scores at half-time are emptied: the old fansite did not know them`)
@@ -707,4 +766,147 @@ export async function importOldSiteMatches(
   }
 
   return report
+}
+
+/**
+ * Pairs the matches of the files with the rows of the old fansite in the database (#1631). The
+ * round is derived from the date, so a date that changes renumbers rounds: a row is found first
+ * by season, competition, club, home or away and date, then through the list of date
+ * corrections, and only then by the round. A row pairs with one match only: when the files have
+ * two matches on one day against the same club, or the database has two rows, they fall back
+ * on the round.
+ */
+function pairStoredMatches(
+  derived: readonly DerivedOldSiteMatch[],
+  stored: readonly StoredMatch[],
+  clubIds: ReadonlyMap<string, number>,
+  lines: string[],
+  corrections: readonly OldSiteDateCorrection[],
+): { blocked: Set<DerivedOldSiteMatch>; pairs: Map<DerivedOldSiteMatch, Pairing> } {
+  const pairs = new Map<DerivedOldSiteMatch, Pairing>()
+  const claimed = new Set<number>()
+  const own = stored.filter((row) => row.dataSource === oldSiteSource)
+  const identity = (
+    values: { competition: string; home: boolean; matchDate: string; season: string },
+    clubId?: number,
+  ) => `${values.season}|${values.competition}|${clubId}|${values.home}|${values.matchDate}`
+  const inFile = new Map<string, number>()
+  const inDatabase = new Map<string, StoredMatch[]>()
+
+  for (const one of derived) {
+    const clubId = clubIds.get(one.clubCode)
+
+    if (one.values !== null && clubId !== undefined) {
+      const key = identity(one.values, clubId)
+
+      inFile.set(key, (inFile.get(key) ?? 0) + 1)
+    }
+  }
+  for (const row of own) {
+    const key = identity(row, row.clubId)
+
+    inDatabase.set(key, [...(inDatabase.get(key) ?? []), row])
+  }
+
+  const pair = (one: DerivedOldSiteMatch, row: StoredMatch, how: Pairing['how']) => {
+    pairs.set(one, { how, row })
+    claimed.add(row.id)
+  }
+
+  for (const one of derived) {
+    const clubId = clubIds.get(one.clubCode)
+
+    if (one.values === null || clubId === undefined) {
+      continue
+    }
+
+    const key = identity(one.values, clubId)
+    const found = inDatabase.get(key) ?? []
+
+    if (inFile.get(key) === 1 && found.length === 1 && found[0] !== undefined) {
+      pair(one, found[0], 'date')
+    }
+  }
+
+  for (const correction of corrections) {
+    const one = derived.find(
+      (candidate) =>
+        candidate.clubCode === correction.clubCode &&
+        candidate.values?.competition === correction.competition &&
+        candidate.values.home === correction.home &&
+        candidate.values.matchDate === correction.to &&
+        candidate.values.season === correction.season,
+    )
+    const clubId = clubIds.get(correction.clubCode)
+
+    if (one?.values === undefined || one.values === null || clubId === undefined || pairs.has(one)) {
+      continue
+    }
+
+    const found = inDatabase.get(identity({ ...correction, matchDate: correction.from }, clubId)) ?? []
+    const row = found.length === 1 ? found[0] : undefined
+
+    if (row !== undefined && !claimed.has(row.id)) {
+      pair(one, row, 'correction')
+    } else if (own.some((candidate) => candidate.season === correction.season)) {
+      lines.push(
+        `error: the date correction of ${correction.season} ${correction.clubCode} (${correction.from} to ${correction.to}) finds ${found.length} stored matches, so it is left out`,
+      )
+    }
+  }
+
+  const byRound = new Map(stored.map((row) => [matchKey(row), row]))
+
+  for (const one of derived) {
+    const row = one.values === null ? undefined : byRound.get(matchKey(one.values))
+
+    if (row !== undefined && !pairs.has(one) && !claimed.has(row.id)) {
+      pair(one, row, 'round')
+    }
+  }
+
+  // A row can only take a round that no row outside the moving pairs holds. A match that can't
+  // is left alone and said so, instead of failing on the unique key: the others may be blocked
+  // by it in turn, so this goes on until nothing changes.
+  const blocked = new Set<DerivedOldSiteMatch>()
+  let again = true
+
+  while (again) {
+    again = false
+
+    const moving = new Set(
+      [...pairs.entries()]
+        .filter(([one, { how, row }]) => how !== 'round' && row.round !== one.values?.round)
+        .map(([, { row }]) => row.id),
+    )
+
+    for (const one of derived) {
+      const key = one.values === null ? undefined : matchKey(one.values)
+      const holder = key === undefined ? undefined : byRound.get(key)
+      const own = pairs.get(one)
+
+      if (
+        key === undefined ||
+        blocked.has(one) ||
+        holder === undefined ||
+        holder.id === own?.row.id ||
+        moving.has(holder.id)
+      ) {
+        continue
+      }
+      // The holder stays: a row of another source, or one that no match of the files takes
+      // takes over.
+      blocked.add(one)
+      if (own !== undefined) {
+        pairs.delete(one)
+        claimed.delete(own.row.id)
+        again = true
+      }
+      lines.push(
+        `error: ${key} is held by match ${holder.id} of ${holder.dataSource} and does not move, so the match is left alone`,
+      )
+    }
+  }
+
+  return { blocked, pairs }
 }
