@@ -725,6 +725,33 @@ describe('the steps spelers and doelpunten', () => {
     ])
   })
 
+  it('leaves the goals that another source gave to a match the old fansite recorded nothing of', async () => {
+    // Nothing recorded: 0-0, no events, no lineup, no referee (#1623 gives such a match goals).
+    const empty = oldMatch({
+      result: { awayFullTime: 0, awayHalfTime: 0, homeFullTime: 0, homeHalfTime: 0, note: null },
+    })
+
+    await run([empty])
+
+    const [match] = await database.db.select().from(matches)
+
+    await database.db.update(matches).set({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+    await database.db.insert(matchGoals).values({
+      matchId: match!.id,
+      minute: 12,
+      ours: true,
+      ownGoal: false,
+      penalty: false,
+      player: 'Iemand Anders',
+    })
+
+    const { lines } = await importOldSiteGoals(database.db, [empty], oldPlayers)
+
+    expect((await goalRows()).map((row) => row.player)).toEqual(['Iemand Anders'])
+    expect(await changeRows()).toHaveLength(0)
+    expect(lines.join('\n')).not.toContain('goals removed')
+  })
+
   it('gives a match that does not add up no goals, and the log says which', async () => {
     const { goals } = await run([
       oldMatch({ events: winGoals.slice(0, 2) }),

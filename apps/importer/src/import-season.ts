@@ -14,6 +14,7 @@ import { seasonOf } from '@fansite/db/season'
 import type { ImportOptions } from './import-feeds.ts'
 
 import { createFetcher, type Fetcher } from './fetcher.ts'
+import { fillFromSeasonProgramme } from './fill-from-season-programme.ts'
 import { fillResultsFromCrossTables } from './fill-results-from-cross-tables.ts'
 import { groupStagesOf, importGroupStages } from './import-group-standings.ts'
 import {
@@ -310,17 +311,38 @@ function checkSeason(argument: string | undefined): Checked {
 
 /**
  * Fills the results of the old fansite's matches that have none from the cross table (#1621),
- * for a season of the old fansite, after the matches of the season. It costs no request for any
+ * and for 2006/07 the results and goals from the programme of the season (#1623), for a season
+ * of the old fansite, after the matches of the season. It costs no request for any
  * other season. A failure is a line in the log and nothing more: the season was stored.
  */
 async function fillResults(db: Database, fetcher: Fetcher, season: string, origin: string): Promise<string[]> {
-  try {
-    const { filled, lines } = await fillResultsFromCrossTables(db, fetcher, season, { origin })
+  const lines: string[] = []
 
-    return filled === 0 && lines.length === 0 ? [] : [`Results ${season}: ${filled} filled from Wikipedia.`, ...lines]
+  try {
+    const { filled, lines: filledLines } = await fillResultsFromCrossTables(db, fetcher, season, { origin })
+
+    if (filled !== 0 || filledLines.length !== 0) {
+      lines.push(`Results ${season}: ${filled} filled from Wikipedia.`, ...filledLines)
+    }
   } catch (error) {
-    return [`Results ${season}: not filled from Wikipedia. ${describeError(error)}`]
+    lines.push(`Results ${season}: not filled from Wikipedia. ${describeError(error)}`)
   }
+
+  // The programme of the last season of the old fansite has the goals too (#1623).
+  try {
+    const programme = await fillFromSeasonProgramme(db, fetcher, season, { origin })
+
+    if (programme.filled + programme.made + programme.goals !== 0 || programme.lines.length !== 0) {
+      lines.push(
+        `Programme ${season}: ${programme.filled} results filled, ${programme.made} matches made, ${programme.goals} goals stored.`,
+        ...programme.lines,
+      )
+    }
+  } catch (error) {
+    lines.push(`Programme ${season}: not read from Wikipedia. ${describeError(error)}`)
+  }
+
+  return lines
 }
 
 /**
