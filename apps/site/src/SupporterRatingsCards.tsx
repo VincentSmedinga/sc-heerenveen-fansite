@@ -1,7 +1,7 @@
-import { Card, CardLink, DataTable, Heading, SeasonPicker, Text } from '@fansite/design-system'
+import { Card, CardColumns, CardLink, DataTable, Heading, SeasonPicker, Text, Winner } from '@fansite/design-system'
 
 import { yearWinnersPath } from './fans-paths'
-import { type RankedPlayer, type YearWinner } from './fans/season-ratings'
+import { type BestYearWinners, type RankedPlayer, type YearWinner } from './fans/season-ratings'
 import { gradeText, minimumMatches, minimumRatings, oldSourceLine } from './player-ratings'
 
 /** The dash a figure that we do not have shows: a figure we do not have is never a nought. */
@@ -84,37 +84,83 @@ export const noYearWinners = 'Nog geen uitblinkers.'
 /** The source line under the list of the Uitblinkers of the year. */
 export const yearWinnersSource = 'Tot 2006/07: cijfers van bezoekers van de oude Fansite.'
 
+/** The small line under a winner: the number of ratings, or the source of an old rating. */
+const ratingsLine = (ratings: number | undefined) =>
+  ratings === undefined
+    ? 'Seizoencijfer van de oude Fansite'
+    : `Gemiddelde van ${ratings} ${ratings === 1 ? 'cijfer' : 'cijfers'}`
+
+/** The id of the heading of the card of a season, so the card can name itself. */
+const seasonHeadingId = (season: string) => `uitblinker-${season.replace('/', '-')}`
+
 /**
- * The card on the page "Uitblinker van het jaar": a table of the season, the player or players
- * and the season rating, the newest season first. The current season says "Na het seizoen"
- * until it is over. The Uitblinker is named in the table, so no colour carries it.
+ * The strong card beside the cards of the seasons: the player with the highest season rating of
+ * all the seasons that are over, with that season. On an equal rating every player is in it.
  */
-export function YearWinnersCard({ winners }: { winners: readonly YearWinner[] }) {
+export function BestYearWinnersCard({ best }: { best: BestYearWinners }) {
   return (
-    <Card aria-labelledby="uitblinkers-van-het-jaar" game="uitblinker">
-      <Heading id="uitblinkers-van-het-jaar" level={2}>
-        Uitblinkers van het jaar
+    <Card aria-labelledby="uitblinker-van-de-uitblinkers" game="uitblinker" surface="strong">
+      <Heading id="uitblinker-van-de-uitblinkers" level={2}>
+        Uitblinker van de Uitblinkers
       </Heading>
-      {winners.length === 0 ? (
-        <Text>{noYearWinners}</Text>
-      ) : (
-        <DataTable
-          appearance="text"
-          caption="De Uitblinker van elk seizoen, het nieuwste seizoen eerst"
-          columns={['Seizoen', 'Speler', { name: 'Gem' }]}
-          rows={winners.map((winner) => ({
-            cells: [
-              // On an equal rating both players are the winner.
-              winner.names.length === 0 ? afterTheSeason : winner.names.join(' en '),
-              winner.average === undefined ? dash : gradeText(winner.average),
-            ],
-            header: winner.season,
-          }))}
-          // The seasons stand in their own order, the newest first.
-          sortable={false}
+      {best.players.map((player) => (
+        <Winner
+          average={gradeText(best.average)}
+          key={`${player.season}-${player.name}`}
+          label="Uitblinker van de Uitblinkers"
+          line={
+            player.ratings === undefined
+              ? `Seizoen ${player.season} · seizoencijfer van de oude Fansite`
+              : `Seizoen ${player.season} · ${ratingsLine(player.ratings).toLowerCase()}`
+          }
+          name={player.name}
         />
-      )}
-      <Text appearance="meta">{yearWinnersSource}</Text>
+      ))}
     </Card>
+  )
+}
+
+/**
+ * The cards on the page "Uitblinker van het jaar" (issue 1613): one card for each season, the
+ * newest first, with a seal for the winner or for both players on an equal rating. The running
+ * season has a card without a seal that says "Na het seizoen" until it is over. The Uitblinker
+ * is named in text, so no colour carries it. Without a season there is one card that says so.
+ */
+export function YearWinnerCards({ winners }: { winners: readonly YearWinner[] }) {
+  if (winners.length === 0) {
+    return (
+      <Card aria-labelledby="uitblinkers-van-het-jaar" game="uitblinker">
+        <Heading id="uitblinkers-van-het-jaar" level={2}>
+          Uitblinkers van het jaar
+        </Heading>
+        <Text>{noYearWinners}</Text>
+      </Card>
+    )
+  }
+
+  return (
+    <CardColumns>
+      {winners.map((winner) => (
+        <Card aria-labelledby={seasonHeadingId(winner.season)} game="uitblinker" key={winner.season}>
+          <Heading id={seasonHeadingId(winner.season)} level={2}>
+            {`Uitblinker ${winner.season}`}
+          </Heading>
+          {winner.average === undefined ? (
+            <Text>{afterTheSeason}</Text>
+          ) : (
+            // On an equal rating both players are the winner.
+            winner.players.map((player) => (
+              <Winner
+                average={gradeText(winner.average as number)}
+                key={player.name}
+                label="Uitblinker van het jaar"
+                line={ratingsLine(player.ratings)}
+                name={player.name}
+              />
+            ))
+          )}
+        </Card>
+      ))}
+    </CardColumns>
   )
 }

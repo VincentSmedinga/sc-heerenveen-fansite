@@ -108,7 +108,11 @@ describe('the figures of the season ratings', () => {
 
     expect(found.oldRatings).toEqual([{ average: 6.8, name: 'Speler A', playerId: player, season: '1999/00' }])
     expect(
-      yearWinners(found, new Date('2026-11-22T12:00:00Z')).map((row) => [row.season, row.names, row.average]),
+      yearWinners(found, new Date('2026-11-22T12:00:00Z')).map((row) => [
+        row.season,
+        row.players.map((player) => player.name),
+        row.average,
+      ]),
     ).toEqual([
       ['2026/27', [], undefined],
       ['1999/00', ['Speler A'], 6.8],
@@ -128,7 +132,7 @@ describe('the figures of the season ratings', () => {
     const now = new Date('2026-11-22T12:00:00Z')
     const found = await readRatingFigures(database.db, now)
 
-    expect(yearWinners(found, now).map((row) => [row.season, row.names])).toEqual([
+    expect(yearWinners(found, now).map((row) => [row.season, row.players.map((player) => player.name)])).toEqual([
       ['2026/27', []],
       ['2004/05', ['Speler B']],
     ])
