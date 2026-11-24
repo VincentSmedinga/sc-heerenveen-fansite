@@ -541,7 +541,12 @@ export async function importOldSiteMatches(
             roundsChanged += 1
             await db
               .update(matches)
-              .set({ matchDate: values.matchDate, round: values.round })
+              .set({
+                round: values.round,
+                ...(edits.get(own.row.id)?.kickoffEdited === true
+                  ? {}
+                  : { dateText: values.dateText, kickoffAt: values.kickoffAt, matchDate: values.matchDate }),
+              })
               .where(eq(matches.id, own.row.id))
           }
         }
