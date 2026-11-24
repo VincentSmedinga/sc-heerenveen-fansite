@@ -1,4 +1,5 @@
 import { Card, DataTable, Heading, type TableColumn, tableColumns, tableLegend } from '@fansite/design-system'
+import { Fragment } from 'react'
 
 import type { PlayerSeason } from './player-seasons'
 
@@ -6,13 +7,19 @@ import { type CompetitionChoice, competitionWords } from './competition'
 import { nextSeason } from './player-page'
 
 /** The figures a column can show, each a field of `PlayerSeason`. */
-type FigureId = 'assists' | 'cleanSheets' | 'conceded' | 'goals' | 'played' | 'started' | 'yellow'
+type FigureId = 'assists' | 'cleanSheets' | 'conceded' | 'goals' | 'played' | 'red' | 'started' | 'yellow'
 
-/** The columns of a goalkeeper: matches, clean sheets, goals against and yellow cards. */
-const goalkeeperColumns: readonly FigureId[] = ['played', 'cleanSheets', 'conceded', 'yellow']
+/** The columns of a goalkeeper: matches, clean sheets, goals against and the cards. */
+const goalkeeperColumns: readonly FigureId[] = ['played', 'cleanSheets', 'conceded', 'yellow', 'red']
 
-/** The columns of everyone else: matches, line-ups, goals and assists. */
-const fieldColumns: readonly FigureId[] = ['played', 'started', 'goals', 'assists']
+/** The columns of everyone else: matches, line-ups, goals, assists and the cards. */
+const fieldColumns: readonly FigureId[] = ['played', 'started', 'goals', 'assists', 'yellow', 'red']
+
+/**
+ * The columns that go behind the button "Toon meer" on a phone, where six do not fit (#1624):
+ * the cards, and for a goalkeeper only the red ones, so that he keeps four columns.
+ */
+const moreColumns = (goalkeeper: boolean): readonly FigureId[] => (goalkeeper ? ['red'] : ['yellow', 'red'])
 
 /** The id of the card, for the heading that names it. */
 export const playerSeasonsCardId = 'per-seizoen'
@@ -47,10 +54,11 @@ export type PlayerSeasonsTable = {
 export function playerSeasonsTable(seasons: readonly PlayerSeason[], goalkeeper: boolean): PlayerSeasonsTable {
   const wanted = goalkeeper ? goalkeeperColumns : fieldColumns
   const ids = wanted.filter((id) => seasons.some((season) => season[id] !== undefined))
+  const more = moreColumns(goalkeeper)
   const totals = (id: FigureId) => seasons.reduce((total, season) => total + (season[id] ?? 0), 0)
 
   return {
-    columns: ids.map((id) => ({ ...tableColumns[id], id })),
+    columns: ids.map((id) => ({ ...tableColumns[id], id, ...(more.includes(id) ? { more: true } : {}) })),
     complete: Object.fromEntries(
       wanted.map((id) => [id, seasons.every((season) => season[id] !== undefined)]),
     ) as Record<FigureId, boolean>,
@@ -121,30 +129,42 @@ export function PlayerSeasonsCard({
     return null
   }
 
+  // A table with no column behind the button gets no button: it would have nothing to show.
+  const Columns = table.columns.some(({ more }) => more === true) ? DataTable.More : Fragment
+
   return (
     <Card aria-labelledby={playerSeasonsCardId}>
       <Heading id={playerSeasonsCardId} level={2}>
         Per seizoen
       </Heading>
-      <DataTable
-        caption={`De cijfers van ${name} per seizoen bij sc Heerenveen, ${competition === 'all' ? '' : `alleen ${competitionWords(competition)}, `}het nieuwste seizoen eerst, met het totaal onderaan`}
-        columns={['Seizoen', ...table.columns.map(({ icon, name: word }) => ({ icon, name: word }))]}
-        legend={
-          <>
-            {tableLegend(table.columns)}.{' '}
-            {playerSeasonsNotes(seasons, table, goalkeeper, competition !== 'all').join(' ')}
-          </>
-        }
-        rows={table.rows.map((row) => ({
-          cells: row.cells,
-          ...(row.gap === true ? { gap: true } : {}),
-          header: row.header,
-          ...(row.season === undefined ? (row.gap === true ? {} : { total: true }) : { href: address(row.season) }),
-          ...(row.shirtNumber === undefined ? {} : { aside: `nr. ${row.shirtNumber}` }),
-        }))}
-        // The total stays at the bottom and a gap where it is, so the table does not sort.
-        sortable={false}
-      />
+      <Columns>
+        <DataTable
+          caption={`De cijfers van ${name} per seizoen bij sc Heerenveen, ${competition === 'all' ? '' : `alleen ${competitionWords(competition)}, `}het nieuwste seizoen eerst, met het totaal onderaan`}
+          columns={[
+            'Seizoen',
+            ...table.columns.map(({ icon, more, name: word }) => ({
+              icon,
+              ...(more === true ? { more } : {}),
+              name: word,
+            })),
+          ]}
+          legend={
+            <>
+              {tableLegend(table.columns)}.{' '}
+              {playerSeasonsNotes(seasons, table, goalkeeper, competition !== 'all').join(' ')}
+            </>
+          }
+          rows={table.rows.map((row) => ({
+            cells: row.cells,
+            ...(row.gap === true ? { gap: true } : {}),
+            header: row.header,
+            ...(row.season === undefined ? (row.gap === true ? {} : { total: true }) : { href: address(row.season) }),
+            ...(row.shirtNumber === undefined ? {} : { aside: `nr. ${row.shirtNumber}` }),
+          }))}
+          // The total stays at the bottom and a gap where it is, so the table does not sort.
+          sortable={false}
+        />
+      </Columns>
     </Card>
   )
 }
