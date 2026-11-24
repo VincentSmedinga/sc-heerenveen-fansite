@@ -5,7 +5,7 @@ import { Card, DataTable, Heading, Link, List, Page, Text } from '@fansite/desig
 import { adminAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { requireRole } from '#src/beheer/require-role'
-import { days, shortDays, topLength, visitNumbers } from '#src/beheer/visits'
+import { days, shortDays, topLength, transitionsLength, visitNumbers } from '#src/beheer/visits'
 import { getDatabase } from '#src/database'
 
 // Render on each request: who is logged in and what the counters say are not known when the
@@ -43,6 +43,17 @@ const skipReasonTexts = {
   },
 } as const
 
+/** What each kind of origin is called in the table. */
+const originNames = {
+  direct: 'Rechtstreeks',
+  forum: 'Het forum',
+  overig: 'Een andere site of pagina',
+  sociaal: 'Sociale media',
+  zoekmachine: 'Een zoekmachine',
+} as const
+
+const percentFormat = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 0, style: 'percent' })
+
 /** A day as `2026-10-26`, written for a reader: `ma 26 okt`. */
 const formatDay = (day: string) => dayFormat.format(new Date(`${day}T12:00:00Z`))
 
@@ -53,7 +64,9 @@ const formatDay = (day: string) => dayFormat.format(new Date(`${day}T12:00:00Z`)
 export default async function VisitPage() {
   await requireRole('owner', 'editor')
 
-  const { perDay, skipped, topPages, total, totalShort } = await visitNumbers(getDatabase().db)
+  const { browsers, origins, perDay, skipped, topPages, total, totalShort, transitions } = await visitNumbers(
+    getDatabase().db,
+  )
   const counted = total.views > 0 || total.visitors > 0
   const anySkipped = skipped.some((row) => row.total > 0)
 
@@ -107,6 +120,54 @@ export default async function VisitPage() {
                 caption={`De ${topLength} meest bekeken pagina’s van de laatste ${days} dagen, met het aantal weergaven`}
                 columns={['Pagina', 'Weergaven']}
                 rows={topPages.map((row) => ({ cells: [row.views], header: row.path }))}
+              />
+            </Card>
+            <Card aria-labelledby="stappen-kop">
+              <Heading id="stappen-kop" level={2}>
+                Van pagina naar pagina
+              </Heading>
+              <Text>
+                Hoe vaak een pagina werd geopend na een andere pagina van de site, of na een herkomst van buiten. Een
+                pagina die opnieuw wordt geladen telt niet.
+              </Text>
+              <DataTable
+                caption={`De ${transitionsLength} vaakste stappen van een pagina of herkomst naar een pagina, de laatste ${days} dagen, met het aantal keren`}
+                columns={['Van → naar', 'Keren']}
+                rows={transitions.map((row) => ({ cells: [row.views], header: `${row.source} → ${row.path}` }))}
+              />
+            </Card>
+            <Card aria-labelledby="herkomst-kop">
+              <Heading id="herkomst-kop" level={2}>
+                Waar bezoekers vandaan komen
+              </Heading>
+              <Text>
+                Van een andere site bewaren we alleen de soort, nooit het adres. Rechtstreeks is ook een bezoeker van
+                wie de browser of een app niet laat weten waar die vandaan komt. Een andere site of pagina is ook een
+                pagina van onze eigen site die we niet tellen.
+              </Text>
+              <DataTable
+                caption={`Weergaven per soort herkomst, de laatste ${days} dagen`}
+                columns={['Herkomst', 'Weergaven']}
+                rows={origins.map((row) => ({ cells: [row.views], header: originNames[row.origin] }))}
+                // Five kinds in a fixed order: no sorting.
+                sortable={false}
+              />
+            </Card>
+            <Card aria-labelledby="browsers-kop">
+              <Heading id="browsers-kop" level={2}>
+                Browsers en apparaten
+              </Heading>
+              <Text>
+                Per soort browser, besturingssysteem en apparaat hoeveel bezoekers er waren, zonder versienummers. Een
+                bezoeker die op twee apparaten kijkt, telt twee keer.
+              </Text>
+              <DataTable
+                caption={`Bezoekers per browser, besturingssysteem en apparaat, de laatste ${days} dagen, met het aandeel van alle bezoekers`}
+                columns={['Browser, systeem, apparaat', 'Bezoekers', 'Aandeel']}
+                rows={browsers.map((row) => ({
+                  cells: [row.visitors, { sortValue: row.share, text: percentFormat.format(row.share) }],
+                  header: `${row.browser}, ${row.os}, ${row.device}`,
+                }))}
               />
             </Card>
           </>

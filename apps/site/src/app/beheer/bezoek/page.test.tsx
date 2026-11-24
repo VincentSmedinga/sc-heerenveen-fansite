@@ -29,6 +29,8 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM page_views')
   await database.pool.query('DELETE FROM daily_visitors')
   await database.pool.query('DELETE FROM visit_exclusions')
+  await database.pool.query('DELETE FROM page_transitions')
+  await database.pool.query('DELETE FROM browser_visitors')
 })
 
 /** The h1s, h2s and so on of some markup, as text. */
@@ -102,6 +104,15 @@ describe('the page with the numbers of the visit', () => {
       { day: today, path: '/nieuws/podcasts', views: 3 },
     ])
 
+    await database.pool.query(
+      "INSERT INTO page_transitions (day, source, path, views) VALUES (?, '/', '/nieuws', 7), (?, 'forum', '/', 2)",
+      [today, today],
+    )
+    await database.pool.query(
+      "INSERT INTO browser_visitors (day, browser, os, device, visitors) VALUES (?, 'Safari', 'iOS', 'telefoon', 3), (?, 'Firefox', 'Linux', 'computer', 1)",
+      [today, today],
+    )
+
     const html = renderToStaticMarkup(await VisitPage())
 
     expect(headings(html)).toEqual([
@@ -109,11 +120,18 @@ describe('the page with the numbers of the visit', () => {
       'h2 Totalen',
       'h2 Per dag',
       'h2 Meest bekeken pagina’s',
+      'h2 Van pagina naar pagina',
+      'h2 Waar bezoekers vandaan komen',
+      'h2 Browsers en apparaten',
       'h2 Niet meegeteld',
       'h2 Wat deze cijfers zijn',
     ])
-    expect(html.match(/<table/g)).toHaveLength(3)
-    expect(html.match(/<caption/g)).toHaveLength(3)
+    expect(html.match(/<table/g)).toHaveLength(6)
+    expect(html.match(/<caption/g)).toHaveLength(6)
+    expect(html).toContain('/ → /nieuws')
+    expect(html).toContain('Safari, iOS, telefoon')
+    expect(html).toContain('75%')
+    expect(html).toContain('twee keer')
     expect(html.match(/<th scope="col"/g)).toBeTruthy()
     expect([...html.matchAll(/<th[ >][^>]*>/g)].every(([tag]) => tag.includes('scope='))).toBe(true)
     // A thousands separator in the Dutch way.
@@ -121,7 +139,7 @@ describe('the page with the numbers of the visit', () => {
     expect(html).toContain('<td class="hf-numeric">2.003</td>')
     expect(html.match(/<th scope="row"[^>]*>\/(nieuws\/podcasts)?<\/th>/g)).toHaveLength(2)
     // 30 days and the two totals.
-    expect(html.match(/<th scope="row"/g)).toHaveLength(2 + 30 + 2)
+    expect(html.match(/<th scope="row"/g)).toHaveLength(2 + 30 + 2 + 2 + 5 + 2)
   })
 
   it('explains in plain words what the numbers are and are not', async () => {

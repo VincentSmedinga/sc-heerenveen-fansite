@@ -1,6 +1,15 @@
 import type { Database } from '@fansite/db/client'
 
-import { dailyVisitors, pageViews, type SkipReason, skipReasons, visitExclusions } from '@fansite/db/schema'
+import {
+  browserVisitors,
+  dailyVisitors,
+  pageTransitions,
+  pageViews,
+  type SkipReason,
+  skipReasons,
+  visitExclusions,
+  visitOrigins,
+} from '@fansite/db/schema'
 import { visitDay } from '@fansite/db/visits'
 import { desc, gte, sql } from 'drizzle-orm'
 
@@ -18,8 +27,20 @@ export const shortDays = 7
 /** How many of the most viewed pages the page lists. */
 export const topLength = 20
 
+/** How many of the most common steps from page to page the page lists. */
+export const transitionsLength = 20
+
+/** One kind of browser, system and device, with the visitors of the period and their share. */
+export type BrowserRow = { browser: string; device: string; os: string; share: number; visitors: number }
+
+/** A kind of origin with the views that came from it. */
+export type OriginRow = { origin: (typeof visitOrigins)[number]; views: number }
+
 /** How many requests of the last 7 and 30 days were not counted, for one reason. */
 export type SkippedRequests = { reason: SkipReason; total: number; totalShort: number }
+
+/** A step from a page or an origin to a page, with how often it was made. */
+export type TransitionRow = { path: string; source: string; views: number }
 
 /** The most viewed page of the period, with its views. */
 export type ViewedPage = { path: string; views: number }
@@ -29,6 +50,10 @@ export type VisitDay = { day: string; views: number; visitors: number }
 
 /** What the page shows. */
 export type VisitNumbers = {
+  /** Browser, system and device of the visitors, the most common first. */
+  browsers: BrowserRow[]
+  /** The five kinds of origin: where views came from other than a page of our own site. */
+  origins: OriginRow[]
   /** The last `days` days, newest first, a day without a counter as zero. */
   perDay: VisitDay[]
   /** The requests that were not counted, one row per reason, always all of them. */
@@ -39,6 +64,8 @@ export type VisitNumbers = {
   total: Totals
   /** The sum of the last 7 days. */
   totalShort: Totals
+  /** The most common steps from one page to another, and from an origin to a page. */
+  transitions: TransitionRow[]
 }
 
 type Totals = { views: number; visitors: number }
@@ -83,6 +110,37 @@ export async function visitNumbers(db: Pick<Database, 'select'>, now: Date = new
     .from(visitExclusions)
     .where(gte(visitExclusions.day, first))
 
+  const transitions = await db
+    .select({
+      path: pageTransitions.path,
+      source: pageTransitions.source,
+      views: sql<number>`sum(${pageTransitions.views})`.mapWith(Number),
+    })
+    .from(pageTransitions)
+    .where(gte(pageTransitions.day, first))
+    .groupBy(pageTransitions.source, pageTransitions.path)
+    .orderBy(desc(sql`sum(${pageTransitions.views})`), pageTransitions.source, pageTransitions.path)
+    .limit(transitionsLength)
+  const originTotals = await db
+    .select({
+      source: pageTransitions.source,
+      views: sql<number>`sum(${pageTransitions.views})`.mapWith(Number),
+    })
+    .from(pageTransitions)
+    .where(gte(pageTransitions.day, first))
+    .groupBy(pageTransitions.source)
+  const browserRows = await db
+    .select({
+      browser: browserVisitors.browser,
+      device: browserVisitors.device,
+      os: browserVisitors.os,
+      visitors: sql<number>`sum(${browserVisitors.visitors})`.mapWith(Number),
+    })
+    .from(browserVisitors)
+    .where(gte(browserVisitors.day, first))
+    .groupBy(browserVisitors.browser, browserVisitors.os, browserVisitors.device)
+    .orderBy(desc(sql`sum(${browserVisitors.visitors})`), browserVisitors.browser, browserVisitors.os)
+
   const shortFirst = list[shortDays - 1] ?? first
   const skipped = skipReasons.map((reason) => {
     const own = skippedRows.filter((row) => row.reason === reason)
@@ -98,12 +156,23 @@ export async function visitNumbers(db: Pick<Database, 'select'>, now: Date = new
   const visitorsOf = new Map(visitors.map((row) => [row.day, row.visitors]))
   const perDay = list.map((day) => ({ day, views: viewsOf.get(day) ?? 0, visitors: visitorsOf.get(day) ?? 0 }))
 
+  const visitorsTotal = browserRows.reduce((sum, row) => sum + row.visitors, 0)
+  // Every kind of origin, also one without views. A view after a page of our own site has a
+  // path as its source and is not an origin.
+  const origins = visitOrigins.map((origin) => ({
+    origin,
+    views: originTotals.find((row) => row.source === origin)?.views ?? 0,
+  }))
+
   return {
+    browsers: browserRows.map((row) => ({ ...row, share: visitorsTotal === 0 ? 0 : row.visitors / visitorsTotal })),
+    origins,
     perDay,
     skipped,
     topPages: top,
     total: sumOf(perDay),
     totalShort: sumOf(perDay.slice(0, shortDays)),
+    transitions,
   }
 }
 

@@ -4,11 +4,13 @@ import { createVisitCounter, type SkipReason, type Visit } from '@fansite/db/vis
 import { BlockList, isIP } from 'node:net'
 
 import { getArticle } from './articles'
+import { type BrowserFamily, browserKindOf } from './browser-kind'
 import { getDatabase } from './database'
 import { reasonOf } from './errors'
 import { isClubSlug } from './opponents'
 import { pages } from './pages'
 import { seasonFromSlug } from './seasons'
+import { originOf } from './visit-origins'
 
 /**
  * The browser texts that are not visitors, in one place: crawlers and other bots, tools that
@@ -67,10 +69,59 @@ export type PageVisit = {
   article: string | undefined
   /** The slug of the club when the page is the page of a club; the database has to know it. */
   club: string | undefined
+  /** The kind of browser, system and device, from the browser text. */
+  kind: BrowserFamily
   /** The path of the page, without a query. */
   path: string
+  /** The path of a counted page, `/redactie/*`, `/tegenstanders/*` or the kind of origin. */
+  source: string
   /** The browser text. */
   userAgent: string
+}
+
+/**
+ * Where a visit comes from. The `Referer` of our own site gives the path of the page before,
+ * but only when it is a page we count, with the pages of articles and of clubs as one group
+ * each: a made-up `Referer` can then never make a new row. A page of our own site that we don't
+ * count is `overig`. The `Referer` of another site gives only the kind of origin (see
+ * `originOf`) and its address is dropped here. No `Referer` is `direct`.
+ */
+export function sourceOf(request: NextRequest): string {
+  const referer = request.headers.get('referer')
+
+  if (referer === null || referer.trim() === '') {
+    return 'direct'
+  }
+
+  let url: URL
+
+  try {
+    url = new URL(referer)
+  } catch {
+    return 'overig'
+  }
+
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+    return 'overig'
+  }
+
+  const own = [request.headers.get('host'), request.nextUrl.host].filter((host) => host !== null)
+
+  if (!own.includes(url.host)) {
+    return originOf(url.hostname)
+  }
+
+  const path = countedPathOf(url.pathname)
+
+  if (countedPaths.has(path)) {
+    return path
+  }
+
+  if (articlePath.test(path)) {
+    return '/redactie/*'
+  }
+
+  return clubPath.test(path) ? '/tegenstanders/*' : 'overig'
 }
 
 /**
@@ -142,7 +193,17 @@ export function requestOf(request: NextRequest): PageRequest | undefined {
     return { skipped: 'vooruitladen' }
   }
 
-  return { visit: { address: addressOf(headers), article, club, path, userAgent } }
+  return {
+    visit: {
+      address: addressOf(headers),
+      article,
+      club,
+      kind: browserKindOf(userAgent),
+      path,
+      source: sourceOf(request),
+      userAgent,
+    },
+  }
 }
 
 /**

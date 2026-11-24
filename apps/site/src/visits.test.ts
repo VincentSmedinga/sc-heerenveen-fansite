@@ -40,12 +40,67 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
+describe('the source of a visit', () => {
+  const from = (referer: string | undefined, path = '/nieuws') =>
+    visitOf(request(path, referer === undefined ? {} : { referer }))?.source
+
+  it('is direct without a Referer', () => {
+    expect(from(undefined)).toBe('direct')
+    expect(from('')).toBe('direct')
+  })
+
+  it('is the path of a page we count when the Referer is our own site, without its query', () => {
+    expect(from('http://localhost:3000/')).toBe('/')
+    expect(from('http://localhost:3000/wedstrijden/cijfers?x=1#y')).toBe('/wedstrijden/cijfers')
+    // A season counts as the page it is a season of.
+    expect(from('http://localhost:3000/wedstrijden/2025-26')).toBe('/wedstrijden')
+  })
+
+  it('groups the pages of articles and of clubs, so an invented one makes no new row', () => {
+    expect(from('http://localhost:3000/redactie/dit-zijn-wij')).toBe('/redactie/*')
+    expect(from('http://localhost:3000/redactie/verzonnen-1')).toBe('/redactie/*')
+    expect(from('http://localhost:3000/tegenstanders/ado-den-haag')).toBe('/tegenstanders/*')
+  })
+
+  it('is overig for a page of our own site that we do not count, and for a Referer that is no address', () => {
+    expect(from('http://localhost:3000/beheer')).toBe('overig')
+    expect(from('http://localhost:3000/verzonnen/pad/met/veel/delen')).toBe('overig')
+    expect(from('not an address')).toBe('overig')
+    expect(from('javascript:alert(1)')).toBe('overig')
+  })
+
+  it('is only the kind of origin for another site, and never the address', () => {
+    expect(from('https://forum.heerenveen.org/discussie/12')).toBe('forum')
+    expect(from('https://www.google.nl/search?q=klaverboer')).toBe('zoekmachine')
+    expect(from('https://duckduckgo.com/')).toBe('zoekmachine')
+    expect(from('https://www.bing.com/')).toBe('zoekmachine')
+    expect(from('https://l.facebook.com/l.php?u=x')).toBe('sociaal')
+    expect(from('https://t.co/abc')).toBe('sociaal')
+    expect(from('https://bsky.app/profile/x')).toBe('sociaal')
+    expect(from('https://www.nu.nl/voetbal/artikel')).toBe('overig')
+    expect(from('https://notgoogle.com/')).toBe('overig')
+    expect(from('https://google.com.evil.example/')).toBe('overig')
+    expect(JSON.stringify(visitOf(request('/nieuws', { referer: 'https://www.nu.nl/geheim?q=1' })))).not.toContain(
+      'nu.nl',
+    )
+  })
+
+  it('is the host of the request that makes a Referer our own, also behind a host header', () => {
+    expect(
+      visitOf(request('/nieuws', { host: 'acc.heerenveen.org', referer: 'https://acc.heerenveen.org/' }))?.source,
+    ).toBe('/')
+  })
+})
+
 describe('visitOf', () => {
   it('counts a visit to a page, with the path without the query', () => {
     expect(visitOf(request('/nieuws/podcasts?podcast=testpodcast&pagina=2'))).toEqual({
       address,
       article: undefined,
+      club: undefined,
+      kind: { browser: 'Firefox', device: 'computer', os: 'Linux' },
       path: '/nieuws/podcasts',
+      source: 'direct',
       userAgent: firefox,
     })
     expect(visitOf(request('/?nieuws=15'))).toMatchObject({ path: '/' })
