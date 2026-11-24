@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef, ReactNode } from 'react'
+import { type ComponentPropsWithoutRef, Fragment, type ReactNode } from 'react'
 
 import { classNames } from '../classNames'
 import { Heading, type HeadingLevel } from '../heading/Heading'
@@ -52,9 +52,10 @@ const minuteWords = (minute: number, stoppageMinutes?: number | undefined) =>
 const clock = (minute: number, stoppageMinutes?: number | undefined) => minute + (stoppageMinutes ?? 0) / 100
 
 /**
- * The sentence a screen reader hears for a substitute, such as "Sven Kuipers, rugnummer 2, erin
- * in minuut 62 voor Lars Dijkstra, doelpunt in minuut 85". Every mark in the line has a word in
- * it, so no mark is the only sign.
+ * The sentence a screen reader hears for a substitute, such as "Sven Kuipers, rugnummer 2,
+ * doelpunt in minuut 85, erin in minuut 62 voor Lars Dijkstra". The order is the one of the
+ * drawing: the name and his goals first, the substitution last, so a goal can only be his.
+ * Every mark in the line has a word in it, so no mark is the only sign.
  */
 export function substituteSentence(substitute: MatchSubstitute): string {
   const parts = [fullName(substitute.name)]
@@ -63,15 +64,15 @@ export function substituteSentence(substitute: MatchSubstitute): string {
     parts.push(`rugnummer ${substitute.shirtNumber}`)
   }
 
-  parts.push(
-    `erin in minuut ${minuteWords(substitute.minute, substitute.stoppageMinutes)} voor ${fullName(substitute.playerOut)}`,
-  )
-
   for (const goal of substitute.goals ?? []) {
     const word = goal.ownGoal === true ? 'eigen doelpunt' : 'doelpunt'
 
     parts.push(goal.minute === null ? word : `${word} in minuut ${minuteWords(goal.minute, goal.stoppageMinutes)}`)
   }
+
+  parts.push(
+    `erin in minuut ${minuteWords(substitute.minute, substitute.stoppageMinutes)} voor ${fullName(substitute.playerOut)}`,
+  )
 
   return parts.join(', ')
 }
@@ -94,12 +95,13 @@ const Line = ({ children, href }: { children: ReactNode; href: string | undefine
 /**
  * The substitutes of one team who came on, under a heading "Wissels <team>". Each has a
  * disc with the shirt number and a ring that starts at the minute he came on (the same as
- * on the pitch, without the quiet track under it), his name, and under that in small
- * letters the icon "erin", the minute, "voor <name>" and, when he scored, the goal and its
- * minute. A team without substitutes says "Geen wissels." The list has a name for a screen
- * reader and one sentence for each line (`substituteSentence`); everything drawn is hidden
- * from it. Put the lists of the two teams in `MatchSubstitutes.Group`, which puts them
- * side by side from 40 rem wide. match-substitutes.css gives it its look.
+ * on the pitch, without the quiet track under it) and his name. When he scored, his goals
+ * follow the name on the same line, each as an icon with its minute, after a dot. Under
+ * that, in small letters, is the substitution: the icon "erin", the minute and "voor <name>".
+ * A team without substitutes says "Geen wissels." The list has a name for a screen reader and
+ * one sentence for each line (`substituteSentence`); everything drawn is hidden from it. Put
+ * the lists of the two teams in `MatchSubstitutes.Group`, which puts them side by side from 40
+ * rem wide. match-substitutes.css gives it its look.
  */
 export const MatchSubstitutes = ({
   className,
@@ -142,17 +144,21 @@ export const MatchSubstitutes = ({
                     shirtNumber={substitute.shirtNumber}
                   />
                   <span className="hf-match-substitutes-text">
-                    <PlayerName givenName={substitute.name.givenName} surname={substitute.name.surname} />
+                    <span className="hf-match-substitutes-title">
+                      <PlayerName givenName={substitute.name.givenName} surname={substitute.name.surname} />
+                      {substitute.goals?.map((goal, goalIndex) => (
+                        <Fragment key={`${goal.minute ?? 'unknown'}-${goal.stoppageMinutes ?? 0}-${goalIndex}`}>
+                          {' '}
+                          <span className="hf-meta hf-match-substitutes-goal">
+                            · <MatchEventIcon kind={goal.ownGoal === true ? 'own-goal' : 'goal'} />{' '}
+                            {pitchMinute(goal.minute, goal.stoppageMinutes)}
+                          </span>
+                        </Fragment>
+                      ))}
+                    </span>
                     <span className="hf-meta hf-match-substitutes-detail">
                       <MatchEventIcon kind="in" /> {pitchMinute(substitute.minute, substitute.stoppageMinutes)} voor{' '}
                       {fullName(substitute.playerOut)}
-                      {substitute.goals?.map((goal, goalIndex) => (
-                        <span key={`${goal.minute ?? 'unknown'}-${goal.stoppageMinutes ?? 0}-${goalIndex}`}>
-                          {' '}
-                          · <MatchEventIcon kind={goal.ownGoal === true ? 'own-goal' : 'goal'} />{' '}
-                          {pitchMinute(goal.minute, goal.stoppageMinutes)}
-                        </span>
-                      ))}
                     </span>
                   </span>
                 </span>
