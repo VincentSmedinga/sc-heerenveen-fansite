@@ -1,4 +1,5 @@
 import { Card, DataTable, Heading, type TableColumn, tableColumns, tableLegend } from '@fansite/design-system'
+import { Fragment } from 'react'
 
 import type { PlayerSeason } from './player-seasons'
 
@@ -128,12 +129,15 @@ export function PlayerSeasonsCard({
     return null
   }
 
+  // A table with no column behind the button gets no button: it would have nothing to show.
+  const Columns = table.columns.some(({ more }) => more === true) ? DataTable.More : Fragment
+
   return (
     <Card aria-labelledby={playerSeasonsCardId}>
       <Heading id={playerSeasonsCardId} level={2}>
         Per seizoen
       </Heading>
-      <DataTable.More>
+      <Columns>
         <DataTable
           caption={`De cijfers van ${name} per seizoen bij sc Heerenveen, ${competition === 'all' ? '' : `alleen ${competitionWords(competition)}, `}het nieuwste seizoen eerst, met het totaal onderaan`}
           columns={[
@@ -160,7 +164,7 @@ export function PlayerSeasonsCard({
           // The total stays at the bottom and a gap where it is, so the table does not sort.
           sortable={false}
         />
-      </DataTable.More>
+      </Columns>
     </Card>
   )
 }

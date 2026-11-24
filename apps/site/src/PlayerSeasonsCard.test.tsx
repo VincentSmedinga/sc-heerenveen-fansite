@@ -81,6 +81,13 @@ describe('the cards in the table Per seizoen', () => {
     )
   })
 
+  it('has no button Toon meer when no column is left behind it', () => {
+    const html = render([season('2004/05', { red: undefined, yellow: undefined })])
+
+    expect(html).not.toContain('hf-data-table-more')
+    expect(render([season('2004/05')])).toContain('hf-data-table-more')
+  })
+
   it('has no geel and rood for a player without a figure about cards in any season', () => {
     const table = cards(false, [season('2004/05', { red: undefined, yellow: undefined })])
 
