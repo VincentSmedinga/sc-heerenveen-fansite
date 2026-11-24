@@ -1,6 +1,6 @@
 ---
 name: builder-workflow
-description: Build an approved issue from worktree to open pull request, in the order AGENTS.md and CONTRIBUTING.md set, with the steps Builders skipped before. Use when you are the Builder of an issue, at the start and again before you ask for the go-ahead.
+description: Build an approved issue from worktree to open pull request, in the order AGENTS.md and CONTRIBUTING.md set, with the steps Builders skipped before. Use when you are the Builder of an issue, at the start and again before you push.
 argument-hint: <issue number>
 ---
 
@@ -45,7 +45,7 @@ The ones Builders break most:
 - Commit.
   The hooks fix the formatting and check the message (Conventional Commits, British English, imperative).
 
-## Before you ask for the go-ahead
+## Before you push
 
 1. The checks from _De controles_ in `CONTRIBUTING.md`: `pnpm lint`, `typecheck`, `test`, `build`, `test:a11y`, with `docker compose up -d --wait` first.
    The smoke test when markup, page text or a log line changed.
@@ -59,8 +59,10 @@ The ones Builders break most:
    The two that get missed most: `git grep` for what you removed or renamed (docs, READMEs, MDX, stories, comments, `.env.example`, `apps/site/scripts/smoke.js`), and the two commands for comment width and one sentence per line.
 5. The code and security checklist in `CONTRIBUTING.md`.
 6. `git status` shows nothing: the Reviewer and CI read the head of the branch.
-7. Tell the owner what you built, which criteria it meets, anything that differs from the issue, and ask for the go-ahead to push and open the pull request.
-   A go-ahead covers one push and the pull request it opens.
+7. Push and open the pull request yourself, without asking for a go-ahead (decided on 24 November 2026).
+   Say once that the pull request is open: what you built, which criteria it meets and anything that differs from the issue.
+   A difference also goes in the description.
+   A choice that changes what visitors see still goes to the owner first, before you build it.
 
 ## Push and open the pull request
 
@@ -82,18 +84,19 @@ Tick only the boxes that are true, and tick the boxes in the issue for what the 
 
 Then:
 
-1. `get_status`; if it doesn't report your pull request, `bind_pr`.
-   Turn on Auto-fix with `set_monitor` (`auto_fix` and `address_comments`).
-   Don't poll CI yourself.
+1. Don't try to turn on Auto-fix: the app only allows it on a pull request that the logged-in GitHub account opened, and ours come from the GitHub App.
+   The owner may turn it on; then the app wakes you for a failed check, a conflict or a comment.
+   Don't poll CI yourself: after the Reviewer's report, read it once with `gh pr checks <number>`.
 2. A visible change gets one to three screenshots in the description, or the line "Geen screenshots: de wijziging is niet zichtbaar." (see _Screenshots_ in `AGENTS.md`).
-   Pushing them to `pr-screenshots` needs no new go-ahead.
+   Pushing them to `pr-screenshots` needs no go-ahead either.
    For work from a design, make them at the sizes and in the state of the design's board, so they can be laid next to it, and tell the Coordinator each difference with the design.
 3. Start the Reviewer with the `review-pr` skill, unless the pull request has none.
    A pull request that only changes docs or stories without a visual change has none: write "Geen reviewer: de pull request wijzigt alleen verhalen of documentatie." instead of the review boxes, after you went through the three checklists yourself.
 
 ## After the review
 
-- Fix the findings and what CI reports, for at most two rounds, with the Reviewer's report posted first (see `review-pr`).
+- Fix the findings and what is red in CI, for at most two rounds, with the Reviewer's report posted first (see `review-pr`).
+  Read CI once with `gh pr checks <number>` after the report, and again only after a push that can change it.
 - If you change the layout of the code or the text after the Reviewer's report, and not only to fix a finding, round two covers that change too: push it with the fixes, so the second report sees it.
 - Before every later push, `get_status`: the owner may have merged already.
   If so, don't push; put the fix on a new branch from `main`.

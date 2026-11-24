@@ -16,7 +16,7 @@ A pull request is done when the decisions it makes are in it (_Definition of Don
 - Something that is still open belongs in the issue, or in the text as _voorlopig_ — never as a decision.
 - The Coordinator writes the decisions of a specification into the issue, under "Beslissingen".
   The Builder then adds them to the file, with its own.
-  A decision that belongs to no issue gets its own small pull request, with the owner's go-ahead; it has no Reviewer, because it only changes a file in `docs/`.
+  A decision that belongs to no issue gets its own small pull request, which the Coordinator or the Specifier opens with the owner's go-ahead (they are not a Builder); it has no Reviewer, because it only changes a file in `docs/`.
 
 ## Where
 

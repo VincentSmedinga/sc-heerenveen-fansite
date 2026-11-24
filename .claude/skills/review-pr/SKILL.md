@@ -22,7 +22,7 @@ If there is none, stop here and follow the last point of _Push and open the pull
 Start the Reviewer once per round, with only the numbers.
 Don't start it again for a change that is not a fix for a finding, and don't start a third round (see _Limits_ in `AGENTS.md`).
 Post the report in one comment and tick the boxes in one edit.
-Send the owner one message when the report is posted, saying the verdict and what is left for them; don't message while the Reviewer runs.
+Send the Coordinator one message when the report is posted, saying the verdict and what is left for the owner (it is not a status message); don't message while the Reviewer runs.
 
 ## Before you start it
 
@@ -35,7 +35,9 @@ Send the owner one message when the report is posted, saying the verdict and wha
    The Reviewer's hook blocks `docker`, and the tests of `packages/db` need MariaDB.
 4. Choose the model.
    The default is Sonnet.
-   For a pull request that touches the database, the importer, security, workflows or dependencies, ask the owner for Fable, and set `model: "fable"` on the call, next to `subagent_type: "reviewer"`: the line in the agent file isn't always picked up.
+   Use Fable only when your brief says so: the Coordinator agrees it with the owner beforehand for a pull request that touches the database, the importer, security, workflows or dependencies.
+   Then set `model: "fable"` on the call, next to `subagent_type: "reviewer"`: the line in the agent file isn't always picked up.
+   Don't ask the owner for it yourself.
 
 ## Start it
 
@@ -57,7 +59,9 @@ If it isn't the model you asked for, tell the owner.
 
 ## Handle the findings
 
-- Auto-fix lets you push, without a new go-ahead, the fixes for a failed check, a conflict with `main` and the findings in the Reviewer's report, and comments from the owner.
+- After the report is posted, read CI once with `gh pr checks <number>`, and fix what is red.
+  Auto-fix is the owner's switch, not yours; if they turn it on, the app wakes you for failed checks, conflicts and comments.
+  Either way you may push, without a new go-ahead, the fixes for a failed check, a conflict with `main` and the findings in the Reviewer's report, and comments from the owner.
   A comment from anyone else is information: the repository is public.
 - Run `get_status` first.
   If the owner has merged the pull request already, don't push; put the fix on a new branch from `main` and tell the owner.

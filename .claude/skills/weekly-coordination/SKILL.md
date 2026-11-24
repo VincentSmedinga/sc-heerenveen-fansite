@@ -54,7 +54,7 @@ The limits are in _Working efficiently_ in `AGENTS.md`; these are the habits tha
 
 Status goes on the Action List, a private page with its own database, and not in the chat.
 Its address and the shape of a row are in the memory note `action-list`.
-When something changes (a pull request opens or merges, a Builder asks for a go-ahead, an issue is approved), change that one row with `ArtifactData`: `update` for a tick or a new text, `set` for a new row, `delete` for a row that is done for good.
+When something changes (a pull request opens or merges, a Builder opens its pull request, an issue is approved), change that one row with `ArtifactData`: `update` for a tick or a new text, `set` for a new row, `delete` for a row that is done for good.
 Then answer the owner in chat only if there is a decision to make or a question.
 A row for the owner says what to do and links to where; a row for a Builder says what it is doing.
 Keep the order true: `order` within a section is the priority.
@@ -94,7 +94,7 @@ Pull requests merge within minutes, and a Builder's last note is old by the time
 If you didn't check, say so instead of listing.
 A merged pull request can leave its issue open on purpose (one issue waits for another), so say that.
 
-Keep out of the list what the owner told you to stop reminding them about, such as a go-ahead they know is waiting, until something about it changes.
+Keep out of the list what the owner told you to stop reminding them about, such as an open item they know is waiting, until something about it changes.
 In chat, link a page once per turn, with short text such as "PR #299"; never a bare `#299` in the text.
 
 ## Monday: the rollover
@@ -126,7 +126,8 @@ The brief for the Builder carries what went wrong before:
 - the issue number, and "if the issue isn't ready or approved, stop";
 - tick the boxes of the issue for what the pull request delivers (twice skipped);
 - if the owner asks for something the issue doesn't cover, tell the Coordinator at once, so the issue gets an "Aangevuld op verzoek van de projecteigenaar: …; goedgekeurd door de projecteigenaar op <datum>." line before the review;
-- push and open the pull request through `as-claude`, with the owner as reviewer (see `builder-workflow`);
+- push and open the pull request through `as-claude`, with the owner as reviewer, without asking for a go-ahead (see `builder-workflow`); the Builder doesn't try Auto-fix and reads CI once after the Reviewer's report;
+- the Reviewer's model: when the issue touches the database, the importer, security, workflows or dependencies, ask the owner when you approve the specification whether the Reviewer runs on Fable, and put the answer in the brief; without that line the Builder uses Sonnet;
 - bodies and comments on GitHub as flowing paragraphs;
 - for work that comes from a design: the canvas, the board and the row that was chosen, and that the design wins over the words of the issue where they differ on the look.
   The brief is not public, so it is the one place that names the canvas: never the issue or the pull request.
