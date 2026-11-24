@@ -3,7 +3,16 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { lockNameFor, withLock } from '@fansite/db/lock'
 import { listSeasonMatches, listSeasonStandings, listWikipediaPages } from '@fansite/db/queries'
-import { matchChanges, matches, matchGoals, matchImports, players, standings, wikipediaPages } from '@fansite/db/schema'
+import {
+  clubs,
+  matchChanges,
+  matches,
+  matchGoals,
+  matchImports,
+  players,
+  standings,
+  wikipediaPages,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
 import { execFile } from 'node:child_process'
@@ -584,6 +593,116 @@ describe('the command', () => {
     expect(held.ran && held.result.lines.join('\n')).toContain('An import is still running')
     expect(server.paths()).toEqual([])
     expect(await database.db.select().from(matches)).toEqual([])
+  })
+})
+
+describe('a season of the archive of the Fansite without a page with matches (#1637)', () => {
+  const noPage = (season: string) =>
+    `Matches ${season}: no matches page for this season, the matches come from the archive of the Fansite`
+
+  it('is no fault: the line says why, the command exits with 0, and nothing is stored', async () => {
+    const server = await serve()
+
+    for (const season of ['1990/91', '1991/92', '1992/93', '1993/94']) {
+      const { code, lines } = await runCommand(server, season)
+
+      expect(lines, season).toEqual([noPage(season)])
+      expect(code, season).toBe(0)
+    }
+    expect(await database.db.select().from(matches)).toEqual([])
+  })
+
+  it('stays a fault for a season outside the archive, with exit code 1', async () => {
+    const server = await serve()
+
+    for (const season of ['1989/90', '2007/08']) {
+      const { code, lines } = await runCommand(server, season)
+
+      expect(code, season).toBe(1)
+      expect(lines.join('\n'), season).toMatch(/^Matches \d{4}\/\d{2}: warning, nothing changed/u)
+    }
+  })
+
+  it('stays a fault for another failure of a season of the archive, such as a server error', async () => {
+    const server = await startServer({
+      '/robots.txt': reply(200, '', { 'Content-Type': 'text/plain' }),
+      [pageUrl('', pageTitles('1993/94').programme)]: reply(500, 'Oeps'),
+    })
+
+    servers.push(server)
+
+    const { code, lines } = await runCommand(server, '1993/94')
+
+    expect(code).toBe(1)
+    expect(lines.join('\n')).toMatch(/^Matches 1993\/94: warning, nothing changed/u)
+  })
+
+  it('is no fault in the command for all seasons either, which sums up with 1 of 1 read', async () => {
+    const server = await serve()
+    const lines: string[] = []
+    const code = await runSeasonsImport(database.url, '1993/94', {
+      clock: () => new Date('1994-10-25T12:00:00Z'),
+      makeFetcher: (robots) => fetcherFor([server], { robots }),
+      wikipediaOrigin: server.origin,
+      write: (line) => lines.push(line),
+    })
+
+    expect(code).toBe(0)
+    expect(lines).toEqual([noPage('1993/94'), 'Seasons: 1 of 1 read.'])
+  })
+})
+
+describe('2006/07: the programme of the season goes before the cross table (#1637)', () => {
+  /** A cross table whose cell for the match at Ajax is not the result of the league match. */
+  const crossTable = [
+    '=== Uitslagen ===',
+    '{| class="wikitable"',
+    '! Thuis (beneden) / Uit (rechts)',
+    '! [[AFC Ajax|AJA]]',
+    '! [[sc Heerenveen|HEE]]',
+    '|-',
+    "|align=right|'''[[AFC Ajax|Ajax]]'''||bgcolor=\"#999999\"| ||bgcolor=\"#C0F0D0\"|4 – 0",
+    '|-',
+    "|align=right|'''[[sc Heerenveen]]'''||bgcolor=\"#C0F0D0\"|1 – 0||bgcolor=\"#999999\"| ",
+    '|}',
+  ].join('\n')
+  const programme = readFileSync(new URL('./fixtures/wikipedia-season-programme-2006-07.wiki', import.meta.url), 'utf8')
+
+  it('fills a match from the programme, and only the matches the programme does not know from the table', async () => {
+    await database.pool.query('DELETE FROM clubs')
+
+    const [{ insertId: ajax = 0 } = {}] = await database.db
+      .insert(clubs)
+      .values({ name: 'Ajax', slug: 'ajax', wikipediaPage: 'AFC Ajax' })
+
+    await database.db.insert(matches).values({
+      clubId: ajax,
+      competition: 'Eredivisie',
+      dataSource: 'oude-fansite',
+      home: false,
+      matchDate: '2006-08-19',
+      opponent: 'Ajax',
+      round: 'Speelronde 1',
+      season: '2006/07',
+      status: 'result_unknown',
+    })
+
+    const server = await startServer({
+      '/robots.txt': reply(200, '', { 'Content-Type': 'text/plain' }),
+      [pageUrl('', 'Eredivisie 2006/07')]: reply(200, crossTable, wiki),
+      [pageUrl('', 'Sc Heerenveen in het seizoen 2006/07')]: reply(200, programme, wiki),
+    })
+
+    servers.push(server)
+
+    const { lines } = await runCommand(server, '2006/07')
+
+    // The table says 0-4 for us at Ajax, the programme 3-2: the programme goes first.
+    expect(await database.db.select().from(matches).where(eq(matches.season, '2006/07'))).toContainEqual(
+      expect.objectContaining({ goalsAgainst: 2, goalsFor: 3, round: 'Speelronde 1', status: 'played' }),
+    )
+    expect(lines.join('\n')).toContain('result 3-2 filled from the programme')
+    expect(lines.join('\n')).not.toContain('filled from the cross table')
   })
 })
 

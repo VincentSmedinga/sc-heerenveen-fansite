@@ -107,6 +107,11 @@ export type MatchReport =
        */
       kind: 'error'
       message: string
+      /**
+       * True when the fault is a page of the season that does not exist (HTTP 404). A season of
+       * the old fansite has none, and the run says so without failing (#1637).
+       */
+      missing?: true
       season: string
     }
   | {
@@ -507,6 +512,7 @@ async function fetchPages(fetcher: Fetcher, season: string, origins: Origins): P
       return {
         kind: 'error',
         message: titles.length === 1 ? missing : `none of the pages ${titles.join(' or ')} exists: ${missing}`,
+        missing: true,
         season,
       }
     }

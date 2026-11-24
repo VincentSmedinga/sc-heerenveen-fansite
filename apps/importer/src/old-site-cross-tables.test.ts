@@ -224,6 +224,54 @@ describe('compareCrossTables', () => {
       { ...season('1990/91'), kind: 'page', text: eredivisie199091 },
     ])
 
+  it('names a match of the correction list apart, and lists it as a difference once the result is not the corrected one', async () => {
+    const id = await insertClubs()
+    const correction = {
+      club: 'Ajax',
+      competition: 'Eredivisie' as const,
+      date: '1990-09-01',
+      from: { against: 4, for: 1 },
+      home: true,
+      season: '1990/91',
+      source: 'a made-up source',
+      to: { against: 0, for: 3 },
+    }
+    const compareWith = async () => {
+      const [table] = await compareCrossTables(
+        { select: database.db.select.bind(database.db) },
+        [{ ...season('1990/91'), kind: 'page', text: eredivisie199091 }],
+        [correction],
+      )
+
+      return table!
+    }
+    const ajax = (values: Partial<NewMatch>): NewMatch => ({
+      ...played,
+      clubId: id('Ajax'),
+      opponent: 'Ajax',
+      round: 'Speelronde 1',
+      ...values,
+    })
+
+    // The table has 1-4 for sc Heerenveen at home; the match has the corrected 3-0.
+    await database.db.insert(matches).values(ajax({ goalsAgainst: 0, goalsFor: 3 }))
+
+    const corrected = await compareWith()
+
+    expect(corrected.lines.filter((line) => line.startsWith('Thuis tegen Ajax'))).toEqual([])
+    expect(corrected.corrected).toEqual([
+      'Thuis tegen Ajax, 1 september 1990: gecorrigeerd, de database heeft 3-0 en de kruistabel van Wikipedia heeft 1-4: dat is de uitslag van de play-off, de programmatabel van de pagina van sc Heerenveen in het seizoen heeft 3-0',
+    ])
+
+    // Another result, such as an editor's, is a difference like any other.
+    await database.pool.query('UPDATE matches SET goals_for = 2, goals_against = 2')
+
+    const other = await compareWith()
+
+    expect(other.corrected).toEqual([])
+    expect(other.lines).toContain('Thuis tegen Ajax, 1 september 1990: de database heeft 2-2, de kruistabel heeft 1-4')
+  })
+
   it('lists the scores that differ and the matches the database does not have', async () => {
     const id = await insertClubs()
     const match = (name: string, round: number, values: Partial<NewMatch>): NewMatch => ({

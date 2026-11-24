@@ -15,7 +15,7 @@ import type { ImportOptions } from './import-feeds.ts'
 
 import { createFetcher, type Fetcher } from './fetcher.ts'
 import { fillFromSeasonProgramme } from './fill-from-season-programme.ts'
-import { fillResultsFromCrossTables } from './fill-results-from-cross-tables.ts'
+import { fillResultsFromCrossTables, hasCrossTable } from './fill-results-from-cross-tables.ts'
 import { groupStagesOf, importGroupStages } from './import-group-standings.ts'
 import {
   englishWikipediaOrigin,
@@ -23,6 +23,7 @@ import {
   importPastSeason,
   isPastSeason,
   isSeason,
+  type MatchReport,
   repairKnownClubs,
   wikipediaOrigin,
 } from './import-matches.ts'
@@ -172,7 +173,7 @@ export async function runSeasonImport(
       return 1
     }
 
-    write(formatMatchReport(run.result.report))
+    write(describeReport(run.result.report))
     for (const line of run.result.fill) {
       write(line)
     }
@@ -180,7 +181,7 @@ export async function runSeasonImport(
       write(line)
     }
 
-    return run.result.report.kind === 'imported' && run.result.groups.ok ? 0 : 1
+    return (run.result.report.kind === 'imported' || isArchiveGap(run.result.report)) && run.result.groups.ok ? 0 : 1
   } finally {
     await close()
   }
@@ -254,7 +255,7 @@ export async function runSeasonsImport(
         write(line)
       }
 
-      const text = formatMatchReport(run.result.report)
+      const text = describeReport(run.result.report)
 
       write(text)
       for (const line of run.result.fill) {
@@ -263,7 +264,7 @@ export async function runSeasonsImport(
       for (const line of run.result.groups.lines) {
         write(line)
       }
-      if (run.result.report.kind !== 'imported') {
+      if (run.result.report.kind !== 'imported' && !isArchiveGap(run.result.report)) {
         failed.push({ reason: text.slice(`Matches ${season}: `.length), season })
       } else if (!run.result.groups.ok) {
         failed.push({ reason: run.result.groups.lines.join('; '), season })
@@ -309,6 +310,13 @@ function checkSeason(argument: string | undefined): Checked {
   return { kind: 'season', season: argument }
 }
 
+/** The line of the log for a report: a season of the old fansite without a page is no fault. */
+function describeReport(report: MatchReport): string {
+  return isArchiveGap(report)
+    ? `Matches ${report.season}: no matches page for this season, the matches come from the archive of the Fansite`
+    : formatMatchReport(report)
+}
+
 /**
  * Fills the results of the old fansite's matches that have none from the cross table (#1621),
  * and for 2006/07 the results and goals from the programme of the season (#1623), for a season
@@ -317,6 +325,24 @@ function checkSeason(argument: string | undefined): Checked {
  */
 async function fillResults(db: Database, fetcher: Fetcher, season: string, origin: string): Promise<string[]> {
   const lines: string[] = []
+
+  // The programme of the last season of the old fansite goes first (#1637): a cell of the cross
+  // table can be wrong, and a match that the programme knows must not be filled from it.
+  try {
+    const programme = await fillFromSeasonProgramme(db, fetcher, season, { origin })
+
+    if (
+      programme.filled + programme.made + programme.goals + programme.corrected !== 0 ||
+      programme.lines.length !== 0
+    ) {
+      lines.push(
+        `Programme ${season}: ${programme.filled} results filled, ${programme.corrected} corrected, ${programme.made} matches made, ${programme.goals} goals stored.`,
+        ...programme.lines,
+      )
+    }
+  } catch (error) {
+    lines.push(`Programme ${season}: not read from Wikipedia. ${describeError(error)}`)
+  }
 
   try {
     const { filled, lines: filledLines } = await fillResultsFromCrossTables(db, fetcher, season, { origin })
@@ -328,21 +354,16 @@ async function fillResults(db: Database, fetcher: Fetcher, season: string, origi
     lines.push(`Results ${season}: not filled from Wikipedia. ${describeError(error)}`)
   }
 
-  // The programme of the last season of the old fansite has the goals too (#1623).
-  try {
-    const programme = await fillFromSeasonProgramme(db, fetcher, season, { origin })
-
-    if (programme.filled + programme.made + programme.goals !== 0 || programme.lines.length !== 0) {
-      lines.push(
-        `Programme ${season}: ${programme.filled} results filled, ${programme.made} matches made, ${programme.goals} goals stored.`,
-        ...programme.lines,
-      )
-    }
-  } catch (error) {
-    lines.push(`Programme ${season}: not read from Wikipedia. ${describeError(error)}`)
-  }
-
   return lines
+}
+
+/**
+ * Whether a report is the lack of a page with matches for a season of the old fansite (#1637):
+ * Wikipedia has no such page for 1990/91 to 2006/07, and the matches come from the files. Any
+ * other fault stays one, also a 404 for a season outside that range.
+ */
+function isArchiveGap(report: MatchReport): boolean {
+  return report.kind === 'error' && report.missing === true && hasCrossTable(report.season)
 }
 
 /**

@@ -30,4 +30,13 @@ export const oldSiteDateCorrections: readonly OldSiteDateCorrection[] = [
     source: 'Nederlandse Wikipedia',
     to: '1993-03-28',
   },
+  {
+    clubCode: 'heraclesalmelo',
+    competition: 'Eredivisie',
+    from: '2007-01-27',
+    home: true,
+    season: '2006/07',
+    source: 'Nederlandse Wikipedia',
+    to: '2007-01-26',
+  },
 ]

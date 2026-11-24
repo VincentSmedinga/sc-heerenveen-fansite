@@ -14,6 +14,7 @@ import { matchEdits, matches, matchGoals, matchReports, players } from '@fansite
 import { and, eq, inArray, isNull } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
+import type { OldSiteResultCorrection } from './old-site-result-corrections.ts'
 import type { ProgrammeRow } from './read-season-programme.ts'
 
 import { wikipediaOrigin } from './import-matches.ts'
@@ -21,6 +22,7 @@ import { isGoalOfOurPlayer, playerLinker } from './link-players.ts'
 import { storeGoals } from './match-changes.ts'
 import { clubFinder } from './old-site-clubs.ts'
 import { fetchCrossTables } from './old-site-cross-tables.ts'
+import { correctionFor, oldSiteResultCorrections } from './old-site-result-corrections.ts'
 import { readSeasonProgramme } from './read-season-programme.ts'
 import { transfersPageTitle } from './read-transfers.ts'
 import { months } from './read-wikipedia.ts'
@@ -29,12 +31,14 @@ import { months } from './read-wikipedia.ts'
 export const programmeSeason = '2006/07'
 
 /** What a fill did, in the shape of #1621's: the matches that got a result or were made. */
-export type ProgrammeReport = { filled: number; goals: number; lines: string[]; made: number }
+export type ProgrammeReport = { corrected: number; filled: number; goals: number; lines: string[]; made: number }
 
 /** Whether a season has a programme on its page to fill from. */
 export const hasProgramme = (season: string) => season === programmeSeason
 
 type Context = {
+  clubName: string
+  corrections: readonly OldSiteResultCorrection[]
   isNew: boolean
   label: string
   link: ReturnType<typeof playerLinker>
@@ -51,10 +55,14 @@ export async function fillFromSeasonProgramme(
   db: Database,
   fetcher: Fetcher,
   season: string,
-  { origin = wikipediaOrigin, pause }: { origin?: string; pause?: number } = {},
+  {
+    corrections = oldSiteResultCorrections,
+    origin = wikipediaOrigin,
+    pause,
+  }: { corrections?: readonly OldSiteResultCorrection[]; origin?: string; pause?: number } = {},
   now = new Date(),
 ): Promise<ProgrammeReport> {
-  const report: ProgrammeReport = { filled: 0, goals: 0, lines: [], made: 0 }
+  const report: ProgrammeReport = { corrected: 0, filled: 0, goals: 0, lines: [], made: 0 }
 
   if (!hasProgramme(season)) {
     return report
@@ -164,7 +172,7 @@ export async function fillFromSeasonProgramme(
       continue
     }
 
-    await fillMatch(db, match, row, { isNew, label, link, personBook, report })
+    await fillMatch(db, match, row, { clubName: club.name, corrections, isNew, label, link, personBook, report })
   }
 
   return report
@@ -172,7 +180,7 @@ export async function fillFromSeasonProgramme(
 
 /** Fills the result and the goals of one match, leaving what is there. */
 async function fillMatch(db: Database, found: Match, row: ProgrammeRow, context: Context): Promise<void> {
-  const { isNew, label, link, personBook, report } = context
+  const { clubName, corrections, isNew, label, link, personBook, report } = context
   let match = found
   const [edit] = await db.select().from(matchEdits).where(eq(matchEdits.matchId, match.id))
   const locked = lockedFields(edit)
@@ -187,6 +195,34 @@ async function fillMatch(db: Database, found: Match, row: ProgrammeRow, context:
     report.lines.push(`${label}: ${row.goalsProblem ?? 'no result on the page'}`)
 
     return
+  }
+
+  // A result that the cross table got wrong is put right, and only while it is still wrong.
+  const correction = correctionFor(match, clubName, corrections)
+
+  if (
+    correction !== undefined &&
+    !locked.includes('goalsFor') &&
+    match.goalsFor === correction.from.for &&
+    match.goalsAgainst === correction.from.against &&
+    row.score.for === correction.to.for &&
+    row.score.against === correction.to.against
+  ) {
+    await db
+      .update(matches)
+      .set({ goalsAgainst: correction.to.against, goalsFor: correction.to.for })
+      .where(
+        and(
+          eq(matches.id, match.id),
+          eq(matches.goalsFor, correction.from.for),
+          eq(matches.goalsAgainst, correction.from.against),
+        ),
+      )
+    match = { ...match, goalsAgainst: correction.to.against, goalsFor: correction.to.for }
+    report.corrected += 1
+    report.lines.push(
+      `${label}: result ${correction.from.for}-${correction.from.against} corrected to ${correction.to.for}-${correction.to.against}, the cross table of Wikipedia has the result of the play-off (${correction.source})`,
+    )
   }
 
   const gap =
