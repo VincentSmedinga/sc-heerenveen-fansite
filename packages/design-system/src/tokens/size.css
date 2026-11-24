@@ -1,7 +1,7 @@
 /*
- * Size tokens: the height of buttons and fields and of the horizontal bars, in the standard size and the small size. The
- * standard size is 44 pixels, the small size is lower, and both are well above the 24 by 24
- * pixels that WCAG 2.5.8 asks for. The chapter Maten van knoppen en velden in Storybook says
+ * Size tokens: the height of buttons and fields, in the standard size and the small size, and the
+ * sizes of the horizontal bars. The standard size is 44 pixels, the small size is lower, and both are well above the 24 by
+ * 24 pixels that WCAG 2.5.8 asks for. The chapter Maten van knoppen en velden in Storybook says
  * when to take which. A component takes the height from the token and writes no number of its
  * own; the density (see density.css) can lower both.
  *
