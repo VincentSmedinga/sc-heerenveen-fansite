@@ -5,7 +5,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component:
-          'Opsommingen met vierkante tekens, zoals op de oude fansite, genummerde lijsten en definitielijsten.',
+          'Opsommingen met vierkante tekens, zoals op de Fansite van toen, genummerde lijsten en definitielijsten.',
       },
     },
   },

@@ -2213,7 +2213,7 @@ await withEmptyDatabase((database) =>
     assert.match(predictionHtml, /<h1[^>]*>Prognose<\/h1>/)
     assert.match(predictionHtml, /<h2[^>]*>Volgende wedstrijd<\/h2>/)
     // The scoring is for everybody, and a visitor has no list of predictions.
-    assert.match(predictionHtml, /De telling van de oude Fansite\. Hoogstens 30 punten per wedstrijd\./)
+    assert.match(predictionHtml, /De telling van de Fansite\. Hoogstens 30 punten per wedstrijd\./)
     assert.doesNotMatch(predictionHtml, /Jouw voorspellingen/)
     // The card Stand with the way to the whole ranking, which says nothing was predicted yet.
     assert.match(predictionHtml, /<h2[^>]*>Stand<\/h2>/)

@@ -18,7 +18,7 @@ export const quizSize = 10
 export const quizMinimum = 5
 
 /** The line under the heading of the archive and of a month, which credits the old editors. */
-export const archiveCredit = 'Vragen uit het archief van de oude Fansite, gemaakt door de toenmalige redactie.'
+export const archiveCredit = 'Vragen uit het archief van de Fansite, gemaakt door de toenmalige redactie.'
 
 const monthNames = [
   'januari',

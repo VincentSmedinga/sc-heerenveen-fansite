@@ -29,7 +29,7 @@ export const pages = [
   },
   {
     description:
-      'De cijfers van sc Heerenveen 1 sinds 1990/91, zoals de plek door de jaren, de records en de toeschouwers, met de bronnen erbij: Wikipedia en de oude fansite.',
+      'De cijfers van sc Heerenveen 1 sinds 1990/91, zoals de plek door de jaren en de records, met de bronnen erbij: Wikipedia en het archief van de Fansite.',
     path: '/wedstrijden/cijfers/alle',
   },
   {
@@ -97,7 +97,7 @@ export const pages = [
   },
   {
     description:
-      'De Fantest van toen: de quizzen van de oude Fansite, elke maand van december 2001 tot oktober 2005. Speel ze na, zonder dat we je score bewaren.',
+      'De Fantest van toen: de quizzen van de Fansite, elke maand van december 2001 tot oktober 2005. Speel ze na, zonder dat we je score bewaren.',
     path: '/fans/fantest',
   },
   {

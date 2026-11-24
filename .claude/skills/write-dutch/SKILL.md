@@ -23,6 +23,11 @@ This skill is the checklist and the places where it goes wrong.
 
 - **Club:** always "sc Heerenveen", a small s and c, also at the start of a sentence and in "sc Heerenveen Fansite".
   A headline from the media keeps its own spelling.
+- **The Fansite of 1997 to 2006:** "het archief van de Fansite" for what was stored and is shown from it (matches, quizzes, ratings as data), "de Fansite" for the people, the count and the time ("bezoekers van de Fansite").
+  Always a capital F, with "de" or "het", never "de oude Fansite".
+  The site of today is only sc Heerenveen Fansite, "deze site" or "wij"; when both are in one sentence, the old one is "de Fansite van toen" or gets its years, 1997 to 2006.
+  The source line "Wikipedia en sc Heerenveen Fansite" stays.
+  The stored value `Oude fansite`, folder names and names in code stay as they are.
 - **Import:** say "import" or "importer", never "ingestion".
   "Fetcher" only for the HTTP layer.
 - **Ordinary words**, about B1: "samenvoegen", not "mergen".
