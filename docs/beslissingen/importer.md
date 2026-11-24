@@ -3192,6 +3192,7 @@
   Voor de seizoenen daarna volgt de import Wikipedia, en de redactie verbetert in het beheer wat niet klopt of ontbreekt.
 - **Later:** in een seizoen met wedstrijden van de oude fansite maakt de import van Wikipedia geen speler van een doelpuntenmaker; zie _Een doelpuntenmaker met een eigen pagina wordt een speler van het seizoen_ (10 november 2026).
 - **Later:** zie _Een wedstrijd waarvan de oude Fansite niets vastlegde, krijgt geen uitslag_ (24 november 2026): een wedstrijd van de oude fansite zonder iets vastgelegd, krijgt de status `result_unknown`, en een andere bron vult hem niet.
+- **Later:** zie _Wikipedia vult de uitslag van een wedstrijd zonder uitslag_ (24 november 2026): voor 1990/91 tot en met 2006/07 vult de import van Wikipedia wel de uitslag en de status van zo'n wedstrijd, maar alleen als hij er geen heeft.
 
 ## Een vierde deel in `match_edits` voor de gegevens van een wedstrijd
 
@@ -4695,3 +4696,22 @@
   De rij en de datum blijven, zodat de uitslag later uit Wikipedia kan worden ingevuld.
   De import is herhaalbaar en zonder migratie van gegevens.
 - **Alternatieven:** de rij verwijderen (de datum gaat verloren); de status `scheduled` houden (de site noemt een wedstrijd uit 1991 dan een wedstrijd die nog komt, en de Prognose laat er op voorspellen); elke 0 – 0 zonder gegevens weghalen (haalt echte nullen weg zonder bewijs); een vaste lijst van wedstrijden (dekt nieuwe gegevens niet);
+- **Later:** zie _Wikipedia vult de uitslag van een wedstrijd zonder uitslag_ (24 november 2026): de import van een seizoen vult de uitslag wel, uit de kruistabel.
+
+## Wikipedia vult de uitslag van een wedstrijd zonder uitslag
+
+- **Datum:** 24 november 2026
+- **Besluit:** voor 1990/91 tot en met 2006/07 vult de import van Wikipedia (`pnpm import:season`, de workflow _Import season_) de uitslag en de status van een wedstrijd uit het archief van de Fansite, maar alleen als die wedstrijd er geen heeft (#1621).
+  - **Wat:** een wedstrijd in de Eredivisie of de Eerste divisie met bron `oude-fansite`, status `scheduled` of `result_unknown` en geen doelpunten.
+    De import leest de kruistabel van `Eredivisie <seizoen>` of `Eerste divisie <seizoen>` (`readCrossTable`), zoekt de wedstrijd op seizoen, competitie en club (`findMatchesByClub`) en op wie thuis speelde, en zet de doelpunten van sc Heerenveen en de status `played` (`fillResultsFromCrossTables`).
+  - **Wat nooit:** een uitslag die er al is, schrijft de import niet over.
+    Verschilt hij, dan staat dat in het controleverslag van `import:old-site --report`, zoals voorheen.
+    Een uitslag die de redactie zelf invulde (`result_edited`) blijft staan.
+    De import zet ook geen `result_set_at`, geen stand na negentig minuten en geen ruststand: de kruistabel heeft ze niet.
+  - **Niet te vinden:** een wedstrijd waarvoor de tabel geen uitslag heeft (de club ontbreekt, thuis en uit kloppen niet, of er zijn twee wedstrijden zonder uitslag tegen dezelfde club), of een tabel die niet te lezen is, blijft zoals hij is en krijgt een regel in het logboek.
+  - **Herhaalbaar:** een tweede run vindt geen wedstrijd zonder uitslag meer en vraagt Wikipedia niets.
+    `import:old-site` maakt zo'n gevulde uitslag niet weer leeg: een wedstrijd zonder gegevens van het archief, waarvan de uitslag gelijk is aan de kruistabel, blijft zoals hij is.
+- **Waarom:** het archief van de Fansite gaat voor (10 november 2026), maar een wedstrijd zonder uitslag heeft niets om voor te gaan.
+  Wikipedia vult dan alleen een gat.
+- **Alternatieven:** Wikipedia gaat overal voor (tegen de beslissing van 10 november); alles met de hand in het beheer zetten (kan, maar het gat komt bij elke nieuwe kopie van de oude gegevens terug); de stap in `import:old-site` zetten (dat is een andere run dan de Wikipedia-import, en de redactie verwacht Wikipedia daar).
+- **Later:** zie _Een import zoekt een wedstrijd eerst op datum en club_ (9 november 2026): de zin "De uitslag en de status vult hij niet" geldt niet meer voor een wedstrijd zonder uitslag.

@@ -1940,6 +1940,12 @@ pnpm run import:season 2025/26
 - `pnpm run import:status` en de waarschuwingen gaan alleen over het lopende seizoen, ook al staat de rij `match_imports` van het afgelopen seizoen in de database.
   Zo telt een seizoen dat niet wordt ververst nooit als ongezond.
 - De site laat het afgelopen seizoen nog niet zien: elke vraag van de site kiest één seizoen, en dat is het lopende.
+- Voor 1990/91 tot en met 2006/07 vult ze daarna de uitslag van een wedstrijd uit het archief van de Fansite die er geen heeft, uit de kruistabel van `Eredivisie <seizoen>` of `Eerste divisie <seizoen>` (`fillResultsFromCrossTables` in [`src/fill-results-from-cross-tables.ts`](src/fill-results-from-cross-tables.ts), #1621).
+  Het gaat om een wedstrijd met bron `oude-fansite`, status `scheduled` of `result_unknown` en geen doelpunten.
+  Ze zoekt hem op seizoen, competitie en club (`findMatchesByClub`) en op wie thuis speelde, en zet de doelpunten en de status `played`: geen `result_set_at`, geen stand na negentig minuten en geen ruststand, want de tabel heeft ze niet.
+  Een uitslag die er al is, en een uitslag die de redactie invulde, blijven zoals ze zijn.
+  Een wedstrijd waarvoor de tabel niets heeft, of een tabel die niet te lezen is, krijgt een regel in het logboek en verder niets.
+  Een seizoen zonder zo'n wedstrijd vraagt Wikipedia niets, dus een tweede run verandert niets.
 
 Op de host draait hetzelfde bestand als de cronjob de opdracht, met `--season` en het seizoen erachter:
 
@@ -2600,6 +2606,7 @@ Hij doet dit:
 - Een wedstrijd waarvan de oude fansite niets vastlegde (0 – 0 bij uitslag en rust, geen doelpunten, kaarten, opstelling, scheidsrechter, toeschouwers, cijfers of opmerking bij de uitslag), krijgt `status = 'result_unknown'` en geen uitslag, geen ruststand en geen toeschouwers (#1622).
   Voor een wedstrijd in de Eredivisie of de Eerste divisie van 1990/91 tot en met 2006/07 leest de stap eerst de kruistabel van Wikipedia (`readCrossTable`): staat daar 0 – 0, dan blijft het een uitslag.
   Kan de tabel niet gelezen worden, dan blijft de wedstrijd zoals hij is.
+  Een uitslag die de import van een seizoen uit de kruistabel vulde (#1621), maakt ze niet weer leeg.
   Een bewaarde wedstrijd die aan de regel voldoet, wordt bij de volgende import leeg gemaakt, tenzij de redactie er iets van invulde.
   Het logboek telt per seizoen hoeveel wedstrijden `result_unknown` kregen en hoeveel 0 – 0 bleef omdat Wikipedia het bevestigt.
 - De stap raakt alleen rijen met de bron `oude-fansite`.
