@@ -2928,6 +2928,7 @@
 - **Waarom:** de import voegde alleen toe, dus een rij van vóór de lijst met schrijfwijzen bleef naast de goede staan en een speler stond twee keer op de selectie van een seizoen (acceptatie, `Ger Schaap` en `Gerrie Schaap`).
   De rij is door deze stap zelf gemaakt en bevat niets dan een naam, dus er gaat niets verloren.
 - **Alternatieven:** een eenmalige opdracht (het volgende geval, een nieuwe schrijfwijze in de lijst, vraagt weer om een opdracht); alle verouderde rijen samenvoegen, ook van Wikipedia (verlies van pagina, rugnummer en cijfers); niets doen en de projecteigenaar de rijen laten weghalen (de lijst is lang, en de fout komt bij elke nieuwe schrijfwijze terug).
+- **Later:** zie _De importer past een datum in dezelfde ronde aan, houdt één speler per persoon en laat gekoppelde doelpunten staan_ (24 november 2026): een rij met een persoon zonder artikel en niet van de redactie wordt ook samengevoegd, en een rij met bron `verslag` waarvan de oude naam een omzetting uit de lijst is, wordt hernoemd in plaats van samengevoegd.
 
 ## De lijst met schrijfwijzen krijgt 32 omzettingen met minder zekerheid
 
