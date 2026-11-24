@@ -147,12 +147,12 @@ export function requestOf(request: NextRequest): PageRequest | undefined {
 
 /**
  * What to count for a request, or undefined when it isn't a visit: a request that is not a
- * GET for a page of the site that asks for HTML, a prefetch, a bot, a check of the hosting, or
- * a visitor who asked not to be counted (`DNT: 1` or `Sec-GPC: 1`). Every link of the site
- * loads a whole page, so a page view is a request for HTML. The switches that change the page
- * in the browser (`SwitchLinks`) use the router of Next.js: Next.js hides the headers of its
- * own navigation without a page load from the proxy, and those requests accept any type, so a
- * click on a switch is no visit.
+ * GET for a page of the site that asks for HTML, a prefetch, a bot, a check of the hosting, a
+ * request without `Accept-Language`, or a visitor who asked not to be counted (`DNT: 1` or
+ * `Sec-GPC: 1`). Every link of the site loads a whole page, so a page view is a request for
+ * HTML. The switches that change the page in the browser (`SwitchLinks`) use the router of
+ * Next.js: Next.js hides the headers of its own navigation without a page load from the
+ * proxy, and those requests accept any type, so a click on a switch is no visit.
  */
 export function visitOf(request: NextRequest): PageVisit | undefined {
   const result = requestOf(request)

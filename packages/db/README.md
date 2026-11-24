@@ -380,14 +380,15 @@ Elke opdracht ervan kan opnieuw draaien, want MariaDB kan een `ALTER TABLE` niet
 De site telt paginaweergaven en unieke bezoekers per dag, zonder iemand te volgen (zie _We tellen paginaweergaven en unieke bezoekers per dag_ in [`docs/beslissingen/redactie.md`](../../docs/beslissingen/redactie.md)).
 Een dag is een dag in Nederland (Europe/Amsterdam).
 
-| Tabel            | Wat erin staat                                                                              | Blijft het?                |
-| ---------------- | ------------------------------------------------------------------------------------------- | -------------------------- |
-| `page_views`     | Een teller per dag en per pad (`views`); het pad heeft geen zoekvraag                       | Ja                         |
-| `daily_visitors` | Een teller per dag (`visitors`): het aantal verschillende bezoekers                         | Ja                         |
-| `visitor_salts`  | Het zout van de dag: 32 willekeurige bytes in hex                                           | Nee, tot de dag voorbij is |
-| `visitor_hashes` | De HMAC-SHA-256 (hex) van het IP-adres en de browsertekst, met het zout van de dag, per dag | Nee, tot de dag voorbij is |
+| Tabel              | Wat erin staat                                                                                                                      | Blijft het?                |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `page_views`       | Een teller per dag en per pad (`views`); het pad heeft geen zoekvraag                                                               | Ja                         |
+| `daily_visitors`   | Een teller per dag (`visitors`): het aantal verschillende bezoekers                                                                 | Ja                         |
+| `visit_exclusions` | Een teller per dag en per reden (`requests`) van verzoeken die geen bezoek waren: `bot`, `geen-taal`, `niet-volgen`, `vooruitladen` | Ja                         |
+| `visitor_salts`    | Het zout van de dag: 32 willekeurige bytes in hex                                                                                   | Nee, tot de dag voorbij is |
+| `visitor_hashes`   | De HMAC-SHA-256 (hex) van het IP-adres en de browsertekst, met het zout van de dag, per dag                                         | Nee, tot de dag voorbij is |
 
-Alleen `createVisitCounter(db).record(...)` in `src/visits.ts` schrijft in de tabellen, en `removeVisitorData(db, now)` haalt het zout en de kenmerken weg van alle dagen vóór vandaag.
+Alleen `createVisitCounter(db).record(...)` en `.recordSkipped(...)` in `src/visits.ts` schrijven in de tabellen, en `removeVisitorData(db, now)` haalt het zout en de kenmerken weg van alle dagen vóór vandaag.
 De site roept de eerste aan, in de proxy.
 De tweede draait bij het eerste verzoek van een nieuwe dag in een proces en bij elke run van de import.
 Het IP-adres en de browsertekst staan in geen enkele tabel; `visits.test.ts` zoekt in alle tabellen naar beide.

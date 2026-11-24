@@ -79,6 +79,8 @@ describe('the page with the numbers of the visit', () => {
 
     expect(card.match(/<table/g)).toHaveLength(1)
     expect(card).toContain('<caption')
+    expect(card.match(/<th[^>]*scope="col"[^>]*>[^<]*/g)).toHaveLength(3)
+    expect(card).toContain('>Reden<')
     expect(card).toContain('<th scope="row"')
     expect(card.match(/<th scope="row"[^>]*>/g)).toHaveLength(4)
     expect(card).toContain('<td class="hf-numeric">1.234</td><td class="hf-numeric">1.240</td>')

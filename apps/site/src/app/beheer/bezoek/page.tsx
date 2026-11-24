@@ -129,7 +129,7 @@ export default async function VisitPage() {
             <>
               <DataTable
                 caption={`Verzoeken om een pagina die niet meetelden, per reden, van de laatste ${shortDays} en ${days} dagen`}
-                columns={[`Laatste ${shortDays} dagen`, `Laatste ${days} dagen`]}
+                columns={['Reden', `Laatste ${shortDays} dagen`, `Laatste ${days} dagen`]}
                 rows={skipped.map((row) => ({
                   cells: [row.totalShort, row.total],
                   header: skipReasonTexts[row.reason].name,
