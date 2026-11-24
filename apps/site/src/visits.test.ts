@@ -3,7 +3,7 @@ import { readdirSync, readFileSync } from 'node:fs'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { pages } from './pages'
-import { countVisit, notVisitors, visitOf } from './visits'
+import { countVisit, notVisitors, requestOf, visitOf } from './visits'
 
 const { getArticle, isClubSlug } = vi.hoisted(() => ({ getArticle: vi.fn(), isClubSlug: vi.fn() }))
 
@@ -19,6 +19,7 @@ function request(path = '/', headers: Record<string, string> = {}, method = 'GET
   return new NextRequest(new URL(path, 'http://localhost:3000'), {
     headers: {
       accept: 'text/html,application/xhtml+xml',
+      'accept-language': 'nl-NL,nl;q=0.9,en;q=0.8',
       'user-agent': firefox,
       'x-forwarded-for': address,
       ...headers,
@@ -96,7 +97,7 @@ describe('visitOf', () => {
     (forwarded) => {
       const headers = forwarded === undefined ? {} : { 'x-forwarded-for': forwarded }
       const get = new NextRequest(new URL('/', 'http://localhost:3000'), {
-        headers: { accept: 'text/html', 'user-agent': firefox, ...headers },
+        headers: { accept: 'text/html', 'accept-language': 'nl', 'user-agent': firefox, ...headers },
       })
 
       expect(visitOf(get)).toMatchObject({ address: undefined, path: '/' })
@@ -357,7 +358,87 @@ describe('visitOf', () => {
   })
 })
 
+describe('requestOf', () => {
+  it('skips a browser text of the checks of the hosting, such as DirectAdmin', () => {
+    expect(notVisitors.test('DirectAdmin/1.68.3 (https://directadmin.com)')).toBe(true)
+    expect(requestOf(request('/', { 'user-agent': 'DirectAdmin/1.68.3' }))).toEqual({ skipped: 'bot' })
+    expect(visitOf(request('/', { 'user-agent': 'DirectAdmin/1.68.3' }))).toBeUndefined()
+  })
+
+  it('skips a request without Accept-Language, which every ordinary browser sends', () => {
+    const get = new NextRequest(new URL('/', 'http://localhost:3000'), {
+      headers: { accept: 'text/html', 'user-agent': firefox, 'x-forwarded-for': address },
+    })
+
+    expect(requestOf(get)).toEqual({ skipped: 'geen-taal' })
+    expect(visitOf(get)).toBeUndefined()
+    expect(requestOf(request('/', { 'accept-language': ' ' }))).toEqual({ skipped: 'geen-taal' })
+  })
+
+  it.each([
+    ['a bot', { 'user-agent': 'Googlebot/2.1' }, 'bot'],
+    ['no browser text', { 'user-agent': '' }, 'bot'],
+    ['no language', { 'accept-language': '' }, 'geen-taal'],
+    ['DNT', { dnt: '1' }, 'niet-volgen'],
+    ['GPC', { 'sec-gpc': '1' }, 'niet-volgen'],
+    ['a prefetch', { 'sec-purpose': 'prefetch' }, 'vooruitladen'],
+  ])('sorts %s under its reason', (_name, headers, reason) => {
+    expect(requestOf(request('/', headers))).toEqual({ skipped: reason })
+  })
+
+  it('takes the first reason that fits: bot, geen-taal, niet-volgen, vooruitladen', () => {
+    const all = { dnt: '1', 'sec-purpose': 'prefetch' }
+
+    expect(requestOf(request('/', { ...all, 'accept-language': '', 'user-agent': 'Googlebot/2.1' }))).toEqual({
+      skipped: 'bot',
+    })
+    expect(requestOf(request('/', { ...all, 'accept-language': '' }))).toEqual({ skipped: 'geen-taal' })
+    expect(requestOf(request('/', all))).toEqual({ skipped: 'niet-volgen' })
+    expect(requestOf(request('/', { 'sec-purpose': 'prefetch' }))).toEqual({ skipped: 'vooruitladen' })
+  })
+
+  it('still counts an ordinary request with Accept-Language', () => {
+    expect(requestOf(request('/privacy'))).toEqual({ visit: expect.objectContaining({ path: '/privacy' }) })
+  })
+
+  it.each([
+    ['a POST', '/', { 'user-agent': 'Googlebot/2.1' }, 'POST'],
+    ['a file', '/favicon.ico', { 'user-agent': 'Googlebot/2.1' }, 'GET'],
+    ['the admin', '/beheer', { dnt: '1' }, 'GET'],
+    ['a path that does not exist', '/bestaat-niet', { 'accept-language': '' }, 'GET'],
+    ['a request that does not ask for HTML', '/', { accept: '*/*', dnt: '1' }, 'GET'],
+  ])('sorts nothing for %s, which would not have been a page view', (_name, path, headers, method) => {
+    expect(requestOf(request(path, headers, method))).toBeUndefined()
+  })
+})
+
 describe('countVisit', () => {
+  it('counts a request that is skipped under its reason, and nothing else of it', async () => {
+    const record = vi.fn()
+    const recordSkipped = vi.fn().mockResolvedValue(undefined)
+    const waitUntil = vi.fn()
+
+    countVisit(request('/', { dnt: '1', 'x-forwarded-for': address }), waitUntil, record, recordSkipped)
+    await waitUntil.mock.calls[0]?.[0]
+
+    expect(record).not.toHaveBeenCalled()
+    expect(recordSkipped).toHaveBeenCalledOnce()
+    expect(recordSkipped).toHaveBeenCalledWith({ now: expect.any(Date), reason: 'niet-volgen' })
+  })
+
+  it('does not count a skipped request for an article or a club that does not exist', async () => {
+    const recordSkipped = vi.fn().mockResolvedValue(undefined)
+    const waitUntil = vi.fn()
+
+    getArticle.mockResolvedValue(undefined)
+    isClubSlug.mockResolvedValue(false)
+    countVisit(request('/redactie/bestaat-niet', { dnt: '1' }), waitUntil, vi.fn(), recordSkipped)
+    countVisit(request('/tegenstanders/bestaat-niet', { dnt: '1' }), waitUntil, vi.fn(), recordSkipped)
+    await Promise.all(waitUntil.mock.calls.map(([promise]) => promise))
+
+    expect(recordSkipped).not.toHaveBeenCalled()
+  })
+
   it('hands the visit to the counter, with the moment, and gives it to the server to finish', async () => {
     const record = vi.fn().mockResolvedValue(undefined)
     const waitUntil = vi.fn()
@@ -374,8 +455,8 @@ describe('countVisit', () => {
     const waitUntil = vi.fn()
 
     countVisit(request('/beheer'), waitUntil, record)
-    countVisit(request('/', { dnt: '1' }), waitUntil, record)
-    countVisit(request('/', { 'user-agent': 'Googlebot/2.1' }), waitUntil, record)
+    countVisit(request('/', {}, 'POST'), waitUntil, record)
+    countVisit(request('/bestaat-niet', { 'user-agent': 'Googlebot/2.1' }), waitUntil, record)
 
     expect(record).not.toHaveBeenCalled()
     expect(waitUntil).not.toHaveBeenCalled()

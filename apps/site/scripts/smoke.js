@@ -422,6 +422,7 @@ async function checkCounting(database) {
   const browser = 'Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0'
   const visitor = (address, headers = {}) => ({
     accept: 'text/html',
+    'accept-language': 'nl-NL,nl;q=0.9',
     'user-agent': browser,
     'x-forwarded-for': address,
     ...headers,
@@ -446,6 +447,8 @@ async function checkCounting(database) {
   await get('/', visitor('203.0.113.9', { 'sec-gpc': '1' }))
   await get('/', visitor('203.0.113.9', { 'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1)' }))
   await get('/', visitor('203.0.113.9', { 'sec-purpose': 'prefetch' }))
+  // Node.js sends `Accept-Language: *` unless the header is set, so set it empty.
+  await get('/', visitor('203.0.113.9', { 'accept-language': '' }))
   await get('/', { 'x-forwarded-for': '203.0.113.9' })
   await get('/beheer', visitor('203.0.113.9'))
   await get('/beheer/inloggen', visitor('203.0.113.9'))
@@ -480,6 +483,20 @@ async function checkCounting(database) {
       [
         { day, path: '/', views: 1 },
         { day, path: '/privacy', views: 3 },
+      ],
+    )
+
+    // What was skipped is counted under its reason, and only a request for a page is in it.
+    const [skipped] = await pool.query(
+      'SELECT CAST(day AS CHAR) AS day, reason, requests FROM visit_exclusions ORDER BY reason',
+    )
+    assert.deepEqual(
+      skipped.map(({ day, reason, requests }) => ({ day, reason, requests })),
+      [
+        { day, reason: 'bot', requests: 1 },
+        { day, reason: 'geen-taal', requests: 1 },
+        { day, reason: 'niet-volgen', requests: 2 },
+        { day, reason: 'vooruitladen', requests: 1 },
       ],
     )
 

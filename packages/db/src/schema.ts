@@ -2319,6 +2319,26 @@ export const dailyVisitors = mysqlTable('daily_visitors', {
   visitors: int('visitors', { unsigned: true }).notNull().default(0),
 })
 
+/** Why a request for a page is not counted as a visit, in the order the site tries them. */
+export const skipReasons = ['bot', 'geen-taal', 'niet-volgen', 'vooruitladen'] as const
+
+export type SkipReason = (typeof skipReasons)[number]
+
+/**
+ * The requests for a page that were not counted, one row per day and reason: a counter and
+ * nothing about who asked, no address, no browser text and no path. Only a request that would
+ * have been a page view is in it. The counters stay. `day` is a day in the Netherlands.
+ */
+export const visitExclusions = mysqlTable(
+  'visit_exclusions',
+  {
+    day: date('day', { mode: 'string' }).notNull(),
+    reason: mysqlEnum('reason', skipReasons).notNull(),
+    requests: int('requests', { unsigned: true }).notNull().default(0),
+  },
+  (table) => [primaryKey({ columns: [table.day, table.reason], name: 'visit_exclusions_day_reason' })],
+)
+
 /**
  * The salt of a day: 32 random bytes in hex, made with the first visit of that day. A hash of a
  * visitor is only worth anything with the salt of its day. The row goes as soon as the day is

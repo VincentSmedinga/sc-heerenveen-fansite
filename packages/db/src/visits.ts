@@ -2,8 +2,11 @@ import { lt, sql } from 'drizzle-orm'
 import { createHmac, randomBytes } from 'node:crypto'
 
 import type { Database } from './client.ts'
+import type { SkipReason } from './schema.ts'
 
-import { dailyVisitors, pageViews, visitorHashes, visitorSalts } from './schema.ts'
+import { dailyVisitors, pageViews, visitExclusions, visitorHashes, visitorSalts } from './schema.ts'
+
+export type { SkipReason }
 
 export type Visit = {
   /** The address of the visitor, hashed and kept nowhere. Without it only the view counts. */
@@ -80,6 +83,14 @@ export function createVisitCounter(db: Database) {
           .values({ day, visitors: 1 })
           .onDuplicateKeyUpdate({ set: { visitors: sql`${dailyVisitors.visitors} + 1` } })
       }
+    },
+
+    /** Counts a request that is not a visit, under the reason: a number per day and reason. */
+    async recordSkipped({ now, reason }: { now: Date; reason: SkipReason }) {
+      await db
+        .insert(visitExclusions)
+        .values({ day: visitDay(now), reason, requests: 1 })
+        .onDuplicateKeyUpdate({ set: { requests: sql`${visitExclusions.requests} + 1` } })
     },
   }
 }

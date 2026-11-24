@@ -1,6 +1,6 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
-import { dailyVisitors, pageViews } from '@fansite/db/schema'
+import { dailyVisitors, pageViews, visitExclusions } from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
@@ -19,6 +19,7 @@ afterAll(async () => {
 beforeEach(async () => {
   await database.pool.query('DELETE FROM page_views')
   await database.pool.query('DELETE FROM daily_visitors')
+  await database.pool.query('DELETE FROM visit_exclusions')
 })
 
 // Noon in the Netherlands on Monday 26 October 2026, the day the clocks went back.
@@ -42,6 +43,26 @@ describe('lastDays', () => {
 })
 
 describe('visitNumbers', () => {
+  it('gives the skipped requests per reason for the last 7 and 30 days, every reason, in order', async () => {
+    await database.db.insert(visitExclusions).values([
+      { day: '2026-10-26', reason: 'bot', requests: 5 },
+      { day: '2026-10-20', reason: 'bot', requests: 3 },
+      { day: '2026-10-19', reason: 'bot', requests: 2 },
+      { day: '2026-10-26', reason: 'geen-taal', requests: 1 },
+      // Older than 30 days: not in the numbers.
+      { day: '2026-09-26', reason: 'bot', requests: 100 },
+    ])
+
+    const { skipped } = await visitNumbers(database.db, now)
+
+    expect(skipped).toEqual([
+      { reason: 'bot', total: 10, totalShort: 8 },
+      { reason: 'geen-taal', total: 1, totalShort: 1 },
+      { reason: 'niet-volgen', total: 0, totalShort: 0 },
+      { reason: 'vooruitladen', total: 0, totalShort: 0 },
+    ])
+  })
+
   it('gives every one of the 30 days, newest first, a day without counters as zero', async () => {
     await database.db.insert(dailyVisitors).values({ day: '2026-10-26', visitors: 4 })
     await database.db.insert(pageViews).values({ day: '2026-10-26', path: '/', views: 9 })

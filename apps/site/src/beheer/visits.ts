@@ -1,6 +1,6 @@
 import type { Database } from '@fansite/db/client'
 
-import { dailyVisitors, pageViews } from '@fansite/db/schema'
+import { dailyVisitors, pageViews, type SkipReason, skipReasons, visitExclusions } from '@fansite/db/schema'
 import { visitDay } from '@fansite/db/visits'
 import { desc, gte, sql } from 'drizzle-orm'
 
@@ -18,6 +18,9 @@ export const shortDays = 7
 /** How many of the most viewed pages the page lists. */
 export const topLength = 20
 
+/** How many requests of the last 7 and 30 days were not counted, for one reason. */
+export type SkippedRequests = { reason: SkipReason; total: number; totalShort: number }
+
 /** The most viewed page of the period, with its views. */
 export type ViewedPage = { path: string; views: number }
 
@@ -28,6 +31,8 @@ export type VisitDay = { day: string; views: number; visitors: number }
 export type VisitNumbers = {
   /** The last `days` days, newest first, a day without a counter as zero. */
   perDay: VisitDay[]
+  /** The requests that were not counted, one row per reason, always all of them. */
+  skipped: SkippedRequests[]
   /** The most viewed pages of those days, most views first. */
   topPages: ViewedPage[]
   /** The sum of the last 30 days. */
@@ -73,12 +78,29 @@ export async function visitNumbers(db: Pick<Database, 'select'>, now: Date = new
     .orderBy(desc(sql`sum(${pageViews.views})`), pageViews.path)
     .limit(topLength)
 
+  const skippedRows = await db
+    .select({ day: visitExclusions.day, reason: visitExclusions.reason, requests: visitExclusions.requests })
+    .from(visitExclusions)
+    .where(gte(visitExclusions.day, first))
+
+  const shortFirst = list[shortDays - 1] ?? first
+  const skipped = skipReasons.map((reason) => {
+    const own = skippedRows.filter((row) => row.reason === reason)
+
+    return {
+      reason,
+      total: own.reduce((sum, row) => sum + row.requests, 0),
+      totalShort: own.filter((row) => row.day >= shortFirst).reduce((sum, row) => sum + row.requests, 0),
+    }
+  })
+
   const viewsOf = new Map(views.map((row) => [row.day, row.views]))
   const visitorsOf = new Map(visitors.map((row) => [row.day, row.visitors]))
   const perDay = list.map((day) => ({ day, views: viewsOf.get(day) ?? 0, visitors: visitorsOf.get(day) ?? 0 }))
 
   return {
     perDay,
+    skipped,
     topPages: top,
     total: sumOf(perDay),
     totalShort: sumOf(perDay.slice(0, shortDays)),

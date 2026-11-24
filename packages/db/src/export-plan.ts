@@ -181,6 +181,7 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
   supporter_sessions: 'structure',
   supporters: 'structure',
   unavailable_marks: 'copy',
+  visit_exclusions: 'copy',
   visitor_hashes: 'structure',
   visitor_salts: 'structure',
   wikidata_items: 'copy',

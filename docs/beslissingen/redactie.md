@@ -1380,6 +1380,8 @@
 - **Rechtsgrond:** de Builder nam gerechtvaardigd belang aan (we willen weten of de site gelezen wordt, en we houden geen persoonsgegevens langer dan de dag).
   Toestemming is niet nodig, omdat er niets op het apparaat van de bezoeker staat.
   Een jurist heeft dit niet bekeken.
+- **Later:** zie _We tellen ook wat we niet meetellen, per reden_ (23 november 2026): de tabel `visit_exclusions` komt erbij, met alleen dag, reden en aantal.
+  En de logbestanden van de host zijn wel te lezen, alleen niet voor ons doel: de redactie kan ze zien in het beheerpaneel van de host, en de privacyverklaring zegt dat nu.
 
 ## Bots, DNT en GPC worden niet geteld
 
@@ -1394,6 +1396,7 @@
   Een bot die zich als browser voordoet, telt wel mee; de lijst groeit als er een opduikt.
 - **Later:** de dagelijkse Lighthouse-controle doet zich voor als een gewone browser, want Lighthouse 13 zet geen "Lighthouse" meer in de browsertekst.
   Ze blijft buiten de cijfers met `DNT: 1`, dat de controle meestuurt (zie _We meten zelf, elke dag, met een vast budget voor wat kan en een melding voor tijd_ in `werkwijze.md`, 7 november 2026).
+- **Later:** zie _We tellen ook wat we niet meetellen, per reden_ (23 november 2026): een verzoek dat om deze redenen wegvalt, telt nu als een getal per dag en reden, en `directadmin` staat in `notVisitors`.
 
 ## De proxy telt, na het antwoord, alleen een aanvraag van een pagina
 
@@ -1435,6 +1438,8 @@
 - **Nog niet gecontroleerd op de host:** we hebben bij het bouwen geen toegang tot de hosting.
   Stuurt de host de header niet, of een andere, dan telt de site de weergaven en geen bezoekers (`daily_visitors` blijft 0).
   `docs/acceptatieomgeving.md` (_Bezoekers tellen_) zegt hoe je dat op acceptatie ziet.
+- **Later:** gecontroleerd op 23 november 2026: de host stuurt `X-Forwarded-For` mee, dus `daily_visitors` blijft niet op 0.
+  `docs/acceptatieomgeving.md` zegt nu hoe je een telling naast het logboek van de host legt.
 - **Alternatieven:** het eerste adres in de header (een bezoeker kan het zelf zetten); een andere header zoals `X-Real-IP` (we weten niet of de host hem stuurt); alleen de browsertekst (alle bezoekers met dezelfde browser tellen als één).
 
 ## Doelpuntenmakers staan in één regel op minuut, met groene en rode minuten
@@ -3244,3 +3249,40 @@
   Overal "fan" voor het woord zetten ("fanknop" leest onnatuurlijk).
   Een test die het woord weert: de regel staat in het hoofdstuk Redactie en in de checklist van de reviewer, en een lijst met uitzonderingen kost meer onderhoud dan hij oplevert.
 - **Later:** vervangt de toon "van supporter tot supporter" uit _De toon en de schrijfwijzer staan in het hoofdstuk Redactie_ (29 oktober 2026) en het motto "Voor supporters, door supporters" uit _Geen disclaimer, wel "Voor supporters, door supporters"_ (22 oktober 2026).
+
+## We tellen ook wat we niet meetellen, per reden
+
+- **Datum:** 23 november 2026
+- **Besluit:** de site telt per dag en reden hoeveel verzoeken voor een pagina niet meetellen (`bot`, `geen-taal`, `niet-volgen`, `vooruitladen`), en toont dat op `/beheer/bezoek` in de kaart Niet meegeteld, voor de laatste 7 en 30 dagen.
+  De tellers staan in de tabel `visit_exclusions` (migratie `0113_add_visit_exclusions`) met alleen `day`, `reason` en `requests`, en blijven zolang de site bestaat.
+  Een verzoek telt hier alleen als het anders een paginaweergave was geweest (een GET voor HTML van een pad dat we tellen, bij een artikel of club die bestaat), en krijgt de eerste reden die past, in de volgorde hierboven.
+- **Waarom:** een bezoekersaantal dat je niet kunt controleren, vertrouw je niet.
+  Met deze tellers zie je hoe groot de rest is, zonder iets over de verzoeken zelf te bewaren: geen adres, geen browsertekst en geen pad, ook niet in het logboek.
+- **Alternatieven:** niets tellen en de logboeken van de host lezen (bevatten volledige IP-adressen, en bewaren maar één dag); een voorbeeld van elke browsertekst bewaren (breekt de belofte dat de browsertekst nergens staat).
+
+## Een verzoek zonder `Accept-Language` telt niet
+
+- **Datum:** 23 november 2026
+- **Besluit:** een verzoek dat geen `Accept-Language` meestuurt, is geen bezoeker en geen weergave.
+  Het telt als reden `geen-taal`, na `bot` en voor `niet-volgen`.
+- **Waarom:** elke gewone browser stuurt hem.
+  Bots die zich als Chrome voordoen, laten hem vaak weg.
+  We lezen alleen een header die al in het verzoek zit.
+- **Alternatieven:** ook eisen dat `Sec-Fetch-*` aanwezig is (oudere Safari stuurt die niet, dus echte bezoekers vallen af; later toevoegen als de tellers van `geen-taal` laten zien dat het nodig is); verzoeken van datacenters weglaten (vraagt een lijst van adressen en bewaart meer).
+
+## Ons eigen bezoek blijft meetellen
+
+- **Datum:** 23 november 2026
+- **Besluit:** de redactie en andere mensen van het project worden niet apart weggelaten.
+  De uitleg op `/beheer/bezoek` zegt dat, en dat wie het wil voorkomen Do Not Track of Global Privacy Control in de eigen browser kan aanzetten.
+- **Waarom:** de sessiecookie van het beheer gaat alleen naar `/beheer` en nooit naar een pagina van de site, dus de site ziet een ingelogde redacteur niet.
+  Een knop of een markeringscookie zou een nieuw cookie op de hele site zetten.
+- **Alternatieven:** een knop "Tel mijn bezoek niet mee" op de privacypagina met een cookie van een jaar; een markeringscookie bij het inloggen in het beheer; verzoeken van bekende adressen weglaten (we bewaren geen adressen).
+
+## Wat de host bewaart, staat in de privacyverklaring
+
+- **Datum:** 23 november 2026
+- **Besluit:** de privacyverklaring zegt dat de host logbestanden met IP-adres en browsertekst bijhoudt, dat de redactie ze kan inzien en dat we ze alleen gebruiken om de site en onze cijfers te controleren.
+- **Waarom:** de redactie kan ze lezen in het beheerpaneel van de host.
+  "Wij kunnen daar niet bij" was onjuist.
+- **Later:** zie de **Later:**-regels bij _We tellen paginaweergaven en unieke bezoekers per dag, met een kenmerk dat elke dag wisselt_ en _Het adres van de bezoeker is het laatste adres van `X-Forwarded-For`_.

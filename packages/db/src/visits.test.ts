@@ -19,7 +19,7 @@ afterAll(async () => {
 })
 
 beforeEach(async () => {
-  for (const table of ['page_views', 'daily_visitors', 'visitor_salts', 'visitor_hashes']) {
+  for (const table of ['page_views', 'daily_visitors', 'visitor_salts', 'visitor_hashes', 'visit_exclusions']) {
     await database.pool.query('DELETE FROM ??', [table])
   }
 })
@@ -120,6 +120,31 @@ describe('createVisitCounter', () => {
     expect(await rows('page_views')).toEqual([{ day: '2026-10-26', path: '/', views: 1 }])
     expect(await rows('daily_visitors')).toEqual([])
     expect(await rows('visitor_hashes')).toEqual([])
+  })
+
+  it('counts a skipped request per day and reason, and nothing else', async () => {
+    const counter = createVisitCounter(database.db)
+
+    await counter.recordSkipped({ now: morning, reason: 'bot' })
+    await counter.recordSkipped({ now: morning, reason: 'bot' })
+    await counter.recordSkipped({ now: morning, reason: 'niet-volgen' })
+    await counter.recordSkipped({ now: new Date('2026-10-27T08:00:00Z'), reason: 'bot' })
+
+    expect(await rows('visit_exclusions')).toEqual([
+      { day: '2026-10-26', reason: 'bot', requests: 2 },
+      { day: '2026-10-26', reason: 'niet-volgen', requests: 1 },
+      { day: '2026-10-27', reason: 'bot', requests: 1 },
+    ])
+    expect(await rows('page_views')).toEqual([])
+    expect(await rows('daily_visitors')).toEqual([])
+  })
+
+  it('has only the day, the reason and the number in the table of skipped requests', async () => {
+    const [columns] = await database.pool.query<RowDataPacket[]>(
+      "SELECT column_name AS name FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'visit_exclusions' ORDER BY ordinal_position",
+    )
+
+    expect(columns.map((column) => column['name'])).toEqual(['day', 'reason', 'requests'])
   })
 
   it('keeps the address and the browser text out of every table', async () => {
