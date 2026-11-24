@@ -106,6 +106,17 @@ describe('pitchRingArc', () => {
 })
 
 describe('PitchPlayer', () => {
+  it('puts the lead before the surname, and keeps the whole name in the sentence', () => {
+    const { container } = render(
+      <ol>
+        <PitchPlayer {...visser} lead="B." ours />
+      </ol>,
+    )
+
+    expect(container.querySelector('.hf-pitch-player-surname')?.textContent).toBe('B. Visser')
+    expect(container.querySelector('.hf-visually-hidden')?.textContent).toContain('Bram Visser')
+  })
+
   it('is one list item with one sentence, and hides the drawing from a screen reader', () => {
     const { container } = render(
       <ol>

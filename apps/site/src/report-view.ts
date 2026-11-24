@@ -6,7 +6,7 @@ import { oldSiteReportSource } from '@fansite/db/schema'
 import type { MatchPageData } from './match-page'
 
 import { playerHref } from './player-address'
-import { type NameParts, personNameParts } from './player-name'
+import { leadOfNamesake, type NameParts, personNameParts } from './player-name'
 
 // What the page of a match shows, taken from a report that has passed the rules: the plain data
 // of `match-page.ts`, with the names of the players in the two parts `PlayerName` shows.
@@ -89,6 +89,7 @@ export function matchPageDataOf(
     players: stored.appearances.map((player) => ({
       captain: player.captain,
       id: player.id,
+      lead: leadOfNamesake(names.get(player.id)),
       name: nameOfPlayer(player.name, names.get(player.id)),
       ours: player.ours,
       shirtNumber: player.shirtNumber,

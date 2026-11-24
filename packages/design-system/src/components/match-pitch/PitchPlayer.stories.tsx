@@ -65,6 +65,17 @@ export const Default = meta.story({
   name: 'Een speler met alle merken',
 })
 
+export const SharedSurname = meta.story({
+  args: {
+    lead: 'R.',
+    minutesPlayed: 90,
+    name: { givenName: 'Rick', surname: 'Demo' },
+    ours: true,
+    shirtNumber: 6,
+  },
+  name: 'Met beginletter: een ander met dezelfde achternaam speelde in die jaren',
+})
+
 export const Opponent = meta.story({
   args: {
     minutesPlayed: 90,

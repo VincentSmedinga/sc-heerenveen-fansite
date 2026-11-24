@@ -1182,8 +1182,55 @@ describe('the matches with a report that is klaar', () => {
     expect(found?.clubSlug).toBe('testdorp-fc')
     expect(found?.stored.appearances.map((row) => row.name)).toEqual(['Luca Oyen', 'Gijs Test'])
     expect([...(found?.names.values() ?? [])]).toEqual([
-      { familyName: null, familyNamePrefix: null, givenName: null, searchTerm: 'Oyen', slug: null },
+      {
+        familyName: null,
+        familyNamePrefix: null,
+        givenName: null,
+        namesakes: [],
+        searchTerm: 'Oyen',
+        seasons: [],
+        slug: null,
+      },
     ])
+  })
+
+  it('gives the other persons with the same surname, each with their seasons', async () => {
+    const matchId = await playedMatch()
+    const made = async (givenName: string, familyName: string, seasons: string[]) => {
+      const [person] = await database.db
+        .insert(persons)
+        .values({
+          familyName,
+          givenName,
+          name: `${givenName} ${familyName}`,
+          wikipediaPage: `${givenName} ${familyName}`,
+        })
+        .$returningId()
+      const ids: number[] = []
+
+      for (const when of seasons) {
+        const [row] = await database.db
+          .insert(players)
+          .values({ name: `${givenName} ${familyName}`, personId: person!.id, searchTerm: familyName, season: when })
+          .$returningId()
+
+        ids.push(row!.id)
+      }
+
+      return ids[0]!
+    }
+    const first = await made('Jeroen', 'Proef', ['2004/05', '2005/06'])
+
+    await made('Henrico', 'Proef', ['2006/07'])
+    await made('Anna', 'Anders', ['2005/06'])
+    await report(matchId)
+    await appearance(matchId, { name: 'Jeroen Proef', playerId: first, shirtNumber: 4 })
+
+    const found = await findReportedMatch(database.db, { clubSlug: 'testdorp-fc', matchDate: '2026-08-08', season })
+    const [named] = [...(found?.names.values() ?? [])]
+
+    expect(named?.seasons.toSorted()).toEqual(['2004/05', '2005/06'])
+    expect(named?.namesakes).toEqual([{ givenName: 'Henrico', seasons: ['2006/07'] }])
   })
 
   it('finds a match by its season, its day and its opponent, and nothing else', async () => {

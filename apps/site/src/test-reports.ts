@@ -97,16 +97,48 @@ const names: ReportedMatch['names'] = new Map([
       familyName: 'Brandsma',
       familyNamePrefix: null,
       givenName: 'Tjerk',
+      namesakes: [],
       searchTerm: 'Brandsma',
+      seasons: [],
       slug: 'tjerk-brandsma',
     },
   ],
   [
     4,
-    { familyName: 'Hove', familyNamePrefix: 'ten', givenName: 'Ruben', searchTerm: 'ten Hove', slug: 'ruben-ten-hove' },
+    {
+      familyName: 'Hove',
+      familyNamePrefix: 'ten',
+      givenName: 'Ruben',
+      namesakes: [],
+      searchTerm: 'ten Hove',
+      seasons: [],
+      slug: 'ruben-ten-hove',
+    },
   ],
-  [9, { familyName: null, familyNamePrefix: null, givenName: null, searchTerm: 'Demo', slug: null }],
-  [10, { familyName: null, familyNamePrefix: null, givenName: null, searchTerm: 'Idzenga', slug: null }],
+  [
+    9,
+    {
+      familyName: null,
+      familyNamePrefix: null,
+      givenName: null,
+      namesakes: [],
+      searchTerm: 'Demo',
+      seasons: [],
+      slug: null,
+    },
+  ],
+  [
+    10,
+    {
+      familyName: null,
+      familyNamePrefix: null,
+      givenName: null,
+      namesakes: [],
+      searchTerm: 'Idzenga',
+      seasons: [],
+      slug: null,
+    },
+  ],
 ])
 
 /** The report: a copy each time, so a test can change what it wants. */

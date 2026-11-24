@@ -41,7 +41,14 @@ import { lastDayOf } from './match-format'
 import { letterOf, type MatchResult, resultOf, type Scored } from './match-result'
 import { type MatchSource, sourceOf } from './match-sources'
 import { playerHref } from './player-address'
-import { type NameParts, personNameParts, personSortName, splitPersonName, textSortName } from './player-name'
+import {
+  leadOfName,
+  type NameParts,
+  personNameParts,
+  personSortName,
+  splitPersonName,
+  textSortName,
+} from './player-name'
 
 /** The name of our own club in the table. */
 const ourClub = 'sc Heerenveen'
@@ -1028,12 +1035,12 @@ export function goalsWithInitials(goals: ScorerGoal[]): ScorerGoal[] {
       return goal
     }
 
-    const initial = given.charAt(0).toUpperCase()
-    const sharesInitial = [...same.values()]
-      .filter((other) => other !== parts)
-      .some((other) => (other.givenName?.trim().charAt(0).toUpperCase() ?? '') === initial)
+    const lead = leadOfName(
+      given,
+      [...same.values()].filter((other) => other !== parts).map((other) => other.givenName),
+    )
 
-    return { ...goal, player: sharesInitial ? `${given} ${goal.player}` : `${initial}. ${goal.player}` }
+    return { ...goal, player: `${lead} ${goal.player}` }
   })
 }
 

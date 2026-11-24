@@ -7991,6 +7991,21 @@
 - **Alternatieven:** een kaart met de schermnaam en wat je kunt doen (herhaalt de kop, is een nieuwe kaart die niemand ontwierp, en zonder spel valt er weinig te doen); alleen de kaart weghalen (de pagina zegt dan nergens wie je bent).
 - **Later:** _Fans staat in het hoofdmenu zodra accounts aan staan_ hierboven zegt dat `/fans` een kaart heeft om alvast een account te maken; die kaart is er alleen nog voor een bezoeker zonder sessie.
 
+## Op het veld van een wedstrijd staat een speler met zijn beginletter als een naamgenoot in dezelfde jaren speelde
+
+- **Datum:** 22 november 2026
+- **Besluit:** een speler van ons krijgt op de wedstrijdpagina de beginletter van zijn voornaam voor zijn achternaam (`J. Drost`) als een andere persoon met dezelfde achternaam, met het voorvoegsel erbij, in `players` een seizoen heeft dat hooguit één seizoen van een seizoen van hem afligt (#1557).
+  Een seizoen ertussen hoeft er niet te zijn.
+  Bij dezelfde beginletter komt de hele voornaam.
+  De regel staat op één plek (`leadOfName` en `leadOfNamesake` in `apps/site/src/player-name.ts`) en geldt op het veld en bij de doelpuntenmakers boven de score; de doelpuntenmakers in een wedstrijdregel gebruiken dezelfde functie voor de letter.
+  De opstellingenlijst, de wissels en het verloop tonen de hele naam, en de zin voor een schermlezer ook.
+  Spelers van tegenstanders vallen erbuiten, en er komt geen veld in het beheer om de keuze per persoon te wijzigen.
+- **Waarom:** tweelingen en vader en zoon staan vaak in aangrenzende seizoenen, en een speler uit een heel ander tijdperk is niet te verwarren.
+  Eén regel op één plek, zodat de pagina niet twee namen voor één speler toont.
+  Een tegenstander is een naam zonder persoon tot E13 klaar is, en de regel komt uit de gegevens: wie het anders wil, verbetert de naam van de persoon.
+- **Alternatieven:** altijd bij een gedeelde achternaam (ook "J. de Jong" voor wie nooit samen speelde); alleen in hetzelfde seizoen (mist de Drosts); alleen het veld; een schakelaar per persoon.
+- **Later:** de beslissing _`goalsWithInitials` vergelijkt de namen_ in _Doelpunten tellen per persoon_ hierboven blijft gelden voor de doelpuntenmakers in een wedstrijdregel; alleen de letter komt nu uit de gedeelde functie.
+
 ## De pagina Uitblinker van het jaar toont een kaart per seizoen en de Uitblinker van de Uitblinkers
 
 - **Datum:** 24 november 2026
