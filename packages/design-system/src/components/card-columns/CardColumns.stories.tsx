@@ -13,7 +13,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Kaarten in twee kolommen als er plaats voor is, en anders onder elkaar. Met `columns={3}` zijn het er drie vanaf een brede plaats (52 rem), twee vanaf 28 rem en één daaronder.',
+          'Kaarten in twee kolommen als er plaats voor is, en anders onder elkaar. Met `columns={3}` zijn het er drie op een brede plaats, twee op een middelbrede en één op een smalle.',
           'De volgorde in de code is de leesvolgorde: de eerste kaart links, de tweede rechts, de derde weer links.',
           'Hij is gebouwd uit `Card`, die hij naast elkaar zet.',
         ].join('\n'),
