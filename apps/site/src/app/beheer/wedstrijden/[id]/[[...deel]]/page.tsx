@@ -38,7 +38,7 @@ import { matchFormId } from '#src/beheer/form-ids'
 import { describeHeldChange, describeWithoutDecision, explainHold } from '#src/beheer/held-changes'
 import { parseItemId } from '#src/beheer/items'
 import { findMatch } from '#src/beheer/match-entries'
-import { goalKinds, isKnockout, statusChoices, valuesOf } from '#src/beheer/match-form'
+import { goalKinds, isKnockout, statusChoicesFor, valuesOf } from '#src/beheer/match-form'
 import { columnParts, isFormColumn } from '#src/beheer/quality-table'
 import { requireRole } from '#src/beheer/require-role'
 import { SaveButtons } from '#src/beheer/SaveButtons'
@@ -246,7 +246,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
         showDelay,
         squad,
         stadiums,
-        statuses: statusChoices,
+        statuses: statusChoicesFor(match.status),
         timeOptional: match.dataSource === 'oude-fansite',
       }}
       initial={

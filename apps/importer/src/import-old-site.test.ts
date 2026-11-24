@@ -11,6 +11,7 @@ import path from 'node:path'
 import { promisify } from 'node:util'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import type { CrossTableSeason, FetchedCrossTable } from './old-site-cross-tables.ts'
 import type { OldSiteStep } from './old-site-step.ts'
 
 import {
@@ -68,10 +69,15 @@ beforeEach(async () => {
 /** No test asks Wikipedia: every title is without an article. */
 const noTitles = async () => ({ kind: 'missing' }) as const
 
+/** Nor does a test ask Wikipedia for a cross table: no page can be read. */
+const noCrossTables = async (seasons: readonly CrossTableSeason[]): Promise<FetchedCrossTable[]> =>
+  seasons.map((season) => ({ ...season, kind: 'none', reason: 'test' }))
+
 /** Runs the command against the small files and collects what it prints. */
 async function run(options: Parameters<typeof runOldSiteImport>[1] = {}) {
   const lines: string[] = []
   const code = await runOldSiteImport(database.url, {
+    crossTables: noCrossTables,
     folder,
     titles: noTitles,
     write: (line) => lines.push(line),

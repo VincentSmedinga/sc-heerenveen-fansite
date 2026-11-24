@@ -14,6 +14,7 @@ import {
   listReportedMatches,
   listScheduledMatches,
   listSeasonReports,
+  listUnknownResultMatches,
   matchForRules,
   mayHaveReport,
   phaseOf,
@@ -1099,6 +1100,24 @@ describe('a match that is still being played', () => {
     expect((await listScheduledMatches(database.db, season)).map(({ match }) => match.id)).toEqual([without])
     expect((await listScheduledMatches(database.db, season))[0]?.clubSlug).toBe('testdorp-fc')
     expect(await listScheduledMatches(database.db, '2025/26')).toEqual([])
+  })
+
+  it('lists a match without a result by itself, with its club, and no other match (#1622)', async () => {
+    const unknown = await playedMatch({
+      goalsAgainst: null,
+      goalsFor: null,
+      matchDate: '2026-08-22',
+      round: 'Speelronde 4',
+      status: 'result_unknown',
+    })
+
+    await playedMatch()
+    await scheduledMatch({ matchDate: '2026-11-21', round: 'Speelronde 13' })
+
+    expect((await listUnknownResultMatches(database.db, season)).map(({ match }) => match.id)).toEqual([unknown])
+    expect((await listUnknownResultMatches(database.db, season))[0]?.clubSlug).toBe('testdorp-fc')
+    expect(await listUnknownResultMatches(database.db, '2025/26')).toEqual([])
+    expect((await listScheduledMatches(database.db, season)).map(({ match }) => match.id)).not.toContain(unknown)
   })
 
   it('may have a report from its day on, in Dutch time, and only when it is played or scheduled', () => {

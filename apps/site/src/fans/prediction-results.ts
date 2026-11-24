@@ -34,7 +34,7 @@ export type CrowdFigures = {
 }
 
 /** What the list says of a match: where it stands. */
-export type PredictionState = 'cancelled' | 'live' | 'played' | 'postponed' | 'upcoming'
+export type PredictionState = 'cancelled' | 'live' | 'played' | 'postponed' | 'result_unknown' | 'upcoming'
 
 /** A match of a prediction, with what the cards show of it. */
 export type ScoredMatch = {
@@ -103,7 +103,7 @@ export type Row = {
   opponent: string
   round: string
   season: string
-  status: 'cancelled' | 'played' | 'postponed' | 'scheduled'
+  status: 'cancelled' | 'played' | 'postponed' | 'result_unknown' | 'scheduled'
 }
 
 /** A score of sc Heerenveen against the opponent, as the home and the away club. */
@@ -129,7 +129,7 @@ const stateOf = (row: Row, now: Date): PredictionState => {
  * A match that was called off has no result.
  */
 export function resultOf(row: Pick<Row, Exclude<keyof Row, 'id'>>): PredictionResult {
-  if (row.status === 'cancelled' || row.status === 'postponed') {
+  if (row.status === 'cancelled' || row.status === 'postponed' || row.status === 'result_unknown') {
     return {}
   }
 
@@ -248,7 +248,10 @@ export async function scoredPredictions(db: Database, supporterId: number, now =
 
 /** What the supporter scored over the matches that have points: their number and the sum. */
 export function totalsOf(list: readonly ScoredPrediction[]) {
-  const counted = list.filter((item) => item.match.state !== 'cancelled' && item.match.state !== 'postponed')
+  const counted = list.filter(
+    (item) =>
+      item.match.state !== 'cancelled' && item.match.state !== 'postponed' && item.match.state !== 'result_unknown',
+  )
 
   return { count: counted.length, points: counted.reduce((sum, item) => sum + item.points.total, 0) }
 }

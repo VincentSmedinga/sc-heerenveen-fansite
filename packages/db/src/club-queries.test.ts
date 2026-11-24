@@ -126,6 +126,23 @@ describe('listClubRecords', () => {
     ])
   })
 
+  it('does not count a match without a result in the records of a club (#1622)', async () => {
+    await store(
+      played('FC Twente', 2, 0),
+      played('FC Twente', 0, 0, {
+        goalsAgainst: null,
+        goalsFor: null,
+        matchDate: '1991-02-01',
+        season: '1990/91',
+        status: 'result_unknown',
+      }),
+    )
+
+    expect(await listClubRecords(database.db)).toEqual([
+      expect.objectContaining({ drawn: 0, goalsAgainst: 0, goalsFor: 2, lost: 0, played: 1, won: 1 }),
+    ])
+  })
+
   it('gives the country of the club, and null for a club whose country we do not know', async () => {
     await store(played('FC Twente', 2, 0), played('Ajax', 1, 2))
     await database.pool.query("UPDATE clubs SET country = 'NL', country_source = 'manual' WHERE name = 'FC Twente'")

@@ -6,7 +6,9 @@ import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq, sql } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
+import type { FetchedCrossTable } from './old-site-cross-tables.ts'
 import type { OldSiteMatch } from './old-site-file.ts'
+import type { OldSiteContext } from './old-site-step.ts'
 
 import { importOldSiteClubs, oldSiteClubIds } from './old-site-clubs.ts'
 import { readOldSiteData } from './old-site-file.ts'
@@ -932,6 +934,212 @@ describe('the step matches', () => {
   })
 })
 
+/** Twelve made-up clubs for a made-up cross table: sc Heerenveen, NEC, Ajax and fillers. */
+const tableClubs = ['sc Heerenveen', 'NEC', 'Ajax', ...Array.from({ length: 9 }, (_, index) => `Club ${index + 1}`)]
+
+/** A made-up page with a cross table, every home club wins 1 – 0 except where `cells` says. */
+function crossTablePage(cells: Record<string, string> = {}) {
+  return [
+    '== Uitslagen ==',
+    '{| class="wikitable"',
+    '|-',
+    '! Thuis / Uit',
+    ...tableClubs.map((club) => `! [[${club}|C]]`),
+    ...tableClubs.flatMap((home) => [
+      '|-',
+      `|[[${home}]]||${tableClubs
+        .map((away) => cells[`${home}-${away}`] ?? (home === away ? ' ' : '1 – 0'))
+        .join('||')}`,
+    ]),
+    '|}',
+    '',
+    '== Topscorers ==',
+  ].join('\n')
+}
+
+/** The pages Wikipedia would give for the seasons asked for, or why there are none. */
+const wikipedia =
+  (cells: Record<string, string>, failure?: string): NonNullable<OldSiteContext['crossTables']> =>
+  async (seasons) =>
+    seasons.map((season): FetchedCrossTable =>
+      failure === undefined
+        ? { ...season, kind: 'page', text: crossTablePage(cells) }
+        : { ...season, kind: 'none', reason: failure },
+    )
+
+describe('a match of which the old fansite recorded nothing (#1622)', () => {
+  const oldClubs = [
+    { code: 'nec', country: 'NL', name: 'NEC' },
+    { code: 'ajax', country: 'NL', name: 'Ajax' },
+  ]
+  const nothing = { awayFullTime: 0, awayHalfTime: 0, homeFullTime: 0, homeHalfTime: 0, note: null }
+  const empty = (overrides: Partial<OldSiteMatch> = {}) => oldMatch({ result: nothing, ...overrides })
+  const cup = { code: 'nec.bekerthuis', competition: 2 }
+  let adminId = 0
+
+  beforeEach(async () => {
+    for (const table of ['match_changes', 'match_edits', 'match_statistics', 'matches', 'clubs', 'admin_users']) {
+      await database.pool.query(`DELETE FROM ${table}`)
+    }
+    await database.pool.query("INSERT INTO admin_users (email, role) VALUES ('redactie@example.org', 'editor')")
+    adminId = (await database.db.select().from(adminUsers))[0]?.id ?? 0
+  })
+
+  async function run(list: OldSiteMatch[], crossTables?: OldSiteContext['crossTables']) {
+    await importOldSiteClubs(database.db, oldClubs)
+
+    return importOldSiteMatches(
+      database.db,
+      list,
+      oldClubs,
+      await oldSiteClubIds(database.db, oldClubs),
+      new Date(),
+      crossTables,
+    )
+  }
+
+  const rows = () => database.db.select().from(matches).orderBy(asc(matches.matchDate))
+
+  it('gives a match without a league table no result, with its day and its club', async () => {
+    const report = await run([empty(cup)])
+    const [row] = await rows()
+
+    expect(row).toMatchObject({
+      attendance: null,
+      goalsAgainst: null,
+      goalsFor: null,
+      halfTimeAgainst: null,
+      halfTimeFor: null,
+      halfTimeSource: null,
+      matchDate: '2001-09-01',
+      opponent: 'NEC',
+      status: 'result_unknown',
+    })
+    expect(report.lines).toContain(
+      '2001/02: 1 matches without a result (result_unknown), 0 goalless matches kept because Wikipedia confirms the 0-0',
+    )
+  })
+
+  it('gives a league match no result when Wikipedia says another score, or has none', async () => {
+    await run(
+      [empty(), empty({ code: 'ajax.thuis', dateTime: '2001-09-08 20:00:00' })],
+      // The cell of sc Heerenveen at home against Ajax is empty: Wikipedia has nothing for it.
+      wikipedia({ 'sc Heerenveen-Ajax': ' ', 'sc Heerenveen-NEC': '2 – 1' }),
+    )
+
+    expect((await rows()).map((row) => [row.opponent, row.status, row.goalsFor])).toEqual([
+      ['NEC', 'result_unknown', null],
+      ['Ajax', 'result_unknown', null],
+    ])
+  })
+
+  it('keeps a 0-0 that Wikipedia confirms, and says so in the report', async () => {
+    const report = await run([empty()], wikipedia({ 'sc Heerenveen-NEC': '0 – 0' }))
+    const [row] = await rows()
+
+    expect(row).toMatchObject({ goalsAgainst: 0, goalsFor: 0, halfTimeFor: 0, status: 'played' })
+    expect(report.lines).toContain(
+      '2001/02: 0 matches without a result (result_unknown), 1 goalless matches kept because Wikipedia confirms the 0-0',
+    )
+  })
+
+  it('keeps the 0-0 where Wikipedia could not be read, because a real 0-0 must not go', async () => {
+    const list = [empty(), empty({ code: 'ajax.thuis', dateTime: '2001-09-08 20:00:00' })]
+    const failed = await run(list, wikipedia({}, 'de pagina bestaat niet'))
+    const missing = await run(list)
+
+    expect((await rows()).map((row) => row.status)).toEqual(['played', 'played'])
+    expect(failed.lines.join('\n')).toContain('left as they are, because Wikipedia could not be read')
+    expect(missing.lines.join('\n')).toContain('left as they are, because Wikipedia could not be read')
+  })
+
+  it('keeps a 0-0 with anything recorded', async () => {
+    const recorded = [
+      empty({ attendance: 12_000 }),
+      empty({ referee: 'Jan Wegereef' }),
+      empty({ lineup: [{ minuteIn: 0, minuteOut: 90, order: 1, playerCode: 'jan.janssen', playerName: null }] }),
+      empty({
+        events: [{ assist: null, event: 2, kind: null, minute: 30, playerCode: 'jan.janssen', playerName: null }],
+      }),
+      empty({ result: { ...nothing, note: 'n.v.' } }),
+      empty({ statistics: { ...zeroStatistics, homeFouls: 3 } }),
+      empty({ result: { ...nothing, homeFullTime: 1 } }),
+    ].map((one, index) => ({
+      ...one,
+      code: `${index % 2 === 0 ? 'nec' : 'ajax'}.bekerthuis`,
+      competition: 2,
+      dateTime: `2001-09-0${index + 1} 20:00:00`,
+    }))
+
+    await run(recorded)
+
+    expect((await rows()).map((row) => row.status)).toEqual(Array.from({ length: 7 }, () => 'played'))
+  })
+
+  it('empties a stored match once, and a second run changes nothing', async () => {
+    await run([empty()], wikipedia({ 'sc Heerenveen-NEC': '0 – 0' }))
+    expect((await rows())[0]).toMatchObject({ halfTimeFor: 0, halfTimeSource: 'oude-fansite', status: 'played' })
+
+    const first = await run([empty()], wikipedia({ 'sc Heerenveen-NEC': '1 – 0' }))
+    const second = await run([empty()], wikipedia({ 'sc Heerenveen-NEC': '1 – 0' }))
+
+    expect((await rows())[0]).toMatchObject({
+      goalsAgainst: null,
+      goalsFor: null,
+      halfTimeAgainst: null,
+      halfTimeFor: null,
+      halfTimeSource: null,
+      status: 'result_unknown',
+    })
+    expect(first).toMatchObject({ changed: 1, created: 0 })
+    expect(second).toMatchObject({ changed: 0, created: 0, unchanged: 1 })
+  })
+
+  it('becomes played again when the file has a result', async () => {
+    await run([empty(cup)])
+    await run([oldMatch(cup)])
+
+    expect((await rows())[0]).toMatchObject({ goalsFor: 2, status: 'played' })
+  })
+
+  it('never empties what the editors entered', async () => {
+    await run([oldMatch(cup)])
+
+    const [stored] = await rows()
+
+    // A result of the editors stays, whatever the file says.
+    await database.db.insert(matchEdits).values({
+      beforeGoals: '[]',
+      beforeMatch: '{}',
+      editedAt: new Date(),
+      editedBy: adminId,
+      matchId: stored!.id,
+      reason: 'Beter bekend',
+      resultEdited: true,
+    })
+    await run([empty(cup)])
+    expect((await rows())[0]).toMatchObject({ goalsFor: 2, status: 'played' })
+
+    // So do spectators and a score at half-time of the editors.
+    await database.db.delete(matchEdits)
+    await database.db.insert(matchEdits).values({
+      beforeGoals: '[]',
+      beforeMatch: '{}',
+      editedAt: new Date(),
+      editedBy: adminId,
+      factsEdited: true,
+      matchId: stored!.id,
+      reason: 'Beter bekend',
+    })
+    await database.db
+      .update(matches)
+      .set({ attendance: 9000, halfTimeAgainst: 0, halfTimeFor: 1, halfTimeSource: 'redactie' })
+      .where(eq(matches.id, stored!.id))
+    await run([empty(cup)])
+    expect((await rows())[0]).toMatchObject({ attendance: 9000, halfTimeFor: 1, status: 'played' })
+  })
+})
+
 describe('the files of the old fansite', () => {
   it('makes 671 matches in the right competitions, and a second run changes nothing', async () => {
     for (const table of ['match_edits', 'match_statistics', 'matches', 'clubs']) {
@@ -965,7 +1173,14 @@ describe('the files of the old fansite', () => {
       'Play-offs UEFA Cup': 4,
       'UEFA Cup': 23,
     })
-    expect(before.every((row) => row.dataSource === 'oude-fansite' && row.status === 'played')).toBe(true)
+    expect(before.every((row) => row.dataSource === 'oude-fansite')).toBe(true)
+    // Without Wikipedia only a match outside the leagues is known to have no result (#1622).
+    expect(
+      before
+        .filter((row) => row.status === 'result_unknown')
+        .every((row) => !['Eerste divisie', 'Eredivisie'].includes(row.competition)),
+    ).toBe(true)
+    expect(before.every((row) => row.status === 'played' || row.status === 'result_unknown')).toBe(true)
     expect(before.filter((row) => row.kickoffAt === null)).toHaveLength(12)
     expect(before.filter((row) => row.round.startsWith('Speelronde'))).toHaveLength(15 * 34 + 34)
     expect(before.filter((row) => row.extraTime)).toHaveLength(8)

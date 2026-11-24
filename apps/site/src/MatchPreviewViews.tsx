@@ -102,11 +102,14 @@ export function PreviewHeader({
   facts,
   home,
   opponent,
+  pill = 'Voorbeschouwing',
   title,
 }: {
   facts: MatchHeaderFact[]
   home: boolean
   opponent: string
+  /** The words in the pill: "Voorbeschouwing", or "Uitslag onbekend" without a result. */
+  pill?: string
   title: string
 }) {
   return (
@@ -121,7 +124,7 @@ export function PreviewHeader({
         home={home}
         opponent={opponent}
         phase="upcoming"
-        pill="Voorbeschouwing"
+        pill={pill}
       />
     </Card>
   )

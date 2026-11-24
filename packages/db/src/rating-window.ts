@@ -54,7 +54,7 @@ export type RatingMatch = {
   opponent: string
   round: string
   season: string
-  status: 'cancelled' | 'played' | 'postponed' | 'scheduled'
+  status: 'cancelled' | 'played' | 'postponed' | 'result_unknown' | 'scheduled'
 }
 
 /** A player a supporter can rate: the rating belongs to the appearance in the report. */

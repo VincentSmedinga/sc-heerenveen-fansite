@@ -7,8 +7,9 @@ import { keepSourceDifferences, readTakenOverParts } from '@fansite/db/source-di
 import { eq } from 'drizzle-orm'
 
 import type { OldSiteClub, OldSiteMatch } from './old-site-file.ts'
-import type { OldSiteDatabase, OldSiteStepReport } from './old-site-step.ts'
+import type { OldSiteContext, OldSiteDatabase, OldSiteStepReport } from './old-site-step.ts'
 
+import { crossTableKey, crossTableSeasons, crossTableSeasonsOf, readCrossTableScores } from './old-site-cross-tables.ts'
 import { amsterdamToUtc } from './read-wikipedia.ts'
 
 /** The source marker of the matches this step writes. */
@@ -58,6 +59,12 @@ export type DerivedOldSiteMatch = {
   lines: string[]
   /** The match as it is in the file. */
   match: OldSiteMatch
+  /**
+   * The old fansite has nothing of this match (#1622): 0-0 at the end and at half-time, no
+   * goals, cards, lineup, referee, spectators or statistics, and no remark on the result. Only
+   * with a check against Wikipedia is that a match without a result (`result_unknown`).
+   */
+  noRecord?: boolean
   /** Why the match can't be used, else undefined. */
   skip?: string
   statistics: null | Omit<NewMatchStatistics, 'matchId'>
@@ -127,6 +134,19 @@ export function readResultNote(note: null | string): ResultNote {
   }
 
   return { away: Number(score[2]), home: Number(score[1]), kind: score[3] === 'n.v.' ? 'extra-score' : 'shootout' }
+}
+
+/** Asks for the cross tables of the seasons that have a match with nothing recorded. */
+async function askWikipedia(
+  db: Pick<OldSiteDatabase, 'select'>,
+  candidates: readonly DerivedOldSiteMatch[],
+  crossTables: OldSiteContext['crossTables'],
+) {
+  const seasons = crossTableSeasonsOf({ matches: candidates.map((one) => one.match) })
+
+  return crossTables === undefined || seasons.length === 0
+    ? undefined
+    : readCrossTableScores(db, await crossTables(seasons))
 }
 
 function deriveOne(match: OldSiteMatch, number: number, groupSize: number): DerivedOldSiteMatch {
@@ -234,9 +254,22 @@ function deriveOne(match: OldSiteMatch, number: number, groupSize: number): Deri
     attendance = null
   }
 
+  const noRecord =
+    result.homeFullTime === 0 &&
+    result.awayFullTime === 0 &&
+    result.homeHalfTime === 0 &&
+    result.awayHalfTime === 0 &&
+    match.events.length === 0 &&
+    match.lineup.length === 0 &&
+    (match.referee ?? '').trim() === '' &&
+    (match.attendance ?? 0) === 0 &&
+    !hasStatistics &&
+    ending.kind === 'none'
+
   return {
     ...empty,
     halfTimeUnknown,
+    noRecord,
     statistics: hasStatistics
       ? {
           cornersAgainst: theirs(stats.homeCorners, stats.awayCorners),
@@ -286,6 +319,15 @@ function fitsResult(
   return Object.keys(dropHalfTimeThatNoLongerFits(claim, row)).length === 0
 }
 
+/** Whether a match of a league has a cross table on Wikipedia to check a 0-0 against (#976). */
+function inCrossTables(values: Pick<OldSiteMatchValues, 'competition' | 'season'>): boolean {
+  return (
+    leagues.includes(values.competition) &&
+    values.season >= crossTableSeasons.first &&
+    values.season <= crossTableSeasons.last
+  )
+}
+
 /**
  * The score after 90 minutes when the goals of the match prove it: the list has as many goals
  * for each side as the final score, each with a minute, and none is an own goal (the file does
@@ -311,6 +353,25 @@ function ninetyMinutes(
   return {
     against: theirs.filter((goal) => goal.minute <= 90).length,
     for: ours.filter((goal) => goal.minute <= 90).length,
+  }
+}
+
+/** The row of a match nothing is known of: no score, no half-time, no spectators (#1622). */
+function withoutResult<Values extends OldSiteMatchValues>(values: Values): Values {
+  return {
+    ...values,
+    afterNinetyAgainst: null,
+    afterNinetyFor: null,
+    attendance: null,
+    extraTime: false,
+    goalsAgainst: null,
+    goalsFor: null,
+    halfTimeAgainst: null,
+    halfTimeFor: null,
+    halfTimeSource: null,
+    penaltiesAgainst: null,
+    penaltiesFor: null,
+    status: 'result_unknown',
   }
 }
 
@@ -352,6 +413,7 @@ export async function importOldSiteMatches(
   oldClubs: readonly OldSiteClub[],
   clubIds: ReadonlyMap<string, number>,
   now = new Date(),
+  crossTables?: OldSiteContext['crossTables'],
 ): Promise<OldSiteStepReport> {
   const report: OldSiteStepReport = { changed: 0, created: 0, lines: [], skipped: 0, unchanged: 0 }
   const names = new Map(oldClubs.map((club) => [club.code, club.name]))
@@ -379,6 +441,17 @@ export async function importOldSiteMatches(
   const keys = new Set<string>()
   let remarks = 0
   let clearedHalfTimes = 0
+  const withoutResultBySeason = new Map<string, number>()
+  const goallessBySeason = new Map<string, number>()
+  const unchecked: string[] = []
+
+  // A match with nothing recorded is a goalless 0-0 only when Wikipedia says so. The league
+  // tables are asked for, once, and only for the seasons that have such a match (#1622).
+  const wikipedia = await askWikipedia(
+    db,
+    derived.filter((one) => one.noRecord === true && one.values !== null && inCrossTables(one.values)),
+    crossTables,
+  )
 
   for (const one of derived) {
     const { match } = one
@@ -402,7 +475,24 @@ export async function importOldSiteMatches(
       continue
     }
 
-    const values = { ...one.values, clubId, opponent }
+    let values: OldSiteMatchValues & { clubId: number; opponent: string } = { ...one.values, clubId, opponent }
+
+    if (one.noRecord === true) {
+      const checked = inCrossTables(values)
+      const readable = wikipedia?.readable.has(`${values.season}|${values.competition}`) === true
+      const score = checked ? wikipedia?.scores.get(crossTableKey(values)) : undefined
+
+      if (checked && !readable) {
+        // Without the table nothing is certain: a real 0-0 must not go, so the row stays.
+        unchecked.push(label)
+      } else if (score?.for === 0 && score.against === 0) {
+        goallessBySeason.set(values.season, (goallessBySeason.get(values.season) ?? 0) + 1)
+      } else {
+        values = withoutResult(values)
+        withoutResultBySeason.set(values.season, (withoutResultBySeason.get(values.season) ?? 0) + 1)
+      }
+    }
+
     const key = matchKey(values)
     const before = stored.get(key)
 
@@ -424,6 +514,12 @@ export async function importOldSiteMatches(
         )
       }
       if (lookup.kind === 'found' && lookup.match.dataSource !== oldSiteSource) {
+        // The old fansite has nothing of this match, so there is nothing to compare or fill.
+        if (values.status === 'result_unknown') {
+          report.unchanged += 1
+          continue
+        }
+
         const compared = compareClaim(lookup.match, values, lockedFields(edits.get(lookup.match.id)))
 
         // A difference waits for the editors as a change, once (#974). The match keeps the
@@ -499,11 +595,11 @@ export async function importOldSiteMatches(
       // Who played at home goes with the result.
       ...(held?.has('result') === true ? otherFields.filter((field) => field !== 'home') : otherFields),
     ] as const
-    const change: Record<string, unknown> = {}
+    const change: Partial<Match> = {}
 
     for (const field of fields) {
       if (!sameValue(before[field], values[field])) {
-        change[field] = values[field]
+        Object.assign(change, { [field]: values[field] })
       }
     }
 
@@ -523,8 +619,24 @@ export async function importOldSiteMatches(
     }
 
     // A score at half-time that the old fansite never knew is emptied again, but only when the
-    // file itself was its source: what the editors filled in stays (#1617).
-    if (one.halfTimeUnknown === true && before.halfTimeSource === 'oude-fansite' && before.halfTimeFor !== null) {
+    // file itself was its source: what the editors filled in stays (#1617). The same goes for
+    // the half-time of a match without a result (#1622), which must go with the score.
+    // Spectators or a score at half-time that the editors filled in are a record: such a row is
+    // not emptied.
+    const keptByEditors =
+      (change.attendance === undefined ? before.attendance : change.attendance) !== null ||
+      (before.halfTimeFor !== null && before.halfTimeSource !== 'oude-fansite')
+
+    if (change.status === 'result_unknown' && keptByEditors) {
+      for (const field of resultFields) {
+        delete change[field]
+      }
+      report.lines.push(`${label}: has spectators or a score at half-time from the editors, so it is not emptied`)
+    }
+
+    const halfTimeFromFile = before.halfTimeSource === 'oude-fansite' && before.halfTimeFor !== null
+
+    if (halfTimeFromFile && (one.halfTimeUnknown === true || change.status === 'result_unknown')) {
       Object.assign(change, { halfTimeAgainst: null, halfTimeFor: null, halfTimeSource: null })
       clearedHalfTimes += 1
     }
@@ -563,6 +675,16 @@ export async function importOldSiteMatches(
   }
   if (clearedHalfTimes > 0) {
     report.lines.push(`${clearedHalfTimes} scores at half-time are emptied: the old fansite did not know them`)
+  }
+  for (const season of [...new Set([...withoutResultBySeason.keys(), ...goallessBySeason.keys()])].toSorted()) {
+    report.lines.push(
+      `${season}: ${withoutResultBySeason.get(season) ?? 0} matches without a result (result_unknown), ${goallessBySeason.get(season) ?? 0} goalless matches kept because Wikipedia confirms the 0-0`,
+    )
+  }
+  if (unchecked.length > 0) {
+    report.lines.push(
+      `${unchecked.length} matches with nothing recorded are left as they are, because Wikipedia could not be read for them: ${unchecked.join(', ')}`,
+    )
   }
   if (remarks > 0) {
     report.lines.push(`${remarks} remarks of the old editors are not copied to the note: they are working notes`)

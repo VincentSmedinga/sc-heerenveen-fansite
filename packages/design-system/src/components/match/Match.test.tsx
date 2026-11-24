@@ -615,6 +615,46 @@ describe('Match', () => {
     expect(container.querySelector('.hf-match-goals')).toBeNull()
   })
 
+  it('says "Uitslag onbekend" where the result would be, with the day and no score or dash', () => {
+    const { container } = render(
+      <Match
+        competition="Eredivisie"
+        dateTime="1992-03-08"
+        home
+        opponent="Willem II"
+        round="Speelronde 27"
+        status="result_unknown"
+        time="zo 8 mrt 1992"
+      />,
+    )
+
+    expect(container.querySelector('.hf-match-unknown')?.textContent).toContain('Uitslag onbekend')
+    expect(container.querySelector('.hf-match-versus')).toBeNull()
+    expect(container.querySelector('time')?.textContent).toBe('zo 8 mrt 1992')
+    expect(container.querySelector('.hf-match-goals')).toBeNull()
+    expect(container.textContent).not.toContain('–')
+    expect(container.textContent).toContain('tegen Willem II')
+    expect(container.textContent).toContain(', uitslag onbekend')
+  })
+
+  it('links a match without a result to its page, named "uitslag onbekend"', () => {
+    const { container } = render(
+      <Match
+        dateTime="1992-03-08"
+        home
+        opponent="Willem II"
+        reportHref="/wedstrijden/1991-92/1992-03-08-willem-ii"
+        round="Speelronde 27"
+        status="result_unknown"
+        time="zo 8 mrt 1992"
+      />,
+    )
+
+    expect(container.querySelector('a')?.getAttribute('href')).toBe('/wedstrijden/1991-92/1992-03-08-willem-ii')
+    expect(container.querySelector('a')?.textContent).toMatch(/, uitslag onbekend$/u)
+    expect(container.textContent).not.toContain('verslag')
+  })
+
   it('names a cancelled match for a screen reader as the clubs, the round and "Geannuleerd"', () => {
     const { container } = render(<Match home opponent="Willem II" round="Speelronde 27" status="cancelled" />)
 

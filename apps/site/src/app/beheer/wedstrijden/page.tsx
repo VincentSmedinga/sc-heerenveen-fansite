@@ -257,7 +257,13 @@ function ResultCell({ match }: { match: AdminMatchRow }) {
         ? `${match.goalsFor} - ${match.goalsAgainst}`
         : `${match.goalsAgainst} - ${match.goalsFor}`
       : undefined
-  const status = { cancelled: 'Geannuleerd', played: '–', postponed: 'Uitgesteld', scheduled: 'Gepland' }[match.status]
+  const status = {
+    cancelled: 'Geannuleerd',
+    played: '–',
+    postponed: 'Uitgesteld',
+    result_unknown: 'Uitslag onbekend',
+    scheduled: 'Gepland',
+  }[match.status]
 
   return (
     <>
