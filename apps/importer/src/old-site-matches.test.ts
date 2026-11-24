@@ -1043,6 +1043,22 @@ describe('a match of which the old fansite recorded nothing (#1622)', () => {
     )
   })
 
+  it('does not empty a result that Wikipedia filled in (#1621), and does when it says another score', async () => {
+    const cells = { 'sc Heerenveen-NEC': '2 – 1' }
+
+    await run([empty()], wikipedia(cells))
+    await database.db.update(matches).set({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+
+    const second = await run([empty()], wikipedia(cells))
+
+    expect((await rows())[0]).toMatchObject({ goalsAgainst: 1, goalsFor: 2, status: 'played' })
+    expect(second.unchanged).toBe(1)
+
+    // The table says another score: the result is not Wikipedia's, so the rule empties it.
+    await run([empty()], wikipedia({ 'sc Heerenveen-NEC': '3 – 3' }))
+    expect((await rows())[0]).toMatchObject({ goalsFor: null, status: 'result_unknown' })
+  })
+
   it('keeps the 0-0 where Wikipedia could not be read, because a real 0-0 must not go', async () => {
     const list = [empty(), empty({ code: 'ajax.thuis', dateTime: '2001-09-08 20:00:00' })]
     const failed = await run(list, wikipedia({}, 'de pagina bestaat niet'))

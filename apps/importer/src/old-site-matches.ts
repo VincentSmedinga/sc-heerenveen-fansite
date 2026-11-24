@@ -328,6 +328,17 @@ function inCrossTables(values: Pick<OldSiteMatchValues, 'competition' | 'season'
   )
 }
 
+/** Whether a stored match of the old fansite has the result Wikipedia filled in (#1621). */
+function isFilledFromWikipedia(row: Match | undefined, score: { against: number; for: number }): boolean {
+  return (
+    row !== undefined &&
+    row.dataSource === oldSiteSource &&
+    row.status === 'played' &&
+    row.goalsFor === score.for &&
+    row.goalsAgainst === score.against
+  )
+}
+
 /**
  * The score after 90 minutes when the goals of the match prove it: the list has as many goals
  * for each side as the final score, each with a minute, and none is an own goal (the file does
@@ -487,6 +498,11 @@ export async function importOldSiteMatches(
         unchecked.push(label)
       } else if (score?.for === 0 && score.against === 0) {
         goallessBySeason.set(values.season, (goallessBySeason.get(values.season) ?? 0) + 1)
+      } else if (score !== undefined && isFilledFromWikipedia(stored.get(matchKey(values)), score)) {
+        // The result is Wikipedia's (#1621): the old fansite has nothing, so it is not emptied.
+        keys.add(matchKey(values))
+        report.unchanged += 1
+        continue
       } else {
         values = withoutResult(values)
         withoutResultBySeason.set(values.season, (withoutResultBySeason.get(values.season) ?? 0) + 1)

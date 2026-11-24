@@ -14,6 +14,7 @@ import { seasonOf } from '@fansite/db/season'
 import type { ImportOptions } from './import-feeds.ts'
 
 import { createFetcher, type Fetcher } from './fetcher.ts'
+import { fillResultsFromCrossTables } from './fill-results-from-cross-tables.ts'
 import { groupStagesOf, importGroupStages } from './import-group-standings.ts'
 import {
   englishWikipediaOrigin,
@@ -157,7 +158,11 @@ export async function runSeasonImport(
         origin,
       }).catch((error: unknown) => ({ kind: 'error', message: describeError(error), season: parsed.season }) as const)
 
-      return { groups: await readGroupStages(db, fetcher, parsed.season, origin, clock), report }
+      return {
+        fill: await fillResults(db, fetcher, parsed.season, origin),
+        groups: await readGroupStages(db, fetcher, parsed.season, origin, clock),
+        report,
+      }
     })
 
     if (!run.ran) {
@@ -167,6 +172,9 @@ export async function runSeasonImport(
     }
 
     write(formatMatchReport(run.result.report))
+    for (const line of run.result.fill) {
+      write(line)
+    }
     for (const line of run.result.groups.lines) {
       write(line)
     }
@@ -226,7 +234,12 @@ export async function runSeasonsImport(
           (error: unknown) => ({ kind: 'error', message: describeError(error), season }) as const,
         )
 
-        return { groups: await readGroupStages(db, fetcher, season, origin, clock), lines, report }
+        return {
+          fill: await fillResults(db, fetcher, season, origin),
+          groups: await readGroupStages(db, fetcher, season, origin, clock),
+          lines,
+          report,
+        }
       })
 
       if (!run.ran) {
@@ -243,6 +256,9 @@ export async function runSeasonsImport(
       const text = formatMatchReport(run.result.report)
 
       write(text)
+      for (const line of run.result.fill) {
+        write(line)
+      }
       for (const line of run.result.groups.lines) {
         write(line)
       }
@@ -290,6 +306,21 @@ function checkSeason(argument: string | undefined): Checked {
   }
 
   return { kind: 'season', season: argument }
+}
+
+/**
+ * Fills the results of the old fansite's matches that have none from the cross table (#1621),
+ * for a season of the old fansite, after the matches of the season. It costs no request for any
+ * other season. A failure is a line in the log and nothing more: the season was stored.
+ */
+async function fillResults(db: Database, fetcher: Fetcher, season: string, origin: string): Promise<string[]> {
+  try {
+    const { filled, lines } = await fillResultsFromCrossTables(db, fetcher, season, { origin })
+
+    return filled === 0 && lines.length === 0 ? [] : [`Results ${season}: ${filled} filled from Wikipedia.`, ...lines]
+  } catch (error) {
+    return [`Results ${season}: not filled from Wikipedia. ${describeError(error)}`]
+  }
 }
 
 /**
