@@ -1,5 +1,5 @@
 /*
- * Size tokens: the height of buttons and fields, in the standard size and the small size. The
+ * Size tokens: the height of buttons and fields and of the horizontal bars, in the standard size and the small size. The
  * standard size is 44 pixels, the small size is lower, and both are well above the 24 by 24
  * pixels that WCAG 2.5.8 asks for. The chapter Maten van knoppen en velden in Storybook says
  * when to take which. A component takes the height from the token and writes no number of its
@@ -14,5 +14,15 @@
   :root {
     --hf-size-control: 2.75rem;
     --hf-size-control-small: 2.25rem;
+
+    /*
+     * The horizontal bars: two heights and one corner. The thin bar sits next to a number in a
+     * table cell, and is the height of the line of the results and of the parts of the score
+     * bar. The thick bar is a bar in a list, and the bar of the results. All of them have the
+     * same corner on every side.
+     */
+    --hf-size-bar-thin: 0.75rem;
+    --hf-size-bar-thick: 1.25rem;
+    --hf-radius-bar: 0.1875rem;
   }
 }

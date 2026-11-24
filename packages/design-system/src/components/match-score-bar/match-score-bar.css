@@ -28,7 +28,7 @@
   }
 
   .hf-match-score-bar-pieces {
-    block-size: 0.5rem;
+    block-size: var(--hf-size-bar-thin);
   }
 
   /*
@@ -62,6 +62,7 @@
     background-clip: padding-box;
     background-color: color-mix(in srgb, var(--hf-match-score-bar-colour) 80%, transparent);
     border-inline-start: 2px solid transparent;
+    border-radius: var(--hf-radius-bar);
     inset-block: 0;
     inset-inline: var(--hf-score-start) calc(100% - var(--hf-score-end));
     position: absolute;

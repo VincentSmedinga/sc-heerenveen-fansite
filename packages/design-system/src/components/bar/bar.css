@@ -55,22 +55,21 @@
    * The bar sits to the end of the number, in the same cell, so the numbers stay in line. It is
    * as long as the share of the largest number, which the component gives as a number from 0
    * to 100 in --hf-bar-share, so a number that is half of the largest has half of the bar. The
-   * fill is the green of a win: a calm 70% of it, which reaches 3:1 on the card in light and in
-   * dark. A table can use the whole green for a row that stands out. The bar is decoration, so
+   * fill is the green of a count (the tone `plain` of chart.css, as in a list): a calm 70% of
+   * it, which reaches 3:1 on the card in light and in dark, with no track. A table can use the whole green for a row that stands out. The bar is decoration, so
    * a screen reader skips it (aria-hidden).
    */
   .hf-bar {
-    block-size: 0.75rem;
+    block-size: var(--hf-size-bar-thin);
     display: inline-block;
     inline-size: var(--hf-bar-size);
     margin-inline-start: var(--hf-bar-gap);
     vertical-align: -0.0625rem;
 
     &::before {
-      background-color: color-mix(in srgb, var(--hf-colour-outcome-win) 70%, transparent);
+      background-color: color-mix(in srgb, var(--hf-chart-colour) var(--hf-chart-strength), transparent);
       block-size: 100%;
-      border-end-end-radius: 0.125rem;
-      border-start-end-radius: 0.125rem;
+      border-radius: var(--hf-radius-bar);
       content: '';
       display: block;
       inline-size: calc(var(--hf-bar-share) * 1%);

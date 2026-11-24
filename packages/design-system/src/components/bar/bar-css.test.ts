@@ -30,10 +30,16 @@ describe('bar.css', () => {
     expect(declarationsOf('&::before')).toMatch(/inline-size: calc\(var\(--hf-bar-share\) \* 1%\)/u)
   })
 
-  it('colours the bars with a calm part of the green of a win', () => {
+  it('colours the bars with a part of the colour of their tone, as a bar in a list does', () => {
     expect(declarationsOf('&::before')).toMatch(
-      /background-color: color-mix\(in srgb, var\(--hf-colour-outcome-win\) 70%, transparent\)/u,
+      /background-color: color-mix\(in srgb, var\(--hf-chart-colour\) var\(--hf-chart-strength\), transparent\)/u,
     )
+  })
+
+  it('is thin, has the corner of every bar on all four sides and no track', () => {
+    expect(declarationsOf('.hf-bar')).toMatch(/block-size: var\(--hf-size-bar-thin\)/u)
+    expect(declarationsOf('&::before')).toMatch(/border-radius: var\(--hf-radius-bar\)/u)
+    expect(css).not.toMatch(/track/u)
   })
 
   it('keeps the bars visible in forced colours with a system colour', () => {

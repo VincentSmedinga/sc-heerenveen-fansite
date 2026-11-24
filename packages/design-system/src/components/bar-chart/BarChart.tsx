@@ -53,8 +53,8 @@ export type BarChartBar = {
    */
   label?: string
   /**
-   * The tone that gives the colour of the bar. `plain` is the blue of a bar that only counts
-   * something, with no good or bad in it.
+   * The tone that gives the colour of the bar. `plain` is the green of a bar that only counts
+   * something, the same as the bars of a table and a list.
    */
   tone: 'plain' | ChartTone
   /** From 0 to `max`. Higher is clamped, lower is 0. */

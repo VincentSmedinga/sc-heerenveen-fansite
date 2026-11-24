@@ -28,7 +28,7 @@ describe('Bar', () => {
     const { container } = render(<Bar share={40} />)
     const bar = container.firstElementChild as HTMLElement
 
-    expect(bar.className).toBe('hf-bar')
+    expect(bar.className).toBe('hf-bar hf-chart-tone-plain')
     expect(bar.getAttribute('aria-hidden')).toBe('true')
     expect(bar.getAttribute('role')).toBeNull()
     expect(bar.textContent).toBe('')

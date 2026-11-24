@@ -4688,6 +4688,7 @@
     Het getal van een kwartier staat boven zijn staaf (`label` van `BarChartBar`), de naam eronder; een schermlezer krijgt dezelfde getallen als verborgen tekst.
 - **Waarom:** een grafiek laat in één blik zien wanneer een speler op zijn best was en wanneer hij scoort, maar een grafiek van drie getallen vertelt niets.
 - **Later:** zie _De grafieken van een speler staan in de zijkolom, in zachte kaarten_ (11 november 2026): de kaarten staan niet meer onder de loopbaan, en het spoor van een balk heeft op een zacht vlak de tint van het spoor van de schakelaar.
+- **Later:** zie _Een balk die een aantal toont is groen_ in `designsysteem.md` (24 november 2026): de balken zijn niet meer blauw maar groen, en het token `--hf-colour-chart-bar` bestaat niet meer.
 - **Alternatieven:** altijd alle drie de kaarten tonen; de kwartieren als tabel; de getallen als zichtbare regel onder de grafiek; het groen van een winst voor de balken (het ontwerp heeft blauw, en groen betekent winst).
 
 ## Een wedstrijd telt voor een speler alleen als hij op het veld stond
