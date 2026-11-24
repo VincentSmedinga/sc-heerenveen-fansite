@@ -7,7 +7,7 @@ import { toolbarAreas } from '#src/beheer/areas'
 import { compact } from '#src/beheer/density'
 import { addMatchFormId } from '#src/beheer/form-ids'
 import { listClubChoices } from '#src/beheer/match-additions'
-import { statusChoices } from '#src/beheer/match-form'
+import { statusChoicesFor } from '#src/beheer/match-form'
 import { requireRole } from '#src/beheer/require-role'
 import { SaveButtons } from '#src/beheer/SaveButtons'
 import { getDatabase } from '#src/database'
@@ -47,7 +47,7 @@ export default async function AddMatchPage() {
         <SaveButtons buttons={[{ label: 'Wedstrijd toevoegen' }]} cancelHref={matchesPath} formId={addMatchFormId} />
       </Page.Toolbar>
       <Page.Cell area="main">
-        <AddMatchForm action={submitAddMatch} choices={{ clubs, competitions, statuses: statusChoices }} />
+        <AddMatchForm action={submitAddMatch} choices={{ clubs, competitions, statuses: statusChoicesFor() }} />
       </Page.Cell>
     </Page.Main>
   )

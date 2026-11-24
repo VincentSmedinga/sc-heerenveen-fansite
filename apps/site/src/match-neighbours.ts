@@ -8,7 +8,7 @@ import { cacheFor } from './cache'
 import { getDatabase } from './database'
 import { matchMoment } from './match-format'
 import { getMatchSeasons } from './matches'
-import { getPublicReports, reportAddress } from './report-data'
+import { getPublicReports, getUnknownResultMatches, reportAddress } from './report-data'
 
 // The links at the bottom of the page of a match: the match before it and the match after it in
 // the order of play over all competitions and seasons (see `listMatchSequence`). A match with a
@@ -31,6 +31,10 @@ export async function getMatchNeighbours(id: number, now: Date) {
       for (const reported of await getPublicReports(season)) {
         links.set(reported.match.id, reportAddress(season, reported.match.matchDate, reported.clubSlug))
       }
+      // A match without a result has a page of its own too (#1622).
+      for (const { clubSlug, match } of await getUnknownResultMatches(season)) {
+        links.set(match.id, reportAddress(season, match.matchDate, clubSlug))
+      }
     }
   }
 
@@ -43,8 +47,8 @@ export async function getMatchNeighbours(id: number, now: Date) {
 /**
  * The properties of one side of the card. A match with a result has its stand from our side
  * (and the shoot-out when there was one). Any other match has no stand and no colour: "Live"
- * while it is being played, "Uitgesteld" or "Geannuleerd", and otherwise its day in the short
- * form of the lists, without the time.
+ * while it is being played, "Uitgesteld", "Geannuleerd", "Uitslag onbekend", and otherwise its
+ * day in the short form of the lists, without the time.
  */
 export function neighbourOf(match: MatchInSequence, href: string | undefined, now: Date): MatchNeighbour {
   const base = { club: match.opponent, home: match.home, ...(href === undefined ? {} : { href }) }
@@ -66,6 +70,10 @@ export function neighbourOf(match: MatchInSequence, href: string | undefined, no
 
   if (match.status === 'cancelled') {
     return { ...base, state: 'Geannuleerd' }
+  }
+
+  if (match.status === 'result_unknown') {
+    return { ...base, state: 'Uitslag onbekend' }
   }
 
   if (phaseOf(match, now) === 'live') {

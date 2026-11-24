@@ -255,6 +255,37 @@ describe('overviewOf', () => {
     })
   })
 
+  describe('with a match without a result', () => {
+    // Round 5 was played, but nobody knows the result: it is in the results, with its day.
+    const withUnknown = season.map((item) =>
+      item.round === 'Speelronde 5' ? match('Speelronde 5', 'result_unknown', '2026-08-29') : item,
+    )
+    const afterwards = new Date('2026-09-20T12:00:00Z')
+
+    it('has begun whatever the clock says, so it is in the results and never in the programme', () => {
+      expect(overviewOf(withUnknown, between).programme.map((item) => item.round)).toEqual([
+        'Speelronde 6',
+        'Speelronde 7',
+      ])
+      expect(overviewOf(withUnknown, afterwards).results.map((item) => item.round)).toContain('Speelronde 5')
+    })
+
+    it('is never the previous match, which needs a result to show', () => {
+      expect(overviewOf(withUnknown, new Date('2026-09-01T12:00:00Z')).previous?.round).toBe('Speelronde 4')
+    })
+
+    it('does not say that the result is still to come', () => {
+      expect(lacksResult(match('Speelronde 5', 'result_unknown', '2026-08-29'), afterwards)).toBe(false)
+    })
+
+    it('does not count in the numbers of the season', () => {
+      const unknown = match('Speelronde 5', 'result_unknown', '2026-08-29')
+
+      expect(scoreCountsOf([...season, unknown])).toEqual(scoreCountsOf(season))
+      expect(leagueResultsOf([...season, unknown])).toEqual(leagueResultsOf(season))
+    })
+  })
+
   it('does not change the list it is given', () => {
     const copy = [...season]
 

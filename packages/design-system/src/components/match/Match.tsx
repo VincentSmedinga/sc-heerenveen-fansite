@@ -11,10 +11,10 @@ const ourClub = 'sc Heerenveen'
 const attendanceFormat = new Intl.NumberFormat('nl-NL')
 
 /**
- * Where a match stands: still to be played, played, called off without a new date, or called
- * off for good.
+ * Where a match stands: still to be played, played, called off without a new date, called
+ * off for good, or played with a result that nobody knows.
  */
-export const matchStatuses = ['scheduled', 'played', 'postponed', 'cancelled'] as const
+export const matchStatuses = ['scheduled', 'played', 'postponed', 'cancelled', 'result_unknown'] as const
 
 /** One goal of a played match. */
 export type MatchGoal = {
@@ -102,6 +102,30 @@ export type MatchProps =
        */
       resultMissing?: boolean
       status: 'scheduled'
+    })
+  | (MatchWithTimeProps & {
+      afterNinetyAgainst?: never
+      afterNinetyFor?: never
+      extraTime?: never
+      goals?: never
+      goalsAgainst?: never
+      goalsFor?: never
+      live?: never
+      penaltiesAgainst?: never
+      penaltiesFor?: never
+      preview?: never
+      /**
+       * The address of the page of this match, when it has one. The line with the two clubs is
+       * then the link, as for any other match.
+       */
+      reportHref?: string | undefined
+      resultMissing?: never
+      /**
+       * A match that was played, of which nobody recorded the result (for instance a match of
+       * the old fansite). It has the day and the two clubs, and the words "Uitslag onbekend"
+       * where the result would be: no score, no dash and no goals.
+       */
+      status: 'result_unknown'
     })
 
 export type MatchStatus = (typeof matchStatuses)[number]
@@ -340,7 +364,9 @@ export const Match = ({
             .join(', '),
           shown: sides(home, goalsFor, goalsAgainst, '–'),
         }
-      : { hidden: 'tegen', shown: '–' }
+      : status === 'result_unknown'
+        ? { hidden: 'tegen', shown: 'Uitslag onbekend' }
+        : { hidden: 'tegen', shown: '–' }
 
   const when =
     status === 'postponed' ? (
@@ -367,7 +393,12 @@ export const Match = ({
   const clubs = (
     <>
       <span className={first === ourClub ? 'hf-match-own' : undefined}>{first}</span>{' '}
-      <span className={classNames('hf-match-score', outcome ? `hf-match-${outcome}` : 'hf-match-versus')}>
+      <span
+        className={classNames(
+          'hf-match-score',
+          outcome ? `hf-match-${outcome}` : status === 'result_unknown' ? 'hf-match-unknown' : 'hf-match-versus',
+        )}
+      >
         <span aria-hidden="true">
           {score.shown}
           {afterNinety ? (
@@ -419,10 +450,19 @@ export const Match = ({
           <a className="hf-match-link" href={reportHref}>
             {clubs}
             <span className="hf-visually-hidden">
-              {live === true ? ', live verslag' : preview === true ? ', voorbeschouwing' : ', verslag'}
+              {status === 'result_unknown'
+                ? ', uitslag onbekend'
+                : live === true
+                  ? ', live verslag'
+                  : preview === true
+                    ? ', voorbeschouwing'
+                    : ', verslag'}
             </span>
           </a>
         )}
+        {status === 'result_unknown' && reportHref === undefined ? (
+          <span className="hf-visually-hidden">, uitslag onbekend</span>
+        ) : null}
       </p>
       {goals !== undefined && goals.length > 0 ? (
         <p className="hf-match-goals">

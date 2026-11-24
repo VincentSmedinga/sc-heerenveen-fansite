@@ -25,7 +25,7 @@ export type PredictionMatch = {
   opponent: string
   round: string
   season: string
-  status: 'cancelled' | 'played' | 'postponed' | 'scheduled'
+  status: 'cancelled' | 'played' | 'postponed' | 'result_unknown' | 'scheduled'
 }
 
 /**

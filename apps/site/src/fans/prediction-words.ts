@@ -81,6 +81,9 @@ export function rowMatchOf(match: Omit<ScoredMatch, 'state'>, state: PredictionS
   if (state === 'cancelled' || state === 'postponed') {
     return { ...base, status: state }
   }
+  if (state === 'result_unknown') {
+    return { ...base, ...matchMoment({ ...match, status: 'played' }, now), status: state }
+  }
 
   const moment = matchMoment({ ...match, status: 'played' }, now)
 

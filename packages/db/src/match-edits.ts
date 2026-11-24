@@ -181,6 +181,9 @@ export function describeEntryResult(match: ResultFields): string {
   if (match.status === 'cancelled') {
     return 'geannuleerd'
   }
+  if (match.status === 'result_unknown') {
+    return 'uitslag onbekend'
+  }
 
   const ours = match.goalsFor ?? 0
   const theirs = match.goalsAgainst ?? 0

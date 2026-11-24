@@ -51,7 +51,15 @@ export const oldSiteSteps: readonly OldSiteStep[] = [
   { name: 'clubs', run: (db, data) => importOldSiteClubs(db, data.clubs) },
   {
     name: 'matches',
-    run: async (db, data) => importOldSiteMatches(db, data.matches, data.clubs, await oldSiteClubIds(db, data.clubs)),
+    run: async (db, data, context) =>
+      importOldSiteMatches(
+        db,
+        data.matches,
+        data.clubs,
+        await oldSiteClubIds(db, data.clubs),
+        new Date(),
+        context.crossTables,
+      ),
   },
   { name: 'spelers', run: (db, data) => importOldSitePlayers(db, data.matches, data.players) },
   { name: 'doelpunten', run: (db, data) => importOldSiteGoals(db, data.matches, data.players) },
@@ -68,6 +76,8 @@ export const oldSiteSteps: readonly OldSiteStep[] = [
 ]
 
 export type OldSiteImportOptions = {
+  /** Gets the cross tables of Wikipedia (#1622). By default the real ones. */
+  crossTables?: OldSiteContext['crossTables']
   /** Shows what the run would do, and writes nothing. */
   dryRun?: boolean
   /** The folder with the files, by default the one next to `import.mjs`. */
@@ -126,6 +136,7 @@ export function formatStepReport(name: string, report: OldSiteStepReport): strin
 export async function runOldSiteImport(
   databaseUrl: string,
   {
+    crossTables,
     dryRun = false,
     folder = defaultOldSiteFolder(),
     steps = oldSiteSteps,
@@ -144,7 +155,7 @@ export async function runOldSiteImport(
   }
 
   const { close, db, pool } = connect(databaseUrl)
-  const context: OldSiteContext = { titles: titles ?? realTitles(db) }
+  const context: OldSiteContext = { crossTables: crossTables ?? realCrossTables(db), titles: titles ?? realTitles(db) }
   const prefix = dryRun ? 'Dry run, nothing is written. ' : ''
 
   try {
@@ -230,6 +241,11 @@ export async function runOldSiteReport(
 /** Today in Amsterdam as `2026-11-08`. */
 function amsterdamToday(): string {
   return new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Amsterdam' })
+}
+
+/** Gets the cross tables from the Dutch Wikipedia. Its fetcher is made at the first season. */
+function realCrossTables(db: Database & OldSiteDatabase): NonNullable<OldSiteContext['crossTables']> {
+  return (seasons) => fetchCrossTables(createFetcher({ robots: robotsStoreFor(db) }), wikipediaOrigin, seasons)
 }
 
 /** The lookup that asks the Dutch Wikipedia. Its fetcher is made at the first title. */
