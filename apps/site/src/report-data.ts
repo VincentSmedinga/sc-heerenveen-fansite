@@ -1,6 +1,7 @@
 import {
   listReportedMatches,
   listScheduledMatches,
+  listUnknownResultMatches,
   matchForRules,
   phaseOf,
   type ReportedMatch,
@@ -180,12 +181,44 @@ export async function getPublicReports(season: string) {
  * exists.
  */
 export async function getReportAddresses(season: string) {
-  return new Map(
-    (await getPublicReports(season)).map((reported): [string, string] => [
+  const [reports, unknown] = await Promise.all([getPublicReports(season), getUnknownResultMatches(season)])
+
+  return new Map([
+    ...reports.map((reported): [string, string] => [
       `${reported.match.competition}|${reported.match.round}`,
       reportAddress(season, reported.match.matchDate, reported.clubSlug),
     ]),
+    // A match without a result has a page too (#1622).
+    ...unknown.map(({ clubSlug, match }): [string, string] => [
+      `${match.competition}|${match.round}`,
+      reportAddress(season, match.matchDate, clubSlug),
+    ]),
+  ])
+}
+
+const currentUnknown = cacheForKey(currentSeasonPeriod, (season) => listUnknownResultMatches(getDatabase().db, season))
+const pastUnknown = cacheForKey(pastSeasonPeriod, (season) => listUnknownResultMatches(getDatabase().db, season))
+
+/** The match of the address `/wedstrijden/<seizoen>/<datum>-<club>` without a result. */
+export async function getUnknownResultMatch(season: string, slug: string) {
+  const address = parseReportSlug(slug)
+
+  if (address === undefined || !(await getMatchSeasons()).includes(season)) {
+    return undefined
+  }
+
+  return (await getUnknownResultMatches(season)).find(
+    ({ clubSlug, match }) => match.matchDate === address.matchDate && clubSlug === address.clubSlug,
   )
+}
+
+/**
+ * The matches of a season that were played without a known result (#1622): each has a page of
+ * its own with the clubs and the day, and the words "Uitslag onbekend". The caller asks for a
+ * season of `getMatchSeasons` only.
+ */
+export async function getUnknownResultMatches(season: string): Promise<ScheduledMatch[]> {
+  return season === seasonOf(new Date()) ? currentUnknown(season) : pastUnknown(season)
 }
 
 const currentPreviews = cacheForKey(currentSeasonPeriod, (season) => listScheduledMatches(getDatabase().db, season))

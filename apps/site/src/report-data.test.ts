@@ -1,4 +1,4 @@
-import { listReportedMatches, listScheduledMatches } from '@fansite/db/match-reports'
+import { listReportedMatches, listScheduledMatches, listUnknownResultMatches } from '@fansite/db/match-reports'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getMatchSeasons } from './matches'
@@ -22,6 +22,7 @@ vi.mock('@fansite/db/match-reports', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   listReportedMatches: vi.fn(),
   listScheduledMatches: vi.fn(),
+  listUnknownResultMatches: vi.fn(() => Promise.resolve([])),
 }))
 vi.mock('./database', () => ({ getDatabase: () => ({ db: {} }) }))
 vi.mock('./matches', async (importOriginal) => ({
@@ -159,6 +160,20 @@ describe('the addresses of the pages', () => {
     expect(await getReportAddresses('2026/27')).toEqual(
       new Map([['Eredivisie|Speelronde 1', '/wedstrijden/2026-27/2026-10-24-testdorp-fc']]),
     )
+  })
+
+  it('links a match without a result to its page too, and leaves it out of the sitemap (#1622)', async () => {
+    vi.mocked(listUnknownResultMatches).mockResolvedValueOnce([
+      {
+        clubSlug: 'testdorp-fc',
+        match: { ...reportedMatch().match, round: 'Speelronde 2', status: 'result_unknown' },
+      },
+    ])
+
+    expect((await getReportAddresses('2026/27')).get('Eredivisie|Speelronde 2')).toBe(
+      '/wedstrijden/2026-27/2026-10-24-testdorp-fc',
+    )
+    expect(await getAllReportAddresses()).toEqual(['/wedstrijden/2026-27/2026-10-24-testdorp-fc'])
   })
 
   it('gives all the addresses of all the seasons, for the sitemap', async () => {

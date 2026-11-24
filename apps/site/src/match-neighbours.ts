@@ -8,7 +8,7 @@ import { cacheFor } from './cache'
 import { getDatabase } from './database'
 import { matchMoment } from './match-format'
 import { getMatchSeasons } from './matches'
-import { getPublicReports, reportAddress } from './report-data'
+import { getPublicReports, getUnknownResultMatches, reportAddress } from './report-data'
 
 // The links at the bottom of the page of a match: the match before it and the match after it in
 // the order of play over all competitions and seasons (see `listMatchSequence`). A match with a
@@ -30,6 +30,10 @@ export async function getMatchNeighbours(id: number, now: Date) {
     if (season !== undefined && seasons.has(season)) {
       for (const reported of await getPublicReports(season)) {
         links.set(reported.match.id, reportAddress(season, reported.match.matchDate, reported.clubSlug))
+      }
+      // A match without a result has a page of its own too (#1622).
+      for (const { clubSlug, match } of await getUnknownResultMatches(season)) {
+        links.set(match.id, reportAddress(season, match.matchDate, clubSlug))
       }
     }
   }

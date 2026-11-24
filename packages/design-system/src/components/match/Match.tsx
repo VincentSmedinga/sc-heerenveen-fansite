@@ -450,11 +450,19 @@ export const Match = ({
           <a className="hf-match-link" href={reportHref}>
             {clubs}
             <span className="hf-visually-hidden">
-              {live === true ? ', live verslag' : preview === true ? ', voorbeschouwing' : ', verslag'}
+              {status === 'result_unknown'
+                ? ', uitslag onbekend'
+                : live === true
+                  ? ', live verslag'
+                  : preview === true
+                    ? ', voorbeschouwing'
+                    : ', verslag'}
             </span>
           </a>
         )}
-        {status === 'result_unknown' ? <span className="hf-visually-hidden">, uitslag onbekend</span> : null}
+        {status === 'result_unknown' && reportHref === undefined ? (
+          <span className="hf-visually-hidden">, uitslag onbekend</span>
+        ) : null}
       </p>
       {goals !== undefined && goals.length > 0 ? (
         <p className="hf-match-goals">

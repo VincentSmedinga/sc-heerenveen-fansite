@@ -4688,9 +4688,10 @@
     De controle `matches_result_only_when_played` hoefde niet te veranderen, want ze noemt alleen `played`; een wedstrijd zonder uitslag mag geen uitslag, ruststand of toeschouwers hebben, zoals `postponed` en `cancelled`.
   - **De site** toont "Uitslag onbekend" waar de uitslag zou staan, in de lijsten, bij de club en bij de buurwedstrijden, met de datum en zonder streepje.
     De wedstrijd telt niet mee in standen, punten, doelpunten, reeksen, statistieken of de Prognose, en is geen "volgende" of "vorige" wedstrijd.
-    Er is geen eigen pagina: een pagina bestaat alleen bij een verslag, en daar is niets van.
+    De wedstrijd heeft wel een eigen pagina op het adres van de wedstrijd, zonder verslag: de twee clubs, de datum, de woorden "Uitslag onbekend" en de wedstrijd ervoor en erna.
+    De pagina komt niet in zoekmachines, en een verslag of uitslag die later komt, neemt het adres over.
     In het beheer biedt alleen het formulier van zo'n wedstrijd de status aan; een uitslag invullen en `Gespeeld` kiezen maakt er weer een uitslag van.
 - **Waarom:** de oude site had niets van deze wedstrijden, dus het zijn geen uitslagen, en een echte 0 – 0 mag niet weg.
   De rij en de datum blijven, zodat de uitslag later uit Wikipedia kan worden ingevuld.
   De import is herhaalbaar en zonder migratie van gegevens.
-- **Alternatieven:** de rij verwijderen (de datum gaat verloren); de status `scheduled` houden (de site noemt een wedstrijd uit 1991 dan een wedstrijd die nog komt, en de Prognose laat er op voorspellen); elke 0 – 0 zonder gegevens weghalen (haalt echte nullen weg zonder bewijs); een vaste lijst van wedstrijden (dekt nieuwe gegevens niet); een eigen pagina voor zo'n wedstrijd (er is niets om te tonen).
+- **Alternatieven:** de rij verwijderen (de datum gaat verloren); de status `scheduled` houden (de site noemt een wedstrijd uit 1991 dan een wedstrijd die nog komt, en de Prognose laat er op voorspellen); elke 0 – 0 zonder gegevens weghalen (haalt echte nullen weg zonder bewijs); een vaste lijst van wedstrijden (dekt nieuwe gegevens niet);

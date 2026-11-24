@@ -55,6 +55,7 @@ vi.mock('#src/report-data', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getPreviewMatch: vi.fn(),
   getPublicReport: vi.fn(),
+  getUnknownResultMatch: vi.fn(() => Promise.resolve(undefined)),
 }))
 
 let clock = 0

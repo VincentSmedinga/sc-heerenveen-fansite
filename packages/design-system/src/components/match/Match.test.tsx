@@ -637,6 +637,24 @@ describe('Match', () => {
     expect(container.textContent).toContain(', uitslag onbekend')
   })
 
+  it('links a match without a result to its page, named "uitslag onbekend"', () => {
+    const { container } = render(
+      <Match
+        dateTime="1992-03-08"
+        home
+        opponent="Willem II"
+        reportHref="/wedstrijden/1991-92/1992-03-08-willem-ii"
+        round="Speelronde 27"
+        status="result_unknown"
+        time="zo 8 mrt 1992"
+      />,
+    )
+
+    expect(container.querySelector('a')?.getAttribute('href')).toBe('/wedstrijden/1991-92/1992-03-08-willem-ii')
+    expect(container.querySelector('a')?.textContent).toMatch(/, uitslag onbekend$/u)
+    expect(container.textContent).not.toContain('verslag')
+  })
+
   it('names a cancelled match for a screen reader as the clubs, the round and "Geannuleerd"', () => {
     const { container } = render(<Match home opponent="Willem II" round="Speelronde 27" status="cancelled" />)
 
