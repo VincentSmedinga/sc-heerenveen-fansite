@@ -56,8 +56,9 @@
    * as long as the share of the largest number, which the component gives as a number from 0
    * to 100 in --hf-bar-share, so a number that is half of the largest has half of the bar. The
    * fill is the green of a count (the tone `plain` of chart.css, as in a list): a calm 70% of
-   * it, which reaches 3:1 on the card in light and in dark, with no track. A table can use the whole green for a row that stands
-   * out. The bar is decoration, so a screen reader skips it (aria-hidden).
+   * it, which reaches 3:1 on the card in light and in dark, with no track. A table can use the
+   * whole green for a row that stands out. The bar is decoration, so a screen reader skips it
+   * (aria-hidden).
    */
   .hf-bar {
     block-size: var(--hf-size-bar-thin);
