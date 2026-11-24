@@ -2723,6 +2723,8 @@
     Toeschouwers `0` en een lege scheidsrechter zijn "onbekend" en worden leeg.
 - **Waarom:** de oude gegevens zijn een bron met gaten en aantekeningen van redacteuren; de stap kopieert wat een bezoeker mag lezen, en meldt de rest.
 - **Alternatieven:** de opmerkingen van de oude redactie tonen zoals ze zijn (interne aantekeningen en twee links naar sites die niet meer bestaan in een openbare kolom); `note` geheel leeg laten (we verliezen drie feiten, zoals het debuut in de Eredivisie); de stand na 90 minuten ook bij `n.s.` uit de doelpunten halen (de beslissing noemt het alleen bij `n.v.`).
+- **Later:** zie _De import van de oude fansite koppelt een wedstrijd op datum, en een datum die verandert staat in een lijst_ (24 november 2026): `import:old-site` zoekt een opgeslagen wedstrijd van de oude fansite eerst op club en datum, en pas daarna op de ronde.
+  De ronde is dan een eigenschap van de rij, niet haar identiteit.
 
 ## De stappen `spelers` en `doelpunten` slaan een lijst doelpunten alleen op als ze optellen tot de uitslag
 
@@ -3193,6 +3195,7 @@
 - **Later:** in een seizoen met wedstrijden van de oude fansite maakt de import van Wikipedia geen speler van een doelpuntenmaker; zie _Een doelpuntenmaker met een eigen pagina wordt een speler van het seizoen_ (10 november 2026).
 - **Later:** zie _Een wedstrijd waarvan de oude Fansite niets vastlegde, krijgt geen uitslag_ (24 november 2026): een wedstrijd van de oude fansite zonder iets vastgelegd, krijgt de status `result_unknown`, en een andere bron vult hem niet.
 - **Later:** zie _Wikipedia vult de uitslag van een wedstrijd zonder uitslag_ (24 november 2026): voor 1990/91 tot en met 2006/07 vult de import van Wikipedia wel de uitslag en de status van zo'n wedstrijd, maar alleen als hij er geen heeft.
+- **Later:** zie _De import van de oude fansite koppelt een wedstrijd op datum, en een datum die verandert staat in een lijst_ (24 november 2026): de stap `matches` van `import:old-site` zoekt zijn eigen rijen eerst op datum en club, en gebruikt de ronde alleen als terugval.
 
 ## Een vierde deel in `match_edits` voor de gegevens van een wedstrijd
 
@@ -4737,3 +4740,29 @@
   Een lijst die niet optelt, spreekt de uitslag en de bezoeker tegen.
 - **Alternatieven:** de wedstrijd van 13 mei niet maken en melden (de redactie voegt hem toe met het formulier, trager, en de wedstrijd ontbreekt zolang niemand het doet); alle regels met een tegenstrijdigheid overslaan; de doelpunten ook aan een wedstrijd geven waarvan het archief wel iets vastlegde, wat de stap van de doelpunten bij de volgende import weer weghaalt.
 - **Later:** zie _Wikipedia vult de uitslag van een wedstrijd zonder uitslag_ (24 november 2026): deze beslissing volgt dezelfde regel, en vult ook de doelpunten.
+
+## De import van de oude fansite koppelt een wedstrijd op datum, en een datum die verandert staat in een lijst
+
+- **Datum:** 24 november 2026
+- **Besluit:** de stap `matches` van `import:old-site` koppelt een wedstrijd uit het bestand eerst aan een opgeslagen rij van de oude fansite op seizoen, competitie, club, thuis of uit, en dezelfde datum (#1631).
+  Alleen wat zo niet te koppelen is, valt terug op de ronde.
+  Een gekoppelde rij houdt haar `id`, en dus haar verslag, opstelling, doelpunten, kaarten en wissels; de import schrijft er de nieuwe ronde in, en de datum als die verandert.
+  - **Niet dubbel:** een rij hoort bij één wedstrijd uit het bestand.
+    Past een rij op meer dan één wedstrijd (een herspeelde wedstrijd op één dag, tegen dezelfde club), of zijn er in het bestand twee, dan vallen die terug op de ronde.
+  - **Rondes die wisselen:** de rondes zijn uniek per seizoen en competitie.
+    De stap haalt eerst de ronde weg bij elke rij die van ronde verandert (`Verplaatst <id>`), en schrijft daarna de nieuwe.
+    De stap is niet één transactie: stopt een run daartussen, dan koppelt de volgende dezelfde rijen op hun datum.
+  - **Een ronde die vastzit:** houdt een rij van een andere bron, of van de redactie, de ronde die een wedstrijd nodig heeft, dan blijft de wedstrijd waar hij is en staat er een regel `error:` in het logboek.
+  - **Het logboek:** een regel met hoeveel wedstrijden op datum zijn gekoppeld, hoeveel via de lijst en hoeveel op de ronde, en hoeveel rondes zijn veranderd; en een regel voor elke datum die verandert.
+- **Besluit:** een datum die in het bestand verandert, staat in een kleine lijst in de importer (`old-site-date-corrections.ts`): seizoen, competitie, club, thuis of uit, de oude en de nieuwe datum en de bron.
+  De stap koppelt de opgeslagen rij op de oude datum, en schrijft de nieuwe.
+  De lijst begint met RBC Roosendaal thuis in 1992/93, van 28 maart 1992 naar 28 maart 1993 (Nederlandse Wikipedia).
+  Vindt een regel in een seizoen met opgeslagen wedstrijden geen rij, dan staat daar een regel `error:` in het logboek.
+  De datum in het bestand is ook hersteld, zodat een nieuwe database goed begint.
+  Een regel kan weg als de run op productie hem heeft gemaakt.
+- **Besluit:** het adres met de oude datum krijgt geen doorverwijzing: `/wedstrijden/1992-93/1992-03-28-rbc-roosendaal` geeft de gewone pagina "niet gevonden".
+- **Waarom:** de ronde is afgeleid van de datum, dus een datum die verandert verschuift tientallen rondes, en de sleutel op de ronde zette verslagen bij de verkeerde wedstrijd.
+  De ronde is een eigenschap van de wedstrijd, niet haar identiteit.
+  Een lijst is zichtbaar, controleerbaar en na de run op productie weg te halen.
+  De oude datum was fout, een doorverwijzing is code in de site voor één adres, en de pagina bestaat nog maar kort.
+- **Alternatieven:** de sleutel op de ronde houden en een verschoven wedstrijd met SQL herstellen (bij elke nieuwe kopie van de gegevens opnieuw); de ronde in het bestand bewaren (het bestand kent de ronde niet); terugvallen op de oude ronde binnen dezelfde club en kant (te losjes: er zijn twee thuiswedstrijden tegen een club in een seizoen); een doorverwijzing van oud naar nieuw adres.
