@@ -251,7 +251,27 @@ async function fillMatch(db: Database, found: Match, row: ProgrammeRow, context:
 
   const stored = await db.select().from(matchGoals).where(eq(matchGoals.matchId, match.id))
 
-  if (stored.length > 0 || !(isNew || (await recordedNothing(db, match)))) {
+  if (stored.length > 0) {
+    // A goal that has its page but lost its person gets him back (#1639): the step of the old
+    // fansite for the goals against us no longer takes the link away, and this is the one place
+    // that knows the page of a scorer.
+    for (const goal of stored) {
+      if (goal.wikipediaPage !== null && goal.personId === null) {
+        const personId = await personBook.resolve(goal.wikipediaPage)
+
+        if (personId !== null) {
+          await db
+            .update(matchGoals)
+            .set({ personId })
+            .where(and(eq(matchGoals.id, goal.id), isNull(matchGoals.personId)))
+          report.lines.push(`${label}: ${goal.player} is linked to his person again`)
+        }
+      }
+    }
+
+    return
+  }
+  if (!(isNew || (await recordedNothing(db, match)))) {
     return
   }
   if (row.goals === null) {

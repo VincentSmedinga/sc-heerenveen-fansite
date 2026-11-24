@@ -1,5 +1,5 @@
-import { mergePlayerInto } from '@fansite/db/person-merge'
-import { playerNameMaxLength, players } from '@fansite/db/schema'
+import { mergeEditorsPersonInto, mergePlayerInto } from '@fansite/db/person-merge'
+import { persons, playerNameMaxLength, players } from '@fansite/db/schema'
 import { eq, inArray } from 'drizzle-orm'
 
 import type { OldSiteMatch, OldSitePlayer } from './old-site-file.ts'
@@ -26,8 +26,17 @@ export type OldSitePlayerRef = {
   season: string
 }
 
+/**
+ * The name as the database compares it, and a letter that has no accent to take off (`ø`) as
+ * the letter without it, so `Ken Ilso Larsen` finds `Ken Ilsø Larsen` (#1639).
+ */
+const foldedName = (name: string) =>
+  nameKey(name).replace(/[øđł]/gu, (letter) => ({ đ: 'd', ł: 'l', ø: 'o' })[letter] ?? letter)
+
 /** The key of a player in `players`: the season and the name, as the database compares them. */
-export const oldSitePlayerKey = (season: string, name: string) => `${season}|${nameKey(name)}`
+export const oldSitePlayerKey = (season: string, name: string) => `${season}|${foldedName(name)}`
+
+type PlayerRow = typeof players.$inferSelect
 
 /** The full name of a player of the old table: given name, infix and surname, single spaces. */
 export function oldSitePlayerName(player: Pick<OldSitePlayer, 'firstName' | 'infix' | 'lastName'>): string {
@@ -36,6 +45,100 @@ export function oldSitePlayerName(player: Pick<OldSitePlayer, 'firstName' | 'inf
     .join(' ')
     .replace(/\s+/gu, ' ')
     .trim()
+}
+
+/**
+ * The rows of `players` of the seasons by `oldSitePlayerKey`. A row is also found under another
+ * spelling of the same person in the same season (#1639), the spelling of his person or the one
+ * the owner chose: `mergeDoublePlayers` keeps one row for a person, so the steps must find that
+ * row and make no second. A spelling that fits more than one row, or a row that has the exact
+ * name, is not touched.
+ */
+export async function oldSitePlayerRows(
+  db: Pick<OldSiteDatabase, 'select'>,
+  seasons: readonly string[],
+): Promise<Map<string, PlayerRow>> {
+  const found = new Map<string, PlayerRow>()
+
+  if (seasons.length === 0) {
+    return found
+  }
+
+  const rows = await db
+    .select()
+    .from(players)
+    .where(inArray(players.season, [...seasons]))
+    .orderBy(players.id)
+
+  for (const row of rows) {
+    if (!found.has(oldSitePlayerKey(row.season, row.name))) {
+      found.set(oldSitePlayerKey(row.season, row.name), row)
+    }
+  }
+
+  const personNames = await namesOfPersons(db, [
+    ...new Set(rows.flatMap((row) => (row.personId === null ? [] : [row.personId]))),
+  ])
+  const aliases = new Map<string, Set<PlayerRow>>()
+
+  for (const row of rows) {
+    for (const spelling of spellingsOf(row, personNames)) {
+      const key = oldSitePlayerKey(row.season, spelling)
+
+      if (!found.has(key)) {
+        aliases.set(key, (aliases.get(key) ?? new Set()).add(row))
+      }
+    }
+  }
+  for (const [key, group] of aliases) {
+    if (group.size === 1) {
+      found.set(key, [...group][0]!)
+    }
+  }
+
+  return found
+}
+
+/** The names persons go by, from `persons` and from the rows of `players` with a person. */
+async function namesOfPersons(db: Pick<OldSiteDatabase, 'select'>, personIds: readonly number[]) {
+  const names = new Map<number, Set<string>>()
+  const add = (id: null | number, name: null | string) => {
+    if (id !== null && name !== null && name !== '') {
+      names.set(id, (names.get(id) ?? new Set()).add(name))
+    }
+  }
+
+  if (personIds.length > 0) {
+    for (const row of await db
+      .select({ id: persons.id, name: persons.name })
+      .from(persons)
+      .where(inArray(persons.id, [...personIds]))) {
+      add(row.id, row.name)
+    }
+    for (const row of await db
+      .select({ name: players.name, personId: players.personId })
+      .from(players)
+      .where(inArray(players.personId, [...personIds]))) {
+      add(row.personId, row.name)
+    }
+  }
+
+  return names
+}
+
+/**
+ * Every spelling a row of a season goes by: its own name, the spelling the owner chose for it
+ * (`oldSiteNameCorrections`) and the names of its person, from `persons` and from his other
+ * rows. Pure.
+ */
+function spellingsOf(row: PlayerRow, personNames: ReadonlyMap<number, ReadonlySet<string>>): string[] {
+  const chosen = oldSiteNameCorrections.get(row.name)
+
+  return [
+    row.name,
+    ...(chosen === undefined ? [] : [chosen]),
+    ...(row.personId === null ? [] : [...(personNames.get(row.personId) ?? [])]),
+  ]
 }
 
 /**
@@ -93,14 +196,8 @@ export async function importOldSitePlayers(
   const report: OldSiteStepReport = { changed: 0, created: 0, lines: [], skipped: 0, unchanged: 0 }
   const wanted = deriveOldSitePlayers(oldMatches, oldPlayers)
   const seasons = [...new Set(wanted.map((player) => player.season))]
-  const stored = new Map<string, typeof players.$inferSelect>()
+  const stored = await oldSitePlayerRows(db, seasons)
   const fresh: (typeof players.$inferInsert)[] = []
-
-  if (seasons.length > 0) {
-    for (const row of await db.select().from(players).where(inArray(players.season, seasons))) {
-      stored.set(oldSitePlayerKey(row.season, row.name), row)
-    }
-  }
 
   for (const player of wanted) {
     if (player.name.length > playerNameMaxLength || player.searchTerm.length > playerNameMaxLength) {
@@ -117,6 +214,7 @@ export async function importOldSitePlayers(
     const row = stored.get(oldSitePlayerKey(player.season, player.name))
 
     if (row !== undefined) {
+      // A row under another spelling is the same player: it is not added again (#1639).
       if (
         row.name !== player.name &&
         oldSiteNameCorrections.get(row.name) === player.name &&
@@ -154,19 +252,7 @@ export async function oldSitePlayerIds(
   db: Pick<OldSiteDatabase, 'select'>,
   seasons: readonly string[],
 ): Promise<Map<string, number>> {
-  const ids = new Map<string, number>()
-
-  if (seasons.length === 0) {
-    return ids
-  }
-  for (const row of await db
-    .select()
-    .from(players)
-    .where(inArray(players.season, [...seasons]))) {
-    ids.set(oldSitePlayerKey(row.season, row.name), row.id)
-  }
-
-  return ids
+  return new Map([...(await oldSitePlayerRows(db, seasons))].map(([key, row]) => [key, row.id]))
 }
 
 /**
@@ -245,14 +331,17 @@ export function resolveOldSiteCode(
 }
 
 /**
- * Merges a stale row into the player the corrections chose. An earlier run (before the owner
- * chose a spelling) made a row with the name `Ger Schaap`, and the squad of Wikipedia has
- * `Gerrie Schaap`, so a season showed him twice. A row is stale when it is of the same season,
- * has the source `verslag`, nothing else but a name (no page, no person) and a name that is
- * exactly a key of `oldSiteNameCorrections` whose spelling has a row too. Whatever points to
- * it (goals, appearances, numbers of the season) is pointed to the other row, and the stale row
- * is removed (`mergePlayerInto`). Other names, other sources and a row with a page or a person
- * are never touched. Returns the number of rows merged: a second run finds none.
+ * Merges a stale row into the row of the same player. An earlier run made a row with the name
+ * `Ger Schaap` (before the owner chose a spelling), and the squad of Wikipedia has `Gerrie
+ * Schaap`, so a season showed him twice; the same for a spelling that is another spelling of
+ * the person of the other row (#1639). A row is stale when it is of the same season, has the
+ * source `verslag` and no page, and its name is a spelling of exactly one other row of the
+ * season (its name, or a name of its person). Whatever points to it (goals, appearances,
+ * numbers of the season) is pointed to the other row, and the stale row is removed
+ * (`mergePlayerInto`). When it has a person the editors did not make and who has no article,
+ * that person is merged into the person of the other row (`mergeEditorsPersonInto`). Other
+ * sources and a row with a page are never touched. Returns the number of rows merged: a second
+ * run finds none.
  */
 async function mergeStaleOldSitePlayers(db: OldSiteDatabase, seasons: readonly string[], lines: string[]) {
   if (seasons.length === 0) {
@@ -260,30 +349,56 @@ async function mergeStaleOldSitePlayers(db: OldSiteDatabase, seasons: readonly s
   }
 
   const rows = await db.select().from(players).where(inArray(players.season, seasons))
+  const personNames = await namesOfPersons(
+    db,
+    rows.flatMap((row) => (row.personId === null ? [] : [row.personId])),
+  )
   let merged = 0
 
   for (const stale of rows) {
-    const spelling = oldSiteNameCorrections.get(stale.name)
-    const target =
-      spelling === undefined
-        ? undefined
-        : rows.find((row) => row.season === stale.season && nameKey(row.name) === nameKey(spelling))
-
-    if (
-      target === undefined ||
-      target.id === stale.id ||
-      stale.source !== 'verslag' ||
-      stale.wikipediaPage !== null ||
-      stale.personId !== null
-    ) {
+    if (stale.source !== 'verslag' || stale.wikipediaPage !== null) {
       continue
     }
 
-    await db.transaction(async (tx) => {
-      await mergePlayerInto(tx, stale.id, target.id)
+    const own = new Set([stale.name, oldSiteNameCorrections.get(stale.name) ?? stale.name].map(foldedName))
+    const targets = rows.filter(
+      (row) =>
+        row.season === stale.season &&
+        row.id !== stale.id &&
+        (row.source !== 'verslag' || row.id < stale.id) &&
+        [row.name, ...(row.personId === null ? [] : [...(personNames.get(row.personId) ?? [])])].some((name) =>
+          own.has(foldedName(name)),
+        ),
+    )
+    const target = targets.length === 1 ? targets[0] : undefined
+
+    if (target === undefined || (stale.personId !== null && target.personId === null)) {
+      continue
+    }
+
+    const done = await db.transaction(async (tx) => {
+      if (stale.personId !== null && stale.personId !== target.personId) {
+        const [person] = await tx.select().from(persons).where(eq(persons.id, stale.personId))
+
+        if (person === undefined || person.wikipediaPage !== null || person.nameSource === 'redactie') {
+          return false
+        }
+        await mergeEditorsPersonInto(tx, stale.personId, target.personId!)
+      }
+
+      const [left] = await tx.select().from(players).where(eq(players.id, stale.id))
+
+      if (left !== undefined) {
+        await mergePlayerInto(tx, stale.id, target.id)
+      }
+
+      return true
     })
-    merged += 1
-    lines.push(`${stale.name} (${stale.season}) is merged into ${target.name}`)
+
+    if (done) {
+      merged += 1
+      lines.push(`${stale.name} (${stale.season}) is merged into ${target.name}`)
+    }
   }
 
   return merged

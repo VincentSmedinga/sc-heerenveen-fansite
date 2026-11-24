@@ -124,6 +124,27 @@ describe('linking the goals against us to a person', () => {
     expect((await goalRows())[0]?.personId).toBe(id)
   })
 
+  it('leaves a goal with a Wikipedia page alone, and takes a link from one without (#1639)', async () => {
+    const id = await person('Piet Pietersen')
+
+    await load([lost('nec.thuis', ['Piet P.', 'Klaas Klaassen'])])
+    await database.db
+      .update(matchGoals)
+      .set({ personId: id, wikipediaPage: 'Piet Pietersen' })
+      .where(eq(matchGoals.player, 'Piet P.'))
+    await database.db.update(matchGoals).set({ personId: id }).where(eq(matchGoals.player, 'Klaas Klaassen'))
+
+    const first = await importOldSiteOpponentGoals(database.db, none)
+    const second = await importOldSiteOpponentGoals(database.db, none)
+
+    expect(await goalRows()).toMatchObject([
+      { personId: id, player: 'Piet P.', wikipediaPage: 'Piet Pietersen' },
+      { personId: null, player: 'Klaas Klaassen' },
+    ])
+    expect(first).toMatchObject({ changed: 1, created: 0 })
+    expect(second).toMatchObject({ changed: 0, created: 0, unchanged: 1 })
+  })
+
   it('does not link a name that two persons have, and says so', async () => {
     await person('Piet Pietersen', 'Piet Pietersen')
     await person('Piet Pietersen', 'Piet Pietersen (voetballer, 1970)')

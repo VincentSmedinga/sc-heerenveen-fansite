@@ -8,7 +8,7 @@ import type { Database } from '@fansite/db/client'
 
 import { opponentGoalNamesakes, personsWhoDiffer } from '@fansite/db/persons'
 import { matchEdits, matches, matchGoals, matchReports, persons, players } from '@fansite/db/schema'
-import { and, asc, eq, inArray, isNotNull } from 'drizzle-orm'
+import { and, asc, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
 
 import type { OldSiteDatabase, OldSiteStepReport } from './old-site-step.ts'
 
@@ -206,7 +206,8 @@ export function personIdsByName(rows: readonly { id: number; name: null | string
 /**
  * The goals of the opponents in the matches of the old fansite, minus the matches whose goals
  * the editors filled in or whose report they saved: those stay as they are. An own goal is the
- * goal of the player of ours who scored it, so it is not here.
+ * goal of the player of ours who scored it, so it is not here. A goal with a `wikipedia_page`
+ * is not here either: the season programme linked it through Wikipedia, so its name may differ.
  */
 export async function readOpponentGoals(db: Reader): Promise<OpponentGoal[]> {
   const edited = new Set<number>()
@@ -228,7 +229,15 @@ export async function readOpponentGoals(db: Reader): Promise<OpponentGoal[]> {
     })
     .from(matchGoals)
     .innerJoin(matches, eq(matches.id, matchGoals.matchId))
-    .where(and(eq(matches.dataSource, oldSiteSource), eq(matchGoals.ours, false), eq(matchGoals.ownGoal, false)))
+    .where(
+      and(
+        eq(matches.dataSource, oldSiteSource),
+        eq(matchGoals.ours, false),
+        eq(matchGoals.ownGoal, false),
+        // A goal with a Wikipedia page was linked by the season programme (#1623, #1639).
+        isNull(matchGoals.wikipediaPage),
+      ),
+    )
     .orderBy(asc(matchGoals.id))
 
   return rows.filter((row) => !edited.has(row.matchId))

@@ -560,17 +560,29 @@ export async function importOldSiteMatches(
         if (own !== undefined) {
           claimed.add(own.row.id)
           pairedBy[own.how] += 1
+          // The date follows the file within the round too (#1639); an edited kick-off stays.
+          const keepsKickoff =
+            edits.get(own.row.id)?.kickoffEdited === true || takenOver.get(own.row.id)?.has('kickoff') === true
+          const change: Partial<Match> = {}
+
           if (own.row.round !== values.round) {
             roundsChanged += 1
-            await db
-              .update(matches)
-              .set({
-                round: values.round,
-                ...(edits.get(own.row.id)?.kickoffEdited === true
-                  ? {}
-                  : { dateText: values.dateText, kickoffAt: values.kickoffAt, matchDate: values.matchDate }),
-              })
-              .where(eq(matches.id, own.row.id))
+            change.round = values.round
+          }
+          if (!keepsKickoff) {
+            for (const field of kickoffFields) {
+              if (!sameValue(own.row[field], values[field])) {
+                Object.assign(change, { [field]: values[field] })
+              }
+            }
+          }
+          if (change.matchDate !== undefined) {
+            report.lines.push(`${label}: the date changes from ${own.row.matchDate} to ${values.matchDate}`)
+          }
+          if (Object.keys(change).length > 0) {
+            await db.update(matches).set(change).where(eq(matches.id, own.row.id))
+            report.changed += 1
+            continue
           }
         }
         report.unchanged += 1
