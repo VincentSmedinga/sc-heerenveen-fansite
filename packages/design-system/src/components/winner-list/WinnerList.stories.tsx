@@ -31,7 +31,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component:
-          'De uitblinkers van het seizoen onder elkaar, voor een zachte kaart naast het hoofdvlak: de naam groot, de wedstrijd klein eronder en het gemiddelde groot aan de rechterkant. Boven elke rij staat een dunne lijn, ook boven de eerste, met de krappe maat van de meeste lijsten.',
+          'De uitblinkers van het seizoen onder elkaar, voor een zachte kaart naast het hoofdvlak: de naam groot, de wedstrijd klein eronder en het gemiddelde aan de rechterkant. Boven elke rij staat een dunne lijn, ook boven de eerste, met de krappe maat van de meeste lijsten.',
       },
       page: ControlsDocsPage,
     },

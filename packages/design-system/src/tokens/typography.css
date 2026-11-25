@@ -108,13 +108,16 @@
     /* The bar "Op deze pagina" */
     --hf-anchor-font-size: 1rem;
 
-    /* A mark in a row of marks */
+    /* A small figure: a mark in a row of marks, the average of a winner and the one in a seal */
     --hf-figure-font-size: 1.125rem;
 
-    /* The total in the hole of a donut */
+    /*
+     * A large figure: on a question card, the total in the hole of a donut or of a shoot-out, the
+     * points and the large prediction, the fields of a score and the digits of a code
+     */
     --hf-figure-large-font-size: 1.5rem;
 
-    /* The number in a row of key figures */
+    /* The number in a row of key figures, the largest figure */
     --hf-key-figure-font-size: 3.25rem;
 
     /* A long number (5 to 6 characters, then 7 or more) shrinks with the width of its card, so it stays on one line */
@@ -129,16 +132,16 @@
     --hf-link-underline-thickness-hover: 1.5px;
     --hf-link-underline-offset: 0.15em;
 
-    /* Emphasis: strong, b, buttons, chart titles, caption, a status not to miss */
+    /* Emphasis: strong, b, buttons, caption, a status not to miss */
     --hf-strong-font-weight: 700;
 
-    /* The figures people look up: a score, the key figure of a table, a mark in a row, a donut */
+    /* The figures people look up: a score, a large or key figure, the key figure of a table, a mark */
     --hf-figure-font-weight: 700;
 
-    /* The number in a row of key figures, a step lighter than the wordmark */
-    --hf-key-figure-font-weight: 800;
-
-    /* The name of something: the label and the legend of a form, th and dt */
+    /*
+     * The name of something: the label and the legend of a form, th and dt, and the small title
+     * of a chart or a row of marks
+     */
     --hf-name-font-weight: 600;
 
     /* The menu in the header and its current item, 200 heavier */

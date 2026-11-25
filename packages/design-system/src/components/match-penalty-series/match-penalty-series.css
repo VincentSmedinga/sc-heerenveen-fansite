@@ -29,13 +29,13 @@
     overflow-wrap: anywhere;
   }
 
-  /* The total is in the font of the headings, as large as heading 2. */
+  /* The total is a large figure in the font of the headings. */
   .hf-match-penalty-total {
     font-family: var(--hf-font-family-display);
-    font-size: var(--hf-heading-2-font-size);
+    font-size: var(--hf-figure-large-font-size);
     font-stretch: var(--hf-heading-2-font-stretch);
     font-variant-numeric: tabular-nums;
-    font-weight: var(--hf-heading-2-font-weight);
+    font-weight: var(--hf-figure-font-weight);
     line-height: var(--hf-heading-2-line-height);
   }
 

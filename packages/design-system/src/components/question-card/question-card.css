@@ -68,7 +68,7 @@
     font-size: var(--hf-figure-large-font-size);
     font-stretch: 125%;
     font-variant-numeric: tabular-nums;
-    font-weight: var(--hf-key-figure-font-weight);
+    font-weight: var(--hf-figure-font-weight);
     line-height: 1.1;
   }
 }
