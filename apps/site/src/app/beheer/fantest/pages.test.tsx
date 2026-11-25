@@ -8,7 +8,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 
 import { createAccount } from '#src/beheer/accounts'
 import { createQuiz, saveQuiz } from '#src/beheer/quizzes'
-import { loadArchive, loadQuiz } from '#src/fans/fantest'
+import { loadArchive, loadQuiz } from '#src/fans/fantest-months'
 
 import QuizPage from './[id]/page'
 import PreviewPage from './[id]/voorbeeld/page'
@@ -139,7 +139,7 @@ describe('the pages of the Fantest in the admin', () => {
     expect(html).not.toContain('checked')
   })
 
-  it('keeps a quiz of the editors out of the public archive, so no right answer leaves the server', async () => {
+  it('keeps a quiz of the editors for a later month out of the public pages, so no right answer leaves', async () => {
     expect(await loadArchive(database.db)).toEqual([])
     expect(await loadQuiz(database.db, 2099, 3)).toBeUndefined()
   })

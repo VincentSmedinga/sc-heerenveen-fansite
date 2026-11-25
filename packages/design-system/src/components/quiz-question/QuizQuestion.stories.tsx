@@ -18,7 +18,7 @@ const meta = preview.meta({
     question: { description: 'De vraag, in de woorden van de quiz.' },
     result: {
       description:
-        'Toont de vraag na het nakijken: het goede antwoord, de keuze van de speler en de percentages, zonder keuzerondjes. Zonder `result` is het een vraag om te beantwoorden.',
+        'Toont de vraag na het nakijken: het goede antwoord, de keuze van de speler en de percentages, zonder keuzerondjes. Zonder `chosen` is het een vraag om alleen te lezen, en met `allCorrect` telt elk antwoord. Zonder `result` is het een vraag om te beantwoorden.',
     },
     total: { description: 'Hoeveel vragen de quiz heeft, zodat er "Vraag 3 van 10" staat.' },
     value: {
@@ -31,7 +31,7 @@ const meta = preview.meta({
       description: {
         component: [
           'Eén vraag van een quiz, in een eigen kaart: "Vraag 3 van 10", de vraag en vier antwoorden als grote rijen. Kies hem voor een quiz met meerkeuzevragen waar elke vraag zijn eigen foutmelding en zijn eigen goed of fout krijgt.',
-          'Hij werkt zonder JavaScript en met het toetsenbord: de pijltjes lopen langs de antwoorden. Na het nakijken toont dezelfde kaart het goede antwoord, de keuze van de speler en hoe de fans van toen kozen. Kleur is nooit het enige teken: de woorden en het vet zeggen hetzelfde.',
+          'Hij werkt zonder JavaScript en met het toetsenbord: de pijltjes lopen langs de antwoorden. Na het nakijken toont dezelfde kaart het goede antwoord, de keuze van de speler en hoe anderen kozen. Kleur is nooit het enige teken: de woorden en het vet zeggen hetzelfde.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -78,6 +78,16 @@ export const CheckedWrong = meta.story({
 export const CheckedWithoutPercentages = meta.story({
   args: { ...question, result: { chosen: 2, correct: 3 } },
   name: 'Nagekeken, zonder percentages',
+})
+
+export const ToRead = meta.story({
+  args: { ...question, result: { correct: 3, percentages: [10, 20, 60, 10] } },
+  name: 'Uitslag om te lezen',
+})
+
+export const Cancelled = meta.story({
+  args: { ...question, result: { allCorrect: true, chosen: 1, correct: 3, percentages: [10, 20, 60, 10] } },
+  name: 'Elk antwoord goed',
 })
 
 export const WithTheKeyboard = meta.story({

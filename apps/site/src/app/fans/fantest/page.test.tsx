@@ -3,7 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import FantestPage, { generateMetadata } from './page'
 
-const { currentSupporter, findEntry, loadArchive, loadMonthQuiz } = vi.hoisted(() => ({
+const { closedFigures, currentSupporter, findEntry, loadArchive, loadMonthQuiz } = vi.hoisted(() => ({
+  closedFigures: vi.fn(),
   currentSupporter: vi.fn(),
   findEntry: vi.fn(),
   loadArchive: vi.fn(),
@@ -11,7 +12,11 @@ const { currentSupporter, findEntry, loadArchive, loadMonthQuiz } = vi.hoisted((
 }))
 
 vi.mock('#src/database', () => ({ getDatabase: () => ({ db: {} }) }))
-vi.mock('#src/fans/fantest', async (importOriginal) => ({ ...(await importOriginal<object>()), loadArchive }))
+vi.mock('#src/fans/fantest-months', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  closedFigures,
+  loadArchive,
+}))
 vi.mock('#src/fans/require-supporter', () => ({ currentSupporter }))
 vi.mock('#src/fans/fantest-entry', async (importOriginal) => ({
   ...(await importOriginal<object>()),
@@ -50,12 +55,15 @@ beforeEach(() => {
   vi.stubEnv('FANS_ACCOUNTS', 'on')
   vi.stubEnv('FANS_FANTEST', 'on')
   vi.stubEnv('SITE_ENV', 'local')
-  loadArchive.mockResolvedValue([
-    { averageTenths: 43, month: 1, questions: 10, year: 2003 },
-    { averageTenths: undefined, month: 12, questions: 10, year: 2002 },
-    { averageTenths: 38, month: 12, questions: 9, year: 2003 },
-    { averageTenths: 41, month: 5, questions: 10, year: 2003 },
-  ])
+  closedFigures.mockResolvedValue(new Map())
+  loadArchive.mockResolvedValue(
+    [
+      { averageTenths: 43, month: 1, questions: 10, year: 2003 },
+      { averageTenths: undefined, month: 12, questions: 10, year: 2002 },
+      { averageTenths: 38, month: 12, questions: 9, year: 2003 },
+      { averageTenths: 41, month: 5, questions: 10, year: 2003 },
+    ].map((month, id) => ({ ...month, id, source: 'oude-fansite' })),
+  )
 })
 
 afterEach(() => {
@@ -206,5 +214,62 @@ describe('the archive of the Fantest', () => {
     vi.stubEnv('FANS_ACCOUNTS', 'off')
 
     await expect(render()).rejects.toThrow('NEXT_NOT_FOUND')
+  })
+})
+
+describe('the months of the editors that are over', () => {
+  const editors = (id: number, year: number, month: number) => ({
+    averageTenths: undefined,
+    id,
+    month,
+    questions: 10,
+    source: 'redactie',
+    year,
+  })
+  const figures = (participants: number, total: number) => ({ allRight: 2, chosen: {}, participants, total })
+
+  beforeEach(() => {
+    loadArchive.mockResolvedValue([
+      editors(21, 2026, 10),
+      editors(20, 2026, 9),
+      { ...editors(1, 2003, 5), averageTenths: 41, source: 'oude-fansite' },
+    ])
+    closedFigures.mockResolvedValue(
+      new Map([
+        [20, figures(4, 30)],
+        [21, figures(8, 52)],
+      ]),
+    )
+  })
+
+  it('shows the last one with its result above the list, with a link to the right answers', async () => {
+    const html = await render()
+
+    expect(html).toMatch(/<h2[^>]*>Uitslag van oktober 2026<\/h2>/)
+    expect(html.indexOf('Uitslag van oktober 2026')).toBeLessThan(html.indexOf('Eerdere maanden'))
+    expect(html).toContain('>6,5<')
+    expect(html).toContain('>8<')
+    expect(html).toContain('keer alles goed')
+    expect(html).toContain('Bekijk de goede ')
+    expect(html).not.toContain('Fantest van toen')
+  })
+
+  it('lists them between the old months, the newest year first, with the average from five on', async () => {
+    const html = await render()
+
+    expect(html.indexOf('>2026<')).toBeLessThan(html.indexOf('>2003<'))
+    expect(html).toContain('href="/fans/fantest/2026-09"')
+    expect(html).toContain('Gemiddeld 6,5 van 10')
+    expect(html).toContain('Toen gemiddeld 4,1 van 10')
+    expect(html.match(/emiddeld \d/g)).toHaveLength(2)
+  })
+
+  it('shows only the number of participants of a last month with fewer than five', async () => {
+    closedFigures.mockResolvedValue(new Map([[21, figures(1, 7)]]))
+    const html = await render()
+
+    expect(html).toContain('1 deelnemer<')
+    expect(html).not.toContain('gemiddeld 7')
+    expect(html).not.toContain('hf-key-figure')
   })
 })

@@ -7,7 +7,7 @@ import { checkQuizAction } from './actions'
 const { loadQuiz } = vi.hoisted(() => ({ loadQuiz: vi.fn() }))
 
 vi.mock('#src/database', () => ({ getDatabase: () => ({ db: {} }) }))
-vi.mock('#src/fans/fantest', async (importOriginal) => ({ ...(await importOriginal<object>()), loadQuiz }))
+vi.mock('#src/fans/fantest-months', async (importOriginal) => ({ ...(await importOriginal<object>()), loadQuiz }))
 vi.mock('next/navigation', () => ({
   notFound: () => {
     throw new Error('NEXT_NOT_FOUND')

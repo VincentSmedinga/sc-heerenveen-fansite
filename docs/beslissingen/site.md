@@ -7785,6 +7785,7 @@
   #1481 en verder (een nieuwe quiz elke maand) zijn niet goedgekeurd en zitten er niet in.
 - **Later:** zie _De redactie schrijft de Fantest in het beheer, en een ingevulde quiz is vergrendeld_ (25 november 2026): #1481 is gebouwd, en het archief toont alleen de quizzen van de oude Fansite.
   Zie ook _Een supporter doet de Fantest van de maand één keer_ (25 november 2026): `/fans/fantest` heet nu "Fantest", met de quiz van de maand boven het archief, en is voor een ingelogde supporter noindex en persoonlijk.
+- **Later:** sinds 25 november 2026 staan ook de gesloten maanden van de redactie in de lijst en onder hetzelfde adres, met de uitslag eerst (zie _Een gesloten maand van de Fantest opent met de uitslag_).
 
 ## De tabel van de telling heeft de uitkomsten als rijen
 
@@ -8109,6 +8110,7 @@
 - **Alternatieven:** de score tot na de maand geheim houden; de goede antwoorden meteen tonen; de score pas bij het lezen uitrekenen (dan verandert ze als de redactie een vraag annuleert); een geblokkeerd account naar `/fans/geblokkeerd` sturen (dan is ook het archief weg).
 - **Let op:** zet de redactie na het versturen "alles goed" bij een vraag, dan verandert de bewaarde score niet vanzelf.
   Wie de cijfers van een gesloten maand toont (#1483, #1484), beslist of hij de score opnieuw uitrekent uit de bewaarde antwoorden.
+- **Later:** de cijfers en de eigen score van een gesloten maand rekent de site uit de bewaarde antwoorden (zie _Een gesloten maand van de Fantest opent met de uitslag_).
 
 ## De ranglijst van de Fantest telt de gesloten maanden uit de bewaarde antwoorden
 
@@ -8130,3 +8132,28 @@
 - **Waarom:** met de lopende maand erbij is de stand te sturen met antwoorden die al rondgaan.
   "Alles goed" annuleert een slechte vraag, en dat hoort voor iedereen te gelden, ook voor wie eerder verstuurde.
 - **Alternatieven:** ook de lopende maand tellen; de bewaarde score optellen (dan helpt het annuleren van een vraag alleen wie later verstuurt); een opgeheven account als "Voormalige fan" laten staan, zoals bij Fjouwer (het issue wil er niets van terugzien); de supporter zonder naam in de standen zijn eigen plaats tonen, zoals bij Fjouwer (het issue vraagt geen regel); een stand over de laatste vijf quizzen (kan later).
+
+## Een gesloten maand van de Fantest opent met de uitslag, en is daarna na te spelen
+
+- **Datum:** 25 november 2026
+- **Besluit:** zodra een maand voorbij is, in Nederlandse tijd, toont `/fans/fantest/<jaar>-<maand>` de uitslag aan iedereen (#1484).
+  - Bij elke vraag staat het goede antwoord, in woorden en vet, met het deel van de deelnemers per antwoord.
+    Boven de vragen staan het aantal deelnemers, het gemiddelde en hoe vaak iemand alles goed had, en eronder de slottekst.
+  - Een ingelogde supporter die meedeed, ziet de eigen antwoorden, "Goed." of "Fout." en de score, ook onder vijf deelnemers.
+    Een geblokkeerd account ziet wat een bezoeker ziet.
+  - Wie niet meedeed, speelt de maand met de link "Speel deze quiz zelf" (`?spelen=1`), met hetzelfde formulier als het archief.
+    Dat telt nergens mee en bewaart niets.
+    Wie meedeed, krijgt die link niet.
+  - De oude maanden blijven openen als formulier.
+  - Onder vijf deelnemers is er van de cijfers alleen het aantal.
+  - De cijfers tellen de site uit de bewaarde antwoorden, met "alles goed" zoals die nu staat, net als de ranglijst.
+    Ze komen uit één query over alle gesloten maanden en staan vijf minuten in het geheugen.
+    Een opgeheven account telt anoniem mee; een geblokkeerd account niet, opgeheven of niet.
+  - Bij een vraag met "alles goed" is geen antwoord gemarkeerd, en staat er dat elk antwoord als goed telt.
+  - `/fans/fantest` toont boven de lijst de cijfers van de laatste gesloten maand van de redactie, met een link naar de goede antwoorden.
+    Zodra zo'n maand er is, heet de lijst "Eerdere maanden" in plaats van "Fantest van toen".
+  - De pagina van een gesloten maand staat in de sitemap en mag in zoekmachines; voor wie meedeed is ze `noindex`.
+- **Waarom:** het issue wil dat een gesloten quiz voor iedereen te lezen is, zoals op de oude Fansite, en dat wie niet meedeed hem nog kan spelen.
+  De uitslag eerst laten zien maakt het lezen vanzelfsprekend; spelen is een keuze.
+- **Alternatieven:** de maand openen als formulier, zoals het archief (dan zijn de antwoorden pas na het spelen te lezen); de uitslag van de laatste maand met alle vragen op `/fans/fantest` zelf (een heel lange pagina); de bewaarde score optellen (dan wijkt de uitslag af van de ranglijst).
+- **Let op:** het gemiddelde en de percentages verschuiven als de redactie later "alles goed" zet.

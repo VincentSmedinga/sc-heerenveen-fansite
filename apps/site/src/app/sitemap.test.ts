@@ -14,7 +14,7 @@ const { getAllReportAddresses, getClubRecords, getPlayerSlugs, getPublishedArtic
 
 vi.mock('../articles', () => ({ getPublishedArticles }))
 vi.mock('../database', () => ({ getDatabase: () => ({ db: {} }) }))
-vi.mock('../fans/fantest', async (importOriginal) => ({ ...(await importOriginal<object>()), loadArchive }))
+vi.mock('../fans/fantest-months', async (importOriginal) => ({ ...(await importOriginal<object>()), loadArchive }))
 vi.mock('../opponents', () => ({ getClubRecords, opponentsPath: '/tegenstanders' }))
 vi.mock('../report-data', () => ({ getAllReportAddresses }))
 vi.mock('../player-page', () => ({ getPlayerSlugs, playerAddress: (slug: string) => `/spelers/${slug}` }))

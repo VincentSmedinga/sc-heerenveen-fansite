@@ -1,14 +1,10 @@
-import type { Database } from '@fansite/db/client'
-
-import { quizQuestions, quizzes } from '@fansite/db/schema'
 import { scoreQuiz } from '@fansite/shared/quiz-score'
-import { and, asc, count, desc, eq } from 'drizzle-orm'
 
-// The Fantest of the old fansite as an archive (issue 1480): the quizzes by month and the pages
-// that let a visitor play one. It holds the sums of the visitors of then and never a person,
-// and nothing of a visitor of this site: the answers are checked and forgotten. The quiz of
-// the running month, which a supporter takes part in, is in fantest-entry.ts; both share the
-// names of the form and the check for a gap.
+// The words, the addresses and the form of the Fantest, without the database, so the browser
+// can use them too. A visitor plays a month that is over, of the old fansite (issue 1480) or
+// of the editors (issue 1484), and the answers are checked and forgotten. fantest-months.ts
+// reads those months; the quiz of the running month, which a supporter takes part in, is in
+// fantest-entry.ts.
 
 /** The address of the page of the Fantest: the quiz of the month and the archive. */
 export const fantestPath = '/fans/fantest'
@@ -19,7 +15,7 @@ export const fantestRankingPath = `${fantestPath}/ranglijst`
 /** A quiz has ten questions; one with fewer has a question that was left out. */
 export const quizSize = 10
 
-/** The percentages and the average of a month show with at least this many participants. */
+/** The percentages and the averages of a month show with at least this many participants. */
 export const quizMinimum = 5
 
 /** The line under the heading of the archive and of a month, which credits the old editors. */
@@ -72,15 +68,6 @@ export const questionId = (position: number) => answerField(position)
 /** The name of the hidden field that says which month the form belongs to. */
 export const monthField = 'maand'
 
-/** One month in the archive, as the list shows it. */
-export type ArchiveMonth = {
-  /** The average score in tenths, or nothing when too few took part for it to show. */
-  averageTenths: number | undefined
-  month: number
-  questions: number
-  year: number
-}
-
 /** What the form of a month holds: the answers, the errors and whether it was checked. */
 export type QuizState = {
   /** The chosen answer (1 to 4) of each question, by its position. */
@@ -97,15 +84,22 @@ export type QuizView = {
   month: number
   participants: number | undefined
   questions: QuizViewQuestion[]
+  /**
+   * What only a quiz of the editors has (issue 1484). `count` is how many took part, also when
+   * that is too few for the other figures, and `allRight` how many had every question right.
+   */
+  recent?: undefined | { allRight: number | undefined; closingText: string; count: number; intro: string }
   year: number
 }
 
 export type QuizViewQuestion = {
+  /** The editors cancelled the question: every answer counts. */
+  allCorrect?: boolean
   answers: [string, string, string, string]
   /** The place (1 to 4) of the right answer. */
   correct: number
   percentages: [number, number, number, number] | undefined
-  /** The place in the quiz of the old site, which names the field. */
+  /** The place in the quiz, which names the field. */
   position: number
   text: string
 }
@@ -116,38 +110,6 @@ export const emptyQuizState: QuizState = { answers: {}, checked: false, errors: 
 export const missingAnswer = (number: number) => `Kies een antwoord bij vraag ${number}.`
 
 export const summaryTitle = (missing: number) => `Nog ${missing} ${missing === 1 ? 'vraag' : 'vragen'} zonder antwoord`
-
-/**
- * The months of the archive, the newest first. Only quizzes of the old fansite are in it: a
- * quiz of the editors shows nowhere yet. A month has a quiz only when it is published,
- * so a month without one (such as July and August 2003) is not in the list. The average shows
- * only for a month with at least `quizMinimum` participants.
- */
-export async function loadArchive(db: Database): Promise<ArchiveMonth[]> {
-  const rows = await db
-    .select({
-      average: quizzes.averageScoreTenths,
-      month: quizzes.month,
-      participants: quizzes.participants,
-      questions: count(quizQuestions.id),
-      year: quizzes.year,
-    })
-    .from(quizzes)
-    .leftJoin(quizQuestions, eq(quizQuestions.quizId, quizzes.id))
-    .where(and(eq(quizzes.source, 'oude-fansite'), eq(quizzes.status, 'published')))
-    .groupBy(quizzes.id)
-    .orderBy(desc(quizzes.year), desc(quizzes.month))
-
-  return rows.map(({ average, month, participants, questions, year }) => ({
-    averageTenths: enough(participants) ? (average ?? undefined) : undefined,
-    month,
-    questions,
-    year,
-  }))
-}
-
-/** Whether enough visitors took part for their figures to show. */
-const enough = (participants: null | number) => participants !== null && participants >= quizMinimum
 
 /**
  * Checks the answers of one form against the questions. `entries` are the values of the fields,
@@ -178,56 +140,11 @@ export function checkQuiz(
 }
 
 /**
- * One published quiz of the old fansite with its questions in their order, or nothing when the
- * month has none. A quiz of the editors is never read here, so its right answers can't reach a
- * visitor through the archive. The
- * percentages, the average and the number of participants are there only when at least
- * `quizMinimum` visitors took part, so a page can't show a figure of a handful of people.
+ * The score of the chosen answers, by the position of each question. Of a question with "alles
+ * goed" every answer counts.
  */
-export async function loadQuiz(db: Database, year: number, month: number): Promise<QuizView | undefined> {
-  const [quiz] = await db
-    .select()
-    .from(quizzes)
-    .where(
-      and(
-        eq(quizzes.year, year),
-        eq(quizzes.month, month),
-        eq(quizzes.source, 'oude-fansite'),
-        eq(quizzes.status, 'published'),
-      ),
-    )
-    .limit(1)
-
-  if (quiz === undefined) {
-    return undefined
-  }
-
-  const shown = enough(quiz.participants)
-  const rows = await db
-    .select()
-    .from(quizQuestions)
-    .where(eq(quizQuestions.quizId, quiz.id))
-    .orderBy(asc(quizQuestions.position))
-
-  return {
-    averageTenths: shown ? (quiz.averageScoreTenths ?? undefined) : undefined,
-    month,
-    participants: shown ? (quiz.participants ?? undefined) : undefined,
-    questions: rows.map((row) => ({
-      answers: row.answers,
-      // A quiz of the old fansite always has the right answer.
-      correct: row.correctAnswer ?? 0,
-      percentages: shown ? (row.percentages ?? undefined) : undefined,
-      position: row.position,
-      text: row.text,
-    })),
-    year,
-  }
-}
-
-/** The score of a checked state, "6 van 10". */
-export const scoreOf = (questions: readonly QuizViewQuestion[], state: QuizState) =>
+export const scoreOf = (questions: readonly QuizViewQuestion[], answers: QuizState['answers']) =>
   scoreQuiz(
-    questions.map((question) => state.answers[question.position]),
-    questions.map((question) => question.correct),
+    questions.map((question) => answers[question.position]),
+    questions.map((question) => (question.allCorrect ? (answers[question.position] ?? 0) : question.correct)),
   )

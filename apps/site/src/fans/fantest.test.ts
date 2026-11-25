@@ -65,7 +65,7 @@ describe('checkQuiz', () => {
     const state = checkQuiz(questions, ['1', '2', '3'])
 
     expect(state).toEqual({ answers: { 1: 1, 3: 2, 4: 3 }, checked: true, errors: {} })
-    expect(scoreOf(questions, state)).toBe(2)
+    expect(scoreOf(questions, state.answers)).toBe(2)
   })
 
   it('gives each question without an answer its own error, numbered in this quiz, and keeps the rest', () => {

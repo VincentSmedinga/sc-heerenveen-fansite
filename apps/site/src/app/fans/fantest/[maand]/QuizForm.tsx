@@ -1,23 +1,10 @@
 'use client'
 
-import {
-  Button,
-  Card,
-  CardLink,
-  ErrorSummary,
-  Form,
-  Heading,
-  KeyFigures,
-  Notice,
-  QuizQuestion,
-  Strong,
-  Text,
-} from '@fansite/design-system'
+import { Button, Card, CardLink, ErrorSummary, Form, Heading, Notice, QuizQuestion, Text } from '@fansite/design-system'
 import { useActionState, useEffect } from 'react'
 
 import {
   answerField,
-  averageText,
   emptyQuizState,
   missingAnswer,
   monthField,
@@ -25,11 +12,11 @@ import {
   questionId,
   quizSize,
   type QuizState,
-  type QuizViewQuestion,
-  scoreOf,
+  type QuizView,
   summaryTitle,
 } from '#src/fans/fantest'
 
+import { QuizResult } from '../QuizResult'
 import { checkQuizAction } from './actions'
 
 // The form of one month: a card for each question and one button. It is a client component only
@@ -37,28 +24,15 @@ import { checkQuizAction } from './actions'
 // without JavaScript. After an error the focus goes to the summary, whose links bring it to the
 // questions. After the check the same questions show again with the right answers, and the
 // link "Opnieuw" loads the page anew, so the form is empty again. Nothing is stored.
-export function QuizForm({
-  averageTenths,
-  month,
-  participants,
-  questions,
-  when,
-  year,
-}: {
-  averageTenths: number | undefined
-  month: number
-  participants: number | undefined
-  questions: readonly QuizViewQuestion[]
-  /** "mei 2003", for the line under the figures. */
-  when: string
-  year: number
-}) {
+export function QuizForm({ again, quiz }: { /** The address of the empty quiz. */ again: string; quiz: QuizView }) {
+  const { month, participants, questions, recent, year } = quiz
   const [state, action] = useActionState<QuizState, FormData>(checkQuizAction, emptyQuizState)
   const errors = questions.flatMap((question, index) =>
     state.errors[question.position] === undefined
       ? []
       : [{ id: questionId(question.position), message: missingAnswer(index + 1) }],
   )
+  // Only an old month misses questions: a quiz of the editors always has ten.
   const missing = questions.length < quizSize
 
   useEffect(() => {
@@ -80,49 +54,10 @@ export function QuizForm({
   ) : null
 
   if (state.checked) {
-    const score = scoreOf(questions, state)
-
     return (
       <>
-        <Card aria-labelledby="fantest-score-kop" id="fantest-score" surface="strong" tabIndex={-1}>
-          <Heading id="fantest-score-kop" level={2}>
-            Je score
-          </Heading>
-          {participants === undefined || averageTenths === undefined ? (
-            <Text>
-              <Strong>
-                {score} van {questions.length}
-              </Strong>
-            </Text>
-          ) : (
-            <KeyFigures
-              figures={[
-                { figure: String(score), label: `van ${questions.length}`, note: 'jouw score' },
-                { figure: averageText(averageTenths), label: 'toen gemiddeld', note: `van ${questions.length}` },
-                { figure: String(participants), label: 'deden toen mee', note: `in ${when}` },
-              ]}
-            />
-          )}
-        </Card>
-        {participants === undefined ? null : <Text appearance="meta">Bij elke vraag: hoe fans het toen deden.</Text>}
-        {intro}
-        {questions.map((question, index) => (
-          <QuizQuestion
-            answers={question.answers}
-            id={questionId(question.position)}
-            key={question.position}
-            name={answerField(question.position)}
-            number={index + 1}
-            question={question.text}
-            result={{
-              chosen: state.answers[question.position] ?? 0,
-              correct: question.correct,
-              percentages: question.percentages,
-            }}
-            total={questions.length}
-          />
-        ))}
-        <CardLink href={`/fans/fantest/${monthSlug(year, month)}`}>Opnieuw</CardLink>
+        <QuizResult answers={state.answers} notice={intro} quiz={quiz} />
+        <CardLink href={again}>Opnieuw</CardLink>
       </>
     )
   }
@@ -137,7 +72,11 @@ export function QuizForm({
         </Heading>
         <Text>
           Kies bij elke vraag één antwoord. Daarna zie je meteen hoe je het deed
-          {participants === undefined ? '.' : `, en hoe fans het in ${year} deden.`}
+          {participants === undefined
+            ? '.'
+            : recent === undefined
+              ? `, en hoe fans het in ${year} deden.`
+              : ', en hoe de deelnemers het deden.'}
         </Text>
       </Card>
       <Form action={action}>

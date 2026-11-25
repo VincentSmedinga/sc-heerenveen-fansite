@@ -96,3 +96,29 @@ test('lists the months by year with a link to each, and leaves out a month witho
   await expect(page.getByRole('link', { name: 'Juli 2003' })).toHaveCount(0)
   await expect(page.getByRole('link', { name: 'Fantest' })).toBeVisible()
 })
+
+test('shows a closed month of the editors to everybody, who can then play it without a trace', async ({
+  context,
+  page,
+}) => {
+  await page.goto('/fans/fantest/2025-03')
+  await expect(page.getByRole('heading', { level: 2, name: 'Zo deed iedereen het' })).toBeVisible()
+  await expect(page.getByText('Het goede antwoord is Testantwoord B.').first()).toBeVisible()
+  await expect(page.getByText('Een verzonnen slottekst.')).toBeVisible()
+  await expect(page.getByRole('radio')).toHaveCount(0)
+
+  await page.getByRole('link', { name: 'Speel deze quiz zelf' }).click()
+  // Question n has the right answer ((n - 1) % 4) + 1: all ten right.
+  for (let number = 1; number <= 10; number += 1) {
+    await page
+      .getByRole('group', { name: `Redactievraag ${number} over Testclub?` })
+      .getByRole('radio', { name: `Testantwoord ${'ABCD'[(number - 1) % 4]}` })
+      .check()
+  }
+  await page.getByRole('button', { name: 'Kijk mijn antwoorden na' }).click()
+  await expect(page.getByRole('heading', { level: 2, name: 'Je score' })).toBeVisible()
+  await expect(page.getByText('jouw score')).toBeVisible()
+  await expect(page.getByText('Goed.')).toHaveCount(10)
+  expect(await checkPage(page)).toEqual([])
+  expect(await context.cookies()).toEqual([])
+})

@@ -7,12 +7,24 @@ import type { QuizState, QuizView } from '#src/fans/fantest'
 
 import FantestMonthPage, { generateMetadata } from './page'
 
-const { loadQuiz, useActionState } = vi.hoisted(() => ({ loadQuiz: vi.fn(), useActionState: vi.fn() }))
+const { closedFigures, currentSupporter, findAnswers, loadQuiz, useActionState } = vi.hoisted(() => ({
+  closedFigures: vi.fn(),
+  currentSupporter: vi.fn(),
+  findAnswers: vi.fn(),
+  loadQuiz: vi.fn(),
+  useActionState: vi.fn(),
+}))
 
 vi.mock('react', async (importOriginal) => ({ ...(await importOriginal<typeof React>()), useActionState }))
 vi.mock('./actions', () => ({ checkQuizAction: vi.fn() }))
 vi.mock('#src/database', () => ({ getDatabase: () => ({ db: {} }) }))
-vi.mock('#src/fans/fantest', async (importOriginal) => ({ ...(await importOriginal<object>()), loadQuiz }))
+vi.mock('#src/fans/require-supporter', () => ({ currentSupporter }))
+vi.mock('#src/fans/fantest-months', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  closedFigures,
+  findAnswers,
+  loadQuiz,
+}))
 vi.mock('next/navigation', () => ({
   notFound: () => {
     throw new Error('NEXT_NOT_FOUND')
@@ -38,7 +50,10 @@ const quiz = (count = 10, extra: Partial<QuizView> = {}): QuizView => ({
 })
 
 const empty: QuizState = { answers: {}, checked: false, errors: {} }
-const params = (maand: string) => ({ params: Promise.resolve({ maand }) })
+const params = (maand: string, query: Record<string, string> = {}) => ({
+  params: Promise.resolve({ maand }),
+  searchParams: Promise.resolve(query),
+})
 
 beforeEach(() => {
   vi.stubEnv('FANS_ACCOUNTS', 'on')
@@ -49,9 +64,11 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllEnvs()
+  vi.resetAllMocks()
 })
 
-const render = async (maand = '2003-05') => renderToStaticMarkup(await FantestMonthPage(params(maand)))
+const render = async (maand = '2003-05', query: Record<string, string> = {}) =>
+  renderToStaticMarkup(await FantestMonthPage(params(maand, query)))
 
 describe('the page of a month of the Fantest', () => {
   it('starts with the way back, the heading and the card "Tien vragen", with fans and not supporters', async () => {
@@ -230,5 +247,143 @@ describe('the page of a month of the Fantest', () => {
     expect(metadata.title).toBe('Fantest mei 2003')
     expect(metadata.robots).toBeUndefined()
     expect(String(metadata.alternates?.canonical)).toMatch(/\/fans\/fantest\/2003-05$/)
+  })
+})
+
+describe('the page of a closed month of the editors', () => {
+  const editors = {
+    ...quiz(10, { averageTenths: undefined, month: 10, participants: undefined, year: 2026 }),
+    id: 4,
+    questions: questionsOf(10).map((one) => ({ ...one, percentages: undefined })),
+    recent: {
+      allRight: undefined,
+      closingText: 'Een verzonnen slottekst.',
+      count: 0,
+      intro: 'Een verzonnen inleiding.',
+    },
+  }
+  /** Of `participants`, six in ten chose the right answer 2 of each question. */
+  const figuresOf = (participants: number) =>
+    new Map([
+      [
+        4,
+        {
+          allRight: 2,
+          chosen: Object.fromEntries(Array.from({ length: 10 }, (_, index) => [index + 1, [0, participants, 0, 0]])),
+          participants,
+          total: participants * 7,
+        },
+      ],
+    ])
+  const supporter = { disabledAt: null, id: 7 }
+  /** Nine right, the second wrong. */
+  const own = Object.fromEntries(Array.from({ length: 10 }, (_, index) => [index + 1, index === 1 ? 1 : 2]))
+
+  beforeEach(() => {
+    loadQuiz.mockResolvedValue(editors)
+    closedFigures.mockResolvedValue(figuresOf(5))
+  })
+
+  it('shows a visitor the right answers, how everybody did and the closing text, without a form', async () => {
+    const html = await render('2026-10')
+
+    expect(html.match(/<h1/g)).toHaveLength(1)
+    expect(html).toContain('Fantest oktober 2026')
+    expect(html).toContain('Een verzonnen inleiding.')
+    expect(html).toContain('Zo deed iedereen het')
+    expect(html).toContain('>7,0<')
+    expect(html).toContain('>5<')
+    expect(html).toContain('keer alles goed')
+    expect(html.match(/Het goede antwoord is Twee\./g)).toHaveLength(10)
+    expect(html).toContain('100%')
+    expect(html).toContain('Een verzonnen slottekst.')
+    expect(html).toContain('href="/fans/fantest/2026-10?spelen=1"')
+    expect(html).not.toContain('<form')
+    expect(html).not.toMatch(/Jouw keuze|Goed\.|Fout\./)
+    expect(findAnswers).not.toHaveBeenCalled()
+  })
+
+  it('shows only the number of participants below five: no percentage, average or "alles goed"', async () => {
+    closedFigures.mockResolvedValue(figuresOf(4))
+    const html = await render('2026-10')
+
+    expect(html).toContain('4 deelnemers')
+    expect(html).not.toContain('%')
+    expect(html).not.toContain('gemiddeld')
+    expect(html).not.toContain('alles goed')
+    expect(html).toContain('Het goede antwoord is Twee.')
+  })
+
+  it('says "0 deelnemers" for a month that nobody did', async () => {
+    closedFigures.mockResolvedValue(new Map())
+
+    expect(await render('2026-10')).toContain('0 deelnemers')
+  })
+
+  it('shows a supporter who took part the own answers and score, in words, and nothing to play', async () => {
+    currentSupporter.mockResolvedValue(supporter)
+    findAnswers.mockResolvedValue(own)
+    const html = await render('2026-10', { spelen: '1' })
+
+    expect(findAnswers).toHaveBeenCalledWith({}, 7, 4)
+    expect(html).toContain('Je score')
+    expect(html).toContain('jouw score')
+    expect(html).toContain('>9<')
+    expect(html.match(/Jouw keuze/g)).toHaveLength(10)
+    expect(html.match(/Goed\./g)).toHaveLength(9)
+    expect(html).toContain('Fout.')
+    expect(html).not.toContain('spelen=1')
+    expect(html).not.toContain('<form')
+  })
+
+  it('shows the own score also below five participants', async () => {
+    currentSupporter.mockResolvedValue(supporter)
+    findAnswers.mockResolvedValue(own)
+    closedFigures.mockResolvedValue(figuresOf(3))
+    const html = await render('2026-10')
+
+    expect(html).toContain('9 van 10')
+    expect(html).toContain('3 deelnemers')
+    expect(html).not.toContain('%')
+  })
+
+  it('reads nothing of a blocked account', async () => {
+    currentSupporter.mockResolvedValue({ disabledAt: new Date(), id: 7 })
+    const html = await render('2026-10')
+
+    expect(findAnswers).not.toHaveBeenCalled()
+    expect(html).toContain('Zo deed iedereen het')
+    expect(html).not.toContain('Jouw keuze')
+  })
+
+  it('lets somebody who did not take part play it, without a right answer on that page', async () => {
+    currentSupporter.mockResolvedValue(supporter)
+    const html = await render('2026-10', { spelen: '1' })
+
+    expect(html.match(/<fieldset/g)).toHaveLength(10)
+    expect(html).toContain('Kijk mijn antwoorden na')
+    expect(html).toContain('en hoe de deelnemers het deden.')
+    expect(html).not.toContain('Het goede antwoord')
+  })
+
+  it('shows the figures after playing, and "Opnieuw" gives the empty quiz again', async () => {
+    useActionState.mockReturnValue([{ answers: own, checked: true, errors: {} }, vi.fn()])
+    const html = await render('2026-10', { spelen: '1' })
+
+    expect(html).toContain('Je score')
+    expect(html).toContain('deden mee')
+    expect(html).not.toContain('deden toen mee')
+    expect(html).toContain('href="/fans/fantest/2026-10?spelen=1"')
+    expect(html).toContain('Een verzonnen slottekst.')
+  })
+
+  it('is noindex for a supporter who took part, and may be found by everybody else', async () => {
+    vi.stubEnv('SITE_ENV', 'production')
+
+    expect((await generateMetadata(params('2026-10'))).robots).toBeUndefined()
+    currentSupporter.mockResolvedValue(supporter)
+    expect((await generateMetadata(params('2026-10'))).robots).toBeUndefined()
+    findAnswers.mockResolvedValue(own)
+    expect((await generateMetadata(params('2026-10'))).robots).toEqual({ follow: false, index: false })
   })
 })

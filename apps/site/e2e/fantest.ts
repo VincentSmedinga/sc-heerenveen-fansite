@@ -6,13 +6,14 @@ import path from 'node:path'
 
 /**
  * The made-up quizzes of the Fantest: one of the editors for the running month and one for
- * 2099, two closed months of 2025 with the answers of made-up supporters for the ranking
- * (#1483), and two so the pages of the archive have something to show (#1480): June 2003 with
- * ten questions and the figures of 38 visitors, and September 2003 with a question left out and
- * only three visitors, so the percentages and the average stay away. A month of 2003 or the
- * running month that a development database already has keeps its quiz. A quiz of the editors
- * for 2099 or for January or February 2025 is replaced. The checks put the rows in before the
- * first test and take only these rows out after the last one.
+ * 2099, three closed months of 2025 with the answers of made-up supporters, for the ranking
+ * (#1483) and the pages of a closed month (#1484), and two so the pages of the archive have
+ * something to show (#1480): June 2003 with ten questions and the figures of 38 visitors, and
+ * September 2003 with a question left out and only three visitors, so the percentages and the
+ * average stay away. A month of 2003 or the running month that a development database already
+ * has keeps its quiz. A quiz of the editors for 2099 or for January to March 2025 is replaced.
+ * The checks put the rows in before the first test and take only these rows out after the last
+ * one.
  */
 const months = [
   { average: 41, missing: [], month: 6, participants: 38 },
@@ -123,11 +124,13 @@ export async function editorsQuizId() {
 }
 
 /** The made-up supporters of the ranking and the closed months they took part in (#1483). */
-const rankedFans = ['Testfan Aukje', 'Testfan Bouke', 'Testfan Douwe']
+const rankedFans = ['Testfan Aukje', 'Testfan Bouke', 'Testfan Douwe', 'Testfan Froukje', 'Testfan Gerben']
 const rankedAddresses = 'ranglijst-%@example.test'
 const rankedMonths = [
   { month: 1, scores: [8, 6, 6], year: 2025 },
   { month: 2, scores: [7, 9], year: 2025 },
+  // Five took part, so this month shows its average and percentages (#1484).
+  { month: 3, scores: [10, 8, 7, 5, 4], year: 2025 },
 ]
 
 /** A published quiz of the editors with ten made-up questions, which nobody filled in. */
@@ -164,7 +167,7 @@ async function addEditorsQuiz(db: ReturnType<typeof connectToDatabase>['db'], wh
 }
 
 /**
- * Two closed months of the editors with the answers of made-up supporters, so the ranking has
+ * Closed months of the editors with the answers of made-up supporters, so the ranking has
  * tables to show.
  */
 async function addRankedMonths(db: ReturnType<typeof connectToDatabase>['db']) {
