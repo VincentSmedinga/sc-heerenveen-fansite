@@ -1306,6 +1306,7 @@
 - **Waarom:** de minuten staan niet in de gegevens van Wikipedia, wel in ons eigen verslag.
   Eén functie voorkomt dat de pagina, het formulier van de Uitblinker (#1470) en de spellen verschillende getallen geven.
 - **Alternatieven:** de minuten opslaan (raakt achterop bij een gecorrigeerd verslag); de berekening per onderdeel herhalen.
+- **Later:** zie _Per seizoen toont de minuten van een speler, als elke wedstrijd een opstelling heeft_ in `site.md` (26 november 2026): de kaart Per seizoen rekent met `minutesPlayed` ook over een verslag dat niet af is.
 
 ## De linie van een speler voor Fjouwer staat vast per seizoen, in `fantasy_player_lines`
 

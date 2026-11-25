@@ -8380,6 +8380,7 @@
   - **Verschil:** Spelers › Cijfers, en de andere kolommen van de kaart, tellen alleen de verslagen die af zijn.
     De minuten kunnen daardoor over meer wedstrijden gaan dan "gespeeld" in dezelfde rij.
     In een verslag dat niet af is, kan een wissel ontbreken, en dan wijkt het aantal minuten iets af.
+    Liet de import een rode kaart zonder minuut weg, dan telt de speler de hele wedstrijd.
   - **Eredivisie:** met alleen de Eredivisie tellen de minuten van die wedstrijden, en moet nog steeds elke wedstrijd van het seizoen een opstelling hebben.
   - **Totaal:** de rij telt de seizoenen met minuten op, en toont een streepje als geen seizoen ze heeft.
     De kolom blijft dan staan, naast de andere cijfers.

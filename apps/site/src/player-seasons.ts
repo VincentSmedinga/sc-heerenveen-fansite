@@ -267,10 +267,11 @@ export function playerSeasonsOf(allFacts: PlayerSeasonFacts, only?: readonly Com
 
 /**
  * Reads what the seasons of a person need, in a few queries: his rows in `players`, the played
- * matches of those seasons, the appearances in the reports that are `klaar` with their cards
- * and substitutions, the goals, and the table of Wikipedia. The goals belong to him by
- * `person_id`, by `player_id` or by `appearance_id`; one query with `or` returns a goal once,
- * whichever of the three ways it matches, and an own goal or a goal against us never matches.
+ * matches of those seasons, his appearances in every report with their cards and substitutions
+ * (the figures other than the minutes keep those of a report that is `klaar`), the goals, and
+ * the table of Wikipedia. The goals belong to him by `person_id`, by `player_id` or by
+ * `appearance_id`; one query with `or` returns a goal once, whichever of the three ways it
+ * matches, and an own goal or a goal against us never matches.
  */
 export async function readPlayerSeasonFacts(personId: number): Promise<PlayerSeasonFacts> {
   const { db } = getDatabase()
