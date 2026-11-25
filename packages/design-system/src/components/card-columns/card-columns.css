@@ -5,6 +5,9 @@
  * with a pair of cards on each row, so the order of the code is the order of reading. A browser
  * that knows grid lanes lets each card go to the shortest column, so the gaps under the shorter
  * card of a pair are gone.
+ *
+ * With a lead card, a second grid holds the lead and, beside it, the grid of the other cards,
+ * which has a column less. So the height of the lead does not touch the rows of the others.
  */
 
 @layer hf.components {
@@ -14,7 +17,8 @@
     container-type: inline-size;
   }
 
-  .hf-card-columns-grid {
+  .hf-card-columns-grid,
+  .hf-card-columns-split {
     align-items: start;
     display: grid;
     gap: var(--hf-space-xl);
@@ -26,8 +30,13 @@
   }
 
   @container hf-card-columns (width >= 28rem) {
-    .hf-card-columns-grid {
+    .hf-card-columns-grid,
+    .hf-card-columns-split {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .hf-card-columns-split > .hf-card-columns-grid {
+      grid-template-columns: minmax(0, 1fr);
     }
 
     @supports (display: grid-lanes) {
@@ -39,8 +48,15 @@
 
   /* Three columns from 52rem, two from 28rem, as for two columns. */
   @container hf-card-columns (width >= 52rem) {
-    .hf-card-columns-three > .hf-card-columns-grid {
+    .hf-card-columns-three > .hf-card-columns-grid,
+    .hf-card-columns-three > .hf-card-columns-split {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    /* The cards beside the lead take the last two columns, as wide as the lead. */
+    .hf-card-columns-three > .hf-card-columns-split > .hf-card-columns-grid {
+      grid-column: span 2;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 }
