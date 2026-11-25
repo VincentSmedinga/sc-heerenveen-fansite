@@ -133,7 +133,7 @@ describe('the responses of the quiz while the month runs', () => {
     const first = await keyOf(2)
     const second = await keyOf(3)
 
-    expect(first.after).toContain('1 van 10')
+    expect(first.after).toContain('>1 van 10<')
     expect(first.sent).toBe('redirect /fans/fantest?verstuurd=1')
     expect(second).toEqual(first)
     expect(JSON.stringify(first)).not.toMatch(/slottekst|correct|goed antwoord/i)

@@ -113,6 +113,15 @@ describe('the quiz of the month', () => {
     expect(html).not.toMatch(/Goed\.|Fout\./)
   })
 
+  it('says nothing about stored answers to a supporter without any', async () => {
+    currentSupporter.mockResolvedValue(supporter)
+
+    const html = await render({ al: '1', verstuurd: '1' })
+
+    expect(html).not.toContain('Je antwoorden zijn verstuurd.')
+    expect(html).not.toContain('Je hebt al meegedaan')
+  })
+
   it.each([
     ['al', 'Je hebt al meegedaan aan deze Fantest.'],
     ['gesloten', 'Deze Fantest is gesloten.'],
@@ -121,6 +130,7 @@ describe('the quiz of the month', () => {
     expect(await render({ [name]: '1' })).not.toContain(words)
 
     currentSupporter.mockResolvedValue(supporter)
+    findEntry.mockResolvedValue({ score: 6 })
     expect(await render({ [name]: '1' })).toContain(words)
   })
 

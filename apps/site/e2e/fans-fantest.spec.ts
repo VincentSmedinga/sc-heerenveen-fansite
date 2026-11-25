@@ -76,7 +76,7 @@ for (const javaScriptEnabled of [false, true]) {
       await choose(page, 5)
       await page.getByRole('button', { name: 'Verstuur mijn antwoorden' }).click()
       // "A" is right for the questions 1, 5 and 9.
-      await expect(page.getByText('3 van 10')).toBeVisible()
+      await expect(page.getByText('3 van 10', { exact: true })).toBeVisible()
       await expect(page.getByRole('status').filter({ hasText: 'Je antwoorden zijn verstuurd.' })).toBeVisible()
       await expect(page.getByRole('radio')).toHaveCount(0)
       await expect(page.getByText('Goed.')).toHaveCount(0)
@@ -86,7 +86,7 @@ for (const javaScriptEnabled of [false, true]) {
 
       await other.getByRole('button', { name: 'Verstuur mijn antwoorden' }).click()
       await expect(other.getByText('Je hebt al meegedaan aan deze Fantest.')).toBeVisible()
-      await expect(other.getByText('3 van 10')).toBeVisible()
+      await expect(other.getByText('3 van 10', { exact: true })).toBeVisible()
 
       await page.goto('/fans/mijn-account/gegevens')
       await expect(page.getByRole('rowheader', { name: /: score$/ })).toBeVisible()

@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import type { ReactNode } from 'react'
 
 import { Card, Heading, Link, List, Page, Text } from '@fansite/design-system'
 import { requireFansPart } from '@fansite/shared/fans-env'
@@ -70,13 +69,19 @@ export default async function FantestPage({
   ])
   const { month, year } = currentMonth(now)
   const when = monthTitle(year, month)
-  const message = (Object.keys(messages) as (keyof typeof messages)[]).find((name) => parameters[name] === '1')
-
-  let card: ReactNode = null
-
-  if (quiz !== undefined) {
-    card = await cardOf(quiz, supporter, monthSlug(year, month))
-  }
+  // Only a supporter who may take part and did has an entry.
+  const entry =
+    quiz !== undefined && supporter !== undefined && mayTakePart(supporter)
+      ? await findEntry(db, supporter.id, quiz.id)
+      : undefined
+  // A notice is about this supporter, so a visitor with the same address sees none. That the
+  // answers are stored is only said when they are.
+  const message = (Object.keys(messages) as (keyof typeof messages)[]).find(
+    (name) =>
+      parameters[name] === '1' &&
+      supporter !== undefined &&
+      (entry !== undefined || (name !== 'al' && name !== 'verstuurd')),
+  )
 
   return (
     <Page.Main areas={areas}>
@@ -88,9 +93,7 @@ export default async function FantestPage({
         <Heading id="fantest-maand" level={2}>
           {capital(when)}
         </Heading>
-        {/* A notice is about this supporter, so a visitor with the same address sees none. A
-            quiz that closed may leave a month without a new one. */}
-        {message === undefined || supporter === undefined ? null : (
+        {message === undefined ? null : (
           <>
             <Message id={messageId}>{messages[message]}</Message>
             <FocusOnLoad id={messageId} />
@@ -101,7 +104,7 @@ export default async function FantestPage({
         ) : (
           <>
             <Paragraphs text={quiz.intro} />
-            {card}
+            {cardOf(quiz, supporter, entry, monthSlug(year, month))}
           </>
         )}
       </Page.Cell>
@@ -150,7 +153,12 @@ function byYear(months: readonly ArchiveMonth[]) {
 }
 
 /** What stands under the introduction, for who is looking. */
-async function cardOf(quiz: MonthQuiz, supporter: Awaited<ReturnType<typeof currentSupporter>>, month: string) {
+function cardOf(
+  quiz: MonthQuiz,
+  supporter: Awaited<ReturnType<typeof currentSupporter>>,
+  entry: undefined | { score: number },
+  month: string,
+) {
   if (supporter === undefined) {
     return <JoinCard />
   }
@@ -158,8 +166,6 @@ async function cardOf(quiz: MonthQuiz, supporter: Awaited<ReturnType<typeof curr
   if (!mayTakePart(supporter)) {
     return <BlockedCard />
   }
-
-  const entry = await findEntry(getDatabase().db, supporter.id, quiz.id)
 
   if (entry !== undefined) {
     return <ScoreCard questions={quiz.questions.length} score={entry.score} />
