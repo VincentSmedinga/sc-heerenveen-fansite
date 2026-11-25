@@ -16,8 +16,8 @@ const goalkeeperColumns: readonly FigureId[] = ['played', 'minutes', 'cleanSheet
 const fieldColumns: readonly FigureId[] = ['played', 'started', 'minutes', 'goals', 'assists', 'yellow', 'red']
 
 /**
- * The columns that go behind the button "Toon meer" on a phone, where six do not fit (#1624):
- * the cards, and for a goalkeeper only the red ones, so that he keeps four columns.
+ * The columns that go behind the button "Toon meer" on a phone, where seven do not fit (#1624):
+ * the cards, and for a goalkeeper only the red ones, so that he keeps five columns of figures.
  */
 const moreColumns = (goalkeeper: boolean): readonly FigureId[] => (goalkeeper ? ['red'] : ['yellow', 'red'])
 

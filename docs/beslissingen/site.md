@@ -8383,6 +8383,8 @@
   - **Eredivisie:** met alleen de Eredivisie tellen de minuten van die wedstrijden, en moet nog steeds elke wedstrijd van het seizoen een opstelling hebben.
   - **Totaal:** de rij telt de seizoenen met minuten op, en toont een streepje als geen seizoen ze heeft.
     De kolom blijft dan staan, naast de andere cijfers.
+  - **Op een telefoon** staan de minuten meteen in de tabel, en de kaarten blijven achter "Toon meer".
+    Daarvoor staan de kolommen dichter op elkaar (zie _Een tabel met "Toon meer" heeft op een smal scherm minder ruimte tussen de kolommen_ in `designsysteem.md`).
 - **Waarom:** de minuten komen uit de verslagen, en een seizoen met ontbrekende opstellingen geeft een te laag getal dat op weinig speeltijd lijkt.
   Met alleen de verslagen die af zijn, had in de kopie van acceptatie van 25 november 2026 alleen 2026/27 minuten.
   In 1998/99 tot en met 2002/03 en 2005/06 heeft daar elke wedstrijd een opstelling, maar zijn enkele verslagen niet af.

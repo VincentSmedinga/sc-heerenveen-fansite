@@ -4684,3 +4684,13 @@
   De ring van de voorbeeldschijf viel in de compacte maat tegen het woord aan.
   Liggend loopt de rij van boven naar beneden, en met meer spreiding valt de naam van de onderste speler buiten het veld.
 - **Alternatieven:** de rij verspringen; elke rij breder maken (bij drie of minder is er al ruimte genoeg).
+
+## Een tabel met "Toon meer" heeft op een smal scherm minder ruimte tussen de kolommen
+
+- **Datum:** 26 november 2026
+- **Besluit:** in `DataTable.More` houden de cijferkolommen onder 24rem de helft van hun ruimte aan de zijkanten, en de eerste kolom de helft van de ruimte erachter (#1674).
+  Dat is dezelfde ruimte als in een tabel die sorteert.
+  Op een telefoon van 320 pixels loopt het seizoen in de kaart Per seizoen daardoor over twee regels, en na "Toon meer" over drie.
+- **Waarom:** met de minuten erbij paste de tabel niet op 320 pixels.
+  De projecteigenaar wil de minuten op een telefoon meteen zien.
+- **Alternatieven:** de minuten achter "Toon meer" (het seizoen blijft dan op één regel); de tabel zijwaarts laten scrollen.
