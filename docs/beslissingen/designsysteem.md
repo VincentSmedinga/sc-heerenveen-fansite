@@ -4567,6 +4567,7 @@
   Groot (`--hf-figure-large-font-size`) is het getal van `QuestionCard`, het totaal van `DonutChart` en `MatchPenaltySeries`, de punten en de grote voorspelling in `PredictionList`, de velden en waarden van `ScoreGrid` en de cijfers in `CodeInput`.
   Klein (`--hf-figure-font-size`) zijn de tekens in `MarkRow` en het gemiddelde in `WinnerList` en in het zegel van `Winner`.
   De uitslag in `MatchHeader` blijft op Kop 1.
+  In de grote voorspelling van `PredictionList` is alleen de eindstand 700: de ruststand tussen haakjes blijft gewoon van gewicht, zoals in _De rij van PredictionList zet de punten en de voorspelling rechts_.
 - **Waarom:** zes maten naast elkaar hadden geen regel.
   Twee tokens bestonden al, en de grootste zichtbare stap is 4 pixels.
   De uitslag is de kop van de pagina.
