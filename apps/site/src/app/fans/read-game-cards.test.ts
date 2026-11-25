@@ -265,6 +265,13 @@ describe('the card of Fjouwer', () => {
     expect(mocks.cachedStanding).toHaveBeenCalledWith(7)
   })
 
+  it('writes a negative number of points with a real minus sign', async () => {
+    mocks.supporterFours.mockResolvedValue([{ match: { id: 7 }, ready: true, total: -3 }])
+    mocks.cachedStanding.mockResolvedValue({ counted: 1, places: new Map() })
+
+    expect((await readFjouwerCard(supporter, now))?.mine?.figures?.[0]?.figure).toBe('−3')
+  })
+
   it('asks for a new choice when a player of an inherited four does not count', async () => {
     mocks.fjouwerState.mockResolvedValue({ four: [1, 2, 3, 4], inherited: true, notCounting: [2], saved: false })
 

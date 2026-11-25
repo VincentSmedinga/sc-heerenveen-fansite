@@ -8,6 +8,7 @@ import { fantestPath } from '#src/fans/fantest'
 import { currentMonth, findEntry, loadMonthQuiz } from '#src/fans/fantest-entry'
 import { rankingOf as fantestRankingOf, monthScores } from '#src/fans/fantest-ranking'
 import { fjouwerPath, fjouwerSquad, fjouwerState, fjouwerSurnames } from '#src/fans/fjouwer'
+import { pointsText } from '#src/fans/fjouwer-form'
 import { cachedStanding, supporterFours } from '#src/fans/fjouwer-points'
 import { seasonRanking as fjouwerSeasonRanking, rankedSeasons as rankedFjouwerSeasons } from '#src/fans/fjouwer-ranking'
 import { countFours, countParticipants } from '#src/fans/game-counts'
@@ -205,7 +206,7 @@ export function readFjouwerCard(supporter: CardSupporter | undefined, now = new 
         ? undefined
         : [
             {
-              figure: String(last.total),
+              figure: pointsText(last.total),
               label: last.total === 1 ? 'punt' : 'punten',
               note: 'in je laatste wedstrijd',
             },

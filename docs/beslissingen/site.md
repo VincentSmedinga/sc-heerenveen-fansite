@@ -8223,3 +8223,12 @@
 - **Waarom:** de pagina is de plek om in één keer te zien wat er te doen is.
   Ze komt nooit in een cache, dus persoonlijke inhoud kan hier.
 - **Alternatieven:** een lichtere pagina met alleen de staat, één zin en een link per spel.
+
+## `/fans` blijft vindbaar voor zoekmachines, ook met de korte standen
+
+- **Datum:** 25 november 2026
+- **Besluit:** `/fans` blijft op productie vindbaar en staat in de sitemap, ook nu de korte standen schermnamen tonen (#1646).
+  De standen van de spellen op hun eigen pagina's veranderen niet.
+- **Waarom:** `/fans` is de startpagina van het hoofdstuk, en die moet te vinden zijn.
+  Wie zijn naam niet in de standen wil, zet dat uit op Mijn account.
+- **Alternatieven:** `noindex` zolang de pagina een stand toont, zoals de ranglijst van de Fantest.
