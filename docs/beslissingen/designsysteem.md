@@ -4030,6 +4030,7 @@
   Reflow (WCAG 1.4.10) blijft goed: inzoomen maakt de kolom in rem smaller, dus de rijen worden één kolom.
 - **Alternatieven:** de media queries houden (klopt niet in een zijbalk); één vaste grens voor alle vier (de vier hebben andere kolombreedtes); een `div` om elke lijst (alleen bij `PlayerList`, waar `columns` het niet anders toelaat).
 - **Later:** vervangt de grenzen van het venster (52 rem en 40 rem) die `KeyFigures`, `QuestionCard.Grid`, `PlayerList` en `OutcomeLine` volgens eerdere besluiten hadden, en maakt van `across` "vanaf 42 rem van de kolom" in plaats van "vanaf de breedte van een brede pagina".
+- **Later:** de ruimte tussen de kaarten van `KeyFigures` en `QuestionCard.Grid` is op 25 november 2026 2 rem geworden, dus de rekensom met 1 rem klopt niet meer; de grenzen van 42 en 40 rem blijven (zie _Kaarten in een raster binnen een kolom staan 2 rem uit elkaar_, #1645).
 
 ## De binnenruimte van een kaart blijft een media query
 
@@ -4464,3 +4465,12 @@
 - **Waarom:** een lange pagina met veel kaarten laat in drie kolommen meer in beeld dan in twee.
 - **Alternatieven:** de kolommen van boven naar beneden vullen (de volgorde van lezen volgt dan niet het scherm); een eigen onderdeel voor drie kolommen.
 - **Later:** dit vult _`CardColumns` zet kaarten in een raster met paren, en grid lanes maakt het beter_ aan: er zijn nu twee of drie kolommen.
+
+## Kaarten in een raster binnen een kolom staan 2 rem uit elkaar
+
+- **Datum:** 25 november 2026
+- **Besluit:** een raster van kaarten binnen een kolom gebruikt dezelfde ruimte als het raster van de pagina, `--hf-space-xl` (2 rem) (#1645).
+  Dat geldt voor `OpenGameCards`, `KeyFigures`, `QuestionCard.Grid` en `Tile.Grid`; `CardColumns` deed het al.
+  `SideBySide` blijft zoals het is: het zet twee delen van één taak naast elkaar en is geen raster van kaarten.
+- **Waarom:** de kaarten zien er zo uit als de andere kaarten die naast elkaar staan.
+- **Alternatieven:** een rij kleine kaarten dichter bij elkaar houden, met 0,5 of 1 rem.

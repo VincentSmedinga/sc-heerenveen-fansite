@@ -7,7 +7,7 @@
 @layer hf.components {
   .hf-open-game-cards {
     display: grid;
-    gap: var(--hf-space-s);
+    gap: var(--hf-space-xl);
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 

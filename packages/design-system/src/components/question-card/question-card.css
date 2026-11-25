@@ -5,14 +5,14 @@
    * Three columns where the column is wide and one where it is narrow. The cells of a row are
    * as high as the highest one, so the row has an even edge. The list is the container and its
    * items ask it, because a list can't ask for its own width. Three cards of about 12rem and
-   * two gaps of 1rem need 40rem.
+   * two gaps of 2rem need 40rem.
    */
   .hf-question-grid {
     container-name: hf-question-grid;
     container-type: inline-size;
     display: flex;
     flex-wrap: wrap;
-    gap: var(--hf-space-m);
+    gap: var(--hf-space-xl);
     list-style: none;
     margin: 0;
     padding: 0;
@@ -26,7 +26,7 @@
 
   @container hf-question-grid (inline-size >= 40rem) {
     .hf-question-item {
-      flex-basis: calc((100% - 2 * var(--hf-space-m)) / 3);
+      flex-basis: calc((100% - 2 * var(--hf-space-xl)) / 3);
     }
   }
 

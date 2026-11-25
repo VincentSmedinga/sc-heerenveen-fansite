@@ -13,7 +13,7 @@
     container-type: inline-size;
     display: flex;
     flex-wrap: wrap;
-    gap: var(--hf-space-m);
+    gap: var(--hf-space-xl);
     list-style: none;
     margin: 0;
     padding: 0;
@@ -29,17 +29,17 @@
 
   /* Four figures: two to a row at every width, so the row is never three and one. */
   .hf-key-figures-four > .hf-key-figure {
-    flex: 0 0 calc((100% - var(--hf-space-m)) / 2);
+    flex: 0 0 calc((100% - var(--hf-space-xl)) / 2);
   }
 
   /*
-   * Across: four in one row from 42rem of column. Each card needs about 9.4rem (the basis of
-   * .hf-key-figure) and the three gaps are 3rem, which is 40.5rem; the rest is room to breathe.
-   * A main column on a wide page is wider than this, a sidebar is not.
+   * Across: four in one row from 42rem of column. With three gaps of 2rem each card then has
+   * 9rem, a little under the basis of .hf-key-figure, which its text wraps in. A main column on
+   * a wide page is wider than this, a sidebar is not.
    */
   @container hf-key-figures (inline-size >= 42rem) {
     .hf-key-figures-across > .hf-key-figure {
-      flex-basis: calc((100% - 3 * var(--hf-space-m)) / 4);
+      flex-basis: calc((100% - 3 * var(--hf-space-xl)) / 4);
     }
   }
 
