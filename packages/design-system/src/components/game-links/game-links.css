@@ -16,4 +16,12 @@
     margin-block-start: 0;
     padding-block-end: var(--hf-space-m);
   }
+
+  /*
+   * The last match of a list has no space under it (match.css), so the links take it above
+   * themselves and add none below.
+   */
+  li:last-child > .hf-match + .hf-game-links {
+    padding-block: var(--hf-space-m) 0;
+  }
 }

@@ -268,6 +268,7 @@ De server bewaart ze vijf minuten (`src/podcasts.ts`).
 De afleveringen hebben dezelfde feiten als op `/nieuws/podcasts`.
 De kaart (`EpisodesCard` in `src/NewsCards.tsx`) toont alleen afleveringen van de laatste 8 dagen, gerekend vanaf nu; een aflevering van precies 8 dagen oud staat er nog in.
 Is er geen, dan staat er "We hebben de laatste 8 dagen geen podcastafleveringen gevonden." en blijft de link "Alle podcasts".
+Dit geldt ook voor de kaart "Podcasts" op `/nieuws`, want het is dezelfde kaart.
 
 Onder het forum staat voor elk spel van Fans dat nu open is een kleine kaart (`OpenGameCards`), twee naast elkaar, in de volgorde Prognose, Uitblinker, Fjouwer, Fantest.
 Een kaart heeft de naam van het spel, tot wanneer het open is ("Open tot za 16.45") en een korte link.
@@ -282,7 +283,6 @@ Een spel is open als accounts en het spel aan staan en:
 Het lezen gebeurt bij elk bezoek en kijkt niet wie er kijkt.
 Kan een spel niet gelezen worden, dan ontbreekt alleen dat spel, en het logboek zegt waarom.
 Zonder open spel is er geen kaart.
-Dit geldt ook voor de kaart "Podcasts" op `/nieuws`, want het is dezelfde kaart.
 
 Boven de discussies staan twee blokken met wedstrijden: "Wedstrijden" en "Stand" (zie _De wedstrijden_).
 Op een telefoon is de volgorde het artikel, het nieuws, de podcasts, de wedstrijden, de stand, het forum en de spellen.

@@ -187,7 +187,6 @@ const drawings: Record<IconName, ReactNode> = {
       <path d="m4.1 11.9-.7.7" />
     </>
   ),
-  // A bin: the lid with its handle, the bin that narrows at the bottom, and two lines in it.
   // A board with a player to pick (a circle), one of the other side (a cross) and the run
   // from one to the other: the game Fjouwer.
   'tactics-board': (
@@ -198,6 +197,7 @@ const drawings: Record<IconName, ReactNode> = {
       <path d="M5 7.5c.25-2 1.25-2.75 2.5-2.5" />
     </>
   ),
+  // A bin: the lid with its handle, the bin that narrows at the bottom, and two lines in it.
   trash: (
     <>
       <path d="M2.5 4.5h11" />

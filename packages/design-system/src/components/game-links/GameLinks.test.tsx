@@ -1,4 +1,6 @@
 import { render, screen } from '@testing-library/react'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { type GameLinkItem, GameLinks } from './GameLinks'
@@ -28,6 +30,12 @@ describe('GameLinks', () => {
 
     expect(icons).toHaveLength(4)
     expect(icons.every((icon) => icon.getAttribute('aria-hidden') === 'true')).toBe(true)
+  })
+
+  it('keeps its space above it under the last match of a list, which has none of its own', () => {
+    const css = readFileSync(join(import.meta.dirname, 'game-links.css'), 'utf8')
+
+    expect(css).toMatch(/li:last-child > \.hf-match \+ \.hf-game-links \{\s*padding-block: var\(--hf-space-m\) 0;/)
   })
 
   it('is nothing without a game', () => {
