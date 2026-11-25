@@ -148,6 +148,7 @@
 - **Later:** zie _De toegankelijkheidscontroles draaien op de gebouwde site, in de bestaande CI-job_.
   Sindsdien draait de reviewer `pnpm test:a11y` in plaats van `pnpm exec playwright test`, en toetst axe de pagina's.
   Sinds 1 november 2026 draait hij ook die niet meer zelf: de uitkomst komt uit CI (zie _De zware controles delen de machine_).
+- **Later:** sinds 25 november 2026 neemt de reviewer ook lint, typecheck en tests uit CI over (zie _De Reviewer neemt de controles uit CI over_).
 
 ## De reviewer start direct na het openen van de pull request
 
@@ -173,6 +174,7 @@
   Hij draait nog wel lint, typecontrole en de tests van de pakketten die de pull request raakt.
 - **Later:** sinds 24 november 2026 zet de Builder Auto-fix niet meer aan, want de app laat dat niet toe op pull requests van de GitHub App.
   Hij leest CI één keer na het verslag van de reviewer en herstelt wat rood is, met dezelfde vrijheid om te pushen zonder nieuw akkoord (zie _Auto-fix: de Builder leest CI één keer_).
+- **Later:** sinds 25 november 2026 draait de Builder niet meer alle controles voor het pushen en de reviewer ze niet meer zelf (zie _Een Builder test lokaal alleen het eigen werk_ en _De Reviewer neemt de controles uit CI over_).
 
 ## Een agent start Storybook zelf, en werkt ook zonder
 
@@ -352,6 +354,7 @@
   Een eigen script dat de diff controleert; dat is code om te onderhouden voor iets wat twee regels doen.
   Niets doen en de reviewer deze dingen laten melden; dat kost een reviewronde per pull request, en de limiet is twee.
 - **Later:** sinds 24 november 2026 loopt de Builder de laatste controle door vlak voordat hij zelf pusht, niet voordat hij om de go-ahead vraagt (zie _Een Builder pusht en opent de pull request zonder akkoord_).
+- **Later:** sinds 25 november 2026 is de rooktest geen punt van de laatste controle meer; de Builder draait hem alleen na een wijziging in `smoke.js` (zie _Een Builder test lokaal alleen het eigen werk_).
 
 ## Skills voor de stappen van de rollen, regels blijven in AGENTS.md
 
@@ -579,6 +582,8 @@
 - **Later:** de getallen (twee processen, 30 minuten, 30 seconden) volgen uit een meting op deze computer.
   Is de computer sneller of zijn er meer Builders, dan meten we opnieuw.
 - **Later:** sinds 9 november 2026 draait een Builder bij een wijziging die alleen CSS of tokens raakt `pnpm build`, `pnpm test:a11y` en `pnpm test:stories` niet meer zelf (zie _Een wijziging die alleen CSS of tokens raakt, draait lokaal minder_).
+- **Later:** sinds 25 november 2026 draait een Builder een zware controle alleen als die het eigen werk toetst of de screenshots levert, en de reviewer draait ook lint, typecheck en tests niet meer zelf (zie _Een Builder test lokaal alleen het eigen werk_ en _De Reviewer neemt de controles uit CI over_).
+  Het slot en de grenzen op het aantal processen gelden nog.
 
 ## Issue-formulieren in YAML, met drie soorten en zonder lege issues
 
@@ -748,6 +753,7 @@
 - **Alternatieven:** de hele keten lokaal houden; dat is trager en geeft dezelfde uitkomst.
   Alle controles aan CI laten; dan mist de Builder de snelle fouten en de screenshots.
 - **Later:** dit beperkt _De zware controles delen de machine_ voor deze soort wijziging; de rest van die beslissing geldt nog.
+- **Later:** sinds 25 november 2026 vervangt _Een Builder test lokaal alleen het eigen werk_ deze beslissing: die regel geldt voor elke wijziging.
 
 ## Een opdracht in een worktree weigert de gedeelde database fansite
 
@@ -966,6 +972,7 @@
 - **Alternatieven:** alleen de projecteigenaar zet Auto-fix aan en de Builder leest CI niet; dan blijft een rode controle liggen tot iemand het ziet.
   De pull request vanaf het account van de projecteigenaar openen; dat kan niet, want een auteur keurt zijn eigen pull request niet goed.
   CI volgen met een lus; dat staat de app niet toe en kost elke keer een beurt.
+- **Later:** sinds 25 november 2026 leest hij CI ook zonder reviewer één keer, na het openen, en wacht hij niet op een job die nog draait (zie _De Builder wacht niet op CI_).
 
 ## De reviewer op Fable staat vooraf in de brief
 
@@ -975,3 +982,35 @@
   Zonder die regel in de brief gebruikt de Builder Sonnet.
 - **Waarom:** de Builder had hier het enige moment om te vragen, en dat vervalt.
 - **Alternatieven:** altijd Sonnet; of voor die pull requests toch voor de push stoppen.
+
+## Een Builder test lokaal alleen het eigen werk
+
+- **Datum:** 25 november 2026
+- **Besluit:** een Builder draait lokaal `pnpm lint`, `pnpm typecheck` en de tests die de gewijzigde code toetsen.
+  Een zware controle draait alleen, of voor een deel, als die het werk zelf toetst of de screenshots levert.
+  De rest is aan CI.
+- **Waarom:** de hele keten kostte bij #1646 16 van de 28 minuten, en CI draait dezelfde controles toch.
+  Lint en typecheck zijn goedkoop en voorkomen de meeste extra pushes.
+- **Nadeel:** een fout elders komt pas in CI boven, en kost dan een extra push.
+- **Alternatieven:** alle tests van de geraakte pakketten; dan draait een wijziging in de database of de site nog steeds minuten.
+  Ook de pakketten die ervan afhangen; dan draait een wijziging in `db` of `shared` bijna alles.
+  Een tabel met zware controles per soort wijziging; dat is trager en een lijst om bij te houden.
+  Ook lint en typecheck aan CI laten; dat bespaart weinig en geeft meer rode runs.
+
+## De Builder wacht niet op CI
+
+- **Datum:** 25 november 2026
+- **Besluit:** de Builder leest CI één keer.
+  Wat daarna rood wordt, komt terug via de Coördinator, die voor het samenvoegen kijkt, of via Auto-fix als de projecteigenaar dat aanzet.
+- **Waarom:** de app staat niet toe dat een sessie CI met `gh` blijft volgen.
+- **Alternatieven:** `gh pr checks --watch`; de uitkomst is dan eerder bekend, maar sessies kunnen het weigeren.
+
+## De Reviewer neemt de controles uit CI over
+
+- **Datum:** 25 november 2026
+- **Besluit:** de Reviewer draait lint, typecheck en tests niet zelf als CI dat doet.
+  Alleen voor een vermoede bevinding of een overgeslagen controle draait de Reviewer iets.
+- **Waarom:** CI draait ze al, de Builder wacht op het verslag, en de computer is gedeeld.
+- **Nadeel:** het verslag kan er zijn voordat CI klaar is.
+  De verplichte controle op `main` houdt een rode pull request dan nog tegen.
+- **Alternatieven:** alleen de gerichte tests draaien, of alles zo laten; beide kosten tijd voor een uitkomst die CI al geeft.

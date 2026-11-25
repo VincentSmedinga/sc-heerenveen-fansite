@@ -71,9 +71,8 @@ Do it once: a run reads every enabled feed in the register and the Wikipedia pag
 
 ## 7. Check
 
-`pnpm lint`, `pnpm typecheck`, `pnpm test` with the database running, `pnpm build`.
-Does the sources page or another page show source names or counts from the register?
-Then also `pnpm test:a11y` and the smoke test (see _De controles_ in `CONTRIBUTING.md`).
+Run what _De controles_ in `CONTRIBUTING.md` says.
+For a source the tests are `seed.test.ts` in `packages/db`, and `import-feeds.test.ts`, `read-feed.test.ts` and, when you changed the lists, `relevance.test.ts` in the importer.
 Then do the final check in `AGENTS.md`, and open the pull request as the `builder-workflow` skill says.
 
 ## Never
