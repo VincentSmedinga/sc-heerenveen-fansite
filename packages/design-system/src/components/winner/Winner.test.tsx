@@ -19,13 +19,13 @@ describe('Winner', () => {
 
   it('has the average as text, with "gemiddeld cijfer" for a screen reader', () => {
     const { container } = render(<Winner average="7,8" label="Uitblinker" name="Testspeler A" />)
-    const seal = container.querySelector('.hf-winner-seal')
+    const star = container.querySelector('.hf-winner-star')
 
-    expect(seal?.textContent).toBe('Gemiddeld cijfer 7,8')
-    expect(seal?.querySelector('.hf-visually-hidden')?.textContent).toBe('Gemiddeld cijfer ')
+    expect(star?.textContent).toBe('Gemiddeld cijfer 7,8')
+    expect(star?.querySelector('.hf-visually-hidden')?.textContent).toBe('Gemiddeld cijfer ')
   })
 
-  it('draws the seal with CSS, so it holds no image and nothing that a screen reader would skip', () => {
+  it('draws the star with CSS, so it holds no image and nothing that a screen reader would skip', () => {
     const { container } = render(<Winner average="7,8" label="Uitblinker" name="Testspeler A" />)
 
     expect(container.querySelector('img, svg')).toBeNull()
@@ -61,30 +61,39 @@ describe('the look of a Winner', () => {
     expect(css).not.toMatch(/var\(--hf-colour-(?:blue|grey|red|steel|sand)-/)
   })
 
-  it('puts the text under the seal where the box is narrow, by the width of the box', () => {
+  it('puts the text under the star where the box is narrow, by the width of the box', () => {
     expect(css).toContain('container-type: inline-size;')
     expect(css).toMatch(/@container hf-winner \(inline-size < /)
   })
 
-  it('draws a seal in two blues, a step apart, with a white number', () => {
-    expect(css).toContain('color: var(--hf-colour-text-on-seal);')
-    expect(css).toMatch(/&::before \{\s*background-color: var\(--hf-colour-background-seal\);/)
-    expect(css).toMatch(/&::after \{\s*background-color: var\(--hf-colour-background-seal-centre\);/)
-    expect(tokens).toContain('--hf-colour-background-seal: var(--hf-colour-blue-600);')
-    expect(tokens).toContain('--hf-colour-background-seal-centre: var(--hf-colour-blue-500);')
-    expect(tokens).toContain('--hf-colour-text-on-seal: var(--hf-colour-white);')
+  it('draws a faceted star in two blues, a step apart, with a white number', () => {
+    expect(css).toContain('color: var(--hf-colour-text-on-star);')
+    expect(css).toMatch(/&::before \{\s*background-color: var\(--hf-colour-background-star\);/)
+    expect(css).toMatch(/&::after \{\s*background-color: var\(--hf-colour-background-star-facet\);/)
+    expect(tokens).toContain('--hf-colour-background-star: var(--hf-colour-blue-600);')
+    expect(tokens).toContain('--hf-colour-background-star-facet: var(--hf-colour-blue-500);')
+    expect(tokens).toContain('--hf-colour-text-on-star: var(--hf-colour-white);')
   })
 
-  it('has an average that reaches 4.5:1 on the disc, the same in light and in dark', () => {
-    expect(contrast(scale('white'), scale('blue-500'))).toBeGreaterThanOrEqual(4.5)
+  it('has five tips, and a facet on one side of each', () => {
+    const [whole = [], facets = []] = [...css.matchAll(/clip-path: polygon\(([^)]*)\)/g)].map(([, points = '']) =>
+      points.split(',').map((point) => point.trim()),
+    )
+
+    expect(whole).toHaveLength(10)
+    // Each facet is the centre, a tip and the corner after it.
+    expect(facets).toHaveLength(15)
+    facets.forEach((point, index) => {
+      if (index % 3 !== 0) expect(whole).toContain(point)
+    })
   })
 
-  it('keeps the rim of the disc for forced colours', () => {
-    expect(css).toMatch(/&::after \{[^}]*border: 0\.0625rem solid transparent;/)
+  it.each(['blue-500', 'blue-600'])('has an average that reaches 4.5:1 on the facets in %s', (blue) => {
+    expect(contrast(scale('white'), scale(blue))).toBeGreaterThanOrEqual(4.5)
   })
 
-  it('keeps the number above the disc inside the seal', () => {
-    expect(css).toMatch(/\.hf-winner-seal \{[^}]*isolation: isolate;/)
+  it('keeps the number above the facets inside the star', () => {
+    expect(css).toMatch(/\.hf-winner-star \{[^}]*isolation: isolate;/)
     expect(css).toMatch(/\.hf-winner-average \{[^}]*z-index: 1;/)
   })
 

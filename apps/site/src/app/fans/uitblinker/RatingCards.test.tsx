@@ -273,7 +273,7 @@ describe('the result of a closed window', () => {
     winner: brandsma,
   }
 
-  it('shows the match, the seal, the table and the number of supporters', () => {
+  it('shows the match, the star, the table and the number of supporters', () => {
     const html = renderToStaticMarkup(<ClosedResultCard match={match} now={now} ratings={ratings} />)
 
     expect(html).toMatch(/<h2[^>]*>Uitslag van de laatste wedstrijd<\/h2>/)
@@ -390,7 +390,7 @@ describe('the head coach in what is shown after saving', () => {
 })
 
 describe('the head coach in the table of a closed match', () => {
-  it('stands last in the table of the result, after the players, without the seal', () => {
+  it('stands last in the table of the result, after the players, without the star', () => {
     const html = renderToStaticMarkup(
       <ClosedResultCard
         match={match}

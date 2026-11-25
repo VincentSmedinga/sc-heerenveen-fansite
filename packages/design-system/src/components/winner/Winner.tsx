@@ -17,16 +17,16 @@ export type WinnerProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
 }
 
 /**
- * The seal for the player whom the supporters graded highest: a seal in two blues, with the
- * average in white, and next to it a red label, the name and one small line. Where the width
- * is tight, the text goes under the seal. The seal itself is decoration, drawn with CSS: the
- * average is text, and a screen reader reads it with "gemiddeld cijfer". winner.css gives it
- * its look.
+ * The star for the player whom the supporters graded highest: a faceted star in two blues,
+ * with the average in white, and next to it a red label, the name and one small line. Where
+ * the width is tight, the text goes under the star. The star itself is decoration, drawn with
+ * CSS: the average is text, and a screen reader reads it with "gemiddeld cijfer". winner.css
+ * gives it its look.
  */
 export const Winner = ({ average, className, label, line, name, ...props }: WinnerProps) => (
   <div {...props} className={classNames('hf-winner', className)}>
     <div className="hf-winner-body">
-      <span className="hf-winner-seal">
+      <span className="hf-winner-star">
         <span className="hf-visually-hidden">Gemiddeld cijfer </span>
         <span className="hf-winner-average">{average}</span>
       </span>

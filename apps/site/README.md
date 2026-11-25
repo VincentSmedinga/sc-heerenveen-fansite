@@ -1591,7 +1591,7 @@ De hoofdtrainer van de wedstrijd (`findRatingCoach`, uit `staff`) krijgt als laa
 Een stap van de import (`closeRatingWindows`) zet de gemiddelden na het sluiten in `match_player_ratings` en `match_coach_ratings` met de bron `fans`.
 De cijfers van een geblokkeerd account tellen niet mee in de gemiddelden van de spelers en de trainer.
 Blokkeren en vrijgeven rekenen de gemiddelden van de gesloten vensters opnieuw uit (`recountRatingsOf`), en `closeAccount` bewaart de markering `blocked` bij de cijfers in `player_ratings` en `coach_ratings` van een geblokkeerd account dat wordt opgeheven.
-Het gemiddelde van de trainer staat als laatste regel in de tabel met gemiddelden (`RatingsTable` in `src/MatchRatingsCard.tsx`), na een zwaardere lijn, ook bij oude wedstrijden, en hij krijgt nooit de zegel.
+Het gemiddelde van de trainer staat als laatste regel in de tabel met gemiddelden (`RatingsTable` in `src/MatchRatingsCard.tsx`), na een zwaardere lijn, ook bij oude wedstrijden, en hij krijgt nooit de ster.
 Op Spelers › Cijfers toont de kaart "Cijfers van de fans" (`SeasonRankingCard`) de eerste vijf spelers van de stand, met de rest achter een uitklapper (#1647).
 Op `/fans` staat een kaart van het spel (`app/fans/uitblinker-card.ts`, zie _De pagina Fans_) en onder "Alles wat we van je bewaren" de eigen cijfers (`src/fans/rating-data.ts`).
 `e2e/fans-rating.spec.ts` zet met `addRatingMatch` (`e2e/admin.ts`) een gespeelde wedstrijd met verslag in de database, omdat de verzonnen gegevens er geen hebben, en met `coach: true` ook een hoofdtrainer.

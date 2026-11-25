@@ -339,7 +339,7 @@ describe('the result of a closed window', () => {
     winner: running(11, 'Luca Oyen', 7.3, 12),
   }
 
-  it('shows everyone the seal and the table under the card for the next match', async () => {
+  it('shows everyone the star and the table under the card for the next match', async () => {
     findRatingWindow.mockResolvedValue(closed)
     fansMatchRatings.mockResolvedValue(result)
 

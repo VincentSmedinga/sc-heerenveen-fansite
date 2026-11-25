@@ -62,7 +62,7 @@ describe('the Uitblinker of the running season', () => {
     expect(await readSeasonUitblinker('2026/27', now)).toEqual({
       kind: 'last-match',
       result: {
-        seal: {
+        star: {
           average: '7,8',
           label: 'Uitblinker vorige wedstrijd',
           line: 'Thuis tegen Ajax, 3–1',
@@ -116,7 +116,7 @@ describe('the Uitblinker of a season that is over', () => {
   it('is the Uitblinker of the year, without a source line for our own fans', async () => {
     expect(await readSeasonUitblinker('2025/26', now)).toEqual({
       kind: 'year',
-      seals: [
+      stars: [
         {
           average: '7,5',
           label: 'Uitblinker van het jaar',

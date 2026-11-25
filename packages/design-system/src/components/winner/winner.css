@@ -1,12 +1,12 @@
 /*
- * The seal for the player graded highest: a seal of twelve points with a round disc on it
- * that holds the average, in two neighbouring blues: the points a step darker than the disc,
- * and the average in white. The seal looks the same in light and in dark. It is decoration
- * drawn with CSS (a clipped background and a disc), so it has no image and the average stays
- * text. In forced colours the fills go and the rim of the disc, which is transparent
- * otherwise, and the number remain. Next to the seal stand a label, the name and a line.
- * Where the box is narrow, the text goes under the seal: a container query, so it follows
- * the width of the card and not of the screen.
+ * The star for the player graded highest: the five-pointed star of the watermark of the
+ * Uitblinker, in facets of two neighbouring blues that alternate round its centre, with the
+ * average in white. It looks the same in light and in dark. The star is decoration drawn
+ * with CSS (two clipped backgrounds), so it has no image and the average stays text, with a
+ * soft edge in the darker blue so it stands out across the facets. In forced colours the
+ * fills go and the number remains. Next to the star stand a label, the name and a line. Where
+ * the box is narrow, the text goes under the star: a container query, so it follows the width
+ * of the card and not of the screen.
  */
 
 @layer hf.components {
@@ -28,72 +28,78 @@
     }
   }
 
-  .hf-winner-seal {
-    --hf-winner-seal-size: 4.25rem;
+  .hf-winner-star {
+    --hf-winner-star-size: 5.5rem;
 
-    block-size: var(--hf-winner-seal-size);
-    color: var(--hf-colour-text-on-seal);
+    block-size: var(--hf-winner-star-size);
+    color: var(--hf-colour-text-on-star);
     display: grid;
     flex: none;
     font-size: var(--hf-figure-font-size);
     font-variant-numeric: tabular-nums;
     font-weight: var(--hf-figure-font-weight);
-    inline-size: var(--hf-winner-seal-size);
+    inline-size: var(--hf-winner-star-size);
     isolation: isolate;
     place-items: center;
     position: relative;
 
-    /* The twelve points. */
+    /* The whole star, in the darker blue. */
     &::before {
-      background-color: var(--hf-colour-background-seal);
+      background-color: var(--hf-colour-background-star);
       clip-path: polygon(
-        50% 0%,
-        60.6% 10.4%,
-        75% 6.7%,
-        79% 21%,
-        93.3% 25%,
-        89.6% 39.4%,
-        100% 50%,
-        89.6% 60.6%,
-        93.3% 75%,
-        79% 79%,
-        75% 93.3%,
-        60.6% 89.6%,
-        50% 100%,
-        39.4% 89.6%,
-        25% 93.3%,
-        21% 79%,
-        6.7% 75%,
-        10.4% 60.6%,
-        0% 50%,
-        10.4% 39.4%,
-        6.7% 25%,
-        21% 21%,
-        25% 6.7%,
-        39.4% 10.4%
+        50% 2.6%,
+        65% 34.8%,
+        100% 38.8%,
+        73.9% 62.7%,
+        81.2% 97.4%,
+        50% 79.9%,
+        18.8% 97.4%,
+        26.1% 62.7%,
+        0% 38.8%,
+        35% 34.8%
       );
       content: '';
       inset: 0;
       position: absolute;
     }
 
-    /* The disc inside the points. Forced colours paint its transparent rim. */
+    /* Every other facet, from the centre to a tip and the corner after it, in the lighter. */
     &::after {
-      background-color: var(--hf-colour-background-seal-centre);
-      border: 0.0625rem solid transparent;
-      border-radius: 50%;
+      background-color: var(--hf-colour-background-star-facet);
+      clip-path: polygon(
+        50% 55.9%,
+        50% 2.6%,
+        65% 34.8%,
+        50% 55.9%,
+        100% 38.8%,
+        73.9% 62.7%,
+        50% 55.9%,
+        81.2% 97.4%,
+        50% 79.9%,
+        50% 55.9%,
+        18.8% 97.4%,
+        26.1% 62.7%,
+        50% 55.9%,
+        0% 38.8%,
+        35% 34.8%
+      );
       content: '';
-      inset: 0.625rem;
+      inset: 0;
       position: absolute;
     }
   }
 
   /*
-   * The number lies on the disc, which is drawn after it. The seal is a stacking context of
-   * its own, so the number never lies over anything outside it, such as a sticky bar.
+   * The number lies on the facets, which are drawn after it, and a little under the middle:
+   * on the centre of the star. The star is a stacking context of its own, so the number never
+   * lies over anything outside it, such as a sticky bar.
    */
   .hf-winner-average {
+    inset-block-start: 0.375rem;
     position: relative;
+    text-shadow:
+      0 0 0.125rem var(--hf-colour-background-star),
+      0 0 0.25rem var(--hf-colour-background-star);
     z-index: 1;
   }
 
@@ -123,8 +129,12 @@
   }
 
   @media (forced-colors: active) {
-    .hf-winner-seal {
+    .hf-winner-star {
       color: CanvasText;
+    }
+
+    .hf-winner-average {
+      text-shadow: none;
     }
   }
 }

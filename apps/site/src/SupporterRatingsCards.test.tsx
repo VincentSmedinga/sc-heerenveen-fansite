@@ -100,7 +100,7 @@ describe('the cards of the Uitblinkers van het jaar', () => {
     expect(html).not.toContain('<table')
   })
 
-  it('has a seal for each player of an equal rating, with the rating and the number of ratings', () => {
+  it('has a star for each player of an equal rating, with the rating and the number of ratings', () => {
     expect(html).toContain('Speler A')
     expect(html).toContain('Speler D')
     expect(html).toContain('7,1')
@@ -122,9 +122,9 @@ describe('the cards of the Uitblinkers van het jaar', () => {
     expect(`${best}${other}`).toContain('Speler A')
   })
 
-  it('says "Na het seizoen" for the season that has no winner yet, without a seal', () => {
+  it('says "Na het seizoen" for the season that has no winner yet, without a star', () => {
     expect(html).toContain('Na het seizoen')
-    expect(html.match(/hf-winner-seal/g)).toHaveLength(3)
+    expect(html.match(/hf-winner-star/g)).toHaveLength(3)
   })
 })
 

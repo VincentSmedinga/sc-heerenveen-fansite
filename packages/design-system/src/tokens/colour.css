@@ -136,12 +136,12 @@
     --hf-colour-background-button-danger-hover: light-dark(var(--hf-colour-red-800), var(--hf-colour-red-200));
 
     /*
-     * The seal of a Winner: its points and the disc on them, two neighbouring blues that are
-     * the same in light and in dark, under a white average (--hf-colour-text-on-seal), which
-     * reaches 4.5:1 on the disc (Winner.test.tsx).
+     * The star of a Winner: facets in two neighbouring blues that are the same in light and in
+     * dark, under a white average (--hf-colour-text-on-star), which reaches 4.5:1 on both
+     * (Winner.test.tsx).
      */
-    --hf-colour-background-seal: var(--hf-colour-blue-600);
-    --hf-colour-background-seal-centre: var(--hf-colour-blue-500);
+    --hf-colour-background-star: var(--hf-colour-blue-600);
+    --hf-colour-background-star-facet: var(--hf-colour-blue-500);
     --hf-colour-background-hover: light-dark(var(--hf-colour-grey-50), var(--hf-colour-blue-950));
 
     /*
@@ -226,7 +226,7 @@
     --hf-colour-text-on-header: var(--hf-colour-blue-50);
     --hf-colour-text-on-header-secondary: var(--hf-colour-blue-200);
     --hf-colour-text-on-band: var(--hf-colour-blue-100);
-    --hf-colour-text-on-seal: var(--hf-colour-white);
+    --hf-colour-text-on-star: var(--hf-colour-white);
     --hf-colour-text-on-button: light-dark(var(--hf-colour-white), var(--hf-colour-blue-950));
     --hf-colour-text-on-button-soft: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-50));
 

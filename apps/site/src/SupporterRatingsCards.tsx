@@ -121,8 +121,8 @@ const seasonHeadingId = (season: string) => `uitblinker-${season.replace('/', '-
 
 /**
  * The cards on the page "Uitblinker van het jaar" (issue 1613): one card for each season, the
- * newest first, with a seal for the winner or for both players on an equal rating. The running
- * season has a card without a seal that says "Na het seizoen" until it is over. The card of the
+ * newest first, with a star for the winner or for both players on an equal rating. The running
+ * season has a card without a star that says "Na het seizoen" until it is over. The card of the
  * best season of all is soft, and its winners are the "Uitblinker van de uitblinkers" (issue
  * 1667). The Uitblinker is named in text, so no colour carries it.
  * Without a season there is one card that says so.

@@ -8290,10 +8290,10 @@
 - **Datum:** 25 november 2026
 - **Besluit:** de Uitblinker van de uitblinkers krijgt geen eigen kaart meer (#1667).
   De kaart van zijn seizoen is zacht en houdt haar kop, en de winnaar heet daar "Uitblinker van de uitblinkers".
-  Zijn zegel is hetzelfde als de andere.
+  Zijn ster is dezelfde als de andere.
   Staan twee spelers gelijk op het hoogste gemiddelde, op twee decimalen, dan heet elk van hen zo, ook in twee seizoenen.
   De kaarten staan over de hele breedte in twee kolommen, en de intro is "Deze spelers kregen van jullie de hoogste gemiddelde cijfers:".
   Onder een winnaar zonder aantal cijfers staat "Gemiddelde van alle cijfers" in plaats van "Seizoencijfer van de Fansite"; de bronregel onder de kaarten noemt de Fansite nog.
 - **Waarom:** de losse kaart herhaalde een speler die al op de pagina stond.
-  De zachte kaart en het label zeggen genoeg; een ander zegel vond de projecteigenaar bij nader inzien niet nodig, anders dan het issue vroeg.
-- **Alternatieven:** de losse kaart houden; de beste bovenaan in een brede kaart; een groter zegel in een andere kleur voor de beste.
+  De zachte kaart en het label zeggen genoeg; een ander teken vond de projecteigenaar bij nader inzien niet nodig, anders dan het issue vroeg.
+- **Alternatieven:** de losse kaart houden; de beste bovenaan in een brede kaart; een groter zegel in een andere kleur voor de beste (zie ook _De uitblinker staat in een ster met facetten_ in `designsysteem.md`).

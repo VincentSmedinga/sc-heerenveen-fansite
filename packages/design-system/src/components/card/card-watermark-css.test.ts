@@ -47,6 +47,13 @@ describe('the watermark of a game card in card-watermark.css', () => {
     expect(body.replace('http://www.w3.org/2000/svg', '')).not.toMatch(/https?:/)
   })
 
+  it('draws the star of the Uitblinker in ten facets, every other one weaker', () => {
+    const body = css.match(/\.hf-card-game-uitblinker \{([^{}]*)\}/)?.[1] ?? ''
+
+    expect(body.match(/%3Cpath /g)).toHaveLength(10)
+    expect(body.match(/fill-opacity=%22\.6%22/g)).toHaveLength(5)
+  })
+
   it('is gone in forced colours, where a mask would be painted in the text colour', () => {
     expect(css).toMatch(/forced-colors: active\) \{\s*display: none;/)
   })

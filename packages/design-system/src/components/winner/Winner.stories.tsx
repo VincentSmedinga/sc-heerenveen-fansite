@@ -34,8 +34,8 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'Het zegel voor de uitblinker: de speler met het hoogste gemiddelde van de fans. Het gemiddelde staat in wit in het midden van het zegel, in twee tinten blauw, en ernaast het label, de naam en één kleine regel.',
-          'Kies hem alleen voor de uitblinker, omdat hij mag opvallen. Elk zegel ziet er hetzelfde uit; het label zegt wat de uitblinker is, zoals de beste van alle seizoenen. Het zegel is versiering en het gemiddelde is gewone tekst; is er weinig ruimte, dan staat de tekst onder het zegel.',
+          'De ster voor de uitblinker: de speler met het hoogste gemiddelde van de fans. Het gemiddelde staat in wit midden in de ster, die dezelfde vorm heeft als het watermerk van de Uitblinker, en ernaast staan het label, de naam en één kleine regel.',
+          'Kies hem alleen voor de uitblinker, omdat hij mag opvallen. Elke ster ziet er hetzelfde uit; het label zegt wat de uitblinker is, zoals de beste van alle seizoenen. De ster is versiering en het gemiddelde is gewone tekst; is er weinig ruimte, dan staat de tekst onder de ster.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
