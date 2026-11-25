@@ -8109,3 +8109,24 @@
 - **Alternatieven:** de score tot na de maand geheim houden; de goede antwoorden meteen tonen; de score pas bij het lezen uitrekenen (dan verandert ze als de redactie een vraag annuleert); een geblokkeerd account naar `/fans/geblokkeerd` sturen (dan is ook het archief weg).
 - **Let op:** zet de redactie na het versturen "alles goed" bij een vraag, dan verandert de bewaarde score niet vanzelf.
   Wie de cijfers van een gesloten maand toont (#1483, #1484), beslist of hij de score opnieuw uitrekent uit de bewaarde antwoorden.
+
+## De ranglijst van de Fantest telt de gesloten maanden uit de bewaarde antwoorden
+
+- **Datum:** 25 november 2026
+- **Besluit:** `/fans/fantest/ranglijst` toont per kalenderjaar de punten van de gesloten maanden, en daaronder de scores van één gesloten maand (#1483).
+  - Alleen gesloten maanden tellen, in Nederlandse tijd.
+    De pagina opent op het lopende jaar, ook als daar nog geen maand van voorbij is, met een keuze voor eerdere jaren.
+  - Gelijke totalen delen een plaats en het volgende nummer valt weg.
+    Binnen een plaats gaat het op schermnaam.
+    Wie meer quizzen deed, krijgt geen voorrang, en een gemiste maand telt niet als nul.
+  - De score van een maand telt de site uit de bewaarde antwoorden, met "alles goed" zoals die nu staat.
+    De bewaarde score in `quiz_entries` is die van het moment van versturen.
+  - Wie zijn naam niet in standen wil, heeft geen regel, ook niet voor zichzelf.
+    Een geblokkeerd account en een opgeheven account staan er niet in en tellen niet mee voor de plaatsen.
+    Heft de redactie een blokkade op, dan is de regel terug.
+  - Een tabel toont vijftig regels, met daaronder de eigen regel van de supporter als die lager staat.
+  - De pagina is voor iedereen te lezen en noindex, en de uitkomst staat vijf minuten in het geheugen.
+    Een geblokkeerd account gaat naar `/fans/geblokkeerd`, zoals bij de andere standen.
+- **Waarom:** met de lopende maand erbij is de stand te sturen met antwoorden die al rondgaan.
+  "Alles goed" annuleert een slechte vraag, en dat hoort voor iedereen te gelden, ook voor wie eerder verstuurde.
+- **Alternatieven:** ook de lopende maand tellen; de bewaarde score optellen (dan helpt het annuleren van een vraag alleen wie later verstuurt); een opgeheven account als "Voormalige fan" laten staan, zoals bij Fjouwer (het issue wil er niets van terugzien); de supporter zonder naam in de standen zijn eigen plaats tonen, zoals bij Fjouwer (het issue vraagt geen regel); een stand over de laatste vijf quizzen (kan later).

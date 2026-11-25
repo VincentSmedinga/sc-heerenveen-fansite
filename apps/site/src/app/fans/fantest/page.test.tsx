@@ -181,6 +181,12 @@ describe('the archive of the Fantest', () => {
     expect(html.match(/Toen gemiddeld/g)).toHaveLength(3)
   })
 
+  it('links to the ranking, also in a month without a quiz', async () => {
+    loadMonthQuiz.mockResolvedValue(undefined)
+
+    expect(await render()).toContain('href="/fans/fantest/ranglijst"')
+  })
+
   it('holds no form and nothing personal for a visitor without a quiz this month', async () => {
     loadMonthQuiz.mockResolvedValue(undefined)
     const html = await render()

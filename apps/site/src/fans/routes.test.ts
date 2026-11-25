@@ -53,6 +53,9 @@ const open = [
   'app/fans/fantest/[maand]/actions.ts',
   'app/fans/fantest/[maand]/page.tsx',
   'app/fans/fantest/page.tsx',
+  // The ranking of the Fantest is public like the other rankings: screen names that chose to be
+  // in the standings, and the row of the supporter is marked only with a session (issue 1483).
+  'app/fans/fantest/ranglijst/page.tsx',
   // The page of the game Fjouwer: a visitor sees the match and the way in, and a supporter's
   // four is read only with a session. Its action calls requireSupporter.
   'app/fans/fjouwer/page.tsx',

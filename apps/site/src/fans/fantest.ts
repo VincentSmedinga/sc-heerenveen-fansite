@@ -13,6 +13,9 @@ import { and, asc, count, desc, eq } from 'drizzle-orm'
 /** The address of the page of the Fantest: the quiz of the month and the archive. */
 export const fantestPath = '/fans/fantest'
 
+/** The ranking per calendar year and month (issue 1483). */
+export const fantestRankingPath = `${fantestPath}/ranglijst`
+
 /** A quiz has ten questions; one with fewer has a question that was left out. */
 export const quizSize = 10
 

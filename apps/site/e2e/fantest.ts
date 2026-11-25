@@ -1,7 +1,7 @@
 import { connect } from '@fansite/db/client'
 import { readDatabaseEnv } from '@fansite/db/env'
-import { quizQuestions, quizzes } from '@fansite/db/schema'
-import { and, eq } from 'drizzle-orm'
+import { quizEntries, quizQuestions, quizzes, supporters } from '@fansite/db/schema'
+import { and, eq, inArray, like } from 'drizzle-orm'
 import path from 'node:path'
 
 /**
@@ -68,6 +68,7 @@ export async function addFantest() {
     }
 
     added.push(await addEditorsQuiz(db, editorsMonth))
+    added.push(...(await addRankedMonths(db)))
     // The quiz of the running month, which a supporter takes part in (#1482). A month that has
     // one keeps it.
     const running = currentMonth()
@@ -88,9 +89,11 @@ export async function addFantest() {
 
     try {
       for (const id of added) {
-        // The questions go with the quiz.
+        // The questions and the entries go with the quiz.
         await connection.db.delete(quizzes).where(eq(quizzes.id, id))
       }
+
+      await connection.db.delete(supporters).where(like(supporters.email, rankedAddresses))
     } finally {
       await connection.close()
     }
@@ -116,6 +119,14 @@ export async function editorsQuizId() {
     await close()
   }
 }
+
+/** The made-up supporters of the ranking and the closed months they took part in (#1483). */
+const rankedFans = ['Testfan Aukje', 'Testfan Bouke', 'Testfan Douwe']
+const rankedAddresses = 'ranglijst-%@example.test'
+const rankedMonths = [
+  { month: 1, scores: [8, 6, 6], year: 2025 },
+  { month: 2, scores: [7, 9], year: 2025 },
+]
 
 /** A published quiz of the editors with ten made-up questions, which nobody filled in. */
 async function addEditorsQuiz(db: ReturnType<typeof connectToDatabase>['db'], when: { month: number; year: number }) {
@@ -148,6 +159,49 @@ async function addEditorsQuiz(db: ReturnType<typeof connectToDatabase>['db'], wh
   )
 
   return insertId
+}
+
+/**
+ * Two closed months of the editors with the answers of made-up supporters, so the ranking has
+ * tables to show.
+ */
+async function addRankedMonths(db: ReturnType<typeof connectToDatabase>['db']) {
+  // What a check that stopped halfway left behind goes first.
+  await db.delete(supporters).where(like(supporters.email, rankedAddresses))
+  await db.insert(supporters).values(
+    rankedFans.map((screenName, index) => ({
+      email: `ranglijst-${index}@example.test`,
+      screenName,
+      screenNameKey: screenName.toLowerCase(),
+    })),
+  )
+
+  const fans = await db
+    .select({ id: supporters.id })
+    .from(supporters)
+    .where(inArray(supporters.screenName, rankedFans))
+    .orderBy(supporters.id)
+  const added: number[] = []
+
+  for (const { month, scores, year } of rankedMonths) {
+    const quizId = await addEditorsQuiz(db, { month, year })
+
+    for (const [index, score] of scores.entries()) {
+      await db.insert(quizEntries).values({
+        // Question 1 has answer 2 right, question 2 answer 3, and so on.
+        answers: Array.from({ length: 10 }, (_, place) => ((place + (place < score ? 1 : 2)) % 4) + 1),
+        quizId,
+        score,
+        submittedAt: new Date(Date.UTC(year, month - 1, 15)),
+        supporterId: fans[index]?.id,
+      })
+    }
+
+    await db.update(quizzes).set({ participants: scores.length }).where(eq(quizzes.id, quizId))
+    added.push(quizId)
+  }
+
+  return added
 }
 
 /**

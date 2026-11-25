@@ -1573,6 +1573,18 @@ Een bezoeker ziet de inleiding en de weg naar inloggen of aanmelden, een geblokk
   Bij het opheffen van het account wordt `supporter_id` leeg; van een geblokkeerd account wordt de rij ook als `blocked` gemarkeerd.
 - De kopie van acceptatie krijgt `quiz_entries` zonder rijen.
 
+### De ranglijst van de Fantest
+
+`/fans/fantest/ranglijst` (`app/fans/fantest/ranglijst`) telt per kalenderjaar de punten van de gesloten maanden op, en toont daaronder de scores van één maand (#1483).
+Het jaar en de maand komen uit het adres (`?jaar=2027&maand=2027-03`), met een gewoon formulier dat zonder JavaScript werkt.
+
+- `loadMonthScores` in `src/fans/fantest-ranking.ts` leest alles in één query, en `monthScores` onthoudt die vijf minuten.
+- De score komt uit de bewaarde antwoorden en niet uit `quiz_entries.score`, zodat "alles goed" ook na het versturen telt.
+- De query neemt alleen gepubliceerde quizzen van de redactie van een maand voor de lopende, en alleen supporters met een regel in een ranglijst (`inRankings`).
+- `rankingOf` deelt plaatsen bij gelijke totalen en zet de namen binnen een plaats op alfabet.
+- De pagina is voor iedereen te lezen, is noindex, staat niet in de sitemap en telt niet mee in de bezoekcijfers.
+- `e2e/fantest.ts` zet twee gesloten maanden van 2025 met drie verzonnen supporters in de database.
+
 ### De Fantest van toen
 
 Onder de quiz van de maand staat op `/fans/fantest` het archief van de quizzen van de oude Fansite, en `/fans/fantest/<jaar>-<maand>` (`app/fans/fantest/[maand]`) speelt één maand.
