@@ -28,13 +28,13 @@ export const allPredictionsAddress = `${predictionPath}?alle=ja#jouw-voorspellin
 const plural = (count: number, one: string, many: string) => (count === 1 ? `1 ${one}` : `${count} ${many}`)
 
 /**
- * The soft card "Zo deed iedereen het", in the narrow column: how many had the full-time score
+ * The card "Zo deed iedereen het", in the narrow column: how many had the full-time score
  * exactly right, how many the outcome, and the average. Under five predictions it says only how
  * many there were, because a share of three people says little and shows who they are.
  */
 export function CrowdCard({ figures }: { figures: CrowdFigures }) {
   return (
-    <Card aria-labelledby="zo-deed-iedereen-het" game="prognose" surface="soft">
+    <Card aria-labelledby="zo-deed-iedereen-het" game="prognose">
       <Heading id="zo-deed-iedereen-het" level={2}>
         Zo deed iedereen het
       </Heading>
@@ -126,7 +126,7 @@ export function PointsCard({
   )
 }
 
-/** The soft card "Punten": the scoring as a table, with the link to the rules. */
+/** The card "Punten": the scoring as a table, with the link to the rules. */
 export function ScoringCard() {
   return (
     <GameScoringCard game="prognose">

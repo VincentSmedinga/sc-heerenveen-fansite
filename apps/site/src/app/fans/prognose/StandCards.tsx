@@ -22,7 +22,7 @@ export const standLegend = (
 export const decimalText = (value: number) => value.toFixed(1).replace('.', ',')
 
 /**
- * The strong card "Stand" in the narrow column of the page of the game: the top five of the
+ * The card "Stand" in the narrow column of the page of the game: the top five of the
  * season with their points, the row of the supporter marked, and the link to the whole ranking.
  */
 export function StandCard({

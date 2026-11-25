@@ -7584,6 +7584,8 @@
 - **Waarom:** de hele site gebruikt een kaart voor één onderwerp en een Notice voor een mededeling.
   Een eigen kleur voor goed en fout zou de site rommelig maken, en kleur alleen is geen teken.
 - **Alternatieven:** witte of zandkleurige kaarten in de smalle kolom; groene en rode meldingen.
+- **Later:** zie _Een kaart van een spel is wit, met het watermerk en de kop in de kleur van het spel_ in `designsysteem.md` (25 november 2026, #1648).
+  Een kaart van een spel in de smalle kolom, ook de stand, is nu wit; een kaart zonder spel houdt haar vlak, en de regel over de Notice blijft.
 
 ## Het venster van de Uitblinker sluit op de eerstvolgende bekende aanvang of na zeven dagen, en de server beslist twee keer
 
@@ -8042,6 +8044,7 @@
   Het aantal cijfers laat zien hoeveel fans het cijfer dragen.
   De gegevens, de onderdelen en de stijl bestonden al.
 - **Alternatieven:** de meeste cijfers als maat (beloont spelen en bekendheid, en de drie oudste seizoenen hebben geen aantal); bij een gelijke stand meer cijfers laten beslissen; de tabel naast de kaarten laten staan (dubbele informatie); de sterke kaart op een telefoon onderaan zetten.
+- **Later:** zie _Een kaart van een spel is wit, met het watermerk en de kop in de kleur van het spel_ in `designsysteem.md` (25 november 2026, #1648): de kaart "Uitblinker van de Uitblinkers" is wit.
 
 ## De kaart Per seizoen toont ook de gele en rode kaarten
 
@@ -8192,6 +8195,7 @@
 - **Waarom:** elk spel is in één oogopslag te herkennen, en de spellen nemen weinig ruimte in.
 - **Alternatieven:** één kaart Fans met rijen; een kaart per spel over de volle breedte van de zijkolom; op de plek van de Tag een regel met de wedstrijd of het aantal deelnemers; de links als vraag.
 - **Later:** zie _De kaarten van de open spellen staan onder elkaar_ in `designsysteem.md`: geen raster van twee bij twee en geen kleinere naam meer, maar één kaart per rij over de breedte van de zijkolom.
+- **Later:** zie _Een kaart van een spel is wit, met het watermerk en de kop in de kleur van het spel_ in `designsysteem.md` (25 november 2026, #1648): de kaarten zijn wit, niet zacht.
 
 ## Wedstrijden linkt onder de wedstrijd naar het open spel
 

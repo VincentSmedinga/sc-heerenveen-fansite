@@ -6,7 +6,18 @@
 
 export const scaleSteps = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const
 
-export type ScaleName = 'blue' | 'green' | 'grey' | 'red' | 'sand' | 'steel' | 'yellow'
+export type ScaleName =
+  | 'blue'
+  | 'game-gold'
+  | 'game-green'
+  | 'game-purple'
+  | 'game-red'
+  | 'green'
+  | 'grey'
+  | 'red'
+  | 'sand'
+  | 'steel'
+  | 'yellow'
 
 /**
  * The scales: a colour in one strength (vivid, muted or neutral), numbered from light to dark.
@@ -42,6 +53,30 @@ export const scales: { description: string; label: string; name: ScaleName; step
     steps: [300, 400],
   },
   {
+    description: 'De kleur van de Prognose op de kaarten van het spel: watermerk en koppen.',
+    label: 'Spelrood',
+    name: 'game-red',
+    steps: [50, 200, 700, 800],
+  },
+  {
+    description: 'De kleur van de Uitblinker op de kaarten van het spel: watermerk en koppen.',
+    label: 'Spelpaars',
+    name: 'game-purple',
+    steps: [50, 200, 700, 800],
+  },
+  {
+    description: 'De kleur van Fjouwer op de kaarten van het spel: watermerk en koppen.',
+    label: 'Spelgroen',
+    name: 'game-green',
+    steps: [50, 200, 700, 800],
+  },
+  {
+    description: 'De kleur van de Fantest op de kaarten van het spel: watermerk en koppen.',
+    label: 'Spelgoud',
+    name: 'game-gold',
+    steps: [50, 200, 700, 800],
+  },
+  {
     description: 'Neutraal zand, tint 85° met hooguit 0,017 chroma: warm en nooit helemaal neutraal.',
     label: 'Grijs',
     name: 'grey',
@@ -50,6 +85,10 @@ export const scales: { description: string; label: string; name: ScaleName; step
 
 export const scaleLabels: Record<ScaleName, string> = {
   blue: 'blauw',
+  'game-gold': 'spelgoud',
+  'game-green': 'spelgroen',
+  'game-purple': 'spelpaars',
+  'game-red': 'spelrood',
   green: 'groen',
   grey: 'grijs',
   red: 'rood',
@@ -74,13 +113,10 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
       { name: '--hf-colour-background-surface-strong', use: 'Sterk vlak, ook code' },
       { name: '--hf-colour-background-surface-soft', use: 'Zacht vlak; in donker gelijk aan het vlak' },
       { name: '--hf-colour-background-surface-warm', use: 'Warm vlak; in donker gelijk aan het sterke vlak' },
-      {
-        name: '--hf-colour-watermark-surface',
-        use: 'Watermerk van een spelkaart op het vlak; in donker een stap lichter',
-      },
-      { name: '--hf-colour-watermark-surface-strong', use: 'Watermerk op het sterke vlak' },
-      { name: '--hf-colour-watermark-surface-soft', use: 'Watermerk op het zachte vlak' },
-      { name: '--hf-colour-watermark-surface-warm', use: 'Watermerk op het warme vlak' },
+      { name: '--hf-colour-watermark-prognose', use: 'Watermerk van een kaart van Prognose' },
+      { name: '--hf-colour-watermark-uitblinker', use: 'Watermerk van een kaart van Uitblinker' },
+      { name: '--hf-colour-watermark-fjouwer', use: 'Watermerk van een kaart van Fjouwer' },
+      { name: '--hf-colour-watermark-fantest', use: 'Watermerk van een kaart van Fantest' },
       { name: '--hf-colour-background-header', use: 'Header' },
       { name: '--hf-colour-background-footer', use: 'Footer' },
       {
@@ -124,6 +160,10 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
     tokens: [
       { name: '--hf-colour-text-default', use: 'Lopende tekst' },
       { name: '--hf-colour-text-heading', use: 'Koppen' },
+      { name: '--hf-colour-text-heading-prognose', use: 'Koppen op een kaart van Prognose' },
+      { name: '--hf-colour-text-heading-uitblinker', use: 'Koppen op een kaart van Uitblinker' },
+      { name: '--hf-colour-text-heading-fjouwer', use: 'Koppen op een kaart van Fjouwer' },
+      { name: '--hf-colour-text-heading-fantest', use: 'Koppen op een kaart van Fantest' },
       { name: '--hf-colour-text-secondary', use: 'Secundaire tekst: bron, tijd, bijschrift' },
       { name: '--hf-colour-text-link', use: 'Links' },
       { name: '--hf-colour-text-link-hover', use: 'Link onder de muis' },

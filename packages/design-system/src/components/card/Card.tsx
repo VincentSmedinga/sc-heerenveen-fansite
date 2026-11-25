@@ -31,8 +31,10 @@ export type CardProps = ComponentPropsWithoutRef<'section'> & {
   /**
    * The game this card belongs to. The card then carries a large, very light drawing of
    * that game in its bottom right corner, cut off by the edges: a crystal ball for `prognose`,
-   * a star for `uitblinker`, a tactics board for `fjouwer` and answer tiles for `fantest`.
-   * It is only decoration and sits under the content. A card that doesn't belong to a game
+   * a star for `uitblinker`, a tactics board for `fjouwer` and a list of checkboxes for
+   * `fantest`. The drawing and the headings have the colour of the game. The drawing is only
+   * decoration and sits under the content. A game card is always on the white surface (or
+   * transparent): it ignores `strong`, `soft` and `warm`. A card that doesn't belong to a game
    * leaves it out and is as it was.
    */
   game?: CardGame
@@ -73,6 +75,8 @@ export const Card = ({
   surface = 'default',
   ...props
 }: CardProps) => {
+  // A game card has no tinted surface: the colour of the game is in its watermark and headings.
+  const shownSurface = game && surface !== 'transparent' ? 'default' : surface
   // The button comes straight after the heading, so the keyboard reaches it before the content.
   const [heading, ...rest] = Children.toArray(children)
 
@@ -80,7 +84,7 @@ export const Card = ({
     <Element
       className={classNames(
         'hf-card',
-        surface !== 'default' && `hf-card-${surface}`,
+        shownSurface !== 'default' && `hf-card-${shownSurface}`,
         game && `hf-card-game hf-card-game-${game}`,
         shareable && 'hf-card-shareable',
         className,

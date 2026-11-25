@@ -161,7 +161,7 @@ export const scoringRows: readonly { header: string; points: number }[] = [
   { header: 'Eigen doelpunt', points: fantasyScoring.ownGoal },
 ]
 
-/** The soft card "Punten", in the narrow column: the scoring, and who decides. */
+/** The card "Punten", in the narrow column: the scoring, and who decides. */
 export function ScoringCard() {
   return (
     <GameScoringCard game="fjouwer">

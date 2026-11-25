@@ -72,7 +72,7 @@ describe('the card Stand', () => {
     expect(html).toContain('Jij')
     expect(html).toContain('href="/fans/prognose/stand"')
     expect(html).toContain('Hele <span class="hf-icon-tail">stand')
-    expect(html).toContain('hf-card-strong')
+    expect(html).not.toMatch(/hf-card-(soft|strong|warm)/)
   })
 
   it('says so when the season has no ranking yet', () => {

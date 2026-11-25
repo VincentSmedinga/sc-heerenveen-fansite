@@ -24,9 +24,9 @@ export type OpenGameCardsProps = Omit<ComponentPropsWithoutRef<'div'>, 'children
 }
 
 /**
- * A card for each game that is open now, below each other. Each card is on the soft surface
- * with the watermark of its game, and has the name as an h2 and a link that says what you can
- * do. A card only stands there while its game is open. Without a game there is nothing.
+ * A card for each game that is open now, below each other. Each card has the watermark and the
+ * heading in the colour of its game, the name as an h2 and a link that says what you can do. A
+ * card only stands there while its game is open. Without a game there is nothing.
  * open-game-cards.css gives it its look.
  */
 export function OpenGameCards({ className, items, ...props }: OpenGameCardsProps) {
@@ -39,13 +39,7 @@ export function OpenGameCards({ className, items, ...props }: OpenGameCardsProps
   return (
     <div className={classNames('hf-open-game-cards', className)} {...props}>
       {items.map((item) => (
-        <Card
-          aria-labelledby={`${id}-${item.game}`}
-          className="hf-open-game-card"
-          game={item.game}
-          key={item.game}
-          surface="soft"
-        >
+        <Card aria-labelledby={`${id}-${item.game}`} className="hf-open-game-card" game={item.game} key={item.game}>
           <Heading id={`${id}-${item.game}`} level={2}>
             {item.name}
           </Heading>

@@ -120,12 +120,12 @@ export const yearWinnersSource = 'Tot 2006/07: cijfers van bezoekers van de Fans
 const seasonHeadingId = (season: string) => `uitblinker-${season.replace('/', '-')}`
 
 /**
- * The strong card beside the cards of the seasons: the player with the highest season rating of
+ * The card beside the cards of the seasons: the player with the highest season rating of
  * all the seasons that are over, with that season. On an equal rating every player is in it.
  */
 export function BestYearWinnersCard({ best }: { best: BestYearWinners }) {
   return (
-    <Card aria-labelledby="uitblinker-van-de-uitblinkers" game="uitblinker" surface="strong">
+    <Card aria-labelledby="uitblinker-van-de-uitblinkers" game="uitblinker">
       <Heading id="uitblinker-van-de-uitblinkers" level={2}>
         Uitblinker van de Uitblinkers
       </Heading>

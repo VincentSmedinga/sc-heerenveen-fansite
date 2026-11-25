@@ -114,7 +114,7 @@ describe('the card "Zo deed iedereen het"', () => {
     expect(html).toContain('6 fans hadden de eindstand precies goed.')
     expect(html).toContain('31 fans hadden de uitslag goed.')
     expect(html).toContain('Gemiddeld 18,4 punten, van 54 voorspellingen.')
-    expect(html).toContain('hf-card-soft')
+    expect(html).not.toMatch(/hf-card-(soft|strong|warm)/)
   })
 
   it('says only how many under five, and no average', () => {
@@ -140,7 +140,7 @@ describe('the card "Punten"', () => {
     expect(html).not.toContain('<abbr')
     expect(html.match(/<th[^>]*scope="col"/g)).toHaveLength(3)
     expect(html).toContain('De telling van de Fansite. Hoogstens 30 punten per wedstrijd.')
-    expect(html).toContain('hf-card-soft')
+    expect(html).not.toMatch(/hf-card-(soft|strong|warm)/)
   })
 })
 

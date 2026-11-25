@@ -31,7 +31,7 @@ describe('Card', () => {
       </Card>,
     )
 
-    expect(container.firstElementChild?.className).toBe(`hf-card hf-card-soft hf-card-game hf-card-game-${game}`)
+    expect(container.firstElementChild?.className).toBe(`hf-card hf-card-game hf-card-game-${game}`)
     expect(container.firstElementChild?.hasAttribute('game')).toBe(false)
     expect(container.firstElementChild?.textContent).toBe('Inhoud')
   })

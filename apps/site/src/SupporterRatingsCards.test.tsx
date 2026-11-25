@@ -129,7 +129,7 @@ describe('the cards of the Uitblinkers van het jaar without a season', () => {
 })
 
 describe('the card Uitblinker van de Uitblinkers', () => {
-  it('is a strong card with the rating, the season and the number of ratings', () => {
+  it('is a white card with the rating, the season and the number of ratings', () => {
     const html = renderToStaticMarkup(
       <BestYearWinnersCard
         best={{
@@ -142,7 +142,7 @@ describe('the card Uitblinker van de Uitblinkers', () => {
       />,
     )
 
-    expect(html).toContain('hf-card-strong')
+    expect(html).not.toMatch(/hf-card-(soft|strong|warm)/)
     expect(html).toContain('Uitblinker van de Uitblinkers')
     expect(html).toContain('6,7')
     expect(html).toContain('Seizoen 2005/06 · gemiddelde van 631 cijfers')

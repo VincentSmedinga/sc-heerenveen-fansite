@@ -8,6 +8,8 @@
  *   steps 100, 300, 400, 500 and 700). Steel and sand steps are as light as the grey step with
  *   the same number, except sand-100, which is as light as blue-100.
  * - Neutral: grey, a neutral sand (chroma 0.006 to 0.017), 11 steps: warm and never fully neutral.
+ * - Game: red (hue 27), purple (hue 305), green (hue 150) and gold (hue 92) for the Fans games, steps
+ *   50, 200, 700 and 800, as light as the blue steps with the same number.
  * Roles: the semantic tokens. They have names, never numbers.
  *
  * Roles use light-dark(), which picks a value from the element's colour scheme:
@@ -26,7 +28,6 @@
     --hf-colour-black: #000;
     --hf-colour-blue-50: #eff6ff;
     --hf-colour-blue-100: #dcebfe;
-    --hf-colour-blue-150: #cce1fa;
     --hf-colour-blue-200: #bbd7f8;
     --hf-colour-blue-300: #8fbbf0;
     --hf-colour-blue-400: #6098de;
@@ -80,13 +81,27 @@
     --hf-colour-steel-400: #83a5d2;
     --hf-colour-steel-500: #5d7ea8;
     --hf-colour-steel-600: #416088;
-    --hf-colour-sand-50: #faf6ef;
     --hf-colour-sand-100: #f3e8d3;
-    --hf-colour-sand-200: #e8dbc2;
     --hf-colour-sand-300: #d6c7ab;
     --hf-colour-sand-400: #afa185;
     --hf-colour-sand-500: #877a5f;
     --hf-colour-sand-700: #52462d;
+    --hf-colour-game-red-50: #fff2f0;
+    --hf-colour-game-red-200: #f6c7c1;
+    --hf-colour-game-red-700: #811f1c;
+    --hf-colour-game-red-800: #641110;
+    --hf-colour-game-purple-50: #f7f3fd;
+    --hf-colour-game-purple-200: #dccbf2;
+    --hf-colour-game-purple-700: #592f80;
+    --hf-colour-game-purple-800: #442064;
+    --hf-colour-game-green-50: #eff8f0;
+    --hf-colour-game-green-200: #bbdfc1;
+    --hf-colour-game-green-700: #015825;
+    --hf-colour-game-green-800: #01421a;
+    --hf-colour-game-gold-50: #fcf5de;
+    --hf-colour-game-gold-200: #f0d271;
+    --hf-colour-game-gold-700: #584600;
+    --hf-colour-game-gold-800: #423402;
 
     /*
      * Semantic tokens: light value first, dark value second. A custom property keeps light-dark()
@@ -113,14 +128,14 @@
     --hf-colour-background-band: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-900));
 
     /*
-     * The watermark of a game card (card-watermark.css): a very light tint of the surface it is on. In light it is a
-     * step deeper than the surface, as faint sand on white; in dark it is a step lighter. The text on the card keeps
-     * 4,5:1 against it (card-watermark-css.test.ts).
+     * The colours of the games on a game card: the watermark (card-watermark.css) and the headings (card.css has the
+     * card). The card itself is the ordinary surface. All text keeps 4,5:1 against the surface and the watermark
+     * (card-watermark-css.test.ts).
      */
-    --hf-colour-watermark-surface: light-dark(var(--hf-colour-sand-50), var(--hf-colour-blue-800));
-    --hf-colour-watermark-surface-strong: light-dark(var(--hf-colour-blue-150), var(--hf-colour-blue-700));
-    --hf-colour-watermark-surface-soft: light-dark(var(--hf-colour-blue-100), var(--hf-colour-blue-800));
-    --hf-colour-watermark-surface-warm: light-dark(var(--hf-colour-sand-200), var(--hf-colour-blue-700));
+    --hf-colour-watermark-prognose: light-dark(var(--hf-colour-game-red-50), var(--hf-colour-game-red-800));
+    --hf-colour-watermark-uitblinker: light-dark(var(--hf-colour-game-purple-50), var(--hf-colour-game-purple-800));
+    --hf-colour-watermark-fjouwer: light-dark(var(--hf-colour-game-green-50), var(--hf-colour-game-green-800));
+    --hf-colour-watermark-fantest: light-dark(var(--hf-colour-game-gold-50), var(--hf-colour-game-gold-800));
     --hf-colour-background-button: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-300));
     --hf-colour-background-button-hover: light-dark(var(--hf-colour-blue-900), var(--hf-colour-blue-200));
     --hf-colour-background-button-soft: light-dark(var(--hf-colour-blue-100), var(--hf-colour-blue-700));
@@ -189,6 +204,10 @@
     /* Text */
     --hf-colour-text-default: light-dark(var(--hf-colour-grey-900), var(--hf-colour-grey-50));
     --hf-colour-text-heading: light-dark(var(--hf-colour-blue-900), var(--hf-colour-blue-50));
+    --hf-colour-text-heading-prognose: light-dark(var(--hf-colour-game-red-700), var(--hf-colour-game-red-200));
+    --hf-colour-text-heading-uitblinker: light-dark(var(--hf-colour-game-purple-700), var(--hf-colour-game-purple-200));
+    --hf-colour-text-heading-fjouwer: light-dark(var(--hf-colour-game-green-700), var(--hf-colour-game-green-200));
+    --hf-colour-text-heading-fantest: light-dark(var(--hf-colour-game-gold-700), var(--hf-colour-game-gold-200));
     --hf-colour-text-secondary: light-dark(var(--hf-colour-grey-600), var(--hf-colour-blue-200));
     --hf-colour-text-link: light-dark(var(--hf-colour-blue-700), var(--hf-colour-blue-300));
     --hf-colour-text-link-hover: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-200));
@@ -460,10 +479,10 @@
       --hf-colour-background-surface-strong: var(--hf-colour-blue-100);
       --hf-colour-background-surface-soft: var(--hf-colour-blue-50);
       --hf-colour-background-surface-warm: var(--hf-colour-sand-100);
-      --hf-colour-watermark-surface: var(--hf-colour-sand-50);
-      --hf-colour-watermark-surface-strong: var(--hf-colour-blue-150);
-      --hf-colour-watermark-surface-soft: var(--hf-colour-blue-100);
-      --hf-colour-watermark-surface-warm: var(--hf-colour-sand-200);
+      --hf-colour-watermark-prognose: var(--hf-colour-game-red-50);
+      --hf-colour-watermark-uitblinker: var(--hf-colour-game-purple-50);
+      --hf-colour-watermark-fjouwer: var(--hf-colour-game-green-50);
+      --hf-colour-watermark-fantest: var(--hf-colour-game-gold-50);
       --hf-colour-background-header: var(--hf-colour-blue-900);
       --hf-colour-background-footer: var(--hf-colour-grey-200);
       --hf-colour-background-band: var(--hf-colour-blue-800);
@@ -484,6 +503,10 @@
       --hf-colour-background-stripe-footer: color-mix(in srgb, var(--hf-colour-grey-300) 30%, transparent);
       --hf-colour-text-default: var(--hf-colour-grey-900);
       --hf-colour-text-heading: var(--hf-colour-blue-900);
+      --hf-colour-text-heading-prognose: var(--hf-colour-game-red-700);
+      --hf-colour-text-heading-uitblinker: var(--hf-colour-game-purple-700);
+      --hf-colour-text-heading-fjouwer: var(--hf-colour-game-green-700);
+      --hf-colour-text-heading-fantest: var(--hf-colour-game-gold-700);
       --hf-colour-text-secondary: var(--hf-colour-grey-600);
       --hf-colour-text-link: var(--hf-colour-blue-700);
       --hf-colour-text-link-hover: var(--hf-colour-blue-800);
