@@ -113,7 +113,8 @@ export const missingAnswer = (number: number) => `Kies een antwoord bij vraag ${
 export const summaryTitle = (missing: number) => `Nog ${missing} ${missing === 1 ? 'vraag' : 'vragen'} zonder antwoord`
 
 /**
- * The months of the archive, the newest first. A month has a quiz only when it is published,
+ * The months of the archive, the newest first. Only quizzes of the old fansite are in it: a
+ * quiz of the editors shows nowhere yet. A month has a quiz only when it is published,
  * so a month without one (such as July and August 2003) is not in the list. The average shows
  * only for a month with at least `quizMinimum` participants.
  */
@@ -128,7 +129,7 @@ export async function loadArchive(db: Database): Promise<ArchiveMonth[]> {
     })
     .from(quizzes)
     .leftJoin(quizQuestions, eq(quizQuestions.quizId, quizzes.id))
-    .where(eq(quizzes.status, 'published'))
+    .where(and(eq(quizzes.source, 'oude-fansite'), eq(quizzes.status, 'published')))
     .groupBy(quizzes.id)
     .orderBy(desc(quizzes.year), desc(quizzes.month))
 
@@ -169,7 +170,9 @@ export function checkQuiz(questions: readonly QuizViewQuestion[], entries: reado
 }
 
 /**
- * One published quiz with its questions in their order, or nothing when the month has none. The
+ * One published quiz of the old fansite with its questions in their order, or nothing when the
+ * month has none. A quiz of the editors is never read here, so its right answers can't reach a
+ * visitor through the archive. The
  * percentages, the average and the number of participants are there only when at least
  * `quizMinimum` visitors took part, so a page can't show a figure of a handful of people.
  */
@@ -177,7 +180,14 @@ export async function loadQuiz(db: Database, year: number, month: number): Promi
   const [quiz] = await db
     .select()
     .from(quizzes)
-    .where(and(eq(quizzes.year, year), eq(quizzes.month, month), eq(quizzes.status, 'published')))
+    .where(
+      and(
+        eq(quizzes.year, year),
+        eq(quizzes.month, month),
+        eq(quizzes.source, 'oude-fansite'),
+        eq(quizzes.status, 'published'),
+      ),
+    )
     .limit(1)
 
   if (quiz === undefined) {
@@ -197,7 +207,8 @@ export async function loadQuiz(db: Database, year: number, month: number): Promi
     participants: shown ? (quiz.participants ?? undefined) : undefined,
     questions: rows.map((row) => ({
       answers: row.answers,
-      correct: row.correctAnswer,
+      // A quiz of the old fansite always has the right answer.
+      correct: row.correctAnswer ?? 0,
       percentages: shown ? (row.percentages ?? undefined) : undefined,
       position: row.position,
       text: row.text,

@@ -19,7 +19,7 @@ test('gives an author the start, the articles and his account, by his first name
 
   const bar = page.getByRole('navigation', { name: 'Beheer' })
 
-  await expect(bar.getByRole('link')).toHaveText(['Beheer', 'Artikelen', 'Mijn account (Auteur)'])
+  await expect(bar.getByRole('link')).toHaveText(['Beheer', 'Artikelen', 'Fantest', 'Mijn account (Auteur)'])
   await expect(bar.getByRole('button')).toHaveText(['Uitloggen'])
   await expect(bar.getByRole('link', { name: 'Artikelen' })).toHaveAttribute('aria-current', 'page')
   expect(await checkPage(page)).toEqual([])
@@ -35,6 +35,7 @@ test('gives the owner every screen and marks the one below which the page is', a
     'Beheer',
     'Berichten',
     'Artikelen',
+    'Fantest',
     'Wedstrijden',
     'Spelers',
     'Stadions',

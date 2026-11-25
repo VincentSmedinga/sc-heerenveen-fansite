@@ -946,7 +946,7 @@ Het beheer kent drie rollen (#1156):
 
 - De eigenaar (`owner`) mag alles, ook de accounts beheren op `/beheer/accounts`.
 - Een redacteur (`editor`) mag alles behalve de accounts beheren.
-- Een auteur (`author`) schrijft, publiceert en trekt alleen zijn eigen artikelen in, en ziet zijn eigen account.
+- Een auteur (`author`) schrijft, publiceert en trekt alleen zijn eigen artikelen in, schrijft en publiceert de Fantest, en ziet zijn eigen account.
 
 De eigenaar voegt redacteuren en auteurs toe in het beheer.
 Een eigenaar maak je alleen met een opdracht:
@@ -1023,6 +1023,7 @@ Een sessie die verloopt haalt hem niet weg: daar is hij voor.
 - `/beheer/berichten` is alleen voor de eigenaar en de redacteuren: de 50 nieuwste berichten van alle bronnen die op de site staan of die er niet op staan, met bron, kop als link, tijd en wie een bericht verborg (zie _Berichten verbergen_).
 - `/beheer/artikelen` is voor elke rol: de artikelen van de redactie schrijven, bekijken, publiceren en intrekken (zie _Artikelen schrijven_).
   Een auteur ziet alleen de artikelen die hij maakte (`created_by`), en publiceert en trekt alleen die in (#1159); de serveracties weigeren een artikel van een ander.
+- `/beheer/fantest` is voor elke rol, en alleen als de Fantest aan staat: de maandelijkse quiz van de redactie (zie _De Fantest van de redactie_).
 - `/beheer/wedstrijden` is alleen voor de eigenaar en de redacteuren: een wedstrijd van het lopende seizoen invullen of verbeteren (zie _Wedstrijden invullen_).
 - `/beheer/spelers` is alleen voor de eigenaar en de redacteuren: een speler toevoegen aan de selectie van een seizoen, of er een aanpassen (zie _De spelers van een seizoen_).
 - `/beheer/personen/<nummer>` is alleen voor de eigenaar en de redacteuren: wat voor een persoon in elk seizoen geldt, zoals de naam en de geboortedatum (zie _De spelers van een seizoen_).
@@ -1115,6 +1116,23 @@ Een bericht staat op de site als het niet verborgen is en `relevant` of goedgeke
 - `e2e/relevance.spec.ts` zet een verzonnen twijfelgeval op de site en haalt het terug.
 
 Lokaal zie je de pagina na `pnpm run import` (of met `pnpm --filter site test-data`) en een login, zoals hierboven.
+
+### De Fantest van de redactie
+
+`/beheer/fantest` (`src/app/beheer/fantest`) is voor elke rol: de redactie schrijft er de quiz van een maand (#1481).
+Met de Fantest uit (`FANS_FANTEST` of `FANS_ACCOUNTS`) staat het scherm niet in de balk en antwoorden de pagina's en de acties "niet gevonden" (`requireFantest`).
+
+- De quizzen staan in `quizzes` en `quiz_questions` met de bron `redactie`; `src/beheer/quizzes.ts` leest en schrijft alleen die bron.
+- Een nieuwe quiz is een concept met tien lege vragen, voor een maand die niet voorbij is en nog geen quiz heeft.
+- Een concept mag onaf zijn.
+  Publiceren, en elke wijziging van een gepubliceerde quiz, vraagt tien vragen met vier antwoorden en een goed antwoord (`validateQuiz`).
+  Publiceren kan tot middernacht, Nederlandse tijd, aan het eind van de maand.
+- De knoppen "Vraag 3 omhoog" en "Vraag 3 omlaag" bewaren het formulier en wisselen twee vragen.
+- Zodra `participants` boven nul staat (dat telt #1482), is de quiz vergrendeld: alleen de slottekst en "alles goed" per vraag veranderen nog.
+- Het voorbeeld toont de opgeslagen quiz met `QuizQuestion`, zonder formulier en zonder de goede antwoorden.
+- Elke wijziging komt in `audit_log` als `quiz.create`, `quiz.edit` of `quiz.publish`, met de maand en wat er veranderde in `detail`.
+
+Supporters zien een quiz van de redactie nog nergens: het archief leest alleen de bron `oude-fansite`.
 
 ### Artikelen schrijven
 
@@ -1542,6 +1560,7 @@ Op `/fans` staat een kaart van het spel (`app/fans/UitblinkerCard.tsx`) en onder
 
 `/fans/fantest` (`app/fans/fantest`) is het archief van de quizzen van de oude Fansite, en `/fans/fantest/<jaar>-<maand>` (`app/fans/fantest/[maand]`) speelt één maand.
 De pagina's lezen alleen `src/fans/fantest.ts`: de lijst (`loadArchive`), een quiz (`loadQuiz`) en het nakijken (`checkQuiz`, met `scoreQuiz` uit `packages/shared`).
+`loadArchive` en `loadQuiz` lezen alleen quizzen met de bron `oude-fansite`, zodat de goede antwoorden van een quiz van de redactie de server niet verlaten.
 Het formulier (`QuizForm.tsx`) is een gewone `POST` die zonder JavaScript werkt, en de actie (`actions.ts`) bewaart niets: geen antwoord, geen score en geen cookie.
 Daarom is het archief het enige onderdeel van Fans dat niet noindex is: de pagina's zijn voor iedereen gelijk, staan in de sitemap, en `robots.txt` staat `/fans/fantest` toe onder het geweigerde `/fans/`.
 Percentages en "gemiddeld" staan er alleen bij minstens vijf deelnemers (`quizMinimum`).

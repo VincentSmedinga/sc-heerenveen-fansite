@@ -154,6 +154,17 @@ describe('the admin', () => {
     expect(html).toContain('Houd bij welke namen een club droeg, sinds wanneer, en in welk land hij speelt.')
   })
 
+  it.each(['author', 'editor', 'owner'])('shows the role %s a tile Fantest while the Fantest is on', async (role) => {
+    vi.stubEnv('FANS_ACCOUNTS', 'on')
+    vi.stubEnv('FANS_FANTEST', 'on')
+    requireRole.mockResolvedValue({ email: 'jelle@example.org', firstName: '', role, userId: 1 })
+
+    const html = renderToStaticMarkup(await AdminPage())
+
+    expect(links(tileList(html))).toContain('<a class="hf-tile-link" href="/beheer/fantest">Fantest</a>')
+    vi.unstubAllEnvs()
+  })
+
   it('shows the owner the accounts as well', async () => {
     requireRole.mockResolvedValue({ email: 'eigenaar@example.test', firstName: 'Eva', role: 'owner', userId: 1 })
 

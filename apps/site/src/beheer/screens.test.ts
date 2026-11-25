@@ -10,10 +10,10 @@ describe('the screens of the admin', () => {
   })
 
   it('shows an author the start, the articles and his own account', () => {
-    expect(screensFor('author').map(({ label }) => label)).toEqual(['Beheer', 'Artikelen', 'Mijn account'])
+    expect(screensFor('author').map(({ label }) => label)).toEqual(['Beheer', 'Artikelen', 'Fantest', 'Mijn account'])
   })
 
-  const work = ['Beheer', 'Berichten', 'Artikelen', 'Wedstrijden', 'Spelers', 'Stadions', 'Clubs', 'Bezoek']
+  const work = ['Beheer', 'Berichten', 'Artikelen', 'Fantest', 'Wedstrijden', 'Spelers', 'Stadions', 'Clubs', 'Bezoek']
   const withSupporters = [...work, 'Fans']
 
   it('shows an editor every screen but the accounts', () => {
@@ -21,8 +21,16 @@ describe('the screens of the admin', () => {
   })
 
   it('hides the supporters while the accounts are off', () => {
-    expect(screensFor('editor', false).map(({ label }) => label)).toEqual([...work, 'Mijn account'])
-    expect(screensFor('owner', false).map(({ label }) => label)).toEqual([...work, 'Accounts', 'Mijn account'])
+    const off = ['accounts', 'fantest'] as const
+    const rest = work.filter((label) => label !== 'Fantest')
+
+    expect(screensFor('editor', off).map(({ label }) => label)).toEqual([...rest, 'Mijn account'])
+    expect(screensFor('owner', off).map(({ label }) => label)).toEqual([...rest, 'Accounts', 'Mijn account'])
+  })
+
+  it('hides the Fantest while it is off, for every role', () => {
+    expect(screensFor('author', ['fantest']).map(({ label }) => label)).toEqual(['Beheer', 'Artikelen', 'Mijn account'])
+    expect(screensFor('editor', ['fantest']).map(({ label }) => label)).not.toContain('Fantest')
   })
 
   it('shows the owner every screen, the accounts too', () => {
@@ -45,6 +53,7 @@ describe('the screens of the admin', () => {
     ['/beheer/clubs/kwaliteit', '/beheer/clubs'],
     ['/beheer/clubs/sv-proefdorp', '/beheer/clubs'],
     ['/beheer/bezoek', '/beheer/bezoek'],
+    ['/beheer/fantest/4/voorbeeld', '/beheer/fantest'],
     ['/beheer/supporters/4', '/beheer/supporters'],
     ['/beheer/accounts/4', '/beheer/accounts'],
     ['/beheer/mijn-account', '/beheer/mijn-account'],

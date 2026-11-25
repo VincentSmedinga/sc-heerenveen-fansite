@@ -162,6 +162,9 @@ describe('recordAction', () => {
       'supporter.block',
       'supporter.unblock',
       'supporter.forget-address',
+      'quiz.create',
+      'quiz.edit',
+      'quiz.publish',
     ])
   })
 

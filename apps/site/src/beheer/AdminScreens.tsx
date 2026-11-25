@@ -1,6 +1,7 @@
 'use client'
 
 import type { AdminRole } from '@fansite/db/schema'
+import type { FansPart } from '@fansite/shared/fans-env'
 
 import { NavigationBar } from '@fansite/design-system'
 import { usePathname } from 'next/navigation'
@@ -19,12 +20,13 @@ import { currentScreen, isLoginPage, myAccountHref, screensFor } from './screens
  * first name has "Mijn account" alone.
  */
 export function AdminScreens({
-  accountsOn,
   firstName,
+  off,
   role,
 }: {
-  accountsOn: boolean
   firstName: string
+  /** The parts of Fans that are off: their screens are not in the bar. */
+  off: readonly FansPart[]
   role: AdminRole
 }) {
   const pathname = usePathname()
@@ -39,7 +41,7 @@ export function AdminScreens({
     <NavigationBar
       end={{ action: logOut, label: 'Uitloggen' }}
       label="Beheer"
-      subitems={screensFor(role, accountsOn).map(({ href, label }) => ({
+      subitems={screensFor(role, off).map(({ href, label }) => ({
         current: href === current,
         href,
         label: href === myAccountHref && firstName !== '' ? `${label} (${firstName})` : label,

@@ -17,6 +17,9 @@ const months = [
   { average: 30, missing: [4], month: 9, participants: 3 },
 ] as const
 
+/** The month of the made-up quiz of the editors, far ahead, so it is never over. */
+const editorsMonth = { month: 1, year: 2099 }
+
 /** Puts the quizzes in and returns the function that takes them out again. */
 export async function addFantest() {
   const { close, db } = connectToDatabase()
@@ -63,6 +66,8 @@ export async function addFantest() {
       )
       added.push(insertId)
     }
+
+    added.push(await addEditorsQuiz(db))
   } finally {
     await close()
   }
@@ -79,6 +84,57 @@ export async function addFantest() {
       await connection.close()
     }
   }
+}
+
+/** The number of the made-up quiz of the editors, for its pages in the admin (#1481). */
+export async function editorsQuizId() {
+  const { close, db } = connectToDatabase()
+
+  try {
+    const [row] = await db
+      .select({ id: quizzes.id })
+      .from(quizzes)
+      .where(and(eq(quizzes.year, editorsMonth.year), eq(quizzes.month, editorsMonth.month)))
+
+    if (row === undefined) {
+      throw new Error('There is no made-up quiz of the editors in the database. Did the global setup run?')
+    }
+
+    return row.id
+  } finally {
+    await close()
+  }
+}
+
+/** A published quiz of the editors with ten made-up questions, which nobody filled in. */
+async function addEditorsQuiz(db: ReturnType<typeof connectToDatabase>['db']) {
+  // One that a check that stopped halfway left behind goes first.
+  await db.delete(quizzes).where(and(eq(quizzes.year, editorsMonth.year), eq(quizzes.month, editorsMonth.month)))
+
+  const [{ insertId }] = await db.insert(quizzes).values({
+    ...editorsMonth,
+    closingText: 'Een verzonnen slottekst.',
+    intro: 'Een verzonnen inleiding over Testclub.',
+    source: 'redactie',
+    status: 'published',
+  })
+
+  await db.insert(quizQuestions).values(
+    Array.from({ length: 10 }, (_, index) => ({
+      answers: ['Testantwoord A', 'Testantwoord B', 'Testantwoord C', 'Testantwoord D'] as [
+        string,
+        string,
+        string,
+        string,
+      ],
+      correctAnswer: (index % 4) + 1,
+      position: index + 1,
+      quizId: insertId,
+      text: `Redactievraag ${index + 1} over Testclub?`,
+    })),
+  )
+
+  return insertId
 }
 
 /**

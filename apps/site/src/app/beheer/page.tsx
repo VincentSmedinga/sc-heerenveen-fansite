@@ -5,6 +5,7 @@ import { countWaitingStatDifferences } from '@fansite/db/player-stat-differences
 import { adminRoles } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { Card, Heading, Link, List, Page, Text, Tile } from '@fansite/design-system'
+import { isFansPartOn } from '@fansite/shared/fans-env'
 
 import { roleLabels } from '#src/beheer/account-fields'
 import { adminAreas, todoAreas } from '#src/beheer/areas'
@@ -19,6 +20,7 @@ import { requireRole } from '#src/beheer/require-role'
 import { readStadiumGaps } from '#src/beheer/stadium-quality'
 import { getDatabase } from '#src/database'
 
+import { quizzesPath } from './fantest/paths'
 import { listPath, matchesPath } from './wedstrijden/paths'
 
 // Render on each request: who is logged in is not known when the site is built.
@@ -183,6 +185,11 @@ export default async function AdminPage() {
           <Tile href="/beheer/artikelen" icon="document" level={2} title="Artikelen">
             {editor ? 'Schrijf artikelen en publiceer ze.' : 'Schrijf je eigen artikelen en publiceer ze.'}
           </Tile>
+          {isFansPartOn('fantest') ? (
+            <Tile href={quizzesPath} icon="document" level={2} title="Fantest">
+              Schrijf de quiz van een maand, bekijk hem en publiceer hem.
+            </Tile>
+          ) : null}
           {editor ? (
             <>
               <Tile href={matchesPath} icon="ball" level={2} title="Wedstrijden">

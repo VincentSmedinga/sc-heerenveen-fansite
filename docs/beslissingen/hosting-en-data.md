@@ -1336,6 +1336,7 @@
   Vier vaste antwoorden in één kolom houden de tabel klein, en de controles bewaken de grenzen.
 - **Alternatieven:** een derde tabel voor de antwoorden (een join voor elke vraag, en de plaats van het goede antwoord is dan een verwijzing); een kolom per antwoord en per percentage (twaalf kolommen zonder winst).
 - **Let op:** `quizzes.source` ziet erop toe dat de import van de oude Fansite alleen zijn eigen quizzen verandert of weghaalt.
+- **Later:** zie _Een quiz van de redactie krijgt in dezelfde tabellen een inleiding, een slottekst en "alles goed"_ (25 november 2026): #1481 voegde kolommen toe, en `correct_answer` mag leeg zijn.
 
 ## Een regel van de tegenstander in een verslag kan een persoon hebben
 
@@ -1379,3 +1380,20 @@
   Een speler zonder artikel blijft een naam, en de import maakt geen persoon voor een naam zonder artikel.
 - **Waarom:** de gegevens komen alleen van Wikipedia, met naamsvermelding (CC BY-SA), en een verzonnen persoon zonder bron zegt niets over wie hij is.
 - **Alternatieven:** een persoon voor elke naam in een verslag (geen bron, geen controle).
+
+## Een quiz van de redactie krijgt in dezelfde tabellen een inleiding, een slottekst en "alles goed"
+
+- **Datum:** 25 november 2026
+- **Besluit:** de quizzen van de redactie staan in `quizzes` en `quiz_questions` met de bron `redactie` (#1481).
+  Migratie 0116 voegt daar het volgende aan toe:
+  - `quizzes.intro` en `quizzes.closing_text`, gewone tekst van hoogstens 2000 tekens;
+  - `quiz_questions.all_correct`, de keuze "alles goed" voor een slechte vraag;
+  - `quiz_questions.correct_answer` mag leeg zijn, voor een onaf concept;
+  - drie acties in het logboek: `quiz.create`, `quiz.edit` en `quiz.publish`.
+    Een quiz van de redactie heeft altijd tien rijen met vragen.
+    Een vraag van een concept mag lege teksten hebben.
+- **Waarom:** de pagina van een maand heeft zo voor oud en nieuw één opbouw, en er is één plek die de score berekent.
+  Tien vaste rijen maken van "precies tien vragen in een vaste volgorde" iets wat niet mis kan gaan.
+- **Alternatieven:** aparte tabellen voor nieuwe quizzen (twee keer dezelfde pagina's); een concept in een eigen kolom met JSON bewaren tot het compleet is (twee vormen van dezelfde quiz).
+- **Gevolg:** #1482 telt `participants` op in dezelfde transactie als een inzending, op de rij van de quiz.
+  Wie een vraag met `all_correct` nakijkt, telt elk antwoord als goed.

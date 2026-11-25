@@ -153,10 +153,11 @@ describe('the admin', () => {
     }
   })
 
-  it('lets an author in only where he writes his own articles or sees his account, and only the owner to the accounts', () => {
+  it('lets an author in only at his articles, the Fantest and his account, and only the owner to the accounts', () => {
     // Issue 1156: every other page, route and action asks for the owner or an editor. The
     // articles check on top that an author reaches, publishes and withdraws only his own (see
-    // artikelen/actions.ts); the tests of those files show it.
+    // artikelen/actions.ts); the tests of those files show it. The Fantest is for every role
+    // (issue 1481).
     const forEveryRole = [
       'app/beheer/actions.ts',
       'app/beheer/artikelen/[id]/page.tsx',
@@ -165,6 +166,11 @@ describe('the admin', () => {
       'app/beheer/artikelen/actions.ts',
       'app/beheer/artikelen/nieuw/page.tsx',
       'app/beheer/artikelen/page.tsx',
+      'app/beheer/fantest/[id]/page.tsx',
+      'app/beheer/fantest/[id]/voorbeeld/page.tsx',
+      'app/beheer/fantest/actions.ts',
+      'app/beheer/fantest/nieuw/page.tsx',
+      'app/beheer/fantest/page.tsx',
       'app/beheer/mijn-account/page.tsx',
       'app/beheer/page.tsx',
     ]
