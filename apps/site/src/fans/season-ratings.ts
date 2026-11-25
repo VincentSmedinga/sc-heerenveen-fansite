@@ -142,7 +142,7 @@ export const isOldSeason = (data: RatingFigures, season: string) =>
   data.oldRatings.some((row) => row.season === season) ||
   data.figures.some((figure) => figure.season === season && figure.old)
 
-/** The small line under a winner: the number of ratings, or the source of an old rating. */
+/** The small line under a winner: the number of ratings, or "all ratings" for an old rating. */
 export const ratingsLine = (ratings: number | undefined) =>
   ratings === undefined
     ? 'Gemiddelde van alle cijfers'

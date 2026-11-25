@@ -41,6 +41,7 @@
     font-variant-numeric: tabular-nums;
     font-weight: var(--hf-figure-font-weight);
     inline-size: var(--hf-winner-seal-size);
+    isolation: isolate;
     place-items: center;
     position: relative;
 
@@ -94,7 +95,10 @@
     --hf-winner-seal-points: var(--hf-colour-background-seal-highlight);
   }
 
-  /* The number lies on the disc, which is drawn after it. */
+  /*
+   * The number lies on the disc, which is drawn after it. The seal is a stacking context of
+   * its own, so the number never lies over anything outside it, such as a sticky bar.
+   */
   .hf-winner-average {
     position: relative;
     z-index: 1;

@@ -78,6 +78,11 @@ describe('the look of a Winner', () => {
     expect(css).toContain('--hf-winner-seal-points: var(--hf-colour-background-button);')
   })
 
+  it('keeps the number above the disc inside the seal', () => {
+    expect(css).toMatch(/\.hf-winner-seal \{[^}]*isolation: isolate;/)
+    expect(css).toMatch(/\.hf-winner-average \{[^}]*z-index: 1;/)
+  })
+
   it('makes the seal of the highlight larger, with red points', () => {
     expect(css).toMatch(
       /\.hf-winner-highlight \.hf-winner-seal \{\s*--hf-winner-seal-size: 5\.25rem;\s*--hf-winner-seal-points: var\(--hf-colour-background-seal-highlight\);/,
