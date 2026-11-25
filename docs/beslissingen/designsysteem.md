@@ -4466,6 +4466,7 @@
 - **Waarom:** een lange pagina met veel kaarten laat in drie kolommen meer in beeld dan in twee.
 - **Alternatieven:** de kolommen van boven naar beneden vullen (de volgorde van lezen volgt dan niet het scherm); een eigen onderdeel voor drie kolommen.
 - **Later:** dit vult _`CardColumns` zet kaarten in een raster met paren, en grid lanes maakt het beter_ aan: er zijn nu twee of drie kolommen.
+- **Later:** sinds 25 november 2026 kan één kaart de eerste kolom voor zich krijgen (zie _`CardColumns` geeft met `lead` één kaart een eigen kolom_).
 
 ## De lichte pagina krijgt grijs-50 als achtergrond
 
@@ -4485,3 +4486,14 @@
   `SideBySide` blijft zoals het is: het zet twee delen van één taak naast elkaar en is geen raster van kaarten.
 - **Waarom:** de kaarten zien er zo uit als de andere kaarten die naast elkaar staan.
 - **Alternatieven:** een rij kleine kaarten dichter bij elkaar houden, met 0,5 of 1 rem.
+
+## `CardColumns` geeft met `lead` één kaart een eigen kolom
+
+- **Datum:** 25 november 2026
+- **Besluit:** `CardColumns` krijgt de optie `lead`: een kaart die in de code eerst staat en de eerste kolom voor zich alleen heeft (#1654).
+  De andere kaarten staan ernaast in een eigen raster, met twee kolommen vanaf 52 rem en één vanaf 28 rem, even breed als zonder `lead`.
+  Onder 28 rem staat alles onder elkaar.
+  Grid lanes geldt alleen voor het raster met de andere kaarten.
+- **Waarom:** een kaart die veel langer is dan de andere maakt in een raster per rij grote gaten.
+  Een eigen raster houdt de hoogte van die kaart buiten de rijen van de andere.
+- **Alternatieven:** de eerste kaart over alle rijen laten lopen (het aantal rijen moet dan in de CSS staan, en de extra hoogte kan over de rijen verdeeld worden); twee `CardColumns` in een eigen indeling op de site (een tweede manier om hetzelfde te doen, met breedtes die niet vanzelf gelijk zijn).

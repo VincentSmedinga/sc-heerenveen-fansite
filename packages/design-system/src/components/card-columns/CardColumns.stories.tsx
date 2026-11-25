@@ -15,6 +15,7 @@ const meta = preview.meta({
         component: [
           'Kaarten in twee kolommen als er plaats voor is, en anders onder elkaar. Met `columns={3}` zijn het er drie op een brede plaats, twee op een middelbrede en één op een smalle.',
           'De volgorde in de code is de leesvolgorde: de eerste kaart links, de tweede rechts, de derde weer links.',
+          'Is één kaart veel langer dan de andere, geef die dan als `lead`: ze krijgt de eerste kolom voor zich alleen en de andere staan ernaast.',
           'Hij is gebouwd uit `Card`, die hij naast elkaar zet.',
         ].join('\n'),
       },
@@ -47,6 +48,32 @@ export const DrieKolommen = meta.story({
   args: { columns: 3 },
   render: (args) => (
     <CardColumns {...args}>
+      {letters.map((letter, index) => (
+        <Card key={letter}>
+          <Heading level={2}>{letter}</Heading>
+          {Array.from({ length: lengths[index] ?? 2 }, (_, line) => (
+            <Text key={line}>Regel {line + 1}</Text>
+          ))}
+        </Card>
+      ))}
+    </CardColumns>
+  ),
+})
+
+export const EersteKaartApart = meta.story({
+  args: { columns: 3 },
+  render: (args) => (
+    <CardColumns
+      {...args}
+      lead={
+        <Card>
+          <Heading level={2}>Lange kaart</Heading>
+          {Array.from({ length: 24 }, (_, line) => (
+            <Text key={line}>Regel {line + 1}</Text>
+          ))}
+        </Card>
+      }
+    >
       {letters.map((letter, index) => (
         <Card key={letter}>
           <Heading level={2}>{letter}</Heading>

@@ -8067,6 +8067,7 @@
   Per rij lezen houdt toetsenbord en schermlezer alfabetisch, en de bron aan het eind laat zien waar de gegevens vandaan komen.
 - **Alternatieven:** de kolommen van boven naar beneden vullen; een eigen onderdeel voor deze pagina; de zijkolom houden met de bron erin.
 - **Later:** dit vervangt de zijkolom met de bron van de overzichten, en op Op land de landkaarten in de hoofdkolom.
+- **Later:** sinds 25 november 2026 staat Nederland op Op land in een eigen eerste kolom, eerst in de code, met de andere landen en de bron ernaast (zie _Nederland staat op Op land in een eigen eerste kolom_).
 
 ## De redactie schrijft de Fantest in het beheer, en een ingevulde quiz is vergrendeld
 
@@ -8237,6 +8238,19 @@
 - **Waarom:** `/fans` is de startpagina van het hoofdstuk, en die moet te vinden zijn.
   Wie zijn naam niet in de standen wil, zet dat uit op Mijn account.
 - **Alternatieven:** `noindex` zolang de pagina een stand toont, zoals de ranglijst van de Fantest.
+
+## Nederland staat op Op land in een eigen eerste kolom
+
+- **Datum:** 25 november 2026
+- **Besluit:** op `/spelers/overzicht/land` vult de kaart van Nederland de eerste kolom, en staan de andere landen en de bron in de kolommen ernaast (#1654).
+  De tweede en derde kolom gebruiken grid lanes waar de browser dat kan, en anders rijen.
+  Op twee kolommen staat Nederland links en de rest rechts.
+  Op één kolom blijft de volgorde zoals ze was.
+  De regel geldt alleen voor Nederland.
+  Nederland staat ook eerst als een ander land meer spelers heeft; de balk onder de kop en De grootste landen houden de volgorde van grootte.
+- **Waarom:** Nederland telt ongeveer de helft van de spelers en geen ander land komt in de buurt.
+  Zo blijft Nederland eerst en volledig zichtbaar, zonder dat het de andere landen naar beneden duwt.
+- **Alternatieven:** een eigen kaart over de volle breedte na de andere landen; de lijst van Nederland inklappen; Nederland opdelen per linie; alleen een link naar de lijst op naam; op een telefoon Nederland als laatste tonen (de volgorde op het scherm wijkt dan af van de leesvolgorde); op een telefoon inklappen.
 
 ## Spelers toont de Uitblinker van het seizoen bovenaan de zijkolom, en "In het kort" boven de selectie
 
