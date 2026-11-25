@@ -163,8 +163,9 @@
     --hf-colour-background-zebra: light-dark(var(--hf-colour-grey-50), var(--hf-colour-blue-950));
 
     /*
-     * The track behind a bar in a diagram (BarList). A step darker than the page in light, so it
-     * shows on the page and on a white card; in dark it is the colour of the page.
+     * The track behind a bar in a diagram (BarList). A step darker than the page in
+     * light, so it shows on the page and on a white card; in dark it is the colour of
+     * the page.
      */
     --hf-colour-background-bar-track: light-dark(var(--hf-colour-grey-100), var(--hf-colour-blue-950));
     --hf-colour-background-highlight: light-dark(var(--hf-colour-blue-100), var(--hf-colour-blue-800));
