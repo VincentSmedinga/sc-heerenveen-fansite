@@ -1,5 +1,6 @@
 import { expect, type Page, test } from '@playwright/test'
 
+import { forgetSignUps } from './admin'
 import { checkPage } from './check-page'
 import { sentMails } from './fake-mail'
 
@@ -14,6 +15,9 @@ async function signUp(page: Page) {
   const id = unique()
   const address = `fantest-${id}@example.org`
 
+  // The whole site takes only so many sign-ups an hour, and the checks share one database. So
+  // this check starts with none counted and leaves none behind.
+  await forgetSignUps()
   await page.goto('/fans/aanmelden')
   await page.getByLabel('Schermnaam').fill(`Fantest ${id}`.slice(0, 20))
   await page.getByLabel('E-mailadres').fill(address)
@@ -26,6 +30,7 @@ async function signUp(page: Page) {
   await page.getByLabel('Code uit de mail').fill(/^(\d{6})$/m.exec(mail)?.[1] ?? '')
   await page.getByRole('button', { name: 'Doorgaan' }).click()
   await expect(page).toHaveURL(/\/fans\?welkom=1$/)
+  await forgetSignUps()
 }
 
 const question = (page: Page, number: number) =>
