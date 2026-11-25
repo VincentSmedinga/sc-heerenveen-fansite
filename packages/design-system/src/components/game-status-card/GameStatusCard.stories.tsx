@@ -4,7 +4,7 @@ import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { DataTable } from '../data-table/DataTable'
 import { KeyFigures } from '../key-figures/KeyFigures'
 import { Match } from '../match/Match'
-import { tableColumns } from '../table-columns'
+import { tableColumns, tableLegend } from '../table-columns'
 import { Text } from '../text/Text'
 import { Winner } from '../winner/Winner'
 import { GameStatusCard } from './GameStatusCard'
@@ -25,6 +25,7 @@ const standing = (
   <DataTable
     caption="Stand 2026/27"
     columns={['Fan', { ...tableColumns.points, key: true }]}
+    legend={tableLegend([tableColumns.points])}
     rows={[
       { cells: [212], header: 'Tjalle99', position: 1 },
       { aside: 'Jij', cells: [198], header: 'Pompebled', highlight: true, position: 2 },

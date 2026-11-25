@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
   fjouwerSeasons: vi.fn(),
   fjouwerSquad: vi.fn(),
   fjouwerState: vi.fn(),
+  fjouwerSurnames: vi.fn(),
   loadMonthQuiz: vi.fn(),
   monthScores: vi.fn(),
   predictionRanking: vi.fn(),
@@ -51,6 +52,7 @@ vi.mock('#src/fans/fjouwer', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   fjouwerSquad: mocks.fjouwerSquad,
   fjouwerState: mocks.fjouwerState,
+  fjouwerSurnames: mocks.fjouwerSurnames,
 }))
 vi.mock('#src/fans/fjouwer-points', async (importOriginal) => ({
   ...(await importOriginal<object>()),
@@ -121,6 +123,9 @@ beforeEach(() => {
     ['Jansen', 'Veerman', 'Dijkstra', 'Hansen'].map((surname, index) => ({ id: index + 1, surname })),
   )
   mocks.fjouwerState.mockResolvedValue({ four: [], inherited: false, notCounting: [], saved: false })
+  mocks.fjouwerSurnames.mockResolvedValue(
+    new Map(['Jansen', 'Veerman', 'Dijkstra', 'Hansen', 'Vertrokken'].map((surname, index) => [index + 1, surname])),
+  )
   mocks.supporterFours.mockResolvedValue([])
   mocks.loadMonthQuiz.mockResolvedValue({ id: 3, month: 11, questions: Array.from({ length: 10 }), year: 2026 })
   mocks.monthScores.mockResolvedValue(
@@ -253,7 +258,7 @@ describe('the card of Fjouwer', () => {
     expect(card?.mine?.lines).toEqual(['Jouw vier: Jansen, Veerman, Dijkstra, Hansen.'])
     expect(card?.mine?.figures).toEqual([
       { figure: '14', label: 'punten', note: 'in je laatste wedstrijd' },
-      { figure: '2e', label: 'plek', note: 'van 87 bij deze wedstrijd' },
+      { figure: '2e', label: 'plek', note: 'van 87 in je laatste wedstrijd' },
     ])
     expect(card?.action).toMatchObject({ label: 'Wijzig je vier', type: 'link' })
     expect(card?.tag.tone).toBe('open')
@@ -267,6 +272,27 @@ describe('the card of Fjouwer', () => {
 
     expect(card?.mine?.lines).toContain('Veerman telt niet mee.')
     expect(card?.action.type).toBe('button')
+  })
+
+  it('names all four and asks for a new choice when a player left the squad', async () => {
+    mocks.fjouwerState.mockResolvedValue({ four: [1, 2, 3, 5], inherited: false, notCounting: [], saved: true })
+
+    const card = await readFjouwerCard(supporter, now)
+
+    expect(card?.mine?.lines).toEqual([
+      'Jouw vier: Jansen, Veerman, Dijkstra, Vertrokken.',
+      'Vertrokken telt niet mee.',
+    ])
+    expect(card?.tag.tone).toBe('todo')
+  })
+
+  it('has no button while the squad of the season is not known', async () => {
+    mocks.fjouwerSquad.mockResolvedValue([])
+
+    const card = await readFjouwerCard(supporter, now)
+
+    expect(card?.action).toEqual({ href: '/fans/fjouwer', label: 'Naar Fjouwer', type: 'link' })
+    expect(card?.tag.tone).toBe('open')
   })
 
   it('is closed without a match to choose for, and keeps the points', async () => {

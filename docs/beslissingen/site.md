@@ -8217,7 +8217,9 @@
   - **De korte stand** volgt de regels van de ranglijst en zet er niemand onder: wie lager staat, ziet de eigen rij niet.
   - **Aantallen:** Fjouwer telt de fans die voor deze wedstrijd hebben opgeslagen, niet wie een eerdere vier meeneemt.
     Geblokkeerde accounts tellen nergens mee.
-  - **Een overgenomen vier** geldt als gedaan zolang alle vier tellen.
+  - **Een vier** geldt als gedaan zolang alle vier tellen, ook als hij is overgenomen.
+    Een speler die niet meer in de selectie zit, telt niet; de kaart noemt hem wel.
+    Zolang de selectie niet bekend is, is er geen knop.
 - **Waarom:** de pagina is de plek om in één keer te zien wat er te doen is.
   Ze komt nooit in een cache, dus persoonlijke inhoud kan hier.
 - **Alternatieven:** een lichtere pagina met alleen de staat, één zin en een link per spel.

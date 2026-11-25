@@ -1,4 +1,13 @@
-import { DataTable, GameStatusCard, KeyFigures, Match, tableColumns, Text, Winner } from '@fansite/design-system'
+import {
+  DataTable,
+  GameStatusCard,
+  KeyFigures,
+  Match,
+  tableColumns,
+  tableLegend,
+  Text,
+  Winner,
+} from '@fansite/design-system'
 
 import type { GameCardData } from './game-card-data'
 
@@ -24,6 +33,7 @@ export function GameCard({ action, game, heading, lines, match, mine, ranking, t
         <DataTable
           caption={ranking.caption}
           columns={['Fan', { ...tableColumns.points, key: true }]}
+          legend={tableLegend([tableColumns.points])}
           rows={ranking.rows}
           sortable={false}
         />

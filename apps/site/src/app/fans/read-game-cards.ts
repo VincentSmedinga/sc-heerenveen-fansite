@@ -1,3 +1,5 @@
+import type { DataTableRow } from '@fansite/design-system'
+
 import { seasonOf } from '@fansite/db/season'
 
 import { getDatabase } from '#src/database'
@@ -5,7 +7,7 @@ import { reasonOf } from '#src/errors'
 import { fantestPath } from '#src/fans/fantest'
 import { currentMonth, findEntry, loadMonthQuiz } from '#src/fans/fantest-entry'
 import { rankingOf as fantestRankingOf, monthScores } from '#src/fans/fantest-ranking'
-import { fjouwerPath, fjouwerSquad, fjouwerState } from '#src/fans/fjouwer'
+import { fjouwerPath, fjouwerSquad, fjouwerState, fjouwerSurnames } from '#src/fans/fjouwer'
 import { cachedStanding, supporterFours } from '#src/fans/fjouwer-points'
 import { seasonRanking as fjouwerSeasonRanking, rankedSeasons as rankedFjouwerSeasons } from '#src/fans/fjouwer-ranking'
 import { countFours, countParticipants } from '#src/fans/game-counts'
@@ -90,7 +92,7 @@ export function readPrognoseCard(supporter: CardSupporter | undefined, now = new
       lines,
       ...(match === undefined ? {} : { match: upcoming(match, now) }),
       ...(saved === undefined ? {} : { mine: { lines: [`Jouw voorspelling: ${lowerFirst(standsText(saved))}`] } }),
-      ...(rows.length === 0 ? {} : { ranking: { caption: `Stand ${season}`, rows: rows as never } }),
+      ...(rows.length === 0 ? {} : { ranking: { caption: `Stand ${season}`, rows } }),
       heading: 'Prognose',
       tag: open === undefined ? closedTag : todo ? todoTag : openTag(open.closesAt, now),
     }
@@ -104,7 +106,7 @@ export function readPrognoseCard(supporter: CardSupporter | undefined, now = new
 function shortRanking<Ranking extends { rows: readonly { supporterId: null | number }[] }>(
   ranking: Ranking,
   supporterId: number | undefined,
-  rowsOf: (ranking: Ranking, supporterId: number | undefined, limit: number, withFigures: boolean) => object[],
+  rowsOf: (ranking: Ranking, supporterId: number | undefined, limit: number, withFigures: boolean) => DataTableRow[],
 ) {
   const shown = ranking.rows.slice(0, shortRows)
   const own = shown.some((row) => row.supporterId === supporterId) ? supporterId : undefined
@@ -177,18 +179,27 @@ export function readFjouwerCard(supporter: CardSupporter | undefined, now = new 
     const rows = seasons.includes(season)
       ? shortRanking(await fjouwerSeasonRanking(season), player?.id, fjouwerRows)
       : []
-    const surnames = new Map(squad.map((member) => [member.id, member.surname]))
+    const surnames = await fjouwerSurnames(db, state?.four ?? [])
     const named = (ids: readonly number[]) => ids.flatMap((id) => surnames.get(id) ?? [])
-    const four = state === undefined ? [] : named(state.four)
-    const notCounting = state === undefined ? [] : named(state.notCounting)
+    const inSquad = new Set(squad.map((member) => member.id))
+    // A player who left the squad counts no more than one who was chosen ten times. While the
+    // squad of the season is not known, there is nothing to hold the four against.
+    const lost =
+      state === undefined || squad.length === 0
+        ? []
+        : state.four.filter((id) => state.notCounting.includes(id) || !inSquad.has(id))
+    const four = named(state?.four ?? [])
+    const notCounting = named(lost)
     // A four that is inherited counts, as long as all four of them do.
-    const done = state !== undefined && state.four.length - state.notCounting.length === 4
-    const todo = state !== undefined && !done
+    const done = state !== undefined && squad.length > 0 && state.four.length === 4 && lost.length === 0
+    // Without a squad the page of the game has no form, so there is nothing to do yet.
+    const todo = state !== undefined && squad.length > 0 && !done
     const last = fours.find((item) => item.ready)
+    const standing = last === undefined ? undefined : await cachedStanding(last.match.id)
+    const found = player === undefined ? undefined : placeFigure(standing, player.id)
+    // The card shows the match to come, so the place says which match it is of.
     const place =
-      last === undefined || player === undefined
-        ? undefined
-        : placeFigure(await cachedStanding(last.match.id), player.id)
+      found === undefined ? undefined : { ...found, note: `van ${standing?.counted} in je laatste wedstrijd` }
     const figures =
       last?.total === undefined
         ? undefined
@@ -222,7 +233,7 @@ export function readFjouwerCard(supporter: CardSupporter | undefined, now = new 
       ...(mineLines.length === 0 && figures === undefined
         ? {}
         : { mine: { lines: mineLines, ...(figures === undefined ? {} : { figures }) } }),
-      ...(rows.length === 0 ? {} : { ranking: { caption: `Stand ${season}`, rows: rows as never } }),
+      ...(rows.length === 0 ? {} : { ranking: { caption: `Stand ${season}`, rows } }),
       heading: 'Fjouwer',
       tag: open === undefined ? closedTag : todo ? todoTag : openTag(open.closesAt, now),
     }

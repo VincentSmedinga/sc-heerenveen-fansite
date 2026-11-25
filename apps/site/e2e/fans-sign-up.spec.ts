@@ -46,7 +46,7 @@ test.describe('without JavaScript', () => {
     // The welcome is on Fans, and Mijn account shows the data.
     await expect(page).toHaveURL(/\/fans\?welkom=1$/)
     await expect(page.getByText(`Welkom, ${name}.`)).toBeVisible()
-    await expect(page.getByText('Maak alvast een account')).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: 'Doe mee' })).toHaveCount(0)
     await expect(page.getByText(`Je bent ingelogd als ${name}.`)).toBeVisible()
     await page.goto('/fans/mijn-account')
     await expect(page.getByText('Welkom,')).toHaveCount(0)
