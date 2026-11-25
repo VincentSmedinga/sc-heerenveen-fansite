@@ -183,7 +183,7 @@
     inline-size: 1.25rem;
     justify-content: center;
 
-    /* The ring is 4px outside the disc; the margin keeps room round it, more before the word. */
+    /* The ring is 4px outside the disc; the margin makes room, more before the word. */
     margin-inline: 4px calc(4px + var(--hf-space-xs));
   }
 
