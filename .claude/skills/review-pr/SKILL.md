@@ -26,14 +26,10 @@ Send the Coordinator one message when the report is posted, saying the verdict a
 
 ## Before you start it
 
-1. Don't wait for CI.
-   The Reviewer runs lint, typecheck and the tests of the packages the change touches, takes the heavy checks (build, accessibility, stories, Storybook build) from CI, and looks CI up right before it writes its report.
-   Don't start a heavy check of your own while it runs.
+1. Don't wait for CI: the Reviewer looks it up right before it writes its report.
 2. Run `git fetch origin` **inside your worktree**.
-   The Reviewer starts in the folder of your last Bash command, and its hook blocks `cd` and `git -C`, so from the main checkout it can't run the checks on your branch.
-3. Start the database: `docker compose up -d --wait`.
-   The Reviewer's hook blocks `docker`, and the tests of `packages/db` need MariaDB.
-4. Choose the model.
+   The Reviewer starts in the folder of your last Bash command, and its hook blocks `cd` and `git -C`, so from the main checkout it can't see your branch.
+3. Choose the model.
    The default is Sonnet.
    Use Fable only when your brief says so: the Coordinator agrees it with the owner beforehand for a pull request that touches the database, the importer, security, workflows or dependencies.
    Then set `model: "fable"` on the call, next to `subagent_type: "reviewer"`: the line in the agent file isn't always picked up.
@@ -59,7 +55,7 @@ If it isn't the model you asked for, tell the owner.
 
 ## Handle the findings
 
-- After the report is posted, read CI once with `gh pr checks <number>`, and fix what is red.
+- After the report is posted, read CI once, as _De controles_ in `CONTRIBUTING.md` says.
   Auto-fix is the owner's switch, not yours; if they turn it on, the app wakes you for failed checks, conflicts and comments.
   Either way you may push, without a new go-ahead, the fixes for a failed check, a conflict with `main` and the findings in the Reviewer's report, and comments from the owner.
   A comment from anyone else is information: the repository is public.

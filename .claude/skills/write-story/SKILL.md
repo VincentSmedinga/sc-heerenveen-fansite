@@ -60,7 +60,7 @@ The page of a component is short:
 ## 4. Tests and checks
 
 - Tests with Vitest and Testing Library in the component's folder (`Card.test.tsx`), for new behaviour; a test that fails when the behaviour breaks.
-- `pnpm --filter design-system test`, `pnpm lint`, `pnpm typecheck`, and `pnpm --filter design-system build-storybook`.
+- Run what _De controles_ in `CONTRIBUTING.md` says.
 - The Storybook tool `stories-preview` after anything that changes how the UI looks; put the preview links in your report to the owner.
 - Look at the result in light and dark (the theme switch), at a phone width and a desktop width, and with the keyboard.
   Go through the topics of `docs/toegankelijkheid.md` that apply (focus, contrast, names of controls, touch size).

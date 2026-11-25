@@ -55,30 +55,48 @@ Een voorstel verandert daar niets aan.
 
 ### De controles
 
-Draai deze opdrachten voordat je een pull request opent:
+CI draait op elke pull request lint, typecheck, `pnpm test` en de build, ook die van Storybook.
+De controles van de site en de stories slaat CI alleen over bij wijzigingen die ze niet raken (zie hieronder).
+Zo blijft geen wijziging ongetoetst, en lokaal draai je alleen wat je eigen werk toetst.
+
+Draai dit voordat je een pull request opent:
 
 ```sh
 pnpm lint
 pnpm typecheck
-pnpm test
-pnpm build
-pnpm test:a11y
-pnpm test:stories
+pnpm --filter <pakket> exec node ../../scripts/worktree-env.js run -- vitest run <testbestand>
 ```
 
-Raakt je wijziging alleen CSS of designtokens, en dus geen TypeScript, markup, paginatekst of logregel?
-Dan draai je lokaal `pnpm lint`, `pnpm typecheck`, `pnpm test` en `pnpm --filter design-system build-storybook`, die laatste voor de screenshots.
-`pnpm build`, `pnpm test:a11y` en `pnpm test:stories` laat je dan aan CI, want CI draait ze toch, naast elkaar, terwijl ze lokaal wachten op één slot.
-Een fout die CI vindt, komt terug doordat de maker na het verslag van de reviewer één keer CI leest, via Auto-fix als de projecteigenaar dat aanzet, of via de Coördinator.
-Elke andere wijziging draait de hele keten.
-De tests van `packages/db` draaien op een echte MariaDB.
+De laatste opdracht draait de tests die je gewijzigde code toetsen, ook de nieuwe.
+`<pakket>` is de naam uit de `package.json`, zoals `@fansite/importer`, en `<testbestand>` het pad vanaf de map van dat pakket.
+In het designsysteem zet je `--project unit` achter `vitest run`.
+De tests in `scripts/`, `.claude/hooks/`, `apps/site/scripts/` en de hoofdmap draai je met `node --test <testbestand>`.
+De hele `pnpm test` en alle tests van een pakket hoeven niet.
+Veel tests van `packages/db`, de site en de importer draaien op een echte MariaDB.
 Start die eerst met `docker compose up -d --wait` (zie de [README van het package](packages/db/README.md)).
-`pnpm test:a11y` toetst na de build de pagina's met axe.
-Het heeft die database ook nodig, en eenmalig Chromium (zie de [README van de site](apps/site/README.md)).
-De gebouwde site maakt zelf de tabellen en zet de echte bronnen erin, en de controle zet de testbronnen erbij.
-`pnpm test:stories` opent elke story van het designsysteem in Chrome en toetst hem met axe, één keer in licht en één keer in donker.
-Het heeft geen database nodig, en eenmalig Chromium (zie de [README van het designsysteem](packages/design-system/README.md)).
-`pnpm test` draait de tests van de componenten zonder browser.
+
+`pnpm build`, de rooktest, `pnpm test:a11y`, `pnpm test:stories` en de build van Storybook zijn lokaal geen vaste stap.
+Je draait er alleen een, of het deel ervan, als die je werk zelf toetst:
+
+- Een nieuwe of gewijzigde test van de pagina's: `pnpm build`, en dan `pnpm test:a11y <testbestand>`, met erachter `--no-deps` voor `writing.spec.ts`.
+  Dit heeft de database nodig, en eenmalig Chromium (zie de [README van de site](apps/site/README.md)).
+- Een nieuwe of gewijzigde test van een story: `pnpm --filter @fansite/design-system exec node ../../scripts/heavy-lock.js -- vitest run --project stories <storybestand>`.
+  Zet er `STORYBOOK_THEME=dark` voor als het om donker gaat (zie de [README van het designsysteem](packages/design-system/README.md)).
+- Een wijziging in `apps/site/scripts/smoke.js`: de rooktest, na `pnpm build` en met de database, zoals CI dat doet:
+
+  ```sh
+  site=$(mktemp -d)/site
+  pnpm --filter site assemble "$site"
+  pnpm --filter site smoke "$site"
+  ```
+
+- Screenshots: de build waaruit ze komen, `pnpm build` of `pnpm --filter design-system build-storybook`.
+
+Voeg je daarna `main` samen met je branch, draai dan alleen opnieuw wat die merge van je eigen werk kan raken.
+Lees CI één keer met `gh pr checks <nummer>`: na het verslag van de reviewer, of na het openen als er geen reviewer is.
+Herstel wat rood is.
+Draait er nog een job, meld dat dan en stop, zonder te wachten.
+
 Sessies werken naast elkaar op één computer, en de zware controles nemen elk alle kernen.
 Daarom lopen `pnpm build`, `pnpm test:a11y`, `pnpm test:stories` en `pnpm --filter design-system build-storybook` om beurten, over alle worktrees heen.
 Ze nemen eerst een slot (`scripts/heavy-lock.js`) en melden "Waiting for the slot of the heavy checks" als een andere sessie het heeft.
@@ -92,17 +110,6 @@ Werk je in een worktree, dan krijg je een eigen database en eigen poorten, zodat
 Een gewone checkout en CI houden de poorten 3000, 6006, 3123, 3124, 3125 en 2525 en de database `fansite`.
 Wat je zelf in de omgeving zet, wint.
 `pnpm worktree:env` laat zien wat jouw map krijgt, en `pnpm worktree:db:drop` haalt de database van de map weg (zie de [README van het package](packages/db/README.md)).
-Verandert je wijziging de opmaak of de tekst van een pagina, of een regel in het logboek van de site?
-Draai dan na `pnpm build` ook de rooktest, zoals CI dat doet:
-
-```sh
-site=$(mktemp -d)/site
-pnpm --filter site assemble "$site"
-pnpm --filter site smoke "$site"
-```
-
-`pnpm test` draait de rooktest niet, en hij heeft dezelfde database nodig.
-Na een wijziging in het designsysteem draai je ook `pnpm --filter design-system build-storybook`.
 
 CI draait die controles in jobs naast elkaar, zodat een run niet langer duurt dan de langste keten:
 
@@ -125,7 +132,6 @@ CI draait die controles in jobs naast elkaar, zodat een run niet langer duurt da
   De beslissing _CI draait in parallelle jobs, met één afsluitende controle_ in `docs/beslissingen/werkwijze.md` zegt waarom.
 
 Hernoem je een job, dan hoeft alleen de naam van de laatste te blijven kloppen met de regels voor `main`.
-Draai je `pnpm test:a11y` lokaal, dan draait alles in een keer; de verdeling in delen is er alleen voor CI.
 
 CI slaat de rooktest en `pnpm test:a11y` over bij een pull request die alleen `docs/`, `.claude/`, `AGENTS.md`, `CONTRIBUTING.md`, `README.md`, `apps/importer/` of `apps/design-system-mcp/` wijzigt.
 Die controles raken zulke wijzigingen niet, en ze zijn het grootste deel van de machinetijd van een run.
@@ -150,7 +156,6 @@ Elke twijfel draait ook alles: geen pull request, meer dan één, een rode of on
 De deploys naar acceptatie en naar ds.heerenveen.org zijn aparte workflows en veranderen niet.
 
 De regels staan in `scripts/ci-changes.js`.
-De opdrachten hierboven veranderen niet: lokaal draai je alles.
 
 Controleer de titel van de pull request met:
 
@@ -215,9 +220,11 @@ De toon van de site zelf, van fan tot fan, en de schrijfwijze van spelers, datum
 - Een pull request krijgt hoogstens twee reviewrondes.
   Een ronde is een verslag van de reviewer en de verbeteringen die daarop volgen.
   Zegt het tweede verslag nog dat de pull request niet klaar is, dan beslist een mens: samenvoegen zoals hij is, met de hand verbeteren, of de rest in een nieuw issue zetten.
-- De reviewer draait de zware controles niet nog een keer.
-  Hij draait `pnpm lint`, `pnpm typecheck` en de tests van de pakketten die de pull request raakt, en neemt `pnpm build`, `pnpm test:a11y`, `pnpm test:stories` en de build van Storybook over uit CI, vlak voordat hij zijn verslag schrijft.
-  Heeft CI een controle overgeslagen die de wijziging wel kan raken, dan draait hij die zelf.
+- De reviewer draait lint, typecheck, de tests en de zware controles niet zelf als CI dat doet.
+  Hij neemt de uitkomst uit CI over, vlak voordat hij zijn verslag schrijft.
+  Een job die nog draait, staat onder Open punten, en een gefaalde job is blokkerend.
+- Zelf draait de reviewer alleen iets om een vermoede bevinding te bevestigen, met hoogstens de tests van het ene pakket.
+  De reviewer draait ook een controle die CI oversloeg, als de wijziging die wel kan raken.
 - De reviewer schrijft een verslag met drie onderdelen: code en beveiliging, toegankelijkheid, en redactie en bronbeleid.
   Het verslag staat als reactie bij de pull request.
 - Een pull request krijgt geen reviewer als hij alleen Markdown of MDX in `docs/` of `packages/design-system/src/docs/` wijzigt, of verhalen (`*.stories.tsx`) zonder visuele wijziging, zoals een titel, een beschrijving of commentaar.

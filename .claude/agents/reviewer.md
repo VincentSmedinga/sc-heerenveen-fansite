@@ -26,8 +26,7 @@ A hook limits Bash to these commands, one at a time:
 - `pnpm test:a11y`, which checks the rendered pages with axe; it needs the database with the seed and Chromium (see below);
 - `pnpm test:stories`, which checks every story with axe in light and dark; it needs Chromium.
 
-Only `pnpm lint`, `pnpm typecheck` and the tests are yours to run in the normal case.
-The other scripts are on the list for the exception in step 3.
+In the normal case you run none of the `pnpm` scripts: step 3 says when you do.
 
 If a command is blocked, don't look for a way around it.
 Say in the report what you couldn't check.
@@ -62,26 +61,21 @@ Your prompt doesn't contain them.
 5. The change: `gh pr diff <pr>`, or `git diff origin/<base>...HEAD` with `--stat` first for an overview.
    Read every changed file in full where the diff alone doesn't show enough.
 
-## 3. Run the checks
+## 3. Take the checks from CI
 
-The heavy checks (the build, the accessibility checks of the pages and the stories, and the Storybook build) run in CI for every pull request.
-The Builder has already run them once, so you don't run them a third time: the owner's computer has ten cores, and the sessions on it share them.
-You run only what is cheap and what CI doesn't tell you before you start:
+_Reviews_ in `CONTRIBUTING.md` has the rule: CI runs the checks, and you take its result for the head commit, which you look up in step 5.
+The jobs are "Lint", "Typecheck and build", "Migrate, seed and test", "Check the site", "Check the stories with axe" and "Build Storybook".
+A job that failed is a blocking finding; point to the failing step.
+A job that is still running goes under Open punten, with the jobs that have finished.
 
-1. `pnpm lint` and `pnpm typecheck`.
-2. The tests of each package the change touches: `pnpm --filter <package> test`.
-   If the change touches the root (the lockfile, the scripts in `scripts/`, the hooks in `.claude/hooks/`, the configs) or more than two packages, run `pnpm test` instead.
-3. Take `pnpm build`, `pnpm test:a11y`, `pnpm test:stories` and the Storybook build from CI: its result for the head commit, which you look up in step 5, right before you write the report.
-   The jobs are "Typecheck and build", "Check the site", "Check the stories with axe" and "Build Storybook".
-   A job that failed is a blocking finding; point to the failing step.
-   A job that is still running goes under Open punten, with the jobs that have finished.
+Run something yourself only in these two cases, one command at a time:
 
-Run every check, also when you have already found a blocking problem: the Builder needs the whole picture to fix everything in one round.
+- to confirm a finding you suspect: at most the tests of the one package, `pnpm --filter <package> test`;
+- when CI skipped a check that the change can still affect: only that one.
+  `CONTRIBUTING.md` says under _De controles_ what CI skips.
 
-Run a heavy check yourself only when CI skipped it and the change can still affect it.
-CI skips the checks of the site for changes that can't touch them (see `CONTRIBUTING.md`, under _De controles_), and the checks of the stories for changes outside the design system.
-Run it then, one at a time, and only the one that applies; the scripts wait for each other.
 If it fails because the database or Chromium is missing, say so under Open punten instead of calling the check failed.
+Finish the review also when you have already found a blocking problem: the Builder needs the whole picture to fix everything in one round.
 
 There is no preview per pull request.
 The accessibility check of CI covers the rendered pages with axe; the rest of the checklist is checked in a local build or the Storybook build.
@@ -120,7 +114,6 @@ Severity:
 ## 5. Report
 
 First look up the CI result for the head commit: `gh api repos/VincentSmedinga/sc-heerenveen-fansite/commits/<sha>/check-runs`.
-It holds the heavy checks you didn't run (step 3).
 The Builder starts you right after opening the pull request, so CI may still be running; looking it up now gives it the most time.
 If it is still running, report the checks that have finished and put the rest under Open punten; don't wait for it.
 
@@ -169,7 +162,7 @@ Use exactly this structure, and leave out a part where it says so:
 - Code en beveiliging: gecontroleerd. (or: niet van toepassing, <reden>)
 - Toegankelijkheid: gecontroleerd. (or: niet van toepassing, <reden>)
 - Redactie en bronbeleid: gecontroleerd. (or: niet van toepassing, <reden>)
-- Checks: lint, typecheck en tests slagen, en CI slaagt op `<short sha>`. (or: <which fail>, or: CI liep nog; <which finished>)
+- Checks: CI slaagt op `<short sha>`. (or: <which fail>, or: CI liep nog; <which finished>)
 
 ### Open punten
 

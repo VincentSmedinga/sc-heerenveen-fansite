@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from 'react-dom/server'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import FansPage from './page'
 
@@ -9,6 +9,16 @@ const { currentSupporter } = vi.hoisted(() => ({
   ),
 }))
 
+const { readFantestCard, readFjouwerCard, readPrognoseCard, readUitblinkerCard } = vi.hoisted(() => ({
+  readFantestCard: vi.fn(),
+  readFjouwerCard: vi.fn(),
+  readPrognoseCard: vi.fn(),
+  readUitblinkerCard: vi.fn(),
+}))
+
+// What a card says is tested with its reader; here the page shows the cards it gets.
+vi.mock('./read-game-cards', () => ({ readFantestCard, readFjouwerCard, readPrognoseCard }))
+vi.mock('./uitblinker-card', () => ({ readUitblinkerCard }))
 vi.mock('#src/fans/require-supporter', () => ({ currentSupporter }))
 vi.mock('next/navigation', () => ({
   notFound: vi.fn(() => {
@@ -41,18 +51,6 @@ describe('FansPage', () => {
 
     expect(html).not.toContain('Fantest')
     expect(html.match(/komt eraan/g)).toHaveLength(3)
-  })
-
-  it('names Fjouwer with a link only when the game is on', async () => {
-    vi.stubEnv('FANS_ACCOUNTS', 'on')
-    expect(await render()).not.toContain('href="/fans/fjouwer"')
-
-    vi.stubEnv('FANS_VIER', 'on')
-
-    const html = await render()
-
-    expect(html).toContain('<a href="/fans/fjouwer">Naar Fjouwer</a>')
-    expect(html.match(/komt eraan/g)).toHaveLength(2)
   })
 
   it('has the buttons Account maken and Inloggen, to their pages, and the links to the rules and to what we keep', async () => {
@@ -185,3 +183,80 @@ describe('FansPage, after confirming a new account', () => {
 async function render(searchParams: Record<string, string> = {}) {
   return renderToStaticMarkup(await FansPage({ searchParams: Promise.resolve(searchParams) }))
 }
+
+describe('FansPage, with games on', () => {
+  const cardOf = (game: string, heading: string) => ({
+    action: { href: `/fans/${game}`, label: `Naar ${heading}`, type: 'link' },
+    game,
+    heading,
+    lines: [],
+    tag: { text: 'Open', tone: 'open' },
+  })
+
+  beforeEach(() => {
+    for (const name of ['FANS_ACCOUNTS', 'FANS_PROGNOSE', 'FANS_UITBLINKER', 'FANS_VIER', 'FANS_FANTEST']) {
+      vi.stubEnv(name, 'on')
+    }
+
+    readPrognoseCard.mockResolvedValue(cardOf('prognose', 'Prognose'))
+    readUitblinkerCard.mockResolvedValue(cardOf('uitblinker', 'Uitblinker'))
+    readFjouwerCard.mockResolvedValue(cardOf('fjouwer', 'Fjouwer'))
+    readFantestCard.mockResolvedValue(cardOf('fantest', 'Fantest'))
+  })
+
+  afterEach(() => {
+    vi.resetAllMocks()
+    currentSupporter.mockResolvedValue(undefined)
+  })
+
+  const headings = (html: string) => [...html.matchAll(/<h2[^>]*>(.*?)<\/h2>/g)].map(([, text]) => text)
+
+  it('shows the intro, "Doe mee" first and a card for each game in order, in two columns, and no "Wat komt er"', async () => {
+    const html = await render()
+
+    expect(html).toContain(
+      'Voorspel de uitslag, geef de spelers een cijfer, kies de vier die jij opstelt en doe de Fantest.',
+    )
+    expect(headings(html)).toEqual(['Doe mee', 'Prognose', 'Uitblinker', 'Fjouwer', 'Fantest'])
+    expect(html).toContain('hf-card-columns')
+    expect(html).toContain('Alleen je schermnaam is voor anderen te zien.')
+    expect(html).not.toContain('Wat komt er')
+    expect(html).not.toContain('Maak alvast een account')
+    expect(html).toContain('Spelregels van alle spellen')
+    expect(html).toContain('Wat we bewaren als je een account hebt')
+  })
+
+  it('leaves a game that is off out of the intro and the cards, and does not name it', async () => {
+    vi.stubEnv('FANS_VIER', 'off')
+    vi.stubEnv('FANS_UITBLINKER', 'off')
+
+    const html = await render()
+
+    expect(html).toContain('Voorspel de uitslag en doe de Fantest.')
+    expect(headings(html)).toEqual(['Doe mee', 'Prognose', 'Fantest'])
+    expect(readFjouwerCard).not.toHaveBeenCalled()
+    expect(readUitblinkerCard).not.toHaveBeenCalled()
+    expect(html).not.toContain('komt eraan')
+  })
+
+  it('leaves out only the card of a game that could not be read', async () => {
+    readFjouwerCard.mockResolvedValue(undefined)
+
+    expect(headings(await render())).toEqual(['Doe mee', 'Prognose', 'Uitblinker', 'Fantest'])
+  })
+
+  it('shows a supporter the line in place of "Doe mee", and gives the session to the readers', async () => {
+    const supporter = { createdAt: new Date('2026-01-01'), disabledAt: null, id: 5, screenName: 'Tjalle99' }
+
+    currentSupporter.mockResolvedValue(supporter)
+
+    const html = await render()
+
+    expect(html).toContain('Je bent ingelogd als Tjalle99.')
+    expect(headings(html)).toEqual(['Prognose', 'Uitblinker', 'Fjouwer', 'Fantest'])
+
+    for (const read of [readPrognoseCard, readUitblinkerCard, readFjouwerCard, readFantestCard]) {
+      expect(read).toHaveBeenCalledWith(supporter)
+    }
+  })
+})

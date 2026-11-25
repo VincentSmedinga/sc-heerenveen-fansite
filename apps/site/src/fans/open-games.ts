@@ -25,7 +25,7 @@ export type OpenGame =
 export type OpenGameName = (typeof openGameNames)[number]
 
 /** What the site says of the match a game is open for. */
-export type OpenMatch = Pick<PredictionMatch, 'competition' | 'home' | 'opponent' | 'round' | 'season'>
+export type OpenMatch = PredictionMatch
 
 const partOf = {
   fantest: 'fantest',
@@ -36,6 +36,13 @@ const partOf = {
 
 type Database = ReturnType<typeof getDatabase>['db']
 
+/** The moment the quiz of a month closes: 00.00 Dutch time as the next month begins. */
+export function quizClosesAt(year: number, month: number) {
+  const next = month === 12 ? `${year + 1}-01-01` : `${year}-${String(month + 1).padStart(2, '0')}-01`
+
+  return amsterdamToUtc(next, '00:00')
+}
+
 const readers: Record<OpenGameName, (db: Database, now: Date) => Promise<OpenGame | undefined>> = {
   // A quiz runs to the last day of its month, so it closes as the next month begins.
   async fantest(db, now) {
@@ -44,9 +51,8 @@ const readers: Record<OpenGameName, (db: Database, now: Date) => Promise<OpenGam
     }
 
     const { month, year } = currentMonth(now)
-    const next = month === 12 ? `${year + 1}-01-01` : `${year}-${String(month + 1).padStart(2, '0')}-01`
 
-    return { closesAt: amsterdamToUtc(next, '00:00'), game: 'fantest', month }
+    return { closesAt: quizClosesAt(year, month), game: 'fantest', month }
   },
   async fjouwer(db, now) {
     const match = await fjouwerMatch(db, now)
@@ -68,6 +74,13 @@ const readers: Record<OpenGameName, (db: Database, now: Date) => Promise<OpenGam
 }
 
 /**
+ * Whether one game is open at `now`, and until when: the one answer of the site. It throws when
+ * the game can't be read, so the page Fans can leave out the card of that game alone. The
+ * caller checks that the game is switched on.
+ */
+export const readOpenGame = (game: OpenGameName, now = new Date()) => readers[game](getDatabase().db, now)
+
+/**
  * The games of `wanted` that are switched on and open at `now`, in the order of
  * `openGameNames`. A game that can't be read is left out and logged, so the others stay.
  */
@@ -80,7 +93,7 @@ export async function loadOpenGames(
       .filter((game) => wanted.includes(game))
       .map(async (game) => {
         try {
-          return isFansPartOn(partOf[game]) ? await readers[game](getDatabase().db, now) : undefined
+          return isFansPartOn(partOf[game]) ? await readOpenGame(game, now) : undefined
         } catch (error) {
           console.error(`Could not read whether the game ${game} is open: ${reasonOf(error)}`)
 

@@ -169,6 +169,40 @@ export async function fjouwerState(db: Database, supporterId: number, match: Fjo
 }
 
 /**
+ * The surnames of players by their id, also of a player who is no longer in the squad: the four
+ * of a supporter keeps him.
+ */
+export async function fjouwerSurnames(db: Database, ids: readonly number[]): Promise<Map<number, string>> {
+  if (ids.length === 0) {
+    return new Map()
+  }
+
+  const rows = await db
+    .select({
+      familyName: persons.familyName,
+      familyNamePrefix: persons.familyNamePrefix,
+      givenName: persons.givenName,
+      id: players.id,
+      name: players.name,
+    })
+    .from(players)
+    .leftJoin(persons, eq(players.personId, persons.id))
+    .where(inArray(players.id, [...ids]))
+
+  return new Map(
+    rows.map((row) => {
+      const parts = personNameParts({
+        personFamilyName: row.familyName,
+        personFamilyNamePrefix: row.familyNamePrefix,
+        personGivenName: row.givenName,
+      })
+
+      return [row.id, parts?.surname || splitPersonName(row.name).surname]
+    }),
+  )
+}
+
+/**
  * Stores the four of a supporter for the match and replaces an earlier row. It writes only for
  * the match of the card and only before it closes. The checks are the rules (`checkPicks`),
  * and the write checks the deadline once more with the clock of the database for a known
