@@ -2280,7 +2280,7 @@ await withEmptyDatabase((database) =>
     assert.match(html, /<a [^>]*href="\/fans\/uitblinker"[^>]*>Naar de <span class="hf-icon-tail">Uitblinker</)
 
     // The game Fjouwer: a visitor sees the card with the next match and the way in, no list of
-    // players, and no search engine may index it. Fans names it, with a link.
+    // players, and no search engine may index it. Fans has its card, with a link.
     const four = await fetch(`${origin}/fans/fjouwer`)
     const fourHtml = await four.text()
 
@@ -2301,7 +2301,7 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(fourHtml, /Eerdere wedstrijden/)
     assert.equal(four.headers.get('cache-control'), 'no-store')
     assert.equal(four.headers.get('x-robots-tag'), 'noindex, nofollow')
-    assert.match(html, /<a [^>]*href="\/fans\/fjouwer"[^>]*>Naar Fjouwer<\/a>/)
+    assert.match(html, /<a [^>]*href="\/fans\/fjouwer"[^>]*>Naar <span class="hf-icon-tail">Fjouwer</)
 
     // The rules of all games: a card for each game that is on, for everybody.
     const rules = await fetch(`${origin}/fans/spelregels`)
