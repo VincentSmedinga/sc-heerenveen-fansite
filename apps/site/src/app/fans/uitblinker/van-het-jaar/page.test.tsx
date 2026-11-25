@@ -37,7 +37,7 @@ describe('the page Uitblinker van het jaar', () => {
     expect(ratingFigures).not.toHaveBeenCalled()
   })
 
-  it('has one h1, a card for the running season and for the winner that the season rating gives, and the strong card', async () => {
+  it('has one h1, a card for the running season and for the winner that the season rating gives, with the best one in a soft card', async () => {
     vi.stubEnv('FANS_ACCOUNTS', 'on')
     vi.stubEnv('FANS_UITBLINKER', 'on')
     const html = renderToStaticMarkup(await YearWinnersPage())
@@ -47,10 +47,12 @@ describe('the page Uitblinker van het jaar', () => {
     expect(html).toContain('Speler A')
     expect(html.indexOf('Uitblinker 2026/27')).toBeLessThan(html.indexOf('Uitblinker 2000/01'))
     expect(html).not.toContain('<table')
-    expect(html).toContain('Uitblinker van de Uitblinkers')
+    expect(html).toContain('Deze spelers kregen van jullie de hoogste gemiddelde cijfers:')
+    expect(html).toContain('Uitblinker van de uitblinkers')
+    expect(html).not.toContain('Uitblinker van de Uitblinkers')
+    expect(html).not.toContain('hf-card-strong')
+    expect(html.match(/hf-card-soft/g)).toHaveLength(1)
     expect(html).toContain('Tot 2006/07: cijfers van bezoekers van de Fansite.')
-    // On a phone the strong card stands before the cards of the years.
-    expect(html.indexOf('Uitblinker van de Uitblinkers')).toBeLessThan(html.indexOf('Uitblinker 2026/27'))
   })
 
   it('shows nothing but the running season while no season has ratings', async () => {
@@ -61,7 +63,8 @@ describe('the page Uitblinker van het jaar', () => {
 
     expect(html).toContain('Na het seizoen')
     expect(html).not.toContain('Uitblinker 2000/01')
-    expect(html).not.toContain('Uitblinker van de Uitblinkers')
+    expect(html).not.toContain('Uitblinker van de uitblinkers')
+    expect(html).not.toContain('hf-card-soft')
   })
 
   it('is not indexed', () => {

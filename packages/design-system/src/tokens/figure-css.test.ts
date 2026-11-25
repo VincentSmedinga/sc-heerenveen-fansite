@@ -39,7 +39,7 @@ describe('the large figures', () => {
     ['match-penalty-series/match-penalty-series.css', '.hf-match-penalty-total', 'figure-large'],
     ['mark-row/mark-row.css', '.hf-mark-row-mark', 'figure'],
     ['winner-list/winner-list.css', '.hf-winner-list-average', 'figure'],
-    ['winner/winner.css', '.hf-winner-seal', 'figure'],
+    ['winner/winner.css', '.hf-winner-star', 'figure'],
   ])('gives %s %s the size of its step and the weight of a figure', (file, selector, step) => {
     expect(valueOf(`components/${file}`, selector, 'font-size')).toBe(token(`${step}-font-size`))
     expect(valueOf(`components/${file}`, selector, 'font-weight')).toBe(token('figure-font-weight'))

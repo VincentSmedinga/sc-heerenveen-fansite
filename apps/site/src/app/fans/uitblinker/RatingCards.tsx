@@ -48,7 +48,7 @@ import { seasonAddress } from '#src/seasons'
 // that gets what it shows; the form is a client component of its own (RatingForm).
 
 /**
- * The card of a match whose window is closed, for everyone: the seal, the averages and the
+ * The card of a match whose window is closed, for everyone: the star, the averages and the
  * number of supporters. It has nothing for a match that no supporter rated.
  */
 export function ClosedResultCard({ match, now, ratings }: { match: RatingMatch; now: Date; ratings: MatchRatings }) {

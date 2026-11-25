@@ -29,7 +29,7 @@ import { nameOfPlayer } from '#src/report-view'
 
 // The card Uitblinker on the page of a match: for an old match (issue 1467) the ratings that
 // visitors of the old fansite gave, for a new one (issue 1472) what supporters gave, with the
-// Uitblinker of the match in a seal. The card is the same for every visitor: while the window
+// Uitblinker of the match in a star. The card is the same for every visitor: while the window
 // is open it has only the count, and the averages come when it closes.
 
 /** A grade with a decimal comma: `7,8`. */
@@ -45,7 +45,7 @@ export async function loadOldMatchRatings(match: { id: number }): Promise<MatchR
 }
 
 /**
- * The card Uitblinker of an old match: the heading with "Van de fans" beside it, the seal of
+ * The card Uitblinker of an old match: the heading with "Van de fans" beside it, the star of
  * the Uitblinker of the match (not when nobody has enough ratings), the table of the players by
  * average (`orderRatings`), and the source.
  */
@@ -72,7 +72,7 @@ export const supportersText = (count: number, already = false) =>
   `${count === 1 ? '1 fan gaf' : `${count} fans gaven`}${already ? ' al' : ''} cijfers`
 
 /**
- * The card Uitblinker of a new match. Once the window is closed: the seal, the table and the
+ * The card Uitblinker of a new match. Once the window is closed: the star, the table and the
  * number of supporters, and with fewer than five supporters only the number. While it is open:
  * the number, when the result comes, and the way to give the grades.
  */
@@ -106,7 +106,7 @@ export function NewMatchRatingsCard({
 }
 
 /**
- * The seal of the Uitblinker of a match, and under it the table of the players with their
+ * The star of the Uitblinker of a match, and under it the table of the players with their
  * average and the number of ratings, in the order of `ratings`. A player with fewer than
  * `ratingMinimum` ratings has no average. `names` gives the players their name as the report
  * writes it; without it the name stands as it is.
@@ -135,7 +135,7 @@ export function RatingsTable({
         columns={['Speler', { key: true, name: 'Gem' }, { name: 'Cijfers' }]}
         rows={[
           ...players.map((player) => rowOf(player, winner, names)),
-          // The head coach is the last row, after a heavier line, and never has the seal.
+          // The head coach is the last row, after a heavier line, and never has the star.
           ...(coach === undefined
             ? []
             : [

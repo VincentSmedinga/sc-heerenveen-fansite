@@ -4255,6 +4255,7 @@
     De zegel is met CSS getekend en heeft geen plaatje, en het gemiddelde is gewone tekst met "Gemiddeld cijfer" voor een schermlezer.
     De zegel heeft de kleuren van een knop, zodat het cijfer in donker leesbaar blijft: dan is de zegel licht en het cijfer donker.
     Is de ruimte krap, dan staat de tekst onder de zegel, ook weer volgens de breedte van de kaart.
+  - **Later:** zie _De uitblinker staat in een ster met facetten_: het zegel is een ster geworden, met eigen kleuren die in licht en donker gelijk zijn.
 - **Waarom:** tien knoppen zijn sneller dan een keuzelijst, en een schuifbalk geeft geen geheel cijfer en is moeilijk met een toetsenbord.
   Beide onderdelen werken in een gewoon formulier en op een gewone pagina zonder JavaScript, zodat het formulier (#1470) en de wedstrijdpagina (#1467) ze alleen hoeven te gebruiken.
 - **Alternatieven:** een keuzelijst per speler; een schuifbalk; de zegel als plaatje (dan staat het gemiddelde niet als tekst); de knoppen in twee rijen volgens het scherm in plaats van de kaart.
@@ -4625,3 +4626,17 @@
 - **Besluit:** `Rule` is de dunne lijn (`hr`) als component, voor twee onderwerpen onder dezelfde kop (#1660).
 - **Waarom:** de site schrijft geen HTML, en in de kaart van een spel liep het formulier om in te loggen zonder lijn door in de wedstrijd.
 - **Alternatieven:** alleen extra ruimte; een eigen vlak om het formulier.
+
+## De uitblinker staat in een ster met facetten
+
+- **Datum:** 25 november 2026
+- **Besluit:** `Winner` toont het gemiddelde niet meer in een rond zegel, maar in een ster met vijf punten, dezelfde vorm als het watermerk van de Uitblinker (#1667).
+  De ster heeft facetten in twee tinten blauw die naast elkaar liggen, stap 600 en stap 500, en het cijfer in wit met een zachte rand in stap 600.
+  De kleuren zijn in licht en donker gelijk, met de tokens `--hf-colour-background-star`, `--hf-colour-background-star-facet` en `--hf-colour-text-on-star`.
+  Er is één ster: ook de beste van alle seizoenen krijgt geen andere.
+  Het watermerk van de Uitblinker krijgt dezelfde facetten, om en om iets zwakker, op elke kaart van dat spel.
+  Het cijfer haalt 4,5:1 op beide facetten.
+  In geforceerde kleuren blijft het cijfer over.
+- **Waarom:** het watermerk van de Uitblinker is een ster, dus teken en achtergrond horen zo bij elkaar.
+  De projecteigenaar koos na voorbeelden voor de ster met facetten.
+- **Alternatieven:** een rond zegel met punten in twee kleuren, eerst blauw met wit en rood, daarna blauw (gebouwd en vervangen); zilver en goud; een ster met een kleinere ster of een rondje erin.

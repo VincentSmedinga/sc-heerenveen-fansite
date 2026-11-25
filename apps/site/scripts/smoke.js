@@ -2251,6 +2251,7 @@ await withEmptyDatabase((database) =>
     assert.equal(yearWinners.status, 200, '/fans/uitblinker/van-het-jaar must be there with Uitblinker on')
     assert.match(yearWinnersHtml, /<h1[^>]*>Uitblinker van het jaar<\/h1>/)
     assert.match(yearWinnersHtml, /<h2[^>]*>Uitblinker \d{4}\/\d{2}<\/h2>/)
+    assert.match(yearWinnersHtml, /Deze spelers kregen van jullie de hoogste gemiddelde cijfers:/)
     assert.match(yearWinnersHtml, /Na het seizoen/)
     assert.doesNotMatch(yearWinnersHtml, /<table/)
     assert.equal(yearWinners.headers.get('x-robots-tag'), 'noindex, nofollow')

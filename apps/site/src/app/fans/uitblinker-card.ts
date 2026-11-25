@@ -71,7 +71,7 @@ export async function readUitblinkerCard(
               ...(latest.ratings.winner === undefined
                 ? {}
                 : {
-                    seal: {
+                    star: {
                       average: gradeText(latest.ratings.winner.average),
                       line: resultLine(latest.match),
                       name: latest.ratings.winner.name,

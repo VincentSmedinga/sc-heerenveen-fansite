@@ -8042,6 +8042,7 @@
   Het aantal cijfers laat zien hoeveel fans het cijfer dragen.
   De gegevens, de onderdelen en de stijl bestonden al.
 - **Alternatieven:** de meeste cijfers als maat (beloont spelen en bekendheid, en de drie oudste seizoenen hebben geen aantal); bij een gelijke stand meer cijfers laten beslissen; de tabel naast de kaarten laten staan (dubbele informatie); de sterke kaart op een telefoon onderaan zetten.
+- **Later:** zie _De Uitblinker van de uitblinkers valt op in de kaart van zijn seizoen_: de aparte, sterke kaart is weg, en "Seizoencijfer van de Fansite" heet "Gemiddelde van alle cijfers".
 
 ## De kaart Per seizoen toont ook de gele en rode kaarten
 
@@ -8333,3 +8334,16 @@
 - **Waarom:** de andere pagina's wisselen zo ook.
   Links werken zonder JavaScript, dus een aparte versie is niet nodig, en een klik telt niet als nieuw bezoek.
 - **Alternatieven:** de eigen schakelaar houden.
+
+## De Uitblinker van de uitblinkers valt op in de kaart van zijn seizoen
+
+- **Datum:** 25 november 2026
+- **Besluit:** de Uitblinker van de uitblinkers krijgt geen eigen kaart meer (#1667).
+  De kaart van zijn seizoen is zacht en houdt haar kop, en de winnaar heet daar "Uitblinker van de uitblinkers".
+  Zijn ster is dezelfde als de andere.
+  Staan twee spelers gelijk op het hoogste gemiddelde, op twee decimalen, dan heet elk van hen zo, ook in twee seizoenen.
+  De kaarten staan over de hele breedte in twee kolommen, en de intro is "Deze spelers kregen van jullie de hoogste gemiddelde cijfers:".
+  Onder een winnaar zonder aantal cijfers staat "Gemiddelde van alle cijfers" in plaats van "Seizoencijfer van de Fansite"; de bronregel onder de kaarten noemt de Fansite nog.
+- **Waarom:** de losse kaart herhaalde een speler die al op de pagina stond.
+  De zachte kaart en het label zeggen genoeg; een ander teken vond de projecteigenaar bij nader inzien niet nodig, anders dan het issue vroeg.
+- **Alternatieven:** de losse kaart houden; de beste bovenaan in een brede kaart; een groter zegel in een andere kleur voor de beste (zie ook _De uitblinker staat in een ster met facetten_ in `designsysteem.md`).

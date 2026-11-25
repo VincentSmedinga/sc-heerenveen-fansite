@@ -7,17 +7,17 @@ import { withoutIcons } from './without-icons'
 const render = (uitblinker: Parameters<typeof SeasonUitblinkerCard>[0]['uitblinker']) =>
   withoutIcons(renderToStaticMarkup(<SeasonUitblinkerCard uitblinker={uitblinker} />))
 
-const seal = { average: '7,8', label: 'Uitblinker vorige wedstrijd', line: 'Thuis tegen Ajax, 3–1', name: 'Speler A' }
+const star = { average: '7,8', label: 'Uitblinker vorige wedstrijd', line: 'Thuis tegen Ajax, 3–1', name: 'Speler A' }
 
 describe('the card Uitblinker on Spelers', () => {
   it('shows a season that is over with each winner, the source and the link to the Uitblinkers of the year', () => {
     const html = render({
       kind: 'year',
-      seals: [
-        { ...seal, label: 'Uitblinker van het jaar' },
-        { ...seal, label: 'Uitblinker van het jaar', name: 'Speler B' },
-      ],
       source: 'Tot 2006/07: cijfers van bezoekers van de Fansite.',
+      stars: [
+        { ...star, label: 'Uitblinker van het jaar' },
+        { ...star, label: 'Uitblinker van het jaar', name: 'Speler B' },
+      ],
     })
 
     expect(html).toMatch(/<h2[^>]*>Uitblinker<\/h2>/)
@@ -31,7 +31,7 @@ describe('the card Uitblinker on Spelers', () => {
     const html = render({
       kind: 'last-match',
       openMatch: 'sc Heerenveen – FC Twente',
-      result: { seal, supporters: '31 fans gaven cijfers.' },
+      result: { star, supporters: '31 fans gaven cijfers.' },
     })
 
     expect(html).toContain('Speler A')
@@ -42,7 +42,7 @@ describe('the card Uitblinker on Spelers', () => {
   })
 
   it('has no link while the window is closed', () => {
-    expect(render({ kind: 'last-match', result: { seal, supporters: '31 fans gaven cijfers.' } })).not.toContain('<a ')
+    expect(render({ kind: 'last-match', result: { star, supporters: '31 fans gaven cijfers.' } })).not.toContain('<a ')
   })
 
   it('has only a short sentence and the link while the window is open and there is no result', () => {

@@ -151,7 +151,7 @@ describe('reading the card of the Uitblinker for Fans', () => {
   it('adds the Uitblinker of the last match with a result, the same for a visitor and a supporter', async () => {
     const expected = {
       count: '31 fans gaven cijfers.',
-      seal: { average: '7,8', line: 'Thuis tegen Sparta Rotterdam, 3–1', name: 'Dylan Vente' },
+      star: { average: '7,8', line: 'Thuis tegen Sparta Rotterdam, 3–1', name: 'Dylan Vente' },
     }
 
     expect((await readUitblinkerCard(undefined, now))?.winner).toEqual(expected)
@@ -165,13 +165,13 @@ describe('reading the card of the Uitblinker for Fans', () => {
     expect(findOwnRatings).not.toHaveBeenCalled()
   })
 
-  it('has no result, and so no seal, while no window has closed', async () => {
+  it('has no result, and so no star, while no window has closed', async () => {
     latestResult.mockResolvedValue(undefined)
 
     expect((await readUitblinkerCard(undefined, now))?.winner).toBeUndefined()
   })
 
-  it('has the number but no seal when nobody had five grades', async () => {
+  it('has the number but no star when nobody had five grades', async () => {
     latestResult.mockResolvedValue({ ...latest, ratings: { players: [], supporters: 3 } })
 
     expect((await readUitblinkerCard(undefined, now))?.winner).toEqual({ count: '3 fans gaven cijfers.' })
