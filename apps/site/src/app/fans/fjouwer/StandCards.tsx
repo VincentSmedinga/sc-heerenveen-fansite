@@ -20,7 +20,7 @@ export const standCaption = (matchCount: number) =>
   `Stand na ${matchCount === 1 ? '1 wedstrijd' : `${matchCount} wedstrijden`}`
 
 /**
- * The strong card "Stand" in the narrow column of the page of the game: the top five of the
+ * The card "Stand" in the narrow column of the page of the game: the top five of the
  * season with their points, the row of the fan marked, and the link to the whole ranking.
  */
 export function StandCard({

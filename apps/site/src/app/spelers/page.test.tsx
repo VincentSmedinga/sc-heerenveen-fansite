@@ -172,7 +172,7 @@ describe('the page /spelers', () => {
     expect(html).toContain('kort-topscorers')
   })
 
-  it('puts the card Uitblinker at the top of the sidebar, soft and with its watermark', async () => {
+  it('puts the card Uitblinker at the top of the sidebar, with its watermark', async () => {
     vi.mocked(readSeasonUitblinker).mockResolvedValue({
       kind: 'last-match',
       openMatch: 'sc Heerenveen – FC Twente',
@@ -182,7 +182,7 @@ describe('the page /spelers', () => {
     const sidebar = html.slice(html.indexOf('style="grid-area:side"'), html.indexOf('</main>'))
 
     expect(sidebar).toMatch(
-      /^[^>]*>\s*<section class="hf-card hf-card-soft hf-card-game hf-card-game-uitblinker" aria-labelledby="uitblinker">/u,
+      /^[^>]*>\s*<section class="hf-card hf-card-game hf-card-game-uitblinker" aria-labelledby="uitblinker">/u,
     )
     expect(sidebar.indexOf('id="uitblinker"')).toBeLessThan(sidebar.indexOf('kort-topscorers'))
     expect(readSeasonUitblinker).toHaveBeenCalledWith('2026/27')

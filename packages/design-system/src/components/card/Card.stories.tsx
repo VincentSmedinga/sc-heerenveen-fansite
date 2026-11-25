@@ -32,7 +32,8 @@ const meta = preview.meta({
     },
     game: {
       control: 'select',
-      description: 'Het spel waar de kaart bij hoort. De kaart krijgt dan een groot, zacht watermerk van dat spel.',
+      description:
+        'Het spel waar de kaart bij hoort. De kaart krijgt dan een groot, zacht watermerk en koppen in de kleur van dat spel.',
       options: [undefined, ...cardGames],
       table: union(cardGames),
     },
@@ -58,6 +59,7 @@ const meta = preview.meta({
           'Op een zoekpagina is wat filters of een zoekveld bevat warm, en zijn de andere kaarten wit, zacht of sterk.',
           'Buurkaarten mogen dezelfde kleur hebben, en kleur is nooit het enige teken: in donker zijn zacht en wit gelijk, en warm en sterk ook.',
           'Een kaart van een spel (Prognose, Uitblinker, Fjouwer of Fantest) krijgt met `game` een groot, zacht watermerk van dat spel in de rechteronderhoek; kies het alleen voor kaarten die bij een spel horen, en niet voor kaarten voor een account, een uitnodiging of een vraag van de Fantest.',
+          'Elk spel heeft een eigen kleur voor het watermerk en de koppen: Prognose rood, Uitblinker paars, Fjouwer groen en Fantest goudgeel. Een kaart van een spel is wit; geef haar alleen het zachte vlak als ze tussen de andere kaarten van haar spel moet opvallen. De naam, de tekening en de linktekst zeggen ook zonder kleur welk spel het is.',
           'Met `shareable` krijgt de kaart een knop die er een afbeelding van maakt, met het logo, het adres van de site, de datum en de bron; gebruik hem alleen voor cijfers en feiten, nooit voor het werk van journalisten.',
         ].join('\n'),
       },
@@ -336,26 +338,18 @@ const games: { game: CardGame; label: string }[] = [
   { game: 'fantest', label: 'Fantest' },
 ]
 
-const gameSurfaces: { label: string; surface: CardSurface }[] = [
-  { label: 'wit', surface: 'default' },
-  { label: 'zacht', surface: 'soft' },
-  { label: 'sterk', surface: 'strong' },
-]
-
-// A game card on each of the three surfaces with content that runs over the drawing, and one
-// with only a heading, where the drawing shows in full.
+// A game card with content that runs over the drawing, and one with only a heading, where the
+// drawing shows in full.
 const renderGame = ({ game, label }: { game: CardGame; label: string }) => (
   <Page.Body>
     <Page.Main>
-      {gameSurfaces.map(({ label: surfaceLabel, surface }) => (
-        <Card aria-labelledby={`${game}-${surface}`} game={game} key={surface} surface={surface}>
-          <Heading appearance={3} id={`${game}-${surface}`} level={2}>
-            {label}, {surfaceLabel} vlak
-          </Heading>
-          <Text>De tekst staat boven het watermerk en blijft goed te lezen.</Text>
-          {newsItems}
-        </Card>
-      ))}
+      <Card aria-labelledby={`${game}-card`} game={game}>
+        <Heading appearance={3} id={`${game}-card`} level={2}>
+          {label}
+        </Heading>
+        <Text>De tekst staat boven het watermerk en blijft goed te lezen.</Text>
+        {newsItems}
+      </Card>
       <Card aria-labelledby={`${game}-short`} game={game}>
         <Heading appearance={3} id={`${game}-short`} level={2}>
           {label}, zonder inhoud eronder
@@ -391,26 +385,15 @@ export const WatermarksDark = meta.story({
   render: () => (
     <Page.Body>
       <Page.Main>
-        {games.map(({ game, label }, index) => (
-          <Card
-            aria-labelledby={`dark-${game}`}
-            game={game}
-            key={game}
-            surface={gameSurfaces[index % gameSurfaces.length]?.surface ?? 'default'}
-          >
+        {games.map(({ game, label }) => (
+          <Card aria-labelledby={`dark-${game}`} game={game} key={game}>
             <Heading appearance={3} id={`dark-${game}`} level={2}>
               {label}
             </Heading>
-            <Text>In donker is het watermerk een stap lichter dan de kaart.</Text>
+            <Text>In donker zijn de koppen licht en is het watermerk donker, in de kleur van het spel.</Text>
             {newsItems}
           </Card>
         ))}
-        <Card aria-labelledby="dark-strong" game="uitblinker" surface="strong">
-          <Heading appearance={3} id="dark-strong" level={2}>
-            Uitblinker, sterk vlak
-          </Heading>
-          <Text>De tekst blijft goed te lezen.</Text>
-        </Card>
       </Page.Main>
     </Page.Body>
   ),

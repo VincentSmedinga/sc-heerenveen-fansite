@@ -123,10 +123,10 @@ export function rankingRows<Row extends StandRow>({
   ]
 }
 
-/** The soft card "Punten": the scoring of the game, as the game gives it. */
+/** The card "Punten": the scoring of the game, as the game gives it. */
 export function ScoringCard({ children, game }: { children: ReactNode; game: CardGame }) {
   return (
-    <Card aria-labelledby="punten-telling" game={game} surface="soft">
+    <Card aria-labelledby="punten-telling" game={game}>
       <Heading id="punten-telling" level={2}>
         Punten
       </Heading>
@@ -136,7 +136,7 @@ export function ScoringCard({ children, game }: { children: ReactNode; game: Car
 }
 
 /**
- * The strong card "Stand" in the narrow column of the page of a game: the top of the season
+ * The card "Stand" in the narrow column of the page of a game: the top of the season
  * with the points, or one line when there is no row to show, and the link to the whole ranking.
  */
 export function StandCard({
@@ -151,7 +151,7 @@ export function StandCard({
   season: string
 }) {
   return (
-    <Card aria-labelledby="stand-kop" game={game} surface="strong">
+    <Card aria-labelledby="stand-kop" game={game}>
       <Heading id="stand-kop" level={2}>
         Stand
       </Heading>

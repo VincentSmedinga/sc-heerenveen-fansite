@@ -1837,6 +1837,7 @@
 - **Later:** zie _Op Spelers is de ranglijst witte inhoud, en de bijzondere doelpunten staan in de zijkolom_ (1 november 2026): op de pagina Spelers is de ranglijst Doelpuntenmakers de hoofdinhoud en dus wit (regel 1 in plaats van regel 4); op Statistieken blijft de top 5 zacht.
 - **Later:** zie _Tegenstanders heeft een zijkolom met de kaart Gemiddeld resultaat, en "Alle tegenstanders" is wit_ (4 november 2026) in `site.md`: op de pagina Tegenstanders is de lijst met alle tegenstanders de hoofdinhoud en dus wit (regel 1); de top 10 in de zijkolom is zacht (regel 4).
 - **Later:** zie _De homepage kiest zijn kaartvlakken op soort inhoud, en dit geldt alleen voor de homepage_ (9 november 2026) in `site.md`: op de homepage zijn `ArticleCard` warm en Wedstrijden en Stand zacht, en de blokken zijn niet meer allemaal wit; `ArticleCard` is niet meer zacht.
+- **Later:** een kaart van een spel (`game`) volgt deze regels niet meer: ze is altijd wit of doorzichtig (zie _Een kaart van een spel is wit, met het watermerk en de kop in de kleur van het spel_, 25 november 2026, #1648).
 
 ## De knop om een kaart als afbeelding op te slaan toont een camera, en is in rust rustiger
 
@@ -4175,6 +4176,8 @@
   Een masker laat het icoon de kleur van het vlak volgen, in licht en in donker, zonder een tekening per thema.
 - **Alternatieven:** een watermerk op elke kaart; een illustratie naast de kop; een `<svg>` als kind van de kaart (dat verandert de opbouw van de kaart met een knop voor een afbeelding, en moet apart verborgen worden voor hulptechnologie).
 - **Later:** op 25 november 2026 vervangen kleine kaarten per spel de kaart Fans op de voorpagina, en die krijgen het watermerk wel, want elk is de kaart van een spel (zie _Elk open spel heeft een kleine kaart op de voorpagina, onder het forum_ in `site.md`, #1645).
+- **Later:** zie _Een kaart van een spel is wit, met het watermerk en de kop in de kleur van het spel_ (25 november 2026, #1648).
+  Het watermerk is 60 procent van de breedte, heeft de kleur van het spel in plaats van een tint van het vlak, en de Fantest heeft een nieuwe tekening.
 
 ## De code uit de mail is één veld dat als zes vakjes is getekend
 
@@ -4640,3 +4643,31 @@
 - **Waarom:** het watermerk van de Uitblinker is een ster, dus teken en achtergrond horen zo bij elkaar.
   De projecteigenaar koos na voorbeelden voor de ster met facetten.
 - **Alternatieven:** een rond zegel met punten in twee kleuren, eerst blauw met wit en rood, daarna blauw (gebouwd en vervangen); zilver en goud; een ster met een kleinere ster of een rondje erin.
+
+## Elk spel van Fans heeft een eigen zachte kleur
+
+- **Datum:** 25 november 2026
+- **Besluit:** elk spel van Fans heeft een eigen zachte kleur: Prognose rood, Uitblinker paars, Fjouwer groen en Fantest goudgeel (#1648).
+  De kleuren zijn vier reeksen met de stappen 50, 200, 700 en 800, in OKLCH even licht als die van de blauwe reeks.
+- **Waarom:** een spel is zo in één oogopslag te herkennen.
+  Rood is een clubkleur.
+- **Alternatieven:** alle spellen zacht blauw laten; oranje voor de Prognose (lijkt te veel op goud en op de tag "Nog te doen"); gewoon goud voor de Fantest (gelijk aan het warme vlak).
+
+## Een kaart van een spel is wit, met het watermerk en de kop in de kleur van het spel
+
+- **Datum:** 25 november 2026
+- **Besluit:** een kaart van een spel is wit; het watermerk en de kop hebben de kleur van het spel (#1648).
+  - Het watermerk heeft in licht de stap 50 en in donker de stap 800, en is 60 procent van de breedte van de kaart.
+  - Alle koppen van de kaart (`h2` tot en met `h5`) hebben in licht de stap 700 en in donker de stap 200.
+    Alle andere tekst houdt zijn gewone kleur.
+  - Het watermerk van de Fantest is een lijst van vier vakjes met elk een lijn ernaast, het derde aangevinkt.
+  - Alleen een kaart met `game` is een kaart van een spel.
+    Op de pagina's van de spellen houden de kaarten zonder `game` hun blauwe vlak: "Eerdere winnaars" en "Zo werkt het" op Uitblinker, en de kaarten met een score of uitslag op Fantest.
+    Ze krijgen geen watermerk en geen gekleurde kop.
+  - Eén kaart van een spel houdt het zachte vlak: de kaart van het beste seizoen op Uitblinker van het jaar (#1667), zodat ze opvalt.
+    Ze heeft wel het watermerk en de koppen in de kleur van het spel.
+    `Card` neemt daarom het vlak dat de pagina kiest.
+    Een doorzichtige kaart heeft geen watermerk en gewone koppen.
+- **Waarom:** de gekleurde vlakken maakten de site te kinderlijk, en zo herken je een spel toch aan de kleur.
+  De naam, de tekening en de linktekst zeggen ook zonder kleur welk spel het is.
+- **Alternatieven:** gekleurde vlakken; witte kaarten met een watermerk in de stap 100 (meer kleur in het watermerk); alleen de eerste kop kleuren (een kaart met tussenkoppen heeft dan twee kleuren koppen); `Card` bij `game` elk ander vlak laten negeren (dan kan geen kaart van een spel opvallen); ook de kaart van het beste seizoen wit (dan markeert alleen het label haar).

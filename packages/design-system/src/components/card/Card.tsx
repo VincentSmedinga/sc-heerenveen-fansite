@@ -31,9 +31,11 @@ export type CardProps = ComponentPropsWithoutRef<'section'> & {
   /**
    * The game this card belongs to. The card then carries a large, very light drawing of
    * that game in its bottom right corner, cut off by the edges: a crystal ball for `prognose`,
-   * a star for `uitblinker`, a tactics board for `fjouwer` and answer tiles for `fantest`.
-   * It is only decoration and sits under the content. A card that doesn't belong to a game
-   * leaves it out and is as it was.
+   * a star for `uitblinker`, a tactics board for `fjouwer` and a list of checkboxes for
+   * `fantest`. The drawing and the headings have the colour of the game. The drawing is only
+   * decoration and sits under the content. A game card is on the white surface; a page gives it
+   * another surface only to make one card stand out among the others of its game. A card that
+   * doesn't belong to a game leaves it out and is as it was.
    */
   game?: CardGame
   /**

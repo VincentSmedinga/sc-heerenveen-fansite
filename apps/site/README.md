@@ -512,7 +512,7 @@ De spelers komen uit `listSeasonPlayers` in `@fansite/db/queries`, in de volgord
 De werkbalk van `/spelers` heeft alleen de seizoenskiezer, zonder keuze van competitie, en `/spelers` leest `?competitie=` niet.
 Boven de selectie, in de hoofdkolom, staat de witte kaart "In het kort" (`SquadSummaryCard` in `src/SquadSummaryCard.tsx`, de cijfers uit `getSquadSummary` in `src/squad-summary.ts`): het aantal spelers van de kaart Selectie, het aantal landen en, alleen in het lopende seizoen, de gemiddelde, jongste en oudste leeftijd (`ageOf`, alleen bij minstens drie kwart van de spelers).
 Mist er iets, dan staat er onder de regels "X van de Y spelers" (zie `DataLine`); kent de pagina de selectie niet, dan is er geen kaart, en een geboortedatum verlaat de server niet.
-De zijkolom begint met de zachte kaart "Uitblinker" met het watermerk van het spel (`SeasonUitblinkerCard`, wat erop staat leest `readSeasonUitblinker` in `src/fans/season-uitblinker.ts`, #1647).
+De zijkolom begint met de kaart "Uitblinker", wit met het watermerk en de kop in de kleur van het spel (`SeasonUitblinkerCard`, wat erop staat leest `readSeasonUitblinker` in `src/fans/season-uitblinker.ts`, #1647).
 Een voorbij seizoen toont de Uitblinker van het jaar, met de bronregel als het cijfer van de Fansite komt, en de link "Uitblinker van het jaar".
 Het lopende seizoen toont de Uitblinker van de laatste wedstrijd met een uitslag, met het aantal fans, en zolang het venster open is de link "Geef cijfers".
 Zonder uitblinker en zonder open venster, met de Uitblinker uit of bij een fout is er geen kaart.

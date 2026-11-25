@@ -54,7 +54,7 @@ describe('the card Stand', () => {
     expect(html).not.toContain('fan07<')
     expect(html).toContain('fan30')
     expect(html).toContain('href="/fans/fjouwer/stand"')
-    expect(html).toContain('hf-card-strong')
+    expect(html).not.toMatch(/hf-card-(soft|strong|warm)/)
   })
 
   it('says so when the season has no ranking yet', () => {

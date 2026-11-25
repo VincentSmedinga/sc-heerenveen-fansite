@@ -25,15 +25,33 @@ describe('Card', () => {
   })
 
   it.each(cardGames)('carries the watermark of %s when the card belongs to that game', (game) => {
+    const { container } = render(<Card game={game}>Inhoud</Card>)
+
+    expect(container.firstElementChild?.className).toBe(`hf-card hf-card-game hf-card-game-${game}`)
+    expect(container.firstElementChild?.hasAttribute('game')).toBe(false)
+    expect(container.firstElementChild?.textContent).toBe('Inhoud')
+  })
+
+  it('keeps the soft surface of a game card that has to stand out', () => {
     const { container } = render(
-      <Card game={game} surface="soft">
+      <Card game="uitblinker" surface="soft">
         Inhoud
       </Card>,
     )
 
-    expect(container.firstElementChild?.className).toBe(`hf-card hf-card-soft hf-card-game hf-card-game-${game}`)
-    expect(container.firstElementChild?.hasAttribute('game')).toBe(false)
-    expect(container.firstElementChild?.textContent).toBe('Inhoud')
+    expect(container.firstElementChild?.className).toBe('hf-card hf-card-soft hf-card-game hf-card-game-uitblinker')
+  })
+
+  it('keeps a transparent game card transparent', () => {
+    const { container } = render(
+      <Card game="prognose" surface="transparent">
+        Inhoud
+      </Card>,
+    )
+
+    expect(container.firstElementChild?.className).toBe(
+      'hf-card hf-card-transparent hf-card-game hf-card-game-prognose',
+    )
   })
 
   it('has no watermark without a game, and adds nothing to the content for it', () => {

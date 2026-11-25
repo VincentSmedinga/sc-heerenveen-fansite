@@ -7,13 +7,13 @@ import { ratingPath } from './fans/rating'
 
 /**
  * The card "Uitblinker" at the top of the sidebar of the page Spelers (issue 1647): the star of
- * the season, soft and with the watermark of the game. The running season shows the last match
+ * the season, in the colour of the game. The running season shows the last match
  * with a result and, while the window is open, the way to give grades, named by the match. A
  * season that is over shows its Uitblinker of the year, with both on an equal rating.
  */
 export function SeasonUitblinkerCard({ uitblinker }: { uitblinker: SeasonUitblinker }) {
   return (
-    <Card aria-labelledby="uitblinker" game="uitblinker" surface="soft">
+    <Card aria-labelledby="uitblinker" game="uitblinker">
       <Heading id="uitblinker" level={2}>
         Uitblinker
       </Heading>

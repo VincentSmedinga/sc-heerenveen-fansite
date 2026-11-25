@@ -24,7 +24,7 @@ describe('OpenGameCards', () => {
       'Uitblinker',
     ])
     expect(screen.getByRole('region', { name: 'Uitblinker' }).className).toContain('hf-card-game-uitblinker')
-    expect(screen.getByRole('region', { name: 'Prognose' }).className).toContain('hf-card-soft')
+    expect(screen.getByRole('region', { name: 'Prognose' }).className).not.toContain('hf-card-soft')
   })
 
   it('has a link that is named by what it is about, and no tag', () => {
