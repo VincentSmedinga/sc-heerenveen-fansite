@@ -363,7 +363,7 @@ describe('the result of a closed window', () => {
   })
 })
 
-describe('the card Uitblinkers of the season', () => {
+describe('the card Eerdere winnaars', () => {
   const winners = [
     {
       average: 7.8,
@@ -375,24 +375,48 @@ describe('the card Uitblinkers of the season', () => {
       opponent: 'Sparta Rotterdam',
     },
   ]
+  const closed: RatingWindow = { ...base, coach: null, players, state: 'closed' }
+  const states: [string, RatingWindow][] = [
+    ['open', open],
+    ['waiting', { ...base, state: 'waiting' }],
+    ['closed', closed],
+    ['without a match', { state: 'none' }],
+  ]
 
-  it('stands in the narrow column before "Zo werkt het", for everyone', async () => {
-    seasonWinners.mockResolvedValue(winners)
+  it.each(states)('stands before "Zo werkt het" with the link to the year, for everyone: %s', async (_name, window) => {
+    findRatingWindow.mockResolvedValue(window)
+
+    for (const visitor of [undefined, supporter]) {
+      currentSupporter.mockResolvedValue(visitor)
+
+      for (const list of [[], winners]) {
+        seasonWinners.mockResolvedValue(list)
+
+        const html = await render()
+
+        expect(html).toMatch(/<h2[^>]*>Eerdere winnaars<\/h2>/)
+        expect(html.indexOf('Eerdere winnaars')).toBeLessThan(html.indexOf('Zo werkt het'))
+        expect(html).toContain('href="/fans/uitblinker/van-het-jaar"')
+        expect(html.includes('Dylan Vente')).toBe(list.length > 0)
+        expect(html.includes('Dit seizoen is er nog geen Uitblinker.')).toBe(list.length === 0)
+      }
+    }
+  })
+
+  it('reads the season of the match, and the running season without a match', async () => {
+    await render()
+
+    expect(seasonWinners).toHaveBeenLastCalledWith('2026/27')
+
+    vi.useFakeTimers({ now: new Date('2027-09-01T12:00:00Z'), toFake: ['Date'] })
+    findRatingWindow.mockResolvedValue({ state: 'none' })
 
     const html = await render()
 
-    expect(html).toMatch(/<h2[^>]*>Uitblinkers 2026\/27<\/h2>/)
-    expect(html.indexOf('Uitblinkers 2026/27')).toBeLessThan(html.indexOf('Zo werkt het'))
-    expect(seasonWinners).toHaveBeenCalledWith('2026/27')
-  })
+    expect(seasonWinners).toHaveBeenLastCalledWith('2027/28')
+    expect(html).toContain('href="/wedstrijden"')
 
-  it('is not there for a season without an Uitblinker, or before any match was played', async () => {
-    expect(await render()).not.toContain('Uitblinkers 2026/27')
-
-    findRatingWindow.mockResolvedValue({ state: 'none' })
-
-    expect(await render()).not.toContain('Uitblinkers')
-    expect(seasonWinners).not.toHaveBeenCalledWith(undefined)
+    vi.useRealTimers()
   })
 
   it('is the same for a supporter and a visitor', async () => {

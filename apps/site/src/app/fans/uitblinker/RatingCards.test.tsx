@@ -6,12 +6,12 @@ import type { RatingMatch, RatingPlayer } from '#src/fans/rating'
 
 import {
   ClosedResultCard,
+  EarlierWinnersCard,
   HowItWorksCard,
   JoinCard,
   NextMatchCard,
   OpenCard,
   SavedView,
-  SeasonWinnersCard,
   WaitingCard,
 } from './RatingCards'
 
@@ -298,7 +298,7 @@ describe('the result of a closed window', () => {
   })
 })
 
-describe('the card Uitblinkers of the season', () => {
+describe('the card Eerdere winnaars', () => {
   const winners: SeasonWinner[] = [
     {
       average: 7.8,
@@ -312,11 +312,12 @@ describe('the card Uitblinkers of the season', () => {
     { average: 7.4, goalsAgainst: 2, goalsFor: 2, home: false, matchId: 1, name: 'Andries Noppert', opponent: 'Ajax' },
   ]
 
-  it('is a soft card with a name, an average and the match for each Uitblinker, and the link to the matches', () => {
-    const html = renderToStaticMarkup(<SeasonWinnersCard season="2026/27" winners={winners} />)
+  it('is a strong card with a name, an average and the match for each Uitblinker, and both links', () => {
+    const html = renderToStaticMarkup(<EarlierWinnersCard season="2026/27" winners={winners} />)
 
-    expect(html).toContain('hf-card-soft')
-    expect(html).toMatch(/<h2[^>]*>Uitblinkers 2026\/27<\/h2>/)
+    expect(html).toContain('hf-card-strong')
+    expect(html).toMatch(/<h2[^>]*>Eerdere winnaars<\/h2>/)
+    expect(html).not.toContain('nog geen Uitblinker')
     expect(html).toContain('Dylan Vente')
     expect(html).toContain('7,8')
     expect(html).toContain('Thuis tegen Sparta Rotterdam, 3–1')
@@ -328,8 +329,14 @@ describe('the card Uitblinkers of the season', () => {
     expect(html.indexOf('Dylan Vente')).toBeLessThan(html.indexOf('Andries Noppert'))
   })
 
-  it('is not there for a season without an Uitblinker', () => {
-    expect(renderToStaticMarkup(<SeasonWinnersCard season="2026/27" winners={[]} />)).toBe('')
+  it('says that the season has no Uitblinker yet instead of the list, and keeps both links', () => {
+    const html = renderToStaticMarkup(<EarlierWinnersCard season="2026/27" winners={[]} />)
+
+    expect(html).toMatch(/<h2[^>]*>Eerdere winnaars<\/h2>/)
+    expect(html).toContain('Dit seizoen is er nog geen Uitblinker.')
+    expect(html).not.toContain('hf-winner-list')
+    expect(html).toContain('>Alle <span class="hf-icon-tail">wedstrijden<svg')
+    expect(html).toContain('href="/fans/uitblinker/van-het-jaar"')
   })
 })
 

@@ -1584,6 +1584,8 @@ De pagina komt nooit in een cache.
 `/fans/uitblinker` (`app/fans/uitblinker`) laat een fan de spelers en de trainer van de laatste wedstrijd een cijfer van 1 tot 10 geven.
 De regels van het venster staan op één plek, `packages/db/src/rating-window.ts`: welke wedstrijd, wie in de lijst staat (minstens 30 minuten volgens het verslag, `ratingMinimumMinutes`), wanneer het venster sluit en het opslaan, dat het sluitmoment in de `INSERT` nog eens met de klok van de database controleert.
 De pagina en de actie roepen alleen `src/fans/rating.ts` aan, en het formulier (`RatingForm.tsx`) is een gewone `POST` die zonder JavaScript werkt.
+Bovenaan de zijkolom staat altijd de kaart "Eerdere winnaars" (`EarlierWinnersCard`), met de uitblinker van elke wedstrijd van het seizoen en de link "Uitblinker van het jaar" (#1661).
+Zonder wedstrijd om cijfers over te geven gaat de kaart over het lopende seizoen.
 De cijfers staan in `player_ratings`, per fan en verschijning in het verslag.
 De hoofdtrainer van de wedstrijd (`findRatingCoach`, uit `staff`) krijgt als laatste groep ook een cijfer, in `coach_ratings`, en alleen als één persoon de dag zeker had.
 Een stap van de import (`closeRatingWindows`) zet de gemiddelden na het sluiten in `match_player_ratings` en `match_coach_ratings` met de bron `fans`.

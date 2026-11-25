@@ -2237,6 +2237,10 @@ await withEmptyDatabase((database) =>
     assert.equal(rating.status, 200, '/fans/uitblinker must be there with Uitblinker on')
     assert.match(ratingHtml, /<h1[^>]*>Uitblinker<\/h1>/)
     assert.match(ratingHtml, /<h2[^>]*>Zo werkt het<\/h2>/)
+    // The earlier winners are there without a match too, with the link to the year.
+    assert.match(ratingHtml, /<h2[^>]*>Eerdere winnaars<\/h2>/)
+    assert.match(ratingHtml, /Dit seizoen is er nog geen Uitblinker\./)
+    assert.match(ratingHtml, /href="\/fans\/uitblinker\/van-het-jaar"/)
     assert.doesNotMatch(ratingHtml, /type="radio"/)
     assert.equal(rating.headers.get('cache-control'), 'no-store')
     assert.equal(rating.headers.get('x-robots-tag'), 'noindex, nofollow')
