@@ -155,7 +155,7 @@ export default async function RatingPage({
         </Text>
       </Page.Cell>
       <Page.Cell area="rate">{card}</Page.Cell>
-      <Page.Section area="side" aria-label="Uitleg van het spel">
+      <Page.Section area="side" aria-label="Winnaars en uitleg">
         <EarlierWinnersCard season={season} winners={winners} />
         <HowItWorksCard />
       </Page.Section>

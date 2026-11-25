@@ -395,6 +395,7 @@ describe('the card Eerdere winnaars', () => {
         const html = await render()
 
         expect(html).toMatch(/<h2[^>]*>Eerdere winnaars<\/h2>/)
+        expect(html).toContain('aria-label="Winnaars en uitleg"')
         expect(html.indexOf('Eerdere winnaars')).toBeLessThan(html.indexOf('Zo werkt het'))
         expect(html).toContain('href="/fans/uitblinker/van-het-jaar"')
         expect(html.includes('Dylan Vente')).toBe(list.length > 0)
