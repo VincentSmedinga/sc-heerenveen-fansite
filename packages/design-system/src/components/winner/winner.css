@@ -1,12 +1,13 @@
 /*
- * The seal for the player graded highest: a seal of twelve points with a round disc on it that
- * holds the average, so it has two colours: the points in the colour of a button and the disc in
- * the colour of the surface. The seal of the highlight is larger and has red points. The seal is
- * decoration drawn with CSS (a clipped background and a disc with a rim), so it has no image and
- * the average stays text, in the colour of a heading on the disc, in light and in dark. In
- * forced colours the fills go and the rim of the disc and the number remain. Next to the seal
- * stand a label, the name and a line. Where the box is narrow, the text goes under the seal: a
- * container query, so it follows the width of the card and not of the screen.
+ * The seal for the player graded highest: a seal of twelve points with a round disc on it
+ * that holds the average, so it has two colours: the points in the colour of a button and the
+ * disc in the colour of the surface. The seal of the highlight is larger and has red points.
+ * The seal is decoration drawn with CSS (a clipped background and a disc with a rim), so it
+ * has no image and the average stays text, in the colour of a heading on the disc, in light
+ * and in dark. In forced colours the fills go and the rim of the disc and the number remain.
+ * Next to the seal stand a label, the name and a line. Where the box is narrow, the text goes
+ * under the seal: a container query, so it follows the width of the card and not of the
+ * screen.
  */
 
 @layer hf.components {
