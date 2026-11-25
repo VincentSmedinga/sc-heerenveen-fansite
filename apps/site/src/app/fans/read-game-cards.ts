@@ -9,7 +9,7 @@ import { fjouwerPath, fjouwerSquad, fjouwerState } from '#src/fans/fjouwer'
 import { cachedStanding, supporterFours } from '#src/fans/fjouwer-points'
 import { seasonRanking as fjouwerSeasonRanking, rankedSeasons as rankedFjouwerSeasons } from '#src/fans/fjouwer-ranking'
 import { countFours, countParticipants } from '#src/fans/game-counts'
-import { readOpenGame } from '#src/fans/open-games'
+import { quizClosesAt, readOpenGame } from '#src/fans/open-games'
 import { findPrediction, predictionPath, standsText } from '#src/fans/prediction'
 import { countedPredictions } from '#src/fans/prediction-crowd'
 import { rankedSeasons, seasonRanking } from '#src/fans/prediction-ranking'
@@ -83,12 +83,7 @@ export function readPrognoseCard(supporter: CardSupporter | undefined, now = new
         ? { href: predictionPath, label: 'Voorspellen', type: 'button' }
         : {
             href: predictionPath,
-            label:
-              match === undefined
-                ? 'Naar de Prognose'
-                : saved === undefined
-                  ? 'Voorspel de uitslag'
-                  : 'Wijzig je voorspelling',
+            label: saved === undefined ? 'Naar de Prognose' : 'Wijzig je voorspelling',
             type: 'link',
           },
       game: 'prognose',
@@ -97,7 +92,7 @@ export function readPrognoseCard(supporter: CardSupporter | undefined, now = new
       ...(saved === undefined ? {} : { mine: { lines: [`Jouw voorspelling: ${lowerFirst(standsText(saved))}`] } }),
       ...(rows.length === 0 ? {} : { ranking: { caption: `Stand ${season}`, rows: rows as never } }),
       heading: 'Prognose',
-      tag: match === undefined ? closedTag : todo ? todoTag : openTag,
+      tag: open === undefined ? closedTag : todo ? todoTag : openTag(open.closesAt, now),
     }
   })
 }
@@ -143,11 +138,7 @@ export function readFantestCard(supporter: CardSupporter | undefined, now = new 
     return {
       action: todo
         ? { href: fantestPath, label: 'Doe de Fantest', type: 'button' }
-        : {
-            href: fantestPath,
-            label: quiz === undefined || entry !== undefined ? 'Naar de Fantest' : `Doe de test van ${name}`,
-            type: 'link',
-          },
+        : { href: fantestPath, label: 'Naar de Fantest', type: 'link' },
       game: 'fantest',
       lines:
         quiz === undefined
@@ -158,7 +149,13 @@ export function readFantestCard(supporter: CardSupporter | undefined, now = new 
         : { mine: { lines: [`Je score deze maand: ${entry.score} van ${quiz.questions.length}.`] } }),
       ...(rows.length === 0 ? {} : { ranking: { caption: `Stand ${year}`, rows } }),
       heading: 'Fantest',
-      tag: quiz === undefined ? closedTag : todo ? todoTag : openTag,
+      // The quiz closes at midnight, which reads best as the last minute of the month.
+      tag:
+        quiz === undefined
+          ? closedTag
+          : todo
+            ? todoTag
+            : openTag(new Date(quizClosesAt(year, month).getTime() - 60 * 1000), now),
     }
   })
 }
@@ -213,7 +210,7 @@ export function readFjouwerCard(supporter: CardSupporter | undefined, now = new 
         ? { href: fjouwerPath, label: 'Kies je vier', type: 'button' }
         : {
             href: fjouwerPath,
-            label: match === undefined ? 'Naar Fjouwer' : done ? 'Wijzig je vier' : 'Kies jouw fjouwer',
+            label: done ? 'Wijzig je vier' : 'Naar Fjouwer',
             type: 'link',
           },
       game: 'fjouwer',
@@ -227,7 +224,7 @@ export function readFjouwerCard(supporter: CardSupporter | undefined, now = new 
         : { mine: { lines: mineLines, ...(figures === undefined ? {} : { figures }) } }),
       ...(rows.length === 0 ? {} : { ranking: { caption: `Stand ${season}`, rows: rows as never } }),
       heading: 'Fjouwer',
-      tag: match === undefined ? closedTag : todo ? todoTag : openTag,
+      tag: open === undefined ? closedTag : todo ? todoTag : openTag(open.closesAt, now),
     }
   })
 }

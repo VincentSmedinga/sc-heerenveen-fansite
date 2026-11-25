@@ -1567,7 +1567,7 @@ De stap maakt de rij vlak voor het bericht uitgaat en haalt hem weg als het vers
 Zolang een spel aan staat, toont de pagina per spel dat aan staat een kaart (`GameStatusCard` uit het designsysteem), in de volgorde Prognose, Uitblinker, Fjouwer, Fantest, in een of twee kolommen.
 Elk spel heeft een lezer die zegt wat er op zijn kaart staat: `read-game-cards.ts` en `uitblinker-card.ts`.
 Of de Prognose en Fjouwer open zijn, zegt `readOpenGame` (`src/fans/open-games.ts`), dezelfde regel als op de homepage en Wedstrijden.
-De Tag zegt "Open", "Nog te doen", "Gesloten" of "Nog niet open", zonder moment: tot wanneer je kunt, staat op de pagina van het spel.
+De Tag zegt "Open tot za 16.45" (met het moment waarop het spel sluit), "Nog te doen", "Gesloten" of "Nog niet open".
 Iedereen ziet de wedstrijd, het aantal fans (`src/fans/game-counts.ts`) en de bovenste drie van de stand van dit seizoen of jaar.
 Een fan die is ingelogd en mee mag doen, ziet ook wat van die fan is, en een knop zolang er iets te doen is.
 Een geblokkeerd account ziet wat een bezoeker ziet.

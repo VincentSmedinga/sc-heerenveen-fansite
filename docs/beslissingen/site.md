@@ -8211,8 +8211,9 @@
   Een geblokkeerd account ziet wat een bezoeker ziet.
   "Wat komt er" staat er alleen zolang geen spel aan staat.
   Een spel dat niet gelezen kan worden, valt weg en komt in het logboek.
-  - **Zonder moment in de Tag:** de Tag zegt "Open", "Nog te doen", "Gesloten" of "Nog niet open".
-    Het issue noemt "Open tot za 16.45", maar op de voorpagina is het sluitingsmoment van de kaarten gehaald, en dat geldt hier ook.
+  - **De Tag** zegt "Open tot za 16.45" (groen), "Nog te doen" (oranje), "Gesloten" (grijs) of "Nog niet open" (neutraal).
+    Op de kleine kaarten van de voorpagina staat geen moment, op deze pagina wel: hier is de kaart de plek om te zien tot wanneer je kunt.
+    De Fantest noemt de laatste minuut van de maand ("Open tot ma 30 nov 23.59").
   - **De korte stand** volgt de regels van de ranglijst en zet er niemand onder: wie lager staat, ziet de eigen rij niet.
   - **Aantallen:** Fjouwer telt de fans die voor deze wedstrijd hebben opgeslagen, niet wie een eerdere vier meeneemt.
     Geblokkeerde accounts tellen nergens mee.

@@ -51,11 +51,11 @@ const before = new Date('2026-10-01T00:00:00Z')
 const supporter = { createdAt: before, disabledAt: null, id: 5 }
 
 describe('the state of the card of the Uitblinker on Fans', () => {
-  it('is open with a link for a visitor, without a button and without a moment in the tag', () => {
-    expect(uitblinkerCardState(open)).toEqual({
-      action: { href: '/fans/uitblinker', label: 'Geef de spelers een cijfer', type: 'link' },
+  it('is green with the moment it closes for a visitor, with a link and without a button', () => {
+    expect(uitblinkerCardState(open, undefined, now)).toEqual({
+      action: { href: '/fans/uitblinker', label: 'Naar de Uitblinker', type: 'link' },
       lines: ['Geef de spelers van de laatste wedstrijd een cijfer.'],
-      tag: { text: 'Open', tone: 'open' },
+      tag: { text: 'Open tot do 20.00', tone: 'open' },
     })
   })
 

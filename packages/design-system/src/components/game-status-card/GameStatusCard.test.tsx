@@ -3,13 +3,13 @@ import { describe, expect, it } from 'vitest'
 
 import { GameStatusCard } from './GameStatusCard'
 
-const tag = { text: 'Open', tone: 'open' } as const
+const tag = { text: 'Open tot za 16.45', tone: 'open' } as const
 
 describe('GameStatusCard', () => {
   it('is named by an h2, carries the watermark of its game and says how it stands', () => {
     render(
       <GameStatusCard
-        action={{ href: '/fans/prognose', label: 'Voorspel de uitslag', type: 'link' }}
+        action={{ href: '/fans/prognose', label: 'Naar de Prognose', type: 'link' }}
         game="prognose"
         heading="Prognose"
         tag={tag}
@@ -22,9 +22,9 @@ describe('GameStatusCard', () => {
 
     expect(card.className).toContain('hf-card-game-prognose')
     expect(screen.getByRole('heading', { level: 2, name: 'Prognose' })).toBeDefined()
-    expect(screen.getByText('Open').className).toContain('hf-tag-open')
+    expect(screen.getByText('Open tot za 16.45').className).toContain('hf-tag-open')
     expect(screen.getByText('48 fans voorspelden al.')).toBeDefined()
-    expect(screen.getByRole('link', { name: 'Voorspel de uitslag' }).getAttribute('href')).toBe('/fans/prognose')
+    expect(screen.getByRole('link', { name: 'Naar de Prognose' }).getAttribute('href')).toBe('/fans/prognose')
   })
 
   it('has a button that goes to the page for what is still to be done, and then no link', () => {

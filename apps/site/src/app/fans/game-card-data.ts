@@ -1,6 +1,7 @@
 import type { GameStatusAction, KeyFigure } from '@fansite/design-system'
 import type { DataTableRow, MatchProps, TagProps } from '@fansite/design-system'
 
+import { deadlineText } from '#src/fans/prediction'
 import { mayTakePart } from '#src/fans/take-part'
 
 // What a card of a game on the page Fans says (issue 1646). A reader per game works it out,
@@ -26,8 +27,8 @@ export type GameCardData = {
   winner?: { count: string; seal?: { average: string; line: string; name: string } }
 }
 
-/** The tag of a game that is open. The moment it closes is on the page of the game. */
-export const openTag = { text: 'Open', tone: 'open' } as const
+/** The tag of a game that is open, with the moment it closes: "Open tot za 16.45". */
+export const openTag = (closesAt: Date, now: Date) => ({ text: deadlineText(closesAt, now), tone: 'open' }) as const
 
 export const todoTag = { text: 'Nog te doen', tone: 'todo' } as const
 

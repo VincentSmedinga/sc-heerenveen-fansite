@@ -51,6 +51,7 @@ export async function readUitblinkerCard(
     const state = uitblinkerCardState(
       window,
       player === undefined ? undefined : { createdAt: player.createdAt, grades },
+      now,
     )
     const running = window.state === 'open' ? supportersIn(await loadRunningRatings(db, window.match.id)) : 0
     const latest = await latestResult()
@@ -95,6 +96,7 @@ export async function readUitblinkerCard(
 export function uitblinkerCardState(
   window: RatingWindow,
   supporter?: { createdAt: Date; grades: number },
+  now = new Date(),
 ): UitblinkerState {
   const link = (label: string) => ({ href: ratingPath, label, type: 'link' }) as const
 
@@ -125,9 +127,9 @@ export function uitblinkerCardState(
 
   if (!takesPart) {
     return {
-      action: link('Geef de spelers een cijfer'),
+      action: link('Naar de Uitblinker'),
       lines: [`Geef de spelers${window.coach === null ? '' : ' en de trainer'} van de laatste wedstrijd een cijfer.`],
-      tag: openTag,
+      tag: openTag(window.closesAt, now),
     }
   }
 
@@ -136,7 +138,7 @@ export function uitblinkerCardState(
     lines: [
       `Geef ${players} spelers${window.coach === null ? '' : ' en de trainer'} een cijfer. Kan tot ${closingText(window.closesAt)}.`,
     ],
-    tag: supporter.grades >= toRate ? openTag : todoTag,
+    tag: supporter.grades >= toRate ? openTag(window.closesAt, now) : todoTag,
   }
 }
 

@@ -24,7 +24,10 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock('#src/database', () => ({ getDatabase: () => ({ db: {} }) }))
-vi.mock('#src/fans/open-games', () => ({ readOpenGame: mocks.readOpenGame }))
+vi.mock('#src/fans/open-games', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  readOpenGame: mocks.readOpenGame,
+}))
 vi.mock('#src/fans/game-counts', () => ({
   countFours: mocks.countFours,
   countParticipants: mocks.countParticipants,
@@ -139,11 +142,11 @@ describe('the card of the Prognose', () => {
     const card = await readPrognoseCard(undefined, now)
 
     expect(card).toMatchObject({
-      action: { href: '/fans/prognose', label: 'Voorspel de uitslag', type: 'link' },
+      action: { href: '/fans/prognose', label: 'Naar de Prognose', type: 'link' },
       lines: ['48 fans voorspelden al.'],
       match: { opponent: 'FC Twente' },
       ranking: { caption: 'Stand 2026/27' },
-      tag: { text: 'Open', tone: 'open' },
+      tag: { text: 'Open tot za 16.45', tone: 'open' },
     })
     expect(headers(card)).toEqual(['Tjalle99', 'Pompebled', 'Blauwwit'])
     expect(marked(card)).toEqual([])
@@ -220,10 +223,10 @@ describe('the card of Fjouwer', () => {
     const card = await readFjouwerCard(undefined, now)
 
     expect(card).toMatchObject({
-      action: { label: 'Kies jouw fjouwer', type: 'link' },
+      action: { label: 'Naar Fjouwer', type: 'link' },
       lines: ['87 fans kozen hun vier.'],
       ranking: { caption: 'Stand 2026/27' },
-      tag: { text: 'Open' },
+      tag: { text: 'Open tot za 16.45' },
     })
     expect(headers(card)).toHaveLength(3)
     expect(mocks.supporterFours).not.toHaveBeenCalled()
@@ -292,10 +295,10 @@ describe('the card of the Fantest', () => {
     const card = await readFantestCard(undefined, now)
 
     expect(card).toMatchObject({
-      action: { href: '/fans/fantest', label: 'Doe de test van november', type: 'link' },
+      action: { href: '/fans/fantest', label: 'Naar de Fantest', type: 'link' },
       lines: ['De Fantest van november.', '12 fans deden mee.'],
       ranking: { caption: 'Stand 2026' },
-      tag: { text: 'Open' },
+      tag: { text: 'Open tot ma 30 nov 23.59' },
     })
     expect(headers(card)).toEqual(['Tjalle99', 'Pompebled', 'Blauwwit'])
     expect(mocks.findEntry).not.toHaveBeenCalled()

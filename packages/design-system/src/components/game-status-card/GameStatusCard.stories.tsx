@@ -36,7 +36,7 @@ const standing = (
 
 const meta = preview.meta({
   args: {
-    action: { href: '/fans/prognose', label: 'Voorspel de uitslag', type: 'link' as const },
+    action: { href: '/fans/prognose', label: 'Naar de Prognose', type: 'link' as const },
     children: (
       <>
         {match}
@@ -46,7 +46,7 @@ const meta = preview.meta({
     ),
     game: 'prognose' as const,
     heading: 'Prognose',
-    tag: { text: 'Open', tone: 'open' as const },
+    tag: { text: 'Open tot za 16.45', tone: 'open' as const },
   },
   argTypes: {
     action: { description: 'De knop voor wat nog te doen is, of de link naar de pagina van het spel.' },
