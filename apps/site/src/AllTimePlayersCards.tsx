@@ -1,12 +1,12 @@
 import {
   Card,
   DataTable,
+  DescriptionList,
   Disclosure,
   Heading,
   Link,
   List,
   PlayerName,
-  ShortFact,
   tableColumns,
   Text,
   TopScorersTable,
@@ -324,8 +324,8 @@ const recordNames = [
  * youngest and the oldest scorer and the fastest goal, each with the player and the match or
  * the season. Players who share a record are all on its line. The match is a link when it has a
  * page (`reportHrefs`, by season, competition and round). It is built like the card Records of
- * Wedstrijden · Cijfers: a soft card with a name in the quiet style above each value. It stands
- * on top of the sidebar. A record the data has nothing for is left out.
+ * Wedstrijden · Cijfers: a soft card with a stacked `DescriptionList`, the name above each
+ * value. It stands on top of the sidebar. A record the data has nothing for is left out.
  */
 export function PlayerRecordsCard({
   matches,
@@ -362,23 +362,20 @@ export function PlayerRecordsCard({
       <Heading anchor id="records" level={2}>
         Records
       </Heading>
-      <List role="list">
+      <DescriptionList stacked>
         {recordNames.flatMap(([key, name]) => {
           const record = records[key]
 
           return record === undefined
             ? []
             : [
-                <List.Item key={key}>
-                  <Text appearance="meta">{name}</Text>
-                  <ShortFact>
-                    {recordValue(key, record)}
-                    {record.entries.map((entry) => entryLine(entry))}
-                  </ShortFact>
-                </List.Item>,
+                <DescriptionList.Item key={key} term={name}>
+                  <Text>{recordValue(key, record)}</Text>
+                  {record.entries.map((entry) => entryLine(entry))}
+                </DescriptionList.Item>,
               ]
         })}
-      </List>
+      </DescriptionList>
       <Text appearance="meta">
         De leeftijd is op de dag van de wedstrijd. Spelers zonder geboortedag tellen niet mee voor de jongste en de
         oudste.

@@ -21,6 +21,7 @@ const meta = preview.meta({
           'De thuisclub staat eerst en de uitslag heeft de kleur van de uitkomst voor sc Heerenveen, nooit als enig teken. Een wedstrijd kan nog moeten komen, uitgesteld of geannuleerd zijn, live gaan, na verlenging of strafschoppen eindigen, of nog geen uitslag hebben.',
           'Een wedstrijd met een eigen pagina (`reportHref`) heeft de regel met de twee clubs en de uitslag als link. De namen en het streepje hebben de kleur van een link, de uitslag houdt de kleur van de uitkomst, en de regel is onderstreept als een gewone link, en dikker onder de muis en bij focus van het toetsenbord. Een schermlezer hoort wat er staat en dan waar de link heen gaat, zoals "sc Heerenveen 2 tegen 0 Ajax, verslag". Een wedstrijd zonder pagina is gewone tekst. De andere regels staan buiten de link.',
           'Zet hem in een `List.Item` met `role="list"` op de `List`, in een `Card` onder een kop van niveau 2. Hij is gebouwd uit `Time` en `Text`, met de uitkomst die ook de andere onderdelen met een uitslag gebruiken.',
+          'In een `List` staat boven elke wedstrijd een dunne lijn, ook boven de eerste, met de ruime maat die wedstrijden, nieuws en discussies delen. Een wedstrijd buiten een lijst, of als omschrijving in een `DescriptionList`, heeft geen lijn.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

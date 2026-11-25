@@ -254,8 +254,8 @@ const separator = (
  * result between them, the scorers, and where and who. It is plain text, with no club badge,
  * only the names. Only a match that has a page of its own (`reportHref`) has a link, and the
  * link is the line with the two clubs and the result: no separate line says "Het verslag" or
- * "Voorbeschouwing". The others have no link. match.css gives it its look, and draws the lines
- * between the lines of a List.
+ * "Voorbeschouwing". The others have no link. match.css gives it its look, and row-lines.css
+ * draws the lines between the matches of a List.
  *
  * The link has the colour of a link on the names of the clubs and on the dash, so you see
  * which match has a page; the result keeps the colour of the outcome. It is underlined like any

@@ -1,6 +1,6 @@
 import type { PublicMatch } from '@fansite/db/queries'
 
-import { Card, Heading, List, PlayerName, ShortFact, Text } from '@fansite/design-system'
+import { Card, DescriptionList, Heading, PlayerName, Text } from '@fansite/design-system'
 import { Fragment } from 'react'
 
 import type { MultiGoalScorer } from './matches'
@@ -12,9 +12,9 @@ import { BasedOn, imageCredit } from './MatchViews'
 /**
  * The card of the page Spelers with the goals that stand out: the hattricks and doubles of the
  * season with the players who scored them, the penalties out of all our goals, and the own
- * goals for and against. It is built as the card Uitersten: a list with a line per part, each
- * with its name as quiet text above the value, in the same item, so a screen reader reads the
- * name and its value together and the thin lines come from the design system (`ShortFact`).
+ * goals for and against. It is built as the card Uitersten: a stacked `DescriptionList` with a
+ * pair per part, the name above the value, so a screen reader hears which value belongs to
+ * which name.
  * The hattricks and the doubles say "Nog geen" when nobody has any; the penalties and the own
  * goals are numbers, so a zero stays. Without a goal in a played match the card is a sentence
  * for visitors, with no parts and no button for an image. The line under it says how many
@@ -46,31 +46,27 @@ export function SpecialGoalsCard({
       </Heading>
       {hasGoals ? (
         <>
-          <List role="list">
-            <List.Item>
-              <Text appearance="meta">Hattricks</Text>
-              <MultiGoalFact players={hattricks} />
-            </List.Item>
-            <List.Item>
-              <Text appearance="meta">Dubbelslagen</Text>
-              <MultiGoalFact players={doubles} />
-            </List.Item>
-            <List.Item>
-              <Text appearance="meta">Strafschoppen</Text>
-              <ShortFact>{`${penalties} van de ${goalsFor} ${goalsFor === 1 ? 'doelpunt' : 'doelpunten'}`}</ShortFact>
-            </List.Item>
-            <List.Item>
-              <Text appearance="meta">Eigen doelpunten</Text>
-              <ShortFact>
+          <DescriptionList stacked>
+            <DescriptionList.Item empty={hattricks.length === 0} term="Hattricks">
+              <MultiGoalValue players={hattricks} />
+            </DescriptionList.Item>
+            <DescriptionList.Item empty={doubles.length === 0} term="Dubbelslagen">
+              <MultiGoalValue players={doubles} />
+            </DescriptionList.Item>
+            <DescriptionList.Item term="Strafschoppen">
+              <Text>{`${penalties} van de ${goalsFor} ${goalsFor === 1 ? 'doelpunt' : 'doelpunten'}`}</Text>
+            </DescriptionList.Item>
+            <DescriptionList.Item term="Eigen doelpunten">
+              <Text>
                 {`${ownGoalsFor} door de tegenstander`}
                 {/* The dot is only for the eye; the spaces stay outside, so the parts don't run together. */}{' '}
                 <Text aria-hidden="true" as="span">
                   ·
                 </Text>{' '}
                 {`${ownGoalsAgainst} door ons`}
-              </ShortFact>
-            </List.Item>
-          </List>
+              </Text>
+            </DescriptionList.Item>
+          </DescriptionList>
           <BasedOn known={known} played={played} />
         </>
       ) : (
@@ -83,15 +79,15 @@ export function SpecialGoalsCard({
 /**
  * The players of the hattricks or the doubles on one line, each with his name as one name (see
  * `PlayerName`), separated by commas, and for a player who did it more than once how often
- * (`2×`). Nobody has any: "Nog geen", in the quiet style.
+ * (`2×`). Nobody has any: "Nog geen" (the pair marks it as empty, so it is quiet).
  */
-function MultiGoalFact({ players }: { players: MultiGoalScorer[] }) {
+function MultiGoalValue({ players }: { players: MultiGoalScorer[] }) {
   if (players.length === 0) {
-    return <ShortFact empty>Nog geen</ShortFact>
+    return <Text>Nog geen</Text>
   }
 
   return (
-    <ShortFact>
+    <Text>
       {players.map(({ givenName, href, id, surname, times }, index) => (
         <Fragment key={id}>
           {index > 0 && ', '}
@@ -99,6 +95,6 @@ function MultiGoalFact({ players }: { players: MultiGoalScorer[] }) {
           {times > 1 && ` ${times}×`}
         </Fragment>
       ))}
-    </ShortFact>
+    </Text>
   )
 }

@@ -5,25 +5,20 @@ import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
 import { List } from '../list/List'
 import { PlayerName } from '../player-name/PlayerName'
-import { Text } from '../text/Text'
 import { ShortFact } from './ShortFact'
 
 const meta = preview.meta({
   argTypes: {
-    children: { description: 'Wat de regel zegt: een getal, een zin of namen.' },
-    empty: {
-      description:
-        'Of de regel zegt dat er niets te tonen is, zoals "Nog geen". Hij heeft dan het gewone gewicht en de rustige kleur.',
-    },
+    children: { description: 'Wat de regel zegt, zoals een speler.' },
   },
   component: ShortFact,
   parameters: {
     docs: {
       description: {
         component: [
-          'Een feit als korte regel in een lijst, met de naam erboven, zoals de uitersten van een seizoen hun naam boven de wedstrijd hebben.',
-          'Het is een korte regel voor een waarde die geen wedstrijd is. Zet de naam als `Text` met `appearance="meta"` en de regel samen in een `List.Item`, de lijst in een `Card` onder een kop van niveau 2, en geef de `List` `role="list"`.',
-          'Hij is gebouwd uit `Text` en `List`, in de vorm van een korte regel.',
+          'Een korte regel in een lijst voor één ding zonder naam of periode ervoor, zoals een speler van de selectie.',
+          'Zet elke regel in een `List.Item`, de lijst in een `Card` onder een kop, en geef de `List` `role="list"`. Boven elke regel staat een dunne lijn, ook boven de eerste, met de krappe maat van de meeste lijsten.',
+          'Heeft elke waarde een naam erboven, kies dan een `DescriptionList` onder elkaar, zodat een schermlezer hoort wat bij elkaar hoort.',
         ].join('\n'),
       },
       page: ControlsDocsPage,
@@ -33,55 +28,31 @@ const meta = preview.meta({
   title: 'Patronen/ShortFact',
 })
 
-const inCard = (children: React.ReactNode, id: string) => (
-  <div style={{ maxInlineSize: '20rem' }}>
-    <Card aria-labelledby={id} surface="soft">
-      <Heading id={id} level={2}>
-        Testcijfers
-      </Heading>
-      <List role="list">{children}</List>
-    </Card>
-  </div>
-)
-
 export const Default = meta.story({
-  args: { children: '1 van de 17 doelpunten' },
-  name: 'Een feit met een naam erboven',
-  render: (args) =>
-    inCard(
-      <List.Item>
-        <Text appearance="meta">Strafschoppen</Text>
-        <ShortFact {...args} />
-      </List.Item>,
-      'feit-een',
-    ),
-})
-
-export const SeveralFacts = meta.story({
-  name: 'Vier feiten onder elkaar, met namen en een leeg feit',
-  render: () =>
-    inCard(
-      <>
-        <List.Item>
-          <Text appearance="meta">Hattricks</Text>
-          <ShortFact empty>Nog geen</ShortFact>
-        </List.Item>
-        <List.Item>
-          <Text appearance="meta">Dubbelslagen</Text>
-          <ShortFact>
-            <PlayerName givenName="Testspeler" surname="Een" />, 2×,
-            <PlayerName givenName="Testspeler" surname="Twee" />
-          </ShortFact>
-        </List.Item>
-        <List.Item>
-          <Text appearance="meta">Strafschoppen</Text>
-          <ShortFact>1 van de 17 doelpunten</ShortFact>
-        </List.Item>
-        <List.Item>
-          <Text appearance="meta">Eigen doelpunten</Text>
-          <ShortFact>1 door de tegenstander · 0 door ons</ShortFact>
-        </List.Item>
-      </>,
-      'feit-vier',
-    ),
+  args: { children: <PlayerName givenName="Testspeler" surname="Een" /> },
+  name: 'Spelers onder elkaar',
+  render: (args) => (
+    <div style={{ maxInlineSize: '20rem' }}>
+      <Card aria-labelledby="feit-spelers">
+        <Heading id="feit-spelers" level={2}>
+          Testselectie
+        </Heading>
+        <List role="list">
+          <List.Item>
+            <ShortFact {...args} />
+          </List.Item>
+          <List.Item>
+            <ShortFact>
+              <PlayerName givenName="Testspeler" surname="Twee" />
+            </ShortFact>
+          </List.Item>
+          <List.Item>
+            <ShortFact>
+              <PlayerName givenName="Testspeler" surname="Drie" />
+            </ShortFact>
+          </List.Item>
+        </List>
+      </Card>
+    </div>
+  ),
 })

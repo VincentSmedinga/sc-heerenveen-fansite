@@ -76,4 +76,20 @@ describe('DescriptionList', () => {
 
     expect(container.querySelector('dl.hf-description-list-aligned')).toBeNull()
   })
+
+  it('marks a description that says there is nothing as empty, and no other', () => {
+    const { container } = render(
+      <DescriptionList stacked>
+        <DescriptionList.Item empty term="Hattricks">
+          Nog geen
+        </DescriptionList.Item>
+        <DescriptionList.Item term="Strafschoppen">1</DescriptionList.Item>
+      </DescriptionList>,
+    )
+    const [empty, full] = container.querySelectorAll('dd')
+
+    expect(empty?.className).toBe('hf-description-list-empty')
+    expect(full?.hasAttribute('class')).toBe(false)
+    expect(empty?.previousElementSibling?.textContent).toBe('Hattricks')
+  })
 })

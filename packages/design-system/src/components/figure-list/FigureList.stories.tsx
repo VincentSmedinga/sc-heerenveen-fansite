@@ -15,6 +15,7 @@ const meta = preview.meta({
           'Een cijferlijst zet een paar namen onder elkaar, elk met een getal aan het eind van de regel, op het gewicht van een getal.',
           'Kies hem voor een klein blok in een zijkolom, zoals de doelpunten van een speler per competitie. Cijfers in kolommen zijn een `DataTable`.',
           'Elke regel is een `FigureList.Item`, dat alleen in een cijferlijst werkt.',
+          'Boven elke rij staat een dunne lijn, ook boven de eerste, met de krappe maat van de meeste lijsten.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

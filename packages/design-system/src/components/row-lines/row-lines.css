@@ -1,0 +1,58 @@
+/*
+ * The thin line between the rows of a list, and the space around it. This is the one place
+ * for both: the components keep the look of what is in a row. Every row has a line above it,
+ * also the first, so a list shows where it starts, and the last row has no space under it,
+ * because the card around the list pads there. The line takes the colour of the lines of a
+ * card, and outside a card the default border colour.
+ *
+ * There are two sizes. Matches, news items and discussions are roomy: the medium step. All
+ * other rows are dense: the small step. A new list with lines adds its row to one of them
+ * here, and to the test in row-lines-css.test.ts.
+ */
+
+@layer hf.components {
+  /* Roomy. A match, a news item or a discussion also has this space outside a list. */
+  .hf-match,
+  .hf-news-item,
+  .hf-discussion-item {
+    padding-block: var(--hf-space-m);
+  }
+
+  /* Dense. A short line also has this space outside a list. */
+  .hf-short-line,
+  .hf-winner-list-item,
+  .hf-prediction-list-item,
+  .hf-figure-list-item,
+  .hf-description-list-stacked > div,
+  .hf-match-event,
+  .hf-on-this-day-match,
+  .hf-match-pitch-roster-list > li {
+    padding-block: var(--hf-space-s);
+  }
+
+  /*
+   * The line. A match, a news item, a discussion and a short line are rows only as the item of
+   * a list, so a match on its own or as a description has no line.
+   */
+  li > :is(.hf-match, .hf-news-item, .hf-discussion-item, .hf-short-line),
+  .hf-winner-list-item,
+  .hf-prediction-list-item,
+  .hf-figure-list-item,
+  .hf-description-list-stacked > div,
+  .hf-match-event,
+  .hf-on-this-day-match,
+  .hf-match-pitch-roster-list > li {
+    border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
+  }
+
+  li:last-child > :is(.hf-match, .hf-news-item, .hf-discussion-item, .hf-short-line),
+  .hf-winner-list-item:last-child,
+  .hf-prediction-list-item:last-child,
+  .hf-figure-list-item:last-child,
+  .hf-description-list-stacked > div:last-child,
+  .hf-match-event:last-child,
+  .hf-on-this-day-match:last-child,
+  .hf-match-pitch-roster-list > li:last-child {
+    padding-block-end: 0;
+  }
+}

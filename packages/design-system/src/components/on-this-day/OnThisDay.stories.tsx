@@ -32,6 +32,7 @@ const meta = preview.meta({
         component: [
           'De warme kaart met de wedstrijden die op de datum van vandaag in eerdere jaren zijn gespeeld: het jaar, de clubs en de uitslag, en een link naar meer. De uitslag aan het eind van de rij staat op het gewicht van een getal.',
           'Kies hem om een bezoeker een reden te geven om terug te kijken; op een dag zonder wedstrijden laat je de kaart weg.',
+          'Boven elke wedstrijd staat een dunne lijn, ook boven de eerste, met de krappe maat van de meeste lijsten.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

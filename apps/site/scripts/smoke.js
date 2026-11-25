@@ -1622,13 +1622,13 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(figuresHtml, /Alle (?:<span[^>]*>)?doelpuntenmakers/)
     // The card Bijzondere doelpunten comes after the list of scorers, in the sidebar. The
     // made-up data has no hattrick, two doubles (Demo, and Proefman in the cup), one penalty
-    // and an own goal of the opponent. The card is a list of four parts, each with its name as
-    // quiet text above its value, with no subheadings, soft, with a button for an image, and
-    // it counts the cup for all matches.
+    // and an own goal of the opponent. The card is a description list of four parts, each with
+    // its name as quiet text above its value, with no subheadings, soft, with a button for an
+    // image, and it counts the cup for all matches.
     const cardOf = (html) =>
       /<section[^>]*aria-labelledby="bijzondere-doelpunten">.*?<\/section>/s.exec(html)?.[0] ?? ''
     const factsOf = (card) =>
-      [...card.matchAll(/<li><p[^>]*>(.*?)<\/p>(.*?)<\/li>/g)].map(([, name, value]) => [
+      [...card.matchAll(/<dt[^>]*>(.*?)<\/dt><dd[^>]*>(.*?)<\/dd>/g)].map(([, name, value]) => [
         name,
         value.replaceAll(/<[^>]*>/g, ''),
       ])

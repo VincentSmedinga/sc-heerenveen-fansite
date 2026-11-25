@@ -244,11 +244,11 @@ export function CleanSheetsCard({
  * The card of the statistics page with the extremes of the matches that are counted: the
  * biggest win and loss, the match with the most goals, and our earliest and our last goal. Each
  * is a `Match` with its name above it, as the heading of the line, in the same item as the
- * match. The list draws its line above the name (see short-line.css), so it stays between the
- * items. A line without a match is left out, and the card doesn't say so. Under the list stand
- * how many matches the lines are based on: the first three on every played match, the two goals
- * on the matches whose goals are known. Without a played match it is a sentence for visitors
- * and no list.
+ * match. The thin line of a pair is above the name, so the name stays with its match. A line
+ * without a match is left out, and the card doesn't say so. Under the list stand how many
+ * matches the lines are based on: the first three on every played match, the two goals on the
+ * matches whose goals are known. Without a played match it is a sentence for visitors and no
+ * list.
  */
 export function ExtremesCard({
   competition,

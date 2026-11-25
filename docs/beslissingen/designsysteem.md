@@ -4384,6 +4384,8 @@
   `Tooltip` en `pull-to-refresh` hebben een eigen kleur op een eigen vlak.
 - **Eén pull request:** het is één regel in CSS, mechanische vervangingen en één prop, en het hoeft maar één keer in licht en donker bekeken.
   - **Alternatieven:** splitsen in kleur en gewicht, en legenda's en kolomletters.
+- **Later:** zie _Een omschrijving in `DescriptionList` heeft het gewone gewicht_: het antwoord bij een term heeft niet meer het naamgewicht.
+  De andere waarden in dat lijstje houden het.
 
 ## Een achternaam en een getal aan het eind van een rij hebben overal hetzelfde gewicht
 
@@ -4397,6 +4399,8 @@
   Eén regel is makkelijker te onthouden.
 - **Later:** zie _In een tabel is vet voor het kerngetal, niet voor onze club of een achternaam_, dat dit uitbreidt naar lijsten.
 - **Alternatieven:** 700 voor een achternaam (dan wordt hij zwaarder dan een rijkop); geen uitzonderingen (de gestapelde antwoorden worden zwaar op elke kaart); alleen lijsten die op een tabel lijken (laat 500 en 600 op twee plekken staan).
+- **Later:** zie _Een omschrijving in `DescriptionList` heeft het gewone gewicht_: een antwoord in een gestapelde `DescriptionList` is nu 400 in plaats van 500.
+  Een getal met de term links blijft 700.
 
 ## De vlag is een intern onderdeel, en een stadion of een club is geen achternaam
 
@@ -4485,3 +4489,56 @@
   `SideBySide` blijft zoals het is: het zet twee delen van één taak naast elkaar en is geen raster van kaarten.
 - **Waarom:** de kaarten zien er zo uit als de andere kaarten die naast elkaar staan.
 - **Alternatieven:** een rij kleine kaarten dichter bij elkaar houden, met 0,5 of 1 rem.
+
+## De lijnen tussen rijen staan in één CSS-bestand
+
+- **Datum:** 25 november 2026
+- **Besluit:** de dunne lijn tussen de rijen van een lijst en de ruimte eromheen staan alleen in `components/row-lines/row-lines.css` (#1652).
+  De componenten houden de opmaak van hun inhoud.
+  Een nieuwe lijst met lijnen zet de klasse van haar rij in dat bestand, en `row-lines-css.test.ts` bewaakt dat geen ander bestand die lijn of ruimte zet.
+  De extra pixel boven een `DiscussionItem` vervalt.
+  De lijn tussen de groepen van `PickList` is 1 pixel in de lijnkleur van de kaart.
+- **Waarom:** twaalf plekken tekenden de lijn zelf, met drie maten ruimte en met of zonder lijn boven de eerste rij.
+- **Alternatieven:** een klasse die elk onderdeel in zijn markup zet (meer wijzigingen in de onderdelen voor hetzelfde resultaat); een variant van `List` (niet elke rij staat in een `List`).
+
+## Elke rij van een lijst met lijnen heeft een lijn erboven, ook de eerste
+
+- **Datum:** 25 november 2026
+- **Besluit:** elke rij van een lijst met lijnen heeft een lijn erboven, ook de eerste.
+- **Waarom:** de componenten deden het verschillend.
+  Een lijn boven elke rij is één regel zonder uitzonderingen en laat zien waar de lijst begint.
+- **Alternatieven:** nooit een lijn boven de eerste rij; alleen een lijn als de lijst op andere inhoud volgt.
+
+## De lijsten met lijnen hebben twee maten
+
+- **Datum:** 25 november 2026
+- **Besluit:** de lijsten hebben twee maten: ruim voor wedstrijden, nieuws en discussies, krap voor al het andere.
+- **Waarom:** een derde maat is een extra keuze bij elke nieuwe lijst, voor een klein verschil.
+- **Alternatieven:** de extra kleine maat houden voor "Op deze dag" en de namenlijst onder het veld.
+
+## Een naam boven een waarde is een `DescriptionList` onder elkaar
+
+- **Datum:** 25 november 2026
+- **Besluit:** een naam boven een waarde is overal een `DescriptionList` met `stacked`, met een waarde in de maat en het gewicht van gewone tekst op "Records" bij de spelers aller tijden, "Bijzondere doelpunten" en de kaart met strafschoppen.
+  Die waarde staat in een `Text`.
+  `DescriptionList.Item` krijgt de eigenschap `empty` voor een waarde als "Nog geen", die dan grijs is.
+  `ShortFact` verliest die eigenschap en blijft voor een regel zonder naam, zoals op de kaart Selectie.
+- **Waarom:** twee opbouwen deden hetzelfde.
+  Een `dl` koppelt naam en waarde ook voor een schermlezer, en de kaarten gaan zo op "Uitersten" lijken.
+- **Alternatieven:** de waarde zwaar houden; de kleine maat van de wedstrijdkop gebruiken; de nagebouwde lijst houden; "Nog geen" grijs maken met een nieuwe variant van `Text` (breder dan nodig).
+
+## Een omschrijving in `DescriptionList` heeft het gewone gewicht
+
+- **Datum:** 25 november 2026
+- **Besluit:** een `dd` heeft het normale gewicht.
+  Alleen in de vorm `aligned` blijft hij vet.
+- **Waarom:** de grijze naam onderscheidt de waarde al.
+  Een getal aan het eind van een rij blijft vet, zoals in tabellen en bij balken (#1607).
+- **Alternatieven:** elke `dd` normaal, ook de getallen rechts; het naamgewicht houden.
+
+## De lijnen en de naam boven een waarde zijn één pull request
+
+- **Datum:** 25 november 2026
+- **Besluit:** de lijnen en de naam boven een waarde zijn samen één pull request.
+- **Waarom:** beide raken `DescriptionList`, en zo is er één review en één ronde in licht en donker.
+- **Alternatieven:** twee issues.

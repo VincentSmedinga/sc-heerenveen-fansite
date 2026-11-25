@@ -298,7 +298,10 @@ describe('the card Bijzondere doelpunten on /spelers/cijfers', () => {
     /<section [^>]*aria-labelledby="bijzondere-doelpunten">.*?<\/section>/s.exec(html)?.[0] ?? ''
   /** The parts of the card: the name and the value under it, as a screen reader reads them. */
   const facts = (html: string) =>
-    [...html.matchAll(/<li><p[^>]*>(.*?)<\/p>(.*?)<\/li>/g)].map(([, name, value]) => [plain(name), plain(value)])
+    [...html.matchAll(/<dt[^>]*>(.*?)<\/dt><dd[^>]*>(.*?)<\/dd>/g)].map(([, name, value]) => [
+      plain(name),
+      plain(value),
+    ])
   const goal = (player: string, options: Partial<PublicMatch['goals'][number]> = {}) => ({
     minute: 10,
     ours: true,
@@ -337,11 +340,11 @@ describe('the card Bijzondere doelpunten on /spelers/cijfers', () => {
     expect(cardOf(html)).toContain('data-hf-card-share')
   })
 
-  it('is a list of four parts, each with its name as quiet text above its value, and no subheadings', async () => {
+  it('is a description list of four pairs, each with its name as quiet text above its value, and no subheadings', async () => {
     const html = cardOf(await render())
 
     expect(html).toMatch(
-      /<ul role="list"><li><p class="hf-meta">Hattricks<\/p><div class="hf-short-line hf-short-fact">/,
+      /<dl class="hf-description-list hf-description-list-stacked"><div><dt class="hf-meta">Hattricks<\/dt><dd/,
     )
     expect(facts(html).map(([name]) => name)).toEqual([
       'Hattricks',
@@ -350,7 +353,8 @@ describe('the card Bijzondere doelpunten on /spelers/cijfers', () => {
       'Eigen doelpunten',
     ])
     expect(html.match(/<h[1-6]/g)).toHaveLength(1)
-    expect(html.match(/<li>/g)).toHaveLength(4)
+    expect(html.match(/<dt /g)).toHaveLength(4)
+    expect(html.match(/<dd/g)).toHaveLength(4)
   })
 
   it('says "Nog geen" in the quiet style for hattricks and doubles nobody has, and keeps the numbers', async () => {
@@ -362,7 +366,7 @@ describe('the card Bijzondere doelpunten on /spelers/cijfers', () => {
       ['Strafschoppen', '0 van de 4 doelpunten'],
       ['Eigen doelpunten', '0 door de tegenstander · 0 door ons'],
     ])
-    expect(html.match(/<span class="hf-short-line-aside">Nog geen<\/span>/g)).toHaveLength(2)
+    expect(html.match(/<dd class="hf-description-list-empty"><p>Nog geen<\/p><\/dd>/g)).toHaveLength(2)
   })
 
   it('lists the hattricks and the doubles with the names as one name, and how often for a repeat', async () => {
@@ -423,7 +427,7 @@ describe('the card Bijzondere doelpunten on /spelers/cijfers', () => {
     const html = cardOf(await render())
 
     expect(plain(html)).toContain('We hebben nog geen doelpunten van dit seizoen. Kijk straks nog eens.')
-    expect(html).not.toContain('<li>')
+    expect(html).not.toContain('<dt')
     expect(html).not.toContain('data-hf-card-share')
   })
 

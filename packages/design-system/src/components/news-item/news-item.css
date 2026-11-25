@@ -16,7 +16,6 @@
     container-name: hf-news-item;
     container-type: inline-size;
     overflow-wrap: anywhere;
-    padding-block: var(--hf-space-m);
   }
 
   /*
@@ -100,18 +99,5 @@
   :is(ul, ol):has(> li > .hf-news-item) {
     list-style: none;
     padding-inline-start: 0;
-  }
-
-  li > .hf-news-item {
-    border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
-  }
-
-  li:first-child > .hf-news-item {
-    border-block-start: 0;
-    padding-block-start: 0;
-  }
-
-  li:last-child > .hf-news-item {
-    padding-block-end: 0;
   }
 }

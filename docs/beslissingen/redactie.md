@@ -2561,6 +2561,7 @@
 - **Niet erin:** de positie van de doelpuntenmaker (voor een afgelopen seizoen bestaat geen selectie), het aandeel van de topscorer en het aantal verschillende spelers (dat staat in Doelpuntenmakers).
 - **Alternatieven:** vier koppen van niveau 3 met onder elk een lijst of een zin (te zwaar voor vier korte feiten, en de eerste versie van deze kaart); een tabel met een rij per speler (veel kolommen voor weinig getallen); een `dl` met `dt` en `dd` (de dunne lijnen horen bij `li`, en de kaart Uitersten is ook een lijst); de lege delen weglaten (een bezoeker kan niet zien of ze er niet zijn of er niet werden gezocht); een hattrick ook bij de dubbelslagen laten staan (dezelfde wedstrijd wordt dan twee keer genoemd); de kaart naar Statistieken zetten (de pagina Spelers is er voor wat bij spelers hoort, zie _Statistieken toont de top 5 van de doelpuntenmakers, en de volledige lijst staat op Spelers_).
 - **Later:** zie _Op Spelers is de ranglijst witte inhoud, en de bijzondere doelpunten staan in de zijkolom_ (1 november 2026): de kaart staat niet meer onder Doelpuntenmakers maar in de zijkolom, en de bronvermelding sluit de zijkolom af.
+- **Later:** zie _Een naam boven een waarde is een `DescriptionList` onder elkaar_ in `designsysteem.md` (25 november 2026): de kaart is nu zo'n lijst, de waarde heeft de maat en het gewicht van gewone tekst, en `ShortFact` tekent er niets meer.
 
 ## De Stand zegt dat een uitslag nog ontbreekt, zonder datum op de kaarten
 

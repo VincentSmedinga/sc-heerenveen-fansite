@@ -204,16 +204,6 @@
     list-style: none;
     margin: 0;
     padding-inline-start: 0;
-
-    > li {
-      border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
-      padding-block: var(--hf-space-xs);
-    }
-
-    > li:first-child {
-      border-block-start: 0;
-      padding-block-start: 0;
-    }
   }
 
   /*
