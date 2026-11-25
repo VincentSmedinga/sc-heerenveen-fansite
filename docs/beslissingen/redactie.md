@@ -698,6 +698,7 @@
 - **Alternatieven:** de rand laten zoals hij was, met het verloop, of in de kleur van de pagina met een scherpe overgang.
   `html` blauw maken; dat kleurt ook de ruimte onder de footer bij uitrekken.
   De strook alleen op een iPhone met uitsparing tonen; daar is in CSS geen vraag voor, want de inset is in Safari 0.
+- **Later:** sinds 25 november 2026 is de kleur van de pagina in licht `grey-50` (zie _De lichte pagina krijgt grijs-50 als achtergrond_ in `designsysteem.md`).
   Een strook van 4 pixels of minder, of een bijna doorzichtige; Safari negeert die.
 - **Later:** de strook blijft niet meer staan als de kop uit beeld is; zie _De blauwe rand bovenaan scrolt weg met de kop_.
 - **Later:** de strook blijft nu altijd staan, ook als de kop uit beeld is; zie _De statusbalk van Safari heeft altijd één van de twee blauwen, tot de modus wisselt_.

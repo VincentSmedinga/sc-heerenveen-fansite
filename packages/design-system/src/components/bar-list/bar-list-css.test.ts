@@ -2,15 +2,28 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
+import { fallback, role, scale } from '../../tokens/colourRoles'
+
 // jsdom doesn't apply rules in a cascade layer, so the test reads the files' text, without the
 // comments.
 const read = (file: string) => readFileSync(join(import.meta.dirname, '..', file), 'utf8').replace(/\/\*.*?\*\//gs, '')
 
 describe('the track of a bar list', () => {
-  it('is the colour of the page, or the track of the card it is on', () => {
+  it('is the colour of a bar track, or the track of the card it is on', () => {
     expect(read('bar-list/bar-list.css')).toContain(
-      'background-color: var(--hf-card-track, var(--hf-colour-background-page));',
+      'background-color: var(--hf-card-track, var(--hf-colour-background-bar-track));',
     )
+  })
+
+  it('stays grey-100 in light, a step darker than the page, so it shows on a white card too', () => {
+    expect(role('background-bar-track').light).toBe(scale('grey-100'))
+    expect(fallback('background-bar-track')).toBe(scale('grey-100'))
+    expect(role('background-page').light).toBe(scale('grey-50'))
+    expect(fallback('background-page')).toBe(scale('grey-50'))
+  })
+
+  it('stays the colour of the page in dark', () => {
+    expect(role('background-bar-track').dark).toBe(role('background-page').dark)
   })
 
   it('is the tint of the track of a switch on a soft card, so it shows against the blue', () => {

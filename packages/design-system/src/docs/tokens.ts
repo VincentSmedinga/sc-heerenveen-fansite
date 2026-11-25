@@ -113,6 +113,7 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
       { name: '--hf-colour-background-thumb', use: 'Knop onder de gekozen keuze van de schakelaar' },
       { name: '--hf-colour-background-hover', use: 'Rij onder de muis' },
       { name: '--hf-colour-background-zebra', use: 'Zebrarijen in tabellen' },
+      { name: '--hf-colour-background-bar-track', use: 'Baan achter een balk in een diagram' },
       { name: '--hf-colour-background-highlight', use: 'Gemarkeerde rij, zoals sc Heerenveen in de stand' },
       { name: '--hf-colour-background-stripe', use: 'Strepen van de Friese vlag boven de footer' },
       { name: '--hf-colour-background-stripe-footer', use: 'Strepen van de Friese vlag over de footer' },

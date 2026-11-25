@@ -10,7 +10,7 @@ const fontCode = 'ui-monospace, menlo, consolas, monospace'
 export const brandTitle = 'sc Heerenveen Fansite · designsysteem'
 
 export const lightTheme = create({
-  appBg: '#f1eee7', // grey-100
+  appBg: '#faf8f4', // grey-50
   appBorderColor: '#e3dfd7', // grey-200
   appContentBg: '#ffffff', // white
   base: 'light',

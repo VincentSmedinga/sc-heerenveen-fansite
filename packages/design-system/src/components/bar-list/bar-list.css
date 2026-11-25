@@ -54,7 +54,7 @@
   }
 
   .hf-bar-list-track {
-    background-color: var(--hf-card-track, var(--hf-colour-background-page));
+    background-color: var(--hf-card-track, var(--hf-colour-background-bar-track));
     block-size: var(--hf-size-bar-thick);
     border-radius: var(--hf-radius-bar);
     display: block;
