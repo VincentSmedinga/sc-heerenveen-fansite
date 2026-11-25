@@ -19,7 +19,13 @@
   }
 
   .hf-open-game-card > .hf-heading-2 {
-    font-size: min(var(--hf-heading-3-font-size), 17cqi);
+    font-size: var(--hf-heading-3-font-size);
+  }
+
+  @container (width < 8rem) {
+    .hf-open-game-card > .hf-heading-2 {
+      font-size: var(--hf-heading-4-font-size);
+    }
   }
 
   /* A tag over two lines keeps a calm shape. */

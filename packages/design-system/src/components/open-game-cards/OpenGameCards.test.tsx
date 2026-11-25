@@ -45,7 +45,12 @@ describe('OpenGameCards', () => {
     const css = readFileSync(join(import.meta.dirname, 'open-game-cards.css'), 'utf8')
 
     expect(css).toContain('grid-template-columns: repeat(2, minmax(0, 1fr));')
-    expect(css).not.toContain('@container')
-    expect(css).not.toContain('@media')
+    expect(css.match(/grid-template-columns/g)).toHaveLength(1)
+  })
+
+  it('makes the name smaller in a narrow card, so Uitblinker stays in one piece', () => {
+    const css = readFileSync(join(import.meta.dirname, 'open-game-cards.css'), 'utf8')
+
+    expect(css).toMatch(/@container \(width < 8rem\) \{[^}]*font-size: var\(--hf-heading-4-font-size\);/)
   })
 })
