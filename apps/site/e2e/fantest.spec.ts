@@ -87,11 +87,11 @@ test('says so, scores "van 9" and shows no figures, for a month with a question 
 
 test('lists the months by year with a link to each, and leaves out a month without a quiz', async ({ page }) => {
   await page.goto('/fans/fantest')
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Fantest van toen')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Fantest')
   await expect(
     page.getByText('Vragen uit het archief van de Fansite, gemaakt door de toenmalige redactie.'),
   ).toBeVisible()
-  await expect(page.getByRole('heading', { level: 2, name: '2003' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 3, name: '2003' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Juni 2003' })).toHaveAttribute('href', '/fans/fantest/2003-06')
   await expect(page.getByRole('link', { name: 'Juli 2003' })).toHaveCount(0)
   await expect(page.getByRole('link', { name: 'Fantest' })).toBeVisible()

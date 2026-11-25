@@ -1257,6 +1257,7 @@
   Schermnamen en adressen van echte supporters horen daar niet.
   De naamloze cijfers zijn wel nuttig om een pagina na te kijken.
 - **Alternatieven:** de adressen vervangen door verzonnen adressen en de schermnamen houden, zoals bij de beheerders (een schermnaam is van een echte persoon en vaak herkenbaar); ook de tabellen van de spellen leeg laten (dan is op de kopie niets van Fans te controleren).
+- **Later:** zie _Wat een supporter op de Fantest verstuurt, staat in `quiz_entries`_ (25 november 2026): die tabel komt zonder rijen mee.
 
 ## Een test houdt verwijzingen naar supporters uit de kopie
 
@@ -1396,3 +1397,15 @@
 - **Gevolg:** een quiz van de redactie heeft altijd tien rijen met vragen, en een vraag van een concept mag lege teksten hebben.
   #1482 telt `participants` op in dezelfde transactie als een inzending, op de rij van de quiz.
   Wie een vraag met `all_correct` nakijkt, telt elk antwoord als goed.
+
+## Wat een supporter op de Fantest verstuurt, staat in `quiz_entries`
+
+- **Datum:** 25 november 2026
+- **Besluit:** migratie 0117 maakt `quiz_entries`, met per supporter en quiz één rij (#1482):
+  de tien antwoorden als plaatsen 1 tot en met 4 in een kolom met JSON, de score, `blocked` en het moment van versturen.
+  `supporter_id` heeft een unieke sleutel samen met `quiz_id`, en wordt leeg bij het opheffen van het account (`ON DELETE SET NULL`).
+  De rij gaat weg met haar quiz.
+  De kopie van acceptatie krijgt de tabel zonder rijen.
+- **Waarom:** de tien antwoorden worden altijd samen geschreven en gelezen, dus een rij per antwoord voegt niets toe.
+  Het issue vraagt dat de kopie de antwoorden leegt.
+- **Alternatieven:** een rij per antwoord (tien keer zoveel rijen voor dezelfde cijfers); de rij meenemen in de kopie zonder `supporter_id`, zoals bij de andere spellen.

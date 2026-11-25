@@ -6,9 +6,11 @@ import { and, asc, count, desc, eq } from 'drizzle-orm'
 
 // The Fantest of the old fansite as an archive (issue 1480): the quizzes by month and the pages
 // that let a visitor play one. It holds the sums of the visitors of then and never a person,
-// and nothing of a visitor of this site: the answers are checked and forgotten.
+// and nothing of a visitor of this site: the answers are checked and forgotten. The quiz of
+// the running month, which a supporter takes part in, is in fantest-entry.ts; both share the
+// names of the form and the check for a gap.
 
-/** The address of the archive. */
+/** The address of the page of the Fantest: the quiz of the month and the archive. */
 export const fantestPath = '/fans/fantest'
 
 /** A quiz has ten questions; one with fewer has a question that was left out. */
@@ -151,7 +153,10 @@ const enough = (participants: null | number) => participants !== null && partici
  * score of a quiz they did not finish. The answers that were given stay in the state. Nothing
  * is stored.
  */
-export function checkQuiz(questions: readonly QuizViewQuestion[], entries: readonly unknown[]): QuizState {
+export function checkQuiz(
+  questions: readonly Pick<QuizViewQuestion, 'position'>[],
+  entries: readonly unknown[],
+): QuizState {
   const answers: Record<number, number> = {}
   const errors: Record<number, string> = {}
 

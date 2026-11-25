@@ -7784,6 +7784,7 @@
   `/fans/` blijft in `robots.txt` geweigerd voor al het andere.
   #1481 en verder (een nieuwe quiz elke maand) zijn niet goedgekeurd en zitten er niet in.
 - **Later:** zie _De redactie schrijft de Fantest in het beheer, en een ingevulde quiz is vergrendeld_ (25 november 2026): #1481 is gebouwd, en het archief toont alleen de quizzen van de oude Fansite.
+  Zie ook _Een supporter doet de Fantest van de maand één keer_ (25 november 2026): `/fans/fantest` heet nu "Fantest", met de quiz van de maand boven het archief, en is voor een ingelogde supporter noindex en persoonlijk.
 
 ## De tabel van de telling heeft de uitkomsten als rijen
 
@@ -8077,4 +8078,34 @@
   Wie een quiz al invulde, mag niet merken dat de vragen daarna anders zijn.
   Knoppen om te verplaatsen werken met een toetsenbord en zonder JavaScript.
   De site slaat nergens afbeeldingen op, en dat is een eigen stuk werk.
-- **Alternatieven:** auteurs alleen hun eigen quizzen geven (er is maar één quiz per maand en de redactie maakt hem samen); slepen om te sorteren (werkt niet zonder JavaScript); een nummer per vraag intypen (foutgevoelig); plaatjes bij vragen (later een eigen issue, met een alt-tekst en opslag op onze eigen host).
+- **Alternatieven:** auteurs alleen hun eigen quizzen geven (er is maar één quiz per maand en de redactie maakt hem samen); slepen om te sorteren (werkt niet zonder JavaScript); een nummer per vraag intypen (foutgevoelig); plaatjes bij vragen (later een eigen issue, met een alt-tekst en opslag op onze eigen host)
+- **Later:** zie _Een supporter doet de Fantest van de maand één keer_ (25 november 2026): de goede antwoorden gaan ook na het versturen niet naar de browser zolang de maand loopt..
+
+## Een supporter doet de Fantest van de maand één keer
+
+- **Datum:** 25 november 2026
+- **Besluit:** `/fans/fantest` toont boven het archief de quiz van de redactie van de lopende kalendermaand, in Nederlandse tijd (#1482).
+  - Een ingelogde supporter beantwoordt de tien vragen één keer.
+    Na het versturen ziet hij zijn score, zonder te zien welke antwoorden goed waren.
+    De score staat tijdens de maand alleen bij hemzelf; de goede antwoorden komen na de maand (#1484), en de ranglijst telt alleen gesloten maanden (#1483).
+    Een nieuw account mag meedoen aan de lopende maand.
+    Er is geen timer.
+  - Wat een supporter verstuurt, staat in `quiz_entries`: de antwoorden, de score van dat moment en het moment.
+    Een unieke sleutel op supporter en quiz dwingt één keer af.
+    De score telt een vraag met "alles goed" voor elk antwoord, zoals die op het moment van versturen staat.
+  - Zolang de maand loopt, leest de pagina de goede antwoorden niet, en geen respons bevat ze.
+    Een test maakt elke respons met twee verschillende sleutels en dezelfde score, en eist dat ze gelijk zijn.
+  - Het formulier stuurt een kenmerk van de vragen mee.
+    Wijzigt de redactie de vragen terwijl het formulier openstaat, vóór de eerste deelnemer, dan wordt er niets bewaard.
+  - Bij het opheffen van een account blijven de antwoorden zonder koppeling staan, en tellen ze mee in de cijfers van de maand.
+    Van een geblokkeerd account wordt de rij gemarkeerd (`blocked`), zoals bij de cijfers van de Uitblinker, zodat ze niet gaan meetellen.
+  - Een geblokkeerd account ziet op de pagina zelf een uitleg met een verwijzing naar Contact, omdat het archief eronder voor iedereen blijft.
+  - De kopie van acceptatie krijgt de tabel zonder rijen, anders dan de tabellen van de andere spellen.
+  - Voor een bezoeker blijft de pagina vindbaar; voor een ingelogde supporter is ze `noindex`.
+    Ze komt nooit in een cache.
+- **Waarom:** eenmalig meedoen volgt de oude Fansite, en de score meteen tonen geeft weinig weg.
+  Zonder de goede antwoorden in een respons gaan ze niet rond onder deelnemers.
+  Een score die met andere vragen is gerekend dan de supporter zag, is fout.
+- **Alternatieven:** de score tot na de maand geheim houden; de goede antwoorden meteen tonen; de score pas bij het lezen uitrekenen (dan verandert ze als de redactie een vraag annuleert); een geblokkeerd account naar `/fans/geblokkeerd` sturen (dan is ook het archief weg).
+- **Let op:** zet de redactie na het versturen "alles goed" bij een vraag, dan verandert de bewaarde score niet vanzelf.
+  Wie de cijfers van een gesloten maand toont (#1483, #1484), beslist of hij de score opnieuw uitrekent uit de bewaarde antwoorden.

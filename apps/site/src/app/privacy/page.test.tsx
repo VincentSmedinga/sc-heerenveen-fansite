@@ -320,6 +320,18 @@ describe('the page Privacy with accounts on', () => {
     expect(withAccounts().text).not.toContain('herinnering voor de Prognose')
   })
 
+  it('names the answers to the Fantest among what an account keeps, only while the Fantest is on', () => {
+    vi.stubEnv('FANS_FANTEST', 'on')
+
+    expect(withAccounts().text).toContain(
+      'Doe je mee aan de Fantest, dan bewaren we je antwoorden, je score en het moment waarop je ze verstuurde.',
+    )
+
+    vi.stubEnv('FANS_FANTEST', 'off')
+
+    expect(withAccounts().text).not.toContain('Doe je mee aan de Fantest')
+  })
+
   it('links to Mijn account', () => {
     expect(withAccounts().plain).toContain('<a href="/fans/mijn-account">Mijn account</a>')
   })

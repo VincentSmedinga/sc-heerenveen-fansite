@@ -2247,12 +2247,16 @@ await withEmptyDatabase((database) =>
     assert.match(yearWinnersHtml, /Na het seizoen/)
     assert.doesNotMatch(yearWinnersHtml, /<table/)
     assert.equal(yearWinners.headers.get('x-robots-tag'), 'noindex, nofollow')
-    // The archive of the Fantest is the same for everybody; the empty database has no quiz, so
-    // no month is there.
+    // The page of the Fantest: the empty database has no quiz of this month and no archive.
     const fantest = await fetch(`${origin}/fans/fantest`)
 
     assert.equal(fantest.status, 200, '/fans/fantest must be there with Fantest on')
-    assert.match(await fantest.text(), /<h1[^>]*>Fantest van toen<\/h1>/)
+    const fantestHtml = await fantest.text()
+
+    assert.match(fantestHtml, /<h1[^>]*>Fantest<\/h1>/)
+    assert.match(fantestHtml, /staat er geen Fantest klaar/)
+    assert.match(fantestHtml, /<h2[^>]*>Fantest van toen<\/h2>/)
+    assert.equal(fantest.headers.get('cache-control'), 'no-store')
     assert.equal(
       (await fetch(`${origin}/fans/fantest/2003-05`)).status,
       404,

@@ -35,7 +35,7 @@ export default async function FantestMonthPage({ params }: Params) {
       <Page.Back>
         <Text>
           <Link href={fantestPath} icon="arrow-left">
-            Fantest van toen
+            Fantest
           </Link>
         </Text>
       </Page.Back>

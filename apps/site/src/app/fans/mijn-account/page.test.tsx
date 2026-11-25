@@ -191,7 +191,7 @@ describe('Mijn account, with the cards of #1454', () => {
     const html = await render()
 
     expect(html).toMatch(/<dt class="hf-meta">Prognose<\/dt><dd><p>Nog niets\.<\/p><\/dd>/)
-    expect(html).not.toContain('Fantest')
+    expect(html).toMatch(/<dt class="hf-meta">Fantest<\/dt><dd><p>Nog niets\.<\/p><\/dd>/)
   })
 
   it('lets a blocked supporter see the data and close the account', async () => {

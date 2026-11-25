@@ -6,6 +6,7 @@ import { isFansPartOn } from '@fansite/shared/fans-env'
 import { count, eq } from 'drizzle-orm'
 
 import { fansGames } from '../fans-paths'
+import { fantestData } from './fantest-data'
 import { fjouwerData } from './fjouwer'
 import { predictionData } from './prediction-results'
 import { ratingData } from './rating-data'
@@ -44,14 +45,13 @@ export type GameData = {
 /**
  * The place of a game: its part, the tables in which it keeps what a supporter filled in, and
  * how it reads them. A table of a game refers to the supporter with `ON DELETE SET NULL`, so
- * what was filled in stays without a link to a person when the account goes. Fantest keeps
- * nothing of a supporter, so it has no place.
+ * what was filled in stays without a link to a person when the account goes.
  */
 export type GamePlace = {
   label: string
   /** Gives what the supporter filled in, or `undefined` for nothing. */
   load: (db: Database, supporterId: number) => Promise<GameData | undefined>
-  part: Exclude<FansPart, 'accounts' | 'fantest'>
+  part: Exclude<FansPart, 'accounts'>
   tables: readonly string[]
 }
 
@@ -60,15 +60,20 @@ export type GamePlace = {
  * yet has no entry; the issue that builds it adds one.
  */
 const kept: Partial<Record<GamePlace['part'], Pick<GamePlace, 'load' | 'tables'>>> = {
+  fantest: { load: fantestData, tables: ['quiz_entries'] },
   prognose: { load: predictionData, tables: ['predictions'] },
   uitblinker: { load: ratingData, tables: ['coach_ratings', 'player_ratings'] },
   vier: { load: fjouwerData, tables: ['fantasy_picks'] },
 }
 
 /** The places of the games, in the order of the bar of games. */
-export const gamePlaces: readonly GamePlace[] = fansGames.flatMap(({ label, part }) =>
-  part === 'fantest' ? [] : [{ label, load: () => Promise.resolve(undefined), part, tables: [], ...kept[part] }],
-)
+export const gamePlaces: readonly GamePlace[] = fansGames.map(({ label, part }) => ({
+  label,
+  load: () => Promise.resolve(undefined),
+  part,
+  tables: [],
+  ...kept[part],
+}))
 
 /** What the account itself holds, for the first card of the page. */
 export type AccountData = {
