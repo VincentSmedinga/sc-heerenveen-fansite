@@ -5,6 +5,14 @@ import { screenNameMaxLength, screenNameMinLength } from './screen-name'
 // What the form of signing up shows: the names of its fields, its state and the words of its
 // messages. The design of the chapter Fans gives the words.
 
+/** The pages of signing up. */
+export const signUpPaths = {
+  account: '/fans/mijn-account',
+  confirm: '/fans/aanmelden/bevestigen',
+  form: '/fans/aanmelden',
+  sent: '/fans/aanmelden/verstuurd',
+} as const
+
 /** The names of the fields, which are also their `id`: an error links to the field with it. */
 export const signUpFields = { email: 'e-mail', screenName: 'schermnaam' } as const
 

@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 
+import { forgetSignUps } from './admin'
 import { checkPage } from './check-page'
 import { sentMails } from './fake-mail'
 
@@ -46,7 +47,7 @@ test.describe('without JavaScript', () => {
     // The welcome is on Fans, and Mijn account shows the data.
     await expect(page).toHaveURL(/\/fans\?welkom=1$/)
     await expect(page.getByText(`Welkom, ${name}.`)).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Doe mee' })).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: 'Inloggen' })).toHaveCount(0)
     await expect(page.getByText(`Je bent ingelogd als ${name}.`)).toBeVisible()
     await page.goto('/fans/mijn-account')
     await expect(page.getByText('Welkom,')).toHaveCount(0)
@@ -111,6 +112,8 @@ test('makes an account with the button behind the link', async ({ page }) => {
 test('shows the address, keeps the digits of a pasted code, and asks for a new code only after a minute', async ({
   page,
 }) => {
+  await forgetSignUps()
+
   const id = unique()
   const address = `code-${id}@example.org`
   const name = `Code_${id}`.slice(0, 20)

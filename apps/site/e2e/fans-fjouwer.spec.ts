@@ -104,9 +104,7 @@ test.describe('without JavaScript', () => {
 test('asks a visitor to log in, and has no list of players', async ({ page }) => {
   await page.goto('/fans/fjouwer')
   await expect(page.getByRole('heading', { level: 2, name: 'Jouw vier' })).toBeVisible()
-  await expect(
-    page.getByText('Log in om je vier te kiezen. Nog geen account? Dat maak je in een minuut.'),
-  ).toBeVisible()
+  await expect(page.getByText('Log in om je vier te kiezen.')).toBeVisible()
   await expect(page.getByRole('checkbox')).toHaveCount(0)
   await checkPage(page)
 })

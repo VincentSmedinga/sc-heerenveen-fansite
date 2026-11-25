@@ -67,14 +67,15 @@ describe('the card of the match to predict', () => {
     expect(html.indexOf('FC Twente')).toBeLessThan(html.lastIndexOf('sc Heerenveen'))
   })
 
-  it('gives a visitor the line about the points, the notice and the two buttons, and no grid', () => {
+  it('gives a visitor the line about the points and the form to log in, and no grid', () => {
     const html = open({ loggedIn: false })
 
     expect(html).toContain('Hoogstens 30 punten per wedstrijd.')
-    expect(html).toContain('Log in om te voorspellen. Nog geen account? Dat maak je in een minuut.')
-    expect(html).toMatch(/action="\/fans\/inloggen"/)
-    expect(html).toMatch(/name="terug"[^>]*value="\/fans\/prognose"|value="\/fans\/prognose"[^>]*name="terug"/)
-    expect(html).toMatch(/action="\/fans\/aanmelden"/)
+    expect(html).toContain('<hr/>')
+    expect(html).not.toContain('>Inloggen<')
+    expect(html).toContain('Log in om te voorspellen.')
+    expect(html).toMatch(/name="terug"[^>]*value="\/fans\/prognose"/)
+    expect(html).toContain('href="/fans/aanmelden"')
     expect(html).not.toContain('Ruststand')
   })
 
@@ -98,6 +99,11 @@ describe('the card of the match to predict', () => {
 
     expect(html).toMatch(/<details[^>]*><summary[^>]*>[^]*Voorspellen[^]*<\/summary>[^]*Log in om te voorspellen/)
     expect(html).toContain('Hoogstens 30 punten per wedstrijd.')
+    expect(html).not.toMatch(/<details[^>]* open/)
+  })
+
+  it('has no way in without a known kick-off', () => {
+    expect(open({ loggedIn: false, match: { ...match, kickoffAt: null } })).not.toContain('name="e-mail"')
   })
 })
 

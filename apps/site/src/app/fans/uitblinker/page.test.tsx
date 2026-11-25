@@ -146,10 +146,13 @@ describe('the page of the Uitblinker', () => {
     expect(html.match(/type="radio"/g)).toHaveLength(20)
   })
 
-  it('shows a visitor the card Doe mee and no form', async () => {
+  it('shows a visitor the form to log in inside the card of the match, and no grades', async () => {
     const html = await render()
 
-    expect(html).toMatch(/<h2[^>]*>Doe mee<\/h2>/)
+    expect(html).toMatch(/<h2[^>]*>Geef je cijfers<\/h2>[^]*<hr\/>[^]*name="e-mail"/)
+    expect(html).toContain('Log in om cijfers te geven.')
+    expect(html).toMatch(/name="terug"[^>]*value="\/fans\/uitblinker"/)
+    expect(html).not.toContain('Doe mee')
     expect(html).not.toContain('type="radio"')
     expect(html).not.toContain('Cijfers opslaan')
   })
@@ -360,6 +363,20 @@ describe('the result of a closed window', () => {
     fansMatchRatings.mockResolvedValue(result)
 
     expect(await render()).not.toContain('Uitslag van de laatste wedstrijd')
+  })
+})
+
+describe('the way in to the Uitblinker', () => {
+  it('is not there while the window waits, is closed or has no match', async () => {
+    for (const window of [
+      { ...base, state: 'waiting' },
+      { ...base, coach: null, players, state: 'closed' },
+      { state: 'none' },
+    ] satisfies RatingWindow[]) {
+      findRatingWindow.mockResolvedValue(window)
+
+      expect(await render()).not.toContain('name="e-mail"')
+    }
   })
 })
 

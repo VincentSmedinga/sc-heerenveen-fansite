@@ -6865,6 +6865,7 @@
 - **Alternatieven:** het item verbergen tot er een spel is (aanmelden is dan niet te testen); de instellingen bij de bouw lezen (dan kent een pagina "niet gevonden" het item niet).
 - **Later:** zie _De links in het hoofdmenu staan op een telefoon dichter bij elkaar_ in `designsysteem.md` (21 november 2026): daar staat hoe breed het menu op een telefoon is.
 - **Later:** op 25 november 2026 toont `/fans` zodra een spel aan staat een kaart per spel, en heet de kaart voor een bezoeker "Doe mee" (zie _`/fans` toont per spel dat aan staat een kaart, met wat er speelt en wat van jou is_, #1646).
+- **Later:** zie _Een fan vraagt de inloglink op de pagina van het spel zelf_ (25 november 2026, #1660): zodra een spel aan staat, vervangt de witte kaart "Inloggen" de kaart "Doe mee".
 
 ## Een supporter maakt een account met een schermnaam en een e-mailadres
 
@@ -7445,6 +7446,7 @@
   Het adres van een seizoen is `?seizoen=2026-27`, zoals bij de andere pagina's met een seizoen.
 - **Waarom:** een bezoeker kan elk adres verzinnen, en een sleutel per adres vult het geheugen van de server.
 - **Alternatieven:** de ranglijst bij elk bezoek berekenen (zwaar na een seizoen met veel voorspellingen).
+- **Later:** zie _Stand Prognose wisselt met SwitchLinks_ (25 november 2026, #1660): de keuze tussen "Seizoen" en "Per wedstrijd" is de gewone schakelaar, ook zonder JavaScript.
 
 - **Datum:** 21 november 2026
 - **Besluit:** kaarten in de smalle kolom naast een hoofdkaart gebruiken het zachte oppervlak van Card.
@@ -8010,6 +8012,7 @@
 - **Alternatieven:** een kaart met de schermnaam en wat je kunt doen (herhaalt de kop, is een nieuwe kaart die niemand ontwierp, en zonder spel valt er weinig te doen); alleen de kaart weghalen (de pagina zegt dan nergens wie je bent).
 - **Later:** _Fans staat in het hoofdmenu zodra accounts aan staan_ hierboven zegt dat `/fans` een kaart heeft om alvast een account te maken; die kaart is er alleen nog voor een bezoeker zonder sessie.
 - **Later:** zolang een spel aan staat, heet die kaart sinds 25 november 2026 "Doe mee" (zie _`/fans` toont per spel dat aan staat een kaart, met wat er speelt en wat van jou is_, #1646).
+- **Later:** zie _Een fan vraagt de inloglink op de pagina van het spel zelf_ (25 november 2026, #1660): zodra een spel aan staat, krijgt een bezoeker de witte kaart "Inloggen" in plaats van de kaart met twee knoppen.
 
 ## Op het veld van een wedstrijd staat een speler met zijn beginletter als een naamgenoot in dezelfde jaren speelde
 
@@ -8233,6 +8236,7 @@
 - **Waarom:** de pagina is de plek om in één keer te zien wat er te doen is.
   Ze komt nooit in een cache, dus persoonlijke inhoud kan hier.
 - **Alternatieven:** een lichtere pagina met alleen de staat, één zin en een link per spel.
+- **Later:** zie _Een fan vraagt de inloglink op de pagina van het spel zelf_ (25 november 2026, #1660): de kaart "Doe mee" is de witte kaart "Inloggen".
 
 ## `/fans` blijft vindbaar voor zoekmachines, ook met de korte standen
 
@@ -8283,3 +8287,49 @@
 - **Waarom:** de link naar Uitblinker van het jaar staat zo altijd op dezelfde plek, bij de andere winnaars, en komt maar één keer voor.
   De sterke kaart valt op.
 - **Alternatieven:** de zachte kaart met het seizoen in de kop houden; de link in de kaart "Zo werkt het" zetten (die gaat over de regels, en met een Uitblinker staat de link er dan twee keer of verhuist hij); een losse kaart met alleen de link.
+
+## Een fan vraagt de inloglink op de pagina van het spel zelf
+
+- **Datum:** 25 november 2026
+- **Besluit:** een fan vraagt de inloglink op Fans en op de spelpagina's zelf, met een gedeeld onderdeel (`PageLogIn`, #1660).
+  De kaarten "Doe mee" verdwijnen, en de pagina Inloggen blijft.
+- **Waarom:** het scheelt een stap, en er is overal dezelfde weg naar binnen.
+- **Alternatieven:** alleen de twee gekopieerde meldingen delen; één kaart "Doe mee" met knoppen voor alle spellen; het formulier alleen op de spelpagina's; zonder witte kaart in de bestaande kaart.
+
+- **Datum:** 25 november 2026
+- **Besluit:** in de kaart van een spel staat het formulier zonder eigen kaart en kop, onder een lijn.
+  Op Fans en de Fantest, waar het los staat, is het een witte kaart met de kop "Inloggen".
+  De tekst is één alinea: vet waarvoor je inlogt, en dan "We mailen je een link en een code.", ook op de pagina Inloggen.
+  De link naast de knop heet "Maak een account".
+  Dit vervangt de witte kaart binnen de kaart van het spel en de melding.
+- **Waarom:** een kaart in een kaart zag er niet goed uit, en zonder lijn liep het formulier door in de wedstrijd.
+  De korte tekst zegt genoeg.
+- **Alternatieven:** de witte kaart binnen de kaart van het spel; een zacht vlak binnen de kaart; zonder lijn; de melding houden.
+
+- **Datum:** 25 november 2026
+- **Besluit:** het formulier is dat van de pagina Inloggen, met dezelfde actie (`LogInFields` en `requestLogIn`), met de pagina als adres om naar terug te gaan.
+  Achter "Voorspellen" in de kaart "Daarna" gaat de uitklapper open als het formulier terugkomt met een fout of een grens.
+- **Waarom:** controles, grenzen en antwoorden blijven zo op één plek, en de pagina werkt ook zonder JavaScript.
+- **Alternatieven:** een eigen actie per spel; een formulier dat naar de pagina Inloggen gaat en daar de fouten toont.
+
+## De spellen van Fans delen hun kaarten
+
+- **Datum:** 25 november 2026
+- **Besluit:** de spellen delen hun gekopieerde kaarten in de code (`src/fans/GameCards.tsx`: de wedstrijdregel, de kaart "Stand", de tabel van de hele stand, de kaart zonder wedstrijd en de kaart "Punten") en houden elk hun eigen teksten en kolommen (#1660).
+  De kaart "Stand" zegt bij beide spellen "Nog geen stand dit seizoen." als er geen rij te tonen is.
+- **Waarom:** de kopieën liepen al uiteen.
+  De teksten verschillen omdat de spellen verschillen.
+- **Alternatieven:** de teksten en de opbouw gelijkmaken; de kopieën laten staan.
+
+- **Datum:** 25 november 2026
+- **Besluit:** het delen van de kaarten en het inloggen op de pagina zitten in één issue.
+- **Waarom:** beide veranderen dezelfde kaarten van de spellen.
+- **Alternatieven:** twee issues, met het opruimen apart.
+
+## Stand Prognose wisselt met SwitchLinks
+
+- **Datum:** 25 november 2026
+- **Besluit:** Stand Prognose kiest tussen "Seizoen" en "Per wedstrijd" met `SwitchLinks` (#1660).
+- **Waarom:** de andere pagina's wisselen zo ook.
+  Links werken zonder JavaScript, dus een aparte versie is niet nodig, en een klik telt niet als nieuw bezoek.
+- **Alternatieven:** de eigen schakelaar houden.

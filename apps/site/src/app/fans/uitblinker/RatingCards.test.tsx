@@ -8,7 +8,6 @@ import {
   ClosedResultCard,
   EarlierWinnersCard,
   HowItWorksCard,
-  JoinCard,
   NextMatchCard,
   OpenCard,
   SavedView,
@@ -116,16 +115,6 @@ describe('the other cards', () => {
 
     expect(html).toContain('De volgende wedstrijd is nog niet bekend.')
     expect(html).not.toMatch(/\(\w+ \d+ \w+\)/)
-  })
-
-  it('has for a visitor the strong card Doe mee with both buttons, which carry the page to come back to', () => {
-    const html = renderToStaticMarkup(<JoinCard />)
-
-    expect(html).toContain('hf-card-strong')
-    expect(html).toMatch(/<h2[^>]*>Doe mee<\/h2>/)
-    expect(html).toContain('schermnaam en een e-mailadres')
-    expect(html).toMatch(/<button[^>]*>Account maken<\/button>/)
-    expect(html).toMatch(/<button[^>]*value="\/fans\/uitblinker" name="terug">Inloggen<\/button>/)
   })
 
   it('explains the game in the soft card of the side column', () => {

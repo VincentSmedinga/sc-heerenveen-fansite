@@ -1,22 +1,8 @@
 import type { ReactNode } from 'react'
 
-import {
-  Button,
-  Card,
-  CardLink,
-  Disclosure,
-  Form,
-  Heading,
-  Match,
-  Notice,
-  PredictionCrowd,
-  ScoreGrid,
-  Tag,
-  Text,
-} from '@fansite/design-system'
+import { Card, CardLink, Heading, PredictionCrowd, ScoreGrid, Tag, Text } from '@fansite/design-system'
 
-import { logInPaths } from '#src/fans/log-in'
-import { returnParameter } from '#src/fans/log-in-form'
+import { NoMatchCard as GameNoMatchCard, MatchLine } from '#src/fans/GameCards'
 import {
   clubsOf,
   deadlineText,
@@ -25,48 +11,11 @@ import {
   predictionPath,
   type PredictionValues,
 } from '#src/fans/prediction'
-import { signUpPaths } from '#src/fans/sign-up'
-import { matchMoment } from '#src/match-format'
 import { crowdProps, type PredictionCrowdData } from '#src/PredictionCrowdCard'
 import { reportAddress } from '#src/report-data'
 
+import { PageLogIn } from '../inloggen/PageLogIn'
 import { PredictionForm } from './PredictionForm'
-
-/** The logged-out visitor's way in: a notice and the two buttons, as on Fans. */
-function LogInNotice({ withScoring = false }: { withScoring?: boolean }) {
-  return (
-    <>
-      {withScoring ? <Text>{scoringLine}</Text> : null}
-      <Notice>Log in om te voorspellen. Nog geen account? Dat maak je in een minuut.</Notice>
-      {/* Forms that only go to a page: the design system has no link as a button. */}
-      <Form action={logInPaths.form} method="get">
-        {/* The button carries the page to come back to: a form sends its name and value. */}
-        <Button name={returnParameter} type="submit" value={predictionPath}>
-          Inloggen
-        </Button>
-      </Form>
-      <Form action={signUpPaths.form}>
-        <Button appearance="soft" type="submit">
-          Account maken
-        </Button>
-      </Form>
-    </>
-  )
-}
-
-/** The match of a card, in the look of the lists: the day and the competition small above. */
-function MatchLine({ match, now }: { match: PredictionMatch; now: Date }) {
-  return (
-    <Match
-      competition={match.competition}
-      {...matchMoment({ ...match, status: 'scheduled' }, now)}
-      home={match.home}
-      opponent={match.opponent}
-      round={match.round}
-      status="scheduled"
-    />
-  )
-}
 
 /** The line about the points, for somebody who is not logged in. */
 const scoringLine = 'Hoogstens 30 punten per wedstrijd.'
@@ -119,12 +68,9 @@ export function ClosedCard({
 /** The card for the time that no match is known: one line. */
 export function NoMatchCard({ heading, id }: { heading: string; id: string }) {
   return (
-    <Card aria-labelledby={id} game="prognose">
-      <Heading id={id} level={2}>
-        {heading}
-      </Heading>
-      <Text>De volgende wedstrijd is nog niet bekend.</Text>
-    </Card>
+    <GameNoMatchCard game="prognose" heading={heading} id={id}>
+      De volgende wedstrijd is nog niet bekend.
+    </GameNoMatchCard>
   )
 }
 
@@ -163,12 +109,12 @@ export function OpenCard({
   if (!open || match.kickoffAt === null) {
     body = <Text>Zodra de aftrap bekend is, kun je hier voorspellen.</Text>
   } else if (!loggedIn) {
-    body = inDisclosure ? (
-      <Disclosure summary="Voorspellen">
-        <LogInNotice withScoring />
-      </Disclosure>
-    ) : (
-      <LogInNotice />
+    body = (
+      <PageLogIn
+        {...(inDisclosure ? { before: <Text>{scoringLine}</Text>, behind: 'Voorspellen' } : {})}
+        message="Log in om te voorspellen."
+        returnTo={predictionPath}
+      />
     )
   } else {
     body = (

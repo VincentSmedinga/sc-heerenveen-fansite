@@ -46,7 +46,7 @@ for (const javaScriptEnabled of [false, true]) {
 
     test('signs up, does the quiz once and reads the score', async ({ page }) => {
       await page.goto('/fans/fantest')
-      await expect(page.getByRole('main').getByRole('link', { name: 'Inloggen' })).toBeVisible()
+      await expect(page.getByRole('button', { name: 'Stuur me een link' })).toBeVisible()
       await expect(page.getByRole('radio')).toHaveCount(0)
 
       await signUp(page)
