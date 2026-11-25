@@ -69,6 +69,34 @@ export function ClosedResultCard({ match, now, ratings }: { match: RatingMatch; 
   )
 }
 
+/**
+ * The side card with the Uitblinker of each match of the season, the newest first, the link to
+ * the matches and the link to the Uitblinkers of the year. It is always there (issue 1661), so
+ * that last link is too: a season without an Uitblinker says so instead of the list.
+ */
+export function EarlierWinnersCard({ season, winners }: { season: string; winners: readonly SeasonWinner[] }) {
+  return (
+    <Card aria-labelledby="eerdere-winnaars" surface="strong">
+      <Heading id="eerdere-winnaars" level={2}>
+        Eerdere winnaars
+      </Heading>
+      {winners.length === 0 ? (
+        <Text>Dit seizoen is er nog geen Uitblinker.</Text>
+      ) : (
+        <WinnerList
+          items={winners.map((winner) => ({
+            average: gradeText(winner.average),
+            line: resultLine(winner),
+            name: winner.name,
+          }))}
+        />
+      )}
+      <CardLink href={seasonAddress(matchesPath, season, seasonOf(new Date()))}>Alle wedstrijden</CardLink>
+      <CardLink href={yearWinnersPath}>Uitblinker van het jaar</CardLink>
+    </Card>
+  )
+}
+
 /** The side card that says how the game works, in a few short lines. */
 export function HowItWorksCard() {
   return (
@@ -271,33 +299,6 @@ export function SavedView({
         sortable={false}
       />
     </>
-  )
-}
-
-/**
- * The side card with the Uitblinker of each match of the season, the newest first, and the
- * link to the matches. A season without an Uitblinker has no card.
- */
-export function SeasonWinnersCard({ season, winners }: { season: string; winners: readonly SeasonWinner[] }) {
-  if (winners.length === 0) {
-    return null
-  }
-
-  return (
-    <Card aria-labelledby="uitblinkers-seizoen" surface="soft">
-      <Heading id="uitblinkers-seizoen" level={2}>
-        Uitblinkers {season}
-      </Heading>
-      <WinnerList
-        items={winners.map((winner) => ({
-          average: gradeText(winner.average),
-          line: resultLine(winner),
-          name: winner.name,
-        }))}
-      />
-      <CardLink href={seasonAddress(matchesPath, season, seasonOf(new Date()))}>Alle wedstrijden</CardLink>
-      <CardLink href={yearWinnersPath}>Uitblinker van het jaar</CardLink>
-    </Card>
   )
 }
 

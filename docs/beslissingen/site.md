@@ -7647,6 +7647,7 @@
 - **Let op:** een venster dat gesloten is, maar waarvan de import de gemiddelden nog niet schreef (hoogstens een kwartier), toont geen kaart op de wedstrijdpagina.
   De trainer staat er niet in; die komt met #1479.
 - **Later:** zie _De trainer staat als laatste regel in de tabel met gemiddelden_ (22 november 2026): de trainer staat nu als laatste regel in de tabel met gemiddelden, op de wedstrijdpagina en op `/fans/uitblinker`.
+- **Later:** zie _Op de pagina Uitblinker staat altijd de kaart Eerdere winnaars_ (25 november 2026): de sterke kaart "Eerdere winnaars" vervangt de zachte kaart en staat er altijd, ook zonder uitblinker.
 
 ## Spelers › Cijfers rangschikt de seizoencijfers, en de Uitblinker van het jaar heeft een eigen pagina
 
@@ -7675,6 +7676,7 @@
 - **Later:** zie _De Uitblinker van het jaar is de speler met het hoogste seizoencijfer, ook voor de oude seizoenen_ (22 november 2026): de acht uitblinkers komen niet meer uit `old_season_winners`, de drempel van zes wedstrijden is die van drie, en bij een gelijk seizoencijfer staan beide spelers er.
 - **Later:** zie _De pagina Uitblinker van het jaar toont een kaart per seizoen en de Uitblinker van de Uitblinkers_ (24 november 2026): de pagina heeft geen tabel meer.
 - **Later:** sinds 25 november 2026 toont de tabel eerst vijf spelers, met de rest achter een uitklapper (zie _De ranglijst van de fans op Spelers › Cijfers toont de top 5_, #1647).
+- **Later:** zie _Op de pagina Uitblinker staat altijd de kaart Eerdere winnaars_ (25 november 2026): de sterke kaart "Eerdere winnaars" vervangt de zachte kaart en staat er altijd, ook zonder uitblinker.
 
 ## De hoofdtrainer krijgt in de Uitblinker een cijfer, als laatste groep van het formulier
 
@@ -8271,3 +8273,13 @@
   De plaatsen lopen door.
 - **Waarom:** de pagina blijft kort, en de hele lijst is met één klik te zien.
 - **Alternatieven:** een lijst van wie het vaakst Uitblinker van een wedstrijd was.
+
+## Op de pagina Uitblinker staat altijd de kaart Eerdere winnaars
+
+- **Datum:** 25 november 2026
+- **Besluit:** op `/fans/uitblinker` staat bovenaan de zijkolom altijd een sterke kaart "Eerdere winnaars", ook zonder Uitblinker, met een zin die dat zegt (#1661).
+  Zonder wedstrijd om cijfers over te geven gaat de kaart over het lopende seizoen.
+  Ze vervangt de zachte kaart "Uitblinkers <seizoen>".
+- **Waarom:** de link naar Uitblinker van het jaar staat zo altijd op dezelfde plek, bij de andere winnaars, en komt maar één keer voor.
+  De sterke kaart valt op.
+- **Alternatieven:** de zachte kaart met het seizoen in de kop houden; de link in de kaart "Zo werkt het" zetten (die gaat over de regels, en met een Uitblinker staat de link er dan twee keer of verhuist hij); een losse kaart met alleen de link.

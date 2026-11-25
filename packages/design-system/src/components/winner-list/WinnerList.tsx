@@ -18,7 +18,7 @@ export type WinnerListProps = Omit<ComponentPropsWithoutRef<'ul'>, 'children'> &
 
 /**
  * The players who were best of their match, one row each, for a side card such as
- * "Uitblinkers 2026/27": the name large with the match in small letters under it, and the
+ * "Eerdere winnaars": the name large with the match in small letters under it, and the
  * average on the right. A screen reader hears "gemiddeld cijfer" before the average.
  */
 export function WinnerList({ className, items, ...props }: WinnerListProps) {
