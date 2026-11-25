@@ -21,6 +21,10 @@ export const quizMinimum = 5
 /** The line under the heading of the archive and of a month, which credits the old editors. */
 export const archiveCredit = 'Vragen uit het archief van de Fansite, gemaakt door de toenmalige redactie.'
 
+/** The same credit above a list that also holds months of the editors of now. */
+export const mixedArchiveCredit =
+  'De vragen van 2001 tot en met 2005 komen uit het archief van de Fansite, gemaakt door de toenmalige redactie.'
+
 const monthNames = [
   'januari',
   'februari',

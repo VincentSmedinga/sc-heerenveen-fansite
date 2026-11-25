@@ -252,6 +252,11 @@ describe('the months of the editors that are over', () => {
     expect(html).toContain('keer alles goed')
     expect(html).toContain('Bekijk de goede ')
     expect(html).not.toContain('Fantest van toen')
+    // The credit of the old editors is about their years only.
+    expect(html).toContain(
+      'De vragen van 2001 tot en met 2005 komen uit het archief van de Fansite, gemaakt door de toenmalige redactie.',
+    )
+    expect(html).not.toContain('Vragen uit het archief')
   })
 
   it('lists them between the old months, the newest year first, with the average from five on', async () => {

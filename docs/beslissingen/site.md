@@ -8146,12 +8146,13 @@
     Wie meedeed, krijgt die link niet.
   - De oude maanden blijven openen als formulier.
   - Onder vijf deelnemers is er van de cijfers alleen het aantal.
-  - De cijfers tellen de site uit de bewaarde antwoorden, met "alles goed" zoals die nu staat, net als de ranglijst.
+  - De site telt de cijfers uit de bewaarde antwoorden, met "alles goed" zoals die nu staat, net als de ranglijst.
     Ze komen uit één query over alle gesloten maanden en staan vijf minuten in het geheugen.
     Een opgeheven account telt anoniem mee; een geblokkeerd account niet, opgeheven of niet.
   - Bij een vraag met "alles goed" is geen antwoord gemarkeerd, en staat er dat elk antwoord als goed telt.
   - `/fans/fantest` toont boven de lijst de cijfers van de laatste gesloten maand van de redactie, met een link naar de goede antwoorden.
     Zodra zo'n maand er is, heet de lijst "Eerdere maanden" in plaats van "Fantest van toen".
+    De erkenning van de toenmalige redactie noemt dan de jaren 2001 tot en met 2005.
   - De pagina van een gesloten maand staat in de sitemap en mag in zoekmachines; voor wie meedeed is ze `noindex`.
 - **Waarom:** het issue wil dat een gesloten quiz voor iedereen te lezen is, zoals op de oude Fansite, en dat wie niet meedeed hem nog kan spelen.
   De uitslag eerst laten zien maakt het lezen vanzelfsprekend; spelen is een keuze.

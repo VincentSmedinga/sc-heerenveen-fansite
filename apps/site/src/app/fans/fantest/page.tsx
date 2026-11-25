@@ -12,6 +12,7 @@ import {
   capital,
   fantestPath,
   fantestRankingPath,
+  mixedArchiveCredit,
   monthPath,
   monthSlug,
   monthTitle,
@@ -144,7 +145,7 @@ export default async function FantestPage({
             </Text>
           </>
         )}
-        <Text appearance="meta">{archiveCredit}</Text>
+        <Text appearance="meta">{latest === undefined ? archiveCredit : mixedArchiveCredit}</Text>
         {byYear(archive).map(({ months, year: archiveYear }) => (
           <Card aria-labelledby={`fantest-${archiveYear}`} key={archiveYear}>
             <Heading id={`fantest-${archiveYear}`} level={3}>
