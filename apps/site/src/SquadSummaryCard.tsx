@@ -7,10 +7,10 @@ import { DataLine } from './DataLine'
 const oneDecimal = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 1, minimumFractionDigits: 1 })
 
 /**
- * The card "De selectie in het kort" on the page Spelers: how many players the card Selectie
+ * The card "In het kort" on the page Spelers: how many players the card Selectie
  * shows, the average age, the youngest and the oldest, and the number of countries, as lines
- * with the name on the left and the figure on the right. It is a soft card at the top of the
- * sidebar. The lines with an age are there only in the current season and only when enough
+ * with the name on the left and the figure on the right. It is a white card at the top of the
+ * main column. The lines with an age are there only in the current season and only when enough
  * players have an age; under the lines, one sentence says how many players the figures rest on
  * when some are missing. Only the worked-out figures come in: never a date of birth.
  */
@@ -18,9 +18,9 @@ export function SquadSummaryCard({ summary }: { summary: SquadSummary }) {
   const { ages, basis, countries } = summary
 
   return (
-    <Card aria-labelledby="de-selectie-in-het-kort" surface="soft">
-      <Heading id="de-selectie-in-het-kort" level={2}>
-        De selectie in het kort
+    <Card aria-labelledby="in-het-kort">
+      <Heading id="in-het-kort" level={2}>
+        In het kort
       </Heading>
       <DescriptionList aligned stacked>
         <DescriptionList.Item term="Spelers">{summary.players}</DescriptionList.Item>

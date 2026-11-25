@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { readSeasonUitblinker } from '#src/fans/season-uitblinker'
 import { getMatchData, getMatchSeasons } from '#src/matches'
 import { getSeasonPlayerStats } from '#src/season-player-stats'
 import { getSeasonReportFigures } from '#src/season-report-figures'
@@ -33,6 +34,9 @@ vi.mock('#src/season-squad', async (importOriginal) => ({
 // The figures of the squad are made up too: they come from the dates of birth in the database.
 vi.mock('#src/squad-summary', () => ({ getSquadSummary: vi.fn() }))
 
+// What the card Uitblinker says is tested with its reader (season-uitblinker.test.ts).
+vi.mock('#src/fans/season-uitblinker', () => ({ readSeasonUitblinker: vi.fn() }))
+
 // The appearances are made up too: the page reads them from the database.
 vi.mock('#src/season-player-stats', () => ({ getSeasonPlayerStats: vi.fn() }))
 
@@ -64,6 +68,7 @@ beforeEach(() => {
   })
   vi.mocked(getMatchData).mockResolvedValue(matchData)
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27'])
+  vi.mocked(readSeasonUitblinker).mockReset()
 })
 
 afterEach(() => {
@@ -78,12 +83,12 @@ describe('the page /spelers', () => {
 
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1">Spelers</h1>',
+      '<h2 class="hf-heading-2" id="in-het-kort">In het kort</h2>',
       '<h2 class="hf-heading-2 hf-heading-anchored" id="selectie"><span class="hf-heading-target"></span><a class="hf-heading-link" href="#selectie">Selectie</a></h2>',
       '<h3 class="hf-heading-3">Doelmannen</h3>',
       '<h3 class="hf-heading-3">Verdedigers</h3>',
       '<h3 class="hf-heading-3">Middenvelders</h3>',
       '<h3 class="hf-heading-3">Aanvallers</h3>',
-      '<h2 class="hf-heading-2" id="de-selectie-in-het-kort">De selectie in het kort</h2>',
       '<h2 class="hf-heading-2" id="kort-topscorers">Topscorers</h2>',
       '<h2 class="hf-heading-2" id="kort-de-nul-gehouden">De nul gehouden</h2>',
     ])
@@ -121,13 +126,13 @@ describe('the page /spelers', () => {
     expect(sidebar).not.toContain('kort-minuten')
   })
 
-  it('has the four cards in the order Topscorers, Assists, De nul gehouden and Minuten for a season with match reports', async () => {
+  it('has the four cards in the order Topscorers, Assists, Minuten and De nul gehouden for a season with match reports', async () => {
     vi.mocked(getSeasonReportFigures).mockResolvedValue(figuresData)
 
     const html = await render()
     const ids = [...html.matchAll(/aria-labelledby="(kort-[a-z-]+)"/g)].map((match) => match[1])
 
-    expect(ids).toEqual(['kort-topscorers', 'kort-assists', 'kort-de-nul-gehouden', 'kort-minuten'])
+    expect(ids).toEqual(['kort-topscorers', 'kort-assists', 'kort-minuten', 'kort-de-nul-gehouden'])
     expect(html).toContain('<a href="/spelers/cijfers#assists">Alle assists</a>')
     expect(html).toContain('<a href="/spelers/cijfers#minuten">Alle minuten</a>')
     expect(getSeasonReportFigures).toHaveBeenCalledWith('2026/27', 'all')
@@ -148,23 +153,48 @@ describe('the page /spelers', () => {
     )
   })
 
-  it('has the soft card "De selectie in het kort" in the sidebar, above the strong card, with the figures of the summary', async () => {
+  it('has the white card "In het kort" in the main column above the squad, with the figures of the summary', async () => {
     const html = await render()
-    const sidebar = html.slice(html.indexOf('style="grid-area:side"'), html.indexOf('</main>'))
+    const main = html.slice(html.indexOf('style="grid-area:main"'), html.indexOf('style="grid-area:side"'))
 
-    expect(sidebar).toContain('<section class="hf-card hf-card-soft" aria-labelledby="de-selectie-in-het-kort">')
-    expect(sidebar.indexOf('de-selectie-in-het-kort')).toBeLessThan(sidebar.indexOf('kort-topscorers'))
-    expect(plain(sidebar)).toContain('Spelers5Gemiddelde leeftijd24,3 jaarJongste17 jaarOudste34 jaarLanden3')
+    expect(main).toContain('<section class="hf-card" aria-labelledby="in-het-kort">')
+    expect(main.indexOf('in-het-kort')).toBeLessThan(main.indexOf('id="selectie"'))
+    expect(plain(main)).toContain('Spelers5Gemiddelde leeftijd24,3 jaarJongste17 jaarOudste34 jaarLanden3')
     expect(getSquadSummary).toHaveBeenCalledWith(squadData, '2026/27', now)
   })
 
-  it('has no card "De selectie in het kort" when the squad is not known', async () => {
+  it('has no card "In het kort" when the squad is not known', async () => {
     vi.mocked(getSquadSummary).mockResolvedValue(undefined)
 
     const html = await render()
 
-    expect(html).not.toContain('de-selectie-in-het-kort')
+    expect(html).not.toContain('in-het-kort')
     expect(html).toContain('kort-topscorers')
+  })
+
+  it('puts the card Uitblinker at the top of the sidebar, soft and with its watermark', async () => {
+    vi.mocked(readSeasonUitblinker).mockResolvedValue({
+      kind: 'last-match',
+      openMatch: 'sc Heerenveen – FC Twente',
+    })
+
+    const html = await render()
+    const sidebar = html.slice(html.indexOf('style="grid-area:side"'), html.indexOf('</main>'))
+
+    expect(sidebar).toMatch(
+      /^[^>]*>\s*<section class="hf-card hf-card-soft hf-card-game hf-card-game-uitblinker" aria-labelledby="uitblinker">/u,
+    )
+    expect(sidebar.indexOf('id="uitblinker"')).toBeLessThan(sidebar.indexOf('kort-topscorers'))
+    expect(readSeasonUitblinker).toHaveBeenCalledWith('2026/27')
+  })
+
+  it('has no card Uitblinker and no empty place without one', async () => {
+    const html = await render()
+
+    expect(html).not.toContain('hf-card-game-uitblinker')
+    expect(html).toMatch(
+      /aria-label="Meer over de spelers"><section class="hf-card hf-card-soft" aria-labelledby="kort-topscorers">/u,
+    )
   })
 
   it('has no date of birth anywhere in the page', async () => {

@@ -242,6 +242,7 @@ export async function loadLatestResult(db: Database) {
       home: matches.home,
       id: matches.id,
       opponent: matches.opponent,
+      season: matches.season,
     })
     .from(matchPlayerRatings)
     .innerJoin(matches, eq(matches.id, matchPlayerRatings.matchId))

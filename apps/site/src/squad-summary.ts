@@ -10,7 +10,7 @@ import { cardPlayers, type SeasonSquad, showsPlayers } from './season-squad'
 export type SquadFigure = { age: number | undefined; country: null | string | undefined }
 
 /**
- * The figures of the card "De selectie in het kort": how many players the card Selectie shows,
+ * The figures of the card "In het kort": how many players the card Selectie shows,
  * from how many countries, and, in the current season, how old they are. `ages` is absent when
  * the card leaves the three lines with an age out, and `countries` when nobody has a country.
  * `basis` is set when the figures rest on fewer players than the card shows: the number of

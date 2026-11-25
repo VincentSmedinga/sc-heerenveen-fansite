@@ -149,3 +149,32 @@ describe('the card Uitblinker van de Uitblinkers', () => {
     expect(html).toContain('Seizoen 1999/00 · seizoencijfer van de Fansite')
   })
 })
+
+describe('the short ranking on Spelers › Cijfers', () => {
+  const rows = (count: number) =>
+    Array.from({ length: count }, (_, index) => ({
+      average: 9 - index / 10,
+      matches: 3,
+      name: `Speler ${index + 1}`,
+      place: index + 1,
+      playerId: index + 1,
+      ratings: 30,
+    }))
+
+  it('shows the first five and the others behind a Disclosure, with the places going on', () => {
+    const html = card({ rows: rows(7) })
+    const [open = '', folded = ''] = html.split('<details')
+
+    expect(open).toContain('Speler 5')
+    expect(open).not.toContain('Speler 6')
+    expect(folded).toContain('Toon alle 7 spelers')
+    expect(folded).toContain('Speler 6')
+    expect(folded).toContain('Speler 7')
+    expect(folded).toMatch(/>6<\/td>/)
+    expect(html).toContain(yearWinnersPath)
+  })
+
+  it('has no Disclosure with five players or fewer', () => {
+    expect(card({ rows: rows(5) })).not.toContain('<details')
+  })
+})

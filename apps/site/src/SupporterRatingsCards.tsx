@@ -1,15 +1,29 @@
-import { Card, CardColumns, CardLink, DataTable, Heading, SeasonPicker, Text, Winner } from '@fansite/design-system'
+import {
+  Card,
+  CardColumns,
+  CardLink,
+  DataTable,
+  Disclosure,
+  Heading,
+  SeasonPicker,
+  Text,
+  Winner,
+} from '@fansite/design-system'
 
 import { yearWinnersPath } from './fans-paths'
-import { type BestYearWinners, type RankedPlayer, type YearWinner } from './fans/season-ratings'
+import { type BestYearWinners, type RankedPlayer, ratingsLine, type YearWinner } from './fans/season-ratings'
 import { gradeText, minimumMatches, minimumRatings, oldSourceLine } from './player-ratings'
 
 /** The dash a figure that we do not have shows: a figure we do not have is never a nought. */
 const dash = '–'
 
+/** How many players of the ranking show at once; the rest is behind a Disclosure. */
+export const shownPlayers = 5
+
 /**
  * The card "Cijfers van de fans" on Spelers › Cijfers (issue 1474): the players of a season
- * from the highest season rating down, with the link to the Uitblinkers of the year. The card
+ * from the highest season rating down, the first five at once and the rest behind a Disclosure
+ * (issue 1647), with the link to the Uitblinkers of the year. The card
  * has the watermark of the Uitblinker (see `Card`). A season without a player that counts
  * says so instead of showing an empty table.
  */
@@ -45,21 +59,18 @@ export function SeasonRankingCard({
         <Text>Dit seizoen zijn er nog geen cijfers.</Text>
       ) : (
         <>
-          <DataTable
+          <RankingTable
             caption={`Seizoen ${season}, de spelers van hoog naar laag op seizoencijfer`}
-            columns={[
-              'Speler',
-              { abbreviation: 'W', name: 'Wedstrijden met cijfers' },
-              { abbreviation: 'Gem', key: true, name: 'Gemiddeld cijfer' },
-            ]}
-            rows={rows.map((row) => ({
-              cells: [row.matches ?? dash, gradeText(row.average)],
-              header: row.name,
-              position: row.place,
-            }))}
-            // The players stand in the order of the ranking, from the highest rating down.
-            sortable={false}
+            rows={rows.slice(0, shownPlayers)}
           />
+          {rows.length > shownPlayers && (
+            <Disclosure summary={`Toon alle ${rows.length} spelers`}>
+              <RankingTable
+                caption={`Seizoen ${season}, de andere spelers van hoog naar laag op seizoencijfer`}
+                rows={rows.slice(shownPlayers)}
+              />
+            </Disclosure>
+          )}
           <Text appearance="meta">
             {`W: wedstrijden met ${minimumRatings} cijfers of meer. Gem: gemiddelde van alle cijfers van het seizoen. Een speler staat er vanaf ${minimumMatches} wedstrijden.`}
             {seasonOnly ? ' Een streepje: van dat seizoen is alleen het seizoencijfer bekend.' : ''}
@@ -69,6 +80,27 @@ export function SeasonRankingCard({
       {oldSource ? <Text appearance="meta">{oldSourceLine}</Text> : null}
       <CardLink href={yearWinnersPath}>Uitblinker van het jaar</CardLink>
     </Card>
+  )
+}
+
+/** A table of players of the ranking, with their places. */
+function RankingTable({ caption, rows }: { caption: string; rows: readonly RankedPlayer[] }) {
+  return (
+    <DataTable
+      caption={caption}
+      columns={[
+        'Speler',
+        { abbreviation: 'W', name: 'Wedstrijden met cijfers' },
+        { abbreviation: 'Gem', key: true, name: 'Gemiddeld cijfer' },
+      ]}
+      rows={rows.map((row) => ({
+        cells: [row.matches ?? dash, gradeText(row.average)],
+        header: row.name,
+        position: row.place,
+      }))}
+      // The players stand in the order of the ranking, from the highest rating down.
+      sortable={false}
+    />
   )
 }
 
@@ -83,12 +115,6 @@ export const noYearWinners = 'Nog geen uitblinkers.'
 
 /** The source line under the list of the Uitblinkers of the year. */
 export const yearWinnersSource = 'Tot 2006/07: cijfers van bezoekers van de Fansite.'
-
-/** The small line under a winner: the number of ratings, or the source of an old rating. */
-const ratingsLine = (ratings: number | undefined) =>
-  ratings === undefined
-    ? 'Seizoencijfer van de Fansite'
-    : `Gemiddelde van ${ratings} ${ratings === 1 ? 'cijfer' : 'cijfers'}`
 
 /** The id of the heading of the card of a season, so the card can name itself. */
 const seasonHeadingId = (season: string) => `uitblinker-${season.replace('/', '-')}`

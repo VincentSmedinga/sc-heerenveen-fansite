@@ -6,12 +6,12 @@ import { SquadSummaryCard } from './SquadSummaryCard'
 const render = (...args: Parameters<typeof SquadSummaryCard>) => renderToStaticMarkup(SquadSummaryCard(...args))
 const plain = (html: string) => html.replaceAll(/<[^>]*>/g, ' ').replaceAll(/\s+/g, ' ')
 
-describe('the card "De selectie in het kort"', () => {
-  it('is a soft card with an h2 and a description list of the five lines in order, the average with a comma', () => {
+describe('the card "In het kort"', () => {
+  it('is a white card with an h2 and a description list of the five lines in order, the average with a comma', () => {
     const html = render({ summary: { ages: { average: 24.34, oldest: 34, youngest: 17 }, countries: 11, players: 28 } })
 
-    expect(html).toContain('<section class="hf-card hf-card-soft" aria-labelledby="de-selectie-in-het-kort">')
-    expect(html).toContain('<h2 class="hf-heading-2" id="de-selectie-in-het-kort">De selectie in het kort</h2>')
+    expect(html).toContain('<section class="hf-card" aria-labelledby="in-het-kort">')
+    expect(html).toContain('<h2 class="hf-heading-2" id="in-het-kort">In het kort</h2>')
     expect(html).toContain('<dl class="hf-description-list hf-description-list-stacked hf-description-list-aligned">')
     expect(plain(html)).toContain('Spelers 28 Gemiddelde leeftijd 24,3 jaar Jongste 17 jaar Oudste 34 jaar Landen 11')
     expect(html).not.toContain('Op basis van')

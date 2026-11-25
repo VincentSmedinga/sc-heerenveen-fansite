@@ -1029,7 +1029,7 @@ export async function listSeasonMatches(db: Database, season: string) {
 /**
  * The date of birth of every player of a season, such as `2026/27`, by the name of the row
  * (`name`, unique in a season) and how exactly the date is known (`birthDatePrecision`). It is
- * for the figures of the card "De selectie in het kort" (an age is worked out from it) and is
+ * for the figures of the card "In het kort" (an age is worked out from it) and is
  * not for a page: the date itself must not leave the server. Both are null for a player
  * without a person or without a date.
  */

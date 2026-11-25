@@ -5954,6 +5954,7 @@
 - **Besluit:** de leeftijden op de kaart zijn die van vandaag (zoals op de pagina van een speler), en alleen in het lopende seizoen; in een eerder seizoen valt de leeftijd weg (#1261).
 - **Waarom:** een leeftijd van nu zegt niets over spelers van lang geleden, en de leeftijd van een oud-speler is al niet getoond (zie _De regel onder de naam is plaats, jaar en leeftijd_).
 - **Alternatieven:** de leeftijd op de eerste dag van het seizoen (werkt voor elk seizoen, maar wijkt af van de pagina van een speler en van de leeftijd die een supporter ziet); de volledige geboortedatum tonen (een persoonsgegeven).
+- **Later:** sinds 25 november 2026 heet de kaart "In het kort" en staat ze wit in de brede kolom boven de selectie (zie _Spelers toont de Uitblinker van het seizoen bovenaan de zijkolom, en "In het kort" boven de selectie_, #1647). De inhoud is gelijk gebleven.
 
 ## De kaart toont alleen wat we kennen, en zegt hoeveel dat is
 
@@ -6078,6 +6079,7 @@
 - **Waarom:** een kaart met alleen een link nodigt niet uit, en de eerste drie namen van een lijst wel.
   Drie regels per kaart houden de zijkolom kort, ook als veel spelers evenveel hebben.
 - **Alternatieven:** de kaart houden en er cijfers in zetten (vier onderwerpen worden één lange kaart); een lijst van wedstrijden bij De nul gehouden (die staat op de pagina Cijfers van de wedstrijden, waar de link heen gaat).
+- **Later:** sinds 25 november 2026 staat de kaart Uitblinker bovenaan de zijkolom, is "De selectie in het kort" naar de brede kolom verhuisd en komt De nul gehouden na Minuten (zie _Spelers toont de Uitblinker van het seizoen bovenaan de zijkolom, en "In het kort" boven de selectie_, #1647).
 
 ## De kwaliteit van wedstrijden staat onder Wedstrijden, en elk onderwerp krijgt zijn eigen kwaliteitslijst
 
@@ -7669,6 +7671,7 @@
   De trainer staat er niet in en wordt nooit de uitblinker; zijn cijfer hoort bij #1479.
 - **Later:** zie _De Uitblinker van het jaar is de speler met het hoogste seizoencijfer, ook voor de oude seizoenen_ (22 november 2026): de acht uitblinkers komen niet meer uit `old_season_winners`, de drempel van zes wedstrijden is die van drie, en bij een gelijk seizoencijfer staan beide spelers er.
 - **Later:** zie _De pagina Uitblinker van het jaar toont een kaart per seizoen en de Uitblinker van de Uitblinkers_ (24 november 2026): de pagina heeft geen tabel meer.
+- **Later:** sinds 25 november 2026 toont de tabel eerst vijf spelers, met de rest achter een uitklapper (zie _De ranglijst van de fans op Spelers › Cijfers toont de top 5_, #1647).
 
 ## De hoofdtrainer krijgt in de Uitblinker een cijfer, als laatste groep van het formulier
 
@@ -8232,3 +8235,21 @@
 - **Waarom:** `/fans` is de startpagina van het hoofdstuk, en die moet te vinden zijn.
   Wie zijn naam niet in de standen wil, zet dat uit op Mijn account.
 - **Alternatieven:** `noindex` zolang de pagina een stand toont, zoals de ranglijst van de Fantest.
+
+## Spelers toont de Uitblinker van het seizoen bovenaan de zijkolom, en "In het kort" boven de selectie
+
+- **Datum:** 25 november 2026
+- **Besluit:** Spelers toont de Uitblinker van het seizoen bovenaan de zijkolom, "In het kort" wit boven de selectie en De nul gehouden onderaan (#1647).
+  Een voorbij seizoen toont de Uitblinker van het jaar.
+  Het lopende seizoen toont de Uitblinker van de laatste wedstrijd van dit seizoen met een uitslag, en de link naar het formulier zolang het venster open is.
+  Zonder uitblinker en zonder open venster is er geen kaart.
+- **Waarom:** de uitblinker hoort bij de spelers van het seizoen, niet alleen bij de dagen waarop je cijfers kunt geven.
+- **Alternatieven:** "In het kort" onder de selectie; voor het lopende seizoen de koploper van het seizoen.
+
+## De ranglijst van de fans op Spelers › Cijfers toont de top 5
+
+- **Datum:** 25 november 2026
+- **Besluit:** de ranglijst van de fans op Spelers › Cijfers toont de top 5, met de andere spelers achter de uitklapper "Toon alle N spelers" (#1647).
+  De plaatsen lopen door.
+- **Waarom:** de pagina blijft kort, en de hele lijst is met één klik te zien.
+- **Alternatieven:** een lijst van wie het vaakst Uitblinker van een wedstrijd was.
