@@ -8291,6 +8291,7 @@
 - **Waarom:** de link naar Uitblinker van het jaar staat zo altijd op dezelfde plek, bij de andere winnaars, en komt maar één keer voor.
   De sterke kaart valt op.
 - **Alternatieven:** de zachte kaart met het seizoen in de kop houden; de link in de kaart "Zo werkt het" zetten (die gaat over de regels, en met een Uitblinker staat de link er dan twee keer of verhuist hij); een losse kaart met alleen de link.
+- **Later:** zie _Een kaart van een spel is wit, met het watermerk en de kop in de kleur van het spel_ in `designsysteem.md` (25 november 2026, #1648): de kaart "Eerdere winnaars" is niet meer sterk blauw maar wit, als kaart van het spel.
 
 ## Een fan vraagt de inloglink op de pagina van het spel zelf
 

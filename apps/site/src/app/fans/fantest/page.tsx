@@ -229,7 +229,7 @@ function LatestResult({ figures, month }: { figures: MonthFigures | undefined; m
   const participants = figures?.participants ?? 0
 
   return (
-    <Card aria-labelledby="fantest-uitslag" surface="strong">
+    <Card aria-labelledby="fantest-uitslag" game="fantest">
       <Heading id="fantest-uitslag" level={2}>
         Uitslag van {when}
       </Heading>

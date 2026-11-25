@@ -117,10 +117,11 @@ describe('the other cards', () => {
     expect(html).not.toMatch(/\(\w+ \d+ \w+\)/)
   })
 
-  it('explains the game in the soft card of the side column', () => {
+  it('explains the game in a card of the game in the side column', () => {
     const html = renderToStaticMarkup(<HowItWorksCard />)
 
-    expect(html).toContain('hf-card-soft')
+    expect(html).toContain('hf-card-game-uitblinker')
+    expect(html).not.toMatch(/hf-card-(soft|strong|warm)/)
     expect(html).toMatch(/<h2[^>]*>Zo werkt het<\/h2>/)
     expect(html).toContain('zeven dagen')
     expect(html).toContain('wijzigen')
@@ -301,10 +302,11 @@ describe('the card Eerdere winnaars', () => {
     { average: 7.4, goalsAgainst: 2, goalsFor: 2, home: false, matchId: 1, name: 'Andries Noppert', opponent: 'Ajax' },
   ]
 
-  it('is a strong card with a name, an average and the match for each Uitblinker, and both links', () => {
+  it('is a card of the game with a name, an average and the match for each Uitblinker, and both links', () => {
     const html = renderToStaticMarkup(<EarlierWinnersCard season="2026/27" winners={winners} />)
 
-    expect(html).toContain('hf-card-strong')
+    expect(html).toContain('hf-card-game-uitblinker')
+    expect(html).not.toMatch(/hf-card-(soft|strong|warm)/)
     expect(html).toMatch(/<h2[^>]*>Eerdere winnaars<\/h2>/)
     expect(html).not.toContain('nog geen Uitblinker')
     expect(html).toContain('Dylan Vente')

@@ -119,6 +119,9 @@ describe('the quiz of the month', () => {
 
     expect(findEntry).toHaveBeenCalledWith({}, 7, 4)
     expect(html).toContain('6 van 10')
+    const card = html.split('<section').find((part) => part.includes('aria-labelledby="fantest-score-kop"'))
+    expect(card).toContain('hf-card-game-fantest')
+    expect(card).not.toMatch(/hf-card-(soft|strong|warm)/)
     expect(html).toContain('Je antwoorden zijn verstuurd.')
     expect(html).not.toContain('Redactievraag')
     expect(html).not.toContain('type="radio"')
@@ -250,6 +253,9 @@ describe('the months of the editors that are over', () => {
     const html = await render()
 
     expect(html).toMatch(/<h2[^>]*>Uitslag van oktober 2026<\/h2>/)
+    const card = html.split('<section').find((part) => part.includes('aria-labelledby="fantest-uitslag"'))
+    expect(card).toContain('hf-card-game-fantest')
+    expect(card).not.toMatch(/hf-card-(soft|strong|warm)/)
     expect(html.indexOf('Uitslag van oktober 2026')).toBeLessThan(html.indexOf('Eerdere maanden'))
     expect(html).toContain('>6,5<')
     expect(html).toContain('>8<')

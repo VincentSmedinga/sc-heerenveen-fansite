@@ -38,7 +38,7 @@ export function Message({ children, id }: { children: string; id: string }) {
 /** The score of a supporter who took part. Which answers were right stays unsaid. */
 export function ScoreCard({ questions, score }: { questions: number; score: number }) {
   return (
-    <Card aria-labelledby="fantest-score-kop" surface="strong">
+    <Card aria-labelledby="fantest-score-kop" game="fantest">
       <Heading id="fantest-score-kop" level={3}>
         Je score
       </Heading>

@@ -146,11 +146,12 @@ describe('the page of a month of the Fantest', () => {
       useActionState.mockReturnValue([checked, vi.fn()])
     })
 
-    it('shows the score "9", "van 10" and what the fans of then did, in a strong card', async () => {
+    it('shows the score "9", "van 10" and what the fans of then did, in a white card of the game', async () => {
       const html = await render()
 
       expect(html).toContain('Je score')
-      expect(html).toContain('hf-card-strong')
+      expect(html).toContain('hf-card-game-fantest')
+      expect(html).not.toMatch(/hf-card-(soft|strong|warm)/)
       expect(html).toContain('>9<')
       expect(html).toContain('van 10')
       expect(html).toContain('>4,1<')

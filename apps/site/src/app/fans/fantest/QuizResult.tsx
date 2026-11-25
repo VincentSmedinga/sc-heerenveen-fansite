@@ -57,7 +57,7 @@ export function QuizResult({
   return (
     <>
       {score === undefined && recent === undefined ? null : (
-        <Card aria-labelledby="fantest-score-kop" id="fantest-score" surface="strong" tabIndex={-1}>
+        <Card aria-labelledby="fantest-score-kop" game="fantest" id="fantest-score" tabIndex={-1}>
           <Heading id="fantest-score-kop" level={2}>
             {score === undefined ? 'Zo deed iedereen het' : 'Je score'}
           </Heading>

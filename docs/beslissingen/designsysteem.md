@@ -4178,6 +4178,7 @@
 - **Later:** op 25 november 2026 vervangen kleine kaarten per spel de kaart Fans op de voorpagina, en die krijgen het watermerk wel, want elk is de kaart van een spel (zie _Elk open spel heeft een kleine kaart op de voorpagina, onder het forum_ in `site.md`, #1645).
 - **Later:** zie _Een kaart van een spel is wit, met het watermerk en de kop in de kleur van het spel_ (25 november 2026, #1648).
   Het watermerk is 60 procent van de breedte, heeft de kleur van het spel in plaats van een tint van het vlak, en de Fantest heeft een nieuwe tekening.
+  De kaarten met een score of uitslag van de Fantest zijn kaarten van het spel en krijgen het watermerk ook; de vragen niet.
 
 ## De code uit de mail is één veld dat als zes vakjes is getekend
 
@@ -4646,6 +4647,8 @@
   - Alle koppen van de kaart (`h2` tot en met `h5`) hebben in licht de stap 700 en in donker de stap 200.
     Alle andere tekst houdt zijn gewone kleur.
   - Het watermerk van de Fantest is een lijst van vier vakjes met elk een lijn ernaast, het derde aangevinkt.
+  - Ook de kaarten op de pagina van een spel die blauw waren, horen bij hun spel: "Eerdere winnaars" en "Zo werkt het" op Uitblinker, en "Je score", de uitslag van je score en de uitslag van een maand op Fantest.
+    Op de pagina's van de spellen blijft geen blauwe kaart over.
   - `Card` negeert bij `game` de vlakken `strong`, `soft` en `warm`, zodat geen pagina een gekleurd vlak onder een spel kan zetten.
     `transparent` blijft, zonder watermerk en met gewone koppen.
 - **Waarom:** de gekleurde vlakken maakten de site te kinderlijk, en zo herken je een spel toch aan de kleur.
