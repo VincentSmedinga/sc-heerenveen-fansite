@@ -8168,11 +8168,14 @@
 - **Datum:** 25 november 2026
 - **Besluit:** de voorpagina toont per open spel een kleine kaart met het watermerk, in een raster van twee bij twee onder het forum, ook op een telefoon (#1645).
   De podcasts staan onder het nieuws, in de hoofdkolom.
-  De kaarten staan op het zachte oppervlak en hebben de naam als `h2`, een groene Tag "Open tot za 16.45" en een korte link, zonder zin met de wedstrijd.
+  De kaarten staan op het zachte oppervlak en hebben de naam als `h2` en een link die zegt wat je kunt doen, zonder zin met de wedstrijd.
+  De links zijn "Voorspel de uitslag", "Geef de spelers een cijfer", "Kies jouw fjouwer" en "Doe de test van november".
+  Er staat geen Tag en geen sluitingsmoment op de kaart: dat staat op de pagina van het spel, bij het formulier.
+  Dat is na het bekijken van de eerste versie zo besloten, in plaats van de groene Tag "Open tot za 16.45" uit het issue.
   De naam is kleiner in een smalle kaart, zodat geen woord midden afbreekt.
   Het component is `OpenGameCards`.
 - **Waarom:** elk spel is in één oogopslag te herkennen, en de spellen nemen weinig ruimte in.
-- **Alternatieven:** één kaart Fans met rijen; een kaart per spel over de volle breedte van de zijkolom.
+- **Alternatieven:** één kaart Fans met rijen; een kaart per spel over de volle breedte van de zijkolom; op de plek van de Tag een regel met de wedstrijd of het aantal deelnemers; de links als vraag.
 
 ## Wedstrijden linkt onder de wedstrijd naar het open spel
 
@@ -8190,7 +8193,7 @@
   `loadOpenGames` (`apps/site/src/fans/open-games.ts`) is de ene plek die dat beslist, voor de voorpagina, Wedstrijden en later `/fans`.
   Het gebruikt de regels van de spellen zelf en leest bij elk bezoek, zonder eigen geheugen.
   Een spel dat niet gelezen kan worden, valt weg en komt in het logboek.
-  De Fantest sluit als de volgende maand begint; de Tag noemt de laatste minuut van de maand ("Open tot ma 30 nov 23.59").
+  De Fantest sluit als de volgende maand begint.
 - **Waarom:** de pagina's blijven kort en cachebaar, en wat van jou is, staat op `/fans` en op de pagina van het spel.
   Lezen bij elk bezoek houdt de kaart gelijk met de klok.
-- **Alternatieven:** de kaart altijd tonen, met de stand of de laatste uitblinker; de open spellen een paar minuten bewaren (dan blijft een gesloten spel langer staan); de Fantest "tot di 1 dec 00.00" laten zeggen (leest als een dag later).
+- **Alternatieven:** de kaart altijd tonen, met de stand of de laatste uitblinker; de open spellen een paar minuten bewaren (dan blijft een gesloten spel langer staan).

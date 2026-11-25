@@ -4,9 +4,6 @@ import type { OpenGame, OpenMatch } from './open-games'
 
 import { openGameCards, openGameLinks } from './open-game-views'
 
-// Friday 20 November 2026, noon in the Netherlands.
-const now = new Date('2026-11-20T11:00:00Z')
-
 const next: OpenMatch = {
   competition: 'Eredivisie',
   home: true,
@@ -25,34 +22,37 @@ const games: OpenGame[] = [
 ]
 
 describe('the cards of the open games', () => {
-  it('says until when each is open in Dutch time, with the date from six days away', () => {
-    expect(openGameCards(games, now).map(({ tag }) => tag)).toEqual([
-      'Open tot za 16.45',
-      'Open tot do 26 nov 20.00',
-      'Open tot za 28 nov 16.45',
-      'Open tot ma 30 nov 23.59',
+  it('gives each a link that says what you can do, named by what it is about, and no deadline', () => {
+    expect(openGameCards(games)).toEqual([
+      {
+        game: 'prognose',
+        href: '/fans/prognose',
+        link: 'Voorspel de uitslag',
+        linkName: 'Voorspel de uitslag van sc Heerenveen – FC Twente',
+        name: 'Prognose',
+      },
+      {
+        game: 'uitblinker',
+        href: '/fans/uitblinker',
+        link: 'Geef de spelers een cijfer',
+        linkName: 'Geef de spelers een cijfer voor Ajax – sc Heerenveen',
+        name: 'Uitblinker',
+      },
+      {
+        game: 'fjouwer',
+        href: '/fans/fjouwer',
+        link: 'Kies jouw fjouwer',
+        linkName: 'Kies jouw fjouwer voor sc Heerenveen – FC Twente',
+        name: 'Fjouwer',
+      },
+      {
+        game: 'fantest',
+        href: '/fans/fantest',
+        link: 'Doe de test van november',
+        linkName: 'Doe de test van november',
+        name: 'Fantest',
+      },
     ])
-  })
-
-  it('gives each a short link, named by what it is about, and no sentence about the match', () => {
-    expect(openGameCards(games, now).map(({ href, link, linkName, name }) => ({ href, link, linkName, name }))).toEqual(
-      [
-        { href: '/fans/prognose', link: 'Voorspel', linkName: 'Voorspel sc Heerenveen – FC Twente', name: 'Prognose' },
-        {
-          href: '/fans/uitblinker',
-          link: 'Geef cijfers',
-          linkName: 'Geef cijfers voor Ajax – sc Heerenveen',
-          name: 'Uitblinker',
-        },
-        {
-          href: '/fans/fjouwer',
-          link: 'Kies je vier',
-          linkName: 'Kies je vier voor sc Heerenveen – FC Twente',
-          name: 'Fjouwer',
-        },
-        { href: '/fans/fantest', link: 'Doe de test', linkName: 'Doe de test van november', name: 'Fantest' },
-      ],
-    )
   })
 })
 

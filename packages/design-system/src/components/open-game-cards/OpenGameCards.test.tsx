@@ -8,10 +8,9 @@ import { type OpenGameCardItem, OpenGameCards } from './OpenGameCards'
 const prognose: OpenGameCardItem = {
   game: 'prognose',
   href: '/fans/prognose',
-  link: 'Voorspel',
-  linkName: 'Voorspel sc Heerenveen – FC Twente',
+  link: 'Voorspel de uitslag',
+  linkName: 'Voorspel de uitslag van sc Heerenveen – FC Twente',
   name: 'Prognose',
-  tag: 'Open tot za 16.45',
 }
 
 const uitblinker: OpenGameCardItem = { ...prognose, game: 'uitblinker', name: 'Uitblinker' }
@@ -28,13 +27,13 @@ describe('OpenGameCards', () => {
     expect(screen.getByRole('region', { name: 'Prognose' }).className).toContain('hf-card-soft')
   })
 
-  it('says until when it is open in a green tag, with a link that is named by what it is about', () => {
-    render(<OpenGameCards items={[prognose]} />)
+  it('has a link that is named by what it is about, and no tag', () => {
+    const { container } = render(<OpenGameCards items={[prognose]} />)
 
-    expect(screen.getByText('Open tot za 16.45').className).toContain('hf-tag-open')
-    expect(screen.getByRole('link', { name: 'Voorspel sc Heerenveen – FC Twente' }).getAttribute('href')).toBe(
-      '/fans/prognose',
-    )
+    expect(
+      screen.getByRole('link', { name: 'Voorspel de uitslag van sc Heerenveen – FC Twente' }).getAttribute('href'),
+    ).toBe('/fans/prognose')
+    expect(container.querySelector('.hf-tag')).toBeNull()
   })
 
   it('is nothing without a game', () => {

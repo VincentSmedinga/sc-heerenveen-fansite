@@ -5,7 +5,7 @@ import { fansPath } from '#src/fans-paths'
 import type { OpenGame } from './open-games'
 
 import { fjouwerPath } from './fjouwer-form'
-import { clubsOf, deadlineText, predictionPath } from './prediction'
+import { clubsOf, predictionPath } from './prediction'
 import { ratingPath } from './rating'
 
 // The words of the open games (issue 1645): the cards on the home page and the links under a
@@ -13,7 +13,12 @@ import { ratingPath } from './rating'
 
 const fantestPath = `${fansPath}/fantest`
 const monthFormat = new Intl.DateTimeFormat('nl-NL', { month: 'long', timeZone: 'UTC' })
-const minute = 60 * 1000
+
+const cardWords = {
+  fjouwer: { href: fjouwerPath, link: 'Kies jouw fjouwer', name: 'Fjouwer', preposition: 'voor' },
+  prognose: { href: predictionPath, link: 'Voorspel de uitslag', name: 'Prognose', preposition: 'van' },
+  uitblinker: { href: ratingPath, link: 'Geef de spelers een cijfer', name: 'Uitblinker', preposition: 'voor' },
+} as const
 
 const clubsLine = (match: Parameters<typeof clubsOf>[0]) => {
   const { away, home } = clubsOf(match)
@@ -22,38 +27,17 @@ const clubsLine = (match: Parameters<typeof clubsOf>[0]) => {
 }
 
 /** The card of each open game on the home page. */
-export function openGameCards(games: readonly OpenGame[], now = new Date()): OpenGameCardItem[] {
+export function openGameCards(games: readonly OpenGame[]): OpenGameCardItem[] {
   return games.map((open) => {
-    // The Fantest closes at midnight, which reads best as the last minute of the month.
-    const last = open.game === 'fantest' ? new Date(open.closesAt.getTime() - minute) : open.closesAt
-    const tag = deadlineText(last, now)
-
     if (open.game === 'fantest') {
-      const month = monthFormat.format(new Date(Date.UTC(2000, open.month - 1, 1)))
+      const link = `Doe de test van ${monthFormat.format(new Date(Date.UTC(2000, open.month - 1, 1)))}`
 
-      return {
-        game: open.game,
-        href: fantestPath,
-        link: 'Doe de test',
-        linkName: `Doe de test van ${month}`,
-        name: 'Fantest',
-        tag,
-      }
+      return { game: open.game, href: fantestPath, link, linkName: link, name: 'Fantest' }
     }
 
-    const match = clubsLine(open.match)
-    const words = {
-      fjouwer: { href: fjouwerPath, link: 'Kies je vier', linkName: `Kies je vier voor ${match}`, name: 'Fjouwer' },
-      prognose: { href: predictionPath, link: 'Voorspel', linkName: `Voorspel ${match}`, name: 'Prognose' },
-      uitblinker: {
-        href: ratingPath,
-        link: 'Geef cijfers',
-        linkName: `Geef cijfers voor ${match}`,
-        name: 'Uitblinker',
-      },
-    }[open.game]
+    const { href, link, name, preposition } = cardWords[open.game]
 
-    return { game: open.game, tag, ...words }
+    return { game: open.game, href, link, linkName: `${link} ${preposition} ${clubsLine(open.match)}`, name }
   })
 }
 

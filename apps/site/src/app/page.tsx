@@ -124,7 +124,7 @@ export default async function HomePage() {
   const { article, discussions, episodes, headlines, matches, matchLinks, openGames } = content
   const now = new Date()
   const news = headlinesOfTheWindow(headlines, now)
-  const games = openGameCards(openGames, now)
+  const games = openGameCards(openGames)
 
   return (
     <>

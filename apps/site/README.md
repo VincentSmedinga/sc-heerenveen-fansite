@@ -271,7 +271,8 @@ Is er geen, dan staat er "We hebben de laatste 8 dagen geen podcastafleveringen 
 Dit geldt ook voor de kaart "Podcasts" op `/nieuws`, want het is dezelfde kaart.
 
 Onder het forum staat voor elk spel van Fans dat nu open is een kleine kaart (`OpenGameCards`), twee naast elkaar, in de volgorde Prognose, Uitblinker, Fjouwer, Fantest.
-Een kaart heeft de naam van het spel, tot wanneer het open is ("Open tot za 16.45") en een korte link.
+Een kaart heeft de naam van het spel en een link die zegt wat je kunt doen: "Voorspel de uitslag", "Geef de spelers een cijfer", "Kies jouw fjouwer" en "Doe de test van november".
+Tot wanneer een spel open is, staat niet op de kaart maar op de pagina van het spel.
 `loadOpenGames` in `src/fans/open-games.ts` is de ene plek die zegt welk spel open is, en `src/fans/open-game-views.ts` schrijft de woorden.
 Een spel is open als accounts en het spel aan staan en:
 

@@ -1415,7 +1415,7 @@ describe('the cards of the open games on the homepage', () => {
       'Fjouwer',
       'Fantest',
     ])
-    expect(cards).toContain('aria-label="Voorspel sc Heerenveen – FC Twente"')
+    expect(cards).toContain('aria-label="Voorspel de uitslag van sc Heerenveen – FC Twente"')
     expect(cards).toContain('aria-label="Doe de test van oktober"')
     expect(html).toContain('aria-label="De wedstrijden, de stand, het forum en de spellen"')
     expect(html).not.toContain('fans-heading')

@@ -27,9 +27,4 @@
       font-size: var(--hf-heading-4-font-size);
     }
   }
-
-  /* A tag over two lines keeps a calm shape. */
-  .hf-open-game-card .hf-tag {
-    border-radius: 0.75rem;
-  }
 }

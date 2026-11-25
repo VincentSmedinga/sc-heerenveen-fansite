@@ -6,10 +6,9 @@ import { type OpenGameCardItem, OpenGameCards } from './OpenGameCards'
 const prognose: OpenGameCardItem = {
   game: 'prognose',
   href: '/fans/prognose',
-  link: 'Voorspel',
-  linkName: 'Voorspel sc Heerenveen – FC Twente',
+  link: 'Voorspel de uitslag',
+  linkName: 'Voorspel de uitslag van sc Heerenveen – FC Twente',
   name: 'Prognose',
-  tag: 'Open tot za 16.45',
 }
 
 const games: OpenGameCardItem[] = [
@@ -17,26 +16,23 @@ const games: OpenGameCardItem[] = [
   {
     game: 'uitblinker',
     href: '/fans/uitblinker',
-    link: 'Geef cijfers',
-    linkName: 'Geef cijfers voor FC Utrecht – sc Heerenveen',
+    link: 'Geef de spelers een cijfer',
+    linkName: 'Geef de spelers een cijfer voor FC Utrecht – sc Heerenveen',
     name: 'Uitblinker',
-    tag: 'Open tot do 20.00',
   },
   {
     game: 'fjouwer',
     href: '/fans/fjouwer',
-    link: 'Kies je vier',
-    linkName: 'Kies je vier voor sc Heerenveen – FC Twente',
+    link: 'Kies jouw fjouwer',
+    linkName: 'Kies jouw fjouwer voor sc Heerenveen – FC Twente',
     name: 'Fjouwer',
-    tag: 'Open tot za 16.45',
   },
   {
     game: 'fantest',
     href: '/fans/fantest',
-    link: 'Doe de test',
+    link: 'Doe de test van november',
     linkName: 'Doe de test van november',
     name: 'Fantest',
-    tag: 'Open tot ma 30 nov 23.59',
   },
 ]
 
@@ -50,7 +46,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component:
-          'De spellen die nu open zijn, als kleine kaarten naast elkaar, voor de voorpagina: de naam van het spel, tot wanneer het open is en een korte link.',
+          'De spellen die nu open zijn, als kleine kaarten naast elkaar, voor de voorpagina: de naam van het spel en een link die zegt wat je kunt doen.',
       },
       page: ControlsDocsPage,
     },
