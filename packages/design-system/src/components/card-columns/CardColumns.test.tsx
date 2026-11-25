@@ -26,6 +26,19 @@ describe('CardColumns', () => {
     expect(renderToStaticMarkup(<CardColumns columns={3} />)).toContain('class="hf-card-columns hf-card-columns-three"')
   })
 
+  it('puts a lead card before the grid of the others, in the order of reading', () => {
+    const html = renderToStaticMarkup(
+      <CardColumns columns={3} lead={<p>A</p>}>
+        <p>B</p>
+        <p>C</p>
+      </CardColumns>,
+    )
+
+    expect(html).toBe(
+      '<div class="hf-card-columns hf-card-columns-three"><div class="hf-card-columns-split"><p>A</p><div class="hf-card-columns-grid"><p>B</p><p>C</p></div></div></div>',
+    )
+  })
+
   it('passes a class and attributes to the container', () => {
     const html = renderToStaticMarkup(<CardColumns className="extra" id="x" />)
 
@@ -46,8 +59,23 @@ describe('card-columns.css', () => {
 
   it('has three columns from 52rem, measured on the container, only for the three-column variant', () => {
     expect(css).toMatch(
-      /@container hf-card-columns \(width >= 52rem\) \{\s*\.hf-card-columns-three > \.hf-card-columns-grid \{\s*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);/,
+      /@container hf-card-columns \(width >= 52rem\) \{\s*\.hf-card-columns-three > \.hf-card-columns-grid,\s*\.hf-card-columns-three > \.hf-card-columns-split \{\s*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);/,
     )
     expect(css).toContain('@container hf-card-columns (width >= 28rem)')
+  })
+
+  it('gives the cards beside a lead one column from 28rem and two from 52rem', () => {
+    const [middle, wide] = css.split('@container hf-card-columns (width >= 52rem)')
+
+    expect(middle).toMatch(
+      /\.hf-card-columns-split > \.hf-card-columns-grid \{\s*grid-template-columns: minmax\(0, 1fr\);/,
+    )
+    expect(wide).toMatch(
+      /\.hf-card-columns-three > \.hf-card-columns-split > \.hf-card-columns-grid \{\s*grid-column: span 2;\s*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/,
+    )
+  })
+
+  it('never makes the grid with the lead into grid lanes, so the lead keeps its column', () => {
+    expect(css).toMatch(/@supports \(display: grid-lanes\) \{\s*\.hf-card-columns-grid \{\s*display: grid-lanes;/)
   })
 })

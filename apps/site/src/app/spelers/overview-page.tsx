@@ -155,6 +155,13 @@ export async function OverviewPage({ view }: { view: OverviewView }) {
   const current = seasonOf(new Date())
   const total = players.length
   const countries = view === 'land' ? byCountry(players) : []
+  // The Netherlands has about half of all players, so its card has a column of its own.
+  const dutch = countries.find((group) => group.country === 'NL')
+  const countrySection = (group: CountryGroup) => (
+    <Section anchor={countryAnchor(group)} count={group.players.length} key={countryAnchor(group)} title={group.name}>
+      <Rows current={current} players={group.players} />
+    </Section>
+  )
   const intro =
     view === 'naam'
       ? `Alle ${total} spelers die sinds ${since} in de selectie van sc Heerenveen stonden, op achternaam. Een voorvoegsel telt niet mee: Joost van Aken staat bij de A.`
@@ -192,7 +199,7 @@ export async function OverviewPage({ view }: { view: OverviewView }) {
           area={view === 'land' ? 'cards' : 'main'}
           aria-label={view === 'land' ? 'De spelers per land' : 'De spelers per letter'}
         >
-          <CardColumns columns={3}>
+          <CardColumns columns={3} lead={dutch && countrySection(dutch)}>
             {view === 'naam'
               ? byLetter(players).map(({ letter, players: group }) => (
                   <Section
@@ -204,16 +211,7 @@ export async function OverviewPage({ view }: { view: OverviewView }) {
                     <Rows current={current} players={group} />
                   </Section>
                 ))
-              : countries.map((group) => (
-                  <Section
-                    anchor={countryAnchor(group)}
-                    count={group.players.length}
-                    key={countryAnchor(group)}
-                    title={group.name}
-                  >
-                    <Rows current={current} players={group.players} />
-                  </Section>
-                ))}
+              : countries.filter((group) => group !== dutch).map(countrySection)}
             <Card as="div" surface="transparent">
               <WikipediaCredit archive compact />
             </Card>
