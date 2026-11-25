@@ -76,18 +76,28 @@ export type PlayerReportStats = {
  * A match with a report that is `klaar` or `bezig`, for the page of the match and the links to
  * it. The match was played, or it is still being played (see `mayHaveReport`):
  * the match with the name its opponent had that day, the `slug` of the opponent, the report,
- * and the names of our players by the id of their row in the report. Whether the report is
- * right is for the caller to check with `checkMatchReport`.
+ * the names of our players by the id of their row in the report, and those of the persons of
+ * the opponent's players in the same way. Whether the report is right is for the caller to
+ * check with `checkMatchReport`.
  */
 export type ReportedMatch = {
   clubSlug: string
   match: Match
   names: Map<number, ReportedPlayerName>
+  /** The persons the opponent's players are linked to (#1544), whose names may be empty. */
+  opponentPersons: Map<number, ReportedPersonName>
   stored: StoredMatchReport
 }
 
 /** Another person of ours with the same surname as a reported player. */
 export type ReportedNamesake = { givenName: null | string; seasons: string[] }
+
+/** The parts of the name of a person, as the importer kept them. */
+export type ReportedPersonName = {
+  familyName: null | string
+  familyNamePrefix: null | string
+  givenName: null | string
+}
 
 /**
  * The name of one of our players as the importer kept it, for the players of a report: the
@@ -748,6 +758,39 @@ async function readFamilies(db: ReportDatabase, familyNames: string[]) {
   return { byPerson }
 }
 
+/** The names of the persons of the opponent's players, by the id of their row in a report. */
+async function readOpponentPersons(db: ReportDatabase, reports: Iterable<StoredMatchReport>) {
+  const linked = [...reports].flatMap((stored) =>
+    stored.appearances.filter((player) => !player.ours && player.personId !== null),
+  )
+  const names = new Map<number, ReportedPersonName>()
+
+  if (linked.length === 0) {
+    return names
+  }
+
+  const found = await db
+    .select({
+      familyName: persons.familyName,
+      familyNamePrefix: persons.familyNamePrefix,
+      givenName: persons.givenName,
+      id: persons.id,
+    })
+    .from(persons)
+    .where(inArray(persons.id, [...new Set(linked.map((player) => player.personId!))]))
+  const byPerson = new Map(found.map(({ id, ...name }) => [id, name]))
+
+  for (const player of linked) {
+    const name = byPerson.get(player.personId!)
+
+    if (name !== undefined) {
+      names.set(player.id, name)
+    }
+  }
+
+  return names
+}
+
 /** The report, the players and the events of several matches, read with a few queries. */
 async function readStoredReports(db: ReportDatabase, ids: number[]) {
   if (ids.length === 0) {
@@ -788,11 +831,12 @@ async function reportedMatchesOf(db: ReportDatabase, where: ReturnType<typeof an
     rows.map((row) => row.match.id),
   )
   const names = await readReportedPlayerNames(db, stored.values())
+  const opponentPersons = await readOpponentPersons(db, stored.values())
 
   return rows.flatMap((row) => {
     const report = stored.get(row.match.id)
 
-    return report === undefined ? [] : [{ ...row, names, stored: report }]
+    return report === undefined ? [] : [{ ...row, names, opponentPersons, stored: report }]
   })
 }
 

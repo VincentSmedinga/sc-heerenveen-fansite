@@ -21,9 +21,9 @@ export type PitchPlayerData = {
   /** His goals, in the order of the clock. A player without any leaves it out. */
   goals?: readonly PitchPlayerGoal[] | undefined
   /**
-   * What stands before his surname under the disc, to tell him from a namesake: `J.`, or his
-   * given name. Leave it out for a player whose surname is enough. The sentence for a screen
-   * reader always has the whole name.
+   * What stands before the name under the disc, to tell him from a namesake: `J.`, or his
+   * given name. It needs a surname or a `shortName`; leave it out for a player whose name
+   * there is enough. The sentence for a screen reader always has the whole name.
    */
   lead?: string | undefined
   /** The minute he came on. A player of the line-up leaves it out (0). */
@@ -33,6 +33,12 @@ export type PitchPlayerData = {
   name: MatchPlayerName
   /** His shirt number, or empty for a player without one (the old line-ups have none). */
   shirtNumber: null | number
+  /**
+   * What stands under the disc instead of the surname, for a player whose `name` has no
+   * surname of its own, such as an opponent known by one string. The sentence for a screen
+   * reader and the list under the pitch keep `name`.
+   */
+  shortName?: string | undefined
   /** The minute he was substituted. Leave it out for a player who stayed on or was sent off. */
   substitutedOffAt?: number | undefined
 }
@@ -147,6 +153,7 @@ export const PitchPlayer = ({
   name,
   ours,
   shirtNumber,
+  shortName,
   style,
   substitutedOffAt,
   ...props
@@ -162,8 +169,9 @@ export const PitchPlayer = ({
     substitutedOffAt,
   }
   const arc = pitchRingArc(player, extraTime)
-  const surname = name.surname === '' ? (name.givenName ?? '') : name.surname
-  const shownName = name.surname === '' || lead === undefined || lead === '' ? surname : `${lead} ${surname}`
+  const surname = shortName ?? (name.surname === '' ? undefined : name.surname)
+  const shownName =
+    surname === undefined ? (name.givenName ?? '') : lead === undefined || lead === '' ? surname : `${lead} ${surname}`
 
   return (
     <li

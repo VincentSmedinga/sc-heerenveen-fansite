@@ -327,6 +327,7 @@ De seed zet bij de eerste wedstrijd van de Eredivisie (`Speelronde 1`) een verzo
 Een tweede verzonnen verslag hoort bij de bekerwedstrijd van de achtste finale: met verlenging, wissels en kaarten tot minuut 120 en een strafschoppenserie die we met 4–3 wonnen.
 Vier spelers van ons staan er zonder rugnummer in, twee in de basis en twee op de bank, zoals in de oude opstellingen.
 `readMatchReport` geeft de schoten van de serie mee als `shootout`, en `listReportedMatches` en `findReportedMatch` ook, voor de pagina van de wedstrijd.
+Die twee geven met `opponentPersons` ook de naam van de persoon van elke gekoppelde speler van de tegenstander, op het id van zijn regel in het verslag.
 Die twee geven ook een wedstrijd die nog `scheduled` is, als hij een verslag heeft (zie _Een wedstrijd die nog wordt gespeeld blijft "gepland", met een verslag dat `bezig` is_ in `docs/beslissingen/hosting-en-data.md`).
 De doelpunten van zo'n wedstrijd staan in `match_goals` en in het verslag, maar de lijsten van de site lezen alleen de doelpunten van een gespeelde wedstrijd (`withGoals` in `queries.ts`).
 

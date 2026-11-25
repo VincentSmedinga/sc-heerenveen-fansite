@@ -47,6 +47,9 @@ const surnamePrefixes = new Set(["'t", '’t', 'da', 'de', 'den', 'der', 'di', '
 
 const isPrefix = (word: string) => surnamePrefixes.has(word.toLowerCase())
 
+/** A player of the opponent in a report: the name as text, and the person if he is linked. */
+export type OpponentPlayer = { name: string; person?: PersonName | undefined }
+
 /**
  * What stands before the surname of a player to tell him from someone with the same surname:
  * the first letter of his given name and a full stop (`J.`), or the whole given name when one
@@ -67,6 +70,33 @@ export function leadOfName(
   const shared = others.some((other) => (other ?? '').trim().charAt(0).toUpperCase() === initial)
 
   return shared ? given : `${initial}.`
+}
+
+/**
+ * How the players of the opponent in one line-up are shortened, on the pitch of a match and
+ * among the scorers above the score (#1672): the name without the given name, in the order of
+ * `players`. When two or more have the same short name, each gets a lead before it (see
+ * `leadOfName`): `J.`, or the whole given name when the initial is shared too.
+ */
+export function shortOpponentNames(players: readonly OpponentPlayer[]): { lead: string; shortName: string }[] {
+  const shortened = players.map(withoutGivenName)
+
+  return shortened.map((player, index) => {
+    const same = shortened.filter(
+      (other, at) => at !== index && other.shortName.toLowerCase() === player.shortName.toLowerCase(),
+    )
+
+    return {
+      lead:
+        same.length === 0
+          ? ''
+          : leadOfName(
+              player.givenName,
+              same.map((other) => other.givenName),
+            ),
+      shortName: player.shortName,
+    }
+  })
 }
 
 /**
@@ -100,6 +130,29 @@ export function textSortName(name: string): string {
   const at = words.findIndex((word) => !isPrefix(word))
 
   return (at === -1 ? words : words.slice(at)).join(' ')
+}
+
+/**
+ * An opponent's name without the given name. A linked person gives his prefix and family name
+ * (`van Oevelen`), or the given name when that is all he has. A name as text loses its first
+ * word (`Anis Hadj Moussa` is `Hadj Moussa`). A name of one word, or one that starts with a
+ * prefix and so has no given name, stays whole.
+ */
+function withoutGivenName({ name, person }: OpponentPlayer): { givenName: string; shortName: string } {
+  const kept = person === undefined ? undefined : personNameParts(person)
+
+  if (kept !== undefined) {
+    return kept.surname === ''
+      ? { givenName: '', shortName: kept.givenName ?? '' }
+      : { givenName: kept.givenName ?? '', shortName: kept.surname }
+  }
+
+  const words = name.trim().split(/\s+/)
+  const [first = ''] = words
+
+  return words.length < 2 || isPrefix(first)
+    ? { givenName: '', shortName: words.join(' ') }
+    : { givenName: first, shortName: words.slice(1).join(' ') }
 }
 
 /** The year a season starts in: `2004/05` is 2004. */

@@ -60,9 +60,18 @@ export function parseFormation(formation: null | string | undefined): null | num
  */
 const rowDepth = (index: number, rows: number) => 0.075 + (index * 0.365) / rows
 
+/**
+ * The part of the width a row of this size is spread over, with the same room left on both
+ * sides. A row of four or more uses more of it, so its names have more room.
+ */
+const rowSpread = (size: number) => (size >= 5 ? 0.88 : size === 4 ? 0.92 : 0.8)
+
 /** The place of a player along the row, as a share of its width. */
-const rowOffset = (position: number, size: number) =>
-  size === 1 ? 0.5 : size >= 5 ? 0.06 + (0.88 * (position + 0.5)) / size : 0.1 + (0.8 * (position + 0.5)) / size
+const rowOffset = (position: number, size: number) => {
+  const spread = rowSpread(size)
+
+  return (1 - spread) / 2 + (spread * (position + 0.5)) / size
+}
 
 const percent = (share: number) => Math.round(share * 1000) / 10
 
@@ -112,7 +121,7 @@ export function pitchSpots(
         portrait: ours
           ? { x: percent(offset), y: percent(1 - toward) }
           : { x: percent(1 - offset), y: percent(toward) },
-        share: percent(((size >= 5 ? 0.88 : 0.8) / size) * 0.95),
+        share: percent((rowSpread(size) / size) * 0.95),
       })
     }
   })

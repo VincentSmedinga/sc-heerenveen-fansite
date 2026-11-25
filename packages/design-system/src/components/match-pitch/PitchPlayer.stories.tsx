@@ -79,9 +79,10 @@ export const SharedSurname = meta.story({
 export const Opponent = meta.story({
   args: {
     minutesPlayed: 90,
-    name: { givenName: 'Hein', surname: 'Testma' },
+    name: { givenName: 'Hein van Testma', surname: '' },
     ours: false,
     shirtNumber: 1,
+    shortName: 'van Testma',
   },
   name: 'Een speler van de tegenstander',
 })

@@ -117,6 +117,17 @@ describe('PitchPlayer', () => {
     expect(container.querySelector('.hf-visually-hidden')?.textContent).toContain('Bram Visser')
   })
 
+  it('shows the short name with its lead, and keeps the whole name in the sentence', () => {
+    const { container } = render(
+      <ol>
+        <PitchPlayer {...visser} lead="B." name={{ givenName: 'Bram Visser', surname: '' }} ours shortName="Visser" />
+      </ol>,
+    )
+
+    expect(container.querySelector('.hf-pitch-player-surname')?.textContent).toBe('B. Visser')
+    expect(container.querySelector('.hf-visually-hidden')?.textContent).toContain('Bram Visser')
+  })
+
   it('is one list item with one sentence, and hides the drawing from a screen reader', () => {
     const { container } = render(
       <ol>

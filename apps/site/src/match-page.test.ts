@@ -206,10 +206,10 @@ describe('the header', () => {
     // sc Heerenveen.
     expect(scorersFor.map((scorer) => [scorer.player, scorer.minute, scorer.ownGoal, scorer.penalty])).toEqual([
       ['Demo', 12, false, false],
-      ['Dirk Proefland', 78, true, false],
+      ['Proefland', 78, true, false],
     ])
     expect(scorersAgainst.map((scorer) => [scorer.player, scorer.minute, scorer.penalty])).toEqual([
-      ['Frank Dummydijk', 40, true],
+      ['Dummydijk', 40, true],
     ])
   })
 
@@ -444,7 +444,7 @@ describe('a goal and a yellow card without a minute', () => {
     const { scorersFor } = unknown()
 
     expect(scorersFor.map((scorer) => [scorer.player, scorer.minute])).toEqual([
-      ['Dirk Proefland', 78],
+      ['Proefland', 78],
       ['Demo', null],
     ])
   })
@@ -550,5 +550,46 @@ describe('a player with a namesake', () => {
       href: '/spelers/ruben-ten-hove',
       surname: 'ten Hove',
     })
+  })
+})
+
+describe('a player of the opponent', () => {
+  const page = () => {
+    const reported = reportedMatch()
+
+    reported.opponentPersons.set(103, { familyName: 'Proefland', familyNamePrefix: 'van', givenName: 'Dirk' })
+
+    return buildMatchPage(matchPageDataOf(reported, [], true))
+  }
+
+  it('has no given name on the pitch, from the person or from the text, and ours stay as they are', () => {
+    const { pitch } = page()
+    const theirs = pitch.opponent?.players ?? []
+
+    expect(theirs[2]).toMatchObject({ name: { givenName: 'Dirk Proefland', surname: '' }, shortName: 'van Proefland' })
+    expect(theirs[8]?.shortName).toBe('Dummydijk')
+    expect(pitch.ours.players.every((one) => !('shortName' in one))).toBe(true)
+  })
+
+  it('has no given name among the scorers, and the whole name in the course of the match', () => {
+    const { events, scorersAgainst } = page()
+
+    expect(scorersAgainst.map((scorer) => scorer.player)).toEqual(['Dummydijk'])
+    expect(events).toContainEqual(
+      expect.objectContaining({ kind: 'goal', player: { givenName: 'Frank Dummydijk', surname: '' } }),
+    )
+  })
+
+  it('gets the initial on the pitch and among the scorers when he shares his name', () => {
+    const reported = reportedMatch()
+    const other = reported.stored.appearances.find((player) => player.id === 110)!
+
+    other.name = 'Ronald Dummydijk'
+
+    const built = buildMatchPage(matchPageDataOf(reported, [], true))
+
+    expect(built.pitch.opponent?.players[8]?.lead).toBe('F.')
+    expect(built.scorersAgainst[0]?.player).toBe('F. Dummydijk')
+    expect(built.substitutes.opponent?.[0]?.name.surname).toBe('')
   })
 })

@@ -2889,6 +2889,7 @@
   Het andere team staat dan op een half veld, en zonder team is er geen veld.
   Een team zonder formatie heeft een eigen zin, apart van "past de formatie niet bij de spelers".
   Zie ook _Een rij van de opstelling loopt van links naar rechts, in de richting van de aanval_ (13 november 2026): de volgorde binnen een rij is nu vastgelegd.
+- **Later:** zie _Een rij van vier staat breder op het veld_ (25 november 2026): ook een rij van vier krijgt meer ruimte.
 
 ## Het veld staat rechtop op een telefoon en ligt vanaf een breedte van 40 rem
 
@@ -4671,3 +4672,13 @@
 - **Waarom:** de gekleurde vlakken maakten de site te kinderlijk, en zo herken je een spel toch aan de kleur.
   De naam, de tekening en de linktekst zeggen ook zonder kleur welk spel het is.
 - **Alternatieven:** gekleurde vlakken; witte kaarten met een watermerk in de stap 100 (meer kleur in het watermerk); alleen de eerste kop kleuren (een kaart met tussenkoppen heeft dan twee kleuren koppen); `Card` bij `game` elk ander vlak laten negeren (dan kan geen kaart van een spel opvallen); ook de kaart van het beste seizoen wit (dan markeert alleen het label haar).
+
+## Een rij van vier staat breder op het veld
+
+- **Datum:** 25 november 2026
+- **Besluit:** een rij van vier spelers beslaat 92 procent van de breedte van de ploeg in plaats van 80 (#1672), en een naam krijgt daar evenveel meer ruimte.
+  Een rij van drie of minder en een rij van vijf of meer blijven zoals ze waren.
+  In de uitleg onder het veld staat er ruimte tussen de voorbeeldschijf en het woord "Rugnummer".
+- **Waarom:** de namen van vier verdedigers staan dicht op elkaar, en langs de zijlijnen was ruimte over.
+  De ring van de voorbeeldschijf viel in de compacte maat tegen het woord aan.
+- **Alternatieven:** de rij verspringen; elke rij breder maken (bij drie of minder is er al ruimte genoeg).
