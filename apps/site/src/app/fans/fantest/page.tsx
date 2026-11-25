@@ -12,6 +12,7 @@ import {
   averageText,
   capital,
   fantestPath,
+  fantestRankingPath,
   loadArchive,
   monthPath,
   monthSlug,
@@ -109,6 +110,9 @@ export default async function FantestPage({
             {cardOf(quiz, supporter, entry, monthSlug(year, month))}
           </>
         )}
+        <Text>
+          <Link href={fantestRankingPath}>Ranglijst per jaar</Link>
+        </Text>
       </Page.Cell>
       <Page.Cell area="archive">
         <Heading level={2}>Fantest van toen</Heading>

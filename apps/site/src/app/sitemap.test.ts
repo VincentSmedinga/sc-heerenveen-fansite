@@ -103,6 +103,7 @@ const notInSitemap: string[] = [
   '/fans/uitblinker/van-het-jaar',
   // One page for every month of the Fantest: the sitemap lists them from the database.
   '/fans/fantest/[maand]',
+  '/fans/fantest/ranglijst',
   // A page of results has no use in a search engine, and says noindex.
   '/nieuws/zoeken',
   // The same for the search for a player.

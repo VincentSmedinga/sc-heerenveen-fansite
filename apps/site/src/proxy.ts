@@ -84,12 +84,17 @@ export function proxy(request: NextRequest, event?: NextFetchEvent) {
 /**
  * Whether the path is a page of a supporter that no search engine may index: Mijn account and
  * its pages, the games Prognose and Uitblinker, whose pages show what a supporter predicted or
- * graded, and the page of the link in a reminder, which has a code in its address.
+ * graded, the ranking of the Fantest, which has screen names, and the page of the link in a
+ * reminder, which has a code in its address.
  */
 function isPersonalFansPath(pathname: string) {
-  return ['/fans/herinnering', '/fans/mijn-account', '/fans/prognose', '/fans/uitblinker'].some(
-    (page) => pathname === page || pathname.startsWith(`${page}/`),
-  )
+  return [
+    '/fans/fantest/ranglijst',
+    '/fans/herinnering',
+    '/fans/mijn-account',
+    '/fans/prognose',
+    '/fans/uitblinker',
+  ].some((page) => pathname === page || pathname.startsWith(`${page}/`))
 }
 
 export const config = {

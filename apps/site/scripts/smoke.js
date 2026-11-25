@@ -2177,6 +2177,11 @@ await withEmptyDatabase((database) =>
       'a month of the Fantest must be "not found" with Fantest off',
     )
     assert.equal(
+      (await fetch(`${origin}/fans/fantest/ranglijst`)).status,
+      404,
+      '/fans/fantest/ranglijst must be "not found" with Fantest off',
+    )
+    assert.equal(
       (await fetch(`${origin}/fans/fjouwer`)).status,
       404,
       '/fans/fjouwer must be "not found" with Fjouwer off',
@@ -2262,6 +2267,14 @@ await withEmptyDatabase((database) =>
       404,
       'a month without a quiz must be "not found"',
     )
+    // The ranking of the Fantest: a visitor reads it, and the empty database has no score.
+    assert.match(fantestHtml, /<a [^>]*href="\/fans\/fantest\/ranglijst"/)
+
+    const fantestRanking = await fetch(`${origin}/fans/fantest/ranglijst`)
+
+    assert.equal(fantestRanking.status, 200, '/fans/fantest/ranglijst must be there with Fantest on')
+    assert.match(await fantestRanking.text(), /<h1[^>]*>Ranglijst Fantest<\/h1>/)
+    assert.equal(fantestRanking.headers.get('x-robots-tag'), 'noindex, nofollow')
     // The card of the game on Fans, with its way to the page.
     assert.match(html, /<h2[^>]*>Uitblinker<\/h2>/)
     assert.match(html, /<a [^>]*href="\/fans\/uitblinker"[^>]*>Naar de <span class="hf-icon-tail">Uitblinker</)

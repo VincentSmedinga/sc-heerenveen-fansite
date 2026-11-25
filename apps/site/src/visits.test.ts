@@ -368,6 +368,7 @@ describe('visitOf', () => {
       '/fans/aanmelden/bevestigen',
       '/fans/aanmelden/verstuurd',
       '/fans/fantest/[maand]',
+      '/fans/fantest/ranglijst',
       '/fans/fjouwer',
       '/fans/fjouwer/stand',
       '/fans/geblokkeerd',

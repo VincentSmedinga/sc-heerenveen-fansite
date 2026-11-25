@@ -118,6 +118,7 @@ describe('proxy', () => {
     '/fans/mijn-account',
     '/fans/mijn-account/schermnaam',
     '/fans/mijn-account/e-mailadres/verstuurd',
+    '/fans/fantest/ranglijst',
     '/fans/prognose',
     '/fans/uitblinker',
   ])('keeps %s out of search engines on production too', (path) => {
