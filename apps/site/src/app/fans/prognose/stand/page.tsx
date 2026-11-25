@@ -101,7 +101,8 @@ export default async function StandPage({
             size="small"
             value={perMatch ? 'match' : 'season'}
           />
-          {perMatch ? (
+          {/* Without a played match with predictions there is nothing to choose from. */}
+          {perMatch && playedMatches.length === 0 ? null : perMatch ? (
             <Form action={standPath} method="get">
               <Field id="stand-wedstrijd" label="Wedstrijd" required={false}>
                 <Select defaultValue={match === undefined ? '' : String(match.id)} name="wedstrijd">

@@ -1583,7 +1583,7 @@ De pagina komt nooit in een cache.
 
 Fans, Prognose, Fjouwer, Uitblinker en Fantest hebben voor een bezoeker het formulier om in te loggen (`app/fans/inloggen/PageLogIn.tsx`, #1660), alleen waar je ook mee kunt doen.
 In de kaart van een spel staat het onder een lijn; op Fans en de Fantest is het een witte kaart met de kop "Inloggen".
-Zij gebruikt het formulier en de actie van de pagina Inloggen (`LogInForm.tsx`, `actions.ts`), en na het inloggen kom je terug op de pagina waar het formulier stond.
+Het formulier is dat van de pagina Inloggen, met dezelfde actie (`LogInForm.tsx`, `actions.ts`), en na het inloggen kom je terug op de pagina waar het formulier stond.
 Wat de spellen verder delen, staat in `src/fans/GameCards.tsx`: de wedstrijdregel, de kaart "Stand" met haar tabel, de kaart zonder wedstrijd en de kaart "Punten".
 
 ### De Uitblinker

@@ -8307,7 +8307,7 @@
 - **Alternatieven:** de witte kaart binnen de kaart van het spel; een zacht vlak binnen de kaart; zonder lijn; de melding houden.
 
 - **Datum:** 25 november 2026
-- **Besluit:** de kaart gebruikt het formulier en de actie van de pagina Inloggen (`LogInFields` en `requestLogIn`), met de pagina als adres om naar terug te gaan.
+- **Besluit:** het formulier is dat van de pagina Inloggen, met dezelfde actie (`LogInFields` en `requestLogIn`), met de pagina als adres om naar terug te gaan.
   Achter "Voorspellen" in de kaart "Daarna" gaat de uitklapper open als het formulier terugkomt met een fout of een grens.
 - **Waarom:** controles, grenzen en antwoorden blijven zo op één plek, en de pagina werkt ook zonder JavaScript.
 - **Alternatieven:** een eigen actie per spel; een formulier dat naar de pagina Inloggen gaat en daar de fouten toont.

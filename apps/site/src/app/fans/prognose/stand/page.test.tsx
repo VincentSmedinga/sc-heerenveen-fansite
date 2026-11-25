@@ -53,6 +53,11 @@ describe('the switch of Stand Prognose', () => {
     const query = Object.fromEntries(new URL(href, 'https://fansite.invalid').searchParams)
 
     expect(href).toBe('/fans/prognose/stand?wedstrijd=0')
-    expect(await render(query)).toContain('Voor deze wedstrijd is nog niets voorspeld.')
+    const empty = await render(query)
+
+    expect(empty).toContain('Voor deze wedstrijd is nog niets voorspeld.')
+    // No empty list of matches with a button that leads back to the season.
+    expect(empty).not.toContain('<select')
+    expect(await render()).not.toContain('<select')
   })
 })
