@@ -17,7 +17,7 @@ The rules are in _Working efficiently_ in `AGENTS.md`.
 The ones Builders break most:
 
 - Run each check in the foreground, once, and start no background monitors; never end a turn only to wait.
-- While you work, run the tests of what you touch; run the full chain once, after the last commit.
+- Run only what tests your own work, as _De controles_ in `CONTRIBUTING.md` says.
 - Send one message when the owner or the Coordinator has to decide something, and none for status.
 
 ## Start
@@ -47,12 +47,8 @@ The ones Builders break most:
 
 ## Before you push
 
-1. The checks from _De controles_ in `CONTRIBUTING.md`: `pnpm lint`, `typecheck`, `test`, `build`, `test:a11y`, with `docker compose up -d --wait` first.
-   The smoke test when markup, page text or a log line changed.
-   `pnpm --filter design-system build-storybook` and `pnpm test:stories` after a design system change.
-   A change that only touches CSS or design tokens (no TypeScript, markup, page text or log line) runs `lint`, `typecheck`, `test` and the Storybook build, and leaves `build`, `test:a11y` and `test:stories` to CI (see _De controles_).
-   `build`, `test:a11y`, `test:stories` and the Storybook build take a slot and wait for each other, also across worktrees (see _Heavy checks_ in `AGENTS.md`): run them once, one at a time, after the last commit.
-2. Merge `origin/main` one more time (`git fetch origin main && git merge origin/main`), and run the checks again if it brought changes.
+1. The checks from _De controles_ in `CONTRIBUTING.md`, after the last commit.
+2. Merge `origin/main` one more time (`git fetch origin main && git merge origin/main`), and run again only what the merge can affect.
    A conflict keeps CI from starting, and on 11 November 2026 almost every pull request conflicted in `docs/beslissingen/`.
 3. The pull request title: `printf '%s\n' '<title>' | pnpm exec commitlint`.
 4. The final check in `AGENTS.md`, point by point.
@@ -86,7 +82,7 @@ Then:
 
 1. Don't try to turn on Auto-fix: the app only allows it on a pull request that the logged-in GitHub account opened, and ours come from the GitHub App.
    The owner may turn it on; then the app wakes you for a failed check, a conflict or a comment.
-   Don't poll CI yourself: after the Reviewer's report, read it once with `gh pr checks <number>`.
+   Don't poll CI: read it once, as _De controles_ in `CONTRIBUTING.md` says.
 2. A visible change gets one to three screenshots in the description, or the line "Geen screenshots: de wijziging is niet zichtbaar." (see _Screenshots_ in `AGENTS.md`).
    Pushing them to `pr-screenshots` needs no go-ahead either.
    For work from a design, make them at the sizes and in the state of the design's board, so they can be laid next to it, and tell the Coordinator each difference with the design.
@@ -96,7 +92,6 @@ Then:
 ## After the review
 
 - Fix the findings and what is red in CI, for at most two rounds, with the Reviewer's report posted first (see `review-pr`).
-  Read CI once with `gh pr checks <number>` after the report, and again only after a push that can change it.
 - If you change the layout of the code or the text after the Reviewer's report, and not only to fix a finding, round two covers that change too: push it with the fixes, so the second report sees it.
 - Before every later push, `get_status`: the owner may have merged already.
   If so, don't push; put the fix on a new branch from `main`.
