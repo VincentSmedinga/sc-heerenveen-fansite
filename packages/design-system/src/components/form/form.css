@@ -47,4 +47,15 @@
     gap: var(--hf-space-s);
     grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
   }
+
+  /*
+   * The button of a form with something beside it, such as a link: on one line, in the middle of
+   * each other, and what is beside the button goes under it where there is no room.
+   */
+  .hf-form-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--hf-space-s) var(--hf-space-m);
+  }
 }

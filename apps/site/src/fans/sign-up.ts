@@ -14,6 +14,7 @@ import { codeHashOf, hashOf, newCode, newToken } from '../login/tokens'
 import { isBlockedAddress } from './blocked-addresses'
 import { endEarlierCodes, logInPaths, noteMail, removeEndedChanges } from './log-in'
 import { checkScreenName } from './screen-name'
+import { signUpPaths } from './sign-up-form'
 import { supporterKind } from './supporter-login'
 
 // Signing up as a supporter (issue 1446). The account is made only when the address is
@@ -22,13 +23,7 @@ import { supporterKind } from './supporter-login'
 // answers the same for an address that has an account already; that address gets the mail to
 // log in instead, so the form doesn't tell who has an account.
 
-/** The pages of signing up. */
-export const signUpPaths = {
-  account: '/fans/mijn-account',
-  confirm: '/fans/aanmelden/bevestigen',
-  form: '/fans/aanmelden',
-  sent: '/fans/aanmelden/verstuurd',
-} as const
+export { signUpPaths }
 
 /** The most sign-ups in one hour of the clock, for the whole site. */
 export const signUpsPerHour = 30

@@ -9,15 +9,15 @@ import { notFound, redirect } from 'next/navigation'
 import { getDatabase } from '#src/database'
 import { logInPaths } from '#src/fans/log-in'
 import { fansMatchRatings, loadRunningCoachRating, loadRunningRatings, seasonWinners } from '#src/fans/match-ratings'
-import { findOwnCoachRating, findOwnRatings, findRatingWindow } from '#src/fans/rating'
+import { findOwnCoachRating, findOwnRatings, findRatingWindow, ratingPath } from '#src/fans/rating'
 import { currentSupporter } from '#src/fans/require-supporter'
 import { pageAreas } from '#src/page-areas'
 
+import { LogInCard } from '../inloggen/LogInCard'
 import {
   ClosedResultCard,
   EarlierWinnersCard,
   HowItWorksCard,
-  JoinCard,
   LateNotice,
   NextMatchCard,
   OpenCard,
@@ -85,12 +85,9 @@ export default async function RatingPage({
     card = <WaitingCard match={window.match} now={now} />
   } else if (supporter === undefined) {
     card = (
-      <>
-        <OpenCard closesAt={window.closesAt} match={window.match} now={now} withCoach={window.coach !== null}>
-          {null}
-        </OpenCard>
-        <JoinCard />
-      </>
+      <OpenCard closesAt={window.closesAt} match={window.match} now={now} withCoach={window.coach !== null}>
+        <LogInCard level={3} message="Log in om cijfers te geven." returnTo={ratingPath} />
+      </OpenCard>
     )
   } else if (supporter.createdAt.getTime() >= window.startsAt.getTime()) {
     card = (

@@ -329,6 +329,29 @@ export const Transparent = meta.story({
   render: renderTransparent,
 })
 
+// A white card inside the card of a game, as the way in to log in on the page of a game. The
+// inner card has no watermark of its own.
+export const Nested = meta.story({
+  name: 'Een witte kaart in de kaart van een spel',
+  render: () => (
+    <Card aria-labelledby="spel" game="uitblinker">
+      <Heading id="spel" level={2}>
+        Geef je cijfers
+      </Heading>
+      <Text>De witte kaart staat in de kaart van het spel en houdt haar eigen rand.</Text>
+      <Card aria-labelledby="binnen">
+        <Heading id="binnen" level={3}>
+          Inloggen
+        </Heading>
+        <Notice>Log in om cijfers te geven.</Notice>
+        <Text>
+          Nog geen account? <Link href="#aanmelden">Account maken</Link>
+        </Text>
+      </Card>
+    </Card>
+  ),
+})
+
 const games: { game: CardGame; label: string }[] = [
   { game: 'prognose', label: 'Prognose' },
   { game: 'uitblinker', label: 'Uitblinker' },

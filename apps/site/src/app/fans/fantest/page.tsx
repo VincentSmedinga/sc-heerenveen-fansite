@@ -26,7 +26,8 @@ import { FocusOnLoad } from '#src/FocusOnLoad'
 import { pageMetadata } from '#src/metadata'
 import { pageAreas } from '#src/page-areas'
 
-import { BlockedCard, JoinCard, Message, messages, ScoreCard } from './MonthQuizCards'
+import { LogInCard } from '../inloggen/LogInCard'
+import { BlockedCard, Message, messages, ScoreCard } from './MonthQuizCards'
 import { MonthQuizForm } from './MonthQuizForm'
 import { Paragraphs } from './Paragraphs'
 import { participantsText } from './QuizResult'
@@ -199,7 +200,7 @@ function cardOf(
   month: string,
 ) {
   if (supporter === undefined) {
-    return <JoinCard />
+    return <LogInCard level={3} message="Log in om mee te doen." returnTo={fantestPath} />
   }
 
   if (!mayTakePart(supporter)) {

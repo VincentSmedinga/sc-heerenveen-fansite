@@ -5,10 +5,12 @@ import { isFansPartOn, requireFansPart } from '@fansite/shared/fans-env'
 import { notFound } from 'next/navigation'
 
 import { fansGames, fansPath, rulesPath } from '#src/fans-paths'
+import { logInPaths } from '#src/fans/log-in'
 import { currentSupporter } from '#src/fans/require-supporter'
 import { pageMetadata } from '#src/metadata'
 
 import { GameCard } from './GameCard'
+import { LogInCard } from './inloggen/LogInCard'
 import { readFantestCard, readFjouwerCard, readPrognoseCard } from './read-game-cards'
 import { readUitblinkerCard } from './uitblinker-card'
 
@@ -56,13 +58,14 @@ const justCreated = (createdAt: Date) => Date.now() - createdAt.getTime() < welc
 /**
  * The page Fans, the start of the chapter (issue 1646). While a game is on it shows a card for
  * each game that is on, with what is going on and, for a supporter who is logged in, what is
- * theirs. While no game is on it says what is coming. A visitor without a session first gets a
- * card to make an account, with buttons to the sign-up (#1446) and to logging in (#1448); a
- * supporter who is logged in gets one line of small text with the screen name of the session
- * and a link to Mijn account. After logging out (`?uitgelogd=1`) a Notice says so. After
- * confirming a new account (`?welkom=1`) another welcomes the supporter by the screen name of
- * the session, and only in the minutes after the account was made, so the address of the page
- * doesn't show it again later. The page never comes in a cache.
+ * theirs. While no game is on it says what is coming. A visitor without a session first gets
+ * the way in: the card with the form to log in (#1660), or, while no game is on, a card to make
+ * an account with buttons to the sign-up (#1446) and to logging in (#1448). A supporter who is
+ * logged in gets one line of small text with the screen name of the session and a link to Mijn
+ * account. After logging out (`?uitgelogd=1`) a Notice says so. After confirming a new account
+ * (`?welkom=1`) another welcomes the supporter by the screen name of the session, and only in
+ * the minutes after the account was made, so the address of the page doesn't show it again
+ * later. The page never comes in a cache.
  */
 export default async function FansPage({
   searchParams,
@@ -73,8 +76,8 @@ export default async function FansPage({
 
   // A visit of a supporter who is logged in counts: the session stays open another 90 days, and
   // the account keeps the day of the visit. The session also decides what the page shows: the
-  // card to make an account for a visitor, the line with the screen name for a supporter, and
-  // what is theirs on the cards.
+  // way in for a visitor, the line with the screen name for a supporter, and what is theirs on
+  // the cards.
   const supporter = await currentSupporter()
 
   const { uitgelogd, welkom } = await searchParams
@@ -94,14 +97,24 @@ export default async function FansPage({
         {welkom === '1' && supporter !== undefined && justCreated(supporter.createdAt) ? (
           <Notice>Welkom, {supporter.screenName}. Je account is klaar en je blijft op dit apparaat ingelogd.</Notice>
         ) : null}
-        {supporter === undefined ? (
+        {supporter !== undefined ? (
+          <Text appearance="meta">
+            Je bent ingelogd als {supporter.screenName}. <Link href={`${fansPath}/mijn-account`}>Mijn account</Link>
+          </Text>
+        ) : on.length > 0 ? (
+          <LogInCard
+            level={2}
+            message="Log in om mee te doen. Alleen je schermnaam is voor anderen te zien."
+            returnTo={logInPaths.home}
+          />
+        ) : (
           <Card aria-labelledby="doe-mee" surface="strong">
             <Heading id="doe-mee" level={2}>
-              {on.length === 0 ? 'Maak alvast een account' : 'Doe mee'}
+              Maak alvast een account
             </Heading>
             <Text>
-              {on.length === 0 ? 'Dan ben je klaar als het eerste spel begint. ' : ''}Je hebt alleen een schermnaam en
-              een e-mailadres nodig, geen wachtwoord. Alleen je schermnaam is voor anderen te zien.
+              Dan ben je klaar als het eerste spel begint. Je hebt alleen een schermnaam en een e-mailadres nodig, geen
+              wachtwoord. Alleen je schermnaam is voor anderen te zien.
             </Text>
             {/* A form that only goes to the page: the design system has no link button. */}
             <Form action={`${fansPath}/aanmelden`}>
@@ -113,10 +126,6 @@ export default async function FansPage({
               </Button>
             </Form>
           </Card>
-        ) : (
-          <Text appearance="meta">
-            Je bent ingelogd als {supporter.screenName}. <Link href={`${fansPath}/mijn-account`}>Mijn account</Link>
-          </Text>
         )}
         {cards.length === 0 ? null : (
           <CardColumns>

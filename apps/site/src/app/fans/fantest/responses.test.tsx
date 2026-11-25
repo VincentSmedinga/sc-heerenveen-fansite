@@ -161,6 +161,7 @@ describe('the responses of the quiz while the month runs', () => {
     expect(second).toEqual(first)
     expect(Object.values(first.month)).toEqual(Array.from({ length: 4 }, () => 'NEXT_NOT_FOUND'))
     expect(first.addresses.join()).not.toContain('2026-11')
-    expect(JSON.stringify(first)).not.toMatch(/slottekst|correct|goed antwoord/i)
+    // `autoCorrect` is an attribute of the field of the address, in the card to log in.
+    expect(JSON.stringify(first)).not.toMatch(/slottekst|(?<!auto)correct|goed antwoord/i)
   })
 })

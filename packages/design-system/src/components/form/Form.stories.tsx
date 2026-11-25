@@ -6,6 +6,8 @@ import { Card } from '../card/Card'
 import { Field } from '../field/Field'
 import { Heading } from '../heading/Heading'
 import { Input } from '../input/Input'
+import { Link } from '../link/Link'
+import { Text } from '../text/Text'
 import { Form } from './Form'
 
 const meta = preview.meta({
@@ -67,6 +69,23 @@ export const Cards = meta.story({
           <Input name="stand" />
         </Field>
       </Card>
+    </Form>
+  ),
+})
+
+export const Actions = meta.story({
+  name: 'Knop met een link ernaast',
+  render: () => (
+    <Form onSubmit={(event) => event.preventDefault()}>
+      <Field id="e-mailadres" label="E-mailadres">
+        <Input autoComplete="email" name="e-mailadres" type="email" />
+      </Field>
+      <Form.Actions>
+        <Button type="submit">Stuur me een link</Button>
+        <Text>
+          Nog geen account? <Link href="#aanmelden">Account maken</Link>
+        </Text>
+      </Form.Actions>
     </Form>
   ),
 })

@@ -1,9 +1,4 @@
-import { Card, CardLink, Heading, Link, Notice, Strong, Text } from '@fansite/design-system'
-
-import { fantestPath } from '#src/fans/fantest'
-import { logInPaths } from '#src/fans/log-in'
-import { returnParameter } from '#src/fans/log-in-form'
-import { signUpPaths } from '#src/fans/sign-up'
+import { Card, Heading, Link, Notice, Strong, Text } from '@fansite/design-system'
 
 // The cards around the quiz of the running month (issue 1482). None of them gets a right
 // answer.
@@ -27,23 +22,6 @@ export function BlockedCard() {
         De redactie heeft je account geblokkeerd. Daarom doe je niet mee aan de Fantest. Denk je dat dit niet klopt? Dat
         kun je melden via <Link href="/contact">Contact</Link>.
       </Text>
-    </Card>
-  )
-}
-
-/** The way in for a visitor, who sees no questions. */
-export function JoinCard() {
-  return (
-    <Card aria-labelledby="fantest-meedoen" surface="strong">
-      <Heading id="fantest-meedoen" level={3}>
-        Doe mee
-      </Heading>
-      <Text>Om mee te doen heb je alleen een schermnaam en een e-mailadres nodig. Een wachtwoord is niet nodig.</Text>
-      {/* The first link carries the page to come back to. */}
-      <CardLink href={`${logInPaths.form}?${new URLSearchParams({ [returnParameter]: fantestPath }).toString()}`}>
-        Inloggen
-      </CardLink>
-      <CardLink href={signUpPaths.form}>Account maken</CardLink>
     </Card>
   )
 }

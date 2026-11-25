@@ -6,7 +6,6 @@ import {
   Heading,
   type KeyFigure,
   KeyFigures,
-  Match,
   PredictionList,
   type PredictionListItem,
   Strong,
@@ -20,10 +19,9 @@ import type { FourPoints, MatchStanding, PointsMatch } from '#src/fans/fjouwer-p
 
 import { fjouwerRulesAddress } from '#src/fans-paths'
 import { pointsText } from '#src/fans/fjouwer-form'
+import { ScoringCard as GameScoringCard, MatchLine } from '#src/fans/GameCards'
 import { clubsOf } from '#src/fans/prediction'
 import { rowMatchOf } from '#src/fans/prediction-words'
-import { matchMoment } from '#src/match-format'
-import { reportAddress } from '#src/report-data'
 
 // The cards of the points of the game Fjouwer (issue 1471): the four of the last match with
 // what each player did, the earlier matches, and the scoring.
@@ -68,17 +66,7 @@ export function LastMatchCard({
       {score === undefined ? (
         <Text>{`${clubsOf(match).home} – ${clubsOf(match).away}`}</Text>
       ) : (
-        <Match
-          competition={match.competition}
-          {...matchMoment({ ...match, status: 'played' }, now)}
-          goalsAgainst={score.goalsAgainst}
-          goalsFor={score.goalsFor}
-          home={match.home}
-          opponent={match.opponent}
-          reportHref={reportAddress(match.season, match.matchDate, match.clubSlug)}
-          round={match.round}
-          status="played"
-        />
+        <MatchLine match={{ ...match, ...score }} now={now} played />
       )}
       {item.ready && item.total !== undefined ? (
         <>
@@ -176,10 +164,7 @@ export const scoringRows: readonly { header: string; points: number }[] = [
 /** The soft card "Punten", in the narrow column: the scoring, and who decides. */
 export function ScoringCard() {
   return (
-    <Card aria-labelledby="punten-telling" game="fjouwer" surface="soft">
-      <Heading id="punten-telling" level={2}>
-        Punten
-      </Heading>
+    <GameScoringCard game="fjouwer">
       <DataTable
         caption="Wat een speler oplevert"
         columns={['Onderdeel', 'Punten']}
@@ -188,6 +173,6 @@ export function ScoringCard() {
       />
       <Text>Het verslag van de redactie beslist wat een speler deed.</Text>
       <CardLink href={fjouwerRulesAddress}>Spelregels</CardLink>
-    </Card>
+    </GameScoringCard>
   )
 }

@@ -11,6 +11,15 @@ import { sentMails } from './fake-mail'
 
 const unique = () => `${Date.now().toString(36)}${Math.floor(Math.random() * 1000)}`
 
+/** The code of the last mail to one address, once the site has handed it over. */
+async function codeTo(address: string, count: number) {
+  await expect.poll(() => sentMails().filter((mail) => mail.includes(`To: ${address}`)).length).toBe(count)
+
+  const mail = sentMails().findLast((one) => one.includes(`To: ${address}`)) ?? ''
+
+  return /^(\d{6})$/m.exec(mail)?.[1] ?? ''
+}
+
 /** Opens the form of the next match, which stands behind the button Voorspellen. */
 async function openForm(page: Page) {
   await page.goto('/fans/prognose')
@@ -34,6 +43,8 @@ async function signUp(page: Page) {
   await page.getByLabel('Code uit de mail').fill(/^(\d{6})$/m.exec(mail)?.[1] ?? '')
   await page.getByRole('button', { name: 'Doorgaan' }).click()
   await expect(page).toHaveURL(/\/fans\?welkom=1$/)
+
+  return address
 }
 
 const field = (page: Page, row: 'Eindstand' | 'Ruststand', club: string) =>
@@ -69,6 +80,28 @@ test.describe('without JavaScript', () => {
     await expect(page.getByText('Je voorspelling is gewijzigd. Rust 1–0, eind 3–1.')).toBeVisible()
   })
 
+  test('logs in on the page itself: the fold stays open after an error, and the code leads back', async ({ page }) => {
+    const address = await signUp(page)
+
+    await page.context().clearCookies()
+    await openForm(page)
+    await page.getByRole('button', { name: 'Stuur me een link' }).click()
+
+    // The page came back with the error, and the fold of the next match is open.
+    await expect(page).toHaveURL(/\/fans\/prognose$/)
+    await expect(page.getByRole('region', { name: 'Kijk nog even naar 1 ding' }).getByRole('link')).toHaveText([
+      'Vul je e-mailadres in.',
+    ])
+    await expect(page.getByLabel('E-mailadres')).toBeVisible()
+
+    await page.getByLabel('E-mailadres').fill(address)
+    await page.getByRole('button', { name: 'Stuur me een link' }).click()
+    await expect(page).toHaveURL(/\/fans\/inloggen\/verstuurd\?ref=.*terug=%2Ffans%2Fprognose/)
+    await page.getByLabel('Code uit de mail').fill(await codeTo(address, 2))
+    await page.getByRole('button', { name: 'Doorgaan' }).click()
+    await expect(page).toHaveURL(/\/fans\/prognose$/)
+  })
+
   test('shows an error at the field that is empty, and keeps the other numbers', async ({ page }) => {
     await signUp(page)
     await openForm(page)
@@ -98,7 +131,7 @@ test('asks a visitor to log in, and comes back to the page after logging in', as
   await page.goto('/fans/prognose')
   // The match that began is closed; the way in stands behind the button of the next match.
   await page.getByText('Voorspellen', { exact: true }).click()
-  await expect(page.getByText('Log in om te voorspellen. Nog geen account? Dat maak je in een minuut.')).toBeVisible()
+  await expect(page.getByText('Log in om te voorspellen.')).toBeVisible()
   await expect(page.getByRole('heading', { level: 2, name: 'Volgende wedstrijd' })).toBeVisible()
   await expect(page.getByText('Gesloten')).toBeVisible()
   await expect(page.getByRole('textbox', { name: 'Ruststand sc Heerenveen' })).toHaveCount(0)

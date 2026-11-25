@@ -32,7 +32,7 @@ export type { CardGroupProps } from './components/card-group/CardGroup'
 export { CardLink, leavesTheSite } from './components/card-link/CardLink'
 export type { CardLinkProps } from './components/card-link/CardLink'
 export { Card, cardElements, cardSurfaces } from './components/card/Card'
-export type { CardElement, CardProps, CardSurface } from './components/card/Card'
+export type { CardElement, CardGame, CardProps, CardSurface } from './components/card/Card'
 export { CareerTimeline } from './components/career-timeline/CareerTimeline'
 export type {
   CareerMoment,

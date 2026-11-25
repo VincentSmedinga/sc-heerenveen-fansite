@@ -16,9 +16,9 @@ import {
 import { currentSupporter } from '#src/fans/require-supporter'
 import { pageAreas } from '#src/page-areas'
 import { seasonChoices, seasonFromSlug, seasonSlug } from '#src/seasons'
+import { SwitchLinks } from '#src/SwitchLinks'
 
 import { standPath, StandTable } from '../StandCards'
-import { StandSwitch } from './StandSwitch'
 
 const areas = pageAreas({ main: ['stand'] })
 
@@ -91,7 +91,15 @@ export default async function StandPage({
       </Page.Cell>
       <Page.Cell area="stand">
         <Card game="prognose">
-          <StandSwitch addresses={addresses} view={perMatch ? 'match' : 'season'} />
+          <SwitchLinks
+            label="Weergave van de stand"
+            options={[
+              { href: addresses.season, label: 'Seizoen', value: 'season' },
+              { href: addresses.match, label: 'Per wedstrijd', value: 'match' },
+            ]}
+            size="small"
+            value={perMatch ? 'match' : 'season'}
+          />
           {perMatch ? (
             <Form action={standPath} method="get">
               <Field id="stand-wedstrijd" label="Wedstrijd" required={false}>

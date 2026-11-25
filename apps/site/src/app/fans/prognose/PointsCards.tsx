@@ -5,18 +5,16 @@ import {
   Heading,
   type KeyFigure,
   KeyFigures,
-  Match,
   PredictionList,
   Text,
 } from '@fansite/design-system'
 import { maxPredictionPoints, pointsPerPart } from '@fansite/shared/prediction-points'
 
+import { ScoringCard as GameScoringCard, MatchLine } from '#src/fans/GameCards'
 import { clubsOf, predictionPath } from '#src/fans/prediction'
 import { type CrowdFigures, type ScoredPrediction, totalsOf } from '#src/fans/prediction-results'
 import { guessText, listItemOf, playedScore, reasonText, scoreText } from '#src/fans/prediction-words'
 import { RulesLink } from '#src/fans/RulesLink'
-import { matchMoment } from '#src/match-format'
-import { reportAddress } from '#src/report-data'
 
 // The cards of the points of the game Prognose (issue 1449): what a fan predicted, the
 // points of a match, how everybody did, and the scoring itself.
@@ -106,17 +104,7 @@ export function PointsCard({
           {clubs.home} – {clubs.away}
         </Text>
       ) : (
-        <Match
-          competition={match.competition}
-          {...matchMoment({ ...match, status: 'played' }, now)}
-          goalsAgainst={match.goalsAgainst ?? 0}
-          goalsFor={match.goalsFor ?? 0}
-          home={match.home}
-          opponent={match.opponent}
-          reportHref={reportAddress(match.season, match.matchDate, match.clubSlug)}
-          round={match.round}
-          status="played"
-        />
+        <MatchLine match={match} now={now} played />
       )}
       <Text>{guessText(item)}</Text>
       {played ? (
@@ -141,14 +129,11 @@ export function PointsCard({
 /** The soft card "Punten": the scoring as a table, with the link to the rules. */
 export function ScoringCard() {
   return (
-    <Card aria-labelledby="punten-telling" game="prognose" surface="soft">
-      <Heading id="punten-telling" level={2}>
-        Punten
-      </Heading>
+    <GameScoringCard game="prognose">
       <ScoringTable caption="Wat een voorspelling oplevert" />
       <Text>{`De telling van de Fansite. Hoogstens ${maxPredictionPoints} punten per wedstrijd.`}</Text>
       <RulesLink />
-    </Card>
+    </GameScoringCard>
   )
 }
 

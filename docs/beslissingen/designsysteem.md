@@ -4610,3 +4610,11 @@
   Over de hele breedte past de naam van elk spel op de gewone maat.
 - **Alternatieven:** twee naast elkaar houden; twee naast elkaar alleen in een brede kolom.
 - **Later:** vervangt het raster van twee bij twee en de kleinere naam uit _Elk open spel heeft een kleine kaart op de voorpagina, onder het forum_ in `site.md`.
+
+## Een formulier zet iets naast zijn knop met Form.Actions
+
+- **Datum:** 25 november 2026
+- **Besluit:** `Form.Actions` zet de knop van een formulier op één regel met iets ernaast, zoals een link naar een andere weg naar binnen (#1660).
+  Past dat niet, dan staat het eronder, en de volgorde op het scherm is die van het toetsenbord.
+- **Waarom:** de kaart om in te loggen zet "Account maken" naast de knop, en zo blijft de ruimte een zaak van het designsysteem.
+- **Alternatieven:** `inline` op het hele formulier (dan staat ook het veld ernaast); eigen stijl in de site.
