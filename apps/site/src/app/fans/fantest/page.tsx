@@ -111,7 +111,7 @@ export default async function FantestPage({
           </>
         )}
         <Text>
-          <Link href={fantestRankingPath}>Ranglijst van de Fantest</Link>
+          <Link href={fantestRankingPath}>Ranglijst per jaar</Link>
         </Text>
       </Page.Cell>
       <Page.Cell area="archive">
