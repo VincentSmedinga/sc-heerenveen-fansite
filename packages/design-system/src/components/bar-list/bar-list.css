@@ -2,7 +2,7 @@
  * A list of lying bars: the name, the bar and the number in one row. The name has the room it
  * needs, the number sits at the end, and the bar takes what is left, so it never makes the
  * card wider on a narrow screen. The fill is the green of a count (the tone `plain` of
- * chart.css) on a track in the colour of the page, or the tint of the track of a switch on a
+ * chart.css) on a track of its own colour, or the tint of the track of a switch on a
  * soft card, and it reaches 3:1 on the card in light and in dark.
  */
 
