@@ -1,4 +1,4 @@
-import { Button, Card, Form, Heading, Link, Notice, Strong, Text } from '@fansite/design-system'
+import { Card, Heading, Link, Notice, Strong, Text } from '@fansite/design-system'
 
 import { fantestPath } from '#src/fans/fantest'
 import { logInPaths } from '#src/fans/log-in'
@@ -39,18 +39,15 @@ export function JoinCard() {
         Doe mee
       </Heading>
       <Text>Om mee te doen heb je alleen een schermnaam en een e-mailadres nodig. Een wachtwoord is niet nodig.</Text>
-      {/* Forms that only go to a page: the design system has no link as a button. */}
-      <Form action={logInPaths.form} method="get">
-        {/* The button carries the page to come back to: a form sends its name and value. */}
-        <Button name={returnParameter} type="submit" value={fantestPath}>
+      <Text>
+        {/* The link carries the page to come back to. */}
+        <Link href={`${logInPaths.form}?${new URLSearchParams({ [returnParameter]: fantestPath }).toString()}`}>
           Inloggen
-        </Button>
-      </Form>
-      <Form action={signUpPaths.form}>
-        <Button appearance="soft" type="submit">
-          Account maken
-        </Button>
-      </Form>
+        </Link>
+      </Text>
+      <Text>
+        <Link href={signUpPaths.form}>Account maken</Link>
+      </Text>
     </Card>
   )
 }

@@ -267,7 +267,8 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { path: '/fans/uitblinker', status: 200 },
   // The Uitblinkers of the year: a card with the running season, whatever the database holds.
   { path: '/fans/uitblinker/van-het-jaar', status: 200 },
-  // The archive of the Fantest (#1480) and its months: the made-up quizzes of June 2003 (with
+  // The Fantest as a visitor sees it, with the quiz of the month (#1482) and the archive
+  // (#1480), and its months: the made-up quizzes of June 2003 (with
   // the figures of then) and September 2003 (a question left out, too few visitors for the
   // figures), a month without a quiz, and an address that is no month. fantest.spec.ts plays
   // one.

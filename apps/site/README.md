@@ -1565,7 +1565,8 @@ Een bezoeker ziet de inleiding en de weg naar inloggen of aanmelden, een geblokk
 - `submitEntry` vergrendelt de rij van de quiz, controleert de maand en het account, rekent de score uit met `scoreQuiz` en telt `participants` op, in één transactie.
   Een vraag met "alles goed" telt voor elk antwoord.
 - Een supporter doet één keer mee per quiz: `quiz_entries` heeft een unieke sleutel op `supporter_id` en `quiz_id`.
-- Het formulier stuurt een kenmerk van de vragen mee (`versie`). Zijn de vragen intussen gewijzigd, dan wordt er niets bewaard.
+- Het formulier stuurt een kenmerk van de vragen mee (`versie`).
+  Zijn de vragen intussen gewijzigd, dan wordt er niets bewaard.
 - Zolang de maand loopt, staat het goede antwoord in geen enkele respons.
   `app/fans/fantest/responses.test.tsx` maakt elke respons twee keer, met een andere sleutel en dezelfde score, en eist dat ze gelijk zijn.
 - De antwoorden en de score staan onder "Alles wat we van je bewaren" (`src/fans/fantest-data.ts`).
