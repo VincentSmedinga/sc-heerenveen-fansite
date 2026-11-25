@@ -108,12 +108,14 @@
     /* The bar "Op deze pagina" */
     --hf-anchor-font-size: 1rem;
 
-    /* A small figure: a mark in a row of marks, the average of a winner and the one in a seal */
+    /*
+     * A small figure: a mark in a row of marks, the average of a winner and the one in a seal
+     */
     --hf-figure-font-size: 1.125rem;
 
     /*
-     * A large figure: on a question card, the total in the hole of a donut or of a shoot-out, the
-     * points and the large prediction, the fields of a score and the digits of a code
+     * A large figure: on a question card, the total in the hole of a donut or of a shoot-out,
+     * the points and the large prediction, the fields of a score and the digits of a code
      */
     --hf-figure-large-font-size: 1.5rem;
 
@@ -135,7 +137,10 @@
     /* Emphasis: strong, b, buttons, caption, a status not to miss */
     --hf-strong-font-weight: 700;
 
-    /* The figures people look up: a score, a large or key figure, the key figure of a table, a mark */
+    /*
+     * The figures people look up: a score, a large or key figure, the key figure of a table,
+     * a mark
+     */
     --hf-figure-font-weight: 700;
 
     /*
