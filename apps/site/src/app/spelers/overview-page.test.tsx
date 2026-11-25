@@ -92,8 +92,8 @@ describe('the overview by country', () => {
     expect(html).toMatch(/<a aria-current="page"[^>]*href="\/spelers\/overzicht\/land"/)
     expect(html).toContain('href="#land-nederland"')
     expect([...html.matchAll(/<h2[^>]*id="(land-[\w-]+)"/g)].map(([, id]) => id)).toEqual([
-      'land-denemarken',
       'land-nederland',
+      'land-denemarken',
       'land-zweden',
     ])
     expect(html).toContain('2 spelers uit Denemarken en Zweden.')
@@ -106,9 +106,29 @@ describe('the overview by country', () => {
     expect(html).toContain('hf-card-columns-three')
     expect(at('id="landen"')).toBeLessThan(at('id="ze-komen-uit-het-noorden"'))
     expect(at('id="ze-komen-uit-het-noorden"')).toBeLessThan(at('id="werelddelen"'))
-    expect(at('id="werelddelen"')).toBeLessThan(at('id="land-denemarken"'))
+    expect(at('id="werelddelen"')).toBeLessThan(at('id="land-nederland"'))
+    expect(at('id="land-nederland"')).toBeLessThan(at('id="land-denemarken"'))
     expect(at('id="land-zweden"')).toBeLessThan(at('Bron: Wikipedia'))
     expect(html.indexOf('Bron: Wikipedia')).toBe(html.lastIndexOf('Bron: Wikipedia'))
+  })
+
+  it('gives the Netherlands a column of its own, before the grid with the other countries', async () => {
+    const html = await render('land')
+    const split = html.indexOf('hf-card-columns-split')
+    const grid = html.indexOf('hf-card-columns-grid')
+    const dutch = html.indexOf('id="land-nederland"')
+
+    expect(split).toBeGreaterThan(-1)
+    expect(dutch).toBeGreaterThan(split)
+    expect(dutch).toBeLessThan(grid)
+    expect(html.indexOf('id="land-denemarken"')).toBeGreaterThan(grid)
+  })
+
+  it('has no column of its own without a player from the Netherlands', async () => {
+    vi.mocked(getPlayersOverview).mockResolvedValue(overviewOf([row(1, 'Berg', { country: 'DK' })]))
+
+    expect(await render('land')).not.toContain('hf-card-columns-split')
+    expect(await render('naam')).not.toContain('hf-card-columns-split')
   })
 
   it('names the card of the north Ze komen uit het noorden, and the anchor follows the title', async () => {
