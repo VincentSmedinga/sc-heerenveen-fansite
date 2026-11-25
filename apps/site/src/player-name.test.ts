@@ -5,6 +5,7 @@ import {
   leadOfNamesake,
   personNameParts,
   personSortName,
+  shortOpponentNames,
   splitPersonName,
   textSortName,
 } from './player-name'
@@ -117,6 +118,74 @@ describe('leadOfNamesake', () => {
       }),
     ).toBe('')
     expect(leadOfNamesake(undefined)).toBe('')
+  })
+})
+
+describe('shortOpponentNames', () => {
+  const shortened = (...names: string[]) => shortOpponentNames(names.map((name) => ({ name })))
+  const person = (givenName: null | string, familyName: null | string, prefix: null | string = null) => ({
+    personFamilyName: familyName,
+    personFamilyNamePrefix: prefix,
+    personGivenName: givenName,
+  })
+
+  it('takes the prefix and the family name of a linked person', () => {
+    expect(shortOpponentNames([{ name: 'Kayne van Oevelen', person: person('Kayne', 'Oevelen', 'van') }])).toEqual([
+      { lead: '', shortName: 'van Oevelen' },
+    ])
+    expect(shortOpponentNames([{ name: 'Jan Willem Testma', person: person('Jan Willem', 'Testma') }])).toEqual([
+      { lead: '', shortName: 'Testma' },
+    ])
+  })
+
+  it('keeps the given name of a person who has nothing else', () => {
+    expect(shortOpponentNames([{ name: 'Koke', person: person('Koke', null) }])).toEqual([
+      { lead: '', shortName: 'Koke' },
+    ])
+  })
+
+  it('reads the text when the linked person has no name yet', () => {
+    expect(shortOpponentNames([{ name: 'Ozan Kökçü', person: person(null, null) }])).toEqual([
+      { lead: '', shortName: 'Kökçü' },
+    ])
+  })
+
+  it('drops the first word of a name as text', () => {
+    expect(shortened('Eric da Silva Moreira', 'Anis Hadj Moussa').map((one) => one.shortName)).toEqual([
+      'da Silva Moreira',
+      'Hadj Moussa',
+    ])
+  })
+
+  it('keeps a name of one word, and one that starts with a prefix, whole', () => {
+    expect(shortened('Koke', 'van Testma')).toEqual([
+      { lead: '', shortName: 'Koke' },
+      { lead: '', shortName: 'van Testma' },
+    ])
+  })
+
+  it('gives two players with the same name the initial of the given name', () => {
+    expect(shortened('Julian Baas', 'Youri Baas', 'Anis Testma')).toEqual([
+      { lead: 'J.', shortName: 'Baas' },
+      { lead: 'Y.', shortName: 'Baas' },
+      { lead: '', shortName: 'Testma' },
+    ])
+  })
+
+  it('gives the whole given name when the initial is shared too, also between a person and text', () => {
+    expect(
+      shortOpponentNames([{ name: 'Julian Baas', person: person('Julian', 'Baas') }, { name: 'Joris Baas' }]),
+    ).toEqual([
+      { lead: 'Julian', shortName: 'Baas' },
+      { lead: 'Joris', shortName: 'Baas' },
+    ])
+  })
+
+  it('gives no lead to a namesake without a given name', () => {
+    expect(shortened('Baas', 'Youri Baas')).toEqual([
+      { lead: '', shortName: 'Baas' },
+      { lead: 'Y.', shortName: 'Baas' },
+    ])
   })
 })
 

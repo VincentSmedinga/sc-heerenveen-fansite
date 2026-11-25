@@ -348,8 +348,12 @@ Lukt het lezen niet, dan toont `/wedstrijden` de foutpagina, zoals `/bronnen`.
   De beginletter en de hele voornaam komen uit één functie, `leadOfName` in `src/player-name.ts`.
 - **De beginletter op de wedstrijdpagina:** een speler van ons krijgt op het veld en bij de doelpuntenmakers boven de score de beginletter van zijn voornaam voor zijn achternaam, zoals `J. Drost`, als een andere persoon met dezelfde achternaam (het voorvoegsel telt mee) in `players` een seizoen heeft dat hooguit één seizoen van een seizoen van hem afligt (`leadOfNamesake` in `src/player-name.ts`).
   Hebben ze dezelfde beginletter, dan komt de hele voornaam.
-  Een speler van de tegenstander, of zonder persoon, voornaam of achternaam, blijft zoals hij is.
+  Een speler van ons zonder persoon, voornaam of achternaam blijft zoals hij is.
   De opstellingenlijst, de wissels en het verloop tonen de hele naam, en de zin voor een schermlezer ook.
+- **De tegenstander op het veld:** op het veld en bij de doelpuntenmakers boven de score staat een speler van de tegenstander zonder voornaam (`shortOpponentNames` in `src/player-name.ts`).
+  Met een persoon komt de naam uit de persoon, anders valt het eerste woord weg.
+  Een naam van één woord, of een die met een voorvoegsel begint, blijft heel.
+  Delen twee spelers van de tegenstander in het verslag een naam, dan krijgen ze de beginletter van hun voornaam, of de hele voornaam bij dezelfde letter.
 - **Verloop op de ranglijst:** een kaart op het zachte vlak (`surface="soft"`, anker `#verloop-op-de-ranglijst`, `PlacePerRoundCard` in `src/PlacePerRoundCard.tsx`, #411) in de zijbalk, direct onder de stand, met de laatste regel "Alleen de Eredivisie" en een link in de balk "Op deze pagina:".
   De lijn is `BarChart.Trend` met plek 1 bovenaan en de speelrondes onderaan; ze is voor een schermlezer verborgen.
   De x-as heeft een streepje met een getal bij ronde 1, een kwart, de helft, driekwart en de laatste ronde (1, 8, 17, 25 en 34), de y-as bij plek 1, de helft en de laatste plek (1, 9 en 18) (`axisTicks` in `src/placeHistory.ts`), en de tooltip zegt "Ronde 12: plek 4" met alleen de plek vet.

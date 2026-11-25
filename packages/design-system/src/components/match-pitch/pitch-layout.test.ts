@@ -123,6 +123,16 @@ describe('pitchSpots', () => {
     })
   })
 
+  it('spreads a row of four wider than a row of three, and gives its names more room', () => {
+    const spots = pitchSpots('4-3-3', lineUpSize, true) ?? []
+
+    expect(spots.slice(1, 5).map((spot) => spot.portrait.x)).toEqual([15.5, 38.5, 61.5, 84.5])
+    expect(spots[1]?.share).toBe(21.9)
+    expect(spots.slice(5, 8).map((spot) => spot.portrait.x)).toEqual([23.3, 50, 76.7])
+    // Lying down the row of four is as it was, so the name of its last player stays inside.
+    expect(spots.slice(1, 5).map((spot) => spot.landscape.y)).toEqual([20, 40, 60, 80])
+  })
+
   it('gives a row of five or more a little more room to the side', () => {
     const wide = pitchSpots('3-5-2', lineUpSize, true) ?? []
     const normal = pitchSpots('4-4-2', lineUpSize, true) ?? []

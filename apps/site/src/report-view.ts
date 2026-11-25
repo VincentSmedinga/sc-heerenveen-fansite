@@ -1,4 +1,4 @@
-import type { ReportedMatch, ReportedPlayerName, ReportPhase } from '@fansite/db/match-reports'
+import type { ReportedMatch, ReportedPersonName, ReportedPlayerName, ReportPhase } from '@fansite/db/match-reports'
 import type { MatchHeaderFact, MatchPlayerName } from '@fansite/design-system'
 
 import { oldSiteReportSource } from '@fansite/db/schema'
@@ -92,6 +92,7 @@ export function matchPageDataOf(
       lead: leadOfNamesake(names.get(player.id)),
       name: nameOfPlayer(player.name, names.get(player.id)),
       ours: player.ours,
+      person: personOf(reported.opponentPersons.get(player.id)),
       shirtNumber: player.shirtNumber,
       starter: player.starter,
     })),
@@ -103,6 +104,16 @@ export function matchPageDataOf(
     })),
   }
 }
+
+/** The name of the person of an opponent, as `PersonName` has it. */
+const personOf = (known: ReportedPersonName | undefined) =>
+  known === undefined
+    ? undefined
+    : {
+        personFamilyName: known.familyName,
+        personFamilyNamePrefix: known.familyNamePrefix,
+        personGivenName: known.givenName,
+      }
 
 /**
  * The name of a player of the report in the two parts `PlayerName` shows. A player of ours

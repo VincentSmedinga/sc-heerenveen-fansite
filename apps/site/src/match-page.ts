@@ -12,6 +12,8 @@ import type {
 
 import { type MatchReport, minutesPlayed } from '@fansite/shared/match-report'
 
+import { type PersonName, shortOpponentNames } from './player-name'
+
 // What the page of a match shows, worked out from plain data: the data of the report with the
 // names of the players, and nothing of the database. The page of a match builds it from a
 // stored report (`matchPageDataOf` in report-view.ts), and the preview in the admin (#851)
@@ -134,13 +136,19 @@ export type MatchPagePlayer = {
   /** Any number that is unique in the data: the other lists point to a player by it. */
   id: number
   /**
-   * What stands before his surname where the page shortens his name, to tell him from another
-   * of our players with the same surname: `J.`, or his given name. Empty for most players.
+   * What stands before his short name where the page shortens his name, to tell him from a
+   * namesake: `J.`, or his given name. Empty for most players. For a player of the opponent,
+   * `buildMatchPage` works it out itself.
    */
   lead?: string | undefined
   name: MatchPlayerName
   /** Whether he is ours. Otherwise he plays for the opponent. */
   ours: boolean
+  /**
+   * The person a player of the opponent is linked to, as the importer kept the name. Leave it
+   * out for ours, and for an opponent who is only a name.
+   */
+  person?: PersonName | undefined
   /** Empty for a player without a shirt number, such as in the old line-ups. */
   shirtNumber: null | number
   /** Whether he is in the line-up. Otherwise he is on the bench. */
@@ -159,7 +167,27 @@ export type MatchPageSubstitution = {
 }
 
 /** The surname of a name, or the whole name when it has no surname: for a list of scorers. */
-const shortName = (name: MatchPlayerName) => (name.surname === '' ? (name.givenName ?? '') : name.surname)
+const surnameOf = (name: MatchPlayerName) => (name.surname === '' ? (name.givenName ?? '') : name.surname)
+
+/** A player as the page shows him: an opponent also has the name without the given name. */
+type ShownPlayer = MatchPagePlayer & { shortName?: string | undefined }
+
+/**
+ * The players with the short names of the opponent (see `shortOpponentNames`): all of his
+ * players in the report are one line-up, so one player has one short name on the whole page.
+ */
+function withShortOpponentNames(players: readonly MatchPagePlayer[]): ShownPlayer[] {
+  const theirs = players.filter((player) => !player.ours)
+  const short = shortOpponentNames(
+    theirs.map(({ name, person }) => ({
+      name: [name.givenName, name.surname].filter(Boolean).join(' '),
+      person,
+    })),
+  )
+  const byId = new Map(theirs.map((player, index) => [player.id, short[index]]))
+
+  return players.map((player) => ({ ...player, ...byId.get(player.id) }))
+}
 
 /** A short name with the lead before it (see `MatchPagePlayer.lead`), when it has one. */
 const withLead = (lead: string | undefined, short: string) =>
@@ -316,19 +344,20 @@ function withScores(data: MatchPageData, events: MatchTimelineEvent[]): MatchTim
 }
 
 /** The goals under a club in the header, in the order of the clock. */
-const scorersOf = (data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlayer>, ours: boolean) =>
+const scorersOf = (data: MatchPageData, byId: ReadonlyMap<number, ShownPlayer>, ours: boolean) =>
   data.goals
     .filter((goal) => goal.ours === ours && byId.has(goal.playerId))
     .toSorted(byClock)
     .map((goal): MatchHeaderScorer => {
-      const name = byId.get(goal.playerId)?.name ?? { surname: '' }
+      const scorer = byId.get(goal.playerId)
+      const name = scorer?.name ?? { surname: '' }
 
       return {
         ...(name.href === undefined ? {} : { href: name.href }),
         minute: goal.minute,
         ownGoal: goal.ownGoal,
         penalty: goal.penalty,
-        player: withLead(byId.get(goal.playerId)?.lead, shortName(name)),
+        player: withLead(scorer?.lead, scorer?.shortName ?? surnameOf(name)),
         stoppageMinutes: goal.stoppageMinutes,
       }
     })
@@ -340,8 +369,8 @@ const added = (stoppageMinutes: null | number) => (stoppageMinutes === null ? un
  * What the page makes of the data, for each team: the line-up with the minutes each player
  * played, his goals and his heaviest card, and the substitutes who came on.
  */
-function teamOf(data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlayer>, ours: boolean) {
-  const players = data.players.filter((player) => player.ours === ours)
+function teamOf(data: MatchPageData, byId: ReadonlyMap<number, ShownPlayer>, ours: boolean) {
+  const players = [...byId.values()].filter((player) => player.ours === ours)
   // The minutes follow the rules of the report form, in `@fansite/shared`. A page shows the
   // minutes of a report that is not finished too, so only the lists of the page go in.
   const report: MatchReport = {
@@ -415,6 +444,7 @@ function teamOf(data: MatchPageData, byId: ReadonlyMap<number, MatchPagePlayer>,
         ...(player.lead === undefined || player.lead === '' ? {} : { lead: player.lead }),
         minutesPlayed: minutes.played,
         name: player.name,
+        ...(player.shortName === undefined ? {} : { shortName: player.shortName }),
         shirtNumber: player.shirtNumber,
         substitutedOffAt: minutes.off,
       }
@@ -446,7 +476,7 @@ const kickResults = { gestopt: 'saved', naast: 'missed', raak: 'scored' } as con
 
 /** Makes the properties of the components of the page of a match from its data. */
 export function buildMatchPage(data: MatchPageData): BuiltMatchPage {
-  const byId = new Map(data.players.map((player) => [player.id, player]))
+  const byId = new Map(withShortOpponentNames(data.players).map((player) => [player.id, player]))
   const ours = teamOf(data, byId, true)
   const theirs = teamOf(data, byId, false)
   const known = data.goals.filter((goal) => byId.has(goal.playerId))

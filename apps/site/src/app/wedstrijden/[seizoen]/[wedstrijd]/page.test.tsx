@@ -100,7 +100,7 @@ describe('the page of a match', () => {
     const text = plain(await render())
 
     expect(text).toContain('Doelpunten sc Heerenveen: Demo 12’')
-    expect(text).toContain('Doelpunten Testdorp FC: Frank Dummydijk 40’')
+    expect(text).toContain('Doelpunten Testdorp FC: Dummydijk 40’')
     expect(text).toContain('Competitie Eredivisie Ronde Speelronde 1 Datum')
   })
 

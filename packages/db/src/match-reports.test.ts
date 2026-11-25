@@ -1213,6 +1213,24 @@ describe('the matches with a report that is klaar', () => {
     ])
   })
 
+  it('gives the name of the person of an opponent who is linked to one', async () => {
+    const matchId = await playedMatch()
+    const [person] = await database.db
+      .insert(persons)
+      .values({ familyName: 'Proef', familyNamePrefix: 'van', givenName: 'Gijs', wikipediaPage: 'Gijs van Proef' })
+      .$returningId()
+
+    await report(matchId)
+    await appearance(matchId, { name: 'Gijs van Proef', ours: false, personId: person!.id, shirtNumber: 1 })
+    await appearance(matchId, { name: 'Anna Test', ours: false, shirtNumber: 2 })
+
+    const found = await findReportedMatch(database.db, { clubSlug: 'testdorp-fc', matchDate: '2026-08-08', season })
+
+    expect([...(found?.opponentPersons.entries() ?? [])]).toEqual([
+      [found?.stored.appearances[0]?.id, { familyName: 'Proef', familyNamePrefix: 'van', givenName: 'Gijs' }],
+    ])
+  })
+
   it('gives the other persons with the same surname, each with their seasons', async () => {
     const matchId = await playedMatch()
     const made = async (givenName: string, familyName: string, seasons: string[]) => {

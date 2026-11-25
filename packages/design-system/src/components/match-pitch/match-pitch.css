@@ -182,7 +182,9 @@
     font-weight: var(--hf-figure-font-weight);
     inline-size: 1.25rem;
     justify-content: center;
-    margin-inline: var(--hf-space-xs);
+
+    /* The ring is 4px outside the disc; the margin makes room, more before the word. */
+    margin-inline: 4px calc(4px + var(--hf-space-xs));
   }
 
   .hf-match-pitch-rosters {

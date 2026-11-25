@@ -147,6 +147,7 @@ export function reportedMatch(): ReportedMatch {
     clubSlug: 'testdorp-fc',
     match: { ...match },
     names: new Map(names),
+    opponentPersons: new Map(),
     stored: {
       appearances: appearances(),
       cards: [

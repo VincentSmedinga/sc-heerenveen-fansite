@@ -8030,6 +8030,7 @@
   Een tegenstander is een naam zonder persoon tot E13 klaar is, en de regel komt uit de gegevens: wie het anders wil, verbetert de naam van de persoon.
 - **Alternatieven:** altijd bij een gedeelde achternaam (ook "J. de Jong" voor wie nooit samen speelde); alleen in hetzelfde seizoen (mist de Drosts); alleen het veld; een schakelaar per persoon.
 - **Later:** de beslissing _`goalsWithInitials` vergelijkt de namen_ in _Doelpunten tellen per persoon_ hierboven blijft gelden voor de doelpuntenmakers in een wedstrijdregel; alleen de letter komt nu uit de gedeelde functie.
+- **Later:** zie _Op het veld staat een speler van de tegenstander zonder voornaam_ (25 november 2026): spelers van tegenstanders vallen er niet meer buiten.
 
 ## De pagina Uitblinker van het jaar toont een kaart per seizoen en de Uitblinker van de Uitblinkers
 
@@ -8351,3 +8352,17 @@
 - **Waarom:** de losse kaart herhaalde een speler die al op de pagina stond.
   De zachte kaart en het label zeggen genoeg; een ander teken vond de projecteigenaar bij nader inzien niet nodig, anders dan het issue vroeg.
 - **Alternatieven:** de losse kaart houden; de beste bovenaan in een brede kaart; een groter zegel in een andere kleur voor de beste (zie ook _De uitblinker staat in een ster met facetten_ in `designsysteem.md`).
+
+## Op het veld staat een speler van de tegenstander zonder voornaam
+
+- **Datum:** 25 november 2026
+- **Besluit:** op het veld en bij de doelpuntenmakers boven de score staat een speler van de tegenstander zonder voornaam (#1672).
+  Met een persoon komt de naam uit de persoon, met het voorvoegsel en de achternaam.
+  Zonder persoon valt het eerste woord weg.
+  Een naam van één woord blijft heel, en ook een naam die met een voorvoegsel begint (`van Hanegem`), want daar staat geen voornaam.
+  Een gedeelde naam in één opstelling krijgt de beginletter, en bij dezelfde beginletter de hele voornaam.
+  Alle spelers van de tegenstander in het verslag tellen daarbij mee, ook de wissels, zodat een speler overal op de pagina dezelfde korte naam heeft.
+  De opstellingenlijst, de wissels, het verloop en de zin voor een schermlezer tonen de hele naam.
+  De regel staat in `shortOpponentNames` in `apps/site/src/player-name.ts`.
+- **Waarom:** het veld toont onze spelers al met hun achternaam, en een hele naam neemt op een smal veld veel ruimte.
+- **Alternatieven:** de hele naam houden; alleen het laatste woord tonen (dan wordt "da Silva Moreira" alleen "Moreira"); een veld voor de korte naam in het beheer.
