@@ -137,7 +137,8 @@ export function listQuizzes(db: Pick<Database, 'select'>): Promise<AdminQuizRow[
  * Saves the form of a quiz and does what the button asked: publish it, or move a question one
  * place. A draft may be unfinished. Publishing, and every change of a published quiz, asks for
  * ten complete questions, and publishing also for a month that is not over. A locked quiz takes
- * only the closing text and "alles goed", whatever else the form sends.
+ * only the closing text and "alles goed", whatever else the form sends. `oldForm` says that the
+ * form still had the fields of an unlocked quiz.
  */
 export function saveQuiz(
   db: Database,
@@ -146,6 +147,7 @@ export function saveQuiz(
   submitted: QuizValues,
   intent: QuizIntent,
   now = new Date(),
+  oldForm = false,
 ): Promise<SaveOutcome> {
   return db.transaction(async (tx): Promise<SaveOutcome> => {
     // The lock on the row keeps an entry of a supporter and a change apart.
@@ -193,7 +195,7 @@ export function saveQuiz(
 
     const changes = describeChanges(stored, values)
     // A form from before the quiz was locked may send changes that are not taken.
-    const refused = locked && (intent.kind !== 'save' || changesLocked(stored, submitted))
+    const refused = locked && (intent.kind !== 'save' || (oldForm && changesLocked(stored, submitted)))
 
     if (changes.length === 0 && !publish) {
       return { status: refused ? 'refused' : 'unchanged' }
@@ -245,24 +247,11 @@ export function saveQuiz(
   })
 }
 
-/**
- * Whether a form sends something else for a part that is locked. The form of a locked quiz
- * sends none of these parts, so an empty one says nothing.
- */
+/** Whether a form of an unlocked quiz changes a part that is locked now. */
 function changesLocked(stored: QuizValues, sent: QuizValues) {
-  const differs = (now: string, wanted: string) => wanted !== '' && wanted !== now
-
   return (
-    differs(stored.intro, sent.intro) ||
-    sent.vragen.some((question, index) => {
-      const old = stored.vragen[index] ?? emptyQuestion()
-
-      return (
-        differs(old.tekst, question.tekst) ||
-        differs(old.goed, question.goed) ||
-        question.antwoorden.some((answer, place) => differs(old.antwoorden[place] ?? '', answer))
-      )
-    })
+    stored.intro !== sent.intro ||
+    describeChanges(stored, { ...sent, slottekst: stored.slottekst }).some((change) => change.startsWith('vraag '))
   )
 }
 

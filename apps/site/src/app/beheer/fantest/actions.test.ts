@@ -132,6 +132,19 @@ describe('the actions of the Fantest', () => {
     expect((await database.db.select().from(quizzes))[0]?.status).toBe('draft')
   })
 
+  it('say that the questions were not saved for a form from before the lock', async () => {
+    await logInAs('editor')
+    await create()
+
+    const id = await firstId()
+
+    await database.db.update(quizzes).set({ participants: 1 })
+
+    expect(await save(id, { intro: 'Te laat.' })).toMatchObject({
+      redirect: expect.stringContaining('?gedaan=niet-bewaard&keer='),
+    })
+  })
+
   it('give a save without changes an address of its own', async () => {
     await logInAs('editor')
     await create()

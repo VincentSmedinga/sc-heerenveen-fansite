@@ -69,7 +69,9 @@ export async function submitQuiz(quizId: number, _previous: QuizFormState, formD
 
   const values = readQuizValues(formData)
   const intent = readIntent(formData)
-  const outcome = await saveQuiz(getDatabase().db, userId, id, values, intent)
+  // The form of a locked quiz has no field for the introduction.
+  const oldForm = formData.has('intro')
+  const outcome = await saveQuiz(getDatabase().db, userId, id, values, intent, new Date(), oldForm)
 
   if (outcome.status === 'invalid') {
     return { errors: outcome.errors, values: outcome.values }

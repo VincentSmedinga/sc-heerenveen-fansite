@@ -204,7 +204,7 @@ describe('saveQuiz', () => {
     sent.vragen[3] = { ...sent.vragen[3]!, allesGoed: true }
 
     // The sent form also changes locked parts, so the editor hears that those are not taken.
-    expect(await save(id, sent)).toEqual({ status: 'refused' })
+    expect(await saveQuiz(database.db, userId, id, sent, { kind: 'save' }, now, true)).toEqual({ status: 'refused' })
 
     const stored = await quiz(id)
     const expected = complete()
@@ -230,9 +230,15 @@ describe('saveQuiz', () => {
     expect(await save(id, { ...empty, slottekst: 'Nieuw.' })).toEqual({ status: 'locked' })
     expect(await save(id, { ...empty, slottekst: 'Nieuw.' })).toEqual({ status: 'unchanged' })
 
-    const old = { ...complete(), intro: 'Te laat.', slottekst: 'Nieuw.' }
+    const send = (values: QuizValues) => saveQuiz(database.db, userId, id, values, { kind: 'save' }, now, true)
+    const old = { ...complete(), slottekst: 'Nieuw.' }
+    const emptied = { ...old, intro: '' }
+    const unchosen = { ...old, vragen: old.vragen.map((question) => ({ ...question, goed: '' })) }
 
-    expect(await save(id, old)).toEqual({ status: 'refused' })
+    // An old form with the stored questions changes nothing that is locked.
+    expect(await send({ ...old, intro: 'Een nieuwe maand.' })).toEqual({ status: 'unchanged' })
+    expect(await send(emptied)).toEqual({ status: 'refused' })
+    expect(await send({ ...unchosen, intro: 'Een nieuwe maand.' })).toEqual({ status: 'refused' })
     expect((await quiz(id)).values.intro).toBe('Een nieuwe maand.')
   })
 

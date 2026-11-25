@@ -114,7 +114,21 @@ describe('the pages of the Fantest in the admin', () => {
     expect(html).toContain('Peer (goed antwoord)')
   })
 
-  it('preview the quiz as a supporter sees it, without a form and without the right answers', async () => {
+  it('say that the questions are locked and were not saved, only for a locked quiz', async () => {
+    const searchParams = Promise.resolve({ gedaan: 'niet-bewaard' })
+    const open = renderToStaticMarkup(await QuizPage({ params: params(), searchParams }))
+
+    expect(open).not.toContain('Vragen vergrendeld')
+
+    await database.db.update(quizzes).set({ participants: 1 }).where(eq(quizzes.id, id))
+
+    const locked = renderToStaticMarkup(await QuizPage({ params: params(), searchParams }))
+
+    expect(locked).toContain('Vragen vergrendeld')
+    expect(locked).toContain('Je wijzigingen daaraan zijn niet bewaard.')
+  })
+
+  it('preview the quiz as a fan sees it, without a form and without the right answers', async () => {
     const html = renderToStaticMarkup(await PreviewPage({ params: params() }))
 
     expect(html).toContain('Fantest maart 2099')
