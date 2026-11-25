@@ -7,13 +7,13 @@ import { type CompetitionChoice, competitionWords } from './competition'
 import { nextSeason } from './player-page'
 
 /** The figures a column can show, each a field of `PlayerSeason`. */
-type FigureId = 'assists' | 'cleanSheets' | 'conceded' | 'goals' | 'played' | 'red' | 'started' | 'yellow'
+type FigureId = 'assists' | 'cleanSheets' | 'conceded' | 'goals' | 'minutes' | 'played' | 'red' | 'started' | 'yellow'
 
-/** The columns of a goalkeeper: matches, clean sheets, goals against and the cards. */
-const goalkeeperColumns: readonly FigureId[] = ['played', 'cleanSheets', 'conceded', 'yellow', 'red']
+/** The columns of a goalkeeper: matches, minutes, clean sheets, goals against and the cards. */
+const goalkeeperColumns: readonly FigureId[] = ['played', 'minutes', 'cleanSheets', 'conceded', 'yellow', 'red']
 
-/** The columns of everyone else: matches, line-ups, goals, assists and the cards. */
-const fieldColumns: readonly FigureId[] = ['played', 'started', 'goals', 'assists', 'yellow', 'red']
+/** The columns of everyone else: matches, line-ups, minutes, goals, assists and the cards. */
+const fieldColumns: readonly FigureId[] = ['played', 'started', 'minutes', 'goals', 'assists', 'yellow', 'red']
 
 /**
  * The columns that go behind the button "Toon meer" on a phone, where six do not fit (#1624):
@@ -26,6 +26,9 @@ export const playerSeasonsCardId = 'per-seizoen'
 
 /** What a screen reader reads for the row between two spells, in place of the sign. */
 const gapHeader = 'niet bij sc Heerenveen'
+
+/** The line under the table when a season has a dash for the minutes (#1674). */
+const minutesNote = 'Minuten tellen alleen in een seizoen met een opstelling bij elke wedstrijd.'
 
 /** The dash a figure that we do not have shows: a figure we do not have is never a nought. */
 const dash = '–'
@@ -49,13 +52,17 @@ export type PlayerSeasonsTable = {
 /**
  * The columns by the line of the player, without the column that has no figure in any season,
  * and a row for each season, the newest first, and a row Totaal. The total adds up the seasons
- * that have a figure; `complete` says for each column whether that is every season.
+ * that have a figure; `complete` says for each column whether that is every season. The column
+ * of the minutes stands with the others, also when no season has them, and its total is then a
+ * dash.
  */
 export function playerSeasonsTable(seasons: readonly PlayerSeason[], goalkeeper: boolean): PlayerSeasonsTable {
   const wanted = goalkeeper ? goalkeeperColumns : fieldColumns
-  const ids = wanted.filter((id) => seasons.some((season) => season[id] !== undefined))
+  const known = (id: FigureId) => seasons.some((season) => season[id] !== undefined)
+  const others = wanted.some((id) => id !== 'minutes' && known(id))
+  const ids = wanted.filter((id) => known(id) || (id === 'minutes' && others))
   const more = moreColumns(goalkeeper)
-  const totals = (id: FigureId) => seasons.reduce((total, season) => total + (season[id] ?? 0), 0)
+  const totals = (id: FigureId) => (known(id) ? seasons.reduce((total, season) => total + (season[id] ?? 0), 0) : dash)
 
   return {
     columns: ids.map((id) => ({ ...tableColumns[id], id, ...(more.includes(id) ? { more: true } : {}) })),
@@ -185,7 +192,8 @@ export function playerSeasonsNotes(
   const wikipedia = seasons.filter((season) => season.source === 'wikipedia').map(({ season }) => season)
   // Under the Eredivisie a season of the Wikipedia table has dashes, for the reason below.
   const hasDash = seasons.some(
-    (season) => !(league && season.source === 'wikipedia') && shown.some((id) => season[id] === undefined),
+    (season) =>
+      !(league && season.source === 'wikipedia') && shown.some((id) => id !== 'minutes' && season[id] === undefined),
   )
 
   if (goalkeeper) {
@@ -193,6 +201,9 @@ export function playerSeasonsNotes(
   }
   if (hasDash) {
     notes.push('Een streepje: van dat seizoen hebben we geen opstellingen.')
+  }
+  if (shown.includes('minutes') && seasons.some((season) => season.minutes === undefined)) {
+    notes.push(minutesNote)
   }
   // One short line for each kind of gap, with the seasons as ranges.
   const some = seasons.filter((season) => season.source === 'some-lineups')
