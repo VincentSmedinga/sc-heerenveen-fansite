@@ -14,6 +14,7 @@ import { requireRole } from '#src/beheer/require-role'
 import { SaveButtons } from '#src/beheer/SaveButtons'
 import { getDatabase } from '#src/database'
 import { capital, monthTitle } from '#src/fans/fantest'
+import { FocusOnLoad } from '#src/FocusOnLoad'
 
 import { submitQuiz } from '../actions'
 import { quizPreviewPath, quizzesPath } from '../paths'
@@ -44,8 +45,13 @@ export default async function QuizPage({ params, searchParams }: Props) {
 
   const { month, year } = quiz
   const stage: QuizFormStage = quiz.locked ? 'locked' : quiz.status
-  const { gedaan } = await searchParams
+  const { gedaan, vraag } = await searchParams
   const notice = noticeFor(gedaan, quiz)
+  const moved =
+    gedaan === 'verplaatst' && typeof vraag === 'string' && /^(?:[1-9]|10)$/u.test(vraag) ? vraag : undefined
+  // A new text from the server, such as after a question moved, starts the form anew, and so
+  // does a save that changed nothing, so no old errors stay behind.
+  const version = `${stage}-${String(gedaan)}-${JSON.stringify(quiz.values)}`
 
   return (
     <Page.Main areas={toolbarAreas} className={compact}>
@@ -81,11 +87,11 @@ export default async function QuizPage({ params, searchParams }: Props) {
         <QuizForm
           action={submitQuiz.bind(null, quiz.id)}
           initial={quiz.values}
-          // A new text from the server, such as after a question moved, starts the form anew.
-          key={`${stage}-${JSON.stringify(quiz.values)}`}
+          key={`formulier-${version}`}
           maxLengths={quizLimits}
           stage={stage}
         />
+        {moved === undefined ? null : <FocusOnLoad id={`vraag-${moved}-kop`} key={`focus-${version}`} />}
         <Text>
           <Link href={quizzesPath}>Terug naar de quizzen</Link>
         </Text>

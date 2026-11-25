@@ -144,7 +144,8 @@ function Question({
 
   return (
     <Card aria-labelledby={headingId}>
-      <Heading id={headingId} level={2}>
+      {/* The page brings the focus here after the question moved. */}
+      <Heading id={headingId} level={2} tabIndex={-1}>
         Vraag {number}
       </Heading>
       {locked ? (

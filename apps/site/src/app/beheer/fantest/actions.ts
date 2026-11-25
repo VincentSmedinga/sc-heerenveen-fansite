@@ -72,7 +72,7 @@ export async function submitQuiz(quizId: number, _previous: QuizFormState, formD
   const outcome = await saveQuiz(getDatabase().db, userId, id, values, intent)
 
   if (outcome.status === 'invalid') {
-    return { errors: outcome.errors, values }
+    return { errors: outcome.errors, values: outcome.values }
   }
 
   if (outcome.status === 'missing') {
@@ -87,5 +87,8 @@ export async function submitQuiz(quizId: number, _previous: QuizFormState, formD
     unchanged: 'ongewijzigd',
   } as const
 
-  redirect(quizPath(id, done[outcome.status]))
+  // After a move the page needs to know where the question went, to bring the focus there.
+  const moved = outcome.status === 'moved' && intent.kind === 'move' ? `&vraag=${intent.to}` : ''
+
+  redirect(`${quizPath(id, done[outcome.status])}${moved}`)
 }

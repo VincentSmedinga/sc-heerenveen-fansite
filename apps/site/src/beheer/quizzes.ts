@@ -28,7 +28,7 @@ export type CreateOutcome =
   { errors: { jaar?: string; maand?: string }; status: 'invalid' } | { id: number; status: 'created' }
 
 export type SaveOutcome =
-  | { errors: QuizErrors; status: 'invalid' }
+  | { errors: QuizErrors; status: 'invalid'; values: QuizValues }
   | { status: 'locked' | 'missing' | 'moved' | 'published' | 'saved' | 'unchanged' }
 
 /** Whether somebody filled the quiz in, so its questions may no longer change. */
@@ -179,7 +179,8 @@ export function saveQuiz(
     }
 
     if (Object.keys(errors).length > 0) {
-      return { errors, status: 'invalid' }
+      // A locked quiz shows its questions again as they are stored.
+      return { errors, status: 'invalid', values }
     }
 
     if (!locked && intent.kind === 'move') {

@@ -132,6 +132,17 @@ describe('the actions of the Fantest', () => {
     expect((await database.db.select().from(quizzes))[0]?.status).toBe('draft')
   })
 
+  it('lead to the place a question moved to', async () => {
+    await logInAs('editor')
+    await create()
+
+    const id = await firstId()
+
+    expect(await save(id, { knop: 'omlaag-2', 'vraag-2': 'Testvraag?' })).toEqual({
+      redirect: `/beheer/fantest/${id}?gedaan=verplaatst&vraag=3`,
+    })
+  })
+
   it('ask for a month and a year', async () => {
     await logInAs('editor')
 

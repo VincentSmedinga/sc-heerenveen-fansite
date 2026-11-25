@@ -161,7 +161,7 @@ describe('saveQuiz', () => {
     const id = await draft()
     const after = new Date('2026-12-31T23:00:00Z')
 
-    expect(await save(id, complete(), 'publish', after)).toEqual({
+    expect(await save(id, complete(), 'publish', after)).toMatchObject({
       errors: { maand: 'December 2026 is al voorbij, dus deze quiz kun je niet meer publiceren.' },
       status: 'invalid',
     })
@@ -215,6 +215,20 @@ describe('saveQuiz', () => {
     expect(stored.values).toEqual(expected)
     expect((await log()).at(-1)).toMatchObject({
       detail: 'Fantest december 2026; slottekst; alles goed aan bij vraag 4',
+    })
+  })
+
+  it('gives back the stored questions with an error on a locked quiz', async () => {
+    const id = await draft()
+
+    await save(id, complete(), 'publish')
+    await fillIn(id)
+
+    const sent = { intro: '', slottekst: 'x'.repeat(2001), vragen: Array.from({ length: 10 }, emptyQuestion) }
+
+    expect(await save(id, sent)).toMatchObject({
+      status: 'invalid',
+      values: { intro: 'Een nieuwe maand.', slottekst: sent.slottekst, vragen: complete().vragen },
     })
   })
 
