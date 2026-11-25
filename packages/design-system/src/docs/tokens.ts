@@ -106,6 +106,7 @@ export const semanticTokenGroups: { label: string; tokens: SemanticToken[] }[] =
       { name: '--hf-colour-background-button-soft-hover', use: 'Zachte knop onder de muis' },
       { name: '--hf-colour-background-button-danger', use: 'Gevaarlijke knop, voor wat je weghaalt' },
       { name: '--hf-colour-background-button-danger-hover', use: 'Gevaarlijke knop onder de muis' },
+      { name: '--hf-colour-background-seal-highlight', use: 'Punten van het zegel dat opvalt (Winner)' },
       {
         name: '--hf-colour-background-track',
         use: 'Baan van de schakelaar, een doorzichtige tint die de kleur van het vlak overneemt',
@@ -537,6 +538,8 @@ export const pairGroups: { description: string; label: string; pairs: Pair[]; te
       pair('background-button-danger', 'surface', 'Gevaarlijke knop op een vlak', 'grafisch'),
       pair('background-button-danger-hover', 'page', 'Gevaarlijke knop onder de muis op de pagina', 'grafisch'),
       pair('background-button-danger-hover', 'surface', 'Gevaarlijke knop onder de muis op een vlak', 'grafisch'),
+      pair('background-seal-highlight', 'surface', 'Zegel dat opvalt op een vlak', 'grafisch'),
+      pair('background-seal-highlight', 'surface-soft', 'Zegel dat opvalt op een zacht vlak', 'grafisch'),
       pair('marker-graphic', 'page', 'Opsommingsteken of lijn op de pagina', 'grafisch'),
       pair('marker-graphic', 'surface', 'Opsommingsteken of lijn op een vlak', 'grafisch'),
       pair('marker-graphic', 'surface-strong', 'Opsommingsteken of lijn op een sterk vlak', 'grafisch'),

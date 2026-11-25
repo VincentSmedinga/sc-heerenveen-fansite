@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
 import { yearWinnersPath } from './fans-paths'
-import { BestYearWinnersCard, SeasonRankingCard, YearWinnerCards } from './SupporterRatingsCards'
+import { SeasonRankingCard, YearWinnerCards } from './SupporterRatingsCards'
 
 const options = [
   { label: '2026/27', value: '2026-27' },
@@ -109,8 +109,18 @@ describe('the cards of the Uitblinkers van het jaar', () => {
     expect(html).toContain('Uitblinker van het jaar')
   })
 
-  it('names the old Fansite where there is no number of ratings', () => {
-    expect(html).toContain('Seizoencijfer van de Fansite')
+  it('says it is the average of all ratings where there is no number of ratings', () => {
+    expect(html).toContain('Gemiddelde van alle cijfers')
+  })
+
+  it('has a soft card for the best season of all, with seals that stand out and their own label', () => {
+    const [, best = '', other = ''] = html.split('<section')
+
+    expect(html.match(/hf-card-soft/g)).toHaveLength(1)
+    expect(html.match(/hf-winner-highlight/g)).toHaveLength(2)
+    expect(html.match(/Uitblinker van de uitblinkers/g)).toHaveLength(2)
+    expect(html.match(/Uitblinker van het jaar/g)).toHaveLength(1)
+    expect(`${best}${other}`).toContain('Speler A')
   })
 
   it('says "Na het seizoen" for the season that has no winner yet, without a seal', () => {
@@ -125,28 +135,6 @@ describe('the cards of the Uitblinkers van het jaar without a season', () => {
 
     expect(html).toContain('Nog geen uitblinkers.')
     expect(html).not.toContain('hf-winner')
-  })
-})
-
-describe('the card Uitblinker van de Uitblinkers', () => {
-  it('is a strong card with the rating, the season and the number of ratings', () => {
-    const html = renderToStaticMarkup(
-      <BestYearWinnersCard
-        best={{
-          average: 6.7,
-          players: [
-            { name: 'Speler A', ratings: 631, season: '2005/06' },
-            { name: 'Speler X', ratings: undefined, season: '1999/00' },
-          ],
-        }}
-      />,
-    )
-
-    expect(html).toContain('hf-card-strong')
-    expect(html).toContain('Uitblinker van de Uitblinkers')
-    expect(html).toContain('6,7')
-    expect(html).toContain('Seizoen 2005/06 · gemiddelde van 631 cijfers')
-    expect(html).toContain('Seizoen 1999/00 · seizoencijfer van de Fansite')
   })
 })
 

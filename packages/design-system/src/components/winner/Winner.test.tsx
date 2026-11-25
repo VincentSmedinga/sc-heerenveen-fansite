@@ -40,6 +40,14 @@ describe('Winner', () => {
     expect(container.querySelector('.hf-winner-line')).toBeNull()
   })
 
+  it('marks the seal that stands out, and no other', () => {
+    const { container, rerender } = render(<Winner average="7,8" label="Uitblinker" name="Testspeler A" />)
+
+    expect(container.querySelector('.hf-winner-highlight')).toBeNull()
+    rerender(<Winner average="7,8" highlight label="Uitblinker" name="Testspeler A" />)
+    expect(container.querySelector('.hf-winner-highlight .hf-winner-seal')).not.toBeNull()
+  })
+
   it('passes other props to the outer element', () => {
     const { container } = render(
       <Winner average="7,8" className="extra" data-extra="1" label="Uitblinker" name="Testspeler A" />,
@@ -64,8 +72,30 @@ describe('the look of a Winner', () => {
     expect(css).toMatch(/@container hf-winner \(inline-size < /)
   })
 
-  it.each(['light', 'dark'] as const)('has an average that reaches 4.5:1 on the seal in %s', (theme) => {
-    expect(contrast(role('text-on-button')[theme], role('background-button')[theme])).toBeGreaterThanOrEqual(4.5)
+  it('draws a seal in two colours: points and a disc in the colour of the surface', () => {
+    expect(css).toContain('background-color: var(--hf-winner-seal-points);')
+    expect(css).toMatch(/&::after \{[^}]*background-color: var\(--hf-colour-background-surface\);/)
+    expect(css).toContain('--hf-winner-seal-points: var(--hf-colour-background-button);')
+  })
+
+  it('makes the seal of the highlight larger, with red points', () => {
+    expect(css).toMatch(
+      /\.hf-winner-highlight \.hf-winner-seal \{\s*--hf-winner-seal-size: 5\.25rem;\s*--hf-winner-seal-points: var\(--hf-colour-background-seal-highlight\);/,
+    )
+  })
+
+  it.each(['light', 'dark'] as const)('has an average that reaches 4.5:1 on the disc in %s', (theme) => {
+    expect(contrast(role('text-heading')[theme], role('background-surface')[theme])).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it.each(['light', 'dark'] as const)('has points that reach 3:1 against the disc and every card in %s', (theme) => {
+    for (const points of ['background-button', 'background-seal-highlight']) {
+      for (const surface of ['surface', 'surface-soft', 'surface-strong']) {
+        const ratio = contrast(role(points)[theme], role(`background-${surface}`)[theme])
+
+        expect(ratio, `${points} on ${surface}`).toBeGreaterThanOrEqual(3)
+      }
+    }
   })
 
   it.each(['light', 'dark'] as const)('has text that reaches 4.5:1 on the surfaces in %s', (theme) => {

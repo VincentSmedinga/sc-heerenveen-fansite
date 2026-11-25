@@ -1,10 +1,11 @@
 /*
- * The seal for the best-graded player of a match: a seal of twelve points in the colour of a
- * button with the average on it, and next to it a label, the name and a line. The seal is
- * decoration drawn with CSS (a clipped background and a thin ring), so it has no image and the
- * average stays text. It uses the colours of a button, so the white number keeps its contrast in
- * dark too, where the seal is light and the number dark. In forced colours the clipped fill goes
- * and the ring and the number remain. Where the box is narrow, the text goes under the seal: a
+ * The seal for the player graded highest: a seal of twelve points with a round disc on it that
+ * holds the average, so it has two colours: the points in the colour of a button and the disc in
+ * the colour of the surface. The seal of the highlight is larger and has red points. The seal is
+ * decoration drawn with CSS (a clipped background and a disc with a rim), so it has no image and
+ * the average stays text, in the colour of a heading on the disc, in light and in dark. In
+ * forced colours the fills go and the rim of the disc and the number remain. Next to the seal
+ * stand a label, the name and a line. Where the box is narrow, the text goes under the seal: a
  * container query, so it follows the width of the card and not of the screen.
  */
 
@@ -29,9 +30,10 @@
 
   .hf-winner-seal {
     --hf-winner-seal-size: 4.25rem;
+    --hf-winner-seal-points: var(--hf-colour-background-button);
 
     block-size: var(--hf-winner-seal-size);
-    color: var(--hf-colour-text-on-button);
+    color: var(--hf-colour-text-heading);
     display: grid;
     flex: none;
     font-size: var(--hf-figure-font-size);
@@ -43,7 +45,7 @@
 
     /* The twelve points. */
     &::before {
-      background-color: var(--hf-colour-background-button);
+      background-color: var(--hf-winner-seal-points);
       clip-path: polygon(
         50% 0%,
         60.6% 10.4%,
@@ -75,18 +77,26 @@
       position: absolute;
     }
 
-    /* The thin ring inside the points. */
+    /* The disc inside the points, with a thin rim that stays in forced colours. */
     &::after {
-      border: 0.09rem solid color-mix(in srgb, currentcolor 55%, transparent);
+      background-color: var(--hf-colour-background-surface);
+      border: 0.0625rem solid currentcolor;
       border-radius: 50%;
       content: '';
-      inset: 0.5625rem;
+      inset: 0.625rem;
       position: absolute;
     }
   }
 
+  .hf-winner-highlight .hf-winner-seal {
+    --hf-winner-seal-size: 5.25rem;
+    --hf-winner-seal-points: var(--hf-colour-background-seal-highlight);
+  }
+
+  /* The number lies on the disc, which is drawn after it. */
   .hf-winner-average {
     position: relative;
+    z-index: 1;
   }
 
   .hf-winner-text {

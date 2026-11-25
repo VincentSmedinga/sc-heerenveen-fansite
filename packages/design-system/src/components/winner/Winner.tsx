@@ -8,6 +8,11 @@ export type WinnerProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
    * reads "gemiddeld cijfer" before it.
    */
   average: string
+  /**
+   * A seal that stands out among the others: larger and with red points, for the one player who
+   * is best of all, such as the "Uitblinker van de uitblinkers". The label has to say it too.
+   */
+  highlight?: boolean | undefined
   /** The red label above the name, such as "Uitblinker vorige wedstrijd", shown in capitals. */
   label: string
   /** One small line under the name, such as "Thuis tegen Testclub, 3–1". Without it, none. */
@@ -17,14 +22,14 @@ export type WinnerProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
 }
 
 /**
- * The seal for the player of a match whom the supporters graded highest: a blue seal with the
- * average in white, and next to it a red label, the name and one small line. Where the width
- * is tight, the text goes under the seal. The seal itself is decoration, drawn with CSS: the
- * average is text, and a screen reader reads it with "gemiddeld cijfer". winner.css gives it
- * its look.
+ * The seal for the player whom the supporters graded highest: a seal in two colours, blue
+ * points round a disc with the average, and next to it a red label, the name and one small
+ * line. With `highlight` the seal is larger and its points are red. Where the width is tight,
+ * the text goes under the seal. The seal itself is decoration, drawn with CSS: the average is
+ * text, and a screen reader reads it with "gemiddeld cijfer". winner.css gives it its look.
  */
-export const Winner = ({ average, className, label, line, name, ...props }: WinnerProps) => (
-  <div {...props} className={classNames('hf-winner', className)}>
+export const Winner = ({ average, className, highlight, label, line, name, ...props }: WinnerProps) => (
+  <div {...props} className={classNames('hf-winner', highlight && 'hf-winner-highlight', className)}>
     <div className="hf-winner-body">
       <span className="hf-winner-seal">
         <span className="hf-visually-hidden">Gemiddeld cijfer </span>
