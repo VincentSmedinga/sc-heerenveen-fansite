@@ -8186,6 +8186,7 @@
   Het component is `OpenGameCards`.
 - **Waarom:** elk spel is in één oogopslag te herkennen, en de spellen nemen weinig ruimte in.
 - **Alternatieven:** één kaart Fans met rijen; een kaart per spel over de volle breedte van de zijkolom; op de plek van de Tag een regel met de wedstrijd of het aantal deelnemers; de links als vraag.
+- **Later:** zie _De kaarten van de open spellen staan onder elkaar_ in `designsysteem.md`: geen raster van twee bij twee en geen kleinere naam meer, maar één kaart per rij over de breedte van de zijkolom.
 
 ## Wedstrijden linkt onder de wedstrijd naar het open spel
 

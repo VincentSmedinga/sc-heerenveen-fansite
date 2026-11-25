@@ -4599,3 +4599,14 @@
 - **Besluit:** de grote getallen en de kleine titels zijn samen één pull request (#1662).
 - **Waarom:** beide zijn maten en gewichten in CSS, deels in dezelfde bestanden, met één ronde in licht en donker.
 - **Alternatieven:** twee issues.
+
+## De kaarten van de open spellen staan onder elkaar
+
+- **Datum:** 25 november 2026
+- **Besluit:** de kaarten van de open spellen (`OpenGameCards`) staan onder elkaar, niet twee naast elkaar (#1665).
+  Ze hebben `--hf-space-xl` ertussen, en de opvulling en de maat van de kop van een gewone kaart.
+  De kleinere opvulling, de kleinere kop en de nog kleinere kop in een heel smalle kaart zijn weg.
+- **Waarom:** in de smalle zijkolom worden twee kaarten naast elkaar te smal om goed te lezen.
+  Over de hele breedte past de naam van elk spel op de gewone maat.
+- **Alternatieven:** twee naast elkaar houden; twee naast elkaar alleen in een brede kolom.
+- **Later:** vervangt het raster van twee bij twee en de kleinere naam uit _Elk open spel heeft een kleine kaart op de voorpagina, onder het forum_ in `site.md`.

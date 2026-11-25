@@ -24,11 +24,10 @@ export type OpenGameCardsProps = Omit<ComponentPropsWithoutRef<'div'>, 'children
 }
 
 /**
- * A small card for each game that is open now, two beside each other, also on a phone and in a
- * narrow column. Each card is on the soft surface with the watermark of its game, and has the
- * name as an h2 and a link that says what you can do. A card only stands there while its game
- * is open. The name gets smaller in a narrow card, so no word breaks in two. Without a game
- * there is nothing. open-game-cards.css gives it its look.
+ * A card for each game that is open now, below each other. Each card is on the soft surface
+ * with the watermark of its game, and has the name as an h2 and a link that says what you can
+ * do. A card only stands there while its game is open. Without a game there is nothing.
+ * open-game-cards.css gives it its look.
  */
 export function OpenGameCards({ className, items, ...props }: OpenGameCardsProps) {
   const id = useId()
