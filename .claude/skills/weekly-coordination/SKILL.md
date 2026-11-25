@@ -137,6 +137,11 @@ The brief for the Builder carries what went wrong before:
 You start issues as the load allows (see _Planning Builders on the load_ in `AGENTS.md`), each with its own Builder.
 When you patch an issue, read the body just before you write it: Builders tick boxes in the same body, and an old copy overwrites theirs.
 
+## Before a merge
+
+Look at CI (`gh pr checks <number>`) before you merge on "klaar".
+A red check goes back to the Builder, which reads CI only once and may not have seen it.
+
 ## An issue closes
 
 - Check that the boxes are ticked to match what the merged pull request delivered.
