@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
-import { contrast, role } from '../../tokens/colourRoles'
+import { contrast, role, scale } from '../../tokens/colourRoles'
 import { Winner } from './Winner'
 
 describe('Winner', () => {
@@ -40,14 +40,6 @@ describe('Winner', () => {
     expect(container.querySelector('.hf-winner-line')).toBeNull()
   })
 
-  it('marks the seal that stands out, and no other', () => {
-    const { container, rerender } = render(<Winner average="7,8" label="Uitblinker" name="Testspeler A" />)
-
-    expect(container.querySelector('.hf-winner-highlight')).toBeNull()
-    rerender(<Winner average="7,8" highlight label="Uitblinker" name="Testspeler A" />)
-    expect(container.querySelector('.hf-winner-highlight .hf-winner-seal')).not.toBeNull()
-  })
-
   it('passes other props to the outer element', () => {
     const { container } = render(
       <Winner average="7,8" className="extra" data-extra="1" label="Uitblinker" name="Testspeler A" />,
@@ -62,6 +54,8 @@ describe('Winner', () => {
 
 const css = readFileSync(join(import.meta.dirname, 'winner.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
 
+const tokens = readFileSync(join(import.meta.dirname, '../../tokens/colour.css'), 'utf8')
+
 describe('the look of a Winner', () => {
   it('takes its colours from colour roles, never from a scale', () => {
     expect(css).not.toMatch(/var\(--hf-colour-(?:blue|grey|red|steel|sand)-/)
@@ -72,35 +66,26 @@ describe('the look of a Winner', () => {
     expect(css).toMatch(/@container hf-winner \(inline-size < /)
   })
 
-  it('draws a seal in two colours: points and a disc in the colour of the surface', () => {
-    expect(css).toContain('background-color: var(--hf-winner-seal-points);')
-    expect(css).toMatch(/&::after \{[^}]*background-color: var\(--hf-colour-background-surface\);/)
-    expect(css).toContain('--hf-winner-seal-points: var(--hf-colour-background-button);')
+  it('draws a seal in two blues, a step apart, with a white number', () => {
+    expect(css).toContain('color: var(--hf-colour-text-on-seal);')
+    expect(css).toMatch(/&::before \{\s*background-color: var\(--hf-colour-background-seal\);/)
+    expect(css).toMatch(/&::after \{\s*background-color: var\(--hf-colour-background-seal-centre\);/)
+    expect(tokens).toContain('--hf-colour-background-seal: var(--hf-colour-blue-600);')
+    expect(tokens).toContain('--hf-colour-background-seal-centre: var(--hf-colour-blue-500);')
+    expect(tokens).toContain('--hf-colour-text-on-seal: var(--hf-colour-white);')
+  })
+
+  it('has an average that reaches 4.5:1 on the disc, the same in light and in dark', () => {
+    expect(contrast(scale('white'), scale('blue-500'))).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('keeps the rim of the disc for forced colours', () => {
+    expect(css).toMatch(/&::after \{[^}]*border: 0\.0625rem solid transparent;/)
   })
 
   it('keeps the number above the disc inside the seal', () => {
     expect(css).toMatch(/\.hf-winner-seal \{[^}]*isolation: isolate;/)
     expect(css).toMatch(/\.hf-winner-average \{[^}]*z-index: 1;/)
-  })
-
-  it('makes the seal of the highlight larger, with red points', () => {
-    expect(css).toMatch(
-      /\.hf-winner-highlight \.hf-winner-seal \{\s*--hf-winner-seal-size: 5\.25rem;\s*--hf-winner-seal-points: var\(--hf-colour-background-seal-highlight\);/,
-    )
-  })
-
-  it.each(['light', 'dark'] as const)('has an average that reaches 4.5:1 on the disc in %s', (theme) => {
-    expect(contrast(role('text-heading')[theme], role('background-surface')[theme])).toBeGreaterThanOrEqual(4.5)
-  })
-
-  it.each(['light', 'dark'] as const)('has points that reach 3:1 against the disc and every card in %s', (theme) => {
-    for (const points of ['background-button', 'background-seal-highlight']) {
-      for (const surface of ['surface', 'surface-soft', 'surface-strong']) {
-        const ratio = contrast(role(points)[theme], role(`background-${surface}`)[theme])
-
-        expect(ratio, `${points} on ${surface}`).toBeGreaterThanOrEqual(3)
-      }
-    }
   })
 
   it.each(['light', 'dark'] as const)('has text that reaches 4.5:1 on the surfaces in %s', (theme) => {

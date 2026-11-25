@@ -24,7 +24,7 @@ export const generateMetadata = (): Metadata => {
 /**
  * The page "Uitblinker van het jaar" (issues 1474, 1613 and 1667): a card for each season with
  * its best player, the newest first, in two columns, from the season ratings that supporters
- * gave. The best of all seasons stands out in its card. It is gone, like the rest of the game,
+ * gave. The card of the best of all seasons stands out. It is gone, like the rest of the game,
  * when the Uitblinker is switched off.
  */
 export default async function YearWinnersPage() {

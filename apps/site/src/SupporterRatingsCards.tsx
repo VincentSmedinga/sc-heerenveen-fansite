@@ -123,8 +123,8 @@ const seasonHeadingId = (season: string) => `uitblinker-${season.replace('/', '-
  * The cards on the page "Uitblinker van het jaar" (issue 1613): one card for each season, the
  * newest first, with a seal for the winner or for both players on an equal rating. The running
  * season has a card without a seal that says "Na het seizoen" until it is over. The card of the
- * best season of all is soft, and its winners are the "Uitblinker van de uitblinkers" with a
- * seal that stands out (issue 1667). The Uitblinker is named in text, so no colour carries it.
+ * best season of all is soft, and its winners are the "Uitblinker van de uitblinkers" (issue
+ * 1667). The Uitblinker is named in text, so no colour carries it.
  * Without a season there is one card that says so.
  */
 export function YearWinnerCards({ winners }: { winners: readonly YearWinner[] }) {
@@ -160,7 +160,6 @@ export function YearWinnerCards({ winners }: { winners: readonly YearWinner[] })
             winner.players.map((player) => (
               <Winner
                 average={gradeText(winner.average as number)}
-                highlight={best.has(winner.season)}
                 key={player.name}
                 label={best.has(winner.season) ? 'Uitblinker van de uitblinkers' : 'Uitblinker van het jaar'}
                 line={ratingsLine(player.ratings)}

@@ -1,13 +1,12 @@
 /*
  * The seal for the player graded highest: a seal of twelve points with a round disc on it
- * that holds the average, so it has two colours: the points in the colour of a button and the
- * disc in the colour of the surface. The seal of the highlight is larger and has red points.
- * The seal is decoration drawn with CSS (a clipped background and a disc with a rim), so it
- * has no image and the average stays text, in the colour of a heading on the disc, in light
- * and in dark. In forced colours the fills go and the rim of the disc and the number remain.
- * Next to the seal stand a label, the name and a line. Where the box is narrow, the text goes
- * under the seal: a container query, so it follows the width of the card and not of the
- * screen.
+ * that holds the average, in two neighbouring blues: the points a step darker than the disc,
+ * and the average in white. The seal looks the same in light and in dark. It is decoration
+ * drawn with CSS (a clipped background and a disc), so it has no image and the average stays
+ * text. In forced colours the fills go and the rim of the disc, which is transparent
+ * otherwise, and the number remain. Next to the seal stand a label, the name and a line.
+ * Where the box is narrow, the text goes under the seal: a container query, so it follows
+ * the width of the card and not of the screen.
  */
 
 @layer hf.components {
@@ -31,10 +30,9 @@
 
   .hf-winner-seal {
     --hf-winner-seal-size: 4.25rem;
-    --hf-winner-seal-points: var(--hf-colour-background-button);
 
     block-size: var(--hf-winner-seal-size);
-    color: var(--hf-colour-text-heading);
+    color: var(--hf-colour-text-on-seal);
     display: grid;
     flex: none;
     font-size: var(--hf-figure-font-size);
@@ -47,7 +45,7 @@
 
     /* The twelve points. */
     &::before {
-      background-color: var(--hf-winner-seal-points);
+      background-color: var(--hf-colour-background-seal);
       clip-path: polygon(
         50% 0%,
         60.6% 10.4%,
@@ -79,20 +77,15 @@
       position: absolute;
     }
 
-    /* The disc inside the points, with a thin rim that stays in forced colours. */
+    /* The disc inside the points. Forced colours paint its transparent rim. */
     &::after {
-      background-color: var(--hf-colour-background-surface);
-      border: 0.0625rem solid currentcolor;
+      background-color: var(--hf-colour-background-seal-centre);
+      border: 0.0625rem solid transparent;
       border-radius: 50%;
       content: '';
       inset: 0.625rem;
       position: absolute;
     }
-  }
-
-  .hf-winner-highlight .hf-winner-seal {
-    --hf-winner-seal-size: 5.25rem;
-    --hf-winner-seal-points: var(--hf-colour-background-seal-highlight);
   }
 
   /*

@@ -113,11 +113,10 @@ describe('the cards of the Uitblinkers van het jaar', () => {
     expect(html).toContain('Gemiddelde van alle cijfers')
   })
 
-  it('has a soft card for the best season of all, with seals that stand out and their own label', () => {
+  it('has a soft card for the best season of all, whose winners have a label of their own', () => {
     const [, best = '', other = ''] = html.split('<section')
 
     expect(html.match(/hf-card-soft/g)).toHaveLength(1)
-    expect(html.match(/hf-winner-highlight/g)).toHaveLength(2)
     expect(html.match(/Uitblinker van de uitblinkers/g)).toHaveLength(2)
     expect(html.match(/Uitblinker van het jaar/g)).toHaveLength(1)
     expect(`${best}${other}`).toContain('Speler A')
