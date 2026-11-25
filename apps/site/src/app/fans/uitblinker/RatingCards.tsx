@@ -71,7 +71,7 @@ export function ClosedResultCard({ match, now, ratings }: { match: RatingMatch; 
  */
 export function EarlierWinnersCard({ season, winners }: { season: string; winners: readonly SeasonWinner[] }) {
   return (
-    <Card aria-labelledby="eerdere-winnaars" game="uitblinker">
+    <Card aria-labelledby="eerdere-winnaars" surface="strong">
       <Heading id="eerdere-winnaars" level={2}>
         Eerdere winnaars
       </Heading>
@@ -95,7 +95,7 @@ export function EarlierWinnersCard({ season, winners }: { season: string; winner
 /** The side card that says how the game works, in a few short lines. */
 export function HowItWorksCard() {
   return (
-    <Card aria-labelledby="zo-werkt-het" game="uitblinker">
+    <Card aria-labelledby="zo-werkt-het" surface="soft">
       <Heading id="zo-werkt-het" level={2}>
         Zo werkt het
       </Heading>
