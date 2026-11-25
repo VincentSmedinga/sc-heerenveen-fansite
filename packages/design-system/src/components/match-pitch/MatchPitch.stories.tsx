@@ -31,6 +31,7 @@ const meta = preview.meta({
           'De opstelling van beide teams op een veld, getekend uit de formatie en de volgorde van de spelers; een ring om elke speler toont de minuten die hij speelde, en merken tonen doelpunten, kaarten, wissels en de aanvoerder.',
           'Het veld is zo groot als er teams op staan: beide teams, de helft van één team, of geen veld als er van geen van beide een bruikbare formatie is. Een schermlezer hoort per team een lijst met één zin per speler, en onder het veld staat dezelfde opstelling als lijst.',
           'Hij is gebouwd uit `PitchPlayer`, `PlayerName`, `MatchEventIcon`, `Disclosure`, `Heading` en `Tag`.',
+          'In de namenlijst onder het veld staat boven elke naam een dunne lijn, ook boven de eerste, met de krappe maat van de meeste lijsten.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

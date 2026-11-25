@@ -242,9 +242,7 @@ describe('the page with all seasons, /spelers/cijfers/alle', () => {
     const html = await render()
     const side = html.slice(html.indexOf('style="grid-area:side"'))
     const card = /<section[^>]*aria-labelledby="records".*?<\/section>/s.exec(side)?.[0] ?? ''
-    const lines = [...card.matchAll(/<p class="hf-meta">([^<]+)<\/p>/g)]
-      .map(([, name]) => name)
-      .filter((name) => !name?.startsWith('De leeftijd'))
+    const lines = [...card.matchAll(/<dt class="hf-meta">([^<]+)<\/dt>/g)].map(([, name]) => name)
 
     expect(side.indexOf('id="records"')).toBeLessThan(side.indexOf('id="hattricks"'))
     expect(card).toContain('hf-card-soft')

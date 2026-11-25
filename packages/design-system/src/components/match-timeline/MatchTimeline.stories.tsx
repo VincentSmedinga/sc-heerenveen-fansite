@@ -30,6 +30,7 @@ const meta = preview.meta({
           'Elke gebeurtenis is één regel: de minuut in een pil, gevuld voor sc Heerenveen en open voor de tegenstander, en daarna het pictogram en de naam. De blokken zijn genummerde lijsten met een naam, onder een kop van het niveau dat de pagina kiest.',
           'Bij een doelpunt kan de stand erbij staan, tussen het pictogram en de naam: vet, met de thuisclub eerst, en groen als sc Heerenveen voorstaat, grijs bij gelijk en rood bij achterstand. De kleur komt erbij: het getal zegt wie voorstaat, en een schermlezer hoort de stand met de namen van de clubs.',
           'Hij is gebouwd uit `MatchEventIcon`, `PlayerName` en `Heading`.',
+          'Boven elke gebeurtenis staat een dunne lijn, ook boven de eerste van een blok, met de krappe maat van de meeste lijsten.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

@@ -2,8 +2,8 @@
  * A match: the two clubs with the result between them, with small type around them. Above them
  * are the competition and the round, and for a played match the day; under them the stadium and
  * the referee, and for a match without a result the day before them. The line
- * with the clubs is the link to the page of the match, when it has one. A List of matches has a
- * thin line between the matches.
+ * with the clubs is the link to the page of the match, when it has one. row-lines.css draws
+ * the lines between the matches of a List.
  */
 
 @layer hf.components {
@@ -13,7 +13,6 @@
     gap: 0.125rem;
     grid-template-columns: minmax(0, 1fr);
     overflow-wrap: anywhere;
-    padding-block: var(--hf-space-m);
   }
 
   .hf-match-extra-lines > * {
@@ -189,22 +188,9 @@
     color: var(--hf-colour-text-missing);
   }
 
-  /* A List with matches in it: no bullets, no indent, and a thin line between the lines. */
+  /* A List with matches in it: no bullets and no indent. The lines are in row-lines.css. */
   :is(ul, ol):has(> li > .hf-match) {
     list-style: none;
     padding-inline-start: 0;
-  }
-
-  li > .hf-match {
-    border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
-  }
-
-  li:first-child > .hf-match {
-    border-block-start: 0;
-    padding-block-start: 0;
-  }
-
-  li:last-child > .hf-match {
-    padding-block-end: 0;
   }
 }

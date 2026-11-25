@@ -8,11 +8,9 @@
   }
 
   .hf-figure-list-item {
-    border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
     column-gap: var(--hf-space-s);
     display: flex;
     justify-content: space-between;
-    padding-block: var(--hf-space-s);
   }
 
   /* A long name wraps, and an unbroken one does too, so the row never scrolls sideways. */

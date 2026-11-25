@@ -44,11 +44,12 @@ type ShortStaffPlaceProps = {
 /**
  * A person of the staff as a short line in a list: the name, with in front of it, when there is
  * something to say, when they had the job, as in "tot 14 mrt 2026 Robin van Persie". It is a
- * short line for a person: short-line.css draws the lines, the wrapping and the colours, and
- * short-staff.css only makes room for the longer text before the name. A person has a
- * `givenName` and a `surname`; a stadium or a club has a `name`, in one piece. The name is a
- * PlayerName, so the given name is in the normal weight, and "(interim)" is in the normal
- * weight and the second colour. A line can have a note under it, on a line of its own.
+ * short line for a person: short-line.css draws the wrapping and the colours, row-lines.css
+ * the lines, and short-staff.css only makes room for the longer text before the name. A
+ * person has a `givenName` and a `surname`; a stadium or a club has a `name`, in one piece.
+ * The name is a PlayerName, so the given name is in the normal weight, and "(interim)" is in
+ * the normal weight and the second colour. A line can have a note under it, on a line of its
+ * own.
  */
 export const ShortStaff = ({
   className,

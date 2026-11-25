@@ -46,8 +46,8 @@ const separator = (
  * A line of the discussions of our own forum. The title is a link to the discussion, and under
  * it the number of replies, who wrote the last post and when, as in "83 reacties · laatst
  * Buffon1 · 13:28". The name is plain text: no link and no avatar. There is no text of a post
- * and no image. discussion-item.css gives it its look, and draws the lines between the lines of
- * a List.
+ * and no image. discussion-item.css gives it its look, and row-lines.css draws the lines
+ * between the lines of a List.
  */
 export const DiscussionItem = ({
   className,

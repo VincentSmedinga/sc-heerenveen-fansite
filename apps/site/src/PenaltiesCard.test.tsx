@@ -11,7 +11,8 @@ describe('PenaltiesCard', () => {
     expect(html).toContain('hf-card-soft')
     expect(html).toContain('>Voor ons, benut<')
     expect(html).toContain('>Tegen ons, benut<')
-    expect(html.indexOf('>5<')).toBeLessThan(html.indexOf('>3<'))
+    expect(html).toContain('<dt class="hf-meta">Voor ons, benut</dt><dd><p>5</p></dd>')
+    expect(html).toContain('<dt class="hf-meta">Tegen ons, benut</dt><dd><p>3</p></dd>')
   })
 
   it('says that only the penalties that were scored are known, and how many matches it is based on', () => {
@@ -26,7 +27,7 @@ describe('PenaltiesCard', () => {
 
     expect(html).toContain('id="strafschoppen"')
     expect(html).toContain('Geen strafschoppen')
-    expect(html).not.toContain('<li')
+    expect(html).not.toContain('<dl')
     expect(html).toContain('We kennen alleen de benutte strafschoppen.')
   })
 

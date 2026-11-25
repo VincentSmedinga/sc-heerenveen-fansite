@@ -12,20 +12,9 @@
 
   .hf-winner-list-item {
     align-items: start;
-    border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
     column-gap: var(--hf-space-m);
     display: grid;
     grid-template-columns: minmax(0, 1fr) max-content;
-    padding-block: var(--hf-space-s);
-  }
-
-  .hf-winner-list-item:first-child {
-    border-block-start: 0;
-    padding-block-start: 0;
-  }
-
-  .hf-winner-list-item:last-child {
-    padding-block-end: 0;
   }
 
   .hf-winner-list-text {

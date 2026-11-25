@@ -31,6 +31,7 @@ const meta = preview.meta({
           'Het component heeft geen intro of foto: die tonen we alleen met toestemming van de bron (principe 1 en 2 van de Redactie), en er staat nooit een logo van de bron bij (principe 3).',
           'Zet hem in een `List.Item` voor een lijst met nieuws, met `role="list"` op de `List`, in een `Card` onder een kop van niveau 2.',
           'Hij is gebouwd uit `Link`, `Text` en `Time`, met het pictogram voor een link naar buiten uit `Icon`.',
+          'In een `List` staat boven elk bericht een dunne lijn, ook boven het eerste, met de ruime maat die wedstrijden, nieuws en discussies delen.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

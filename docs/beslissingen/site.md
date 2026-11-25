@@ -5927,6 +5927,7 @@
 - **Waarom:** de datum links in `ShortMatch` neemt veel ruimte en laat de regel met de clubs toch vaak afbreken; een `Match` met de clubs en de uitslag op een eigen regel kost weinig extra hoogte, en met één onderdeel hoeft de site niet meer te kiezen tussen twee.
 - **Alternatieven:** een eigenschap `showCompetition` op `Match` (meer API, terwijl weglaten van `competition` hetzelfde doet); de eerste regel van `Match` aanpassen zodat de datum altijd bovenaan staat (de eigenaar wil dat later bekijken).
 - **Later:** zie _`Match` is voor een volledige lijst, `ShortMatch` voor een selectie_ (4 november 2026).
+- **Later:** zie _De lijnen tussen rijen staan in één CSS-bestand_ in `designsysteem.md` (25 november 2026): de lijnen staan nu in `row-lines.css`, en de regels voor een naam boven een wedstrijd zijn weg.
 
 ## Stadion en scheidsrechter staan alleen op de lijsten met detail
 

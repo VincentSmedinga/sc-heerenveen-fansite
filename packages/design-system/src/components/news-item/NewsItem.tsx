@@ -71,8 +71,8 @@ const separator = (
  * permission of the source (editorial principles 1 and 2). In a line narrower than 24rem the
  * day and the time are above the headline, chosen with a container query in news-item.css; the
  * order in the HTML is the same. The outer div is the container, and the layout div inside it
- * is the grid. news-item.css gives it its look, and draws the lines between the lines of a
- * List.
+ * is the grid. news-item.css gives it its look, and row-lines.css draws the lines between the
+ * lines of a List.
  */
 export const NewsItem = ({
   className,

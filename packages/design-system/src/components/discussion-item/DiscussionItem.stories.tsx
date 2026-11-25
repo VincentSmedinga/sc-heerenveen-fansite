@@ -27,6 +27,7 @@ const meta = preview.meta({
           'De schermnaam is gewone tekst, en het component laat nooit de tekst van een bericht zien (zie Redactie, "Ons eigen forum").',
           'Zet hem in een `List.Item` voor een lijst met discussies, met `role="list"` op de `List`, in een `Card` onder een kop van niveau 2 met onderaan een link naar het forum.',
           'Hij is gebouwd uit `Link` en `Text`, en de tijd uit `Time`.',
+          'In een `List` staat boven elke discussie een dunne lijn, ook boven de eerste, met de ruime maat die wedstrijden, nieuws en discussies delen.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

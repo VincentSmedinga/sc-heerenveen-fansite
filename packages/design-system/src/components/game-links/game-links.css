@@ -18,8 +18,8 @@
   }
 
   /*
-   * The last match of a list has no space under it (match.css), so the links take it above
-   * themselves and add none below.
+   * The last match of a list has no space under it (row-lines.css), so the links take it
+   * above themselves and add none below.
    */
   li:last-child > .hf-match + .hf-game-links {
     padding-block: var(--hf-space-m) 0;

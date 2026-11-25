@@ -18,7 +18,7 @@ const meta = preview.meta({
       description: {
         component: [
           'Een rij kerngetallen zet twee tot vier grote getallen bovenaan een pagina, zoals bij een speler, zodat de bezoeker in één blik ziet waar het over gaat.',
-          'Elk getal staat in een eigen kaart, met een woord en een korte regel die zegt wat het telt; een schermlezer leest elk getal als één zin. Voor feiten in een lijst onder elkaar is `ShortFact` er.',
+          'Elk getal staat in een eigen kaart, met een woord en een korte regel die zegt wat het telt; een schermlezer leest elk getal als één zin. Voor feiten met een naam onder elkaar is een `DescriptionList` onder elkaar er.',
           'Hij is gebouwd uit `Card` en `Text`.',
         ].join('\n'),
       },

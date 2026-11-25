@@ -570,8 +570,8 @@ De kaarten Alle spelers, Assists en Minuten staan hier niet: we hebben de opstel
 De kaart Bijzondere doelpunten (`SpecialGoalsCard` in `src/SpecialGoalsCard.tsx`, met `specialGoalsOf` in `src/matches.ts`), met het anker `#bijzondere-doelpunten`, staat in de zijkolom ("Meer cijfers over de spelers") op het zachte vlak.
 Op een telefoon volgt de zijkolom op de hoofdkolom, dus de lijst met doelpuntenmakers komt eerst, en de bronvermelding sluit de zijkolom af.
 Ze noemt ook de pagina's van de selectie van het seizoen, en Wikidata (CC0) als een speler daarvandaan komt.
-De kaart heeft één kop, van niveau 2, en daaronder een lijst van vier delen: elk deel is een `List.Item` met de naam als rustige tekst erboven (`Text appearance="meta"`) en de waarde eronder in een `ShortFact` van het designsysteem, dat de dunne lijnen tussen de delen tekent.
-De naam en de waarde staan in hetzelfde lijstitem, dus een schermlezer leest ze samen.
+De kaart heeft één kop, van niveau 2, en daaronder een `DescriptionList` met `stacked` van vier delen: de naam is de rustige `dt` en de waarde de `dd` eronder, in een `Text`.
+Zo hoort een schermlezer welke waarde bij welke naam hoort.
 De delen zijn:
 
 - **Hattricks:** de spelers met drie of meer doelpunten in één wedstrijd, achter elkaar met komma's ("Jan Jansen 2×, Piet Pietersen"; één keer staat er geen getal), of "Nog geen" in de rustige kleur.

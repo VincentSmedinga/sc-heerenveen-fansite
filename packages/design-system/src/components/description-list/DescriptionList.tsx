@@ -5,6 +5,11 @@ import { classNames } from '../classNames'
 export type DescriptionListItemProps = Omit<ComponentPropsWithoutRef<'div'>, 'children'> & {
   /** The description: plain text or content in a line, such as a `Time`. */
   children: ReactNode
+  /**
+   * Whether the description says that there is nothing to show, such as `Nog geen`. It is
+   * then in the quiet colour, so it does not look like a fact.
+   */
+  empty?: boolean
   /** What the description is about, such as `Stadion`. */
   term: ReactNode
 }
@@ -28,10 +33,10 @@ export type DescriptionListProps = ComponentPropsWithoutRef<'dl'> & {
  * `div` that keeps the two together. It only works inside a DescriptionList, so it is written
  * as DescriptionList.Item.
  */
-const Item = ({ children, term, ...props }: DescriptionListItemProps) => (
+const Item = ({ children, empty = false, term, ...props }: DescriptionListItemProps) => (
   <div {...props}>
     <dt className="hf-meta">{term}</dt>
-    <dd>{children}</dd>
+    <dd className={empty ? 'hf-description-list-empty' : undefined}>{children}</dd>
   </div>
 )
 
@@ -40,8 +45,8 @@ Item.displayName = 'DescriptionList.Item'
 
 /**
  * A few short facts as pairs of a term and a description: a `dl` of DescriptionList.Item
- * elements. The term is small and quiet, the description is a little heavier than running
- * text, and the pairs stand next to each other as far as they fit and wrap where they do not.
+ * elements. The term is small and quiet, the description has the weight of running text, and
+ * the pairs stand next to each other as far as they fit and wrap where they do not.
  * It does not know where it stands: the head of a match and a card with figures both use it.
  * description-list.css gives it its look.
  */

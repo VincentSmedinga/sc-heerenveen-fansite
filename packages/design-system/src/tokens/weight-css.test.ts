@@ -185,6 +185,12 @@ describe('the font weights in the CSS of tables', () => {
     }
   })
 
+  it('sets a description in the weight of running text', () => {
+    const rules = weightRules(read('components/description-list/description-list.css'))
+
+    expect(rules.find(({ selector }) => selector === '.hf-description-list dd')?.value).toBe(token('body'))
+  })
+
   it('sets the figure at the end of a row in the weight of a figure', () => {
     for (const [file, name] of [
       ['components/figure-list/figure-list.css', 'hf-figure-list-figure'],

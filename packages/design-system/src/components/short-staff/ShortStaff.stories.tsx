@@ -32,6 +32,7 @@ const meta = preview.meta({
           'Een persoon van de staf als korte regel in een lijst: de naam, en als dat iets zegt ervoor wanneer die de functie had of kreeg.',
           'Het is een korte regel voor een persoon, voor een lijst zoals de hoofdtrainers van een seizoen. Een stadion of een club is geen achternaam: geef die mee als `name`. Zet de regel in een `List.Item`, de lijst in een `Card` onder een kop van niveau 2, en geef de `List` `role="list"`.',
           'Hij is gebouwd uit `PlayerName` en `Text`.',
+          'In een `List` staat boven elke regel een dunne lijn, ook boven de eerste, met de krappe maat van de meeste lijsten.',
         ].join('\n'),
       },
       page: ControlsDocsPage,

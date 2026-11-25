@@ -2,11 +2,11 @@
  * The course of a match: two blocks next to each other, the first and the second half, and a
  * third over the full width for extra time. In a block every event is a line with the minute in
  * a pill, filled for sc Heerenveen and open for the opponent, and beside it the icon and the
- * name. The rows are parted by a thin line. The blocks sit next to each other when the place
- * they are in is wide enough, and under each other when it is not: the width is that of the
- * place the timeline is in, such as a card, and not of the screen. Nothing here depends on a
- * colour: the pill says whose event it is to the eye, and the hidden text says it in words. The
- * score of a goal has a colour, but the figures say who leads.
+ * name. The rows are parted by a thin line (row-lines.css). The blocks sit next to each other
+ * when the place they are in is wide enough, and under each other when it is not: the width is
+ * that of the place the timeline is in, such as a card, and not of the screen. Nothing here
+ * depends on a colour: the pill says whose event it is to the eye, and the hidden text says it
+ * in words. The score of a goal has a colour, but the figures say who leads.
  */
 
 @layer hf.components {
@@ -52,11 +52,9 @@
 
   .hf-match-event {
     align-items: start;
-    border-block-start: 1px solid var(--hf-card-line, var(--hf-colour-border-default));
     column-gap: var(--hf-space-s);
     display: flex;
     overflow-wrap: anywhere;
-    padding-block: var(--hf-space-s);
   }
 
   /*
@@ -68,15 +66,6 @@
     border-radius: 0.25rem;
     outline: 0.1875rem solid var(--hf-colour-focus);
     outline-offset: 2px;
-  }
-
-  .hf-match-event:first-child {
-    border-block-start: 0;
-    padding-block-start: 0;
-  }
-
-  .hf-match-event:last-child {
-    padding-block-end: 0;
   }
 
   /*
