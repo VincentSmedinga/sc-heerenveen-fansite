@@ -49,3 +49,20 @@ describe('Form.Buttons', () => {
     expect(buttons?.textContent).toBe('Knoppen')
   })
 })
+
+describe('Form.Actions', () => {
+  it('is a row with its class that keeps the order of what is in it', () => {
+    const { container } = render(
+      <Form>
+        <Form.Actions className="extra">
+          <button type="submit">Verstuur</button>
+          <a href="#hulp">Hulp</a>
+        </Form.Actions>
+      </Form>,
+    )
+    const row = container.querySelector('.hf-form-actions')
+
+    expect(row?.classList.contains('extra')).toBe(true)
+    expect([...(row?.children ?? [])].map((child) => child.textContent)).toEqual(['Verstuur', 'Hulp'])
+  })
+})

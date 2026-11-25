@@ -9,7 +9,6 @@ import {
   Form,
   Heading,
   List,
-  Match,
   Notice,
   Tag,
   Text,
@@ -17,8 +16,7 @@ import {
 } from '@fansite/design-system'
 
 import { rulesPath, yearWinnersPath } from '#src/fans-paths'
-import { logInPaths } from '#src/fans/log-in'
-import { returnParameter } from '#src/fans/log-in-form'
+import { MatchLine } from '#src/fans/GameCards'
 import {
   type MatchRatings,
   orderRatings,
@@ -42,10 +40,7 @@ import {
   type RatingPlayer,
   waitingText,
 } from '#src/fans/rating'
-import { signUpPaths } from '#src/fans/sign-up'
-import { matchMoment } from '#src/match-format'
 import { gradeText, RatingsTable, supportersText } from '#src/MatchRatingsCard'
-import { reportAddress } from '#src/report-data'
 import { matchesPath } from '#src/season-page'
 import { seasonAddress } from '#src/seasons'
 
@@ -62,7 +57,7 @@ export function ClosedResultCard({ match, now, ratings }: { match: RatingMatch; 
       <Heading id="uitslag" level={2}>
         Uitslag van de laatste wedstrijd
       </Heading>
-      <MatchLine match={match} now={now} />
+      <MatchLine match={match} now={now} played />
       {ratings.supporters < ratingMinimum ? null : <RatingsTable ratings={ratings} />}
       <Text appearance="meta">{supportersText(ratings.supporters)}.</Text>
     </Card>
@@ -115,30 +110,6 @@ export function HowItWorksCard() {
         <List.Item>Als het venster dicht is, zien alle fans de uitslag.</List.Item>
       </List>
       <CardLink href={ratingRulesPath}>Spelregels</CardLink>
-    </Card>
-  )
-}
-
-/** The way in for a visitor who is not logged in: what is needed, and the two buttons. */
-export function JoinCard() {
-  return (
-    <Card aria-labelledby="doe-mee" surface="strong">
-      <Heading id="doe-mee" level={2}>
-        Doe mee
-      </Heading>
-      <Text>
-        Om cijfers te geven heb je alleen een schermnaam en een e-mailadres nodig. Een wachtwoord is niet nodig.
-      </Text>
-      {/* Forms that only go to a page: the design system has no link as a button. */}
-      <Form action={signUpPaths.form}>
-        <Button type="submit">Account maken</Button>
-      </Form>
-      <Form action={logInPaths.form} method="get">
-        {/* The button carries the page to come back to: a form sends its name and value. */}
-        <Button appearance="soft" name={returnParameter} type="submit" value={ratingPath}>
-          Inloggen
-        </Button>
-      </Form>
     </Card>
   )
 }
@@ -198,7 +169,7 @@ export function OpenCard({
       <Text>
         <Tag tone="open">{deadlineTag(closesAt, now)}</Tag>
       </Text>
-      <MatchLine match={match} now={now} />
+      <MatchLine match={match} now={now} played />
       <Text>
         Geef elke speler die 30 minuten of langer speelde een cijfer van 1 tot 10{withCoach ? ', en de trainer' : ''}.
         Je kunt ze wijzigen tot {closingText(closesAt)}.
@@ -312,7 +283,7 @@ export function WaitingCard({ match, now }: { match: RatingMatch; now: Date }) {
       <Text>
         <Tag>Nog niet open</Tag>
       </Text>
-      <MatchLine match={match} now={now} />
+      <MatchLine match={match} now={now} played />
       <Text>{waitingText}</Text>
     </Card>
   )
@@ -320,21 +291,3 @@ export function WaitingCard({ match, now }: { match: RatingMatch; now: Date }) {
 
 /** The part of the rules page about this game. */
 const ratingRulesPath = `${rulesPath}#uitblinker`
-
-/** The match of a card, in the look of the lists: the day and the competition small above. */
-function MatchLine({ match, now }: { match: RatingMatch; now: Date }) {
-  return (
-    <Match
-      competition={match.competition}
-      {...matchMoment({ ...match, status: 'played' }, now)}
-      extraTime={match.extraTime}
-      goalsAgainst={match.goalsAgainst ?? 0}
-      goalsFor={match.goalsFor ?? 0}
-      home={match.home}
-      opponent={match.opponent}
-      reportHref={reportAddress(match.season, match.matchDate, match.clubSlug)}
-      round={match.round}
-      status="played"
-    />
-  )
-}

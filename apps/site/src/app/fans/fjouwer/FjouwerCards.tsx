@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import { Button, Card, Form, Heading, Match, Notice, Tag, Text } from '@fansite/design-system'
+import { Card, Heading, Tag, Text } from '@fansite/design-system'
 
 import type { FjouwerMatch } from '#src/fans/fjouwer'
 
@@ -12,12 +12,10 @@ import {
   unknownHourMessage,
 } from '#src/fans/fjouwer-form'
 import { closesAt } from '#src/fans/fjouwer-rules'
-import { logInPaths } from '#src/fans/log-in'
-import { returnParameter } from '#src/fans/log-in-form'
+import { NoMatchCard as GameNoMatchCard, MatchLine } from '#src/fans/GameCards'
 import { deadlineText } from '#src/fans/prediction'
-import { signUpPaths } from '#src/fans/sign-up'
-import { matchMoment } from '#src/match-format'
 
+import { PageLogIn } from '../inloggen/PageLogIn'
 import { FjouwerForm } from './FjouwerForm'
 
 const id = 'jouw-vier'
@@ -53,7 +51,7 @@ export function JouwVierCard({
   let body: ReactNode
 
   if (choice === undefined) {
-    body = <LogInNotice />
+    body = <PageLogIn message="Log in om je vier te kiezen." returnTo={fjouwerPath} />
   } else if (choice.players.length === 0) {
     body = <Text>Van dit seizoen kennen we de selectie nog niet.</Text>
   } else {
@@ -102,46 +100,8 @@ export function JouwVierCard({
 /** The card for the end of the season, when no match is left: one sentence and no form. */
 export function NoMatchCard() {
   return (
-    <Card aria-labelledby={id} game="fjouwer">
-      <Heading id={id} level={2}>
-        Jouw vier
-      </Heading>
-      <Text>Er is geen komende wedstrijd meer. Zodra de volgende wedstrijd bekend is, kies je hier weer je vier.</Text>
-    </Card>
-  )
-}
-
-/** The logged-out visitor's way in: a notice and the two buttons, as on Fans. */
-function LogInNotice() {
-  return (
-    <>
-      <Notice>Log in om je vier te kiezen. Nog geen account? Dat maak je in een minuut.</Notice>
-      {/* Forms that only go to a page: the design system has no link as a button. */}
-      <Form action={logInPaths.form} method="get">
-        {/* The button carries the page to come back to: a form sends its name and value. */}
-        <Button name={returnParameter} type="submit" value={fjouwerPath}>
-          Inloggen
-        </Button>
-      </Form>
-      <Form action={signUpPaths.form}>
-        <Button appearance="soft" type="submit">
-          Account maken
-        </Button>
-      </Form>
-    </>
-  )
-}
-
-/** The match of the card, in the look of the lists: the day and the competition small above. */
-function MatchLine({ match, now }: { match: FjouwerMatch; now: Date }) {
-  return (
-    <Match
-      competition={match.competition}
-      {...matchMoment({ ...match, status: 'scheduled' }, now)}
-      home={match.home}
-      opponent={match.opponent}
-      round={match.round}
-      status="scheduled"
-    />
+    <GameNoMatchCard game="fjouwer" heading="Jouw vier" id={id}>
+      Er is geen komende wedstrijd meer. Zodra de volgende wedstrijd bekend is, kies je hier weer je vier.
+    </GameNoMatchCard>
   )
 }

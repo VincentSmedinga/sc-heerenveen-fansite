@@ -211,15 +211,17 @@ describe('FansPage, with games on', () => {
 
   const headings = (html: string) => [...html.matchAll(/<h2[^>]*>(.*?)<\/h2>/g)].map(([, text]) => text)
 
-  it('shows the intro, "Doe mee" first and a card for each game in order, in two columns, and no "Wat komt er"', async () => {
+  it('shows the intro, the card to log in first and a card for each game in order, in two columns, and no "Wat komt er"', async () => {
     const html = await render()
 
     expect(html).toContain(
       'Voorspel de uitslag, geef de spelers een cijfer, kies de vier die jij opstelt en doe de Fantest.',
     )
-    expect(headings(html)).toEqual(['Doe mee', 'Prognose', 'Uitblinker', 'Fjouwer', 'Fantest'])
+    expect(headings(html)).toEqual(['Inloggen', 'Prognose', 'Uitblinker', 'Fjouwer', 'Fantest'])
     expect(html).toContain('hf-card-columns')
-    expect(html).toContain('Alleen je schermnaam is voor anderen te zien.')
+    expect(html).toContain('<strong>Log in om mee te doen.</strong> We mailen je een link en een code.')
+    expect(html).toMatch(/name="terug"[^>]*value="\/fans"/)
+    expect(html).not.toContain('action="/fans/inloggen"')
     expect(html).not.toContain('Wat komt er')
     expect(html).not.toContain('Maak alvast een account')
     expect(html).toContain('Spelregels van alle spellen')
@@ -233,7 +235,7 @@ describe('FansPage, with games on', () => {
     const html = await render()
 
     expect(html).toContain('Voorspel de uitslag en doe de Fantest.')
-    expect(headings(html)).toEqual(['Doe mee', 'Prognose', 'Fantest'])
+    expect(headings(html)).toEqual(['Inloggen', 'Prognose', 'Fantest'])
     expect(readFjouwerCard).not.toHaveBeenCalled()
     expect(readUitblinkerCard).not.toHaveBeenCalled()
     expect(html).not.toContain('komt eraan')
@@ -242,10 +244,10 @@ describe('FansPage, with games on', () => {
   it('leaves out only the card of a game that could not be read', async () => {
     readFjouwerCard.mockResolvedValue(undefined)
 
-    expect(headings(await render())).toEqual(['Doe mee', 'Prognose', 'Uitblinker', 'Fantest'])
+    expect(headings(await render())).toEqual(['Inloggen', 'Prognose', 'Uitblinker', 'Fantest'])
   })
 
-  it('shows a supporter the line in place of "Doe mee", and gives the session to the readers', async () => {
+  it('shows a supporter the line in place of the card to log in, and gives the session to the readers', async () => {
     const supporter = { createdAt: new Date('2026-01-01'), disabledAt: null, id: 5, screenName: 'Tjalle99' }
 
     currentSupporter.mockResolvedValue(supporter)
@@ -253,6 +255,7 @@ describe('FansPage, with games on', () => {
     const html = await render()
 
     expect(html).toContain('Je bent ingelogd als Tjalle99.')
+    expect(html).not.toContain('name="e-mail"')
     expect(headings(html)).toEqual(['Prognose', 'Uitblinker', 'Fjouwer', 'Fantest'])
 
     for (const read of [readPrognoseCard, readUitblinkerCard, readFjouwerCard, readFantestCard]) {

@@ -218,7 +218,7 @@ De laatste link van de footer is Beheer, naar `/beheer/inloggen`, voor iedereen 
 ## Schakelaars die in de pagina wisselen
 
 Welke stand, Welke wedstrijden en Welke berichten zijn gewone links (`SegmentedLinks` uit het designsysteem, dat niets van Next.js kent).
-`SwitchLinks` in `src/SwitchLinks.tsx` is het clientonderdeel dat er met JavaScript een wissel binnen de pagina van maakt: `StandingsSwitch`, `CompetitionLinks` en de lijst in `/beheer/berichten` gebruiken het.
+`SwitchLinks` in `src/SwitchLinks.tsx` is het clientonderdeel dat er met JavaScript een wissel binnen de pagina van maakt: `StandingsSwitch`, `CompetitionLinks`, Stand Prognose en de lijst in `/beheer/berichten` gebruiken het.
 Een gewone klik met de linkermuisknop (of Enter) zet de waarde van de schakelaar meteen op de keuze en roept `router.push(href, { scroll: false })` aan; de oude inhoud blijft staan tot de nieuwe er is.
 Terwijl de pagina laadt, staat `aria-busy="true"` op de groep, en daarna zegt de regel met `role="status"` naast de groep wat er gekozen is: "Laatste 5 gekozen".
 Valt de wissel weg, dan staat de schakelaar weer op de waarde van de pagina.
@@ -1568,7 +1568,7 @@ De stap maakt de rij vlak voor het bericht uitgaat en haalt hem weg als het vers
 ### De pagina Fans
 
 `/fans` (`app/fans/page.tsx`) is de start van het hoofdstuk (#1646).
-Zolang een spel aan staat, toont de pagina per spel dat aan staat een kaart (`GameStatusCard` uit het designsysteem), in de volgorde Prognose, Uitblinker, Fjouwer, Fantest, in een of twee kolommen.
+Zolang een spel aan staat, krijgt een bezoeker bovenaan de kaart om in te loggen, en toont de pagina per spel dat aan staat een kaart (`GameStatusCard` uit het designsysteem), in de volgorde Prognose, Uitblinker, Fjouwer, Fantest, in een of twee kolommen.
 Elk spel heeft een lezer die zegt wat er op zijn kaart staat: `read-game-cards.ts` en `uitblinker-card.ts`.
 Of de Prognose en Fjouwer open zijn, zegt `readOpenGame` (`src/fans/open-games.ts`), dezelfde regel als op de homepage en Wedstrijden.
 De Tag zegt "Open tot za 16.45" (met het moment waarop het spel sluit), "Nog te doen", "Gesloten" of "Nog niet open".
@@ -1578,6 +1578,13 @@ Een geblokkeerd account ziet wat een bezoeker ziet.
 Kan een spel niet gelezen worden, dan ontbreekt alleen die kaart, en het logboek zegt waarom.
 Staat geen enkel spel aan, dan zegt de pagina wat er komt.
 De pagina komt nooit in een cache.
+
+### Inloggen op een pagina van een spel
+
+Fans, Prognose, Fjouwer, Uitblinker en Fantest hebben voor een bezoeker het formulier om in te loggen (`app/fans/inloggen/PageLogIn.tsx`, #1660), alleen waar je ook mee kunt doen.
+In de kaart van een spel staat het onder een lijn; op Fans en de Fantest is het een witte kaart met de kop "Inloggen".
+Het formulier is dat van de pagina Inloggen, met dezelfde actie (`LogInForm.tsx`, `actions.ts`), en na het inloggen kom je terug op de pagina waar het formulier stond.
+Wat de spellen verder delen, staat in `src/fans/GameCards.tsx`: de wedstrijdregel, de kaart "Stand" met haar tabel, de kaart zonder wedstrijd en de kaart "Punten".
 
 ### De Uitblinker
 
@@ -1599,7 +1606,7 @@ Op `/fans` staat een kaart van het spel (`app/fans/uitblinker-card.ts`, zie _De 
 ### De Fantest van de maand
 
 `/fans/fantest` (`app/fans/fantest`) toont boven het archief de gepubliceerde quiz van de redactie van de lopende maand, in Nederlandse tijd (#1482).
-Een bezoeker ziet de inleiding en de weg naar inloggen of aanmelden, een geblokkeerd account een uitleg, en een supporter de tien vragen of, na het meedoen, de score.
+Een bezoeker ziet de inleiding en het formulier om in te loggen (zie _Inloggen op een pagina van een spel_), een geblokkeerd account een uitleg, en een supporter de tien vragen of, na het meedoen, de score.
 `src/fans/fantest-entry.ts` leest de quiz zonder goede antwoorden (`loadMonthQuiz`) en bewaart wat een supporter verstuurt (`submitEntry`).
 
 - `submitEntry` vergrendelt de rij van de quiz, controleert de maand en het account, rekent de score uit met `scoreQuiz` en telt `participants` op, in één transactie.

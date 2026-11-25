@@ -5,7 +5,7 @@ import { requireFansPart } from '@fansite/shared/fans-env'
 import { notFound, redirect } from 'next/navigation'
 
 import { returnPathOf } from '#src/fans/log-in'
-import { returnMessage, returnParameter } from '#src/fans/log-in-form'
+import { logInExplanation, returnMessage, returnParameter } from '#src/fans/log-in-form'
 import { currentSupporter } from '#src/fans/require-supporter'
 import { signUpPaths } from '#src/fans/sign-up'
 
@@ -37,9 +37,7 @@ export default async function LogInPage({
       <Page.Cell>
         <Heading level={1}>Inloggen</Heading>
         {returnTo === undefined ? null : <Notice>{returnMessage}</Notice>}
-        <Text appearance="intro">
-          Vul je e-mailadres in. We mailen je een link en een code. Je hebt geen wachtwoord nodig.
-        </Text>
+        <Text appearance="intro">{logInExplanation}</Text>
         <LogInForm returnTo={returnTo} />
         <Text>
           Nog geen account? <Link href={signUpPaths.form}>Account maken</Link>
