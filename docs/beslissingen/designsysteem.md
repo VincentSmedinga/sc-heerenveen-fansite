@@ -1497,6 +1497,7 @@
 - **Later:** zie _In een tabel is vet voor het kerngetal, niet voor onze club of een achternaam_.
   Nadruk (700) blijft de regel, maar in een tabel is hij alleen nog voor het kerngetal en de rij met het totaal; koppen en rijkoppen zijn 600.
 - **Later:** op 9 november 2026 is het menu in de header lichter: `--hf-menu-font-weight` 500 en `--hf-menu-current-font-weight` 700, nog steeds 200 verschil (zie _Koppen op gewicht 700, een steilere schaal en een lichter menu_).
+- **Later:** zie _Een kleine titel bij een grafiek of formulier is halfvet_: ook de titel van een `DonutChart` en een `MarkRow` en de legenda van `ScoreGrid`, `PickList` en `RatingScale` zijn nu 600.
 
 ## De acht voorlopige kleuren blijven en heten niet meer voorlopig
 
@@ -3287,6 +3288,7 @@
 - **Alternatieven:** `Card` als element van de lijst (de kaart kan geen `li` zijn); één vast raster van twee kolommen (dat wordt één rij op een breed scherm, en een getal als "1,26" past dan niet naast een tweede op een smalle kolom).
 - **Later:** vervangt de lijst zonder kaarten en het vaste raster uit de beslissing hierboven, "Kerngetallen zijn een lijst met één zin per getal, en alleen het getal is groot".
   Het gewicht 800 komt erbij naast de gewichten 400 tot 700 en 900 uit de beslissing over de gewichten per bedoeling; `weight-css.test.ts` staat het toe, en het lettertype heeft het gewicht al.
+- **Later:** zie _Elk groot getal is 700, en het gewicht 800 verdwijnt_: het getal is 700, `--hf-key-figure-font-weight` bestaat niet meer en `weight-css.test.ts` staat 800 niet meer toe.
 
 ## `DataTable` heeft een rij Totaal en woorden achter de rijkop
 
@@ -4345,6 +4347,7 @@
 - **Waarom:** het getal is wat een fan zoekt, en de status brak rechts over twee regels en nam de plek van wat belangrijk is.
   Kleur is nooit het enige teken (docs/toegankelijkheid.md), en de haakjes lezen een schermlezer niet als ruststand.
 - **Alternatieven:** een eigen regel met de clubs en een ongekleurde uitslag (de projecteigenaar wil overal `Match`, dus ook de kleur van de uitslag); de clubnamen inkorten met een weglatingsteken (de projecteigenaar wil nooit afgekapte tekst); de punten op de metaregel en alleen de voorspelling rechts; de status rechts laten staan; een `aria-label` op een gewone `span` voor de voorspelling (wordt niet overal voorgelezen); een eigen pictogram voor het vinkje en het kruisje (een teken in de tekst volstaat, en het is voor schermlezers verborgen).
+- **Later:** zie _Een groot getal heeft een van drie maten, en `MatchHeader` blijft op Kop 1_: zonder punten staat de voorspelling in de grote maat van een getal, niet in de maat van een kop, en de punten en de eindstand zijn op het gewicht van een getal.
 
 ## InputSuggestions biedt een lijst namen aan een Input aan
 
@@ -4401,6 +4404,7 @@
 - **Alternatieven:** 700 voor een achternaam (dan wordt hij zwaarder dan een rijkop); geen uitzonderingen (de gestapelde antwoorden worden zwaar op elke kaart); alleen lijsten die op een tabel lijken (laat 500 en 600 op twee plekken staan).
 - **Later:** zie _Een omschrijving in `DescriptionList` heeft het gewone gewicht_: een antwoord in een gestapelde `DescriptionList` is nu 400 in plaats van 500.
   Een getal met de term links blijft 700.
+- **Later:** zie _Elk groot getal is 700, en het gewicht 800 verdwijnt_: een rij met kerngetallen houdt geen eigen gewicht meer en is ook 700.
 
 ## De vlag is een intern onderdeel, en een stadion of een club is geen achternaam
 
@@ -4553,4 +4557,45 @@
 - **Datum:** 25 november 2026
 - **Besluit:** de lijnen en de naam boven een waarde zijn samen één pull request.
 - **Waarom:** beide raken `DescriptionList`, en zo is er één review en één ronde in licht en donker.
+- **Alternatieven:** twee issues.
+
+## Een groot getal heeft een van drie maten, en `MatchHeader` blijft op Kop 1
+
+- **Datum:** 25 november 2026
+- **Besluit:** een groot getal heeft een van drie maten: kerngetal, groot of klein (#1662).
+  Kerngetal (`--hf-key-figure-font-size`) is alleen `KeyFigures`.
+  Groot (`--hf-figure-large-font-size`) is het getal van `QuestionCard`, het totaal van `DonutChart` en `MatchPenaltySeries`, de punten en de grote voorspelling in `PredictionList`, de velden en waarden van `ScoreGrid` en de cijfers in `CodeInput`.
+  Klein (`--hf-figure-font-size`) zijn de tekens in `MarkRow` en het gemiddelde in `WinnerList` en in het zegel van `Winner`.
+  De uitslag in `MatchHeader` blijft op Kop 1.
+  In de grote voorspelling van `PredictionList` is alleen de eindstand 700: de ruststand tussen haakjes blijft gewoon van gewicht, zoals in _De rij van PredictionList zet de punten en de voorspelling rechts_.
+- **Waarom:** zes maten naast elkaar hadden geen regel.
+  Twee tokens bestonden al, en de grootste zichtbare stap is 4 pixels.
+  De uitslag is de kop van de pagina.
+- **Alternatieven:** twee maten (de cijfers in een rij en het gemiddelde groeien dan van 18 naar 24 pixels); alleen de gewichten gelijktrekken (de zes maten blijven).
+
+## Elk groot getal is 700, en het gewicht 800 verdwijnt
+
+- **Datum:** 25 november 2026
+- **Besluit:** elk groot getal heeft het gewicht van een getal (`--hf-figure-font-weight`, 700), ook de kerngetallen (#1662).
+  Het token `--hf-key-figure-font-weight` en daarmee het gewicht 800 verdwijnen.
+- **Waarom:** één gewicht voor elk getal is de eenvoudigste regel.
+  Maat, lettertype en breedte onderscheiden de kerngetallen al.
+- **Alternatieven:** 800 houden voor alleen `KeyFigures`; ook de vraagkaart op 800 houden.
+
+## Een kleine titel bij een grafiek of formulier is halfvet
+
+- **Datum:** 25 november 2026
+- **Besluit:** een kleine titel bij een grafiek of formulier is halfvet (`--hf-name-font-weight`, 600) in de kleur van koppen, op zijn eigen maat (#1662).
+  Dat zijn de titel van `DonutChart` en `MarkRow` en de legenda van `ScoreGrid`, `PickList` en `RatingScale`.
+  De namen van de clubs boven de velden van `ScoreGrid` hebben hetzelfde gewicht.
+  De legenda's nemen gewicht en kleur van de basisstijl van `legend`.
+- **Waarom:** elke andere legenda en elk label is al zo.
+  Vet blijft voor nadruk en getallen.
+- **Alternatieven:** de kleine stijl in hoofdletters (valt sterk op en leest slecht bij lange namen); alle legenda's en labels vet (raakt elk formulier).
+
+## De grote getallen en de kleine titels zijn één pull request
+
+- **Datum:** 25 november 2026
+- **Besluit:** de grote getallen en de kleine titels zijn samen één pull request (#1662).
+- **Waarom:** beide zijn maten en gewichten in CSS, deels in dezelfde bestanden, met één ronde in licht en donker.
 - **Alternatieven:** twee issues.

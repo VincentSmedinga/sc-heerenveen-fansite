@@ -27,9 +27,7 @@
     padding-block-start: var(--hf-space-m);
 
     > legend {
-      color: var(--hf-colour-text-heading);
       display: flex;
-      font-weight: var(--hf-strong-font-weight);
       gap: var(--hf-space-m);
       inline-size: 100%;
       justify-content: space-between;

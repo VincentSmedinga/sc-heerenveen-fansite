@@ -39,7 +39,7 @@
   .hf-prediction-list-number {
     font-size: var(--hf-figure-large-font-size);
     font-variant-numeric: tabular-nums;
-    font-weight: var(--hf-strong-font-weight);
+    font-weight: var(--hf-figure-font-weight);
     line-height: 1.1;
   }
 
@@ -55,11 +55,11 @@
   /* Without points the prediction is what the row has on the right, so it is larger. */
   .hf-prediction-list-guess-large {
     color: inherit;
-    font-size: var(--hf-heading-2-font-size);
+    font-size: var(--hf-figure-large-font-size);
   }
 
   .hf-prediction-list-guess-large .hf-prediction-list-part:first-child {
-    font-weight: var(--hf-strong-font-weight);
+    font-weight: var(--hf-figure-font-weight);
   }
 
   .hf-prediction-list-right {

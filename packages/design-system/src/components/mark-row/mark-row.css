@@ -14,7 +14,7 @@
 
   .hf-mark-row-title {
     color: var(--hf-colour-text-heading);
-    font-weight: var(--hf-strong-font-weight);
+    font-weight: var(--hf-name-font-weight);
   }
 
   .hf-mark-row-marks {

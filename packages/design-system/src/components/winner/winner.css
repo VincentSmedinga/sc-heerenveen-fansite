@@ -34,7 +34,7 @@
     color: var(--hf-colour-text-on-button);
     display: grid;
     flex: none;
-    font-size: var(--hf-heading-3-font-size);
+    font-size: var(--hf-figure-font-size);
     font-variant-numeric: tabular-nums;
     font-weight: var(--hf-figure-font-weight);
     inline-size: var(--hf-winner-seal-size);

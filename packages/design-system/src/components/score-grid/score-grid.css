@@ -16,7 +16,6 @@
   }
 
   .hf-score-grid-legend {
-    font-weight: var(--hf-strong-font-weight);
     padding: 0;
     padding-block-end: var(--hf-space-s);
   }
@@ -35,7 +34,7 @@
   }
 
   .hf-score-grid-club {
-    font-weight: var(--hf-strong-font-weight);
+    font-weight: var(--hf-name-font-weight);
     hyphens: auto;
     line-height: 1.25;
     overflow-wrap: anywhere;
@@ -54,7 +53,7 @@
   /* One digit, big enough for a thumb: a square a little more than the height of a control. */
   .hf-score-grid-field.hf-score-grid-field {
     block-size: 3.5rem;
-    font-size: var(--hf-heading-2-font-size);
+    font-size: var(--hf-figure-large-font-size);
     font-variant-numeric: tabular-nums;
     font-weight: var(--hf-figure-font-weight);
     inline-size: 3.5rem;
@@ -64,7 +63,7 @@
   }
 
   .hf-score-grid-value {
-    font-size: var(--hf-heading-2-font-size);
+    font-size: var(--hf-figure-large-font-size);
     font-variant-numeric: tabular-nums;
     font-weight: var(--hf-figure-font-weight);
     justify-self: center;
