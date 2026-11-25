@@ -74,11 +74,11 @@ export default async function RankingPage({
       <Page.Cell area="year">
         <Card aria-labelledby="ranglijst-jaar" game="fantest">
           <Heading id="ranglijst-jaar" level={2}>
-            Heel {year}
+            Stand {year}
           </Heading>
           {years.length > 1 ? (
             <Form action={fantestRankingPath} method="get">
-              <Field id="ranglijst-jaar-keuze" label="Jaar" required={false}>
+              <Field hideOptional id="ranglijst-jaar-keuze" label="Jaar" required={false}>
                 <Select defaultValue={String(year)} key={year} name="jaar">
                   {years.map((item) => (
                     <Select.Option key={item} value={String(item)}>
@@ -105,12 +105,12 @@ export default async function RankingPage({
         <Page.Cell area="month">
           <Card aria-labelledby="ranglijst-maand" game="fantest">
             <Heading id="ranglijst-maand" level={2}>
-              Per maand
+              Scores van {monthTitle(year, month)}
             </Heading>
             {months.length > 1 ? (
               <Form action={fantestRankingPath} method="get">
                 <Input name="jaar" type="hidden" value={year} />
-                <Field id="ranglijst-maand-keuze" label="Maand" required={false}>
+                <Field hideOptional id="ranglijst-maand-keuze" label="Maand" required={false}>
                   <Select defaultValue={monthSlug(year, month)} key={monthSlug(year, month)} name="maand">
                     {months.map((item) => (
                       <Select.Option key={item} value={monthSlug(year, item)}>

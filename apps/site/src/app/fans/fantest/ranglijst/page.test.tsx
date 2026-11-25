@@ -71,6 +71,16 @@ describe('the ranking of the Fantest', () => {
     expect(await render({ jaar: '2027', maand: '2027-01' })).toContain('Scores van januari 2027')
   })
 
+  it('names the month in sight, also when the year has only one closed month', async () => {
+    monthScores.mockResolvedValue([score(1, 1, 7)])
+    const html = await render()
+
+    expect(html).toMatch(/<h2[^>]*>Scores van januari 2027<\/h2>/)
+    expect(html).toMatch(/<h2[^>]*>Stand 2027<\/h2>/)
+    expect(html).not.toContain('<form action="/fans/fantest/ranglijst" method="get"><input')
+    expect(html).not.toContain('niet verplicht')
+  })
+
   it('shows an earlier year on request, and the running year for a made-up one', async () => {
     const html = await render({ jaar: '2026' })
 
