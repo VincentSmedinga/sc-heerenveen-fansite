@@ -247,7 +247,7 @@ De homepage kent geen parameters, geen filter, geen paginering en geen balk met 
 Elke kaart met een lijst toont standaard vijf items: de discussies en de afleveringen op de homepage en de afleveringen op `/nieuws` (`itemsPerCard` in `src/items-per-card.ts`); het nieuws is de hoofdkaart en toont de koppen van de laatste 3 dagen, minstens 5 en hoogstens 20.
 De toegestane maten staan op één plek, `listSizes`: 5, 10, 20 en 50, en elk aantal in dat bestand komt daaruit; een test (`src/items-per-card.test.ts`) zegt dat.
 Een bezoeker kiest geen maat.
-De hoofdkolom en de zijbalk zijn niet op gelijke lengte gebracht: bij 1100 pixels breed en met de verzonnen gegevens is de hoofdkolom 805 pixels hoog en de zijbalk 2055.
+De hoofdkolom en de smalle kolom zijn niet op gelijke lengte gebracht.
 
 In de smalle kolom naast het nieuws staat na Wedstrijden en Stand het blok "Nieuwste discussies" (zie _Op de homepage staat Wedstrijden boven het forum_ in `docs/beslissingen/site.md`), want het forum is onze zustersite: de vijf discussies van het forum waar het laatst op is gereageerd.
 Een discussie is een `DiscussionItem` uit het designsysteem: de titel als link naar het laatste bericht van de discussie op het forum, en daaronder het aantal reacties, de schermnaam van de laatste reageerder als gewone tekst en de tijd, zoals "83 reacties · laatst Buffon1 · 13:28".
