@@ -26,6 +26,8 @@ const season = (name: string, extra: Partial<PlayerSeason> = {}): PlayerSeason =
   started: 28,
   yellow: 2,
   ...extra,
+  // A season without every finished report has no minutes here, unless a test says otherwise.
+  ...(extra.source !== undefined && !('minutes' in extra) ? { minutes: undefined } : {}),
 })
 
 const render = (seasons: PlayerSeason[], goalkeeper = false) =>
@@ -308,5 +310,54 @@ describe('the minutes in the table Per seizoen', () => {
     const table = playerSeasonsTable([season('2004/05'), season('2000/01')], false)
 
     expect(table.rows[1]).toMatchObject({ cells: [], gap: true })
+  })
+})
+
+describe('the lines under the table for a season with minutes and reports that are not finished', () => {
+  const minutes = { minutes: 900 }
+  const withoutFigures = { assists: undefined, played: undefined, started: undefined, yellow: undefined }
+
+  it('says that the minutes count every line-up of a season with only some finished reports', () => {
+    const html = render([
+      season('2001/02', { ...minutes, matchesInSeason: 42, reportedMatches: 36, source: 'some-lineups' }),
+      season('2000/01', { matchesInSeason: 41, reportedMatches: 8, source: 'some-lineups' }),
+    ])
+
+    expect(html).toContain('Opstellingen: 2001/02 (36 van 42, de minuten uit alle 42), 2000/01 (8 van 41).')
+  })
+
+  it('says where the minutes of a season of Wikipedia come from, and does not deny its line-ups', () => {
+    const html = render([
+      season('2001/02', { ...minutes, source: 'wikipedia', started: undefined }),
+      season('2000/01', { source: 'wikipedia' }),
+    ])
+
+    expect(html).toContain('Cijfers van Wikipedia: 2000/01.')
+    expect(html).toContain('Cijfers van Wikipedia, de minuten uit onze opstellingen: 2001/02.')
+    expect(html).toContain('Een streepje: dat cijfer hebben we niet van dat seizoen.')
+    expect(html).not.toContain('geen opstellingen')
+  })
+
+  it('says that a season without a finished report has the goals and the minutes', () => {
+    const html = render([season('1995/96', { ...withoutFigures, ...minutes, source: 'none' }), season('1994/95')])
+
+    expect(html).toContain('Alleen de doelpunten en de minuten: 1995/96.')
+    expect(html).not.toContain('Alleen de doelpunten:')
+    expect(html).not.toContain('geen opstellingen')
+  })
+
+  it('says under the Eredivisie that a season of Wikipedia has the goals and the minutes', () => {
+    const html = renderToStaticMarkup(
+      <PlayerSeasonsCard
+        address={(value) => value}
+        competition="league"
+        goalkeeper={false}
+        name="Test Speler"
+        seasons={[season('2001/02', { ...withoutFigures, ...minutes, source: 'wikipedia' }), season('2000/01')]}
+      />,
+    )
+
+    expect(html).toContain('Per competitie alleen de doelpunten en de minuten: 2001/02.')
+    expect(html).not.toContain('Geen cijfers per competitie')
   })
 })

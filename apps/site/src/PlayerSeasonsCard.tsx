@@ -189,9 +189,14 @@ export function playerSeasonsNotes(
 ): string[] {
   const notes: string[] = []
   const shown = table.columns.map(({ id }) => id)
-  const wikipedia = seasons.filter((season) => season.source === 'wikipedia').map(({ season }) => season)
+  // A season with minutes has its line-ups, also when its reports are not all finished (#1674),
+  // so its lines say where the minutes come from.
+  const seasonsFrom = (source: PlayerSeason['source'], withMinutes: boolean) =>
+    seasons
+      .filter((season) => season.source === source && (season.minutes !== undefined) === withMinutes)
+      .map(({ season }) => season)
   // Under the Eredivisie a season of the Wikipedia table has dashes, for the reason below.
-  const hasDash = seasons.some(
+  const dashed = seasons.filter(
     (season) =>
       !(league && season.source === 'wikipedia') && shown.some((id) => id !== 'minutes' && season[id] === undefined),
   )
@@ -199,8 +204,12 @@ export function playerSeasonsNotes(
   if (goalkeeper) {
     notes.push('Nul en tegendoelpunten tellen alleen de wedstrijden die hij van begin tot eind speelde.')
   }
-  if (hasDash) {
-    notes.push('Een streepje: van dat seizoen hebben we geen opstellingen.')
+  if (dashed.length > 0) {
+    notes.push(
+      dashed.some((season) => season.minutes !== undefined)
+        ? 'Een streepje: dat cijfer hebben we niet van dat seizoen.'
+        : 'Een streepje: van dat seizoen hebben we geen opstellingen.',
+    )
   }
   if (shown.includes('minutes') && seasons.some((season) => season.minutes === undefined)) {
     notes.push(minutesNote)
@@ -209,17 +218,30 @@ export function playerSeasonsNotes(
   const some = seasons.filter((season) => season.source === 'some-lineups')
 
   if (some.length > 0) {
-    notes.push(
-      `Opstellingen: ${some.map((season) => `${season.season} (${season.reportedMatches} van ${season.matchesInSeason})`).join(', ')}.`,
-    )
-  }
-  const goalsOnly = seasons.filter((season) => season.source === 'none').map(({ season }) => season)
+    const counted = ({ matchesInSeason, minutes, reportedMatches }: PlayerSeason) => {
+      const all = minutes === undefined ? '' : `, de minuten uit alle ${matchesInSeason}`
 
-  if (goalsOnly.length > 0) {
-    notes.push(`Alleen de doelpunten: ${seasonRanges(goalsOnly)}.`)
+      return `${reportedMatches} van ${matchesInSeason}${all}`
+    }
+
+    notes.push(`Opstellingen: ${some.map((season) => `${season.season} (${counted(season)})`).join(', ')}.`)
   }
-  if (wikipedia.length > 0) {
-    notes.push(`${league ? 'Geen cijfers per competitie' : 'Cijfers van Wikipedia'}: ${seasonRanges(wikipedia)}.`)
+  const wikipedia = league
+    ? ['Geen cijfers per competitie', 'Per competitie alleen de doelpunten en de minuten']
+    : ['Cijfers van Wikipedia', 'Cijfers van Wikipedia, de minuten uit onze opstellingen']
+  const lines = [
+    ['none', false, 'Alleen de doelpunten'],
+    ['none', true, 'Alleen de doelpunten en de minuten'],
+    ['wikipedia', false, wikipedia[0]],
+    ['wikipedia', true, wikipedia[1]],
+  ] as const
+
+  for (const [source, withMinutes, words] of lines) {
+    const found = seasonsFrom(source, withMinutes)
+
+    if (found.length > 0) {
+      notes.push(`${words}: ${seasonRanges(found)}.`)
+    }
   }
   if (shown.some((id) => !table.complete[id])) {
     notes.push('Het totaal telt alleen de seizoenen met een cijfer.')
