@@ -188,8 +188,8 @@ async function addRankedMonths(db: ReturnType<typeof connectToDatabase>['db']) {
 
     for (const [index, score] of scores.entries()) {
       await db.insert(quizEntries).values({
-        // Question 1 has answer 2 right, question 2 answer 3, and so on.
-        answers: Array.from({ length: 10 }, (_, place) => ((place + (place < score ? 1 : 2)) % 4) + 1),
+        // The first `score` answers are the right ones of `addEditorsQuiz`, the rest are not.
+        answers: Array.from({ length: 10 }, (_, place) => ((place + (place < score ? 0 : 1)) % 4) + 1),
         quizId,
         score,
         submittedAt: new Date(Date.UTC(year, month - 1, 15)),

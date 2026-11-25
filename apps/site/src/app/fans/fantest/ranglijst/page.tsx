@@ -13,7 +13,7 @@ import { pageAreas } from '#src/page-areas'
 
 import { MonthTable, YearTable } from './RankingTable'
 
-const areas = pageAreas({ main: ['year', 'month'] })
+const areas = pageAreas({ back: true, main: ['year', 'month'] })
 
 // Render on each request: the session is not known at build time, and the page is not indexed.
 export const dynamic = 'force-dynamic'

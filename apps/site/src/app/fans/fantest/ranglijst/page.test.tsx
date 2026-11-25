@@ -60,6 +60,12 @@ describe('the ranking of the Fantest', () => {
     expect(html).not.toContain('Jij')
   })
 
+  it('has an area for the link back, so the link stands above the heading', async () => {
+    const html = await render()
+
+    expect(html).toMatch(/back back/)
+  })
+
   it('shows the latest closed month, and another on request', async () => {
     expect(await render()).toContain('Scores van februari 2027')
     expect(await render({ jaar: '2027', maand: '2027-01' })).toContain('Scores van januari 2027')
