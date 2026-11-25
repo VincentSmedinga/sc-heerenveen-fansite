@@ -224,7 +224,7 @@ De toon van de site zelf, van fan tot fan, en de schrijfwijze van spelers, datum
   Hij neemt de uitkomst uit CI over, vlak voordat hij zijn verslag schrijft.
   Een job die nog draait, staat onder Open punten, en een gefaalde job is blokkerend.
 - Zelf draait de reviewer alleen iets om een vermoede bevinding te bevestigen, met hoogstens de tests van het ene pakket.
-  Of als CI een controle oversloeg die de wijziging wel kan raken.
+  De reviewer draait ook een controle die CI oversloeg, als de wijziging die wel kan raken.
 - De reviewer schrijft een verslag met drie onderdelen: code en beveiliging, toegankelijkheid, en redactie en bronbeleid.
   Het verslag staat als reactie bij de pull request.
 - Een pull request krijgt geen reviewer als hij alleen Markdown of MDX in `docs/` of `packages/design-system/src/docs/` wijzigt, of verhalen (`*.stories.tsx`) zonder visuele wijziging, zoals een titel, een beschrijving of commentaar.
