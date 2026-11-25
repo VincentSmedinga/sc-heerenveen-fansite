@@ -1,5 +1,6 @@
 import { expect, type Page, test } from '@playwright/test'
 
+import { forgetSignUps } from './admin'
 import { checkPage } from './check-page'
 import { sentMails } from './fake-mail'
 
@@ -28,6 +29,8 @@ async function openForm(page: Page) {
 
 /** Makes an account with the code from the fake mail server, and stays logged in. */
 async function signUp(page: Page) {
+  await forgetSignUps()
+
   const id = unique()
   const address = `voorspel-${id}@example.org`
 

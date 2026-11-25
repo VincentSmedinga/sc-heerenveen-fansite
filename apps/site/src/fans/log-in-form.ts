@@ -9,6 +9,9 @@ export type LogInState = { error?: string; failure?: 'ceiling' | 'limited'; valu
 
 export const emptyLogInState: LogInState = { value: '' }
 
+/** The explanation above the form of logging in. */
+export const logInExplanation = 'We mailen je een link en een code.'
+
 /** The words of the errors of the field, the same as when signing up. */
 export const logInErrorMessages = {
   empty: 'Vul je e-mailadres in.',

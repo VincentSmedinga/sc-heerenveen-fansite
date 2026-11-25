@@ -4616,5 +4616,12 @@
 - **Datum:** 25 november 2026
 - **Besluit:** `Form.Actions` zet de knop van een formulier op één regel met iets ernaast, zoals een link naar een andere weg naar binnen (#1660).
   Past dat niet, dan staat het eronder, en de volgorde op het scherm is die van het toetsenbord.
-- **Waarom:** de kaart om in te loggen zet "Account maken" naast de knop, en zo blijft de ruimte een zaak van het designsysteem.
+- **Waarom:** het formulier om in te loggen zet "Maak een account" naast de knop, en zo blijft de ruimte een zaak van het designsysteem.
 - **Alternatieven:** `inline` op het hele formulier (dan staat ook het veld ernaast); eigen stijl in de site.
+
+## Een lijn tussen twee onderwerpen is het component Rule
+
+- **Datum:** 25 november 2026
+- **Besluit:** `Rule` is de dunne lijn (`hr`) als component, voor twee onderwerpen onder dezelfde kop (#1660).
+- **Waarom:** de site schrijft geen HTML, en in de kaart van een spel liep het formulier om in te loggen zonder lijn door in de wedstrijd.
+- **Alternatieven:** alleen extra ruimte; een eigen vlak om het formulier.

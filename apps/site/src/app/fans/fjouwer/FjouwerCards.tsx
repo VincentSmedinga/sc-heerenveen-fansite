@@ -15,7 +15,7 @@ import { closesAt } from '#src/fans/fjouwer-rules'
 import { NoMatchCard as GameNoMatchCard, MatchLine } from '#src/fans/GameCards'
 import { deadlineText } from '#src/fans/prediction'
 
-import { LogInCard } from '../inloggen/LogInCard'
+import { PageLogIn } from '../inloggen/PageLogIn'
 import { FjouwerForm } from './FjouwerForm'
 
 const id = 'jouw-vier'
@@ -51,7 +51,7 @@ export function JouwVierCard({
   let body: ReactNode
 
   if (choice === undefined) {
-    body = <LogInCard level={3} message="Log in om je vier te kiezen." returnTo={fjouwerPath} />
+    body = <PageLogIn message="Log in om je vier te kiezen." returnTo={fjouwerPath} />
   } else if (choice.players.length === 0) {
     body = <Text>Van dit seizoen kennen we de selectie nog niet.</Text>
   } else {

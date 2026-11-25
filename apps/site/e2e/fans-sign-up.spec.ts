@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 
+import { forgetSignUps } from './admin'
 import { checkPage } from './check-page'
 import { sentMails } from './fake-mail'
 
@@ -111,6 +112,8 @@ test('makes an account with the button behind the link', async ({ page }) => {
 test('shows the address, keeps the digits of a pasted code, and asks for a new code only after a minute', async ({
   page,
 }) => {
+  await forgetSignUps()
+
   const id = unique()
   const address = `code-${id}@example.org`
   const name = `Code_${id}`.slice(0, 20)

@@ -10,7 +10,7 @@ import { currentSupporter } from '#src/fans/require-supporter'
 import { pageMetadata } from '#src/metadata'
 
 import { GameCard } from './GameCard'
-import { LogInCard } from './inloggen/LogInCard'
+import { PageLogIn } from './inloggen/PageLogIn'
 import { readFantestCard, readFjouwerCard, readPrognoseCard } from './read-game-cards'
 import { readUitblinkerCard } from './uitblinker-card'
 
@@ -102,11 +102,7 @@ export default async function FansPage({
             Je bent ingelogd als {supporter.screenName}. <Link href={`${fansPath}/mijn-account`}>Mijn account</Link>
           </Text>
         ) : on.length > 0 ? (
-          <LogInCard
-            level={2}
-            message="Log in om mee te doen. Alleen je schermnaam is voor anderen te zien."
-            returnTo={logInPaths.home}
-          />
+          <PageLogIn card={2} message="Log in om mee te doen." returnTo={logInPaths.home} />
         ) : (
           <Card aria-labelledby="doe-mee" surface="strong">
             <Heading id="doe-mee" level={2}>

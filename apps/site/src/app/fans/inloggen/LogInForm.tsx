@@ -83,7 +83,7 @@ export function LogInFields({
   )
 }
 
-// The form of logging in, on the page to log in and on the pages of Fans (LogInCard). Like the
+// The form of logging in, on the page to log in and on the pages of Fans (PageLogIn). Like the
 // form of signing up, it is a client component only to show what the server says: the form is a
 // plain POST that works without JavaScript.
 export function LogInForm({ returnTo }: { returnTo: string | undefined }) {

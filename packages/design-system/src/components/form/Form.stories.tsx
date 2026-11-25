@@ -7,7 +7,6 @@ import { Field } from '../field/Field'
 import { Heading } from '../heading/Heading'
 import { Input } from '../input/Input'
 import { Link } from '../link/Link'
-import { Text } from '../text/Text'
 import { Form } from './Form'
 
 const meta = preview.meta({
@@ -82,9 +81,7 @@ export const Actions = meta.story({
       </Field>
       <Form.Actions>
         <Button type="submit">Stuur me een link</Button>
-        <Text>
-          Nog geen account? <Link href="#aanmelden">Account maken</Link>
-        </Text>
+        <Link href="#aanmelden">Maak een account</Link>
       </Form.Actions>
     </Form>
   ),

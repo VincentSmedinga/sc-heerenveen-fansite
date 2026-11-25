@@ -135,9 +135,9 @@ test('shows a visitor the way in and no form', async ({ page }) => {
   try {
     await page.context().clearCookies()
     await page.goto('/fans/uitblinker')
-    await expect(page.getByRole('heading', { level: 3, name: 'Inloggen' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Stuur me een link' })).toBeVisible()
     await expect(page.getByRole('radio')).toHaveCount(0)
-    await expect(page.getByRole('link', { name: 'Account maken' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Maak een account' })).toBeVisible()
     await checkPage(page)
   } finally {
     await remove()

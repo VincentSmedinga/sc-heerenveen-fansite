@@ -13,7 +13,7 @@ import { findOwnCoachRating, findOwnRatings, findRatingWindow, ratingPath } from
 import { currentSupporter } from '#src/fans/require-supporter'
 import { pageAreas } from '#src/page-areas'
 
-import { LogInCard } from '../inloggen/LogInCard'
+import { PageLogIn } from '../inloggen/PageLogIn'
 import {
   ClosedResultCard,
   EarlierWinnersCard,
@@ -86,7 +86,7 @@ export default async function RatingPage({
   } else if (supporter === undefined) {
     card = (
       <OpenCard closesAt={window.closesAt} match={window.match} now={now} withCoach={window.coach !== null}>
-        <LogInCard level={3} message="Log in om cijfers te geven." returnTo={ratingPath} />
+        <PageLogIn message="Log in om cijfers te geven." returnTo={ratingPath} />
       </OpenCard>
     )
   } else if (supporter.createdAt.getTime() >= window.startsAt.getTime()) {

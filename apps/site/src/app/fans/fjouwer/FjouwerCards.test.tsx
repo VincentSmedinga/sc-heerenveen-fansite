@@ -64,13 +64,14 @@ describe('the card Jouw vier', () => {
     expect(html).toContain('FC Twente')
   })
 
-  it('asks a visitor to log in inside the card, and shows no list', () => {
+  it('asks a visitor to log in inside the card, under a rule, and shows no list', () => {
     const html = render({ choice: undefined })
 
-    expect(html).toMatch(/<h3[^>]*>Inloggen<\/h3>/)
+    expect(html).toContain('<hr/>')
+    expect(html).not.toContain('>Inloggen<')
     expect(html).toContain('Log in om je vier te kiezen.')
     expect(html).toMatch(/name="terug"[^>]*value="\/fans\/fjouwer"/)
-    expect(html).toContain('Account maken')
+    expect(html).toContain('Maak een account')
     expect(html).not.toContain('type="checkbox"')
   })
 

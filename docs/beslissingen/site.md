@@ -8291,10 +8291,20 @@
 ## Een fan vraagt de inloglink op de pagina van het spel zelf
 
 - **Datum:** 25 november 2026
-- **Besluit:** een fan vraagt de inloglink op Fans en op de spelpagina's zelf, met een gedeeld onderdeel in een witte kaart (`LogInCard`, #1660).
+- **Besluit:** een fan vraagt de inloglink op Fans en op de spelpagina's zelf, met een gedeeld onderdeel (`PageLogIn`, #1660).
   De kaarten "Doe mee" verdwijnen, en de pagina Inloggen blijft.
 - **Waarom:** het scheelt een stap, en er is overal dezelfde weg naar binnen.
 - **Alternatieven:** alleen de twee gekopieerde meldingen delen; één kaart "Doe mee" met knoppen voor alle spellen; het formulier alleen op de spelpagina's; zonder witte kaart in de bestaande kaart.
+
+- **Datum:** 25 november 2026
+- **Besluit:** in de kaart van een spel staat het formulier zonder eigen kaart en kop, onder een lijn.
+  Op Fans en de Fantest, waar het los staat, is het een witte kaart met de kop "Inloggen".
+  De tekst is één alinea: vet waarvoor je inlogt, en dan "We mailen je een link en een code.", ook op de pagina Inloggen.
+  De link naast de knop heet "Maak een account".
+  Dit vervangt de witte kaart binnen de kaart van het spel en de melding.
+- **Waarom:** een kaart in een kaart zag er niet goed uit, en zonder lijn liep het formulier door in de wedstrijd.
+  De korte tekst zegt genoeg.
+- **Alternatieven:** de witte kaart binnen de kaart van het spel; een zacht vlak binnen de kaart; zonder lijn; de melding houden.
 
 - **Datum:** 25 november 2026
 - **Besluit:** de kaart gebruikt het formulier en de actie van de pagina Inloggen (`LogInFields` en `requestLogIn`), met de pagina als adres om naar terug te gaan.

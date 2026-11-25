@@ -219,7 +219,7 @@ describe('FansPage, with games on', () => {
     )
     expect(headings(html)).toEqual(['Inloggen', 'Prognose', 'Uitblinker', 'Fjouwer', 'Fantest'])
     expect(html).toContain('hf-card-columns')
-    expect(html).toContain('Log in om mee te doen. Alleen je schermnaam is voor anderen te zien.')
+    expect(html).toContain('<strong>Log in om mee te doen.</strong> We mailen je een link en een code.')
     expect(html).toMatch(/name="terug"[^>]*value="\/fans"/)
     expect(html).not.toContain('action="/fans/inloggen"')
     expect(html).not.toContain('Wat komt er')

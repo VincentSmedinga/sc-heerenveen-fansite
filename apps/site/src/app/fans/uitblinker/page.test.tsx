@@ -146,10 +146,10 @@ describe('the page of the Uitblinker', () => {
     expect(html.match(/type="radio"/g)).toHaveLength(20)
   })
 
-  it('shows a visitor the card to log in inside the card of the match, and no grades', async () => {
+  it('shows a visitor the form to log in inside the card of the match, and no grades', async () => {
     const html = await render()
 
-    expect(html).toMatch(/<h2[^>]*>Geef je cijfers<\/h2>[^]*<h3[^>]*>Inloggen<\/h3>/)
+    expect(html).toMatch(/<h2[^>]*>Geef je cijfers<\/h2>[^]*<hr\/>[^]*name="e-mail"/)
     expect(html).toContain('Log in om cijfers te geven.')
     expect(html).toMatch(/name="terug"[^>]*value="\/fans\/uitblinker"/)
     expect(html).not.toContain('Doe mee')

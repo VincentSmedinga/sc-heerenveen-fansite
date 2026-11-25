@@ -1581,7 +1581,8 @@ De pagina komt nooit in een cache.
 
 ### Inloggen op een pagina van een spel
 
-Fans, Prognose, Fjouwer, Uitblinker en Fantest hebben voor een bezoeker de witte kaart "Inloggen" (`app/fans/inloggen/LogInCard.tsx`, #1660), alleen waar je ook mee kunt doen.
+Fans, Prognose, Fjouwer, Uitblinker en Fantest hebben voor een bezoeker het formulier om in te loggen (`app/fans/inloggen/PageLogIn.tsx`, #1660), alleen waar je ook mee kunt doen.
+In de kaart van een spel staat het onder een lijn; op Fans en de Fantest is het een witte kaart met de kop "Inloggen".
 Zij gebruikt het formulier en de actie van de pagina Inloggen (`LogInForm.tsx`, `actions.ts`), en na het inloggen kom je terug op de pagina waar het formulier stond.
 Wat de spellen verder delen, staat in `src/fans/GameCards.tsx`: de wedstrijdregel, de kaart "Stand" met haar tabel, de kaart zonder wedstrijd en de kaart "Punten".
 
@@ -1605,7 +1606,7 @@ Op `/fans` staat een kaart van het spel (`app/fans/uitblinker-card.ts`, zie _De 
 ### De Fantest van de maand
 
 `/fans/fantest` (`app/fans/fantest`) toont boven het archief de gepubliceerde quiz van de redactie van de lopende maand, in Nederlandse tijd (#1482).
-Een bezoeker ziet de inleiding en de kaart om in te loggen (zie _Inloggen op een pagina van een spel_), een geblokkeerd account een uitleg, en een supporter de tien vragen of, na het meedoen, de score.
+Een bezoeker ziet de inleiding en het formulier om in te loggen (zie _Inloggen op een pagina van een spel_), een geblokkeerd account een uitleg, en een supporter de tien vragen of, na het meedoen, de score.
 `src/fans/fantest-entry.ts` leest de quiz zonder goede antwoorden (`loadMonthQuiz`) en bewaart wat een supporter verstuurt (`submitEntry`).
 
 - `submitEntry` vergrendelt de rij van de quiz, controleert de maand en het account, rekent de score uit met `scoreQuiz` en telt `participants` op, in één transactie.

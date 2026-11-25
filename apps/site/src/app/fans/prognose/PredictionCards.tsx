@@ -14,7 +14,7 @@ import {
 import { crowdProps, type PredictionCrowdData } from '#src/PredictionCrowdCard'
 import { reportAddress } from '#src/report-data'
 
-import { LogInCard } from '../inloggen/LogInCard'
+import { PageLogIn } from '../inloggen/PageLogIn'
 import { PredictionForm } from './PredictionForm'
 
 /** The line about the points, for somebody who is not logged in. */
@@ -110,9 +110,8 @@ export function OpenCard({
     body = <Text>Zodra de aftrap bekend is, kun je hier voorspellen.</Text>
   } else if (!loggedIn) {
     body = (
-      <LogInCard
+      <PageLogIn
         {...(inDisclosure ? { before: <Text>{scoringLine}</Text>, behind: 'Voorspellen' } : {})}
-        level={3}
         message="Log in om te voorspellen."
         returnTo={predictionPath}
       />
