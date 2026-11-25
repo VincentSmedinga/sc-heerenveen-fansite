@@ -149,6 +149,12 @@ export const isOldSeason = (data: RatingFigures, season: string) =>
   data.oldRatings.some((row) => row.season === season) ||
   data.figures.some((figure) => figure.season === season && figure.old)
 
+/** The small line under a winner: the number of ratings, or the source of an old rating. */
+export const ratingsLine = (ratings: number | undefined) =>
+  ratings === undefined
+    ? 'Seizoencijfer van de Fansite'
+    : `Gemiddelde van ${ratings} ${ratings === 1 ? 'cijfer' : 'cijfers'}`
+
 /** The text of a count: one match, two matches. */
 export const matchesText = (count: number) => (count === 1 ? '1 wedstrijd' : `${count} wedstrijden`)
 

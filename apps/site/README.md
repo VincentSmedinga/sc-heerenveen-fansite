@@ -510,9 +510,13 @@ Onder de kop staat de zin over de volledigheid van de lijst, uit `squad_complete
 Bij de beste bron `verslag` (een seizoen met alleen spelers uit onze verslagen) zegt de zin dat de lijst uit de verslagen komt, en staat er één lijst met alleen namen; spelers uit verslagen staan niet op de kaart als een betere bron het seizoen heeft (`cardPlayers`).
 De spelers komen uit `listSeasonPlayers` in `@fansite/db/queries`, in de volgorde van het rugnummer en daarna de zoekterm en de naam.
 De werkbalk van `/spelers` heeft alleen de seizoenskiezer, zonder keuze van competitie, en `/spelers` leest `?competitie=` niet.
-De zijkolom begint met de zachte kaart "De selectie in het kort" (`SquadSummaryCard` in `src/SquadSummaryCard.tsx`, de cijfers uit `getSquadSummary` in `src/squad-summary.ts`): het aantal spelers van de kaart Selectie, het aantal landen en, alleen in het lopende seizoen, de gemiddelde, jongste en oudste leeftijd (`ageOf`, alleen bij minstens drie kwart van de spelers).
+Boven de selectie, in de hoofdkolom, staat de witte kaart "In het kort" (`SquadSummaryCard` in `src/SquadSummaryCard.tsx`, de cijfers uit `getSquadSummary` in `src/squad-summary.ts`): het aantal spelers van de kaart Selectie, het aantal landen en, alleen in het lopende seizoen, de gemiddelde, jongste en oudste leeftijd (`ageOf`, alleen bij minstens drie kwart van de spelers).
 Mist er iets, dan staat er onder de regels "X van de Y spelers" (zie `DataLine`); kent de pagina de selectie niet, dan is er geen kaart, en een geboortedatum verlaat de server niet.
-Daaronder staan vier kleine zachte kaarten (`src/PlayersTopCards.tsx`, #1286): Topscorers, Assists, De nul gehouden en Minuten, met de bronvermelding erna.
+De zijkolom begint met de zachte kaart "Uitblinker" met het watermerk van het spel (`SeasonUitblinkerCard`, wat erop staat leest `readSeasonUitblinker` in `src/fans/season-uitblinker.ts`, #1647).
+Een voorbij seizoen toont de Uitblinker van het jaar, met de bronregel als het cijfer van de Fansite komt, en de link "Uitblinker van het jaar".
+Het lopende seizoen toont de Uitblinker van de laatste wedstrijd met een uitslag, met het aantal fans, en zolang het venster open is de link "Geef cijfers".
+Zonder uitblinker en zonder open venster, met de Uitblinker uit of bij een fout is er geen kaart.
+Daaronder staan vier kleine zachte kaarten (`src/PlayersTopCards.tsx`, #1286): Topscorers, Assists, Minuten en De nul gehouden, met de bronvermelding erna.
 De drie kaarten met een ranglijst tonen de eerste drie plaatsen als een regel per plaats (`BarList`): de naam of namen, het getal en een balk.
 Delen drie of meer spelers een plaats, dan staat er "4 spelers" zonder namen (`src/players-top.ts`).
 De getallen komen uit dezelfde functies als de grote kaarten (`topScorersOf`, `rankedPlaces`), en tellen alle competities van het gekozen seizoen.
@@ -1586,6 +1590,7 @@ Een stap van de import (`closeRatingWindows`) zet de gemiddelden na het sluiten 
 De cijfers van een geblokkeerd account tellen niet mee in de gemiddelden van de spelers en de trainer.
 Blokkeren en vrijgeven rekenen de gemiddelden van de gesloten vensters opnieuw uit (`recountRatingsOf`), en `closeAccount` bewaart de markering `blocked` bij de cijfers in `player_ratings` en `coach_ratings` van een geblokkeerd account dat wordt opgeheven.
 Het gemiddelde van de trainer staat als laatste regel in de tabel met gemiddelden (`RatingsTable` in `src/MatchRatingsCard.tsx`), na een zwaardere lijn, ook bij oude wedstrijden, en hij krijgt nooit de zegel.
+Op Spelers › Cijfers toont de kaart "Cijfers van de fans" (`SeasonRankingCard`) de eerste vijf spelers van de stand, met de rest achter een uitklapper (#1647).
 Op `/fans` staat een kaart van het spel (`app/fans/uitblinker-card.ts`, zie _De pagina Fans_) en onder "Alles wat we van je bewaren" de eigen cijfers (`src/fans/rating-data.ts`).
 `e2e/fans-rating.spec.ts` zet met `addRatingMatch` (`e2e/admin.ts`) een gespeelde wedstrijd met verslag in de database, omdat de verzonnen gegevens er geen hebben, en met `coach: true` ook een hoofdtrainer.
 

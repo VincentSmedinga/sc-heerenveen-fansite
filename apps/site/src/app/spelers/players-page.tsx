@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
+import { readSeasonUitblinker } from '#src/fans/season-uitblinker'
 import { seasonSourceOf, sourceName, sourceOf } from '#src/match-sources'
 import { SourceCredit } from '#src/MatchViews'
 import { pageMetadata, seasonPageMetadata } from '#src/metadata'
@@ -16,6 +17,7 @@ import { getSeasonReportFigures } from '#src/season-report-figures'
 import { getSeasonSquad, type SeasonSquad } from '#src/season-squad'
 import { seasonAddress, seasonChoices, seasonSlug } from '#src/seasons'
 import { SeasonSquadCard } from '#src/SeasonSquadCard'
+import { SeasonUitblinkerCard } from '#src/SeasonUitblinkerCard'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
 import { getSquadSummary } from '#src/squad-summary'
 import { SquadSummaryCard } from '#src/SquadSummaryCard'
@@ -53,16 +55,17 @@ export async function playersMetadata(season: string): Promise<Metadata> {
  * `/spelers/2025-26` for another, which is what the two routes render. It has the title row
  * and the season picker, and the card Selectie with every player of the season in parts by
  * position and, under the heading, how complete that list is. That card is white: the squad is
- * what the page is for. The figures of the players are on their own page (Cijfers, see
+ * what the page is for. Above it stands the white card "In het kort" (`SquadSummaryCard`, when
+ * the squad is known). The figures of the players are on their own page (Cijfers, see
  * `PlayerFiguresPage`), so the toolbar has no choice of competition. The sidebar has the soft
- * card "De selectie in het kort" (`SquadSummaryCard`, when the squad is known), the four small
- * soft cards Topscorers, Assists, De nul gehouden and Minuten (`PlayersTopCards`), each with
- * the first three places of its figure and a link to its large card for the same season, and
- * ends with the credit. A card without figures is left out, and so are Assists and Minuten
- * when the season has no match report that is `klaar`. The
- * sidebar follows the main column on a phone, so the squad comes first there. The page has one
- * list, so it has no bar "Op deze pagina:". A season that has
- * no matches in the database is the page "niet gevonden".
+ * card "Uitblinker" (`SeasonUitblinkerCard`, when the season has one or the window is open),
+ * the four small soft cards Topscorers, Assists, Minuten and De nul gehouden
+ * (`PlayersTopCards`), each with the first three places of its figure and a link to its large
+ * card for the same season, and ends with the credit. A card without figures is left out, and
+ * so are Assists and Minuten when the season has no match report that is `klaar`. The sidebar
+ * follows the main column on a phone, so the squad comes first there. The page has one list, so
+ * it has no bar "Op deze pagina:". A season that has no matches in the database is the page
+ * "niet gevonden".
  */
 export async function PlayersPage({ season }: { season: string }) {
   const loaded = await loadSeasonPage(season, playersPath)
@@ -84,6 +87,7 @@ export async function PlayersPage({ season }: { season: string }) {
   const { data, seasons } = loaded
   const summary = await loadSummary(squad, season)
   const figures = await loadFigures(season)
+  const uitblinker = await readSeasonUitblinker(season)
   const current = seasonOf(new Date())
   const playerFigures = seasonAddress(playerFiguresPath, season, current)
   const showsReports = figures?.seasonHasReports === true
@@ -98,19 +102,20 @@ export async function PlayersPage({ season }: { season: string }) {
         <SeasonPicker action={pickerPath} options={seasonChoices(seasons)} size="small" value={seasonSlug(season)} />
       </Page.Toolbar>
       <Page.Section area="main" aria-label="De selectie van het seizoen">
+        {summary === undefined ? null : <SquadSummaryCard summary={summary} />}
         <SeasonSquadCard squad={squad} />
       </Page.Section>
       <Page.Section area="side" aria-label="Meer over de spelers">
-        {summary === undefined ? null : <SquadSummaryCard summary={summary} />}
+        {uitblinker === undefined ? null : <SeasonUitblinkerCard uitblinker={uitblinker} />}
         <TopScorersShortCard href={`${playerFigures}#doelpuntenmakers`} matches={data.matches} />
         {showsReports && <ReportShortCard figure="assists" figures={figures} href={`${playerFigures}#assists`} />}
+        {showsReports && <ReportShortCard figure="minutes" figures={figures} href={`${playerFigures}#minuten`} />}
         <CleanSheetsShortCard
           href={`${seasonAddress(statisticsPath, season, current)}#de-nul-gehouden`}
           matches={data.matches}
           now={new Date()}
           when={season === current ? 'dit seizoen' : `in ${season}`}
         />
-        {showsReports && <ReportShortCard figure="minutes" figures={figures} href={`${playerFigures}#minuten`} />}
         {(data.matches.length > 0 || data.standings.length > 0 || squad.pages.length > 0) && (
           <SourceCredit
             edited={data.edited}
@@ -150,7 +155,7 @@ async function loadSquad(season: string) {
   }
 }
 
-/** The figures of the card "De selectie in het kort", or undefined: no card (error logged). */
+/** The figures of the card "In het kort", or undefined: no card (error logged). */
 async function loadSummary(squad: SeasonSquad, season: string) {
   try {
     return await getSquadSummary(squad, season, new Date())
