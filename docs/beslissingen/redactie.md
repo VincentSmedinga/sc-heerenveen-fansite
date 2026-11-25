@@ -701,6 +701,7 @@
   Een strook van 4 pixels of minder, of een bijna doorzichtige; Safari negeert die.
 - **Later:** de strook blijft niet meer staan als de kop uit beeld is; zie _De blauwe rand bovenaan scrolt weg met de kop_.
 - **Later:** de strook blijft nu altijd staan, ook als de kop uit beeld is; zie _De statusbalk van Safari heeft altijd één van de twee blauwen, tot de modus wisselt_.
+- **Later:** sinds 25 november 2026 is de kleur van de pagina in licht `grey-50` (zie _De lichte pagina krijgt grijs-50 als achtergrond_ in `designsysteem.md`).
 - **Gecontroleerd en niet gecontroleerd:** in de iOS Simulator (iOS 27.0, iPhone 18 Pro) in Safari, in licht en in donker, boven aan de pagina en na het scrollen, met Licht en Donker en met het systeemthema gewisseld terwijl de pagina open stond.
   Niet in iOS 26 (geen simulator beschikbaar), niet op een echte telefoon, niet op een iPad en niet in een app op het beginscherm; de projecteigenaar kijkt dat na.
   Een test in Chromium (`e2e/safe-area.spec.ts`) controleert dat de strook het eerste element van de pagina is, vastzit, geen aanraking aanneemt, dezelfde kleur heeft als de kop en `theme-color` in licht en donker, en na Licht of Donker terugkomt.
