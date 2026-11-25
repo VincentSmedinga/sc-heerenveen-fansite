@@ -188,15 +188,14 @@ const drawings: Record<IconName, ReactNode> = {
     </>
   ),
   // A bin: the lid with its handle, the bin that narrows at the bottom, and two lines in it.
-  // A board of the pitch with the halfway line and a few players: the game Fjouwer.
+  // A board with a player to pick (a circle), one of the other side (a cross) and the run
+  // from one to the other: the game Fjouwer.
   'tactics-board': (
     <>
-      <path d="M5 2.5h6A1.5 1.5 0 0 1 12.5 4v8a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 12V4A1.5 1.5 0 0 1 5 2.5Z" />
-      <path d="M3.5 8h9" />
-      <path d="M6 5.25h.01" />
-      <path d="M10 5.25h.01" />
-      <path d="M6 10.75h.01" />
-      <path d="M10 10.75h.01" />
+      <path d="M3.5 2.5h9A1.5 1.5 0 0 1 14 4v8a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12V4a1.5 1.5 0 0 1 1.5-1.5Z" />
+      <circle cx="5.5" cy="10.5" r="1.25" />
+      <path d="m9.5 4.5 2.5 2.5M12 4.5 9.5 7" />
+      <path d="M5 7.5c.25-2 1.25-2.75 2.5-2.5" />
     </>
   ),
   trash: (
