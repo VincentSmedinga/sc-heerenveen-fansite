@@ -4031,6 +4031,7 @@
   Reflow (WCAG 1.4.10) blijft goed: inzoomen maakt de kolom in rem smaller, dus de rijen worden één kolom.
 - **Alternatieven:** de media queries houden (klopt niet in een zijbalk); één vaste grens voor alle vier (de vier hebben andere kolombreedtes); een `div` om elke lijst (alleen bij `PlayerList`, waar `columns` het niet anders toelaat).
 - **Later:** vervangt de grenzen van het venster (52 rem en 40 rem) die `KeyFigures`, `QuestionCard.Grid`, `PlayerList` en `OutcomeLine` volgens eerdere besluiten hadden, en maakt van `across` "vanaf 42 rem van de kolom" in plaats van "vanaf de breedte van een brede pagina".
+- **Later:** de ruimte tussen de kaarten van `KeyFigures` en `QuestionCard.Grid` is op 25 november 2026 2 rem geworden, dus de rekensom met 1 rem klopt niet meer; de grenzen van 42 en 40 rem blijven (zie _Kaarten in een raster binnen een kolom staan 2 rem uit elkaar_, #1645).
 
 ## De binnenruimte van een kaart blijft een media query
 
@@ -4171,6 +4172,7 @@
   Een kaart voor een account is een taak, geen spel.
   Een masker laat het icoon de kleur van het vlak volgen, in licht en in donker, zonder een tekening per thema.
 - **Alternatieven:** een watermerk op elke kaart; een illustratie naast de kop; een `<svg>` als kind van de kaart (dat verandert de opbouw van de kaart met een knop voor een afbeelding, en moet apart verborgen worden voor hulptechnologie).
+- **Later:** op 25 november 2026 vervangen kleine kaarten per spel de kaart Fans op de voorpagina, en die krijgen het watermerk wel, want elk is de kaart van een spel (zie _Elk open spel heeft een kleine kaart op de voorpagina, onder het forum_ in `site.md`, #1645).
 
 ## De code uit de mail is één veld dat als zes vakjes is getekend
 
@@ -4474,3 +4476,12 @@
 - **Waarom:** de pagina oogt lichter en frisser, en kaarten houden toch hun vorm.
   Een baan in de kleur van de pagina is op een witte kaart bijna niet te zien.
 - **Alternatieven:** grijs-100 houden; een witte pagina (witte kaarten verliezen dan hun vorm); grijs-100 rechtstreeks in `bar-list.css` zetten, wat het donkere thema niet volgt.
+
+## Kaarten in een raster binnen een kolom staan 2 rem uit elkaar
+
+- **Datum:** 25 november 2026
+- **Besluit:** een raster van kaarten binnen een kolom gebruikt dezelfde ruimte als het raster van de pagina, `--hf-space-xl` (2 rem) (#1645).
+  Dat geldt voor `OpenGameCards`, `KeyFigures`, `QuestionCard.Grid` en `Tile.Grid`; `CardColumns` deed het al.
+  `SideBySide` blijft zoals het is: het zet twee delen van één taak naast elkaar en is geen raster van kaarten.
+- **Waarom:** de kaarten zien er zo uit als de andere kaarten die naast elkaar staan.
+- **Alternatieven:** een rij kleine kaarten dichter bij elkaar houden, met 0,5 of 1 rem.

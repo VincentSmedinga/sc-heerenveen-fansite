@@ -8,6 +8,8 @@ import { notFound } from 'next/navigation'
 import { cupOutcomeOf } from '#src/cup-outcome'
 import { reviewBranch } from '#src/env'
 import { reasonOf } from '#src/errors'
+import { openGameLinks } from '#src/fans/open-game-views'
+import { loadOpenGames } from '#src/fans/open-games'
 import { GroupStageTable } from '#src/GroupStageTable'
 import { lastFiveOf } from '#src/last-five'
 import { seasonSourceOf, sourceName, sourceOf } from '#src/match-sources'
@@ -80,6 +82,9 @@ export async function matchesMetadata(season: string): Promise<Metadata> {
  * card with figures that belongs to it on the page Cijfers, of the same season. A season that
  * has no matches in the database is the page "niet gevonden".
  *
+ * In the current season the match a game of Fans is open for has a link to it under its line
+ * (see `openGameLinks`).
+ *
  * The card Verloop op de ranglijst, under the table, shows our place after each round of the
  * season as a line. A season whose results are not of all clubs, or in which points were taken
  * off, has no such card (see `placePerRoundOf`). Our place in every season, the card Onze plek
@@ -130,6 +135,10 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
   const reportAddresses = await reportAddressesOf(season)
   const liveReports = reportAddresses === undefined ? undefined : await getLiveReports(season, now)
   const previewAddresses = reportAddresses === undefined ? undefined : await getPreviewAddresses(season)
+  // The games of Fans that are open, under their match. Only the current season has them.
+  const gameLinks = current
+    ? openGameLinks(await loadOpenGames(now, ['prognose', 'uitblinker', 'fjouwer']), season)
+    : undefined
   // The cards with figures are on the statistics page of the same season, and its key
   // figures show our place.
   const statistics = (id?: string) =>
@@ -212,6 +221,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
                 </Text>
               ) : (
                 <MatchLines
+                  gameLinks={gameLinks}
                   matches={programme}
                   now={now}
                   previewAddresses={previewAddresses}
@@ -241,6 +251,7 @@ export async function MatchesPage({ searchParams, season }: { searchParams: Prom
                     {name}
                   </Heading>
                   <MatchLines
+                    gameLinks={gameLinks}
                     liveReports={liveReports}
                     matches={matches}
                     now={now}

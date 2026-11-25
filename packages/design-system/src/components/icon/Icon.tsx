@@ -9,6 +9,7 @@ export const iconNames = [
   'ball',
   'camera',
   'chart',
+  'crystal-ball',
   'document',
   'envelope',
   'external-link',
@@ -17,7 +18,9 @@ export const iconNames = [
   'plus',
   'save',
   'speech',
+  'star',
   'sun',
+  'tactics-board',
   'trash',
 ] as const
 
@@ -106,6 +109,14 @@ const drawings: Record<IconName, ReactNode> = {
       <path d="M11.5 11V7" />
     </>
   ),
+  // A crystal ball on its foot, with a highlight: the game Prognose.
+  'crystal-ball': (
+    <>
+      <circle cx="8" cy="6.5" r="4.5" />
+      <path d="M5.5 6a2.5 2.5 0 0 1 2-2" />
+      <path d="M5.5 10.5 4 13.5h8l-1.5-3" />
+    </>
+  ),
   // A page with a folded corner and two lines of text: an article.
   document: (
     <>
@@ -161,6 +172,8 @@ const drawings: Record<IconName, ReactNode> = {
       <path d="M5 8h3.5" />
     </>
   ),
+  // A star of five points: the game Uitblinker.
+  star: <path d="M8 2.5l1.7 3.5 3.8.55-2.75 2.7.65 3.8L8 11.25l-3.4 1.8.65-3.8L2.5 6.55l3.8-.55Z" />,
   sun: (
     <>
       <circle cx="8" cy="8" r="3" />
@@ -172,6 +185,16 @@ const drawings: Record<IconName, ReactNode> = {
       <path d="m11.9 11.9.7.7" />
       <path d="m12.6 3.4-.7.7" />
       <path d="m4.1 11.9-.7.7" />
+    </>
+  ),
+  // A board with a player to pick (a circle), one of the other side (a cross) and the run
+  // from one to the other: the game Fjouwer.
+  'tactics-board': (
+    <>
+      <path d="M3.5 2.5h9A1.5 1.5 0 0 1 14 4v8a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12V4a1.5 1.5 0 0 1 1.5-1.5Z" />
+      <circle cx="5.5" cy="10.5" r="1.25" />
+      <path d="m9.5 4.5 2.5 2.5M12 4.5 9.5 7" />
+      <path d="M5 7.5c.25-2 1.25-2.75 2.5-2.5" />
     </>
   ),
   // A bin: the lid with its handle, the bin that narrows at the bottom, and two lines in it.

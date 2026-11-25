@@ -3,6 +3,7 @@ import type { PublicMatch, PublicStaff } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { loadOpenGames } from '#src/fans/open-games'
 import { getLeagueResults, getMatchData, getMatchSeasons } from '#src/matches'
 import { matchShortcutsOf } from '#src/matchShortcuts'
 import { getLiveReports, getPreviewAddresses, getReportAddresses } from '#src/report-data'
@@ -10,6 +11,7 @@ import { legendsOf } from '#src/test-legend'
 import { leagueResultsData, leagueRoundOf, matchData } from '#src/test-matches'
 import { withoutIcons } from '#src/without-icons'
 
+import { MatchesPage as MatchesView } from './matches-page'
 import MatchesPage, { generateMetadata } from './page'
 
 // Only the query is replaced: the split into the programme and the results is the real one.
@@ -19,6 +21,14 @@ vi.mock('#src/matches', async (importOriginal) => ({
   getLeagueResults: vi.fn(),
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
+}))
+
+// Which games are open is tested on its own (open-games.test.ts); here the page shows them.
+vi.mock('#src/fans/open-games', () => ({ loadOpenGames: vi.fn() }))
+vi.mock('next/headers', () => ({
+  cookies: () => {
+    throw new Error('The page must not read the cookies of the visitor')
+  },
 }))
 
 vi.mock('#src/report-data', async (importOriginal) => ({
@@ -67,6 +77,8 @@ beforeEach(() => {
   vi.mocked(getLiveReports).mockResolvedValue(new Set())
   vi.mocked(getPreviewAddresses).mockReset()
   vi.mocked(getPreviewAddresses).mockResolvedValue(new Map())
+  vi.mocked(loadOpenGames).mockReset()
+  vi.mocked(loadOpenGames).mockResolvedValue([])
 })
 
 afterEach(() => {
@@ -1435,5 +1447,69 @@ describe('the cards of the current season', () => {
     expect(html.indexOf('id="programma"')).toBeLessThan(html.indexOf('id="uitslagen"'))
     expect(html.indexOf('id="uitslagen"')).toBeLessThan(html.indexOf('id="stand"'))
     expect(html).toContain('We hebben nog geen uitslagen van dit seizoen.')
+  })
+})
+
+describe('the links to the open games', () => {
+  const match = (opponent: string, round: string) => ({
+    competition: 'Eredivisie' as const,
+    home: true,
+    opponent,
+    round,
+    season: '2026/27',
+  })
+  const closesAt = new Date('2026-10-31T19:00:00Z')
+
+  beforeEach(() => {
+    vi.mocked(loadOpenGames).mockResolvedValue([
+      { closesAt, game: 'prognose', match: match('Proefstad SV', 'Speelronde 10') },
+      { closesAt, game: 'uitblinker', match: match('Voorbeeld United', 'Speelronde 9') },
+      { closesAt, game: 'fjouwer', match: match('Proefstad SV', 'Speelronde 10') },
+    ])
+  })
+
+  it('puts the links under the next match in Programma, the Prognose first, and under the last result', async () => {
+    const html = await render()
+
+    expect(section(html, 'programma')).toContain('href="/fans/prognose"')
+    expect(section(html, 'programma')).not.toContain('href="/fans/uitblinker"')
+    expect(resultCards(html)).toContain('href="/fans/uitblinker"')
+    expect(resultCards(html)).not.toContain('href="/fans/prognose"')
+    // Under the line of the next match, and above the one after it.
+    expect(html.slice(html.indexOf('Proefstad SV'), html.indexOf('Nepstad Rangers'))).toContain(
+      'Wat denk je dat het wordt?',
+    )
+    expect(html.indexOf('Wat denk je dat het wordt?')).toBeLessThan(html.indexOf('Welke fjouwer stel jij'))
+    expect(html).not.toContain('hf-open-game-card')
+  })
+
+  it('keeps the links outside the link to the page of the match', async () => {
+    vi.mocked(getPreviewAddresses).mockResolvedValue(
+      new Map([['Eredivisie|Speelronde 10', '/wedstrijden/2026-27/voorbeschouwing']]),
+    )
+
+    const html = await render()
+
+    expect(html).toMatch(
+      /<a class="hf-match-link" href="\/wedstrijden\/2026-27\/voorbeschouwing">(?:(?!<\/a>).)*<\/a>/u,
+    )
+    expect(html).toContain('</p></div><ul class="hf-game-links" role="list"><li><a href="/fans/prognose">')
+  })
+
+  it('asks for the games that are about a match, and shows nothing without one', async () => {
+    vi.mocked(loadOpenGames).mockResolvedValue([])
+
+    expect(await render()).not.toContain('hf-game-links')
+    expect(loadOpenGames).toHaveBeenCalledWith(now, ['prognose', 'uitblinker', 'fjouwer'])
+  })
+
+  it('has no links and reads no game for another season', async () => {
+    vi.mocked(getMatchData).mockResolvedValue({ ...matchData, season: '2025/26' })
+    vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26'])
+
+    const html = renderToStaticMarkup(await MatchesView({ searchParams: Promise.resolve({}), season: '2025/26' }))
+
+    expect(html).not.toContain('hf-game-links')
+    expect(loadOpenGames).not.toHaveBeenCalled()
   })
 })

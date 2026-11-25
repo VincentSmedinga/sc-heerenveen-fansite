@@ -21,6 +21,8 @@ import {
   Form,
   formatAverage,
   FormChart,
+  type GameLinkItem,
+  GameLinks,
   Heading,
   Input,
   List,
@@ -824,6 +826,7 @@ export function MatchLegend({ matches }: { matches: readonly MatchLineMatch[] })
  * abbreviations of these matches.
  */
 export function MatchLines({
+  gameLinks,
   liveReports,
   matches,
   now,
@@ -831,6 +834,11 @@ export function MatchLines({
   reportAddresses,
   withCompetition = true,
 }: {
+  /**
+   * The links to the games of Fans that are open, by `<competition>|<round>` (see
+   * `openGameLinks`): they stand under the line of their match.
+   */
+  gameLinks?: ReadonlyMap<string, readonly GameLinkItem[]> | undefined
   /**
    * The matches that are live, by `<competition>|<round>` (see `getLiveReports`): the link of
    * their line is named "live verslag" for a screen reader.
@@ -874,6 +882,7 @@ export function MatchLines({
                 withCompetition={withCompetition}
                 withStadium={withDetails}
               />
+              <GameLinks items={gameLinks?.get(key) ?? []} />
             </List.Item>
           )
         })}

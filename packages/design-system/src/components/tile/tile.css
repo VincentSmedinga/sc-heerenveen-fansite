@@ -8,7 +8,7 @@
    */
   .hf-tile-grid {
     display: grid;
-    gap: var(--hf-space-m);
+    gap: var(--hf-space-xl);
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
     list-style: none;
     margin: 0;

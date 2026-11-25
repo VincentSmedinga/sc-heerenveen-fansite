@@ -247,9 +247,9 @@ De homepage kent geen parameters, geen filter, geen paginering en geen balk met 
 Elke kaart met een lijst toont standaard vijf items: de discussies en de afleveringen op de homepage en de afleveringen op `/nieuws` (`itemsPerCard` in `src/items-per-card.ts`); het nieuws is de hoofdkaart en toont de koppen van de laatste 3 dagen, minstens 5 en hoogstens 20.
 De toegestane maten staan op één plek, `listSizes`: 5, 10, 20 en 50, en elk aantal in dat bestand komt daaruit; een test (`src/items-per-card.test.ts`) zegt dat.
 Een bezoeker kiest geen maat.
-De hoofdkolom en de zijbalk zijn niet op gelijke lengte gebracht: bij 1100 pixels breed en met de verzonnen gegevens is de hoofdkolom 805 pixels hoog en de zijbalk 2055.
+De hoofdkolom en de smalle kolom zijn niet op gelijke lengte gebracht.
 
-In de zijbalk naast het nieuws staat na Wedstrijden en Stand het blok "Nieuwste discussies" (zie _Op de homepage staat Wedstrijden boven het forum_ in `docs/beslissingen/site.md`), want het forum is onze zustersite: de vijf discussies van het forum waar het laatst op is gereageerd.
+In de smalle kolom naast het nieuws staat na Wedstrijden en Stand het blok "Nieuwste discussies" (zie _Op de homepage staat Wedstrijden boven het forum_ in `docs/beslissingen/site.md`), want het forum is onze zustersite: de vijf discussies van het forum waar het laatst op is gereageerd.
 Een discussie is een `DiscussionItem` uit het designsysteem: de titel als link naar het laatste bericht van de discussie op het forum, en daaronder het aantal reacties, de schermnaam van de laatste reageerder als gewone tekst en de tijd, zoals "83 reacties · laatst Buffon1 · 13:28".
 Van vandaag staat alleen de tijd, van de zes dagen ervoor de korte dag en de tijd, en daarvoor de datum.
 Onder de discussies staat de link "Naar het forum"; zijn er geen discussies, dan staat er een tekst voor bezoekers boven die link.
@@ -263,15 +263,30 @@ Het haalt alleen berichten op die `relevant` zijn en niet verborgen (`isShown`);
 De server bewaart de koppen vijf minuten (`src/headlines.ts`), dus een nieuw bericht staat binnen vijf minuten op de pagina.
 De pagina wordt bij elk bezoek gemaakt, dus de build leest de database niet.
 Lukt het lezen niet, dan toont de pagina de foutpagina, zoals `/bronnen`.
-Onderaan de zijbalk staat het blok "Nieuwste podcasts": de nieuwste afleveringen van alle podcasts van de laatste 8 dagen, tot vijf, als `NewsItem`, met de link "Alle podcasts" naar `/nieuws/podcasts` eronder.
+Direct onder "Laatste nieuws", in de hoofdkolom, staat het blok "Nieuwste podcasts": de nieuwste afleveringen van alle podcasts van de laatste 8 dagen, tot vijf, als `NewsItem`, met de link "Alle podcasts" naar `/nieuws/podcasts` eronder.
 De server bewaart ze vijf minuten (`src/podcasts.ts`).
 De afleveringen hebben dezelfde feiten als op `/nieuws/podcasts`.
 De kaart (`EpisodesCard` in `src/NewsCards.tsx`) toont alleen afleveringen van de laatste 8 dagen, gerekend vanaf nu; een aflevering van precies 8 dagen oud staat er nog in.
 Is er geen, dan staat er "We hebben de laatste 8 dagen geen podcastafleveringen gevonden." en blijft de link "Alle podcasts".
 Dit geldt ook voor de kaart "Podcasts" op `/nieuws`, want het is dezelfde kaart.
 
+Onder het forum staat voor elk spel van Fans dat nu open is een kleine kaart (`OpenGameCards`), twee naast elkaar, in de volgorde Prognose, Uitblinker, Fjouwer, Fantest.
+Een kaart heeft de naam van het spel en een link die zegt wat je kunt doen: "Voorspel de uitslag", "Geef de spelers een cijfer", "Kies jouw fjouwer" en "Doe de test van november".
+Tot wanneer een spel open is, staat niet op de kaart maar op de pagina van het spel.
+`loadOpenGames` in `src/fans/open-games.ts` is de ene plek die zegt welk spel open is, en `src/fans/open-game-views.ts` schrijft de woorden.
+Een spel is open als accounts en het spel aan staan en:
+
+- de Prognose: de aftrap van de volgende wedstrijd is bekend en nog niet geweest;
+- de Uitblinker: het venster voor cijfers is open;
+- Fjouwer: er is een wedstrijd waarvoor je nog kunt kiezen;
+- de Fantest: er is een gepubliceerde quiz van deze maand.
+
+Het lezen gebeurt bij elk bezoek en kijkt niet wie er kijkt.
+Kan een spel niet gelezen worden, dan ontbreekt alleen dat spel, en het logboek zegt waarom.
+Zonder open spel is er geen kaart.
+
 Boven de discussies staan twee blokken met wedstrijden: "Wedstrijden" en "Stand" (zie _De wedstrijden_).
-Op een telefoon staat de zijbalk onder het nieuws, dus de blokken staan onderaan de pagina.
+Op een telefoon is de volgorde het artikel, het nieuws, de podcasts, de wedstrijden, de stand, het forum en de spellen.
 Zonder gegevens van de wedstrijden staat er een zin voor bezoekers.
 Lukt het lezen van de wedstrijden niet, dan verdwijnen de twee blokken en schrijft de site de reden in het logboek, zoals bij het artikel; de rest van de pagina blijft werken.
 
@@ -283,6 +298,8 @@ Lokaal staan er berichten en discussies na `pnpm run import` (zie de [README van
 De kaarten met cijfers staan op `/wedstrijden/cijfers` (zie _De cijfers_).
 In het lopende seizoen staat het programma in de eerste van twee gelijke kolommen (`columns="equal"` op `Page.Main`), en in de tweede de uitslagen met daaronder de stand en de hoofdtrainers, die in een sectie met een naam staan die in de bron als laatste komt.
 Op een telefoon staat dus het programma bovenaan, dan de uitslagen en dan de stand.
+In het lopende seizoen staat onder de regel van een wedstrijd waarvoor een spel van Fans open is een link naar dat spel (`GameLinks`, `openGameLinks`): in Programma "Wat denk je dat het wordt?" (Prognose) en "Welke fjouwer stel jij op?", en in de uitslagen "Wie vond jij de besten?" (Uitblinker).
+De link staat los van de link naar de pagina van de wedstrijd.
 Een seizoen dat voorbij is, heeft de stand met de hoofdtrainers in de tweede kolom, vóór de uitslagen in de bron, dus op een telefoon bovenaan.
 Onder de stand en onder de uitslagen staat een link naar de kaart op de pagina Cijfers waar ze bij hoort, voor hetzelfde seizoen: de stand naar de pagina Cijfers, waar onze plek bovenaan staat, en de uitslagen naar "Het verloop van het seizoen".
 Op een telefoon staat onder de kop een balk "Op deze pagina:" met een link naar elke kaart (Programma, een link per kaart met uitslagen, Stand, Verloop op de ranglijst als het seizoen die heeft, en Hoofdtrainer, behalve in een seizoen met Verloop op de ranglijst; een eerder seizoen heeft geen Programma en noemt de stand Eindstand) (`Page.Shortcuts`, via het slot `@shortcuts` van de layout, in `app/@shortcuts/wedstrijden`); op een breed scherm is hij er niet.

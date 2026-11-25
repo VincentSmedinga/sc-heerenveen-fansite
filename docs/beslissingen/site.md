@@ -1647,6 +1647,7 @@
 - **Later:** zie _De kaart met podcasts toont de afleveringen van de laatste 8 dagen_ (7 november 2026): de kaart met podcasts op de homepage en op `/nieuws` toont alleen afleveringen van de laatste 8 dagen, tot vijf.
 - **Later:** zie _Op de homepage staat Wedstrijden boven het forum_ (6 november 2026): de zijbalk van de homepage begint met Wedstrijden en Stand, dan het forum, dan de podcasts.
 - **Later:** zie _De kaart Laatste nieuws toont de koppen van de laatste 3 dagen, minstens 5 en hoogstens 20_ (9 november 2026): de link heet "Al het nieuws", en "Laatste nieuws" toont geen vaste tien koppen (`firstHeadlines`) meer.
+- **Later:** op 25 november 2026 staat "Nieuwste podcasts" niet meer in de zijbalk, maar in de hoofdkolom onder "Laatste nieuws" (zie _Elk open spel heeft een kleine kaart op de voorpagina, onder het forum_, #1645).
 
 ## De kaarten van Statistieken staan in een hoofdkolom en een brede zijbalk, vier links en vijf rechts
 
@@ -2935,6 +2936,7 @@
 - **Waarom:** op een wedstrijddag komt de bezoeker vooral voor de uitslag of het programma, en het forum is een link naar buiten.
 - **Alternatieven:** het forum bovenaan laten (de keuze van 1 november 2026).
 - **Later:** dit vervangt het deel van _De homepage en het nieuws zijn twee pagina's, en het forum staat bovenaan de zijbalk van de homepage_ (1 november 2026) dat zegt dat het forum bovenaan staat.
+- **Later:** op 25 november 2026 gaan de podcasts naar de hoofdkolom, onder het nieuws, en komen de kaarten van de spellen onder het forum (zie _Elk open spel heeft een kleine kaart op de voorpagina, onder het forum_, #1645).
 
 ## Resultaten per hoofdtrainer staan als tabel op Cijfers
 
@@ -7468,6 +7470,8 @@
 - **Waarom:** de voorpagina blijft zo cachebaar, en een bezoeker ziet in één oogopslag wat er te doen is.
   Persoonlijke gegevens horen onder `/fans`.
 - **Alternatieven:** een kaart per spel op de voorpagina; een persoonlijke kaart voor wie is ingelogd.
+- **Later:** op 25 november 2026 is de kaart Fans vervangen door een kleine kaart per open spel, en is `OpenGameList` weg (zie _Elk open spel heeft een kleine kaart op de voorpagina, onder het forum_, #1645).
+  De kaarten blijven openbaar, voor iedereen gelijk en zonder cookie.
 
 ## De regels van alle spellen staan op één pagina
 
@@ -8158,3 +8162,38 @@
   De uitslag eerst laten zien maakt het lezen vanzelfsprekend; spelen is een keuze.
 - **Alternatieven:** de maand openen als formulier, zoals het archief (dan zijn de antwoorden pas na het spelen te lezen); de uitslag van de laatste maand met alle vragen op `/fans/fantest` zelf (een heel lange pagina); de bewaarde score optellen (dan wijkt de uitslag af van de ranglijst).
 - **Let op:** het gemiddelde en de percentages verschuiven als de redactie later "alles goed" zet.
+
+## Elk open spel heeft een kleine kaart op de voorpagina, onder het forum
+
+- **Datum:** 25 november 2026
+- **Besluit:** de voorpagina toont per open spel een kleine kaart met het watermerk, in een raster van twee bij twee onder het forum, ook op een telefoon (#1645).
+  De podcasts staan onder het nieuws, in de hoofdkolom.
+  De kaarten staan op het zachte oppervlak en hebben de naam als `h2` en een link die zegt wat je kunt doen, zonder zin met de wedstrijd.
+  De links zijn "Voorspel de uitslag", "Geef de spelers een cijfer", "Kies jouw fjouwer" en "Doe de test van november".
+  Er staat geen Tag en geen sluitingsmoment op de kaart: dat staat op de pagina van het spel, bij het formulier.
+  Dat is na het bekijken van de eerste versie zo besloten, in plaats van de groene Tag "Open tot za 16.45" uit het issue.
+  De naam is kleiner in een smalle kaart, zodat geen woord midden afbreekt.
+  Het component is `OpenGameCards`.
+- **Waarom:** elk spel is in één oogopslag te herkennen, en de spellen nemen weinig ruimte in.
+- **Alternatieven:** één kaart Fans met rijen; een kaart per spel over de volle breedte van de zijkolom; op de plek van de Tag een regel met de wedstrijd of het aantal deelnemers; de links als vraag.
+
+## Wedstrijden linkt onder de wedstrijd naar het open spel
+
+- **Datum:** 25 november 2026
+- **Besluit:** Wedstrijden krijgt geen kaarten van de spellen, maar in het lopende seizoen een link onder de wedstrijd waarvoor een spel open is (#1645).
+  De Prognose en Fjouwer staan onder hun wedstrijd in Programma, de Uitblinker onder de laatste wedstrijd in de uitslagen.
+  De link begint met het icoon van het spel en eindigt met een pijl (`GameLinks`), en staat los van de link naar de wedstrijdpagina.
+- **Waarom:** de vraag staat zo bij de wedstrijd zelf, en het programma blijft bovenaan.
+- **Alternatieven:** kaarten boven Programma; alleen links voor de Prognose en de Uitblinker.
+
+## Een kaart of link staat er alleen zolang het spel open is, en één plek zegt wanneer
+
+- **Datum:** 25 november 2026
+- **Besluit:** een kaart of link staat er alleen zolang het spel open is, en is voor iedereen gelijk (#1645).
+  `loadOpenGames` (`apps/site/src/fans/open-games.ts`) is de ene plek die dat beslist, voor de voorpagina, Wedstrijden en later `/fans`.
+  Het gebruikt de regels van de spellen zelf en leest bij elk bezoek, zonder eigen geheugen.
+  Een spel dat niet gelezen kan worden, valt weg en komt in het logboek.
+  De Fantest sluit als de volgende maand begint.
+- **Waarom:** de pagina's blijven kort en cachebaar, en wat van jou is, staat op `/fans` en op de pagina van het spel.
+  Lezen bij elk bezoek houdt de kaart gelijk met de klok.
+- **Alternatieven:** de kaart altijd tonen, met de stand of de laatste uitblinker; de open spellen een paar minuten bewaren (dan blijft een gesloten spel langer staan).

@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
 
-import { ArticleCard, Card, CardLink, Heading, List, NewsItem, Page, Text } from '@fansite/design-system'
+import { ArticleCard, Card, CardLink, Heading, List, NewsItem, OpenGameCards, Page, Text } from '@fansite/design-system'
 import { cache } from 'react'
 
 import { getDiscussions } from '../discussions'
 import { reviewBranch } from '../env'
 import { reasonOf } from '../errors'
-import { FansCard, loadOpenGames } from '../FansCard'
+import { openGameCards } from '../fans/open-game-views'
+import { loadOpenGames } from '../fans/open-games'
 import { getHeadlines, headlineCount, headlinesOfTheWindow } from '../headlines'
 import { getMatchData, type MatchData } from '../matches'
 import { MatchesCard, StandingsCard } from '../MatchViews'
@@ -63,6 +64,19 @@ async function loadMatchLinks(data: MatchData | undefined) {
   }
 }
 
+/** The name of the second column for a screen reader: what stands in it now. */
+function sideLabel(hasMatches: boolean, hasGames: boolean) {
+  const parts = [
+    ...(hasMatches ? ['de wedstrijden', 'de stand'] : []),
+    'het forum',
+    ...(hasGames ? ['de spellen'] : []),
+  ]
+  const last = parts.pop() ?? ''
+  const label = parts.length === 0 ? last : `${parts.join(', ')} en ${last}`
+
+  return `${label.charAt(0).toUpperCase()}${label.slice(1)}`
+}
+
 /**
  * The newest headlines, the newest discussions of the forum and the newest podcast
  * episodes, and the newest article of the editors and the matches, or undefined when the
@@ -110,6 +124,7 @@ export default async function HomePage() {
   const { article, discussions, episodes, headlines, matches, matchLinks, openGames } = content
   const now = new Date()
   const news = headlinesOfTheWindow(headlines, now)
+  const games = openGameCards(openGames)
 
   return (
     <>
@@ -117,7 +132,7 @@ export default async function HomePage() {
         areas={pageAreas({
           after: ['side'],
           head: false,
-          main: ['article', 'news'].slice(article === undefined ? 1 : 0),
+          main: ['article', 'news', 'podcasts'].slice(article === undefined ? 1 : 0),
         })}
       >
         {/* The logo just above already shows the name, so the h1 is for screen readers only.
@@ -170,7 +185,10 @@ export default async function HomePage() {
             <CardLink href="/nieuws">Al het nieuws</CardLink>
           </Card>
         </Page.Cell>
-        <Page.Section area="side" aria-label="De wedstrijden, de stand, het forum en de podcasts">
+        <Page.Cell area="podcasts">
+          <EpisodesCard episodes={episodes} heading="Nieuwste podcasts" now={now} />
+        </Page.Cell>
+        <Page.Section area="side" aria-label={sideLabel(matches !== undefined, games.length > 0)}>
           {matches !== undefined && (
             <>
               <MatchesCard
@@ -183,9 +201,8 @@ export default async function HomePage() {
               <StandingsCard data={matches} now={now} />
             </>
           )}
-          <FansCard items={openGames} />
           <DiscussionsCard discussions={discussions} now={now} />
-          <EpisodesCard episodes={episodes} heading="Nieuwste podcasts" now={now} />
+          <OpenGameCards items={games} />
         </Page.Section>
       </Page.Main>
     </>
