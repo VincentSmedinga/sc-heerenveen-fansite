@@ -5954,7 +5954,8 @@
 - **Besluit:** de leeftijden op de kaart zijn die van vandaag (zoals op de pagina van een speler), en alleen in het lopende seizoen; in een eerder seizoen valt de leeftijd weg (#1261).
 - **Waarom:** een leeftijd van nu zegt niets over spelers van lang geleden, en de leeftijd van een oud-speler is al niet getoond (zie _De regel onder de naam is plaats, jaar en leeftijd_).
 - **Alternatieven:** de leeftijd op de eerste dag van het seizoen (werkt voor elk seizoen, maar wijkt af van de pagina van een speler en van de leeftijd die een supporter ziet); de volledige geboortedatum tonen (een persoonsgegeven).
-- **Later:** sinds 25 november 2026 heet de kaart "In het kort" en staat ze wit in de brede kolom boven de selectie (zie _Spelers toont de Uitblinker van het seizoen bovenaan de zijkolom, en "In het kort" boven de selectie_, #1647). De inhoud is gelijk gebleven.
+- **Later:** sinds 25 november 2026 heet de kaart "In het kort" en staat ze wit in de brede kolom boven de selectie (zie _Spelers toont de Uitblinker van het seizoen bovenaan de zijkolom, en "In het kort" boven de selectie_, #1647).
+  De inhoud is gelijk gebleven.
 
 ## De kaart toont alleen wat we kennen, en zegt hoeveel dat is
 
