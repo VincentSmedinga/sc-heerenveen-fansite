@@ -546,6 +546,7 @@
   Of een andere naam dan `strong` voor het tonale vlak: `blue` lijkt te veel op `soft`, `tinted` is ook waar voor `soft` en `warm`, `accent` is al de rode tekstkleur en `highlight` is al een achtergrond met dezelfde waarden.
 - **Later:** zie _Ruimte komt uit vijf stappen, met gemiddeld als vaste keuze_ (31 oktober 2026): de binnenruimte van een kaart is 1 rem rondom op een smal scherm en 1,5 rem rondom op een breed scherm, en de ruimte voor het pijltje van een kop volgt de binnenruimte.
   Het was 1 en 1,25 rem, en 1,5 en 1,75 rem.
+- **Later:** sinds 25 november 2026 is de pagina in licht niet meer zandgrijs maar grijs-50; zie _De lichte pagina krijgt grijs-50 als achtergrond_.
 
 ## Hulpklassen zitten in de sterkste laag
 
