@@ -4,7 +4,7 @@ import { isFansPartOn } from '@fansite/shared/fans-env'
 import { getDatabase } from '#src/database'
 import { reasonOf } from '#src/errors'
 import { gradeText, supportersText } from '#src/MatchRatingsCard'
-import { oldSourceLine } from '#src/player-ratings'
+import { yearWinnersSource } from '#src/SupporterRatingsCards'
 
 import { latestResult, resultLine } from './match-ratings'
 import { clubsOf } from './prediction'
@@ -92,6 +92,6 @@ async function yearOf(season: string, now: Date): Promise<SeasonUitblinker | und
       line: ratingsLine(player.ratings),
       name: player.name,
     })),
-    ...(isOldSeason(data, season) ? { source: oldSourceLine } : {}),
+    ...(isOldSeason(data, season) ? { source: yearWinnersSource } : {}),
   }
 }

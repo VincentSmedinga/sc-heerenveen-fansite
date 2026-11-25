@@ -95,6 +95,16 @@ describe('the Uitblinker of the running season', () => {
     }
   })
 
+  it('has no link for an open window of a match of another season', async () => {
+    findRatingWindow.mockResolvedValue({ match: { ...match, season: '2025/26' }, state: 'open' })
+
+    expect(await readSeasonUitblinker('2026/27', now)).not.toHaveProperty('openMatch')
+
+    latestResult.mockResolvedValue(undefined)
+
+    expect(await readSeasonUitblinker('2026/27', now)).toBeUndefined()
+  })
+
   it('has no card without a Uitblinker and without an open window', async () => {
     latestResult.mockResolvedValue({ ...latest, ratings: { players: [], supporters: 3 } })
 
@@ -120,7 +130,7 @@ describe('the Uitblinker of a season that is over', () => {
 
   it('has the source line for a rating of the old Fansite', async () => {
     expect(await readSeasonUitblinker('2005/06', now)).toMatchObject({
-      source: 'Cijfers van bezoekers van de Fansite, 2001 tot 2007.',
+      source: 'Tot 2006/07: cijfers van bezoekers van de Fansite.',
     })
   })
 

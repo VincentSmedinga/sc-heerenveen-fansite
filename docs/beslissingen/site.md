@@ -5968,6 +5968,7 @@
   Op de acceptatiekopie (10 november 2026) hebben 23 van de 28 spelers van het lopende seizoen een geboortedatum op de dag en 28 van de 28 een land.
 - **Alternatieven:** de kaart alleen tonen als alles bekend is (dan mist hij nu de leeftijd); een gemiddelde van de spelers die we kennen zonder zin (misleidend).
 - **Later:** deze kaart komt bij "`/spelers` toont alleen de selectie: de kaart Selectie en de bronvermelding" in _De cijfers van de spelers staan op `/spelers/cijfers`, en `/spelers` toont alleen de selectie_: de zijkolom heeft nu ook deze kaart, boven "Cijfers van dit seizoen".
+- **Later:** sinds 25 november 2026 heet de kaart "In het kort" en staat ze wit in de brede kolom boven de selectie (zie _Spelers toont de Uitblinker van het seizoen bovenaan de zijkolom, en "In het kort" boven de selectie_, #1647).
 
 ## Het land per regel blijft de vlag
 

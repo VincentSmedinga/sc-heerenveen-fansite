@@ -17,12 +17,12 @@ describe('the card Uitblinker on Spelers', () => {
         { ...seal, label: 'Uitblinker van het jaar' },
         { ...seal, label: 'Uitblinker van het jaar', name: 'Speler B' },
       ],
-      source: 'Cijfers van bezoekers van de Fansite, 2001 tot 2007.',
+      source: 'Tot 2006/07: cijfers van bezoekers van de Fansite.',
     })
 
     expect(html).toMatch(/<h2[^>]*>Uitblinker<\/h2>/)
     expect(html.match(/hf-winner-text/g)).toHaveLength(2)
-    expect(html).toContain('Cijfers van bezoekers van de Fansite, 2001 tot 2007.')
+    expect(html).toContain('Tot 2006/07: cijfers van bezoekers van de Fansite.')
     expect(html).toContain('<a href="/fans/uitblinker/van-het-jaar">Uitblinker van het jaar</a>')
     expect(html).not.toContain('Geef cijfers')
   })
