@@ -4,13 +4,13 @@ import type { OpenGame, OpenMatch } from './open-games'
 
 import { openGameCards, openGameLinks } from './open-game-views'
 
-const next: OpenMatch = {
+const next = {
   competition: 'Eredivisie',
   home: true,
   opponent: 'FC Twente',
   round: '14',
   season: '2026/27',
-}
+} as OpenMatch
 
 const last: OpenMatch = { ...next, home: false, opponent: 'Ajax', round: '13' }
 

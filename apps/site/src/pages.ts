@@ -87,7 +87,7 @@ export const pages = [
   },
   {
     description:
-      'Het hoofdstuk voor fans: de spellen die komen, zoals een voorspelling van de uitslag en een cijfer voor de spelers, en alvast een account.',
+      'Het hoofdstuk voor fans: de spellen, zoals een voorspelling van de uitslag en een cijfer voor de spelers, en een eigen account.',
     path: '/fans',
   },
   {
