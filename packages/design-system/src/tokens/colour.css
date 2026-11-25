@@ -8,8 +8,8 @@
  *   steps 100, 300, 400, 500 and 700). Steel and sand steps are as light as the grey step with
  *   the same number, except sand-100, which is as light as blue-100.
  * - Neutral: grey, a neutral sand (chroma 0.006 to 0.017), 11 steps: warm and never fully neutral.
- * - Game: red (hue 27), purple (hue 305), green (hue 150) and gold (hue 92) for the Fans games, steps
- *   50, 200, 700 and 800, as light as the blue steps with the same number.
+ * - Game: red (hue 27), purple (hue 305), green (hue 150) and gold (hue 92) for the Fans games,
+ *   steps 50, 200, 700 and 800, as light as the blue steps with the same number.
  * Roles: the semantic tokens. They have names, never numbers.
  *
  * Roles use light-dark(), which picks a value from the element's colour scheme:
@@ -128,9 +128,9 @@
     --hf-colour-background-band: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-900));
 
     /*
-     * The colours of the games on a game card: the watermark (card-watermark.css) and the headings (card.css has the
-     * card). The card itself is the ordinary surface. All text keeps 4,5:1 against the surface and the watermark
-     * (card-watermark-css.test.ts).
+     * The colours of the games on a game card, for the watermark and the headings
+     * (card-watermark.css). The card itself is the ordinary surface. All text keeps 4,5:1
+     * against the surface and the watermark (card-watermark-css.test.ts).
      */
     --hf-colour-watermark-prognose: light-dark(var(--hf-colour-game-red-50), var(--hf-colour-game-red-800));
     --hf-colour-watermark-uitblinker: light-dark(var(--hf-colour-game-purple-50), var(--hf-colour-game-purple-800));

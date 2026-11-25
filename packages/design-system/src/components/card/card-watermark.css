@@ -1,9 +1,10 @@
 /*
  * The watermark of a game card: a large, very light drawing of the game in the bottom right corner, cut off by the
  * edges of the card. It is a pseudo-element, so it is not in the accessibility tree, takes no focus and no clicks, and
- * sits under the content of the card. The drawings are masks in SVG in this file, painted in the colour of the game
- * (--hf-colour-watermark-*), so no request to another address is needed. The headings of the card have the colour of
- * the game too (--hf-colour-text-heading-*); all other text keeps its own colour.
+ * sits under the content of the card. The drawings are masks in SVG in this file, painted in
+ * the colour of the game (--hf-colour-watermark-*), so no request to another address is needed.
+ * The headings of the card have the colour of the game too (--hf-colour-text-heading-*); all
+ * other text keeps its own colour.
  * It is tilted a little and sized as a share of the width of the card, so it never makes the card wider; the card clips
  * what sticks out. In forced colours it is gone: a mask would be painted in the text colour there.
  */
@@ -42,7 +43,10 @@
     }
   }
 
-  /* All headings of a game card, not only the first one. A transparent card keeps the ordinary colour. */
+  /*
+   * All headings of a game card, not only the first one. A transparent card keeps the ordinary
+   * colour.
+   */
   .hf-card-game:not(.hf-card-transparent) :is(h1, h2, h3, h4, h5) {
     color: var(--hf-card-heading-colour);
   }
