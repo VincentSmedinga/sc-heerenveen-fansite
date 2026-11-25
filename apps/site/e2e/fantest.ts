@@ -6,11 +6,13 @@ import path from 'node:path'
 
 /**
  * The made-up quizzes of the Fantest: one of the editors for the running month and one for
- * 2099, and two so the pages of the archive have something to show (#1480): June 2003 with ten
- * questions and the figures of 38 visitors, and September 2003 with a question left out and
- * only three visitors, so the percentages and the average stay away. A month that a
- * development database already has keeps its quiz. The checks put the rows in before the first
- * test and take only these rows out after the last one.
+ * 2099, two closed months of 2025 with the answers of made-up supporters for the ranking
+ * (#1483), and two so the pages of the archive have something to show (#1480): June 2003 with
+ * ten questions and the figures of 38 visitors, and September 2003 with a question left out and
+ * only three visitors, so the percentages and the average stay away. A month of 2003 or the
+ * running month that a development database already has keeps its quiz. A quiz of the editors
+ * for 2099 or for January or February 2025 is replaced. The checks put the rows in before the
+ * first test and take only these rows out after the last one.
  */
 const months = [
   { average: 41, missing: [], month: 6, participants: 38 },
