@@ -37,7 +37,7 @@ describe('the page Uitblinker van het jaar', () => {
     expect(ratingFigures).not.toHaveBeenCalled()
   })
 
-  it('has one h1, a card for the running season and for the winner that the season rating gives, and the strong card', async () => {
+  it('has one h1, a card for the running season and for the winner that the season rating gives, and the card of the best of all years', async () => {
     vi.stubEnv('FANS_ACCOUNTS', 'on')
     vi.stubEnv('FANS_UITBLINKER', 'on')
     const html = renderToStaticMarkup(await YearWinnersPage())
@@ -49,7 +49,7 @@ describe('the page Uitblinker van het jaar', () => {
     expect(html).not.toContain('<table')
     expect(html).toContain('Uitblinker van de Uitblinkers')
     expect(html).toContain('Tot 2006/07: cijfers van bezoekers van de Fansite.')
-    // On a phone the strong card stands before the cards of the years.
+    // On a phone the card of the best of all years stands before the cards of the years.
     expect(html.indexOf('Uitblinker van de Uitblinkers')).toBeLessThan(html.indexOf('Uitblinker 2026/27'))
   })
 
