@@ -272,7 +272,8 @@ Dit geldt ook voor de kaart "Podcasts" op `/nieuws`, want het is dezelfde kaart.
 
 Onder het forum staat voor elk spel van Fans dat nu open is een kleine kaart (`OpenGameCards`), twee naast elkaar, in de volgorde Prognose, Uitblinker, Fjouwer, Fantest.
 Een kaart heeft de naam van het spel en een link die zegt wat je kunt doen: "Voorspel de uitslag", "Geef de spelers een cijfer", "Kies jouw fjouwer" en "Doe de test van november".
-Tot wanneer een spel open is, staat niet op de kaart maar op de pagina van het spel.
+Tot wanneer een spel open is, staat niet op de kaart.
+De pagina van de Prognose, de Uitblinker en Fjouwer noemt dat moment; de Fantest loopt tot het eind van de maand, en zijn pagina noemt alleen de maand.
 `loadOpenGames` in `src/fans/open-games.ts` is de ene plek die zegt welk spel open is, en `src/fans/open-game-views.ts` schrijft de woorden.
 Een spel is open als accounts en het spel aan staan en:
 
@@ -1560,6 +1561,20 @@ De link opent `/fans/herinnering/uitzetten`, een pagina met een knop die de heri
 `supporter_reminders` bewaart per fan en wedstrijd dat het bericht is verstuurd, zonder adres of naam.
 De stap maakt de rij vlak voor het bericht uitgaat en haalt hem weg als het versturen mislukt, zodat een mislukt bericht bij de volgende run opnieuw wordt geprobeerd.
 
+### De pagina Fans
+
+`/fans` (`app/fans/page.tsx`) is de start van het hoofdstuk (#1646).
+Zolang een spel aan staat, toont de pagina per spel dat aan staat een kaart (`GameStatusCard` uit het designsysteem), in de volgorde Prognose, Uitblinker, Fjouwer, Fantest, in een of twee kolommen.
+Elk spel heeft een lezer die zegt wat er op zijn kaart staat: `read-game-cards.ts` en `uitblinker-card.ts`.
+Of de Prognose en Fjouwer open zijn, zegt `readOpenGame` (`src/fans/open-games.ts`), dezelfde regel als op de homepage en Wedstrijden.
+De Tag zegt "Open", "Nog te doen", "Gesloten" of "Nog niet open", zonder moment: tot wanneer je kunt, staat op de pagina van het spel.
+Iedereen ziet de wedstrijd, het aantal fans (`src/fans/game-counts.ts`) en de bovenste drie van de stand van dit seizoen of jaar.
+Een fan die is ingelogd en mee mag doen, ziet ook wat van die fan is, en een knop zolang er iets te doen is.
+Een geblokkeerd account ziet wat een bezoeker ziet.
+Kan een spel niet gelezen worden, dan ontbreekt alleen die kaart, en het logboek zegt waarom.
+Staat geen enkel spel aan, dan zegt de pagina wat er komt.
+De pagina komt nooit in een cache.
+
 ### De Uitblinker
 
 `/fans/uitblinker` (`app/fans/uitblinker`) laat een fan de spelers en de trainer van de laatste wedstrijd een cijfer van 1 tot 10 geven.
@@ -1571,7 +1586,7 @@ Een stap van de import (`closeRatingWindows`) zet de gemiddelden na het sluiten 
 De cijfers van een geblokkeerd account tellen niet mee in de gemiddelden van de spelers en de trainer.
 Blokkeren en vrijgeven rekenen de gemiddelden van de gesloten vensters opnieuw uit (`recountRatingsOf`), en `closeAccount` bewaart de markering `blocked` bij de cijfers in `player_ratings` en `coach_ratings` van een geblokkeerd account dat wordt opgeheven.
 Het gemiddelde van de trainer staat als laatste regel in de tabel met gemiddelden (`RatingsTable` in `src/MatchRatingsCard.tsx`), na een zwaardere lijn, ook bij oude wedstrijden, en hij krijgt nooit de zegel.
-Op `/fans` staat een kaart van het spel (`app/fans/UitblinkerCard.tsx`) en onder "Alles wat we van je bewaren" de eigen cijfers (`src/fans/rating-data.ts`).
+Op `/fans` staat een kaart van het spel (`app/fans/uitblinker-card.ts`, zie _De pagina Fans_) en onder "Alles wat we van je bewaren" de eigen cijfers (`src/fans/rating-data.ts`).
 `e2e/fans-rating.spec.ts` zet met `addRatingMatch` (`e2e/admin.ts`) een gespeelde wedstrijd met verslag in de database, omdat de verzonnen gegevens er geen hebben, en met `coach: true` ook een hoofdtrainer.
 
 ### De Fantest van de maand

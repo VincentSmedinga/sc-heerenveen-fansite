@@ -3,7 +3,7 @@ import type { PublicMatch, PublicStaff } from '@fansite/db/queries'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { loadOpenGames } from '#src/fans/open-games'
+import { loadOpenGames, type OpenMatch } from '#src/fans/open-games'
 import { getLeagueResults, getMatchData, getMatchSeasons } from '#src/matches'
 import { matchShortcutsOf } from '#src/matchShortcuts'
 import { getLiveReports, getPreviewAddresses, getReportAddresses } from '#src/report-data'
@@ -1451,13 +1451,14 @@ describe('the cards of the current season', () => {
 })
 
 describe('the links to the open games', () => {
-  const match = (opponent: string, round: string) => ({
-    competition: 'Eredivisie' as const,
-    home: true,
-    opponent,
-    round,
-    season: '2026/27',
-  })
+  const match = (opponent: string, round: string) =>
+    ({
+      competition: 'Eredivisie' as const,
+      home: true,
+      opponent,
+      round,
+      season: '2026/27',
+    }) as OpenMatch
   const closesAt = new Date('2026-10-31T19:00:00Z')
 
   beforeEach(() => {

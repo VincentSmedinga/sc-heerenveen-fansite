@@ -98,6 +98,10 @@ test('makes an account with the button behind the link', async ({ page }) => {
   await expect(page).toHaveURL(/\/fans\?welkom=1$/)
   await expect(page.getByText(`Welkom, ${name}.`)).toBeVisible()
   await checkPage(page)
+  // The page Fans of a supporter who is logged in, with the cards of the games, in dark too.
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await checkPage(page)
+  await page.emulateMedia({ colorScheme: 'light' })
 
   // The link works once.
   await page.goto(url)

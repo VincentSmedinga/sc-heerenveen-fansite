@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Button, Card, Form, Heading, Link, List, Notice, Page, Tag, Text } from '@fansite/design-system'
+import { Button, Card, CardColumns, Form, Heading, Link, List, Notice, Page, Tag, Text } from '@fansite/design-system'
 import { isFansPartOn, requireFansPart } from '@fansite/shared/fans-env'
 import { notFound } from 'next/navigation'
 
@@ -8,7 +8,9 @@ import { fansGames, fansPath, rulesPath } from '#src/fans-paths'
 import { currentSupporter } from '#src/fans/require-supporter'
 import { pageMetadata } from '#src/metadata'
 
-import { readUitblinkerCard, UitblinkerCard } from './UitblinkerCard'
+import { GameCard } from './GameCard'
+import { readFantestCard, readFjouwerCard, readPrognoseCard } from './read-game-cards'
+import { readUitblinkerCard } from './uitblinker-card'
 
 // Render on each request: the canonical URL comes from SITE_ENV and the parts of Fans from
 // their own settings, which the build doesn't know.
@@ -20,13 +22,30 @@ export const generateMetadata = (): Metadata => {
   return pageMetadata('/fans', 'Fans')
 }
 
-// What each game does, in one sentence, for the card "Wat komt er". Fantest is not here: its
-// card on Fans comes with an issue of its own.
+// What each game does, in one sentence, for the card "Wat komt er", which stands only while no
+// game is on. Fantest is not in that list.
 const coming = [
   { part: 'prognose', sentence: 'Voorspel de rust- en eindstand van de volgende wedstrijd.' },
   { part: 'uitblinker', sentence: 'Geef de spelers en de trainer na elke wedstrijd een cijfer.' },
   { part: 'vier', sentence: 'Kies vier spelers die punten scoren.' },
 ] as const
+
+// The games in the order of their cards, each with the words of the intro and the reader.
+const games = [
+  { invitation: 'voorspel de uitslag', part: 'prognose', read: readPrognoseCard },
+  { invitation: 'geef de spelers een cijfer', part: 'uitblinker', read: readUitblinkerCard },
+  { invitation: 'kies de vier die jij opstelt', part: 'vier', read: readFjouwerCard },
+  { invitation: 'doe de Fantest', part: 'fantest', read: readFantestCard },
+] as const
+
+/** "Voorspel de uitslag, geef de spelers een cijfer en doe de Fantest." */
+function introOf(invitations: readonly string[]) {
+  const last = invitations.at(-1) ?? ''
+  const first = invitations.slice(0, -1)
+  const text = first.length === 0 ? last : `${first.join(', ')} en ${last}`
+
+  return `${text.charAt(0).toUpperCase()}${text.slice(1)}.`
+}
 
 /** How long after making the account the welcome can still show. */
 const welcomeMinutes = 10
@@ -35,14 +54,15 @@ const welcomeMinutes = 10
 const justCreated = (createdAt: Date) => Date.now() - createdAt.getTime() < welcomeMinutes * 60 * 1000
 
 /**
- * The page Fans, as long as no game exists: what is coming, and for a visitor without a session
- * a card to make an account already. The buttons lead to the sign-up (#1446) and to logging in
- * (#1448). A supporter who is logged in sees no card but one line of small text with the
- * screen name of the session and a link to Mijn account. After logging out
- * (`?uitgelogd=1`) a Notice says so. After confirming a new account (`?welkom=1`) another
- * welcomes the supporter by the screen name of the session, and only in the minutes after the
- * account was made, so the address of the page doesn't show it again later. A game that is on
- * has no link yet: its own issue gives it one.
+ * The page Fans, the start of the chapter (issue 1646). While a game is on it shows a card for
+ * each game that is on, with what is going on and, for a supporter who is logged in, what is
+ * theirs. While no game is on it says what is coming. A visitor without a session first gets a
+ * card to make an account, with buttons to the sign-up (#1446) and to logging in (#1448); a
+ * supporter who is logged in gets one line of small text with the screen name of the session
+ * and a link to Mijn account. After logging out (`?uitgelogd=1`) a Notice says so. After
+ * confirming a new account (`?welkom=1`) another welcomes the supporter by the screen name of
+ * the session, and only in the minutes after the account was made, so the address of the page
+ * doesn't show it again later. The page never comes in a cache.
  */
 export default async function FansPage({
   searchParams,
@@ -53,32 +73,35 @@ export default async function FansPage({
 
   // A visit of a supporter who is logged in counts: the session stays open another 90 days, and
   // the account keeps the day of the visit. The session also decides what the page shows: the
-  // card to make an account for a visitor, the line with the screen name for a supporter.
+  // card to make an account for a visitor, the line with the screen name for a supporter, and
+  // what is theirs on the cards.
   const supporter = await currentSupporter()
 
   const { uitgelogd, welkom } = await searchParams
-  const uitblinker = await readUitblinkerCard(supporter)
+  const on = games.filter(({ part }) => isFansPartOn(part))
+  const cards = (await Promise.all(on.map(({ read }) => read(supporter)))).filter((card) => card !== undefined)
 
   return (
     <Page.Main>
       <Page.Cell>
         <Heading level={1}>Fans</Heading>
         <Text appearance="intro">
-          Hier komen de spellen voor fans: voorspel de uitslag, geef de spelers een cijfer en kies je eigen vier. Zonder
-          prijzen en zonder reclame.
+          {on.length === 0
+            ? 'Hier komen de spellen voor fans: voorspel de uitslag, geef de spelers een cijfer en kies je eigen vier. Zonder prijzen en zonder reclame.'
+            : introOf(on.map(({ invitation }) => invitation))}
         </Text>
         {uitgelogd === '1' ? <Notice>Je bent uitgelogd.</Notice> : null}
         {welkom === '1' && supporter !== undefined && justCreated(supporter.createdAt) ? (
           <Notice>Welkom, {supporter.screenName}. Je account is klaar en je blijft op dit apparaat ingelogd.</Notice>
         ) : null}
         {supporter === undefined ? (
-          <Card aria-labelledby="alvast-een-account" surface="strong">
-            <Heading id="alvast-een-account" level={2}>
-              Maak alvast een account
+          <Card aria-labelledby="doe-mee" surface="strong">
+            <Heading id="doe-mee" level={2}>
+              {on.length === 0 ? 'Maak alvast een account' : 'Doe mee'}
             </Heading>
             <Text>
-              Dan ben je klaar als het eerste spel begint. Je hebt alleen een schermnaam en een e-mailadres nodig, geen
-              wachtwoord. Alleen je schermnaam is voor anderen te zien.
+              {on.length === 0 ? 'Dan ben je klaar als het eerste spel begint. ' : ''}Je hebt alleen een schermnaam en
+              een e-mailadres nodig, geen wachtwoord. Alleen je schermnaam is voor anderen te zien.
             </Text>
             {/* A form that only goes to the page: the design system has no link button. */}
             <Form action={`${fansPath}/aanmelden`}>
@@ -95,30 +118,29 @@ export default async function FansPage({
             Je bent ingelogd als {supporter.screenName}. <Link href={`${fansPath}/mijn-account`}>Mijn account</Link>
           </Text>
         )}
-        {uitblinker === undefined ? null : <UitblinkerCard {...uitblinker} />}
-        <Card aria-labelledby="wat-komt-er">
-          <Heading id="wat-komt-er" level={2}>
-            Wat komt er
-          </Heading>
-          <List role="list">
-            {coming.map(({ part, sentence }) => {
-              const game = fansGames.find((candidate) => candidate.part === part)
-
-              return (
+        {cards.length === 0 ? null : (
+          <CardColumns>
+            {cards.map((card) => (
+              <GameCard key={card.game} {...card} />
+            ))}
+          </CardColumns>
+        )}
+        {on.length === 0 ? (
+          <Card aria-labelledby="wat-komt-er">
+            <Heading id="wat-komt-er" level={2}>
+              Wat komt er
+            </Heading>
+            <List role="list">
+              {coming.map(({ part, sentence }) => (
                 <List.Item key={part}>
-                  <Heading level={3}>{game?.label}</Heading>
+                  <Heading level={3}>{fansGames.find((game) => game.part === part)?.label}</Heading>
                   <Text>{sentence}</Text>
-                  {part === 'vier' && isFansPartOn(part) && game !== undefined ? (
-                    <Text>
-                      <Link href={game.href}>{`Naar ${game.label}`}</Link>
-                    </Text>
-                  ) : null}
-                  {!isFansPartOn(part) && <Tag>komt eraan</Tag>}
+                  <Tag>komt eraan</Tag>
                 </List.Item>
-              )
-            })}
-          </List>
-        </Card>
+              ))}
+            </List>
+          </Card>
+        ) : null}
         <Text appearance="meta">
           <Link href={rulesPath}>Spelregels van alle spellen</Link> ·{' '}
           <Link href="/privacy#account">Wat we bewaren als je een account hebt</Link>

@@ -6859,6 +6859,7 @@
   Een pagina met persoonlijke inhoud mag nergens blijven hangen, en de openbare pagina's blijven voor iedereen gelijk en goed te cachen.
 - **Alternatieven:** het item verbergen tot er een spel is (aanmelden is dan niet te testen); de instellingen bij de bouw lezen (dan kent een pagina "niet gevonden" het item niet).
 - **Later:** zie _De links in het hoofdmenu staan op een telefoon dichter bij elkaar_ in `designsysteem.md` (21 november 2026): daar staat hoe breed het menu op een telefoon is.
+- **Later:** op 25 november 2026 toont `/fans` zodra een spel aan staat een kaart per spel, en heet de kaart voor een bezoeker "Doe mee" (zie _`/fans` toont per spel dat aan staat een kaart, met wat er speelt en wat van jou is_, #1646).
 
 ## Een supporter maakt een account met een schermnaam en een e-mailadres
 
@@ -8000,6 +8001,7 @@
   De kop toont alleen initialen, geen schermnaam als tekst (#1450); de regel is de plek op de pagina waar je ziet wie je bent en waar je naar je account gaat, ook als er nog geen spel is.
 - **Alternatieven:** een kaart met de schermnaam en wat je kunt doen (herhaalt de kop, is een nieuwe kaart die niemand ontwierp, en zonder spel valt er weinig te doen); alleen de kaart weghalen (de pagina zegt dan nergens wie je bent).
 - **Later:** _Fans staat in het hoofdmenu zodra accounts aan staan_ hierboven zegt dat `/fans` een kaart heeft om alvast een account te maken; die kaart is er alleen nog voor een bezoeker zonder sessie.
+- **Later:** zolang een spel aan staat, heet die kaart sinds 25 november 2026 "Doe mee" (zie _`/fans` toont per spel dat aan staat een kaart, met wat er speelt en wat van jou is_, #1646).
 
 ## Op het veld van een wedstrijd staat een speler met zijn beginletter als een naamgenoot in dezelfde jaren speelde
 
@@ -8170,7 +8172,8 @@
   De podcasts staan onder het nieuws, in de hoofdkolom.
   De kaarten staan op het zachte oppervlak en hebben de naam als `h2` en een link die zegt wat je kunt doen, zonder zin met de wedstrijd.
   De links zijn "Voorspel de uitslag", "Geef de spelers een cijfer", "Kies jouw fjouwer" en "Doe de test van november".
-  Er staat geen Tag en geen sluitingsmoment op de kaart: dat staat op de pagina van het spel, bij het formulier.
+  Er staat geen Tag en geen sluitingsmoment op de kaart.
+  De pagina van de Prognose, de Uitblinker en Fjouwer noemt dat moment bij het formulier; de Fantest loopt tot het eind van de maand, en zijn pagina noemt alleen de maand.
   Dat is na het bekijken van de eerste versie zo besloten, in plaats van de groene Tag "Open tot za 16.45" uit het issue.
   De naam is kleiner in een smalle kaart, zodat geen woord midden afbreekt.
   Het component is `OpenGameCards`.
@@ -8197,3 +8200,23 @@
 - **Waarom:** de pagina's blijven kort en cachebaar, en wat van jou is, staat op `/fans` en op de pagina van het spel.
   Lezen bij elk bezoek houdt de kaart gelijk met de klok.
 - **Alternatieven:** de kaart altijd tonen, met de stand of de laatste uitblinker; de open spellen een paar minuten bewaren (dan blijft een gesloten spel langer staan).
+
+## `/fans` toont per spel dat aan staat een kaart, met wat er speelt en wat van jou is
+
+- **Datum:** 25 november 2026
+- **Besluit:** `/fans` toont een kaart per spel dat aan staat, in de volgorde Prognose, Uitblinker, Fjouwer, Fantest, in een of twee kolommen (#1646).
+  Elke kaart heeft de naam, een Tag met de staat, de wedstrijd of de maand, het aantal fans, een bovenste drie van de stand en de weg naar het spel (`GameStatusCard`).
+  Een ingelogde fan die mee mag doen, ziet ook wat van die fan is: de voorspelling, de vier met de punten en de plek van de laatste wedstrijd, of de score van deze maand.
+  Wie nog iets te doen heeft, ziet een oranje Tag "Nog te doen" en een knop.
+  Een geblokkeerd account ziet wat een bezoeker ziet.
+  "Wat komt er" staat er alleen zolang geen spel aan staat.
+  Een spel dat niet gelezen kan worden, valt weg en komt in het logboek.
+  - **Zonder moment in de Tag:** de Tag zegt "Open", "Nog te doen", "Gesloten" of "Nog niet open".
+    Het issue noemt "Open tot za 16.45", maar op de voorpagina is het sluitingsmoment van de kaarten gehaald, en dat geldt hier ook.
+  - **De korte stand** volgt de regels van de ranglijst en zet er niemand onder: wie lager staat, ziet de eigen rij niet.
+  - **Aantallen:** Fjouwer telt de fans die voor deze wedstrijd hebben opgeslagen, niet wie een eerdere vier meeneemt.
+    Geblokkeerde accounts tellen nergens mee.
+  - **Een overgenomen vier** geldt als gedaan zolang alle vier tellen.
+- **Waarom:** de pagina is de plek om in één keer te zien wat er te doen is.
+  Ze komt nooit in een cache, dus persoonlijke inhoud kan hier.
+- **Alternatieven:** een lichtere pagina met alleen de staat, één zin en een link per spel.
