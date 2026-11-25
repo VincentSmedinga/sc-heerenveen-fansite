@@ -4676,9 +4676,11 @@
 ## Een rij van vier staat breder op het veld
 
 - **Datum:** 25 november 2026
-- **Besluit:** een rij van vier spelers beslaat 92 procent van de breedte van de ploeg in plaats van 80 (#1672), en een naam krijgt daar evenveel meer ruimte.
+- **Besluit:** op het rechtopstaande veld beslaat een rij van vier spelers 92 procent van de breedte in plaats van 80 (#1672), en een naam krijgt daar evenveel meer ruimte.
+  Op het liggende veld blijft de rij zoals ze was.
   Een rij van drie of minder en een rij van vijf of meer blijven zoals ze waren.
   In de uitleg onder het veld staat er ruimte tussen de voorbeeldschijf en het woord "Rugnummer".
 - **Waarom:** de namen van vier verdedigers staan dicht op elkaar, en langs de zijlijnen was ruimte over.
   De ring van de voorbeeldschijf viel in de compacte maat tegen het woord aan.
+  Liggend loopt de rij van boven naar beneden, en met meer spreiding valt de naam van de onderste speler buiten het veld.
 - **Alternatieven:** de rij verspringen; elke rij breder maken (bij drie of minder is er al ruimte genoeg).

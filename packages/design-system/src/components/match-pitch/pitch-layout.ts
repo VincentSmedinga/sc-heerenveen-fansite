@@ -62,13 +62,15 @@ const rowDepth = (index: number, rows: number) => 0.075 + (index * 0.365) / rows
 
 /**
  * The part of the width a row of this size is spread over, with the same room left on both
- * sides. A row of four or more uses more of it, so its names have more room.
+ * sides. A row of five or more uses more of it, and so does a row of four on the upright
+ * pitch, so its names have more room there. Lying down the row runs from top to bottom, and a
+ * wider row of four would cut off the name of its last player.
  */
-const rowSpread = (size: number) => (size >= 5 ? 0.88 : size === 4 ? 0.92 : 0.8)
+const rowSpread = (size: number, upright: boolean) => (size >= 5 ? 0.88 : size === 4 && upright ? 0.92 : 0.8)
 
-/** The place of a player along the row, as a share of its width. */
-const rowOffset = (position: number, size: number) => {
-  const spread = rowSpread(size)
+/** The place of a player along the row, as a share of the room the row is spread over. */
+const rowOffset = (position: number, size: number, upright: boolean) => {
+  const spread = rowSpread(size, upright)
 
   return (1 - spread) / 2 + (spread * (position + 0.5)) / size
 }
@@ -108,20 +110,19 @@ export function pitchSpots(
     const depth = rowDepth(index, rows.length)
 
     for (let position = 0; position < size; position++) {
-      const offset = rowOffset(position, size)
+      const across = rowOffset(position, size, true)
+      const down = rowOffset(position, size, false)
       const length = half ? 2 : 1
       // On a half the rows run from the halfway line to the goal line, so twice as far.
       const toward = depth * length
 
       spots.push({
-        landscape: ours
-          ? { x: percent(toward), y: percent(offset) }
-          : { x: percent(1 - toward), y: percent(1 - offset) },
+        landscape: ours ? { x: percent(toward), y: percent(down) } : { x: percent(1 - toward), y: percent(1 - down) },
         landscapeShare: percent(rowGap * 0.95 * length),
         portrait: ours
-          ? { x: percent(offset), y: percent(1 - toward) }
-          : { x: percent(1 - offset), y: percent(toward) },
-        share: percent((rowSpread(size) / size) * 0.95),
+          ? { x: percent(across), y: percent(1 - toward) }
+          : { x: percent(1 - across), y: percent(toward) },
+        share: percent((rowSpread(size, true) / size) * 0.95),
       })
     }
   })
