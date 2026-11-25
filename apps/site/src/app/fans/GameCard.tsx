@@ -21,7 +21,7 @@ export function GameCard({ action, game, heading, lines, match, mine, ranking, t
       ))}
       {winner === undefined ? null : (
         <>
-          {winner.seal === undefined ? null : <Winner label="Uitblinker vorige wedstrijd" {...winner.seal} />}
+          {winner.star === undefined ? null : <Winner label="Uitblinker vorige wedstrijd" {...winner.star} />}
           <Text appearance="meta">{winner.count}</Text>
         </>
       )}

@@ -18,13 +18,6 @@ import { minimumMatches, minimumRatings } from '#src/player-ratings'
 /** The days after the last match of a season that its window can still be open. */
 const windowDays = 7
 
-/** The Uitblinker of the Uitblinkers: the highest season rating of the seasons over. */
-export type BestYearWinners = {
-  average: number
-  /** The winner, or every winner of a season on an equal rating, each with their season. */
-  players: (YearWinnerPlayer & { season: string })[]
-}
-
 /** A season rating of 1998/99 to 2000/01, which has no matches and no count. */
 export type OldRating = { average: number; name: string; playerId: null | number; season: string }
 
@@ -149,37 +142,26 @@ export const isOldSeason = (data: RatingFigures, season: string) =>
   data.oldRatings.some((row) => row.season === season) ||
   data.figures.some((figure) => figure.season === season && figure.old)
 
-/** The small line under a winner: the number of ratings, or the source of an old rating. */
+/** The small line under a winner: the number of ratings, or "all ratings" for an old rating. */
 export const ratingsLine = (ratings: number | undefined) =>
   ratings === undefined
-    ? 'Seizoencijfer van de Fansite'
+    ? 'Gemiddelde van alle cijfers'
     : `Gemiddelde van ${ratings} ${ratings === 1 ? 'cijfer' : 'cijfers'}`
 
 /** The text of a count: one match, two matches. */
 export const matchesText = (count: number) => (count === 1 ? '1 wedstrijd' : `${count} wedstrijden`)
 
 /**
- * The Uitblinker of the Uitblinkers (issue 1613): the highest season rating of all the seasons
- * that are over, by the same rule as the winner of a season. On an equal rating (to two
- * decimals) every player is in it, each with their season, the newest season first. Without a
- * season that is over there is none.
+ * The seasons of the Uitblinker van de uitblinkers (issues 1613 and 1667): those with the
+ * highest season rating of all the seasons that are over, by the same rule as the winner of a
+ * season. On an equal rating (to two decimals) every such season is in it. Without a season
+ * that is over there is none.
  */
-export function bestYearWinners(winners: readonly YearWinner[]): BestYearWinners | undefined {
+export function bestSeasons(winners: readonly YearWinner[]): Set<string> {
   const over = winners.filter((row): row is YearWinner & { average: number } => row.average !== undefined)
   const best = Math.max(...over.map((row) => hundredths(row.average)))
-  const top = over.filter((row) => hundredths(row.average) === best)
-  const [first] = top
 
-  if (first === undefined) {
-    return undefined
-  }
-
-  return {
-    average: first.average,
-    players: top
-      .toSorted((a, b) => b.season.localeCompare(a.season))
-      .flatMap((row) => row.players.map((player) => ({ ...player, season: row.season }))),
-  }
+  return new Set(over.filter((row) => hundredths(row.average) === best).map((row) => row.season))
 }
 
 /** What is read: the figures of every season and the old season ratings. */

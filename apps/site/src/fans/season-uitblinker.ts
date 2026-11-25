@@ -20,13 +20,13 @@ export type SeasonUitblinker =
       kind: 'last-match'
       /** The match that can be rated now, in words, or nothing while the window is closed. */
       openMatch?: string
-      /** The seal and how many fans gave grades, or nothing while there is no result. */
-      result?: { seal: UitblinkerSeal; supporters: string }
+      /** The star and how many fans gave grades, or nothing while there is no result. */
+      result?: { star: UitblinkerStar; supporters: string }
     }
-  | { kind: 'year'; seals: UitblinkerSeal[]; source?: string }
+  | { kind: 'year'; source?: string; stars: UitblinkerStar[] }
 
-/** One seal of the card. */
-export type UitblinkerSeal = { average: string; label: string; line: string; name: string }
+/** One star of the card. */
+export type UitblinkerStar = { average: string; label: string; line: string; name: string }
 
 /**
  * The card of the season at `now`, or nothing: while the game is off, for a season without a
@@ -63,7 +63,7 @@ async function lastMatchOf(season: string, now: Date): Promise<SeasonUitblinker 
       ? {}
       : {
           result: {
-            seal: {
+            star: {
               average: gradeText(winner.average),
               label: 'Uitblinker vorige wedstrijd',
               line: resultLine(latest.match),
@@ -86,7 +86,7 @@ async function yearOf(season: string, now: Date): Promise<SeasonUitblinker | und
 
   return {
     kind: 'year',
-    seals: winner.players.map((player) => ({
+    stars: winner.players.map((player) => ({
       average: gradeText(average),
       label: 'Uitblinker van het jaar',
       line: ratingsLine(player.ratings),

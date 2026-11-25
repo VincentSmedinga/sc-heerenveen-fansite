@@ -64,10 +64,11 @@
     --hf-card-watermark-y: 6%;
   }
 
+  /* A star in facets, as the star of a Winner: every other facet is a little weaker. */
   .hf-card-game-uitblinker {
     --hf-card-heading-colour: var(--hf-colour-text-heading-uitblinker);
     --hf-card-watermark-colour: var(--hf-colour-watermark-uitblinker);
-    --hf-card-watermark-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Cpath d=%22M50 4l13.5 29 31.5 3.6-23.5 21.5 6.6 31.2L50 73.6 21.9 89.3l6.6-31.2L5 36.6 36.5 33z%22/%3E%3C/svg%3E');
+    --hf-card-watermark-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Cpath d=%22M50 52L50 4 63.5 33z%22/%3E%3Cpath d=%22M50 52L63.5 33 95 36.6z%22 fill-opacity=%22.6%22/%3E%3Cpath d=%22M50 52L95 36.6 71.5 58.1z%22/%3E%3Cpath d=%22M50 52L71.5 58.1 78.1 89.3z%22 fill-opacity=%22.6%22/%3E%3Cpath d=%22M50 52L78.1 89.3 50 73.6z%22/%3E%3Cpath d=%22M50 52L50 73.6 21.9 89.3z%22 fill-opacity=%22.6%22/%3E%3Cpath d=%22M50 52L21.9 89.3 28.5 58.1z%22/%3E%3Cpath d=%22M50 52L28.5 58.1 5 36.6z%22 fill-opacity=%22.6%22/%3E%3Cpath d=%22M50 52L5 36.6 36.5 33z%22/%3E%3Cpath d=%22M50 52L36.5 33 50 4z%22 fill-opacity=%22.6%22/%3E%3C/svg%3E');
   }
 
   .hf-card-game-fjouwer {

@@ -24,7 +24,7 @@ export type GameCardData = {
   ranking?: { caption: string; rows: DataTableRow[] }
   tag: { text: string; tone: NonNullable<TagProps['tone']> }
   /** The Uitblinker of the last match with a result, and how many fans gave grades. */
-  winner?: { count: string; seal?: { average: string; line: string; name: string } }
+  winner?: { count: string; star?: { average: string; line: string; name: string } }
 }
 
 /** The tag of a game that is open, with the moment it closes: "Open tot za 16.45". */

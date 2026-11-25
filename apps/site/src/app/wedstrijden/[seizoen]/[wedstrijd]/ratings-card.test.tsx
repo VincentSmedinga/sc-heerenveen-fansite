@@ -136,7 +136,7 @@ const coachTable = (html: string) =>
 describe('the head coach in the card Uitblinker (issue 1479)', () => {
   const withCoach = (count: number) => ratings({ coach: { average: 6.4, count, name: 'Robin Veldman' } })
 
-  it('is the last row of an old match, after a heavier line, with the same columns and no seal', async () => {
+  it('is the last row of an old match, after a heavier line, with the same columns and no star', async () => {
     vi.mocked(oldMatchRatings).mockResolvedValue(withCoach(27))
 
     const html = await render()
@@ -191,7 +191,7 @@ describe('the head coach in the card Uitblinker (issue 1479)', () => {
 })
 
 describe('the card Uitblinker on the page of an old match', () => {
-  it('shows the seal with the average, the name and the count, and the source line', async () => {
+  it('shows the star with the average, the name and the count, and the source line', async () => {
     const html = await render()
     const text = plain(html)
 
@@ -231,7 +231,7 @@ describe('the card Uitblinker on the page of an old match', () => {
     expect(plain(row)).not.toContain('8,9')
   })
 
-  it('has no seal when nobody has five ratings, only the table', async () => {
+  it('has no star when nobody has five ratings, only the table', async () => {
     vi.mocked(oldMatchRatings).mockResolvedValue({ players: [player(3, 'Speler 3', 8.9, 3)], supporters: 3 })
 
     const html = await render()
@@ -313,7 +313,7 @@ describe('the card Uitblinker on the page of a new match', () => {
 
   const matchId = reportedMatch().match.id
 
-  it('shows, once the window closed, the seal, the table and the number of supporters, without a source line', async () => {
+  it('shows, once the window closed, the star, the table and the number of supporters, without a source line', async () => {
     vi.mocked(fansMatchRatings).mockResolvedValue(ratings())
 
     const html = await render()

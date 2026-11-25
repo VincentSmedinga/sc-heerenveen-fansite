@@ -149,6 +149,14 @@
      */
     --hf-colour-background-button-danger: light-dark(var(--hf-colour-red-700), var(--hf-colour-red-300));
     --hf-colour-background-button-danger-hover: light-dark(var(--hf-colour-red-800), var(--hf-colour-red-200));
+
+    /*
+     * The star of a Winner: facets in two neighbouring blues that are the same in light and in
+     * dark, under a white average (--hf-colour-text-on-star), which reaches 4.5:1 on both
+     * (Winner.test.tsx).
+     */
+    --hf-colour-background-star: var(--hf-colour-blue-600);
+    --hf-colour-background-star-facet: var(--hf-colour-blue-500);
     --hf-colour-background-hover: light-dark(var(--hf-colour-grey-50), var(--hf-colour-blue-950));
 
     /*
@@ -237,6 +245,7 @@
     --hf-colour-text-on-header: var(--hf-colour-blue-50);
     --hf-colour-text-on-header-secondary: var(--hf-colour-blue-200);
     --hf-colour-text-on-band: var(--hf-colour-blue-100);
+    --hf-colour-text-on-star: var(--hf-colour-white);
     --hf-colour-text-on-button: light-dark(var(--hf-colour-white), var(--hf-colour-blue-950));
     --hf-colour-text-on-button-soft: light-dark(var(--hf-colour-blue-800), var(--hf-colour-blue-50));
 

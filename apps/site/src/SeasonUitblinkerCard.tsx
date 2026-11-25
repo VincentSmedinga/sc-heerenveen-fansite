@@ -6,7 +6,7 @@ import { yearWinnersPath } from './fans-paths'
 import { ratingPath } from './fans/rating'
 
 /**
- * The card "Uitblinker" at the top of the sidebar of the page Spelers (issue 1647): the seal of
+ * The card "Uitblinker" at the top of the sidebar of the page Spelers (issue 1647): the star of
  * the season, in the colour of the game. The running season shows the last match
  * with a result and, while the window is open, the way to give grades, named by the match. A
  * season that is over shows its Uitblinker of the year, with both on an equal rating.
@@ -19,8 +19,8 @@ export function SeasonUitblinkerCard({ uitblinker }: { uitblinker: SeasonUitblin
       </Heading>
       {uitblinker.kind === 'year' ? (
         <>
-          {uitblinker.seals.map((seal) => (
-            <Winner key={seal.name} {...seal} />
+          {uitblinker.stars.map((star) => (
+            <Winner key={star.name} {...star} />
           ))}
           {uitblinker.source === undefined ? null : <Text appearance="meta">{uitblinker.source}</Text>}
           <CardLink href={yearWinnersPath}>Uitblinker van het jaar</CardLink>
@@ -31,7 +31,7 @@ export function SeasonUitblinkerCard({ uitblinker }: { uitblinker: SeasonUitblin
             <Text>Geef de spelers van de laatste wedstrijd een cijfer.</Text>
           ) : (
             <>
-              <Winner {...uitblinker.result.seal} />
+              <Winner {...uitblinker.result.star} />
               <Text appearance="meta">{uitblinker.result.supporters}</Text>
             </>
           )}

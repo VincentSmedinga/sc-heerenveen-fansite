@@ -4258,6 +4258,7 @@
     De zegel is met CSS getekend en heeft geen plaatje, en het gemiddelde is gewone tekst met "Gemiddeld cijfer" voor een schermlezer.
     De zegel heeft de kleuren van een knop, zodat het cijfer in donker leesbaar blijft: dan is de zegel licht en het cijfer donker.
     Is de ruimte krap, dan staat de tekst onder de zegel, ook weer volgens de breedte van de kaart.
+  - **Later:** zie _De uitblinker staat in een ster met facetten_: het zegel is een ster geworden, met eigen kleuren die in licht en donker gelijk zijn.
 - **Waarom:** tien knoppen zijn sneller dan een keuzelijst, en een schuifbalk geeft geen geheel cijfer en is moeilijk met een toetsenbord.
   Beide onderdelen werken in een gewoon formulier en op een gewone pagina zonder JavaScript, zodat het formulier (#1470) en de wedstrijdpagina (#1467) ze alleen hoeven te gebruiken.
 - **Alternatieven:** een keuzelijst per speler; een schuifbalk; de zegel als plaatje (dan staat het gemiddelde niet als tekst); de knoppen in twee rijen volgens het scherm in plaats van de kaart.
@@ -4629,6 +4630,20 @@
 - **Waarom:** de site schrijft geen HTML, en in de kaart van een spel liep het formulier om in te loggen zonder lijn door in de wedstrijd.
 - **Alternatieven:** alleen extra ruimte; een eigen vlak om het formulier.
 
+## De uitblinker staat in een ster met facetten
+
+- **Datum:** 25 november 2026
+- **Besluit:** `Winner` toont het gemiddelde niet meer in een rond zegel, maar in een ster met vijf punten, dezelfde vorm als het watermerk van de Uitblinker (#1667).
+  De ster heeft facetten in twee tinten blauw die naast elkaar liggen, stap 600 en stap 500, en het cijfer in wit met een zachte rand in stap 600.
+  De kleuren zijn in licht en donker gelijk, met de tokens `--hf-colour-background-star`, `--hf-colour-background-star-facet` en `--hf-colour-text-on-star`.
+  Er is één ster: ook de beste van alle seizoenen krijgt geen andere.
+  Het watermerk van de Uitblinker krijgt dezelfde facetten, om en om iets zwakker, op elke kaart van dat spel.
+  Het cijfer haalt 4,5:1 op beide facetten.
+  In geforceerde kleuren blijft het cijfer over.
+- **Waarom:** het watermerk van de Uitblinker is een ster, dus teken en achtergrond horen zo bij elkaar.
+  De projecteigenaar koos na voorbeelden voor de ster met facetten.
+- **Alternatieven:** een rond zegel met punten in twee kleuren, eerst blauw met wit en rood, daarna blauw (gebouwd en vervangen); zilver en goud; een ster met een kleinere ster of een rondje erin.
+
 ## Elk spel van Fans heeft een eigen zachte kleur
 
 - **Datum:** 25 november 2026
@@ -4649,8 +4664,10 @@
   - Alleen een kaart met `game` is een kaart van een spel.
     Op de pagina's van de spellen houden de kaarten zonder `game` hun blauwe vlak: "Eerdere winnaars" en "Zo werkt het" op Uitblinker, en de kaarten met een score of uitslag op Fantest.
     Ze krijgen geen watermerk en geen gekleurde kop.
-  - `Card` negeert bij `game` de vlakken `strong`, `soft` en `warm`, zodat geen pagina een gekleurd vlak onder een spel kan zetten.
-    `transparent` blijft, zonder watermerk en met gewone koppen.
+  - Eén kaart van een spel houdt het zachte vlak: de kaart van het beste seizoen op Uitblinker van het jaar (#1667), zodat ze opvalt.
+    Ze heeft wel het watermerk en de koppen in de kleur van het spel.
+    `Card` neemt daarom het vlak dat de pagina kiest.
+    Een doorzichtige kaart heeft geen watermerk en gewone koppen.
 - **Waarom:** de gekleurde vlakken maakten de site te kinderlijk, en zo herken je een spel toch aan de kleur.
   De naam, de tekening en de linktekst zeggen ook zonder kleur welk spel het is.
-- **Alternatieven:** gekleurde vlakken; witte kaarten met een watermerk in de stap 100 (meer kleur in het watermerk); alleen de eerste kop kleuren (een kaart met tussenkoppen heeft dan twee kleuren koppen); `surface` bij een spel in de typen verbieden (meer code voor hetzelfde).
+- **Alternatieven:** gekleurde vlakken; witte kaarten met een watermerk in de stap 100 (meer kleur in het watermerk); alleen de eerste kop kleuren (een kaart met tussenkoppen heeft dan twee kleuren koppen); `Card` bij `game` elk ander vlak laten negeren (dan kan geen kaart van een spel opvallen); ook de kaart van het beste seizoen wit (dan markeert alleen het label haar).

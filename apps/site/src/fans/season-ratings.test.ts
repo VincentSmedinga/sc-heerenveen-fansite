@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  bestYearWinners,
+  bestSeasons,
   isOldSeason,
   rankSeason,
   type RatingFigures,
@@ -251,36 +251,29 @@ describe('the Uitblinker of the Uitblinkers', () => {
     season,
   })
 
-  it('is the highest season rating of the seasons that are over, with its number of ratings', () => {
+  it('is the season with the highest rating of the seasons that are over', () => {
     expect(
-      bestYearWinners([
+      bestSeasons([
         row('2026/27', undefined),
         row('2005/06', 6.7, ['Speler A', 631]),
         row('2004/05', 6.1, ['Speler B', 300]),
       ]),
-    ).toEqual({ average: 6.7, players: [{ name: 'Speler A', ratings: 631, season: '2005/06' }] })
+    ).toEqual(new Set(['2005/06']))
   })
 
-  it('has every player of an equal rating to two decimals, each with their season', () => {
-    const best = bestYearWinners([
-      row('2005/06', 6.704, ['Speler A', 631]),
-      row('2003/04', 6.7, ['Speler B', 90], ['Speler C', 120]),
-    ])
-
-    expect(best?.players).toEqual([
-      { name: 'Speler A', ratings: 631, season: '2005/06' },
-      { name: 'Speler B', ratings: 90, season: '2003/04' },
-      { name: 'Speler C', ratings: 120, season: '2003/04' },
-    ])
-  })
-
-  it('has no number of ratings for a season of the old Fansite', () => {
-    expect(bestYearWinners([row('1999/00', 7.4, ['Speler X', undefined])])?.players[0]?.ratings).toBeUndefined()
+  it('has every season of an equal rating to two decimals', () => {
+    expect(
+      bestSeasons([
+        row('2005/06', 6.704, ['Speler A', 631]),
+        row('2004/05', 6.69, ['Speler D', 10]),
+        row('2003/04', 6.7, ['Speler B', 90], ['Speler C', 120]),
+      ]),
+    ).toEqual(new Set(['2003/04', '2005/06']))
   })
 
   it('is none while no season is over', () => {
-    expect(bestYearWinners([row('2026/27', undefined)])).toBeUndefined()
-    expect(bestYearWinners([])).toBeUndefined()
+    expect(bestSeasons([row('2026/27', undefined)])).toEqual(new Set())
+    expect(bestSeasons([])).toEqual(new Set())
   })
 })
 

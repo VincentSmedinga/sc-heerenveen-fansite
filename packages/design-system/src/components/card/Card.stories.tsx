@@ -59,7 +59,7 @@ const meta = preview.meta({
           'Op een zoekpagina is wat filters of een zoekveld bevat warm, en zijn de andere kaarten wit, zacht of sterk.',
           'Buurkaarten mogen dezelfde kleur hebben, en kleur is nooit het enige teken: in donker zijn zacht en wit gelijk, en warm en sterk ook.',
           'Een kaart van een spel (Prognose, Uitblinker, Fjouwer of Fantest) krijgt met `game` een groot, zacht watermerk van dat spel in de rechteronderhoek; kies het alleen voor kaarten die bij een spel horen, en niet voor kaarten voor een account, een uitnodiging of een vraag van de Fantest.',
-          'Elk spel heeft een eigen kleur voor het watermerk en de koppen: Prognose rood, Uitblinker paars, Fjouwer groen en Fantest goudgeel. Een kaart van een spel is altijd wit (of doorzichtig), dus `strong`, `soft` en `warm` doen er niets. De naam, de tekening en de linktekst zeggen ook zonder kleur welk spel het is.',
+          'Elk spel heeft een eigen kleur voor het watermerk en de koppen: Prognose rood, Uitblinker paars, Fjouwer groen en Fantest goudgeel. Een kaart van een spel is wit; geef haar alleen het zachte vlak als ze tussen de andere kaarten van haar spel moet opvallen. De naam, de tekening en de linktekst zeggen ook zonder kleur welk spel het is.',
           'Met `shareable` krijgt de kaart een knop die er een afbeelding van maakt, met het logo, het adres van de site, de datum en de bron; gebruik hem alleen voor cijfers en feiten, nooit voor het werk van journalisten.',
         ].join('\n'),
       },

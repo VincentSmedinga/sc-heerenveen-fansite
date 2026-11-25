@@ -26,6 +26,16 @@ describe('the watermark of a game card in card-watermark.css', () => {
     }
   })
 
+  // One card stands out on the soft surface (Uitblinker van het jaar).
+  it.each(cardGames)('keeps 4,5:1 for all the text of %s on a soft card', (game) => {
+    const soft = role('background-surface-soft')
+
+    for (const text of [...texts, `text-heading-${game}`]) {
+      expect(contrast(role(text).light, soft.light), `${text} in light`).toBeGreaterThanOrEqual(4.5)
+      expect(contrast(role(text).dark, soft.dark), `${text} in dark`).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
   it.each(cardGames)('gives %s a watermark that shows on the card, in light and in dark', (game) => {
     const watermark = role(`watermark-${game}`)
     const surface = role('background-surface')
@@ -62,6 +72,13 @@ describe('the watermark of a game card in card-watermark.css', () => {
     expect(body).toMatch(/--hf-card-watermark-image: url\(['"]data:image\/svg\+xml,/)
     // The only address is the namespace of SVG, which is a name and no request.
     expect(body.replace('http://www.w3.org/2000/svg', '')).not.toMatch(/https?:/)
+  })
+
+  it('draws the star of the Uitblinker in ten facets, every other one weaker', () => {
+    const body = css.match(/\.hf-card-game-uitblinker \{([^{}]*)\}/)?.[1] ?? ''
+
+    expect(body.match(/%3Cpath /g)).toHaveLength(10)
+    expect(body.match(/fill-opacity=%22\.6%22/g)).toHaveLength(5)
   })
 
   it('is gone in forced colours, where a mask would be painted in the text colour', () => {

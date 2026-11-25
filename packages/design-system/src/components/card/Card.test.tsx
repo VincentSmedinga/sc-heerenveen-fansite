@@ -32,14 +32,14 @@ describe('Card', () => {
     expect(container.firstElementChild?.textContent).toBe('Inhoud')
   })
 
-  it.each(['strong', 'soft', 'warm'] as const)('keeps a game card white when it asks for %s', (surface) => {
+  it('keeps the soft surface of a game card that has to stand out', () => {
     const { container } = render(
-      <Card game="prognose" surface={surface}>
+      <Card game="uitblinker" surface="soft">
         Inhoud
       </Card>,
     )
 
-    expect(container.firstElementChild?.className).toBe('hf-card hf-card-game hf-card-game-prognose')
+    expect(container.firstElementChild?.className).toBe('hf-card hf-card-soft hf-card-game hf-card-game-uitblinker')
   })
 
   it('keeps a transparent game card transparent', () => {
