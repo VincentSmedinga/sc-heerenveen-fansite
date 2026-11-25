@@ -1,4 +1,4 @@
-import { isFansPartOn } from '@fansite/shared/fans-env'
+import { fansParts, readFans } from '@fansite/shared/fans-env'
 
 import { sessionToken } from '#src/beheer/require-role'
 import { findSession } from '#src/beheer/sessions'
@@ -20,5 +20,8 @@ export async function AdminBar() {
     return null
   }
 
-  return <AdminScreens accountsOn={isFansPartOn('accounts')} firstName={session.firstName} role={session.role} />
+  const on = readFans()
+  const off = fansParts.filter((part) => !on[part])
+
+  return <AdminScreens firstName={session.firstName} off={off} role={session.role} />
 }

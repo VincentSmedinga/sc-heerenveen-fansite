@@ -5213,6 +5213,7 @@
   Het logboek schrijft `article.publish` en `article.unpublish` met zijn account, zoals bij een redacteur.
 - **Waarom:** de redactie is klein en overlegt zelf; een verplichte tweede persoon vertraagt zonder dat het iets oplevert.
 - **Alternatieven:** alleen een redacteur publiceert (zoals #1156 deed); een gepubliceerd artikel op slot voor zijn auteur.
+- **Later:** zie _De redactie schrijft de Fantest in het beheer, en een ingevulde quiz is vergrendeld_ (25 november 2026): een auteur schrijft en publiceert ook de Fantest, elke quiz.
 
 ## De pagina Kwaliteit is een werktabel met een kolom per deel van de gegevens
 
@@ -7782,6 +7783,7 @@
 - **Let op:** de pagina's zijn `force-dynamic`, omdat de instelling en de vragen pas bij een verzoek bekend zijn.
   `/fans/` blijft in `robots.txt` geweigerd voor al het andere.
   #1481 en verder (een nieuwe quiz elke maand) zijn niet goedgekeurd en zitten er niet in.
+- **Later:** zie _De redactie schrijft de Fantest in het beheer, en een ingevulde quiz is vergrendeld_ (25 november 2026): #1481 is gebouwd, en het archief toont alleen de quizzen van de oude Fansite.
 
 ## De tabel van de telling heeft de uitkomsten als rijen
 
@@ -8052,3 +8054,27 @@
   Per rij lezen houdt toetsenbord en schermlezer alfabetisch, en de bron aan het eind laat zien waar de gegevens vandaan komen.
 - **Alternatieven:** de kolommen van boven naar beneden vullen; een eigen onderdeel voor deze pagina; de zijkolom houden met de bron erin.
 - **Later:** dit vervangt de zijkolom met de bron van de overzichten, en op Op land de landkaarten in de hoofdkolom.
+
+## De redactie schrijft de Fantest in het beheer, en een ingevulde quiz is vergrendeld
+
+- **Datum:** 25 november 2026
+- **Besluit:** `/beheer/fantest` is voor de eigenaar, de redacteuren en de auteurs, en iedere rol mag elke quiz schrijven en publiceren (#1481).
+  - Een quiz hoort bij een jaar en een maand, met hoogstens één quiz per maand.
+    De maand kies je bij het maken, en ze verandert daarna niet.
+  - Een concept mag onaf zijn.
+    Publiceren vraagt tien vragen met vier antwoorden en een goed antwoord, en kan niet meer als de maand voorbij is.
+    De maand sluit op de laatste dag om middernacht, Nederlandse tijd.
+    De inleiding en de slottekst mogen leeg blijven.
+  - Een gepubliceerde quiz is nog te wijzigen zolang niemand hem heeft ingevuld, en blijft daarbij compleet.
+    Daarna zijn de inleiding, de vragen, de antwoorden, de volgorde en het goede antwoord vergrendeld.
+    Alleen de slottekst en "alles goed" per vraag veranderen nog.
+  - "Alles goed" annuleert een slechte vraag: elk antwoord telt, ook na het vergrendelen.
+  - De volgorde wijzig je met de knoppen "Vraag 3 omhoog" en "Vraag 3 omlaag", die het formulier bewaren.
+  - Vragen hebben geen plaatje.
+  - Het archief van de Fansite toont alleen zijn eigen quizzen.
+    Een quiz van de redactie ziet een fan pas met #1482, en de goede antwoorden gaan niet naar de browser voordat de antwoorden verstuurd zijn.
+- **Waarom:** de redactie schrijft elke maand tien vragen, vaak in meer keren.
+  Wie een quiz al invulde, mag niet merken dat de vragen daarna anders zijn.
+  Knoppen om te verplaatsen werken met een toetsenbord en zonder JavaScript.
+  De site slaat nergens afbeeldingen op, en dat is een eigen stuk werk.
+- **Alternatieven:** auteurs alleen hun eigen quizzen geven (er is maar één quiz per maand en de redactie maakt hem samen); slepen om te sorteren (werkt niet zonder JavaScript); een nummer per vraag intypen (foutgevoelig); plaatjes bij vragen (later een eigen issue, met een alt-tekst en opslag op onze eigen host).

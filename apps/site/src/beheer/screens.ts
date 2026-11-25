@@ -1,4 +1,5 @@
 import type { AdminRole } from '@fansite/db/schema'
+import type { FansPart } from '@fansite/shared/fans-env'
 
 // The roles are written out here instead of imported from the schema, because the bar is a
 // client component and the schema must not go into the browser. `screens.test.ts` keeps them
@@ -17,8 +18,8 @@ export const myAccountHref = '/beheer/mijn-account'
 export type Screen = {
   href: string
   label: string
-  /** Whether the screen is for the accounts of supporters: it is hidden while they are off. */
-  needsAccounts?: boolean
+  /** The part of Fans the screen is for: it is hidden while that part is off. */
+  part?: FansPart
   roles: readonly AdminRole[]
 }
 
@@ -31,12 +32,13 @@ export const screens: readonly Screen[] = [
   { href: '/beheer', label: 'Beheer', roles: allRoles },
   { href: '/beheer/berichten', label: 'Berichten', roles: workRoles },
   { href: '/beheer/artikelen', label: 'Artikelen', roles: allRoles },
+  { href: '/beheer/fantest', label: 'Fantest', part: 'fantest', roles: allRoles },
   { href: '/beheer/wedstrijden', label: 'Wedstrijden', roles: workRoles },
   { href: '/beheer/spelers', label: 'Spelers', roles: workRoles },
   { href: '/beheer/stadions', label: 'Stadions', roles: workRoles },
   { href: '/beheer/clubs', label: 'Clubs', roles: workRoles },
   { href: '/beheer/bezoek', label: 'Bezoek', roles: workRoles },
-  { href: '/beheer/supporters', label: 'Fans', needsAccounts: true, roles: workRoles },
+  { href: '/beheer/supporters', label: 'Fans', part: 'accounts', roles: workRoles },
   { href: '/beheer/accounts', label: 'Accounts', roles: ['owner'] },
   { href: myAccountHref, label: 'Mijn account', roles: allRoles },
 ]
@@ -62,11 +64,13 @@ export function isLoginPage(pathname: string): boolean {
 }
 
 /**
- * The screens a role may see. `accountsOn` is whether the accounts of supporters are on (the
- * server knows, the browser does not); while they are off, their screen is not in the bar.
+ * The screens a role may see. `off` lists the parts of Fans that are off (the server knows,
+ * the browser does not); their screens are not in the bar.
  */
-export function screensFor(role: AdminRole, accountsOn = true): Screen[] {
-  return screens.filter((screen) => screen.roles.includes(role) && (accountsOn || screen.needsAccounts !== true))
+export function screensFor(role: AdminRole, off: readonly FansPart[] = []): Screen[] {
+  return screens.filter(
+    (screen) => screen.roles.includes(role) && (screen.part === undefined || !off.includes(screen.part)),
+  )
 }
 
 function isAtOrBelow(pathname: string, href: string) {

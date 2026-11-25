@@ -532,7 +532,8 @@ Zo kan niemand nagaan wie een account heeft.
   Een sessie eindigt na 9 dagen zonder gebruik, en na 14 dagen hoe dan ook.
   Uitloggen verwijdert de sessie op de server.
 - Alles onder `/beheer` krijgt `X-Robots-Tag: noindex, nofollow` en `Cache-Control: no-store`, ook op productie, en `robots.txt` weigert `/beheer` op elke omgeving.
-- De eigenaar mag alles in het beheer, een redacteur alles behalve de accounts, en een auteur alleen zijn eigen artikelen en zijn eigen account.
+- De eigenaar mag alles in het beheer, een redacteur alles behalve de accounts, en een auteur alleen zijn eigen artikelen, de Fantest en zijn eigen account.
+  `/beheer/fantest` is voor elke rol, als de Fantest aan staat: daar schrijft de redactie de quiz van een maand (zie _De Fantest van de redactie_ in de [README van de site](../apps/site/README.md)).
   `/beheer/accounts` is voor de eigenaar: daar voegt hij redacteuren en auteurs toe en wijzigt hij ze.
   `/beheer/mijn-account` is voor iedereen: de eigen gegevens, en voor de eigenaar en een redacteur de keuze voor de mail over afwijkingen van Wikipedia.
   `/beheer/artikelen` is voor elke rol: daar schrijft, bekijkt, publiceert en trekt een redacteur een artikel van de redactie in (zie [`artikelen.md`](artikelen.md)); een auteur schrijft, publiceert en trekt er alleen zijn eigen artikelen in.

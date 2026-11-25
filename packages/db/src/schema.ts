@@ -633,6 +633,9 @@ export const auditActions = [
   'supporter.block',
   'supporter.unblock',
   'supporter.forget-address',
+  'quiz.create',
+  'quiz.edit',
+  'quiz.publish',
 ] as const
 
 export type AuditAction = (typeof auditActions)[number]
@@ -3418,12 +3421,16 @@ export const quizStatuses = ['draft', 'published'] as const
 
 export type QuizStatus = (typeof quizStatuses)[number]
 
+/** The most characters of the texts of a quiz of the editors. The admin checks them. */
+export const quizLimits = { answer: 200, closingText: 2000, intro: 2000, question: 500 }
+
 /**
  * A quiz of the Fantest (issue 1480): one month with its questions. The archive of the old
- * fansite fills it with `oude-fansite` quizzes; a monthly quiz of the editors (1481 and 1482)
- * would use `redactie`. For an old quiz it keeps the sum of what visitors did then: how many
- * took part and their average score over the questions that are in the archive, in tenths (41
- * is 4,1). It keeps nothing of a person, and nothing of a visitor of this site.
+ * fansite fills it with `oude-fansite` quizzes; the editors write a monthly quiz with
+ * `redactie` in the admin (issue 1481), with an introduction and a closing text in plain text.
+ * `participants` is how many took part, with their average score over the questions in tenths
+ * (41 is 4,1). A quiz of the editors with participants is locked: its questions no longer
+ * change. The table keeps nothing of a person.
  */
 export const quizzes = mysqlTable(
   'quizzes',
@@ -3435,6 +3442,8 @@ export const quizzes = mysqlTable(
     status: mysqlEnum('status', quizStatuses).notNull(),
     participants: int('participants', { unsigned: true }),
     averageScoreTenths: smallint('average_score_tenths', { unsigned: true }),
+    intro: varchar('intro', { length: quizLimits.intro }),
+    closingText: varchar('closing_text', { length: quizLimits.closingText }),
   },
   (table) => [
     unique('quizzes_year_month_unique').on(table.year, table.month),
@@ -3449,7 +3458,8 @@ export type Quiz = typeof quizzes.$inferSelect
  * A question of a quiz: its place in the quiz (the old quiz had ten, and a question that is
  * left out leaves a gap), the text, four answers, the place of the right one (1 to 4) and, for
  * an old question, the percentage of visitors who chose each answer. Without visitors the
- * percentages are null.
+ * percentages are null. A draft of the editors may have an empty text or answers and no right
+ * answer yet. With `allCorrect` the editors cancelled a bad question, so every answer counts.
  */
 export const quizQuestions = mysqlTable(
   'quiz_questions',
@@ -3461,7 +3471,8 @@ export const quizQuestions = mysqlTable(
     position: tinyint('position', { unsigned: true }).notNull(),
     text: varchar('text', { length: 1000 }).notNull(),
     answers: json('answers').$type<[string, string, string, string]>().notNull(),
-    correctAnswer: tinyint('correct_answer', { unsigned: true }).notNull(),
+    correctAnswer: tinyint('correct_answer', { unsigned: true }),
+    allCorrect: boolean('all_correct').notNull().default(false),
     percentages: json('percentages').$type<[number, number, number, number] | null>(),
   },
   (table) => [

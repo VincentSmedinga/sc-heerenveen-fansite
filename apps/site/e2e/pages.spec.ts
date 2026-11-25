@@ -5,6 +5,7 @@ import { articleIdOf, testArticles } from './articles'
 import { checkPage } from './check-page'
 import { clubPair } from './club-pair'
 import { earlierSeasonSlug } from './earlier-season'
+import { editorsQuizId } from './fantest'
 import { heldMatchId, statSeasonSlug } from './held-changes'
 import { incompleteReportPath } from './incomplete-report'
 import { liveReportMatchId, liveReportPath } from './live-report'
@@ -348,6 +349,17 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   { admin: 'author', path: '/beheer/artikelen/{published}', status: 404 },
   { admin: 'author', path: '/beheer/artikelen/{published}/voorbeeld', status: 404 },
   { admin: 'author', path: '/beheer/artikelen/{published}/versies/1', status: 404 },
+  // The quizzes of the editors are for every role (issue 1481): the list, the form for a new
+  // one, the form of a published quiz and its preview. `{quiz}` is the made-up one (see
+  // fantest.ts). The public page of its month says "niet gevonden".
+  { admin: 'author', path: '/beheer/fantest', status: 200 },
+  { admin: 'editor', path: '/beheer/fantest?fout=weg', status: 200 },
+  { admin: 'editor', path: '/beheer/fantest/nieuw', status: 200 },
+  { admin: 'author', path: '/beheer/fantest/{quiz}', status: 200 },
+  { admin: 'editor', path: '/beheer/fantest/{quiz}?gedaan=gepubliceerd', status: 200 },
+  { admin: 'editor', path: '/beheer/fantest/{quiz}/voorbeeld', status: 200 },
+  { admin: 'editor', path: '/beheer/fantest/999999', status: 404 },
+  { path: '/fans/fantest/2099-01', status: 404 },
   // The supporters are for the owner and the editors (issue 1458); an author gets 404.
   { admin: 'owner', path: '/beheer/supporters', status: 200 },
   { admin: 'owner', path: '/beheer/supporters?zoek=proef', status: 200 },
@@ -587,6 +599,7 @@ async function withNumbers(path: string) {
   return path.includes('{')
     ? path
         .replace('{draft}', String(await articleIdOf(testArticles.draft.slug)))
+        .replace('{quiz}', path.includes('{quiz}') ? String(await editorsQuizId()) : '{quiz}')
         .replace('{account}', path.includes('{account}') ? String(await adminAccountId('editor')) : '{account}')
         .replace('{supporter}', path.includes('{supporter}') ? String(await madeUpSupporterId()) : '{supporter}')
         .replace('{published}', String(await articleIdOf(testArticles.published.slug)))
