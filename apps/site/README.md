@@ -270,7 +270,7 @@ De kaart (`EpisodesCard` in `src/NewsCards.tsx`) toont alleen afleveringen van d
 Is er geen, dan staat er "We hebben de laatste 8 dagen geen podcastafleveringen gevonden." en blijft de link "Alle podcasts".
 Dit geldt ook voor de kaart "Podcasts" op `/nieuws`, want het is dezelfde kaart.
 
-Onder het forum staat voor elk spel van Fans dat nu open is een kleine kaart (`OpenGameCards`), twee naast elkaar, in de volgorde Prognose, Uitblinker, Fjouwer, Fantest.
+Onder het forum staat voor elk spel van Fans dat nu open is een kaart (`OpenGameCards`), onder elkaar, in de volgorde Prognose, Uitblinker, Fjouwer, Fantest.
 Een kaart heeft de naam van het spel en een link die zegt wat je kunt doen: "Voorspel de uitslag", "Geef de spelers een cijfer", "Kies jouw fjouwer" en "Doe de test van november".
 Tot wanneer een spel open is, staat niet op de kaart.
 De pagina van de Prognose, de Uitblinker en Fjouwer noemt dat moment; de Fantest loopt tot het eind van de maand, en zijn pagina noemt alleen de maand.

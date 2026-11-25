@@ -75,7 +75,7 @@
 
   .hf-donut-chart-title {
     color: var(--hf-colour-text-heading);
-    font-weight: var(--hf-strong-font-weight);
+    font-weight: var(--hf-name-font-weight);
   }
 
   .hf-donut-chart-plot {

@@ -26,7 +26,7 @@
       box-sizing: border-box;
       color: var(--hf-colour-text-heading);
       display: block;
-      font-size: var(--hf-heading-2-font-size);
+      font-size: var(--hf-figure-large-font-size);
       font-variant-numeric: tabular-nums;
       font-weight: var(--hf-figure-font-weight);
       inline-size: calc(100% + var(--hf-code-box) + var(--hf-code-gap));

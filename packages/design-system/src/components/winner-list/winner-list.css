@@ -1,7 +1,7 @@
 /*
  * The players who were best of their match: a row for each, the name large with a small line
- * under it, and the average large in a column of its own on the right. A row has a thin line
- * above it, as the rows of the open games have.
+ * under it, and the average, a small figure, in a column of its own on the right. A row has a
+ * thin line above it, as the rows of the open games have.
  */
 
 @layer hf.components {
@@ -25,16 +25,17 @@
   .hf-winner-list-name,
   .hf-winner-list-average {
     color: var(--hf-colour-text-heading);
-    font-size: var(--hf-heading-3-font-size);
     font-weight: var(--hf-figure-font-weight);
     line-height: 1.2;
   }
 
   .hf-winner-list-name {
+    font-size: var(--hf-heading-3-font-size);
     overflow-wrap: anywhere;
   }
 
   .hf-winner-list-average {
+    font-size: var(--hf-figure-font-size);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }

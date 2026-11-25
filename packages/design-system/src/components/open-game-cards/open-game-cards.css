@@ -1,30 +1,12 @@
 /*
- * The cards of the games that are open: two beside each other at every width. A card is small,
- * so it has less padding than a card of the page, and its name follows its width: Uitblinker,
- * the longest name, stays in one piece in the narrowest column (16rem).
+ * The cards of the games that are open: below each other, one in a row, with the space between
+ * cards in a column. Each is an ordinary card, with its padding and the size of its heading.
  */
 
 @layer hf.components {
   .hf-open-game-cards {
     display: grid;
     gap: var(--hf-space-xl);
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .hf-open-game-cards > .hf-open-game-card {
-    container-type: inline-size;
-
-    --hf-card-padding-block: var(--hf-space-s);
-    --hf-card-padding-inline: var(--hf-space-s);
-  }
-
-  .hf-open-game-card > .hf-heading-2 {
-    font-size: var(--hf-heading-3-font-size);
-  }
-
-  @container (width < 8rem) {
-    .hf-open-game-card > .hf-heading-2 {
-      font-size: var(--hf-heading-4-font-size);
-    }
+    grid-template-columns: minmax(0, 1fr);
   }
 }

@@ -22,8 +22,6 @@
     padding: 0;
 
     > legend {
-      color: var(--hf-colour-text-heading);
-      font-weight: var(--hf-strong-font-weight);
       /* stylelint-disable-next-line declaration-property-value-allowed-list -- A gap does not reach the legend of a fieldset, so the space under the legend is a margin. */
       margin-block-end: 0.125rem;
       padding: 0;

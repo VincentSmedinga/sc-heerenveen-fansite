@@ -46,7 +46,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component:
-          'De spellen die nu open zijn, als kleine kaarten naast elkaar, voor de voorpagina: de naam van het spel en een link die zegt wat je kunt doen.',
+          'De spellen die nu open zijn, als kaarten onder elkaar, voor de zijkolom van de voorpagina: de naam van het spel en een link die zegt wat je kunt doen.',
       },
       page: ControlsDocsPage,
     },
