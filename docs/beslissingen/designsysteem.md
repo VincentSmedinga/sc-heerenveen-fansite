@@ -546,6 +546,7 @@
   Of een andere naam dan `strong` voor het tonale vlak: `blue` lijkt te veel op `soft`, `tinted` is ook waar voor `soft` en `warm`, `accent` is al de rode tekstkleur en `highlight` is al een achtergrond met dezelfde waarden.
 - **Later:** zie _Ruimte komt uit vijf stappen, met gemiddeld als vaste keuze_ (31 oktober 2026): de binnenruimte van een kaart is 1 rem rondom op een smal scherm en 1,5 rem rondom op een breed scherm, en de ruimte voor het pijltje van een kop volgt de binnenruimte.
   Het was 1 en 1,25 rem, en 1,5 en 1,75 rem.
+- **Later:** sinds 25 november 2026 is de pagina in licht niet meer zandgrijs maar grijs-50; zie _De lichte pagina krijgt grijs-50 als achtergrond_.
 
 ## Hulpklassen zitten in de sterkste laag
 
@@ -4463,3 +4464,13 @@
 - **Waarom:** een lange pagina met veel kaarten laat in drie kolommen meer in beeld dan in twee.
 - **Alternatieven:** de kolommen van boven naar beneden vullen (de volgorde van lezen volgt dan niet het scherm); een eigen onderdeel voor drie kolommen.
 - **Later:** dit vult _`CardColumns` zet kaarten in een raster met paren, en grid lanes maakt het beter_ aan: er zijn nu twee of drie kolommen.
+
+## De lichte pagina krijgt grijs-50 als achtergrond
+
+- **Datum:** 25 november 2026
+- **Besluit:** de lichte pagina krijgt grijs-50 als achtergrond (#1649), ook in de terugval voor browsers zonder `light-dark()` en in de eigen schil van Storybook.
+  De baan achter een balk in een diagram krijgt een eigen token, `--hf-colour-background-bar-track`: in licht blijft die grijs-100, in donker de kleur van de pagina.
+  Donker, de footer en de strepen aan het einde van de pagina veranderen niet.
+- **Waarom:** de pagina oogt lichter en frisser, en kaarten houden toch hun vorm.
+  Een baan in de kleur van de pagina is op een witte kaart bijna niet te zien.
+- **Alternatieven:** grijs-100 houden; een witte pagina (witte kaarten verliezen dan hun vorm); grijs-100 rechtstreeks in `bar-list.css` zetten, wat het donkere thema niet volgt.
