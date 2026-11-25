@@ -10,12 +10,15 @@ const css = (file: string) =>
 describe('the space between cards in a grid', () => {
   it.each([
     ['card-columns/card-columns.css', '.hf-card-columns-grid'],
+    ['card-columns/card-columns.css', '.hf-card-columns-split'],
     ['key-figures/key-figures.css', '.hf-key-figures'],
     ['open-game-cards/open-game-cards.css', '.hf-open-game-cards'],
     ['question-card/question-card.css', '.hf-question-grid'],
     ['tile/tile.css', '.hf-tile-grid'],
   ])('is the space of the grid of the page in %s', (file, selector) => {
-    const rules = [...css(file).matchAll(/([^{}]+)\{(?=([^{}]*))/g)].filter(([, name]) => name?.trim() === selector)
+    const rules = [...css(file).matchAll(/([^{}]+)\{(?=([^{}]*))/g)].filter(([, names]) =>
+      names?.split(',').some((name) => name.trim() === selector),
+    )
 
     expect(rules.map(([, , body]) => body).join('')).toContain('gap: var(--hf-space-xl);')
   })
