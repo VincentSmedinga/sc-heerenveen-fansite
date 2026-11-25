@@ -93,7 +93,7 @@ describe('the pages of the Fantest in the admin', () => {
   it('give every field of the ten questions a label of its own', async () => {
     const html = renderToStaticMarkup(await QuizPage({ params: params(), searchParams: none }))
 
-    for (const label of ['Tekst van vraag 10', 'Antwoord 4 van vraag 10', 'Goede antwoord van vraag 10']) {
+    for (const label of ['Tekst van vraag 10', 'Antwoord 4 van vraag 10', 'Goed antwoord van vraag 10']) {
       expect(html).toContain(`>${label}</label>`)
     }
     expect(html).toContain('Nakijken van vraag 10')

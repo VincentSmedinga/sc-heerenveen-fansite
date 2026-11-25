@@ -115,7 +115,6 @@ export function validateQuiz({ intro, slottekst, vragen }: QuizValues, complete:
   }
 
   check('intro', intro, quizLimits.intro, 'De inleiding')
-  check('slottekst', slottekst, quizLimits.closingText, 'De slottekst')
 
   vragen.forEach(({ antwoorden, goed, tekst }, index) => {
     const number = index + 1
@@ -141,6 +140,8 @@ export function validateQuiz({ intro, slottekst, vragen }: QuizValues, complete:
       errors[correctField(number)] = `Kies het goede antwoord van vraag ${number}.`
     }
   })
+
+  check('slottekst', slottekst, quizLimits.closingText, 'De slottekst')
 
   return errors
 }

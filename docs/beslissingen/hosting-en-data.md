@@ -1390,10 +1390,9 @@
   - `quiz_questions.all_correct`, de keuze "alles goed" voor een slechte vraag;
   - `quiz_questions.correct_answer` mag leeg zijn, voor een onaf concept;
   - drie acties in het logboek: `quiz.create`, `quiz.edit` en `quiz.publish`.
-    Een quiz van de redactie heeft altijd tien rijen met vragen.
-    Een vraag van een concept mag lege teksten hebben.
 - **Waarom:** de pagina van een maand heeft zo voor oud en nieuw één opbouw, en er is één plek die de score berekent.
   Tien vaste rijen maken van "precies tien vragen in een vaste volgorde" iets wat niet mis kan gaan.
 - **Alternatieven:** aparte tabellen voor nieuwe quizzen (twee keer dezelfde pagina's); een concept in een eigen kolom met JSON bewaren tot het compleet is (twee vormen van dezelfde quiz).
-- **Gevolg:** #1482 telt `participants` op in dezelfde transactie als een inzending, op de rij van de quiz.
+- **Gevolg:** een quiz van de redactie heeft altijd tien rijen met vragen, en een vraag van een concept mag lege teksten hebben.
+  #1482 telt `participants` op in dezelfde transactie als een inzending, op de rij van de quiz.
   Wie een vraag met `all_correct` nakijkt, telt elk antwoord als goed.

@@ -203,7 +203,8 @@ describe('saveQuiz', () => {
     }))
     sent.vragen[3] = { ...sent.vragen[3]!, allesGoed: true }
 
-    expect(await save(id, sent)).toEqual({ status: 'locked' })
+    // The sent form also changes locked parts, so the editor hears that those are not taken.
+    expect(await save(id, sent)).toEqual({ status: 'refused' })
 
     const stored = await quiz(id)
     const expected = complete()
@@ -216,6 +217,35 @@ describe('saveQuiz', () => {
     expect((await log()).at(-1)).toMatchObject({
       detail: 'Fantest december 2026; slottekst; alles goed aan bij vraag 4',
     })
+  })
+
+  it('says locked for the form of a locked quiz, and refused for an old form without other changes', async () => {
+    const id = await draft()
+
+    await save(id, complete(), 'publish')
+    await fillIn(id)
+
+    const empty = { intro: '', vragen: Array.from({ length: 10 }, emptyQuestion) }
+
+    expect(await save(id, { ...empty, slottekst: 'Nieuw.' })).toEqual({ status: 'locked' })
+    expect(await save(id, { ...empty, slottekst: 'Nieuw.' })).toEqual({ status: 'unchanged' })
+
+    const old = { ...complete(), intro: 'Te laat.', slottekst: 'Nieuw.' }
+
+    expect(await save(id, old)).toEqual({ status: 'refused' })
+    expect((await quiz(id)).values.intro).toBe('Een nieuwe maand.')
+  })
+
+  it('puts the error about the month first, in the order of the page', async () => {
+    const id = await draft()
+    const values = complete()
+
+    values.slottekst = 'x'.repeat(2001)
+    values.vragen[0] = { ...values.vragen[0]!, tekst: '' }
+
+    const outcome = await save(id, values, 'publish', new Date('2027-01-01T12:00:00Z'))
+
+    expect(Object.keys(outcome.status === 'invalid' ? outcome.errors : {})).toEqual(['maand', 'vraag-1', 'slottekst'])
   })
 
   it('gives back the stored questions with an error on a locked quiz', async () => {
@@ -239,7 +269,7 @@ describe('saveQuiz', () => {
     await fillIn(id)
 
     expect(await saveQuiz(database.db, userId, id, complete(), { from: 1, kind: 'move', to: 2 }, now)).toEqual({
-      status: 'unchanged',
+      status: 'refused',
     })
     expect((await quiz(id)).values.vragen[0]?.tekst).toBe('Testvraag 1?')
   })

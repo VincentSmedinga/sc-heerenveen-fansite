@@ -31,7 +31,7 @@ type Props = {
 }
 
 // The form of one quiz of the editors (issue 1481), with where it stands and a link to the
-// preview. The notice after an action is told only when the quiz is in that state.
+// preview. The notices about publishing and the lock show only when the quiz is in that state.
 export default async function QuizPage({ params, searchParams }: Props) {
   await requireRole(...adminRoles)
   requireFantest()
@@ -45,13 +45,13 @@ export default async function QuizPage({ params, searchParams }: Props) {
 
   const { month, year } = quiz
   const stage: QuizFormStage = quiz.locked ? 'locked' : quiz.status
-  const { gedaan, vraag } = await searchParams
+  const { gedaan, keer, vraag } = await searchParams
   const notice = noticeFor(gedaan, quiz)
   const moved =
     gedaan === 'verplaatst' && typeof vraag === 'string' && /^(?:[1-9]|10)$/u.test(vraag) ? vraag : undefined
   // A new text from the server, such as after a question moved, starts the form anew, and so
-  // does a save that changed nothing, so no old errors stay behind.
-  const version = `${stage}-${String(gedaan)}-${JSON.stringify(quiz.values)}`
+  // does each save that changed nothing (`keer`), so no old errors stay behind.
+  const version = `${stage}-${String(gedaan)}-${String(keer)}-${JSON.stringify(quiz.values)}`
 
   return (
     <Page.Main areas={toolbarAreas} className={compact}>
@@ -107,6 +107,13 @@ function noticeFor(done: string | string[] | undefined, { locked, status }: Admi
       return { text: 'De quiz is bewaard als concept. Vul de vragen in.', title: 'Quiz gemaakt' }
     case 'gepubliceerd':
       return status === 'published' ? { text: 'De quiz is gepubliceerd.', title: 'Gepubliceerd' } : undefined
+    case 'niet-bewaard':
+      return locked
+        ? {
+            text: 'Deze quiz is intussen ingevuld, dus de vragen zijn vergrendeld. Je wijzigingen daaraan zijn niet bewaard.',
+            title: 'Vragen vergrendeld',
+          }
+        : undefined
     case 'ongewijzigd':
       return { text: 'Je had niets veranderd, dus er is niets opgeslagen.', title: 'Niets veranderd' }
     case 'opgeslagen':

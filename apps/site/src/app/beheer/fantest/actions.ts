@@ -83,12 +83,16 @@ export async function submitQuiz(quizId: number, _previous: QuizFormState, formD
     locked: 'vergrendeld',
     moved: 'verplaatst',
     published: 'gepubliceerd',
+    refused: 'niet-bewaard',
     saved: 'opgeslagen',
     unchanged: 'ongewijzigd',
   } as const
 
-  // After a move the page needs to know where the question went, to bring the focus there.
+  // After a move the page needs to know where the question went, to bring the focus there. A
+  // save that changed nothing leaves the quiz as it was, so the time makes its address new and
+  // the page starts the form anew, without old errors.
   const moved = outcome.status === 'moved' && intent.kind === 'move' ? `&vraag=${intent.to}` : ''
+  const again = outcome.status === 'unchanged' || outcome.status === 'refused' ? `&keer=${Date.now()}` : ''
 
-  redirect(`${quizPath(id, done[outcome.status])}${moved}`)
+  redirect(`${quizPath(id, done[outcome.status])}${moved}${again}`)
 }

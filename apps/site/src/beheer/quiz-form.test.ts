@@ -115,6 +115,6 @@ describe('validateQuiz', () => {
     values.slottekst = 'x'.repeat(2001)
     values.vragen[0] = { ...values.vragen[0]!, antwoorden: ['x'.repeat(201), 'b', 'c', 'd'], tekst: 'x'.repeat(501) }
 
-    expect(Object.keys(validateQuiz(values, false))).toEqual(['intro', 'slottekst', 'vraag-1', 'vraag-1-antwoord-1'])
+    expect(Object.keys(validateQuiz(values, false))).toEqual(['intro', 'vraag-1', 'vraag-1-antwoord-1', 'slottekst'])
   })
 })

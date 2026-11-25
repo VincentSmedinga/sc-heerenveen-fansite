@@ -29,7 +29,7 @@ export type CreateOutcome =
 
 export type SaveOutcome =
   | { errors: QuizErrors; status: 'invalid'; values: QuizValues }
-  | { status: 'locked' | 'missing' | 'moved' | 'published' | 'saved' | 'unchanged' }
+  | { status: 'locked' | 'missing' | 'moved' | 'published' | 'refused' | 'saved' | 'unchanged' }
 
 /** Whether somebody filled the quiz in, so its questions may no longer change. */
 export const isLocked = ({ participants }: { participants: null | number }) => (participants ?? 0) > 0
@@ -172,10 +172,14 @@ export function saveQuiz(
       }
     }
 
-    const errors = validateQuiz(values, !locked && (publish || status === 'published'))
+    let errors = validateQuiz(values, !locked && (publish || status === 'published'))
 
     if (publish && monthPassed(year, month, now)) {
-      errors['maand'] = `${capital(monthTitle(year, month))} is al voorbij, dus deze quiz kun je niet meer publiceren.`
+      // The month stands at the top of the page, so its error comes first.
+      errors = {
+        maand: `${capital(monthTitle(year, month))} is al voorbij, dus deze quiz kun je niet meer publiceren.`,
+        ...errors,
+      }
     }
 
     if (Object.keys(errors).length > 0) {
@@ -188,9 +192,11 @@ export function saveQuiz(
     }
 
     const changes = describeChanges(stored, values)
+    // A form from before the quiz was locked may send changes that are not taken.
+    const refused = locked && (intent.kind !== 'save' || changesLocked(stored, submitted))
 
     if (changes.length === 0 && !publish) {
-      return { status: 'unchanged' }
+      return { status: refused ? 'refused' : 'unchanged' }
     }
 
     await tx
@@ -232,11 +238,32 @@ export function saveQuiz(
     }
 
     if (locked) {
-      return { status: 'locked' }
+      return { status: refused ? 'refused' : 'locked' }
     }
 
     return { status: intent.kind === 'move' ? 'moved' : 'saved' }
   })
+}
+
+/**
+ * Whether a form sends something else for a part that is locked. The form of a locked quiz
+ * sends none of these parts, so an empty one says nothing.
+ */
+function changesLocked(stored: QuizValues, sent: QuizValues) {
+  const differs = (now: string, wanted: string) => wanted !== '' && wanted !== now
+
+  return (
+    differs(stored.intro, sent.intro) ||
+    sent.vragen.some((question, index) => {
+      const old = stored.vragen[index] ?? emptyQuestion()
+
+      return (
+        differs(old.tekst, question.tekst) ||
+        differs(old.goed, question.goed) ||
+        question.antwoorden.some((answer, place) => differs(old.antwoorden[place] ?? '', answer))
+      )
+    })
+  )
 }
 
 /** What changed, in words for the log: the parts and the numbers of the questions. */

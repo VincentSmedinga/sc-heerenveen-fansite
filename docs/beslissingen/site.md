@@ -8072,7 +8072,7 @@
   - De volgorde wijzig je met de knoppen "Vraag 3 omhoog" en "Vraag 3 omlaag", die het formulier bewaren.
   - Vragen hebben geen plaatje.
   - Het archief van de Fansite toont alleen zijn eigen quizzen.
-    Een quiz van de redactie ziet een supporter pas met #1482, en de goede antwoorden gaan niet naar de browser voordat de antwoorden verstuurd zijn.
+    Een quiz van de redactie ziet een fan pas met #1482, en de goede antwoorden gaan niet naar de browser voordat de antwoorden verstuurd zijn.
 - **Waarom:** de redactie schrijft elke maand tien vragen, vaak in meer keren.
   Wie een quiz al invulde, mag niet merken dat de vragen daarna anders zijn.
   Knoppen om te verplaatsen werken met een toetsenbord en zonder JavaScript.

@@ -45,7 +45,7 @@ export default async function QuizPreviewPage({ params }: { params: Promise<{ id
             Voorbeeld
           </Heading>
           <Text>
-            Zo ziet een supporter deze quiz, met wat nu is opgeslagen. Je keuzes worden niet bewaard.{' '}
+            Zo ziet een fan deze quiz, met wat nu is opgeslagen. Je keuzes worden niet bewaard.{' '}
             <Link href={quizPath(quiz.id)}>Terug naar het formulier</Link>
           </Text>
         </Card>

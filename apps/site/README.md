@@ -1132,7 +1132,7 @@ Met de Fantest uit (`FANS_FANTEST` of `FANS_ACCOUNTS`) staat het scherm niet in 
 - Het voorbeeld toont de opgeslagen quiz met `QuizQuestion`, zonder formulier en zonder de goede antwoorden.
 - Elke wijziging komt in `audit_log` als `quiz.create`, `quiz.edit` of `quiz.publish`, met de maand en wat er veranderde in `detail`.
 
-Supporters zien een quiz van de redactie nog nergens: het archief leest alleen de bron `oude-fansite`.
+Fans zien een quiz van de redactie nog nergens: het archief leest alleen de bron `oude-fansite`.
 
 ### Artikelen schrijven
 

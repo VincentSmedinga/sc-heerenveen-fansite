@@ -132,6 +132,17 @@ describe('the actions of the Fantest', () => {
     expect((await database.db.select().from(quizzes))[0]?.status).toBe('draft')
   })
 
+  it('give a save without changes an address of its own', async () => {
+    await logInAs('editor')
+    await create()
+
+    const id = await firstId()
+
+    expect(await save(id, {})).toMatchObject({
+      redirect: expect.stringMatching(new RegExp(`^/beheer/fantest/${id}\\?gedaan=ongewijzigd&keer=\\d+$`, 'u')),
+    })
+  })
+
   it('lead to the place a question moved to', async () => {
     await logInAs('editor')
     await create()

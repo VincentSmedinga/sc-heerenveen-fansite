@@ -190,7 +190,7 @@ function Question({
             error={errors[correctField(number)]}
             hideOptional
             id={correctField(number)}
-            label={`Goede antwoord van vraag ${number}`}
+            label={`Goed antwoord van vraag ${number}`}
             required={false}
           >
             <Select defaultValue={question.goed} name={correctField(number)} width="natural">
