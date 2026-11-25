@@ -7446,6 +7446,7 @@
   Het adres van een seizoen is `?seizoen=2026-27`, zoals bij de andere pagina's met een seizoen.
 - **Waarom:** een bezoeker kan elk adres verzinnen, en een sleutel per adres vult het geheugen van de server.
 - **Alternatieven:** de ranglijst bij elk bezoek berekenen (zwaar na een seizoen met veel voorspellingen).
+- **Later:** zie _Stand Prognose wisselt met SwitchLinks_ (25 november 2026, #1660): de keuze tussen "Seizoen" en "Per wedstrijd" is de gewone schakelaar, ook zonder JavaScript.
 
 - **Datum:** 21 november 2026
 - **Besluit:** kaarten in de smalle kolom naast een hoofdkaart gebruiken het zachte oppervlak van Card.
@@ -7479,7 +7480,6 @@
 - **Alternatieven:** een kaart per spel op de voorpagina; een persoonlijke kaart voor wie is ingelogd.
 - **Later:** op 25 november 2026 is de kaart Fans vervangen door een kleine kaart per open spel, en is `OpenGameList` weg (zie _Elk open spel heeft een kleine kaart op de voorpagina, onder het forum_, #1645).
   De kaarten blijven openbaar, voor iedereen gelijk en zonder cookie.
-- **Later:** zie _Stand Prognose wisselt met SwitchLinks_ (25 november 2026, #1660): de keuze tussen "Seizoen" en "Per wedstrijd" is de gewone schakelaar, ook zonder JavaScript.
 
 ## De regels van alle spellen staan op één pagina
 

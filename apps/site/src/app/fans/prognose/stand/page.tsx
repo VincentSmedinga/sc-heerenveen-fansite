@@ -69,7 +69,8 @@ export default async function StandPage({
   const match =
     playedMatches.find((item) => String(item.id) === matchParam) ?? (perMatch ? playedMatches[0] : undefined)
   const addresses = {
-    match: playedMatches[0] === undefined ? standPath : `${standPath}?wedstrijd=${playedMatches[0].id}`,
+    // Each choice has an address of its own, also without a match to show: 0 is no match.
+    match: `${standPath}?wedstrijd=${playedMatches[0]?.id ?? 0}`,
     season: standPath,
   }
   const ranking = perMatch

@@ -45,9 +45,14 @@ describe('the switch of Stand Prognose', () => {
     expect(await render({ wedstrijd: '7' })).toMatch(/<a[^>]*aria-current="[^"]+"[^>]*>(?:<[^>]+>)*Per wedstrijd/)
   })
 
-  it('says that nothing was predicted without a played match with predictions', async () => {
+  it('says that nothing was predicted behind Per wedstrijd without a match with predictions', async () => {
     rankedMatches.mockResolvedValue([])
 
-    expect(await render({ wedstrijd: '7' })).toContain('Voor deze wedstrijd is nog niets voorspeld.')
+    // The address of the link itself, which is another one than that of Seizoen.
+    const href = /href="([^"]+)"[^>]*>(?:<[^>]+>)*Per wedstrijd/.exec(await render())?.[1] ?? ''
+    const query = Object.fromEntries(new URL(href, 'https://fansite.invalid').searchParams)
+
+    expect(href).toBe('/fans/prognose/stand?wedstrijd=0')
+    expect(await render(query)).toContain('Voor deze wedstrijd is nog niets voorspeld.')
   })
 })
