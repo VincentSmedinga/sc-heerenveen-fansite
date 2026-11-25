@@ -1,0 +1,19 @@
+/*
+ * The links to the open games under a match: one on each line, with room between them for a
+ * finger. They belong to the match above, so they sit close under it.
+ */
+
+@layer hf.components {
+  .hf-game-links {
+    display: grid;
+    gap: var(--hf-space-s);
+    justify-items: start;
+    list-style: none;
+    padding-inline-start: 0;
+  }
+
+  .hf-match + .hf-game-links {
+    margin-block-start: 0;
+    padding-block-end: var(--hf-space-m);
+  }
+}

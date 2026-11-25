@@ -4170,6 +4170,7 @@
   Een kaart voor een account is een taak, geen spel.
   Een masker laat het icoon de kleur van het vlak volgen, in licht en in donker, zonder een tekening per thema.
 - **Alternatieven:** een watermerk op elke kaart; een illustratie naast de kop; een `<svg>` als kind van de kaart (dat verandert de opbouw van de kaart met een knop voor een afbeelding, en moet apart verborgen worden voor hulptechnologie).
+- **Later:** op 25 november 2026 vervangen kleine kaarten per spel de kaart Fans op de voorpagina, en die krijgen het watermerk wel, want elk is de kaart van een spel (zie _Elk open spel heeft een kleine kaart op de voorpagina, onder het forum_ in `site.md`, #1645).
 
 ## De code uit de mail is één veld dat als zes vakjes is getekend
 

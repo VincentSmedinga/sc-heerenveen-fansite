@@ -44,7 +44,8 @@
 @import url('./components/chip/chip.css');
 @import url('./components/code-input/code-input.css');
 @import url('./components/game-heading/game-heading.css');
-@import url('./components/open-game-list/open-game-list.css');
+@import url('./components/game-links/game-links.css');
+@import url('./components/open-game-cards/open-game-cards.css');
 @import url('./components/prediction-list/prediction-list.css');
 @import url('./components/score-grid/score-grid.css');
 @import url('./components/rating-scale/rating-scale.css');

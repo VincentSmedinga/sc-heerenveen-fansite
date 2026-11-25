@@ -9,6 +9,7 @@ export const iconNames = [
   'ball',
   'camera',
   'chart',
+  'crystal-ball',
   'document',
   'envelope',
   'external-link',
@@ -17,7 +18,9 @@ export const iconNames = [
   'plus',
   'save',
   'speech',
+  'star',
   'sun',
+  'tactics-board',
   'trash',
 ] as const
 
@@ -106,6 +109,14 @@ const drawings: Record<IconName, ReactNode> = {
       <path d="M11.5 11V7" />
     </>
   ),
+  // A crystal ball on its foot, with a highlight: the game Prognose.
+  'crystal-ball': (
+    <>
+      <circle cx="8" cy="6.5" r="4.5" />
+      <path d="M5.5 6a2.5 2.5 0 0 1 2-2" />
+      <path d="M5.5 10.5 4 13.5h8l-1.5-3" />
+    </>
+  ),
   // A page with a folded corner and two lines of text: an article.
   document: (
     <>
@@ -161,6 +172,8 @@ const drawings: Record<IconName, ReactNode> = {
       <path d="M5 8h3.5" />
     </>
   ),
+  // A star of five points: the game Uitblinker.
+  star: <path d="M8 2.5l1.7 3.5 3.8.55-2.75 2.7.65 3.8L8 11.25l-3.4 1.8.65-3.8L2.5 6.55l3.8-.55Z" />,
   sun: (
     <>
       <circle cx="8" cy="8" r="3" />
@@ -175,6 +188,17 @@ const drawings: Record<IconName, ReactNode> = {
     </>
   ),
   // A bin: the lid with its handle, the bin that narrows at the bottom, and two lines in it.
+  // A board of the pitch with the halfway line and a few players: the game Fjouwer.
+  'tactics-board': (
+    <>
+      <path d="M5 2.5h6A1.5 1.5 0 0 1 12.5 4v8a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 12V4A1.5 1.5 0 0 1 5 2.5Z" />
+      <path d="M3.5 8h9" />
+      <path d="M6 5.25h.01" />
+      <path d="M10 5.25h.01" />
+      <path d="M6 10.75h.01" />
+      <path d="M10 10.75h.01" />
+    </>
+  ),
   trash: (
     <>
       <path d="M2.5 4.5h11" />

@@ -5,7 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getNewestArticle } from '../articles'
 import { getDiscussions } from '../discussions'
+import { loadMonthQuiz } from '../fans/fantest-entry'
+import { fjouwerMatch } from '../fans/fjouwer'
 import { predictionMatches } from '../fans/prediction'
+import { findRatingWindow } from '../fans/rating'
 import { getHeadlines } from '../headlines'
 import { getMatchData, type MatchData, overviewOf } from '../matches'
 import { MatchLines } from '../MatchViews'
@@ -15,8 +18,8 @@ import { matchData } from '../test-matches'
 import { withoutIcons } from '../without-icons'
 import HomePage, { generateMetadata } from './page'
 
-// The card Fans asks which match the Prognose is open for. The home page must not read the
-// cookies: the cookie of a supporter would make the page personal and so not cacheable.
+// The home page must not read the cookies: the cookie of a supporter would make the page
+// personal, so a visitor who is logged in would get another page than one who is not.
 vi.mock('next/headers', () => ({
   cookies: () => {
     throw new Error('The homepage must not read the cookies of the visitor')
@@ -26,9 +29,19 @@ vi.mock('next/headers', () => ({
   },
 }))
 vi.mock('../database', () => ({ getDatabase: () => ({ db: {} }) }))
+// Only the queries of the games are replaced: which games are open is the real code.
+vi.mock('../fans/fantest-entry', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  loadMonthQuiz: vi.fn(),
+}))
+vi.mock('../fans/fjouwer', async (importOriginal) => ({ ...(await importOriginal<object>()), fjouwerMatch: vi.fn() }))
 vi.mock('../fans/prediction', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   predictionMatches: vi.fn(),
+}))
+vi.mock('../fans/rating', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  findRatingWindow: vi.fn(),
 }))
 
 // Only the query is replaced: the check of the number in the address is the real one.
@@ -117,20 +130,23 @@ async function renderDiscussions() {
   const html = await renderSidebar()
   const start = html.indexOf('<section class="hf-card" aria-labelledby="discussions-heading">')
 
-  return html.slice(start, html.indexOf('<section class="hf-card" aria-labelledby="episodes-heading">'))
+  return html.slice(start, html.indexOf('</section>', start) + '</section>'.length)
 }
 
 /** The start of the section with the cards beside the news, which has the name of its cards. */
 const sidebarStart = '<section class="hf-page-section"'
 
-/** The main column alone: the news, without the section beside it, closed with the main. */
+/**
+ * The news in the main column alone, without the podcasts under it and the section beside it,
+ * closed with the main.
+ */
 async function renderMain() {
   const html = await render()
 
-  return `${html.slice(0, html.indexOf(sidebarStart))}</main>`
+  return `${html.slice(0, html.indexOf('<div class="hf-page-cell" style="grid-area:podcasts">'))}</main>`
 }
 
-/** The section beside the news alone: the matches, the table, the forum and the podcasts. */
+/** The section beside the news alone: the matches, the table, the forum and the games. */
 async function renderSidebar() {
   const html = await render()
 
@@ -174,10 +190,10 @@ describe('the homepage', () => {
     expect(html.match(/<h[1-6][^>]*>.*?<\/h[1-6]>/g)).toEqual([
       '<h1 class="hf-heading-1 hf-visually-hidden">sc Heerenveen Fansite</h1>',
       '<h2 class="hf-heading-2" id="media-heading">Laatste nieuws</h2>',
+      '<h2 class="hf-heading-2" id="episodes-heading">Nieuwste podcasts</h2>',
       '<h2 class="hf-heading-2" id="matches-heading">Wedstrijden</h2>',
       '<h2 class="hf-heading-2" id="standings-heading">Stand</h2>',
       '<h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies</h2>',
-      '<h2 class="hf-heading-2" id="episodes-heading">Nieuwste podcasts</h2>',
     ])
   })
 
@@ -455,27 +471,29 @@ const episodes: PublicEpisode[] = [
   },
 ]
 
-/** The block of podcasts alone: the last card of the sidebar. */
+/** The block of podcasts alone, under the news in the main column. */
 async function renderEpisodes() {
-  const html = await renderSidebar()
+  const html = await render()
+  const start = html.indexOf('<section class="hf-card" aria-labelledby="episodes-heading">')
 
-  return html.slice(
-    html.indexOf('<section class="hf-card" aria-labelledby="episodes-heading">'),
-    html.indexOf('</section></main>'),
-  )
+  return html.slice(start, html.indexOf('</section>', start) + '</section>'.length)
 }
 
-describe('the podcast episodes in the sidebar of the homepage', () => {
+describe('the podcast episodes on the homepage', () => {
   beforeEach(() => {
     vi.mocked(getHeadlines).mockResolvedValue([])
   })
 
-  it('puts the block at the end of the sidebar, named by its h2, with the link to all podcasts under the list', async () => {
+  it('puts the block in the main column under the news, named by its h2, with the link to all podcasts under the list', async () => {
     vi.mocked(getLatestEpisodes).mockResolvedValue(episodes)
 
-    const html = await renderSidebar()
+    const html = await render()
 
-    expect(html.indexOf('standings-heading')).toBeLessThan(html.indexOf('episodes-heading'))
+    expect(html).toContain(
+      '</section></div><div class="hf-page-cell" style="grid-area:podcasts"><section class="hf-card" aria-labelledby="episodes-heading">',
+    )
+    expect(html.indexOf('media-heading')).toBeLessThan(html.indexOf('episodes-heading'))
+    expect(html.indexOf('episodes-heading')).toBeLessThan(html.indexOf(sidebarStart))
     expect(await renderEpisodes()).toMatch(
       /^<section class="hf-card" aria-labelledby="episodes-heading"><h2 class="hf-heading-2" id="episodes-heading">Nieuwste podcasts<\/h2><ul role="list">.*<\/ul><p><a href="\/nieuws\/podcasts">Alle <span class="hf-icon-tail">podcasts<svg [^>]*class="hf-icon"[^>]*>.*?<\/svg><\/span><\/a><\/p><\/section>$/,
     )
@@ -611,7 +629,7 @@ describe('the discussions in the sidebar of the homepage', () => {
     expect(html.match(/<section class="hf-page-section"/g)).toHaveLength(1)
     expect(html.indexOf('media-heading')).toBeLessThan(html.indexOf(sidebarStart))
     expect(withoutIcons(await renderSidebar())).toMatch(
-      /^<section class="hf-page-section" style="grid-area:side" aria-label="De wedstrijden, de stand, het forum en de podcasts"><section class="hf-card hf-card-soft" aria-labelledby="matches-heading">.*<\/section><section class="hf-card hf-card-soft" aria-labelledby="standings-heading">.*<\/section><section class="hf-card" aria-labelledby="discussions-heading"><h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies<\/h2><ul role="list">.*<\/ul><p><a href="https:\/\/forum.heerenveen.org">Naar het forum <span class="hf-visually-hidden">\(externe site\)<\/span><\/a><\/p><\/section><section class="hf-card" aria-labelledby="episodes-heading">.*<\/section><\/section><\/main>$/,
+      /^<section class="hf-page-section" style="grid-area:side" aria-label="De wedstrijden, de stand en het forum"><section class="hf-card hf-card-soft" aria-labelledby="matches-heading">.*<\/section><section class="hf-card hf-card-soft" aria-labelledby="standings-heading">.*<\/section><section class="hf-card" aria-labelledby="discussions-heading"><h2 class="hf-heading-2" id="discussions-heading">Nieuwste discussies<\/h2><ul role="list">.*<\/ul><p><a href="https:\/\/forum.heerenveen.org">Naar het forum <span class="hf-visually-hidden">\(externe site\)<\/span><\/a><\/p><\/section><\/section><\/main>$/,
     )
   })
 
@@ -872,11 +890,11 @@ describe('the matches and the table in the sidebar of the homepage', () => {
     expect(html.indexOf('media-heading')).toBeLessThan(html.indexOf('matches-heading'))
     expect(html.indexOf('matches-heading')).toBeLessThan(html.indexOf('standings-heading'))
     expect(html.indexOf('standings-heading')).toBeLessThan(html.indexOf('discussions-heading'))
-    expect(html.indexOf('discussions-heading')).toBeLessThan(html.indexOf('episodes-heading'))
+    expect(html.indexOf('episodes-heading')).toBeLessThan(html.indexOf('matches-heading'))
     expect(html).not.toContain('<aside')
     expect(html.match(/<section class="hf-page-section"/g)).toHaveLength(1)
     expect(html.lastIndexOf('<section')).toBe(
-      html.indexOf('<section class="hf-card" aria-labelledby="episodes-heading">'),
+      html.indexOf('<section class="hf-card" aria-labelledby="discussions-heading">'),
     )
   })
 
@@ -1340,51 +1358,97 @@ describe('the line under the table in the sidebar of the homepage', () => {
   })
 })
 
-describe('the card Fans on the homepage', () => {
+describe('the cards of the open games on the homepage', () => {
+  const match = {
+    clubSlug: 'fc-twente',
+    competition: 'Eredivisie' as const,
+    dateText: null,
+    home: true,
+    id: 1,
+    kickoffAt: new Date('2026-10-24T14:45:00Z'),
+    matchDate: '2026-10-24',
+    opponent: 'FC Twente',
+    round: '10',
+    season: '2026/27',
+    status: 'scheduled' as const,
+  }
+
   beforeEach(() => {
     vi.mocked(getHeadlines).mockResolvedValue(headlines)
+    vi.mocked(getMatchData).mockResolvedValue(matchData)
     vi.mocked(predictionMatches).mockReset()
-    vi.mocked(predictionMatches).mockResolvedValue({
-      next: {
-        clubSlug: 'fc-twente',
-        competition: 'Eredivisie',
-        dateText: null,
-        home: true,
-        id: 1,
-        kickoffAt: new Date('2026-10-24T14:45:00Z'),
-        matchDate: '2026-10-24',
-        opponent: 'FC Twente',
-        round: '10',
-        season: '2026/27',
-        status: 'scheduled',
-      },
+    vi.mocked(predictionMatches).mockResolvedValue({ next: match })
+    vi.mocked(fjouwerMatch).mockReset()
+    vi.mocked(fjouwerMatch).mockResolvedValue(match)
+    vi.mocked(findRatingWindow).mockReset()
+    vi.mocked(findRatingWindow).mockResolvedValue({
+      closesAt: new Date('2026-10-24T14:45:00Z'),
+      coach: null,
+      match: { ...match, extraTime: false, goalsAgainst: 0, goalsFor: 1, status: 'played' },
+      players: [],
+      startsAt: new Date('2026-10-18T12:30:00Z'),
+      state: 'open',
     })
+    vi.mocked(loadMonthQuiz).mockReset()
+    vi.mocked(loadMonthQuiz).mockResolvedValue({
+      id: 1,
+      intro: '',
+      month: 10,
+      questions: [],
+      version: 'a',
+      year: 2026,
+    })
+
+    for (const name of ['FANS_ACCOUNTS', 'FANS_PROGNOSE', 'FANS_UITBLINKER', 'FANS_VIER', 'FANS_FANTEST']) {
+      vi.stubEnv(name, 'on')
+    }
   })
 
-  it('puts the card in the sidebar between the table and the forum, without reading the visitor', async () => {
-    vi.stubEnv('FANS_ACCOUNTS', 'on')
-    vi.stubEnv('FANS_PROGNOSE', 'on')
-
+  it('shows a card for each game under the forum, in order, without reading the visitor', async () => {
     const html = withoutIcons(await renderSidebar())
+    const cards = html.slice(html.indexOf('<div class="hf-open-game-cards">'))
 
-    expect(html).toContain('<h2 class="hf-heading-2" id="fans-heading">Fans</h2>')
-    expect(html).toContain('Voorspel sc Heerenveen – FC Twente. Kan tot zaterdag 16.45 uur.')
-    expect(html.indexOf('standings-heading')).toBeLessThan(html.indexOf('fans-heading'))
-    expect(html.indexOf('fans-heading')).toBeLessThan(html.indexOf('discussions-heading'))
-    // Called again, it gives the same page: nothing in it depends on who asks.
-    expect(withoutIcons(await renderSidebar())).toBe(html)
+    expect(html.indexOf('discussions-heading')).toBeLessThan(html.indexOf('hf-open-game-cards'))
+    expect([...cards.matchAll(/<h2 [^>]*>(.*?)<\/h2>/g)].map(([, name]) => name)).toEqual([
+      'Prognose',
+      'Uitblinker',
+      'Fjouwer',
+      'Fantest',
+    ])
+    expect(cards).toContain('aria-label="Voorspel sc Heerenveen – FC Twente"')
+    expect(cards).toContain('aria-label="Doe de test van oktober"')
+    expect(html).toContain('aria-label="De wedstrijden, de stand, het forum en de spellen"')
+    expect(html).not.toContain('fans-heading')
   })
 
-  it('has no card while the Prognose is off, and no h2 for it', async () => {
-    expect(await renderSidebar()).not.toContain('fans-heading')
+  it('leaves the podcasts above the matches, which gives a phone the order of the code', async () => {
+    const html = await render()
+    const places = ['media-heading', 'episodes-heading', 'matches-heading', 'standings-heading', 'discussions-heading']
+      .map((id) => html.indexOf(id))
+      .concat(html.indexOf('hf-open-game-cards'))
+
+    expect(places).toEqual([...places].sort((a, b) => a - b))
+  })
+
+  it('has no card, no empty place and no word of the games in the label while accounts are off', async () => {
+    vi.stubEnv('FANS_ACCOUNTS', 'off')
+
+    const html = await renderSidebar()
+
+    expect(html).not.toContain('hf-open-game')
+    expect(html).toContain('aria-label="De wedstrijden, de stand en het forum"')
     expect(predictionMatches).not.toHaveBeenCalled()
   })
 
-  it('has no card and no empty place when no match is open', async () => {
-    vi.stubEnv('FANS_ACCOUNTS', 'on')
-    vi.stubEnv('FANS_PROGNOSE', 'on')
-    vi.mocked(predictionMatches).mockResolvedValue({})
+  it('leaves out a game that can not be read and keeps the others', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => undefined)
 
-    expect(await renderSidebar()).not.toContain('fans-heading')
+    vi.mocked(findRatingWindow).mockRejectedValue(new Error('Failed query'))
+
+    const html = await renderSidebar()
+
+    expect(html).toContain('hf-card-game-prognose')
+    expect(html).not.toContain('hf-card-game-uitblinker')
+    expect(log).toHaveBeenCalledOnce()
   })
 })
