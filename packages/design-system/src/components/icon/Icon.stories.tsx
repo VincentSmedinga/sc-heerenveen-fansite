@@ -30,6 +30,7 @@ const labels: Record<IconName, string> = {
   ball: 'Voetbal',
   camera: 'Camera',
   chart: 'Staafdiagram',
+  'crystal-ball': 'Glazen bol',
   document: 'Pagina met tekst',
   envelope: 'Envelop',
   'external-link': 'Externe link',
@@ -38,7 +39,9 @@ const labels: Record<IconName, string> = {
   plus: 'Plus',
   save: 'Diskette',
   speech: 'Tekstballon',
+  star: 'Ster',
   sun: 'Zon',
+  'tactics-board': 'Tactiekbord',
   trash: 'Prullenbak',
 }
 
