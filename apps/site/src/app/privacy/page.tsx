@@ -34,8 +34,8 @@ const AccountSection = ({ fantest, reminder }: { fantest: boolean; reminder: boo
     </Text>
     {fantest ? (
       <Text>
-        Doe je mee aan de Fantest, dan bewaren we je antwoorden, je score en het moment waarop je ze verstuurde. De
-        quizzen van toen spelen bewaart niets.
+        Doe je mee aan de Fantest, dan bewaren we je antwoorden, je score en het moment waarop je ze verstuurde. Speel
+        je een quiz van toen, dan bewaren we niets.
       </Text>
     ) : null}
     <Text>

@@ -20,8 +20,8 @@ export const generateMetadata = (): Metadata => {
   return pageMetadata('/fans', 'Fans')
 }
 
-// What each game does, in one sentence, for the card "Wat komt er". Fantest is not here: it is
-// an archive of old quizzes, without an account, and comes with an issue of its own.
+// What each game does, in one sentence, for the card "Wat komt er". Fantest is not here: its
+// card on Fans comes with an issue of its own.
 const coming = [
   { part: 'prognose', sentence: 'Voorspel de rust- en eindstand van de volgende wedstrijd.' },
   { part: 'uitblinker', sentence: 'Geef de spelers en de trainer na elke wedstrijd een cijfer.' },

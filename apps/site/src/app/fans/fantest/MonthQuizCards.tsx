@@ -1,4 +1,4 @@
-import { Card, Heading, Link, Notice, Strong, Text } from '@fansite/design-system'
+import { Card, CardLink, Heading, Link, Notice, Strong, Text } from '@fansite/design-system'
 
 import { fantestPath } from '#src/fans/fantest'
 import { logInPaths } from '#src/fans/log-in'
@@ -11,7 +11,7 @@ import { signUpPaths } from '#src/fans/sign-up'
 /** What the page says after a form that was sent, by the name in the address. */
 export const messages = {
   al: 'Je hebt al meegedaan aan deze Fantest. Er is niets opnieuw bewaard.',
-  gesloten: 'Deze Fantest is gesloten. Je antwoorden zijn niet bewaard.',
+  gesloten: 'De Fantest van je formulier is gesloten. Je antwoorden zijn niet bewaard.',
   gewijzigd: 'De redactie heeft de vragen net gewijzigd. Je antwoorden zijn niet bewaard. Beantwoord ze opnieuw.',
   verstuurd: 'Je antwoorden zijn verstuurd.',
 } as const
@@ -39,15 +39,11 @@ export function JoinCard() {
         Doe mee
       </Heading>
       <Text>Om mee te doen heb je alleen een schermnaam en een e-mailadres nodig. Een wachtwoord is niet nodig.</Text>
-      <Text>
-        {/* The link carries the page to come back to. */}
-        <Link href={`${logInPaths.form}?${new URLSearchParams({ [returnParameter]: fantestPath }).toString()}`}>
-          Inloggen
-        </Link>
-      </Text>
-      <Text>
-        <Link href={signUpPaths.form}>Account maken</Link>
-      </Text>
+      {/* The first link carries the page to come back to. */}
+      <CardLink href={`${logInPaths.form}?${new URLSearchParams({ [returnParameter]: fantestPath }).toString()}`}>
+        Inloggen
+      </CardLink>
+      <CardLink href={signUpPaths.form}>Account maken</CardLink>
     </Card>
   )
 }

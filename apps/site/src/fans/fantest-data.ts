@@ -7,10 +7,20 @@ import type { GameData } from './my-data'
 
 import { capital, monthTitle } from './fantest'
 
+const momentFormat = new Intl.DateTimeFormat('nl-NL', {
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  month: 'long',
+  timeZone: 'Europe/Amsterdam',
+  year: 'numeric',
+})
+
 /**
- * What the Fantest keeps of a supporter, for the pages of the data (issue 1482): for each month
- * the score, and under it each question with the answer that was chosen. It never says which
- * answer was right. Gives `undefined` for a supporter who never took part.
+ * What the Fantest keeps of a supporter, for the pages of the data (issue 1482): for each
+ * month the moment of sending (Dutch time) and the score, and under them each question with the
+ * answer that was chosen. It never says which answer was right. Gives `undefined` for a
+ * supporter who never took part.
  */
 export async function fantestData(db: Database, supporterId: number): Promise<GameData | undefined> {
   const found = await db
@@ -19,6 +29,7 @@ export async function fantestData(db: Database, supporterId: number): Promise<Ga
       month: quizzes.month,
       quizId: quizEntries.quizId,
       score: quizEntries.score,
+      submittedAt: quizEntries.submittedAt,
       year: quizzes.year,
     })
     .from(quizEntries)
@@ -40,6 +51,7 @@ export async function fantestData(db: Database, supporterId: number): Promise<Ga
       .orderBy(asc(quizQuestions.position))
     const when = capital(monthTitle(entry.year, entry.month))
 
+    rows.push({ cells: [momentFormat.format(entry.submittedAt)], header: `${when}: verstuurd` })
     rows.push({ cells: [`${entry.score} van ${entry.answers.length}`], header: `${when}: score` })
     rows.push(
       ...questions.map(({ answers, text }, index) => ({
@@ -52,7 +64,7 @@ export async function fantestData(db: Database, supporterId: number): Promise<Ga
   const [latest] = found
 
   return {
-    columns: ['Vraag', 'Jouw antwoord'],
+    columns: ['Vraag', 'Wat we bewaren'],
     rows,
     summary:
       found.length === 1 && latest !== undefined

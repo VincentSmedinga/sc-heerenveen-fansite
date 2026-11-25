@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Card, Heading, Link, List, Page, Text } from '@fansite/design-system'
 import { requireFansPart } from '@fansite/shared/fans-env'
 import { notFound } from 'next/navigation'
+import { Fragment } from 'react'
 
 import { getDatabase } from '#src/database'
 import {
@@ -93,11 +94,12 @@ export default async function FantestPage({
         <Heading id="fantest-maand" level={2}>
           {capital(when)}
         </Heading>
+        {/* The key gives each notice the focus, also when one follows another. */}
         {message === undefined ? null : (
-          <>
+          <Fragment key={message}>
             <Message id={messageId}>{messages[message]}</Message>
             <FocusOnLoad id={messageId} />
-          </>
+          </Fragment>
         )}
         {quiz === undefined ? (
           <Text>Voor {when} staat er geen Fantest klaar.</Text>

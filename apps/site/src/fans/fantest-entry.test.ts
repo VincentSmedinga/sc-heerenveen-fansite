@@ -245,9 +245,11 @@ describe('fantestData', () => {
     const data = await fantestData(database.db, supporterId)
 
     expect(data?.summary).toBe('1 Fantest, 6 van 10')
-    expect(data?.rows).toHaveLength(11)
-    expect(data?.rows[0]).toEqual({ cells: ['6 van 10'], header: 'November 2026: score' })
-    expect(data?.rows[7]).toEqual({ cells: ['d'], header: 'November 2026, 7. Testvraag 7?' })
+    expect(data?.rows).toHaveLength(12)
+    // 12:00 UTC is 13:00 in the Netherlands.
+    expect(data?.rows[0]).toEqual({ cells: ['25 november 2026 om 13:00'], header: 'November 2026: verstuurd' })
+    expect(data?.rows[1]).toEqual({ cells: ['6 van 10'], header: 'November 2026: score' })
+    expect(data?.rows[8]).toEqual({ cells: ['d'], header: 'November 2026, 7. Testvraag 7?' })
 
     // The same for every key: what was chosen, not what was right.
     await database.db.update(quizQuestions).set({ correctAnswer: 1 }).where(eq(quizQuestions.quizId, id))

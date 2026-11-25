@@ -8078,8 +8078,8 @@
   Wie een quiz al invulde, mag niet merken dat de vragen daarna anders zijn.
   Knoppen om te verplaatsen werken met een toetsenbord en zonder JavaScript.
   De site slaat nergens afbeeldingen op, en dat is een eigen stuk werk.
-- **Alternatieven:** auteurs alleen hun eigen quizzen geven (er is maar één quiz per maand en de redactie maakt hem samen); slepen om te sorteren (werkt niet zonder JavaScript); een nummer per vraag intypen (foutgevoelig); plaatjes bij vragen (later een eigen issue, met een alt-tekst en opslag op onze eigen host)
-- **Later:** zie _Een supporter doet de Fantest van de maand één keer_ (25 november 2026): de goede antwoorden gaan ook na het versturen niet naar de browser zolang de maand loopt..
+- **Alternatieven:** auteurs alleen hun eigen quizzen geven (er is maar één quiz per maand en de redactie maakt hem samen); slepen om te sorteren (werkt niet zonder JavaScript); een nummer per vraag intypen (foutgevoelig); plaatjes bij vragen (later een eigen issue, met een alt-tekst en opslag op onze eigen host).
+- **Later:** zie _Een supporter doet de Fantest van de maand één keer_ (25 november 2026): de goede antwoorden gaan ook na het versturen niet naar de browser zolang de maand loopt.
 
 ## Een supporter doet de Fantest van de maand één keer
 

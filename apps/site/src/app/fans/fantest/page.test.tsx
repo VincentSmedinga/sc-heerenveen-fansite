@@ -124,7 +124,7 @@ describe('the quiz of the month', () => {
 
   it.each([
     ['al', 'Je hebt al meegedaan aan deze Fantest.'],
-    ['gesloten', 'Deze Fantest is gesloten.'],
+    ['gesloten', 'De Fantest van je formulier is gesloten.'],
     ['gewijzigd', 'De redactie heeft de vragen net gewijzigd.'],
   ])('says what happened after "%s", only to a supporter', async (name, words) => {
     expect(await render({ [name]: '1' })).not.toContain(words)
