@@ -80,6 +80,27 @@ describe('QuizQuestion', () => {
       expect(items[1]?.textContent).toBe('Feyenoord20%')
     })
 
+    it('names the right answer to somebody who only reads, without "Goed." or "Fout."', () => {
+      render(<QuizQuestion {...props} result={{ correct: 3, percentages: [10, 20, 60, 10] }} />)
+
+      expect(screen.getByText('Het goede antwoord is Sunderland.')).toBeTruthy()
+      expect(screen.queryByText('Jouw keuze')).toBeNull()
+      expect(screen.queryByText(/Goed\.|Fout\./)).toBeNull()
+      expect(screen.getAllByRole('listitem')[2]?.textContent).toBe('Sunderland, goed antwoord60%')
+    })
+
+    it('marks no answer of a cancelled question and counts every choice as good', () => {
+      render(<QuizQuestion {...props} result={{ allCorrect: true, chosen: 1, correct: 3 }} />)
+
+      const items = screen.getAllByRole('listitem')
+
+      expect(items[0]?.textContent).toBe('AjaxJouw keuze')
+      expect(items[2]?.textContent).toBe('Sunderland')
+      expect(screen.getByText('Goed.').parentElement?.textContent).toBe(
+        'Goed. Bij deze vraag telt elk antwoord als goed.',
+      )
+    })
+
     it('says "Goed." for a right answer and names the right one for a wrong answer', () => {
       const { unmount } = checked(3)
 

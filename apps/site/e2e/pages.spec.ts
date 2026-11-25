@@ -273,12 +273,17 @@ const pages: { admin?: E2eRole; path: string; status: number }[] = [
   // figures), a month without a quiz, and an address that is no month. fantest.spec.ts plays
   // one.
   { path: '/fans/fantest', status: 200 },
-  // The ranking of the Fantest (#1483), with the made-up scores of two months of 2025.
+  // The ranking of the Fantest (#1483), with the made-up scores of three months of 2025.
   { path: '/fans/fantest/ranglijst', status: 200 },
   { path: '/fans/fantest/ranglijst?jaar=2025&maand=2025-01', status: 200 },
   { path: '/fans/fantest/2003-06', status: 200 },
   { path: '/fans/fantest/2003-09', status: 200 },
   { path: '/fans/fantest/2003-07', status: 404 },
+  // A month of the editors that is over (#1484): its result with five who took part and with
+  // fewer, and the quiz to play.
+  { path: '/fans/fantest/2025-03', status: 200 },
+  { path: '/fans/fantest/2025-01', status: 200 },
+  { path: '/fans/fantest/2025-03?spelen=1', status: 200 },
   { path: '/fans/fantest/onzin', status: 404 },
   // The page of the link in a reminder: without a good code it says the link does not work.
   { path: '/fans/herinnering/uitzetten', status: 200 },

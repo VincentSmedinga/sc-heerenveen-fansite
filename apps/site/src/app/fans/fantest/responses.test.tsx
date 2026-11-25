@@ -10,10 +10,14 @@ import { eq } from 'drizzle-orm'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import sitemap from '#src/app/sitemap'
 import { fantestData } from '#src/fans/fantest-data'
 
+import { checkQuizAction } from './[maand]/actions'
+import FantestMonthPage, { generateMetadata as monthMetadata } from './[maand]/page'
 import { submitQuizAction } from './actions'
 import FantestPage, { generateMetadata } from './page'
+import RankingPage from './ranglijst/page'
 
 const { context, currentSupporter } = vi.hoisted(() => ({
   context: { db: undefined as unknown },
@@ -115,8 +119,27 @@ async function responses() {
   const sent = await submitQuizAction(gap, form).then(String, (error: Error) => error.message)
   const after = await page()
   const data = await fantestData(database.db, supporterId)
+  // Every other page of the Fantest that could show the running month (issue 1484): its own
+  // page, also to play it, the action of that page, the ranking and the sitemap.
+  const params = Promise.resolve({ maand: quiz.month })
+  const refusal = (promise: Promise<unknown>) =>
+    promise.then(
+      () => 'shown',
+      (error: Error) => error.message,
+    )
+  const playForm = new FormData()
 
-  return { after, data, formProps: [...formProps], gap, metadata, open, sent, visitor }
+  playForm.set('maand', quiz.month)
+  const month = {
+    action: await refusal(checkQuizAction({ answers: {}, checked: false, errors: {} }, playForm)),
+    metadata: await refusal(monthMetadata({ params })),
+    page: await refusal(FantestMonthPage({ params, searchParams: Promise.resolve({}) })),
+    play: await refusal(FantestMonthPage({ params, searchParams: Promise.resolve({ spelen: '1' }) })),
+  }
+  const ranking = renderToStaticMarkup(await RankingPage({ searchParams: Promise.resolve({}) }))
+  const addresses = (await sitemap()).map((entry) => entry.url).filter((url) => url.includes('/fans/'))
+
+  return { addresses, after, data, formProps: [...formProps], gap, metadata, month, open, ranking, sent, visitor }
 }
 
 describe('the responses of the quiz while the month runs', () => {
@@ -136,6 +159,8 @@ describe('the responses of the quiz while the month runs', () => {
     expect(first.after).toContain('>1 van 10<')
     expect(first.sent).toBe('redirect /fans/fantest?verstuurd=1')
     expect(second).toEqual(first)
+    expect(Object.values(first.month)).toEqual(Array.from({ length: 4 }, () => 'NEXT_NOT_FOUND'))
+    expect(first.addresses.join()).not.toContain('2026-11')
     expect(JSON.stringify(first)).not.toMatch(/slottekst|correct|goed antwoord/i)
   })
 })

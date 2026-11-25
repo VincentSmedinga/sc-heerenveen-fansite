@@ -35,12 +35,17 @@ export type QuizQuestionProps = Omit<ComponentPropsWithoutRef<'div'>, 'aria-desc
 
 /**
  * What a question looks like after it is checked: which answer is right and which one the
- * player chose, both as a place from 1 to 4, and how many percent of the visitors of then
- * chose each answer. Without `percentages` the card shows none.
+ * player chose, both as a place from 1 to 4, and how many percent of the others chose each
+ * answer. Without `percentages` the card shows none.
  */
 export type QuizQuestionResult = {
-  /** The place (1 to 4) of the answer the player chose. */
-  chosen: number
+  /** The question was cancelled: no answer is marked, and every choice is good. */
+  allCorrect?: boolean | undefined
+  /**
+   * The place (1 to 4) of the answer the player chose. Without it, the card is for somebody who
+   * only reads: it names the right answer and has no "Goed." or "Fout.".
+   */
+  chosen?: number | undefined
   /** The place (1 to 4) of the right answer. */
   correct: number
   /** The percentage of each answer, in the order of the answers. */
@@ -54,8 +59,10 @@ export type QuizQuestionResult = {
  * arrow keys move between the answers), and a question has its own error that the group points
  * to. With `result` it shows the same question after it is checked: the right answer in bold
  * and green, a wrong choice of the player in red, the percentage of each answer, and under them
- * "Goed." or "Fout. Het goede antwoord is …". Colour is never the only sign: the words, the
- * bold and the percentage say the same. quiz-question.css gives it its look.
+ * "Goed." or "Fout. Het goede antwoord is …", and without a choice "Het goede antwoord is …".
+ * Of a cancelled question (`allCorrect`) no answer is marked, and the card says that every
+ * answer counts. Colour is never the only sign: the words, the bold and the percentage say the
+ * same. quiz-question.css gives it its look.
  */
 export const QuizQuestion = ({
   answers,
@@ -114,7 +121,7 @@ export const QuizQuestion = ({
           <ul aria-labelledby={`${id}-question`} className="hf-quiz-question-answers" role="list">
             {answers.map((answer, index) => {
               const place = index + 1
-              const isCorrect = place === result.correct
+              const isCorrect = !result.allCorrect && place === result.correct
               const isChosen = place === result.chosen
               const percentage = result.percentages?.[index]
 
@@ -124,7 +131,7 @@ export const QuizQuestion = ({
                     'hf-quiz-question-answer',
                     'hf-quiz-question-checked',
                     isCorrect && 'hf-quiz-question-correct',
-                    isChosen && !isCorrect && 'hf-quiz-question-wrong',
+                    isChosen && !isCorrect && !result.allCorrect && 'hf-quiz-question-wrong',
                   )}
                   key={answer + index}
                 >
@@ -132,7 +139,9 @@ export const QuizQuestion = ({
                     {answer}
                     {isChosen ? <span className="hf-quiz-question-mark">Jouw keuze</span> : null}
                     {isCorrect ? <span className="hf-visually-hidden">, goed antwoord</span> : null}
-                    {isChosen && !isCorrect ? <span className="hf-visually-hidden">, fout antwoord</span> : null}
+                    {isChosen && !isCorrect && !result.allCorrect ? (
+                      <span className="hf-visually-hidden">, fout antwoord</span>
+                    ) : null}
                   </span>
                   {percentage === undefined ? null : <span className="hf-quiz-question-percentage">{percentage}%</span>}
                 </li>
@@ -140,16 +149,40 @@ export const QuizQuestion = ({
             })}
           </ul>
           <Text className="hf-quiz-question-verdict">
-            {result.chosen === result.correct ? (
-              <strong>Goed.</strong>
-            ) : (
-              <>
-                <strong>Fout.</strong> Het goede antwoord is {answers[result.correct - 1]}.
-              </>
-            )}
+            <QuizVerdict answers={answers} result={result} />
           </Text>
         </div>
       )}
     </div>
+  )
+}
+
+/** The line under a checked question. */
+const QuizVerdict = ({ answers, result }: { answers: QuizAnswers; result: QuizQuestionResult }) => {
+  if (result.allCorrect) {
+    return (
+      <>
+        {result.chosen === undefined ? null : (
+          <>
+            <strong>Goed.</strong>{' '}
+          </>
+        )}
+        Bij deze vraag telt elk antwoord als goed.
+      </>
+    )
+  }
+
+  const right = `Het goede antwoord is ${answers[result.correct - 1]}.`
+
+  if (result.chosen === undefined) {
+    return right
+  }
+
+  return result.chosen === result.correct ? (
+    <strong>Goed.</strong>
+  ) : (
+    <>
+      <strong>Fout.</strong> {right}
+    </>
   )
 }

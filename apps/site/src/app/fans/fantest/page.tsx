@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import { Card, Heading, Link, List, Page, Text } from '@fansite/design-system'
+import { Card, CardLink, Heading, KeyFigures, Link, List, Page, Text } from '@fansite/design-system'
 import { requireFansPart } from '@fansite/shared/fans-env'
 import { notFound } from 'next/navigation'
 import { Fragment } from 'react'
@@ -8,17 +8,18 @@ import { Fragment } from 'react'
 import { getDatabase } from '#src/database'
 import {
   archiveCredit,
-  type ArchiveMonth,
   averageText,
   capital,
   fantestPath,
   fantestRankingPath,
-  loadArchive,
+  mixedArchiveCredit,
   monthPath,
   monthSlug,
   monthTitle,
+  quizMinimum,
 } from '#src/fans/fantest'
 import { currentMonth, findEntry, loadMonthQuiz, type MonthQuiz } from '#src/fans/fantest-entry'
+import { type ArchiveMonth, averageOf, closedFigures, loadArchive, type MonthFigures } from '#src/fans/fantest-months'
 import { currentSupporter } from '#src/fans/require-supporter'
 import { mayTakePart } from '#src/fans/take-part'
 import { FocusOnLoad } from '#src/FocusOnLoad'
@@ -27,8 +28,11 @@ import { pageAreas } from '#src/page-areas'
 
 import { BlockedCard, JoinCard, Message, messages, ScoreCard } from './MonthQuizCards'
 import { MonthQuizForm } from './MonthQuizForm'
+import { Paragraphs } from './Paragraphs'
+import { participantsText } from './QuizResult'
 
-const areas = pageAreas({ main: ['month', 'archive'] })
+const areas = pageAreas({ main: ['month', 'latest', 'archive'] })
+const areasWithoutLatest = pageAreas({ main: ['month', 'archive'] })
 
 const messageId = 'fantest-melding'
 
@@ -50,9 +54,11 @@ export const generateMetadata = async (): Promise<Metadata> => {
  * The page of the Fantest. First the quiz of the editors for the running month (issue 1482): a
  * supporter who is logged in and may take part answers it once and then sees the score, a
  * visitor sees the introduction and the way in, and a blocked account an explanation. No right
- * answer is read for this page. Under it the archive (issue 1480): one card for each year, the
- * newest first, with a link for each month that has a quiz of the old fansite and, under it,
- * how the fans of then did on average. With the Fantest off the page is "niet gevonden".
+ * answer is read for this page. Then the figures of the last quiz of the editors that is over
+ * (issue 1484), with a link to its right answers. Under that the months that are over: one card
+ * for each year, the newest first, with a link for each month that has a quiz of the old
+ * fansite (issue 1480) or of the editors and, under it, the average. With the Fantest off the
+ * page is "niet gevonden".
  */
 export default async function FantestPage({
   searchParams,
@@ -63,12 +69,14 @@ export default async function FantestPage({
 
   const now = new Date()
   const { db } = getDatabase()
-  const [quiz, supporter, parameters, archive] = await Promise.all([
+  const [quiz, supporter, parameters, archive, figures] = await Promise.all([
     loadMonthQuiz(db, now),
     currentSupporter(now),
     searchParams,
-    loadArchive(db),
+    loadArchive(db, now),
+    closedFigures(),
   ])
+  const latest = archive.find((item) => item.source === 'redactie')
   const { month, year } = currentMonth(now)
   const when = monthTitle(year, month)
   // Only a supporter who may take part and did has an entry.
@@ -86,7 +94,7 @@ export default async function FantestPage({
   )
 
   return (
-    <Page.Main areas={areas}>
+    <Page.Main areas={latest === undefined ? areasWithoutLatest : areas}>
       <Page.Cell area="head">
         <Heading level={1}>Fantest</Heading>
         <Text appearance="intro">Elke maand tien vragen over sc Heerenveen.</Text>
@@ -114,13 +122,30 @@ export default async function FantestPage({
           <Link href={fantestRankingPath}>Ranglijst per jaar</Link>
         </Text>
       </Page.Cell>
+      {latest === undefined ? null : (
+        <Page.Cell area="latest">
+          <LatestResult figures={figures.get(latest.id)} month={latest} />
+        </Page.Cell>
+      )}
       <Page.Cell area="archive">
-        <Heading level={2}>Fantest van toen</Heading>
-        <Text>
-          Van december 2001 tot oktober 2005 had de Fansite elke maand een Fantest: tien vragen over de club. Speel ze
-          na. Je score van deze oude quizzen bewaren we niet.
-        </Text>
-        <Text appearance="meta">{archiveCredit}</Text>
+        {latest === undefined ? (
+          <>
+            <Heading level={2}>Fantest van toen</Heading>
+            <Text>
+              Van december 2001 tot oktober 2005 had de Fansite elke maand een Fantest: tien vragen over de club. Speel
+              ze na. Je score van deze oude quizzen bewaren we niet.
+            </Text>
+          </>
+        ) : (
+          <>
+            <Heading level={2}>Eerdere maanden</Heading>
+            <Text>
+              Speel een maand die voorbij is na: we bewaren je score dan niet. Van december 2001 tot oktober 2005 had de
+              Fansite elke maand een Fantest.
+            </Text>
+          </>
+        )}
+        <Text appearance="meta">{latest === undefined ? archiveCredit : mixedArchiveCredit}</Text>
         {byYear(archive).map(({ months, year: archiveYear }) => (
           <Card aria-labelledby={`fantest-${archiveYear}`} key={archiveYear}>
             <Heading id={`fantest-${archiveYear}`} level={3}>
@@ -130,11 +155,7 @@ export default async function FantestPage({
               {months.map((item) => (
                 <List.Item key={item.month}>
                   <Link href={monthPath(item.year, item.month)}>{capital(monthTitle(item.year, item.month))}</Link>
-                  {item.averageTenths === undefined ? null : (
-                    <Text appearance="meta">
-                      Toen gemiddeld {averageText(item.averageTenths)} van {item.questions}
-                    </Text>
-                  )}
+                  <Average figures={figures.get(item.id)} month={item} />
                 </List.Item>
               ))}
             </List>
@@ -142,6 +163,18 @@ export default async function FantestPage({
         ))}
       </Page.Cell>
     </Page.Main>
+  )
+}
+
+/** The line under a month in the list: how those who took part did on average. */
+function Average({ figures, month }: { figures: MonthFigures | undefined; month: ArchiveMonth }) {
+  const old = month.source === 'oude-fansite'
+  const tenths = old ? month.averageTenths : averageOf(figures)
+
+  return tenths === undefined ? null : (
+    <Text appearance="meta">
+      {old ? 'Toen gemiddeld' : 'Gemiddeld'} {averageText(tenths)} van {month.questions}
+    </Text>
   )
 }
 
@@ -188,10 +221,29 @@ function cardOf(
   )
 }
 
-/** Plain text as paragraphs: every line with text is one. */
-function Paragraphs({ text }: { text: string }) {
-  return text
-    .split('\n')
-    .filter((line) => line.trim() !== '')
-    .map((line, index) => <Text key={index}>{line}</Text>)
+/** How everybody did on the last quiz of the editors that is over, and the way to it. */
+function LatestResult({ figures, month }: { figures: MonthFigures | undefined; month: ArchiveMonth }) {
+  const when = monthTitle(month.year, month.month)
+  const average = averageOf(figures)
+  const participants = figures?.participants ?? 0
+
+  return (
+    <Card aria-labelledby="fantest-uitslag" surface="strong">
+      <Heading id="fantest-uitslag" level={2}>
+        Uitslag van {when}
+      </Heading>
+      {figures === undefined || average === undefined || participants < quizMinimum ? (
+        <Text>{participantsText(participants)}</Text>
+      ) : (
+        <KeyFigures
+          figures={[
+            { figure: averageText(average), label: 'gemiddeld', note: `van ${month.questions}` },
+            { figure: String(participants), label: 'deden mee', note: `in ${when}` },
+            { figure: String(figures.allRight), label: 'keer alles goed', note: `alle ${month.questions} goed` },
+          ]}
+        />
+      )}
+      <CardLink href={monthPath(month.year, month.month)}>Bekijk de goede antwoorden</CardLink>
+    </Card>
+  )
 }

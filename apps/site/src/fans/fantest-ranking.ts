@@ -1,12 +1,12 @@
 import type { Database } from '@fansite/db/client'
 
 import { quizEntries, quizQuestions, quizzes, supporters } from '@fansite/db/schema'
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 
 import { cacheFor } from '#src/cache'
 import { getDatabase } from '#src/database'
 
-import { currentMonth } from './fantest-entry'
+import { closedEditorsQuiz, countedScore } from './fantest-months'
 import { inRankings } from './rankings'
 
 // The ranking of the monthly Fantest per calendar year (issue 1483). Nothing of it is stored:
@@ -47,17 +47,10 @@ const fiveMinutes = 5 * 60 * 1000
  * a supporter who left their name out are not in it.
  */
 export async function loadMonthScores(db: Pick<Database, 'select'>, now = new Date()): Promise<MonthScore[]> {
-  const running = currentMonth(now)
-  // Of a question with "alles goed" every answer counts. The answers are in the order of the
-  // questions, and the places in the JSON start at zero.
-  const score = sql<number>`sum(case when ${quizQuestions.allCorrect}
-    or json_value(${quizEntries.answers}, concat('$[', ${quizQuestions.position} - 1, ']')) = ${quizQuestions.correctAnswer}
-    then 1 else 0 end)`.mapWith(Number)
-
   return db
     .select({
       month: quizzes.month,
-      score,
+      score: countedScore,
       screenName: supporters.screenName,
       supporterId: supporters.id,
       year: quizzes.year,
@@ -66,14 +59,7 @@ export async function loadMonthScores(db: Pick<Database, 'select'>, now = new Da
     .innerJoin(quizzes, eq(quizzes.id, quizEntries.quizId))
     .innerJoin(quizQuestions, eq(quizQuestions.quizId, quizzes.id))
     .innerJoin(supporters, eq(supporters.id, quizEntries.supporterId))
-    .where(
-      and(
-        eq(quizzes.source, 'redactie'),
-        eq(quizzes.status, 'published'),
-        sql`${quizzes.year} * 100 + ${quizzes.month} < ${running.year * 100 + running.month}`,
-        inRankings(),
-      ),
-    )
+    .where(and(closedEditorsQuiz(now), inRankings()))
     .groupBy(quizEntries.id, quizzes.year, quizzes.month, supporters.id, supporters.screenName)
 }
 

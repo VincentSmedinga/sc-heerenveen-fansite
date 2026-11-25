@@ -69,7 +69,7 @@ export function ScoreCard({ questions, score }: { questions: number; score: numb
           {score} van {questions}
         </Strong>
       </Text>
-      <Text>Welke antwoorden goed waren, zie je hier nu niet. Je doet één keer mee.</Text>
+      <Text>Welke antwoorden goed waren, zie je als de maand voorbij is. Je doet één keer mee.</Text>
     </Card>
   )
 }

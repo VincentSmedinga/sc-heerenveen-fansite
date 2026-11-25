@@ -6,7 +6,8 @@ import { getPublishedArticles } from '../articles'
 import { getDatabase } from '../database'
 import { reasonOf } from '../errors'
 import { fansPath } from '../fans-paths'
-import { fantestPath, loadArchive, monthPath } from '../fans/fantest'
+import { fantestPath, monthPath } from '../fans/fantest'
+import { loadArchive } from '../fans/fantest-months'
 import { urlOf } from '../metadata'
 import { getClubRecords, opponentsPath } from '../opponents'
 import { pages } from '../pages'
@@ -63,7 +64,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error(`Could not read the players for the sitemap: ${reasonOf(error)}`)
   }
 
-  // The months of the Fantest are public, the same for everyone and full of old quizzes.
+  // The months of the Fantest that are over are public: for a visitor the same for everyone.
   if (fans.fantest) {
     try {
       for (const { month, year } of await loadArchive(getDatabase().db)) {
