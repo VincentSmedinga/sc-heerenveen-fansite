@@ -65,10 +65,8 @@ describe('the tables that refer to a supporter', () => {
 })
 
 describe('the places of the games', () => {
-  it('are there for every game but Fantest, which keeps nothing of a supporter', () => {
-    expect(gamePlaces.map(({ part }) => part)).toEqual(
-      fansGames.filter(({ part }) => part !== 'fantest').map(({ part }) => part),
-    )
+  it('are there for every game', () => {
+    expect(gamePlaces.map(({ part }) => part)).toEqual(fansGames.map(({ part }) => part))
   })
 
   it('list only the games that are on, with nothing for a supporter who played nothing', async () => {
@@ -82,6 +80,10 @@ describe('the places of the games', () => {
     } finally {
       await database.drop()
     }
+  })
+
+  it('keep the answers to the Fantest in the table quiz_entries', () => {
+    expect(gamePlaces.find(({ part }) => part === 'fantest')?.tables).toEqual(['quiz_entries'])
   })
 
   it('keep the predictions in the table predictions, and the grades in coach_ratings and player_ratings', () => {

@@ -820,6 +820,13 @@
       "when": 1795564448743,
       "tag": "0116_add_editors_quiz",
       "breakpoints": true
+    },
+    {
+      "idx": 117,
+      "version": "5",
+      "when": 1795569098715,
+      "tag": "0117_add_quiz_entries",
+      "breakpoints": true
     }
   ]
 }

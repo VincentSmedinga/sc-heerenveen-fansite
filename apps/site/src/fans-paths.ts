@@ -13,7 +13,7 @@ export const fjouwerRulesAddress = `${rulesPath}#fjouwer`
 /** The page with the Uitblinker of each season (issue 1474). */
 export const yearWinnersPath = `${fansPath}/uitblinker/van-het-jaar`
 
-/** The games, in the order of the bar under the menu. Fantest is an archive, but a part too. */
+/** The games, in the order of the bar under the menu. */
 export const fansGames = [
   { href: `${fansPath}/prognose`, label: 'Prognose', part: 'prognose' },
   { href: `${fansPath}/uitblinker`, label: 'Uitblinker', part: 'uitblinker' },

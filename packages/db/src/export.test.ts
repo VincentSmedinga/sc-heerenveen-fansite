@@ -118,6 +118,10 @@ describe('exportPlan', () => {
     ).toEqual([])
   })
 
+  it('empties the table with the answers of supporters to the Fantest (issue 1482)', () => {
+    expect(exportPlan['quiz_entries']).toBe('structure')
+  })
+
   it('copies no reference to a supporter: a table of a game takes that column as NULL', () => {
     expect(copiedSupporterReferences(tables, exportPlan)).toEqual([])
   })
@@ -419,6 +423,12 @@ describe('exportDump', () => {
       await other.pool.query(
         "INSERT INTO supporter_login_attempts (address_hash, attempted_at) VALUES ('address-hash', '2026-11-10 08:00:00')",
       )
+      await other.pool.query(
+        "INSERT INTO quizzes (id, year, month, source, status) VALUES (7, 2099, 1, 'redactie', 'published')",
+      )
+      await other.pool.query(
+        "INSERT INTO quiz_entries (supporter_id, quiz_id, answers, score, submitted_at) VALUES (5, 7, '[1,2,3,4,1,2,3,4,1,2]', 6, '2099-01-02 08:00:00')",
+      )
 
       process.env['ROW_DUMP_URL'] = other.url
       await exportDump({ DATABASE_URL: other.url, MYSQLDUMP_COMMAND: writeRowDump(work) }, out, now)
@@ -431,6 +441,9 @@ describe('exportDump', () => {
       expect(text(), table).toContain(`CREATE TABLE \`${table}\``)
       expect(text(), table).not.toContain(`INSERT INTO \`${table}\``)
     }
+
+    expect(text()).toContain('CREATE TABLE `quiz_entries`')
+    expect(text()).not.toContain('INSERT INTO `quiz_entries`')
 
     // The dump does hold rows, so the search below means something.
     expect(text()).toContain('INSERT INTO `__drizzle_migrations`')

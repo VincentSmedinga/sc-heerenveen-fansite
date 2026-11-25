@@ -46,8 +46,10 @@ const open = [
   'app/fans/aanmelden/bevestigen/page.tsx',
   'app/fans/aanmelden/page.tsx',
   'app/fans/aanmelden/verstuurd/page.tsx',
-  // The archive of the Fantest is the same for everybody and keeps nothing of a visitor, so its
-  // pages and its action need no session (issue 1480).
+  // The archive of the Fantest is the same for everybody and keeps nothing of a visitor, so
+  // its pages and its action need no session (issue 1480). The page of the Fantest is public
+  // too: the quiz of the month shows only with a session, and its action calls
+  // requireSupporter.
   'app/fans/fantest/[maand]/actions.ts',
   'app/fans/fantest/[maand]/page.tsx',
   'app/fans/fantest/page.tsx',
@@ -137,6 +139,7 @@ beforeEach(() => {
   vi.stubEnv('FANS_PROGNOSE', 'on')
   vi.stubEnv('FANS_VIER', 'on')
   vi.stubEnv('FANS_UITBLINKER', 'on')
+  vi.stubEnv('FANS_FANTEST', 'on')
 })
 
 afterEach(() => {
@@ -195,13 +198,15 @@ describe('the pages of Fans', () => {
     routes
       .concat(actionFiles)
       .flatMap((file) =>
-        file.startsWith('app/fans/fjouwer/')
-          ? [[file, 'FANS_VIER']]
-          : file.startsWith('app/fans/prognose/')
-            ? [[file, 'FANS_PROGNOSE']]
-            : file.startsWith('app/fans/uitblinker/')
-              ? [[file, 'FANS_UITBLINKER']]
-              : [],
+        file.startsWith('app/fans/fantest/')
+          ? [[file, 'FANS_FANTEST']]
+          : file.startsWith('app/fans/fjouwer/')
+            ? [[file, 'FANS_VIER']]
+            : file.startsWith('app/fans/prognose/')
+              ? [[file, 'FANS_PROGNOSE']]
+              : file.startsWith('app/fans/uitblinker/')
+                ? [[file, 'FANS_UITBLINKER']]
+                : [],
       ),
   )('answer not found in %s while its game is off (%s) and accounts are on', async (file, setting) => {
     vi.stubEnv(setting ?? '', 'off')

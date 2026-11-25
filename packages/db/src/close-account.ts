@@ -6,6 +6,7 @@ import type { Database } from './client.ts'
 import {
   coachRatings,
   playerRatings,
+  quizEntries,
   supporterBlockedAddresses,
   supporterEmailChanges,
   supporterLoginLinks,
@@ -28,8 +29,9 @@ export function blockedAddressHash(email: string) {
  * It keeps nothing of the account, with one exception (issue 1458): of a blocked account it
  * keeps the SHA-256 of the address and the moment, in the same transaction, so the supporter
  * can't sign up again with it for 12 months, and it marks the grades of the account, for the
- * players and the head coach, as blocked, without a person, so they keep not counting (issues
- * 1476 and 1479). A caller doesn't have to do anything for that. It writes one line in the log,
+ * players and the head coach, and its answers to the Fantest as blocked, without a person, so
+ * they keep not counting (issues 1476, 1479 and 1482). A caller doesn't have to do anything for
+ * that. It writes one line in the log,
  * without the number, the name or the address. It gives whether there was an account to remove.
  */
 export async function closeAccount(db: Database, supporterId: number, now = new Date()): Promise<boolean> {
@@ -45,9 +47,10 @@ export async function closeAccount(db: Database, supporterId: number, now = new 
         .insert(supporterBlockedAddresses)
         .values({ addressHash: blockedAddressHash(account.email), blockedAt: now })
         .onDuplicateKeyUpdate({ set: { blockedAt: now } })
-      // The grades stay without a person, and keep not counting (issue 1476).
+      // The grades and answers stay without a person, and keep not counting (issue 1476).
       await tx.update(playerRatings).set({ blocked: true }).where(eq(playerRatings.supporterId, supporterId))
       await tx.update(coachRatings).set({ blocked: true }).where(eq(coachRatings.supporterId, supporterId))
+      await tx.update(quizEntries).set({ blocked: true }).where(eq(quizEntries.supporterId, supporterId))
     }
 
     await tx.delete(supporterEmailChanges).where(eq(supporterEmailChanges.supporterId, supporterId))

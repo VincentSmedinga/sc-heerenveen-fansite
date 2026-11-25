@@ -5,12 +5,12 @@ import { and, eq } from 'drizzle-orm'
 import path from 'node:path'
 
 /**
- * Two made-up quizzes of the Fantest, so the pages of the archive have something to show
- * (#1480): June 2003 with ten questions and the figures of 38 visitors, and September 2003
- * with a question left out and only three visitors, so the percentages and the average stay
- * away. A month that a development database already has (it imported the archive) keeps its
- * quiz. The checks put the rows in before the first test and take only these rows out after
- * the last one.
+ * The made-up quizzes of the Fantest: one of the editors for the running month and one for
+ * 2099, and two so the pages of the archive have something to show (#1480): June 2003 with ten
+ * questions and the figures of 38 visitors, and September 2003 with a question left out and
+ * only three visitors, so the percentages and the average stay away. A month that a
+ * development database already has keeps its quiz. The checks put the rows in before the first
+ * test and take only these rows out after the last one.
  */
 const months = [
   { average: 41, missing: [], month: 6, participants: 38 },
@@ -67,7 +67,18 @@ export async function addFantest() {
       added.push(insertId)
     }
 
-    added.push(await addEditorsQuiz(db))
+    added.push(await addEditorsQuiz(db, editorsMonth))
+    // The quiz of the running month, which a supporter takes part in (#1482). A month that has
+    // one keeps it.
+    const running = currentMonth()
+    const [taken] = await db
+      .select({ id: quizzes.id })
+      .from(quizzes)
+      .where(and(eq(quizzes.year, running.year), eq(quizzes.month, running.month)))
+
+    if (taken === undefined) {
+      added.push(await addEditorsQuiz(db, running))
+    }
   } finally {
     await close()
   }
@@ -107,12 +118,14 @@ export async function editorsQuizId() {
 }
 
 /** A published quiz of the editors with ten made-up questions, which nobody filled in. */
-async function addEditorsQuiz(db: ReturnType<typeof connectToDatabase>['db']) {
+async function addEditorsQuiz(db: ReturnType<typeof connectToDatabase>['db'], when: { month: number; year: number }) {
   // One that a check that stopped halfway left behind goes first.
-  await db.delete(quizzes).where(and(eq(quizzes.year, editorsMonth.year), eq(quizzes.month, editorsMonth.month)))
+  await db
+    .delete(quizzes)
+    .where(and(eq(quizzes.year, when.year), eq(quizzes.month, when.month), eq(quizzes.source, 'redactie')))
 
   const [{ insertId }] = await db.insert(quizzes).values({
-    ...editorsMonth,
+    ...when,
     closingText: 'Een verzonnen slottekst.',
     intro: 'Een verzonnen inleiding over Testclub.',
     source: 'redactie',
@@ -149,4 +162,14 @@ function connectToDatabase() {
   }
 
   return connect(readDatabaseEnv().DATABASE_URL)
+}
+
+/** The year and month in Dutch time, as the site counts them. */
+function currentMonth() {
+  const [year = 0, month = 0] = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Amsterdam' })
+    .format(new Date())
+    .split('-')
+    .map(Number)
+
+  return { month, year }
 }

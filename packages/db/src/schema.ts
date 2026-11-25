@@ -3430,7 +3430,7 @@ export const quizLimits = { answer: 200, closingText: 2000, intro: 2000, questio
  * `redactie` in the admin (issue 1481), with an introduction and a closing text in plain text.
  * `participants` is how many took part, with their average score over the questions in tenths
  * (41 is 4,1). A quiz of the editors with participants is locked: its questions no longer
- * change. The table keeps nothing of a person.
+ * change. The table keeps nothing of a person; what a supporter sends in is in `quiz_entries`.
  */
 export const quizzes = mysqlTable(
   'quizzes',
@@ -3484,3 +3484,34 @@ export const quizQuestions = mysqlTable(
 )
 
 export type QuizQuestion = typeof quizQuestions.$inferSelect
+
+/**
+ * What a supporter sent in for a quiz of the editors (issue 1482): the place (1 to 4) of the
+ * chosen answer of each of the ten questions, in their order, and the score the server counted
+ * at that moment. A supporter has one row for each quiz and can't change it. `supporter_id` is
+ * emptied when the account is closed (`ON DELETE SET NULL`), so the answers stay without a link
+ * to a person. `blocked` is set when the account is closed while the editors had blocked it, so
+ * the entry can be left out of the figures of the month. Times are UTC.
+ */
+export const quizEntries = mysqlTable(
+  'quiz_entries',
+  {
+    id: int('id', { unsigned: true }).autoincrement().primaryKey(),
+    supporterId: int('supporter_id', { unsigned: true }).references(() => supporters.id, { onDelete: 'set null' }),
+    quizId: int('quiz_id', { unsigned: true })
+      .notNull()
+      .references(() => quizzes.id, { onDelete: 'cascade' }),
+    answers: json('answers').$type<number[]>().notNull(),
+    score: tinyint('score', { unsigned: true }).notNull(),
+    blocked: boolean('blocked').notNull().default(false),
+    submittedAt: datetime('submitted_at').notNull(),
+  },
+  (table) => [
+    unique('quiz_entries_supporter_id_quiz_id_unique').on(table.supporterId, table.quizId),
+    index('quiz_entries_quiz_id_idx').on(table.quizId),
+    check('quiz_entries_score_in_range', sql`${table.score} <= 10`),
+    check('quiz_entries_ten_answers', sql`json_length(${table.answers}) = 10`),
+  ],
+)
+
+export type QuizEntry = typeof quizEntries.$inferSelect

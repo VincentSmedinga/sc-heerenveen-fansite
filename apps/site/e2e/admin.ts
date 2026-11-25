@@ -14,10 +14,11 @@ import {
   predictions,
   sources,
   staff,
+  supporterLoginAttempts,
   supporters,
 } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
-import { and, eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray, isNull } from 'drizzle-orm'
 import path from 'node:path'
 
 import { hashOf, newToken } from '../src/beheer/sessions'
@@ -368,6 +369,20 @@ export async function correctPlayedResult(matchId: number, goalsFor: number, goa
 
   try {
     await db.update(matches).set({ goalsAgainst, goalsFor }).where(eq(matches.id, matchId))
+  } finally {
+    await close()
+  }
+}
+
+/**
+ * Forgets how many sign-ups this hour had, which counts for the whole site. A check that makes
+ * an account calls it first, so it doesn't use up what the other checks need.
+ */
+export async function forgetSignUps() {
+  const { close, db } = connect(localDatabaseUrl())
+
+  try {
+    await db.delete(supporterLoginAttempts).where(isNull(supporterLoginAttempts.addressHash))
   } finally {
     await close()
   }

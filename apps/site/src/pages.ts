@@ -97,7 +97,7 @@ export const pages = [
   },
   {
     description:
-      'De Fantest van toen: de quizzen van de Fansite, elke maand van december 2001 tot oktober 2005. Speel ze na, zonder dat we je score bewaren.',
+      'De Fantest: elke maand tien vragen over sc Heerenveen, en de quizzen van de Fansite van 2001 tot 2005 om na te spelen.',
     path: '/fans/fantest',
   },
   {

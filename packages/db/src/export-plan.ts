@@ -57,8 +57,10 @@ export const supporterTables = [
  * no other table needs their numbers to make sense. The tables are there, so signing up on the
  * owner's computer makes a new account in the copy.
  *
- * The rule for the tables of the games that are still to come: a table that refers to a
- * supporter comes along, but without that reference. The column becomes `NULL` in `replace`, so
+ * `quiz_entries` is `structure` too (issue 1482): the copy gets no answers of supporters.
+ *
+ * The rule for the other tables of the games: a table that refers to a supporter comes along,
+ * but without that reference. The column becomes `NULL` in `replace`, so
  * the predictions and the marks can be looked at, and belong to nobody. export.test.ts fails
  * for a column that refers to `supporters` and is copied as it is.
  *
@@ -164,6 +166,8 @@ export const exportPlan: Readonly<Record<string, ExportRule>> = {
     ],
     replace: { supporter_id: 'NULL' },
   },
+  // What supporters sent in for a quiz: the copy gets no row of it (issue 1482).
+  quiz_entries: 'structure',
   quiz_questions: 'copy',
   quizzes: 'copy',
   robots_txt: 'copy',

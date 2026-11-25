@@ -1128,11 +1128,11 @@ Met de Fantest uit (`FANS_FANTEST` of `FANS_ACCOUNTS`) staat het scherm niet in 
   Publiceren, en elke wijziging van een gepubliceerde quiz, vraagt tien vragen met vier antwoorden en een goed antwoord (`validateQuiz`).
   Publiceren kan tot middernacht, Nederlandse tijd, aan het eind van de maand.
 - De knoppen "Vraag 3 omhoog" en "Vraag 3 omlaag" bewaren het formulier en wisselen twee vragen.
-- Zodra `participants` boven nul staat (dat telt #1482), is de quiz vergrendeld: alleen de slottekst en "alles goed" per vraag veranderen nog.
+- Zodra `participants` boven nul staat (dat telt een supporter die meedoet, zie _De Fantest van de maand_), is de quiz vergrendeld: alleen de slottekst en "alles goed" per vraag veranderen nog.
 - Het voorbeeld toont de opgeslagen quiz met `QuizQuestion`, zonder formulier en zonder de goede antwoorden.
 - Elke wijziging komt in `audit_log` als `quiz.create`, `quiz.edit` of `quiz.publish`, met de maand en wat er veranderde in `detail`.
 
-Fans zien een quiz van de redactie nog nergens: het archief leest alleen de bron `oude-fansite`.
+Fans zien de quiz van de lopende maand op `/fans/fantest`; het archief leest alleen de bron `oude-fansite`.
 
 ### Artikelen schrijven
 
@@ -1556,13 +1556,31 @@ Het gemiddelde van de trainer staat als laatste regel in de tabel met gemiddelde
 Op `/fans` staat een kaart van het spel (`app/fans/UitblinkerCard.tsx`) en onder "Alles wat we van je bewaren" de eigen cijfers (`src/fans/rating-data.ts`).
 `e2e/fans-rating.spec.ts` zet met `addRatingMatch` (`e2e/admin.ts`) een gespeelde wedstrijd met verslag in de database, omdat de verzonnen gegevens er geen hebben, en met `coach: true` ook een hoofdtrainer.
 
+### De Fantest van de maand
+
+`/fans/fantest` (`app/fans/fantest`) toont boven het archief de gepubliceerde quiz van de redactie van de lopende maand, in Nederlandse tijd (#1482).
+Een bezoeker ziet de inleiding en de weg naar inloggen of aanmelden, een geblokkeerd account een uitleg, en een supporter de tien vragen of, na het meedoen, de score.
+`src/fans/fantest-entry.ts` leest de quiz zonder goede antwoorden (`loadMonthQuiz`) en bewaart wat een supporter verstuurt (`submitEntry`).
+
+- `submitEntry` vergrendelt de rij van de quiz, controleert de maand en het account, rekent de score uit met `scoreQuiz` en telt `participants` op, in één transactie.
+  Een vraag met "alles goed" telt voor elk antwoord.
+- Een supporter doet één keer mee per quiz: `quiz_entries` heeft een unieke sleutel op `supporter_id` en `quiz_id`.
+- Het formulier stuurt een kenmerk van de vragen mee (`versie`).
+  Zijn de vragen intussen gewijzigd, dan wordt er niets bewaard.
+- Zolang de maand loopt, staat het goede antwoord in geen enkele respons.
+  `app/fans/fantest/responses.test.tsx` maakt elke respons twee keer, met een andere sleutel en dezelfde score, en eist dat ze gelijk zijn.
+- De antwoorden en de score staan onder "Alles wat we van je bewaren" (`src/fans/fantest-data.ts`).
+  Bij het opheffen van het account wordt `supporter_id` leeg; van een geblokkeerd account wordt de rij ook als `blocked` gemarkeerd.
+- De kopie van acceptatie krijgt `quiz_entries` zonder rijen.
+
 ### De Fantest van toen
 
-`/fans/fantest` (`app/fans/fantest`) is het archief van de quizzen van de oude Fansite, en `/fans/fantest/<jaar>-<maand>` (`app/fans/fantest/[maand]`) speelt één maand.
+Onder de quiz van de maand staat op `/fans/fantest` het archief van de quizzen van de oude Fansite, en `/fans/fantest/<jaar>-<maand>` (`app/fans/fantest/[maand]`) speelt één maand.
 De pagina's lezen alleen `src/fans/fantest.ts`: de lijst (`loadArchive`), een quiz (`loadQuiz`) en het nakijken (`checkQuiz`, met `scoreQuiz` uit `packages/shared`).
 `loadArchive` en `loadQuiz` lezen alleen quizzen met de bron `oude-fansite`, zodat de goede antwoorden van een quiz van de redactie de server niet verlaten.
-Het formulier (`QuizForm.tsx`) is een gewone `POST` die zonder JavaScript werkt, en de actie (`actions.ts`) bewaart niets: geen antwoord, geen score en geen cookie.
-Daarom is het archief het enige onderdeel van Fans dat niet noindex is: de pagina's zijn voor iedereen gelijk, staan in de sitemap, en `robots.txt` staat `/fans/fantest` toe onder het geweigerde `/fans/`.
+Het formulier (`[maand]/QuizForm.tsx`) is een gewone `POST` die zonder JavaScript werkt, en de actie (`[maand]/actions.ts`) bewaart niets: geen antwoord, geen score en geen cookie.
+Voor een bezoeker zijn de pagina's van de Fantest daarom niet noindex: ze zijn voor iedereen gelijk, staan in de sitemap, en `robots.txt` staat `/fans/fantest` toe onder het geweigerde `/fans/`.
+Is een supporter ingelogd, dan zet `/fans/fantest` zelf `noindex`.
 Percentages en "gemiddeld" staan er alleen bij minstens vijf deelnemers (`quizMinimum`).
 De vragen komen uit `fantest.json` van de oude Fansite, via de stap `fantest` van `import.mjs --old-site` (zie de README van de importer).
 `e2e/fantest.ts` zet twee verzonnen quizzen in de database, voor `e2e/pages.spec.ts` en `e2e/fantest.spec.ts`.

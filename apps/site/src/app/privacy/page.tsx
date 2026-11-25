@@ -19,7 +19,7 @@ const EmailLink = () => (
 )
 
 /** The part about accounts of supporters (#1456). */
-const AccountSection = ({ reminder }: { reminder: boolean }) => (
+const AccountSection = ({ fantest, reminder }: { fantest: boolean; reminder: boolean }) => (
   <>
     <Heading anchor id="account" level={2}>
       Als je een account maakt
@@ -32,6 +32,12 @@ const AccountSection = ({ reminder }: { reminder: boolean }) => (
       we gebruiken het nergens anders voor dan voor de berichten hieronder. De dag van je laatste bezoek gebruiken we om
       accounts te vinden die niemand meer gebruikt.
     </Text>
+    {fantest ? (
+      <Text>
+        Doe je mee aan de Fantest, dan bewaren we je antwoorden, je score en het moment waarop je ze verstuurde. Speel
+        je een quiz van toen, dan bewaren we niets.
+      </Text>
+    ) : null}
     <Text>
       We bewaren geen IP-adres, geen gegevens over je browser, geen echte naam, geboortedatum of woonplaats, en geen
       wachtwoord. Je logt in met een link of een code die we mailen. Om te voorkomen dat iemand een mailbox volstuurt,
@@ -147,7 +153,7 @@ export default function PrivacyPage() {
             nodig voor iets waar je zelf om vraagt, en het volgt niemand.
           </Text>
         ) : null}
-        {accounts ? <AccountSection reminder={isFansPartOn('prognose')} /> : null}
+        {accounts ? <AccountSection fantest={isFansPartOn('fantest')} reminder={isFansPartOn('prognose')} /> : null}
         <Heading anchor id="berichten" level={2}>
           Als je ons een bericht stuurt
         </Heading>
