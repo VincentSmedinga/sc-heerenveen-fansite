@@ -4,25 +4,17 @@ import { describe, expect, it } from 'vitest'
 import { yearWinnersPath } from './fans-paths'
 import { SeasonRankingCard, YearWinnerCards } from './SupporterRatingsCards'
 
-const options = [
-  { label: '2026/27', value: '2026-27' },
-  { label: '2005/06', value: '2005-06' },
-]
-
 const card = (props: Partial<Parameters<typeof SeasonRankingCard>[0]> = {}) =>
   renderToStaticMarkup(
     <SeasonRankingCard
-      action="/spelers/cijfers"
-      fields={{}}
+      current
       oldSource={false}
-      options={options}
       rows={[
         { average: 7.25, matches: 9, name: 'Speler A', place: 1, playerId: 1, ratings: 200 },
         { average: 7, matches: undefined, name: 'Speler B', place: 2, playerId: null, ratings: undefined },
       ]}
       season="2026/27"
       seasonOnly={false}
-      value="2026-27"
       {...props}
     />,
   )
@@ -58,18 +50,29 @@ describe('the card Cijfers van de fans', () => {
     expect(card()).not.toContain('Cijfers van bezoekers')
   })
 
-  it('has the season picker and the link to the Uitblinkers of the year', () => {
+  it('has no season picker of its own, and links to the Uitblinkers of the year', () => {
     const html = card()
 
-    expect(html).toContain('Seizoen van de cijfers kiezen')
+    expect(html).not.toContain('<form')
+    expect(html).not.toContain('<select')
     expect(html).toContain(`href="${yearWinnersPath}"`)
     expect(html).toContain('Uitblinker van het <span class="hf-icon-tail">jaar')
   })
 
-  it('says there are no ratings, instead of an empty table, for a season without a player', () => {
+  it('says there was no election in an earlier season without a player', () => {
+    const html = card({ current: false, rows: [], season: '2012/13' })
+
+    expect(html).toContain('<p>Geen verkiezing in dit seizoen</p>')
+    expect(html).not.toContain('nog geen cijfers')
+    expect(html).not.toContain('<table')
+    expect(html).toContain(`href="${yearWinnersPath}"`)
+  })
+
+  it('says there are no ratings yet, instead of an empty table, in the running season', () => {
     const html = card({ rows: [] })
 
     expect(html).toContain('Dit seizoen zijn er nog geen cijfers.')
+    expect(html).not.toContain('Geen verkiezing')
     expect(html).not.toContain('<table')
     expect(html).toContain(`href="${yearWinnersPath}"`)
   })

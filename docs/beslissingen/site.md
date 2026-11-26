@@ -7688,6 +7688,7 @@
 - **Later:** zie _De pagina Uitblinker van het jaar toont een kaart per seizoen en de Uitblinker van de Uitblinkers_ (24 november 2026): de pagina heeft geen tabel meer.
 - **Later:** sinds 25 november 2026 toont de tabel eerst vijf spelers, met de rest achter een uitklapper (zie _De ranglijst van de fans op Spelers › Cijfers toont de top 5_, #1647).
 - **Later:** zie _Op de pagina Uitblinker staat altijd de kaart Eerdere winnaars_ (25 november 2026): de sterke kaart "Eerdere winnaars" vervangt de zachte kaart en staat er altijd, ook zonder uitblinker.
+- **Later:** zie _De kaart Cijfers van de fans volgt het seizoen van de pagina_ (26 november 2026): de eigen seizoenkeuze en `?seizoen=` zijn weg.
 
 ## De hoofdtrainer krijgt in de Uitblinker een cijfer, als laatste groep van het formulier
 
@@ -8495,3 +8496,13 @@
   Uitklappers die iets anders verbergen dan de rest van dezelfde lijst blijven een `Disclosure`.
 - **Waarom:** het is één lijst, met één bijschrift, doorlopende plaatsen en sorteren over alle regels.
 - **Alternatieven:** de twee delen houden.
+
+## De kaart Cijfers van de fans volgt het seizoen van de pagina
+
+- **Datum:** 26 november 2026
+- **Besluit:** de kaart "Cijfers van de fans" heeft geen eigen keuze voor het seizoen en geen `?seizoen=` meer, en toont altijd het seizoen van de pagina (#1691).
+  Telt er in het lopende seizoen nog geen speler, dan staat er "Dit seizoen zijn er nog geen cijfers.", en in een eerder seizoen "Geen verkiezing in dit seizoen".
+  Een oud adres met `?seizoen=` toont het seizoen van de pagina.
+- **Waarom:** er is een keuze per pagina, en de kaart toont nooit een ander seizoen dan de rest.
+- **Nadeel:** cijfers van een seizoen zonder wedstrijden in de database zijn op deze pagina niet meer te zien.
+- **Alternatieven:** de eigen keuze houden.

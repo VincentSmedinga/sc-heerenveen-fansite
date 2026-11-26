@@ -1617,7 +1617,8 @@ Een stap van de import (`closeRatingWindows`) zet de gemiddelden na het sluiten 
 De cijfers van een geblokkeerd account tellen niet mee in de gemiddelden van de spelers en de trainer.
 Blokkeren en vrijgeven rekenen de gemiddelden van de gesloten vensters opnieuw uit (`recountRatingsOf`), en `closeAccount` bewaart de markering `blocked` bij de cijfers in `player_ratings` en `coach_ratings` van een geblokkeerd account dat wordt opgeheven.
 Het gemiddelde van de trainer staat als laatste regel in de tabel met gemiddelden (`RatingsTable` in `src/MatchRatingsCard.tsx`), na een zwaardere lijn, ook bij oude wedstrijden, en hij krijgt nooit de ster.
-Op Spelers › Cijfers toont de kaart "Cijfers van de fans" (`SeasonRankingCard`) de eerste vijf spelers van de stand, en de knop "Toon alle N spelers" zet de rest in dezelfde tabel (`ShowAll`, #1647 en #1690).
+Op Spelers › Cijfers toont de kaart "Cijfers van de fans" (`SeasonRankingCard`) de stand van het seizoen van de pagina (#1691): in het lopende seizoen zonder speler die telt "Dit seizoen zijn er nog geen cijfers.", in een eerder seizoen "Geen verkiezing in dit seizoen".
+Ze toont de eerste vijf spelers van de stand, en de knop "Toon alle N spelers" zet de rest in dezelfde tabel (`ShowAll`, #1647 en #1690).
 Op `/fans` staat een kaart van het spel (`app/fans/uitblinker-card.ts`, zie _De pagina Fans_) en onder "Alles wat we van je bewaren" de eigen cijfers (`src/fans/rating-data.ts`).
 `e2e/fans-rating.spec.ts` zet met `addRatingMatch` (`e2e/admin.ts`) een gespeelde wedstrijd met verslag in de database, omdat de verzonnen gegevens er geen hebben, en met `coach: true` ook een hoofdtrainer.
 
