@@ -6,8 +6,10 @@
 // the site: the homepage keeps its headlines for five minutes. `--remove` takes them out again,
 // the season before this one only while all its matches are made up, and a list of stadiums
 // and a list of names of its own for SV Proefdorp, and made-up persons without a line or a
-// country for the work list of the admin. The database holds nothing else of them: it is the
-// one you develop with.
+// country for the work list of the admin. The season before this one also gets a made-up
+// squad, for the card Veranderingen in de selectie on /spelers; `--remove` takes out all
+// players of that season when the made-up players who left are among them. The database holds
+// nothing else of them: it is the one you develop with.
 //
 //   pnpm --filter site test-data
 //   pnpm --filter site test-data --remove

@@ -130,6 +130,7 @@ Kies een andere map met `--out <map>`.
 `--full-page` neemt de hele pagina in plaats van het eerste scherm.
 
 De homepage (met de kaart van het artikel), `/redactie/e2e-artikel`, `/nieuws`, `/nieuws/podcasts` en de pagina van een eerder seizoen, `/wedstrijden/<seizoen>`, hebben de verzonnen gegevens van de toegankelijkheidscontrole nodig (zie _Toegankelijkheid controleren_), en `pnpm test:a11y` haalt ze er na afloop weer uit.
+De kaart "Veranderingen in de selectie" op `/spelers` heeft de verzonnen selectie van het seizoen ervoor nodig (`e2e/earlier-squad.ts`).
 De werklijst `/beheer/spelers/kwaliteit/personen/snel` heeft de verzonnen personen zonder linie of land nodig (`e2e/persons.ts`).
 `pnpm --filter site test-data` zet ze in de database van je `.env`, en `pnpm --filter site test-data --remove` haalt ze er weer uit.
 Gebruik daarvoor de database waarmee je ontwikkelt, niet die van de controle of van de hosting.
