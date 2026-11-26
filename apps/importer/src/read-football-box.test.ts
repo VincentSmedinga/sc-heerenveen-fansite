@@ -48,6 +48,8 @@ describe('the pages with football box blocks', () => {
       [
         ['nl', 'Play-offs Nederlands voetbal 2008'],
         ['en', '2007–08 UEFA Cup first round'],
+        ['nl', 'Eredivisie 2007/08 (mannenvoetbal)'],
+        ['nl', 'KNVB Beker 2007/08 (mannen)'],
       ],
       [
         ['nl', 'KNVB Beker 2008/09 (mannen)'],
@@ -63,8 +65,11 @@ describe('the pages with football box blocks', () => {
     expect(footballBoxPages(season)).toEqual([])
   })
 
-  it('reads 97 matches from the seven pages, each with a result', () => {
-    const matches = footballBoxTitles.flatMap((title) => read(title))
+  it('reads 97 matches from the seven pages of blocks and the table of 2008/09, each with a result', () => {
+    // The two pages with tables per round have a reader of their own (`read-round-tables.ts`).
+    const matches = footballBoxTitles
+      .filter((title) => pageOf(title).format === undefined)
+      .flatMap((title) => read(title))
 
     expect(matches).toHaveLength(97)
     expect(matches.every((match) => match.status === 'played' && match.goalsFor !== null)).toBe(true)

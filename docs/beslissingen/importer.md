@@ -3239,6 +3239,7 @@
 - **Alternatieven:** alleen imports (de gaten blijven); wachten tot vrijwilligers Wikipedia aanvullen (kost jaren en geeft de redactie geen controle).
 - **Later:** de import van Wikipedia meldt sinds 9 november 2026 geen verschil per veld meer voor een wedstrijd van de redactie die hij op datum en club vindt, maar één regel dat hij haar overslaat; zie _De import slaat een wedstrijd van de redactie over_.
   Voor 63 wedstrijden van 2007/08 tot en met 2009/10 is er sindsdien wel een bron die de import leest (#1001).
+- **Later:** sinds 26 november 2026 leest de import alle wedstrijden van 2007/08; zie _De competitie van 2007/08 komt uit het programma op de pagina van de Eredivisie_ (#1676).
 
 ## De bronregel van een wedstrijd is een kolom van `matches`
 
@@ -3334,6 +3335,8 @@
 - **Alternatieven:** een kruistabel met alleen een uitslag (geen datum, dus geen wedstrijd); alle wedstrijden met de hand invoeren (63 wedstrijden invoeren kost de redactie veel tijd).
 - **Later:** sinds 9 november 2026 leest dezelfde lezer ook een zevende pagina, met de 34 competitiewedstrijden van 2008/09 in een tabel; zie _De competitie van 2008/09 komt uit de tabel op de seizoenspagina van de club_.
   Samen zijn het 97 wedstrijden.
+- **Later:** sinds 26 november 2026 heeft 2007/08 ook de competitie en de beker, uit twee pagina's met tabellen per ronde, en `league_results` krijgt de uitslagen van dat seizoen; zie _De competitie van 2007/08 komt uit het programma op de pagina van de Eredivisie_ (#1676).
+  Samen zijn het 133 wedstrijden, en de pagina's van 2007/08 met tabellen hebben de soort `programme` en `cup`.
 
 ## De Johan Cruijff Schaal en de play-offs voor de Champions League zijn competities
 
@@ -4474,6 +4477,7 @@
 - **Waarom:** nl.wikipedia is de goedgekeurde bron voor wedstrijdgegevens, de pagina's hebben de eindstand, en onze wedstrijden zijn voor 1991/92 en 2007/08 te onvolledig om er een stand uit te rekenen.
   In een proef op 18 november 2026 las de lezer van de oudere tabel 18 van de 20 pagina's zoals ze waren; twee kleine aanpassingen (het jaar in de kop van 1998/99, het gedachtestreepje in 2003/04) deden de rest.
 - **Alternatieven:** de stand uit onze wedstrijden berekenen (faalt bij 1991/92 en 2007/08 en geeft nooit de punten of het doelsaldo van de pagina); de Engelse Wikipedia (alleen nodig als een Nederlandse pagina de stand niet heeft, en geen enkele zat in dat geval).
+- **Later:** sinds 26 november 2026 hebben we alle wedstrijden van 2007/08; zie _De competitie van 2007/08 komt uit het programma op de pagina van de Eredivisie_ (#1676).
 
 - **Datum:** 18 november 2026
 - **Besluit:** `standings` krijgt een kolom `competition` (`Eredivisie` of `Eerste divisie`, standaard `Eredivisie`), met migratie `0091_add_standings_competition`.
@@ -4848,3 +4852,25 @@
 - **Eigen keuze bij het bouwen:** de koppeling van de zeven doelpunten zit in de stap van het seizoensprogramma, omdat de doelpunten daar al een pagina hadden en de stap `doelpunten tegen ons` ze niet meer aanraakt.
   Een rij met bron `verslag` die al onder een andere spelling bestond, krijgt de gekozen schrijfwijze (hij wordt hernoemd), in plaats van dat er een nieuwe rij komt die daarna samengevoegd wordt.
 - **Alternatieven:** de rij op acceptatie met de hand aanpassen (laat hetzelfde gat voor de volgende correctie); alleen deze ene naam in `oldSiteNameCorrections` zetten (de volgende speler met een andere spelling herhaalt het); de stap `doelpunten tegen ons` zelf op `wikipedia_page` laten koppelen (meer code, twee plekken die koppelen).
+
+## De competitie van 2007/08 komt uit het programma op de pagina van de Eredivisie
+
+- **Datum:** 26 november 2026
+- **Besluit:** de import van 2007/08 leest de tabellen onder `Programma` op de Nederlandse pagina `Eredivisie 2007/08 (mannenvoetbal)`, voor onze 34 wedstrijden en voor de 306 uitslagen van alle clubs (#1676).
+- **Waarom:** de pagina heeft elke wedstrijd met datum en uitslag, en de import is te herhalen, noemt de bron en is te controleren met de eindstand.
+  De uitslagen van alle clubs geven het verloop op de ranglijst en de vorm van tegenstanders, zoals vanaf 2010/11.
+- **Eigen keuzes bij het bouwen:**
+  - Een ingehaalde wedstrijd houdt het nummer van de ronde in de kop, ook al staat ze later op de pagina.
+  - De pagina noemt geen jaar: juli tot en met december horen bij 2007, de andere maanden bij 2008.
+  - De clubnamen en de controle komen van de eindstand op dezelfde pagina, die de import niet opslaat (`import:tables` doet dat).
+  - De pagina staat in `wikipedia_pages` met de soort `programme`, zodat de bronvermelding "Programma Eredivisie 2007/08" zegt en het beheer haar bij een competitiewedstrijd vindt.
+- **Alternatieven:** de redactie voert 34 wedstrijden met de hand in (veel werk, en zonder controle); alleen onze 34 wedstrijden (geen verloop op de ranglijst).
+
+## De bekerwedstrijden van 2007/08 komen uit de pagina van de KNVB Beker
+
+- **Datum:** 26 november 2026
+- **Besluit:** de import leest onze 2 wedstrijden en hun doelpunten uit de tabel op de Nederlandse pagina `KNVB Beker 2007/08 (mannen)` (#1676).
+  De stand na elk doelpunt zegt voor welke club het telt.
+  De pagina staat in `wikipedia_pages` met de soort `cup`.
+- **Waarom:** dan is het seizoen volledig, met doelpunten bij de beker.
+- **Alternatieven:** alleen de competitie (de beker blijft ontbreken of wordt met de hand ingevoerd).
