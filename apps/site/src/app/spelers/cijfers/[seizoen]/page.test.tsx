@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { ratingFigures } from '#src/fans/season-ratings'
 import { getMatchData, getMatchSeasons, getPersonTraits } from '#src/matches'
 import { getSeasonReportFigures } from '#src/season-report-figures'
 import { playerFiguresShortcuts } from '#src/statisticsShortcuts'
@@ -16,6 +17,12 @@ vi.mock('#src/matches', async (importOriginal) => ({
   getMatchData: vi.fn(),
   getMatchSeasons: vi.fn(),
   getPersonTraits: vi.fn(),
+}))
+
+// The ratings of supporters are made up, for the card Cijfers van de fans.
+vi.mock('#src/fans/season-ratings', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  ratingFigures: vi.fn(),
 }))
 
 // The figures of the match reports are made up too, and by default there are none.
@@ -131,6 +138,41 @@ describe('the page of an earlier season, /spelers/cijfers/2025-26', () => {
       expect(digest).toContain('/spelers/cijfers;')
       expect(digest).not.toContain('308')
       expect(getMatchData).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('the card Cijfers van de fans', () => {
+    const rated = (season: string) => ({
+      figures: [{ counting: 9, name: 'Speler A', old: false, playerId: 1, ratings: 100, season, total: 700 }],
+      oldRatings: [],
+      overSeasons: new Set<string>(),
+    })
+
+    beforeEach(() => {
+      vi.stubEnv('FANS_ACCOUNTS', 'on')
+      vi.stubEnv('FANS_UITBLINKER', 'on')
+    })
+
+    it('shows the ranking of the season of the page, also for an old address with ?seizoen=', async () => {
+      vi.mocked(ratingFigures).mockResolvedValue(rated('2025/26'))
+
+      const page = await SeasonPlayerFiguresPage({
+        ...params('2025-26'),
+        searchParams: Promise.resolve({ seizoen: '2024-25' }),
+      })
+      const html = renderToStaticMarkup(page)
+
+      expect(html).toContain('Seizoen 2025/26, de spelers')
+      expect(html).toContain('Speler A')
+    })
+
+    it('says there was no election for a season without ratings, and shows no other season', async () => {
+      vi.mocked(ratingFigures).mockResolvedValue(rated('2026/27'))
+
+      const html = await render()
+
+      expect(html).toContain('Geen verkiezing in dit seizoen')
+      expect(html).not.toContain('Speler A')
     })
   })
 
