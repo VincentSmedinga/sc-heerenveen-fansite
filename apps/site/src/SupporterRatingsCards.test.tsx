@@ -160,6 +160,12 @@ describe('the short ranking on Spelers › Cijfers', () => {
     expect(html).not.toContain('<details')
   })
 
+  it('puts the button under the table and its legend', () => {
+    const html = card({ rows: rows(7) })
+
+    expect(html.indexOf('Een speler staat er vanaf')).toBeLessThan(html.indexOf('Toon alle 7 spelers'))
+  })
+
   it('has no button with five players or fewer', () => {
     expect(card({ rows: rows(5) })).not.toContain('Toon alle')
   })

@@ -204,6 +204,8 @@ describe('the page with all seasons, /spelers/cijfers/alle', () => {
     expect(html).toContain('1<span')
     expect(html).toContain('niet alle doelpuntenmakers bekend')
     expect(html).toContain('* Van een deel van de wedstrijden van dit seizoen kennen we de doelpuntenmakers niet.')
+    // The line explains the table, so it stands in the block of its list, above a button.
+    expect(html).toMatch(/<div class="hf-show-all[^>]*>(?:(?!<\/section>).)*<\/table><\/div><p[^>]*>\* Van een deel/s)
   })
 
   it('has every season in one table that can sort, with a button when there are more than five', async () => {

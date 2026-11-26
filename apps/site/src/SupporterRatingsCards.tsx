@@ -67,6 +67,7 @@ export function SeasonRankingCard({
                 { abbreviation: 'W', name: 'Wedstrijden met cijfers' },
                 { abbreviation: 'Gem', key: true, name: 'Gemiddeld cijfer' },
               ]}
+              legend={`W: wedstrijden met ${minimumRatings} cijfers of meer. Gem: gemiddelde van alle cijfers van het seizoen. Een speler staat er vanaf ${minimumMatches} wedstrijden.${seasonOnly ? ' Een streepje: van dat seizoen is alleen het seizoencijfer bekend.' : ''}`}
               rows={rows.map((row) => ({
                 cells: [row.matches ?? dash, gradeText(row.average)],
                 header: row.name,
@@ -76,10 +77,6 @@ export function SeasonRankingCard({
               sortable={false}
             />
           </ShowAll>
-          <Text appearance="meta">
-            {`W: wedstrijden met ${minimumRatings} cijfers of meer. Gem: gemiddelde van alle cijfers van het seizoen. Een speler staat er vanaf ${minimumMatches} wedstrijden.`}
-            {seasonOnly ? ' Een streepje: van dat seizoen is alleen het seizoencijfer bekend.' : ''}
-          </Text>
         </>
       )}
       {oldSource ? <Text appearance="meta">{oldSourceLine}</Text> : null}

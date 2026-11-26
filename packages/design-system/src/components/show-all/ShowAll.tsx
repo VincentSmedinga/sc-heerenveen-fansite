@@ -70,6 +70,8 @@ export const ShowAll = ({
           appearance="soft"
           aria-expanded={open}
           className="hf-show-all-button"
+          // A button is of no use in the image of a card.
+          data-hf-card-share-skip=""
           onClick={toggle}
           size="small"
           type="button"

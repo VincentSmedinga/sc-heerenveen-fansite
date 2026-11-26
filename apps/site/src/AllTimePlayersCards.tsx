@@ -168,12 +168,12 @@ export function ClubTopScorersCard({
             href: `${seasonAddress(playerFiguresPath, season, current)}${competitionQuery(competition)}`,
           }))}
         />
+        {seasons.some((season) => season.incomplete) && (
+          <Text appearance="meta">
+            * Van een deel van de wedstrijden van dit seizoen kennen we de doelpuntenmakers niet.
+          </Text>
+        )}
       </ShowAll>
-      {seasons.some((season) => season.incomplete) && (
-        <Text appearance="meta">
-          * Van een deel van de wedstrijden van dit seizoen kennen we de doelpuntenmakers niet.
-        </Text>
-      )}
     </Card>
   )
 }

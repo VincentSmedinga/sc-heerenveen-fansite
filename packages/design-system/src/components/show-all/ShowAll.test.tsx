@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { DataTable } from '../data-table/DataTable'
+import { PredictionList } from '../prediction-list/PredictionList'
 import { ShowAll } from './ShowAll'
 
 const rows = ['Alkmaar', 'Breda', 'Coevorden', 'Delft'].map((header, index) => ({ cells: [index], header }))
@@ -95,6 +96,40 @@ describe('ShowAll', () => {
     click('Gespeeld')
     click('Gespeeld')
     expect(hidden(container)).toEqual(['Coevorden', 'Delft'])
+  })
+
+  it('hides the later rows of a PredictionList too', () => {
+    const items = ['Alkmaar', 'Breda', 'Coevorden'].map((opponent, index) => ({
+      match: {
+        competition: 'Eredivisie',
+        dateTime: '2026-11-29',
+        home: true,
+        opponent,
+        round: `Speelronde ${14 - index}`,
+        status: 'scheduled' as const,
+        time: 'zo 29 nov',
+      },
+      prediction: 'Vier spelers',
+    }))
+    const { container } = render(
+      <ShowAll moreLabel="Toon alle 3 wedstrijden" shown={1} total={3}>
+        <PredictionList items={items} />
+      </ShowAll>,
+    )
+    const rule = container.querySelector('style')?.textContent ?? ''
+    const selector = /\{\s*(.+?)\s*\{ display: none;/u.exec(rule)?.[1] ?? ''
+
+    expect([...container.querySelectorAll(selector)]).toEqual(
+      [...container.querySelectorAll('.hf-prediction-list-item')].slice(1),
+    )
+  })
+
+  it('leaves the button out of the image of a card', () => {
+    render(list(2))
+
+    const button = screen.getByRole('button', { name: 'Toon alle 4 clubs' })
+
+    expect(button.hasAttribute('data-hf-card-share-skip')).toBe(true)
   })
 
   it('shows the button only where script is on', () => {
