@@ -4940,6 +4940,7 @@
   - `wikitext-headings.ts` leest alle kopjes die de lezers zoeken, en telt de `=`-tekens en de witruimte met de hand.
     Dat geldt voor alle plekken, niet alleen de drie die opvielen (#1685).
   - Elk bestand houdt zijn eigen regels: welke niveaus tellen en welke titel past.
+  - Een regel met precies `==` sluit de sectie Programma van een bekerpagina niet meer af.
   - Een regel met alleen `=`-tekens is een kopje vanaf vijf tekens.
     Vier tekens (`====`) waren bij een paar lezers een kopje zonder titel, en zijn dat niet meer.
     Een lezer van de groepsstanden ziet geen enkele regel met alleen `=`-tekens meer als kopje.
