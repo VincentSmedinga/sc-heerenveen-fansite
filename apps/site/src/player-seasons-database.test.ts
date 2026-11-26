@@ -117,7 +117,7 @@ describe('reading the seasons of a person', () => {
     const facts = await readPlayerSeasonFacts(personId)
 
     expect(facts.players).toEqual([{ season: '2003/04', shirtNumber: 9 }])
-    expect(facts.matchCounts).toEqual([{ played: 4, reported: 2, season: '2003/04' }])
+    expect(facts.matchCounts).toEqual([{ lineups: 0, played: 4, reported: 2, season: '2003/04' }])
     // The appearance in the report that is bezig is left out.
     expect(facts.appearances).toEqual([
       expect.objectContaining({ goalsAgainst: 0, red: true, season: '2003/04', starter: true, yellow: true }),
@@ -166,6 +166,7 @@ describe('reading the seasons of a person', () => {
       assists: [],
       goals: [],
       matchCounts: [],
+      minutes: [],
       players: [],
       tables: [],
     })
@@ -193,5 +194,67 @@ describe('reading the seasons of a person', () => {
     expect(facts.appearances.map(({ cameOn: came }) => came).sort()).toEqual([false, true])
     expect(benched).not.toBe(cameOn)
     expect(playerSeasonsOf(facts)[0]).toMatchObject({ played: 1, source: 'lineups' })
+  })
+})
+
+describe('reading the minutes of a person', () => {
+  it('counts them from every report with our line-up of eleven, finished or not', async () => {
+    const [{ insertId: personId }] = await database.db.insert(persons).values({ name: 'Verzonnen Minuut' })
+    const [{ insertId: playerId }] = await database.db
+      .insert(players)
+      .values({ name: 'Verzonnen Minuut', personId, searchTerm: 'minuut', season: '2003/04' })
+    // The other ten of the line-up, and a substitute.
+    const teamMates = async (matchId: number, count: number) => {
+      for (let number = 20; number < 20 + count; number += 1) {
+        await database.db
+          .insert(matchAppearances)
+          .values({ matchId, name: `Maat ${number}`, ours: true, shirtNumber: number, starter: true })
+      }
+    }
+    const substitute = async (matchId: number) => {
+      const [{ insertId }] = await database.db
+        .insert(matchAppearances)
+        .values({ matchId, name: 'Invaller', ours: true, shirtNumber: 14, starter: false })
+
+      return insertId
+    }
+    // Substituted after 60 minutes, in a finished report.
+    const first = await match('2003/04', 1, 0)
+    const wentOff = await appear(first, playerId, 4)
+
+    await teamMates(first, 10)
+    await database.db.insert(matchSubstitutions).values({
+      appearanceInId: await substitute(first),
+      appearanceOutId: wentOff,
+      matchId: first,
+      minute: 60,
+      ours: true,
+    })
+    // Sent off after 30 minutes, in a report that is bezig.
+    const second = await match('2003/04', 2, 0, 'bezig')
+    const sentOff = await appear(second, playerId, 4)
+
+    await teamMates(second, 10)
+    await database.db
+      .insert(matchCards)
+      .values({ appearanceId: sentOff, kind: 'rood', matchId: second, minute: 30, ours: true })
+
+    const complete = await readPlayerSeasonFacts(personId)
+
+    expect(complete.matchCounts).toEqual([{ lineups: 2, played: 2, reported: 1, season: '2003/04' }])
+    expect(complete.minutes.map(({ minutes }) => minutes).sort()).toEqual([30, 60])
+    // The other figures still count the finished report only.
+    expect(complete.appearances).toHaveLength(1)
+    expect(playerSeasonsOf(complete)[0]).toMatchObject({ minutes: 90, source: 'some-lineups' })
+
+    // A match with ten of our line-up, and so without it: the season has no minutes.
+    const third = await match('2003/04', 3, 0, 'bezig')
+
+    await teamMates(third, 10)
+
+    const missing = await readPlayerSeasonFacts(personId)
+
+    expect(missing.matchCounts).toEqual([{ lineups: 2, played: 3, reported: 1, season: '2003/04' }])
+    expect(playerSeasonsOf(missing)[0]?.minutes).toBeUndefined()
   })
 })

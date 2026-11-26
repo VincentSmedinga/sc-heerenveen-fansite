@@ -326,5 +326,17 @@
     .hf-data-table-more[data-ready]:not([data-open]) .hf-more-column {
       display: none;
     }
+
+    /*
+     * The number columns give up half of their space beside the text, as in a table that sorts,
+     * so the five figures of a player, with minutes of four digits, still fit at 320 pixels.
+     */
+    .hf-data-table-more .hf-data-table :is(th, td).hf-numeric {
+      padding-inline: calc(var(--hf-space-xs) / 2);
+    }
+
+    .hf-data-table-more .hf-data-table :is(th, td):first-child {
+      padding-inline-end: calc(var(--hf-space-xs) / 2);
+    }
   }
 }

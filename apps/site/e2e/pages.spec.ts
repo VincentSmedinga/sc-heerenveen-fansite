@@ -675,7 +675,13 @@ test('the table Per seizoen has the columns of the figures that we have, and a d
 
   const table = page.getByRole('table', { name: /per seizoen/ })
 
-  expect(await table.locator('thead th').allTextContents()).toEqual(['Seizoen', 'gespeeld', 'doelpunten', 'assists'])
+  expect(await table.locator('thead th').allTextContents()).toEqual([
+    'Seizoen',
+    'gespeeld',
+    'minuten',
+    'doelpunten',
+    'assists',
+  ])
   await expect(table.getByRole('row', { name: /2002\/03/ })).toContainText('28')
   await expect(table.getByRole('row', { name: /2001\/02/ })).toContainText('–')
   await expect(table.getByRole('row', { name: /Totaal/ })).toContainText('28')
@@ -688,5 +694,5 @@ test('the table Per seizoen has the columns of the figures that we have, and a d
       .getByRole('table', { name: /per seizoen/ })
       .locator('thead th')
       .allTextContents(),
-  ).toEqual(['Seizoen', 'gespeeld'])
+  ).toEqual(['Seizoen', 'gespeeld', 'minuten'])
 })
