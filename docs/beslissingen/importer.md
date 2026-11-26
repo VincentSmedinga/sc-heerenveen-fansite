@@ -4874,3 +4874,60 @@
   De pagina staat in `wikipedia_pages` met de soort `cup`.
 - **Waarom:** dan is het seizoen volledig, met doelpunten bij de beker.
 - **Alternatieven:** alleen de competitie (de beker blijft ontbreken of wordt met de hand ingevoerd).
+
+## De importer zoekt een oude speler van de tegenstander op naam op Wikipedia
+
+- **Datum:** 26 november 2026
+- **Besluit:** de importer zoekt een speler van de tegenstander zonder persoon op naam op de Nederlandse Wikipedia, en controleert de club en het seizoen op Wikidata (#1678).
+  Hij vraagt alleen `nl.wikipedia.org/wiki/…` en `Special:EntityData`, via de fetcher, met 250 milliseconden ertussen.
+- **Waarom:** de `robots.txt` van `query.wikidata.org` verbiedt `/sparql`, dus een zoekopdracht "wie speelde bij deze club" kan niet.
+  De pagina-informatie van een artikel en `Special:EntityData` mogen wel.
+  Een speler zonder Nederlands artikel wordt toch geen persoon (22 november 2026).
+- **Alternatieven:** de querydienst als uitzondering op onze regel over `robots.txt`.
+
+## Een artikel past alleen als Wikidata de club in dat seizoen noemt
+
+- **Datum:** 26 november 2026
+- **Besluit:** een artikel past alleen als het item een mens is en bij "lid van sportteam" (`P54`) de club van de regel noemt, met een begin- of einddatum, in een periode die het seizoen (1 juli tot en met 30 juni) raakt.
+  Eerst het artikel met precies de naam, na een doorverwijzing, en anders "Naam (voetballer)".
+- **Waarom:** er is dan nauwelijks kans op een naamgenoot.
+- **Alternatieven:** ook een voetballer met precies die naam zonder de club of de jaren: tot ongeveer 14% meer regels, maar met echte kans op de verkeerde man.
+
+## De zoekstap draait elk uur met hoogstens 50 namen
+
+- **Datum:** 26 november 2026
+- **Besluit:** de stap draait elk uur met hoogstens 50 namen, de namen met de meeste regels eerst, en zoekt een naam na 180 dagen opnieuw.
+- **Waarom:** dat zijn ongeveer 110 verzoeken en minder dan een minuut per run, en de achterstand is in ongeveer twee dagen weg.
+- **Alternatieven:** 200 namen per run (de vergrendeling zit dan minuten langer vast); een opdracht met de hand (nieuwe regels worden dan niet vanzelf gezocht).
+
+## De redactie krijgt van de open namen alleen de aantallen
+
+- **Datum:** 26 november 2026
+- **Besluit:** het logboek noemt per run de namen die gezocht zijn, de nieuwe personen, de gekoppelde regels en de namen zonder passend artikel, en niemand bij naam.
+  `import:status` toont hoeveel namen nog niet gezocht zijn.
+- **Waarom:** het issue blijft klein.
+  Een scherm kan later een eigen issue worden.
+- **Alternatieven:** een leeslijst in beheer; zelf een persoon kiezen per regel.
+
+## De ruime regel van de naam geldt ook voor de personen van de zoekstap
+
+- **Datum:** 26 november 2026
+- **Besluit:** de regel van de naam (22 november 2026) geldt ook voor de personen die de zoekstap maakt.
+  De stap draait daarvoor: wat Wikidata bewijst, krijgt eerst zijn persoon.
+- **Waarom:** zo worden de meeste regels gekoppeld.
+  De uitzonderingslijst houdt een naamgenoot tegen.
+- **Alternatieven:** een persoon uit deze stap alleen koppelen waar club en seizoen passen: minder fouten, minder regels en een uitzondering in de bestaande koppeling.
+
+## Keuzes bij het bouwen van de zoekstap
+
+- **Datum:** 26 november 2026
+- **Besluit:**
+  - Een club en seizoen neemt het eerste artikel dat past; de stap vraagt "Naam (voetballer)" alleen als er een club of seizoen overblijft.
+  - Mislukt een verzoek, dan schrijft de stap voor die naam niets: geen persoon, geen regel en geen herinnering.
+  - Een doorverwijzing die nergens uitkomt en een naam met een teken dat geen titel kan hebben, tellen als "geen artikel".
+  - Een jaar of een maand bij `P54` telt als al zijn dagen, en elke uitspraak telt die niet "deprecated" is.
+  - Een persoon met dezelfde titel van de Engelse Wikipedia gebruikt de stap niet.
+  - Van een databasefout staat alleen de code in het logboek, want de melding kan namen bevatten.
+- **Waarom:** een half onderzochte naam zou via de regel van de naam toch gekoppeld worden en nooit meer gezocht.
+  Een kapotte doorverwijzing die als mislukt verzoek telt, zou bovenaan blijven staan en de stap elke run stoppen.
+- **Alternatieven:** het gevonden deel van een naam al bewaren; elke fout als mislukt verzoek tellen.

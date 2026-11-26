@@ -54,6 +54,7 @@ import { readForum } from './read-forum.ts'
 import { judgeRelevance, opponentsAround } from './relevance.ts'
 import { robotsStoreFor } from './robots-store.ts'
 import { finishRun, reasonOf, recordLockTaken, recordReport, removeOldRuns, startRun } from './run-log.ts'
+import { importOpponentSearch } from './search-opponent-persons.ts'
 import { syncItemClubs } from './store-item-clubs.ts'
 import { describeError } from './text.ts'
 
@@ -427,6 +428,8 @@ export async function runImport(
               `Club squads: warning, not read: ${describeError(error)}`,
             ])
 
+      const wikidataAddress = wikidata === undefined ? (origin === wikipediaOrigin ? wikidataOrigin : null) : wikidata
+
       // After the Wikipedia pages: the persons they made are read from Wikidata in the same
       // run.
       const personLines = await importPersonData(db, fetcher, {
@@ -436,8 +439,20 @@ export async function runImport(
         englishOrigin: englishOrigin ?? (origin === wikipediaOrigin ? englishWikipediaOrigin : null),
         origin,
         pause: personDataPause,
-        wikidata: wikidata === undefined ? (origin === wikipediaOrigin ? wikidataOrigin : null) : wikidata,
+        wikidata: wikidataAddress,
       })
+
+      // After the clubs got their Q-number, and before the players are linked: persons for the
+      // players of opponents that no rule can link (#1678). The next run reads their data.
+      const searchLines =
+        origin === null || wikidataAddress === null
+          ? []
+          : await importOpponentSearch(db, fetcher, {
+              clock,
+              origin,
+              pause: personDataPause,
+              wikidata: wikidataAddress,
+            })
 
       // After the steps that make persons: the players of the opponent get the person their
       // goal or their name points to (#1544).
@@ -461,7 +476,14 @@ export async function runImport(
 
       return {
         clubLines: [...supporterLines, ...reminderLines, ...ratingLines, ...clubLines],
-        personLines: [...clubSquadLines, ...personLines, ...opponentLines, ...addresses, ...stadiumLines],
+        personLines: [
+          ...clubSquadLines,
+          ...personLines,
+          ...searchLines,
+          ...opponentLines,
+          ...addresses,
+          ...stadiumLines,
+        ],
         reports,
         wikipedia,
       }

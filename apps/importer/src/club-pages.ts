@@ -13,13 +13,15 @@ export const maxRedirects = 3
 
 /** What came of asking Wikipedia about titles: the answers, or why there are none. */
 export type PageLookup =
-  | { kind: 'blocked-by-robots'; url: string }
   | {
+      /** Set when the pages answered, but their redirects lead to no article. */
+      brokenRedirect?: boolean
       kind: 'error'
       message: string
       /** The title that answered 404, when that is why there is no answer: no article. */
       missing?: string
     }
+  | { kind: 'blocked-by-robots'; url: string }
   | {
       kind: 'found'
       redirects: Map<string, string>
@@ -127,13 +129,25 @@ export async function lookUpTitles(
       const target = linkedPage(text.slice(marker[0].length))
 
       if (target === null) {
-        return { kind: 'error', message: `${printable(title)}: a redirect without a title to go to` }
+        return {
+          brokenRedirect: true,
+          kind: 'error',
+          message: `${printable(title)}: a redirect without a title to go to`,
+        }
       }
       if (chain.length > maxRedirects) {
-        return { kind: 'error', message: `${printable(first)}: more than ${maxRedirects} redirects in a row` }
+        return {
+          brokenRedirect: true,
+          kind: 'error',
+          message: `${printable(first)}: more than ${maxRedirects} redirects in a row`,
+        }
       }
       if (chain.includes(target)) {
-        return { kind: 'error', message: `${printable(first)}: the redirects go round in a circle` }
+        return {
+          brokenRedirect: true,
+          kind: 'error',
+          message: `${printable(first)}: the redirects go round in a circle`,
+        }
       }
 
       const answered = redirects.get(target) ?? articles.get(target)

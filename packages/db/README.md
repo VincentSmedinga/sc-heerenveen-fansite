@@ -951,6 +951,13 @@ De migratie `0071_add_death_date_to_persons` doet dat ook; terugdraaien kan met 
 Terugdraaien op de host: haal de foreign key `persons_birth_place_id_wikidata_items_id_fk`, de index `persons_wikidata_id_unique` en de acht kolommen weg, dan `person_nationalities`, `person_positions` en `wikidata_items`.
 De importer leest de personen dan opnieuw.
 
+### De tabel `opponent_name_searches`
+
+De importer zoekt spelers van de tegenstander zonder persoon op Wikipedia (#1678, zie de [README van de importer](../../apps/importer/README.md), _Spelers van tegenstanders zoeken op Wikipedia_).
+Een rij zegt wanneer hij voor een `name` (byte voor byte vergeleken), `club_id` en `season` zocht (`searched_at`, UTC); die drie zijn de sleutel.
+De rijen gaan weg met hun club.
+`opponentNamesToSearch`, `findOrAddOpponentPerson`, `giveRowsPerson` en `rememberOpponentSearch` in `@fansite/db/opponent-persons` lezen en schrijven voor die stap.
+
 ### Zoeken in wedstrijden
 
 `match-search.ts` (`@fansite/db/match-search`) heeft de twee vragen van `/wedstrijden/zoeken` (#1150).

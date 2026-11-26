@@ -32,6 +32,8 @@ export type TestItem = {
   positions?: (ItemStatement | string)[]
   /** The countries a person plays for (`P1532`, #1278). */
   sportCountries?: (ItemStatement | string)[]
+  /** The teams a person was a member of (`P54`), with the dates of the qualifiers (#1678). */
+  teams?: { end?: TimeValue; rank?: Rank; start?: TimeValue; value: string }[]
 }
 
 type ItemStatement = { rank?: Rank; value: string }
@@ -101,27 +103,34 @@ export function itemJson(id: string, item: TestItem = {}): string {
       type: 'statement',
     }))
   }
-  if (item.homeGrounds !== undefined) {
-    const qualifier = (time: TimeValue | undefined, property: string) =>
+  for (const [property, statements] of [
+    ['P115', item.homeGrounds],
+    ['P54', item.teams],
+  ] as const) {
+    if (statements === undefined) {
+      continue
+    }
+
+    const qualifier = (time: TimeValue | undefined, name: string) =>
       time === undefined
         ? {}
         : {
-            [property]: [
+            [name]: [
               {
                 datavalue: {
                   type: 'time',
                   value: { calendarmodel: 'http://www.wikidata.org/entity/Q1985727', ...time },
                 },
-                property,
+                property: name,
                 snaktype: 'value',
               },
             ],
           }
 
-    claims['P115'] = item.homeGrounds.map(({ end, rank = 'normal', start, value }) => ({
+    claims[property] = statements.map(({ end, rank = 'normal', start, value }) => ({
       mainsnak: {
         datavalue: { type: 'wikibase-entityid', value: { 'entity-type': 'item', id: value } },
-        property: 'P115',
+        property,
         snaktype: 'value',
       },
       qualifiers: { ...qualifier(start, 'P580'), ...qualifier(end, 'P582') },

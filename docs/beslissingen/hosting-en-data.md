@@ -1371,6 +1371,7 @@
   De uitzonderingslijst en het logboek van de import vangen dat op.
 - **Alternatieven:** alleen koppelen bij zekerheid (een doelpunt, of een naam die maar bij één persoon van die club past) met een controlelijst; alleen koppelen wat de redactie kiest.
 - **Let op:** een foute koppeling verhelpt de redactie voorlopig via de uitzonderingslijst; een scherm om te ontkoppelen is er niet.
+- **Later:** sinds 26 november 2026 zoekt de import eerst op Wikipedia naar de namen die deze regels niet kunnen koppelen, en geeft hij de passende regels direct hun persoon (#1678); zie _Een artikel past alleen als Wikidata de club in dat seizoen noemt_ in `importer.md`.
 - **Later:** sinds 23 november 2026 kijkt `linkOpponentPersons` eerst naar de selectie van de club (`club_squad_players`, #1542): een naam die daar precies staat, met een persoon, geeft die persoon, ook als meer personen die naam dragen.
   Staan er in de selectie twee spelers met die naam en verschillende personen, dan geldt de selectie niet en gaat het verder met de regels hierboven.
   De telling heeft er een uitkomst bij, `squad`, en de import schrijft die alleen in het logboek als ze groter is dan nul.
@@ -1410,3 +1411,13 @@
 - **Waarom:** de tien antwoorden worden altijd samen geschreven en gelezen, dus een rij per antwoord voegt niets toe.
   Het issue vraagt dat de kopie de antwoorden leegt.
 - **Alternatieven:** een rij per antwoord (tien keer zoveel rijen voor dezelfde cijfers); de rij meenemen in de kopie zonder `supporter_id`, zoals bij de andere spellen.
+
+## De importer onthoudt per naam, club en seizoen wanneer hij een tegenstander zocht
+
+- **Datum:** 26 november 2026
+- **Besluit:** migratie 0118 zet de tabel `opponent_name_searches` neer (#1678): de naam, de club, het seizoen en `searched_at`, met de eerste drie als sleutel.
+  De naam wordt byte voor byte vergeleken, zoals een titel op Wikipedia.
+  De rijen gaan weg met hun club, en de kopie van acceptatie neemt de tabel mee.
+- **Waarom:** zonder dit geheugen zoekt elke run dezelfde namen, en komen de andere nooit aan de beurt.
+  Per club en seizoen onthouden laat een nieuwe regel van een bekende naam meteen zoeken.
+- **Alternatieven:** alleen per naam onthouden (een nieuw seizoen wacht dan tot 180 dagen); een kolom op `match_appearances` (een verslag opnieuw opslaan maakt de regels opnieuw).
