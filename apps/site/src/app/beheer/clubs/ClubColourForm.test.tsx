@@ -44,6 +44,25 @@ describe('the form of the colour of a club', () => {
     expect(action.mock.calls[0]?.[1].get('kleur')).toBe('#00a651')
   })
 
+  it('says what holds now after a choice, with where it comes from', async () => {
+    show(() => Promise.resolve({ mode: 'eigen', saved: '#00a651' }))
+    save()
+
+    await waitFor(() => expect(screen.getByText(/Nu: #00a651, gekozen door de redactie\./u)).toBeTruthy())
+
+    cleanup()
+    show(() => Promise.resolve({ mode: 'geen', saved: '' }))
+    save()
+
+    await waitFor(() => expect(screen.getByText(/Nu: geen kleur, gekozen door de redactie\./u)).toBeTruthy())
+
+    cleanup()
+    show(() => Promise.resolve({ mode: 'lijst', saved: '#e30613' }), '#00a651')
+    save()
+
+    await waitFor(() => expect(screen.getByText(/Nu: #e30613, uit de lijst\./u)).toBeTruthy())
+  })
+
   it('shows the error at the field, keeps the value and moves the focus there', async () => {
     show(() => Promise.resolve({ colour: 'rood', error: 'Dat is geen kleur.', field: 'kleur', mode: 'eigen' }))
     save()

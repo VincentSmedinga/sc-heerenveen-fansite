@@ -43,7 +43,12 @@ export function ClubColourForm({ action, choice, colour, name, showDelay }: Prop
     }
   }, [state])
 
-  const source = stored === 'lijst' ? 'uit de lijst' : 'gekozen door de redactie'
+  // The page is not rendered again after a choice that worked, so the line takes what was
+  // saved from the answer of the action.
+  const saved = state.saved === undefined ? undefined : state.saved || null
+  const holds = saved === undefined ? colour : saved
+  const fromList = saved === undefined ? stored === 'lijst' : state.mode === 'lijst'
+  const source = fromList ? 'uit de lijst' : 'gekozen door de redactie'
 
   return (
     <Card aria-labelledby="kleur-kop">
@@ -51,7 +56,7 @@ export function ClubColourForm({ action, choice, colour, name, showDelay }: Prop
         Kleur van de club
       </Heading>
       <Text appearance="meta">
-        {`Nu: ${colour ?? 'geen kleur'}, ${source}. De rondjes van deze club op het veld van een wedstrijd krijgen die kleur. Zonder kleur zijn ze open.`}
+        {`Nu: ${holds ?? 'geen kleur'}, ${source}. De rondjes van deze club op het veld van een wedstrijd krijgen die kleur. Zonder kleur zijn ze open.`}
       </Text>
       <Form action={formAction}>
         <RadioGroup
