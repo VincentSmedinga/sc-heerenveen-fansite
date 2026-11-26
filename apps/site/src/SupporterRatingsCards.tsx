@@ -1,14 +1,4 @@
-import {
-  Card,
-  CardColumns,
-  CardLink,
-  DataTable,
-  Heading,
-  SeasonPicker,
-  ShowAll,
-  Text,
-  Winner,
-} from '@fansite/design-system'
+import { Card, CardColumns, CardLink, DataTable, Heading, ShowAll, Text, Winner } from '@fansite/design-system'
 
 import { yearWinnersPath } from './fans-paths'
 import { bestSeasons, type RankedPlayer, ratingsLine, type YearWinner } from './fans/season-ratings'
@@ -24,39 +14,32 @@ export const shownPlayers = 5
  * The card "Cijfers van de fans" on Spelers › Cijfers (issue 1474): the players of a season
  * from the highest season rating down, the first five at once and the rest on a button
  * (issues 1647 and 1690), with the link to the Uitblinkers of the year. The card
- * has the watermark of the Uitblinker (see `Card`). A season without a player that counts
- * says so instead of showing an empty table.
+ * has the watermark of the Uitblinker (see `Card`). It is about the season of the page (issue
+ * 1691). A season without a player that counts says so instead of showing an empty table.
  */
 export function SeasonRankingCard({
-  action,
-  fields,
+  current,
   oldSource,
-  options,
   rows,
   season,
   seasonOnly,
-  value,
 }: {
-  /** Where the season picker sends the choice: the page itself, with `?seizoen=`. */
-  action: string
-  fields: Readonly<Record<string, string>>
+  /** Whether it is the running season, which has no ratings yet when `rows` is empty. */
+  current: boolean
   /** Whether the numbers come from the old fansite, so the source stands under them. */
   oldSource: boolean
-  options: readonly { label: string; value: string }[]
   rows: readonly RankedPlayer[]
   season: string
   /** Whether a row has only a season rating, so the legend says so. */
   seasonOnly: boolean
-  value: string
 }) {
   return (
     <Card aria-labelledby="cijfers-van-supporters" game="uitblinker">
       <Heading id="cijfers-van-supporters" level={2}>
         Cijfers van de fans
       </Heading>
-      <SeasonPicker action={action} fields={fields} label={seasonPickerLabel} options={options} value={value} />
       {rows.length === 0 ? (
-        <Text>Dit seizoen zijn er nog geen cijfers.</Text>
+        <Text>{current ? noRatingsYet : noElection}</Text>
       ) : (
         <>
           <ShowAll moreLabel={`Toon alle ${rows.length} spelers`} shown={shownPlayers} total={rows.length}>
@@ -85,8 +68,11 @@ export function SeasonRankingCard({
   )
 }
 
-/** What the season picker of the card is called: the page has another picker of its own. */
-export const seasonPickerLabel = 'Seizoen van de cijfers'
+/** What stands instead of the table in the running season while nobody counts yet. */
+export const noRatingsYet = 'Dit seizoen zijn er nog geen cijfers.'
+
+/** What stands instead of the table in an earlier season without ratings. */
+export const noElection = 'Geen verkiezing in dit seizoen'
 
 /** The text that stands for a season that has no Uitblinker of the year yet. */
 export const afterTheSeason = 'Na het seizoen'

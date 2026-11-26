@@ -722,38 +722,33 @@ describe('the card Cijfers van de fans on the page /spelers/cijfers', () => {
     expect(card).not.toContain('Speler C')
     expect(card).not.toContain('Speler D')
     expect(card).toContain('href="/fans/uitblinker/van-het-jaar"')
-    expect(html).toContain('aria-label="Seizoen van de cijfers kiezen"')
+    expect(html).not.toContain('Seizoen van de cijfers')
   })
 
-  it('shows another season for ?seizoen=, with the source line of the old fansite', async () => {
+  it('keeps to the season of the page for an old address with ?seizoen=', async () => {
     vi.stubEnv('FANS_ACCOUNTS', 'on')
     vi.stubEnv('FANS_UITBLINKER', 'on')
-    const html = await renderWith({ seizoen: '2005-06' })
 
-    expect(html).toContain('Seizoen 2005/06')
-    expect(html).toContain('Speler D')
-    expect(html).toContain('Cijfers van bezoekers van de Fansite, 2001 tot 2007.')
+    for (const seizoen of ['2005-06', 'onzin']) {
+      const html = await renderWith({ seizoen })
+
+      expect(html).toContain('Seizoen 2026/27')
+      expect(html).not.toContain('Speler D')
+    }
   })
 
-  it('shows a season with only season ratings with a dash and the line that says so', async () => {
+  it('says there are no ratings yet in the running season, and does not fall back to another', async () => {
     vi.stubEnv('FANS_ACCOUNTS', 'on')
     vi.stubEnv('FANS_UITBLINKER', 'on')
-    const html = await renderWith({ seizoen: '1999-00' })
+    vi.mocked(ratingFigures).mockResolvedValue({
+      ...figures,
+      figures: figures.figures.filter((one) => one.season !== '2026/27'),
+    })
+    const html = await renderWith()
 
-    expect(html).toContain('Speler E')
-    expect(html).toContain('van dat seizoen is alleen het seizoencijfer bekend')
-  })
-
-  it('says there are no ratings for a season that has none, and falls back to the season of the page for an unknown one', async () => {
-    vi.stubEnv('FANS_ACCOUNTS', 'on')
-    vi.stubEnv('FANS_UITBLINKER', 'on')
-    vi.mocked(ratingFigures).mockResolvedValue({ ...figures, figures: [], oldRatings: [] })
-
-    expect(await renderWith()).toContain('Dit seizoen zijn er nog geen cijfers.')
-    expect(await renderWith({ seizoen: 'onzin' })).toContain('Dit seizoen zijn er nog geen cijfers.')
-    // Figures exist for the season of the page, so an unknown choice shows that one.
-    vi.mocked(ratingFigures).mockResolvedValue(figures)
-    expect(await renderWith({ seizoen: 'onzin' })).toContain('Seizoen 2026/27')
+    expect(html).toContain('Dit seizoen zijn er nog geen cijfers.')
+    expect(html).not.toContain('Geen verkiezing')
+    expect(html).not.toContain('Speler D')
   })
 
   it('is left out, and the page stays, when the ratings could not be read', async () => {
