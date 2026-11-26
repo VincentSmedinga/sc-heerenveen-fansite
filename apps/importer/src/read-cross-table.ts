@@ -4,6 +4,7 @@
 // template. A table that has changed shape gives an error, never a guess. The table has scores
 // and no dates.
 import { clean, clubName, linkedPage, plain } from './read-wikipedia.ts'
+import { findHeadings, findLooseHeadings } from './wikitext-headings.ts'
 
 /**
  * Why a table could not be read: the page has no heading `Uitslagen`, the heading has no table
@@ -52,14 +53,15 @@ const scorePattern = /^(\d{1,2})\s*[–-]\s*(\d{1,2})$/u
  */
 export function readCrossTable(text: string): ReadCrossTable {
   const page = clean(text).replace(/\{\{\s*nowrap\s*\|([^{}]*)\}\}/giu, '$1')
-  const heading = /^(={2,6})[ \t]*Uitslagen[ \t]*\1[ \t]*$/imu.exec(page)
+  const heading = findHeadings(page).find(({ title }) => /^Uitslagen$/iu.test(title))
 
-  if (heading === null) {
+  if (heading === undefined) {
     return { kind: 'error', problem: 'no-heading' }
   }
 
-  const rest = page.slice(heading.index + heading[0].length)
-  const section = rest.slice(0, /^={2,6}[^=\n].*=[ \t]*$/mu.exec(rest)?.index ?? rest.length)
+  const rest = page.slice(heading.end)
+  const next = findLooseHeadings(rest).find(({ opening }) => opening >= 2 && opening <= 6)
+  const section = rest.slice(0, next?.index)
   const start = section.indexOf('{|')
   const end = section.indexOf('\n|}', start)
 

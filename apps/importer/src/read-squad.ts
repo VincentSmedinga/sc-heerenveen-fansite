@@ -14,6 +14,7 @@ import type { SeasonPlayer, SeasonSquad } from './season-squad.ts'
 
 import { countryOfCell, countryWarning } from './read-country.ts'
 import { clean, linkedPage, plain } from './read-wikipedia.ts'
+import { findHeadings, findHeadingStart } from './wikitext-headings.ts'
 
 /** What the import keeps of one player. */
 export type ReadPlayer = {
@@ -255,17 +256,17 @@ function competitionsInOrder(rows: string[]): boolean {
 
 /** The text between `== Spelers ==` (any level) and the end of the first table under it. */
 function findTable(text: string): string | undefined {
-  const heading = /^(={2,6})[ \t]*Spelers[ \t]*\1[ \t]*$/mu.exec(text)
+  const heading = findHeadings(text).find(({ title }) => title === 'Spelers')
 
-  if (heading === null) {
+  if (heading === undefined) {
     return undefined
   }
 
-  const rest = text.slice(heading.index + heading[0].length)
-  const next = /^={2,6}[^=\n].*$/mu.exec(rest)
+  const rest = text.slice(heading.end)
+  const next = findHeadingStart(rest)
   const start = rest.search(/^\{\|/mu)
 
-  if (start < 0 || (next !== null && next.index < start)) {
+  if (start < 0 || (next !== undefined && next < start)) {
     return undefined
   }
 

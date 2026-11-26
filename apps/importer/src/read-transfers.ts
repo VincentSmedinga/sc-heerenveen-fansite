@@ -32,12 +32,10 @@ import type { SeasonPlayer, SeasonSquad } from './season-squad.ts'
 
 import { nameKey } from './read-squad.ts'
 import { clean, linkedPage, plain } from './read-wikipedia.ts'
+import { readHeading } from './wikitext-headings.ts'
 
 /** What a list is about: players who came, players who left, or players on loan. */
 type Group = 'arrived' | 'departed' | 'ignored' | 'loaned'
-
-/** A heading of the text with the level it has: `==` is 2. */
-type Heading = { level: number; title: string }
 
 /** Where a list sits in the year: before the season, or in the winter break. */
 type Window = 'summer' | 'winter'
@@ -59,8 +57,6 @@ const flag = /\{\{[A-Za-z0-9-]+-VLAG\}\}/gu
 
 /** A number of goals: a few digits. */
 const count = /^\d{1,3}$/u
-
-const headingLine = /^(={2,6})[ \t]*(.*?)[ \t]*\1[ \t]*$/u
 
 /**
  * Reads the list of scorers under the heading "Doelpuntenmakers": a small table for each
@@ -147,7 +143,7 @@ export function readSeasonTransfers(text: string): SeasonSquad {
         return { kind: 'error', message: problem }
       }
     } else if (!inside.has(index)) {
-      const heading = headingOf(line)
+      const heading = readHeading(line)
       const label = windowOf(/^'''(.+?)'''$/u.exec(line.trim())?.[1] ?? '')
 
       if (heading !== undefined) {
@@ -253,12 +249,6 @@ function groupOf(title: string): Group | undefined {
   }
 
   return undefined
-}
-
-function headingOf(line: string): Heading | undefined {
-  const match = headingLine.exec(line)
-
-  return match === null ? undefined : { level: (match[1] ?? '').length, title: match[2] ?? '' }
 }
 
 /**
@@ -444,7 +434,7 @@ function rowsOf(lines: string[]): string[][] {
 function sectionLines(text: string, title: RegExp): string[] | undefined {
   const lines = text.split('\n')
   const start = lines.findIndex((line) => {
-    const heading = headingOf(line)
+    const heading = readHeading(line)
 
     return heading?.level === 2 && title.test(plain(heading.title))
   })
@@ -454,7 +444,7 @@ function sectionLines(text: string, title: RegExp): string[] | undefined {
   }
 
   const rest = lines.slice(start + 1)
-  const end = rest.findIndex((line) => headingOf(line)?.level === 2)
+  const end = rest.findIndex((line) => readHeading(line)?.level === 2)
 
   return end < 0 ? rest : rest.slice(0, end)
 }

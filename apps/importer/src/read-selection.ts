@@ -24,6 +24,7 @@ import type { SeasonPlayer, SeasonSquad } from './season-squad.ts'
 import { countryOfCell, countryWarning } from './read-country.ts'
 import { dataCells, headerCells, nameOf, squadGroups } from './read-squad.ts'
 import { clean, linkedPage, plain } from './read-wikipedia.ts'
+import { findHeadings } from './wikitext-headings.ts'
 
 /** A flag in front of a name or a club: `{{NL-VLAG}}`. */
 const flag = /\{\{[A-Za-z0-9-]+-VLAG\}\}/gu
@@ -105,18 +106,17 @@ export function readSeasonSelection(text: string): SeasonSquad {
 
 /** The text under the first heading `Selectie` or `Voorlopige selectie`, up to the next one. */
 function findSection(text: string): string | undefined {
-  const headings = [...text.matchAll(/^(={2,6})[ \t]*(.+?)[ \t]*\1[ \t]*$/gmu)]
-  const index = headings.findIndex((heading) => /^(?:voorlopige )?selectie\b/iu.test(plain(heading[2] ?? '')))
+  const headings = findHeadings(text)
+  const index = headings.findIndex((heading) => /^(?:voorlopige )?selectie\b/iu.test(plain(heading.title)))
   const heading = headings[index]
 
   if (heading === undefined) {
     return undefined
   }
 
-  const start = heading.index + heading[0].length
   const next = headings[index + 1]
 
-  return text.slice(start, next?.index ?? text.length)
+  return text.slice(heading.end, next?.index ?? text.length)
 }
 
 /** Whether a cell holds a flag and nothing else. */

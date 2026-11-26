@@ -4,6 +4,7 @@
 // P` on the page of 2009/10), and a row per club with its place in front of the name (`1.`) or
 // not. The table of our group is the one with a row of sc Heerenveen; the others are not read.
 import { clean, clubName, linkedPage, plain } from './read-wikipedia.ts'
+import { readLooseHeading } from './wikitext-headings.ts'
 
 /** One club of the group, as the page has it: the name and the article of the club. */
 export type ReadGroupClub = {
@@ -106,10 +107,10 @@ export function readGroupStandings(text: string): ReadGroupStandings {
   let open: null | { group: string; lines: string[] } = null
 
   for (const line of lines) {
-    const found = /^=+\s*(.*?)\s*=+\s*$/u.exec(line)
+    const found = readLooseHeading(line.trimEnd())
 
-    if (open === null && found !== null) {
-      heading = plain(found[1] ?? '')
+    if (open === null && found !== undefined) {
+      heading = plain(found.title)
     }
     if (open === null && line.startsWith('{|')) {
       open = { group: heading, lines: [] }

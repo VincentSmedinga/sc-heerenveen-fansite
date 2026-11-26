@@ -22,6 +22,7 @@ import type { SeasonPlayer, SeasonSquad } from './season-squad.ts'
 
 import { nameKey, squadGroups } from './read-squad.ts'
 import { clean, linkedPage, plain } from './read-wikipedia.ts'
+import { findHeadings } from './wikitext-headings.ts'
 
 /** One player in one table, before the players of the tables are put together. */
 type Row = {
@@ -423,13 +424,12 @@ function readPositionTable(body: string, warnings: string[]): Row[] | string {
 
 /** The headings of the text, each with the text under it up to the next heading. */
 function sectionsOf(text: string): Section[] {
-  const headings = [...text.matchAll(/^(={2,6})[ \t]*(.*?)[ \t]*\1[ \t]*$/gmu)]
+  const headings = findHeadings(text)
 
   return headings.map((heading, index) => {
-    const start = heading.index + heading[0].length
     const end = headings[index + 1]?.index ?? text.length
 
-    return { body: text.slice(start, end), title: heading[2] ?? '' }
+    return { body: text.slice(heading.end, end), title: heading.title }
   })
 }
 
