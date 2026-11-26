@@ -14,7 +14,7 @@ import {
 } from '@fansite/db/schema'
 
 import { printable } from './text.ts'
-import { findHeadings, findLooseHeadings, findSectionHeadings } from './wikitext-headings.ts'
+import { findHeadingAbove, findHeadings, findLooseHeadings, findSectionHeadings } from './wikitext-headings.ts'
 
 export type { ReadGoal, ReadMatch, Template }
 
@@ -531,7 +531,7 @@ export function readPlayoffs(text: string): ReadProgramme {
   const problems: string[] = []
 
   for (const box of boxes.filter((found) => isOurs(found) && !isRestOfStopped(found, boxes))) {
-    const heading = rounds.findLast((candidate) => candidate.index < box.index)?.title
+    const heading = findHeadingAbove(rounds, box.index)?.title
     const round = heading === undefined ? null : playoffRound(heading, plain(box.params.get('round') ?? ''))
     const match = readMatch(box, competition, round, restOf(box, boxes))
 
@@ -823,7 +823,7 @@ function findTemplates(text: string, start: RegExp): Template[] {
       }
     }
 
-    const heading = headings.findLast((candidate) => candidate.index < found.index)
+    const heading = findHeadingAbove(headings, found.index)
 
     templates.push({ heading: heading?.title ?? null, index: found.index, params })
   }

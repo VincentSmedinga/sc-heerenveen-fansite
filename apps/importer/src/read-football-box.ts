@@ -24,7 +24,7 @@ import {
   readMatch,
   withoutRefn,
 } from './read-wikipedia.ts'
-import { findHeadings, findSectionHeadings } from './wikitext-headings.ts'
+import { findHeadingAbove, findHeadings, findSectionHeadings } from './wikitext-headings.ts'
 
 /** A page with `football box` blocks, and where on it the matches of each competition are. */
 export type FootballBoxPage = {
@@ -333,7 +333,7 @@ export function readFootballBoxes(text: string, page: FootballBoxPage): ReadProg
   const ours = findTemplates(cleaned, boxStart)
     .filter(isOurs)
     .map((box) => {
-      const topHeading = topHeadings.findLast((heading) => heading.index < box.index)?.title ?? ''
+      const topHeading = findHeadingAbove(topHeadings, box.index)?.title ?? ''
       const section = page.sections.find(
         (candidate) => candidate.heading.test(box.heading ?? '') && (candidate.topHeading?.test(topHeading) ?? true),
       )

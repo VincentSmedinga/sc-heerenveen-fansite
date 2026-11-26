@@ -4940,6 +4940,8 @@
   - `wikitext-headings.ts` leest alle kopjes die de lezers zoeken, en telt de `=`-tekens en de witruimte met de hand.
     Dat geldt voor alle plekken, niet alleen de drie die opvielen (#1685).
   - Elk bestand houdt zijn eigen regels: welke niveaus tellen en welke titel past.
+  - Het kopje boven een tabel of sjabloon zoekt de importer door de lijst steeds te halveren.
+    Zo blijft ook een pagina met veel kopjes en veel sjablonen snel.
   - Een regel met precies `==` sluit de sectie Programma van een bekerpagina niet meer af.
   - Een regel met alleen `=`-tekens is een kopje vanaf vijf tekens.
     Vier tekens (`====`) waren bij een paar lezers een kopje zonder titel, en zijn dat niet meer.

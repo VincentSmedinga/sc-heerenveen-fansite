@@ -8,7 +8,7 @@ import { matchGoalPlayerMaxLength, standingsClubMaxLength } from '@fansite/db/sc
 import type { ReadGoal, ReadMatch, ReadResult } from './read-wikipedia.ts'
 
 import { clean, clubName, cupRoundName, linkedPage, months, plain, readMatch, withoutRefn } from './read-wikipedia.ts'
-import { findHeadingStart, findSectionHeadings } from './wikitext-headings.ts'
+import { findHeadingAbove, findHeadingStart, findSectionHeadings } from './wikitext-headings.ts'
 
 export type ReadCupTables = { kind: 'error'; message: string } | { kind: 'read'; matches: ReadMatch[] }
 
@@ -59,7 +59,7 @@ export function readCupTables(
       continue
     }
 
-    const heading = headings.findLast((candidate) => candidate.index < found.index)?.title
+    const heading = findHeadingAbove(headings, found.index)?.title
     const round = cupRoundName(heading === undefined ? null : plain(heading))
 
     for (const lines of rows) {

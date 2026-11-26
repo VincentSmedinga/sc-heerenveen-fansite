@@ -37,8 +37,6 @@ import { readHeading } from './wikitext-headings.ts'
 /** What a list is about: players who came, players who left, or players on loan. */
 type Group = 'arrived' | 'departed' | 'ignored' | 'loaned'
 
-/** A heading of the text with the level it has: `==` is 2. */
-
 /** Where a list sits in the year: before the season, or in the winter break. */
 type Window = 'summer' | 'winter'
 

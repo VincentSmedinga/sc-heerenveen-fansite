@@ -36,6 +36,28 @@ const equalsLine = /^=.*$/gmu
 
 const lineBreak = /[\n\r\u2028\u2029]/u
 
+/**
+ * The last of these headings that starts before this place in the text, or undefined. The
+ * headings are in the order of the text. It halves the list at each step: a search from the
+ * end for every table or template of a page takes quadratic time.
+ */
+export function findHeadingAbove<T extends { index: number }>(headings: readonly T[], index: number): T | undefined {
+  let low = 0
+  let high = headings.length
+
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2)
+
+    if ((headings[middle]?.index ?? index) < index) {
+      low = middle + 1
+    } else {
+      high = middle
+    }
+  }
+
+  return headings[low - 1]
+}
+
 /** The headings of the text from top to bottom, as `readHeading` reads them. */
 export function findHeadings(text: string, maxLevel = 6): PlacedHeading[] {
   return Array.from(text.matchAll(equalsLine)).flatMap(({ 0: line, index }) => {

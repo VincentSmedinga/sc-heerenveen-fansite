@@ -13,6 +13,7 @@ import { readSeasonStatistics } from './read-statistics.ts'
 import { readSeasonScorers, readSeasonTransfers } from './read-transfers.ts'
 import { readCup, readEuropaLeague, readLeague, readPlayoffs, readStandings } from './read-wikipedia.ts'
 import {
+  findHeadingAbove,
   findHeadings,
   findHeadingStart,
   findLooseHeadings,
@@ -80,6 +81,18 @@ describe('the headings of a text', () => {
 
   it('gives the headings with one equals sign too', () => {
     expect(findLooseHeadings(text).map(({ title }) => title)).toEqual(['Een', 'Twee', 'Los'])
+  })
+
+  it('finds the heading above a place in the text', () => {
+    const headings = findHeadings(text)
+    const above = (index: number) => findHeadingAbove(headings, index)?.title
+
+    expect(above(0)).toBeUndefined()
+    expect(above(text.indexOf('== Een'))).toBeUndefined()
+    expect(above(text.indexOf('tekst'))).toBe('Een')
+    expect(above(text.indexOf('=== Twee'))).toBe('Een')
+    expect(above(text.length)).toBe('Twee')
+    expect(findHeadingAbove([], 10)).toBeUndefined()
   })
 
   it('finds where the next heading starts, closed or not', () => {
