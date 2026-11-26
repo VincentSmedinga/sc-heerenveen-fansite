@@ -192,7 +192,7 @@ export async function addLiveEvent(
 
       next[side][kind].push(row)
 
-      const checked = checkReportForm(next, contextOf({ match, squad }))
+      const checked = checkReportForm(next, contextOf({ match, report: stored, squad }))
 
       const ownErrors = liveErrorsOf(checked.errors, kind, side, number, false)
 
@@ -347,7 +347,10 @@ export async function removeLiveEvent(
       const squad = await readSquad(transaction, match.season, match.matchDate)
       const after = await readMatchReport(transaction, matchId)
       const goalsAfter = await readGoals(transaction, matchId)
-      const errors = checkReportForm(valuesOfReport(after, goalsAfter, squad), contextOf({ match, squad })).errors
+      const errors = checkReportForm(
+        valuesOfReport(after, goalsAfter, squad),
+        contextOf({ match, report: after, squad }),
+      ).errors
 
       await settle(transaction, userId, match, stored, goals, kind, errors, `${described} weggehaald`, now)
 

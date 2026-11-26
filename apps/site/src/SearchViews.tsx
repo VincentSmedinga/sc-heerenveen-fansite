@@ -108,8 +108,9 @@ export function SquadCard({ squad }: { squad: Squad }) {
           <Fragment key={group.label}>
             <Heading level={3}>{group.label}</Heading>
             <List role="list">
-              {group.players.map((player) => (
-                <List.Item key={player.name}>
+              {group.players.map((player, index) => (
+                // Two players can have one name, so the place in the list tells them apart.
+                <List.Item key={`${index}-${player.name}`}>
                   <Link href={searchHref(player.searchTerm)}>
                     <PlayerName {...(personNameParts(player) ?? { givenName: player.name, surname: '' })} />
                   </Link>

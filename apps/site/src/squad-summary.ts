@@ -120,7 +120,7 @@ export async function getSquadSummary(squad: SeasonSquad, season: string, today:
 
   const summary = squadSummary(
     cardPlayers(squad).map((player) => {
-      const birth = births.get(player.name)
+      const birth = births.get(player.sourceName)
 
       return { age: birth === undefined ? undefined : ageOf(birth, today), country: player.country }
     }),

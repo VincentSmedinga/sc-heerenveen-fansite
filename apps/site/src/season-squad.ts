@@ -44,7 +44,7 @@ export type SquadPlayer = NameParts & {
   country: null | string | undefined
   /** The page of the player (see `playerHref`): absent for a player who has none. */
   href?: string | undefined
-  /** Tells the lines apart: the name as the importer kept it, which is unique in a season. */
+  /** Tells the lines apart: the name of the source on the row, which is unique in a season. */
   key: string
   /** The line behind the name, such as `3e seizoen`: absent when we can't prove the number. */
   seasonLine?: string | undefined
@@ -200,12 +200,12 @@ function linesOf(players: PublicSeasonPlayer[], seasonNumbers: SeasonSquad['seas
 
   return players.map((player) => {
     const href = playerHref(player.personSlug)
-    const number = seasonNumbers.get(player.name)
+    const number = seasonNumbers.get(player.sourceName)
 
     return {
       country: flagged ? player.country : undefined,
       ...(href === undefined ? {} : { href }),
-      key: player.name,
+      key: player.sourceName,
       ...(number === undefined ? {} : { seasonLine: `${number}e seizoen` }),
       shirtNumber: numbered ? player.shirtNumber : undefined,
       ...(personNameParts(player) ?? { givenName: player.name, surname: '' }),

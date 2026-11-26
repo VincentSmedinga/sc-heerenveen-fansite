@@ -124,10 +124,10 @@ export function YearWinnerCards({ winners }: { winners: readonly YearWinner[] })
             <Text>{afterTheSeason}</Text>
           ) : (
             // On an equal rating both players are the winner.
-            winner.players.map((player) => (
+            winner.players.map((player, index) => (
               <Winner
                 average={gradeText(winner.average as number)}
-                key={player.name}
+                key={`${index}-${player.name}`}
                 label={best.has(winner.season) ? 'Uitblinker van de uitblinkers' : 'Uitblinker van het jaar'}
                 line={ratingsLine(player.ratings)}
                 name={player.name}

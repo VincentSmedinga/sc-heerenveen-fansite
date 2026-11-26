@@ -269,6 +269,42 @@ describe('a report after a name is changed (#1697)', () => {
     expect([await lines(), await scorers()]).toEqual(before)
   })
 
+  it('saves two players of the opponent whose persons have one name, as they are', async () => {
+    await save(
+      report({
+        zij: {
+          doelpunt: [goal({ minuut: '40', naam: 'Sibbing' })],
+          speler: [opponent('J. Jansen'), { ...opponent('Jan Jansen'), rugnummer: '8' }],
+        },
+      }),
+    )
+
+    for (const sourceName of ['J. Jansen', 'Jan Jansen']) {
+      const [added] = await database.db.insert(persons).values({ name: 'Jan Jansen' }).$returningId()
+
+      await database.db
+        .update(matchAppearances)
+        .set({ personId: added!.id })
+        .where(eq(matchAppearances.sourceName, sourceName))
+    }
+
+    const screen = (await findReportScreen(database.db, matchId, t1))!
+    const values = valuesOfReport(screen.report, screen.goals, screen.squad, screen.match)
+
+    expect(values.zij.speler.map((row) => row.naam)).toEqual(['Jan Jansen', 'Jan Jansen'])
+    expect(checkReportForm(values, contextOf(screen)).errors).toEqual({})
+
+    const plan = checkReportForm(values, contextOf(screen)).plan!
+
+    expect(await saveReport(database.db, userId, matchId, plan, t1)).toEqual({ status: 'unchanged' })
+    // A third line with that name is one too many.
+    const third = { ...values, zij: { ...values.zij, speler: [...values.zij.speler, opponent('Jan Jansen')] } }
+
+    expect(Object.values(checkReportForm(third, contextOf(screen)).errors).join(' ')).toContain(
+      'staat al in het verslag',
+    )
+  })
+
   it('keeps the names of the sources and the persons when something else changes', async () => {
     const { screen, theirs, values } = await renamed()
     const before = [await lines(), await scorers()]

@@ -673,6 +673,7 @@ async function storePlayer(
             or(
               eq(players.personId, personId),
               eq(players.sourceName, name),
+              eq(shownPlayerName(), name),
               page === null ? undefined : eq(players.wikipediaPage, page),
             ),
           ),
@@ -799,6 +800,13 @@ async function storePlayerEdit(
         })
       }
 
+      // A player without a person who gets another name gets a person, who holds the name. With
+      // a page that a person has already, he is that person, so this comes before the check on
+      // the season.
+      if (renamed && personId === null) {
+        personId = (await findOrAddEditorsPerson(transaction, { name: entry.name, page: entry.page })).id
+      }
+
       // A name is no reason to refuse: it is the person's, and the rows keep their own.
       const taken = [
         entry.page === null ? undefined : eq(players.wikipediaPage, entry.page),
@@ -814,11 +822,6 @@ async function storePlayerEdit(
 
       if (same !== undefined) {
         throw new Refusal({ wikipedia: alreadyThere(same, { name, page: entry.page, personId }, player.season) })
-      }
-
-      // A player without a person who gets another name gets a person, who holds the name.
-      if (renamed && personId === null) {
-        personId = (await findOrAddEditorsPerson(transaction, { name: entry.name, page: entry.page })).id
       }
 
       // A number that changes for a player who is in a saved line-up with his old number: the

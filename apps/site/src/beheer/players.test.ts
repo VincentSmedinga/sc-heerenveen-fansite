@@ -742,6 +742,39 @@ describe('editPlayer', () => {
     expect((await findAdminPlayer(database.db, id))?.player.name).toBe('Johan Vos')
   })
 
+  it('refuses to add a player with the name another player of the season is shown with', async () => {
+    const [{ insertId: personId }] = await database.db.insert(persons).values({ name: 'Pelle van Amersfoort' })
+
+    await database.db.insert(players).values({ personId, searchTerm: 'Oud', season, sourceName: 'Pelle van Oudenaam' })
+
+    expect(await addPlayer(database.db, userId, season, entry())).toMatchObject({
+      errors: { achternaam: expect.stringContaining('Pelle van Amersfoort') },
+      status: 'refused',
+    })
+  })
+
+  it('refuses a renamed player without a person who is a person of the season by his page', async () => {
+    await knownPerson('Luca Oyen', season)
+
+    const [known] = await allPersons()
+
+    await database.db.update(players).set({ wikipediaPage: null })
+
+    const [{ insertId: id }] = await database.db
+      .insert(players)
+      .values({ searchTerm: 'Vos', season, source: 'verslag', sourceName: 'Jan Vos', wikipediaPage: 'Luca Oyen' })
+
+    expect(
+      await editPlayer(
+        database.db,
+        userId,
+        id,
+        entry({ name: { familyName: 'Vos', familyNamePrefix: null, givenName: 'Johan' }, page: 'Luca Oyen' }),
+      ),
+    ).toMatchObject({ status: 'refused' })
+    expect(await allPersons()).toMatchObject([{ id: known!.id, name: 'Pelle van Amersfoort' }])
+  })
+
   it('takes a name another player of the season has, and refuses his title', async () => {
     const id = await added()
 

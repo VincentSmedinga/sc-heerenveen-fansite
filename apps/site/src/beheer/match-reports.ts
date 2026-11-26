@@ -108,8 +108,10 @@ export function appearancePlaces(stored: Pick<StoredMatchReport, 'appearances'>)
 }
 
 /** The context the checks need for a screen. */
-export function contextOf(screen: Pick<ReportScreen, 'match' | 'squad'>): ReportContext {
-  return { match: screen.match, squad: screen.squad }
+export function contextOf(
+  screen: Partial<Pick<ReportScreen, 'report'>> & Pick<ReportContext, 'squad'> & Pick<ReportScreen, 'match'>,
+): ReportContext {
+  return { match: screen.match, opponentNames: sharedOpponentNames(screen.report), squad: screen.squad }
 }
 
 /**
@@ -208,6 +210,27 @@ function firstSeasonOfPrediction(season: string): string | undefined {
   const start = Number(found[1]) - 2
 
   return `${start}/${String((start + 1) % 100).padStart(2, '0')}`
+}
+
+/**
+ * The names that more than one player of the opponent has in a stored report, with how often:
+ * two persons with one name, whose lines had different names of the source (#1697). The checks
+ * let such a name stand that often, so saving the report as it is stays possible.
+ */
+function sharedOpponentNames(stored: StoredMatchReport | undefined): Map<string, number> {
+  const sources = new Map<string, string[]>()
+
+  for (const line of stored?.appearances.filter((one) => !one.ours) ?? []) {
+    const name = line.name.toLocaleLowerCase('nl')
+
+    sources.set(name, [...(sources.get(name) ?? []), line.sourceName.toLocaleLowerCase('nl')])
+  }
+
+  return new Map(
+    [...sources].flatMap(([name, written]) =>
+      written.length > 1 && new Set(written).size === written.length ? [[name, written.length] as const] : [],
+    ),
+  )
 }
 
 /** A name as the squad and the report write it, for comparing: no capitals, one space. */
@@ -1035,7 +1058,7 @@ function reportErrors(
 ) {
   const values = valuesOfReport(report, goals, squad)
 
-  return Object.keys(checkReportForm(values, { match, squad }).errors).length > 0
+  return Object.keys(checkReportForm(values, contextOf({ match, report, squad })).errors).length > 0
 }
 
 /**
