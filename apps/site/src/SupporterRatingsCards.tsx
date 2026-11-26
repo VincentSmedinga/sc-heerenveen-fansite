@@ -3,9 +3,9 @@ import {
   CardColumns,
   CardLink,
   DataTable,
-  Disclosure,
   Heading,
   SeasonPicker,
+  ShowAll,
   Text,
   Winner,
 } from '@fansite/design-system'
@@ -17,13 +17,13 @@ import { gradeText, minimumMatches, minimumRatings, oldSourceLine } from './play
 /** The dash a figure that we do not have shows: a figure we do not have is never a nought. */
 const dash = '–'
 
-/** How many players of the ranking show at once; the rest is behind a Disclosure. */
+/** How many players of the ranking show at once; a button shows the rest. */
 export const shownPlayers = 5
 
 /**
  * The card "Cijfers van de fans" on Spelers › Cijfers (issue 1474): the players of a season
- * from the highest season rating down, the first five at once and the rest behind a Disclosure
- * (issue 1647), with the link to the Uitblinkers of the year. The card
+ * from the highest season rating down, the first five at once and the rest on a button
+ * (issues 1647 and 1690), with the link to the Uitblinkers of the year. The card
  * has the watermark of the Uitblinker (see `Card`). A season without a player that counts
  * says so instead of showing an empty table.
  */
@@ -59,18 +59,23 @@ export function SeasonRankingCard({
         <Text>Dit seizoen zijn er nog geen cijfers.</Text>
       ) : (
         <>
-          <RankingTable
-            caption={`Seizoen ${season}, de spelers van hoog naar laag op seizoencijfer`}
-            rows={rows.slice(0, shownPlayers)}
-          />
-          {rows.length > shownPlayers && (
-            <Disclosure summary={`Toon alle ${rows.length} spelers`}>
-              <RankingTable
-                caption={`Seizoen ${season}, de andere spelers van hoog naar laag op seizoencijfer`}
-                rows={rows.slice(shownPlayers)}
-              />
-            </Disclosure>
-          )}
+          <ShowAll moreLabel={`Toon alle ${rows.length} spelers`} shown={shownPlayers} total={rows.length}>
+            <DataTable
+              caption={`Seizoen ${season}, de spelers van hoog naar laag op seizoencijfer`}
+              columns={[
+                'Speler',
+                { abbreviation: 'W', name: 'Wedstrijden met cijfers' },
+                { abbreviation: 'Gem', key: true, name: 'Gemiddeld cijfer' },
+              ]}
+              rows={rows.map((row) => ({
+                cells: [row.matches ?? dash, gradeText(row.average)],
+                header: row.name,
+                position: row.place,
+              }))}
+              // The players stand in the order of the ranking, from the highest rating down.
+              sortable={false}
+            />
+          </ShowAll>
           <Text appearance="meta">
             {`W: wedstrijden met ${minimumRatings} cijfers of meer. Gem: gemiddelde van alle cijfers van het seizoen. Een speler staat er vanaf ${minimumMatches} wedstrijden.`}
             {seasonOnly ? ' Een streepje: van dat seizoen is alleen het seizoencijfer bekend.' : ''}
@@ -80,27 +85,6 @@ export function SeasonRankingCard({
       {oldSource ? <Text appearance="meta">{oldSourceLine}</Text> : null}
       <CardLink href={yearWinnersPath}>Uitblinker van het jaar</CardLink>
     </Card>
-  )
-}
-
-/** A table of players of the ranking, with their places. */
-function RankingTable({ caption, rows }: { caption: string; rows: readonly RankedPlayer[] }) {
-  return (
-    <DataTable
-      caption={caption}
-      columns={[
-        'Speler',
-        { abbreviation: 'W', name: 'Wedstrijden met cijfers' },
-        { abbreviation: 'Gem', key: true, name: 'Gemiddeld cijfer' },
-      ]}
-      rows={rows.map((row) => ({
-        cells: [row.matches ?? dash, gradeText(row.average)],
-        header: row.name,
-        position: row.place,
-      }))}
-      // The players stand in the order of the ranking, from the highest rating down.
-      sortable={false}
-    />
   )
 }
 

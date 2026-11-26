@@ -7,6 +7,7 @@ import {
   Link,
   List,
   PlayerName,
+  ShowAll,
   tableColumns,
   Text,
   TopScorersTable,
@@ -52,9 +53,9 @@ const playersIn = (places: readonly YearsPlace[]) => places.reduce((sum, place) 
 
 /**
  * The card Topscorers sinds <season>: the first ten places of the goal scorers of all seasons,
- * as the card of a season counts them, with the years each was with the club. Under the table a
- * closed block shows the places 11 to 25, and a line says for how many matches we don't know
- * the scorers. The card is white and stands in the main column.
+ * as the card of a season counts them, with the years each was with the club. A button under
+ * the table shows the places 11 to 25 in that table, and a line says for how many matches
+ * we don't know the scorers. The card is white and stands in the main column.
  */
 export function AllTimeScorersCard({
   competition,
@@ -65,7 +66,7 @@ export function AllTimeScorersCard({
   matches: readonly AllTimeMatch[]
   scorers: ReturnType<typeof allTimeScorersOf>
 }) {
-  const { more, since, top, topGoals, total } = scorers
+  const { more, since, top, total } = scorers
   const { known, played } = scorersCoverage([...matches], competition)
   const caption = (part: string) =>
     `${part} van sc Heerenveen sinds ${since ?? ''}, in ${wordsOf(competition)}, met de jaren bij de club`
@@ -83,21 +84,14 @@ export function AllTimeScorersCard({
             ? '1 speler heeft gescoord'
             : `${total} spelers hebben gescoord`}
       </Text>
-      <TopScorersTable
-        caption={caption(cut ? `De top ${scorersShown} van de doelpuntenmakers` : 'Doelpuntenmakers')}
-        rows={top}
-        showYears
-      />
-      {more.length > 0 && (
-        <Disclosure summary={`Toon de top ${scorersMore}`}>
-          <TopScorersTable
-            caption={caption(`De plaatsen ${scorersShown + 1} tot en met ${scorersMore} van de doelpuntenmakers`)}
-            rows={more}
-            scaleTo={topGoals}
-            showYears
-          />
-        </Disclosure>
-      )}
+      <ShowAll
+        moreLabel={`Toon de top ${scorersMore}`}
+        // A player has a row with the years, so the players of a shared place stay together.
+        shown={playersIn(top)}
+        total={playersIn(top) + playersIn(more)}
+      >
+        <TopScorersTable caption={caption('Doelpuntenmakers')} rows={[...top, ...more]} showYears />
+      </ShowAll>
       <DataLine
         limits={[known < played && `de doelpuntenmakers van ${known} van de ${played} gespeelde wedstrijden`]}
       />
@@ -108,9 +102,10 @@ export function AllTimeScorersCard({
 /**
  * The card Clubtopscorer per seizoen: a row for each season, the newest first, with the
  * season (a link to its figures), the player or players who shared the first place and their
- * goals. The last five seasons are in the table and a closed block has the rest. A season
- * whose scorers we don't all know has a star and, under the tables, a line that says so. The
- * card is white and stands in the main column, under Topscorers sinds 1990/91.
+ * goals. The last five seasons show and a button shows the rest in the same table, which
+ * sorts every season. A season whose scorers we don't all know has a star and, under the
+ * table, a line that says so. The card is white and stands in the main column, under
+ * Topscorers sinds 1990/91.
  */
 export function ClubTopScorersCard({
   competition,
@@ -124,48 +119,6 @@ export function ClubTopScorersCard({
   matches: readonly AllTimeMatch[]
   seasons: readonly ClubTopScorerSeason[]
 }) {
-  const recent = seasons.slice(0, clubTopScorerSeasonsShown)
-  const earlier = seasons.slice(clubTopScorerSeasonsShown)
-  const caption = (part: string) => `${part} van sc Heerenveen, in ${wordsOf(competition)}, met zijn doelpunten`
-  const table = (rows: readonly ClubTopScorerSeason[], part: string) => (
-    <DataTable
-      appearance="text"
-      caption={caption(part)}
-      columns={['Seizoen', 'Speler', tableColumns.goals]}
-      rows={rows.map(({ goals, incomplete, players, season }) => ({
-        cells: [
-          {
-            content: players.map((player, index) => (
-              <Text as="span" key={player.id}>
-                {index > 0 && ', '}
-                <PlayerName givenName={player.givenName} href={player.href} surname={player.surname} />
-              </Text>
-            )),
-            sortValue: players.map((player) => textSortName(player.surname)).join(', '),
-          },
-          {
-            content: incomplete ? (
-              <>
-                {goals}
-                <Text aria-hidden="true" as="span">
-                  *
-                </Text>
-                <Text as="span" className="hf-visually-hidden">
-                  , niet alle doelpuntenmakers bekend
-                </Text>
-              </>
-            ) : (
-              goals
-            ),
-            sortValue: goals,
-          },
-        ],
-        header: season,
-        href: `${seasonAddress(playerFiguresPath, season, current)}${competitionQuery(competition)}`,
-      }))}
-    />
-  )
-
   return (
     <Card aria-labelledby="clubtopscorer-per-seizoen" shareable={imageCredit(true, undefined, [...matches])}>
       <Heading anchor id="clubtopscorer-per-seizoen" level={2}>
@@ -174,15 +127,48 @@ export function ClubTopScorersCard({
       <Text>
         {seasons.length === 1 ? 'De clubtopscorer van 1 seizoen' : `De clubtopscorer van ${seasons.length} seizoenen`}
       </Text>
-      {table(
-        recent,
-        `De laatste ${recent.length === 1 ? 'seizoen' : `${recent.length} seizoenen`} met de clubtopscorer`,
-      )}
-      {earlier.length > 0 && (
-        <Disclosure summary={`Toon alle ${seasons.length} seizoenen`}>
-          {table(earlier, 'De oudere seizoenen met de clubtopscorer')}
-        </Disclosure>
-      )}
+      <ShowAll
+        moreLabel={`Toon alle ${seasons.length} seizoenen`}
+        shown={clubTopScorerSeasonsShown}
+        total={seasons.length}
+      >
+        <DataTable
+          appearance="text"
+          caption={`De clubtopscorer per seizoen van sc Heerenveen, in ${wordsOf(competition)}, met zijn doelpunten`}
+          columns={['Seizoen', 'Speler', tableColumns.goals]}
+          rows={seasons.map(({ goals, incomplete, players, season }) => ({
+            cells: [
+              {
+                content: players.map((player, index) => (
+                  <Text as="span" key={player.id}>
+                    {index > 0 && ', '}
+                    <PlayerName givenName={player.givenName} href={player.href} surname={player.surname} />
+                  </Text>
+                )),
+                sortValue: players.map((player) => textSortName(player.surname)).join(', '),
+              },
+              {
+                content: incomplete ? (
+                  <>
+                    {goals}
+                    <Text aria-hidden="true" as="span">
+                      *
+                    </Text>
+                    <Text as="span" className="hf-visually-hidden">
+                      , niet alle doelpuntenmakers bekend
+                    </Text>
+                  </>
+                ) : (
+                  goals
+                ),
+                sortValue: goals,
+              },
+            ],
+            header: season,
+            href: `${seasonAddress(playerFiguresPath, season, current)}${competitionQuery(competition)}`,
+          }))}
+        />
+      </ShowAll>
       {seasons.some((season) => season.incomplete) && (
         <Text appearance="meta">
           * Van een deel van de wedstrijden van dit seizoen kennen we de doelpuntenmakers niet.

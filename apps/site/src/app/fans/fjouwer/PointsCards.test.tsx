@@ -135,16 +135,17 @@ describe('the card Eerdere wedstrijden', () => {
     expect(html).toContain('Noppert, Hilgers, Proper, Vente')
     expect(html).toContain('>10<')
     expect(html).toContain('>11<')
-    expect(html).not.toContain('<details')
+    expect(html).not.toContain('<button')
   })
 
-  it('leaves the last five open and puts the rest behind "Alle N wedstrijden"', () => {
+  it('has one list with every match, with the button "Toon alle N wedstrijden" after the first five', () => {
     const html = renderToStaticMarkup(<EarlierMatchesCard items={many(8)} now={now} />)
 
-    expect(html).toContain('<details')
-    expect(html).toContain('Alle 8 wedstrijden')
-    expect(html.split('hf-prediction-list-item').length - 1).toBe(8)
-    expect(html.indexOf('<details')).toBeGreaterThan(html.indexOf('>14<'))
+    expect(html.match(/<ul/g)).toHaveLength(1)
+    expect(html.split('<li class="hf-prediction-list-item"').length - 1).toBe(8)
+    expect(html).toContain('nth-child(n + 6)')
+    expect(html).toMatch(/<button[^>]*aria-expanded="false"[^>]*>Toon alle 8 wedstrijden<\/button>/)
+    expect(html).not.toContain('<details')
   })
 })
 

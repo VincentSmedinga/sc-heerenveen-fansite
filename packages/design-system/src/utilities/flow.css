@@ -49,7 +49,7 @@
      * The large building blocks: a table, a group of data tables, the place of the table of
      * the standings, of the top scorers or of a record (the table with its legend, which bar.css
      * keeps the medium step from), a bar chart, a donut chart on its own or in a group, the
-     * chart of the form, the table of a form and the grid of tiles. A new large block goes in
+     * chart of the form, the table of a form, the grid of tiles and a list with a ShowAll. A new large block goes in
      * this list, and the test in flow-css.test.ts checks the list.
      */
     > :is(h1, h2, h3, h4, h5, h6),
@@ -64,7 +64,8 @@
       .hf-form-chart,
       .hf-input-table,
       .hf-tile-grid,
-      .hf-question-grid
+      .hf-question-grid,
+      .hf-show-all
     ),
     > :has(+ :is(h1, h2, h3, h4, h5, h6, hr)),
     > hr {

@@ -171,14 +171,14 @@ describe('the page with all seasons, /spelers/cijfers/alle', () => {
     expect(html).not.toContain('Toon de top 25')
   })
 
-  it('puts the places 11 to 25 in a closed block, without JavaScript, and nobody twice', async () => {
+  it('puts the places 11 to 25 in the same table, behind a button, and nobody twice', async () => {
     const html = await render()
-    const block = /<details[^>]*><summary>Toon de top 25.*?<\/details>/s.exec(html)?.[0] ?? ''
+    const card = html.slice(0, html.indexOf('clubtopscorer-per-seizoen'))
 
-    expect(block).not.toContain(' open')
-    expect(block).toContain('plaatsen 11 tot en met 25')
-    expect(block.match(/<tr>/g)?.length).toBeGreaterThan(0)
-    expect(html.slice(0, html.indexOf('clubtopscorer-per-seizoen')).match(/>SpelerA</g)?.length).toBe(1)
+    expect(card.match(/<table/g)).toHaveLength(1)
+    expect(card).toContain('nth-child(n + 11)')
+    expect(card).toMatch(/<button[^>]*aria-expanded="false"[^>]*>Toon de top 25<\/button>/)
+    expect(card.match(/>SpelerA</g)?.length).toBe(1)
   })
 
   it('has the card Clubtopscorer per seizoen under the topscorers, with a link for each season', async () => {
@@ -206,16 +206,17 @@ describe('the page with all seasons, /spelers/cijfers/alle', () => {
     expect(html).toContain('* Van een deel van de wedstrijden van dit seizoen kennen we de doelpuntenmakers niet.')
   })
 
-  it('has the rest of the seasons in a closed block when there are more than five', async () => {
+  it('has every season in one table that can sort, with a button when there are more than five', async () => {
     vi.mocked(getAllTimeMatches).mockResolvedValue(
       Array.from({ length: 7 }, (_, index) => match(`${1995 + index}/${String(96 + index).slice(-2)}`, [goal('Een')])),
     )
 
     const html = await render()
-    const block = /<details[^>]*><summary>Toon alle 7 seizoenen.*?<\/details>/s.exec(html)?.[0] ?? ''
+    const card = html.slice(html.indexOf('aria-labelledby="clubtopscorer-per-seizoen"'))
+    const table = /<table.*?<\/table>/s.exec(card)?.[0] ?? ''
 
-    expect(block).not.toContain(' open')
-    expect(block.match(/<tr>/g)).toHaveLength(3)
+    expect(table.match(/<tr>/g)).toHaveLength(8)
+    expect(card).toMatch(/<button[^>]*aria-expanded="false"[^>]*>Toon alle 7 seizoenen<\/button>/)
   })
 
   it('has no card Clubtopscorer per seizoen when nobody has scored', async () => {

@@ -5682,6 +5682,8 @@
   We kennen de opstellingen maar van een deel van de seizoenen, dus lijsten aller tijden van wedstrijden, minuten en assists zouden spelers overslaan (zie _Geen lijst aller tijden van wedstrijden, minuten, assists en kaarten per speler_).
 - **Nadeel:** de jaren bij de club zijn de seizoenen in de selectie en kunnen langer zijn dan de jaren waarin een speler scoorde; een speler zonder persoon in de gegevens heeft er geen.
 - **Alternatieven:** de jaren van de eerste tot de laatste doelpunten (zegt niets over zijn tijd bij de club); een tabel met de top 25 in de `Disclosure`, ook de eerste tien (dubbel); een eigen pagina Records.
+- **Later:** zie _De rest van een lijst komt met een knop in dezelfde tabel of lijst erbij_ (26 november 2026): de plaatsen 11 tot en met 25 staan niet meer in een tweede tabel onder een `Disclosure`, maar in dezelfde tabel achter de knop "Toon de top 25".
+  De hattricks houden hun `Disclosure`.
 
 ## Spelers · Cijfers heeft de kaart Invallers die scoorden
 
@@ -5739,6 +5741,7 @@
   - **De balk "Op deze pagina:"** heeft er een link bij, "Clubtopscorer", naar `#clubtopscorer-per-seizoen`, en laat hem weg als de kaart er niet is.
 - **Waarom:** de erelijst van onze clubtopscorers, seizoen voor seizoen, past bij de vraag "wie scoorde het vaakst in dat jaar?" en brengt een bezoeker naar de cijfers van dat seizoen.
 - **Alternatieven:** de kaart in de zijkolom (de tabel is breder dan een zijkaart); een rij per seizoen met alleen de eerste van een gedeelde plek; alle seizoenen open in plaats van achter een `Disclosure`.
+- **Later:** zie _De rest van een lijst komt met een knop in dezelfde tabel of lijst erbij_ (26 november 2026): de oudere seizoenen staan in dezelfde tabel, achter de knop "Toon alle <n> seizoenen", en sorteren gaat over alle seizoenen.
 
 ## Wedstrijden · Cijfers heeft de kaart Formaties, alleen bij een seizoen met opstellingen
 
@@ -5797,6 +5800,7 @@
   De kaart doet dat zonder pagina erbij.
 - **Alternatieven:** een eigen pagina `/seizoenen` (#782); één kolom W–G–V; een kolom per seizoen met de hoofdtrainer.
 - **Later:** zie _Een seizoen in de Eerste divisie staat in een eigen band onder de 18, met een gestippelde lijn_ (19 november 2026): de plek is die van de competitie waarin we speelden, en de Eerste divisie staat erbij.
+- **Later:** zie _De rest van een lijst komt met een knop in dezelfde tabel of lijst erbij_ (26 november 2026): de rest van de seizoenen staat in dezelfde tabel, achter de knop "Toon alle <n> seizoenen"; zonder JavaScript staan ze er allemaal.
 
 ## Wedstrijden · Cijfers heeft de kaart Per competitie, met een rij per soort competitie
 
@@ -8287,6 +8291,7 @@
   De plaatsen lopen door.
 - **Waarom:** de pagina blijft kort, en de hele lijst is met één klik te zien.
 - **Alternatieven:** een lijst van wie het vaakst Uitblinker van een wedstrijd was.
+- **Later:** zie _De rest van een lijst komt met een knop in dezelfde tabel of lijst erbij_ (26 november 2026): de andere spelers staan in dezelfde tabel, achter de knop "Toon alle N spelers".
 
 ## Op de pagina Uitblinker staat altijd de kaart Eerdere winnaars
 
@@ -8448,3 +8453,12 @@
   Een lijst die compleet heet, mag geen spelers verbergen.
 - **Alternatieven:** "Dit is de hele selectie" (zegt niet wie dat weet).
   De zin van `compleet` met "Waarschijnlijk" (zwakker dan wat de redactie weet).
+
+## De rest van een lijst komt met een knop in dezelfde tabel of lijst erbij
+
+- **Datum:** 26 november 2026
+- **Besluit:** vijf kaarten tonen één tabel of lijst met de knop van `ShowAll`, en niet meer een tweede deel onder een `Disclosure` (#1690): "Cijfers van de fans", "Topscorers sinds 1990/91" ("Toon de top 25"), "Clubtopscorer per seizoen", "Seizoen voor seizoen" en "Eerdere wedstrijden" van Fjouwer ("Toon alle N wedstrijden").
+  Alleen "Clubtopscorer per seizoen" sorteert, over alle seizoenen.
+  Uitklappers die iets anders verbergen dan de rest van dezelfde lijst blijven een `Disclosure`.
+- **Waarom:** het is één lijst, met één bijschrift, doorlopende plaatsen en sorteren over alle regels.
+- **Alternatieven:** de twee delen houden.

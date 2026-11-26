@@ -148,20 +148,19 @@ describe('the short ranking on Spelers › Cijfers', () => {
       ratings: 30,
     }))
 
-  it('shows the first five and the others behind a Disclosure, with the places going on', () => {
+  it('has one table with every player, with the places going on, and a button after the first five', () => {
     const html = card({ rows: rows(7) })
-    const [open = '', folded = ''] = html.split('<details')
 
-    expect(open).toContain('Speler 5')
-    expect(open).not.toContain('Speler 6')
-    expect(folded).toContain('Toon alle 7 spelers')
-    expect(folded).toContain('Speler 6')
-    expect(folded).toContain('Speler 7')
-    expect(folded).toMatch(/>6<\/td>/)
+    expect(html.match(/<table/g)).toHaveLength(1)
+    expect(html).toContain('Speler 7')
+    expect(html).toMatch(/>6<\/td>/)
+    expect(html).toContain('nth-child(n + 6)')
+    expect(html).toMatch(/<button[^>]*aria-expanded="false"[^>]*>Toon alle 7 spelers<\/button>/)
     expect(html).toContain(yearWinnersPath)
+    expect(html).not.toContain('<details')
   })
 
-  it('has no Disclosure with five players or fewer', () => {
-    expect(card({ rows: rows(5) })).not.toContain('<details')
+  it('has no button with five players or fewer', () => {
+    expect(card({ rows: rows(5) })).not.toContain('Toon alle')
   })
 })
