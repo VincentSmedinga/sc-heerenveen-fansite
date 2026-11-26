@@ -138,7 +138,7 @@ describe('the look of the list', () => {
   const css = readFileSync(join(import.meta.dirname, 'prediction-list.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
 
   it('puts the points and the prediction under the match when the list itself has little room', () => {
-    const narrow = css.slice(css.indexOf('@container hf-prediction-list (inline-size < 15rem)'))
+    const narrow = css.slice(css.indexOf('@container hf-prediction-list (inline-size < 13rem)'))
 
     expect(css).toContain('container: hf-prediction-list / inline-size;')
     expect(narrow).toMatch(/\.hf-prediction-list-item \{\s*grid-template-columns: minmax\(0, 1fr\);/)

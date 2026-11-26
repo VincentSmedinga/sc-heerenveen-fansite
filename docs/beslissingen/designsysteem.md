@@ -4729,16 +4729,18 @@
 ## ScoreGrid zet bij weinig ruimte het label boven de velden
 
 - **Datum:** 26 november 2026
-- **Besluit:** onder 15rem eigen breedte staan "Ruststand" en "Eindstand" op een eigen regel, zodat de kolommen van de clubs de volle breedte krijgen (#1686).
+- **Besluit:** onder 13rem eigen breedte staan "Ruststand" en "Eindstand" op een eigen regel, zodat de kolommen van de clubs de volle breedte krijgen (#1686).
   Een veld wordt dan niet breder dan zijn kolom.
   Het raster staat in een `div` die de container is.
+  De grens is 13rem, omdat het raster op de site binnen een uitklap in een kaart op 320 pixels 220 pixels heeft (13,75rem), en daar met gewone tekst vier kolommen houdt.
 - **Waarom:** thuis blijft links en uit rechts, en de volgorde met het toetsenbord verandert niet.
 - **Alternatieven:** een rij per club met kolommen voor ruststand en eindstand: de namen krijgen ruimte, maar de indeling en de volgorde veranderen.
 
 ## PredictionList zet bij weinig ruimte de voorspelling onder de wedstrijd
 
 - **Datum:** 26 november 2026
-- **Besluit:** onder 15rem eigen breedte staan de punten en de voorspelling links onder de wedstrijd, op een regel die mag afbreken (#1686).
+- **Besluit:** onder 13rem eigen breedte staan de punten en de voorspelling links onder de wedstrijd, op een regel die mag afbreken (#1686).
+  De grens is dezelfde als die van `ScoreGrid`, zodat de lijst ook in een uitklap op 320 pixels met gewone tekst zo blijft.
 - **Waarom:** de wedstrijd krijgt de volle breedte.
 - **Alternatieven:** een smallere kolom ernaast die over meer regels breekt: de wedstrijd blijft krap.
 

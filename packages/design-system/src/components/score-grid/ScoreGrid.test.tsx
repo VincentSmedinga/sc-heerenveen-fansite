@@ -138,7 +138,7 @@ describe('the look of the grid', () => {
   })
 
   it('puts the label of a row above its fields when the grid itself has little room', () => {
-    const narrow = css.slice(css.indexOf('@container hf-score-grid (inline-size < 15rem)'))
+    const narrow = css.slice(css.indexOf('@container hf-score-grid (inline-size < 13rem)'))
 
     expect(css).toContain('container: hf-score-grid / inline-size;')
     expect(narrow).toContain('grid-template-columns: minmax(0, 1fr) max-content minmax(0, 1fr);')
