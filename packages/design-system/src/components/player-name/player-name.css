@@ -69,13 +69,13 @@
   }
 
   /*
-   * With `lineBehind` the line stands behind the name, in the same text. It is a short line, so
-   * it stays together and goes to the next line as a whole. With a shirt number the flag, the
-   * name and the line are one column beside the number.
+   * With `lineBehind` the line stands behind the name, in the same text. It goes to the next
+   * line as a whole, and breaks only when it is wider than the column, such as with large text.
+   * With a shirt number the flag, the name and the line are one column beside the number.
    */
   .hf-player-name-behind .hf-player-name-meta {
-    display: inline;
-    white-space: nowrap;
+    display: inline-block;
+    max-inline-size: 100%;
   }
 
   .hf-player-name-line {
@@ -93,20 +93,17 @@
   }
 
   /*
-   * With a flag the first line starts at the flag and every next line under the name: the
-   * column is indented by the flag and its space, and the first line steps back.
+   * With a flag the column makes room for it beside every line, and the flag stands in that
+   * room at the top. So a long word never leaves the flag alone on the first line.
    */
   .hf-player-name-line-flagged {
-    --hf-player-name-flag-place: calc(1.25rem + var(--hf-space-s));
-
-    padding-inline-start: var(--hf-player-name-flag-place);
-    text-indent: calc(-1 * var(--hf-player-name-flag-place));
+    padding-inline-start: calc(1.25rem + var(--hf-space-s));
+    position: relative;
   }
 
   .hf-player-name-flag {
-    display: inline-block;
-    inline-size: var(--hf-player-name-flag-place);
-    text-indent: 0;
-    vertical-align: top;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    position: absolute;
   }
 }
