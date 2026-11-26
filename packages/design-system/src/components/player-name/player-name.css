@@ -97,7 +97,10 @@
    * room at the top. So a long word never leaves the flag alone on the first line.
    */
   .hf-player-name-line-flagged {
-    padding-inline-start: calc(1.25rem + var(--hf-space-s));
+    /* The width of a flag and the space behind it. */
+    --hf-player-name-flag-place: calc(1.25rem + var(--hf-space-s));
+
+    padding-inline-start: var(--hf-player-name-flag-place);
     position: relative;
   }
 
