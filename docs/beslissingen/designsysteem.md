@@ -4816,3 +4816,13 @@
 - **Besluit:** een kleine test van de CSS en een verhaal, en we kijken het na met de hand in Storybook (#1699).
 - **Waarom:** dat volgt _We kijken grote tekst met de hand na_: geen nieuw gereedschap, en maten krijgen geen test in de browser.
 - **Alternatieven:** een test in de browser die de breedte van de balk meet.
+
+## Een doorzichtige `Card` als deel van een kaart heeft geen ruimte aan de zijkanten
+
+- **Datum:** 26 november 2026
+- **Besluit:** de delen van één kaart kunnen in `CardColumns` naast elkaar staan, elk als doorzichtige `Card` (#1700).
+  Zo'n deel heeft binnen een kaart geen ruimte en geen rand aan de zijkanten.
+  Een doorzichtige `Card` buiten een kaart blijft zoals ze is.
+- **Waarom:** de tekst van de delen lijnt dan uit met de kop van de kaart, en een smal scherm verliest geen breedte.
+- **Alternatieven:** een nieuw component voor kolommen binnen een kaart.
+  De ruimte houden, zodat de delen inspringen.

@@ -8528,6 +8528,8 @@
   Wie alleen uit de verslagen komt, staat niet op elke kaart Selectie, en telt daarom wel als aanwezig.
 - **Alternatieven:** alleen twee complete seizoenen.
   Elk seizoen met een waarschuwing (bij een onvolledige selectie is de lijst dan vooral onjuist).
+- **Later:** sinds 26 november 2026 heet de kaart "Mutaties" (zie _De mutaties staan onder de selectie, als "Erin" en "Eruit"_, #1700).
+  Wanneer de kaart verschijnt en wie in welke lijst staat, blijft zoals het is.
 
 ## De kaart zegt "niet meer in de selectie", zonder datum of reden
 
