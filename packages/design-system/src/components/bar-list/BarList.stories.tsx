@@ -130,7 +130,15 @@ export const MarkedRow = meta.story({
 export const LittleRoom = meta.story({
   args: {
     rows: [
-      { highlight: true, label: <Link href="#">Verenigd Koninkrijk</Link>, value: 1170 },
+      {
+        highlight: true,
+        label: (
+          <>
+            <Link href="#">Verenigd Koninkrijk</Link> (meeste minuten)
+          </>
+        ),
+        value: 1170,
+      },
       { label: 'Nederland', value: 640 },
       { label: 'Denemarken', value: 90 },
     ],
