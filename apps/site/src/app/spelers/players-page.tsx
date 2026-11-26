@@ -19,7 +19,9 @@ import { seasonAddress, seasonChoices, seasonSlug } from '#src/seasons'
 import { SeasonSquadCard } from '#src/SeasonSquadCard'
 import { SeasonUitblinkerCard } from '#src/SeasonUitblinkerCard'
 import { ServerError, serverErrorTitle } from '#src/ServerError'
+import { getSquadChanges } from '#src/squad-changes'
 import { getSquadSummary } from '#src/squad-summary'
+import { SquadChangesCard } from '#src/SquadChangesCard'
 import { SquadSummaryCard } from '#src/SquadSummaryCard'
 import { withBranch } from '#src/title'
 
@@ -59,13 +61,15 @@ export async function playersMetadata(season: string): Promise<Metadata> {
  * the squad is known). The figures of the players are on their own page (Cijfers, see
  * `PlayerFiguresPage`), so the toolbar has no choice of competition. The sidebar has the soft
  * card "Uitblinker" (`SeasonUitblinkerCard`, when the season has one or the window is open),
- * the four small soft cards Topscorers, Assists, Minuten and De nul gehouden
- * (`PlayersTopCards`), each with the first three places of its figure and a link to its large
- * card for the same season, and ends with the credit. A card without figures is left out, and
- * so are Assists and Minuten when the season has no match report that is `klaar`. The sidebar
- * follows the main column on a phone, so the squad comes first there. The page has one list, so
- * it has no bar "Op deze pagina:". A season that has no matches in the database is the page
- * "niet gevonden".
+ * the soft card "Veranderingen in de selectie" (`SquadChangesCard`, when this season and the
+ * one before say enough), the four small soft cards Topscorers, Assists, Minuten and De nul
+ * gehouden (`PlayersTopCards`), each with the first three places of its figure and a link to
+ * its large card for the same season, and ends with the credit, which also names the pages of
+ * the squad of the season before while the changes are shown. A card without figures is left
+ * out, and so are Assists and Minuten when the season has no match report that is `klaar`. The
+ * sidebar follows the main column on a phone, so the squad comes first there. The page has no
+ * bar "Op deze pagina:". A season that has no matches in the database is the page "niet
+ * gevonden".
  */
 export async function PlayersPage({ season }: { season: string }) {
   const loaded = await loadSeasonPage(season, playersPath)
@@ -86,12 +90,16 @@ export async function PlayersPage({ season }: { season: string }) {
 
   const { data, seasons } = loaded
   const summary = await loadSummary(squad, season)
+  const changes = await loadChanges(squad, season, seasons)
   const figures = await loadFigures(season)
   const uitblinker = await readSeasonUitblinker(season)
   const current = seasonOf(new Date())
   const playerFigures = seasonAddress(playerFiguresPath, season, current)
   const showsReports = figures?.seasonHasReports === true
-  const squadSource = { pages: squad.pages, wikidata: squad.players.some((player) => player.source === 'wikidata') }
+  const squadSource = {
+    pages: [...squad.pages, ...(changes?.source.pages.map((page) => ({ ...page, season: changes.previous })) ?? [])],
+    wikidata: squad.players.some((player) => player.source === 'wikidata') || changes?.source.wikidata === true,
+  }
 
   return (
     <Page.Main areas={pageAreas({ after: ['side'], toolbar: true })}>
@@ -107,6 +115,7 @@ export async function PlayersPage({ season }: { season: string }) {
       </Page.Section>
       <Page.Section area="side" aria-label="Meer over de spelers">
         {uitblinker === undefined ? null : <SeasonUitblinkerCard uitblinker={uitblinker} />}
+        {changes === undefined ? null : <SquadChangesCard changes={changes} />}
         <TopScorersShortCard href={`${playerFigures}#doelpuntenmakers`} matches={data.matches} />
         {showsReports && <ReportShortCard figure="assists" figures={figures} href={`${playerFigures}#assists`} />}
         {showsReports && <ReportShortCard figure="minutes" figures={figures} href={`${playerFigures}#minuten`} />}
@@ -128,6 +137,20 @@ export async function PlayersPage({ season }: { season: string }) {
       </Page.Section>
     </Page.Main>
   )
+}
+
+/**
+ * The changes compared with the season before, or undefined: no card, also when they could not
+ * be read (the error is logged).
+ */
+async function loadChanges(squad: SeasonSquad, season: string, seasons: readonly string[]) {
+  try {
+    return await getSquadChanges(squad, season, seasons)
+  } catch (error) {
+    console.error(`Could not read the changes of the squad for ${playersPath}: ${reasonOf(error)}`)
+
+    return undefined
+  }
 }
 
 /**

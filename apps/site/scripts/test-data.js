@@ -15,6 +15,7 @@ import { addArticles } from '../e2e/articles.ts'
 import { addClubNames } from '../e2e/club-names.ts'
 import { addDiscussions } from '../e2e/discussions.ts'
 import { addEarlierSeason } from '../e2e/earlier-season.ts'
+import { addEarlierSquad } from '../e2e/earlier-squad.ts'
 import { addEpisodes } from '../e2e/episodes.ts'
 import { addFinalPlaces } from '../e2e/final-places.ts'
 import { addHeadlines } from '../e2e/headlines.ts'
@@ -33,6 +34,7 @@ for (const add of [
   addEpisodes,
   addArticles,
   addEarlierSeason,
+  addEarlierSquad,
   addFinalPlaces,
   addHeldChange,
   addOlderMeetings,

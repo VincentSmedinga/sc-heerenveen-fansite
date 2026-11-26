@@ -6,6 +6,7 @@ import { getMatchData, getMatchSeasons } from '#src/matches'
 import { getSeasonPlayerStats } from '#src/season-player-stats'
 import { getSeasonReportFigures } from '#src/season-report-figures'
 import { getSeasonSquad } from '#src/season-squad'
+import { getSquadChanges } from '#src/squad-changes'
 import { getSquadSummary } from '#src/squad-summary'
 import { matchData } from '#src/test-matches'
 import { figuresData, noReports } from '#src/test-report-figures'
@@ -33,6 +34,9 @@ vi.mock('#src/season-squad', async (importOriginal) => ({
 
 // The figures of the squad are made up too: they come from the dates of birth in the database.
 vi.mock('#src/squad-summary', () => ({ getSquadSummary: vi.fn() }))
+
+// Who is new and who is gone is compared in squad-changes.test.ts.
+vi.mock('#src/squad-changes', () => ({ getSquadChanges: vi.fn() }))
 
 // What the card Uitblinker says is tested with its reader (season-uitblinker.test.ts).
 vi.mock('#src/fans/season-uitblinker', () => ({ readSeasonUitblinker: vi.fn() }))
@@ -69,6 +73,7 @@ beforeEach(() => {
   vi.mocked(getMatchData).mockResolvedValue(matchData)
   vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27'])
   vi.mocked(readSeasonUitblinker).mockReset()
+  vi.mocked(getSquadChanges).mockReset()
 })
 
 afterEach(() => {
@@ -586,5 +591,61 @@ describe('the card Selectie on /spelers', () => {
     vi.mocked(getSeasonSquad).mockRejectedValue(new Error('no database'))
 
     expect(await render()).toContain('Er ging iets mis')
+  })
+})
+
+describe('the card Veranderingen in de selectie on /spelers', () => {
+  const changes = {
+    arrived: [],
+    departed: [],
+    incomplete: [],
+    previous: '2025/26',
+    source: {
+      pages: [{ readAt: new Date('2026-10-20T11:30:00Z'), title: 'Sc Heerenveen in het seizoen 2025/26 (mannen)' }],
+      wikidata: true,
+    },
+  }
+  const side = (html: string) => html.slice(html.indexOf('style="grid-area:side"'), html.indexOf('</main>'))
+
+  beforeEach(() => {
+    vi.mocked(getMatchSeasons).mockResolvedValue(['2026/27', '2025/26'])
+    vi.mocked(getSquadChanges).mockResolvedValue(changes)
+  })
+
+  it('is in the sidebar above the small cards, and the credit names the squad of the season before and Wikidata', async () => {
+    const sidebar = side(await render())
+
+    expect(getSquadChanges).toHaveBeenCalledWith(squadData, '2026/27', ['2026/27', '2025/26'])
+    expect(sidebar.indexOf('veranderingen-in-de-selectie')).toBeGreaterThan(-1)
+    expect(sidebar.indexOf('veranderingen-in-de-selectie')).toBeLessThan(sidebar.indexOf('kort-topscorers'))
+    expect(sidebar).toContain('Selectie 2025/26')
+    expect(sidebar).toContain('Sc_Heerenveen_in_het_seizoen_2025/26_(mannen)')
+    expect(sidebar).toContain('Selectie 2026/27')
+    expect(sidebar).toContain('Wikidata')
+  })
+
+  it('is not there without changes, and the credit does not name the season before', async () => {
+    vi.mocked(getSquadChanges).mockResolvedValue(undefined)
+
+    const sidebar = side(await render())
+
+    expect(sidebar).not.toContain('veranderingen-in-de-selectie')
+    expect(sidebar).not.toContain('Selectie 2025/26')
+    expect(sidebar).not.toContain('Wikidata')
+  })
+
+  it('is left out alone, and the error logged, when the season before can not be read', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    vi.mocked(getSquadChanges).mockRejectedValue(new Error('connect ECONNREFUSED 127.0.0.1:3306'))
+
+    const html = await render()
+
+    expect(html).not.toContain('veranderingen-in-de-selectie')
+    expect(html).toContain('id="selectie"')
+    expect(html).toContain('kort-topscorers')
+    expect(error).toHaveBeenCalledWith(
+      'Could not read the changes of the squad for /spelers: connect ECONNREFUSED 127.0.0.1:3306',
+    )
   })
 })

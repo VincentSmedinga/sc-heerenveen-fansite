@@ -17,6 +17,17 @@ describe('the card "In het kort"', () => {
     expect(html).not.toContain('Op basis van')
   })
 
+  it('has the lines of the positions under Spelers', () => {
+    const positions = [
+      { count: 3, label: 'Doelmannen' },
+      { count: 0, label: 'Verdedigers' },
+    ]
+
+    expect(plain(render({ summary: { countries: 4, players: 3, positions } }))).toContain(
+      'Spelers 3 Doelmannen 3 Verdedigers 0 Landen 4',
+    )
+  })
+
   it('shows one decimal also for a whole average', () => {
     expect(plain(render({ summary: { ages: { average: 24, oldest: 30, youngest: 20 }, players: 3 } }))).toContain(
       '24,0 jaar',

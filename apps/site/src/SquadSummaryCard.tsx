@@ -8,14 +8,15 @@ const oneDecimal = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 1, mi
 
 /**
  * The card "In het kort" on the page Spelers: how many players the card Selectie
- * shows, the average age, the youngest and the oldest, and the number of countries, as lines
- * with the name on the left and the figure on the right. It is a white card at the top of the
+ * shows and how many of them there are per position, the average age, the youngest and the
+ * oldest, and the number of countries, as lines with the name on the left and the figure on the
+ * right. It is a white card at the top of the
  * main column. The lines with an age are there only in the current season and only when enough
  * players have an age; under the lines, one sentence says how many players the figures rest on
  * when some are missing. Only the worked-out figures come in: never a date of birth.
  */
 export function SquadSummaryCard({ summary }: { summary: SquadSummary }) {
-  const { ages, basis, countries } = summary
+  const { ages, basis, countries, positions } = summary
 
   return (
     <Card aria-labelledby="in-het-kort">
@@ -24,6 +25,11 @@ export function SquadSummaryCard({ summary }: { summary: SquadSummary }) {
       </Heading>
       <DescriptionList aligned stacked>
         <DescriptionList.Item term="Spelers">{summary.players}</DescriptionList.Item>
+        {positions?.map(({ count, label }) => (
+          <DescriptionList.Item key={label} term={label}>
+            {count}
+          </DescriptionList.Item>
+        ))}
         {ages === undefined ? null : (
           <>
             <DescriptionList.Item term="Gemiddelde leeftijd">
