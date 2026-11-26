@@ -13,7 +13,9 @@
 //   pnpm screenshots http://localhost:6006 componenten-pagina-page-footer--default --dark
 //
 // A target that starts with a slash is a path on the site. Anything else is the id of a story,
-// and opens iframe.html of Storybook with it. Only a build on this computer is accepted, so a
+// and opens iframe.html of Storybook with it. A story is photographed only when Storybook has
+// finished it, play function included; an error, an unknown story or a story that isn't ready
+// after 30 seconds stops the command. Only a build on this computer is accepted, so a
 // screenshot never shows data of the host. The default folder is screenshots in the folder
 // where you ran pnpm, which Git ignores.
 //
@@ -63,6 +65,12 @@ export function addressOf(base, target) {
 
   return `${base}/iframe.html?id=${encodeURIComponent(target)}&viewMode=story`
 }
+
+/** Whether a target is the id of a story and not a path on the site. */
+export const isStory = (target) => !target.startsWith('/')
+
+/** How long a story gets to finish. */
+export const storyTimeout = 30_000
 
 /** Reads the command line: where the build is, what to photograph, and the options. */
 export function parseArguments(argv) {
@@ -138,6 +146,39 @@ export function slugOf(target) {
 }
 
 /**
+ * What to do with a story, from what its page shows: wait, photograph it, or stop with a
+ * reason. `waited` is the time in milliseconds since the page loaded.
+ */
+export function storyStep({ errorMessage, id, noPreview, phase }, story, waited) {
+  // Storybook finishes a story that threw as well, so what it shows goes first.
+  if (errorMessage !== undefined) {
+    return { action: 'stop', reason: `Storybook shows an error: ${errorMessage}` }
+  }
+
+  if (noPreview) {
+    return { action: 'stop', reason: 'Storybook has no preview: the story does not exist.' }
+  }
+
+  // Storybook opens the first story that starts with an id it does not know.
+  if (id !== undefined && id !== story) {
+    return { action: 'stop', reason: `the story does not exist (Storybook opened "${id}").` }
+  }
+
+  if (id === story && phase === 'finished') {
+    return { action: 'photograph' }
+  }
+
+  if (waited >= storyTimeout) {
+    return {
+      action: 'stop',
+      reason: `the story is not ready after ${storyTimeout / 1000} seconds (phase: ${phase ?? 'none'}).`,
+    }
+  }
+
+  return { action: 'wait' }
+}
+
+/**
  * The name of a file, such as podcasts-390.png, or home-900-dark.png when dark was asked for.
  */
 export const fileNameOf = (target, width, dark) => `${slugOf(target)}-${width}${dark ? '-dark' : ''}.png`
@@ -171,6 +212,10 @@ async function photograph({ base, dark, fullPage, out, targets }) {
 
   mkdirSync(folder, { recursive: true })
 
+  // The files of a target wait here until all its widths succeeded, so a story that fails in
+  // one width leaves no file at all.
+  let pending = []
+
   try {
     for (const { file, target, viewport } of plan) {
       // One device pixel per CSS pixel and a colour scheme that is always set, so the default
@@ -191,12 +236,24 @@ async function photograph({ base, dark, fullPage, out, targets }) {
           throw new ScreenshotsError(`${address} answered ${response?.status() ?? 'nothing'}.`)
         }
 
+        if (isStory(target)) {
+          await waitForStory(page, target)
+        }
+
         await page.evaluate(() => document.fonts.ready)
 
         const png = await page.screenshot({ animations: 'disabled', fullPage })
 
-        writeFileSync(path.join(folder, file), png)
-        written.push({ file, size: png.length })
+        pending.push({ file, png })
+
+        if (pending.length === viewports.length) {
+          for (const image of pending) {
+            writeFileSync(path.join(folder, image.file), image.png)
+            written.push({ file: image.file, size: image.png.length })
+          }
+
+          pending = []
+        }
       } finally {
         await context.close()
       }
@@ -206,6 +263,40 @@ async function photograph({ base, dark, fullPage, out, targets }) {
   }
 
   return { folder, written }
+}
+
+/** What the page of a story shows, for storyStep. It runs in the browser. */
+function readStory() {
+  const { classList } = document.body
+  const render = globalThis.__STORYBOOK_PREVIEW__?.currentRender
+
+  return {
+    errorMessage: classList.contains('sb-show-errordisplay')
+      ? (document.querySelector('#error-message')?.textContent.trim() ?? '')
+      : undefined,
+    id: render?.id,
+    noPreview: classList.contains('sb-show-nopreview'),
+    phase: render?.phase,
+  }
+}
+
+/** Waits until Storybook has finished the story, or throws with the reason why it will not. */
+async function waitForStory(page, story) {
+  const start = Date.now()
+
+  for (;;) {
+    const step = storyStep(await page.evaluate(readStory), story, Date.now() - start)
+
+    if (step.action === 'photograph') {
+      return
+    }
+
+    if (step.action === 'stop') {
+      throw new ScreenshotsError(`No screenshot of "${story}": ${step.reason}`)
+    }
+
+    await page.waitForTimeout(100)
+  }
 }
 
 // `import.meta.main` only exists from Node 24.2, and engines allows 24.0 and 24.1 too, so
