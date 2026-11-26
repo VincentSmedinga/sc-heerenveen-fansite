@@ -31,6 +31,7 @@ const seasonOf = (season: string, extra: Partial<PlayerSeason> = {}, complete = 
   goalsByCompetition: {},
   lineupMatches: [],
   matchesInSeason: 34,
+  minutes: 2500,
   played: undefined,
   red: undefined,
   reportedMatches: complete ? 34 : 10,

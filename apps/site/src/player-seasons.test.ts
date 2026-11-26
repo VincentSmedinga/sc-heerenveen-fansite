@@ -8,7 +8,15 @@ import {
   type SeasonAppearance,
 } from './player-seasons'
 
-const none: PlayerSeasonFacts = { appearances: [], assists: [], goals: [], matchCounts: [], players: [], tables: [] }
+const none: PlayerSeasonFacts = {
+  appearances: [],
+  assists: [],
+  goals: [],
+  matchCounts: [],
+  minutes: [],
+  players: [],
+  tables: [],
+}
 
 /** A made-up appearance in a line-up. */
 const appearance = (season: string, extra: Partial<SeasonAppearance> = {}): SeasonAppearance => ({
@@ -69,7 +77,8 @@ describe('the seasons of a player', () => {
       ],
       assists: [{ season: '2003/04' }],
       goals: [goal('2003/04'), goal('2003/04', 'KNVB Beker')],
-      matchCounts: [{ played: 3, reported: 3, season: '2003/04' }],
+      matchCounts: [{ lineups: 3, played: 3, reported: 3, season: '2003/04' }],
+      minutes: [],
       players: [{ season: '2003/04', shirtNumber: 9 }],
       tables: [{ appearances: 99, assists: 99, season: '2003/04' }],
     })
@@ -91,7 +100,8 @@ describe('the seasons of a player', () => {
       ...none,
       appearances: [appearance('2026/27')],
       goals: [goal('2026/27')],
-      matchCounts: [{ played: 12, reported: 1, season: '2026/27' }],
+      matchCounts: [{ lineups: 1, played: 12, reported: 1, season: '2026/27' }],
+      minutes: [],
       players: [{ season: '2026/27', shirtNumber: 35 }],
       tables: [{ appearances: 11, assists: 3, season: '2026/27' }],
     })
@@ -106,7 +116,8 @@ describe('the seasons of a player', () => {
     const [season] = playerSeasonsOf({
       ...none,
       appearances: [appearance('2007/08'), appearance('2007/08', { cameOn: true, starter: false })],
-      matchCounts: [{ played: 41, reported: 8, season: '2007/08' }],
+      matchCounts: [{ lineups: 8, played: 41, reported: 8, season: '2007/08' }],
+      minutes: [],
       players: [{ season: '2007/08', shirtNumber: null }],
     })
 
@@ -122,7 +133,8 @@ describe('the seasons of a player', () => {
   it('has dashes for a season without anything, and no nought for goals we cannot know', () => {
     const [season] = playerSeasonsOf({
       ...none,
-      matchCounts: [{ played: 30, reported: 0, season: '1990/91' }],
+      matchCounts: [{ lineups: 0, played: 30, reported: 0, season: '1990/91' }],
+      minutes: [],
       players: [{ season: '1990/91', shirtNumber: null }],
     })
 
@@ -144,7 +156,8 @@ describe('the seasons of a player', () => {
         appearance('2003/04', { cameOn: true, goalsAgainst: 0, starter: false }),
         appearance('2003/04', { goalsAgainst: 0, red: true }),
       ],
-      matchCounts: [{ played: 5, reported: 5, season: '2003/04' }],
+      matchCounts: [{ lineups: 5, played: 5, reported: 5, season: '2003/04' }],
+      minutes: [],
       players: [{ season: '2003/04', shirtNumber: 1 }],
     })
 
@@ -159,7 +172,8 @@ describe('the seasons of a player', () => {
         appearance('2003/04', { cameOn: true, match: matchOf('2003/04', 2), starter: false }),
         appearance('2003/04', { match: matchOf('2003/04', 3) }),
       ],
-      matchCounts: [{ played: 3, reported: 3, season: '2003/04' }],
+      matchCounts: [{ lineups: 3, played: 3, reported: 3, season: '2003/04' }],
+      minutes: [],
       players: [{ season: '2003/04', shirtNumber: 1 }],
     })
 
@@ -179,9 +193,10 @@ describe('the seasons of a player', () => {
       ],
       goals: [goal('2003/04'), goal('2003/04', 'KNVB Beker')],
       matchCounts: [
-        { played: 2, reported: 2, season: '2003/04' },
-        { played: 34, reported: 0, season: '2004/05' },
+        { lineups: 2, played: 2, reported: 2, season: '2003/04' },
+        { lineups: 0, played: 34, reported: 0, season: '2004/05' },
       ],
+      minutes: [],
       players: [
         { season: '2003/04', shirtNumber: 9 },
         { season: '2004/05', shirtNumber: 9 },
@@ -195,5 +210,46 @@ describe('the seasons of a player', () => {
     expect(playerSeasonsOf(facts)[0]).toMatchObject({ assists: 6, played: 30 })
     expect(playerCompetitionOptions(facts)).toEqual(['all', 'league', 'cup'])
     expect(playerCompetitionOptions({ ...facts, appearances: [], goals: [goal('2003/04')] })).toEqual([])
+  })
+})
+
+describe('the minutes of a season', () => {
+  const minutes = (season: string, count: number, competition: 'Eredivisie' | 'KNVB Beker' = 'Eredivisie') => ({
+    competition,
+    minutes: count,
+    season,
+  })
+  const facts: PlayerSeasonFacts = {
+    ...none,
+    matchCounts: [
+      // Every match has a line-up, one report is not finished; the other season misses one.
+      { lineups: 2, played: 2, reported: 1, season: '2003/04' },
+      { lineups: 1, played: 2, reported: 1, season: '2004/05' },
+    ],
+    minutes: [minutes('2003/04', 90), minutes('2003/04', 25, 'KNVB Beker'), minutes('2004/05', 90)],
+    players: [
+      { season: '2003/04', shirtNumber: 9 },
+      { season: '2004/05', shirtNumber: 9 },
+    ],
+  }
+
+  it('adds them up when every played match has our line-up, and has none when one is missing', () => {
+    const [missing, complete] = playerSeasonsOf(facts)
+
+    expect(complete?.minutes).toBe(115)
+    expect(missing?.minutes).toBeUndefined()
+  })
+
+  it('counts the competition that is asked, and still wants every line-up of the season', () => {
+    const [missing, complete] = playerSeasonsOf(facts, ['Eredivisie'])
+
+    expect(complete?.minutes).toBe(90)
+    expect(missing?.minutes).toBeUndefined()
+  })
+
+  it('has none for a season without a played match', () => {
+    const [season] = playerSeasonsOf({ ...none, players: [{ season: '2026/27', shirtNumber: 1 }] })
+
+    expect(season?.minutes).toBeUndefined()
   })
 })

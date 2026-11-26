@@ -7,17 +7,17 @@ import { type CompetitionChoice, competitionWords } from './competition'
 import { nextSeason } from './player-page'
 
 /** The figures a column can show, each a field of `PlayerSeason`. */
-type FigureId = 'assists' | 'cleanSheets' | 'conceded' | 'goals' | 'played' | 'red' | 'started' | 'yellow'
+type FigureId = 'assists' | 'cleanSheets' | 'conceded' | 'goals' | 'minutes' | 'played' | 'red' | 'started' | 'yellow'
 
-/** The columns of a goalkeeper: matches, clean sheets, goals against and the cards. */
-const goalkeeperColumns: readonly FigureId[] = ['played', 'cleanSheets', 'conceded', 'yellow', 'red']
+/** The columns of a goalkeeper: matches, minutes, clean sheets, goals against and the cards. */
+const goalkeeperColumns: readonly FigureId[] = ['played', 'minutes', 'cleanSheets', 'conceded', 'yellow', 'red']
 
-/** The columns of everyone else: matches, line-ups, goals, assists and the cards. */
-const fieldColumns: readonly FigureId[] = ['played', 'started', 'goals', 'assists', 'yellow', 'red']
+/** The columns of everyone else: matches, line-ups, minutes, goals, assists and the cards. */
+const fieldColumns: readonly FigureId[] = ['played', 'started', 'minutes', 'goals', 'assists', 'yellow', 'red']
 
 /**
- * The columns that go behind the button "Toon meer" on a phone, where six do not fit (#1624):
- * the cards, and for a goalkeeper only the red ones, so that he keeps four columns.
+ * The columns that go behind the button "Toon meer" on a phone, where seven do not fit (#1624):
+ * the cards, and for a goalkeeper only the red ones, so that he keeps five columns of figures.
  */
 const moreColumns = (goalkeeper: boolean): readonly FigureId[] => (goalkeeper ? ['red'] : ['yellow', 'red'])
 
@@ -26,6 +26,9 @@ export const playerSeasonsCardId = 'per-seizoen'
 
 /** What a screen reader reads for the row between two spells, in place of the sign. */
 const gapHeader = 'niet bij sc Heerenveen'
+
+/** The line under the table when a season has a dash for the minutes (#1674). */
+const minutesNote = 'Minuten tellen alleen in een seizoen met een opstelling bij elke wedstrijd.'
 
 /** The dash a figure that we do not have shows: a figure we do not have is never a nought. */
 const dash = '–'
@@ -49,13 +52,17 @@ export type PlayerSeasonsTable = {
 /**
  * The columns by the line of the player, without the column that has no figure in any season,
  * and a row for each season, the newest first, and a row Totaal. The total adds up the seasons
- * that have a figure; `complete` says for each column whether that is every season.
+ * that have a figure; `complete` says for each column whether that is every season. The column
+ * of the minutes stands with the others, also when no season has them, and its total is then a
+ * dash.
  */
 export function playerSeasonsTable(seasons: readonly PlayerSeason[], goalkeeper: boolean): PlayerSeasonsTable {
   const wanted = goalkeeper ? goalkeeperColumns : fieldColumns
-  const ids = wanted.filter((id) => seasons.some((season) => season[id] !== undefined))
+  const known = (id: FigureId) => seasons.some((season) => season[id] !== undefined)
+  const others = wanted.some((id) => id !== 'minutes' && known(id))
+  const ids = wanted.filter((id) => known(id) || (id === 'minutes' && others))
   const more = moreColumns(goalkeeper)
-  const totals = (id: FigureId) => seasons.reduce((total, season) => total + (season[id] ?? 0), 0)
+  const totals = (id: FigureId) => (known(id) ? seasons.reduce((total, season) => total + (season[id] ?? 0), 0) : dash)
 
   return {
     columns: ids.map((id) => ({ ...tableColumns[id], id, ...(more.includes(id) ? { more: true } : {}) })),
@@ -182,33 +189,59 @@ export function playerSeasonsNotes(
 ): string[] {
   const notes: string[] = []
   const shown = table.columns.map(({ id }) => id)
-  const wikipedia = seasons.filter((season) => season.source === 'wikipedia').map(({ season }) => season)
+  // A season with minutes has its line-ups, also when its reports are not all finished (#1674),
+  // so its lines say where the minutes come from.
+  const seasonsFrom = (source: PlayerSeason['source'], withMinutes: boolean) =>
+    seasons.filter((season) => season.source === source && (season.minutes !== undefined) === withMinutes)
   // Under the Eredivisie a season of the Wikipedia table has dashes, for the reason below.
-  const hasDash = seasons.some(
-    (season) => !(league && season.source === 'wikipedia') && shown.some((id) => season[id] === undefined),
+  const dashed = seasons.filter(
+    (season) =>
+      !(league && season.source === 'wikipedia') && shown.some((id) => id !== 'minutes' && season[id] === undefined),
   )
 
   if (goalkeeper) {
     notes.push('Nul en tegendoelpunten tellen alleen de wedstrijden die hij van begin tot eind speelde.')
   }
-  if (hasDash) {
-    notes.push('Een streepje: van dat seizoen hebben we geen opstellingen.')
+  if (dashed.length > 0) {
+    notes.push(
+      dashed.some((season) => season.minutes !== undefined)
+        ? 'Een streepje: dat cijfer hebben we niet van dat seizoen.'
+        : 'Een streepje: van dat seizoen hebben we geen opstellingen.',
+    )
+  }
+  if (shown.includes('minutes') && seasons.some((season) => season.minutes === undefined)) {
+    notes.push(minutesNote)
   }
   // One short line for each kind of gap, with the seasons as ranges.
   const some = seasons.filter((season) => season.source === 'some-lineups')
 
   if (some.length > 0) {
-    notes.push(
-      `Opstellingen: ${some.map((season) => `${season.season} (${season.reportedMatches} van ${season.matchesInSeason})`).join(', ')}.`,
-    )
-  }
-  const goalsOnly = seasons.filter((season) => season.source === 'none').map(({ season }) => season)
+    const counted = ({ matchesInSeason, minutes, reportedMatches }: PlayerSeason) => {
+      // With one competition chosen the minutes count its matches only, so not all of them.
+      const all = league || minutes === undefined ? '' : `, de minuten uit alle ${matchesInSeason}`
 
-  if (goalsOnly.length > 0) {
-    notes.push(`Alleen de doelpunten: ${seasonRanges(goalsOnly)}.`)
+      return `${reportedMatches} van ${matchesInSeason}${all}`
+    }
+
+    notes.push(`Opstellingen: ${some.map((season) => `${season.season} (${counted(season)})`).join(', ')}.`)
   }
-  if (wikipedia.length > 0) {
-    notes.push(`${league ? 'Geen cijfers per competitie' : 'Cijfers van Wikipedia'}: ${seasonRanges(wikipedia)}.`)
+  const wikipedia = league
+    ? ['Geen cijfers per competitie', 'Per competitie alleen de doelpunten en de minuten']
+    : ['Cijfers van Wikipedia', 'Cijfers van Wikipedia, de minuten uit onze opstellingen']
+  // A season without a finished report and without a goal of his has a dash for the goals.
+  const noneWithMinutes = seasonsFrom('none', true)
+  const lines = [
+    ['Alleen de doelpunten', seasonsFrom('none', false)],
+    ['Alleen de doelpunten en de minuten', noneWithMinutes.filter((season) => season.goals !== undefined)],
+    ['Alleen de minuten', noneWithMinutes.filter((season) => season.goals === undefined)],
+    [wikipedia[0], seasonsFrom('wikipedia', false)],
+    [wikipedia[1], seasonsFrom('wikipedia', true)],
+  ] as const
+
+  for (const [words, found] of lines) {
+    if (found.length > 0) {
+      notes.push(`${words}: ${seasonRanges(found.map(({ season }) => season))}.`)
+    }
   }
   if (shown.some((id) => !table.complete[id])) {
     notes.push('Het totaal telt alleen de seizoenen met een cijfer.')

@@ -4608,6 +4608,7 @@
 - **Waarom:** een doelman wordt niet beoordeeld op doelpunten en assists, en een veldspeler niet op de nul.
   Zes kolommen op 320 pixels maken de tabel te breed, dus vier per linie.
 - **Alternatieven:** één tabel met alle kolommen (te breed op een telefoon); de kolommen van de tabel Alle spelers (die hebben minuten, en die hebben we niet).
+- **Later:** zie _Per seizoen toont de minuten van een speler, als elke wedstrijd een opstelling heeft_ (26 november 2026): er is een kolom met de minuten.
 - **Later:** zie _De kaart Per seizoen toont ook de gele en rode kaarten_ (24 november 2026): zes kolommen per linie in plaats van vier, waarvan de laatste achter een knop op een telefoon.
 
 ## De naam van een speler van ons linkt naar zijn pagina, op de plekken waar hij als naam staat
@@ -8066,6 +8067,7 @@
   De knop is wat het design system al biedt voor een tabel die op een telefoon te breed wordt, zonder zijwaarts scrollen.
 - **Alternatieven:** de basis op een telefoon weglaten (de kaarten zijn dan altijd zichtbaar, maar de opstellingen verdwijnen achter een knop); de tabel zijwaarts laten scrollen (nieuw in het design system en lastig met een schermlezer); rood en geel-rood als aparte kolommen (nog breder, en geen andere tabel scheidt ze); de rij Totaal zonder kaarten (het totaal is dan niet af).
 - **Later:** dit vult _De tabel Per seizoen heeft kolommen naar de linie van de speler_ aan: zes kolommen per linie in plaats van vier.
+- **Later:** zie _Per seizoen toont de minuten van een speler, als elke wedstrijd een opstelling heeft_ (26 november 2026): met de minuten zijn het zeven kolommen voor een veldspeler en zes voor een doelman.
 
 ## Het overzicht van alle spelers staat in drie even brede kolommen, met de bron als laatste kaart
 
@@ -8368,6 +8370,34 @@
   De regel staat in `shortOpponentNames` in `apps/site/src/player-name.ts`.
 - **Waarom:** het veld toont onze spelers al met hun achternaam, en een hele naam neemt op een smal veld veel ruimte.
 - **Alternatieven:** de hele naam houden; alleen het laatste woord tonen (dan wordt "da Silva Moreira" alleen "Moreira"); een veld voor de korte naam in het beheer.
+
+## Per seizoen toont de minuten van een speler, als elke wedstrijd een opstelling heeft
+
+- **Datum:** 26 november 2026
+- **Besluit:** de kaart "Per seizoen" heeft een kolom met de minuten (`tableColumns.minutes`), na de basis bij een veldspeler en na gespeeld bij een doelman (#1674).
+  - **Welk seizoen:** een seizoen toont de minuten alleen als elke gespeelde wedstrijd een verslag heeft met onze elf basisspelers.
+    Het verslag mag af zijn (`klaar`) of niet (`bezig`).
+    Anders staat er een streepje, en onder de tabel: "Minuten tellen alleen in een seizoen met een opstelling bij elke wedstrijd."
+  - **Berekening:** `minutesPlayed`, dezelfde functie als op Spelers › Cijfers, over elk verslag met hem.
+  - **Verschil:** Spelers › Cijfers, en de andere kolommen van de kaart, tellen alleen de verslagen die af zijn.
+    De minuten kunnen daardoor over meer wedstrijden gaan dan "gespeeld" in dezelfde rij.
+    In een verslag dat niet af is, kan een wissel ontbreken, en dan wijkt het aantal minuten iets af.
+    Liet de import een rode kaart zonder minuut weg, dan telt de speler de hele wedstrijd.
+  - **De regels onder de tabel** zeggen waar de minuten vandaan komen bij een seizoen met minuten waarvan niet elk verslag af is.
+    Dat is "(36 van 42, de minuten uit alle 42)" achter de opstellingen, "Cijfers van Wikipedia, de minuten uit onze opstellingen" of "Alleen de doelpunten en de minuten".
+    Zonder doelpunt van de speler is het "Alleen de minuten".
+    Met één competitie gekozen valt "de minuten uit alle 42" weg, want dan tellen alleen de minuten van die competitie.
+    Bij alleen de Eredivisie is het "Per competitie alleen de doelpunten en de minuten".
+    Heeft zo'n seizoen een streepje, dan staat er "Een streepje: dat cijfer hebben we niet van dat seizoen."
+  - **Eredivisie:** met alleen de Eredivisie tellen de minuten van die wedstrijden, en moet nog steeds elke wedstrijd van het seizoen een opstelling hebben.
+  - **Totaal:** de rij telt de seizoenen met minuten op, en toont een streepje als geen seizoen ze heeft.
+    De kolom blijft dan staan, naast de andere cijfers.
+  - **Op een telefoon** staan de minuten meteen in de tabel, en de kaarten blijven achter "Toon meer".
+    Daarvoor staan de kolommen dichter op elkaar (zie _Een tabel met "Toon meer" heeft op een smal scherm minder ruimte tussen de kolommen_ in `designsysteem.md`).
+- **Waarom:** de minuten komen uit de verslagen, en een seizoen met ontbrekende opstellingen geeft een te laag getal dat op weinig speeltijd lijkt.
+  Met alleen de verslagen die af zijn, had in de kopie van acceptatie van 25 november 2026 alleen 2026/27 minuten.
+  In 1998/99 tot en met 2002/03 en 2005/06 heeft daar elke wedstrijd een opstelling, maar zijn enkele verslagen niet af.
+- **Alternatieven:** alleen de verslagen die af zijn (bijna overal een streepje); altijd het getal tonen met "uit N van M wedstrijden"; de kolom alleen tonen als elk seizoen van de speler compleet is; geen kolom.
 
 ## De redactie zet een eigen markering, geen niveau
 

@@ -16,6 +16,7 @@ const season = (name: string, extra: Partial<PlayerSeason> = {}): PlayerSeason =
   goalsByCompetition: {},
   lineupMatches: [],
   matchesInSeason: 34,
+  minutes: 2500,
   played: 30,
   red: 0,
   reportedMatches: 34,
@@ -25,6 +26,8 @@ const season = (name: string, extra: Partial<PlayerSeason> = {}): PlayerSeason =
   started: 28,
   yellow: 2,
   ...extra,
+  // A season without every finished report has no minutes here, unless a test says otherwise.
+  ...(extra.source !== undefined && !('minutes' in extra) ? { minutes: undefined } : {}),
 })
 
 const render = (seasons: PlayerSeason[], goalkeeper = false) =>
@@ -46,10 +49,25 @@ describe('the cards in the table Per seizoen', () => {
     const field = cards(false, [season('2004/05')])
     const keeper = cards(true, [season('2004/05', { cleanSheets: 3, conceded: 20 })])
 
-    expect(field.columns.map(({ id }) => id)).toEqual(['played', 'started', 'goals', 'assists', 'yellow', 'red'])
-    expect(field.columns.map(({ more }) => more === true)).toEqual([false, false, false, false, true, true])
-    expect(keeper.columns.map(({ id }) => id)).toEqual(['played', 'cleanSheets', 'conceded', 'yellow', 'red'])
-    expect(keeper.columns.map(({ more }) => more === true)).toEqual([false, false, false, false, true])
+    expect(field.columns.map(({ id }) => id)).toEqual([
+      'played',
+      'started',
+      'minutes',
+      'goals',
+      'assists',
+      'yellow',
+      'red',
+    ])
+    expect(field.columns.map(({ more }) => more === true)).toEqual([false, false, false, false, false, true, true])
+    expect(keeper.columns.map(({ id }) => id)).toEqual([
+      'played',
+      'minutes',
+      'cleanSheets',
+      'conceded',
+      'yellow',
+      'red',
+    ])
+    expect(keeper.columns.map(({ more }) => more === true)).toEqual([false, false, false, false, false, true])
   })
 
   it('wraps the table in the button and shows the cards for a field player', () => {
@@ -57,7 +75,7 @@ describe('the cards in the table Per seizoen', () => {
 
     expect(html).toContain('hf-data-table-more')
     expect(html).toContain('hf-more-column')
-    expect(legendsOf(html)).toEqual(['gespeeld, basis, doelpunten, assists, geel, rood'])
+    expect(legendsOf(html)).toEqual(['gespeeld, basis, minuten, doelpunten, assists, geel, rood'])
   })
 
   it('counts a yellow-red card in both columns: the figures are those of the seasons', () => {
@@ -91,7 +109,7 @@ describe('the cards in the table Per seizoen', () => {
   it('has no geel and rood for a player without a figure about cards in any season', () => {
     const table = cards(false, [season('2004/05', { red: undefined, yellow: undefined })])
 
-    expect(table.columns.map(({ id }) => id)).toEqual(['played', 'started', 'goals', 'assists'])
+    expect(table.columns.map(({ id }) => id)).toEqual(['played', 'started', 'minutes', 'goals', 'assists'])
   })
 })
 
@@ -106,6 +124,7 @@ describe('the table Per seizoen', () => {
     expect(html.match(/<span title="[^"]+">/g)).toEqual([
       '<span title="Gespeeld">',
       '<span title="Basis">',
+      '<span title="Minuten">',
       '<span title="Doelpunten">',
       '<span title="Assists">',
       '<span title="Geel">',
@@ -116,7 +135,7 @@ describe('the table Per seizoen', () => {
     expect(html).toContain('<span class="hf-meta hf-data-table-aside">nr. 35</span>')
     expect(html).toContain('<tr class="hf-data-table-total"><th scope="row">Totaal</th>')
     expect(html).toMatch(
-      /<th scope="row">Totaal<\/th><td class="hf-numeric">60<\/td><td class="hf-numeric">56<\/td><td class="hf-numeric">10<\/td><td class="hf-numeric">2<\/td><td class="hf-numeric hf-more-column">4<\/td><td class="hf-numeric hf-more-column">0<\/td>/,
+      /<th scope="row">Totaal<\/th><td class="hf-numeric">60<\/td><td class="hf-numeric">56<\/td><td class="hf-numeric">5\.000<\/td><td class="hf-numeric">10<\/td><td class="hf-numeric">2<\/td><td class="hf-numeric hf-more-column">4<\/td><td class="hf-numeric hf-more-column">0<\/td>/,
     )
   })
 
@@ -140,12 +159,13 @@ describe('the table Per seizoen', () => {
 
     expect(html.match(/<span title="[^"]+">/g)).toEqual([
       '<span title="Gespeeld">',
+      '<span title="Minuten">',
       '<span title="Nul">',
       '<span title="Tegendoelpunten">',
       '<span title="Geel">',
       '<span title="Rood">',
     ])
-    expect(legendsOf(html)).toEqual(['gespeeld, nul, tegendoelpunten, geel, rood'])
+    expect(legendsOf(html)).toEqual(['gespeeld, minuten, nul, tegendoelpunten, geel, rood'])
     expect(html).toContain('van begin tot eind')
   })
 
@@ -156,6 +176,7 @@ describe('the table Per seizoen', () => {
         season('2003/04', {
           assists: undefined,
           goals: undefined,
+          minutes: undefined,
           played: undefined,
           red: undefined,
           source: 'none',
@@ -166,8 +187,8 @@ describe('the table Per seizoen', () => {
       false,
     )
 
-    expect(rows.columns.map(({ id }) => id)).toEqual(['played', 'started', 'goals'])
-    expect(rows.rows[1]?.cells).toEqual(['–', '–', '–'])
+    expect(rows.columns.map(({ id }) => id)).toEqual(['played', 'started', 'minutes', 'goals'])
+    expect(rows.rows[1]?.cells).toEqual(['–', '–', '–', '–'])
   })
 
   it('says what a dash is, and that the total counts only the seasons with a figure', () => {
@@ -236,5 +257,132 @@ describe('the table Per seizoen', () => {
     expect(html).toContain('Geen cijfers per competitie: 2004/05.')
     expect(html).not.toContain('geen opstellingen')
     expect(html).toContain('–')
+  })
+})
+
+describe('the minutes in the table Per seizoen', () => {
+  const note = 'Minuten tellen alleen in een seizoen met een opstelling bij elke wedstrijd.'
+
+  it('shows the minutes of each season and their total, without the line when every season has them', () => {
+    const table = playerSeasonsTable([season('2004/05'), season('2003/04', { minutes: 900 })], false)
+    const column = table.columns.findIndex(({ id }) => id === 'minutes')
+
+    expect(table.rows.map((row) => row.cells[column])).toEqual([2500, 900, 3400])
+    expect(render([season('2004/05')])).not.toContain(note)
+  })
+
+  it('shows a dash and the line why for a season without every line-up, and adds up the others', () => {
+    const seasons = [season('2004/05'), season('2003/04', { minutes: undefined })]
+    const table = playerSeasonsTable(seasons, false)
+    const column = table.columns.findIndex(({ id }) => id === 'minutes')
+
+    expect(table.rows.map((row) => row.cells[column])).toEqual([2500, '–', 2500])
+    expect(render(seasons)).toContain(note)
+    expect(render(seasons)).toContain('Het totaal telt alleen de seizoenen met een cijfer.')
+    // The dash of the minutes is not one of a season without line-ups.
+    expect(render(seasons)).not.toContain('geen opstellingen')
+  })
+
+  it('keeps the column, with a dash as the total, when no season has every line-up', () => {
+    const seasons = [season('2004/05', { minutes: undefined })]
+    const table = playerSeasonsTable(seasons, false)
+    const column = table.columns.findIndex(({ id }) => id === 'minutes')
+
+    expect(table.rows.map((row) => row.cells[column])).toEqual(['–', '–'])
+    expect(render(seasons)).toContain(note)
+  })
+
+  it('has no column of minutes alone for a player without any other figure', () => {
+    const empty = {
+      assists: undefined,
+      goals: undefined,
+      minutes: undefined,
+      played: undefined,
+      red: undefined,
+      started: undefined,
+      yellow: undefined,
+    }
+
+    expect(render([season('1990/91', empty)])).toBe('')
+  })
+
+  it('gives the row of a spell at another club no minutes', () => {
+    const table = playerSeasonsTable([season('2004/05'), season('2000/01')], false)
+
+    expect(table.rows[1]).toMatchObject({ cells: [], gap: true })
+  })
+})
+
+describe('the lines under the table for a season with minutes and reports that are not finished', () => {
+  const minutes = { minutes: 900 }
+  const withoutFigures = { assists: undefined, played: undefined, started: undefined, yellow: undefined }
+
+  it('says that the minutes count every line-up of a season with only some finished reports', () => {
+    const html = render([
+      season('2001/02', { ...minutes, matchesInSeason: 42, reportedMatches: 36, source: 'some-lineups' }),
+      season('2000/01', { matchesInSeason: 41, reportedMatches: 8, source: 'some-lineups' }),
+    ])
+
+    expect(html).toContain('Opstellingen: 2001/02 (36 van 42, de minuten uit alle 42), 2000/01 (8 van 41).')
+  })
+
+  it('says where the minutes of a season of Wikipedia come from, and does not deny its line-ups', () => {
+    const html = render([
+      season('2001/02', { ...minutes, source: 'wikipedia', started: undefined }),
+      season('2000/01', { source: 'wikipedia' }),
+    ])
+
+    expect(html).toContain('Cijfers van Wikipedia: 2000/01.')
+    expect(html).toContain('Cijfers van Wikipedia, de minuten uit onze opstellingen: 2001/02.')
+    expect(html).toContain('Een streepje: dat cijfer hebben we niet van dat seizoen.')
+    expect(html).not.toContain('geen opstellingen')
+  })
+
+  it('says that a season without a finished report has the goals and the minutes', () => {
+    const html = render([season('1995/96', { ...withoutFigures, ...minutes, source: 'none' }), season('1994/95')])
+
+    expect(html).toContain('Alleen de doelpunten en de minuten: 1995/96.')
+    expect(html).not.toContain('Alleen de doelpunten:')
+    expect(html).not.toContain('geen opstellingen')
+  })
+
+  it('says under the Eredivisie that a season of Wikipedia has the goals and the minutes', () => {
+    const html = renderToStaticMarkup(
+      <PlayerSeasonsCard
+        address={(value) => value}
+        competition="league"
+        goalkeeper={false}
+        name="Test Speler"
+        seasons={[season('2001/02', { ...withoutFigures, ...minutes, source: 'wikipedia' }), season('2000/01')]}
+      />,
+    )
+
+    expect(html).toContain('Per competitie alleen de doelpunten en de minuten: 2001/02.')
+    expect(html).not.toContain('Geen cijfers per competitie')
+  })
+
+  it('says only the minutes for a season without a finished report and without a goal', () => {
+    const html = render([
+      season('1995/96', { ...withoutFigures, ...minutes, goals: undefined, source: 'none' }),
+      season('1994/95'),
+    ])
+
+    expect(html).toContain('Alleen de minuten: 1995/96.')
+    expect(html).not.toContain('Alleen de doelpunten')
+  })
+
+  it('does not say that the minutes count every line-up when one competition is chosen', () => {
+    const html = renderToStaticMarkup(
+      <PlayerSeasonsCard
+        address={(value) => value}
+        competition="league"
+        goalkeeper={false}
+        name="Test Speler"
+        seasons={[season('2001/02', { ...minutes, matchesInSeason: 42, reportedMatches: 36, source: 'some-lineups' })]}
+      />,
+    )
+
+    expect(html).toContain('Opstellingen: 2001/02 (36 van 42).')
+    expect(html).not.toContain('de minuten uit alle')
   })
 })
