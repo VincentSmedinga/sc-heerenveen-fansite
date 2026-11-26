@@ -5,19 +5,26 @@
  * thicker border, and the text of the error is in the Field: the colour is never the only sign.
  * The letter spacing also follows the last digit, so the input is one box and one gap wider
  * than the boxes and the wrapper clips it: otherwise the input scrolls after the sixth digit.
+ * The wrapper is a container, so the boxes, the gaps, the borders and, if they would not fit,
+ * the digits shrink with the room it has, as with text at 200% on a narrow phone.
  */
 
 @layer hf.components {
   .hf-code-input {
-    --hf-code-box: clamp(2.5rem, 11.5vw, 2.75rem);
-    --hf-code-gap: var(--hf-space-s);
+    --hf-code-box-max: clamp(2.5rem, 11.5vw, 2.75rem);
 
+    container: hf-code-input / inline-size;
     display: inline-block;
-    inline-size: calc(6 * var(--hf-code-box) + 5 * var(--hf-code-gap));
+    inline-size: min(100%, calc(6 * var(--hf-code-box-max) + 5 * var(--hf-space-s)));
     justify-self: start;
-    max-inline-size: 100%;
     overflow: clip;
     position: relative;
+
+    /* On the children, so that cqi is the width of this wrapper. */
+    > * {
+      --hf-code-gap: min(var(--hf-space-s), 3cqi);
+      --hf-code-box: min(var(--hf-code-box-max), calc((100cqi - 5 * var(--hf-code-gap)) / 6));
+    }
 
     > input {
       background: transparent;
@@ -26,7 +33,7 @@
       box-sizing: border-box;
       color: var(--hf-colour-text-heading);
       display: block;
-      font-size: var(--hf-figure-large-font-size);
+      font-size: min(var(--hf-figure-large-font-size), calc(var(--hf-code-box) * 1.5));
       font-variant-numeric: tabular-nums;
       font-weight: var(--hf-figure-font-weight);
       inline-size: calc(100% + var(--hf-code-box) + var(--hf-code-gap));
@@ -60,18 +67,18 @@
 
   .hf-code-input-box {
     background-color: var(--hf-colour-background-surface);
-    border: 0.125rem solid var(--hf-colour-border-input);
+    border: min(0.125rem, 1cqi) solid var(--hf-colour-border-input);
     border-radius: 0.5rem;
     box-sizing: border-box;
 
     &[data-current] {
       border-color: var(--hf-colour-focus);
-      border-width: 0.25rem;
+      border-width: min(0.25rem, 2cqi);
     }
   }
 
   .hf-code-input:has(> input[aria-invalid='true']) .hf-code-input-box {
     border-color: var(--hf-colour-text-accent);
-    border-width: 0.25rem;
+    border-width: min(0.25rem, 2cqi);
   }
 }

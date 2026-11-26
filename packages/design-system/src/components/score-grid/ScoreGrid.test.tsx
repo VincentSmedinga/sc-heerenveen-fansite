@@ -137,6 +137,16 @@ describe('the look of the grid', () => {
     expect(css).toContain('overflow-wrap: anywhere;')
   })
 
+  it('puts the label of a row above its fields when the grid itself has little room', () => {
+    const narrow = css.slice(css.indexOf('@container hf-score-grid (inline-size < 15rem)'))
+
+    expect(css).toContain('container: hf-score-grid / inline-size;')
+    expect(narrow).toContain('grid-template-columns: minmax(0, 1fr) max-content minmax(0, 1fr);')
+    expect(narrow).toMatch(/\.hf-score-grid-corner \{\s*display: none;/)
+    expect(narrow).toMatch(/\.hf-score-grid-label \{\s*grid-column: 1 \/ -1;/)
+    expect(narrow).toContain('inline-size: min(3.5rem, 100%);')
+  })
+
   it('makes a field a square of at least 44 pixels', () => {
     expect(css).toContain('block-size: 3.5rem;')
     expect(css).toContain('inline-size: 3.5rem;')

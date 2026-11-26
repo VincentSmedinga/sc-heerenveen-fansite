@@ -137,6 +137,16 @@ describe('a prediction in words', () => {
 describe('the look of the list', () => {
   const css = readFileSync(join(import.meta.dirname, 'prediction-list.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
 
+  it('puts the points and the prediction under the match when the list itself has little room', () => {
+    const narrow = css.slice(css.indexOf('@container hf-prediction-list (inline-size < 15rem)'))
+
+    expect(css).toContain('container: hf-prediction-list / inline-size;')
+    expect(narrow).toMatch(/\.hf-prediction-list-item \{\s*grid-template-columns: minmax\(0, 1fr\);/)
+    expect(narrow).toMatch(/\.hf-prediction-list-side \{[^}]*flex-wrap: wrap;/)
+    expect(narrow).toMatch(/\.hf-prediction-list-side \{[^}]*text-align: start;/)
+    expect(narrow).toMatch(/\.hf-prediction-list-side \{[^}]*white-space: normal;/)
+  })
+
   it('never cuts text short, and takes the space of the Match out of the row', () => {
     expect(css).not.toContain('text-overflow')
     expect(css).not.toContain('overflow: hidden')
