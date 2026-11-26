@@ -346,13 +346,16 @@ describe('the mark that a squad is complete, on the list of the players (#1675)'
     )
   })
 
-  it('says that the site follows later for a scorer who went missing after the calculation', async () => {
-    await markSquadComplete(database.db, userId, season)
+  it('does not promise in the notice that the site shows a mark that does not count', async () => {
     await database.db.insert(matchGoals).values({ matchId, minute: 3, ours: true, player: 'Niet Erbij' })
+    await markSquadComplete(database.db, userId, season)
 
-    expect(await list({ seizoen: '2019-20' })).toContain(
-      'Na de volgende berekening telt de markering daarom niet meer op de site.',
+    const html = await list({ gedaan: 'compleet', seizoen: '2019-20' })
+
+    expect(html).toContain(
+      'is gemarkeerd als compleet. De markering telt nu niet op de site, omdat in de lijst een doelpuntenmaker ontbreekt.',
     )
+    expect(html).not.toContain('De site toont dat')
   })
 
   it('explains a season that can not be marked', async () => {

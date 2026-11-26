@@ -13,6 +13,8 @@ import {
   type NewMatch,
   persons,
   players,
+  squadCompleteMarks,
+  squadCompleteness,
   stadiumNames,
   stadiums,
   wikipediaPages,
@@ -52,6 +54,8 @@ beforeEach(async () => {
   await database.pool.query('DELETE FROM audit_log')
   await database.pool.query('DELETE FROM match_changes')
   await database.pool.query('DELETE FROM matches')
+  await database.pool.query('DELETE FROM squad_complete_marks')
+  await database.pool.query('DELETE FROM squad_completeness')
   await database.pool.query('DELETE FROM club_home_grounds')
   await database.pool.query('DELETE FROM stadium_names')
   await database.pool.query('DELETE FROM stadiums')
@@ -982,5 +986,21 @@ describe('the changes of Wikipedia that are held back', () => {
     expect(await database.db.select().from(auditLog)).toMatchObject([
       { action: 'match.keep', itemId: matchId, reason: 'Het blijft staan', userId },
     ])
+  })
+})
+
+describe('the squad of a marked season after a change of the goals (#1675)', () => {
+  const level = async () => (await database.db.select().from(squadCompleteness))[0]?.level
+
+  it('drops below complete in the same save for a scorer who is not in the list, and comes back with an undo', async () => {
+    const id = await addMatch({ season: '2019/20' })
+    await database.db.insert(players).values({ name: 'Oyen', searchTerm: 'Oyen', season: '2019/20' })
+    await database.db.insert(squadCompleteMarks).values({ markedAt: t0, season: '2019/20' })
+
+    await saveEntry(database.db, userId, id, entry({ goals: [goal({ player: 'Niet Erbij' })] }), undefined, t0)
+    expect(await level()).not.toBe('compleet')
+
+    await undoEntry(database.db, userId, id, undefined, t1)
+    expect(await level()).toBe('compleet')
   })
 })

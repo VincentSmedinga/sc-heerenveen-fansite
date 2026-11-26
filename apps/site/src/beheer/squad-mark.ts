@@ -5,7 +5,7 @@
 import type { Database } from '@fansite/db/client'
 
 import { recordAction } from '@fansite/db/audit-log'
-import { adminUsers, players, squadCompleteMarks, squadCompleteness } from '@fansite/db/schema'
+import { adminUsers, players, squadCompleteMarks } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
 import { findMissingScorers, storeCompleteness } from '@fansite/db/store-completeness'
 import { eq } from 'drizzle-orm'
@@ -23,10 +23,8 @@ export type SquadMark = {
     | {
         /** The first name or the address of the account, or null when the account is gone. */
         by: null | string
-        /** Whether the site says the squad is complete: the stored level is `compleet`. */
-        counts: boolean
         markedAt: Date
-        /** The scorers of ours who are not in the list. */
+        /** The scorers of ours who are not in the list: with one, the mark does not count. */
         missing: string[]
       }
 }
@@ -41,12 +39,10 @@ export async function findSquadMark(db: Database, season: string, now = new Date
       .select({
         accountId: adminUsers.id,
         by: accountName(adminUsers),
-        level: squadCompleteness.level,
         markedAt: squadCompleteMarks.markedAt,
       })
       .from(squadCompleteMarks)
       .leftJoin(adminUsers, eq(squadCompleteMarks.markedBy, adminUsers.id))
-      .leftJoin(squadCompleteness, eq(squadCompleteness.season, squadCompleteMarks.season))
       .where(eq(squadCompleteMarks.season, season)),
     canBeMarked(db, season, now),
   ])
@@ -59,7 +55,6 @@ export async function findSquadMark(db: Database, season: string, now = new Date
     canMark,
     mark: {
       by: mark.accountId === null ? null : mark.by,
-      counts: mark.level === 'compleet',
       markedAt: mark.markedAt,
       missing: await findMissingScorers(db, season),
     },

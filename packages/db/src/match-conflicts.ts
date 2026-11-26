@@ -15,6 +15,7 @@ import { clearParts, dropHalfTimeThatNoLongerFits, insertGoals } from './match-e
 import { matchChanges, matchEdits, matches, matchGoals, matchReports } from './schema.ts'
 import { seasonOf } from './season.ts'
 import { linkMatchToStadium } from './stadiums.ts'
+import { storeCompleteness } from './store-completeness.ts'
 
 /**
  * A decision about a difference. `take-over` makes the part what Wikipedia says and lets the
@@ -165,7 +166,11 @@ export async function decideConflict(
     return 'gone'
   }
 
-  const [match] = await db.select({ id: matches.id }).from(matches).where(eq(matches.id, change.matchId)).for('update')
+  const [match] = await db
+    .select({ id: matches.id, season: matches.season })
+    .from(matches)
+    .where(eq(matches.id, change.matchId))
+    .for('update')
 
   if (match === undefined) {
     return 'gone'
@@ -183,6 +188,11 @@ export async function decideConflict(
     }
 
     await applyPart(db, match.id, proposal, now)
+
+    if (part === 'goals') {
+      // The scorers decide whether the squad of the season can be complete (#1675).
+      await storeCompleteness(db, match.season, undefined, now)
+    }
 
     const [edit] = await db.select().from(matchEdits).where(eq(matchEdits.matchId, match.id)).for('update')
 

@@ -82,10 +82,14 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
   const rows = await listAdminPlayers(db, season)
   const doubles = doubleShirtNumbers(rows)
   const squad = await findSquadMark(db, season, now)
-  const markDelay = `De site toont dat binnen ${describePeriod(squadKeptFor)}.`
+  // A mark with a scorer who is missing does not show on the site, so the notice says so.
+  const markDelay =
+    (squad.mark?.missing.length ?? 0) > 0
+      ? 'De markering telt nu niet op de site, omdat in de lijst een doelpuntenmaker ontbreekt.'
+      : `De site toont dat binnen ${describePeriod(squadKeptFor)}.`
   const notices: Record<string, string> = {
     compleet: `De selectie van ${season} is gemarkeerd als compleet. ${markDelay}`,
-    ingetrokken: `De markering van de selectie van ${season} is ingetrokken. ${markDelay}`,
+    ingetrokken: `De markering van de selectie van ${season} is ingetrokken. De site toont dat binnen ${describePeriod(squadKeptFor)}.`,
     samengevoegd: 'De twee personen zijn één persoon.',
     toegevoegd: `De speler staat in de selectie van ${season} en is te kiezen bij een doelpunt. Op de site staat hij ${describeShowDelay(season, now)}.`,
     'was-al-compleet': `De selectie van ${season} was al gemarkeerd. Er is niets veranderd.`,
