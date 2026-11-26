@@ -2,8 +2,8 @@
  * The list of what a fan predicted: a row for each match, the Match on the left and the points
  * and the prediction on the right. A row has a thin line above it, as the short lines have.
  * Nothing is ever cut short: a long club name wraps, as it does in a Match. With less than
- * 15rem of its own, as with large text, the points and the prediction go under the match, on the
- * left, on a line that may wrap.
+ * 15rem of its own, as with large text, the points and the prediction go under the match, on
+ * the left, on a line that may wrap.
  */
 
 @layer hf.components {

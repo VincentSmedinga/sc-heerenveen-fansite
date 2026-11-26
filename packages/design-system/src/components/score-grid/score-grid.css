@@ -4,9 +4,9 @@
  * straight in one grid, so a field is never further from its row than from its column. The grid
  * keeps four columns on the narrowest phone: the fields are as wide as they are high, and a long
  * club name breaks over two lines above its field instead of pushing the fields out of sight.
- * With less than 15rem of its own, as with large text, "Ruststand" and "Eindstand" get a line of
- * their own above their two fields, and the clubs and the fields share the full width.
- * A field with an error gets the look of any invalid field (see components/input/input.css).
+ * With less than 15rem of its own, as with large text, "Ruststand" and "Eindstand" get a line
+ * of their own above their two fields, and the clubs and the fields share the full width. A
+ * field with an error gets the look of any invalid field (see components/input/input.css).
  */
 
 @layer hf.components {
