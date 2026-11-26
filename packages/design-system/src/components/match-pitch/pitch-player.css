@@ -57,7 +57,10 @@
     position: absolute;
   }
 
-  /* The disc is filled for sc Heerenveen and open, with a rim, for an opponent without colour. */
+  /*
+   * The disc is filled for sc Heerenveen and open, with a rim, for an opponent without a
+   * colour.
+   */
   .hf-pitch-player-number {
     align-items: center;
     border-radius: 50%;
