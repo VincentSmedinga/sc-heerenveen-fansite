@@ -5,6 +5,7 @@ import type { TestDatabase } from './test-database.ts'
 import {
   findSquadCompleteness,
   findSquadPage,
+  listSeasonNumbers,
   listSeasonPlayerBirths,
   listSeasonPlayers,
   listSquad,
@@ -555,6 +556,75 @@ describe('listSeasonPlayers', () => {
       { country: 'BE', name: 'Zonder Persoon', position: null },
     ])
     expect(await facts('2025/26')).toEqual([{ country: 'NL', name: 'Beide', position: 'aanvaller' }])
+  })
+})
+
+describe('listSeasonNumbers', () => {
+  const complete = ['2019/20', '2020/21', '2021/22', '2022/23']
+
+  let seeded = 0
+
+  /** A player in the seasons given, linked to one person, and the seasons that are complete. */
+  async function seed(seasons: string[], completeSeasons: string[]) {
+    await database.pool.query('DELETE FROM squad_completeness')
+
+    const [{ insertId: person }] = await database.db
+      .insert(persons)
+      .values({ familyName: 'Speler', wikipediaPage: `Seizoenen ${(seeded += 1)}` })
+
+    await database.db
+      .insert(players)
+      .values(seasons.map((season) => ({ name: 'Testspeler', personId: person, searchTerm: 'Speler', season })))
+
+    for (const season of ['2019/20', '2020/21', '2021/22', '2022/23', '2023/24']) {
+      await database.pool.query(
+        "INSERT INTO squad_completeness (season, probability, level, player_count, best_source, checks, calculated_at) VALUES (?, ?, ?, 28, 'selectie', '[]', UTC_TIMESTAMP())",
+        completeSeasons.includes(season) ? [season, 95, 'compleet'] : [season, 70, 'bijna'],
+      )
+    }
+  }
+
+  it('gives 1 for a first season after a complete one', async () => {
+    await seed(['2020/21'], complete)
+
+    expect(await listSeasonNumbers(database.db, '2020/21')).toEqual(new Map([['Testspeler', 1]]))
+  })
+
+  it('gives nothing when the season before the first is not complete', async () => {
+    await seed(['2020/21'], ['2020/21'])
+
+    expect(await listSeasonNumbers(database.db, '2020/21')).toEqual(new Map())
+  })
+
+  it('gives nothing when there is no season before the first', async () => {
+    await seed(['2019/20'], complete)
+
+    expect(await listSeasonNumbers(database.db, '2019/20')).toEqual(new Map())
+  })
+
+  it('counts the seasons before and after a break, over complete seasons', async () => {
+    await seed(['2020/21', '2022/23', '2023/24'], [...complete, '2023/24'])
+
+    expect(await listSeasonNumbers(database.db, '2023/24')).toEqual(new Map([['Testspeler', 3]]))
+  })
+
+  it('gives nothing when a season in between without the player is not complete', async () => {
+    await seed(['2020/21', '2022/23'], ['2019/20', '2020/21', '2022/23'])
+
+    expect(await listSeasonNumbers(database.db, '2022/23')).toEqual(new Map())
+  })
+
+  it('leaves later seasons out of the number', async () => {
+    await seed(['2020/21', '2021/22', '2022/23'], complete)
+
+    expect(await listSeasonNumbers(database.db, '2020/21')).toEqual(new Map([['Testspeler', 1]]))
+  })
+
+  it('gives nothing for a player without a person', async () => {
+    await seed(['2021/22'], complete)
+    await database.db.insert(players).values({ name: 'Zonder Persoon', searchTerm: 'Persoon', season: '2020/21' })
+
+    expect(await listSeasonNumbers(database.db, '2020/21')).toEqual(new Map())
   })
 })
 

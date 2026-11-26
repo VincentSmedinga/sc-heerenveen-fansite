@@ -30,6 +30,13 @@ export type PlayerNameProps = Omit<ComponentPropsWithoutRef<'span'>, 'children'>
    */
   href?: string | undefined
   /**
+   * Puts the line of the children behind the name instead of under it, for a short line such as
+   * the number of seasons. A line that doesn't fit goes on under the name, not under the shirt
+   * number or the flag. With `href` the line stands outside the link, so the link is named by
+   * the name alone.
+   */
+  lineBehind?: boolean
+  /**
    * The shirt number, in a column before the name. `null` is a player without one in a list
    * where others have one: the column stays empty, so the names of the lines still start at the
    * same place. Leave it out in a list where nobody has a number, and the name has no column.
@@ -56,8 +63,8 @@ export type PlayerNameProps = Omit<ComponentPropsWithoutRef<'span'>, 'children'>
  * column of its own between them. The number, the flag and the name are one line of text, one
  * space apart, and the flag reads as the name of the country. A country without a drawing has
  * its code in a frame of the size of a flag, which reads as the name of the country too. With
- * children there is a line behind the name (see `PlayerNameProps`). Without any of these the
- * markup is a name alone.
+ * children there is a line under the name, or behind it with `lineBehind` (see
+ * `PlayerNameProps`). Without any of these the markup is a name alone.
  * player-name.css gives the look.
  */
 export const PlayerName = ({
@@ -66,10 +73,18 @@ export const PlayerName = ({
   country,
   givenName,
   href,
+  lineBehind = false,
   shirtNumber,
   surname,
   ...props
 }: PlayerNameProps) => {
+  const line =
+    children === undefined || children === null || children === false ? null : (
+      <>
+        {' '}
+        <span className="hf-meta hf-player-name-meta">{children}</span>
+      </>
+    )
   const name = (
     <>
       {givenName === undefined || givenName === '' ? null : (
@@ -79,19 +94,15 @@ export const PlayerName = ({
         </>
       )}
       {surname === '' ? null : <span className="hf-player-name-surname">{surname}</span>}
-      {children === undefined || children === null || children === false ? null : (
-        <>
-          {' '}
-          <span className="hf-meta hf-player-name-meta">{children}</span>
-        </>
-      )}
+      {lineBehind ? null : line}
     </>
   )
 
   if (shirtNumber === undefined && country === undefined) {
     return (
-      <span {...props} className={classNames('hf-player-name', className)}>
+      <span {...props} className={classNames('hf-player-name', lineBehind && 'hf-player-name-behind', className)}>
         {href === undefined ? name : <a href={href}>{name}</a>}
+        {lineBehind ? line : null}
       </span>
     )
   }
@@ -118,24 +129,42 @@ export const PlayerName = ({
       </>
     )
 
+  const flagAndName =
+    href === undefined ? (
+      <>
+        {lineBehind && flag !== null ? <span className="hf-player-name-flag">{flag}</span> : flag}
+        <span className="hf-player-name-text">{name}</span>
+      </>
+    ) : (
+      <a className="hf-player-name-link" href={href}>
+        {lineBehind && flag !== null ? <span className="hf-player-name-flag">{flag}</span> : flag}
+        <span className="hf-player-name-text">{name}</span>
+      </a>
+    )
+
   return (
-    <span {...props} className={classNames('hf-player-name', 'hf-player-name-numbered', className)}>
+    <span
+      {...props}
+      className={classNames(
+        'hf-player-name',
+        'hf-player-name-numbered',
+        lineBehind && 'hf-player-name-behind',
+        className,
+      )}
+    >
       {shirtNumber === undefined ? null : (
         <>
           <span className="hf-player-name-number">{shirtNumber}</span>
           {shirtNumber === null ? null : ' '}
         </>
       )}
-      {href === undefined ? (
-        <>
-          {flag}
-          <span className="hf-player-name-text">{name}</span>
-        </>
+      {lineBehind ? (
+        <span className={classNames('hf-player-name-line', flag !== null && 'hf-player-name-line-flagged')}>
+          {flagAndName}
+          {line}
+        </span>
       ) : (
-        <a className="hf-player-name-link" href={href}>
-          {flag}
-          <span className="hf-player-name-text">{name}</span>
-        </a>
+        flagAndName
       )}
     </span>
   )
