@@ -88,7 +88,7 @@
    */
   .hf-player-name-behind .hf-player-name-link {
     display: inline;
-    padding-block: 0.1875rem;
+    padding-block: var(--hf-space-xs);
   }
 
   /*
