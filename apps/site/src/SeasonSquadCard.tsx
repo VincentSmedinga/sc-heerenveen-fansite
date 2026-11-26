@@ -7,12 +7,13 @@ import { cardPlayers, completenessSentence, type SeasonSquad, showsPlayers, squa
  * The card Selectie on the page Spelers: every player of the season in parts by position, and
  * under the heading how complete the list is. A player is the shirt number, the flag of the
  * country and the name (a `PlayerName` with `shirtNumber` and `country`, on a line of a
- * `ShortFact` for the thin lines), with a link to his page when he has one, and no photo. A
- * season whose squad we don't know has the heading and the sentence alone. The card has no
- * button for an image: it is a list, not a figure to share.
+ * `ShortFact` for the thin lines), with a link to his page when he has one, and no photo.
+ * Behind the name stands the how-manyth season it is, such as "3e seizoen", where our lists
+ * prove it. A season whose squad we don't know has the heading and the sentence alone. The
+ * card has no button for an image: it is a list, not a figure to share.
  */
 export function SeasonSquadCard({ squad }: { squad: SeasonSquad }) {
-  const parts = showsPlayers(squad) ? squadParts(cardPlayers(squad)) : []
+  const parts = showsPlayers(squad) ? squadParts(cardPlayers(squad), squad.seasonNumbers) : []
 
   return (
     <Card aria-labelledby="selectie">
@@ -31,9 +32,12 @@ export function SeasonSquadCard({ squad }: { squad: SeasonSquad }) {
                     country={player.country}
                     givenName={player.givenName}
                     href={player.href}
+                    lineBehind
                     shirtNumber={player.shirtNumber}
                     surname={player.surname}
-                  />
+                  >
+                    {player.seasonLine}
+                  </PlayerName>
                 </ShortFact>
               </List.Item>
             ))}

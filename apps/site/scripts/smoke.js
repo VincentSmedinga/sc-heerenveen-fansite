@@ -1533,10 +1533,10 @@ await withEmptyDatabase((database) =>
     )
     assert.match(
       squadCard,
-      /hf-player-name-number">1<\/span> <img alt="Nederland" class="hf-flag"[^>]*\/> <span class="hf-player-name-text">.*?Brandsma/s,
+      /hf-player-name-number">1<\/span> <span class="hf-player-name-line hf-player-name-line-flagged"><span class="hf-player-name-flag"><img alt="Nederland" class="hf-flag"[^>]*\/> <\/span><span class="hf-player-name-text">.*?Brandsma/s,
     )
     // A player without a country, among others who have one, has an empty place for the flag.
-    assert.match(squadCard, /<span class="hf-flag"><\/span><span class="hf-player-name-text">/)
+    assert.match(squadCard, /<span class="hf-flag"><\/span><\/span><span class="hf-player-name-text">/)
     assert.ok(playersHtml.indexOf('id="selectie"') < playersHtml.indexOf('aria-label="Meer over de spelers"'))
     // Above the squad, in the main column, is the white card "In het kort".
     // The made-up squad has countries, so the card has Spelers and Landen, and no date of birth
