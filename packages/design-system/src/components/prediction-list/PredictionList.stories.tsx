@@ -63,7 +63,7 @@ const meta = preview.meta({
     docs: {
       description: {
         component: [
-          'De lijst met wat een fan voorspelde: een rij per wedstrijd met links de wedstrijd zoals Match hem toont, met de kleur van de uitslag, en rechts de punten met de voorspelling.',
+          'De lijst met wat een fan voorspelde: een rij per wedstrijd met links de wedstrijd zoals Match hem toont, met de kleur van de uitslag, en rechts de punten met de voorspelling. Is er weinig ruimte, zoals met grote tekst, dan staan die onder de wedstrijd.',
           'Kies hem voor een korte lijst op een kaart. Het is een lijst en geen tabel, want een rij leest als één zin. De uitslag breekt nooit af: een lange clubnaam gaat over een tweede regel door. Er wordt niets ingekort.',
           'Boven elke rij staat een dunne lijn, ook boven de eerste, met de krappe maat van de meeste lijsten.',
         ].join('\n'),

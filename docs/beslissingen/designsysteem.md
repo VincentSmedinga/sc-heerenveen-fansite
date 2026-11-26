@@ -4222,6 +4222,7 @@
 - **Waarom:** vier cijfers invullen gaat sneller dan vier keuzelijsten openen, de rij en de kolom maken de naam van elk veld duidelijk, en het raster past ook op een telefoon.
   Een spel heeft een toestand die een bezoeker in één oogopslag wil zien, en kleur alleen is niet genoeg.
 - **Alternatieven:** twee keer twee keuzelijsten van 0 tot 9, zoals op de oude Fansite; een eigen onderdeel voor de toestand van een spel; alleen tekst zonder tint.
+- **Later:** (26 november 2026, #1686) met weinig ruimte, zoals bij tekst op 200% op een telefoon, zijn het geen vier kolommen meer (zie _ScoreGrid zet bij weinig ruimte het label boven de velden_).
 
 - **Datum:** 21 november 2026
 - **Besluit:** de `ScoreGrid` krijgt een prop `ids`, de `id` van elk veld (#1447).
@@ -4354,6 +4355,7 @@
   Kleur is nooit het enige teken (docs/toegankelijkheid.md), en de haakjes lezen een schermlezer niet als ruststand.
 - **Alternatieven:** een eigen regel met de clubs en een ongekleurde uitslag (de projecteigenaar wil overal `Match`, dus ook de kleur van de uitslag); de clubnamen inkorten met een weglatingsteken (de projecteigenaar wil nooit afgekapte tekst); de punten op de metaregel en alleen de voorspelling rechts; de status rechts laten staan; een `aria-label` op een gewone `span` voor de voorspelling (wordt niet overal voorgelezen); een eigen pictogram voor het vinkje en het kruisje (een teken in de tekst volstaat, en het is voor schermlezers verborgen).
 - **Later:** zie _Een groot getal heeft een van drie maten, en `MatchHeader` blijft op Kop 1_: zonder punten staat de voorspelling in de grote maat van een getal, niet in de maat van een kop, en de punten en de eindstand zijn op het gewicht van een getal.
+- **Later:** (26 november 2026, #1686) met weinig ruimte staan de punten en de voorspelling onder de wedstrijd en mag die regel wel afbreken (zie _PredictionList zet bij weinig ruimte de voorspelling onder de wedstrijd_).
 
 ## InputSuggestions biedt een lijst namen aan een Input aan
 
@@ -4711,3 +4713,42 @@
   Een lichte kleur zoals geel steekt weinig af tegen het lichte veld (1,3:1).
   Dat aanvaarden we: het rugnummer blijft leesbaar en de ring toont de vorm.
 - **Alternatieven:** een open rondje met een dikke rand in de clubkleur en een dunne lijn in de tekstkleur.
+
+## De vakjes van CodeInput krimpen met de ruimte
+
+- **Datum:** 26 november 2026
+- **Besluit:** de zes vakjes blijven op één rij (#1686).
+  Hun breedte en de ruimte ertussen volgen de beschikbare ruimte, en de cijfers worden alleen kleiner als dat moet.
+  Met tekst op 200% op 360 pixels hoeft dat niet: de cijfers passen in de verhalen en op de site, en houden de maat `--hf-figure-large-font-size`.
+  In weinig ruimte worden wel de randen van de vakjes dunner, zodat een cijfer in zijn vakje past.
+  De ruimte tussen de cijfers rekent met de breedte van een tabelcijfer van Atkinson Hyperlegible Next (0,632em), niet met `1ch`.
+  `1ch` is breder, waardoor elk cijfer iets verder naar links stond: op 200% raakte het zesde de rand van zijn vakje.
+  Met gewone tekst schuiven de cijfers daardoor hoogstens ruim 3 pixels naar het midden van hun vakje.
+- **Waarom:** het veld ziet er met gewone tekst uit zoals nu en blijft één tekstveld.
+- **Alternatieven:** bij weinig ruimte een gewoon veld zonder vakjes: eenvoudiger, maar een ander uiterlijk.
+
+## ScoreGrid zet bij weinig ruimte het label boven de velden
+
+- **Datum:** 26 november 2026
+- **Besluit:** onder 13rem eigen breedte staan "Ruststand" en "Eindstand" op een eigen regel, zodat de kolommen van de clubs de volle breedte krijgen (#1686).
+  Een veld wordt dan niet breder dan zijn kolom.
+  Het raster staat in een `div` die de container is.
+  De grens is 13rem, omdat het raster op de site binnen een uitklap in een kaart op 320 pixels 220 pixels heeft (13,75rem), en daar met gewone tekst vier kolommen houdt.
+- **Waarom:** thuis blijft links en uit rechts, en de volgorde met het toetsenbord verandert niet.
+- **Alternatieven:** een rij per club met kolommen voor ruststand en eindstand: de namen krijgen ruimte, maar de indeling en de volgorde veranderen.
+
+## PredictionList zet bij weinig ruimte de voorspelling onder de wedstrijd
+
+- **Datum:** 26 november 2026
+- **Besluit:** onder 13rem eigen breedte staan de punten en de voorspelling links onder de wedstrijd, op een regel die mag afbreken (#1686).
+  De grens is dezelfde als die van `ScoreGrid`, zodat de lijst ook in een uitklap op 320 pixels met gewone tekst zo blijft.
+- **Waarom:** de wedstrijd krijgt de volle breedte.
+- **Alternatieven:** een smallere kolom ernaast die over meer regels breekt: de wedstrijd blijft krap.
+
+## We kijken grote tekst met de hand na
+
+- **Datum:** 26 november 2026
+- **Besluit:** `docs/toegankelijkheid.md` krijgt een regel over tekst op 200% op 360 pixels (#1686).
+  We kijken dat na in Storybook, met kleine tests van de CSS en zonder nieuw gereedschap.
+- **Waarom:** de checklist vroeg alleen om inzoomen tot 400%, en zo bleef dit onopgemerkt.
+- **Alternatieven:** alleen de drie onderdelen herstellen.

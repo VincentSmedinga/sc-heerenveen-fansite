@@ -4,7 +4,9 @@
  * straight in one grid, so a field is never further from its row than from its column. The grid
  * keeps four columns on the narrowest phone: the fields are as wide as they are high, and a long
  * club name breaks over two lines above its field instead of pushing the fields out of sight.
- * A field with an error gets the look of any invalid field (see components/input/input.css).
+ * With less than 13rem of its own, as with large text, "Ruststand" and "Eindstand" get a line
+ * of their own above their two fields, and the clubs and the fields share the full width. A
+ * field with an error gets the look of any invalid field (see components/input/input.css).
  */
 
 @layer hf.components {
@@ -24,6 +26,10 @@
     display: grid;
     gap: 0.125rem;
     padding-block-end: var(--hf-space-s);
+  }
+
+  .hf-score-grid-container {
+    container: hf-score-grid / inline-size;
   }
 
   .hf-score-grid-grid {
@@ -71,5 +77,23 @@
 
   .hf-score-grid-value[data-empty] {
     color: var(--hf-colour-text-secondary);
+  }
+
+  @container hf-score-grid (inline-size < 13rem) {
+    .hf-score-grid-grid {
+      grid-template-columns: minmax(0, 1fr) max-content minmax(0, 1fr);
+    }
+
+    .hf-score-grid-corner {
+      display: none;
+    }
+
+    .hf-score-grid-label {
+      grid-column: 1 / -1;
+    }
+
+    .hf-score-grid-field.hf-score-grid-field {
+      inline-size: min(3.5rem, 100%);
+    }
   }
 }

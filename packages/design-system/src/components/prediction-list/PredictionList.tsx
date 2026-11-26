@@ -45,8 +45,9 @@ const guessWords = ({ fullTime, halfTime }: PredictionListGuess) =>
  * `Match` shows it, with the colour of the result, and on the right the points and the
  * prediction. A match without points shows only the prediction, in larger type. A part of the
  * prediction that earned points is green with a tick, and a part that did not is red with a
- * cross. Text is never cut short: a long club name wraps. It is a list and not a table, because
- * a row reads as one sentence.
+ * cross. Text is never cut short: a long club name wraps. With little room, as with large text,
+ * the points and the prediction go under the match. It is a list and not a table, because a row
+ * reads as one sentence.
  */
 export function PredictionList({ className, items, ...props }: PredictionListProps) {
   return (
