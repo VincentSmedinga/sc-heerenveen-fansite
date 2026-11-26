@@ -25,6 +25,9 @@ const cupHeaders = ['Datum', 'Wedstrijd', 'Uitslag', 'Scoreverloop']
 const cupGoal =
   /^(\d{1,3})(?:\+(\d{1,2}))?\s*['’′]\s*(\[\[[^\]]*\]\]|[^[(]+?)\s*(?:\(((?:\[\[[^\]]*\]\]|[^()[\]])+)\)\s*)?(\d{1,2})\s*[-–]\s*(\d{1,2})$/u
 
+/** The most characters of one goal in the cell of the cup page. */
+const longestGoal = 200
+
 /** The heading of a round of the programme: `Inhaal` in front of the rows that were late. */
 const roundHeading = /^(?:Inhaal )?Eredivisie (\d{4}\/\d{2}) Ronde (\d{1,2})$/u
 
@@ -60,8 +63,9 @@ export function readCupTables(
 
     for (const lines of rows) {
       const [date = '', clubs = '', score = '', goals = ''] = lines.map(cell)
-      const teams = /^(.*?)\s*(?:–|--)\s*(.*)$/u.exec(clubs)
-      const shown = teams === null ? [] : [teams[1] ?? '', teams[2] ?? ''].map((team) => plain(team).toLowerCase())
+      const teams = /^(.*?)(?:–|--)(.*)$/u.exec(clubs)
+      const sides = teams === null ? [] : [(teams[1] ?? '').trim(), (teams[2] ?? '').trim()]
+      const shown = sides.map((team) => plain(team).toLowerCase())
 
       // Only a row with us in it matters; "Jong sc Heerenveen" links to our article too.
       if (!/heerenveen/iu.test(plain(clubs)) || /jong (?:sc )?heerenveen/iu.test(plain(clubs))) {
@@ -80,7 +84,7 @@ export function readCupTables(
       }
 
       // The two clubs without the bold of the winner, and with our link where we are.
-      const [team1 = '', team2 = ''] = [teams[1] ?? '', teams[2] ?? ''].map((team) =>
+      const [team1 = '', team2 = ''] = sides.map((team) =>
         plain(team).toLowerCase() === 'sc heerenveen' ? '[[sc Heerenveen]]' : team.replace(/'{2,}/gu, ''),
       )
       const read = readMatch(
@@ -243,7 +247,8 @@ export function readProgrammeTables(
 
 /** A cell without the bars in front of it and without its attributes: `|width=200|0-0`. */
 function cell(line: string): string {
-  return line.replace(/^\|+\s*(?:(?:[a-z]+="?[^"|\s]*"?\s*)+\|)?/u, '').trim()
+  // One class for everything up to the bar keeps this linear on any line of the page.
+  return line.replace(/^\|+\s*(?:[a-z]+=[^|[\]{}]*\|)?/u, '').trim()
 }
 
 /**
@@ -265,7 +270,8 @@ function cupGoals(
   let [home, away] = [0, 0]
 
   for (const part of parts) {
-    const found = cupGoal.exec(part)
+    // A goal is short; a longer part is not matched at all.
+    const found = part.length > longestGoal ? null : cupGoal.exec(part)
 
     if (found === null) {
       return problem(`the scorers have a part we do not know: '${plain(part).slice(0, 40)}'`)

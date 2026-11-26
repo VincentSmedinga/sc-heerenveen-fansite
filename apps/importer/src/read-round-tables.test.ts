@@ -188,6 +188,17 @@ describe('the programme of the Eredivisie 2007/08', () => {
     ).toContain('it has 33 matches of sc Heerenveen, not 34')
   })
 
+  // Anyone can write such a line on Wikipedia; a pattern that backtracks would hang here.
+  it('refuses a long line of attributes without a closing bar at once', () => {
+    const line = `|${'a='.repeat(50_000)}`
+    const started = Date.now()
+
+    expect(
+      leagueError((text) => text.replace('[[Abe Lenstra Stadion]]\n|0-0', `[[Abe Lenstra Stadion]]\n${line}`)),
+    ).toContain('a score we do not know')
+    expect(Date.now() - started).toBeLessThan(2000)
+  })
+
   it('leaves out a match of other clubs without a score, and names it', () => {
     const changed = league((text) => text.replace('|4-0\n', '|\n'))
 
@@ -243,6 +254,18 @@ describe('the KNVB Beker 2007/08', () => {
 
     expect(argon?.goals).toBeNull()
     expect(argon?.goalsProblem).toContain('the scorers have a part we do not know')
+  })
+
+  it('does not hang on a long part in the scorers or in the clubs', () => {
+    const started = Date.now()
+    const spaces = `16' x${' '.repeat(100_000)}x`
+    const [argon] = cup((text) => text.replace("16' [[Gerald Sibon]] 0-1", spaces))
+
+    expect(argon?.goalsProblem).toContain('the scorers have a part we do not know')
+    expect(
+      cup((text) => text.replace('[[SV Argon|Argon]] –', `[[SV Argon|Argon]]${' '.repeat(100_000)}–`)),
+    ).toHaveLength(2)
+    expect(Date.now() - started).toBeLessThan(2000)
   })
 
   it('gives an error for a row of ours it does not know, and for another number of matches', () => {
