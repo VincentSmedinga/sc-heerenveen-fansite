@@ -2,7 +2,8 @@
 // `footballbox2` and `Football box collapsible` of six Wikipedia pages, Dutch and English, and
 // the league matches of 2008/09 from a table on the page of the club's season. The seasons have
 // no page the other readers know (`read-wikipedia.ts`), so a fixed list says per season which
-// pages there are, and under which heading each competition stands. A block or a row of the
+// pages there are, and under which heading each competition stands. The list also has two pages
+// of 2007/08 with tables per round, which `read-round-tables.ts` reads. A block or a row of the
 // table is put into the shape `readMatch` reads, so a match is checked the way every other
 // match is. A page that has changed shape gives an error, never a guess, and a field the page
 // leaves open stays empty.
@@ -26,6 +27,11 @@ import {
 
 /** A page with `football box` blocks, and where on it the matches of each competition are. */
 export type FootballBoxPage = {
+  /**
+   * A page that has its matches in tables per round, not in blocks (`read-round-tables.ts`):
+   * the programme of the league or the cup. It is kept in `wikipedia_pages` as that kind.
+   */
+  format?: 'cup' | 'programme'
   /** The language edition of Wikipedia the page is on, as in its address. */
   language: 'en' | 'nl'
   /** The table with the league matches, on a page that has them in a table, not in blocks. */
@@ -132,6 +138,14 @@ const footballBoxSeasons: Readonly<Record<string, readonly FootballBoxPage[]>> =
       sections: [{ competition: 'UEFA Cup', heading: /^Matches$/u, round: numbered('Eerste ronde') }],
       title: '2007–08 UEFA Cup first round',
     },
+    {
+      format: 'programme',
+      language: 'nl',
+      matches: 34,
+      sections: [],
+      title: 'Eredivisie 2007/08 (mannenvoetbal)',
+    },
+    { format: 'cup', language: 'nl', matches: 2, sections: [], title: 'KNVB Beker 2007/08 (mannen)' },
   ],
   '2008/09': [
     {

@@ -2,9 +2,18 @@ import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
 import { listWikipediaPages } from '@fansite/db/queries'
-import { clubs, matches, matchGoals, matchImports, players, standings, wikipediaPages } from '@fansite/db/schema'
+import {
+  clubs,
+  leagueResults,
+  matches,
+  matchGoals,
+  matchImports,
+  players,
+  standings,
+  wikipediaPages,
+} from '@fansite/db/schema'
 import { createTestDatabase } from '@fansite/db/test-database'
-import { asc, eq } from 'drizzle-orm'
+import { and, asc, eq, inArray } from 'drizzle-orm'
 import { readFileSync } from 'node:fs'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
@@ -39,6 +48,7 @@ afterAll(async () => {
 beforeEach(async () => {
   for (const table of [
     'match_changes',
+    'league_results',
     'matches',
     'persons',
     'club_names',
@@ -134,7 +144,7 @@ async function serve(change: Record<string, (text: string) => string> = {}) {
   return { dutch, english }
 }
 
-/** The paths of the seven pages among the requests of a server. */
+/** The paths of the nine pages among the requests of a server. */
 const pageRequests = (server: TestServer) => {
   const paths = new Set(footballBoxTitles.map((title) => pageUrl('', title)))
 
@@ -159,7 +169,7 @@ async function rowsOf(season: string) {
 }
 
 describe('pnpm run import:season for 2007/08, 2008/09 and 2009/10', () => {
-  it('stores the 97 matches of the seven pages with the source wikipedia, and a second run changes nothing', async () => {
+  it('stores the 133 matches of the nine pages with the source wikipedia, and a second run changes nothing', async () => {
     const wikipedia = await serve()
     const first = []
 
@@ -169,15 +179,18 @@ describe('pnpm run import:season for 2007/08, 2008/09 and 2009/10', () => {
 
     expect(first.map((result) => result.code)).toEqual([0, 0, 0])
     expect(first.map((result) => result.lines[0])).toEqual([
-      'Matches 2007/08: 6 new, 0 updated, 0 unchanged, 0 removed; the pages of this season have no table',
+      'Matches 2007/08: 42 new, 0 updated, 0 unchanged, 0 removed; the pages of this season have no table',
       'Matches 2008/09: 45 new, 0 updated, 0 unchanged, 0 removed; the pages of this season have no table',
       'Matches 2009/10: 46 new, 0 updated, 0 unchanged, 0 removed; the pages of this season have no table',
     ])
-    expect(first.flatMap((result) => result.lines).some((line) => line.includes('league results'))).toBe(false)
+    // Only 2007/08 has the results of every club, and they agree with the table of the page.
+    expect(first.flatMap((result) => result.lines).filter((line) => line.includes('league results'))).toEqual([
+      'Matches 2007/08: league results of all clubs: 306 new, 0 updated, 0 unchanged, 0 removed',
+    ])
 
     const stored = await database.db.select().from(matches)
 
-    expect(stored).toHaveLength(97)
+    expect(stored).toHaveLength(133)
     expect(stored.every((match) => match.dataSource === 'wikipedia' && match.status === 'played')).toBe(true)
     expect(await database.db.select().from(standings)).toEqual([])
 
@@ -189,12 +202,16 @@ describe('pnpm run import:season for 2007/08, 2008/09 and 2009/10', () => {
     }
 
     expect(second.map((result) => result.lines[0])).toEqual([
-      'Matches 2007/08: 0 new, 0 updated, 6 unchanged, 0 removed; the pages of this season have no table',
+      'Matches 2007/08: 0 new, 0 updated, 42 unchanged, 0 removed; the pages of this season have no table',
       'Matches 2008/09: 0 new, 0 updated, 45 unchanged, 0 removed; the pages of this season have no table',
       'Matches 2009/10: 0 new, 0 updated, 46 unchanged, 0 removed; the pages of this season have no table',
     ])
     expect(await Promise.all(seasons.map(rowsOf))).toEqual(before)
-    expect(await database.db.select().from(matches)).toHaveLength(97)
+    expect(second.flatMap((result) => result.lines)).toContain(
+      'Matches 2007/08: league results of all clubs: 0 new, 0 updated, 306 unchanged, 0 removed',
+    )
+    expect(await database.db.select().from(matches)).toHaveLength(133)
+    expect(await database.db.select().from(leagueResults)).toHaveLength(306)
   })
 
   it('asks for the pages of the season alone, each on the Wikipedia of its language', async () => {
@@ -224,6 +241,8 @@ describe('pnpm run import:season for 2007/08, 2008/09 and 2009/10', () => {
     await run(wikipedia, '2007/08')
 
     expect(await listWikipediaPages(database.db, '2007/08')).toEqual([
+      { kind: 'programme', language: 'nl', readAt: now, title: 'Eredivisie 2007/08 (mannenvoetbal)' },
+      { kind: 'cup', language: 'nl', readAt: now, title: 'KNVB Beker 2007/08 (mannen)' },
       { kind: 'matches', language: 'en', readAt: now, title: '2007–08 UEFA Cup first round' },
       { kind: 'matches', language: 'nl', readAt: now, title: 'Play-offs Nederlands voetbal 2008' },
     ])
@@ -334,7 +353,7 @@ describe('pnpm run import:season for 2007/08, 2008/09 and 2009/10', () => {
 
     expect(code).toBe(0)
     expect(lines[0]).toBe(
-      'Matches 2007/08: 5 new, 0 updated, 1 unchanged, 0 removed; the pages of this season have no table',
+      'Matches 2007/08: 41 new, 0 updated, 1 unchanged, 0 removed; the pages of this season have no table',
     )
     expect(lines.filter((line) => line.includes('Halve finale, wedstrijd 1/2'))).toEqual([
       `Matches 2007/08: warning, Play-offs Champions League Halve finale, wedstrijd 1/2 (2008-05-01) left out: the editors added this match (match ${before[0]?.id}), and the import of Wikipedia leaves it as it is`,
@@ -342,13 +361,98 @@ describe('pnpm run import:season for 2007/08, 2008/09 and 2009/10', () => {
     expect(lines.some((line) => line.includes('match difference'))).toBe(false)
     expect(await editorMatch()).toEqual(before)
     expect(before[0]).toMatchObject({ referee: null, stadium: null })
-    expect(await database.db.select().from(matches)).toHaveLength(6)
+    expect(await database.db.select().from(matches)).toHaveLength(42)
 
     // A second run finds it again, and still changes nothing.
     await run(wikipedia, '2007/08')
 
     expect(await editorMatch()).toEqual(before)
-    expect(await database.db.select().from(matches)).toHaveLength(6)
+    expect(await database.db.select().from(matches)).toHaveLength(42)
+  })
+
+  it('adds the league and the cup to the six matches of 2007/08 that are there, and leaves those', async () => {
+    const wikipedia = await serve()
+
+    // As on acceptance: the pages of the play-offs and the UEFA Cup have been read.
+    await run(wikipedia, '2007/08')
+    await database.db.delete(matches).where(inArray(matches.competition, ['Eredivisie', 'KNVB Beker']))
+    await database.db.delete(leagueResults)
+
+    const before = await rowsOf('2007/08')
+    const { code, lines } = await run(wikipedia, '2007/08')
+    const stored = await database.db.select().from(matches)
+    const count = (competition: string) => stored.filter((match) => match.competition === competition).length
+
+    expect(code).toBe(0)
+    expect(lines[0]).toContain('36 new, 0 updated, 6 unchanged, 0 removed')
+    expect(stored).toHaveLength(42)
+    expect([count('Eredivisie'), count('KNVB Beker'), count('UEFA Cup'), count('Play-offs Champions League')]).toEqual([
+      34, 2, 2, 4,
+    ])
+    expect(stored.filter((match) => before.matches.some((old) => old.id === match.id))).toEqual(before.matches)
+    expect(await database.db.select().from(leagueResults)).toHaveLength(306)
+    expect(await database.db.select().from(standings)).toEqual([])
+  })
+
+  it('ties our goals in the cup of 2007/08 to the players of that season', async () => {
+    await database.db.insert(players).values(
+      ['Gerald Sibon', 'Miralem Sulejmani', 'Michael Bradley'].map((name) => ({
+        name,
+        position: 'aanvaller' as const,
+        searchTerm: name.split(' ').slice(1).join(' '),
+        season: '2007/08',
+      })),
+    )
+
+    await run(await serve(), '2007/08')
+
+    const squad = await database.db.select().from(players)
+    const goals = await database.db
+      .select({ goal: matchGoals })
+      .from(matchGoals)
+      .innerJoin(matches, eq(matchGoals.matchId, matches.id))
+      .where(and(eq(matches.competition, 'KNVB Beker'), eq(matchGoals.ours, true)))
+      .orderBy(asc(matchGoals.id))
+
+    expect(goals.map(({ goal }) => [goal.minute, squad.find((player) => player.id === goal.playerId)?.name])).toEqual([
+      [16, 'Gerald Sibon'],
+      [30, 'Miralem Sulejmani'],
+      [52, 'Michael Bradley'],
+      [72, 'Michael Bradley'],
+    ])
+  })
+
+  it('writes nothing, and names the page, when the programme or the cup is not what we know', async () => {
+    for (const [title, change] of [
+      [
+        'Eredivisie 2007/08 (mannenvoetbal)',
+        (text: string) => text.replace('[[Abe Lenstra Stadion]]\n|0-0', '[[Abe Lenstra Stadion]]\n|'),
+      ],
+      ['KNVB Beker 2007/08 (mannen)', (text: string) => text.replace("– '''[[sc Heerenveen]]'''", "– '''[[PSV]]'''")],
+    ] as const) {
+      const { code, lines } = await run(await serve({ [title]: change }), '2007/08')
+
+      expect(code).toBe(1)
+      expect(lines.join('\n')).toContain(`the page '${title}'`)
+      expect(await database.db.select().from(matches)).toEqual([])
+      expect(await database.db.select().from(leagueResults)).toEqual([])
+      expect(await database.db.select().from(wikipediaPages)).toEqual([])
+      await database.pool.query('DELETE FROM match_imports')
+    }
+  })
+
+  it('warns when the results do not agree with the table of the page', async () => {
+    const wikipedia = await serve({
+      'Eredivisie 2007/08 (mannenvoetbal)': (text) => text.replace('|4-0\n', '|\n'),
+    })
+    const { code, lines } = await run(wikipedia, '2007/08')
+
+    expect(code).toBe(0)
+    expect(lines).toContain(
+      'Matches 2007/08: warning, league results left out: Ronde 1: AZ - VVV-Venlo has no day or score we know',
+    )
+    expect(lines.some((line) => line.includes('the results do not agree with the table: AZ 33 results'))).toBe(true)
+    expect(await database.db.select().from(leagueResults)).toHaveLength(305)
   })
 
   it('stores the 34 league matches of 2008/09 from the table, with scorers that have no minute', async () => {

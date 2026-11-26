@@ -24,7 +24,7 @@ import type { Judgement } from './classify-change.ts'
 import type { Fetcher } from './fetcher.ts'
 import type { ResultCounts } from './league-results.ts'
 import type { LinkedGoal, Proposal } from './match-changes.ts'
-import type { ReadGoal, ReadMatch, ReadStandingsRow } from './read-wikipedia.ts'
+import type { ReadGoal, ReadMatch, ReadResult, ReadStandingsRow } from './read-wikipedia.ts'
 
 import { checkGoals, checkMatches, checkResults, checkStandings } from './check-wikipedia.ts'
 import {
@@ -60,6 +60,7 @@ import {
   similarPersonsWarning,
 } from './person-pages.ts'
 import { footballBoxPages, readFootballBoxes } from './read-football-box.ts'
+import { readCupTables, readProgrammeTables } from './read-round-tables.ts'
 import { nameKey, searchTerm } from './read-squad.ts'
 import {
   europaLeaguePage,
@@ -91,7 +92,7 @@ export type MatchImportOptions = {
   clock?: () => Date
   /**
    * The address of the English Wikipedia, which has the Europa League matches of 2012/13 and
-   * most matches of 2007/08 to 2009/10. A test gives the address of its own web server.
+   * many matches of 2007/08 to 2009/10. A test gives the address of its own web server.
    */
   englishOrigin?: string
   /** The address of Wikipedia. A test gives the address of its own web server. */
@@ -172,7 +173,7 @@ type TitleRead = Problem | { kind: 'missing'; message: string } | { kind: 'page'
 export const wikipediaOrigin = 'https://nl.wikipedia.org'
 
 /**
- * The address of the English Wikipedia: the Europa League matches of 2012/13 and most matches
+ * The address of the English Wikipedia: the Europa League matches of 2012/13 and many matches
  * of 2007/08 to 2009/10 come from there.
  */
 export const englishWikipediaOrigin = 'https://en.wikipedia.org'
@@ -203,8 +204,9 @@ export function formatMatchReport(report: MatchReport): string {
     case 'imported':
       return [
         `${head}: ${report.matches.added} new, ${report.matches.updated} updated, ${report.matches.unchanged} unchanged, ${report.matches.removed} removed${report.matches.held === 0 ? '' : `, ${report.matches.held} held`}; ${report.standings === 0 ? 'the pages of this season have no table' : `table of ${report.standings} clubs for ${report.validOn}`}`,
-        // A season without a table (2007/08 to 2009/10) has no results of every club either.
-        ...(report.standings === 0
+        // A season without a table (2008/09 and 2009/10 here) has no results of every club
+        // either; 2007/08 has them without a table, which another command reads.
+        ...(report.standings === 0 && Object.values(report.results).every((count) => count === 0)
           ? []
           : [
               `${head}: league results of all clubs: ${report.results.added} new, ${report.results.updated} updated, ${report.results.unchanged} unchanged, ${report.results.removed} removed`,
@@ -1011,13 +1013,14 @@ async function readAndStore(
 }
 
 /**
- * Reads, checks and stores a season whose matches are in `football box` blocks: 2007/08 to
- * 2009/10 (`read-football-box.ts`). It asks for the pages of the list of that season and for
- * no other, each on the Wikipedia of its language, and stores the matches the way
- * `readAndStore` does: every page must be read and every check must pass, or nothing changes.
- * These pages have no league table and no results of the other clubs, so the report has none.
- * Each page is kept in `wikipedia_pages` with the kind `matches` and its language, for the
- * credit.
+ * Reads, checks and stores a season of the list of `read-football-box.ts`: 2007/08 to 2009/10.
+ * It asks for the pages of the list of that season and for no other, each on the Wikipedia of
+ * its language, and stores the matches the way `readAndStore` does: every page must be read and
+ * every check must pass, or nothing changes. The league table is not read here (the command of
+ * the old tables does that, `old-standings.ts`). The programme of 2007/08 also gives the
+ * results of every club, checked against the table on that page: a difference is a warning.
+ * Each page is kept in `wikipedia_pages` with its language, for the credit: as `matches`, or
+ * as `programme` or `cup` for the pages with tables per round.
  */
 async function readAndStoreFootballBoxes(
   db: Database,
@@ -1030,6 +1033,8 @@ async function readAndStoreFootballBoxes(
   const pages: (PageRead & { language: string })[] = []
   const found: ReadMatch[] = []
   const problems: string[] = []
+  // The results of every club, with the clubs of the table of the same page.
+  let league: undefined | { results: ReadResult[]; warnings: string[] }
 
   for (const page of footballBoxPages(season)) {
     const read = await fetchTitle(fetcher, page.language === 'en' ? origins.english : origins.nl, page.title, season)
@@ -1041,18 +1046,47 @@ async function readAndStoreFootballBoxes(
       return read
     }
 
-    const matchesOfPage = readFootballBoxes(read.text, page)
+    if (page.format === 'programme') {
+      const programme = readProgrammeTables(read.text, { matches: page.matches, season, title: page.title })
+      const table = readStandings(read.text)
 
-    if (matchesOfPage.kind === 'error') {
-      problems.push(matchesOfPage.message)
+      if (programme.kind === 'error') {
+        problems.push(programme.message)
+      } else if (table.kind === 'error') {
+        problems.push(`${page.title}: ${table.message}`)
+      } else {
+        const named = matchClubNames(programme.results, table.rows)
+
+        found.push(...programme.matches)
+        problems.push(...checkResults(named.results))
+        league = {
+          results: named.results,
+          warnings: resultWarnings(programme.unread, playedWarning(named.results, table.rows, named.strangers)),
+        }
+      }
     } else {
-      found.push(...matchesOfPage.matches)
+      const matchesOfPage =
+        page.format === 'cup'
+          ? readCupTables(read.text, { matches: page.matches, title: page.title })
+          : readFootballBoxes(read.text, page)
+
+      if (matchesOfPage.kind === 'error') {
+        problems.push(matchesOfPage.message)
+      } else {
+        found.push(...matchesOfPage.matches)
+      }
     }
-    pages.push({ kind: 'matches', language: page.language, text: read.text, title: page.title, version: read.version })
+    pages.push({
+      kind: page.format ?? 'matches',
+      language: page.language,
+      text: read.text,
+      title: page.title,
+      version: read.version,
+    })
   }
 
   if (problems.length === 0) {
-    problems.push(...checkMatches(found, { league: found.some((match) => match.competition === 'Eredivisie') }))
+    problems.push(...checkMatches(found))
   }
   if (problems.length > 0) {
     return { kind: 'error', message: problems.join('; '), season }
@@ -1086,18 +1120,25 @@ async function readAndStoreFootballBoxes(
       },
     )
 
-    if (!result.heldAll) {
-      for (const page of pages) {
-        const values = { kind: page.kind, language: page.language, readAt: now, season, version: page.version }
-
-        await transaction
-          .insert(wikipediaPages)
-          .values({ title: page.title, ...values })
-          .onDuplicateKeyUpdate({ set: values })
-      }
+    if (result.heldAll) {
+      return { ...result, results: { added: 0, removed: 0, unchanged: 0, updated: 0 } }
     }
 
-    return result
+    const results =
+      league === undefined
+        ? { added: 0, removed: 0, unchanged: 0, updated: 0 }
+        : await storeResults(transaction, season, league.results)
+
+    for (const page of pages) {
+      const values = { kind: page.kind, language: page.language, readAt: now, season, version: page.version }
+
+      await transaction
+        .insert(wikipediaPages)
+        .values({ title: page.title, ...values })
+        .onDuplicateKeyUpdate({ set: values })
+    }
+
+    return { ...result, results }
   })
 
   if (stored.heldAll) {
@@ -1116,7 +1157,7 @@ async function readAndStoreFootballBoxes(
     kind: 'imported',
     matches: stored.counts,
     persons: [...describePersons(asked.personLookup.asked, stored.persons, personNames.counts), ...stored.players],
-    results: { added: 0, removed: 0, unchanged: 0, updated: 0 },
+    results: stored.results,
     season,
     standings: 0,
     validOn: seasonStart(season),
@@ -1125,6 +1166,7 @@ async function readAndStoreFootballBoxes(
       ...asked.personLookup.warnings,
       ...guessedNameWarnings(personNames.guessed),
       ...(alikeWarning === undefined ? [] : [alikeWarning]),
+      ...(league?.warnings ?? []),
     ],
   }
 }

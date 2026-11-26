@@ -113,6 +113,7 @@ Daarmee zijn te lezen met datum, uitslag en doelpuntenmakers:
 
 De overige 70 wedstrijden zijn 68 Eredivisie-wedstrijden van 2007/08 en 2008/09 en 2 bekerwedstrijden van 2007/08.
 Voor 2007/08 heeft Wikipedia nergens een datum van de competitie, en voor 2008/09 alleen de Nederlandse seizoenspagina.
+Op 26 november 2026 bleek dat de competitie van 2007/08 toch datums op Wikipedia heeft: onder `Programma` op `Eredivisie 2007/08 (mannenvoetbal)` (#1676).
 Er zijn twee wegen voor de competitie:
 
 1. **Een lezer voor de Nederlandse seizoenspagina van 2008/09** (tabel met 34 competitiewedstrijden met datum, stadion, uitslag en doelpuntenmakers zonder minuut).

@@ -1,0 +1,1667 @@
+== Ranglijst ==
+=== Eindstand ===
+{| class="wikitable sortable" cellspacing="0" cellpadding="3" style="background-color: #f9f9f9; font-size: 90%; text-align: center; border:1px solid #aaa;"
+!width=36|{{afkorting|pos|positie}}
+!align=left width=130|club
+!width=31|{{afkorting|gs|aantal gespeelde wedstrijden}}
+!width=26|{{afkorting|w|aantal gewonnen wedstrijden}}
+!width=26|{{afkorting|g|aantal gelijk gespeelde wedstrijden}}
+!width=26|{{afkorting|v|aantal verloren wedstrijden}}
+!width=34|{{afkorting|pnt|totaal punten}}
+!width=31|{{afkorting|dv|aantal gemaakte doelpunten}}
+!width=31|{{afkorting|dt|aantal doelpunten tegen}}
+!width=31|{{afkorting|ds|doelsaldo}}
+|- style="background:#ACE1AF;"
+| 1. ||align=left| [[PSV (voetbalclub)|PSV]] || 34 || 21 || 9 || 4 || '''72''' || 65 || 24 || 41
+|- style="background:#C0F0D0;"
+| 2. ||align=left| [[AFC Ajax|Ajax]] || 34 || 20 || 9 || 5 || '''69''' || 94 || 45 || 49
+|- style="background:#C0F0D0;"
+| 3. ||align=left| [[NAC Breda]] || 34 || 19 || 6 || 9 || '''63''' || 48 || 40 || 8
+|- style="background:#C0F0D0;"
+| 4. ||align=left| [[FC Twente]] || 34 || 17 || 11 || 6 || '''62''' || 52 || 32 || 20
+|- style="background:#C0F0D0;"
+| 5. ||align=left| [[sc Heerenveen]] || 34 || 18 || 6 || 10 || '''60''' || 88 || 48 || 40
+|- style="background:#EEE8AA;"
+| 6. ||align=left| [[Feyenoord]] || 34 || 18 || 6 || 10 || '''60''' || 64 || 41 || 23
+|- style="background:#B0E0E6;"
+| 7. ||align=left| [[FC Groningen]] || 34 || 15 || 6 || 13 || '''51''' || 53 || 54 || -1
+|- style="background:#B0E0E6;"
+| 8. ||align=left| [[N.E.C.]] || 34 || 14 || 7 || 13 || '''49''' || 49 || 50 || -1
+|- style="background:#B0E0E6;"
+| 9. ||align=left| [[Roda JC Kerkrade|Roda JC]] || 34 || 12 || 11 || 11 || '''47''' || 55 || 55 || 0
+|- style="background:#B0E0E6;"
+| 10. ||align=left| [[FC Utrecht]] || 34 || 13 || 7 || 14 || '''46''' || 59 || 55 || 4
+|-
+| 11. ||align=left| [[AZ (voetbalclub)|AZ]] || 34 || 11 || 10 || 13 || '''43''' || 48 || 53 || -5
+|-
+| 12. ||align=left| [[SBV Vitesse|Vitesse]] || 34 || 12 || 7 || 15 || '''43''' || 46 || 55 || -9
+|-
+| 13. ||align=left| [[Sparta Rotterdam]] || 34 || 9 || 7 || 18 || '''34''' || 52 || 76 || -24
+|-
+| 14. ||align=left| [[Heracles Almelo]] || 34 || 8 || 8 || 18 || '''32''' || 34 || 64 || -30
+|-
+| 15. ||align=left| [[Willem II (voetbalclub)|Willem II]] || 34 || 8 || 7 || 19 || '''31''' || 40 || 49 || -9
+|- style="background:#FFCCCC;"
+| 16. ||align=left| [[BV De Graafschap|De Graafschap]] || 34 || 7 || 9 || 18 || '''30''' || 33 || 64 || -31
+|- style="background:#FFCCCC;"
+| 17. ||align=left| [[VVV-Venlo]] || 34 || 7 || 8 || 19 || '''29''' || 44 || 76 || -32
+|- style="background:#FF8888;"
+| 18. ||align=left| [[SBV Excelsior|Excelsior]] || 34 || 7 || 6 || 21 || '''27''' || 32 || 75 || -43
+|}
+
+{{NieuweKolom}}
+
+== Programma ==
+{|cellspacing=3 style="margin-top:1em; width:400 px; clear:both;" class="toccolours"
+|colspan="4" | '''Eredivisie 2007/08 Ronde 1'''
+|-
+|width=100|[[17 augustus]]
+|width=250|[[sc Heerenveen]] - [[Willem II (voetbalclub)|Willem II]]
+|width=200|[[Abe Lenstra Stadion]]
+|0-0
+|-
+|[[18 augustus]]
+|[[AZ (voetbalclub)|AZ]] - [[VVV-Venlo]]
+|[[DSB Stadion]]
+|4-0
+|-
+|[[18 augustus]]
+|[[NAC Breda]] - [[FC Groningen]]
+|[[Rat Verlegh Stadion]]
+|0-3
+|-
+|[[18 augustus]]
+|[[SBV Excelsior|Excelsior]] - [[FC Twente]]
+|[[Stadion Woudestein]]
+|0-2
+|-
+|[[18 augustus]]
+|[[N.E.C.]] - [[Roda JC Kerkrade|Roda JC]]
+|[[McDOS Goffertstadion]]
+|1-1
+|-
+|[[19 augustus]]
+|[[FC Utrecht]] - [[Feyenoord]]
+|[[Stadion Galgenwaard]]
+|0-3
+|-
+|[[19 augustus]]
+|[[Sparta Rotterdam]] - [[SBV Vitesse|Vitesse]]
+|[[Sparta-Stadion Het Kasteel]]
+|1-2
+|-
+|[[19 augustus]]
+|[[Heracles Almelo]] - [[PSV (voetbalclub)|PSV]]
+|[[Polman Stadion]]
+|0-2
+|-
+|[[19 augustus]]
+|[[BV De Graafschap|De Graafschap]] - [[AFC Ajax|Ajax]]
+|[[De Vijverberg]]
+|1-8
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 2'''
+|-
+|[[24 augustus]]
+|[[Roda JC Kerkrade|Roda JC]] - [[Heracles Almelo]]
+|[[Parkstad Limburg Stadion]]
+|2-1
+|-
+|[[25 augustus]]
+|[[PSV (voetbalclub)|PSV]] - [[N.E.C.]]
+|[[Philips Stadion]]
+|5-0
+|-
+|[[25 augustus]]
+|[[VVV-Venlo]] - [[SBV Excelsior|Excelsior]]
+|[[Seacon Stadion - De Koel -]]
+|3-1
+|-
+|[[25 augustus]]
+|[[Willem II (voetbalclub)|Willem II]] - [[Sparta Rotterdam]]
+|[[Willem II Stadion]]
+|2-2
+|-
+|[[25 augustus]]
+|[[SBV Vitesse|Vitesse]] - [[AZ (voetbalclub)|AZ]]
+|[[GelreDome]]
+|1-0
+|-
+|[[26 augustus]]
+|[[AFC Ajax|Ajax]] - [[sc Heerenveen]]
+|[[Amsterdam ArenA]]
+|4-1
+|-
+|[[26 augustus]]
+|[[FC Groningen]] - [[BV De Graafschap|De Graafschap]]
+|[[Euroborg]]
+|0-2
+|-
+|[[26 augustus]]
+|[[FC Twente]] - [[FC Utrecht]]
+|[[Arke Stadion]]
+|2-2
+|-
+|[[26 augustus]]
+|[[Feyenoord]] - [[NAC Breda]]
+|[[Stadion Feijenoord]]
+|5-0
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 3'''
+|-
+|[[31 augustus]]
+|[[AZ (voetbalclub)|AZ]] - [[SBV Excelsior|Excelsior]]
+|[[DSB Stadion]]
+|3-0
+|-
+|[[1 september]]
+|[[sc Heerenveen]] - [[Sparta Rotterdam]]
+|[[Abe Lenstra Stadion]]
+|3-3
+|-
+|[[1 september]]
+|[[Feyenoord]] - [[Willem II (voetbalclub)|Willem II]]
+|[[Stadion Feijenoord]]
+|2-0
+|-
+|[[1 september]]
+|[[NAC Breda]] - [[Heracles Almelo]]
+|[[Rat Verlegh Stadion]]
+|4-1
+|-
+|[[1 september]]
+|[[FC Twente]] - [[PSV (voetbalclub)|PSV]]
+|[[Arke Stadion]]
+|0-0
+|-
+|[[2 september]]
+|[[FC Utrecht]] - [[BV De Graafschap|De Graafschap]]
+|[[Stadion Galgenwaard]]
+|2-2
+|-
+|[[2 september]]
+|[[AFC Ajax|Ajax]] - [[FC Groningen]]
+|[[Amsterdam ArenA]]
+|2-2
+|-
+|[[2 september]]
+|[[SBV Vitesse|Vitesse]] - [[N.E.C.]]
+|[[GelreDome]]
+|1-0
+|-
+|[[2 september]]
+|[[VVV-Venlo]] - [[Roda JC Kerkrade|Roda JC]]
+|[[Seacon Stadion - De Koel -]]
+|3-5
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 4'''
+|-
+|[[14 september]]
+|[[FC Groningen]] - [[FC Utrecht]]
+|[[Euroborg]]
+|0-2
+|-
+|[[15 september]]
+|[[PSV (voetbalclub)|PSV]] - [[SBV Vitesse|Vitesse]]
+|[[Philips Stadion]]
+|1-0
+|-
+|[[15 september]]
+|[[SBV Excelsior|Excelsior]] - [[sc Heerenveen]]
+|[[Stadion Woudestein]]
+|2-5
+|-
+|[[15 september]]
+|[[Heracles Almelo]] - [[AFC Ajax|Ajax]]
+|[[Polman Stadion]]
+|0-1
+|-
+|[[15 september]]
+|[[BV De Graafschap|De Graafschap]] - [[VVV-Venlo]]
+|[[Stadion De Vijverberg|Vijverberg]]
+|3-2
+|-
+|[[16 september]]
+|[[Sparta Rotterdam]] - [[AZ (voetbalclub)|AZ]]
+|[[Sparta-Stadion Het Kasteel]]
+|2-2
+|-
+|[[16 september]]
+|[[Willem II (voetbalclub)|Willem II]] - [[FC Twente]]
+|[[Willem II Stadion]]
+|1-3
+|-
+|[[16 september]]
+|[[N.E.C.]] - [[NAC Breda]]
+|[[McDOS Goffertstadion]]
+|0-1
+|-
+|[[16 september]]
+|[[Roda JC Kerkrade|Roda JC]] - [[Feyenoord]]
+|[[Parkstad Limburg Stadion]]
+|1-3
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 5'''
+|-
+|[[21 september]]
+|[[VVV-Venlo]] - [[NAC Breda]]
+|[[Seacon Stadion - De Koel -]]
+|1-3
+|-
+|[[22 september]]
+|[[Sparta Rotterdam]] - [[Heracles Almelo]]
+|[[Sparta-Stadion Het Kasteel]]
+|1-1
+|-
+|[[22 september]]
+|[[Willem II (voetbalclub)|Willem II]] - [[Roda JC Kerkrade|Roda JC]]
+|[[Willem II Stadion]]
+|1-0
+|-
+|[[22 september]]
+|[[SBV Vitesse|Vitesse]] - [[BV De Graafschap|De Graafschap]]
+|[[GelreDome]]
+|0-2
+|-
+|[[23 september]]
+|[[sc Heerenveen]] - [[FC Utrecht]]
+|[[Abe Lenstra Stadion]]
+|2-3
+|-
+|[[23 september]]
+|[[AZ (voetbalclub)|AZ]] - [[AFC Ajax|Ajax]]
+|[[DSB Stadion]]
+|2-3
+|-
+|[[23 september]]
+|[[FC Twente]] - [[N.E.C.]]
+|[[Arke Stadion]]
+|3-0
+|-
+|[[23 september]]
+|[[PSV (voetbalclub)|PSV]] - [[Feyenoord]]
+|[[Philips Stadion]]
+|4-0
+|-
+|[[23 september]]
+|[[SBV Excelsior|Excelsior]] - [[FC Groningen]]
+|[[Stadion Woudestein]]
+|1-3
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 6'''
+|-
+|[[29 september]]
+|[[Feyenoord]] - [[sc Heerenveen]]
+|[[Stadion Feijenoord]]
+|2-0
+|-
+|[[29 september]]
+|[[NAC Breda]] - [[PSV (voetbalclub)|PSV]]
+|[[Rat Verlegh Stadion]]
+|1-1
+|-
+|[[29 september]]
+|[[Roda JC Kerkrade|Roda JC]] - [[SBV Excelsior|Excelsior]]
+|[[Parkstad Limburg Stadion]]
+|3-3
+|-
+|[[29 september]]
+|[[FC Groningen]] - [[Sparta Rotterdam]]
+|[[Euroborg]]
+|1-0
+|-
+|[[30 september]]
+|[[N.E.C.]] - [[Willem II (voetbalclub)|Willem II]]
+|[[McDOS Goffertstadion]]
+|1-0
+|-
+|[[30 september]]
+|[[FC Utrecht]] - [[SBV Vitesse|Vitesse]]
+|[[Stadion Galgenwaard]]
+|2-4
+|-
+|[[30 september]]
+|[[AFC Ajax|Ajax]] - [[VVV-Venlo]]
+|[[Amsterdam ArenA]]
+|6-1
+|-
+|[[30 september]]
+|[[Heracles Almelo]] - [[AZ (voetbalclub)|AZ]]
+|[[Polman Stadion]]
+|2-1
+|-
+|[[30 september]]
+|[[BV De Graafschap|De Graafschap]] - [[FC Twente]]
+|[[De Vijverberg]]
+|0-0
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 7'''
+|-
+|[[5 oktober]]
+|[[VVV-Venlo]] - [[FC Utrecht]]
+|[[Seacon Stadion - De Koel -]]
+|1-2
+|-
+|[[6 oktober]]
+|[[NAC Breda]] - [[BV De Graafschap|De Graafschap]]
+|[[Rat Verlegh Stadion]]
+|1-0
+|-
+|[[6 oktober]]
+|[[PSV (voetbalclub)|PSV]] - [[Willem II (voetbalclub)|Willem II]]
+|[[Philips Stadion]]
+|3-0
+|-
+|[[6 oktober]]
+|[[SBV Excelsior|Excelsior]] - [[N.E.C.]]
+|[[Stadion Woudestein]]
+|2-0
+|-
+|[[7 oktober]]
+|[[sc Heerenveen]] - [[Heracles Almelo]]
+|[[Abe Lenstra Stadion]]
+|9-0
+|-
+|[[7 oktober]]
+|[[Sparta Rotterdam]] - [[AFC Ajax|Ajax]]
+|[[Sparta-Stadion Het Kasteel]]
+|2-2
+|-
+|[[7 oktober]]
+|[[AZ (voetbalclub)|AZ]] - [[FC Groningen]]
+|[[DSB Stadion]]
+|2-2
+|-
+|[[7 oktober]]
+|[[FC Twente]] - [[Roda JC Kerkrade|Roda JC]]
+|[[Arke Stadion]]
+|0-1
+|-
+|[[7 oktober]]
+|[[SBV Vitesse|Vitesse]] - [[Feyenoord]]
+|[[GelreDome]]
+|0-1
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 8'''
+|-
+|[[19 oktober]]
+|[[BV De Graafschap|De Graafschap]] - [[Sparta Rotterdam]]
+|[[De Vijverberg]]
+|4-0
+|-
+|[[20 oktober]]
+|[[AFC Ajax|Ajax]] - [[N.E.C.]]
+|[[Amsterdam ArenA]]
+|0-0
+|-
+|[[20 oktober]]
+|[[PSV (voetbalclub)|PSV]] - [[VVV-Venlo]]
+|[[Philips Stadion]]
+|3-1
+|-
+|[[20 oktober]]
+|[[Feyenoord]] - [[SBV Excelsior|Excelsior]]
+|[[Stadion Feijenoord]]
+|1-0
+|-
+|[[20 oktober]]
+|[[Heracles Almelo]] - [[SBV Vitesse|Vitesse]]
+|[[Polman Stadion]]
+|2-2
+|-
+|[[21 oktober]]
+|[[AZ (voetbalclub)|AZ]] - [[sc Heerenveen]]
+|[[DSB Stadion]]
+|0-1
+|-
+|[[21 oktober]]
+|[[FC Groningen]] - [[FC Twente]]
+|[[Euroborg]]
+|1-0
+|-
+|[[21 oktober]]
+|[[Roda JC Kerkrade|Roda JC]] - [[FC Utrecht]]
+|[[Parkstad Limburg Stadion]]
+|1-1
+|-
+|[[21 oktober]]
+|[[Willem II (voetbalclub)|Willem II]] - [[NAC Breda]]
+|[[Willem II Stadion]]
+|0-0
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 9'''
+|-
+|[[26 oktober]]
+|[[SBV Vitesse|Vitesse]] - [[Willem II (voetbalclub)|Willem II]]
+|[[GelreDome]]
+|1-0
+|-
+|[[27 oktober]]
+|[[Roda JC Kerkrade|Roda JC]] - [[BV De Graafschap|De Graafschap]]
+|[[Parkstad Limburg Stadion]]
+|1-0
+|-
+|[[27 oktober]]
+|[[VVV-Venlo]] - [[sc Heerenveen]]
+|[[Seacon Stadion - De Koel -]]
+|0-4
+|-
+|[[27 oktober]]
+|[[FC Twente]] - [[Feyenoord]]
+|[[Arke Stadion]]
+|2-0
+|-
+|[[27 oktober]]
+|[[SBV Excelsior|Excelsior]] - [[Heracles Almelo]]
+|[[Stadion Woudestein]]
+|1-1
+|-
+|[[28 oktober]]
+|[[FC Utrecht]] - [[AFC Ajax|Ajax]]
+|[[Stadion Galgenwaard]]
+|0-1
+|-
+|[[28 oktober]]
+|[[NAC Breda]] - [[AZ (voetbalclub)|AZ]]
+|[[Rat Verlegh Stadion]]
+|2-3
+|-
+|[[28 oktober]]
+|[[N.E.C.]] - [[FC Groningen]]
+|[[McDOS Goffertstadion]]
+|5-1
+|-
+|[[28 oktober]]
+|[[Sparta Rotterdam]] - [[PSV (voetbalclub)|PSV]]
+|[[Sparta-Stadion Het Kasteel]]
+|1-4
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 10'''
+|-
+|[[2 november]]
+| [[Willem II (voetbalclub)|Willem II]] - [[VVV-Venlo]]
+|[[Willem II Stadion]]
+|1-2
+|-
+|[[3 november]]
+|[[sc Heerenveen]] - [[PSV (voetbalclub)|PSV]]
+|[[Abe Lenstra Stadion]]
+|2-1
+|-
+|[[3 november]]
+|[[AZ (voetbalclub)|AZ]] - [[N.E.C.]]
+|[[DSB Stadion]]
+|4-0
+|-
+|[[3 november]]
+|[[SBV Excelsior|Excelsior]] - [[Sparta Rotterdam]]
+|[[Stadion Woudestein]]
+|4-3
+|-
+|[[4 november]]
+|[[AFC Ajax|Ajax]] - [[Roda JC Kerkrade|Roda JC]]
+|[[Amsterdam ArenA]]
+|4-2
+|-
+|[[4 november]]
+|[[Feyenoord]] - [[BV De Graafschap|De Graafschap]]
+|[[Stadion Feijenoord]]
+|2-0
+|-
+|[[4 november]]
+|[[FC Groningen]] - [[SBV Vitesse|Vitesse]]
+|[[Euroborg]]
+|0-0
+|-
+|[[4 november]]
+|[[FC Utrecht]] - [[NAC Breda]]
+|[[Stadion Galgenwaard]]
+|0-1
+|-
+|[[4 november]]
+|[[Heracles Almelo]] - [[FC Twente]]
+|[[Polman Stadion]]
+|0-3
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 11'''
+|-
+|[[9 november]]
+|[[N.E.C.]] - [[Heracles Almelo]]
+|[[McDOS Goffertstadion]]
+|3-0
+|-
+|[[10 november]]
+|[[Willem II (voetbalclub)|Willem II]] - [[FC Utrecht]]
+|[[Willem II Stadion]]
+|1-4
+|-
+|[[10 november]]
+|[[VVV-Venlo]] - [[Sparta Rotterdam]]
+|[[Seacon Stadion - De Koel -]]
+|2-0
+|-
+|[[10 november]]
+|[[FC Twente]] - [[NAC Breda]]
+|[[Arke Stadion]]
+|1-1
+|-
+|[[10 november]]
+|[[BV De Graafschap|De Graafschap]] - [[SBV Excelsior|Excelsior]]
+|[[De Vijverberg]]
+|1-1
+|-
+|[[11 november]]
+|[[SBV Vitesse|Vitesse]] - [[sc Heerenveen]]
+|[[GelreDome]]
+|0-1
+|-
+|[[11 november]]
+|[[Roda JC Kerkrade|Roda JC]] - [[FC Groningen]]
+|[[Parkstad Limburg Stadion]]
+|5-1
+|-
+|[[11 november]]
+|[[PSV (voetbalclub)|PSV]] - [[AZ (voetbalclub)|AZ]]
+|[[Philips Stadion]]
+|1-1
+|-
+|[[11 november]]
+|[[Feyenoord]] - [[AFC Ajax|Ajax]]
+|[[Stadion Feijenoord]]
+|2-2
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 12'''
+|-
+|[[23 november]]
+|[[NAC Breda]] - [[Roda JC Kerkrade|Roda JC]]
+|[[Rat Verlegh Stadion]]
+|0-0
+|-
+|[[24 november]]
+|[[sc Heerenveen]] - [[BV De Graafschap|De Graafschap]]
+|[[Abe Lenstra Stadion]]
+|2-3
+|-
+|[[24 november]]
+|[[Heracles Almelo]] - [[VVV-Venlo]]
+|[[Polman Stadion]]
+|0-0
+|-
+|[[24 november]]
+|[[SBV Excelsior|Excelsior]] - [[PSV (voetbalclub)|PSV]]
+|[[Stadion Woudestein]]
+|1-4
+|-
+|[[24 november]]
+|[[AZ (voetbalclub)|AZ]] - [[Willem II (voetbalclub)|Willem II]]
+|[[DSB Stadion]]
+|2-0
+|-
+|[[25 november]]
+|[[Sparta Rotterdam]] - [[FC Twente]]
+|[[Sparta-Stadion Het Kasteel]]
+|1-1
+|-
+|[[25 november]]
+|[[FC Utrecht]] - [[N.E.C.]]
+|[[Stadion Galgenwaard]]
+|3-2
+|-
+|[[25 november]]
+|[[FC Groningen]] - [[Feyenoord]]
+|[[Euroborg]]
+|3-2
+|-
+|[[25 november]]
+|[[AFC Ajax|Ajax]] - [[SBV Vitesse|Vitesse]]
+|[[Amsterdam ArenA]]
+|4-1
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 13'''
+|-
+|[[30 november]]
+|[[FC Utrecht]] - [[Sparta Rotterdam]]
+|[[Stadion Galgenwaard]]
+|7-1
+|-
+|[[1 december]]
+|[[Willem II (voetbalclub)|Willem II]] - [[SBV Excelsior|Excelsior]]
+|[[Willem II Stadion]]
+|6-0
+|-
+|[[1 december]]
+|[[Roda JC Kerkrade|Roda JC]] - [[SBV Vitesse|Vitesse]]
+|[[Parkstad Limburg Stadion]]
+|3-2
+|-
+|[[1 december]]
+|[[FC Groningen]] - [[VVV-Venlo]]
+|[[Euroborg]]
+|1-0
+|-
+|[[1 december]]
+|[[BV De Graafschap|De Graafschap]] - [[PSV (voetbalclub)|PSV]]
+|[[De Vijverberg]]
+|0-1
+|-
+|[[2 december]]
+|[[Feyenoord]] - [[Heracles Almelo]]
+|[[Stadion Feijenoord]]
+|6-0
+|-
+|[[2 december]]
+|[[FC Twente]] - [[AZ (voetbalclub)|AZ]]
+|[[Arke Stadion]]
+|2-1
+|-
+|[[2 december]]
+|[[AFC Ajax|Ajax]] - [[NAC Breda]]
+|[[Amsterdam ArenA]]
+|1-3
+|-
+|[[2 december]]
+|[[N.E.C.]] - [[sc Heerenveen]]
+|[[McDOS Goffertstadion]]
+|0-1
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 14'''
+|-
+|[[7 december]]
+|[[PSV (voetbalclub)|PSV]] - [[Roda JC Kerkrade|Roda JC]]
+|[[Philips Stadion]]
+|2-4
+|-
+|[[8 december]]
+|[[Willem II (voetbalclub)|Willem II]] - [[AFC Ajax|Ajax]]
+|[[Willem II Stadion]]
+|2-3
+|-
+|[[8 december]]
+|[[SBV Excelsior|Excelsior]] - [[NAC Breda]]
+|[[Stadion Woudestein]]
+|0-3
+|-
+|[[8 december]]
+|[[Heracles Almelo]] - [[BV De Graafschap|De Graafschap]]
+|[[Polman Stadion]]
+|2-0
+|-
+|[[8 december]]
+|[[SBV Vitesse|Vitesse]] - [[FC Twente]]
+|[[GelreDome]]
+|2-2
+|-
+|[[9 december]]
+|[[VVV-Venlo]] - [[Feyenoord]]
+|[[Seacon Stadion - De Koel -]]
+|0-0
+|-
+|[[9 december]]
+|[[AZ (voetbalclub)|AZ]] - [[FC Utrecht]]
+|[[DSB Stadion]]
+|2-1
+|-
+|[[9 december]]
+|[[sc Heerenveen]] - [[FC Groningen]]
+|[[Abe Lenstra Stadion]]
+|4-2
+|-
+|[[9 december]]
+|[[Sparta Rotterdam]] - [[N.E.C.]]
+||[[Sparta-Stadion Het Kasteel]]
+|1-0
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 15'''
+|-
+|[[14 december]]
+|[[Roda JC Kerkrade|Roda JC]] - [[Sparta Rotterdam]]
+|[[Parkstad Limburg Stadion]]
+|2-3
+|-
+|[[15 december]]
+|[[NAC Breda]] - [[sc Heerenveen]]
+|[[Rat Verlegh Stadion]]
+|1-5
+|-
+|[[15 december]]
+|[[FC Twente]] - [[VVV-Venlo]]
+|[[Arke Stadion]]
+|1-1
+|-
+|[[15 december]]
+|[[BV De Graafschap|De Graafschap]] - [[N.E.C.]]
+|[[De Vijverberg]]
+|1-1
+|-
+|[[16 december]]
+|[[SBV Vitesse|Vitesse]] - [[SBV Excelsior|Excelsior]]
+|[[GelreDome]]
+|3-0
+|-
+|[[16 december]]
+|[[FC Utrecht]] - [[Heracles Almelo]]
+|[[Stadion Galgenwaard]]
+|3-1
+|-
+|[[16 december]]
+|[[FC Groningen]] - [[Willem II (voetbalclub)|Willem II]]
+|[[Euroborg]]
+|1-0
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 16'''
+|-
+|[[21 december]]
+|[[Willem II (voetbalclub)|Willem II]] - [[BV De Graafschap|De Graafschap]]
+|[[Willem II Stadion]]
+|1-2
+|-
+|[[22 december]]
+|[[sc Heerenveen]] - [[FC Twente]]
+|[[Abe Lenstra Stadion]]
+|1-2
+|-
+|[[22 december]]
+|[[PSV (voetbalclub)|PSV]] - [[FC Utrecht]]
+|[[Philips Stadion]]
+|4-1
+|-
+|[[22 december]]
+|[[Heracles Almelo]] - [[FC Groningen]]
+|[[Polman Stadion]]
+|1-2
+|-
+|[[23 december]]
+|[[VVV-Venlo]] - [[SBV Vitesse|Vitesse]]
+|[[Seacon Stadion - De Koel -]]
+|2-0
+|-
+|[[23 december]]
+|[[N.E.C.]] - [[Feyenoord]]
+|[[McDOS Goffertstadion]]
+|0-2
+|-
+|[[23 december]]
+|[[SBV Excelsior|Excelsior]] - [[AFC Ajax|Ajax]]
+|[[Stadion Woudestein]]
+|2-1
+|-
+|[[23 december]]
+|[[AZ (voetbalclub)|AZ]] - [[Roda JC Kerkrade|Roda JC]]
+|[[DSB Stadion]]
+|1-1
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 17'''
+|-
+|[[26 december]]
+|[[N.E.C.]] - [[VVV-Venlo]]
+|[[McDOS Goffertstadion]]
+|2-2
+|-
+|[[26 december]]
+|[[Feyenoord]] - [[Sparta Rotterdam]]
+|[[Stadion Feijenoord]]
+|2-0
+|-
+|[[26 december]]
+|[[FC Groningen]] - [[PSV (voetbalclub)|PSV]]
+|[[Euroborg]]
+|2-1
+|-
+|[[27 december]]
+|[[Roda JC Kerkrade|Roda JC]] - [[sc Heerenveen]]
+|[[Parkstad Limburg Stadion]]
+|1-0
+|-
+|[[27 december]]
+|[[NAC Breda]] - [[SBV Vitesse|Vitesse]]
+|[[Rat Verlegh Stadion]]
+|1-2
+|-
+|[[27 december]]
+|[[Heracles Almelo]] - [[Willem II (voetbalclub)|Willem II]]
+|[[Polman Stadion]]
+|1-0
+|-
+|[[27 december]]
+|[[FC Utrecht]] - [[SBV Excelsior|Excelsior]]
+|[[Stadion Galgenwaard]]
+|4-1
+|-
+|[[27 december]]
+|[[AFC Ajax|Ajax]] - [[FC Twente]]
+|[[Amsterdam ArenA]]
+|2-2
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 18'''
+|-
+|[[29 december]]
+|[[Sparta Rotterdam]] - [[FC Groningen]]
+|[[Sparta-Stadion Het Kasteel]]
+|1-3
+|-
+|[[30 december]]
+|[[Willem II (voetbalclub)|Willem II]] - [[N.E.C.]]
+|[[Willem II Stadion]]
+|3-0
+|-
+|[[30 december]]
+|[[VVV-Venlo]] - [[AFC Ajax|Ajax]]
+|[[Seacon Stadion - De Koel -]]
+|2-2
+|-
+|[[30 december]]
+|[[SBV Vitesse|Vitesse]] - [[FC Utrecht]]
+|[[GelreDome]]
+|2-2
+|-
+|[[30 december]]
+|[[sc Heerenveen]] - [[Feyenoord]]
+|[[Abe Lenstra Stadion]]
+|1-1
+|-
+|[[30 december]]
+|[[PSV (voetbalclub)|PSV]] - [[NAC Breda]]
+|[[Philips Stadion]]
+|2-0
+|-
+|[[30 december]]
+|[[FC Twente]] - [[BV De Graafschap|De Graafschap]]
+|[[Arke Stadion]]
+|2-0
+|-
+|[[30 december]]
+|[[SBV Excelsior|Excelsior]] - [[Roda JC Kerkrade|Roda JC]]
+|[[Stadion Woudestein]]
+|1-2
+|-
+|[[30 december]]
+|[[AZ (voetbalclub)|AZ]] - [[Heracles Almelo]]
+|[[DSB Stadion]]
+|1-0
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 19'''
+|-
+|[[11 januari]]
+|[[N.E.C.]] - [[FC Twente]]
+|[[McDOS Goffertstadion]]
+|2-2
+|-
+|[[12 januari]]
+|[[Roda JC Kerkrade|Roda JC]] - [[Willem II (voetbalclub)|Willem II]]
+|[[Parkstad Limburg Stadion]]
+|1-1
+|-
+|[[12 januari]]
+|[[NAC Breda]] - [[VVV-Venlo]]
+|[[Rat Verlegh Stadion]]
+|0-0
+|-
+|[[12 januari]]
+|[[Feyenoord]] - [[PSV (voetbalclub)|PSV]]
+|[[Stadion Feijenoord]]
+|0-1
+|-
+|[[12 januari]]
+|[[FC Groningen]] - [[SBV Excelsior|Excelsior]]
+|[[Euroborg]]
+|3-2
+|-
+|[[13 januari]]
+|[[Heracles Almelo]] - [[Sparta Rotterdam]]
+|[[Polman Stadion]]
+|2-0
+|-
+|[[13 januari]]
+|[[FC Utrecht]] - [[sc Heerenveen]]
+|[[Stadion Galgenwaard]]
+|2-2
+|-
+|[[13 januari]]
+|[[BV De Graafschap|De Graafschap]] - [[SBV Vitesse|Vitesse]]
+|[[De Vijverberg]]
+|0-3
+|-
+|[[13 januari]]
+|[[AFC Ajax|Ajax]] - [[AZ (voetbalclub)|AZ]]
+|[[Amsterdam ArenA]]
+|6-1
+|-
+|colspan="4" |'''Inhaal Eredivisie 2007/08 Ronde 17'''
+|-
+|[[16 januari]]
+|[[BV De Graafschap|De Graafschap]] - [[AZ (voetbalclub)|AZ]]
+|[[De Vijverberg]]
+|1-2
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 20'''
+|-
+|[[18 januari]]
+|[[SBV Excelsior|Excelsior]] - [[Feyenoord]]
+|[[Stadion Woudestein]]
+|2-1
+|-
+|[[19 januari]]
+|[[sc Heerenveen]] - [[AZ (voetbalclub)|AZ]]
+|[[Abe Lenstra Stadion]]
+|4-0
+|-
+|[[19 januari]]
+|[[NAC Breda]] - [[Willem II (voetbalclub)|Willem II]]
+|[[Rat Verlegh Stadion]]
+|1-0
+|-
+|[[19 januari]]
+|[[FC Utrecht]] - [[Roda JC Kerkrade|Roda JC]]
+|[[Stadion Galgenwaard]]
+|3-1
+|-
+|[[19 januari]]
+|[[SBV Vitesse|Vitesse]] - [[Heracles Almelo]]
+|[[GelreDome]]
+|2-0
+|-
+|[[20 januari]]
+|[[N.E.C.]] - [[AFC Ajax|Ajax]]
+|[[McDOS Goffertstadion]]
+|1-1
+|-
+|[[20 januari]]
+|[[VVV-Venlo]] - [[PSV (voetbalclub)|PSV]]
+|[[Seacon Stadion - De Koel -]]
+|1-1
+|-
+|[[20 januari]]
+|[[Sparta Rotterdam]] - [[BV De Graafschap|De Graafschap]]
+|[[Sparta-Stadion Het Kasteel]]
+|6-1
+|-
+|[[20 januari]]
+|[[FC Twente]] - [[FC Groningen]]
+|[[Arke Stadion]]
+|3-1
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 21'''
+|-
+|[[22 januari]]
+|[[Willem II (voetbalclub)|Willem II]] - [[SBV Vitesse|Vitesse]]
+|[[Willem II Stadion]]
+|4-0
+|-
+|[[22 januari]]
+|[[AZ (voetbalclub)|AZ]] - [[NAC Breda]]
+|[[DSB Stadion]]
+|1-2
+|-
+|[[22 januari]]
+|[[Heracles Almelo]] - [[SBV Excelsior|Excelsior]]
+|[[Polman Stadion]]
+|2-0
+|-
+|[[23 januari]]
+|[[AFC Ajax|Ajax]] - [[FC Utrecht]]
+|[[Amsterdam ArenA]]
+|2-0
+|-
+|[[23 januari]]
+|[[FC Groningen]] - [[N.E.C.]]
+|[[Euroborg]]
+|5-1
+|-
+|[[23 januari]]
+|[[sc Heerenveen]] - [[VVV-Venlo]]
+|[[Abe Lenstra Stadion]]
+|5-1
+|-
+|[[23 januari]]
+|[[PSV (voetbalclub)|PSV]] - [[Sparta Rotterdam]]
+|[[Philips Stadion]]
+|3-1
+|-
+|[[23 januari]]
+|[[BV De Graafschap|De Graafschap]] - [[Roda JC Kerkrade|Roda JC]]
+|[[De Vijverberg]]
+|2-1
+|-
+|[[24 januari]]
+|[[Feyenoord]] - [[FC Twente]]
+|[[Stadion Feijenoord]]
+|3-1
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 22'''
+|-
+|[[25 januari]]
+|[[Willem II (voetbalclub)|Willem II]] - [[AZ (voetbalclub)|AZ]]
+|[[Willem II Stadion]]
+|3-0
+|-
+|[[26 januari]]
+|[[PSV (voetbalclub)|PSV]] - [[SBV Excelsior|Excelsior]]
+|[[Philips Stadion]]
+|2-1
+|-
+|[[26 januari]]
+|[[Roda JC Kerkrade|Roda JC]] - [[NAC Breda]]
+|[[Parkstad Limburg Stadion]]
+|0-2
+|-
+|[[26 januari]]
+|[[BV De Graafschap|De Graafschap]] - [[sc Heerenveen]]
+|[[De Vijverberg]]
+|0-3
+|-
+|[[27 januari]]
+|[[N.E.C.]] - [[FC Utrecht]]
+|[[McDOS Goffertstadion]]
+|2-0
+|-
+|[[27 januari]]
+|[[SBV Vitesse|Vitesse]] - [[AFC Ajax|Ajax]]
+|[[GelreDome]]
+|2-2
+|-
+|[[27 januari]]
+|[[VVV-Venlo]] - [[Heracles Almelo]]
+|[[Seacon Stadion - De Koel -]]
+|0-5
+|-
+|[[27 januari]]
+|[[Feyenoord]] - [[FC Groningen]]
+|[[Stadion Feijenoord]]
+|1-1
+|-
+|[[27 januari]]
+|[[FC Twente]] - [[Sparta Rotterdam]]
+|[[Arke Stadion]]
+|1-2
+|-
+|colspan="4" | '''Inhaal Eredivisie 2007/08 Ronde 15'''
+|-
+|[[30 januari]]
+|[[AFC Ajax|Ajax]] - [[PSV (voetbalclub)|PSV]]
+|[[Amsterdam ArenA]]
+|0-2
+|-
+|[[30 januari]]
+|[[Feyenoord]] - [[AZ (voetbalclub)|AZ]]
+|[[Stadion Feijenoord]]
+|2-2
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 23'''
+|-
+|[[1 februari]]
+|[[NAC Breda]] - [[FC Twente]]
+|[[Rat Verlegh Stadion]]
+|1-0
+|-
+|[[2 februari]]
+|[[sc Heerenveen]] - [[SBV Vitesse|Vitesse]]
+|[[Abe Lenstra Stadion]]
+|7-0
+|-
+|[[2 februari]]
+|[[AZ (voetbalclub)|AZ]] - [[PSV (voetbalclub)|PSV]]
+|[[DSB Stadion]]
+|0-2
+|-
+|[[2 februari]]
+|[[Heracles Almelo]] - [[N.E.C.]]
+|[[Polman Stadion]]
+|0-2
+|-
+|[[2 februari]]
+|[[SBV Excelsior|Excelsior]] - [[BV De Graafschap|De Graafschap]]
+|[[Stadion Woudestein]]
+|1-1
+|-
+|[[3 februari]]
+|[[AFC Ajax|Ajax]] - [[Feyenoord]]
+|[[Amsterdam ArenA]]
+|3-0
+|-
+|[[3 februari]]
+|[[FC Groningen]] - [[Roda JC Kerkrade|Roda JC]]
+|[[Euroborg]]
+|1-1
+|-
+|[[3 februari]]
+|[[Sparta Rotterdam]] - [[VVV-Venlo]]
+|[[Sparta-Stadion Het Kasteel]]
+|2-0
+|-
+|[[3 februari]]
+|[[FC Utrecht]] - [[Willem II (voetbalclub)|Willem II]]
+|[[Stadion Galgenwaard]]
+|2-0
+|-
+|colspan="4" | '''Inhaal Eredivisie 2007/08 Ronde 16'''
+|-
+|[[6 februari]]
+|[[Sparta Rotterdam]] - [[NAC Breda]]
+|[[Sparta-Stadion Het Kasteel]]
+|0-1
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 24'''
+|-
+|[[8 februari]]
+|[[FC Twente]] - [[Heracles Almelo]]
+|[[Arke Stadion]]
+|2-1
+|-
+|[[9 februari]]
+|[[SBV Vitesse|Vitesse]] - [[FC Groningen]]
+|[[GelreDome]]
+|2-1
+|-
+|[[9 februari]]
+|[[PSV (voetbalclub)|PSV]] - [[sc Heerenveen]]
+|[[Philips Stadion]]
+|1-1
+|-
+|[[9 februari]]
+|[[NAC Breda]] - [[FC Utrecht]]
+|[[Rat Verlegh Stadion]]
+|1-0
+|-
+|[[9 februari]]
+|[[BV De Graafschap|De Graafschap]] - [[Feyenoord]]
+|[[De Vijverberg]]
+|1-3
+|-
+|[[10 februari]]
+|[[VVV-Venlo]] - [[Willem II (voetbalclub)|Willem II]]
+|[[Seacon Stadion - De Koel -]]
+|1-1
+|-
+|[[10 februari]]
+|[[Sparta Rotterdam]] - [[SBV Excelsior|Excelsior]]
+|[[Sparta-Stadion Het Kasteel]]
+|0-1
+|-
+|[[10 februari]]
+|[[Roda JC Kerkrade|Roda JC]] - [[AFC Ajax|Ajax]]
+|[[Parkstad Limburg Stadion]]
+|2-1
+|-
+|[[10 februari]]
+|[[N.E.C.]] - [[AZ (voetbalclub)|AZ]]
+|[[McDOS Goffertstadion]]
+|5-2
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 25'''
+|-
+|[[15 februari]]
+|[[AFC Ajax|Ajax]] - [[Sparta Rotterdam]]
+|[[Amsterdam ArenA]]
+|6-2
+|-
+|[[16 februari]]
+|[[Willem II (voetbalclub)|Willem II]] - [[PSV (voetbalclub)|PSV]]
+|[[Willem II Stadion]]
+|0-1
+|-
+|[[16 februari]]
+|[[Roda JC Kerkrade|Roda JC]] - [[FC Twente]]
+|[[Parkstad Limburg Stadion]]
+|3-1
+|-
+|[[16 februari]]
+|[[N.E.C.]] - [[SBV Excelsior|Excelsior]]
+|[[McDOS Goffertstadion]]
+|0-1
+|-
+|[[16 februari]]
+|[[Heracles Almelo]] - [[sc Heerenveen]]
+|[[Polman Stadion]]
+|2-2
+|-
+|[[17 februari]]
+|[[Feyenoord]] - [[SBV Vitesse|Vitesse]]
+|[[Stadion Feijenoord]]
+|1-0
+|-
+|[[17 februari]]
+|[[FC Utrecht]] - [[VVV-Venlo]]
+|[[Stadion Galgenwaard]]
+|1-4
+|-
+|[[17 februari]]
+|[[FC Groningen]] - [[AZ (voetbalclub)|AZ]]
+|[[Euroborg]]
+|2-1
+|-
+|[[17 februari]]
+|[[BV De Graafschap|De Graafschap]] - [[NAC Breda]]
+|[[De Vijverberg]]
+|0-1
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 26'''
+|-
+|[[22 februari]]
+|[[Sparta Rotterdam]] - [[FC Utrecht]]
+|[[Sparta-Stadion Het Kasteel]]
+|2-1
+|-
+|[[23 februari]]
+|[[SBV Vitesse|Vitesse]] - [[Roda JC Kerkrade|Roda JC]]
+|[[GelreDome]]
+|1-1
+|-
+|[[23 februari]]
+|[[SBV Excelsior|Excelsior]] - [[Willem II (voetbalclub)|Willem II]]
+|[[Stadion Woudestein]]
+|0-0
+|-
+|[[23 februari]]
+|[[Heracles Almelo]] - [[Feyenoord]]
+|[[Polman Stadion]]
+|3-3
+|-
+|[[23 februari]]
+|[[AZ (voetbalclub)|AZ]] - [[FC Twente]]
+|[[DSB Stadion]]
+|0-0
+|-
+|[[24 februari]]
+|[[PSV (voetbalclub)|PSV]] - [[BV De Graafschap|De Graafschap]]
+|[[Philips Stadion]]
+|4-1
+|-
+|[[24 februari]]
+|[[sc Heerenveen]] - [[N.E.C.]]
+|[[Abe Lenstra Stadion]]
+|2-3
+|-
+|[[24 februari]]
+|[[VVV-Venlo]] - [[FC Groningen]]
+|[[Seacon Stadion - De Koel -]]
+|2-5
+|-
+|[[24 februari]]
+|[[NAC Breda]] - [[AFC Ajax|Ajax]]
+|[[Rat Verlegh Stadion]]
+|2-3
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 27'''
+|-
+|[[29 februari]]
+|[[SBV Vitesse|Vitesse]] - [[VVV-Venlo]]
+|[[GelreDome]]
+|1-3
+|-
+|[[1 maart]]
+|[[NAC Breda]] - [[Sparta Rotterdam]]
+|[[Rat Verlegh Stadion]]
+|3-0
+|-
+|[[1 maart]]
+|[[Roda JC Kerkrade|Roda JC]] - [[AZ (voetbalclub)|AZ]]
+|[[Parkstad Limburg Stadion]]
+|1-1
+|-
+|[[1 maart]]
+|[[BV De Graafschap|De Graafschap]] - [[Willem II (voetbalclub)|Willem II]]
+|[[De Vijverberg]]
+|1-2
+|-
+|[[1 maart]]
+|[[FC Twente]] - [[sc Heerenveen]]
+|[[Arke Stadion]]
+|1-0
+|-
+|[[2 maart]]
+|[[AFC Ajax|Ajax]] - [[SBV Excelsior|Excelsior]]
+|[[Amsterdam ArenA]]
+|4-0
+|-
+|[[2 maart]]
+|[[FC Groningen]] - [[Heracles Almelo]]
+|[[Euroborg]]
+|1-2
+|-
+|[[2 maart]]
+|[[FC Utrecht]] - [[PSV (voetbalclub)|PSV]]
+|[[Stadion Galgenwaard]]
+|3-1
+|-
+|[[2 maart]]
+|[[Feyenoord]] - [[N.E.C.]]
+|[[Stadion Feijenoord]]
+|1-3
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 28'''
+|-
+|[[7 maart]]
+|[[Heracles Almelo]] - [[FC Utrecht]]
+|[[Polman Stadion]]
+|2-1
+|-
+|[[8 maart]]
+|[[Willem II (voetbalclub)|Willem II]] - [[FC Groningen]]
+|[[Willem II Stadion]]
+|1-2
+|-
+|[[8 maart]]
+|[[sc Heerenveen]] - [[NAC Breda]]
+|[[Abe Lenstra Stadion]]
+|3-0
+|-
+|[[8 maart]]
+|[[N.E.C.]] - [[BV De Graafschap|De Graafschap]]
+|[[McDOS Goffertstadion]]
+|3-1
+|-
+|[[8 maart]]
+|[[SBV Excelsior|Excelsior]] - [[SBV Vitesse|Vitesse]]
+|[[Stadion Woudestein]]
+|1-2
+|-
+|[[9 maart]]
+|[[Sparta Rotterdam]] - [[Roda JC Kerkrade|Roda JC]]
+|[[Sparta-Stadion Het Kasteel]]
+|4-1
+|-
+|colspan="4" | '''Inhaal Eredivisie 2007/08 Ronde 28'''
+|-
+|[[11 maart]]
+|[[VVV-Venlo]] - [[FC Twente]]
+|[[Seacon Stadion - De Koel -]]
+|0-2
+|-
+|[[12 maart]]
+|[[AZ (voetbalclub)|AZ]] - [[Feyenoord]]
+|[[DSB Stadion]]
+|0-1
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 29'''
+|-
+|[[14 maart]]
+|[[FC Groningen]] - [[sc Heerenveen]]
+|[[Euroborg]]
+|0-1
+|-
+|[[15 maart]]
+|[[NAC Breda]] - [[SBV Excelsior|Excelsior]]
+|[[Rat Verlegh Stadion]]
+|2-0
+|-
+|[[15 maart]]
+|[[BV De Graafschap|De Graafschap]] - [[Heracles Almelo]]
+|[[De Vijverberg]]
+|0-0
+|-
+|[[15 maart]]
+|[[FC Twente]] - [[SBV Vitesse|Vitesse]]
+|[[Arke Stadion]]
+|4-3
+|-
+|[[15 maart]]
+|[[Feyenoord]] - [[VVV-Venlo]]
+|[[Stadion Feijenoord]]
+|4-1
+|-
+|[[16 maart]]
+|[[AFC Ajax|Ajax]] - [[Willem II (voetbalclub)|Willem II]]
+|[[Amsterdam ArenA]]
+|4-1
+|-
+|[[16 maart]]
+|[[FC Utrecht]] - [[AZ (voetbalclub)|AZ]]
+|[[Stadion Galgenwaard]]
+|2-2
+|-
+|[[16 maart]]
+|[[N.E.C.]] - [[Sparta Rotterdam]]
+|[[McDOS Goffertstadion]]
+|4-2
+|-
+|[[16 maart]]
+|[[Roda JC Kerkrade|Roda JC]] - [[PSV (voetbalclub)|PSV]]
+|[[Parkstad Limburg Stadion]]
+|1-1
+|-
+|colspan="4" | '''Inhaal Eredivisie 2007/08 Ronde 28'''
+|-
+|[[19 maart]]
+|[[PSV (voetbalclub)|PSV]] - [[AFC Ajax|Ajax]]
+|[[Philips Stadion]]
+|0-0
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 30'''
+|-
+|[[21 maart]]
+|[[SBV Vitesse|Vitesse]] - [[NAC Breda]]
+|[[GelreDome]]
+|3-3
+|-
+|[[22 maart]]
+|[[sc Heerenveen]] - [[Roda JC Kerkrade|Roda JC]]
+|[[Abe Lenstra Stadion]]
+|4-3
+|-
+|[[22 maart]]
+|[[PSV (voetbalclub)|PSV]] - [[FC Groningen]]
+|[[Philips Stadion]]
+|3-0
+|-
+|[[22 maart]]
+|[[SBV Excelsior|Excelsior]] - [[FC Utrecht]]
+|[[Stadion Woudestein]]
+|0-2
+|-
+|[[22 maart]]
+|[[AZ (voetbalclub)|AZ]] - [[BV De Graafschap|De Graafschap]]
+|[[DSB Stadion]]
+|0-0
+|-
+|[[23 maart]]
+|[[Willem II (voetbalclub)|Willem II]] - [[Heracles Almelo]]
+|[[Willem II Stadion]]
+|2-1
+|-
+|[[23 maart]]
+|[[VVV-Venlo]] - [[N.E.C.]]
+|[[Seacon Stadion - De Koel -]]
+|1-2
+|-
+|[[23 maart]]
+|[[Sparta Rotterdam]] - [[Feyenoord]]
+|[[Sparta-Stadion Het Kasteel]]
+|3-2
+|-
+|[[23 maart]]
+|[[FC Twente]] - [[AFC Ajax|Ajax]]
+|[[Arke Stadion]]
+|2-1
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 31'''
+|-
+|[[28 maart]]
+|[[BV De Graafschap|De Graafschap]] - [[FC Groningen]]
+|[[De Vijverberg]]
+|1-1
+|-
+|[[29 maart]]
+|[[N.E.C.]] - [[PSV (voetbalclub)|PSV]]
+|[[De Goffert]]
+|0-0
+|-
+|[[29 maart]]
+|[[sc Heerenveen]] - [[AFC Ajax|Ajax]]
+|[[Abe Lenstra Stadion]]
+|2-4
+|-
+|[[29 maart]]
+|[[Heracles Almelo]] - [[Roda JC Kerkrade|Roda JC]]
+|[[Polman Stadion]]
+|0-0
+|-
+|[[29 maart]]
+|[[SBV Excelsior|Excelsior]] - [[VVV-Venlo]]
+|[[Stadion Woudestein]]
+|2-1
+|-
+|[[30 maart]]
+|[[NAC Breda]] - [[Feyenoord]]
+|[[Rat Verlegh Stadion]]
+|3-1
+|-
+|[[30 maart]]
+|[[AZ (voetbalclub)|AZ]] - [[SBV Vitesse|Vitesse]]
+|[[DSB Stadion]]
+|2-1
+|-
+|[[30 maart]]
+|[[FC Utrecht]] - [[FC Twente]]
+|[[Stadion Galgenwaard]]
+|0-1
+|-
+|[[30 maart]]
+|[[Sparta Rotterdam]] - [[Willem II Tilburg|Willem II]]
+|[[Sparta-Stadion Het Kasteel]]
+|2-2
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 32'''
+|-
+|[[4 april]]
+|[[Roda JC Kerkrade|Roda JC]] - [[N.E.C.]]
+|[[Parkstad Limburg Stadion]]
+|0-2
+|-
+|[[5 april]]
+|[[Willem II (voetbalclub)|Willem II]] - [[sc Heerenveen]]
+|[[Willem II Stadion]]
+|2-3
+|-
+|[[5 april]]
+|[[FC Twente]] - [[SBV Excelsior|Excelsior]]
+|[[Arke Stadion]]
+|1-0
+|-
+|[[5 april]]
+|[[SBV Vitesse|Vitesse]] - [[Sparta Rotterdam]]
+|[[GelreDome]]
+|3-0
+|-
+|[[6 april]]
+|[[VVV-Venlo]] - [[AZ (voetbalclub)|AZ]]
+|[[Seacon Stadion - De Koel -]]
+|2-3
+|-
+|[[6 april]]
+|[[AFC Ajax|Ajax]] - [[BV De Graafschap|De Graafschap]]
+|[[Amsterdam ArenA]]
+|4-1
+|-
+|[[6 april]]
+|[[Feyenoord]] - [[FC Utrecht]]
+|[[Stadion Feijenoord]]
+|3-1
+|-
+|[[6 april]]
+|[[FC Groningen]] - [[NAC Breda]]
+|[[Euroborg]]
+|1-2
+|-
+|[[6 april]]
+|[[PSV (voetbalclub)|PSV]] - [[Heracles Almelo]]
+|[[Philips Stadion]]
+|2-0
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 33'''
+|-
+|[[13 april]]
+|[[PSV (voetbalclub)|PSV]] - [[FC Twente]]
+|[[Philips Stadion]]
+|1-1
+|-
+|[[13 april]]
+|[[Roda JC Kerkrade|Roda JC]] - [[VVV-Venlo]]
+|[[Parkstad Limburg Stadion]]
+|4-1
+|-
+|[[13 april]]
+|[[Willem II (voetbalclub)|Willem II]] - [[Feyenoord]]
+|[[Willem II Stadion]]
+|3-1
+|-
+|[[13 april]]
+|[[Sparta Rotterdam]] - [[sc Heerenveen]]
+|[[Sparta-Stadion Het Kasteel]]
+|4-2
+|-
+|[[13 april]]
+|[[Heracles Almelo]] - [[NAC Breda]]
+|[[Polman Stadion]]
+|0-1
+|-
+|[[13 april]]
+|[[BV De Graafschap|De Graafschap]] - [[FC Utrecht]]
+|[[De Vijverberg]]
+|1-1
+|-
+|[[13 april]]
+|[[SBV Excelsior|Excelsior]] - [[AZ (voetbalclub)|AZ]]
+|[[Stadion Woudestein]]
+|1-1
+|-
+|[[13 april]]
+|[[N.E.C.]] - [[SBV Vitesse|Vitesse]]
+|[[De Goffert]]
+|1-0
+|-
+|colspan="4" | '''Inhaal Eredivisie 2007/08 Ronde 33'''
+|-
+|[[16 april]]
+|[[FC Groningen]] - [[AFC Ajax|Ajax]]
+|[[Euroborg]]
+|1-2
+|-
+|colspan="4" | '''Eredivisie 2007/08 Ronde 34'''
+|-
+|[[20 april]]
+|[[AFC Ajax|Ajax]] - [[Heracles Almelo]]
+|[[Amsterdam ArenA]]
+|5-1
+|-
+|[[20 april]]
+|[[AZ (voetbalclub)|AZ]] - [[Sparta Rotterdam]]
+|[[DSB Stadion]]
+|1-0
+|-
+|[[20 april]]
+|[[FC Twente]] - [[Willem II (voetbalclub)|Willem II]]
+|[[Arke Stadion]]
+|2-0
+|-
+|[[20 april]]
+|[[FC Utrecht]] - [[FC Groningen]]
+|[[Stadion Galgenwaard]]
+|1-0
+|-
+|[[20 april]]
+|[[Feyenoord]] - [[Roda JC Kerkrade|Roda JC]]
+|[[Stadion Feijenoord]]
+|3-0
+|-
+|[[20 april]]
+|[[NAC Breda]] - [[N.E.C.]]
+|[[Rat Verlegh Stadion]]
+|1-3
+|-
+|[[20 april]]
+|[[sc Heerenveen]] - [[SBV Excelsior|Excelsior]]
+|[[Abe Lenstra Stadion]]
+|5-0
+|-
+|[[20 april]]
+|[[SBV Vitesse|Vitesse]] - [[PSV (voetbalclub)|PSV]]
+|[[GelreDome]]
+|0-1
+|-
+|[[20 april]]
+|[[VVV-Venlo]] - [[BV De Graafschap|De Graafschap]]
+|[[Seacon Stadion - De Koel -]]
+|3-0
+|}
+
+== Individuele prijzen ==
