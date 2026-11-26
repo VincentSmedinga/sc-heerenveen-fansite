@@ -4796,6 +4796,7 @@
   - **Breedte:** `BarList` geeft de naam 4,5em en het getal 2em, en laat de balk de rest; een naam breekt af waar nodig, dus er scrolt niets zijwaarts op 320 pixels.
 - **Waarom:** de grafieken horen bij de andere cijfers, en de hoofdkolom blijft voor de tabel en de loopbaan.
 - **Alternatieven:** de grafieken in de hoofdkolom houden, op het witte vlak (de eerste keuze, #1085); een eigen token voor het spoor op een zacht vlak (de tint van het spoor van de schakelaar past al); de grafieken onderaan de zijkolom (de uitslagen staan dan ver van de cijfers per competitie).
+- **Later:** met weinig ruimte, zoals met tekst op 200% op een telefoon, staat de balk van `BarList` onder de naam en het getal (_Bij weinig ruimte staat de balk van `BarList` onder de naam en het getal_ in `designsysteem.md`, 26 november 2026).
 
 ## Het adres van een speler schrijft letters zonder los accent uit
 

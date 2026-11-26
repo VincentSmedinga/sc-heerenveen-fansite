@@ -20,6 +20,7 @@ const meta = preview.meta({
           'Staat er een eenheid achter het getal, zoals een procent, geef die dan mee met `unit`; de balken blijven even lang als de getallen.',
           'De balken zijn dik, groen en staan op een spoor: groen is hier een aantal, dezelfde kleur als in een tabel en een staafdiagram.',
           'Moet één regel opvallen, markeer die dan met `highlight`, en zeg ook in de naam waarom.',
+          'Heeft de lijst weinig ruimte, zoals met grote tekst op een telefoon, dan staat de balk onder de naam en het getal.',
           'Hij is gebouwd uit `Bar`.',
         ].join('\n'),
       },
@@ -119,6 +120,29 @@ export const MarkedRow = meta.story({
       <Card aria-labelledby="balken-gemarkeerd">
         <Heading id="balken-gemarkeerd" level={2}>
           Meest voorspelde eindstanden
+        </Heading>
+        <BarList {...args} />
+      </Card>
+    </div>
+  ),
+})
+
+export const LittleRoom = meta.story({
+  args: {
+    rows: [
+      { highlight: true, label: <Link href="#">Verenigd Koninkrijk</Link>, value: 1170 },
+      { label: 'Nederland', value: 640 },
+      { label: 'Denemarken', value: 90 },
+    ],
+    unit: ' min',
+    wide: true,
+  },
+  name: 'Met weinig ruimte',
+  render: (args) => (
+    <div style={{ maxInlineSize: '13rem' }}>
+      <Card aria-labelledby="balken-smal">
+        <Heading id="balken-smal" level={2}>
+          Minuten per land
         </Heading>
         <BarList {...args} />
       </Card>
