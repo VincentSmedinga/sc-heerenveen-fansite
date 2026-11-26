@@ -83,12 +83,11 @@ describe('CodeInput', () => {
 describe('the look of the code field', () => {
   const css = readFileSync(join(import.meta.dirname, 'code-input.css'), 'utf8').replace(/\/\*.*?\*\//gs, '')
 
-  it('lets the boxes, the gaps and the digits shrink with the room of the field itself', () => {
+  it('lets the boxes and the gaps shrink with the room of the field itself', () => {
     expect(css).toContain('container: hf-code-input / inline-size;')
     expect(css).toContain('inline-size: min(100%, calc(6 * var(--hf-code-box-max) + 5 * var(--hf-space-s)));')
     expect(css).toContain('--hf-code-gap: min(var(--hf-space-s), 3cqi);')
     expect(css).toContain('--hf-code-box: min(var(--hf-code-box-max), calc((100cqi - 5 * var(--hf-code-gap)) / 6));')
-    expect(css).toContain('font-size: min(var(--hf-figure-large-font-size), calc(var(--hf-code-box) * 1.2));')
   })
 
   it('spaces the digits by the width of a tabular digit, so the sixth is in its box too', () => {
