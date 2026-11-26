@@ -1014,3 +1014,13 @@
 - **Nadeel:** het verslag kan er zijn voordat CI klaar is.
   De verplichte controle op `main` houdt een rode pull request dan nog tegen.
 - **Alternatieven:** alleen de gerichte tests draaien, of alles zo laten; beide kosten tijd voor een uitkomst die CI al geeft.
+
+## Het screenshotscript wacht tot Storybook klaar is met een story
+
+- **Datum:** 26 november 2026
+- **Besluit:** bij een story wacht `pnpm screenshots` op de fase `finished` van de weergave in Storybook.
+  Bij een fout, een onbekende story of na 30 seconden stopt het script zonder foto van die story.
+- **Waarom:** zo staat ook het resultaat van de play-functie op de foto, en een mislukte foto valt meteen op.
+- **Alternatieven:** wachten tot `#storybook-root` inhoud heeft, maar een dialoog staat daarbuiten en inhoud kan er staan voordat de play-functie klaar is.
+  Luisteren naar de gebeurtenis `storyRendered`, maar dan moet het script luisteren voordat Storybook bestaat, en de gebeurtenis komt ook voor het laatste deel van de weergave.
+  Een vaste wachttijd, maar die is soms te kort en altijd traag.

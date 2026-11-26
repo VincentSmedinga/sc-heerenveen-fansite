@@ -3,7 +3,18 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { addressOf, fileNameOf, parseArguments, planFiles, ScreenshotsError, slugOf, viewports } from './screenshots.js'
+import {
+  addressOf,
+  fileNameOf,
+  isStory,
+  parseArguments,
+  planFiles,
+  ScreenshotsError,
+  slugOf,
+  storyStep,
+  storyTimeout,
+  viewports,
+} from './screenshots.js'
 
 test('takes the address of a local build and the targets', () => {
   assert.deepEqual(parseArguments(['http://localhost:3000/', '/', '/podcasts']), {
@@ -117,4 +128,57 @@ test('plans a file per target and width, in order', () => {
 
 test('refuses two targets that would be written to one file', () => {
   assert.throws(() => planFiles(['/podcasts', '/podcasts/'], false), /another target/)
+})
+
+const story = 'components-footer--default'
+const shows = (state) => ({ errorMessage: undefined, id: story, noPreview: false, phase: 'finished', ...state })
+
+test('tells a story from a path on the site', () => {
+  assert.equal(isStory(story), true)
+  assert.equal(isStory('/podcasts'), false)
+})
+
+test('photographs a story that Storybook has finished', () => {
+  assert.deepEqual(storyStep(shows(), story, 100), { action: 'photograph' })
+  assert.deepEqual(storyStep(shows(), story, storyTimeout), { action: 'photograph' })
+})
+
+test('waits while Storybook is not there yet or the story is still busy', () => {
+  assert.deepEqual(storyStep(shows({ id: undefined, phase: undefined }), story, 0), { action: 'wait' })
+
+  for (const phase of ['preparing', 'loading', 'rendering', 'playing', 'played', 'completed', 'errored', 'aborted']) {
+    assert.deepEqual(storyStep(shows({ phase }), story, 100), { action: 'wait' }, phase)
+  }
+})
+
+test('stops when Storybook shows an error, even when it calls the story finished', () => {
+  const step = storyStep(shows({ errorMessage: 'The button is gone' }), story, 100)
+
+  assert.equal(step.action, 'stop')
+  assert.match(step.reason, /The button is gone/)
+  assert.equal(storyStep(shows({ errorMessage: '' }), story, 100).action, 'stop')
+})
+
+test('stops when the story does not exist', () => {
+  const step = storyStep(shows({ id: undefined, noPreview: true, phase: undefined }), story, 100)
+
+  assert.equal(step.action, 'stop')
+  assert.match(step.reason, /does not exist/)
+})
+
+test('stops when Storybook opens another story than the one asked for', () => {
+  const step = storyStep(shows(), 'components-footer', 100)
+
+  assert.equal(step.action, 'stop')
+  assert.match(step.reason, /does not exist.*components-footer--default/)
+})
+
+test('stops when the story is not ready after 30 seconds', () => {
+  assert.equal(storyTimeout, 30_000)
+  assert.equal(storyStep(shows({ phase: 'playing' }), story, storyTimeout - 1).action, 'wait')
+
+  const step = storyStep(shows({ phase: 'playing' }), story, storyTimeout)
+
+  assert.equal(step.action, 'stop')
+  assert.match(step.reason, /not ready after 30 seconds \(phase: playing\)/)
 })
