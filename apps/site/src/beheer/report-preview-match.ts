@@ -13,7 +13,7 @@ const numberFormat = new Intl.NumberFormat('nl-NL')
  * it: the facts under the result, whether there was extra time, the score after 90 minutes and
  * the result of the shoot-out. They come from the match, not from the form.
  */
-export function previewMatchOf(match: Match, now: Date): ReportPreviewMatch {
+export function previewMatchOf(match: Match, now: Date, opponentColour: null | string): ReportPreviewMatch {
   const phase = phaseOf(match, now)
   // A match that is being played shows its kick-off, as the page of the match does.
   const day = matchMoment(phase === undefined ? { ...match, status: 'played' } : match, now, { withYear: true })
@@ -47,6 +47,7 @@ export function previewMatchOf(match: Match, now: Date): ReportPreviewMatch {
     facts,
     home: match.home,
     opponent: match.opponent,
+    opponentColour,
     ...(phase === undefined ? {} : { phase }),
     penalties:
       match.penaltiesFor !== null && match.penaltiesAgainst !== null

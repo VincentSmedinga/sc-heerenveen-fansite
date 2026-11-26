@@ -325,6 +325,7 @@ De kop is `MatchHeader` met fase `upcoming` en de pil "Voorbeschouwing", daarond
 De pagina heeft `noindex` en staat niet in de sitemap, en in Programma en in de kaart Wedstrijden op de homepage is de regel met de twee clubs de link ernaar (`getPreviewAddresses`).
 Een wedstrijd met een verslag toont altijd het verslag, ook de geplande wedstrijd met een verslag.
 `src/report-view.ts` zet een verslag om in gewone gegevens (`matchPageDataOf`, het type `MatchPageData` van `src/match-page.ts`), en `buildMatchPage` maakt daar de eigenschappen van de onderdelen van: de gebeurtenissen voor `MatchTimeline`, het veld met de spelers en hun minuten voor `MatchPitch`, de wissels, de doelpuntenmakers van de kop, de balk Wedstrijdverloop en de rondes van de strafschoppenserie.
+De kleur van de tegenstander (`opponentColour`, uit `clubColourOf` in `@fansite/db/club-colours`: de keuze van de redactie, anders de lijst) vult zijn rondjes op het veld, bij zijn naam en bij de wisselspelers (#1677).
 `MatchPageView` (`src/MatchPageView.tsx`) zet die onderdelen op de pagina, uit die gegevens en uit niets anders.
 Het voorbeeld naast het formulier van het verslag (`ReportPreview`, `src/beheer/report-preview.ts`) maakt die gegevens uit de waarden van het formulier en gebruikt datzelfde onderdeel, met `preview` aan.
 In de lijst is de regel met de twee clubs en de uitslag de link naar die pagina (`Match` met `reportHref`); er is geen aparte regel meer met "Het verslag", "Voorbeschouwing" of "Live".
@@ -1055,7 +1056,7 @@ Een sessie die verloopt haalt hem niet weg: daar is hij voor.
 - `/beheer/spelers` is alleen voor de eigenaar en de redacteuren: een speler toevoegen aan de selectie van een seizoen, of er een aanpassen (zie _De spelers van een seizoen_).
 - `/beheer/personen/<nummer>` is alleen voor de eigenaar en de redacteuren: wat voor een persoon in elk seizoen geldt, zoals de naam en de geboortedatum (zie _De spelers van een seizoen_).
 - `/beheer/stadions` is alleen voor de eigenaar en de redacteuren: de stadions beheren, hun namen, plaats en adres, en de thuisvelden van een club (zie _De stadions_ en _De stadions van een club_).
-- `/beheer/clubs` is alleen voor de eigenaar en de redacteuren: bijhouden welke namen een club droeg en sinds wanneer, met een toelichting, en het land van een club (zie _De namen van een club_).
+- `/beheer/clubs` is alleen voor de eigenaar en de redacteuren: bijhouden welke namen een club droeg en sinds wanneer, met een toelichting, en het land en de kleur van een club (zie _De namen van een club_).
 - `/beheer/wedstrijden/kwaliteit` is alleen voor de eigenaar en de redacteuren: wat er van elk seizoen ontbreekt, in een tabel met een kolom per deel van een wedstrijd (zie _De kwaliteit van de gegevens_).
 - `/beheer/spelers/kwaliteit/personen` is alleen voor de eigenaar en de redacteuren: wat we van personen missen, per letter, met de snelle lijst, de namen, de vaste plaatsen en de verschillen in spelerscijfers en spelersgegevens eronder (zie _De kwaliteit van de gegevens_).
 - `/beheer/stadions/kwaliteit` is alleen voor de eigenaar en de redacteuren: wat de stadions en de clubs nog missen, met de wedstrijden zonder stadion in de tabel bij Wedstrijden (zie _De kwaliteit van de gegevens_).
@@ -1318,6 +1319,9 @@ De lijst is alleen voor de weergave: de import bepaalt de naam in de kop en het 
   Is de laatste naam van de lijst een andere (`headingNotice`), dan zegt een melding dat in gewone tekst; opslaan kan wel.
 - De werkbalk heeft "Eigen lijst opslaan" en "Annuleren", en het formulier heeft ze aan het einde.
   De tweede kolom heeft de schrijfwijzen die we van Wikipedia kennen (alleen lezen, uit `club_names`) en het uitklapblok "Lijst weghalen", dat eerst een bevestiging vraagt.
+- De tweede kolom heeft ook "Kleur van de club" (`ClubColourForm.tsx`, #1677): de kleur uit de lijst, een eigen kleur (`#` en zes hexadecimale tekens) of geen kleur, met de kleur die nu geldt.
+  `chooseClubColour` (`src/beheer/club-colour.ts`) bewaart de keuze in `clubs.colour_choice` en schrijft `club.edit` in het logboek.
+  Een ongeldige kleur wordt niet bewaard: het veld toont de fout en krijgt de focus.
 - Elke naam van de lijst komt bij het opslaan ook in `club_names`, zodat de import de oude naam als dezelfde club vindt en er geen tweede club ontstaat.
   Hoort een naam bij een andere club (op naam, zonder verschil in hoofdletters, accenten en leestekens), dan staat er een fout bij het veld en wordt niets opgeslagen.
   Een naam uit de lijst halen of de lijst weghalen laat `club_names` zoals het is.

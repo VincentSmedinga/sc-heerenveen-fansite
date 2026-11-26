@@ -1421,3 +1421,17 @@
 - **Waarom:** zonder dit geheugen zoekt elke run dezelfde namen, en komen de andere nooit aan de beurt.
   Per club en seizoen onthouden laat een nieuwe regel van een bekende naam meteen zoeken.
 - **Alternatieven:** alleen per naam onthouden (een nieuw seizoen wacht dan tot 180 dagen); een kolom op `match_appearances` (een verslag opnieuw opslaan maakt de regels opnieuw).
+
+## De clubkleur komt uit een eigen lijst, niet uit Wikipedia of Wikidata
+
+- **Datum:** 26 november 2026
+- **Besluit:** de kleuren staan in een lijst in de repository (`club-colours.ts` in `packages/db`), die redacteurs per club in het beheer kunnen vervangen (#1677).
+  De lijst gaat op het adres van de club (`clubs.slug`), dat nooit verandert.
+  Migratie 0120 geeft `clubs` de kolom `colour_choice`: leeg voor de lijst, `none` voor geen kleur, of een eigen `#rrggbb`.
+  Bij het samenvoegen houdt de club die blijft haar keuze, en anders krijgt ze die van de club die verdwijnt.
+  De importer haalt geen kleur op en schrijft de kolom niet.
+- **Waarom:** Wikidata had op 26 november 2026 bij 3 van 20 clubs een kleur.
+  De Engelse Wikipedia geeft de kleur van het shirt zonder het patroon: wit bij onder meer Ajax, PSV en Sparta, zwart bij FC Groningen en niets bij Fortuna Sittard.
+  Clubkleuren veranderen zelden.
+  De lijst op `slug` vraagt geen import en geen verzoek naar een ander domein.
+- **Alternatieven:** de importer leest de eerste kleur die niet wit is uit de Engelse Wikipedia, met correcties in het beheer; alleen invullen in het beheer, voor meer dan honderd clubs; de lijst bij het importeren in de database zetten (een nieuwe kleur wacht dan op een import).

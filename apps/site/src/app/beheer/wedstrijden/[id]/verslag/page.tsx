@@ -8,6 +8,7 @@ import { notFound } from 'next/navigation'
 
 import { finishPath, livePath, matchPath, pastePath } from '#src/app/beheer/wedstrijden/paths'
 import { rowAreas, rowStyle } from '#src/beheer/areas'
+import { findClubColour } from '#src/beheer/club-colour'
 import { compact } from '#src/beheer/density'
 import { reportFormId } from '#src/beheer/form-ids'
 import { parseItemId } from '#src/beheer/items'
@@ -111,7 +112,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
         matchId: match.id,
         opponent: match.opponent,
         opponentNames: await readOpponentNames(getDatabase().db, match.clubId),
-        preview: previewMatchOf(match, now),
+        preview: previewMatchOf(match, now, await findClubColour(getDatabase().db, match.clubId)),
         previousLineUp: previousLineUp?.label,
         previousOpponentLineUp: previousOpponentLineUp?.label,
         series: seriesOf(match),

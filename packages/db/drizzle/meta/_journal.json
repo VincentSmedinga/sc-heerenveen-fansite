@@ -841,6 +841,13 @@
       "when": 1795653999180,
       "tag": "0119_add_opponent_name_searches",
       "breakpoints": true
+    },
+    {
+      "idx": 120,
+      "version": "5",
+      "when": 1795654852282,
+      "tag": "0120_add_club_colour_choice",
+      "breakpoints": true
     }
   ]
 }

@@ -23,7 +23,15 @@ export { removeClubNamePeriods, replaceClubNamePeriods }
 
 /** The club an editor opens: it, its own list and the spellings Wikipedia has for it. */
 export type AdminClub = {
-  club: { country: null | string; countrySource: null | string; id: number; name: string; slug: string }
+  club: {
+    /** What the editors chose for the colour: null for the list, `none` or a colour. */
+    colourChoice: null | string
+    country: null | string
+    countrySource: null | string
+    id: number
+    name: string
+    slug: string
+  }
   own: NamePeriodLine[]
   /** The other spellings in the data of Wikipedia (`club_names`), A to Z. Read only. */
   spellings: string[]
@@ -44,12 +52,13 @@ export async function findAdminClub(db: Database, slug: string): Promise<AdminCl
   }
 
   const [facts] = await db
-    .select({ country: clubs.country, countrySource: clubs.countrySource })
+    .select({ colourChoice: clubs.colourChoice, country: clubs.country, countrySource: clubs.countrySource })
     .from(clubs)
     .where(eq(clubs.id, club.id))
 
   return {
     club: {
+      colourChoice: facts?.colourChoice ?? null,
       country: facts?.country ?? null,
       countrySource: facts?.countrySource ?? null,
       id: club.id,

@@ -241,6 +241,26 @@ describe('PitchPlayer', () => {
     expect(container.querySelector('.hf-pitch-player-theirs')).not.toBeNull()
   })
 
+  it('fills the disc of an opponent with a club colour, with a black or white number', () => {
+    const { container } = render(
+      <ol>
+        <PitchPlayer {...visser} colour="#ffd500" ours={false} />
+        <PitchPlayer {...visser} colour="#ffd500" ours />
+        <PitchPlayer {...visser} colour="red; position: fixed" ours={false} />
+      </ol>,
+    )
+    const [club, own, wrong] = [...container.querySelectorAll<HTMLElement>('.hf-pitch-player-disc')]
+
+    expect(club?.classList.contains('hf-pitch-player-disc-club')).toBe(true)
+    expect(club?.style.getPropertyValue('--hf-club-colour')).toBe('#ffd500')
+    expect(club?.style.getPropertyValue('--hf-club-figure')).toBe('#000000')
+
+    for (const open of [own, wrong]) {
+      expect(open?.classList.contains('hf-pitch-player-disc-club')).toBe(false)
+      expect(open?.getAttribute('style')).toBeNull()
+    }
+  })
+
   it('shows the given name when a player has no surname', () => {
     const { container } = render(
       <ol>

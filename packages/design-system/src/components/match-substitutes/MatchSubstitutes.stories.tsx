@@ -187,6 +187,16 @@ export const BothTeams = meta.story({
   ),
 })
 
+export const OpponentLightColour = meta.story({
+  args: { colour: '#ffd500', headingLevel: 3, ours: false, substitutes: theirs, team: 'Testdorp FC' },
+  name: 'Een tegenstander met een lichte clubkleur',
+})
+
+export const OpponentDarkColour = meta.story({
+  args: { colour: '#111111', headingLevel: 3, ours: false, substitutes: theirs, team: 'Testdorp FC' },
+  name: 'Een tegenstander met een donkere clubkleur',
+})
+
 export const GoalWithoutMinute = meta.story({
   args: {
     headingLevel: 3,

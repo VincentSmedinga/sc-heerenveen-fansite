@@ -93,6 +93,11 @@ describe('matchPageDataOf', () => {
     })
   })
 
+  it('takes the colour of the opponent', () => {
+    expect(matchPageDataOf({ ...reportedMatch(), opponentColour: '#e30613' }, [], true).opponentColour).toBe('#e30613')
+    expect(data.opponentColour).toBeNull()
+  })
+
   it('says that the formation was derived only for a report of the old fansite that the editors did not save', () => {
     const derived = (report: Partial<ReturnType<typeof reportedMatch>['stored']['report']>) => {
       const reported = reportedMatch()

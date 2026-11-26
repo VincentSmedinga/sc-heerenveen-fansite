@@ -324,6 +324,26 @@ describe('mergeChosenClubs', () => {
     expect(await database.db.select().from(clubNamePeriods)).toHaveLength(0)
   })
 
+  it('keeps the choice of a colour of the club that stays, and takes the other one without it', async () => {
+    const own = await addClub({ colourChoice: '#00853e', name: 'A', slug: 'a' })
+    const gone = await addClub({ colourChoice: '#e30613', name: 'B', slug: 'b' })
+    const bare = await addClub({ name: 'C', slug: 'c' })
+    const chosen = await addClub({ colourChoice: 'none', name: 'D', slug: 'd' })
+
+    await mergeChosenClubs(database.db, { describe: describe_, keptId: own, otherId: gone, userId: null })
+    await mergeChosenClubs(database.db, { describe: describe_, keptId: bare, otherId: chosen, userId: null })
+
+    const rows = await database.db.select().from(clubs)
+
+    expect(rows.find((row) => row.id === own)?.colourChoice).toBe('#00853e')
+    expect(rows.find((row) => row.id === bare)?.colourChoice).toBe('none')
+  })
+
+  it('keeps no colour that is not checked', async () => {
+    await expect(addClub({ colourChoice: 'red', name: 'A', slug: 'a' })).rejects.toThrow()
+    await expect(addClub({ colourChoice: '#E30613', name: 'B', slug: 'b' })).rejects.toThrow()
+  })
+
   it('makes the article of the club that goes a title when the club that stays has one', async () => {
     const stays = await addClub({ name: 'A', slug: 'a', wikipediaPage: 'A (club)' })
     const goes = await addClub({ name: 'B', slug: 'b', wikipediaPage: 'B (club)' })

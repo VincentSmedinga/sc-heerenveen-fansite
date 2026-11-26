@@ -46,6 +46,19 @@
     background-color: var(--hf-colour-background-button);
   }
 
+  /* An opponent with a colour: filled with it, as his discs on the pitch are. */
+  .hf-match-pitch-swatch-club {
+    background-color: var(--hf-club-colour);
+    border-color: var(--hf-club-colour);
+  }
+
+  @media (forced-colors: active) {
+    .hf-match-pitch-swatch-club {
+      background-color: transparent;
+      border-color: CanvasText;
+    }
+  }
+
   /*
    * The field. Its own container, so the players can ask how wide it is. The lines are the
    * graphic line colour of the surface, which reaches 3:1 on the grass in light and in dark.

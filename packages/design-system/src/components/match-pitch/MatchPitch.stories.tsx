@@ -90,7 +90,8 @@ const ours = (formation: null | string, players = ourPlayers()): MatchPitchTeam 
   players,
 })
 
-const opponent = (formation: null | string, players = theirPlayers()): MatchPitchTeam => ({
+const opponent = (formation: null | string, players = theirPlayers(), colour?: string): MatchPitchTeam => ({
+  colour,
   formation,
   name: 'Testdorp FC',
   players,
@@ -113,6 +114,24 @@ export const Default = meta.story({
   },
   decorators: [phone],
   name: 'Een gewone wedstrijd',
+})
+
+export const OpponentLightColour = meta.story({
+  args: { headingLevel: 3, opponent: opponent('4-4-2', undefined, '#ffd500'), ours: ours('4-2-3-1') },
+  decorators: [phone],
+  name: 'Een tegenstander met een lichte clubkleur',
+})
+
+export const OpponentDarkColour = meta.story({
+  args: { headingLevel: 3, opponent: opponent('4-4-2', undefined, '#111111'), ours: ours('4-2-3-1') },
+  decorators: [phone],
+  name: 'Een tegenstander met een donkere clubkleur',
+})
+
+export const OpponentBlueColour = meta.story({
+  args: { headingLevel: 3, opponent: opponent('4-4-2', undefined, '#005baa'), ours: ours('4-2-3-1') },
+  decorators: [phone],
+  name: 'Een tegenstander in blauw, bijna als sc Heerenveen',
 })
 
 // The players are named after the place they have in the formation, so a story shows that the

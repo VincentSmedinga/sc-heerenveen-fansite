@@ -22,6 +22,24 @@ const renderPitch = (ours: MatchPitchTeam, opponent: MatchPitchTeam) =>
   render(<MatchPitch headingLevel={3} opponent={opponent} ours={ours} />)
 
 describe('MatchPitch', () => {
+  it('fills the disc by the name and the discs on the pitch of an opponent with a colour', () => {
+    const { container } = renderPitch(team('sc Heerenveen', '4-3-3'), {
+      ...team('Testdorp FC', '4-4-2'),
+      colour: '#e30613',
+    })
+    const [own, other] = [...container.querySelectorAll<HTMLElement>('.hf-match-pitch-swatch')]
+
+    expect(own?.classList.contains('hf-match-pitch-swatch-club')).toBe(false)
+    expect(other?.style.getPropertyValue('--hf-club-colour')).toBe('#e30613')
+    expect(container.querySelectorAll('.hf-match-pitch-field .hf-pitch-player-disc-club')).toHaveLength(11)
+  })
+
+  it('leaves the discs of an opponent without a colour open', () => {
+    const { container } = renderPitch(team('sc Heerenveen', '4-3-3'), team('Testdorp FC', '4-4-2'))
+
+    expect(container.querySelector('.hf-match-pitch-swatch-club, .hf-pitch-player-disc-club')).toBeNull()
+  })
+
   it('makes a list of eleven players for each team, named after the team and the formation', () => {
     const { container } = renderPitch(team('sc Heerenveen', '4-2-3-1'), team('Testdorp FC', '4-4-2'))
     const lists = container.querySelectorAll('.hf-match-pitch-field ol')

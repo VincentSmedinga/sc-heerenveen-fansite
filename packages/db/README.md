@@ -725,6 +725,7 @@ De gegevens komen van Wikipedia en vallen onder CC BY-SA 4.0, zoals de wedstrijd
 | `wikidata_read_at`    | Wanneer de importer het item las, in UTC; een gelezen club krijgt geen verzoek meer                                                                        |
 | `stadiums_read_at`    | Wanneer de importer de thuisvelden (`P115`) van het item las, in UTC; een gelezen club krijgt geen verzoek meer (#1298)                                    |
 | `home_grounds_source` | `manual` als de redactie de thuisvelden van de club zette, dan laat de importer ze staan; `wikidata` als de importer ze schreef; leeg als niemand ze zette |
+| `colour_choice`       | De kleur die de redactie koos (#1677): `#rrggbb` of `none`; leeg, dan geldt de lijst in `src/club-colours.ts`. De importer schrijft hem niet               |
 | `created_at`          | Wanneer de club is toegevoegd, in UTC                                                                                                                      |
 
 De CHECK-constraint `clubs_slug_format` weigert een slug met hoofdletters, een underscore of twee streepjes achter elkaar, in elke tool.
@@ -1053,6 +1054,7 @@ Hebben twee clubs elk een eigen artikel dat geen doorverwijzing is, dan komen ze
 De redactie voegt twee clubs ook samen onder Beheer, op `/beheer/clubs/samenvoegen` (#1345), met `mergeChosenClubs` uit `@fansite/db/club-merge`.
 Dat is één transactie die `matches.club_id`, `club_names`, `club_pages`, `club_name_periods` en `club_home_grounds` naar de club die blijft zet, zonder dubbele sleutels, en de rijen die de club bij zijn naam noemen (`item_clubs`, `standings` en `league_results`) naar de naam van de club die blijft.
 Een seizoen, stadion, artikel of kop dat beide clubs al hadden, blijft één keer staan.
+De keuze van een kleur (`colour_choice`) van de club die blijft gaat voor; heeft die er geen, dan krijgt ze die van de club die verdwijnt.
 Het Wikidata-nummer en het artikel gaan mee als de club die blijft er geen heeft, anders wordt het artikel een titel in `club_pages`.
 Hebben beide clubs een Wikidata-nummer, dan doet de functie niets (`both-wikidata`).
 `club.merge` staat in `audit_log`, en de naam van de club die verdwijnt wordt een andere naam, zodat de import van de oude fansite de club bij die naam vindt.

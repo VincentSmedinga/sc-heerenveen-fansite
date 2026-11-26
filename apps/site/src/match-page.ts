@@ -81,6 +81,8 @@ export type MatchPageData = {
   incidents: readonly MatchPageIncident[]
   kicks: readonly MatchPageKick[]
   opponent: string
+  /** The colour of the opponent's club as `#rrggbb`, for his discs. Open without one. */
+  opponentColour?: null | string
   /** Whether the side of the opponent is complete: otherwise only our team is on the pitch. */
   opponentComplete: boolean
   /** The score of the shoot-out. */
@@ -505,7 +507,12 @@ export function buildMatchPage(data: MatchPageData): BuiltMatchPage {
     ),
     pitch: {
       opponent: data.opponentComplete
-        ? { formation: data.formations.opponent, name: data.opponent, players: theirs.starters }
+        ? {
+            colour: data.opponentColour ?? undefined,
+            formation: data.formations.opponent,
+            name: data.opponent,
+            players: theirs.starters,
+          }
         : undefined,
       ours: { formation: data.formations.ours, name: ourClub, players: ours.starters },
     },

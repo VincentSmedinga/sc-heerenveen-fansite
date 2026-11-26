@@ -18,6 +18,7 @@ import type {
   StatsCompetition,
 } from './schema.ts'
 
+import { clubColourOf } from './club-colours.ts'
 import { withSeasonNames } from './club-name-periods.ts'
 import {
   clubs,
@@ -84,6 +85,8 @@ export type ReportedMatch = {
   clubSlug: string
   match: Match
   names: Map<number, ReportedPlayerName>
+  /** The colour of the opponent as `#rrggbb` (`clubColourOf`), or null for none. */
+  opponentColour: null | string
   /** The persons the opponent's players are linked to (#1544), whose names may be empty. */
   opponentPersons: Map<number, ReportedPersonName>
   stored: StoredMatchReport
@@ -843,7 +846,7 @@ async function reportedMatchesOf(db: ReportDatabase, where: ReturnType<typeof an
 /** The matches that have a report, whichever its status, with the opponent's name and slug. */
 async function reportedMatchRows(db: ReportDatabase, where: ReturnType<typeof and>) {
   const rows = await db
-    .select({ clubSlug: clubs.slug, match: matches })
+    .select({ clubSlug: clubs.slug, colourChoice: clubs.colourChoice, match: matches })
     .from(matches)
     .innerJoin(matchReports, eq(matchReports.matchId, matches.id))
     .innerJoin(clubs, eq(clubs.id, matches.clubId))
@@ -854,5 +857,7 @@ async function reportedMatchRows(db: ReportDatabase, where: ReturnType<typeof an
     rows.map((row) => ({ ...row.match, clubSlug: row.clubSlug })),
   )
 
-  return named.map(({ clubSlug, ...match }) => ({ clubSlug, match }))
+  const colours = new Map(rows.map((row) => [row.match.id, clubColourOf(row.clubSlug, row.colourChoice)]))
+
+  return named.map(({ clubSlug, ...match }) => ({ clubSlug, match, opponentColour: colours.get(match.id) ?? null }))
 }

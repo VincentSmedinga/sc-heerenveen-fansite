@@ -204,6 +204,16 @@ describe('MatchSubstitutes', () => {
     expect(other.container.querySelector('.hf-pitch-player-disc-theirs')).not.toBeNull()
   })
 
+  it('fills the disc of an opponent with the colour of his club', () => {
+    const { container } = render(
+      <MatchSubstitutes colour="#e30613" headingLevel={3} ours={false} substitutes={[kuipers]} team="Testdorp FC" />,
+    )
+    const disc = container.querySelector<HTMLElement>('.hf-pitch-player-disc')
+
+    expect(disc?.classList.contains('hf-pitch-player-disc-club')).toBe(true)
+    expect(disc?.style.getPropertyValue('--hf-club-figure')).toBe('#ffffff')
+  })
+
   it('puts the two teams in a group', () => {
     const { container } = render(
       <MatchSubstitutes.Group>
