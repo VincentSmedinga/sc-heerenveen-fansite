@@ -8292,6 +8292,7 @@
 - **Waarom:** de uitblinker hoort bij de spelers van het seizoen, niet alleen bij de dagen waarop je cijfers kunt geven.
 - **Alternatieven:** "In het kort" onder de selectie; voor het lopende seizoen de koploper van het seizoen.
 - **Later:** sinds 26 november 2026 staat tussen de Uitblinker en de vier kleine kaarten de kaart "Veranderingen in de selectie" (zie _Veranderingen in de selectie staan in de zijkolom van Spelers_, #788).
+  Sinds 26 november 2026 staat "In het kort" zacht bovenaan de zijkolom, boven de Uitblinker, en staan de veranderingen als "Mutaties" onder de selectie (zie _"In het kort" staat bovenaan de zijkolom van Spelers_ en _De mutaties staan onder de selectie, als "Erin" en "Eruit"_, #1700).
 
 ## De ranglijst van de fans op Spelers › Cijfers toont de top 5
 
@@ -8527,6 +8528,8 @@
   Wie alleen uit de verslagen komt, staat niet op elke kaart Selectie, en telt daarom wel als aanwezig.
 - **Alternatieven:** alleen twee complete seizoenen.
   Elk seizoen met een waarschuwing (bij een onvolledige selectie is de lijst dan vooral onjuist).
+- **Later:** sinds 26 november 2026 heet de kaart "Mutaties" (zie _De mutaties staan onder de selectie, als "Erin" en "Eruit"_, #1700).
+  Wanneer de kaart verschijnt en wie in welke lijst staat, blijft zoals het is.
 
 ## De kaart zegt "niet meer in de selectie", zonder datum of reden
 
@@ -8536,6 +8539,8 @@
   `left_squad_at` is het moment waarop de import een speler niet meer zag, niet het moment van vertrek.
 - **Alternatieven:** het woord "vertrokken".
   Een derde lijst met wie in het lopende seizoen uit de selectie ging, met die datum.
+- **Later:** sinds 26 november 2026 heet die lijst "Eruit" (zie _De mutaties staan onder de selectie, als "Erin" en "Eruit"_, #1700).
+  Een datum, bestemming of reden toont de kaart nog steeds niet.
 
 ## Veranderingen in de selectie staan in de zijkolom van Spelers
 
@@ -8547,6 +8552,8 @@
   De vergelijking leunt op de pagina's van het vorige seizoen, en een bron noemen we altijd.
 - **Alternatieven:** op Spelers › Cijfers.
   In de brede kolom onder "In het kort" (dan komt de selectie lager).
+- **Later:** sinds 26 november 2026 heet de kaart "Mutaties" en staat ze wit in de hoofdkolom onder de selectie (zie _De mutaties staan onder de selectie, als "Erin" en "Eruit"_, #1700).
+  De bronvermelding blijft zoals ze is.
 
 ## De aantallen per positie staan in "In het kort"
 
@@ -8557,3 +8564,44 @@
 - **Alternatieven:** een getal achter elke kop in de kaart Selectie.
   Een eigen kaart.
   Niet tellen.
+- **Later:** sinds 26 november 2026 telt de kaart de spelers niet meer per positie (zie _"In het kort" telt de spelers niet per positie_, #1700).
+
+## "In het kort" staat bovenaan de zijkolom van Spelers
+
+- **Datum:** 26 november 2026
+- **Besluit:** "In het kort" staat zacht bovenaan de zijkolom, boven de Uitblinker (#1700).
+- **Waarom:** de selectie komt zo meteen onder de seizoenskiezer, en de cijfers in het kort vullen de lijst aan.
+- **Alternatieven:** onder de Uitblinker.
+  Boven de selectie in de brede kolom, zoals sinds #1647.
+
+## "In het kort" telt de spelers niet per positie
+
+- **Datum:** 26 november 2026
+- **Besluit:** de aantallen per positie verdwijnen van de kaart (#1700).
+- **Waarom:** de kaart wordt er lang van, en de kaart "Selectie" groepeert de spelers al per positie.
+- **Alternatieven:** de aantallen houden.
+  Ze achter de koppen in de kaart "Selectie" zetten.
+
+## De mutaties staan onder de selectie, als "Erin" en "Eruit"
+
+- **Datum:** 26 november 2026
+- **Besluit:** de kaart heet "Mutaties" en staat wit onder de selectie, met "Erin" en "Eruit" en hun aantallen (#1700).
+  De zin "Vergeleken met …" vervalt.
+  De delen staan naast elkaar als de kaart breed genoeg is, en op een telefoon onder elkaar (`CardColumns`).
+- **Waarom:** de brede kolom heeft ruimte voor twee lijsten naast elkaar.
+  Op een smal scherm passen namen dan niet op een regel.
+  `CardColumns` meet de plaats waar de delen staan en houdt de volgorde van lezen, dus er is geen nieuw component nodig.
+  Elk deel is een doorzichtige `Card`, die binnen een kaart geen ruimte aan de zijkanten heeft.
+- **Alternatieven:** in de zijkolom, zoals in #788.
+  Ook op een telefoon naast elkaar.
+  De koppen "Nieuw" en "Niet meer in de selectie" houden.
+  Een zachte kaart.
+
+## De mutaties staan op achternaam
+
+- **Datum:** 26 november 2026
+- **Besluit:** "Erin" en "Eruit" sorteren op de achternaam zonder voorvoegsel, en daarna op de voornaam (#1700).
+  De kaart "Selectie" blijft op positie en rugnummer.
+- **Waarom:** zonder kopjes per positie zoek je een naam het snelst op alfabet.
+- **Alternatieven:** de volgorde van de kaart "Selectie".
+  Ook de selectie op achternaam.

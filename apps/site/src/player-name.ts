@@ -1,3 +1,5 @@
+import { foldLetters } from '@fansite/db/slug-letters'
+
 /** A player's name in the two parts `PlayerName` shows: the given name and the surname. */
 export type NameParts = {
   /** The given name; absent for a player with one name. */
@@ -40,6 +42,33 @@ export function personNameParts(name: PersonName): NameParts | undefined {
  */
 export function personSortName(name: PersonName): string {
   return (name.personFamilyName ?? '').trim() || (name.personGivenName ?? '').trim()
+}
+
+const collator = new Intl.Collator('nl')
+
+/** What puts a name in a list by name: the family name without prefix, and the given name. */
+export type NameOrder = { givenName: string; sortName: string }
+
+/** The order of a list by name: family name without prefix, then given name. */
+export function compareByName(a: NameOrder, b: NameOrder): number {
+  return (
+    collator.compare(foldLetters(a.sortName), foldLetters(b.sortName)) ||
+    collator.compare(foldLetters(a.givenName), foldLetters(b.givenName))
+  )
+}
+
+/**
+ * What puts a player in a list by name: the name the importer kept of the person, or without
+ * one the name as text. A person without a family name is put in order by the given name.
+ */
+export function nameOrderOf(name: PersonName, text: string): NameOrder {
+  if (personNameParts(name) === undefined) {
+    return { givenName: splitPersonName(text).givenName ?? '', sortName: textSortName(text) }
+  }
+
+  const family = (name.personFamilyName ?? '').trim()
+
+  return { givenName: family === '' ? '' : (name.personGivenName ?? '').trim(), sortName: personSortName(name) }
 }
 
 /** The words that start a surname after the first word, as in `Jan Willem van Hanegem`. */

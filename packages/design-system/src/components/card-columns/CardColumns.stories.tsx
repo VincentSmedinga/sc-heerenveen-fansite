@@ -3,6 +3,7 @@ import preview from '#.storybook/preview'
 import { ControlsDocsPage } from '../../docs/ControlsDocsPage'
 import { Card } from '../card/Card'
 import { Heading } from '../heading/Heading'
+import { List } from '../list/List'
 import { Text } from '../text/Text'
 import { CardColumns } from './CardColumns'
 
@@ -16,6 +17,7 @@ const meta = preview.meta({
           'Kaarten in twee kolommen als er plaats voor is, en anders onder elkaar. Met `columns={3}` zijn het er drie op een brede plaats, twee op een middelbrede en één op een smalle.',
           'De volgorde in de code is de leesvolgorde: de eerste kaart links, de tweede rechts, de derde weer links.',
           'Is één kaart veel langer dan de andere, geef die dan als `lead`: ze krijgt de eerste kolom voor zich alleen en de andere staan ernaast.',
+          'Ook de delen van één kaart kunnen zo naast elkaar: geef elk deel als doorzichtige `Card`.',
           'Hij is gebouwd uit `Card`, die hij naast elkaar zet.',
         ].join('\n'),
       },
@@ -83,5 +85,25 @@ export const EersteKaartApart = meta.story({
         </Card>
       ))}
     </CardColumns>
+  ),
+})
+
+export const DelenVanEenKaart = meta.story({
+  name: 'Delen van één kaart',
+  render: (args) => (
+    <Card>
+      <Heading level={2}>Mutaties</Heading>
+      <CardColumns {...args}>
+        {['Erin', 'Eruit'].map((part) => (
+          <Card as="div" key={part} surface="transparent">
+            <Heading level={3}>{part} (2)</Heading>
+            <List>
+              <List.Item>Proefspeler Een</List.Item>
+              <List.Item>Proefspeler Twee</List.Item>
+            </List>
+          </Card>
+        ))}
+      </CardColumns>
+    </Card>
   ),
 })

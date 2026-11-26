@@ -2,7 +2,8 @@ import { listSeasonPlayerPersons } from '@fansite/db/queries'
 
 import { cacheForKey } from './cache'
 import { getDatabase } from './database'
-import { cardPlayers, getSeasonSquad, type SeasonSquad, squadParts, type SquadPlayer } from './season-squad'
+import { compareByName, nameOrderOf } from './player-name'
+import { cardPlayers, getSeasonSquad, linesOf, type SeasonSquad, type SquadPlayer } from './season-squad'
 
 /** One season as the comparison needs it. */
 export type ComparedSeason = { persons: readonly RowPerson[]; season: string; squad: SeasonSquad }
@@ -14,9 +15,9 @@ export type ComparedSeason = { persons: readonly RowPerson[]; season: string; sq
 export type RowPerson = { name: string; personId: null | number; sourceName: string }
 
 /**
- * The card Veranderingen in de selectie: who is new compared with the season before and who is
- * no longer there, each in the order of the card Selectie. `incomplete` has the seasons of the
- * two that are nearly complete, the older one first. `source` is where the squad of the season
+ * The card Mutaties: who is new compared with the season before and who is no longer there,
+ * each by name (`compareByName`). `incomplete` has the seasons of the two that are nearly
+ * complete, the older one first. `source` is where the squad of the season
  * before comes from, for the credit of the page.
  */
 export type SquadChanges = {
@@ -98,9 +99,10 @@ export function squadChanges(current: ComparedSeason, before: ComparedSeason): S
 }
 
 /**
- * The players on the card Selectie of `season` who have no row in `other`, in the order of that
- * card. Two rows are the same player when their person is the same, and, when one of the two
- * has no person, when a name of theirs is: the one we show or that of the source.
+ * The players on the card Selectie of `season` who have no row in `other`, by family name
+ * without prefix and then by given name. Two rows are the same player when their person is
+ * the same, and, when one of the two has no person, when a name of theirs is: the one we show
+ * or that of the source.
  */
 function onlyIn(season: ComparedSeason, other: ComparedSeason) {
   const personOf = new Map(season.persons.map((row) => [row.sourceName, row.personId]))
@@ -118,5 +120,12 @@ function onlyIn(season: ComparedSeason, other: ComparedSeason) {
     return namesakes.every((row) => person !== null && row.personId !== null)
   })
 
-  return squadParts(players).flatMap((part) => part.players)
+  const byName = players
+    .map((player) => ({ order: nameOrderOf(player, player.name), player }))
+    .sort((a, b) => compareByName(a.order, b.order))
+
+  return linesOf(
+    byName.map(({ player }) => player),
+    new Map(),
+  )
 }

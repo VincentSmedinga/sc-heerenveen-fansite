@@ -5,7 +5,7 @@ import { eq, isNotNull } from 'drizzle-orm'
 
 import { cacheFor } from './cache'
 import { getDatabase } from './database'
-import { personNameParts, personSortName, splitPersonName, textSortName } from './player-name'
+import { compareByName, nameOrderOf, personNameParts, splitPersonName } from './player-name'
 import { periodsOf } from './player-page'
 
 /** The address of the overview of all players, by name, and by country. */
@@ -86,29 +86,23 @@ export function overviewOf(rows: readonly Row[]): PlayersOverview {
       personGivenName: first.givenName,
     }
     const parts = personNameParts(name)
+    const text = (first.name ?? '').trim() || newest.rowName
+    const { givenName, sortName } = nameOrderOf(name, text)
     let surname: string
     let rest: string
-    let sortName: string
-    let givenName: string
 
     if (parts !== undefined) {
       const family = (first.familyName ?? '').trim()
 
-      // A person without a family name is shown and put in order by his given name.
+      // A person without a family name is shown by the given name.
       surname = family === '' ? (parts.givenName ?? '') : family
-      givenName = family === '' ? '' : (first.givenName ?? '').trim()
       rest =
         family === '' ? '' : [givenName, (first.familyNamePrefix ?? '').trim()].filter((part) => part !== '').join(' ')
-      sortName = personSortName(name)
     } else {
-      const text = (first.name ?? '').trim() || newest.rowName
       const split = splitPersonName(text)
-
-      sortName = textSortName(text)
-      surname = sortName
-      givenName = split.givenName ?? ''
       const prefix = split.surname.slice(0, split.surname.length - sortName.length).trim()
 
+      surname = sortName
       rest = [givenName, prefix].filter((part) => part !== '').join(' ')
     }
 
@@ -165,12 +159,7 @@ export function letterOf(player: Pick<OverviewPlayer, 'sortName'>): string {
 
 /** The players in the order of the list: family name without prefix, then given name. */
 export function sortPlayers(list: readonly OverviewPlayer[]): OverviewPlayer[] {
-  return [...list].sort(
-    (a, b) =>
-      collator.compare(foldLetters(a.sortName), foldLetters(b.sortName)) ||
-      collator.compare(foldLetters(a.givenName), foldLetters(b.givenName)) ||
-      a.id - b.id,
-  )
+  return [...list].sort((a, b) => compareByName(a, b) || a.id - b.id)
 }
 
 /** The name of a country, or the code when the design system does not know it. */

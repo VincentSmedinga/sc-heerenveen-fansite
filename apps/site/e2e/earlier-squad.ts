@@ -18,7 +18,7 @@ const newThisSeason = 3
 
 /**
  * Gives the season before the current one a made-up squad that is nearly complete, so /spelers
- * shows the card Veranderingen in de selectie with both lists and its warning. It is the squad
+ * shows the card Mutaties with both lists and its warning. It is the squad
  * of this season without a few players, and two who are gone. It adds nothing when that season
  * has players or a level already, or when this season has no players. The function it returns
  * takes out what this run added.

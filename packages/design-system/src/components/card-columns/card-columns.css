@@ -29,6 +29,15 @@
     }
   }
 
+  /*
+   * Inside a card, a transparent card is one part of that card. It has no space of its own at
+   * the sides, so its text lines up with the heading of the card around it.
+   */
+  .hf-card .hf-card-columns-grid > .hf-card-transparent {
+    border-width: 0;
+    padding-inline: 0;
+  }
+
   @container hf-card-columns (width >= 28rem) {
     .hf-card-columns-grid,
     .hf-card-columns-split {

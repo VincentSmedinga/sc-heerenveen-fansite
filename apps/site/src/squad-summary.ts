@@ -4,11 +4,7 @@ import { seasonOf } from '@fansite/db/season'
 import { cacheForKey } from './cache'
 import { getDatabase } from './database'
 import { ageOf } from './player-page'
-import { cardPlayers, type SeasonSquad, showsPlayers, type SquadPart, squadParts } from './season-squad'
-import { saysEnough } from './squad-changes'
-
-/** The number of players of one position, under the name the card Selectie gives the part. */
-export type PositionCount = { count: number; label: string }
+import { cardPlayers, type SeasonSquad, showsPlayers } from './season-squad'
 
 /** A player of the card as the figures need him: the age of today and the country. */
 export type SquadFigure = { age: number | undefined; country: null | string | undefined }
@@ -18,40 +14,17 @@ export type SquadFigure = { age: number | undefined; country: null | string | un
  * from how many countries, and, in the current season, how old they are. `ages` is absent when
  * the card leaves the three lines with an age out, and `countries` when nobody has a country.
  * `basis` is set when the figures rest on fewer players than the card shows: the number of
- * players the smallest basis has, and how many players there are. `positions` has the number
- * of players per position (`positionCounts`), absent when the list doesn't say enough.
+ * players the smallest basis has, and how many players there are.
  */
 export type SquadSummary = {
   ages?: { average: number; oldest: number; youngest: number }
   basis?: { known: number; total: number }
   countries?: number
   players: number
-  positions?: PositionCount[]
 }
-
-/** The parts of the card Selectie that always have a line, from the goal to the front. */
-const positionLabels = ['Doelmannen', 'Verdedigers', 'Middenvelders', 'Aanvallers']
 
 /** The share of the players who need an age before the card shows the lines with an age. */
 const enoughAges = 3 / 4
-
-/**
- * The number of players in each part of the card Selectie (`squadParts`): the four positions,
- * also with nobody in them, and then the players without a position when there are any, so the
- * lines add up to all players. Undefined when nobody has a position.
- */
-export function positionCounts(parts: readonly SquadPart[]): PositionCount[] | undefined {
-  const counts = parts.flatMap(({ label, players }) => (label === null ? [] : [{ count: players.length, label }]))
-
-  if (counts.length === 0) {
-    return undefined
-  }
-
-  return [
-    ...positionLabels.map((label) => counts.find((part) => part.label === label) ?? { count: 0, label }),
-    ...counts.filter((part) => !positionLabels.includes(part.label)),
-  ]
-}
 
 /**
  * The figures of the card from its players. `withAges` is false in a season that is over: an
@@ -118,7 +91,7 @@ export async function getSquadSummary(squad: SeasonSquad, season: string, today:
   const withAges = season === seasonOf(today)
   const births = withAges ? await seasonBirths(season) : new Map()
 
-  const summary = squadSummary(
+  return squadSummary(
     cardPlayers(squad).map((player) => {
       const birth = births.get(player.sourceName)
 
@@ -126,7 +99,4 @@ export async function getSquadSummary(squad: SeasonSquad, season: string, today:
     }),
     withAges,
   )
-  const positions = saysEnough(squad) ? positionCounts(squadParts(cardPlayers(squad))) : undefined
-
-  return summary === undefined || positions === undefined ? summary : { ...summary, positions }
 }
