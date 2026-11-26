@@ -25,7 +25,7 @@ import { type NameParts, personNameParts, personSortName } from './player-name'
 /** A match of any season with its goals, as `getAllTimeMatches` gives it. */
 export type AllTimeMatch = Awaited<ReturnType<typeof listAllMatchGoals>>[number]
 
-/** How many places the card Topscorers shows, and how many with the closed block under it. */
+/** How many places the card Topscorers shows, and how many after its button. */
 export const scorersShown = 10
 export const scorersMore = 25
 
@@ -54,11 +54,10 @@ export function yearsAtClub(seasons: readonly string[] | undefined): string {
 const personOfKey = (key: string) => (key.startsWith('person:') ? Number(key.slice('person:'.length)) : undefined)
 
 /**
- * The scorers of all time: the first ten places, the places 11 to 25 for the block that opens,
- * how many people scored, the goals of the top scorer (the full bar of both tables), and the
- * first season, from which the list counts. The count is the one of the card of a season, so a
- * person who scored in two seasons is one row. A player who shares the last place of a part is
- * in that part, so a place never splits over the two.
+ * The scorers of all time: the first ten places, the places 11 to 25 for the button, how many
+ * people scored, and the first season, from which the list counts. The count is the one of the
+ * card of a season, so a person who scored in two seasons is one row. A player who shares the
+ * last place of a part is in that part, so a place never splits over the two.
  */
 export function allTimeScorersOf(
   matches: readonly AllTimeMatch[],
@@ -80,12 +79,11 @@ export function allTimeScorersOf(
     more: withYears(scorers.filter((scorer) => scorer.position > scorersShown && scorer.position <= scorersMore)),
     since: matches.map((match) => match.season).sort()[0],
     top: withYears(scorers.filter((scorer) => scorer.position <= scorersShown)),
-    topGoals: scorers[0]?.goals ?? 0,
     total: scorers.length,
   }
 }
 
-/** How many seasons the card Clubtopscorer per seizoen shows before its closed block. */
+/** How many seasons the card Clubtopscorer per seizoen shows before its button. */
 export const clubTopScorerSeasonsShown = 5
 
 /** The top scorer or scorers of one season, with the goals they share. */

@@ -1,0 +1,18 @@
+@layer hf.components {
+  /*
+   * The button of ShowAll. Without JavaScript every row is there, so the button, which the
+   * server sends, only shows where script is on.
+   */
+  .hf-show-all .hf-show-all-button {
+    display: none;
+
+    /* The small height of the button, with the text of running text, as in DataTable.More. */
+    font-size: var(--hf-body-font-size);
+  }
+
+  @media (scripting: enabled) {
+    .hf-show-all .hf-show-all-button {
+      display: inline-block;
+    }
+  }
+}

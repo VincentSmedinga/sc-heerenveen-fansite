@@ -582,7 +582,7 @@ De seizoenskiezer heeft "Alle seizoenen" als eerste keuze (`seasonChoicesWithAll
 Wedstrijden · Cijfers gebruikt dezelfde hulp voor zijn eigen `/alle` (#1211).
 De keuze van competitie werkt ook hier, via `?competitie=`.
 De wedstrijden van alle seizoenen komen uit `getAllTimeMatches` (één query: `listAllMatchGoals` in `@fansite/db/queries`, een uur bewaard); de tellingen staan in `src/all-time-players.ts` en de kaarten in `src/AllTimePlayersCards.tsx`.
-De hoofdkolom heeft "Topscorers sinds 1990/91" (anker `#topscorers-sinds-1990-91`): de eerste tien plaatsen als `TopScorersTable` met de kolom Jaren (`showYears`), en in een `Disclosure` "Toon de top 25" de plaatsen 11 tot en met 25, met balken naar de topscorer van de hele lijst (`scaleTo`).
+De hoofdkolom heeft "Topscorers sinds 1990/91" (anker `#topscorers-sinds-1990-91`): de eerste tien plaatsen als `TopScorersTable` met de kolom Jaren (`showYears`), en in een `ShowAll`: de knop "Toon de top 25" zet de plaatsen 11 tot en met 25 in dezelfde tabel, met balken op de schaal van de eerste plaats.
 De jaren bij de club komen uit de seizoenen in de selectie (`getPersonSeasons`, `listPersonSeasons`): `2012/13` en `2013/14` zijn `2012–2014`.
 Onder de kaart staat van hoeveel gespeelde wedstrijden we de doelpuntenmakers niet kennen.
 De zijkolom begint met de zachte kaart Records (`#records`, `PlayerRecordsCard`, met `playerRecordsOf` in `src/all-time-players.ts`): de meeste doelpunten in één seizoen (de eerste plaats van Clubtopscorer per seizoen) en in één wedstrijd, de jongste en de oudste doelpuntenmaker (de leeftijd in jaren en dagen op de dag van de wedstrijd, uit `getPersonBirthDates`; een speler zonder volledige geboortedatum telt niet mee, en de datum zelf staat nooit op de pagina) en het snelste doelpunt (alleen met een minuut van 1 tot en met 90).
@@ -1626,7 +1626,7 @@ Een stap van de import (`closeRatingWindows`) zet de gemiddelden na het sluiten 
 De cijfers van een geblokkeerd account tellen niet mee in de gemiddelden van de spelers en de trainer.
 Blokkeren en vrijgeven rekenen de gemiddelden van de gesloten vensters opnieuw uit (`recountRatingsOf`), en `closeAccount` bewaart de markering `blocked` bij de cijfers in `player_ratings` en `coach_ratings` van een geblokkeerd account dat wordt opgeheven.
 Het gemiddelde van de trainer staat als laatste regel in de tabel met gemiddelden (`RatingsTable` in `src/MatchRatingsCard.tsx`), na een zwaardere lijn, ook bij oude wedstrijden, en hij krijgt nooit de ster.
-Op Spelers › Cijfers toont de kaart "Cijfers van de fans" (`SeasonRankingCard`) de eerste vijf spelers van de stand, met de rest achter een uitklapper (#1647).
+Op Spelers › Cijfers toont de kaart "Cijfers van de fans" (`SeasonRankingCard`) de eerste vijf spelers van de stand, en de knop "Toon alle N spelers" zet de rest in dezelfde tabel (`ShowAll`, #1647 en #1690).
 Op `/fans` staat een kaart van het spel (`app/fans/uitblinker-card.ts`, zie _De pagina Fans_) en onder "Alles wat we van je bewaren" de eigen cijfers (`src/fans/rating-data.ts`).
 `e2e/fans-rating.spec.ts` zet met `addRatingMatch` (`e2e/admin.ts`) een gespeelde wedstrijd met verslag in de database, omdat de verzonnen gegevens er geen hebben, en met `coach: true` ook een hoofdtrainer.
 

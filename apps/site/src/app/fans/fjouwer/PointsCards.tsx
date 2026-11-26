@@ -2,12 +2,12 @@ import {
   Card,
   CardLink,
   DataTable,
-  Disclosure,
   Heading,
   type KeyFigure,
   KeyFigures,
   PredictionList,
   type PredictionListItem,
+  ShowAll,
   Strong,
   tableColumns,
   tableLegend,
@@ -26,7 +26,7 @@ import { rowMatchOf } from '#src/fans/prediction-words'
 // The cards of the points of the game Fjouwer (issue 1471): the four of the last match with
 // what each player did, the earlier matches, and the scoring.
 
-/** How many earlier matches stand open before the rest goes behind the fold. */
+/** How many earlier matches show before the button. */
 export const shownEarlier = 5
 
 const playedScore = (match: PointsMatch) =>
@@ -119,8 +119,8 @@ const listItemOf = (item: FourPoints, now: Date): PredictionListItem => ({
 
 /**
  * The card "Eerdere wedstrijden": a row for each earlier match with a four and a finished
- * report, the newest first. The last five stand open and the rest is behind a Disclosure. With
- * no earlier match there is no card.
+ * report, the newest first. The last five show and a button shows the rest in the same list.
+ * With no earlier match there is no card.
  */
 export function EarlierMatchesCard({ items, now }: { items: readonly FourPoints[]; now: Date }) {
   const finished = items.filter((item) => item.ready)
@@ -129,20 +129,14 @@ export function EarlierMatchesCard({ items, now }: { items: readonly FourPoints[
     return null
   }
 
-  const open = finished.slice(0, shownEarlier)
-  const rest = finished.slice(shownEarlier)
-
   return (
     <Card aria-labelledby="eerdere-wedstrijden" game="fjouwer">
       <Heading id="eerdere-wedstrijden" level={2}>
         Eerdere wedstrijden
       </Heading>
-      <PredictionList aria-labelledby="eerdere-wedstrijden" items={open.map((item) => listItemOf(item, now))} />
-      {rest.length === 0 ? null : (
-        <Disclosure summary={`Alle ${finished.length} wedstrijden`}>
-          <PredictionList aria-label="De andere wedstrijden" items={rest.map((item) => listItemOf(item, now))} />
-        </Disclosure>
-      )}
+      <ShowAll moreLabel={`Toon alle ${finished.length} wedstrijden`} shown={shownEarlier} total={finished.length}>
+        <PredictionList aria-labelledby="eerdere-wedstrijden" items={finished.map((item) => listItemOf(item, now))} />
+      </ShowAll>
     </Card>
   )
 }

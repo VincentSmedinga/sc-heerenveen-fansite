@@ -1262,7 +1262,7 @@ await withEmptyDatabase((database) =>
       /id="(?:verloop-van-het-seizoen|hoe-de-wedstrijden-verlopen|reeksen|uitersten)"/,
     )
     // The card Seizoen voor seizoen took in Onze plek door de jaren (#1212): a row for each
-    // season, with a link to it, and the first table of five seasons at most.
+    // season, with a link to it, in one table.
     assert.match(allSeasonsHtml, /<h3[^>]*id="seizoen-voor-seizoen"/)
     assert.doesNotMatch(allSeasonsHtml, /id="onze-plek-door-de-jaren"/)
     // The card Per competitie (#1213): a row for each kind of competition with a match, each a
@@ -1273,7 +1273,7 @@ await withEmptyDatabase((database) =>
     assert.doesNotMatch(allSeasonsHtml, /<th scope="row"><a href="\/wedstrijden\/zoeken\?competitie=europa"/)
     assert.match(
       allSeasonsHtml,
-      /<caption class="hf-visually-hidden">De laatste seizoenen van sc Heerenveen: de plek in de competitie waarin we speelden/,
+      /<caption class="hf-visually-hidden">De seizoenen van sc Heerenveen: de plek in de competitie waarin we speelden/,
     )
     assert.match(allSeasonsHtml, /<th scope="row"><a href="\/wedstrijden">[^<]*\(nu\)<\/a><\/th>/)
     assert.match(

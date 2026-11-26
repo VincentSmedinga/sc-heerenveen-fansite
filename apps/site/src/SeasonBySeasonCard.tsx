@@ -1,7 +1,7 @@
 import type { StandingsCompetition } from '@fansite/db/schema'
 import type { CSSProperties } from 'react'
 
-import { BarChart, Card, DataTable, Disclosure, Heading, tableColumns, tableLegend, Text } from '@fansite/design-system'
+import { BarChart, Card, DataTable, Heading, ShowAll, tableColumns, tableLegend, Text } from '@fansite/design-system'
 
 import type { CompetitionChoice } from './competition'
 import type { FinalPlace } from './matches'
@@ -69,7 +69,7 @@ export function lineOfPositions(positions: readonly (null | number)[]) {
 /** The label of a season on the axis: `10/11` for `2010/11`. */
 const shortSeason = (season: string) => season.slice(2)
 
-/** How many of the latest seasons the table shows before the Disclosure. */
+/** How many of the latest seasons the table shows before the button. */
 const shownSeasons = 5
 
 const figureColumns = [tableColumns.won, tableColumns.drawn, tableColumns.lost, tableColumns.goals] as const
@@ -80,8 +80,8 @@ const legend = tableLegend([...figureColumns.slice(0, 3), { ...tableColumns.goal
  * The card "Seizoen voor seizoen": every season we have matches of, the newest first, with our
  * place in the league we played in, the matches won, drawn and lost, and the goals for and
  * against. On top is our place through the years as a line, with place 1 at the top (hidden
- * from a screen reader, which has the table). The table shows the latest five seasons; a
- * Disclosure, which works without JavaScript, shows the rest. A season is a link to its
+ * from a screen reader, which has the table). The table shows the latest five seasons and a
+ * button shows the rest; without JavaScript every season is there. A season is a link to its
  * matches. The season going on is marked "nu". The place is that of the league we played in
  * whatever the choice: the Eredivisie, and for a season in the Eerste divisie the table says
  * so ("3 (Eerste divisie)"), the chart shows it as a dotted stretch of the line in a band
@@ -130,8 +130,6 @@ export function SeasonBySeasonCard({
   }
   const caption = (what: string) =>
     `${what} van sc Heerenveen: de plek in de competitie waarin we speelden, de wedstrijden gewonnen, gelijk en verloren en de doelpunten voor en tegen${choice === 'all' ? '' : `, in ${competitionWords(choice)}`}`
-  const recent = seasons.slice(0, shownSeasons)
-  const rest = seasons.slice(shownSeasons)
   const { apart, below, max, textOf, ticks, values } = lineOf(places)
   const elsewhere = places.flatMap(({ row, season }) =>
     row === undefined || row.competition === 'Eredivisie' ? [] : [{ competition: row.competition, season }],
@@ -163,24 +161,16 @@ export function SeasonBySeasonCard({
           <BarChart.Trend apart={apart} labels={labels} values={values} />
         </BarChart>
       )}
-      {/* The seasons are one list in two tables, so sorting one half would be wrong. */}
-      <DataTable
-        caption={caption('De laatste seizoenen')}
-        columns={columns}
-        legend={legend}
-        rows={recent.map(rowOf)}
-        sortable={false}
-      />
-      {rest.length === 0 ? null : (
-        <Disclosure summary={`Toon alle ${seasons.length} seizoenen`}>
-          <DataTable
-            caption={caption('De eerdere seizoenen')}
-            columns={columns}
-            rows={rest.map(rowOf)}
-            sortable={false}
-          />
-        </Disclosure>
-      )}
+      <ShowAll moreLabel={`Toon alle ${seasons.length} seizoenen`} shown={shownSeasons} total={seasons.length}>
+        <DataTable
+          caption={caption('De seizoenen')}
+          columns={columns}
+          legend={legend}
+          rows={seasons.map(rowOf)}
+          // The seasons stand in their order, the newest first.
+          sortable={false}
+        />
+      </ShowAll>
       {deductions.map(({ points, season }) => (
         <Text
           appearance="meta"
