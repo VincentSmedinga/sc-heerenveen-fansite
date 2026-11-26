@@ -2743,6 +2743,7 @@
   Eén onderdeel voor de naam van een speler houdt het simpel, en een regel achter de naam kan er zo bij, voor de hoofdtrainers nu en voor het aantal seizoenen later (#811).
 - **Alternatieven:** `ShortPlayer` laten staan als omhulsel om `PlayerName` (twee onderdelen die bijna hetzelfde doen).
   Een eigenschap `meta` voor de regel (zie boven).
+- **Later:** sinds 26 november 2026 kan de regel met `lineBehind` ook direct achter de naam staan; zie _`PlayerName` zet een korte regel achter de naam met `lineBehind`_.
 - **Later:** dit vervangt het onderdeel `ShortPlayer`, dat in _Op Spelers is de selectie de inhoud van de pagina, en de doelpuntenmakers staan in de zijkolom_ (`site.md`) de regel van de kaart Selectie was.
 - **Later:** sinds 9 november 2026 heeft `PlayerName` ook `country`, een vlag tussen het rugnummer en de naam; zie _De vlag bij een speler zijn eigen SVG-tekeningen in `PlayerName`, met de landnaam als alt-tekst_.
 
@@ -4752,3 +4753,16 @@
   We kijken dat na in Storybook, met kleine tests van de CSS en zonder nieuw gereedschap.
 - **Waarom:** de checklist vroeg alleen om inzoomen tot 400%, en zo bleef dit onopgemerkt.
 - **Alternatieven:** alleen de drie onderdelen herstellen.
+
+## `PlayerName` zet een korte regel achter de naam met `lineBehind`
+
+- **Datum:** 26 november 2026
+- **Besluit:** `PlayerName` krijgt de eigenschap `lineBehind` (#811).
+  De regel uit `children` staat dan direct achter de naam, in dezelfde kleine, rustige letters.
+  Past hij niet, dan loopt hij door onder de naam, niet onder het rugnummer of de vlag.
+  Met `href` staat de regel buiten de link.
+  Zonder `lineBehind` blijft de regel onder de naam.
+- **Waarom:** de kaart Selectie heeft veel regels, en een tweede regel per speler maakt haar veel hoger.
+  De link heet zo naar de naam alleen.
+- **Alternatieven:** de bestaande regel onder de naam.
+  Het nummer van het seizoen in de naam zelf (dan hoort het bij de link).

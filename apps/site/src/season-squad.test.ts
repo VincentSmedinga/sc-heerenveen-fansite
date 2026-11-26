@@ -77,6 +77,23 @@ describe('squadParts', () => {
   })
 })
 
+describe('the line behind the name (#811)', () => {
+  it('says the how-manyth season it is for a player with a number, and nothing for the others', () => {
+    const parts = squadParts(
+      [player({ name: 'Een Keeper', position: 'doelman' }), player({ name: 'Twee Keeper', position: 'doelman' })],
+      new Map([['Een Keeper', 3]]),
+    )
+
+    expect(parts[0]?.players.map((line) => line.seasonLine)).toEqual(['3e seizoen', undefined])
+  })
+
+  it('gives the line in the one list of a season without positions too', () => {
+    const parts = squadParts([player({ name: 'Een Speler', position: null })], new Map([['Een Speler', 1]]))
+
+    expect(parts[0]?.players[0]?.seasonLine).toBe('1e seizoen')
+  })
+})
+
 describe('completenessSentence', () => {
   it('says the squad is unknown for a season without a row', () => {
     expect(completenessSentence(undefined)).toBe('Van dit seizoen kennen we de selectie niet.')

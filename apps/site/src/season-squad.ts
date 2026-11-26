@@ -1,4 +1,10 @@
-import { findSquadCompleteness, listSeasonPlayers, listSquadPages, type PublicSeasonPlayer } from '@fansite/db/queries'
+import {
+  findSquadCompleteness,
+  listSeasonNumbers,
+  listSeasonPlayers,
+  listSquadPages,
+  type PublicSeasonPlayer,
+} from '@fansite/db/queries'
 
 import { cacheForKey } from './cache'
 import { getDatabase } from './database'
@@ -7,14 +13,16 @@ import { type NameParts, personNameParts } from './player-name'
 
 /**
  * The squad of a season for the card Selectie on the page Spelers: every player of the season,
- * the chance that the list is the whole squad, and the Wikipedia pages the list was read
- * from. `completeness` is undefined for a season without players, which the card reads as
- * `onbekend`.
+ * the chance that the list is the whole squad, the Wikipedia pages the list was read from, and
+ * per player (by the name of the row) the how-manyth season it is, only where our lists prove
+ * it (`listSeasonNumbers`). `completeness` is undefined for a season without players, which
+ * the card reads as `onbekend`.
  */
 export type SeasonSquad = {
   completeness: Awaited<ReturnType<typeof findSquadCompleteness>>
   pages: { readAt: Date; title: string }[]
   players: PublicSeasonPlayer[]
+  seasonNumbers: ReadonlyMap<string, number>
 }
 
 /** A part of the card and its players, in the order of the list. */
@@ -24,7 +32,10 @@ export type SquadPart = {
   players: SquadPlayer[]
 }
 
-/** A player as a line of the card: the shirt number, the country and the name in two parts. */
+/**
+ * A player as a line of the card: the shirt number, the country, the name in two parts and the
+ * how-manyth season it is.
+ */
 export type SquadPlayer = NameParts & {
   /**
    * The code of two letters of the country (`NL`). Null: none, where others have one.
@@ -35,6 +46,8 @@ export type SquadPlayer = NameParts & {
   href?: string | undefined
   /** Tells the lines apart: the name as the importer kept it, which is unique in a season. */
   key: string
+  /** The line behind the name, such as `3e seizoen`: absent when we can't prove the number. */
+  seasonLine?: string | undefined
   /** Null: no number, where others have one. Undefined: nobody in the part has a number. */
   shirtNumber: null | number | undefined
 }
@@ -58,13 +71,14 @@ export const squadKeptFor = 5 * 60 * 1000
 
 async function loadSquad(season: string): Promise<SeasonSquad> {
   const { db } = getDatabase()
-  const [completeness, pages, players] = await Promise.all([
+  const [completeness, pages, players, seasonNumbers] = await Promise.all([
     findSquadCompleteness(db, season),
     listSquadPages(db, season),
     listSeasonPlayers(db, season),
+    listSeasonNumbers(db, season),
   ])
 
-  return { completeness, pages, players }
+  return { completeness, pages, players, seasonNumbers }
 }
 
 const seasonSquads = cacheForKey(squadKeptFor, loadSquad)
@@ -160,15 +174,18 @@ export function squadPageName(title: string, season: string, dutchPages: number)
  * card then has one list. Players without a position, among others who have one, are the last
  * part. The query already put the players in order, which each part keeps.
  */
-export function squadParts(players: PublicSeasonPlayer[]): SquadPart[] {
+export function squadParts(
+  players: PublicSeasonPlayer[],
+  seasonNumbers: SeasonSquad['seasonNumbers'] = new Map(),
+): SquadPart[] {
   if (players.every((player) => player.position === null)) {
-    return players.length === 0 ? [] : [{ label: null, players: linesOf(players) }]
+    return players.length === 0 ? [] : [{ label: null, players: linesOf(players, seasonNumbers) }]
   }
 
   return partOrder.flatMap((part) => {
     const inPart = players.filter((player) => (player.position ?? 'unknown') === part)
 
-    return inPart.length === 0 ? [] : [{ label: labels[part], players: linesOf(inPart) }]
+    return inPart.length === 0 ? [] : [{ label: labels[part], players: linesOf(inPart, seasonNumbers) }]
   })
 }
 
@@ -177,17 +194,19 @@ function isCompleteByEditors(completeness: SeasonSquad['completeness']) {
   return completeness?.markedComplete === true && completeness.level === 'compleet'
 }
 
-function linesOf(players: PublicSeasonPlayer[]): SquadPlayer[] {
+function linesOf(players: PublicSeasonPlayer[], seasonNumbers: SeasonSquad['seasonNumbers']): SquadPlayer[] {
   const numbered = players.some((player) => player.shirtNumber !== null)
   const flagged = players.some((player) => player.country !== null)
 
   return players.map((player) => {
     const href = playerHref(player.personSlug)
+    const number = seasonNumbers.get(player.name)
 
     return {
       country: flagged ? player.country : undefined,
       ...(href === undefined ? {} : { href }),
       key: player.name,
+      ...(number === undefined ? {} : { seasonLine: `${number}e seizoen` }),
       shirtNumber: numbered ? player.shirtNumber : undefined,
       ...(personNameParts(player) ?? { givenName: player.name, surname: '' }),
     }

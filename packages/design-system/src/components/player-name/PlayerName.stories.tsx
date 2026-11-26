@@ -12,7 +12,7 @@ const meta = preview.meta({
     children: {
       control: 'text',
       description:
-        'Een regel achter de naam met meer over de speler, in kleine, rustige letters en op een eigen regel, zoals het aantal wedstrijden van een hoofdtrainer. Voor een schermlezer komt hij als eigen tekst na de naam.',
+        'Een regel achter de naam met meer over de speler, in kleine, rustige letters en op een eigen regel, zoals het aantal wedstrijden van een hoofdtrainer. Met `lineBehind` staat hij op dezelfde regel. Voor een schermlezer komt hij als eigen tekst na de naam.',
     },
     country: {
       control: 'text',
@@ -27,6 +27,11 @@ const meta = preview.meta({
       control: 'text',
       description:
         'De pagina van de speler. Met een adres is de hele naam één link, met de vlag erin als versiering, zodat de link alleen de naam als naam heeft. Het rugnummer blijft buiten de link. Laat hem weg bij een speler zonder pagina: de naam is dan gewone tekst.',
+    },
+    lineBehind: {
+      control: 'boolean',
+      description:
+        'Zet de regel direct achter de naam in plaats van eronder, voor een korte regel zoals het aantal seizoenen. Past hij niet, dan loopt hij door onder de naam. Met `href` staat de regel buiten de link.',
     },
     shirtNumber: {
       control: 'number',
@@ -315,6 +320,49 @@ export const WithLine = meta.story({
         </PlayerName>
       </List.Item>
     </List>
+  ),
+})
+
+export const WithLineBehind = meta.story({
+  name: 'Met een korte regel direct achter de naam',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Met `lineBehind` staat de regel direct achter de naam, zoals het aantal seizoenen op de kaart Selectie. Past hij niet, dan loopt hij door onder de naam, niet onder het rugnummer of de vlag. De link heet naar de naam alleen.',
+      },
+    },
+  },
+  render: () => (
+    <div style={{ maxInlineSize: '18rem' }}>
+      <List role="list">
+        <List.Item>
+          <PlayerName country="NL" givenName="Testspeler" href="#een" lineBehind shirtNumber={1} surname="Een">
+            3e seizoen
+          </PlayerName>
+        </List.Item>
+        <List.Item>
+          <PlayerName country={null} givenName="Testspeler" lineBehind shirtNumber={null} surname="Twee" />
+        </List.Item>
+        <List.Item>
+          <PlayerName
+            country="BE"
+            givenName="Jan van der Voorbeeldstraat"
+            href="#drie"
+            lineBehind
+            shirtNumber={39}
+            surname="Proefmans-Van Nepperveldhuizen"
+          >
+            1e seizoen
+          </PlayerName>
+        </List.Item>
+        <List.Item>
+          <PlayerName givenName="Testspeler" lineBehind surname="Vier">
+            12e seizoen
+          </PlayerName>
+        </List.Item>
+      </List>
+    </div>
   ),
 })
 

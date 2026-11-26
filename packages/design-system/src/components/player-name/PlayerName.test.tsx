@@ -164,6 +164,58 @@ describe('PlayerName', () => {
       expect(container.textContent).toBe('9 Dinho 3e seizoen')
     })
   })
+
+  describe('with the line behind the name, `lineBehind`', () => {
+    it('keeps number, name and line one text, without hidden text', () => {
+      const { container } = render(
+        <PlayerName givenName="Jakob" lineBehind shirtNumber={9} surname="Trenskow">
+          3e seizoen
+        </PlayerName>,
+      )
+
+      expect(container.firstElementChild?.classList.contains('hf-player-name-behind')).toBe(true)
+      expect(container.querySelector('.hf-player-name-line > .hf-player-name-meta')?.textContent).toBe('3e seizoen')
+      expect(container.textContent).toBe('9 Jakob Trenskow 3e seizoen')
+      expect(container.querySelector('.hf-visually-hidden, [aria-hidden], [hidden]')).toBeNull()
+    })
+
+    it('stands outside the link, so the link is named by the name alone, with and without a flag', () => {
+      const { rerender } = render(
+        <PlayerName country="NL" givenName="Jakob" href="/speler" lineBehind shirtNumber={9} surname="Trenskow">
+          3e seizoen
+        </PlayerName>,
+      )
+
+      expect(screen.getByRole('link', { name: 'Jakob Trenskow' })).toBeDefined()
+
+      rerender(
+        <PlayerName href="/speler" lineBehind surname="Dinho">
+          1e seizoen
+        </PlayerName>,
+      )
+
+      expect(screen.getByRole('link', { name: 'Dinho' })).toBeDefined()
+    })
+
+    it('puts the flag in a place of its own, in the column of the name', () => {
+      const { container } = render(
+        <PlayerName country="NL" lineBehind shirtNumber={9} surname="Dinho">
+          1e seizoen
+        </PlayerName>,
+      )
+
+      expect(
+        container.querySelector('.hf-player-name-line-flagged > .hf-player-name-flag > img.hf-flag'),
+      ).not.toBeNull()
+    })
+
+    it('indents nothing where nobody has a flag, and has no line without children', () => {
+      const { container } = render(<PlayerName lineBehind shirtNumber={9} surname="Dinho" />)
+
+      expect(container.querySelector('.hf-player-name-line')).not.toBeNull()
+      expect(container.querySelector('.hf-player-name-line-flagged, .hf-player-name-meta')).toBeNull()
+    })
+  })
 })
 
 describe('PlayerName with a country', () => {
