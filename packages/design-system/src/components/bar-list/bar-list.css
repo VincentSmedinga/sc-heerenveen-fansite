@@ -3,11 +3,13 @@
  * needs, the number sits at the end, and the bar takes what is left, so it never makes the
  * card wider on a narrow screen. The fill is the green of a count (the tone `plain` of
  * chart.css) on a track of its own colour, or the tint of the track of a switch on a
- * soft card, and it reaches 3:1 on the card in light and in dark. A row can be marked.
+ * soft card, and it reaches 3:1 on the card in light and in dark. A row can be marked. With
+ * little room, as with large text on a phone, the bar goes below the name and the number.
  */
 
 @layer hf.components {
   .hf-bar-list {
+    container: hf-bar-list / inline-size;
     display: grid;
     list-style: none;
     margin: 0;
@@ -84,6 +86,33 @@
     border-radius: var(--hf-radius-bar);
     display: block;
     inline-size: calc(var(--hf-bar-list-share) * 1%);
+  }
+
+  /*
+   * With less than 13rem for the list, the fixed columns leave the bar nothing and push the
+   * number out of the card. The name and the number then share the first line and the bar has
+   * the full width below them. The number takes at most half of the line, so a long unit
+   * goes to a second line before the name runs out of room. The order in the HTML stays:
+   * name, bar, number. The space between two rows is larger than the space between a name
+   * and its bar.
+   */
+  @container hf-bar-list (inline-size < 13rem) {
+    .hf-bar-list .hf-bar-list-row {
+      align-items: baseline;
+      gap: var(--hf-space-xs) var(--hf-space-s);
+      grid-template-columns: minmax(0, 1fr) fit-content(50%);
+      padding-block: var(--hf-space-s);
+    }
+
+    .hf-bar-list-value {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .hf-bar-list-track {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
   }
 
   /* In forced colours a background colour is replaced, unless it is a system colour. */
