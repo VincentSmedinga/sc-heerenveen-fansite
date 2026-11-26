@@ -13,6 +13,7 @@ const html = renderToStaticMarkup(
         ...player,
         personSlug: index < 2 ? `testspeler-${index + 1}` : null,
       })),
+      seasonNumbers: new Map([['Testkeeper Een', 3]]),
     }}
   />,
 )
@@ -20,7 +21,7 @@ const html = renderToStaticMarkup(
 describe('the links on the card Selectie', () => {
   it('makes the name of a player with a page one link, with the flag in it and the shirt number outside', () => {
     expect(html).toMatch(
-      /hf-player-name-number">1<\/span> <a class="hf-player-name-link" href="\/spelers\/testspeler-1"><img alt="" [^>]*\/><span class="hf-player-name-text">/u,
+      /hf-player-name-number">1<\/span> <span class="hf-player-name-line hf-player-name-line-flagged"><a class="hf-player-name-link" href="\/spelers\/testspeler-1"><span class="hf-player-name-flag"><img alt="" [^>]*\/><\/span><span class="hf-player-name-text">/u,
     )
   })
 
@@ -35,5 +36,15 @@ describe('the links on the card Selectie', () => {
     expect(html).toContain('Vier')
     expect(html).not.toMatch(/<a [^>]*>(?:(?!<\/a>).)*Vier/s)
     expect(html.match(/<a [^>]*href="\/spelers\//g)).toHaveLength(2)
+  })
+})
+
+describe('the line behind the name (#811)', () => {
+  it('shows the how-manyth season behind the name, outside the link', () => {
+    expect(html).toContain('</a> <span class="hf-meta hf-player-name-meta">3e seizoen</span>')
+  })
+
+  it('shows nothing behind the other names', () => {
+    expect(html.match(/hf-player-name-meta/g)).toHaveLength(1)
   })
 })

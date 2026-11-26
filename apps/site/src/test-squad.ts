@@ -61,4 +61,5 @@ export const squadData: SeasonSquad = {
       source: 'selectie',
     },
   ],
+  seasonNumbers: new Map(),
 }
