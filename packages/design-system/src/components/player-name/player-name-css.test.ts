@@ -18,3 +18,30 @@ describe('the link in player-name.css', () => {
     expect(body).toContain('align-self: flex-start;')
   })
 })
+
+describe('the line behind the name in player-name.css', () => {
+  it('goes to the next line as a whole, and breaks inside the column when it is wider than that', () => {
+    const body = rule(String.raw`\.hf-player-name-behind \.hf-player-name-meta`)
+
+    expect(body).toContain('display: inline-block;')
+    expect(body).toContain('max-inline-size: 100%;')
+    expect(body).not.toContain('nowrap')
+  })
+
+  it('makes room for the flag beside every line, so a long word never leaves it alone', () => {
+    const column = rule(String.raw`\.hf-player-name-line-flagged`)
+    const flag = rule(String.raw`\.hf-player-name-flag`)
+
+    expect(column).toContain('padding-inline-start: var(--hf-player-name-flag-place);')
+    expect(column).toContain('position: relative;')
+    expect(flag).toContain('position: absolute;')
+    expect(flag).toContain('inset-inline-start: 0;')
+  })
+
+  it('keeps the link in the text, so the name goes on from the same place as the line', () => {
+    const body = rule(String.raw`\.hf-player-name-behind \.hf-player-name-link`)
+
+    expect(body).toContain('display: inline;')
+    expect(body).toContain('padding-block: var(--hf-space-xs);')
+  })
+})
