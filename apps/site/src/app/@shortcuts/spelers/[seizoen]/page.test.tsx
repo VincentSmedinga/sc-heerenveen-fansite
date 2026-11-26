@@ -40,6 +40,7 @@ const season = (extra: Partial<PlayerSeason> = {}): PlayerSeason => ({
   goalsByCompetition: { Eredivisie: 5 },
   lineupMatches: [],
   matchesInSeason: 34,
+  minutes: 2500,
   played: 30,
   red: 0,
   reportedMatches: 34,
@@ -83,6 +84,7 @@ beforeEach(() => {
     assists: [],
     goals: [],
     matchCounts: [],
+    minutes: [],
     players: [],
     tables: [],
   })

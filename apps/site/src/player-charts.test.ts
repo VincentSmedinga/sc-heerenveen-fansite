@@ -32,6 +32,7 @@ const season = (name: string, extra: Partial<PlayerSeason> = {}): PlayerSeason =
   goalsByCompetition: {},
   lineupMatches: [],
   matchesInSeason: 34,
+  minutes: 2500,
   played: 20,
   red: 0,
   reportedMatches: 34,

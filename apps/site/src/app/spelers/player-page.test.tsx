@@ -45,6 +45,7 @@ const madeUpSeason: PlayerSeason = {
   goalsByCompetition: { Eredivisie: 5 },
   lineupMatches: [],
   matchesInSeason: 34,
+  minutes: 2500,
   played: 30,
   red: 0,
   reportedMatches: 34,
@@ -98,6 +99,7 @@ beforeEach(() => {
     assists: [],
     goals: [],
     matchCounts: [],
+    minutes: [],
     players: [],
     tables: [],
   })
@@ -143,7 +145,8 @@ const cupFacts = {
     season: '2003/04',
     stoppage: null,
   })),
-  matchCounts: [{ played: 2, reported: 2, season: '2003/04' }],
+  matchCounts: [{ lineups: 2, played: 2, reported: 2, season: '2003/04' }],
+  minutes: [],
   players: [{ season: '2003/04', shirtNumber: 9 }],
   tables: [],
 }

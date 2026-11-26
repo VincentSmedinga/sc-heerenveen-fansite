@@ -81,4 +81,13 @@ describe('data-table.css', () => {
   it('has a sign whose text reaches 4.5:1 on its fill in a browser without light-dark()', () => {
     expect(contrast(fallback('text-missing'), fallback('background-missing'))).toBeGreaterThanOrEqual(4.5)
   })
+
+  it('halves the space beside the number columns of a table with more columns in that narrow block', () => {
+    const narrow = css.slice(css.indexOf('@container hf-data-table-more (inline-size < 24rem)'))
+
+    expect(narrow).toMatch(
+      /\.hf-data-table-more \.hf-data-table :is\(th, td\)\.hf-numeric \{\s*padding-inline: calc\(var\(--hf-space-xs\) \/ 2\);/u,
+    )
+    expect(narrow).toMatch(/:first-child \{\s*padding-inline-end: calc\(var\(--hf-space-xs\) \/ 2\);/u)
+  })
 })
