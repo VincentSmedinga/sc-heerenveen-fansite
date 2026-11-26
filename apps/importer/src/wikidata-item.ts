@@ -15,6 +15,16 @@ export type HomeGround = { end: null | PartialDate; stadiumId: string; start: nu
 /** A date of a statement as Wikidata knows it: a day, a month or a year, never coarser. */
 export type PartialDate = { day: null | number; month: null | number; year: number }
 
+/** What the importer takes from an item to see if a person played for a club (#1678). */
+export type PlayerItem = {
+  /** Whether the item is a human (`P31` is `Q5`). */
+  human: boolean
+  /** The Q-number of the item itself. */
+  id: string
+  /** The teams of `P54`, with the dates of their qualifiers if any. */
+  teams: { end: null | PartialDate; start: null | PartialDate; teamId: string }[]
+}
+
 /** What the importer takes from the item of a stadium: its coordinates and where it lies. */
 export type StadiumItem = {
   /** The coordinates (`P625`), both or none. */
@@ -119,28 +129,7 @@ export function readDutchTitle(text: string): null | string {
 export function readHomeGrounds(text: string): HomeGround[] {
   const entity = firstEntity(text)
   const claims = entity !== null && isRecord(entity['claims']) ? entity['claims'] : {}
-  const list = Array.isArray(claims['P115']) ? (claims['P115'] as unknown[]) : []
-  const grounds: HomeGround[] = []
-
-  for (const claim of list) {
-    if (!isRecord(claim) || claim['rank'] === 'deprecated' || !isRecord(claim['mainsnak'])) {
-      continue
-    }
-
-    const snak = claim['mainsnak']
-    const data = snak['datavalue']
-    const id = isRecord(data) && isRecord(data['value']) ? data['value']['id'] : undefined
-
-    if (snak['snaktype'] !== 'value' || typeof id !== 'string' || !/^Q\d+$/u.test(id)) {
-      continue
-    }
-
-    const qualifiers = isRecord(claim['qualifiers']) ? claim['qualifiers'] : {}
-
-    grounds.push({ end: qualifierDate(qualifiers['P582']), stadiumId: id, start: qualifierDate(qualifiers['P580']) })
-  }
-
-  return grounds
+  return datedItemsOf(claims, 'P115').map(({ end, itemId, start }) => ({ end, stadiumId: itemId, start }))
 }
 
 /**
@@ -208,6 +197,27 @@ export function readPlaceIds(text: string): null | string[] {
 }
 
 /**
+ * Whether a person is a human and which teams they were a member of (`P54`, #1678), with the
+ * start (`P580`) and end (`P582`) of each. Every statement counts that is not deprecated,
+ * preferred or not, since a career has many. Null for a text that is no item.
+ */
+export function readPlayerItem(text: string): null | PlayerItem {
+  const entity = firstEntity(text)
+
+  if (entity === null || typeof entity['id'] !== 'string' || !/^Q\d+$/u.test(entity['id'])) {
+    return null
+  }
+
+  const claims = isRecord(entity['claims']) ? entity['claims'] : {}
+
+  return {
+    human: itemIdsOf(statementsOf(claims, 'P31')).includes('Q5'),
+    id: entity['id'],
+    teams: datedItemsOf(claims, 'P54').map(({ end, itemId, start }) => ({ end, start, teamId: itemId })),
+  }
+}
+
+/**
  * The item of a stadium (#1298): the label, the place it lies in (`P131`) and the coordinates
  * (`P625`), with the rules of the other properties. Null for a text that is no item.
  */
@@ -238,6 +248,35 @@ export function readStadium(text: string): null | StadiumItem {
   }
 
   return { coordinates, label: labelOf(entity), placeId: itemIdsOf(statementsOf(claims, 'P131'))[0] ?? null }
+}
+
+/**
+ * The items of every statement of a property that is not deprecated, preferred or not, with the
+ * dates of the qualifiers start (`P580`) and end (`P582`).
+ */
+function datedItemsOf(claims: Record<string, unknown>, property: string) {
+  const list = Array.isArray(claims[property]) ? (claims[property] as unknown[]) : []
+  const found: { end: null | PartialDate; itemId: string; start: null | PartialDate }[] = []
+
+  for (const claim of list) {
+    if (!isRecord(claim) || claim['rank'] === 'deprecated' || !isRecord(claim['mainsnak'])) {
+      continue
+    }
+
+    const snak = claim['mainsnak']
+    const data = snak['datavalue']
+    const id = isRecord(data) && isRecord(data['value']) ? data['value']['id'] : undefined
+
+    if (snak['snaktype'] !== 'value' || typeof id !== 'string' || !/^Q\d+$/u.test(id)) {
+      continue
+    }
+
+    const qualifiers = isRecord(claim['qualifiers']) ? claim['qualifiers'] : {}
+
+    found.push({ end: qualifierDate(qualifiers['P582']), itemId: id, start: qualifierDate(qualifiers['P580']) })
+  }
+
+  return found
 }
 
 function dateOf(statements: Statement[]): WikidataItem['birth'] {

@@ -3,6 +3,7 @@ import type { MatchImport, WikipediaPage } from '@fansite/db/schema'
 import type { SeasonCoverage } from '@fansite/db/season-coverage'
 
 import { connect } from '@fansite/db/client'
+import { opponentNamesToSearch } from '@fansite/db/opponent-persons'
 import { countPersonData, countPersonNames, playerListReadAt, playerListReport } from '@fansite/db/persons'
 import {
   clubs,
@@ -34,6 +35,7 @@ import { waitingChanges } from './match-changes.ts'
 import { opponentGoalReport } from './old-site-opponent-goals.ts'
 import { doublePlayers, similarPersons } from './person-pages.ts'
 import { unhealthyAfter } from './run-log.ts'
+import { searchedBefore } from './search-opponent-persons.ts'
 import { formatTime, printable } from './text.ts'
 
 /**
@@ -144,6 +146,7 @@ export async function showStatus(
     const squadUnhealthy = await showSquadStatus(db, now, write)
 
     await showClubSquadStatus(db, now, write)
+    await showOpponentNames(db, now, write)
     await showCompleteness(db, now, write)
     await showSimilarPersons(db, write)
     await showPlayerList(db, write)
@@ -360,6 +363,17 @@ async function showOpponentGoals(db: Database, write: (line: string) => void): P
   for (const { against, for: forUs, name } of report.names) {
     write(`  ${printable(name)}: against us ${against.join(', ')}; for us ${forUs.join(', ') || 'none'}`)
   }
+}
+
+/**
+ * Shows how many names of players of opponents the importer has not looked for on Wikipedia
+ * yet (#1678). It is information and no fault.
+ */
+async function showOpponentNames(db: Database, now: Date, write: (line: string) => void): Promise<void> {
+  const { notSearched } = await opponentNamesToSearch(db, { limit: 0, searchedBefore: searchedBefore(now) })
+
+  write('')
+  write(`Opponents' names not searched on Wikipedia yet: ${notSearched}`)
 }
 
 /**

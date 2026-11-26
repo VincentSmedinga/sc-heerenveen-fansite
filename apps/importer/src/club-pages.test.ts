@@ -178,6 +178,7 @@ describe('lookUpTitles', () => {
       ]),
     })
     expect(await lookUpTitles(fetcher, server.origin, ['E'], new Map())).toEqual({
+      brokenRedirect: true,
       kind: 'error',
       message: 'E: more than 3 redirects in a row',
     })
@@ -188,10 +189,12 @@ describe('lookUpTitles', () => {
     const fetcher = fetcherFor([server])
 
     expect(await lookUpTitles(fetcher, server.origin, ['A'], new Map())).toEqual({
+      brokenRedirect: true,
       kind: 'error',
       message: 'A: the redirects go round in a circle',
     })
     expect(await lookUpTitles(fetcher, server.origin, ['C'], new Map())).toEqual({
+      brokenRedirect: true,
       kind: 'error',
       message: 'C: a redirect without a title to go to',
     })

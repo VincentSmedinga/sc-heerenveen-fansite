@@ -2797,6 +2797,25 @@ export type MatchAppearance = typeof matchAppearances.$inferSelect
 export type NewMatchAppearance = typeof matchAppearances.$inferInsert
 
 /**
+ * When the importer last looked on Wikipedia for a player of an opponent (#1678), once for each
+ * name, club and season of the rows without a person. It asks again after 180 days. A search
+ * of which a request failed leaves no row. The name is that of the report, compared byte for
+ * byte as Wikipedia compares titles; the rows go with their club.
+ */
+export const opponentNameSearches = mysqlTable(
+  'opponent_name_searches',
+  {
+    name: articleTitle('name').notNull(),
+    clubId: int('club_id', { unsigned: true })
+      .notNull()
+      .references(() => clubs.id, { onDelete: 'cascade' }),
+    season: varchar('season', { length: matchLimits.season }).notNull(),
+    searchedAt: datetime('searched_at').notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.name, table.clubId, table.season] })],
+)
+
+/**
  * The checks that every event of a report has on its minute: from 1 to the last minute of extra
  * time, and added time (1 to 15 minutes) only after the end of a half: 45, 90, 105 or 120.
  */

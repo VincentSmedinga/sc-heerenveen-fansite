@@ -834,6 +834,13 @@
       "when": 1795651804029,
       "tag": "0118_add_squad_complete_marks",
       "breakpoints": true
+    },
+    {
+      "idx": 119,
+      "version": "5",
+      "when": 1795653999180,
+      "tag": "0119_add_opponent_name_searches",
+      "breakpoints": true
     }
   ]
 }

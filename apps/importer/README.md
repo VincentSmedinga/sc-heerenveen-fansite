@@ -1396,6 +1396,30 @@ De regels zijn: `Stadiums of matches: N filled from the home grounds, M left wit
 Draai het pas als de thuisvelden van de clubs er zijn (`import:stadiums`, #1298).
 Het is veilig om twee keer te draaien: een tweede keer vindt niets meer en schrijft `Stadiums of matches: nothing to fill.`, of alleen de wedstrijden die het oversloeg.
 
+### Spelers van tegenstanders zoeken op Wikipedia
+
+De gewone import zoekt de namen van regels van de tegenstander die de koppeling hieronder niet kan koppelen: de naam past bij niemand of bij meer dan één persoon (#1678).
+Regels van ons, namen op `opponentPersonExceptions` (voor die club) en clubs zonder Wikidata-nummer slaat hij over.
+De stap staat in `src/search-opponent-persons.ts`, na de gegevens uit Wikidata en vóór de koppeling.
+
+- **Hoeveel:** hoogstens 50 namen per run, de namen met de meeste regels eerst, met al hun clubs en seizoenen tegelijk.
+- **Verzoeken:** eerst het artikel met precies de naam (`?action=raw`, met de doorverwijzingen), dan de pagina-informatie (`?action=info`) en het item (`Special:EntityData`).
+  Blijft er een club of seizoen over, dan hetzelfde voor "Naam (voetballer)".
+  Alles gaat via de fetcher, met 250 milliseconden ertussen.
+- **Wat past:** het item is een mens en noemt bij `P54` de club (`clubs.wikidata_id`), met een begin- of einddatum, in een periode die het seizoen (1 juli tot en met 30 juni) raakt.
+  Een ontbrekende datum is open, en een uitspraak met de rang "deprecated" telt niet.
+  Anders blijft de regel een naam.
+- **Personen:** de persoon met dat Q-nummer of dat artikel, anders een nieuwe, met de naam volgens dezelfde regels als de andere personen.
+  De regels zonder persoon met die naam, club en dat seizoen krijgen hem direct.
+  De volgende run leest zijn gegevens uit Wikidata.
+- **Geheugen:** `opponent_name_searches` onthoudt per naam, club en seizoen wanneer er gezocht is.
+  Na 180 dagen zoekt de import opnieuw, en een nieuwe club of een nieuw seizoen bij de eerstvolgende gelegenheid.
+- **Fouten:** een naam waarvan een verzoek mislukt, wordt niet onthouden.
+  Na drie mislukte verzoeken op rij stopt de stap, en bij `robots.txt` of een verzoek om te wachten meteen.
+  Het is een waarschuwing en de import mislukt niet.
+- **Logboek:** `Opponents' names: N searched, P new persons, R rows linked, W without a fitting article.`
+  Het noemt niemand, en `pnpm run import:status` toont hoeveel namen nog niet gezocht zijn.
+
 ### Een speler van de tegenstander krijgt een persoon
 
 De gewone import geeft de regels van de tegenstander in de verslagen hun persoon (`match_appearances.person_id`, #1544), na de stappen die personen maken.
