@@ -42,9 +42,9 @@ export async function addLiveReport() {
     await db.insert(matchReports).values({ matchId, opponentComplete: false, source, status: 'bezig' })
 
     const players = [
-      { name: 'Verzonnen Keeper', shirtNumber: 1 },
-      { name: 'Verzonnen Verdediger', shirtNumber: 4 },
-      { name: 'Verzonnen Spits', shirtNumber: 9 },
+      { shirtNumber: 1, sourceName: 'Verzonnen Keeper' },
+      { shirtNumber: 4, sourceName: 'Verzonnen Verdediger' },
+      { shirtNumber: 9, sourceName: 'Verzonnen Spits' },
     ]
     const ids = await Promise.all(
       players.map(async (player) => {
@@ -59,7 +59,7 @@ export async function addLiveReport() {
 
     await db
       .insert(matchGoals)
-      .values({ appearanceId: ids[2] ?? 0, matchId, minute: 23, ours: true, player: 'Verzonnen Spits' })
+      .values({ appearanceId: ids[2] ?? 0, matchId, minute: 23, ours: true, sourceName: 'Verzonnen Spits' })
   } finally {
     await close()
   }

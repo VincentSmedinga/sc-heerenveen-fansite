@@ -486,20 +486,22 @@ describe('valuesOf', () => {
       [
         {
           minute: 12,
+          name: 'Luca Oyen',
           ours: true,
           ownGoal: false,
           penalty: true,
-          player: 'Luca Oyen',
           playerId: 11,
+          sourceName: 'Luca Oyen',
           stoppageMinutes: null,
         },
         {
           minute: 40,
+          name: 'Sibbing',
           ours: false,
           ownGoal: false,
           penalty: false,
-          player: 'Sibbing',
           playerId: null,
+          sourceName: 'Sibbing',
           stoppageMinutes: 2,
         },
       ] as never,
@@ -527,11 +529,12 @@ describe('valuesOf', () => {
       [
         {
           minute: null,
+          name: 'Oyen',
           ours: true,
           ownGoal: false,
           penalty: false,
-          player: 'Oyen',
           playerId: 11,
+          sourceName: 'Oyen',
           stoppageMinutes: null,
         },
       ] as never,

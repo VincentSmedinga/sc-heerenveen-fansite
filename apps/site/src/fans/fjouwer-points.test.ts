@@ -64,14 +64,14 @@ beforeEach(async () => {
   await database.db.delete(supporters)
   await database.db.insert(players).values(
     squad.map(([name, position]) => ({
-      name,
       position,
       searchTerm: name,
       season: '2026/27',
       source: 'selectie' as const,
+      sourceName: name,
     })),
   )
-  ids = Object.fromEntries((await database.db.select().from(players)).map((row) => [row.name, row.id]))
+  ids = Object.fromEntries((await database.db.select().from(players)).map((row) => [row.sourceName, row.id]))
 })
 
 async function addMatch(days: number, more: Partial<typeof matches.$inferInsert> = {}): Promise<number> {
@@ -106,10 +106,10 @@ async function addReport(matchId: number, status: 'bezig' | 'klaar' = 'klaar') {
       .insert(matchAppearances)
       .values({
         matchId,
-        name,
         ours: true,
         playerId: ids[name] ?? 0,
         shirtNumber: index + 1,
+        sourceName: name,
         starter: name !== 'Trenskow',
       })
       .$returningId()
@@ -121,7 +121,7 @@ async function addReport(matchId: number, status: 'bezig' | 'klaar' = 'klaar') {
     matchId,
     minute: 10,
     ours: true,
-    player: 'Speler',
+    sourceName: 'Speler',
     ...more,
   })
 

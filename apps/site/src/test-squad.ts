@@ -15,6 +15,7 @@ export const squadData: SeasonSquad = {
     {
       country: 'NL',
       name: 'Testkeeper Een',
+      sourceName: 'Testkeeper Een',
       ...noName,
       position: 'doelman',
       searchTerm: 'Een',
@@ -24,6 +25,7 @@ export const squadData: SeasonSquad = {
     {
       country: 'NL',
       name: 'Testspeler van Twee',
+      sourceName: 'Testspeler van Twee',
       ...noName,
       position: 'verdediger',
       searchTerm: 'van Twee',
@@ -41,10 +43,12 @@ export const squadData: SeasonSquad = {
       searchTerm: 'Drie',
       shirtNumber: 8,
       source: 'selectie',
+      sourceName: 'Proefman Drie',
     },
     {
       country: 'SE',
       name: 'Testaanvaller Vier',
+      sourceName: 'Testaanvaller Vier',
       ...noName,
       position: 'aanvaller',
       searchTerm: 'Vier',
@@ -54,6 +58,7 @@ export const squadData: SeasonSquad = {
     {
       country: null,
       name: 'Testreserve Vijf',
+      sourceName: 'Testreserve Vijf',
       ...noName,
       position: 'aanvaller',
       searchTerm: 'Vijf',

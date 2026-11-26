@@ -83,7 +83,7 @@ async function appearance(matchId: number, name: string, shirtNumber: number, st
   const playerId = await ourPlayer(playerName, shirtNumber === 1 ? 'doelman' : 'middenvelder')
   const [inserted] = await database.db
     .insert(matchAppearances)
-    .values({ matchId, name, ours: true, playerId, shirtNumber, starter })
+    .values({ matchId, ours: true, playerId, shirtNumber, sourceName: name, starter })
     .$returningId()
 
   return inserted!.id
@@ -111,7 +111,7 @@ async function lineUp(matchId: number) {
     ours: true,
     ownGoal: false,
     penalty: false,
-    player: 'Aart Mid',
+    sourceName: 'Aart Mid',
   })
 
   return { keeper, mid, off, on }
@@ -120,7 +120,7 @@ async function lineUp(matchId: number) {
 async function ourPlayer(name: string, position: 'aanvaller' | 'doelman' | 'middenvelder' | 'verdediger') {
   const [inserted] = await database.db
     .insert(players)
-    .values({ name, position, searchTerm: name, season: '2026/27', source: 'selectie' })
+    .values({ position, searchTerm: name, season: '2026/27', source: 'selectie', sourceName: name })
     .$returningId()
 
   return inserted!.id

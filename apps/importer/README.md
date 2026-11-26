@@ -1055,7 +1055,7 @@ De regels staan op één plek, `playerLinker` in [`src/link-players.ts`](src/lin
    Hebben twee spelers van het seizoen dezelfde persoon, dan slaat deze regel over;
 2. anders is de pagina van de link van het doelpunt gelijk aan de `wikipedia_page` van een speler;
 3. anders is de naam in de wedstrijdregel gelijk aan zijn volledige naam;
-4. anders eindigt zijn naam op de getoonde naam (meestal de achternaam, `Oyen` voor `Luca Oyen`), en maar één speler heeft zo'n naam;
+4. anders eindigt zijn naam (van de bron of van de persoon) op de getoonde naam (meestal de achternaam, `Oyen` voor `Luca Oyen`), en maar één speler heeft zo'n naam;
 5. anders blijft `player_id` leeg.
 
 Hoofdletters en accenten tellen niet mee.
@@ -1155,7 +1155,7 @@ De import leest ze uit hetzelfde verzoek waarmee hij de titel opvraagt, dus een 
 - **De lijst `personNames`** in [`src/person-names.ts`](src/person-names.ts) zegt per titel de voornaam, het voorvoegsel en de achternaam.
   Hij gaat voor alles, geeft `manual` en wordt nooit vervangen.
   Zet er een naam in nadat je de gok in het logboek hebt nagekeken, of als de projecteigenaar een spelling koos die geen titel is (`Igor Korneev`, voor het artikel `Igor Kornejev`).
-  De rij van een speler in `players` krijgt dezelfde naam (`listedName`, `chooseListedNames`); een naam die de redactie zette blijft.
+  De rij van een speler in `players` krijgt dezelfde naam (`listedName`, `chooseListedNames`) als naam van de bron; een naam die de redactie aan een persoon gaf, blijft.
 - **Een persoon zonder naam** krijgt hem bij de eerstvolgende import van een seizoen met zijn titel: de import vraagt zijn artikel nog één keer op.
   Een tweede run schrijft en vraagt niets.
 - **Het logboek** noemt per run hoeveel namen zijn bewaard, per bron, en `pnpm run import:status` toont de aantallen per bron voor alle personen.
@@ -2400,6 +2400,9 @@ Het is geen waarschuwing meer en er komt geen regel in het logboek van het behee
 
 De redactie kan in het beheer een speler toevoegen en de naam, het rugnummer, de positie en de Wikipedia-pagina van een speler aanpassen (#1020).
 `players.editors_fields` zegt welke van die velden van de redactie zijn, en de import schrijft ze nooit (#1022).
+De naam is geen veld van de redactie: die staat bij de persoon, en `players.name` is de naam zoals de bron hem schreef (#1697).
+De import mag die bijwerken, maakt van een andere naam geen afwijking en wijzigt nooit een naam die de redactie aan een persoon gaf.
+Koppelen op naam werkt met de naam van de bron en met de naam van de persoon (`rowsByName` in `@fansite/db/shown-name`), zodat een nieuwe spelling geen tweede rij maakt.
 Dat geldt voor de import van de selectie (`import-squad.ts`), van een vorige selectie (`import-past-squad.ts`) en voor `storeChosenSpellings`.
 
 - De andere velden vult de import aan zoals altijd: het land, en een positie, rugnummer, pagina of persoon die leeg is.
@@ -2409,7 +2412,7 @@ Dat geldt voor de import van de selectie (`import-squad.ts`), van een vorige sel
 - De redactie beslist op `/beheer/spelers/kwaliteit/spelersgegevens/<seizoen>`.
   Neemt ze de waarde van de import over, dan is het veld niet meer van de redactie en houdt de import het weer bij.
   Houdt ze haar eigen waarde, dan komt dezelfde afwijking niet terug zolang beide waarden gelijk blijven.
-- De import vindt een speler van de redactie op zijn pagina, zijn naam of zijn persoon (`editorsByPerson`), en maakt dan geen tweede rij.
+- De import vindt een speler van de redactie op zijn pagina, de naam van de bron of van de persoon, of zijn persoon (`editorsByPerson`), en maakt dan geen tweede rij.
   De rij van de redactie blijft, met haar `id` en haar bron.
 - Een speler met de bron `redactie` blijft in de selectie als geen lijst hem heeft, en de eerste goede lezing haalt hem niet weg.
 - Maakte de redactie een persoon zonder artikel, en linkt een lijst voor die speler een pagina, dan wordt hij de persoon van die pagina, met de naam van de redactie (`mergeEditorsPersonInto`).

@@ -66,7 +66,7 @@ beforeEach(async () => {
 const season = '2026/27'
 
 /** A player in the report, and his id in the report. */
-async function appearance(matchId: number, values: Partial<NewMatchAppearance> & { name: string }) {
+async function appearance(matchId: number, values: Partial<NewMatchAppearance> & { sourceName: string }) {
   const [inserted] = await database.db
     .insert(matchAppearances)
     .values({ matchId, ours: true, shirtNumber: 1, starter: true, ...values })
@@ -107,7 +107,7 @@ async function playedMatch(values: Partial<NewMatch> = {}) {
 async function player(name: string, shirtNumber: number) {
   const [inserted] = await database.db
     .insert(players)
-    .values({ name, searchTerm: name, season, shirtNumber, source: 'selectie' })
+    .values({ searchTerm: name, season, shirtNumber, source: 'selectie', sourceName: name })
     .$returningId()
 
   return inserted!.id
@@ -124,24 +124,26 @@ describe('the tables of a report', () => {
     const oyen = await player('Luca Oyen', 9)
 
     await report(matchId)
-    await appearance(matchId, { name: 'Luca Oyen', playerId: oyen, shirtNumber: 9 })
+    await appearance(matchId, { playerId: oyen, shirtNumber: 9, sourceName: 'Luca Oyen' })
 
-    await expect(appearance(matchId, { name: 'Luca Oyen', playerId: oyen, shirtNumber: 10 })).rejects.toThrow()
-    await expect(appearance(matchId, { name: 'Sander Vos', shirtNumber: 9 })).rejects.toThrow()
-    await expect(appearance(matchId, { name: 'Gijs Test', ours: false, shirtNumber: 9 })).resolves.toBeTypeOf('number')
+    await expect(appearance(matchId, { playerId: oyen, shirtNumber: 10, sourceName: 'Luca Oyen' })).rejects.toThrow()
+    await expect(appearance(matchId, { shirtNumber: 9, sourceName: 'Sander Vos' })).rejects.toThrow()
+    await expect(appearance(matchId, { ours: false, shirtNumber: 9, sourceName: 'Gijs Test' })).resolves.toBeTypeOf(
+      'number',
+    )
   })
 
   it('lets a report have players without a shirt number, also several in a team, and gives them back empty', async () => {
     const matchId = await playedMatch()
 
     await report(matchId)
-    await appearance(matchId, { name: 'Eerste', shirtNumber: null })
-    await appearance(matchId, { name: 'Tweede', shirtNumber: null })
-    await appearance(matchId, { name: 'Derde', ours: false, shirtNumber: null })
-    await appearance(matchId, { name: 'Vierde', ours: false, shirtNumber: null })
-    await appearance(matchId, { name: 'Met nummer', shirtNumber: 9 })
+    await appearance(matchId, { shirtNumber: null, sourceName: 'Eerste' })
+    await appearance(matchId, { shirtNumber: null, sourceName: 'Tweede' })
+    await appearance(matchId, { ours: false, shirtNumber: null, sourceName: 'Derde' })
+    await appearance(matchId, { ours: false, shirtNumber: null, sourceName: 'Vierde' })
+    await appearance(matchId, { shirtNumber: 9, sourceName: 'Met nummer' })
 
-    await expect(appearance(matchId, { name: 'Dubbel', shirtNumber: 9 })).rejects.toThrow()
+    await expect(appearance(matchId, { shirtNumber: 9, sourceName: 'Dubbel' })).rejects.toThrow()
 
     const stored = await readMatchReport(database.db, matchId)
 
@@ -151,13 +153,13 @@ describe('the tables of a report', () => {
   it('needs a name, a shirt number from 1 to 99, and a report to belong to', async () => {
     const matchId = await playedMatch()
 
-    await expect(appearance(matchId, { name: 'Luca Oyen' })).rejects.toThrow()
+    await expect(appearance(matchId, { sourceName: 'Luca Oyen' })).rejects.toThrow()
 
     await report(matchId)
-    await expect(appearance(matchId, { name: '' })).rejects.toThrow()
-    await expect(appearance(matchId, { name: 'Luca Oyen', shirtNumber: 0 })).rejects.toThrow()
-    await expect(appearance(matchId, { name: 'Luca Oyen', shirtNumber: 100 })).rejects.toThrow()
-    await expect(appearance(matchId, { name: 'Luca Oyen', shirtNumber: 99 })).resolves.toBeTypeOf('number')
+    await expect(appearance(matchId, { sourceName: '' })).rejects.toThrow()
+    await expect(appearance(matchId, { shirtNumber: 0, sourceName: 'Luca Oyen' })).rejects.toThrow()
+    await expect(appearance(matchId, { shirtNumber: 100, sourceName: 'Luca Oyen' })).rejects.toThrow()
+    await expect(appearance(matchId, { shirtNumber: 99, sourceName: 'Luca Oyen' })).resolves.toBeTypeOf('number')
   })
 
   it('needs a status that is in the list, and a source that is not empty', async () => {
@@ -182,9 +184,9 @@ describe('the tables of a report', () => {
     await report(one)
     await report(two)
 
-    const ours = await appearance(one, { name: 'Luca Oyen', shirtNumber: 9 })
-    const theirs = await appearance(one, { name: 'Gijs Test', ours: false, shirtNumber: 9 })
-    const other = await appearance(two, { name: 'Sander Vos', shirtNumber: 4 })
+    const ours = await appearance(one, { shirtNumber: 9, sourceName: 'Luca Oyen' })
+    const theirs = await appearance(one, { ours: false, shirtNumber: 9, sourceName: 'Gijs Test' })
+    const other = await appearance(two, { shirtNumber: 4, sourceName: 'Sander Vos' })
     const card = { kind: 'geel' as const, minute: 30, stoppageMinutes: null }
 
     await expect(
@@ -209,9 +211,9 @@ describe('the tables of a report', () => {
 
     await report(matchId)
 
-    const a = await appearance(matchId, { name: 'A', shirtNumber: 1 })
-    const b = await appearance(matchId, { name: 'B', shirtNumber: 2, starter: false })
-    const c = await appearance(matchId, { name: 'C', shirtNumber: 3, starter: false })
+    const a = await appearance(matchId, { shirtNumber: 1, sourceName: 'A' })
+    const b = await appearance(matchId, { shirtNumber: 2, sourceName: 'B', starter: false })
+    const c = await appearance(matchId, { shirtNumber: 3, sourceName: 'C', starter: false })
     const swap = (out: number, on: number) => ({
       appearanceInId: on,
       appearanceOutId: out,
@@ -231,7 +233,7 @@ describe('the tables of a report', () => {
 
     await report(matchId)
 
-    const a = await appearance(matchId, { name: 'A' })
+    const a = await appearance(matchId, { sourceName: 'A' })
     const incident = (minute: number, stoppageMinutes: null | number) =>
       database.db
         .insert(matchIncidents)
@@ -251,7 +253,7 @@ describe('the tables of a report', () => {
 
     await report(matchId)
 
-    const a = await appearance(matchId, { name: 'A' })
+    const a = await appearance(matchId, { sourceName: 'A' })
     const card = (kind: 'geel' | 'geel-rood' | 'rood', minute: number) =>
       database.db.insert(matchCards).values({ appearanceId: a, kind, matchId, minute, ours: true })
 
@@ -277,14 +279,14 @@ describe('what goes with what', () => {
 
     await report(matchId)
 
-    const scorer = await appearance(matchId, { name: 'Luca Oyen', playerId: oyen, shirtNumber: 9 })
-    const helper = await appearance(matchId, { name: 'Sander Vos', shirtNumber: 10 })
-    const bench = await appearance(matchId, { name: 'Jan Bank', shirtNumber: 14, starter: false })
-    const keeper = await appearance(matchId, { name: 'Gijs Test', ours: false, shirtNumber: 1 })
+    const scorer = await appearance(matchId, { playerId: oyen, shirtNumber: 9, sourceName: 'Luca Oyen' })
+    const helper = await appearance(matchId, { shirtNumber: 10, sourceName: 'Sander Vos' })
+    const bench = await appearance(matchId, { shirtNumber: 14, sourceName: 'Jan Bank', starter: false })
+    const keeper = await appearance(matchId, { ours: false, shirtNumber: 1, sourceName: 'Gijs Test' })
 
     await database.db
       .insert(matchGoals)
-      .values({ appearanceId: scorer, assistAppearanceId: helper, matchId, minute: 12, ours: true, player: 'Oyen' })
+      .values({ appearanceId: scorer, assistAppearanceId: helper, matchId, minute: 12, ours: true, sourceName: 'Oyen' })
     await database.db.insert(matchCards).values({ appearanceId: scorer, kind: 'geel', matchId, minute: 30, ours: true })
     await database.db
       .insert(matchSubstitutions)
@@ -320,7 +322,7 @@ describe('what goes with what', () => {
 
     expect(await count('match_cards')).toBe(0)
     expect(await database.db.select().from(matchGoals)).toMatchObject([
-      { appearanceId: null, assistAppearanceId: helper, minute: 12, player: 'Oyen' },
+      { appearanceId: null, assistAppearanceId: helper, minute: 12, sourceName: 'Oyen' },
     ])
 
     await database.db.delete(matchAppearances).where(eq(matchAppearances.id, helper))
@@ -350,7 +352,7 @@ describe('what goes with what', () => {
     await database.db.delete(players).where(eq(players.id, oyen))
 
     expect(await database.db.select().from(matchAppearances).where(eq(matchAppearances.id, scorer))).toMatchObject([
-      { name: 'Luca Oyen', playerId: null, shirtNumber: 9 },
+      { playerId: null, shirtNumber: 9, sourceName: 'Luca Oyen' },
     ])
     expect(await count('match_cards')).toBe(1)
   })
@@ -379,8 +381,8 @@ describe('reading a report', () => {
 
     await report(matchId)
 
-    const a = await appearance(matchId, { name: 'A', shirtNumber: 1 })
-    const b = await appearance(matchId, { name: 'B', shirtNumber: 2 })
+    const a = await appearance(matchId, { shirtNumber: 1, sourceName: 'A' })
+    const b = await appearance(matchId, { shirtNumber: 2, sourceName: 'B' })
     const card = (
       appearanceId: number,
       kind: 'geel' | 'rood',
@@ -396,7 +398,7 @@ describe('reading a report', () => {
     })
 
     // Stored out of order, on purpose: the same minute keeps the order of id.
-    const c = await appearance(matchId, { name: 'C', shirtNumber: 3 })
+    const c = await appearance(matchId, { shirtNumber: 3, sourceName: 'C' })
 
     await database.db
       .insert(matchCards)
@@ -408,9 +410,9 @@ describe('reading a report', () => {
         card(c, 'rood', 10),
       ])
     await database.db.insert(matchGoals).values([
-      { matchId, minute: 70, ours: true, player: 'Late' },
-      { matchId, minute: 12, ours: true, player: 'Eerste' },
-      { matchId, minute: 12, ours: true, player: 'Tweede' },
+      { matchId, minute: 70, ours: true, sourceName: 'Late' },
+      { matchId, minute: 12, ours: true, sourceName: 'Eerste' },
+      { matchId, minute: 12, ours: true, sourceName: 'Tweede' },
     ])
 
     const stored = await readMatchReport(database.db, matchId)
@@ -423,8 +425,8 @@ describe('reading a report', () => {
       [45, 2, 'geel'],
       [80, null, 'rood'],
     ])
-    expect(stored?.goals.map((row) => row.player)).toEqual(['Eerste', 'Tweede', 'Late'])
-    expect(stored?.appearances.map((row) => row.name)).toEqual(['A', 'B', 'C'])
+    expect(stored?.goals.map((row) => row.sourceName)).toEqual(['Eerste', 'Tweede', 'Late'])
+    expect(stored?.appearances.map((row) => row.sourceName)).toEqual(['A', 'B', 'C'])
   })
 
   it('gives a goal and a card without a minute last, and takes them along into the shape of the rules', async () => {
@@ -432,8 +434,8 @@ describe('reading a report', () => {
 
     await report(matchId)
 
-    const a = await appearance(matchId, { name: 'A', shirtNumber: 1 })
-    const b = await appearance(matchId, { name: 'B', shirtNumber: 2 })
+    const a = await appearance(matchId, { shirtNumber: 1, sourceName: 'A' })
+    const b = await appearance(matchId, { shirtNumber: 2, sourceName: 'B' })
 
     // Stored before the ones with a minute, on purpose.
     await database.db.insert(matchCards).values([
@@ -441,14 +443,14 @@ describe('reading a report', () => {
       { appearanceId: b, kind: 'geel', matchId, minute: 60, ours: true },
     ])
     await database.db.insert(matchGoals).values([
-      { matchId, minute: null, ours: true, player: 'Onbekend' },
-      { matchId, minute: 70, ours: true, player: 'Late' },
-      { matchId, minute: 12, ours: true, player: 'Eerste' },
+      { matchId, minute: null, ours: true, sourceName: 'Onbekend' },
+      { matchId, minute: 70, ours: true, sourceName: 'Late' },
+      { matchId, minute: 12, ours: true, sourceName: 'Eerste' },
     ])
 
     const stored = (await readMatchReport(database.db, matchId))!
 
-    expect(stored.goals.map((row) => [row.player, row.minute])).toEqual([
+    expect(stored.goals.map((row) => [row.sourceName, row.minute])).toEqual([
       ['Eerste', 12],
       ['Late', 70],
       ['Onbekend', null],
@@ -463,11 +465,11 @@ describe('reading a report', () => {
 
     await report(matchId, 'bezig')
 
-    const a = await appearance(matchId, { captain: true, name: 'A', shirtNumber: 7 })
+    const a = await appearance(matchId, { captain: true, shirtNumber: 7, sourceName: 'A' })
 
     await database.db
       .insert(matchGoals)
-      .values({ appearanceId: a, matchId, minute: 5, ours: true, penalty: true, player: 'A' })
+      .values({ appearanceId: a, matchId, minute: 5, ours: true, penalty: true, sourceName: 'A' })
 
     const stored = await readMatchReport(database.db, matchId)
 
@@ -558,10 +560,10 @@ describe('the numbers of the players from the reports', () => {
 
     // First match: Oyen scores, Vos gives the assist and goes off at 60, Bank comes on for him
     // and is booked, an opponent scores an own goal that does not count for Oyen.
-    const o1 = await appearance(first, { name: 'Luca Oyen', playerId: oyen, shirtNumber: 9 })
-    const v1 = await appearance(first, { name: 'Sander Vos', playerId: vos, shirtNumber: 10 })
-    const b1 = await appearance(first, { name: 'Jan Bank', playerId: bank, shirtNumber: 14, starter: false })
-    const x1 = await appearance(first, { name: 'Gijs Test', ours: false, shirtNumber: 4 })
+    const o1 = await appearance(first, { playerId: oyen, shirtNumber: 9, sourceName: 'Luca Oyen' })
+    const v1 = await appearance(first, { playerId: vos, shirtNumber: 10, sourceName: 'Sander Vos' })
+    const b1 = await appearance(first, { playerId: bank, shirtNumber: 14, sourceName: 'Jan Bank', starter: false })
+    const x1 = await appearance(first, { ours: false, shirtNumber: 4, sourceName: 'Gijs Test' })
 
     await database.db
       .insert(matchSubstitutions)
@@ -572,10 +574,10 @@ describe('the numbers of the players from the reports', () => {
     ])
     await database.db
       .insert(matchGoals)
-      .values({ appearanceId: o1, assistAppearanceId: v1, matchId: first, minute: 12, ours: true, player: 'Oyen' })
+      .values({ appearanceId: o1, assistAppearanceId: v1, matchId: first, minute: 12, ours: true, sourceName: 'Oyen' })
 
     // Second match, in the cup: Oyen is sent off with a yellow-red card at 70.
-    const o2 = await appearance(second, { name: 'Luca Oyen', playerId: oyen, shirtNumber: 9 })
+    const o2 = await appearance(second, { playerId: oyen, shirtNumber: 9, sourceName: 'Luca Oyen' })
 
     await database.db.insert(matchCards).values([
       { appearanceId: o2, kind: 'geel', matchId: second, minute: 20, ours: true },
@@ -583,14 +585,14 @@ describe('the numbers of the players from the reports', () => {
     ])
     await database.db
       .insert(matchGoals)
-      .values({ appearanceId: o2, matchId: second, minute: 30, ours: true, penalty: true, player: 'Oyen' })
+      .values({ appearanceId: o2, matchId: second, minute: 30, ours: true, penalty: true, sourceName: 'Oyen' })
 
     // Third match is bezig and counts for nobody.
-    const o3 = await appearance(third, { name: 'Luca Oyen', playerId: oyen, shirtNumber: 9 })
+    const o3 = await appearance(third, { playerId: oyen, shirtNumber: 9, sourceName: 'Luca Oyen' })
 
     await database.db
       .insert(matchGoals)
-      .values({ appearanceId: o3, matchId: third, minute: 5, ours: true, player: 'Oyen' })
+      .values({ appearanceId: o3, matchId: third, minute: 5, ours: true, sourceName: 'Oyen' })
 
     return { bank, first, oyen, second, vos }
   }
@@ -648,7 +650,7 @@ describe('the numbers of the players from the reports', () => {
       .select()
       .from(matchAppearances)
       .where(and(eq(matchAppearances.matchId, first), eq(matchAppearances.playerId, bank)))
-    const replacement = await appearance(first, { name: 'Kees Reserve', shirtNumber: 20, starter: false })
+    const replacement = await appearance(first, { shirtNumber: 20, sourceName: 'Kees Reserve', starter: false })
 
     // Bank came on at 60 and goes off again at 85.
     await database.db
@@ -675,7 +677,7 @@ describe('the numbers of the players from the reports', () => {
       matchId: first,
       minute: 75,
       ours: true,
-      player: 'Bank',
+      sourceName: 'Bank',
     })
 
     const found = await readPlayerReportStats(database.db, season)
@@ -743,8 +745,8 @@ describe('the numbers of the players from the reports', () => {
     const bench = await player('Jan Bank', 14)
 
     await report(matchId)
-    await appearance(matchId, { name: 'Jan Bank', playerId: bench, shirtNumber: 14, starter: false })
-    await appearance(matchId, { name: 'Gijs Test', ours: false, shirtNumber: 4, starter: false })
+    await appearance(matchId, { playerId: bench, shirtNumber: 14, sourceName: 'Jan Bank', starter: false })
+    await appearance(matchId, { ours: false, shirtNumber: 4, sourceName: 'Gijs Test', starter: false })
 
     expect(await readPlayerReportStats(database.db, season)).toEqual([{ ...zero, name: 'Jan Bank', playerId: bench }])
   })
@@ -763,11 +765,11 @@ describe('the numbers of the players from the reports', () => {
       .$returningId()
     const [inserted] = await database.db
       .insert(players)
-      .values({ name: 'Joost van Aken', personId: person!.id, searchTerm: 'van Aken', season, shirtNumber: 4 })
+      .values({ personId: person!.id, searchTerm: 'van Aken', season, shirtNumber: 4, sourceName: 'Joost van Aken' })
       .$returningId()
 
     await report(matchId)
-    await appearance(matchId, { name: 'Joost van Aken', playerId: inserted!.id, shirtNumber: 4 })
+    await appearance(matchId, { playerId: inserted!.id, shirtNumber: 4, sourceName: 'Joost van Aken' })
 
     expect(await readPlayerReportStats(database.db, season)).toMatchObject([
       {
@@ -940,8 +942,8 @@ describe('reading the shoot-out of a report', () => {
 
     await report(matchId, status)
 
-    const ours = await appearance(matchId, { name: 'Luca Oyen', playerId: oyen, shirtNumber: 9 })
-    const theirs = await appearance(matchId, { name: 'Gijs Test', ours: false, shirtNumber: 7 })
+    const ours = await appearance(matchId, { playerId: oyen, shirtNumber: 9, sourceName: 'Luca Oyen' })
+    const theirs = await appearance(matchId, { ours: false, shirtNumber: 7, sourceName: 'Gijs Test' })
 
     // Written in a mixed order, to see that the reader sorts them.
     await database.db.insert(matchShootoutKicks).values([
@@ -972,7 +974,7 @@ describe('reading the shoot-out of a report', () => {
 
     expect(found?.match.id).toBe(matchId)
     expect(found?.stored.shootout).toHaveLength(4)
-    expect(found?.stored.appearances.find((player) => player.id === ours)?.name).toBe('Luca Oyen')
+    expect(found?.stored.appearances.find((player) => player.id === ours)?.sourceName).toBe('Luca Oyen')
     expect(found?.names.get(ours)?.searchTerm).toBe('Luca Oyen')
     expect(
       (await findReportedMatch(database.db, { clubSlug: 'testdorp-fc', matchDate: '2026-08-08', season }))?.stored
@@ -1016,9 +1018,11 @@ describe('the goals of the reports against the squad table of Wikipedia', () => 
 
     await report(matchId, status)
 
-    const o = await appearance(matchId, { name: 'Luca Oyen', playerId: oyen, shirtNumber: 9 })
+    const o = await appearance(matchId, { playerId: oyen, shirtNumber: 9, sourceName: 'Luca Oyen' })
 
-    await database.db.insert(matchGoals).values({ appearanceId: o, matchId, minute: 12, ours: true, player: 'Oyen' })
+    await database.db
+      .insert(matchGoals)
+      .values({ appearanceId: o, matchId, minute: 12, ours: true, sourceName: 'Oyen' })
 
     return { matchId, oyen, vos }
   }
@@ -1157,7 +1161,7 @@ describe('a match that is still being played', () => {
 
     for (const matchId of [live, played]) {
       await report(matchId, 'bezig')
-      await database.db.insert(matchGoals).values({ matchId, minute: 10, ours: true, player: 'Luca Oyen' })
+      await database.db.insert(matchGoals).values({ matchId, minute: 10, ours: true, sourceName: 'Luca Oyen' })
     }
 
     const shown = await listSeasonMatches(database.db, season)
@@ -1174,8 +1178,8 @@ describe('a match that is still being played', () => {
     // Even a report that is klaar (which the rules refuse) would not count for a match that
     // is not played.
     await report(live)
-    await appearance(live, { name: 'Luca Oyen', playerId: oyen, shirtNumber: 9 })
-    await database.db.insert(matchGoals).values({ matchId: live, minute: 10, ours: true, player: 'Luca Oyen' })
+    await appearance(live, { playerId: oyen, shirtNumber: 9, sourceName: 'Luca Oyen' })
+    await database.db.insert(matchGoals).values({ matchId: live, minute: 10, ours: true, sourceName: 'Luca Oyen' })
 
     const [{ clubId }] = (await database.db.select({ clubId: matches.clubId }).from(matches)) as [{ clubId: number }]
 
@@ -1193,14 +1197,14 @@ describe('the matches with a report that is klaar', () => {
 
     await database.db.update(players).set({ searchTerm: 'Oyen' }).where(eq(players.id, oyen))
     await report(matchId)
-    await appearance(matchId, { name: 'Luca Oyen', playerId: oyen, shirtNumber: 9 })
-    await appearance(matchId, { name: 'Gijs Test', ours: false, shirtNumber: 1 })
+    await appearance(matchId, { playerId: oyen, shirtNumber: 9, sourceName: 'Luca Oyen' })
+    await appearance(matchId, { ours: false, shirtNumber: 1, sourceName: 'Gijs Test' })
 
     const found = await findReportedMatch(database.db, { clubSlug: 'testdorp-fc', matchDate: '2026-08-08', season })
 
     expect(found?.match).toMatchObject({ id: matchId, opponent: 'Testdorp FC', round: 'Speelronde 1' })
     expect(found?.clubSlug).toBe('testdorp-fc')
-    expect(found?.stored.appearances.map((row) => row.name)).toEqual(['Luca Oyen', 'Gijs Test'])
+    expect(found?.stored.appearances.map((row) => row.sourceName)).toEqual(['Luca Oyen', 'Gijs Test'])
     expect([...(found?.names.values() ?? [])]).toEqual([
       {
         familyName: null,
@@ -1248,8 +1252,8 @@ describe('the matches with a report that is klaar', () => {
       .$returningId()
 
     await report(matchId)
-    await appearance(matchId, { name: 'Gijs van Proef', ours: false, personId: person!.id, shirtNumber: 1 })
-    await appearance(matchId, { name: 'Anna Test', ours: false, shirtNumber: 2 })
+    await appearance(matchId, { ours: false, personId: person!.id, shirtNumber: 1, sourceName: 'Gijs van Proef' })
+    await appearance(matchId, { ours: false, shirtNumber: 2, sourceName: 'Anna Test' })
 
     const found = await findReportedMatch(database.db, { clubSlug: 'testdorp-fc', matchDate: '2026-08-08', season })
 
@@ -1275,7 +1279,12 @@ describe('the matches with a report that is klaar', () => {
       for (const when of seasons) {
         const [row] = await database.db
           .insert(players)
-          .values({ name: `${givenName} ${familyName}`, personId: person!.id, searchTerm: familyName, season: when })
+          .values({
+            personId: person!.id,
+            searchTerm: familyName,
+            season: when,
+            sourceName: `${givenName} ${familyName}`,
+          })
           .$returningId()
 
         ids.push(row!.id)
@@ -1288,7 +1297,7 @@ describe('the matches with a report that is klaar', () => {
     await made('Henrico', 'Proef', ['2006/07'])
     await made('Anna', 'Anders', ['2005/06'])
     await report(matchId)
-    await appearance(matchId, { name: 'Jeroen Proef', playerId: first, shirtNumber: 4 })
+    await appearance(matchId, { playerId: first, shirtNumber: 4, sourceName: 'Jeroen Proef' })
 
     const found = await findReportedMatch(database.db, { clubSlug: 'testdorp-fc', matchDate: '2026-08-08', season })
     const [named] = [...(found?.names.values() ?? [])]

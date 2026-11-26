@@ -54,7 +54,7 @@ async function person(name: string, seasons: string[]) {
   for (const season of seasons) {
     const [{ insertId }] = await database.db
       .insert(players)
-      .values({ name, personId, searchTerm: name.toLowerCase(), season, shirtNumber: 9 })
+      .values({ personId, searchTerm: name.toLowerCase(), season, shirtNumber: 9, sourceName: name })
 
     ids[season] = insertId
   }

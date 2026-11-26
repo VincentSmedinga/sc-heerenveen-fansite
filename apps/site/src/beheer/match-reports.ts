@@ -13,7 +13,13 @@ import {
   markedParts,
   refreshSnapshot,
 } from '@fansite/db/match-edits'
-import { mayHaveReport, readMatchReport } from '@fansite/db/match-reports'
+import {
+  mayHaveReport,
+  readMatchReport,
+  type ReportAppearance,
+  type ReportGoal,
+  selectReportGoals,
+} from '@fansite/db/match-reports'
 import { linkOpponentPersons } from '@fansite/db/opponent-persons'
 import { compareReportGoals } from '@fansite/db/player-stat-differences'
 import {
@@ -30,6 +36,7 @@ import {
   matchSubstitutions,
   players,
 } from '@fansite/db/schema'
+import { shownClubPlayerName, shownPlayerName, shownSearchTerm } from '@fansite/db/shown-name'
 import { storeCompleteness } from '@fansite/db/store-completeness'
 import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, lt, or } from 'drizzle-orm'
 import { createHash } from 'node:crypto'
@@ -80,7 +87,7 @@ export type SaveReportOutcome =
   { status: 'missing' } | { status: 'not-played' } | { status: 'saved' } | { status: 'stale' } | { status: 'unchanged' }
 
 /** A player of the squad of the season, with what the report needs of him. */
-type SquadRow = ReportSquadPlayer & { personId: null | number; wikipediaPage: null | string }
+type SquadRow = ReportSquadPlayer & { personId: null | number; sourceName: string; wikipediaPage: null | string }
 
 /**
  * Where the players of a stored report are in the form: the side and the number of the row
@@ -101,8 +108,10 @@ export function appearancePlaces(stored: Pick<StoredMatchReport, 'appearances'>)
 }
 
 /** The context the checks need for a screen. */
-export function contextOf(screen: Pick<ReportScreen, 'match' | 'squad'>): ReportContext {
-  return { match: screen.match, squad: screen.squad }
+export function contextOf(
+  screen: Partial<Pick<ReportScreen, 'report'>> & Pick<ReportContext, 'squad'> & Pick<ReportScreen, 'match'>,
+): ReportContext {
+  return { match: screen.match, opponentNames: sharedOpponentNames(screen.report), squad: screen.squad }
 }
 
 /**
@@ -203,6 +212,27 @@ function firstSeasonOfPrediction(season: string): string | undefined {
   return `${start}/${String((start + 1) % 100).padStart(2, '0')}`
 }
 
+/**
+ * The names that more than one player of the opponent has in a stored report, with how often:
+ * two persons with one name, whose lines had different names of the source (#1697). The checks
+ * let such a name stand that often, so saving the report as it is stays possible.
+ */
+function sharedOpponentNames(stored: StoredMatchReport | undefined): Map<string, number> {
+  const sources = new Map<string, string[]>()
+
+  for (const line of stored?.appearances.filter((one) => !one.ours) ?? []) {
+    const name = line.name.toLocaleLowerCase('nl')
+
+    sources.set(name, [...(sources.get(name) ?? []), line.sourceName.toLocaleLowerCase('nl')])
+  }
+
+  return new Map(
+    [...sources].flatMap(([name, written]) =>
+      written.length > 1 && new Set(written).size === written.length ? [[name, written.length] as const] : [],
+    ),
+  )
+}
+
 /** A name as the squad and the report write it, for comparing: no capitals, one space. */
 const nameKey = (name: string) => name.trim().replace(/\s+/gu, ' ').toLocaleLowerCase('nl')
 
@@ -260,10 +290,10 @@ export async function findPreviousOpponentLineUp(
 
   const values = valuesOfReport(stored, [], [])
   const known = await db
-    .select({ name: clubSquadPlayers.name })
+    .select({ name: shownClubPlayerName(), sourceName: clubSquadPlayers.sourceName })
     .from(clubSquadPlayers)
     .where(eq(clubSquadPlayers.clubId, match.clubId))
-  const inSquad = new Set(known.map((player) => nameKey(player.name)))
+  const inSquad = new Set(known.flatMap((player) => [nameKey(player.name), nameKey(player.sourceName)]))
   const speler = values.zij.speler.map((row) =>
     inSquad.size === 0 || inSquad.has(nameKey(row.naam ?? ''))
       ? row
@@ -287,7 +317,7 @@ export async function findReportScreen(db: Pick<Database, 'select'>, id: number,
   }
 
   return {
-    goals: await db.select().from(matchGoals).where(eq(matchGoals.matchId, id)).orderBy(asc(matchGoals.id)),
+    goals: await selectReportGoals(db).where(eq(matchGoals.matchId, id)).orderBy(asc(matchGoals.id)),
     match,
     report: await readMatchReport(db, id),
     squad: await readSquad(db, match.season, match.matchDate),
@@ -497,12 +527,13 @@ export async function readSquad(db: Pick<Database, 'select'>, season: string, ma
     .select({
       id: players.id,
       inSquad: players.inSquad,
-      name: players.name,
+      name: shownPlayerName(),
       personId: players.personId,
       previousShirtNumber: players.previousShirtNumber,
-      searchTerm: players.searchTerm,
+      searchTerm: shownSearchTerm(),
       shirtNumber: players.shirtNumber,
       shirtNumberFrom: players.shirtNumberFrom,
+      sourceName: players.sourceName,
       wikipediaPage: players.wikipediaPage,
     })
     .from(players)
@@ -645,7 +676,7 @@ export async function saveReport(
       player.ours
         ? squad.find((row) =>
             player.squadId === null
-              ? row.name.toLocaleLowerCase('nl') === player.name.toLocaleLowerCase('nl')
+              ? [row.name, row.sourceName].some((name) => isSameName(name, player.name))
               : row.id === player.squadId,
           )
         : undefined,
@@ -663,15 +694,14 @@ export async function saveReport(
     const halfTimeAgainst = plan.halfTime?.against ?? null
     const halfTimeChanged = match.halfTimeFor !== halfTimeFor || match.halfTimeAgainst !== halfTimeAgainst
 
-    if (stored !== undefined && !halfTimeChanged && planSignature(plan, known) === storedSignature(stored)) {
+    const oldGoals = await selectReportGoals(transaction).where(eq(matchGoals.matchId, id)).orderBy(asc(matchGoals.id))
+    // The form shows the names of the persons; what is stored keeps the names of the sources.
+    const sourced = withSourceNames(plan, known, stored, oldGoals)
+
+    if (stored !== undefined && !halfTimeChanged && planSignature(sourced, known) === storedSignature(stored)) {
       return { status: 'unchanged' } as const
     }
 
-    const oldGoals = await transaction
-      .select()
-      .from(matchGoals)
-      .where(eq(matchGoals.matchId, id))
-      .orderBy(asc(matchGoals.id))
     const row = {
       formationOpponent: plan.formations.opponent,
       formationOurs: plan.formations.ours,
@@ -702,18 +732,18 @@ export async function saveReport(
     const playerIds: (null | number)[] = []
     const appearanceIds: number[] = []
 
-    for (const [index, player] of plan.appearances.entries()) {
+    for (const [index, player] of sourced.appearances.entries()) {
       let playerId = known[index]?.id ?? null
 
       if (player.ours && playerId === null) {
         const [added] = await transaction
           .insert(players)
           .values({
-            name: player.name,
-            searchTerm: searchTermOf(player.name),
+            searchTerm: searchTermOf(player.sourceName),
             season: match.season,
             shirtNumber: player.shirtNumber,
             source: 'verslag',
+            sourceName: player.sourceName,
           })
           .$returningId()
 
@@ -725,10 +755,11 @@ export async function saveReport(
         .values({
           captain: player.captain,
           matchId: id,
-          name: player.name,
           ours: player.ours,
+          personId: player.personId,
           playerId,
           shirtNumber: player.shirtNumber,
+          sourceName: player.sourceName,
           starter: player.starter,
         })
         .$returningId()
@@ -794,18 +825,10 @@ export async function saveReport(
 
     if (plan.goals.length > 0) {
       await transaction.insert(matchGoals).values(
-        plan.goals.map((goal) => {
+        sourced.goals.map((goal) => {
           const scorer = goal.appearance === null ? undefined : plan.appearances[goal.appearance]
           const squadRow = goal.appearance === null ? undefined : known[goal.appearance]
-          const before = oldGoals.find(
-            (old) =>
-              old.ours === goal.ours &&
-              old.minute === goal.minute &&
-              old.stoppageMinutes === goal.stoppageMinutes &&
-              old.ownGoal === goal.ownGoal &&
-              old.penalty === goal.penalty &&
-              old.player.toLocaleLowerCase('nl') === goal.name.toLocaleLowerCase('nl'),
-          )
+          const before = goal.before
 
           return {
             appearanceId: goal.appearance === null ? null : appearance(goal.appearance),
@@ -816,9 +839,9 @@ export async function saveReport(
             ownGoal: goal.ownGoal,
             penalty: goal.penalty,
             personId: squadRow?.personId ?? before?.personId ?? null,
-            player: goal.name,
             // Only a player of ours has a row in `players`.
             playerId: scorer?.ours === true && goal.appearance !== null ? (playerIds[goal.appearance] ?? null) : null,
+            sourceName: goal.sourceName,
             stoppageMinutes: goal.stoppageMinutes,
             wikipediaPage: squadRow?.wikipediaPage ?? before?.wikipediaPage ?? null,
           }
@@ -880,7 +903,7 @@ export function shirtNumberOn(
  */
 export function valuesOfReport(
   stored: StoredMatchReport | undefined,
-  goals: readonly MatchGoal[],
+  goals: readonly ReportGoal[],
   squad: readonly ReportSquadPlayer[],
   match?: { halfTimeAgainst: null | number; halfTimeFor: null | number },
 ): ReportValues {
@@ -950,7 +973,7 @@ export function valuesOfReport(
     values[sideOf(goal.ours)].doelpunt.push({
       ...moment(goal),
       assist: refWithSide(goal.assistAppearanceId),
-      naam: goal.appearanceId === null ? goal.player : '',
+      naam: goal.appearanceId === null ? goal.name : '',
       soort: goal.ownGoal ? 'eigen' : goal.penalty ? 'strafschop' : 'gewoon',
       speler: refWithSide(goal.appearanceId),
     })
@@ -981,12 +1004,12 @@ function describeReport(plan: ReportPlan) {
 }
 
 /** The plan as a text that two plans share when they store the same rows. */
-function planSignature(plan: ReportPlan, known: readonly (undefined | { id: number })[]) {
+function planSignature(plan: SourcedPlan, known: readonly (undefined | { id: number })[]) {
   return JSON.stringify({
     appearances: plan.appearances.map((player, index) => [
       player.ours,
-      player.ours ? (known[index]?.id ?? `nieuw:${player.name}`) : null,
-      player.name,
+      player.ours ? (known[index]?.id ?? `nieuw:${player.sourceName}`) : null,
+      player.sourceName,
       player.shirtNumber,
       player.starter,
       player.captain,
@@ -999,7 +1022,7 @@ function planSignature(plan: ReportPlan, known: readonly (undefined | { id: numb
       goal.assist,
       goal.minute,
       goal.stoppageMinutes,
-      goal.name,
+      goal.sourceName,
       goal.ownGoal,
       goal.penalty,
     ]),
@@ -1030,12 +1053,12 @@ function planSignature(plan: ReportPlan, known: readonly (undefined | { id: numb
 function reportErrors(
   match: Match,
   report: StoredMatchReport | undefined,
-  goals: readonly MatchGoal[],
+  goals: readonly ReportGoal[],
   squad: readonly ReportSquadPlayer[],
 ) {
   const values = valuesOfReport(report, goals, squad)
 
-  return Object.keys(checkReportForm(values, { match, squad }).errors).length > 0
+  return Object.keys(checkReportForm(values, contextOf({ match, report, squad })).errors).length > 0
 }
 
 /**
@@ -1048,6 +1071,15 @@ function searchTermOf(name: string) {
   return words.length < 2 ? words.join(' ') : words.slice(1).join(' ')
 }
 
+/** Whether two names are one name, whatever the capitals. */
+const isSameName = (a: string, b: string) => a.toLocaleLowerCase('nl') === b.toLocaleLowerCase('nl')
+
+/** A plan with, for each line and goal, the name of the source that is stored (#1697). */
+type SourcedPlan = Omit<ReportPlan, 'appearances' | 'goals'> & {
+  appearances: (ReportPlan['appearances'][number] & { personId: null | number; sourceName: string })[]
+  goals: (ReportPlan['goals'][number] & { before: ReportGoal | undefined; sourceName: string })[]
+}
+
 /** The stored report as the same text, so a save that changes nothing can be seen. */
 function storedSignature(stored: StoredMatchReport) {
   const place = new Map(stored.appearances.map((appearance, index) => [appearance.id, index]))
@@ -1057,7 +1089,7 @@ function storedSignature(stored: StoredMatchReport) {
     appearances: stored.appearances.map((appearance) => [
       appearance.ours,
       appearance.ours ? appearance.playerId : null,
-      appearance.name,
+      appearance.sourceName,
       appearance.shirtNumber,
       appearance.starter,
       appearance.captain,
@@ -1070,7 +1102,7 @@ function storedSignature(stored: StoredMatchReport) {
       at(goal.assistAppearanceId),
       goal.minute,
       goal.stoppageMinutes,
-      goal.player,
+      goal.sourceName,
       goal.ownGoal,
       goal.penalty,
     ]),
@@ -1095,4 +1127,70 @@ function storedSignature(stored: StoredMatchReport) {
       substitution.stoppageMinutes,
     ]),
   })
+}
+
+/**
+ * The plan with the names the rows keep. The form shows the name of the person, so a line that
+ * was stored keeps its name of the source and its person: a line of ours is found by its
+ * player, every other line by a name (that of the source or the one shown), first with the
+ * same shirt number. A new line of a player of the squad takes the name of the source of his
+ * row, and any other new line the name that was typed. A goal that was there keeps its name of
+ * the source too: it is the stored goal of the same side, minute and kind with the same name
+ * or the same scorer.
+ */
+function withSourceNames(
+  plan: ReportPlan,
+  known: readonly (SquadRow | undefined)[],
+  stored: StoredMatchReport | undefined,
+  oldGoals: readonly ReportGoal[],
+): SourcedPlan {
+  const left = [...(stored?.appearances ?? [])]
+  const was: (ReportAppearance | undefined)[] = []
+  const appearances = plan.appearances.map((player, index) => {
+    const row = known[index]
+    const fits = left.filter(
+      (one) =>
+        one.ours === player.ours &&
+        (player.ours && row !== undefined
+          ? one.playerId === row.id
+          : isSameName(one.name, player.name) || isSameName(one.sourceName, player.name)),
+    )
+    const found = fits.find((one) => one.shirtNumber === player.shirtNumber) ?? fits[0]
+
+    if (found !== undefined) {
+      left.splice(left.indexOf(found), 1)
+    }
+    was.push(found)
+
+    return {
+      ...player,
+      personId: found?.personId ?? null,
+      sourceName: found?.sourceName ?? row?.sourceName ?? player.name,
+    }
+  })
+  const goalsLeft = [...oldGoals]
+  const goals = plan.goals.map((goal) => {
+    const scorer = goal.appearance === null ? undefined : was[goal.appearance]
+    const sameMoment = goalsLeft.filter(
+      (old) =>
+        old.ours === goal.ours &&
+        old.minute === goal.minute &&
+        old.stoppageMinutes === goal.stoppageMinutes &&
+        old.ownGoal === goal.ownGoal &&
+        old.penalty === goal.penalty,
+    )
+    const before =
+      sameMoment.find((old) => isSameName(old.name, goal.name) || isSameName(old.sourceName, goal.name)) ??
+      sameMoment.find((old) => scorer !== undefined && old.appearanceId === scorer.id)
+
+    if (before !== undefined) {
+      goalsLeft.splice(goalsLeft.indexOf(before), 1)
+    }
+
+    const named = goal.appearance === null ? undefined : appearances[goal.appearance]
+
+    return { ...goal, before, sourceName: before?.sourceName ?? named?.sourceName ?? goal.name }
+  })
+
+  return { ...plan, appearances, goals }
 }

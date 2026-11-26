@@ -198,7 +198,7 @@ const scorersOf = async (round: string) =>
       .innerJoin(matches, eq(matchGoals.matchId, matches.id))
       .where(eq(matches.round, round))
       .orderBy(asc(matchGoals.id))
-  ).map(({ goal }) => [goal.minute, goal.stoppageMinutes, goal.player, goal.ours, goal.ownGoal, goal.penalty])
+  ).map(({ goal }) => [goal.minute, goal.stoppageMinutes, goal.sourceName, goal.ours, goal.ownGoal, goal.penalty])
 
 const health = async () => (await database.db.select().from(matchImports))[0]
 
@@ -2699,10 +2699,10 @@ describe('the status', () => {
     // The squad has the two now. The other scorers are players already, made from their goals.
     await database.db.insert(players).values(
       ['Oliver Braude', 'Nolhan Courtens'].map((name) => ({
-        name,
         position: 'aanvaller' as const,
         searchTerm: name,
         season: '2026/27',
+        sourceName: name,
         wikipediaPage: name,
       })),
     )
@@ -2773,10 +2773,10 @@ describe('linking the goals to the players of the squad', () => {
       rows.map(([name, wikipediaPage]) => ({
         inSquad,
         leftSquadAt: inSquad ? null : first,
-        name,
         position: 'aanvaller' as const,
         searchTerm: name.split(' ').slice(1).join(' '),
         season: '2026/27',
+        sourceName: name,
         wikipediaPage,
       })),
     )
@@ -2786,13 +2786,13 @@ describe('linking the goals to the players of the squad', () => {
   const linksOf = async (round: string) =>
     (
       await database.db
-        .select({ goal: matchGoals, player: players.name })
+        .select({ goal: matchGoals, player: players.sourceName })
         .from(matchGoals)
         .innerJoin(matches, eq(matchGoals.matchId, matches.id))
         .leftJoin(players, eq(matchGoals.playerId, players.id))
         .where(eq(matches.round, round))
         .orderBy(asc(matchGoals.id))
-    ).map(({ goal, player }) => [goal.player, player, goal.wikipediaPage])
+    ).map(({ goal, player }) => [goal.sourceName, player, goal.wikipediaPage])
 
   it('links a goal by the page, by the full name and by a surname only one player has, and no other', async () => {
     await addPlayers([
@@ -2825,7 +2825,7 @@ describe('linking the goals to the players of the squad', () => {
     const [trenskow] = await database.db.select().from(players)
     const goalRows = () => database.db.select().from(matchGoals).orderBy(asc(matchGoals.id))
     const before = await goalRows()
-    const ofTrenskow = before.filter((goal) => goal.player === 'Trenskow')
+    const ofTrenskow = before.filter((goal) => goal.sourceName === 'Trenskow')
 
     expect(ofTrenskow.length).toBeGreaterThan(1)
     expect(ofTrenskow.every((goal) => goal.playerId === trenskow?.id)).toBe(true)
@@ -2877,7 +2877,11 @@ describe('linking the goals to the players of the squad', () => {
     const days = (count: number) => new Date(first.getTime() + hours(24 * count))
     const rivera = async () =>
       (
-        await database.db.select().from(matchGoals).where(eq(matchGoals.player, 'Rivera')).orderBy(asc(matchGoals.id))
+        await database.db
+          .select()
+          .from(matchGoals)
+          .where(eq(matchGoals.sourceName, 'Rivera'))
+          .orderBy(asc(matchGoals.id))
       )[0]
 
     /**
@@ -2905,7 +2909,7 @@ describe('linking the goals to the players of the squad', () => {
 
     it('links a goal that fits one player of the season now, also in a match that waits', async () => {
       const lines = await waitingMatch(() => addPlayers([['Maxence Rivera', null]]))
-      const [player] = await database.db.select().from(players).where(eq(players.name, 'Maxence Rivera'))
+      const [player] = await database.db.select().from(players).where(eq(players.sourceName, 'Maxence Rivera'))
 
       expect((await rivera())?.playerId).toBe(player?.id)
       expect(lines).toContainEqual(expect.stringMatching(/^1 goal without a player linked, \d+ left without one$/u))
@@ -2933,14 +2937,14 @@ describe('linking the goals to the players of the squad', () => {
     it('keeps a goal the editors linked to a player', async () => {
       // The first read made Trenskow a player from his goals.
       const trenskow = async () =>
-        (await database.db.select().from(players).where(eq(players.name, 'Jacob Trenskow')))[0]
+        (await database.db.select().from(players).where(eq(players.sourceName, 'Jacob Trenskow')))[0]
 
       await waitingMatch(async () => {
         await addPlayers([['Maxence Rivera', null]])
         await database.db
           .update(matchGoals)
           .set({ playerId: (await trenskow())?.id })
-          .where(eq(matchGoals.player, 'Rivera'))
+          .where(eq(matchGoals.sourceName, 'Rivera'))
       })
 
       expect((await rivera())?.playerId).toBe((await trenskow())?.id)
@@ -2997,7 +3001,7 @@ describe('linking the goals to the players of the squad', () => {
     ].map((name) => [name, name])
     const rivera = '{{goal|82}} [[Maxence Rivera|Rivera]]'
     const linked = original.programme.replace(rivera, '{{goal|82}} [[Pelle van Amersfoort|Van Amersfoort]]')
-    const ofPelle = () => database.db.select().from(players).where(eq(players.name, 'Pelle van Amersfoort'))
+    const ofPelle = () => database.db.select().from(players).where(eq(players.sourceName, 'Pelle van Amersfoort'))
 
     it('gives a season whose players come from goals only a row of completeness, once (#1040)', async () => {
       const { server } = await serve({ programme: linked })
@@ -3078,11 +3082,11 @@ describe('linking the goals to the players of the squad', () => {
 
       const ofEditors = {
         editorsFields: ['name', 'shirt_number', 'wikipedia_page'] as ('name' | 'shirt_number' | 'wikipedia_page')[],
-        name: 'Pelle van A.',
         searchTerm: 'van A.',
         season: '2026/27',
         shirtNumber: 14,
         source: 'redactie' as const,
+        sourceName: 'Pelle van A.',
         wikipediaPage: 'Pelle van Amersfoort',
       }
 
@@ -3171,7 +3175,7 @@ describe('linking the goals to the players of the squad', () => {
 
       expect(rows).toHaveLength(others.length + 1)
       expect(
-        (await database.db.select().from(matchGoals).where(eq(matchGoals.player, 'Van Amersfoort'))).map(
+        (await database.db.select().from(matchGoals).where(eq(matchGoals.sourceName, 'Van Amersfoort'))).map(
           (goal) => goal.playerId,
         ),
       ).toEqual([pelle?.id, pelle?.id])
@@ -3277,7 +3281,7 @@ describe('linking the goals to the players of the squad', () => {
 
       await importAt(server, first)
 
-      expect(await database.db.select().from(players).where(eq(players.name, 'Abdellah Ouazane'))).toEqual([])
+      expect(await database.db.select().from(players).where(eq(players.sourceName, 'Abdellah Ouazane'))).toEqual([])
     })
   })
 })
@@ -3350,7 +3354,7 @@ describe('the play-offs for the Conference League', () => {
     ])
 
     const goals = await database.db
-      .select({ minute: matchGoals.minute, ours: matchGoals.ours, player: matchGoals.player })
+      .select({ minute: matchGoals.minute, ours: matchGoals.ours, player: matchGoals.sourceName })
       .from(matchGoals)
       .innerJoin(matches, eq(matchGoals.matchId, matches.id))
       .where(eq(matches.competition, 'Play-offs Conference League'))
@@ -3633,7 +3637,7 @@ describe('the persons of the scorers', () => {
         .leftJoin(persons, eq(matchGoals.personId, persons.id))
         .where(eq(matches.round, round))
         .orderBy(asc(matchGoals.id))
-    ).map(({ goal, page }) => [goal.player, goal.wikipediaPage, page])
+    ).map(({ goal, page }) => [goal.sourceName, goal.wikipediaPage, page])
 
   it('gives every goal with a page a person, and two titles of one article the same person', async () => {
     const { server } = await serve(
@@ -3679,10 +3683,10 @@ describe('the persons of the scorers', () => {
 
   it('links a goal under a redirect to the player of the squad, by the person', async () => {
     await database.db.insert(players).values({
-      name: 'Maxence Rivera Gomez',
       position: 'aanvaller',
       searchTerm: 'Rivera Gomez',
       season,
+      sourceName: 'Maxence Rivera Gomez',
       wikipediaPage: 'Maxence Rivera (voetballer)',
     })
 

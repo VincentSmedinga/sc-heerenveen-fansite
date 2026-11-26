@@ -248,9 +248,10 @@ export function encodeProposal(proposal: Proposal): string {
 export async function storeGoals(db: Pick<Database, 'insert'>, matchId: number, goals: LinkedGoal[]) {
   if (goals.length > 0) {
     await db.insert(matchGoals).values(
-      goals.map(({ playerPage, ...goal }): NewMatchGoal => ({
+      goals.map(({ player, playerPage, ...goal }): NewMatchGoal => ({
         ...goal,
         matchId,
+        sourceName: player,
         wikipediaPage: playerPage,
       })),
     )

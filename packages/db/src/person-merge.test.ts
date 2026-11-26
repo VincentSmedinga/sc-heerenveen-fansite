@@ -109,14 +109,14 @@ describe('mergePersons', () => {
 
     // The name of a player ignores accents (utf8mb4_unicode_ci): g and ğ, z and ž, c and ć are
     // the same there, so a season never has two rows that differ in those alone.
-    await addPlayer({ name: 'Uğur Yıldırım', season: '2004/05' })
-    await addPlayer({ name: 'Radoslav Samardžić', season: '2004/05' })
-    await expect(addPlayer({ name: 'Ugur Yıldırım', season: '2004/05' })).rejects.toThrow()
-    await expect(addPlayer({ name: 'Radoslav Samardzic', season: '2004/05' })).rejects.toThrow()
+    await addPlayer({ season: '2004/05', sourceName: 'Uğur Yıldırım' })
+    await addPlayer({ season: '2004/05', sourceName: 'Radoslav Samardžić' })
+    await expect(addPlayer({ season: '2004/05', sourceName: 'Ugur Yıldırım' })).rejects.toThrow()
+    await expect(addPlayer({ season: '2004/05', sourceName: 'Radoslav Samardzic' })).rejects.toThrow()
     // A dotless ı is not an i, and a hyphen is not a space: these are two names.
-    await addPlayer({ name: 'Ugur Yildirim', season: '2004/05' })
-    await addPlayer({ name: 'Jan Harm Schippers', season: '2004/05' })
-    await addPlayer({ name: 'Jan-Harm Schippers', season: '2004/05' })
+    await addPlayer({ season: '2004/05', sourceName: 'Ugur Yildirim' })
+    await addPlayer({ season: '2004/05', sourceName: 'Jan Harm Schippers' })
+    await addPlayer({ season: '2004/05', sourceName: 'Jan-Harm Schippers' })
   })
 
   it('merges a pair that both exist, with their goals, players, titles and what Wikidata said', async () => {
@@ -158,23 +158,23 @@ describe('mergePersons', () => {
     await database.db.insert(personSportCountries).values({ itemId: 'Q43', personId: other, position: 0 })
 
     const squad = await addPlayer({
-      name: 'Uğur Yıldırım',
       personId: kept,
       season: '2004/05',
+      sourceName: 'Uğur Yıldırım',
       wikipediaPage: ugur.title,
     })
     const scorer = await addPlayer({
-      name: 'Ugur Yıldırım',
       personId: other,
       season: '2005/06',
       source: 'doelpunten',
+      sourceName: 'Ugur Yıldırım',
       wikipediaPage: 'Ugur Yıldırım',
     })
     const matchId = await addMatch('2004-10-24')
 
     await database.db.insert(matchGoals).values([
-      { matchId, minute: 10, ours: true, personId: kept, player: 'Yıldırım', playerId: squad },
-      { matchId, minute: 80, ours: true, personId: other, player: 'Yıldırım', playerId: scorer },
+      { matchId, minute: 10, ours: true, personId: kept, playerId: squad, sourceName: 'Yıldırım' },
+      { matchId, minute: 80, ours: true, personId: other, playerId: scorer, sourceName: 'Yıldırım' },
     ])
 
     const first = await mergePersons(database.db, list)
@@ -359,29 +359,29 @@ describe('mergePersons', () => {
     const season = '1994/95'
     // The row of the transfers has the title that stays, the row of the statistics the other.
     const stays = await addPlayer({
-      name: 'Jan Harm Schippers',
       personId: kept,
       season,
       source: 'transfers',
+      sourceName: 'Jan Harm Schippers',
       wikipediaPage: 'Jan Harm Schippers',
     })
     const double = await addPlayer({
       country: 'NL',
-      name: 'Jan-Harm Schippers',
       personId: other,
       position: 'aanvaller',
       season,
       shirtNumber: 9,
       source: 'statistieken',
+      sourceName: 'Jan-Harm Schippers',
       wikipediaPage: 'Jan-Harm Schippers',
     })
-    const later = await addPlayer({ name: 'Jan-Harm Schippers', personId: other, season: '1995/96' })
+    const later = await addPlayer({ personId: other, season: '1995/96', sourceName: 'Jan-Harm Schippers' })
     const one = await addMatch('1994-09-01')
     const two = await addMatch('1994-09-08')
 
     await database.db.insert(matchGoals).values([
-      { matchId: one, minute: 10, ours: true, personId: other, player: 'Schippers', playerId: double },
-      { matchId: two, minute: 20, ours: true, personId: kept, player: 'Schippers', playerId: stays },
+      { matchId: one, minute: 10, ours: true, personId: other, playerId: double, sourceName: 'Schippers' },
+      { matchId: two, minute: 20, ours: true, personId: kept, playerId: stays, sourceName: 'Schippers' },
     ])
     await database.db.insert(matchReports).values([
       { matchId: one, status: 'klaar' },
@@ -390,9 +390,9 @@ describe('mergePersons', () => {
     // The first match has the other row only, so the line-up moves. The second has both: one
     // row for each player and match, so the other stays in the report without a player.
     await database.db.insert(matchAppearances).values([
-      { matchId: one, name: 'Jan-Harm Schippers', ours: true, playerId: double, starter: true },
-      { matchId: two, name: 'Jan-Harm Schippers', ours: true, playerId: double, starter: false },
-      { matchId: two, name: 'Jan Harm Schippers', ours: true, playerId: stays, starter: true },
+      { matchId: one, ours: true, playerId: double, sourceName: 'Jan-Harm Schippers', starter: true },
+      { matchId: two, ours: true, playerId: double, sourceName: 'Jan-Harm Schippers', starter: false },
+      { matchId: two, ours: true, playerId: stays, sourceName: 'Jan Harm Schippers', starter: true },
     ])
     await database.db.insert(playerSeasonStats).values([
       { appearances: 20, assists: 1, competition: 'Eredivisie', goals: 5, playerId: double, season },
@@ -421,12 +421,12 @@ describe('mergePersons', () => {
       {
         country: 'NL',
         id: stays,
-        name: 'Jan Harm Schippers',
         personId: kept,
         position: 'aanvaller',
         season,
         shirtNumber: 9,
         source: 'transfers',
+        sourceName: 'Jan Harm Schippers',
         wikipediaPage: 'Jan Harm Schippers',
       },
       { id: later, personId: kept, season: '1995/96' },
@@ -475,12 +475,12 @@ describe('mergePersons', () => {
       nameSource: 'guess',
       wikipediaPage: 'Radoslav Samardzic',
     })
-    const player = await addPlayer({ name: 'Radoslav Samardzic', personId: id, season: '1997/98' })
+    const player = await addPlayer({ personId: id, season: '1997/98', sourceName: 'Radoslav Samardzic' })
     const matchId = await addMatch('1997-09-01')
 
     await database.db
       .insert(matchGoals)
-      .values({ matchId, minute: 10, ours: true, personId: id, player: 'Samardzic', playerId: player })
+      .values({ matchId, minute: 10, ours: true, personId: id, playerId: player, sourceName: 'Samardzic' })
 
     const first = await mergePersons(database.db, list, new Map([[samardzic.title, name]]))
 
@@ -652,21 +652,21 @@ describe('mergePersons', () => {
     // The row of the table has the title that stays and the better source, and still goes.
     const ofTable = await addPlayer({
       country: 'NL',
-      name: 'Jan Harm Schippers',
       personId: kept,
       position: 'aanvaller',
       season: '2004/05',
       shirtNumber: 11,
       source: 'selectie',
+      sourceName: 'Jan Harm Schippers',
       wikipediaPage: schippers.title,
     })
     const ofEditors = await addPlayer({
       editorsFields: ['name', 'shirt_number', 'wikipedia_page'],
-      name: 'J.H. Schippers',
       personId: other,
       season: '2004/05',
       shirtNumber: 7,
       source: 'redactie',
+      sourceName: 'J.H. Schippers',
       wikipediaPage: schippers.aliases[0]!,
     })
 
@@ -677,11 +677,11 @@ describe('mergePersons', () => {
         country: 'NL',
         editorsFields: ['name', 'shirt_number', 'wikipedia_page'],
         id: ofEditors,
-        name: 'J.H. Schippers',
         personId: kept,
         position: 'aanvaller',
         shirtNumber: 7,
         source: 'redactie',
+        sourceName: 'J.H. Schippers',
         wikipediaPage: schippers.aliases[0],
       },
     ])
@@ -705,8 +705,18 @@ describe('mergeEditorsPersonInto', () => {
       .insert(persons)
       .values({ familyName: 'Spits', givenName: 'Sanne', name: 'Sanne Spits', nameSource: 'redactie' })
     const titled = await addPerson({ birthDate: '1999-01-02', name: 'S. Spits', wikipediaPage: 'Sanne Spits (1999)' })
-    const player = await addPlayer({ name: 'Sanne Spits', personId: untitled, season: '2004/05', source: 'redactie' })
-    const earlier = await addPlayer({ name: 'Sanne Spits', personId: untitled, season: '2003/04', source: 'redactie' })
+    const player = await addPlayer({
+      personId: untitled,
+      season: '2004/05',
+      source: 'redactie',
+      sourceName: 'Sanne Spits',
+    })
+    const earlier = await addPlayer({
+      personId: untitled,
+      season: '2003/04',
+      source: 'redactie',
+      sourceName: 'Sanne Spits',
+    })
 
     expect(await mergeEditorsPersonInto(database.db, untitled, titled)).toBe(true)
     expect(await personRows()).toMatchObject([
@@ -780,17 +790,22 @@ describe('mergeChosenPersons', () => {
 
   it('points everything at the person that stays, remembers the title and writes one row of the log', async () => {
     const { old, renamed } = await twoPersons()
-    const first = await addPlayer({ name: 'Oude Naam', personId: old, season: '2003/04', wikipediaPage: 'Oude Naam' })
-    const later = await addPlayer({ name: 'Nieuwe Naam', personId: renamed, season: '2004/05' })
+    const first = await addPlayer({
+      personId: old,
+      season: '2003/04',
+      sourceName: 'Oude Naam',
+      wikipediaPage: 'Oude Naam',
+    })
+    const later = await addPlayer({ personId: renamed, season: '2004/05', sourceName: 'Nieuwe Naam' })
     const matchId = await addMatch('2003-10-24')
 
     await database.db.insert(matchReports).values({ matchId, status: 'klaar' })
     await database.db
       .insert(matchAppearances)
-      .values({ matchId, name: 'Oude Naam', ours: true, playerId: first, starter: true })
+      .values({ matchId, ours: true, playerId: first, sourceName: 'Oude Naam', starter: true })
     await database.db.insert(matchGoals).values([
-      { matchId, minute: 10, ours: true, personId: old, player: 'Oude Naam', playerId: first },
-      { matchId, minute: 20, ours: true, personId: old, player: 'Oude Naam' },
+      { matchId, minute: 10, ours: true, personId: old, playerId: first, sourceName: 'Oude Naam' },
+      { matchId, minute: 20, ours: true, personId: old, sourceName: 'Oude Naam' },
     ])
 
     const plan = await mergeChosenPersons(
@@ -843,17 +858,22 @@ describe('mergeChosenPersons', () => {
 
   it('makes the two rows of a season one row, and keeps the row of the editors', async () => {
     const { old, renamed } = await twoPersons()
-    const ofImport = await addPlayer({ name: 'Nieuwe Naam', personId: renamed, season: '2004/05', shirtNumber: 9 })
+    const ofImport = await addPlayer({
+      personId: renamed,
+      season: '2004/05',
+      shirtNumber: 9,
+      sourceName: 'Nieuwe Naam',
+    })
     const ofEditors = await addPlayer({
       editorsFields: ['name'],
-      name: 'O. Naam',
       personId: old,
       season: '2004/05',
+      sourceName: 'O. Naam',
     })
 
     expect(await planPersonMerge(database.db, old, renamed)).toMatchObject({
       doubles: [
-        { gone: { id: ofImport, name: 'Nieuwe Naam' }, season: '2004/05', stays: { id: ofEditors, name: 'O. Naam' } },
+        { gone: { id: ofImport, name: 'Nieuwe Naam' }, season: '2004/05', stays: { id: ofEditors, name: 'Oude Naam' } },
       ],
       editorsValues: 2,
     })
@@ -863,7 +883,7 @@ describe('mergeChosenPersons', () => {
     await mergeChosenPersons(database.db, { describe: describePlan, keptId: renamed, otherId: old, userId: null })
 
     expect(await playerRows()).toMatchObject([
-      { editorsFields: ['name'], id: ofEditors, name: 'O. Naam', personId: renamed, shirtNumber: 9 },
+      { editorsFields: ['name'], id: ofEditors, personId: renamed, shirtNumber: 9, sourceName: 'O. Naam' },
     ])
   })
 
@@ -900,13 +920,13 @@ describe('fillPlayerFrom (#1076)', () => {
   const rowOf = async (id: number) => (await database.db.select().from(players).where(eq(players.id, id)))[0]!
 
   it('takes the previous number and its day along with the number it fills in', async () => {
-    const stays = await addPlayer({ name: 'Testspeler Blijft', season: '2004/05' })
+    const stays = await addPlayer({ season: '2004/05', sourceName: 'Testspeler Blijft' })
     const gone = await addPlayer({
-      name: 'Testspeler Weg',
       previousShirtNumber: 29,
       season: '2004/05',
       shirtNumber: 9,
       shirtNumberFrom: '2004-10-01',
+      sourceName: 'Testspeler Weg',
     })
 
     await fillPlayerFrom(database.db, await rowOf(stays), await rowOf(gone))
@@ -920,18 +940,18 @@ describe('fillPlayerFrom (#1076)', () => {
 
   it('keeps its own previous number and day when it has a number already', async () => {
     const stays = await addPlayer({
-      name: 'Testspeler Blijft',
       previousShirtNumber: 3,
       season: '2004/05',
       shirtNumber: 4,
       shirtNumberFrom: '2004-11-01',
+      sourceName: 'Testspeler Blijft',
     })
     const gone = await addPlayer({
-      name: 'Testspeler Weg',
       previousShirtNumber: 29,
       season: '2004/05',
       shirtNumber: 9,
       shirtNumberFrom: '2004-10-01',
+      sourceName: 'Testspeler Weg',
     })
 
     await fillPlayerFrom(database.db, await rowOf(stays), await rowOf(gone))

@@ -284,7 +284,7 @@ describe('deleteAddedMatch', () => {
 
     await database.db
       .insert(matchGoals)
-      .values({ matchId: id, minute: 12, ours: true, player: 'Oyen', stoppageMinutes: null })
+      .values({ matchId: id, minute: 12, ours: true, sourceName: 'Oyen', stoppageMinutes: null })
 
     expect(await deleteAddedMatch(database.db, userId, id, 'Dubbel', t0)).toBe('done')
     expect(await database.db.select().from(matches)).toEqual([])
@@ -296,7 +296,7 @@ describe('deleteAddedMatch', () => {
   it('works out the completeness of the squad of its season again (#1675)', async () => {
     const outcome = await addMatch(database.db, userId, entry(), t0)
 
-    await database.db.insert(players).values({ name: 'Oyen', searchTerm: 'Oyen', season: '2008/09' })
+    await database.db.insert(players).values({ searchTerm: 'Oyen', season: '2008/09', sourceName: 'Oyen' })
     await database.pool.query('DELETE FROM squad_completeness')
     await deleteAddedMatch(database.db, userId, outcome.status === 'added' ? outcome.id : 0, 'Dubbel', t0)
 

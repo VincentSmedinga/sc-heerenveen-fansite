@@ -11,6 +11,7 @@ import {
   staff,
   supporters,
 } from '@fansite/db/schema'
+import { shownAppearanceName, shownPlayerName } from '@fansite/db/shown-name'
 import { and, asc, desc, eq, isNull, sql } from 'drizzle-orm'
 
 import { cacheFor, cacheForKey } from '#src/cache'
@@ -90,7 +91,7 @@ export async function loadMatchRatings(
       appearanceId: matchAppearances.id,
       average: matchPlayerRatings.average,
       count: matchPlayerRatings.ratingCount,
-      name: players.name,
+      name: shownPlayerName(),
       playerId: matchPlayerRatings.playerId,
     })
     .from(matchPlayerRatings)
@@ -104,7 +105,7 @@ export async function loadMatchRatings(
       ),
     )
     .where(and(eq(matchPlayerRatings.matchId, matchId), eq(matchPlayerRatings.source, source)))
-    .orderBy(asc(matchAppearances.id), asc(players.name))
+    .orderBy(asc(matchAppearances.id), asc(shownPlayerName()))
 
   if (rows.length === 0) {
     return undefined
@@ -157,14 +158,20 @@ export async function loadRunningRatings(db: Database, matchId: number): Promise
       appearanceId: matchAppearances.id,
       average: sql<string>`avg(${playerRatings.grade})`,
       count: sql<number>`count(*)`,
-      name: matchAppearances.name,
+      name: shownAppearanceName(),
       playerId: matchAppearances.playerId,
     })
     .from(playerRatings)
     .innerJoin(matchAppearances, eq(matchAppearances.id, playerRatings.appearanceId))
     .leftJoin(supporters, eq(supporters.id, playerRatings.supporterId))
     .where(and(eq(matchAppearances.matchId, matchId), eq(playerRatings.blocked, false), isNull(supporters.disabledAt)))
-    .groupBy(matchAppearances.id, matchAppearances.name, matchAppearances.playerId)
+    .groupBy(
+      matchAppearances.id,
+      matchAppearances.sourceName,
+      matchAppearances.ours,
+      matchAppearances.personId,
+      matchAppearances.playerId,
+    )
 
   return rows.flatMap((row) =>
     row.playerId === null
@@ -272,7 +279,7 @@ export async function loadSeasonWinners(db: Database, season: string): Promise<S
       goalsFor: matches.goalsFor,
       home: matches.home,
       matchId: matches.id,
-      name: players.name,
+      name: shownPlayerName(),
       opponent: matches.opponent,
       playerId: matchPlayerRatings.playerId,
     })

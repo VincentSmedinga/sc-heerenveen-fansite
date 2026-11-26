@@ -4,6 +4,8 @@
 // have a player. A goal that no rule can place is left without a player, never guessed.
 import type { Player } from '@fansite/db/schema'
 
+import { rowsByName } from '@fansite/db/shown-name'
+
 import type { ReadGoal } from './read-wikipedia.ts'
 
 import { nameKey } from './read-squad.ts'
@@ -15,7 +17,10 @@ export type LinkableGoal = Pick<ReadGoal, 'ours' | 'ownGoal' | 'player' | 'playe
 }
 
 /** What the rules need to know of a player of the season, in the squad or not any more. */
-export type LinkablePlayer = Pick<Player, 'id' | 'name' | 'wikipediaPage'> & {
+export type LinkablePlayer = Pick<Player, 'id' | 'sourceName' | 'wikipediaPage'> & {
+  /** The name of his person, when it may differ from the name of the source (`shownName`). */
+  name?: string
+
   /** The person of the player, or null or left out when the player has none yet. */
   personId?: null | number
 }
@@ -38,7 +43,8 @@ export function isGoalOfOurPlayer(goal: Pick<ReadGoal, 'ours' | 'ownGoal'>): boo
  *    finds a goal under a redirect of the page of the player. Two players of one person are
  *    not told apart, so this rule skips them;
  * 2. the page the goal links to is the page of a player (`wikipedia_page`);
- * 3. the name in the goal is the full name of a player;
+ * 3. the name in the goal is the full name of a player, as a source wrote it or as his person
+ *    has it;
  * 4. the name in the goal, usually the surname, ends a name, and only one player has such a
  *    name: `Oyen` for `Luca Oyen`, and `Van Hecke` for `Jan Paul van Hecke`. Two players with
  *    the same surname are not told apart here, so a goal that has no link to either of them is
@@ -49,13 +55,14 @@ export function isGoalOfOurPlayer(goal: Pick<ReadGoal, 'ours' | 'ownGoal'>): boo
  */
 export function playerLinker(squad: LinkablePlayer[]): (goal: LinkableGoal) => null | number {
   const byPage = new Map<string, number>()
-  const byName = new Map<string, number>()
+  const byName = rowsByName(
+    squad.map((player) => ({ ...player, name: player.name ?? player.sourceName })),
+    nameKey,
+  )
   const byPerson = new Map<number, number>()
   const sharedPersons = new Set<number>()
 
   for (const player of squad) {
-    byName.set(nameKey(player.name), player.id)
-
     if (player.personId !== null && player.personId !== undefined) {
       if (byPerson.has(player.personId)) {
         sharedPersons.add(player.personId)
@@ -68,6 +75,11 @@ export function playerLinker(squad: LinkablePlayer[]): (goal: LinkableGoal) => n
       byPage.set(nameKey(player.wikipediaPage), player.id)
     }
   }
+
+  // A goal is placed by the name of the source of a row and by the name of its person.
+  const namesOf = (player: LinkablePlayer) => [
+    ...new Set([player.name ?? player.sourceName, player.sourceName].map(nameKey)),
+  ]
 
   return (goal) => {
     if (!isGoalOfOurPlayer(goal)) {
@@ -87,11 +99,13 @@ export function playerLinker(squad: LinkablePlayer[]): (goal: LinkableGoal) => n
     if (page !== undefined) {
       return page
     }
-    if (byName.has(name)) {
-      return byName.get(name) ?? null
+    const full = byName.get(name)
+
+    if (full !== undefined) {
+      return full.id
     }
 
-    const ending = squad.filter((player) => nameKey(player.name).endsWith(` ${name}`))
+    const ending = squad.filter((player) => namesOf(player).some((full) => full.endsWith(` ${name}`)))
 
     return ending.length === 1 ? (ending[0]?.id ?? null) : null
   }

@@ -64,7 +64,7 @@ async function match(season: string, day: number, goalsAgainst: number, report: 
 const appear = async (matchId: number, playerId: number, shirtNumber: number, starter = true) => {
   const [{ insertId }] = await database.db
     .insert(matchAppearances)
-    .values({ matchId, name: `Speler ${shirtNumber}`, ours: true, playerId, shirtNumber, starter })
+    .values({ matchId, ours: true, playerId, shirtNumber, sourceName: `Speler ${shirtNumber}`, starter })
 
   return insertId
 }
@@ -74,7 +74,7 @@ describe('reading the seasons of a person', () => {
     const [{ insertId: personId }] = await database.db.insert(persons).values({ name: 'Verzonnen Keeper' })
     const [{ insertId: playerId }] = await database.db
       .insert(players)
-      .values({ name: 'Verzonnen Keeper', personId, searchTerm: 'keeper', season: '2003/04', shirtNumber: 9 })
+      .values({ personId, searchTerm: 'keeper', season: '2003/04', shirtNumber: 9, sourceName: 'Verzonnen Keeper' })
     const first = await match('2003/04', 1, 0)
     const second = await match('2003/04', 2, 2)
     const third = await match('2003/04', 3, 1, 'bezig')
@@ -87,12 +87,12 @@ describe('reading the seasons of a person', () => {
       .values({ name: 'Verzonnen Maat', slug: 'verzonnen-maat' })
     const [{ insertId: matePlayerId }] = await database.db
       .insert(players)
-      .values({ name: 'Verzonnen Maat', personId: mateId, searchTerm: 'maat', season: '2003/04' })
+      .values({ personId: mateId, searchTerm: 'maat', season: '2003/04', sourceName: 'Verzonnen Maat' })
     const mateInFirst = await appear(first, matePlayerId, 8)
 
     await appear(third, playerId, 9)
 
-    const ours = { ours: true, player: 'Keeper' }
+    const ours = { ours: true, sourceName: 'Keeper' }
 
     await database.db.insert(matchGoals).values([
       // The three ways to him, and a goal that has all three: each counts once.
@@ -102,10 +102,10 @@ describe('reading the seasons of a person', () => {
       { ...ours, appearanceId: inSecond, matchId: second, personId, playerId },
       // An own goal, a goal against us and a goal of somebody else do not count.
       { ...ours, matchId: second, ownGoal: true, personId },
-      { matchId: second, ours: false, personId, player: 'Tegenstander' },
-      { ...ours, matchId: fourth, player: 'Ander' },
+      { matchId: second, ours: false, personId, sourceName: 'Tegenstander' },
+      { ...ours, matchId: fourth, sourceName: 'Ander' },
       // A goal of somebody else that he gave the assist for.
-      { ...ours, assistAppearanceId: inSecond, matchId: second, player: 'Ander' },
+      { ...ours, assistAppearanceId: inSecond, matchId: second, sourceName: 'Ander' },
     ])
     await database.db
       .insert(matchCards)
@@ -128,7 +128,7 @@ describe('reading the seasons of a person', () => {
     expect(facts.assists).toHaveLength(1)
     // The assists of his goals, with the page of the player who gave it; and the goal he scored
     // against us, which belongs to the match as ours.
-    expect(facts.assistGivers).toEqual([{ name: 'Speler 8', slug: 'verzonnen-maat' }])
+    expect(facts.assistGivers).toEqual([{ name: 'Verzonnen Maat', slug: 'verzonnen-maat' }])
     expect(facts.againstUs).toEqual([
       expect.objectContaining({ match: expect.objectContaining({ clubSlug: expect.any(String), id: second }) }),
     ])
@@ -140,12 +140,12 @@ describe('reading the seasons of a person', () => {
     const [{ insertId: personId }] = await database.db.insert(persons).values({ name: 'Verzonnen Veld' })
     const [{ insertId: playerId }] = await database.db
       .insert(players)
-      .values({ name: 'Verzonnen Veld', personId, searchTerm: 'veld', season: '2003/04' })
+      .values({ personId, searchTerm: 'veld', season: '2003/04', sourceName: 'Verzonnen Veld' })
     const first = await match('2003/04', 1, 0)
     const out = await appear(first, playerId, 4)
     const [{ insertId: other }] = await database.db
       .insert(matchAppearances)
-      .values({ matchId: first, name: 'Invaller', ours: true, shirtNumber: 14, starter: false })
+      .values({ matchId: first, ours: true, shirtNumber: 14, sourceName: 'Invaller', starter: false })
 
     await database.db
       .insert(matchSubstitutions)
@@ -176,14 +176,14 @@ describe('reading the seasons of a person', () => {
     const [{ insertId: personId }] = await database.db.insert(persons).values({ name: 'Verzonnen Bank' })
     const [{ insertId: playerId }] = await database.db
       .insert(players)
-      .values({ name: 'Verzonnen Bank', personId, searchTerm: 'bank', season: '2003/04' })
+      .values({ personId, searchTerm: 'bank', season: '2003/04', sourceName: 'Verzonnen Bank' })
     const first = await match('2003/04', 1, 0)
     const second = await match('2003/04', 2, 0)
     const benched = await appear(first, playerId, 12, false)
     const cameOn = await appear(second, playerId, 12, false)
     const [{ insertId: out }] = await database.db
       .insert(matchAppearances)
-      .values({ matchId: second, name: 'Basisspeler', ours: true, shirtNumber: 5, starter: true })
+      .values({ matchId: second, ours: true, shirtNumber: 5, sourceName: 'Basisspeler', starter: true })
 
     await database.db
       .insert(matchSubstitutions)
@@ -202,19 +202,19 @@ describe('reading the minutes of a person', () => {
     const [{ insertId: personId }] = await database.db.insert(persons).values({ name: 'Verzonnen Minuut' })
     const [{ insertId: playerId }] = await database.db
       .insert(players)
-      .values({ name: 'Verzonnen Minuut', personId, searchTerm: 'minuut', season: '2003/04' })
+      .values({ personId, searchTerm: 'minuut', season: '2003/04', sourceName: 'Verzonnen Minuut' })
     // The other ten of the line-up, and a substitute.
     const teamMates = async (matchId: number, count: number) => {
       for (let number = 20; number < 20 + count; number += 1) {
         await database.db
           .insert(matchAppearances)
-          .values({ matchId, name: `Maat ${number}`, ours: true, shirtNumber: number, starter: true })
+          .values({ matchId, ours: true, shirtNumber: number, sourceName: `Maat ${number}`, starter: true })
       }
     }
     const substitute = async (matchId: number) => {
       const [{ insertId }] = await database.db
         .insert(matchAppearances)
-        .values({ matchId, name: 'Invaller', ours: true, shirtNumber: 14, starter: false })
+        .values({ matchId, ours: true, shirtNumber: 14, sourceName: 'Invaller', starter: false })
 
       return insertId
     }

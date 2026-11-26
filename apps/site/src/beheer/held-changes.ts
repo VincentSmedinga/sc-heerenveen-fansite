@@ -2,7 +2,7 @@ import type { Match, MatchGoal } from '@fansite/db/schema'
 
 import { decodeProposal } from '@fansite/db/match-changes'
 import { takenOverAt } from '@fansite/db/match-conflicts'
-import { describeEntryGoals, describeEntryKickoff, describeEntryResult } from '@fansite/db/match-edits'
+import { describeEntryGoals, describeEntryKickoff, describeEntryResult, goalFieldsOf } from '@fansite/db/match-edits'
 
 import type { HeldChange } from './match-entries'
 
@@ -51,7 +51,7 @@ export function describeHeldChange(
   const wikipedia = proposal.match
   const pairs: [string, string, string][] = [
     ['Uitslag', describeEntryResult(match), describeEntryResult(wikipedia)],
-    ['Doelpunten', describeEntryGoals([...goals]), describeEntryGoals(proposal.goals)],
+    ['Doelpunten', describeEntryGoals(goals.map(goalFieldsOf)), describeEntryGoals(proposal.goals)],
     ['Aanvang', describeEntryKickoff(match), describeEntryKickoff(wikipedia)],
     ['Tegenstander', clubOf(match), clubOf(wikipedia)],
     ['Stadion', match.stadium ?? none, wikipedia.stadium ?? none],

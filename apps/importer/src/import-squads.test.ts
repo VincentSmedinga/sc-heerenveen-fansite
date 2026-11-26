@@ -141,7 +141,7 @@ async function serve(pages: Record<string, string>, extra: Record<string, Handle
 }
 
 async function storedPlayers(forSeason = season) {
-  return database.db.select().from(players).where(eq(players.season, forSeason)).orderBy(asc(players.name))
+  return database.db.select().from(players).where(eq(players.season, forSeason)).orderBy(asc(players.sourceName))
 }
 
 describe('squadSources', () => {
@@ -325,7 +325,7 @@ describe('importPastSquad', () => {
     expect(report).toMatchObject({ kind: 'imported', pages: 1, players: { improved: 0, unchanged: 0 }, season })
 
     const rows = await storedPlayers()
-    const deRoon = rows.filter((row) => row.name === 'Marten de Roon')
+    const deRoon = rows.filter((row) => row.sourceName === 'Marten de Roon')
 
     // In both lists: one row, with the source, position and number of the selection.
     expect(deRoon).toHaveLength(1)
@@ -339,7 +339,7 @@ describe('importPastSquad', () => {
     })
     expect(deRoon[0]?.personId).not.toBeNull()
     // Only in the transfers: that source, and no position or number.
-    expect(rows.find((row) => row.name === 'Niek Loohuis')).toMatchObject({
+    expect(rows.find((row) => row.sourceName === 'Niek Loohuis')).toMatchObject({
       position: null,
       shirtNumber: null,
       source: 'transfers',
@@ -408,10 +408,10 @@ describe('importPastSquad', () => {
     const report = await importAt(server, season)
     const rows = await storedPlayers()
 
-    expect(rows.find((row) => row.name === 'Marten de Roon')?.country).toBe('NL')
-    expect(rows.find((row) => row.name === 'Kenny Otigba')?.country).toBe('HU')
+    expect(rows.find((row) => row.sourceName === 'Marten de Roon')?.country).toBe('NL')
+    expect(rows.find((row) => row.sourceName === 'Kenny Otigba')?.country).toBe('HU')
     // A player of the transfers only has no flag.
-    expect(rows.find((row) => row.name === 'Niek Loohuis')?.country).toBeNull()
+    expect(rows.find((row) => row.sourceName === 'Niek Loohuis')?.country).toBeNull()
     expect(report.kind === 'imported' && report.countries).toEqual({
       known: rows.filter((row) => row.country !== null).length,
       total: rows.length,
@@ -433,8 +433,8 @@ describe('importPastSquad', () => {
 
     const before = await storedPlayers()
 
-    expect(before.filter((row) => row.name.includes('Schippers'))).toMatchObject([
-      { name: 'Jan Harm Schippers', wikipediaPage: 'Jan Harm Schippers' },
+    expect(before.filter((row) => row.sourceName.includes('Schippers'))).toMatchObject([
+      { sourceName: 'Jan Harm Schippers', wikipediaPage: 'Jan Harm Schippers' },
     ])
 
     const other = await serve({ [squadPageTitle(season)]: twoLists.replaceAll('Marten de Roon', 'Jan-Harm Schippers') })
@@ -457,17 +457,17 @@ describe('importPastSquad', () => {
     await importAt(server, season)
 
     // A row of before the owner chose: the name and the page are the other spelling.
-    const [row] = (await storedPlayers()).filter((one) => one.name === kept)
+    const [row] = (await storedPlayers()).filter((one) => one.sourceName === kept)
 
-    await database.db.update(players).set({ name: old, wikipediaPage: old }).where(eq(players.id, row!.id))
+    await database.db.update(players).set({ sourceName: old, wikipediaPage: old }).where(eq(players.id, row!.id))
 
     const count = (await storedPlayers()).length
     const again = await importAt(server, season)
 
     expect(again).toMatchObject({ kind: 'imported', players: { added: 0 } })
     expect(await storedPlayers()).toHaveLength(count)
-    expect((await storedPlayers()).filter((one) => [kept, old].includes(one.name))).toMatchObject([
-      { id: row!.id, name: kept, wikipediaPage: kept },
+    expect((await storedPlayers()).filter((one) => [kept, old].includes(one.sourceName))).toMatchObject([
+      { id: row!.id, sourceName: kept, wikipediaPage: kept },
     ])
   })
 
@@ -475,15 +475,21 @@ describe('importPastSquad', () => {
     const server = await serve({ [squadPageTitle(season)]: twoLists })
 
     await database.db.insert(players).values([
-      { name: 'Marten de Roon', searchTerm: 'de Roon', season, source: 'selectie', wikipediaPage: 'Marten de Roon' },
-      { country: 'BE', name: 'Kenny Otigba', searchTerm: 'Otigba', season, source: 'selectie' },
+      {
+        searchTerm: 'de Roon',
+        season,
+        source: 'selectie',
+        sourceName: 'Marten de Roon',
+        wikipediaPage: 'Marten de Roon',
+      },
+      { country: 'BE', searchTerm: 'Otigba', season, source: 'selectie', sourceName: 'Kenny Otigba' },
     ])
     await importAt(server, season)
 
     const rows = await storedPlayers()
 
-    expect(rows.find((row) => row.name === 'Marten de Roon')?.country).toBe('NL')
-    expect(rows.find((row) => row.name === 'Kenny Otigba')?.country).toBe('BE')
+    expect(rows.find((row) => row.sourceName === 'Marten de Roon')?.country).toBe('NL')
+    expect(rows.find((row) => row.sourceName === 'Kenny Otigba')?.country).toBe('BE')
   })
 
   it('improves a source, a position and a number on a second read, and removes nobody', async () => {
@@ -492,14 +498,14 @@ describe('importPastSquad', () => {
     await database.db.insert(players).values([
       // Known from a worse list, without a position or a number.
       {
-        name: 'Marten de Roon',
         searchTerm: 'de Roon',
         season,
         source: 'transfers',
+        sourceName: 'Marten de Roon',
         wikipediaPage: 'Marten de Roon',
       },
       // Not on the page any more: stays.
-      { name: 'Een Oude Speler', searchTerm: 'Speler', season, source: 'doelpunten' },
+      { searchTerm: 'Speler', season, source: 'doelpunten', sourceName: 'Een Oude Speler' },
     ])
 
     const report = await importAt(server, season)
@@ -508,12 +514,15 @@ describe('importPastSquad', () => {
 
     const rows = await storedPlayers()
 
-    expect(rows.find((row) => row.name === 'Marten de Roon')).toMatchObject({
+    expect(rows.find((row) => row.sourceName === 'Marten de Roon')).toMatchObject({
       position: 'middenvelder',
       shirtNumber: 15,
       source: 'selectie',
     })
-    expect(rows.find((row) => row.name === 'Een Oude Speler')).toMatchObject({ inSquad: true, source: 'doelpunten' })
+    expect(rows.find((row) => row.sourceName === 'Een Oude Speler')).toMatchObject({
+      inSquad: true,
+      source: 'doelpunten',
+    })
   })
 
   it('gives a scorer the import of the matches made the row of the list, found by his page or his person (#1024)', async () => {
@@ -525,11 +534,11 @@ describe('importPastSquad', () => {
       { page: 'M. de Roon', personId },
     ])
     await database.db.insert(players).values({
-      name: 'M. de Roon',
       personId,
       searchTerm: 'de Roon',
       season,
       source: 'doelpunten',
+      sourceName: 'M. de Roon',
       wikipediaPage: 'M. de Roon',
     })
 
@@ -552,12 +561,12 @@ describe('importPastSquad', () => {
       // Known from a worse list, so the lists would improve the line and the number.
       await database.db.insert(players).values({
         editorsFields: ['name', 'position', 'shirt_number'],
-        name: 'M. de Roon',
         position: 'verdediger',
         searchTerm: 'de Roon',
         season,
         shirtNumber: 6,
         source: 'transfers',
+        sourceName: 'M. de Roon',
         wikipediaPage: 'Marten de Roon',
       })
 
@@ -567,14 +576,13 @@ describe('importPastSquad', () => {
 
       expect(await deRoon()).toMatchObject({
         id: before!.id,
-        name: 'M. de Roon',
         position: 'verdediger',
         shirtNumber: 6,
         // What the editors did not set is still improved.
         source: 'selectie',
+        sourceName: 'M. de Roon',
       })
       expect(await waiting()).toMatchObject([
-        { editorsValue: 'M. de Roon', field: 'name', importValue: 'Marten de Roon', playerId: before!.id, season },
         { editorsValue: '6', field: 'shirt_number', importValue: '15', status: 'pending' },
         { editorsValue: 'verdediger', field: 'position', importValue: 'middenvelder', status: 'pending' },
       ])
@@ -584,7 +592,6 @@ describe('importPastSquad', () => {
       await importAt(server, season)
 
       expect(await waiting()).toMatchObject([
-        { field: 'name', status: 'pending' },
         { field: 'shirt_number', resolution: 'reverted', status: 'rejected' },
         { field: 'position', status: 'pending' },
       ])
@@ -602,21 +609,21 @@ describe('importPastSquad', () => {
         // Found by his person: the lists link another title of his page.
         {
           editorsFields: ['name', 'wikipedia_page'],
-          name: 'M. de Roon',
           personId,
           searchTerm: 'de Roon',
           season,
           source: 'redactie',
+          sourceName: 'M. de Roon',
           wikipediaPage: 'M. de Roon',
         },
         // Found by his page, with a number of the editors.
         {
           editorsFields: ['name', 'shirt_number', 'wikipedia_page'],
-          name: 'Kenny Otigba',
           searchTerm: 'Otigba',
           season,
           shirtNumber: 44,
           source: 'redactie',
+          sourceName: 'Kenny Otigba',
           wikipediaPage: 'Kenny Otigba',
         },
       ])
@@ -628,21 +635,20 @@ describe('importPastSquad', () => {
       // No second row of either, and the lists fill in what they lack.
       expect(rows.filter((row) => row.personId === personId)).toMatchObject([
         {
-          id: before.find((row) => row.name === 'M. de Roon')!.id,
-          name: 'M. de Roon',
+          id: before.find((row) => row.sourceName === 'M. de Roon')!.id,
           position: 'middenvelder',
           shirtNumber: 15,
           source: 'redactie',
+          sourceName: 'M. de Roon',
           wikipediaPage: 'M. de Roon',
         },
       ])
-      expect(rows.filter((row) => row.name.includes('Otigba'))).toMatchObject([
+      expect(rows.filter((row) => row.sourceName.includes('Otigba'))).toMatchObject([
         { position: 'verdediger', shirtNumber: 44, source: 'redactie' },
       ])
-      expect(rows.find((row) => row.name === 'Kenny Otigba')?.personId).not.toBeNull()
+      expect(rows.find((row) => row.sourceName === 'Kenny Otigba')?.personId).not.toBeNull()
       expect(await waiting()).toMatchObject([
         { editorsValue: '44', field: 'shirt_number', importValue: '2' },
-        { editorsValue: 'M. de Roon', field: 'name', importValue: 'Marten de Roon' },
         { editorsValue: 'M. de Roon', field: 'wikipedia_page', importValue: 'Marten de Roon' },
       ])
 
@@ -656,10 +662,10 @@ describe('importPastSquad', () => {
 
       await database.db
         .insert(players)
-        .values({ editorsFields: ['name'], name: 'Sanne Spits', searchTerm: 'Spits', season, source: 'redactie' })
+        .values({ editorsFields: ['name'], searchTerm: 'Spits', season, source: 'redactie', sourceName: 'Sanne Spits' })
       await importAt(server, season)
 
-      expect((await storedPlayers()).find((row) => row.name === 'Sanne Spits')).toMatchObject({
+      expect((await storedPlayers()).find((row) => row.sourceName === 'Sanne Spits')).toMatchObject({
         inSquad: true,
         source: 'redactie',
       })
@@ -670,16 +676,16 @@ describe('importPastSquad', () => {
     const server = await serve({ [squadPageTitle(season)]: twoLists })
 
     await database.db.insert(players).values({
-      name: 'Niek Loohuis',
       position: 'verdediger',
       searchTerm: 'Loohuis',
       season,
       shirtNumber: 4,
       source: 'selectie',
+      sourceName: 'Niek Loohuis',
     })
     await importAt(server, season)
 
-    expect((await storedPlayers()).find((row) => row.name === 'Niek Loohuis')).toMatchObject({
+    expect((await storedPlayers()).find((row) => row.sourceName === 'Niek Loohuis')).toMatchObject({
       position: 'verdediger',
       shirtNumber: 4,
       source: 'selectie',
@@ -745,9 +751,9 @@ describe('importPastSquad', () => {
 
     expect(rows.length).toBeGreaterThan(5)
     expect(rows.every((row) => row.source === 'engels' && row.wikipediaPage === null)).toBe(true)
-    expect(rows.filter((row) => row.personId !== null).map((row) => row.name)).toEqual(['Jan Bekkema'])
+    expect(rows.filter((row) => row.personId !== null).map((row) => row.sourceName)).toEqual(['Jan Bekkema'])
     expect(await database.db.select().from(persons).where(isNotNull(persons.wikipediaPage))).toEqual([])
-    expect(rows.find((row) => row.name === 'Warner Hahn')).toMatchObject({ position: 'doelman', shirtNumber: 1 })
+    expect(rows.find((row) => row.sourceName === 'Warner Hahn')).toMatchObject({ position: 'doelman', shirtNumber: 1 })
     expect(await database.db.select().from(wikipediaPages)).toMatchObject([{ kind: 'squad', title }])
   })
 
@@ -809,7 +815,7 @@ describe('importPastSquad', () => {
 
       await database.db
         .insert(players)
-        .values({ name: 'Warner Hahn', personId: id, searchTerm: 'Hahn', season: '2017/18' })
+        .values({ personId: id, searchTerm: 'Hahn', season: '2017/18', sourceName: 'Warner Hahn' })
 
       return id
     }
@@ -826,10 +832,10 @@ describe('importPastSquad', () => {
         id === null ? null : (await database.db.select().from(persons).where(eq(persons.id, id)))[0]
 
       // By name: no request for Warner Hahn.
-      expect(rows.find((row) => row.name === 'Warner Hahn')?.personId).toBe(hahn)
+      expect(rows.find((row) => row.sourceName === 'Warner Hahn')?.personId).toBe(hahn)
       expect(pageRequests(three.english)).not.toContain(infoUrl('', 'Warner Hahn'))
       // By the English link: the Dutch title of the item, and the row keeps no page.
-      const daniel = rows.find((row) => row.name === 'Daniel Høegh')
+      const daniel = rows.find((row) => row.sourceName === 'Daniel Høegh')
 
       expect(await person(daniel?.personId ?? null)).toMatchObject({
         englishTitle: false,
@@ -837,7 +843,7 @@ describe('importPastSquad', () => {
       })
       expect(daniel?.wikipediaPage).toBeNull()
       // Without a Dutch article: a person under the English title, marked as such.
-      const yuki = rows.find((row) => row.name === 'Yuki Kobayashi')
+      const yuki = rows.find((row) => row.sourceName === 'Yuki Kobayashi')
 
       expect(await person(yuki?.personId ?? null)).toMatchObject({
         englishTitle: true,
@@ -865,24 +871,24 @@ describe('importPastSquad', () => {
 
       await database.db
         .insert(players)
-        .values({ name: 'Daniel Høegh', personId: other, searchTerm: 'Høegh', season: '2018/19' })
+        .values({ personId: other, searchTerm: 'Høegh', season: '2018/19', sourceName: 'Daniel Høegh' })
       await run(await servers3())
 
-      expect((await storedPlayers('2018/19')).find((row) => row.name === 'Daniel Høegh')?.personId).toBe(other)
+      expect((await storedPlayers('2018/19')).find((row) => row.sourceName === 'Daniel Høegh')?.personId).toBe(other)
     })
 
     it('leaves a player alone whose page the editors set, also when the Dutch title is another one', async () => {
       await database.db.insert(players).values({
         editorsFields: ['wikipedia_page'],
-        name: 'Daniel Høegh',
         searchTerm: 'Høegh',
         season: '2018/19',
         source: 'redactie',
+        sourceName: 'Daniel Høegh',
         wikipediaPage: 'Daniel Høegh (voetballer)',
       })
 
       const report = await run(await servers3())
-      const row = (await storedPlayers('2018/19')).find((one) => one.name === 'Daniel Høegh')
+      const row = (await storedPlayers('2018/19')).find((one) => one.sourceName === 'Daniel Høegh')
 
       expect(report).toMatchObject({ kind: 'imported' })
       expect(row).toMatchObject({
@@ -897,11 +903,11 @@ describe('importPastSquad', () => {
       const first = await run(broken)
 
       expect(first.kind === 'imported' && first.warnings.join('\n')).toMatch(/1 English title could not be asked/u)
-      expect((await storedPlayers('2018/19')).find((row) => row.name === 'Daniel Høegh')?.personId).toBeNull()
+      expect((await storedPlayers('2018/19')).find((row) => row.sourceName === 'Daniel Høegh')?.personId).toBeNull()
 
       await run(await servers3())
 
-      expect((await storedPlayers('2018/19')).find((row) => row.name === 'Daniel Høegh')?.personId).not.toBeNull()
+      expect((await storedPlayers('2018/19')).find((row) => row.sourceName === 'Daniel Høegh')?.personId).not.toBeNull()
     })
 
     it('stops asking after three failures in a row', async () => {
@@ -930,7 +936,7 @@ describe('importPastSquad', () => {
     const first = await importAt(server, season)
 
     expect(first.kind === 'imported' && first.warnings.some((line) => line.startsWith('Persons:'))).toBe(true)
-    expect((await storedPlayers()).find((row) => row.name === 'Marten de Roon')?.personId).toBeNull()
+    expect((await storedPlayers()).find((row) => row.sourceName === 'Marten de Roon')?.personId).toBeNull()
 
     // Wikipedia answers again.
     server.requests.length = 0
@@ -939,7 +945,7 @@ describe('importPastSquad', () => {
     const second = await importAt(working, season)
 
     expect(second).toMatchObject({ kind: 'imported', players: { added: 0, improved: 1 } })
-    expect((await storedPlayers()).find((row) => row.name === 'Marten de Roon')?.personId).not.toBeNull()
+    expect((await storedPlayers()).find((row) => row.sourceName === 'Marten de Roon')?.personId).not.toBeNull()
   })
 
   it('refuses a season that is not over, before it asks or writes anything', async () => {

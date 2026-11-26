@@ -43,7 +43,7 @@ const later = new Date('2026-11-10T10:00:00Z')
 async function player(values: Partial<typeof players.$inferInsert> = {}) {
   const [inserted] = await database.db
     .insert(players)
-    .values({ name: 'Sanne Spits', searchTerm: 'Spits', season, ...values })
+    .values({ searchTerm: 'Spits', season, sourceName: 'Sanne Spits', ...values })
     .$returningId()
 
   return inserted!.id
@@ -73,22 +73,15 @@ describe('holding the fields of the editors', () => {
   }
 
   it('lets the import write the fields the editors did not set, and keeps theirs', () => {
-    expect(
-      holdEditorsFields(row, { name: 'Sanne Spitz', position: 'middenvelder', shirtNumber: 19, wikipediaPage: 'S' }),
-    ).toEqual({
-      allowed: { name: 'Sanne Spits', position: 'middenvelder', shirtNumber: 9, wikipediaPage: 'S' },
-      differences: [
-        { editorsValue: 'Sanne Spits', field: 'name', importValue: 'Sanne Spitz', playerId: 7 },
-        { editorsValue: '9', field: 'shirt_number', importValue: '19', playerId: 7 },
-      ],
+    expect(holdEditorsFields(row, { position: 'middenvelder', shirtNumber: 19, wikipediaPage: 'S' })).toEqual({
+      allowed: { position: 'middenvelder', shirtNumber: 9, wikipediaPage: 'S' },
+      differences: [{ editorsValue: '9', field: 'shirt_number', importValue: '19', playerId: 7 }],
     })
   })
 
   it('finds no difference in a value that is the same, or in a field the list does not give', () => {
-    expect(
-      holdEditorsFields(row, { name: 'Sanne Spits', position: null, shirtNumber: null, wikipediaPage: null }),
-    ).toEqual({
-      allowed: { name: 'Sanne Spits', position: null, shirtNumber: 9, wikipediaPage: null },
+    expect(holdEditorsFields(row, { position: null, shirtNumber: null, wikipediaPage: null })).toEqual({
+      allowed: { position: null, shirtNumber: 9, wikipediaPage: null },
       differences: [],
     })
   })
@@ -97,7 +90,7 @@ describe('holding the fields of the editors', () => {
     expect(
       holdEditorsFields(
         { ...row, editorsFields: ['wikipedia_page'] },
-        { name: 'Sanne Spits', position: 'aanvaller', shirtNumber: 9, wikipediaPage: 'Sanne Spits' },
+        { position: 'aanvaller', shirtNumber: 9, wikipediaPage: 'Sanne Spits' },
       ),
     ).toMatchObject({
       allowed: { wikipediaPage: null },
@@ -148,7 +141,7 @@ describe('keeping a difference', () => {
 
   it('closes a difference that is gone, and replaces one whose values changed', async () => {
     const id = await player()
-    const other = await player({ name: 'Jelle Jong' })
+    const other = await player({ sourceName: 'Jelle Jong' })
 
     await keepPlayerFieldDifferences(
       database.db,
@@ -228,43 +221,19 @@ describe('deciding a difference', () => {
     ])
   })
 
-  it('takes a name over on the row and on a person the editors named', async () => {
-    const [person] = await database.db
-      .insert(persons)
-      .values({ familyName: 'Spits', givenName: 'Sanne', name: 'Sanne Spits', nameSource: 'redactie' })
-      .$returningId()
-    const id = await player({ editorsFields: ['name'], personId: person!.id })
+  it('has no difference about a name: one that waits is not shown, not decided, and closes', async () => {
+    const id = await player({ editorsFields: ['name'] })
 
-    await keepPlayerFieldDifferences(
-      database.db,
-      season,
-      [found(id, 'name', 'Sanne Spits', 'Sanne van der Spitz')],
-      first,
-    )
+    await keepPlayerFieldDifferences(database.db, season, [found(id, 'name', 'Sanne Spits', 'Sanne Spitz')], first)
 
-    expect(await decide((await differences())[0]!.id, 'take-over')).toBe('done')
-    expect(await playerOf(id)).toMatchObject({
-      editorsFields: [],
-      name: 'Sanne van der Spitz',
-      searchTerm: 'van der Spitz',
-    })
-    expect(await database.db.select().from(persons)).toMatchObject([
-      { familyName: null, givenName: null, name: 'Sanne van der Spitz', nameSource: null },
-    ])
-  })
-
-  it('leaves the name of a person the importer or the list named', async () => {
-    const [person] = await database.db
-      .insert(persons)
-      .values({ familyName: 'Spits', name: 'Sanne Spits', nameSource: 'manual', wikipediaPage: 'Sanne Spits' })
-      .$returningId()
-    const id = await player({ editorsFields: ['name'], name: 'S. Spits', personId: person!.id })
-
-    await keepPlayerFieldDifferences(database.db, season, [found(id, 'name', 'S. Spits', 'Sanne Spits')], first)
-    await decide((await differences())[0]!.id, 'take-over')
-
-    expect(await playerOf(id)).toMatchObject({ name: 'Sanne Spits' })
-    expect(await database.db.select().from(persons)).toMatchObject([{ familyName: 'Spits', nameSource: 'manual' }])
+    expect(await countWaitingFieldDifferences(database.db)).toEqual(new Map())
+    expect(await listWaitingFieldDifferences(database.db, season)).toEqual([])
+    expect(await decide((await differences())[0]!.id, 'take-over')).toBe('not-waiting')
+    expect(await playerOf(id)).toMatchObject({ sourceName: 'Sanne Spits' })
+    // The next run of the import finds none, and the row closes.
+    await keepPlayerFieldDifferences(database.db, season, [], later)
+    expect(await differences()).toMatchObject([{ resolution: 'reverted', status: 'rejected' }])
+    expect(await database.db.select().from(auditLog)).toEqual([])
   })
 
   it('takes a page over with the person we know for it', async () => {
@@ -298,8 +267,8 @@ describe('deciding a difference', () => {
     const id = await player({ editorsFields: ['wikipedia_page'], personId: own!.id })
     const other = await player({
       editorsFields: ['wikipedia_page'],
-      name: 'Jelle Jong',
       personId: titled!.id,
+      sourceName: 'Jelle Jong',
       wikipediaPage: 'Jelle Jong (1990)',
     })
 
@@ -326,30 +295,23 @@ describe('deciding a difference', () => {
     expect(await playerOf(other)).toMatchObject({ personId: null, wikipediaPage: 'Jelle Jong (2001)' })
   })
 
-  it('says so when another player of the season has the name or the page, and leaves the difference waiting', async () => {
-    const id = await player({ editorsFields: ['name', 'wikipedia_page'] })
+  it('says so when another player of the season has the page, and leaves the difference waiting', async () => {
+    const id = await player({ editorsFields: ['wikipedia_page'] })
 
-    await player({ name: 'Sanne Spitz', wikipediaPage: 'Sanne Spitz' })
-    await keepPlayerFieldDifferences(
-      database.db,
-      season,
-      [found(id, 'name', 'Sanne Spits', 'Sanne Spitz'), found(id, 'wikipedia_page', null, 'Sanne Spitz')],
-      first,
-    )
+    await player({ sourceName: 'Sanne Spitz', wikipediaPage: 'Sanne Spitz' })
+    await keepPlayerFieldDifferences(database.db, season, [found(id, 'wikipedia_page', null, 'Sanne Spitz')], first)
 
-    const [name, page] = await differences()
-
-    expect(await decide(name!.id, 'take-over')).toBe('taken')
-    expect(await decide(page!.id, 'take-over')).toBe('taken')
-    expect(await playerOf(id)).toMatchObject({ name: 'Sanne Spits', wikipediaPage: null })
-    expect(await differences()).toMatchObject([{ status: 'pending' }, { status: 'pending' }])
+    expect(await decide((await differences())[0]!.id, 'take-over')).toBe('taken')
+    expect(await playerOf(id)).toMatchObject({ wikipediaPage: null })
+    expect(await differences()).toMatchObject([{ status: 'pending' }])
     expect(await database.db.select().from(auditLog)).toEqual([])
   })
+
   it('says so when another player of the season is the person of the page already', async () => {
     const [known] = await database.db.insert(persons).values({ wikipediaPage: 'Sanne Spits' }).$returningId()
 
     await database.db.insert(personPages).values({ page: 'Sanne Spits (voetballer)', personId: known!.id })
-    await player({ name: 'S. Spits', personId: known!.id, wikipediaPage: 'Sanne Spits' })
+    await player({ personId: known!.id, sourceName: 'S. Spits', wikipediaPage: 'Sanne Spits' })
 
     const id = await player({ editorsFields: ['wikipedia_page'] })
 

@@ -1,5 +1,6 @@
+import type { ReportAppearance } from '@fansite/db/match-reports'
 import type { ReportedMatch } from '@fansite/db/match-reports'
-import type { Match, MatchAppearance } from '@fansite/db/schema'
+import type { Match } from '@fansite/db/schema'
 
 /*
  * A made-up match with a report that passes the rules, for the tests of the page of a match.
@@ -51,7 +52,7 @@ const ourNames: Record<number, string> = {
 
 const theirNames: Record<number, string> = { 103: 'Dirk Proefland', 109: 'Frank Dummydijk', 110: 'Ronald Proefveld' }
 
-function appearances(): MatchAppearance[] {
+function appearances(): ReportAppearance[] {
   return [
     ...Array.from({ length: 13 }, (_, index) => {
       const id = index + 1
@@ -83,7 +84,7 @@ function appearances(): MatchAppearance[] {
         starter: id <= 111,
       }
     }),
-  ]
+  ].map((player) => ({ ...player, sourceName: player.name }))
 }
 
 /**
@@ -162,12 +163,13 @@ export function reportedMatch(): ReportedMatch {
           id: 1,
           matchId: 7,
           minute: 12,
+          name: 'Demo',
           ours: true,
           ownGoal: false,
           penalty: false,
           personId: null,
-          player: 'Demo',
           playerId: 9,
+          sourceName: 'Demo',
           stoppageMinutes: null,
           wikipediaPage: null,
         },
@@ -177,12 +179,13 @@ export function reportedMatch(): ReportedMatch {
           id: 2,
           matchId: 7,
           minute: 40,
+          name: 'Dummydijk',
           ours: false,
           ownGoal: false,
           penalty: true,
           personId: null,
-          player: 'Dummydijk',
           playerId: null,
+          sourceName: 'Dummydijk',
           stoppageMinutes: null,
           wikipediaPage: null,
         },
@@ -192,12 +195,13 @@ export function reportedMatch(): ReportedMatch {
           id: 3,
           matchId: 7,
           minute: 78,
+          name: 'Proefland',
           ours: true,
           ownGoal: true,
           penalty: false,
           personId: null,
-          player: 'Proefland',
           playerId: null,
+          sourceName: 'Proefland',
           stoppageMinutes: null,
           wikipediaPage: null,
         },

@@ -92,7 +92,7 @@ beforeEach(async () => {
 
   const [added] = await database.db
     .insert(matchAppearances)
-    .values({ captain: false, matchId, name: 'Speler 9', ours: true, shirtNumber: 9, starter: true })
+    .values({ captain: false, matchId, ours: true, shirtNumber: 9, sourceName: 'Speler 9', starter: true })
     .$returningId()
 
   scorer = added?.id ?? 0

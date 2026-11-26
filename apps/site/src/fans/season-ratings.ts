@@ -3,6 +3,7 @@ import type { Database } from '@fansite/db/client'
 import { startOf } from '@fansite/db/rating-window'
 import { matches, matchPlayerRatings, oldSeasonRatings, players } from '@fansite/db/schema'
 import { seasonOf } from '@fansite/db/season'
+import { shownPlayerName } from '@fansite/db/shown-name'
 import { sql } from 'drizzle-orm'
 
 import { cacheFor } from '#src/cache'
@@ -170,7 +171,7 @@ export async function readRatingFigures(db: Database, now = new Date()): Promise
     db
       .select({
         counting: sql<number>`sum(${matchPlayerRatings.ratingCount} >= ${minimumRatings})`,
-        name: players.name,
+        name: shownPlayerName(),
         old: sql<number>`max(${matchPlayerRatings.source} = 'oude-fansite')`,
         playerId: matchPlayerRatings.playerId,
         ratings: sql<number>`sum(${matchPlayerRatings.ratingCount})`,
@@ -180,7 +181,7 @@ export async function readRatingFigures(db: Database, now = new Date()): Promise
       .from(matchPlayerRatings)
       .innerJoin(matches, sql`${matches.id} = ${matchPlayerRatings.matchId}`)
       .innerJoin(players, sql`${players.id} = ${matchPlayerRatings.playerId}`)
-      .groupBy(matches.season, matchPlayerRatings.playerId, players.name),
+      .groupBy(matches.season, matchPlayerRatings.playerId, players.sourceName, players.personId),
     db.select().from(oldSeasonRatings),
     db
       .select({

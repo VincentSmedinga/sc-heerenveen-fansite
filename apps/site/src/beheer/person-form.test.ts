@@ -1,6 +1,7 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { adminUsers, auditLog, personPages, persons, players, squadCompleteness } from '@fansite/db/schema'
+import { readNamedPlayers } from '@fansite/db/shown-name'
 import { createTestDatabase } from '@fansite/db/test-database'
 import { asc, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
@@ -55,9 +56,9 @@ beforeEach(async () => {
   otherId = other
   await database.db.insert(personPages).values({ page: 'Piet Bedacht', personId: otherId })
   await database.db.insert(players).values([
-    { name: 'Jan Verzonnen', personId, searchTerm: 'Verzonnen', season: '2004/05' },
-    { name: 'Jan Verzonnen', personId, searchTerm: 'Verzonnen', season: '2005/06' },
-    { name: 'Piet Bedacht', personId: otherId, searchTerm: 'Bedacht', season: '2005/06' },
+    { personId, searchTerm: 'Verzonnen', season: '2004/05', sourceName: 'Jan Verzonnen' },
+    { personId, searchTerm: 'Verzonnen', season: '2005/06', sourceName: 'Jan Verzonnen' },
+    { personId: otherId, searchTerm: 'Bedacht', season: '2005/06', sourceName: 'Piet Bedacht' },
   ])
 })
 
@@ -80,7 +81,7 @@ const entryOf = async (changes: Partial<PersonValues>, part?: Parameters<typeof 
 const person = async () => (await database.db.select().from(persons).where(eq(persons.id, personId)))[0]
 const ourRows = () =>
   database.db
-    .select({ editorsFields: players.editorsFields, name: players.name, page: players.wikipediaPage })
+    .select({ editorsFields: players.editorsFields, name: players.sourceName, page: players.wikipediaPage })
     .from(players)
     .where(eq(players.personId, personId))
     .orderBy(asc(players.season))
@@ -120,7 +121,8 @@ describe('the form of a person', () => {
     expect(rated.map((row) => row.season).sort()).toEqual(['2004/05', '2005/06'])
   })
 
-  it('renames the person and his player in every season, as the editors name', async () => {
+  it('renames the person only, and every season shows the name', async () => {
+    const before = await ourRows()
     const outcome = await editPerson(
       database.db,
       userId,
@@ -131,9 +133,11 @@ describe('the form of a person', () => {
 
     expect(outcome).toEqual({ status: 'changed' })
     expect(await person()).toMatchObject({ familyNamePrefix: 'van', name: 'Jan van Bedenksel', nameSource: 'redactie' })
-    expect(await ourRows()).toEqual([
-      { editorsFields: ['name'], name: 'Jan van Bedenksel', page: null },
-      { editorsFields: ['name'], name: 'Jan van Bedenksel', page: null },
+    // The rows keep the names of their sources (#1697).
+    expect(await ourRows()).toEqual(before)
+    expect((await readNamedPlayers(database.db, eq(players.personId, personId))).map((row) => row.name)).toEqual([
+      'Jan van Bedenksel',
+      'Jan van Bedenksel',
     ])
     expect((await log()).map(({ action, detail, itemId }) => ({ action, detail, itemId }))).toEqual([
       {
@@ -154,7 +158,7 @@ describe('the form of a person', () => {
     ])
   })
 
-  it('refuses a name that another player of one of his seasons has, and changes nothing', async () => {
+  it('takes a name another player of one of his seasons has', async () => {
     const outcome = await editPerson(
       database.db,
       userId,
@@ -163,9 +167,8 @@ describe('the form of a person', () => {
       now,
     )
 
-    expect(outcome).toMatchObject({ errors: { achternaam: expect.stringMatching(/^Het seizoen 2005\/06 heeft al/u) } })
-    expect((await person())?.name).toBe('Jan Verzonnen')
-    expect(await log()).toEqual([])
+    expect(outcome).toMatchObject({ status: 'changed' })
+    expect((await person())?.name).toBe('Piet Bedacht')
   })
 
   it('gives a person without a page the page, and his players too', async () => {

@@ -25,6 +25,7 @@ import {
   wikipediaPageMaxLength,
   wikipediaPages,
 } from '@fansite/db/schema'
+import { type NamedPlayer, readNamedPlayers, rowsByName } from '@fansite/db/shown-name'
 import { and, eq, inArray, isNull, ne, type SQL } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
@@ -506,9 +507,9 @@ async function storePlayers(
   found: MergedPlayer[],
   personBook: { resolve: (title: string) => Promise<null | number> },
 ) {
-  const rows = await db.select().from(players).where(eq(players.season, season))
-  const byPage = new Map<string, Player>()
-  const byName = new Map<string, Player>()
+  const rows = await readNamedPlayers(db, eq(players.season, season))
+  const byPage = new Map<string, NamedPlayer>()
+  const byName = rowsByName(rows, nameKey)
   const counts = { added: 0, improved: 0, unchanged: 0 }
   const rank = (source: PlayerSource) => playerSources.indexOf(source)
   // A scorer the import of the matches made is also known by his person, as in
@@ -518,7 +519,6 @@ async function storePlayers(
   const differences: FoundFieldDifference[] = []
 
   for (const row of rows) {
-    byName.set(nameKey(row.name), row)
     if (row.wikipediaPage !== null) {
       byPage.set(nameKey(row.wikipediaPage), row)
     }
@@ -534,13 +534,13 @@ async function storePlayers(
     if (before === undefined) {
       const row = {
         country: player.country,
-        name: player.name,
         personId,
         position: player.position,
         searchTerm: searchTerm(player.name),
         season,
         shirtNumber: player.shirtNumber,
         source: player.source,
+        sourceName: player.name,
         wikipediaPage: player.page,
       }
       const [{ insertId }] = await db.insert(players).values(row)
@@ -552,6 +552,7 @@ async function storePlayers(
         id: insertId,
         inSquad: true,
         leftSquadAt: null,
+        name: player.name,
         previousShirtNumber: null,
         shirtNumberFrom: null,
       }
@@ -574,7 +575,6 @@ async function storePlayers(
     // What a list says about a field the editors set waits for them.
     differences.push(
       ...holdEditorsFields(before, {
-        name: player.name,
         position: player.position,
         shirtNumber: player.shirtNumber,
         wikipediaPage: player.page,
@@ -642,7 +642,7 @@ async function storePlayers(
 
     const after = { ...before, ...changes }
 
-    byName.set(nameKey(after.name), after)
+    byName.set(nameKey(after.sourceName), after)
     if (after.wikipediaPage !== null) {
       byPage.set(nameKey(after.wikipediaPage), after)
     }

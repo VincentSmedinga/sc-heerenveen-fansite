@@ -284,12 +284,14 @@ describe('the weekly read of the season that has just ended', () => {
         .select({ appearances: playerSeasonStats.appearances })
         .from(playerSeasonStats)
         .innerJoin(players, eq(playerSeasonStats.playerId, players.id))
-        .where(eq(players.name, 'Bernt Klaverboer')),
+        .where(eq(players.sourceName, 'Bernt Klaverboer')),
     ).toContainEqual({ appearances: 10 })
   })
 
   it('keeps the players of a season it reads for the first time, and makes a warning of a missing page', async () => {
-    await database.db.insert(players).values({ name: 'Speler Van Vroeger', searchTerm: 'Speler Van Vroeger', season })
+    await database.db
+      .insert(players)
+      .values({ searchTerm: 'Speler Van Vroeger', season, sourceName: 'Speler Van Vroeger' })
 
     const lines = await rereadAt(await serve({ [season]: { pages: ended } }), firstOfJuly)
 

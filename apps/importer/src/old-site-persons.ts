@@ -4,6 +4,7 @@
 // and redirects are remembered in `person_pages` like everywhere else.
 import { createPersonBook } from '@fansite/db/persons'
 import { persons, players } from '@fansite/db/schema'
+import { readNamedPlayers } from '@fansite/db/shown-name'
 import { and, eq, inArray, isNotNull, isNull, type SQL } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
@@ -132,8 +133,8 @@ export async function linkPersonsByName(
       .select()
       .from(players)
       .where(and(scope, isNull(players.personId)))
-  ).filter((row) => !skip.has(nameKey(row.name)))
-  const linked = await db.select().from(players).where(isNotNull(players.personId))
+  ).filter((row) => !skip.has(nameKey(row.sourceName)))
+  const linked = await readNamedPlayers(db, isNotNull(players.personId))
 
   report.unchanged = (
     await db
@@ -145,15 +146,15 @@ export async function linkPersonsByName(
   const personsOfName = new Map<string, Set<number>>()
 
   for (const row of linked) {
-    const key = nameKey(row.name)
-
-    personsOfName.set(key, (personsOfName.get(key) ?? new Set()).add(row.personId!))
+    for (const key of [row.sourceName, row.name].map(nameKey)) {
+      personsOfName.set(key, (personsOfName.get(key) ?? new Set()).add(row.personId!))
+    }
   }
 
   const byName = new Map<string, typeof open>()
 
   for (const row of open) {
-    byName.set(nameKey(row.name), [...(byName.get(nameKey(row.name)) ?? []), row])
+    byName.set(nameKey(row.sourceName), [...(byName.get(nameKey(row.sourceName)) ?? []), row])
   }
 
   const redirects = new Map<string, string>()
@@ -162,7 +163,7 @@ export async function linkPersonsByName(
   const doubts: string[] = []
 
   for (const [key, rows] of [...byName].sort(([a], [b]) => a.localeCompare(b))) {
-    const name = rows[0]!.name
+    const name = rows[0]!.sourceName
     const doubt = (reason: string) => {
       report.skipped += rows.length
       doubts.push(

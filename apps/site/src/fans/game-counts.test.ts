@@ -76,7 +76,7 @@ describe('the number of fans who saved a four', () => {
     }
     const [{ insertId: playerId }] = await database.db
       .insert(players)
-      .values({ name: 'Proefman', position: 'middenvelder', searchTerm: 'Proefman', season: '2026/27' })
+      .values({ position: 'middenvelder', searchTerm: 'Proefman', season: '2026/27', sourceName: 'Proefman' })
     const match = await addMatch(1)
     const other = await addMatch(2)
     const pick = (matchId: number, supporterId: null | number) => ({
@@ -106,7 +106,7 @@ describe('the surnames of a four', () => {
   it('names a player who is no longer in the squad too', async () => {
     const [{ insertId }] = await database.db
       .insert(players)
-      .values({ inSquad: false, name: 'Piet de Vertrekker', searchTerm: 'Vertrekker', season: '2026/27' })
+      .values({ inSquad: false, searchTerm: 'Vertrekker', season: '2026/27', sourceName: 'Piet de Vertrekker' })
 
     expect((await fjouwerSurnames(database.db, [insertId])).get(insertId)).toBe('de Vertrekker')
     expect(await fjouwerSurnames(database.db, [])).toEqual(new Map())

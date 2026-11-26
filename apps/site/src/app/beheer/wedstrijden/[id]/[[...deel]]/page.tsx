@@ -199,8 +199,8 @@ export default async function MatchPage({ params, searchParams }: Props) {
           .join(', ')
 
   const incoming = goals.flatMap((goal, index) =>
-    goal.playerId === null && goal.ours !== goal.ownGoal && goal.player.trim() !== ''
-      ? [{ name: goal.player.trim(), number: index + 1 }]
+    goal.playerId === null && goal.ours !== goal.ownGoal && goal.name.trim() !== ''
+      ? [{ name: goal.name.trim(), number: index + 1 }]
       : [],
   )
   const navigation = [
@@ -241,7 +241,10 @@ export default async function MatchPage({ params, searchParams }: Props) {
         opponent: match.opponent,
         opponentNames: await readOpponentNames(getDatabase().db, match.clubId),
         report: hasReport
-          ? { goals: goals.map((goal) => describeEntryGoals([goal])), href: reportPath(match.id) }
+          ? {
+              goals: goals.map((goal) => describeEntryGoals([{ ...goal, player: goal.name }])),
+              href: reportPath(match.id),
+            }
           : undefined,
         showDelay,
         squad,

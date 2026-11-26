@@ -135,11 +135,18 @@ beforeEach(async () => {
   for (const [index, name] of ['Anne Spits', 'Bas Keeper', 'Cor Back'].entries()) {
     const [player] = await database.db
       .insert(players)
-      .values({ name, searchTerm: name, season: '2026/27', source: 'selectie' })
+      .values({ searchTerm: name, season: '2026/27', source: 'selectie', sourceName: name })
       .$returningId()
     const [added] = await database.db
       .insert(matchAppearances)
-      .values({ matchId, name, ours: true, playerId: player?.id ?? 0, shirtNumber: index + 1, starter: true })
+      .values({
+        matchId,
+        ours: true,
+        playerId: player?.id ?? 0,
+        shirtNumber: index + 1,
+        sourceName: name,
+        starter: true,
+      })
       .$returningId()
 
     appearances.push(added?.id ?? 0)

@@ -11,6 +11,7 @@ import type { Match } from '@fansite/db/schema'
 import { lockedFields } from '@fansite/db/match-edits'
 import { createPersonBook } from '@fansite/db/persons'
 import { matchEdits, matches, matchGoals, matchReports, players } from '@fansite/db/schema'
+import { readNamedPlayers } from '@fansite/db/shown-name'
 import { and, eq, inArray, isNull } from 'drizzle-orm'
 
 import type { Fetcher } from './fetcher.ts'
@@ -94,7 +95,7 @@ export async function fillFromSeasonProgramme(
   report.lines.push(...read.problems.map((problem) => `Programme ${season}: ${problem}`))
 
   const findClub = await clubFinder(db)
-  const squad = await db.select().from(players).where(eq(players.season, season))
+  const squad = await readNamedPlayers(db, eq(players.season, season))
   const link = playerLinker(squad)
   const personBook = await createPersonBook(db)
 
@@ -264,7 +265,7 @@ async function fillMatch(db: Database, found: Match, row: ProgrammeRow, context:
             .update(matchGoals)
             .set({ personId })
             .where(and(eq(matchGoals.id, goal.id), isNull(matchGoals.personId)))
-          report.lines.push(`${label}: ${goal.player} is linked to his person again`)
+          report.lines.push(`${label}: ${goal.sourceName} is linked to his person again`)
         }
       }
     }

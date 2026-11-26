@@ -678,13 +678,14 @@ De rijen komen op naam en dan competitie.
 Hetzelfde verschil komt er één keer, en een verschil dat een mens afwees komt niet terug zolang beide aantallen gelijk blijven.
 
 `players.editors_fields` zegt welke velden van een speler de redactie in het beheer zette (#1022): `name`, `shirt_number`, `position` en `wikipedia_page`, als een `SET` van MariaDB.
+`name` telt sinds #1697 niet meer: de waarde blijft in de `SET` staan, maar de import houdt er niets voor tegen en het beheer toont geen afwijking over een naam.
 De importer schrijft zo'n veld nooit.
 Leest hij er een andere waarde voor, dan bewaart `player_field_differences` die tot de redactie beslist:
 
 | Kolom                           | Betekenis                                                                                        |
 | ------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `player_id`, `season`           | De speler en zijn seizoen; de rij gaat mee weg met de speler                                     |
-| `field`                         | Het veld: `name`, `shirt_number`, `position` of `wikipedia_page`                                 |
+| `field`                         | Het veld: `shirt_number`, `position` of `wikipedia_page` (`name` alleen in oude rijen)           |
 | `editors_value`, `import_value` | Wat de speler heeft (leeg voor een veld dat de redactie leegliet), en wat de import las          |
 | `status`                        | `pending` (wacht), `accepted` (de waarde van de import overgenomen) of `rejected`                |
 | `resolution`                    | `person`, `reverted` (de afwijking is weg) of `replaced` (andere waarden); leeg zolang het wacht |
@@ -704,6 +705,16 @@ De goede lezing van de selectie vervangt de verzonnen selectie bij de eerste kee
 Een database met echte wedstrijden raakt de seed niet aan.
 De verzonnen doelpunten verwijzen naar verzonnen spelers (`madeUpGoals` en `madeUpSquad`), met een speler die de selectie verliet en twee spelers met dezelfde achternaam (Testvoort), zodat de pagina's en de controles de gevallen van de koppeling hebben.
 Elke verzonnen speler heeft ook een persoon met de naam in delen (`personsForMadeUpPlayers` in `seed.ts`), en zijn doelpunten verwijzen ernaar, zoals de import het doet.
+
+### Welke naam we tonen
+
+Een naam hoort bij de persoon (#1697).
+`players.name`, `match_appearances.name`, `match_goals.player` en `club_squad_players.name` zijn de naam zoals de bron hem schreef; in de code heten ze `sourceName`.
+`@fansite/db/shown-name` is de ene plek die zegt wat een pagina toont: de naam van de persoon van de regel, en zonder persoon of zonder naam die van de bron.
+
+- `shownPlayerName`, `shownAppearanceName`, `shownGoalName` en `shownClubPlayerName` zijn de naam in een query.
+- `shownSearchTerm` is de achternaam waarop een lijst sorteert: die van de persoon, en anders `players.search_term`.
+- `readNamedPlayers` geeft de rijen van een selectie met beide namen, en `rowsByName` zoekt een rij op beide.
 
 ## De tabellen `clubs` en `club_names`
 

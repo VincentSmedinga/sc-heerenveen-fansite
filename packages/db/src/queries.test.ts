@@ -1972,7 +1972,7 @@ describe('the matches and the table of a season', () => {
 
       const [row] = await database.db.select({ id: matches.id }).from(matches).where(eq(matches.season, '2010/11'))
 
-      await database.db.insert(matchGoals).values({ matchId: row?.id ?? 0, minute: 3, ours: true, player: 'Oud' })
+      await database.db.insert(matchGoals).values({ matchId: row?.id ?? 0, minute: 3, ours: true, sourceName: 'Oud' })
 
       const rows = await listAllMatchGoals(database.db)
 
@@ -2002,10 +2002,10 @@ describe('the matches and the table of a season', () => {
         .values({ familyName: 'Oud', givenName: 'Jan', name: 'Jan Oud' })
 
       await database.db.insert(players).values([
-        { name: 'Jan Oud', personId: personId, searchTerm: 'Oud Jan', season: '2011/12' },
-        { name: 'J. Oud', personId: personId, searchTerm: 'Oud J', season: '2011/12' },
-        { name: 'Jan Oud', personId: personId, searchTerm: 'Oud Jan', season: '2010/11' },
-        { name: 'Zonder Persoon', searchTerm: 'Zonder', season: '2010/11' },
+        { personId: personId, searchTerm: 'Oud Jan', season: '2011/12', sourceName: 'Jan Oud' },
+        { personId: personId, searchTerm: 'Oud J', season: '2011/12', sourceName: 'J. Oud' },
+        { personId: personId, searchTerm: 'Oud Jan', season: '2010/11', sourceName: 'Jan Oud' },
+        { searchTerm: 'Zonder', season: '2010/11', sourceName: 'Zonder Persoon' },
       ])
 
       expect(await listPersonSeasons(database.db)).toEqual([
@@ -2185,9 +2185,9 @@ describe('the matches and the table of a season', () => {
       const id = cupMatch?.id ?? 0
 
       await database.db.insert(matchGoals).values([
-        { matchId: id, minute: null, ours: false, player: 'Onbekend' },
-        { matchId: id, minute: 88, ours: false, player: 'Late' },
-        { matchId: id, minute: 18, ours: true, player: 'Vroeg' },
+        { matchId: id, minute: null, ours: false, sourceName: 'Onbekend' },
+        { matchId: id, minute: 88, ours: false, sourceName: 'Late' },
+        { matchId: id, minute: 18, ours: true, sourceName: 'Vroeg' },
       ])
 
       const rows = await listSeasonMatches(database.db, '2026/27')
@@ -2210,11 +2210,11 @@ describe('the matches and the table of a season', () => {
       const id = cupMatch?.id ?? 0
 
       await database.db.insert(matchGoals).values([
-        { matchId: id, minute: 88, ours: false, player: 'Late' },
-        { matchId: id, minute: 45, ours: false, player: 'Blessuretijd', stoppageMinutes: 2 },
-        { matchId: id, minute: 46, ours: true, player: 'Na rust' },
-        { matchId: id, minute: 45, ours: true, player: 'Voor rust' },
-        { matchId: id, minute: 18, ours: true, penalty: true, player: 'Vroeg' },
+        { matchId: id, minute: 88, ours: false, sourceName: 'Late' },
+        { matchId: id, minute: 45, ours: false, sourceName: 'Blessuretijd', stoppageMinutes: 2 },
+        { matchId: id, minute: 46, ours: true, sourceName: 'Na rust' },
+        { matchId: id, minute: 45, ours: true, sourceName: 'Voor rust' },
+        { matchId: id, minute: 18, ours: true, penalty: true, sourceName: 'Vroeg' },
       ])
 
       const rows = await listSeasonMatches(database.db, '2026/27')
@@ -2309,19 +2309,19 @@ describe('the matches and the table of a season', () => {
         .where(eq(matches.round, 'Kwartfinale'))
       const id = cupMatch?.id ?? 0
       const [{ insertId: oyen }] = await database.db.insert(players).values({
-        name: 'Luca Oyen',
         position: 'aanvaller',
         searchTerm: 'Oyen',
         season: '2026/27',
+        sourceName: 'Luca Oyen',
         wikipediaPage: 'Luca Oyen',
       })
       const [{ insertId: farji }] = await database.db.insert(players).values({
         inSquad: false,
         leftSquadAt: now,
-        name: 'Marko Farji',
         position: 'aanvaller',
         searchTerm: 'Farji',
         season: '2026/27',
+        sourceName: 'Marko Farji',
         wikipediaPage: 'Marko Farji',
       })
       const [{ insertId: lucaPerson }] = await database.db
@@ -2341,18 +2341,18 @@ describe('the matches and the table of a season', () => {
           minute: 10,
           ours: true,
           personId: lucaPerson,
-          player: 'Oyen',
           playerId: oyen,
+          sourceName: 'Oyen',
           wikipediaPage: 'Luca Oyen',
         },
-        { matchId: id, minute: 20, ours: true, player: 'Farji', playerId: farji },
-        { matchId: id, minute: 25, ours: true, player: 'Kemper', wikipediaPage: 'Boy Kemper' },
+        { matchId: id, minute: 20, ours: true, playerId: farji, sourceName: 'Farji' },
+        { matchId: id, minute: 25, ours: true, sourceName: 'Kemper', wikipediaPage: 'Boy Kemper' },
         {
           matchId: id,
           minute: 30,
           ours: false,
           personId: opponentPerson,
-          player: 'Van Aken',
+          sourceName: 'Van Aken',
           wikipediaPage: 'Joost van Aken',
         },
       ])
@@ -2392,16 +2392,16 @@ describe('the matches and the table of a season', () => {
         .insert(persons)
         .values({ familyName: 'Dijk', givenName: 'Sven', name: 'Sven Dijk', slug: 'sven-dijk' })
       const [{ insertId: squadRow }] = await database.db.insert(players).values({
-        name: 'Sven Dijk',
         personId: person,
         position: 'aanvaller',
         searchTerm: 'Dijk',
         season: '2026/27',
+        sourceName: 'Sven Dijk',
       })
 
       await database.db
         .insert(matchGoals)
-        .values({ matchId: id, minute: 10, ours: true, player: 'Dijk', playerId: squadRow })
+        .values({ matchId: id, minute: 10, ours: true, playerId: squadRow, sourceName: 'Dijk' })
 
       const cup = (await listSeasonMatches(database.db, '2026/27')).find((match) => match.round === 'Kwartfinale')
 

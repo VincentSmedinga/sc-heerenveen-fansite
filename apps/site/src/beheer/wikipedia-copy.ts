@@ -72,13 +72,13 @@ export function wikipediaGoals(goals: MatchGoal[], home: boolean): string {
  * minute, with the name first on the home side and the minute first on the away side.
  */
 function writeGoal(
-  goal: Pick<MatchGoal, 'minute' | 'ownGoal' | 'penalty' | 'player' | 'stoppageMinutes' | 'wikipediaPage'>,
+  goal: Pick<MatchGoal, 'minute' | 'ownGoal' | 'penalty' | 'sourceName' | 'stoppageMinutes' | 'wikipediaPage'>,
   homeSide: boolean,
 ) {
   const name =
-    goal.wikipediaPage === null || goal.wikipediaPage === goal.player
-      ? `[[${goal.player}]]`
-      : `[[${goal.wikipediaPage}|${goal.player}]]`
+    goal.wikipediaPage === null || goal.wikipediaPage === goal.sourceName
+      ? `[[${goal.sourceName}]]`
+      : `[[${goal.wikipediaPage}|${goal.sourceName}]]`
 
   if (goal.minute === null) {
     return name

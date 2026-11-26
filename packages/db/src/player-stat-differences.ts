@@ -10,6 +10,7 @@ import type { PlayerStatDifference, PlayerStatSource, StatsCompetition } from '.
 import { recordAction } from './audit-log.ts'
 import { findReportGoalDifferences } from './match-reports.ts'
 import { matches, matchGoals, players, playerSeasonStats, playerStatDifferences } from './schema.ts'
+import { shownPlayerName } from './shown-name.ts'
 
 /** A difference as a comparison found it. */
 export type FoundStatDifference = {
@@ -274,7 +275,7 @@ export async function keepPlayerStatDifferences(
 /** The differences of a season that wait, by the name of the player and the competition. */
 export async function listWaitingStatDifferences(db: Reader, season: string): Promise<WaitingStatDifference[]> {
   const found = await db
-    .select({ difference: playerStatDifferences, name: players.name })
+    .select({ difference: playerStatDifferences, name: shownPlayerName() })
     .from(playerStatDifferences)
     .innerJoin(players, eq(playerStatDifferences.playerId, players.id))
     .where(and(eq(playerStatDifferences.season, season), eq(playerStatDifferences.status, 'pending')))

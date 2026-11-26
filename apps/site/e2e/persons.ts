@@ -59,9 +59,9 @@ export async function addPersons() {
     try {
       const names = people.map(({ name }) => name)
 
-      await db.delete(matchGoals).where(eq(matchGoals.player, forwardGoalName))
-      await db.delete(matchAppearances).where(eq(matchAppearances.name, forwardOpponentName))
-      await db.delete(players).where(inArray(players.name, names))
+      await db.delete(matchGoals).where(eq(matchGoals.sourceName, forwardGoalName))
+      await db.delete(matchAppearances).where(eq(matchAppearances.sourceName, forwardOpponentName))
+      await db.delete(players).where(inArray(players.sourceName, names))
       await db.delete(persons).where(inArray(persons.name, names))
     } finally {
       await close()
@@ -96,10 +96,10 @@ export async function addPersons() {
       if (person !== undefined && seasons.length > 0) {
         await db.insert(players).values(
           seasons.map((season) => ({
-            name,
             personId: person.id,
             searchTerm: (name.split(' ').at(-1) ?? name).toLowerCase(),
             season,
+            sourceName: name,
           })),
         )
       }
@@ -143,7 +143,7 @@ async function addFigures(db: ReturnType<typeof connect>['db']) {
     const [row] = await db
       .select({ id: players.id })
       .from(players)
-      .where(and(eq(players.name, name), eq(players.season, '2002/03')))
+      .where(and(eq(players.sourceName, name), eq(players.season, '2002/03')))
 
     if (row === undefined) {
       throw new Error(`There is no made-up player ${name} in 2002/03.`)
@@ -191,14 +191,16 @@ async function addGoals(db: ReturnType<typeof connect>['db']) {
     return
   }
 
-  await db.insert(players).values({ name: 'Verzonnen Aanvaller', personId: person.id, searchTerm: 'aanvaller', season })
+  await db
+    .insert(players)
+    .values({ personId: person.id, searchTerm: 'aanvaller', season, sourceName: 'Verzonnen Aanvaller' })
 
   const goal = (matchId: number, minute: number, ours: boolean) => ({
     matchId,
     minute,
     ours,
     personId: person.id,
-    player: forwardGoalName,
+    sourceName: forwardGoalName,
   })
 
   await db.insert(matchGoals).values([
@@ -240,10 +242,10 @@ async function addAgainst(db: ReturnType<typeof connect>['db']) {
   await db.insert(matchAppearances).values(
     reports.map(({ matchId }) => ({
       matchId,
-      name: forwardOpponentName,
       ours: false,
       personId: person.id,
       shirtNumber: 99,
+      sourceName: forwardOpponentName,
       starter: true,
     })),
   )

@@ -258,7 +258,7 @@ export function planDoublePlayers(rows: readonly Player[]): {
   const left: DoublePlayer[] = []
   const rank = (row: Player) => (isOfEditors(row) ? 0 : playerSources.length) + playerSources.indexOf(row.source)
   // At the same source the row with the spelling the owner chose stays, not the old one.
-  const old = (row: Player) => (oldSiteNameCorrections.has(row.name) ? 1 : 0)
+  const old = (row: Player) => (oldSiteNameCorrections.has(row.sourceName) ? 1 : 0)
   const best = (group: Player[]) => group.toSorted((a, b) => rank(a) - rank(b) || old(a) - old(b) || a.id - b.id)
   const bySeason = groupBy(rows, (row) => row.season)
 
@@ -276,7 +276,9 @@ export function planDoublePlayers(rows: readonly Player[]): {
       kept = kept.filter((row) => !gone.includes(row))
     }
 
-    for (const group of groupBy(kept, (row) => nameKey(oldSiteNameCorrections.get(row.name) ?? row.name)).values()) {
+    for (const group of groupBy(kept, (row) =>
+      nameKey(oldSiteNameCorrections.get(row.sourceName) ?? row.sourceName),
+    ).values()) {
       if (group.length < 2) {
         continue
       }
@@ -285,7 +287,7 @@ export function planDoublePlayers(rows: readonly Player[]): {
 
       if (new Set(group.flatMap((row) => (row.personId === null ? [] : [row.personId]))).size > 1) {
         left.push({
-          name: stays!.name,
+          name: stays!.sourceName,
           reason: 'the rows are of different persons, or one has no person and could be either',
           season,
         })
@@ -302,8 +304,8 @@ export function planDoublePlayers(rows: readonly Player[]): {
  * The search term of a player whose row gets an other spelling of his name: the surname of the
  * old name in the new spelling (`Samardžić`), or the new surname.
  */
-export function renamedSearchTerm(row: { name: string; searchTerm: string }, name: string): string {
-  return name.length === row.name.length && nameKey(row.name).endsWith(nameKey(row.searchTerm))
+export function renamedSearchTerm(row: { searchTerm: string; sourceName: string }, name: string): string {
+  return name.length === row.sourceName.length && nameKey(row.sourceName).endsWith(nameKey(row.searchTerm))
     ? name.slice(-row.searchTerm.length)
     : nameKey(name).endsWith(` ${nameKey(row.searchTerm)}`)
       ? row.searchTerm
@@ -337,29 +339,29 @@ async function chooseListedNames(db: Pick<Database, 'select' | 'transaction'>): 
   const rows = await db.select().from(players).where(inArray(players.wikipediaPage, titles))
 
   for (const row of rows) {
-    const name = listedName(row.name, row.wikipediaPage)
+    const name = listedName(row.sourceName, row.wikipediaPage)
 
-    if (name === undefined || name === row.name || row.editorsFields.includes('name')) {
+    if (name === undefined || name === row.sourceName) {
       continue
     }
 
     await db.transaction(async (tx) => {
       const same = (await tx.select().from(players).where(eq(players.season, row.season))).find(
-        (one) => one.id !== row.id && (one.wikipediaPage === row.wikipediaPage || one.name === name),
+        (one) => one.id !== row.id && (one.wikipediaPage === row.wikipediaPage || one.sourceName === name),
       )
 
       if (same !== undefined) {
         await mergePlayerInto(tx, row.id, same.id)
-        lines.push(`${row.name} (${row.season}) is merged into ${same.name}`)
+        lines.push(`${row.sourceName} (${row.season}) is merged into ${same.sourceName}`)
 
         return
       }
 
       await tx
         .update(players)
-        .set({ name, searchTerm: renamedSearchTerm(row, name) })
+        .set({ searchTerm: renamedSearchTerm(row, name), sourceName: name })
         .where(eq(players.id, row.id))
-      lines.push(`${row.name} (${row.season}) is now ${name}`)
+      lines.push(`${row.sourceName} (${row.season}) is now ${name}`)
     })
   }
 
@@ -394,21 +396,21 @@ async function chooseListedPlayerSpellings(
 
       await db.transaction(async (tx) => {
         const same = (await tx.select().from(players).where(eq(players.season, row.season))).find(
-          (one) => one.id !== row.id && (one.wikipediaPage === title || one.name === name),
+          (one) => one.id !== row.id && (one.wikipediaPage === title || one.sourceName === name),
         )
 
         if (same !== undefined) {
           await mergePlayerInto(tx, row.id, same.id)
-          lines.push(`${row.name} (${row.season}) is merged into ${same.name}`)
+          lines.push(`${row.sourceName} (${row.season}) is merged into ${same.sourceName}`)
 
           return
         }
 
         await tx
           .update(players)
-          .set({ name, searchTerm: renamedSearchTerm(row, name), wikipediaPage: title })
+          .set({ searchTerm: renamedSearchTerm(row, name), sourceName: name, wikipediaPage: title })
           .where(eq(players.id, row.id))
-        lines.push(`${row.name} (${row.season}) is now ${name}`)
+        lines.push(`${row.sourceName} (${row.season}) is now ${name}`)
       })
     }
   }
@@ -441,7 +443,7 @@ async function mergeDoublePlayers(db: Pick<Database, 'select' | 'transaction'>):
       await mergePlayerInto(tx, gone.id, stays.id)
       await fillPlayerFrom(tx, stays, gone)
     })
-    lines.push(`${gone.name} (${gone.season}) is merged into ${stays.name}`)
+    lines.push(`${gone.sourceName} (${gone.season}) is merged into ${stays.sourceName}`)
   }
 
   return lines

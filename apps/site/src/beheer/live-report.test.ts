@@ -1,6 +1,7 @@
 import type { TestDatabase } from '@fansite/db/test-database'
 
 import { withClubs } from '@fansite/db/clubs'
+import { selectReportGoals } from '@fansite/db/match-reports'
 import { readMatchReport } from '@fansite/db/match-reports'
 import {
   adminUsers,
@@ -74,15 +75,15 @@ beforeEach(async () => {
   matchId = inserted?.id ?? 0
   await database.db.insert(players).values(
     squadOf(1).map((player) => ({
-      name: player.name,
       searchTerm: player.name,
       season: '2026/27',
       shirtNumber: player.shirtNumber,
+      sourceName: player.name,
     })),
   )
   squad = (await database.db.select().from(players).orderBy(asc(players.shirtNumber))).map((player) => ({
     id: player.id,
-    name: player.name,
+    name: player.sourceName,
     shirtNumber: player.shirtNumber,
   }))
 
@@ -116,10 +117,10 @@ describe('addLiveEvent for a goal', () => {
     })
 
     expect(await database.db.select().from(matchAppearances).orderBy(asc(matchAppearances.id))).toEqual(before)
-    expect(await database.db.select().from(matchGoals).where(eq(matchGoals.minute, 23))).toMatchObject([
-      { ours: true, player: 'Speler 9' },
+    expect(await selectReportGoals(database.db).where(eq(matchGoals.minute, 23))).toMatchObject([
+      { ours: true, sourceName: 'Speler 9' },
     ])
-    expect(await database.db.select().from(matchGoals)).toHaveLength(4)
+    expect(await selectReportGoals(database.db)).toHaveLength(4)
     expect(await log()).toMatchObject([
       { action: 'match.edit', detail: "Doelpunt 23' Speler 9", itemId: matchId, userId },
     ])
@@ -131,9 +132,9 @@ describe('addLiveEvent for a goal', () => {
     expect(
       await add('doelpunt', { extra: '3', kant: 'zij', minuut: '45', naam: 'Sibbing', soort: 'strafschop' }),
     ).toMatchObject({ status: 'saved' })
-    expect(await database.db.select().from(matchGoals).where(eq(matchGoals.ours, false))).toMatchObject([
-      { minute: 40, player: 'Sibbing' },
-      { minute: 45, penalty: true, player: 'Sibbing', stoppageMinutes: 3 },
+    expect(await selectReportGoals(database.db).where(eq(matchGoals.ours, false))).toMatchObject([
+      { minute: 40, sourceName: 'Sibbing' },
+      { minute: 45, penalty: true, sourceName: 'Sibbing', stoppageMinutes: 3 },
     ])
     expect((await log())[0]?.detail).toBe("Doelpunt 45+3' Sibbing")
   })
@@ -153,7 +154,7 @@ describe('addLiveEvent for a goal', () => {
       errors: { [liveFieldId('doelpunt', 'speler')]: expect.any(String) as string },
       status: 'refused',
     })
-    expect(await database.db.select().from(matchGoals)).toHaveLength(3)
+    expect(await selectReportGoals(database.db)).toHaveLength(3)
     expect(await log()).toEqual([])
   })
 
@@ -256,7 +257,7 @@ describe('removeLiveEvent', () => {
     await add('doelpunt', { kant: 'zij', minuut: '88', naam: 'Sibbing' })
     expect(await rated()).toEqual(['2026/27'])
 
-    const [added] = await database.db.select().from(matchGoals).where(eq(matchGoals.minute, 88))
+    const [added] = await selectReportGoals(database.db).where(eq(matchGoals.minute, 88))
 
     await forget()
     await removeLiveEvent(database.db, userId, matchId, 'doelpunt', added!.id)
@@ -266,13 +267,13 @@ describe('removeLiveEvent', () => {
   it('takes an event away, logs a line, and says so when it is gone already', async () => {
     await add('doelpunt', { kant: 'zij', minuut: '88', naam: 'Sibbing' })
 
-    const [added] = await database.db.select().from(matchGoals).where(eq(matchGoals.minute, 88))
+    const [added] = await selectReportGoals(database.db).where(eq(matchGoals.minute, 88))
 
     expect(await removeLiveEvent(database.db, userId, matchId, 'doelpunt', added!.id)).toEqual({
       removed: "Doelpunt 88' Sibbing weggehaald",
       status: 'removed',
     })
-    expect(await database.db.select().from(matchGoals)).toHaveLength(3)
+    expect(await selectReportGoals(database.db)).toHaveLength(3)
     expect((await log()).map((line) => line.detail)).toEqual([
       "Doelpunt 88' Sibbing",
       "Doelpunt 88' Sibbing weggehaald",
@@ -308,14 +309,14 @@ describe('two editors at the same time', () => {
     const outcomes = await Promise.all(minutes.map((minuut) => add('doelpunt', { minuut, speler: scorer })))
 
     expect(outcomes.map((outcome) => outcome.status)).toEqual(minutes.map(() => 'saved'))
-    expect(await database.db.select().from(matchGoals)).toHaveLength(3 + minutes.length)
+    expect(await selectReportGoals(database.db)).toHaveLength(3 + minutes.length)
     expect(await log()).toHaveLength(minutes.length)
   })
 
   it('keeps an event that is added while a goal is taken away', async () => {
     await add('doelpunt', { minuut: '5', speler: await appearanceOf(9) })
 
-    const [added] = await database.db.select().from(matchGoals).where(eq(matchGoals.minute, 5))
+    const [added] = await selectReportGoals(database.db).where(eq(matchGoals.minute, 5))
     const [removed, saved] = await Promise.all([
       removeLiveEvent(database.db, userId, matchId, 'doelpunt', added!.id),
       add('kaart', { minuut: '33', soort: 'geel', speler: await appearanceOf(4) }),
@@ -324,7 +325,7 @@ describe('two editors at the same time', () => {
     expect(removed.status).toBe('removed')
     expect(saved.status).toBe('saved')
     expect(await database.db.select().from(matchCards)).toHaveLength(1)
-    expect(await database.db.select().from(matchGoals).where(eq(matchGoals.minute, 5))).toEqual([])
+    expect(await selectReportGoals(database.db).where(eq(matchGoals.minute, 5))).toEqual([])
   })
 
   it('refuses the save of the full form that was opened before an event was added, and keeps the event', async () => {
@@ -337,7 +338,7 @@ describe('two editors at the same time', () => {
     expect(await saveReport(database.db, userId, matchId, checked.plan!, new Date(), opened)).toEqual({
       status: 'stale',
     })
-    expect(await database.db.select().from(matchGoals)).toHaveLength(4)
+    expect(await selectReportGoals(database.db)).toHaveLength(4)
 
     const current = reportBasis(await readMatchReport(database.db, matchId))
 
@@ -346,7 +347,7 @@ describe('two editors at the same time', () => {
     expect(await saveReport(database.db, userId, matchId, checked.plan!, new Date(), current)).toEqual({
       status: 'saved',
     })
-    expect(await database.db.select().from(matchGoals)).toHaveLength(3)
+    expect(await selectReportGoals(database.db)).toHaveLength(3)
   })
 })
 
@@ -356,7 +357,7 @@ describe('the overview', () => {
     await add('wissel', { erin: await appearanceOf(12), eruit: await appearanceOf(9), minuut: '60' })
 
     const stored = (await readMatchReport(database.db, matchId))!
-    const goals = await database.db.select().from(matchGoals).orderBy(asc(matchGoals.id))
+    const goals = await selectReportGoals(database.db).orderBy(asc(matchGoals.id))
     const view = liveViewOf(stored, goals)
 
     // What the lists of a substitution follow: the substitutions and cards with their clock.

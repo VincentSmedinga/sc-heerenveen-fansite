@@ -85,7 +85,7 @@ async function difference() {
     .where(eq(matches.id, id))
   await database.db
     .insert(matchGoals)
-    .values({ matchId: id, minute: 12, ours: true, ownGoal: false, penalty: false, player: 'Oyen' })
+    .values({ matchId: id, minute: 12, ours: true, ownGoal: false, penalty: false, sourceName: 'Oyen' })
   await database.db.insert(matchEdits).values({
     beforeGoals: encodeGoals([]),
     beforeMatch: encodeMatch(before!),

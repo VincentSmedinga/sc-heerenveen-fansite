@@ -55,19 +55,24 @@ async function goal(player: string, round: string, inSeason = season) {
     })
     .$returningId()) as [{ id: number }]
 
-  await database.db.insert(matchGoals).values({ matchId: id, minute: 10, ours: true, player })
+  await database.db.insert(matchGoals).values({ matchId: id, minute: 10, ours: true, sourceName: player })
 }
 
 /** Twenty-six players: 24 from the selection and two from the transfers. */
 async function twoSources() {
   await database.db.insert(players).values([
     ...Array.from({ length: 24 }, (_, index) => ({
-      name: `Speler ${index}`,
       searchTerm: `Speler ${index}`,
       season,
       source: 'selectie' as const,
+      sourceName: `Speler ${index}`,
     })),
-    ...['Oud Een', 'Oud Twee'].map((name) => ({ name, searchTerm: name, season, source: 'transfers' as const })),
+    ...['Oud Een', 'Oud Twee'].map((name) => ({
+      searchTerm: name,
+      season,
+      source: 'transfers' as const,
+      sourceName: name,
+    })),
   ])
 }
 
@@ -120,10 +125,10 @@ describe('storeCompleteness', () => {
 
     // The scorer joins the list: the chance rises again.
     await database.db.insert(players).values({
-      name: 'Onbekende Spits',
       searchTerm: 'Spits',
       season,
       source: 'selectie',
+      sourceName: 'Onbekende Spits',
     })
     await storeCompleteness(database.db, season, undefined, later)
     expect((await rowOf())?.probability).toBe(95)
@@ -134,10 +139,10 @@ describe('storeCompleteness', () => {
 
     await database.db.insert(players).values(
       Array.from({ length: 29 }, (_, index) => ({
-        name: `Speler ${index}`,
         searchTerm: `Speler ${index}`,
         season: running,
         source: 'selectie' as const,
+        sourceName: `Speler ${index}`,
       })),
     )
     await goal('Speler 1', 'Speelronde 1', running)
@@ -203,7 +208,7 @@ describe('a season the editors marked as complete (#1675)', () => {
     await mark()
 
     await storeCompleteness(database.db, season, { goalsTotal: 0, matchesTotal: 1 }, first)
-    await database.db.insert(players).values({ name: 'Nieuw', searchTerm: 'Nieuw', season, source: 'verslag' })
+    await database.db.insert(players).values({ searchTerm: 'Nieuw', season, source: 'verslag', sourceName: 'Nieuw' })
     // The import command works out every season again, from the database alone.
     await recalculateCompleteness(database.db, later)
 
@@ -212,7 +217,9 @@ describe('a season the editors marked as complete (#1675)', () => {
   })
 
   it('is lowered by a scorer who is missing, and has the old outcome again once the mark is gone', async () => {
-    await database.db.insert(players).values({ name: 'Speler 0', searchTerm: 'Speler 0', season, source: 'doelpunten' })
+    await database.db
+      .insert(players)
+      .values({ searchTerm: 'Speler 0', season, source: 'doelpunten', sourceName: 'Speler 0' })
     await storeCompleteness(database.db, season, undefined, first)
     const before = await rowOf()
 
@@ -241,7 +248,7 @@ describe('recalculateCompleteness and the command', () => {
     await twoSources()
     await database.db
       .insert(players)
-      .values({ name: 'Een', searchTerm: 'Een', season: '2012/13', source: 'doelpunten' })
+      .values({ searchTerm: 'Een', season: '2012/13', source: 'doelpunten', sourceName: 'Een' })
 
     const lines = await recalculateCompleteness(database.db, first)
 

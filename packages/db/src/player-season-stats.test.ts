@@ -11,18 +11,18 @@ import { createTestDatabase } from './test-database.ts'
 const season = '2026/27'
 
 const oyen: NewPlayer = {
-  name: 'Luca Oyen',
   position: 'aanvaller',
   searchTerm: 'Oyen',
   season,
+  sourceName: 'Luca Oyen',
   wikipediaPage: 'Luca Oyen',
 }
 
 const vente: NewPlayer = {
-  name: 'Dylan Vente',
   position: 'aanvaller',
   searchTerm: 'Vente',
   season,
+  sourceName: 'Dylan Vente',
   wikipediaPage: 'Dylan Vente',
 }
 

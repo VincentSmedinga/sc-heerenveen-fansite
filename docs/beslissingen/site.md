@@ -2596,6 +2596,7 @@
 - **Alternatieven:** de titel blijven gebruiken en alleen de doorverwijzingen bij het tonen oplossen (een verzoek per bezoek of een lijst in de site).
   De gok bij het tonen verbeteren (een gok blijft een gok, en elke pagina doet hem opnieuw).
 - **Later:** zie _Een naam zonder persoon splitsen we op het eerste woord, met een vaste lijst voorvoegsels_ (8 november 2026): zonder persoon staat de naam van de wedstrijdpagina niet meer helemaal als achternaam.
+- **Later:** zie _De naam van een speler hoort bij de persoon, de tekst op een regel is de naam van de bron_ in `hosting-en-data.md` (26 november 2026): de doelpuntenregel haalt de achternaam uit de persoon, en de zoekterm volgt de persoon.
 
 ## Een vastgehouden wijziging van Wikipedia beslist een beheerder in het beheer, in de schermen van de wedstrijden
 
@@ -4238,6 +4239,8 @@
   Elke persoon in één lijst (duizenden keuzes).
   Bij het aanpassen een speler naar de persoon van een andere pagina verplaatsen (een stille samenvoeging).
   Elke speler zonder persoon bij het aanpassen een persoon geven (dezelfde oude speler zou in elk seizoen een eigen persoon krijgen).
+- **Later:** zie _De naam van een speler hoort bij de persoon, de tekst op een regel is de naam van de bron_ in `hosting-en-data.md` (26 november 2026): een andere naam gaat alleen naar de persoon, en een speler zonder persoon die een andere naam krijgt, krijgt een persoon.
+  Het formulier weigert bij het aanpassen geen naam meer.
 
 ## De weg naar een nieuwe speler begint bij de plek waar hij ontbreekt
 
@@ -5359,6 +5362,8 @@
 - **Alternatieven:** alleen de persoon hernoemen en de seizoenen laten (de lijst van een seizoen toont dan de oude naam); drie velden voor dag, maand en jaar (meer werk voor een veld dat meestal een jaar is); een datumveld van de browser met een apart veld voor een jaar.
 - **Later:** zie _De reden bij een opslag of een besluit in het beheer is optioneel_ (12 november 2026): de reden bij Opslaan mag leeg.
 - **Later:** zie _De quiz vraagt de kant van spelers, een speler tegelijk_ (13 november 2026): het deel Linie heet nu Linie en kant en heeft ook de keuze Kant.
+- **Later:** zie _De naam van een speler hoort bij de persoon, de tekst op een regel is de naam van de bron_ in `hosting-en-data.md` (26 november 2026): een nieuwe naam gaat alleen naar de persoon.
+  `players.name` en `editors_fields` veranderen niet, en de weigering bij een andere speler met die naam is weg.
 
 ## De tabel van de personen telt vijf gegevens per persoon
 

@@ -11,12 +11,13 @@ import {
   dropHalfTimeThatNoLongerFits,
   encodeGoals,
   encodeMatch,
+  goalFieldsOf,
   markedParts,
   type MatchPart,
   refreshSnapshot,
   removeEntry,
 } from '@fansite/db/match-edits'
-import { mayHaveReport, phaseOf } from '@fansite/db/match-reports'
+import { mayHaveReport, phaseOf, type ReportGoal, selectReportGoals } from '@fansite/db/match-reports'
 import { listWikipediaPages } from '@fansite/db/queries'
 import {
   adminUsers,
@@ -28,6 +29,7 @@ import {
   players,
   stadiumNames,
 } from '@fansite/db/schema'
+import { shownPlayerName } from '@fansite/db/shown-name'
 import { listAdminStadiums } from '@fansite/db/stadium-admin'
 import { hasChosenStadium, linkMatchToStadium } from '@fansite/db/stadiums'
 import { storeCompleteness } from '@fansite/db/store-completeness'
@@ -203,7 +205,7 @@ export async function findMatch(db: Pick<Database, 'select'>, id: number) {
     return undefined
   }
 
-  const goals = await db.select().from(matchGoals).where(eq(matchGoals.matchId, id)).orderBy(asc(matchGoals.id))
+  const goals = await selectReportGoals(db).where(eq(matchGoals.matchId, id)).orderBy(asc(matchGoals.id))
   const [edit] = await db
     .select({ editedByName: accountName(adminUsers), row: matchEdits })
     .from(matchEdits)
@@ -212,13 +214,14 @@ export async function findMatch(db: Pick<Database, 'select'>, id: number) {
   const squad: SquadPlayer[] = await db
     .select({
       id: players.id,
-      name: players.name,
+      name: shownPlayerName(),
       personId: players.personId,
+      sourceName: players.sourceName,
       wikipediaPage: players.wikipediaPage,
     })
     .from(players)
     .where(eq(players.season, match.season))
-    .orderBy(asc(players.name))
+    .orderBy(asc(shownPlayerName()))
 
   const [report] = await db
     .select({ status: matchReports.status })
@@ -326,11 +329,7 @@ export async function saveEntry(
       return { status: 'missing' } as const
     }
 
-    const goals = await transaction
-      .select()
-      .from(matchGoals)
-      .where(eq(matchGoals.matchId, id))
-      .orderBy(asc(matchGoals.id))
+    const goals = await selectReportGoals(transaction).where(eq(matchGoals.matchId, id)).orderBy(asc(matchGoals.id))
     const [edit] = await transaction.select().from(matchEdits).where(eq(matchEdits.matchId, id)).for('update')
     const parts = changedParts(match, goals, entry, await hasChosenStadium(transaction, id))
 
@@ -369,9 +368,13 @@ export async function saveEntry(
       await transaction.delete(matchGoals).where(eq(matchGoals.matchId, id))
 
       if (entry.goals.length > 0) {
-        await transaction
-          .insert(matchGoals)
-          .values(keepStoredLinks(goals, entry.goals).map((goal) => ({ ...goal, matchId: id })))
+        await transaction.insert(matchGoals).values(
+          keepStoredLinks(goals, entry.goals).map(({ player, ...goal }) => ({
+            ...goal,
+            matchId: id,
+            sourceName: player,
+          })),
+        )
       }
 
       // The scorers decide whether the squad of the season can be complete (#1675).
@@ -453,7 +456,7 @@ export async function saveEntry(
  * The stored goals as the entry of a match holds them. The form of a match with a report has no
  * goals of its own, so its entry keeps these (see `submitMatch`).
  */
-export function storedEntryGoals(goals: MatchGoal[]): EntryGoal[] {
+export function storedEntryGoals(goals: ReportGoal[]): EntryGoal[] {
   return goals.map((goal) => ({
     appearanceId: goal.appearanceId,
     assistAppearanceId: goal.assistAppearanceId,
@@ -462,7 +465,7 @@ export function storedEntryGoals(goals: MatchGoal[]): EntryGoal[] {
     ownGoal: goal.ownGoal,
     penalty: goal.penalty,
     personId: goal.personId,
-    player: goal.player,
+    player: goal.sourceName,
     playerId: goal.playerId,
     stoppageMinutes: goal.stoppageMinutes,
     wikipediaPage: goal.wikipediaPage,
@@ -576,7 +579,7 @@ export async function waitingHeldChanges(db: Pick<Database, 'select'>, matchId: 
 const minuteOf = (moment: Date | null) => (moment === null ? null : Math.floor(moment.getTime() / 60_000))
 
 /** The parts of the entry that differ from what is stored. */
-function changedParts(match: Match, goals: MatchGoal[], entry: MatchEntry, stadiumChosen: boolean): MatchPart[] {
+function changedParts(match: Match, goals: ReportGoal[], entry: MatchEntry, stadiumChosen: boolean): MatchPart[] {
   const parts: MatchPart[] = []
   const { kickoff, result } = entry
 
@@ -635,7 +638,7 @@ function describeChanges(
     lines.push(`Uitslag: ${describeEntryResult(match)} → ${describeEntryResult({ ...entry.result, ...withClub })}`)
   }
   if (parts.includes('goals')) {
-    lines.push(`Doelpunten: ${describeEntryGoals(goals)} → ${describeEntryGoals(entry.goals)}`)
+    lines.push(`Doelpunten: ${describeEntryGoals(goals.map(goalFieldsOf))} → ${describeEntryGoals(entry.goals)}`)
   }
 
   if (parts.includes('facts')) {
@@ -654,7 +657,10 @@ function describeChanges(
  * any case.
  */
 function isSameGoal(
-  stored: Pick<MatchGoal, 'minute' | 'ours' | 'ownGoal' | 'penalty' | 'player' | 'playerId' | 'stoppageMinutes'>,
+  stored: Pick<
+    ReportGoal,
+    'minute' | 'name' | 'ours' | 'ownGoal' | 'penalty' | 'playerId' | 'sourceName' | 'stoppageMinutes'
+  >,
   entry: EntryGoal,
 ) {
   return (
@@ -665,7 +671,10 @@ function isSameGoal(
     stored.penalty === entry.penalty &&
     (stored.playerId === null || entry.playerId === null
       ? stored.playerId === entry.playerId &&
-        stored.player.toLocaleLowerCase('nl') === entry.player.toLocaleLowerCase('nl')
+        // The form shows the name of the person, so that name is the same scorer too.
+        [stored.sourceName, stored.name].some(
+          (name) => name.toLocaleLowerCase('nl') === entry.player.toLocaleLowerCase('nl'),
+        )
       : stored.playerId === entry.playerId)
   )
 }
@@ -675,7 +684,7 @@ function isSameGoal(
  * the link to the page of its scorer, his person and his name as Wikipedia writes it, and the
  * players of its match report (`appearance_id` and `assist_appearance_id`).
  */
-function keepStoredLinks(stored: MatchGoal[], entry: EntryGoal[]): EntryGoal[] {
+function keepStoredLinks(stored: ReportGoal[], entry: EntryGoal[]): EntryGoal[] {
   const left = [...stored]
 
   return entry.map((goal) => {
@@ -690,14 +699,14 @@ function keepStoredLinks(stored: MatchGoal[], entry: EntryGoal[]): EntryGoal[] {
           assistAppearanceId: found.assistAppearanceId,
           // The person the import stored, or else the person of the player the editor chose.
           personId: found.personId ?? goal.personId ?? null,
-          player: found.player,
+          player: found.sourceName,
           wikipediaPage: found.wikipediaPage,
         }
   })
 }
 
 /** Whether the goals of the entry are the stored goals, in the same order. */
-function sameGoals(stored: MatchGoal[], entry: EntryGoal[]) {
+function sameGoals(stored: ReportGoal[], entry: EntryGoal[]) {
   return stored.length === entry.length && stored.every((goal, index) => isSameGoal(goal, entry[index]!))
 }
 

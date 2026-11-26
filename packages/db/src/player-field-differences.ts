@@ -11,10 +11,11 @@ import type { Player, PlayerField, PlayerFieldDifference, PlayerPosition } from 
 import { recordAction } from './audit-log.ts'
 import { givePersonPage } from './persons.ts'
 import { personPages, persons, playerFieldDifferences, playerPositions, players } from './schema.ts'
+import { shownPlayerName } from './shown-name.ts'
 
 /**
- * What a decision came to: `done`; `not-waiting` when the difference was decided already or
- * does not exist; `taken` when another player of the season has the name, the page or the
+ * What a decision came to: `done`; `not-waiting` when the difference was decided already, does
+ * not exist or is about a name; `taken` when another player of the season has the page or the
  * person of the page already, so the value of the import cannot be written.
  */
 export type FieldDecisionOutcome = 'done' | 'not-waiting' | 'taken'
@@ -31,7 +32,6 @@ export type FoundFieldDifference = {
 
 /** What the import read of a player. Null is a field the list does not give. */
 export type ImportedPlayerFields = {
-  name: null | string
   position: null | PlayerPosition
   shirtNumber: null | number
   wikipediaPage: null | string
@@ -39,6 +39,9 @@ export type ImportedPlayerFields = {
 
 /** A difference that waits, with the name of the player. */
 export type WaitingFieldDifference = PlayerFieldDifference & { name: string }
+
+/** A field of a player that the editors can hold against the import. */
+type ComparedField = Exclude<PlayerField, 'name'>
 
 type Reader = Pick<Database, 'select'>
 
@@ -53,18 +56,24 @@ export const playerFieldLabels: Record<PlayerField, string> = {
 }
 
 const columns = {
-  name: 'name',
   position: 'position',
   shirt_number: 'shirtNumber',
   wikipedia_page: 'wikipediaPage',
-} as const satisfies Record<PlayerField, keyof ImportedPlayerFields>
+} as const satisfies Record<ComparedField, keyof ImportedPlayerFields>
+
+/**
+ * Whether the import compares this field with what the editors set. The name is not one: it
+ * belongs to the person (#1697), so an `editors_fields` of before that holds nothing back and
+ * a difference about a name that still waits is not shown.
+ */
+const isCompared = (field: PlayerField): field is ComparedField => field !== 'name'
 
 /** How many differences wait for a decision, in each season that has any. */
 export async function countWaitingFieldDifferences(db: Reader): Promise<Map<string, number>> {
   const found = await db
     .select({ season: playerFieldDifferences.season, total: count() })
     .from(playerFieldDifferences)
-    .where(eq(playerFieldDifferences.status, 'pending'))
+    .where(and(eq(playerFieldDifferences.status, 'pending'), ne(playerFieldDifferences.field, 'name')))
     .groupBy(playerFieldDifferences.season)
 
   return new Map(found.map((row) => [row.season, row.total]))
@@ -76,10 +85,7 @@ export async function countWaitingFieldDifferences(db: Reader): Promise<Map<stri
  * writes it again; `keep` leaves the player as he is. Either way the difference is decided,
  * with a line in the log of the admin for the player.
  *
- * A name that is taken over is the name of the row, with the surname the search page looks
- * for. A name of the editors on his person goes too: the person gets the name of the import
- * without parts and without a source, so the importer can give him the name of his article. A
- * page that is taken over brings its person when we know one; a person of the editors without
+ * A page that is taken over brings its person when we know one; a person of the editors without
  * a page gets the page; and otherwise the player is without a person until the next import
  * finds the person of the page.
  */
@@ -95,7 +101,7 @@ export async function decidePlayerFieldDifference(
     .where(eq(playerFieldDifferences.id, id))
     .for('update')
 
-  if (difference === undefined || difference.status !== 'pending') {
+  if (difference === undefined || difference.status !== 'pending' || !isCompared(difference.field)) {
     return 'not-waiting'
   }
 
@@ -105,7 +111,7 @@ export async function decidePlayerFieldDifference(
     if (player === undefined) {
       return 'not-waiting'
     }
-    if (!(await takeOver(db, player, difference))) {
+    if (!(await takeOver(db, player, { ...difference, field: difference.field }))) {
       return 'taken'
     }
   }
@@ -144,13 +150,13 @@ export function describeFieldDifference(
  * nothing, so it is no difference.
  */
 export function holdEditorsFields(
-  player: Pick<Player, 'editorsFields' | 'id' | 'name' | 'position' | 'shirtNumber' | 'wikipediaPage'>,
+  player: Pick<Player, 'editorsFields' | 'id' | 'position' | 'shirtNumber' | 'wikipediaPage'>,
   read: ImportedPlayerFields,
 ): { allowed: ImportedPlayerFields; differences: FoundFieldDifference[] } {
   const allowed: Record<string, null | number | string> = { ...read }
   const differences: FoundFieldDifference[] = []
 
-  for (const field of player.editorsFields) {
+  for (const field of player.editorsFields.filter(isCompared)) {
     const column = columns[field]
     const has = player[column]
     const wanted = read[column]
@@ -267,10 +273,16 @@ export async function keepPlayerFieldDifferences(
 /** The differences of a season that wait, by the name of the player and the field. */
 export async function listWaitingFieldDifferences(db: Reader, season: string): Promise<WaitingFieldDifference[]> {
   const found = await db
-    .select({ difference: playerFieldDifferences, name: players.name })
+    .select({ difference: playerFieldDifferences, name: shownPlayerName() })
     .from(playerFieldDifferences)
     .innerJoin(players, eq(playerFieldDifferences.playerId, players.id))
-    .where(and(eq(playerFieldDifferences.season, season), eq(playerFieldDifferences.status, 'pending')))
+    .where(
+      and(
+        eq(playerFieldDifferences.season, season),
+        eq(playerFieldDifferences.status, 'pending'),
+        ne(playerFieldDifferences.field, 'name'),
+      ),
+    )
     .orderBy(asc(playerFieldDifferences.id))
 
   return found
@@ -278,46 +290,18 @@ export async function listWaitingFieldDifferences(db: Reader, season: string): P
     .toSorted((a, b) => a.name.localeCompare(b.name, 'nl') || a.field.localeCompare(b.field) || a.id - b.id)
 }
 
-/** The surname the search page looks for: the name without its first word. */
-function searchTermOf(name: string): string {
-  const words = name.split(' ').filter(Boolean)
-
-  return words.length < 2 ? words.join(' ') : words.slice(1).join(' ')
-}
-
 /**
  * Gives the player the value of the import and takes the field off the list of the editors.
- * False when another player of the season has the name, the page or the person of the page.
+ * False when another player of the season has the page or the person of the page.
  */
-async function takeOver(db: Writer, player: Player, difference: PlayerFieldDifference): Promise<boolean> {
+async function takeOver(
+  db: Writer,
+  player: Player,
+  difference: PlayerFieldDifference & { field: ComparedField },
+): Promise<boolean> {
   const value = difference.importValue
   const editorsFields = player.editorsFields.filter((field) => field !== difference.field)
-  const other = (column: typeof players.name | typeof players.wikipediaPage) =>
-    db
-      .select({ id: players.id })
-      .from(players)
-      .where(and(eq(players.season, player.season), ne(players.id, player.id), eq(column, value)))
-
   switch (difference.field) {
-    case 'name': {
-      if ((await other(players.name)).length > 0) {
-        return false
-      }
-
-      await db
-        .update(players)
-        .set({ editorsFields, name: value, searchTerm: searchTermOf(value) })
-        .where(eq(players.id, player.id))
-
-      if (player.personId !== null) {
-        await db
-          .update(persons)
-          .set({ familyName: null, familyNamePrefix: null, givenName: null, name: value, nameSource: null })
-          .where(and(eq(persons.id, player.personId), eq(persons.nameSource, 'redactie')))
-      }
-
-      return true
-    }
     case 'position': {
       const position = playerPositions.find((one) => one === value)
 
@@ -336,7 +320,14 @@ async function takeOver(db: Writer, player: Player, difference: PlayerFieldDiffe
 
       return true
     case 'wikipedia_page': {
-      if ((await other(players.wikipediaPage)).length > 0) {
+      if (
+        (
+          await db
+            .select({ id: players.id })
+            .from(players)
+            .where(and(eq(players.season, player.season), ne(players.id, player.id), eq(players.wikipediaPage, value)))
+        ).length > 0
+      ) {
         return false
       }
 

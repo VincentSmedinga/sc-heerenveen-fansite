@@ -173,7 +173,7 @@ describe('saveEntry', () => {
       status: 'saved',
     })
     expect(await stored(id)).toMatchObject({ goalsAgainst: 1, goalsFor: 2, resultSetAt: t0, status: 'played' })
-    expect((await goalsOf(id)).map((row) => [row.minute, row.player, row.ours])).toEqual([
+    expect((await goalsOf(id)).map((row) => [row.minute, row.sourceName, row.ours])).toEqual([
       [12, 'Oyen', true],
       [40, 'Sibbing', false],
       [77, 'Oyen', true],
@@ -242,10 +242,10 @@ describe('saveEntry', () => {
       const [{ id: playerId }] = await database.db
         .insert(players)
         .values({
-          name: 'Luca Oyen',
           position: 'aanvaller',
           searchTerm: 'oyen',
           season: '2026/27',
+          sourceName: 'Luca Oyen',
           wikipediaPage: 'Luca Oyen',
         })
         .$returningId()
@@ -258,8 +258,8 @@ describe('saveEntry', () => {
         .then((rows) => rows as [{ id: number }])
 
       await database.db.insert(matchGoals).values([
-        { matchId: id, minute: 12, ours: true, personId, player: 'Oyen', playerId, wikipediaPage: 'Luca Oyen' },
-        { matchId: id, minute: 40, ours: false, player: 'Sibbing', wikipediaPage: 'Sven Sibbing' },
+        { matchId: id, minute: 12, ours: true, personId, playerId, sourceName: 'Oyen', wikipediaPage: 'Luca Oyen' },
+        { matchId: id, minute: 40, ours: false, sourceName: 'Sibbing', wikipediaPage: 'Sven Sibbing' },
       ])
 
       // What the form gives back for those goals: the name of the player table, and no link
@@ -293,8 +293,8 @@ describe('saveEntry', () => {
       ).toEqual({ parts: ['kickoff'], status: 'saved' })
       expect(markedParts((await edit(id))!)).toEqual(['kickoff'])
       expect(await goalsOf(id)).toMatchObject([
-        { player: 'Oyen', wikipediaPage: 'Luca Oyen' },
-        { player: 'Sibbing', wikipediaPage: 'Sven Sibbing' },
+        { sourceName: 'Oyen', wikipediaPage: 'Luca Oyen' },
+        { sourceName: 'Sibbing', wikipediaPage: 'Sven Sibbing' },
       ])
       expect((await log())[0]?.detail).not.toContain('Doelpunten')
     })
@@ -312,7 +312,7 @@ describe('saveEntry', () => {
       )
 
       expect(markedParts((await edit(id))!)).toEqual(['goals'])
-      expect((await goalsOf(id)).map((row) => [row.minute, row.player, row.ours])).toEqual([
+      expect((await goalsOf(id)).map((row) => [row.minute, row.sourceName, row.ours])).toEqual([
         [12, 'Oyen', true],
         [41, 'Sibbing', false],
       ])
@@ -817,9 +817,9 @@ describe('listAdminMatches and findMatch', () => {
     const id = await addMatch()
 
     await database.db.insert(players).values([
-      { name: 'Bernt Klaverboer', position: 'aanvaller', searchTerm: 'klaverboer', season: '2026/27' },
-      { name: 'Luca Oyen', position: 'aanvaller', searchTerm: 'oyen', season: '2026/27' },
-      { name: 'Vorig Jaar', position: 'aanvaller', searchTerm: 'vorig', season: '2025/26' },
+      { position: 'aanvaller', searchTerm: 'klaverboer', season: '2026/27', sourceName: 'Bernt Klaverboer' },
+      { position: 'aanvaller', searchTerm: 'oyen', season: '2026/27', sourceName: 'Luca Oyen' },
+      { position: 'aanvaller', searchTerm: 'vorig', season: '2025/26', sourceName: 'Vorig Jaar' },
     ])
     await saveEntry(
       database.db,
@@ -921,7 +921,7 @@ describe('the changes of Wikipedia that are held back', () => {
     const rated = async () => (await database.db.select().from(squadCompleteness)).map((row) => row.season)
     const forget = () => database.pool.query('DELETE FROM squad_completeness')
 
-    await database.db.insert(players).values({ name: 'Oyen', searchTerm: 'Oyen', season: '2026/27' })
+    await database.db.insert(players).values({ searchTerm: 'Oyen', season: '2026/27', sourceName: 'Oyen' })
 
     // A held change that takes the match away, and then a difference about the goals.
     const held = await addHeld(await addMatch(), { newValue: null })
@@ -1018,7 +1018,7 @@ describe('the squad of a marked season after a change of the goals (#1675)', () 
 
   it('drops below complete in the same save for a scorer who is not in the list, and comes back with an undo', async () => {
     const id = await addMatch({ season: '2019/20' })
-    await database.db.insert(players).values({ name: 'Oyen', searchTerm: 'Oyen', season: '2019/20' })
+    await database.db.insert(players).values({ searchTerm: 'Oyen', season: '2019/20', sourceName: 'Oyen' })
     await database.db.insert(squadCompleteMarks).values({ markedAt: t0, season: '2019/20' })
 
     await saveEntry(database.db, userId, id, entry({ goals: [goal({ player: 'Niet Erbij' })] }), undefined, t0)

@@ -58,9 +58,9 @@ beforeEach(async () => {
     { page: 'Nieuwe Naam', personId: renamed },
   ])
   await database.db.insert(players).values([
-    { name: 'Oude Naam', personId: old, searchTerm: 'Naam', season: '2020/21', shirtNumber: 9 },
-    { name: 'Nieuwe Naam', personId: renamed, searchTerm: 'Naam', season: '2021/22' },
-    { name: 'Nieuwe Naam', personId: renamed, searchTerm: 'Naam', season: '2022/23' },
+    { personId: old, searchTerm: 'Naam', season: '2020/21', shirtNumber: 9, sourceName: 'Oude Naam' },
+    { personId: renamed, searchTerm: 'Naam', season: '2021/22', sourceName: 'Nieuwe Naam' },
+    { personId: renamed, searchTerm: 'Naam', season: '2022/23', sourceName: 'Nieuwe Naam' },
   ])
 })
 
@@ -182,7 +182,7 @@ describe('mergePersons', () => {
   it('makes two rows of one season one row, names them in the log and rates the season again', async () => {
     await database.db
       .insert(players)
-      .values({ name: 'Oude Naam', personId: old, searchTerm: 'Naam', season: '2021/22', shirtNumber: 14 })
+      .values({ personId: old, searchTerm: 'Naam', season: '2021/22', shirtNumber: 14, sourceName: 'Oude Naam' })
 
     const rows = await database.db.select().from(players).orderBy(asc(players.id))
     const stays = rows.find((row) => row.season === '2021/22' && row.personId === renamed)
@@ -196,7 +196,7 @@ describe('mergePersons', () => {
     expect(
       (await database.db.select().from(players).orderBy(asc(players.season))).map((row) => [
         row.season,
-        row.name,
+        row.sourceName,
         row.shirtNumber,
       ]),
     ).toEqual([

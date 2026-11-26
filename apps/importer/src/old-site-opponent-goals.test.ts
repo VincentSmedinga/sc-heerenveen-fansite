@@ -100,8 +100,8 @@ describe('linking the goals against us to a person', () => {
 
     expect(report).toMatchObject({ changed: 0, created: 1, unchanged: 1 })
     expect(await goalRows()).toMatchObject([
-      { personId: id, player: 'Piet Pietersen', playerId: null, wikipediaPage: null },
-      { personId: null, player: 'Klaas Klaassen' },
+      { personId: id, playerId: null, sourceName: 'Piet Pietersen', wikipediaPage: null },
+      { personId: null, sourceName: 'Klaas Klaassen' },
     ])
   })
 
@@ -131,15 +131,15 @@ describe('linking the goals against us to a person', () => {
     await database.db
       .update(matchGoals)
       .set({ personId: id, wikipediaPage: 'Piet Pietersen' })
-      .where(eq(matchGoals.player, 'Piet P.'))
-    await database.db.update(matchGoals).set({ personId: id }).where(eq(matchGoals.player, 'Klaas Klaassen'))
+      .where(eq(matchGoals.sourceName, 'Piet P.'))
+    await database.db.update(matchGoals).set({ personId: id }).where(eq(matchGoals.sourceName, 'Klaas Klaassen'))
 
     const first = await importOldSiteOpponentGoals(database.db, none)
     const second = await importOldSiteOpponentGoals(database.db, none)
 
     expect(await goalRows()).toMatchObject([
-      { personId: id, player: 'Piet P.', wikipediaPage: 'Piet Pietersen' },
-      { personId: null, player: 'Klaas Klaassen' },
+      { personId: id, sourceName: 'Piet P.', wikipediaPage: 'Piet Pietersen' },
+      { personId: null, sourceName: 'Klaas Klaassen' },
     ])
     expect(first).toMatchObject({ changed: 1, created: 0 })
     expect(second).toMatchObject({ changed: 0, created: 0, unchanged: 1 })
@@ -216,7 +216,7 @@ describe('linking the goals against us to a person', () => {
     const rows = await goalRows()
 
     expect(rows.map((row) => row.personId)).toEqual([null, null, null])
-    expect(await database.db.select().from(players).where(eq(players.name, 'Jan Janssen'))).toHaveLength(1)
+    expect(await database.db.select().from(players).where(eq(players.sourceName, 'Jan Janssen'))).toHaveLength(1)
   })
 
   it('reports the goals by season and each linked name with its seasons', async () => {
@@ -225,7 +225,7 @@ describe('linking the goals against us to a person', () => {
     await load([lost('nec.thuis', ['Jan Janssen', 'Klaas Klaassen'])])
     await database.db
       .insert(players)
-      .values({ name: 'Jan Janssen', personId: id, searchTerm: 'Janssen', season: '1999/00' })
+      .values({ personId: id, searchTerm: 'Janssen', season: '1999/00', sourceName: 'Jan Janssen' })
     await importOldSiteOpponentGoals(database.db, none)
 
     expect(await opponentGoalReport(database.db, none)).toEqual({

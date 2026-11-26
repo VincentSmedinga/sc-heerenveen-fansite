@@ -72,7 +72,7 @@ beforeEach(async () => {
 
   const [player] = await database.db
     .insert(players)
-    .values({ name: 'Luca Oyen', position: 'aanvaller', searchTerm: 'oyen', season: '2026/27' })
+    .values({ position: 'aanvaller', searchTerm: 'oyen', season: '2026/27', sourceName: 'Luca Oyen' })
     .$returningId()
 
   playerId = player?.id ?? 0
@@ -271,7 +271,7 @@ describe('deciding a difference between the editors and the import about a playe
     expect(await player()).toMatchObject({ shirtNumber: 9 })
   })
 
-  it('says so when the difference is decided already, is no number, or the name is taken', async () => {
+  it('says so when the difference is decided already, is no number, or the page is taken', async () => {
     await decideField(fieldDifferenceId, { besluit: 'houden', reden: 'Hij speelt met 9' })
 
     expect(await decideField(fieldDifferenceId, { besluit: 'houden', reden: 'Nog eens' })).toEqual({
@@ -284,10 +284,12 @@ describe('deciding a difference between the editors and the import about a playe
       redirect: '/beheer/spelers',
     })
 
-    await database.db.insert(players).values({ name: 'Luuk Oyen', searchTerm: 'Oyen', season: '2026/27' })
+    await database.db
+      .insert(players)
+      .values({ searchTerm: 'Oyen', season: '2026/27', sourceName: 'Luuk Oyen', wikipediaPage: 'Luuk Oyen' })
     await database.db
       .update(playerFieldDifferences)
-      .set({ decidedAt: null, field: 'name', importValue: 'Luuk Oyen', resolution: null, status: 'pending' })
+      .set({ decidedAt: null, field: 'wikipedia_page', importValue: 'Luuk Oyen', resolution: null, status: 'pending' })
     expect(await decideField(fieldDifferenceId, { besluit: 'overnemen', reden: 'Daarom' })).toEqual({
       redirect: `${fieldPage}?fout=bezet`,
     })

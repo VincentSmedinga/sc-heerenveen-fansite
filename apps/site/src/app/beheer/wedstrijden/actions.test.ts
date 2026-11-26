@@ -107,7 +107,7 @@ beforeEach(async () => {
   matchId = inserted?.id ?? 0
   await database.db
     .insert(players)
-    .values({ name: 'Luca Oyen', position: 'aanvaller', searchTerm: 'oyen', season: '2026/27' })
+    .values({ position: 'aanvaller', searchTerm: 'oyen', season: '2026/27', sourceName: 'Luca Oyen' })
 })
 
 /** The form as an editor fills it in for a 2-1 win, and the changes in `overrides`. */
@@ -285,7 +285,11 @@ describe('submitMatch', () => {
 
     expect(await submit(matchId, formData)).toEqual({ redirect: `/beheer/wedstrijden/${matchId}?gedaan=opgeslagen` })
     expect(
-      (await database.db.select().from(matchGoals)).map((goal) => [goal.minute, goal.player, goal.playerId !== null]),
+      (await database.db.select().from(matchGoals)).map((goal) => [
+        goal.minute,
+        goal.sourceName,
+        goal.playerId !== null,
+      ]),
     ).toEqual([
       [40, 'Sibbing', false],
       [50, 'Luca Oyen', true],
@@ -886,15 +890,15 @@ describe('submitMatch for a match with a report', () => {
   async function withReport() {
     await database.db.insert(players).values(
       squadOf(1).map((player) => ({
-        name: player.name,
         searchTerm: player.name,
         season: '2026/27',
         shirtNumber: player.shirtNumber,
+        sourceName: player.name,
       })),
     )
 
-    const squad = (await database.db.select().from(players)).filter((player) => player.name.startsWith('Speler '))
-    const choices = squad.map((player) => ({ id: player.id, name: player.name, shirtNumber: player.shirtNumber }))
+    const squad = (await database.db.select().from(players)).filter((player) => player.sourceName.startsWith('Speler '))
+    const choices = squad.map((player) => ({ id: player.id, name: player.sourceName, shirtNumber: player.shirtNumber }))
 
     await submit(matchId, form({ ...(await threeGoals()) }))
 

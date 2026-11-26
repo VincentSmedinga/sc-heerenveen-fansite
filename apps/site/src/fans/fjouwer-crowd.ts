@@ -1,6 +1,7 @@
 import type { Database } from '@fansite/db/client'
 
 import { fantasyPicks, matches, persons, players, supporters } from '@fansite/db/schema'
+import { shownPlayerName } from '@fansite/db/shown-name'
 import { and, eq, inArray } from 'drizzle-orm'
 
 import { cacheForKey } from '#src/cache'
@@ -131,7 +132,7 @@ async function chosenPlayers(db: Database, tally: ReadonlyMap<number, number>, c
       familyNamePrefix: persons.familyNamePrefix,
       givenName: persons.givenName,
       id: players.id,
-      name: players.name,
+      name: shownPlayerName(),
     })
     .from(players)
     .leftJoin(persons, eq(players.personId, persons.id))

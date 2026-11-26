@@ -35,7 +35,7 @@ const goal = (overrides: Partial<MatchGoal> = {}) =>
     ours: true,
     ownGoal: false,
     penalty: false,
-    player: 'Hakim Ziyech',
+    sourceName: 'Hakim Ziyech',
     stoppageMinutes: null,
     ...overrides,
   }) as MatchGoal

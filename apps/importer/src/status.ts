@@ -443,10 +443,10 @@ async function showPlayersWithoutPerson(db: Database, write: (line: string) => v
     .orderBy(desc(players.season))
 
   const open = await db
-    .select({ name: players.name, season: players.season })
+    .select({ name: players.sourceName, season: players.season })
     .from(players)
     .where(isNull(players.personId))
-    .orderBy(asc(players.name))
+    .orderBy(asc(players.sourceName))
 
   for (const { season, total, without } of rows) {
     if (Number(without) > 0) {
@@ -501,7 +501,7 @@ async function showUnlinkedGoals(db: Database, season: string, write: (line: str
       .select({
         ours: matchGoals.ours,
         ownGoal: matchGoals.ownGoal,
-        player: matchGoals.player,
+        player: matchGoals.sourceName,
         playerId: matchGoals.playerId,
       })
       .from(matchGoals)

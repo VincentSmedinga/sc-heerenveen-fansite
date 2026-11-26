@@ -29,10 +29,10 @@ beforeEach(async () => {
 async function addPlayers(season: string, source: 'selectie' | 'verslag', count: number, prefix: string) {
   await database.db.insert(players).values(
     Array.from({ length: count }, (_, index) => ({
-      name: `${prefix} ${index}`,
       searchTerm: `${prefix} ${index}`,
       season,
       source,
+      sourceName: `${prefix} ${index}`,
     })),
   )
 }

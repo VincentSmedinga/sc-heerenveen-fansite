@@ -19,6 +19,7 @@ const player = (name: string, extra: Partial<Player> = {}): Player => ({
   name,
   searchTerm: name,
   shirtNumber: null,
+  sourceName: name,
   ...extra,
 })
 
@@ -30,7 +31,7 @@ const squadOf = (players: Player[], level: 'bijna' | 'compleet' | 'deels' = 'com
 
 /** A season of players who are each a name, with the person behind them (null: none). */
 const compared = (season: string, rows: [string, null | number, Partial<Player>?][]): ComparedSeason => ({
-  persons: rows.map(([name, personId]) => ({ name, personId })),
+  persons: rows.map(([name, personId, extra]) => ({ name, personId, sourceName: extra?.sourceName ?? name })),
   season,
   squad: squadOf(rows.map(([name, , extra]) => player(name, extra))),
 })
@@ -69,6 +70,20 @@ describe('squadChanges', () => {
 
     expect(names(changes.arrived)).toEqual(['Piet Naamgenoot'])
     expect(names(changes.departed)).toEqual(['Piet Naamgenoot'])
+  })
+
+  it('finds the person of a row by the name of its source, also when we show another name (#1697)', () => {
+    const renamed = { sourceName: 'Oude Schrijfwijze' }
+    const changes = squadChanges(
+      compared('2026/27', [
+        ['Dubbel', 1, renamed],
+        ['Dubbel', 2],
+      ]),
+      compared('2025/26', [['Andere Naam', 1]]),
+    )
+
+    expect(names(changes.arrived)).toEqual(['Dubbel'])
+    expect(changes.departed).toEqual([])
   })
 
   it('compares by name when one of the two rows has no person', () => {

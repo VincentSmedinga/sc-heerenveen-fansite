@@ -3,7 +3,7 @@ import type { GoalFields, GoalSnapshot } from '@fansite/db/match-edits'
 import type { Match, MatchChange, NewMatchGoal } from '@fansite/db/schema'
 
 import { oldSiteGoalsReason } from '@fansite/db/match-conflicts'
-import { describeEntryGoals } from '@fansite/db/match-edits'
+import { describeEntryGoals, goalFieldsOf } from '@fansite/db/match-edits'
 import {
   matchChanges,
   matchEdits,
@@ -150,7 +150,7 @@ export const orderedOldSiteGoalEvents = (match: OldSiteMatch): OldSiteEvent[] =>
         (a.minute === 0 ? Number.POSITIVE_INFINITY : a.minute) - (b.minute === 0 ? Number.POSITIVE_INFINITY : b.minute),
     )
 
-const goalFields = ['minute', 'ours', 'ownGoal', 'penalty', 'player', 'playerId', 'stoppageMinutes'] as const
+const goalFields = ['minute', 'ours', 'ownGoal', 'penalty', 'sourceName', 'playerId', 'stoppageMinutes'] as const
 
 /**
  * The step `doelpunten`: makes the rows in `match_goals` for every match with the source
@@ -248,8 +248,8 @@ export async function importOldSiteGoals(
       ours: goal.ours,
       ownGoal: goal.ownGoal,
       penalty: goal.penalty,
-      player: goal.player,
       playerId: goal.playerKey === null ? null : (playerIds.get(goal.playerKey) ?? null),
+      sourceName: goal.player,
       stoppageMinutes: null,
     })
     const existing = goalsOf.get(before.id) ?? []
@@ -304,7 +304,7 @@ export async function importOldSiteGoals(
           lastSeenAt: now,
           matchId: before.id,
           newValue: list,
-          oldValue: describeEntryGoals(existing),
+          oldValue: describeEntryGoals(existing.map(goalFieldsOf)),
           part: 'goals',
           proposal: JSON.stringify(proposal),
           reason: oldSiteGoalsReason,
@@ -369,7 +369,7 @@ function snapshotOf(goal: NewMatchGoal): GoalFields & GoalSnapshot {
     ownGoal: goal.ownGoal ?? false,
     penalty: goal.penalty ?? false,
     personId: goal.personId ?? null,
-    player: goal.player,
+    player: goal.sourceName,
     playerId: goal.playerId ?? null,
     stoppageMinutes: goal.stoppageMinutes ?? null,
     wikipediaPage: goal.wikipediaPage ?? null,

@@ -243,7 +243,7 @@ export const getPlayersOverview = cacheFor(5 * 60 * 1000, async (): Promise<Play
       id: persons.id,
       line: persons.line,
       name: persons.name,
-      rowName: players.name,
+      rowName: players.sourceName,
       season: players.season,
       slug: persons.slug,
     })

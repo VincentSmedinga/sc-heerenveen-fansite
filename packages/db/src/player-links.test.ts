@@ -31,10 +31,10 @@ const match: Omit<NewMatch, 'clubId'> = {
 }
 
 const player: NewPlayer = {
-  name: 'Luca Oyen',
   position: 'aanvaller',
   searchTerm: 'Oyen',
   season: '2026/27',
+  sourceName: 'Luca Oyen',
   wikipediaPage: 'Luca Oyen',
 }
 
@@ -62,7 +62,7 @@ describe('the links between goals and players', () => {
 
     await database.db
       .insert(matchGoals)
-      .values({ matchId, minute: 12, ours: true, player: 'Oyen', playerId, wikipediaPage: 'Luca Oyen' })
+      .values({ matchId, minute: 12, ours: true, playerId, sourceName: 'Oyen', wikipediaPage: 'Luca Oyen' })
   }
 
   it('puts a new player in the squad, without a departure', async () => {
@@ -83,7 +83,7 @@ describe('the links between goals and players', () => {
 
     // The goal stays, with the page and the name, and has no player.
     expect(await database.db.select().from(matchGoals)).toMatchObject([
-      { player: 'Oyen', playerId: null, wikipediaPage: 'Luca Oyen' },
+      { playerId: null, sourceName: 'Oyen', wikipediaPage: 'Luca Oyen' },
     ])
   })
 
@@ -112,11 +112,11 @@ describe('the links between goals and players', () => {
   it('keeps a page to one player in a season, and lets two seasons or two empty pages be', async () => {
     await database.db.insert(players).values(player)
 
-    await expect(database.db.insert(players).values({ ...player, name: 'Luca Oyen Junior' })).rejects.toThrow()
+    await expect(database.db.insert(players).values({ ...player, sourceName: 'Luca Oyen Junior' })).rejects.toThrow()
 
     await database.db.insert(players).values({ ...player, season: '2025/26' })
-    await database.db.insert(players).values({ ...player, name: 'Pim Verbeek', wikipediaPage: null })
-    await database.db.insert(players).values({ ...player, name: 'Sam Kersten', wikipediaPage: null })
+    await database.db.insert(players).values({ ...player, sourceName: 'Pim Verbeek', wikipediaPage: null })
+    await database.db.insert(players).values({ ...player, sourceName: 'Sam Kersten', wikipediaPage: null })
 
     expect(await database.db.select().from(players)).toHaveLength(4)
   })
@@ -163,11 +163,11 @@ describe(`the migration ${migration}`, () => {
     await prepareDatabase({ migrationsFolder, seed: false, url: database.url })
 
     expect(await database.db.select().from(players)).toMatchObject([
-      { inSquad: true, leftSquadAt: null, name: 'Luca Oyen', wikipediaPage: null },
-      { inSquad: true, leftSquadAt: null, name: 'Pim Verbeek', wikipediaPage: null },
+      { inSquad: true, leftSquadAt: null, sourceName: 'Luca Oyen', wikipediaPage: null },
+      { inSquad: true, leftSquadAt: null, sourceName: 'Pim Verbeek', wikipediaPage: null },
     ])
     expect(await database.db.select().from(matchGoals)).toMatchObject([
-      { player: 'Oyen', playerId: null, wikipediaPage: null },
+      { playerId: null, sourceName: 'Oyen', wikipediaPage: null },
     ])
   })
 

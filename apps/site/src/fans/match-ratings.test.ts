@@ -77,16 +77,21 @@ beforeEach(async () => {
 async function addPlayer(name: string, options: { inLineUp: boolean; inSquad?: boolean }) {
   const [result] = await database.db
     .insert(players)
-    .values({ inSquad: options.inSquad ?? true, name, searchTerm: name, season: '2003/04' })
+    .values({ inSquad: options.inSquad ?? true, searchTerm: name, season: '2003/04', sourceName: name })
 
   if (options.inLineUp) {
     await database.db
       .insert(matchReports)
       .values({ matchId, status: 'klaar' })
       .onDuplicateKeyUpdate({ set: { matchId } })
-    await database.db
-      .insert(matchAppearances)
-      .values({ matchId, name, ours: true, playerId: result.insertId, shirtNumber: result.insertId, starter: true })
+    await database.db.insert(matchAppearances).values({
+      matchId,
+      ours: true,
+      playerId: result.insertId,
+      shirtNumber: result.insertId,
+      sourceName: name,
+      starter: true,
+    })
   }
 
   return result.insertId
@@ -359,7 +364,7 @@ describe('the Uitblinkers of a season', () => {
   async function ratePlayer(forMatch: number, name: string, average: string, count: number) {
     const [player] = await database.db
       .insert(players)
-      .values({ inSquad: true, name, searchTerm: name, season: '2026/27' })
+      .values({ inSquad: true, searchTerm: name, season: '2026/27', sourceName: name })
       .$returningId()
 
     await database.db

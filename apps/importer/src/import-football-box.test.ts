@@ -270,7 +270,7 @@ describe('pnpm run import:season for 2007/08, 2008/09 and 2009/10', () => {
       penaltiesFor: 5,
       stadium: 'De Kuip',
     })
-    expect(goals.map((goal) => [goal.minute, goal.player])).toEqual([
+    expect(goals.map((goal) => [goal.minute, goal.sourceName])).toEqual([
       [27, 'Goran Popov'],
       [54, 'Eljero Elia'],
       [112, 'Bonaventure Kalou'],
@@ -281,10 +281,10 @@ describe('pnpm run import:season for 2007/08, 2008/09 and 2009/10', () => {
   it('ties a goal to a player of the season by the name, and logs the goals that find none', async () => {
     await database.db.insert(players).values(
       ['Gerald Sibon', 'Michal Papadopulos'].map((name) => ({
-        name,
         position: 'aanvaller' as const,
         searchTerm: name.split(' ').slice(1).join(' '),
         season: '2009/10',
+        sourceName: name,
       })),
     )
 
@@ -292,13 +292,13 @@ describe('pnpm run import:season for 2007/08, 2008/09 and 2009/10', () => {
     const { lines } = await run(wikipedia, '2009/10')
     const squad = await database.db.select().from(players)
     const goals = await database.db.select().from(matchGoals).where(eq(matchGoals.ours, true))
-    const idOf = (name: string) => squad.find((player) => player.name === name)?.id
+    const idOf = (name: string) => squad.find((player) => player.sourceName === name)?.id
 
     expect(
-      goals.filter((goal) => goal.player === 'Sibon').every((goal) => goal.playerId === idOf('Gerald Sibon')),
+      goals.filter((goal) => goal.sourceName === 'Sibon').every((goal) => goal.playerId === idOf('Gerald Sibon')),
     ).toBe(true)
-    expect(goals.filter((goal) => goal.player === 'Sibon').length).toBeGreaterThan(5)
-    expect(goals.filter((goal) => goal.player === 'Losada').every((goal) => goal.playerId === null)).toBe(true)
+    expect(goals.filter((goal) => goal.sourceName === 'Sibon').length).toBeGreaterThan(5)
+    expect(goals.filter((goal) => goal.sourceName === 'Losada').every((goal) => goal.playerId === null)).toBe(true)
     // An English link is no person: no goal of an English page has a page or a person.
     expect(goals.every((goal) => goal.wikipediaPage === null && goal.personId === null)).toBe(true)
     expect(lines.find((line) => line.includes('no player in the squad table'))).toMatch(
@@ -397,10 +397,10 @@ describe('pnpm run import:season for 2007/08, 2008/09 and 2009/10', () => {
   it('ties our goals in the cup of 2007/08 to the players of that season', async () => {
     await database.db.insert(players).values(
       ['Gerald Sibon', 'Miralem Sulejmani', 'Michael Bradley'].map((name) => ({
-        name,
         position: 'aanvaller' as const,
         searchTerm: name.split(' ').slice(1).join(' '),
         season: '2007/08',
+        sourceName: name,
       })),
     )
 
@@ -414,7 +414,9 @@ describe('pnpm run import:season for 2007/08, 2008/09 and 2009/10', () => {
       .where(and(eq(matches.competition, 'KNVB Beker'), eq(matchGoals.ours, true)))
       .orderBy(asc(matchGoals.id))
 
-    expect(goals.map(({ goal }) => [goal.minute, squad.find((player) => player.id === goal.playerId)?.name])).toEqual([
+    expect(
+      goals.map(({ goal }) => [goal.minute, squad.find((player) => player.id === goal.playerId)?.sourceName]),
+    ).toEqual([
       [16, 'Gerald Sibon'],
       [30, 'Miralem Sulejmani'],
       [52, 'Michael Bradley'],
@@ -485,7 +487,7 @@ describe('pnpm run import:season for 2007/08, 2008/09 and 2009/10', () => {
       .where(eq(matchGoals.matchId, league[0]?.id ?? 0))
       .orderBy(asc(matchGoals.id))
 
-    expect(goals.map((goal) => [goal.ours, goal.minute, goal.player, goal.wikipediaPage])).toEqual([
+    expect(goals.map((goal) => [goal.ours, goal.minute, goal.sourceName, goal.wikipediaPage])).toEqual([
       [false, null, 'Tuyp', 'Jack Tuyp'],
       [false, null, 'Tuyp', 'Jack Tuyp'],
       [true, null, 'Grindheim', 'Christian Grindheim'],

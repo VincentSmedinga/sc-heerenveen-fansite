@@ -135,7 +135,7 @@ describe('the step cijfers', () => {
       ['oude-fansite', '8.00', 12, '0.90'],
     ])
 
-    const names = new Map((await database.db.select().from(players)).map((row) => [row.id, row.name]))
+    const names = new Map((await database.db.select().from(players)).map((row) => [row.id, row.sourceName]))
 
     expect(rows.map((row) => names.get(row.playerId))).toEqual(['Hans Vonk', 'Erik Edman', 'Hans Vonk'])
   })
@@ -363,8 +363,8 @@ describe('the step seizoencijfers', () => {
 
   it('links the codes of Rafael Piresvieira and Radoslav Samarzic to the players of their seasons', async () => {
     await database.db.insert(players).values([
-      { name: 'Rafael Pires Vieira', searchTerm: 'Pires Vieira', season: '2000/01', source: 'verslag' },
-      { name: 'Radoslav Samardžić', searchTerm: 'Samardžić', season: '1998/99', source: 'verslag' },
+      { searchTerm: 'Pires Vieira', season: '2000/01', source: 'verslag', sourceName: 'Rafael Pires Vieira' },
+      { searchTerm: 'Samardžić', season: '1998/99', source: 'verslag', sourceName: 'Radoslav Samardžić' },
     ])
 
     const result = await importOldSiteSeasonRatings(
@@ -377,7 +377,7 @@ describe('the step seizoencijfers', () => {
       }),
     )
     const rows = await database.db.select().from(oldSeasonRatings).orderBy(asc(oldSeasonRatings.id))
-    const names = new Map((await database.db.select().from(players)).map((row) => [row.id, row.name]))
+    const names = new Map((await database.db.select().from(players)).map((row) => [row.id, row.sourceName]))
 
     expect(result.lines).toEqual([])
     expect(rows.map((row) => [row.season, row.name, names.get(row.playerId ?? 0)])).toEqual([

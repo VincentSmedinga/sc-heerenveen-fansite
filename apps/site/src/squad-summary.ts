@@ -99,7 +99,7 @@ const keptFor = 5 * 60 * 1000
 async function loadBirths(season: string) {
   const { db } = getDatabase()
 
-  return new Map((await listSeasonPlayerBirths(db, season)).map(({ name, ...birth }) => [name, birth]))
+  return new Map((await listSeasonPlayerBirths(db, season)).map(({ sourceName, ...birth }) => [sourceName, birth]))
 }
 
 const seasonBirths = cacheForKey(keptFor, loadBirths)
@@ -120,7 +120,7 @@ export async function getSquadSummary(squad: SeasonSquad, season: string, today:
 
   const summary = squadSummary(
     cardPlayers(squad).map((player) => {
-      const birth = births.get(player.name)
+      const birth = births.get(player.sourceName)
 
       return { age: birth === undefined ? undefined : ageOf(birth, today), country: player.country }
     }),

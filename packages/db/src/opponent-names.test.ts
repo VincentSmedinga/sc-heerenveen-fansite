@@ -24,9 +24,9 @@ describe('readOpponentNames (#1542)', () => {
     const readAt = new Date('2026-11-20T10:00:00Z')
 
     await database.db.insert(clubSquadPlayers).values([
-      { clubId, name: 'Piet Bakker', readAt, shirtNumber: 9 },
-      { clubId, name: 'Jan Jansen', readAt, shirtNumber: 1 },
-      { clubId: other?.id ?? 0, name: 'Dusan Tadic', readAt },
+      { clubId, readAt, shirtNumber: 9, sourceName: 'Piet Bakker' },
+      { clubId, readAt, shirtNumber: 1, sourceName: 'Jan Jansen' },
+      { clubId: other?.id ?? 0, readAt, sourceName: 'Dusan Tadic' },
     ])
 
     let round = 0
@@ -54,7 +54,9 @@ describe('readOpponentNames (#1542)', () => {
       await database.db.insert(matchReports).values({ matchId, status: 'klaar' })
       await database.db
         .insert(matchAppearances)
-        .values(names.map((name, index) => ({ matchId, name, ours, shirtNumber: index + 1, starter: true })))
+        .values(
+          names.map((name, index) => ({ matchId, ours, shirtNumber: index + 1, sourceName: name, starter: true })),
+        )
     }
 
     await report(clubId, ['jan jansen', 'Kees de Boer', 'Aad Mulder'])

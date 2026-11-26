@@ -120,7 +120,7 @@ describe('the squad of a club we meet', () => {
 
     const rows = await database.db
       .select({
-        name: clubSquadPlayers.name,
+        name: clubSquadPlayers.sourceName,
         person: clubSquadPlayers.personId,
         position: clubSquadPlayers.position,
         readAt: clubSquadPlayers.readAt,
@@ -196,13 +196,39 @@ describe('the squad of a club we meet', () => {
       .where(eq(clubSquadPlayers.clubId, clubId))
       .orderBy(asc(clubSquadPlayers.id))
 
-    expect(rows.map((row) => [row.name, row.shirtNumber])).toEqual([
+    expect(rows.map((row) => [row.sourceName, row.shirtNumber])).toEqual([
       ['Karel Doelman', 1],
       ['Jonas Stopper', 5],
       ['Max Zonderartikel', 8],
     ])
     expect(rows.every((row) => row.readAt.getTime() === later.getTime())).toBe(true)
     expect(await database.db.select().from(persons)).toHaveLength(3)
+  })
+
+  it('finds the row of a renamed player by the name of his person (#1697)', async () => {
+    const clubId = await meet('FC Voorbeeld', 'FC Voorbeeld')
+    const server = await serve({ 'FC Voorbeeld': fixture('wikipedia-club-squad.wiki') })
+
+    await importAt(server, first)
+
+    const rows = () => database.db.select().from(clubSquadPlayers).where(eq(clubSquadPlayers.clubId, clubId))
+    const before = (await rows()).find((row) => row.personId !== null)!
+
+    // The row has an older spelling of the source, and the person the name the table writes.
+    await database.db
+      .update(persons)
+      .set({ name: before.sourceName, nameSource: 'redactie' })
+      .where(eq(persons.id, before.personId!))
+    await database.db
+      .update(clubSquadPlayers)
+      .set({ sourceName: 'Oude Schrijfwijze' })
+      .where(eq(clubSquadPlayers.id, before.id))
+
+    expect((await importAt(server, new Date(first.getTime() + days(7)))).players).toMatchObject({
+      added: 0,
+      removed: 0,
+    })
+    expect((await rows()).find((row) => row.id === before.id)?.sourceName).toBe(before.sourceName)
   })
 
   it('leaves the rows of a club whose article has no readable selection, with one line', async () => {

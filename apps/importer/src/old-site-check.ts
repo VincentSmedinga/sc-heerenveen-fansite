@@ -435,7 +435,7 @@ export async function buildOldSiteCheck(db: OldSiteCheckDatabase, data: OldSiteD
   const personless = new Map<string, Set<string>>()
 
   for (const row of await db
-    .select({ name: players.name, season: players.season })
+    .select({ name: players.sourceName, season: players.season })
     .from(players)
     .where(and(eq(players.source, 'verslag'), isNull(players.personId)))) {
     personless.set(row.name, (personless.get(row.name) ?? new Set()).add(row.season))

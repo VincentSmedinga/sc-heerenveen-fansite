@@ -70,6 +70,11 @@ export type PlannedPlayer = {
 /** What the checks need to know about the match and its season. */
 export type ReportContext = {
   match: ReportMatch
+  /**
+   * How often a name of the opponent may stand in the report, for the names that may stand
+   * more than once (`sharedOpponentNames`). Left out, every name may stand once.
+   */
+  opponentNames?: ReadonlyMap<string, number>
   squad: readonly ReportSquadPlayer[]
 }
 
@@ -302,6 +307,7 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
   const origins = { appearances: [] as [Side, number][] }
   const placeOf = new Map<string, number>()
   const squadIds = new Map<string, string>()
+  const opponentSeen = new Map<string, number>()
 
   for (const side of sides) {
     values[side].speler.forEach((row, index) => {
@@ -334,7 +340,11 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
       // A player of ours is one row in `players`: the squad's, or one with the same name.
       const sameName =
         side === 'wij' && chosen === undefined
-          ? context.squad.find((player) => player.name.toLocaleLowerCase('nl') === given.toLocaleLowerCase('nl'))
+          ? context.squad.find((player) =>
+              [player.name, player.sourceName].some(
+                (name) => name?.toLocaleLowerCase('nl') === given.toLocaleLowerCase('nl'),
+              ),
+            )
           : undefined
       const known = chosen ?? sameName
       // The shirt number may stay empty: a player of the squad then has his own, and anybody
@@ -380,12 +390,21 @@ export function checkReportForm(values: ReportValues, context: ReportContext): C
 
       // A player is in the report once, in the line-up or on the bench: one of ours by his row
       // in the squad or else by his name, one of the opponent by his name.
+      const lower = given.toLocaleLowerCase('nl')
+      // A stored report can hold two players of the opponent whose persons have one name.
+      const earlier = side === 'zij' ? (opponentSeen.get(lower) ?? 0) : 0
+
+      if (side === 'zij') {
+        opponentSeen.set(lower, earlier + 1)
+      }
+
+      const copy = earlier < (context.opponentNames?.get(lower) ?? 1) ? earlier : 0
       const key =
         side === 'wij'
           ? known === undefined
             ? `naam:${given.toLocaleLowerCase('nl')}`
             : `id:${known.id}`
-          : `zij:${given.toLocaleLowerCase('nl')}`
+          : `zij:${lower}:${copy}`
 
       const first = squadIds.get(key)
 

@@ -7,8 +7,11 @@ import { cardPlayers, getSeasonSquad, type SeasonSquad, squadParts, type SquadPl
 /** One season as the comparison needs it. */
 export type ComparedSeason = { persons: readonly RowPerson[]; season: string; squad: SeasonSquad }
 
-/** Who a row of a season is: its name and the person behind it, if there is one. */
-export type RowPerson = { name: string; personId: null | number }
+/**
+ * Who a row of a season is: the name we show for it, the name of its source, which tells the
+ * rows of a season apart, and the person behind it, if there is one.
+ */
+export type RowPerson = { name: string; personId: null | number; sourceName: string }
 
 /**
  * The card Veranderingen in de selectie: who is new compared with the season before and who is
@@ -97,20 +100,22 @@ export function squadChanges(current: ComparedSeason, before: ComparedSeason): S
 /**
  * The players on the card Selectie of `season` who have no row in `other`, in the order of that
  * card. Two rows are the same player when their person is the same, and, when one of the two
- * has no person, when their name is.
+ * has no person, when a name of theirs is: the one we show or that of the source.
  */
 function onlyIn(season: ComparedSeason, other: ComparedSeason) {
-  const personOf = new Map(season.persons.map((row) => [row.name, row.personId]))
+  const personOf = new Map(season.persons.map((row) => [row.sourceName, row.personId]))
   const people = new Set(other.persons.map((row) => row.personId))
-  const names = new Map(other.persons.map((row) => [row.name, row.personId]))
-  const players = cardPlayers(season.squad).filter(({ name }) => {
-    const person = personOf.get(name) ?? null
+  const players = cardPlayers(season.squad).filter(({ name, sourceName }) => {
+    const person = personOf.get(sourceName) ?? null
 
     if (person !== null && people.has(person)) return false
 
-    const namesake = names.get(name)
+    const namesakes = other.persons.filter((row) =>
+      [row.name, row.sourceName].some((one) => one === name || one === sourceName),
+    )
 
-    return namesake === undefined || (person !== null && namesake !== null)
+    // A row with the same name is the same player, unless both have a person of their own.
+    return namesakes.every((row) => person !== null && row.personId !== null)
   })
 
   return squadParts(players).flatMap((part) => part.players)

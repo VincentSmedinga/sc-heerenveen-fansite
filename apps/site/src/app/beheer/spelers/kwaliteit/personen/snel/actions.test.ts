@@ -62,10 +62,10 @@ async function addPerson(values: typeof persons.$inferInsert, seasons: string[] 
   if (seasons.length > 0) {
     await database.db.insert(players).values(
       seasons.map((season) => ({
-        name: values.name ?? values.wikipediaPage ?? 'Naamloos',
         personId: id,
         searchTerm: 'verzonnen',
         season,
+        sourceName: values.name ?? values.wikipediaPage ?? 'Naamloos',
       })),
     )
   }

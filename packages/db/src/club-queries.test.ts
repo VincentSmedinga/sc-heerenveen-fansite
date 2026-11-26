@@ -311,10 +311,10 @@ describe('listSquadPersonIds', () => {
       .$returningId()
 
     await database.db.insert(players).values([
-      { name: 'Test Squadman', personId: person!.id, searchTerm: 'Test Squadman', season: '2026/27' },
-      { inSquad: false, name: 'Test Gone', personId: gone!.id, searchTerm: 'Test Gone', season: '2026/27' },
-      { name: 'Test Nobody', searchTerm: 'Test Nobody', season: '2026/27' },
-      { name: 'Test Old', personId: gone!.id, searchTerm: 'Test Old', season: '2025/26' },
+      { personId: person!.id, searchTerm: 'Test Squadman', season: '2026/27', sourceName: 'Test Squadman' },
+      { inSquad: false, personId: gone!.id, searchTerm: 'Test Gone', season: '2026/27', sourceName: 'Test Gone' },
+      { searchTerm: 'Test Nobody', season: '2026/27', sourceName: 'Test Nobody' },
+      { personId: gone!.id, searchTerm: 'Test Old', season: '2025/26', sourceName: 'Test Old' },
     ])
 
     expect(await listSquadPersonIds(database.db, '2026/27')).toEqual([person!.id])
@@ -332,16 +332,22 @@ describe('listSeasonPlayerPersons', () => {
       .$returningId()
 
     await database.db.insert(players).values([
-      { inSquad: false, name: 'Test Gebleven', personId: person!.id, searchTerm: 'Test Gebleven', season: '2026/27' },
-      { name: 'Test Naamloos', searchTerm: 'Test Naamloos', season: '2026/27', source: 'verslag' },
-      { name: 'Test Vorig', searchTerm: 'Test Vorig', season: '2025/26' },
+      {
+        inSquad: false,
+        personId: person!.id,
+        searchTerm: 'Test Gebleven',
+        season: '2026/27',
+        sourceName: 'Test Gebleven',
+      },
+      { searchTerm: 'Test Naamloos', season: '2026/27', source: 'verslag', sourceName: 'Test Naamloos' },
+      { searchTerm: 'Test Vorig', season: '2025/26', sourceName: 'Test Vorig' },
     ])
 
     const rows = await listSeasonPlayerPersons(database.db, '2026/27')
 
     expect(rows.toSorted((a, b) => a.name.localeCompare(b.name))).toEqual([
-      { name: 'Test Gebleven', personId: person!.id },
-      { name: 'Test Naamloos', personId: null },
+      { name: 'Test Gebleven', personId: person!.id, sourceName: 'Test Gebleven' },
+      { name: 'Test Naamloos', personId: null, sourceName: 'Test Naamloos' },
     ])
 
     await database.pool.query("DELETE FROM players WHERE search_term LIKE 'Test %'")
@@ -443,9 +449,9 @@ describe('listClubMatches', () => {
       .orderBy(matches.id)
 
     await database.db.insert(matchGoals).values([
-      { matchId: twenteMatch, minute: 70, ours: false, player: 'Late' },
-      { matchId: twenteMatch, minute: 12, ours: true, penalty: true, player: 'Vroeg' },
-      { matchId: ajaxMatch, minute: 5, ours: true, player: 'Elders' },
+      { matchId: twenteMatch, minute: 70, ours: false, sourceName: 'Late' },
+      { matchId: twenteMatch, minute: 12, ours: true, penalty: true, sourceName: 'Vroeg' },
+      { matchId: ajaxMatch, minute: 5, ours: true, sourceName: 'Elders' },
     ])
 
     const [list] = await listClubMatches(database.db, twente)

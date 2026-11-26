@@ -19,8 +19,8 @@ export function SeasonUitblinkerCard({ uitblinker }: { uitblinker: SeasonUitblin
       </Heading>
       {uitblinker.kind === 'year' ? (
         <>
-          {uitblinker.stars.map((star) => (
-            <Winner key={star.name} {...star} />
+          {uitblinker.stars.map((star, index) => (
+            <Winner key={`${index}-${star.name}`} {...star} />
           ))}
           {uitblinker.source === undefined ? null : <Text appearance="meta">{uitblinker.source}</Text>}
           <CardLink href={yearWinnersPath}>Uitblinker van het jaar</CardLink>

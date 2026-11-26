@@ -187,15 +187,15 @@ describe('the first import, into an empty database', () => {
     expect(stored).toHaveLength(25)
     expect(stored.every((player) => player.season === season)).toBe(true)
     expect(stored[0]).toMatchObject({
-      name: 'Bernt Klaverboer',
       position: 'doelman',
       searchTerm: 'Klaverboer',
       shirtNumber: 22,
+      sourceName: 'Bernt Klaverboer',
       wikipediaPage: 'Bernt Klaverboer',
     })
     expect(stored.every((player) => player.inSquad && player.leftSquadAt === null)).toBe(true)
     expect(stored.every((player) => player.source === 'selectie')).toBe(true)
-    expect(stored.find((player) => player.name === 'Sten Kremers')).toMatchObject({
+    expect(stored.find((player) => player.sourceName === 'Sten Kremers')).toMatchObject({
       position: 'doelman',
       searchTerm: 'Kremers',
       shirtNumber: null,
@@ -256,7 +256,7 @@ describe('the first import, into an empty database', () => {
 
     await importAt(server, first)
 
-    expect(await database.db.select().from(players).where(eq(players.name, 'Dylan Vente'))).toMatchObject([
+    expect(await database.db.select().from(players).where(eq(players.sourceName, 'Dylan Vente'))).toMatchObject([
       { searchTerm: 'Vente', wikipediaPage: 'Dylan Vente (voetballer)' },
     ])
   })
@@ -318,15 +318,15 @@ describe('reading again', () => {
     )
 
     const after = await database.db.select().from(players).orderBy(asc(players.id))
-    const named = (name: string) => after.find((player) => player.name === name)
+    const named = (name: string) => after.find((player) => player.sourceName === name)
 
     expect(after).toHaveLength(26)
     expect(named('Marko Farji')).toMatchObject({ inSquad: false, leftSquadAt: later, wikipediaPage: 'Marko Farji' })
     expect(named('Pim Verbeek')).toMatchObject({ inSquad: true, leftSquadAt: null })
     expect(named('Dirk Proper')).toMatchObject({ shirtNumber: 8 })
     // Nobody who is in the table or was in it before gets a new id.
-    expect(after.slice(0, 25).map((player) => [player.id, player.name])).toEqual(
-      before.map((player) => [player.id, player.name]),
+    expect(after.slice(0, 25).map((player) => [player.id, player.sourceName])).toEqual(
+      before.map((player) => [player.id, player.sourceName]),
     )
   })
 
@@ -336,7 +336,7 @@ describe('reading again', () => {
     await importAt(server, first)
 
     const country = async (name: string) =>
-      (await database.db.select().from(players).where(eq(players.name, name)))[0]?.country
+      (await database.db.select().from(players).where(eq(players.sourceName, name)))[0]?.country
 
     expect(await country('Dirk Proper')).toBe('NL')
     expect(await country('Marko Farji')).toBe('IQ')
@@ -377,7 +377,9 @@ describe('reading again', () => {
       kind: 'imported',
       warnings: ["Dirk Proper: the country '{{ENG-VLAG}}' is not one we know, so it is left empty"],
     })
-    expect((await database.db.select().from(players).where(eq(players.name, 'Dirk Proper')))[0]?.country).toBeNull()
+    expect(
+      (await database.db.select().from(players).where(eq(players.sourceName, 'Dirk Proper')))[0]?.country,
+    ).toBeNull()
   })
 
   it('keeps the id of a player when his number, position, name or page change', async () => {
@@ -385,14 +387,14 @@ describe('reading again', () => {
 
     await importAt(server, first)
 
-    const [klaverboer] = await database.db.select().from(players).where(eq(players.name, 'Bernt Klaverboer'))
+    const [klaverboer] = await database.db.select().from(players).where(eq(players.sourceName, 'Bernt Klaverboer'))
 
     // A new spelling of the name, on the same page.
     page.squad = original.replace('[[Bernt Klaverboer]]', '[[Bernt Klaverboer|Bernt Klaverboer-Jansen]]')
     await importAt(server, new Date(first.getTime() + hours(1)))
 
     expect(await database.db.select().from(players).where(eq(players.id, klaverboer!.id))).toMatchObject([
-      { name: 'Bernt Klaverboer-Jansen', wikipediaPage: 'Bernt Klaverboer' },
+      { sourceName: 'Bernt Klaverboer-Jansen', wikipediaPage: 'Bernt Klaverboer' },
     ])
     expect(await database.db.select().from(players)).toHaveLength(25)
   })
@@ -408,7 +410,7 @@ describe('reading again', () => {
     await importAt(server, new Date(first.getTime() + hours(1)))
 
     expect(await database.db.select().from(players).where(eq(players.wikipediaPage, 'Bernt Klaverboer'))).toMatchObject(
-      [{ name: 'Bernt Klaverboer-Jansen', previousShirtNumber: 77, shirtNumberFrom: '2026-10-01' }],
+      [{ previousShirtNumber: 77, shirtNumberFrom: '2026-10-01', sourceName: 'Bernt Klaverboer-Jansen' }],
     )
   })
 
@@ -425,7 +427,7 @@ describe('reading again', () => {
     const report = await importAt(server, new Date(first.getTime() + hours(2)))
 
     expect(report).toMatchObject({ kind: 'imported', players: { added: 0, left: 0, unchanged: 25, updated: 0 } })
-    expect(await database.db.select().from(players).where(eq(players.name, 'Marko Farji'))).toMatchObject([
+    expect(await database.db.select().from(players).where(eq(players.sourceName, 'Marko Farji'))).toMatchObject([
       { inSquad: false, leftSquadAt: left },
     ])
   })
@@ -435,7 +437,7 @@ describe('reading again', () => {
 
     await importAt(server, first)
 
-    const [farji] = await database.db.select().from(players).where(eq(players.name, 'Marko Farji'))
+    const [farji] = await database.db.select().from(players).where(eq(players.sourceName, 'Marko Farji'))
 
     page.squad = without(original, 'Marko Farji')
     await importAt(server, new Date(first.getTime() + hours(1)))
@@ -445,7 +447,7 @@ describe('reading again', () => {
 
     expect(report).toMatchObject({ kind: 'imported', players: { added: 0, left: 0, unchanged: 24, updated: 1 } })
     expect(await database.db.select().from(players)).toHaveLength(25)
-    expect(await database.db.select().from(players).where(eq(players.name, 'Marko Farji'))).toMatchObject([
+    expect(await database.db.select().from(players).where(eq(players.sourceName, 'Marko Farji'))).toMatchObject([
       { id: farji!.id, inSquad: true, leftSquadAt: null },
     ])
   })
@@ -465,7 +467,7 @@ describe('reading again', () => {
 
     expect(after.map((player) => [player.id, player.inSquad])).toEqual(before.map((player) => [player.id, true]))
     expect(after.every((player) => player.wikipediaPage !== null)).toBe(true)
-    expect(after.find((player) => player.name === 'Roberts Uldrikis')?.wikipediaPage).toBe('Roberts Uldriķis')
+    expect(after.find((player) => player.sourceName === 'Roberts Uldrikis')?.wikipediaPage).toBe('Roberts Uldriķis')
   })
 
   it('replaces the made-up squad of the seed with the first good read, and nothing after it', async () => {
@@ -479,7 +481,7 @@ describe('reading again', () => {
     const read = await database.db.select().from(players).orderBy(asc(players.id))
 
     expect(read).toHaveLength(25)
-    expect(read.map((player) => player.name)).not.toContain('Tjerk Brandsma')
+    expect(read.map((player) => player.sourceName)).not.toContain('Tjerk Brandsma')
 
     // After that a player who is gone stays.
     page.squad = without(original, 'Marko Farji')
@@ -502,7 +504,7 @@ describe('reading again', () => {
 
     await importAt(server, first)
 
-    const [farji] = await database.db.select().from(players).where(eq(players.name, 'Marko Farji'))
+    const [farji] = await database.db.select().from(players).where(eq(players.sourceName, 'Marko Farji'))
     const [match] = await database.db
       .insert(matches)
       .values(
@@ -527,8 +529,8 @@ describe('reading again', () => {
       matchId: match!.id,
       minute: 10,
       ours: true,
-      player: 'Farji',
       playerId: farji!.id,
+      sourceName: 'Farji',
       wikipediaPage: 'Marko Farji',
     })
     page.squad = without(original, 'Marko Farji')
@@ -541,10 +543,10 @@ describe('reading again', () => {
     const { server } = await serve()
 
     await importAt(server, first)
-    await database.db.update(players).set({ searchTerm: 'Vente (Dylan)' }).where(eq(players.name, 'Dylan Vente'))
+    await database.db.update(players).set({ searchTerm: 'Vente (Dylan)' }).where(eq(players.sourceName, 'Dylan Vente'))
     await importAt(server, new Date(first.getTime() + hours(1)))
 
-    expect((await database.db.select().from(players).where(eq(players.name, 'Dylan Vente')))[0]?.searchTerm).toBe(
+    expect((await database.db.select().from(players).where(eq(players.sourceName, 'Dylan Vente')))[0]?.searchTerm).toBe(
       'Vente (Dylan)',
     )
   })
@@ -560,7 +562,7 @@ describe('reading again', () => {
     expect(report).toMatchObject({ kind: 'imported', players: { added: 0, left: 0, unchanged: 24, updated: 1 } })
     expect(await database.db.select().from(players)).toHaveLength(25)
     expect(await database.db.select().from(players).where(eq(players.shirtNumber, 11))).toMatchObject([
-      { name: 'Luca Öyen', searchTerm: 'Oyen' },
+      { searchTerm: 'Oyen', sourceName: 'Luca Öyen' },
     ])
   })
 
@@ -615,7 +617,7 @@ describe('reading again', () => {
 
     await importAt(server, first)
 
-    const [before] = await database.db.select().from(players).where(eq(players.name, 'Jan Harm Schippers'))
+    const [before] = await database.db.select().from(players).where(eq(players.sourceName, 'Jan Harm Schippers'))
 
     expect(before).toMatchObject({ wikipediaPage: 'Jan Harm Schippers' })
     page.squad = original.replace('[[Luca Oyen]]', '[[Jan-Harm Schippers]]')
@@ -625,7 +627,7 @@ describe('reading again', () => {
     expect(report).toMatchObject({ kind: 'imported', players: { added: 0, left: 0, unchanged: 25, updated: 0 } })
     expect(await database.db.select().from(players)).toHaveLength(25)
     expect(await database.db.select().from(players).where(eq(players.id, before!.id))).toMatchObject([
-      { name: 'Jan Harm Schippers', personId: before!.personId, wikipediaPage: 'Jan Harm Schippers' },
+      { personId: before!.personId, sourceName: 'Jan Harm Schippers', wikipediaPage: 'Jan Harm Schippers' },
     ])
     expect(
       (await database.db.select().from(persons)).filter((row) => row.wikipediaPage?.includes('Schippers')),
@@ -645,14 +647,14 @@ describe('reading again', () => {
 
       const [before] = await database.db.select().from(players).where(eq(players.wikipediaPage, title))
 
-      expect(before).toMatchObject({ name, wikipediaPage: title })
+      expect(before).toMatchObject({ sourceName: name, wikipediaPage: title })
       page.squad = original.replace('[[Luca Oyen]]', `[[${title}|${title}]]`)
 
       const report = await importAt(server, new Date(first.getTime() + hours(1)))
 
       expect(report).toMatchObject({ kind: 'imported', players: { added: 0, left: 0, unchanged: 25, updated: 0 } })
       expect(await database.db.select().from(players).where(eq(players.wikipediaPage, title))).toMatchObject([
-        { id: before!.id, name, personId: before!.personId },
+        { id: before!.id, personId: before!.personId, sourceName: name },
       ])
     },
   )
@@ -668,11 +670,11 @@ describe('reading again', () => {
       await importAt(server, first)
 
       // A row of before the owner chose: the name and the page are the other spelling.
-      const [oyen] = await database.db.select().from(players).where(eq(players.name, 'Luca Oyen'))
+      const [oyen] = await database.db.select().from(players).where(eq(players.sourceName, 'Luca Oyen'))
 
       await database.db
         .update(players)
-        .set({ name: other, searchTerm: otherTerm, wikipediaPage: other })
+        .set({ searchTerm: otherTerm, sourceName: other, wikipediaPage: other })
         .where(eq(players.id, oyen!.id))
       page.squad = original.replace('[[Luca Oyen]]', `[[${other}]]`)
 
@@ -682,8 +684,8 @@ describe('reading again', () => {
       // The season ends with one row for him: the same row, in the spelling that stays.
       expect(await database.db.select().from(players)).toHaveLength(25)
       expect(
-        (await database.db.select().from(players)).filter((row) => [other, stays].includes(row.name)),
-      ).toMatchObject([{ id: oyen!.id, inSquad: true, name: stays, searchTerm: term, wikipediaPage: stays }])
+        (await database.db.select().from(players)).filter((row) => [other, stays].includes(row.sourceName)),
+      ).toMatchObject([{ id: oyen!.id, inSquad: true, searchTerm: term, sourceName: stays, wikipediaPage: stays }])
     },
   )
 
@@ -693,7 +695,7 @@ describe('reading again', () => {
     it('gets the row of the table when the table has him: the same id, the source selectie, no second row', async () => {
       await database.db
         .insert(players)
-        .values({ ...scorer, name: 'Bernt Klaverboer', wikipediaPage: 'Bernt Klaverboer' })
+        .values({ ...scorer, sourceName: 'Bernt Klaverboer', wikipediaPage: 'Bernt Klaverboer' })
 
       const [before] = await database.db.select().from(players)
       const { server } = await serve()
@@ -702,7 +704,7 @@ describe('reading again', () => {
       expect(report).toMatchObject({ kind: 'imported', players: { added: 24, left: 0, updated: 1 } })
       expect(await database.db.select().from(players)).toHaveLength(25)
       expect(await database.db.select().from(players).where(eq(players.id, before!.id))).toMatchObject([
-        { inSquad: true, name: 'Bernt Klaverboer', source: 'selectie' },
+        { inSquad: true, source: 'selectie', sourceName: 'Bernt Klaverboer' },
       ])
       expect((await database.db.select().from(players).where(eq(players.id, before!.id)))[0]?.position).not.toBeNull()
       // The next read finds him unchanged.
@@ -720,22 +722,22 @@ describe('reading again', () => {
       ])
       await database.db
         .insert(players)
-        .values({ ...scorer, name: 'B. Klaverboer', personId, wikipediaPage: 'B. Klaverboer' })
+        .values({ ...scorer, personId, sourceName: 'B. Klaverboer', wikipediaPage: 'B. Klaverboer' })
 
       const [before] = await database.db.select().from(players)
       const { server } = await serve()
 
       expect(await importAt(server, first)).toMatchObject({ players: { added: 24, updated: 1 } })
       expect(await database.db.select().from(players).where(eq(players.personId, personId))).toMatchObject([
-        { id: before!.id, name: 'Bernt Klaverboer', source: 'selectie', wikipediaPage: 'Bernt Klaverboer' },
+        { id: before!.id, source: 'selectie', sourceName: 'Bernt Klaverboer', wikipediaPage: 'Bernt Klaverboer' },
       ])
     })
 
     it('stays in the squad, with his source, while the table does not have him', async () => {
       await database.db.insert(players).values({
         ...scorer,
-        name: 'Pelle van Amersfoort',
         searchTerm: 'van Amersfoort',
+        sourceName: 'Pelle van Amersfoort',
         wikipediaPage: 'Pelle van Amersfoort',
       })
 
@@ -745,9 +747,9 @@ describe('reading again', () => {
       expect(await importAt(server, new Date(first.getTime() + hours(1)))).toMatchObject({
         players: { left: 0, unchanged: 25 },
       })
-      expect(await database.db.select().from(players).where(eq(players.name, 'Pelle van Amersfoort'))).toMatchObject([
-        { inSquad: true, leftSquadAt: null, source: 'doelpunten' },
-      ])
+      expect(
+        await database.db.select().from(players).where(eq(players.sourceName, 'Pelle van Amersfoort')),
+      ).toMatchObject([{ inSquad: true, leftSquadAt: null, source: 'doelpunten' }])
     })
   })
 })
@@ -770,14 +772,15 @@ describe('what the editors set of a player (#1022)', () => {
 
     const before = await klaverboer()
 
-    // The editors gave him another name, number and line. The table then changes his flag.
+    // The editors set another number and line, and the row has another name than the table.
+    // The table then changes his flag.
     await database.db
       .update(players)
       .set({
         editorsFields: ['name', 'shirt_number', 'position'],
-        name: 'Bernt K.',
         position: 'aanvaller',
         shirtNumber: 1,
+        sourceName: 'Bernt K.',
       })
       .where(eq(players.id, before.id))
     page.squad = original.replace(
@@ -790,10 +793,11 @@ describe('what the editors set of a player (#1022)', () => {
       country: 'BE',
       editorsFields: ['name', 'shirt_number', 'position'],
       id: before.id,
-      name: 'Bernt K.',
       position: 'aanvaller',
       shirtNumber: 1,
       source: 'selectie',
+      // The name of the source is no field of the editors: theirs is that of the person.
+      sourceName: 'Bernt Klaverboer',
     })
     // The next read finds him unchanged, and writes nothing.
     expect(await importAt(server, evenLater)).toMatchObject({ players: { unchanged: 25, updated: 0 } })
@@ -811,30 +815,54 @@ describe('what the editors set of a player (#1022)', () => {
       .update(players)
       .set({
         editorsFields: ['name', 'shirt_number', 'position'],
-        name: 'Bernt K.',
         position: 'aanvaller',
         shirtNumber: 1,
+        sourceName: 'Bernt K.',
       })
       .where(eq(players.id, before.id))
     await importAt(server, later)
 
     expect(await waiting()).toMatchObject([
-      { editorsValue: 'Bernt K.', field: 'name', importValue: 'Bernt Klaverboer', playerId: before.id, season },
-      { editorsValue: '1', field: 'shirt_number', importValue: '22', status: 'pending' },
+      { editorsValue: '1', field: 'shirt_number', importValue: '22', playerId: before.id, season, status: 'pending' },
       { editorsValue: 'aanvaller', field: 'position', firstSeenAt: later, importValue: 'doelman', lastSeenAt: later },
     ])
 
     // The editors make the number that of the table: that difference closes itself, and the
-    // other two are seen again and not kept twice.
+    // other one is seen again and not kept twice.
     await database.db.update(players).set({ shirtNumber: 22 }).where(eq(players.id, before.id))
     await importAt(server, evenLater)
 
     expect(await waiting()).toMatchObject([
-      { field: 'name', firstSeenAt: later, lastSeenAt: evenLater, status: 'pending' },
       { decidedAt: evenLater, field: 'shirt_number', resolution: 'reverted', status: 'rejected' },
       { field: 'position', firstSeenAt: later, lastSeenAt: evenLater, status: 'pending' },
     ])
-    expect(await klaverboer()).toMatchObject({ name: 'Bernt K.', position: 'aanvaller', shirtNumber: 22 })
+    expect(await klaverboer()).toMatchObject({ position: 'aanvaller', shirtNumber: 22, sourceName: 'Bernt Klaverboer' })
+  })
+
+  it('finds the row of a renamed player by the name of his person, and makes no second row (#1697)', async () => {
+    const { page, server } = await serve()
+
+    await importAt(server, first)
+
+    const before = await klaverboer()
+
+    // The editors renamed the person, and the table then writes the new name, without a link.
+    await database.db
+      .update(persons)
+      .set({ name: 'Bernt Klaverman', nameSource: 'redactie' })
+      .where(eq(persons.id, before.personId!))
+    page.squad = original.replace('[[Bernt Klaverboer]]', 'Bernt Klaverman')
+
+    expect(await importAt(server, later)).toMatchObject({ players: { added: 0, left: 0 } })
+    expect(await database.db.select().from(players).where(eq(players.personId, before.personId!))).toMatchObject([
+      { id: before.id, sourceName: 'Bernt Klaverman' },
+    ])
+    expect(await database.db.select().from(players)).toHaveLength(25)
+    expect(await importAt(server, evenLater)).toMatchObject({ players: { unchanged: 25, updated: 0 } })
+    expect(await database.db.select().from(persons).where(eq(persons.id, before.personId!))).toMatchObject([
+      { name: 'Bernt Klaverman', nameSource: 'redactie' },
+    ])
+    expect(await waiting()).toEqual([])
   })
 
   it('keeps a player the editors added in the squad when the table does not have him, also in the first read', async () => {
@@ -842,7 +870,7 @@ describe('what the editors set of a player (#1022)', () => {
       .insert(players)
       .values([
         ...madeUpSquad(first),
-        { editorsFields: ['name'], name: 'Sanne Spits', searchTerm: 'Spits', season, source: 'redactie' },
+        { editorsFields: ['name'], searchTerm: 'Spits', season, source: 'redactie', sourceName: 'Sanne Spits' },
       ])
 
     const { server } = await serve()
@@ -850,7 +878,7 @@ describe('what the editors set of a player (#1022)', () => {
     expect(await importAt(server, first)).toMatchObject({ players: { added: 25, left: 0 } })
     expect(await importAt(server, later)).toMatchObject({ players: { left: 0, unchanged: 25 } })
     expect(await database.db.select().from(players)).toHaveLength(26)
-    expect(await database.db.select().from(players).where(eq(players.name, 'Sanne Spits'))).toMatchObject([
+    expect(await database.db.select().from(players).where(eq(players.sourceName, 'Sanne Spits'))).toMatchObject([
       { inSquad: true, leftSquadAt: null, source: 'redactie' },
     ])
   })
@@ -858,10 +886,10 @@ describe('what the editors set of a player (#1022)', () => {
   it('merges the player of the table into the player of the editors with the same page, and fills in what he lacks', async () => {
     await database.db.insert(players).values({
       editorsFields: ['name', 'wikipedia_page'],
-      name: 'Bernt K.',
       searchTerm: 'K.',
       season,
       source: 'redactie',
+      sourceName: 'Bernt K.',
       wikipediaPage: 'Bernt Klaverboer',
     })
 
@@ -876,19 +904,17 @@ describe('what the editors set of a player (#1022)', () => {
     expect(after).toMatchObject({
       country: 'NL',
       id: before!.id,
-      name: 'Bernt K.',
       position: 'doelman',
       shirtNumber: 22,
       source: 'redactie',
+      sourceName: 'Bernt Klaverboer',
     })
     expect(after.personId).not.toBeNull()
     // The numbers of the table are his.
     expect(
       await database.db.select().from(playerSeasonStats).where(eq(playerSeasonStats.playerId, after.id)),
     ).not.toEqual([])
-    expect(await waiting()).toMatchObject([
-      { editorsValue: 'Bernt K.', field: 'name', importValue: 'Bernt Klaverboer' },
-    ])
+    expect(await waiting()).toEqual([])
   })
 
   it('finds a player of the editors by his person when the table links another title, and keeps their page', async () => {
@@ -900,11 +926,11 @@ describe('what the editors set of a player (#1022)', () => {
     ])
     await database.db.insert(players).values({
       editorsFields: ['name', 'wikipedia_page'],
-      name: 'B. Klaverboer',
       personId,
       searchTerm: 'Klaverboer',
       season,
       source: 'redactie',
+      sourceName: 'B. Klaverboer',
       wikipediaPage: 'B. Klaverboer',
     })
 
@@ -913,10 +939,9 @@ describe('what the editors set of a player (#1022)', () => {
 
     expect(await importAt(server, first)).toMatchObject({ players: { added: 24, updated: 1 } })
     expect(await database.db.select().from(players).where(eq(players.personId, personId))).toMatchObject([
-      { id: before!.id, name: 'B. Klaverboer', shirtNumber: 22, wikipediaPage: 'B. Klaverboer' },
+      { id: before!.id, shirtNumber: 22, sourceName: 'Bernt Klaverboer', wikipediaPage: 'B. Klaverboer' },
     ])
     expect(await waiting()).toMatchObject([
-      { editorsValue: 'B. Klaverboer', field: 'name', importValue: 'Bernt Klaverboer' },
       { editorsValue: 'B. Klaverboer', field: 'wikipedia_page', importValue: 'Bernt Klaverboer' },
     ])
   })
@@ -928,11 +953,11 @@ describe('what the editors set of a player (#1022)', () => {
 
     await database.db.insert(players).values({
       editorsFields: ['name'],
-      name: 'Bernt Klaverboer',
       personId: untitled,
       searchTerm: 'Klaverboer',
       season,
       source: 'redactie',
+      sourceName: 'Bernt Klaverboer',
     })
 
     const [before] = await database.db.select().from(players)
@@ -968,10 +993,10 @@ describe('two persons the editors merged in the admin (#977)', () => {
 
     await database.db.insert(personPages).values({ page: 'Bernt Oudenaam', personId: old })
     await database.db.insert(players).values({
-      name: 'Bernt Oudenaam',
       personId: old,
       searchTerm: 'Oudenaam',
       season: '2025/26',
+      sourceName: 'Bernt Oudenaam',
       wikipediaPage: 'Bernt Oudenaam',
     })
 
@@ -1005,7 +1030,7 @@ describe('two persons the editors merged in the admin (#977)', () => {
     ])
     expect(
       await database.db
-        .select({ name: players.name, season: players.season })
+        .select({ name: players.sourceName, season: players.season })
         .from(players)
         .where(eq(players.personId, kept))
         .orderBy(asc(players.season)),
@@ -1175,14 +1200,14 @@ describe('the numbers of the players', () => {
       })
       .from(playerSeasonStats)
       .innerJoin(players, eq(playerSeasonStats.playerId, players.id))
-      .where(eq(players.name, name))
+      .where(eq(players.sourceName, name))
       .orderBy(asc(playerSeasonStats.competition))
   }
 
   /** A match that was played, with the Eredivisie goals of the squad table. */
   async function playMatchWithTheGoalsOfTheTable() {
     const rows = await database.db
-      .select({ goals: playerSeasonStats.goals, name: players.name, playerId: players.id })
+      .select({ goals: playerSeasonStats.goals, name: players.sourceName, playerId: players.id })
       .from(playerSeasonStats)
       .innerJoin(players, eq(playerSeasonStats.playerId, players.id))
       .where(eq(playerSeasonStats.competition, 'Eredivisie'))
@@ -1211,8 +1236,8 @@ describe('the numbers of the players', () => {
         matchId: insertId,
         minute: index + 1,
         ours: true,
-        player: scorer.name,
         playerId: scorer.playerId,
+        sourceName: scorer.name,
       })),
     )
 
@@ -1254,7 +1279,7 @@ describe('the numbers of the players', () => {
       { appearances: 0, assists: 0, competition: 'Eredivisie', goals: 0, updatedAt: first },
       { appearances: 2, assists: 0, competition: 'KNVB Beker', goals: 1, updatedAt: first },
     ])
-    expect(await database.db.select().from(players).where(eq(players.name, 'Luca Oyen'))).toHaveLength(1)
+    expect(await database.db.select().from(players).where(eq(players.sourceName, 'Luca Oyen'))).toHaveLength(1)
   })
 
   it('updates the numbers in the next run, without double rows, and moves the moment only for a change', async () => {
@@ -1289,7 +1314,7 @@ describe('the numbers of the players', () => {
     page.squad = without(original, 'Marko Farji')
     await importAt(server, new Date(first.getTime() + hours(1)))
 
-    expect(await database.db.select().from(players).where(eq(players.name, 'Marko Farji'))).toMatchObject([
+    expect(await database.db.select().from(players).where(eq(players.sourceName, 'Marko Farji'))).toMatchObject([
       { inSquad: false },
     ])
     expect(await statsOf('Marko Farji')).toEqual([
@@ -1351,13 +1376,13 @@ describe('the numbers of the players', () => {
     await importAt(server, first)
 
     const matchId = await playMatchWithTheGoalsOfTheTable()
-    const [oyen] = await database.db.select().from(players).where(eq(players.name, 'Luca Oyen'))
+    const [oyen] = await database.db.select().from(players).where(eq(players.sourceName, 'Luca Oyen'))
 
     // One goal less for Oyen. His own goal and a goal of the opponent don't count for him.
     await database.pool.query('DELETE FROM match_goals WHERE player_id = ? LIMIT 1', [oyen?.id])
     await database.db.insert(matchGoals).values([
-      { matchId, minute: 80, ours: false, ownGoal: true, player: 'Oyen', playerId: oyen?.id ?? null },
-      { matchId, minute: 81, ours: false, player: 'Oyen' },
+      { matchId, minute: 80, ours: false, ownGoal: true, playerId: oyen?.id ?? null, sourceName: 'Oyen' },
+      { matchId, minute: 81, ours: false, sourceName: 'Oyen' },
     ])
 
     const before = await database.db.select().from(playerSeasonStats).orderBy(asc(playerSeasonStats.id))
@@ -1391,7 +1416,7 @@ describe('the numbers of the players', () => {
 
     await database.db
       .insert(matchGoals)
-      .values({ matchId, minute: 82, ours: true, player: 'Oyen', playerId: oyen?.id ?? null })
+      .values({ matchId, minute: 82, ours: true, playerId: oyen?.id ?? null, sourceName: 'Oyen' })
     await importAt(server, new Date(first.getTime() + hours(3)))
     expect(await database.db.select().from(playerStatDifferences)).toMatchObject([
       { resolution: 'reverted', status: 'rejected' },
@@ -1403,7 +1428,7 @@ describe('the numbers of the players', () => {
 
     await importAt(server, first)
 
-    const [oyen] = await database.db.select().from(players).where(eq(players.name, 'Luca Oyen'))
+    const [oyen] = await database.db.select().from(players).where(eq(players.sourceName, 'Luca Oyen'))
     const league = () =>
       database.db
         .select()
@@ -1436,14 +1461,21 @@ describe('the numbers of the players', () => {
     await importAt(server, first)
 
     const matchId = await playMatchWithTheGoalsOfTheTable()
-    const [oyen] = await database.db.select().from(players).where(eq(players.name, 'Luca Oyen'))
+    const [oyen] = await database.db.select().from(players).where(eq(players.sourceName, 'Luca Oyen'))
 
     // The report of the only match is klaar and gives Oyen one goal, where the table says two.
     await database.db.insert(matchReports).values({ matchId, status: 'klaar' })
 
     const [appearance] = await database.db
       .insert(matchAppearances)
-      .values({ matchId, name: 'Luca Oyen', ours: true, playerId: oyen?.id ?? null, shirtNumber: 9, starter: true })
+      .values({
+        matchId,
+        ours: true,
+        playerId: oyen?.id ?? null,
+        shirtNumber: 9,
+        sourceName: 'Luca Oyen',
+        starter: true,
+      })
       .$returningId()
 
     await database.pool.query('UPDATE match_goals SET appearance_id = ? WHERE player_id = ? LIMIT 1', [
@@ -1481,7 +1513,7 @@ describe('the numbers of the players', () => {
 
     await importAt(server, new Date(first.getTime() + hours(1)))
 
-    const [oyen] = await database.db.select().from(players).where(eq(players.name, 'Luca Oyen'))
+    const [oyen] = await database.db.select().from(players).where(eq(players.sourceName, 'Luca Oyen'))
 
     // Oyen has no Eredivisie goal in the table now, so the goals of the matches are not his.
     expect(
@@ -1494,11 +1526,11 @@ describe('the numbers of the players', () => {
 
 describe('seasons', () => {
   const oldPlayer = {
-    name: 'Oude Speler',
     position: 'doelman',
     searchTerm: 'Speler',
     season: '2025/26',
     shirtNumber: 1,
+    sourceName: 'Oude Speler',
   } as const
 
   it('leaves the players of an earlier season as they are when a squad is read', async () => {
@@ -1508,12 +1540,12 @@ describe('seasons', () => {
 
     await importAt(server, first)
     // Another squad with the same name in the earlier season does not clash with it either.
-    await database.db.insert(players).values({ ...oldPlayer, name: 'Bernt Klaverboer', season: '2025/26' })
+    await database.db.insert(players).values({ ...oldPlayer, season: '2025/26', sourceName: 'Bernt Klaverboer' })
     await importAt(server, new Date(first.getTime() + hours(1)))
 
     const old = await database.db.select().from(players).where(eq(players.season, '2025/26'))
 
-    expect(old.map((player) => player.name).sort()).toEqual(['Bernt Klaverboer', 'Oude Speler'])
+    expect(old.map((player) => player.sourceName).sort()).toEqual(['Bernt Klaverboer', 'Oude Speler'])
     expect(await database.db.select().from(players).where(eq(players.season, season))).toHaveLength(25)
   })
 
@@ -1756,18 +1788,18 @@ describe('the status', () => {
 describe('storeChosenSpellings', () => {
   const season = '1996/97'
   const rows = async () =>
-    (await database.db.select().from(players).where(eq(players.season, season)).orderBy(asc(players.name))).map(
-      (row) => `${row.name} | ${row.searchTerm} | ${row.wikipediaPage}`,
+    (await database.db.select().from(players).where(eq(players.season, season)).orderBy(asc(players.sourceName))).map(
+      (row) => `${row.sourceName} | ${row.searchTerm} | ${row.wikipediaPage}`,
     )
 
   it('gives each of the four the spelling that stays, with the surname as search term, and then changes nothing', async () => {
     await database.db.insert(players).values([
-      { name: 'Jan-Harm Schippers', searchTerm: 'Schippers', season, wikipediaPage: 'Jan-Harm Schippers' },
-      { name: 'Radoslav Samardzic', searchTerm: 'Samardzic', season },
-      { name: 'Robert van der Berg', searchTerm: 'van der Berg', season, source: 'transfers' },
-      { name: 'Ugur Yıldırım', searchTerm: 'Yıldırım', season, wikipediaPage: 'Ugur Yıldırım' },
-      { name: 'Jordy Buijs', searchTerm: 'Buijs', season },
-      { name: 'Robert van der Berg', searchTerm: 'van der Berg', season: '1997/98' },
+      { searchTerm: 'Schippers', season, sourceName: 'Jan-Harm Schippers', wikipediaPage: 'Jan-Harm Schippers' },
+      { searchTerm: 'Samardzic', season, sourceName: 'Radoslav Samardzic' },
+      { searchTerm: 'van der Berg', season, source: 'transfers', sourceName: 'Robert van der Berg' },
+      { searchTerm: 'Yıldırım', season, sourceName: 'Ugur Yıldırım', wikipediaPage: 'Ugur Yıldırım' },
+      { searchTerm: 'Buijs', season, sourceName: 'Jordy Buijs' },
+      { searchTerm: 'van der Berg', season: '1997/98', sourceName: 'Robert van der Berg' },
     ])
 
     const before = await database.db.select().from(players).orderBy(asc(players.id))
@@ -1785,7 +1817,7 @@ describe('storeChosenSpellings', () => {
       before.map((row) => row.id),
     )
     expect(await database.db.select().from(players).where(eq(players.season, '1997/98'))).toMatchObject([
-      { name: 'Robert van der Berg' },
+      { sourceName: 'Robert van der Berg' },
     ])
     expect(await storeChosenSpellings(database.db, season)).toBe(0)
   })
@@ -1793,10 +1825,10 @@ describe('storeChosenSpellings', () => {
   it('merges the row of the other spelling into the row that stays when the season has both', async () => {
     const [{ insertId: stays }] = await database.db
       .insert(players)
-      .values({ name: 'Robert van den Berg', searchTerm: 'van den Berg', season })
+      .values({ searchTerm: 'van den Berg', season, sourceName: 'Robert van den Berg' })
     const [{ insertId: other }] = await database.db
       .insert(players)
-      .values({ name: 'Robert van der Berg', searchTerm: 'van der Berg', season, source: 'transfers' })
+      .values({ searchTerm: 'van der Berg', season, source: 'transfers', sourceName: 'Robert van der Berg' })
 
     await database.db.insert(playerSeasonStats).values({
       appearances: 3,
@@ -1813,29 +1845,29 @@ describe('storeChosenSpellings', () => {
     expect(await storeChosenSpellings(database.db, season)).toBe(0)
   })
 
-  it('leaves a name and a page the editors set as they wrote them (#1022)', async () => {
+  it('leaves a page the editors set as they wrote it, and writes the name of the source (#1022)', async () => {
     await database.db.insert(players).values([
       {
         editorsFields: ['name', 'wikipedia_page'],
-        name: 'Jan-Harm Schippers',
         searchTerm: 'Schippers',
         season,
+        sourceName: 'Jan-Harm Schippers',
         wikipediaPage: 'Jan-Harm Schippers',
       },
-      // Only the name is theirs: the page gets the title that stays.
+      // No field is theirs but the name of before #1697: the page gets the title that stays.
       {
         editorsFields: ['name'],
-        name: 'Robert van der Berg',
         searchTerm: 'van der Berg',
         season,
+        sourceName: 'Robert van der Berg',
         wikipediaPage: 'Robert van der Berg',
       },
     ])
 
-    expect(await storeChosenSpellings(database.db, season)).toBe(1)
+    expect(await storeChosenSpellings(database.db, season)).toBe(2)
     expect(await rows()).toEqual([
-      'Jan-Harm Schippers | Schippers | Jan-Harm Schippers',
-      'Robert van der Berg | van der Berg | Robert van den Berg',
+      'Jan Harm Schippers | Schippers | Jan-Harm Schippers',
+      'Robert van den Berg | van den Berg | Robert van den Berg',
     ])
     expect(await storeChosenSpellings(database.db, season)).toBe(0)
   })
@@ -1843,18 +1875,18 @@ describe('storeChosenSpellings', () => {
   it('keeps the row of the editors when the season has both spellings, and merges the other into it (#1022)', async () => {
     const [{ insertId: other }] = await database.db.insert(players).values({
       country: 'NL',
-      name: 'Robert van den Berg',
       position: 'verdediger',
       searchTerm: 'van den Berg',
       season,
+      sourceName: 'Robert van den Berg',
     })
     const [{ insertId: ofEditors }] = await database.db.insert(players).values({
       editorsFields: ['shirt_number'],
-      name: 'Robert van der Berg',
       searchTerm: 'van der Berg',
       season,
       shirtNumber: 4,
       source: 'redactie',
+      sourceName: 'Robert van der Berg',
     })
 
     await database.db.insert(playerSeasonStats).values({
@@ -1871,32 +1903,32 @@ describe('storeChosenSpellings', () => {
       {
         country: 'NL',
         id: ofEditors,
-        name: 'Robert van den Berg',
         position: 'verdediger',
         shirtNumber: 4,
         source: 'redactie',
+        sourceName: 'Robert van den Berg',
       },
     ])
     expect(await database.db.select().from(playerSeasonStats)).toMatchObject([{ goals: 1, playerId: ofEditors }])
     expect(await storeChosenSpellings(database.db, season)).toBe(0)
   })
 
-  it('merges the row of the spelling that stays into a row whose name the editors set, and keeps their name (#1022)', async () => {
+  it('merges the row of the spelling that stays into a row of the editors, and writes that spelling (#1022)', async () => {
     const [{ insertId: ofEditors }] = await database.db.insert(players).values({
       editorsFields: ['name'],
-      name: 'Robert van der Berg',
       searchTerm: 'van der Berg',
       season,
       source: 'redactie',
+      sourceName: 'Robert van der Berg',
     })
 
     await database.db
       .insert(players)
-      .values({ name: 'Robert van den Berg', searchTerm: 'van den Berg', season, shirtNumber: 4 })
+      .values({ searchTerm: 'van den Berg', season, shirtNumber: 4, sourceName: 'Robert van den Berg' })
 
     expect(await storeChosenSpellings(database.db, season)).toBe(1)
     expect(await database.db.select().from(players).where(eq(players.season, season))).toMatchObject([
-      { id: ofEditors, name: 'Robert van der Berg', searchTerm: 'van der Berg', shirtNumber: 4 },
+      { id: ofEditors, searchTerm: 'van den Berg', shirtNumber: 4, sourceName: 'Robert van den Berg' },
     ])
     expect(await storeChosenSpellings(database.db, season)).toBe(0)
   })

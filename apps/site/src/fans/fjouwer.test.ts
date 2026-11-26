@@ -54,13 +54,13 @@ beforeEach(async () => {
   supporterId = (await database.db.select().from(supporters))[0]?.id ?? 0
   await database.db.insert(players).values(
     squadRows.map(([name, position]) => ({
-      name,
       position,
       searchTerm: name,
       season: '2026/27',
+      sourceName: name,
     })),
   )
-  ids = Object.fromEntries((await database.db.select().from(players)).map((row) => [row.name, row.id]))
+  ids = Object.fromEntries((await database.db.select().from(players)).map((row) => [row.sourceName, row.id]))
 })
 
 async function addMatch(kickoffAt: Date | null, extra: Partial<typeof matches.$inferInsert> = {}): Promise<number> {
@@ -148,11 +148,11 @@ describe('the squad', () => {
     await database.db
       .update(players)
       .set({ inSquad: false, leftSquadAt: at(100) })
-      .where(eq(players.name, 'Sauer'))
+      .where(eq(players.sourceName, 'Sauer'))
     await database.db
       .update(players)
       .set({ inSquad: false, leftSquadAt: at(-5) })
-      .where(eq(players.name, 'Wolters'))
+      .where(eq(players.sourceName, 'Wolters'))
     await database.db.insert(fantasyPlayerLines).values({ line: 'aanvaller', playerId: ids['Proper'] as number })
 
     const squad = await fjouwerSquad(database.db, (await fjouwerMatch(database.db, now))!)
@@ -229,7 +229,7 @@ describe('saving', () => {
       playerIds: four('Noppert', 'Hilgers', 'Proper', 'Vente'),
       supporterId,
     })
-    await database.db.update(players).set({ position: 'verdediger' }).where(eq(players.name, 'Proper'))
+    await database.db.update(players).set({ position: 'verdediger' }).where(eq(players.sourceName, 'Proper'))
     await saveFjouwer(database.db, {
       matchId: match,
       playerIds: four('Noppert', 'Hilgers', 'Proper', 'Vente'),

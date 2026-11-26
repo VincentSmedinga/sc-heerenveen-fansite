@@ -58,8 +58,8 @@ describe('importOpponentPersons', () => {
     const [person] = await database.db.insert(persons).values({ name: 'Jan de Vries' }).$returningId()
 
     await database.db.insert(matchAppearances).values([
-      { matchId, name: 'Jan de Vries', ours: false, starter: true },
-      { matchId, name: 'Onbekend Persoon', ours: false, starter: true },
+      { matchId, ours: false, sourceName: 'Jan de Vries', starter: true },
+      { matchId, ours: false, sourceName: 'Onbekend Persoon', starter: true },
     ])
 
     expect(await importOpponentPersons(database.db)).toEqual([
@@ -68,7 +68,7 @@ describe('importOpponentPersons', () => {
 
     const rows = await database.db.select().from(matchAppearances).where(eq(matchAppearances.matchId, matchId))
 
-    expect(rows.map((row) => [row.name, row.personId])).toEqual([
+    expect(rows.map((row) => [row.sourceName, row.personId])).toEqual([
       ['Jan de Vries', person?.id],
       ['Onbekend Persoon', null],
     ])

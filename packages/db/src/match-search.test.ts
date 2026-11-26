@@ -50,7 +50,7 @@ async function addScorer(name: string, slug: string, { old = [] as string[] } = 
   const personId = inserted!.id
   const [player] = await database.db
     .insert(players)
-    .values({ name, personId, searchTerm: 'x', season: '2001/02' })
+    .values({ personId, searchTerm: 'x', season: '2001/02', sourceName: name })
     .$returningId()
 
   for (const address of old) {
@@ -92,9 +92,9 @@ describe('listScorerMatchIds', () => {
     const { personId, playerId } = await addScorer('Joost van Aken', 'joost-van-aken', { old: ['joost-aken'] })
 
     await database.db.insert(matchGoals).values([
-      { matchId: scored, ours: true, personId, player: 'Van Aken', playerId },
+      { matchId: scored, ours: true, personId, playerId, sourceName: 'Van Aken' },
       // A goal of the opponent, and an own goal that counts for them, are not his goals.
-      { matchId: other, ours: false, ownGoal: true, personId, player: 'Van Aken', playerId },
+      { matchId: other, ours: false, ownGoal: true, personId, playerId, sourceName: 'Van Aken' },
     ])
 
     expect(await listScorerMatchIds(database.db, ['aken'])).toEqual([scored])
@@ -108,8 +108,8 @@ describe('listScorerMatchIds', () => {
     const { playerId } = await addScorer('Piet Jansen', 'piet-jansen')
 
     await database.db.insert(matchGoals).values([
-      { matchId: scored, ours: true, player: 'Jansen', playerId },
-      { matchId: scored, minute: 80, ours: true, player: 'Jansen', playerId },
+      { matchId: scored, ours: true, playerId, sourceName: 'Jansen' },
+      { matchId: scored, minute: 80, ours: true, playerId, sourceName: 'Jansen' },
     ])
 
     expect(await listScorerMatchIds(database.db, ['jansen'])).toEqual([scored])

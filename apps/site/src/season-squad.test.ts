@@ -6,9 +6,28 @@ import { squadData } from './test-squad'
 
 const base = squadData.players[0]!
 
-const player = (overrides: Partial<(typeof squadData.players)[number]>) => ({ ...base, ...overrides })
+const player = (overrides: Partial<(typeof squadData.players)[number]>) => ({
+  ...base,
+  sourceName: overrides.name ?? base.sourceName,
+  ...overrides,
+})
 
 describe('squadParts', () => {
+  it('tells two lines of one name apart and gives each the number of its source (#1697)', () => {
+    const [part] = squadParts(
+      [
+        player({ name: 'Jan Jansen', sourceName: 'J. Jansen' }),
+        player({ name: 'Jan Jansen', sourceName: 'Jan Jansen' }),
+      ],
+      new Map([['J. Jansen', 3]]),
+    )
+
+    expect(part?.players.map((line) => [line.key, line.seasonLine])).toEqual([
+      ['J. Jansen', '3e seizoen'],
+      ['Jan Jansen', undefined],
+    ])
+  })
+
   it('keeps the order the query gave inside a part and the parts from the goal to the front', () => {
     const parts = squadParts([
       player({ name: 'Aanval Een', position: 'aanvaller', shirtNumber: 9 }),

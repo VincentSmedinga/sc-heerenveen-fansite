@@ -49,7 +49,7 @@ async function addMatch(season: string, status: 'played' | 'scheduled' = 'played
 }
 
 async function addPlayer(name: string) {
-  const [result] = await database.db.insert(players).values({ name, searchTerm: name, season: '2003/04' })
+  const [result] = await database.db.insert(players).values({ searchTerm: name, season: '2003/04', sourceName: name })
 
   return result.insertId
 }

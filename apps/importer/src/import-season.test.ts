@@ -468,7 +468,7 @@ describe('the command', () => {
       .where(eq(matches.round, 'Speelronde 33'))
       .orderBy(asc(matchGoals.id))
 
-    expect(kemper.map((row) => [row.match_goals.player, row.match_goals.minute, row.match_goals.penalty])).toEqual([
+    expect(kemper.map((row) => [row.match_goals.sourceName, row.match_goals.minute, row.match_goals.penalty])).toEqual([
       ['Kemper', 36, false],
       ['Kemper', 74, true],
     ])

@@ -15,8 +15,8 @@ const goal = (overrides: Partial<MatchGoal>): MatchGoal => ({
   ownGoal: false,
   penalty: false,
   personId: null,
-  player: 'Van Bergen',
   playerId: null,
+  sourceName: 'Van Bergen',
   stoppageMinutes: null,
   wikipediaPage: null,
   ...overrides,
@@ -27,10 +27,10 @@ const wikipedia = 'onze invoer en Wikipedia verschillen'
 
 describe('wikipediaGoals', () => {
   const goals = [
-    goal({ minute: 45, player: 'Van Bergen', stoppageMinutes: 1, wikipediaPage: 'Henk van Bergen' }),
-    goal({ id: 2, minute: 60, ours: false, player: 'Smans' }),
-    goal({ id: 3, minute: 88, ours: false, penalty: true, player: 'Kramer' }),
-    goal({ id: 4, minute: 90, ours: true, ownGoal: true, player: 'De Jong' }),
+    goal({ minute: 45, sourceName: 'Van Bergen', stoppageMinutes: 1, wikipediaPage: 'Henk van Bergen' }),
+    goal({ id: 2, minute: 60, ours: false, sourceName: 'Smans' }),
+    goal({ id: 3, minute: 88, ours: false, penalty: true, sourceName: 'Kramer' }),
+    goal({ id: 4, minute: 90, ours: true, ownGoal: true, sourceName: 'De Jong' }),
   ]
 
   it('puts our goals on the home side, name first, with the minute and the link', () => {

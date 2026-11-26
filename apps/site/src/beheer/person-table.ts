@@ -122,7 +122,7 @@ export async function readPersonGaps(db: Pick<Database, 'select'>, now = new Dat
       id: persons.id,
       line: persons.line,
       name: persons.name,
-      rowName: players.name,
+      rowName: players.sourceName,
       season: players.season,
       slug: persons.slug,
       wikipediaPage: persons.wikipediaPage,

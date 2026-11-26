@@ -87,11 +87,14 @@ beforeEach(async () => {
     const [{ insertId }] = await database.db.insert(persons).values(person)
 
     ids[key] = insertId
-    await database.db
-      .insert(players)
-      .values(
-        seasons.map((season) => ({ name: person.name, personId: insertId, searchTerm: person.familyName, season })),
-      )
+    await database.db.insert(players).values(
+      seasons.map((season) => ({
+        personId: insertId,
+        searchTerm: person.familyName,
+        season,
+        sourceName: person.name,
+      })),
+    )
   }
 
   // A person who never stood in our squad does not count.

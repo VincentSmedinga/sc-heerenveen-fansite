@@ -106,7 +106,7 @@ async function addMatch(clubId: number, season: string, ...names: string[]) {
   if (names.length > 0) {
     await connection.db
       .insert(matchAppearances)
-      .values(names.map((name) => ({ matchId, name, ours: false, starter: true })))
+      .values(names.map((name) => ({ matchId, ours: false, sourceName: name, starter: true })))
   }
 
   return matchId
@@ -384,13 +384,15 @@ describe('searchOpponentPersons', () => {
     const matchId = await addMatch(club, '1995/96', 'Via Naam', 'Via Selectie', 'Via Doelpunt', 'Op De Lijst')
 
     await addMatch(without, '1995/96', 'Zonder Nummer')
-    await connection.db.insert(matchAppearances).values({ matchId, name: 'Een Van Ons', ours: true, starter: true })
+    await connection.db
+      .insert(matchAppearances)
+      .values({ matchId, ours: true, sourceName: 'Een Van Ons', starter: true })
 
     const [named] = await connection.db.insert(persons).values({ name: 'Via Naam' }).$returningId()
 
     await connection.db
       .insert(clubSquadPlayers)
-      .values({ clubId: club, name: 'Via Selectie', personId: named!.id, readAt: now })
+      .values({ clubId: club, personId: named!.id, readAt: now, sourceName: 'Via Selectie' })
 
     const [goalRow] = await rows("SELECT id FROM match_appearances WHERE name = 'Via Doelpunt'")
 
@@ -400,7 +402,7 @@ describe('searchOpponentPersons', () => {
       minute: 1,
       ours: false,
       personId: named!.id,
-      player: 'Via Doelpunt',
+      sourceName: 'Via Doelpunt',
     })
 
     const served = await serve()

@@ -506,7 +506,7 @@ describe('playerPageOf', () => {
   } as unknown as Person
 
   it('keeps the year of birth and never the whole date', () => {
-    const page = playerPageOf(person, [{ name: 'Jan de Vries', season: '2004/05' }], 'Emmen')
+    const page = playerPageOf(person, [{ season: '2004/05', sourceName: 'Jan de Vries' }], 'Emmen')
 
     expect(page.birthYear).toBe('1974')
     expect(JSON.stringify(page)).not.toContain('1974-05-06')
@@ -514,7 +514,7 @@ describe('playerPageOf', () => {
 
   it('works out the age from the whole date, on the day of the birthday and the day before', () => {
     // In May the current season is 2025/26.
-    const rows = [{ name: 'Jan de Vries', season: '2025/26' }]
+    const rows = [{ season: '2025/26', sourceName: 'Jan de Vries' }]
 
     expect(playerPageOf(person, rows, 'Emmen', new Date('2026-05-05T10:00:00Z')).age).toBe(51)
     expect(playerPageOf(person, rows, 'Emmen', new Date('2026-05-06T10:00:00Z')).age).toBe(52)
@@ -525,33 +525,37 @@ describe('playerPageOf', () => {
   it('gives an age to a player in the squad of the current season and to one read recently', () => {
     const today = new Date('2026-11-11T10:00:00Z')
 
-    expect(playerPageOf(person, [{ name: 'Jan de Vries', season: '2026/27' }], 'Emmen', today).age).toBe(52)
+    expect(playerPageOf(person, [{ season: '2026/27', sourceName: 'Jan de Vries' }], 'Emmen', today).age).toBe(52)
     expect(
       playerPageOf(
         person,
         [
-          { name: 'Jan de Vries', season: '2026/27' },
-          { name: 'Jan de Vries', season: '2003/04' },
+          { season: '2026/27', sourceName: 'Jan de Vries' },
+          { season: '2003/04', sourceName: 'Jan de Vries' },
         ],
         'Emmen',
         today,
       ).age,
     ).toBe(52)
     // A former player keeps his place and year of birth, but has no age.
-    const former = playerPageOf(person, [{ name: 'Jan de Vries', season: '2025/26' }], 'Emmen', today)
+    const former = playerPageOf(person, [{ season: '2025/26', sourceName: 'Jan de Vries' }], 'Emmen', today)
 
     expect(former.age).toBeUndefined()
     expect(former.birthYear).toBe('1974')
     expect(former.birthPlace).toBe('Emmen')
     // The season turns over on 1 July: before it the squad of 2025/26 is the current one.
     expect(
-      playerPageOf(person, [{ name: 'Jan de Vries', season: '2025/26' }], 'Emmen', new Date('2026-06-20T10:00:00Z'))
-        .age,
+      playerPageOf(
+        person,
+        [{ season: '2025/26', sourceName: 'Jan de Vries' }],
+        'Emmen',
+        new Date('2026-06-20T10:00:00Z'),
+      ).age,
     ).toBe(52)
   })
 
   it('has no age without the whole date, only the year or the month', () => {
-    const rows = [{ name: 'Jan de Vries', season: '2026/27' }]
+    const rows = [{ season: '2026/27', sourceName: 'Jan de Vries' }]
 
     expect(playerPageOf({ ...person, birthDatePrecision: 'year' }, rows, 'Emmen').age).toBeUndefined()
     expect(playerPageOf({ ...person, birthDatePrecision: 'month' }, rows, 'Emmen').age).toBeUndefined()
@@ -563,8 +567,8 @@ describe('playerPageOf', () => {
     const page = playerPageOf(
       { ...person, familyName: null, familyNamePrefix: null, givenName: null, name: null },
       [
-        { name: 'Jan Vries', season: '2005/06' },
-        { name: 'J. de Vries', season: '2004/05' },
+        { season: '2005/06', sourceName: 'Jan Vries' },
+        { season: '2004/05', sourceName: 'J. de Vries' },
       ],
       undefined,
     )

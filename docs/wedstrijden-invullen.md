@@ -148,6 +148,7 @@ Klopt een wedstrijd of een verslag niet, verbeter dan die: het verschil verdwijn
 ## Spelersgegevens die verschillen
 
 Wat je in het beheer van een speler invult of aanpast, blijft staan: de naam, het rugnummer, de positie en de Wikipedia-pagina.
+Een naam hoort bij de persoon: wijzig je hem, dan tonen elk seizoen en elke opstelling de nieuwe naam.
 De import schrijft die velden daarna niet meer.
 Leest hij op Wikipedia iets anders, dan staat op `/beheer/wedstrijden/kwaliteit` bij het seizoen "spelersgegevens verschillen".
 De pagina erachter noemt de speler, het veld, jouw waarde en die van de import.

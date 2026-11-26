@@ -74,17 +74,17 @@ export async function addPreviousLineUp() {
       ...lineUpNames.map((name, index) => ({
         captain: index === 0,
         matchId: previousId,
-        name,
         ours: true,
         shirtNumber: index + 1,
+        sourceName: name,
         starter: index < 11,
       })),
       ...opponentNames.map((name, index) => ({
         captain: index === 0,
         matchId: previousId,
-        name,
         ours: false,
         shirtNumber: index + 1,
+        sourceName: name,
         starter: index < 11,
       })),
     ])

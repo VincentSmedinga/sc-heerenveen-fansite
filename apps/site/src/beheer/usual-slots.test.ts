@@ -101,17 +101,17 @@ describe('the line-ups in a 4-3-3 from the database', () => {
     await database.db.insert(matchAppearances).values([
       ...Array.from({ length: starters }, (_nothing, index) => ({
         matchId: insertId,
-        name: `Speler ${index + 1}`,
         ours: true,
+        sourceName: `Speler ${index + 1}`,
         starter: true,
       })),
       ...Array.from({ length: bench }, (_nothing, index) => ({
         matchId: insertId,
-        name: `Bank ${index + 1}`,
         ours: true,
+        sourceName: `Bank ${index + 1}`,
         starter: false,
       })),
-      { matchId: insertId, name: 'Tegenstander', ours: false, starter: true },
+      { matchId: insertId, ours: false, sourceName: 'Tegenstander', starter: true },
     ])
 
     return insertId

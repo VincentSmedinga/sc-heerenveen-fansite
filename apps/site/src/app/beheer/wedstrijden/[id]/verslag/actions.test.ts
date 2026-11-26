@@ -101,15 +101,15 @@ beforeEach(async () => {
   matchId = inserted?.id ?? 0
   await database.db.insert(players).values(
     squadOf(1).map((player) => ({
-      name: player.name,
       searchTerm: player.name,
       season: '2026/27',
       shirtNumber: player.shirtNumber,
+      sourceName: player.name,
     })),
   )
   squad = (await database.db.select().from(players).orderBy(asc(players.shirtNumber))).map((player) => ({
     id: player.id,
-    name: player.name,
+    name: player.sourceName,
     shirtNumber: player.shirtNumber,
   }))
 })
@@ -297,7 +297,7 @@ describe('submitReport', () => {
   })
 
   it('leaves the import alone for the goals afterwards, also when the result changes', async () => {
-    await database.db.insert(matchGoals).values({ matchId, minute: 12, ours: true, player: 'Oyen' })
+    await database.db.insert(matchGoals).values({ matchId, minute: 12, ours: true, sourceName: 'Oyen' })
     await submit(matchId, report())
 
     // The result of Wikipedia changes: it is not marked, so it follows. The goals are marked.

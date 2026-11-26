@@ -341,26 +341,26 @@ describe('listSquad', () => {
 
   it('gives the players of the season by shirt number, those without a number last, a player without a position, and nobody who left the squad', async () => {
     await database.db.insert(players).values([
-      { name: 'Zonder Nummer', position: 'doelman', searchTerm: 'Nummer', season: '2026/27', shirtNumber: null },
-      { name: 'Zonder Positie', position: null, searchTerm: 'Positie', season: '2026/27', shirtNumber: null },
-      { name: 'Tien Speler', position: 'aanvaller', searchTerm: 'Speler', season: '2026/27', shirtNumber: 10 },
+      { position: 'doelman', searchTerm: 'Nummer', season: '2026/27', shirtNumber: null, sourceName: 'Zonder Nummer' },
+      { position: null, searchTerm: 'Positie', season: '2026/27', shirtNumber: null, sourceName: 'Zonder Positie' },
+      { position: 'aanvaller', searchTerm: 'Speler', season: '2026/27', shirtNumber: 10, sourceName: 'Tien Speler' },
       {
         country: 'NL',
-        name: 'Een Keeper',
         position: 'doelman',
         searchTerm: 'Keeper',
         season: '2026/27',
         shirtNumber: 1,
+        sourceName: 'Een Keeper',
       },
-      { name: 'Oud Speler', position: 'aanvaller', searchTerm: 'Oud', season: '2025/26', shirtNumber: 9 },
+      { position: 'aanvaller', searchTerm: 'Oud', season: '2025/26', shirtNumber: 9, sourceName: 'Oud Speler' },
       {
         inSquad: false,
         leftSquadAt: new Date('2027-01-31T12:00:00Z'),
-        name: 'Vertrokken Speler',
         position: 'aanvaller',
         searchTerm: 'Speler',
         season: '2026/27',
         shirtNumber: 7,
+        sourceName: 'Vertrokken Speler',
       },
     ])
 
@@ -381,12 +381,12 @@ describe('listSquad', () => {
     })
 
     await database.db.insert(players).values({
-      name: 'Joost van Aken',
       personId: person,
       position: 'verdediger',
       searchTerm: 'van Aken',
       season: '2026/27',
       shirtNumber: 4,
+      sourceName: 'Joost van Aken',
     })
 
     expect(await listSquad(database.db, '2026/27')).toEqual([
@@ -430,14 +430,14 @@ describe('listSeasonPlayerBirths', () => {
     })
 
     await database.db.insert(players).values([
-      { name: 'Joost van Aken', personId: person, searchTerm: 'Aken', season: '2026/27' },
-      { name: 'Zonder Persoon', searchTerm: 'Persoon', season: '2026/27' },
-      { name: 'Ander Seizoen', searchTerm: 'Seizoen', season: '2025/26' },
+      { personId: person, searchTerm: 'Aken', season: '2026/27', sourceName: 'Joost van Aken' },
+      { searchTerm: 'Persoon', season: '2026/27', sourceName: 'Zonder Persoon' },
+      { searchTerm: 'Seizoen', season: '2025/26', sourceName: 'Ander Seizoen' },
     ])
 
     expect(await listSeasonPlayerBirths(database.db, '2026/27')).toEqual([
-      { birthDate: '2001-05-17', birthDatePrecision: 'day', name: 'Joost van Aken' },
-      { birthDate: null, birthDatePrecision: null, name: 'Zonder Persoon' },
+      { birthDate: '2001-05-17', birthDatePrecision: 'day', sourceName: 'Joost van Aken' },
+      { birthDate: null, birthDatePrecision: null, sourceName: 'Zonder Persoon' },
     ])
   })
 })
@@ -445,28 +445,34 @@ describe('listSeasonPlayerBirths', () => {
 describe('listSeasonPlayers', () => {
   it('gives every player of the season, also one who left, by shirt number, then surname and name', async () => {
     await database.db.insert(players).values([
-      { name: 'Zonder Nummer', position: 'doelman', searchTerm: 'Nummer', season: '2026/27', shirtNumber: null },
-      { name: 'Anton Zonder', position: null, searchTerm: 'Zonder', season: '2026/27', shirtNumber: null },
-      { name: 'Joost van Aken', position: 'verdediger', searchTerm: 'van Aken', season: '2026/27', shirtNumber: 4 },
-      { name: 'Bas Zeven', position: 'aanvaller', searchTerm: 'Zeven', season: '2026/27', shirtNumber: 4 },
+      { position: 'doelman', searchTerm: 'Nummer', season: '2026/27', shirtNumber: null, sourceName: 'Zonder Nummer' },
+      { position: null, searchTerm: 'Zonder', season: '2026/27', shirtNumber: null, sourceName: 'Anton Zonder' },
+      {
+        position: 'verdediger',
+        searchTerm: 'van Aken',
+        season: '2026/27',
+        shirtNumber: 4,
+        sourceName: 'Joost van Aken',
+      },
+      { position: 'aanvaller', searchTerm: 'Zeven', season: '2026/27', shirtNumber: 4, sourceName: 'Bas Zeven' },
       {
         country: 'NL',
-        name: 'Een Keeper',
         position: 'doelman',
         searchTerm: 'Keeper',
         season: '2026/27',
         shirtNumber: 1,
+        sourceName: 'Een Keeper',
       },
       {
         inSquad: false,
         leftSquadAt: new Date('2027-01-31T12:00:00Z'),
-        name: 'Vertrokken Speler',
         position: 'aanvaller',
         searchTerm: 'Speler',
         season: '2026/27',
         shirtNumber: 7,
+        sourceName: 'Vertrokken Speler',
       },
-      { name: 'Oud Speler', position: 'aanvaller', searchTerm: 'Oud', season: '2025/26', shirtNumber: 9 },
+      { position: 'aanvaller', searchTerm: 'Oud', season: '2025/26', shirtNumber: 9, sourceName: 'Oud Speler' },
     ])
 
     const found = await listSeasonPlayers(database.db, '2026/27')
@@ -490,6 +496,7 @@ describe('listSeasonPlayers', () => {
       searchTerm: 'Keeper',
       shirtNumber: 1,
       source: 'selectie',
+      sourceName: 'Een Keeper',
     })
   })
 
@@ -502,12 +509,12 @@ describe('listSeasonPlayers', () => {
     })
 
     await database.db.insert(players).values({
-      name: 'Joost van Aken',
       personId: person,
       position: 'verdediger',
       searchTerm: 'van Aken',
       season: '2026/27',
       shirtNumber: 4,
+      sourceName: 'Joost van Aken',
     })
 
     expect(await listSeasonPlayers(database.db, '2026/27')).toMatchObject([
@@ -528,22 +535,22 @@ describe('listSeasonPlayers', () => {
 
     await database.db.insert(players).values([
       // Only the season.
-      { ...row, country: 'BE', name: 'Alleen Seizoen', personId: unknown, position: 'doelman', searchTerm: 'a' },
+      { ...row, country: 'BE', personId: unknown, position: 'doelman', searchTerm: 'a', sourceName: 'Alleen Seizoen' },
       // Only the person.
-      { ...row, name: 'Alleen Persoon', personId: defender, searchTerm: 'b' },
+      { ...row, personId: defender, searchTerm: 'b', sourceName: 'Alleen Persoon' },
       // Neither, with a person and without one.
-      { ...row, name: 'Geen Van Beide', searchTerm: 'd' },
-      { ...row, country: 'BE', name: 'Zonder Persoon', personId: null, searchTerm: 'e' },
+      { ...row, searchTerm: 'd', sourceName: 'Geen Van Beide' },
+      { ...row, country: 'BE', personId: null, searchTerm: 'e', sourceName: 'Zonder Persoon' },
     ])
     // Both: the person goes before the season for the country, the season before the person for
     // the position. Another season, because a person is in a season once.
     await database.db.insert(players).values({
       country: 'SR',
-      name: 'Beide',
       personId: defender,
       position: 'aanvaller',
       searchTerm: 'c',
       season: '2025/26',
+      sourceName: 'Beide',
     })
 
     const facts = async (season: string) =>
@@ -574,7 +581,7 @@ describe('listSeasonNumbers', () => {
 
     await database.db
       .insert(players)
-      .values(seasons.map((season) => ({ name: 'Testspeler', personId: person, searchTerm: 'Speler', season })))
+      .values(seasons.map((season) => ({ personId: person, searchTerm: 'Speler', season, sourceName: 'Testspeler' })))
 
     for (const season of ['2019/20', '2020/21', '2021/22', '2022/23', '2023/24']) {
       await database.pool.query(
@@ -622,7 +629,7 @@ describe('listSeasonNumbers', () => {
 
   it('gives nothing for a player without a person', async () => {
     await seed(['2021/22'], complete)
-    await database.db.insert(players).values({ name: 'Zonder Persoon', searchTerm: 'Persoon', season: '2020/21' })
+    await database.db.insert(players).values({ searchTerm: 'Persoon', season: '2020/21', sourceName: 'Zonder Persoon' })
 
     expect(await listSeasonNumbers(database.db, '2020/21')).toEqual(new Map())
   })

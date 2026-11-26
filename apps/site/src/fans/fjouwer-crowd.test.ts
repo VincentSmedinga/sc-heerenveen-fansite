@@ -32,10 +32,15 @@ beforeEach(async () => {
   await database.db.delete(supporters)
   rounds = 0
   people = 0
-  await database.db
-    .insert(players)
-    .values(names.map((name) => ({ name, position: 'middenvelder' as const, searchTerm: name, season: '2026/27' })))
-  ids = Object.fromEntries((await database.db.select().from(players)).map((row) => [row.name, row.id]))
+  await database.db.insert(players).values(
+    names.map((name) => ({
+      position: 'middenvelder' as const,
+      searchTerm: name,
+      season: '2026/27',
+      sourceName: name,
+    })),
+  )
+  ids = Object.fromEntries((await database.db.select().from(players)).map((row) => [row.sourceName, row.id]))
 })
 
 // Matches in the order they close: one a week from 1 November 2026.
@@ -212,10 +217,10 @@ describe('the figures of Fjouwer for a match', () => {
   it('gives a player with a surname that another one has the whole name', async () => {
     const match = await addMatch()
     const [other] = await database.db.insert(players).values({
-      name: 'Joost Vente',
       position: 'aanvaller',
       searchTerm: 'Joost Vente',
       season: '2026/27',
+      sourceName: 'Joost Vente',
     })
 
     ids['Joost Vente'] = other.insertId
